@@ -1,4 +1,12 @@
-// -----------------------------------------------------------------------------
+// ============================================================================
+// Copyright Jean-Charles LAMBERT - 2006
+// e-mail:   Jean-Charles.Lambert@oamp.fr
+// address:  Dynamique des galaxies
+//           Laboratoire d'Astrophysique de Marseille
+//           2, place Le Verrier
+//           13248 Marseille Cedex 4, France
+//           CNRS U.M.R 6110
+// ============================================================================
 // gadget_endian_tools.cc                                                       
 // Implementation of the class GadgetEndianTools                                
 //                                                                              
@@ -6,8 +14,13 @@
 //                                                                              
 // Intel/Amd/Alpha are little-endian compliant                                  
 //                                                                              
-// PowerPC IBM/Sparc/SGI are big-endian compliant                               
-// -----------------------------------------------------------------------------
+// PowerPC IBM/Sparc/SGI are big-endian compliant                              
+// ============================================================================
+// 08-Nov-2006 : v 1.0 (JCL)
+//               - added into NEMO cvs
+// 19-Nov-2006 : v 1.2 (JCL)
+//               - some debugging info removed
+// ============================================================================
 
 #include <iostream>
 #include "gadget_endian_tools.h"
@@ -52,10 +65,10 @@ void GadgetEndianTools::swapBytes( void * x,
 // perform IO (Read,Write) operation on the header
 int GadgetEndianTools::ioHeader(t_io_header_1 * header,const ioop op)
 {
-  std::cerr << "header adress ioHeader=" << header <<"\n";
+  //std::cerr << "header adress ioHeader=" << header <<"\n";
   char * ptr=(char *) header;
   char *pp=(char *)ptr;
-  std::cerr << "pptr adress ioHeader=" << ptr <<"\n";
+  //std::cerr << "pptr adress ioHeader=" << ptr <<"\n";
   for (int i=0; i<NB_DATA_HEADER; i++) { // loop on all header member data
     // process IO  header member data
     ioData(ptr, dth[i].size_bytes, dth[i].items, op);
@@ -121,7 +134,5 @@ int GadgetEndianTools::ioData(char * ptr,int size_bytes, int items,const ioop op
 
   return 1;
 }
-// -----------------------------------------------------------------------------
-// -----------------------------------------------------------------------------
 
 // -----------------------------------------------------------------------------

@@ -1,6 +1,14 @@
-// -----------------------------------------------------------------------------
+// ============================================================================
+// Copyright Jean-Charles LAMBERT - 2006
+// e-mail:   Jean-Charles.Lambert@oamp.fr
+// address:  Dynamique des galaxies
+//           Laboratoire d'Astrophysique de Marseille
+//           2, place Le Verrier
+//           13248 Marseille Cedex 4, France
+//           CNRS U.M.R 6110
+// ============================================================================
 // gadget_data_structure.h                                                            
-// -----------------------------------------------------------------------------
+// ============================================================================
 #ifndef GADGET_DATA_STRUCTURE_H
 #define GADGET_DATA_STRUCTURE_H
 

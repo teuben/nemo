@@ -1,4 +1,12 @@
-// -----------------------------------------------------------------------------
+// ============================================================================
+// Copyright Jean-Charles LAMBERT - 2006
+// e-mail:   Jean-Charles.Lambert@oamp.fr
+// address:  Dynamique des galaxies
+//           Laboratoire d'Astrophysique de Marseille
+//           2, place Le Verrier
+//           13248 Marseille Cedex 4, France
+//           CNRS U.M.R 6110
+// ============================================================================
 // gadget_endian_tools.h                                                        
 // Definitition of the class GadgetEndianTools                                  
 //                                                                              
@@ -6,8 +14,8 @@
 //                                                                              
 // Intel/Amd/Alpha are little-endian compliant                                  
 //                                                                              
-// PowerPC IBM/Sparc/SGI are big-endian compliant                               
-// -----------------------------------------------------------------------------
+// PowerPC IBM/Sparc/SGI are big-endian compliant                              
+// ============================================================================ 
 #ifndef GADGET_ENDIAN_TOOLS_H
 #define GADGET_ENDIAN_TOOLS_H
 
