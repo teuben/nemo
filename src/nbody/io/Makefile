@@ -14,6 +14,7 @@ INCFILES = get_snap.c put_snap.c myget_snap.c myput_snap.c \
 SRCFILES = $(INCFILES)
 OBJFILES = snapserial.o
 SRCDIR = $(NEMO)/src/nbody/io
+SUBDIRS= gadget
 BINFILES = atos atos_sp atosph atosph_sp stoa stoa_sp tabtos \
 	   rvsnap snaprv snaptipsy tipsysnap \
 	   gadgetsnap snapgadget
@@ -45,10 +46,16 @@ update:
 nemo_lib: $(INCFILES)
 	@echo no nemo_lib in `pwd`
 
-nemo_bin: $(BINFILES)
-
-bins: $(BINFILES)
+nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
+	rm -f *.o
+
+bins: $(BINFILES) nemo_subbins
+	mv $(BINFILES) $(NEMOBIN)
+
+nemo_subbins:
+	-@for i in $(SUBDIRS); do \
+	(cd $$i; echo SUBSUBDIR $$i; $(MAKE) nemo_bin); done
 
 nemo_src:
 
