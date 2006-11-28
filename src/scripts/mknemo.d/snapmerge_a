@@ -1,0 +1,13 @@
+#! /bin/csh -f
+#
+#  snapmerge_a, it compiles snapmerge_a_sp snapmerge_a_dp
+
+set dir=$NEMO/src/nbody/trans
+
+if (-e $dir) then
+  cd $dir
+  make snapmerge_a
+else
+  echo mknemo.d: $dir does not exist
+endif
+
