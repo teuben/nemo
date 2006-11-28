@@ -17,7 +17,8 @@ LOBJFILES=
 BINFILES = snapcenter snapsort snapstack snaptrim snaprotate snapdens \
 	snapscale unbind snapmask snapadd snaprect \
         snapsphere snapmass snapspin snaptrans snapvirial \
-        snapcopy snapinert snapmerge snapshift snapsplit
+        snapcopy snapinert snapmerge snapshift snapsplit \
+        snapmerge_a_sp snapmerge_a_dp
 
 TESTFILES =
 
@@ -113,4 +114,19 @@ hackdens: .hackdens
 .hackdens:
 	(cd hackdens ; $(MAKE) hackdens)
 
+# targets for snapmerge_a_(s|d)_p
+snapmerge_a : snapmerge_a_sp snapmerge_a_dp
+	@/bin/cp snapmerge_a_sp snapmerge_a_dp $(NEMOBIN)
 
+snapmerge_a_sp : snapmerge_a_sp.o 
+	$(CC) -o $@ snapmerge_a_sp.o  -L$(NEMOLIB) -lnemo -lm
+
+snapmerge_a_sp.o : snapmerge_a.c
+	$(CC) $(CFLAGS) -DSINGLEPREC -c snapmerge_a.c -o snapmerge_a_sp.o
+
+snapmerge_a_dp : snapmerge_a_dp.o 
+	$(CC) -o $@ snapmerge_a_dp.o  -L$(NEMOLIB) -lnemo -lm
+
+snapmerge_a_dp.o : snapmerge_a.c
+	$(CC) $(CFLAGS) -c snapmerge_a.c -o snapmerge_a_dp.o
+#
