@@ -37,6 +37,7 @@
  * 22-jun-04    added some more useful astr constants
  * 25-jan-05    added powd/powi
  *  1-aug-05    nemo_string, nemo_stream for starlab interfaces
+ * 29-nov-06    within() now using double's
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -489,7 +490,7 @@ extern void bswap_bigend(void *vdat, int len, int cnt);
 #define bswaps(p,cnt)  bswap(p,sizeof(short),cnt)
 
   /* misc/within.c */
-extern bool within(real val, string range, real fuzz);
+extern bool within(double val, string range, double fuzz);
 
 
 #if defined(__cplusplus)

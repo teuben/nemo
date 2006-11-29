@@ -8,15 +8,16 @@
  *	dark-ages	created					JEB
  *	19-oct-90	index() -> strchr()			PJT
  *      20-feb-94       ansi
- *	22-jan-95	ansi prototypes, also all in real	pjt
+ *	22-jan-95	ansi prototypes, also all in real	 pjt
  *      10-aug-95       allow the #N syntax for snapshots        pjt  
+ *      29-nov-06       real->double for more general usage      pjt
  */
 
 #include <stdinc.h>
 
 local int within_count = 0;
 
-bool within(real val, string range, real fuzz)
+bool within(double val, string range, double fuzz)
 {
     char *endptr, *subptr, *sepptr, *colptr;
     double sublow, subhi;
@@ -67,7 +68,7 @@ string usage="test within()";
 
 nemo_main()
 {
-    if (within(getrparam("val"), getparam("range"), getrparam("fuzz")))
+    if (within(getdparam("val"), getparam("range"), getdparam("fuzz")))
         printf("within returns TRUE\n");
     else
         printf("within returns FALSE\n");
