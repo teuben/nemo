@@ -1,0 +1,71 @@
+.TH SNAPMERGE_A 1NEMO "28 November 2006"
+.SH NAME
+snapmerge_a_sp, snapmerge_a_dp \- Merge the second input snapshot at the end of the
+first one (single and double precision output).
+.SH SYNOPSIS
+\fBsnapmerge_a_sp in1=... in2=...\fP [parameter=value]
+.SH DESCRIPTION
+\fBsnapmerge_a\fP merges the second input snapshot at the end 
+of the first snapshot but without making a copy of the first
+snapshot. This is very convenient when the first snapshot
+is very large and prevent problems of space disk. \fBPlease, notice that
+the input snaphot will be modified. You have been warned...\fP
+.PP
+  The program go to the end of the first snapshot and get nbody
+and time (\fItlast\fP). Then, it reads each timestep of the second snapshot and starts
+to append to the first snapshot, only if the time of the current timestep
+is greater than \fItlast\fP, and if the nbody values in both snapshots are identical.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin1=\fP
+Input NEMO snapshot [???]    
+.TP 20
+\fBin2=\fP
+Input NEMO snapshot to append after in1 [???]
+.SH RETURN VALUE
+The program print out (on stdout) the following codes:
+.nf
+.ta +1.0i +4.0i
+-1  : an error occured, no merging.
+ 0  : the second snapshot does not have a time step greater than the last
+      time step of the first snapshot, no merging.
+ 1  : merging have been successfully completed.
+.fi
+.SH EXAMPLE
+The following perl script program, convert all snapshots produced by the
+gadget2 program to a single one NEMO file. It can be usefull to make
+analysis of the whole NEMO snaphot or to display with glnemo.
+.nf
+
+#!/usr/bin/perl
+use strict;
+my $out="cosmo256.snap_dp";
+foreach my $i ( <snapshot_???> ) {         # read all snapshot_XXX
+    printf STDERR "[$i]\n";
+    `gadget2nemo $i /tmp/snap.$$`; # gadget2nemo
+
+    if ( ! -f $out ) {
+        `mv /tmp/snap.$$ $out`;            # first snapshot
+    }
+    else {
+        `snapmerge_a_dp $out /tmp/snap.$$`;# merging
+        `/bin/rm /tmp/snap.$$`;
+    }
+}
+.fi
+Notice this is an example for the double precision (_dp) version, the
+single precision (_sp) works the same way.
+.SH SEE ALSO
+snapmerge(1NEMO), snapshot(5NEMO)
+.SH FILES
+src/nbody/trans/snapmerge_a.c
+.SH AUTHOR
+Jean-Charles LAMBERT
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+28-Nov-06	V1.21: added to CVS  JCL
+28-nov-06	merged two man pages into one	PJT
+.fi
