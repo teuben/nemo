@@ -75,6 +75,14 @@ void falcON::warning(const char* fmt,              // I: warning message
   va_end(ap);
 }
 //------------------------------------------------------------------------------
+void falcON::debug_info(const char* fmt,           // I: debugging information  
+			...             ) {        //[I: parameters]            
+  va_list  ap;
+  va_start(ap,fmt);
+  printerr("### falcON Debug Info: ", fmt, ap, false);
+  va_end(ap);
+}
+//------------------------------------------------------------------------------
 void falcON::debug_info(int         deb,           // I: level for reporting    
 			const char* fmt,           // I: debugging information  
 			...             ) {        //[I: parameters]            

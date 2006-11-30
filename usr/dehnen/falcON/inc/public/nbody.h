@@ -192,6 +192,26 @@ namespace falcON {
     /// which SPH quantities are computed by setforces()
     virtual fieldset computesSPH()   const = 0;
     //--------------------------------------------------------------------------
+    /// is a particular quantity computed?
+    bool computes(fieldbit b) const {
+      return computes().contain(fieldset(b));
+    }
+    //--------------------------------------------------------------------------
+    /// is a particular quantity required?
+    bool requires(fieldbit b) const {
+      return requires().contain(fieldset(b));
+    }
+    //--------------------------------------------------------------------------
+    /// is a particular SPH quantity computed?
+    bool computesSPH(fieldbit b) const {
+      return computesSPH().contain(fieldset(b));
+    }
+    //--------------------------------------------------------------------------
+    /// is a particular SPH quantity required?
+    bool requiresSPH(fieldbit b) const {
+      return requiresSPH().contain(fieldset(b));
+    }
+    //--------------------------------------------------------------------------
     /// write diagnostic statistics
     virtual void dia_stats_body(std::ostream&) const=0;
     //--------------------------------------------------------------------------

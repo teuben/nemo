@@ -142,6 +142,15 @@ namespace WDutils {
   //                                                                            
   /// Print debugging information to stderr.                                    
   //                                                                            
+  /// Uses a printf() style format string as first argument, further arguments  
+  /// must match format, exactly as in printf, which will be called.            
+  /// \param fmt gives the format in C printf() style                           
+  void debug_info(const char*fmt, ... );
+
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  /// Print debugging information to stderr.                                    
+  //                                                                            
   /// Debugging information is printed if the debugging level exceeds the       
   /// debugging depth (1st argument). The debugging level is found from         
   /// falcON::run_info::debug_level() and initialized at start-up of main().    
