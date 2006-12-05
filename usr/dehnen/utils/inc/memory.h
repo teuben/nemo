@@ -33,6 +33,10 @@
 #  include <cstddef>
 #  define WDutils_included_cstddef
 #endif
+#ifndef WDutils_included_iostream
+#  include <iostream>
+#  define WDutils_included_iostream
+#endif
 #ifndef WDutils_included_exception_h
 #  include <exception.h>
 #endif
@@ -1145,6 +1149,12 @@ namespace WDutils {
     int const&size(int d) const {
       return N[d];
     }
+    /// set all values to given constant
+    /// \param n (input) new size of array in each dimension
+    /// \param x (input) initialize each element with this value
+    void setval(T const&x = T(0) ) WDutils_THROWING {
+      for(int i=0; i!=K[0]*N[0]; ++i) A[i] = x;
+    }
     /// reset: destruct and construct again
     /// \param n (input) new size of array in each dimension
     void reset(const int n[D]) WDutils_THROWING {
@@ -1159,7 +1169,7 @@ namespace WDutils {
     /// \param x (input) initialize each element with this value
     void reset(const int n[D], T const&x) WDutils_THROWING {
       reset(n);
-      for(int i=0; i!=K[0]*N[0]; ++i) A[i] = x;
+      setval(x);
     }
     /// construction from nothing: sizes are all equal to 0
     Array() : A(0) {
@@ -1178,23 +1188,11 @@ namespace WDutils {
       const int n[2] = {n0,n1};
       reset(n);
     }
-    /// construction from sizes for D=2
-    Array(int n0, int n1, T const&x) WDutils_THROWING
-    : A(0) {
-      const int n[2] = {n0,n1};
-      reset(n,x);
-    }
     /// construction from sizes for D=3
     Array(int n0, int n1, int n2) WDutils_THROWING
     : A(0) {
       const int n[3] = {n0,n1,n2};
       reset(n);
-    }
-    /// construction from sizes for D=3
-    Array(int n0, int n1, int n2, T const&x) WDutils_THROWING
-    : A(0) {
-      const int n[3] = {n0,n1,n2};
-      reset(n,x);
     }
     /// construction from sizes for D=4
     Array(int n0, int n1, int n2, int n3) WDutils_THROWING
@@ -1213,12 +1211,6 @@ namespace WDutils {
     : A(0) {
       const int n[5] = {n0,n1,n2,n3,n4};
       reset(n);
-    }
-    /// construction from sizes for D=5
-    Array(int n0, int n1, int n2, int n3, int n4, T const&x) WDutils_THROWING
-    : A(0) {
-      const int n[5] = {n0,n1,n2,n3,n4};
-      reset(n,x);
     }
     /// construction from sizes and initial value
     /// \param n (input) size of array in each dimension
