@@ -119,9 +119,10 @@
 // v 3.0.4  20/07/2005  WD omit list of possible output specs                  |
 // v 3.0.5  22/03/2006  WD minor bug in this file (logstep) fixed              |
 // v 3.0.6  11/08/2006  WD made hmin obligatory (no default)                   |
+// v 3.0.7  07/12/2006  WD renamed hmin to kmin (to prepare for SPH)           |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.0.5"
-#define falcON_VERSION_D "22-mar-2006 Walter Dehnen                          "
+#define falcON_VERSION   "3.0.7"
+#define falcON_VERSION_D "07-dec-2006 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
@@ -165,7 +166,7 @@ string defv[] = {
   "Nref=16\n          if using eps_i: size of cell for estimating n      ",
   "emin=0\n           if using eps_i: lower limit for eps_i              ",
 #endif
-  "hmin=???\n         tau_min = (1/2)^hmin                               ",
+  "kmin=???\n         tau_min = (1/2)^kmin  MUST be given                ",
   "Nlev=1\n           # time-step levels                                 ",
   "fac=\n             tau = fac / acc           \\   If more than one of  ",
   "fph=\n             tau = fph / pot            |  these is non-zero,   ",
@@ -232,7 +233,7 @@ void falcON::main() falcON_THROWING
   vect X0;                                            // potential root center  
   FalcONCode NBDY(getparam   ("in"),                  //   snapshot input       
 		  resume,                             //   resume old simul?    
-		  getiparam  ("hmin"),                //   -log_2(time step)    
+		  getiparam  ("kmin"),                //   -log_2(time step)    
 		  getiparam  ("Nlev"),                //   # time steps         
 		  getrparam_z("fac"),                 //   fac in adapting steps
 		  getrparam_z("fph"),                 //   fph in adapting steps
