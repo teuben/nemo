@@ -472,7 +472,7 @@ NBodyCode::NBodyCode(// data input
 }
 //------------------------------------------------------------------------------
 void NBodyCode::init(const ForceAndDiagnose         *FS,
-		     int                             hmin,
+		     int                             kmin,
 		     int                             Nlev,
 		     const BlockStepCode::StepLevels*St,
 		     fieldset p, fieldset k, fieldset r,
@@ -483,10 +483,10 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
     if(FS->acc_ext()) SHOT.add_fields(fieldset::q);
     if(Nlev <= 1 || St == 0)
       CODE = static_cast<const Integrator*>
-	( new LeapFrogCode(hmin,FS,p,k,r,P,K,R) );
+	( new LeapFrogCode(kmin,FS,p,k,r,P,K,R) );
     else
       CODE = static_cast<const Integrator*>
-	( new BlockStepCode(hmin+1-Nlev,Nlev,FS,St,p,k,r,P,K,R,
+	( new BlockStepCode(kmin+1-Nlev,Nlev,FS,St,p,k,r,P,K,R,
 			    int(1+std::log10(double(SHOT.N_bodies())))) );
    
   } catch(falcON::exception E) {
