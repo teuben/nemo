@@ -640,7 +640,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // initialize Integrator, see NOTE above                                    
     void init(const ForceAndDiagnose         *,    // I: e.g. ForceALCON        
-	      int                             ,    // I: hmin: t_min=2^(-hmin)  
+	      int                             ,    // I: kmin: t_min=2^(-kmin)  
 	      int                             ,    // I: # time-step levels     
 	      const BlockStepCode::StepLevels*,
 	      fieldset, fieldset, fieldset=fieldset::o,
@@ -1027,7 +1027,7 @@ namespace falcON {
 	       const char *       file,            // I: input file             
 	       bool               resume,          // I: resume old (if nemo)   
 	       // time-integration related                                      
-	       int                hmin,            // I: hmin: t_min=2^(-hmin)  
+	       int                kmin,            // I: kmin: t_min=2^(-kmin)  
 	       int                Nlev,            // I: # time-step levels     
 	       real               fa,              // I: f_a                    
 	       real               fp,              // I: f_p                    
@@ -1080,7 +1080,7 @@ namespace falcON {
 #endif
       if(Nlev > 1 && GS.scheme() == 0)
 	falcON_THROW("FalcONCode: time stepping factors=0\n");
-      NBodyCode::init(this, hmin, Nlev, &GS, fieldset::x, fieldset::v);
+      NBodyCode::init(this, kmin, Nlev, &GS, fieldset::x, fieldset::v);
     }
   };// class falcON::FalcONCode
   //////////////////////////////////////////////////////////////////////////////

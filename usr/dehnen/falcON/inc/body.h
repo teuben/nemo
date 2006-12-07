@@ -319,6 +319,12 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// output in format "no:index".                                          
       friend std::ostream& operator<<(std::ostream&, const index&);
+      //------------------------------------------------------------------------
+      /// equality                                                              
+      bool operator== (index const&i) const { return I == i.I; }
+      //------------------------------------------------------------------------
+      /// inequality                                                            
+      bool operator!= (index const&i) const { return I != i.I; }
     };
     //==========================================================================
     //                                                                          
@@ -1240,11 +1246,9 @@ namespace falcON {
     //--------------------------------------------------------------------------
     void CheckData(fieldset s, const char*f, int l) const
     {
-      if(debug(6) && !have_all(s)) {
-	std::cerr<< "falcON Debug Info: "<<f<<':'<<l 
-		 << " bodies data required but not present: \""
-		 << all_data().missing(s) << "\"\n";
-      }
+      if(debug(6) && !have_all(s))
+	debug_info(" %s:%d: bodies data required but not present: \"%s\"\n",
+		   f,l,word(all_data().missing(s)));
     }
   protected:
     //==========================================================================

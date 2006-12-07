@@ -297,34 +297,34 @@ namespace falcON {
     /// adjusts the SPH smoothing lengths                                       
     ///                                                                         
     /// The individual SPH smoothing lengths h_i are iteratively adjusted such  
-    /// that\n mu_i := h_i^3 * rho_i\n equals a given value \a mu. The bodies'  
+    /// that\n h3d_i := h_i^3 * rho_i\n equals a given value \a h3d. The bodies'
     /// size() fields are updated.                                              
-    /// \param mu   desired value for mu_i                                      
+    /// \param h3d   desired value for h3d_i                                    
     /// \param hmax maximum h_i                                                 
-    /// \param tol  relative error tolerated for mu_i = mu                      
+    /// \param tol  relative error tolerated for h3d_i = h3d                    
     /// \param all  adjust h_i for all or only active bodies?                   
     /// \param imax maximum # iterations                                        
-    void adjust_SPH_sizes(real mu, real hmax, real tol,
+    void adjust_SPH_sizes(real h3d, real hmax, real tol,
 			  bool all, unsigned imax) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// SPH sweep one                                                           
     ///                                                                         
     /// First, we perform a tree walk to:\n                                     
     /// - generate an interaction list \n                                       
-    /// - measure\n mu_i := h_i^3 * rho_i \n and dmu_i/dh_i \n                  
+    /// - measure\n h3d_i := h_i^3 * rho_i \n and dh3d_i/dh_i \n                
     /// Second, if \a wf > 1, we do:                                            
-    /// - adjust h_i so that mu_i = \a Mu using one iteration \n                
-    /// - use the interaction list to: compute mu, dmu/dh, dmu/dt               
+    /// - adjust h_i so that h3d_i = \a H3d using one iteration \n              
+    /// - use the interaction list to: compute h3d, dh3d/dh, dh3d/dt            
     /// Finally, all interacting leaves are marked and all bodies for which     
-    /// after the iteration |mu-\a Mu| > \a dM are marked sph_special. \n       
+    /// after the iteration |h3d-\a H3d| > \a dH3d are marked sph_special. \n   
     /// For more details, see sph.h                                             
-    /// \return     # leafs with |mu_i - \a Mu| > \a dM                         
-    /// \param Mu   goal for mu_i                                               
-    /// \param dM   tolerance for mu_i                                          
+    /// \return     # leafs with |h3d_i - \a H3d| > \a dH3d                     
+    /// \param H3d  goal for h3d_i                                              
+    /// \param dH3d tolerance for h3d_i                                         
     /// \param hmax maximum for h_i                                             
     /// \param wf   widening factor for h_i                                     
     /// \param all for all or only active bodies?                               
-    int SPH_sweep_one(real Mu, real dM, real hmax,
+    int SPH_sweep_one(real H3d, real dH3d, real hmax,
 		      real wf, bool all = 0) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// SPH sweep two                                                           
@@ -336,11 +336,11 @@ namespace falcON {
     /// \param fvis factor for viscosity                                        
     void SPH_sweep_two(const EquationOfState*eos, real fvis) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// \return # bodies with mu_i < Mu - dM
-    unsigned const&N_MuSmall() const;
+    /// \return # bodies with h3d_i < H3d - dH3d
+    unsigned const&N_H3dSmall() const;
     //--------------------------------------------------------------------------
-    /// \return # bodies with mu_i > Mu - dM
-    unsigned const&N_MuLarge() const;
+    /// \return # bodies with h3d_i > H3d - dH3d
+    unsigned const&N_H3dLarge() const;
     //--------------------------------------------------------------------------
     /// \return # bodies with h_i == h_max
     unsigned const&N_HatMax () const;

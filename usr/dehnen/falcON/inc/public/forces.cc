@@ -397,17 +397,17 @@ namespace falcON {
   //                                                                           |
   //---------------------------------------------------------------------------+
 #ifdef falcON_SPH
-  inline void forces::adjust_SPH_sizes(real mu, real hm, real dm, bool al,
+  inline void forces::adjust_SPH_sizes(real h3d, real hm, real dh3d, bool al,
 				       unsigned ix) falcON_THROWING
   {
-    SPHT->adjust_sizes(mu,hm,dm,al,ix);
+    SPHT->adjust_sizes(h3d,hm,dh3d,al,ix);
   }
   //----------------------------------------------------------------------------
-  inline int forces::SPH_sweep_one(real mu, real dm, real hm, real wf,
+  inline int forces::SPH_sweep_one(real h3d, real dh3d, real hm, real wf,
 				   bool al) falcON_THROWING
   
   {
-    return SPHT->sweep_one(mu,dm,hm,wf,al);
+    return SPHT->sweep_one(h3d,dh3d,hm,wf,al);
   }
   //----------------------------------------------------------------------------
   inline void forces::SPH_sweep_two(const EquationOfState*e,
@@ -417,12 +417,12 @@ namespace falcON {
     SPHT->sweep_two(e,a);
   }
   //----------------------------------------------------------------------------
-  inline unsigned const&forces::N_MuSmall() const {
-    return SPHT->N_MuSmall();
+  inline unsigned const&forces::N_H3dSmall() const {
+    return SPHT->N_H3dSmall();
   }
   //----------------------------------------------------------------------------
-  inline unsigned const&forces::N_MuLarge() const {
-    return SPHT->N_MuLarge();
+  inline unsigned const&forces::N_H3dLarge() const {
+    return SPHT->N_H3dLarge();
   }
   //----------------------------------------------------------------------------
   inline unsigned const&forces::N_HatMax () const {
