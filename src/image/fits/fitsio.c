@@ -56,6 +56,7 @@
 /*    23-jul-02 add fitresize                                           */
 /*    14-nov-02 add dummy DATASUM and CHECKSUM                          */
 /*     8-nov-05 also recognize XTENSION = 'IMAGE'                       */
+/*    11-dec-06 store cvsID in output                                   */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /************************************************************************/
@@ -115,6 +116,7 @@ local int first_message = 1;		/* See: fitopen */
 
 local string cfits1="FITS (Flexible Image Transport System) format is defined in 'Astronomy";
 local string cfits2="and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H";
+local string cfits3="nemo::fitsio.c $Id$";
 
 /**********************************************************************/
 FITS *fitopen(string name,string status,int naxis,int *nsize)
@@ -200,6 +202,7 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
     f->bzero  = w_bzero;
     fitwra(f,"COMMENT",cfits1);
     fitwra(f,"COMMENT",cfits2);
+    fitwra(f,"COMMENT",cfits3);
     fitwrhda(f,"DATASUM", "0000000000000000");
     fitwrhda(f,"CHECKSUM","0000000000000000");
 

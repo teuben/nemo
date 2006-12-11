@@ -58,6 +58,7 @@
  *              30-dec-04       don't shorted blank keyval's to appease VALGRIND and common sense ?     PJT
  *                              also made a3..a5 1 char longer to make room for the terminating 0
  *              10-nov-05       newline option in fts_pgroup,fts_ptable 
+ *              11-dec-06       store cvsID in saved string
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -93,6 +94,7 @@ local int ftslpb_o=FTSLPB;
 
 local string cfits1="FITS (Flexible Image Transport System) format is defined in 'Astronomy";
 local string cfits2="and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H";
+local string cfits3="nemo::fits.c $Id$";
 
 
 /* local functions in fits.c */
@@ -2488,6 +2490,7 @@ int fts_whead(fits_header *fh, stream ostr)
     fts_wvard(ostr,"BZERO",fh->bzero,NULL);
     fts_wvar(ostr,"COMMENT",cfits1);
     fts_wvar(ostr,"COMMENT",cfits2);
+    fts_wvar(ostr,"COMMENT",cfits3);
     if (fh->comment) 
         for (i=0; fh->comment[i] != NULL; i++)
             fts_wvar(ostr,"COMMENT",fh->comment[i]);
