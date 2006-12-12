@@ -11703,7 +11703,7 @@ fi;
       for dir in $cdir/lib $cdir
         do
           if test -f ${dir}/libcfitsio.a ; then
-            CFITSIO_LIB="-L${dir}"
+            CFITSIO_LIB="${dir}/libcfitsio.a"
             break;
           fi
         done
@@ -11723,7 +11723,6 @@ echo "${ECHO_T}${cdir}" >&6
 #define HAVE_LIBCFITSIO 1
 _ACEOF
 
-      CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
       rm -f src/include/cfitsio ; ln -s $incdir src/include/cfitsio
     fi
   fi
@@ -17067,8 +17066,8 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS="-L\$NEMOLIB -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
-	    PGPLOT_DIR="\$NEMOLIB"
+	    YAPP_LIBS='-L\$NEMOLIB'" -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    PGPLOT_DIR='\$NEMOLIB'
 	    { echo "$as_me:$LINENO: WARNING: using dollar" >&5
 echo "$as_me: WARNING: using dollar" >&2;}
 	    echo $PGPLOT_DIR

@@ -556,7 +556,7 @@ if test "$ok" = "yes"; then
       for dir in $cdir/lib $cdir
         do
           if test -f ${dir}/libcfitsio.a ; then
-            CFITSIO_LIB="-L${dir}"
+            CFITSIO_LIB="${dir}/libcfitsio.a"
             break;
           fi
         done
@@ -569,7 +569,6 @@ if test "$ok" = "yes"; then
     else
       AC_MSG_RESULT(${cdir})
       AC_DEFINE(HAVE_LIBCFITSIO)
-      CFITSIO_LIB="$CFITSIO_LIB -lcfitsio"
       rm -f src/include/cfitsio ; ln -s $incdir src/include/cfitsio
     fi
   fi
@@ -822,8 +821,8 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS="-L\$NEMOLIB -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
-	    PGPLOT_DIR="\$NEMOLIB"
+	    YAPP_LIBS='-L\$NEMOLIB'" -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    PGPLOT_DIR='\$NEMOLIB'
 	    AC_MSG_WARN(using dollar)
 	    echo $PGPLOT_DIR
 	    echo $NEMOLIB
