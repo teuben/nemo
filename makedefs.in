@@ -30,10 +30,9 @@ CXX = @CXX@
 # common examples:
 #HDF_INC=-I/local/include -I/usr/local/include -I/usr/include/hdf
 #
-#HDF_LIB=-ldf -lz
-#  Might need to add something like:   -L/local/lib -R /local/lib
-#  if your solaris system requires that
-#HDF_LIB=-ldf -ljpeg -lz
+# Might need to add something like:   -L/local/lib -R /local/lib
+# if your solaris system requires that
+#HDF_LIB=-ldf -ljpeg -lz -lsz
 
 HDF_INC = @HDF_INC@
 HDF_LIB = @HDF_LIB@
@@ -59,6 +58,13 @@ MIRIAD_LIB = @MIRIAD_LIB@
 #	GSL
 GSL_CFLAGS = @GSL_CFLAGS@
 GSL_LIBS   = @GSL_LIBS@
+
+#	FFTW
+#       -lfftw3, or -lfftw3f or -lfftw3l (depending on precision library, for float or long double)
+#       
+FFTW_CFLAGS = @FFTW_CFLAGS@
+FFTW_LIBS   = @FFTW_LIBS@
+
 
 #	READLINE
 RDL_LIBS   = @RDL_LIBS@
@@ -96,8 +102,8 @@ YAPPLIB = $(NEMOLIB)/yapp_@YAPP_NAME@.o @YAPP_LIBS@
 NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ $(GSL_CFLAGS) $(MACH)
 NEMO_FFLAGS = @NEMO_FFLAGS@
 NEMO_LDFLAGS = 
-NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) @MATH_LIBS@ @MACOS_LIBS@
-NEMO_LIBSPP = -L$(NEMOLIB) -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) @MATH_LIBS@ @MACOS_LIBS@
+NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
+NEMO_LIBSPP = -L$(NEMOLIB) -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
 
 #			some graphics libraries:
 GLLIBS = @GLLIBS@
