@@ -1,0 +1,270 @@
+#! /bin/csh -f
+#
+#  MIRIAD/install/python.install:
+#  A sample shell script to install python and some friends to 
+#  your choice of a prefix directory (prefix=)
+#
+#  Count on diskspace:
+#  tar tree:     20 MB
+#  build tree:  135 MB
+#  opt tree:     66 MB
+#
+#  Examples of usage:
+#    python.install  download=1
+#    python.install  Python=2.4.3 prefix=$ASTROMAKE/opt/python/2.4.3
+#    python.install  Python=2.4.3 download=1 sf=easynews
+#
+#  ToDo: 
+#  - should really do this script in python!!!
+#  - write a -help
+#
+#  Known Problems:
+#  - ppgplot and gfortran seem not to work together
+#  - scipy still missing numerous things (now solved with blas and lapack)
+#
+#  History:
+#     sometime-2006  Written for miriad                                          PJT
+#     oct-2006       updated some of the versions to current, added numdisplay   PJT
+
+#                         binaries
+set prefix=`pwd`/opt
+#                         control the sources
+set dir=`pwd`             # place where tar balls live
+set download=0            # or download them from scratch
+set sf=superb             # sourceforge mirror ($sf.dl.sourceforge.net)   [superb,easynews,umn,internap]
+
+#                         basenames for url to get source from
+set url_Python=http://www.python.org//ftp/python/%s/Python-%s.tar.bz2
+set url_ipython=http://ipython.scipy.org/dist/ipython-%s.tar.gz
+set url_Numeric=http://%s.dl.sourceforge.net/numpy/Numeric-%s.tar.gz
+set url_numarray=http://%s.dl.sourceforge.net/numpy/numarray-%s.tar.gz
+set url_numpy=http://%s.dl.sourceforge.net/numpy/numpy-%s.tar.gz
+set url_scipy=http://%s.dl.sourceforge.net/scipy/scipy-%s.tar.gz
+set url_ppgplot=http://efault.net/npat/hacks/ppgplot/dist/ppgplot-%s.tar.gz
+set url_pyfits=ftp://ra.stsci.edu/pub/pyfits/pyfits_v%s.tar.gz
+set url_numdisplay=http://stsdas.stsci.edu/numdisplay/download/numdisplay_%s.tar
+set url_TableIO=http://php.iupui.edu/~mmiller3/python/TableIO.tar.gz
+set url_blas=http://www.netlib.org/blas/blas.tgz
+set url_lapack=http://www.netlib.org/lapack/lapack.tgz
+set url_matplotlib=http://%s.dl.sourceforge.net/matplotlib/matplotlib-%s.tar.gz
+set url_gnuplot=http://%s.dl.sourceforge.net/sourceforge/gnuplot-py/gnuplot-py-%s.tar.gz 
+#                         the versions of the tar balls
+set Python=2.4.2
+set ipython=0.7.1.fix1
+set Numeric=24.2
+set numarray=1.5.2
+set numpy=1.0rc1
+set scipy=0.5.1
+set ppgplot=1.3
+set pyfits=1.0
+set numdisplay=10
+set TableIO=0
+set blas=0
+set lapack=0
+set matplotlib=0.87.6
+set gnuplot=1.7
+
+#                         poor mans command line parser....
+foreach arg ($*)
+  set $arg
+end
+
+#                         we'll do all the work in a clean build tree
+mkdir -p build
+mkdir -p $prefix
+cd build
+
+#                         useful aliases
+alias report_status 'set err=$status;\
+if ($err) then;\
+echo FAILED;\
+else\
+echo OK;\
+endif'
+
+alias url_get 'set file=$url:t;\
+if (-e $file) then\
+echo $file exists\
+else\
+wget $url\
+endif'
+
+#                         Grab all the sources
+if ($download) then
+  echo Downloading....
+  pushd $dir 
+  set url=`printf $url_Python     $Python   $Python`    ; url_get $url
+  set url=`printf $url_ipython    $ipython`             ; url_get $url
+  set url=`printf $url_Numeric    $sf       $Numeric`   ; url_get $url
+  set url=`printf $url_numarray   $sf       $numarray`  ; url_get $url
+  set url=`printf $url_numpy      $sf       $numpy`     ; url_get $url
+  set url=`printf $url_scipy      $sf       $scipy`     ; url_get $url
+  set url=`printf $url_ppgplot    $ppgplot`             ; url_get $url
+  set url=`printf $url_pyfits     $pyfits`              ; url_get $url
+  set url=`printf $url_numdisplay $numdisplay`          ; url_get $url
+  set url=`printf $url_TableIO`                         ; url_get $url
+  set url=`printf $url_blas`                            ; url_get $url
+  set url=`printf $url_lapack`                          ; url_get $url
+  set url=`printf $url_matplotlib $sf       $matplotlib`; url_get $url
+  set url=`printf $url_gnuplot    $sf       $gnuplot`   ; url_get $url
+
+  popd
+endif
+
+
+#                                                   python
+echo -n "Python $Python "
+set p=Python-$Python
+tar jxf $dir/$p.tar.bz2
+(cd $p ; ./configure --prefix=$prefix ; make ; make install) >& install.python.log
+report_status
+
+
+set path=($prefix/bin $path)
+rehash
+
+#                                                   blas
+echo -n "blas "
+set p=blas
+(mkdir -p $p ; cd $p; tar zxf $dir/$p.tgz;\
+  g77 -fno-second-underscore -O2 -c *.f;\
+  ar r libfblas.a *.o;\
+  ranlib libfblas.a;\
+  mv libfblas.a $prefix/lib) >& install.blas.log
+report_status
+setenv BLAS $prefix/lib/libfblas.a
+
+#                                                   lapack
+echo -n "lapack "
+set p=lapack
+tar zxf $dir/$p.tgz
+(cd LAPACK;\
+  cp INSTALL/make.inc.LINUX make.inc;\
+  make lapacklib OPTS=-O2;\
+  mv lapack_LINUX.a $prefix/lib/libflapack.a) >& install.lapack.log
+report_status
+setenv LAPACK $prefix/lib/libflapack.a
+
+#                                                   ipython
+echo -n "ipython $ipython "
+set p=ipython-$ipython
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.ipython.log
+report_status
+
+#                                                   Numeric
+echo -n "Numeric $Numeric "
+set p=Numeric-$Numeric
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.Numeric.log
+report_status
+
+#                                                   numarray
+echo -n "numarray $numarray "
+set p=numarray-$numarray
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.numarray.log
+report_status
+
+#                                                   numpy
+echo -n "numpy $numpy "
+set p=numpy-$numpy
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.numpy.log
+report_status
+
+#                                                   scipy
+echo -n "scipy $scipy "
+set p=scipy-$scipy
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.scipy.log
+report_status
+
+#                                                   ppgplot
+if ($?PGPLOT_DIR == 0) echo "Warning: PGPLOT_DIR not set"
+echo -n "ppgplot $ppgplot "
+set p=ppgplot-$ppgplot
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.ppgplot.log
+report_status
+
+#                                                   pyfits
+echo -n "pyfits $pyfits "
+set p=pyfits_v$pyfits
+tar zxf $dir/$p.tar.gz
+(cd pyfits ; python setup.py install) >& install.pyfits.log
+report_status
+
+#                                                   numdisplay
+echo -n "numdisplay $numdisplay "
+set p=numdisplay_v$numdisplay
+tar xf $dir/$p.tar
+(cd numdisplay ; python setup.py install) >& install.numdisplay.log
+report_status
+
+#                                                   TableIO
+echo -n "TableIO "
+set p=TableIO
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.TableIO.log
+report_status
+
+#                                                   matplotlib
+echo -n "matplotlib $matplotlib "
+set p=matplotlib-$matplotlib
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.matplotlib.log
+report_status
+
+#                                                   gnuplot
+echo -n "gnuplot $gnuplot "
+set p=gnuplot-py-$gnuplot
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.gnuplot.log
+report_status
+
+
+
+
+#  write out startup scripts in the $prefix
+
+rc:
+
+set rc1=$prefix/python_start.sh
+set rc2=$prefix/python_start.csh
+alias e echo
+set PBIN=$prefix/bin
+set PLIB=$prefix/lib
+
+e '# generated'                                                            > $rc1
+e "PBIN=$prefix/bin"                                                      >> $rc1
+e "PLIB=$prefix/lib"                                                      >> $rc1
+e 'if [ -z "${PATH}" ]'                                                   >> $rc1
+e 'then'                                                                  >> $rc1
+e '    PATH="$PBIN"; export PATH'                                         >> $rc1
+e 'else'                                                                  >> $rc1
+e '    PATH="$PBIN:$PATH"; export PATH'                                   >> $rc1
+e 'fi'                                                                    >> $rc1
+e 'if [ -z "${LD_LIBRARY_PATH}" ]'                                        >> $rc1
+e 'then'                                                                  >> $rc1
+e '    LD_LIBRARY_PATH="$PLIB"; export LD_LIBRARY_PATH'                   >> $rc1
+e 'else'                                                                  >> $rc1
+e '    LD_LIBRARY_PATH="$PLIB:$LD_LIBRARY_PATH"; export LD_LIBRARY_PATH'  >> $rc1
+e 'fi'                                                                    >> $rc1
+
+
+
+e '# generated'                                                            > $rc2
+e "set PBIN = $prefix/bin"                                                >> $rc2
+e "set PLIB = $prefix/lib"                                                >> $rc2
+e 'if ($?PATH == 0) then'                                                 >> $rc2
+e '    setenv PATH "$PBIN"'                                               >> $rc2
+e 'else'                                                                  >> $rc2
+e '    setenv PATH "${PBIN}:$PATH"'                                       >> $rc2
+e 'endif'                                                                 >> $rc2
+e 'if ($?LD_LIBRARY_PATH == 0) then'                                      >> $rc2
+e '    setenv LD_LIBRARY_PATH $PLIB'                                      >> $rc2
+e 'else'                                                                  >> $rc2
+e '    setenv LD_LIBRARY_PATH "${PLIB}:$LD_LIBRARY_PATH"'                 >> $rc2
+e 'endif'                                                                 >> $rc2
+
