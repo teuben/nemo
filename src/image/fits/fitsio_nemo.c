@@ -12,9 +12,14 @@
 #include <nemo.h>
 #include "fitsio_nemo.h" 
 
-#ifndef HAVE_LIBCFITSIO
+/*#ifndef HAVE_LIBCFITSIO*/
+#if 1
 #include "fitsio.c"       /* old self-coded MIRIAD-style interface */
 #else
+
+/* there is some old outstanding bug in the cfitsio interface... 
+ * so as of 14-dec-2006 this version has been hardcoded out
+ */
 
 static int w_bitpix = -32;               /* see: fit_setbitpix()    */
 static FLOAT w_bscale = 1.0;             /* see: fit_setscale()     */
