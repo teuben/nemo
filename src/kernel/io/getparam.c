@@ -126,6 +126,7 @@
  * 18-oct-04       k  support for the CVS ID (cvsid)
  * 28-dec-04       l  help/report CVS ID properly (help=I)
  * 30-jun-05       o  parse integers with 0x as hex numbers
+ * 14-dec-06    3.5   changed some printf()'s to fprintf(stderr,....)'s
 
   TODO:
       - what if there is no VERSION=
@@ -169,7 +170,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4o 30-jun-05 PJT"
+#define GETPARAM_VERSION_ID  "3.5 14-dec-06 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -647,7 +648,7 @@ void initparam(string argv[], string defv[])
           useflag = useflag || streq(keys[i].val,"???");
 
     if (useflag) {
-        printusage(defv);                  /* give minimum 'usage' and exit */
+        printusage(defv);         /* give minimum 'usage' to stderr and exit */
         local_exit(0);
         /*NOTREACHED*/
     }
@@ -1196,16 +1197,16 @@ local void printusage(string *defv)
     int i;
     bool otherargs;
 
-    printf("Insufficient parameters, try 'help=', 'help=?' or 'help=h',\n");
-    printf("Usage: %s", progname);
+    fprintf(stderr,"Insufficient parameters, try 'help=', 'help=?' or 'help=h',\n");
+    fprintf(stderr,"Usage: %s", progname);
     otherargs = FALSE;
     for (i=1; i<nkeys; i++)
         if (streq(keys[i].val,"???"))
-            printf(" %s=???", keys[i].key);
+	  fprintf(stderr," %s=???", keys[i].key);
         else
-            otherargs = TRUE;
-    printf(otherargs ? " ...\n" : "\n");
-    if (usage) printf("%s\n",usage);
+	  otherargs = TRUE;
+    fprintf(stderr,otherargs ? " ...\n" : "\n");
+    if (usage) fprintf(stderr,"%s\n",usage);
 }
 
 /*
