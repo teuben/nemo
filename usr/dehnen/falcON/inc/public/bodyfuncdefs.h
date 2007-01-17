@@ -84,6 +84,7 @@ namespace {
   inline real __srho () { need |= fieldset::R; return real(RNG()); }
   inline real __fact () { need |= fieldset::F; return real(RNG()); }
   inline real __csnd () { need |= fieldset::C; return real(RNG()); }
+  inline real __molw () { need |= fieldset::M; return real(RNG()); }
 
 #endif
 
@@ -118,6 +119,7 @@ namespace {
 #  define rho __srho()
 #  define f   __fact()
 #  define c   __csnd()
+#  define my  __molw()
 
 #endif
 

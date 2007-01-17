@@ -4,7 +4,7 @@
 /// \file   inc/public/io.h                                                     
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2006                                                           
+/// \date   2000-2007                                                           
 ///                                                                             
 /// \brief  contains declarations of classes falcON::input and falcON::output,  
 ///         as well as NEMO I/O support                                         
@@ -391,7 +391,8 @@ namespace falcON {
       SPHdens = 1 << 21,
       SPHhdot = 1 << 22,
       SPHfact = 1 << 23,
-      SPHcs   = 1 << 24
+      SPHcs   = 1 << 24,
+      SPHmu   = 1 << 25
     };
     //--------------------------------------------------------------------------
     /// get the nemo_io::DataType used for a given Field                        
@@ -422,6 +423,7 @@ namespace falcON {
       case SPHhdot: return Real;
       case SPHfact: return Real;
       case SPHcs  : return Real;
+      case SPHmu  : return Real;
       default     : return Null;
       }
     }
@@ -438,7 +440,8 @@ namespace falcON {
       case SPHdens:
       case SPHhdot:
       case SPHfact:
-      case SPHcs:   return true;
+      case SPHcs:
+      case SPHmu:   return true;
       default:      return false;
       }
     }
@@ -471,6 +474,7 @@ namespace falcON {
       case fieldbit::J: return SPHhdot;
       case fieldbit::F: return SPHfact;
       case fieldbit::C: return SPHcs;
+      case fieldbit::M: return SPHmu;
       default         : return null;
       }
     }
@@ -503,6 +507,7 @@ namespace falcON {
       case SPHhdot: return fieldbit::J;
       case SPHfact: return fieldbit::F;
       case SPHcs:   return fieldbit::C;
+      case SPHmu:   return fieldbit::M;
       default: falcON_THROW("unaccountable nemo_io::Field\n");
       }
     }

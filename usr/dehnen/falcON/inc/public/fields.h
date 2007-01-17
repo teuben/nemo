@@ -5,7 +5,7 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2002-2006                                                          
+/// \date    2002-2007                                                          
 ///                                                                             
 /// \brief   body flags and support for body data management                    
 ///                                                                             
@@ -56,7 +56,7 @@ namespace falcON {
   public:
     /// enumeration holding the individual flags
     enum single {
-      empty         = 0,       ///< no flag set
+      empty         = 0,        ///< no flag set
       active        = 1 <<  0,  ///< a body/tree node is active
       remove        = 1 <<  1,  ///< body to be removed, see bodies::remove()
       sph           = 1 <<  2,  ///< body is SPH particle
@@ -295,7 +295,7 @@ namespace falcON {
   //                                                                          //
   // There are many different N-body data (mass, position, etc), each with    //
   // its unique data type and I/O requirements etc. Below are several types   //
-  // and constant designed for managing this.                                 //
+  // and constants designed for managing this.                                //
   //                                                                          //
   // class fieldbit                                                           //
   // represents individual body data types as integer, i.e. 0 corresponds to  //
@@ -316,8 +316,8 @@ namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   namespace BodyData {
     const int         NOSPH   = 19;                // # non-sph data            
-    const int         NQUANT  = 31;                // total # data              
-    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIESRDJFC";
+    const int         NQUANT  = 32;                // total # data              
+    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIESRDJFCM";
                                                    // one-char data tags        
     //--------------------------------------------------------------------------
     // array with human readable names for the N-body data                      
@@ -330,7 +330,7 @@ namespace falcON {
 	"SPH smoothing length", "number of SPH partners", "U_internal",
 	"U_predicted", "(dU/dt)_total", "(dU/dt)_external", "entropy",
 	"gas density", "d(gas density)/dt", "dlog(h)/dt", "factor",
-	"sound speed"
+	"sound speed", "molecular weight"
       };
     //--------------------------------------------------------------------------
     // array with the sizeof() the N-body data                                  
@@ -344,7 +344,7 @@ namespace falcON {
       sizeof(flags),          // flags
       sizeof(int),            // key
       sizeof(double),         // time step
-      //            sink properties: 10
+      //            sink properties: 11
       sizeof(real),           // potential
       sizeof(real),           // external potential
       sizeof(vect),           // acceleration
@@ -368,7 +368,8 @@ namespace falcON {
       sizeof(real),           // dgas-density/dt
       sizeof(real),           // dlogh/dt
       sizeof(real),           // f_i
-      sizeof(real)            // sound speed
+      sizeof(real),           // sound speed
+      sizeof(real)            // molecular weight
     };
   } // namespace BodyData
   // ///////////////////////////////////////////////////////////////////////////
@@ -443,6 +444,7 @@ namespace falcON {
       J       = 28,           ///< dh/dt or dlnh/dt
       F       = 29,           ///< factor f_i
       C       = 30,           ///< sound speed
+      M       = 31,           ///< molecular weight
       invalid = NQUANT        ///< not corresponding to any field
     };
     //--------------------------------------------------------------------------
@@ -570,12 +572,13 @@ namespace falcON {
       J       = 1 << fieldbit::J,   ///< just dh/dt or dlnh/dt
       F       = 1 << fieldbit::F,   ///< just factors f_i
       C       = 1 << fieldbit::C,   ///< just sound speeds
+      M       = 1 << fieldbit::M,   ///< just molecular weights
       /// default SPH quantities
       sphdef  = H|R|V|J|F|C,
       /// all SPH quantities
-      sphmax  = sphdef|N|U|Y|I|E|S|D,
+      sphmax  = sphdef|N|U|Y|I|E|S|D|M,
       /// SPH quantities supported by NEMO I/O
-      sphnemo = H|N|U|I|E|S|R|J|F|C,
+      sphnemo = H|N|U|I|E|S|R|J|F|C|M,
       /// all floating point scalar SPH quantities
       sphscal = H|U|Y|I|E|S|R|D|J|F|C,
       /// N-body and external gravitational potentials
@@ -980,6 +983,7 @@ namespace falcON {
   DefFieldTraits(28, real);                        // SPH: dh/dt                
   DefFieldTraits(29, real);                        // SPH: f_i                  
   DefFieldTraits(30, real);                        // SPH: sound speed          
+  DefFieldTraits(31, real);                        // SPH: molecular weights    
 #undef DefFieldTraits
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -1021,7 +1025,8 @@ namespace falcON {
   MACRO(fieldbit::D,drho);			\
   MACRO(fieldbit::J,hdot);			\
   MACRO(fieldbit::F,fact);			\
-  MACRO(fieldbit::C,csnd);
+  MACRO(fieldbit::C,csnd);			\
+  MACRO(fieldbit::M,molw);
 #define DEF_NAMED(MACRO)			\
   DEF_NAMED_NONSPH(MACRO)			\
   DEF_NAMED_SPH(MACRO)

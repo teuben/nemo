@@ -3,7 +3,7 @@
 //                                                                             |
 // io.cc                                                                       |
 //                                                                             |
-// Copyright (C) 2000-2006  Walter Dehnen                                      |
+// Copyright (C) 2000-2007  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -55,6 +55,9 @@ extern "C" {
 #endif
 #ifndef GasFactTag
 #  define GasFactTag "SPHFactor"
+#endif
+#ifndef MolWeightTag
+#  define MolWeightTag "MolecularWeight"
 #endif
 #ifndef GasDensTag
 #  warning
@@ -142,6 +145,7 @@ namespace {
     case nemo_io::SPHhdot: return GasHdotTag;
     case nemo_io::SPHfact: return GasFactTag;
     case nemo_io::SPHcs  : return SoundSpeedTag;
+    case nemo_io::SPHmu  : return MolWeightTag;
     case nemo_io::null:
       falcON_THROW("nemo I/O: nemo_io::null not I/O able");
     default:
@@ -191,7 +195,8 @@ namespace {
     case nemo_io::SPHdens:
     case nemo_io::SPHhdot:
     case nemo_io::SPHfact:
-    case nemo_io::SPHcs:   return true;
+    case nemo_io::SPHcs:  
+    case nemo_io::SPHmu:   return true;
     default:               return false;
     }
   }
@@ -383,7 +388,7 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   if(! INPUT.has_snapshot())
     falcON_THROW("cannot open snapshot from nemo input stream");
   if(INPUT.SNAP_IN)
-    falcON_THROW("cannot open 2nd snapshot from nemo input stream");
+    falcON_THROW("trying to open 2nd snapshot from nemo input stream");
   // 1 open snapshot set
   get_set(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
   INPUT.SNAP_IN = this;
