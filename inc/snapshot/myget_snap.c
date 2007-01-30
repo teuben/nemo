@@ -493,7 +493,6 @@ real *tsptr;			/* pointer to time of input */
 int *ifptr;			/* pointer to input bit flags */
 string times;
 {
-    bool within();
     int um;
 
     *ifptr = 0;

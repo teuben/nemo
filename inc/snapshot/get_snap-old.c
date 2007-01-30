@@ -62,9 +62,6 @@
  * GET_SNAP_PARAMETERS: worker routine to input snapshot parameters.
  */
 
-extern  bool within(real, string, real);
-
-
 
 #ifndef get_snap_parameters
 
