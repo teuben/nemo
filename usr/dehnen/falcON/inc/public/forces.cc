@@ -411,10 +411,10 @@ namespace falcON {
   }
   //----------------------------------------------------------------------------
   inline void forces::SPH_sweep_two(const EquationOfState*e,
-				    real a) falcON_THROWING
+				    real a, real b) falcON_THROWING
   
   {
-    SPHT->sweep_two(e,a);
+    SPHT->sweep_two(e,a,b);
   }
   //----------------------------------------------------------------------------
   inline unsigned const&forces::N_MuSmall() const {
