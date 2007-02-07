@@ -6,6 +6,7 @@
  *    6-oct-92  repaired the long_changed convention out_mass -> mass 
  *              as was done in hackcode1 ages ago                       PJT
  *   10-apr-01  gcc warnings
+ *    7-feb-07  gcc4 fix for prototype
  */
 
 #include "defs.h"
@@ -15,7 +16,7 @@
 #include <snapshot/snapshot.h>
 #include <snapshot/get_snap.c>
 
-extern void _put_snap_diagnostics(stream outstr, int *ofptr);
+local void _put_snap_diagnostics(stream outstr, int *ofptr);
 
 #define put_snap_diagnostics  _put_snap_diagnostics
 #include <snapshot/put_snap.c>
@@ -199,7 +200,7 @@ local void diagnostics(void)
  * PUT_SNAP_DIAGNOSTICS: output various N-body diagnostics.
  */
 
-void _put_snap_diagnostics(stream outstr, int *ofptr)
+local void _put_snap_diagnostics(stream outstr, int *ofptr)
 {
     real cput;
 

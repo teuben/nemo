@@ -5,6 +5,7 @@
  *      20-jan-04  0.3 diffusion/sigma
  *       3-feb-04  0.4 major CVS version skew fix
  *      24-dec-04  0.6b global fix for MacOSX 
+ *       7-feb-07  0.6c prototype fix for gcc4
  *
  * To improve:  use allocate() for number of particles; not static
  *
@@ -36,7 +37,7 @@ string defv[] = {
     "freqdiff=\n          frequency of diffusion [freq]",
     "seed=0\n		  random seed",
     "headline=\n          random verbiage",
-    "VERSION=0.6b\n	  24-dec-04 PJT",
+    "VERSION=0.6c\n	  7-feb-07 PJT",
     NULL,
 };
 
