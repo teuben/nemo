@@ -1555,49 +1555,37 @@ namespace {
 //------------------------------------------------------------------------------
 falcON_TRAITS(GadgetHeader,"GadgetHeader");
 ////////////////////////////////////////////////////////////////////////////////
-#define READ_ALL(BIT) if(nt) {						\
-    FortranIRec F(in);							\
+#define READ(BIT) if(!is_sph(BIT) && nd || ns) {			\
+    FortranIRec F(in, rec);						\
+    unsigned nr = is_sph(BIT)? ns : ns+nd;				\
     if(read.contain(BIT)) {						\
-      if(F.size() != nt*field_traits<BIT>::size)			\
+      if(F.size() != nr*field_traits<BIT>::size)			\
 	falcON_THROW("bodies::read_gadget(): mismatch reading %u %c: "	\
 		     "expected %u bytes, found %u\n",			\
-		     nt,field_traits<BIT>::word(),			\
-		     nt*field_traits<BIT>::size,F.size());		\
+		     nr,field_traits<BIT>::word(),			\
+		     nr*field_traits<BIT>::size,F.size());		\
       add_field(BIT);							\
-      if(ns) { body sph(SPH); sph.read_Fortran(F, BIT, ns); }		\
-      if(nd) { body std(STD); std.read_Fortran(F, BIT, nd); }		\
+      if(ns) {								\
+	body sph(SPH);							\
+	sph.read_Fortran(F, BIT, ns);					\
+      }									\
+      if(!is_sph(BIT) && nd) {						\
+	body std(STD);							\
+        std.read_Fortran(F, BIT, nd);					\
+      }									\
       debug_info(2,"bodies::read_gadget(): read %u %c\n",		\
-	         nt, field_traits<BIT>::word());			\
+	         nr, field_traits<BIT>::word());			\
       fgot |= fieldset(BIT);						\
     } else {								\
       F.skip_bytes(F.size());						\
       debug_info(3,"bodies::read_gadget(): skip %u %c\n",		\
-                 nt, field_traits<BIT>::word());			\
-    }									\
-  }
-#define READ_SPH(BIT) if(ns) {						\
-    FortranIRec F(in);							\
-    if(read.contain(BIT)) {						\
-      if(F.size() != ns*field_traits<BIT>::size)			\
-	falcON_THROW("bodies::read_gadget(): mismatch reading %u %c: "	\
-		     "expected %u bytes, found %u\n",			\
-		     ns,field_traits<BIT>::word(),			\
-		     ns*field_traits<BIT>::size,F.size());		\
-      body sph(SPH);							\
-      add_field(BIT);							\
-      sph.read_Fortran(F, BIT, ns);		       			\
-      debug_info(2,"bodies::read_gadget(): read %u %c\n",		\
-	         ns, field_traits<BIT>::word());			\
-      fgot |= fieldset(BIT);						\
-    } else {								\
-      F.skip_bytes(F.size());						\
-      debug_info(3,"bodies::read_gadget(): skip %u %c\n",		\
-                 nt, field_traits<BIT>::word());			\
+                 nr, field_traits<BIT>::word());			\
     }									\
   }
 //------------------------------------------------------------------------------
 double bodies::read_gadget(const char*fname,
-			   fieldset   read) falcON_THROWING
+			   fieldset   read,
+			   unsigned   rec) falcON_THROWING
 {
   read &= fieldset("mxvkURHpa");
   fieldset got;
@@ -1610,7 +1598,7 @@ double bodies::read_gadget(const char*fname,
   if(in) {
     // 1.1 try single file "fname"
     file = fname;
-    try { FortranIRec::Read(in, header, 1); }
+    try { FortranIRec::Read(in, header, 1, rec); }
     catch(exception E) { falcON_RETHROW(E); }
     nfile = header->num_files;
     if(nfile==0) nfile=1;
@@ -1630,7 +1618,7 @@ double bodies::read_gadget(const char*fname,
     if(!in) falcON_THROW("bodies::read_gadget(): cannot open file \"%s\" "
 			 "nor file \"%s\"\n", fname, filename);
     file = filename;
-    try { FortranIRec::Read(in, header, 1); }
+    try { FortranIRec::Read(in, header, 1, rec); }
     catch(exception E) { falcON_RETHROW(E); }
     nfile = header->num_files;
     if(debug(1)) {
@@ -1662,19 +1650,18 @@ double bodies::read_gadget(const char*fname,
       if(k) nd += header->npart[k];
       if(header->masstab[k] == 0) nm += header->npart[k];
     }
-    unsigned nt = ns+nd;
     // read positions
-    READ_ALL(fieldbit::x);
+    READ(fieldbit::x);
     if(read == fgot) goto NextFile;
     // read velocties
-    READ_ALL(fieldbit::v);
+    READ(fieldbit::v);
     if(read == fgot) goto NextFile;
     // read keys
-    READ_ALL(fieldbit::k);
+    READ(fieldbit::k);
     if(read == fgot) goto NextFile;
     // read masses --- OR assign them ...
     if(nm) {
-      FortranIRec F(in);
+      FortranIRec F(in, rec);
       if(read.contain(fieldbit::m)) {
 	if(F.size() != nm*sizeof(real))
 	  falcON_THROW("bodies::read_gadget(): mismatch reading %u m: "
@@ -1716,19 +1703,19 @@ double bodies::read_gadget(const char*fname,
     }
     if(read == fgot) goto NextFile;
     // read gas internal energies
-    READ_SPH(fieldbit::U);
+    READ(fieldbit::U);
     if(read == fgot) goto NextFile;
     // read gas densities
-    READ_SPH(fieldbit::R);
+    READ(fieldbit::R);
     if(read == fgot) goto NextFile;
     // read SPH smoothing lengths
-    READ_SPH(fieldbit::H);
+    READ(fieldbit::H);
     if(read == fgot) goto NextFile;
     // read potentials
-    READ_ALL(fieldbit::p);
+    READ(fieldbit::p);
     if(read == fgot) goto NextFile;
     // read accelerations
-    READ_ALL(fieldbit::a);
+    READ(fieldbit::a);
     if(read == fgot) goto NextFile;
   NextFile:
     got |= fgot;
@@ -1740,7 +1727,7 @@ double bodies::read_gadget(const char*fname,
       in.open(file);
       if(!in) falcON_THROW("bodies::read_gadget(): cannot open file \"%s\"\n",
 			   file);
-      try { FortranIRec::Read(in, &headeri, 1); }
+      try { FortranIRec::Read(in, &headeri, 1, rec); }
       catch(exception E) { falcON_RETHROW(E); }
       if(header0.mismatch(headeri))
 	falcON_THROW("bodies::read_gadget(): header mismatch\n");
@@ -1760,7 +1747,7 @@ double bodies::read_gadget(const char*fname,
 #define WRITE(BIT)							\
   if(!is_sph(BIT) || N_sph()) {						\
     unsigned nw = is_sph(BIT)? N_sph() : N_bodies();			\
-    FortranORec F(out, nw * field_traits<BIT>::size);			\
+    FortranORec F(out, nw * field_traits<BIT>::size, rec);		\
     if(have(BIT)) {							\
       if(N_sph())							\
 	begin_sph_bodies().write_Fortran(F, BIT, N_sph());		\
@@ -1779,8 +1766,8 @@ double bodies::read_gadget(const char*fname,
     written |= fieldset(BIT);						\
   }
 //------------------------------------------------------------------------------
-void bodies::write_gadget(output&out, double time, fieldset write, bool warn)
-  const falcON_THROWING
+void bodies::write_gadget(output&out, double time, fieldset write,
+			  bool warn, unsigned rec) const falcON_THROWING
 {
   // ensure we have keys ("ids" in gadget)
   write |= fieldset("mxvkU");
@@ -1791,7 +1778,7 @@ void bodies::write_gadget(output&out, double time, fieldset write, bool warn)
   header->num_files = 1;
   header->npart[0] = header->npartTotal[0] = N_sph();
   header->npart[1] = header->npartTotal[1] = N_std();
-  FortranORec::Write(out,header,1);
+  FortranORec::Write(out,header,1,rec);
   // write out data
   fieldset written;
   WRITE(fieldbit::x);

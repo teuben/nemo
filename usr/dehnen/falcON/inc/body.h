@@ -1206,7 +1206,9 @@ namespace falcON {
     /// \return simulation time of snapshot
     /// \param  fname (input) basename of data file(s).
     /// \param  read  (input) data to read (maximum is mxvkURH)
-    double read_gadget(const char*fname, fieldset read) falcON_THROWING;
+    /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
+    double read_gadget(const char*fname, fieldset read, unsigned rec=4)
+      falcON_THROWING;
     //--------------------------------------------------------------------------
     /// writes snapshot in gadget format to a single data file
     ///
@@ -1221,7 +1223,9 @@ namespace falcON {
     /// \param  time  (input) time to write to snapshot
     /// \param  write (input) data to write (minimum: mxvkU, maximum mxvkURHpa
     /// \param  warn  (input) warn about missing data?
-    void write_gadget(output&out, double time, fieldset write, bool warn=0)
+    /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
+    void write_gadget(output&out, double time, fieldset write, bool warn=0,
+		      unsigned rec=4)
       const falcON_THROWING;
     //--------------------------------------------------------------------------
     //@}
@@ -1696,9 +1700,11 @@ namespace falcON {
     /// \return simulation time of snapshot
     /// \param  fname (input) basename of data file(s).
     /// \param  read  (input) data to read (maximum is mxvkURH)
-    void read_gadget(const char*fname, fieldset read) falcON_THROWING
+    /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
+    void read_gadget(const char*fname, fieldset read, unsigned rec=4)
+      falcON_THROWING
     {
-      double t = bodies::read_gadget(fname, read);
+      double t = bodies::read_gadget(fname, read, rec);
       set_time(t);
       if(!has_initial_time()) init_time(t);
     }
@@ -1715,10 +1721,11 @@ namespace falcON {
     /// \param  out   (input) falcON::output to write to
     /// \param  write (input) data to write (minimum: mxvkU, maximum mxvkURHpa
     /// \param  warn  (input) warn  about missing data?
-    void write_gadget(output &out, fieldset write, bool warn=1)
+    /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
+    void write_gadget(output &out, fieldset write, bool warn=0, unsigned rec=4)
       const falcON_THROWING
     {
-      bodies::write_gadget(out, time(), write, warn);
+      bodies::write_gadget(out, time(), write, warn, rec);
     }
   };// class snapshot
 } // namespace falcON {

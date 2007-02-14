@@ -975,15 +975,19 @@ namespace falcON {
   class FortranIRec {
   private:
     input           &IN;                  // related input stream
+    const unsigned   HSZE;                // size of header: 4 or 8
     unsigned         SIZE;                // size (bytes) of record
     mutable unsigned READ;                // number of bytes already read
     //--------------------------------------------------------------------------
     FortranIRec           (FortranIRec const&); // not implemented
     FortranIRec& operator=(FortranIRec const&); // not implemented
+    unsigned read_size() throw(falcON::exception);
   public:
     //--------------------------------------------------------------------------
     /// constructor: read buffer with size information
-    FortranIRec(input&) throw(falcON::exception);
+    /// \param in  falcON::input to read from
+    /// \param rec (optional) size of Fortran record header: 4 or 8
+    FortranIRec(input&in, unsigned rec=4) throw(falcON::exception);
     //--------------------------------------------------------------------------
     /// close: same as destruction
     void close() throw(falcON::exception);
@@ -1033,11 +1037,12 @@ namespace falcON {
     /// \param in  input stream to read from
     /// \param buf data buffer to read into
     /// \param n   number of data of type T to read
+    /// \param rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
-    static void Read(input &in, T*buf, unsigned n)
+    static void Read(input &in, T*buf, unsigned n, unsigned rec=4)
       throw(falcON::exception)
     {
-      FortranIRec FIR(in);
+      FortranIRec FIR(in,rec);
       if( sizeof(T) * n > FIR.size() )
 	throw exception("ReadFortranRecord(): cannot read %d %s: "
 			"only %d bytes in record (required are %d)\n",
@@ -1067,18 +1072,22 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class FortranORec {
   private:
-    output        &OUT;                 // related output stream
-    unsigned       SIZE;                // size (bytes) of record
+    output          &OUT;                 // related output stream
+    const unsigned   HSZE;                // size of header: 4 or 8
+    unsigned         SIZE;                // size (bytes) of record
     mutable unsigned WRITTEN;             // number of bytes already written
     //--------------------------------------------------------------------------
     FortranORec           (FortranORec const&); // not implemented
     FortranORec& operator=(FortranORec const&); // not implemented
+    void write_size() throw(falcON::exception);
   public:
     //--------------------------------------------------------------------------
     /// constructor: write buffer with size information
     /// \param out output stream to write to
     /// \param size size (in bytes) of record
-    FortranORec(output&out, unsigned size) throw(falcON::exception);
+    /// \param rec (optional) size of Fortran record header must be 4 or 8
+    FortranORec(output&out, unsigned size, unsigned rec=4)
+      throw(falcON::exception);
     //--------------------------------------------------------------------------
     /// destructor: write to end of record, write end buffer
     ~FortranORec() throw(falcON::exception) { close(); }
@@ -1111,6 +1120,7 @@ namespace falcON {
     /// \return    number of data actually written
     /// \param buf buffer to write
     /// \param n   number of data to write
+    /// \param rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
     unsigned write(const T*buf, unsigned n) throw(falcON::exception) {
       if(WRITTEN + n*sizeof(T) > SIZE) {
@@ -1131,10 +1141,10 @@ namespace falcON {
     /// \param buf data buffer to write from
     /// \param n   number of data of type T to write
     template<typename T>
-    static void Write(output&out, const T*buf, unsigned n)
+    static void Write(output&out, const T*buf, unsigned n, unsigned rec=4)
       throw(falcON::exception)
     {
-      FortranORec FOR(out, sizeof(T)*n);
+      FortranORec FOR(out, sizeof(T)*n, rec);
       FOR.write(buf,n);
     }
     //--------------------------------------------------------------------------

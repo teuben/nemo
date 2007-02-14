@@ -836,15 +836,30 @@ bool falcON::time_in_range(double t, const char*times)
 // class falcON::FortranIRec                                                    
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-falcON::FortranIRec::FortranIRec(input& in)
-  throw(falcON::exception) : IN(in), READ(0)
+unsigned falcON::FortranIRec::read_size() throw(falcON::exception)
+{
+  if(HSZE == 4) {
+    uint32 S;
+    IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32));
+    return S;
+  } else if(HSZE == 8) {
+    uint64 S;
+    IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64));
+    return S;
+  } else 
+    throw exception("FortranIRec: header size must be 4 or 8\n");
+  return 0;
+}
+//------------------------------------------------------------------------------
+falcON::FortranIRec::FortranIRec(input& in, unsigned rec)
+  throw(falcON::exception) : IN(in), HSZE(rec), READ(0)
 {
   debug_info(8,"FortranIRec: opening ... \n");
   if(!IN) throw exception("FortranIRec::FortranIRec(): input corrupted");
   if(IN.FREC)
     throw exception("trying to open 2nd FortranIRec to same input\n");
   IN.FREC = this;
-  IN.read(static_cast<char*>(static_cast<void*>(&SIZE)),sizeof(unsigned));
+  SIZE = read_size();
   debug_info(6,"FortranIRec: opened with %u bytes\n",SIZE);
 }
 //------------------------------------------------------------------------------
@@ -878,11 +893,9 @@ void falcON::FortranIRec::close() throw(falcON::exception)
 	    READ, SIZE);
     for(char C; READ!=SIZE; ++READ) IN.read(&C,1);
   }
-  unsigned S;
-  IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(unsigned));
+  unsigned S = read_size();
   IN.FREC = 0;
-  if(S != SIZE)
-    throw exception("FortranIRec: record size mismatch");
+  if(S != SIZE) throw exception("FortranIRec: record size mismatch");
   debug_info(6,"FortranIRec: closed with %u bytes\n",SIZE);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -890,15 +903,26 @@ void falcON::FortranIRec::close() throw(falcON::exception)
 // class falcON::FortranORec                                                    
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-falcON::FortranORec::FortranORec(output& out, unsigned size)
-  throw(falcON::exception) : OUT(out), SIZE(size), WRITTEN(0)
+void falcON::FortranORec::write_size() throw(falcON::exception)
+{
+  if(HSZE == 4) {
+    uint32 S = SIZE;
+    OUT.write(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32));
+  } else if(HSZE == 8) {
+    uint64 S;
+    OUT.write(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64));
+  } else 
+    throw exception("FortranORec: header size must be 4 or 8\n");
+}
+//------------------------------------------------------------------------------
+falcON::FortranORec::FortranORec(output& out, unsigned size, unsigned rec)
+  throw(falcON::exception) : OUT(out), HSZE(rec), SIZE(size), WRITTEN(0)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(OUT.FREC)
     throw exception("trying to open 2nd FortranORec to same output\n");
   OUT.FREC = this;
-  OUT.write(static_cast<const char*>(static_cast<const void*>(&SIZE)),
-	    sizeof(unsigned));
+  write_size();
   debug_info(6,"FortranORec: opened for %u bytes\n",SIZE);
 }
 //------------------------------------------------------------------------------
@@ -931,8 +955,7 @@ void falcON::FortranORec::close() throw(falcON::exception)
 	    " ... padding with 0\n", WRITTEN, SIZE);
     for(char C=0; WRITTEN!=SIZE; ++WRITTEN) OUT.write(&C,1);
   }
-  OUT.write(static_cast<const char*>(static_cast<const void*>(&SIZE)),
-	    sizeof(unsigned));
+  write_size();
   OUT.FREC = 0;
   debug_info(6,"FortranORec: closed with %u bytes\n",SIZE);
 }
