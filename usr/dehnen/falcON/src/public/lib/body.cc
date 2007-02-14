@@ -420,8 +420,8 @@ void bodies::block::write_potpex(data_out&outp,
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
-void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, size_t from,
-				 size_t N) falcON_THROWING
+void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
+				 unsigned N) falcON_THROWING
 {
   if(!TYPE.allows(f))
     falcON_THROW("bodies::block::read_Fortran(%c): not allowed by our type",
@@ -430,16 +430,16 @@ void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, size_t from,
     falcON_THROW("bodies::block::read_Fortran(%c): cannot read that many",
 		 letter(f));
   add_field(f);
-  size_t R = I.read_bytes(static_cast<char*>(DATA[value(f)])
-			  +from*falcON::size(f), N*falcON::size(f));
+  unsigned R = I.read_bytes(static_cast<char*>(DATA[value(f)])
+			    +from*falcON::size(f), N*falcON::size(f));
   if(R != N*falcON::size(f))
     falcON_THROW("bodies::block::read_Fortran(%c): "
 		 "could only read %u of %u bytes\n",R,N*falcON::size(f));
   debug_info(4,"bodies::block::read_Fortran(): read %u %s\n",N,name(f));
 }
 ////////////////////////////////////////////////////////////////////////////////
-void bodies::block::write_Fortran(FortranORec&O, fieldbit f, size_t from,
-				  size_t N) const falcON_THROWING
+void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
+				  unsigned N) const falcON_THROWING
 {
   if(0 == DATA[value(f)])
     falcON_THROW("bodies::block::write_Fortran(%c): data not supported",
@@ -447,8 +447,8 @@ void bodies::block::write_Fortran(FortranORec&O, fieldbit f, size_t from,
   if(from + N > NBOD)
     falcON_THROW("bodies::block::write_Fortran(%c): cannot write that many",
 		 letter(f));
-  size_t W = O.write_bytes(static_cast<const char*>(DATA[value(f)])
-			   +from*falcON::size(f), N*falcON::size(f));
+  unsigned W = O.write_bytes(static_cast<const char*>(DATA[value(f)])
+			     +from*falcON::size(f), N*falcON::size(f));
   if(W != N*falcON::size(f))
     falcON_THROW("bodies::block::write_Fortran(%c): "
 		 "could only write %u of %u bytes\n",W,N*falcON::size(f));
@@ -518,7 +518,7 @@ bodies::iterator& bodies::iterator::read_posvel(data_in& D, fieldset get,
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
 bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I,
-						 fieldbit f, size_t R)
+						 fieldbit f, unsigned R)
   falcON_THROWING
 {
   if(R * falcON::size(f) > I.bytes_unread())
@@ -526,7 +526,7 @@ bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I,
 		 "only %u bytes left on Fortran record\n",
 		 R, name(f), R*falcON::size(f), I.bytes_unread());
   while(is_valid() && R) {
-    size_t r = min(N-K, R);
+    unsigned r = min(N-K, R);
     const_cast<block*>(B)->read_Fortran(I,f,K,r);
     R -= r;
     K += r;
@@ -537,7 +537,7 @@ bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I,
 }
 ////////////////////////////////////////////////////////////////////////////////
 bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
-						  fieldbit f, size_t W)
+						  fieldbit f, unsigned W)
   falcON_THROWING
 {
   if(W * falcON::size(f) > O.bytes_free())
@@ -545,7 +545,7 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
 		 "only %u bytes left free on Fortran record\n",
 		 W, name(f), W*falcON::size(f), O.bytes_free());
   while(is_valid() && W) {
-    size_t w = min(N-K, W);
+    unsigned w = min(N-K, W);
     B->write_Fortran(O,f,K,w);
     W -= w;
     K += w;

@@ -273,8 +273,9 @@ namespace falcON {
 #endif
       //------------------------------------------------------------------------
       // Gadget I/O support                                                     
-      void read_Fortran (FortranIRec&,fieldbit, size_t, size_t) falcON_THROWING;
-      void write_Fortran(FortranORec&,fieldbit, size_t, size_t) const
+      void read_Fortran (FortranIRec&,fieldbit, unsigned, unsigned)
+	falcON_THROWING;
+      void write_Fortran(FortranORec&,fieldbit, unsigned, unsigned) const
 	falcON_THROWING;
     };
     //==========================================================================
@@ -812,8 +813,8 @@ namespace falcON {
       /// formatted output: write bodyindex
       friend std::ostream& operator<<(std::ostream&, const iterator&);
       //------------------------------------------------------------------------
-      iterator& read_Fortran (FortranIRec&, fieldbit, size_t) falcON_THROWING;
-      iterator& write_Fortran(FortranORec&, fieldbit, size_t) falcON_THROWING;
+      iterator& read_Fortran (FortranIRec&, fieldbit, unsigned) falcON_THROWING;
+      iterator& write_Fortran(FortranORec&, fieldbit, unsigned) falcON_THROWING;
 #ifdef falcON_NEMO
       iterator& read_data (data_in &, unsigned =0) falcON_THROWING;
       iterator& write_data(data_out&, unsigned =0) falcON_THROWING;

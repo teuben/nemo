@@ -974,9 +974,9 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class FortranIRec {
   private:
-    input         &IN;                  // related input stream
-    size_t         SIZE;                // size (bytes) of record
-    mutable size_t READ;                // number of bytes already read
+    input           &IN;                  // related input stream
+    unsigned         SIZE;                // size (bytes) of record
+    mutable unsigned READ;                // number of bytes already read
     //--------------------------------------------------------------------------
     FortranIRec           (FortranIRec const&); // not implemented
     FortranIRec& operator=(FortranIRec const&); // not implemented
@@ -999,7 +999,7 @@ namespace falcON {
     /// \return    number of bytes actually read
     /// \param buf buffer to read into
     /// \param n   number of bytes to read
-    size_t read_bytes(char*buf, size_t n) throw(falcON::exception);
+    unsigned read_bytes(char*buf, unsigned n) throw(falcON::exception);
     //--------------------------------------------------------------------------
     /// read some data of any type
     ///
@@ -1011,7 +1011,7 @@ namespace falcON {
     /// \param buf buffer to read into
     /// \param n   number of data to read
     template<typename T>
-    size_t read(T*buf, size_t n) throw(falcON::exception) {
+    unsigned read(T*buf, unsigned n) throw(falcON::exception) {
       if(READ+n*sizeof(T) > SIZE) {
 	warning("FortranIRec::read(): cannot read %d, but only %d %s\n",
 		n, (SIZE-READ)/sizeof(T), nameof(T));
@@ -1025,7 +1025,7 @@ namespace falcON {
     /// skip some bytes
     ///
     /// \param n   number of bytes to skip
-    void skip_bytes(size_t n);
+    void skip_bytes(unsigned n);
     //--------------------------------------------------------------------------
     /// read a single FORTRAN record in one go (you have to know its size!)
     ///
@@ -1034,7 +1034,7 @@ namespace falcON {
     /// \param buf data buffer to read into
     /// \param n   number of data of type T to read
     template<typename T>
-    static void Read(input &in, T*buf, size_t n)
+    static void Read(input &in, T*buf, unsigned n)
       throw(falcON::exception)
     {
       FortranIRec FIR(in);
@@ -1049,13 +1049,13 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
     /// information on number of bytes already read
-    size_t const&bytes_read() const { return READ; }
+    unsigned const&bytes_read() const { return READ; }
     //--------------------------------------------------------------------------
     /// information on number of bytes yet to be read
-    size_t bytes_unread() const { return SIZE-READ; }
+    unsigned bytes_unread() const { return SIZE-READ; }
     //--------------------------------------------------------------------------
     /// information on total size of record
-    size_t const&size() const { return SIZE; }
+    unsigned const&size() const { return SIZE; }
   };// class FortranIRec
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -1068,8 +1068,8 @@ namespace falcON {
   class FortranORec {
   private:
     output        &OUT;                 // related output stream
-    size_t         SIZE;                // size (bytes) of record
-    mutable size_t WRITTEN;             // number of bytes already written
+    unsigned       SIZE;                // size (bytes) of record
+    mutable unsigned WRITTEN;             // number of bytes already written
     //--------------------------------------------------------------------------
     FortranORec           (FortranORec const&); // not implemented
     FortranORec& operator=(FortranORec const&); // not implemented
@@ -1078,7 +1078,7 @@ namespace falcON {
     /// constructor: write buffer with size information
     /// \param out output stream to write to
     /// \param size size (in bytes) of record
-    FortranORec(output&out, size_t size) throw(falcON::exception);
+    FortranORec(output&out, unsigned size) throw(falcON::exception);
     //--------------------------------------------------------------------------
     /// destructor: write to end of record, write end buffer
     ~FortranORec() throw(falcON::exception) { close(); }
@@ -1094,13 +1094,13 @@ namespace falcON {
     /// \return number of bytes actually written
     /// \param buf buffer to write
     /// \param n   number of bytes to write
-    size_t write_bytes(const char*buf, size_t n) throw(falcON::exception);
+    unsigned write_bytes(const char*buf, unsigned n) throw(falcON::exception);
     //--------------------------------------------------------------------------
     /// fill some bytes with a given value
     ///
     /// \param n   number of bytes to fill
     /// \param val value to fill them with
-    void fill_bytes(size_t n, char val=0);
+    void fill_bytes(unsigned n, char val=0);
     //--------------------------------------------------------------------------
     /// write some data of any type
     ///
@@ -1112,7 +1112,7 @@ namespace falcON {
     /// \param buf buffer to write
     /// \param n   number of data to write
     template<typename T>
-    size_t write(const T*buf, size_t n) throw(falcON::exception) {
+    unsigned write(const T*buf, unsigned n) throw(falcON::exception) {
       if(WRITTEN + n*sizeof(T) > SIZE) {
 	warning("FortranORec::write(): "
 		"cannot write %d, but only %d %s\n",
@@ -1131,7 +1131,7 @@ namespace falcON {
     /// \param buf data buffer to write from
     /// \param n   number of data of type T to write
     template<typename T>
-    static void Write(output&out, const T*buf, size_t n)
+    static void Write(output&out, const T*buf, unsigned n)
       throw(falcON::exception)
     {
       FortranORec FOR(out, sizeof(T)*n);
@@ -1139,13 +1139,13 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
     /// information on number of bytes already written
-    size_t const&bytes_written() const { return WRITTEN; }
+    unsigned const&bytes_written() const { return WRITTEN; }
     //--------------------------------------------------------------------------
     /// information on number of bytes yet to be written
-    size_t bytes_free() const { return SIZE-WRITTEN; }
+    unsigned bytes_free() const { return SIZE-WRITTEN; }
     //--------------------------------------------------------------------------
     /// information on total size of record
-    size_t const&size() const { return SIZE; }
+    unsigned const&size() const { return SIZE; }
   };// class FortranORec
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
