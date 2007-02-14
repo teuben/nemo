@@ -3,7 +3,7 @@
 //                                                                             |
 // body.cc                                                                     |
 //                                                                             |
-// Copyright (C) 2000-2006 Walter Dehnen                                       |
+// Copyright (C) 2000-2007 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -85,7 +85,7 @@ void bodies::block::reset_data(fieldset b) const falcON_THROWING {
 inline
 void bodies::block::add_field (fieldbit f) falcON_THROWING {
   if(TYPE.allows(f) && 0 == DATA[value(f)] ) {
-    debug_info(4,"bodies::block::add_field(): allocating data for %d %c (%s)\n",
+    debug_info(4,"bodies::block::add_field(): allocating data for %u %c (%s)\n",
 	       NALL,letter(f),name(f));
     set_data_void(f, falcON_NEW(char,NALL*falcON::size(f)));
     if(f == fieldbit::f) reset_flags();
@@ -418,6 +418,44 @@ void bodies::block::write_potpex(data_out&outp,
   outp.write(P,N);
   falcON_DEL_A(P);
 }
+#endif // falcON_NEMO
+////////////////////////////////////////////////////////////////////////////////
+void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, size_t from,
+				 size_t N) falcON_THROWING
+{
+  if(!TYPE.allows(f))
+    falcON_THROW("bodies::block::read_Fortran(%c): not allowed by our type",
+		 letter(f));
+  if(from + N > NBOD)
+    falcON_THROW("bodies::block::read_Fortran(%c): cannot read that many",
+		 letter(f));
+  add_field(f);
+  size_t R = I.read_bytes(static_cast<char*>(DATA[value(f)])
+			  +from*falcON::size(f), N*falcON::size(f));
+  if(R != N*falcON::size(f))
+    falcON_THROW("bodies::block::read_Fortran(%c): "
+		 "could only read %u of %u bytes\n",R,N*falcON::size(f));
+  debug_info(4,"bodies::block::read_Fortran(): read %u %s\n",N,name(f));
+}
+////////////////////////////////////////////////////////////////////////////////
+void bodies::block::write_Fortran(FortranORec&O, fieldbit f, size_t from,
+				  size_t N) const falcON_THROWING
+{
+  if(0 == DATA[value(f)])
+    falcON_THROW("bodies::block::write_Fortran(%c): data not supported",
+		 letter(f));
+  if(from + N > NBOD)
+    falcON_THROW("bodies::block::write_Fortran(%c): cannot write that many",
+		 letter(f));
+  size_t W = O.write_bytes(static_cast<const char*>(DATA[value(f)])
+			   +from*falcON::size(f), N*falcON::size(f));
+  if(W != N*falcON::size(f))
+    falcON_THROW("bodies::block::write_Fortran(%c): "
+		 "could only write %u of %u bytes\n",W,N*falcON::size(f));
+  debug_info(4,"bodies::block::write_Fortran(): written %u %s\n",N,name(f));
+}
+////////////////////////////////////////////////////////////////////////////////
+#ifdef falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::bodies::iterator                                               
@@ -479,6 +517,44 @@ bodies::iterator& bodies::iterator::read_posvel(data_in& D, fieldset get,
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
+bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I,
+						 fieldbit f, size_t R)
+  falcON_THROWING
+{
+  if(R * falcON::size(f) > I.bytes_unread())
+    falcON_THROW("body::read_Fortran: want %u %s (%u bytes) but "
+		 "only %u bytes left on Fortran record\n",
+		 R, name(f), R*falcON::size(f), I.bytes_unread());
+  while(is_valid() && R) {
+    size_t r = min(N-K, R);
+    const_cast<block*>(B)->read_Fortran(I,f,K,r);
+    R -= r;
+    K += r;
+    if(K >= N) next_block();
+  }
+  if(R) falcON_THROW("body::read_Fortran: %u data remain unread\n",R);
+  return *this;
+}
+////////////////////////////////////////////////////////////////////////////////
+bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
+						  fieldbit f, size_t W)
+  falcON_THROWING
+{
+  if(W * falcON::size(f) > O.bytes_free())
+    falcON_THROW("body::write_Fortran: want %u %s (%u bytes) but "
+		 "only %u bytes left free on Fortran record\n",
+		 W, name(f), W*falcON::size(f), O.bytes_free());
+  while(is_valid() && W) {
+    size_t w = min(N-K, W);
+    B->write_Fortran(O,f,K,w);
+    W -= w;
+    K += w;
+    if(K >= N) next_block();
+  }
+  if(W) falcON_THROW("body::write_Fortran: %u data remain unwritten\n",W);
+  return *this;
+}
+////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::bodies                                                         
 //                                                                              
@@ -491,7 +567,7 @@ unsigned bodies::N_subset() const
   LoopAllBodies(this,b) if(in_subset(b)) ++n;
   return n;
 }
-// delete all blocks and reset related data                                 
+// delete all blocks and reset related data
 void bodies::del_data() falcON_THROWING
 {
   for(unsigned i=0; i!=index::max_blocks; ++i) if(BLOCK[i]) {
@@ -507,7 +583,7 @@ void bodies::del_data() falcON_THROWING
   FIRST = 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
-// destruction: delete all data                                             
+// destruction: delete all data
 bodies::~bodies() falcON_THROWING
 {
   debug_info(6,"bodies::~bodies(): destructing bodies");
@@ -518,7 +594,7 @@ bodies::~bodies() falcON_THROWING
   del_data();
 }
 ////////////////////////////////////////////////////////////////////////////////
-// set blocks' FIRST entries                                                
+// set blocks' FIRST entries
 void bodies::set_firsts()
 {
   unsigned n = 0;
@@ -529,7 +605,7 @@ void bodies::set_firsts()
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// set up blocks to hold N[t] bodies of type t                              
+// set up blocks to hold N[t] bodies of type t
 void bodies::set_data(const unsigned *N) falcON_THROWING
 {
   NBLK = 0u;
@@ -571,7 +647,7 @@ bodies::bodies(unsigned nb,
   BITS      ( bits ),
   C_FORTRAN ( 0 )
 {
-  debug_info(3,"bodies::bodies(): constructing bodies: nb=%d, ns=%d, bits=%s",
+  debug_info(3,"bodies::bodies(): constructing bodies: nb=%u, ns=%u, bits=%s",
 	     nb,ns,word(bits));
   unsigned n[BT_NUM] = {ns, nb>ns? nb-ns:0};
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
@@ -586,7 +662,7 @@ bodies::bodies(const unsigned*nall,
 {
   unsigned none[BT_NUM]={0,0};
   const unsigned*n = nall? nall : none;
-  debug_info(3,"bodies::bodies(): constructing bodies: n=%d,%d, bits=%s",
+  debug_info(3,"bodies::bodies(): constructing bodies: n=%u,%u, bits=%s",
 	     n[0],n[1],word(bits));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
@@ -653,7 +729,7 @@ bodies::bodies(char, const unsigned n[BT_NUM]) falcON_THROWING
 : BITS      ( 0 ),
   C_FORTRAN ( 1 )
 {
-  debug_info(3,"bodies::bodies(): constructing bodies for C & FORTRAN: n=%d,%d",
+  debug_info(3,"bodies::bodies(): constructing bodies for C & FORTRAN: n=%u,%u",
 	     n[0],n[1]);
   for(bodytype t; t; ++t)
     if(n[t] > index::max_bodies)
@@ -771,7 +847,7 @@ void bodies::merge(bodies&Other) falcON_THROWING {
 void bodies::create(unsigned N, bodytype t) falcON_THROWING
 {
   if(N > index::max_bodies) 
-    falcON_THROW("bodies::create(): asked for %d > %d bodies\n",
+    falcON_THROW("bodies::create(): asked for %u > %u bodies\n",
 		 N,  index::max_bodies);
   if(NBLK >= index::max_blocks)
     falcON_THROW("bodies::create(): number of blocks exceeded\n");
@@ -785,7 +861,7 @@ void bodies::create(unsigned N, bodytype t) falcON_THROWING
   link_blocks();
   // set block::FIRST                                                           
   set_firsts();
-  debug_info(2,"bodies::create(): created %d new bodies of type %s\n",
+  debug_info(2,"bodies::create(): created %u new bodies of type %s\n",
 	     N,t.name());
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -863,9 +939,9 @@ fieldset bodies::read_snapshot(snap_in  const&snap,
       b.read_data(inpt,Nread);
       if(inpt.N() != inpt.N_read())
 	falcON_THROW("bodies::read_snapshot(): "
-		     "could only read %d of %d %c data",
+		     "could only read %u of %u %c data",
 		     inpt.N_read(), inpt.N(), letter(f));
-      debug_info(2,"bodies::read_snapshot(): %d %c read",
+      debug_info(2,"bodies::read_snapshot(): %u %c read",
 		 inpt.N_read(), letter(f));
       BITS |= fieldset(f);
       read |= fieldset(f);
@@ -902,18 +978,22 @@ void bodies::write_snapshot(snap_out const&snap,
     written |= fieldset::potent;
   }
   for(fieldbit f; f; ++f)
-    if(put.contain(f) && !written.contain(f) ) {
+    if(put.contain(f) && !written.contain(f) &&
+       (!falcON::is_sph(f) || N_sph() ) ) {
       data_out outp(snap,nemo_io::field(f));
       body b(start);
       b.write_data(outp,Nwrite);
       if(outp.N() != outp.N_written())
 	falcON_THROW("bodies::write_snapshot(): "
-		     "could only write %d of %d %c data",
+		     "could only write %u of %u %c data",
 		     outp.N_written(), outp.N(), letter(f));
-      debug_info(2,"bodies::write_snapshot(): written %d %c",
+      debug_info(2,"bodies::write_snapshot(): written %u %c",
 		 outp.N_written(), letter(f));
       written |= fieldset(f);
     }
+  debug_info(1,"bodies::write_snapshot(): "
+	     "written=%s for %u SPH & %u STD bodies\n",
+	     word(written), N_sph(), N_std());
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
@@ -1062,7 +1142,6 @@ void bodies::sorted(Array<index>&table,
 // class falcON::snapshot                                                       
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef falcON_NEMO
 namespace {
   class PointerBank {
     //--------------------------------------------------------------------------
@@ -1128,7 +1207,7 @@ namespace {
 			 "name mismatch ('%s' : '%s')",P->name,n);
 	  if(P->size != s)
 	    falcON_THROW("snapshot::set_pointer(): "
-			 "size mismatch (%d : %d)",P->size,s);
+			 "size mismatch (%u : %u)",P->size,s);
 	  P->pter = p;
 	  return;
 	}
@@ -1155,7 +1234,7 @@ namespace {
 	if(0==strcmp(P->key, k)) {
 	  if(s != P->size)
 	    falcON_THROW("snapshot::%s(): "
-			 "size (%d) does not match value in bank (%d)\n",
+			 "size (%u) does not match value in bank (%u)\n",
 			 func,s,P->size);
 	  if(strcmp(n,P->name))
 	    falcON_THROW("snapshot::%s(): "
@@ -1262,11 +1341,8 @@ snapshot::snapshot(snapshot const&S,
   INIT   ( S.INIT ),
   TINI   ( S.TINI ),
   TIME   ( S.TIME ),
-  PBNK   ( 
-#ifdef falcON_PROPER
-	   S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) :
-#endif
-	   0 ) {}
+  PBNK   ( S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) : 0 )
+{}
 ////////////////////////////////////////////////////////////////////////////////
 #if(0) // not yet implemented due to bodies::copy() missing
 void snapshot::copy(snapshot const&S,
@@ -1275,22 +1351,17 @@ void snapshot::copy(snapshot const&S,
 {
   bodies::copy(S,Bd,F);
   TIME = S.TIME;
-# ifdef falcON_PROPER
   if(PBNK) falcON_DEL_O(static_cast<PointerBank*>(PBNK));
   PBNK = S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) : 0;
-# else
-  PBNK = 0;
-# endif
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 snapshot::~snapshot()
 {
-#ifdef falcON_PROPER
   if(PBNK) { falcON_DEL_O(static_cast<PointerBank*>(PBNK)); PBNK = 0; }
-#endif
 }
 ////////////////////////////////////////////////////////////////////////////////
+#ifdef falcON_NEMO
 bool snapshot::read_nemo(                          // R: was time in range?     
 			 nemo_in const&i,          // I: nemo input             
 			 fieldset     &r,          // O: what has been read     
@@ -1352,8 +1423,8 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
     falcON_THROW("snapshot::write_nemo() start body is not ours\n");
   if(n == 0) n = N_bodies()-i;
   else if(i + n > N_bodies()) {
-    warning("snapshot::write_nemo() cannot write %d bodies, "
-	    "will only write %d\n",n,N_bodies()-i);
+    warning("snapshot::write_nemo() cannot write %u bodies, "
+	    "will only write %u\n",n,N_bodies()-i);
     n = N_bodies()-i;
   }
   unsigned ns = N_bodies(bodytype::gas)>i? N_bodies(bodytype::gas)-i : 0;
@@ -1368,5 +1439,378 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
   snap_out s(o,N_bodies(),N_bodies(bodytype::gas),TIME);
   write_snapshot(s,w,begin_all_bodies(),N_bodies());
 }
-////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_NEMO
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  struct GadgetHeader {  // structure taken from gadget/allvars.h
+    int          npart[6];
+    double       masstab[6];
+    double       time;
+    double       redshift;
+    int          flag_sfr;
+    int          flag_feedback;
+    unsigned int npartTotal[6];
+    int          flag_cooling;
+    int          num_files;
+    double       BoxSize;
+    double       Omega0;
+    double       OmegaLambda;
+    double       HubbleParam;
+    int          flag_stellarage;
+    int          flag_metals;
+    unsigned int npartTotalHighWord[6];
+    int          flag_entropy_instead_u;
+    char         fill[60];
+    //--------------------------------------------------------------------------
+    GadgetHeader() :
+      time(0.), redshift(0.), flag_sfr(0), flag_feedback(0), flag_cooling(0),
+      num_files(0), BoxSize(0.), Omega0(0.), OmegaLambda(0.), HubbleParam(0.),
+      flag_stellarage(0), flag_metals(0), flag_entropy_instead_u(0)
+    {
+      for(int k=0; k!=6; ++k) {
+	npart[k] = 0;
+	npartTotal[k] = 0;
+	npartTotalHighWord[k] = 0;
+	masstab[k] = 0.;
+      }
+    }
+    //--------------------------------------------------------------------------
+    bool mismatch(GadgetHeader const&H) const {
+      bool okay = true;
+#define CHECK_I(FIELD,FIELDNAME)				\
+      if(FIELD != H.FIELD) {					\
+	okay = false;						\
+	warning("GadgetHeader \"%s\" mismatch (%u vs %u)\n",	\
+		FIELDNAME, FIELD, H.FIELD);			\
+      }
+#define CHECK_D(FIELD,FIELDNAME)				\
+      if(FIELD != H.FIELD) {					\
+	okay = false;						\
+	warning("GadgetHeader\"%s\" mismatch (%f vs %f)\n",	\
+		FIELDNAME, FIELD, H.FIELD);			\
+      }
+      CHECK_D(time,"time");
+      CHECK_D(redshift,"redshift");
+      CHECK_I(flag_sfr,"flag_sfr");
+      CHECK_I(flag_feedback,"flag_feedback");
+      CHECK_I(npartTotal[0],"npartTotal[0]");
+      CHECK_I(npartTotal[1],"npartTotal[1]");
+      CHECK_I(npartTotal[2],"npartTotal[2]");
+      CHECK_I(npartTotal[3],"npartTotal[3]");
+      CHECK_I(npartTotal[4],"npartTotal[4]");
+      CHECK_I(npartTotal[5],"npartTotal[5]");
+      CHECK_I(flag_cooling,"flag_cooling");
+      CHECK_I(num_files,"num_files");
+      CHECK_D(BoxSize,"BoxSize");
+      CHECK_D(Omega0,"Omega0");
+      CHECK_D(OmegaLambda,"OmegaLambda");
+      CHECK_D(HubbleParam,"HubbleParam");
+      CHECK_I(flag_stellarage,"flag_stellarage");
+      CHECK_I(flag_metals,"flag_metals");
+      CHECK_I(flag_entropy_instead_u,"flag_entropy_instead_u");
+      CHECK_I(npartTotalHighWord[0],"npartTotalHighWord[0]");
+      CHECK_I(npartTotalHighWord[1],"npartTotalHighWord[1]");
+      CHECK_I(npartTotalHighWord[2],"npartTotalHighWord[2]");
+      CHECK_I(npartTotalHighWord[3],"npartTotalHighWord[3]");
+      CHECK_I(npartTotalHighWord[4],"npartTotalHighWord[4]");
+      CHECK_I(npartTotalHighWord[5],"npartTotalHighWord[5]");
+      return !okay;
+#undef CHECK_I
+#undef CHECK_D
+    }
+    //--------------------------------------------------------------------------
+    void check_simple_npart_error() {
+      for(int k=0; k!=6; ++k)
+	if(npart[k] > npartTotal[k]) {
+	  warning("GadgetHeader: npart[%u]=%u > npartTotal[%u]=%u: "
+		  "we will try to fix by setting npartTotal[%u]=%u\n",
+		  k,npart[k],k,npartTotal[k],k,npart[k]);
+	  npartTotal[k] = npart[k];
+	}
+    }
+    //--------------------------------------------------------------------------
+    void dump(std::ostream&out) const {
+      out<<" gadget header dump:";
+      for(int k=0; k!=6; ++k)
+	out<<"\n type "<<k
+	   <<": npart="<<std::setw(8)<<npart[k]
+	   <<" npartTotal="<<std::setw(8)<<npartTotal[k]
+	   <<" masstab="<<masstab[k];
+      out<<"\n redshift               = "<<redshift
+	 <<"\n flag_sfr               = "<<flag_sfr
+	 <<"\n flag_feedback          = "<<flag_feedback
+	 <<"\n flag_cooling           = "<<flag_cooling
+	 <<"\n num_files              = "<<num_files
+	 <<"\n BoxSize                = "<<BoxSize
+	 <<"\n Omega0                 = "<<Omega0
+	 <<"\n OmegaLambda            = "<<OmegaLambda
+	 <<"\n HubbleParam            = "<<HubbleParam
+	 <<"\n flag_stellarage        = "<<flag_stellarage
+	 <<"\n flag_metals            = "<<flag_metals
+	 <<"\n flag_entropy_instead_u = "<<flag_entropy_instead_u
+	 <<std::endl;
+    }
+  };
+} // namespace {
+//------------------------------------------------------------------------------
+falcON_TRAITS(GadgetHeader,"GadgetHeader");
+////////////////////////////////////////////////////////////////////////////////
+#define READ_ALL(BIT) if(nt) {						\
+    FortranIRec F(in);							\
+    if(read.contain(BIT)) {						\
+      if(F.size() != nt*field_traits<BIT>::size)			\
+	falcON_THROW("bodies::read_gadget(): mismatch reading %u %c: "	\
+		     "expected %u bytes, found %u\n",			\
+		     nt,field_traits<BIT>::word(),			\
+		     nt*field_traits<BIT>::size,F.size());		\
+      add_field(BIT);							\
+      if(ns) { body sph(SPH); sph.read_Fortran(F, BIT, ns); }		\
+      if(nd) { body std(STD); std.read_Fortran(F, BIT, nd); }		\
+      debug_info(2,"bodies::read_gadget(): read %u %c\n",		\
+	         nt, field_traits<BIT>::word());			\
+      fgot |= fieldset(BIT);						\
+    } else {								\
+      F.skip_bytes(F.size());						\
+      debug_info(3,"bodies::read_gadget(): skip %u %c\n",		\
+                 nt, field_traits<BIT>::word());			\
+    }									\
+  }
+#define READ_SPH(BIT) if(ns) {						\
+    FortranIRec F(in);							\
+    if(read.contain(BIT)) {						\
+      if(F.size() != ns*field_traits<BIT>::size)			\
+	falcON_THROW("bodies::read_gadget(): mismatch reading %u %c: "	\
+		     "expected %u bytes, found %u\n",			\
+		     ns,field_traits<BIT>::word(),			\
+		     ns*field_traits<BIT>::size,F.size());		\
+      body sph(SPH);							\
+      add_field(BIT);							\
+      sph.read_Fortran(F, BIT, ns);		       			\
+      debug_info(2,"bodies::read_gadget(): read %u %c\n",		\
+	         ns, field_traits<BIT>::word());			\
+      fgot |= fieldset(BIT);						\
+    } else {								\
+      F.skip_bytes(F.size());						\
+      debug_info(3,"bodies::read_gadget(): skip %u %c\n",		\
+                 nt, field_traits<BIT>::word());			\
+    }									\
+  }
+//------------------------------------------------------------------------------
+double bodies::read_gadget(const char*fname,
+			   fieldset   read) falcON_THROWING
+{
+  read &= fieldset("mxvkURHpa");
+  fieldset got;
+  // 1 open first data file, read header, and determine number of data files
+  GadgetHeader header0,headeri,*header=&header0;
+  input        in(fname);
+  int          nfile=1;
+  char         filename[256];
+  const char  *file=0;
+  if(in) {
+    // 1.1 try single file "fname"
+    file = fname;
+    try { FortranIRec::Read(in, header, 1); }
+    catch(exception E) { falcON_RETHROW(E); }
+    nfile = header->num_files;
+    if(nfile==0) nfile=1;
+    if(debug(1)) {
+      debug_info("bodies::read_gadget(): header read from file \"%s\":\n",
+		 fname);
+      header->dump(std::clog);
+    }
+    if(nfile!=1)
+      falcON_THROW("bodies::read_gadget(): num_files=%u, expected 0 or 1\n",
+		   nfile);
+    header->check_simple_npart_error();
+  } else {
+    // 1.2 try file "fname.0" (with possibly more to follow)
+    sprintf(filename,"%s.%u",fname,0);
+    in.open(filename);
+    if(!in) falcON_THROW("bodies::read_gadget(): cannot open file \"%s\" "
+			 "nor file \"%s\"\n", fname, filename);
+    file = filename;
+    try { FortranIRec::Read(in, header, 1); }
+    catch(exception E) { falcON_RETHROW(E); }
+    nfile = header->num_files;
+    if(debug(1)) {
+      debug_info("bodies::read_gadget(): header read from file \"%s\":\n",file);
+      header->dump(std::clog);
+    }
+  }
+  // 2 establish number of SPH and non-SPH particles and allocate memory.
+  unsigned NB[BT_NUM] = {0}, NP[6] ={0};
+  NB[0] = header->npartTotal[0];
+  for(int k=1; k!=6; ++k) NB[1] += header->npartTotal[k];
+  if(NB[0] == 0) read &= fieldset(fieldset::nonSPH);
+  reset(NB,read);
+  // 3 loop data files
+  body SPH = begin_sph_bodies();
+  body STD = begin_std_bodies();
+  for(int ifile=0; ifile!=nfile; ) {
+    fieldset fgot;
+    for(int k=0; k!=6; ++k) {
+      NP[k] += header->npart[k];
+      if(NP[k] > header->npartTotal[k])
+	falcON_THROW("bodies::read_gadget(): corrupted data file(s): "
+		     "Sum npart[%u]=%u > npartTotal[%u]=%u\n",
+		     k,NP[k],k,header->npartTotal[k]);
+    }
+    // 3.1 determine number of sph and std bodies in this file
+    unsigned ns = header->npart[0], nd=0, nm=0;
+    for(int k=0; k!=6; ++k) {
+      if(k) nd += header->npart[k];
+      if(header->masstab[k] == 0) nm += header->npart[k];
+    }
+    unsigned nt = ns+nd;
+    // read positions
+    READ_ALL(fieldbit::x);
+    if(read == fgot) goto NextFile;
+    // read velocties
+    READ_ALL(fieldbit::v);
+    if(read == fgot) goto NextFile;
+    // read keys
+    READ_ALL(fieldbit::k);
+    if(read == fgot) goto NextFile;
+    // read masses --- OR assign them ...
+    if(nm) {
+      FortranIRec F(in);
+      if(read.contain(fieldbit::m)) {
+	if(F.size() != nm*sizeof(real))
+	  falcON_THROW("bodies::read_gadget(): mismatch reading %u m: "
+		       "expected %u bytes, found %u\n",
+		       nm,nm*sizeof(real), F.size());
+	body sph(SPH), std(STD);
+	add_field(fieldbit::m);
+	if(header->npart[0]) {
+	  if(header->masstab[0])
+	    for(int b=0; b!=header->npart[0]; ++b,++sph)
+	      sph.mass() = header->masstab[0];
+	  else
+	    sph.read_Fortran(F, fieldbit::m, header->npart[0]);
+	}
+	for(int k=1; k!=6; ++k) if(header->npart[k]) {
+	  if(header->masstab[k])
+	    for(int b=0; b!=header->npart[k]; ++b,++std)
+	      std.mass() = header->masstab[k];
+	  else
+	    std.read_Fortran(F, fieldbit::m, header->npart[k]);
+	}
+	debug_info(2,"bodies::read_gadget(): read %u m\n", nm);
+	fgot |= fieldset(fieldbit::m);
+      } else {
+	F.skip_bytes(F.size());
+	debug_info(3,"bodies::read_gadget(): skip %u m\n", nm);
+      }
+    } else if(read.contain(fieldbit::m)) {
+      body sph(SPH), std(STD);
+      add_field(fieldbit::m);
+      if(header->npart[0])
+	for(int b=0; b!=header->npart[0]; ++b,++sph)
+	  sph.mass() = header->masstab[0];
+      for(int k=1; k!=6; ++k) if(header->npart[k]) {
+	for(int b=0; b!=header->npart[k]; ++b,++std)
+	  std.mass() = header->masstab[k];
+      }
+      fgot |= fieldset(fieldbit::m);
+    }
+    if(read == fgot) goto NextFile;
+    // read gas internal energies
+    READ_SPH(fieldbit::U);
+    if(read == fgot) goto NextFile;
+    // read gas densities
+    READ_SPH(fieldbit::R);
+    if(read == fgot) goto NextFile;
+    // read SPH smoothing lengths
+    READ_SPH(fieldbit::H);
+    if(read == fgot) goto NextFile;
+    // read potentials
+    READ_ALL(fieldbit::p);
+    if(read == fgot) goto NextFile;
+    // read accelerations
+    READ_ALL(fieldbit::a);
+    if(read == fgot) goto NextFile;
+  NextFile:
+    got |= fgot;
+    // open next data file (unless all have been read) and move SPH & STD
+    if(++ifile != nfile) {
+      SPH += ns;
+      STD += nd;
+      sprintf(filename,"%s.%u",fname,ifile);
+      in.open(file);
+      if(!in) falcON_THROW("bodies::read_gadget(): cannot open file \"%s\"\n",
+			   file);
+      try { FortranIRec::Read(in, &headeri, 1); }
+      catch(exception E) { falcON_RETHROW(E); }
+      if(header0.mismatch(headeri))
+	falcON_THROW("bodies::read_gadget(): header mismatch\n");
+      header = &headeri;
+      if(debug(2)) {
+	debug_info("bodies::read_gadget(): header read from file \"%s\":\n",
+		   file);
+	header->dump(std::clog);
+      }
+    }
+  }
+  debug_info(1,"bodies::read_gadget(): read %s for %u SPH & %u STD bodies\n",
+	     word(got), NB[0], NB[1]);
+  return header->time;
+}
+////////////////////////////////////////////////////////////////////////////////
+#define WRITE(BIT)							\
+  if(!is_sph(BIT) || N_sph()) {						\
+    unsigned nw = is_sph(BIT)? N_sph() : N_bodies();			\
+    FortranORec F(out, nw * field_traits<BIT>::size);			\
+    if(have(BIT)) {							\
+      if(N_sph())							\
+	begin_sph_bodies().write_Fortran(F, BIT, N_sph());		\
+      if(!is_sph(BIT) && N_std())					\
+        begin_std_bodies().write_Fortran(F, BIT, N_std());		\
+      debug_info(2,"bodies::write_gadget(): written %u %c\n",		\
+	         nw, field_traits<BIT>::word());			\
+    } else {								\
+      if(warn)								\
+	warning("bodies::write_gadget(): don't have %c, write out zeros\n", \
+		field_traits<BIT>::word());				\
+      F.fill_bytes(nw);							\
+      debug_info(2,"bodies::write_gadget(): written %u 0 for %c\n",	\
+	         nw, field_traits<BIT>::word());			\
+    }									\
+    written |= fieldset(BIT);						\
+  }
+//------------------------------------------------------------------------------
+void bodies::write_gadget(output&out, double time, fieldset write, bool warn)
+  const falcON_THROWING
+{
+  // ensure we have keys ("ids" in gadget)
+  write |= fieldset("mxvkU");
+  const bool had_keys = have(fieldbit::k);
+  if(!had_keys) const_cast<bodies*>(this)->add_field(fieldbit::k);
+  // initialize and write header
+  GadgetHeader header0, *header=&header0;
+  header->num_files = 1;
+  header->npart[0] = header->npartTotal[0] = N_sph();
+  header->npart[1] = header->npartTotal[1] = N_std();
+  FortranORec::Write(out,header,1);
+  // write out data
+  fieldset written;
+  WRITE(fieldbit::x);
+  WRITE(fieldbit::v);
+  WRITE(fieldbit::k);
+  WRITE(fieldbit::m);
+  WRITE(fieldbit::U);
+  if(write & fieldset("RHpa")) {
+  WRITE(fieldbit::R);
+  if(write & fieldset("Hpa")) {
+  WRITE(fieldbit::H);
+  if(write & fieldset("pa")) {
+  WRITE(fieldbit::p);
+  if(write & fieldset::a)
+  WRITE(fieldbit::a);
+  } } }
+  debug_info(1,"bodies::write_gadget(): written %s for "
+	     "%u SPH & %u STD bodies\n", word(written), N_sph(), N_std());
+  // make sure we have no keys if we didn't have them before ...
+  if(!had_keys) const_cast<bodies*>(this)->del_field(fieldbit::k);
+}
+////////////////////////////////////////////////////////////////////////////////

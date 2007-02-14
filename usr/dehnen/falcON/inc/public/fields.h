@@ -18,7 +18,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2006  Walter Dehnen                                       
+// Copyright (C) 2002-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -948,7 +948,8 @@ namespace falcON {
   public field_type<TYPE> {						\
     typedef TYPE type;							\
     static const bool   is_sph = BIT >= BodyData::NOSPH;		\
-    static const char   word() { return BodyData::SQUANT[BIT]; }	\
+    static const size_t size   = sizeof(type);                          \
+    static       char   word() { return BodyData::SQUANT[BIT]; }	\
     static const char  *name() { return BodyData::QNAME[BIT]; }		\
   };
   //----------------------------------------------------------------------------

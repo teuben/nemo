@@ -4,14 +4,14 @@
 /// \file   inc/body.h                                                          
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2006                                                           
+/// \date   2000-2007                                                           
 ///                                                                             
 /// \brief  contains declarations of class falcON::bodies,                      
 ///	    class falcON::snapshot and some useful macros.                      
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2006 Walter Dehnen                                        
+// Copyright (C) 2000-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -45,6 +45,10 @@ namespace falcON {
   class snap_out;
   class data_out;
 #endif
+  class output;
+  class input;
+  class FortranIRec;
+  class FortranORec;
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // meta programmed sum over array                                             
@@ -260,13 +264,18 @@ namespace falcON {
 	falcON_THROWING;
 #ifdef falcON_NEMO
       //------------------------------------------------------------------------
-      // read from nemo data inputs                                             
+      // NEMO I/O support                                                       
     protected:
       void read_data   (data_in &,unsigned,unsigned)          falcON_THROWING;
       void read_posvel (data_in &,unsigned,unsigned,fieldset) falcON_THROWING;
       void write_data  (data_out&,unsigned,unsigned) const    falcON_THROWING;
       void write_potpex(data_out&,unsigned,unsigned) const    falcON_THROWING;
 #endif
+      //------------------------------------------------------------------------
+      // Gadget I/O support                                                     
+      void read_Fortran (FortranIRec&,fieldbit, size_t, size_t) falcON_THROWING;
+      void write_Fortran(FortranORec&,fieldbit, size_t, size_t) const
+	falcON_THROWING;
     };
     //==========================================================================
     //                                                                          
@@ -803,6 +812,8 @@ namespace falcON {
       /// formatted output: write bodyindex
       friend std::ostream& operator<<(std::ostream&, const iterator&);
       //------------------------------------------------------------------------
+      iterator& read_Fortran (FortranIRec&, fieldbit, size_t) falcON_THROWING;
+      iterator& write_Fortran(FortranORec&, fieldbit, size_t) falcON_THROWING;
 #ifdef falcON_NEMO
       iterator& read_data (data_in &, unsigned =0) falcON_THROWING;
       iterator& write_data(data_out&, unsigned =0) falcON_THROWING;
@@ -1120,7 +1131,7 @@ namespace falcON {
     //@}
     //==========================================================================
     //                                                                          
-    /// \name I/O to file                                                       
+    /// \name I/O to file in various formats                                    
     //@{                                                                        
     //                                                                          
     //==========================================================================
@@ -1184,6 +1195,34 @@ namespace falcON {
 			   unsigned       Nd,
 			   unsigned       Nb,
 			   unsigned       Ns= 0);
+    //--------------------------------------------------------------------------
+    /// Reads a single snapshot from file(s) written in gadget2 data format 1
+    ///
+    /// Gadget allows a single snapshot to be distributed over more than one
+    /// file. In this case the file names are assumed to be derived from the one
+    /// given as fname.0 fname.1 etc.
+    ///
+    /// \return simulation time of snapshot
+    /// \param  fname (input) basename of data file(s).
+    /// \param  read  (input) data to read (maximum is mxvkURH)
+    double read_gadget(const char*fname, fieldset read) falcON_THROWING;
+    //--------------------------------------------------------------------------
+    /// writes snapshot in gadget format to a single data file
+    ///
+    /// gadget data files MUST contain at least m,x,v,k,U. In additions, they
+    /// may contain R,H or R,H,p,a, partly dependent on whether the file is a
+    /// full dump or a initial-conditions file only. Here we allow for these
+    /// three options.\n
+    /// Data not existent in the snapshot but obliged to be written out will be
+    /// reset to zero and a warning will issued, unless explicitly suppressed.
+    ///
+    /// \param  out   (input) falcON::output to write to
+    /// \param  time  (input) time to write to snapshot
+    /// \param  write (input) data to write (minimum: mxvkU, maximum mxvkURHpa
+    /// \param  warn  (input) warn about missing data?
+    void write_gadget(output&out, double time, fieldset write, bool warn=0)
+      const falcON_THROWING;
+    //--------------------------------------------------------------------------
     //@}
     //==========================================================================
     //                                                                          
@@ -1429,8 +1468,8 @@ namespace falcON {
     /// add a pointer to pointer bank
     /// (see also set_pointer())
     ///
-    /// The sizeof(T) and type nameof(T) are also remembered in the pointer
-    /// bank. If the key is already known to the bank, an error is thrown.
+    /// The sizeof(T) and nameof(T) are also remembered in the pointer bank.
+    /// If the key is already known to the bank, an error is thrown.
     /// A NULL pointer will not be added to the bank.
     /// \param T    (template parameter) type of object pointed to
     /// \param pter (input)  pointer to be stored in bank
@@ -1645,9 +1684,42 @@ namespace falcON {
 		    iterator const&start,
 		    unsigned       Nwrite=0) const falcON_THROWING;
     //@}
+#endif // falcON_NEMO
     //--------------------------------------------------------------------------
-#endif
-  }; // class snapshot
+    /// Reads a single snapshot from file(s) written in gadget2 data format 1
+    ///
+    /// Gadget allows a single snapshot to be distributed over more than one
+    /// file. In this case the file names are assumed to be derived from the one
+    /// given as fname.0 fname.1 etc.
+    ///
+    /// \return simulation time of snapshot
+    /// \param  fname (input) basename of data file(s).
+    /// \param  read  (input) data to read (maximum is mxvkURH)
+    void read_gadget(const char*fname, fieldset read) falcON_THROWING
+    {
+      double t = bodies::read_gadget(fname, read);
+      set_time(t);
+      if(!has_initial_time()) init_time(t);
+    }
+    //--------------------------------------------------------------------------
+    /// writes snapshot in gadget format to a single data file
+    ///
+    /// gadget data files MUST contain at least m,x,v,k,U. In additions, they
+    /// may contain R,H or R,H,p,a, partly dependent on whether the file is a
+    /// full dump or a initial-conditions file only. Here we allow for these
+    /// three options.\n
+    /// Data not existent in the snapshot but obliged to be written out will be
+    /// reset to zero and a warning will issued, unless explicitly suppressed.
+    ///
+    /// \param  out   (input) falcON::output to write to
+    /// \param  write (input) data to write (minimum: mxvkU, maximum mxvkURHpa
+    /// \param  warn  (input) warn  about missing data?
+    void write_gadget(output &out, fieldset write, bool warn=1)
+      const falcON_THROWING
+    {
+      bodies::write_gadget(out, time(), write, warn);
+    }
+  };// class snapshot
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 falcON_TRAITS(falcON::bodies::index,"bodies::index");

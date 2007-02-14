@@ -124,9 +124,9 @@ $(LIB)gravity.o:	$(gravity_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)partner.o:	$(partner_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
-ifdef NEMO
 $(LIB)io.o:		$(io_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
+ifdef NEMO
 $(LIB)manip.o:		$(manip_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)bodyfunc.o:	$(bodyfunc_cc) $(LIBT) $(makefiles)
@@ -165,9 +165,9 @@ public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
 
 else
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
-			$(LIB)gravity.o $(LIB)kernel.o $(LIB)partner.o \
-			$(LIB)nbody.o $(LIB)forcesC.o $(LIB)sample.o \
-			$(LIB)neighbours.o
+			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
+			$(LIB)partner.o $(LIB)nbody.o $(LIB)forcesC.o \
+			$(LIB)sample.o $(LIB)neighbours.o
 endif
 
 ifdef NEMO
@@ -280,6 +280,8 @@ $(BIN)addgravity:	$(SEXE)addgravity.cc $(BINT) $(main_h) $(body_h) $(externacc_h
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)density:		$(SEXE)density.cc $(BINT) $(main_h) $(neighbours_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)gadget2nemo:	$(SEXE)gadget2nemo.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(makefiles)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)getgravity:	$(SEXE)getgravity.cc $(BINT) $(main_h) $(forces_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)gyrfalcON:	$(SEXE)gyrfalcON.cc $(BINT) $(main_h) $(nbody_h) $(manip_h) $(makefiles)
@@ -297,6 +299,8 @@ $(BIN)mkdehnen:		$(SEXE)mkdehnen.cc $(BINT) $(main_h) $(gamma_h) $(io_h) $(LIB)g
 $(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(io_h) $(random_h) $(Pi_h) $(LIB)king.o $(makefiles)
 			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
 $(BIN)mkplum:		$(SEXE)mkplum.cc $(BINT) $(main_h) $(sample_h) $(io_h) $(makefiles)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)nemo2gadget:	$(SEXE)nemo2gadget.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(body_h) $(inline_io_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
@@ -327,6 +331,7 @@ ifdef NEMO
 a2s		:	$(falcON) $(BIN)a2s
 addgravity	:	$(falcON) $(BIN)addgravity
 density		:	$(falcON) $(BIN)density
+gadget2nemo	:	$(falcON) $(BIN)gadget2nemo
 getgravity	:	$(falcON) $(BIN)getgravity
 gyrfalcON	:	$(falcON) $(BIN)gyrfalcON
 lagrange_radii	:	$(falcON) $(BIN)lagrange_radii
@@ -336,6 +341,7 @@ mkbodiesfunc	:	$(falcON) $(BIN)mkbodiesfunc
 mkdehnen	:	$(falcON) $(BIN)mkdehnen
 mkking		:	$(falcON) $(BIN)mkking
 mkplum		:	$(falcON) $(BIN)mkplum
+nemo2gadget	:	$(falcON) $(BIN)nemo2gadget
 s2a		:	$(falcON) $(BIN)s2a
 scale_eps	:	$(falcON) $(BIN)scale_eps
 set_time	:	$(falcON) $(BIN)set_time

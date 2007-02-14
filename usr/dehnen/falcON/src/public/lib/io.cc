@@ -21,13 +21,11 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/io.h>
-#ifdef   falcON_NEMO                               // empty if NEMO not running 
-#include <public/basic.h>
-#include <iostream>
 #include <fstream>
 #include <cstdlib>
 #include <cstring>
 
+#ifdef   falcON_NEMO
 // nemo header files
 extern "C" {
 # include <stdinc.h>
@@ -88,6 +86,8 @@ extern "C" {
 #  define DensityTag "Density"
 #endif
 
+#endif // falcON_NEMO
+
 using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
@@ -116,6 +116,7 @@ namespace {
   {
     if(openstdin) --openstdin;
   }
+#ifdef   falcON_NEMO
   //////////////////////////////////////////////////////////////////////////////
   inline char* NemoTag(nemo_io::Field f) falcON_THROWING
   {
@@ -215,6 +216,7 @@ namespace {
   inline bool is_phases(nemo_io::Field f) {
     return f == nemo_io::posvel;
   }
+#endif // falcON_NEMO
   //////////////////////////////////////////////////////////////////////////////
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
@@ -234,8 +236,7 @@ void output::__open(bool append)
     open_stdout();
     OUT = &std::cout;
     debug_info(2,"output: open stdout\n");
-  }
-  else {
+  } else {
     std::ofstream *FOUT = new std::ofstream();
     if(append) {
       FOUT->open(FILE,std::ios::out | std::ios::app);
@@ -257,44 +258,60 @@ void output::__open(bool append)
   }
 }
 //------------------------------------------------------------------------------
-void output::__close() {
+void output::close() {
+  if(FREC) {
+    if(FILE)
+      warning("closing FortranORec before output from file \"%s\"\n",FILE);
+    else
+      warning("closing FortranORec before output\n");
+    FREC->close();
+  }
   debug_info(2,"output: closing\n");
   if(OUT == &std::cout) close_stdout();
   else if(OUT) falcON_DEL_O(OUT);
   APPENDING = false;
+  OUT = 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // class falcON::input                                                        //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-void input::__open(const char*file) {
-  if     (0 == file || file[0] == 0) {
+void input::__open() {
+  if     (0 == FILE || FILE[0] == 0) {
     IN = 0;
     debug_info(2,"input: empty file\n");
-  } else if(0 == std::strcmp(file,"-") ) {
+  } else if(0 == std::strcmp(FILE,"-") ) {
     open_stdin();
     IN= &std::cin;
     debug_info(2,"input: stdin\n");
-  }
-  else {
-    std::ifstream *FIN = new std::ifstream(file);
+  } else {
+    std::ifstream *FIN = new std::ifstream(FILE);
     if( FIN->is_open() ) {
       IN = FIN;
-      debug_info(2,"input: open file \"%s\"\n",file);
+      debug_info(2,"input: open file \"%s\"\n",FILE);
     } else {
-      debug_info(2,"input: could not open file \"%s\"\n",file);
+      debug_info(2,"input: could not open file \"%s\"\n",FILE);
       IN = 0;
       falcON_DEL_O(FIN);
     }
   }
 }
 //------------------------------------------------------------------------------
-void input::__close() {
+void input::close() {
+  if(FREC) {
+    if(FILE)
+      warning("closing FortranIRec before input from file \"%s\"\n",FILE);
+    else
+      warning("closing FortranIRec before input\n");
+    FREC->close();
+  }
   debug_info(2,"input: closing\n");
   if(IN == &std::cin) close_stdin();
   else if(IN) falcON_DEL_O(IN);
+  IN = 0;
 }
+#ifdef   falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // class falcON::nemo_io                                                      //
@@ -802,6 +819,10 @@ namespace falcON {
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// function falcON::time_in_range                                             //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
 bool falcON::time_in_range(double t, const char*times)
 {
   return  times == 0
@@ -810,3 +831,109 @@ bool falcON::time_in_range(double t, const char*times)
 }
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_NEMO
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// class falcON::FortranIRec                                                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+falcON::FortranIRec::FortranIRec(input& in)
+  throw(falcON::exception) : IN(in), READ(0)
+{
+  debug_info(8,"FortranIRec: opening ... \n");
+  if(!IN) throw exception("FortranIRec::FortranIRec(): input corrupted");
+  if(IN.FREC)
+    throw exception("trying to open 2nd FortranIRec to same input\n");
+  IN.FREC = this;
+  IN.read(static_cast<char*>(static_cast<void*>(&SIZE)),sizeof(size_t));
+  debug_info(6,"FortranIRec: opened with %u bytes\n",SIZE);
+}
+//------------------------------------------------------------------------------
+size_t falcON::FortranIRec::read_bytes(char*buf, size_t n)
+  throw(falcON::exception)
+{
+  if(!IN) throw exception("FortranIRec::read_bytes(): input corrupted");
+  if(READ + n > SIZE) {
+    warning("FortranIRec::read(): cannot read %u, but only %u bytes\n",
+	    n, SIZE-READ);
+    n = SIZE - READ;
+  }
+  IN.read(buf,n);
+  if(!IN) throw exception("FortranIRec: input corrupted");
+  READ += n;
+  debug_info(6,"FortranIRec: read %u bytes\n",n);
+  return n;
+}
+//------------------------------------------------------------------------------
+void falcON::FortranIRec::skip_bytes(size_t n) {
+  if(READ + n > SIZE) n = SIZE - READ;
+  if(n && !IN) throw exception("FortranIRec::skip_bytes(): input corrupted");
+  for(char C; n; --n,++READ) IN.read(&C,1);
+}
+//------------------------------------------------------------------------------
+void falcON::FortranIRec::close() throw(falcON::exception)
+{
+  if(!IN) throw exception("FortranIRec::close(): input corrupted");
+  if(READ != SIZE) {
+    warning("FortranIRec: only %u of %u bytes read on closing record\n",
+	    READ, SIZE);
+    for(char C; READ!=SIZE; ++READ) IN.read(&C,1);
+  }
+  size_t S;
+  IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(size_t));
+  IN.FREC = 0;
+  if(S != SIZE)
+    throw exception("FortranIRec: record size mismatch");
+  debug_info(6,"FortranIRec: closed with %u bytes\n",SIZE);
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// class falcON::FortranORec                                                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+falcON::FortranORec::FortranORec(output& out, size_t size)
+  throw(falcON::exception) : OUT(out), SIZE(size), WRITTEN(0)
+{
+  if(!OUT) throw exception("FortranORec: output corrupted");
+  if(OUT.FREC)
+    throw exception("trying to open 2nd FortranORec to same output\n");
+  OUT.FREC = this;
+  OUT.write(static_cast<const char*>(static_cast<const void*>(&SIZE)),
+	    sizeof(size_t));
+  debug_info(6,"FortranORec: opened for %u bytes\n",SIZE);
+}
+//------------------------------------------------------------------------------
+size_t falcON::FortranORec::write_bytes(const char*buf, size_t n)
+  throw(falcON::exception)
+{
+  if(!OUT) throw exception("FortranORec: output corrupted");
+  if(WRITTEN + n > SIZE) {
+    warning("FortranORec::write(): cannot read %u, but only %u bytes\n",
+	    n, SIZE-WRITTEN);
+    n = SIZE - WRITTEN;
+  }
+  OUT.write(buf,n);
+  if(!OUT) throw exception("FortranORec: ostream corrupted");
+  WRITTEN += n;
+  debug_info(6,"FortranORec: written %u bytes\n",n);
+  return n;
+}
+//------------------------------------------------------------------------------
+void falcON::FortranORec::fill_bytes(size_t n, char C) {
+  if(WRITTEN + n > SIZE) n = SIZE - WRITTEN;
+  for(; n; --n,++WRITTEN) OUT.write(&C,1);
+}
+//------------------------------------------------------------------------------
+void falcON::FortranORec::close() throw(falcON::exception)
+{
+  if(!OUT) throw exception("FortranORec: output corrupted");
+  if(WRITTEN!=SIZE) {
+    warning("FortranORec: only %u of %u bytes written on closing record"
+	    " ... padding with 0\n", WRITTEN, SIZE);
+    for(char C=0; WRITTEN!=SIZE; ++WRITTEN) OUT.write(&C,1);
+  }
+  OUT.write(static_cast<const char*>(static_cast<const void*>(&SIZE)),
+	    sizeof(size_t));
+  OUT.FREC = 0;
+  debug_info(6,"FortranORec: closed with %u bytes\n",SIZE);
+}
+////////////////////////////////////////////////////////////////////////////////

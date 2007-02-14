@@ -11,7 +11,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2005 Walter Dehnen                                        
+// Copyright (C) 2000-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -31,6 +31,10 @@
 #ifndef falcON_included_io_h
 #define falcON_included_io_h
 
+#ifndef falcON_included_iostream
+#  include <iostream>
+#  define falcON_included_iostream
+#endif
 #ifndef falcON_included_cstdio
 #  include <cstdio>
 #  define falcON_included_cstdio
@@ -44,12 +48,35 @@
 #  define falcON_included_string
 #endif
 #ifndef falcON_included_types_h
+#  include <public/utils.h>
+#endif
+#ifndef falcON_included_types_h
 #  include <public/fields.h>
 #endif
 
-#ifdef  falcON_NEMO
 //------------------------------------------------------------------------------
 namespace falcON {
+  class FortranIRec;
+  class FortranORec;
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::iofile                                                       
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  class iofile {
+  protected:
+    static const int FNAME_MAX_SIZE = 256;
+    char             FNAME[FNAME_MAX_SIZE];
+    const char      *FILE;
+    iofile() : FILE(0) {}
+    void setfile(const char*file) {
+      strncpy(FNAME,file,FNAME_MAX_SIZE);
+      FILE = file? FNAME : 0;
+    }
+  public:
+    /// give file name, if any
+    const char*const&file() const { return FILE; }
+  };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::output                                                       
@@ -64,21 +91,29 @@ namespace falcON {
   /// the member method stream().                                               
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
-  class output {
-    static const int FNAME_MAX_SIZE = 200;
+  class output : public iofile {
     std::ostream *OUT;
-    char          FNAME[FNAME_MAX_SIZE];
-    char         *FILE;
     bool          APPENDING;
+    FortranORec  *FREC;
+    friend class FortranORec;
+    //--------------------------------------------------------------------------
+    output           (output const&); // not implemented
+    output& operator=(output const&); // not implemented
     //--------------------------------------------------------------------------
     void __open (bool);
-    void __close();
   public:
     /// \name const boolean information                                         
     //@{
-    bool   is_open     () const { return OUT != 0; }   ///< ready for output?
-    bool   is_appending() const { return APPENDING; }  ///< appending output?
-    operator bool      () const { return OUT != 0; }   ///< ready for output?
+    /// ready for output?
+    bool   is_open     () const { return OUT != 0; }
+    /// appending output?
+    bool   is_appending() const { return APPENDING; }
+    /// writes to file?
+    bool   is_file     () const {  return OUT && OUT != &std::cout; }
+    /// writes to stdout?
+    bool   is_stdout   () const { return OUT == &std::cout; }
+    /// ready for output?
+    operator bool      () const { return OUT != 0; }
     //@}
     //--------------------------------------------------------------------------
     /// \name type conversion to ostream                                        
@@ -93,10 +128,18 @@ namespace falcON {
     std::ostream const& stream   () const { return *OUT; }
     //@}
     //--------------------------------------------------------------------------
+    /// \name destruction and closing                                           
+    //@{
+    /// close any open files; \c stdout is freed for other output
+    void close();
+    /// like close()
+    ~output() { close(); }
+    //@}
+    //--------------------------------------------------------------------------
     /// \name construction and opening                                          
     //@{
     /// construction from nothing: nothing is opened
-    output() : OUT(0) , FILE(0), APPENDING(false) {}
+    output() : OUT(0) , APPENDING(false), FREC(0) {}
     /// construction from file name and potential option for appending.
     /// If \e file equals 0 or ".", nothing is opened.  If \e file equals "-",
     /// and no other output or nemo_out is opened to \c stdout, we map to
@@ -104,9 +147,8 @@ namespace falcON {
     /// existing file of the same name is deleted unless \e append is true, in
     /// which case, we append to that existing file.
     explicit
-    output(const char*file, bool append = 0) : APPENDING(false) {
-      strncpy(FNAME,file,FNAME_MAX_SIZE);
-      FILE = file? FNAME : 0;
+    output(const char*file, bool append=0) : FREC(0), APPENDING(false) {
+      setfile(file);
       __open(append);
     }
     /// construction from file and potential option for appending.
@@ -115,23 +157,20 @@ namespace falcON {
     /// created for output. An existing file of the same name is deleted unless
     /// \e append is true, in which case, we append to that existing file.
     explicit
-    output(std::string const&file, bool append = 0) : APPENDING(false) {
-      strncpy(FNAME,file.c_str(),FNAME_MAX_SIZE);
-      FILE = file.c_str()? FNAME : 0;
+    output(std::string const&file, bool append=0) : FREC(0), APPENDING(false) {
+      setfile(file.c_str());
       __open(append);
     }
     /// close possible old stream, then proceed as in construction         
     void open(const char*file, bool append = 0) {
-      __close();
-      strncpy(FNAME,file,FNAME_MAX_SIZE);
-      FILE = file? FNAME : 0;
+      close();
+      setfile(file);
       __open(append);
     }
     /// close possible old stream, then proceed as in construction         
     void open(std::string const&file, bool append = 0) {
-      __close();
-      strncpy(FNAME,file.c_str(),FNAME_MAX_SIZE);
-      FILE = file.c_str()? FNAME : 0;
+      close();
+      setfile(file.c_str());
       __open(append);
     }
     /// open file with name made from \e format string and \e tag.
@@ -162,19 +201,6 @@ namespace falcON {
     }
     //@}
     //--------------------------------------------------------------------------
-    /// \name destruction and closing                                           
-    //@{
-    /// close any open files; \c stdout is freed for other output
-    void close() {
-      __close();
-      OUT = 0;
-    }
-    /// like close()
-    ~output() { __close(); }
-    //@}
-    //--------------------------------------------------------------------------
-    /// return name of output file if any
-    const char* file() const { return FILE; }
     /// flush() output
     void flush() { if(OUT) OUT->flush(); }
     //--------------------------------------------------------------------------
@@ -199,6 +225,11 @@ namespace falcON {
       return (*OUT) << p;
     }
     //@}
+    //--------------------------------------------------------------------------
+    /// unformatted output
+    void write(const char*a, size_t n) {
+      if(OUT) OUT->write(a,n);
+    }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -212,15 +243,26 @@ namespace falcON {
   /// for other operations on std::istream, use the member method stream().     
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
-  class input {
-    std::istream  *IN;
-    void __open(const char*);
-    void __close();
+  class input : public iofile {
+    std::istream *IN;
+    FortranIRec  *FREC;
+    friend class FortranIRec;
+    //--------------------------------------------------------------------------
+    input           (input const&); // not implemented
+    input& operator=(input const&); // not implemented
+    //--------------------------------------------------------------------------
+    void __open();
   public:
     /// \name const boolean information                                         
     //@{
-    bool   is_open() const { return IN != 0; }         ///< ready for input?
-    operator bool () const { return IN != 0; }         ///< ready for input?
+    /// ready for input?
+    bool   is_open () const { return IN != 0; }
+    /// reads from file?
+    bool   is_file () const { return IN && IN != &std::cin; }
+    /// reads from stdin?
+    bool   is_stdin() const { return IN == &std::cin; }
+    /// ready for input?
+    operator bool  () const { return IN != 0; }
     //@}
     //--------------------------------------------------------------------------
     /// \name type conversion to istream                                        
@@ -235,44 +277,49 @@ namespace falcON {
     std::istream const& stream   () const { return *IN; }
     //@}
     //--------------------------------------------------------------------------
+    /// \name destruction and closing
+    //@{
+    /// if \c stdin: clear \c stdin, otherwise delete ifstream
+    void close();
+    /// like close()
+    ~input() { close(); }
+    //@}
+    //--------------------------------------------------------------------------
     /// \name construction and opening                                          
     //@{
     /// construction from nothing: nothing is opened
-    input() : IN(0) {}
+    input() : IN(0), FREC(0) {}
     /// construction from file name.
     /// If \e file equals "-", and no other input or nemo_in is opened to \c
     /// stdin, we map to \c stdin.  Otherwise, a file of name \e file is opened
     /// for input.
     explicit
-    input(const char*file) { __open(file); }
+    input(const char*file) : FREC(0) {
+      setfile(file);
+      __open();
+    }
     /// construction from file name.
     /// If \e file equals "-", and no other input or nemo_in is opened to \c
     /// stdin, we map to \c stdin.  Otherwise, a file of name \e file is opened
     /// for input.
     explicit
-    input(std::string const&file) { __open(file.c_str()); }
+    input(std::string const&file) : FREC(0) {
+      setfile(file.c_str());
+      __open();
+    }
     /// close possible old stream, then proceed as in construction
     void open(const char*file) {
-      __close();
-      __open(file);
+      close();
+      setfile(file);
+      __open();
     }
     //@}
     /// close possible old stream, then proceed as in construction
     void open(std::string const&file) {
-      __close();
-      __open(file.c_str());
+      close();
+      setfile(file.c_str());
+      __open();
     }
-    //--------------------------------------------------------------------------
-    /// \name destruction and closing
-    //@{
-    /// if \c stdin: clear \c stdin, otherwise delete ifstream
-    void close() {
-      __close();
-      IN = 0;
-    }
-    /// like close()
-    ~input() { __close(); }
-    //@}
     //--------------------------------------------------------------------------
     /// \name formated input using operator >>
     //@{
@@ -287,7 +334,7 @@ namespace falcON {
     }
     /// input of manipulator \e m
     std::istream& operator>> (std::istream::__ios_type &(*p)
-                              (std::istream::__ios_type &)) {
+			      (std::istream::__ios_type &)) {
       return (*IN) >> p;
     }
     /// input of manipulator \e m
@@ -295,7 +342,13 @@ namespace falcON {
       return (*IN) >> p;
     }
     //@}
+    //--------------------------------------------------------------------------
+    /// unformatted input
+    void read(char*a, size_t n) {
+      if(IN) IN->read(a,n);
+    }
   };
+#ifdef  falcON_NEMO
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::nemo_io                                                      
@@ -909,7 +962,205 @@ namespace falcON {
   /// \param t (input) simulation time
   /// \param r (input) time range as string, using NEMO notation
   bool time_in_range(double t, const char*r);
+  //////////////////////////////////////////////////////////////////////////////
+#endif // falcON_NEMO
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::FortranIRec                                                  
+  //                                                                            
+  /// represents a record for unformatted FORTRAN style input;                  
+  /// used for reading gadget data files                                        
+  ///                                                                           
+  // ///////////////////////////////////////////////////////////////////////////
+  class FortranIRec {
+  private:
+    input         &IN;                  // related input stream
+    size_t         SIZE;                // size (bytes) of record
+    mutable size_t READ;                // number of bytes already read
+    //--------------------------------------------------------------------------
+    FortranIRec           (FortranIRec const&); // not implemented
+    FortranIRec& operator=(FortranIRec const&); // not implemented
+  public:
+    //--------------------------------------------------------------------------
+    /// constructor: read buffer with size information
+    FortranIRec(input&) throw(falcON::exception);
+    //--------------------------------------------------------------------------
+    /// close: same as destruction
+    void close() throw(falcON::exception);
+    //--------------------------------------------------------------------------
+    /// destructor: read to end of record, read end buffer
+    ~FortranIRec() throw(falcON::exception) { close(); }
+    //--------------------------------------------------------------------------
+    /// read some bytes
+    ///
+    /// If more bytes are wanted than left in the record, only those left
+    /// in the record will be read and a warning be issued.
+    ///
+    /// \return    number of bytes actually read
+    /// \param buf buffer to read into
+    /// \param n   number of bytes to read
+    size_t read_bytes(char*buf, size_t n) throw(falcON::exception);
+    //--------------------------------------------------------------------------
+    /// read some data of any type
+    ///
+    /// If more data are wanted than left in the record, only those left
+    /// in the record will be read and a warning be issued.
+    ///
+    /// \param T   data type
+    /// \return    number of data actually read
+    /// \param buf buffer to read into
+    /// \param n   number of data to read
+    template<typename T>
+    size_t read(T*buf, size_t n) throw(falcON::exception) {
+      if(READ+n*sizeof(T) > SIZE) {
+	warning("FortranIRec::read(): cannot read %d, but only %d %s\n",
+		n, (SIZE-READ)/sizeof(T), nameof(T));
+	n = (SIZE-READ)/sizeof(T);
+      }
+      if(n) read_bytes(static_cast<char*>
+		      (static_cast<void*>(buf)), sizeof(T)*n);
+      return n;
+    }
+    //--------------------------------------------------------------------------
+    /// skip some bytes
+    ///
+    /// \param n   number of bytes to skip
+    void skip_bytes(size_t n);
+    //--------------------------------------------------------------------------
+    /// read a single FORTRAN record in one go (you have to know its size!)
+    ///
+    /// \param T   type of data to read
+    /// \param in  input stream to read from
+    /// \param buf data buffer to read into
+    /// \param n   number of data of type T to read
+    template<typename T>
+    static void Read(input &in, T*buf, size_t n)
+      throw(falcON::exception)
+    {
+      FortranIRec FIR(in);
+      if( sizeof(T) * n > FIR.size() )
+	throw exception("ReadFortranRecord(): cannot read %d %s: "
+			"only %d bytes in record (required are %d)\n",
+			n,nameof(T),FIR.size(),sizeof(T)*n);
+      if( sizeof(T) * n < FIR.size() )
+	warning("ReadFortranRecord(): reading %d %s: only %d of %d in record\n",
+		n,nameof(T),sizeof(T)*n,FIR.size());
+      FIR.read(buf,n);
+    }
+    //--------------------------------------------------------------------------
+    /// information on number of bytes already read
+    size_t const&bytes_read() const { return READ; }
+    //--------------------------------------------------------------------------
+    /// information on number of bytes yet to be read
+    size_t bytes_unread() const { return SIZE-READ; }
+    //--------------------------------------------------------------------------
+    /// information on total size of record
+    size_t const&size() const { return SIZE; }
+  };// class FortranIRec
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::FortranORec                                                  
+  //                                                                            
+  /// represents a record for unformatted FORTRAN style output;                 
+  /// used for writing gadget data files                                        
+  ///                                                                           
+  // ///////////////////////////////////////////////////////////////////////////
+  class FortranORec {
+  private:
+    output        &OUT;                 // related output stream
+    size_t         SIZE;                // size (bytes) of record
+    mutable size_t WRITTEN;             // number of bytes already written
+    //--------------------------------------------------------------------------
+    FortranORec           (FortranORec const&); // not implemented
+    FortranORec& operator=(FortranORec const&); // not implemented
+  public:
+    //--------------------------------------------------------------------------
+    /// constructor: write buffer with size information
+    /// \param out output stream to write to
+    /// \param size size (in bytes) of record
+    FortranORec(output&out, size_t size) throw(falcON::exception);
+    //--------------------------------------------------------------------------
+    /// destructor: write to end of record, write end buffer
+    ~FortranORec() throw(falcON::exception) { close(); }
+    //--------------------------------------------------------------------------
+    /// close: same as destruction
+    void close() throw(falcON::exception);
+    //--------------------------------------------------------------------------
+    /// write some bytes
+    ///
+    /// If more bytes are to be written than left for the record, we only
+    /// write as many as the record allows but issue a warning.
+    ///
+    /// \return number of bytes actually written
+    /// \param buf buffer to write
+    /// \param n   number of bytes to write
+    size_t write_bytes(const char*buf, size_t n) throw(falcON::exception);
+    //--------------------------------------------------------------------------
+    /// fill some bytes with a given value
+    ///
+    /// \param n   number of bytes to fill
+    /// \param val value to fill them with
+    void fill_bytes(size_t n, char val=0);
+    //--------------------------------------------------------------------------
+    /// write some data of any type
+    ///
+    /// If more data are to be written than left for the record, we only
+    /// write as many as the record allows but issue a warning.
+    ///
+    /// \param T   data type
+    /// \return    number of data actually written
+    /// \param buf buffer to write
+    /// \param n   number of data to write
+    template<typename T>
+    size_t write(const T*buf, size_t n) throw(falcON::exception) {
+      if(WRITTEN + n*sizeof(T) > SIZE) {
+	warning("FortranORec::write(): "
+		"cannot write %d, but only %d %s\n",
+		n, (SIZE-WRITTEN)/sizeof(T), nameof(T));
+	n = (SIZE-WRITTEN)/sizeof(T);
+      }
+      if(n) write_bytes(static_cast<const char*>
+		       (static_cast<const void*>(buf)), sizeof(T)*n);
+      return n;
+    }
+    //--------------------------------------------------------------------------
+    /// write a single FORTRAN record in one go
+    ///
+    /// \param T   type of data to write
+    /// \param out output stream to write to
+    /// \param buf data buffer to write from
+    /// \param n   number of data of type T to write
+    template<typename T>
+    static void Write(output&out, const T*buf, size_t n)
+      throw(falcON::exception)
+    {
+      FortranORec FOR(out, sizeof(T)*n);
+      FOR.write(buf,n);
+    }
+    //--------------------------------------------------------------------------
+    /// information on number of bytes already written
+    size_t const&bytes_written() const { return WRITTEN; }
+    //--------------------------------------------------------------------------
+    /// information on number of bytes yet to be written
+    size_t bytes_free() const { return SIZE-WRITTEN; }
+    //--------------------------------------------------------------------------
+    /// information on total size of record
+    size_t const&size() const { return SIZE; }
+  };// class FortranORec
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
-#endif // falcON_NEMO
+falcON_TRAITS(falcON::output,"output");
+falcON_TRAITS(falcON::input,"input");
+#ifdef falcON_NEMO
+falcON_TRAITS(falcON::nemo_io,"nemo_io");
+falcON_TRAITS(falcON::nemo_in,"nemo_in");
+falcON_TRAITS(falcON::snap_in,"snap_in");
+falcON_TRAITS(falcON::data_in,"data_in");
+falcON_TRAITS(falcON::nemo_out,"nemo_out");
+falcON_TRAITS(falcON::snap_out,"snap_out");
+falcON_TRAITS(falcON::data_out,"data_out");
+#endif
+falcON_TRAITS(falcON::FortranIRec,"FortranIRec");
+falcON_TRAITS(falcON::FortranORec,"FortranORec");
+////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_io_h
