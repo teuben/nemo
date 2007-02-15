@@ -960,3 +960,167 @@ void falcON::FortranORec::close() throw(falcON::exception)
   debug_info(6,"FortranORec: closed with %u bytes\n",SIZE);
 }
 ////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// struct falcON::GadgetHeader                                                  
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+falcON::GadgetHeader::GadgetHeader() :
+  time(0.), redshift(0.), flag_sfr(0), flag_feedback(0), flag_cooling(0),
+  num_files(0), BoxSize(0.), Omega0(0.), OmegaLambda(0.), HubbleParam(0.),
+  flag_stellarage(0), flag_metals(0), flag_entropy_instead_u(0)
+{
+  for(int k=0; k!=6; ++k) {
+    npart[k] = 0;
+    npartTotal[k] = 0;
+    npartTotalHighWord[k] = 0;
+    masstab[k] = 0.;
+  }
+}
+//------------------------------------------------------------------------------
+bool falcON::GadgetHeader::Read(input& in, unsigned rec, bool& swap)
+  throw(falcON::exception)
+{
+  swap = 0;
+  // read record header and determine swapping necessity
+  if(rec == 4) {
+    uint32 S;
+    in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32));
+    if(S != sizeof(GadgetHeader)) {
+      swap_bytes(S);
+      if(S == sizeof(GadgetHeader)) swap = 1;
+      else return false;
+    }
+  } else if(rec == 8) {
+    uint64 S;
+    in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64));
+    if(S != sizeof(GadgetHeader)) {
+      swap_bytes(S);
+      if(S == sizeof(GadgetHeader)) swap = 1;
+      else {
+	warning("GadgetHeader::Read(): record size != header size\n");
+	return false;
+      }
+    }
+  } else
+    throw falcON::exception("Fortran header size must be 4 or 8\n");
+  // read full GadgetHeader
+  in.read(static_cast<char*>
+	  (static_cast<void*>(this)), sizeof(GadgetHeader));
+  // if required swap bytes
+  if(swap) {
+    swap_bytes(npart,6);
+    swap_bytes(masstab,6);
+    swap_bytes(time);
+    swap_bytes(redshift);
+    swap_bytes(flag_sfr);
+    swap_bytes(flag_feedback);
+    swap_bytes(npartTotal,6);
+    swap_bytes(flag_cooling);
+    swap_bytes(num_files);
+    swap_bytes(BoxSize);
+    swap_bytes(Omega0);
+    swap_bytes(OmegaLambda);
+    swap_bytes(HubbleParam);
+    swap_bytes(flag_stellarage);
+    swap_bytes(flag_metals);
+    swap_bytes(npartTotalHighWord,6);
+    swap_bytes(flag_entropy_instead_u);
+  }
+  // read record trailer and check for consistency
+  if(rec == 4) {
+    uint32 S;
+    in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32));
+    if(swap) swap_bytes(S);
+    if(S != sizeof(GadgetHeader)) {
+      warning("GadgetHeader::Read(): record size mismatch\n");
+      return false;
+    }
+  } else if(rec == 8) {
+    uint64 S;
+    in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64));
+    if(swap) swap_bytes(S);
+    if(S != sizeof(GadgetHeader)) {
+      warning("GadgetHeader::Read(): record size mismatch\n");
+      return false;
+    }
+  }
+  return true;
+}
+//------------------------------------------------------------------------------
+bool falcON::GadgetHeader::mismatch(GadgetHeader const&H) const {
+  bool okay = true;
+#define CHECK_I(FIELD,FIELDNAME)				\
+  if(FIELD != H.FIELD) {					\
+    okay = false;						\
+    warning("GadgetHeader \"%s\" mismatch (%u vs %u)\n",	\
+	    FIELDNAME, FIELD, H.FIELD);				\
+  }
+#define CHECK_D(FIELD,FIELDNAME)			\
+  if(FIELD != H.FIELD) {				\
+    okay = false;					\
+    warning("GadgetHeader\"%s\" mismatch (%f vs %f)\n",	\
+	    FIELDNAME, FIELD, H.FIELD);			\
+  }
+  CHECK_D(time,"time");
+  CHECK_D(redshift,"redshift");
+  CHECK_I(flag_sfr,"flag_sfr");
+  CHECK_I(flag_feedback,"flag_feedback");
+  CHECK_I(npartTotal[0],"npartTotal[0]");
+  CHECK_I(npartTotal[1],"npartTotal[1]");
+  CHECK_I(npartTotal[2],"npartTotal[2]");
+  CHECK_I(npartTotal[3],"npartTotal[3]");
+  CHECK_I(npartTotal[4],"npartTotal[4]");
+  CHECK_I(npartTotal[5],"npartTotal[5]");
+  CHECK_I(flag_cooling,"flag_cooling");
+  CHECK_I(num_files,"num_files");
+  CHECK_D(BoxSize,"BoxSize");
+  CHECK_D(Omega0,"Omega0");
+  CHECK_D(OmegaLambda,"OmegaLambda");
+  CHECK_D(HubbleParam,"HubbleParam");
+  CHECK_I(flag_stellarage,"flag_stellarage");
+  CHECK_I(flag_metals,"flag_metals");
+  CHECK_I(flag_entropy_instead_u,"flag_entropy_instead_u");
+  CHECK_I(npartTotalHighWord[0],"npartTotalHighWord[0]");
+  CHECK_I(npartTotalHighWord[1],"npartTotalHighWord[1]");
+  CHECK_I(npartTotalHighWord[2],"npartTotalHighWord[2]");
+  CHECK_I(npartTotalHighWord[3],"npartTotalHighWord[3]");
+  CHECK_I(npartTotalHighWord[4],"npartTotalHighWord[4]");
+  CHECK_I(npartTotalHighWord[5],"npartTotalHighWord[5]");
+  return !okay;
+#undef CHECK_I
+#undef CHECK_D
+}
+//------------------------------------------------------------------------------
+void falcON::GadgetHeader::check_simple_npart_error() {
+  for(int k=0; k!=6; ++k)
+    if(npart[k] > npartTotal[k]) {
+      warning("GadgetHeader: npart[%u]=%u > npartTotal[%u]=%u: "
+	      "we will try to fix by setting npartTotal[%u]=%u\n",
+	      k,npart[k],k,npartTotal[k],k,npart[k]);
+      npartTotal[k] = npart[k];
+    }
+}
+//------------------------------------------------------------------------------
+void falcON::GadgetHeader::dump(std::ostream&out) const {
+  out<<" gadget header dump:";
+  for(int k=0; k!=6; ++k)
+    out<<"\n type "<<k
+       <<": npart="<<std::setw(8)<<npart[k]
+       <<" npartTotal="<<std::setw(8)<<npartTotal[k]
+       <<" masstab="<<masstab[k];
+  out<<"\n redshift               = "<<redshift
+     <<"\n flag_sfr               = "<<flag_sfr
+     <<"\n flag_feedback          = "<<flag_feedback
+     <<"\n flag_cooling           = "<<flag_cooling
+     <<"\n num_files              = "<<num_files
+     <<"\n BoxSize                = "<<BoxSize
+     <<"\n Omega0                 = "<<Omega0
+     <<"\n OmegaLambda            = "<<OmegaLambda
+     <<"\n HubbleParam            = "<<HubbleParam
+     <<"\n flag_stellarage        = "<<flag_stellarage
+     <<"\n flag_metals            = "<<flag_metals
+     <<"\n flag_entropy_instead_u = "<<flag_entropy_instead_u
+     <<std::endl;
+}
+////////////////////////////////////////////////////////////////////////////////

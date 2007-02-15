@@ -1157,8 +1157,155 @@ namespace falcON {
     /// information on total size of record
     unsigned const&size() const { return SIZE; }
   };// class FortranORec
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // support for byte-swapping                                                  
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  namespace {
+    inline void swap_char(char&A, char&B) { char T(A); A=B; B=T; }
+    template<int B> struct __bswap {};
+    template<> struct __bswap<1> {
+      static void swap(void*vdat, unsigned cnt) { return; }
+    };
+    template<> struct __bswap<2> {
+      static void swap(void*vdat, unsigned cnt) {
+	char*dat = static_cast<char*>(vdat);
+	for(; cnt; --cnt,dat+=2) {
+	  swap_char(dat[0],dat[1]);
+	}
+      }
+    };
+    template<> struct __bswap<4> {
+      static void swap(void*vdat, unsigned cnt) {
+	char*dat = static_cast<char*>(vdat);
+	for(; cnt; --cnt, dat+=4) {
+	  swap_char(dat[0],dat[3]);
+	  swap_char(dat[1],dat[2]);
+	}
+      }
+    };
+    template<> struct __bswap<8> {
+      static void swap(void*vdat, unsigned cnt) {
+	char*dat = static_cast<char*>(vdat);
+	for(; cnt; --cnt,dat+=8) {
+	  swap_char(dat[0],dat[7]);
+	  swap_char(dat[1],dat[6]);
+	  swap_char(dat[2],dat[5]);
+	  swap_char(dat[3],dat[4]);
+	}
+      }
+    };
+    template<> struct __bswap<16> {
+      static void swap(void*vdat, unsigned cnt) {
+	char*dat = static_cast<char*>(vdat);
+	for(; cnt; --cnt,dat+=16) {
+	  swap_char(dat[0],dat[15]);
+	  swap_char(dat[1],dat[14]);
+	  swap_char(dat[2],dat[13]);
+	  swap_char(dat[3],dat[12]);
+	  swap_char(dat[4],dat[11]);
+	  swap_char(dat[5],dat[10]);
+	  swap_char(dat[6],dat[ 9]);
+	  swap_char(dat[7],dat[ 8]);
+	}
+      }
+    };
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  /// swap the bytes for one object of any type
+  ///
+  /// in order for this to work, the sizeof() the type must be 1,2,4,8, or 16
+  ///
+  /// \param bdat first element to swap bytes for
+  /// \param cnt  number of elments to swap bytes for
+  template<typename B> inline
+  void swap_bytes(B&bdat) {
+    __bswap<sizeof(B)>::swap(static_cast<void*>(&bdat), 1);
+  }
+  /// swap the bytes of elements of any type
+  ///
+  /// in order for this to work, the sizeof() the type must be 1,2,4,8, or 16
+  ///
+  /// \param bdat first element to swap bytes for
+  /// \param cnt  number of elments to swap bytes for
+  template<typename B> inline
+  void swap_bytes(B* bdat, unsigned cnt) {
+    __bswap<sizeof(B)>::swap(static_cast<void*>(bdat), cnt);
+  }
+  /// swap the bytes of elements of unknown type but known size
+  ///
+  /// \param bdat pointer to first element
+  /// \param size size of the elements, must be 1,2,4,8, or 16
+  /// \param cnt  number of elments to swap bytes for
+  inline
+  void swap_bytes(void*vdat, unsigned len, unsigned cnt) falcON_THROWING {
+    switch(len) {
+    case  1: return;
+    case  2: return __bswap< 2>::swap(vdat,cnt);
+    case  4: return __bswap< 4>::swap(vdat,cnt);
+    case  8: return __bswap< 8>::swap(vdat,cnt);
+    case 16: return __bswap<16>::swap(vdat,cnt);
+    default: falcON_THROW("swap_bytes(): sizeof(type)=%d: not supported\n",len);
+    }
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  /// structure modelled after gadget/allvars.h                                 
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  struct GadgetHeader {
+    int          npart[6];          ///< # particles per type in this file
+    double       masstab[6];        ///< if non-zero: mass of particle of type
+    double       time;              ///< simulation time of snapshot
+    double       redshift;          ///< redshift of snapshot
+    int          flag_sfr;
+    int          flag_feedback;
+    unsigned int npartTotal[6];     ///< # particles per type in whole snapshot
+    int          flag_cooling;
+    int          num_files;         ///< # file for this snapshot
+    double       BoxSize;
+    double       Omega0;
+    double       OmegaLambda;
+    double       HubbleParam;
+    int          flag_stellarage;
+    int          flag_metals;
+    unsigned int npartTotalHighWord[6];
+    int          flag_entropy_instead_u;
+    char         fill[60];          ///< to get sizeof(GadgetHeader)=256
+    //--------------------------------------------------------------------------
+    /// default constructor: set all data to 0
+    GadgetHeader();
+    //--------------------------------------------------------------------------
+    /// try to read a GadgetHeader from an input file
+    ///
+    /// If the size of the Fortran record == 256 == sizeof(GadgetHeader), we
+    /// read the header and return true.\n
+    /// If the size of the Fortran record == byte_swapped(256), then we assume
+    /// the file is of different endianess. We read the header, byte-swap it
+    /// and return true.\n
+    /// Otherwise, the data are not consistent with a GadgetHeader, so we return
+    /// false.
+    /// \return have read successfully
+    /// \param  in   input stream to read from
+    /// \param  rec  size of Fortran record header (must be 4 or 8)
+    /// \param  swap (output) need byte-swap?
+    bool Read(input& in, unsigned rec, bool& swap)
+      throw(falcON::exception);
+    //--------------------------------------------------------------------------
+    /// check whether two GadgetHeaders could possibly come from different data
+    /// files for the same snapshot
+    bool mismatch(GadgetHeader const&H) const;
+    //--------------------------------------------------------------------------
+    /// on some ICs, npartTotal[] = 0. Here we remedy for this error
+    void check_simple_npart_error();
+    //--------------------------------------------------------------------------
+    /// dump all the header data
+    void dump(std::ostream&out) const;
+  };
+  // ///////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
-////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 falcON_TRAITS(falcON::output,"output");
 falcON_TRAITS(falcON::input,"input");
 #ifdef falcON_NEMO
@@ -1172,5 +1319,6 @@ falcON_TRAITS(falcON::data_out,"data_out");
 #endif
 falcON_TRAITS(falcON::FortranIRec,"FortranIRec");
 falcON_TRAITS(falcON::FortranORec,"FortranORec");
+falcON_TRAITS(falcON::GadgetHeader,"GadgetHeader");
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_io_h

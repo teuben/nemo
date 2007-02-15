@@ -245,6 +245,7 @@ namespace falcON {
       void del_fields(fieldset ) falcON_THROWING;
       void set_fields(fieldset ) falcON_THROWING;
       void remove    (unsigned&) falcON_THROWING;
+      void swap_bytes(fieldbit ) falcON_THROWING;
       ~block() falcON_THROWING;
       //------------------------------------------------------------------------
       void skip(unsigned&, flags) const falcON_THROWING;
@@ -273,9 +274,9 @@ namespace falcON {
 #endif
       //------------------------------------------------------------------------
       // Gadget I/O support                                                     
-      void read_Fortran (FortranIRec&,fieldbit, unsigned, unsigned)
+      void read_Fortran (FortranIRec&, fieldbit, unsigned, unsigned, bool)
 	falcON_THROWING;
-      void write_Fortran(FortranORec&,fieldbit, unsigned, unsigned) const
+      void write_Fortran(FortranORec&, fieldbit, unsigned, unsigned) const
 	falcON_THROWING;
     };
     //==========================================================================
@@ -813,7 +814,8 @@ namespace falcON {
       /// formatted output: write bodyindex
       friend std::ostream& operator<<(std::ostream&, const iterator&);
       //------------------------------------------------------------------------
-      iterator& read_Fortran (FortranIRec&, fieldbit, unsigned) falcON_THROWING;
+      iterator& read_Fortran (FortranIRec&, fieldbit, unsigned, bool=0)
+	falcON_THROWING;
       iterator& write_Fortran(FortranORec&, fieldbit, unsigned) falcON_THROWING;
 #ifdef falcON_NEMO
       iterator& read_data (data_in &, unsigned =0) falcON_THROWING;
@@ -974,10 +976,17 @@ namespace falcON {
     ///
     /// Body data of fields in b, which are allocated, are set to zero
     /// \param b  (input) body data fields to be reset
-    void reset_data(fieldset b) const falcON_THROWING {
-      for(const block*p=FIRST; p; p=p->next()) p->reset_data(b);
+    void reset_data(fieldset f) const falcON_THROWING {
+      for(const block*p=FIRST; p; p=p->next()) p->reset_data(f);
     }
+    //--------------------------------------------------------------------------
+  protected:
+    /// swap the bytes (little-endian <-> bit-endian)
+    ///
+    /// \param b body data field to swap bytes for
+    void swap_bytes(fieldbit b) falcON_THROWING;
     //@}
+  public:
     //==========================================================================
     //                                                                          
     /// \name methods using another set of bodies                               
