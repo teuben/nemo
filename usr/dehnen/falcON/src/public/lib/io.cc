@@ -219,6 +219,21 @@ namespace {
 #endif // falcON_NEMO
   //////////////////////////////////////////////////////////////////////////////
 } // namespace {
+// /////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// falcON::FileSize()                                                           
+//                                                                              
+// /////////////////////////////////////////////////////////////////////////////
+size_t falcON::FileSize(const char*sFileName)
+{
+  std::ifstream f;
+  f.open(sFileName, std::ios_base::binary | std::ios_base::in);
+  if (!f.good() || f.eof() || !f.is_open()) { return 0; }
+  f.seekg(0, std::ios_base::beg);
+  std::ifstream::pos_type begin_pos = f.tellg();
+  f.seekg(0, std::ios_base::end);
+  return f.tellg() - begin_pos;
+}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // class falcON::output                                                       //
@@ -522,7 +537,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
 		 NemoTag(FIELD), dim[0], snap.N(FIELD));
   } else if(dim[1] == 0) {
     // 3.2 array of scalars
-    if(!is_scalar(FIELD) )
+    if(!::is_scalar(FIELD) )
       falcON_THROW("nemo input of %s: found scalars",NemoTag(FIELD));
     debug_info(6,"  opening data set for %d scalars\n",NTOT);
     get_data_set(static_cast< ::stream >(INPUT.stream()),
@@ -530,7 +545,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
     SUBN = 1;
   } else if(dim[2] == 0) {
     // 3.2 array of vectors
-    if(!is_vector(FIELD) )
+    if(!::is_vector(FIELD) )
       falcON_THROW("nemo input of %s: found vectors",NemoTag(FIELD));
     if(dim[1] != NDIM)
       falcON_THROW("nemo input of %s: Ndim mismatch",NemoTag(FIELD));
@@ -721,8 +736,8 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
     NWRITTEN(0),
     NTOT (nemo_io::is_sph(FIELD)? OUTPUT.NSPH : OUTPUT.NBOD),
     TYPE (nemo_io::type(FIELD)),
-    SUBN (is_scalar(FIELD)? 1:
-	  is_vector(FIELD)? NDIM : 2*NDIM)
+    SUBN (::is_scalar(FIELD)? 1:
+	  ::is_vector(FIELD)? NDIM : 2*NDIM)
 {
   debug_info(5,"data_out::data_out(%s) ...\n",NemoTag(FIELD));
   if( OUTPUT.DATA_OUT )
@@ -731,11 +746,11 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
   if( OUTPUT.has_been_written(FIELD) )
     falcON_THROW("cannot write %s: has already been written",
 		 NemoTag(FIELD));
-  if(is_scalar(FIELD)) {
+  if(::is_scalar(FIELD)) {
     put_data_set(static_cast< ::stream >(OUTPUT.stream()),
 		 NemoTag(FIELD),NemoType(TYPE),NTOT,0);
     debug_info(6,"  opening data set for %d scalars\n",NTOT);
-  } else if(is_vector(FIELD)) {
+  } else if(::is_vector(FIELD)) {
     put_data_set(static_cast< ::stream >(OUTPUT.stream()),
 		 NemoTag(FIELD),NemoType(TYPE),NTOT,NDIM,0);
     debug_info(6,"  opening data set for %d vectors\n",NTOT);
@@ -841,18 +856,20 @@ unsigned falcON::FortranIRec::read_size() throw(falcON::exception)
   if(HSZE == 4) {
     uint32 S;
     IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32));
+    if(SWAP) swap_bytes(S);
     return S;
   } else if(HSZE == 8) {
     uint64 S;
     IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64));
+    if(SWAP) swap_bytes(S);
     return S;
   } else 
     throw exception("FortranIRec: header size must be 4 or 8\n");
   return 0;
 }
 //------------------------------------------------------------------------------
-falcON::FortranIRec::FortranIRec(input& in, unsigned rec)
-  throw(falcON::exception) : IN(in), HSZE(rec), READ(0)
+falcON::FortranIRec::FortranIRec(input& in, unsigned rec, bool swap)
+  throw(falcON::exception) : IN(in), HSZE(rec), SWAP(swap), READ(0)
 {
   debug_info(8,"FortranIRec: opening ... \n");
   if(!IN) throw exception("FortranIRec::FortranIRec(): input corrupted");

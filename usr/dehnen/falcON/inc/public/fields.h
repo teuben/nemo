@@ -501,6 +501,10 @@ namespace falcON {
     friend bool is_sph(fieldbit f);
     /// is the data field supported by NEMO I/O?
     friend bool is_nemo(fieldbit);
+    /// is the data field a floating point scalar?
+    friend bool is_scalar(fieldbit);
+    /// is the data field a vector?
+    friend bool is_vector(fieldbit);
   };// class fieldbit
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -801,6 +805,8 @@ namespace falcON {
     b = fieldset(c);
     return s;
   }
+  inline bool is_scalar(fieldbit f) { return fieldset::scalars & 1<<f.val; }
+  inline bool is_vector(fieldbit f) { return fieldset::vectors & 1<<f.val; }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // inline definitions of a friend of class fieldbit                         //

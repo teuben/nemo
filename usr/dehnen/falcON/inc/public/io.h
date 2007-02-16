@@ -56,6 +56,18 @@
 
 //------------------------------------------------------------------------------
 namespace falcON {
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // falcON::FileSize()                                                         
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  /// computes the file size by opening the file for reading and seeking.
+  /// taken from www.codeproject.com/file/filesize.asp
+  /// \note the reported file size may be too small (according to above source) 
+  /// \param  sFileName name of file 
+  /// \return size of file sFileName in bytes
+  size_t FileSize(const char*sFileName);
+  // ///////////////////////////////////////////////////////////////////////////
   class FortranIRec;
   class FortranORec;
   // ///////////////////////////////////////////////////////////////////////////
@@ -976,6 +988,7 @@ namespace falcON {
   private:
     input           &IN;                  // related input stream
     const unsigned   HSZE;                // size of header: 4 or 8
+    const bool       SWAP;                // swap bytes for headers
     unsigned         SIZE;                // size (bytes) of record
     mutable unsigned READ;                // number of bytes already read
     //--------------------------------------------------------------------------
@@ -987,7 +1000,9 @@ namespace falcON {
     /// constructor: read buffer with size information
     /// \param in  falcON::input to read from
     /// \param rec (optional) size of Fortran record header: 4 or 8
-    FortranIRec(input&in, unsigned rec=4) throw(falcON::exception);
+    /// \param bswap (optional) swap bytes for size information?
+    FortranIRec(input&in, unsigned rec=4, bool bswap=0)
+      throw(falcON::exception);
     //--------------------------------------------------------------------------
     /// close: same as destruction
     void close() throw(falcON::exception);

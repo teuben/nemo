@@ -429,6 +429,7 @@ void bodies::block::write_potpex(data_out&outp,
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
+#ifdef falcON_REAL_IS_FLOAT
 void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
 				 unsigned N, bool swap) falcON_THROWING
 {
@@ -441,7 +442,12 @@ void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
   add_field(f);
   char    *C = static_cast<char*>(DATA[value(f)])+from*falcON::size(f);
   unsigned R = I.read_bytes(C, N*falcON::size(f));
-  if(swap) falcON::swap_bytes(static_cast<void*>(C), falcON::size(f), N);
+  if(swap) 
+    if(is_vector(f))
+      falcON::swap_bytes(static_cast<void*>(C), sizeof(real), Ndim*N);
+    else
+      falcON::swap_bytes(static_cast<void*>(C), falcON::size(f), N);
+
   if(R != N*falcON::size(f))
     falcON_THROW("bodies::block::read_Fortran(%c): "
 		 "could only read %u of %u bytes\n",R,N*falcON::size(f));
@@ -464,6 +470,7 @@ void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
 		 "could only write %u of %u bytes\n",W,N*falcON::size(f));
   debug_info(4,"bodies::block::write_Fortran(): written %u %s\n",N,name(f));
 }
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
@@ -527,6 +534,7 @@ bodies::iterator& bodies::iterator::read_posvel(data_in& D, fieldset get,
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
+#ifdef falcON_REAL_IS_FLOAT
 bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I, fieldbit f, 
 						 unsigned R, bool swap)
   falcON_THROWING
@@ -564,6 +572,7 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
   if(W) falcON_THROW("body::write_Fortran: %u data remain unwritten\n",W);
   return *this;
 }
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::bodies                                                         
@@ -1458,9 +1467,19 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
+#ifdef falcON_REAL_IS_FLOAT
+//------------------------------------------------------------------------------
 #define READ(BIT) if(!is_sph(BIT) && nd || ns) {			\
-    FortranIRec F(in, rec);						\
     unsigned nr = is_sph(BIT)? ns : ns+nd;				\
+    unsigned fr = rec+rec + nr*field_traits<BIT>::size;			\
+    if(fsze+fr > fsize) {						\
+      fieldset miss = fgot.missing(read);				\
+      warning("bodies::read_gadget(): reached end of file \"%s\"; "	\
+	      "cannot read %s\n", file, word(miss));			\
+      read &= fgot;							\
+      goto NextFile;							\
+    }									\
+    FortranIRec F(in, rec, swap);					\
     if(read.contain(BIT)) {						\
       if(F.size() != nr*field_traits<BIT>::size)			\
 	falcON_THROW("bodies::read_gadget(): mismatch reading %u %c: "	\
@@ -1472,7 +1491,7 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 	body sph(SPH);							\
 	sph.read_Fortran(F, BIT, ns, swap);				\
       }									\
-      if(!is_sph(BIT) && nd) {						\
+      if(nd && !is_sph(BIT)) {						\
 	body std(STD);							\
         std.read_Fortran(F, BIT, nd, swap);				\
       }									\
@@ -1484,25 +1503,29 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
       debug_info(3,"bodies::read_gadget(): skip %u %c\n",		\
                  nr, field_traits<BIT>::word());			\
     }									\
+    fsze += fr;								\
   }
 //------------------------------------------------------------------------------
 double bodies::read_gadget(const char*fname,
 			   fieldset   read,
+			   fieldset  &got,
 			   unsigned   rec) falcON_THROWING
 {
   read &= fieldset("mxvkURHpa");
-  fieldset got;
+  got   = fieldset::empty;
   // 1 open first data file, read header, and determine number of data files
   GadgetHeader header0,headeri,*header=&header0;
-  input        in(fname);
+  input        in;
   int          nfile=1;
   char         filename[256];
   const char  *file=0;
   bool         swap;
-  if(in) {
+  size_t       fsize = FileSize(fname);
+  if(fsize) {
     // 1.1 try single file "fname"
     file = fname;
     try {
+      in.open(file);
       if(! header->Read(in, rec, swap))
       falcON_THROW("bodies::read_gadget(): "
 		   "file \"%s\" not a gadget data file\n",file);
@@ -1524,6 +1547,7 @@ double bodies::read_gadget(const char*fname,
   } else {
     // 1.2 try file "fname.0" (with possibly more to follow)
     sprintf(filename,"%s.%u",fname,0);
+    fsize = FileSize(filename);
     in.open(filename);
     if(!in) falcON_THROW("bodies::read_gadget(): cannot open file \"%s\" "
 			 "nor file \"%s\"\n", fname, filename);
@@ -1553,6 +1577,7 @@ double bodies::read_gadget(const char*fname,
   body STD = begin_std_bodies();
   for(int ifile=0; ifile!=nfile; ) {
     fieldset fgot;
+    size_t   fsze = rec+rec + sizeof(GadgetHeader);
     for(int k=0; k!=6; ++k) {
       NP[k] += header->npart[k];
       if(NP[k] > header->npartTotal[k])
@@ -1566,18 +1591,26 @@ double bodies::read_gadget(const char*fname,
       if(k) nd += header->npart[k];
       if(header->masstab[k] == 0) nm += header->npart[k];
     }
-    // read positions
+    // 3.2 read positions
     READ(fieldbit::x);
     if(read == fgot) goto NextFile;
-    // read velocties
+    // 3.3 read velocties
     READ(fieldbit::v);
     if(read == fgot) goto NextFile;
-    // read keys
+    // 3.4 read keys
     READ(fieldbit::k);
     if(read == fgot) goto NextFile;
-    // read masses --- OR assign them ...
+    // 3.5 read masses --- OR assign them ...
     if(nm) {
-      FortranIRec F(in, rec);
+      unsigned fr = rec+rec + nm*sizeof(real);
+      if(fsze+fr > fsize) {
+	fieldset miss = fgot.missing(read);
+	warning("bodies::read_gadget(): reached end of file \"%s\"; "
+		"cannot read %s\n", file, word(miss));
+	read &= fgot;
+	goto NextFile;
+      }
+      FortranIRec F(in, rec, swap);
       if(read.contain(fieldbit::m)) {
 	if(F.size() != nm*sizeof(real))
 	  falcON_THROW("bodies::read_gadget(): mismatch reading %u m: "
@@ -1605,6 +1638,7 @@ double bodies::read_gadget(const char*fname,
 	F.skip_bytes(F.size());
 	debug_info(3,"bodies::read_gadget(): skip %u m\n", nm);
       }
+      fsze += fr;
     } else if(read.contain(fieldbit::m)) {
       body sph(SPH), std(STD);
       add_field(fieldbit::m);
@@ -1618,24 +1652,24 @@ double bodies::read_gadget(const char*fname,
       fgot |= fieldset(fieldbit::m);
     }
     if(read == fgot) goto NextFile;
-    // read gas internal energies
+    // 3.6 read gas internal energies
     READ(fieldbit::U);
     if(read == fgot) goto NextFile;
-    // read gas densities
+    // 3.7 read gas densities
     READ(fieldbit::R);
     if(read == fgot) goto NextFile;
-    // read SPH smoothing lengths
+    // 3.8 read SPH smoothing lengths
     READ(fieldbit::H);
     if(read == fgot) goto NextFile;
-    // read potentials
+    // 3.9 read potentials
     READ(fieldbit::p);
     if(read == fgot) goto NextFile;
-    // read accelerations
+    // 3.10 read accelerations
     READ(fieldbit::a);
     if(read == fgot) goto NextFile;
   NextFile:
     got |= fgot;
-    // open next data file (unless all have been read) and move SPH & STD
+    // 3.11 open next data file (unless all have been read) and move SPH & STD
     if(++ifile != nfile) {
       SPH += ns;
       STD += nd;
@@ -1724,4 +1758,6 @@ void bodies::write_gadget(output&out, double time, fieldset write,
   // make sure we have no keys if we didn't have them before ...
   if(!had_keys) const_cast<bodies*>(this)->del_field(fieldbit::k);
 }
+//------------------------------------------------------------------------------
+#endif // falcON_REAL_IS_FLOAT
 ////////////////////////////////////////////////////////////////////////////////

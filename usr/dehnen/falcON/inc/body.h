@@ -274,10 +274,12 @@ namespace falcON {
 #endif
       //------------------------------------------------------------------------
       // Gadget I/O support                                                     
+#ifdef falcON_REAL_IS_FLOAT
       void read_Fortran (FortranIRec&, fieldbit, unsigned, unsigned, bool)
 	falcON_THROWING;
       void write_Fortran(FortranORec&, fieldbit, unsigned, unsigned) const
 	falcON_THROWING;
+#endif
     };
     //==========================================================================
     //                                                                          
@@ -814,9 +816,11 @@ namespace falcON {
       /// formatted output: write bodyindex
       friend std::ostream& operator<<(std::ostream&, const iterator&);
       //------------------------------------------------------------------------
+#ifdef falcON_REAL_IS_FLOAT
       iterator& read_Fortran (FortranIRec&, fieldbit, unsigned, bool=0)
 	falcON_THROWING;
       iterator& write_Fortran(FortranORec&, fieldbit, unsigned) falcON_THROWING;
+#endif
 #ifdef falcON_NEMO
       iterator& read_data (data_in &, unsigned =0) falcON_THROWING;
       iterator& write_data(data_out&, unsigned =0) falcON_THROWING;
@@ -1205,6 +1209,7 @@ namespace falcON {
 			   unsigned       Nd,
 			   unsigned       Nb,
 			   unsigned       Ns= 0);
+#ifdef falcON_REAL_IS_FLOAT
     //--------------------------------------------------------------------------
     /// Reads a single snapshot from file(s) written in gadget2 data format 1
     ///
@@ -1215,9 +1220,10 @@ namespace falcON {
     /// \return simulation time of snapshot
     /// \param  fname (input) basename of data file(s).
     /// \param  read  (input) data to read (maximum is mxvkURH)
+    /// \param  gto   (output) data which actually have been read
     /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
-    double read_gadget(const char*fname, fieldset read, unsigned rec=4)
-      falcON_THROWING;
+    double read_gadget(const char*fname, fieldset read, fieldset&got,
+		       unsigned rec=4) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// writes snapshot in gadget format to a single data file
     ///
@@ -1236,6 +1242,7 @@ namespace falcON {
     void write_gadget(output&out, double time, fieldset write, bool warn=0,
 		      unsigned rec=4)
       const falcON_THROWING;
+#endif
     //--------------------------------------------------------------------------
     //@}
     //==========================================================================
@@ -1699,6 +1706,7 @@ namespace falcON {
 		    unsigned       Nwrite=0) const falcON_THROWING;
     //@}
 #endif // falcON_NEMO
+#ifdef falcON_REAL_IS_FLOAT
     //--------------------------------------------------------------------------
     /// Reads a single snapshot from file(s) written in gadget2 data format 1
     ///
@@ -1706,16 +1714,18 @@ namespace falcON {
     /// file. In this case the file names are assumed to be derived from the one
     /// given as fname.0 fname.1 etc.
     ///
-    /// \return simulation time of snapshot
+    /// \return       data which actually have been read
     /// \param  fname (input) basename of data file(s).
     /// \param  read  (input) data to read (maximum is mxvkURH)
     /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
-    void read_gadget(const char*fname, fieldset read, unsigned rec=4)
+    fieldset read_gadget(const char*fname, fieldset read, unsigned rec=4)
       falcON_THROWING
     {
-      double t = bodies::read_gadget(fname, read, rec);
+      fieldset got;
+      double t = bodies::read_gadget(fname, read, got, rec);
       set_time(t);
       if(!has_initial_time()) init_time(t);
+      return got;
     }
     //--------------------------------------------------------------------------
     /// writes snapshot in gadget format to a single data file
@@ -1736,6 +1746,7 @@ namespace falcON {
     {
       bodies::write_gadget(out, time(), write, warn, rec);
     }
+#endif // falcON_REAL_IS_FLOAT
   };// class snapshot
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
