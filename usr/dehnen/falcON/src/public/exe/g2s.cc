@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                 |
 //-----------------------------------------------------------------------------+
 //                                                                             |
-// nemo2gadget.cc                                                              |
+// g2s.cc                                                                      |
 //                                                                             |
 // Copyright (C) 2007 Walter Dehnen                                            |
 //                                                                             |
@@ -21,7 +21,7 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
-// NEMO to Gadget snapshot file converter                                      |
+// Gadget to NEMO snapshot file converter                                      |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -29,10 +29,13 @@
 //                                                                             |
 // v 0.0    14/02/2007  WD created & seriously debugged                        |
 // v 0.1    14/02/2007  WD added param header                                  |
+// v 0.2    15/02/2007  WD can handle different endianess; added param first   |
+// v 0.3    16/02/2007  WD checks on file size, only writes what it got        |
 // v 1.0    16/02/2007  WD moved to public part of falcON                      |
+// v 1.0.1  23/02/2007  WD renamed to g2s (previously gadget2nemo)             |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "1.0"
-#define falcON_VERSION_D "16-feb-2007 Walter Dehnen                          "
+#define falcON_VERSION   "1.0.1"
+#define falcON_VERSION_D "23-feb-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #include <body.h>                                  // bodies                    
 #include <public/io.h>                             // NEMO file I/O             
@@ -42,44 +45,32 @@
 #include <string>
 ////////////////////////////////////////////////////////////////////////////////
 string defv[] = {	
-  "in=???\n           input file (nemo snapshot)                         ",
-  "out=???\n          base name for output files (out000 out001 ...)     ", 
-  "copy=mxvkU\n       data to copy (minimum mxvkU, maximum mxvkURHpa)    ",
-  "times=first\n      time range(s) to select snapshots from;\n"
-  "                    if equals first, write only one file \"out\",\n"
-  "                    otherwise allow for multiple time steps           ",
-  "first=0\n          index for first snapshot to write                  ",
-  "warn=f\n           warn about missing data (which will be zeroed)     ",
+  "in=???\n           input base file (GADGET snapshot)                  ",
+  "out=???\n          output file (nemo snapshot)                        ",
+  "nshot=1\n          number of snapshots to read                        ",
+  "copy=mxvU\n        data to copy (maximum: mxvkURHpa)                  ",
+  "first=0\n          first snapshot to read                             ",
   "header=4\n         header size or unfio (4 or 8)                      ",
-  falcON_DEFV, NULL};
-string usage="NEMO snapshot to GADGET converter";
+    falcON_DEFV, NULL};
+string usage="GADGET to NEMO snapshot converter";
 ////////////////////////////////////////////////////////////////////////////////
 void falcON::main() falcON_THROWING
 {
-  const char* fbase=getparam("out");
-  nemo_in in(getparam("in"));
-  if(!in) falcON_THROW("cannot open file \"%s\" for input\n",getparam("in"));
-  fieldset copy = getioparam("copy") & fieldset("mxvkURHpa"), read;
+  const char* fbase=getparam("in");
+  unsigned nshot = getuparam("nshot");
+  nemo_out out(getparam("out"));
+  fieldset copy = getioparam("copy") & fieldset("mxvkURHpa"), got;
   snapshot shot;
-  if(0 == strcmp(getparam("times"), "first")) {
-    if(!in.has_snapshot())
-      falcON_THROW("file \"%s\" contains no snapshot\n",getparam("in"));
-    shot.read_nemo(in, read, copy);
-    output out(fbase);
-    if(!out) falcON_THROW("cannot open file \"%s\" for output\n",fbase);
-    shot.write_gadget(out,copy,getbparam("warn"),getuparam("header"));
-  } else {
-    unsigned ifile = getuparam("first");
-    char file[256];
-    strcpy(file,fbase);
-    strcat(file,"%03d");
-    output out;
-    while(in.has_snapshot()) {
-      if(! shot.read_nemo(in,read,copy,getparam("times"),0) ) continue;
-      out.reopen(file,ifile++);
-      if(!out) falcON_THROW("cannot open file \"%s\" for output\n",file);
-      shot.write_gadget(out,copy,getbparam("warn"),getuparam("header"));
+  if(nshot > 1) {
+    for(unsigned i=0; i!=nshot; ++i) {
+      char file[256];
+      sprintf(file, "%s%03d", fbase, i+getuparam("first"));
+      got = shot.read_gadget(file, copy, getuparam("header"));
+      shot.write_nemo(out, copy & got);
     }
+  } else {
+    got = shot.read_gadget(fbase, copy, getuparam("header"));
+    shot.write_nemo(out, copy & got);
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
