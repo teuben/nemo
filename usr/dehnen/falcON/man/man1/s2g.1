@@ -1,0 +1,76 @@
+.TH s2g 1falcON "16 Feb 2007"
+
+.SH name
+\fBs2g\fP \- converts nemo snapshots to gadget data file(s) using falcON
+
+.SH synopsis
+\fB2s2g\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+.SH description
+\fBs2g\fP reads nemo from a nemo snapshot file and writes each
+snapshot into a separate file in gadget data format 1.
+
+.SH parameters
+
+.TP 12
+\fBin=\fP\fIfile\fP
+Input file name (nemo snapshot file). Default: \fBrequired\fP.
+.TP
+\fBout=\fP\fIfbase\fP
+Base file name for gadget snapshot data file(s). Default: \fBrequired\fP.
+.TP
+\fBcopy=\fP\fIIOstring\fP
+Specifies which data shall be copied to gadget data file(s).
+Default: \fBmxvkU\fP, Maximum: \fBmxvkURHap\fP.
+
+A gadget data file must at least contain positions, velocities, keys
+(ids), masses (if not specified via the header), and internal gas
+energies. In addition it may contain gas densities, gas smoothing
+lengths, potentials, and accelerations. All data specified by the
+\fIIOstring\fP will be written, but at least \fBmxvkU\fP and at most
+\fBmxvkURHap\fP. If some data were not present in the nemo snapshot,
+zero values will be substituted.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Specifies the times for the snapshots to be converted. If
+\fBtimes\fP=="first", only the first snapshot in the nemo snapshot
+file is converted. Default: \fBfirst\fP
+.TP
+\fBfirst=\fP\fIval\fP
+Specifies the running index of the first gadget snapshot file. If
+\fBtimes\fP!="first", output will be made to the files
+\fIfbase\fP\fBXXX\fP where \fBXXX\fP labels the snapshots, starting
+at \fBfirst\fP. Default: \fB0\fP
+.TP
+\fBwarn=\fP\fIt/f\fP
+If true, a warning is issued if data need to be zeroed. Default: \fBf\fP
+.TP
+\fBheader=\fP\fIval\fP
+Size (in bytes) of the FORTRAN record header to be used in writing the
+gadget files. For compatibility, this should usually be 4, but on some
+64bit machines, gadget may require 8. Default: \fB4\fP.
+
+
+.SH see also
+g2s(1falcON)
+.PP
+
+.fi
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf               \fIUser Guide for falcON\fP.
+.fi
+.SH author
+Walter Dehnen   walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+16-Feb-2007	first version of manual  WD
+.fi
+
+
