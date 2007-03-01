@@ -1182,7 +1182,7 @@ namespace falcON {
     ///
     /// \param So     (input) snapshot output to write to
     /// \param Bd     (input) body data fields to be written
-    /// \param start  (input) start position for writint
+    /// \param start  (input) start position for writing
     /// \param Nwrite (input,optional) write this many (default: all in output)
     void write_snapshot(snap_out const&So,
 			fieldset       Bd,

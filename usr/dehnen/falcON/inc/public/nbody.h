@@ -24,11 +24,11 @@
 ///                     WD added BlockStepCode::StepLevels::always_adjust() to  
 ///                        allow for the new schemes in DirectCode.cc           
 ///                     WD increase precision of log output if real==double     
-/// \version 13-07-2005 WD  adapt for new falcON                                
+/// \version 13-07-2005 WD adapt for new falcON                                 
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2005 Walter Dehnen                                        
+// Copyright (C) 2000-2006 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -972,12 +972,12 @@ namespace falcON {
     // in NBodyCode (otherwise the functions below are taken).                  
     //--------------------------------------------------------------------------
     virtual void cpu_stats_head(std::ostream&to) const {
-      if(SELF_GRAV) to << " tree  grav ";
+      if(SELF_GRAV) to << "l2R  D  tree  grav ";
       if(acc_ext()) to << " pext ";
     }
     //--------------------------------------------------------------------------
     virtual void cpu_stats_line(std::ostream&to) const {
-      if(SELF_GRAV) to << "------------";
+      if(SELF_GRAV) to << "-------------------";
       if(acc_ext()) to << "------";
     }
     //--------------------------------------------------------------------------
