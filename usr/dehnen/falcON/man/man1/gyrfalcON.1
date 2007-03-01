@@ -1,4 +1,4 @@
-.TH gyrfalcON 1falcON "21 September 2004"
+.TH gyrfalcON 1falcON "28 February 2007"
 
 .SH name
 gyrfalcON \- a superberb N-body code (public version)
@@ -98,9 +98,9 @@ simulation data via the pipe from \gyrfalcON\ may find that a pre-set
 condition for ending the simulation is satisfied and create a
 stopfile. No Default.
 .TP
-\fBhmin=\fP\fIval\fP
-The shortest time step is taken to be \fBtau\fP=2^(-\fIval\fP)
-simulation time units long. Default: 6.
+\fBkmax=\fP\fIval\fP
+The longest time step is taken to be \fBtau\fP=2^(-\fIval\fP)
+simulation time units long. Default: \fBrequired\fP.
 .TP
 \fBNlev=\fP\fInum\fP
 \fInum\fP time-step levels will be used. If \fInum\fP=1, a leap-frog
@@ -250,7 +250,7 @@ is ".:$FALCON/manip".
 In order to integrate a Plummer sphere with N=10^5 particles, you may
 issue the command
 .PP
-\fBmkplum - 100000 seed=1 | gyrfalcON - plum.snp tstop=10 eps=0.1
+\fBmkplum - 100000 seed=1 | gyrfalcON - plum.snp tstop=10 kmax=6 eps=0.1
 .PP
 which first creates initial conditions from a Plummer model, which are
 then piped into \fBgyrfalcON\fP. \fBgyrfalcON\fP creates an output
@@ -258,27 +258,27 @@ file \fBplum.snp\fP containing output every full time unit until time
 t=10. The log output looks like this:
 .PP
 .nf
-# ---------------------------------------------------------------------------------------------------------------------
-# "gyrfalcON - plum.snp tstop=10 eps=0.1 VERSION=2.1Igcc-3.2"
+# ---------------------------------------------------------------------------------------------------------------------------
+# "gyrfalcON - plum.snp tstop=10 kmax=6 eps=0.1"
 #
-# run at  Tue May 18 16:23:55
+# run at  Wed Feb 28 09:36:44
 #     by  "wd11"
-#     on  "andromeda.star.le.ac.uk"
-#     pid  30313
+#     on  "virgo"
+#     pid  5620
 #
-#    time       E=T+V        T          V_in        W         -2T/W     |L|      |v_cm|   tree  grav  step  accumulated
-# ---------------------------------------------------------------------------------------------------------------------
- 0.0000     -0.1461342    0.14677    -0.29290    -0.29161    1.0066  0.0021715  0.0017    0.13  0.99  1.13   0:00:01.13
- 0.015625   -0.1461343    0.14677    -0.29290    -0.29161    1.0066  0.0021715  0.0017    0.09  1.01  1.11   0:00:02.29
- 0.031250   -0.1461347    0.14677    -0.29290    -0.29161    1.0066  0.0021714  0.0017    0.08  1.02  1.12   0:00:03.43
- 0.046875   -0.1461345    0.14677    -0.29290    -0.29161    1.0066  0.0021714  0.0017    0.07  0.99  1.09   0:00:04.54
+#    time       E=T+V        T          V_in        W         -2T/W     |L|      |v_cm| l2R  D  tree  grav  step  accumulated
+# ---------------------------------------------------------------------------------------------------------------------------
+ 0.0000     -0.1461342    0.14677    -0.29290    -0.29161    1.0066  0.0021715  0.0017    9 16  0.07  0.94  1.02   0:00:01.02
+ 0.015625   -0.1461343    0.14677    -0.29290    -0.29161    1.0066  0.0021715  0.0017    9 16  0.05  0.95  1.02   0:00:02.04
+ 0.031250   -0.1461347    0.14677    -0.29290    -0.29161    1.0066  0.0021714  0.0017    9 16  0.04  0.95  1.02   0:00:03.06
+ 0.046875   -0.1461345    0.14677    -0.29290    -0.29161    1.0066  0.0021714  0.0017    9 16  0.04  0.96  1.02   0:00:04.08
  .
  .
  .
- 9.9531     -0.1461328    0.14451    -0.29065    -0.28940    0.99873 0.0021646  0.0017    0.08  1.00  1.11   0:11:53.60
- 9.9688     -0.1461329    0.14451    -0.29065    -0.28940    0.99873 0.0021646  0.0017    0.08  1.01  1.10   0:11:54.72
- 9.9844     -0.1461330    0.14451    -0.29065    -0.28939    0.99872 0.0021646  0.0017    0.08  1.01  1.11   0:11:55.85
- 10.000     -0.1461333    0.14451    -0.29064    -0.28940    0.99870 0.0021647  0.0017    0.07  0.99  1.08   0:11:56.95
+ 9.9531     -0.1461328    0.14451    -0.29065    -0.28940    0.99873 0.0021646  0.0017    9 16  0.05  0.96  1.03   0:10:47.70
+ 9.9688     -0.1461329    0.14451    -0.29065    -0.28939    0.99873 0.0021646  0.0017    9 16  0.05  0.95  1.01   0:10:48.71
+ 9.9844     -0.1461329    0.14451    -0.29064    -0.28939    0.99872 0.0021646  0.0017    9 16  0.06  0.95  1.02   0:10:49.73
+ 10.000     -0.1461333    0.14451    -0.29064    -0.28940    0.99870 0.0021647  0.0017    9 16  0.04  0.95  1.01   0:10:50.74
 .if
 
 .SH output data warning (NEMO)
@@ -310,4 +310,5 @@ Walter Dehnen                              walter.dehnen@astro.le.ac.uk
 18-may-2004	first version of manual    WD
 01-jul-2004	version 2.2 of gyrfalcON   WD
 27-sep-2005	version 3.0.4 of gyrfalcON WD
+28-feb-2007     version 3.0.9 of gyrfalcON WD
 .fi
