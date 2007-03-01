@@ -3,7 +3,7 @@
 //                                                                             |
 // kernel.cc                                                                   |
 //                                                                             |
-// Copyright (C) 2000-2005  Walter Dehnen                                      |
+// Copyright (C) 2000-2007  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -563,6 +563,7 @@ void GravKern::direct(cell_iter const&A, leaf_iter const&B) const
     }
   else
 #endif
+  {
     if(is_active(B)) {
       if     (al_active(A)) Direct<0>::many_YA(ARGS);
       else if(is_active(A)) Direct<0>::many_YS(ARGS);
@@ -571,6 +572,7 @@ void GravKern::direct(cell_iter const&A, leaf_iter const&B) const
       if     (al_active(A)) Direct<0>::many_NA(ARGS);
       else if(is_active(A)) Direct<0>::many_NS(ARGS);
     }
+  }
 }
 //------------------------------------------------------------------------------
 void GravKernAll::direct(cell_iter const&A, leaf_iter const&B) const
@@ -588,37 +590,37 @@ void GravKernAll::direct(cell_iter const&A, leaf_iter const&B) const
 void GravKern::direct(cell_iter const&C) const
 {
   const    unsigned  N1 = number(C)-1;
-  register unsigned  k, Nk;
-  register leaf_iter A = C.begin_leafs();
+  register leaf_iter A  = C.begin_leafs();
 #ifdef falcON_INDI
   if(INDI_SOFT)
     if(al_active(C))
-      for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A) Direct<1>::many_YA(ARGS);
+      for(unsigned Nk=N1; Nk; --Nk,++A) Direct<1>::many_YA(ARGS);
     else
-      for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A)
-	if(is_active(A))                     Direct<1>::many_YS(ARGS);
-	else                                 Direct<1>::many_NS(ARGS);
+      for(unsigned Nk=N1; Nk; --Nk,++A)
+	if(is_active(A))                Direct<1>::many_YS(ARGS);
+	else                            Direct<1>::many_NS(ARGS);
   else
 #endif
+  {
     if(al_active(C))
-      for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A) Direct<0>::many_YA(ARGS);
+      for(unsigned Nk=N1; Nk; --Nk,++A) Direct<0>::many_YA(ARGS);
     else
-      for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A)
-	if(is_active(A))                     Direct<0>::many_YS(ARGS);
-	else                                 Direct<0>::many_NS(ARGS);
+      for(unsigned Nk=N1; Nk; --Nk,++A)
+	if(is_active(A))                Direct<0>::many_YS(ARGS);
+	else                            Direct<0>::many_NS(ARGS);
+  }
 }
 //------------------------------------------------------------------------------
 void GravKernAll::direct(cell_iter const&C) const
 {
   const    unsigned  N1 = number(C)-1;
-  register unsigned  k, Nk;
-  register leaf_iter A = C.begin_leafs();
+  register leaf_iter A  = C.begin_leafs();
 #ifdef falcON_INDI
   if(INDI_SOFT)
-    for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A) Direct<1>::many_YA(ARGS);
+    for(unsigned Nk=N1; Nk; --Nk,++A) Direct<1>::many_YA(ARGS);
   else
 #endif
-    for(k=0, Nk=N1; Nk!=0; --Nk, ++k, ++A) Direct<0>::many_YA(ARGS);
+    for(unsigned Nk=N1; Nk; --Nk,++A) Direct<0>::many_YA(ARGS);
 }
 #undef ARGS
 //==============================================================================

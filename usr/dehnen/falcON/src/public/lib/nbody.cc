@@ -791,6 +791,8 @@ void ForceALCON::set_tree_and_forces(bool all, bool build_tree) const
 //------------------------------------------------------------------------------
 void ForceALCON::cpu_stats_body(std::ostream&to) const {
   if(SELF_GRAV) {
+    to << std::setw(3) << int(log(FALCON.root_radius())/M_LN2) <<' '
+       << std::setw(2) << FALCON.root_depth() <<' ';
     Integrator::print_cpu(CPU_TREE, to);
     to<<' ';
     Integrator::print_cpu(CPU_GRAV, to);
