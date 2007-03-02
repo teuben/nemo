@@ -391,40 +391,40 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = utils/inc/tupel.h \
-			 utils/inc/exception.h \
-			 utils/inc/inline.h \
-			 utils/inc/inline_io.h \
-			 utils/inc/traits.h \
-			 utils/inc/random.h \
-			 utils/inc/numerics.h \
-			 utils/inc/Pi.h \
-			 utils/inc/memory.h \
-			 utils/inc/WDMath.h \
-			 inc/public/types.h \
-			 inc/public/basic.h \
-			 inc/public/fields.h \
-			 inc/public/io.h \
-			 inc/body.h \
-			 inc/public/manip.h \
-			 inc/public/profile.h \
-			 inc/public/bodyfunc.h \
-			 inc/public/interact.h \
-			 inc/public/nbody.h \
-			 src/public/manip/set_subset.cc \
-			 src/public/manip/use_filter.cc \
-			 src/public/manip/set_centre.cc \
-			 src/public/manip/bound_centre.cc \
-			 src/public/manip/dens_centre.cc \
-			 src/public/manip/density.cc \
-			 src/public/manip/densprof.cc \
-			 src/public/manip/set_centre.cc \
-			 src/public/manip/sphereprof.cc \
-			 src/public/manip/projprof.cc \
-			 src/public/manip/lagrange.cc \
-			 src/public/manip/add_plummer.cc \
-			 src/public/manip/symmetrize_pairs.cc \
-			 src/public/manip/randomize_azimuth.cc
+INPUT		=	utils/inc/tupel.h \
+			utils/inc/exception.h \
+			utils/inc/inline.h \
+			utils/inc/inline_io.h \
+			utils/inc/traits.h \
+			utils/inc/random.h \
+			utils/inc/numerics.h \
+			utils/inc/Pi.h \
+			utils/inc/memory.h \
+			utils/inc/WDMath.h \
+			inc/public/types.h \
+			inc/public/basic.h \
+			inc/public/fields.h \
+			inc/public/io.h \
+			inc/body.h \
+			inc/public/manip.h \
+			inc/public/profile.h \
+			inc/public/bodyfunc.h \
+			inc/public/interact.h \
+			inc/public/nbody.h \
+			src/public/manip/set_subset.cc \
+			src/public/manip/use_filter.cc \
+			src/public/manip/set_centre.cc \
+			src/public/manip/bound_centre.cc \
+			src/public/manip/dens_centre.cc \
+			src/public/manip/density.cc \
+			src/public/manip/densprof.cc \
+			src/public/manip/set_centre.cc \
+			src/public/manip/sphereprof.cc \
+			src/public/manip/projprof.cc \
+			src/public/manip/lagrange.cc \
+			src/public/manip/add_plummer.cc \
+			src/public/manip/symmetrize_pairs.cc \
+			src/public/manip/randomize_azimuth.cc
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 
