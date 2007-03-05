@@ -21,12 +21,12 @@ gyrfalcON:
 	@echo Running $@
 	@rm -f bench.dat bench.log
 	$(EXEC) mkplum p1024.in 1024 seed=1024
-	$(EXEC) gyrfalcON in=p1024.in out=p1024.out kmin=6 tstop=$(TSTOP) > p1024.log
+	$(EXEC) gyrfalcON in=p1024.in out=p1024.out kmax=6 tstop=$(TSTOP) > p1024.log
 	@head -12 p1024.log
 	@echo "..."
 	@tail -2 p1024.log
 	$(EXEC) snapscale p1024.in p1024.in2 mscale=0.5
-	$(EXEC) gyrfalcON in=p1024.in2 out=p1024.out2 kmin=6 tstop=$(TSTOP) \
+	$(EXEC) gyrfalcON in=p1024.in2 out=p1024.out2 kmax=6 tstop=$(TSTOP) \
 		accname=Plummer accpars=0,0.5,1 > p1024.log2
 	@head -12 p1024.log2
 	@echo "..."
