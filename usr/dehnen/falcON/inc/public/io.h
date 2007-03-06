@@ -455,9 +455,10 @@ namespace falcON {
       SPHentr = 1 << 20,
       SPHdens = 1 << 21,
       SPHhdot = 1 << 22,
-      SPHfact = 1 << 23,
-      SPHcs   = 1 << 24,
-      SPHmu   = 1 << 25
+      SPHalfa = 1 << 23,
+      SPHfact = 1 << 24,
+      SPHcs   = 1 << 25,
+      SPHmu   = 1 << 26
     };
     //--------------------------------------------------------------------------
     /// get the nemo_io::DataType used for a given Field                        
@@ -486,6 +487,7 @@ namespace falcON {
       case SPHentr: return Real;
       case SPHdens: return Real;
       case SPHhdot: return Real;
+      case SPHalfa: return Real;
       case SPHfact: return Real;
       case SPHcs  : return Real;
       case SPHmu  : return Real;
@@ -504,6 +506,7 @@ namespace falcON {
       case SPHentr:
       case SPHdens:
       case SPHhdot:
+      case SPHalfa:
       case SPHfact:
       case SPHcs:
       case SPHmu:   return true;
@@ -534,8 +537,9 @@ namespace falcON {
       case fieldbit::U: return SPHu;
       case fieldbit::I: return SPHudot;
       case fieldbit::E: return SPHurad;
-      case fieldbit::S: return SPHentr;
+      case fieldbit::K: return SPHentr;
       case fieldbit::R: return SPHdens;
+      case fieldbit::A: return SPHalfa;
       case fieldbit::J: return SPHhdot;
       case fieldbit::F: return SPHfact;
       case fieldbit::C: return SPHcs;
@@ -567,9 +571,10 @@ namespace falcON {
       case SPHu:    return fieldbit::U;
       case SPHudot: return fieldbit::I;
       case SPHurad: return fieldbit::E;
-      case SPHentr: return fieldbit::S;
+      case SPHentr: return fieldbit::K;
       case SPHdens: return fieldbit::R;
       case SPHhdot: return fieldbit::J;
+      case SPHalfa: return fieldbit::A;
       case SPHfact: return fieldbit::F;
       case SPHcs:   return fieldbit::C;
       case SPHmu:   return fieldbit::M;

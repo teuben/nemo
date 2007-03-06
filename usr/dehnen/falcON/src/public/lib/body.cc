@@ -168,7 +168,7 @@ bodies::block::block(unsigned no,                  // I: our No
 }
 ///////////////////////////////////////////////////////////////////////////////
 template<unsigned BIT=0, unsigned END=BodyData::NQUANT> struct CopyBody {
-  static const unsigned BD = 1<<BIT;
+  static const fieldset::value_type BD = fieldset::one <<BIT;
   static void copy(void    **data,
 		   unsigned  from,
 		   unsigned  to  ,
@@ -178,7 +178,7 @@ template<unsigned BIT=0, unsigned END=BodyData::NQUANT> struct CopyBody {
       memcpy(static_cast<      char*>(data[BIT])+to  *BodyData::ZQUANT[BIT],
 	     static_cast<const char*>(data[BIT])+from*BodyData::ZQUANT[BIT],
 	     BodyData::ZQUANT[BIT]);
-      c |= fieldset(1<<BIT);
+      c |= fieldset(fieldbit(BIT));
     }
     CopyBody<BIT+1, END>::copy(data,from,to,b,c);
   }
@@ -189,14 +189,14 @@ template<unsigned BIT> struct CopyBody<BIT,BIT> {
 //------------------------------------------------------------------------------
 fieldset bodies::block::copy_body(unsigned from, unsigned to, fieldset b)
 {
-  fieldset copied(0);
+  fieldset copied;
   if(from != to)
     CopyBody<0>::copy(DATA,from,to,b,copied);
   return copied;
 }
 ////////////////////////////////////////////////////////////////////////////////
 template<unsigned BIT=0, unsigned END=BodyData::NQUANT> struct CopyBodies {
-  static const unsigned BD = 1<<BIT;
+  static const fieldset::value_type BD = fieldset::one <<BIT;
   static void copy(void*const*data_fr,
 		   void*const*data_to,
 		   unsigned  fr,
@@ -204,11 +204,11 @@ template<unsigned BIT=0, unsigned END=BodyData::NQUANT> struct CopyBodies {
 		   unsigned  num,
 		   fieldset  b,
 		   fieldset&c) {
-    if(data_fr[BIT] && data_to[BIT] && b & fieldset(1<<BIT) ) {
+    if(data_fr[BIT] && data_to[BIT] && b & fieldset(fieldbit(BIT)) ) {
       memcpy(static_cast<      char*>(data_fr[BIT])+to*BodyData::ZQUANT[BIT],
 	     static_cast<const char*>(data_to[BIT])+fr*BodyData::ZQUANT[BIT],
 	     num*BodyData::ZQUANT[BIT]);
-      c |= fieldset(1<<BIT);
+      c |= fieldset(fieldbit(BIT));
     }
     CopyBodies<BIT+1, END>::copy(data_fr,data_to,fr,to,num,b,c);
   }
@@ -224,7 +224,7 @@ fieldset bodies::block::copy_bodies(const block*other,
 				    unsigned    num,
 				    fieldset    copy) falcON_THROWING
 {
-  fieldset copied(0);
+  fieldset copied;
   if(this == other)
     falcON_ExceptF("this == other","bodies::block::copy_bodies()");
   else
@@ -259,10 +259,10 @@ fieldset bodies::block::copy(const block*&From,
     falcON_ExceptF("cannot copy from self","bodies::block::copy()");
   NBOD = 0u;
   if( From == 0)
-    return fieldset(0);
+    return fieldset::empty;
   unsigned copy;
   unsigned free = NALL;
-  fieldset copied (0);
+  fieldset copied;
   // skip bodies not to be copied                                               
   From->skip(from,copyflag);
   while(free &&                              // WHILE  we have still space      
@@ -606,7 +606,7 @@ void bodies::del_data() falcON_THROWING
 bodies::~bodies() falcON_THROWING
 {
   debug_info(6,"bodies::~bodies(): destructing bodies");
-  BITS = fieldset(0);
+  BITS = fieldset::empty;
   if(C_FORTRAN)
     for(fieldbit f; f; ++f)
       const_cast<block*>(FIRST)->set_data_void(f,0);
@@ -745,7 +745,7 @@ bodies::bodies(bodies const&Other,
 ////////////////////////////////////////////////////////////////////////////////
 // construction for C & FORTRAN support                                     
 bodies::bodies(char, const unsigned n[BT_NUM]) falcON_THROWING
-: BITS      ( 0 ),
+: BITS      ( fieldset::empty ),
   C_FORTRAN ( 1 )
 {
   debug_info(3,"bodies::bodies(): constructing bodies for C & FORTRAN: n=%u,%u",
@@ -977,7 +977,7 @@ fieldset bodies::read_snapshot(snap_in  const&snap,
   if(read & fieldset::source) mark_srce_data_changed();
   if(read & fieldset::sphmax) mark_sph_data_changed();
   if(warn && want != read) warning("bodies::read_snapshot: couldn't read %s",
-				  word(want.missing(read)));
+				  word(read.missing(want)));
   return read;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -1402,7 +1402,7 @@ bool snapshot::read_nemo(                          // R: was time in range?
 
   if(s.has_time()) {
     if(t && !time_in_range(s.time(),t)) {
-      r = fieldset(0);
+      r = fieldset::empty;
       return false;
     }
     TIME = s.time();

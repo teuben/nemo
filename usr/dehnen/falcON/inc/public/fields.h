@@ -316,8 +316,8 @@ namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   namespace BodyData {
     const int         NOSPH   = 19;                // # non-sph data            
-    const int         NQUANT  = 32;                // total # data              
-    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIESRDJFCM";
+    const int         NQUANT  = 33;                // total # data              
+    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIEKRABJFCM";
                                                    // one-char data tags        
     //--------------------------------------------------------------------------
     // array with human readable names for the N-body data                      
@@ -328,8 +328,8 @@ namespace falcON {
 	"auxiliary scalar", "auxiliary vector", "time-step level",
 	"number of partners", "node number", "Peano-Hilbert key",
 	"SPH smoothing length", "number of SPH partners", "U_internal",
-	"U_predicted", "(dU/dt)_total", "(dU/dt)_external", "entropy",
-	"gas density", "d(gas density)/dt", "dlog(h)/dt", "factor",
+	"U_predicted", "(dU/dt)_total", "(dU/dt)_external", "entropy function",
+	"gas density", "alpha_visc", "dalpha_visc/dt", "dlog(h)/dt", "factor",
 	"sound speed", "molecular weight"
       };
     //--------------------------------------------------------------------------
@@ -356,16 +356,17 @@ namespace falcON {
       sizeof(unsigned),       // number of partners
       sizeof(indx),           // node number
       sizeof(peanokey),       // Peano-Hilbert key
-      //            SPH properties: 12
+      //            SPH properties: 13
       sizeof(real),           // size
       sizeof(unsigned),       // number of SPH partners
       sizeof(real),           // U_internal
       sizeof(real),           // U_predicted
       sizeof(real),           // (dU/dt)_total
       sizeof(real),           // (dU/dt)_external
-      sizeof(real),           // entropy
+      sizeof(real),           // entropy function
       sizeof(real),           // gas-density
-      sizeof(real),           // dgas-density/dt
+      sizeof(real),           // alpha_visc
+      sizeof(real),           // dalpha_visc/dt
       sizeof(real),           // dlogh/dt
       sizeof(real),           // f_i
       sizeof(real),           // sound speed
@@ -388,6 +389,8 @@ namespace falcON {
   class fieldbit {
   public:
     //--------------------------------------------------------------------------
+    /// type of internal representation
+    typedef int value_type;
     /// \name static members
     //@{
     static const int   NOSPH = BodyData::NOSPH;  ///< # non-sph data            
@@ -401,7 +404,7 @@ namespace falcON {
     //@}
     //--------------------------------------------------------------------------
   private:
-    int val;
+    value_type val;
   public:
     //--------------------------------------------------------------------------
     /// specifies the field - value relation
@@ -437,14 +440,15 @@ namespace falcON {
       Y       = 22,           ///< predicted U
       I       = 23,           ///< (dU/dt)_total
       E       = 24,           ///< (dU/dt)_external
-      S       = 25,           ///< entropy/entropy function (currently not used)
+      K       = 25,           ///< entropy function
       R       = 26,           ///< gas-density rho
-      D       = 27,           ///< drho/dt
+      A       = 27,           ///< alpha_visc
+      B       = 28,           ///< dalpha_visc/dt
       V       = w,            ///< predicted velocity (again)
-      J       = 28,           ///< dh/dt or dlnh/dt
-      F       = 29,           ///< factor f_i
-      C       = 30,           ///< sound speed
-      M       = 31,           ///< molecular weight
+      J       = 29,           ///< dlnh/dt
+      F       = 30,           ///< factor f_i
+      C       = 31,           ///< sound speed
+      M       = 32,           ///< molecular weight
       invalid = NQUANT        ///< not corresponding to any field
     };
     //--------------------------------------------------------------------------
@@ -535,56 +539,66 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class fieldset {
     //--------------------------------------------------------------------------
-    unsigned val;
   public:
+    /// type used in internal representation
+    typedef uint64 value_type;
+  private:
+    value_type val;
+  public:
+    const static value_type nil=0, one=1;
     //--------------------------------------------------------------------------
     /// specifies single-field sets and some combined sets
     ///
     /// Single-field sets have the same name as the corresponding fieldbit::bits
     /// value. They are useful as building blocks for combined sets.
     enum bits {
-      o       = 0,                  ///< an empty set
-      m       = 1 << fieldbit::m,   ///< just masses
-      x       = 1 << fieldbit::x,   ///< just positions
-      v       = 1 << fieldbit::v,   ///< just velocities
-      w       = 1 << fieldbit::w,   ///< just predicted velocities
-      e       = 1 << fieldbit::e,   ///< just individual softening lengths
-      f       = 1 << fieldbit::f,   ///< just falcON::flagss
-      k       = 1 << fieldbit::k,   ///< just integer keys
-      t       = 1 << fieldbit::t,   ///< just time steps
-      p       = 1 << fieldbit::p,   ///< just N-body gravitational potentials
-      q       = 1 << fieldbit::q,   ///< just external gravitational potentials
-      a       = 1 << fieldbit::a,   ///< just accelarations
-      j       = 1 << fieldbit::j,   ///< just jerks
-      r       = 1 << fieldbit::r,   ///< just mass-densities
-      y       = 1 << fieldbit::y,   ///< just auxiliary scalar data
-      z       = 1 << fieldbit::z,   ///< just auxiliary vector data
-      l       = 1 << fieldbit::l,   ///< just time-step levels
-      n       = 1 << fieldbit::n,   ///< just numbers of neighbours
-      d       = 1 << fieldbit::d,   ///< just node numbers
-      h       = 1 << fieldbit::h,   ///< just Peano-Hilbert keys
-      H       = 1 << fieldbit::H,   ///< just SPH smoothing lengths
-      N       = 1 << fieldbit::N,   ///< just number of SPH interaction partners
-      U       = 1 << fieldbit::U,   ///< just internal energies U
-      Y       = 1 << fieldbit::Y,   ///< just predicted U
-      I       = 1 << fieldbit::I,   ///< just (dU/dt)_total
-      E       = 1 << fieldbit::E,   ///< just (dU/dt)_external
-      S       = 1 << fieldbit::S,   ///< just entropies/entropy functions
-      R       = 1 << fieldbit::R,   ///< just gas-densities rho
-      D       = 1 << fieldbit::D,   ///< just drho/dt
-      V       = 1 << fieldbit::V,   ///< just predicted velocities
-      J       = 1 << fieldbit::J,   ///< just dh/dt or dlnh/dt
-      F       = 1 << fieldbit::F,   ///< just factors f_i
-      C       = 1 << fieldbit::C,   ///< just sound speeds
-      M       = 1 << fieldbit::M,   ///< just molecular weights
+      o       = nil,                 ///< an empty set
+      // STD & SPH:
+      m       = one << fieldbit::m,  ///< just masses
+      x       = one << fieldbit::x,  ///< just positions
+      v       = one << fieldbit::v,  ///< just velocities
+      w       = one << fieldbit::w,  ///< just predicted velocities
+      e       = one << fieldbit::e,  ///< just individual softening lengths
+      f       = one << fieldbit::f,  ///< just falcON::flagss
+      k       = one << fieldbit::k,  ///< just integer keys
+      t       = one << fieldbit::t,  ///< just time steps
+      p       = one << fieldbit::p,  ///< just N-body gravitational potentials
+      q       = one << fieldbit::q,  ///< just external gravitational potentials
+      a       = one << fieldbit::a,  ///< just accelarations
+      j       = one << fieldbit::j,  ///< just jerks
+      r       = one << fieldbit::r,  ///< just mass-densities
+      y       = one << fieldbit::y,  ///< just auxiliary scalar data
+      z       = one << fieldbit::z,  ///< just auxiliary vector data
+      l       = one << fieldbit::l,  ///< just time-step levels
+      n       = one << fieldbit::n,  ///< just numbers of neighbours
+      d       = one << fieldbit::d,  ///< just node numbers
+      h       = one << fieldbit::h,  ///< just Peano-Hilbert keys
+      // SPH only:
+      H       = one << fieldbit::H,  ///< just SPH smoothing lengths
+      N       = one << fieldbit::N,  ///< just number of SPH iaction partners
+      U       = one << fieldbit::U,  ///< just internal energies U
+      Y       = one << fieldbit::Y,  ///< just predicted U
+      I       = one << fieldbit::I,  ///< just (dU/dt)_total
+      E       = one << fieldbit::E,  ///< just (dU/dt)_external
+      K       = one << fieldbit::K,  ///< just entropy functions
+      R       = one << fieldbit::R,  ///< just gas-densities rho
+      A       = one << fieldbit::A,  ///< just alpha_visc
+      B       = one << fieldbit::B,  ///< just dalpha_visc/dt
+      V       = one << fieldbit::V,  ///< just predicted velocities
+      J       = one << fieldbit::J,  ///< just dlnh/dt
+      F       = one << fieldbit::F,  ///< just factors f_i
+      C       = one << fieldbit::C,  ///< just sound speeds
+      M       = one << fieldbit::M,  ///< just molecular weights
       /// default SPH quantities
       sphdef  = H|R|V|J|F|C,
       /// all SPH quantities
-      sphmax  = sphdef|N|U|Y|I|E|S|D|M,
+      sphmax  = sphdef|N|U|Y|I|E|K|A|B|M,
       /// SPH quantities supported by NEMO I/O
-      sphnemo = H|N|U|I|E|S|R|J|F|C|M,
+      sphnemo = H|N|U|I|E|K|R|A|J|F|C|M,
       /// all floating point scalar SPH quantities
-      sphscal = H|U|Y|I|E|S|R|D|J|F|C,
+      sphscal = H|U|Y|I|E|K|R|A|B|J|F|C|M,
+      /// artificial viscosity
+      artvisc = A|B,
       /// N-body and external gravitational potentials
       potent  = p|q,
       /// phases = {x,v}
@@ -621,36 +635,24 @@ namespace falcON {
     //==========================================================================
     /// \name constructors and assignment                                       
     //@{
-    /// unitialized: empty set
-    fieldset()                    : val(0) {}
+    /// default constructor: empty set
+    fieldset() : val(0) {}
     /// copy constructor
-    fieldset(fieldset const   &b) : val(b.val) {}
+    fieldset(fieldset const&b) : val(b.val) {}
     /// from fieldset::bits
-    fieldset(bits              b) : val(b) {}
+    fieldset(bits b) : val(b) {}
     /// from fieldbit::bits
-    fieldset(fieldbit::bits    b) : val(1 << b) {}
-    /// from integer: take value
-    explicit fieldset(int      i) : val(i) {}
-    /// from unsigned: take value
-    explicit fieldset(unsigned i) : val(i) {}
+    fieldset(fieldbit::bits b) : val(one << b) {}
+    /// from value_type: take value
+    explicit fieldset(value_type i) : val(i) {}
     /// from falcON::fieldbit: single-field set
-    explicit fieldset(fieldbit f) : val(1 << falcON::value(f)) {}
-    /// from char: single-field set, match against \b name of enum values in
-    /// fieldset::bits; for example, fieldset('m') gives the single-field set
-    /// with just masses
-    explicit fieldset(char c) : val(0) {
-      for(fieldbit f; f; ++f)
-	if(c == letter(f) ) {
-	  val |= 1 << falcON::value(f);
-	  return;
-	}
-    }
+    explicit fieldset(fieldbit f) : val(one << falcON::value(f)) {}
     /// from string: match each character against a single-field set's name, 
     /// corresponding to the name of the fieldset::bits value; for example,
     /// fieldset("mxv") yields a fieldset with masses, positions and velocities
     explicit fieldset(const char*c) : val(0) {
       for(fieldbit f; f; ++f)
-	if(std::strchr(c,letter(f))) val |= 1 << falcON::value(f);
+	if(std::strchr(c,letter(f))) val |= one << falcON::value(f);
     }
     /// copy assignment operator
     fieldset&operator= (fieldset b) { val  = b.val; return *this; }
@@ -689,9 +691,9 @@ namespace falcON {
     /// cross section of two sets
     friend fieldset operator& (bits, fieldset);
     /// is set empty?
-    bool is_empty() const { return val != 0; }
+    bool is_empty() const { return val != nil; }
     /// is set empty?
-    operator bool() const { return val != 0; }
+    operator bool() const { return val != nil; }
     /// are two sets identical?
     bool operator== (fieldset b) const { return val == b.val; }
     /// are two sets identical?
@@ -719,7 +721,7 @@ namespace falcON {
     /// does this set contain \b all of set \c b ?
     bool contain(bits b) const { return (val & b)==b; }
     /// does this set contain field \c f ?
-    bool contain(fieldbit f) const { return val & (1 << falcON::value(f)); }
+    bool contain(fieldbit f) const { return val & (one << falcON::value(f)); }
     /// does this set contain field \c f ?
     bool contain(fieldbit::bits f) const { return contain(fieldbit(f)); }
     /// fields in \c b but not in this set
@@ -727,9 +729,9 @@ namespace falcON {
     /// fields in \c b but not in this set
     fieldset missing(bits b) const { return fieldset(b^val) & b; }
     /// return the integer value (combination of all bits)
-    unsigned const&value() const { return val; }
+    value_type const&value() const { return val; }
     /// return the integer value (combination of all bits)
-    friend unsigned const&value(fieldset const&);
+    friend value_type const&value(fieldset const&);
     //==========================================================================
     // description                                                              
     //==========================================================================
@@ -782,12 +784,12 @@ namespace falcON {
   //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
   inline fieldset operator| (fieldset::bits a, fieldset::bits b) {
-    return fieldset(int(a)|int(b));
+    return fieldset(fieldset::value_type(a) | fieldset::value_type(b));
   }
   inline fieldset operator| (fieldset::bits b, fieldset d) { return d | b; }
   inline fieldset operator& (fieldset::bits b, fieldset d) { return d & b; }
   inline bool operator!= (fieldset::bits b, fieldset d) { return d != b; }
-  inline unsigned const&value(fieldset const&b) { return b.val; }
+  inline fieldset::value_type const&value(fieldset const&b) { return b.val; }
   inline const char*word(fieldset::wlist const&w) { return w.W; }
   inline const char*word(fieldset d) { return d.word(); }
   inline const char*word(const fieldset*d) { return d->word(); }
@@ -984,13 +986,14 @@ namespace falcON {
   DefFieldTraits(22, real);                        // SPH: predicted U_in       
   DefFieldTraits(23, real);                        // SPH: (dU/dt)_total        
   DefFieldTraits(24, real);                        // SPH: (dU/dt)_external     
-  DefFieldTraits(25, real);                        // SPH: entropy              
+  DefFieldTraits(25, real);                        // SPH: entropy function     
   DefFieldTraits(26, real);                        // SPH: gas density          
-  DefFieldTraits(27, real);                        // SPH: d(gas density)/dt    
-  DefFieldTraits(28, real);                        // SPH: dh/dt                
-  DefFieldTraits(29, real);                        // SPH: f_i                  
-  DefFieldTraits(30, real);                        // SPH: sound speed          
-  DefFieldTraits(31, real);                        // SPH: molecular weights    
+  DefFieldTraits(27, real);                        // SPH: alpha_visc           
+  DefFieldTraits(28, real);                        // SPH: dalpha_visc/dt       
+  DefFieldTraits(29, real);                        // SPH: dh/dt                
+  DefFieldTraits(30, real);                        // SPH: f_i                  
+  DefFieldTraits(31, real);                        // SPH: sound speed          
+  DefFieldTraits(32, real);                        // SPH: molecular weights    
 #undef DefFieldTraits
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -1027,9 +1030,10 @@ namespace falcON {
   MACRO(fieldbit::Y,uprd);			\
   MACRO(fieldbit::I,udot);			\
   MACRO(fieldbit::E,udex);			\
-  MACRO(fieldbit::S,entr);			\
+  MACRO(fieldbit::K,entr);			\
   MACRO(fieldbit::R,srho);			\
-  MACRO(fieldbit::D,drho);			\
+  MACRO(fieldbit::A,alfa);			\
+  MACRO(fieldbit::B,adot);			\
   MACRO(fieldbit::J,hdot);			\
   MACRO(fieldbit::F,fact);			\
   MACRO(fieldbit::C,csnd);			\

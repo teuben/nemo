@@ -31,9 +31,10 @@
 // v 0.1    14/02/2007  WD added param header                                  |
 // v 1.0    16/02/2007  WD moved to public part of falcON                      |
 // v 1.0.1  23/02/2007  WD renamed to s2g (previously nemo2gadget)             |
+// v 1.0.2  05/03/2007  WD avoid warning from bodies::read_snapshot()          |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "1.0.1"
-#define falcON_VERSION_D "23-feb-2007 Walter Dehnen                          "
+#define falcON_VERSION   "1.0.2"
+#define falcON_VERSION_D "05-mar-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #include <body.h>                                  // bodies                    
 #include <public/io.h>                             // NEMO file I/O             
@@ -47,13 +48,13 @@ string defv[] = {
   "out=???\n          base name for output files (out000 out001 ...)     ", 
   "copy=mxvkU\n       data to copy (minimum mxvkU, maximum mxvkURHpa)    ",
   "times=first\n      time range(s) to select snapshots from;\n"
-  "                    if equals first, write only one file \"out\",\n"
+  "                    if equals \"first\", write only one file \"out\",\n"
   "                    otherwise allow for multiple time steps           ",
-  "first=0\n          index for first snapshot to write                  ",
+  "first=0\n          index for first snapshot to write (of more than 1) ",
   "warn=f\n           warn about missing data (which will be zeroed)     ",
-  "header=4\n         header size or unfio (4 or 8)                      ",
+  "header=4\n         header size for unfio (4 or 8)                     ",
   falcON_DEFV, NULL};
-string usage="NEMO snapshot to GADGET converter";
+string usage="Walter's NEMO to GADGET snapshot converter";
 ////////////////////////////////////////////////////////////////////////////////
 void falcON::main() falcON_THROWING
 {
@@ -65,7 +66,7 @@ void falcON::main() falcON_THROWING
   if(0 == strcmp(getparam("times"), "first")) {
     if(!in.has_snapshot())
       falcON_THROW("file \"%s\" contains no snapshot\n",getparam("in"));
-    shot.read_nemo(in, read, copy);
+    shot.read_nemo(in,read,copy,0,0);
     output out(fbase);
     if(!out) falcON_THROW("cannot open file \"%s\" for output\n",fbase);
     shot.write_gadget(out,copy,getbparam("warn"),getuparam("header"));

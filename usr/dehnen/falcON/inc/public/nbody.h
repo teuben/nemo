@@ -19,7 +19,8 @@
 ///                                                                             
 /// \version 14-01-2005 WD integration of H,R moved Integrator -> ForceSPH      
 /// \version 01-04-2005 WD soft_type -> enum.h as falcON::soft_type             
-///                     WD last 4 args of NbodyCode::init() default: fieldset::o
+///                     WD last 4 args of NbodyCode::init() default to          
+///                        fieldset::empty                                      
 /// \version 05-04-2005 WD SELF_GRAV removed from ForceALCON (in ForceDiagGrav) 
 ///                     WD added BlockStepCode::StepLevels::always_adjust() to  
 ///                        allow for the new schemes in DirectCode.cc           
@@ -96,7 +97,7 @@ namespace falcON {
   ///                                                                           
   /// \note      the force solver may also need to assist in the integration:   
   /// evolution of quantities not fitting in the integration scheme below MUST  
-  /// be dealt with by the force solver, for instance, adaption of the sofening 
+  /// be dealt with by the force solver, for instance, adaption of the softening
   /// or smoothing lengths (which really is a force rather than an integration  
   /// issue).                                                                   
   ///                                                                           
@@ -450,7 +451,6 @@ namespace falcON {
   //                                                                            
   // class falcON::LeapFrogCode                                                 
   //                                                                            
-  /// non-abstract class, derived from class falcON::Integrator                 
   /// implements kick-drift-kick leap-frog                                      
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
@@ -479,40 +479,41 @@ namespace falcON {
 		 fieldset k_sph,
 		 fieldset r_sph) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// implement pure virtual function of base class
+    /// perform a full kick-drift-kick step
     void fullstep() const;
     //--------------------------------------------------------------------------
   };// class falcON::LeapFrogCode
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::BlockStepCode                                              //
-  //                                                                          //
-  // non-abstract class, derived from class falcON::Integrator                //
-  // implements a hierarchical blockstep scheme with kick-drift-kick leap-frog//
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::BlockStepCode                                                
+  //                                                                            
+  //  implements a hierarchical blockstep scheme with kick-drift-kick leap-frog 
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
   class BlockStepCode : public Integrator {
-    //--------------------------------------------------------------------------
-    // sub-type StepLevels                                                      
-    //--------------------------------------------------------------------------
   public:
+    //--------------------------------------------------------------------------
+    /// abstract sub-type: interface for assigning/adjusting time-step levels   
     struct StepLevels {
       typedef double *const c_pdouble;
-      //------------------------------------------------------------------------
-      virtual void assign_level(body         &,    // I: body                   
-				c_pdouble  [2],    // I: tables with tau, tau^2 
-				int          *,    // I: table for # / step     
-				int) const  =0;    // I: highest table index    
-      //------------------------------------------------------------------------
-      virtual void adjust_level(body         &,    // I: body                   
-				c_pdouble  [2],    // I: tables with tau, tau^2 
-				int          *,    // I: table for # / step     
-				int           ,    // I: lowest  allowed level  
-				int) const  =0;    // I: highest allowed level  
-      //------------------------------------------------------------------------
-      virtual bool always_adjust () const {        // R: call adjust_level()    
-	return false;                              //    even if only one level 
-      }
+      /// pure virtual: assign time-step level to body
+      /// \param B  body to assign level to
+      /// \param T  tables with tau_l, tau^2_l
+      /// \param N  table for # bodies / step
+      /// \param H  highest table index
+      virtual void assign_level(body&B, c_pdouble T[2], int*N, int H)
+	const =0;
+      /// pure virtual: adjust time-step level of body
+      /// \param B  body whose level to adjust
+      /// \param T  tables with tau_l, tau^2_l
+      /// \param N  table for # bodies / step
+      /// \param L  lowest allowed level
+      /// \param H  highest allowed level
+      virtual void adjust_level(body&B, c_pdouble T[2], int*N, int L, int H)
+	const =0;
+      /// virtual function: shall adjust_level() always be called,
+      /// even if there is only one level?
+      virtual bool always_adjust () const { return false; }
     };
     //--------------------------------------------------------------------------
     // data members                                                             
@@ -643,8 +644,11 @@ namespace falcON {
 	      int                             ,    // I: kmin: t_min=2^(-kmin)  
 	      int                             ,    // I: # time-step levels     
 	      const BlockStepCode::StepLevels*,
-	      fieldset, fieldset, fieldset=fieldset::o,
-	      fieldset=fieldset::o, fieldset=fieldset::o, fieldset=fieldset::o)
+	      fieldset, fieldset,
+	      fieldset=fieldset::empty,
+	      fieldset=fieldset::empty,
+	      fieldset=fieldset::empty,
+	      fieldset=fieldset::empty)
       falcON_THROWING;
     //--------------------------------------------------------------------------
     // destruction                                                              
@@ -729,7 +733,7 @@ namespace falcON {
 		      fieldset::v |
 		      fieldset::a |
 		      fieldset::p |
-		      (acc_ext()? fieldset::q : fieldset::o) );
+		      (acc_ext()? fieldset::q : fieldset::empty) );
     }
     //--------------------------------------------------------------------------
     virtual real Ekin() const { return T; }
@@ -986,7 +990,7 @@ namespace falcON {
     virtual fieldset computes() const { 
       return fieldset(fieldset::p |
 		      fieldset::a |
-		      (acc_ext()? fieldset::q : fieldset::o) );
+		      (acc_ext()? fieldset::q : fieldset::empty) );
     }
     //--------------------------------------------------------------------------
     // note: we don't require eps_i, but use them as part of force computation  
@@ -996,8 +1000,8 @@ namespace falcON {
 	& ~computes();
     }
     //--------------------------------------------------------------------------
-    virtual fieldset requiresSPH () const { return fieldset::o; } 
-    virtual fieldset computesSPH () const { return fieldset::o; } 
+    virtual fieldset requiresSPH () const { return fieldset::empty; } 
+    virtual fieldset computesSPH () const { return fieldset::empty; } 
     //--------------------------------------------------------------------------
     virtual void setforces (bool all, bool, double) const {
       set_tree_and_forces(all,false);
@@ -1020,48 +1024,73 @@ namespace falcON {
   private:
     GravSteps GS;
     //--------------------------------------------------------------------------
-    // construction                                                             
-    //--------------------------------------------------------------------------
+    /// constructor
+    ///
+    /// \param file   data input file for N-body data
+    /// \param resume resume old simulation?
+    /// \param kmin   tau_min=2^(-kmin)
+    /// \param Nlev   # time-step levels
+    /// \param fa     time step factor f_acc
+    /// \param fp     time step factor f_phi
+    /// \param fc     time step factor f_c
+    /// \param fe     time step factor f_eps
+    /// \param Ncrit  N_crit for tree building
+    /// \param hgrow  build tree only every 2^hgrow shortest steps
+    /// \param croot  if non-null: pter to pre-set root centre position
+    /// \param eps    if > 0: global softening length; if < 0: use eps_i
+    /// \param kernel softening kernel
+    /// \param aex    pter to external acceleration field
+    /// \param theta  opening angle
+    /// \param Grav   Newton's constant of gravity
+#ifdef falcON_INDI
+#ifdef falcON_ADAP
+    /// \param Nsoft  # of bodies in softening shpere
+    /// \param Nref   # of bodies in smallest cell to estimate eps_i
+    /// \param emin   minimum eps_i
+#endif
+    /// \param soft   softening type
+#endif
+    /// \param time   time to read input for (take first if null)
+    /// \param read   data to read in addition to required for integration
+    /// \param dir    number controlling direct summation
   public:
     FalcONCode(// data input                                                    
-	       const char *       file,            // I: input file             
-	       bool               resume,          // I: resume old (if nemo)   
+	       const char *       file,
+	       bool               resume,
 	       // time-integration related                                      
-	       int                kmin,            // I: kmin: t_min=2^(-kmin)  
-	       int                Nlev,            // I: # time-step levels     
-	       real               fa,              // I: f_a                    
-	       real               fp,              // I: f_p                    
-	       real               fc,              // I: f_c                    
-	       real               fe,              // I: f_e                    
+	       int                kmin,
+	       int                Nlev,
+	       real               fa,
+	       real               fp,
+	       real               fc,
+	       real               fe,
 	       // tree related                                                  
-	       int                Ncrit,           // I: N_crit                 
-	       int                hgrow,           // I: h_grow                 
-	       const vect        *croot,           // I: pre-set root center    
+	       int                Ncrit,
+	       int                hgrow,
+	       const vect        *croot,
 	       // gravity related                                               
-	       real               eps,             // I: eps                    
-	       kern_type          kernel,          // I: softening kernel       
-	       const acceleration*aex,             // I: Acceleration_external  
-	       real               theta,           // I: tolerance parameter    
-	       real               Grav,            // I: Newton's G             
+	       real               eps,
+	       kern_type          kernel,
+	       const acceleration*aex,
+	       real               theta,
+	       real               Grav,
 	       // default arguments                                             
 #ifdef falcON_INDI
 #ifdef falcON_ADAP
-	       real               Nsoft= zero,     //[I: Nsoft]                 
-	       unsigned           Nref = 32,       //[I: Nref]                  
-	       real               emin = zero,     //[I: emin]                  
+	       real               Nsoft = zero,
+	       unsigned           Nref = 32,
+	       real               emin = zero,
 #endif
-	       soft_type          soft =           //[I: softening type]        
-	       global_fixed, 
+	       soft_type          soft = global_fixed, 
 #endif
-	       const char        *time = 0,        //[I: time for input]        
-	       fieldset           read = fieldset::o, //[I: what else to read?] 
-	       const int          dir[4]=          //[I: direct sum: gravity]   
-	       Default::direct) falcON_THROWING :
+	       const char        *time = 0,
+	       fieldset           read = fieldset::empty,
+	       const int          dir[4] = Default::direct) falcON_THROWING :
       NBodyCode ( file, resume, read | fieldset(
 #ifdef falcON_INDI
 		  soft != global_fixed ? fieldset::e :
 #endif
-		  fieldset::o), time ),
+		  fieldset::empty), time ),
       ForceALCON( &SHOT, eps, theta, Ncrit, croot, kernel, Grav, (1<<hgrow)-1, 
 		  aex, dir
 #ifdef falcON_INDI

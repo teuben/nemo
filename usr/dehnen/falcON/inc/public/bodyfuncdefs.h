@@ -4,11 +4,11 @@
 /// \file   inc/public/bodyfuncdefs.h                                           
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
+/// \date   2004-2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
+// Copyright (C) 2004-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -80,7 +80,7 @@ namespace {
   inline real __uin  () { need |= fieldset::U; return real(RNG()); }
   inline real __udot () { need |= fieldset::I; return real(RNG()); }
   inline real __udex () { need |= fieldset::E; return real(RNG()); }
-  inline real __entr () { need |= fieldset::S; return real(RNG()); }
+  inline real __entr () { need |= fieldset::K; return real(RNG()); }
   inline real __srho () { need |= fieldset::R; return real(RNG()); }
   inline real __fact () { need |= fieldset::F; return real(RNG()); }
   inline real __csnd () { need |= fieldset::C; return real(RNG()); }
@@ -115,7 +115,7 @@ namespace {
 #  define U   __uin()
 #  define Ui  __udot()
 #  define Ue  __udex()
-#  define S   __entr()
+#  define K   __entr()
 #  define rho __srho()
 #  define f   __fact()
 #  define c   __csnd()
@@ -195,7 +195,7 @@ namespace {
 #  define U   uin(b)                      /* SPH: internal energy            */
 #  define Ud  udot(b)                     /* SPH: (dU/dt)_total              */
 #  define Ue  udex(b)                     /* SPH: (dU/dt)_external           */
-#  define S   entr(b)                     /* SPH: entropy (function)         */
+#  define K   entr(b)                     /* SPH: entropy (function)         */
 #  define rho srho(b)                     /* SPH: gas density                */
 #  define f   fact(b)                     /* SPH: factor f_i                 */
 #  define c   csnd(b)                     /* SPH: sound speed                */

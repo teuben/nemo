@@ -486,7 +486,7 @@ namespace falcON {
   //----------------------------------------------------------------------------
   inline fieldset getioparam_z(const char* option) {
     return hasvalue(const_cast<char*>(option))?
-      getioparam(const_cast<char*>(option)) : fieldset::o;
+      getioparam(const_cast<char*>(option)) : fieldset::empty;
   }
   //----------------------------------------------------------------------------
   // read io, if not given return io::all                                       

@@ -57,8 +57,8 @@ Integrator::Integrator(const ForceAndDiagnose*S,
   if( predALL & fieldset::x && !(kickALL & fieldset::v) )
     falcON_THROW("Integration: request to predict x without kicking v");
   requALL = 
-    kickALL & fieldset::v ? fieldset::a : fieldset::o |
-    predALL & fieldset::w ? fieldset::a : fieldset::o;
+    kickALL & fieldset::v ? fieldset::a : fieldset::empty |
+    predALL & fieldset::w ? fieldset::a : fieldset::empty;
 #ifdef falcON_SPH
   if( (test=predSPH & ~fieldset(fieldset::x|fieldset::H|fieldset::R|
 				fieldset::Y|fieldset::V)) ) 
@@ -74,10 +74,10 @@ Integrator::Integrator(const ForceAndDiagnose*S,
   if( predSPH & fieldset::x && !((kickSPH|kickALL) & fieldset::v) )
     falcON_THROW("Integration: request to predict x without kicking v");
   requSPH =
-    predSPH & fieldset::H ? fieldset::J : fieldset::o |
-    predSPH & fieldset::V ? fieldset::a : fieldset::o |
-    predSPH & fieldset::R ? fieldset::D : fieldset::o |
-    kickSPH & fieldset::U ? fieldset::I : fieldset::o;
+//     predSPH & fieldset::H ? fieldset::J : fieldset::empty |
+    predSPH & fieldset::V ? fieldset::a : fieldset::empty |
+//     predSPH & fieldset::R ? fieldset::D : fieldset::empty |
+    kickSPH & fieldset::U ? fieldset::I : fieldset::empty;
 #endif
   // sanity check requirements and delivieries
   reset_CPU();

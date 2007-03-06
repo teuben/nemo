@@ -41,9 +41,11 @@
 // v 4.0   15/11/2005  WD added filter (proprietary only)                       
 // v 4.0.1 16/11/2005  WD improvements in filter (BodyFunc<>)                   
 // v 4.1   04/07/2006  WD made public (along with bodyfunc.h)                   
+// v 4.2   27/02/2007  WD print out "nan" or "inf" if float is nan or inf       
+// v 4.3   05/03/2007  WD enabled filter in public version                      
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "4.1"
-#define falcON_VERSION_D "04-jul-2006 Walter Dehnen                          "
+#define falcON_VERSION   "4.3"
+#define falcON_VERSION_D "05-mar-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2a"
@@ -52,9 +54,7 @@
 //-----------------------------------------------------------------------------+
 #include <body.h>                                  // bodies etc..              
 #include <public/io.h>                             // WDs C++ NEMO I/O          
-#ifdef falcON_PROPER
-#  include <public/bodyfunc.h>                     // body functions            
-#endif
+#include <public/bodyfunc.h>                       // body functions            
 #include <main.h>                                  // NEMO basics & main        
 #include <cstdio>                                  // C std I/O                 
 //------------------------------------------------------------------------------
@@ -63,14 +63,12 @@ string defv[] = {
   "out=-\n          file for ascii output (may contain format string)  ",
   "times=all\n      times to process                                   ",
   "write=\n         select data to write out (default: all)            ",
-#ifdef falcON_PROPER
-  "filter=\n        bodyfunc filter (boolean): which bodies to write   ",
-  "pars=\n          parameters for filter, if any                      ",
-#endif
   "iformat=%d\n     format for integers                                ",
   "rformat=%14.6E\n format for real numbers                            ",
   "index=\n         first index if out contains format string          ",
   "header=t\n       write header                                       ",
+  "filter=\n        bodyfunc filter (boolean): which bodies to write   ",
+  "pars=\n          parameters for filter, if any                      ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string usage = "s2a -- Walter's simple snapshot to ascii converter\n";
@@ -79,7 +77,7 @@ namespace {
   //----------------------------------------------------------------------------
   falcON::fieldset OUTPUT = falcON::fieldset::o;
   FILE*            OUT       = 0;
-  char             RFORMAT[32], IFORMAT[32], VFORMAT[96];
+  char             RFORMAT[32], IFORMAT[32];
   //----------------------------------------------------------------------------
   template<typename T> struct Print {
     static void print(T const&t) {
@@ -88,12 +86,16 @@ namespace {
   //----------------------------------------------------------------------------
   template<> struct Print<falcON::real> {
     static void print(falcON::real const&t) {
-      fprintf(OUT,RFORMAT,t);
+      if     (isnan(t)) fprintf(OUT,"nan ");
+      else if(isinf(t)) fprintf(OUT,"inf ");
+      else              fprintf(OUT,RFORMAT,t);
     } };
   //----------------------------------------------------------------------------
   template<> struct Print<falcON::vect> {
     static void print(falcON::vect const&t) {
-      fprintf(OUT,VFORMAT,t[0],t[1],t[2]);
+      Print<falcON::real>::print(t[0]);
+      Print<falcON::real>::print(t[1]);
+      Print<falcON::real>::print(t[2]);
     } };
   //----------------------------------------------------------------------------
   template<typename T> 
@@ -117,19 +119,13 @@ void falcON::main() falcON_THROWING {
   const bool     FOUT (hasvalue("out") && strcmp(getparam("out"),"-"));
   strcpy(IFORMAT,getparam("iformat")); strcat(IFORMAT," ");
   strcpy(RFORMAT,getparam("rformat")); strcat(RFORMAT," ");
-  strcpy(VFORMAT,RFORMAT);
-  strcat(VFORMAT,RFORMAT);
-  strcat(VFORMAT,RFORMAT);
-#ifdef falcON_PROPER
   BodyFunc<bool>*F=
     hasvalue("filter")? new BodyFunc<bool>(getparam("filter"),
 					   getparam_z("pars")) : 0;
-#endif
   if(!FOUT) OUT = stdout;
   while(IN.has_snapshot()) {
     if(! SHOT.read_nemo(IN,READ,NEED,getparam("times"),0)) continue;
     unsigned Nb[BT_NUM]={0u}, Ntot=0u;
-#ifdef falcON_PROPER
     if(F) {
       SHOT.add_field(fieldbit::f);
       for(bodytype t; t; ++t) {
@@ -141,7 +137,6 @@ void falcON::main() falcON_THROWING {
 	Ntot += Nb[t];
       }
     } else
-#endif
       for(bodytype t; t; ++t) {
 	Nb[t] = SHOT.N_bodies(t);
 	Ntot += Nb[t];
@@ -169,10 +164,9 @@ void falcON::main() falcON_THROWING {
 	      SHOT.time(),Ntot,Nb[bodytype::gas]);
       for(fieldbit f; f; ++f)
 	if(OUTPUT.contain(f) && SHOT.have(f))
-	  fprintf(OUT," %s",name(f));
+	  fprintf(OUT," '%s'",name(f));
       fprintf(OUT,"\n#\n");
     }
-#ifdef falcON_PROPER
     if(F) {
       LoopSPHBodies(&SHOT,b)
 	if( is_marked(b) ) {
@@ -185,7 +179,6 @@ void falcON::main() falcON_THROWING {
 	  fprintf(OUT,"\n");
 	}
     } else
-#endif
     {
       LoopSPHBodies(&SHOT,b) {
 	LoopAllFields<BodyPrint>::const_loop(b);
@@ -198,7 +191,5 @@ void falcON::main() falcON_THROWING {
     }
   }
   if(FOUT) fclose(OUT);
-#ifdef falcON_PROPER
   if(F) falcON_DEL_O(F);
-#endif
 }

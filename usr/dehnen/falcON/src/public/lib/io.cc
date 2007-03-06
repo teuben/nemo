@@ -57,6 +57,9 @@ extern "C" {
 #ifndef MolWeightTag
 #  define MolWeightTag "MolecularWeight"
 #endif
+#ifndef ArtViscTag
+#  define ArtViscTag "ArtificialViscosity"
+#endif
 #ifndef GasDensTag
 #  warning
 #  warning GasDensTag not #defined by NEMO
@@ -144,6 +147,7 @@ namespace {
     case nemo_io::SPHentr: return EntFuncTag;
     case nemo_io::SPHdens: return GasDensTag;
     case nemo_io::SPHhdot: return GasHdotTag;
+    case nemo_io::SPHalfa: return ArtViscTag;
     case nemo_io::SPHfact: return GasFactTag;
     case nemo_io::SPHcs  : return SoundSpeedTag;
     case nemo_io::SPHmu  : return MolWeightTag;
@@ -195,6 +199,7 @@ namespace {
     case nemo_io::SPHentr:
     case nemo_io::SPHdens:
     case nemo_io::SPHhdot:
+    case nemo_io::SPHalfa:
     case nemo_io::SPHfact:
     case nemo_io::SPHcs:  
     case nemo_io::SPHmu:   return true;
@@ -525,7 +530,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
 		 NemoTag(FIELD), NemoType(TYPE), 
 		 NemoType(nemo_io::type(FIELD)));
   debug_info(6,"  data type: %s\n",nemo_io::type_name(TYPE));
-  // 2 get dimensiones of data on file
+  // 2 get dimensions of data on file
   int*dim=get_dims(static_cast< ::stream >(INPUT.stream()),NemoTag(FIELD));
   if(!dim)
     falcON_THROW("cannot read # %s data",NemoTag(FIELD));
@@ -544,7 +549,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
 		 NemoTag(FIELD),TypeTag,NTOT,0);
     SUBN = 1;
   } else if(dim[2] == 0) {
-    // 3.2 array of vectors
+    // 3.3 array of vectors
     if(!::is_vector(FIELD) )
       falcON_THROW("nemo input of %s: found vectors",NemoTag(FIELD));
     if(dim[1] != NDIM)
@@ -554,7 +559,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
 		 NemoTag(FIELD),TypeTag,NTOT,NDIM,0);
     SUBN = NDIM;
   } else if(dim[3] == 0) {
-    // 3.2 array of phases
+    // 3.4 array of phases
     if(!is_phases(FIELD) )
       falcON_THROW("nemo input of %s: found phases",NemoTag(FIELD));
     if(dim[1] != 2 && dim[2] != NDIM)
@@ -564,7 +569,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
 		 NemoTag(FIELD),TypeTag,NTOT,2,NDIM,0);
     SUBN = 2*NDIM;
   } else {
-    // 3.3 array of yet higher rank
+    // 3.5 array of yet higher rank
     falcON_THROW("nemo input of %s: found high-rank data",NemoTag(FIELD));
   }
   INPUT.DATA_IN = this;
@@ -981,7 +986,6 @@ void falcON::FortranORec::close() throw(falcON::exception)
 // struct falcON::GadgetHeader                                                  
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////
 falcON::GadgetHeader::GadgetHeader() :
   time(0.), redshift(0.), flag_sfr(0), flag_feedback(0), flag_cooling(0),
   num_files(0), BoxSize(0.), Omega0(0.), OmegaLambda(0.), HubbleParam(0.),
@@ -1014,10 +1018,7 @@ bool falcON::GadgetHeader::Read(input& in, unsigned rec, bool& swap)
     if(S != sizeof(GadgetHeader)) {
       swap_bytes(S);
       if(S == sizeof(GadgetHeader)) swap = 1;
-      else {
-	warning("GadgetHeader::Read(): record size != header size\n");
-	return false;
-      }
+      else return false;
     }
   } else
     throw falcON::exception("Fortran header size must be 4 or 8\n");
