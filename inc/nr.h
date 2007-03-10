@@ -1,6 +1,7 @@
 /* for NEMO:  no select(), since unix has one ...                 */
 /*            added some 'x' routines for multidim (xdim) fitting */
 /*            darwin:  cannot use fmin()                          */
+/*            mar 2007: linux now also seems to have fmin()       */
 
 #ifndef _NR_H_
 #define _NR_H_
@@ -184,7 +185,7 @@ void fitexy(float x[], float y[], int ndat, float sigx[], float sigy[],
 void fixrts(float d[], int m);
 void fleg(float x, float pl[], int nl);
 void flmoon(int n, int nph, long *jd, float *frac);
-#if !defined(darwin) && !defined(cygwin)
+#if !defined(darwin) && !defined(cygwin) && !defined(linux)
 /* double fmin(double,double); for darwin */
 float fmin(float x[]);
 #endif
