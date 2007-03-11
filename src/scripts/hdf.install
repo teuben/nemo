@@ -26,12 +26,12 @@ foreach arg ($*)
    set $arg
 end
 
-if (! -e $src) then
+if (! -e $SRC) then
   echo HDF source directory src=$src does not exist, try NEMO=
   echo or:
   echo " cd $NEMO/local"
   echo " wget ftp://ftp.hdfgroup.org/HDF/HDF_Current/src/$HDF.tar.gz"
-  echo " tar zxf $hdf.tar.gz"
+  echo " tar zxf $HDF.tar.gz"
   echo " ../src/scripts/hdf.install"
   exit 1
 endif
