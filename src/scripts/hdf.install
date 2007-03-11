@@ -4,14 +4,17 @@
 #
 #
 #  16-dec-04    checked for HDF4.2r0.tar.gz
+#  11-mar-07    fixed for new hdfgroup location and their new silly naming convention
 # 
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
 #			 	.. command line keywords ..
-set HDF=HDF4.2r0
-set hdf=hdf4.2r0
+set HDF=HDF4.2r1
+set hdf=hdf4.2r1
 set src=$NEMO/local/$hdf
+set SRC=$NEMO/local/$HDF
+
 set prefix=$NEMO
 
 
@@ -27,13 +30,13 @@ if (! -e $src) then
   echo HDF source directory src=$src does not exist, try NEMO=
   echo or:
   echo " cd $NEMO/local"
-  echo " wget ftp://ftp.ncsa.uiuc.edu/HDF/pub/outgoing/hdf4/$hdf/$hdf.tar.gz"
+  echo " wget ftp://ftp.hdfgroup.org/HDF/HDF_Current/src/$HDF.tar.gz"
   echo " tar zxf $hdf.tar.gz"
   echo " ../src/scripts/hdf.install"
   exit 1
 endif
 
-cd $src
+cd $SRC
 ./configure --prefix=$prefix
 make -i clean
 make -i
