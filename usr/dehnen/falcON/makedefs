@@ -119,7 +119,11 @@ endif
 
 ifeq ($(PLATFORM),x86_64)
 # on opteron (x86-64) use
+ifdef DSSE
+CPUFLAGS	:= -march=k8 -mpreferred-stack-boundary=4 -DfalcON_SSE16
+else
 CPUFLAGS	:= -march=k8 -mpreferred-stack-boundary=4
+endif
 endif
 endif
 
@@ -132,6 +136,7 @@ endif
 # this is used for compilation of code with inline assembly SSE instructions
 # it prevents the compiler to mess with SSE and break the code.
 NOSSE		:= -mno-sse -mno-sse2 -mno-sse3 -mfpmath=387
+##NOSSE		:= -mfpmath=387
 
 else
 ifeq ($(COMPILER),pgcc)
@@ -214,7 +219,7 @@ endif
 
 # -------------------------
 # compile and link commands
-# ------------------------- 
+# -------------------------
 
 MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS)
 MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS) $(NBDYFLAGS) -shared

@@ -341,6 +341,56 @@ namespace falcON {
     };
     //==========================================================================
     //                                                                          
+    // sub-type bodies::TimeSteps                                               
+    //                                                                          
+    //==========================================================================
+    class TimeSteps {
+      int      KMAX;
+      unsigned NSTEPS, HIGHEST;
+      double  *TAU,*TAUQ,*TAUH;
+    public:
+      //------------------------------------------------------------------------
+      TimeSteps(int km, unsigned ns)
+	: KMAX   ( km ),
+	  NSTEPS ( ns ),
+	  HIGHEST( ns? ns-1 : 0 ),
+	  TAU    ( NSTEPS? falcON_NEW(double, NSTEPS) : 0 ),
+	  TAUQ   ( NSTEPS? falcON_NEW(double, NSTEPS) : 0 ),
+	  TAUH   ( NSTEPS? falcON_NEW(double, NSTEPS) : 0 )
+      {
+	if(NSTEPS) {
+	  TAU [0] = pow(0.5,KMAX);
+	  TAUH[0] = 0.5*TAU[0];
+	  TAUQ[0] = square(TAU[0]);
+	  for(int n=1; n!=NSTEPS; ++n) {
+	    TAU [n] = TAUH[n-1];
+	    TAUH[n] = 0.5*TAU[n];
+	    TAUQ[n] = square(TAU[n]);
+	  }
+	}
+      }
+      //------------------------------------------------------------------------
+      ~TimeSteps() {
+	if(TAU)  { falcON_DEL_A(TAU ); TAU =0; }
+	if(TAUQ) { falcON_DEL_A(TAUQ); TAUQ=0; }
+	if(TAUH) { falcON_DEL_A(TAUH); TAUH=0; }
+      }
+      //------------------------------------------------------------------------
+      bool is_leap_frog() const { return NSTEPS == 1; }
+      int highest_level() const { return HIGHEST; }
+      const double&tau_min() const { return TAU[HIGHEST]; }
+      const double&tau_max() const { return TAU[0]; }
+      const int&kmax() const { return KMAX; }
+      unsigned const&Nsteps() const { return NSTEPS; }
+      double const&tau (int i) const { return TAU [i]; }
+      double const&tauq(int i) const { return TAUQ[i]; }
+      double const&tauh(int i) const { return TAUH[i]; }
+      const double*tau () const { return TAU; }
+      const double*tauq() const { return TAUQ; }
+      const double*tauh() const { return TAUH; }
+    };
+    //==========================================================================
+    //                                                                          
     // data of class bodies                                                     
     //                                                                          
     //==========================================================================
@@ -355,6 +405,7 @@ namespace falcON {
     block           *BLOCK[index::max_blocks];     // table: blocks             
     block           *TYPES[BT_NUM];                // table: bodies per bodytype
     block           *FIRST;                        // first block of bodies     
+    const TimeSteps *TSTEPS;                       // time steps                
     mutable bool     SRCC;                         // source data changed?      
     mutable bool     SPHC;                         // SPH data changed?         
     const bool       C_FORTRAN;                    // we are used for C/FORTRAN 
@@ -477,6 +528,32 @@ namespace falcON {
     bodytype const&type(index i) const {
       return BLOCK[i.no()]->type();
     }
+    //@}
+    //==========================================================================
+    //                                                                          
+    /// \name support for time steps (including access via bodies::index)       
+    //@{                                                                        
+    //==========================================================================
+    /// do we have time step data?
+    bool have_steps() const { return TSTEPS!=0; }
+    /// will tau(), tauq(), and tauh() below run successfully?
+    bool have_tau() const { return have_steps() && have_level(); }
+    /// let the user provide time step data
+    void set_steps(const TimeSteps*T) { TSTEPS = T; }
+    /// give TimeSteps 
+    const TimeSteps*steps() const { return TSTEPS; }
+    /// time step given a time step level
+    double const&tau(indx  l) const { return TSTEPS->tau(l); }
+    /// time step of body given its index
+    double const&tau(index i) const { return tau(level(i)); }
+    /// time step squared given a time step level
+    double const&tauq(indx  l) const { return TSTEPS->tauq(l); }
+    /// time step squared of body given its index
+    double const&tauq(index i) const { return tauq(level(i)); }
+    /// half time step given a time step level
+    double const&tauh(indx  l) const { return TSTEPS->tauh(l); }
+    /// half time step of body given its index
+    double const&tauh(index i) const { return tauh(level(i)); }
     //@}
     //==========================================================================
     //                                                                          
@@ -697,6 +774,12 @@ namespace falcON {
       friend vect angmom(iterator const&);
       /// return type of body
       friend bodytype const&type(iterator const&);
+      /// return time step of body 
+      friend double const&tau(iterator const&);
+      /// return time step squared of body 
+      friend double const&tauq(iterator const&);
+      /// return half time step of body 
+      friend double const&tauh(iterator const&);
       //@}
       //------------------------------------------------------------------------
       /// \name flag manipulations                                              
@@ -784,7 +867,10 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name miscellaneous                                                   
       //@{
+      /// increment until next body in subset
       iterator& next_in_subset();
+      /// increment until next active body
+      iterator& next_active();
       //@}
       //------------------------------------------------------------------------
       /// \name const boolean flag informations via friends                     
@@ -1390,11 +1476,25 @@ namespace falcON {
     while(is_valid() && falcON::has_flag(*this) && !in_subset());
     return*this;
   }
+  inline bodies::iterator& bodies::iterator::next_active() {
+    do ++(*this);
+    while(is_valid() && !is_active());
+    return*this;
+  }
   inline vect angmom(bodies::iterator const&i) {
     return falcON::pos(i) ^ falcON::vel(i);
   }
   inline bodytype const&type(bodies::iterator const&i) {
     i.B->type();
+  }
+  inline double const&tau(bodies::iterator const&i) {
+    return i.my_bodies()->tau(level(i));
+  }
+  inline double const&tauq(bodies::iterator const&i) {
+    return i.my_bodies()->tauq(level(i));
+  }
+  inline double const&tauh(bodies::iterator const&i) {
+    return i.my_bodies()->tauh(level(i));
   }
   inline bool bodies::iterator::is_source() const {
     return falcON::mass(*this) != zero;
@@ -1841,6 +1941,23 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
 /// \param NAME2  name given to inner-loop variable (of type falcON::body)
 #define LoopBodyPairs(NAME1,NAME2)		\
   for(falcON::body NAME2(NAME1,1); NAME2; ++NAME2)
+#endif
+//------------------------------------------------------------------------------
+#ifndef LoopActiveBodies        /* loop all active bodies */
+/// This macro provides an easy way to loop over all active bodies
+///
+/// A typical usage would look like this \code
+///   snapshot *S;
+///   LoopActiveBodies(S,b) {
+///     b.pos() += dt*vel(b);
+///     b.vel() += dt*acc(b);
+///   } \endcode
+///
+/// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
+/// \param NAME  name given to loop variable (of type falcON::body)
+#define LoopActiveBodies(PTER,NAME)					\
+  for(falcON::body NAME=(PTER)->begin_all_bodies();			\
+      NAME; NAME.next_active())
 #endif
 //------------------------------------------------------------------------------
 #ifndef LoopSubsetBodies        /* loop all bodies which are in_subset() */

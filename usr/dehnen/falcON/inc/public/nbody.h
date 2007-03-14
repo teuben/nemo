@@ -490,7 +490,7 @@ namespace falcON {
   //  implements a hierarchical blockstep scheme with kick-drift-kick leap-frog 
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
-  class BlockStepCode : public Integrator {
+  class BlockStepCode : public Integrator, public bodies::TimeSteps {
   public:
     //--------------------------------------------------------------------------
     /// abstract sub-type: interface for assigning/adjusting time-step levels   
@@ -498,19 +498,15 @@ namespace falcON {
       typedef double *const c_pdouble;
       /// pure virtual: assign time-step level to body
       /// \param B  body to assign level to
-      /// \param T  tables with tau_l, tau^2_l
       /// \param N  table for # bodies / step
       /// \param H  highest table index
-      virtual void assign_level(body&B, c_pdouble T[2], int*N, int H)
-	const =0;
+      virtual void assign_level(body&B, unsigned *N, int H) const =0;
       /// pure virtual: adjust time-step level of body
       /// \param B  body whose level to adjust
-      /// \param T  tables with tau_l, tau^2_l
       /// \param N  table for # bodies / step
       /// \param L  lowest allowed level
       /// \param H  highest allowed level
-      virtual void adjust_level(body&B, c_pdouble T[2], int*N, int L, int H)
-	const =0;
+      virtual void adjust_level(body&B, unsigned *N, int L, int H) const =0;
       /// virtual function: shall adjust_level() always be called,
       /// even if there is only one level?
       virtual bool always_adjust () const { return false; }
@@ -519,36 +515,16 @@ namespace falcON {
     // data members                                                             
     //--------------------------------------------------------------------------
   private:
-    typedef double *pdouble;
-    int                    H0;                     // sets longest time step    
-    int                    NSTEPS, HIGHEST;        // # steps, #steps-1         
-    pdouble                T[2];                   // tables: tau, tau/2        
-    double                *TAUH;                   // table: tau/2              
-    int                   *N;                      // table:  #                 
+    unsigned              *N;                      // table:  #                 
     int                    W;                      // width in stats fields     
     const StepLevels*const ST;                     // for adjusing levels       
     //--------------------------------------------------------------------------
     // private methods                                                          
     //--------------------------------------------------------------------------
   private:
-    void assign_levels() const {
-      LoopAllBodies(snap_shot(),b)
-	ST->assign_level(b, T, N, HIGHEST);
-    }
-    //--------------------------------------------------------------------------
-    void adjust_levels(int low, bool all) const {
-      LoopAllBodies(snap_shot(),b)
-	if(all || is_active(b)) 
-	  ST->adjust_level(b, T, N, low, HIGHEST);
-    }
-    //--------------------------------------------------------------------------
-    void update_Nlev(const bodies*B) {
-      for(int l=0; l!=NSTEPS; ++l)
-	N[l] = 0;
-      LoopAllBodies(B,b)
-	++(N[level(b)]);
-    }
-    //--------------------------------------------------------------------------
+    void assign_levels() const;
+    void adjust_levels(int, bool) const;
+    void update_Nlev(const bodies*);
     void account_del() const;
     void account_new() const;
     void elementary_step(int) const;
@@ -556,12 +532,7 @@ namespace falcON {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    bool         is_leap_frog  ()       const { return NSTEPS == 1; }
-    int          highest_level ()       const { return HIGHEST; }
-    const double&tau_min       ()       const { return T[0][HIGHEST]; }
-    const double&tau_max       ()       const { return T[0][0]; }
-    const int   &h0            ()       const { return H0; }
-    const int   &No_in_level   (int l)  const { return N[l]; }
+    const unsigned&No_in_level   (int l)  const { return N[l]; }
     //--------------------------------------------------------------------------
     // to satisfy class Integrator::fullstep()                                  
     void fullstep() const;
@@ -572,8 +543,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
     void stats_line(std::ostream&to) const {
       SOLVER -> dia_stats_line(to);
-      if(HIGHEST)
-	for(int l=0; l!=NSTEPS; ++l) 
+      if(highest_level())
+	for(int l=0; l!=Nsteps(); ++l) 
 	  for(int i=0; i<=W; ++i) to<<'-';
       cpu_stats_line(to);
       to<<std::endl;
@@ -581,8 +552,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
     void stats_body(std::ostream&to) const {
       SOLVER -> dia_stats_body(to);
-      if(HIGHEST)
-	for(int l=0; l!=NSTEPS; ++l)
+      if(highest_level())
+	for(int l=0; l!=Nsteps(); ++l)
 	  to<<std::setw(W)<<N[l]<<' ';
       cpu_stats_body(to);
       to<<std::endl;
@@ -590,18 +561,15 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // construction & destruction                                               
     //--------------------------------------------------------------------------
-    BlockStepCode (int,                            // I: h0, tau_max = 2^-h0    
-		   int,                            // I: #steps                 
+    BlockStepCode (int,                            // I: kmax, tau_max = 2^-kmax
+		   unsigned,                       // I: #steps                 
 		   const ForceAndDiagnose*,
 		   const StepLevels      *,
 		   fieldset, fieldset, fieldset, fieldset, fieldset, fieldset,
 		   int) falcON_THROWING;
     //--------------------------------------------------------------------------
     ~BlockStepCode () { 
-      falcON_DEL_A(N);
-      falcON_DEL_A(T[0]);
-      falcON_DEL_A(T[1]);
-      falcON_DEL_A(TAUH);
+      if(N) { falcON_DEL_A(N); N=0; }
     }
   };// class falcON::BlockStepCode   
 #ifdef falcON_NEMO
@@ -801,8 +769,8 @@ namespace falcON {
       if(SCH == 0)     return zero;
       if(SCH == use_p) return FPQ/square(fpot(B));
       else {
-	register real   ia = 1./norm(acc(B));
-	register double tq = 1.e7;
+	double ia = 1./norm(acc(B));
+	double tq = 1.e7;
 	if(SCH & use_a) update_min(tq, FAQ*ia);
 	if(SCH & use_p) update_min(tq, FPQ/square(fpot(B)));
 	if(SCH & use_g) update_min(tq, FGQ*abs(fpot(B))*ia);
@@ -811,33 +779,29 @@ namespace falcON {
       }
     }
     //--------------------------------------------------------------------------
-    void assign_level(body     &Bi,                // I: body                   
-		      c_pdouble T[2],              // I: tables tau, tau^2      
-		      int      *N,                 // I: table for # / step     
-		      int       H) const           // I: highest table index    
+    void assign_level(body        &Bi,             // I: body                   
+		      unsigned    *N,              // I: table: # / step        
+		      int          H) const        // I: highest table index    
     {
-      register double tq=twice(tq_grav(Bi));
-      register int    l =0;
-      while(T[1][l]>tq && l<H) ++l;
-      Bi.level() = l;
-      N[l]++;
+      double tq=twice(tq_grav(Bi));
+      for(Bi.level()=0; tauq(Bi)>tq && level(Bi)<H; ++(Bi.level()));
+      N[level(Bi)]++;
     }
     //--------------------------------------------------------------------------
-    void adjust_level(body     &Bi,                // I: bodies                 
-		      c_pdouble T[2],              // I: tables tau, tau^2      
-		      int      *N,                 // I: table for # / step     
-		      int       L,                 // I: lowest  allowed level  
-		      int       H) const           // I: highest allowed level  
+    void adjust_level(body        &Bi,             // I: bodies                 
+		      unsigned    *N,              // I: table: # / step        
+		      int          L,              // I: lowest  allowed level  
+		      int          H) const        // I: highest allowed level  
     {
       const double root_half=0.7071067811865475244;
       register double tq=tq_grav(Bi)*root_half;    // tau^2 * sqrt(1/2)         
-      if       (T[1][level(Bi)] < tq) {            // IF too short              
+      if       (tauq(Bi) < tq) {                   // IF too short              
 	if(level(Bi) > L) {                        //   IF(above lowest active) 
 	  N[level(Bi)] --;                         //     leave old level       
 	  Bi.level()   --;                         //     set new level         
 	  N[level(Bi)] ++;                         //     join new level        
 	}                                          //   ENDIF                   
-      } else if(T[1][level(Bi)] > tq+tq) {         // ELIF too long             
+      } else if(tauq(Bi) > tq+tq) {                // ELIF too long             
 	if(level(Bi) < H) {                        //   IF(below highest level) 
 	  N[level(Bi)] --;                         //     leave old level       
 	  Bi.level()   ++;                         //     set new level         
@@ -881,17 +845,15 @@ namespace falcON {
     //--------------------------------------------------------------------------
   protected:
     void assign_level(body        &Bi,             // I: body                   
-		      c_pdouble    T[2],           // I: tables tau, tau^2      
-		      int         *N,              // I: table for # / step     
+		      unsigned    *N,              // I: table: # / step        
 		      int          H) const        // I: highest table index    
-    { GravStepper::assign_level(Bi,T,N,H); }
+    { GravStepper::assign_level(Bi,N,H); }
     //--------------------------------------------------------------------------
     void adjust_level(body        &Bi,             // I: bodies                 
-		      c_pdouble    T[2],           // I: tables tau, tau^2      
-		      int         *N,              // I: table for # / step     
+		      unsigned    *N,              // I: table: # / step        
 		      int          L,              // I: lowest  allowed level  
 		      int          H) const        // I: highest allowed level  
-    { GravStepper::adjust_level(Bi,T,N,L,H); }
+    { GravStepper::adjust_level(Bi,N,L,H); }
     //--------------------------------------------------------------------------
     // public methods                                                           
     //--------------------------------------------------------------------------

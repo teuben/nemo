@@ -60,6 +60,9 @@ extern "C" {
 #ifndef ArtViscTag
 #  define ArtViscTag "ArtificialViscosity"
 #endif
+#ifndef GasDivVTag
+#  define GasDivVTag "Divergenc(Velocity)"
+#endif
 #ifndef GasDensTag
 #  warning
 #  warning GasDensTag not #defined by NEMO
@@ -122,6 +125,8 @@ namespace {
 #ifdef   falcON_NEMO
   //////////////////////////////////////////////////////////////////////////////
   inline char* NemoTag(nemo_io::Field f) falcON_THROWING
+  // returning char* rather than const char* ONLY because uses as argument to
+  // nemo:: routines which don't know nothing about const
   {
     switch(f) {
     case nemo_io::mass   : return MassTag;
@@ -129,7 +134,7 @@ namespace {
     case nemo_io::vel    : return VelTag;
     case nemo_io::eps    : return EpsTag;
     case nemo_io::key    : return KeyTag;
-    case nemo_io::tau    : return TimeStepTag;
+    case nemo_io::step   : return TimeStepTag;
     case nemo_io::pot    : return PotentialTag;
     case nemo_io::acc    : return AccelerationTag;
     case nemo_io::jerk   : return JerkTag;
@@ -147,9 +152,10 @@ namespace {
     case nemo_io::SPHentr: return EntFuncTag;
     case nemo_io::SPHdens: return GasDensTag;
     case nemo_io::SPHhdot: return GasHdotTag;
-    case nemo_io::SPHalfa: return ArtViscTag;
     case nemo_io::SPHfact: return GasFactTag;
     case nemo_io::SPHcs  : return SoundSpeedTag;
+    case nemo_io::SPHalfa: return ArtViscTag;
+    case nemo_io::SPHdivv: return GasDivVTag;
     case nemo_io::SPHmu  : return MolWeightTag;
     case nemo_io::null:
       falcON_THROW("nemo I/O: nemo_io::null not I/O able");
@@ -185,7 +191,7 @@ namespace {
     case nemo_io::mass:
     case nemo_io::eps:
     case nemo_io::key:
-    case nemo_io::tau:
+    case nemo_io::step:
     case nemo_io::pot:
     case nemo_io::dens:
     case nemo_io::aux:

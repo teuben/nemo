@@ -2,7 +2,7 @@
 //                                                                             |
 // nbody.cc                                                                    |
 //                                                                             |
-// Copyright (C) 2000-2006  Walter Dehnen                                      |
+// Copyright (C) 2000-2007  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -305,10 +305,10 @@ void BlockStepCode::elementary_step(int t) const { // I: number of step
   static int m = 0;                                // # of tiny moves omitted   
   ++m;                                             // count shortest steps      
   ++t;                                             // add one to t              
-  int l=HIGHEST;                                   // find lowest level moving  
+  int l=highest_level();                           // find lowest level moving  
   for(; !(t&1) && l; t>>=1, --l);                  // l: lowest level moving    
   bool move=false;                                 // need to do anything?      
-  for(int i=l; i!=NSTEPS; ++i)                     // LOOP levels up to highest 
+  for(int i=l; i!=Nsteps(); ++i)                   // LOOP levels up to highest 
     if(N[i]) move = true;                          //   IF any non-empty: move  
   if(!move) return;                                // IF not moving: DONE       
   bool all=true;                                   // are all active?           
@@ -321,19 +321,19 @@ void BlockStepCode::elementary_step(int t) const { // I: number of step
     if(level(b) >= l) b.flag_as_active();          //   IF(level>=l): active    
     else              b.unflag_active ();          //   ELSE        : inactive  
   set_time_derivs(all,l==0,dt);                    // set accelerations etc     
-  kick_i(TAUH,all);                                // kick velocity etc         
+  kick_i(tauh(),all);                              // kick velocity etc         
   if(l != highest_level() ||                       // IF(levels may change OR   
      ST->always_adjust() )                         //    always adjusting       
     adjust_levels(l, l==0);                        //   h -> h'                 
   if(l) {                                          // IF not last step          
     remember(all);                                 //   remember to be predicted
-    kick_i(TAUH,all);                              //   kick by half a step     
+    kick_i(tauh(),all);                            //   kick by half a step     
   }                                                // ENDIF                     
 }
 //------------------------------------------------------------------------------
 inline void BlockStepCode::account_del() const {
   if(snap_shot()->N_del()) {
-    for(int l=0; l!=NSTEPS; ++l)
+    for(int l=0; l!=Nsteps(); ++l)
       N[l] = 0u;
     LoopAllBodies(snap_shot(),b)
       if(!is_new(b)) ++(N[level(b)]);
@@ -350,11 +350,32 @@ inline void BlockStepCode::account_new() const {
       } else
 	b.unflag_active ();
     set_time_derivs(0,0,0.);
-    LoopAllBodies(snap_shot(),b) 
-      if(is_active(b))
-	ST->assign_level(b, T, N, HIGHEST);
+    LoopActiveBodies(snap_shot(),b)
+      ST->assign_level(b, N, highest_level());
     snap_shot()->reset_Nnew();
   }
+}
+//------------------------------------------------------------------------------
+void BlockStepCode::assign_levels() const {
+  if(!snap_shot()->have_steps())
+    error("BlockStepCode::assign_levels(): steps not set\n");
+  LoopAllBodies(snap_shot(),b)
+    ST->assign_level(b, N, highest_level());
+}
+//------------------------------------------------------------------------------
+void BlockStepCode::adjust_levels(int low, bool all) const {
+  if(all)
+    LoopAllBodies(snap_shot(),b)
+      ST->adjust_level(b, N, low, highest_level());
+  else
+    LoopActiveBodies(snap_shot(),b)
+      ST->adjust_level(b, N, low, highest_level());
+}
+//------------------------------------------------------------------------------
+void BlockStepCode::update_Nlev(const bodies*B) {
+  for(int l=0; l!=Nsteps(); ++l) N[l] = 0;
+  LoopAllBodies(B,b)
+    ++(N[level(b)]);
 }
 //------------------------------------------------------------------------------
 void BlockStepCode::fullstep() const {
@@ -362,44 +383,31 @@ void BlockStepCode::fullstep() const {
   account_del();                                   // account for removed bodies
   account_new();                                   // account for new bodies    
   remember(true);                                  // remember to be predicted  
-  kick_i(TAUH,true);                               // kick by half a step       
-  for(int t=0; t!=1<<HIGHEST; ++t)                 // LOOP elementary steps     
+  kick_i(tauh(),true);                             // kick by half a step       
+  for(int t=0; t!=1<<highest_level(); ++t)         // LOOP elementary steps     
     elementary_step(t);                            //   elementary step         
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
 }
 //------------------------------------------------------------------------------
-BlockStepCode::BlockStepCode(int h0,               // I: h0, tau_max = 2^-h0    
-			     int Ns,               // I: #steps                 
+BlockStepCode::BlockStepCode(int      km,          // I: tau_max = 2^-kmax      
+			     unsigned Ns,          // I: #steps                 
 			     const ForceAndDiagnose *F,
 			     const StepLevels       *S,
 			     fieldset p, fieldset k, fieldset r,
 			     fieldset P, fieldset K, fieldset R, int w)
   falcON_THROWING :
-  Integrator( F,p,k,r,P,K,R ),
-  H0        ( h0 ),
-  NSTEPS    ( abs(Ns) ),
-  HIGHEST   ( NSTEPS-1 ),
-  TAUH      ( falcON_NEW(double,NSTEPS) ),
-  N         ( falcON_NEW(int   ,NSTEPS) ),
-  W         ( (H0+HIGHEST)>9? max(5,w) : max(4,w) ),
-  ST        ( S )
+  Integrator        ( F,p,k,r,P,K,R ),
+  bodies::TimeSteps ( km, Ns),
+  N                 ( Ns? falcON_NEW(unsigned,Ns) : 0 ),
+  W                 ( (kmax()+highest_level())>9? max(5,w) : max(4,w) ),
+  ST                ( S )
 {
-  T[0]     = falcON_NEW(double,NSTEPS);
-  T[1]     = falcON_NEW(double,NSTEPS);
-  N[0]     = 0;
-  T[0][0]  = pow(0.5,h0);
-  TAUH[0]  = 0.5*T[0][0];
-  T[1][0]  = square(T[0][0]);
-  for(int i=1; i!=NSTEPS; ++i) {
-    N[i]    = 0;
-    T[0][i] = TAUH[i-1];
-    TAUH[i] = 0.5*T[0][i];
-    T[1][i] = square(T[0][i]);
-  }
+  for(int n=0; n!=Nsteps(); ++n) N[n] = 0;
   remember();                                      // to be predicted quantities
   set_time_derivs(1,1,0.);                         // set initial forces        
-  snap_shot()->add_fields(fieldset::l);
+  snap_shot()->add_fields(fieldset::l);            // make sure we have levels  
+  snap_shot()->set_steps(this);                    // set time steps in bodies  
   assign_levels();                                 // get bodies into levels    
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
@@ -415,8 +423,8 @@ namespace falcON {
 //------------------------------------------------------------------------------
 void BlockStepCode::stats_head(std::ostream&to) const {
   SOLVER -> dia_stats_head(to);
-  if(HIGHEST)
-    for(int i=0, h=-h0(); i!=NSTEPS; i++, h--)
+  if(highest_level())
+    for(int i=0, h=-kmax(); i!=Nsteps(); i++, h--)
       if     (h>13)  put_char(to,' ',W-4)<<"2^" <<     h  <<' ';
       else if(h> 9)  put_char(to,' ',W-4)       << (1<<h) <<' ';
       else if(h> 6)  put_char(to,' ',W-4)<<' '  << (1<<h) <<' ';
@@ -487,8 +495,7 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
     else
       CODE = static_cast<const Integrator*>
 	( new BlockStepCode(kmin+1-Nlev,Nlev,FS,St,p,k,r,P,K,R,
-			    int(1+std::log10(double(SHOT.N_bodies())))) );
-   
+			    int(1+std::log10(double(SHOT.N_bodies())))));
   } catch(falcON::exception E) {
     debug_info(2,"NBodyCode::init(): caught error \"%s\"\n",E.text());
     falcON_RETHROW(E);

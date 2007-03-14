@@ -437,7 +437,7 @@ namespace falcON {
       vel     = 1 <<  2,
       eps     = 1 <<  3,
       key     = 1 <<  4,
-      tau     = 1 <<  5,
+      step    = 1 <<  5,
       pot     = 1 <<  6,
       acc     = 1 <<  7,
       jerk    = 1 <<  8,
@@ -455,10 +455,11 @@ namespace falcON {
       SPHentr = 1 << 20,
       SPHdens = 1 << 21,
       SPHhdot = 1 << 22,
-      SPHalfa = 1 << 23,
-      SPHfact = 1 << 24,
-      SPHcs   = 1 << 25,
-      SPHmu   = 1 << 26
+      SPHfact = 1 << 23,
+      SPHcs   = 1 << 24,
+      SPHalfa = 1 << 25,
+      SPHdivv = 1 << 26,
+      SPHmu   = 1 << 27
     };
     //--------------------------------------------------------------------------
     /// get the nemo_io::DataType used for a given Field                        
@@ -469,7 +470,7 @@ namespace falcON {
       case vel    : return Real;
       case eps    : return Real;
       case key    : return Integer;
-      case tau    : return Real;
+      case step   : return Real;
       case pot    : return Real;
       case acc    : return Real;
       case jerk   : return Real;
@@ -487,9 +488,10 @@ namespace falcON {
       case SPHentr: return Real;
       case SPHdens: return Real;
       case SPHhdot: return Real;
-      case SPHalfa: return Real;
       case SPHfact: return Real;
       case SPHcs  : return Real;
+      case SPHalfa: return Real;
+      case SPHdivv: return Real;
       case SPHmu  : return Real;
       default     : return Null;
       }
@@ -506,9 +508,10 @@ namespace falcON {
       case SPHentr:
       case SPHdens:
       case SPHhdot:
-      case SPHalfa:
       case SPHfact:
       case SPHcs:
+      case SPHalfa:
+      case SPHdivv:
       case SPHmu:   return true;
       default:      return false;
       }
@@ -523,7 +526,7 @@ namespace falcON {
       case fieldbit::v: return vel;
       case fieldbit::e: return eps;
       case fieldbit::k: return key;
-      case fieldbit::t: return tau;
+      case fieldbit::t: return step;
       case fieldbit::p: return pot;
       case fieldbit::a: return acc;
       case fieldbit::j: return jerk;
@@ -540,6 +543,7 @@ namespace falcON {
       case fieldbit::K: return SPHentr;
       case fieldbit::R: return SPHdens;
       case fieldbit::A: return SPHalfa;
+      case fieldbit::D: return SPHdivv;
       case fieldbit::J: return SPHhdot;
       case fieldbit::F: return SPHfact;
       case fieldbit::C: return SPHcs;
@@ -557,7 +561,7 @@ namespace falcON {
       case vel:     return fieldbit::v;
       case eps:     return fieldbit::e;
       case key:     return fieldbit::k;
-      case tau:     return fieldbit::t;
+      case step:    return fieldbit::t;
       case pot:     return fieldbit::p;
       case acc:     return fieldbit::a;
       case jerk:    return fieldbit::j;
@@ -574,9 +578,10 @@ namespace falcON {
       case SPHentr: return fieldbit::K;
       case SPHdens: return fieldbit::R;
       case SPHhdot: return fieldbit::J;
-      case SPHalfa: return fieldbit::A;
       case SPHfact: return fieldbit::F;
       case SPHcs:   return fieldbit::C;
+      case SPHalfa: return fieldbit::A;
+      case SPHdivv: return fieldbit::D;
       case SPHmu:   return fieldbit::M;
       default: falcON_THROW("unaccountable nemo_io::Field\n");
       }

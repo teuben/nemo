@@ -317,7 +317,7 @@ namespace falcON {
   namespace BodyData {
     const int         NOSPH   = 19;                // # non-sph data            
     const int         NQUANT  = 33;                // total # data              
-    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIEKRABJFCM";
+    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIEKRADJFCM";
                                                    // one-char data tags        
     //--------------------------------------------------------------------------
     // array with human readable names for the N-body data                      
@@ -329,7 +329,7 @@ namespace falcON {
 	"number of partners", "node number", "Peano-Hilbert key",
 	"SPH smoothing length", "number of SPH partners", "U_internal",
 	"U_predicted", "(dU/dt)_total", "(dU/dt)_external", "entropy function",
-	"gas density", "alpha_visc", "dalpha_visc/dt", "dlog(h)/dt", "factor",
+	"gas density", "alpha_visc", "div(v)", "dlog(h)/dt", "factor",
 	"sound speed", "molecular weight"
       };
     //--------------------------------------------------------------------------
@@ -366,7 +366,7 @@ namespace falcON {
       sizeof(real),           // entropy function
       sizeof(real),           // gas-density
       sizeof(real),           // alpha_visc
-      sizeof(real),           // dalpha_visc/dt
+      sizeof(real),           // div(v)
       sizeof(real),           // dlogh/dt
       sizeof(real),           // f_i
       sizeof(real),           // sound speed
@@ -443,7 +443,7 @@ namespace falcON {
       K       = 25,           ///< entropy function
       R       = 26,           ///< gas-density rho
       A       = 27,           ///< alpha_visc
-      B       = 28,           ///< dalpha_visc/dt
+      D       = 28,           ///< div(v)
       V       = w,            ///< predicted velocity (again)
       J       = 29,           ///< dlnh/dt
       F       = 30,           ///< factor f_i
@@ -583,7 +583,7 @@ namespace falcON {
       K       = one << fieldbit::K,  ///< just entropy functions
       R       = one << fieldbit::R,  ///< just gas-densities rho
       A       = one << fieldbit::A,  ///< just alpha_visc
-      B       = one << fieldbit::B,  ///< just dalpha_visc/dt
+      D       = one << fieldbit::D,  ///< just div(v)
       V       = one << fieldbit::V,  ///< just predicted velocities
       J       = one << fieldbit::J,  ///< just dlnh/dt
       F       = one << fieldbit::F,  ///< just factors f_i
@@ -592,13 +592,13 @@ namespace falcON {
       /// default SPH quantities
       sphdef  = H|R|V|J|F|C,
       /// all SPH quantities
-      sphmax  = sphdef|N|U|Y|I|E|K|A|B|M,
+      sphmax  = sphdef|N|U|Y|I|E|K|A|D|M,
       /// SPH quantities supported by NEMO I/O
-      sphnemo = H|N|U|I|E|K|R|A|J|F|C|M,
+      sphnemo = H|N|U|I|E|K|R|A|D|J|F|C|M,
       /// all floating point scalar SPH quantities
-      sphscal = H|U|Y|I|E|K|R|A|B|J|F|C|M,
-      /// artificial viscosity
-      artvisc = A|B,
+      sphscal = H|U|Y|I|E|K|R|A|D|J|F|C|M,
+      /// artificial viscosity & div(v) (required to integrate alpha)
+      artvisc = A|D,
       /// N-body and external gravitational potentials
       potent  = p|q,
       /// phases = {x,v}
@@ -989,7 +989,7 @@ namespace falcON {
   DefFieldTraits(25, real);                        // SPH: entropy function     
   DefFieldTraits(26, real);                        // SPH: gas density          
   DefFieldTraits(27, real);                        // SPH: alpha_visc           
-  DefFieldTraits(28, real);                        // SPH: dalpha_visc/dt       
+  DefFieldTraits(28, real);                        // SPH: div(v)               
   DefFieldTraits(29, real);                        // SPH: dh/dt                
   DefFieldTraits(30, real);                        // SPH: f_i                  
   DefFieldTraits(31, real);                        // SPH: sound speed          
@@ -1011,7 +1011,7 @@ namespace falcON {
   MACRO(fieldbit::e,eps);			\
   MACRO(fieldbit::f,flag);			\
   MACRO(fieldbit::k,key);			\
-  MACRO(fieldbit::t,tau);			\
+  MACRO(fieldbit::t,step);			\
   MACRO(fieldbit::p,pot);			\
   MACRO(fieldbit::q,pex);			\
   MACRO(fieldbit::a,acc);			\
@@ -1033,7 +1033,7 @@ namespace falcON {
   MACRO(fieldbit::K,entr);			\
   MACRO(fieldbit::R,srho);			\
   MACRO(fieldbit::A,alfa);			\
-  MACRO(fieldbit::B,adot);			\
+  MACRO(fieldbit::D,divv);			\
   MACRO(fieldbit::J,hdot);			\
   MACRO(fieldbit::F,fact);			\
   MACRO(fieldbit::C,csnd);			\
