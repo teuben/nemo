@@ -82,6 +82,23 @@ AC_PROG_RANLIB
 
 AC_ARG_PROGRAM
 
+AC_CHECK_PROGS(MAKE, [gmake make])
+if test x"${MAKE}" = x
+then
+    AC_MSG_ERROR([cannot find a make utility])
+else
+    AC_MSG_CHECKING([whether ${MAKE} is GNU Make])
+    if ${MAKE} --version 2>/dev/null | head -n 1 |
+       grep "GNU Make" >/dev/null
+    then
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+        AC_MSG_ERROR([GNU Make is required, but ${MAKE} is
+                      different])
+    fi
+fi
+
 AC_ARG_ENABLE(debug, [  --enable-debug          compile for debugging], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
         CFLAGS="-g"
@@ -360,7 +377,8 @@ case $host_os in
     ;;
   darwin*)
     CCSHARED="-fPIC -fno-common"
-    MACOS_LIBS="-lcc_dynamic -L/sw/lib"
+#    MACOS_LIBS="-lcc_dynamic -L/sw/lib"
+    MACOS_LIBS="-L/sw/lib"
     NEMO_CFLAGS="$NEMO_CFLAGS -I/sw/include"
     ;;
   sol*)
