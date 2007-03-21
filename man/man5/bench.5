@@ -17,7 +17,7 @@ Here are the benchmarks
 .nf
 \fBbench0\fP:	\fItime directcode nbody=10240\fP
 \fBbench1\fP:	\fItime hackcode1 nbody=10240\fP
-\fBbench2\fP:	\fItime mkplummer p1 10240; time gyrfalcON p1 . hmin=6 tstop=2\fB
+\fBbench2\fP:	\fItime mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2\fB
 \fBbench3\fP:	\fItime mkspiral s000 1000000 nmodel=40\fP
 \fBbench4\fP:	\fIccdmath "" - 'ranu(0,1)' size=128 | ccdpot - . help=c\fB
 .fi
@@ -27,27 +27,33 @@ and the data :
 .nf
 .ta +3i
 bench0
-       P4/3.0	342.7
-       G5/2.0	472.8
-       AMD-opt64/2.0	300.3
-       AMD-ath64/2.0	888.7
-       P4/2.8 w/cygwin	365.9
+       P4/3.0           342.7
+       G5/2.0           472.8
+       AMD-opt64/2.0    300.3
+       AMD-ath64/2.0    888.7
+       P4/2.8 w/cygwin  365.9
        x86_64/3.0       516.4
+       x86_64/3.2       480.6
+      
 
 bench1
-       P4/3.0	13.4
-       G5/2.0	13.1
-       AMD-opt64/2.0	9.36
-       AMD-ath64/2.0	17.45
-       P4/2.8 w/cygwin	15.1
+       P4/3.0           13.4
+       G5/2.0           13.1
+       AMD-opt64/2.0     9.36
+       AMD-ath64/2.0    17.45
+       P4/2.8 w/cygwin  15.1
        x86_64/3.0       11.7
+       x86_64/3.2       10.7
+       sparcv9+vis/0.36 81.5
 
 bench2
-       P4/3.0	10.8
-       G5/2.0	21.0
-       AMD-opt64/2.0	8.1
-       AMD-ath64/2.0	8.9
-       P4/2.8 w/cygwin	45.5
+       P4/3.0           10.8
+       G5/2.0           21.0
+       AMD-opt64/2.0     8.1
+       AMD-ath64/2.0     8.9
+       P4/2.8 w/cygwin  45.5
+       x86_64/3.2        8.6
+       sparcv9+vis/0.36 85.1  
 
 bench3 
        P4/3.0	22.890u  5.980s 1:45.63 27.3%
@@ -57,6 +63,8 @@ bench3
        P4/2.8	25.541u 8.081s 0:59.98 56.0% (S/ATA)
        P4/2.8 w/cygwin	276.56u 26.35s 6:34.75 76.7% (using mkplummer V2.8)
        x86_64/3.0       21.651u 8.897s 0:48.05 63.5%    0+0k 0+0io 0pf+0w
+       x86_64/3.2       21.950u 9.997s 0:39.37 81.1%  (SATA)
+
 .fi
 .SH "SEE ALSO"
 gyrfalcON(1NEMO), data(5NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO),
