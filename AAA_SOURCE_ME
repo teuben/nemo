@@ -45,6 +45,10 @@
 # 30-jul-06  PJT                various for gh2006 at the beach near Veracruz :-)
 # 17-aug-06  PJT                corrected for new falcON procedure
 # 31-aug-06  PJT                some png support for pgplot
+# 20-mar-07  PJT                comment on gmake vs. make
+
+# choose make or gmake
+set make=make
 
 if ($?NEMO) goto bad_has_nemo
 
@@ -105,18 +109,18 @@ echo ./configure $copts
 echo Initializing NEMO environment
 source nemo_start >>& install.log
 echo Postconfig
-make postconfig >>& install.log
+$make postconfig >>& install.log
 source NEMORC.local
 if ($pgplot) then
     # other options:   
-    make pgplot PNG=$png >>& install.log
+    $make pgplot PNG=$png >>& install.log
 endif
 
 rehash
 echo '++++++++++++++++++++++++++++++++++++++++' >>& install.log
 
 echo Building NEMO library 
-(cd src; make -i clean install) >>& install.log
+(cd src; $make -i clean install) >>& install.log
 if ($status) then
     @ stat++
 endif
@@ -145,7 +149,7 @@ src/scripts/testsuite -b >>& install.log
 if (1) then
   # also done in 'make libs', should be done earlier so we can add some Testfile's
   echo Compiling falcON and its tools. 
-  (cd usr/dehnen/; make all)  >& install_falcON.log
+  (cd usr/dehnen/; $make all)  >& install_falcON.log
 endif
 
 if ($stat == 0) then
