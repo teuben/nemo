@@ -1,6 +1,7 @@
 #
 # Source this file in a csh to install and build NEMO from scratch 
-# (referred to as the "old manybody method")
+# (referred to as the "old manybody method"). This is not to load
+# NEMO in your shell, use the nemo_start script for that!
 #
 # wget ftp://ftp.astro.umd.edu/progs/nemo/nemo_cvs.tar.gz
 #
