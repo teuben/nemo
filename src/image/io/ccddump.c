@@ -9,6 +9,7 @@
  *	21-may-92   1.1a  (SGI) fixed an ANSI complaint		pjt
  *	25-may-95 
  *	27-mar-97   1.1c  remove nested declarations            pjt
+ *      28-mar-07   1.2   allow SM style                        pjt
  */
 
 
@@ -26,16 +27,21 @@ string defv[] = {	/* keywords + help string for user interface */
 	"range=\n	Range in case scaling is needed (A:B)",
         "mode=row\n	Output mode [row|column]",
         "swap=false\n	Swap bytes?[t|f]",
-	"VERSION=1.1c\n	27-mar-97 PJT",
+	"sm=f\n         use SM file_type mode CH?",
+	"VERSION=1.2\n	28-mar-07 PJT",
 	NULL,
 };
 
 string usage="dump the bytes of an image, optional scaling";
 
+static bool Qsm;
+
 nemo_main()
 {
         imageptr iptr=NULL;
         stream instr, outstr;
+
+	Qsm = getbparam("sm");
 
 	instr = stropen (getparam("in"),"r");	/* get stream */
 	read_image (instr,&iptr);               /* read image */
@@ -139,30 +145,44 @@ imageptr iptr;
 int      outmode;
 bool     swap;
 {
-    int   ix, iy, iz, nx, ny, nz, nlen;
-    float zout;
+  int   ix, iy, iz, nx, ny, nz, nlen, itmp;
+  float zout, ftmp;
 
-    nx = Nx(iptr);
-    ny = Ny(iptr);
-    nz = Nz(iptr);
-    nlen = sizeof(float);
-    if (outmode) {          /* column by column; plane after plane */
-      for (iz=0; iz<nz; iz++)
-        for (ix=0; ix<nx; ix++)
-            for (iy=0; iy<ny; iy++) {
-                zout = (float) CubeValue(iptr,ix,iy,iz);
-                if (swap) swapbytes(&zout,nlen);
-                fwrite(&zout,nlen,1,outstr);
-            }
-    } else {                    /* row by row; plane after plane */
-      for (iz=0; iz<nz; iz++)
-        for (iy=0; iy<ny; iy++)
-            for (ix=0; ix<nx; ix++) {
-                zout = (float) CubeValue(iptr,ix,iy,iz);
-                if (swap) swapbytes(&zout,nlen);
-                fwrite(&zout,nlen,1,outstr);
-            }
-    }
+  nx = Nx(iptr);
+  ny = Ny(iptr);
+  nz = Nz(iptr);
+  
+  if (Qsm) {
+    if (nz>1) error("3D images not supported in SM mode");
+    warning("testing new SM mode, not swapping bytes though");
+
+    /* this is the CH filetype in sm */
+    
+    itmp=nx;              if(swap)bswapi(&itmp,1);    fwrite(&itmp,sizeof(int),1,outstr);
+    itmp=ny;              if(swap)bswapi(&itmp,1);    fwrite(&itmp,sizeof(int),1,outstr);
+    ftmp = Xmin(iptr);    if(swap)bswapf(&ftmp,1);    fwrite(&ftmp,sizeof(float),1,outstr);
+    ftmp += nx*Dx(iptr);  if(swap)bswapf(&ftmp,1);    fwrite(&ftmp,sizeof(float),1,outstr);
+    ftmp = Ymin(iptr);    if(swap)bswapf(&ftmp,1);    fwrite(&ftmp,sizeof(float),1,outstr);
+    ftmp += ny*Dy(iptr);  if(swap)bswapf(&ftmp,1);    fwrite(&ftmp,sizeof(float),1,outstr);
+  }
+  nlen = sizeof(float);
+  if (outmode) {          /* column by column; plane after plane */
+    for (iz=0; iz<nz; iz++)
+      for (ix=0; ix<nx; ix++)
+	for (iy=0; iy<ny; iy++) {
+	  zout = (float) CubeValue(iptr,ix,iy,iz);
+	  if (swap) bswapf(&zout,1);
+	  fwrite(&zout,nlen,1,outstr);
+	}
+  } else {                    /* row by row; plane after plane */
+    for (iz=0; iz<nz; iz++)
+      for (iy=0; iy<ny; iy++)
+	for (ix=0; ix<nx; ix++) {
+	  zout = (float) CubeValue(iptr,ix,iy,iz);
+	  if (swap) bswapf(&zout,1);
+	  fwrite(&zout,nlen,1,outstr);
+	}
+  }
 }
             
 
@@ -184,7 +204,7 @@ bool     swap;
         for (ix=0; ix<nx; ix++)
             for (iy=0; iy<ny; iy++) {
                 zout = (double) CubeValue(iptr,ix,iy,iz);
-                if (swap) swapbytes(&zout,nlen);
+                if (swap) bswapd(&zout,1);
                 fwrite(&zout,nlen,1,outstr);
             }
     } else {                    /* row by row; plane after plane */
@@ -192,16 +212,14 @@ bool     swap;
         for (iy=0; iy<ny; iy++)
             for (ix=0; ix<nx; ix++) {
                 zout = (double) CubeValue(iptr,ix,iy,iz);
-                if (swap) swapbytes(&zout,nlen);
+                if (swap) bswapd(&zout,1);
                 fwrite(&zout,nlen,1,outstr);
             }
     }
 }
             
     
-get_range(s, a, b)
-char *s;
-real *a, *b;
+get_range(char *s, real *a, real *b)
 {
     char *cp;
 
@@ -220,22 +238,3 @@ real *a, *b;
     return(1);
 }
     
-swapbytes( cp, n)
-char *cp;                       /* pointer to beginning */
-int n;                          /* number of bytes in item */
-{
-    register char tmp, *bp, *ep;
-    register char k;
-    
-    bp = cp;                    /* pointer to begin */
-    ep = &bp[n-1];              /* pointer to end */
-    k = (char) (n/2);           /* half for # loops */
-
-    while (k>0) {               /* loop */
-        tmp = *bp;
-        *bp++ = *ep;
-        *ep-- = tmp;
-        k--;
-    }
-}
-
