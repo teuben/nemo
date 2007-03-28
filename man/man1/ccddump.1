@@ -1,6 +1,6 @@
-.TH CCDDUMP 1NEMO "9 December 1989" 
+.TH CCDDUMP 1NEMO "28 March 2007"
 .SH NAME
-ccddump \- dump contents of an image
+ccddump \- dump contents of an image to other format
 .SH SYNOPSIS
 .PP
 \fBccddump in=\fPimage  \fBou=\fPdump [parameter = value ...]
@@ -39,6 +39,13 @@ Output mode, rows first or columns first. [default: row]
 .TP
 \fBswap=\fIbool\fP
 Swap the bytes? [default: \fBtrue\fP].
+.TP
+\fBsm=t|f\fP
+Use the CH sm file_type? . You will need the directive
+.nf
+   file_type       CH
+.fi
+in your ~/.sm file. [default: \fBfalse\fP].
 .SH "SEE ALSO"
 ccdfits(1NEMO), ccdprint(1NEMO), image(5NEMO), tsf(1NEMO)
 .SH AUTHOR
@@ -52,4 +59,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 30-Jul-89	V1.0: Created	PJT
+28-mar-07	V1.2 sm output option	PJT
 .fi
