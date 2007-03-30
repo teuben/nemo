@@ -5,7 +5,7 @@
 # 1999 by the Massachusetts Institute of Technology.
 ##########################################################################
 
-AC_DEFUN(ACX_CHECK_CC_FLAGS,
+AC_DEFUN([ACX_CHECK_CC_FLAGS],
 [
 AC_REQUIRE([AC_PROG_CC])
 AC_CACHE_CHECK(whether ${CC-cc} accepts $1, ac_$2,
@@ -26,7 +26,7 @@ else
 fi
 ])
 
-AC_DEFUN(ACX_PROG_GCC_VERSION,
+AC_DEFUN([ACX_PROG_GCC_VERSION],
 [
 AC_REQUIRE([AC_PROG_CC])
 AC_CACHE_CHECK(whether we are using gcc $1.$2 or later, ac_cv_prog_gcc_$1_$2,
@@ -54,10 +54,10 @@ else
 fi
 ])
 
-AC_DEFUN(ACX_PROG_CC_EGCS,
+AC_DEFUN([ACX_PROG_CC_EGCS],
 [ACX_PROG_GCC_VERSION(2,90,acx_prog_egcs=yes,acx_prog_egcs=no)])
 
-AC_DEFUN(ACX_PROG_CC_MAXOPT,
+AC_DEFUN([ACX_PROG_CC_MAXOPT],
 [
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([ACX_PROG_CC_EGCS])
@@ -166,7 +166,7 @@ dnl---------------------------------------------------------------------------
 
 dnl detect Fortran name-mangling scheme
 
-AC_DEFUN(ACX_F77_FUNC_MANGLE,
+AC_DEFUN([ACX_F77_FUNC_MANGLE],
 [
 AC_REQUIRE([AC_PROG_CC])
 AC_REQUIRE([AC_PROG_F77])
