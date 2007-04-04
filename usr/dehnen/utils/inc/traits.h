@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2005-2006                                                          
+/// \date    2005-2007                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2005-2006  Walter Dehnen                                       
+// Copyright (C) 2005-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -29,6 +29,10 @@
 #ifndef WDutils_included_traits_h
 #define WDutils_included_traits_h
 
+#ifndef WDutils_included_typeinfo_h
+# include <typeinfo>
+# define WDutils_included_typeinfo_h
+#endif
 #ifndef WDutils_included_basic_h
 # include <exception.h>
 #endif

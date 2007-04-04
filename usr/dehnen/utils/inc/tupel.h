@@ -5,9 +5,9 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1996-2006                                                          
+/// \date    1996-2007                                                          
 ///                                                                             
-/// \brief   contains the definition of template class falcON::tupel and        
+/// \brief   contains the definition of template class WDutild::tupel and       
 ///	     all its members and friends                                        
 ///                                                                             
 /// \version aug-2003: template metaprogramming to unroll loops automatically   
@@ -19,10 +19,11 @@
 /// \version mar-2006: removed reliance on friend namespace injection           
 /// \version jul-2006: added global function applied()                          
 /// \version sep-2006: added member method reset()                              
+/// \version mar-2007: made data protected                                      
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1996-2006  Walter Dehnen                                       
+// Copyright (C) 1996-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -74,9 +75,10 @@ namespace WDutils {
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
   template<int N, typename X> class tupel {
-    // private types and data                                                   
+    // private/protected types and data                                         
   private:
     typedef meta::taux<X,N-1,0> M;
+  protected:
     X a[N];                          ///< data: an array of N elements of type X
   public:
     //--------------------------------------------------------------------------

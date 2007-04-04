@@ -8,13 +8,18 @@
 default			: library
 install			: library cleanobj
 
+# -----------------
+# Hardware platform
+# -----------------
+PLATFORM 		:= $(shell uname -m)
+
 # -----------
 # directories
 # -----------
 
-INC			:= inc/
-SRC			:= src/
-LIB			:= lib/
+INC             	:= inc/
+SRC             	:= src/
+LIB             	:= lib/
 LIBT			:= $(LIB).dummy
 $(LIBT)			:
 			mkdir --parents --mode=755 $(LIB)
@@ -23,6 +28,8 @@ $(LIBT)			:
 # -----------------------
 # compiler and linker etc
 # -----------------------
+
+#DEBUG			:= -DDEBUG
 
 COMPILER		:= gcc
 #COMPILER		:= pgcc#         problems with linking
@@ -60,7 +67,11 @@ CPUFLAGS		:= -mcpu=k8 -mpreferred-stack-boundary=4
 endif
 endif
 
+ifdef DEBUG
+OPTFLAGS		:= -ggdb -fPIC $(CPUFLAGS) -rdynamic
+else
 OPTFLAGS		:= -ggdb -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
+endif
 
 else
 ifeq ($(COMPILER),pgcc)

@@ -82,9 +82,9 @@ namespace WDutils { namespace meta {
   template<typename X> inline
   void update_min(X&x, const X&y, const X&a) { if((y-a)<x) x=y-a; }
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class meta::taux<scalar,N,I>                                             //
-  //                                                                          //
+  //                                                                            
+  /// template metaprogramming: unroll loops over dimensions for class tupel    
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   template<typename X, int N, int I=0> class taux {
     typedef const X       cX;

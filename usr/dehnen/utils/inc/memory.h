@@ -1150,7 +1150,6 @@ namespace WDutils {
       return N[d];
     }
     /// set all values to given constant
-    /// \param n (input) new size of array in each dimension
     /// \param x (input) initialize each element with this value
     void setval(T const&x = T(0) ) WDutils_THROWING {
       for(int i=0; i!=K[0]*N[0]; ++i) A[i] = x;
@@ -1276,6 +1275,11 @@ namespace WDutils {
     /// return size of array
     int const&size(int) const {
       return N;
+    }
+    /// set all values to given constant
+    /// \param x (input) initialize each element with this value
+    void setval(T const&x = T(0) ) WDutils_THROWING {
+      for(int i=0; i!=N; ++i) A[i] = x;
     }
     /// reset: destruct and construct again
     /// \param n (input) new size of array
