@@ -1177,7 +1177,7 @@ namespace falcON {
     /// \param N (input) if no body available, allocate this many
     iterator new_body(bodytype t, unsigned N) falcON_THROWING
     {
-      if(0 == N_free(t)) create(min(1u,N),t);
+      if(0 == N_free(t)) create(max(1u,N),t);
       return new_body(t);
     }
     //--------------------------------------------------------------------------
@@ -1186,7 +1186,6 @@ namespace falcON {
     unsigned const&N_new(bodytype t) const {
       return NNEW[t];
     }
-    //--------------------------------------------------------------------------
     //--------------------------------------------------------------------------
     /// returns the number of bodies created by \a new_body() since last call of
     /// \a reset_Nnew(), if any.
@@ -1206,13 +1205,13 @@ namespace falcON {
       return NDEL[t];
     }
     //--------------------------------------------------------------------------
-    /// returns the number of bodies created by \a remove() since last call of
+    /// returns the number of bodies removed by \a remove() since last call of
     /// \a reset_Ndel(), if any.
     unsigned N_del() const {
       return sum<BT_NUM>(NDEL);
     }
     //--------------------------------------------------------------------------
-    /// resets the counters of bodies created by \a new_body
+    /// resets the counters of bodies removed by \a remove()
     void reset_Ndel() {
       for(bodytype t; t; ++t)
 	NDEL[t] = 0u;

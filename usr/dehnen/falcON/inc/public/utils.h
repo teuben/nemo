@@ -60,6 +60,7 @@ namespace falcON {
   using WDutils::exception;
   void error(const char*, ...);
   void warning(const char*, ...);
+  void debug_info(const char*, ...);
   void debug_info(int, const char*, ...);
   using falcON::error;
   using falcON::warning;

@@ -483,9 +483,9 @@ namespace falcON {
     //  - allocate memory for cell source properties & reset their coeff pter   
     //  - pass source properties up the tree, count active cells                
     bool prepare(                                  // R: ALL || all are active  
-		 const GravMAC*const&,             // I: MAC                    
-		 bool          const&,             // I: all or active only?    
-		 bool          const&);            // I: allocate cell coeffs?  
+		 const GravMAC*,                   // I: MAC                    
+		 bool          ,                   // I: all or active only?    
+		 bool          );                  // I: allocate cell coeffs?  
     //--------------------------------------------------------------------------
     // tree stuff to be superseeded                                             
     //--------------------------------------------------------------------------

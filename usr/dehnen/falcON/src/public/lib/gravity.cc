@@ -847,14 +847,14 @@ unsigned GravEstimator::pass_up(const GravMAC*const&MAC,
   return n;                                        // return # active cells     
 }
 //------------------------------------------------------------------------------
-bool GravEstimator::prepare(const GravMAC*const&MAC,
-			    bool          const&al,
-			    bool          const&alloc_cell_coeffs)
+bool GravEstimator::prepare(const GravMAC*MAC,
+			    bool          al,
+			    bool          alloc_cell_coeffs)
 {
   SET_I
   if(al) NLA_needed = TREE->N_leafs();             // all leafs are sink        
   if(NLA_needed==0) {
-    falcON_WarningF("no body active","GravEstimator");
+    falcON_WarningF("no body active","GravEstimator::prepare()");
     return 1;
   }
   //  - allocate memory for leaf sink properties for active leafs               

@@ -143,6 +143,9 @@ namespace falcON {
       SPHT->reset();
 #endif
       SET_T(" time: OctTree::build():               ");
+      if(debug(4))
+	debug_info("forces::grow(): tree re-grown with %d leafs\n",
+		   TREE->N_leafs());
     } else {
       TREE = new OctTree(BODIES,Ncrit,x0);
       GRAV->new_tree(TREE);
@@ -150,6 +153,9 @@ namespace falcON {
       SPHT->new_tree(TREE);
 #endif
       SET_T(" time: OctTree::OctTree():            ");
+      if(debug(4))
+	debug_info("forces::grow(): new tree made with %d leafs\n",
+		   TREE->N_leafs());
     }
   }
   //----------------------------------------------------------------------------

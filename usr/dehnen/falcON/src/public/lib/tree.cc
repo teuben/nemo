@@ -1120,16 +1120,42 @@ namespace {
   //----------------------------------------------------------------------------
   void TreeBuilder::setup_leaf_order(const bodies*BB)
   {
-    D0 = falcON_NEW(dot,TREE->N_leafs());          // allocate dots             
+    if(BB->N_del())                                // IF bodies are removed     
+      return setup_from_scratch(BB,TREE->SP_flag()); // setup from scratch      
+    D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
     dot*Di = D0;                                   // current dot               
     XAVE = zero;                                   // reset X_ave               
     XMAX = XMIN = BB->pos(mybody(LeafNo(TREE,0))); // reset x_min & x_max       
     __LoopLeafs(TREE,Li) {                         // LOOP leaf                 
       Di->set_up(BB,mybody(Li));                   //   initialize dot          
-      Di->pos().up_min_max(XMIN,XMAX);
+      Di->pos().up_min_max(XMIN,XMAX);             //   update XMIN,XMAX        
       XAVE += Di->pos();                           //   sum up X                
       Di++;                                        //   incr current dot        
     }                                              // END LOOP                  
+    if(BB->N_new()) {                              // IF have new bodies        
+      flags SP = TREE->SP_flag();                  //   flag for choosing bodies
+      if(SP && BB->have_flag()) {                  //   IF take only some bodies
+	LoopAllBodies(BB,b) if(is_new(b)) {        //     LOOP new bodies       
+	  if(flag(b).are_set(SP)) {                //       IF body to be used  
+	    Di->set_up(b);                         //         initialize dot    
+	    if(isnan(Di->pos()))                   //         test for nan      
+	      error("tree building: body position contains nan\n");
+	    Di->pos().up_min_max(XMIN,XMAX);       //         update XMIN,XMAX  
+	    XAVE += Di->pos();                     //         sum up X          
+	    Di++;                                  //         incr current dot  
+	  }                                        //       ENDIF               
+	}                                          //     END LOOP              
+      } else {                                     //   ELSE use all new bodies 
+	LoopAllBodies(BB,b) if(is_new(b)) {        //     LOOP new bodies       
+	  Di->set_up(b);                           //       initialize dot      
+	  if(isnan(Di->pos()))                     //       test for nan        
+	    error("tree building: body position contains nan\n");
+	  Di->pos().up_min_max(XMIN,XMAX);         //       update XMIN,XMAX    
+	  XAVE += Di->pos();                       //       sum up X            
+	  Di++;                                    //       incr current dot    
+	}                                          //     END LOOP              
+      }                                            //   ENDIF                   
+    }                                              // ENDIF                     
     DN    = Di;                                    // set: beyond last dot      
     XAVE /= real(DN-D0);                           // set: X_ave                
   }

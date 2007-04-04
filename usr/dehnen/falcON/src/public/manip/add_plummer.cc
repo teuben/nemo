@@ -61,7 +61,7 @@ namespace falcON { namespace Manipulate {
   class add_plummer : public manipulator {
   private:
     const   Random3 Ran;
-    const   int     N;
+    const   int     N,NP;
     const   double  GM,R,V,m,e;
     mutable int     K;
     //--------------------------------------------------------------------------
@@ -116,6 +116,31 @@ namespace falcON { namespace Manipulate {
       vel[2] = vr * cth - vth * sth;
     }
     //--------------------------------------------------------------------------
+    void add_body(const snapshot*S) const
+    {
+      body B = const_cast<snapshot*>(S)->new_body(bodytype::std, N-K);
+      if(! B.is_valid() )
+	error("Manipulator \"add_plummer\": bodies::new_body() is invalid\n");
+      ++K;
+      if( S->have(fieldbit::x) )
+	if( S->have(fieldbit::v) ) sample(B.pos(), B.vel());
+	else { vect v; sample(B.pos(), v); }
+      else if( S->have(fieldbit::v) ) { vect x; sample(x, B.vel()); }
+      if( S->have(fieldbit::m) ) B.mass() = m;
+      if( S->have(fieldbit::e) ) B.eps () = e;
+      if( S->have(fieldbit::a) ) B.acc () = zero;
+      if( S->have(fieldbit::p) ) B.pot () = zero;
+      if( S->have(fieldbit::q) ) B.pex () = zero;
+      if( S->have(fieldbit::l) ) {
+	indx lmax = 0;
+	LoopAllBodies(S,b) if(level(b) > lmax) lmax = level(b);
+	B.level() = lmax;
+      }
+      debug_info(8,"Manipulator \"add_plummer\": "
+		 "added new body with block No %d and sub-index %d\n",
+		 block_No(B), subindex(B));
+    }
+    //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::o; }
     fieldset provide() const { return fieldset::o; }
     fieldset change () const { return fieldset::o; }
@@ -126,12 +151,13 @@ namespace falcON { namespace Manipulate {
 		int          npar,
 		const char  *file) :
       N   (npar>0? int (pars[0]) : 0 ),
+      NP  (npar>5? int (pars[5]) : 1 ),
       GM  (npar>1?      pars[1]  : 1.),
       R   (npar>2?      pars[2]  : 1.),
       V   ( sqrt(GM/R ) ),
-      Ran (npar>3? long(pars[3]) : long(time(0)) ),
+      Ran (npar>3 && int(pars[3])? long(pars[3]) : long(time(0)) ),
       m   (npar>4?      pars[4]  : N? GM/N : 0.),
-      e   (npar>5?      pars[5]  : 0.1 )
+      e   (npar>6?      pars[6]  : 0.1 )
     {
       if(npar<6 && nemo_debug(1) || nemo_debug(2))
 	std::cerr<<
@@ -143,40 +169,25 @@ namespace falcON { namespace Manipulate {
 	  " par[2] : scale radius R of Plummer sphere (default: 1)\n"
 	  " par[3] : random seed (default time)\n"
 	  " par[4] : mass per new body (default: GM/N)\n"
-	  " par[5] : individual softening length (if needed, default: 0.1)\n\n";
-      if(npar>6 && nemo_debug(1))
+	  " par[5] : # bodies to be added each time (default: 1)\n"
+	  " par[6] : individual softening length (if needed, default: 0.1)\n\n";
+      if(npar>7 && nemo_debug(1))
 	warning(" Manipulator \"add_plummer\":"
-		" skipping parameters beyond 6\n");
+		" skipping parameters beyond 7\n");
       if(N <= 0)
-	warning("Manipulator \"add_plummer\": N=%d: nothing to be done\n");
+	warning("Manipulator \"add_plummer\": N=%d: nothing to be done\n",N);
     }
     //--------------------------------------------------------------------------
     ~add_plummer() {}
   };
   //////////////////////////////////////////////////////////////////////////////
   bool add_plummer::manipulate(const snapshot*S) const falcON_THROWING {
-    if(K >= N) return false;
-    body B = const_cast<snapshot*>(S)->new_body(bodytype::std, N-K);
-    if(! B.is_valid() )
-      error("Manipulator \"add_plummer\": bodies::new_body() is invalid\n");
-    ++K;
-    if( S->have(fieldbit::x) )
-      if( S->have(fieldbit::v) ) sample(B.pos(), B.vel());
-      else { vect v; sample(B.pos(), v); }
-    else if( S->have(fieldbit::v) ) { vect x; sample(x, B.vel()); }
-    if( S->have(fieldbit::m) ) B.mass() = m;
-    if( S->have(fieldbit::e) ) B.eps () = e;
-    if( S->have(fieldbit::a) ) B.acc () = zero;
-    if( S->have(fieldbit::p) ) B.pot () = zero;
-    if( S->have(fieldbit::q) ) B.pex () = zero;
-    if( S->have(fieldbit::l) ) {
-      indx lmax = 0;
-      LoopAllBodies(S,b) if(level(b) > lmax) lmax = level(b);
-      B.level() = lmax;
-    }
-    debug_info(5,"Manipulator \"add_plummer\": "
-	       "added new body with block No %d and sub-index %d\n",
-	       block_No(B), subindex(B));
+    int I=0;
+    for(; I!=NP && K < N; ++I) add_body(S);
+    if(I==1)
+      debug_info(5,"Manipulator \"add_plummer\": added new body\n");
+    else if(I> 1)
+      debug_info(5,"Manipulator \"add_plummer\": added %d new bodies\n",I);
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////
