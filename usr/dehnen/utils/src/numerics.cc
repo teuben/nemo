@@ -1,17 +1,17 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    src/exception.cc                                                   
+/// \file    src/numerics.cc                                                    
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1994-2006                                                          
+/// \date    1994-2007                                                          
 ///                                                                             
 /// \todo    add doxygen documentation                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2005  Walter Dehnen                                       
+// Copyright (C) 1994-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -560,10 +560,12 @@ namespace WDutils {
     if(debug(8)) R->r[1]->dump();
   }
   //////////////////////////////////////////////////////////////////////////////
-  template<typename scalar>
-  FindPercentile<scalar>::FindPercentile(const scalar*F, int N, const scalar*W)
-    : DATA ( new PercentileFinder<scalar>(F,N,W) )
-  {}
+  template<typename scalar> void
+  FindPercentile<scalar>::setup(const scalar*F, int N, const scalar*W)
+  {
+    if(DATA) WDutils_DEL_O(static_cast<PercentileFinder<scalar>*>(DATA));
+    DATA = new PercentileFinder<scalar>(F,N,W);
+  }
   template<typename scalar>
   FindPercentile<scalar>::~FindPercentile() {
     WDutils_DEL_O(static_cast<PercentileFinder<scalar>*>(DATA));
@@ -576,7 +578,6 @@ namespace WDutils {
   scalar FindPercentile<scalar>::Percentile(int r) const {
     return static_cast<PercentileFinder<scalar>*>(DATA)->FindValue(r);
   }
-
   template class FindPercentile<double>;
   template class FindPercentile<float>;
 } // namespace WDutils

@@ -5,13 +5,13 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1994-2006                                                          
+/// \date    1994-2007                                                          
 ///                                                                             
-/// \todo    add doxygen documentation                                          
+/// \todo    finish doxygen documentation                                       
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2006  Walter Dehnen                                       
+// Copyright (C) 1994-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -164,13 +164,18 @@ namespace WDutils {
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  // sorting                                                                    
-  //                                                                            
+  /// \name sorting and related                                                 
+  //{@                                                                          
   //----------------------------------------------------------------------------
+  /// the numbers 0 to n-1 are ordered in ascending order of A[i]
+  /// using the heap-sort algorithm; based on a routine given in NR
+  /// \param sortable type of values to be sorted
+  /// \param sortit class with operator[](int) returning sortable
+  /// \param A (input) array or values to be sorted
+  /// \param n (input) number of elements
+  /// \param indx (output) index table so that A[indx[i]] is sorted
   template<typename sortable, class sortit>
   void HeapIndex(const sortit&A, const int n, int *indx)
-    // based on a routine given in NR                                           
-    // the numbers 0 to n-1 are ordered in ascending order of A[i]              
   {
     if(n<=0) return;
     if(n==1) { indx[0]=0; return; }
@@ -204,6 +209,12 @@ namespace WDutils {
     }
   }
   //----------------------------------------------------------------------------
+  /// the numbers 0 to n-1 are ordered in ascending order of A[i]
+  /// using the heap-sort algorithm; based on a routine given in NR
+  /// \param sortable type of values to be sorted
+  /// \param A (input) array or values to be sorted
+  /// \param n (input) number of elements
+  /// \param indx (output) index table so that A[indx[i]] is sorted
   template<typename sortable>
   void HeapIndex(const sortable*A, const int n, int *indx)
     // based on a routine given in NR                                           
@@ -241,30 +252,71 @@ namespace WDutils {
     }
   }
   //----------------------------------------------------------------------------
-  // Given a table of approximately evenly distribute ranks, make an approximate
-  // table of values. For size of table << N, this is considerably faster than  
-  // using a full sort.                                                         
+  /// the numbers 0 to n-1 are ordered in ascending order of A[i]
+  /// using the heap-sort algorithm; based on a routine given in NR
+  /// \param sortable type of values to be sorted
+  /// \param A (input) Array or values to be sorted
+  /// \param indx (output) index table so that A[indx[i]] is sorted
+  template<typename sortable>
+  void HeapIndex(Array<sortable,1>const&A, Array<int,1>const&I) {
+    if(A.size() != I.size()) error("size mismatch in HeapIndex()\n");
+    HeapIndex(A.array(),A.size(),I.array());
+  }
   //----------------------------------------------------------------------------
+  /// obtain approximate function values for given ranks.
+  ///
+  /// Given a table of approximately evenly distributed ranks R[i], make an 
+  /// approximate table of values Y[i] so that rank(Y[i]) ~= R[i].
+  /// For size of table of ranks m << n, this is considerably faster than  
+  /// using a full sort.
+  ///
+  /// \param sortable type of values to be sorted
+  /// \param sortit class with operator[](int) returning sortable
+  /// \param A (input) objects to be sorted
+  /// \param n (input) number of objects
+  /// \param R (input) table of ranks
+  /// \param Y (output) table of approximate values at given ranks
+  /// \param m (input) size of tables R and Y, usually m << n
+  /// \param indx (output) index table so that A[indx[i]] is sorted
+  /// \param Amin (optional input) minimum value
+  /// \param Amax (optional input) maximum value
   template<typename sortable, typename sortit> inline
-  void set_value_table(sortit         const&,       // I: objects to be sorted  
-		       int            const&,       // I: # objects             
-		       const sortable*const&,       // I: table of ranks        
-		       sortable      *const&,       // O: table of values       
-		       int            const&,       // I: size of these tables  
-		       const sortable* = 0,         //[I: minimum value]        
-		       const sortable* = 0);        //[I: maximum value]        
+  void set_value_table(sortit         const&A,
+		       int            const&n,
+		       const sortable*const&R,
+		       sortable      *const&Y,
+		       int            const&m,
+		       const sortable* Amin= 0,
+		       const sortable* Amax= 0);
   //----------------------------------------------------------------------------
   /// find percentiles of a 1D distribution of values                           
-  /// intantinations for float and double                                       
-  //----------------------------------------------------------------------------
+  /// instantinations for float and double                                      
   template<typename scalar> class FindPercentile {
     void *DATA;
+    /// copy constructor disabled; use references instead of copies
+    FindPercentile(const FindPercentile&);
+    void setup(const scalar*, int, const scalar*);
   public:
     /// ctor: setup sort tree
     /// \param F (input) array with elements
     /// \param N (input) number of elements
     /// \param W (optional input) array of weights
-    FindPercentile(const scalar*F, int N, const scalar*W=0);
+    FindPercentile(const scalar*F, int N, const scalar*W=0) : DATA(0) {
+      setup(F,N,W);
+    }
+    /// ctor: setup sort tree
+    /// \param F (input) Array with elements
+    FindPercentile(Array<scalar,1>const&F) : DATA(0) {
+      setup(F.array(),F.size(),0);
+    }
+    /// ctor: setup sort tree
+    /// \param F (input) Array<> with elements
+    /// \param W (input) Array<> of weights
+    FindPercentile(Array<scalar,1>const&F,
+		   Array<scalar,1>const&W) : DATA(0) {
+      if(F.size() != W.size()) error("size mismatch in FindPercentile\n");
+      setup(F.array(),F.size(),W.array());
+    }
     /// dtor: de-allocate sorttree
     ~FindPercentile();
     /// \param f percentile note that P in [0,1]
@@ -276,28 +328,37 @@ namespace WDutils {
   };
   //----------------------------------------------------------------------------
   /// just find a single percentile                                             
-  //----------------------------------------------------------------------------
+  /// \return percentile value: r values are less than this
+  /// \param r rank
+  /// \param F array with values
+  /// \param N size of array
   template<typename scalar>
-  scalar percentile(int r, const scalar*F, int N)
-  {
+  scalar percentile(int r, const scalar*F, int N) {
     FindPercentile<scalar> FP(F,N);
     return FP.Percentile(r);
   }
   //----------------------------------------------------------------------------
+  /// just find a single percentile                                             
+  /// \return percentile value: a fraction f of the total weight is at y<F
+  /// \param f fraction
+  /// \param F array with values
+  /// \param N size of array
+  /// \param W array with weights
   template<typename scalar>
   scalar percentile(scalar f, const scalar*F, int N, const scalar*W)
   {
     FindPercentile<scalar> FP(F,N,W);
     return FP.Percentile(f);
   }
+  //@}
   //----------------------------------------------------------------------------
   // polynomial interpolation on grids                                          
   //----------------------------------------------------------------------------
   template<typename scalar_type>
-  inline int find_for_polev(int& j, const int n, const int m,
-			    const scalar_type *x, const scalar_type xi)
+  inline int find_for_polev(int& j, int n, int m,
+			    const scalar_type *x, scalar_type xi)
   {
-    register int M=m;
+    int M=m;
     j = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
     j = hunt(x,n,xi,j) - (m+1)/2 + 1;
     if(j>=0 && j<n && x[j]==xi)	 M = 1; 	    // no interpolation required
@@ -307,10 +368,10 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   template<int m, typename scalar_type>
-  inline int find_for_polev_T(int& j, const int n,
-			      const scalar_type *x, const scalar_type xi)
+  inline int find_for_polev_T(int& j, int n,
+			      const scalar_type *x, scalar_type xi)
   {
-    register int M=m;
+    int M=m;
     j = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
     j = hunt(x,n,xi,j) - (m+1)/2 + 1;
     if(j>=0 && j<n && x[j]==xi)	 M = 1; 	    // no interpolation required
@@ -322,15 +383,14 @@ namespace WDutils {
   template<typename scalar_type, typename num_type>
   inline num_type polint(const scalar_type *xa,
 			 const num_type *ya,
-			 const int n,
-			 const scalar_type x)
+			 int n,
+			 scalar_type x)
   {
     // polynom interpolation using n values
-    register int i,m;
-    register num_type y,*P=WDutils_NEW(num_type,n);
-    for(i=0;i!=n;++i) P[i]=ya[i];
-    for(m=1;m!=n;++m)
-      for(i=0;i<n-m;++i) {
+    num_type y,*P=WDutils_NEW(num_type,n);
+    for(int i=0;i!=n;++i) P[i]=ya[i];
+    for(int m=1;m!=n;++m)
+      for(int i=0;i<n-m;++i) {
 	if(xa[i]==xa[i+m]) WDutils_ErrorF("x's not distinct","polev()");
 	P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
       }
@@ -342,14 +402,13 @@ namespace WDutils {
   template<int n, typename scalar_type, typename num_type>
   inline num_type polint_T(const scalar_type*xa,
 			   const num_type   *ya,
-			   const scalar_type x) 
+			   scalar_type x) 
   {
     // polynom interpolation using n values
-    register int i,m;
-    register num_type y, P[n];
-    for(i=0;i!=n;++i) P[i]=ya[i];
-    for(m=1;m!=n;++m)
-      for(i=0;i<n-m;++i) {
+    num_type y, P[n];
+    for(int i=0;i!=n;++i) P[i]=ya[i];
+    for(int m=1;m!=n;++m)
+      for(int i=0;i<n-m;++i) {
 	if(xa[i]==xa[i+m]) WDutils_ErrorF("x's not distinct","polev()");
 	P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
       }
@@ -359,11 +418,10 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   // polynomial interpolation using m of n values                               
   template<typename scalar_type, typename num_type>
-  inline num_type polev(const scalar_type x,
+  inline num_type polev(scalar_type x,
 			const scalar_type*xarr,
-			const num_type   *yarr,
-			const int         n,
-			const int         m)
+			const num_type*yarr,
+			int n, int m)
   {
     // given the arrays xarr, yarr, polev returns y(x) using m of n values.
     int j, M;
@@ -391,10 +449,10 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   // polynomial interpolation using 4 of n values                               
   template<typename scalar_type, typename num_type>
-  inline num_type polev(const scalar_type x,
+  inline num_type polev(scalar_type x,
 			const scalar_type*xarr,
-			const num_type   *yarr,
-			const int         n)
+			const num_type*yarr,
+			int n)
   {
     // given the arrays xarr, yarr, polev returns y(x) using 4 of n values.
     int j, M=find_for_polev_T<4>(j,n,xarr,x);
@@ -403,20 +461,19 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   // like polev, but taking Array<T>
   template<typename scalar_type, typename num_type>
-  inline num_type polev(const scalar_type x,
-			const Array<scalar_type,1> xarr,
-			const Array<num_type   ,1> yarr)
+  inline num_type polev(scalar_type x,
+			const Array<scalar_type,1>&xarr,
+			const Array<num_type,1>&yarr)
   {
     if(xarr.size() != yarr.size()) error("size mismatch in polev()\n");
     return polev(x,xarr.array(),yarr.array(),xarr.size());
   }
   //----------------------------------------------------------------------------
   template<typename scalar_type, typename num_type>
-  inline num_type ipolev(const scalar_type x,
+  inline num_type ipolev(scalar_type x,
 			 const scalar_type*xarr,
 			 const num_type   *yarr,
-			 const int         n,
-			 const int         m)
+			 int n, int m)
   {
     // like polev, but no extrapolation. gives boundary values instead          
     if(x < xarr[0]   && xarr[0]   < xarr[n-1]) return yarr[0];
@@ -427,10 +484,10 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   template<typename scalar_type, typename num_type>
-  inline num_type ipolev(const scalar_type x,
+  inline num_type ipolev(scalar_type x,
 			 const scalar_type*xarr,
-			 const num_type   *yarr,
-			 const int         n)
+			 const num_type*yarr,
+			 int n)
   {
     // like polev, but no extrapolation. gives boundary values instead          
     if(x < xarr[0]   && xarr[0]   < xarr[n-1]) return yarr[0];
@@ -444,9 +501,9 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   template <typename scalar_type>
   scalar_type rtsafe(void(*func)(scalar_type,scalar_type&,scalar_type&),
-		     const scalar_type x1,
-		     const scalar_type x2,
-		     const scalar_type xacc)
+		     scalar_type x1,
+		     scalar_type x2,
+		     scalar_type xacc)
   {
     const int            maxit=100;
     register scalar_type xh,xl,dx,dxo,f,df,fh,fl,rts,swap,temp;

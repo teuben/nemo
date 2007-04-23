@@ -936,7 +936,7 @@ namespace WDutils {
   //                                                                            
   //  class ConstPseudoArray<T,D>                                               
   //                                                                            
-  /// used as return type for Array<>::operator[]                               
+  /// used as return type for Array<>::operator[] const                         
   ///                                                                           
   /// Apart from a function returning the size in the first dimension, the only 
   /// public member functions for D>1 are the operator[] and element(), which   
@@ -1137,6 +1137,8 @@ namespace WDutils {
 	if(N[d] != n[d]) return false;
       return true;
     }
+    /// copy constructor is disabled (private); use references instead of copies
+    Array(Array const&);
   public:
     /// rank: number of dimensions
     static const int rank = D;
@@ -1261,6 +1263,8 @@ namespace WDutils {
       const T*C;  ///< const pointer to allocated memory 
     };
     //@}
+    /// copy constructor is disabled (private); use references instead of copies
+    Array(Array const&);
   public:
     /// rank: number of dimensions
     static const int rank = 1;
@@ -1308,7 +1312,7 @@ namespace WDutils {
     void reset(const int n[1], T const&x) WDutils_THROWING {
       reset(n[0],x);
     }
-    /// construction from nothing: size equal to 0
+    /// default constructor: size equal to 0
     Array() : A(0), N(0) {}
     /// construction from sizes
     /// \param n (input) size of array in each dimension
