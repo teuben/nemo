@@ -1,18 +1,18 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    inc/random.h                                                       
+/// \file    inc/public/random.h                                                
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 /// \author  Paul McMillan                                                      
 ///                                                                             
-/// \date    1994-2006                                                          
+/// \date    1994-2007                                                          
 ///                                                                             
 /// \todo    add doxygen documentation                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2006  Walter Dehnen                                       
+// Copyright (C) 1994-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -37,6 +37,9 @@
 #ifndef falcON_included_random_h
 #define falcON_included_random_h
 
+#ifndef falcON_included_basic_h
+#  include <public/basic.h>
+#endif
 #ifndef WDutils_included_random_h
 #  include <random.h>
 #endif
@@ -50,6 +53,7 @@ extern "C" {
 #endif
 
 namespace falcON {
+  using namespace WDutils;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class falcON::PseudoRandom                                               //
@@ -63,7 +67,7 @@ namespace falcON {
   public:
     typedef long  seed_type;
     double RandomDouble() const { return xrandom(0.,1.); }
-    explicit PseudoRandom(seed_type const&s) { set_xrandom(s); }
+    explicit PseudoRandom(seed_type  s) { set_xrandom(s); }
     explicit PseudoRandom(const char*s) { init_xrandom(const_cast<char*>(s)); }
   };
 
@@ -81,18 +85,18 @@ namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   class Random : public PseudoRandom {
   private:
-    const unsigned  N;
-    const Sobol    *S;
+    const unsigned N;
+    const Sobol   *S;
     //--------------------------------------------------------------------------
     // construction:                                                            
     //--------------------------------------------------------------------------
   public:
-    Random(seed_type const&s,                      // I: seed for pseudo RNG    
-	   unsigned  const&n) :                    // I: # Sobols               
+    Random(seed_type s,                            // I: seed for pseudo RNG    
+	   unsigned  n) :                          // I: # Sobols               
       PseudoRandom(s), N(n), S(falcON_NEW(Sobol,n)) {}
 #ifdef falcON_NEMO
-    Random(const     char *s,                      // I: seed for NEMO::xrandom 
-	   unsigned  const&n) :                    // I: # Sobols               
+    Random(const char*s,                           // I: seed for NEMO::xrandom 
+	   unsigned   n) :                         // I: # Sobols               
       PseudoRandom(s), N(n), S(falcON_NEW(Sobol,n)) {}
 #endif
     //--------------------------------------------------------------------------

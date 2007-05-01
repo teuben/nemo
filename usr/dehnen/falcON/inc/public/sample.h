@@ -1,29 +1,40 @@
 // -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// sample.h                                                                    |
-//                                                                             |
-// Copyright (C) 2004-2006  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-// some history                                                                |
-// 27/10/2004 WD  added support for DF evaluation                              |
-// 16/02/2006 WD  added support for non-monotonic DF                           |
-//-----------------------------------------------------------------------------+
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file   inc/public/sample.h                                                 
+///                                                                             
+/// \author Walter Dehnen                                                       
+/// \date   2000-2007                                                           
+///                                                                             
+/// \brief  code for sampling spherical stellar dynamical equilibria            
+///                                                                             
+/// \todo   finish doxygen documentation                                        
+///                                                                             
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2004-2007  Walter Dehnen                                       
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// some history                                                                 
+// 27/10/2004 WD  added support for DF evaluation                               
+// 16/02/2006 WD  added support for non-monotonic DF                            
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_sample_h
 #define falcON_included_sample_h
 
@@ -35,36 +46,29 @@
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::SphericalSampler                                           //
-  //                                                                          //
-  // PUBLIC version:                                                          //
-  //                                                                          //
-  // We consider isotropic DFs, i.e. f=f(E)                                   //
-  //                                                                          //
-  //                                                                          //
-  // PROPRIETARY version:                                                     //
-  //                                                                          //
-  // We consider DFs of the general form (Eps := -E = Psi-v^2/2)              //
-  //                                                                          //
-  //     f = L^(-2b) g(Q)                                                     //
-  //                                                                          //
-  // with Q := Eps - L^2/(2a^2)                                               //
-  //                                                                          //
-  // The Binney anisotropy parameter beta for these models is                 //
-  //                                                                          //
-  //     beta = (r^2 + b*a^2) / (r^2 + a^2),                                  //
-  //                                                                          //
-  // which is beta=b at r=0 and beta=1 at r=oo.                               //
-  // For b=0, we obtain the Ossipkov-Merritt model. For a=oo, we obtain a     //
-  // model with constant anisotropy. For b=0 and a=oo, we get the isotropic   //
-  // DF.                                                                      //
-  //                                                                          //
-  // NOTE  1. Since a=0 makes no sense, we interprete a=0 as a=oo.            //
-  //       2. If the model has a different type of DF, one may not use these  //
-  //          methods but superseed the sampling routines below.              //
-  //                                                                          //
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::SphericalSampler                                             
+  //                                                                            
+  /// provides routines for sampling phase-space densities                      
+#ifndef falcON_PROPER
+  /// PUBLIC version:  we consider isotropic DFs, i.e. f=f(E)                   
+#else
+  /// PROPRIETARY version: we consider DFs of the general form\n                
+  ///    f = L^(-2b) g(Q)\n                                                     
+  /// with\n                                                                    
+  ///    Q := Eps - L^2/(2a^2)\n                                                
+  /// where\n                                                                   
+  ///    Eps := -E = Psi-v^2/2.\n                                               
+  /// The Binney anisotropy parameter beta for these models is\n                
+  ///    beta = (r^2 + b*a^2) / (r^2 + a^2),\n                                  
+  /// which is beta=b at r=0 and beta=1 at r=oo.\n                              
+  /// For b=0, we obtain the Ossipkov-Merritt model. For a=oo, we obtain a      
+  /// model with constant anisotropy. For b=0 and a=oo, the DF is isotropic.    
+  /// \note Since a=0 makes no sense, we interprete a=0 as a=oo.                
+  /// \note If the model has a different type of DF, one may not use these      
+  ///       methods but superseed the sampling routines below.                  
+#endif
   //////////////////////////////////////////////////////////////////////////////
   class SphericalSampler {
   private:
@@ -94,16 +98,16 @@ namespace falcON {
     // construction & destruction                                               
     //--------------------------------------------------------------------------
     explicit 
-    SphericalSampler(double const& mt,             // I: total mass             
+    SphericalSampler(double mt,                    // I: total mass             
 #ifdef falcON_PROPER
-		     double const& =0.,            //[I: a: anisotropy radius]  
-		     double const& =0.,            //[I: b0]                    
+		     double   =0.,                 //[I: a: anisotropy radius]  
+		     double   =0.,                 //[I: b0]                    
 		     const double* =0,             //[I: mass adaption: radii]  
-		     int    const& =0,             //[I: mass adaption: # -- ]  
-		     double const& =1.2,           //[I: mass adaption: factor] 
-		     bool   const& =0,             //[I: mass adaption: R_-/Re] 
+		     int      =0,                  //[I: mass adaption: # -- ]  
+		     double   =1.2,                //[I: mass adaption: factor] 
+		     bool     =0,                  //[I: mass adaption: R_-/Re] 
 #endif
-		     bool   const&c=0)            //[I: allow non-monotonic f] 
+		     bool  c  =0)                  //[I: allow non-monotonic f] 
 #ifdef falcON_PROPER
       ;
 #else
