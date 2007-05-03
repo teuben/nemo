@@ -51,73 +51,78 @@
 double WDutils::qbulir(double(*func)(double),
 		       double  a,
 		       double  b, 
-		       double  eps_,
+		       double  eps,
 		       double *erro,
 		       bool    abort,
 		       int     mx)
 {
-  register double ba=b-a;
+  // get actual computing precision and adjust accuracy
+  static double eta=0.;
+  if(eta == 0.) {
+    eta = 1.e-7;
+    while(eta+1. != 1.) eta *=0.5;
+    eta  *=2.;                       // eta = actual computing accuracy
+  }
+  if(eps<eta) eps=eta;
+  // get integration interval and return zero if it vanishes
+  double ba=b-a;
   if(ba==0.) return 0.;
-  register int    i,n=2,nn=3,m,mr, bo,bu=0,odd=1;
-  register double c,d1,ddt,den,e,eps,eta=1.e-7,gr,hm,nt,err,
-                  sm,t,t1,t2,t2a,ta,tab=0.,tb,v=0.,w;
-  double          d[7],dt[7];
-
-  while(eta+1. != 1.) eta *=0.5;
-  eta  *=2.;                       // eta = actual computing accuracy
-  eps   = max(eps_,eta);
-  sm    = 0.;
-  gr    = 0.;
-  t1    = 0.;
-  t2    = 0.5*((*func)(a)+(*func)(b));
-  t2a   = t2;
-  tb    = abs(t2a);
-  c     = t2*ba;
-  dt[0] = c;
-  for(m=0; m!=mx; ++m) {           // iterate over the refinements
-    bo = (m>=7);
+  // initialise some variables
+  bool   bo,bu=0,odd=1;
+  int    i,m,n=2,nn=3,mr;
+  double d[7],dt[7];
+  double ddt,hm,nt,err,t,ta,tab=(0),v=(0),w,sm(0),gr(0),t1(0),
+    t2 =0.5*(func(a)+func(b)),
+    t2a=t2,
+    tb =abs(t2a),
+    c  =t2*ba;
+  dt[0]=c;
+  // iterate over the refinements
+  for(m=1; m<=mx; ++m) {
+    bo = m>=7;
     hm = ba/n;
     if(odd) {
-      for(i=1;i<=n;i+=2) {
-	w  = (*func)(a+i*hm);
-	t2+= w;
-	tb+= abs(w);
+      for(i=1; i<=n; i+=2) {
+	w = func(a+i*hm);
+	t2 += w;
+	tb += abs(w);
       }
-      nt  = t2;
-      tab = tb * abs(hm);
-      d[1]=16./9.;
-      d[3]=64./9.;
-      d[5]=256./9.;
+      nt   = t2;
+      tab  = tb * abs(hm);
+      d[1] = 1.77777777777777777778; // 16/9
+      d[3] = 7.11111111111111111111; // 64/9
+      d[5] = 28.4444444444444444444; // 256.9
     } else {
-      for(i=1;i<=n;i+=6) {
-	w  = i*hm;
-	t1+= (*func)(a+w) + (*func)(b-w);
+      for(i=1; i<=n; i+=6) {
+	w = i*hm;
+	t1+= func(a+w) + func(b-w);
       }
-      nt  = t1+t2a;
-      t2a =t2;
-      d[1]=9./4.;
-      d[3]=9.;
-      d[5]=36.;
+      nt   = t1+t2a;
+      t2a  = t2;
+      d[1] = 2.25; // 9/4
+      d[3] = 9.;
+      d[5] = 36.;
     }
-    ddt  =dt[0];
-    t    =nt*hm;
-    dt[0]=t;
-    nt   =dt[0];
+    ddt   = dt[0];
+    t     = nt*hm;
+    dt[0] = t;
+    nt    = dt[0];
     if(bo) {
-      mr  =6;
-      d[6]=64.;
-      w   =144.;
+      mr   = 6;
+      d[6] = 64.;
+      w    = 144.;
     } else {
-      mr  =m;
-      d[m]=n*n;
-      w   =d[m];
+      mr   = m;
+      d[m] = n*n;
+      w    = d[m];
     }
     for(i=1;i<=mr;i++) {
-      d1 =d[i]*ddt;
-      den=d1-nt;
-      e  =nt-ddt;
-      if(den != 0.) {
-	e /= den;
+      double d1  = d[i]*ddt;
+      double den = d1-nt;
+//    double e   = nt-ddt;
+      if(den) {
+	double e = (nt-ddt)/den;
+//	e /= den;
 	v  = nt*e;
 	nt = d1*e;
 	t += v;
@@ -125,8 +130,8 @@ double WDutils::qbulir(double(*func)(double),
 	nt = 0.;
 	v  = 0.;
       }
-      ddt  = dt[i];
-      dt[i]= v;
+      ddt   = dt[i];
+      dt[i] = v;
     }
     ta = c;
     c  = t;
@@ -135,21 +140,21 @@ double WDutils::qbulir(double(*func)(double),
     t += v;
     err= abs(v);
     if(ta<t) {
-      d1 = ta;
+      double d1 = ta;
       ta = t;
       t  = d1;
     }
-    bo = bo || (ta<gr && t>sm);
+    bo  = bo || (ta<gr && t>sm);
     if(bu && bo && err < eps*tab*w) break;
-    gr = ta;
-    sm = t;
-    odd= !odd;
-    i  = n;
-    n  = nn;
-    nn = i+i;
-    bu = bo;
-    d[2]=4.;
-    d[4]=16.;
+    gr  = ta;
+    sm  = t;
+    odd = !odd;
+    i   = n;
+    n   = nn;
+    nn  = i+i;
+    bu  = bo;
+    d[2]= 4.;
+    d[4]= 16.;
   }
   v = tab*eta;
   if(err<v) err = v;
