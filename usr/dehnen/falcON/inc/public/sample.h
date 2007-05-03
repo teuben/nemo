@@ -1,4 +1,4 @@
-// -*- C++ -*-                                                                 |
+// -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
 /// \file   inc/public/sample.h                                                 
@@ -7,8 +7,6 @@
 /// \date   2000-2007                                                           
 ///                                                                             
 /// \brief  code for sampling spherical stellar dynamical equilibria            
-///                                                                             
-/// \todo   finish doxygen documentation                                        
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -33,6 +31,7 @@
 // some history                                                                 
 // 27/10/2004 WD  added support for DF evaluation                               
 // 16/02/2006 WD  added support for non-monotonic DF                            
+// 02/05/2007 WD  made support for Cuddeford (1991) DF public                   
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_sample_h
@@ -50,11 +49,8 @@ namespace falcON {
   //                                                                            
   // class falcON::SphericalSampler                                             
   //                                                                            
-  /// provides routines for sampling phase-space densities                      
-#ifndef falcON_PROPER
-  /// PUBLIC version:  we consider isotropic DFs, i.e. f=f(E)                   
-#else
-  /// PROPRIETARY version: we consider DFs of the general form\n                
+  /// provides routines for sampling phase-space densities.                     
+  /// We consider DFs of the general form\n                                     
   ///    f = L^(-2b) g(Q)\n                                                     
   /// with\n                                                                    
   ///    Q := Eps - L^2/(2a^2)\n                                                
@@ -68,116 +64,121 @@ namespace falcON {
   /// \note Since a=0 makes no sense, we interprete a=0 as a=oo.                
   /// \note If the model has a different type of DF, one may not use these      
   ///       methods but superseed the sampling routines below.                  
-#endif
-  //////////////////////////////////////////////////////////////////////////////
+  ///                                                                           
+  // ///////////////////////////////////////////////////////////////////////////
   class SphericalSampler {
-  private:
-    const double Mt;
-    const double ibt;
-    const bool   careful;
     typedef tupel<2,double> pair_d;
+  private:
+    const bool    careful,OM,beta;
+    const double  Mt,ra,iraq,b0,ibt;
+    Array<pair_d> Xe;
+    Array<double> Is;
     //--------------------------------------------------------------------------
 #ifdef falcON_PROPER
-    const bool   adapt_masses, Peri, OM, beta;
-    const double ra,iraq;
-    const double b0;
+    const bool   adapt_masses, Peri;
     const int    nR;
     const double*Rad, fac;
     double      *num;
-    pair_d      *Xe;
-    double      *Is;
-    int          Ne;
+#endif
     //--------------------------------------------------------------------------
     // private methods                                                          
     //--------------------------------------------------------------------------
     inline void setis();
-#endif
     inline double F0(double) const;
   public:
     //--------------------------------------------------------------------------
-    // construction & destruction                                               
-    //--------------------------------------------------------------------------
+    /// ctor
+    /// \param mt total mass to be sampled
+    /// \param ra Ossipkov (1979) - Merritt (1985) anisotropy radius
+    /// \param b0 Cuddeford (1991) central anisotropy
+#ifdef falcON_PROPER
+    /// \param rr radii for mass adaption
+    /// \param nr number of radii for mass adaption
+    /// \param fr factor for mass adaption
+    /// \param pr using R_peri (or R_circ) for mass adaption ?
+#endif
+    /// \param cf be extra careful when g(Q) may be non-monotonic.
     explicit 
-    SphericalSampler(double mt,                    // I: total mass             
+    SphericalSampler(double mt, double ra=0., double b0=0.,
 #ifdef falcON_PROPER
-		     double   =0.,                 //[I: a: anisotropy radius]  
-		     double   =0.,                 //[I: b0]                    
-		     const double* =0,             //[I: mass adaption: radii]  
-		     int      =0,                  //[I: mass adaption: # -- ]  
-		     double   =1.2,                //[I: mass adaption: factor] 
-		     bool     =0,                  //[I: mass adaption: R_-/Re] 
+		     const double* rr=0, int nr=0, double fr=1.2, bool pr=0,
 #endif
-		     bool  c  =0)                  //[I: allow non-monotonic f] 
-#ifdef falcON_PROPER
-      ;
-#else
-      : 
-    Mt(mt), ibt(1./3.), careful(c) {}
-#endif
+		     bool cf=0);
     //--------------------------------------------------------------------------
+    /// dtor
     ~SphericalSampler() { 
 #ifdef falcON_PROPER
       if(num) falcON_DEL_A(num);
-      if(Xe)  falcON_DEL_A(Xe);
-      if(Is)  falcON_DEL_A(Is);
 #endif
     }
     //--------------------------------------------------------------------------
-    // 1. Methods required for sampling radius and velocity: abstract           
-    //--------------------------------------------------------------------------
+    /// \name abstract methods required for sampling radius and velocity
+    //@{
   protected:
-    virtual double DF(double)         const=0;     // f(E) or g(Q)              
+    /// g(Q) (reduces tof(E) for isotropuc case)
+    virtual double DF(double) const=0;
+    /// Psi(R)
+    virtual double Ps(double) const=0;
+    /// r(M), M in [0,M_total]
+    virtual double rM(double) const=0;
 #ifdef falcON_PROPER
-    virtual double Re(double)         const=0;     // Rcirc(Eps)                
-    virtual double Rp(double, double) const=0;     // R_peri(Eps, L)            
+    /// R_circ(Eps)
+    virtual double Re(double) const=0;
+    /// R_peri(Eps,L)
+    virtual double Rp(double, double) const=0;
 #endif
-    virtual double Ps(double)         const=0;     // Psi(R)                    
-    virtual double rM(double)         const=0;     // r(M), M in [0,M_total]    
+    //@}
     //--------------------------------------------------------------------------
-    // 2. Sampling of phase space                                               
-    //                                                                          
-    // Sampling radius, radial and tangential velocity from the model. The      
-    // boolean template specifies whether quasi-random number are used (true)   
-    // for getting the radius as well as the angles in velocity space.          
-    //                                                                          
-    //--------------------------------------------------------------------------
-    template<bool QUASI>
-    double set_radvel(                             // R: Psi(r)                 
-		      Random const&,               // I: pseudo & quasi RNG     
-		      double&,                     // O: radius                 
-		      double&,                     // O: radial velocity        
-		      double&,                     // O: tangential velocity    
-		      double&) const;              // O: f(E) or g(Q)           
-    //--------------------------------------------------------------------------
-    // 3. Sampling of full phase-space: non-virtual                             
-    //                                                                          
-    // NOTE on scales                                                           
-    // We assume that the randomly generated (r,vr,vt) are already properly     
-    // scaled as well as the Psi returnd. Also the routines for pericentre and  
-    // Rc(E) are assummed to take arguments and return values that are both     
-    // scaled.                                                                  
-    //--------------------------------------------------------------------------
+    /// sampling radius, radial and tangential velocity from the model.
+    /// \return Psi(r)
+    /// \param q (input) use quasi (or pseudo) random numbers?
+    /// \param R (input) quasi and pseudo random number generator
+    /// \param r (output) radius
+    /// \param vr (output) radial velocity
+    /// \param vt (output) tangential velocity
+    /// \param f  (output) full DF at sampled point
+    double set_radvel(bool q, Random const&R,
+		      double&r, double&vr, double&vt, double&f) const;
   public:
-    void sample(body   const&,                     // I: first body to sample   
-		unsigned     ,                     // I: # bodies to sample     
-		bool         ,                     // I: quasi random?          
-		Random const&,                     // I: pseudo & quasi RNG     
-		double       =0.5,                 //[I: fraction with vphi>0]  
-#ifdef falcON_PROPER
-	        double       =0.0,                 //[I: factor: setting eps_i] 
-#endif
-		bool         =false                //[I: write DF into aux?]    
-		) const;          
     //--------------------------------------------------------------------------
-    void sample(bodies const&B,                    // I/O: bodies to sample     
-		bool         q,                    // I: quasi random?          
-		Random const&R,                    // I: pseudo & quasi RNG     
-		double       f =0.5,               //[I: fraction with vphi>0]  
+    /// sampling of full phase-space: non-virtual
+    /// \note assuming the randomly generated (r,vr,vt) are already properly
+    ///       scaled as well as the Psi returnd. Also the routines for
+    ///       R_peri and R_circ are assummed to take arguments and return
+    ///       values that are both scaled.
+    /// \param B0 (input) first body to sample
+    /// \param N (input) number of bodies to sample
+    /// \param q (input) use quasi (or pseudo) random numbers?
+    /// \param R (input) quasi and pseudo random number generator
+    /// \param f (input) fraction with vphi>0
 #ifdef falcON_PROPER
-	        double       e =0.0,               //[I: factor: setting eps_i] 
+    /// \param e (input) factor: setting eps_i
 #endif
-		bool         g =false              //[I: write DF into aux?]    
-		) const
+    /// \param g (input)  write DF into aux?
+    void sample(body const&B0, unsigned N, bool q, Random const&R, double f=0.5,
+#ifdef falcON_PROPER
+	        double e=0.0,
+#endif
+		bool g=false) const;          
+    //--------------------------------------------------------------------------
+    /// sampling of full phase-space: non-virtual
+    /// \note assuming the randomly generated (r,vr,vt) are already properly
+    ///       scaled as well as the Psi returnd. Also the routines for
+    ///       R_peri and R_circ are assummed to take arguments and return
+    ///       values that are both scaled.
+    /// \param B (input) bodies to sample
+    /// \param q (input) use quasi (or pseudo) random numbers?
+    /// \param R (input) quasi and pseudo random number generator
+    /// \param f (input) fraction with vphi>0
+#ifdef falcON_PROPER
+    /// \param e (input) factor: setting eps_i
+#endif
+    /// \param g (input)  write DF into aux?
+    void sample(bodies const&B, bool q, Random const&R, double f=0.5,
+#ifdef falcON_PROPER
+	        double e=0.0,
+#endif
+		bool g=false) const
     {
       sample(B.begin_all_bodies(), B.N_bodies(), q,R,f,
 #ifdef falcON_PROPER
@@ -186,7 +187,7 @@ namespace falcON {
 	     g);
     }
     //--------------------------------------------------------------------------
-  };
+  };// class SphericalSampler
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 #endif// falcON_included_sample_h

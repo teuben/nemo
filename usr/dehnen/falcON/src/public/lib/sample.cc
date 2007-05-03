@@ -3,7 +3,7 @@
 //                                                                             |
 // sample.cc                                                                   |
 //                                                                             |
-// Copyright (C) 2004-2006  Walter Dehnen                                      |
+// Copyright (C) 2004-2007  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -27,17 +27,61 @@
 
 using namespace falcON;
 
-#ifdef falcON_PROPER
-#  include <proper/sample.cc>
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // class falcON::SphericalSampler                                             //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-inline double SphericalSampler::
-F0(double Psi) const
+namespace {
+  const int Ne1=1000, Ne=Ne1+1;
+  double __p;
+  inline double dI(double const&eta, double const&I)
+  {
+    return pow(sin(eta),__p);
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+inline void SphericalSampler::setis()
+  // set table with int(sin(eta)^(1-2b), eta=0..x)                              
+{
+  if(!beta) return;
+  Is[0]    = 0.;
+  Xe[0][0] = 0.;
+  Xe[0][1] = 1.;
+  const double    de =Pi/Ne1;
+  double eta = 0.;
+  __p = 1-b0-b0;
+  for(register int i=1; i!=Ne; ++i) {
+    Is[i]    = rk4(Is[i-1],eta,de,dI);
+    eta     += de;
+    Xe[i][0] = sin(eta);
+    Xe[i][1] = cos(eta);
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+#ifdef falcON_PROPER
+#  include <proper/sample.cc>
+#else
+SphericalSampler::SphericalSampler(double __mt,
+				   double __ra,
+				   double __b0,
+				   bool   __c) :
+  careful ( __c ),
+  OM      ( __ra>0. ),
+  beta    ( __b0 != 0. ),
+  Mt      ( __mt ),
+  ra      ( __ra ),
+  iraq    ( __ra>0? 1./(__ra*__ra) : 0. ),
+  b0      ( __b0 ),
+  ibt     ( 1./(3. - __b0 - __b0) ),
+  Xe      ( beta? Ne : 0 ),
+  Is      ( beta? Ne : 0 )
+{
+  if(beta) setis();
+}
+#endif
+////////////////////////////////////////////////////////////////////////////////
+inline double SphericalSampler::F0(double Psi) const
 {
   if(careful) {
     // be careful in finding a value f0 so that f(Eps) < f0 for Eps in [0,Psi]
@@ -56,18 +100,19 @@ F0(double Psi) const
     return DF(Psi);
 }
 ////////////////////////////////////////////////////////////////////////////////
-template<bool QUASI> double SphericalSampler::
+double SphericalSampler::
 set_radvel(                                        // R: Psi(r)                 
-	   Random const&RNG,                       // I: pseudo & quasi RNG     
+	   bool         q,                         // I: quasi (or random) RNG? 
+	   Random const&R,                         // I: pseudo & quasi RNG     
 	   double      &r,                         // O: radius                 
 	   double      &vr,                        // O: radial velocity        
 	   double      &vt,                        // O: tangential velocity    
-	   double      &f) const                   // O: f(E) or g(Q)           
+	   double      &f) const                   // O: f(E,L)                 
 {
   //                                                                            
   // 1. get r & Psi(r)                                                          
   //                                                                            
-  r = rM(QUASI? RNG(0)*Mt : RNG()*Mt);             // get Lagrange radius from M
+  r = rM(q? R(0)*Mt : R()*Mt);                     // get Lagrange radius from M
   double Psi = Ps(r);                              // get potential             
   //                                                                            
   // 2. get w                                                                   
@@ -75,27 +120,25 @@ set_radvel(                                        // R: Psi(r)
   double w, we=sqrt(2*Psi);                        // escape velocity           
   double f0=F0(Psi);                               // DF(w=0)                   
   do {                                             // DO                        
-    w = we * pow(RNG(),ibt);                       //   sample velocity 0<w<we  
-    f = DF(Psi-0.5*w*w);                           //   get DF                  
+    w = we * pow(R(),ibt);                         //   sample velocity 0<w<we  
+    f = DF(Psi-0.5*w*w);                           //   get g(Q)                
     if(f>f0)                                       //   IF f>f(w=0)             
       error("sampling error: DF non-monotonic"     //     ERROR                 
 	    ": f(Psi=%g)=%g < f(Eps=%g)=%g\n",
 	    f,Psi-0.5*w*w,f0,Psi);                 //     ERROR                 
-  } while(f0 * RNG() > f);                         // WHILE ( rejected )        
+  } while(f0 * R() > f);                           // WHILE ( rejected )        
   //                                                                            
-  // 3. get angle in velocity space -> vr, vt                                   
+  // 3. get angle in velocity space -> vr, vt  and set f=L^-2b*g(Q)             
   //                                                                            
-#ifdef falcON_PROPER
-  if(beta) falcON_SAMPLE_SETV else                 // IF b0 != 0                
-#endif
-  {                                                // ELSE                      
-    double ce = QUASI? RNG(1,-1.,1.) : RNG(-1.,1.);//   sample cos(eta)         
+  if(beta) {                                       // IF b0 != 0                
+    pair_d SC=polev((q? R(1):R())*Is[Ne1],Is,Xe);  //   sample eta              
+    vt = w * SC[0]/sqrt(1+r*r*iraq);               //   tangential velocity     
+    vr = w * SC[1];                                //   radial velocity         
+    if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);  //   distribution function   
+  } else {                                         // ELSE                      
+    double ce = q? R(1,-1.,1.) : R(-1.,1.);        //   sample cos(eta)         
     vr = w * ce;                                   //   radial velocity         
-    vt = w * sqrt((1-ce*ce)
-#ifdef falcON_PROPER
-		  /(1+r*r*iraq)
-#endif
-		  );                               //   tangential velocity     
+    vt = w * sqrt((1-ce*ce)/(1+r*r*iraq));         //   tangential velocity     
   }                                                // ENDIF                     
   return Psi;                                      // return potential          
 }
@@ -103,7 +146,7 @@ set_radvel(                                        // R: Psi(r)
 void SphericalSampler::sample(body   const&B0,     // I: first body to sample   
 			      unsigned     N,      // I: # bodies to sample     
 			      bool         q,      // I: quasi random?          
-			      Random const&RNG,    // I: pseudo & quasi RNG     
+			      Random const&R,      // I: pseudo & quasi RNG     
 			      double       f_,     //[I: fraction with vphi>0]  
 #ifdef falcON_PROPER
 			      double       epar,   //[I: factor: setting eps_i] 
@@ -125,9 +168,7 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
     // 1. get r,vr,vt,f                                                         
     //                                                                          
     double r,vr,vt,f;                              //   radius, v_tan, v_rad, DF
-    double Psi = q?                                //   quasi-randomly?         
-      set_radvel<1>(RNG,r,vr,vt,f) :               //     YES: get r,vr,vt,f    
-      set_radvel<0>(RNG,r,vr,vt,f);                //     NO:  get r,vr,vt,f    
+    double Psi = set_radvel(q,R,r,vr,vt,f);        //   get Psi,r,vr,vt,f(E,L)  
     //                                                                          
     // 2. establish number of bodies at (r,vr,vt), depending on mass adaption   
     //                                                                          
@@ -144,23 +185,23 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
       Bi.mass() = mu;                              //     set mass              
       Mcum     += mu;                              //     cumulate total mass   
       register double                              //     some auxiliary vars:  
-	cth = q? RNG(2,-1.,1.):RNG(-1.,1.),        //     sample cos(theta)     
+	cth = q? R(2,-1.,1.):R(-1.,1.),            //     sample cos(theta)     
 	sth = std::sqrt(1.-cth*cth),               //     sin(theta)            
-	phi = q? RNG(3,0.,TPi):RNG(0.,TPi),        //     sample azimuth phi    
+	phi = q? R(3,0.,TPi):R(0.,TPi),            //     sample azimuth phi    
 	cph = std::cos(phi),                       //     cos(phi)              
 	sph = std::sin(phi);                       //     sin(phi)              
       Bi.pos()[0] = r * sth * cph;                 //     x=r*sin(th)*cos(ph)   
       Bi.pos()[1] = r * sth * sph;                 //     y=r*sin(th)*sin(ph)   
       Bi.pos()[2] = r * cth;                       //     z=r*cos(th)           
       register double                              //     some auxiliary vars:  
-	psi = q? RNG(4,0.,TPi):RNG(0.,TPi),        //     sample angle psi      
+	psi = q? R(4,0.,TPi):R(0.,TPi),            //     sample angle psi      
         vth = vt * std::cos(psi),                  //     v_theta               
         vph = vt * std::sin(psi),                  //     v_phi                 
         vm  = vr * sth + vth * cth;                //     v_meridional          
       if       (fp>0.) {                           //     IF flip sign to pos?  
-	if(fp>  (q? RNG(5):RNG())) vph= abs(vph);  //       draw -> flip        
+	if(fp>  (q? R(5):R())) vph= abs(vph);      //       draw -> flip        
       } else if(fp<0.) {                           //     ELIF flip sign to neg?
-	if(fp< -(q? RNG(5):RNG())) vph=-abs(vph);  //       draw -> flip        
+	if(fp< -(q? R(5):R())) vph=-abs(vph);      //       draw -> flip        
       }                                            //     ENDIF                 
       Bi.vel()[0] = vm * cph - vph * sph;          //     v_x= ...              
       Bi.vel()[1] = vm * sph + vph * cph;          //     v_y= ...              

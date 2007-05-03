@@ -407,9 +407,7 @@ DehnenModelSampler::
 DehnenModelSampler(double const&gamma,             // I: gamma                  
 		   double const&radius,            // I: scale radius           
 		   double const&Mtot,              // I: GM (untruncated)       
-#ifdef falcON_PROPER
 		   double const&r_a,               //[I: anisotropy radius]     
-#endif
 		   double const&rmax,              //[I: maximum radius]        
 		   int    const&N,                 //[I: # points on table f(y)]
 		   double const&eps                //[I: numerical precision]   
@@ -421,20 +419,16 @@ DehnenModelSampler(double const&gamma,             // I: gamma
 #endif
 		   ) :
   ScaledDehnenModel ( gamma,radius,Mtot,eps ),
-  SphericalSampler  ( rmax>0? Mr(rmax):Mtot
+  SphericalSampler  ( rmax>0? Mr(rmax):Mtot, r_a
 #ifdef falcON_PROPER
-		      , r_a, 0., __r,__n,__f,__p
+		      , 0., __r,__n,__f,__p
 #endif
 		      ),
   n                 ( N ),
   y                 ( falcON_NEW(double,n) ),
   f                 ( falcON_NEW(double,n) ),
   fi                ( gamma>0.? 0.5*(gamma-6) : -2. ),
-  fo                ( 
-#ifdef falcON_PROPER
-		     r_a<=0? 2.5 : 
-#endif
-		     0.5 )
+  fo                ( r_a<=0? 2.5 : 0.5 )
 {
   if(radius <= 0.0) error("DehnenModel: scale radius <= 0\n");
   if(Mtot   <= 0.0) error("DehnenModel: total mass <= 0\n");
@@ -443,11 +437,7 @@ DehnenModelSampler(double const&gamma,             // I: gamma
   const double dy=1./double(n+1);
   for(int i=0; i!=n; ++i) { 
     y[i] = (i+1)*dy;
-    f[i] = log(
-#ifdef falcON_PROPER
-	       r_a>0? F(Psy(y[i]), r_a) : 
-#endif
-	       F(Psy(y[i])) );
+    f[i] = log(r_a>0? F(Psy(y[i]), r_a) : F(Psy(y[i])) );
   }
 }
 ////////////////////////////////////////////////////////////////////////////////

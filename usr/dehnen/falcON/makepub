@@ -300,9 +300,11 @@ $(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(io_h) $(
 			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
 $(BIN)mkplum:		$(SEXE)mkplum.cc $(BINT) $(main_h) $(sample_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(body_h) $(inline_io_h) $(io_h) $(makefiles)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)s2g:		$(SEXE)s2g.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(body_h) $(inline_io_h) $(io_h) $(makefiles)
+$(BIN)s2s:		$(SEXE)s2s.cc $(BINT) $(main_h) $(body_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)scale_eps:	$(SEXE)scale_eps.cc $(BINT) $(main_h) $(body_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
@@ -341,18 +343,19 @@ mkbodiesfunc	:	$(falcON) $(BIN)mkbodiesfunc
 mkdehnen	:	$(falcON) $(BIN)mkdehnen
 mkking		:	$(falcON) $(BIN)mkking
 mkplum		:	$(falcON) $(BIN)mkplum
-s2g		:	$(falcON) $(BIN)s2g
 s2a		:	$(falcON) $(BIN)s2a
+s2g		:	$(falcON) $(BIN)s2g
+s2s		:	$(falcON) $(BIN)s2s
 scale_eps	:	$(falcON) $(BIN)scale_eps
 set_time	:	$(falcON) $(BIN)set_time
 snapfilter	:	$(falcON) $(BIN)snapfilter
 snapprop	:	$(falcON) $(BIN)snapprop
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
-exe_pub		:=	TestGrav gyrfalcON a2s addgravity density \
-			getgravity lagrange_radii manipulate mkbodiesfunc \
+exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
+			gyrfalcON lagrange_radii manipulate mkbodiesfunc \
 			mkbodyfunc mkdehnen mkking mkplum s2a scale_eps \
-			snapfilter snapprop symmetrize g2s s2g
+			snapfilter snapprop symmetrize s2g s2s
 else
 
 exe_pub		:=	TestGrav

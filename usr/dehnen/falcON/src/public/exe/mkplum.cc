@@ -3,7 +3,7 @@
 //                                                                             |
 // mkplum.cc                                                                   |
 //                                                                             |
-// Copyright (C) 2000-2005 Walter Dehnen                                       |
+// Copyright (C) 2000-2007 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -31,9 +31,10 @@
 // v 1.1.1 20/05/2005  WD several minor updates                                |
 // v 2.0   14/06/2005  WD new falcON                                           |
 // v 2.1   13/06/2005  WD changes in fieldset                                  |
+// v 2.2   02/05/2007  WD made Ossipkov-Merritt anisotropic model public       |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.1"
-#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
+#define falcON_VERSION   "2.2"
+#define falcON_VERSION_D "02-may-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkplum
@@ -50,9 +51,7 @@ string defv[] = {
   "nbody=???\n        number of bodies                                   ",
   "r_s=1\n            scale radius                                       ",
   "mass=1\n           total mass of Plummer model                        ",
-#ifdef falcON_PROPER
   "r_a=\n             Ossipkov-Merritt anisotropy radius                 ",
-#endif
   "seed=0\n           seed for the randum number generator               ",
   "q-ran=f\n          use quasi- instead of pseudo-random numbers        ",
   "time=0\n           simulation time of snapshot                        ",
@@ -169,20 +168,10 @@ namespace {
   public:
     PlummerModelSampler(double const&radius,       // I: scale radius           
 			double const&Mtot,         // I: GM (untruncated)       
-#ifdef falcON_PROPER
 			double const&r_a,          // I: anisotropy radius      
-#endif
 			double const&rmax) :       // I: maximum radius         
-      ScaledPlummerModel ( radius, Mtot
-#ifdef falcON_PROPER
-			   , r_a
-#endif
-			   ),
-      SphericalSampler   ( rmax>0? Mr(rmax) : Mtot
-#ifdef falcON_PROPER
-			   , r_a
-#endif
-			   )
+      ScaledPlummerModel ( radius, Mtot , r_a ),
+      SphericalSampler   ( rmax>0? Mr(rmax) : Mtot , r_a )
     {}
     //--------------------------------------------------------------------------
     // provide the abstract functions                                           
@@ -206,17 +195,13 @@ void falcON::main() falcON_THROWING
   const bool   WD  (getbparam("WD_units"));        // using WD_units?           
   const Random Ran (getparam("seed"),6);           // random-number-generators  
   if(hasvalue("rmax") && getdparam("rmax")<=0.) falcON_THROW("rmax <= 0");
-#ifdef falcON_PROPER
   if(hasvalue("r_a")  && getdparam("r_a") <=0.) falcON_THROW("r_a <= 0");
-#endif
   snapshot shot(getdparam("time"),
 		getuparam("nbody"),
 		fieldset(fieldset::basic));
   PlummerModelSampler PS(getdparam("r_s"),
 			 WD? getdparam("mass")/mf : getdparam("mass"),
-#ifdef falcON_PROPER
 			 getdparam_z("r_a"),
-#endif
 			 getdparam_z("rmax"));
   PS.sample(shot,getbparam("q-ran"),Ran,getdparam("f_pos"));
   nemo_out out(getparam("out"));

@@ -3,7 +3,7 @@
 //                                                                             |
 // mkdehnen.cc                                                                 |
 //                                                                             |
-// Copyright (C) 2004, 2005 Walter Dehnen                                      |
+// Copyright (C) 2004, 2005, 2007 Walter Dehnen                                |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -42,9 +42,10 @@
 // v 3.0   10/06/2005  WD new falcON: new bodies, new nemo_io                  |
 // v 3.1   06/07/2005  WD default rmax=1000 r_s                                |
 // v 3.2   13/06/2005  WD changes in fieldset                                  |
+// v 3.3   02/05/2007  WD made Ossipkov-Merritt anisotropic models public      |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.2"
-#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
+#define falcON_VERSION   "3.3"
+#define falcON_VERSION_D "02-may-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile mkdehnen
@@ -61,9 +62,7 @@ string defv[] = {
   "gamma=???\n        inner power-law slope of density, gamma in[0,2.5[  ",
   "mass=1\n           total mass                                         ",
   "r_s=1\n            scale radius                                       ",
-#ifdef falcON_PROPER
   "r_a=\n             Ossipkov-Merritt anisotropy radius                 ",
-#endif
   "seed=0\n           seed for the randum number generator               ",
   "q-ran=f\n          use quasi- instead of pseudo-random numbers        ",
   "time=0\n           simulation time of snapshot                        ",
@@ -81,8 +80,8 @@ string defv[] = {
   falcON_DEFV, NULL };
 ////////////////////////////////////////////////////////////////////////////////
 string usage = "mkdehnen -- initial conditions from a Dehnen (1993) model"
-#ifdef falcON_PROPER
                "\n            possibly with Osipkov-Merritt anisotropy"
+#ifdef falcON_PROPER
                "\n            and mass adaption (proprietary version only)"
 #endif
 ;
@@ -93,10 +92,8 @@ void falcON::main() falcON_THROWING
   //----------------------------------------------------------------------------
   // 1. set some parameters                                                     
   //----------------------------------------------------------------------------
-#ifdef falcON_PROPER
   if(hasvalue("r_a")  && getdparam("r_a") <=0.)
     falcON_THROW("r_a <= 0");
-#endif
   const bool     WD  (getbparam("WD_units"));      // using WD_units?           
   const Random   Ran (getparam("seed"),6);         // random-number-generators  
   const fieldset data( 
@@ -126,9 +123,7 @@ void falcON::main() falcON_THROWING
   else          rmax  = 0.;
   DehnenModelSampler GS(getdparam("gamma"), rs,
 			WD? getdparam("mass")/mf : getdparam("mass"),
-#ifdef falcON_PROPER
 			getdparam_z("r_a"),
-#endif
 			rmax,9999,1.e-8
 #ifdef falcON_PROPER
 		       ,Rad,nb,
@@ -137,8 +132,6 @@ void falcON::main() falcON_THROWING
 #endif
 			);
   snapshot shot(getdparam("time"), getiparam("nbody"), data);
-#ifdef falcON_PROPER
-#endif
   GS.sample(shot,getbparam("q-ran"),Ran,getdparam("f_pos"),
 #ifdef falcON_PROPER
 	    getdparam("epar"),

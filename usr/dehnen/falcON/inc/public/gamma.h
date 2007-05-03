@@ -3,7 +3,7 @@
 //                                                                             |
 // gamma.h                                                                     |
 //                                                                             |
-// Copyright (C) 1994, 1995, 2004-2006  Walter Dehnen                          |
+// Copyright (C) 1994, 1995, 2004-2007  Walter Dehnen                          |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -277,9 +277,7 @@ namespace falcON {
     DehnenModelSampler(double const&,              // I: gamma                  
 		       double const&,              // I: scale radius           
 		       double const&,              // I: GM (untruncated)       
-#ifdef falcON_PROPER
 		       double const& = 0.,         //[I: anisotropy radius]     
-#endif
 		       double const& = 0.,         //[I: maximum radius]        
 		       int    const& = 9999,       //[I: # points on table f(y)]
 		       double const& = 1.e-8       //[I: numerical precision]   
