@@ -3,7 +3,7 @@
  *                                                                              
  * defacc.h                                                                     
  *                                                                              
- * Copyright Walter Dehnen, 2003-2004                                           
+ * Copyright Walter Dehnen, 2003-2007                                           
  * e-mail:   walter.dehnen@astro.le.ac.uk                                       
  * address:  Department of Physics and Astronomy, University of Leicester       
  *           University Road, Leicester LE1 7RH, United Kingdom                 
@@ -29,6 +29,7 @@
  *                              allows superpositions using GrowCombined        
  * version 3.1  17/09/2004  WD  somewhat improved documentation                 
  * version 3.2  12/11/2004  WD  catching std::bad_alloc and report error        
+ * version 3.3  04/05/2007  WD  added global scope resolution operators         
  *                                                                              
  *******************************************************************************
  *                                                                              
@@ -622,16 +623,16 @@ void iniacceleration(const double*pars,					\
 {									\
   nemo_dprintf(4,"iniacceleration() called\n");				\
   if(AccN == AccMax) {							\
-    warning("iniacceleration(): request to initialize "			\
-	    "more than %d accelerations of type \"%s\"",		\
-	    AccMax, MyAccInstall::name());				\
+    ::warning("iniacceleration(): request to initialize "		\
+	      "more than %d accelerations of type \"%s\"",		\
+	      AccMax, MyAccInstall::name());				\
     *accel = 0;								\
     return;								\
   }									\
   try {									\
     MyAcc[AccN] = new MyAccInstall(pars,npar,file,need_m,need_v);	\
   } catch(std::bad_alloc E) {						\
-    error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
+    ::error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
   }									\
   *accel = Accs[AccN++];						\
 }
@@ -658,19 +659,19 @@ void inipotential(const int   *npar,					\
 {									\
   if(MyPot) {								\
     if(MyPot->differ(pars,*npar,file))					\
-      warning("inipotential(): re-initializing \"%s\" "			\
-	      "with different parameters or data file",			\
-	      MyPotInstall::name());					\
+      ::warning("inipotential(): re-initializing \"%s\" "		\
+		"with different parameters or data file",		\
+		MyPotInstall::name());					\
     else								\
-      warning("inipotential(): re-initializing \"%s\" "			\
-	      "with identical parameters and data file",		\
-	      MyPotInstall::name());					\
+      ::warning("inipotential(): re-initializing \"%s\" "		\
+		"with identical parameters and data file",		\
+		MyPotInstall::name());					\
     delete MyPot;							\
   }									\
   try {									\
     MyPot = new MyPotInstall(pars,*npar,file,0,0);			\
   } catch(std::bad_alloc E) {						\
-    error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
+    ::error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
   }									\
 }									\
 void potential_double(const int   *ndim,				\
