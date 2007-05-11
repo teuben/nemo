@@ -158,7 +158,9 @@ namespace WDutils {
     if(k<0 || k>=n-1 || x[k]>xi || x[k+1]<xi) {
       k = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
       k = hunt(x,n,xi,k);
-      if(k<0 || k>=n) WDutils_ErrorF("x out of range","find()");
+      if(k<0 || k>=n) 
+	error("[%s.%d]: in %s: x=%f out of range [%f,%f]\n",
+	      __FILE__,__LINE__,"find()",xi,x[0],x[n-1]);
     }
   }
   //@}
