@@ -753,13 +753,19 @@ namespace falcON {
     // data members                                                             
     //--------------------------------------------------------------------------
     bool    UPX;                                   // use pot+pex for potential 
+    bool    UGE;                                   // use global soften'g length
     int     SCH;                                   // stepping scheme           
+    double  EPS;                                   // global softening length   
     double  FAQ,FPQ,FGQ,FEQ;                       // factors^2 for stepping    
     //--------------------------------------------------------------------------
     // private methods                                                          
     //--------------------------------------------------------------------------
     real fpot(body const&B) const {
       return UPX? pex(B)+pot(B) : pot(B);
+    }
+    //--------------------------------------------------------------------------
+    real soft(body const&B) const {
+      return UGE? EPS : eps(B);
     }
     //--------------------------------------------------------------------------
     // protected methods                                                        
@@ -774,7 +780,7 @@ namespace falcON {
 	if(SCH & use_a) update_min(tq, FAQ*ia);
 	if(SCH & use_p) update_min(tq, FPQ/square(fpot(B)));
 	if(SCH & use_g) update_min(tq, FGQ*abs(fpot(B))*ia);
-	if(SCH & use_e) update_min(tq, FEQ*eps(B)*std::sqrt(ia));
+	if(SCH & use_e) update_min(tq, FEQ*soft(B)*std::sqrt(ia));
 	return tq;
       }
     }
@@ -813,11 +819,13 @@ namespace falcON {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    GravStepper(real const&fa,
-		real const&fp,
-		real const&fg,
-		real const&fe,
-		bool const&up) : UPX(up), SCH(0)
+    GravStepper(real fa,
+		real fp,
+		real fg,
+		real fe,
+		bool up,
+		real ep = zero,
+		bool ue = 0) : UPX(up), UGE(ue), EPS(ep), SCH(0)
     {
       FAQ = fa*fa; if(FAQ) SCH |= use_a;
       FPQ = fp*fp; if(FPQ) SCH |= use_p;
@@ -858,11 +866,13 @@ namespace falcON {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    GravSteps(real const&fa,
-	      real const&fp,
-	      real const&fg,
-	      real const&fe,
-	      bool const&up) : GravStepper(fa,fp,fg,fe,up) {}
+    GravSteps(real fa,
+	      real fp,
+	      real fg,
+	      real fe,
+	      bool up,
+	      real ep = zero,
+	      bool ue = 0) : GravStepper(fa,fp,fg,fe,up,ep,ue) {}
     //--------------------------------------------------------------------------
   };// class falcON::GravSteps
   //////////////////////////////////////////////////////////////////////////////
@@ -1062,7 +1072,7 @@ namespace falcON {
 #endif
 #endif
 		  ),
-      GS         ( fa,fp,fc,fe, aex!=0 )
+      GS         ( fa,fp,fc,fe, aex!=0, abs(eps), eps>=zero)
     {
 #ifdef falcON_ADAP
       if(soft == individual_adaptive && hgrow)
