@@ -35,6 +35,7 @@ if (! -e $src) then
   echo " ../src/scripts/cfitsio.install"
   echo "Alternatively you can also try curl:"
   echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3020.tar.gz | tar zxf -"
+  echo "CCfits:  http://heasarc.gsfc.nasa.gov/docs/software/fitsio/ccfits/CCfits-1.6.tar.gz"
   exit 1
 endif
 
