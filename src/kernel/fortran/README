@@ -32,6 +32,15 @@
    respective routines. See $NEMOLIB/makedefs for some comments
    on how it can also be solved.
 
+5. The 4.x series GNU Fortran compiler, as of 4.2.0, now uses 4-byte record 
+   markers by default for unformatted files to be compatible with g77 and 
+   most other compilers. 
+   The implementation allows for records greater than 2 GB and is compatible 
+   with several other compilers. Older versions of gfortran used 8-byte record 
+   markers by default (on most systems). In order to change the length of the 
+   record markers, e.g. to read unformatted files created by older gfortran 
+   versions, the  -frecord-marker=8 option can be used.
+
 
 
 January 2000:	converted to use the more generic F77_FUNC macros
