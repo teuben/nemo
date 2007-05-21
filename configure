@@ -316,7 +316,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS NEMO NEMOHOST NEMO_LIBS NEMO_CFLAGS NEMO_FFLAGS WARNING NEMOVER build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP CXX CXXFLAGS ac_ct_CXX AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB MAKE X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS XLIBS XINCS GLLIBS F77 FFLAGS ac_ct_F77 FLIBS CCSHARED MACOS_LIBS PNG_LIB PGPLOT_DIR LOADOBJ_MACH LOADOBJ_LIBS MATH_LIBS HDF_INC HDF_LIB CFITSIO_INC CFITSIO_LIB PVM_LIB PVM_INC MIRIAD_INC MIRIAD_LIB GSL_CONFIG GSL_CFLAGS GSL_LIBS TCL_CFLAGS TCL_LIBS RDL_LIBS LIBOBJS YAPP_NAME YAPP_LIBS YAPP_DEF LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS NEMO NEMOHOST NEMO_LIBS NEMO_CFLAGS NEMO_FFLAGS WARNING NEMOVER build build_cpu build_vendor build_os host host_cpu host_vendor host_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP CXX CXXFLAGS ac_ct_CXX AWK INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA LN_S SET_MAKE RANLIB ac_ct_RANLIB MAKE X_CFLAGS X_PRE_LIBS X_LIBS X_EXTRA_LIBS XLIBS XINCS GLLIBS F77 FFLAGS ac_ct_F77 FLIBS F77_CMAIN_FFLAGS CCSHARED MACOS_LIBS PNG_LIB PGPLOT_DIR LOADOBJ_MACH LOADOBJ_LIBS MATH_LIBS HDF_INC HDF_LIB CFITSIO_INC CFITSIO_LIB PVM_LIB PVM_INC MIRIAD_INC MIRIAD_LIB GSL_CONFIG GSL_CFLAGS GSL_LIBS TCL_CFLAGS TCL_LIBS RDL_LIBS LIBOBJS YAPP_NAME YAPP_LIBS YAPP_DEF LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -11323,7 +11323,138 @@ else
 echo "$as_me: WARNING: no FORTRAN compiler" >&2;}
 fi
 
-ACX_F77_CMAIN_FFLAGS(,AC_MSG_WARN([problems fortran-c interface]))
+echo "$as_me:$LINENO: checking for f77 flags to use C main function" >&5
+echo $ECHO_N "checking for f77 flags to use C main function... $ECHO_C" >&6
+if test "${acx_cv_f77_cmain_fflags+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  acx_cv_f77_cmain_fflags="unknown"
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+cat >conftest.$ac_ext <<_ACEOF
+int main(void) { return 0; }
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  mv conftest.$ac_objext conftest_cmain.$ac_objext
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+acx_cv_f77_cmain_fflags=error
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+if test "x$acx_cv_f77_cmain_fflags" != xerror; then
+    ac_ext=f
+ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
+ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_f77_compiler_gnu
+
+    acx_save_LIBS=$LIBS
+    LIBS="conftest_cmain.$ac_objext $LIBS"
+    acx_save_FFLAGS=$FFLAGS
+    for acx_flag in none -nofor_main; do
+	case $acx_flag in
+	    none) FFLAGS=$acx_save_FFLAGS ;;
+	    *)    FFLAGS="$acx_save_FFLAGS $acx_flag" ;;
+	esac
+	cat >conftest.$ac_ext <<_ACEOF
+
+      subroutine foobar()
+      return
+      end
+
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_f77_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  acx_cv_f77_cmain_fflags=$acx_flag; break
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext;
+    done
+    FFLAGS=$acx_save_FFLAGS
+    LIBS=$acx_save_LIBS
+    ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+fi
+fi
+echo "$as_me:$LINENO: result: $acx_cv_f77_cmain_fflags" >&5
+echo "${ECHO_T}$acx_cv_f77_cmain_fflags" >&6
+    case $acx_cv_f77_cmain_fflags in
+	error|unknown)
+	    F77_CMAIN_FFLAGS=""
+	    { echo "$as_me:$LINENO: WARNING: problems fortran-c interface" >&5
+echo "$as_me: WARNING: problems fortran-c interface" >&2;}
+	    ;;
+	*)
+	    if test "x$acx_cv_f77_cmain_fflags" = xnone; then
+		F77_CMAIN_FFLAGS=""
+	    else
+		F77_CMAIN_FFLAGS="$acx_cv_f77_cmain_fflags"
+	    fi
+
+	    ;;
+    esac
+
+
 
 echo "$as_me:$LINENO: checking size of unformatted fortran I/O header/footer" >&5
 echo $ECHO_N "checking size of unformatted fortran I/O header/footer... $ECHO_C" >&6
@@ -17690,6 +17821,7 @@ s,@F77@,$F77,;t t
 s,@FFLAGS@,$FFLAGS,;t t
 s,@ac_ct_F77@,$ac_ct_F77,;t t
 s,@FLIBS@,$FLIBS,;t t
+s,@F77_CMAIN_FFLAGS@,$F77_CMAIN_FFLAGS,;t t
 s,@CCSHARED@,$CCSHARED,;t t
 s,@MACOS_LIBS@,$MACOS_LIBS,;t t
 s,@PNG_LIB@,$PNG_LIB,;t t
