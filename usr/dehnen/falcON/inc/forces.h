@@ -333,9 +333,11 @@ namespace falcON {
     /// active bodies: dv/dt and du/dt; Next, h, dv/dt, du/dt, fact, csnd, and  
     /// possibly srho are copied back to the bodies                             
     /// \param eos pter to equation of state                                    
-    /// \param alfa factor for viscosity                                        
-    /// \param beta factor for viscosity                                        
-    void SPH_sweep_two(const EquationOfState*eos, real alfa, real beta)
+    /// \param alfa factor for artificial viscosity                             
+    /// \param beta factor for artificial viscosity                             
+    /// \param eps  parameter for artificial viscosity                          
+    void SPH_sweep_two(const EquationOfState*eos,
+		       real alfa, real beta, real eps)
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// \return # bodies with mu_i < Mu - dMu

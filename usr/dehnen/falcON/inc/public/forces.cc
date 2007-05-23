@@ -416,11 +416,11 @@ namespace falcON {
     return SPHT->sweep_one(mu,dmu,hm,wf,al);
   }
   //----------------------------------------------------------------------------
-  inline void forces::SPH_sweep_two(const EquationOfState*e,
-				    real a, real b) falcON_THROWING
+  inline void forces::SPH_sweep_two(const EquationOfState*eos,
+				    real a, real b, real e) falcON_THROWING
   
   {
-    SPHT->sweep_two(e,a,b);
+    SPHT->sweep_two(eos,a,b,e);
   }
   //----------------------------------------------------------------------------
   inline unsigned const&forces::N_MuSmall() const {

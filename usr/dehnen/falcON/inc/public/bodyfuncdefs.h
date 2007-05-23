@@ -233,6 +233,6 @@ namespace {
 #define Ly    (m*ly)                      /* y-component of ---              */
 #define Lz    (m*lz)                      /* z-component of ---              */
 #define Ltot  abs(L)                      /* total angular momentum          */
+#define phi   pot                         /* potential for NEMO ---          */
 #define E     (half*norm(vel)+phi)        /* total specific energy           */
 #define etot  (half*norm(vel)+phi)        /* --- for NEMO compatibility      */
-#define phi   pot                         /* potential for NEMO ---          */
