@@ -13,19 +13,20 @@
  *	 6-apr-01	changed malloc -> calloc		pjt
  *         jan-02       experimenting with exception handling	pjt/nas
  *       7-sep-05       TOOLBOX benchmark pjt/chapman
+ *      25-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@oamp.fr>
  */
 
 #include <stdinc.h>
 #include <errno.h>
 
-void *allocate(int nb)
+void *allocate(size_t nb)
 {
     void *mem;
 
     /* how should this kind of error be processed ? */
     if (nb < 0) error("allocate < 0: cannot allocate %d bytes",nb);
     if (nb==0) nb++;       /* never allocate 0 bytes */
-    mem = (void *) calloc((size_t)nb, 1);
+    mem = (void *) calloc(nb, 1);
     if (mem == NULL)  {
 	nemo_dprintf(0,"solaris csh: limit datasize unlimited\n");
         nemo_dprintf(0,"solaris ksh: ulimit -d unlimited\n");
@@ -35,7 +36,7 @@ void *allocate(int nb)
     return mem;
 }
 
-void *reallocate(void *bp, int nb)
+void *reallocate(void *bp, size_t nb)
 {
     void *mem;
 
@@ -43,9 +44,9 @@ void *reallocate(void *bp, int nb)
     if (nb < 0) error("reallocate: cannot allocate %d bytes",nb);
     if (nb == 0) nb++;
     if(bp==NULL)
-        mem = (void *) calloc((size_t)nb, 1);
+        mem = (void *) calloc(nb, 1);
     else
-        mem = (void *) realloc((void *)bp,(size_t)nb);
+        mem = (void *) realloc((void *)bp,nb);
     if (mem == NULL)  {
 	error("reallocate: not enough memory for %d bytes", nb);
     }

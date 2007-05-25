@@ -36,6 +36,7 @@
  *        18-jun-03   pjt    <docs>
  * V 3.1  15-mar-05   pjt    C++ compilable
  * V 3.2   2-jun-05   pjt    blocked (sequential) I/O
+ * V 3.3  25-may-07   pjt    handle > 2GB objects in memory (Pierre Fortin <pierre.fortin@oamp.fr>)
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -894,7 +895,7 @@ local bool puthdr(stream str, itemptr ipt)
 
 local bool putdat(stream str, itemptr ipt)
 {
-    int len;
+    size_t len;
 
     if (ItemDat(ipt) == NULL)			/* no data to write?        */
 	error("putdat: item %s has no data", ItemTag(ipt));
@@ -1113,7 +1114,7 @@ bool qsf(stream str)
 
 local void getdat(itemptr ipt, stream str)
 {
-    int dlen, elen;
+    size_t dlen, elen;
 
     elen = eltcnt(ipt, 0);
     dlen = elen * ItemLen(ipt);                 /* count bytes of data	    */

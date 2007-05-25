@@ -443,10 +443,10 @@ bool nemo_debug(int);
 #define eprintf warning
 
 /* core/allocate.c */
-extern void *allocate(int);
-extern void *reallocate(void *, int);
+extern void *allocate(size_t);
+extern void *reallocate(void *, size_t);
 /* this is to shut up e.g. gcc when allocate(n*sizeof(T)) is used */
-#define  sizeof  (int)sizeof
+#define  sizeof  (size_t)sizeof
 
 /* core/common.c */
 void set_common(int id, int byte_size);
