@@ -1,3 +1,7 @@
+  - objects > 2GB or 4GB have issues, since allocate() deals 
+    with int, not size_t. That's being addressed in 3.2.5
+    (May 2007)
+
 MacOSX problems: (a special macosx.html web page dedicated to this)
     See:     http://bima.astro.umd.edu/nemo/macosx.html
   - configure leaves -lcrt.o etc. in, so they need manual removal
