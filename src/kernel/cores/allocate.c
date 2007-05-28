@@ -23,6 +23,9 @@ void *allocate(size_t nb)
 {
     void *mem;
 
+    if (sizeof(size_t) == 4 && nb > 2147483647)
+      warning("allocate: 32bit machine allocate");
+
     /* how should this kind of error be processed ? */
     if (nb < 0) error("allocate < 0: cannot allocate %d bytes",nb);
     if (nb==0) nb++;       /* never allocate 0 bytes */
@@ -74,7 +77,9 @@ string defv[] = {
   "incr=16\n       Increment size (in kB) to reallocate the size\n",
   "nrealloc=0\n    Number of times to increment and reallocate\n",
   "repeat=1\n      How often to repeat the whole test",
-  "VERSION=1.0\n   7-sep-2005 PJT",
+  "big1=100\n      Allocate the product of these two",
+  "big2=100\n      Allocate the product of these two",
+  "VERSION=1.1\n   28-may-2007 PJT",
   NULL,
 };
 
@@ -86,11 +91,23 @@ void nemo_main(void) {
   int incr = getiparam("incr")*1024;
   int nrealloc = getiparam("nrealloc");
   int repeat = getiparam("repeat");
+  int big1 = getiparam("big1");
+  int big2 = getiparam("big2");
+  int big = big1*big2;
+  size_t big64 = big1*big2;
   int i;
   char *data;
 
   nemo_dprintf(0,"  Alloc:  %d * %d bytes\n",nalloc,size0);
   nemo_dprintf(0,"ReAlloc:  %d * %d bytes\n",nrealloc,incr);
+
+  if (big   < 0) warning("big   < 0: %d overflow? (%d x %d) %ld",big,big1,big2,big64);
+  if (big64 < 0) warning("big64 < 0: %d overflow? (%d x %d)"    ,big,big1,big2);
+  dprintf(0,"sizeof(size_t) = %d\n",sizeof(size_t));
+  data = allocate(big64);
+  free(data);
+  dprintf(0,"Passed big64 allocating %d\n",big64);
+
 
   while (repeat-- > 0) {              /* repeat loop */
 
