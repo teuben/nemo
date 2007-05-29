@@ -39,7 +39,8 @@
 
 
 #define TIMEFUZZ 0.0000001
-
+extern int maxbodies[];
+int CURRENT_IO;
 /* ----------------------------------------------------------------
 |  put_data_select :                                               
 |  Save the snapshot in NEMO format.                               
@@ -306,6 +307,8 @@ int get_data_select_f(char * infile,
   if ((no_io = get_old_file(infile,io_in,read_one,instr,MAXIO)) < 0) {
     no_io = get_new_file(infile,io_in,read_one,instr,"r",MAXIO);
   }
+  CURRENT_IO = no_io;
+
   /* print out what it's doing */
   if (I_io)
     chk_parameters(TRUE,*size_array,rtype);
@@ -398,7 +401,7 @@ int get_data_select_f(char * infile,
       
       if (!streq(select_time,"all") &&
 	  !within(real_time,select_time,TIMEFUZZ)) {
-	fprintf(stderr,"Info : skipping time step [%.4f]\n",real_time);
+	dprintf(1,"Info : skipping time step [%.4f]\n",real_time);
 	get_tes(instr[no_io], ParametersTag);
 	get_tes(instr[no_io], SnapShotTag);
 	if (SP_io) {
@@ -723,9 +726,6 @@ int get_data_select_f(char * infile,
 	  free(epsptr);
 	}  
       } /* if (EPS_io) { */
-      /* garbage collecting */
-      free((int *) nbodyptr); 
-      free((char *) timeptr);
       get_tes(instr[no_io], ParticlesTag);
 							
       /* get out of the loop */
@@ -748,6 +748,14 @@ int get_data_select_f(char * infile,
     free((char*) SelString);
     *nbody_f=nBodySelected;
   }
+  /* check out dynamic snapshots */
+  if (maxbodies[CURRENT_IO] < *nbodyptr) {
+    maxbodies[CURRENT_IO] = *nbodyptr;
+  }
+  /* garbage collecting */
+  free((int *) nbodyptr); 
+  free((char *) timeptr);
+
   dprintf(1,"End of [get_data_select_f]....\n");
   return 1;
 }

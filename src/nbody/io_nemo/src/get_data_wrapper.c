@@ -21,7 +21,8 @@
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 
-
+extern int maxbodies[];
+extern int CURRENT_IO;
 /* ----------------------------------------------------------------
 |  get_data_gen :                                                  
 |                                                                  
@@ -29,8 +30,12 @@
 int get_data_gen(stream instr, char * TypeTag,char * DataType,
 		 int size_alloc, int nbody, int dim1,int dim2,void ** genptr)
 {
+  if (*genptr && maxbodies[CURRENT_IO] < nbody) {
+    free((void *) *genptr);
+    *genptr = NULL;
+  }
   if (*genptr == NULL)
-    *genptr = ( void **) allocate(size_alloc);
+    *genptr = ( void *) allocate(size_alloc);
   get_data_coerced(instr, TypeTag, DataType,*genptr, nbody,
                    dim1,dim2,0);
   return 0;
@@ -47,7 +52,7 @@ int get_data_time(stream instr, char * DataType, int size_type,
   if (get_tag_ok(instr, TimeTag))
     { 
       if (*timeptr == NULL)
-	*timeptr = (void **) allocate(size_type);
+	*timeptr = (void *) allocate(size_type);
       get_data_coerced(instr, TimeTag, DataType, *timeptr,0);
       status = 1; 
     }
@@ -66,7 +71,7 @@ int get_data_nbody(stream instr, char * DataType, int size_type, void ** nbodypt
   if (get_tag_ok(instr, NobjTag))
     { 
       if (*nbodyptr == NULL)
-	*nbodyptr = (void **) allocate(size_type);
+	*nbodyptr = (void *) allocate(size_type);
       get_data_coerced(instr, NobjTag, DataType, *nbodyptr,0);
       status = 1; 
     }
@@ -85,8 +90,13 @@ int get_data_mass(stream instr, char * DataType, int nbody, int size_type,
 
   if (get_tag_ok(instr, MassTag))
     { 
+      if (*massptr && maxbodies[CURRENT_IO] < nbody) {
+	dprintf(1,"NEW ALLOC => [%d] [%d]\n",maxbodies[CURRENT_IO],nbody);
+	free((void *) *massptr);
+	*massptr = NULL;
+      }
       if (*massptr == NULL)
-	*massptr = (void **) allocate(size_type * nbody);
+	*massptr = (void *) allocate(size_type * nbody);
       get_data_coerced(instr, MassTag, DataType, *massptr,
 		       nbody, 0);
       status = 1; 
@@ -106,8 +116,13 @@ int get_data_pos(stream instr, char * DataType, int nbody, int size_type,
 
   if (get_tag_ok(instr, PosTag))
     { 
+      if (*posptr && maxbodies[CURRENT_IO] < nbody) {
+	dprintf(1,"pos NEW ALLOC => [%d] [%d]\n",maxbodies[CURRENT_IO],nbody);
+	free((void *) *posptr);
+	*posptr = NULL;
+      }
       if (*posptr == NULL) {
-	*posptr = (void **) allocate(size_type * nbody *ndim);
+	*posptr = (void *) allocate(size_type * nbody *ndim);
       }
       get_data_coerced(instr, PosTag, DataType, *posptr,
 		       nbody,ndim,0);
@@ -128,8 +143,12 @@ int get_data_vel(stream instr, char * DataType, int nbody, int size_type,
 
   if (get_tag_ok(instr, VelTag))
     { 
+      if (*velptr && maxbodies[CURRENT_IO] < nbody) {
+	free((void *) *velptr);
+	*velptr = NULL;
+      }
       if (*velptr == NULL)
-	*velptr = (void **) allocate(size_type * nbody*ndim);
+	*velptr = (void *) allocate(size_type * nbody*ndim);
       get_data_coerced(instr, VelTag, DataType, *velptr,
 		       nbody,ndim, 0);
       status = 1; 
@@ -149,8 +168,12 @@ int get_data_phase(stream instr, char * DataType, int nbody,
 
   if (get_tag_ok(instr, PhaseSpaceTag))
     { 
+      if (*phaseptr && maxbodies[CURRENT_IO] < nbody) {
+	free((void *) *phaseptr);
+	*phaseptr = NULL;
+      }
       if (*phaseptr == NULL)
-	*phaseptr = (void **) allocate(size_type*nbody*2*ndim);
+	*phaseptr = (void *) allocate(size_type*nbody*2*ndim);
 
       get_data_coerced(instr, PhaseSpaceTag, DataType, *phaseptr,
 		       nbody,2,ndim,0);
@@ -174,8 +197,12 @@ int get_data_pot(stream instr, char * DataType, int nbody, int size_type,
 
   if (get_tag_ok(instr, PotentialTag))
     { 
+      if (*potptr && maxbodies[CURRENT_IO] < nbody) {
+	free((void *) *potptr);
+	*potptr = NULL;
+      }
       if (*potptr == NULL)
-	*potptr = (void **) allocate(size_type * nbody);
+	*potptr = (void *) allocate(size_type * nbody);
       get_data_coerced(instr, PotentialTag, DataType, *potptr,
 		       nbody, 0);
       status = 1; 
@@ -195,8 +222,12 @@ int get_data_acc(stream instr, char * DataType, int nbody, int size_type,
 
   if (get_tag_ok(instr, AccelerationTag))
     { 
+      if (*accptr && maxbodies[CURRENT_IO] < nbody) {
+	free((void *) *accptr);
+	*accptr = NULL;
+      }
       if (*accptr == NULL)
-	*accptr = (void **) allocate(size_type * nbody*ndim);
+	*accptr = (void *) allocate(size_type * nbody*ndim);
       get_data_coerced(instr, AccelerationTag, DataType, *accptr,
 		       nbody,ndim, 0);
       status = 1; 
@@ -216,8 +247,12 @@ int get_data_keys(stream instr, char * DataType, int nbody, int size_type,
 
   if (get_tag_ok(instr, KeyTag))
     { 
+      if (*keysptr && maxbodies[CURRENT_IO] < nbody) {
+	free((void *) *keysptr);
+	*keysptr = NULL;
+      }
       if (*keysptr == NULL)
-	*keysptr = (void **) allocate(size_type * nbody);
+	*keysptr = (void *) allocate(size_type * nbody);
       get_data_coerced(instr, KeyTag, DataType, *keysptr,
 		       nbody, 0);
       status = 1; 
@@ -237,8 +272,12 @@ int get_data_eps(stream instr, char * DataType, int nbody, int size_type,
 
   if (get_tag_ok(instr, EpsTag))
     { 
+      if (*epsptr && maxbodies[CURRENT_IO] < nbody) {
+	free((void *) *epsptr);
+	*epsptr = NULL;
+      }
       if (*epsptr == NULL)
-	*epsptr = (void **) allocate(size_type * nbody);
+	*epsptr = (void *) allocate(size_type * nbody);
       get_data_coerced(instr, EpsTag, DataType, *epsptr,
 		       nbody, 0);
       status = 1; 

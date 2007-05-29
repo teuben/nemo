@@ -15,7 +15,7 @@
 extern "C" {
 #endif
 
-void init_io_one(bool * , bool *, bool *, char **, int);
+void init_io_one(int *, bool * , bool *, bool *, char **, int);
 
 void init_flag_io();
 

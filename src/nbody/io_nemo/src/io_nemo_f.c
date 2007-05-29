@@ -23,6 +23,7 @@
 | 03-Mar-05	 V1.30: code cleaning, valgrind mem/leak safe    JCL
 | 24-Apr-06      V1.31: memory leak fixed                        JCL
 | 19-Jun-06      V1.32: happy gfortran                           JCL
+| 29-May-07      V1.42: handle snapshot with different #bodies   JCL
 +----------------------------------------------------------------  */
 
 #ifdef ABSOFT
@@ -72,6 +73,9 @@ bool   set_history_f[MAXIO];
 char * history_prog_f=NULL;
 char * hist_file_f;        /* history file name */
 
+/* variables to store max #bodies per file */
+int   maxbodies[MAXIO];
+
 /* io_nemo_data_f (EXPORTED) */
 char 
   * pos_f  ,   /* position           */
@@ -115,7 +119,7 @@ int IO_NEMO_F(char * iofile,
 	
   /* initialize I/O variables */
   if (first) {
-    init_io_one(read_one, save_one, set_history_f, &history_prog_f, MAXIO);
+    init_io_one(maxbodies,read_one, save_one, set_history_f, &history_prog_f, MAXIO);
     first = FALSE;
   }
 	
@@ -263,6 +267,7 @@ int CLOSE_IO_NEMO_F(char * iofile,int * lg)
     
     /* RAZ variables */
     read_one[no_io] = FALSE;
+    maxbodies[no_io]= 0;
     free((char *) io_in[no_io]);
     code=1;
   }

@@ -20,6 +20,7 @@
 |                       added, valgrind mem/leak safe               
 | 24-Apr-06      V1.31: memory leak fixed                        JCL
 | 19-Jun-06      V1.32: happy gfortran                           JCL
+| 29-May-07      V1.42: handle snapshot with different #bodies   JCL
 +----------------------------------------------------------------  */
 
 /* -----------------------------------------------------------------
@@ -65,6 +66,9 @@ bool   save_one[MAXIO];
 bool   set_history[MAXIO];
 char * history_prog=NULL;
 char * hist_file;         /* history file name  */
+
+/* variables to store max #bodies per file */
+int   maxbodies[MAXIO];
 
 /* ------------------------------------------------------------------
 |  reajust_ptr :                                                     
@@ -113,7 +117,7 @@ int io_nemo(char * iofile,
 
   /* init I/O variable */
   if (first) {
-    init_io_one(read_one, save_one, set_history, &history_prog, MAXIO);
+    init_io_one(maxbodies, read_one, save_one, set_history, &history_prog, MAXIO);
     first = FALSE;
   }
 
@@ -294,6 +298,7 @@ int close_io_nemo(char * iofile)
 
     /* RAZ variables */
     read_one[no_io] = FALSE;
+    maxbodies[no_io]= 0;
     set_history[no_io] = FALSE;
     free((char *) io_in[no_io]);
     code=1;

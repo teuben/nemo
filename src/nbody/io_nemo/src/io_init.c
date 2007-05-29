@@ -47,13 +47,14 @@ int
 |  init_io_one :                                                    
 |  Initilalize the NEMO engine and some variables.                  
 +----------------------------------------------------------------- */
-void init_io_one(bool * read_one,
+void init_io_one(int  * maxbodies,
+		 bool * read_one,
 		 bool * save_one,
 		 bool * set_history,
 		 char **history_prog,
 		 int    MAXIO)
 { 
-  string defv[] = { "none=none","VERSION=1.32",NULL };
+  string defv[] = { "none=none","VERSION=1.41",NULL };
   string argv[] = { "IO_NEMO",NULL };
   int i;
   string * histo;
@@ -62,6 +63,7 @@ void init_io_one(bool * read_one,
   
   /* initialyze files control arrays */
   for (i=0; i< MAXIO; i++) {
+    maxbodies[i]   = 0;
     read_one[i]    = FALSE;
     save_one[i]    = FALSE;
     set_history[i] = FALSE;

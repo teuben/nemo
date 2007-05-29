@@ -43,7 +43,8 @@
 
 
 #define TIMEFUZZ 0.0000001
-
+extern int maxbodies[];
+int CURRENT_IO;
 /* -----------------------------------------------------------------
 |  put_data_select :                                                
 |  Save the snapshot in NEMO format.                                
@@ -262,7 +263,8 @@ int get_data_select(char * infile,
   if ((no_io = get_old_file(infile,io_in,read_one,instr,MAXIO)) < 0) {
     no_io = get_new_file(infile,io_in,read_one,instr,"r",MAXIO);
   }
-	
+  CURRENT_IO = no_io;
+  
   /* print out what is doing */
   if (I_io)
     chk_parameters(TRUE,0, rtype);
@@ -554,9 +556,6 @@ int get_data_select(char * infile,
     break;								
   } /* for(;;) */
 
-  /* get_tes(instr[no_io], SnapShotTag); */
-  free(nbodyptr);
-  
   if (SP_io) {  /* stuff on Selected Particles */
     free(SelectedPart);
     *ion->nbody=nBodySelected;
@@ -566,6 +565,14 @@ int get_data_select(char * infile,
     ion->bits = (int *) allocate_pointer((char *) ion->bits,sizeof(int));
     *ion->bits = keybits;
   }
+  /* check out dynamic snapshots */
+  if (maxbodies[CURRENT_IO] < *nbodyptr) {
+    maxbodies[CURRENT_IO] = *nbodyptr;
+  }
+
+  /* get_tes(instr[no_io], SnapShotTag); */
+  free(nbodyptr);
+
   return status;
 
 }
