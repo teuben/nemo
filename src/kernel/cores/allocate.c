@@ -94,7 +94,7 @@ void nemo_main(void) {
   int big1 = getiparam("big1");
   int big2 = getiparam("big2");
   int big = big1*big2;
-  size_t big64 = big1*big2;
+  size_t big64 = (size_t)big1*(size_t)big2;    /* this is crucial to cast */
   int i;
   char *data;
 
@@ -106,7 +106,7 @@ void nemo_main(void) {
   dprintf(0,"sizeof(size_t) = %d\n",sizeof(size_t));
   data = allocate(big64);
   free(data);
-  dprintf(0,"Passed big64 allocating %d\n",big64);
+  dprintf(0,"Passed big64 allocating %ld\n",big64);
 
 
   while (repeat-- > 0) {              /* repeat loop */
