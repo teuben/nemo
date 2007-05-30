@@ -12,6 +12,7 @@
  *       8-oct-01 read eps/dens                 PJT
  *      17-jan-02 detect split Pos/Vel		pjt
  *       2-apr-02 add UdotIntTag for ZENO	pjt
+ *      30-may-07 allocate() needs size_t args for > 44.7M      pjt
  */
 
 /*
@@ -147,7 +148,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, MassTag)) {
-	mbuf = (real *) allocate(*nbptr * sizeof(real));
+        mbuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	get_data_coerced(instr, MassTag, RealType, mbuf, *nbptr, 0);
 	for (bp = *btptr, mp = mbuf; bp < *btptr + *nbptr; bp++)
 	    Mass(bp) = *mp++;
@@ -179,7 +180,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, PhaseSpaceTag)) {
-	rvbuf = (real *) allocate(*nbptr * 2 * NDIM * sizeof(real));
+        rvbuf = (real *) allocate((size_t)(*nbptr) * 2 * NDIM * sizeof(real));
 	get_data_coerced(instr, PhaseSpaceTag, RealType, rvbuf,
 			 *nbptr, 2, NDIM, 0);
 	for (bp = *btptr, rvp = rvbuf; bp < *btptr + *nbptr; bp++) {
@@ -192,8 +193,8 @@ int *ifptr;			/* pointer to input bit flags */
 	*ifptr |= PhaseSpaceBit;
     } else if (get_tag_ok(instr, PosTag) || get_tag_ok(instr, VelTag)) {
       real *rbuf, *vbuf, *rp, *vp;
-      rbuf = (real *) allocate(*nbptr * 2 * NDIM * sizeof(real));
-      vbuf = (real *) allocate(*nbptr * 2 * NDIM * sizeof(real));
+      rbuf = (real *) allocate((size_t)(*nbptr) * 2 * NDIM * sizeof(real));
+      vbuf = (real *) allocate((size_t)(*nbptr) * 2 * NDIM * sizeof(real));
       if (get_tag_ok(instr,PosTag))
 	  get_data_coerced(instr, PosTag, RealType, rbuf,
 		       *nbptr, NDIM, 0);
@@ -235,7 +236,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, PotentialTag)) {
-	pbuf = (real *) allocate(*nbptr * sizeof(real));
+        pbuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	get_data_coerced(instr, PotentialTag, RealType, pbuf, *nbptr, 0);
 	for (bp = *btptr, pp = pbuf; bp < *btptr + *nbptr; bp++)
 	    Phi(bp) = *pp++;
@@ -267,7 +268,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, AccelerationTag)) {
-	abuf = (real *) allocate(*nbptr * NDIM * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * NDIM * sizeof(real));
 	get_data_coerced(instr, AccelerationTag, RealType, abuf,
 			 *nbptr, NDIM, 0);
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++) {
@@ -302,7 +303,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, AuxTag)) {
-	abuf = (real *) allocate(*nbptr * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	get_data_coerced(instr, AuxTag, RealType, abuf, *nbptr, 0);
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
 	    Aux(bp) = *ap++;
@@ -334,7 +335,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, KeyTag)) {
-	kbuf = (int *) allocate(*nbptr * sizeof(int));
+        kbuf = (int *) allocate((size_t)(*nbptr) * sizeof(int));
 	get_data(instr, KeyTag, IntType, kbuf, *nbptr, 0);
 	for (bp = *btptr, kp = kbuf; bp < *btptr + *nbptr; bp++)
 	    Key(bp) = *kp++;
@@ -366,7 +367,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, DensityTag)) {
-	abuf = (real *) allocate(*nbptr * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	get_data_coerced(instr, DensityTag, RealType, abuf, *nbptr, 0);
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
 	    Dens(bp) = *ap++;
@@ -399,7 +400,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, UdotIntTag)) {
-	abuf = (real *) allocate(*nbptr * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	get_data_coerced(instr, UdotIntTag, RealType, abuf, *nbptr, 0);
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
 	    Dens(bp) = *ap++;
@@ -431,7 +432,7 @@ int *ifptr;			/* pointer to input bit flags */
     Body *bp;
 
     if (get_tag_ok(instr, EpsTag)) {
-	abuf = (real *) allocate(*nbptr * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	get_data_coerced(instr, EpsTag, RealType, abuf, *nbptr, 0);
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
 	    Eps(bp) = *ap++;
@@ -461,7 +462,7 @@ int *ifptr;			/* pointer to input bit flags */
 {
     if (get_tag_ok(instr, ParticlesTag)) {
 	if (*btptr == NULL) {
-	    *btptr = (Body *) allocate(*nbptr * sizeof(Body));
+  	  *btptr = (Body *) allocate((size_t)(*nbptr) * sizeof(Body));
 	}
 	get_set(instr, ParticlesTag);
 	get_snap_csys(instr, ifptr);
