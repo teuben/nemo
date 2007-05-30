@@ -19,6 +19,7 @@
  *      19-oct-01       V3.0  add a scale= parameter (defaults to virial units) pjt
  *      22-mar-04       V2.7  merged version with a hole      ncm+pjt
  *      31-mar-05       V2.8  added nmodel=                       pjt
+ *      30-may-07       V2.8b allocate() with size_t
  */
 
 
@@ -59,7 +60,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
-    "VERSION=2.8a\n           11-apr-05 PJT",
+    "VERSION=2.8b\n           30-may-07 PJT",
     NULL,
 };
 
@@ -204,7 +205,7 @@ rproc mf;
     if (NDIM != 3)
         error("mkplummer: NDIM = %d but should be 3", NDIM);
 
-    btab = (Body *) allocate (nbody * sizeof(Body));
+    btab = (Body *) allocate ((size_t)nbody * sizeof(Body));
 
 /*
  *  Calculating the coordinates is easiest in STRUCTURAL units;
