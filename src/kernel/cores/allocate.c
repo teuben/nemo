@@ -13,7 +13,7 @@
  *	 6-apr-01	changed malloc -> calloc		pjt
  *         jan-02       experimenting with exception handling	pjt/nas
  *       7-sep-05       TOOLBOX benchmark pjt/chapman
- *      25-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@oamp.fr>
+ *      31-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@oamp.fr>
  */
 
 #include <stdinc.h>
@@ -33,9 +33,9 @@ void *allocate(size_t nb)
     if (mem == NULL)  {
 	nemo_dprintf(0,"solaris csh: limit datasize unlimited\n");
         nemo_dprintf(0,"solaris ksh: ulimit -d unlimited\n");
-	error("allocate: not enough memory for %d bytes", nb);
+	error("allocate: not enough memory for %ld bytes", nb);
     }
-    nemo_dprintf(8,"allocate: %d bytes @ %d (0x%x)\n",nb, mem, mem);
+    nemo_dprintf(8,"allocate: %ld bytes @ %ld (0x%x)\n",nb, mem, mem);
     return mem;
 }
 
@@ -44,16 +44,16 @@ void *reallocate(void *bp, size_t nb)
     void *mem;
 
     /* how should this kind of error be processed ? */
-    if (nb < 0) error("reallocate: cannot allocate %d bytes",nb);
+    if (nb < 0) error("reallocate: cannot allocate %ld bytes",nb);
     if (nb == 0) nb++;
     if(bp==NULL)
         mem = (void *) calloc(nb, 1);
     else
         mem = (void *) realloc((void *)bp,nb);
     if (mem == NULL)  {
-	error("reallocate: not enough memory for %d bytes", nb);
+	error("reallocate: not enough memory for %ld bytes", nb);
     }
-    nemo_dprintf(8,"reallocate: %d bytes @ %d \n",nb, mem);
+    nemo_dprintf(8,"reallocate: %ld bytes @ %ld \n",nb, mem);
     return mem;
 }
 
@@ -79,7 +79,7 @@ string defv[] = {
   "repeat=1\n      How often to repeat the whole test",
   "big1=100\n      Allocate the product of these two",
   "big2=100\n      Allocate the product of these two",
-  "VERSION=1.1\n   28-may-2007 PJT",
+  "VERSION=1.2\n   31-may-2007 PJT",
   NULL,
 };
 
