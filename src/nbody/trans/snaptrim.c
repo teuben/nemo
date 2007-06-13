@@ -15,6 +15,7 @@
  *      V2.0  14-sep-02         Multiple output names allowed via mstropen
  *             9-oct-03         more precision in output
  *       2.1  31-dec-03         implemented timefuzz=nearest 
+ *            13-jun-07  WD     using within() from stdinc.h
  */
 
 /* #define INTERACT */
@@ -45,7 +46,11 @@ string defv[] = {
 string usage="cut a snapshot file down to size";
 
 
-extern bool within(real, string, real);
+/* 
+ * commented out as it is already in stdinc.h, causing compilation error WD
+ *
+   extern bool within(real, string, real);
+*/
 extern bool beyond(real, string, real);
 
 nemo_main()
