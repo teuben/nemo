@@ -15,7 +15,7 @@
  *      V2.0  14-sep-02         Multiple output names allowed via mstropen
  *             9-oct-03         more precision in output
  *       2.1  31-dec-03         implemented timefuzz=nearest 
- *            13-jun-07  WD     using within() from stdinc.h
+ *       2.2  13-jun-07  WD     using within() from stdinc.h
  */
 
 /* #define INTERACT */
@@ -37,7 +37,7 @@ string defv[] = {
 #if defined(INTERACT)
     "more=y\n                     needs interactive SETPARAM part",
 #endif
-    "VERSION=2.1\n                31-dec-03 PJT",
+    "VERSION=2.2\n                13-jun-07 PJT/WD",
     NULL,
 };
 

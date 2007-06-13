@@ -7,6 +7,7 @@
  *	28-jan-94  V1.1 allow nbody= to have more entries
  *	22-dec-95  released 'as is'
  *      14-sep-02  V2.0 use mstropen() to optionally split into different files
+ *      13-jun-07  V2.1 using within() from stdinc.h   WD
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -24,7 +25,7 @@ string defv[] = {
     "nbody=\n           Size of one (or more) snapshot(s)",
     "nsnap=\n           Number of pieces to cut a snapshot into",
     "times=all\n        Series of times-ranges to select",
-    "VERSION=2.0\n	14-sep-02 PJT",
+    "VERSION=2.1\n	13-jun-07 PJT/WD",
     NULL,
 };
 
@@ -34,7 +35,11 @@ string usage="cut an N-body snapshot in pieces for serial processing";
 
 #define MAXSNAP 1024
 
-extern bool within(real, string, real);
+/* 
+ * commented out as it is already in stdinc.h, causing compilation error WD
+ *
+   extern bool within(real, string, real);
+*/
 
 nemo_main()
 {
