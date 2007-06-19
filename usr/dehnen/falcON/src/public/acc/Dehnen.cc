@@ -37,7 +37,7 @@ namespace {
 	   int          npar,
 	   const char  *file)
     {
-      if(npar < 4)
+      if(npar < 5)
 	warning("%s: recognizing 5 parameters:\n"
 		" omega        pattern speed (ignored)           [0]\n"
 		" gamma        inner density slope               [1]\n"

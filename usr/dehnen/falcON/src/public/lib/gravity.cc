@@ -60,15 +60,15 @@ namespace falcON {
     const     real A,hA,sA;                        // parameters                
     real          *Z,*Y;                           // tables                    
     //--------------------------------------------------------------------------
-    real z(const real y) const {                   // z(y) = 1/theta - 1        
+    real z(real y) const {                         // z(y) = 1/theta - 1        
       if(y < Y[ 0]) return std::pow(y,hA);
       if(y > Y[N1]) return std::pow(y,sA);
       return polev(y,Y,Z,N);
     }    
   public:
     //--------------------------------------------------------------------------
-    InvertZ(real     const&a,                      // I: power a                
-	    unsigned const&p) :                    // I: order P                
+    InvertZ(real     a,                            // I: power a                
+	    unsigned p) :                          // I: order P                
       P   ( p ),
       A   ( a ),
       hA  ( half * A ),
@@ -93,7 +93,7 @@ namespace falcON {
       falcON_DEL_A(Y);
     }
     //--------------------------------------------------------------------------
-    real invtheta(const real y) const {
+    real invtheta(real y) const {
       return one + z(y);
     }    
   };
@@ -287,21 +287,19 @@ namespace {
       return is_twig(A) || number(A) < N_PRE[2];
     }
     //--------------------------------------------------------------------------
-    static bool well_separated(cell_iter const&A, cell_iter const&B,
-			       real      const&Rq)
+    static bool well_separated(cell_iter const&A, cell_iter const&B, real Rq)
     { 
       return Rq > square(rcrit(A)+rcrit(B));
     }
     //--------------------------------------------------------------------------
-    static bool well_separated(cell_iter const&A, leaf_iter const&B,
-			       real      const&Rq)
+    static bool well_separated(cell_iter const&A, leaf_iter const&B, real Rq)
     { 
       return Rq > rcrit2(A);
     }
     //--------------------------------------------------------------------------
   protected:
     GravIactBase(
-		 GravStats*const&t,                 // I: statistics            
+		 GravStats* t,                      // I: statistics            
 		 int const nd[4]= Default::direct): //[I: direct sum control]   
       STAT ( t )
     {
@@ -347,15 +345,15 @@ namespace {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    GravIact(kern_type const&k,                      // I: type of kernel       
-	     GravStats*const&t,                      // I: statistics           
-	     real      const&e,                      // I: softening length     
-	     unsigned  const&np,                     // I: initial pool size    
+    GravIact(kern_type k,                           // I: type of kernel       
+	     GravStats*t,                           // I: statistics           
+	     real      e,                           // I: softening length     
+	     unsigned  np,                          // I: initial pool size    
 #ifdef falcON_INDI
-	     bool      const&s    = Default::soften, //[I: use individual eps?] 
+	     bool      s    = Default::soften,       //[I: use individual eps?] 
 #endif
 	     int       const nd[4]= Default::direct, //[I: direct sum control]  
-	     bool      const&fp   = false) :         //[I: use Pth pole in pot] 
+	     bool      fp   = false) :               //[I: use Pth pole in pot] 
       GravIactBase  ( t,nd ),
       GravKern      ( k,e,
 #ifdef falcON_INDI
@@ -468,12 +466,12 @@ namespace {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    GravIactAll(kern_type const&k,                  // I: type of kernel        
-		GravStats*const&t,                  // I: statistics            
-		real      const&e,                  // I: softening length      
-		unsigned  const&np,                 // I: initial pool size     
+    GravIactAll(kern_type    k,                     // I: type of kernel        
+		GravStats*   t,                     // I: statistics            
+		real         e,                     // I: softening length      
+		unsigned     np,                    // I: initial pool size     
 #ifdef falcON_INDI
-		bool      const&s =Default::soften, //[I: use individual eps?]  
+		bool         s    =Default::soften, //[I: use individual eps?]  
 #endif
 		int const    nd[4]=Default::direct  //[I: direct sum control]   
 		) :
@@ -655,10 +653,10 @@ namespace {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   template<bool ALL_ACT> 
-  void UpdateBodiesGrav(const OctTree*const&T,
-			real          const&G
+  void UpdateBodiesGrav(const OctTree*T,
+			real          G
 #ifdef falcON_ADAP
-		      , bool          const&U
+		      , bool          U
 #endif
 			)
   {
@@ -742,8 +740,8 @@ GravEstimator::~GravEstimator() {
   if(LEAF_SINK) falcON_DEL_A(LEAF_SINK);
 }
 //------------------------------------------------------------------------------
-unsigned GravEstimator::pass_up(const GravMAC*const&MAC,
-				bool          const&REUSE)
+unsigned GravEstimator::pass_up(const GravMAC*MAC,
+				bool          REUSE)
 {
   // passes up: flag, mass, cofm, rmax[, eph], multipoles; sets rcrit           
   report REPORT("GravEstimator::pass_up_for_approx()");
@@ -913,12 +911,12 @@ bool GravEstimator::prepare(const GravMAC*MAC,
   return all;                                      // return all                
 }
 //------------------------------------------------------------------------------
-void GravEstimator::exact(bool       const&al
+void GravEstimator::exact(bool       al
 #ifdef falcON_ADAP
-			 ,real       const&Nsoft,
-			  unsigned   const&Nref,
-			  real       const&emin,
-			  real       const&efac
+			 ,real       Nsoft,
+			  unsigned   Nref,
+			  real       emin,
+			  real       efac
 #endif
 			  )
 {
@@ -965,15 +963,15 @@ void GravEstimator::exact(bool       const&al
   TREE->mark_grav_usage();
 }
 //------------------------------------------------------------------------------
-void GravEstimator::approx(const GravMAC*const&GMAC,
-			   bool          const&al,
-			   bool          const&split
+void GravEstimator::approx(const GravMAC*GMAC,
+			   bool          al,
+			   bool          split
 #ifdef falcON_ADAP
 			   ,
-			   real          const&Nsoft,
-			   unsigned      const&Nref,
-			   real          const&emin,
-			   real          const&efac
+			   real          Nsoft,
+			   unsigned      Nref,
+			   real          emin,
+			   real          efac
 #endif
 			   )
 {
@@ -1127,8 +1125,8 @@ namespace {
     }
   };
   //----------------------------------------------------------------------------
-  void UpdateBodiesRho(const OctTree*const&T,
-		       bool          const&all)
+  void UpdateBodiesRho(const OctTree*T,
+		       bool          all)
   {
     if(all)
       LoopLeafs(grav::leaf,T,Li)
@@ -1139,7 +1137,7 @@ namespace {
   }
 }                                                  // END: unnamed namespace    
 //------------------------------------------------------------------------------
-void GravEstimator::estimate_nd(bool const&al, unsigned const&Nx) const
+void GravEstimator::estimate_nd(bool al, unsigned Nx) const
 {
   NX = Nx;
   if(al) guess<number_density,1>::do_it(root(),zero);
@@ -1147,7 +1145,7 @@ void GravEstimator::estimate_nd(bool const&al, unsigned const&Nx) const
   UpdateBodiesRho(TREE,al);
 }
 //------------------------------------------------------------------------------
-void GravEstimator::estimate_sd(bool const&al, unsigned const&Nx)
+void GravEstimator::estimate_sd(bool al, unsigned Nx)
 {
   update_leafs();
   prepare(0,al,0);
@@ -1158,7 +1156,7 @@ void GravEstimator::estimate_sd(bool const&al, unsigned const&Nx)
   TREE->mark_grav_usage();
 }
 //------------------------------------------------------------------------------
-void GravEstimator::estimate_md(bool const&al, unsigned const&Nx)
+void GravEstimator::estimate_md(bool al, unsigned Nx)
 {
   update_leafs();
   prepare(0,al,0);
