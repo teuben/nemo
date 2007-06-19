@@ -493,7 +493,9 @@ namespace falcON {
     //@}
     //--------------------------------------------------------------------------
     /// the integer value
-    friend int const&value(fieldbit f);
+    /// \note taking const ref instead of plain value, because otherwise gcc
+    /// version 4.1.2 issues a nonsense warning (obviously a compiler BUG)
+    friend value_type const&value(fieldbit const&f);
     /// the sizeof() the datum corresponding to the data field
     friend size_t const&size(fieldbit f);
     /// the single character abbreviating the data field, same as
@@ -516,7 +518,7 @@ namespace falcON {
   // also serve to inject these functions into namespace falcON               //
   //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
-  inline int        const&value (fieldbit f) { return f.val; }
+  inline fieldbit::value_type const&value (fieldbit const&f) { return f.val; }
   inline size_t     const&size  (fieldbit f) { return BodyData::ZQUANT[f.val]; }
   inline char       const&letter(fieldbit f) { return BodyData::SQUANT[f.val]; }
   inline const char*const&name  (fieldbit f) { return BodyData::QNAME [f.val]; }

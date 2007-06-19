@@ -211,48 +211,48 @@ namespace falcON {
       //------------------------------------------------------------------------
 #ifdef falcON_ADAP
       template<typename bodies_type>
-      void copy_to_bodies_eps(const bodies_type*const&B) {
+      void copy_to_bodies_eps(const bodies_type*B) {
 	B->eps(mybody()) = twice(eph());
       }
 #endif
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void copy_to_bodies_rho(const bodies_type*const&B) const {
+      void copy_to_bodies_rho(const bodies_type*B) const {
 	B->rho(mybody()) = rho();
       }
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void copy_to_bodies_acc(const bodies_type*const&B) const {
+      void copy_to_bodies_acc(const bodies_type*B) const {
 	B->acc(mybody()) = acc();
       }
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void copy_to_bodies_pot(const bodies_type*const&B) const {
+      void copy_to_bodies_pot(const bodies_type*B) const {
 	B->pot(mybody()) = pot();
       }
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void copy_to_bodies_grav(const bodies_type*const&B) const {
+      void copy_to_bodies_grav(const bodies_type*B) const {
 	copy_to_bodies_pot(B);
 	copy_to_bodies_acc(B);
       }
       //------------------------------------------------------------------------
       // with non-unity constant G of gravity                                   
       template<typename bodies_type>
-      void copy_to_bodies_acc(const bodies_type*const&B,
-			      real              const&G) const {
+      void copy_to_bodies_acc(const bodies_type*B,
+			      real              G) const {
 	B->acc(mybody()) = G * acc();
       }
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void copy_to_bodies_pot(const bodies_type*const&B,
-			      real              const&G) const {
+      void copy_to_bodies_pot(const bodies_type*B,
+			      real              G) const {
 	B->pot(mybody()) = G * pot();
       }
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void copy_to_bodies_grav(const bodies_type*const&B,
-			       real              const&G) const {
+      void copy_to_bodies_grav(const bodies_type*B,
+			       real              G) const {
 	copy_to_bodies_pot(B,G);
 	copy_to_bodies_acc(B,G);
       }
@@ -260,25 +260,25 @@ namespace falcON {
       // reset body gravity data (needed if G=0)                                
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void reset_bodies_acc(const bodies_type*const&B) const {
+      void reset_bodies_acc(const bodies_type*B) const {
 	B->acc(mybody()) = zero;
       }
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void reset_bodies_pot(const bodies_type*const&B) const {
+      void reset_bodies_pot(const bodies_type*B) const {
 	B->pot(mybody()) = zero;
       }
       //------------------------------------------------------------------------
       template<typename bodies_type>
-      void reset_bodies_grav(const bodies_type*const&B) const {
+      void reset_bodies_grav(const bodies_type*B) const {
 	reset_bodies_pot(B);
 	reset_bodies_acc(B);
       }
       //------------------------------------------------------------------------
       // simple manipulations                                                   
       //------------------------------------------------------------------------
-      void set_sink  (sink_data*const&sink) { PROP = static_cast<void*>(sink); }
-      void reset_sink()                     { sink()->reset(); }
+      void set_sink  (sink_data*sink) { PROP = static_cast<void*>(sink); }
+      void reset_sink()               { sink()->reset(); }
       //------------------------------------------------------------------------
       void normalize_grav () {                     // acc,pot     /= mass       
 	if(mass()>zero) {
@@ -367,11 +367,11 @@ namespace falcON {
     public:
       void set_rcrit(real const&it) { RAD *= it; }
       //------------------------------------------------------------------------
-      void set_srce(srce_data*const&srce) {
+      void set_srce(srce_data*srce) {
 	AUX1.PTER = static_cast<void*>(srce);
       }
       //------------------------------------------------------------------------
-      void setCoeffs(Cset*const&sink) {
+      void setCoeffs(Cset*sink) {
 	AUX2.PTER = static_cast<void*>(sink); 
       }
       //------------------------------------------------------------------------
@@ -464,19 +464,19 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // adjust leafs' eph_i                                                      
 #ifdef falcON_ADAP
-    void adjust_eph(bool     const&,               // I: for all or active only 
-		    real     const&,               // I: Nsoft: adjust actives  
-		    real     const&,               // I: emin:  adjust actives  
-		    real     const&,               // I: emax:  adjust actives  
-		    unsigned const&,               // I: Nref:  adjust actives  
-		    real     const&);              // I: max change in eps_i    
+    void adjust_eph(bool    ,                      // I: for all or active only 
+		    real    ,                      // I: Nsoft: adjust actives  
+		    real    ,                      // I: emin:  adjust actives  
+		    real    ,                      // I: emax:  adjust actives  
+		    unsigned,                      // I: Nref:  adjust actives  
+		    real    );                     // I: max change in eps_i    
 #endif
     //--------------------------------------------------------------------------
     // - passes up the tree: flag, mass, cofm, rmax[, eph], multipoles          
     // - set the cells r_crit & r_crit^2                                        
     unsigned pass_up(                              // R: # active cells         
-		     const GravMAC*const&,         // I: MAC                    
-		     bool          const&);        // I: reused old tree?       
+		     const GravMAC*,               // I: MAC                    
+		     bool          );              // I: reused old tree?       
     //--------------------------------------------------------------------------
     // prepare for interactions                                                 
     //  - allocate memory for leaf sink properties for active leafs             
@@ -506,12 +506,12 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // construction: allocate memory for leafs' & cells' source properties      
     //--------------------------------------------------------------------------
-    GravEstimator(const OctTree* const&T,          // I: tree to be used        
-		  kern_type      const&k,          // I: kernel to be used      
-		  GravStats*     const&st,         // I: statistics             
-		  real           const&e,          // I: global/max eps         
-		  real           const&g = one,    //[I: Newton's G]            
-		  bool           const&s = 0,      //[I: use individual eps?]   
+    GravEstimator(const OctTree* T,                // I: tree to be used        
+		  kern_type      k,                // I: kernel to be used      
+		  GravStats*     st,               // I: statistics             
+		  real           e,                // I: global/max eps         
+		  real           g = one,          //[I: Newton's G]            
+		  bool           s = 0,            //[I: use individual eps?]   
 		  const int d[4]=Default::direct): //[I: N_direct for gravity]  
       TREE           ( T ),
       LEAFS_UPTODATE ( 0 ),
@@ -547,18 +547,18 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
     // change tree entry, set flags                                             
-    void new_tree(const OctTree*const&T) {
+    void new_tree(const OctTree*T) {
       TREE = T;
       reset();
     }
     //--------------------------------------------------------------------------
-    void reset_softening(const real      e,
-			 const kern_type k) {
+    void reset_softening(real      e,
+			 kern_type k) {
       EPS    = e;
       KERNEL = k;
     }
     //--------------------------------------------------------------------------
-    void reset_NewtonsG(const real g) {
+    void reset_NewtonsG(real g) {
       GRAV = g;
     }
     //--------------------------------------------------------------------------
@@ -568,37 +568,37 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // compute gravity by direct summation                                      
     //--------------------------------------------------------------------------
-    void exact(bool      const& =false             //[I: for all or active only]
+    void exact(bool      =false                    //[I: for all or active only]
 #ifdef falcON_ADAP
-	      ,real      const& =zero,             //[I: Nsoft: adjust eps_i]   
-	       unsigned  const& =0u,               //[I: Nref:  adjust eps_i]   
-	       real      const& =zero,             //[I: eps_min]               
-	       real      const& =zero              //[I: max change of eps]     
+	      ,real      =zero,                    //[I: Nsoft: adjust eps_i]   
+	       unsigned  =0u,                      //[I: Nref:  adjust eps_i]   
+	       real      =zero,                    //[I: eps_min]               
+	       real      =zero                     //[I: max change of eps]     
 #endif
 	       );
     //--------------------------------------------------------------------------
     // compute gravity by the approximate method of Dehnen (2002)               
     //   if enabled, also adapt the individual softening lengths                
     //--------------------------------------------------------------------------
-    void approx(const GravMAC*const&,              // I: MAC                    
-		bool          const& =false,       //[I: for all or active only]
-		bool          const& =true         //[I: combine phases]        
+    void approx(const GravMAC*,                    // I: MAC                    
+		bool          =false,              //[I: for all or active only]
+		bool          =true                //[I: combine phases]        
 #ifdef falcON_ADAP
-	       ,real          const& =zero,        //[I: Nsoft: adjust eps_i]   
-		unsigned      const& =0u,          //[I: Nref:  adjust eps_i]   
-		real          const& =zero,        //[I: eps_min]               
-		real          const& =zero         //[I: max change of eps]     
+	       ,real          =zero,               //[I: Nsoft: adjust eps_i]   
+		unsigned      =0u,                 //[I: Nref:  adjust eps_i]   
+		real          =zero,               //[I: eps_min]               
+		real          =zero                //[I: max change of eps]     
 #endif
 		);
     //--------------------------------------------------------------------------
     // density estimation (number-, surface-, mass-density)                     
     //--------------------------------------------------------------------------
-    void estimate_nd(bool     const&,              // I: all or active only?    
-		     unsigned const&) const;       // I: critical cell size     
-    void estimate_sd(bool     const&,              // I: all or active only?    
-		     unsigned const&);             // I: critical cell size     
-    void estimate_md(bool     const&,              // I: all or active only?    
-		     unsigned const&);             // I: critical cell size     
+    void estimate_nd(bool    ,                     // I: all or active only?    
+		     unsigned) const;              // I: critical cell size     
+    void estimate_sd(bool    ,                     // I: all or active only?    
+		     unsigned);                    // I: critical cell size     
+    void estimate_md(bool    ,                     // I: all or active only?    
+		     unsigned);                    // I: critical cell size     
     //--------------------------------------------------------------------------
     // public const data access                                                 
     //--------------------------------------------------------------------------
@@ -712,7 +712,7 @@ namespace falcON {
 #ifdef ENHANCED_IACT_STATS
     unsigned P_CB, P_CC, P_CX;                     // # BB pairs in direct      
 #  define ADD_SS(COUNTER,NUMBER)  COUNTER += NUMBER;
-    static const char* trick_SS(unsigned const&n, int&w)
+    static const char* trick_SS(unsigned n, int&w)
     {
       if(n < 10) { w=1; return "         ("; }
       if(n < 100) { w=2; return "        ("; }
@@ -728,7 +728,7 @@ namespace falcON {
 #else
 #  define ADD_SS(COUNTER,NUMBER) 
 #endif
-    static int trick(real const&x, int const&w)
+    static int trick(real x, int w)
     {
       if(x<0.001)  return max(1,w-5);
       if(x<0.01)   return max(1,w-4);

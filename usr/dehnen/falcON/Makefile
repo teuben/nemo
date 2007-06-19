@@ -33,7 +33,10 @@ COMPILER		:= gcc
 ifdef DPROPER
 ifeq ($(COMPILER),gcc)
 # 3.1 use SSE instructions in force computation (proprietary only)
-DSSE 			:= -DfalcON_SSE
+#
+# NOTE with gcc 4.1.2 this does not work anymore and has to be commented out
+#
+#DSSE 			:= -DfalcON_SSE
 endif
 endif
 
@@ -190,7 +193,7 @@ cleanobjs	:
 			rm -rf $(LIB)*.o
 
 # 6.8.3 cleans symbolic links
-cleanlinks	:
+cleanlinks	:	
 			rm $(links)
 
 # 6.8.3 cleans everything made in releases
