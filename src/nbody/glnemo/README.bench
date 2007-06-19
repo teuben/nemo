@@ -1,0 +1,30 @@
+
+ HOW TO BENCHMARK GLNEMO
+========================
+
+  It's possible to benchmark glnemo to test your CPU and especially your GPU (Graphic Processor Unit) aka Video Card.
+
+  The idea of the bench is to load an animation file and to render it as fast as possible.
+
+   You'll find 5 bench files located in the directory : $NEMOSRC/nbody/glnemo/bench
+
+   Here is how to proceed, copy and paste the following line into a terminal :
+
+   glnemo $NEMOSRC/nbody/glnemo/snapshot/disk.nemo gas=t anim_file=$NEMOSRC/nbody/glnemo/bench/bench2.anim
+
+
+   glnemo will load the snapshot and will play the animation as fast as possible. At the end,
+a message window popup and will give you the amount of frame per second.
+
+ Here is the result on my platform : Core 2 duo 6700 + Gforce 8800 Gtx ( I know I am lucky :) )
+
+--------------+--------------------+
+Files         | Frames Per Second  |
+--------------+--------------------+
+bench1.anim   |        78          |
+bench2.anim   |        56          |
+bench3.anim   |        57          |
+bench4.anim   |        47          |
+bench5.anim   |        76          |
+--------------+--------------------+
+
