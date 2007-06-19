@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -30,20 +30,20 @@ AnimationEngine::AnimationEngine()
 }
 // ============================================================================
 // AnimationEngine::playSlot()
-void AnimationEngine::playSlot()
+void AnimationEngine::playSlot(bool bench_)
 {
   switch (status) {
   case  NONE :
   case  PLAY : 
     if (fdv.size()) {  // there is frame to be played
       status = PLAY;
-      play->start();
+      play->start(bench_);
     }
     break;
   case  RECORD       :
     record->stop();
     status = NONE;
-    if (play->start()) {
+    if (play->start(bench_)) {
       status = PLAY;
     }
     break;
@@ -51,7 +51,7 @@ void AnimationEngine::playSlot()
     if (render->rendering == 0) { // not rendering anymore
       if (fdv.size()) {  // there is frame to be played
         status = PLAY;
-        play->start();
+        play->start(bench_);
       }       
     }  
     //render->start();
@@ -59,9 +59,34 @@ void AnimationEngine::playSlot()
   }
 }
 // ============================================================================
+// AnimationEngine::loadFrameData(QString)
+void AnimationEngine::loadFrameData( const QString & filename)
+{
+  IOFrameData io_frame_data(filename,true);
+  if (io_frame_data.load(&fdv)) {
+    emit sig_info_from_file( fdv.size(), filename);
+  }
+}
+// ============================================================================
+// AnimationEngine::saveFrameData(QString)
+void AnimationEngine::saveFrameData( const QString & filename)
+{
+  IOFrameData io_frame_data(filename,false);
+  io_frame_data.save(&fdv);
+  emit sig_info_from_file( fdv.size(), filename);
+}
+// ============================================================================
 // AnimationEngine::pauseSlot()
 void AnimationEngine::pauseSlot()
 {
+}
+// ============================================================================
+// AnimationEngine::benchSlot()
+void AnimationEngine::benchSlot()
+{
+  stopSlot();
+  playSlot( true );
+  
 }
 // ============================================================================
 // AnimationEngine::stopSlot()
@@ -372,7 +397,7 @@ int AnimationPlay::runTimeout()
       }
       else {
         if (current_frame_index+1 < (int) fdv->size()) {  // still exist frame to display
-          if ((elapsed_in_timer.elapsed() >               // time to display             
+          if (bench || (elapsed_in_timer.elapsed() >               // time to display
               (*fdv)[current_frame_index].elapsed)) {             
             // display next frame
             current_frame_index++;                              // current new frame index    
@@ -429,9 +454,13 @@ void AnimationPlay::displayFrameIndex(int index)
 // ============================================================================
 // AnimationPlay::start()                                                      
 // return true if it exist recorded frame                                      
-bool AnimationPlay::start()
+bool AnimationPlay::start(bool bench_)
 {
   bool status=true;
+  bench = bench_;
+  if (bench) {
+    bench_time.start();
+  }
   if (playing == 2 ) {  // from pause mode
     playing = 1;       // to play mode   
     emit infoStatus("Playing");
@@ -467,12 +496,19 @@ void AnimationPlay::pause()
 // AnimationPlay::stop()                                                       
 bool AnimationPlay::stop()
 {
+
   playing=0;
   current_frame_index = 0;
   reset=true;
   first_frame=true;
   cumul_elapsed=0;
   my_timer.stop();
+  if (bench) {
+    bench=false;
+    float fps = fdv->size()*1000/bench_time.elapsed();
+    QString message="Benchmark : " + QString("%1").arg(fps,0,'f',1) + " fps.";
+    QMessageBox::information(NULL,NULL,message,"Ok");
+  }
   emit infoStatus("None");
   return true;
   
@@ -588,6 +624,8 @@ void AnimationRender::runTimeout()
     } 
     else {
       emit uploadToGL(&store_options,select_options_gui);           // send to GLBox  
+      emit renderDrawBox(&store_options,select_options_gui,
+			  current_frame_render,dirname,framename);
     }
     QImage img;
     emit takeScreensgot(img);                                     // screenshot     

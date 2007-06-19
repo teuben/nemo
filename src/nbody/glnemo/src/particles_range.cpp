@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -88,6 +88,7 @@ int ParticlesRange::parseSelectedString(char * select_string, const int nbody,
            <<" with nbody=["<<nbody<<"]\n";
       exit(1);
     }
+#if 0
     // Correct npart value if selected_range is out of nbody
     int nbody_out = 0;
     for (int i=0; i<npart; i++) {
@@ -98,7 +99,8 @@ int ParticlesRange::parseSelectedString(char * select_string, const int nbody,
     }
     PRINT_D std::cerr << "NBODY out = " << nbody_out 
                  << " and nbody =" << nbody <<"\n";
-    npart = nbody_out;   
+    npart = nbody_out;
+#endif       
   }
   else {  // select all the particles
     npart=nbody;

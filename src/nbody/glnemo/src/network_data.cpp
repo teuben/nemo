@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -54,6 +54,7 @@ NetworkData::NetworkData(const char * hostname,const int _port)
   // allocate memory for pointers
   //nbody = new int;
   //timu  = new float;
+  part_data = new ParticlesData();
   part_data->allocVar(); // allocate nbody, timu
   // Initialize global class data
   *part_data->nbody = -1;
@@ -113,7 +114,7 @@ int NetworkData::loadPos(ParticlesSelectVector * psv, const bool vel)
       } 
       int nbytes=*((int *) (clientMB->getSizBuffer()));  // #bytes transferred
       int new_body = (int) ((float) (nbytes) / 3.0 / sizeof(float));
-      assert (new_body <= *part_data->nbody);
+      //assert (new_body <= *part_data->nbody);
       
       // allocate memory to store positions           
       if ( ! part_data->pos ||               // not yet allocated
@@ -132,7 +133,7 @@ int NetworkData::loadPos(ParticlesSelectVector * psv, const bool vel)
         } 
         int nbytes=*((int *) (clientMB->getSizBuffer()));  // #bytes transferred
         int new_body = (int) ((float) (nbytes) / 3.0 / sizeof(float));
-        assert (new_body <= *part_data->nbody);
+        //assert (new_body <= *part_data->nbody);
         
         // allocate memory to store velocities           
         if ( ! part_data->vel ||               // not yet allocated
@@ -193,7 +194,7 @@ int NetworkData::loadPos(ParticlesSelectVector * psv, const bool vel)
 // send data to the opengl object                                              
 void NetworkData::uploadGlData(ParticlesSelectVector * psv)
 {
-   if (is_new_data_loaded) {
+   if (1||is_new_data_loaded) {
     emit loadedData(part_data,psv);
     is_new_data_loaded = FALSE;
   } 

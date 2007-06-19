@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -37,6 +37,8 @@ signals:
   void uploadToGL(GlobalOptions *, const bool);  // send to GLBOX to update GL  
   void loadNextFrame();                          // request next frame loading  
   void infoStatus(QString);
+  void renderDrawBox(GlobalOptions *,const bool,
+		 const int,const QString ,const QString);
 protected:  
   FrameDataVector * fdv;
   bool activated;
@@ -116,18 +118,17 @@ Q_OBJECT
 public:
   AnimationPlay(FrameDataVector *);
   ~AnimationPlay();  
-  bool start();
+  bool start(bool bench_=false);
   bool stop();
   void pause();
 signals:
   //void uploadToGL(GlobalOptions *, const bool);  // send to GLBOX to update GL
   void endOfRecord();                            // send to main appli        
   void infoPlay(int,int,int);
-  void infoStatus(QString);
+  //void infoStatus(QString);
 public slots:
 int runTimeout();            // called from QTimer signal   
 void displayFrameIndex(int); // called from slider move     
-
 private slots:
 //void slotPlay();
 
@@ -140,8 +141,10 @@ private:
   int cumul_elapsed;       // cumulated eplased time at the current frame
   bool reset;              // ...                                        
   bool first_frame;        // special check for the first frame          
-  QTime elapsed_in_timer;  // time spent                                 
+  QTime elapsed_in_timer;  // time spent in a frame                      
+  QTime bench_time;        // time spent during the bench                
   int whole_time;          // whole time animation                       
+  bool bench;              // bench control variable                     
   //QTimer my_timer;
 };
 // ----------------------------------------------------------------------------
@@ -158,9 +161,13 @@ public:
   AnimationRender * render;
   AnimationPlay   * play;    
   FrameDataVector fdv; 
-
-private slots:
-  void playSlot();
+  signals:
+    void sig_info_from_file( const int &, const QString &);
+  public slots:
+  void benchSlot();
+  void loadFrameData(const QString&);
+  private slots:
+  void playSlot(bool bench_=false);
   void pauseSlot();
   void stopSlot();
   void recordSlot();
@@ -169,6 +176,8 @@ private slots:
   void firstFrameSlot();
   void lastFrameSlot();
   void displayFrameIndexSlot(int);
+  void saveFrameData(const QString&);
+
 private:
   enum STATUS {
     NONE, PLAY, RECORD, RENDER

@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -48,9 +48,11 @@ class VirtualData : public QObject
   virtual bool isConnected() { return FALSE; };
   virtual int reload(ParticlesSelectVector *, const bool) { std::cerr << "reload not implemented\n"; return 0;};
   virtual ParticlesData * getParticlesData() { return part_data;};
+  virtual void forceClose() { close(); };
   bool is_loading_thread;
   bool is_end_of_data;
-  
+  ParticlesData * part_data;
+  virtual void computeCooMax();
   // 
   enum Status {
     EndOfNemo
@@ -60,12 +62,12 @@ class VirtualData : public QObject
   virtual void messageLoad(QString * );
   void infoMessage(std::string);
   void newTime(const float);
-  protected:
+  /*protected*/
   int full_nbody;
-  ParticlesData * part_data;
-  virtual void computeCooMax();
-  private:
+  
 
+  private:
+  virtual int close() { return 0;} ;
 };
 #endif // VIRTUAL_DATA_H
 // ============================================================================

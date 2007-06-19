@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -56,45 +56,52 @@ using namespace std;
 // ============================================================================
 // NEMO parameters                                                             
 ::string defv[] = {  // use `::'string because of 'using namespace std'
-  "in=\n             Nemo input snapshot                                             ",
+  "in=\n             Nemo input snapshot                                           \n"
+  "                   or ascii file with a list of NEMO files                       \n"
+  "                   in such case, the first line of the file                    \n"
+  "                   must be :                                                   \n"
+  "                   #glnemo_file_list                                             ",
   "server=\n         Running simulation server hostname                              ",
-  "select=all\n      Select particles from the : range operator , separeted\n"
-  "                   by a comma. E.g 0:999,1000:1999 would select two sets\n"
+  "select=all\n      Select particles from the : range operator , separeted        \n"
+  "                   by a comma. E.g 0:999,1000:1999 would select two sets        \n"
   "                   of 1000 particles and give them a different color              ",
-  "range_visib=t\n   toggle visibility  for the particles selected via \'select=\'\n"
+  "range_visib=t\n   toggle visibility  for the particles selected via \'select=\' \n"
   "                   options. Can be usefull if you only want to display particles\n"
   "                   selected via \'select_list\' options(see below). In that case\n"
   "                   you should set \'f\'                                           ",
-  "select_list=\n    Select particles from list of indexes          ",
-  "times=all\n       Select time                                    ",
-  "vel=t\n           load velocity coordinates                      ",
-  "disp_vel=f\n      display velocity vectors                       ",
-  "blending=t\n      Activate blending colors                       ",
-  "dbuffer=f\n       Activate OpenGL depth buffer                   ",
-  "perspective=t\n   false means orthographic                       ",
-  "bestzoom=t\n      automatic zoom                                 ",
-  "play=f\n          automatically load and display next snapshot   ",
-  "ortho_range=6.0\n xy range if orthographic projection            ",
-  "zoom=-14\n        zoom value                                     ",  
-  "xrot=0.0\n        rotation angle on X axis                       ",
-  "yrot=0.0\n        rotation angle on Y axis                       ",
-  "zrot=0.0\n        rotation angle on Z axis                       ",
-  "xtrans=0.0\n      translation on X                               ",
-  "ytrans=0.0\n      translation on Y                               ",
-  "ztrans=0.0\n      translation on Z                               ",
-  "grid=f\n          Show grid                                      ",
-  "gas=f\n           gas like particle effect                       ",
-  "texture_s=0.15\n  texture size of gaz particle                   ",
-  "texture_ac=125\n  texture alpha color of gaz particle            ",
-  "psize=1.0\n       Set particles size                             ",
-  "port=4444\n       Server's communication port                    ",
-  "wsize=925\n       Windows's width size                           ",
-  "hsize=685\n       Windows's height size                          ",
-  "screenshot=\n     Screenshot name                                ",
-  "VERSION=0.93\n    "__DATE__"  - JCL  compiled at <"__TIME__">   ",
+  "select_list=\n    Select particles from list of indexes                           ",
+  "times=all\n       Select time                                                     ",
+  "vel=t\n           load velocity coordinates                                       ",
+  "disp_vel=f\n      display velocity vectors                                        ",
+  "blending=t\n      Activate blending colors                                        ",
+  "dbuffer=f\n       Activate OpenGL depth buffer                                    ",
+  "perspective=t\n   false means orthographic                                        ",
+  "bestzoom=t\n      automatic zoom                                                  ",
+  "play=f\n          automatically load and display next snapshot                    ",
+  "ortho_range=6.0\n xy range if orthographic projection                             ",
+  "zoom=-14\n        zoom value                                                      ",
+  "xrot=0.0\n        rotation angle on X axis                                        ",
+  "yrot=0.0\n        rotation angle on Y axis                                        ",
+  "zrot=0.0\n        rotation angle on Z axis                                        ",
+  "xtrans=0.0\n      translation on X                                                ",
+  "ytrans=0.0\n      translation on Y                                                ",
+  "ztrans=0.0\n      translation on Z                                                ",
+  "grid=f\n          Show grid                                                       ",
+  "gas=f\n           gas like particle effect                                        ",
+  "texture_s=0.15\n  texture size of gaz particle                                    ",
+  "texture_ac=125\n  texture alpha color of gaz particle                             ",
+  "psize=1.0\n       Set particles size                                              ",
+  "port=4444\n       Server's communication port                                     ",
+  "wsize=925\n       Windows's width size                                            ",
+  "hsize=685\n       Windows's height size                                           ",
+  "screenshot=\n     Screenshot name                                                 ",
+  "anim_file=\n      Animation filename                                              ",
+  "anim_play=t\n     play an animation ? (anim_file must be selected)                ",
+  "anim_bench=t\n    play an animation in benchmark mode ?                           ",
+  "VERSION=0.94\n    "__DATE__"  - JCL  compiled at <"__TIME__">                     ",
   NULL
 };
-::string usage="3D OpenGL Nemo Snapshot rendering";
+::string usage="Interactive 3D OpenGL visualization program for Nemo snapshots";
 
 // ============================================================================
 //  The main program is here                                                   

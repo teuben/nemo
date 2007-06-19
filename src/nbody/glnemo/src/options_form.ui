@@ -153,6 +153,9 @@
                                         <property name="name">
                                             <cstring>alpha_slider</cstring>
                                         </property>
+                                        <property name="minValue">
+                                            <number>1</number>
+                                        </property>
                                         <property name="maxValue">
                                             <number>255</number>
                                         </property>
@@ -1782,9 +1785,44 @@
                             <property name="name">
                                 <cstring>unnamed</cstring>
                             </property>
-                            <widget class="QLayoutWidget" row="0" column="1">
+                            <widget class="QLayoutWidget" row="1" column="0">
                                 <property name="name">
-                                    <cstring>layout36</cstring>
+                                    <cstring>layout33</cstring>
+                                </property>
+                                <vbox>
+                                    <property name="name">
+                                        <cstring>unnamed</cstring>
+                                    </property>
+                                    <widget class="QLabel">
+                                        <property name="name">
+                                            <cstring>textLabel1_2_2</cstring>
+                                        </property>
+                                        <property name="text">
+                                            <string>Texture alpha color</string>
+                                        </property>
+                                    </widget>
+                                    <widget class="QSlider">
+                                        <property name="name">
+                                            <cstring>texture_alpha_color</cstring>
+                                        </property>
+                                        <property name="minValue">
+                                            <number>1</number>
+                                        </property>
+                                        <property name="maxValue">
+                                            <number>255</number>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                        <property name="tickmarks">
+                                            <enum>Below</enum>
+                                        </property>
+                                    </widget>
+                                </vbox>
+                            </widget>
+                            <widget class="QLayoutWidget" row="0" column="0">
+                                <property name="name">
+                                    <cstring>layout35</cstring>
                                 </property>
                                 <vbox>
                                     <property name="name">
@@ -1800,9 +1838,9 @@
                                     </widget>
                                     <widget class="QLayoutWidget">
                                         <property name="name">
-                                            <cstring>layout32</cstring>
+                                            <cstring>layout34</cstring>
                                         </property>
-                                        <vbox>
+                                        <hbox>
                                             <property name="name">
                                                 <cstring>unnamed</cstring>
                                             </property>
@@ -1814,53 +1852,42 @@
                                                     <string>Texture size</string>
                                                 </property>
                                             </widget>
-                                            <widget class="QSlider">
-                                                <property name="name">
-                                                    <cstring>texture_size</cstring>
-                                                </property>
-                                                <property name="orientation">
-                                                    <enum>Horizontal</enum>
-                                                </property>
-                                                <property name="tickmarks">
-                                                    <enum>Below</enum>
-                                                </property>
-                                            </widget>
-                                        </vbox>
-                                    </widget>
-                                    <widget class="QLayoutWidget">
-                                        <property name="name">
-                                            <cstring>layout33</cstring>
-                                        </property>
-                                        <vbox>
-                                            <property name="name">
-                                                <cstring>unnamed</cstring>
-                                            </property>
                                             <widget class="QLabel">
                                                 <property name="name">
-                                                    <cstring>textLabel1_2_2</cstring>
+                                                    <cstring>tex_value</cstring>
+                                                </property>
+                                                <property name="paletteBackgroundColor">
+                                                    <color>
+                                                        <red>255</red>
+                                                        <green>223</green>
+                                                        <blue>216</blue>
+                                                    </color>
+                                                </property>
+                                                <property name="frameShape">
+                                                    <enum>LineEditPanel</enum>
                                                 </property>
                                                 <property name="text">
-                                                    <string>Texture alpha color</string>
+                                                    <string>0</string>
+                                                </property>
+                                                <property name="alignment">
+                                                    <set>AlignVCenter|AlignRight</set>
                                                 </property>
                                             </widget>
-                                            <widget class="QSlider">
-                                                <property name="name">
-                                                    <cstring>texture_alpha_color</cstring>
-                                                </property>
-                                                <property name="minValue">
-                                                    <number>1</number>
-                                                </property>
-                                                <property name="maxValue">
-                                                    <number>255</number>
-                                                </property>
-                                                <property name="orientation">
-                                                    <enum>Horizontal</enum>
-                                                </property>
-                                                <property name="tickmarks">
-                                                    <enum>Below</enum>
-                                                </property>
-                                            </widget>
-                                        </vbox>
+                                        </hbox>
+                                    </widget>
+                                    <widget class="QSlider">
+                                        <property name="name">
+                                            <cstring>texture_size</cstring>
+                                        </property>
+                                        <property name="maxValue">
+                                            <number>1000</number>
+                                        </property>
+                                        <property name="orientation">
+                                            <enum>Horizontal</enum>
+                                        </property>
+                                        <property name="tickmarks">
+                                            <enum>Below</enum>
+                                        </property>
                                     </widget>
                                 </vbox>
                             </widget>
@@ -2212,6 +2239,7 @@
     <slot access="private">setupOctreeSlot()</slot>
     <slot access="private">updateVelVectorFactor()</slot>
     <slot>setVelBox( bool b )</slot>
+    <slot access="private">labelTextureValue()</slot>
 </slots>
 <functions>
     <function access="private" specifier="non virtual">init()</function>

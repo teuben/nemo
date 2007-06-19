@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -18,7 +18,7 @@
 #include "virtual_particles_select.h"
 #include "gl_object.h"
 #include "particles_data.h"
-
+#include "frustumculling.h"
 /**
 @author Jean-Charles Lambert
 */
@@ -39,9 +39,10 @@ class GLOctree : public GLObject {
     GLOctree(GlobalOptions * _options);
 
     ~GLOctree();
-    void update(const ParticlesData   *  ,
+    void update(ParticlesData   *  ,
 		ParticlesSelectVector * );
     void update();
+    void displayPolygons(const double * mModel,const GLuint texture,const float u_max,const float v_max);
   public slots:
     void buildDisplayList();
   private:
@@ -52,7 +53,7 @@ class GLOctree : public GLObject {
     bool new_data;     // true if new
     int nbody_keeped;  // #bodies keep after tree walk
     float rmid[3];
-    const ParticlesData * p_data;
+    ParticlesData * p_data;
     GlobalOptions * store_options;
     ParticlesSelectVector  * psv;
     bool first;
@@ -61,7 +62,15 @@ class GLOctree : public GLObject {
     void expandTree(float );
     void insertParticle(int, Node **, float *, int, int );
     int hackTreeDL(Node *, float *, int );
+    int hackTreePolygons(Node *, float *, int, bool );
+    int computePolygons(Node *);
     void init();
+
+    const double * mModel;
+    GLuint texture,textureX2;
+    float  u_max;
+    float  v_max;
+    FrustumCulling frustum;
 };
 
 #endif

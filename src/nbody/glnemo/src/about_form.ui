@@ -115,7 +115,7 @@
                             <cursor>13</cursor>
                         </property>
                         <property name="text">
-                            <string>Copyright © Jean-Charles LAMBERT 2004-2006&lt;br&gt;
+                            <string>Copyright © Jean-Charles LAMBERT 2004-2007&lt;br&gt;
                               &lt;br&gt;
                        &lt;a href="mailto:Jean-Charles.Lambert@oamp.fr"&gt;Jean-Charles.Lambert@oamp.fr&lt;/a&gt;&lt;br&gt;
 &lt;br&gt;
@@ -161,7 +161,7 @@
                         </property>
                         <property name="text">
                             <string>
-Copyright © Jean-Charles LAMBERT 2004-2006
+Copyright © Jean-Charles LAMBERT 2004-2007
 
 Glnemo is governed by the CeCILL  license under French law and
 abiding by the rules of distribution of free software.  You can  use, 
@@ -714,7 +714,7 @@ Version 2.0 dated 2005-05-21.
                         </font>
                     </property>
                     <property name="text">
-                        <string>Glnemo version 0.93</string>
+                        <string>Glnemo version 0.94</string>
                     </property>
                 </widget>
                 <spacer>

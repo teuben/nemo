@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -21,12 +21,14 @@ public:
     const ParticlesData& operator=(const ParticlesData& m);
     
     int allocVar();
+    int allocTree();
     int  * nbody, i_max[3] ;
     float * pos,
           * vel, * vel_norm,
           coo_max[3], 
           * timu;
-    
+    int * tree_depth;   // array to store tree_depth for each particles
+    int tree_size_max;
     int * nemobits;      
     ~ParticlesData();
      char * mallocate(char *, int, bool force=false);

@@ -94,9 +94,9 @@ void ParticlesSelectForm::apply()
   // proceed on list
   applyList();
   if (part_data) { // we must have data to display !!!
-      pthread_mutex_lock(mutex_data);
+      //pthread_mutex_lock(mutex_data);
       emit applyData(part_data,my_psv);  // send signal to GLBox to update the data
-      pthread_mutex_unlock(mutex_data);
+      //pthread_mutex_unlock(mutex_data);
   }     
 }
 // ============================================================================

@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -157,6 +157,7 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
 		  select_part,&part_data->nbody,&part_data->pos, &part_data->timu,
                   select_time,&part_data->nemobits);
   }
+  is_open=TRUE;
   if (status != 0) {
     if ( status == -1) {  // Bad nemobits
       if ( ! ( *part_data->nemobits & TimeBit)) { // no TimeBit
@@ -166,14 +167,17 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
         std::cerr << "Forcing time to [0.0]\n";
         *(part_data->timu) = 0.0;
       }
-    } 
+    }
+    // intialyse tree_depht array
+    part_data->allocTree();
+
     PRINT_D std::cerr << "time = " << *(part_data->timu) << "\n";        
-    is_open=TRUE;
     is_new_data_loaded = TRUE;
     computeCooMax();
     float * cmax = getCooMax();
     PRINT_D std::cerr << "COOmax = " <<cmax[0]
                       <<" "<<cmax[1]<<" "<<cmax[2]<<"\n";
+    full_nbody=*(part_data->nbody);
     if (! is_parsed) {
       is_parsed = TRUE;
       if ( ! strcmp(nemo_file,"-")) {
@@ -195,7 +199,7 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
       // it crashs the aplication                             
       //emit newTime(*timu);             // send to animation   
       emit loadedData(part_data, psv);  // send to glbox       
-      is_new_data_loaded = FALSE;
+      //is_new_data_loaded = FALSE;
     }    
   } else {
     // we can now unlock the data
@@ -209,7 +213,7 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
 // Upload Data to GLbox                                                        
 void SnapshotData::uploadGlData(ParticlesSelectVector * psv)
 {
-  if (is_new_data_loaded) {
+  if (1||is_new_data_loaded) {
     //emit newTime(*timu);               // send to animation   
     emit loadedData(part_data, psv);    // send to glbox       
     is_new_data_loaded = FALSE;

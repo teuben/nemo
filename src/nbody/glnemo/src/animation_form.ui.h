@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                       
+// Copyright Jean-Charles LAMBERT - 2004-2007                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique de galaxies                                             
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -13,6 +13,7 @@
 #include <qfiledialog.h>
 #include <qmessagebox.h>
 #include <qdatetime.h>
+#include <qfileinfo.h>
 // ============================================================================
 // AnimationForm::init()
 void AnimationForm::init()
@@ -49,12 +50,30 @@ void AnimationForm::actionReset()
 
 // ============================================================================
 // AnimationForm::browseScriptFile()
+
 void AnimationForm::browseScriptFile()
 {
-    QString fn = QFileDialog::getOpenFileName( edit_filename->text(), QString::null,this);
-    if ( !fn.isEmpty() ) {
-	edit_filename->setText(fn);
+    //static QFileDialog * fld;
+    if (save_radio->isOn()) {
+	fld.setMode( QFileDialog::AnyFile );
+    } else {
+	fld.setMode( QFileDialog::ExistingFile );
     }
+    QString fn;
+    //QString fn = QFileDialog::getOpenFileName( edit_filename->text(), QString::null,this);
+    if (fld.exec()) {    
+	fn = fld.selectedFile();
+
+	if ( !fn.isEmpty() ) {
+	    //edit_filename->setText(fn);
+	    //QMessageBox::information(this,NULL,fn);
+	    if (save_radio->isOn()) {
+		emit save_frame_data(fn);
+	    } else {
+		emit load_frame_data(fn);
+	    }
+	}
+    }	
 }
 
 // ============================================================================
@@ -113,7 +132,7 @@ void AnimationForm::infoRecord( int _whole_elapsed, int nframe )
     whole_elapsed = _whole_elapsed;
     t=n.addMSecs(_whole_elapsed); 
     frame_duration->setText(t.toString());
-    frame_lcd->display(nframe);
+    frame_lcd->display(nframe+1);
 }
 // ============================================================================
 // AnimationForm::infoPlay()
@@ -210,4 +229,20 @@ void AnimationForm::resetRendering()
 void AnimationForm::renderButtonTextSlot( QString  name)
 {
     start_button_render->setText(name);
+}
+
+// ============================================================================
+// AnimationForm::
+void AnimationForm::info_from_file( const int & nframe, const QString & fn)
+{
+    QFileInfo fi(fn);
+    file_text->setText(fi.fileName());
+    frames_text->setText(QString("%1").arg(nframe,0));
+    
+}
+
+
+void AnimationForm::startBench()
+{
+    emit sig_start_bench();
 }

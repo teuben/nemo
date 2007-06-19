@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -20,7 +20,6 @@
 #include <string.h>
 #include <qdatetime.h>
 #include "glbox.h"
-
 #include "smoke.h"
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
@@ -32,7 +31,8 @@ using namespace std;
 // Initialize static class variables:
 int GLBox::width=894, GLBox::height=633;
 float ortho_left,ortho_right,ortho_bottom,ortho_top;
-
+pthread_mutex_t mutex;  // to protect the filling of the data
+ParticlesSelectVector   mypsv; // to store a copy of psv
 // ============================================================================
 // constructor                                                                 
 GLBox::GLBox( QWidget* parent, const char* name,
@@ -44,7 +44,12 @@ GLBox::GLBox( QWidget* parent, const char* name,
   ixTrans = iyTrans = izTrans = 0;
   scale = 1.0;                    // default object scale
   enable_s = false;
-
+  // init mutex to protect data
+  int status = pthread_mutex_init(&mutex,NULL);
+  if (status != 0 ) {
+    std::cerr <<"error during [pthread_mutex_init], aborted...\n";
+    std::exit(1);
+  }
   // get options
   store_options = _options;
   anim_engine   = _anim_engine; 
@@ -100,7 +105,8 @@ void GLBox::initializeGL()
   qglClearColor( black );		// Let OpenGL clear to black
   glEnable(GL_DEPTH_TEST);
   glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
-  store_options->zoom = -10.;
+  glHint(GL_POINT_SMOOTH, GL_NICEST);
+  //store_options->zoom = -10.;
   
   // Enable GL textures
   //glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -109,6 +115,21 @@ void GLBox::initializeGL()
   // Nice texture coordinate interpolation
   glHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
   PRINT_D std::cerr << "-- Initialize GL --\n";
+#if 0
+  float f,xx[3];
+  glGetFloatv(GL_POINT_SIZE,&f);
+  std::cerr << "gl Get = " << f << "\n";
+  glGetFloatv(GL_POINT_SIZE_MIN,&f);
+  std::cerr << "gl Get = " << f << "\n";
+  glGetFloatv(GL_POINT_SIZE_MAX,&f);
+  std::cerr << "gl Get = " << f << "\n";
+  glGetFloatv(GL_POINT_FADE_THRESHOLD_SIZE,&f);
+  std::cerr << "gl Get = " << f << "\n";
+  glGetFloatv(GL_POINT_DISTANCE_ATTENUATION,xx);
+  std::cerr << "gl Get = " << xx[0] << " " << xx[1] << " " << xx[2] << "\n";
+  glGetFloatv(GL_POINT_SPRITE_COORD_ORIGIN,&f);
+  std::cerr << "gl Get = " << f << "\n";
+#endif
 #if POLY  
   //glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_MODULATE);
   loadImage();
@@ -120,17 +141,9 @@ void GLBox::initializeGL()
 // performed here.                                                             
 void GLBox::paintGL()
 {
-#if 0
-  static QTime t;
-  static bool first=true;
-  if (first) {
-    first=false;
-    t.start();
-  } else {
-    //t.restart();
-    std::cerr << t.elapsed() << endl;
-  }
-#endif
+
+  pthread_mutex_lock(&mutex);
+  
   // record frame if activates
   anim_engine->record->beginFrame();
   
@@ -190,11 +203,13 @@ void GLBox::paintGL()
   //glDisable(GL_DEPTH_TEST);
 
   glPointSize(store_options->psize);
+//  glPointParameter();
   glEnable(GL_POINT_SMOOTH);
-
   // octree display
   //treeUpdate();
+  //tree->updateAlphaSlot( store_options->particles_alpha);
   tree->display();
+  
   
   // control blending on particles
   if (store_options->blending) {
@@ -205,6 +220,7 @@ void GLBox::paintGL()
   } else {
     glDisable(GL_BLEND);
   }
+
 #if 1
   // control depht buffer on particles
   if (store_options->dbuffer) {
@@ -239,9 +255,17 @@ else
 #if POLY  
   if (store_options->show_poly) { // Display Polygons          
     glLoadIdentity();             // reset opengl state machine
+#if 1
+    //tree->update();
+    if (store_options->octree_enable) {
+      tree->displayPolygons( mModel,texture[0],u_max,v_max);
+    }
     for (int i=0; i<nb_object; i++) {
       vparticles_object[i]->displayPolygons(mModel,texture[0],u_max,v_max);
     }
+#else
+  tree->displayPolygons( mModel,texture[0],u_max,v_max);
+#endif
   }
 #endif  
   glEnable(GL_DEPTH_TEST); // in any case enable depth buffer for grids
@@ -254,6 +278,7 @@ else
 #endif  
   // record end of frame if activated
   anim_engine->record->endFrame(store_options);
+  pthread_mutex_unlock(&mutex);
 }
 // ============================================================================
 // GLBox::resizeGL()                                                           
@@ -304,16 +329,20 @@ void GLBox::getData(const ParticlesData * _p_data,
                     ParticlesSelectVector  * psv)
 {
 
+  pthread_mutex_lock(&mutex);
   //static ParticlesData * p_data = new ParticlesData();
   // copy particles data into working array to prevent
   // bad display during "playing" snapshot            
   *p_data = *_p_data;
-    
-  for (int i=0; i< (int ) psv->size(); i++ ) {
-    (*psv)[i].vps->defaultIndexTab();  // reset index, in case of loading
+  // duplicate psv to prevent segmentation fault during
+  // snapshot loading with different number of particles
+  mypsv.clear();
+  mypsv = *psv;
+  for (int i=0; i< (int ) mypsv.size(); i++ ) {
+    (mypsv)[i].vps->defaultIndexTab();  // reset index, in case of loading
   }
   // create octree
-  tree->update(p_data,psv); 
+  tree->update(p_data,&mypsv); 
   
   // delete previous objects
 #if 0
@@ -323,17 +352,17 @@ void GLBox::getData(const ParticlesData * _p_data,
   nb_object=0;
 #endif
   // compute velocity resize factor
-  vel_max_norm=getVelMaxNorm(p_data,psv);
+  vel_max_norm=getVelMaxNorm(p_data,&mypsv);
       				
   
   // loop on all the objects stored in psv
-  for (int i=0; i< (int ) psv->size(); i++ ) {
-    (*psv)[i].vps->printRange();
+  for (int i=0; i< (int ) mypsv.size(); i++ ) {
+    (mypsv)[i].vps->printRange();
     if (i>=nb_object ) { // create a new object
       nb_object++;
       GLParticlesObject * pobj;
       pobj = new GLParticlesObject( p_data,
-      				 ((*psv)[i].vps),
+      				 ((mypsv)[i].vps),
                                  store_options->vel_vector_size/vel_max_norm);
      
       //vparticles_object.push_back(*pobj);
@@ -344,12 +373,12 @@ void GLBox::getData(const ParticlesData * _p_data,
       (*psv)[i].vps->defaultIndexTab();  // reset index, in case of loading
     #endif  
       vparticles_object[i]->updateObject( p_data,
-					 ((*psv)[i].vps),
+					 ((mypsv)[i].vps),
                                          store_options->vel_vector_size/vel_max_norm);
     }
   }
   // desactivate not selected objects
-  for (int i=(int ) psv->size(); i< nb_object; i++ ) {
+  for (int i=(int ) mypsv.size(); i< nb_object; i++ ) {
     vparticles_object[i]->setActivate(FALSE);
   }
   setParticlesSize((int) store_options->psize,false);
@@ -363,7 +392,8 @@ void GLBox::getData(const ParticlesData * _p_data,
       vparticles_object[i]->rebuildDisplayList();
     }
   }
-#endif  
+#endif
+  pthread_mutex_unlock(&mutex);
   updateGL();
 }
 // ============================================================================
@@ -371,11 +401,13 @@ void GLBox::getData(const ParticlesData * _p_data,
 //                                                                             
 void GLBox::updateVelVectorFactor()
 {
-    for (int i=0; i<nb_object; i++) {
-      vparticles_object[i]->rebuildVelDisplayList(store_options->vel_vector_size/vel_max_norm);
-    }
+  pthread_mutex_lock(&mutex);
+  for (int i=0; i<nb_object; i++) {
+    vparticles_object[i]->rebuildVelDisplayList(store_options->vel_vector_size/vel_max_norm);
+  }
     //if (ugl) updateGL();
-    updateGL();
+  pthread_mutex_unlock(&mutex);
+  updateGL();
 }
 // ============================================================================
 // GLBox::setZoom()                                                            
@@ -735,7 +767,7 @@ void GLBox::loadImage()
   //  return;
   //QString name="/home/jcl/download/PEngine/images/particle.png";
 #if 0  
-  QString name="/home/jcl/works/glnemo/src/images/smoke.png";
+  QString name="/home/jcl/text1.png";
   QImage img(name);
 #else  
   QString name="smoke";  

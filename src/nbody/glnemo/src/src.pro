@@ -44,6 +44,7 @@ HEADERS += glbox.h \
            particles_range.h \
            virtual_data.h \
            acquire_data_thread.h \
+	   drawbox.h \
            gl_text_object.h \
            gl_hud_object.h \
            network_data.h \
@@ -67,7 +68,8 @@ HEADERS += glbox.h \
            animation_engine.h \
            frustumculling.h \
            gloctree.h \
-           glcube.h 
+           glcube.h \
+	   filelistdata.h
 SOURCES += glbox.cpp \
            globjwin.cpp \
            glnemo.cpp \
@@ -78,6 +80,7 @@ SOURCES += glbox.cpp \
            particles_range.cpp \
            virtual_data.cpp \
            acquire_data_thread.cpp \
+	   drawbox.cpp \
            gl_text_object.cpp \
            gl_hud_object.cpp \
            network_data.cpp \
@@ -96,4 +99,5 @@ SOURCES += glbox.cpp \
            animation_engine.cpp \
            frustumculling.cpp \
            gloctree.cpp \
-           glcube.cpp 
+           glcube.cpp \
+	   filelistdata.cpp

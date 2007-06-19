@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -24,8 +24,10 @@ ParticlesData::ParticlesData()
   timu     = NULL;
   nbody    = NULL;
   nemobits = NULL;
+  tree_depth = NULL;	
   coo_max[0] = coo_max[1] = coo_max[2] = 0.0;
   i_max[0]   = i_max[1]   = i_max[2]   = 0;
+  tree_size_max = 1000000;
 }
 // ============================================================================
 // copy Constructor                                                            
@@ -34,7 +36,9 @@ const ParticlesData& ParticlesData::operator=(const ParticlesData& m)
   if (m.nbody) {
     nbody = (int *) mallocate((char *) nbody, sizeof(int), true);
     *nbody = *m.nbody;
-    
+
+   tree_depth = (int *) mallocate((char *) tree_depth, sizeof(int)* (*nbody), true);
+
    if (m.pos) {
       pos = (float *) mallocate((char *) pos, sizeof (int) * 3 * (*nbody), true);
       //memcpy((float *) pos, (float *) m.pos, sizeof(float)* (*nbody) * 3);
@@ -110,6 +114,8 @@ ParticlesData::~ParticlesData()
 	free ((int   *) nbody);
   if (nemobits) 
 	free ((int   *) nemobits);
+  if (tree_depth) 
+	free ((int   *) tree_depth);
 
 }
 
@@ -138,10 +144,22 @@ char * ParticlesData::mallocate(char * p, int lg, bool force)
 int ParticlesData::allocVar()
 {
   nbody    = (int   *) mallocate((char *) nbody   , sizeof(int));
+  //tree_depth = (int   *) mallocate((char *) tree_depth, sizeof(int)* (*nbody));
+  //tree_depth = (int   *) mallocate((char *) tree_depth, sizeof(int));
   nemobits = (int   *) mallocate((char *) nemobits, sizeof(int));
   timu     = (float *) mallocate((char *) timu    , sizeof(float));
   *nbody = *nemobits = -1;
   *timu  = -1.;
+  return 1;
+}
+// ============================================================================
+// ParticlesData::allocTree                                                     
+int ParticlesData::allocTree()
+{
+  tree_depth = (int   *) mallocate((char *) tree_depth, sizeof(int)* (*nbody));
+  for (int i=0; i<*nbody; i++) {
+    tree_depth[i] = 1;
+  }
   return 1;
 }
 // ============================================================================

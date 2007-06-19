@@ -1,6 +1,6 @@
-.TH GLNEMO 1NEMO "26 September 2006"
+.TH GLNEMO 1NEMO "19 June 2007"
 .SH NAME
-glnemo \- 3D OpenGL Nemo Snapshot rendering
+glnemo \- Interactive 3D OpenGL visualization program for Nemo snapshots
 .SH SYNOPSIS
 \fBglnemo\fP [parameter=value]
 .SH DESCRIPTION
@@ -15,7 +15,18 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Nemo input snapshot []    
+Nemo input snapshot [] or ascii file with a list of NEMO snapshots. In
+such case, the ascii file must begin with the following line:
+#glnemo_list_file
+.nf
+example:
+-------- cut here --------
+#glnemo_list_file
+my_snap.0001.nemo 0:199999
+my_snap.0002.nemo 100:299999
+my_snap.0003.nemo 0:1999,3000:5000
+-------- cut here --------
+.fi
 .TP 20
 \fBserver=\fP
 Running simulation server hostname (right now works with gyrfalcON) []   
@@ -124,6 +135,15 @@ Windows's height size [685]
 .TP 20
 \fBscreenshot=\fP
 Screenshot name []
+.TP 20
+\fBanim_file=\fP
+Animation filename (previously recorded from animation module) []
+.TP 20
+\fBanim_play=\fP
+play an animation ? (anim_file must be selected) [t]
+.TP 20
+\fBanim_bench=\fP
+play an animation in benchmark mode ? [t]
 .SH OPERATION
 All the parameters given to the command line can be interactively
 modified in real time using the graphic user interface composed of menus, icons and
@@ -165,4 +185,7 @@ Jean-Charles Lambert
 25-Apr-06	V0.90 animation module, octree, bugs fixed	JCL
 15-Jul-06	V0.92 bigger DOF, cube display, bugs fixed	JCL
 26-Sep-06	V0.93 velocity vectors display, bugs fixed	JCL
+19-Jun-07	V0.94 list of snapshots as input        	JCL
+	      snapshots with different #bodies
+	      animation files etc...see Changelog
 .fi

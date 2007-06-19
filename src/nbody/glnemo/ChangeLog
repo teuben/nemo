@@ -1,31 +1,64 @@
 glnemo ChangeLog
 
-in CVS V 0.93, September 2006
+V 0.94  June 2007
+=================
+	*) Input :
+	----------
+	- it's now possible to give as input an ascii file with a list
+	of NEMO snapshots. In such case, the first line of the ascii file
+	must be :
+	#glnemo_file_list
+
+	- it's now possible to display NEMO snapshots with different
+	number of particles. (you need io_nemo >= 1.42)
+	
+	*) Animation:
+	------------
+
+	- it's now possible to save in a file all the events
+	(mouse,keyborad) recorded during an animation. You can then reload
+	later this file to play the events from another snapshot.
+
+	- on the Animation module, there is a "bench" button which report
+	how many frames per second your machine is able to play your
+	animation. 
+
+	- new parameters in the command line to play animation and
+	benchmark.
+	
+	*) Octree:	   
+	   -------
+
+	- when octree is actived, frustum culling is activated to speed up
+	the rendering (a bit buggy btw ....)
+	
+	*) Bugs fixed: 
+           -----------
+        - bestzoom now works even if particles are in a small range.
+
+	- zoom option selected from the command line now works.
+
+	- and many many others.
+	
+V 0.93, September 2006
 =============================
-	*) general:
-	   --------
+	*) features:
+	   ---------
 
-	- a lot of compilation warnings have been removed.
-	
-        *) features:
-           ---------
+	- Velocity vectors display enable for a NEMO snapshot and a
+	gyrfalcON simulation. It's possible to control le vectors size
+	from the option dialog box (OpenGL tab).
 
-        - velocity vectors display enable for NEMO snapshots and 
-        gyrfalcON simulations. It's possible to control the vectors size
-        from the option dialog box (OpenGL tab).
-	- new command line options (vel, vel_disp, play)
-	
+	*) Animation:
+	   ---------
 
-        *) Animation:
-           ---------
-
-        - the option "selected from recording" from the [Options]'s tab
-        from Animation dialog box has been fixed. It's now possible to
-        record all the OpenGL effects during the animation.
+	- the option " selected from recording" from the [Options]'s tab
+	from Animation dialog box has been fixed. It's now possible to
+	record all the OpenGL effects during the animation.
 
 
-NEMO 3.2.4 (V 0.92, July 2006)
-==============================
+V 0.92, July 2006, (NEMO 3.2.4)
+================================
 	*) general:
 	   --------
 	- happy g++ 4.1.x .

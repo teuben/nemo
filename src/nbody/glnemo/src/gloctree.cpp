@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2006                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -99,7 +99,7 @@ void GLOctree::init()
 // ============================================================================
 // GLOctree::update()                                                          
 // update tree with new Particles object                                       
-void GLOctree::update(const ParticlesData * _p_data ,
+void GLOctree::update(ParticlesData * _p_data ,
 		      ParticlesSelectVector  * psv_)
 {
   first=true;
@@ -107,7 +107,7 @@ void GLOctree::update(const ParticlesData * _p_data ,
   p_data = _p_data;
   psv   = psv_;
   new_data = true;
-    
+
   // build Display list
   buildDisplayList();
 }
@@ -140,6 +140,8 @@ int GLOctree::build()
     new_data=false;
     init();
     computeSizeMax();
+    p_data->tree_size_max = size_max;
+    
     PRINT_D std::cerr << "Start build\n";
     
     for (int obj=0; obj< (int ) psv->size(); obj++ ) { 
@@ -195,6 +197,7 @@ void GLOctree::insertParticle(int index, Node ** node, float * rmid, int level, 
   if (((*node)->node[octant])==NULL) { // yes it's free !
     Node * new_node=new Node(index,obj); // insert a particle (leaf)
     (*node)->node[octant] = new_node;
+    p_data->tree_depth[index] = level; // Save particle's level
   }
   else { // octant is not free
     if ((*node)->node[octant]->type ==0) { // it's a node
@@ -364,5 +367,199 @@ void GLOctree::expandTree(float new_size)
   while (size_max < new_size) {
     size_max = size_max << 1;
   }
+}
+// ============================================================================
+// GLParticlesObject::displayPolygons()                                        
+// displayPolygons to create gas like particles effect.                        
+// use billboarding technique to display polygons :                            
+// - transforms coordinates points according model view matrix                 
+// - draw quad (2 triangles) around new coordinates and facing camera          
+void GLOctree::displayPolygons(const double * _mModel,const GLuint _texture,const float _u_max,const float _v_max)
+{
+  // get variables
+  mModel   = _mModel;
+  texture  = _texture;
+  u_max    = _u_max;
+  v_max    = _v_max;
+
+  textureX2 = texture*2;
+  // parse tree if activated
+  if (store_options->octree_enable) {
+    for (int obj=0; obj< (int ) psv->size(); obj++ ) {
+      VirtualParticlesSelect * vps = (*psv)[obj].vps;
+      if (vps->is_visible) {
+        vps->resetIndexTab();
+      }
+    }
+    nbody_keeped=0;
+    glEnable( GL_TEXTURE_2D );
+    glDisable(GL_DEPTH_TEST);
+    glBindTexture(GL_TEXTURE_2D, texture); // Select texture
+    // Get Frustum
+    frustum.getFC();
+
+    hackTreePolygons(root,rmid,1,true);
+
+    glDisable( GL_TEXTURE_2D );
+  }
+}
+// ============================================================================
+// GLOctree::hackTreePolygons
+int GLOctree::hackTreePolygons(Node * tree, float * rmid, int level, bool check_tree)
+{
+#define MM(row,col)  mModel[col*4+row]
+  
+float vv[8][3]; // 8 vertex to store
+  //std::cerr << "hi\n";
+  float new_rmid[8][3];
+  if ( !tree  ) { // free node
+    return 0;
+  }
+  else if (tree->type == 1) { // a leaf
+    if (level >= store_options->octree_level) { // selected particles
+      (*psv)[tree->obj].vps->addIndexTab(tree->index);
+      //computePolygons( tree );
+    }
+    return 1;
+  }
+  else { // a node
+    
+    
+    // Build
+    float square_minus1=(float ) size_max/(1<<level-1);
+    float square=(float ) size_max/(1<<level);
+    int fac[2] = { -1,1 };
+    for (int i=0;i<2;i++) {
+      for (int j=0;j<2;j++) {
+        for (int k=0;k<2;k++) {
+          int octant=(i<<2)+(j<<1)+k;
+          
+          // new middle coordinates
+          new_rmid[octant][0]=fac[i]*square+rmid[0];
+          new_rmid[octant][1]=fac[j]*square+rmid[1];
+          new_rmid[octant][2]=fac[k]*square+rmid[2];
+          if (check_tree) {
+	    // vertex's octant coordinates
+            vv[octant][0]=fac[i]*square_minus1+rmid[0];//+fac[i]*textureX2;
+            vv[octant][1]=fac[j]*square_minus1+rmid[1];//+fac[j]*textureX2;
+            vv[octant][2]=fac[k]*square_minus1+rmid[2];//+fac[k]*textureX2;
+            //
+          }
+          assert(octant<8);
+          //hackTreePolygons(tree->node[octant],new_rmid,level+1,true);
+        } //k
+      } //j
+    } //i
+    bool inside=true;  // true if octant inside FC
+    // must check_tree if not all the vertex of the octant
+    // are not in the frustum                             
+    if (check_tree) {
+      
+      int np_inside=0;
+      // check out octant in FC?
+      for (int i=0; i<8; i++) {
+        float x=vv[i][0];
+        float y=vv[i][1];
+        float z=vv[i][2];
+        // compute point coordinates according to model via matrix
+        float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3);//*w;
+        float my = MM(1,0)*x + MM(1,1)*y + MM(1,2)*z + MM(1,3);//*w;
+        float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
+        if (frustum.isPointInside(mx,my,mz)) {
+          np_inside++;
+        }
+      }
+      // check if center of octant is inside
+      if (np_inside == 0) {
+        float x=rmid[0];
+        float y=rmid[1];
+        float z=rmid[2];
+        // compute point coordinates according to model via matrix
+        float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3);//*w;
+        float my = MM(1,0)*x + MM(1,1)*y + MM(1,2)*z + MM(1,3);//*w;
+        float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
+        if (frustum.isPointInside(mx,my,mz)) {
+          np_inside++;
+        }
+      }
+      if (np_inside==0) {   // the whole octant 
+        inside = false;     // is out of the FC 
+      }
+      else
+        if (np_inside==8) {   // the whole octant is in the FC    
+          check_tree = false; // no need to keep compute the FC   
+        }
+    }
+    if (inside) {                // octant inside FC     
+      for (int i=0; i<8; i++) {  // check out sub octants
+        hackTreePolygons(tree->node[i],new_rmid[i],level+1,check_tree);
+      }
+    }
+  }
+}
+// ============================================================================
+// GLOctree::computePolygons( Node * )
+int GLOctree::computePolygons(Node * tree)
+{
+
+  //glEnable(GL_DEPTH_TEST);	
+  setColor((*psv)[tree->obj].vps->col);    // set the color
+  glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),store_options->texture_alpha_color);
+
+  float uv[4][2] = { {0.0,   1.0-v_max}, {0.0,   1.0},{u_max, 1.0},
+    {u_max, 1.0-v_max}
+  };
+  static int modulo=0;
+  float rot=0.0;
+  // Get Frustum
+  //frustum.getFC();
+  int visible=0;
+
+  int index=tree->index;
+  float
+      x=p_data->pos[index*3  ],
+  y=p_data->pos[index*3+1],
+  z=p_data->pos[index*3+2];
+    //w=1.0;
+
+  // compute point coordinates according to model via matrix
+  float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3);//*w;
+  float my = MM(1,0)*x + MM(1,1)*y + MM(1,2)*z + MM(1,3);//*w;
+  float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
+  modulo += (modulo%4);
+  rot++;
+  if (1) { // frustum.isPointInside(mx,my,mz)) {
+    float new_texture_size=store_options->texture_size;
+    visible++;
+    glPushMatrix();
+    glTranslatef(mx,my,mz);         // move to the transform particles
+    glRotatef(rot,0.0,0.0,1.0);   // rotate triangles around z axis
+    glBegin(GL_TRIANGLES);
+
+    // 1st triangle
+    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+    modulo = (modulo+1)%4;
+    glVertex3f(-new_texture_size , new_texture_size  ,0. );
+    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+    modulo = (modulo+1)%4;
+    glVertex3f(-new_texture_size , -new_texture_size  ,0. );
+    glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+    glVertex3f(new_texture_size , -new_texture_size  ,0. );
+    // second triangle
+    modulo = (modulo+2)%4;
+    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+    glVertex3f(-new_texture_size , new_texture_size  ,0. );
+    modulo = (modulo+2)%4;
+    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+    glVertex3f(+new_texture_size , -new_texture_size  ,0. );
+    modulo = (modulo+1)%4;
+    glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+    glVertex3f(new_texture_size , new_texture_size  ,0. );
+    glEnd();
+    glPopMatrix();
+  }
+  return 1;
+
+  //std::cerr << "visible = " << visible << "\n";
 }
 // ============================================================================

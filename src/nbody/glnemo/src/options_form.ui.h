@@ -132,6 +132,7 @@ void OptionsForm::downloadOptions(GlobalOptions * options)
     show_poly->setChecked(store_options->show_poly);     
     texture_size->setValue((int) (texture_size->maxValue()*(store_options->texture_size)/ (store_options->MAX_TEXTURE_SIZE)));    
     texture_alpha_color->setValue(store_options->texture_alpha_color);
+    labelTextureValue();
     //      Octree
     enable_tree->setChecked(store_options->octree_enable);
     display_tree->setChecked(store_options->octree_display);
@@ -328,6 +329,7 @@ void OptionsForm::changeTextureSize(int)
         (store_options->MAX_TEXTURE_SIZE)/
         texture_size->maxValue()); 
     //std::cerr<< "texture size =" << store_options->texture_size <<"\n";
+    labelTextureValue();
     emit setTextureSize(store_options->texture_size);
 }
 
@@ -406,4 +408,10 @@ void OptionsForm::updateVelVectorFactor()
 void OptionsForm::setVelBox( bool b)
 {
     vel_box->setEnabled(b);
+}
+
+
+void OptionsForm::labelTextureValue()
+{
+    tex_value->setText(QString("%1").arg(store_options->texture_size,0,'f',3));
 }

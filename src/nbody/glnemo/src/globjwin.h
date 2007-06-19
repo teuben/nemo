@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -35,7 +35,7 @@
 #include "global_options.h"
 #include "options_form.h"
 #include "animation_engine.h"
-
+#include "drawbox.h"
 #include "particles_data.h"
 
 class GLBox;
@@ -63,7 +63,8 @@ private:
   VirtualData * virtual_data;
   bool play_animation;  
   int play_timer;
-
+  DrawBox * draw_box;
+  
 protected slots:
     void deleteFirstWidget();
     void selectFileOpen();
@@ -84,7 +85,7 @@ private slots:
     void optionsCamera();
     void optionsLookForNetworkServer();
     void optionsReloadSnapshot();
-    void optionsAnimation();
+    void optionsAnimation(bool display=true);
     void messageWarning(QString *,int);
     void infoMessage(std::string );
     void optionsRecord();
@@ -96,6 +97,8 @@ private slots:
     void optionsRotateAroundX(float ang=360., int step=1);
     void optionsRotateAroundY(float ang=360., int step=1);
     void optionsRotateAroundZ(float ang=360., int step=1);
+    void renderDrawBox(GlobalOptions *,const bool, const int,const QString ,const QString);
+    void getData(const ParticlesData *, ParticlesSelectVector*);
     //void startRenderAnim();
     //void stopRenderAnim();
 public:

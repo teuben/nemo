@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -13,10 +13,14 @@
 #define FRAME_DATA_H
 
 #include <qdatetime.h>
+#include <qobject.h>
 #include <vector>
-
+#include <iostream>
+#include <fstream>
+#include <qstring.h>
 #include "global_options.h"
 
+#define MAGICFDCOOKIE "***GLNEMO SCRIPTFILE***"
 class FrameData;
 typedef std::vector <FrameData> FrameDataVector;
 
@@ -31,4 +35,18 @@ public:
     GlobalOptions store_options;
 };
 
+class IOFrameData :  public QObject {
+  Q_OBJECT
+  public:
+  IOFrameData(const QString&,bool);
+  ~IOFrameData();
+
+  int save(FrameDataVector*);
+  int load(FrameDataVector*);
+  private:
+    QString filename;
+    bool is_load;
+    std::ifstream in;
+    std::ofstream out;
+};
 #endif

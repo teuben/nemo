@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2004-2005                                  
+// Copyright Jean-Charles LAMBERT - 2004-2007                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -303,6 +303,7 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
   // rotate uv map and rotate triangles     
   //for (int i=0; i < vps->npart; i+=vps->step_part) {
   //  int index=vps->getIndex(i);
+  
   for (int i=0; i < vps->ni_index; i++) {
       int index=vps->index_tab[i]; 
       float 
@@ -311,40 +312,52 @@ void GLParticlesObject::displayPolygons(const double * mModel,GLuint texture,flo
       z=p_data->pos[index*3+2];
       //w=1.0;
       
-    // compute point coordinates according to model via matrix  
+    // compute point coordinates according to model via matrix
     float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3);//*w;
     float my = MM(1,0)*x + MM(1,1)*y + MM(1,2)*z + MM(1,3);//*w;
     float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
-    modulo = i%4;
-    rot++;
+    
+    //modulo = i%4;
+    modulo=0;
+    //rot++;
+    //rot=0.; // 20% without rotations
+    rot=index;
     if (1) { // frustum.isPointInside(mx,my,mz)) {
-	visible++;
-	glPushMatrix();
-	glTranslatef(mx,my,mz);         // move to the transform particles
-	glRotatef(rot,0.0,0.0,1.0);   // rotate triangles around z axis
-	glBegin(GL_TRIANGLES);
-	
-	// 1st triangle
-	glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
-	modulo = (modulo+1)%4;
-	glVertex3f(-texture_size , texture_size  ,0. );
-	glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
-	modulo = (modulo+1)%4;
-	glVertex3f(-texture_size , -texture_size  ,0. );
-	glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
-	glVertex3f(texture_size , -texture_size  ,0. );
-	// second triangle
-	modulo = (modulo+2)%4;
-	glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
-	glVertex3f(-texture_size , texture_size  ,0. );
-	modulo = (modulo+2)%4;
-	glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
-	glVertex3f(+texture_size , -texture_size  ,0. );
-	modulo = (modulo+1)%4;
-	glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
-	glVertex3f(texture_size , texture_size  ,0. );     
-	glEnd();
-	glPopMatrix();    
+      float new_texture_size=(float) (p_data->tree_size_max) / (2<<(p_data->tree_depth[index]));
+      if (texture_size<new_texture_size) {
+        new_texture_size = texture_size;
+      }
+      else {
+        new_texture_size *= p_data->tree_depth[index];
+      }
+      new_texture_size=texture_size;
+      visible++;
+      glPushMatrix();
+      glTranslatef(mx,my,mz);         // move to the transform particles
+      glRotatef(rot,0.0,0.0,1.0);   // rotate triangles around z axis
+      glBegin(GL_TRIANGLES);
+
+      // 1st triangle
+      glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+      modulo = (modulo+1)%4;
+      glVertex3f(-new_texture_size , new_texture_size  ,0. );
+      glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+      modulo = (modulo+1)%4;
+      glVertex3f(-new_texture_size , -new_texture_size  ,0. );
+      glTexCoord2f(uv[modulo][0],   uv[modulo][1]);
+      glVertex3f(new_texture_size , -new_texture_size  ,0. );
+      // second triangle
+      modulo = (modulo+2)%4;
+      glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+      glVertex3f(-new_texture_size , new_texture_size  ,0. );
+      modulo = (modulo+2)%4;
+      glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+      glVertex3f(+new_texture_size , -new_texture_size  ,0. );
+      modulo = (modulo+1)%4;
+      glTexCoord2f(uv[modulo][0],  uv[modulo][1]);
+      glVertex3f(new_texture_size , new_texture_size  ,0. );
+      glEnd();
+      glPopMatrix();
     }
   }
    
