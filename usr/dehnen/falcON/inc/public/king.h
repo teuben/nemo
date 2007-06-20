@@ -3,7 +3,7 @@
 //                                                                             |
 // king.h                                                                      |
 //                                                                             |
-// Copyright (C) 2000-2003, 2005  Walter Dehnen                                |
+// Copyright (C) 2000-2003, 2005, 2007  Walter Dehnen                          |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -22,6 +22,8 @@
 //-----------------------------------------------------------------------------+
 #ifndef falcON_included_king_h
 #define falcON_included_king_h
+
+#include <public/basic.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
@@ -68,7 +70,10 @@ namespace falcON {
 	       const unsigned n=1000) :           // # grid points              
       Psi0(W), N(0), r(0), ps(0), m(0), rh(0),
       vscal(1), rscal(1), Pscal(1), rhscl(1), mscal(1), sdscl(1), drscl(1)
-    { setup(n); }
+    {
+      if(W <= 0.0) error("king_model: W0 [%f] must be positive\n",W);
+      setup(n);
+    }
     //--------------------------------------------------------------------------
     ~king_model() { reset(); }
     //--------------------------------------------------------------------------
