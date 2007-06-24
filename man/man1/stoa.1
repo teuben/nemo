@@ -10,6 +10,9 @@ to generate input files for remote supercomputers.  \fIstoa_sp\fP is
 similar, but uses single precision.
 .PP
 Snapshots which contain diagnostics are ignored.
+.PP 
+Another alternative to printing out an ASCII list of body variables
+is \fIsnapprint(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 25
@@ -53,7 +56,7 @@ Note that the masses, phase-space coordinates, and potentials are all
 optional, enabled by the \fBoptions\fP parameter. This format may be
 repeated until end-of-file.
 .SH "SEE ALSO"
-atos(1NEMO), rsf(1NEMO), tsf(1NEMO), filestruct(3NEMO), snapshot(5NEMO).
+atos(1NEMO), rsf(1NEMO), tsf(1NEMO), snapprint(1NEMO), filestruct(3NEMO), snapshot(5NEMO).
 .SH AUTHOR
 Joshua E. Barnes, Peter Teuben
 .SH "UPDATE HISTORY"
