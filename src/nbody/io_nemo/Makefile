@@ -70,7 +70,7 @@ clean_obj :
 	/bin/rm ${IONO}/*.o
 
 clean_test :
-	/bin/rm -rf ${IONB}/* run_test
+	/bin/rm -rf compile/bin/*
 
 run_Testfile : dummy
 	@make -f Testfile clean testc testf
