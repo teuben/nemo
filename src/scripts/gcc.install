@@ -11,7 +11,7 @@
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
-#			 	.. command line keywords .. fc=f77 or f95
+#			 	.. command line keywords .. fc=f77 or f95 or fortran
 set src=$NEMO/local/gcc
 set prefix=$NEMO/opt
 set version=3.3.5
@@ -62,6 +62,8 @@ echo Be sure to change your path and add $prefix/bin before your other path elem
 
 if ($version:r:r == 3 && $fc != f77) echo "Warning: gcc3 should use fc=f77, not $fc"
 if ($version:r:r == 4 && $fc != f95) echo "Warning: gcc4 should use fc=f95, not $fc"
+
+# note: 4.2.0 deprecated f95, should use fortran instead....
 
 ../configure --prefix=$prefix --enable-threads --enable-languages=c,c++,$fc >& build1.log
 echo status $status on build1.log
