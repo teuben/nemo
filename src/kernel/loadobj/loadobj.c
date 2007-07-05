@@ -21,6 +21,7 @@
  *	20-jan-94	NULL is now STUB				pjt
  *	22-oct-96	DL is default for linux				pjt
  *      12-jul-03       DL is default for darwin (though needs dlcompat) PJT
+ *      04-Jul-07       DL for OpenBSD                             Woodchuck
  */
 
 #include <stdinc.h>		/* standard Nemo include file */
@@ -34,6 +35,8 @@
 # elif defined(sgi) || defined(alpha) || defined(__alpha) 
 #  define DL 1
 # elif defined(linux) && defined(SYSV) || defined(darwin)
+#  define DL 1
+# elif defined(__OpenBSD__)
 #  define DL 1
 # endif
 #endif
