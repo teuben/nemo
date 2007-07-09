@@ -623,7 +623,8 @@ void GLObjectWindow::selectListIndex()
   if (select_list) {
     VirtualParticlesSelect * vps = new VirtualParticlesSelect();
     try { // try to load data from particle list
-      vps->storeParticlesList(&psv,*part_data->nbody,select_list);
+      //vps->storeParticlesList(&psv,*part_data->nbody,select_list);
+      vps->storeParticlesList(&psv,1000,select_list);
     }// try
     catch (int n) {
       switch (n) {
@@ -1056,7 +1057,7 @@ void GLObjectWindow::optionsTogglePlay()
         }
       } 
       else {
-        play_timer = startTimer( 250 );  // 100 ms timer events
+        play_timer = startTimer( 220 );  // 100 ms timer events
         //play_timer = startTimer( 40 ); 
       }
     } 
