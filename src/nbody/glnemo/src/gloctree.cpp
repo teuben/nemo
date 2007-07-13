@@ -69,6 +69,7 @@ GLOctree::GLOctree(GlobalOptions * _options):GLObject()
   // copy global options
   store_options = _options;
   root=NULL;
+  psv=NULL;
   dplist_index = glGenLists( 1 );    // get a new display list index
   setColor(green);
   setActivate(store_options->octree_display);
@@ -119,7 +120,7 @@ void GLOctree::update()
   //if (!first) return;
   setActivate(store_options->octree_display);
   
-  if ( ! store_options->octree_enable ) {
+  if ( ! store_options->octree_enable) {
     setActivate(false); // do not display tree
     // restore default object particles index
     for (int obj=0; obj< (int ) psv->size(); obj++ ) { 
@@ -136,7 +137,7 @@ void GLOctree::update()
 // build octree                                                                
 int GLOctree::build()
 {
-  if (new_data && store_options->octree_enable) {
+  if (psv && store_options->octree_enable) {
     new_data=false;
     init();
     computeSizeMax();
@@ -173,7 +174,7 @@ void GLOctree::insertParticle(int index, Node ** node, float * rmid, int level, 
   //assert(level < 30);
   if (level > 30) {
     PRINT_D ;
-    std::cerr << "Skip particle with index [" << index << "]\n";
+    //std::cerr << "Skip particle with index [" << index << "]\n";
     return;
   }
   level_max = MAX(level,level_max);
@@ -223,7 +224,7 @@ void GLOctree::buildDisplayList()
   build();   // build octree
   
   // display list
-  if (store_options->octree_enable) {
+  if (psv && store_options->octree_enable) {
     for (int obj=0; obj< (int ) psv->size(); obj++ ) { 
       VirtualParticlesSelect * vps = (*psv)[obj].vps;
       if (vps->is_visible) {

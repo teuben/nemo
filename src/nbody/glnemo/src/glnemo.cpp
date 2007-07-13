@@ -98,7 +98,7 @@ using namespace std;
   "anim_file=\n      Animation filename                                              ",
   "anim_play=t\n     play an animation ? (anim_file must be selected)                ",
   "anim_bench=t\n    play an animation in benchmark mode ?                           ",
-  "VERSION=0.94\n    "__DATE__"  - JCL  compiled at <"__TIME__">                     ",
+  "VERSION=0.94.1\n    "__DATE__"  - JCL  compiled at <"__TIME__">                     ",
   NULL
 };
 ::string usage="Interactive 3D OpenGL visualization program for Nemo snapshots";

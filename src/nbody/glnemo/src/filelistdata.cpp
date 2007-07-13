@@ -177,18 +177,27 @@ int FileListData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
       connect(virtual_data,SIGNAL(loadedData(const ParticlesData *,
       ParticlesSelectVector * )),
       this,SLOT(getData(const ParticlesData *, ParticlesSelectVector *)));
-            
+      
+      ParticlesSelectVector psv2=*psv; // copy for retreiving the color
+      int nb_select2=VirtualParticlesSelect::nb_select;
       psv->clear();   // clear particles range vectors
       VirtualParticlesSelect::nb_select = 0;
-      
-      if (virtual_data->loadPos(psv, load_vel)) {
-        part_data = virtual_data->getParticlesData();
-        status = true;
-        stop   = true;
-      } else {
-        stop   = false;
+        if (virtual_data->loadPos(psv, load_vel)) {
+          part_data = virtual_data->getParticlesData();
+          status = true;
+          stop   = true;
+          // copy back color and visibility
+          for (unsigned int i=0; i<psv2.size();i++) {
+            if (i<psv->size()) {
+              (*psv)[i].vps->col = psv2[i].vps->col;
+              (*psv)[i].vps->is_visible = psv2[i].vps->is_visible;
+            }
+          }
+          VirtualParticlesSelect::nb_select=nb_select2;
+        } else {
+          stop   = false;
+        }
       }
-    }
     
   }
  if (!status) is_end_of_data = TRUE;

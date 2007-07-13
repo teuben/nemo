@@ -1,5 +1,14 @@
 glnemo ChangeLog
 
+V 0.94.1  July 2007
+===================
+	*) Bugs fixed: 
+           -----------
+           - application no more crash while displaying a snapshot with different nbodies and velocity
+           enable.
+           - application no more crash when glnemo is started from the command line with a
+           'select_index_list' file in parameter.
+
 V 0.94  June 2007
 =================
 	*) Input :

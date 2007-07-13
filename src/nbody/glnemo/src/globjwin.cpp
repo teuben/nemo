@@ -868,7 +868,14 @@ void GLObjectWindow::optionsReloadSnapshot()
       glbox->setHud(GLHudObject::Title,virtual_data->getDataName());
       glbox->setHud(GLHudObject::Getdata,virtual_data->getDataType());
       if (strcmp(virtual_data->getDataType(),"File list") ) { // do not preserve range for File List
-        psv = psv2;
+        //!!!psv = psv2;
+        // copy back color and visibility
+        for (unsigned int i=0; i<psv2.size();i++) {
+          if (i<psv.size()) {
+            psv[i].vps->col = psv2[i].vps->col;
+            psv[i].vps->is_visible = psv2[i].vps->is_visible;
+          }
+        }
         VirtualParticlesSelect::nb_select = nb_select_copy;
       }
       glbox->getData( part_data,&psv);   // upload the data with the right color

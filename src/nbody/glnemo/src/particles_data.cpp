@@ -40,7 +40,7 @@ const ParticlesData& ParticlesData::operator=(const ParticlesData& m)
    tree_depth = (int *) mallocate((char *) tree_depth, sizeof(int)* (*nbody), true);
 
    if (m.pos) {
-      pos = (float *) mallocate((char *) pos, sizeof (int) * 3 * (*nbody), true);
+      pos = (float *) mallocate((char *) pos, sizeof (float) * 3 * (*nbody), true);
       //memcpy((float *) pos, (float *) m.pos, sizeof(float)* (*nbody) * 3);
       for (int i=0; i < (*nbody); i++) {
         pos[i*3]    = m.pos[i*3];
@@ -156,7 +156,7 @@ int ParticlesData::allocVar()
 // ParticlesData::allocTree                                                     
 int ParticlesData::allocTree()
 {
-  tree_depth = (int   *) mallocate((char *) tree_depth, sizeof(int)* (*nbody));
+  tree_depth = (int   *) mallocate((char *) tree_depth, sizeof(int)* (*nbody),true);
   for (int i=0; i<*nbody; i++) {
     tree_depth[i] = 1;
   }
@@ -167,9 +167,9 @@ int ParticlesData::allocTree()
 void ParticlesData::computeVelNorm()
 {
   if (vel) {
-    if (! vel_norm) {
-      vel_norm = (float *) mallocate((char *) vel_norm, sizeof(float)*(*nbody),true);
-    }
+  
+    vel_norm = (float *) mallocate((char *) vel_norm, sizeof(float)*(*nbody),true);
+    
     for (int i=0; i<(*nbody); i++) {
       float vx=vel[i*3];
       float vy=vel[i*3 + 1];

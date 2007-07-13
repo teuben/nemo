@@ -137,13 +137,13 @@ int SnapshotData::reload(ParticlesSelectVector * psv, const bool load_vel)
 // Read snapshot positions, send them to the glbox                             
 int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
 {
-  PRINT_D std::cerr << "loadPos pos="<<part_data->pos <<" nemo_file ["<<nemo_file<<"]\n";
-  PRINT_D std::cerr << "loadPos select_part="<<select_part<<"\n"; 
   
   //                                                         
   // we must protect data access during multithreaded loading
   //                                                         
   pthread_mutex_lock(mutex_data);
+  PRINT_D std::cerr << "loadPos pos="<<part_data->pos <<" nemo_file ["<<nemo_file<<"]\n";
+  PRINT_D std::cerr << "loadPos select_part="<<select_part<<"\n"; 
   
   // load via 'io_nemo'
   int status;
@@ -168,6 +168,7 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
         *(part_data->timu) = 0.0;
       }
     }
+    PRINT_D std::cerr << "(0)time = " << *(part_data->timu) << "\n";
     // intialyse tree_depht array
     part_data->allocTree();
 
@@ -178,15 +179,30 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
     PRINT_D std::cerr << "COOmax = " <<cmax[0]
                       <<" "<<cmax[1]<<" "<<cmax[2]<<"\n";
     full_nbody=*(part_data->nbody);
+    PRINT_D std::cerr << "part_data->nbody = " << *(part_data->nbody) << "\n";
     if (! is_parsed) {
       is_parsed = TRUE;
       if ( ! strcmp(nemo_file,"-")) {
           full_nbody=*(part_data->nbody);
       }
       // particles selected from a RANGE
-      int nobject=VirtualData::fillParticleRange(psv,full_nbody,sel2);
-      if (nobject) ; // do nothing (remove compiler warning)
+      //!!!int nobject=VirtualData::fillParticleRange(psv,full_nbody,sel2);
+      //!!!if (nobject) ; // do nothing (remove compiler warning)
     }
+    ParticlesSelectVector psv2=*psv;
+    int nb_select2=VirtualParticlesSelect::nb_select;
+    VirtualParticlesSelect::nb_select=0;
+    psv->clear();
+    int nobject=VirtualData::fillParticleRange(psv,full_nbody,sel2);
+    if (nobject) ; // do nothing (remove compiler warning)
+    // copy back color and visibility
+    for (unsigned int i=0; i<psv2.size();i++) {
+      if (i<psv->size()) {
+          (*psv)[i].vps->col = psv2[i].vps->col;
+          (*psv)[i].vps->is_visible = psv2[i].vps->is_visible;
+      }
+    }
+    VirtualParticlesSelect::nb_select=nb_select2;
     //pthread_mutex_lock(mutex_data);
     // compute velocity vector norm
     part_data->computeVelNorm();
@@ -198,7 +214,7 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
       // because it's not possible to share the OpenGl Display
       // it crashs the aplication                             
       //emit newTime(*timu);             // send to animation   
-      emit loadedData(part_data, psv);  // send to glbox       
+      emit loadedData(part_data, psv);  // send to glbox
       //is_new_data_loaded = FALSE;
     }    
   } else {
@@ -214,8 +230,8 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
 void SnapshotData::uploadGlData(ParticlesSelectVector * psv)
 {
   if (1||is_new_data_loaded) {
-    //emit newTime(*timu);               // send to animation   
-    emit loadedData(part_data, psv);    // send to glbox       
+    //emit newTime(*timu);               // send to animation 
+    emit loadedData(part_data, psv);    // send to glbox
     is_new_data_loaded = FALSE;
   }
 }

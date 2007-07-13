@@ -14,6 +14,9 @@
     <absoluteprojectpath>false</absoluteprojectpath>
     <description></description>
     <secondaryLanguages/>
+    <projectname>glnemo</projectname>
+    <versioncontrol/>
+    <defaultencoding></defaultencoding>
   </general>
   <kdevfileview>
     <groups>
@@ -72,8 +75,8 @@
   <kdevdebugger>
     <general>
       <dbgshell></dbgshell>
-      <programargs></programargs>
-      <gdbpath></gdbpath>
+      <programargs>/r10data/ftm/batch/out.nemo times=10:200000</programargs>
+      <gdbpath>/r5data/jcl/local/gdb-6.6/bin/gdb</gdbpath>
       <configGdbScript></configGdbScript>
       <runShellScript></runShellScript>
       <runGdbScript></runGdbScript>
@@ -89,13 +92,18 @@
   </kdevdebugger>
   <kdevtrollproject>
     <run>
-      <mainprogram>bin/glnemo</mainprogram>
-      <programargs>snapshot/disk.nemo</programargs>
+      <mainprogram>/net/direct/r5data/home/jcl/works/CVS_WORKS/glnemo/bin/glnemo</mainprogram>
+      <programargs>/tmp/out.nemo</programargs>
       <directoryradio>build</directoryradio>
       <customdirectory>/</customdirectory>
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars/>
+      <globaldebugarguments>/tmp/out.nemo</globaldebugarguments>
+      <globalcwd>/net/direct/r5data/home/jcl/works/CVS_WORKS/glnemo</globalcwd>
+      <useglobalprogram>true</useglobalprogram>
+      <autoinstall>false</autoinstall>
+      <autokdesu>false</autokdesu>
     </run>
     <general>
       <activedir>src</activedir>
@@ -110,12 +118,16 @@
       <runmultiplejobs>false</runmultiplejobs>
     </make>
     <subclassing/>
+    <qmake>
+      <savebehaviour>2</savebehaviour>
+      <replacePaths>false</replacePaths>
+      <disableDefaultOpts>true</disableDefaultOpts>
+    </qmake>
   </kdevtrollproject>
   <kdevfilecreate>
     <filetypes/>
     <useglobaltypes>
       <type ext="ui" />
-      <type ext="cpp" />
       <type ext="h" />
       <type ext="ts" />
     </useglobaltypes>
@@ -134,7 +146,7 @@
     <EMAIL>Jean-Charles.Lambert@oamp.fr</EMAIL>
     <LICENSE>Custom</LICENSE>
     <VERSION>0.1</VERSION>
-    <dest>/r2data/home/jcl/works/CVS_WORKS/glnemo</dest>
+    <dest>/r5data/home/jcl/works/CVS_WORKS/glnemo</dest>
   </substmap>
   <kdevcppsupport>
     <references/>
@@ -149,6 +161,23 @@
       <codeCompletionDelay>250</codeCompletionDelay>
       <argumentsHintDelay>400</argumentsHintDelay>
       <headerCompletionDelay>250</headerCompletionDelay>
+      <showOnlyAccessibleItems>false</showOnlyAccessibleItems>
+      <completionBoxItemOrder>0</completionBoxItemOrder>
+      <howEvaluationContextMenu>true</howEvaluationContextMenu>
+      <showCommentWithArgumentHint>true</showCommentWithArgumentHint>
+      <statusBarTypeEvaluation>false</statusBarTypeEvaluation>
+      <namespaceAliases>std=_GLIBCXX_STD;__gnu_cxx=std</namespaceAliases>
+      <processPrimaryTypes>true</processPrimaryTypes>
+      <processFunctionArguments>false</processFunctionArguments>
+      <preProcessAllHeaders>false</preProcessAllHeaders>
+      <parseMissingHeaders>false</parseMissingHeaders>
+      <resolveIncludePaths>true</resolveIncludePaths>
+      <alwaysParseInBackground>true</alwaysParseInBackground>
+      <usePermanentCaching>true</usePermanentCaching>
+      <alwaysIncludeNamespaces>false</alwaysIncludeNamespaces>
+      <includePaths>.;</includePaths>
+      <parseMissingHeadersExperimental>false</parseMissingHeadersExperimental>
+      <resolveIncludePathsUsingMakeExperimental>false</resolveIncludePathsUsingMakeExperimental>
     </codecompletion>
     <designerintegration>
       <qtdesigner/>
@@ -162,10 +191,20 @@
       <inlineSet>true</inlineSet>
     </creategettersetter>
     <qt>
-      <used>false</used>
+      <used>true</used>
       <version>3</version>
-      <root></root>
+      <root>/usr/lib/qt3</root>
+      <includestyle>3</includestyle>
+      <designerintegration>ExternalDesigner</designerintegration>
+      <qmake>/usr/lib/qt3/bin/qmake</qmake>
+      <designer>/usr/bin/designer-qt3</designer>
+      <designerpluginpaths/>
     </qt>
+    <splitheadersource>
+      <enabled>false</enabled>
+      <synchronize>true</synchronize>
+      <orientation>Vertical</orientation>
+    </splitheadersource>
   </kdevcppsupport>
   <cppsupportpart>
     <filetemplates>
