@@ -16,6 +16,11 @@ If only two snapshots are added,
 \fIsnapstack(1NEMO)\fP offers some more options, such as adding
 a relative shift in phase space. If more complicated shifts are necessary,
 \fIsnapshift(1NEMO)\fP can be used before \fIsnapadd\fP.
+.PP
+If you want to keep the snapshots separate, simple unix tools like \fIcat(1)\fP
+will work fine. For some of the older NEMO programs, embedded history could throw
+them off, and \fIcsf(1NEMO)\fP should be used to create cleaner snapshots. See
+an example below.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -37,13 +42,26 @@ Message header appended to any existing ones in the input files [default: none].
 Snapshots only copy accross \fIMass\fP (if they have it) and 
 \fIPhaseSpace\fP.
 .SH "SEE ALSO"
-snapstack(1NEMO), snapmerge(1NEMO), snapmerge_a(1NEMO), snapshift(1NEMO), snapcenter(1NEMO), snapshot(5NEMO)
+snapstack(1NEMO), snapmerge(1NEMO), snapmerge_a(1NEMO), snapshift(1NEMO), snapcenter(1NEMO), scf(1NEMO), snapshot(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
 .nf
 .ta +2.0i
 ~/src/nbody/trans	snapadd.c
+.fi
+.SH EXAMPLES
+Although snapadd merges snapshots, if you want separate snapshots with their own timestamps,
+unix \fIcat(1)\fP will do just fine:
+.nf
+  % cat snap1 snap2 snap3 > snap.all
+.fi
+though this might throw off some older NEMO programs that cannot handle embeddded history
+tags. If so, filter them through \fIcsf(1NEMO)\fP, e.g.:
+.nf
+  % csf snap1 snap.all
+  % csf snap2 - item=SnapShot >> snap.all
+  % csf snap3 - item=SnapShot >> snap.all
 .fi
 .SH "UPDATE HISTORY"
 .nf
@@ -53,4 +71,5 @@ Peter Teuben
 xx-xxx-87	snapstack written by JEB
 18-nov-90	V2.0: snapadd revived with multiple input	PJT
 13-may-92	V2.2: added concurrent reading  	PJT
+15-jul-07	added examples (while at V2.5b)	PJT
 .fi
