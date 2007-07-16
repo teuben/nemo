@@ -9,10 +9,15 @@ initial conditions that correspond to the density variations at a given
 redshift \fBz\fP (use \fBz=0\fP for non-comoving coordinates) are set
 based on 3 sweeps of cumulative mass computations along X, Y and Z.
 .PP
-Note that this routine will only work in the linear regime when the fluctuations
+Note that this routine will only work well in the linear regime when the fluctuations
 are very small, resulting in small perturbations from the central location in
 a cell. The code will warn when a particle falls outside the cell boundary,
 but otherwise happily allow that.
+.PP
+It is also possible to generate unequal mass particles, by assigning a single
+mass in each cell based on the local density, by using \fBdensit=t\P. This
+could be useful if subsequent forces are used to initialize the velocities
+in a cosmological setting.
 .PP
 This program is currently under development, features change on an almost daily
 basis and the manual page can easily be out of sync with the program itself
@@ -54,7 +59,10 @@ Initial seed
 [0]
 .TP
 \fBdensity=t|f\fP
-Use density map to make an exact lattice grid (under TEST) 
+Use density map to make an exact lattice grid (under TEST). Typically
+one would then compute the forces, followed by setting the initial
+velocities based on the accellerations (see \fIsnap*vel(1NEMO)\fP).
+Default: f
 .TP
 \fBrejection=t|f\fP
 Use rejection technique to seed the 'grid'. This will generally result 
@@ -73,11 +81,18 @@ ccdmath "" - 'fie=rang(1,0.01)' size=10,10,10 | mkcosmo - snap1
   ### nemo Debug info: MinMax = 0.969161 1.03211
 .fi
 Note this cube is not centered on 0,0,0 but instead one of the corners coincides with it.
+.PP
+Here is an example of using density based masses:
+.nf
+   mkcosmo ccd0 snap0 density=t ....
+   gyrfalcON snap0 snap1 give=mxva hmin=6 tstop=0
+   snapvel snap1 snap2 alpha=0.001432 ...
+.fi
 .SH CAVEATS
 The code assumes in a few places that the cube is really a cube with equal sizes in all
 3 dimensions. This is not always checked!
 .SH SEE ALSO
-mkcube(1NEMO), ccdmath(1NEMO), image(5NEMO), snapshot(5NEMO)
+mkcube(1NEMO), ccdmath(1NEMO), snapvel(1NEMO), image(5NEMO), snapshot(5NEMO)
 .PP
 grafics and cosmics (Ed Bertschinger's programs)
 .SH FILES
