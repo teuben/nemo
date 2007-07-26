@@ -25,8 +25,9 @@ if ($?YAPPLIB) then
 endif
 setenv YAPP        @YAPP_DEF@
 setenv PGPLOT_DIR  @PGPLOT_DIR@
-setenv PGPLOT_LIB  $PGPLOT_DIR
-setenv PGPLOT_FONT $PGPLOT_DIR/grfont.dat
+# the next two are actually not really needed, derived from PGPLOT_DIR
+# setenv PGPLOT_LIB  $PGPLOT_DIR
+# setenv PGPLOT_FONT $PGPLOT_DIR/grfont.dat
 
 # you can optionally uncomment and set some of the following PGPLOT variables
 # see also "man 5 yapp" for more info
