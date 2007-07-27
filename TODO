@@ -195,6 +195,7 @@ code & line coverage: (gcov, lcov)
 - alternatives to autoconf?  
 	Pre Make Kit  = http://pmk.sourceforge.net/
 	Cmake (KDE uses it)
+  also check the Autoconf Macro Archive: http://autoconf-archive.cryp.to/
  
 - Testfile's:    also needs a program to be added to the local Makefile,
 	as well as in the list of programs to be installed...
