@@ -1,4 +1,4 @@
-.TH HDFGRID 1NEMO "23 December 2004"
+.TH HDFGRID 1NEMO "27 October 2006"
 .SH NAME
 hdfwedge \- Regrid a polar HDF4 SDS wedge to cartesian image
 .SH SYNOPSIS
@@ -69,9 +69,15 @@ Attempt to fill the plane by making the data periodic.
 ** currently only periodic=t works **
 [Default: \fBt\fP].
 .TP
-\fBsymmetry=odd|even|automatic\fP
-Override symmetry properties of the variable to be gridded. 
-This option is not used yet. See also \fBmirror=\fP
+\fBz=\fP\fIz-value\fP
+Select a z-slice (0=first) from the RPZ cube if NZ > 1. By default
+the first (or only for 2D data) slice is used.
+.TP
+\fBorder=\fP\fI{z,p,r}\fP
+Order of HDF axes. Note again that the order of axes in HDF is defined
+in C order (eg. as seen in \fItsd(1NEMO)\fP), where the first printed axis
+is the slowest varying axis (usually the Z  axis in an R-P-Z cube.
+But we still would call this cube with \fBorder=zpr\fP
 .SH EXAMPLES
 Here is ....
 .nf
@@ -97,6 +103,9 @@ Maps made with an odd numbered of PHI zones have a minor discontinuity along -X 
 src/image/hdf/cmhog  	hdfwedge.c
 .SH SEE ALSO
 hdfgrid(1NEMO), tsd(1NEMO), sdsfits(1NEMO)
+.nf
+visit: http://www.llnl.gov/visit/
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -105,4 +114,5 @@ Peter Teuben
 17-dec-04	V0.1 created	PJT
 20-dec-04	V0.2 repair files with 2-step shadow zones	PJT
 23-dec-04	V0.3 fixed for odd sized Nphi files	PJT
+26-oct-06	V0.5 use z= to handle 3D cubes	PJT
 .fi
