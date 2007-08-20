@@ -3,8 +3,8 @@ include $(NEMOLIB)/makedefs
 #   Example Makefile for hello.c within NEMO environment
 #CFLAGS = -g
 #LDFLAGS = -g
-BIN = hello hello++ bye
-SRC = hello.c
+BIN = hello hello++ bye hallo
+SRC = hello.c hallo.f
 MAN = hello.1
 CCC = g++ -I$(NEMOINC) -L$(NEMOLIB)
 SRCDIR =  $(NEMO)/src/tutor/hello
