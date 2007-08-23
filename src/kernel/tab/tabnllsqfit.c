@@ -61,7 +61,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=2.0\n      21-nov-05 PJT",
+    "VERSION=2.0a\n     23-aug-07 PJT",
     NULL
 };
 
@@ -388,7 +388,7 @@ nemo_main()
     } else if (scanopt(method,"arm3")) {
     	do_arm3();
     } else
-        error("fit=%s invalid; try [line,plane,poly,gauss]",
+        error("fit=%s invalid; try [line,plane,poly,poly2,gauss1d,gauss2d,exp,arm,loren,arm3]",
 	      getparam("fit"));
 }
 
@@ -496,6 +496,7 @@ real data_rms(int n, real *d, real *dy, int m)
 #if 0
   return sqrt(sum);
 #else
+  if (n-m <= 0) warning("no DOF to compute rms/chi");
   return gammq(0.5*(n-m), 0.5*sum);
 #endif
     
