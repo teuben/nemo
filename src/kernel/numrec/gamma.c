@@ -47,7 +47,7 @@ void gcf(real *gammcf, real a, real x, real *gln)
 		h *= del;
 		if (fabs(del-1.0) < EPS) break;
 	}
-	if (i > ITMAX) error("a too large, ITMAX too small in gcf");
+	if (i > ITMAX) error("i=%d too large, ITMAX=%d too small in gcf,i,ITMAX");
 	*gammcf=exp(-x+a*log(x)-(*gln))*h;
 }
 
@@ -58,8 +58,8 @@ void gser(real *gamser, real a, real x, real *gln)
 
 	*gln=gammln(a);
 	if (x <= 0.0) {
-		if (x < 0.0) error("x less than 0 in routine gser");
-		*gamser=0.0;
+	        if (x < 0.0) error("x=%g less than 0 in routine gser",x);
+	        *gamser=0.0;
 		return;
 	} else {
 		ap=a;
@@ -73,7 +73,7 @@ void gser(real *gamser, real a, real x, real *gln)
 				return;
 			}
 		}
-		error("a too large, ITMAX too small in routine gser");
+		error("a too large, ITMAX=%d too small in routine gser",ITMAX);
 		return;
 	}
 }
@@ -82,7 +82,7 @@ real gammq(real a, real x)
 {
 	real gamser,gammcf,gln;
 
-	if (x < 0.0 || a <= 0.0) error("Invalid arguments in routine gammq");
+	if (x < 0.0 || a <= 0.0) error("a=%g, x=%g: Invalid arguments in routine gammq",a,x);
 	if (x < (a+1.0)) {
 		gser(&gamser,a,x,&gln);
 		return 1.0-gamser;
