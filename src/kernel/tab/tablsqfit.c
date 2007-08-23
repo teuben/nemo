@@ -84,7 +84,7 @@ string defv[] = {
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
     "tab=f\n            short one-line output?",
-    "VERSION=3.4c\n     21-nov-05 PJT",
+    "VERSION=3.4d\n     23-aug-07 PJT",
     NULL
 };
 
@@ -160,7 +160,7 @@ nemo_main()
     } else if (scanopt(method,"fourier")) {
     	do_fourier();
     } else
-        error("fit=%s invalid; try [line,ellipse,imageshift,plane,poly,peak,area]",
+        error("fit=%s invalid; try [line,ellipse,imageshift,plane,gauss1d,gauss2d,poly,area,peak,zero,fourier]",
 	      getparam("fit"));
 
     if (outstr) strclose(outstr);
