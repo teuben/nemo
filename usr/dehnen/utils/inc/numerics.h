@@ -218,33 +218,33 @@ namespace WDutils {
   /// \param n (input) number of elements
   /// \param indx (output) index table so that A[indx[i]] is sorted
   template<typename sortable>
-  void HeapIndex(const sortable*A, const int n, int *indx)
+  void HeapIndex(const sortable*A, int n, int*indx)
     // based on a routine given in NR                                           
     // the numbers 0 to n-1 are ordered in ascending order of A[i]              
   {
     if(n<=0) return;
     if(n==1) { indx[0]=0; return; }
-    register int      l,j,ir,indxt,i;
-    register sortable q;
-    for(j=0; j!=n; ++j) indx[j] = j;
-    l = n>>1;
-    ir= n-1;
+    for(int j=0; j!=n; ++j) indx[j] = j;
+    int l = n>>1;
+    int ir= n-1;
     for(;;) {
+      const sortable*q;
+      int indxt;
       if(l>0)
-	q = A[indxt=indx[--l]];
+	q = A+(indxt=indx[--l]);
       else {
-	q = A[indxt=indx[ir]];
+	q = A+(indxt=indx[ir]);
 	indx[ir] = indx[0];
 	if(--ir == 0) {
 	  indx[0] = indxt;
 	  return;
 	}
       }
-      i = l;
-      j = (l<<1) + 1;
+      int i = l;
+      int j = (l<<1) + 1;
       while(j<=ir) {
-	if(j < ir && A[indx[j]] < A[indx[j+1]] ) j++;
-	if(q < A[indx[j]] ) {
+	if(j  < ir && A[indx[j]] < A[indx[j+1]] ) j++;
+	if(*q < A[indx[j]] ) {
 	  indx[i] = indx[j];
 	  j+= 1+(i=j);
 	} else
@@ -260,7 +260,7 @@ namespace WDutils {
   /// \param A (input) Array or values to be sorted
   /// \param indx (output) index table so that A[indx[i]] is sorted
   template<typename sortable>
-  void HeapIndex(Array<sortable,1>const&A, Array<int,1>const&I) {
+  void HeapIndex(Array<sortable,1>const&A, Array<int,1>&I) {
     if(A.size() != I.size()) error("size mismatch in HeapIndex()\n");
     HeapIndex(A.array(),A.size(),I.array());
   }

@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1994-2005                                                          
+/// \date    1994-2005, 2007                                                    
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2005  Walter Dehnen                                       
+// Copyright (C) 1994-2005, 2007  Walter Dehnen                                 
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -210,10 +210,6 @@ namespace WDutils {
     if     (x < min) min = x;
     else if(x > max) max = x;
   }
-  //----------------------------------------------------------------------------
-  template<typename scalar_type> inline
-  char* negspace(const scalar_type&x)
-  { return (x<scalar_type(0))? " " : "  "; }
   //----------------------------------------------------------------------------
   inline bool is_integral(const float&x)
   { return floor(abs(x))==abs(x);  }

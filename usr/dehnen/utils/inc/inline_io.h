@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2000-2005                                                          
+/// \date    2000-2007                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2005  Walter Dehnen                                       
+// Copyright (C) 2000-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -45,18 +45,19 @@
 #endif
 //------------------------------------------------------------------------------
 namespace WDutils {
-  //----------------------------------------------------------------------------
-  // inline functions for opening file I/O and, if not successfull either       
-  // - issue a warning and return:               open()                         
-  // - issue an error:                           open_error()                   
-  // both exist for opening ofstreams, ofstreams for appending, and ifstreams,  
-  // as well as general fstreams.                                               
-  //----------------------------------------------------------------------------
-  inline bool open      (                           // R:   success?            
-			 std::ofstream& S,          // I/O: stream to open      
-			 const char* file,          // I:   file name           
-			 std::ios::openmode mode = std::ios::out |
-			                           std::ios::trunc)
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  /// \name inline functions for opening file I/O                               
+  //@{                                                                          
+  // ///////////////////////////////////////////////////////////////////////////
+  /// try to open an output file
+  /// if not successful, we issue a warning and return false
+  /// \return successfully opened?
+  /// \param S ofstream to open
+  /// \param file name of file to open
+  /// \param mode (optional) open mode, default: output & truncation
+  inline bool open(std::ofstream& S, const char* file,
+		   std::ios::openmode mode = std::ios::out | std::ios::trunc)
   {
     S.open(file,mode);
     if(! S.is_open() ) {
@@ -65,24 +66,26 @@ namespace WDutils {
     }
     return true;
   }
-  //----------------------------------------------------------------------------
-  inline void open_error(                           // no success -> abort      
-			 std::ofstream& S,          // I/O: stream to open      
-			 const char* file,          // I: file name             
-			 std::ios::openmode mode = std::ios::out |
-			                           std::ios::trunc)
+  /// try to open an output file
+  /// if not successful, we issue a fatal error
+  /// \param S ofstream to open
+  /// \param file name of file to open
+  /// \param mode (optional) open mode, default: output & truncation
+  inline
+  void open_error(std::ofstream& S, const char* file,
+		  std::ios::openmode mode = std::ios::out | std::ios::trunc)
   {
     S.open(file,mode);
     if(! S.is_open() ) error("cannot open file \"%s\" for output",file);
   }
-  //////////////////////////////////////////////////////////////////////////////
-  // open_to_append returns an integer with the following meaning:              
-  // 0  couldn't open a file                                                    
-  // 1  file did already exist and has been opened for appending                
-  // 2  file could not be opened for appending, but opened as normal            
-  inline int open_to_append(                        // 0/1/                     
-			    std::ofstream& S,       // I/O: stream to open      
-			    const char* file)       // I: file name             
+  /// try to open an output file for appending
+  /// if not successful, we issue a warning and return 0\n
+  /// if file did already exist and was opened for appending, return 1\n
+  /// if did not exist and but a new one has been opened, return 2
+  /// \return see above
+  /// \param S ofstream to open
+  /// \param file name of file to open
+  inline int open_to_append(std::ofstream& S, const char* file)
   {
     S.open(file,std::ios::out | std::ios::app);
     if(S.is_open() ) return 1;
@@ -91,10 +94,14 @@ namespace WDutils {
     warning("cannot open file \"%s\" for appending",file);
     return 0;
   }
-  //----------------------------------------------------------------------------
-  inline int open_to_append_error(                  // no success -> abort      
-				   std::ofstream& S,// I/O: stream to open      
-				   const char* file)// I: file name             
+  /// try to open an output file for appending
+  /// if not successful, we issue a fatal error
+  /// if file did already exist and was opened for appending, return 1\n
+  /// if did not exist and but a new one has been opened, return 2
+  /// \return see above
+  /// \param S ofstream to open
+  /// \param file name of file to open
+  inline int open_to_append_error(std::ofstream& S, const char* file)
   {
     S.open(file,std::ios::out | std::ios::app);
     if(S.is_open() ) return 1;
@@ -103,7 +110,12 @@ namespace WDutils {
     error("cannot open file \"%s\" for appending",file);
     return 0;
   }
-  //////////////////////////////////////////////////////////////////////////////
+  /// try to open an input file
+  /// if not successful, we issue a warning and return false
+  /// \return successfully opened?
+  /// \param S ifstream to open
+  /// \param file name of file to open
+  /// \param mode (optoinal) opening mode, default: input
   inline bool open(std::ifstream& S, const char* file,
 		   std::ios::openmode mode=std::ios::in)
   {
@@ -114,14 +126,23 @@ namespace WDutils {
     }
     return 1;
   }
-  //----------------------------------------------------------------------------
+  /// try to open an input file
+  /// if not successful, we issue a fatal error
+  /// \param S ifstream to open
+  /// \param file name of file to open
+  /// \param mode (optoinal) opening mode, default: input
   inline void open_error(std::ifstream& S, const char* file,
 			 std::ios::openmode mode=std::ios::in)
   {
     S.open(file,mode);
     if(! S.is_open() ) error("cannot open file \"%s\" for input",file);
   }
-  //////////////////////////////////////////////////////////////////////////////
+  /// try to open a file for in-, output, or both
+  /// if not successful, we issue a warning an return false
+  /// \return successfully opened?
+  /// \param S fstream to open
+  /// \param file name of file to open
+  /// \param mode opening mode
   inline bool open(std::fstream& S, const char* file,
 		   std::ios::openmode mode)
   {
@@ -132,30 +153,35 @@ namespace WDutils {
     }
     return 1;
   }
-  //----------------------------------------------------------------------------
+  /// try to open a file for in-, output, or both
+  /// if not successful, we issue a fatal warning
+  /// \param S fstream to open
+  /// \param file name of file to open
+  /// \param mode opening mode
   inline void open_error(std::fstream& S, const char* file,
 			 std::ios::openmode mode)
   {
     S.open(file,mode);
     if(! S.is_open() ) error("cannot open file \"%s\"",file);
   }
+  //@}
   //----------------------------------------------------------------------------
-  // read all characters until '\n' (inclusive)                                 
-  //----------------------------------------------------------------------------
-  inline void SwallowRestofLine(std::istream& from)
+  /// swallow the rest of the current line
+  /// reads all character up to and including the next '\n'.
+  /// \return istream read (this allows to put this routine in a >> >> sequence)
+  /// \param from istream to read from
+  inline std::istream&SwallowRestofLine(std::istream& from)
   {
     char c;
     do from.get(c); while( from.good() && c !='\n');
-  }
-  //----------------------------------------------------------------------------
-  inline std::istream& eatl(std::istream& from)
-  {
-    SwallowRestofLine(from);
     return from;
   }
   //----------------------------------------------------------------------------
-  // return "st", "nd", "rd", "th" given i to make a ordered number             
-  //----------------------------------------------------------------------------
+  /// return shorthand for making ordered number
+  /// given an integer, return "st", "nd", "rd" or "th" such that appended to
+  /// the integer it makes correct ordered number, e.g. "3rd", "8th", "101st".
+  /// \return "st", "nd", "rd" or "th"
+  /// \param i integer
   inline const char* stndrdth(int i)
   {
     if(i<0) i=-i;
@@ -173,16 +199,18 @@ namespace WDutils {
     }
   }
   //----------------------------------------------------------------------------
-  // return " " or nothing (zero pointer) for a being positive or negative      
-  //----------------------------------------------------------------------------
+  /// for a>=0 return " ", and for a<0 nothing (zero pointer), such that output
+  /// like cout << neg_space(a) << a looks aligned whatever signs a has.
   template<typename scalar>
   inline const char* neg_space(scalar const&a)
   {
-    return a < scalar(0)? "" : " ";
+    return a < scalar(0)? 0 : " ";
   }
   //----------------------------------------------------------------------------
-  // if the next char in istream equals a specific one, eat it                  
-  //----------------------------------------------------------------------------
+  /// eat the next char in an istream, if it equals a specific one
+  /// \return istream used
+  /// \param i istream to read from
+  /// \param c character to eat
   inline std::istream& skip_char(std::istream& i, const char c) {
     char x;
     i>>x;
@@ -190,8 +218,10 @@ namespace WDutils {
     return i.putback(x);
   }
   //----------------------------------------------------------------------------
-  // if the next char in istream equals a specific one, eat the rest of the line
-  //----------------------------------------------------------------------------
+  /// eat the next entire line, if next character equals a specific one
+  /// \return istream used
+  /// \param i istream to read from
+  /// \param c character to match if the entire line is to be skipped
   inline std::istream& skip_line(std::istream& i, const char c) {
     char x;
     i>>x;
@@ -199,17 +229,19 @@ namespace WDutils {
     else       return i.putback(x);
   }
   //----------------------------------------------------------------------------
-  // like skip_line, but returns a boolean                                      
-  //----------------------------------------------------------------------------
+  /// eat the next entire line, if next character equals a specific one
+  /// \return has line been skipped?
+  /// \param i istream to read from
+  /// \param c character to match if the entire line is to be skipped
   inline bool eat_line(std::istream& i, const char c) {
     char x;
     i>>x;
     if(x==c) { SwallowRestofLine(i); return true; }
     else     { i.putback(x);         return false; }
   }
-  //----------------------------------------------------------------------------
-  // I/O of arrays whose size is known at compile time                          
-  //----------------------------------------------------------------------------
+  // ///////////////////////////////////////////////////////////////////////////
+  /// \name I/O of arrays whose size is known at compile time
+  //@{
   template<int N, int I=0> struct meta_io {
   template<typename X> static void write(std::ostream&s, const X*x)
     { s<<x[I]<<' '; meta_io<N,I+1>::write(s,x); }
@@ -222,6 +254,12 @@ namespace WDutils {
   template<typename X> static void read (std::istream&s,       X*x) { s>>x[N]; }
   };
   //----------------------------------------------------------------------------
+  /// write and array in the format "a1 a2 a3 ... aN"
+  /// \param N template parameter: size of array
+  /// \param X template parameter: type of array elements
+  /// \return ostream used
+  /// \param s ostream to write to
+  /// \param x pointer to first element
   template<int N, typename X> inline
   std::ostream& write_arr(std::ostream&s, const X* x)
   { 
@@ -229,6 +267,12 @@ namespace WDutils {
     return s;
   }
   //----------------------------------------------------------------------------
+  /// read an array from a space-separated format
+  /// \param N template parameter: size of array
+  /// \param X template parameter: type of array elements
+  /// \return istream used
+  /// \param s istream to read from
+  /// \param x pointer to first element
   template<int N, typename X> inline
   std::istream& read_arr(std::istream&s, X* x)
   { 
@@ -244,20 +288,33 @@ namespace WDutils {
     }
     return s;
   }
-  //----------------------------------------------------------------------------
-  // I/O of arrays whose size is known at run time                              
-  //----------------------------------------------------------------------------
-  template<typename S> inline
-  std::ostream& write_array(std::ostream&s, const S* x, unsigned N)
+  //@}
+  // ///////////////////////////////////////////////////////////////////////////
+  /// \name I/O of arrays whose size is known at run time
+  //@{
+  /// write and array in the format "a1 a2 a3 ... aN"
+  /// \param X template parameter: type of array elements
+  /// \return ostream used
+  /// \param s ostream to write to
+  /// \param x pointer to first element
+  /// \param N size of array
+  template<typename X> inline
+  std::ostream& write_array(std::ostream&s, const X* x, unsigned N)
   {
     s << x[0];
     for(register unsigned i=1; i!=N; ++i) s<<" "<<x[i];
     return s;
   }
   //----------------------------------------------------------------------------
-  template<typename S> inline
-  std::istream& read_array(std::istream&s, S* x, unsigned N) {
-    register S y[N];
+  /// read an array from a space-separated format
+  /// \param X template parameter: type of array elements
+  /// \return istream used
+  /// \param s istream to read from
+  /// \param x pointer to first element
+  /// \param N size of array
+  template<typename X> inline
+  std::istream& read_array(std::istream&s, X* x, unsigned N) {
+    register X y[N];
     char c=0;
     s >> c;
     if(c == '(') {
@@ -271,6 +328,7 @@ namespace WDutils {
     for(register unsigned i=0; i!=N; ++i) x[i] = y[i];
     return s;
   }
+  //}@
   //----------------------------------------------------------------------------
 } // namespace WDutils
 

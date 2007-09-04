@@ -134,6 +134,7 @@ MAKE_OBJ		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
 # -----------------------
 
 Pi_h			:= $(INC)Pi.h
+heap_h			:= $(INC)heap.h
 inline_h		:= $(INC)inline.h
 inline_io_h		:= $(INC)inline_io.h
 exception_h		:= $(INC)exception.h
