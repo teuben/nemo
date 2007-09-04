@@ -32,9 +32,10 @@
 // v 1.0    16/02/2007  WD moved to public part of falcON                      |
 // v 1.0.1  23/02/2007  WD renamed to s2g (previously nemo2gadget)             |
 // v 1.0.2  05/03/2007  WD avoid warning from bodies::read_snapshot()          |
+// v 1.0.3  30/08/2007  WD debugged error message                              |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "1.0.2"
-#define falcON_VERSION_D "05-mar-2007 Walter Dehnen                          "
+#define falcON_VERSION   "1.0.3"
+#define falcON_VERSION_D "30-aug-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #include <body.h>                                  // bodies                    
 #include <public/io.h>                             // NEMO file I/O             
@@ -44,17 +45,17 @@
 #include <string>
 ////////////////////////////////////////////////////////////////////////////////
 string defv[] = {	
-  "in=???\n           input file (nemo snapshot)                         ",
+  "in=???\n           input file (in nemo snapshot format)               ",
   "out=???\n          base name for output files (out000 out001 ...)     ", 
   "copy=mxvkU\n       data to copy (minimum mxvkU, maximum mxvkURHpa)    ",
   "times=first\n      time range(s) to select snapshots from;\n"
   "                    if equals \"first\", write only one file \"out\",\n"
   "                    otherwise allow for multiple time steps           ",
-  "first=0\n          index for first snapshot to write (of more than 1) ",
+  "first=0\n          index for first snapshot to write (if more than 1) ",
   "warn=f\n           warn about missing data (which will be zeroed)     ",
   "header=4\n         header size for unfio (4 or 8)                     ",
   falcON_DEFV, NULL};
-string usage="Walter's NEMO to GADGET snapshot converter";
+string usage="NEMO to GADGET converter (better than \"nemo2gadget\")";
 ////////////////////////////////////////////////////////////////////////////////
 void falcON::main() falcON_THROWING
 {
@@ -79,7 +80,7 @@ void falcON::main() falcON_THROWING
     while(in.has_snapshot()) {
       if(! shot.read_nemo(in,read,copy,getparam("times"),0) ) continue;
       out.reopen(file,ifile++);
-      if(!out) falcON_THROW("cannot open file \"%s\" for output\n",file);
+      if(!out) falcON_THROW("cannot open file \"%s\" for output\n",out.file());
       shot.write_gadget(out,copy,getbparam("warn"),getuparam("header"));
     }
   }

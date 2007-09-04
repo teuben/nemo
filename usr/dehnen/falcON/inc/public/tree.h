@@ -4,7 +4,7 @@
 /// \file   inc/public/tree.h                                                   
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2006                                                           
+/// \date   2000-2007                                                           
 ///                                                                             
 /// \brief  contains definition of class \a OctTree and                         
 ///         macros for access to cells & leafs of a tree                        
@@ -79,7 +79,7 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name data of class Leaf
       //@{
-      vect POS;                                 ///< center of mass = position
+      vect POS;                                 ///< centre of mass = position
     protected:
       /// union to provide auxiliary storage for derived class; not initialized
       union {
@@ -204,7 +204,7 @@ namespace falcON {
     //                                                                          
     // sub-type OctTree::Cell                                                   
     //                                                                          
-    /// represents a cell in the tree.                                          
+    /// represents a cell in the tree, size: 64 bytes.                          
     /// \note any derived type shall NOT add any data (must be of the same      
     /// size), to allow allocation here                                         
     ///                                                                         
@@ -225,7 +225,9 @@ namespace falcON {
       int      NUMBER;                       ///< 4bytes: # leaf descendants    
       int      FCLEAF;                       ///< 4bytes: index of fst leaf desc
       int      FCCELL;                       ///< 4bytes: index of fst cell kid 
-      vect     CENTER;                       ///<12bytes: center of cube        
+      int      PACELL;                       ///< 4bytes: index of parent cell  
+      vect     CENTRE;                       ///<12bytes: centre of cube        
+      // 40 bytes
       //@}
       //------------------------------------------------------------------------
       /// \name data not used by OctTree at all
@@ -233,12 +235,14 @@ namespace falcON {
     protected:
       vect  POS;                             ///<12bytes: position/cofm         
       real  RAD;                             ///< 4bytes: radius/size/rcrit     
+      // 56 bytes
       /// union \a data to hold either a pointer, a scalar, or an unsigned
       union data {
 	void     *PTER;
 	real      SCAL;
 	unsigned  NUMB;
-      } AUX1, AUX2, AUX3;                    ///<12bytes for 3 \a data
+      } AUX1, AUX2;                          ///< 8bytes for 2 \a data
+      // 64 bytes
       //@}
       //------------------------------------------------------------------------
       Cell() {}  ///< construction: do nothing
@@ -256,6 +260,8 @@ namespace falcON {
       friend int      const&number  (const Cell*);
       friend int      const&fcleaf  (const Cell*);
       friend int      const&fccell  (const Cell*);
+      friend int      const&pacell  (const Cell*);
+      friend vect     const&centre  (const Cell*);
       friend vect     const&center  (const Cell*);
       friend int      ecleaf        (const Cell*);
       friend int      ncleaf        (const Cell*);
@@ -304,14 +310,18 @@ namespace falcON {
       //@}
       //------------------------------------------------------------------------
       static void dump_head(std::ostream&o) {
-	o<<"#      flag    lev oct cells ncell leafs nleaf number"
-	 <<"            center";
+	o<<"#      flag    lev oct paren cells ncell leafs nleaf number"
+	 <<"            centre        ";
       }
       //------------------------------------------------------------------------
       void dump(std::ostream&o) const {
 	o<<' '<<std::setw(7)<< flags(*this)
 	 <<' '<<std::setw(3)<< int(LEVEL)
 	 <<' '<<std::setw(3)<< int(OCTANT);
+	if(PACELL < 0)
+	  o<<"     -";
+	else
+	  o<<' '<<std::setw(5)<<PACELL;
 	if(NCELLS)
 	  o<<' '<<std::setw(5)<<FCCELL;
 	else
@@ -321,14 +331,14 @@ namespace falcON {
 	 <<' '<<std::setw(5)<<NLEAFS
 	 <<' '<<std::setw(6)<<NUMBER;
 	for(register int d=0; d!=Ndim; ++d)
-	  o<<' '<<std::setw(8)<<std::setprecision(4)<<CENTER[d];
+	  o<<' '<<std::setw(8)<<std::setprecision(4)<<CENTRE[d];
       }
       //------------------------------------------------------------------------
     protected:
       void copy_sub(const Cell*C) {
 	LEVEL  = C->LEVEL;
 	OCTANT = C->OCTANT;
-	CENTER = C->CENTER;
+	CENTRE = C->CENTRE;
       }
     }; // class Cell
     //--------------------------------------------------------------------------
@@ -356,7 +366,7 @@ namespace falcON {
     mutable Leaf      *LEAFS;                    ///< memory for leafs          
     mutable Cell      *CELLS;                    ///< memory for cells          
     mutable real      *RA;                       ///< table of cell radii       
-    vect               RCENTER;                  ///< root center               
+    vect               RCENTRE;                  ///< root centre               
     union {
       mutable char    *ALLOC;                    ///< allocated memory          
       mutable unsigned*DUINT;                    ///< easy access to 1st few    
@@ -478,13 +488,17 @@ namespace falcON {
     /// return maximum allowed tree depth
     unsigned      const&Maxdepth   () const { return DUINT[3]; }
     /// return radius of cell of given tree level
-    real const&rad (int  const&l) const { return RA[l]; }
-    /// return radius of cell of given tree level
-    real const&rad (indx const&l) const { return RA[l]; }
+    real const&rad (int l) const { return RA[l]; }
     /// return radius of root cell
     real const&root_radius() const { return RA[level(CellNo(0))]; }
     /// return centre of root cell
-    vect const&root_center() const { return RCENTER; }
+    vect const&root_center() const { return RCENTRE; }
+    /// return centre of root cell
+    vect const&root_centre() const { return RCENTRE; }
+    /// find smallest cell, if any, containing a given position
+    /// \param  x position
+    /// \return pointer to smallest cell containing x, 0 if x not in root
+    const Cell*surrounding_cell(vect const&x) const;
     //==========================================================================
     //                                                                          
     // sub-type OctTree::CellIter<>                                             
@@ -507,19 +521,17 @@ namespace falcON {
       //@{
     public:
       /// from pointers to tree and cell
-      CellIter(const OctTree*const&t,
-	       CELL         *const&c) : T(t),   C(c)   {}
+      CellIter(const OctTree*const&t, CELL*const&c) : T(t), C(c)   {}
       /// from CellIter<CELL>
-      CellIter(CellIter const&I)         : T(I.T), C(I.C) {}
+      CellIter(CellIter const&I) : T(I.T), C(I.C) {}
       /// from CellIter<DERIVED_CELL>
       template<typename DerivedCell>
       CellIter(CellIter<DerivedCell> const&I) 
-	: T( I.my_tree() ),
-	  C( static_cast<CELL*>(I.c_pter()) ) {}
-      /// from nothing: set pointers to zer
-      CellIter()                         : T(0),   C(0)   {}
-      /// from any int: like from nothing
-      explicit CellIter(int)             : T(0),   C(0)   {}
+	: T( I.my_tree() ), C( static_cast<CELL*>(I.c_pter()) ) {}
+      /// from nothing: set pointers to zero
+      CellIter() : T(0), C(0) {}
+      /// from any int: as from nothing
+      explicit CellIter(int) : T(0), C(0) {}
       //@}
       //------------------------------------------------------------------------
       /// assignment
@@ -609,6 +621,10 @@ namespace falcON {
       bool is_valid() const {
 	return T != 0;
       }
+      /// are we the root cell
+      bool is_root() const {
+	return level(C) == 0;
+      }
       /// conversion to bool: are we referring to a valid cel?
       operator bool () const {
 	return is_valid();
@@ -638,22 +654,33 @@ namespace falcON {
       /// radius of cell
       real const&radius() const {return T->rad(level(C)); }
       //------------------------------------------------------------------------
-      /// \name access to cell kids and arbitrary cell
+      /// \name access to cell relatives
       //@{
+      /// parent cell (if not root)
+      CellIter parent() const {
+	return pacell(C) < 0?
+	  CellIter(0,0) : 
+	  CellIter(T, static_cast<CELL*>(T->CellNo(pacell(C)))); }
+      /// promote to parent cell
+      CellIter& to_parent() {
+	if(pacell(C) < 0) { T=0; C=0; }
+	else C = static_cast<CELL*>(T->CellNo(pacell(C)));
+	return *this;
+      }
       /// first cell kid (if any)
       cell_child begin_cell_kids() const { 
 	return cell_child(T, static_cast<CELL*>(T->CellNo(fccell(C)))); }
-      /// end of cell kids
+      /// end of cell kids (if any)
       cell_child end_cell_kids  () const {
 	return cell_child(T, static_cast<CELL*>(T->CellNo(eccell(C)))); }
-      /// cell of given number
+      /// cell of given index in the same tree
       CellIter CellNo(unsigned i) const {
 	return CellIter(T, static_cast<CELL*>(T->CellNo(i))); }
       //@}
       //------------------------------------------------------------------------
       /// \name access to leaf kids and descendants
       //@{
-      /// first leaf kid (always)
+      /// first leaf kid (always exists)
       leaf_child begin_leafs   () const {
 	return static_cast<leaf_child>(T->LeafNo(fcleaf(C))); }
       /// end of leaf kids
@@ -773,7 +800,9 @@ namespace falcON {
   inline int const&number(const OctTree::Cell*C) { return C->NUMBER; }
   inline int const&fcleaf(const OctTree::Cell*C) { return C->FCLEAF; }
   inline int const&fccell(const OctTree::Cell*C) { return C->FCCELL; }
-  inline vect const&center(const OctTree::Cell*C) { return C->CENTER; }
+  inline int const&pacell(const OctTree::Cell*C) { return C->PACELL; }
+  inline vect const&center(const OctTree::Cell*C) { return C->CENTRE; }
+  inline vect const&centre(const OctTree::Cell*C) { return C->CENTRE; }
   inline int ecleaf(const OctTree::Cell*C) { return C->FCLEAF+C->NLEAFS; }
   inline int ncleaf(const OctTree::Cell*C) { return C->FCLEAF+C->NUMBER; }
   inline int eccell(const OctTree::Cell*C) { return C->FCCELL+C->NCELLS; }

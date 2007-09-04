@@ -32,6 +32,7 @@ tupel_h			:= $(IUTI)tupel.h $(IUTI)tupel.cc $(traits_h)
 exception_h		:= $(IUTI)exception.h $(traits_h)
 WDMath_h		:= $(IUTI)WDMath.h $(Pi_h) $(exception_h)
 memory_h		:= $(IUTI)memory.h $(exception_h) $(inline_h)
+heap_h			:= $(IUTI)heap.h $(memory_h)
 numerics_h		:= $(IUTI)numerics.h $(inline_h) $(memory_h) $(tupel_h)
 spline_h		:= $(IUTI)spline.h $(numerics_h) $(memory_h)
 random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
@@ -108,7 +109,7 @@ sample_cc		:= $(SLIB)sample.cc $(sample_h) $(basic_h) $(numerics_h)
 gamma_cc		:= $(SLIB)gamma.cc $(gamma_h) $(numerics_h)
 king_cc			:= $(SLIB)king.cc $(king_h) $(numerics_h)
 bodyfunc_cc		:= $(SLIB)bodyfunc.cc $(bodyfunc_h) $(bodyfuncdefs_h) 
-neighbours_cc		:= $(SLIB)neighbours.cc $(neighbours_h) $(interact_h)
+neighbours_cc		:= $(SLIB)neighbours.cc $(neighbours_h)
 
 # ---------------
 # library modules
@@ -161,7 +162,7 @@ public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
 			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
 			$(LIB)partner.o $(LIB)nbody.o $(LIB)forcesC.o \
 			$(LIB)tools.o $(LIB)sample.o $(LIB)manip.o \
-			$(LIB)profile.o $(LIB)bodyfunc.o $(LIB)neighbours.o 
+			$(LIB)profile.o $(LIB)bodyfunc.o $(LIB)neighbours.o
 
 else
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \

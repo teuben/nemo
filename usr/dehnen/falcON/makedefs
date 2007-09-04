@@ -136,7 +136,6 @@ endif
 # this is used for compilation of code with inline assembly SSE instructions
 # it prevents the compiler to mess with SSE and break the code.
 NOSSE		:= -mno-sse -mno-sse2 -mno-sse3 -mfpmath=387
-##NOSSE		:= -mfpmath=387
 
 else
 ifeq ($(COMPILER),pgcc)

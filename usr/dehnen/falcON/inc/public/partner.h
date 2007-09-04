@@ -139,7 +139,7 @@ namespace falcON {
 	OctTree::Leaf::dump(o);
 	o<<' '<<setw(5)<<setprecision(4)<<size();
 	if(flag().is_set(flags::sticky))
-	  for(register indx d=0; d!=Ndim; ++d)
+	  for(indx d=0; d!=Ndim; ++d)
 	    o<<' '<<setw(7)<<setprecision(4)<<vel()[d];
       }
       //------------------------------------------------------------------------
@@ -165,6 +165,7 @@ namespace falcON {
       // data of class cell                                                     
       //------------------------------------------------------------------------
       struct srce_data {
+	real    SIZE;
 	vect    VEL;                               // velocity center           
       };
       //------------------------------------------------------------------------
@@ -177,7 +178,9 @@ namespace falcON {
       }
       real     const&vrad() const { return RAD; }
       real     const&rmax() const { return RAD; }
-      real     const&size() const { return AUX3.SCAL; }
+      real     const&size() const {
+	return static_cast<srce_data*>(AUX1.PTER)->SIZE;
+      }
       unsigned const&numb() const { return AUX2.NUMB; }
     public:
       //------------------------------------------------------------------------
@@ -191,7 +194,7 @@ namespace falcON {
       vect    &pos () { return POS; }
       real    &vrad() { return RAD; }
       real    &rmax() { return RAD; }
-      real    &size() { return AUX3.SCAL; }
+      real    &size() { return static_cast<srce_data*>(AUX1.PTER)->SIZE; }
       unsigned&numb() { return AUX2.NUMB; }
       //------------------------------------------------------------------------
       // const data access via friends                                          
@@ -215,7 +218,7 @@ namespace falcON {
 	OctTree::Cell::dump(o);
 	o<<' '<<setw(6)<<setprecision(4)<<size();
 	if       (this->is_set(flags::sticky)) {
-	  for(register indx d=0; d!=Ndim; ++d)
+	  for(indx d=0; d!=Ndim; ++d)
 	    o<<' '<<setw(9)<<setprecision(4)<<vel()[d];
 	  o<<' '<<setw(5)<<setprecision(4)<<vrad();
 	} else if(this->is_set(flags::sph))

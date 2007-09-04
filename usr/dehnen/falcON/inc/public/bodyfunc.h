@@ -4,11 +4,11 @@
 /// \file   inc/public/bodyfunc.h                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
+/// \date   2004-2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
+// Copyright (C) 2004-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -320,7 +320,7 @@ namespace falcON {
 		     TYPE == 'i'? "int"  :
 		     TYPE == 'r'? "real" :
 		     TYPE == 'v'? "vect" : "unknown") );
-      if(!b->have_all(NEED))
+      if(!b.have_all(NEED))
 	falcON_THROW("bodiesfunc::func<%s>() not all data need (%s) "
 		     "known for body\n", word(NEED));
 #endif
@@ -381,7 +381,7 @@ namespace falcON {
 		     TYPE == 'i'? "int"  :
 		     TYPE == 'r'? "real" :
 		     TYPE == 'v'? "vect" : "unknown") );
-      if(!b->have_all(NEED))
+      if(!b.have_all(NEED))
 	falcON_THROW("bodiesfunc::func<%s>() not all data need (%s) "
 		     "known for body\n", word(NEED));
 #endif

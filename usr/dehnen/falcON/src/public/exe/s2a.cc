@@ -4,7 +4,7 @@
 /// \file   src/mains/s2a.cc                                                    
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2002-2006                                                           
+/// \date   2002-2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -43,9 +43,10 @@
 // v 4.1   04/07/2006  WD made public (along with bodyfunc.h)                   
 // v 4.2   27/02/2007  WD print out "nan" or "inf" if float is nan or inf       
 // v 4.3   05/03/2007  WD enabled filter in public version                      
+// v 4.4   30/08/2007  WD fivename() for field headers                          
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "4.3"
-#define falcON_VERSION_D "05-mar-2007 Walter Dehnen                          "
+#define falcON_VERSION   "4.4"
+#define falcON_VERSION_D "30-aug-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2a"
@@ -164,7 +165,7 @@ void falcON::main() falcON_THROWING {
 	      SHOT.time(),Ntot,Nb[bodytype::gas]);
       for(fieldbit f; f; ++f)
 	if(OUTPUT.contain(f) && SHOT.have(f))
-	  fprintf(OUT," '%s'",name(f));
+	  fprintf(OUT," '%s'",fivename(f));
       fprintf(OUT,"\n#\n");
     }
     if(F) {

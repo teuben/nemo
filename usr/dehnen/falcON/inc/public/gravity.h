@@ -315,7 +315,6 @@ namespace falcON {
     // OctTree::Cell::RAD  |  rmax, rcrit, size                                 
     // OctTree::Cell::AUX1 |  pointer to srce_data                              
     // OctTree::Cell::AUX2 |  pointer to Coeffs (sink data)                     
-    // OctTree::Cell::AUX3 |  eps/2 (only used with indiv softening lengths)    
     // srce_data::MASS     |  mass                                              
     // srce_data::POLS     |  specific multipole moments                        
     //                                                                          
@@ -340,6 +339,7 @@ namespace falcON {
 #endif
       struct srce_data {
 	real MASS;
+	real EPSH;
 	Mset POLS;
 	void normalize_poles()         { POLS.normalize(MASS); }
       };
@@ -358,7 +358,7 @@ namespace falcON {
       real const&size  () const { return RAD; }
       real const&rcrit () const { return RAD; }
       real       rcrit2() const { return square(rcrit()); }
-      real const&eph   () const { return AUX3.SCAL; }
+      real const&eph   () const { return __srce->EPSH; }
       Cset&Coeffs() const { return *static_cast<Cset*>(AUX2.PTER); }
       const Mset&poles () const { return __srce->POLS; }
       //------------------------------------------------------------------------
@@ -385,7 +385,7 @@ namespace falcON {
       vect &cofm  () { return POS; }
       real &rmax  () { return RAD; }
       real &size  () { return RAD; }
-      real &eph   () { return AUX3.SCAL; }
+      real &eph   () { return __srce->EPSH; }
       Cset &Coeffs() { return *static_cast<Cset*>(AUX2.PTER); }
       Mset &poles () { return __srce->POLS; }
 #undef __srce
@@ -427,7 +427,7 @@ namespace falcON {
       void dump(std::ostream&o) const {
 	OctTree::Cell::dump(o);
 	o<<' '<<setw(8)<<mass();
-	for(register int i=0; i<Ndim; i++)
+	for(int i=0; i<Ndim; i++)
 	  o<<' '<<setw(8)<<setprecision(4)<<cofm()[i];
 	o<<' '<<setw(12)<<rmax()
 	 <<' '<<setw(12)<<rcrit();
@@ -838,9 +838,9 @@ namespace falcON {
     void write(std::ostream&out) const {
       unsigned part, total=total_approx_iacts()+total_direct_iacts();
 #ifdef ENHANCED_IACT_STATS
-      register int wSS;
+      int wSS;
 #endif
-      register real percent;
+      real percent;
       out <<
 	" interaction statitics:\n"
 	"     type          approx   direct"

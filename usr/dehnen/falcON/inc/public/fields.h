@@ -317,11 +317,14 @@ namespace falcON {
   namespace BodyData {
     const int         NOSPH   = 19;                // # non-sph data            
     const int         NQUANT  = 33;                // total # data              
-    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIEKRADJFCM";
-                                                   // one-char data tags        
     //--------------------------------------------------------------------------
-    // array with human readable names for the N-body data                      
-    const char* const QNAME[NQUANT] = 
+    /// array with the one-char data tags used as enum names
+    /// \note not (to be) referred to outside of this file
+    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIEKRADJFCM";
+    //--------------------------------------------------------------------------
+    /// array with full-length human readable names for the N-body data
+    /// \note not (to be) referred to outside of this file
+    const char* const QFULLNAME[NQUANT] = 
       { "mass", "position", "velocity", "predicted velocity",
 	"softening length", "body flags", "key", "time step", "potential",
 	"external potential", "acceleration", "jerk", "density",
@@ -333,44 +336,64 @@ namespace falcON {
 	"sound speed", "molecular weight"
       };
     //--------------------------------------------------------------------------
-    // array with the sizeof() the N-body data                                  
+    /// array with function names for the N-body data
+    /// \note not (to be) referred to outside of this file
+    const char* const QFUNCNAME[NQUANT] = 
+      { "mass", "pos", "vel", "vprd", "eps", "flag", "key", "step", "pot",
+	"pex", "acc", "jerk", "rho", "aux", "zet", "level", "num", "node",
+	"peano",
+	"size", "snum", "uin", "uprd", "udot", "udex", "entr", "srho", "alfa",
+	"divv", "hdot", "fact", "csnd", "molw"
+      };
+    //--------------------------------------------------------------------------
+    /// array with five-chacter names for the N-body data
+    /// \note not (to be) referred to outside of this file
+    const char* const QFIVENAME[NQUANT] = 
+      { "mass ", "pos  ", "vel  ", "vprd ", "eps  ", "flag ", "key  ", "step ",
+	"pot  ", "pex  ", "acc  ", "jerk ", "rho  ", "aux  ", "zet  ", "level",
+	"num  ", "node ", "peano",
+	"size ", "snum ", "uin  ", "uprd ", "udot ", "udex ", "entr ", "srho ",
+	"alfa ", "divv ", "hdot ", "fact ", "csnd ", "molw "
+      };
+    //--------------------------------------------------------------------------
+    /// array with the sizeof() the N-body data
     const size_t ZQUANT[NQUANT] = {
       //            source properties: 8
-      sizeof(real),           // mass
-      sizeof(vect),           // position
-      sizeof(vect),           // velocity
-      sizeof(vect),           // velocity_predicted
-      sizeof(real),           // softening length
-      sizeof(flags),          // flags
-      sizeof(int),            // key
-      sizeof(double),         // time step
+      sizeof(real),           ///< mass
+      sizeof(vect),           ///< position
+      sizeof(vect),           ///< velocity
+      sizeof(vect),           ///< velocity_predicted
+      sizeof(real),           ///< softening length
+      sizeof(flags),          ///< flags
+      sizeof(int),            ///< key
+      sizeof(double),         ///< time step
       //            sink properties: 11
-      sizeof(real),           // potential
-      sizeof(real),           // external potential
-      sizeof(vect),           // acceleration
-      sizeof(vect),           // jerk
-      sizeof(real),           // density (mass)
-      sizeof(real),           // auxiliary scalar
-      sizeof(vect),           // auxiliary vector
-      sizeof(indx),           // level
-      sizeof(unsigned),       // number of partners
-      sizeof(indx),           // node number
-      sizeof(peanokey),       // Peano-Hilbert key
+      sizeof(real),           ///< potential
+      sizeof(real),           ///< external potential
+      sizeof(vect),           ///< acceleration
+      sizeof(vect),           ///< jerk
+      sizeof(real),           ///< density (mass)
+      sizeof(real),           ///< auxiliary scalar
+      sizeof(vect),           ///< auxiliary vector
+      sizeof(indx),           ///< level
+      sizeof(unsigned),       ///< number of partners
+      sizeof(indx),           ///< node number
+      sizeof(peanokey),       ///< Peano-Hilbert key
       //            SPH properties: 13
-      sizeof(real),           // size
-      sizeof(unsigned),       // number of SPH partners
-      sizeof(real),           // U_internal
-      sizeof(real),           // U_predicted
-      sizeof(real),           // (dU/dt)_total
-      sizeof(real),           // (dU/dt)_external
-      sizeof(real),           // entropy function
-      sizeof(real),           // gas-density
-      sizeof(real),           // alpha_visc
-      sizeof(real),           // div(v)
-      sizeof(real),           // dlogh/dt
-      sizeof(real),           // f_i
-      sizeof(real),           // sound speed
-      sizeof(real)            // molecular weight
+      sizeof(real),           ///< size
+      sizeof(unsigned),       ///< number of SPH partners
+      sizeof(real),           ///< U_internal
+      sizeof(real),           ///< U_predicted
+      sizeof(real),           ///< (dU/dt)_total
+      sizeof(real),           ///< (dU/dt)_external
+      sizeof(real),           ///< entropy function
+      sizeof(real),           ///< gas-density
+      sizeof(real),           ///< alpha_visc
+      sizeof(real),           ///< div(v)
+      sizeof(real),           ///< dlogh/dt
+      sizeof(real),           ///< f_i
+      sizeof(real),           ///< sound speed
+      sizeof(real)            ///< molecular weight
     };
   } // namespace BodyData
   // ///////////////////////////////////////////////////////////////////////////
@@ -396,9 +419,13 @@ namespace falcON {
     static const int   NOSPH = BodyData::NOSPH;  ///< # non-sph data            
     static const int   NQUANT= BodyData::NQUANT; ///< total # data              
     /// letter for body datum
-    static char const& SNAME(int i) { return BodyData::SQUANT[i]; }
+    static const char& SNAME(int i) { return BodyData::SQUANT[i]; }
+    /// 5-character function name for body dataum
+    static const char* FIVENAME(int i) { return BodyData::QFIVENAME[i]; }
+    /// function name for body dataum
+    static const char* FUNCNAME(int i) { return BodyData::QFUNCNAME[i]; }
     /// full name for body dataum
-    static const char* const& FNAME(int i) { return BodyData::QNAME[i]; }
+    static const char* FULLNAME(int i) { return BodyData::QFULLNAME[i]; }
     /// size of type for body datum
     static size_t const& SIZE(int i) { return BodyData::ZQUANT[i]; }
     //@}
@@ -417,6 +444,7 @@ namespace falcON {
       x       = 1,            ///< position
       v       = 2,            ///< velocity
       w       = 3,            ///< predicted velocity
+      V       = w,            ///< predicted velocity (again)
       e       = 4,            ///< individual gravitational softening length
       f       = 5,            ///< falcON::flags
       k       = 6,            ///< integer key or identifier
@@ -444,7 +472,6 @@ namespace falcON {
       R       = 26,           ///< gas-density rho
       A       = 27,           ///< alpha_visc
       D       = 28,           ///< div(v)
-      V       = w,            ///< predicted velocity (again)
       J       = 29,           ///< dlnh/dt
       F       = 30,           ///< factor f_i
       C       = 31,           ///< sound speed
@@ -501,8 +528,12 @@ namespace falcON {
     /// the single character abbreviating the data field, same as
     /// the name of the corresponding enum value in fieldbit::bits
     friend char const&letter(fieldbit f);
-    /// the name of the data field
-    friend const char* const&name(fieldbit f);
+    /// the full name of the data field
+    friend const char*fullname(fieldbit f);
+    /// the 5-character function name of the data field
+    friend const char*fivename(fieldbit f);
+    /// the function name of the data field
+    friend const char*funcname(fieldbit f);
     /// is the data field a SPH quantity?
     friend bool is_sph(fieldbit f);
     /// is the data field supported by NEMO I/O?
@@ -519,10 +550,12 @@ namespace falcON {
   //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
   inline fieldbit::value_type const&value (fieldbit const&f) { return f.val; }
-  inline size_t     const&size  (fieldbit f) { return BodyData::ZQUANT[f.val]; }
-  inline char       const&letter(fieldbit f) { return BodyData::SQUANT[f.val]; }
-  inline const char*const&name  (fieldbit f) { return BodyData::QNAME [f.val]; }
-  inline bool             is_sph(fieldbit f) { return f.val>= BodyData::NOSPH; }
+  inline size_t const&size  (fieldbit f) { return BodyData::ZQUANT[f.val]; }
+  inline char const&letter  (fieldbit f) { return BodyData::SQUANT[f.val]; }
+  inline const char*fullname(fieldbit f) { return BodyData::QFULLNAME[f.val]; }
+  inline const char*funcname(fieldbit f) { return BodyData::QFUNCNAME[f.val]; }
+  inline const char*fivename(fieldbit f) { return BodyData::QFIVENAME[f.val]; }
+  inline bool       is_sph  (fieldbit f) { return f.val>= BodyData::NOSPH; }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::fieldset                                                     
@@ -959,8 +992,10 @@ namespace falcON {
     typedef TYPE type;							\
     static const bool   is_sph = BIT >= BodyData::NOSPH;		\
     static const size_t size   = sizeof(type);                          \
-    static       char   word() { return BodyData::SQUANT[BIT]; }	\
-    static const char  *name() { return BodyData::QNAME[BIT]; }		\
+    static const char&word     () { return BodyData::SQUANT[BIT]; }	\
+    static const char*fullname () { return BodyData::QFULLNAME[BIT]; }	\
+    static const char*funcname () { return BodyData::QFUNCNAME[BIT]; }	\
+    static const char*fivename () { return BodyData::QFIVENAME[BIT]; }	\
   };
   //----------------------------------------------------------------------------
   DefFieldTraits( 0, real);                        // mass                      

@@ -3,7 +3,7 @@
 //                                                                             |
 /// \file src/public/tree.cc                                                   |
 //                                                                             |
-// Copyright (C) 2000-2005  Walter Dehnen                                      |
+// Copyright (C) 2000-2007  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -62,7 +62,8 @@ namespace falcON {
     static int     &number_(OctTree::Cell* const&C) { return C->NUMBER; }
     static int     &fcleaf_(OctTree::Cell* const&C) { return C->FCLEAF; }
     static int     &fccell_(OctTree::Cell* const&C) { return C->FCCELL; }
-    static vect    &center_(OctTree::Cell* const&C) { return C->CENTER; }
+    static int     &pacell_(OctTree::Cell* const&C) { return C->PACELL; }
+    static vect    &centre_(OctTree::Cell* const&C) { return C->CENTRE; }
     //--------------------------------------------------------------------------
     static void copy_sub  (OctTree::Cell* const&C, const OctTree::Cell* const&P) {
       C->copy_sub(P);
@@ -150,7 +151,7 @@ namespace {
   //----------------------------------------------------------------------------
   inline vect Integer(const vect& x) {
     vect c(zero);                                  // reset return position     
-    LoopDims c[d]=int(x[d]+half);                  // find center position      
+    LoopDims c[d]=int(x[d]+half);                  // find centre position      
     return c;                                      // and return it             
   }
   //----------------------------------------------------------------------------
@@ -187,8 +188,8 @@ namespace {
 		    const OctTree::Cell*,          // I:   current parent cell  
 		    const OctTree      *,          // I:   daughter tree        
 		    OctTree::Cell      *,          // I:   current cell to link 
-		    OctTree::Cell      *&,         // I/O: next free cell       
-		    OctTree::Leaf      *&);        // I/O: next free leaf       
+		    OctTree::Cell     *&,          // I/O: next free cell       
+		    OctTree::Leaf     *&);         // I/O: next free leaf       
     //--------------------------------------------------------------------------
     static int link(                               // R:   depth of tree        
 		    const OctTree*const&PT,        // I:   parent tree          
@@ -196,6 +197,7 @@ namespace {
     {
       OctTree::Leaf* Lf=FstLeaf(DT);
       OctTree::Cell* Cf=FstCell(DT)+1;
+      pacell_(FstCell(DT)) = -1;
       return link(PT,FstCell(PT), DT, FstCell(DT), Cf, Lf);
     }
   };
@@ -203,14 +205,14 @@ namespace {
   int 
   SubTreeBuilder::link(                            // R:   depth of tree        
 		       const OctTree      * PT,    // I:   parent tree          
-		       const OctTree::Cell* P,     // I:   current parent cell  
+		       const OctTree::Cell* P,     // I:   cell in parent tree  
 		       const OctTree      * T,     // I:   daughter tree        
 		       OctTree::Cell      * C,     // I:   current cell to link 
 		       OctTree::Cell      *&Cf,    // I/O: next free cell       
 		       OctTree::Leaf      *&Lf)    // I/O: next free leaf       
   {
     int dep=0;                                     // depth                     
-    copy_sub(C,P);                                 // copy level, octant, center
+    copy_sub(C,P);                                 // copy level, octant, centre
     nleafs_(C) = 0;                                // reset cell: # leaf kids   
     ncells_(C) = 0;                                // reset cell: # cell kids   
     fcleaf_(C) = NoLeaf(T,Lf);                     // set cell: sub-leafs       
@@ -230,13 +232,14 @@ namespace {
 	  }                                        //   ENDIF                   
     number_(C) = nleafs_(C);                       // # leafs >= # leaf kids    
     if(ncells_(C)) {                               // IF(cell has cell kids)    
-      int de;                                      //   depth of sub-cell       
+      int c = NoCell(T,C);                         //   index of cell           
       OctTree::Cell*Ci=Cf;                         //   remember free cells     
       fccell_(C) = NoCell(T,Ci);                   //   set cell children       
       Cf += ncells_(C);                            //   reserve children cells  
       __LoopCellKids(PT,P,pc)                      //   LOOP(c kids of Pcell)   
 	if(is_subtreecell(pc)) {                   //     IF(cell == subt cell) 
-	  de =link(PT,pc,T,Ci,Cf,Lf);              //       link sub cells      
+	  pacell_(Ci) = c;                         //       sub-cell's parent   
+	  int de =link(PT,pc,T,Ci,Cf,Lf);          //       link sub cells      
 	  if(de>dep) dep=de;                       //       update depth        
 	  number_(C)+= number_(Ci++);              //       count leaf descends 
 	}                                          //     ENDIF                 
@@ -341,14 +344,14 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   // this macro requires you to close the curly bracket or use macro EndDotList 
 #define BeginDotList(LIST,NAME)		           /* loop elements of list  */\
-  for(register dot*NAME=LIST.HEAD, *NEXT_NAME;     /* pointers: current, next*/\
+  for(dot*NAME=LIST.HEAD, *NEXT_NAME;              /* pointers: current, next*/\
       NAME;					   /* loop until current=0   */\
       NAME = NEXT_NAME) { 			   /* set current = next     */\
   NEXT_NAME = NAME->NEXT;                          /* get next elemetnt      */
 #define EndDotList }                               // close curly brackets      
   // this macro fails if dot.NEXT is manipulated within the loop                
 #define LoopDotListS(LIST,NAME)		           /* loop elements of list  */\
-  for(register dot* NAME = LIST.HEAD;	           /* current dot            */\
+  for(dot* NAME = LIST.HEAD;	                   /* current dot            */\
       NAME;					   /* loop until current=0   */\
       NAME = NAME->NEXT)                           // set current = next        
   //////////////////////////////////////////////////////////////////////////////
@@ -356,7 +359,7 @@ namespace {
   // class falcON::box                                                          
   //                                                                            
   // basic link structure in a box-dot tree.                                    
-  // a box represents a cube centered on center() with half size ("radius")     
+  // a box represents a cube centered on centre() with half size ("radius")     
   // equal to BoxDotTree::RA[LEVEL].                                            
   // if N <= Ncrit, it only contains sub-dots, which are in a linked list       
   // pointed to by DOTS.                                                        
@@ -380,7 +383,7 @@ namespace {
     //--------------------------------------------------------------------------
     bool marked_as_box  (int const&i) const { return TYPE & (1<<i); }
     bool marked_as_dot  (int const&i) const { return !marked_as_box(i); }
-    vect const&center   ()            const { return pos(); }
+    vect const&centre   ()            const { return pos(); }
     //--------------------------------------------------------------------------
     /// octant of position \e x within box (not checked)
     int octant(const vect&x) const {
@@ -399,7 +402,7 @@ namespace {
     //--------------------------------------------------------------------------
     /// octant of Cell within this box (not checked)
     int octant(const OctTree::Cell*C) const {
-      return ::octant(pos(),falcON::center(C));
+      return ::octant(pos(),falcON::centre(C));
     }
     //--------------------------------------------------------------------------
     bool is_twig() const {
@@ -411,10 +414,10 @@ namespace {
     box() {}
     //--------------------------------------------------------------------------
     void mark_as_box(int const&i) { TYPE |=  (1<<i); }
-    vect&center     ()            { return pos(); }
+    vect&centre     ()            { return pos(); }
     //--------------------------------------------------------------------------
     box& reset_octants() {
-      for(register node**P=OCT; P!=OCT+Nsub; ++P) *P = 0;
+      for(node**P=OCT; P!=OCT+Nsub; ++P) *P = 0;
       return *this;
     }
     //--------------------------------------------------------------------------
@@ -445,8 +448,8 @@ namespace {
     //--------------------------------------------------------------------------
     // const friends                                                            
     //--------------------------------------------------------------------------
-    friend vect      &center (      box*const&B) {return B->center();  }
-    friend vect const&center (const box*const&B) {return B->center();  }
+    friend vect      &centre (      box*const&B) {return B->centre();  }
+    friend vect const&centre (const box*const&B) {return B->centre();  }
   };// struct box {
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
@@ -508,7 +511,7 @@ namespace {
     //--------------------------------------------------------------------------
     // does box contain a given position?                                       
     inline bool contains(const box*B, const vect&x) const {
-      return ::contains(center(B),radius(B),x);
+      return ::contains(centre(B),radius(B),x);
     }
     //--------------------------------------------------------------------------
     // does box contain a given dot?                                            
@@ -524,9 +527,9 @@ namespace {
 	      "(presumably more than Ncrit=%d bodies have a common position "
 	      "which may be NaN)", DMAX,NCRIT);
       real rad=RA[l];
-      if(i&1) center(B)[0] += rad;  else  center(B)[0] -= rad;
-      if(i&2) center(B)[1] += rad;  else  center(B)[1] -= rad;
-      if(i&4) center(B)[2] += rad;  else  center(B)[2] -= rad;
+      if(i&1) centre(B)[0] += rad;  else  centre(B)[0] -= rad;
+      if(i&2) centre(B)[1] += rad;  else  centre(B)[1] -= rad;
+      if(i&4) centre(B)[2] += rad;  else  centre(B)[2] -= rad;
     }
     //--------------------------------------------------------------------------
     inline box* new_box(size_t const&nl) {
@@ -541,7 +544,7 @@ namespace {
     {
       box* P = new_box(nl);                        // get box off the stack     
       P->LEVEL    = B->LEVEL;                      // set level                 
-      P->center() = B->center();                   // copy center of parent     
+      P->centre() = B->centre();                   // copy centre of parent     
       shrink_to_octant(P,i);                       // shrink to correct octant  
 #ifdef falcON_MPI
       P->PEANO    = B->PEANO;                      // copy peano map            
@@ -673,13 +676,13 @@ namespace {
 		     int            ,              // I:   local peano key      
 		     OctTree::Cell* ,              // I:   current cell         
 		     OctTree::Cell*&,              // I/O: index: free cells    
-		     OctTree::Leaf*&
+		     OctTree::Leaf*&               // I/O: index: free leafs    
 #ifdef falcON_track_bug
 		     ,
 		     const dot *    ,
 		     const dot *
 #endif
-		                     ) const;      // I/O: index: free leafs    
+		                     ) const;
     //--------------------------------------------------------------------------
     // RECURSIVE                                                                
     // This routines transforms the box-dot tree into the cell-leaf tree,       
@@ -691,13 +694,13 @@ namespace {
 		     int            ,              // I:   local peano key      
 		     OctTree::Cell* ,              // I:   current cell         
 		     OctTree::Cell*&,              // I/O: index: free cells    
-		     OctTree::Leaf*&
+		     OctTree::Leaf*&               // I/O: index: free leafs    
 #ifdef falcON_track_bug
 		     ,
 		     const dot *    ,
 		     const dot *
 #endif
-		                     ) const;      // I/O: index: free leafs    
+		                     ) const;
     //--------------------------------------------------------------------------
     BoxDotTree()
       : BM(0), TREE(0), RA(0), P0(0) {}
@@ -709,7 +712,7 @@ namespace {
 	       int           nc,                   // I: N_crit                 
 	       int           dm,                   // I: D_max                  
 	       size_t        nl,                   // I: N_dots                 
-	       vect    const&x0,                   // I: root center            
+	       vect    const&x0,                   // I: root centre            
 	       real          sz,                   // I: root radius            
 	       size_t        nb = 0)               //[I: #boxes initially alloc]
     {
@@ -725,7 +728,7 @@ namespace {
       RA[0]    = sz;
       for(int l=0; l!=DMAX; ++l) RA[l+1] = half * RA[l];
       P0->LEVEL = 0;
-      P0->center() = x0;
+      P0->centre() = x0;
 #ifdef falcON_MPI
       P0->PEANO.set_root();
 #endif
@@ -777,6 +780,7 @@ namespace {
 #endif
       OctTree::Cell* C0 = FstCell(TREE), *Cf=C0+1;
       OctTree::Leaf* Lf = FstLeaf(TREE);
+      pacell_(C0) = -1;
       DEPTH = NCRIT > 1?
 	link_cells_N(P0,0,0,C0,Cf,Lf BUG_LINK_PARS) :
 	link_cells_1(P0,0,0,C0,Cf,Lf BUG_LINK_PARS) ;
@@ -810,7 +814,7 @@ namespace {
     peano_ (C) = P->PEANO;                         // copy peano map            
     key_   (C) = k;                                // set local peano key       
 #endif
-    center_(C) = P->center();                      // copy center               
+    centre_(C) = P->centre();                      // copy centre               
     number_(C) = P->NUMBER;                        // copy number               
     fcleaf_(C) = NoLeaf(TREE,Lf);                  // set cell: leaf kids       
     nleafs_(C) = 0;                                // reset cell: # leaf kids   
@@ -829,12 +833,14 @@ namespace {
 	nleafs_(C)++;                              //     inc # sub-leafs       
       }                                            // END LOOP                  
     if(nsub) {                                     // IF sub-boxes              
+      int c = NoCell(TREE,C);                      //   index of cell           
       OctTree::Cell*Ci=Cf;                         //   remember free cells     
       fccell_(C) = NoCell(TREE,Ci);                //   set cell: 1st sub-cell  
       ncells_(C) = nsub;                           //   set cell: # sub-cells   
       Cf += nsub;                                  //   reserve nsub cells      
       for(i=0, N=P->OCT; i!=Nsub; ++i,++N)         //   LOOP octants            
 	if(*N && P->marked_as_box(i)) {            //     IF sub-box            
+	  pacell_(Ci) = c;                         //       sub-cell's parent   
 	  int de = link_cells_1(static_cast<box*>(*N), i,
 #ifdef falcON_MPI
 				P->PEANO.key(i),
@@ -883,7 +889,7 @@ namespace {
     peano_ (C) = P->PEANO;                         // copy peano map            
     key_   (C) = k;                                // set local peano key       
 #endif
-    center_(C) = P->center();                      // copy center               
+    centre_(C) = P->centre();                      // copy centre               
     number_(C) = P->NUMBER;                        // copy number               
     fcleaf_(C) = NoLeaf(TREE,Lf);                  // set cell: leaf kids       
     if(P->is_twig()) {                             // IF box==twig              
@@ -917,12 +923,14 @@ namespace {
 	  nleafs_(C)++;                            //       inc # sub-leafs     
       }                                            //   END LOOP                
       if(nsub) {                                   //   IF has sub-boxes        
+	int c = NoCell(TREE,C);                    //     index of cell         
 	OctTree::Cell*Ci=Cf;                       //     remember free cells   
 	fccell_(C) = NoCell(TREE,Ci);              //     set cell: 1st sub-cel 
 	ncells_(C) = nsub;                         //     set cell: # cell kids 
 	Cf += nsub;                                //     reserve nsub cells    
 	for(i=0, N=P->OCT; i!=Nsub; ++i,++N)       //     LOOP octants          
 	  if(*N && P->marked_as_box(i)) {          //       IF sub-box          
+	    pacell_(Ci) = c;                       //         sub-cell's parent 
 	    int de = link_cells_N(static_cast<box*>(*N), i,
 #ifdef falcON_MPI
 				  P->PEANO.key(i),
@@ -953,13 +961,13 @@ namespace {
     //--------------------------------------------------------------------------
     // data of class TreeBuilder                                                
     //--------------------------------------------------------------------------
-    const vect *ROOTCENTER;                        // pre-determined root center
+    const vect *ROOTCENTRE;                        // pre-determined root centre
     vect        XAVE, XMIN, XMAX;                  // extreme positions         
     dot        *D0, *DN;                           // begin/end of dots         
     //--------------------------------------------------------------------------
-    // This routines returns the root center nearest to the mean position       
-    inline vect root_center() {
-      return ROOTCENTER? *ROOTCENTER : Integer(XAVE);
+    // This routines returns the root centre nearest to the mean position       
+    inline vect root_centre() {
+      return ROOTCENTRE? *ROOTCENTRE : Integer(XAVE);
     }
     //--------------------------------------------------------------------------
     // This routines returns the half-size R of the smallest cube, centered     
@@ -1000,14 +1008,14 @@ namespace {
     // 1   completely from scratch                                              
     //--------------------------------------------------------------------------
     TreeBuilder(const OctTree*,                    // I: tree to be build       
-		const vect   *,                    // I: pre-determined center  
+		const vect   *,                    // I: pre-determined centre  
 		int           ,                    // I: Ncrit                  
 		int           ,                    // I: Dmax                   
 		const bodies *,                    // I: body sources           
 		flags        = flags::empty);      //[I: flag specifying bodies]
     //--------------------------------------------------------------------------
     TreeBuilder(const OctTree*,                    // I: tree to be build       
-		const vect   *,                    // I: pre-determined center  
+		const vect   *,                    // I: pre-determined centre  
 		int           ,                    // I: Ncrit                  
 		int           ,                    // I: Dmax                   
 		const bodies *,                    // I: body sources           
@@ -1025,7 +1033,7 @@ namespace {
     //       arrays). Thus, if those have changed, don't re-build the tree!     
     //--------------------------------------------------------------------------
     TreeBuilder(const OctTree*,                    // I: old/new tree           
-		const vect   *,                    // I: pre-determined center  
+		const vect   *,                    // I: pre-determined centre  
 		int           ,                    // I: Ncrit                  
 		int           );                   // I: Dmax                   
     //--------------------------------------------------------------------------
@@ -1055,6 +1063,8 @@ namespace {
   void TreeBuilder::setup_from_scratch(const bodies*BB,
 				       flags        SP)
   {
+    if(!BB->have_pos())
+      falcON_THROW("bodies have no position in tree building\n");
     D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
     dot* Di=D0;                                    // current dot               
     XAVE = zero;                                   // reset X_ave               
@@ -1091,6 +1101,8 @@ namespace {
 				       vect   const&xmax,
 				       flags        SP)
   {
+    if(!BB->have_pos())
+      falcON_THROW("bodies have no position in tree building\n");
     D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
     dot* Di=D0;                                    // current dot               
     XAVE = zero;                                   // reset X_ave               
@@ -1122,6 +1134,8 @@ namespace {
   {
     if(BB->N_del())                                // IF bodies are removed     
       return setup_from_scratch(BB,TREE->SP_flag()); // setup from scratch      
+    if(!BB->have_pos())
+      falcON_THROW("bodies have no position in tree building\n");
     D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
     dot*Di = D0;                                   // current dot               
     XAVE = zero;                                   // reset X_ave               
@@ -1167,11 +1181,11 @@ namespace {
 			   int           dm,
 			   const bodies *bb,
 			   flags         sp) :
-    ROOTCENTER(x0)
+    ROOTCENTRE(x0)
   {
     report REPORT("TreeBuilder::TreeBuilder(): 1.1.1");
     setup_from_scratch(bb,sp);
-    vect X0 = root_center();
+    vect X0 = root_centre();
     BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
   }
   //----------------------------------------------------------------------------
@@ -1184,11 +1198,11 @@ namespace {
 			   vect    const&xmin,
 			   vect    const&xmax,
 			   flags         sp) :
-    ROOTCENTER(x0)
+    ROOTCENTRE(x0)
   {
     report REPORT("TreeBuilder::TreeBuilder(): 1.1.2");
     setup_from_scratch(bb,xmin,xmax,sp);
-    vect X0 = root_center();
+    vect X0 = root_centre();
     BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
   }
   //----------------------------------------------------------------------------
@@ -1197,12 +1211,12 @@ namespace {
 			   const vect   *x0,
 			   int           nc,
 			   int           dm) : 
-    ROOTCENTER(x0)
+    ROOTCENTRE(x0)
   {
     TREE = t;                                      // set tree                  
     report REPORT("TreeBuilder::TreeBuilder(): 2");
     setup_leaf_order(TREE->my_bodies());           // use leaf order            
-    vect X0 = root_center();
+    vect X0 = root_centre();
     BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -1311,7 +1325,7 @@ inline void OctTree::set_depth(unsigned dp) {
 //------------------------------------------------------------------------------
 OctTree::OctTree(const bodies*bb,                  // I: body sources           
 		 int          nc,                  // I: N_crit                 
-		 const vect  *x0,                  // I: pre-determined center  
+		 const vect  *x0,                  // I: pre-determined centre  
 		 int          dm,                  // I: max tree depth         
 		 flags        sp) :                // I: flag specifying bodies 
   BSRCES(bb), SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
@@ -1333,7 +1347,7 @@ OctTree::OctTree(const bodies*bb,                  // I: body sources
     allocate(0,0,0,zero);                          //   reset leafs & cells     
     set_depth(0);                                  //   set tree depth to zero  
   }                                                // ENDIF                     
-  RCENTER = center(root());                        // set root center           
+  RCENTRE = centre(root());                        // set root centre           
 }  
 //------------------------------------------------------------------------------
 // construction from bodies with X_min/max known already                        
@@ -1342,7 +1356,7 @@ OctTree::OctTree(const bodies*bb,            // I: body sources
 		 vect   const&xi,            // I: x_min                  
 		 vect   const&xa,            // I: x_max                  
 		 int          nc,            // I: N_crit                 
-		 const vect  *x0,            // I: pre-determined center  
+		 const vect  *x0,            // I: pre-determined centre  
 		 int          dm,            // I: max tree depth         
 		 flags        sp) :          // I: flag specifying bodies 
   BSRCES(bb), SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
@@ -1366,7 +1380,7 @@ OctTree::OctTree(const bodies*bb,            // I: body sources
     allocate(0,0,0,zero);                          //   reset leafs & cells     
     set_depth(0);                                  //   set tree depth to zero  
   }                                                // ENDIF                     
-  RCENTER = center(root());                        // set root center           
+  RCENTRE = centre(root());                        // set root centre           
 }
 //------------------------------------------------------------------------------
 // construction as sub-tree from another tree                                   
@@ -1391,13 +1405,13 @@ OctTree::OctTree(const OctTree*par,                // I: parent tree
     set_depth(                                     //   set tree depth          
 	      SubTreeBuilder::link(par,this));     //   link sub-tree           
   }                                                // ENDIF                     
-  RCENTER = center(root());                        // set root center           
+  RCENTRE = centre(root());                        // set root centre           
 }
 //------------------------------------------------------------------------------
 // building using the leaf-order of the old tree structure                      
 //------------------------------------------------------------------------------
 void OctTree::build(int        const&nc,           //[I: N_crit]                
-		    const vect*const&x0,           //[I: pre-determined center] 
+		    const vect*const&x0,           //[I: pre-determined centre] 
 		    int        const&dm)           //[I: max tree depth]        
 {
   report REPORT("OctTree::build(%d,%d)",nc,dm);
@@ -1421,20 +1435,39 @@ void OctTree::build(int        const&nc,           //[I: N_crit]
   }                                                // ENDIF                     
   STATE = state((STATE & origins) | re_grown);     // reset state               
   USAGE = un_used;                                 // reset usage flag          
-  RCENTER = center(root());                        // set root center           
+  RCENTRE = centre(root());                        // set root centre           
 }
 //------------------------------------------------------------------------------
 // re-using old tree structure                                                  
 //------------------------------------------------------------------------------
-void OctTree::reuse() {
+void OctTree::reuse()
+{
   for(leaf_iterator Li=begin_leafs(); Li!=end_leafs(); ++Li)
     Li->copy_from_bodies_pos(BSRCES);
   STATE = state((STATE & origins) | re_used);      // reset state               
   USAGE = un_used;                                 // reset usage flag          
 }
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
+// destruction                                                                  
+//------------------------------------------------------------------------------
 OctTree::~OctTree()
 {
   if(ALLOC) { delete16(ALLOC); }
+}
+//------------------------------------------------------------------------------
+// find surrounding cell
+//------------------------------------------------------------------------------
+const OctTree::Cell* OctTree::surrounding_cell(vect const&x) const
+{
+  const Cell*C = FstCell();
+  if(!contains(centre(C),rad(level(C)),x)) return 0;    // x not in root cell
+  for(;;) {
+    if(0==ncells(C)) return C;                 // twig cell --> we are done
+    uint8 oct = ::octant(centre(C),x);         // get octant of x
+    const Cell*D = CellNo(fccell(C));          // LOOP daughter cells
+    for(; D!=CellNo(eccell(C)); ++D)           //   search for matching octant
+      if(octant(D) == oct) { C=D; break; }     //   match: set C=daughter, break
+    if(D!=C) return C;                         // no match found: return C
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////

@@ -45,31 +45,32 @@
 #include <string>
 ////////////////////////////////////////////////////////////////////////////////
 string defv[] = {	
-  "in=???\n           input base file (GADGET snapshot)                  ",
-  "out=???\n          output file (nemo snapshot)                        ",
+  "in=???\n           input base file (GADGET format)                    ",
+  "out=???\n          output file (nemo snapshot format)                 ",
   "nshot=1\n          number of snapshots to read                        ",
   "copy=mxvU\n        data to copy (maximum: mxvkURHpa)                  ",
   "first=0\n          first snapshot to read                             ",
   "header=4\n         header size or unfio (4 or 8)                      ",
-    falcON_DEFV, NULL};
-string usage="GADGET to NEMO snapshot converter";
+  falcON_DEFV, NULL};
+string usage="GADGET to NEMO converter (better than \"gadget2nemo\")";
 ////////////////////////////////////////////////////////////////////////////////
 void falcON::main() falcON_THROWING
 {
   const char* fbase=getparam("in");
-  unsigned nshot = getuparam("nshot");
+  unsigned nshot=getuparam("nshot");
+  unsigned header=getuparam("header");
   nemo_out out(getparam("out"));
-  fieldset copy = getioparam("copy") & fieldset("mxvkURHpa"), got;
+  fieldset copy=getioparam("copy") & fieldset("mxvkURHpa"), got;
   snapshot shot;
   if(nshot > 1) {
     for(unsigned i=0; i!=nshot; ++i) {
       char file[256];
       sprintf(file, "%s%03d", fbase, i+getuparam("first"));
-      got = shot.read_gadget(file, copy, getuparam("header"));
+      got = shot.read_gadget(file, copy, header);
       shot.write_nemo(out, copy & got);
     }
   } else {
-    got = shot.read_gadget(fbase, copy, getuparam("header"));
+    got = shot.read_gadget(fbase, copy, header);
     shot.write_nemo(out, copy & got);
   }
 }

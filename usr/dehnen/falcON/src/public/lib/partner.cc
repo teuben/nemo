@@ -2,7 +2,7 @@
 //                                                                              
 /// \file src/public/partner.cc                                                 
 //                                                                              
-// Copyright (C) 2000-2006  Walter Dehnen                                       
+// Copyright (C) 2000-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -82,18 +82,18 @@ namespace {
     {
       if(take_all) {
 	if(all_active) {
-	  for(register leaf_iter B=B0; B!=BN; ++B)
+	  for(leaf_iter B=B0; B!=BN; ++B)
 	    check_pair(A,B);
 	} else {
-	  for(register leaf_iter B=B0; B!=BN; ++B)
+	  for(leaf_iter B=B0; B!=BN; ++B)
 	    if(is_active(B)) check_pair(A,B);
 	}
       } else {
 	if(all_active) {
-	  for(register leaf_iter B=B0; B!=BN; ++B)
+	  for(leaf_iter B=B0; B!=BN; ++B)
 	    if(take(B)) check_pair(A,B);
 	} else {
-	  for(register leaf_iter B=B0; B!=BN; ++B)
+	  for(leaf_iter B=B0; B!=BN; ++B)
 	    if(take(B) && is_active(B)) check_pair(A,B);
 	}
       }
@@ -248,18 +248,18 @@ namespace {
   protected:
     void check_pair(leaf_iter const&A, leaf_iter const&B) const
     {
-      register vect R = pos(A)-pos(B);             // distance vector           
-      register real Sq= square(size(A)+size(B));   // (combined size)^2         
+      vect R = pos(A)-pos(B);                      // distance vector           
+      real Sq= square(size(A)+size(B));            // (combined size)^2         
       if(norm(R) < Sq) {                           // IF(overlap at t=0):       
 	add_pair(A,B);                             //   add                     
 	Counter<COUNT>::count(A,B);                //   count collision partners
 	return;                                    //   DONE                    
       }                                            // ENDIF                     
       if(TAU==zero) return;                        // IF(no time > 0) DONE      
-      register vect V = vel(A)-vel(B);             // velocity difference       
-      register real RV= R*V;                       // scalar product            
+      vect V = vel(A)-vel(B);                      // velocity difference       
+      real RV= R*V;                                // scalar product            
       if(RV > zero) return;                        // IF(diverging orbits) DONE 
-      register real t = min(TAU,-RV/norm(V));      // time of min distance      
+      real t = min(TAU,-RV/norm(V));               // time of min distance      
       if(norm(R+t*V) < Sq) {                       // IF(overlap)               
 	add_pair(A,B);                             //   add                     
 	Counter<COUNT>::count(A,B);                //   count collision partners
@@ -270,20 +270,20 @@ namespace {
       // true  if there cannot possibly be an interaction between any A and B   
       // false if an interaction between any A and B is possible                
     {
-      register vect R = pos(A)-pos(B);             // R   = distance vector     
-      register real
+      vect R = pos(A)-pos(B);                      // R   = distance vector     
+      real
 	Rq = norm(R),                              // R^2 = distance^2          
 	x  = size(A)+size(B);                      // x   = combined size       
       if(Rq < x*x) return false;                   // overlap at t=0            
       if(TAU==zero) return true;                   // no times t>0              
-      register vect V = vel(A)-vel(B);             // V   = velocity diff       
-      register real
+      vect V = vel(A)-vel(B);                      // V   = velocity diff       
+      real
 	w  = vrad(A),                              // w   = v-size              
 	wq = w*w,                                  // w^2 = (v-size)^2          
 	RV = R*V,                                  // R*V = scalar product      
 	RVq= RV*RV;                                // (R*V)^2                   
       if(RV>zero && RVq>wq*Rq) return true;        // R*V/|R| > w: diverging    
-      register real
+      real
 	Vq = norm(V),                              // V^2 = (v-distance)^2      
 	t  = (wq>=Vq)? TAU :                       // v-size too large          
 	min(TAU, (w*real(sqrt((Rq*Vq-RVq)/(Vq-wq)))-RV)/Vq );// t of min dist   
@@ -295,20 +295,20 @@ namespace {
       // true  if there cannot possibly be an interaction between any A and B   
       // false if an interaction between any A and B is possible                
     {
-      register vect R = pos(A)-pos(B);             // R   = distance vector     
-      register real
+      vect R = pos(A)-pos(B);                      // R   = distance vector     
+      real
 	Rq = norm(R),                              // R^2 = distance^2          
 	x  = size(A)+size(B);                      // x   = combined size       
       if(Rq < x*x) return false;                   // overlap at t=0            
       if(TAU==zero) return true;                   // no times t>0              
-      register vect V = vel(A)-vel(B);             // V   = velocity diff       
-      register real
+      vect V = vel(A)-vel(B);                      // V   = velocity diff       
+      real
 	w  = vrad(A)+vrad(B),                      // w   = combined v-size     
 	wq = w*w,                                  // w^2 = (comb v-size)^2     
 	RV = R*V,                                  // R*V = scalar product      
 	RVq= RV*RV;                                // (R*V)^2                   
       if(RV>zero && RVq>wq*Rq) return true;        // R*V/|R| > w: diverging    
-      register real
+      real
 	Vq = norm(V),                              // V^2 = (v-distance)^2      
 	t  = (wq>=Vq)? TAU :                       // v-size too large          
 	min(TAU, (w*real(sqrt((Rq*Vq-RVq)/(Vq-wq)))-RV)/Vq );// t of min dist   
@@ -342,7 +342,7 @@ namespace {
   protected:
     void check_pair(leaf_iter const&A, leaf_iter const&B) const
     {
-      register real Rq = dist_sq(pos(A),pos(B));
+      real Rq = dist_sq(pos(A),pos(B));
       if(Rq < sizeq(A) || Rq < sizeq(B))
 	Counter<1>::count(A,B);
     }
@@ -381,7 +381,7 @@ namespace {
   protected:
     void check_pair(leaf_iter const&A, leaf_iter const&B) const
     {
-      register real Rq = dist_sq(pos(A),pos(B));
+      real Rq = dist_sq(pos(A),pos(B));
       if(Rq < sizeq(A) || Rq < sizeq(B)) {
 	add_pair(A,B);
 	Counter<COUNT>::count(A,B);
@@ -570,9 +570,9 @@ void PartnerEstimator::prepare_sph()
   update_leafs_sph();                              // update flags & leafs      
   if(SPH_UPTODATE) return;                         // IF up to date: DONE       
   // 2. loop cells: pass flags & number of sph leafs up; count sph cells        
-  register unsigned nc = 0;                        // counter: # sph cells      
+  unsigned nc = 0;                                 // counter: # sph cells      
   LoopCellsUp(cell_iterator,TREE,Ci) {             // LOOP cells upwards        
-    register unsigned ns = 0;                      //   counter: # sph leafs    
+    unsigned ns = 0;                               //   counter: # sph leafs    
     Ci->reset_active_flag();                       //   reset activity flag     
     LoopPartnerLKids(cell_iterator,Ci,l,sph) {     //   LOOP partner sub-leafs  
       Ci->add_active_flag(l);                      //     add in activity flag  
@@ -597,25 +597,25 @@ void PartnerEstimator::prepare_sph()
   if(CELL_SRCE) falcON_DEL_A(CELL_SRCE);
   CELL_SRCE = falcON_NEW(Cell::srce_data,NC);
   // 4. loop cells: give memory to PartnerCells, pass up pos, size, rmax        
-  register Cell::srce_data*ci=CELL_SRCE;    // pter to cell's source     
+  Cell::srce_data*ci=CELL_SRCE;                    // pter to cell's source     
   LoopCellsUp(cell_iterator,TREE,Ci)
   if(is_sph(Ci)) {                                 // LOOP sph ells upwards     
     Ci->set_srce(ci++);                            //   give srce memory        
-    register vect x(zero);                         //   mean position           
+    vect x(zero);                                  //   mean position           
     LoopPartnerLKids(cell_iterator,Ci,l,sph)       //   LOOP partner sub-leafs  
       x += pos(l);                                 //     add up: mean pos      
     LoopPartnerCKids(cell_iterator,Ci,c,sph)       //   LOOP partner sub-cells  
       x += numb(c) * pos(c);                       //     add up: mean pos      
     x /= real(numb(Ci));                           //   mean position           
     Ci->pos() = x;                                 //   set cell: mean position 
-    register real s=zero,r=zero;                   //   size, r_max             
+    real s=zero,r=zero;                            //   size, r_max             
     LoopPartnerLKids(cell_iterator,Ci,l,sph) {     //   LOOP partner sub-leafs  
-      register real R = dist(x,pos(l));            //     distance to sub leaf  
+      real R = dist(x,pos(l));                     //     distance to sub leaf  
       update_max(r,R);                             //     update r_max          
       update_max(s,R+size(l));                     //     update size           
     }                                              //   END LOOP                
     LoopPartnerCKids(cell_iterator,Ci,c,sph) {     //   LOOP partner sub-cells  
-      register real R = dist(x,pos(c));            //     distance to sub cell  
+      real R = dist(x,pos(c));                     //     distance to sub cell  
       update_max(r,R+rmax(c));                     //     update r_max          
       update_max(s,R+size(c));                     //     update size           
     }                                              //   END LOOP                
@@ -631,9 +631,9 @@ void PartnerEstimator::prepare_sticky()
   update_leafs_sticky();                           // update flags & leafs      
   if(STC_UPTODATE) return;                         // IF up to date: DONE       
   // 2. loop cells: pass flags & number of sticky leafs up; count sticky cells  
-  register unsigned nc = 0;                        // counter: # sticky cells   
+  unsigned nc = 0;                                 // counter: # sticky cells   
   LoopCellsUp(cell_iterator,TREE,Ci) {             // LOOP cells upwards        
-    register unsigned ns = 0;                      //   counter: # sticky leafs 
+    unsigned ns = 0;                               //   counter: # sticky leafs 
     Ci->reset_active_flag();                       //   reset activity flag     
     LoopPartnerLKids(cell_iterator,Ci,l,sticky) {  //   LOOP partner sub-leafs  
       Ci->add_active_flag(l);                      //     add in activity flag  
@@ -658,12 +658,12 @@ void PartnerEstimator::prepare_sticky()
   if(CELL_SRCE) falcON_DEL_A(CELL_SRCE);
   CELL_SRCE = falcON_NEW(Cell::srce_data,NC);
   // 4. loop cells: give memory to partner cells, pass up pos, vel, size, vrad  
-  register Cell::srce_data*ci=CELL_SRCE;           // pter to cell's source     
+  Cell::srce_data*ci=CELL_SRCE;                    // pter to cell's source     
   LoopCellsUp(cell_iterator,TREE,Ci)
   if(is_sticky(Ci)) {                              // LOOP sticky ells upwards  
     Ci->set_srce(ci++);                            //   give srce memory        
-    register vect x(zero);                         //   mean position           
-    register vect v(zero);                         //   mean velocity           
+    vect x(zero);                                  //   mean position           
+    vect v(zero);                                  //   mean velocity           
     LoopPartnerLKids(cell_iterator,Ci,l,sticky) {  //   LOOP partner sub-leafs  
       x += pos(l);                                 //     add up: mean pos      
       v += vel(l);                                 //     add up: mean vel      
@@ -672,12 +672,12 @@ void PartnerEstimator::prepare_sticky()
       x += numb(c) * pos(c);                       //     add up: mean pos      
       v += numb(c) * vel(c);                       //     add up: mean vel      
     }                                              //   END LOOP                
-    register real iN=one/real(numb(Ci));           //   1/N_sticky              
+    real iN=one/real(numb(Ci));                    //   1/N_sticky              
     x *= iN;                                       //   mean position           
     v *= iN;                                       //   mean velocity           
     Ci->pos() = x;                                 //   set cell: mean position 
     Ci->vel() = v;                                 //   set cell: mean position 
-    register real s=zero,r=zero;                   //   size, vrad              
+    real s=zero,r=zero;                            //   size, vrad              
     LoopPartnerLKids(cell_iterator,Ci,l,sticky) {  //   LOOP partner sub-leafs  
       update_max(s,dist(x,pos(l))+size(l));        //     update size           
       update_max(r,dist(v,vel(l)));                //     update vrad           

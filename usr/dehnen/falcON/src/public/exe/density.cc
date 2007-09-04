@@ -1,15 +1,15 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file    src/mains/density.cc                                               
+/// \file    src/exe/density.cc                                                 
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2006                                                               
+/// \date    2006-2007                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006  Walter Dehnen                                            
+// Copyright (C) 2006-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -37,12 +37,14 @@
 // v 1.2    26/07/2006  WD BodyFilter                                           
 // v 2.0    27/07/2006  WD made public                                          
 // v 2.1    28/07/2006  WD keyword findmax added                                
+// v 3.0    04/09/2007  WD completely new neighbours.cc (3 times faster)        
+//                         Ferrers kernel, default K=32                         
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.0"
-#define falcON_VERSION_D "27-jul-2006 Walter Dehnen                          "
+#define falcON_VERSION   "3.0"
+#define falcON_VERSION_D "04-sep-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
-#  error You need NEMO to compile "TestNeigh"
+#  error You need NEMO to compile "density"
 #endif
 #define falcON_RepAction 0                         // no action reporting       
 //-----------------------------------------------------------------------------+
@@ -52,14 +54,15 @@
 #include <ctime>
 #include <body.h>                                  // the bodies                
 #include <public/io.h>                             // my NEMO I/O               
-#include <public/neighbours.h>                     // getting dist to neighbours
+#include <public/neighbours.h>                     // finding neighbours        
 #include <public/bodyfunc.h>                       // body functions            
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 string defv[] = {
   "in=???\n           input file                                         ",
   "out=???\n          output file                                        ",
-  "K=16\n             number of neighbours                               ",
+  "K=32\n             number of neighbours                               ",
+  "N=1\n              order of Ferrers kernel                            ",
   "times=all\n        times to process                                   ",
   "choose=\n          a boolean bodyfunc expression to choose bodies     ",
   "params=\n          any parameters required by choose                  ",
@@ -73,25 +76,24 @@ usage = "estimate mass density based on distance to Kth neighbour";
 //------------------------------------------------------------------------------
 namespace {
   using namespace falcON;
-  falcON::real  FAC;        ///< factor used in estimation of density
-  falcON::real  RHO = zero; ///< maximum density 
-  bodies::index BRH;        ///< body with maximum density
-
-  void dens(const bodies*                    B,
-	    const NeighbourLister::Leaf*     L,
-	    const NeighbourLister::Neighbour*N,
-	    int                              K)
+  using falcON::real;
+  real F; ///< normalisation factor for kernel
+  int  N; ///< order of Ferrers kernel
+  void prepare(int n) {
+    N = n;
+    F = 0.75/Pi;
+    for(n=1; n<=N; ++n)
+      F *= double(n+n+3)/double(n+n);
+  }
+  void SetDensity(const bodies*B, const OctTree::Leaf*L,
+		  const Neighbour*NB, int K)
   {
-    falcON::real m(zero);
-    const NeighbourLister::Neighbour*NK = N+K;
-    for(const NeighbourLister::Neighbour*n=N; n!=NK; ++n)
-      m += B->mass(mybody(n->L));
-    m *= FAC/cube(max_dist(L));
-    B->rho(mybody(L)) = m;
-    if(m > RHO) {
-      RHO = m;
-      BRH = mybody(L);
-    }
+    real iHq = one/NB[K-1].Q;
+    real rho = zero;
+    for(int k=0; k!=K-1; ++k)
+      rho += scalar(NB[k].L) * std::pow(one-iHq*NB[k].Q,N);
+    rho *= F * std::pow(sqrt(iHq),3);
+    B->rho(mybody(L)) = rho;
   }
 }
 //------------------------------------------------------------------------------
@@ -103,28 +105,27 @@ void falcON::main() falcON_THROWING
   BodyFilter     BF  (getparam_z("choose"), getparam_z("params"));
   const fieldset SRCE(fieldset::m | fieldset::x);
   const fieldset GIVE(getioparam_z("give") | fieldset::r);
-  const fieldset WANT(getioparam_z("give") | SRCE |
+  const fieldset WANT((GIVE & ~fieldset(fieldset::r)) | SRCE |
 		      (BF? BF.need() : fieldset(fieldset::o)));
   const unsigned K   (getiparam("K"));
   const bool     VERB(getbparam("verbose"));
+  prepare(getiparam("N"));
   // loop snapshots & process them                                              
   fieldset       READ;
   snapshot       SHOT;
-  FAC          = (K-0.5)/(K*FPit);
   while(IN.has_snapshot()) {
     // read time, read snapshot
     if(!SHOT.read_nemo(IN,READ,WANT,getparam("times"),0)) continue;
     // check data availability
     check_sufficient(READ,WANT);
-    SHOT.add_field(fieldbit::r);
     BF.set_time(SHOT.time());
     // build tree
     clock_t CPU0 = clock();
     flags   FLAG = flags::empty;
+    SHOT.add_field(fieldbit::f);
     if(BF) {
       FLAG = flags::marked;
       int Nmark(0);
-      SHOT.add_field(fieldbit::f);
       LoopAllBodies(&SHOT,B)
 	if(BF(B)) {
 	  B.mark();
@@ -135,7 +136,7 @@ void falcON::main() falcON_THROWING
 	std::cerr<<' '<<Nmark<<" bodies satisfy criterion"<<std::endl;
       if(Nmark == 0) continue;
     }
-    OctTree TREE(&SHOT, K+1, 0, Default::MaxDepth, FLAG);
+    OctTree TREE(&SHOT, max(1u,K/4), 0, Default::MaxDepth, FLAG);
     if(VERB) {
       clock_t CPU1 = clock();
       std::cerr<<setprecision(6)
@@ -143,9 +144,11 @@ void falcON::main() falcON_THROWING
 	       <<(CPU1 - CPU0)/real(CLOCKS_PER_SEC)<<std::endl;
       CPU0 = CPU1;
     }
-    // find Kth nearest neighbours and estimate density
-    NeighbourLister NELI(&TREE,K);
-    NELI.Estimate(&dens,true);
+    // estimate density
+    SHOT.add_field(fieldbit::r);
+    unsigned NIAC;
+    ProcessNeighbourList(&TREE,K,&SetDensity,NIAC,true);
+
     // for non-chosen bodies set density to zero
     if(BF)
       LoopAllBodies(&SHOT,B)
@@ -156,15 +159,23 @@ void falcON::main() falcON_THROWING
 	       <<" time needed for density estimation: "
 	       <<(CPU1 - CPU0)/real(CLOCKS_PER_SEC)<<'\n'
 	       <<" number of neighbour updates:        "
-	       <<NELI.N_interact()<<std::endl;
+	       <<NIAC<<std::endl;
     }
     // write output
     if(OUT || OUT.open(getparam("out"))) SHOT.write_nemo(OUT,GIVE);
     // find maximum density if wanted
-    if(getbparam("findmax"))
+    if(getbparam("findmax")) {
+      body BRH=SHOT.begin_all_bodies();
+      real RHO = zero;
+      LoopAllBodies(&SHOT,B)
+	if(rho(B) > RHO) {
+	  RHO = rho(B);
+	  BRH = B;
+	}
       std::cerr<<" maximum density "<< RHO
-	       <<" found for body #"<< SHOT.bodyindex(BRH)
-	       <<" at x = "<< SHOT.pos(BRH)
+	       <<" found for body #"<< bodyindex(BRH)
+	       <<" at x = "<< pos(BRH)
 	       <<"\n";
+    }
   }
 }

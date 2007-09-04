@@ -4,11 +4,11 @@
 /// \file   src/public/manip/density.cc                                         
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006                                                                
+/// \date   2006,2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006 Walter Dehnen                                             
+// Copyright (C) 2006,2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -31,6 +31,7 @@
 // v 0.0    27/04/2006  WD created                                              
 // v 0.1    07/07/2006  WD replacing bodyset with flags::ignore                 
 // v 0.2    27/07/2006  WD made public                                          
+// v 0.3    04/09/2007  WD new neighbours.h                                     
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -43,17 +44,25 @@ namespace falcON { namespace Manipulate {
   // auxiliary data and function                                              //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  real FAC;
-  void dens(const bodies*                    B,
-	    const NeighbourLister::Leaf*     L,
-	    const NeighbourLister::Neighbour*N,
-	    int                              K)
+  real FAC; ///< normalisation factor for kernel
+  int  NF;  ///< order of Ferrers kernel
+  void prepare(int n) {
+    NF  = n;
+    FAC = 0.75/Pi;
+    for(n=1; n<=NF; ++n)
+      FAC *= double(n+n+3)/double(n+n);
+  }
+  void SetDensity(const bodies       *B,
+		  const OctTree::Leaf*L,
+		  const Neighbour    *N,
+		  int                 K)
   {
-    real m(zero);
-    const NeighbourLister::Neighbour*NK = N+K;
-    for(const NeighbourLister::Neighbour*n=N; n!=NK; ++n)
-      m += B->mass(mybody(n->L));
-    B->rho(mybody(L)) = FAC*m/cube(max_dist(L));
+    real iHq = one/N[K-1].Q;
+    real rho = zero;
+    for(int k=0; k!=K-1; ++k)
+      rho += scalar(N[k].L) * std::pow(one-iHq*N[k].Q,NF);
+    rho *= FAC * std::pow(sqrt(iHq),3);
+    B->rho(mybody(L)) = rho;
   }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -152,16 +161,16 @@ namespace falcON { namespace Manipulate {
       CPU0 = CPU1;
     }
     // 2. find Kth nearest neighbours and estimate density
-    NeighbourLister NELI(&TREE,K);
     if(!S->have(fieldbit::r))
       const_cast<snapshot*>(S)->add_field(fieldbit::r);
-    NELI.Estimate(&dens,true);
+    unsigned NIAC;
+    ProcessNeighbourList(&TREE,K,&SetDensity,NIAC,true);
     if(falcON::debug(1)) {
       clock_t CPU1 = clock();
       falcON::debug_info(1,"density::manipulate():"
 		 " %f sec needed for density estimation;"
 		 " %d neighbour updates\n",
-		 (CPU1 - CPU0)/real(CLOCKS_PER_SEC),NELI.N_interact());
+		 (CPU1 - CPU0)/real(CLOCKS_PER_SEC),NIAC);
     }
     // 3. set new TMAN
     TMAN += STEP;

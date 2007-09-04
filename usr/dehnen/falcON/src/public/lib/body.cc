@@ -86,7 +86,7 @@ inline
 void bodies::block::add_field (fieldbit f) falcON_THROWING {
   if(TYPE.allows(f) && 0 == DATA[value(f)] ) {
     debug_info(4,"bodies::block::add_field(): allocating data for %u %c (%s)\n",
-	       NALL,letter(f),name(f));
+	       NALL,letter(f),fullname(f));
     set_data_void(f, falcON_NEW(char,NALL*falcON::size(f)));
     if(f == fieldbit::f) reset_flags();
   }
@@ -96,7 +96,7 @@ inline
 void bodies::block::del_field (fieldbit f) falcON_THROWING {
   if(DATA[value(f)]) {
     debug_info(4,"bodies::block::del_field(): "
-	       "de-allocating data for %c (%s)\n",letter(f),name(f));
+	       "de-allocating data for %c (%s)\n",letter(f),fullname(f));
     falcON_DEL_A(static_cast<char*>(DATA[value(f)]));
   }
   set_data_void(f,0);
@@ -106,7 +106,7 @@ inline
 void bodies::block::swap_bytes(fieldbit f) falcON_THROWING {
   if(DATA[value(f)]) {
     debug_info(4,"bodies::block::swap_bytes(): "
-	       "swapping bytes for %c (%s)\n",letter(f),name(f));
+	       "swapping bytes for %c (%s)\n",letter(f),fullname(f));
     falcON::swap_bytes(DATA[value(f)], falcON::size(f), NALL);
   }
 }
@@ -451,7 +451,7 @@ void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
   if(R != N*falcON::size(f))
     falcON_THROW("bodies::block::read_Fortran(%c): "
 		 "could only read %u of %u bytes\n",R,N*falcON::size(f));
-  debug_info(4,"bodies::block::read_Fortran(): read %u %s\n",N,name(f));
+  debug_info(4,"bodies::block::read_Fortran(): read %u `%s'\n",N,fullname(f));
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
@@ -468,7 +468,8 @@ void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
   if(W != N*falcON::size(f))
     falcON_THROW("bodies::block::write_Fortran(%c): "
 		 "could only write %u of %u bytes\n",W,N*falcON::size(f));
-  debug_info(4,"bodies::block::write_Fortran(): written %u %s\n",N,name(f));
+  debug_info(4,"bodies::block::write_Fortran(): written %u `%s'\n",
+	     N,fullname(f));
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////////
@@ -540,9 +541,9 @@ bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I, fieldbit f,
   falcON_THROWING
 {
   if(R * falcON::size(f) > I.bytes_unread())
-    falcON_THROW("body::read_Fortran: want %u %s (%u bytes) but "
+    falcON_THROW("body::read_Fortran: want %u `%s' (%u bytes) but "
 		 "only %u bytes left on Fortran record\n",
-		 R, name(f), R*falcON::size(f), I.bytes_unread());
+		 R, fullname(f), R*falcON::size(f), I.bytes_unread());
   while(is_valid() && R) {
     unsigned r = min(N-K, R);
     const_cast<block*>(B)->read_Fortran(I,f,K,r,swap);
@@ -559,9 +560,9 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
   falcON_THROWING
 {
   if(W * falcON::size(f) > O.bytes_free())
-    falcON_THROW("body::write_Fortran: want %u %s (%u bytes) but "
+    falcON_THROW("body::write_Fortran: want %u `%s' (%u bytes) but "
 		 "only %u bytes left free on Fortran record\n",
-		 W, name(f), W*falcON::size(f), O.bytes_free());
+		 W, fullname(f), W*falcON::size(f), O.bytes_free());
   while(is_valid() && W) {
     unsigned w = min(N-K, W);
     B->write_Fortran(O,f,K,w);
