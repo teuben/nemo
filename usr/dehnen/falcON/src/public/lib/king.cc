@@ -3,7 +3,7 @@
 //                                                                             |
 // king.cc                                                                     |
 //                                                                             |
-// Copyright (C) 2000, 2001, 2002, 2003  Walter Dehnen                         |
+// Copyright (C) 2000-2003, 2007  Walter Dehnen                                |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -44,7 +44,7 @@ namespace {
     return exp(Psi)*erf(sPsi) - f1*sPsi*(1+f2*Psi);
   }
   //--------------------------------------------------------------------------
-  inline vec2D integrand1(double const&r, vec2D const&Y)
+  inline vec2D integrand1(double r, vec2D const&Y)
     // takes x=r as independent, Y[0]=Psi, Y[1]=Psi'
   {
     register vec2D F;
@@ -53,7 +53,7 @@ namespace {
     return F;
   }
   //----------------------------------------------------------------------------
-  inline vec2D integrand2(double const&Psi, vec2D const&Y)
+  inline vec2D integrand2(double Psi, vec2D const&Y)
     // takes Psi as independent, Y[0]=r, Y[1]=Psi'
   {
     register vec2D F;

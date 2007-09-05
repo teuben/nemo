@@ -3,10 +3,6 @@
 ///                                                                             
 /// \file    inc/public/fields.h                                                
 ///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2002-2007                                                          
-///                                                                             
 /// \brief   body flags and support for body data management                    
 ///                                                                             
 ///          Contents:                                                          
@@ -15,6 +11,10 @@
 ///          \li falcON::fieldset: representing a set of body data fields       
 ///          \li template falcON::field_traits                                  
 ///          \li further constants and macros                                   
+///                                                                             
+/// \author  Walter Dehnen                                                      
+///                                                                             
+/// \date    2002-2007                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              

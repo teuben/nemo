@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2000-2006                                                          
+/// \date    2000-2007                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2006  Walter Dehnen                                       
+// Copyright (C) 2000-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -1108,7 +1108,9 @@ namespace WDutils {
   //                                                                            
   //  class Array<T,D>                                                          
   ///                                                                           
-  /// acts like an D-dimensional array T[N_1]...[N_D]; operator[] as expected   
+  /// a D-dimensional array, operator[] as expected, specialisation for D=1.    
+  /// acts like a T[N_1]...[N_D], but allocates only one chunk of memory and no 
+  /// pointers.                                                                 
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T, int D=1> class Array {
@@ -1172,7 +1174,7 @@ namespace WDutils {
       reset(n);
       setval(x);
     }
-    /// construction from nothing: sizes are all equal to 0
+    /// default ctor. construction from nothing: sizes are all equal to 0
     Array() : A(0) {
       set(0);
     }
@@ -1184,30 +1186,38 @@ namespace WDutils {
       reset(n);
     }
     /// construction from sizes for D=2
+    /// \param n0 (input) size of array in dimension 0
+    /// \param n1 (input) size of array in dimension 1
     Array(int n0, int n1) WDutils_THROWING
     : A(0) {
       const int n[2] = {n0,n1};
       reset(n);
     }
     /// construction from sizes for D=3
+    /// \param n0 (input) size of array in dimension 0
+    /// \param n1 (input) size of array in dimension 1
+    /// \param n2 (input) size of array in dimension 2
     Array(int n0, int n1, int n2) WDutils_THROWING
     : A(0) {
       const int n[3] = {n0,n1,n2};
       reset(n);
     }
     /// construction from sizes for D=4
+    /// \param n0 (input) size of array in dimension 0
+    /// \param n1 (input) size of array in dimension 1
+    /// \param n2 (input) size of array in dimension 2
+    /// \param n3 (input) size of array in dimension 3
     Array(int n0, int n1, int n2, int n3) WDutils_THROWING
     : A(0) {
       const int n[4] = {n0,n1,n2,n3};
       reset(n);
     }
-    /// construction from sizes for D=4
-    Array(int n0, int n1, int n2, int n3, T const&x) WDutils_THROWING
-    : A(0) {
-      const int n[4] = {n0,n1,n2,n3};
-      reset(n,x);
-    }
     /// construction from sizes for D=5
+    /// \param n0 (input) size of array in dimension 0
+    /// \param n1 (input) size of array in dimension 1
+    /// \param n2 (input) size of array in dimension 2
+    /// \param n3 (input) size of array in dimension 3
+    /// \param n4 (input) size of array in dimension 4
     Array(int n0, int n1, int n2, int n3, int n4) WDutils_THROWING
     : A(0) {
       const int n[5] = {n0,n1,n2,n3,n4};
@@ -1228,32 +1238,43 @@ namespace WDutils {
       set(0);
     }
     /// type conversion to pointer: return first element
+    /// \return pointer to allocated memory
     T      *const&array()       { return A; }
     /// type conversion to const pointer: return first element
+    /// \return const pointer to allocated memory
     const T*const&array() const { return C; }
     /// non-const array sub-scription: return PseudoArray
+    /// \param i (input) index in first dimension (dimension 0)
+    /// \return sub-array of D-1 dimensions
     PseudoArray<T,D-1> operator[] (int i) THROW_BAD {
       CHECK_BAD(N[0],D);
       return PseudoArray<T,D-1>(A+i*K[0],N+1,K+1);
     }
     /// const array sub-scription: return ConstPseudoArray
+    /// \param i (input) index in first dimension (dimension 0)
+    /// \return sub-array of D-1 dimensions
     ConstPseudoArray<T,D-1> operator[] (int i) const THROW_BAD {
       CHECK_BAD(N[0],D);
       return ConstPseudoArray<T,D-1>(C+i*K[0],N+1,K+1);
     }
     /// same as operator[]
+    /// \param i (input) index in first dimension (dimension 0)
+    /// \return sub-array of D-1 dimensions
     PseudoArray<T,D-1> element (int i) THROW_BAD {
       CHECK_BAD(N[0],D);
       return PseudoArray<T,D-1>(A+i*K[0],N+1,K+1);
     }
     /// same as operator[]
+    /// \param i (input) index in first dimension (dimension 0)
+    /// \return sub-array of D-1 dimensions
     ConstPseudoArray<T,D-1> element (int i) const THROW_BAD {
       CHECK_BAD(N[0],D);
       return ConstPseudoArray<T,D-1>(C+i*K[0],N+1,K+1);
     }
   };// class Array<T,D>
   // ///////////////////////////////////////////////////////////////////////////
-  /// special case D=1
+  /// special case D=1 for Array<T,D>.
+  /// acts like a simple T[N], except that memory is on the heap not the stack.
   template<typename T> class Array<T,1> {
     /// \name data
     //@{

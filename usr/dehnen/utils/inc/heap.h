@@ -3,11 +3,11 @@
 ///                                                                             
 /// \file   utils/inc/heap.h                                                    
 ///                                                                             
+/// \brief  provides support for min and max heap structures                    
+///                                                                             
 /// \author Walter Dehnen                                                       
 ///                                                                             
 /// \date   2007                                                                
-///                                                                             
-/// \brief  provides support for min and max heap structures                    
 ///                                                                             
 /// \version 14-06-2007 WD created from scratch                                 
 /// \version 31-08-2007 WD transferred to utils                                 
@@ -55,11 +55,11 @@ namespace WDutils {
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  /// struct WalkSwap                                                           
+  //  struct WalkSwap                                                           
   //                                                                            
-  /// provides the elementary heap operations down() and up() using swap()      
+  /// provides the elementary heap operations down() and up() using std::swap() 
   ///                                                                           
-  /// To be used as template parameter for struct HeapAlgorithms<>.\n           
+  /// To be used as template parameter for class HeapAlgorithms.\n              
   /// \note The array holding the heap is addressed from 0 to n-1. This makes   
   ///       the relations between parent and child indices somewhat arkward, but
   ///       fits much better with the C/C++ convention of array addressing.     
@@ -72,6 +72,7 @@ namespace WDutils {
     /// \param a array[0..n-1] to be heapified
     /// \param p index of element to be walked down the tree
     /// \param n size of array
+    /// \param compare Comparator (see <functional>), e.g. std::less
     template<typename T, class Comparator>
     static void down(T*a, int p, int n, Comparator compare) {
       for(int c=child(p); c<n; p=c,to_child(c)) {
@@ -84,6 +85,7 @@ namespace WDutils {
     /// \param a array[0..n-1] to be heapified
     /// \param c index of element to be walked up the tree
     /// \param n size of array
+    /// \param compare Comparator (see <functional>), e.g. std::less
     template<typename T, class Comparator>
     static void up(T*a, int c, int n, Comparator compare) {
       for(int p=parent(c); c; c=p,to_parent(p)) {
@@ -94,11 +96,11 @@ namespace WDutils {
   };// struct WalkSwap
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  /// struct WalkNoSwap                                                         
+  //  struct WalkNoSwap                                                         
   //                                                                            
   /// provides the elementary heap operations down() and up() without swap()    
   ///                                                                           
-  /// To be used as template parameter for struct HeapAlgorithms<>.\n           
+  /// To be used as template parameter for class HeapAlgorithms<>.\n            
   /// Instead of swap(), we use the copy constructor and assign (=) operator of 
   /// the value_type. If these don't exist (are private) or if swap() is more   
   /// efficient, use class WalkSwap.\n                                          
@@ -114,6 +116,7 @@ namespace WDutils {
     /// \param a array[0..n-1] to be heapified
     /// \param p index of element to be walked down the tree
     /// \param n size of array
+    /// \param compare Comparator (see <functional>), e.g. std::less
     template<typename T, class Comparator>
     static void down(T*a, int p, int n, Comparator compare) {
       if(p>=(n>>1)) return;
@@ -130,6 +133,7 @@ namespace WDutils {
     /// \param a array[0..n-1] to be heapified
     /// \param c index of element to be walked up the tree
     /// \param n size of array
+    /// \param compare Comparator (see <functional>), e.g. std::less
     template<typename T, class Comparator>
     static void up(T*a, int c, int n, Comparator compare) {
       if(c<1) return;
@@ -144,10 +148,12 @@ namespace WDutils {
   };// struct WalkNoSwap
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  /// class HeapAlgorithms                                                      
+  // class HeapAlgorithms                                                       
   //                                                                            
   /// provides (static member) methods for supporting heaps                     
-  //                                                                            
+  /// \param Walk either WalkSwap or WalkNoSwap                                 
+  /// \param Comparator usually either std::less or std::greater                
+  ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
   template<class Walk, template<typename T> class Comparator>
   class HeapAlgorithms {
@@ -160,23 +166,25 @@ namespace WDutils {
       for(int i=n>>1; i; --i)
 	Walk::down(a,i-1,n,Comparator<T>());
     }
-    /// put array back into heap order after the top element has replaced.
+    /// put array back into heap order after the top (first) element has been
+    /// replaced.
     /// This is equivalent to, but much faster than, pop() followed by push().
-    /// \param a array[0..n-1] in heap order, except for top element
+    /// \param a array[0..n-1] in heap order, except for element 0
     /// \param n size of array
     template<typename T>
     static void after_top_replace(T*a, int n) {
       Walk::down(a,0,n,Comparator<T>());
     }
-    /// put array back into heap order after the last element has changed
+    /// put array back into heap order after the last element has been replaced
     /// \note used in push()
-    /// \param a array[0..n-1] in heap order, except for last element
+    /// \param a array[0..n-1] in heap order, except for element n-1
     /// \param n size of array
     template<typename T>
     static void after_last_replace(T*a, int n) {
       Walk::up(a,n-1,n,Comparator<T>());
     }
-    /// put array back into heap order after the ith element (only) has changed
+    /// put array back into heap order after the ith element (only) has
+    /// been replaced
     /// \param a array[0..n-1] in heap order, except for ith element
     /// \param i element that has been replaced, must be in [0,n-1]
     /// \param n size of array
@@ -216,7 +224,7 @@ namespace WDutils {
     }
     /// transform heap structured array into ordered array.
     /// For a max-heap, ie. if Comparator is std::less, the array will be
-    /// ascendingly order, while a min-heap will be descendingly ordered
+    /// ascendingly ordered, while a min-heap will be descendingly ordered
     /// \param a array[0..n-1]; input heap; output ordered
     /// \param n size of array
     template<typename T>
@@ -284,11 +292,17 @@ namespace WDutils {
     MinHeap::build(a,n);
     MinHeap::sort(a,n);
   }
-  /// general heapsort in place, avoiding swap()
-  template<typename T, template<typename T> class Comparator>
-  void HeapSortGeneral(T*a, int n) {
-    HeapAlgorithms<WalkNoSwap,Comparator>::build(a,n);
-    HeapAlgorithms<WalkNoSwap,Comparator>::sort(a,n);
+  /// ascending heapsort in place, using swap()
+  template<typename T>
+  void HeapSortAscSwap(T*a, int n) {
+    MaxHeapSwap::build(a,n);
+    MaxHeapSwap::sort(a,n);
+  }
+  /// descending heapsort in place, using swap()
+  template<typename T>
+  void HeapSortDescSwap(T*a, int n) {
+    MinHeapSwap::build(a,n);
+    MinHeapSwap::sort(a,n);
   }
   //@}
   // ///////////////////////////////////////////////////////////////////////////

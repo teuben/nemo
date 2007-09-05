@@ -3,11 +3,11 @@
 ///                                                                             
 /// \file   inc/public/io.h                                                     
 ///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2000-2007                                                           
-///                                                                             
 /// \brief  contains declarations of classes falcON::input and falcON::output,  
 ///         as well as NEMO I/O support                                         
+///                                                                             
+/// \author Walter Dehnen                                                       
+/// \date   2000-2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -1145,7 +1145,6 @@ namespace falcON {
     /// \return    number of data actually written
     /// \param buf buffer to write
     /// \param n   number of data to write
-    /// \param rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
     unsigned write(const T*buf, unsigned n) throw(falcON::exception) {
       if(WRITTEN + n*sizeof(T) > SIZE) {
@@ -1165,6 +1164,7 @@ namespace falcON {
     /// \param out output stream to write to
     /// \param buf data buffer to write from
     /// \param n   number of data of type T to write
+    /// \param rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
     static void Write(output&out, const T*buf, unsigned n, unsigned rec=4)
       throw(falcON::exception)
@@ -1242,8 +1242,7 @@ namespace falcON {
   ///
   /// in order for this to work, the sizeof() the type must be 1,2,4,8, or 16
   ///
-  /// \param bdat first element to swap bytes for
-  /// \param cnt  number of elments to swap bytes for
+  /// \param bdat element to swap bytes for
   template<typename B> inline
   void swap_bytes(B&bdat) {
     __bswap<sizeof(B)>::swap(static_cast<void*>(&bdat), 1);
@@ -1255,13 +1254,13 @@ namespace falcON {
   /// \param bdat first element to swap bytes for
   /// \param cnt  number of elments to swap bytes for
   template<typename B> inline
-  void swap_bytes(B* bdat, unsigned cnt) {
+  void swap_bytes(B*bdat, unsigned cnt) {
     __bswap<sizeof(B)>::swap(static_cast<void*>(bdat), cnt);
   }
   /// swap the bytes of elements of unknown type but known size
   ///
-  /// \param bdat pointer to first element
-  /// \param size size of the elements, must be 1,2,4,8, or 16
+  /// \param vdat pointer to first element
+  /// \param len  size of the elements, must be 1,2,4,8, or 16
   /// \param cnt  number of elments to swap bytes for
   inline
   void swap_bytes(void*vdat, unsigned len, unsigned cnt) falcON_THROWING {

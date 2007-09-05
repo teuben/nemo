@@ -90,7 +90,7 @@ namespace WDutils {
   //                                                                            
   //----------------------------------------------------------------------------
   template<typename T>
-  int hunt(const T*xarr, const int n, const T x, const int j) {
+  int hunt(const T*xarr, int n, T x, int j) {
     int  jlo=j,jhi,l=n-1;
     bool ascnd=(xarr[l]>xarr[0]);
     if(!ascnd && xarr[l]==xarr[0] ) return -1;	    // x_0 = x_l                
@@ -145,7 +145,6 @@ namespace WDutils {
   /// \param x    (input) array of T, must be ordered (ascending or descending) 
   /// \param n    (input) size of array xarr                                    
   /// \param xi   (input) value to find position for                            
-  /// \param j    (input) initial guess for position                            
   /// \return     position jlo such that xarr[jlo] <= x < xarr[jlo+1]           
   ///                                                                           
   /// If the original value for k already gives the position, we return.        
@@ -153,7 +152,7 @@ namespace WDutils {
   /// If x is not in range, we throw an error.                                  
   //                                                                            
   template<typename T>
-  inline void find(int& k, const int n, T const *x, const T xi)
+  inline void find(int&k, int n, const T*x, T xi)
   {
     if(k<0 || k>=n-1 || x[k]>xi || x[k+1]<xi) {
       k = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
@@ -170,23 +169,24 @@ namespace WDutils {
   //{@                                                                          
   //----------------------------------------------------------------------------
   /// the numbers 0 to n-1 are ordered in ascending order of A[i]
-  /// using the heap-sort algorithm; based on a routine given in NR
+  /// using the heap-sort algorithm; based on a routine given in NR.
+  /// \note a routine HeapSort() can be found in file heap.h.
   /// \param sortable type of values to be sorted
   /// \param sortit class with operator[](int) returning sortable
   /// \param A (input) array or values to be sorted
   /// \param n (input) number of elements
   /// \param indx (output) index table so that A[indx[i]] is sorted
   template<typename sortable, class sortit>
-  void HeapIndex(const sortit&A, const int n, int *indx)
+  void HeapIndex(const sortit&A, int n, int*indx)
   {
     if(n<=0) return;
     if(n==1) { indx[0]=0; return; }
-    register int      l,j,ir,indxt,i;
-    register sortable q;
-    for(j=0; j!=n; ++j) indx[j] = j;
-    l = n>>1;
-    ir= n-1;
+    for(int j=0; j!=n; ++j) indx[j] = j;
+    int l = n>>1;
+    int ir= n-1;
+    sortable q;
     for(;;) {
+      int indxt;
       if(l>0)
 	q = A[indxt=indx[--l]];
       else {
@@ -197,8 +197,8 @@ namespace WDutils {
 	  return;
 	}
       }
-      i = l;
-      j = (l<<1) + 1;
+      int i = l;
+      int j = (l<<1) + 1;
       while(j<=ir) {
 	if(j < ir && A[indx[j]] < A[indx[j+1]] ) j++;
 	if(q < A[indx[j]] ) {
@@ -212,7 +212,8 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   /// the numbers 0 to n-1 are ordered in ascending order of A[i]
-  /// using the heap-sort algorithm; based on a routine given in NR
+  /// using the heap-sort algorithm; based on a routine given in NR.
+  /// \note a routine HeapSort() can be found in file heap.h.
   /// \param sortable type of values to be sorted
   /// \param A (input) array or values to be sorted
   /// \param n (input) number of elements
@@ -258,7 +259,7 @@ namespace WDutils {
   /// using the heap-sort algorithm; based on a routine given in NR
   /// \param sortable type of values to be sorted
   /// \param A (input) Array or values to be sorted
-  /// \param indx (output) index table so that A[indx[i]] is sorted
+  /// \param I (output) index table so that A[I[i]] is sorted
   template<typename sortable>
   void HeapIndex(Array<sortable,1>const&A, Array<int,1>&I) {
     if(A.size() != I.size()) error("size mismatch in HeapIndex()\n");
@@ -279,7 +280,6 @@ namespace WDutils {
   /// \param R (input) table of ranks
   /// \param Y (output) table of approximate values at given ranks
   /// \param m (input) size of tables R and Y, usually m << n
-  /// \param indx (output) index table so that A[indx[i]] is sorted
   /// \param Amin (optional input) minimum value
   /// \param Amax (optional input) maximum value
   template<typename sortable, typename sortit> inline
@@ -507,8 +507,8 @@ namespace WDutils {
 		     scalar_type x2,
 		     scalar_type xacc)
   {
-    const int            maxit=100;
-    register scalar_type xh,xl,dx,dxo,f,df,fh,fl,rts,swap,temp;
+    const int   maxit=100;
+    scalar_type xh,xl,dx,dxo,f,df,fh,fl,rts,temp;
     func(x1,fl,df);
     func(x2,fh,df);
     if(fl*fh >= 0.) WDutils_ErrorF("root must be bracketed","rtsafe()");
@@ -518,15 +518,15 @@ namespace WDutils {
     } else {
       xh  = x1;
       xl  = x2;
-      swap= fl;
+      temp= fl;
       fl  = fh;
-      fh  = swap;
+      fh  = temp;
     }
     rts = 0.5*(x1+x2);
     dxo = abs(x2-x1);
     dx  = dxo;
     func(rts,f,df);
-    for (register int j=0; j!=maxit; ++j) {
+    for(int j=0; j!=maxit; ++j) {
       if((((rts-xh)*df-f)*((rts-xl)*df-f)>= 0.) || (abs(2.*f)>abs(dxo*df))) {
 	dxo = dx;
 	dx  = 0.5*(xh-xl);
@@ -561,8 +561,8 @@ namespace WDutils {
 	       scalar_type& cx,                    // O:  cx                    
 	       scalar_type(*f)(const scalar_type)) // I: f(x)                   
   {
-    const    scalar_type GLIMIT=100.0, GOLD=1.618034, TINY=1.e-20;
-    register scalar_type ulim,u,r,q,fu,fa=f(ax),fb=f(bx),fc;
+    const scalar_type GLIMIT=100.0, GOLD=1.618034, TINY=1.e-20;
+    scalar_type ulim,u,r,q,fu,fa=f(ax),fb=f(bx),fc;
     if(fb<fa) { swap(ax,bx); swap(fa,fb); }
     cx = bx+GOLD*(bx-ax);
     fc = f(cx);
@@ -607,18 +607,17 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   template<typename scalar_type> scalar_type
   brent(                                           // R: f_min = f(x_min)       
-	const scalar_type ax,                      // I: ax   these bracket the 
-	const scalar_type bx,                      // I: bx   minimum, e.g. out-
-	const scalar_type cx,                      // I: cx   put of minbrak()  
-	scalar_type(*f)(const scalar_type),        // I: function f(x)          
-	const scalar_type tol,                     // I: accuracy wanted        
+	scalar_type ax,                            // I: ax   these bracket the 
+	scalar_type bx,                            // I: bx   minimum, e.g. out-
+	scalar_type cx,                            // I: cx   put of minbrak()  
+	scalar_type(*f)(scalar_type),              // I: function f(x)          
+	scalar_type tol,                           // I: accuracy wanted        
 	scalar_type& xmin)                         // O: x_min                  
   {
-    const    int         itmax=100;
-    const    scalar_type cgold=0.381966, zeps=1.e-10;
-    register int         iter;
-    register scalar_type a,b,d=0.,e=0.,etemp,fu,fv,fw,fx,p,q,r,tol1,tol2,
-                         u,v,w,x,xm;
+    const int   itmax=100;
+    const scalar_type cgold=0.381966, zeps=1.e-10;
+    int         iter;
+    scalar_type a,b,d=0.,e=0.,etemp,fu,fv,fw,fx,p,q,r,tol1,tol2,u,v,w,x,xm;
     a = (ax<cx) ? ax:cx;
     b = (ax>cx) ? ax:cx;
     x = w = v = bx;
@@ -712,14 +711,14 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   template<typename scalar_type, typename vector_type>
   inline
-  vector_type rk4(const vector_type y,
-		  const vector_type dy0,
-		  const scalar_type x,
-		  const scalar_type h,
-		  vector_type(*derivs)(scalar_type const&, vector_type const&))
+  vector_type rk4(vector_type const&y,
+		  vector_type const&dy0,
+		  scalar_type x,
+		  scalar_type h,
+		  vector_type(*derivs)(scalar_type, vector_type const&))
   {
-    const    scalar_type hh=0.5*h, h6=h/6., xh=x+hh;
-    register vector_type yt,dym,dyt;
+    const scalar_type hh=0.5*h, h6=h/6., xh=x+hh;
+    vector_type yt,dym,dyt;
     dyt = derivs(xh,y+hh*dy0);
     dym = derivs(xh,y+hh*dyt);
     yt  = y+h*dym;
@@ -730,10 +729,10 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   template<typename scalar_type, typename vector_type>
   inline
-  vector_type rk4(const vector_type y,
-		  const scalar_type x,
-		  const scalar_type h,
-		  vector_type(*derivs)(scalar_type const&, vector_type const&))
+  vector_type rk4(vector_type const&y,
+		  scalar_type x,
+		  scalar_type h,
+		  vector_type(*derivs)(scalar_type, vector_type const&))
   {
     return rk4(y,derivs(x,y),x,h,derivs);
   }
@@ -741,17 +740,16 @@ namespace WDutils {
   // Legendre polynomials and their derivatives                                 
   //----------------------------------------------------------------------------
   template<typename S, int N>
-  void LegendrePeven(S*p, const double x) 
+  void LegendrePeven(S*p, double x) 
   {
     // based on a routine from J.J. Binney                                      
     // evaluates even Legendre Polys up to l=2*(N-1) at x                       
-    register int    n,l,l2;
-    register double x2=x*x;
+    double x2=x*x;
     p[0] = 1.;
     p[1] = 1.5*x2-0.5;
-    for(n=2; n<N; n++) {
-      l    = 2*(n-1);
-      l2   = l+l;
+    for(int n=2; n<N; n++) {
+      int l  = 2*(n-1);
+      int l2 = l+l;
       p[n] = - p[n-2] * l*(l-1)/double((l2+1)*(l2-1))
 	     + p[n-1] * (x2 - (l2*l+l2-1)/double((l2-1)*(l2+3)) );
       p[n]*= (l2+1)*(l2+3) / double((l+1)*(l+2));
@@ -759,19 +757,18 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   template<typename S, int N>
-  void dLegendrePeven(S*p, S*d, const double x)
+  void dLegendrePeven(S*p, S*d, double x)
     // based on a routine from J.J. Binney                                      
     // evaluates even Legendre Polys and its derivs up to l=2*(N-1) at x        
   {
-    register int    n,l,l2;
-    register double x2=x*x;
+    double x2=x*x;
     p[0] = 1.;
     d[0] = 0.;
     p[1] = 1.5*x2-0.5;
     d[1] = 1.5;
-    for(n=2; n<N; n++) {
-      l    = 2*(n-1);
-      l2   = l+l;
+    for(int n=2; n<N; ++n) {
+      int l  = 2*(n-1);
+      int l2 = l+l;
       p[n] = - p[n-2] * l*(l-1)/double((l2+1)*(l2-1))
 	     + p[n-1] * (x2 - (l2*l+l2-1)/double((l2-1)*(l2+3)) );
       p[n]*= (l2+1)*(l2+3) / double((l+1)*(l+2));
@@ -781,23 +778,23 @@ namespace WDutils {
       d[n]*= (l2+1)*(l2+3) / double((l+1)*(l+2));
     }
     x2 = x+x;
-    for(n=0; n<N; n++)
+    for(int n=0; n<N; n++)
       d[n] *= x2;
   }
   //----------------------------------------------------------------------------
   template<typename S, int N> inline
-  void LegendrePeven(tupel<N,S>& p, const double x) {
+  void LegendrePeven(tupel<N,S>& p, double x) {
     return LegendrePeven<S,N>(p,x);
   }
   //----------------------------------------------------------------------------
   template<typename S, int N> inline
-  void dLegendrePeven(tupel<N,S>& p, tupel<N,S>& d, const double x) {
+  void dLegendrePeven(tupel<N,S>& p, tupel<N,S>& d, double x) {
     return dLegendrePeven<S,N>(p,d,x);
   }
   //----------------------------------------------------------------------------
   // Gauss-Legendre integration: points & weights                               
   //----------------------------------------------------------------------------
-  void GaussLegendre(double*, double*, const unsigned);
+  void GaussLegendre(double*, double*, unsigned);
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   /// \name eigensystem of symmetric matrix                                     
@@ -1143,7 +1140,7 @@ namespace {
     const scalar* RANK;                            // table: ranks              
     scalar      * VALUE;                           // table: values (to be made)
     //--------------------------------------------------------------------------
-    range* split(range* const&RNGE) {
+    range* split(range*RNGE) {
       // split the twig range RNGE into two sub-ranges                          
       register scalar H=scalar(0.5)*RNGE->S;
       register range* LOWR = RG.new_element();

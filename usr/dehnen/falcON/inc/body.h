@@ -3,11 +3,12 @@
 ///                                                                             
 /// \file   inc/body.h                                                          
 ///                                                                             
+/// \brief  contains declarations of class falcON::bodies,                      
+///	    class falcON::snapshot and some useful macros;                      
+///         currently problems with doxygen documentation.                      
+///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2000-2007                                                           
-///                                                                             
-/// \brief  contains declarations of class falcON::bodies,                      
-///	    class falcON::snapshot and some useful macros.                      
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -86,7 +87,6 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
 
   class bodies {
-
     //==========================================================================
     //                                                                          
     // static data                                                              
@@ -148,11 +148,11 @@ namespace falcON {
       typename field_traits<BIT>::type&datum(int i) const {
 #if defined(DEBUG) || defined(EBUG)
 	if(0 == DATA[BIT])
-	  falcON_THROW("trying to access non-allocated data in bodies: %c",
-		       BodyData::SQUANT[BIT]);
+	  falcON_THROW("trying to access non-allocated \"%s\" data in bodies\n",
+		       field_traits<BIT>::fullname());
 	if(i < 0 || i >= NBOD)
-	  falcON_THROW("index out of range in data access of bodies: %c",
-		       BodyData::SQUANT[BIT]);
+	  falcON_THROW("index out of range in \"%s\" data access of bodies\n",
+		       field_traits<BIT>::fullname());
 #endif
 	return data<BIT>()[i];
       }
@@ -161,11 +161,11 @@ namespace falcON {
       typename field_traits<BIT>::type const&const_datum(int i) const {
 #if defined(DEBUG) || defined(EBUG)
 	if(0 == DATA[BIT])
-	  falcON_THROW("trying to access non-allocated data in bodies: %c",
-		       BodyData::SQUANT[BIT]);
+	  falcON_THROW("trying to access non-allocated \"%s\" data in bodies\n",
+		       field_traits<BIT>::fullname());
 	if(i < 0 || i >= NBOD)
-	  falcON_THROW("index out of range in data access of bodies: %c",
-		       BodyData::SQUANT[BIT]);
+	  falcON_THROW("index out of range in \"%s\" data access of bodies\n",
+		       field_traits<BIT>::fullname());
 #endif
 	return const_data<BIT>()[i];
       }
@@ -300,7 +300,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// useful constants,                                                     
       /// determines interpretation of index::I                                 
-      enum {
+      enum
+      {
 	block_bits = 8,                 ///< number of bits used for blocks No. 
 	index_bits = 24,                ///< number of bits used for sub-index. 
 	max_blocks = 1 << block_bits,   ///< maximum number of blocks.          
@@ -411,12 +412,10 @@ namespace falcON {
     const bool       C_FORTRAN;                    // we are used for C/FORTRAN 
     //==========================================================================
   public:
-    block   *const&first_block()        const { return FIRST; }
+    block *const&first_block() const { return FIRST; }
     //==========================================================================
-    //                                                                          
     /// \name Functions providing information about the number of bodies        
     //@{                                                                        
-    //==========================================================================
     /// # bodies allocated for a given bodytype.
     unsigned const&N_alloc (bodytype t) const { return NALL[int(t)]; }
     /// total # bodies allocated.
@@ -437,13 +436,11 @@ namespace falcON {
     unsigned       N_free  ()           const { return N_alloc() -N_bodies(); }
     //@}
     //--------------------------------------------------------------------------
-    bool     const&srce_data_changed()  const { return SRCC; }
-    bool     const&sph_data_changed()   const { return SPHC; }
+    bool const&srce_data_changed() const { return SRCC; }
+    bool const&sph_data_changed() const { return SPHC; }
     //==========================================================================
-    //                                                                          
     /// \name Functions providing information about body data hold              
     //@{                                                                        
-    //==========================================================================
     /// sum of all body data hold.
     fieldset const&all_data  ()           const { return  BITS; }
     /// do we have none of these data?
@@ -495,10 +492,8 @@ namespace falcON {
 #undef ConstAcess
     //@}
     //==========================================================================
-    //                                                                          
     /// \name further methods using bodies::index                               
     //@{                                                                        
-    //==========================================================================
     /// return true if the named or indicated datum is hold
     bool has_field(index i, fieldbit f) const {
       return BLOCK[i.no()] && BLOCK[i.no()]->has_field(f);
@@ -530,10 +525,8 @@ namespace falcON {
     }
     //@}
     //==========================================================================
-    //                                                                          
     /// \name support for time steps (including access via bodies::index)       
     //@{                                                                        
-    //==========================================================================
     /// do we have time step data?
     bool have_steps() const { return TSTEPS!=0; }
     /// will tau(), tauq(), and tauh() below run successfully?
@@ -596,6 +589,14 @@ namespace falcON {
 	N = B? B->N_bodies() : 0;                  //   set end of indices      
       }
     public:
+#if defined(DEBUG) || defined(EBUG)
+# define CheckInvalid(NAME)					\
+	if(!is_valid())						\
+	  falcON_THROW("body::%s() called on invalid body",NAME);
+#else
+# define CheckInvalid(NAME)
+#endif
+
       //------------------------------------------------------------------------
       /// \name access to bodies, block, sub-index, and total index             
       //@{
@@ -605,26 +606,17 @@ namespace falcON {
       }
       /// return const pointer to my falcON::bodies
       const bodies*const&my_bodies() const {
-#if defined(DEBUG) || defined(EBUG)
-	if(!is_valid())
-	  falcON_THROW("body::my_bodies() called on invalid body");
-#endif
+	CheckInvalid("my_bodies");
 	return B->my_bodies();
       }
       /// return number of my bodies::block
       unsigned const&my_block_No () const {
-#if defined(DEBUG) || defined(EBUG)
-	if(!is_valid())
-	  falcON_THROW("body::my_block_No() called on invalid body");
-#endif
+	CheckInvalid("my_block");
 	return B->my_No();
       }
       /// return running body index (between 0, N-1)
       unsigned my_index() const {
-#if defined(DEBUG) || defined(EBUG)
-	if(!is_valid())
-	  falcON_THROW("body::my_index() called on invalid body");
-#endif
+	CheckInvalid("my_index");
 	return B->first() + K;
       }
       /// friend return const pointer to falcON::bodies of iterator
@@ -641,6 +633,7 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// conversion to bodies::index                                           
       operator index() const {
+	CheckInvalid("operator index");
 	return index(B->my_No(), K);
       }
       //------------------------------------------------------------------------
@@ -650,7 +643,7 @@ namespace falcON {
       }
       //------------------------------------------------------------------------
       /// conversion to bool: are we referring to a valid body?
-      operator bool () const {
+      operator bool() const {
 	return is_valid();
       }
       //------------------------------------------------------------------------
@@ -666,35 +659,40 @@ namespace falcON {
       }
       /// are we before another iterator? (assuming the same bodies)
       bool operator<  (iterator const&i) const {
+	CheckInvalid("operator<");
 	return B==i.B? K< i.K : B->first()<i.B->first();
       }
       /// are we before or equal to another iterator? (assuming the same bodies)
       bool operator<= (iterator const&i) const {
+	CheckInvalid("operator<=");
 	return B==i.B? K<=i.K : B->first()<i.B->first();
       }
       /// are we after another iterator? (assuming the same bodies)
       bool operator>  (iterator const&i) const {
+	CheckInvalid("operator>");
 	return B==i.B? K> i.K : B->first()>i.B->first();
       }
       /// are we after or equal to another iterator? (assuming the same bodies)
       bool operator>= (iterator const&i) const {
+	CheckInvalid("operator>=");
 	return B==i.B? K>=i.K : B->first()>i.B->first();
       }
       //@}
       //------------------------------------------------------------------------
+#define HasDatum(Bit,Name) friend bool has_##Name(iterator const&);
       /// \name information about data hold                                     
       //@{
       /// has our body the datum indicated?
       friend bool has_field(iterator const&, fieldbit);
-#define HasDatum(Bit,Name) friend bool has_##Name(iterator const&);
-      DEF_NAMED(HasDatum)
-#undef HasDatum
+      DEF_NAMED(HasDatum);
       //@}
+#undef HasDatum
       //------------------------------------------------------------------------
       /// \name forward iteration                                               
       //@{
       /// pre-fix: get next body (note: there is no post-fix operator++)
       iterator& operator++() {
+	CheckInvalid("operator++");
 	++K;                                       // increment subindex        
 	if(K == N) next_block();                   // end of block: next block  
 	return *this;
@@ -741,14 +739,15 @@ namespace falcON {
 #if defined(DEBUG) || defined(EBUG)
 	if(!is_valid())
 	  falcON_THROW("body::datum<%c>() called on invalid body",
-		       BodyData::SQUANT[BIT]);
+		       field_traits<BIT>::word());
 #endif
 	return B-> template datum<BIT>(K);
       }
       //------------------------------------------------------------------------
-#define NonConstAccess(Bit,Name)				\
-      field_traits<Bit>::type&Name() {				\
-        return B-> datum<Bit>(K);				\
+#define NonConstAccess(Bit,Name)			\
+      field_traits<Bit>::type&Name() {			\
+	CheckInvalid(field_traits<BIT>::funcname());	\
+        return B-> datum<Bit>(K);			\
       }
       DEF_NAMED(NonConstAccess);
 #undef NonConstAccess
@@ -762,7 +761,7 @@ namespace falcON {
 #if defined(DEBUG) || defined(EBUG)
 	if(! is_valid() )
 	  falcON_THROW("body::const_dat<%c>() called on invalid body",
-		       BodyData::SQUANT[BIT]);
+		       field_traits<BIT>::word());
 #endif
 	return B-> template const_datum<BIT>(K);
       }
@@ -915,15 +914,15 @@ namespace falcON {
       iterator& read_posvel (data_in &, fieldset, unsigned =0) falcON_THROWING;
 #endif
       //------------------------------------------------------------------------
-    };
+    };// class iterator
+#undef CheckInvalid
     //==========================================================================
-    //                                                                          
     /// \name generate iterators                                                
     /// use these methods to obtain begin and end iterators when looping over   
     /// all or a subset of all bodies                                           
     //@{                                                                        
-    //==========================================================================
     /// begin of all bodies
+    /// \return iterator to first body
     iterator begin_bodies() const { return iterator(FIRST); }
     /// begin of all bodies
     iterator begin_all_bodies() const { return iterator(FIRST); }
@@ -967,10 +966,8 @@ namespace falcON {
     static iterator bodyNil() { return iterator(0); }
     //@}
     //==========================================================================
-    //                                                                          
     /// \name construction, destruction, and management of bodies and body data 
     //@{                                                                        
-    //==========================================================================
     /// Constructor 1, backward compatible version
     ///
     /// \param Nb (input) total number of bodies
@@ -1065,8 +1062,9 @@ namespace falcON {
     /// Reset some body data to zero
     ///
     /// Body data of fields in b, which are allocated, are set to zero
-    /// \param b  (input) body data fields to be reset
-    void reset_data(fieldset f) const falcON_THROWING {
+    /// \param f  (input) body data fields to be reset
+    void reset_data(fieldset f) const falcON_THROWING
+    {
       for(const block*p=FIRST; p; p=p->next()) p->reset_data(f);
     }
     //--------------------------------------------------------------------------
@@ -1094,7 +1092,6 @@ namespace falcON {
     /// \param B  (input) bodies to be copied
     /// \param Bd (input, optional) body data to be copied
     /// \param f  (input, optional) flag for bodies to be copied
-    /// \note \b not \b yet \b implemented!
     void copy(bodies const&B, fieldset Bd=fieldset::all, int f=0)
       falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -1109,7 +1106,6 @@ namespace falcON {
     /// \param B  (input) bodies to be added
     /// \param Bd (input, optional) body data to be copied
     /// \param f  (input, optional) flag for bodies to be copied
-    /// \note \b not \b yet \b implemented!
     void add(bodies const&B,  fieldset Bd=fieldset::all, int f=0)
       falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -1167,11 +1163,7 @@ namespace falcON {
     /// make a new body of type \e t; if none available, allocate a block of
     /// \e N new bodies first.
     ///
-    /// This simple routine combines N_free(), create(), and new_body() via
-    /// \code
-    ///   if(0 == N_free(t)) create(min(1u,N),t);
-    ///   return new_body(t);
-    /// \endcode
+    /// This simple routine combines N_free(), create(), and new_body()
     /// \return a valid bodies::iterator to a body of type \e t
     /// \param t (input) bodytype of body requested
     /// \param N (input) if no body available, allocate this many
@@ -1223,9 +1215,7 @@ namespace falcON {
     /// data to avoid that overhead. Even if the allocation equals the usage, 
     /// we may re-allocate the data to group the bodies in the lowest possible
     /// number of blocks.
-    /// 
     /// \note \b NOT \b YET \b IMPLEMENTED 
-    ///
     void shrink() falcON_THROWING; 
     //@}
     //==========================================================================
@@ -1305,7 +1295,7 @@ namespace falcON {
     /// \return simulation time of snapshot
     /// \param  fname (input) basename of data file(s).
     /// \param  read  (input) data to read (maximum is mxvkURH)
-    /// \param  gto   (output) data which actually have been read
+    /// \param  got   (output) data which actually have been read
     /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
     double read_gadget(const char*fname, fieldset read, fieldset&got,
 		       unsigned rec=4) falcON_THROWING;

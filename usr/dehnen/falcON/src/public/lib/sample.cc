@@ -35,7 +35,7 @@ using namespace falcON;
 namespace {
   const int Ne1=1000, Ne=Ne1+1;
   double __p;
-  inline double dI(double const&eta, double const&I)
+  inline double dI(double eta, double const&I)
   {
     return pow(sin(eta),__p);
   }

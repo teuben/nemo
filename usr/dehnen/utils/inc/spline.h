@@ -145,7 +145,7 @@ namespace WDutils {
     /// \param y2h (input) y''(xh)
     /// \param yi  (output) y(xi)
     /// \param dyi (optional output) y'(xi)
-    /// \param d2y1 (optional output) y''(xi)
+    /// \param d2yi (optional output) y''(xi)
     static void evaluate(scalar_type const&xi,
 			 scalar_type const&xl,
 			 scalar_type const&xh,
@@ -172,13 +172,13 @@ namespace WDutils {
     }
     //--------------------------------------------------------------------------
     /// evaluate spline at x=xi                                                 
+    /// \return y(xi)
     /// \param xi (input) x-value where spline is desired
     /// \param x  (input) array with x[0] <= xi <= x[1]
     /// \param y  (input) array with y(x)
     /// \param y2 (input) array with y''(x)
-    /// \param yi  (output) y(xi)
     /// \param dyi (optional output) y'(xi)
-    /// \param d2y1 (optional output) y''(xi)
+    /// \param d2yi (optional output) y''(xi)
     static table_type evaluate(scalar_type const &xi,
 			       const scalar_type *x,
 			       const table_type  *y,
