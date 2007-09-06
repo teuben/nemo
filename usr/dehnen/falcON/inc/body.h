@@ -746,7 +746,7 @@ namespace falcON {
       //------------------------------------------------------------------------
 #define NonConstAccess(Bit,Name)			\
       field_traits<Bit>::type&Name() {			\
-	CheckInvalid(field_traits<BIT>::funcname());	\
+	CheckInvalid(field_traits<Bit>::funcname());	\
         return B-> datum<Bit>(K);			\
       }
       DEF_NAMED(NonConstAccess);

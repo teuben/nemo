@@ -101,6 +101,9 @@ namespace Manipulate {
     fieldset provide() const { return fieldset::f; }
     fieldset change () const { return fieldset::f; }
     //--------------------------------------------------------------------------
+    /// construction from boolean bodyfunc expression
+    /// \param filter boolean bodyfunc expression
+    /// \param params parameters (if any) required by filter
     set_subset(const char*params, const char*filter) falcON_THROWING 
     : BF(0) {
       try {
@@ -121,7 +124,11 @@ namespace Manipulate {
       }
     }
     //--------------------------------------------------------------------------
-    bool manipulate(const snapshot*S) const {
+    /// manipulate snapshot: flag filtered bodies to be "in_subset()"
+    /// \param S snapshot
+    /// \return always false (to continue simulation)
+    bool manipulate(const snapshot*S) const
+    {
       if(BF && *BF) {
 	// make sure flags are supported
 	if(!S->have(fieldbit::f))

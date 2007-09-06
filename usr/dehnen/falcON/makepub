@@ -193,6 +193,8 @@ $(MAN)projprof.so:		$(SMAN)projprof.cc $(MANT) $(defman_h) $(io_h) $(profile_h) 
 				$(MAKE_MANIP)
 $(MAN)randomize_azimuth.so:	$(SMAN)randomize_azimuth.cc $(MANT) $(defman_h) $(Pi_h) $(random_h) $(makefiles)
 				$(MAKE_MANIP)
+$(MAN)report_bodies.so:		$(SMAN)report_bodies.cc $(MANT) $(defman_h) $(makefiles)
+				$(MAKE_MANIP)
 $(MAN)set_centre.so:		$(SMAN)set_centre.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)set_filter.so:		$(SMAN)set_filter.cc $(MANT) $(defman_h) $(bodyfunc_h) $(makefiles)
@@ -214,6 +216,7 @@ manip_pub		:=	$(MAN)add_plummer.so \
 				$(MAN)lagrange.so \
 				$(MAN)projprof.so \
 				$(MAN)randomize_azimuth.so \
+				$(MAN)report_bodies.so \
 				$(MAN)set_centre.so \
 				$(MAN)set_filter.so \
 				$(MAN)set_subset.so \

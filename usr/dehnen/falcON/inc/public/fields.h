@@ -365,7 +365,7 @@ namespace falcON {
       sizeof(vect),           ///< velocity_predicted
       sizeof(real),           ///< softening length
       sizeof(flags),          ///< flags
-      sizeof(int),            ///< key
+      sizeof(unsigned),       ///< key
       sizeof(double),         ///< time step
       //            sink properties: 11
       sizeof(real),           ///< potential
@@ -787,7 +787,6 @@ namespace falcON {
       char W[BodyData::NQUANT+1];
     public:
       explicit wlist(const fieldset*d) { d->make_word(W); }
-      explicit wlist(fieldset const&d) { d. make_word(W); }
       operator const char* () const { return W; }
       friend const char*word(wlist const&);
     };
@@ -1004,7 +1003,7 @@ namespace falcON {
   DefFieldTraits( 3, vect);                        // predicted velocity        
   DefFieldTraits( 4, real);                        // softening length          
   DefFieldTraits( 5, flags)                        // body flags                
-  DefFieldTraits( 6, int );                        // body key                  
+  DefFieldTraits( 6, unsigned);                    // body key                  
   DefFieldTraits( 7, double);                      // time step                 
   DefFieldTraits( 8, real);                        // internal potential        
   DefFieldTraits( 9, real);                        // external potential        

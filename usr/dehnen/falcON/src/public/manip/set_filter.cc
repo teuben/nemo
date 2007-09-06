@@ -101,7 +101,8 @@ namespace falcON { namespace Manipulate {
       }
     }
     //--------------------------------------------------------------------------
-    bool manipulate(const snapshot*S) const {
+    bool manipulate(const snapshot*S) const
+    {
       if(BF) {
 	// if body keys are needed, make sure they are supported
 	if(BF->need(fieldbit::k) && !S->have(fieldbit::k))
