@@ -318,6 +318,8 @@ $(BIN)snapfilter:	$(SEXE)snapfilter.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefil
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)snapprop:		$(SEXE)snapprop.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)snapstac:		$(SEXE)snapstac.cc $(BINT) $(body_h) $(main_h) $(io_h) $(makefiles)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)symmetrize:	$(SEXE)symmetrize.cc $(BINT) $(main_h) $(body_h) $(io_h) $(inline_io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 endif
@@ -354,12 +356,13 @@ scale_eps	:	$(falcON) $(BIN)scale_eps
 set_time	:	$(falcON) $(BIN)set_time
 snapfilter	:	$(falcON) $(BIN)snapfilter
 snapprop	:	$(falcON) $(BIN)snapprop
+snapstac	:	$(falcON) $(BIN)snapstac
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
 exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
 			gyrfalcON lagrange_radii manipulate mkbodiesfunc \
 			mkbodyfunc mkdehnen mkking mkplum s2a scale_eps \
-			snapfilter snapprop symmetrize s2g s2s
+			snapfilter snapprop snapstac symmetrize s2g s2s
 else
 
 exe_pub		:=	TestGrav
