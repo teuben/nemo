@@ -1,26 +1,41 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// snapstac.cc                                                                 |
-//                                                                             |
-// Copyright (C) 2005  Walter Dehnen                                           |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// This is a non-public part of the code.                                      |
-// It is property of its author and not to be made public without his written  |
-// consent.                                                                    |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-// history:                                                                    |
-//                                                                             |
-// v 0.0    21/09/2005 WD created                                              |
-//-----------------------------------------------------------------------------+
-#define falcON_VERSION   "0.0"
-#define falcON_VERSION_D "22-sep-2005 Walter Dehnen                          "
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file   src/mains/snapfilter.cc                                             
+///                                                                             
+/// \author Walter Dehnen                                                       
+/// \date   2005,2007                                                           
+///                                                                             
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2005,2007 Walter Dehnen                                        
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// history:                                                                     
+//                                                                              
+// v 0.0    21/09/2005 WD created                                               
+// v 0.1    10/09/2007 WD fixed bug with history buffer                         
+////////////////////////////////////////////////////////////////////////////////
+#define falcON_VERSION   "0.1"
+#define falcON_VERSION_D "10-sep-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
-#  error You need NEMO to compile "snapfilter"
+#  error You need NEMO to compile "snapstac"
 #endif
 #define falcON_RepAction 0                         // no action reporting       
 //-----------------------------------------------------------------------------+
@@ -45,7 +60,6 @@ void falcON::main() falcON_THROWING
 {
   fieldset       got(getioparam_a("write"));
   const fieldset write(getioparam_z("write"));
-  nemo_out       out(getparam("out"));
   nemo_in        in1(getparam("in1")), in2(getparam("in2"));
   if(!in1.has_snapshot())
     falcON_THROW("cannot load snapshot from file %s\n",getparam("in1"));
@@ -59,9 +73,9 @@ void falcON::main() falcON_THROWING
 		      fieldset::o,
 		      snap1.Nsph()+snap2.Nsph());
   // read snapshots
-  const body     b1(shot.begin_all_bodies());
+  const body b1(shot.begin_all_bodies());
   got &= shot.read_nemo(snap1, got, b1, 0, 0);
-  const body     b2(b1, snap1.Nbod());
+  const body b2(b1, snap1.Nbod());
   got &= shot.read_nemo(snap2, got, b2, 0, 0);
   if(write && !got.contain(write))
     warning("couldn't read %s from both %s and %s\n",
@@ -92,8 +106,8 @@ void falcON::main() falcON_THROWING
     }
   }
   // output
-  if(out)
-    shot.write_nemo(out,got);
+  nemo_out out(getparam("out"));
+  if(out) shot.write_nemo(out,got);
 }
 //------------------------------------------------------------------------------
 
