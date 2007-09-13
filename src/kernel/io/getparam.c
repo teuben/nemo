@@ -127,6 +127,7 @@
  * 28-dec-04       l  help/report CVS ID properly (help=I)
  * 30-jun-05       o  parse integers with 0x as hex numbers
  * 14-dec-06    3.5   changed some printf()'s to fprintf(stderr,....)'s
+ * 13-sep-07 WD    a  print name of name whose key is not found
 
   TODO:
       - what if there is no VERSION=
@@ -2000,7 +2001,7 @@ local int findkey(string name)
                 name, keys[last].key);
         return last;
     } else if (count > 1) {
-        dprintf(0,"### Minimum match failed, found: ");
+        dprintf(0,"Minimum match failed for \"%s\", found: ",name);
         for (j=0; j<nkeys; j++)
             if (strncmp(keys[j].key,name,(unsigned)l)==0)
                 dprintf(0,"%s ",keys[j].key);
@@ -2094,7 +2095,7 @@ local keyword *findakey(string name)
 	    name, keys[last].key);
     return &keys[last];
   } else if (count > 1) {
-    dprintf(0,"### Minimum match failed, found: ");
+    dprintf(0,"Minimum match failed for \"%s\", found: ",name);
     for (j=0; j<nkeys; j++)
       if (strncmp(keys[j].key,name,(unsigned)l)==0)
 	dprintf(0,"%s ",keys[j].key);
