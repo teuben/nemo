@@ -171,7 +171,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.5 14-dec-06 PJT"
+#define GETPARAM_VERSION_ID  "3.5a 13-sep-07 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
