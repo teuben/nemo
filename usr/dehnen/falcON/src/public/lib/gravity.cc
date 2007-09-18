@@ -737,7 +737,7 @@ void GravEstimator::update_leafs()
 //------------------------------------------------------------------------------
 GravEstimator::~GravEstimator() {
   if(CELL_SRCE) falcON_DEL_A(CELL_SRCE);
-  if(LEAF_SINK) falcON_DEL_A(LEAF_SINK);
+  if(LEAF_ACPN) falcON_DEL_A(LEAF_ACPN);
 }
 //------------------------------------------------------------------------------
 unsigned GravEstimator::pass_up(const GravMAC*MAC,
@@ -850,31 +850,31 @@ bool GravEstimator::prepare(const GravMAC*MAC,
 			    bool          alloc_cell_coeffs)
 {
   SET_I
-  if(al) NLA_needed = TREE->N_leafs();             // all leafs are sink        
+  if(al) NLA_needed = TREE->N_leafs();             // all leafs are active      
   if(NLA_needed==0) {
     falcON_WarningF("no body active","GravEstimator::prepare()");
     return 1;
   }
-  //  - allocate memory for leaf sink properties for active leafs               
+  //  - allocate memory for leaf acc/pot/num properties for active leafs        
   if(NLA!=NLA_needed) {                            // IF #active leafs changed  
-    if(LEAF_SINK) falcON_DEL_A(LEAF_SINK);         //   delete old allocation   
+    if(LEAF_ACPN) falcON_DEL_A(LEAF_ACPN);         //   delete old allocation   
     NLA = NLA_needed;                              //   # new allocation        
-    LEAF_SINK=falcON_NEW(Leaf::sink_data,NLA);     //   allocate memory         
+    LEAF_ACPN=falcON_NEW(Leaf::acpn_data,NLA);     //   allocate memory         
   }                                                // ENDIF                     
   const bool all = al || NLA==TREE->N_leafs();     // are all active?           
-  Leaf::sink_data*si=LEAF_SINK;                    // pter to leafs' sink data  
+  Leaf::acpn_data*si=LEAF_ACPN;                    // pter to leafs' acpn data  
   if(all)                                          // IF all leafs              
     LoopLeafs(Leaf,TREE,Li) {                      //   LOOP leafs              
-      si->reset();                                 //     reset sink data       
-      Li->set_sink(si++);                          //     set leaf: sink        
+      si->reset();                                 //     reset acpn data       
+      Li->set_acpn(si++);                          //     set leaf: acpn        
     }                                              //   END LOOP                
   else                                             // ELSE (only active)        
     LoopLeafs(Leaf,TREE,Li)                        //   LOOP leafs              
       if(is_active(Li)) {                          //     IF(leaf is active)    
-	si->reset();                               //       reset sink data     
-	Li->set_sink(si++);                        //       set leaf: sink      
+	si->reset();                               //       reset acpn data     
+	Li->set_acpn(si++);                        //       set leaf: acpn      
       } else                                       //     ELSE                  
-	  Li->set_sink(0);                         //       leaf has no sink    
+	  Li->set_acpn(0);                         //       leaf has no acpn    
   // update cell source properties                                              
   if(!CELLS_UPTODATE ||                            // IF sources out-of-date    
      NCT != TREE->N_cells()) {                     //    OR changed in number   

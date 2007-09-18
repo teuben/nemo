@@ -90,6 +90,10 @@ namespace {
       : GalaxyFile     ( file ),
 	GalaxyPotential( from )
     {
+      if(nemo_debug(2) )
+	std::cerr<<
+	  " falcON debug info:\n"
+	  " external potential \"GalPot\" requires data file in GalPot format.\n";
       double omega = (npar>0)? pars[0] : 0.;
       if (npar>1) warning("Skipped potential parameters for GalPot beyond 1");
       from.close();
