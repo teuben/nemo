@@ -34,7 +34,7 @@
 #  include <public/tensor.h>
 #endif
 #if defined(falcON_SSE_CODE) && !defined(falcON_included_simd_h)
-#  include <proper/simd.h>
+#  include <public/simd.h>
 #endif
 
 namespace falcON {
