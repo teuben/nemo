@@ -270,14 +270,14 @@ acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
 				$(ACC)DehnenMcLaughlin.so \
 				$(ACC)GalPot.so \
-				$(ACC)DiscPot.so \
-				$(ACC)Halo.so \
+#				$(ACC)DiscPot.so \
+#				$(ACC)Halo.so \
 				$(ACC)MiyamotoNagai.so \
 				$(ACC)Monopole.so \
 				$(ACC)NFW.so \
 				$(ACC)Plummer.so \
-				$(ACC)Point.so \
-				$(ACC)PotExp.so
+				$(ACC)Point.so# \
+#				$(ACC)PotExp.so
 endif
 
 # -----
