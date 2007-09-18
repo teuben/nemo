@@ -136,7 +136,7 @@ namespace falcON {
       // patch to fix a bug with gcc version < 3.4
     public:
 #endif
-      struct sink_data : public symset3D<1,real> {
+      struct acpn_data : public symset3D<1,real> {
 	void     reset() {        symset3D<1,real>::operator=(zero); }
 	real    &pot  () { return symset3D<1,real>::tensor<0>(); }
 	vect    &acc  () { return symset3D<1,real>::tensor<1>(); }
@@ -147,19 +147,19 @@ namespace falcON {
       // friends                                                                
       //------------------------------------------------------------------------
       friend class GravEstimator;
-      friend class falcON::traits<sink_data>;
+      friend class falcON::traits<acpn_data>;
       //------------------------------------------------------------------------
       // private const data access                                              
       //------------------------------------------------------------------------
-      sink_data*       sink () const { return static_cast<sink_data*>(PROP); }
+      acpn_data*       acpn () const { return static_cast<acpn_data*>(PROP); }
       real            &mass ()       { return SCAL; }
       real       const&mass () const { return SCAL; }
-      vect       const&acc  () const { return sink()->acc(); }
+      vect       const&acc  () const { return acpn()->acc(); }
       vect       const&cofm () const { return pos(); }
       real       const&sizeq() const { return acc()[0]; }
-      real       const&pot  () const { return sink()->pot(); }
+      real       const&pot  () const { return acpn()->pot(); }
       real       const&rho  () const { return pot(); }
-      unsigned   const&num  () const { return sink()->num(); }
+      unsigned   const&num  () const { return acpn()->num(); }
 #ifdef falcON_INDI
       real       const&eph  () const { return AUXR; }
 #endif
@@ -167,17 +167,17 @@ namespace falcON {
       // non-const data access via members                                      
       //------------------------------------------------------------------------
     public:
-      vect    &acc  () { return sink()->acc(); }
+      vect    &acc  () { return acpn()->acc(); }
       vect    &cofm () { return pos(); }
       real    &sizeq() { return acc()[0]; }
-      real    &pot  () { return sink()->pot(); }
+      real    &pot  () { return acpn()->pot(); }
       real    &rho  () { return pot(); }
-      unsigned&num  () { return sink()->num(); }
+      unsigned&num  () { return acpn()->num(); }
 #ifdef falcON_INDI
       real    &eph  () { return AUXR; }
 #endif
       void     inc  () { ++num(); }
-      symset3D<1,real>& Coeffs() { return *(sink()); }
+      symset3D<1,real>& Coeffs() { return *(acpn()); }
       //------------------------------------------------------------------------
       // const data access via friends                                          
       //------------------------------------------------------------------------
@@ -277,8 +277,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       // simple manipulations                                                   
       //------------------------------------------------------------------------
-      void set_sink  (sink_data*sink) { PROP = static_cast<void*>(sink); }
-      void reset_sink()               { sink()->reset(); }
+      void set_acpn  (acpn_data*acpn) { PROP = static_cast<void*>(acpn); }
+      void reset_acpn()               { acpn()->reset(); }
       //------------------------------------------------------------------------
       void normalize_grav () {                     // acc,pot     /= mass       
 	if(mass()>zero) {
@@ -314,7 +314,7 @@ namespace falcON {
     // OctTree::Cell::POS  |  centre of mass                                    
     // OctTree::Cell::RAD  |  rmax, rcrit, size                                 
     // OctTree::Cell::AUX1 |  pointer to srce_data                              
-    // OctTree::Cell::AUX2 |  pointer to Coeffs (sink data)                     
+    // OctTree::Cell::AUX2 |  pointer to Coeffs                                 
     // srce_data::MASS     |  mass                                              
     // srce_data::POLS     |  specific multipole moments                        
     //                                                                          
@@ -330,7 +330,7 @@ namespace falcON {
       typedef grav::Mset Mset;
       typedef grav::Cset Cset;
       //------------------------------------------------------------------------
-      static const int N_SINK = Cset::NDAT;
+      static const int N_ACPN = Cset::NDAT;
       //------------------------------------------------------------------------
     private:
 #if defined(__GNUC__) && (__GNUC__ < 3 || __GNUC__ == 3 && __GNUC_MINOR__ < 4)
@@ -371,8 +371,8 @@ namespace falcON {
 	AUX1.PTER = static_cast<void*>(srce);
       }
       //------------------------------------------------------------------------
-      void setCoeffs(Cset*sink) {
-	AUX2.PTER = static_cast<void*>(sink); 
+      void setCoeffs(Cset*coef) {
+	AUX2.PTER = static_cast<void*>(coef); 
       }
       //------------------------------------------------------------------------
       void*returnCoeffs()       { return AUX2.PTER; }
@@ -451,7 +451,7 @@ namespace falcON {
     real                  GRAV;                    // Newton's G (can be 0)     
     unsigned              Ncoeffs,Nchunks,Ncsize;  // # coeffs, chunks, bytes/c 
     Cell::srce_data      *CELL_SRCE;               // memory for cell srce      
-    Leaf::sink_data      *LEAF_SINK;               // memory for leafs          
+    Leaf::acpn_data      *LEAF_ACPN;               // memory for leafs          
     unsigned              NCT, NCA, NLA;           // # allocation of these     
     unsigned              NLA_needed;              // # active leafs            
     //--------------------------------------------------------------------------
@@ -479,7 +479,7 @@ namespace falcON {
 		     bool          );              // I: reused old tree?       
     //--------------------------------------------------------------------------
     // prepare for interactions                                                 
-    //  - allocate memory for leaf sink properties for active leafs             
+    //  - allocate memory for leaf acc/pot/num properties for active leafs      
     //  - allocate memory for cell source properties & reset their coeff pter   
     //  - pass source properties up the tree, count active cells                
     bool prepare(                                  // R: ALL || all are active  
@@ -527,7 +527,7 @@ namespace falcON {
       Nchunks        ( 0u ),
       Ncsize         ( 0u ),
       CELL_SRCE      ( 0 ),
-      LEAF_SINK      ( 0 ),
+      LEAF_ACPN      ( 0 ),
       NCT            ( 0u ),
       NCA            ( 0u ),
       NLA            ( 0u ),
@@ -905,8 +905,8 @@ falcON_TRAITS(falcON::GravEstimator::Cell,"GravEstimator::Cell");
 falcON_TRAITS(falcON::GravEstimator::Leaf,"GravEstimator::Leaf");
 falcON_TRAITS(falcON::GravEstimator::Cell::srce_data,
 	      "GravEstimator::Cell::srce_data");
-falcON_TRAITS(falcON::GravEstimator::Leaf::sink_data,
-	      "GravEstimator::Leaf::sink_data");
+falcON_TRAITS(falcON::GravEstimator::Leaf::acpn_data,
+	      "GravEstimator::Leaf::acpn_data");
 ////////////////////////////////////////////////////////////////////////////////
 #undef  ENHANCED_IACT_STATS
 #endif // falcON_included_gravity_h

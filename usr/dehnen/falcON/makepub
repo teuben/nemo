@@ -43,6 +43,8 @@ random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
 
 utils_h			:= $(traits_h) $(Pi_h) $(inline.h) $(inline_io.h) $(tupel_h) $(exception_h) $(memory_h)
 basic_h			:= $(IPUB)basic.h $(utils_h)
+simd_h			:= $(IPUB)simd.h $(basic_h)
+PotExp_h		:= $(IPUB)PotExp.h $(tupel_h) $(basic_h)
 tensor_h		:= $(IPUB)tensor.h $(utils_h) $(IPUB)tensor.cc
 tensor_set_h		:= $(IPUB)tensor_set.h $(tensor_h) $(simd_h) $(IPUB)tensor_set.cc
 types_h			:= $(IPUB)types.h $(basic_h) $(tensor_h)
@@ -53,7 +55,6 @@ ifdef DMPI
 peano_h			:= $(IPAR)peano.h $(types_h)
 endif
 ifdef DPROPER
-simd_h			:= $(IPRO)simd.h $(basic_h)
 gravity_ind_cc		:= $(IPRO)gravity_ind.cc
 gravity_pro		:= $(gravity_ind_cc)
 kernel_SSE_h		:= $(IPRO)kernel_SSE.h
@@ -81,6 +82,8 @@ king_h			:= $(IPUB)king.h $(basic_h)
 bodyfunc_h		:= $(IPUB)bodyfunc.h $(body_h) 
 bodyduncdefs_h		:= $(IPUB)bodyfuncdefs.h $(body_h) 
 neighbours_h		:= $(IPUB)neighbours.h $(tree_h)
+halo_h			:= $(IPUB)halo.h $(externacc_h)
+WD99disc_h		:= $(IPUB)WD99disc.h $(random_h) $(externacc_h)
 
 timer_h			:= $(IACC)timer.h
 center_h		:= $(IACC)center.h
@@ -110,6 +113,9 @@ gamma_cc		:= $(SLIB)gamma.cc $(gamma_h) $(numerics_h)
 king_cc			:= $(SLIB)king.cc $(king_h) $(numerics_h)
 bodyfunc_cc		:= $(SLIB)bodyfunc.cc $(bodyfunc_h) $(bodyfuncdefs_h) 
 neighbours_cc		:= $(SLIB)neighbours.cc $(neighbours_h)
+halo_cc			:= $(SLIB)halo.cc $(halo_h) $(basic_h) $(spline_h) $(WDMath_h)
+WD99disc_cc		:= $(SLIB)WD99disc.cc $(WD99disc_h) $(numerics_h) $(WDMath_h) $(spline_h)
+PotExp_cc		:= $(SLIB)PotExp.cc $(PotExp_h) $(simd_h)
 
 # ---------------
 # library modules
@@ -127,6 +133,10 @@ $(LIB)partner.o:	$(partner_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)io.o:		$(io_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)halo.o:		$(halo_cc) $(makefiles)
+			$(MAKE_OBJ)
+$(LIB)WD99disc.o:	$(WD99disc_cc) $(makefiles)
+			$(MAKE_OBJ) $(DNEMO)
 ifdef NEMO
 $(LIB)manip.o:		$(manip_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
@@ -156,19 +166,22 @@ $(LIB)gamma.o:		$(gamma_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)king.o:		$(king_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
+$(LIB)PotExp.o:		$(PotExp_cc) $(LIBT) $(makefiles)
+			$(MAKE_OBJ) $(NBDYFLAGS)
 
 ifdef NEMO
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
 			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
 			$(LIB)partner.o $(LIB)nbody.o $(LIB)forcesC.o \
 			$(LIB)tools.o $(LIB)sample.o $(LIB)manip.o \
-			$(LIB)profile.o $(LIB)bodyfunc.o $(LIB)neighbours.o
+			$(LIB)profile.o $(LIB)bodyfunc.o $(LIB)neighbours.o \
+			$(LIB)PotExp.o
 
 else
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
 			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
 			$(LIB)partner.o $(LIB)nbody.o $(LIB)forcesC.o \
-			$(LIB)sample.o $(LIB)neighbours.o
+			$(LIB)sample.o $(LIB)neighbours.o $(LIB)PotExp.o
 endif
 
 ifdef NEMO
@@ -234,8 +247,12 @@ $(ACC)Dehnen.so:		$(SACC)Dehnen.cc $(ACCT) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)DehnenMcLaughlin.so:	$(SACC)DehnenMcLaughlin.cc $(ACCT) $(makefiles)
 				$(MAKE_ACC)
+$(ACC)DiscPot.so:		$(SACC)DiscPot.cc $(ACCT) $(GalPot_h) $(makefiles)
+				$(MAKE_ACC)
 $(ACC)GalPot.so:		$(SACC)GalPot.cc $(ACCT) $(GalPot_h) $(makefiles)
 				$(MAKE_ACC)
+$(ACC)Halo.so:			$(SACC)Halo.cc $(ACCT) $(halo_cc) $(makefiles)
+				$(MAKE_ACC) -I$(SRC)
 $(ACC)MiyamotoNagai.so:		$(SACC)MiyamotoNagai.cc $(ACCT) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)Monopole.so:		$(SACC)Monopole.cc $(ACCT) $(timer_h) $(makefiles)
@@ -246,16 +263,21 @@ $(ACC)Plummer.so:		$(SACC)Plummer.cc $(ACCT) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)Point.so:			$(SACC)Point.cc $(ACCT) $(makefiles)
 				$(MAKE_ACC)
+$(ACC)PotExp.so:                $(SACC)PotExp.cc $(ACCT) $(PotExp_cc) $(makefiles)
+				$(MAKE_ACC) -I$(SRC)
 
 acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
 				$(ACC)DehnenMcLaughlin.so \
 				$(ACC)GalPot.so \
+				$(ACC)DiscPot.so \
+				$(ACC)Halo.so \
 				$(ACC)MiyamotoNagai.so \
 				$(ACC)Monopole.so \
 				$(ACC)NFW.so \
 				$(ACC)Plummer.so \
-				$(ACC)Point.so
+				$(ACC)Point.so \
+				$(ACC)PotExp.so
 endif
 
 # -----
@@ -300,10 +322,14 @@ $(BIN)mkbodyfunc:	$(SEXE)mkbodyfunc.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefil
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mkdehnen:		$(SEXE)mkdehnen.cc $(BINT) $(main_h) $(gamma_h) $(io_h) $(LIB)gamma.o $(makefiles)
 			$(MAKE_EXE) $(LIB)gamma.o $(NEMO_EXE_FLGS)
+$(BIN)mkhalo:		$(SEXE)mkhalo.cc $(main_h) $(sample_h) $(io_h) $(LIB)halo.o $(makefiles)
+			$(MAKE_EXE) $(LIB)halo.o $(NEMO_EXE_FLGS)
 $(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(io_h) $(random_h) $(Pi_h) $(LIB)king.o $(makefiles)
 			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
 $(BIN)mkplum:		$(SEXE)mkplum.cc $(BINT) $(main_h) $(sample_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mkWD99disc:	$(SEXE)mkWD99disc.cc $(main_h) $(WD99disc_h) $(io_h) $(LIB)WD99disc.o $(makefiles)
+			$(MAKE_EXE) $(LIB)WD99disc.o $(NEMO_EXE_FLGS)
 $(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(body_h) $(inline_io_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)s2g:		$(SEXE)s2g.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(makefiles)
@@ -347,8 +373,10 @@ manipulate	:	$(falcON) $(BIN)manipulate
 mkbodyfunc	:	$(falcON) $(BIN)mkbodyfunc
 mkbodiesfunc	:	$(falcON) $(BIN)mkbodiesfunc
 mkdehnen	:	$(falcON) $(BIN)mkdehnen
+mkhalo 		:	$(falcON) $(BIN)mkhalo
 mkking		:	$(falcON) $(BIN)mkking
 mkplum		:	$(falcON) $(BIN)mkplum
+mkWD99disc	:	$(falcON) $(BIN)mkWD99disc
 s2a		:	$(falcON) $(BIN)s2a
 s2g		:	$(falcON) $(BIN)s2g
 s2s		:	$(falcON) $(BIN)s2s
@@ -359,10 +387,17 @@ snapprop	:	$(falcON) $(BIN)snapprop
 snapstac	:	$(falcON) $(BIN)snapstac
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
+#exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
+#			gyrfalcON lagrange_radii manipulate mkbodiesfunc \
+#			mkbodyfunc mkdehnen mkhalo mkking mkplum mkWD99disc \
+#			s2a scale_eps snapfilter snapprop snapstac symmetrize \
+#			s2g s2s
+
 exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
 			gyrfalcON lagrange_radii manipulate mkbodiesfunc \
-			mkbodyfunc mkdehnen mkking mkplum s2a scale_eps \
-			snapfilter snapprop snapstac symmetrize s2g s2s
+			mkbodyfunc mkdehnen mkking mkplum \
+			s2a scale_eps snapfilter snapprop snapstac symmetrize \
+			s2g s2s
 else
 
 exe_pub		:=	TestGrav

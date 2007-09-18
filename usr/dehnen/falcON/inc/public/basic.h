@@ -3,19 +3,19 @@
 ///                                                                             
 /// \file    inc/public/basic.h                                                 
 ///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2002-2006                                                          
-///                                                                             
 /// \brief   Declarations of some basic functions needed in most source code    
 ///                                                                             
 ///          Contents:                                                          
 ///          \li falcON::error, falcON::warning, falcON::message, and           
 ///              falcON::debug_info                                             
 ///          \li exception handling (falcON::exception)                         
-///          \li falcON::compile_info and falcON::run_info                      
+///          \li falcON::compile_info                                           
 ///          \li memory allocation and de-allocation support                    
 ///          \li 16byte memory alignment support                                
+///                                                                             
+/// \author  Walter Dehnen                                                      
+///                                                                             
+/// \date    2002-2006                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              

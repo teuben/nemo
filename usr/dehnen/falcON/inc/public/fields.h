@@ -60,7 +60,7 @@ namespace falcON {
       active        = 1 <<  0,  ///< a body/tree node is active
       remove        = 1 <<  1,  ///< body to be removed, see bodies::remove()
       sph           = 1 <<  2,  ///< body is SPH particle
-      sticky        = 1 <<  3,  ///< body is a sticky particle
+      sink          = 1 <<  3,  ///< body is a sink particle
       newbody       = 1 <<  4,  ///< body is new
       adjust_step   = 1 <<  5,  ///< help with time integration
       not_longer    = 1 <<  6,  ///< help with time integration
@@ -69,6 +69,7 @@ namespace falcON {
       interacting   = 1 <<  9,  ///< help with SPH estimation
       subtree       = 1 << 10,  ///< help with sub-tree building
       marked        = 1 << 11,  ///< auxiliary for several purposes
+      sticky        = 1 << 12,  ///< body is a sticky particle
       ignore        = 1 << 15,  ///< flag used to define subsets of bodies
       // flags for cells only
       all_active    = 1 << 20,  ///< all leafs in cell are active
@@ -367,7 +368,7 @@ namespace falcON {
       sizeof(flags),          ///< flags
       sizeof(unsigned),       ///< key
       sizeof(double),         ///< time step
-      //            sink properties: 11
+      //            non-source properties: 11
       sizeof(real),           ///< potential
       sizeof(real),           ///< external potential
       sizeof(vect),           ///< acceleration
@@ -449,7 +450,7 @@ namespace falcON {
       f       = 5,            ///< falcON::flags
       k       = 6,            ///< integer key or identifier
       t       = 7,            ///< time step (not used in falcON)
-      //            sink properties: 10
+      //            non-source properties: 10
       p       = 8,            ///< N-body gravitational potential
       q       = 9,            ///< external gravitational potential
       a       = 10,           ///< accelaration (gravity and SPH)
@@ -644,8 +645,8 @@ namespace falcON {
       gravity = basic|p|a|f,
       /// non-SPH source properties
       source  = m|x|v|w|e|f|k|t,
-      /// non-SPH sink properties
-      sink    = p|q|a|j|r|y|z|l|n|d|h,
+      /// non-SPH non-source properties
+      nonsource = p|q|a|j|r|y|z|l|n|d|h,
       /// all integer-type quantities
       integers= f|k|d|l|n|h|N,
       /// all floating point scalar quantities
@@ -657,11 +658,11 @@ namespace falcON {
       /// all quantities supported by NEMO Output
       nemo    = nemoin | q,
       /// all quantities at all
-      all     = source|sink|sphmax,
+      all     = source|nonsource|sphmax,
       /// all SPH quantities (again)
       SPH     = sphmax,
       /// all standard quantities
-      STD     = source|sink,
+      STD     = source|nonsource,
       /// all non-SPH quantities
       nonSPH  = all & ~SPH,
       /// an empty set (again)
@@ -872,6 +873,9 @@ namespace falcON {
   public:
     /// types of bodies
     enum bits {
+//       sink = 0, ///< sink: sink particles
+//       gas  = 1, ///< gas: SPH particles
+//       std  = 2  ///< standard: non-SPH bodies
       gas = 0, ///< gas: SPH particles
       std = 1  ///< standard: non-SPH bodies
     };
