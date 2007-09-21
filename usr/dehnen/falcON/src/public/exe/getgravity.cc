@@ -3,7 +3,7 @@
 //                                                                             |
 // getgravity.cc                                                               |
 //                                                                             |
-// Copyright (C) 2002, 2003, 2005 Walter Dehnen                                |
+// Copyright (C) 2002, 2003, 2005, 2007 Walter Dehnen                          |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -31,9 +31,10 @@
 // v 2.0    14/06/2005  WD new falcON, new body.h, new nemo I/O                |
 // v 2.1    22/06/2005  WD changes in nemo I/O support                         |
 // v 2.2    13/06/2005  WD changes in fieldset                                 |
+// v 2.3    13/06/2005  WD changes in fieldset and body.h                      |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.2"
-#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
+#define falcON_VERSION   "2.3"
+#define falcON_VERSION_D "19-sep-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO
 #error You need NEMO to compile "src/mains/getgravity.cc"
@@ -64,8 +65,8 @@ void falcON::main() falcON_THROWING
   nemo_in        srce(getparam("srce"));
   nemo_out       out(getparam("out"));
   const fieldset write(fieldset::x | fieldset::p | fieldset::a);
-  snapshot       ssht(0,fieldset::gravity);
-  forces         falcon(&ssht,getrparam("eps"), getrparam("theta"),
+  snapshot       shot(0,fieldset::gravity);
+  forces         falcon(&shot,getrparam("eps"), getrparam("theta"),
 			kern_type(getiparam("kernel")));
   const fieldset srcedata(fieldset::m|fieldset::x);
   while(srce.has_snapshot()) {
@@ -76,18 +77,21 @@ void falcON::main() falcON_THROWING
     // open snapshot with sinks and ensure we have enough bodies
     nemo_in sink   (getparam("sink"));
     snap_in sink_in(sink);
-    ssht.resetN( srce_in.Nbod() + sink_in.Nbod() );
+    unsigned nbod[BT_NUM] = {0};
+    for(bodytype t; t; ++t)
+      nbod[t] = srce_in.Nbod(t) + sink_in.Nbod(t);
+    shot.resetN(nbod);
     // read sources
-    const body sources(ssht.begin_all_bodies());
-    fieldset read = ssht.read_nemo(srce_in, srcedata, sources);
+    const body sources(shot.begin_all_bodies());
+    fieldset read = shot.read_part(srce_in, srcedata, sources);
     if(!read.contain(srcedata))
       falcON_THROW("sources must have mx data");
     // read sinks
-    const body sinks(sources, srce_in.Nbod());
-    read = ssht.read_nemo(sink_in, fieldset::x, sinks);
+    const body sinks(sources, srce_in.Ntot());
+    read = shot.read_part(sink_in, fieldset::x, sinks);
     if(!read.contain(fieldbit::x))
       falcON_THROW("sinks must have x data");
-    ssht.set_time(srce_in.time());
+    shot.set_time(srce_in.time());
     // loop sources, get their mass and flag them to be inactive
     real M(zero);
     for(body b(sources); b!=sinks; ++b) {
@@ -95,7 +99,7 @@ void falcON::main() falcON_THROWING
       M += mass(b);
     }
     // loop sinks, set their mass and flag them to be active
-    M *= 1.e-10/real(srce_in.Nbod());
+    M *= 1.e-10/real(srce_in.Ntot());
     for(body b(sinks); b; ++b) {
       b.flag_as_active();
       b.mass() = M;
@@ -105,6 +109,6 @@ void falcON::main() falcON_THROWING
     falcon.approximate_gravity();
     // write sink data to output
     if(out)
-      ssht.write_nemo(out,fieldset(fieldset::x|fieldset::a|fieldset::p),sinks);
+      shot.write_nemo(out,fieldset(fieldset::x|fieldset::a|fieldset::p),sinks);
   }
 }

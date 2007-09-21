@@ -626,7 +626,7 @@ void bodies::set_firsts()
 
 ////////////////////////////////////////////////////////////////////////////////
 // set up blocks to hold N[t] bodies of type t
-void bodies::set_data(const unsigned *N) falcON_THROWING
+void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
 {
   NBLK = 0u;
   NTOT = 0u;
@@ -634,7 +634,7 @@ void bodies::set_data(const unsigned *N) falcON_THROWING
     block   *last = 0;
     unsigned i    = 0;
     for(bodytype t; t; ++t) {
-      NBOD[t] = NALL[t] = N? N[t] : 0u;
+      NBOD[t] = NALL[t] = N[t];
       NTOT   += NBOD[t];
       NDEL[t] = 0u;
       NNEW[t] = 0u;
@@ -658,43 +658,55 @@ void bodies::set_data(const unsigned *N) falcON_THROWING
   FIRST = BLOCK[0];
 }
 ////////////////////////////////////////////////////////////////////////////////
-// construction 1:                                                          
-// allocate Nbod (1st arg) bodies with properties given by 2nd argument     
-// 3rd argument gives # SPH bodies within Nbod                              
-bodies::bodies(unsigned nb,
-	       fieldset bits,
-	       unsigned ns) falcON_THROWING :
+// construction 0: construction with N=0, but data fields
+bodies::bodies(fieldset bits) falcON_THROWING : 
   BITS      ( bits ),
   C_FORTRAN ( 0 )
 {
-  debug_info(3,"bodies::bodies(): constructing bodies: nb=%u, ns=%u, bits=%s",
-	     nb,ns,word(bits));
-  unsigned n[BT_NUM] = {ns, nb>ns? nb-ns:0};
+  unsigned n[BT_NUM]={0u};
+  debug_info(3,"bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
+	     n[0],n[1],n[2],word(BITS));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   set_firsts();
 }
 ////////////////////////////////////////////////////////////////////////////////
-bodies::bodies(const unsigned*nall,
+// construction 1, backward compatible version
+bodies::bodies(unsigned ntot,
+	       fieldset bits,
+	       unsigned nsph,
+	       unsigned nsink) falcON_THROWING :
+  BITS      ( bits ),
+  C_FORTRAN ( 0 )
+{
+  debug_info(3,"bodies::bodies(): constructing bodies: "
+	     "ntot=%u, nsph=%u, nsink=%u, bits=%s",
+	     ntot,nsph,nsink,word(bits));
+  if(nsph+nsink > ntot)
+    falcON_THROW("bodies::bodies(): Nsph+Nsink=%u > Ntot=%u",nsph+nsink,ntot);
+  unsigned n[BT_NUM] = {nsink, nsph, ntot-nsink-nsph};
+  for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
+  set_data(n);
+  set_firsts();
+}
+////////////////////////////////////////////////////////////////////////////////
+// construction 1, new version
+bodies::bodies(const unsigned n[BT_NUM],
 	       fieldset       bits) falcON_THROWING : 
   BITS      ( bits ),
   C_FORTRAN ( 0 )
 {
-  unsigned none[BT_NUM]={0,0};
-  const unsigned*n = nall? nall : none;
-  debug_info(3,"bodies::bodies(): constructing bodies: n=%u,%u, bits=%s",
-	     n[0],n[1],word(bits));
+  debug_info(3,"bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
+	     n[0],n[1],n[2],word(bits));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   set_firsts();
 }
 ////////////////////////////////////////////////////////////////////////////////
 // resets N, data; same as destruction followed by constructor 1            
-void bodies::reset(const unsigned*nall,
+void bodies::reset(const unsigned n[BT_NUM],
 		   fieldset       bits) falcON_THROWING
 {
-  unsigned none[BT_NUM]={0,0};
-  const unsigned*n= nall? nall : none;
   bool keepN = true;
   for(bodytype t; t; ++t) keepN = keepN && NALL[t] == n[t];
   if(keepN) {
@@ -940,7 +952,7 @@ fieldset bodies::read_snapshot(snap_in  const&snap,
 			       bool           warn) falcON_THROWING
 {
   fieldset get = want & fieldset::nemoin;
-  if(Nread == 0 || Nread > snap.Nbod()) Nread = snap.Nbod();
+  if(Nread == 0 || Nread > snap.Ntot()) Nread = snap.Ntot();
   if(start.my_index() + Nread > N_bodies())
     falcON_THROW("bodies::read_snapshot(): not enough space for data");
   fieldset read;
@@ -964,7 +976,7 @@ fieldset bodies::read_snapshot(snap_in  const&snap,
       data_in inpt(snap,nemo_io::field(f));
       body b(start);
       b.read_data(inpt,Nread);
-      if(inpt.N() != inpt.N_read())
+      if(min(Nread,inpt.N()) > inpt.N_read())
 	falcON_THROW("bodies::read_snapshot(): "
 		     "could only read %u of %u %c data",
 		     inpt.N_read(), inpt.N(), letter(f));
@@ -989,7 +1001,7 @@ void bodies::write_snapshot(snap_out const&snap,
 {
   if(this != start.my_bodies())
     falcON_THROW("bodies::write_snapshot(): start body is not ours");
-  if(Nwrite == 0 || Nwrite > snap.Nbod()) Nwrite = snap.Nbod();
+  if(Nwrite == 0 || Nwrite > snap.Ntot()) Nwrite = snap.Ntot();
   if(start.my_index() + Nwrite > N_bodies())
     falcON_THROW("bodies::write_snapshot(): not enough data to write");
   put &= BITS;
@@ -1030,18 +1042,17 @@ namespace {
     in >> B. template datum<BIT>();
   }
   void Ignore(std::istream&, body &) {}
-  typedef void (*p_reader)(std::istream&, body &);
+  typedef void (*p_reader)(std::istream&, body&);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::read_simple_ascii(std::istream  &in,
 			       const fieldbit*item,
 			       unsigned       Ni,
-			       unsigned       Nb,
-			       unsigned       Ns)
+			       const unsigned N[BT_NUM])
 {
   // 1. create table of readers                                                 
   fieldset get;
-  p_reader readsph[100]={0}, readstd[100]={0};
+  p_reader read[BT_NUM][100] = {0};
   if(Ni > 100) {
     Ni = 100;
     warning(" can only read the first 100 data entries\n");
@@ -1051,48 +1062,33 @@ void bodies::read_simple_ascii(std::istream  &in,
       warning("bodies::read_simple_ascii: reading item more than once");
     get |= fieldset(item[i]);
     switch(value(item[i])) {
-#define SET_READ_STD(BIT,NAME)				\
+#define SET_READ(BIT,NAME)				\
     case BIT:						\
-      readsph[i]= &Read<BIT>;				\
-      readstd[i]= &Read<BIT>;				\
+      for(bodytype t; t; ++t)				\
+        if(t.allows(BIT)) read[t][i] = &Read<BIT>;	\
       break;
-      DEF_NAMED_NONSPH(SET_READ_STD);
-#undef SET_READ_STD
-#define SET_READ_SPH(BIT,NAME)				\
-    case BIT:						\
-      readsph[i]= &Read<BIT>;				\
-      readstd[i]= 0;					\
-      break;
-      DEF_NAMED_SPH(SET_READ_SPH);
-#undef SET_READ_SPH
+      DEF_NAMED(SET_READ);
+#undef SET_READ
     default: 
-      readsph[i]= 0;
-      readstd[i]= 0;
-      break;
+      for(bodytype t; t; ++t)
+        read[t][i] = 0;
     }
   }
   if(Ni==100)
     warning("bodies::read_simple_ascii(): cannot read >100 items\n");
   // 2. reset N & add fields                                                    
-  resetN(Nb,Ns);
-  add_fields(get);
+  reset(N, BITS|get);
   // 3. loop bodies & read data whereby ignoring lines starting with '#'        
-  LoopSPHBodies(this,Bi) {
-    while( in && eat_line(in,'#') );
-    if(!in) falcON_ExceptF("end of input before data have been read",
-			   "bodies::read_simple_ascii()");
-    for(int i=0; i!=Ni; ++i)
-      if(readsph[i]) readsph[i](in,Bi);
-    SwallowRestofLine(in);
-  }
-  LoopSTDBodies(this,Bi) {
-    while( in && eat_line(in,'#') );
-    if(!in) falcON_ExceptF("end of input before data have been read",
-			   "bodies::read_simple_ascii()");
-    for(int i=0; i!=Ni; ++i)
-      if(readstd[i]) readstd[i](in,Bi);
-    SwallowRestofLine(in);
-  }
+  for(bodytype t; t; ++t)
+    if(N[t])
+      LoopTypedBodies(this,Bi,t) {
+	while( in && eat_line(in,'#') );
+	if(!in) falcON_ExceptF("end of input before data have been read",
+			       "bodies::read_simple_ascii()");
+	for(int i=0; i!=Ni; ++i)
+	  if(read[t][i]) read[t][i](in,Bi);
+	SwallowRestofLine(in);
+      }
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -1325,42 +1321,6 @@ void snapshot::del_pointer(const char*k) const
   if(PBNK) static_cast<PointerBank*>(PBNK)->del(k);
 }
 ////////////////////////////////////////////////////////////////////////////////
-snapshot::snapshot(fieldset Bd) falcON_THROWING
-: bodies ( static_cast<const unsigned*>(0), Bd ),
-  INIT   ( false ),
-  TINI   ( 0. ),
-  TIME   ( 0. ),
-  PBNK   ( 0 ) {}
-////////////////////////////////////////////////////////////////////////////////
-snapshot::snapshot(double   t,
-		   unsigned Nb,
-		   fieldset Bd,
-		   unsigned Ns) falcON_THROWING
-: bodies ( Nb,Bd,Ns ),
-  INIT   ( true ),
-  TINI   ( t ),
-  TIME   ( t ),
-  PBNK   ( 0 ) {}
-////////////////////////////////////////////////////////////////////////////////
-snapshot::snapshot(double         t,
-		   const unsigned*N,
-		   fieldset       Bd) falcON_THROWING
-: bodies ( N,Bd ),
-  INIT   ( true ),
-  TINI   ( t ),
-  TIME   ( t ),
-  PBNK   ( 0 ) {}
-////////////////////////////////////////////////////////////////////////////////
-snapshot::snapshot(double       t,
-		   bodies const&B,
-		   fieldset     Bd,
-		   flags        F) falcON_THROWING
-: bodies ( B,Bd,F ),
-  INIT   ( true ),
-  TINI   ( t ),
-  TIME   ( t ),
-  PBNK   ( 0 ) {}
-////////////////////////////////////////////////////////////////////////////////
 snapshot::snapshot(snapshot const&S,
 		   fieldset       Bd,
 		   flags          F) falcON_THROWING
@@ -1413,19 +1373,20 @@ bool snapshot::read_nemo(                          // R: was time in range?
     }
   } else
     TIME = 0.;
-  if(s.Nbod() != N_bodies() ||
-     s.Nsph() != N_bodies(bodytype::gas) )
-    reset(s.Nbod(), fieldset::o, s.Nsph());
+  bool need_reset = false;
+  for(bodytype t; t; ++t)
+    if(s.Nbod(t) != N_bodies(t)) need_reset = true;
+  if(need_reset) reset(s.Nbod(), fieldset::o);
   r = read_snapshot(s,g,begin_all_bodies(),N_bodies(),w);
   return true;
 }
 ////////////////////////////////////////////////////////////////////////////////
-fieldset snapshot::read_nemo(                      // R: what has been read     
+fieldset snapshot::read_part(                      // R: what has been read     
 			     snap_in  const&s,     // I: nemo input             
 			     fieldset       g,     // I: what to read           
 			     iterator const&b,     // I: start position         
-			     unsigned       n,     //[I: #, def: all in input]  
-			     bool           w)     //[I: warn: missing data]    
+			     bool           w,     //[I: warn: missing data]    
+			     unsigned       n)     //[I: #, def: all in input]  
   falcON_THROWING
 {
   if(s.has_time()) {
@@ -1454,8 +1415,14 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 	    "will only write %u\n",n,N_bodies()-i);
     n = N_bodies()-i;
   }
-  unsigned ns = N_bodies(bodytype::gas)>i? N_bodies(bodytype::gas)-i : 0;
-  snap_out s(o,n,ns,TIME);
+  unsigned nb[BT_NUM]={0}, nt=n, nc(0u);
+  for(bodytype t; t; ++t)
+    if(i < (nc+=N_bodies(t))) {
+      nb[t] = min(nc-i, nt);
+      i  += nb[t];
+      nt -= nb[t];
+    }
+  snap_out s(o,nb,TIME);
   write_snapshot(s,w,b,n);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -1463,7 +1430,7 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 			  fieldset       w) const  // I: what to write          
   falcON_THROWING
 {
-  snap_out s(o,N_bodies(),N_bodies(bodytype::gas),TIME);
+  snap_out s(o,N_bodies_per_type(),TIME);
   write_snapshot(s,w,begin_all_bodies(),N_bodies());
 }
 #endif // falcON_NEMO
@@ -1569,9 +1536,9 @@ double bodies::read_gadget(const char*fname,
   }
   // 2 establish number of SPH and non-SPH particles and allocate memory.
   unsigned NB[BT_NUM] = {0}, NP[6] ={0};
-  NB[0] = header->npartTotal[0];
-  for(int k=1; k!=6; ++k) NB[1] += header->npartTotal[k];
-  if(NB[0] == 0) read &= fieldset(fieldset::nonSPH);
+  NB[bodytype::gas] = header->npartTotal[0];
+  for(int k=1; k!=6; ++k) NB[bodytype::std] += header->npartTotal[k];
+  if(NB[bodytype::gas] == 0) read &= fieldset(fieldset::nonSPH);
   reset(NB,read);
   // 3 loop data files
   body SPH = begin_sph_bodies();
@@ -1699,7 +1666,7 @@ double bodies::read_gadget(const char*fname,
     }
   }
   debug_info(1,"bodies::read_gadget(): read %s for %u SPH & %u STD bodies\n",
-	     word(got), NB[0], NB[1]);
+	     word(got), NB[bodytype::gas], NB[bodytype::std]);
   return header->time;
 }
 ////////////////////////////////////////////////////////////////////////////////

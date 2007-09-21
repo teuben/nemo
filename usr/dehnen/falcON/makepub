@@ -270,14 +270,14 @@ acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
 				$(ACC)DehnenMcLaughlin.so \
 				$(ACC)GalPot.so \
-#				$(ACC)DiscPot.so \
-#				$(ACC)Halo.so \
+				$(ACC)DiscPot.so \
+				$(ACC)Halo.so \
 				$(ACC)MiyamotoNagai.so \
 				$(ACC)Monopole.so \
 				$(ACC)NFW.so \
 				$(ACC)Plummer.so \
-				$(ACC)Point.so# \
-#				$(ACC)PotExp.so
+				$(ACC)Point.so \
+				$(ACC)PotExp.so
 endif
 
 # -----
@@ -322,6 +322,9 @@ $(BIN)mkbodyfunc:	$(SEXE)mkbodyfunc.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefil
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mkdehnen:		$(SEXE)mkdehnen.cc $(BINT) $(main_h) $(gamma_h) $(io_h) $(LIB)gamma.o $(makefiles)
 			$(MAKE_EXE) $(LIB)gamma.o $(NEMO_EXE_FLGS)
+$(BIN)mkgalaxy:		doc/mkgalaxy
+			cp $< $@
+			chmod 755 $@
 $(BIN)mkhalo:		$(SEXE)mkhalo.cc $(main_h) $(sample_h) $(io_h) $(LIB)halo.o $(makefiles)
 			$(MAKE_EXE) $(LIB)halo.o $(NEMO_EXE_FLGS)
 $(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(io_h) $(random_h) $(Pi_h) $(LIB)king.o $(makefiles)
@@ -373,6 +376,7 @@ manipulate	:	$(falcON) $(BIN)manipulate
 mkbodyfunc	:	$(falcON) $(BIN)mkbodyfunc
 mkbodiesfunc	:	$(falcON) $(BIN)mkbodiesfunc
 mkdehnen	:	$(falcON) $(BIN)mkdehnen
+mkgalaxy	:	$(BIN)mkgalaxy
 mkhalo 		:	$(falcON) $(BIN)mkhalo
 mkking		:	$(falcON) $(BIN)mkking
 mkplum		:	$(falcON) $(BIN)mkplum
@@ -387,17 +391,12 @@ snapprop	:	$(falcON) $(BIN)snapprop
 snapstac	:	$(falcON) $(BIN)snapstac
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
-#exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
-#			gyrfalcON lagrange_radii manipulate mkbodiesfunc \
-#			mkbodyfunc mkdehnen mkhalo mkking mkplum mkWD99disc \
-#			s2a scale_eps snapfilter snapprop snapstac symmetrize \
-#			s2g s2s
-
 exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
 			gyrfalcON lagrange_radii manipulate mkbodiesfunc \
-			mkbodyfunc mkdehnen mkking mkplum \
+			mkbodyfunc mkdehnen mkhalo mkking mkplum mkWD99disc \
 			s2a scale_eps snapfilter snapprop snapstac symmetrize \
-			s2g s2s
+			s2g s2s mkgalaxy
+
 else
 
 exe_pub		:=	TestGrav

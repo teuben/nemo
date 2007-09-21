@@ -1,0 +1,499 @@
+#! /bin/csh 
+################################################################################
+##                                                                             #
+## mkgalaxy                                                                    #
+##                                                                             #
+## script for constructing N-body initial conditions for a disc galaxy         #
+## according to McMillan and Dehnen (2007, MNRAS, 378, 541).                   #
+##                                                                             #
+## This script has not been heavily tested, so some bugs may exist. Please     #
+## report any anomalies to Walter <wd11@astro.le.ac.uk> (ideally, send the     #
+## error output in NAME.err generated with a high debug level, i.e. 10).       #
+##                                                                             #
+## For more detailed documentation see mkgalaxy_user_guide.pdf                 #
+##                                                                             #
+## Please acknowledge any usage by citing the above paper. Thanks.             #
+##                                                                             #
+################################################################################
+##                                                                             #
+## Copyright (C) 2007  Paul McMillan, Walter Dehnen                            #
+##                                                                             #
+## This program is free software; you can redistribute it and/or modify        #
+## it under the terms of the GNU General Public License as published by        #
+## the Free Software Foundation; either version 2 of the License, or (at       #
+## your option) any later version.                                             #
+##                                                                             #
+## This program is distributed in the hope that it will be useful, but         #
+## WITHOUT ANY WARRANTY; without even the implied warranty of                  #
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           #
+## General Public License for more details.                                    #
+##                                                                             #
+## You should have received a copy of the GNU General Public License           #
+## along with this program; if not, write to the Free Software                 #
+## Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   #
+##                                                                             #
+################################################################################
+##                                                                             #
+## syntax:                                                                     #
+##                                                                             #
+## mkgalaxy name=NAME [parameters]                                             #
+##                                                                             #
+## where parameters are of the form keyword=VALUE. The keywords can be found   #
+## below where default values are set. In order to skip stages 1 and 2 (making #
+## initial halo & bulge and adjusting them to the full disc (rather than only  #
+## its monopole), use                                                          #
+##                                                                             #
+## mkgalaxy name=NAME spheroid=SPHEROID [parameters]                           #
+##                                                                             #
+## where SPHEROID must refer to a data file in NEMO snapshot format containing #
+## the halo and bulge component already adjusted to the full disc.             #
+##                                                                             #
+## BEWARE that in this case, the user MUST ensure that all the structural      #
+## parameters (those specifying the density profiles) for halo, bulge, and     #
+## disc AS WELL AS the number of bodies in halo in bulge are the same as       #
+## those used in generating the file SPHEROID.                                 #
+##                                                                             #
+################################################################################
+echo "mkgalaxy:    building a N-body model of a disc galaxy"
+
+################################################################################
+## before anything else, we make sure that nemo and falcON are initialized
+echo "mkgalaxy: 0  starting falcON and setting parameters"
+
+if(! $?NEMO) then
+  nemo
+endif
+################################################################################
+## if you have a proprietary version of falcON, you may want to start it here
+# source $NEMO/usr/dehnen/falcON.P/falcON_restart
+
+################################################################################
+##                                                                             #
+## 0  Set all parameters                                                       #
+##                                                                             #
+################################################################################
+## body numbers (note that for $Mb>0 the bulge will also add bodies)
+set Nh=1200000       # number of bodies in halo
+set Nd=200000        # number of disc bodies
+
+################################################################################
+## disc parameters
+set Md=1             # disc mass
+set Rd=1             # disc scale radius
+set Zd=0.1           # disc scale height (rho \propto sech^2(z/Zd))
+set Rsig=0           # if non-zero, rad. vel. disp. sigma \propto exp(-R/Rsig)
+set Q=1.2            # Toomre's Q (const if Rsig=0, else value Q(Rsig)
+set Nbpo=50          # number of disc bodies sampled per orbit
+set ni=4             # number of iterations in disc sampling
+set epsd=0.01        # gravitational softening length for disc bodies
+
+################################################################################
+## halo parameters
+set Mh=24            # halo mass 
+set innerh=7/9       # halo inner logarithmic density slope
+set outerh=31/9      # halo outer logarithmic density slope
+set etah=4/9         # halo transition exponent
+set Rcoreh=0         # halo core radius
+set Rh=6             # halo scale length
+set Rth=60           # halo truncation radius
+set betah=0          # halo anisotropy parameter
+set r_ah=0           # halo anisotropy radius; 0 maps to infinity
+set epsh=0.02        # gravitational softening length for halo bodies
+
+################################################################################
+## bulge parameters
+set Mb=0.2           # bulge mass
+set innerb=1         # bulge inner density exponent
+set outerb=4         # bulge outer density exponent
+set etab=1           # bulge transition exponent
+set Rtb=0            # bulge truncation radius
+set Rcoreb=0         # bulge core radius
+set Rb=0.2           # bulge scale radius
+set betab=0          # bulge anisotropy parameter
+set r_ab=0           # bulge anisotropy radius; 0 maps to infinity
+
+################################################################################
+## Parameters controlling code
+set kmax=3           # maximum timestep = 2^-kmax
+set kmin=7           # minimum timestep = 2^-kmin
+set fac=0.01         # time step control: tau < fac/|acc|
+set fph=0.04         # time step control: tau < fph/|phi|
+set tgrow=40         # Disc growth time
+set seed=1           # seed for RNGs
+set nmax=12          # maximum radial "quantum number" in potential expansion
+set lmax=8           # maximum angular "quantum number" in potential expansion
+set careful=t        # set to 't' if spheroid DF may be non-monotonic
+set debug=2          # debug level used to run all falcON programs
+
+################################################################################
+## parse command line arguments (they will then override the above defaults)
+foreach a ($*)
+    set $a
+end
+
+################################################################################
+## check for name
+if (! $?name) then
+    echo "ERROR [mkgalaxy]: no name given"
+    exit
+endif
+
+################################################################################
+## Find various parameters derived from those above
+if(! $?Nb) then
+    set Nb=`nemoinp "int($Nd*($Mb/$Md))"`
+endif
+if(! $?epsb) then
+    set epsb=$epsd
+endif
+if(! $?giveF) then
+    set giveF=f
+endif
+
+set sdens=`nemoinp "$Md/(2*3.141592*$Rd*$Rd)"` # Central surface dens. of disc
+set Nlev=`nemoinp "$kmin-$kmax+1"`             # Number of different timestep lengths
+set tend=`nemoinp "1.5*$tgrow"`                # End point for disc growth
+set Nh_half=`nemoinp "$Nh/2"`
+set alphah=`nemoinp "1./(2-$innerh)"`
+set Nb_half=`nemoinp "$Nb/2"`
+set alphab=`nemoinp "1./(2-$innerb)"`
+
+## DiscPot, which we use to calculate the potential of the disc component has
+## unfortunate quirks: for historical reasons (relating to the choice of units)
+## one needs to multiply masses by 2.2229302*10^5 before using them to determine
+## the corresponding potential with our unit system.
+set Sd_dp=`nemoinp "2.2229302e5*$sdens"`
+set Zd_dp=`nemoinp "-0.5*$Zd"`
+
+################################################################################
+## sanity check
+if(-e $name.snp) then
+    echo "ERROR [mkgalaxy]: file $name.snp already exists"
+    exit
+endif
+
+################################################################################
+## initialize error output file
+
+echo > $name.err
+echo "file $name.err" >> $name.err
+echo >> $name.err
+echo "mkgalaxy error output" >> $name.err
+echo >> $name.err
+echo "disc parameters:" >> $name.err
+echo "Md     = $Md\t(disc mass)" >> $name.err
+echo "Nd     = $Nd\t(number of disc bodies)" >> $name.err
+echo "Rd     = $Rd\t(disc scale radius)" >> $name.err
+echo "Zd     = $Zd\t(disc scale height)" >> $name.err
+echo "Rsig   = $Rsig\t(if !=0 : scale radius for sigma_R)" >> $name.err
+echo "Q      = $Q\t(Toomre's Q: constant if Rsig=0, otherwise Q(Rsig))" >> $name.err
+echo "Nbpo   = $Nbpo\t(number of disc bodies sampled per orbit)" >> $name.err
+echo "ni     = $ni\t(number of iterations in disc sampling)" >> $name.err
+echo "epsd   = $epsd\t(gravitational softening length for disc bodies)" >> $name.err
+echo "halo parameters:" >> $name.err
+echo "Mh     = $Mh\t(halo mass)" >> $name.err
+echo "Nh     = $Nh\t(number of halo bodies)" >> $name.err
+echo "innerh = $innerh\t(halo inner logarithmic density slope)" >> $name.err
+echo "outerh = $outerh\t(halo outer logarithmic density slope)" >> $name.err
+echo "etah   = $etah\t(halo transition exponent)" >> $name.err
+echo "Rcoreh = $Rcoreh\t(halo core radius)" >> $name.err
+echo "Rh     = $Rh\t(halo scale length)" >> $name.err
+echo "Rth    = $Rth\t(halo truncation radius)" >> $name.err
+echo "betah  = $betah\t(halo anisotropy parameter)" >> $name.err
+echo "r_ah   = $r_ah\t(halo anisotropy radius; 0 maps to infinity)" >> $name.err
+echo "epsh   = $epsh\t(gravitational softening length for halo bodies)" >> $name.err
+echo "bulge parameters:" >> $name.err
+echo "Mb     = $Mb\t(bulge mass)" >> $name.err
+echo "Nb     = $Nb\t(number of bulge bodies)" >> $name.err
+echo "innerb = $innerb\t(bulge inner density exponent)" >> $name.err
+echo "outerb = $outerb\t(bulge outer density exponent)" >> $name.err
+echo "etab   = $etab\t(bulge transition exponent)" >> $name.err
+echo "Rcoreb = $Rcoreb\t(bulge core radius)" >> $name.err
+echo "Rb     = $Rb\t(bulge scale radius)" >> $name.err
+echo "Rtb    = $Rtb\t(bulge truncation radius)" >> $name.err
+echo "betab  = $betab\t(bulge anisotropy parameter)" >> $name.err
+echo "r_ab   = $r_ab\t(bulge anisotropy radius; 0 maps to infinity)" >> $name.err
+echo "epsb   = $epsb\t(gravitational softening length for bulge bodies)" >> $name.err
+echo "parameters controlling code:" >> $name.err
+echo "kmax   = $kmax\t(maximum timestep = 2^-kmax)" >> $name.err
+echo "kmin   = $kmin\t(minimum timestep = 2^-kmin)" >> $name.err
+echo "fac    = $fac\t(time step control: tau < fac/|acc|)" >> $name.err
+echo "fph    = $fph\t(time step control: tau < fph/|phi|)" >> $name.err
+echo "tgrow  = $tgrow\t(disc growth time)" >> $name.err
+echo "seed   = $seed\t(seed for RNGs)" >> $name.err
+echo "nmax   = $nmax\t(maximum n in potential expansion)" >> $name.err
+echo "lmax   = $lmax\t(maximum l in potential expansion)" >> $name.err
+echo "careful= $careful\t(set to 't' if spheroid DF may be non-monotonic)" >> $name.err
+echo "debug  = $debug\t(debug level used to run all falcON programs)" >> $name.err
+echo >> $name.err
+
+################################################################################
+## check if we can skip steps 1 & 2
+if ($?spheroid) then
+    if ( ! -f $spheroid ) then
+	echo "ERROR [mkgalaxy]: file $spheroid does not exist."
+	exit
+    endif
+    echo "mkgalaxy:    file $spheroid assumed to contain halo & bulge adjusted to disc"
+    echo "             skipping steps 1 & 2"
+    echo "             NOTE: the user MUST ensure that parameters match!"
+    set skip=0
+    goto populatedisc
+endif
+
+################################################################################
+##                                                                             #
+## 1  Building the initial spheroid models                                     #
+##                                                                             #
+## file         status                content/meaning                          #
+## --------------------------------------------------------------------------  #
+## $name.prm    generated             accfile for "Monopole"                   #
+## $name.h      generated & deleted   snapshot: initial halo                   #
+## $name.b      generated & deleted   snapshot: initial bulge                  #
+## $name.s      generated             snapshot: initial bulge + halo           #
+##                                                                             #
+################################################################################
+
+echo "mkgalaxy: 1  Building the initial spheroid models"
+
+rm -f $name.h $name.b $name.s $name.prm >& /dev/null
+
+################################################################################
+## Create accfile for "Monopole": the disc potential
+echo "accname=DiscPot"                        >  $name.prm # using "DiscPot"
+echo "accpars=0,$Sd_dp,$Rd,$Zd_dp,0,0"        >> $name.prm # parameters of disc
+
+if(! -f $name.prm) then
+    echo "ERROR [mkgalaxy]: could not create file $name.prm"
+    exit
+endif
+
+################################################################################
+## Create the initial halo in file $name.h with only half of the intended bodies
+echo "mkgalaxy:    creating the initial halo with N=$Nh_half in file $name.h"
+
+if ( $Nb > 0 ) then
+    ## case A: we have a bulge: must provide its potential
+    mkhalo out=$name.h! nbody=$Nh_half M=$Mh inner=$innerh outer=$outerh \
+	eta=$etah r_s=$Rh r_t=$Rth r_c=$Rcoreh b=$betah r_a=$r_ah        \
+	seed=$seed eps=$epsh giveF=$giveF accname=Halo+Monopole          \
+	accpars="0,$Rb,$Mb,$innerb,$outerb,$etab,$Rtb,$Rcoreb;1,10"      \
+	accfile=";$name.prm" careful=$careful debug=$debug >>& $name.err
+else
+    ## case B: no bulge
+    mkhalo out=$name.h! nbody=$Nh_half M=$Mh inner=$innerh outer=$outerh \
+	eta=$etah r_s=$Rh r_t=$Rth r_c=$Rcoreh b=$betah r_a=$r_ah        \
+	seed=$seed eps=$epsh giveF=$giveF accname=Monopole accpars=1,10  \
+	accfile=$name.prm careful=$careful debug=$debug >>& $name.err
+endif
+
+if(! -f $name.h) then
+    echo "ERROR [mkgalaxy]: could not build initial halo model; see also file $name.err."
+    exit
+endif
+
+################################################################################
+## Create the bulge (if there is one) in file $name.b with only half the number
+## of bodies (to be doubled later).
+
+if ( $Nb > 0 ) then
+echo "mkgalaxy:    creating the initial bulge with N=$Nb_half in file $name.b"
+
+    mkhalo out=$name.b! nbody=$Nb_half M=$Mb inner=$innerb outer=$outerb \
+	eta=$etab r_s=$Rb r_t=$Rtb r_c=$Rcoreb b=$betab r_a=$r_ab        \
+	seed=$seed eps=$epsb giveF=$giveF accname=Halo+Monopole          \
+	accpars="0,$Rh,$Mh,$innerh,$outerh,$etah,$Rth,$Rcoreh;1,10"      \
+	accfile=";$name.prm" careful=$careful debug=$debug >>& $name.err
+
+    if(! -f $name.b) then
+	echo "ERROR [mkgalaxy]: could not build initial bulge model; see also file $name.err."
+	exit
+    endif
+
+endif
+
+################################################################################
+## stack halo and bulge as one snapshot in file $name.s
+
+if ( $Nb > 0 ) then
+    echo "mkgalaxy:    stacking initial halo and bulge in file $name.s"
+    snapstac $name.b $name.h $name.s! debug=$debug >>& $name.err
+    rm -f $name.h $name.b >& /dev/null
+else
+    mv $name.h $name.s
+    echo "mkgalaxy:    initial halo in file $name.s"
+endif
+
+if(! -f $name.s) then
+    echo "ERROR [mkgalaxy]: could not build initial halo & bulge models; see also file $name.err."
+    exit
+endif
+
+################################################################################
+##                                                                             #
+## 2  Growing the full disc potential                                          #
+##                                                                             #
+## file         status                content/meaning                          #
+## --------------------------------------------------------------------------- #
+## $name.prm    required  & deleted   accfile for "Monopole"                   #
+## $name.s      required  & deleted   snapshot: initial bulge + halo           #
+## $name.sym    generated & deleted   snapshot: symmetrised $name.s            #
+## $name.grow   generated             logfile of gyrfalcON run                 #
+## $name.S      generated             snapshot: final bulge + halo             #
+##                                                                             #
+################################################################################
+echo "mkgalaxy: 2  Growing the full disc potential"
+
+################################################################################
+## sanity check
+if(-f $name.S) then
+    echo "ERROR [mkgalaxy]: file $name.S already exists."
+    exit
+endif
+
+rm -f $name.sym >& /dev/null
+
+################################################################################
+## symmetrise initial spheroid snapshot, whereby doubling N
+echo "mkgalaxy:    symmetrize initial spheroid snapshot (and doubling body number)"
+symmetrize $name.s $name.sym use=1 debug=$debug >>& $name.err
+
+if(! -f $name.sym) then
+    echo "ERROR [mkgalaxy]: could generated symmetrised halo & bulge model; see also file $name.err."
+    exit
+endif
+
+
+################################################################################
+## run simulation during which disc is grown from its mono-pole.
+echo "mkgalaxy:    start simulation to grow disc potential from monopole"
+echo "mkgalaxy:    (log output into $name.grow) ..."
+
+gyrfalcON in=$name.sym logfile=$name.grow                     \
+    out=$name.S step=$tend tstop=$tend startout=f             \
+    kmax=$kmax Nlev=$Nlev fac=$fac fph=$fph eps=-1 give=mxve  \
+    accname=Monopole accpars=0,$tgrow accfile=$name.prm       \
+    manipname=symmetrize_pairs debug=$debug >>& $name.err
+
+if(! -f $name.S) then
+    echo "ERROR [mkgalaxy]: could not adjust halo & bulge to full disc; see also file $name.err."
+    exit
+endif
+
+################################################################################
+## delete temporary files
+rm -f $name.s $name.sym $name.prm >& /dev/null
+
+################################################################################
+## make sure $spheroid gives the file with the final spheroids
+set spheroid=$name.S
+set skip=0
+
+################################################################################
+##                                                                             #
+## 3  Populating the disc                                                      #
+##                                                                             #
+## file         status                content/meaning                          #
+## --------------------------------------------------------------------------- #
+## $spheroid    required              snapshot: final bulge + halo             #
+## $name.d      generated & deleted   snapshot: initial disc                   #
+## $name.snp    generated             snapshot: final disc + bulge + halo      #
+##                                                                             #
+################################################################################
+populatedisc:
+
+echo "mkgalaxy: 3  Populating the disc"
+
+rm -f $name.d $name.h $name.b >& /dev/null
+
+################################################################################
+## Create disc model given potential of disc model and evolved halo. 
+
+if ( $Nb > 0 ) then
+
+    ## case A: two-component spheriod (bulge and halo): 
+    ############################################################################
+    ## sanity check
+    if($skip) then
+	set Nsp = `snapprop $spheroid prop=N`
+	set Nhb = `nemoinp "$Nh+$Nb"`
+	if( $Nsp != $Nhb) then
+	    echo "ERROR [mkgalaxy]: $spheroid has $Nsp bodies, but halo & bulge have $Nhb."
+	    exit
+	endif
+    endif
+
+    ############################################################################
+    ## split halo and bulge
+    echo "mkgalaxy:    extracting bulge into file $name.b (needed for bulge potential)"
+    snapfilter $spheroid $name.b filter="i<#0"  params=$Nb debug=$debug >>& $name.err
+
+    if(! -f $name.b) then
+	echo "ERROR [mkgalaxy]: could not isolate adjusted bulge component; see also file $name.err."
+	exit
+    endif
+
+    echo "mkgalaxy:    extracting halo into file $name.h (needed for halo potential)"
+    snapfilter $spheroid $name.h filter="i>=#0" params=$Nb debug=$debug >>& $name.err
+
+    if(! -f $name.h) then
+	echo "ERROR [mkgalaxy]: could not isolate adjusted halo component; see also file $name.err."
+	exit
+    endif
+    ############################################################################
+    ## sample disc
+    echo "mkgalaxy:    creating the initial disc with N=$Nd in file $name.d"
+
+    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q      \
+	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF          \
+	accname=PotExp+PotExp                                                 \
+	accpars="0,$alphab,$Rb,$nmax,$lmax,3,1;0,$alphah,$Rh,$nmax,$lmax,3,1" \
+	accfile="$name.b;$name.h" debug=$debug >>& $name.err
+
+    rm -f $name.b $name.h >& /dev/null
+
+else
+    ## case B: one-component spheroid (no bulge, only halo)
+    ############################################################################
+    ## sample disc
+
+    echo "mkgalaxy:    creating the initial disc with N=$Nd in file $name.d"
+
+    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q   \
+	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF       \
+	accname=PotExp accpars="0,$alphah,$Rh,$nmax,$lmax,3,1"             \
+	accfile="$spheroid" debug=$debug >>& $name.err
+
+endif
+    
+if(! -f $name.d) then
+    echo "ERROR [mkgalaxy]: could not build disc model; see also file $name.err."
+    exit
+endif
+
+################################################################################
+## Stack all components into one file and reset simulation time to zero
+echo "mkgalaxy:    stacking all components into file $name.snp"
+snapstac $name.d $spheroid $name.snp time=0 debug=$debug >>& $name.err
+
+if(! -f $name.snp) then
+    echo "ERROR [mkgalaxy]: could not stack disc with spheroid model, see also file $name.err."
+    exit
+endif
+
+################################################################################
+## delete temporary files
+rm -f $name.d $name.prm >& /dev/null
+
+################################################################################
+## done!
+
+echo "mkgalaxy:    finished. snapshots generated:"
+if(! $?skip) then
+echo "             $spheroid:  spheroids adjusted to disc"
+endif
+echo "             $name.snp:  complete galaxy model ready to use"
+
+################################################################################
+#end
+

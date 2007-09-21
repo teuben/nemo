@@ -187,9 +187,9 @@ namespace {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // construction & destruction                                               
     AnlRec(int n, int l)
-      : N1(n+1), L1(l+1), A( falcON_NEW(scalar,N1*L1)) {}
+      : N1(n+1), L1(l+1), A(falcON_NEW(scalar,N1*L1)) {}
     AnlRec(AnlRec const&a)
-      : N1(a.N1), L1(a.L1), A( falcON_NEW(scalar,N1*L1)) {
+      : N1(a.N1), L1(a.L1), A(falcON_NEW(scalar,N1*L1)) {
       memcpy(A,a.A,N1*L1*sizeof(scalar));
     }
     ~AnlRec() { falcON_DEL_A(A); }
@@ -679,7 +679,7 @@ namespace {
       fi  *= r*fi;                                 // fi = r / (1+r^(1/a))^(2a) 
       for(int l=0,lp=1; lp<L1(P); ++l,++lp)        // LOOP lp=dl...L,1          
 	e(P,lp) = fi * e(P,l);                     //   P(0,l+1) = fi*P(0,l)    
-      if(N==0) return;                             // no terms n>0 --> DONE     
+      if(N1(P)==1) return;                         // no terms n>0 --> DONE     
       register scalar tlm = twice(lambda(0));      // 2*lambda(l=0)             
       const    scalar Dtl = 4*AL;                  // 2*(lambda(l+1)-lambda(l)) 
       const    scalar xi2 = xi+xi;                 // 2*xi                      
@@ -717,7 +717,7 @@ namespace {
 	e(P,lp) = fi*e(P,l);                       //   P(0,l+1) = fi*P(0,l)    
 	e(D,lp) = fi*e(D,l) + dfi*e(P,l);          //   D(0,l+1) = dP(0,l+1)/dr 
       }                                            // END LOOP(l)               
-      if(N==0) return;                             // no terms n>0 --> DONE     
+      if(N1(P)==1) return;                         // no terms n>0 --> DONE     
       register scalar tlm  = twice(lambda(0));     // 2*lambda(l=0)             
       const    scalar Dtl  = 4*AL;                 // 2*(lambda(l+1)-lambda(l)) 
       const    scalar xi2  = xi+xi;                // 2*xi                      
@@ -1094,7 +1094,7 @@ namespace {
       fi    *= fi;                                 // fi^2                      
       for(int l=0,lp=2; lp<L1(P); l+=2,lp+=2)      // LOOP lp=dl...L,2          
 	e(P,lp) = fi * e(P,l);                     //   P(0,l+2) = fi^2*P(0,l)  
-      if(N==0) return;                             // no terms n>0 --> DONE     
+      if(N1(P)==1) return;                         // no terms n>0 --> DONE     
       register scalar tlm = twice(lambda(0));      // 2*lambda(l=0)             
       const    scalar Dtl = 8*AL;                  // 2*(lambda(l+dl)-lambda(l))
       const    scalar xi2 = xi+xi;                 // 2*xi                      
@@ -1136,7 +1136,7 @@ namespace {
 	e(P,lp) = fi*e(P,l);                       //   P(0,l+2) = fi^2*P(0,l)  
 	e(D,lp) = fi*e(D,l) + dfi*e(P,l);          //   D(0,l+2) = dP(0,l+2)/dr 
       }                                            // END LOOP(l)               
-      if(N==0) return;                             // no terms n>0 --> DONE     
+      if(N1(P)==1) return;                         // no terms n>0 --> DONE     
       register scalar tlm  = twice(lambda(0));     // 2*lambda(l=0)             
       const    scalar Dtl  = 8*AL;                 // 2*(lambda(l+dl)-lambda(l))
       const    scalar xi2  = xi+xi;                // 2*xi                      
@@ -1694,7 +1694,7 @@ namespace {
       register scalar fi;                          // 1/(1+r^(1/a))^a           
       SetXiFi(xi,fi,r);
       e(P,0) = GM*fi;                              // P(0,0) = G*M/(1+r^(1/a))^a
-      if(N==0) return;                             // no terms n>0 --> DONE     
+      if(N1(P)==1) return;                         // no terms n>0 --> DONE     
       const scalar tlm = twice(lambda(0));         // 2*lambda(l=0)             
       const scalar xi2 = xi+xi;                    // 2*xi                      
       e(P,L1(P)) = tlm * xi * e(P,0);              // P(1,0) = 2*lam*xi*P(0,0)  
@@ -1721,7 +1721,7 @@ namespace {
       SetXiFi(xi,dxi,fi,dfi,r);
       e(P,0) =  fi;                                // P(0,0) = 1/(1+r^(1/a))^a  
       e(D,0) = dfi;                                // D(0,0) = dP(0,0)/dr       
-      if(N==0) return;                             // no terms n>0 --> DONE     
+      if(N1(P)==1) return;                         // no terms n>0 --> DONE     
       const scalar tlm  = twice(lambda(0));        // 2*lambda(l=0)             
       const scalar xi2  = xi+xi;                   // 2*xi                      
       const scalar dxi2 = dxi+dxi;                 // 2*dxi/dr                  
@@ -1976,7 +1976,7 @@ namespace falcON { namespace P {
 using namespace falcON::P;
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-// class falcON::PotExp::CasRec                                               //
+// class CasRec                                                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 template<symmetry S> inline CasRec &CasRec::set(scalar const&cp,
@@ -2035,7 +2035,7 @@ template<symmetry S> inline scalar CasRec::dot(CasRec const&B) const {
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-// class falcON::PotExp::YlmRec                                               //
+// class YlmRec                                                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 template<symmetry S> inline
@@ -2130,7 +2130,7 @@ void YlmRec::table_print(symmetry     s,
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-// class falcON::PotExp::AnlRec                                               //
+// class AnlRec                                                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 template<symmetry S> inline AnlRec &AnlRec::assign(scalar const&x) {
@@ -2995,8 +2995,13 @@ PotExp::PotExp(scalar   a,                         // parameter alpha
   Knlm (n,l),
   STATE(0)
 {
-  if(N<1) {
-    std::sprintf(ERR,"PotExp: nmax must be > 0\n");
+  if(AL<0.5) {
+    std::sprintf(ERR,"PotExp: alpha<0.5\n");
+    STATE |= 2;
+    return;
+  }
+  if(N<0) {
+    std::sprintf(ERR,"PotExp: nmax must be >= 0\n");
     STATE |= 2;
     return;
   }

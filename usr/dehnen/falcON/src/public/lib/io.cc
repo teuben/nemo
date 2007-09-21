@@ -33,6 +33,9 @@ extern "C" {
 # include <history.h>
 # include <snapshot/snapshot.h>
 }
+#ifndef NSinkTag
+#  define NSinkTag "NSink"
+#endif
 #ifndef SoundSpeedTag
 #  define SoundSpeedTag "SoundSpeed"
 #endif
@@ -424,9 +427,9 @@ bool nemo_in::has_snapshot() const
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 snap_in::snap_in(nemo_in const&in) falcON_THROWING : 
-  INPUT(in), DATA_IN(0), FIELDS_READ(0),
-  HAS_NSPH(0), HAS_TIME(0), NBOD(0), NSPH(0), TIME(0.)
+  INPUT(in), DATA_IN(0), FIELDS_READ(0), HAS_TIME(0), NTOT(0u), TIME(0.)
 {
+  for(bodytype t; t; ++t) NBOD[t] = 0u;
   debug_info(4,"snap_in::snap_in() ...\n");
   if(! INPUT.has_snapshot())
     falcON_THROW("cannot open snapshot from nemo input stream");
@@ -452,17 +455,27 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
     INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read # bodies from nemo input stream");
   }
-  get_data(static_cast< ::stream >(INPUT.stream()),NobjTag,IntType,&NBOD,0);
-  debug_info(5,"  read Nobj = %d\n",NBOD);
-  // 3.2 try to read # SPH bodies
-  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),NGasTag)) {
-    get_data(static_cast< ::stream >(INPUT.stream()),NGasTag,IntType,&NSPH,0);
-    HAS_NSPH = true;
-    debug_info(5,"  read Nsph = %d\n",NSPH);
-    if(NSPH > NBOD)
-      falcON_THROW("read nemo data: more SPH bodies than total");
+  get_data(static_cast< ::stream >(INPUT.stream()),NobjTag,IntType,&NTOT,0);
+  debug_info(5,"  read Nobj = %u\n",NTOT);
+  // 3.2 try to read # SINK bodies
+  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),NSinkTag)) {
+    get_data(static_cast< ::stream >(INPUT.stream()),
+	     NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
+    debug_info(5,"  read Nsink = %u\n",NBOD[bodytype::sink]);
   }
-  // 3.3 try to read simulation time
+  // 3.3 try to read # SPH bodies
+  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),NGasTag)) {
+    get_data(static_cast< ::stream >(INPUT.stream()),
+	     NGasTag,IntType,&(NBOD[bodytype::gas]),0);
+    debug_info(5,"  read Nsph = %u\n",NBOD[bodytype::gas]);
+  }
+  // 3.4 set # STD bodies
+  unsigned n(0u);
+  for(bodytype t; t; ++t) n += NBOD[t];
+  if(n > NTOT)
+    falcON_THROW("read nemo data: more non-STD bodies than total");
+  NBOD[bodytype::std] = NTOT - n;
+  // 3.5 try to read simulation time
   if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),TimeTag)) {
     HAS_TIME = true;
     char* time_type = get_type(static_cast< ::stream >(INPUT.stream()),TimeTag);
@@ -498,8 +511,9 @@ snap_in::~snap_in() falcON_THROWING
     debug_info(4,"snap_in::~snap_in(): closing open data_in first\n");
     DATA_IN->~data_in();
   }
-  HAS_NSPH = false;
   HAS_TIME = false;
+  NTOT = 0;
+  for(bodytype t; t; ++t) NBOD[t] = 0u;
   get_tes(static_cast< ::stream >(INPUT.stream()),ParticlesTag);
   get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
   INPUT.SNAP_IN = 0;
@@ -542,7 +556,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
     falcON_THROW("cannot read # %s data",NemoTag(FIELD));
   NTOT = dim[0];
   // 3 check for dimensions to match expectations AND open data set
-  if(dim[0] != snap.N(FIELD) ) {
+  if(NTOT != snap.N(FIELD) ) {
     // 3.1 dim[0] != snap_in::N: error out
     falcON_THROW("nemo input of %s: found %d data, expected %d",
 		 NemoTag(FIELD), dim[0], snap.N(FIELD));
@@ -695,12 +709,13 @@ nemo_out& nemo_out::open(const char* file,
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 snap_out::snap_out(nemo_out const&out,
-		   unsigned       nb,
-		   unsigned       ns,
+		   const unsigned nbod[BT_NUM],
 		   double         time) falcON_THROWING :
-  OUTPUT(out), DATA_OUT(0), FIELDS_WRITTEN(0), NBOD(nb), NSPH(ns)
+  OUTPUT(out), DATA_OUT(0), FIELDS_WRITTEN(0), NTOT(0u)
 {
   debug_info(4,"snap_out::snap_out() ...\n");
+  // 0 set # bodies
+  for(bodytype t; t; ++t) NTOT += NBOD[t] = nbod[t];
   if(OUTPUT.SNAP_OUT)
     falcON_THROW("cannot open 2nd snapshot from nemo output stream");
   // 1 open snapshot set
@@ -709,13 +724,17 @@ snap_out::snap_out(nemo_out const&out,
   debug_info(5,"  snapshot opened\n");
   // 2 write parameter set
   put_set(static_cast< ::stream >(OUTPUT.stream()),ParametersTag);
-  put_data(static_cast< ::stream >(OUTPUT.stream()),NobjTag,IntType,&NBOD,0);
-  put_data(static_cast< ::stream >(OUTPUT.stream()),NGasTag,IntType,&NSPH,0);
+  put_data(static_cast< ::stream >(OUTPUT.stream()),
+	   NobjTag,IntType,&NTOT,0);
+  put_data(static_cast< ::stream >(OUTPUT.stream()),
+	   NGasTag,IntType,&(NBOD[bodytype::gas]),0);
+  put_data(static_cast< ::stream >(OUTPUT.stream()),
+	   NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
   put_data(static_cast< ::stream >(OUTPUT.stream()),
 	   TimeTag,DoubleType,&time,0);
   put_tes(static_cast< ::stream >(OUTPUT.stream()),ParametersTag);
-  debug_info(5,"  parameter written: Nbod=%d, Nsph=%d, time=%f\n",
-	     NBOD, NSPH, time);
+  debug_info(5,"  parameter written: Nbod=%d, Nsph=%d, Nsink=%d, time=%f\n",
+	     NTOT, NBOD[bodytype::gas], NBOD[bodytype::sink], time);
   // 3 open particle set
   put_set(static_cast< ::stream >(OUTPUT.stream()),ParticlesTag);
   int CS = CSCode(Cartesian,Ndim,2);
@@ -729,8 +748,8 @@ snap_out::~snap_out() falcON_THROWING
     debug_info(4,"snap_out::~snap_out(): closing open data_out first\n");
     DATA_OUT->~data_out();
   }
-  NBOD = 0;
-  NSPH = 0;
+  NTOT = 0;
+  for(bodytype t; t; ++t) NBOD[t] = 0u;
   put_tes(static_cast< ::stream >(OUTPUT.stream()),ParticlesTag);
   put_tes(static_cast< ::stream >(OUTPUT.stream()),SnapShotTag);
   OUTPUT.SNAP_OUT = 0;
@@ -742,13 +761,9 @@ snap_out::~snap_out() falcON_THROWING
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
-  : FIELD(f),
-    OUTPUT(snap),
-    NWRITTEN(0),
-    NTOT (nemo_io::is_sph(FIELD)? OUTPUT.NSPH : OUTPUT.NBOD),
-    TYPE (nemo_io::type(FIELD)),
-    SUBN (::is_scalar(FIELD)? 1:
-	  ::is_vector(FIELD)? NDIM : 2*NDIM)
+  : FIELD(f), OUTPUT(snap), NWRITTEN(0),
+    NTOT(OUTPUT.N(FIELD)), TYPE(nemo_io::type(FIELD)),
+    SUBN(::is_scalar(FIELD)? 1: ::is_vector(FIELD)? NDIM : 2*NDIM)
 {
   debug_info(5,"data_out::data_out(%s) ...\n",NemoTag(FIELD));
   if( OUTPUT.DATA_OUT )

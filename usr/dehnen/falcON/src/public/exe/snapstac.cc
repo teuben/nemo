@@ -30,9 +30,10 @@
 //                                                                              
 // v 0.0    21/09/2005 WD created                                               
 // v 0.1    10/09/2007 WD fixed bug with history buffer                         
+// v 0.2    19/09/2007 WD changes in fields.h, body.h, io.h; keyword time       
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.1"
-#define falcON_VERSION_D "10-sep-2007 Walter Dehnen                          "
+#define falcON_VERSION   "0.2"
+#define falcON_VERSION_D "19-sep-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "snapstac"
@@ -49,12 +50,13 @@ string defv[] = {
   "out=???\n          output file name                                   ",
   "deltax=0,0,0\n     position of in1 wrt in2                            ",
   "deltav=0,0,0\n     velocity of in1 wrt in2                            ",
+  "time=\n            set simulation time                                ",
   "zerocm=f\n         zero center of mass                                ",
   "write=\n           which data to write [default: all read]            ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string
-usage = "snapstack -- stack two N-body systems on top of each other\n";
+usage = "snapstack -- stack two N-body systems on top of each other";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -68,15 +70,15 @@ void falcON::main() falcON_THROWING
   snap_in        snap1(in1), snap2(in2);
   const double   time(snap1.has_time()? snap1.time() :
 		      snap2.has_time()? snap2.time() : 0.);
-  snapshot       shot(time,
-		      snap1.Nbod()+snap2.Nbod(),
-		      fieldset::o,
-		      snap1.Nsph()+snap2.Nsph());
+  unsigned nbod[BT_NUM] = {0};
+  for(bodytype t; t; ++t)
+    nbod[t] = snap1.Nbod(t) + snap2.Nbod(t);
+  snapshot       shot(time, nbod, fieldset::o);
   // read snapshots
   const body b1(shot.begin_all_bodies());
-  got &= shot.read_nemo(snap1, got, b1, 0, 0);
-  const body b2(b1, snap1.Nbod());
-  got &= shot.read_nemo(snap2, got, b2, 0, 0);
+  got &= shot.read_part(snap1, got, b1, 0);
+  const body b2(b1, snap1.Ntot());
+  got &= shot.read_part(snap2, got, b2, 0);
   if(write && !got.contain(write))
     warning("couldn't read %s from both %s and %s\n",
 	    word(got.missing(write)), getparam("in1"), getparam("in2"));
@@ -105,6 +107,8 @@ void falcON::main() falcON_THROWING
       }
     }
   }
+  if(hasvalue("time"))
+    shot.set_time(getdparam("time"));
   // output
   nemo_out out(getparam("out"));
   if(out) shot.write_nemo(out,got);

@@ -74,13 +74,14 @@ namespace falcON {
       // flags for cells only
       all_active    = 1 << 20,  ///< all leafs in cell are active
       all_sph       = 1 << 21,  ///< all leafs in cell are SPH particles
-      all_sticky    = 1 << 22,  ///< all leafs in cell are sticky particles
-      subtree_cell  = 1 << 23
+      all_sink      = 1 << 21,  ///< all leafs in cell are SPH particles
+      all_sticky    = 1 << 23,  ///< all leafs in cell are sticky particles
+      subtree_cell  = 1 << 24
     };
     /// enumeration holding some combinations of flags
     enum combined {
-      leaf_flags    = active|sph|sticky|sph_special|interacting,
-      body_flags    = active|sph|sticky|sph_special|remove,
+      leaf_flags    = active|sph|sink|sticky|sph_special|interacting,
+      body_flags    = active|sph|sink|sticky|sph_special|remove,
       subtree_flags = subtree|subtree_cell,
       activ_flags   = active|all_active
     };
@@ -175,12 +176,14 @@ namespace falcON {
     friend bool is_active  (flags const&f);
     friend bool to_remove  (flags const&f);
     friend bool is_sph     (flags const&f);
+    friend bool is_sink    (flags const&f);
     friend bool is_sticky  (flags const&f);
     friend bool is_new     (flags const&f);
     friend bool in_subtree (flags const&f);
     friend bool is_marked  (flags const&f);
     friend bool al_active  (flags const&f);
     friend bool al_sph     (flags const&f);
+    friend bool al_sink    (flags const&f);
     friend bool al_sticky  (flags const&f);
     friend bool in_subset  (flags const&f);
     //@}
@@ -190,12 +193,14 @@ namespace falcON {
     friend bool is_active  (const flags*f);
     friend bool to_remove  (const flags*f);
     friend bool is_sph     (const flags*f);
+    friend bool is_sink    (const flags*f);
     friend bool is_sticky  (const flags*f);
     friend bool is_new     (const flags*f);
     friend bool in_subtree (const flags*f);
     friend bool is_marked  (const flags*f);
     friend bool al_active  (const flags*f);
     friend bool al_sph     (const flags*f);
+    friend bool al_sink    (const flags*f);
     friend bool al_sticky  (const flags*f);
     friend bool in_subset  (const flags*f);
     //@}
@@ -263,24 +268,28 @@ namespace falcON {
   inline bool is_active (flags const&f) { return f.is_set(flags::active); }
   inline bool to_remove (flags const&f) { return f.is_set(flags::remove); }
   inline bool is_sph    (flags const&f) { return f.is_set(flags::sph); }
+  inline bool is_sink   (flags const&f) { return f.is_set(flags::sink); }
   inline bool is_sticky (flags const&f) { return f.is_set(flags::sticky); }
   inline bool is_new    (flags const&f) { return f.is_set(flags::newbody); }
   inline bool in_subtree(flags const&f) { return f.is_set(flags::subtree); }
   inline bool is_marked (flags const&f) { return f.is_set(flags::marked); }
   inline bool al_active (flags const&f) { return f.is_set(flags::all_active); }
   inline bool al_sph    (flags const&f) { return f.is_set(flags::all_sph); }
+  inline bool al_sink   (flags const&f) { return f.is_set(flags::all_sink); }
   inline bool al_sticky (flags const&f) { return f.is_set(flags::all_sticky); }
   inline bool ignore    (flags const&f) { return f.is_set(flags::ignore); }
   inline bool in_subset (flags const&f) { return !f.is_set(flags::ignore); }
   inline bool is_active (const flags*f) { return f->is_set(flags::active); }
   inline bool to_remove (const flags*f) { return f->is_set(flags::remove); }
   inline bool is_sph    (const flags*f) { return f->is_set(flags::sph); }
+  inline bool is_sink   (const flags*f) { return f->is_set(flags::sink); }
   inline bool is_sticky (const flags*f) { return f->is_set(flags::sticky); }
   inline bool is_new    (const flags*f) { return f->is_set(flags::newbody); }
   inline bool in_subtree(const flags*f) { return f->is_set(flags::subtree); }
   inline bool is_marked (const flags*f) { return f->is_set(flags::marked); }
   inline bool al_active (const flags*f) { return f->is_set(flags::all_active); }
   inline bool al_sph    (const flags*f) { return f->is_set(flags::all_sph); }
+  inline bool al_sink   (const flags*f) { return f->is_set(flags::all_sink); }
   inline bool al_sticky (const flags*f) { return f->is_set(flags::all_sticky); }
   inline bool ignore    (const flags*f) { return f->is_set(flags::ignore); }
   inline bool in_subset (const flags*f) { return !f->is_set(flags::ignore); }
@@ -856,8 +865,9 @@ namespace falcON {
   // data related to bodytype management                                      //
   //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
-  const unsigned BT_NUM = 2;
+  const unsigned BT_NUM = 3;
   const fieldset BT_DATA[BT_NUM] = { fieldset::STD | fieldset::SPH,
+				     fieldset::STD | fieldset::SPH,
 				     fieldset::STD };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -873,11 +883,9 @@ namespace falcON {
   public:
     /// types of bodies
     enum bits {
-//       sink = 0, ///< sink: sink particles
-//       gas  = 1, ///< gas: SPH particles
-//       std  = 2  ///< standard: non-SPH bodies
-      gas = 0, ///< gas: SPH particles
-      std = 1  ///< standard: non-SPH bodies
+      sink = 0, ///< sink: sink particles
+      gas  = 1, ///< gas: SPH particles
+      std  = 2  ///< standard: non-SPH bodies
     };
     //--------------------------------------------------------------------------
   private:
@@ -938,11 +946,12 @@ namespace falcON {
     bool allows(fieldbit f) const {
       return BT_DATA[val].contain(f);
     }
-    /// return a name like "std" or "gas"
+    /// return a name like "sink", "gas", or "std"
     const char* name() const {
       switch(val) {
-      case gas: return "gas";
-      default:  return "std";
+      case sink: return "sink";
+      case gas:  return "gas";
+      default:   return "std";
       }
     }
   };

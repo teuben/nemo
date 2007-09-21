@@ -691,8 +691,8 @@ namespace falcON {
     mutable data_in *DATA_IN;                      // if non-zero: open snapshot
     nemo_in const   &INPUT;                        // our input stream          
     mutable int      FIELDS_READ;                  // fields read already       
-    bool             HAS_NSPH, HAS_TIME;           // do we have these data?    
-    unsigned         NBOD, NSPH;                   // # bodies, # SPH bodies    
+    bool             HAS_TIME;                     // have simulation time?     
+    unsigned         NTOT, NBOD[BT_NUM];           // # bodies, # bodies / type 
     double           TIME;                         // simulations time          
     //--------------------------------------------------------------------------
     void*const& stream() const {                   // our nemo stream           
@@ -710,17 +710,18 @@ namespace falcON {
     /// destruction: close snapshot set in NEMO input stream
     ~snap_in() falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// do we have # SPH bodies?
-    bool has_Nsph() const { return HAS_NSPH; }
     /// do we have simul time?  
     bool has_time() const { return HAS_TIME; }
-    /// return # bodies         
-    unsigned const&Nbod() const { return NBOD; }
-    /// return # SPH bodies     
-    unsigned const&Nsph() const { return NSPH; }
+    /// return total # bodies
+    unsigned const&Ntot() const { return NTOT; }
+    /// return array with # bodies per type
+    const unsigned*Nbod() const { return NBOD; }
+    /// return # bodies per given type
+    unsigned const&Nbod(bodytype t) const { return NBOD[t]; }
     /// return the number of data expected for a given field
-    unsigned       N(nemo_io::Field F) const {
-      return nemo_io::is_sph(F)? NSPH : NBOD;
+    unsigned N(nemo_io::Field F) const {
+      return nemo_io::is_sph(F)?
+	NBOD[bodytype::sink]+NBOD[bodytype::gas] : NTOT;
     }
     /// return the simulation time of the snapshot
     double   const&time() const { return TIME; }
@@ -751,7 +752,7 @@ namespace falcON {
     snap_in const          &INPUT;                 // our snapshot              
     const nemo_io::Field    FIELD;                 // sort of data we are for   
     unsigned                NREAD;                 // how many have been read?  
-    unsigned                NTOT;                  // how many are there?       
+    unsigned                NTOT;                  // # data actually on file   
     nemo_io::DataType       TYPE;                  // which data type?          
     unsigned                SUBN;                  // how many items per datum  
     static const int        NDIM = Ndim;           // # spatial dimensions      
@@ -889,7 +890,7 @@ namespace falcON {
     nemo_out const   &OUTPUT;                      // our output stream         
     mutable data_out *DATA_OUT;                    // if non-zero: open data_out
     mutable int       FIELDS_WRITTEN;              // data already written out  
-    unsigned          NBOD, NSPH;                  // # bodies, # SPH bodies    
+    unsigned          NTOT, NBOD[BT_NUM];          // # bodies, # bodies / type 
     //--------------------------------------------------------------------------
     void*const& stream() const {                   // our nemo stream           
       return OUTPUT.stream();
@@ -905,17 +906,21 @@ namespace falcON {
     /// \param Nsph (input) # SPH bodies (must come first)
     /// \param time (input) simulation time
     snap_out(nemo_out const&out,
-	     unsigned       Nbod,
-	     unsigned       Nsph,
+	     const unsigned Nbod[BT_NUM],
 	     double         time) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// destruction: close snapshot set in NEMO output stream
     ~snap_out() falcON_THROWING;
     //--------------------------------------------------------------------------
     /// return total # bodies
-    unsigned const&Nbod() const { return NBOD; }
-    /// return # SPH bodies
-    unsigned const&Nsph() const { return NSPH; }
+    unsigned const&Ntot() const { return NTOT; }
+    /// return # bodies per type
+    unsigned const&Nbod(bodytype t) const { return NBOD[t]; }
+    /// return the number of data expected for a given field
+    unsigned N(nemo_io::Field F) const {
+      return nemo_io::is_sph(F)?
+	NBOD[bodytype::sink]+NBOD[bodytype::gas] : NTOT;
+    }
     /// have data for given field been written already?
     bool has_been_written(nemo_io::Field f) const {
       return FIELDS_WRITTEN & f;

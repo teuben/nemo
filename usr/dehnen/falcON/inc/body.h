@@ -94,15 +94,9 @@ namespace falcON {
     //==========================================================================
   public:
     enum {
-      NbyMaxBits = fieldset::STD,                  // gravity etc: max fields   
-      NbyDefBits = fieldset::gravity,              // gravity etc: default      
-      NbyNBDBits = NbyMaxBits & fieldset::nemo,    // gravity etc: nemo I/O     
-      SPHMaxBits = fieldset::sphmax,               // SPH etc: max fields       
-      SPHDefBits = fieldset::sphdef,               // SPH etc: default          
-      SPHNBDBits = SPHMaxBits & fieldset::nemo,    // SPH etc: emo I/O          
-      MaxBits    = NbyMaxBits | SPHMaxBits,        // maximum fields            
-      DefBits    = NbyDefBits | SPHDefBits,        // default fields            
-      NBDBits    = NbyNBDBits | SPHNBDBits         // nemo I/O fields           
+      DefSTD      = fieldset::gravity,
+      DefSPH      = fieldset::sphdef,
+      DefaultBits = DefSTD | DefSPH
     };
     class iterator;
     //==========================================================================
@@ -420,6 +414,8 @@ namespace falcON {
     unsigned const&N_alloc (bodytype t) const { return NALL[int(t)]; }
     /// total # bodies allocated.
     unsigned       N_alloc ()           const { return sum<BT_NUM>(NALL); }
+    /// array with # bodies in use per bodytype.
+    const unsigned*N_bodies_per_type()  const { return NBOD; }
     /// # bodies in use for a given bodytype.
     unsigned const&N_bodies(bodytype t) const { return NBOD[int(t)]; }
     /// total # bodies in use.
@@ -430,6 +426,8 @@ namespace falcON {
     unsigned const&N_sph   ()           const { return NBOD[bodytype::gas]; }
     /// # standard bodies in use.
     unsigned const&N_std   ()           const { return NBOD[bodytype::std]; }
+    /// # standard bodies in use.
+    unsigned const&N_sink  ()           const { return NBOD[bodytype::sink]; }
     /// # bodies allocated but not used for a given bodytype.
     unsigned       N_free  (bodytype t) const { return N_alloc(t)-N_bodies(t); }
     /// total # bodies allocated but not used.
@@ -968,21 +966,27 @@ namespace falcON {
     //==========================================================================
     /// \name construction, destruction, and management of bodies and body data 
     //@{                                                                        
+    /// Constructor 0: construction with N=0, but data fields
+    explicit 
+    bodies(fieldset Bd=fieldset(DefaultBits)) falcON_THROWING;
+    //--------------------------------------------------------------------------
     /// Constructor 1, backward compatible version
     ///
-    /// \param Nb (input) total number of bodies
+    /// \param Ntot(input) total number of bodies
     /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
-    /// \param Ns (input) number of SPH bodies, must be <= Nb
+    /// \param Nsph (input, optional) number of SPH bodies
+    /// \param Nsink (input, optional) number of SINK bodies
+    /// \note Nsph + Nsink must not exceed Ntot
     explicit 
-    bodies(unsigned Nb, fieldset Bd=fieldset(DefBits), unsigned Ns=0u)
-      falcON_THROWING;
+    bodies(unsigned Ntot, fieldset Bd=fieldset(DefaultBits),
+	   unsigned Nsph=0u, unsigned Nsink=0u) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Constructor 1, new version
     ///
     /// \param N  (input) array with number of bodies per bodytype
     /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
     explicit 
-    bodies(const unsigned*N=0, fieldset Bd=fieldset(DefBits))
+    bodies(const unsigned N[BT_NUM], fieldset Bd=fieldset(DefaultBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Constructor 2: copy constructor
@@ -1026,38 +1030,44 @@ namespace falcON {
     ///
     /// \param N  (input) array with number of bodies per bodytype
     /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
-    void reset(const unsigned*N =0, fieldset Bd= fieldset(DefBits))
+    void reset(const unsigned N[BT_NUM], fieldset Bd= fieldset(DefaultBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Resets N, data: equivalent destructor followed by constructor 1 (old
     /// version)
     ///
-    /// \param Nb (input) total number of bodies
-    /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
-    /// \param Ns (input) number of SPH bodies, must be <= Nb
-    void reset(unsigned Nb, fieldset Bd=fieldset(DefBits), unsigned Ns=0u)
+    /// \param Ntot (input) total number of bodies
+    /// \param Bd (input, optional) data fields (default: mxvapfHRVJFC)
+    /// \param Nsph (input, optional) number of SPH bodies
+    /// \param Nsink (input, optional) number of SINK bodies
+    /// \note Nsph + Nsink must not exceed Ntot
+    void reset(unsigned Ntot, fieldset Bd=fieldset(DefaultBits),
+	       unsigned Nsph=0u, unsigned Nsink=0u)
       falcON_THROWING
     {
-      unsigned n[BT_NUM] = {Ns, Nb>Ns?Nb-Ns:0};
+      if(Nsph+Nsink > Ntot)
+	falcON_THROW("bodies::reset(): Nsph+Nsink=%u > Ntot=%u\n",
+		     Nsph+Nsink,Ntot);
+      unsigned n[BT_NUM] = {Nsink, Nsph, Ntot-Nsink-Nsph};
       reset(n,Bd);
     }
     //--------------------------------------------------------------------------
     /// Resets N, keeps data the same (N[] = bodies per bodytype)
     ///
     /// \param N  (input) array with number of bodies per bodytype
-    void resetN(const unsigned* N=0) falcON_THROWING
+    void resetN(const unsigned N[BT_NUM]) falcON_THROWING
     {
       reset(N,BITS);
     }
-    //--------------------------------------------------------------------------
-    /// Resets N, keeps data the same
-    ///
-    /// \param Nb (input) total number of bodies
-    /// \param Ns (input) number of SPH bodies, must be <= Nb
-    void resetN(unsigned Nb, unsigned Ns= 0u) falcON_THROWING
-    {
-      reset(Nb,BITS,Ns);
-    }
+//     //--------------------------------------------------------------------------
+//     /// Resets N, keeps data the same
+//     ///
+//     /// \param Nb (input) total number of bodies
+//     /// \param Ns (input) number of SPH bodies, must be <= Nb
+//     void resetN(unsigned Nb, unsigned Ns= 0u) falcON_THROWING
+//     {
+//       reset(Nb,BITS,Ns);
+//     }
     //--------------------------------------------------------------------------
     /// Reset some body data to zero
     ///
@@ -1277,13 +1287,33 @@ namespace falcON {
     /// \param In (input) input stream to read from
     /// \param Bd (input) array of body data fields to read in given order
     /// \param Nd (input) number of entries in that array
-    /// \param Nb (input) number of lines to read
-    /// \param Ns (input, optional) number of lines with SPH bodies ( <= Nb )
+    /// \param N  (input) number of lines to read per body type
     void read_simple_ascii(std::istream  &In,
 			   const fieldbit*Bd,			   
 			   unsigned       Nd,
-			   unsigned       Nb,
-			   unsigned       Ns= 0);
+			   const unsigned N[BT_NUM]);
+    /// Read simple ascii formatted input backward compatible
+    ///
+    /// \param In (input) input stream to read from
+    /// \param Bd (input) array of body data fields to read in given order
+    /// \param Nd (input) number of entries in that array
+    /// \param Ntot (input) number of lines to read
+    /// \param Nsph (input, optional) number of lines with SPH bodies
+    /// \param Nsink (input, optional) number of lines with SINK bodies
+    /// \note Nsink+Nsph must not exceed Ntot
+    void read_simple_ascii(std::istream  &In,
+			   const fieldbit*Bd,			   
+			   unsigned       Nd,
+			   unsigned       Ntot,
+			   unsigned       Nsph = 0,
+			   unsigned       Nsink= 0) falcON_THROWING
+    {
+      if(Nsink+Nsph > Ntot)
+	falcON_THROW("bodies::read_simple_ascii: Nsink+Nsph=%u > Ntot=%u\n",
+		     Nsink+Nsph, Ntot);
+      const unsigned N[BT_NUM] = {Nsink, Nsph, Ntot-Nsink-Nsph};
+      read_simple_ascii(In,Bd,Nd,N);
+    }
 #ifdef falcON_REAL_IS_FLOAT
     //--------------------------------------------------------------------------
     /// Reads a single snapshot from file(s) written in gadget2 data format 1
@@ -1400,7 +1430,7 @@ namespace falcON {
     //                                                                          
     //==========================================================================
     // set up blocks to hold N[t] bodies of type t                              
-    void set_data(const unsigned*) falcON_THROWING;
+    void set_data(const unsigned[BT_NUM]) falcON_THROWING;
     //--------------------------------------------------------------------------
     // link the TYPES[] lists together and set FIRST                            
     void link_blocks();
@@ -1653,28 +1683,38 @@ namespace falcON {
     /// Constructor 0: just give the fields to be supported,
     /// used in NBodyCode::NBodyCode() of file nbody.h
     explicit
-    snapshot(fieldset Bd= fieldset(DefBits)) falcON_THROWING;
+    snapshot(fieldset Bd= fieldset(DefaultBits)) falcON_THROWING :
+    bodies(Bd), INIT(false), TINI(0.), TIME(0.), PBNK(0)
+    {}
     //--------------------------------------------------------------------------
     /// Constructor 1 (old version)
     ///
     /// \param t  (input) time of snapshot
-    /// \param Nb (input) total number of bodies
+    /// \param Ntot (input) total number of bodies
     /// \param Bd (input, optional) body data fields to be allocated
-    /// \param Ns (input, optional) number of SPH bodies
+    /// \param Nsph (input, optional) number of SPH bodies
+    /// \param Nsink (input, optional) number of SINK particles
     snapshot(double   t,
-	     unsigned Nb,
-	     fieldset Bd = fieldset(DefBits),
-	     unsigned Ns = 0) falcON_THROWING;
+	     unsigned Ntot = 0,
+	     fieldset Bd   = fieldset(DefaultBits),
+	     unsigned Nsph = 0,
+	     unsigned Nsink= 0) falcON_THROWING :
+    bodies(Ntot, Bd, Nsph, Nsink),
+    INIT(true), TINI(t), TIME(t), PBNK(0)
+    {}
     //--------------------------------------------------------------------------
     /// Constructor 1 (new version)
     ///
-    /// \param t  (input, optional) time of snapshot
-    /// \param N  (input, optional) number of bodies per bodytype
+    /// \param t  (input) time of snapshot
+    /// \param N  (input) number of bodies per bodytype
     /// \param Bd (input, optional) body data fields to be allocated
     explicit 
     snapshot(double         t,
-	     const unsigned*N = 0 ,
-	     fieldset       Bd= fieldset(DefBits)) falcON_THROWING;
+	     const unsigned N[BT_NUM],
+	     fieldset       Bd= fieldset(DefaultBits)) falcON_THROWING :
+    bodies(N,Bd),
+    INIT(true), TINI(t), TIME(t), PBNK(0)
+    {}
     //--------------------------------------------------------------------------
     /// copy constructor from bodies
     ///
@@ -1687,7 +1727,9 @@ namespace falcON {
     snapshot(double       t,
 	     bodies const&B,
 	     fieldset     Bd=fieldset::all,
-	     flags        F =flags::empty) falcON_THROWING;
+	     flags        F =flags::empty) falcON_THROWING :
+    bodies(B,Bd,F), INIT(true), TINI(t), TIME(t), PBNK(0)
+    {}
     //--------------------------------------------------------------------------
     /// copy constructor from snapshot
     ///
@@ -1763,14 +1805,14 @@ namespace falcON {
     /// \param Si    (input) snapshot input
     /// \param Bd    (input) body data fields to be read
     /// \param start (input) first body to be read into
-    /// \param Nread (input, optional) read this many (default: all in input)
     /// \param warn  (input, optional) issue falcON::warning()s about missing
     ///               data (default: issue warning)
-    fieldset read_nemo(snap_in const &Si,
+    /// \param Nread (input, optional) read this many (default: all in input)
+    fieldset read_part(snap_in const &Si,
 		       fieldset       Bd,
 		       iterator const&start,
-		       unsigned       Nread=0,
-		       bool           warn=1) falcON_THROWING;
+		       bool           warn=1,
+		       unsigned       Nread=0) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Generate a NEMO snapshot on disk from all bodies
     ///
@@ -1884,6 +1926,23 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
                    NAME  != (PTER)->end_typed_bodies(TYPE); ++NAME)
 #endif
 //------------------------------------------------------------------------------
+#ifndef LoopSINKBodies           /* loop all SINK bodies                     */
+/// This macro provides an easy way to loop over all SPH bodies
+///
+/// A typical usage would look like this \code
+///   snapshot *S;
+///   LoopSINKBodies(S,b,t) {
+///     b.pos() += dt*vel(b);
+///     b.vel() += dt*acc(b);
+///     b.uin() += dt*udin(b);
+///   } \endcode
+///
+/// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
+/// \param NAME  name given to loop variable (of type falcON::body)
+#define LoopSINKBodies(PTER,NAME)		\
+  LoopTypedBodies(PTER,NAME,bodytype::sink)
+#endif
+//------------------------------------------------------------------------------
 #ifndef LoopSPHBodies           /* loop all SPH bodies                       */
 /// This macro provides an easy way to loop over all SPH bodies
 ///
@@ -1901,8 +1960,8 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
   LoopTypedBodies(PTER,NAME,bodytype::gas)
 #endif
 //------------------------------------------------------------------------------
-#ifndef LoopSTDBodies           /* loop all non-SPH bodies                   */
-/// This macro provides an easy way to loop over all non-SPH bodies
+#ifndef LoopSTDBodies           /* loop all STD bodies                   */
+/// This macro provides an easy way to loop over all STD bodies
 ///
 /// A typical usage would look like this \code
 ///   snapshot *S;

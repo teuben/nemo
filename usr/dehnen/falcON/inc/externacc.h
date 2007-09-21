@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   inc/public/externacc.h                                              
+/// \file   inc/externacc.h                                                     
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2000-2006                                                           

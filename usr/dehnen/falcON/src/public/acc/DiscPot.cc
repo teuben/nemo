@@ -43,7 +43,8 @@
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // Versions                                                                    |
-// 0.0   18-sep-2007    created                                           WD   |
+// 0.0   18-sep-2007    created                                             WD |
+// 0.1   19-sep-2007    small change in debug info                          WD |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <iostream>
@@ -79,23 +80,30 @@ namespace {
     {
       if(npar<5 && nemo_debug(1) || nemo_debug(2) )
 	std::cerr<<
-	  " falcON debug info:\n"
+	  "### nemo debug info:\n"
 	  " external potential \"DiscPot\" recognizes 5 parameters:\n"
 	  "   omega   pattern speed (ignored)\n"
-	  "   Sig_0   central surface density   ["<<(*this)[0]<<"] (default 1)\n"
-	  "   R_d     disc scale length         ["<<(*this)[1]<<"] (default 1)\n"
-	  "   z_d     disc scale height         ["<<(*this)[2]<<"] (default 0.1)\n"
-	  "   R_0     radius of central hole    ["<<(*this)[3]<<"] (default 0)\n"
-	  "   eps     cosine modulation term    ["<<(*this)[4]<<"] (default 0)\n"
-	  " The disc density is given by rho(R,z)=Sigma(R)*h(z)\n"
-	  " with\n\n"
+	  "   Sig_0   central surface density   [1]\n"
+	  "   R_d     disc scale length         [1]\n"
+	  "   z_d     disc scale height         [0.1]\n"
+	  "   R_0     radius of central hole    [0]\n"
+	  "   eps     cosine modulation term    [0]\n"
+	  " The disc density is given by rho(R,z)=Sigma(R)*h(z) with\n\n"
 	  "   Sigma(R) = Sig_0 exp(-R_0/R-R/R_d+eps*cos[R/R_d])\n\n"
-	  " and\n\n"
 	  "          exp(-z/z_d) / (2 z_d)          if z_d > 0\n"
 	  "   h(z) = delta(z)                       if z_d = 0\n"
 	  "          sech^2(z/2|z_d|) / (4|z_d|)    if z_d < 0\n\n";
-      if (npar>5)
+      if (npar>6)
 	warning("Skipped potential parameters for DiscPot beyond %d", npar);
+      if(nemo_debug(2))
+	std::cerr<<
+	  "### nemo debug info:\n"
+	  " external potential \"DiscPot\" initialized with:\n"
+	  "   Sig_0 = "<<(*this)[0]<<"\n"
+	  "   R_d   = "<<(*this)[1]<<"\n"
+	  "   z_d   = "<<(*this)[2]<<"\n"
+	  "   R_0   = "<<(*this)[3]<<"\n"
+	  "   eps   = "<<(*this)[4]<<"\n";
     }
     //--------------------------------------------------------------------------
     template<int NDIM, typename scalar>

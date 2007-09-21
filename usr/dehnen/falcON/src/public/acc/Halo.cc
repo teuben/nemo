@@ -50,7 +50,7 @@ namespace {
     {
       if(npar<8 && nemo_debug(1) || nemo_debug(2) )
 	std::cerr<<
-	  " falcON debug info:\n"
+	  "### nemo debug info:\n"
 	  " external potential \"Halo\" recognizes 8 parameters:\n"
 	  "   omega   pattern speed (ignored)   [0]\n"
 	  "   r_s     scale radius              [1]\n"
@@ -72,7 +72,7 @@ namespace {
 	warning("external potential \"Halo\": file \"%s\" ignored\n",file);
       if(nemo_debug(2))
 	std::cerr<<
-	  " falcON debug info:\n"
+	  "### nemo debug info:\n"
 	  " external potential \"Halo\" initialized with:\n"
 	  "   r_s = "<<scale_radius()<<"\n"
 	  "   m_t = "<<total_mass()<<"\n"

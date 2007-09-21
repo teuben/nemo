@@ -496,7 +496,7 @@ namespace {
     // 0. check consistency of input
     //
     if(npar<5 && nemo_debug(2))
-      std::cerr<<"\n Monopole:\n"
+      std::cerr<<"### nemo Debug info: Monopole:\n"
 	"  provides the acceleration field due to the potential\n\n"
 	"  Phi_0(x) + A(t) * [Phi(x) - Phi_0(x)],\n\n"
 	"  where Phi(x) is a given conservative potential, Phi_0(x) its\n"
@@ -515,7 +515,7 @@ namespace {
 	"  par[4] = number of points in table for monopole       [1001]\n\n";
     if(npar>5)
       warning("Monopole: skipped parameters beyond 6\n");
-    nemo_dprintf(4," Monopole: timer set to: %s with t0=%f, tau=%f\n",
+    nemo_dprintf(4,"Monopole: timer set to: %s with t0=%f, tau=%f\n",
 		 timer::describe(), timer::T0(), timer::TAU());
     if(NR < 2)
       error("Monopole: NR=%d < 2\n",NR);
@@ -526,7 +526,7 @@ namespace {
     //
     // 1. scan data file for accname, accpars, accfile, and initialize Phi
     //
-    nemo_dprintf(4," Monopole: scanning file \"%s\"\n",file);
+    nemo_dprintf(4,"Monopole: scanning file \"%s\"\n",file);
     const int size=256;
     std::ifstream in(file);
     if(! in.good())
@@ -567,10 +567,10 @@ namespace {
     if(accname == 0)
       error("Monopole: no accname= entry found in file \"%s\"\n",file);
     nemo_dprintf(4,"Monopole: successfully scanned accfile:\n");
-    nemo_dprintf(4,"		accname=%s\n",accname);
-    if(accpars) nemo_dprintf(4,"		accpars=%s\n",accpars);
-    if(accfile) nemo_dprintf(4,"		accfile=%s\n",accfile);
-    nemo_dprintf(4," Monopole: now initializing \"%s\"\n",accname);
+    nemo_dprintf(4,"	       accname=%s\n",accname);
+    if(accpars) nemo_dprintf(4,"	       accpars=%s\n",accpars);
+    if(accfile) nemo_dprintf(4,"	       accfile=%s\n",accfile);
+    nemo_dprintf(4,"Monopole: now initializing \"%s\"\n",accname);
     bool m(0),v(0);
     PHI = get_acceleration(accname,accpars,accfile,&m,&v);
     if(PHI==0)
@@ -660,7 +660,7 @@ namespace {
     const scalar *x = pos;
     scalar       *p = pot;
     scalar       *a = acc;
-    nemo_dprintf(4," Monopole: setting P = %f * Phi_0\n",pmono);
+    nemo_dprintf(4,"Monopole: setting P = %f * Phi_0\n",pmono);
     for(int n=0; n!=nbod; ++n,x+=NDIM,p++,a+=NDIM)
       if(flg==0 || flg[n] & 1) {
 	double xq = v_norm<NDIM>(x), f0, p0;
@@ -691,12 +691,12 @@ namespace {
   {
     // obtain amplitude of growth factor
     const scalar ampl = timer::operator()(time);
-    nemo_dprintf(4," Monopole: amplitude=%f\n",ampl);
+    nemo_dprintf(4,"Monopole: amplitude=%f\n",ampl);
     //
     // 1. if A(t) == 1 external potential only
     //
     if(ampl == 1.) {
-      nemo_dprintf(4," Monopole: setting P = Phi\n");
+      nemo_dprintf(4,"Monopole: setting P = Phi\n");
       PHI(NDIM,time,nbod,0,
 	  static_cast<const void*>(pos),0,flg,
 	  static_cast<void*>(pot),
@@ -716,7 +716,7 @@ namespace {
     //
     // 3. add A(t) times external potential
     //
-    nemo_dprintf(4," Monopole: adding P += %f * Phi\n",ampl);
+    nemo_dprintf(4,"Monopole: adding P += %f * Phi\n",ampl);
     scalar *pots = new scalar[nbod];
     scalar *accs = new scalar[NDIM*nbod];
     PHI(NDIM,time,nbod,0,
