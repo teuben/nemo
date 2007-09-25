@@ -237,7 +237,7 @@ if ($?spheroid) then
     echo "mkgalaxy:    file $spheroid assumed to contain halo & bulge adjusted to disc"
     echo "             skipping steps 1 & 2"
     echo "             NOTE: the user MUST ensure that parameters match!"
-    set skip=0
+    set skip=1
     goto populatedisc
 endif
 
