@@ -85,8 +85,9 @@ void bodies::block::reset_data(fieldset b) const falcON_THROWING {
 inline
 void bodies::block::add_field (fieldbit f) falcON_THROWING {
   if(TYPE.allows(f) && 0 == DATA[value(f)] ) {
-    debug_info(4,"bodies::block::add_field(): allocating data for %u %c (%s)\n",
-	       NALL,letter(f),fullname(f));
+    debug_info(4,"bodies::block::add_field(): "
+	       "allocating data for %s bodies: %u %c (%s)\n",
+	       TYPE.name(),NALL,letter(f),fullname(f));
     set_data_void(f, falcON_NEW(char,NALL*falcON::size(f)));
     if(f == fieldbit::f) reset_flags();
   }
@@ -644,6 +645,10 @@ void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
 	  falcON_ExceptF("# blocks exceeds limit","bodies");
 	a = min(NALL[t]-n, unsigned(index::max_bodies));
 	block *b = new block(NBLK,a,a,i,t,BITS,this);
+	if(debug(10))
+	   std::cerr<<"### falcON Debug Info:"
+		    <<" allocated "<<nameof(block)
+		    <<" @ "<<static_cast<void*>(b)<<'\n';
 	i+= a;
 	if(last) last->link(b);
 	last = b;
@@ -1041,8 +1046,13 @@ namespace {
   void Read(std::istream&in, body &B) {
     in >> B. template datum<BIT>();
   }
-  void Ignore(std::istream&, body &) {}
+  template<int BIT> 
+  void Write(std::ostream&to, const body &B) {
+    to << ' ' << field_traits<BIT>::word()
+       << '=' << B. template const_dat<BIT>();
+  }
   typedef void (*p_reader)(std::istream&, body&);
+  typedef void (*p_writer)(std::ostream&, const body&);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::read_simple_ascii(std::istream  &in,
@@ -1052,20 +1062,27 @@ void bodies::read_simple_ascii(std::istream  &in,
 {
   // 1. create table of readers                                                 
   fieldset get;
-  p_reader read[BT_NUM][100] = {0};
+  p_reader read [BT_NUM][100] = {0};
+  p_writer write[BT_NUM][100] = {0};
   if(Ni > 100) {
     Ni = 100;
     warning(" can only read the first 100 data entries\n");
   }
   for(int i=0; i!=Ni; ++i) {
+    debug_info(6,"bodies::read_simple_ascii(): item[%d]=%c\n",
+	       i,letter(item[i]));
     if(get.contain(item[i]))
-      warning("bodies::read_simple_ascii: reading item more than once");
+      warning("bodies::read_simple_ascii(): reading item '%c' more than once",
+	      letter(item[i]));
     get |= fieldset(item[i]);
     switch(value(item[i])) {
 #define SET_READ(BIT,NAME)				\
     case BIT:						\
       for(bodytype t; t; ++t)				\
-        if(t.allows(BIT)) read[t][i] = &Read<BIT>;	\
+        if(t.allows(BIT)) {				\
+          read[t][i] = &Read<BIT>;			\
+          if(debug(20)) write[t][i]= &Write<BIT>;	\
+	}						\
       break;
       DEF_NAMED(SET_READ);
 #undef SET_READ
@@ -1080,15 +1097,25 @@ void bodies::read_simple_ascii(std::istream  &in,
   reset(N, BITS|get);
   // 3. loop bodies & read data whereby ignoring lines starting with '#'        
   for(bodytype t; t; ++t)
-    if(N[t])
+    if(N[t]) {
+      debug_info(4,"bodies::read_simple_ascii(): now reading %d %s bodies...\n",
+		 N[t],t.name());
       LoopTypedBodies(this,Bi,t) {
 	while( in && eat_line(in,'#') );
 	if(!in) falcON_ExceptF("end of input before data have been read",
 			       "bodies::read_simple_ascii()");
+	if(debug(20))
+	  std::cerr<<"### falcON Debug Info: "
+		   <<"bodies::read_simple_ascii(): body "<<Bi<<" reading";
 	for(int i=0; i!=Ni; ++i)
-	  if(read[t][i]) read[t][i](in,Bi);
+	  if(read[t][i]) {
+	    read [t][i](in,Bi);
+	    if(write[t][i]) write[t][i](std::cerr,Bi);
+	  }
+	if(debug(20)) std::cerr<<'\n';
 	SwallowRestofLine(in);
       }
+    }
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -1541,8 +1568,8 @@ double bodies::read_gadget(const char*fname,
   if(NB[bodytype::gas] == 0) read &= fieldset(fieldset::nonSPH);
   reset(NB,read);
   // 3 loop data files
-  body SPH = begin_sph_bodies();
-  body STD = begin_std_bodies();
+  body SPH = begin_typed_bodies(bodytype::gas);
+  body STD = begin_typed_bodies(bodytype::std);
   for(int ifile=0; ifile!=nfile; ) {
     fieldset fgot;
     size_t   fsze = rec+rec + sizeof(GadgetHeader);
@@ -1676,9 +1703,9 @@ double bodies::read_gadget(const char*fname,
     FortranORec F(out, nw * field_traits<BIT>::size, rec);		\
     if(have(BIT)) {							\
       if(N_sph())							\
-	begin_sph_bodies().write_Fortran(F, BIT, N_sph());		\
+	begin_typed_bodies(bodytype::gas).write_Fortran(F, BIT, N_sph()); \
       if(!is_sph(BIT) && N_std())					\
-        begin_std_bodies().write_Fortran(F, BIT, N_std());		\
+        begin_typed_bodies(bodytype::std).write_Fortran(F, BIT, N_std()); \
       debug_info(2,"bodies::write_gadget(): written %u %c\n",		\
 	         nw, field_traits<BIT>::word());			\
     } else {								\

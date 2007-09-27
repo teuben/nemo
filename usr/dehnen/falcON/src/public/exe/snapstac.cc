@@ -1,7 +1,7 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/mains/snapfilter.cc                                             
+/// \file   src/public/exe/snapstac.cc                                          
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2005,2007                                                           
@@ -56,7 +56,7 @@ string defv[] = {
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string
-usage = "snapstack -- stack two N-body systems on top of each other";
+usage = "snapstac -- stack two N-body systems on top of each other";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -73,7 +73,7 @@ void falcON::main() falcON_THROWING
   unsigned nbod[BT_NUM] = {0};
   for(bodytype t; t; ++t)
     nbod[t] = snap1.Nbod(t) + snap2.Nbod(t);
-  snapshot       shot(time, nbod, fieldset::o);
+  snapshot shot(time, nbod, fieldset::o);
   // read snapshots
   const body b1(shot.begin_all_bodies());
   got &= shot.read_part(snap1, got, b1, 0);

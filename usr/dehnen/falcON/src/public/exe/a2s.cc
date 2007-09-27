@@ -1,14 +1,14 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/mains/a2s.cc                                                    
+/// \file   src/public/exe/a2s.cc                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2002-2006                                                           
+/// \date   2002-2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2006 Walter Dehnen                                        
+// Copyright (C) 2002-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -38,9 +38,10 @@
 // v 2.0   16/06/2005  WD new falcON                                            
 // v 2.1   27/06/2005  WD deBUGged                                              
 // v 2.2   04/07/2006  WD made public (in the hope that it's bug free ... )     
+// v 2.3   27/09/2007  WD new keywords Nbod and Nsink                           
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.2"
-#define falcON_VERSION_D "04-jul-2006 Walter Dehnen                          "
+#define falcON_VERSION   "2.3"
+#define falcON_VERSION_D "27-sep-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "a2s"
@@ -53,8 +54,10 @@
 string defv[] = {
   "in=???\n           input ascii file                                   ",
   "out=???\n          output snapshot file                               ",
-  "N=???\n            number of lines (ignore lines starting with '#'    ",
-  "Ns=0\n             first Ns lines to contain SPH data                 ",
+  "N=\n               total # lines (lines starting '#' are ignored)     ",
+  "Nsink=0\n          first Nsink lines to contain SINK particles        ",
+  "Nsph=0\n           next  Nsph  lines to contain SPH particles         ",
+  "Nbod=\n            (Nsink,Nsph,Nstd), overrides N,Nsink,Nsph          ",
   "read=???\n         items to read (in given order). Recognizing:\n"
   "                    m: mass\n"
   "                    x: position\n"
@@ -70,17 +73,17 @@ string defv[] = {
   "                    r: density estimate\n"
   "                    y: auxiliary scalar\n"
   "                    z: auxiliary vector\n"
-  "                    H: SPH smoothing length\n"
-  "                    N: SPH number of neighbours\n"
-  "                    U: SPH internal energy\n"
-  "                    I: SPH (dU/dt)_total\n"
-  "                    E: SPH (dU/dt)_external\n"
-  "                    S: SPH entropy or entropy function\n"
-  "                    R: SPH gas density\n"
-  "                    C: SPH sound speed\n"
-  "                    D: SPH drho/dt\n"
-  "                    J: SPH dh/dt or dlnh/dt\n"
-  "                    F: SPH factor f_i                                 ",
+  "                    H: SPH/SINK smoothing length\n"
+  "                    N: SPH/SINK number of neighbours\n"
+  "                    U: SPH/SINK internal energy\n"
+  "                    I: SPH/SINK (dU/dt)_total\n"
+  "                    E: SPH/SINK (dU/dt)_external\n"
+  "                    S: SPH/SINK entropy or entropy function\n"
+  "                    R: SPH/SINK gas density\n"
+  "                    C: SPH/SINK sound speed\n"
+  "                    D: SPH/SINK drho/dt\n"
+  "                    J: SPH/SINK dh/dt or dlnh/dt\n"
+  "                    F: SPH/SINK factor f_i                            ",
   "write=\n           items to write [default: read]                     ",
   "time=0\n           time for snapshot                                  ",
   falcON_DEFV, NULL };
@@ -96,8 +99,20 @@ void falcON::main() falcON_THROWING
   const char*get = getparam("read");
   for(; K!=32 && get[K]; ++K)
     item[K] = fieldbit(get[K]);
-  snapshot shot (getdparam("time"));
-  shot.read_simple_ascii(in, item, K, getiparam("N"), getiparam("Ns"));
+  unsigned Nbod[BT_NUM]={0};
+  if(hasvalue("Nbod")) {
+    if(BT_NUM != getaparam("Nbod",Nbod,BT_NUM))
+      error("keyword \"Nbod\" must give %d numbers",BT_NUM);
+  } else {
+    unsigned N = getiparam("N");
+    Nbod[0] = getiparam("Nsink");
+    Nbod[1] = getiparam("Nsph");
+    if(N < Nbod[0]+Nbod[1])
+      error("N=%d < Nsink+Nsph=%d",N,Nbod[0]+Nbod[1]);
+    Nbod[2] = N-Nbod[0]-Nbod[1];
+  }
+  snapshot shot(getdparam("time"), Nbod, fieldset::empty);
+  shot.read_simple_ascii(in, item, K, Nbod);
   nemo_out out  (getparam("out"));
   fieldset read (getioparam("read"));
   fieldset write(hasvalue("write")?  getioparam("write") : read);

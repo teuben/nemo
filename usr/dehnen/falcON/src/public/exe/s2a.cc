@@ -1,14 +1,14 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
-/// \file   src/mains/s2a.cc                                                    
+/// \file   src/public/exe/s2a.cc                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
 /// \date   2002-2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2006 Walter Dehnen                                        
+// Copyright (C) 2002-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -44,9 +44,10 @@
 // v 4.2   27/02/2007  WD print out "nan" or "inf" if float is nan or inf       
 // v 4.3   05/03/2007  WD enabled filter in public version                      
 // v 4.4   30/08/2007  WD fivename() for field headers                          
+// v 4.5   27/09/2007  WD Nsink output                                          
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "4.4"
-#define falcON_VERSION_D "30-aug-2007 Walter Dehnen                          "
+#define falcON_VERSION   "4.5"
+#define falcON_VERSION_D "27-sep-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2a"
@@ -77,7 +78,7 @@ string usage = "s2a -- Walter's simple snapshot to ascii converter\n";
 namespace {
   //----------------------------------------------------------------------------
   falcON::fieldset OUTPUT = falcON::fieldset::o;
-  FILE*            OUT       = 0;
+  FILE*            OUT    = 0;
   char             RFORMAT[32], IFORMAT[32];
   //----------------------------------------------------------------------------
   template<typename T> struct Print {
@@ -161,8 +162,10 @@ void falcON::main() falcON_THROWING {
 	fprintf(OUT,"#  on host  %s\n",RunInfo::host());
       if(RunInfo::pid_known())
 	fprintf(OUT,"#  with pid %s\n",RunInfo::pid());
-      fprintf(OUT,"#\n# time: %f\n# Nbod: %d\n# Ngas: %d\n#\n#",
-	      SHOT.time(),Ntot,Nb[bodytype::gas]);
+      fprintf(OUT,"#\n# time: %f\n"
+	      "# Ntot: %d, Nsink:%d, Ngas: %d, Nstd: %d\n#\n#",
+	      SHOT.time(),Ntot,Nb[bodytype::sink],Nb[bodytype::gas],
+	      Nb[bodytype::std]);
       for(fieldbit f; f; ++f)
 	if(OUTPUT.contain(f) && SHOT.have(f))
 	  fprintf(OUT," '%s'",fivename(f));
