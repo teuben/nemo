@@ -388,6 +388,11 @@ namespace falcON {
     static int get(const char*o, int*a, int m) falcON_THROWING {
       return nemoinpi(getparam(const_cast<char*>(o)),a,m);
     } };
+  template<> struct __getA<unsigned> {
+    static int get(const char*o, unsigned*a, int m) falcON_THROWING {
+      return nemoinpi(getparam(const_cast<char*>(o)),
+		      static_cast<int*>(static_cast<void*>(a)),m);
+    } };
   template<> struct __getA<bool> {
     static int get(const char*o, bool*a, int m) falcON_THROWING {
       return nemoinpb(getparam(const_cast<char*>(o)),a,m);
@@ -437,7 +442,7 @@ namespace falcON {
     return unsigned(i);
   }
   //----------------------------------------------------------------------------
-  // read io                                                                    
+  // read fieldset                                                              
   inline fieldset getioparam(const char* option) {
     return fieldset(getparam(const_cast<char*>(option)));
   }
@@ -469,7 +474,7 @@ namespace falcON {
       getbparam(const_cast<char*>(option)) : false;
   }
   //----------------------------------------------------------------------------
-  inline float getdparam_z(const char* option) {
+  inline double getdparam_z(const char* option) {
     return hasvalue(const_cast<char*>(option))?
       getdparam(const_cast<char*>(option)) : 0.;
   }
@@ -489,7 +494,7 @@ namespace falcON {
       getioparam(const_cast<char*>(option)) : fieldset::empty;
   }
   //----------------------------------------------------------------------------
-  // read io, if not given return io::all                                       
+  // read fieldset, if not given return fieldset::all                           
   inline fieldset getioparam_a(const char* option) {
     return hasvalue(const_cast<char*>(option))?
       getioparam(const_cast<char*>(option)) : fieldset::all;
@@ -507,7 +512,7 @@ namespace falcON {
 #endif // falcON_USE_NEMO
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // check io for completeness                                                //
+  // check fieldset for completeness                                          //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   inline void check_sufficient(fieldset const&read, fieldset const&need)

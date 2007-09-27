@@ -559,7 +559,7 @@ namespace falcON {
     /// The following two examples assign the position of the body referred to  
     /// iterator \c i1 to the body referred to by iterator \c i2                
     /// \code                                                                   
-    ///    i2.datum<fieldbit::x>() = const_datum<fieldbit::x>(i1);              
+    ///    i2.datum<fieldbit::x>() = const_dat<fieldbit::x>(i1);                
     ///    i2.pos() = pos(i1);                                                  
     /// \endcode                                                                
     /// The first method allows templated manipulations, while the second is    
@@ -920,33 +920,25 @@ namespace falcON {
     /// all or a subset of all bodies                                           
     //@{                                                                        
     /// begin of all bodies
-    /// \return iterator to first body
-    iterator begin_bodies() const { return iterator(FIRST); }
-    /// begin of all bodies
     iterator begin_all_bodies() const { return iterator(FIRST); }
     /// end of all bodies == invalid iterator
     iterator end_all_bodies  () const { return iterator(0); }
-    /// begin of bodies of given bodytype
+    /// begin of bodies of given bodytype, if any.
+    /// if no bodies of given type exist, invalid iterator is returned
     iterator begin_typed_bodies(bodytype t) const {
       return iterator(TYPES[int(t)]);
     }
-    /// end of bodies of given bodytype
+    /// end of bodies of given bodytype, if any.
+    /// if no bodies of given type exist, invalid iterator is returned
+    /// otherwise the next other type body, or an invalid iterator
     iterator end_typed_bodies(bodytype t) const {
-      return iterator(TYPES[int(t)] == 0? 0 :
-		      int(t)+1 >= BT_NUM? 0 : TYPES[int(t)+1]);
+      if(0==TYPES[int(t)])                      // no bodies of this type
+	return iterator(0);                     //   so return invalid
+      for(++t; t; ++t)                          // find next next type
+	if(TYPES[int(t)])                       //   for which we have bodies
+	  return iterator(TYPES[int(t)]);       //     returng
+      return iterator(0);                       // non found: return invalid
     }
-    /// begin of SPH bodies
-    iterator begin_sph_bodies() const {
-      return begin_typed_bodies(bodytype::gas); }
-    /// end of SPH bodies
-    iterator end_sph_bodies() const {
-      return end_typed_bodies(bodytype::gas); }
-    /// begin of standard (non-SPH) bodies
-    iterator begin_std_bodies() const {
-      return begin_typed_bodies(bodytype::std); }
-    /// end of standard (non-SPH) bodies
-    iterator end_std_bodies()const {
-      return end_typed_bodies(bodytype::std); }
     /// body of a given bodies::index
     iterator bodyIn(index i) const {
       const block*p = BLOCK[i.no()];
