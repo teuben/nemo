@@ -120,7 +120,7 @@ void GLOctree::update()
   //if (!first) return;
   setActivate(store_options->octree_display);
   
-  if ( ! store_options->octree_enable) {
+  if ( psv && ! store_options->octree_enable) {
     setActivate(false); // do not display tree
     // restore default object particles index
     for (int obj=0; obj< (int ) psv->size(); obj++ ) { 
@@ -385,7 +385,7 @@ void GLOctree::displayPolygons(const double * _mModel,const GLuint _texture,cons
 
   textureX2 = texture*2;
   // parse tree if activated
-  if (store_options->octree_enable) {
+  if (psv && store_options->octree_enable) {
     for (int obj=0; obj< (int ) psv->size(); obj++ ) {
       VirtualParticlesSelect * vps = (*psv)[obj].vps;
       if (vps->is_visible) {
