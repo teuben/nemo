@@ -30,9 +30,10 @@
 //                                                                              
 // v 0.0   27/02/2007  WD created.                                              
 // v 0.1   28/02/2007  WD renamed keyword 'write' -> 'copy'                     
+// v 0.2   09/10/2007  WD added keyword 'time'                                  
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.1"
-#define falcON_VERSION_D "28-feb-2007 Walter Dehnen                          "
+#define falcON_VERSION   "0.2"
+#define falcON_VERSION_D "09-oct-2007 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2s"
@@ -51,6 +52,7 @@ string defv[] = {
   "in=???\n         snapshot input file                                ",
   "out=???\n        snapshot output file                               ",
   "times=all\n      times to copy                                      ",
+  "time=\n          set time of snapshots to this value                ",
   "copy=\n          select data to write out (default: all)            ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
@@ -63,6 +65,8 @@ void falcON::main() falcON_THROWING {
   fieldset       READ;
   snapshot       SHOT;
   while(IN.has_snapshot())
-    if(SHOT.read_nemo(IN,READ,KEEP,getparam("times"),0))
+    if(SHOT.read_nemo(IN,READ,KEEP,getparam("times"),0)) {
+      if(hasvalue("time")) SHOT.set_time(getdparam("time"));
       SHOT.write_nemo(OUT,READ);
+    }
 }
