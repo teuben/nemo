@@ -327,6 +327,14 @@ namespace falcON {
     int SPH_sweep_one(real Mu, real dMu, real hmax,
 		      real wf, bool all = 0) falcON_THROWING;
     //--------------------------------------------------------------------------
+    /// between SPH sweeps                                                      
+    ///                                                                         
+    /// prepare for sweep two and copy h, dv/dt, du/dt, fact, csnd, srho back to
+    /// bodies. Used by ForceSPH::setforces().                                  
+    /// \param eos pter to equation of state                                    
+    void SPH_between_sweeps(const EquationOfState*eos)
+      falcON_THROWING;
+    //--------------------------------------------------------------------------
     /// SPH sweep two                                                           
     ///                                                                         
     /// loops the interaction list made in SPH_sweep_one() and estimated for    
@@ -334,10 +342,10 @@ namespace falcON {
     /// possibly srho are copied back to the bodies                             
     /// \param eos pter to equation of state                                    
     /// \param alfa factor for artificial viscosity                             
-    /// \param beta factor for artificial viscosity                             
+    /// \param beta_over_alpha factor for artificial viscosity                  
     /// \param eps  parameter for artificial viscosity                          
     void SPH_sweep_two(const EquationOfState*eos,
-		       real alfa, real beta, real eps)
+		       real alfa, real beta_over_alpha, real eps)
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// \return # bodies with mu_i < Mu - dMu

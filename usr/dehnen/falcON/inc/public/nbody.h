@@ -454,15 +454,13 @@ namespace falcON {
   /// implements kick-drift-kick leap-frog                                      
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
-  class LeapFrogCode : public Integrator {
-    double TAU, TAUH;
-    //--------------------------------------------------------------------------
+  class LeapFrogCode : public Integrator, public bodies::TimeSteps {
     void account_new() const;
   public:
     //--------------------------------------------------------------------------
     /// construction
     ///
-    /// \param h       time step
+    /// \param k       tau = 0.5^k
     /// \param solver  pointer to solver for time derivatives
     /// \param p_all   -> \a predALL
     /// \param k_all   -> \a kickALL
@@ -470,7 +468,7 @@ namespace falcON {
     /// \param p_sph   -> \a predSPH
     /// \param k_sph   -> \a kickSPH
     /// \param r_sph   -> \a rembSPH
-    LeapFrogCode(int h,
+    LeapFrogCode(int k,
 		 const ForceAndDiagnose* solver,
 		 fieldset p_all,
 		 fieldset k_all,
@@ -587,6 +585,7 @@ namespace falcON {
     std::string        FILE;
     snapshot           SHOT;
     const Integrator  *CODE;
+    fieldset           READ;
     //--------------------------------------------------------------------------
     // construction & related                                                   
     //                                                                          

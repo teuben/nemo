@@ -4,7 +4,7 @@
 /// \file   inc/public/forces.cc                                                
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   1999-2007                                                          
+/// \date   1999-2007                                                           
 ///                                                                             
 /// \brief  defines all function members of class forces                        
 ///                                                                             
@@ -414,6 +414,13 @@ namespace falcON {
   
   {
     return SPHT->sweep_one(mu,dmu,hm,wf,al);
+  }
+  //----------------------------------------------------------------------------
+  inline void forces::SPH_between_sweeps(const EquationOfState*eos)
+    falcON_THROWING
+  
+  {
+    SPHT->between_sweeps(eos);
   }
   //----------------------------------------------------------------------------
   inline void forces::SPH_sweep_two(const EquationOfState*eos,

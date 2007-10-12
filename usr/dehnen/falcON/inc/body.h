@@ -340,9 +340,9 @@ namespace falcON {
     //                                                                          
     //==========================================================================
     class TimeSteps {
-      int      KMAX;
-      unsigned NSTEPS, HIGHEST;
-      double  *TAU,*TAUQ,*TAUH;
+      int      KMAX;                     ///< tau_max = 0.5^kmax
+      unsigned NSTEPS, HIGHEST;          ///< # levels, highest level
+      double  *TAU,*TAUQ,*TAUH;          ///< individual tau, tau^2, tau/2
     public:
       //------------------------------------------------------------------------
       TimeSteps(int km, unsigned ns)
@@ -353,7 +353,7 @@ namespace falcON {
 	  TAUQ   ( NSTEPS? falcON_NEW(double, NSTEPS) : 0 ),
 	  TAUH   ( NSTEPS? falcON_NEW(double, NSTEPS) : 0 )
       {
-	if(NSTEPS) {
+	if(NSTEPS>0) {
 	  TAU [0] = pow(0.5,KMAX);
 	  TAUH[0] = 0.5*TAU[0];
 	  TAUQ[0] = square(TAU[0]);
@@ -362,7 +362,8 @@ namespace falcON {
 	    TAUH[n] = 0.5*TAU[n];
 	    TAUQ[n] = square(TAU[n]);
 	  }
-	}
+	} else 
+	  error("bodies::TimeSteps: ns=%d < 1\n",NSTEPS);
       }
       //------------------------------------------------------------------------
       ~TimeSteps() {
@@ -373,13 +374,18 @@ namespace falcON {
       //------------------------------------------------------------------------
       bool is_leap_frog() const { return NSTEPS == 1; }
       int highest_level() const { return HIGHEST; }
-      const double&tau_min() const { return TAU[HIGHEST]; }
-      const double&tau_max() const { return TAU[0]; }
       const int&kmax() const { return KMAX; }
       unsigned const&Nsteps() const { return NSTEPS; }
-      double const&tau (int i) const { return TAU [i]; }
-      double const&tauq(int i) const { return TAUQ[i]; }
-      double const&tauh(int i) const { return TAUH[i]; }
+      /// shortest time step
+      const double&tau_min() const { return TAU[HIGHEST]; }
+      /// longest time step
+      const double&tau_max() const { return TAU[0]; }
+      /// time step of level l
+      double const&tau(int l) const { return TAU[l]; }
+      /// half time step of level l
+      double const&tauh(int l) const { return TAUH[l]; }
+      /// time step squared, given of level l )
+      double const&tauq(int l) const { return TAUQ[l]; }
       const double*tau () const { return TAU; }
       const double*tauq() const { return TAUQ; }
       const double*tauh() const { return TAUH; }
@@ -527,24 +533,31 @@ namespace falcON {
     //@{                                                                        
     /// do we have time step data?
     bool have_steps() const { return TSTEPS!=0; }
-    /// will tau(), tauq(), and tauh() below run successfully?
-    bool have_tau() const { return have_steps() && have_level(); }
     /// let the user provide time step data
     void set_steps(const TimeSteps*T) { TSTEPS = T; }
     /// give TimeSteps 
     const TimeSteps*steps() const { return TSTEPS; }
     /// time step given a time step level
-    double const&tau(indx  l) const { return TSTEPS->tau(l); }
-    /// time step of body given its index
-    double const&tau(index i) const { return tau(level(i)); }
+    double const&tau (indx l) const { return TSTEPS->tau(l); }
     /// time step squared given a time step level
-    double const&tauq(indx  l) const { return TSTEPS->tauq(l); }
-    /// time step squared of body given its index
-    double const&tauq(index i) const { return tauq(level(i)); }
+    double const&tauq(indx l) const { return TSTEPS->tauq(l); }
     /// half time step given a time step level
-    double const&tauh(indx  l) const { return TSTEPS->tauh(l); }
+    double const&tauh(indx l) const { return TSTEPS->tauh(l); }
+    /// time step of body given its index
+    /// \note if leapfrog: return global time step
+    double const&tau(index i) const {
+      return have_level()? tau (level(i)) : tau(0);
+    }
+    /// time step squared of body given its index
+    /// \note if leapfrog: return global time step squared
+    double const&tauq(index i) const {
+      return have_level()? tauq(level(i)) : tauq(0);
+    }
     /// half time step of body given its index
-    double const&tauh(index i) const { return tauh(level(i)); }
+    /// \note if leapfrog: return half global time step
+    double const&tauh(index i) const {
+      return have_level()? tauh(level(i)) : tauh(0);
+    }
     //@}
     //==========================================================================
     //                                                                          
@@ -1499,13 +1512,16 @@ namespace falcON {
     i.B->type();
   }
   inline double const&tau(bodies::iterator const&i) {
-    return i.my_bodies()->tau(level(i));
+    return i.my_bodies()->have_level()? 
+      i.my_bodies()->tau (level(i)) : i.my_bodies()->tau(0);
   }
   inline double const&tauq(bodies::iterator const&i) {
-    return i.my_bodies()->tauq(level(i));
+    return i.my_bodies()->have_level()? 
+      i.my_bodies()->tauq(level(i)) : i.my_bodies()->tauq(0);
   }
   inline double const&tauh(bodies::iterator const&i) {
-    return i.my_bodies()->tauh(level(i));
+    return i.my_bodies()->have_level()? 
+      i.my_bodies()->tauh(level(i)) : i.my_bodies()->tauh(0);
   }
   inline bool bodies::iterator::is_source() const {
     return falcON::mass(*this) != zero;

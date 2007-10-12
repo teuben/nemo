@@ -642,8 +642,6 @@ namespace falcON {
       sphnemo = H|N|U|I|E|K|R|A|D|J|F|C|M,
       /// all floating point scalar SPH quantities
       sphscal = H|U|Y|I|E|K|R|A|D|J|F|C|M,
-      /// artificial viscosity & div(v) (required to integrate alpha)
-      artvisc = A|D,
       /// N-body and external gravitational potentials
       potent  = p|q,
       /// phases = {x,v}
