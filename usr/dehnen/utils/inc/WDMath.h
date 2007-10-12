@@ -124,6 +124,48 @@ namespace WDutils {
   }
 #endif
   // ///////////////////////////////////////////////////////////////////////////
+  /// fast inverse square root.
+  ///
+  /// implementation of a fast inverse sqrt function.
+  /// 
+  /// described in Chris Lomont, "Fast Inverse Square Root", see
+  /// www.lomont/Math/Papers/2003/InvSqrt.pdf
+  ///
+  /// \version       2003 CL  initial C routine
+  /// \version 26-09-2007 WD  adopted to C++
+  /// \version 26-09-2007 WD  using union to give good code under gcc -O2
+  /// \version 26-09-2007 WD  two Newton-Raphson iterations
+  ///
+  /// \author Chris Lomont, Walter Dehnen
+  ///
+  /// \param x argument
+  /// \return approximation to 1/sqrt(x), 5-6 digits accurate
+  inline float invsqrt(float x)
+  {
+    register union { float y; int i; } R; // union to manipulate bits via int i
+    R.y = x;
+    register float xhalf = 0.5f*R.y;      // take x/2
+    R.i = 0x5f375a86 - (R.i>>1);          // manipulate bits: get initial guess
+    R.y*= 1.5f-xhalf*R.y*R.y;             // 1st Newton Raphson step
+    R.y*= 1.5f-xhalf*R.y*R.y;             // 2nd Newton Raphson step
+    return R.y;                           // more steps not sensible for floats
+  }
+  /// inverse square root in double precision: 1/std::sqrt() is fastest
+  inline double invsqrt(double x) {
+    return 1./std::sqrt(x);
+  }
+//   inline double invsqrt(double x)
+//   {
+//     register union { double y; long long int i; } R;
+//     R.y = x;
+//     register double xhalf = 0.5*R.y;
+//     R.i = 0x5fe6ec85e7de30daLL - (R.i>>1);
+//     R.y*= 1.5-xhalf*R.y*R.y;
+//     R.y*= 1.5-xhalf*R.y*R.y;
+//     R.y*= 1.5-xhalf*R.y*R.y;
+//     return R.y;
+//   }
+  // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   /// \name Log's and Exp's (inlines)                                           
   //@{                                                                          
