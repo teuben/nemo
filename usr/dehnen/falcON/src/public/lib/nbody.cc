@@ -258,13 +258,13 @@ void Integrator::write(nemo_out const&o,           // I: nemo output
 // class falcON::LeapFrogCode                                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-LeapFrogCode::LeapFrogCode(int h, const ForceAndDiagnose *F,
+LeapFrogCode::LeapFrogCode(int kstep, const ForceAndDiagnose *F,
 			   fieldset p, fieldset k, fieldset r,
 			   fieldset P, fieldset K, fieldset R) falcON_THROWING :
   Integrator(F,p,k,r,P,K,R),
-  TAU       (pow(0.5,h)),
-  TAUH      (0.5*TAU)
+  bodies::TimeSteps(kstep,1)
 {
+  snap_shot()->set_steps(this);                    // set time steps in bodies  
   remember();                                      // eg: w = v                 
   set_time_derivs(1,1,0.);                         // eg: a = F(x,w)            
   finish_diagnose();                               // finish diagnosis          
@@ -287,10 +287,10 @@ void LeapFrogCode::account_new() const {
 void LeapFrogCode::fullstep() const {
   reset_CPU();                                     // reset cpu timers          
   account_new();                                   // account for new bodies    
-  kick(TAUH);                                      // eg: v+= a*tau/2           
-  drift(TAU);                                      // eg: x+= v*tau;  w+= a*tau 
-  set_time_derivs(1,1,TAU);                        // eg: a = F(x,w)            
-  kick(TAUH);                                      // eg: v+= a*tau/2           
+  kick(tauh(0));                                   // eg: v+= a*tau/2           
+  drift(tau(0));                                   // eg: x+= v*tau;  w+= a*tau 
+  set_time_derivs(1,1,tau(0));                     // eg: a = F(x,w)            
+  kick(tauh(0));                                   // eg: v+= a*tau/2           
   remember();                                      // eg: w = v                 
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
@@ -401,11 +401,11 @@ BlockStepCode::BlockStepCode(int      km,          // I: tau_max = 2^-kmax
   W                 ( (kmax()+highest_level())>9? max(5,w) : max(4,w) ),
   ST                ( S )
 {
+  snap_shot()->set_steps(this);                    // set time steps in bodies  
+  snap_shot()->add_fields(fieldset::l);            // make sure we have levels  
   for(int n=0; n!=Nsteps(); ++n) N[n] = 0;
   remember();                                      // to be predicted quantities
   set_time_derivs(1,1,0.);                         // set initial forces        
-  snap_shot()->add_fields(fieldset::l);            // make sure we have levels  
-  snap_shot()->set_steps(this);                    // set time steps in bodies  
   assign_levels();                                 // get bodies into levels    
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
@@ -453,27 +453,27 @@ NBodyCode::NBodyCode(// data input
   falcON_THROWING :
   FILE ( file ),
   SHOT ( fieldset::gravity | read_more ),
-  CODE ( 0 )
+  CODE ( 0 ),
+  READ ( fieldset::empty )
 {
   const fieldset read(fieldset::basic | read_more);
   nemo_in  In(file);                               // open nemo input           
-  fieldset got;                                    // what did we get?          
   if(resume) {                                     // IF resuming: last snapshot
-    do   SHOT.read_nemo(In,got,read,0,0);          //   DO:  read bodies        
+    do   SHOT.read_nemo(In,READ,read,0,0);         //   DO:  read bodies        
     while(In.has_snapshot());                      //   WHILE more to be read   
   } else {                                         // ELIF:                     
     bool gotit=false;                              //   read snapshot?          
-    do   gotit=SHOT.read_nemo(In,got,read,time,0); //   DO:  try to read them   
+    do   gotit=SHOT.read_nemo(In,READ,read,time,0);//   DO:  try to read them   
     while(!gotit && In.has_snapshot());            //   WHILE snapshots present 
     if(!gotit)                                     //   didn't read any -> ERROR
       falcON_THROW("NBodyCode: no snapshot matching \"time=%s\""
 		   "found in file \"%s\"",time? time:"  ", file);
   }                                                // ENDIF                     
-  if(!got.contain(fieldset::f))                    // UNLESS flags just read    
+  if(!READ.contain(fieldset::f))                   // UNLESS flags just read    
     SHOT.reset_flags();                            //   reset them              
-  if(!got.contain(read))                           // IF some data missing      
+  if(!READ.contain(read))                          // IF some data missing      
     falcON_THROW("NBodyCode: couldn't read body data: %s",
-		 word(got.missing(read)));
+		 word(READ.missing(read)));
   debug_info(4,"NBodyCode constructed\n");
 }
 //------------------------------------------------------------------------------

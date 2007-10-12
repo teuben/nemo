@@ -32,7 +32,7 @@
 //                                                                              
 // history:                                                                     
 //                                                                              
-// v 1.0    21/03/2005  PJM bastardized mkedcm to create mkanyhalo              
+// v 1.0    21/03/2005  PJM bastardized mkcdm to create mkanyhalo               
 // v 1.1    29/09/2005  PJM added Ossipkov-Merritt type anisotropy radius       
 // v 1.2    09/02/2007  WD  bastardized mkanyhalo to create this                
 // v 1.3    02/05/2007  WD  somewhat stable version, improved documentation     
@@ -44,7 +44,7 @@
 // v 2.2    19/09/2007  WD  ensured total mass                                  
 ////////////////////////////////////////////////////////////////////////////////
 #define falcON_VERSION   "2.2"
-#define falcON_VERSION_D "19dir -sep-2007 Walter Dehnen                          "
+#define falcON_VERSION_D "19-sep-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
