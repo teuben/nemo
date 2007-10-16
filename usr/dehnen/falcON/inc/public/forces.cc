@@ -71,6 +71,7 @@ namespace falcON {
 #endif
 			real         g,
 			MAC_type     mac,
+			real         f,
 			const int    gd[4]
 #ifdef falcON_SPH
 		       ,const int    sd[3]
@@ -82,7 +83,7 @@ namespace falcON {
     TREE    ( 0 ),
     GMAC    ( new GravMAC(mac, abs(th), falcON_ORDER) ),
 #ifdef falcON_INDI
-    GRAV    ( new GravEstimator(TREE,k,STATS,e,g,i_soft,gd) ),
+    GRAV    ( new GravEstimator(TREE,k,STATS,e,g,i_soft,f,gd) ),
 #else
     GRAV    ( new GravEstimator(TREE,k,STATS,e,g,0,gd) ),
 #endif
@@ -135,7 +136,7 @@ namespace falcON {
     // This routines grows a fresh tree or re-grows an existing tree            
   {
     SET_I
-      Ncrit = max(Ncr,1);
+    Ncrit = max(Ncr,1);
     if(TREE) {
       TREE->build(Ncrit,x0);
       GRAV->reset();

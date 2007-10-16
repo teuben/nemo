@@ -753,8 +753,8 @@ namespace falcON {
     fieldset operator~ () const { return fieldset(~val); }
     //@}
     //==========================================================================
-    // non-operator member methods and friends                                  
-    //==========================================================================
+    /// \name non-operator member methods and friends                           
+    //@{
     /// do two sets intersect?
     bool intersect(fieldset b) const { return val & b.val; }
     /// do two sets intersect?
@@ -775,6 +775,7 @@ namespace falcON {
     value_type const&value() const { return val; }
     /// return the integer value (combination of all bits)
     friend value_type const&value(fieldset const&);
+    //@}
     //==========================================================================
     // description                                                              
     //==========================================================================
@@ -936,8 +937,12 @@ namespace falcON {
     operator int        () const { return val; }
     /// conversion to long: return No of type
     operator long       () const { return val; }
-    /// is bodytype supporting SPH?
+    /// is bodytype STD
+    bool is_std() const { return val == std; }
+    /// is bodytype SPH
     bool is_sph() const { return val == gas; }
+    /// is bodytype SINK?
+    bool is_sink() const { return val == sink; }
     /// return the full set of fields bodies of this type may hold
     fieldset allows() const { return BT_DATA[val]; }
     /// can bodies of this bodytype hold field \c f?
@@ -953,7 +958,80 @@ namespace falcON {
       }
     }
   };
-
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  //  class falcON::bodytypes                                                   
+  //                                                                            
+  /// Represents a set of different bodytypes                                   
+  ///                                                                           
+  // ///////////////////////////////////////////////////////////////////////////
+  class bodytypes {
+    /// type used in internal representation
+    typedef uint8 value_type;
+  private:
+    value_type val;
+    explicit bodytypes(int i) : val(i) {}
+  public:
+    const static value_type nil=0, one=1;
+    /// types of bodytypes
+    enum bits {
+      none    = nil,                     ///< no bodies at all
+      sink    = one << bodytype::sink,   ///< only sink bodies
+      gas     = one << bodytype::gas,    ///< only gas bodies
+      std     = one << bodytype::std,    ///< only std bodies
+      nonsink = gas|std,               ///< all but sink bodies
+      all     = sink|gas|std           ///< all types of bodies
+    };
+    //--------------------------------------------------------------------------
+    /// \name constructors and assignment                                       
+    /// default ctor: no types
+    bodytypes() : val(0) {}
+    /// from bodytypes::bits
+    bodytypes(bits b) : val(b) {}
+    /// from bodytype
+    explicit bodytypes(bodytype t) : val(one<<int(t)) {}
+    /// from bodytype::bits
+    explicit bodytypes(bodytype::bits t) : val(one<<t) {}
+    /// copy constructor
+    bodytypes(bodytypes const&b) : val(b.val) {}
+    /// copy assignment
+    bodytypes& operator=(bodytypes const&b) { val = b.val; return*this; }
+    //@}
+    //--------------------------------------------------------------------------
+    /// \name operations                                                        
+    //@{
+    /// combine with other bodytypes
+    bodytypes&operator|= (bodytypes b) { val |= b.val; return *this; }
+    /// combination of bodytypes
+    bodytypes operator| (bodytypes b) const { return bodytypes(val | b.val); }
+    /// combination of bodytypes
+    bodytypes operator| (bits b) const { return bodytypes(val | b); }
+    /// cross section of bodytypes
+    bodytypes operator& (bodytypes b) const { return bodytypes(val & b.val); }
+    /// cross section of bodytypes
+    bodytypes operator& (bits b) const { return bodytypes(val & b); }
+    /// no bodytypes at all?
+    operator bool() const { return val != 0; }
+    /// are bodytypes identical?
+    bool operator== (bodytypes b) const { return val == b.val; }
+    /// are bodytypes identical?
+    bool operator== (bits b) const { return val == b; }
+    /// are bodytypes not identical?
+    bool operator!= (bodytypes b) const { return val != b.val; }
+    /// are bodytypes not identical?
+    bool operator!= (bits b) const { return val != b; }
+    //@}
+    //--------------------------------------------------------------------------
+    /// \name non-operator member methods                                       
+    //@{
+    /// is a certain type within our range?
+    bool contain(bodytype t) const { return val & one<<int(t); }
+    /// are all types b within our range?
+    bool contain(bodytypes b) const { return (val & b.val) == b.val; }
+    /// return the integer value (combination of all bits)
+    int value() const { return val; }
+    //@}
+  };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // struct field_zero<type>                                                  //

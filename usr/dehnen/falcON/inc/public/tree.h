@@ -150,6 +150,8 @@ namespace falcON {
       //@{
       /// does the body flag indicate activity?
       friend bool is_active(const Leaf*);
+      /// does the body flag indicate a SINK particle?
+      friend bool is_sink  (const Leaf*);
       /// does the body flag indicate a SPH particle?
       friend bool is_sph   (const Leaf*);
       /// does the body flag indicate a sticky particle?
@@ -295,6 +297,11 @@ namespace falcON {
 	flags::un_set(flags::active);
 	flags::add   (flags::all_active);
       }
+      /// set the sink flag to flags::all_sink
+      void reset_sink_flag() {
+	flags::un_set(flags::sink);
+	flags::add   (flags::all_sink);
+      }
       /// add the activity flag of a Leaf
       void add_active_flag(const Leaf*L) {
 	if( is_active(flag(L)))
@@ -306,6 +313,18 @@ namespace falcON {
       void add_active_flag(const Cell*C) {
 	flags::add_part(*C,flags::active);
 	if(!al_active(C)) flags::un_set(flags::all_active);
+      }
+      /// add the sink flag of a Leaf
+      void add_sink_flag(const Leaf*L) {
+	if( is_sink(flag(L)))
+	  flags::add(flags::sink);
+	else
+	  flags::un_set(flags::all_sink);
+      }
+      /// add the sink flag of a Cell
+      void add_sink_flag(const Cell*C) {
+	flags::add_part(*C,flags::sink);
+	if(!al_sink(C)) flags::un_set(flags::all_sink);
       }
       //@}
       //------------------------------------------------------------------------
@@ -388,28 +407,16 @@ namespace falcON {
     /// \param Nc (input) Ncrit: minimum # bodies/cell
     /// \param C  (optional input) centre of root cell
     /// \param D  (optional input) maximum tree depth
-    /// \param S  (optional input) specific flag: only used bodies flagged
+    /// \param S  (optional input) specific flag: only use bodies flagged
+    /// \param xmin (optional input) minimum position in each dimension
+    /// \param xmax (optional input) maximum position in each dimension
     OctTree(const bodies*B,
 	    int          Nc,
 	    const vect*  C= 0,
 	    int          D= Default::MaxDepth,
-	    flags        S= flags::empty);
-    //--------------------------------------------------------------------------
-    /// construct from scratch given bodies and their maximal extent
-    /// \param B    (input) bodies
-    /// \param xmin (input) minimum position in each dimension
-    /// \param xmax (input) maximum position in each dimension
-    /// \param Nc   (input) Ncrit: minimum # bodies/cell
-    /// \param C    (optional input) centre of root cell
-    /// \param D    (optional input) maximum tree depth
-    /// \param S    (optional input) specific flag: only used bodies flagged
-    OctTree(const bodies*B,
-	    vect   const&xmin,
-	    vect   const&xmax,
-	    int          Nc,
-	    const vect  *C= 0,
-	    int          D= Default::MaxDepth,
-	    flags        S= flags::empty);
+	    flags        S= flags::empty,
+	    const vect  *xmin = 0,
+	    const vect  *xmax = 0);
     //--------------------------------------------------------------------------
     /// construct as sub-tree
     /// \param T  (input) parent tree
@@ -775,6 +782,7 @@ namespace falcON {
   inline bodies::index const&mybody(const OctTree::Leaf*L) { return L->LINK; }
   inline flags const&flag(const OctTree::Leaf*L) { return L->FLAGS; }
   inline bool is_active(const OctTree::Leaf*L) { return is_active(L->FLAGS); }
+  inline bool is_sink(const OctTree::Leaf*L) { return is_sink(L->FLAGS); }
   inline bool is_sph(const OctTree::Leaf*L) { return is_sph(L->FLAGS); }
   inline bool is_sticky(const OctTree::Leaf*L) { return is_sticky(L->FLAGS); }
   inline bool is_set(const OctTree::Leaf*L, flags::single f) {

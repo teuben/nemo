@@ -54,8 +54,8 @@ namespace falcON {
     static const int ORDER = falcON_ORDER;         // expansion order is fixed  
     static const int D_DIM = ORDER+1;              // # terms in D[]            
     static const int P_ORD = ORDER-1;              // order of highest multipole
-    typedef symset3D<ORDER,real>      Cset;        // set of Taylor coeffs      
-    typedef poles3D <P_ORD,real>      Mset;        // set of multipoles         
+    typedef symset3D<ORDER,real> Cset;             // set of Taylor coeffs      
+    typedef poles3D <P_ORD,real> Mset;             // set of multipoles         
     static const int NCOEF = Cset::NDAT;           // # reals in taylor coeffs  
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -195,14 +195,12 @@ namespace falcON {
       //------------------------------------------------------------------------
       // copy data from body to leaf                                            
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void copy_from_bodies_mass(const bodies_type*const&B) {
+      void copy_from_bodies_mass(const bodies*B) {
 	mass() = B->mass(mybody());
       }
       //------------------------------------------------------------------------
 #ifdef falcON_INDI
-      template<typename bodies_type>
-      void copy_from_bodies_eph(const bodies_type*const&B) {
+      void copy_from_bodies_eph(const bodies*B) {
 	eph() = half*B->eps(mybody());
       }
 #endif
@@ -210,67 +208,53 @@ namespace falcON {
       // copy data to body from leaf                                            
       //------------------------------------------------------------------------
 #ifdef falcON_ADAP
-      template<typename bodies_type>
-      void copy_to_bodies_eps(const bodies_type*B) {
+      void copy_to_bodies_eps(const bodies*B) {
 	B->eps(mybody()) = twice(eph());
       }
 #endif
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void copy_to_bodies_rho(const bodies_type*B) const {
+      void copy_to_bodies_rho(const bodies*B) const {
 	B->rho(mybody()) = rho();
       }
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void copy_to_bodies_acc(const bodies_type*B) const {
+      void copy_to_bodies_acc(const bodies*B) const {
 	B->acc(mybody()) = acc();
       }
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void copy_to_bodies_pot(const bodies_type*B) const {
+      void copy_to_bodies_pot(const bodies*B) const {
 	B->pot(mybody()) = pot();
       }
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void copy_to_bodies_grav(const bodies_type*B) const {
+      void copy_to_bodies_grav(const bodies*B) const {
 	copy_to_bodies_pot(B);
 	copy_to_bodies_acc(B);
       }
       //------------------------------------------------------------------------
       // with non-unity constant G of gravity                                   
-      template<typename bodies_type>
-      void copy_to_bodies_acc(const bodies_type*B,
-			      real              G) const {
+      void copy_to_bodies_acc(const bodies*B, real G) const {
 	B->acc(mybody()) = G * acc();
       }
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void copy_to_bodies_pot(const bodies_type*B,
-			      real              G) const {
+      void copy_to_bodies_pot(const bodies*B, real G) const {
 	B->pot(mybody()) = G * pot();
       }
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void copy_to_bodies_grav(const bodies_type*B,
-			       real              G) const {
+      void copy_to_bodies_grav(const bodies*B, real G) const {
 	copy_to_bodies_pot(B,G);
 	copy_to_bodies_acc(B,G);
       }
       //------------------------------------------------------------------------
       // reset body gravity data (needed if G=0)                                
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void reset_bodies_acc(const bodies_type*B) const {
+      void reset_bodies_acc(const bodies*B) const {
 	B->acc(mybody()) = zero;
       }
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void reset_bodies_pot(const bodies_type*B) const {
+      void reset_bodies_pot(const bodies*B) const {
 	B->pot(mybody()) = zero;
       }
       //------------------------------------------------------------------------
-      template<typename bodies_type>
-      void reset_bodies_grav(const bodies_type*B) const {
+      void reset_bodies_grav(const bodies*B) const {
 	reset_bodies_pot(B);
 	reset_bodies_acc(B);
       }
@@ -449,6 +433,7 @@ namespace falcON {
     GravStats            *STATS;                   // interaction statistics    
     real                  EPS;                     // global softening length   
     real                  GRAV;                    // Newton's G (can be 0)     
+    real                  SFAC;                    // factor theta_sink/theta   
     unsigned              Ncoeffs,Nchunks,Ncsize;  // # coeffs, chunks, bytes/c 
     Cell::srce_data      *CELL_SRCE;               // memory for cell srce      
     Leaf::acpn_data      *LEAF_ACPN;               // memory for leafs          
@@ -512,6 +497,7 @@ namespace falcON {
 		  real           e,                // I: global/max eps         
 		  real           g = one,          //[I: Newton's G]            
 		  bool           s = 0,            //[I: use individual eps?]   
+		  real           f = one,          //[I: theta_sink/theta]      
 		  const int d[4]=Default::direct): //[I: N_direct for gravity]  
       TREE           ( T ),
       LEAFS_UPTODATE ( 0 ),
@@ -523,6 +509,7 @@ namespace falcON {
       STATS          ( st ),
       EPS            ( e ),
       GRAV           ( g ),
+      SFAC           ( f ),
       Ncoeffs        ( 0u ),
       Nchunks        ( 0u ),
       Ncsize         ( 0u ),
@@ -606,6 +593,7 @@ namespace falcON {
     kern_type      const&kernel          () const { return KERNEL; }
     GravStats     *const&stats           () const { return STATS; }
     real           const&NewtonsG        () const { return GRAV; }
+    real           const&sink_fac        () const { return SFAC; }
     bool                 ZeroGravity     () const { return GRAV==zero; }
     real           const&softening_length() const { return EPS; }
     unsigned       const&N_active_cells  () const { return NCA; }

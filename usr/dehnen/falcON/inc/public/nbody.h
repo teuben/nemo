@@ -603,12 +603,14 @@ namespace falcON {
     NBodyCode(const char*,                         // I: input file             
 	      bool       ,                         // I: resume old (if nemo)   
 	      fieldset   ,                         // I: read after mxv         
-	      const char* =0) falcON_THROWING;     // I: read 1st snapshot in   
-                                                   //    1st file matching      
+	      const char* =0,                      // I: read 1st snapshot in   
+	                                           //    1st file matching      
+	      fieldset    =fieldset::empty)        // I: try to read these data 
+      falcON_THROWING;
     //--------------------------------------------------------------------------
     // initialize Integrator, see NOTE above                                    
     void init(const ForceAndDiagnose         *,    // I: e.g. ForceALCON        
-	      int                             ,    // I: kmin: t_min=2^(-kmin)  
+	      int                             ,    // I: kmax: t_max=2^(-kmax)  
 	      int                             ,    // I: # time-step levels     
 	      const BlockStepCode::StepLevels*,
 	      fieldset, fieldset,
@@ -754,6 +756,7 @@ namespace falcON {
     bool    UPX;                                   // use pot+pex for potential 
     bool    UGE;                                   // use global soften'g length
     int     SCH;                                   // stepping scheme           
+    int     SINKL;                                 // minimum level for sinks   
     double  EPS;                                   // global softening length   
     double  FAQ,FPQ,FGQ,FEQ;                       // factors^2 for stepping    
     //--------------------------------------------------------------------------
@@ -765,6 +768,10 @@ namespace falcON {
     //--------------------------------------------------------------------------
     real soft(body const&B) const {
       return UGE? EPS : eps(B);
+    }
+    //--------------------------------------------------------------------------
+    int minlevel(body const&B) const {
+      return is_sink(B)? SINKL : 0;
     }
     //--------------------------------------------------------------------------
     // protected methods                                                        
@@ -787,9 +794,10 @@ namespace falcON {
     void assign_level(body        &Bi,             // I: body                   
 		      unsigned    *N,              // I: table: # / step        
 		      int          H) const        // I: highest table index    
+
     {
       double tq=twice(tq_grav(Bi));
-      for(Bi.level()=0; tauq(Bi)>tq && level(Bi)<H; ++(Bi.level()));
+      for(Bi.level()=minlevel(Bi); tauq(Bi)>tq && level(Bi)<H; ++(Bi.level()));
       N[level(Bi)]++;
     }
     //--------------------------------------------------------------------------
@@ -799,7 +807,8 @@ namespace falcON {
 		      int          H) const        // I: highest allowed level  
     {
       const double root_half=0.7071067811865475244;
-      register double tq=tq_grav(Bi)*root_half;    // tau^2 * sqrt(1/2)         
+      double tq=tq_grav(Bi)*root_half;             // tau^2 * sqrt(1/2)         
+      L = max(L,minlevel(Bi));                     // set lowest level for sinks
       if       (tauq(Bi) < tq) {                   // IF too short              
 	if(level(Bi) > L) {                        //   IF(above lowest active) 
 	  N[level(Bi)] --;                         //     leave old level       
@@ -818,13 +827,14 @@ namespace falcON {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    GravStepper(real fa,
+    GravStepper(int  sl,
+		real fa,
 		real fp,
 		real fg,
 		real fe,
 		bool up,
 		real ep = zero,
-		bool ue = 0) : UPX(up), UGE(ue), EPS(ep), SCH(0)
+		bool ue = 0) : UPX(up), UGE(ue), EPS(ep), SCH(0), SINKL(sl)
     {
       FAQ = fa*fa; if(FAQ) SCH |= use_a;
       FPQ = fp*fp; if(FPQ) SCH |= use_p;
@@ -865,13 +875,14 @@ namespace falcON {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    GravSteps(real fa,
+    GravSteps(int  sl,
+	      real fa,
 	      real fp,
 	      real fg,
 	      real fe,
 	      bool up,
 	      real ep = zero,
-	      bool ue = 0) : GravStepper(fa,fp,fg,fe,up,ep,ue) {}
+	      bool ue = 0) : GravStepper(sl,fa,fp,fg,fe,up,ep,ue) {}
     //--------------------------------------------------------------------------
   };// class falcON::GravSteps
   //////////////////////////////////////////////////////////////////////////////
@@ -923,6 +934,7 @@ namespace falcON {
 	       const vect        *,                // I: pre-set root centre    
 	       kern_type          ,                // I: softening kernel       
 	       real               ,                // I: Newton's G             
+	       real               ,                // I: theta_sink/theta       
 	       int                ,                // I: # reused of tree       
 	       const acceleration*,                // I: external acceleration  
 	       const int          [4]              // I: direct sum: gravity    
@@ -999,8 +1011,9 @@ namespace falcON {
     ///
     /// \param file   data input file for N-body data
     /// \param resume resume old simulation?
-    /// \param kmin   tau_min=2^(-kmin)
+    /// \param kmax   tau_max=(1/2)^kmax
     /// \param Nlev   # time-step levels
+    /// \param ksink  minimum time step for sinks: (1/2)^ksink
     /// \param fa     time step factor f_acc
     /// \param fp     time step factor f_phi
     /// \param fc     time step factor f_c
@@ -1013,6 +1026,7 @@ namespace falcON {
     /// \param aex    pter to external acceleration field
     /// \param theta  opening angle
     /// \param Grav   Newton's constant of gravity
+    /// \param sfac   theta_sink/theta
 #ifdef falcON_INDI
 #ifdef falcON_ADAP
     /// \param Nsoft  # of bodies in softening shpere
@@ -1029,8 +1043,9 @@ namespace falcON {
 	       const char *       file,
 	       bool               resume,
 	       // time-integration related                                      
-	       int                kmin,
+	       int                kmax,
 	       int                Nlev,
+	       int                ksink,
 	       real               fa,
 	       real               fp,
 	       real               fc,
@@ -1045,6 +1060,7 @@ namespace falcON {
 	       const acceleration*aex,
 	       real               theta,
 	       real               Grav,
+	       real               sfac,
 	       // default arguments                                             
 #ifdef falcON_INDI
 #ifdef falcON_ADAP
@@ -1062,8 +1078,8 @@ namespace falcON {
 		  soft != global_fixed ? fieldset::e :
 #endif
 		  fieldset::empty), time ),
-      ForceALCON( &SHOT, eps, theta, Ncrit, croot, kernel, Grav, (1<<hgrow)-1, 
-		  aex, dir
+      ForceALCON( &SHOT, eps, theta, Ncrit, croot, kernel, Grav, sfac,
+		  (1<<hgrow)-1, aex, dir
 #ifdef falcON_INDI
 		  ,soft
 #ifdef falcON_ADAP
@@ -1071,16 +1087,20 @@ namespace falcON {
 #endif
 #endif
 		  ),
-      GS         ( fa,fp,fc,fe, aex!=0, abs(eps), eps>=zero)
+      GS         ( ksink-kmax, fa,fp,fc,fe, aex!=0, abs(eps), eps>=zero)
     {
 #ifdef falcON_ADAP
       if(soft == individual_adaptive && hgrow)
 	falcON_THROW("inidividual adaptive softening lengths "
 		     "must not be used with hgrow != 0");
 #endif
+      if(ksink > kmax+Nlev-1)
+	falcON_THROW("FalcONCode: ksink=%d > kmin=%d\n",ksink,kmax+Nlev-1);
+      if(ksink < kmax)
+	falcON_THROW("FalcONCode: ksink=%d < kmax=%d\n",ksink,kmax);
       if(Nlev > 1 && GS.scheme() == 0)
 	falcON_THROW("FalcONCode: time stepping factors=0\n");
-      NBodyCode::init(this, kmin, Nlev, &GS, fieldset::x, fieldset::v);
+      NBodyCode::init(this, kmax, Nlev, &GS, fieldset::x, fieldset::v);
     }
   };// class falcON::FalcONCode
   //////////////////////////////////////////////////////////////////////////////

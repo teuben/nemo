@@ -3,15 +3,15 @@
 ///                                                                             
 /// \file   inc/forces.h                                                        
 ///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   1999-2006                                                           
-///                                                                             
 /// \brief  contains declarations of class falcON::forces, which serves as      
 ///	    joint interface for any force computation in falcON.                
 ///                                                                             
+/// \author Walter Dehnen                                                       
+/// \date   1999-2007                                                           
+///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1999-2006 Walter Dehnen                                        
+// Copyright (C) 1999-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -116,6 +116,7 @@ namespace falcON {
 #endif
     /// \param G   Newton's gravitational constant                              
     /// \param mt  type of multipole acceptance criterion (MAC_type)            
+    /// \param sfac factor theta_sink/theta                                     
     /// \param dir constants controlling usage of direct summation for gravity  
 #ifdef falcON_SPH
     /// \param sdr constants controlling cell-opening for SPH force computation 
@@ -129,6 +130,7 @@ namespace falcON {
 #endif
 	    real         G      = one,
 	    MAC_type     mt     = theta_of_M,
+	    real         sfac   = one,
 	    const int    dir[4] = Default::direct
 #ifdef falcON_SPH
 	   ,const int    sdr[3] =Default::SPHdirect
@@ -217,8 +219,15 @@ namespace falcON {
     /// \note                                                                   
     /// Since Oct-2003, you MUST not change the bodies activity flag between    
     /// tree growth (or re-growth, re-use) and a call to                        
-    /// approximate_gravity(). Whenever you change the flags, you MUST first    
-    /// (re-)grow the tree before you can approximate_gravity().                
+    /// approximate_gravity(). Whenever you change the flags, you MUST either   
+    /// first (re-)grow the tree before you can approximate_gravity() or update 
+    /// the flags (of the tree leafs and cells) yourself (if you know how to do 
+    /// that, that is).                                                         
+    ///                                                                         
+    /// \note                                                                   
+    /// Bodies not loaded into tree at grow() will neither receive gravity nor  
+    /// will their masses matter. Note that by default sink bodies are NOT      
+    /// loaded into the tree                                                    
     ///                                                                         
     /// \param com combine phases 2 and 3? (saves some memory)                  
     /// \param all compute forces for all or only active bodies?                

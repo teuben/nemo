@@ -190,7 +190,6 @@ namespace falcON {
       //------------------------------------------------------------------------
       void reset_flags() const;
       void flag_all_as_active() const falcON_THROWING;
-      void flag_as_sph() const falcON_THROWING;
       //------------------------------------------------------------------------
       // construction & data allocation                                         
       //------------------------------------------------------------------------
@@ -424,6 +423,14 @@ namespace falcON {
     const unsigned*N_bodies_per_type()  const { return NBOD; }
     /// # bodies in use for a given bodytype.
     unsigned const&N_bodies(bodytype t) const { return NBOD[int(t)]; }
+    /// # bodies in use for given set of bodytypes.
+    unsigned N_bodies(bodytypes T) const {
+      unsigned N(0u);
+      for(bodytype t; t; ++t)
+	if(T.contain(t))
+	  N += NBOD[int(t)];
+      return N;
+    }
     /// total # bodies in use.
     unsigned const&N_bodies()           const { return NTOT; }
     /// # bodies not flagged to be ignored
@@ -814,10 +821,6 @@ namespace falcON {
       void unflag_new        () { flag().un_set(flags::newbody); }
       void flag_as_sticky    () { flag().add(flags::sticky); }
       void unflag_sticky     () { flag().un_set(flags::sticky); }
-      /// flag this body as SPH particle
-      void flag_as_sph       () { flag().add(flags::sph); }
-      /// flag this body as non-SPH particle
-      void unflag_sph        () { flag().un_set(flags::sph); }
       /// flag this body for removal by bodies::remove()
       void flag_for_removal  () { flag().add(flags::remove); }
       /// flag this body for usage with longer time step
@@ -1194,6 +1197,16 @@ namespace falcON {
       return NNEW[t];
     }
     //--------------------------------------------------------------------------
+    /// returns the number of bodies created by \a new_body since last call of
+    /// \a reset_Nnew(), if any.
+    unsigned N_new(bodytypes t) const {
+      unsigned N(0u);
+      for(bodytype b; b; ++b)
+	if(t.contain(b))
+	  N += NNEW[int(t)];
+      return N;
+    }
+    //--------------------------------------------------------------------------
     /// returns the number of bodies created by \a new_body() since last call of
     /// \a reset_Nnew(), if any.
     unsigned N_new() const {
@@ -1210,6 +1223,16 @@ namespace falcON {
     /// \a reset_Ndel(), if any.
     unsigned const&N_del(bodytype t) const {
       return NDEL[t];
+    }
+    //--------------------------------------------------------------------------
+    /// returns the number of bodies created by \a new_body since last call of
+    /// \a reset_Nnew(), if any.
+    unsigned N_del(bodytypes t) const {
+      unsigned N(0u);
+      for(bodytype b; b; ++b)
+	if(t.contain(b))
+	  N += NDEL[int(t)];
+      return N;
     }
     //--------------------------------------------------------------------------
     /// returns the number of bodies removed by \a remove() since last call of
@@ -1509,7 +1532,7 @@ namespace falcON {
     return falcON::pos(i) ^ falcON::vel(i);
   }
   inline bodytype const&type(bodies::iterator const&i) {
-    i.B->type();
+    return i.B->type();
   }
   inline double const&tau(bodies::iterator const&i) {
     return i.my_bodies()->have_level()? 
