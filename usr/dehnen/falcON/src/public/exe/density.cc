@@ -40,8 +40,8 @@
 // v 3.0    04/09/2007  WD completely new neighbours.cc (3 times faster)        
 //                         Ferrers kernel, default K=32                         
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "3.0"
-#define falcON_VERSION_D "04-sep-2007 Walter Dehnen                          "
+#define falcON_VERSION   "3.0.1"
+#define falcON_VERSION_D "09-sep-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "density"

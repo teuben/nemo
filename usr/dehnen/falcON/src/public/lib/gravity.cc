@@ -173,10 +173,6 @@ void GravMAC::set_rcrit(const GravEstimator*G) const {
   switch(MAC) {
   case const_theta:
     LoopCellsDown(grav::cell_iter,G->my_tree(),Ci)
-//   for(register grav::cell_iter
-//       Ci ((G->my_tree())->begin_cells());
-//       Ci!=(G->my_tree())->end_cells();
-//     ++Ci)
       Ci->set_rcrit(iTH0);
     break;
   case theta_of_M: {
@@ -751,6 +747,7 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
     // 1    with eps_i: pass flag, mass, N*eps/2, cofm, rmax, multipoles        
     LoopCellsUp(grav::cell_iter,TREE,Ci) {         //   LOOP cells upwards      
       Ci->reset_active_flag();                     //     reset activity flag   
+      Ci->reset_sink_flag();                       //     reset sink flag       
       real eh (zero);                              //     reset eps/2           
       real mon(zero);                              //     reset monopole        
       vect com(zero);                              //     reset dipole          
@@ -759,12 +756,14 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
 	mon += mass(c);                            //       sum up monopole     
 	com += mass(c) * cofm(c);                  //       sum up dipole       
 	Ci->add_active_flag(c);                    //       add in activity flag
+	Ci->add_sink_flag(c);                      //       add in sink flag    
       }                                            //     END LOOP              
       LoopLeafKids(cell_iter,Ci,l) {               //     LOOP sub-leafs s      
 	eh  += eph (l);                            //       sum up eps/2        
 	mon += mass(l);                            //       sum up monopole     
 	com += mass(l) * cofm(l);                  //       sum up dipole       
 	Ci->add_active_flag(l);                    //       add in activity flag
+	Ci->add_sink_flag(l);                      //       add in sink flag    
       }                                            //     END LOOP              
       if(is_active(Ci)) n++;                       //     count active cells    
       Ci->mass() = mon;                            //     set mass              
@@ -799,17 +798,20 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
     // 2    without eps_i: pass flag, mass, cofm, rmax, multipoles              
     LoopCellsUp(grav::cell_iter,TREE,Ci) {         //   LOOP cells upwards      
       Ci->reset_active_flag();                     //     reset activity flag   
+      Ci->reset_sink_flag();                       //     reset sink flag       
       real mon(zero);                              //     reset monopole        
       vect com(zero);                              //     reset dipole          
       LoopCellKids(cell_iter,Ci,c) {               //     LOOP sub-cells c      
 	mon += mass(c);                            //       sum up monopole     
 	com += mass(c) * cofm(c);                  //       sum up dipole       
 	Ci->add_active_flag(c);                    //       add in activity flag
+	Ci->add_sink_flag(c);                      //       add in sink flag    
       }                                            //     END LOOP              
       LoopLeafKids(cell_iter,Ci,l) {               //     LOOP sub-leafs s      
 	mon += mass(l);                            //       sum up monopole     
 	com += mass(l) * cofm(l);                  //       sum up dipole       
 	Ci->add_active_flag(l);                    //       add in activity flag
+	Ci->add_sink_flag(l);                      //       add in sink flag    
       }                                            //     END LOOP              
       if(is_active(Ci)) n++;                       //     count active cells    
       Ci->mass() = mon;                            //     set mass              
@@ -842,6 +844,11 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
     CELL_SRCE[i].normalize_poles();                //   normalize multipoles    
   // 4  set rcrit                                                               
   if(MAC) MAC->set_rcrit(this);                    // set r_crit for all cells  
+  // 5  reduce rcrit for sink nodes                                             
+  if(SFAC < one)                                   // IF theta_sink < theta     
+    LoopCellsDown(grav::cell_iter,TREE,Ci)         //   LOOP cells upwards      
+      if(is_sink(Ci))                              //     IF sink cell          
+	Ci->set_rcrit(SFAC);                       //       scale rcrit         
   return n;                                        // return # active cells     
 }
 //------------------------------------------------------------------------------
@@ -874,7 +881,7 @@ bool GravEstimator::prepare(const GravMAC*MAC,
 	si->reset();                               //       reset acpn data     
 	Li->set_acpn(si++);                        //       set leaf: acpn      
       } else                                       //     ELSE                  
-	  Li->set_acpn(0);                         //       leaf has no acpn    
+	Li->set_acpn(0);                           //       leaf has no acpn    
   // update cell source properties                                              
   if(!CELLS_UPTODATE ||                            // IF sources out-of-date    
      NCT != TREE->N_cells()) {                     //    OR changed in number   
@@ -983,13 +990,16 @@ void GravEstimator::approx(const GravMAC*GMAC,
   }
   SET_I
   report REPORT("GravEstimator::approx()");
+  // update leafs' source fields (mass, flags, epsh) & count active
   update_leafs();
   SET_T(" time: GravEstimator::update_leafs():  ");
 #ifdef falcON_ADAP
-  adjust_eph(al,Nsoft,emin,EPS,Nref,efac);         //[adjust eps_i/2 of leafs]  
+  // adjust epsh of leafs
+  adjust_eph(al,Nsoft,emin,EPS,Nref,efac);
   SET_T(" time: GravEstimator::adjust_eph():    ");
 #endif
-  const bool all = prepare(GMAC,al,0);             // prepare tree              
+  // prepare tree: allocate memory (leafs & cells), pass up source, count active
+  const bool all = prepare(GMAC,al,0);
   if(!all && N_active_cells()==0)
     return warning("[GravEstimator::approx()]: nobody active");
   SET_T(" time: GravEstimator::prepare():       ");

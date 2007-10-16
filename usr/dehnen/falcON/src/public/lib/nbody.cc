@@ -445,18 +445,19 @@ void BlockStepCode::stats_head(std::ostream&to) const {
 // class falcON::NBodyCode                                                    //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-NBodyCode::NBodyCode(// data input                                              
-		     const char*file,              // I: input file             
+NBodyCode::NBodyCode(const char*file,              // I: input file             
 		     bool       resume,            // I: resume old (if nemo)   
 		     fieldset   read_more,         // I: further data to read   
-		     const char*time)              // I: time for initial data  
+		     const char*time,              // I: time for initial data  
+		     fieldset   read_try)          // I: data to try to read    
   falcON_THROWING :
   FILE ( file ),
   SHOT ( fieldset::gravity | read_more ),
   CODE ( 0 ),
   READ ( fieldset::empty )
 {
-  const fieldset read(fieldset::basic | read_more);
+  const fieldset must(fieldset::basic | read_more);
+  const fieldset read(must | read_try);
   nemo_in  In(file);                               // open nemo input           
   if(resume) {                                     // IF resuming: last snapshot
     do   SHOT.read_nemo(In,READ,read,0,0);         //   DO:  read bodies        
@@ -471,14 +472,14 @@ NBodyCode::NBodyCode(// data input
   }                                                // ENDIF                     
   if(!READ.contain(fieldset::f))                   // UNLESS flags just read    
     SHOT.reset_flags();                            //   reset them              
-  if(!READ.contain(read))                          // IF some data missing      
+  if(!READ.contain(must))                          // IF some data missing      
     falcON_THROW("NBodyCode: couldn't read body data: %s",
 		 word(READ.missing(read)));
   debug_info(4,"NBodyCode constructed\n");
 }
 //------------------------------------------------------------------------------
 void NBodyCode::init(const ForceAndDiagnose         *FS,
-		     int                             kmin,
+		     int                             kmax,
 		     int                             Nlev,
 		     const BlockStepCode::StepLevels*St,
 		     fieldset p, fieldset k, fieldset r,
@@ -489,10 +490,10 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
     if(FS->acc_ext()) SHOT.add_fields(fieldset::q);
     if(Nlev <= 1 || St == 0)
       CODE = static_cast<const Integrator*>
-	( new LeapFrogCode(kmin,FS,p,k,r,P,K,R) );
+	( new LeapFrogCode(kmax,FS,p,k,r,P,K,R) );
     else
       CODE = static_cast<const Integrator*>
-	( new BlockStepCode(kmin+1-Nlev,Nlev,FS,St,p,k,r,P,K,R,
+	( new BlockStepCode(kmax,Nlev,FS,St,p,k,r,P,K,R,
 			    int(1+std::log10(double(SHOT.N_bodies())))));
   } catch(falcON::exception E) {
     debug_info(2,"NBodyCode::init(): caught error \"%s\"\n",E.text());
@@ -700,6 +701,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       const vect        *x0,      // I: pre-set root centre    
 		       kern_type          ke,      // I: softening kernel       
 		       real               g,       // I: Newton's G             
+		       real               f,       // I: theta_sink/theta       
 		       int                ru,      // I: # reused of tree       
 		       const acceleration*ae,      // I: external acceleration  
 		       const int          gd[4]    // I: direct sum: gravity    
@@ -727,7 +729,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 #ifdef falcON_INDI
 		  SOFTENING != global_fixed,
 #endif
-		  g, th < zero? const_theta : theta_of_M, gd
+		  g, th < zero? const_theta : theta_of_M, f, gd
 #ifdef falcON_SPH
 		  , sd
 #endif

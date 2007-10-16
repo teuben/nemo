@@ -122,9 +122,11 @@
 // v 3.0.7  07/12/2006  WD renamed hmin to kmin (to prepare for SPH)           |
 // v 3.0.8  28/02/2007  WD replaced kmin by kmax=kmin-Nlev+1                   |
 // v 3.0.9  28/02/2007  WD added diagnostic output: log_2(root radius), depth  |
+// v 3.1    15/10/2007  WD added keyword fsink                                 |
+// v 3.1.1  16/10/2007  WD added keyword ksink                                 |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.0.9"
-#define falcON_VERSION_D "28-feb-2007 Walter Dehnen                          "
+#define falcON_VERSION   "3.1.1"
+#define falcON_VERSION_D "16-oct-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
@@ -146,6 +148,9 @@ string defv[] = {
   "step2=0\n          time between secondary outputs; 0 -> every step    ",
   "theta="falcON_THETA_TEXT
   "\n                 tolerance parameter at M=M_tot                     ",
+#ifdef falcON_PROPER
+  "fsink=1\n          theta_sink / theta (only values <=1 are used)      ",
+#endif
   "hgrow=0\n          grow fresh tree every 2^hgrow smallest steps       ",
   "Ncrit="falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells                     ",
@@ -170,6 +175,9 @@ string defv[] = {
 #endif
   "kmax=???\n         tau_max = (1/2)^kmax  MUST be given                ",
   "Nlev=1\n           # time-step levels                                 ",
+#ifdef falcON_PROPER
+  "ksink=\n           min tau for sinks=(1/2)^ksink (default: kmax)      ",
+#endif
   "fac=\n             tau = fac / acc           \\   If more than one of  ",
   "fph=\n             tau = fph / pot            |  these is non-zero,   ",
   "fpa=\n             tau = fpa * sqrt(pot)/acc  |  we use the minimum   ",
@@ -235,10 +243,14 @@ void falcON::main() falcON_THROWING
   vect X0;                                            // potential root center  
   FalcONCode NBDY(getparam   ("in"),                  //   snapshot input       
 		  resume,                             //   resume old simul?    
-		  getiparam("kmax")                   //   -log_2(time step)    
-		  + getiparam("Nlev") - 1,            //     = kmax+Nlev-1      
+		  getiparam  ("kmax"),                //   tau_max=2^(-kmax)    
 		  getiparam  ("Nlev"),                //   # time steps         
-		  getrparam_z("fac"),                 //   fac in adapting steps
+#ifdef falcON_PROPER
+		  hasvalue   ("ksink")?               //   tau_sink=(1/2)^ksink 
+		  getiparam  ("ksink") :
+#endif
+		  getiparam  ("kmax"),
+ 		  getrparam_z("fac"),                 //   fac in adapting steps
 		  getrparam_z("fph"),                 //   fph in adapting steps
 		  getrparam_z("fpa"),                 //   fpa in adapting steps
 		  getrparam_z("fea"),                 //   fea in adapting steps
@@ -250,6 +262,11 @@ void falcON::main() falcON_THROWING
 		  aex,                                //   external potential   
 		  getrparam  ("theta"),               //   tolerance parameter  
 		  getrparam  ("Grav"),                //   Newton's constant    
+#ifdef falcON_PROPER
+		  getrparam  ("fsink"),               //   theta_sink/theta     
+#else
+		  one,
+#endif
 #ifdef falcON_INDI
 #  ifdef falcON_ADAP
 		  getrparam  ("Nsoft"),               //   #in eps sphere       

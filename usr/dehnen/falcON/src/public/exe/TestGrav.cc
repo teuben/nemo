@@ -299,7 +299,7 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
       <<(cpu1 - cpu0)/real(CLOCKS_PER_SEC)<<endl;
   cpu0 = cpu1;
 #ifdef falcON_INDI
-  forces falcon(BODIES,EPS,theta,K,indiv_soft,one,MAC,DIR);
+  forces falcon(BODIES,EPS,theta,K,indiv_soft,one,MAC,one,DIR);
 #else
   forces falcon(BODIES,EPS,theta,K,one,MAC,DIR);
 #endif

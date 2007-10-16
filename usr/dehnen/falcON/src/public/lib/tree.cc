@@ -982,12 +982,9 @@ namespace {
     }
     //--------------------------------------------------------------------------
     void setup_from_scratch(const bodies*,
-			    flags       = flags::empty);
-    //--------------------------------------------------------------------------
-    void setup_from_scratch(const bodies*,
-			    vect   const&,
-			    vect   const&,
-			    flags       = flags::empty);
+			    flags        ,
+			    const vect  * =0,
+			    const vect  * =0);
     //--------------------------------------------------------------------------
     void setup_leaf_order  (const bodies*);
     //--------------------------------------------------------------------------
@@ -1012,16 +1009,9 @@ namespace {
 		int           ,                    // I: Ncrit                  
 		int           ,                    // I: Dmax                   
 		const bodies *,                    // I: body sources           
-		flags        = flags::empty);      //[I: flag specifying bodies]
-    //--------------------------------------------------------------------------
-    TreeBuilder(const OctTree*,                    // I: tree to be build       
-		const vect   *,                    // I: pre-determined centre  
-		int           ,                    // I: Ncrit                  
-		int           ,                    // I: Dmax                   
-		const bodies *,                    // I: body sources           
-		vect    const&,                    // I: x_min                  
-		vect    const&,                    // I: x_max                  
-		flags        = flags::empty);      //[I: flag specifying bodies]
+		flags         ,                    // I: flag specifying bodies 
+		const vect   * =0,                 //[I: x_min]                 
+		const vect   * =0);                //[I: x_max]                 
     //--------------------------------------------------------------------------
     // 2   from scratch, but aided by old tree                                  
     //     we put the dots to be added in the same order as the leafs of the    
@@ -1061,163 +1051,95 @@ namespace {
   }
   //----------------------------------------------------------------------------
   void TreeBuilder::setup_from_scratch(const bodies*BB,
-				       flags        SP)
+				       flags        SP,
+				       const vect  *xmin,
+				       const vect  *xmax)
   {
     if(!BB->have_pos())
       falcON_THROW("bodies have no position in tree building\n");
-    D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
-    dot* Di=D0;                                    // current dot               
-    XAVE = zero;                                   // reset X_ave               
-    if(SP && BB->have_flag()) {                    // IF take only some bodies  
-      body b=BB->begin_all_bodies();               //   first body              
-      XMAX = XMIN = pos(b);                        //   reset X_min/max         
-      for(; b; ++b)                                //   LOOP bodies             
-	if( flag(b).are_set(SP)) {                 //     IF body to be used    
-	  Di->set_up(b);                           //       initialize dot      
-	  if(isnan(Di->pos()))                     //       test for nan        
-	    error("tree building: body position contains NaN\n");
-	  Di->pos().up_min_max(XMIN,XMAX);
-	  XAVE += Di->pos();                       //       sum up X            
-	  Di++;                                    //       incr current dot    
-	}                                          //   END LOOP                
-    } else {                                       // ELSE use all bodies       
-      body b=BB->begin_all_bodies();               //   first body              
-      XMAX = XMIN = pos(b);                        //   reset X_min/max         
-      for(; b; ++b) {                              //   LOOP bodies             
-	Di->set_up(b);                             //     initialize dot        
-	if(isnan(Di->pos()))                       //     test for nan          
+    if(SP && !BB->have_flag())
+      falcON_THROW("selecting flag given, "
+		   "but bodies have no flag in tree building\n");
+    dot*Di = D0 = falcON_NEW(dot,BB->N_bodies());
+    body b = BB->begin_all_bodies();
+    XAVE = zero;
+    XMAX = XMIN = pos(b);
+    for(; b; ++b)
+      if(!SP || flag(b).are_set(SP)) {
+	Di->set_up(b); 
+	if(isnan(Di->pos()))
 	  error("tree building: body position contains NaN\n");
 	Di->pos().up_min_max(XMIN,XMAX);
-	XAVE += Di->pos();                         //     sum up X              
-	Di++;                                      //     incr current dot      
-      }                                            //   END LOOP                
-    }                                              // ENDIF                     
-    DN    = Di;                                    // set: beyond last dot      
-    XAVE /= real(DN-D0);                           // set: X_ave                
-  }
-  //----------------------------------------------------------------------------
-  void TreeBuilder::setup_from_scratch(const bodies*BB,
-				       vect   const&xmin,
-				       vect   const&xmax,
-				       flags        SP)
-  {
-    if(!BB->have_pos())
-      falcON_THROW("bodies have no position in tree building\n");
-    D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
-    dot* Di=D0;                                    // current dot               
-    XAVE = zero;                                   // reset X_ave               
-    XMIN = xmin;                                   // believe delivered x_min   
-    XMAX = xmax;                                   // believe delivered x_max   
-    if(SP && BB->have_flag()) {                    // IF take only some bodies  
-      LoopAllBodies(BB,b)                          //   LOOP bodies             
-	if( flag(b).are_set(SP)) {                 //     IF body to be used    
-	  Di->set_up(b);                           //       initialize dot      
-	  if(isnan(Di->pos()))                     //       test for nan        
-	    error("tree building: body position contains nan\n");
-	  XAVE += Di->pos();                       //       sum up X            
-	  Di++;                                    //       incr current dot    
-	}                                          //   END LOOP                
-    } else {                                       // ELSE use all bodies       
-      LoopAllBodies(BB,b) {                        //   LOOP bodies             
-	Di->set_up(b);                             //     initialize dot        
-	if(isnan(Di->pos()))                       //     test for nan          
-	  error("tree building: body position contains nan\n");
-	XAVE += Di->pos();                         //     sum up X              
-	Di++;                                      //     incr current dot      
-      }                                            //   END LOOP                
-    }                                              // ENDIF                     
-    DN    = Di;                                    // set: beyond last dot      
-    XAVE /= real(DN-D0);                           // set: X_ave                
+	XAVE += Di->pos();
+	Di++;
+      }
+    DN    = Di;
+    XAVE /= real(DN-D0);
+    if(xmin) XMIN = *xmin;
+    if(xmax) XMAX = *xmax;
   }
   //----------------------------------------------------------------------------
   void TreeBuilder::setup_leaf_order(const bodies*BB)
   {
-    if(BB->N_del())                                // IF bodies are removed     
-      return setup_from_scratch(BB,TREE->SP_flag()); // setup from scratch      
+    flags     SP = TREE->SP_flag();
     if(!BB->have_pos())
       falcON_THROW("bodies have no position in tree building\n");
-    D0 = falcON_NEW(dot,BB->N_bodies());           // allocate dots             
-    dot*Di = D0;                                   // current dot               
-    XAVE = zero;                                   // reset X_ave               
-    XMAX = XMIN = BB->pos(mybody(LeafNo(TREE,0))); // reset x_min & x_max       
-    __LoopLeafs(TREE,Li) {                         // LOOP leaf                 
-      Di->set_up(BB,mybody(Li));                   //   initialize dot          
-      Di->pos().up_min_max(XMIN,XMAX);             //   update XMIN,XMAX        
-      XAVE += Di->pos();                           //   sum up X                
-      Di++;                                        //   incr current dot        
-    }                                              // END LOOP                  
-    if(BB->N_new()) {                              // IF have new bodies        
-      flags SP = TREE->SP_flag();                  //   flag for choosing bodies
-      if(SP && BB->have_flag()) {                  //   IF take only some bodies
-	LoopAllBodies(BB,b) if(is_new(b)) {        //     LOOP new bodies       
-	  if(flag(b).are_set(SP)) {                //       IF body to be used  
-	    Di->set_up(b);                         //         initialize dot    
-	    if(isnan(Di->pos()))                   //         test for nan      
-	      error("tree building: body position contains nan\n");
-	    Di->pos().up_min_max(XMIN,XMAX);       //         update XMIN,XMAX  
-	    XAVE += Di->pos();                     //         sum up X          
-	    Di++;                                  //         incr current dot  
-	  }                                        //       ENDIF               
-	}                                          //     END LOOP              
-      } else {                                     //   ELSE use all new bodies 
-	LoopAllBodies(BB,b) if(is_new(b)) {        //     LOOP new bodies       
-	  Di->set_up(b);                           //       initialize dot      
-	  if(isnan(Di->pos()))                     //       test for nan        
+    if(SP && !BB->have_flag())
+      falcON_THROW("selecting flag given, "
+		   "but bodies have no flag in tree building\n");
+    if(BB->N_del()) return setup_from_scratch(BB,SP);
+    dot*Di = D0 = falcON_NEW(dot,BB->N_bodies());
+    XAVE = zero;
+    XMAX = XMIN = BB->pos(mybody(LeafNo(TREE,0)));
+    __LoopLeafs(TREE,Li) {
+      Di->set_up(BB,mybody(Li));
+      Di->pos().up_min_max(XMIN,XMAX);
+      XAVE += Di->pos();
+      Di++;
+    }
+    if(BB->N_new())
+      LoopAllBodies(BB,b)
+	if(is_new(b) && (!SP || flag(b).are_set(SP))) {
+	  Di->set_up(b);
+	  if(isnan(Di->pos()))
 	    error("tree building: body position contains nan\n");
-	  Di->pos().up_min_max(XMIN,XMAX);         //       update XMIN,XMAX    
-	  XAVE += Di->pos();                       //       sum up X            
-	  Di++;                                    //       incr current dot    
-	}                                          //     END LOOP              
-      }                                            //   ENDIF                   
-    }                                              // ENDIF                     
-    DN    = Di;                                    // set: beyond last dot      
-    XAVE /= real(DN-D0);                           // set: X_ave                
+	  Di->pos().up_min_max(XMIN,XMAX);
+	  XAVE += Di->pos();
+	  Di++;
+	}
+    DN    = Di;
+    XAVE /= real(DN-D0);
   }
   //----------------------------------------------------------------------------
-  // constructor 1.1.1                                                          
-  TreeBuilder::TreeBuilder(const OctTree*t,
+  // constructor 1                                                              
+  TreeBuilder::TreeBuilder(const OctTree*tr,
 			   const vect   *x0,
 			   int           nc,
 			   int           dm,
 			   const bodies *bb,
-			   flags         sp) :
-    ROOTCENTRE(x0)
+			   flags         sp,
+			   const vect   *xmin,
+			   const vect   *xmax)
+    : ROOTCENTRE(x0)
   {
-    report REPORT("TreeBuilder::TreeBuilder(): 1.1.1");
-    setup_from_scratch(bb,sp);
+    report REPORT("TreeBuilder::TreeBuilder(): 1");
+    setup_from_scratch(bb,sp,xmin,xmax);
     vect X0 = root_centre();
-    BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
-  }
-  //----------------------------------------------------------------------------
-  // constructor 1.1.2                                                          
-  TreeBuilder::TreeBuilder(const OctTree*t,
-			   const vect   *x0,
-			   int           nc,
-			   int           dm,
-			   const bodies *bb,
-			   vect    const&xmin,
-			   vect    const&xmax,
-			   flags         sp) :
-    ROOTCENTRE(x0)
-  {
-    report REPORT("TreeBuilder::TreeBuilder(): 1.1.2");
-    setup_from_scratch(bb,xmin,xmax,sp);
-    vect X0 = root_centre();
-    BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
+    BoxDotTree::reset(tr,nc,dm,size_t(DN-D0),X0,root_radius(X0));
   }
   //----------------------------------------------------------------------------
   // constructor 2                                                              
-  TreeBuilder::TreeBuilder(const OctTree*t,
+  TreeBuilder::TreeBuilder(const OctTree*tr,
 			   const vect   *x0,
 			   int           nc,
 			   int           dm) : 
     ROOTCENTRE(x0)
   {
-    TREE = t;                                      // set tree                  
     report REPORT("TreeBuilder::TreeBuilder(): 2");
-    setup_leaf_order(TREE->my_bodies());           // use leaf order            
+    TREE = tr;
+    setup_leaf_order(TREE->my_bodies());
     vect X0 = root_centre();
-    BoxDotTree::reset(t,nc,dm,size_t(DN-D0),X0,root_radius(X0));
+    BoxDotTree::reset(tr,nc,dm,size_t(DN-D0),X0,root_radius(X0));
   }
   //////////////////////////////////////////////////////////////////////////////
 }                                                  // END: empty namespace      
@@ -1238,9 +1160,9 @@ OctTree::mark_sub(flags               F,           // I: subtree flag
 {
   unflag_subtree_flags(C);                         // reset subtree flags       
   int ns=0;                                        // counter: subtree dots     
-  LoopLeafKids(cell_iterator,C,Li)                 // LOOP leaf kids            
-    if(are_set(Li,F)) {                            //   IF flag F is set        
-      flag_for_subtree(Li);                        //     flag for subtree      
+  LoopLeafKids(cell_iterator,C,l)                  // LOOP leaf kids            
+    if(are_set(l,F)) {                             //   IF flagged              
+      flag_for_subtree(l);                         //     flag for subtree      
       ++ns;                                        //     count                 
     }                                              // END LOOP                  
   LoopCellKids(cell_iterator,C,Ci)                 // LOOP cell kids            
@@ -1270,7 +1192,7 @@ void OctTree::mark_for_subtree(flags      F,       // I: flag for subtree
       unflag_subtree_flags(Ci);                    //     reset subtree flags   
       int ns=0;                                    //     # subt dots in cell   
       LoopLeafKids(cell_iterator,Ci,l)             //     LOOP child leafs      
-	if(are_set(l,F)) {                         //       IF flag F is set    
+	if(are_set(l,F)) {                         //       IF flagged          
 	  flag_for_subtree(l);                     //         flag for subtree  
 	  ++ns;                                    //         count             
 	}                                          //     END LOOP              
@@ -1327,12 +1249,14 @@ OctTree::OctTree(const bodies*bb,                  // I: body sources
 		 int          nc,                  // I: N_crit                 
 		 const vect  *x0,                  // I: pre-determined centre  
 		 int          dm,                  // I: max tree depth         
-		 flags        sp) :                // I: flag specifying bodies 
+		 flags        sp,                  // I: flag specifying bodies 
+		 const vect  *xi,                  // I: x_min                  
+		 const vect  *xa) :                // I: x_max                  
   BSRCES(bb), SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
   STATE(fresh), USAGE(un_used)
 {
   SET_I
-  TreeBuilder TB(this,x0,nc,dm,bb,sp);             // initialize TreeBuilder    
+  TreeBuilder TB(this,x0,nc,dm,bb,sp,xi,xa);       // initialize TreeBuilder    
   SET_T(" time for TreeBuilder::TreeBuilder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
     TB.build();                                    //   build box-dot tree      
@@ -1349,39 +1273,6 @@ OctTree::OctTree(const bodies*bb,                  // I: body sources
   }                                                // ENDIF                     
   RCENTRE = centre(root());                        // set root centre           
 }  
-//------------------------------------------------------------------------------
-// construction from bodies with X_min/max known already                        
-//------------------------------------------------------------------------------
-OctTree::OctTree(const bodies*bb,            // I: body sources           
-		 vect   const&xi,            // I: x_min                  
-		 vect   const&xa,            // I: x_max                  
-		 int          nc,            // I: N_crit                 
-		 const vect  *x0,            // I: pre-determined centre  
-		 int          dm,            // I: max tree depth         
-		 flags        sp) :          // I: flag specifying bodies 
-  BSRCES(bb), SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
-  STATE(fresh), USAGE(un_used)
-{
-  SET_I
-  if(dm >= 1<<8)
-    error("OctTree: maximum tree depth must not exceed %d",1<<8-1);
-  TreeBuilder TB(this,x0,nc,dm,bb,xi,xa,sp);      // initialize TreeBuilder   
-  SET_T(" time for TreeBuilder::TreeBuilder(): ");
-  if(TB.N_dots()) {                                // IF(dots in tree)          
-    TB.build();                                    //   build box-dot tree      
-    SET_T(" time for TreeBuilder::build():        ");
-    allocate(TB.N_dots(),TB.N_boxes(),             //   allocate leafs & cells  
-	     TB.N_levels(),TB.root_rad());         //   & set up table: radii   
-    TB.link();                                     //   box-dot -> cell-leaf    
-    set_depth(TB.depth());                         //   set tree depth          
-    SET_T(" time for TreeBuilder::link():         ");
-  } else {                                         // ELSE                      
-    warning("nobody in tree");                     //   issue a warning         
-    allocate(0,0,0,zero);                          //   reset leafs & cells     
-    set_depth(0);                                  //   set tree depth to zero  
-  }                                                // ENDIF                     
-  RCENTRE = centre(root());                        // set root centre           
-}
 //------------------------------------------------------------------------------
 // construction as sub-tree from another tree                                   
 //------------------------------------------------------------------------------

@@ -112,12 +112,10 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
     if(bodyindex(Bi)<NS) {
       Bi.size() = S;
       Bi.flag_as_sticky();
-      Bi.flag_as_sph();
       Bi.flag_as_active();
     }
     else {
       Bi.unflag_sticky();
-      Bi.unflag_sph();
       Bi.unflag_active();
     }
   }

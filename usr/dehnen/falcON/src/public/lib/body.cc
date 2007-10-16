@@ -50,6 +50,10 @@ void bodies::block::reset_flags() const
       for(int n=0; n!=NALL; ++n)
 	datum<fieldbit::f>(n) = flags::sph;
     else
+    if(TYPE.is_sink()) 
+      for(int n=0; n!=NALL; ++n)
+	datum<fieldbit::f>(n) = flags::sink;
+    else
       for(int n=0; n!=NALL; ++n)
 	datum<fieldbit::f>(n) = flags::empty;
   }
@@ -62,15 +66,6 @@ void bodies::block::flag_all_as_active() const falcON_THROWING
       datum<fieldbit::f>(n).add(flags::active);
   else 
     falcON_ExceptF("flags not supported","bodies::flag_all_as_active()");
-}
-////////////////////////////////////////////////////////////////////////////////
-void bodies::block::flag_as_sph() const falcON_THROWING
-{
-  if(0 != DATA[fieldbit::f]) {
-    for(int n=0; n!=NALL; ++n)
-      datum<fieldbit::f>(n).add(flags::sph);
-  } else
-    falcON_ExceptF("flags not supported","bodies::flag_as_sph()");
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::block::reset_data(fieldset b) const falcON_THROWING {
