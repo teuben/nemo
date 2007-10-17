@@ -292,7 +292,7 @@ namespace {
 	      error("Combined: recursion accfile=datafile not allowed\n");
 	  }
 	} else {
-	  strncpy(unknown,Line,8); unknown[9]=0;
+	  strncpy(unknown,Line,8); unknown[8]=0;
 	  warning("Combined: entry \"%s\" in file \"%s\" ignored\n",
 		  unknown,file);
 	}
