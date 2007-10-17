@@ -4,11 +4,11 @@
 /// \file   src/public/manip/symmetrize_pairs.cc                                
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
+/// \date   2004-2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
+// Copyright (C) 2004-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -40,6 +40,8 @@ namespace falcON { namespace Manipulate {
   /// first is in_subset() (default: all, see set_subset), so that the          
   /// sum of the positions of the two bodies in each pair is zero (and          
   /// the same for velocities etc).                                             
+  /// \note we also ensure that the masses of each of a pair of bodies are      
+  /// equal.                                                                    
   ///                                                                           
   /// No parameters or file used.                                               
   ///                                                                           
@@ -49,6 +51,21 @@ namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   class symmetrize_pairs : public manipulator {
   private:
+    //--------------------------------------------------------------------------
+    static void make_equal(real&m1, real&m2) {
+      m1 += m2;
+      m1 *= half;
+      m2  = m1;
+    }
+    //--------------------------------------------------------------------------
+    static void ensure_equal_masses(const bodies*B) {
+      for(body b(B->begin_all_bodies()); b; ++b) 
+	if(in_subset(b)) {
+	  real &m(b.mass());
+	  if(++b) make_equal(m, b.mass());
+	} else
+	  ++b;
+    }
     //--------------------------------------------------------------------------
     static void make_symmetric(vect&x1, vect&x2) {
       x1 -= x2;
@@ -96,6 +113,7 @@ namespace falcON { namespace Manipulate {
   };
   //////////////////////////////////////////////////////////////////////////////
   bool symmetrize_pairs::manipulate(const snapshot*S) const {
+    if(S->have(fieldbit::m)) ensure_equal_masses(S);
     if(S->have(fieldbit::x)) symmetrize<fieldbit::x>(S);
     if(S->have(fieldbit::v)) symmetrize<fieldbit::v>(S);
     if(S->have(fieldbit::a)) symmetrize<fieldbit::a>(S);
