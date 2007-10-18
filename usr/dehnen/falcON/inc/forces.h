@@ -49,6 +49,7 @@ namespace falcON {
 #ifdef falcON_SPH
   class SphEstimator;
   class EquationOfState;
+  class ArtificialViscosity;
 #endif
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
@@ -354,7 +355,7 @@ namespace falcON {
     /// \param beta_over_alpha factor for artificial viscosity                  
     /// \param eps  parameter for artificial viscosity                          
     void SPH_sweep_two(const EquationOfState*eos,
-		       real alfa, real beta_over_alpha, real eps)
+		       const ArtificialViscosity*av)
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// \return # bodies with mu_i < Mu - dMu

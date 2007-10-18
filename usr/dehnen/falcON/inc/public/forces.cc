@@ -425,10 +425,10 @@ namespace falcON {
   }
   //----------------------------------------------------------------------------
   inline void forces::SPH_sweep_two(const EquationOfState*eos,
-				    real a, real b, real e) falcON_THROWING
-  
+				    const ArtificialViscosity*av)
+    falcON_THROWING
   {
-    SPHT->sweep_two(eos,a,b,e);
+    SPHT->sweep_two(eos,av);
   }
   //----------------------------------------------------------------------------
   inline unsigned const&forces::N_MuSmall() const {
