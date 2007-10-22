@@ -82,8 +82,11 @@ namespace falcON {
     const char      *FILE;
     iofile() : FILE(0) {}
     void setfile(const char*file) {
-      strncpy(FNAME,file,FNAME_MAX_SIZE);
-      FILE = file? FNAME : 0;
+      if(file && file[0]) {
+	strncpy(FNAME,file,FNAME_MAX_SIZE);
+	FILE = FNAME;
+      } else
+	FILE = 0;
     }
   public:
     /// give file name, if any

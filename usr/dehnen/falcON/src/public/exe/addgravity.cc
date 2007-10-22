@@ -85,7 +85,6 @@ void falcON::main() falcON_THROWING
   if(SOFT) NEED |= fieldset::e;
 #endif
   vect     X0, *RC(getvparam_z("root_center",X0));
-  double   TIME;
   snapshot SHOT;
   forces   FALCON(&SHOT,
 		  getrparam("eps"),
@@ -115,6 +114,6 @@ void falcON::main() falcON_THROWING
       SHOT.write_nemo(OUT,READ|fieldset(fieldset::a|fieldset::p|fieldset::q));
     } else
       warning("data '%s' missing at time %f: cannot compute gravity",
-	      word(READ.missing(NEED)), TIME);
+	      word(READ.missing(NEED)), SHOT.time());
   }
 }

@@ -3,7 +3,7 @@
 //                                                                             |
 // gyrfalcON.cc                                                                |
 //                                                                             |
-// Copyright (C) 2000-2006 Walter Dehnen                                       |
+// Copyright (C) 2000-2007 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |

@@ -312,6 +312,9 @@ namespace falcON {
       /// return sub-index, encoded in lowest index::index_bits bits.           
       unsigned in() const { return I &  index_mask; }
       //------------------------------------------------------------------------
+      /// return numerical value
+      unsigned const&value() const { return I; }
+      //------------------------------------------------------------------------
       /// unitialized construction.                                             
       index() {}
       //------------------------------------------------------------------------
