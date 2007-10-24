@@ -38,6 +38,7 @@
  * 25-jan-05    added powd/powi
  *  1-aug-05    nemo_string, nemo_stream for starlab interfaces
  * 29-nov-06    within() now using double's
+ * 23-oct-07    added some more PI's and LN's from ZENO/Koda's mathfns.h
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -284,6 +285,15 @@ typedef real (*float_proc)(float);
 #define   FOUR_PI   12.56637061435917295385
 #define   HALF_PI    1.57079632679489661923
 #define   FRTHRD_PI  4.18879020478639098462
+#define INV_PI     0.31830988618379067154
+#define TENSVN_IPI 0.45472840883398667363
+#define ONETRD     0.33333333333333333333
+#define TWOTRD     0.66666666666666666667
+#define FORTRD     1.33333333333333333333
+#define ONESVN     0.14285714285714285714
+#define ONESIX     0.16666666666666666667
+#define M_LN2      0.69314718055994530942
+#define M_LN10     2.30258509299404568402
 
 /*
  * angular conversion factors (multiplicative)
