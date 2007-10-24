@@ -29,6 +29,8 @@ extern bool    hasvalue (string);
 extern bool    updparam (string);
 extern int     indexparam(string, int);
 
+extern int     getparamstat(string);
+
 extern string  getparam  (string);
 extern int     getiparam (string);
 extern long    getlparam (string);
