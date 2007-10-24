@@ -46,12 +46,18 @@
 #ifndef falcON_included_basic_h
 #  include <public/basic.h>
 #endif
+#ifndef falcON_included_cstdio
+# include <cstdio>
+# define falcON_included_cstdio
+#endif
+
+extern "C" struct XDR;
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace { class PotExpAccess; }                  // forward declaration       
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
-  class PotExp;                                    // forward declaration       
+  class AnlmIO;                                    // forward declaration       
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // class falcON::PotExp                                                     //
@@ -112,6 +118,7 @@ namespace falcON {
     class Anlm {
       friend class PotExp;
       friend class ::PotExpAccess;
+      friend class AnlmIO;
       //------------------------------------------------------------------------
       // type used internally for real-valued numbers                           
       typedef double scalar;
@@ -120,11 +127,24 @@ namespace falcON {
       const int N,L, N1,L1,L1Q;
       scalar   *A;
       //------------------------------------------------------------------------
+      /// like destruction followed by construction
+      void reset(int n, int l) {
+	if(n!=N || l!=L) {
+	  falcON_DEL_A(A);
+	  *(const_cast<int*>(&N)) = n;
+	  *(const_cast<int*>(&L)) = l;
+	  *(const_cast<int*>(&N1)) = N+1;
+	  *(const_cast<int*>(&L1)) = L+1;
+	  *(const_cast<int*>(&L1Q)) = L1*L1;
+	  A = falcON_NEW(scalar,N1*L1Q);
+	}
+      }
+      //------------------------------------------------------------------------
       // construction & destruction                                             
-      Anlm (int n, int l) :
+    public:
+      Anlm (int n=0, int l=0) :
 	N(n), L(l),
 	N1(N+1), L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,N1*L1Q)) {}
-    public:
       template<typename POTEXP>
       Anlm (POTEXP const&P) :
 	N(P.Nmax()), L(P.Lmax()),
@@ -313,6 +333,71 @@ namespace falcON {
 		     scalar          =1) const;    //[I: const of Gravity]      
     //--------------------------------------------------------------------------
   };// class PotExp
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class AnlmIO                                                               
+  //                                                                            
+  //////////////////////////////////////////////////////////////////////////////
+  class AnlmIO {
+    AnlmIO (AnlmIO const&);
+    AnlmIO&operator=(AnlmIO const&);
+    //--------------------------------------------------------------------------
+    enum { closed=0, writing=1, reading=2 };
+    int  open;  ///< state
+    XDR *xdrs;  ///< xdr stream
+    FILE*file;  ///< C file stream
+    //--------------------------------------------------------------------------
+  protected:
+    AnlmIO() : open(0), xdrs(0), file(0) {}
+   ~AnlmIO() { close(); }
+    //--------------------------------------------------------------------------
+    void open_for_read (const char*) falcON_THROWING;
+    void open_for_write(const char*) falcON_THROWING;
+    /// \param sym symmetry
+    /// \param al  alpha
+    /// \param rs  scale
+    /// \param A   coeffs
+    /// \param t   time
+    void write(PotExp::symmetry sym, double al, double rs,
+	       PotExp::Anlm const& A, double t) falcON_THROWING;
+    /// \param sym symmetry
+    /// \param al  alpha
+    /// \param rs  scale
+    /// \param A   coeffs
+    /// \param t   time
+    void read (PotExp::symmetry&sym, double&al, double&rs,
+	       PotExp::Anlm&A, double&t) falcON_THROWING;
+  public:
+    bool is_open() const { return open!=closed; }
+    bool is_good() const;
+    void close();
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class AnlmI                                                                
+  //                                                                            
+  //////////////////////////////////////////////////////////////////////////////
+  class AnlmI : public AnlmIO {
+    AnlmI (AnlmI const&);
+    AnlmI&operator=(AnlmI const&);
+    //--------------------------------------------------------------------------
+  public:
+    AnlmI(const char*f) falcON_THROWING { open_for_read(f); }
+    AnlmIO::read;
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class AnlmO                                                                
+  //                                                                            
+  //////////////////////////////////////////////////////////////////////////////
+  class AnlmO : public AnlmIO {
+    AnlmO (AnlmO const&);
+    AnlmO&operator=(AnlmO const&);
+    //--------------------------------------------------------------------------
+  public:
+    AnlmO(const char*f) falcON_THROWING { open_for_write(f); }
+    AnlmIO::write;
+  };
 } // namespace falcON
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_PotExp_h

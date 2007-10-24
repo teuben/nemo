@@ -24,6 +24,21 @@
 #include <public/simd.h>
 #include <cstring>
 #include <iomanip>
+#include <rpc/rpc.h>
+#ifdef   falcON_NEMO
+#  ifdef   MAX               /* not only Peter Teuben, but also somebody */
+#    undef MAX               /* else had the splendid idea to define a   */
+#  endif                     /* C-macro "MAX".                           */
+#  ifdef   MIN               /* not only Peter Teuben, but also somebody */
+#    undef MIN               /* else had the splendid idea to define a   */
+#  endif                     /* C-macro "MIN".                           */
+#  include <stdinc.h>
+#  include <cstring>
+#endif
+
+namespace falcON {
+  bool is_appended(const char*name, char c, char*copy);
+}
 
 using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,15 +47,6 @@ using namespace falcON;
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // simple inline functions and constants                                    //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  template<typename T> inline T twice (T const&x) { return x+x; }
-  template<typename T> inline T square(T const&x) { return x*x; }
-  const double Pi = 3.14159265358979323846264338328;
-  const double TPi= twice(Pi);
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // types                                                                    //
@@ -1938,7 +1944,7 @@ namespace {
     a[1] = am   * sp + a[2] * cp;                  // ay = am*sp + ap*cp        
     a[2] = az;
   }
-}
+} // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON { namespace P {
 #ifdef falcON_SSE
@@ -2213,130 +2219,132 @@ void AnlRec::table_print(symmetry     s,
 // class falcON::PotExp::Anlm  and  related                                   //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-template<symmetry S> inline Anlm &Anlm_assign(Anlm        &A,
+namespace {
+  template<symmetry S> inline Anlm &Anlm_assign(Anlm        &A,
 					      scalar const&x) {
-  AUX<S>::template Connect<__setX>(A,A,x);
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_reset(Anlm&A) {
-  return Anlm_assign<S>(A,scalar(0));
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_multiply(Anlm        &A,
+    AUX<S>::template Connect<__setX>(A,A,x);
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_reset(Anlm&A) {
+    return Anlm_assign<S>(A,scalar(0));
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_multiply(Anlm        &A,
+						  scalar const&x) {
+    AUX<S>::template Connect<__mulX>(A,A,x);
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_divide(Anlm        &A,
 						scalar const&x) {
-  AUX<S>::template Connect<__mulX>(A,A,x);
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_divide(Anlm        &A,
-					      scalar const&x) {
-  return Anlm_multiply<S>(A,scalar(1)/x);
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_copy(Anlm      &A,
-					    Anlm const&B) {
-  AUX<S>::template Connect<__setB>(A,B,scalar(0));
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_add(Anlm      &A,
-					   Anlm const&B) {
-  AUX<S>::template Connect<__addB>(A,B,scalar(0));
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_subtract(Anlm      &A,
-						Anlm const&B) {
-  AUX<S>::template Connect<__subB>(A,B,scalar(0));
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_multiply(Anlm      &A,
-						Anlm const&B) {
-  AUX<S>::template Connect<__mulB>(A,B,scalar(0));
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_addtimes(Anlm        &A,
-						Anlm   const&B,
-						scalar const&x) {
-  AUX<S>::template Connect<__addT>(A,B,x);
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_subtimes(Anlm        &A,
-						Anlm   const&B,
-						scalar const&x) {
-  AUX<S>::template Connect<__subT>(A,B,x);
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline scalar Anlm_dot(Anlm const&A,
-					    Anlm const&B) {
-  return AUX<S>::Dot(A,B);
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_assign(Anlm        &A,
+    return Anlm_multiply<S>(A,scalar(1)/x);
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_copy(Anlm      &A,
+					      Anlm const&B) {
+    AUX<S>::template Connect<__setB>(A,B,scalar(0));
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_add(Anlm      &A,
+					     Anlm const&B) {
+    AUX<S>::template Connect<__addB>(A,B,scalar(0));
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_subtract(Anlm      &A,
+						  Anlm const&B) {
+    AUX<S>::template Connect<__subB>(A,B,scalar(0));
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_multiply(Anlm      &A,
+						  Anlm const&B) {
+    AUX<S>::template Connect<__mulB>(A,B,scalar(0));
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_addtimes(Anlm        &A,
+						  Anlm   const&B,
+						  scalar const&x) {
+    AUX<S>::template Connect<__addT>(A,B,x);
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_subtimes(Anlm        &A,
+						  Anlm   const&B,
+						  scalar const&x) {
+    AUX<S>::template Connect<__subT>(A,B,x);
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline scalar Anlm_dot(Anlm const&A,
+					      Anlm const&B) {
+    return AUX<S>::Dot(A,B);
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_assign(Anlm        &A,
+						AnlRec const&P,
+						YlmRec const&Y) {
+    AUX<S>::template Connect<__setB>(A,P,Y,scalar(0));
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_add(Anlm        &A,
+					     AnlRec const&P,
+					     YlmRec const&Y) {
+    AUX<S>::template Connect<__addB>(A,P,Y,scalar(0));
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_subtract(Anlm        &A,
+						  AnlRec const&P,
+						  YlmRec const&Y) {
+    AUX<S>::template Connect<__subB>(A,P,Y,scalar(0));
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_addtimes(Anlm        &A,
+						  AnlRec const&P,
+						  YlmRec const&Y,
+						  scalar const&x) {
+    AUX<S>::template Connect<__addT>(A,P,Y,x);
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_subtimes(Anlm        &A,
+						  AnlRec const&P,
+						  YlmRec const&Y,
+						  scalar const&x) {
+    AUX<S>::template Connect<__subT>(A,P,Y,x);
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline Anlm &Anlm_multiply(Anlm        &A,
+						  AnlRec const&P,
+						  YlmRec const&Y) {
+    AUX<S>::template Connect<__mulB>(A,P,Y,scalar(0));
+    return A;
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S> inline scalar Anlm_dot(Anlm   const&A,
 					      AnlRec const&P,
 					      YlmRec const&Y) {
-  AUX<S>::template Connect<__setB>(A,P,Y,scalar(0));
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_add(Anlm        &A,
-					   AnlRec const&P,
-					   YlmRec const&Y) {
-  AUX<S>::template Connect<__addB>(A,P,Y,scalar(0));
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_subtract(Anlm        &A,
-						AnlRec const&P,
-						YlmRec const&Y) {
-  AUX<S>::template Connect<__subB>(A,P,Y,scalar(0));
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_addtimes(Anlm        &A,
-						AnlRec const&P,
-						YlmRec const&Y,
-						scalar const&x) {
-  AUX<S>::template Connect<__addT>(A,P,Y,x);
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_subtimes(Anlm        &A,
-						AnlRec const&P,
-						YlmRec const&Y,
-						scalar const&x) {
-  AUX<S>::template Connect<__subT>(A,P,Y,x);
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline Anlm &Anlm_multiply(Anlm        &A,
-						AnlRec const&P,
-						YlmRec const&Y) {
-  AUX<S>::template Connect<__mulB>(A,P,Y,scalar(0));
-  return A;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline scalar Anlm_dot(Anlm   const&A,
-					    AnlRec const&P,
-					    YlmRec const&Y) {
-  return AUX<S>::Dot(A,P,Y);
-}
-//------------------------------------------------------------------------------
-template<symmetry S, typename T>
-inline scalar Anlm_dot(Anlm const  &A,
-		       tupel<3,T>  &d,
-		       AnlRec const&P,
-		       AnlRec const&Pr, 
-		       YlmRec const&Y,
-		       YlmRec const&Yt,
-		       YlmRec const&Yp) {
-  return AUX<S>::Dot(d,A,P,Pr,Y,Yt,Yp);
-}
+    return AUX<S>::Dot(A,P,Y);
+  }
+  //----------------------------------------------------------------------------
+  template<symmetry S, typename T>
+  inline scalar Anlm_dot(Anlm const  &A,
+			 tupel<3,T>  &d,
+			 AnlRec const&P,
+			 AnlRec const&Pr, 
+			 YlmRec const&Y,
+			 YlmRec const&Yt,
+			 YlmRec const&Yp) {
+    return AUX<S>::Dot(d,A,P,Pr,Y,Yt,Yp);
+  }
+} // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 Anlm &Anlm::reset(symmetry S) {
   switch(S) {
@@ -3249,8 +3257,124 @@ SelfGravity<double>(Anlm&, int, const double*, const tupel<3,double>*,
 		    double*, tupel<3,double>*, const int*,
 		    int, bool, int, scalar) const;
 ////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// class falcON::AnlmIO                                                       //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-
+#define TRY_XDR(x,func)							\
+  if(!(x)) falcON_THROW("AnlmIO::%s(): XDR operation failed",func);
+//------------------------------------------------------------------------------
+void AnlmIO::open_for_write(const char*file_name) falcON_THROWING
+{
+  // open file and connect xdr stream to it                                     
+  if(open != closed)
+    falcON_THROW("AnlmIO::open_for_write(): already open");
+#ifdef falcON_NEMO
+  char fname[1024];
+  if(is_appended(file_name,'!',fname))
+    file = stropen(fname,"w!");
+  else
+    file = stropen(file_name,"w");
+#else
+  file = fopen(file_name,"w");
+#endif
+  if(!file)
+    falcON_THROW("cannot open file \"%s\" for writing",file_name);
+  if(xdrs == 0) xdrs = new XDR;
+  xdrstdio_create( xdrs, file, XDR_ENCODE );
+  // create header                                                              
+  char header[10] = "anlmfile", *p=header;
+  // write identifier
+  TRY_XDR(xdr_string(xdrs, &p, 10),"open_for_write");
+  open = writing;
+}
+//------------------------------------------------------------------------------
+void AnlmIO::open_for_read(const char*file_name) falcON_THROWING
+{
+  // open file and connect xdr stream to it                                     
+  if(open != closed)
+    falcON_THROW("AnlmIO::open_for_read(): already open");
+#ifdef falcON_NEMO
+  file = stropen(file_name,"r");
+#else
+  file = fopen(file_name,"r");
+#endif
+  if(!file)
+    falcON_THROW("cannot open file \"%s\" for reading",file_name);
+  if(xdrs == 0) xdrs = new XDR;
+  xdrstdio_create(xdrs, file, XDR_DECODE);
+  // read header                                                                
+  char header[10], shead[10] = "anlmfile", *p=header;
+  // read identifier
+  TRY_XDR(xdr_string(xdrs, &p, 10),"open_for_read");
+  if( strcmp(header,shead) )
+    falcON_THROWING("file \"%s\" is not a XDR *anlmfile*, "
+		    "cannot open for reading",file_name);
+  open = reading;
+}
+//------------------------------------------------------------------------------
+void AnlmIO::read(PotExp::symmetry&sym, double&a, double&r,
+		  PotExp::Anlm&A, double &t)
+  falcON_THROWING
+{
+  if(open != reading)
+    falcON_THROW("AnlmIO::read(): stream not opened for reading");
+  if(feof(file)) falcON_THROW("AnlmIO::read(): seen end of file\n");
+  if(ferror(file)) falcON_THROW("AnlmIO::read(): I/O error\n");
+  int n,l,s;
+  TRY_XDR(xdr_double(xdrs,&t),"read");                 // read time
+  TRY_XDR(xdr_double(xdrs,&a),"read");                 // read alpha
+  TRY_XDR(xdr_double(xdrs,&r),"read");                 // read scale
+  TRY_XDR(xdr_int   (xdrs,&s),"read");                 // read symmetry
+  TRY_XDR(xdr_int   (xdrs,&n),"read");                 // read max n
+  TRY_XDR(xdr_int   (xdrs,&l),"read");                 // read max l
+  sym = PotExp::symmetry(s);
+  A.reset(n,l);
+  Anlm::scalar* aN=A.A+(n+1)*square(l+1);
+  for(Anlm::scalar*a=A.A; a!=aN; ++a)
+    TRY_XDR(xdr_double(xdrs,a),"read");
+}
+//------------------------------------------------------------------------------
+void AnlmIO::write(PotExp::symmetry sym, double a, double r,
+		   PotExp::Anlm const& A, double t)
+  falcON_THROWING
+{
+  if(open != writing)
+    falcON_THROW("AnlmIO::write(): stream not opened for writing");
+  int s = sym;
+  TRY_XDR(xdr_double(xdrs,&t),"write");                           // write time
+  TRY_XDR(xdr_double(xdrs,&a),"write");                           // write alpha
+  TRY_XDR(xdr_double(xdrs,&r),"write");                           // write scale
+  TRY_XDR(xdr_int   (xdrs,&s),"write");                           // write symm
+  TRY_XDR(xdr_int   (xdrs,const_cast<int*>(&(A.nmax()))),"write");// write max n
+  TRY_XDR(xdr_int   (xdrs,const_cast<int*>(&(A.lmax()))),"write");// write max l
+  Anlm::scalar* aN=A.A+(A.nmax()+1)*square(A.lmax()+1);
+  for(const Anlm::scalar*a=A.A; a!=aN; ++a)
+    TRY_XDR(xdr_double(xdrs,const_cast<double*>(a)),"write");
+}
+//------------------------------------------------------------------------------
+bool AnlmIO::is_good() const {
+  return !feof(file) && !ferror(file);
+}
+//------------------------------------------------------------------------------
+void AnlmIO::close()
+{
+  if(open) {
+    xdr_destroy (xdrs);
+    falcON_DEL_O(xdrs);
+#ifdef falcON_NEMO
+    strclose( file );
+#else
+    fclose  ( file );
+#endif
+  }
+  open = closed;
+  xdrs = 0;
+  file = 0;
+}
+#undef TRY_XDR
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
 
 #if (0)
 ////////////////////////////////////////////////////////////////////////////////

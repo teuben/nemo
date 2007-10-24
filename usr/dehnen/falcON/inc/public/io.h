@@ -995,6 +995,14 @@ namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
 #endif // falcON_NEMO
   // ///////////////////////////////////////////////////////////////////////////
+  /// truncated string by one trailing character
+  /// if the last character in name equals c then\n
+  /// - we copy name into copy, except for character c\n
+  /// - we return true\n
+  /// otherwise\n
+  /// - we return false
+  bool is_appended(const char*name, char c, char*copy);
+  // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::FortranIRec                                                  
   //                                                                            

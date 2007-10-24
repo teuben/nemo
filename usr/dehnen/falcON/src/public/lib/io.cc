@@ -649,24 +649,6 @@ void nemo_out::close() falcON_THROWING
   debug_info(4,"nemo_out: closed stream\n");
 }
 //------------------------------------------------------------------------------
-namespace {
-  // if the last character in name equals c then                                
-  // - we copy name into copy, except for character c                           
-  // - we return true                                                           
-  // otherwise                                                                  
-  // - we return false                                                          
-  inline bool is_appended(const char*name, char c, char*copy)
-  {
-    char *end = strrchr(name,c);
-    if(end && end[1] == 0) {
-      strcpy(copy,name);
-      copy[size_t(end-name)] = 0;
-      return true;
-    } else
-      return false;
-  }
-}
-//------------------------------------------------------------------------------
 nemo_out& nemo_out::open(const char* file,
 			 bool appending) falcON_THROWING
 {
@@ -872,6 +854,16 @@ bool falcON::time_in_range(double t, const char*times)
 }
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_NEMO
+////////////////////////////////////////////////////////////////////////////////
+bool falcON::is_appended(const char*name, char c, char*copy) {
+  char *end = strrchr(name,c);
+  if(end && end[1] == 0) {
+    strcpy(copy,name);
+    copy[size_t(end-name)] = 0;
+    return true;
+  } else
+    return false;
+}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::FortranIRec                                                    

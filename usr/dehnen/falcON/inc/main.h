@@ -499,6 +499,18 @@ namespace falcON {
     return hasvalue(const_cast<char*>(option))?
       getioparam(const_cast<char*>(option)) : fieldset::all;
   }
+  //----------------------------------------------------------------------------
+  // read PotExp::symmetry
+#ifdef falcON_included_PotExp_h
+  inline PotExp::symmetry getsymparam(const char*symm) {
+    int __sym (getiparam(const_cast<char*>(symm)));
+    return
+      __sym==4? PotExp::spherical   :
+      __sym==3? PotExp::cylindrical :
+      __sym==2? PotExp::triaxial    :
+      __sym==1? PotExp::reflexion   : PotExp::none;
+  }
+#endif
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // check for file name to relate to a real output (is given && != ".")      //
