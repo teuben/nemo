@@ -1,0 +1,28 @@
+#! /bin/csh -f
+#
+
+#  Some guidelines to install ZENO within NEMO
+#  notice though, some commands are the same and don't do the same
+#    tsf,rsf,csf	pretty much the same
+#    mkorbit		totally  different
+#
+
+set url=http://www.ifa.hawaii.edu/~barnes/zeno/zeno19dec06.tar.gz
+
+echo This script does not install ZENO directly, for now read the comments
+echo But grab the following file
+echo $url
+echo And you will also need the source code of Numerical Recipes
+
+# Installation:   (you need a source code tree for Numerical Recipes V2)
+
+#  mkdir $NEMO/usr/zeno
+#  cd $NEMO/usr/zeno
+#  wget ... zeno19dec06.tar.gz
+#  tar zxf zeno19dec06.tar.gz
+#  mkdir inc bin
+#  cp $NUMRECDIR/other/nrutil.h lib/nrec
+#  cp $NUMRECDIR/recipes/...    lib/nrec
+#  beschb.c  eigsrt.c  golden.c bessik.c  gammln.c  jacobi.c chebev.c  gammp.c   nrutil.c
+#  source ZENORC
+#  make -f ZENO
