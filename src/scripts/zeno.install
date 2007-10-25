@@ -23,6 +23,16 @@ echo And you will also need the source code of Numerical Recipes
 #  mkdir inc bin
 #  cp $NUMRECDIR/other/nrutil.h lib/nrec
 #  cp $NUMRECDIR/recipes/...    lib/nrec
-#  beschb.c  eigsrt.c  golden.c bessik.c  gammln.c  jacobi.c chebev.c  gammp.c   nrutil.c
+#  beschb.c  eigsrt.c  golden.c bessik.c  gammln.c  jacobi.c chebev.c  gammp.c   nrutil.c  gser.c gcf.c
 #  source ZENORC
-#  make -f ZENO
+#  make -f ZENO reset_all install_all
+#
+
+#ZENORC is not in the tar file, if not, use this:
+#+++
+#setenv ZENOPATH `pwd`
+#setenv CCFLAGS "-I$ZENOPATH/inc -DLINUX -L$ZENOPATH/lib"
+#setenv LDFLAGS "-L$ZENOPATH/lib"
+#set path=(. $ZENOPATH/bin $path)
+#rehash
+#---
