@@ -61,9 +61,14 @@ echo reporting the status of 4 steps as we go along.. Be patient.
 echo Be sure to change your path and add $prefix/bin before your other path elements.
 
 if ($version:r:r == 3 && $fc != f77) echo "Warning: gcc3 should use fc=f77, not $fc"
-if ($version:r:r == 4 && $fc != f95) echo "Warning: gcc4 should use fc=f95, not $fc"
-
-# note: 4.2.0 deprecated f95, should use fortran instead....
+if ($version:r:r == 4) then
+  # 4.0.x and 4.1.x use f95, 4.2.x use fortran 
+  if ($version:r:e < 2 && $fc != f95) then
+    echo "Warning: gcc4 should use fc=f95, not $fc"
+  else
+    echo "Warning: gcc4 should use fc=fortran, not $fc"
+  endif
+endif
 
 ../configure --prefix=$prefix --enable-threads --enable-languages=c,c++,$fc >& build1.log
 echo status $status on build1.log
