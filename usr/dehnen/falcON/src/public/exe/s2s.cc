@@ -34,8 +34,8 @@
 // v 0.3   30/10/2007  WD allowed times=first and times=last                    
 // v 1.0   31/10/2007  WD added filter, etc, makes snapfilter redundant         
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.3"
-#define falcON_VERSION_D "30-oct-2007 Walter Dehnen                          "
+#define falcON_VERSION   "1.0"
+#define falcON_VERSION_D "31-oct-2007 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2s"
