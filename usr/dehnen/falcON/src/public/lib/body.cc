@@ -302,16 +302,13 @@ void bodies::block::remove(unsigned &removed) falcON_THROWING
     falcON_ExceptF("flags needed but not supported","bodies::remove()");
   unsigned lo=0u, hi=NBOD-1;
   while(lo < hi) {
-    while(! to_remove(const_datum<fieldbit::f>(lo)) && lo < hi)
-      ++lo;
-    while(  to_remove(const_datum<fieldbit::f>(hi)) && lo < hi) {
-      ++removed;
-      --hi;
-    }
+    while(! to_remove(const_datum<fieldbit::f>(lo)) && lo < hi) ++lo;
+    while(  to_remove(const_datum<fieldbit::f>(hi)) && lo < hi) --hi;
     if(lo < hi) copy_body(hi--,lo++);
   }
   if(lo == hi && ! to_remove(const_datum<fieldbit::f>(lo))) ++lo;
-  NBOD = lo;
+  removed += NBOD - lo;
+  NBOD     = lo;
 }
 #ifdef falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
@@ -711,7 +708,14 @@ void bodies::reset(const unsigned n[BT_NUM],
   for(bodytype t; t; ++t) keepN = keepN && NALL[t] == n[t];
   if(keepN) {
     NTOT = 0u;
-    for(bodytype t; t; ++t) NTOT += (NBOD[t] = NALL[t]);
+    for(bodytype t; t; ++t) {
+      NBOD[t] = NALL[t];
+      NDEL[t] = 0u;
+      NNEW[t] = 0u;
+      NTOT   += NBOD[t];
+    }
+    for(unsigned i=0; i!=index::max_blocks; ++i) 
+      if(BLOCK[i]) BLOCK[i]->NBOD = BLOCK[i]->NALL;
     del_fields(BITS - bits);
     add_fields(bits - BITS);
   } else {
