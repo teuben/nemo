@@ -7,6 +7,7 @@
  *    21-dec-92   V1.4   selectable sort routine                    PJT
  *    10-jun-95       a  declaration fix (linux) n                  pjt
  *    31-dec-02   V1.5   gcc3/SINGLEPREC                            pjt
+ *     1-nov-07       a  bug when Aux is present                    pjt
  */
 
 #include <stdinc.h>
@@ -26,7 +27,7 @@ string defv[] = {
     "rank=etot\n	Value used in ranking particles",
     "times=all\n        Range of times to process ",
     "sort=qsort\n       Sort mode {qsort;...}",
-    "VERSION=1.5\n      31-dec-02 PJT ",
+    "VERSION=1.5a\n     1-nov-07 PJT ",
     NULL,
 };
 
@@ -34,7 +35,7 @@ string usage="sort particles according to a user-specified ranking";
 
 /* #define FLOGGER 1       /* merge in the cute flogger test routines */
 
-void snapsort(Body *, int , real , rproc_body, iproc);
+void snapsort(Body *, int , real , bool, bool, rproc_body, iproc);
 
 
 nemo_main()
@@ -46,6 +47,8 @@ nemo_main()
     Body *btab = NULL;
     int nbody, bits;
     real tsnap;
+    bool Qaux;
+    
 
     instr = stropen(getparam("in"), "r");
     get_history(instr);
@@ -58,7 +61,8 @@ nemo_main()
         get_history(instr);  /*  get history that is not written */
 	get_snap_by_t(instr, &btab, &nbody, &tsnap, &bits, times);
 	if (bits & PhaseSpaceBit) {
-	    snapsort(btab, nbody, tsnap, rank, mysort);
+	  snapsort(btab, nbody, tsnap, bits&AuxBit, bits&KeyBit, rank, mysort);
+	    bits |= KeyBit;
 	    put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 	}
 	btab=NULL;	/* 'free' the snapshot */
@@ -76,15 +80,36 @@ void snapsort(
 	 Body *btab,
 	 int nbody,
 	 real tsnap,
+	 bool Qaux,
+	 bool Qkey,
 	 rproc_body rank,
 	 iproc mysort)
 {
     int i;
     Body *b;
+    real *aux;
 
-    for (i = 0, b = btab; i < nbody; i++, b++)
+    if (Qaux) {  /* make backup copy of Aux */
+      aux = (real *) allocate(nbody*sizeof(real));
+      for (i = 0, b = btab; i < nbody; i++, b++)
+	aux[i] = Aux(b);
+    }
+    if (!Qkey) { /* initialize Key's if they didn't exist */
+      for (i = 0, b = btab; i < nbody; i++, b++)
+	Key(b) = i;
+    }
+    
+
+    for (i = 0, b = btab; i < nbody; i++, b++) {
 	Aux(b) = (rank)(b, tsnap, i);
+    }
     (mysort)(btab, nbody, sizeof(Body), rank_aux);
+
+    if (Qaux) {   /* stuff it back */
+      for (i = 0, b = btab; i < nbody; i++, b++)
+	Aux(b) = aux[i];
+      free(aux);
+    }
 }
 
 
