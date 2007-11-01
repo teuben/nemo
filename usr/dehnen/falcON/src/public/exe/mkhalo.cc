@@ -330,7 +330,7 @@ void falcON::main()
 	 << space << "   M_t(<r) "
 	 << space << "    rho(r) "
 	 << space << "    Psi(r) "
-	 << space << "  g(Q=Psi)\n"
+	 << space << "ln[g(Q=Psi)]\n"
 	 << "#\n";
     for(unsigned n=0; n!=HM.Ntab(); ++n)
       Tab<< setw(w) << setprecision(p) << HM.rad(n) << ' '
