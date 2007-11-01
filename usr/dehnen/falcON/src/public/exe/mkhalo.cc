@@ -42,9 +42,10 @@
 // v 2.0.3  09/05/2007  WD  Mhalo -> M, beta->b                                 
 // v 2.1    13/09/2007  WD  added parameter eps; made public                    
 // v 2.2    19/09/2007  WD  ensured total mass                                  
+// v 2.3    01/11/2007  WD  WD_units                                            
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.2"
-#define falcON_VERSION_D "19-sep-2007 Walter Dehnen                          "
+#define falcON_VERSION   "2.3"
+#define falcON_VERSION_D "01-nov-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -134,9 +135,12 @@ string defv[] = {
   "accname=\n         name of external monopole acceleration field       ",
   "accpars=\n         parameters of external acceleration field          ",
   "accfile=\n         file required by external acceleration field       ",
-  "tabfile=\n         write table with r, pot, vc, sigma to file         ",
+  "tabfile=\n         write table with r, M(r), rho, Psi, g(Q) to file   ",
   "prec=8\n           # significant digits in table                      ",
   "careful=f\n        possibly non-monotonic DF?                         ",
+  "WD_units=f\n       input  units: kpc, Msun\n"
+  "                   output units: kpc, 222288*Msun, Gyr (=> G=1)\n"
+  "                   NOTE: external potential MUST also use these units ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string usage =
@@ -173,9 +177,11 @@ string usage =
 //------------------------------------------------------------------------------
 void falcON::main()
 {
+  const double mf = 2.2228847e5;                   // M_sun in WD_units         
   //----------------------------------------------------------------------------
   // 1. set some parameters                                                     
   //----------------------------------------------------------------------------
+  const bool WD  (getbparam("WD_units"));
   const bool care(getbparam("careful"));
   const Random Ran(getparam("seed"),6);
   const fieldset data((
@@ -206,19 +212,23 @@ void falcON::main()
   // 2. create initial conditions from a halo model using mass adaption         
   //----------------------------------------------------------------------------
   double rs(getdparam("r_s"));
-  const double 
-    gi(getdparam("inner")),
-    go(getdparam("outer")),
-    et(getdparam("eta"));
+  double rc(getdparam("r_c"));
+  double rt(getdparam("r_t"));
+  double ra(getdparam("r_a"));
+  double be(getdparam("b"));
+  double Mt(getdparam("M"));
+  double gi(getdparam("inner"));
+  double go(getdparam("outer"));
+  double et(getdparam("eta"));
+  if(WD) Mt /= mf;
   if(hasvalue("r_2")) {
     if(rs != 1.) warning("'r_2' given: will ignore non-default 'r_s' value\n");
     rs = getdparam("r_2") * pow((go-2)/(2-gi),1/et);
   }
-  ModifiedDoublePowerLawHalo Halo(rs, getdparam("r_c"), getdparam("r_t"),
-				  getdparam("M"), gi, go, et);
-  HaloSampler HaloSample(Halo, getdparam("b"), getdparam("r_a"), mono,
+  ModifiedDoublePowerLawHalo Halo(rs,rc,rt,Mt,gi,go,et);
+  HaloSampler HaloSample(Halo,be,ra,mono,
 #ifdef falcON_PROPER
-			 Rad, nb, getdparam("fac"), getbparam("peri"),
+			 Rad,nb,getdparam("fac"),getbparam("peri"),
 #endif
 			 care);
   //----------------------------------------------------------------------------
@@ -240,8 +250,8 @@ void falcON::main()
       real epsi=getrparam("eps");
       LoopAllBodies(&shot,B) B.eps()=epsi;
     }
-    if(getdparam("M") != HaloSample.Mt()) {
-      const real mfac = getdparam("M")/HaloSample.Mt(), vfac=sqrt(mfac);
+    if(Mt != HaloSample.Mt()) {
+      const real mfac = Mt/HaloSample.Mt(), vfac=sqrt(mfac);
       LoopAllBodies(&shot,B) {
 	B.mass() *= mfac;
 	B.vel () *= vfac;
@@ -272,29 +282,35 @@ void falcON::main()
       Tab<< "#     on \""<<RunInfo::host()<<"\"\n";
     if(RunInfo::pid_known())
       Tab<< "#     pid "<<RunInfo::pid()<<'\n';
-    Tab<< 
-      "#\n"
-      "# table for halo model with density\n"
-      "#\n" <<
-     (Halo.trunc_radius()? 
-      "#                        C sech(r/r_t)\n" :
-      "#                              C\n") <<
-      "#     rho(r) = ----------------------------------\n"
-      "#               inner   eta     [outer-inner]/eta\n"
-      "#              x      (x    + 1)\n#\n" <<
-     (Halo.core_radius()?
-      "# with x = sqrt(r^2 + r_c^2) / r_s\n" :
-      "# with x = r/r_s\n") <<
-      "# and\n";
-    if(Halo.core_radius()) Tab<<"#     r_c   = "<<Halo.core_radius()<<'\n';
-    Tab<<"#     r_s   = "<<Halo.scale_radius()<<'\n';
-    if(Halo.trunc_radius()) Tab<<"#     r_t   = "<<Halo.trunc_radius()<<'\n';
-    Tab<<
-      "#     inner = "<<getdparam("inner")<<"\n"
-      "#     outer = "<<getdparam("outer")<<"\n"
-      "#     eta   = "<<getdparam("eta")<<"\n"
-      "#     C     = "<<Halo.rho0()<<"\n"
-      "#     M_tot = "<<getdparam("M")<<'\n';
+    Tab  << "#\n"
+	 << "# table for halo model with density\n"
+	 << "#\n"
+	 << (Halo.trunc_radius()? 
+	    "#                        C sech(r/r_t)\n" :
+            "#                              C\n")
+	 << "#     rho(r) = ----------------------------------\n"
+	 << "#               inner   eta     [outer-inner]/eta\n"
+	 << "#              x      (x    + 1)\n#\n"
+	 << (Halo.core_radius()?
+	    "# with x = sqrt(r^2 + r_c^2) / r_s\n" :
+	    "# with x = r/r_s\n")
+	 << "# and\n";
+    if(Halo.core_radius()) 
+      Tab<< "#     r_c   = "<<Halo.core_radius()<<(WD? " kpc\n" : "\n");
+    Tab  << "#     r_s   = "<<Halo.scale_radius()<<(WD? " kpc\n" : "\n");
+    if(Halo.trunc_radius())
+      Tab<< "#     r_t   = "<<Halo.trunc_radius()<<(WD? " kpc\n" : "\n");
+    Tab  << "#     inner = "<<gi<<"\n"
+	 << "#     outer = "<<go<<"\n"
+	 << "#     eta   = "<<et<<"\n"
+	 << "#     C     = "<<Halo.rho0();
+    if(WD)
+      Tab<< " = "<<(Halo.rho0()*mf)<<" M_sun/kpc^3";
+    Tab  << '\n'
+	 << "#     M_tot = "<<Halo.total_mass();
+    if(WD)
+      Tab<< " = "<<(Halo.total_mass()*mf)<<" M_sun";
+    Tab  << '\n';
     if(hasvalue("accname")) {
       Tab<<"# and embedded in the external potential \"" << getparam("accname")
 	 <<"\"\n";
@@ -303,23 +319,26 @@ void falcON::main()
       if(hasvalue("accfile"))
 	Tab<<"# with auxiliary file \"" << getparam("accfile") <<"\"\n";
     }
-    Tab<<"#\n"
-       <<"# Psi(0) = "<< setprecision(p) << HM.Ps(0.) << '\n'
-       <<"#\n#"
-       << space << "      r  "
-       << space << "   M_h(<r) "
-       << space << "   M_t(<r) "
-       << space << "    rho(r) "
-       << space << "    Psi(r) "
-       << space << "  g(Q=Psi)\n"
-       << "#\n";
+    Tab  << "#\n"
+         << "# Psi(0) = "<< setprecision(p) << HM.Ps(0.);
+    if(WD)
+      Tab<< "(kpc/Gyr)^2";
+    Tab  << '\n'
+	 << "#\n#"
+	 << space << "      r  "
+	 << space << "   M_h(<r) "
+	 << space << "   M_t(<r) "
+	 << space << "    rho(r) "
+	 << space << "    Psi(r) "
+	 << space << "  g(Q=Psi)\n"
+	 << "#\n";
     for(unsigned n=0; n!=HM.Ntab(); ++n)
-      Tab << setw(w) << setprecision(p) << HM.rad(n) << ' '
-	  << setw(w) << setprecision(p) << HM.mhr(n) << ' '
-	  << setw(w) << setprecision(p) << HM.mtr(n) << ' '
-	  << setw(w) << setprecision(p) << Halo(HM.rad(n)) << ' '
-	  << setw(w) << setprecision(p) << HM.psi(n) << ' '
-	  << setw(w) << setprecision(p) << HM.lng(n) << '\n';
+      Tab<< setw(w) << setprecision(p) << HM.rad(n) << ' '
+	 << setw(w) << setprecision(p) << HM.mhr(n) << ' '
+	 << setw(w) << setprecision(p) << HM.mtr(n) << ' '
+	 << setw(w) << setprecision(p) << Halo(HM.rad(n)) << ' '
+	 << setw(w) << setprecision(p) << HM.psi(n) << ' '
+	 << setw(w) << setprecision(p) << HM.lng(n) << '\n';
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
