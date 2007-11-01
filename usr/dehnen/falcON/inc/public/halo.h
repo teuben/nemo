@@ -310,14 +310,14 @@ namespace falcON {
       Modif(core/scale,trunc/scale),
       rsc  (scale),
       irs  (1/scale),
-      mt   (mt),
+      mt   (mtot),
       rh0  (cube(irs)*mtot/Model.Mtot(Modif)),
       fc1  (rh0*irs),
       fc2  (fc1*irs) 
     {
       debug_info(2,"ModifiedDoublePowerLawHalo: rh0=%f\n",rh0);
     }
-    /// total mas
+    /// total mass
     double const&total_mass() const {
       return mt;
     }
