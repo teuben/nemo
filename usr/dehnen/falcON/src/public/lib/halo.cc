@@ -743,11 +743,13 @@ HaloModel::HaloModel(HaloDensity const&model,
     SPLINE = new spline<double>(ps,in);
     for(int i=0; i!=n; ++i) {
       Q = ps[i];
-      double err, g = qbulir(intgQ,0.,1.,1.e-7,&err,0,50);
+      double err, g = qbulir(intgQ,0.,1.,1.e-8,&err,0,50);
       if(g<0.) error("HaloModel: g(Q=%g)=%g < 0, err=%g\n",Q,g,err);
       if(err>1.e-3) 
 	warning("HaloModel: inaccurate integration for g(Q) at Q=%g\n",Q);
       lg[i] = lfc + p1*log(Q) + log(nu*g);
+      if(i && lg[i]>lg[i-1])
+	warning("HaloModel: non-monotinic DF at E=%g\n",ps[i]);
     }
     delete SPLINE;
   }

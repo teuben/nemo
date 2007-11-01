@@ -112,7 +112,7 @@ set_radvel(                                        // R: Psi(r)
   //                                                                            
   // 1. get r & Psi(r)                                                          
   //                                                                            
-  r = rM(q? R(0)*Mt : R()*Mt);                     // get Lagrange radius from M
+  r = rM((q? R(0):R())*Mt);                        // get Lagrange radius from M
   double Psi = Ps(r);                              // get potential             
   //                                                                            
   // 2. get w                                                                   
@@ -124,8 +124,8 @@ set_radvel(                                        // R: Psi(r)
     f = DF(Psi-0.5*w*w);                           //   get g(Q)                
     if(f>f0)                                       //   IF f>f(w=0)             
       error("sampling error: DF non-monotonic"     //     ERROR                 
-	    ": f(Psi=%g)=%g < f(Eps=%g)=%g\n",
-	    f,Psi-0.5*w*w,f0,Psi);                 //     ERROR                 
+	    ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n",
+	    Psi-0.5*w*w,f,Psi,f0,r);
   } while(f0 * R() > f);                           // WHILE ( rejected )        
   //                                                                            
   // 3. get angle in velocity space -> vr, vt  and set f=L^-2b*g(Q)             
