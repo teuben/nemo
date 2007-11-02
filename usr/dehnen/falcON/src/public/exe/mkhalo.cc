@@ -132,6 +132,8 @@ string defv[] = {
   "epar=\n            if given, set eps_i = epar * sqrt(m_i/M_tot)       ",
 #endif
   "giveF=f\n          give distribution function in aux data?            ",
+  "giveP=f\n          give Phi(r) (halo+external) in pot data?           ",
+  "giveA=f\n          give -dPhi/dr in acc data?                         ",
   "accname=\n         name of external monopole acceleration field       ",
   "accpars=\n         parameters of external acceleration field          ",
   "accfile=\n         file required by external acceleration field       ",
@@ -190,6 +192,8 @@ void falcON::main()
 #endif
      hasvalue ("eps")   ? fieldset::e : fieldset::o) |
     (getbparam("giveF") ? fieldset::y : fieldset::o) |
+    (getbparam("giveP") ? fieldset::p : fieldset::o) |
+    (getbparam("giveA") ? fieldset::a : fieldset::o) |
     fieldset::basic );
 
   const nemo_acc*mono= hasvalue("accname")?           // IF(accname given) THEN 
@@ -241,7 +245,7 @@ void falcON::main()
 #ifdef falcON_PROPER
 		      getdparam("epar"),
 #endif
-		      getbparam("giveF"));
+		      getbparam("giveF"),getbparam("giveP"),getbparam("giveA"));
     if(hasvalue("eps")
 #ifdef falcON_PROPER
        && !hasvalue("epar")

@@ -133,82 +133,57 @@ namespace falcON {
     virtual double Rp(double, double) const=0;
 #endif
     //@}
-    //--------------------------------------------------------------------------
-    /// sampling radius, radial and tangential velocity from the model.
-    /// \return Psi(r)
-    /// \param q (input) use quasi (or pseudo) random numbers?
-    /// \param R (input) quasi and pseudo random number generator
-    /// \param r (output) radius
-    /// \param vr (output) radial velocity
-    /// \param vt (output) tangential velocity
-    /// \param f  (output) full DF at sampled point
-    double set_radvel(bool q, Random const&R,
-		      double&r, double&vr, double&vt, double&f) const;
   public:
     //--------------------------------------------------------------------------
+    /// sampling of full phase-space: non-virtual
+    /// \note assuming the randomly generated (r,vr,vt) are already properly
+    ///       scaled as well as the Psi returnd. Also the routines for
+    ///       R_peri and R_circ are assummed to take arguments and return
+    ///       values that are both scaled.
+    /// \param B0 (input) first body to sample
+    /// \param N  (input) number of bodies to sample
+    /// \param q  (input) use quasi (or pseudo) random numbers?
+    /// \param R  (input) quasi and pseudo random number generator
+    /// \param f  (input) fraction with vphi>0
 #ifdef falcON_PROPER
-    /// sampling of full phase-space: non-virtual
-    /// \note assuming the randomly generated (r,vr,vt) are already properly
-    ///       scaled as well as the Psi returnd. Also the routines for
-    ///       R_peri and R_circ are assummed to take arguments and return
-    ///       values that are both scaled.
-    /// \param B0 (input) first body to sample
-    /// \param N (input) number of bodies to sample
-    /// \param q (input) use quasi (or pseudo) random numbers?
-    /// \param R (input) quasi and pseudo random number generator
-    /// \param f (input) fraction with vphi>0
-    /// \param e (input) factor: setting eps_i
-    /// \param g (input)  write DF into aux?
-    void sample(body const&B0, unsigned N, bool q, Random const&R, double f=0.5,
-	        double e=0.0, bool g=false) const;          
-#else
-    /// sampling of full phase-space: non-virtual
-    /// \note assuming the randomly generated (r,vr,vt) are already properly
-    ///       scaled as well as the Psi returnd. Also the routines for
-    ///       R_peri and R_circ are assummed to take arguments and return
-    ///       values that are both scaled.
-    /// \param B0 (input) first body to sample
-    /// \param N (input) number of bodies to sample
-    /// \param q (input) use quasi (or pseudo) random numbers?
-    /// \param R (input) quasi and pseudo random number generator
-    /// \param f (input) fraction with vphi>0
-    /// \param g (input)  write DF into aux?
-    void sample(body const&B0, unsigned N, bool q, Random const&R, double f=0.5,
-		bool g=false) const;          
+    /// \param e  (input) factor: setting eps_i
 #endif
+    /// \param gF (input) write DF into aux?
+    /// \param gP (input) write Phi into pot?
+    /// \param gA (input) write -dPhi/dr into acc?
+    void sample(body const&B0, unsigned N, bool q, Random const&R, double f=0.5,
+#ifdef falcON_PROPER
+	        double e=0.0,
+#endif
+		bool gF=false, bool gP=false, bool gA=false) const;
     //--------------------------------------------------------------------------
+    /// sampling of full phase-space: non-virtual
+    /// \note assuming the randomly generated (r,vr,vt) are already properly
+    ///       scaled as well as the Psi returnd. Also the routines for
+    ///       R_peri and R_circ are assummed to take arguments and return
+    ///       values that are both scaled.
+    /// \param B  (input) bodies to sample
+    /// \param q  (input) use quasi (or pseudo) random numbers?
+    /// \param R  (input) quasi and pseudo random number generator
+    /// \param f  (input) fraction with vphi>0
 #ifdef falcON_PROPER
-    /// sampling of full phase-space: non-virtual
-    /// \note assuming the randomly generated (r,vr,vt) are already properly
-    ///       scaled as well as the Psi returnd. Also the routines for
-    ///       R_peri and R_circ are assummed to take arguments and return
-    ///       values that are both scaled.
-    /// \param B (input) bodies to sample
-    /// \param q (input) use quasi (or pseudo) random numbers?
-    /// \param R (input) quasi and pseudo random number generator
-    /// \param f (input) fraction with vphi>0
-    /// \param e (input) factor: setting eps_i
-    /// \param g (input)  write DF into aux?
-    void sample(bodies const&B, bool q, Random const&R, double f=0.5,
-	        double e=0.0, bool g=false) const {
-      sample(B.begin_all_bodies(), B.N_bodies(), q,R,f,e,g);
-    }
-#else
-    /// sampling of full phase-space: non-virtual
-    /// \note assuming the randomly generated (r,vr,vt) are already properly
-    ///       scaled as well as the Psi returnd. Also the routines for
-    ///       R_peri and R_circ are assummed to take arguments and return
-    ///       values that are both scaled.
-    /// \param B (input) bodies to sample
-    /// \param q (input) use quasi (or pseudo) random numbers?
-    /// \param R (input) quasi and pseudo random number generator
-    /// \param f (input) fraction with vphi>0
-    /// \param g (input)  write DF into aux?
-    void sample(bodies const&B, bool q, Random const&R, double f=0.5,
-		bool g=false) const {
-      sample(B.begin_all_bodies(), B.N_bodies(), q,R,f,g);
-    }
+    /// \param e  (input) factor: setting eps_i
 #endif
+    /// \param gF (input) write DF into aux?
+    /// \param gP (input) write Phi into pot?
+    /// \param gA (input) write -dPhi/dr into acc?
+    void sample(bodies const&B, bool q, Random const&R, double f=0.5,
+#ifdef falcON_PROPER
+	        double e=0.0,
+#endif
+		bool gF=false, bool gP=false, bool gA=false) const
+    {
+      sample(B.begin_all_bodies(), B.N_bodies(), q,R,f,
+#ifdef falcON_PROPER
+	     e,
+#endif
+	     gF,gP,gA);
+    }
     //--------------------------------------------------------------------------
   };// class SphericalSampler
 } // namespace falcON {

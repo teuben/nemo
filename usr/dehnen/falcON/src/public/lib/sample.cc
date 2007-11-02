@@ -100,49 +100,6 @@ inline double SphericalSampler::F0(double Psi) const
     return DF(Psi);
 }
 ////////////////////////////////////////////////////////////////////////////////
-double SphericalSampler::
-set_radvel(                                        // R: Psi(r)                 
-	   bool         q,                         // I: quasi (or random) RNG? 
-	   Random const&R,                         // I: pseudo & quasi RNG     
-	   double      &r,                         // O: radius                 
-	   double      &vr,                        // O: radial velocity        
-	   double      &vt,                        // O: tangential velocity    
-	   double      &f) const                   // O: f(E,L)                 
-{
-  //                                                                            
-  // 1. get r & Psi(r)                                                          
-  //                                                                            
-  r = rM((q? R(0):R())*Mt);                        // get Lagrange radius from M
-  double Psi = Ps(r);                              // get potential             
-  //                                                                            
-  // 2. get w                                                                   
-  //                                                                            
-  double w, we=sqrt(2*Psi);                        // escape velocity           
-  double f0=F0(Psi);                               // DF(w=0)                   
-  do {                                             // DO                        
-    w = we * pow(R(),ibt);                         //   sample velocity 0<w<we  
-    f = DF(Psi-0.5*w*w);                           //   get g(Q)                
-    if(f>f0)                                       //   IF f>f(w=0)             
-      error("sampling error: DF non-monotonic"     //     ERROR                 
-	    ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n",
-	    Psi-0.5*w*w,f,Psi,f0,r);
-  } while(f0 * R() > f);                           // WHILE ( rejected )        
-  //                                                                            
-  // 3. get angle in velocity space -> vr, vt  and set f=L^-2b*g(Q)             
-  //                                                                            
-  if(beta) {                                       // IF b0 != 0                
-    pair_d SC=polev((q? R(1):R())*Is[Ne1],Is,Xe);  //   sample eta              
-    vt = w * SC[0]/sqrt(1+r*r*iraq);               //   tangential velocity     
-    vr = w * SC[1];                                //   radial velocity         
-    if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);  //   distribution function   
-  } else {                                         // ELSE                      
-    double ce = q? R(1,-1.,1.) : R(-1.,1.);        //   sample cos(eta)         
-    vr = w * ce;                                   //   radial velocity         
-    vt = w * sqrt((1-ce*ce)/(1+r*r*iraq));         //   tangential velocity     
-  }                                                // ENDIF                     
-  return Psi;                                      // return potential          
-}
-////////////////////////////////////////////////////////////////////////////////
 void SphericalSampler::sample(body   const&B0,     // I: first body to sample   
 			      unsigned     N,      // I: # bodies to sample     
 			      bool         q,      // I: quasi random?          
@@ -151,24 +108,54 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
 #ifdef falcON_PROPER
 			      double       epar,   //[I: factor: setting eps_i] 
 #endif
-			      bool         givef)  //[I: write DF into aux?]    
+			      bool         givef,  //[I: write DF       -> aux?]
+			      bool         giveP,  //[I: write Phi      -> pot?]
+			      bool         giveA)  //[I: write -dPhi/dr -> acc?]
   const {
   if(givef && !has_aux(B0))
     warning("SphericalSampler: bodies not supporting aux: cannot give DF");
+  if(giveP && !has_pot(B0))
+    warning("SphericalSampler: bodies not supporting pot: cannot give Phi");
+  if(giveA && !has_acc(B0))
+    warning("SphericalSampler: bodies not supporting acc: cannot give dPhi/dr");
   if(!(B0+(N-1)).is_valid())
     error("SphericalSampler: not enough bodies free");
   const body BN(B0,N);
   givef = givef && has_aux(B0);
+  giveP = giveP && has_pot(B0);
+  giveA = giveA && has_acc(B0);
   const double m  (Mt/double(N));                  // Mt/N: body mass           
   const double fp (2*f_-1);                        // fraction: swap sign(vphi) 
   int    n, k=0;                                   // # bodies / (r,vr,vt)      
   double Ncum=0.,Mcum=0.,mu=m;                     // cumulated num, mu         
   for(body Bi(B0); Bi!=BN; ) {                     // LOOP bodies               
     //                                                                          
-    // 1. get r,vr,vt,f                                                         
+    // 1. get Mr,r,Psi,vr,vt,f                                                  
     //                                                                          
-    double r,vr,vt,f;                              //   radius, v_tan, v_rad, DF
-    double Psi = set_radvel(q,R,r,vr,vt,f);        //   get Psi,r,vr,vt,f(E,L)  
+    double Mr = (q? R(0):R())*Mt;                  // get enclosed mass         
+    double r  = rM(Mr);                            // get Lagrange radius from M
+    double Psi= Ps(r);                             // get potential             
+    double w, we=sqrt(2*Psi);                      // escape velocity           
+    double f0=F0(Psi),f;                           // DF(w=0)                   
+    do {                                           // DO                        
+      w = we * pow(R(),ibt);                       //   sample velocity 0<w<we  
+      f = DF(Psi-0.5*w*w);                         //   get g(Q)                
+      if(f>f0)                                     //   IF f>f(w=0)             
+	error("sampling error: DF non-monotonic"   //     ERROR                 
+	      ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n",
+	      Psi-0.5*w*w,f,Psi,f0,r);
+    } while(f0 * R() > f);                         // WHILE ( rejected )        
+    double vr,vt;                                  // v_r, v_t                  
+    if(beta) {                                     // IF b0 != 0                
+      pair_d SC=polev((q? R(1):R())*Is[Ne1],Is,Xe);//   sample eta              
+      vt = w * SC[0]/sqrt(1+r*r*iraq);             //   tangential velocity     
+      vr = w * SC[1];                              //   radial velocity         
+      if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);//   distribution function   
+    } else {                                       // ELSE                      
+      double ce = q? R(1,-1.,1.) : R(-1.,1.);      //   sample cos(eta)         
+      vr = w * ce;                                 //   radial velocity         
+      vt = w * sqrt((1-ce*ce)/(1+r*r*iraq));       //   tangential velocity     
+    }                                              // ENDIF                     
     //                                                                          
     // 2. establish number of bodies at (r,vr,vt), depending on mass adaption   
     //                                                                          
@@ -181,7 +168,6 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
     // 3. set mass, position, and velocity of n bodies with this (r,vr,vt)      
     //                                                                          
     for(int i=0; i!=n && Bi!=BN; ++i,++k,++Bi) {   //   LOOP n bodies           
-      if(givef) Bi.aux() = f;                      //     set DF                
       Bi.mass() = mu;                              //     set mass              
       Mcum     += mu;                              //     cumulate total mass   
       register double                              //     some auxiliary vars:  
@@ -206,6 +192,9 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
       Bi.vel()[0] = vm * cph - vph * sph;          //     v_x= ...              
       Bi.vel()[1] = vm * sph + vph * cph;          //     v_y= ...              
       Bi.vel()[2] = vr * cth - vth * sth;          //     v_z= ...              
+      if(givef) Bi.aux() = f;                      //     set aux = DF          
+      if(giveP) Bi.pot() =-Psi;                    //     set pot = Phi         
+      if(giveA) Bi.acc() = pos(Bi)*(-Mr/(r*r));    //     set acc = -dPhi/dr    
     }                                              //   END LOOP                
   }                                                // END LOOP                  
   //                                                                            
