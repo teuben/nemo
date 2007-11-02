@@ -78,18 +78,18 @@ default			: links exe manip acc doxu
 ifdef DPROPER
 # proprietary version: don't copy executables and manipulators
 # NOTE: this means we have to set the PATH and MANIPPATH appropriately
-tonemo			: exe manip acc doxu
+tonemo			: acc doxu man
 				cp $(LIB)/*.so $(NEMOLIB)
 			      - cp $(ACC)/* $(NEMOOBJ)/acc/
 else
 # public version: copy executables, manipulators, and accelerations
-tonemo			: exe manip acc doxu
+tonemo			: exe manip acc doxu man
 				cp $(LIB)/*.so $(NEMOLIB)
 			      - cp $(BIN)/* $(NEMOBIN)
 			      - cp $(MAN)/* $(NEMOOBJ)/manip/
 			      - cp $(ACC)/* $(NEMOOBJ)/acc/
 endif
-install			: tonemo man
+install			: tonemo
 else
 default			: exe
 install			: default
