@@ -230,7 +230,7 @@ namespace falcON {
     double const&r_t() const { return rt; }
     /// constructor
     /// \param c core radius
-    /// \param t core radius
+    /// \param t truncation radius
     HaloModifier(double c, double t) falcON_THROWING;
     /// modified density at given radius
     double operator()(HaloDensity const&m, double r) const;
@@ -305,7 +305,8 @@ namespace falcON {
     /// \param trans transition steepness
     ModifiedDoublePowerLawHalo(double scale, double core, double trunc,
 			       double mtot,
-			       double inner, double outer, double trans) :
+			       double inner, double outer, double trans)
+      falcON_THROWING :
       Model(inner,outer,trans),
       Modif(core/scale,trunc/scale),
       rsc  (scale),
@@ -315,8 +316,14 @@ namespace falcON {
       fc1  (rh0*irs),
       fc2  (fc1*irs) 
     {
+      if(isinf(rsc)) falcON_THROW("ModifiedDoublePowerLawHalo: r_s=inf\n");
+      if(rsc   ==0.) falcON_THROW("ModifiedDoublePowerLawHalo: r_s==0\n");
+      if(rsc   < 0.) falcON_THROW("ModifiedDoublePowerLawHalo: r_s=%g<0\n",rsc);
+      if(isinf(mt) ) falcON_THROW("ModifiedDoublePowerLawHalo: M=inf\n");
+      if(mt    ==0.) falcON_THROW("ModifiedDoublePowerLawHalo: M==0\n");
+      if(mt     <0.) falcON_THROW("ModifiedDoublePowerLawHalo: M=%g<0\n",mt);
       debug_info(2,"ModifiedDoublePowerLawHalo: rh0=%f\n",rh0);
-    }
+     }
     /// total mass
     double const&total_mass() const {
       return mt;
