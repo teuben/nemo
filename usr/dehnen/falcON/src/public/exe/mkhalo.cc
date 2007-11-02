@@ -43,6 +43,7 @@
 // v 2.1    13/09/2007  WD  added parameter eps; made public                    
 // v 2.2    19/09/2007  WD  ensured total mass                                  
 // v 2.3    01/11/2007  WD  WD_units                                            
+// v 2.3.1  02/11/2007  WD  deBUGged (r_2 to r_s conversion)                    
 ////////////////////////////////////////////////////////////////////////////////
 #define falcON_VERSION   "2.3"
 #define falcON_VERSION_D "01-nov-2007 Walter Dehnen                          "
@@ -227,7 +228,8 @@ void falcON::main()
   if(WD) Mt /= mf;
   if(hasvalue("r_2")) {
     if(rs != 1.) warning("'r_2' given: will ignore non-default 'r_s' value\n");
-    rs = getdparam("r_2") * pow((go-2)/(2-gi),1/et);
+    if(go <= 2.) error("outer<=2 ==> gamma(r)<2 at finite r; cannot use r_2\n");
+    rs = getdparam("r_2") * pow((2-gi)/(go-2),1/et);
   }
   ModifiedDoublePowerLawHalo Halo(rs,rc,rt,Mt,gi,go,et);
   HaloSampler HaloSample(Halo,be,ra,mono,

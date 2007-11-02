@@ -75,8 +75,8 @@ HaloModifier::HaloModifier(double c, double t) falcON_THROWING
 {
   if(isinf(t)) falcON_THROW("HaloModifier: truncation radius == inf\n");
   if(isnan(t)) falcON_THROW("HaloModifier: truncation radius == nan\n");
-  if(t    <0.) falcON_THROW("HaloModifier: truncation radius < 0\n");
-  if(c    <0.) falcON_THROW("HaloModifier: core radius < 0\n");
+  if(t    <0.) falcON_THROW("HaloModifier: truncation radius = %g < 0\n",t);
+  if(c    <0.) falcON_THROW("HaloModifier: core radius = %g < 0\n",c);
 }
 //------------------------------------------------------------------------------
 inline double HaloModifier::cored(HaloDensity const&Model,

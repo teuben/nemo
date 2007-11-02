@@ -73,7 +73,7 @@ string defv[] = {
   "pars=\n          parameters for filter, if any                      ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "s2a -- Walter's simple snapshot to ascii converter\n";
+string usage = "s2a -- Walter's simple snapshot to ascii converter";
 //------------------------------------------------------------------------------
 namespace {
   //----------------------------------------------------------------------------

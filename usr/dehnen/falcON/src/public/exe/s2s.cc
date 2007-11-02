@@ -63,8 +63,14 @@ string usage = "s2s -- Walter's alternative to snapcopy";
 //------------------------------------------------------------------------------
 namespace {
   using namespace falcON;
-  BodyFilter *BF=0;
-  bool        ZM=0;
+  using falcON::real;
+  BodyFilter    *BF=0;    // filter to apply (if any)
+  BodyFunc<real>*BS=0;    // expression to sort (if any)
+  bool           ZM=0;    // set missing body data to zero?
+  /// apply filter (if any) to snapshot, return true if any body remains
+  /// \return did any body remain after filtering?
+  /// \param ss (pter to) snapshot to be filtered
+  /// \param got body data obtained from data file.
   bool apply_filter(snapshot*ss, fieldset got) {
     if(BF==0) return true;
     BF->set_time(ss->time());
@@ -88,6 +94,9 @@ namespace {
     ss->remove();
     debug_info(1,"%d bodies removed at time %f\n",ss->N_del(),ss->time());
     return ss->N_bodies() > 0;
+  }
+  void apply_sort(snapshot*ss, fieldset copy) {
+    if(BS==0) return;
   }
 }
 //------------------------------------------------------------------------------
