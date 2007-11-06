@@ -30,6 +30,7 @@
 // \version 31/08/2007 WD initial hack (based on code from code/dens)           
 // \version 04/09/2007 WD debugged and working version                          
 // \version 04/09/2007 WD moved to neighbours.cc (which is superseeded)         
+// \version 06/11/2007 WD copy flags only if required.                          
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/neighbours.h>
@@ -93,14 +94,6 @@ namespace {
 #define LoopCellKids(TREE,CELL,NAME)				\
     for(const cell*NAME =TREE->CellNo(fccell(CELL));		\
                    NAME!=TREE->CellNo(eccell(CELL)); ++NAME)
-    //--------------------------------------------------------------------------
-    /// prepare tree: copy body flags & masses
-    void copy_masses() const {
-      for(leaf*l=TREE->begin_leafs(); l!=TREE->end_leafs(); ++l) {
-	l->scalar()=TREE->my_bodies()->mass(mybody(l));
-	l->copy_from_bodies_flag(TREE->my_bodies());
-      }
-    }
     //--------------------------------------------------------------------------
     /// distance^2 from centre of search sphere to the nearest point on a cube
     /// \param Z centre of cube
@@ -219,11 +212,19 @@ namespace {
     /// \param t the tree to be used 
     /// \param k number of neighbours
     /// \param n direct-loop control; default: k/4
-    NeighbourSearch(const OctTree*t, int n)
+    /// \param copy_flags if true, body flags will be copied (if present)
+    NeighbourSearch(const OctTree*t, int n, bool copy_flags=0)
       : TREE(t), NDIR(max(1,n)),
 	BIGQ(12*square(TREE->root_radius())), LIST(0), NIAC(0)
     {
-      copy_masses();
+      if(copy_flags && TREE->my_bodies()->have_flag())
+	for(leaf*l=TREE->begin_leafs(); l!=TREE->end_leafs(); ++l) {
+	  l->scalar()=TREE->my_bodies()->mass(mybody(l));
+	  l->copy_from_bodies_flag(TREE->my_bodies());
+	}
+      else
+	for(leaf*l=TREE->begin_leafs(); l!=TREE->end_leafs(); ++l)
+	  l->scalar()=TREE->my_bodies()->mass(mybody(l));
     }
     //--------------------------------------------------------------------------
     unsigned const&N_iact() const { return NIAC; }
@@ -237,7 +238,7 @@ void falcON::ProcessNeighbourList(const OctTree*T, int K,
 {
   if(T->is_re_used())
     falcON_THROW("ProcessNeighbourList(): tree has been re-used\n");
-  NeighbourSearch NS(T,K/4);
+  NeighbourSearch NS(T,K/4,!all);
   Array<Neighbour> E(K);
   LoopCellsUp(OctTree::CellIter<OctTree::Cell>,T,C) {
     LoopLeafKids(T,C,L) if(all || is_active(L)) {

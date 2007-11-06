@@ -32,6 +32,7 @@
 // v 0.1    07/07/2006  WD replacing bodyset with flags::ignore                 
 // v 0.2    27/07/2006  WD made public                                          
 // v 0.3    04/09/2007  WD new neighbours.h                                     
+// v 0.4    06/11/2007  WD order of Ferrers kernel from param, K=32 default     
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -77,8 +78,9 @@ namespace falcON { namespace Manipulate {
   /// only done every STEP time units.\n                                        
   ///                                                                           
   /// Meaning of the parameters:\n                                              
-  /// par[0]: # nearest neighbours used in density estimate (def: 16)\n         
-  /// par[1]: delta time between estimation (which takes long; def: 0)\n        
+  /// par[0]: # nearest neighbours used in density estimate (def: 32)\n         
+  /// par[1]: order N of Ferrers kernel: W = (1-r^2/h^2)^N (def: 1)\n           
+  /// par[2]: delta time between estimation (which takes long; def: 0)\n        
   ///                                                                           
   /// Usage of pointers: none\n                                                 
   /// Usage of flags:    uses in_subset()\n                                     
@@ -87,6 +89,7 @@ namespace falcON { namespace Manipulate {
   class density : public manipulator {
   private:
     int             K;        ///< # neighbours
+    int             N;        ///< # order of Ferrers kernel
     double          STEP;     ///< delta time between manipulations
     mutable double  TMAN;     ///< time for next manipulation
     mutable bool    FST;      ///< first call to manipulate() ?
@@ -107,7 +110,8 @@ namespace falcON { namespace Manipulate {
 	    int          npar,
 	    const char  *file) falcON_THROWING
     : K    ( npar>0?     int(pars[0])    : 16 ),
-      STEP ( npar>1?         pars[1]     : 0. ),
+      N    ( npar>1?     int(pars[1])    : 1  ),
+      STEP ( npar>2?         pars[2]     : 0. ),
       FST  ( true )
     {
       if(npar==0 && debug(1) || debug(2))
@@ -163,6 +167,7 @@ namespace falcON { namespace Manipulate {
     // 2. find Kth nearest neighbours and estimate density
     if(!S->have(fieldbit::r))
       const_cast<snapshot*>(S)->add_field(fieldbit::r);
+    prepare(N);
     unsigned NIAC;
     ProcessNeighbourList(&TREE,K,&SetDensity,NIAC,true);
     if(falcON::debug(1)) {
