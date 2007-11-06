@@ -3,12 +3,21 @@
 //                                                                             |
 // GalPot.cc                                                                   |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 1996-2007 Walter Dehnen                                       |
 //                                                                             |
-// Copyright Walter Dehnen, 1996-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -25,6 +34,7 @@
 // Version 0.6    05. February  2003                                           |
 // Version 0.7    23. September 2004  fixed "find(): x out of range" error     |
 // Version 0.8    24. June      2005  explicit construction of tupel           |
+// Version 0.9    06. November  2007  consistent with GalPot package           |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #define  GalPot_cc
@@ -46,18 +56,14 @@ namespace GalPot {                                  // v0.4
     TPi = 2*Pi,
     FPi = 4*Pi;
 
-  inline double abs   (const double x) { return (x < 0.)?  -x : x; }
-  inline int    sign  (const double x) { return (x<0.)? -1 : ( (x>0)? 1:0 ); }
-  inline double min   (const double a, const double b) { return (a<b) ? a:b; }
-  inline double max   (const double a, const double b) { return (a>b) ? a:b; }
-  inline double square(const double x)                 { return x*x; }
-  inline double cube  (const double x)                 { return x*x*x; }
+  inline int    sign  (double x) { return x<0.? -1 : x>0? 1:0; }
+  inline double square(double x) { return x*x; }
+  inline double cube  (double x) { return x*x*x; }
 
   inline void SwallowRestofLine(std::istream& from)
   {
     char c;
-    do from.get(c);
-    while(c!='\n');
+    do from.get(c); while( from.good() && c!='\n');
   }
 
   template <class ALLOCTYPE>
@@ -92,6 +98,16 @@ namespace GalPot {                                  // v0.4
     delete[] A;
   }
 
+  inline void error(const char* msgs)
+  {
+    std::cerr<< "GalPot ERROR: " << msgs << std::endl;
+    std::exit(1);
+  }
+
+  inline void warning(const char* msgs)
+  {
+    std::cerr<< "GalPot WARNING: " << msgs << std::endl;
+  }
 
   template<class S>
   int hunt(const S*xarr, const int n, const S x, const int j)
@@ -161,10 +177,7 @@ namespace GalPot {                                  // v0.4
     if(klo<0 || klo>=n-1 || x[klo]>xi || x[klo+1]<xi) {
       klo = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
       klo = hunt(x,n,xi,klo);
-      if(klo<0 || klo>=n) {
-	std::cerr<<"find(): x out of range"<<'\n';
-	std::exit(1);
-      }
+      if(klo<0 || klo>=n) error("find(): x out of range");
       if(klo == n-1) klo = n-2;                         // v.07
     }
   }
@@ -235,8 +248,7 @@ namespace GalPot {                                  // v0.4
     const    S   zero=0., one=1., three=3., six=6.;
     register T   *Y=y, *Yl=yl, *Yh=yh, *Y2l=y2l, *Y2h=y2h, *YK=y+K;
     register S   h,h6,hh,A,B,Aq,Bq,Ap,Bp;
-    if((h=xh-xl)==zero) { std::cerr << "splinTarr bad X input" << '\n';
-    std::exit(1); }
+    if((h=xh-xl)==zero) error("splinTarr bad X input");
     h6=h/six;
     hh=h*h6;
     A =(xh-xi)/h;  Aq=A*A;  Ap=(Aq-one)*A*hh;
@@ -317,8 +329,7 @@ namespace GalPot {                                  // v0.4
   {
     const    S zero=0.,one=1.,two=2.,five=5.,six=6.,nine=9.,fe=48.;
     register S h,hi,hf, A,B,C,D,Aq,Bq;
-    if((h=x1-x0)==zero) { std::cerr << "PsplinT bad X input" << '\n';
-    std::exit(1); }
+    if((h=x1-x0)==zero) error("PsplinT bad X input");
     hi = one/h;
     hf = h*h;
     A  = hi*(x1-xi); Aq = A*A;
@@ -369,8 +380,7 @@ namespace GalPot {                                  // v0.4
     register S h,hi,hq,hf, A,B,C,D,E,F,Aq,Bq;
     register T C2=*yl,C3=C2,C4=C2,C5=C2, t1=C2,t2=C2;
     register T *Y=y,*Yl=yl,*Yh=yh,*Y1l=y1l,*Y1h=y1h,*Y3l=y3l,*Y3h=y3h,*YK=y+K;
-    if((h=xh-xl)==zero) { std::cerr << "PsplinTarr(): bad X input" << '\n';
-    std::exit(1); }
+    if((h=xh-xl)==zero) error("PsplinTarr(): bad X input");
     hi = one/h;
     hq = h*h;
     hf = hq/fe;
@@ -674,7 +684,7 @@ namespace GalPot {                                  // v0.4
     S operator() (S x) const { return (o->*f)(x); }
   };
 
-  static void GaussLegendre(double *x, double *w, const int n)
+  void GaussLegendre(double *x, double *w, int n)
   {
     register double eps=1.e-10;
     for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps);
@@ -702,7 +712,7 @@ namespace GalPot {                                  // v0.4
     }
   }
 
-  static double I0(const double x)
+  double I0(const double x)
   {
     register double ax=abs(x),y;
     if(ax < 3.75) {
@@ -718,7 +728,7 @@ namespace GalPot {                                  // v0.4
 	   +y*0.392377e-2))))))));
   }
 
-  static double I1(const double x)
+  double I1(const double x)
   {
     register double ans,ax=abs(x),y;
     if(ax < 3.75) {
@@ -737,10 +747,9 @@ namespace GalPot {                                  // v0.4
     return x < 0.0 ? -ans : ans;
   }
 
-  static double K0(const double x)
+  double K0(const double x)
   {
-    if(x<0.) { std::cerr<<" negative argument in K0(x)"<<'\n';
-    std::exit(1); }
+    if(x<0.) error("negative argument in K0(x)");
     register double y;
     if(x <= 2.) {
       y = x*x/4.;
@@ -754,10 +763,9 @@ namespace GalPot {                                  // v0.4
 	  +y*(-0.251540e-2+y*0.53208e-3))))));
   }
 
-  static double K1(const double x)
+  double K1(const double x)
   {
-    if(x<0.) { std::cerr<<" negative argument in K1(x)"<<'\n'; 
-    std::exit(1); }
+    if(x<0.) error("negative argument in K1(x)");
     register double y;
     if(x <= 2.) {
       y=x*x/4.0;
@@ -771,10 +779,10 @@ namespace GalPot {                                  // v0.4
 	  +y*(0.325614e-2+y*(-0.68245e-3)))))));
   }
 
-  static double Kn(const int n, const double x)
+  double Kn(const int n, const double x)
   {
-    if(n<0)  { std::cerr<<" negative n in Kn(x)"<<'\n'; std::exit(1); }
-    if(x<0.) { std::cerr<<" negative argument in Kn(x)"<<'\n'; std::exit(1); }
+    if(n<0)  error("negative n in Kn(x)");
+    if(x<0.) error("negative argument in Kn(x)");
     if(n==0) return K0(x);
     if(n==1) return K1(x);
     register int j;
@@ -847,25 +855,23 @@ void DiskAnsatz::setup(const DiskPar& p)
   fac   = TPi*Grav*S0;
 }
 
-double DiskAnsatz::SurfaceDensity(const double R) const
+double DiskAnsatz::SurfaceDensity(double R) const
 {
   if(hollow && R==0.) return 0.;
-  register double y=R/Rd;
-  if(eps==0.)         return S0*exp(-R0/R-y);
-  return S0*exp(-R0/R-y+eps*cos(y));
+  const double y=R/Rd;
+  return eps? S0*exp(-R0/R-y+eps*cos(y)) : S0*exp(-R0/R-y);
 }
 
-inline double DiskAnsatz::mass_integrand(const double y) const
+inline double DiskAnsatz::mass_integrand(double y) const
 {
   if(y<=0. || y>=1.) return 0.;
-  register double y1=1.-y, x=y/y1;    
-  if(eps) return exp(-R0oRd/x-x+eps*cos(x))*x/(y1*y1);
-  return exp(-R0oRd/x-x)*x/(y1*y1);
+  const double y1=1.-y, x=y/y1;
+  return eps? exp(-R0oRd/x-x+eps*cos(x))*x/(y1*y1) : exp(-R0oRd/x-x)*x/(y1*y1);
 }
 
-double DiskAnsatz::mass(const double R) const
+double DiskAnsatz::mass(double R) const
 {
-  register double F=TPi*S0*Rd2;
+  const double F=TPi*S0*Rd2;
   if(R<=0.) {         // give total mass
     if(eps)
       return F*qbulir(Adaptor<DiskAnsatz>(this,&DiskAnsatz::mass_integrand),
@@ -877,27 +883,23 @@ double DiskAnsatz::mass(const double R) const
 		  0.,R/(Rd+R),1.e-6);
 }
 
-double DiskAnsatz::Density(const double R, const double z) const
+double DiskAnsatz::Density(double R, double z) const
 {
-  register double rhR;
-  if(eps)          rhR= (hollow && R==0.)? 0. : exp(-R0/R-R/Rd+eps*cos(R/Rd));
-  else if(hollow)  rhR= (R==0.)? 0. : exp(-R0/R-R/Rd);
-  else             rhR= exp(-R/Rd);
+  double rhR;
+  if(eps)         rhR= (hollow && R==0.)? 0. : exp(-R0/R-R/Rd+eps*cos(R/Rd));
+  else if(hollow) rhR= (R==0.)? 0. : exp(-R0/R-R/Rd);
+  else            rhR= exp(-R/Rd);
   if(thin)                            // vertically thin disk: return Sigma
     return S0*rhR;
   else if(isothermal) {               // vertically isothermal disk
-    register double x  =abs(z/zd),
-      ex =exp(-x),
-      ex1=1.+ex;
+    double x=abs(z/zd), ex=exp(-x), ex1=1.+ex;
     return S0*rhR * ex/(ex1*ex1*zd);
   }                                   // vertically exponential disk
-  register double x  =abs(z/zd),
-    ex =exp(-x);
+  double x=abs(z/zd), ex=exp(-x);
   return S0*rhR * 0.5*ex/zd;
 }
 
-double DiskAnsatz::Residual(const double r, const double st, const double ct)
-  const
+double DiskAnsatz::Residual(double r, double st, double ct) const
 // gives aimed Laplace(Phi_multipole)
 {
   if(ct==0. || S0==0.) return 0;
@@ -960,8 +962,7 @@ double DiskAnsatz::Residual(const double r, const double st, const double ct)
   return fac * ((F-f)*gpp - 2*fp*(g+z*gp)/r - fpp*g);
 }
 
-double DiskAnsatz::operator() (const double R, const double z, const double r,
-                               double* dP) const
+double DiskAnsatz::operator() (double R, double z, double r, double* dP) const
 {
   if(S0==0.) {
     if(dP) dP[0]=dP[1]=0.;
@@ -1040,7 +1041,7 @@ double DiskAnsatz::operator() (const double R, const double z, const double r,
   return fac*f*g;
 }
 
-double DiskAnsatz::Laplace(const double R, const double z) const
+double DiskAnsatz::Laplace(double R, double z) const
 {
   if(S0==0.) return 0;
   register double r=hypot(R,z), g,gp,gpp, F,f,fp,fpp;
@@ -1101,7 +1102,7 @@ double DiskAnsatz::Laplace(const double R, const double z) const
   return fac * (f*gpp + 2*fp*(g+z*gp)/r + fpp*g);
 }
 
-Frequs DiskAnsatz::kapnuom(const double R) const
+Frequs DiskAnsatz::kapnuom(double R) const
 // returns dPhi/dR, d^2Phi/dR^2, d^2Phi/dz^2 at z=0
 {
   if(S0==0.) return Frequs(0.);
@@ -1109,7 +1110,7 @@ Frequs DiskAnsatz::kapnuom(const double R) const
   if(hollow) er = (R==0)? 0. : exp(-R0/R-R/Rd+eps*cos(R/Rd));
   else   er = exp(-R/Rd+eps*cos(R/Rd));
   if(thin) {                          // vertically thin disk
-    std::cerr<<"Warning: KapNuOm(Phi) involves delta(z) at z=0\n";
+    warning("KapNuOm(Phi) involves delta(z) at z=0");
     gpp=0.;
   } else if(isothermal)               // vertically isothermal disk
     gpp=0.5/zd;
@@ -1123,32 +1124,29 @@ Frequs DiskAnsatz::kapnuom(const double R) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// class Disks
+//                                                                            //
+// class Disks                                                                //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-void Disks::reset(const int N, const DiskPar* p)
+void Disks::reset(int N, const DiskPar* p)
 {
-  delete[] D;
-  nd = N;
-  register int i;
+  if(D) delete[] D;
+  nd  = N;
   D   = new DiskAnsatz[nd];
   Dup = D+nd;
-  for(i=0; i<nd; i++) (D+i)->setup(p[i]);
+  for(int i=0; i!=nd; ++i) D[i].setup(p[i]);
 }
 
 Disks::Disks(std::istream& from)
 {
-  if(!from) {
-    std::cerr<<" Trying to construct Disks from a closed std::istream\n";
-    std::exit(1);
-  }
+  if(!from) error("Trying to construct Disks from a closed std::istream");
   DiskPar P;
   from >> nd;
   SwallowRestofLine(from);
   D   = new DiskAnsatz[nd];
   Dup = D+nd;
-  register DiskAnsatz *p=D;
-  for(; p<Dup; p++) {
+  for(DiskAnsatz *p=D; p!=Dup; ++p) {
     from >> P;
     SwallowRestofLine(from);
     p->setup(P);
@@ -1160,21 +1158,21 @@ Disks::Disks(const Disks& DS) : nd(DS.nd)
 {
   D   = new DiskAnsatz[nd];
   Dup = D+nd;
-  register DiskAnsatz *p=D;
-  for(register int i=0; p<Dup; p++,i++)
-    p->setup(DS.Parameter(i));
+  for(int i=0; i!=nd; ++i)
+    D[i].setup(DS.Parameter(i));
 }
 
-Disks::Disks(const int N, const DiskPar* p) : nd(N)
+Disks::Disks(int N, const DiskPar* p) : nd(N)
 {
-  register int i;
   D   = new DiskAnsatz[nd];
   Dup = D+nd;
-  for(i=0; i<nd; i++) (D+i)->setup(p[i]);
+  for(int i=0; i!=nd; ++i) D[i].setup(p[i]);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// class SpheroidDensity
+//                                                                            //
+// class SpheroidDensity                                                      //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
 void SpheroidDensity::setup(const SphrPar& d)
@@ -1193,7 +1191,7 @@ void SpheroidDensity::setup(const SphrPar& d)
   r0i = 1./r0;
 }
 
-double SpheroidDensity::Density(const double R, const double z) const
+double SpheroidDensity::Density(double R, double z) const
 {
   register double m = hypot(R,z*qi), m0=m*r0i, rho=rh0;
   if(gam==0.5)   rho /= sqrt(m0);
@@ -1209,16 +1207,16 @@ double SpheroidDensity::Density(const double R, const double z) const
   return rho;
 }
 
-double SpheroidDensity::mass_integrand(const double y) const
+double SpheroidDensity::mass_integrand(double y) const
 {
   if(rci) {
-    register double y1=1.-y, m=r0*y/y1;
+    double y1=1.-y, m=r0*y/y1;
     return pow(y,2.-gam) * pow(y1,bet-4.) * exp(-square(m*rci));
   }
   return pow(y,2-gam) * pow(1.-y,bet-4.);
 }
 
-double SpheroidDensity::mass(const double m) const
+double SpheroidDensity::mass(double m) const
 {
   return FPi*q*rh0*cube(r0)*
     qbulir(Adaptor<SpheroidDensity>(this,&SpheroidDensity::mass_integrand),
@@ -1226,32 +1224,29 @@ double SpheroidDensity::mass(const double m) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// class Spheroids
+//                                                                            //
+// class Spheroids                                                            //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-void Spheroids::reset(const int N, const SphrPar* p)
+void Spheroids::reset(int N, const SphrPar* p)
 {
-  delete[] S;
-  ns = N;
-  register int i;
+  if(S) delete[] S;
+  ns  = N;
   S   = new SpheroidDensity[ns];
   Sup = S+ns;
-  for(i=0; i<ns; i++) (S+i)->setup(p[i]);
+  for(int i=0; i<ns; i++) S[i].setup(p[i]);
 }
 
 Spheroids::Spheroids(std::istream& from)
 {
-  if(!from) {
-    std::cerr<<" Trying to construct Spheroids from a closed istream\n";
-    std::exit(1);
-  }
+  if(!from) error("Trying to construct Spheroids from a closed istream");
   SphrPar P;
   from >> ns;
   SwallowRestofLine(from);
   S   = new SpheroidDensity[ns];
   Sup = S+ns;
-  SpheroidDensity *p=S;
-  for(; p<Sup; p++) {
+  for(SpheroidDensity *p=S; p!=Sup; ++p) {
     from >> P;
     SwallowRestofLine(from);
     p->setup(P);
@@ -1263,37 +1258,37 @@ Spheroids::Spheroids(const Spheroids& SP) : ns(SP.ns)
 {
   S   = new SpheroidDensity[ns];
   Sup = S+ns;
-  SpheroidDensity *p=S;
-  for(register int i=0; p<Sup; p++,i++) 
-    p->setup(SP.Parameter(i));
+  for(int i=0; i!=ns; ++i) 
+    S[i].setup(SP.Parameter(i));
 }
 
-Spheroids::Spheroids(const int N, const SphrPar* p) : ns(N)
+Spheroids::Spheroids(int N, const SphrPar* p) : ns(N)
 {
-  register int i;
   S   = new SpheroidDensity[ns];
   Sup = S+ns;
-  for(i=0; i<ns; i++) (S+i)->setup(p[i]);
+  for(int i=0; i!=ns; ++i) S[i].setup(p[i]);
 }
 
 double Spheroids::beta() const
 {
-  register double b=1.e3;
-  for(register SpheroidDensity *p=S; p<Sup; p++)
+  double b=1.e3;
+  for(SpheroidDensity *p=S; p!=Sup; ++p)
     b = min(b, p->outer_power());
   return (b==1.e3)? -1 : b;
 }
 
 double Spheroids::gamma() const
 {
-  register double g=0.;
-  for(register SpheroidDensity *p=S; p<Sup; p++)
+  double g=0.;
+  for(SpheroidDensity *p=S; p!=Sup; ++p)
     g = max(g, p->inner_power());
   return g;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// class Multipole
+//                                                                            //
+// class Multipole                                                            //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   const int N =LMAX/2+1;   // number of multipoles
@@ -1317,13 +1312,13 @@ void Multipole::AllocArrays()
   Alloc2D(Z[0],K); Alloc2D(Z[1],K); Alloc2D(Z[2],K); Alloc2D(Z[3],K);
 }
 
-Multipole::Multipole(const int Kk,
-                     const double ri,
-                     const double ra,
-                     const double g,
-                     const double b,
-                     PotResidual const *PR,
-                     const int    lr)
+Multipole::Multipole(int         Kk,
+                     double      ri,
+                     double      ra,
+                     double      g,
+                     double      b,
+                     PotResidual*PR,
+                     int         lr)
 {
   nemo_dprintf(4,"Multipole::Multipole() ... \n");
   LR   = lr;
@@ -1334,20 +1329,22 @@ Multipole::Multipole(const int Kk,
   nemo_dprintf(4," done Multipole::Multipole()\n");
 }
 
-void Multipole::reset(const double ri,
-                      const double ra,
-                      const double g,
-                      const double b,
-                      PotResidual const *PR,
-                      const int lr)
+void Multipole::reset(double      ri,
+		      double      ra,
+		      double      g,
+		      double      b,
+		      PotResidual*PR,
+		      int         lr)
 {
   LR = lr;
   setup(ri,ra,g,b,PR);
 }
 
-void Multipole::setup(const double ri, const double ra,
-                      const double g, const double b,
-                      PotResidual const *PR)
+void Multipole::setup(double      ri,
+		      double      ra,
+                      double      g,
+		      double      b,
+                      PotResidual*PR)
 {
   Rmin = ri;
   Rmax = ra;
@@ -1370,9 +1367,8 @@ void Multipole::setup(const double ri, const double ra,
   //
   nemo_dprintf(5,"Multipole::setup(): 0\n");
   if(beta>0. && beta<3.) {
-    std::cerr<<" Warning: beta= "<<beta
-	     <<" unsuitable for Multipole expansion;"
-	     <<" we'll take beta=3.2\n";
+    warning("beta in ]0,3[ unsuitable for Multipole expansion; "
+	    "we will take beta=3.2\n");
     beta=3.2;
   }
   //
@@ -1581,8 +1577,7 @@ Multipole::~Multipole()
   Free2D(Z[0]); Free2D(Z[1]); Free2D(Z[2]); Free2D(Z[3]);
 }
 
-double Multipole::operator() (const double r, const double ct, const double st,
-                              double* dP) const
+double Multipole::operator() (double r, double ct, double st, double* dP) const
 {
   double Xi[2];
   register double lr=log(r), Phi;
@@ -1617,7 +1612,7 @@ double Multipole::operator() (const double r, const double ct, const double st,
   return Phi;
 }
 
-double Multipole::vcsquare(const double R, double &dvcqdR) const
+double Multipole::vcsquare(double R, double &dvcqdR) const
 {
   const int n2[2]={2,2};
   double Xi[2], dP[2], **d2P;
@@ -1646,7 +1641,7 @@ double Multipole::vcsquare(const double R, double &dvcqdR) const
   return dP[0];               // vc^2       = dPhi/dlnR
 }
 
-double Multipole::Laplace(const double r, const double ct) const
+double Multipole::Laplace(double r, double ct) const
 {
   const    int    m[2]={2,2};
   register double lr=log(r), Phi, Lap;
@@ -1678,7 +1673,7 @@ double Multipole::Laplace(const double r, const double ct) const
   return Lap;
 }
 
-Frequs Multipole::kapnuom(const double R) const
+Frequs Multipole::kapnuom(double R) const
 // returns dPhi/dR, d^2Phi/dR^2/ d^2Phi/dz^2
 {
   const    int    m[2]={2,2};
@@ -1714,18 +1709,20 @@ Frequs Multipole::kapnuom(const double R) const
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// class GalaxyPotential
+//                                                                            //
+// class GalaxyPotential                                                      //
+//                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-double GalaxyPotential::operator() (const double R, const double z) const
+double GalaxyPotential::operator() (double R, double z) const
 {
   register double r  =hypot(R,z), pot=M(r,z/r,R/r);
   for(register DiskAnsatz *p=D; p<Dup; p++) pot+= (*p)(R,z,r);
   return pot;
 }
 
-double GalaxyPotential::operator() (const double R, const double z,
-                                    double& dR, double &dz) const
+double GalaxyPotential::operator() (double R, double z,
+                                    double&dR, double&dz) const
 {
   double d[2];
   register double r  =hypot(R,z), pot=M(r,z/r,R/r,d);
@@ -1738,7 +1735,7 @@ double GalaxyPotential::operator() (const double R, const double z,
   return pot;
 }
 
-void GalaxyPotential::OortConstants(const double R, double &A, double &B) const
+void GalaxyPotential::OortConstants(double R, double &A, double &B) const
 {
   double vc, dvc;
   vc  = sqrt(M.vcsquare(R,dvc));
@@ -1747,7 +1744,7 @@ void GalaxyPotential::OortConstants(const double R, double &A, double &B) const
   B   =-0.5 * (vc/R + dvc);
 }
 
-double GalaxyPotential::Laplace(const double R, const double z) const
+double GalaxyPotential::Laplace(double R, double z) const
 {
   register double r=hypot(R,z), L=M.Laplace(r,z/r);
   register DiskAnsatz *p=D;
@@ -1755,7 +1752,7 @@ double GalaxyPotential::Laplace(const double R, const double z) const
   return L;
 }
 
-Frequs GalaxyPotential::KapNuOm  (const double R) const
+Frequs GalaxyPotential::KapNuOm  (double R) const
 {
   Frequs Om = M.kapnuom(R);
   for(register DiskAnsatz *p=D; p<Dup; p++) Om += p->kapnuom(R);

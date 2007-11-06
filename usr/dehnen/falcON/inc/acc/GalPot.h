@@ -3,12 +3,21 @@
 //                                                                             |
 // GalPot.h                                                                    |
 //                                                                             |
-// C++ code                                                                    |
+// Copyright (C) 1996-2007 Walter Dehnen                                       |
 //                                                                             |
-// Copyright Walter Dehnen, 1996-2004                                          |
-// e-mail:   walter.dehnen@astro.le.ac.uk                                      |
-// address:  Department of Physics and Astronomy, University of Leicester      |
-//           University Road, Leicester LE1 7RH, United Kingdom                |
+// This program is free software; you can redistribute it and/or modify        |
+// it under the terms of the GNU General Public License as published by        |
+// the Free Software Foundation; either version 2 of the License, or (at       |
+// your option) any later version.                                             |
+//                                                                             |
+// This program is distributed in the hope that it will be useful, but         |
+// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
+// General Public License for more details.                                    |
+//                                                                             |
+// You should have received a copy of the GNU General Public License           |
+// along with this program; if not, write to the Free Software                 |
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -26,6 +35,7 @@
 // Version 0.7    23. September 2004  fixed "find(): x out of range" error     |
 // Version 0.8    04. February  2005  debugged error in GaussLegendre()        |
 //                                    used WDutils::tupel                      |
+// Version 0.9    06. November  2007  brought in line with GalPot package      |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 //                                                                             |
@@ -113,7 +123,7 @@ namespace GalPot {                                      // v0.4
 
     Multipole M;
 
-    double Residual      (const double, const double, const double) const;
+    double Residual      (double, double, double) const;
     // this function is not intended for the enduser, it is needed in the       
     // construction of GalaxyPotential itself                                   
 
@@ -132,17 +142,17 @@ namespace GalPot {                                      // v0.4
     // GalaxyPotenial Phi(from);	// read from file and construct object  
     // from.close();			// close file                           
 
-    GalaxyPotential(const int, const DiskPar*,	// No & parameters of disks     
-		    const int, const SphrPar*,	// No & parameters of spheroids 
-		    const double = RMIN,	// min radius of radial grid    
-		    const double = RMAX, 	// max radius of radial grid    
-		    const int    = NRAD);	// No of radial grid points     
+    GalaxyPotential(int, const DiskPar*,	// No & parameters of disks     
+		    int, const SphrPar*,	// No & parameters of spheroids 
+		    double = RMIN,		// min radius of radial grid    
+		    double = RMAX, 		// max radius of radial grid    
+		    int    = NRAD);		// No of radial grid points     
     // constructor from parameters. See above for the meaning of the parameters 
     
-    void   reset   (const int, const DiskPar*,	// No & parameters of disks     
-		    const int, const SphrPar*, 	// No & parameters of spheroids 
-		    const double = RMIN,	// min radius of radial grid    
-		    const double = RMAX);	// max radius of radial grid    
+    void   reset   (int, const DiskPar*,	// No & parameters of disks     
+		    int, const SphrPar*, 	// No & parameters of spheroids 
+		    double = RMIN, 		// min radius of radial grid    
+		    double = RMAX); 		// max radius of radial grid    
     // resets to new parameters (arguments as the above constructor), the       
     // number of radial grid points remains fixed at the old value              
 
@@ -152,14 +162,14 @@ namespace GalPot {                                      // v0.4
     // information on the disks alone                                           
     //--------------------------------------------------------------------------
 
-    double DisksDensity(const double, const double) const;
+    double DisksDensity(double, double) const;
     // returns the disks' volume density at some (R,z) (1st & 2nd argument)     
 
-    double DisksSurfaceDensity(const double) const;
+    double DisksSurfaceDensity(double) const;
     // returns the disks' surface density at some radius (1st argument)         
     // = density integrated over z from -oo to oo.                              
 
-    double DisksMass(const double=0.) const;
+    double DisksMass(double=0.) const;
     // returns the disks' mass inside some radius (1st argument)                
     // = 2*Pi*R*density integrated over z from -oo to oo, and R from 0 to R.    
     // if called with no or zero argument, the total mass is returned           
@@ -167,55 +177,55 @@ namespace GalPot {                                      // v0.4
     int NumberofDisks() const;
     // returns the number of disk components                                    
 
-    DiskPar DiskParameter(const int) const;
+    DiskPar DiskParameter(int) const;
     // returns the parameters of the ith (1st argument) disk                    
 
     //--------------------------------------------------------------------------
     // information on the spheroids alone                                       
     //--------------------------------------------------------------------------
 
-    double SpheroidsDensity(const double, const double) const;
+    double SpheroidsDensity(double, double) const;
     // returns the spheroids' volume density at some (R,z) (1st & 2nd argument) 
 
-    double SpheroidsMass(const double) const;
+    double SpheroidsMass(double) const;
     // returns the spheroids' total mass inside some radius (1st argument)      
     // = 4*Pi*q*m^2*density integrated over m from 0 to R                       
 
     int NumberofSpheroids() const;
     // returns the number of spheroid components                                
 
-    SphrPar SpheroidParameter(const int) const;
+    SphrPar SpheroidParameter(int) const;
     // returns the parameters of the ith (1st argument) spheroid                
 
     //--------------------------------------------------------------------------
     // information on the total                                                 
     //--------------------------------------------------------------------------
 
-    double Density(const double, const double) const;
+    double Density(double, double) const;
     // returns the (input) density in Msun/kpc^3 given (R,z) in kpc.            
 
-    double vcsquare(const double) const;
+    double vcsquare(double) const;
     // return the circular speed squared in (kpc/Myr)^2 at R given in kpc and   
     // z=0.  vc^2 is defined by R*dPhi/dR, which can become negative, e.g. in   
     // the central parts of a hollow disk                                       
 
-    double Mass(const double) const;
+    double Mass(double) const;
     // returns the total mass inside some radius (1st argument)                 
     // this is simply the sum of DisksMass() and SpheroidsMass() above          
 
-    void OortConstants(const double, double&, double&) const;
+    void OortConstants(double, double&, double&) const;
     // given R in kpc (1st argument) returns Oort's constants A, B as 2nd and   
     // 3rd argument. Units of the latter are 1/Myr                              
 
-    double operator() (const double, const double) const;
+    double operator() (double, double) const;
     // returns Phi in (kpc/Myr)^2 at (R,z) given in kpc                         
 
-    double operator() (const double, const double, double&, double&) const;
+    double operator() (double, double, double&, double&) const;
     // returns Phi in (kpc/Myr)^2 at (R,z) given in kpc.                        
     // additionally, on return the 3rd and 4th argument contain the derivatives 
     // dPhi/dR and dPhi/dz in units of kpc/Myr^2                                
 
-    double Laplace(const double, const double) const;
+    double Laplace(double, double) const;
     // returns Laplace(Phi) in 1/Myr^2 given (R,z) in kpc. This is not          
     // necessarily identical to 4 Pi G times GalaxyPot::Density() above, as the 
     // latter returns the input density, while this routine gives the Laplace   
@@ -223,13 +233,105 @@ namespace GalPot {                                      // v0.4
     // limit of infinite many radial grid points, multipoles, and infinite      
     // numerical accuracy                                                       
 
-    Frequs KapNuOm  (const double) const;
+    Frequs KapNuOm  (double) const;
     // given R, the epicycle frequencies kappa (radial), nu (vertical), and     
     // omega (azimuthal) for the circular orbit through (R,z=0) are returned.   
     // units for the frequencies are 1/Myr                                      
 
-  };
-}                                                  // v0.4                      
-#include "GalPot_in.h"		                   // inline functions          
+  };// class GalaxyPotential
+  //////////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // inline members methods of class GalaxyPotential                            
+  //                                                                            
+  //////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+  // Constructors and related (all inline)                                      
+  //////////////////////////////////////////////////////////////////////////////
+  inline double GalaxyPotential::Residual(double a,
+					  double b,
+					  double c) const {
+    return Disks::Residual(a,b,c) + Spheroids::Residual(a,b,c);
+  }
+  //----------------------------------------------------------------------------
+  inline GalaxyPotential::GalaxyPotential(std::istream &from)
+    : Disks(from),
+      Spheroids(from),
+      M(NRAD,RMIN,RMAX,Spheroids::gamma(),Spheroids::beta(),this)
+  {}
+  //----------------------------------------------------------------------------
+  inline GalaxyPotential::GalaxyPotential(int Nd, const DiskPar* pd,
+					  int Ns, const SphrPar* ps,
+					  double rmin, double rmax,
+					  int k)
+    : Disks(Nd,pd),
+      Spheroids(Ns,ps),
+      M(k,rmin,rmax,Spheroids::gamma(),Spheroids::beta(),this)
+  {}
+  //----------------------------------------------------------------------------
+  inline void GalaxyPotential::reset(int Nd, const DiskPar* pd,
+				     int Ns, const SphrPar* ps,
+				     double rmin, double rmax) {
+    Disks::reset(Nd,pd);
+    Spheroids::reset(Ns,ps);
+    M.reset(rmin,rmax,Spheroids::gamma(),Spheroids::beta(),this);
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  // information on the disks alone (all inline)                                
+  //////////////////////////////////////////////////////////////////////////////
+  inline double GalaxyPotential::DisksDensity(double R, double z)
+    const {
+    return Disks::Density(R,z);
+  }
+  //----------------------------------------------------------------------------
+  inline double GalaxyPotential::DisksSurfaceDensity(double R) const {
+    return Disks::SurfaceDensity(R);
+  }
+  //----------------------------------------------------------------------------
+  inline double GalaxyPotential::DisksMass(double R) const {
+    return Disks::Mass(R);
+  }
+  //----------------------------------------------------------------------------
+  inline int GalaxyPotential::NumberofDisks() const {
+    return Disks::NumberofDisks();
+  }
+  //----------------------------------------------------------------------------
+  inline DiskPar GalaxyPotential::DiskParameter(int i) const {
+    return Disks::Parameter(i);
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  // information on the spheroids alone (all inline)                            
+  //////////////////////////////////////////////////////////////////////////////
+  inline double GalaxyPotential::SpheroidsDensity(double R, double z)
+    const {
+    return Spheroids::Density(R,z);
+  }
+  //----------------------------------------------------------------------------
+  inline double GalaxyPotential::SpheroidsMass(double R) const {
+    return Spheroids::Mass(R);
+  }
+  //----------------------------------------------------------------------------
+  inline int GalaxyPotential::NumberofSpheroids() const {
+    return Spheroids::NumberofSpheroids();
+  }
+  //----------------------------------------------------------------------------
+  inline SphrPar GalaxyPotential::SpheroidParameter(int i) const {
+    return Spheroids::Parameter(i);
+  }
+  //////////////////////////////////////////////////////////////////////////////
+  // information on the total (most are non-inline functions)                   
+  //////////////////////////////////////////////////////////////////////////////
+  inline double GalaxyPotential::Density(double R, double z) const {
+    return Disks::Density(R,z) + Spheroids::Density(R,z);
+  }
+  //----------------------------------------------------------------------------
+  inline double GalaxyPotential::Mass(double R) const {
+    return Disks::Mass(R) + Spheroids::Mass(R);
+  }
+  //----------------------------------------------------------------------------
+  inline double GalaxyPotential::vcsquare(double R) const {
+    return M.vcsquare(R);
+  }
+  //////////////////////////////////////////////////////////////////////////////
+} // namespace GalPot {
 #endif                                             // GalPot_h                  
 // end of file GalPot.h ////////////////////////////////////////////////////////
