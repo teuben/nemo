@@ -29,6 +29,7 @@
 // history:                                                                     
 //                                                                              
 // v 0.0    11/07/2006  WD created                                              
+// v 0.1    06/11/2007  WD deBUGged                                             
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -114,6 +115,7 @@ namespace falcON { namespace Manipulate {
       LoopSubsetBodies(S,b) {
 	real E = half*norm(vel(b)) + pot(b) + pex(b);
 	if(E < Emin) {
+	  Emin = E;
 	  XCEN = pos(b);
 	  VCEN = vel(b);
 	}
@@ -122,6 +124,7 @@ namespace falcON { namespace Manipulate {
       LoopSubsetBodies(S,b) {
 	real E = half*norm(vel(b)) + pot(b);
 	if(E < Emin) {
+	  Emin = E;
 	  XCEN = pos(b);
 	  VCEN = vel(b);
 	}
