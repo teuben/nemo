@@ -52,40 +52,44 @@ WDutils::RunInfo::RunInfo()
     __name_known(0),
     __debug(0)
 {
+  try {
   // set time
-  time_t now = ::time(0);
-  snprintf(__time,20,ctime(&now));
-  // set host name, user name, and pid
+    time_t now = ::time(0);
+    snprintf(__time,100,ctime(&now));
+    // set host name, user name, and pid
 #ifdef unix
-  gethostname(__host,100);
-  snprintf(__user,100,(getpwuid(geteuid())->pw_name));
-  snprintf(__pid,10,"%d",getpid());
-  __host_known = 1;
-  __user_known = 1;
-  __pid_known  = 1;
-  char file[64];
-  snprintf(file,64,"/proc/%s/cmdline",__pid);
-  std::ifstream in(file);
-  if(file) {
-    int i,e=0;
-    for(i=0; i!=1024; ++i) __cmd[i]=0;
-    in.getline(__cmd,1023);
-    for(i=1023; i!=0; --i)
-      if(__cmd[i]==0 || isspace(__cmd[i])) __cmd[i] = ' ';
-      else if(e==0) e=i;
-    __cmd[e+1] = 0;
-    for(i=0; !isspace(__cmd[i]); ++i)
-      __name[i] = __cmd[i];
-    __name[i] = 0;
-    __name[i] = 0;
-    __cmd_known  = 1;
-    __name_known = 1;
-  }
+    gethostname(__host,100);
+    snprintf(__user,100,(getpwuid(geteuid())->pw_name));
+    snprintf(__pid,20,"%d",getpid());
+    __host_known = 1;
+    __user_known = 1;
+    __pid_known  = 1;
+    char file[64];
+    snprintf(file,64,"/proc/%s/cmdline",__pid);
+    std::ifstream in(file);
+    if(file) {
+      int i,e=0;
+      for(i=0; i!=1024; ++i) __cmd[i]=0;
+      in.getline(__cmd,1023);
+      for(i=1023; i!=0; --i)
+	if(__cmd[i]==0 || isspace(__cmd[i])) __cmd[i] = ' ';
+	else if(e==0) e=i;
+      __cmd[e+1] = 0;
+      for(i=0; !isspace(__cmd[i]); ++i)
+	__name[i] = __cmd[i];
+      __name[i] = 0;
+      __name[i] = 0;
+      __cmd_known  = 1;
+      __name_known = 1;
+    }
 #else
-  snprintf(__host,100,"unknown.host");
-  snprintf(__user,100,"unknown.user");
-  snprintf(__user,100,"unknown.main");
+    snprintf(__host,100,"unknown.host");
+    snprintf(__user,100,"unknown.user");
+    snprintf(__user,100,"unknown.main");
 #endif
+  } catch(exception E) {
+    WDutils_RETHROW(E);
+  }
 }
 WDutils::RunInfo WDutils::RunInfo::Info;
 ////////////////////////////////////////////////////////////////////////////////
