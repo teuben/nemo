@@ -3,7 +3,7 @@
 //                                                                             |
 /// \file src/public/lib/PotExp.cc                                             |
 //                                                                             |
-// Copyright (C) 1994-1996, 2004-2006 Walter Dehnen                            |
+// Copyright (C) 1994-1996, 2004-2007 Walter Dehnen                            |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -3004,22 +3004,22 @@ PotExp::PotExp(scalar   a,                         // parameter alpha
   STATE(0)
 {
   if(AL<0.5) {
-    std::sprintf(ERR,"PotExp: alpha<0.5\n");
+    snprintf(ERR,256,"PotExp: alpha<0.5\n");
     STATE |= 2;
     return;
   }
   if(N<0) {
-    std::sprintf(ERR,"PotExp: nmax must be >= 0\n");
+    snprintf(ERR,256,"PotExp: nmax must be >= 0\n");
     STATE |= 2;
     return;
   }
   if(L&1) {
-    std::sprintf(ERR,"PotExp: lmax must be even\n");
+    snprintf(ERR,256,"PotExp: lmax must be even\n");
     STATE |= 2;
     return;
   }
   if(L==0 && s != spherical) {
-    std::sprintf(WARN,"PotExp: assuming spherical symmetry since lmax=0\n");
+    snprintf(WARN,256,"PotExp: assuming spherical symmetry since lmax=0\n");
     STATE |= 1;
   }
   setAL (AL);
@@ -3030,6 +3030,19 @@ PotExp::PotExp(scalar   a,                         // parameter alpha
   SetKnl(Knl);
   SetAnl(Anl,Knl);
   Anlm_assign<none>(Knlm,Anl,Nlm);
+}
+//------------------------------------------------------------------------------
+#define CHECKMISMATCH(FUNC)						\
+if(N != C.nmax() || L != C.lmax()) {					\
+  if(N  !=C.nmax())							\
+    if(L!=C.lmax())							\
+      snprintf(ERR,256,"PotExp::%s(): max n&l mismatch\n",FUNC);	\
+    else								\
+      snprintf(ERR,256,"PotExp::%s(): max n mismatch\n",FUNC);		\
+  else if(L!=C.lmax())							\
+    snprintf(ERR,256,"PotExp::%s(): max l mismatch\n",FUNC);		\
+  STATE |= 2;								\
+  return;								\
 }
 //------------------------------------------------------------------------------
 template<typename T>                               // T: double or float        
@@ -3050,13 +3063,7 @@ void PotExp::AddCoeffs  (Anlm            &C,       // O: C_nlm coefficients
   // all bodies whose flag contains (at least one of) the bits in mark.         
   //                                                                            
 {
-  if(N != C.nmax() || L != C.lmax()) {
-    std::sprintf(ERR,"PotExp::AddCoeffs: %s %s\n",
-		 (N!=C.nmax()?"nmax mismatch":" "),
-		 (L!=C.lmax()?"lmax mismatch":" "));
-    STATE |= 2;
-    return;
-  }
+  CHECKMISMATCH("AddCoeffs");
   setAL(AL);
   setR0(R0);
   CBlock<T> B4(C);
@@ -3074,13 +3081,7 @@ void PotExp::Normalize(Anlm&C, scalar const&G) const {
   //                                                                            
   // sets  C_nlm *= G * K_nlm                                                   
   //                                                                            
-  if(N != C.nmax() || L != C.lmax()) {
-    std::sprintf(ERR,"PotExp::Normalize(): %s %s\n",
-		 (N!=C.nmax()?"nmax mismatch":" "),
-		 (L!=C.lmax()?"lmax mismatch":" "));
-    STATE |= 2;
-    return;
-  }
+  CHECKMISMATCH("Normalize");
   if     (SYM & arot) ::normalize<spherical  >(C,Knlm,G);
   else if(SYM & zrot) ::normalize<cylindrical>(C,Knlm,G);
   else if(SYM & axes) ::normalize<triaxial   >(C,Knlm,G);
@@ -3108,13 +3109,7 @@ void PotExp::SetGravity (Anlm const      &C,       // I: C_nlm coefficients
   // acceleration is added if add&2                                             
   //                                                                            
 {
-  if(N != C.nmax() || L != C.lmax()) {
-    std::sprintf(ERR,"PotExp::SetGravity(): %s %s\n",
-		 (N!=C.nmax()?"nmax mismatch":" "),
-		 (L!=C.lmax()?"lmax mismatch":" "));
-    STATE |= 2;
-    return;
-  }
+  CHECKMISMATCH("SetGravity");
   setAL(AL);
   setR0(R0);
   GBlock<T> B4(C);
@@ -3147,13 +3142,7 @@ void PotExp::SetGravity (Anlm       const&C,       // I: C_nlm coefficients
   // acceleration is added if add&2                                             
   //                                                                            
 {
-  if(N != C.nmax() || L != C.lmax()) {
-    std::sprintf(ERR,"PotExp::SetGravity(): %s %s\n",
-		 (N!=C.nmax()?"nmax mismatch":" "),
-		 (L!=C.lmax()?"lmax mismatch":" "));
-    STATE |= 2;
-    return;
-  }
+  CHECKMISMATCH("SetGravity");
   setAL(AL);
   setR0(R0);
   GBlock<T> B4(C);
@@ -3181,13 +3170,7 @@ void PotExp::SetPotential(Anlm const      &C,      // I: C_nlm coefficients
   // potential    is added if add&1                                             
   //                                                                            
 {
-  if(N != C.nmax() || L != C.lmax()) {
-    std::sprintf(ERR,"PotExp::SetPotential(): %s %s\n",
-		 (N!=C.nmax()?"nmax mismatch":" "),
-		 (L!=C.lmax()?"lmax mismatch":" "));
-    STATE |= 2;
-    return;
-  }
+  CHECKMISMATCH("SetPotential");
   setAL(AL);
   setR0(R0);
   PBlock<T> B4(C);
@@ -3214,13 +3197,7 @@ void PotExp::SelfGravity(Anlm            &C,       // O: normalized C_nlm
 			 int              d,       // I: add?         see Note 3
 			 scalar           G) const //[I: const of Gravity]      
 {
-  if(N != C.nmax() || L != C.lmax()) {
-    std::sprintf(ERR,"PotExp::AddCoeffs: %s %s\n",
-		 (N!=C.nmax()?"nmax mismatch":" "),
-		 (L!=C.lmax()?"lmax mismatch":" "));
-    STATE |= 2;
-    return;
-  }
+  CHECKMISMATCH("AddCoeffs");
   setAL(AL);
   setR0(R0);
   C.reset();

@@ -1540,7 +1540,7 @@ double bodies::read_gadget(const char*fname,
     header->check_simple_npart_error();
   } else {
     // 1.2 try file "fname.0" (with possibly more to follow)
-    sprintf(filename,"%s.%u",fname,0);
+    snprintf(filename,256,"%s.%u",fname,0);
     fsize = FileSize(filename);
     in.open(filename);
     if(!in) falcON_THROW("bodies::read_gadget(): cannot open file \"%s\" "
@@ -1667,7 +1667,7 @@ double bodies::read_gadget(const char*fname,
     if(++ifile != nfile) {
       SPH += ns;
       STD += nd;
-      sprintf(filename,"%s.%u",fname,ifile);
+      snprintf(filename,256,"%s.%u",fname,ifile);
       in.open(file);
       if(!in) falcON_THROW("bodies::read_gadget(): cannot open file \"%s\"\n",
 			   file);

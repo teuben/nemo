@@ -49,7 +49,8 @@ namespace falcON {
   //----------------------------------------------------------------------------
   /// For each active body's leaf: find list of neighbours and process it.
   ///
-  /// We first copy the body flag and mass (to OctTree::Leaf::scalar()).\n
+  /// We first copy the body mass (to OctTree::Leaf::scalar()), and, if
+  /// all=false, also the body flags to leafs.\n
   /// We then find for each active leaf the K nearest neighbours in ascending
   /// order of distance.\n
   /// This list is then processed by a user-supplied function.\n

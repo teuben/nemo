@@ -53,7 +53,10 @@ using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
 
+  using falcON::snprintf;
+
   const int debug_depth = 2;
+  const size_t MAX_TYPE_LENGTH = 8;
 
   const char ParInd = '#';      ///< parameter indicator for bodyfunc expression
 
@@ -95,15 +98,19 @@ namespace {
     DataBaseErr(DataBaseErr const&e) : BfErr(e) {}
   };
   //////////////////////////////////////////////////////////////////////////////
-  void shrink(char*newexpr, const char*expr) {
+  void shrink(char*newexpr, size_t size, const char*expr) falcON_THROWING
+  {
     // eats all white spaces from an expression                                 
     const char*e=expr;
     char      *n=newexpr;
-    while( *e ) {
+    const char*u=newexpr+size;
+    while(*e) {
       while(isspace(*e)) ++e;
       *(n++) = *(e++);
+      if(n==u) falcON_THROW("shrinking expression exceeds size limit of %d\n",
+			    size);
     }
-    *n = 0;
+    *n=0;
     debug_info(2,"shrink() expr = \"%s\"\n",newexpr);
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -112,11 +119,11 @@ namespace {
     st_pter Size = (st_pter)findfn(const_cast<char*>(name));
     if(Size == 0) throw BfErr("cannot resolve type of expression");
     switch(Size()) {
-    case 1:  sprintf(type,"bool"); break;
+    case 1:  snprintf(type,MAX_TYPE_LENGTH,"bool"); break;
     case 2: 
-    case 4:  sprintf(type,"int");  break;
-    case 8:  sprintf(type,"real"); break;
-    case 24: sprintf(type,"vect"); break;
+    case 4:  snprintf(type,MAX_TYPE_LENGTH,"int");  break;
+    case 8:  snprintf(type,MAX_TYPE_LENGTH,"real"); break;
+    case 24: snprintf(type,MAX_TYPE_LENGTH,"vect"); break;
     default: throw BfErr("cannot resolve type of expression");
     }
     debug_info(debug_depth,"get_type(): type=%s\n",type);
@@ -136,35 +143,35 @@ namespace {
     const char* falcON_path = falcON::directory();
     if(falcON_path == 0) throw BfErr("cannot locate falcON directory");
     char cmmd[512];
-    sprintf(cmmd,"cd /tmp; %s %s.cc -o %s.so"
-	    " %s -shared -fPIC -I%s/inc -I%s/inc/utils"
+    snprintf(cmmd,512,"cd /tmp; %s %s.cc -o %s.so"
+	     " %s -shared -fPIC -I%s/inc -I%s/inc/utils"
 #ifdef  falcON_NEMO
-	    " -I$NEMOINC -DfalcON_NEMO"
+	     " -I$NEMOINC -DfalcON_NEMO"
 #endif
 #ifdef  falcON_INDI
-	    " -DfalcON_INDI"
+	     " -DfalcON_INDI"
 #endif
 #ifdef  falcON_SPH
-	    " -DfalcON_SPH"
+	     " -DfalcON_SPH"
 #endif
 #if   defined(falcON_DOUBLE)
-	    " -DfalcON_DOUBLE"
+	     " -DfalcON_DOUBLE"
 #elif defined(falcON_SINGLE)
-	    " -DfalcON_SINGLE"
+	     " -DfalcON_SINGLE"
 #endif
-	    " >& %s.log",
-	    getenv("CPATH")? "$CPATH/g++" : "g++",
-	    fname,fname,(flags? flags : " "),falcON_path,falcON_path,fname);
+	     " >& %s.log",
+	     getenv("CPATH")? "$CPATH/g++" : "g++",
+	     fname,fname,(flags? flags : " "),falcON_path,falcON_path,fname);
     debug_info(2,"now compiling using the following command\n   %s\n",cmmd);
     if(system(cmmd)) {
       if(debug(debug_depth)) {
 	std::cerr<<"could not compile temporary file /tmp/"<<fname<<".cc:\n";
 	char show[512];
-	sprintf(show,"more /tmp/%s.cc > /dev/stderr",fname);
+	snprintf(show,512,"more /tmp/%s.cc > /dev/stderr",fname);
 	system(show);
 	std::cerr<<"\nwith the command\n\""<<cmmd<<"\".\n"
 		 <<"Here is the output from the compiler:\n\n";
-	sprintf(show,"more /tmp/%s.log > /dev/stderr",fname);
+	snprintf(show,512,"more /tmp/%s.log > /dev/stderr",fname);
 	std::cerr<<'\n';
 	system(show);
       }
@@ -176,8 +183,8 @@ namespace {
   inline void delete_files(const char*fname) {
     // delete files /tmp/fname.* UNLESS debug(debug_depth)
     if(delete_f && !debug(debug_depth) && fname && fname[0]) {
-      char cmmd[1024];
-      sprintf(cmmd,"rm -f /tmp/%s.* >& /dev/null",fname);
+      char cmmd[512];
+      snprintf(cmmd,512,"rm -f /tmp/%s.* >& /dev/null",fname);
       debug_info(4,"executing \"%s\"\n",cmmd);
       system(cmmd);
     }
@@ -211,7 +218,7 @@ namespace {
       if(p < 0) throw ParseErr(message("'%c' not followed by digit",ParInd));
       if(p+1 > npar) npar = p+1;                   //   update max #parameters  
       if(to+6 >= toUP) throw ParseErr("expression too long");
-      sprintf(to,"__P[%d]",p);                     //   add parameter to output 
+      snprintf(to,6,"__P[%d]",p);                  //   add parameter to output 
       to += 6;                                     //   increment output        
     } else {                                       // ELSE                      
       *(to++) = *(in++);                           //     read expr into sexpr  
@@ -236,9 +243,10 @@ namespace {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class BF_database {
-    char          dir     [256];
-    char          fullfile[512];
-    mutable char  funcname[512];
+    static const size_t STR_LENGTH = 512;
+    char          dir     [STR_LENGTH];
+    char          fullfile[STR_LENGTH];
+    mutable char  funcname[STR_LENGTH];
     bool          locked;
   public:
     //--------------------------------------------------------------------------
@@ -251,23 +259,24 @@ namespace {
       // get falcON library directory
       const char*falcONlib = falcON::libdir();
       if(falcONlib==0) throw(DataBaseErr("falcON library path unknown"));
-      sprintf(dir,"%s/%s",falcONlib,subdir);        // falcONlib/subdir
-      sprintf(fullfile,"%s/%s",dir,file);           // falcONlib/subdir/file
+      snprintf(dir,STR_LENGTH,"%s/%s",falcONlib,subdir);// falcONlib/subdir
+      snprintf(fullfile,STR_LENGTH,"%s/%s",dir,file);   // falcONlib/subdir/file
       // make sure falcONlib/subdir/ exists!
-      char cmmd[512];
-      sprintf(cmmd,"cd %s >& /dev/null",falcONlib);
+      char cmmd[STR_LENGTH];
+      snprintf(cmmd,STR_LENGTH,"cd %s >& /dev/null",falcONlib);
       debug_info(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
-      sprintf(cmmd,"cd %s/%s >& /dev/null",falcONlib,subdir);
+      snprintf(cmmd,STR_LENGTH,"cd %s/%s >& /dev/null",falcONlib,subdir);
       debug_info(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) {
 	debug_info(debug_depth,"BF_database: no directory %s/%s;"
 		   " try to make it\n", falcONlib,subdir);
-	sprintf(cmmd,"mkdir %s/%s >& /dev/null",falcONlib,subdir);
+	snprintf(cmmd,STR_LENGTH,"mkdir %s/%s >& /dev/null",falcONlib,subdir);
 	debug_info(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
 
-	sprintf(cmmd,"chmod 777 %s/%s >& /dev/null",falcONlib,subdir);
+	snprintf(cmmd,STR_LENGTH,"chmod 777 %s/%s >& /dev/null",
+		 falcONlib,subdir);
 	debug_info(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
       }
@@ -285,7 +294,8 @@ namespace {
     bool printinfo(std::ostream&out) const {
       std::ifstream file(fullfile);
       if(file.is_open()) {
-	char     fexp[512], fold[512], type;
+	const size_t FNAME_SIZE = 256;
+	char     fexp[FNAME_SIZE], fold[FNAME_SIZE], type;
 	int      npar,num=1;
 	fieldset need;
 	out << 
@@ -296,7 +306,7 @@ namespace {
 	while(!file.eof()) {
 	  file >> fexp >> type >> npar >> need >> funcname;
 	  if(num==1 || strcmp(fexp,fold)) {
-	    strcpy(fold,fexp);
+	    strncpy(fold,fexp,FNAME_SIZE);
 	    out  << '#'
 		 << std::setw(3)  << num++ << " | "
 		 << std::setw(32) << fexp  << " | "
@@ -343,19 +353,19 @@ namespace {
     //                              - loop database, count functions            
     //                              - return count                              
     int counter() throw(DataBaseErr) {             // R: valid function counter 
-      char cmmd[512];
+      char cmmd[STR_LENGTH];
       // check for existence of backup-file
-      sprintf(cmmd,"ls %s.bak >& /dev/null",fullfile);
+      snprintf(cmmd,STR_LENGTH,"ls %s.bak >& /dev/null",fullfile);
       debug_info(10,"executing \"%s\"\n",cmmd);
       if(!system(cmmd)) throw DataBaseErr(message("file %s/%s.bak exists"));
-      char fbak[512];
-      sprintf(fbak,"%s.bak",fullfile);
+      char fbak[STR_LENGTH];
+      snprintf(fbak,STR_LENGTH,"%s.bak",fullfile);
       // try to open fullfile for reading
       std::ifstream file(fullfile);
       if(!file.is_open()) {
 	// if fullfile is unreadable,
 	//   touch fullfile.bak and lock that; return counter = 1
-	sprintf(cmmd,"touch %s; chmod 000 %s",fbak,fbak);
+	snprintf(cmmd,STR_LENGTH,"touch %s; chmod 000 %s",fbak,fbak);
 	debug_info(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
 	locked = 1;
@@ -364,7 +374,7 @@ namespace {
 	// if fullfile is readable,
 	//   copy to fullfile.bak and lock that
 	//   read fullfile to find counter
-	sprintf(cmmd,"cp %s %s; chmod 000 %s", fullfile,fbak,fbak);
+	snprintf(cmmd,STR_LENGTH,"cp %s %s; chmod 000 %s", fullfile,fbak,fbak);
 	debug_info(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
 	locked = 1;
@@ -381,9 +391,10 @@ namespace {
     //--------------------------------------------------------------------------
     void unlock() {
       if(locked) {
-	char cmmd[512];
-	sprintf(cmmd,"mv %s.bak %s >& /dev/null; chmod 666 %s >& /dev/null",
-		fullfile,fullfile,fullfile);
+	char cmmd[STR_LENGTH];
+	snprintf(cmmd,STR_LENGTH,
+		 "mv %s.bak %s >& /dev/null; chmod 666 %s >& /dev/null",
+		 fullfile,fullfile,fullfile);
 	debug_info(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) warning("problems unlocking database\n");
 	locked = 0;
@@ -402,24 +413,24 @@ namespace {
       throw(DataBaseErr)
     {
       if(!locked) throw DataBaseErr("not locked, cannot put()");
-      char cmmd[512];
-      sprintf(cmmd,"cp /tmp/%s.so %s/%s.so >& /dev/null; "
-	      "chmod 444 %s/%s.so >& /dev/null",
-	      fname,dir,func,dir,func);
+      char cmmd[STR_LENGTH];
+      snprintf(cmmd,STR_LENGTH,"cp /tmp/%s.so %s/%s.so >& /dev/null; "
+	       "chmod 444 %s/%s.so >& /dev/null",
+	       fname,dir,func,dir,func);
       debug_info(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd))
 	throw DataBaseErr(message("cannot copy file /tmp/%s.so into base",
 				  fname));
-      char fbak[512];
-      sprintf(fbak,"%s.bak",fullfile);
-      sprintf(cmmd,"chmod 600 %s >& /dev/null",fbak);
+      char fbak[STR_LENGTH];
+      snprintf(fbak,STR_LENGTH,"%s.bak",fullfile);
+      snprintf(cmmd,STR_LENGTH,"chmod 600 %s >& /dev/null",fbak);
       debug_info(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw DataBaseErr(message("cannot %s",cmmd));
       std::ofstream file;
       if(!open_to_append(file,fbak) )
 	throw DataBaseErr(message("cannot open file %s",fbak));
       file  <<expr<<' '<<type<<' '<<npar<<' '<<need<<' '<<func<<std::endl;
-      sprintf(cmmd,"chmod 000 %s >& /dev/null",fbak);
+      snprintf(cmmd,STR_LENGTH,"chmod 000 %s >& /dev/null",fbak);
       debug_info(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw DataBaseErr(message("cannot %s",cmmd));
     }
@@ -450,11 +461,13 @@ namespace {
       havesyms = true;
     }
     // 1 create C++ file implementing functions fneed and fsize
-    char fname[64], fneed[64], fsize[64], ffile[64];
-    sprintf(fname,"bf_t_%s_%d",RunInfo::pid(),testfunc);
-    sprintf(ffile,"/tmp/%s.cc",fname);
-    sprintf(fneed,"bf_need_%d",testfunc);
-    sprintf(fsize,"bf_size_%d",testfunc++);
+    const size_t FNAME_SIZE=128;
+    char fname[FNAME_SIZE], fneed[FNAME_SIZE], fsize[FNAME_SIZE],
+         ffile[FNAME_SIZE];
+    snprintf(fname,FNAME_SIZE,"bf_t_%s_%d",RunInfo::pid(),testfunc);
+    snprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
+    snprintf(fneed,FNAME_SIZE,"bf_need_%d",testfunc);
+    snprintf(fsize,FNAME_SIZE,"bf_size_%d",testfunc++);
     std::ofstream file(ffile);
     if(!file) 
       throw BfErr(message("cannot create temporary file \"%s\"",ffile));
@@ -486,7 +499,7 @@ namespace {
       // 2 compile the C++ file and create a shared object file
       compile(0,fname);
       // 3 load the .so file and find out about need and type
-      sprintf(ffile,"/tmp/%s.so",fname);
+      snprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
       loadobj(ffile);
       get_type(type,fsize);
       need = get_need(fneed);
@@ -520,15 +533,16 @@ namespace {
       havesyms = true;
     }
     // 1 create C++ file implementing the function
-    char ffile[256], _func[256];
+    const size_t FNAME_SIZE=256;
+    char ffile[FNAME_SIZE], _func[FNAME_SIZE];
     const char*ffunc;
     if(funcn && funcn[0])
       ffunc = funcn;
     else {
-      sprintf(_func,"%s%d",fname,function++);
+      snprintf(_func,FNAME_SIZE,"%s%d",fname,function++);
       ffunc = _func;
     }
-    sprintf(ffile,"/tmp/%s.cc",fname);
+    snprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
     std::ofstream file(ffile);
     if(!file) 
       throw BfErr(message("cannot create temporary file \"%s\"",ffile));
@@ -553,7 +567,7 @@ namespace {
     // 2 compile the C++ file and create a shared object file
     compile(OPTFLAGS,fname);
     // 3 load the .so file and find our function are return it
-    sprintf(ffile,"/tmp/%s.so",fname);
+    snprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
     loadobj(ffile);
     bf_pter func = (bf_pter)findfn(const_cast<char*>(ffunc));
     if(func == 0)
@@ -584,15 +598,16 @@ namespace {
       havesyms = true;
     }
     // 1 create C++ file implementing the method
-    char ffile[256], _func[256];
+    const size_t FNAME_SIZE=256;
+    char ffile[FNAME_SIZE], _func[FNAME_SIZE];
     const char*ffunc;
     if(funcn && funcn[0])
       ffunc = funcn;
     else {
-      sprintf(_func,"%s%d",fname,function++);
+      snprintf(_func,FNAME_SIZE,"%s%d",fname,function++);
       ffunc = _func;
     }
-    sprintf(ffile,"/tmp/%s.cc",fname);
+    snprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
     std::ofstream file(ffile);
     if(!file) 
       throw BfErr(message("cannot create temporary file \"%s\"",ffile));
@@ -617,7 +632,7 @@ namespace {
     // 2 compile the C++ file and create a shared object file
     compile(OPTFLAGS,fname);
     // 3 load the .so file and find our function are return it
-    sprintf(ffile,"/tmp/%s.so",fname);
+    snprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
     loadobj(ffile);
     Bm_pter func = (Bm_pter)findfn(const_cast<char*>(ffunc));
     if(func == 0)
@@ -633,14 +648,15 @@ namespace {
 
   const char sep = '@';        // seperator between subcondition & subexpression
 
-  const int MAX_NUMBER_SUBEXPR = 17;
-  const int MAX_LENGTH_SUBEXPR = 128;
-  const int MAX_LENGTH_EXPR    = 1024;
+  const size_t MAX_OPNAME_LENGTH  = 6;
+  const size_t MAX_NUMBER_SUBEXPR = 17;
+  const size_t MAX_LENGTH_SUBEXPR = 128;
+  const size_t MAX_LENGTH_EXPR    = 1024;
   typedef char *pchar;
 
   char  nexpr  [MAX_LENGTH_EXPR];
-  char  subtype[MAX_NUMBER_SUBEXPR][6];
-  char  subname[MAX_NUMBER_SUBEXPR][6];
+  char  subtype[MAX_NUMBER_SUBEXPR][MAX_TYPE_LENGTH];
+  char  subname[MAX_NUMBER_SUBEXPR][MAX_TYPE_LENGTH];
   char  subexpr[MAX_NUMBER_SUBEXPR][MAX_LENGTH_SUBEXPR];
   pchar sexpr  [MAX_NUMBER_SUBEXPR] = {0};
   pchar scond  [MAX_NUMBER_SUBEXPR] = {0};
@@ -685,7 +701,7 @@ namespace {
     scond[we] = 0;                                 // reset subconditional      
     sexpr[we] = subexpr[we];                       // set new subexpr           
     sname[we] = subname[we];                       // set new subname           
-    sprintf(sname[we],"__S%02d",we);               // write subname             
+    snprintf(sname[we],MAX_TYPE_LENGTH,"__S%02d",we); // write subname          
     char* sex = sexpr[we];                         // pter in subexpr           
     char* const sexUP = sex + MAX_LENGTH_SUBEXPR;  // ceiling of subexpr        
     while(*expr) {                                 // LOOP through expression   
@@ -693,7 +709,7 @@ namespace {
       if       (is_oper(expr,soper[sub])) {        //   IF matches Operator     
 	if(sex+5 >= sexUP)
 	  throw ParseErr("expression too long");
-	sprintf(sex,"__S%02d",sub);                //     add func call to sexpr
+	snprintf(sex,5,"__S%02d",sub);             //     add func call to sexpr
 	sex += 5;                                  //     increment sex         
        	if(*expr!='{')
 	  throw ParseErr(message("'%s' must be followed by '{'",
@@ -774,11 +790,13 @@ namespace {
       havesyms = true;
     }
     // 1 create C++ file implementing functions fneed() and fsize()
-    char fname[64], fneed[64], fsize[64], ffile[64];
-    sprintf(fname,"Bf_t_%s_%d",RunInfo::pid(),testfunc);
-    sprintf(ffile,"/tmp/%s.cc",fname);
-    sprintf(fneed,"Bf_need_%d",testfunc);
-    sprintf(fsize,"Bf_size_%d",testfunc++);
+    const size_t FNAME_SIZE=256;
+    char fname[FNAME_SIZE], fneed[FNAME_SIZE], fsize[FNAME_SIZE],
+         ffile[FNAME_SIZE];
+    snprintf(fname,FNAME_SIZE,"Bf_t_%s_%d",RunInfo::pid(),testfunc);
+    snprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
+    snprintf(fneed,FNAME_SIZE,"Bf_need_%d",testfunc);
+    snprintf(fsize,FNAME_SIZE,"Bf_size_%d",testfunc++);
     std::ofstream file(ffile);
     if(!file)
       throw BfErr(message("cannot create temporary file \"%s\"",ffile));
@@ -825,17 +843,17 @@ namespace {
       // 2 compile the C++ file and create a shared object file
       compile(0,fname);
       // 3 load the .so file and find out about need and types
-      sprintf(ffile,"/tmp/%s.so",fname);
+      snprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
       loadobj(ffile);
       need = get_need(fneed);
       for(int s=0; s!=sub; ++s) {
 	if(soper[s] == 1) need |= fieldset::m;
 	stype[s] = subtype[s];
 	if(soper[s] == 7)
-	  sprintf(stype[s],"int");
+	  snprintf(stype[s],MAX_TYPE_LENGTH,"int");
 	else {
-	  char fsizesub[64];
-	  sprintf(fsizesub,"%s_%d",fsize,s);
+	  char fsizesub[FNAME_SIZE];
+	  snprintf(fsizesub,FNAME_SIZE,"%s_%d",fsize,s);
 	  get_type(stype[s],fsizesub);
 	}
       }
@@ -1037,19 +1055,20 @@ namespace {
       havesyms = true;
     }
     // 1 create C++ file implementing the bodiesfunc function
-    char ffile[64], _func[256];
+    const size_t FNAME_SIZE=256;
+    char ffile[FNAME_SIZE], _func[FNAME_SIZE];
     const char*ffunc;
     if(funcn && funcn[0])
       ffunc = funcn;
     else {
-      sprintf(_func,"%s%d",fname,function++);
+      snprintf(_func,FNAME_SIZE,"%s%d",fname,function++);
       ffunc = _func;
     }
     debug_info(debug_depth,
 	       "bodiesfunc::bodiesfunc(): must make function\n"
 	       "      base name = %s\n"
 	       "      func name = %s\n",fname,ffunc);
-    sprintf(ffile,"/tmp/%s.cc",fname);
+    snprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
     std::ofstream file(ffile);
     if(!file) 
       throw BfErr(message("cannot create temporary file \"%s\"\n",ffile));
@@ -1088,7 +1107,7 @@ namespace {
     // 2 compile the C++ file and create a shared object file
     compile(OPTFLAGS,fname);
     // 3 load the .so file and find our function and return it
-    sprintf(ffile,"/tmp/%s.so",fname);
+    snprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
     loadobj(ffile);
     Bf_pter func = (Bf_pter)findfn(const_cast<char*>(ffunc));
     if(func == 0)
@@ -1105,13 +1124,15 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
   : FUNC(0), TYPE(0), EXPR(0), NPAR(0), NEED(fieldset::o)
 {
   if(oexpr == 0 || *oexpr == 0) return;
-  EXPR = falcON_NEW(char,strlen(oexpr)+1);
-  strcpy(EXPR,oexpr);
+  size_t len = strlen(oexpr)+1;
+  EXPR = falcON_NEW(char,len);
+  strncpy(EXPR,oexpr,len);
   // 0 eliminate white space from expression
-  shrink(nexpr,oexpr);
+  shrink(nexpr,MAX_LENGTH_EXPR,oexpr);
   if(*nexpr == 0) return;
   // 1 employ database
-  char fname[64],ffunc[64],ftype[8];
+  const size_t FNAME_SIZE = 256;
+  char fname[FNAME_SIZE],ffunc[FNAME_SIZE],ftype[MAX_TYPE_LENGTH];
   const char *funcname;
   BF_database*BD = 0;
   try {
@@ -1121,8 +1142,8 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
     funcname = BD->findfunc(nexpr,TYPE,NPAR,NEED);
     if(funcname) {                                  // found one!               
       debug_info(debug_depth,"bodyfunc::bodyfunc(): found one: %s\n",funcname);
-      char ffile[256];
-      sprintf(ffile,"%s/%s.so",BD->directory(),funcname);
+      char ffile[FNAME_SIZE];
+      snprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
       FUNC = (bf_pter)findfn(const_cast<char*>(funcname));
       if(FUNC) return;                              // SUCCESS !!!              
@@ -1131,9 +1152,9 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
 		 funcname,BD->directory(),funcname);
     }
     // 1.2 function not found, so try to get unique new function name
-    sprintf(fname,"bf_%s%d",RunInfo::pid(),function++);
+    snprintf(fname,FNAME_SIZE,"bf_%s%d",RunInfo::pid(),function++);
     int fcount = BD->counter();                     // try to get valid counter 
-    sprintf(ffunc,"bf__%d",fcount);
+    snprintf(ffunc,FNAME_SIZE,"bf__%d",fcount);
     funcname = ffunc;
   }
   // 1.E database error occured, we cannot use it at all
@@ -1220,8 +1241,9 @@ falcON::BodyFunc<T>::BodyFunc(const char*expr, const char*pars)
 {
   if(is_empty()) return;
   if(pars) {
-    PARS = falcON_NEW(char,strlen(pars)+1);
-    strcpy(PARS,pars);
+    size_t len = strlen(pars)+1;
+    PARS = falcON_NEW(char,len);
+    strncpy(PARS,pars,len);
   }
   if(TYPE != bf_type<T>::type )
     throw exception("BodyFunc<%s>::BodyFunc(): expression \"%s\" is of type %s",
@@ -1286,12 +1308,16 @@ falcON::BodyFunc<T>::BodyFunc(const char*expr, const real*pars, int npar)
 	      "but %d are given; will ignore last %d",
 	      nameof(T),expr,NPAR,npar,npar-NPAR);
     if(npar > 0) {
-      PARS = falcON_NEW(char,npar*16);
+      int _len = npar*16;
+      PARS = falcON_NEW(char,_len);
       char par[64], *P=PARS;
       for(int ipar=0; ipar!=npar; ++ipar) {
-	sprintf(par,"%f",pars[ipar]);
-	strcpy(P,par);
-	strcat(P,",");
+	snprintf(par,64,"%f",pars[ipar]);
+	strncpy(P,par,_len);
+	_len -= strlen(par)+1;
+	if(_len < 0) falcON_THROW("BodyFunc<%s>::BodyFunc: "
+				  "difficulty parsing parameters\n",nameof(T));
+	strncat(P,",",1);
 	P += strlen(par) + 1;
       }
       P = 0;
@@ -1330,9 +1356,10 @@ falcON::BodyFilter::BodyFilter(const char*expr, const real*pars, int npar)
 bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
 {
   // 0 eliminate white space from expression
-  shrink(nexpr,oexpr);
+  shrink(nexpr,MAX_LENGTH_EXPR,oexpr);
   // 1 employ database
-  char fname[64],ffunc[64];
+  const size_t FNAME_SIZE=256;
+  char fname[FNAME_SIZE],ffunc[FNAME_SIZE];
   const char *funcname;
   BF_database*BD = 0;
   try {
@@ -1343,8 +1370,8 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
     if(funcname) {                                  // found one!               
       debug_info(debug_depth,
 		 "bodiesfunc::bodiesfunc(): found one: %s\n",funcname);
-      char ffile[256];
-      sprintf(ffile,"%s/%s.so",BD->directory(),funcname);
+      char ffile[FNAME_SIZE];
+      snprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
       FUNC = (Bf_pter)findfn(const_cast<char*>(funcname));
       if(FUNC) return;                            // SUCCESS !!!              
@@ -1353,9 +1380,9 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
 		 funcname,BD->directory(),funcname);
     }
     // 1.2 function not found, so try to get unique new function name
-    sprintf(fname,"Bf_%s%d",RunInfo::pid(),function++);
+    snprintf(fname,FNAME_SIZE,"Bf_%s%d",RunInfo::pid(),function++);
     int fcount = BD->counter();                     // try to get valid counter 
-    sprintf(ffunc,"Bf__%d",fcount);
+    snprintf(ffunc,FNAME_SIZE,"Bf__%d",fcount);
     funcname = ffunc;
   }
   // 1.E database error occured, we cannot use it at all
@@ -1589,7 +1616,7 @@ namespace {
 falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
 {
   // 0 eliminate white space from expression
-  shrink(nexpr,oexpr);
+  shrink(nexpr,MAX_LENGTH_EXPR,oexpr);
   // 1 check against simple expressions
   debug_info(debug_depth,"bodiesmethod::bodiesmethod(): "
 	     "checking for basic expression\n");
@@ -1603,7 +1630,8 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
     }
   }
   // 2 employ database
-  char fname[64],ffunc[64],ftype[8];
+  const size_t FNAME_SIZE=256;
+  char fname[FNAME_SIZE],ffunc[FNAME_SIZE],ftype[MAX_TYPE_LENGTH];
   const char *funcname;
   BF_database*BD = 0;
   try {
@@ -1615,8 +1643,8 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
     if(funcname) {                                  // found one!               
       debug_info(debug_depth,
 		 "bodiesmethod::bodiesmethod(): found one: %s\n",funcname);
-      char ffile[256];
-      sprintf(ffile,"%s/%s.so",BD->directory(),funcname);
+      char ffile[FNAME_SIZE];
+      snprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
       FUNC = (Bm_pter)findfn(const_cast<char*>(funcname));
       if(FUNC) return;                              // SUCCESS !!!              
@@ -1625,9 +1653,9 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
 		 funcname,BD->directory(),funcname);
     }
     // 2.2 function not found, so try to get unique new function name
-    sprintf(fname,"Bm_%s%d",RunInfo::pid(),function++);
+    snprintf(fname,FNAME_SIZE,"Bm_%s%d",RunInfo::pid(),function++);
     int fcount = BD->counter();                     // try to get valid counter 
-    sprintf(ffunc,"Bm__%d",fcount);
+    snprintf(ffunc,FNAME_SIZE,"Bm__%d",fcount);
     funcname = ffunc;
   }
   // 2.E database error occured, we cannot use it at all

@@ -208,7 +208,7 @@ namespace falcON {
     const scalar    AL, R0;                // alpha, scale radius               
     Anlm            Knlm;                  // normalization constants           
     mutable char    STATE;                 // 0: okay, 1: warning 2: error      
-    mutable char    ERR[64],WARN[64];      // error & warning message           
+    mutable char    ERR[256],WARN[256];    // error & warning message           
     //--------------------------------------------------------------------------
     // const data access                                                        
   protected:

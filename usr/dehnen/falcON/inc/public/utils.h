@@ -58,6 +58,7 @@ namespace falcON {
   using namespace WDutils;
   using WDutils::pow;
   using WDutils::exception;
+  using WDutils::snprintf;
   void error(const char*, ...);
   void warning(const char*, ...);
   void debug_info(const char*, ...);
