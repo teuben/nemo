@@ -167,28 +167,57 @@ void WDutils::debug_info(int         deb,          // I: level for reporting
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-// WDutils::message                                                           //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-WDutils::message::message(const char*fmt, ...)
-{
-  va_list  ap;
-  va_start(ap,fmt);
-  vsnprintf(__text,size,fmt,ap);
-  va_end(ap);
-}
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
 // WDutils::exception                                                         //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 WDutils::exception::exception(const char*fmt, ...)
 {
-  char __text[1024];
+  const int size=1024;
+  char __text[size];
   va_list  ap;
   va_start(ap,fmt);
-  vsnprintf(__text,1024,fmt,ap);
+  int w = vsnprintf(__text,1024,fmt,ap);
+  if(w>=size) {
+    warning("WDutils::exception::exception(): "
+	    "string size of %d characters exceeded\n",size);
+    __text[size-1]=0;
+  }
+  if(w<0)
+    warning("WDutils::exception::exception(): formatting error\n");
   va_end(ap);
   std::string::operator= (__text);
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// WDutils::message                                                           //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+WDutils::message::message(const char*fmt, ...) throw(exception)
+{
+  va_list  ap;
+  va_start(ap,fmt);
+  int w = vsnprintf(__text,size,fmt,ap);
+  if(w>=size) throw exception("WDutils::message::message(): "
+			      "string size of %d characters exceeded\n",size);
+  if(w <   0) throw exception("WDutils::message::message(): "
+			      "formatting error\n");
+  va_end(ap);
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// WDutils::snprintf                                                          //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
+  throw(WDutils::exception)
+{
+  va_list  ap;
+  va_start(ap,fmt);
+  int w = std::vsnprintf(str,l,fmt,ap);
+  va_end(ap);
+  if(w==l) throw exception("WDutils::snprintf(): trailing \0 lost\n");
+  if(w >l) throw exception("WDutils::snprintf(): string size exceeded\n");
+  if(w <0) throw exception("WDutils::snprintf(): formatting error\n");
+  return w;
 }
 ////////////////////////////////////////////////////////////////////////////////

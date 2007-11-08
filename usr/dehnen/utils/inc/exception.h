@@ -9,7 +9,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2006  Walter Dehnen                                       
+// Copyright (C) 2000-2007  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -163,33 +163,6 @@ namespace WDutils {
 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  //  WDutils::message                                                          
-  //                                                                            
-  /// C++ wrapper around a C string.                                            
-  ///                                                                           
-  /// Construction from C-type format string + data;                            
-  /// Type conversion to const char*                                            
-  /// Useful for generating a C-style string containing formatted data.         
-  ///                                                                           
-  // ///////////////////////////////////////////////////////////////////////////
-  class message {
-    message(message const&);                       // no copy constructor       
-    static const int size = 1024;
-    char __text[size];
-  public:
-    /// Generate a string from format + data.
-    /// Uses a printf() style format string as first argument, further arguments
-    /// must match format, exactly as in printf, which will be called.
-    /// \param fmt gives the format in C printf() style
-    explicit message(const char* fmt, ...);
-    /// conversion to C-style string
-    operator const char*() const { return __text; }
-    /// return C-style string
-    const char* text() const { return __text; }
-  };
-
-  // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
   //  WDutils::exception                                                        
   //                                                                            
   /// base class for exceptions in falcON; derived from std::string             
@@ -209,6 +182,33 @@ namespace WDutils {
     friend const char*text(exception const&);
   };
   inline const char*text(exception const&e) { return e.text(); }
+
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  //  WDutils::message                                                          
+  //                                                                            
+  /// C++ wrapper around a C string.                                            
+  ///                                                                           
+  /// Construction from C-type format string + data;                            
+  /// Type conversion to const char*                                            
+  /// Useful for generating a C-style string containing formatted data.         
+  ///                                                                           
+  // ///////////////////////////////////////////////////////////////////////////
+  class message {
+    message(message const&);                       // no copy constructor       
+    static const int size = 1024;
+    char __text[size];
+  public:
+    /// Generate a string from format + data.
+    /// Uses a printf() style format string as first argument, further arguments
+    /// must match format, exactly as in printf, which will be called.
+    /// \param fmt gives the format in C printf() style
+    explicit message(const char* fmt, ...) throw(exception);
+    /// conversion to C-style string
+    operator const char*() const { return __text; }
+    /// return C-style string
+    const char* text() const { return __text; }
+  };
 
   // ///////////////////////////////////////////////////////////////////////////
   ///                                                                           
@@ -262,6 +262,22 @@ namespace WDutils {
 #define WDutils_WarningF(MSGS,FUNC)				\
   WDutils::warning("[%s.%d]: in %s: %s",__FILE__,__LINE__,FUNC,MSGS)
   //@}
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  //  WDutils::snprintf()                                                       
+  //                                                                            
+  /// a safer snprintf.                                                         
+  /// If the string size is too small an exception is thrown.\n                 
+  /// If the string size is just long enough, but the trailing zero does not    
+  ///    fit into the string, an exception is thrown.\n                         
+  /// If a formatting error occurs, an exception is thrown.\n                   
+  /// Otherwise the behaviour is identical to ANSI C99 snprintf().              
+  /// \return bytes written                                                     
+  /// \param str string to write into                                           
+  /// \param size maximum number of bytes to write, including trailing \0.      
+  /// \param fmt format string                                                  
+  int snprintf(char*str, size_t size, const char* fmt, ... )
+    throw(WDutils::exception);
   // ///////////////////////////////////////////////////////////////////////////
 } // namespace WDutils
 // /////////////////////////////////////////////////////////////////////////////
