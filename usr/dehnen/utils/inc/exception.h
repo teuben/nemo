@@ -58,10 +58,10 @@ namespace WDutils {
     bool __pid_known;
     bool __name_known;
     bool __cmd_known;
-    char __time    [20];
+    char __time   [100];
     char __host   [100];
     char __user   [100];
-    char __pid     [10];
+    char __pid     [20];
     char __name   [100];
     char __cmd   [1024];
     int  __debug;
