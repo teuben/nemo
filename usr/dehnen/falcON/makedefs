@@ -128,9 +128,9 @@ endif
 endif
 
 ifdef DEBUG
-OPTFLAGS	:= -ggdb -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
+OPTFLAGS	:= -g -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
 else
-OPTFLAGS	:= -ggdb -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
+OPTFLAGS	:= -g -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
 endif
 
 # this is used for compilation of code with inline assembly SSE instructions
