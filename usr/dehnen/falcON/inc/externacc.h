@@ -4,11 +4,11 @@
 /// \file   inc/externacc.h                                                     
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2006                                                           
+/// \date   2000-2007                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2006 Walter Dehnen                                        
+// Copyright (C) 2000-2007 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -220,6 +220,63 @@ namespace falcON {
     }
     //@}
     //--------------------------------------------------------------------------
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::sum_acceleration                                             
+  //                                                                            
+  /// the sum of two acceleration fields.                                       
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  class sum_acceleration : public acceleration {
+  private:
+    typedef const acceleration *cp_accel;
+    cp_accel A1,A2;
+  public:
+    sum_acceleration(cp_accel a1, cp_accel a2) : A1(a1), A2(a2) {}
+    //--------------------------------------------------------------------------
+    /// \name implement abstract methods of base class
+    //@{
+  public:
+    /// no potential?
+    bool is_empty() const {
+      return A1->is_empty() && A2->is_empty();
+    }
+    /// masses needed?
+    bool need_masses() const {
+      return A1->need_masses() || A2->need_masses();
+    }
+    /// velocities needed?
+    bool need_velocities() const {
+      return A1->need_velocities() || A2->need_velocities();
+    }
+    /// computing external gravity at a set of positions
+    void set(double t, int n, const float*m, const vectf*x, const vectf*v,
+	     const flags*f, float*p, vectf*a, int add) const
+    {
+      if(!A1->is_empty()) {
+	A1->set(t,n,m,x,v,f,p,a,add);
+	if(!A2->is_empty())
+	  A2->set(t,n,m,x,v,f,p,a,3);
+      } else {
+	if(!A2->is_empty())
+	  A2->set(t,n,m,x,v,f,p,a,add);
+      }
+    }
+    /// computing external gravity at a set of positions
+    void set(double t, int n, const double*m, const vectd*x, const vectd*v,
+	     const flags*f, double*p, vectd*a, int add) const
+    {
+      if(!A1->is_empty()) {
+	A1->set(t,n,m,x,v,f,p,a,add);
+	if(!A2->is_empty())
+	  A2->set(t,n,m,x,v,f,p,a,3);
+      } else {
+	if(!A2->is_empty())
+	  A2->set(t,n,m,x,v,f,p,a,add);
+      }
+    }
+    //@}
   };
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
