@@ -38,9 +38,10 @@
 // v 1.3   30/04/2007   WD  making ready for release                            
 // v 1.4   13/09/2007   WD  some changes in parameter names                     
 // v 2.0   17/09/2007   WD  using DiscPot (new) for disc's own potential        
+// v 2.1   15/11/2007   WD  fixed problem with external potentials.             
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "1.4"
-#define falcON_VERSION_D "11-sep-2007 Paul McMillan & Walter Dehnen          "
+#define falcON_VERSION   "2.1"
+#define falcON_VERSION_D "15-nov-2007 Paul McMillan & Walter Dehnen          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkWD99disc
@@ -98,44 +99,27 @@ string usage =
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
-//   const double vf = 0.977775320024919;             // km/s  in WD_units         
+//const double vf = 0.977775320024919;             // km/s  in WD_units         
   const double mf = 2.2228847e5;                   // M_sun in WD_units         
   //----------------------------------------------------------------------------
   // 1. set some parameters                                                     
   //----------------------------------------------------------------------------
   if (getiparam("ni") < 1) error("Code requires at least one iteration");
-
-//   const bool   WD (getbparam("WD_units"));         // using WD_units?           
+//const bool   WD (getbparam("WD_units"));         // using WD_units?           
   const Random Ran(getparam("seed"),8);
   const fieldset data( 
     (hasvalue ("eps")   ? fieldset::e : fieldset::o) |
     (getbparam("giveF") ? fieldset::y : fieldset::o) |
     fieldset::basic );
-  // add disc potential using external potential DiscPot
-  char accname[256]={0};
-  bool extacc = hasvalue("accname");
-  if(extacc) {
-    strcpy(accname,getparam("accname"));
-    strcat(accname,"+DiscPot");
-  } else
-    strcpy(accname,"DiscPot");
-  char accpars[1024]={0};
-  if(extacc) {
-    strcpy(accpars,getparam_z("accpars"));
-    strcat(accpars,";");
-  }
-  char accpar[128];
-  sprintf(accpar,"0,%g",getdparam("Sig_0")*mf); strcat(accpars,accpar);
-  sprintf(accpar,",%g",getdparam("R_d")); strcat(accpars,accpar);
-  sprintf(accpar,",%g",-0.5*abs(getdparam("z_d"))); strcat(accpars,accpar);
-  char accfile[1024]={0};
-  if(extacc) {
-    strcpy(accfile,getparam_z("accfile"));
-    strcat(accfile,";");
-  }
-  nemo_acc Aex(accname,              //   initialize external  
-	       accpars,              //   accelerations        
-	       accfile);
+  // add disc potential using potential DiscPot
+  char discpars[128];
+  snprintf(discpars,128,"0,%g,%g,%g",
+	   getdparam("Sig_0")*mf,getdparam("R_d"),-0.5*abs(getdparam("z_d")));
+  nemo_acc disc("DiscPot",discpars,0);
+  nemo_acc aext(getparam_z("accname"),
+		getparam_z("accpars"),
+		getparam_z("accfile"));
+  sum_acceleration asum(&disc,&aext);
   // now sample velocities ...
   WD99disc DM(getiparam("nbpero"),
 	      getdparam("R_d"),
@@ -143,7 +127,10 @@ void falcON::main() falcON_THROWING
 	      getdparam("R_sig"),
 	      getdparam("Q"),
 	      getdparam("z_d"),
-	      getdparam("eps"),&Aex);
+	      getdparam("eps"),
+	      aext.is_empty()?
+	      static_cast<const acceleration*>(&disc) :
+	      static_cast<const acceleration*>(&asum) );
   snapshot shot(getdparam("time"),getiparam("nbody"), data);
   if(getdparam("Q"))    
     DM.sample(shot,getiparam("ni"),getbparam("q-ran"),Ran,getbparam("giveF"));
