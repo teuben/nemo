@@ -213,15 +213,15 @@ WDutils::message::message(const char*fmt, ...) throw(exception)
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
-  throw(WDutils::exception)
+  WDutils_THROWING
 {
   va_list  ap;
   va_start(ap,fmt);
   int w = std::vsnprintf(str,l,fmt,ap);
   va_end(ap);
-  if(w==l) throw exception("WDutils::snprintf(): trailing \0 lost\n");
-  if(w >l) throw exception("WDutils::snprintf(): string size exceeded\n");
-  if(w <0) throw exception("WDutils::snprintf(): formatting error\n");
+  if(w==l) WDutils_THROW("snprintf(): trailing \0 lost");
+  if(w >l) WDutils_THROW("snprintf(): string size exceeded [%d:%d]",w,l);
+  if(w <0) WDutils_THROW("snprintf(): formatting error");
   return w;
 }
 ////////////////////////////////////////////////////////////////////////////////

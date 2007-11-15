@@ -119,7 +119,6 @@ namespace WDutils {
 		const char*fmt,
 		VA_LIST   &list,
 		bool       name = true);
-
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   /// Print an error message to stderr and abort.                               
@@ -219,7 +218,7 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// use instead of <tt> throw(WDutils::exception) </tt> after function
   /// declaration
-#  define WDutils_THROWING 
+#  define WDutils_THROWING
   //----------------------------------------------------------------------------
   /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
   /// WDutils::exception(fmt, data)"
@@ -264,20 +263,18 @@ namespace WDutils {
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  //  WDutils::snprintf()                                                       
+  //  WDutils::snprintf                                                         
   //                                                                            
   /// a safer snprintf.                                                         
-  /// If the string size is too small an exception is thrown.\n                 
-  /// If the string size is just long enough, but the trailing zero does not    
-  ///    fit into the string, an exception is thrown.\n                         
-  /// If a formatting error occurs, an exception is thrown.\n                   
+  /// If the string size is too small or if a formatting error occurs,          
+  /// an exception is thrown, which also gives source file name and line number.
   /// Otherwise the behaviour is identical to ANSI C99 snprintf().              
   /// \return bytes written                                                     
   /// \param str string to write into                                           
   /// \param size maximum number of bytes to write, including trailing \0.      
   /// \param fmt format string                                                  
-  int snprintf(char*str, size_t size, const char* fmt, ... )
-    throw(WDutils::exception);
+  int snprintf(char*str, size_t size, const char* fmt, ... ) WDutils_THROWING;
+
   // ///////////////////////////////////////////////////////////////////////////
 } // namespace WDutils
 // /////////////////////////////////////////////////////////////////////////////
