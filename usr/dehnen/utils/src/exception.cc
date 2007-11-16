@@ -56,6 +56,7 @@ WDutils::RunInfo::RunInfo()
   // set time
     time_t now = ::time(0);
     snprintf(__time,100,ctime(&now));
+    __time[24] = 0;
     // set host name, user name, and pid
 #ifdef unix
     gethostname(__host,100);
