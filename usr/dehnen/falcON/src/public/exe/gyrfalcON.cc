@@ -124,9 +124,11 @@
 // v 3.0.9  28/02/2007  WD added diagnostic output: log_2(root radius), depth  |
 // v 3.1    15/10/2007  WD added keyword fsink                                 |
 // v 3.1.1  16/10/2007  WD added keyword ksink                                 |
+// v 3.2    21/11/2007  WD abandoned secondary output (use a manipulator)      |
+//                         fixed minor problem with output when resume=t       |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.1.1"
-#define falcON_VERSION_D "16-oct-2007 Walter Dehnen                          "
+#define falcON_VERSION   "3.2"
+#define falcON_VERSION_D "21-nov-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
@@ -144,8 +146,6 @@ string defv[] = {
   "logfile=-\n        file for log output                                ",
   "stopfile=\n        stop simulation as soon as file exists             ",
   "logstep=1\n        # blocksteps between log outputs                   ",
-  "out2=\n            file for secondary output stream                   ",
-  "step2=0\n          time between secondary outputs; 0 -> every step    ",
   "theta="falcON_THETA_TEXT
   "\n                 tolerance parameter at M=M_tot                     ",
 #ifdef falcON_PROPER
@@ -187,7 +187,7 @@ string defv[] = {
   "                   - read last snapshot from input file\n"
   "                   - append primary output to input (unless out given)",
   "give=mxv\n         list of output specifications.                     ",
-  "give2=mxv\n        list of specifications for secondary output        ",
+//   "give2=mxv\n        list of specifications for secondary output        ",
   "Grav=1\n           Newton's constant of gravity (0-> no self-gravity) ",
   "root_center=\n     if given (3 numbers), forces tree-root centering   ",
   "accname=\n         name of external acceleration field                ",
@@ -207,21 +207,15 @@ string usage = "gyrfalcON -- a superb N-body code";
 void falcON::main() falcON_THROWING
 {
   // 1. set some parameters                                                     
-  const bool
-    never_ending = !hasvalue("tstop"),                // integrate forever?     
-    resume       = getbparam("resume"),               // resume old simulation ?
-    stopfile     = hasvalue ("stopfile"),             // use stopfile?          
-    lastout      = getbparam("lastout");              // write out last snapshot
-  const double
-    t_end   = getdparam_z("tstop"),                   // integrate until t=t_end
-    dt_out1 = getdparam("step"),                      // primary output interval
-    dt_out2 = getdparam("step2");                     // secondary  --------    
-  const int
-    Nlev    = getiparam("Nlev"),                      // # time step levels     
-    logstep = getiparam("logstep");                   // # blocksteps/logoutput 
-  const fieldset
-    write1 = getioparam("give"),                      // what to output 0?      
-    write2 = getioparam("give2");                     // what to output 1?      
+  const bool never_ending = !hasvalue("tstop");       // integrate forever?     
+  const bool resume = getbparam("resume");            // resume old simulation ?
+  const bool stopfile = hasvalue ("stopfile");        // use stopfile?          
+  const bool lastout = getbparam("lastout");          // write out last snapshot
+  const double t_end = getdparam_z("tstop");          // integrate until t=t_end
+  const double dt_out = getdparam("step");            // output interval        
+  const int Nlev = getiparam("Nlev");                 // # time step levels     
+  const int logstep = getiparam("logstep");           // # blocksteps/logoutput 
+  const fieldset write = getioparam("give");          // what to output?        
   const nemo_acc*aex = hasvalue("accname")?           // IF(potname given) THEN 
     new nemo_acc(getparam  ("accname"),               //   initialize external  
 		 getparam_z("accpars"),               //   accelerations        
@@ -296,17 +290,14 @@ void falcON::main() falcON_THROWING
   output LOGOUT(getparam("logfile"),resume);          // log output stream      
   if(!resume && !hasvalue("out"))                     // check for out=         
     falcON_THROW("you must provide an output file");  //   error if not given   
-  nemo_out OUT1(hasvalue("out")?                      // open NEMO output       
-		getparam("out") : getparam("in"),     //   if not out given,    
-		!hasvalue("out"));                    //   append to input      
-  nemo_out OUT2(getparam_z("out2"));                  // open 2nd nemo output   
+  nemo_out OUT(hasvalue("out")?                       // open NEMO output       
+	       getparam("out") : getparam("in"),      //   if not out given,    
+	       !hasvalue("out"));                     //   append to input      
   bool written=false;                                 // current snapshot wrtten
   if(!resume && getbparam("startout")) {              // IF(not resuming)       
-    NBDY.write(OUT1,write1);                          //   write snapshot       
+    NBDY.write(OUT,write);                            //   write snapshot       
     written = true;                                   //   record writing       
   }                                                   // ENDIF                  
-  if(OUT2)                                            // IF(2nd nemo output)    
-    NBDY.write(OUT2,write2);                          //   write snapshot       
   if(LOGOUT) {                                        // IF any log output      
     NBDY.describe  (LOGOUT);                          //   put history to logout
     NBDY.stats_head(LOGOUT);                          //   header for logout    
@@ -314,9 +305,7 @@ void falcON::main() falcON_THROWING
       NBDY.stats   (LOGOUT);                          //     statistics ->logout
   }                                                   // ENDIF                  
   // 4. time integration & outputs                                              
-  double
-    t_out1 = NBDY.initial_time()+0.999999*dt_out1,    // time for next output 0 
-    t_out2 = NBDY.initial_time()+0.999999*dt_out2;    // time for next output 1 
+  double t_out = NBDY.time()+0.999999*dt_out;         // time for next output   
   for(int steps=1;                                    // blockstep counter      
       (never_ending || NBDY.time() < t_end) &&        // WHILE t < t_end        
       (!stopfile ||                                   //   AND                  
@@ -328,19 +317,15 @@ void falcON::main() falcON_THROWING
     if(MANIP)                                         //   IF(manipulating)     
       if(MANIP(NBDY.my_snapshot()))                   //     IF(manip says so)  
 	break;                                        //       STOP simulation  
-    if(OUT1 && NBDY.time() >= t_out1) {               //   IF(t >= t_out1)      
-      NBDY.write(OUT1,write1);                        //     primary output     
-      t_out1 += dt_out1;                              //     increment t_out1   
+    if(OUT && NBDY.time() >= t_out) {                 //   IF(t >= t_out)       
+      NBDY.write(OUT,write);                          //     primary output     
+      t_out += dt_out;                                //     increment t_out    
       written = true;                                 //     written out        
     } else                                            //   ELSE                 
       written = false;                                //     not written        
-    if(OUT2 && NBDY.time() >= t_out2) {               //   IF(t >= t_out2)      
-      NBDY.write(OUT2,write2);                        //     secondary output   
-      t_out2 += dt_out2;                              //     increment t_out2   
-    }                                                 //   ENDIF                
   }                                                   // END: WHILE             
-  if(OUT1 && !written && lastout)                     // IF not yet done:       
-    NBDY.write(OUT1,write1);                          //   write last snapshot  
+  if(OUT && !written && lastout)                      // IF not yet done:       
+    NBDY.write(OUT,write);                            //   write last snapshot  
   if(LOGOUT && stopfile && file_exists(getparam("stopfile")))
     LOGOUT <<"# simulation STOPPED because file \""
 	   << getparam("stopfile") << "\" found to exist\n";
