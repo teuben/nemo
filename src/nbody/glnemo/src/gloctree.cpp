@@ -119,15 +119,14 @@ void GLOctree::update()
 {
   //if (!first) return;
   setActivate(store_options->octree_display);
-  
+  // restore default object particles index
+  for (int obj=0; obj< (int ) psv->size(); obj++ ) { 
+    if ((*psv)[obj].vps->is_visible) {
+      (*psv)[obj].vps->defaultIndexTab();
+    }
+  }
   if ( psv && ! store_options->octree_enable) {
     setActivate(false); // do not display tree
-    // restore default object particles index
-    for (int obj=0; obj< (int ) psv->size(); obj++ ) { 
-      if ((*psv)[obj].vps->is_visible) {
-	(*psv)[obj].vps->defaultIndexTab();
-      }
-    }
   } else {
     buildDisplayList();
   }
@@ -375,7 +374,7 @@ void GLOctree::expandTree(float new_size)
 // use billboarding technique to display polygons :                            
 // - transforms coordinates points according model view matrix                 
 // - draw quad (2 triangles) around new coordinates and facing camera          
-void GLOctree::displayPolygons(const double * _mModel,const GLuint _texture,const float _u_max,const float _v_max)
+void GLOctree::displayPolygons(const double * _mModel,const double * mProj, const GLuint _texture,const float _u_max,const float _v_max)
 {
   // get variables
   mModel   = _mModel;
@@ -397,7 +396,7 @@ void GLOctree::displayPolygons(const double * _mModel,const GLuint _texture,cons
     glDisable(GL_DEPTH_TEST);
     glBindTexture(GL_TEXTURE_2D, texture); // Select texture
     // Get Frustum
-    frustum.getFC();
+    frustum.getFC(mModel,mProj);
 
     hackTreePolygons(root,rmid,1,true);
 
@@ -459,27 +458,31 @@ float vv[8][3]; // 8 vertex to store
       int np_inside=0;
       // check out octant in FC?
       for (int i=0; i<8; i++) {
-        float x=vv[i][0];
-        float y=vv[i][1];
-        float z=vv[i][2];
+        float x=vv[i][0]+store_options->xtrans;
+        float y=vv[i][1]+store_options->ytrans;
+        float z=vv[i][2]+store_options->ztrans;
+#if 0
         // compute point coordinates according to model via matrix
         float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3);//*w;
         float my = MM(1,0)*x + MM(1,1)*y + MM(1,2)*z + MM(1,3);//*w;
         float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
-        if (frustum.isPointInside(mx,my,mz)) {
+#endif
+        if (frustum.isPointInside(x,y,z)) { //!!mx,my,mz)) {
           np_inside++;
         }
       }
       // check if center of octant is inside
       if (np_inside == 0) {
-        float x=rmid[0];
-        float y=rmid[1];
-        float z=rmid[2];
+        float x=rmid[0]+store_options->xtrans;
+        float y=rmid[1]+store_options->ytrans;
+        float z=rmid[2]+store_options->ztrans;
+#if 0
         // compute point coordinates according to model via matrix
         float mx = MM(0,0)*x + MM(0,1)*y + MM(0,2)*z + MM(0,3);//*w;
         float my = MM(1,0)*x + MM(1,1)*y + MM(1,2)*z + MM(1,3);//*w;
         float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
-        if (frustum.isPointInside(mx,my,mz)) {
+#endif
+        if (frustum.isPointInside(x,y,z)) { //!!mx,my,mz)) {
           np_inside++;
         }
       }
@@ -518,9 +521,9 @@ int GLOctree::computePolygons(Node * tree)
 
   int index=tree->index;
   float
-      x=p_data->pos[index*3  ],
-  y=p_data->pos[index*3+1],
-  z=p_data->pos[index*3+2];
+      x=p_data->pos[index*3  ]+store_options->xtrans,
+      y=p_data->pos[index*3+1]+store_options->ytrans,
+      z=p_data->pos[index*3+2]+store_options->ztrans;
     //w=1.0;
 
   // compute point coordinates according to model via matrix

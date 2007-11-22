@@ -21,7 +21,7 @@ public:
     FrustumCulling();
 
     ~FrustumCulling();
-   void getFC();
+   void getFC(const double *, const double *);
    bool isPointInside(float, float, float);
 private:
    float   proj[16];

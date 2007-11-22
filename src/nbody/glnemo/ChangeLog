@@ -1,5 +1,12 @@
 glnemo ChangeLog
 
+V 0.94.2 November 2007
+======================
+	*) Bugs fixed: 
+           -----------
+           - Best Zoom works now even if particles have been translated.
+           - fix differents bugs regarding to octree partitionning.
+
 V 0.94.1  July 2007
 ===================
 	*) Bugs fixed: 

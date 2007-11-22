@@ -42,7 +42,7 @@ class GLOctree : public GLObject {
     void update(ParticlesData   *  ,
 		ParticlesSelectVector * );
     void update();
-    void displayPolygons(const double * mModel,const GLuint texture,const float u_max,const float v_max);
+    void displayPolygons(const double * mModel,const double * mProj, const GLuint texture,const float u_max,const float v_max);
   public slots:
     void buildDisplayList();
   private:

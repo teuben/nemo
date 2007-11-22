@@ -33,6 +33,7 @@ int GLBox::width=894, GLBox::height=633;
 float ortho_left,ortho_right,ortho_bottom,ortho_top;
 pthread_mutex_t mutex;  // to protect the filling of the data
 ParticlesSelectVector   mypsv; // to store a copy of psv
+double mModel2[16];
 // ============================================================================
 // constructor                                                                 
 GLBox::GLBox( QWidget* parent, const char* name,
@@ -173,8 +174,10 @@ void GLBox::paintGL()
 
 #if 1  
   // Grid Anti aliasing
+  glEnable(GL_MULTISAMPLE);
   if (line_aliased) {
     glEnable(GL_LINE_SMOOTH);
+    glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
   } else {
     glDisable(GL_LINE_SMOOTH);
   }
@@ -187,11 +190,10 @@ void GLBox::paintGL()
   }  
 #endif
   // Translate particles
-  glTranslatef( store_options->xtrans, store_options->ytrans, store_options->ztrans);  
-  
   setModelMatrix(); // save ModelView Matrix
   setProjMatrix();  // save Projection Matrix
-
+  glTranslatef( store_options->xtrans, store_options->ytrans, store_options->ztrans);  
+  glGetDoublev(GL_MODELVIEW_MATRIX, (GLdouble *) mModel2);
 #if 0  
   GLdouble xx,yy,zz;
   gluUnProject(width,0,0.5,mModel,mProj,viewport,&xx,&yy,&zz);
@@ -258,10 +260,10 @@ else
 #if 1
     //tree->update();
     if (store_options->octree_enable) {
-      tree->displayPolygons( mModel,texture[0],u_max,v_max);
+      tree->displayPolygons( mModel,mProj,texture[0],u_max,v_max);
     }
     for (int i=0; i<nb_object; i++) {
-      vparticles_object[i]->displayPolygons(mModel,texture[0],u_max,v_max);
+      vparticles_object[i]->displayPolygons(mModel2,texture[0],u_max,v_max);
     }
 #else
   tree->displayPolygons( mModel,texture[0],u_max,v_max);

@@ -99,7 +99,7 @@
       <terminal>false</terminal>
       <autocompile>true</autocompile>
       <envvars/>
-      <globaldebugarguments>/tmp/out.nemo</globaldebugarguments>
+      <globaldebugarguments></globaldebugarguments>
       <globalcwd>/net/direct/r5data/home/jcl/works/CVS_WORKS/glnemo</globalcwd>
       <useglobalprogram>true</useglobalprogram>
       <autoinstall>false</autoinstall>
