@@ -274,6 +274,17 @@ namespace WDutils {
   /// \param size maximum number of bytes to write, including trailing \0.      
   /// \param fmt format string                                                  
   int snprintf(char*str, size_t size, const char* fmt, ... ) WDutils_THROWING;
+  // ///////////////////////////////////////////////////////////////////////////
+  struct snprintf__ {
+    const char* file;
+    const int   line;
+    snprintf__(const char*f, int l) : file(f), line(l) {}
+    int operator() (char*str, size_t size, const char* fmt, ... )
+      WDutils_THROWING;
+  };
+  /// macro WDutilsSNprintf to be used line snprintf.
+  /// reports source file and line on error.
+#define SNprintf WDutils::snprintf__(__FILE__,__LINE__)
 
   // ///////////////////////////////////////////////////////////////////////////
 } // namespace WDutils

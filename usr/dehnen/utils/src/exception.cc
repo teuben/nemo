@@ -55,18 +55,18 @@ WDutils::RunInfo::RunInfo()
   try {
   // set time
     time_t now = ::time(0);
-    snprintf(__time,100,ctime(&now));
+    SNprintf(__time,100,ctime(&now));
     __time[24] = 0;
     // set host name, user name, and pid
 #ifdef unix
     gethostname(__host,100);
-    snprintf(__user,100,(getpwuid(geteuid())->pw_name));
-    snprintf(__pid,20,"%d",getpid());
+    SNprintf(__user,100,(getpwuid(geteuid())->pw_name));
+    SNprintf(__pid,20,"%d",getpid());
     __host_known = 1;
     __user_known = 1;
     __pid_known  = 1;
     char file[64];
-    snprintf(file,64,"/proc/%s/cmdline",__pid);
+    SNprintf(file,64,"/proc/%s/cmdline",__pid);
     std::ifstream in(file);
     if(file) {
       int i,e=0;
@@ -84,9 +84,9 @@ WDutils::RunInfo::RunInfo()
       __name_known = 1;
     }
 #else
-    snprintf(__host,100,"unknown.host");
-    snprintf(__user,100,"unknown.user");
-    snprintf(__user,100,"unknown.main");
+    SNprintf(__host,100,"unknown.host");
+    SNprintf(__user,100,"unknown.user");
+    SNprintf(__user,100,"unknown.main");
 #endif
   } catch(exception E) {
     WDutils_RETHROW(E);
@@ -220,9 +220,27 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
   va_start(ap,fmt);
   int w = std::vsnprintf(str,l,fmt,ap);
   va_end(ap);
-  if(w==l) WDutils_THROW("snprintf(): trailing \0 lost");
+  if(w==l) WDutils_THROW("snprintf(): trailing 0 lost");
   if(w >l) WDutils_THROW("snprintf(): string size exceeded [%d:%d]",w,l);
   if(w <0) WDutils_THROW("snprintf(): formatting error");
+  return w;
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                            //
+// WDutils::snprintf__                                                        //
+//                                                                            //
+////////////////////////////////////////////////////////////////////////////////
+int WDutils::snprintf__::operator()(char*str, size_t l, const char* fmt, ...)
+  WDutils_THROWING
+{
+  va_list  ap;
+  va_start(ap,fmt);
+  int w = std::vsnprintf(str,l,fmt,ap);
+  va_end(ap);
+  if(w==l) WDutils_THROW("[%s:%d]: snprintf(): trailing 0 lost",file,line);
+  if(w >l) WDutils_THROW("[%s:%d]: snprintf(): string size exceeded [%d:%d]",
+			 w,l,file,line);
+  if(w <0) WDutils_THROW("[%s:%d]: snprintf(): formatting error",file,line);
   return w;
 }
 ////////////////////////////////////////////////////////////////////////////////
