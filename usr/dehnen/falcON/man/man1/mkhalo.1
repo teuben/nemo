@@ -12,7 +12,7 @@ requires NEMO version 3.0.13 or higher, see http://www.astro.umd.edu/nemo.
 \fBmkhalo\fP creates N-body initial conditions with spherical density
 .nf
 
-	                        sech (r/r_t)
+	                        trunc(r/|r_t|)
 	rho(r) = C ------------------------------------,
 	            inner     eta     (outer-inner)/eta
 	           x      * (x    + 1) 
@@ -20,7 +20,15 @@ requires NEMO version 3.0.13 or higher, see http://www.astro.umd.edu/nemo.
 .if
 
 with
+.nf
+        trunc(x) = sech(x)                   if r_t > 0
+                           2
+                 = ------------------        if r_t < 0
+                   sech(x) +1/sech(x)
 
+.if
+
+and
 .nf
                    2    2
         x  = sqrt(r  + r_c)/r_s
@@ -76,6 +84,10 @@ The core radius of the model set to \fIval\fP. Default: \fB0\fP.
 .TP
 \fBr_t=\fP\fIval\fP
 The truncation radius of the model is set to \fIval\fP.
+For \fIval>0\fP the truncation factor is sech(r/\fIval>0\fP), while for
+\fIval<0\fP it is 2/(sech(r/|\fIval>0\fP|)+1/sech(r/|\fIval>0\fP|)).
+Both have the same asymptotic exponential decay, but the latter affects
+the density less at radii smaller than the truncation radius.
 \fBNote\fP if \fIval=0\fP, the truncation radius is set to infinity.
 Default: \fB0\fP.
 .TP

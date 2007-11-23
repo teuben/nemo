@@ -113,7 +113,7 @@ void falcON::main() falcON_THROWING
     fieldset::basic );
   // add disc potential using potential DiscPot
   char discpars[128];
-  snprintf(discpars,128,"0,%g,%g,%g",
+  SNprintf(discpars,128,"0,%g,%g,%g",
 	   getdparam("Sig_0")*mf,getdparam("R_d"),-0.5*abs(getdparam("z_d")));
   nemo_acc disc("DiscPot",discpars,0);
   nemo_acc aext(getparam_z("accname"),

@@ -30,6 +30,80 @@ using namespace falcON;
 // class falcON::HaloModifier                                                 //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+namespace {
+  /// z(y) = 2/(y+1/y) = 2*y/(1+y^2)
+  /// \return z(y)
+  /// \param y y
+  inline double z(double y) {
+    return (y+y)/(1+y*y);
+  }
+  /// z(y) = 2/(y+1/y) = 2*y/(1+y^2)
+  /// \param z1 dz(y)/dy
+  inline double zd(double y, double&z1) {
+    double yq=y*y, yq1=1/(1+yq);
+    z1 = twice(1-yq)*yq1*yq1;
+    return (y+y)*yq1;
+  }
+  /// z(y) = 2/(y+1/y) = 2*y/(1+y^2)
+  /// \param z1 dz(y)/dy
+  /// \param z2 d^2z(y)/dy^2
+  inline double zdd(double y, double&z1, double&z2) {
+    double yq=y*y, yq1=1/(1+yq), yq2=yq1*yq1;
+    z1 = twice(1-yq)*yq2;
+    z2 = 4*y*(yq-3)*yq2*yq1;
+    return (y+y)*yq1;
+  }
+  /// z(y) = 2/(y+1/y) = 2*y/(1+y^2)
+  /// \param y1 (input) dy/dx
+  /// \param z1 dz/dx
+  inline double z(double y, double y1, double&z1) {
+    double r=zd(y,z1);
+    z1 *= y1;
+    return r;
+  }
+  /// z(y) = 2/(y+1/y) = 2*y/(1+y^2)
+  /// \param y1 (input) dy/dx
+  /// \param y2 (input) d^2y/dx^2
+  /// \param z1 dz/dx
+  /// \param z2 d^2z/dx^2
+  inline double z(double y,
+		  double y1, double y2,
+		  double&z1, double&z2) {
+    double r=zdd(y,z1,z2);
+    z2 *= y1*y1;
+    z2 += z1*y2;
+    z1 *= y1;
+    return r;
+  }
+} // namespace {
+//------------------------------------------------------------------------------
+inline double HaloModifier::trunc(double r) const {
+  if(sechtr)
+    return ::z(exp(-r*irt));
+  else
+    return ::z(::z(exp(-r*irt)));
+}
+//------------------------------------------------------------------------------
+inline double HaloModifier::trunc(double r, double&t1) const {
+  double y=exp(-r*irt), y1=-irt*y;
+  if(sechtr)
+    return ::z(y,y1,t1);
+  else {
+    double z1,z=::z(y,y1,z1);
+    return ::z(z,z1,t1);
+  }
+}
+//------------------------------------------------------------------------------
+inline double HaloModifier::trunc(double r, double&t1, double&t2) const {
+  double y=exp(-r*irt), y1=-irt*y, y2=-irt*y1;
+  if(sechtr)
+    return ::z(y,y1,y2,t1,t2);
+  else {
+    double z1,z2,z=::z(y,y1,y2,z1,z2);
+    return ::z(z,z1,z2,t1,t2);
+  }
+}
+//------------------------------------------------------------------------------
 inline double HaloModifier::core(double r) const {
   return sqrt(r*r+rcq);
 }
@@ -47,36 +121,32 @@ inline double HaloModifier::core(double r, double&t1, double&t2) const {
   return c;
 }
 //------------------------------------------------------------------------------
-inline double HaloModifier::trunc(double r) const {
-  double ex=exp(-r*irt);
-  return (ex+ex)/(1+ex*ex);
-}
-//------------------------------------------------------------------------------
-inline double HaloModifier::trunc(double r, double&t1) const {
-  double tr=exp(-r*irt), exq=tr*tr, q=1/(1+exq);
-  tr*= q+q;
-  t1 = irt*(exq-1)*tr*q;
-  return tr;
-}
-//------------------------------------------------------------------------------
-inline double HaloModifier::trunc(double r, double&t1, double&t2) const {
-  double tr=exp(-r*irt), exq=tr*tr, q=1/(1+exq), p=(exq-1)*q;
-  tr*= q+q;
-  t1 = irt*tr*p;
-  t2 = t1*p - tr*tr*tr*irt;
-  t2*= irt;
-  return tr;
-}
-
-//------------------------------------------------------------------------------
 HaloModifier::HaloModifier(double c, double t) falcON_THROWING
-: rc(c), rcq(c*c),
-  rt(t), irt(t>0? 1/t : 0.)
+: rc(abs(c)), rcq(c*c),
+  rt(abs(t)), irt(rt? 1/rt : 0.), sechtr(t>=0)
 {
   if(isinf(t)) falcON_THROW("HaloModifier: truncation radius == inf\n");
   if(isnan(t)) falcON_THROW("HaloModifier: truncation radius == nan\n");
-  if(t    <0.) falcON_THROW("HaloModifier: truncation radius = %g < 0\n",t);
-  if(c    <0.) falcON_THROW("HaloModifier: core radius = %g < 0\n",c);
+  if(c    <0.) warning("HaloModifier: core radius = %g<0; will use %g\n",c,rc);
+//   std::cerr<<" Testing HaloModifier::trunc(): (irt="
+// 	   <<irt<<", sechtr="<<sechtr<<")\n";
+//   for(;;) {
+//     double r;
+//     std::cout<<" r="; std::cin>>r;
+//     if(r<0) break;
+//     double dr=0.0001*r;
+//     double rl=r-dr, rh=r+dr;
+//     double t =trunc(r),tl=trunc(rl),th=trunc(rh);
+//     double t1,t1l,t1h,t1r,t2;
+//     double tr=trunc(r,t1),trl=trunc(rl,t1l),trh=trunc(rh,t1h);
+//     double trr=trunc(r,t1r,t2);
+//     std::cerr<<" tr="<<t<<" ="<<tr<<" ="<<trr<<'\n'
+// 	     <<" t1="<<t1<<" ="<<t1r
+// 	     <<" ="<<((th-tl)/(dr+dr))<<'\n'
+// 	     <<" t2="<<t2
+// 	     <<" ="<<((t+t-tl-th)/(dr*dr))
+// 	     <<" ="<<((t1h-t1l)/(dr+dr))<<'\n';
+//   }
 }
 //------------------------------------------------------------------------------
 inline double HaloModifier::cored(HaloDensity const&Model,

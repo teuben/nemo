@@ -151,7 +151,7 @@ namespace falcON { namespace compile_info {
   char __compiler[30]; const char*compiler() { return __compiler; }
   void init() {
     if(! __set ) {
-      snprintf(__compiler,10,
+      SNprintf(__compiler,10,
 #if   defined (__INTEL_COMPILER)
 	       "icc-%d",__INTEL_COMPILER
 #elif defined (__GNUC__)
@@ -161,12 +161,12 @@ namespace falcON { namespace compile_info {
 #endif
 	       );
 #ifdef falcON_VERSION_D
-      snprintf(__origin,100,falcON_VERSION_D);
+      SNprintf(__origin,100,falcON_VERSION_D);
 #else
       __origin[0] = 0;
 #endif
 #if defined(falcON_VERSION) || defined(falcON_PSIFLAG)
-      snprintf(__version,100,
+      SNprintf(__version,100,
 #ifdef falcON_VERSION
 	       falcON_VERSION
 #endif
@@ -175,7 +175,7 @@ namespace falcON { namespace compile_info {
 #endif
 	       );
 #endif
-      snprintf(__time,30,__DATE__ ", " __TIME__);
+      SNprintf(__time,30,__DATE__ ", " __TIME__);
       __set = 1;
     }
   }
@@ -205,10 +205,10 @@ namespace falcON { namespace defv_info {
   char version [100];                              //   "VERSION=..."           
   char compiled[100];                              //   "COMPILED=..."          
   void init() {
-    snprintf(version,100,"VERSION=%s\n%s",
+    SNprintf(version,100,"VERSION=%s\n%s",
 	     compile_info::version (),
 	     compile_info::origin  ());
-    snprintf(compiled,100,"COMPILED=\n%s, with %s"
+    SNprintf(compiled,100,"COMPILED=\n%s, with %s"
 	     "                                   ",
 	     compile_info::time(),
 	     compile_info::compiler());

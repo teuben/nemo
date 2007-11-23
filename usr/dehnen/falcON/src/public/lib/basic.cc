@@ -185,8 +185,8 @@ void falcON::report::open_file(const char*prog, const char*com)
   REPORT->LEVEL   = 0;
   REPORT->LAST    = clock();
   REPORT->SECONDS = 0.;
-  if(prog) snprintf(REPORT->FNAME,200,"/tmp/%s.%d",prog,getpid());
-  else     snprintf(REPORT->FNAME,200,"/tmp/%d",getpid());
+  if(prog) SNprintf(REPORT->FNAME,200,"/tmp/%s.%d",prog,getpid());
+  else     SNprintf(REPORT->FNAME,200,"/tmp/%d",getpid());
   REPORT->STREAM = fopen(REPORT->FNAME,"w");
   if(REPORT->STREAM) {
     time_t now = ::time(0);

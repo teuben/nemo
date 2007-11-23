@@ -44,9 +44,10 @@
 // v 2.2    19/09/2007  WD  ensured total mass                                  
 // v 2.3    01/11/2007  WD  WD_units                                            
 // v 2.3.1  02/11/2007  WD  deBUGged (r_2 to r_s conversion)                    
+// v 2.4    23/11/2007  WD  steeper truncation for r_t<0                        
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.3"
-#define falcON_VERSION_D "01-nov-2007 Walter Dehnen                          "
+#define falcON_VERSION   "2.4"
+#define falcON_VERSION_D "23-nov-2007 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -113,8 +114,8 @@ string defv[] = {
   "nbody=???\n        number of bodies                                   ",
   "inner=7/9\n        inner density exponent                             ",
   "outer=31/9\n       outer density exponent                             ",
-  "r_s=1\n            Scale radius                                       ",
-  "r_2=\n             use r_s = r_2*((outer-2)/(2-inner))^(1/eta)        ",
+  "r_s=1\n            scale radius                                       ",
+  "r_2=\n             use r_s = r_2*((2-inner)/(outer-2))^(1/eta)        ",
   "M=1\n              total mass of halo                                 ",
   "eta=4/9\n          transition parameter between inner/outer power law ",
   "r_c=0\n            core radius                                        ",
@@ -150,11 +151,18 @@ string usage =
   "mkhalo -- initial conditions from an equilibrium distribution function\n"
   "          with spherical density\n"
   "\n"
-  "                           C sech(r/r_t)\n"
+  "                           C trunc(r/|r_t|)\n"
   "          rho(r) = ----------------------------------\n"
   "                    inner   eta     [outer-inner]/eta\n"
   "                   x      (x    + 1)\n"
   "          with\n"
+  "                                     2\n"
+  "          trunc(z) = sech(z) = --------------   if r_t > 0\n"
+  "                               exp(z)+exp(-z)\n\n"
+  "                             2\n"
+  "                   = -----------------          if r_t < 0\n"
+  "                     sech(z)+1/sech(z)\n"
+  "          and\n"
   "                    2    2\n"
   "          x = sqrt(r +r_c )/r_s.\n"
   "\n"
@@ -227,8 +235,8 @@ void falcON::main()
   double et(getdparam("eta"));
   if(WD) Mt /= mf;
   if(hasvalue("r_2")) {
-    if(rs != 1.) warning("'r_2' given: will ignore non-default 'r_s' value\n");
-    if(go <= 2.) error("outer<=2 ==> gamma(r)<2 at finite r; cannot use r_2\n");
+    if(rs!=1.) warning("'r_2' given: will ignore non-default 'r_s' value\n");
+    if(go<=2.) error("outer<=2 ==> gamma(r)<2 at finite r; cannot use r_2\n");
     rs = getdparam("r_2") * pow((2-gi)/(go-2),1/et);
   }
   ModifiedDoublePowerLawHalo Halo(rs,rc,rt,Mt,gi,go,et);

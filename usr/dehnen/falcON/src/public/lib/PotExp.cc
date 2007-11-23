@@ -3004,22 +3004,22 @@ PotExp::PotExp(scalar   a,                         // parameter alpha
   STATE(0)
 {
   if(AL<0.5) {
-    snprintf(ERR,256,"PotExp: alpha<0.5\n");
+    SNprintf(ERR,256,"PotExp: alpha<0.5\n");
     STATE |= 2;
     return;
   }
   if(N<0) {
-    snprintf(ERR,256,"PotExp: nmax must be >= 0\n");
+    SNprintf(ERR,256,"PotExp: nmax must be >= 0\n");
     STATE |= 2;
     return;
   }
   if(L&1) {
-    snprintf(ERR,256,"PotExp: lmax must be even\n");
+    SNprintf(ERR,256,"PotExp: lmax must be even\n");
     STATE |= 2;
     return;
   }
   if(L==0 && s != spherical) {
-    snprintf(WARN,256,"PotExp: assuming spherical symmetry since lmax=0\n");
+    SNprintf(WARN,256,"PotExp: assuming spherical symmetry since lmax=0\n");
     STATE |= 1;
   }
   setAL (AL);
@@ -3036,11 +3036,11 @@ PotExp::PotExp(scalar   a,                         // parameter alpha
 if(N != C.nmax() || L != C.lmax()) {					\
   if(N  !=C.nmax())							\
     if(L!=C.lmax())							\
-      snprintf(ERR,256,"PotExp::%s(): max n&l mismatch\n",FUNC);	\
+      SNprintf(ERR,256,"PotExp::%s(): max n&l mismatch\n",FUNC);	\
     else								\
-      snprintf(ERR,256,"PotExp::%s(): max n mismatch\n",FUNC);		\
+      SNprintf(ERR,256,"PotExp::%s(): max n mismatch\n",FUNC);		\
   else if(L!=C.lmax())							\
-    snprintf(ERR,256,"PotExp::%s(): max l mismatch\n",FUNC);		\
+    SNprintf(ERR,256,"PotExp::%s(): max l mismatch\n",FUNC);		\
   STATE |= 2;								\
   return;								\
 }

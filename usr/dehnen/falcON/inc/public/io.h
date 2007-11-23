@@ -207,7 +207,7 @@ namespace falcON {
     template<typename T> 
     bool reopen(const char*format, T const&tag, bool append=0) {
       char FNEW[FNAME_MAX_SIZE];
-      snprintf(FNEW,FNAME_MAX_SIZE,format,tag);
+      SNprintf(FNEW,FNAME_MAX_SIZE,format,tag);
       if(OUT==0 || strcmp(FNEW,FNAME)) {
 	open(FNEW,append);
 	return true;

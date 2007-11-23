@@ -199,12 +199,14 @@ namespace falcON {
   //                                                                            
   // class falcON::HaloModifier                                                 
   //                                                                            
-  /// given a HaloDensity rho(r), we modify it to rho(sqrt[r^2+c^2]) sech(r/rt) 
+  /// given rho(r), get Rho(r) := rho(sqrt[r^2+c^2]) trunc(r/|rt|)              
+  /// where trunc(x) = sech(x) for rt>0 and 2/(sech(x)+1/sech(x)) for rt<0      
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
   class HaloModifier {
     const double rc,rcq;              ///< core radius, core radius squared
     const double rt,irt;              ///< truncation radius & its inverse
+    const bool   sechtr;              ///< sech(x) truncation?
   public:
     /// sqrt(r^2+rc^2)
     double core(double r) const;
