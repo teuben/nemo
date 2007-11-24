@@ -190,7 +190,8 @@ string defv[] = {
   "free=t\n         Free-Allocate the array each iter?",
   "layout=f\n       Show memory layout",
   "static=f\n       Benchmark on a static array",
-  "VERSION=2.1\n    19-feb-06 PJT",
+  "transpose=f\n    Transpose a 2D array",
+  "VERSION=2.2\n    12-nov-07 PJT",
   NULL,
 };
 
@@ -475,7 +476,7 @@ nemo_main()
 {
   int i,dim[MAXDIM];
   int ndim = nemoinpi(getparam("dim"),dim,MAXDIM);
-  bool flip = getbparam("flip"), free=getbparam("free");
+  bool flip = getbparam("flip"), free=getbparam("free"), trans=getbparam("transpose");
   int iter=getiparam("iter");
   bool layout = getbparam("layout");
   bool statbench = getbparam("static");
@@ -486,12 +487,30 @@ nemo_main()
   int i1,i2,i3,i4, nd;
 
   mdarray1 x1;
-  mdarray2 x2;
+  mdarray2 x2, x2t;
   mdarray3 x3;
   mdarray4 x4;
   mdarray5 x5;
   mdarray6 x6;
   mdarray7 x7;
+
+  if (trans) {
+    if (ndim != 2) error("transposing needs 2 dimensional array");
+    x2  = allocate_mdarray2(dim[1],dim[0]);
+    x2t = allocate_mdarray2(dim[0],dim[1]);
+    while (iter-- > 0) {
+      init2(dim,x2,flip);
+      for (i1=0; i1<nd; i1++)
+	for (i2=0; i2<nd; i2++) {
+	  x2t[i2][i1] = x2[i1][i2];
+      }
+    }
+    if (free) {
+      free_mdarray2(x2, dim[1],dim[0]);
+      free_mdarray2(x2t,dim[0],dim[1]);
+    }
+    stop(0);
+  }
 
   if (layout) {
     try();
