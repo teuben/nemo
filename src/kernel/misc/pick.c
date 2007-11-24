@@ -1,0 +1,64 @@
+/****************************************************************************/
+/* PICK.C: utility routines for various sorts of math operations. Most   */
+/* these functions work with real values, meaning that they can handle      */
+/* either floats or doubles, depending on compiler switches.                */
+/* Copyright (c) 1999 by Joshua E. Barnes, Tokyo, JAPAN.                    */
+/*    revised for SPH calculation by Jin Koda, Tokyo, JAPAN. 2000           */
+/*    adapted for NEMO for Koda's SPH and Josh' treecode1                   */
+/****************************************************************************/
+
+#include "stdinc.h"
+#include "mathfns.h"
+
+/*
+ * PICKSHELL: pick point on shell.
+ */
+
+void pickshell(real vec[], int ndim, real rad)
+{
+    real rsq, rscale;
+    int i;
+
+    do {
+        rsq = 0.0;
+        for (i = 0; i < ndim; i++) {
+            vec[i] = xrandom(-1.0, 1.0);
+            rsq = rsq + vec[i] * vec[i];
+        }
+    } while (rsq > 1.0);
+    rscale = rad / rsqrt(rsq);
+    for (i = 0; i < ndim; i++)
+        vec[i] = vec[i] * rscale;
+}
+
+/*
+ * PICKBALL: pick point within ball.
+ */
+
+void pickball(real vec[], int ndim, real rad)
+{
+    real rsq;
+    int i;
+
+    do {
+        rsq = 0.0;
+        for (i = 0; i < ndim; i++) {
+            vec[i] = xrandom(-1.0, 1.0);
+            rsq = rsq + vec[i] * vec[i];
+        }
+    } while (rsq > 1.0);
+    for (i = 0; i < ndim; i++)
+        vec[i] = vec[i] * rad;
+}
+
+/*
+ * PICKBOX: pick point within box.
+ */
+
+void pickbox(real vec[], int ndim, real size)
+{
+    int i;
+
+    for (i = 0; i < ndim; i++)
+        vec[i] = xrandom(- size, size);
+}
