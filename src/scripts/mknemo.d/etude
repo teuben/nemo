@@ -1,0 +1,10 @@
+#! /bin/csh -f
+#
+#  falcON tools, for the version after Aug 6, 2006 (nemo 3.2.4)
+
+set dir=$NEMO/usr/koda/etude
+
+cd $dir
+make -f Makefile.nemo clean etude
+mv etude $NEMOBIN
+
