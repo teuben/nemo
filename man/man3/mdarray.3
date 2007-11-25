@@ -31,7 +31,8 @@ mdarray - simple multi-dimensional (C style) array allocators with sequential me
 dimensions are available. Actually data memory is guarenteed to be
 sequentually in memory, as they are with static multidimensional arrays.
 .PP
-Arrays are stored in row major order, e.g. in
+Arrays are stored in row major order, rows vary most rapidly in memory. For
+example in
 .nf
    double matrix a[20][10];
 .fi
@@ -91,11 +92,17 @@ are not the same, whereas for static arrays they are
 .fi
 For example, for a double precision \fIa[n3][n2]n1]\fP mdarray3, instead of using 
 2*n1*n2*n3 words, it will use \fI((2*n1+1)*n2+1)*n3\fP words.
+.PP
+To quote the FFTW manual: \fPusing it will cause FFTW to die a painful death\fP
+(referring to such dynamic arrays)
 .SH SEE ALSO
 .nf
 vectmath(3NEMO)
 nrutil.c (Numerical Recipes) for an alternative approach
+GSL: http://www.gnu.org/software/gsl/manual/html_node/Matrices.html (cf. \fIvalarray\fP in C++)
 http://www.fredosaurus.com/notes-cpp/arrayptr/23two-dim-array-memory-layout.html
+http://www.fftw.org/
+http://c-faq.com/aryptr/
 .fi
 .SH AUTHOR
 Peter Teuben
