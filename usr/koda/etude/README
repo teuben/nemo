@@ -1,0 +1,293 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!  重力流体計算コード(N-body/SPHコード) beta版 1.3 配布         !!!
+!!!                                   2001.07.15 幸田 仁          !!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+目次
+
+        0, N-body/SPHコード "etude"
+	1, 配布条件
+	   1.1 Face-to-Face distribution
+	   1.2 バグは報告する
+	   1.3 コードの名前募集
+	2, 入っているファイルの説明
+	   2.1 README
+	   2.2 Makefile
+	   2.3 TreeSPH計算コード
+	   2.4 C言語の拡張ライブラリ
+	   2.5 データ解析関連
+	3, コンパイル
+	   3.1 Tree-SPHコード(etude)のコンパイル
+	   3.2 スナップショットのgifファイルを作るソフトのコンパイル
+	   3.3 PV図、速度場を描くソフトのコンパイル
+	4, 使い方
+	   4.1 Tree-SPH コード
+	   4.2 movie の使い方
+	   4.3 analysis の使い方
+	5, Version
+
+
+0, N-body/SPHコード "etude"
+
+本コードは Fukuda, Wada & Habe (1998, MNRAS, 295, 463)で定義されたディ
+スク、バー、中心ブラックホールのポテンシャル内での、ガスの運動を計算し
+ます。また結果を様々な角度から見たPV図、速度場として簡単に表示するソフ
+トも付属しています。特に日本で電波観測を行っている観測家の方々に、観測
+結果を理解する道具として、使って頂くことを目的としています。
+
+計算の単位は長さ８kpcを１とし、８kpc内に入るディスクの質量を１、重力定
+数Gを１としています。fgasなどの値は、この質量に対するガス質量の重量比
+を表します(Fukuda, Wada & Habe 1998の定義と若干違います)。
+
+
+1, 配布条件
+
+1.1 Face-to-Face distribution
+
+ソースコードは必ず、幸田から直接受け取って下さい。自分の友だちに勝手に
+あげず、幸田に連絡をし、幸田から直接ソースを渡す、という形にしてくださ
+い。「誰にあげといた」というのもありにしようかと思いましたが、その「誰」
+の次の「誰か」については報告がなくなりそうなので、やっぱり厳密に
+Face-to-Face distribution にしてください。
+
+間違った結果が出てしまったとき、責任はとれないけど、責任を感じないわけ
+ではないので、上記、必ず守ってください。
+
+1.2 バグは報告する
+
+バグがあったら自分だけで解決して済ませず、必ず幸田まで報告して下さい。
+連絡先はkoda@ioa.s.u-tokyo.ac.jpです。
+
+1.3 コードの名前募集
+
+コードに良い名前を募集します。日本語の名前が好みです。カッコ良い名前
+よりも、ほのぼのとした暖かさを醸し出す名前が良いです。
+
+
+2, 入っているファイルの説明
+
+2.1 README
+
+このファイルです。コードの配布条件、コンパイルの仕方、使い方などを説明
+します。
+
+2.2 Makefile
+
+コードをコンパイルするためのファイルです。OS毎にコンパイルオプションを
+代える必要があるかも知れません。配布版はLinux上でgccを用いる場合の例で
+す。gcc -> fcc に代えると、Linux上で富士通Cでも使えています。
+
+2.3 TreeSPH計算コード
+
+重力の部分をtree法、流体の部分をSPH法で計算するコードです。重力計算の
+部分はハワイ大のJoshua E. Barnes氏が作り、幸田が発展させました。流体計
+算の部分については幸田が作りました。ソースファイルは以下です。
+[treecode.c, treecode.h, treedefs.h, treegrav.c, treeio.c, treeload.c
+treengbr.c, treesph.c, treeextf.c, treeinit.c, plot.c]
+
+デフォルトで2次元計算をします。vectdefs.h の中の、"#define TWODIM"とい
+うところを、"#define THREEDIM"にすると3次元計算をしますが、3次元のテス
+ト計算はしていません。また、初期条件などは、3次元用に書き換えないといけ
+ません。3次元版については、メモリの節約などの最適化よりも、コードの読み
+やすさを優先しています。
+
+
+
+2.4 C言語の拡張ライブラリ
+
+ハワイ大のJoshua E. Barnes氏が作り、幸田が発展させたCの拡張ライブラリで
+す。エラーメッセージの出力、算術関数の定義、ベクトル演算のマクロなど、
+いつも必要となる一般的な操作を定義しています。以下のファイルで構成され
+ています。[clib.c, getparam.c, getparam.h, mathfns.c, mathfns.h,
+vectdefs.h, vectmath.h, stdinc.h]
+
+2.5 データ解析関連
+
+データ解析用のソースです。幸田が作りました。movieの方は、計算結果のスナ
+ップショットをgifファイルにします。analysisは、計算結果からスナップショ
+ット、PV図、速度場をインタラクティブに表示します。[movie.c, analysis.c]
+
+
+3, コンパイル
+
+Tree-SPH計算コードの本体は、PGPLOTを使わないモードに設定してありますが、
+movie, analysisの２つの解析ソフトはPGPLOTを使わないと動きません。PGPLOT
+をインストールして下さい。
+
+3.1 Tree-SPHコード(etude)のコンパイル
+
+単純に、makeと打ち込みます。
+
+	# make
+
+配布版はLinux上でgccを使ってコンパイルすることを想定しています。gcc->fcc
+と書き換えると、Linux+富士通Cでも使えています。少し書き換えることでDigital
+Unix + cc、また、SunOS + gcc でも動いています。
+
+Digital Unix上でコンパイルすると、「システムの定義と違ってるからダメ」、
+というエラーメッセージがいくつか出ます。主にmathfns.c、mathfns.hの中に
+定義されている変数や関数についてのエラーです。これらの定義は、C言語拡
+張ライブラリという性格から付加されていますが、実際上、etudeの計算の中で
+は使われていません。注文のついたすべての定義について、コメントアウトす
+れば上手く行きます。
+
+またetudeはPGPLOTを用いて、スナップショットを表示しながら進めることが出
+来ます。そうしたい場合、コンパイルを
+
+	# make etude_ql
+
+とし、etude_ql というバイナリを使ってください。
+さらに環境変数PGPLOT_DEVを/xtermにセットして下さい。[ tcshを使っている場
+合、"setenv PGPLOT_DEV /xterm" など]。
+
+
+3.2 スナップショットのgifファイルを作るソフトのコンパイル
+
+このファイルもPGPLOTを使っています。PGPLOTがないと使えません。以下のよう
+にコンパイルして下さい。
+
+	# make movie
+
+(注) Makefile の中の、-lf2cというリンクを-lg2cに書き換える必要があるとき
+があります。
+
+
+3.3 PV図、速度場を描くソフトのコンパイル
+
+このファイルもPGPLOTを使っています。PGPLOTがないと使えません。以下のよ
+うにコンパイルして下さい。
+
+	# make analysis
+
+(注) 8ビットのX Windowを立ち上げないと、analysis は使えません。Xを立ち
+上げる時に、"xinit -- -bpp 8" として下さい。
+
+(注) Makefile の中の、-lf2cというリンクを-lg2cに書き換える必要があるとき
+があります。
+
+
+4, 使い方
+
+4.1 Tree-SPH コード
+
+Unixの一般のコマンドのように、コマンド(etude)に引数を与える形で使います。
+まずは簡単に
+
+	# etude out=data
+ 
+などとしてみてください。デフォルトの値を使って計算を始めます。out=" "の
+部分がないと、データをファイルに保存しないので注意が必要です。データは
+時間ごとにファイルにセーブされ、data_000, data_001, data_002 などという
+ファイルになります。
+
+次に、バーのパターン速度をOmg_b=30.0[km/s/kpc]にし、バーの強さをfbar=0.05
+[=epsilon]にしたい場合は
+
+	# etude out=data omgb=30.0 fbar=0.05
+
+とします。さらに自己重力をいれたい場合は
+
+	# etude out=data omgb=30.0 fbar=0.05 selfgrav=true
+
+とします。ただし初期条件として一様密度ガス円盤を仮定しているため、外側部分
+でガスの自己重力が強くなり過ぎ、腕がすぐクランプになります。中心部だけ計算
+するように、
+
+	# etude out=data omgb=30.0 fbar=0.05 selfgrav=true rinit=2.0
+
+などとすると良いかもしれません。他にもいろいろパラメータがあり、上と同様に
+デフォルト値から代えられます。どのようなパラメータがあるか知りたい場合、
+
+	# etude -help
+
+と打つと、以下のように一覧が出てきます。この種の計算に詳しくない場合は、
+粒子数(nbody)、ディスクポテンシャルのパラメータ(rcore, vmax)、中心BHの
+パラメータ(rcorebh, fbh)、バーのパターン速度(omgb)、バーの強さ(fbar)、
+ガスの質量フラクション（fgas）、以外のパラメータはいじらない方が賢明です。
+
+	etude                     Hierarchical N-body/SPH code (full scan)
+	  in=                     Input file with initial conditions
+	  out=                    Output file of N-body frames
+	  param=                  Parameter file of calculation
+	  freq=32.0               Fundamental integration frequency
+	  eps=0.025               Density smoothing length
+	  selfgrav=false          Compute self-gravity
+	  theta=1.0               Force accuracy parameter
+	  usequad=false           If true, use quad moments
+	  options=                Various control options
+	  tstop=10.0              Time to stop integration
+	  freqout=30.0            Data output quency
+	  nbody=5000              Number of bodies for test run
+	  seed=123                Random number seed for test run
+	  save=                   Write state file as code runs
+	  restore=                Continue run from state file
+	  rinit=8.0               Radius of initial disk [kpc]
+	  rcore=1.41421356        Core radius [kpc]
+	  vmax=220.0              Maximum disk rotation [km/s]
+	  omgb=26.1               Bar pattern speed [km/s/kpc]
+	  fgas=0.05               Mass fraction of gas in unit radius
+	  fbar=0.1                Strength of bar potential
+	  rcorebh=0.01            Core radius of central black hole [kpc]
+	  fbh=0.0                 Mass ratio of central BH to the galaxy
+	  alpha=1.0               Coefficient of viscousity
+	  beta=2.0                Coefficient of viscousity
+	  nnbr=32                 Requested number of neighbors
+	  nmax=42                 Maximum number of neighbors
+	  nmin=22                 Minimum number of neighbors
+	  VERSION=beta1.3         Jin Koda    June 25 2001
+
+4.2 movie の使い方
+
+計算終了後、出来たアウトプットファイル群に
+
+	# movie (file）（pattarn speed)
+
+と打ち込みます。gifファイルがたくさん出来ます。パターンスピードを指定し
+ないと、静止系（バーが回転して見える系）で見たスナップショットになり、
+指定すると、バーの回転に乗った系でみたスナップショットになります。たとえ
+ばdata_000,data_001, data_002 ...というファイル群が出来たとき、以下のよ
+うに使います。
+
+	(例) # movie data 30.0
+	     # movie data
+
+data_000.gif, data_001.gif, data_002.gif ... というgifファイル群が出来
+ます。たくさんgifファイルが出来たら、xanim を使って、
+
+	# xanim data_*.gif
+
+などとするとムービーが見られます。
+
+
+4.3 analysis の使い方
+
+出来たアウトプットファイルをつかって、
+
+	# analysis (file）（pattarn speed)
+
+と打ち込みます。パターンスピードを指定しないと、静止系（バーが回転して見
+える系）で見たもの、指定すると、バーの回転に乗った系でみたものになります。
+
+	(例) # analysis data_200 30.0
+	     # analysis data_200
+
+出てきた画面上で、1,2,3,.., S, P, V などのキーを打ち込むと、いろいろな図
+を描いてくれます。とりあえず、S,P,Vなどと打ち込んで見てください。具体的な
+効果はカラーテーブルの変換(1,2,3,4,5,6)、スナップショット(S)、カーソルのあ
+る方向[無限遠]から見たPV図(P)、速度場(V)などです。速度場は、カーソルのある
+方角から、銀河を傾けて見たものを描きます。inclinationは、スナップショット
+上で、銀河の中心からの距離の関数になってます。等高線は30km/s毎に引かれます。
+
+
+5, Version
+
+ver. 1.3:
+  Fukuda, Wada & Habe 1998, MNRAS, 295, 463 の中心ブラックホールを扱える
+ ようにした。
+
+ver. 1.5:
+  Spiral Potentialの計算をできるようにした。
+
+ver. 1.6:
+  初期条件の速度場として、Bar/SpiralのPotentialも考慮するようにした。
