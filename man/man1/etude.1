@@ -1,0 +1,113 @@
+.TH ETUDE 1NEMO "23 October 2007"
+.SH NAME
+etude \- Hierarchical N-body/SPH code 
+.SH SYNOPSIS
+\fBetude\fP [parameter=value]
+.SH DESCRIPTION
+\fBetude\fP is an SPH code whereby the gas is (in 2D or 3D) non-selfgravitating
+in an analytic static background potential. Particles are stored in a tree
+structure (see \fItreecode1(1NEMO)\fP in order to efficiently find the nearest
+neighbors required by the SPH algorithm.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file with initial conditions []  
+.TP
+\fBout=\fP
+Output file of N-body frames []  
+.TP
+\fBparam=\fP
+Parameter file of calculation []   
+.TP
+\fBfreq=\fP
+Fundamental integration frequency [32.0]    
+.TP
+\fBeps=\fP
+Density smoothing length [0.025]    
+.TP
+\fBselfgrav=\fP
+Compute self-gravity [false]     
+.TP
+\fBtheta=\fP
+Force accuracy parameter [1.0]    
+.TP
+\fBusequad=\fP
+If true, use quad moments [false]  
+.TP
+\fBoptions=\fP
+Various control options []    
+.TP
+\fBtstop=\fP
+Time to stop integration [3.0]   
+.TP
+\fBfreqout=\fP
+Data output frequency [30.0]    
+.TP
+\fBnbody=\fP
+Number of bodies for test run [5000] 
+.TP
+\fBseed=\fP
+Random number seed for test run [123] 
+.TP
+\fBsave=\fP
+Write state file as code runs [] 
+.TP
+\fBrestore=\fP
+Continue run from state file []  
+.TP
+\fBmode=\fP
+Mode of spiral pattern [2.0]   
+.TP
+\fBpitch=\fP
+Pitch angle of spirals [deg] [10.0]  
+.TP
+\fBrinit=\fP
+Radius of initial disk [kpc] [3.0]  
+.TP
+\fBrcore=\fP
+Core radius [kpc] [1.0]    
+.TP
+\fBvmax=\fP
+Maximum disk rotation [km/s] [220.0]   
+.TP
+\fBomgb=\fP
+Bar pattern speed [km/s/kpc] [26.1]   
+.TP
+\fBfgas=\fP
+Mass fraction of gas in unit radius [0.05]
+.TP
+\fBfbar=\fP
+Strength of bar potential [0.1]   
+.TP
+\fBrcorebh=\fP
+Core radius of central black hole [kpc] [0.01]
+.TP
+\fBfbh=\fP
+Mass ratio of central BH to the galaxy
+.TP
+\fBalpha=\fP
+Coefficient of viscosity [1.0]    
+.TP
+\fBbeta=\fP
+Coefficient of viscosity [2.0]    
+.TP
+\fBnnbr=\fP
+Requested number of neighbors [32]   
+.TP
+\fBnmax=\fP
+Maximum number of neighbors [42]   
+.TP
+\fBnmin=\fP
+Minimum number of neighbors [22]   
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Jin Koda
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+23-Oct-07	V1.8 man page created for NEMO version	PJT
+.fi
