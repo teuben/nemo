@@ -1,4 +1,4 @@
-.TH GETPARAM 3NEMO "30 June 2005"
+.TH GETPARAM 3NEMO "24 November 2007"
 .SH NAME
 getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and command line processing.
 .SH SYNOPSIS
@@ -45,6 +45,8 @@ $";
 .B bool hasvalue(string name)
 .B bool isaparam(string name)
 .B bool updparam(string name)
+
+.B int getparamstat(string);
 
 .B extern int error_level;
 .B extern int debug_level;
@@ -146,6 +148,9 @@ see \fInemoinp(3NEMO)\fP for some extended rules. Also note that
 be modified or freed! An single parameter
 integer that starts with the \fB0x\fP string, can also be parsed
 as a hexdecimal value (see \fIstrtol(3)\fP).
+.PP
+\fBgetparamstat\fP is currently only available to provide ZENO compatibility,
+it currently triggers a call to \fIerror(3NEMO)\fP when called.
 .PP
 As a special case, the contents of \fIargv\fP[0], which is the name used
 to invoke the process, are associated with the keyword name \fBargv0\fP.
