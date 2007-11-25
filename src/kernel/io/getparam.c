@@ -128,6 +128,7 @@
  * 30-jun-05       o  parse integers with 0x as hex numbers
  * 14-dec-06    3.5   changed some printf()'s to fprintf(stderr,....)'s
  * 13-sep-07 WD    a  print name of name whose key is not found
+ * 23-oct-07    3.6   fix bug when ZENO style defv[] is used, more ZENO compat
 
   TODO:
       - what if there is no VERSION=
@@ -171,7 +172,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.5a 13-sep-07 PJT"
+#define GETPARAM_VERSION_ID  "3.6 23-oct-07 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -430,18 +431,33 @@ void initparam(string argv[], string defv[])
     keys[0].help = scopy("Program name");
     keys[0].count = 0;
     keys[0].upd = 0;
-    nzeno = 0;
-    for (i = 1, j=0; i < nkeys; i++, j++) {		/* loop key defs */
+    nzeno =  (*defv[0] == ';');
+
+    /* TODO:  if in zeno mode, it needs to skip EACH ; string, since it's a comment/help */
+
+    for (i = 1, j=0; i < nkeys; i++, j++) {		/* loop over key defs */
         if (defv[j] == NULL) break;
-        while(*defv[j] == ';') {			/* handle ZENO */
-	    dprintf(0,"ZENO: %s\n",defv[j]);
-            nzeno++;
-            j++;
-        }
+	if (nzeno) {
+	  if (j==0) {
+	    usage = defv[0];
+	    dprintf(1,"ZENO Usage: %s\n",usage);
+	  } else
+	    dprintf(1,"ZENO: %s\n",defv[j]);
+	  j++;
+	  if (defv[j] == NULL) {
+	    nkeys = i;
+	    dprintf(2,"ZENO: nkeys=%d %s\n",nkeys,keys[i].keyval);
+	    break;
+	  }
+	}
+
         keys[i].keyval = defv[j];
         keys[i].key = scopy(parname(defv[j]));
         keys[i].val = scopy(parvalue(defv[j]));
-        keys[i].help = scopy(parhelp(defv[j]));
+	if (nzeno)
+	  keys[i].help = scopy(defv[j+1] + 1);
+	else
+	  keys[i].help = scopy(parhelp(defv[j]));
         keys[i].count = 0;
         keys[i].upd = 1;
 	if (keys[i].key[strlen(keys[i].key)-1] == '#')
@@ -1380,6 +1396,16 @@ bool updparam(string name)
     if (kw == NULL) error("(updparam) \"%s\" unknown keyword",name);
     return kw->upd == 1;
 }
+
+/*
+ *  GETPARAMSTAT
+ */
+
+int getparamstat(string name) {
+  error("getparamstat not implemented in NEMO");
+}
+
+
 
 /*
  * GETPARAM: look up parameter value by name
