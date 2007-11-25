@@ -12,3 +12,7 @@ Adapted from Jin Koda's Version 1.7 of etude
 
 - only smoothing length is written out, with mass, that gives density.
   The gas is assumed isothermal, at 10,000 K.
+
+
+TODO:
+ - use NEMO's external potential descriptors
