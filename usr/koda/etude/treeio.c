@@ -3,6 +3,7 @@
 /* inputdata(), startoutput(), output(), savestate(), restorestate().       */
 /* Copyright (c) 1999 by Joshua E. Barnes, Tokyo, JAPAN.                    */
 /*    revised for SPH calculation by Jin Koda, Tokyo, JAPAN. 2000           */
+/*    revised for NEMO by Peter Teuben - october 2007                       */
 /****************************************************************************/
 
 #include "stdinc.h"
@@ -14,6 +15,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <strings.h>
+
+#if defined(USE_NEMO_IO)
+#include <filestruct.h>
+#include <history.h>
+#include <snapshot/snapshot.h>
+#endif
 
 /*
  * Prototypes for local routines.
@@ -29,7 +36,7 @@ local void out_real(stream, real);              /* output real value        */
 local void out_vector(stream, vector);          /* output vector of reals   */
 
 /*
- * Diagnositc output variables.
+ * Diagnostic output variables.
  */
 
 local real mtot;                                /* total mass of system     */
@@ -51,10 +58,59 @@ local real amvec;                               /* angular momentum vector  */
 void inputdata(void)
 {
     stream instr;
-    int ndim;
+    int i, ndim;
     bodyptr p;
+    real *bsca;
+    vector *bvec;
 
     instr = stropen(infile, "r");               /* open input stream        */
+#if defined(USE_NEMO_IO)
+    get_history(instr);
+    get_set(instr,SnapShotTag);
+      get_set(instr,ParametersTag);
+        get_data(instr,NobjTag,IntType,&nbody,0);
+        if (get_tag_ok(instr,TimeTag))
+          get_data(instr,TimeTag,RealType,&tnow,0);
+        else
+          tnow = 0.0;
+      get_tes(instr,ParametersTag);
+      get_set(instr,ParticlesTag);
+        bsca = (real *) allocate(nbody*sizeof(real));
+        bodytab = (bodyptr) allocate(nbody * sizeof(body));
+
+        get_data(instr,MassTag,RealType,bsca,nbody,0);
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+          Mass(p) = bsca[i];
+
+        if (get_tag_ok(instr,PhaseSpaceTag)) {
+          bvec = (vector *) allocate(nbody*sizeof(vector)*2);
+          get_data(instr,PhaseSpaceTag,RealType,bvec,nbody,2,NDIM,0);
+          for (p = bodytab, i=0; p < bodytab+nbody; p++, i++) {
+            SETV(Pos(p),bvec[i]);
+            i++;
+            SETV(Vel(p),bvec[i]);
+          }       
+        } else {
+          bvec = (vector *) allocate(nbody*sizeof(vector));
+          get_data(instr,PosTag,RealType,bvec,nbody,NDIM,0);
+          for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+            SETV(Pos(p),bvec[i]);
+          
+          get_data(instr,VelTag,RealType,bvec,nbody,NDIM,0);
+          for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+            SETV(Vel(p),bvec[i]);
+        }
+
+        get_data(instr,SmoothTag,RealType,bsca,nbody,0);
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+          Hknl(p) = bsca[i];
+
+        free(bvec);
+        free(bsca);
+      get_tes(instr,ParticlesTag);
+    get_tes(instr,SnapShotTag);
+
+#else
     in_int(instr, &nbody);                      /* read number of bodies    */
     if (nbody < 1)
         error("inputdata: nbody = %d is absurd\n", nbody);
@@ -80,6 +136,7 @@ void inputdata(void)
         tnow = 0.0;                             /* then set it to zero      */
     for (p = bodytab; p < bodytab+nbody; p++)   /* loop over new bodies     */
         Type(p) = BODY;                         /* initialize type field    */
+#endif
 }
 
 /*
@@ -167,6 +224,11 @@ void outputdata(void)
     struct stat buf;
     stream outstr;
     bodyptr p;
+    int i;
+    static int first=1;
+    real *bsca;
+    vector *bvec, cm[2];
+ 
 
     sprintf(namebuf, "%s_%.3d", outfile, ++iout);
                                                 /* construct output name    */
@@ -174,6 +236,53 @@ void outputdata(void)
 	while (stat(namebuf, &buf) == 0)        /* increment file number    */
 	    sprintf(namebuf, "%s_%.3d", outfile, ++iout);
     outstr = stropen(namebuf, "w");             /* create & open for output */
+#if defined(USE_NEMO_IO)
+    if (first)
+      put_history(outstr);
+    put_set(outstr,SnapShotTag);
+      put_set(outstr,ParametersTag);
+        put_data(outstr,NobjTag,IntType,&nbody,0);
+        put_data(outstr,TimeTag,RealType,&tnow,0);
+      put_tes(outstr,ParametersTag);
+      put_set(outstr,ParticlesTag);
+        bsca = (real *) allocate(nbody*sizeof(real));
+        bvec = (vector *) allocate(nbody*sizeof(vector));
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+          bsca[i] = Mass(p);
+        if (first)
+          put_data(outstr,MassTag,RealType,bsca,nbody,0);
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+          SETV(bvec[i],Pos(p));
+        put_data(outstr,PosTag,RealType,bvec,nbody,NDIM,0);
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+          SETV(bvec[i],Vel(p));
+        put_data(outstr,VelTag,RealType,bvec,nbody,NDIM,0);
+        if (scanopt(options, "out-phi")) {
+          for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+            bsca[i] = Phi(p);
+          put_data(outstr,PotentialTag,RealType,bsca,nbody,0);
+        }
+        if (scanopt(options, "out-acc")) {
+          for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+            SETV(bvec[i],Acc(p));
+          put_data(outstr,AccelerationTag,RealType,bvec,nbody,NDIM,0);
+        }
+        for (p = bodytab, i=0; p < bodytab+nbody; p++, i++)
+          bsca[i] = Hknl(p);
+	put_data(outstr,SmoothTag,RealType,bsca,nbody,0);
+      put_tes(outstr,ParticlesTag);
+      put_set(outstr,DiagnosticsTag);
+        put_data(outstr,EnergyTag,RealType,etot,3,0);
+        SETV(cm[0],cmpos);
+        SETV(cm[1],cmvel);
+        put_data(outstr,CMPhaseSpaceTag,RealType,cm,2,NDIM,0);
+      put_tes(outstr,DiagnosticsTag);
+    put_tes(outstr,SnapShotTag);
+    if (first) first = 0;
+    free(bsca);
+    free(bvec);
+    strclose(outstr);
+#else
     out_int(outstr, nbody);                     /* write number of bodies   */
     out_int(outstr, NDIM);                      /* number of dimensions     */
     out_real(outstr, mscale);                   /* mass scale in Msun       */
@@ -195,6 +304,7 @@ void outputdata(void)
         for (p = bodytab; p < bodytab+nbody; p++)
             out_vector(outstr, Acc(p));         /* output accelerations     */
     fclose(outstr);                             /* close up output file     */
+#endif
     printf("\n\tdata output to file %s at time %f\n", namebuf, tnow);
     tout += 1.0 / freqout;                      /* schedule next output     */
 }

@@ -463,7 +463,7 @@ local void calckernel2(bodyptr p, bodyptr q, real dr2, real *gknl, real *iknl)
  		*gknl += coefg * (-0.75) * r22 /ratio;
 #if defined(THREEDIM)
 		*iknl += 1.0 - ONESIX * r22 * r22 *
-		    (r22 - 4.8 * (2.0-ratio) + 6.0) 
+		  (r22 - 4.8 * (2.0-ratio) + 6.0) ;
 #else
 		*iknl += ONESVN * (7.0 - (0.5 + ratio) * r22 * r22);
 #endif

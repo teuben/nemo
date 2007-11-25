@@ -39,12 +39,14 @@ string defv[] = {               ";Hierarchical N-body/SPH code " SCANNER,
     "seed=123",                 ";Random number seed for test run",
     "save=",                    ";Write state file as code runs",
     "restore=",                 ";Continue run from state file",
+    
     "mode=2.0",                 ";Mode of spiral pattern",  
     "pitch=10.0",               ";Pitch angle of spirals [deg]",
     "rinit=3.0",                ";Radius of initial disk [kpc]",
     "rcore=1.0",                ";Core radius [kpc]",
     "vmax=220.0",               ";Maximum disk rotation [km/s]",
     "omgb=26.1",                ";Bar pattern speed [km/s/kpc]",
+
     "fgas=0.05",                ";Mass fraction of gas in unit radius",   
     "fbar=0.1",                 ";Strength of bar potential",
     "rcorebh=0.01",             ";Core radius of central black hole [kpc]",
@@ -54,8 +56,8 @@ string defv[] = {               ";Hierarchical N-body/SPH code " SCANNER,
     "nnbr=32",                  ";Requested number of neighbors",
     "nmax=42",                  ";Maximum number of neighbors",
     "nmin=22",                  ";Minimum number of neighbors",
-    "VERSION=beta1.5",          ";Jin Koda    Dec 12 2002",
-    NULL,
+    "VERSION=1.8",              ";Jin Koda    PJT 23-oct-2007",
+    NULL, 
 };
 
 /* Prototypes for local procedures. */
@@ -68,10 +70,15 @@ local void startrun(void);                      /* initialize system state  */
 /*
  * MAIN: toplevel routine for hierarchical N-body code.
  */
-
+#if defined(USE_NEMO_IO)
+void nemo_main(void)
+#else
 void main(int argc, string argv[])
+#endif
 {
+#if !defined(USE_NEMO_IO)
     initparam(argv, defv);                      /* initialize param access  */
+#endif
     headline = defv[0] + 1;                     /* skip ";" in headline     */
     startrun();                                 /* get params & input data  */
     startoutput();                              /* activate output code     */
@@ -226,10 +233,17 @@ local void startrun(void)
             nbody = getiparam("nbody");         /* get number of bodies     */
             if (nbody < 1)                      /* check for silly values   */
                 error("startrun: absurd value for nbody\n");
+#if defined(USE_NEMO_IO)
+	    init_xrandom(getparam("seed"));
+#else
             srandom0(getiparam("seed"));        /* set random number gen.   */
+#endif
             testdata();                         /* and make plummer model   */
         }
     } else {                                    /* else restart old run     */
+#if defined(USE_NEMO_IO)
+        error("restarts not supported in NEMO mode yet");
+#else
         restorestate(getparam("restore"));      /* read in state file       */
         if (getparamstat("eps") & ARGPARAM)     /* if given, set new params */
             eps = getdparam("eps");
@@ -251,5 +265,6 @@ local void startrun(void)
             tout = tnow + 1 / freqout;          /* then offset from now     */
 	temp = rsqrt(27.0/4.0) * rcore * vmax * vmax;
 	initextf();                             /* init. ext. force params. */
+#endif
     }
 }

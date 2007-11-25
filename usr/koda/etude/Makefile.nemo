@@ -1,0 +1,126 @@
+########################################################################
+# MAKEFILE: compile and link treesph code executable files             #
+# Copyright (c) 1999 by Joshua E. Barnes, Tokyo, JAPAN.                #
+#    revised for SPH calculation by Jin Koda, Tokyo, JAPAN. 2000       #
+#    adapted for NEMO, Peter Teuben, 2007                              #
+########################################################################
+
+include $(NEMOLIB)/makedefs
+
+TFLAGS = -DUSE_NEMO_IO -I$(NEMOINC) -I$(NEMOLIB) -g
+
+#########################################################
+### Precision. [SINGLEPREC, MIXEDPREC, or DOUBLEPREC] ###
+#########################################################
+
+# the choice here MUST be consistent with the way NEMO was compiled
+# note: NEMO V3.x only has SINGLEPREC and DOUBLEPREC modes, no MIXEDPREC
+#PRECISION = MIXEDPREC
+PRECISION = DOUBLEPREC
+
+#############
+### Links ###
+#############
+
+X11_LIB = -L/usr/X11R6/lib -lX11
+
+F2C_LIB = -lg2c
+
+CPGPLOT_LIB = -L/usr/local/pgplot/ -lcpgplot -lpgplot -lpng -lgcc -lz\
+         $(X11_LIB) $(F2C_LIB)
+
+#####################
+### Tree-Sph code ###
+#####################
+
+
+OBJECTS = treecode.o treeio.o treeload.o treegrav.o treengbr.o \
+	treesph.o treeextf.o treeinit.o 
+
+etude: $(OBJECTS)
+	$(CC) $(LDFLAGS) -o etude $(OBJECTS) $(NEMO_LIBS)
+
+treecode.o: treecode.c treecode.h treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) $(TFLAGS) -c treecode.c
+
+treeio.o: treeio.c treecode.h treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) $(TFLAGS) -DBINARYIO -c treeio.c
+
+treeload.o: treeload.c treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) $(TFLAGS) -c treeload.c
+
+treegrav.o: treegrav.c treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) $(TFLAGS) -c treegrav.c
+
+treengbr.o: treengbr.c treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) $(TFLAGS) -c treengbr.c
+
+treesph.o: treesph.c treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) $(TFLAGS) -c treesph.c
+
+treeextf.o: treeextf.c treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) $(TFLAGS) -c treeextf.c
+
+treeinit.o: treeinit.c treecode.h treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) $(TFLAGS) -c treeinit.c
+
+
+############################################
+### Tree-Sph code with quick look option ###
+############################################
+
+OBJECT_QL = treecode_ql.o treeio.o treeload.o treegrav.o treengbr.o \
+		treesph.o treeextf.o treeinit.o plot.o
+
+etude_ql: $(OBJECT_QL) libZeno.a
+	$(CC) $(LDFLAGS) -o etude_ql $(OBJECT_QL) libZeno.a \
+	-lm $(CPGPLOT_LIB)
+
+treecode_ql.o: treecode.c treecode.h treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) -DQLOOK -c \
+	-o treecode_ql.o treecode.c 
+
+plot.o: plot.c treedefs.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) -c plot.c
+
+####################
+### Zeno library ###
+####################
+
+libZeno.a: clib.o getparam.o mathfns.o
+	ar ruv libZeno.a clib.o getparam.o mathfns.o
+	ranlib libZeno.a
+
+clib.o: clib.c stdinc.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) -c clib.c
+
+getparam.o: getparam.c stdinc.h getparam.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) -c getparam.c
+
+mathfns.o: mathfns.c stdinc.h mathfns.h
+	$(CC) $(CCFLAGS) -D$(PRECISION) -c mathfns.c
+
+#####################
+### Data analysis ###
+#####################
+
+movie: movie.c stdinc.h mathfns.h vectmath.h
+	$(CC) -o movie movie.c  -lm $(CPGPLOT_LIB)
+
+analysis: analysis.c stdinc.h mathfns.h vectmath.h
+	$(CC) -o analysis analysis.c -lm $(CPGPLOT_LIB)
+
+###########################
+### Remove object files ###
+###########################
+
+clean:;	rm -f *.o libZeno.a
+
+
+
+# on peter's TP61p:
+#bench1 72.522u 0.654s 1:13.24 99.9% 
+#
+
+bench1:
+	./etude out=bench1 tstop=0.5 > bench1.log

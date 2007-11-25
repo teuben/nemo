@@ -1,0 +1,14 @@
+Adapted from Jin Koda's Version 1.7 of etude
+  (which is an SPH adaptation of Josh Barnes' new treecode, as can
+   be found in $NEMO/src/nbody/evolve/hackcode/treecode1)
+
+- needed to add some USE_NEMO_IO
+
+- only works in PRECISION = DOUBLEPREC
+  (or do the same trick as in treecode1 with sqe() etc.)
+
+- small typo forgotten ';'  in THREEDIM section in *iknl +=  in treesph.c
+
+
+- only smoothing length is written out, with mass, that gives density.
+  The gas is assumed isothermal, at 10,000 K.

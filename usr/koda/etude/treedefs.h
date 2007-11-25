@@ -7,6 +7,19 @@
 #ifndef _treedefs_h
 #define _treedefs_h
 
+/* fix for NEMO, once we've sorted out the PRECISION flag stuff ZENO uses */
+#if 0
+#define rsqrt sqrt
+#define rabs  abs
+#define rpow  pow
+#define rsqr  sqr
+#endif
+
+
+/* in NEMO there is a function 'root', so root needs to be redefined */
+
+#define root treecode_root
+
 /*
  * NODE: data common to BODY and CELL structures.
  */
