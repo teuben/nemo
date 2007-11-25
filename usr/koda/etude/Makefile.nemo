@@ -29,6 +29,17 @@ F2C_LIB = -lg2c
 CPGPLOT_LIB = -L/usr/local/pgplot/ -lcpgplot -lpgplot -lpng -lgcc -lz\
          $(X11_LIB) $(F2C_LIB)
 
+ZENO_SRC = clib.c getparam.c getparam.h mathfns.c mathfns.h stdinc.h
+
+zeno:
+	@echo Use: zeno_clean or zeno_fix
+
+zeno_clean:
+	rm -f $(ZENO_SRC)
+
+zeno_fix:
+	(cd libzeno; cp $(ZENO_SRC) ..)
+
 #####################
 ### Tree-Sph code ###
 #####################
@@ -37,7 +48,7 @@ CPGPLOT_LIB = -L/usr/local/pgplot/ -lcpgplot -lpgplot -lpng -lgcc -lz\
 OBJECTS = treecode.o treeio.o treeload.o treegrav.o treengbr.o \
 	treesph.o treeextf.o treeinit.o 
 
-etude: $(OBJECTS)
+etude: zeno_clean $(OBJECTS) 
 	$(CC) $(LDFLAGS) -o etude $(OBJECTS) $(NEMO_LIBS)
 
 treecode.o: treecode.c treecode.h treedefs.h

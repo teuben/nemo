@@ -4,11 +4,17 @@ Adapted from Jin Koda's Version 1.7 of etude
 
 - needed to add some USE_NEMO_IO
 
+- the following files were moved into a subdirectory for Makefile.nemo:
+   clib.c  getparam.c  getparam.h  mathfns.c  mathfns.h  stdinc.h
+  since they are duplicated in NEMO.
+
+  Using zeno_clean and zeno_fix in Makefile.nemo you can toggle between
+  a NEMO and (mini)ZENO build
+
 - only works in PRECISION = DOUBLEPREC
   (or do the same trick as in treecode1 with sqe() etc.)
 
 - small typo forgotten ';'  in THREEDIM section in *iknl +=  in treesph.c
-
 
 - only smoothing length is written out, with mass, that gives density.
   The gas is assumed isothermal, at 10,000 K.
