@@ -144,7 +144,7 @@ HaloModifier::HaloModifier(double c, double t) falcON_THROWING
 // 	     <<" t1="<<t1<<" ="<<t1r
 // 	     <<" ="<<((th-tl)/(dr+dr))<<'\n'
 // 	     <<" t2="<<t2
-// 	     <<" ="<<((t+t-tl-th)/(dr*dr))
+// 	     <<" ="<<((tl-th-t-t)/(dr*dr))
 // 	     <<" ="<<((t1h-t1l)/(dr+dr))<<'\n';
 //   }
 }
@@ -624,7 +624,7 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   class ReducedDensity : public HaloDensity {
     const HaloDensity&Model;
-    const double uq, b, tb;
+    const double uq, b, tb, tb1;
     //--------------------------------------------------------------------------
     double reduc(double r) const {
       if(b == 0.) return 1+r*r*uq;
@@ -640,14 +640,14 @@ namespace {
 	return 1+r*t;
       }
       if(uq == 0.) {
-	const double p=(tb==1.)? 1. : pow(r,tb-1);
+	double p=tb1? pow(r,tb1) : 1.;
 	d1 = tb*p;
 	return r*p;
       }
-      const double rq=r*r, qq=rq*uq, ft=1+qq;
-      const double fc=ft * pow(rq/ft,b);
-      d1 = twice(b+qq)*fc/(r*ft);
-      return fc;
+      double rq=r*r, qq=rq*uq, ft=1+qq;
+      double fc=pow(rq/ft,b);
+      d1 = twice(b+qq)*fc/r;
+      return ft*fc;
     }
     //--------------------------------------------------------------------------
     double reduc(double r, double&d1, double&d2) const {
@@ -658,9 +658,9 @@ namespace {
 	return 1+r*t;
       }
       if(uq== 0.) {
-	const double p=(tb==1.)? 1. : pow(r,tb-1);
+	const double p=tb1? pow(r,tb1) : 1.;
 	d1 = tb*p;
-	d2 = d1*(tb-1)/r;
+	d2 = d1*tb1/r;
 	return r*p;
       }
       const double rq=r*r, qq=rq*uq, ft=1+qq, ift=1/ft, al=twice(b+qq)*ift;
@@ -673,7 +673,29 @@ namespace {
     //--------------------------------------------------------------------------
   public:
     ReducedDensity(const HaloDensity&m, double r_a, double beta)
-      : Model(m), uq(r_a>0? 1/square(r_a):0), b(beta), tb(b+b) {}
+      : Model(m), uq(r_a>0? 1/square(r_a):0), b(beta), tb(b+b), tb1(tb-1)
+    {
+//       std::cerr<<" Testing ReducedDensity(): "
+// 	       <<" r_a="<<r_a<<" uq="<<uq<<'\n'
+// 	       <<" beta="<<beta<<" b="<<b<<" tb="<<tb<<" tb1="<<tb1<<'\n';
+//       for(;;) {
+// 	double r;
+// 	std::cout<<" r="; std::cin>>r;
+// 	if(r<0) break;
+// 	double dr=0.0001*r;
+// 	double rl=r-dr, rh=r+dr;
+// 	double t =(*this)(r),tl=(*this)(rl),th=(*this)(rh);
+// 	double t1,t1l,t1h,t1r,t2;
+// 	double tr=(*this)(r,t1),trl=(*this)(rl,t1l),trh=(*this)(rh,t1h);
+// 	double trr=(*this)(r,t1r,t2);
+// 	std::cerr<<" rd="<<t<<" ="<<tr<<" ="<<trr<<'\n'
+// 		 <<" d1="<<t1<<" ="<<t1r
+// 		 <<" ="<<((th-tl)/(dr+dr))<<'\n'
+// 		 <<" d2="<<t2
+// 		 <<" ="<<((tl+th-t-t)/(dr*dr))
+// 		 <<" ="<<((t1h-t1l)/(dr+dr))<<'\n';
+//       }
+    }
     //--------------------------------------------------------------------------
     double inner_gamma() const {
       return Model.inner_gamma() - tb;
@@ -766,7 +788,7 @@ HaloModel::HaloModel(HaloDensity const&model,
   // 1 compute distribution function                                           
   // 1.1 tabulate integrand on grid considering possible cases for beta
   Array<double,1> in(n);
-  RED = new ReducedDensity(DEN,B,RA);
+  RED = new ReducedDensity(DEN,RA,B);
   if       (B >= 0.5) {        //  0.5 <= beta <  1  :  tabulate d red/ dpsi    
     bool integrand_negative = false;
     for(int i=0; i!=n; ++i) {
@@ -838,7 +860,7 @@ double HaloModel::lnG(double Q) const {
     // 2 at large Q (small radii)
     return lg[0] + (B+B-Ah-(1.5-B)*(2-At)) * (lnRPsi(Q)-lr[0]);
   else
-    // 3 withing tabulated interval
+    // 3 within tabulated interval
     return polev(Q,ps,lg);
 }
 //------------------------------------------------------------------------------
