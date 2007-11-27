@@ -450,19 +450,20 @@ namespace falcON {
       lev     = 1 << 12,
       num     = 1 << 13,
       posvel  = 1 << 14,
-      SPHh    = 1 << 15,
-      SPHnum  = 1 << 16,
-      SPHu    = 1 << 17,
-      SPHudot = 1 << 18,
-      SPHurad = 1 << 19,
-      SPHentr = 1 << 20,
-      SPHdens = 1 << 21,
-      SPHhdot = 1 << 22,
-      SPHfact = 1 << 23,
-      SPHcs   = 1 << 24,
-      SPHalfa = 1 << 25,
-      SPHdivv = 1 << 26,
-      SPHmu   = 1 << 27
+      Size    = 1 << 15,
+      Gasnum  = 1 << 16,
+      Uin     = 1 << 17,
+      Uindot  = 1 << 18,
+      Uinrad  = 1 << 19,
+      Entr    = 1 << 20,
+      Gasdens = 1 << 21,
+      Sizedot = 1 << 22,
+      Sphfact = 1 << 23,
+      Csound  = 1 << 24,
+      AlphaAV = 1 << 25,
+      DivV    = 1 << 26,
+      MolWght = 1 << 27,
+      Spin    = 1 << 28
     };
     //--------------------------------------------------------------------------
     /// get the nemo_io::DataType used for a given Field                        
@@ -483,40 +484,21 @@ namespace falcON {
       case lev    : return Short;
       case num    : return Integer;
       case posvel : return Real;
-      case SPHh   : return Real;
-      case SPHnum : return Integer;
-      case SPHu   : return Real;
-      case SPHudot: return Real;
-      case SPHurad: return Real;
-      case SPHentr: return Real;
-      case SPHdens: return Real;
-      case SPHhdot: return Real;
-      case SPHfact: return Real;
-      case SPHcs  : return Real;
-      case SPHalfa: return Real;
-      case SPHdivv: return Real;
-      case SPHmu  : return Real;
+      case Size   : return Real;
+      case Gasnum : return Integer;
+      case Uin    : return Real;
+      case Uindot : return Real;
+      case Uinrad : return Real;
+      case Entr   : return Real;
+      case Gasdens: return Real;
+      case Sizedot: return Real;
+      case Sphfact: return Real;
+      case Csound : return Real;
+      case AlphaAV: return Real;
+      case DivV   : return Real;
+      case MolWght: return Real;
+      case Spin   : return Real;
       default     : return Null;
-      }
-    }
-    //--------------------------------------------------------------------------
-    /// is a Field SPH?                                                         
-    static bool is_sph(Field f) {
-      switch(f) {
-      case SPHh:
-      case SPHnum:
-      case SPHu:
-      case SPHudot:
-      case SPHurad:
-      case SPHentr:
-      case SPHdens:
-      case SPHhdot:
-      case SPHfact:
-      case SPHcs:
-      case SPHalfa:
-      case SPHdivv:
-      case SPHmu:   return true;
-      default:      return false;
       }
     }
     //--------------------------------------------------------------------------
@@ -538,19 +520,20 @@ namespace falcON {
       case fieldbit::z: return zet;
       case fieldbit::l: return lev;
       case fieldbit::n: return num;
-      case fieldbit::H: return SPHh;
-      case fieldbit::N: return SPHnum;
-      case fieldbit::U: return SPHu;
-      case fieldbit::I: return SPHudot;
-      case fieldbit::E: return SPHurad;
-      case fieldbit::K: return SPHentr;
-      case fieldbit::R: return SPHdens;
-      case fieldbit::A: return SPHalfa;
-      case fieldbit::D: return SPHdivv;
-      case fieldbit::J: return SPHhdot;
-      case fieldbit::F: return SPHfact;
-      case fieldbit::C: return SPHcs;
-      case fieldbit::M: return SPHmu;
+      case fieldbit::H: return Size;
+      case fieldbit::N: return Gasnum;
+      case fieldbit::U: return Uin;
+      case fieldbit::I: return Uindot;
+      case fieldbit::E: return Uinrad;
+      case fieldbit::K: return Entr;
+      case fieldbit::R: return Gasdens;
+      case fieldbit::A: return AlphaAV;
+      case fieldbit::D: return DivV;
+      case fieldbit::J: return Sizedot;
+      case fieldbit::F: return Sphfact;
+      case fieldbit::C: return Csound;
+      case fieldbit::M: return MolWght;
+      case fieldbit::S: return Spin;
       default         : return null;
       }
     }
@@ -573,19 +556,20 @@ namespace falcON {
       case zet:     return fieldbit::z;
       case lev:     return fieldbit::l;
       case num:     return fieldbit::n;
-      case SPHh:    return fieldbit::H;
-      case SPHnum:  return fieldbit::N;
-      case SPHu:    return fieldbit::U;
-      case SPHudot: return fieldbit::I;
-      case SPHurad: return fieldbit::E;
-      case SPHentr: return fieldbit::K;
-      case SPHdens: return fieldbit::R;
-      case SPHhdot: return fieldbit::J;
-      case SPHfact: return fieldbit::F;
-      case SPHcs:   return fieldbit::C;
-      case SPHalfa: return fieldbit::A;
-      case SPHdivv: return fieldbit::D;
-      case SPHmu:   return fieldbit::M;
+      case Size:    return fieldbit::H;
+      case Gasnum:  return fieldbit::N;
+      case Uin:     return fieldbit::U;
+      case Uindot:  return fieldbit::I;
+      case Uinrad:  return fieldbit::E;
+      case Entr:    return fieldbit::K;
+      case Gasdens: return fieldbit::R;
+      case Sizedot: return fieldbit::J;
+      case Sphfact: return fieldbit::F;
+      case Csound:  return fieldbit::C;
+      case AlphaAV: return fieldbit::A;
+      case DivV:    return fieldbit::D;
+      case MolWght: return fieldbit::M;
+      case Spin:    return fieldbit::S;
       default: falcON_THROW("unaccountable nemo_io::Field\n");
       }
     }
@@ -723,8 +707,11 @@ namespace falcON {
     unsigned const&Nbod(bodytype t) const { return NBOD[t]; }
     /// return the number of data expected for a given field
     unsigned N(nemo_io::Field F) const {
-      return nemo_io::is_sph(F)?
-	NBOD[bodytype::sink]+NBOD[bodytype::gas] : NTOT;
+      unsigned n(0u);
+      fieldbit b=nemo_io::bit(F);
+      for(bodytype t; t; ++t)
+	if(t.allows(b)) n += NBOD[t];
+      return n;
     }
     /// return the simulation time of the snapshot
     double   const&time() const { return TIME; }
@@ -921,8 +908,11 @@ namespace falcON {
     unsigned const&Nbod(bodytype t) const { return NBOD[t]; }
     /// return the number of data expected for a given field
     unsigned N(nemo_io::Field F) const {
-      return nemo_io::is_sph(F)?
-	NBOD[bodytype::sink]+NBOD[bodytype::gas] : NTOT;
+      unsigned n(0u);
+      fieldbit b=nemo_io::bit(F);
+      for(bodytype t; t; ++t)
+	if(t.allows(b)) n += NBOD[t];
+      return n;
     }
     /// have data for given field been written already?
     bool has_been_written(nemo_io::Field f) const {

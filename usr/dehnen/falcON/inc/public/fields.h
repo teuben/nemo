@@ -310,13 +310,13 @@ namespace falcON {
   // class fieldbit                                                           //
   // represents individual body data types as integer, i.e. 0 corresponds to  //
   // mass, 1 to positions, etc. fieldbit can be used as a java-style iterator //
-  // over allowes data types.                                                 //
+  // over allowed data types.                                                 //
   //                                                                          //
   // class fieldset                                                           //
   // represents a collection of body data types as integer each bit           //
   // corresponding to the data whose fieldbit matches its position. fieldset  //
   // are used to indicate which body data should be, e.g., allocated, read,   //
-  // written, or copies, etc.                                                 //
+  // written, or copied, etc.                                                 //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////
@@ -325,12 +325,14 @@ namespace falcON {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   namespace BodyData {
-    const int         NOSPH   = 19;                // # non-sph data            
-    const int         NQUANT  = 33;                // total # data              
+    const int         KSTD    = 0;                 // std data start here       
+    const int         KSPH    = 19;                // sph data start here       
+    const int         KSINK   = 33;                // sink data start here      
+    const int         NQUANT  = 34;                // total # data              
     //--------------------------------------------------------------------------
     /// array with the one-char data tags used as enum names
     /// \note not (to be) referred to outside of this file
-    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIEKRADJFCM";
+    const char* const SQUANT  ="mxvwefktpqajryzlndhHNUYIEKRADJFCMS";
     //--------------------------------------------------------------------------
     /// array with full-length human readable names for the N-body data
     /// \note not (to be) referred to outside of this file
@@ -343,7 +345,7 @@ namespace falcON {
 	"SPH smoothing length", "number of SPH partners", "U_internal",
 	"U_predicted", "(dU/dt)_total", "(dU/dt)_external", "entropy function",
 	"gas density", "alpha_visc", "div(v)", "dlog(h)/dt", "factor",
-	"sound speed", "molecular weight"
+	"sound speed", "molecular weight", "spin"
       };
     //--------------------------------------------------------------------------
     /// array with function names for the N-body data
@@ -353,7 +355,7 @@ namespace falcON {
 	"pex", "acc", "jerk", "rho", "aux", "zet", "level", "num", "node",
 	"peano",
 	"size", "snum", "uin", "uprd", "udot", "udex", "entr", "srho", "alfa",
-	"divv", "hdot", "fact", "csnd", "molw"
+	"divv", "hdot", "fact", "csnd", "molw", "spin"
       };
     //--------------------------------------------------------------------------
     /// array with five-chacter names for the N-body data
@@ -363,7 +365,7 @@ namespace falcON {
 	"pot  ", "pex  ", "acc  ", "jerk ", "rho  ", "aux  ", "zet  ", "level",
 	"num  ", "node ", "peano",
 	"size ", "snum ", "uin  ", "uprd ", "udot ", "udex ", "entr ", "srho ",
-	"alfa ", "divv ", "hdot ", "fact ", "csnd ", "molw "
+	"alfa ", "divv ", "hdot ", "fact ", "csnd ", "molw ", "spin "
       };
     //--------------------------------------------------------------------------
     /// array with the sizeof() the N-body data
@@ -403,7 +405,9 @@ namespace falcON {
       sizeof(real),           ///< dlogh/dt
       sizeof(real),           ///< f_i
       sizeof(real),           ///< sound speed
-      sizeof(real)            ///< molecular weight
+      sizeof(real),           ///< sound speed
+      //            SINK properties: 1
+      sizeof(vect)            ///< spin
     };
   } // namespace BodyData
   // ///////////////////////////////////////////////////////////////////////////
@@ -426,7 +430,6 @@ namespace falcON {
     typedef int value_type;
     /// \name static members
     //@{
-    static const int   NOSPH = BodyData::NOSPH;  ///< # non-sph data            
     static const int   NQUANT= BodyData::NQUANT; ///< total # data              
     /// letter for body datum
     static const char& SNAME(int i) { return BodyData::SQUANT[i]; }
@@ -486,6 +489,7 @@ namespace falcON {
       F       = 30,           ///< factor f_i
       C       = 31,           ///< sound speed
       M       = 32,           ///< molecular weight
+      S       = 33,           ///< spin vector
       invalid = NQUANT        ///< not corresponding to any field
     };
     //--------------------------------------------------------------------------
@@ -565,7 +569,9 @@ namespace falcON {
   inline const char*fullname(fieldbit f) { return BodyData::QFULLNAME[f.val]; }
   inline const char*funcname(fieldbit f) { return BodyData::QFUNCNAME[f.val]; }
   inline const char*fivename(fieldbit f) { return BodyData::QFIVENAME[f.val]; }
-  inline bool       is_sph  (fieldbit f) { return f.val>= BodyData::NOSPH; }
+  inline bool       is_sph  (fieldbit f) {
+    return f.val >= BodyData::KSPH && f.val < BodyData::KSINK;
+  }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::fieldset                                                     
@@ -634,6 +640,8 @@ namespace falcON {
       F       = one << fieldbit::F,  ///< just factors f_i
       C       = one << fieldbit::C,  ///< just sound speeds
       M       = one << fieldbit::M,  ///< just molecular weights
+      // SINK only:
+      S       = one << fieldbit::S,  ///< just spin vectors
       /// default SPH quantities
       sphdef  = H|R|V|J|F|C,
       /// all SPH quantities
@@ -659,9 +667,9 @@ namespace falcON {
       /// all floating point scalar quantities
       scalars = m|e|t|p|q|r|y|sphscal,
       /// all vector quantities
-      vectors = x|v|a|j|w|z,
+      vectors = x|v|a|j|w|z|S,
       /// all quantities supported by NEMO Input
-      nemoin  = m|x|v|e|k|t|p|a|r|y|z|l|n|sphnemo,
+      nemoin  = m|x|v|e|k|t|p|a|r|y|z|l|n|sphnemo|S,
       /// all quantities supported by NEMO Output
       nemo    = nemoin | q,
       /// all quantities at all
@@ -670,6 +678,8 @@ namespace falcON {
       SPH     = sphmax,
       /// all standard quantities
       STD     = source|nonsource,
+      /// all sink quantities
+      SINK    = S,
       /// all non-SPH quantities
       nonSPH  = all & ~SPH,
       /// an empty set (again)
@@ -865,9 +875,11 @@ namespace falcON {
   //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
   const unsigned BT_NUM = 3;
-  const fieldset BT_DATA[BT_NUM] = { fieldset::STD | fieldset::SPH,
-				     fieldset::STD | fieldset::SPH,
-				     fieldset::STD };
+  const fieldset BT_DATA[BT_NUM] = {
+    fieldset::STD | fieldset::SPH | fieldset::SINK,
+    fieldset::STD | fieldset::SPH,
+    fieldset::STD
+  };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   //  class falcON::bodytype                                                    
@@ -1078,7 +1090,8 @@ namespace falcON {
   template<> struct field_traits< BIT > :				\
   public field_type<TYPE> {						\
     typedef TYPE type;							\
-    static const bool   is_sph = BIT >= BodyData::NOSPH;		\
+    static const bool   is_sph = BIT >= BodyData::KSPH			\
+                              && BIT < BodyData::KSINK;			\
     static const size_t size   = sizeof(type);                          \
     static const char&word     () { return BodyData::SQUANT[BIT]; }	\
     static const char*fullname () { return BodyData::QFULLNAME[BIT]; }	\
@@ -1119,6 +1132,7 @@ namespace falcON {
   DefFieldTraits(30, real);                        // SPH: f_i                  
   DefFieldTraits(31, real);                        // SPH: sound speed          
   DefFieldTraits(32, real);                        // SPH: molecular weights    
+  DefFieldTraits(33, vect);                        // SINK: spins               
 #undef DefFieldTraits
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -1128,7 +1142,7 @@ namespace falcON {
   // changes in the data type layout etc. are automatically reflected.        //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#define DEF_NAMED_NONSPH(MACRO)			\
+#define DEF_NAMED_STD(MACRO)			\
   MACRO(fieldbit::m,mass);			\
   MACRO(fieldbit::x,pos);			\
   MACRO(fieldbit::v,vel);			\
@@ -1163,9 +1177,12 @@ namespace falcON {
   MACRO(fieldbit::F,fact);			\
   MACRO(fieldbit::C,csnd);			\
   MACRO(fieldbit::M,molw);
+#define DEF_NAMED_SINK(MACRO)			\
+  MACRO(fieldbit::S,spin);
 #define DEF_NAMED(MACRO)			\
-  DEF_NAMED_NONSPH(MACRO)			\
-  DEF_NAMED_SPH(MACRO)
+  DEF_NAMED_STD(MACRO)				\
+  DEF_NAMED_SPH(MACRO)				\
+  DEF_NAMED_SINK(MACRO)
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // templates for looping fields                                             //
@@ -1199,22 +1216,32 @@ namespace falcON {
   };
   //----------------------------------------------------------------------------
   template< template<int> class LOOP>
-  struct LoopSPHFields {
+  struct LoopSINKFields {
     template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, BodyData::NOSPH, BodyData::NQUANT>::loop(x);
+      LoopFields<LOOP, BodyData::KSINK, BodyData::NQUANT>::loop(x);
     }
     template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, BodyData::NOSPH, BodyData::NQUANT>::const_loop(x);
+      LoopFields<LOOP, BodyData::KSINK, BodyData::NQUANT>::const_loop(x);
+    }
+  };
+  //----------------------------------------------------------------------------
+  template< template<int> class LOOP>
+  struct LoopSPHFields {
+    template< typename T > static void loop(T&x) {
+      LoopFields<LOOP, BodyData::KSPH, BodyData::KSINK>::loop(x);
+    }
+    template< typename T > static void const_loop(T const&x) {
+      LoopFields<LOOP, BodyData::KSPH, BodyData::KSINK>::const_loop(x);
     }
   };
   //----------------------------------------------------------------------------
   template< template<int> class LOOP>
   struct LoopSTDFields {
     template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, 0, BodyData::NOSPH>::loop(x);
+      LoopFields<LOOP, 0, BodyData::KSPH>::loop(x);
     }
     template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, 0, BodyData::NOSPH>::const_loop(x);
+      LoopFields<LOOP, 0, BodyData::KSPH>::const_loop(x);
     }
   };
   //////////////////////////////////////////////////////////////////////////////
