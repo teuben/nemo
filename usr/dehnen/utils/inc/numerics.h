@@ -471,6 +471,94 @@ namespace WDutils {
     return polev(x,xarr.array(),yarr.array(),xarr.size());
   }
   //----------------------------------------------------------------------------
+  // supporting macro Polev() to act like polev(), but reporting file & line
+  class polev__ {
+    const char* file;
+    const int   line;
+  public:
+    polev__(const char*f, int l) : file(f), line(l) {}
+    //..........................................................................
+    template<typename scalar_type, typename num_type>
+    num_type polint(const scalar_type *xa, const num_type *ya,
+		    int n, scalar_type x) WDutils_THROWING
+    {
+      num_type y,*P=WDutils_NEW(num_type,n);
+      for(int i=0;i!=n;++i) P[i]=ya[i];
+      for(int m=1;m!=n;++m)
+	for(int i=0;i<n-m;++i) {
+	  if(xa[i]==xa[i+m])
+	    WDutils_THROW("[%s:%d]: in Polev(): xi's not distinct (x=%g)\n",
+			  file,line,x);
+	  P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
+	}
+      y = P[0];
+      WDutils_DEL_A(P);
+      return y;
+    }
+    //..........................................................................
+    template<int n, typename scalar_type, typename num_type>
+    num_type polint_T(const scalar_type*xa, const num_type*ya, scalar_type x)
+      WDutils_THROWING
+    {
+      num_type y, P[n];
+      for(int i=0;i!=n;++i) P[i]=ya[i];
+      for(int m=1;m!=n;++m)
+	for(int i=0;i<n-m;++i) {
+	  if(xa[i]==xa[i+m])
+	    WDutils_THROW("[%s:%d]: in Polev(): xi's not distinct (x=%g)\n",
+			  file,line,x);
+	  P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
+	}
+      y = P[0];    
+      return y;
+    }
+    //..........................................................................
+    template<typename scalar_type, typename num_type>
+    num_type operator()(scalar_type x, const scalar_type*xarr,
+			const num_type*yarr, int n, int m) WDutils_THROWING
+    {
+      int j, M;
+      switch(m) {
+      case 2 : 
+	M = find_for_polev_T<2>(j,n,xarr,x);
+	return polint_T<2>(xarr+j, yarr+j, x);
+      case 3 : 
+	M = find_for_polev_T<3>(j,n,xarr,x);
+	return polint_T<3>(xarr+j, yarr+j, x);
+      case 4 : 
+	M = find_for_polev_T<4>(j,n,xarr,x);
+	return polint_T<4>(xarr+j, yarr+j, x);
+      case 5 : 
+	M = find_for_polev_T<5>(j,n,xarr,x);
+	return polint_T<5>(xarr+j, yarr+j, x);
+      case 6 : 
+	M = find_for_polev_T<6>(j,n,xarr,x);
+	return polint_T<6>(xarr+j, yarr+j, x);
+      default: 
+	M = find_for_polev(j,n,m,xarr,x);
+	return polint(xarr+j, yarr+j, M, x);
+      }
+    }
+    //..........................................................................
+    template<typename scalar_type, typename num_type>
+    num_type operator()(scalar_type x, const scalar_type*xarr,
+			const num_type*yarr, int n)
+    {
+      int j, M=find_for_polev_T<4>(j,n,xarr,x);
+      return polint_T<4>(xarr+j, yarr+j, x);
+    }
+    //..........................................................................
+    template<typename scalar_type, typename num_type>
+    num_type operator()(scalar_type x, const Array<scalar_type,1>&xarr,
+			const Array<num_type,1>&yarr) WDutils_THROWING
+    {
+      if(xarr.size() != yarr.size())
+	WDutils_THROW("[%s:%d]: size mismatch in Polev()\n",file,line);
+      return (*this)(x,xarr.array(),yarr.array(),xarr.size());
+    }
+  };
+#define Polev WDutils::polev__(__FILE__,__LINE__)
+  //----------------------------------------------------------------------------
   template<typename scalar_type, typename num_type>
   inline num_type ipolev(scalar_type x,
 			 const scalar_type*xarr,
