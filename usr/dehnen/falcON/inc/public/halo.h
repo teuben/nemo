@@ -91,7 +91,7 @@ namespace falcON {
     double             Ah,At;                      ///< gamma_0 for rho, psi    
     double             Ch;                         ///< gamma_00 for rho        
     double             ps0;                        ///< Psi(0) (if finite)      
-    int                n,n1,nm;                    ///< size of tables          
+    int                n,n0,n1,nm;                 ///< size of tables          
     Array<double,1>    r,lr;                       ///< r_i, ln(r_i)            
     Array<double,1>    mh;                         ///< M_halo(<r_i)            
     Array<double,1>    mt;                         ///< M_tot(<r_i)             
