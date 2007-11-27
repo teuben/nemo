@@ -64,7 +64,10 @@ extern "C" {
 #  define ArtViscTag "ArtificialViscosity"
 #endif
 #ifndef GasDivVTag
-#  define GasDivVTag "Divergenc(Velocity)"
+#  define GasDivVTag "Divergence(Velocity)"
+#endif
+#ifndef SpinTag
+#  define SpinTag "SpinVector"
 #endif
 #ifndef GasDensTag
 #  warning
@@ -147,19 +150,20 @@ namespace {
     case nemo_io::lev    : return LevelTag;
     case nemo_io::num    : return NumberTag;
     case nemo_io::posvel : return PhaseSpaceTag;
-    case nemo_io::SPHh   : return SmoothTag;
-    case nemo_io::SPHnum : return SPHNumberTag;
-    case nemo_io::SPHu   : return UinternTag;
-    case nemo_io::SPHudot: return UdotIntTag;
-    case nemo_io::SPHurad: return UdotRadTag;
-    case nemo_io::SPHentr: return EntFuncTag;
-    case nemo_io::SPHdens: return GasDensTag;
-    case nemo_io::SPHhdot: return GasHdotTag;
-    case nemo_io::SPHfact: return GasFactTag;
-    case nemo_io::SPHcs  : return SoundSpeedTag;
-    case nemo_io::SPHalfa: return ArtViscTag;
-    case nemo_io::SPHdivv: return GasDivVTag;
-    case nemo_io::SPHmu  : return MolWeightTag;
+    case nemo_io::Size   : return SmoothTag;
+    case nemo_io::Gasnum : return SPHNumberTag;
+    case nemo_io::Uin    : return UinternTag;
+    case nemo_io::Uindot : return UdotIntTag;
+    case nemo_io::Uinrad : return UdotRadTag;
+    case nemo_io::Entr   : return EntFuncTag;
+    case nemo_io::Gasdens: return GasDensTag;
+    case nemo_io::Sizedot: return GasHdotTag;
+    case nemo_io::Sphfact: return GasFactTag;
+    case nemo_io::Csound : return SoundSpeedTag;
+    case nemo_io::AlphaAV: return ArtViscTag;
+    case nemo_io::DivV   : return GasDivVTag;
+    case nemo_io::MolWght: return MolWeightTag;
+    case nemo_io::Spin   : return SpinTag;
     case nemo_io::null:
       falcON_THROW("nemo I/O: nemo_io::null not I/O able");
     default:
@@ -200,18 +204,19 @@ namespace {
     case nemo_io::aux:
     case nemo_io::lev:
     case nemo_io::num:
-    case nemo_io::SPHh:
-    case nemo_io::SPHnum:
-    case nemo_io::SPHu:
-    case nemo_io::SPHudot:
-    case nemo_io::SPHurad:
-    case nemo_io::SPHentr:
-    case nemo_io::SPHdens:
-    case nemo_io::SPHhdot:
-    case nemo_io::SPHalfa:
-    case nemo_io::SPHfact:
-    case nemo_io::SPHcs:  
-    case nemo_io::SPHmu:   return true;
+    case nemo_io::Size:
+    case nemo_io::Gasnum:
+    case nemo_io::Uin:
+    case nemo_io::Uindot:
+    case nemo_io::Uinrad:
+    case nemo_io::Entr:
+    case nemo_io::Gasdens:
+    case nemo_io::Sizedot:
+    case nemo_io::Sphfact:
+    case nemo_io::Csound:  
+    case nemo_io::AlphaAV:  
+    case nemo_io::DivV:  
+    case nemo_io::MolWght: return true;
     default:               return false;
     }
   }
@@ -222,7 +227,8 @@ namespace {
     case nemo_io::vel:
     case nemo_io::acc:
     case nemo_io::zet:
-    case nemo_io::jerk: return true;
+    case nemo_io::jerk: 
+    case nemo_io::Spin: return true;
     default:            return false;
     }
   }
