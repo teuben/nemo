@@ -708,7 +708,7 @@ namespace falcON {
     /// return the number of data expected for a given field
     unsigned N(nemo_io::Field F) const {
       unsigned n(0u);
-      fieldbit b=nemo_io::bit(F);
+      fieldbit b= F==nemo_io::posvel? fieldbit(fieldbit::x) : nemo_io::bit(F);
       for(bodytype t; t; ++t)
 	if(t.allows(b)) n += NBOD[t];
       return n;
@@ -909,7 +909,7 @@ namespace falcON {
     /// return the number of data expected for a given field
     unsigned N(nemo_io::Field F) const {
       unsigned n(0u);
-      fieldbit b=nemo_io::bit(F);
+      fieldbit b= F==nemo_io::posvel? fieldbit(fieldbit::x) : nemo_io::bit(F);
       for(bodytype t; t; ++t)
 	if(t.allows(b)) n += NBOD[t];
       return n;
