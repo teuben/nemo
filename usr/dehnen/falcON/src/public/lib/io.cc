@@ -791,7 +791,7 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
   }
   OUTPUT.DATA_OUT = this;
   report::info("data_out: opened for %d '%s'\n",
-	       NTOT,fullname(nemo_io::bit(FIELD)));
+	       NTOT,NemoTag(FIELD));
 }
 //------------------------------------------------------------------------------
 data_out::~data_out()
@@ -803,8 +803,7 @@ data_out::~data_out()
   OUTPUT.DATA_OUT        = 0;
   OUTPUT.FIELDS_WRITTEN |= FIELD;
   debug_info(5,"data_out(%s) closed\n",NemoTag(FIELD));
-  report::info("data_out: closed output of '%s'\n",
-	       fullname(nemo_io::bit(FIELD)));
+  report::info("data_out: closed output of '%s'\n",NemoTag(FIELD));
 }
 //------------------------------------------------------------------------------
 void data_out::write(const void*data, unsigned n)
