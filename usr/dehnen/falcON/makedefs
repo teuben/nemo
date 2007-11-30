@@ -5,6 +5,12 @@
 #
 ################################################################################
 
+# -----------------
+# Hardware platform
+# -----------------
+
+PLATFORM 	:= $(shell uname -m)
+
 # --------------------
 # maximum tensor order
 # --------------------
@@ -101,7 +107,7 @@ FC		:= $(CPATH)g77
 # CPU dependent optimization flags
 # EDIT to match your hardware
 
-ifeq ($(HOSTNAME),virgo)
+ifeq ($(HOSTNAME),rigel)
 # on virgo use
 CPUFLAGS	:= -march=pentium-m -mpreferred-stack-boundary=4
 
