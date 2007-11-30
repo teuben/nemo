@@ -68,9 +68,9 @@ endif
 endif
 
 ifdef DEBUG
-OPTFLAGS		:= -g -fPIC $(CPUFLAGS) -rdynamic
+OPTFLAGS		:= -ggdb3 -fPIC $(CPUFLAGS) -rdynamic
 else
-OPTFLAGS		:= -g -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
+OPTFLAGS		:= -ggdb3 -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic
 endif
 
 else
