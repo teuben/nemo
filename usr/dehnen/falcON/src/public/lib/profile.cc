@@ -169,13 +169,20 @@ spherical_profile::spherical_profile(const bodies*B,
 	             0.5 * B->mass(I[j]) : B->mass(I[j]);
 	vect_d ri  = x0? B->pos(I[j])-(*x0) : B->pos(I[j]);
 	vect_d vi  = v0? B->vel(I[j])-(*v0) : B->vel(I[j]);
-	vect_d er  = ri/R[j];
-	double vri = er*vi;
-	M   += mi;
-	Mvr += mi*vri;
-	Mvrq+= mi*vri*vri;
-	Mam += mi*(ri^vi);
-	Mvp += mi*(er^vi);
+	if(R[j]==zero) {
+	  double vri = abs(vi);
+	  M   += mi;
+	  Mvr += mi*vri;
+	  Mvrq+= mi*vri*vri;
+	} else {
+	  vect_d er  = ri/R[j];
+	  double vri = er*vi;
+	  M   += mi;
+	  Mvr += mi*vri;
+	  Mvrq+= mi*vri*vri;
+	  Mam += mi*(ri^vi);
+	  Mvp += mi*(er^vi);
+	}
 	add_outer_product3(Mxx,ri,mi);
       }
       rh[i] = iFPit*M/(i? cube(R[ir[i+1]])-cube(R[ir[i-1]]) : cube(R[ir[i+1]]));
