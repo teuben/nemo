@@ -205,11 +205,13 @@ spherical_profile::spherical_profile(const bodies*B,
 	             0.5 * B->mass(I[j]) : B->mass(I[j]);
 	vect_d ri  = x0? B->pos(I[j])-(*x0) : B->pos(I[j]);
 	vect_d vi  = v0? B->vel(I[j])-(*v0) : B->vel(I[j]);
-	vect_d er  = ri/R[j];
-	vect_d ep  = normalized(er^erot);
-	vect_d et  = normalized(er^ep);
-	Mvpq += mi * square(vi*ep);
-	Mvtq += mi * square(vi*et);
+	if(R[j]>zero) {
+	  vect_d er  = ri/R[j];
+	  vect_d ep  = normalized(er^erot);
+	  vect_d et  = normalized(er^ep);
+	  Mvpq += mi * square(vi*ep);
+	  Mvtq += mi * square(vi*et);
+	}
       }
       st[i] = sqrt(Mvtq/M);
       sp[i] = sqrt(M*Mvpq-Mvp*Mvp)/M;
