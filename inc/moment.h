@@ -25,7 +25,8 @@ int  n_moment     (Moment *);	/* number of moments */
 real sum_moment   (Moment *);	/* computes sum0 */
 real mean_moment  (Moment *);	/* computes mean (mom=-1) */
 real median_moment(Moment *);   /* only works if ndat > 0 */
-real sigma_moment (Moment *);	/* computes dispersion around mean (mom=-2) */
+real sigma_moment (Moment *);	/* computes weighted dispersion around mean (mom=-2) */
+real rms_moment   (Moment *);	/* computes rms */
 real skewness_moment (Moment *);	/* computes special 3rd moment (mom=-3) */
 real kurtosis_moment (Moment *);	/* computes special 4th moment (mom=-4) */
 
