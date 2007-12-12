@@ -41,12 +41,11 @@ nemo_main()
 {
   int i,n;
   int maxpnt = getiparam("maxpnt");
-  real mean, rms;
   bool Qcarma = getbparam("carma");
 
   instr = stropen (getparam("infile"),"r");
-
   ini_moment(&m,2,maxpnt);
+
   for(;;) {
     if (fgets(line,MAX_LINELEN,instr) == NULL) 
       break;
@@ -54,10 +53,8 @@ nemo_main()
     n = strlen(line);
     if (line[n-1]=='\n') line[n-1]='\0';
     n = nemoinpr(line,data,MAXCOL);
-    dprintf(5,"n=%d line=%s\n",n,line);
     for (i=0; i<n; i++)
       accum_moment(&m,data[i],1.0);
-    
   }
 
   /* The CARMA version of meanmed outputs this:
@@ -69,16 +66,7 @@ nemo_main()
   printf("  %d ",n_moment(&m));
   printf("  %g ",median_moment(&m));
   printf("  %g ",mean_moment(&m));
-#if 0
-  printf("  %g ",sigma_moment(&m));
-#else
-  n = n_moment(&m);
-  mean = mean_moment(&m);
-  rms = show_moment(&m,2) - mean*mean*n;
-  rms = sqrt(rms/(n-1));
-  printf("  %g ",rms);
-#endif
-
+  printf("  %g ",rms_moment(&m));
   printf("  %g ",min_moment(&m));
   printf("  %g ",max_moment(&m));
   printf("\n");
