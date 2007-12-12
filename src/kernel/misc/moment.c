@@ -9,6 +9,7 @@
  *  16-sep-95   fixed more bugs if no data accumulated
  *   9-dec-99   fix min/max when data deleted
  *   2-feb-05   added moving moments
+ *  12-dec-07   added rms_moment; only valid for equal weights
  */
 
 
@@ -178,6 +179,25 @@ real sigma_moment(Moment *m)
     if (tmp <= 0.0) return 0.0;
     return sqrt(tmp);
 }
+
+/* TODO:  this needs to be weight independant 
+ *        now it only works properly if all weighta are 1
+ */
+
+real rms_moment(Moment *m)
+{
+    real mean, tmp;
+    if (m->mom < 2)
+        error("rms_moment cannot be computed with mom=%d",m->mom);
+    if (m->n < 2) return 0;
+    mean=sum1/sum0;
+    if (m->datamin == m->datamax) return 0.0;
+    tmp = sum2 - mean*mean*sum0;
+    if (tmp <= 0.0) return 0.0;
+    tmp /= (m->n - 1);
+    return sqrt(tmp);
+}
+
 
 real skewness_moment(Moment *m)
 {
