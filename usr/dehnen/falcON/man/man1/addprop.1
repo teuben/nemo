@@ -1,0 +1,72 @@
+.TH addprop 1falcON "21 December 2007"
+
+.SH name
+addprop \- adds (or replaces) a body property in nemo snapshots
+
+.SH synopsis
+\fBaddprop\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+
+.SH description
+\fBaddprop\fP adds a body property and assigns a value, evaluated from
+a \fIbodyfunc(5falcON)\fP expressions and parameters provided.
+
+.SH parameters
+
+.TP 12
+\fBin=\fP\fIfile\fP
+Input snapshots are read from \fIfile\fP, which must be in NEMO
+snapshot format. If \fIfile\fP=-, input is expected from stdin,
+useful for piping data from another program. Default: \fBrequired\fP
+.TP
+\fBout=\fP\fIfile\fP
+Snapshots are written in NEMO snapshot format to \fIfile\fP with same
+body data as the input plus acceleration and potential.  Default:
+\fBrequired\fP.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Range(s) of simulation times, for which snapshots shall be processed.
+Default: \fBall\fP.
+.TP
+\fBwrite=\fP\fIIOstring\fP
+Specifies which data shall be written out.
+Default: \fBall\fP.
+.TP
+\fBprop=\fP\fIval\fP
+The body property to be added/replaced encoded as single character.
+Default: \fBrequired\fP
+.TP
+\fBvalue=\fP\fIexpr\fP
+\fIbodyfunc(5falcON)\fP expression used to evaluate new property for
+each body. Default: \fBrequired\fP
+.TP
+\fBpars=\fP\fIparameter list\fP
+If the \fIbodyfunc(5falcON)\fP expression given with \fBvalue=\fP
+requires parameters (up to 10), these must be provided (as comma-separated
+list) with \fBpars=\fP. No Default.
+
+.SH see also
+bodyfunc(5falcON), snapprop(1falcON)
+.PP
+.nf
+
+.fi
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Walter Dehnen                              walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+21-Dec-2007	first version of manual  WD
+.fi
+
+
