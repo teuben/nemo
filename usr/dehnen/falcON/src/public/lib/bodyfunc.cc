@@ -1222,6 +1222,81 @@ bool bodyfunc::print_db(std::ostream&out)
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
+// implementing falcON::Bodyfunc::Bodyfunc()                                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
+falcON::Bodyfunc::Bodyfunc(const char*expr, const char*pars)
+  throw(falcON::exception)
+  : bodyfunc(expr), PARS(0)
+{
+  if(is_empty()) return;
+  if(pars) {
+    size_t len = strlen(pars)+1;
+    PARS = falcON_NEW(char,len);
+    strncpy(PARS,pars,len);
+  }
+  if(NPAR) {
+    if(pars == 0)
+      throw exception("Bodyfunc::Bodyfunc(): "
+		      "expression \"%s\" requires %d parameters, "
+		      "but none are given", expr,NPAR);
+    int n = 
+#ifdef falcON_REAL_IS_FLOAT
+      nemoinpf
+#else
+      nemoinpd
+#endif
+      (const_cast<char*>(pars),P,MAXPAR);
+    if(n < NPAR)
+      throw exception("Bodyfunc::Bodyfunc(): "
+		      "expression \"%s\" requires %d parameters, "
+		      "but only %d are given", expr,NPAR,n);
+    if(n > NPAR)
+      warning("Bodyfunc::Bodyfunc(): "
+	      "expression \"%s\" requires %d parameters, "
+	      "but %d are given; will ignore last %d",
+	      expr,NPAR,n,n-NPAR);
+  }
+}
+//------------------------------------------------------------------------------
+falcON::Bodyfunc::Bodyfunc(const char*expr, const real*pars, int npar)
+  throw(falcON::exception)
+  : bodyfunc(expr), PARS(0)
+{
+  if(is_empty()) return;
+  if(NPAR) {
+    if(npar == 0 || pars == 0)
+      throw exception("Bodyfunc::Bodyfunc(): "
+		      "expression \"%s\" requires %d parameters, "
+		      "but none are given", expr,NPAR);
+    if(npar < NPAR)
+      throw exception("Bodyfunc::Bodyfunc(): "
+		      "expression \"%s\" requires %d parameters, "
+		      "but only %d are given", expr,NPAR,npar);
+    if(npar > NPAR)
+      warning("Bodyfunc::Bodyfunc(): "
+	      "expression \"%s\" requires %d parameters, "
+	      "but %d are given; will ignore last %d",
+	      expr,NPAR,npar,npar-NPAR);
+    if(npar > 0) {
+      int _len = npar*16;
+      PARS = falcON_NEW(char,_len);
+      char par[64], *PA=PARS;
+      for(int ipar=0; ipar!=npar; ++ipar) {
+	P[ipar] = pars[ipar];
+	SNprintf(par,64,"%f",pars[ipar]);
+	strncpy(PA,par,_len);
+	_len -= strlen(par)+1;
+	if(_len < 0) falcON_THROW("Bodyfunc::Bodyfunc: "
+				  "difficulty parsing parameters\n");
+	strncat(PA,",",1);
+	PA += strlen(par) + 1;
+      }
+    }
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
 // implementing falcON::BodyFunc<T>::BodyFunc()                                 
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
@@ -1240,41 +1315,12 @@ namespace {
 template<typename T>
 falcON::BodyFunc<T>::BodyFunc(const char*expr, const char*pars)
   throw(falcON::exception)
-  : bodyfunc(expr), PARS(0)
+  : Bodyfunc(expr,pars)
 {
   if(is_empty()) return;
-  if(pars) {
-    size_t len = strlen(pars)+1;
-    PARS = falcON_NEW(char,len);
-    strncpy(PARS,pars,len);
-  }
   if(TYPE != bf_type<T>::type )
     throw exception("BodyFunc<%s>::BodyFunc(): expression \"%s\" is of type %s",
 		    nameof(T),expr,Typeof(TYPE));
-  if(NPAR) {
-    if(pars == 0)
-      throw exception("BodyFunc<%s>::BodyFunc(): "
-		      "expression \"%s\" requires %d parameters, "
-		      "but none are given",
-		      nameof(T),expr,NPAR);
-    int n = 
-#ifdef falcON_REAL_IS_FLOAT
-      nemoinpf
-#else
-      nemoinpd
-#endif
-      (const_cast<char*>(pars),P,MAXPAR);
-    if(n < NPAR)
-      throw exception("BodyFunc<%s>::BodyFunc(): "
-		      "expression \"%s\" requires %d parameters, "
-		      "but only %d are given",
-		      nameof(T),expr,NPAR,n);
-    if(n > NPAR)
-      warning("BodyFunc<%s>::BodyFunc(): "
-	      "expression \"%s\" requires %d parameters, "
-	      "but %d are given; will ignore last %d",
-	      nameof(T),expr,NPAR,n,n-NPAR);
-  }
 }
 template falcON::BodyFunc<bool>::BodyFunc(const char*,const char*)
   throw(falcON::exception);
@@ -1288,44 +1334,12 @@ template falcON::BodyFunc<falcON::vect>::BodyFunc(const char*,const char*)
 template<typename T>
 falcON::BodyFunc<T>::BodyFunc(const char*expr, const real*pars, int npar)
   throw(falcON::exception)
-  : bodyfunc(expr), PARS(0)
+  : Bodyfunc(expr,pars,npar)
 {
   if(is_empty()) return;
   if(TYPE != bf_type<T>::type)
     throw exception("BodyFunc<%s>::BodyFunc(): expression \"%s\" is of type %s",
 		    nameof(T),expr,Typeof(TYPE));
-  if(NPAR) {
-    if(npar == 0 || pars == 0)
-      throw exception("BodyFunc<%s>::BodyFunc(): "
-		      "expression \"%s\" requires %d parameters, "
-		      "but none are given",
-		      nameof(T),expr,NPAR);
-    if(npar < NPAR)
-      throw exception("BodyFunc<%s>::BodyFunc(): "
-		      "expression \"%s\" requires %d parameters, "
-		      "but only %d are given",
-		      nameof(T),expr,NPAR,npar);
-    if(npar > NPAR)
-      warning("BodyFunc<%s>::BodyFunc(): "
-	      "expression \"%s\" requires %d parameters, "
-	      "but %d are given; will ignore last %d",
-	      nameof(T),expr,NPAR,npar,npar-NPAR);
-    if(npar > 0) {
-      int _len = npar*16;
-      PARS = falcON_NEW(char,_len);
-      char par[64], *P=PARS;
-      for(int ipar=0; ipar!=npar; ++ipar) {
-	SNprintf(par,64,"%f",pars[ipar]);
-	strncpy(P,par,_len);
-	_len -= strlen(par)+1;
-	if(_len < 0) falcON_THROW("BodyFunc<%s>::BodyFunc: "
-				  "difficulty parsing parameters\n",nameof(T));
-	strncat(P,",",1);
-	P += strlen(par) + 1;
-      }
-      P = 0;
-    }
-  }
 }
 template
 falcON::BodyFunc<bool>::BodyFunc(const char*,const falcON::real*,int)
