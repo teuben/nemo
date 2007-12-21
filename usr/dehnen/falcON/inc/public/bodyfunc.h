@@ -97,6 +97,9 @@ namespace falcON {
     char       *EXPR;
     //--------------------------------------------------------------------------
   public:
+    /// maximum number of parameters allowed
+    /// \note MAXPAR=10 is hardwired into bodyfunc.cc: only one digit is allowed
+    static const int MAXPAR = 10;
     /// print info about bodyfuncs in database, if any
     /// \return true if something was printed out
     /// \param  out  ostream to print to
@@ -121,6 +124,10 @@ namespace falcON {
     /// return original expression
     const char* expression() const { return EXPR; }
     /// function call, non-operator
+    /// \param b body
+    /// \param t time
+    /// \param p parameters
+    /// \return expression evaluated for body \a b, time \a t, parameters \a p
     template<typename T>
     T func (body const&b, double const&t, const real*p) const {
 #if defined(DEBUG) || defined(EBUG)
@@ -152,6 +159,64 @@ namespace falcON {
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
+  // class Bodyfunc                                                             
+  //                                                                            
+  /// a bodyfunc with parameters                                                
+  ///                                                                           
+  // ///////////////////////////////////////////////////////////////////////////
+  class Bodyfunc : protected bodyfunc {
+    real P[MAXPAR];
+    char*PARS;
+  public:
+    /// construction from bodyfunc expression (can be empty)
+    /// \param expr bodyfunc (5falcON) expression --- or NULL
+    /// \param pars comma separated list of parameters
+    Bodyfunc(const char*expr, const char*pars)
+      throw(falcON::exception);
+    /// construction from bodyfunc expression (can be empty)
+    /// \param expr bodyfunc (5falcON) expression --- or NULL
+    /// \param pars array with parameters 
+    /// \param npar number of parameters
+    /// \note there must be enough parameters given
+    Bodyfunc(const char*expr, const real*pars, int npar)
+      throw(falcON::exception);
+    /// dtor: delete data
+    ~Bodyfunc() { if(PARS) falcON_DEL_A(PARS); PARS=0; }
+    /// return type: 'b', 'i', 'r', 'v' for bool, int, real, vect
+    bodyfunc::type;
+    /// check return type
+    bodyfunc::is_type;
+    /// return number of parameters used
+    bodyfunc::npar;
+    /// return nth parameter
+    /// \param  n number of parameter asked
+    real const&param(int n) const { return P[n]; }
+    /// return fields required
+    bodyfunc::need;
+    /// return original expression
+    bodyfunc::expression;
+    /// return parameters
+    const char*parameters() const { return PARS; }
+    /// function call, non-operator
+    /// \param b body
+    /// \param t time
+    /// \return expression evaluated for body \a b at time \a t
+    template<typename T>
+    T func (body const&b, double const&t) const {
+      return bodyfunc::func<T>(b,t,P);
+    }
+    /// function call operator (not very useful, since template)
+    template<typename T>
+    T operator() (body const&b, double const&t) const {
+      return func<T>(b,t);
+    }
+    /// is *this an empty bodyfunc?
+    bodyfunc::is_empty;
+    /// is *this valid (non-empty)?
+    operator bool() const { return !is_empty(); }
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
   // class BodyFunc<T>                                                          
   //                                                                            
   /// a function object taking body and time, returning T (template parameter)  
@@ -163,11 +228,7 @@ namespace falcON {
   /// - if the bodyfunc is empty, we return: true, 0 , zero, vect(zero).        
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
-  template<typename T> class BodyFunc : private bodyfunc {
-    // NOTE: MAXPAR=10 is hardwired into bodyfunc.cc: only one digit is allowed.
-    static const int MAXPAR = 10;
-    real P[MAXPAR];
-    char*PARS;
+  template<typename T> class BodyFunc : private Bodyfunc {
   public:
     /// construction from bodyfunc expression (can be empty)
     /// \param expr body_func (5falcON) expression --- or NULL
@@ -183,28 +244,110 @@ namespace falcON {
     /// \note the bodyfunc expression must return the type T
     BodyFunc(const char*expr, const real*pars, int npar)
       throw(falcON::exception);
-    /// dtor: delete data
-    ~BodyFunc() { if(PARS) falcON_DEL_A(PARS); PARS=0; }
     /// return number of parameters used
-    bodyfunc::npar;
+    Bodyfunc::npar;
     /// return nth parameter
     /// \param  n number of parameter asked
-    real const&param(int n) const { return P[n]; }
+    Bodyfunc::param;
     /// return fields required
-    bodyfunc::need;
+    Bodyfunc::need;
     /// return original expression
-    bodyfunc::expression;
+    Bodyfunc::expression;
     /// return parameters
-    const char*parameters() const { return PARS; }
+    Bodyfunc::parameters;
     /// function call
     /// \param b body
     /// \param t time
     /// \return expression evaluated for body \a b at time \a t
     T operator()(body const&b, double const&t) const {
-      return bodyfunc::func<T>(b,t,P);
+      return Bodyfunc::func<T>(b,t);
     }
     /// is *this an empty bodyfunc?
-    bodyfunc::is_empty;
+    Bodyfunc::is_empty;
+    /// is *this valid (non-empty)?
+    operator bool() const { return !is_empty(); }
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  template<int BIT> struct BodyPropMap {
+    typedef typename field_traits<BIT>::type type;
+  };
+  template<> struct BodyPropMap<fieldbit::f> { typedef int  type; };
+  template<> struct BodyPropMap<fieldbit::k> { typedef int  type; };
+  template<> struct BodyPropMap<fieldbit::t> { typedef real type; };
+  template<> struct BodyPropMap<fieldbit::l> { typedef int  type; };
+  template<> struct BodyPropMap<fieldbit::n> { typedef int  type; };
+  template<> struct BodyPropMap<fieldbit::N> { typedef int  type; };
+  template<> struct BodyPropMap<fieldbit::d> { typedef int  type; };
+  template<> struct BodyPropMap<fieldbit::h> { typedef int  type; };
+  // ---------------------------------------------------------------------------
+  template<int BIT> struct BodyPropType {
+    typedef typename field_traits<BIT>::type proptype;
+    typedef typename BodyPropMap <BIT>::type functype;
+    static proptype convert(functype const&x) {
+      return static_cast<proptype const&>(x);
+    }
+  };
+  template<> struct BodyPropType<fieldbit::f> {
+    typedef field_traits<fieldbit::f>::type proptype;
+    typedef BodyPropMap <fieldbit::f>::type functype;
+    static proptype convert(functype const&x) {
+      return *(static_cast<const flags*>(static_cast<const void*>(&x)));
+    }
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class BodyProp<BIT>                                                        
+  //                                                                            
+  /// wrapper around Bodyfunc, returns field_traits<BIT>::type                  
+  ///                                                                           
+  /// If the return type of bodyfunc is incompatible with our return type, an   
+  /// exception is thrown.                                                      
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  template<int BIT> class BodyProp : private BodyPropType<BIT> {
+    const Bodyfunc*F;   ///< Bodyfunc
+    const double   T;   ///< time
+  public:
+    /// type returned by operator()
+    typedef typename BodyPropType<BIT>::proptype proptype;
+    /// type required by bodyfunc
+    typedef typename BodyPropType<BIT>::functype functype;
+    /// construction from bodyfunc and parameters
+    /// \param f pter to bodyfunc
+    /// \param p array with parameters (may be empty)
+    /// \param n size of array p
+    /// \note n must match b->npar() (we issue a warning if it exceeds)
+    BodyProp(const Bodyfunc*f, double t) 
+      throw(falcON::exception) : F(f), T(t)
+    {
+      if(!F->is_type<functype>())
+	throw falcON::exception("BodyProp<%c>: type mismatch: "
+				"bodyfunc returns %s, but need %s",
+				field_traits<BIT>::word,
+				F->type() == 'b'? "bool" :
+				F->type() == 'i'? "int" :
+				F->type() == 'r'? "real" : "vect",
+				nameof(functype));
+    }
+    /// number of parameters
+    int  const&npar() const { return F->npar(); }
+    /// return nth parameter
+    real const&param(int n) const { return F->param(n); }
+    /// return fields required
+    fieldset const&need() const { return F->need(); }
+    /// return original expression
+    const char* expression() const { return F->expression(); }
+    /// return parameters
+    const char*parameters() const { return F->parameters(); }
+    /// function call
+    /// \param b body
+    /// \param t time
+    /// \return expression evaluated for body \a b at time \a t
+    proptype operator()(body const&b) const {
+      return convert(F->func<functype>(b,T));
+    }
+    /// is *this an empty bodyfunc?
+    bool is_empty() const { return F->is_empty(); }
     /// is *this valid (non-empty)?
     operator bool() const { return !is_empty(); }
   };

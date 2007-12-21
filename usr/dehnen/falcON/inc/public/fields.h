@@ -552,6 +552,8 @@ namespace falcON {
     friend bool is_sph(fieldbit f);
     /// is the data field supported by NEMO I/O?
     friend bool is_nemo(fieldbit);
+    /// is the data field an integer?
+    friend bool is_integer(fieldbit);
     /// is the data field a floating point scalar?
     friend bool is_scalar(fieldbit);
     /// is the data field a vector?
@@ -579,7 +581,7 @@ namespace falcON {
   /// Represents a set of body data fields                                      
   ///                                                                           
   /// falcON::fieldset represents a set of body data fields. Each field         
-  /// corresponds to a unique bit in a 32bit integer (i.e. up to 32 different   
+  /// corresponds to a unique bit in a 64bit integer (i.e. up to 64 different   
   /// fields are possible with this implementation). The position of the bit    
   /// is identical to the value of the corresponding fieldbit::bits. Thus, a    
   /// set containing only, say, the position has the bit fieldbit::x set and    
@@ -610,7 +612,7 @@ namespace falcON {
       v       = one << fieldbit::v,  ///< just velocities
       w       = one << fieldbit::w,  ///< just predicted velocities
       e       = one << fieldbit::e,  ///< just individual softening lengths
-      f       = one << fieldbit::f,  ///< just falcON::flagss
+      f       = one << fieldbit::f,  ///< just falcON::flags
       k       = one << fieldbit::k,  ///< just integer keys
       t       = one << fieldbit::t,  ///< just time steps
       p       = one << fieldbit::p,  ///< just N-body gravitational potentials
@@ -860,8 +862,9 @@ namespace falcON {
     b = fieldset(c);
     return s;
   }
-  inline bool is_scalar(fieldbit f) { return fieldset::scalars & 1<<f.val; }
-  inline bool is_vector(fieldbit f) { return fieldset::vectors & 1<<f.val; }
+  inline bool is_integer(fieldbit f) { return fieldset::integers & 1<<f.val; }
+  inline bool is_scalar (fieldbit f) { return fieldset::scalars & 1<<f.val; }
+  inline bool is_vector (fieldbit f) { return fieldset::vectors & 1<<f.val; }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // inline definitions of a friend of class fieldbit                         //
