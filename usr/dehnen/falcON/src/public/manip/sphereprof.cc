@@ -181,7 +181,8 @@ namespace falcON { namespace Manipulate {
       print_line(SP.has_vels());
       OUT << "#\n"
 	  << "# output from Manipulator \"sphereprof\"\n#\n";
-      if(RunInfo::cmd_known ()) OUT<<"# command: \""<<RunInfo::cmd ()<<"\"\n";
+      if(RunInfo::cmd_known ())
+	OUT<<"# command: \""<<RunInfo::cmd ()<<"\"\n";
       OUT  <<"# run at "<<RunInfo::time()<<'\n';
       if(RunInfo::user_known())
 	OUT<<"#     by \""<<RunInfo::user()<<"\"\n";
