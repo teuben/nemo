@@ -214,6 +214,8 @@ $(MAN)set_filter.so:		$(SMAN)set_filter.cc $(MANT) $(defman_h) $(bodyfunc_h) $(m
 				$(MAKE_MANIP)
 $(MAN)set_subset.so:		$(SMAN)set_subset.cc $(MANT) $(defman_h) $(bodyfunc_h) $(makefiles)
 				$(MAKE_MANIP)
+$(MAN)shift_to_centre.so:	$(SMAN)shift_to_centre.cc $(MANT) $(defman_h) $(makefiles)
+				$(MAKE_MANIP)
 $(MAN)sphereprof.so:		$(SMAN)sphereprof.cc $(MANT) $(defman_h) $(io_h) $(profile_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)symmetrize_pairs.so:	$(SMAN)symmetrize_pairs.cc $(MANT) $(defman_h) $(makefiles)
@@ -233,6 +235,7 @@ manip_pub		:=	$(MAN)add_plummer.so \
 				$(MAN)set_centre.so \
 				$(MAN)set_filter.so \
 				$(MAN)set_subset.so \
+				$(MAN)shift_to_centre.so \
 				$(MAN)sphereprof.so \
 				$(MAN)symmetrize_pairs.so \
 				$(MAN)use_filter.so
@@ -304,6 +307,8 @@ $(BIN)a2s:		$(SEXE)a2s.cc $(BINT) $(main_h) $(inline_io_h) $(io_h) $(body_h) $(m
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)addgravity:	$(SEXE)addgravity.cc $(BINT) $(main_h) $(body_h) $(externacc_h) $(forces_h) $(io_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)addprop:		$(SEXE)addprop.cc $(LIBT) $(main_h) $(bodyfunc_h) $(io_h) $(makefiles)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)density:		$(SEXE)density.cc $(BINT) $(main_h) $(neighbours_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)g2s:		$(SEXE)g2s.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(makefiles)
@@ -364,6 +369,7 @@ TestPairF	:	$(falcON) $(BIN)TestPairF
 ifdef NEMO
 
 a2s		:	$(falcON) $(BIN)a2s
+addprop		:	$(falcON) $(BIN)addprop
 addgravity	:	$(falcON) $(BIN)addgravity
 density		:	$(falcON) $(BIN)density
 g2s		:	$(falcON) $(BIN)g2s
@@ -388,7 +394,7 @@ snapprop	:	$(falcON) $(BIN)snapprop
 snapstac	:	$(falcON) $(BIN)snapstac
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
-exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
+exe_pub		:=	TestGrav a2s addgravity addprop density g2s getgravity \
 			gyrfalcON lagrange_radii manipulate mkbodiesfunc \
 			mkbodyfunc mkdehnen mkhalo mkking mkplum mkWD99disc \
 			s2a s2g s2s scale_eps snapprop snapstac symmetrize \
