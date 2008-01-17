@@ -134,16 +134,22 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
     //                                                                          
     double Mr = (q? R(0):R())*Mt;                  // get enclosed mass         
     double r  = rM(Mr);                            // get Lagrange radius from M
-    double Psi= Ps(r);                             // get potential             
+    double Psi= Ps(r),Q;                           // get potential             
     double w, we=sqrt(2*Psi);                      // escape velocity           
     double f0=F0(Psi),f;                           // DF(w=0)                   
     do {                                           // DO                        
-      w = we * pow(R(),ibt);                       //   sample velocity 0<w<we  
-      f = DF(Psi-0.5*w*w);                         //   get g(Q)                
+      do {                                         //   DO                      
+	w = we * pow(R(),ibt);                     //     sample velocity w     
+	Q = Psi-0.5*w*w;                           //     get Q                 
+      } while(Q<=0.);                              //   WHILE (non-positive)    
+      f = DF(Q);                                   //   get g(Q)                
+      if(isnan(f))
+	error("sampling error: %s is NaN: Eps=%g [r=%g, we=%g, w=%g]\n",
+	      (beta? (iraq==0? "g(E)" : "g(Q)"): (iraq==0? "f(E)" : "f(Q)")),
+	       Q,r,we,w);
       if(f>f0)                                     //   IF f>f(w=0)             
 	error("sampling error: DF non-monotonic"   //     ERROR                 
-	      ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n",
-	      Psi-0.5*w*w,f,Psi,f0,r);
+	      ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n", Q,f,Psi,f0,r);
     } while(f0 * R() > f);                         // WHILE ( rejected )        
     double vr,vt;                                  // v_r, v_t                  
     if(beta) {                                     // IF b0 != 0                
@@ -151,6 +157,9 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
       vt = w * SC[0]/sqrt(1+r*r*iraq);             //   tangential velocity     
       vr = w * SC[1];                              //   radial velocity         
       if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);//   distribution function   
+      if(givef && isnan(f))
+	error("sampling error: f(E,L^2) is NaN"
+	      ": Eps=%g, [vt=%g, r=%g]\n",Psi-0.5*w*w,vt,r);
     } else {                                       // ELSE                      
       double ce = q? R(1,-1.,1.) : R(-1.,1.);      //   sample cos(eta)         
       vr = w * ce;                                 //   radial velocity         

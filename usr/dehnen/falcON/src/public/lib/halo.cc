@@ -854,13 +854,14 @@ HaloModel::HaloModel(HaloDensity const&model,
 //------------------------------------------------------------------------------
 // g(Q)
 double HaloModel::lnG(double Q) const {
-  if(Q < ps[n1])
+  if(Q < ps[n1]) {
     // 1 at small Q (large radii)
+    if(Q < 0.) error("HaloModel::lnG(): Q=%g < 0\n",Q);
     if(RA) // 1.1 finite anisotropy radius
       return lg[n1] + (3.5-Ch-B) * (lnRPsi(Q)-lr[n1]);
     else   // 1.2 infinite anisotropy radius (recognised as RA=0)
       return lg[n1] + (1.5-Ch+B) * (lnRPsi(Q)-lr[n1]);
-  else if(Q > ps[0])
+  } else if(Q > ps[0])
     // 2 at large Q (small radii)
     return lg[0] + (B+B-Ah-(1.5-B)*(2-At)) * (lnRPsi(Q)-lr[0]);
   else
