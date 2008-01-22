@@ -9,6 +9,9 @@
 #               11-jul-2005   various additional packages for NEMO V3.2.3
 #                5-mar-2006   also create nemo_start.sh
 #               20-aug-2006   falcON install 
+#               21-jan-2008   optional nemo= where the root is located
+
+set nemo=nemo           # root directory name
 
 set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
@@ -77,9 +80,9 @@ if ($intel) then
 endif
 
 if ($clean) then
-  if (-e nemo) then
-    echo Cleaning old nemo directory
-    rm -rf nemo
+  if (-e $nemo) then
+    echo Cleaning old nemo=$nemo directory
+    rm -rf $nemo
   endif
 endif
 
@@ -93,11 +96,11 @@ if ($reuse == 0) then
     echo cvs: Using default MAIN branch
     set cvs_rev=()
   endif
-  cvs -Q checkout $cvs_rev nemo
+  cvs -Q checkout $cvs_rev -d $nemo nemo
 endif
 
 
-cd nemo
+cd $nemo
 if (! -e local) mkdir local
 
 if ($reuse) then
