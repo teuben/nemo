@@ -51,6 +51,9 @@ extern "C" {
 #ifndef JerkTag
 #  define JerkTag "Jerk"
 #endif
+#ifndef PhaseSpaceDensityTag
+#  define PhaseSpaceDensityTag "PhaseSpaceDensity"
+#endif
 #ifndef GasHdotTag
 #  define GasHdotTag "Hdot"
 #endif
@@ -149,6 +152,7 @@ namespace {
     case nemo_io::zet    : return AuxVectorTag;
     case nemo_io::lev    : return LevelTag;
     case nemo_io::num    : return NumberTag;
+    case nemo_io::phden  : return PhaseSpaceDensityTag;
     case nemo_io::posvel : return PhaseSpaceTag;
     case nemo_io::Size   : return SmoothTag;
     case nemo_io::Gasnum : return SPHNumberTag;
@@ -204,6 +208,7 @@ namespace {
     case nemo_io::aux:
     case nemo_io::lev:
     case nemo_io::num:
+    case nemo_io::phden:
     case nemo_io::Size:
     case nemo_io::Gasnum:
     case nemo_io::Uin:

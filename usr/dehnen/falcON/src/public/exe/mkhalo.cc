@@ -45,9 +45,10 @@
 // v 2.3    01/11/2007  WD  WD_units                                            
 // v 2.3.1  02/11/2007  WD  deBUGged (r_2 to r_s conversion)                    
 // v 2.4    23/11/2007  WD  steeper truncation for r_t<0                        
+// v 2.4.1  23/01/2008  WD  DF into phden, not aux data field                   
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4"
-#define falcON_VERSION_D "23-nov-2007 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.1"
+#define falcON_VERSION_D "23-jan-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -133,7 +134,7 @@ string defv[] = {
   "peri=f\n           for mass adaption: R_peri(E,L) rather than R_c(E)  ",
   "epar=\n            if given, set eps_i = epar * sqrt(m_i/M_tot)       ",
 #endif
-  "giveF=f\n          give distribution function in aux data?            ",
+  "giveF=f\n          give distribution function in phden data?          ",
   "giveP=f\n          give Phi(r) (halo+external) in pot data?           ",
   "giveA=f\n          give -dPhi/dr in acc data?                         ",
   "accname=\n         name of external monopole acceleration field       ",
@@ -200,7 +201,7 @@ void falcON::main()
      hasvalue ("epar") |
 #endif
      hasvalue ("eps")   ? fieldset::e : fieldset::o) |
-    (getbparam("giveF") ? fieldset::y : fieldset::o) |
+    (getbparam("giveF") ? fieldset::d : fieldset::o) |
     (getbparam("giveP") ? fieldset::p : fieldset::o) |
     (getbparam("giveA") ? fieldset::a : fieldset::o) |
     fieldset::basic );

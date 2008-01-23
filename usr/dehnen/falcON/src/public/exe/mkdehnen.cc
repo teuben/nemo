@@ -43,9 +43,10 @@
 // v 3.1   06/07/2005  WD default rmax=1000 r_s                                |
 // v 3.2   13/06/2005  WD changes in fieldset                                  |
 // v 3.3   02/05/2007  WD made Ossipkov-Merritt anisotropic models public      |
+// v 3.3.1 23/01/2008  WD DF in phden (previous: aux) if giveF=true            |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.3"
-#define falcON_VERSION_D "02-may-2007 Walter Dehnen                          "
+#define falcON_VERSION   "3.3.1"
+#define falcON_VERSION_D "23-jan-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile mkdehnen
@@ -68,7 +69,7 @@ string defv[] = {
   "time=0\n           simulation time of snapshot                        ",
   "f_pos=0.5\n        fraction of bodies with positive sense of rotation ",
   "rmax=1000\n        if != 0, only emit bodies with r <= rmax * r_s     ",
-  "giveF=f\n          give distribution function in aux data?            ",
+  "giveF=f\n          give distribution function in phden data?          ",
 #ifdef falcON_PROPER
   "Rp=\n              for mass adaption: list of R in increasing order   ",
   "fac=1.2\n          for mass adaption: factor between mass bins        ",
@@ -97,7 +98,7 @@ void falcON::main() falcON_THROWING
   const bool     WD  (getbparam("WD_units"));      // using WD_units?           
   const Random   Ran (getparam("seed"),6);         // random-number-generators  
   const fieldset data( 
-    (getbparam("giveF")? fieldset::y : fieldset::o) |
+    (getbparam("giveF")? fieldset::d : fieldset::o) |
 #ifdef falcON_PROPER
     (hasvalue("epar")  ? fieldset::e : fieldset::o) |
 #endif

@@ -39,9 +39,10 @@
 // v 1.4   13/09/2007   WD  some changes in parameter names                     
 // v 2.0   17/09/2007   WD  using DiscPot (new) for disc's own potential        
 // v 2.1   15/11/2007   WD  fixed problem with external potentials.             
+// v 2.1.1 23/01/2008   WD  DF into phden (previous: aux) if giveF=true         
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.1"
-#define falcON_VERSION_D "15-nov-2007 Paul McMillan & Walter Dehnen          "
+#define falcON_VERSION   "2.1.1"
+#define falcON_VERSION_D "23-jan-2008 Paul McMillan & Walter Dehnen          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkWD99disc
@@ -109,7 +110,7 @@ void falcON::main() falcON_THROWING
   const Random Ran(getparam("seed"),8);
   const fieldset data( 
     (hasvalue ("eps")   ? fieldset::e : fieldset::o) |
-    (getbparam("giveF") ? fieldset::y : fieldset::o) |
+    (getbparam("giveF") ? fieldset::d : fieldset::o) |
     fieldset::basic );
   // add disc potential using potential DiscPot
   char discpars[128];

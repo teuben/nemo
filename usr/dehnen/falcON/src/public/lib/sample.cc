@@ -112,8 +112,8 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
 			      bool         giveP,  //[I: write Phi      -> pot?]
 			      bool         giveA)  //[I: write -dPhi/dr -> acc?]
   const {
-  if(givef && !has_aux(B0))
-    warning("SphericalSampler: bodies not supporting aux: cannot give DF");
+  if(givef && !has_phden(B0))
+    warning("SphericalSampler: bodies not supporting phden: cannot give DF");
   if(giveP && !has_pot(B0))
     warning("SphericalSampler: bodies not supporting pot: cannot give Phi");
   if(giveA && !has_acc(B0))
@@ -201,7 +201,7 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
       Bi.vel()[0] = vm * cph - vph * sph;          //     v_x= ...              
       Bi.vel()[1] = vm * sph + vph * cph;          //     v_y= ...              
       Bi.vel()[2] = vr * cth - vth * sth;          //     v_z= ...              
-      if(givef) Bi.aux() = f;                      //     set aux = DF          
+      if(givef) Bi.phden() = f;                    //     set phden = DF        
       if(giveP) Bi.pot() =-Psi;                    //     set pot = Phi         
       if(giveA) Bi.acc() = pos(Bi)*(-Mr/(r*r));    //     set acc = -dPhi/dr    
     }                                              //   END LOOP                

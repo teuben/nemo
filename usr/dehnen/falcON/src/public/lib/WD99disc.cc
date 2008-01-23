@@ -7,11 +7,11 @@
 ///                                                                             
 /// \author Paul McMillan                                                       
 /// \author Walter Dehnen                                                       
-/// \date   2000-2007                                                           
+/// \date   2000-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2007  Walter Dehnen, Paul McMillan                        
+// Copyright (C) 2000-2008  Walter Dehnen, Paul McMillan                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -566,7 +566,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
 			    /(Pi*Z0*Dens)),
 	    exp2 = exp(PO.Omc * (PO.Lorb - PO.Lc)/(PO.sigre*PO.sigre));
 
-	  Bi.aux() = Stilda*PO.Omc*exp1*exp2/
+	  Bi.phden() = Stilda*PO.Omc*exp1*exp2/
 	    (PO.sigre*pow(TPi,1.5)*Z0*PO.omr*sqrt(Pi*Z0*Dens));
 	}
       }
