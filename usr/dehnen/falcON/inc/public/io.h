@@ -450,20 +450,21 @@ namespace falcON {
       lev     = 1 << 12,
       num     = 1 << 13,
       posvel  = 1 << 14,
-      Size    = 1 << 15,
-      Gasnum  = 1 << 16,
-      Uin     = 1 << 17,
-      Uindot  = 1 << 18,
-      Uinrad  = 1 << 19,
-      Entr    = 1 << 20,
-      Gasdens = 1 << 21,
-      Sizedot = 1 << 22,
-      Sphfact = 1 << 23,
-      Csound  = 1 << 24,
-      AlphaAV = 1 << 25,
-      DivV    = 1 << 26,
-      MolWght = 1 << 27,
-      Spin    = 1 << 28
+      phden   = 1 << 15,
+      Size    = 1 << 16,
+      Gasnum  = 1 << 17,
+      Uin     = 1 << 18,
+      Uindot  = 1 << 19,
+      Uinrad  = 1 << 20,
+      Entr    = 1 << 21,
+      Gasdens = 1 << 22,
+      Sizedot = 1 << 23,
+      Sphfact = 1 << 24,
+      Csound  = 1 << 25,
+      AlphaAV = 1 << 26,
+      DivV    = 1 << 27,
+      MolWght = 1 << 28,
+      Spin    = 1 << 29
     };
     //--------------------------------------------------------------------------
     /// get the nemo_io::DataType used for a given Field                        
@@ -484,6 +485,7 @@ namespace falcON {
       case lev    : return Short;
       case num    : return Integer;
       case posvel : return Real;
+      case phden  : return Real;
       case Size   : return Real;
       case Gasnum : return Integer;
       case Uin    : return Real;
@@ -520,6 +522,7 @@ namespace falcON {
       case fieldbit::z: return zet;
       case fieldbit::l: return lev;
       case fieldbit::n: return num;
+      case fieldbit::d: return phden;
       case fieldbit::H: return Size;
       case fieldbit::N: return Gasnum;
       case fieldbit::U: return Uin;
@@ -556,6 +559,7 @@ namespace falcON {
       case zet:     return fieldbit::z;
       case lev:     return fieldbit::l;
       case num:     return fieldbit::n;
+      case phden:   return fieldbit::d;
       case Size:    return fieldbit::H;
       case Gasnum:  return fieldbit::N;
       case Uin:     return fieldbit::U;

@@ -277,7 +277,7 @@ namespace falcON {
   template<> struct BodyPropMap<fieldbit::l> { typedef int  type; };
   template<> struct BodyPropMap<fieldbit::n> { typedef int  type; };
   template<> struct BodyPropMap<fieldbit::N> { typedef int  type; };
-  template<> struct BodyPropMap<fieldbit::d> { typedef int  type; };
+  template<> struct BodyPropMap<fieldbit::c> { typedef int  type; };
   template<> struct BodyPropMap<fieldbit::h> { typedef int  type; };
   // ---------------------------------------------------------------------------
   template<int BIT> struct BodyPropType {
