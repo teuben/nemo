@@ -1,8 +1,19 @@
+/*
+ * naming conventions:      rotcur_NAME where NAME is the name
+ *
+ * input:    r    radius
+ *           n    number of parameters
+ *           p    p[n], parameters to the rotation curve
+ * returns:  the rotation curve
+ *           d    d[n], partial derivatives dV/dp
+ *
+ */
+
 #include <nemo.h>
 
 static int first = 1;
 
-real rotcur_core123(real r, int n, real *p, real *d)
+real rotcur_core1(real r, int n, real *p, real *d)
 {
   real x = r / p[1];
   d[0] = x/(1+x);
