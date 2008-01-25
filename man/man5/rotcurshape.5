@@ -1,0 +1,63 @@
+.TH ROTCURSHAPE 5NEMO "25 January 2008"
+.SH NAME
+rotcurshape \- format for rotation curve shapes
+.SH SYNOPSIS
+.nf
+\fB#include <nemo.h>\fP
+\fBreal rotcur_NAME(real r, int n, real *p, real *d);\fP
+.SH DESCRIPTION
+A \fIrotcurshape\fP file is a small C function
+that should return the value of the rotation
+curve at a given radius. This function will be loaded 
+(from the corresponding .so file)
+by NEMO's dynamic object loader (see also
+\fIloadobj(3NEMO)\fP).
+.PP
+The rotation curve is parameterized by n
+parameters p[0]...p[n-1].
+The function should also return the 'n' partial
+derivatives d[i] = dV/dp[i], for i=0...n-1
+.PP
+The name of the function should be rotcur_NAME()
+where NAME is the rotcurshape name .
+.SH EXAMPLES
+The following example is a rotation curve of a simple linear
+core:
+.nf
+#include <nemo.h>
+
+real rotcur_core1(real r, int n, real *p, real *d)
+{
+  real x = r / p[1];
+  d[0] = x/(1+x);
+  d[1] = -p[0]*d[0]/(p[1]*(1+x));
+  return p[0] * d[0];
+}
+.fi
+Assuming this is in a file core1.c, the command
+.nf
+	bake core1.so
+.fi
+will create a shared object file, which can then be used by rotcurshape:
+.nf
+  % rotcurshape in=... radii=...  rotcur1=core1,100,2,1,0
+.fi
+would fit a linear core with fixed core radius of 2, and initial guess of V=100
+and will fit the velocity scaling V.
+.PP
+Although there are examples in $NEMO/src/image/rotcur/shape, most shapes are builtin
+to the program \fIrotcurshape(1NEMO)\fP.
+.SH "SEE ALSO"
+rotcurshape(1NEMO)
+.SH "AUTHOR"
+Peter Teuben
+.SH "FILES"
+.nf
+.ta +2.5i
+~/src/image/rotcur/shape	examples
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+25-jan-08	documented	PJT
+.fi

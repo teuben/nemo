@@ -189,7 +189,7 @@ Value of the blank pixel that needs to be ignored. [Default: \fB0.0\fP].
 Reject outlier points will fall outside nsigma times the dispersion 
 away from the mean velocity in the disk. By default, it will not reject any outliers.
 Use with care, only useful if close enough to a solution and just a few outliers
-need to be removed.
+need to be removed. 
 .TP
 \fBimagemode=t|f\fP
 Image input file mode? By default the input file is an image, alternatively a simple
@@ -218,7 +218,7 @@ rotation curve used in the subsquent \fBrotcur#=\fP keywords.
 Name of first rotation curve, followed by the initial estimates of its
 parameters (you do need to know how many there are),
 followed by an equal number of 1s (free) and 0s (fixed) to denote
-which parameters are free to fixed during the fitting process. 
+which parameters are free or fixed during the fitting process. 
 .TP
 \fBrotcur2=\fP\fIname2...\fP
 see rotcur1
@@ -337,7 +337,7 @@ but still. It is an alternative to \fIccdvel(1NEMO)\fP
 	rotcur1=plummer,200,10,0,0 fixed=all units=arcsec,1 
 .fi
 .PP
-WHen \fBnsigma>0\fP is used to find an improved solution, the residual map now
+When \fBnsigma>0\fP is used to find an improved solution, the residual map now
 contains 2 maps, and it is the 2nd map which contains the supposed improved
 map. Here is an example how to extract and display
 that 2nd map using \fIcsf(1NEMO)\fP
@@ -374,7 +374,7 @@ to converge, and more than often complains with the message
 if \fBbeam=\fP is used, the map is also used to estimate beam smearing corrections. 
 This is still a totally untested  feature of the code.
 .SH SEE ALSO
-rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), loadobj(3NEMO), gal(AIPS), nllsqfit(3NEMO)
+rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), rotcurshape(5NEMO), loadobj(3NEMO), gal(AIPS), nllsqfit(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
