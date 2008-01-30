@@ -1,5 +1,5 @@
 DIR = src/image/rotcur
-BIN = ccdvel rotcur rotcurshape velcube velfit
+BIN = ccdvel rotcur rotcurshape rotcurtab velcube velfit
 NEED = $(BIN) nemoinp ccdmom
 
 DATA = map1.vel map1.den map1.rotcur map1.r map1.v map1.d map1.rotcurshape \
@@ -80,6 +80,9 @@ rotcurshape: map1.vel
 	$(EXEC) rotcurshape in=map1.vel radii=0,60 pa=$(PA) inc=$(INC) vsys=0 \
 	   tab=map1.rotcurshape units=sec,1 rotcur1=core1,100,20,1,1 > $(NULL); nemo.coverage rotcurshape.c
 	@tail -11 map1.rotcurshape
+
+rotcurtab:
+	$(EXEC) rotcurtab radii=0:5 rotcur1=linear,1 rotcur2=core,1,2,3; nemo.coverage rotcurtab.c
 
 velfit:  map1.vel
 	$(EXEC) velfit in=map1.vel radii=$(R) pa=$(PA) inc=$(INC) out=map2.vel
