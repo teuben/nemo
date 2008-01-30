@@ -22,9 +22,9 @@ MAN3FILES =
 MAN5FILES = 
 INCFILES = 
 SRCFILES = 
-OBJFILES=  
-LOBJFILES= 
-BINFILES = ccdvel rotcur rotcurshape pvtrace velcube velfit
+OBJFILES=  rotcurs.o
+LOBJFILES= $L(rotcurs.o)
+BINFILES = ccdvel rotcur rotcurshape rotcurtab pvtrace velcube velfit
 TESTFILES= 
 
 help:
@@ -51,7 +51,7 @@ $(L):	$(LOBJFILES)
 	$(RANLIB) $(L)
 	rm -f $?
 
-install: 
+install: .install_lib
 
 .install_lib: $(OBJFILES) 
 	ar ruv $(L) $?
