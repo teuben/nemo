@@ -547,8 +547,8 @@ int get_data_select(char * infile,
       get_tes(instr[no_io], ParticlesTag);
     } /*  get_tag_ok(instr[no_io], ParticlesTag */
     else {
-      fprintf(stderr,"Snap error ### no ParticlesTag\n");
-      exit(1);
+      dprintf(1,"### Snapshot WARNING ### no ParticlesTag\n");
+      status = -2;
     } 
     
     /* get out of the loop */
