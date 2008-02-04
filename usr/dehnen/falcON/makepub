@@ -82,7 +82,7 @@ king_h			:= $(IPUB)king.h $(basic_h)
 bodyfunc_h		:= $(IPUB)bodyfunc.h $(body_h) 
 bodyduncdefs_h		:= $(IPUB)bodyfuncdefs.h $(body_h) 
 neighbours_h		:= $(IPUB)neighbours.h $(tree_h)
-halo_h			:= $(IPUB)halo.h $(externacc_h)
+halo_h			:= $(IPUB)halo.h $(externacc_h) $(sample_h)
 WD99disc_h		:= $(IPUB)WD99disc.h $(random_h) $(externacc_h)
 
 timer_h			:= $(IACC)timer.h
@@ -330,7 +330,7 @@ $(BIN)mkdehnen:		$(SEXE)mkdehnen.cc $(BINT) $(main_h) $(gamma_h) $(io_h) $(LIB)g
 $(BIN)mkgalaxy:		doc/mkgalaxy
 			cp $< $@
 			chmod 755 $@
-$(BIN)mkhalo:		$(SEXE)mkhalo.cc $(main_h) $(sample_h) $(io_h) $(LIB)halo.o $(makefiles)
+$(BIN)mkhalo:		$(SEXE)mkhalo.cc $(main_h) $(io_h) $(LIB)halo.o $(makefiles)
 			$(MAKE_EXE) $(LIB)halo.o $(NEMO_EXE_FLGS)
 $(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(io_h) $(random_h) $(Pi_h) $(LIB)king.o $(makefiles)
 			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
@@ -430,6 +430,7 @@ dox/html/index.html:	utils/inc/tupel.h \
 			inc/public/bodyfunc.h \
 			inc/public/interact.h \
 			inc/public/nbody.h \
+			inc/public/PotExp.h \
 			src/public/manip/set_subset.cc \
 			src/public/manip/use_filter.cc \
 			src/public/manip/set_centre.cc \
