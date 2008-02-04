@@ -4,11 +4,11 @@
 /// \file   inc/public/bodyfunc.h                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2007                                                           
+/// \date   2004-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2007 Walter Dehnen                                        
+// Copyright (C) 2004-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -273,7 +273,7 @@ namespace falcON {
   };
   template<> struct BodyPropMap<fieldbit::f> { typedef int  type; };
   template<> struct BodyPropMap<fieldbit::k> { typedef int  type; };
-  template<> struct BodyPropMap<fieldbit::t> { typedef real type; };
+  template<> struct BodyPropMap<fieldbit::s> { typedef real type; };
   template<> struct BodyPropMap<fieldbit::l> { typedef int  type; };
   template<> struct BodyPropMap<fieldbit::n> { typedef int  type; };
   template<> struct BodyPropMap<fieldbit::N> { typedef int  type; };

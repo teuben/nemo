@@ -75,7 +75,7 @@ namespace falcON {
   /// Several (unlimited) manipulator may be concatinated, i.e. a call to       
   /// Manipulator::manipulate() will call the individual manipulate() in the    
   /// order given at construction. The constructor will issue a warning if the  
-  /// needs of the first manipulator exceed mxvapq. See also details for        
+  /// needs of the first manipulator exceed mxvapq. For more details, see       
   /// Manipulator::Manipulator().                                               
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
@@ -135,16 +135,22 @@ namespace falcON {
     /// Instead of '+' as separator, also ',' is allowed. The corresponding     
     /// parameter sets must match in number the names and must be in the format 
     ///                                                                         
-    /// pars1[#pars2[#pars3 ... ]]                                              
+    /// pars1[;pars2[;pars3 ... ]]                                              
     ///                                                                         
     /// with each parameter set being a comma seperated list of numbers (no     
-    /// space) with may be empty. Instead of '#', also ';' is allowed as        
+    /// space) with may be empty. Instead of ';', also '#' is allowed as        
     /// separator. The data files must match in number the names                
     /// and must be in the format                                               
     ///                                                                         
-    /// file1[#file2[#file3 ... ]]                                              
+    /// file1[;file2[;file3 ... ]]                                              
     ///                                                                         
-    /// where again ';' is also allowed as a separator.                         
+    /// where again '#' is also allowed as a separator.                         
+    ///                                                                         
+    /// In the corresponding command-line arguments to programs gyrfalcON       
+    /// and manipulate, the ';' character needs to be protected by placing the  
+    /// whole argument in double quotes as follows:                             
+    ///                                                                         
+    /// manipname=man1+man2 manippars="0,1.432;0,4,1000" manipfile="file1;file2"
     ///                                                                         
     /// Second, the names, parameter sets, and data files can be read from      
     /// a single file. This is done if either \a names is null or starts with   

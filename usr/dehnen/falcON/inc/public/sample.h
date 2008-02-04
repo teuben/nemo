@@ -156,7 +156,6 @@ namespace falcON {
 	        double e=0.0,
 #endif
 		bool gF=false, bool gP=false, bool gA=false) const;
-    //--------------------------------------------------------------------------
     /// sampling of full phase-space: non-virtual
     /// \note assuming the randomly generated (r,vr,vt) are already properly
     ///       scaled as well as the Psi returnd. Also the routines for
@@ -183,6 +182,21 @@ namespace falcON {
 	     e,
 #endif
 	     gF,gP,gA);
+    }
+    //--------------------------------------------------------------------------
+    /// sampling positions only: non-virtual
+    /// \param B0 (input) first body to sample
+    /// \param N  (input) number of bodies to sample
+    /// \param q  (input) use quasi (or pseudo) random numbers?
+    /// \param R  (input) quasi and pseudo random number generator
+    void sample_pos(body const&B0, unsigned N, bool q, Random const&R) const;
+    /// sampling positions only: non-virtual
+    /// \param B  (input) bodies to sample
+    /// \param q  (input) use quasi (or pseudo) random numbers?
+    /// \param R  (input) quasi and pseudo random number generator
+    void sample_pos(bodies const&B, bool q, Random const&R) const
+    {
+      sample_pos(B.begin_all_bodies(), B.N_bodies(), q,R);
     }
     //--------------------------------------------------------------------------
   };// class SphericalSampler

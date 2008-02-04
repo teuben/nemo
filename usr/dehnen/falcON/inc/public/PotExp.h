@@ -6,7 +6,7 @@
 /// \brief  potential expansion in to basis functions of Zhao (1996) type.      
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   1994-1996, 2004, 2007                                               
+/// \date   1996, 2004-2008                                                     
 ///                                                                             
 /// \note                                                                       
 /// The code and its implementation in PotExp.cc are supposed to be included in 
@@ -19,7 +19,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2007  Walter Dehnen, Paul McMillan                        
+// Copyright (C) 1994-2008  Walter Dehnen, Paul McMillan                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -53,42 +53,88 @@
 
 extern "C" struct XDR;
 
-////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 namespace { class PotExpAccess; }                  // forward declaration       
-////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 namespace falcON {
   class AnlmIO;                                    // forward declaration       
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::PotExp                                                     //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::PotExp                                                       
+  //                                                                            
+  /*!
+    \brief Expansion of gravitational potential in basis functions, based on
+    spherical harmonics (Zhao 1996).                                          
+
+    The potential expansion is based on potential-density pairs
+    \f[
+    4\pi\,\rho_{nlm}(\mbox{\boldmath$x$}) =
+    - \Delta\Psi_{nlm}(\mbox{\boldmath$x$}),
+    \f]
+    which satisfy the bi-orthogonality relation
+    \f[
+    \int\mathrm{d}^3\!\mbox{\boldmath$x$}\, \rho_{nlm}(\mbox{\boldmath$x$})\,
+    \Psi_{ijk}(\mbox{\boldmath$x$})=
+    \frac{\delta_{ni}\,\delta_{lj}\,\delta_{mk}}{N_{nlm}}
+    \f]
+    with some normalisation constants \f$N_{nlm}\f$.
+    Thus, given \f$N\f$ mass points with masses \f$m_i\f$ and positions
+    \f$\mathbf{x}_i\f$, we can obtain the coefficients \f$A_{nlm}\f$ for
+    the potential expansion as
+    \f[
+    A_{nlm} = G\,N_{nlm} \sum_{i=1}^N m_i \Psi_{nlm}(\mbox{\boldmath$x$}_i)
+    \f]
+    with \f$G\f$ Newton's constant of gravity.
+    Conversely, the gravitational potential and force are then given as
+    \f{eqnarray}
+    \Phi(\mbox{\boldmath$x$}) &=& - \sum_{nlm} A_{nlm}\,
+    \Psi_{nlm}(\mbox{\boldmath$x$}) \\
+    \mbox{\boldmath$F$}(\mbox{\boldmath$x$}) &=& \sum_{nlm} A_{nlm}\,
+    \mbox{\boldmath$\nabla$}\Psi_{nlm}(\mbox{\boldmath$x$}).
+    \f}
+    The lowest order basis function has functional form (with
+    \f$ r=|\mbox{\boldmath$x$}|\f$)
+    \f[
+    \Psi_{000} = \frac{1}{(r^{1/\alpha} + r_s^{1/\alpha})^{\alpha}}.
+    \f]
+    Thus, for \f$\alpha=1/2\f$ we get the Clutton-Brock (1972) expansion based
+    on the Plummer sphere as lowest order, while for \f$\alpha=1\f$ we get
+    the Hernquist & Ostriker (1992) expansion based on a Hernquist sphere as
+    lowest order.
+    \note
+    The code here is not explicitly using bodies. For a frontend that
+    does directly take bodies arguments, see classes PotentialExpansion
+    and NPotExpansion (both only with the proprietary version).
+  */
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
   class PotExp {
     friend class PotExpAccess;
   public:
     //--------------------------------------------------------------------------
-    // type used internally for real-valued numbers                             
+    /// type used internally for real-valued numbers                            
     typedef double scalar;
     //--------------------------------------------------------------------------
-    // public enum symmetry                                                     
+    /// type to encode symmetry properties                                      
     //                                                                          
-    // The potential expansion code may enforce some type of symmetry.          
-    // There are four degrees of symmetry ranging from reflexion to spherical   
-    // symmetry. Each degree of symmetry implies all lower degrees.             
+    /// The potential expansion code may enforce some type of symmetry.         
+    /// There are four degrees of symmetry ranging from reflexion to spherical  
+    /// symmetry. Each degree of symmetry implies all lower degrees.            
     enum symmetry {
       // basic symmetrizing properties for the A(l,m)                           
-      none       = 0,                      // all terms used                    
-      pint       = 1,                      // A(l,m)=0  IF l or m are odd       
-      axes       = 2,                      // A(l,m)=A(l,-m)=[A(l,m)+A_(l,-m)]/2
-      zrot       = 4,                      // A(l,m)=0  IF m!=0                 
-      arot       = 8,                      // A(l,m)=0  IF l!=0                 
+      none       = 0,                    ///< all terms used                    
+      pint       = 1,                    ///< A(l,m)=0  IF l or m are odd       
+      axes       = 2,                    ///< A(l,m)=A(l,-m)=[A(l,m)+A_(l,-m)]/2
+      zrot       = 4,                    ///< A(l,m)=0  IF m!=0                 
+      arot       = 8,                    ///< A(l,m)=0  IF l!=0                 
       // degrees of symmetry:                                                   
-      reflexion   = pint,                  // reflexion symmetry wrt. origin    
-      triaxial    = reflexion | axes,      // reflexion symmetry wrt. x,y,z axes
-      cylindrical = triaxial  | zrot,      // axi symmetry                      
-      spherical   = cylindrical | arot     // spherical symmetry                
+      reflexion   = pint,                ///< reflexion symmetry wrt. origin    
+      triaxial    = reflexion | axes,    ///< reflexion symmetry wrt. x,y,z axes
+      cylindrical = triaxial  | zrot,    ///< axial symmetry                    
+      spherical   = cylindrical | arot   ///< spherical symmetry                
     };
     //--------------------------------------------------------------------------
+    /// given a symmetry, return a name
     static const char* name_of_sym(symmetry s) {
       switch(s) {
       case spherical:   return "spherical";
@@ -99,40 +145,40 @@ namespace falcON {
       default:          return "ERRORNEOUS";
       }
     }
-    ////////////////////////////////////////////////////////////////////////////
-    //                                                                        //
-    // nested class Anlm                                                      //
-    //                                                                        //
-    // holds the numbers a_nlm with n=0...N, l=0...L, m=-l...l                //
-    //                                                                        //
-    // NOTE                                                                   //
-    //    Depending on the adopted symmetry, we ASSUME certain elements to be //
-    //    zero or trivial copies, but do NOT ENFORCE this. In particular:     //
-    //    1. spherical symmetry: only the l=0,m=0 elements are used.          //
-    //    2. cylindrical symmetry: only the even l, m=0 elements are used.    //
-    //    3. triaxial symmetry: only elements with (l,m) even are considered  //
-    //       and it is implicitly assumed that A[-m]=A[m]; only m>0 are used. //
-    //    4. reflexion symmetry: all elements with even (l,m) are used.       //
-    //                                                                        //
-    ////////////////////////////////////////////////////////////////////////////
+    // /////////////////////////////////////////////////////////////////////////
+    //                                                                          
+    // nested class Anlm                                                        
+    //                                                                          
+    /// holds the coefficients a_nlm with n in [0,N], l in [0,L], m in [-l,l].  
+    /// Depending on the adopted symmetry, we ASSUME certain elements to be zero
+    /// or trivial copies, but do NOT ENFORCE this. In particular:            \n
+    ///   1. spherical symmetry: only the l=0,m=0 elements are used.          \n
+    ///   2. cylindrical symmetry: only the even l, m=0 elements are used.    \n
+    ///   3. triaxial symmetry: only elements with (l,m) even are considered    
+    ///      and it is implicitly assumed that A[-m]=A[m]; only m>0 are used. \n
+    ///   4. reflexion symmetry: all elements with even (l,m) are used.       \n
+    //                                                                          
+    // /////////////////////////////////////////////////////////////////////////
     class Anlm {
       friend class PotExp;
       friend class ::PotExpAccess;
       friend class AnlmIO;
       //------------------------------------------------------------------------
-      // type used internally for real-valued numbers                           
-      typedef double scalar;
-      //------------------------------------------------------------------------
       // data                                                                   
-      const int N,L, N1,L1,L1Q;
-      scalar   *A;
+      const int N;            ///< maximum value for n
+      const int L;            ///< maximum value for l
+      const int N1,L1,L1Q;    ///< nmax+1, lmax+1, (lmax+1)^2
+      scalar   *A;            ///< pointer to coefficient data
       //------------------------------------------------------------------------
+    public:
       /// like destruction followed by construction
-      void reset(int n, int l) {
-	if(n!=N || l!=L) {
+      /// \param nmax maximum for n
+      /// \param lmax maximum for l
+      void reset(int nmax, int lmax) {
+	if(nmax!=N || lmax!=L) {
 	  falcON_DEL_A(A);
-	  *(const_cast<int*>(&N)) = n;
-	  *(const_cast<int*>(&L)) = l;
+	  *(const_cast<int*>(&N)) = nmax;    // dirty trick to change const data
+	  *(const_cast<int*>(&L)) = lmax;
 	  *(const_cast<int*>(&N1)) = N+1;
 	  *(const_cast<int*>(&L1)) = L+1;
 	  *(const_cast<int*>(&L1Q)) = L1*L1;
@@ -140,197 +186,280 @@ namespace falcON {
 	}
       }
       //------------------------------------------------------------------------
-      // construction & destruction                                             
-    public:
-      Anlm (int n=0, int l=0) :
-	N(n), L(l),
+      /// construction from given n_max & l_max, includes default constructor
+      Anlm (int nmax=0, int lmax=0) :
+	N(nmax), L(lmax),
 	N1(N+1), L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,N1*L1Q)) {}
+      /// construction form a potential expansion
       template<typename POTEXP>
-      Anlm (POTEXP const&P) :
+      explicit Anlm (POTEXP const&P) :
 	N(P.Nmax()), L(P.Lmax()),
 	N1(N+1), L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,N1*L1Q)) {}
-      Anlm (Anlm const&a) :
+      /// copy constructor
+      explicit Anlm (Anlm const&a) :
 	N(a.N), L(a.L),
 	N1(N+1), L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,N1*L1Q)) {
 	memcpy(A,a.A,N1*L1Q*sizeof(scalar));
       }
-      ~Anlm() { delete[] A; }
+      /// destructor: delete data array
+      ~Anlm() { falcON_DEL_A(A); }
       //------------------------------------------------------------------------
+      /// return maximum possible n
       int const&nmax() const { return N; }
+      /// return maximum possible l
       int const&lmax() const { return L; }
       //------------------------------------------------------------------------
-      // element access                                                         
-      //    NOTE: that elements ASSUMED to be zero may have any value!          
+      /// non-const element access, given n,l,m
+      /// \note: that elements ASSUMED to be zero may have any value!           
       scalar      &operator() (int n, int l, int m) {
 	return A[n*L1Q+l*(l+1)+m];
       }
+      /// const element access, given n,l,m
+      /// \note: that elements ASSUMED to be zero may have any value!           
       scalar const&operator() (int n, int l, int m) const {
 	return A[n*L1Q+l*(l+1)+m];
       }
       //------------------------------------------------------------------------
-      Anlm&reset   (symmetry=none);                // A[n,l,m] = 0              
-      Anlm&assign  (scalar const&, symmetry=none); // A[n,l,m] = x              
-      Anlm&multiply(scalar const&, symmetry=none); // A[n,l,m]*= x              
-      Anlm&divide  (scalar const&, symmetry=none); // A[n,l,m]/= x              
-      Anlm&copy    (Anlm   const&, symmetry=none); // A[n,l,m] = B[n,l,m]       
-      Anlm&add     (Anlm   const&, symmetry=none); // A[n,l,m]+= B[n,l,m]       
-      Anlm&subtract(Anlm   const&, symmetry=none); // A[n,l,m]-= B[n,l,m]       
-      Anlm&multiply(Anlm   const&, symmetry=none); // A[n,l,m]*= B[n,l,m]       
-      scalar dot   (Anlm   const&, symmetry=none)  // dot product               
-	const;
-      Anlm&addtimes(Anlm   const&,                 // A[n,l,m]+= x*B[n,l,m]     
-		    scalar const&, symmetry=none);
-      Anlm&subtimes(Anlm   const&,                 // A[n,l,m]-= x*B[n,l,m]     
-		    scalar const&, symmetry=none);
-      Anlm&apply   (scalar(*f)(scalar)) {          // A[n,l,m] = f(A[n,l,m])    
+      /// reset: A[n,l,m] = 0
+      /// \param sym: if not none: only relevant coefficients are dealt with
+      Anlm&reset(symmetry sym=none);
+      /// negate: A[n,l,m] =-A[n,l,m]
+      /// \param sym: if not none: only relevant coefficients are dealt with
+      Anlm&negate(symmetry sym=none);
+      /// assign to scalar: A[n,l,m] = x
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&assign(scalar const&x, symmetry sym=none);
+      /// multiply by scalar: A[n,l,m]*= x
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&multiply(scalar const&x, symmetry sym=none);
+      /// divide by scalar: A[n,l,m]/= x
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&divide(scalar const&x, symmetry sym=none);
+      /// assign element wise: A[n,l,m] = B[n,l,m]
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&copy(Anlm const&B, symmetry sym=none);
+      /// add element wise: A[n,l,m] += B[n,l,m]
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&add(Anlm const&B, symmetry sym=none);
+      /// subtract element wise: A[n,l,m] -= B[n,l,m]
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&subtract(Anlm const&B, symmetry sym=none);
+      /// multiply element wise: A[n,l,m] *= B[n,l,m]
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&multiply(Anlm const&B, symmetry sym=none);
+      /// dot product: return Sum_nlm A[n,l,m]*B[n,l,m]
+      /// \param sym if not none: only relevant coefficients are dealt with
+      scalar dot(Anlm const&B, symmetry sym=none) const;
+      /// add element wise times scalar: A[n,l,m] += x*B[n,l,m]
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&addtimes(Anlm const&B, scalar const&x, symmetry sym=none);
+      /// subtract element wise times scalar: A[n,l,m] -= x*B[n,l,m]
+      /// \param sym if not none: only relevant coefficients are dealt with
+      Anlm&subtimes(Anlm const&B, scalar const&x, symmetry sym=none);
+      /// apply element wise operation: A[n,l,m] = f(A[n,l,m])
+      /// \param f function to apply to each element
+      Anlm&apply(scalar(*f)(scalar)) {
 	scalar* const AN = A+(N1*L1Q);
 	for(scalar*a=A; a!=AN; ++a)
 	  *a = f(*a);
 	return *this;
       }
       //------------------------------------------------------------------------
-      // make nice print outs                                                   
-      void print(                                  // nice formated print       
-		 symmetry,                         // I: symmetry to assume     
-		 std::ostream&,                    // I: ostream to write to    
-		 int = 6) const;                   //[I: precision]             
-      void table_print(                            // print table               
-		       symmetry,                   // I: symmetry to assume     
-		       std::ostream&,              // I: ostream to write to    
-		       int = 6) const;             //[I: precision]             
-    }; // class Anlm
+      /// make formated nice print
+      /// \param sym symmetry to assume (suppress printing of ignored terms)
+      /// \param out where to print to
+      /// \param prec precision for printing scalars
+      void print(symmetry sym, std::ostream&out, int prec = 6) const;
+      /// print coefficients as table
+      /// \param sym symmetry to assume (suppress printing of ignored terms)
+      /// \param out where to print to
+      /// \param prec precision for printing scalars
+      void table_print(symmetry sym, std::ostream&out, int prec = 6) const;
+    };// sub-class Anlm
   private:
     //--------------------------------------------------------------------------
     // data members                                                             
-    const symmetry  SYM;                   // symmetry used by this PotExp      
-    const int       N;                     // max N in expansion                
-    const int       L;                     // max L in expansion, MUST be even  
-    const scalar    AL, R0;                // alpha, scale radius               
-    Anlm            Knlm;                  // normalization constants           
-    mutable char    STATE;                 // 0: okay, 1: warning 2: error      
-    mutable char    ERR[256],WARN[256];    // error & warning message           
+    const symmetry  SYM;                   ///< symmetry used by this PotExp    
+    const int       N;                     ///< max n in expansion              
+    const int       L;                     ///< max l in expansion              
+    const scalar    AL, R0;                ///< alpha, scale radius             
+    Anlm            Knlm;                  ///< normalisation constants         
+    mutable char    STATE;                 ///< 0: okay, 1: warning 2: error    
+    mutable char    ERR[256],WARN[256];    ///< error & warning message         
     //--------------------------------------------------------------------------
     // const data access                                                        
   protected:
     Anlm        const& K           () const { return Knlm; }
   public:
+    /// return assumed symmetry
     symmetry    const& Symmetry    () const { return SYM; }
+    /// return parameter alpha
     scalar      const& alpha       () const { return AL; }
+    /// return scale radius
     scalar      const& scale       () const { return R0; }
+    /// return maximum n
     int         const& Nmax        () const { return N; }
+    /// return maximum n
     int         const& Lmax        () const { return L; }
+    /// has an error or warning occured?
     bool               is_okay     () const { return STATE == 0; }
+    /// has a warning occured?
     bool               has_warning () const { return STATE & 1; }
+    /// has an error occured?
     bool               has_error   () const { return STATE & 2; }
+    /// error message, if any
     const char*        error_msg   () const { return ERR; }
+    /// warning message, if any
     const char*        warning_msg () const { STATE &= ~1; return WARN; }
     //--------------------------------------------------------------------------
-    PotExp(scalar,                         // parameter alpha                   
-	   scalar,                         // scale radius                      
-	   int,                            // maximum n in expansion            
-	   int,                            // maximum l in expansion            
-	   symmetry = reflexion);          // symmetry used                     
+    /// constructor
+    /// \param alpha parameter \f$\alpha\f$
+    /// \param scale scale radius \f$r_s\f$
+    /// \param nmax maximum n in expansion
+    /// \param lmax maximum l in expansion
+    /// \param sym symmetry to be assumed, default: reflexion symmetry
+    PotExp(scalar alpha, scalar scale,
+	   int nmax, int lmax, symmetry sym=reflexion);
     //--------------------------------------------------------------------------
+    /// return name of symmetry used
     const char* symmetry_name() const {
       return name_of_sym(SYM);
     }
     //--------------------------------------------------------------------------
-    // add C_nlm due to a set of bodies                                         
-    // Note     If the pointer to body flags is non-zero AND the last argument  
-    //          'k' is non-zero too, only the contributions to C_nlm of bodies  
-    //          for which (flag & k) is true are added.                         
-    template<typename T>                           // T: double or float        
-    void AddCoeffs  (Anlm            &,            // O: C_nlm coefficients     
-		     int              ,            // I: # bodies               
-		     const T         *,            // I: masses                 
-		     const tupel<3,T>*,            // I: positions              
-		     const int       *,            // I: flags        see Note  
-		     int             = 0) const;   //[I: k]           see Note  
+    /*!
+    \brief add coefficients due to a set of bodies.
+
+    This amounts to the operation
+    \f[
+      A_{nlm} += \sum_i m_i \Psi_{nlm}(\mbox{\boldmath$x$}_i).
+    \f]
+    \note The \f$A_{nlm}\f$ are not yet normalised, this must be done
+          via PotExp::Normalize().
+    \param T type of scalar used for masses & positions (float or double)
+    \param A coefficients \f$A_{nlm}\f$ to add to
+    \param n number of bodies
+    \param m array with body masses
+    \param x array with body positions
+    \param f array with body flags (can be null)
+    \param k flag (see note below)
+    \note If flags are provided and the last argument is non-zero, only
+          the contributions of bodies with (f[i] & k) is true are added.
+    */
+    template<typename T>
+    void AddCoeffs(Anlm&A, int n, const T*m, const tupel<3,T>*x,
+	           const int*f, int k=0) const;
     //--------------------------------------------------------------------------
-    // multiply C_nlm with G*A_nl*N_lm                                          
-    void Normalize  (Anlm          &,              // I/O: C_nlm coefficients   
-		     scalar const  & = 1) const;   //[I: constant of Gravity]   
+    /*!
+    \brief normalise the coefficients so that gravity can be computed.
+
+    This amounts to \f$ A_{nlm} \to G\,A_{nlm} N_{nlm}\f$.
+     \param A coefficients \f$A_{nlm}\f$ to be normalised
+     \param G Newton's gravitation constant
+    */
+    void Normalize(Anlm&A, scalar const&G=1) const;
     //--------------------------------------------------------------------------
-    // compute Pot & Acc due to a set of coefficients for a set of bodies       
-    // Notes                                                                    
-    //       1. If the pointer to body flags is 0, gravity is computed for all  
-    //          bodies, otherwise only for those for which (flag & 1) is true.  
-    //       2. If the 1st bit of the last argument is set, potentials are      
-    //          added, otherwise assigned.                                      
-    //          Likewise, if the second bit of that arguement  is set,          
-    //          accelerations are added, otherwise assigned. Thus, a value      
-    //          of 0 means both potentials and acclerations get assigned        
-    template<typename T>                           // T: double or float        
-    void SetGravity (Anlm const      &,            // I: C_nlm coefficients     
-		     int              ,            // I: # bodies               
-		     const tupel<3,T>*,            // I: positions              
-		     T               *,            // O: potentials             
-		     tupel<3,T>      *,            // O: accelerations          
-		     const int       *,            // I: body flags   see Note 1
-		     int              ) const;     // I: add?         see Note 2
+    /*!
+    \brief compute potential and accelerations due to a set of coefficients 
+           for a set of bodies.
+	       
+    This amounts to the operations
+    \f{eqnarray*}
+    \Phi(\mbox{\boldmath$x$}) &=& - \sum_{nlm} A_{nlm}\,
+    \Psi_{nlm}(\mbox{\boldmath$x$}) \\
+    \mbox{\boldmath$F$}(\mbox{\boldmath$x$}) &=& \sum_{nlm} A_{nlm}\,
+    \mbox{\boldmath$\nabla$}\Psi_{nlm}(\mbox{\boldmath$x$}).
+    \f}
+    \note The coefficients must have been normalised via PotExp::Normalize().
+    \param T type of scalar used for positions, potential, accelerations (float or double)
+    \param A coefficients \f$A_{nlm}\f$ to be used
+    \param n number of bodies
+    \param x array with body positions
+    \param P array with body potentials to be assigned/added to
+    \param F array with body accelerations to be assigned/added to
+    \param f array with body flags (can be null)
+    \param add flag (see note below)
+    \note If flags are provided gravity is computed only for bodies for 
+          which f[i]&1 is true.
+    \note If the 1st bit of the last argument is set, potentials are      
+          added, otherwise assigned.\n
+	  Likewise, if the second bit of that arguement is set,
+	  accelerations are added, otherwise assigned. Thus, a value
+	  of 0 means both potentials and acclerations get assigned.
+    */
+    template<typename T>
+    void SetGravity (Anlm const&A, int n, const tupel<3,T>*x, T*P, tupel<3,T>*F,
+		     const int*f, int add) const;
     //--------------------------------------------------------------------------
-    // compute Pot & Acc due to a set of coefficients for a single body         
-    template<typename T>                           // T: double or float        
-    void SetGravity (Anlm       const&,            // I: C_nlm coefficients     
-		     tupel<3,T> const&,            // I: position               
-		     T               &,            // O: potential              
-		     tupel<3,T>      &,            // O: acceleration           
-		     int              ) const;     // I: add?         see Note 2
+    /// compute potential and accelerations due to a set of coefficients 
+    /// for a single body.
+    template<typename T>
+    void SetGravity (Anlm const&A, tupel<3,T> const&x, T&P, tupel<3,T>&F,
+		     int add) const;
     //--------------------------------------------------------------------------
-    // compute Pot due to a set of coefficients for a set of bodies             
-    // Notes                                                                    
-    //       1. If the pointer to body flags is 0, gravity is computed for all  
-    //          bodies, otherwise only for those for which (flag & 1) is true.  
-    //       2. If the 1st bit of the last argument is set, potentials are      
-    //          added, otherwise assigned.                                      
-    template<typename T>                           // T: double or float        
-    void SetPotential(Anlm const      &,           // I: C_nlm coefficients     
-		      int              ,           // I: # bodies               
-		      const tupel<3,T>*,           // I: positions              
-		      T               *,           // O: potentials             
-		      const int       *,           // I: body flags   see Note 1
-		      int              ) const;    // I: add?         see Note 2
+    /*!
+    \brief compute potential due to a set of coefficients for a set of bodies.
+	       
+    This amounts to the operations
+    \f[
+    \Phi(\mbox{\boldmath$x$}) = - \sum_{nlm} A_{nlm}\,
+    \Psi_{nlm}(\mbox{\boldmath$x$}) \\
+    \f]
+    \note The coefficients must have been normalised via PotExp::Normalize().
+    \param T type of scalar used for positions, potential (float or double)
+    \param A coefficients \f$A_{nlm}\f$ to be used
+    \param n number of bodies
+    \param x array with body positions
+    \param P array with body potentials to be assigned/added to
+    \param f array with body flags (can be null)
+    \param add flag (see note below)
+    \note If flags are provided gravity is computed only for bodies for 
+          which f[i]&1 is true.
+    \note If the 1st bit of the last argument is set, potentials are      
+          added, otherwise assigned.
+    */
+    template<typename T>
+    void SetPotential(Anlm const&A, int n, const tupel<3,T>*x, T*P,
+		      const int*f, int add) const;
     //--------------------------------------------------------------------------
-    // self-gravity:                                                            
-    // 1. compute C_nlm from a set of bodies                                    
-    // 2. compute gravity from the C_nlm for the same bodies                    
-    // 3. return the normalized coefficients                                    
-    //                                                                          
-    // WARNING NOTE                                                             
-    // I wrote this code in the presumption that is will be faster than the     
-    // sequence of AddCoeffs(), Normalize(), and SetGravity(), because the      
-    // spherical coordinates are computed once only (when the coefficients are  
-    // computed) and remembered for when gravity is computed from the coeffs.   
-    // However, it turns out that in fact this code is slower! Presumably, this 
-    // is because the computation of the spherical coordinates is in fact faster
-    // than loading them from memory.                                           
-    // Moreover, this routines is not suitable for a body data layout in blocks 
-    // (though it could be amended to fit this).                                
-    //                                                                          
-    // Notes                                                                    
-    //       1. If the pointer to body flags is non-zero AND the argument 'mark'
-    //          is non-zero too, only the contributions to C_nlm of bodies      
-    //          for which (flag & k) is true are added.                         
-    //       2. If the pointer to body flags is 0 or the argument 'all' is true,
-    //          gravity is computed for all bodies, otherwise only for those    
-    //          for which (flag & 1) is true.                                   
-    //       3. If the 1st bit of the argument 'add' is set, potentials are     
-    //          added, otherwise assigned.                                      
-    //          Likewise, if the second bit of that arguement  is set,          
-    //          accelerations are added, otherwise assigned. Thus, a value      
-    //          of 0 means both potentials and acclerations get assigned        
-    template<typename T>                           // T: double or float        
-    void SelfGravity(Anlm            &,            // O: normalized C_nlm       
-		     int              ,            // I: # bodies               
-		     const T         *,            // I: masses                 
-		     const tupel<3,T>*,            // I: positions              
-		     T               *,            // O: potentials             
-		     tupel<3,T>      *,            // O: accelerations          
-		     const int       *,            // I: flags        Notes 1&2 
-		     int              ,            // I: mark         see Note 1
-		     bool             ,            // I: all          see Note 2
-		     int              ,            // I: add?         see Note 3
-		     scalar          =1) const;    //[I: const of Gravity]      
+    /// self-gravity:\n
+    /// 1 compute \f$A_{nlm}\f$ from a set of bodies\n
+    /// 2 compute gravity from the \f$A_{nlm}\f$ for the same bodies\n
+    /// 3 return the normalized coefficients\n
+    ///                                                                         
+    /// \warning
+    /// I wrote this code in the presumption that it will be faster than the
+    /// sequence of AddCoeffs(), Normalize(), and SetGravity(), because the
+    /// spherical coordinates are computed once only (when the coefficients are
+    /// computed) and remembered for when gravity is computed from the coeffs.
+    /// However, it turns out that in fact this code is slower! Presumably, this
+    /// is because the computation of the spherical coordinates is in fact
+    /// faster than loading them from memory.\n
+    /// Moreover, this routine is not suitable for a body data layout in blocks
+    /// (though it could be amended to fit this).
+    ///
+    /// \param T type of scalar used for positions, potential (float or double)
+    /// \param A coefficients \f$A_{nlm}\f$; on output: normalized coeffs
+    /// \param n number of bodies
+    /// \param m array with body masses
+    /// \param x array with body positions
+    /// \param P array with body potentials to be assigned/added to
+    /// \param F array with body accelerations to be assigned/added to
+    /// \param f array with body flags (can be null)
+    /// \param k flag (see note below)
+    /// \param all compute gravity for all (or only those with f[i]&1 == true)?
+    /// \param add flag (see note below)
+    /// \param G Newton's gravitation constant
+    /// \note If flags are provided and 'k' is non-zero, only the contributions 
+    ///       of bodies with (f[i] & k) is true are added to the \f$A_{nlm}\f$.
+    /// \note If the 1st bit of the last argument is set, potentials are      
+    ///       added, otherwise assigned.\n
+    ///       Likewise, if the second bit of that arguement  is set,
+    ///       accelerations are added, otherwise assigned. Thus, a value
+    ///       of 0 means both potentials and acclerations get assigned.
+    template<typename T>
+    void SelfGravity(Anlm&A, int n, const T*m, const tupel<3,T>*x,
+		     T*P, tupel<3,T>*F, const int*f,
+		     int k, bool all, int add, scalar G=1) const;
     //--------------------------------------------------------------------------
   };// class PotExp
   //////////////////////////////////////////////////////////////////////////////
@@ -353,6 +482,11 @@ namespace falcON {
     //--------------------------------------------------------------------------
     void open_for_read (const char*) falcON_THROWING;
     void open_for_write(const char*) falcON_THROWING;
+    void open_for_read (std::string const&f) falcON_THROWING
+    { open_for_read(f.c_str()); }
+    void open_for_write(std::string const&f) falcON_THROWING
+    { open_for_write(f.c_str()); }
+    //--------------------------------------------------------------------------
     /// \param sym symmetry
     /// \param al  alpha
     /// \param rs  scale
@@ -365,7 +499,8 @@ namespace falcON {
     /// \param rs  scale
     /// \param A   coeffs
     /// \param t   time
-    void read (PotExp::symmetry&sym, double&al, double&rs,
+    /// \return was read operation successful?
+    bool read (PotExp::symmetry&sym, double&al, double&rs,
 	       PotExp::Anlm&A, double&t) falcON_THROWING;
   public:
     bool is_open() const { return open!=closed; }
@@ -383,7 +518,17 @@ namespace falcON {
     //--------------------------------------------------------------------------
   public:
     AnlmI(const char*f) falcON_THROWING { open_for_read(f); }
+    AnlmI(std::string const&f) falcON_THROWING { open_for_read(f.c_str()); }
+    void open(const char*f) {
+      if(is_open()) close();
+      open_for_read(f);
+    }
+    void open(std::string const&f) {
+      if(is_open()) close();
+      open_for_read(f);
+    }
     AnlmIO::read;
+    operator bool() const { return is_open(); }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -396,7 +541,17 @@ namespace falcON {
     //--------------------------------------------------------------------------
   public:
     AnlmO(const char*f) falcON_THROWING { open_for_write(f); }
+    AnlmO(std::string const&f) falcON_THROWING { open_for_write(f.c_str()); }
+    void open(const char*f) {
+      if(is_open()) close();
+      open_for_write(f);
+    }
+    void open(std::string const&f) {
+      if(is_open()) close();
+      open_for_write(f);
+    }
     AnlmIO::write;
+    operator bool() const { return is_open(); }
   };
 } // namespace falcON
 ////////////////////////////////////////////////////////////////////////////////

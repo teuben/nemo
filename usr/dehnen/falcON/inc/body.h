@@ -8,11 +8,11 @@
 ///         currently problems with doxygen documentation.                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2007                                                           
+/// \date   2000-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2007 Walter Dehnen                                        
+// Copyright (C) 2000-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -77,9 +77,9 @@ namespace falcON {
   /// Holds and manages the body data.                                          
   ///                                                                           
   /// Body data are hold in a linked list of bodies::block s, which store the   
-  /// data in a structure of array (SoA) form. Sub-type bodies::iterator        
+  /// data in a 'structure of array' (SoA) form. Sub-type bodies::iterator      
   /// provides access to body data (via its members and friends) mimicking an   
-  /// array of structure (AoS) layout. Sub-type bodies::index provides an       
+  /// 'array of structure' (AoS) layout. Sub-type bodies::index provides an     
   /// alternative data access via members of bodies. class falcON::bodies also  
   /// supports data I/O and adding/removing of data fields and bodies.          
   ///                                                                           
@@ -291,8 +291,7 @@ namespace falcON {
       friend class bodies;
       friend class bodies::block;
       //------------------------------------------------------------------------
-      /// useful constants,                                                     
-      /// determines interpretation of index::I                                 
+      /// useful constants, determines interpretation of index::I
       enum
       {
 	block_bits = 8,                 ///< number of bits used for blocks No. 
@@ -302,38 +301,38 @@ namespace falcON {
 	index_mask = max_bodies - 1     ///< mask for extracting sub-index.     
       };
       //------------------------------------------------------------------------
-      /// data are stored in 32bits.                                            
+      /// data are stored in 32bits.
       unsigned I;
     public:
       //------------------------------------------------------------------------
-      /// return No of block, encoded in highest index::block_bits bits.        
+      /// return No of block, encoded in highest index::block_bits bits.
       unsigned no() const { return I >> index_bits; }
       //------------------------------------------------------------------------
-      /// return sub-index, encoded in lowest index::index_bits bits.           
+      /// return sub-index, encoded in lowest index::index_bits bits.
       unsigned in() const { return I &  index_mask; }
       //------------------------------------------------------------------------
       /// return numerical value
       unsigned const&value() const { return I; }
       //------------------------------------------------------------------------
-      /// unitialized construction.                                             
+      /// default constructor: initialized
       index() {}
       //------------------------------------------------------------------------
-      /// copy constructor.                                                     
+      /// copy constructor.
       index(index const&i) : I(i.I) {}
       //------------------------------------------------------------------------
-      /// constructor from block No (b) and body index (n) within block.        
+      /// constructor from block No (b) and index (n) within block.
       index(unsigned b, unsigned n) : I (n | b<<index_bits) {}
       //------------------------------------------------------------------------
-      /// make a copy.                                                          
+      /// make a copy.
       index& operator= (index const&i) { I=i.I; return *this; }
       //------------------------------------------------------------------------
-      /// output in format "no:index".                                          
+      /// output in format "no:index".
       friend std::ostream& operator<<(std::ostream&, const index&);
       //------------------------------------------------------------------------
-      /// equality                                                              
+      /// equality
       bool operator== (index const&i) const { return I == i.I; }
       //------------------------------------------------------------------------
-      /// inequality                                                            
+      /// inequality
       bool operator!= (index const&i) const { return I != i.I; }
     };
     //==========================================================================
@@ -594,9 +593,6 @@ namespace falcON {
       const block* B;                              // block*: current           
       unsigned     K, N;                           // index : current & end     
       //------------------------------------------------------------------------
-      // construction                                                           
-      //------------------------------------------------------------------------
-      iterator();                                  // not implemented           
       /// construction from pointer to block and index within block             
       explicit 
       iterator(const block*b,
@@ -609,6 +605,7 @@ namespace falcON {
 	K = 0;                                     //   set index to 0          
 	N = B? B->N_bodies() : 0;                  //   set end of indices      
       }
+      //------------------------------------------------------------------------
     public:
 #if defined(DEBUG) || defined(EBUG)
 # define CheckInvalid(NAME)					\
@@ -736,6 +733,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name public construction and assignment                              
       //@{
+      /// default constructor makes an invalid body
+      iterator() : B(0) {}
       /// copy constructor
       iterator(iterator const&i) : B(i.B), K(i.K), N(i.N) {}
       /// iterator offset by \e offset from \e i

@@ -7,11 +7,11 @@
 ///         as well as NEMO I/O support                                         
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2007                                                           
+/// \date   2000-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2007 Walter Dehnen                                        
+// Copyright (C) 2000-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -451,20 +451,21 @@ namespace falcON {
       num     = 1 << 13,
       posvel  = 1 << 14,
       phden   = 1 << 15,
-      Size    = 1 << 16,
-      Gasnum  = 1 << 17,
-      Uin     = 1 << 18,
-      Uindot  = 1 << 19,
-      Uinrad  = 1 << 20,
-      Entr    = 1 << 21,
-      Gasdens = 1 << 22,
-      Sizedot = 1 << 23,
-      Sphfact = 1 << 24,
-      Csound  = 1 << 25,
-      AlphaAV = 1 << 26,
-      DivV    = 1 << 27,
-      MolWght = 1 << 28,
-      Spin    = 1 << 29
+      torb    = 1 << 16,
+      Size    = 1 << 17,
+      Gasnum  = 1 << 18,
+      Uin     = 1 << 19,
+      Uindot  = 1 << 20,
+      Uinrad  = 1 << 21,
+      Entr    = 1 << 22,
+      Gasdens = 1 << 23,
+      Sizedot = 1 << 24,
+      Sphfact = 1 << 25,
+      Csound  = 1 << 26,
+      AlphaAV = 1 << 27,
+      DivV    = 1 << 28,
+      MolWght = 1 << 29,
+      Spin    = 1 << 30
     };
     //--------------------------------------------------------------------------
     /// get the nemo_io::DataType used for a given Field                        
@@ -486,6 +487,7 @@ namespace falcON {
       case num    : return Integer;
       case posvel : return Real;
       case phden  : return Real;
+      case torb   : return Real;
       case Size   : return Real;
       case Gasnum : return Integer;
       case Uin    : return Real;
@@ -513,7 +515,7 @@ namespace falcON {
       case fieldbit::v: return vel;
       case fieldbit::e: return eps;
       case fieldbit::k: return key;
-      case fieldbit::t: return step;
+      case fieldbit::s: return step;
       case fieldbit::p: return pot;
       case fieldbit::a: return acc;
       case fieldbit::j: return jerk;
@@ -523,6 +525,7 @@ namespace falcON {
       case fieldbit::l: return lev;
       case fieldbit::n: return num;
       case fieldbit::d: return phden;
+      case fieldbit::t: return torb;
       case fieldbit::H: return Size;
       case fieldbit::N: return Gasnum;
       case fieldbit::U: return Uin;
@@ -550,7 +553,7 @@ namespace falcON {
       case vel:     return fieldbit::v;
       case eps:     return fieldbit::e;
       case key:     return fieldbit::k;
-      case step:    return fieldbit::t;
+      case step:    return fieldbit::s;
       case pot:     return fieldbit::p;
       case acc:     return fieldbit::a;
       case jerk:    return fieldbit::j;
@@ -560,6 +563,7 @@ namespace falcON {
       case lev:     return fieldbit::l;
       case num:     return fieldbit::n;
       case phden:   return fieldbit::d;
+      case torb:    return fieldbit::t;
       case Size:    return fieldbit::H;
       case Gasnum:  return fieldbit::N;
       case Uin:     return fieldbit::U;
