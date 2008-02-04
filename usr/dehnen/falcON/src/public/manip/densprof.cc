@@ -108,8 +108,8 @@ namespace falcON { namespace Manipulate {
   //                                                                            
   /// manipulator: measures profiles of density bins                            
   ///                                                                           
-  /// This manipulator uses a pre-computed mass-density (see class              
-  /// Manipulators::density) to compute the centre and profile of shells with   
+  /// This manipulator uses a pre-computed mass-density (see manipulator        
+  /// Manipulate::density) to compute the centre and profile of shells with     
   /// a small range in rho. Only bodies in_subset() are used.                   
   ///                                                                           
   /// Meaning of the parameters:\n                                              

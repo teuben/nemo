@@ -1,25 +1,32 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// io.cc                                                                       |
-//                                                                             |
-// Copyright (C) 2000-2007  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file   src/public/lib/io.cc                                                
+///                                                                             
+/// \brief  contains definitions of methods declared in inc/public/io.h         
+///                                                                             
+/// \author Walter Dehnen                                                       
+/// \date   2000-2008                                                           
+///                                                                             
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2000-2008 Walter Dehnen                                        
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
 #include <public/io.h>
 #include <fstream>
 #include <cstdlib>
@@ -41,6 +48,9 @@ extern "C" {
 #endif
 #ifndef TimeStepTag
 #  define TimeStepTag "TimeStep"
+#endif
+#ifndef OrbitalPeriodTag
+#  define OrbitalPeriodTag "OrbitalPeriod"
 #endif
 #ifndef AuxVectorTag
 #  define AuxVectorTag "AuxiliaryVector"
@@ -153,6 +163,7 @@ namespace {
     case nemo_io::lev    : return LevelTag;
     case nemo_io::num    : return NumberTag;
     case nemo_io::phden  : return PhaseSpaceDensityTag;
+    case nemo_io::torb   : return OrbitalPeriodTag;
     case nemo_io::posvel : return PhaseSpaceTag;
     case nemo_io::Size   : return SmoothTag;
     case nemo_io::Gasnum : return SPHNumberTag;
@@ -209,6 +220,7 @@ namespace {
     case nemo_io::lev:
     case nemo_io::num:
     case nemo_io::phden:
+    case nemo_io::torb:
     case nemo_io::Size:
     case nemo_io::Gasnum:
     case nemo_io::Uin:

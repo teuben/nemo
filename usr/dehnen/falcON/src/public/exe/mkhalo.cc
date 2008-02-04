@@ -57,58 +57,10 @@
 //-----------------------------------------------------------------------------+
 #include <body.h>                                  // N-body bodies             
 #include <main.h>                                  // main & NEMO stuff         
-#include <public/sample.h>                         // N-body sampler            
 #include <public/io.h>                             // I/O utilities             
 #include <public/halo.h>                           // halo model                
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
-////////////////////////////////////////////////////////////////////////////////
-namespace {
-  using namespace falcON;
-  // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// class HaloSampler                                                         
-  //                                                                            
-  // ///////////////////////////////////////////////////////////////////////////
-  class HaloSampler :
-    private HaloModel,
-    public  SphericalSampler {
-  public:
-    /// constructor
-    /// \param halo model for halo density
-    /// \param beta beta of distritubtion function
-    /// \param r_a  Ossipkov-Merritt anisotropy radius
-    /// \param mono external monopole potential
-    /// \param rad  mass adaption: table of radii
-    /// \param num  mass adaption: size of table of radii
-    /// \param fac  mass adaption: factor
-    /// \param peri mass adaption: use pericentre or R_E?
-    /// \param care care for non-monotonic DF?
-    HaloSampler(HaloDensity const&halo,
-		double beta, double r_a,
-		const acceleration*mono,
-#ifdef falcON_PROPER
-		const double*rad, int num, double fac, bool peri,
-#endif
-		bool care) :
-      HaloModel(halo,beta,r_a,mono),
-      SphericalSampler(Mh_tot(),r_a,beta,
-#ifdef falcON_PROPER
-		       rad,num,fac,peri,
-#endif
-		       care)
-    {}
-    //--------------------------------------------------------------------------
-    HaloModel const&Model() const { return *this; }
-    //--------------------------------------------------------------------------
-    double Mt() const { return HaloModel::Mh_tot(); }
-    double DF(double q)           const { return exp(HaloModel::lnG(q)); }
-    double Ps(double r)           const { return HaloModel::Ps(r); }
-    double rM(double m)           const { return HaloModel::RMh(m); }
-    double Re(double e)           const { return HaloModel::RcE(e); } 
-    double Rp(double e, double l) const { return HaloModel::Rp(e,l*l); }
-  };
-}                                                  // END: unnamed namespace    
 ////////////////////////////////////////////////////////////////////////////////
 string defv[] = {
   "out=???\n          output file                                        ",

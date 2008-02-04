@@ -225,3 +225,25 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
   }
 #endif
 }
+////////////////////////////////////////////////////////////////////////////////
+void SphericalSampler::sample_pos(body const  &B0, // I: first body to sample   
+				  unsigned     N,  // I: # bodies to sample     
+				  bool         q,  // I: quasi random?          
+				  Random const&R)  // I: pseudo & quasi RNG     
+  const {
+  if(!(B0+(N-1)).is_valid()) error("SphericalSampler: not enough bodies free");
+  const body BN(B0,N);
+  const double m  (Mt/double(N));                  // Mt/N: body mass           
+  for(body Bi(B0); Bi!=BN; ++Bi) {                 // LOOP bodies               
+    double Mr = (q? R(0):R())*Mt;                  // get enclosed mass         
+    double r  = rM(Mr);                            // get Lagrange radius from M
+    Bi.mass() = m;                                 //   set mass                
+    double                                         //   some auxiliary vars:    
+      cth = q? R(2,-1.,1.):R(-1.,1.),              //   sample cos(theta)       
+      sth = std::sqrt(1.-cth*cth),                 //   sin(theta)              
+      phi = q? R(3,0.,TPi):R(0.,TPi);              //   sample azimuth phi      
+    Bi.pos()[0] = r * sth * std::cos(phi);         //   x=r*sin(th)*cos(ph)     
+    Bi.pos()[1] = r * sth * std::sin(phi);         //   y=r*sin(th)*sin(ph)     
+    Bi.pos()[2] = r * cth;                         //   z=r*cos(th)             
+  }                                                // END LOOP                  
+}
