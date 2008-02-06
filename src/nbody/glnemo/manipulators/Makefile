@@ -48,7 +48,7 @@ MNAME          := glnemo
 #------------------------------------------------------------------------------
 # C compiler                                                                   
 FC  = g77
-CPP = /usr/bin/g++-3.3.6
+CPP = g++
 CC  = gcc
 CPPFLAGS = -g $(FULLPROPER) -rdynamic
 
