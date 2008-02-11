@@ -8,11 +8,11 @@
 ///                                                                             
 /// \author Paul McMillan                                                       
 /// \author Walter Dehnen                                                       
-/// \date   2000-2007                                                           
+/// \date   2000-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2007  Walter Dehnen, Paul McMillan                        
+// Copyright (C) 2000-2008  Walter Dehnen, Paul McMillan                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -46,9 +46,10 @@
 // v 2.3.1  02/11/2007  WD  deBUGged (r_2 to r_s conversion)                    
 // v 2.4    23/11/2007  WD  steeper truncation for r_t<0                        
 // v 2.4.1  23/01/2008  WD  DF into phden, not aux data field                   
+// v 2.4.2  08/02/2008  WD  removed minor bug with RNG seed                     
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.1"
-#define falcON_VERSION_D "23-jan-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.2"
+#define falcON_VERSION_D "08-feb-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -145,9 +146,9 @@ void falcON::main()
   //----------------------------------------------------------------------------
   // 1. set some parameters                                                     
   //----------------------------------------------------------------------------
-  const bool WD  (getbparam("WD_units"));
-  const bool care(getbparam("careful"));
-  const Random Ran(getparam("seed"),6);
+  const bool WD   (getbparam("WD_units"));
+  const bool care (getbparam("careful"));
+  const Random Ran(getiparam("seed"),6);
   const fieldset data((
 #ifdef falcON_PROPER
      hasvalue ("epar") |

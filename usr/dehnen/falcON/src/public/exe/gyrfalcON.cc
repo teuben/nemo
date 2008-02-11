@@ -3,7 +3,7 @@
 //                                                                             |
 // gyrfalcON.cc                                                                |
 //                                                                             |
-// Copyright (C) 2000-2007 Walter Dehnen                                       |
+// Copyright (C) 2000-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -126,9 +126,10 @@
 // v 3.1.1  16/10/2007  WD added keyword ksink                                 |
 // v 3.2    21/11/2007  WD abandoned secondary output (use a manipulator)      |
 //                         fixed minor problem with output when resume=t       |
+// v 3.2.1  05/02/2008  WD read data needed by manipulator from input file     |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.2"
-#define falcON_VERSION_D "21-nov-2007 Walter Dehnen                          "
+#define falcON_VERSION   "3.2.1"
+#define falcON_VERSION_D "05-feb-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
@@ -224,6 +225,8 @@ void falcON::main() falcON_THROWING
 			  getparam_z("manippars"),    //   THEN                 
 			  getparam_z("manipfile"),    //   initialize N-body    
 			  getparam_z("manippath"));   //   manipulator          
+  const fieldset need(MANIP? MANIP.need() :           // additional data to be  
+		      fieldset(fieldset::empty));     //   read from data input 
   if(Nlev>1 &&                                        // IF(more than one level)
      ! (hasvalue("fac") || hasvalue("fph") ||         //   we need fac or fph   
 	hasvalue("fpa") || hasvalue("fea") ))         //        or fpa or fea   
@@ -275,7 +278,8 @@ void falcON::main() falcON_THROWING
 #endif
 		  global_fixed,
 #endif
-		  getparam_z("time"));                //   initial time         
+		  getparam_z("time"),                 //   initial time         
+		  need);                              //   read these data too  
   if(!never_ending && t_end < NBDY.initial_time()) {  // IF(t_end < t_start)    
     warning("tstop < t_ini: nothing to be done\n");   //   THEN we are done     
     return;                                           //   and can stop here    

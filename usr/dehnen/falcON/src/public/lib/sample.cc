@@ -239,9 +239,9 @@ void SphericalSampler::sample_pos(body const  &B0, // I: first body to sample
     double r  = rM(Mr);                            // get Lagrange radius from M
     Bi.mass() = m;                                 //   set mass                
     double                                         //   some auxiliary vars:    
-      cth = q? R(2,-1.,1.):R(-1.,1.),              //   sample cos(theta)       
+      cth = q? R(1,-1.,1.):R(-1.,1.),              //   sample cos(theta)       
       sth = std::sqrt(1.-cth*cth),                 //   sin(theta)              
-      phi = q? R(3,0.,TPi):R(0.,TPi);              //   sample azimuth phi      
+      phi = q? R(2,0.,TPi):R(0.,TPi);              //   sample azimuth phi      
     Bi.pos()[0] = r * sth * std::cos(phi);         //   x=r*sin(th)*cos(ph)     
     Bi.pos()[1] = r * sth * std::sin(phi);         //   y=r*sin(th)*sin(ph)     
     Bi.pos()[2] = r * cth;                         //   z=r*cos(th)             

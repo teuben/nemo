@@ -45,7 +45,7 @@ namespace {
 		"                 G*M\n"
                 "    Phi = - ---------------\n"
 		"            sqrt(a^2 + r^2)\n\n",name());
-      if(file)
+      if(file && file[0])
 	warning("%s: file \"%s\" ignored",name(),file);
       double
 	o   = npar>0? pars[0] : 0.,
