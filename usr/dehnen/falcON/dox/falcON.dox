@@ -411,9 +411,11 @@ INPUT		=	utils/inc/tupel.h \
 			inc/public/bodyfunc.h \
 			inc/public/interact.h \
 			inc/public/nbody.h \
+			inc/public/PotExp.h \
 			src/public/manip/set_subset.cc \
 			src/public/manip/use_filter.cc \
 			src/public/manip/set_centre.cc \
+			src/public/manip/shift_to_centre.cc \
 			src/public/manip/bound_centre.cc \
 			src/public/manip/dens_centre.cc \
 			src/public/manip/density.cc \

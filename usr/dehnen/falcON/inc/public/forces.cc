@@ -4,13 +4,13 @@
 /// \file   inc/public/forces.cc                                                
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   1999-2007                                                           
+/// \date   1999-2008                                                           
 ///                                                                             
 /// \brief  defines all function members of class forces                        
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1999-2006 Walter Dehnen                                        
+// Copyright (C) 1999-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -459,8 +459,8 @@ namespace falcON {
   //                                                                           |
   //---------------------------------------------------------------------------+
   inline void forces::make_iaction_list(indx_pair *bl,
-                                        uint       nl,
-                                        uint      &na,
+                                        unsigned   nl,
+                                        unsigned  &na,
                                         bool       Max,
                                         real       tau,
 					bool       count) falcON_THROWING

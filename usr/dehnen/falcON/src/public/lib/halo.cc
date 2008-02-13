@@ -125,9 +125,9 @@ HaloModifier::HaloModifier(double c, double t) falcON_THROWING
 : rc(abs(c)), rcq(c*c),
   rt(abs(t)), irt(rt? 1/rt : 0.), sechtr(t>=0)
 {
-  if(isinf(t)) falcON_THROW("HaloModifier: truncation radius == inf\n");
-  if(isnan(t)) falcON_THROW("HaloModifier: truncation radius == nan\n");
-  if(c    <0.) warning("HaloModifier: core radius = %g<0; will use %g\n",c,rc);
+  if(std::isinf(t)) falcON_THROW("HaloModifier: truncation radius == inf\n");
+  if(std::isnan(t)) falcON_THROW("HaloModifier: truncation radius == nan\n");
+  if(c<0.) warning("HaloModifier: core radius = %g<0; will use %g\n",c,rc);
 //   std::cerr<<" Testing HaloModifier::trunc(): (irt="
 // 	   <<irt<<", sechtr="<<sechtr<<")\n";
 //   for(;;) {

@@ -4,11 +4,11 @@
 /// \file   src/public/exe/s2a.cc                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2002-2007                                                           
+/// \date   2002-2008                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2007 Walter Dehnen                                        
+// Copyright (C) 2002-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -45,9 +45,10 @@
 // v 4.3   05/03/2007  WD enabled filter in public version                      
 // v 4.4   30/08/2007  WD fivename() for field headers                          
 // v 4.5   27/09/2007  WD Nsink output                                          
+// v 4.5.1 13/02/2008  WD minor bug (added "std::" to isnan & std::isinf)       
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "4.5"
-#define falcON_VERSION_D "27-sep-2007 Walter Dehnen                          "
+#define falcON_VERSION   "4.5.1"
+#define falcON_VERSION_D "13-feb-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2a"
@@ -88,9 +89,9 @@ namespace {
   //----------------------------------------------------------------------------
   template<> struct Print<falcON::real> {
     static void print(falcON::real const&t) {
-      if     (isnan(t)) fprintf(OUT,"nan ");
-      else if(isinf(t)) fprintf(OUT,"inf ");
-      else              fprintf(OUT,RFORMAT,t);
+      if     (std::isnan(t)) fprintf(OUT,"nan ");
+      else if(std::isinf(t)) fprintf(OUT,"inf ");
+      else                   fprintf(OUT,RFORMAT,t);
     } };
   //----------------------------------------------------------------------------
   template<> struct Print<falcON::vect> {

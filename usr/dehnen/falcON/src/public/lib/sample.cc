@@ -3,7 +3,7 @@
 //                                                                             |
 // sample.cc                                                                   |
 //                                                                             |
-// Copyright (C) 2004-2007  Walter Dehnen                                      |
+// Copyright (C) 2004-2008  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -143,7 +143,7 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
 	Q = Psi-0.5*w*w;                           //     get Q                 
       } while(Q<=0.);                              //   WHILE (non-positive)    
       f = DF(Q);                                   //   get g(Q)                
-      if(isnan(f))
+      if(std::isnan(f))
 	error("sampling error: %s is NaN: Eps=%g [r=%g, we=%g, w=%g]\n",
 	      (beta? (iraq==0? "g(E)" : "g(Q)"): (iraq==0? "f(E)" : "f(Q)")),
 	       Q,r,we,w);
@@ -157,7 +157,7 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
       vt = w * SC[0]/sqrt(1+r*r*iraq);             //   tangential velocity     
       vr = w * SC[1];                              //   radial velocity         
       if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);//   distribution function   
-      if(givef && isnan(f))
+      if(givef && std::isnan(f))
 	error("sampling error: f(E,L^2) is NaN"
 	      ": Eps=%g, [vt=%g, r=%g]\n",Psi-0.5*w*w,vt,r);
     } else {                                       // ELSE                      
