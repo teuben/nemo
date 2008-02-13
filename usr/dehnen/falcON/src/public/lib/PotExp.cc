@@ -3249,6 +3249,7 @@ SelfGravity<double>(Anlm&, int, const double*, const tupel<3,double>*,
 // class falcON::AnlmIO                                                       //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+#define XDRS static_cast<XDR*>(xdrs)
 #define TRY_XDR(x,func,name)						\
   if(!(x)) falcON_THROW("AnlmIO::%s(): XDR operation \"%s\" failed",func,name);
 //------------------------------------------------------------------------------
@@ -3270,11 +3271,11 @@ void AnlmIO::open_for_write(const char*file_name) falcON_THROWING
   if(!file)
     falcON_THROW("cannot open file \"%s\" for writing",file_name);
   if(xdrs == 0) xdrs = new XDR;
-  xdrstdio_create( xdrs, file, XDR_ENCODE );
+  xdrstdio_create( XDRS, file, XDR_ENCODE );
   // create header                                                              
   char header[10] = "anlmfile", *p=header;
   // write identifier
-  TRY_XDR(xdr_string(xdrs, &p, 10),"open_for_write","writing header");
+  TRY_XDR(xdr_string(XDRS, &p, 10),"open_for_write","writing header");
   open = writing;
 }
 //------------------------------------------------------------------------------
@@ -3292,11 +3293,11 @@ void AnlmIO::open_for_read(const char*file_name) falcON_THROWING
   if(!file)
     falcON_THROW("cannot open file \"%s\" for reading",file_name);
   if(xdrs == 0) xdrs = new XDR;
-  xdrstdio_create(xdrs, file, XDR_DECODE);
+  xdrstdio_create(XDRS, file, XDR_DECODE);
   // read header                                                                
   char header[10], shead[10] = "anlmfile", *p=header;
   // read identifier
-  TRY_XDR(xdr_string(xdrs, &p, 10),"open_for_read","reading header");
+  TRY_XDR(xdr_string(XDRS, &p, 10),"open_for_read","reading header");
   if( strcmp(header,shead) )
     falcON_THROWING("file \"%s\" is not a XDR *anlmfile*, "
 		    "cannot open for reading",file_name);
@@ -3310,15 +3311,15 @@ void AnlmIO::write(PotExp::symmetry sym, double a, double r,
   if(open != writing)
     falcON_THROW("AnlmIO::write(): stream not opened for writing");
   int s = sym;
-  TRY_XDR(xdr_double(xdrs,&t),"write","writing time");
-  TRY_XDR(xdr_double(xdrs,&a),"write","writing alpha");
-  TRY_XDR(xdr_double(xdrs,&r),"write","writing scale");
-  TRY_XDR(xdr_int(xdrs,&s),"write","writing symmetry");
-  TRY_XDR(xdr_int(xdrs,const_cast<int*>(&(A.nmax()))),"write","writing nmax");
-  TRY_XDR(xdr_int(xdrs,const_cast<int*>(&(A.lmax()))),"write","writing lmax");
+  TRY_XDR(xdr_double(XDRS,&t),"write","writing time");
+  TRY_XDR(xdr_double(XDRS,&a),"write","writing alpha");
+  TRY_XDR(xdr_double(XDRS,&r),"write","writing scale");
+  TRY_XDR(xdr_int(XDRS,&s),"write","writing symmetry");
+  TRY_XDR(xdr_int(XDRS,const_cast<int*>(&(A.nmax()))),"write","writing nmax");
+  TRY_XDR(xdr_int(XDRS,const_cast<int*>(&(A.lmax()))),"write","writing lmax");
   PotExp::scalar* aN=A.A+(A.nmax()+1)*square(A.lmax()+1);
   for(const PotExp::scalar*a=A.A; a!=aN; ++a)
-    TRY_XDR(xdr_double(xdrs,const_cast<double*>(a)),"write","writing Anlm");
+    TRY_XDR(xdr_double(XDRS,const_cast<double*>(a)),"write","writing Anlm");
 }
 #undef TRY_XDR
 //------------------------------------------------------------------------------
@@ -3332,17 +3333,17 @@ bool AnlmIO::read(PotExp::symmetry&sym, double&a, double&r,
   if(feof(file)) falcON_THROW("AnlmIO::read(): seen end of file\n");
   if(ferror(file)) falcON_THROW("AnlmIO::read(): I/O error\n");
   int n,l,s;
-  TRY_XDR(xdr_double(xdrs,&t),"read","reading time");
-  TRY_XDR(xdr_double(xdrs,&a),"read","reading alpha");
-  TRY_XDR(xdr_double(xdrs,&r),"read","reading scale");
-  TRY_XDR(xdr_int(xdrs,&s),"read","reading symmetry");
-  TRY_XDR(xdr_int(xdrs,&n),"read","reading nmax");
-  TRY_XDR(xdr_int(xdrs,&l),"read","reading lmax");
+  TRY_XDR(xdr_double(XDRS,&t),"read","reading time");
+  TRY_XDR(xdr_double(XDRS,&a),"read","reading alpha");
+  TRY_XDR(xdr_double(XDRS,&r),"read","reading scale");
+  TRY_XDR(xdr_int(XDRS,&s),"read","reading symmetry");
+  TRY_XDR(xdr_int(XDRS,&n),"read","reading nmax");
+  TRY_XDR(xdr_int(XDRS,&l),"read","reading lmax");
   sym = PotExp::symmetry(s);
   A.reset(n,l);
   PotExp::scalar* aN=A.A+(n+1)*square(l+1);
   for(PotExp::scalar*a=A.A; a!=aN; ++a)
-    TRY_XDR(xdr_double(xdrs,a),"read","reading Anlm");
+    TRY_XDR(xdr_double(XDRS,a),"read","reading Anlm");
   return true;
 }
 #undef TRY_XDR
@@ -3354,8 +3355,8 @@ bool AnlmIO::is_good() const {
 void AnlmIO::close()
 {
   if(open) {
-    xdr_destroy (xdrs);
-    falcON_DEL_O(xdrs);
+    xdr_destroy (XDRS);
+    falcON_DEL_O(XDRS);
 #ifdef falcON_NEMO
     strclose( file );
 #else
@@ -3366,6 +3367,7 @@ void AnlmIO::close()
   xdrs = 0;
   file = 0;
 }
+#undef XDRS
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 
