@@ -51,8 +51,6 @@
 # define falcON_included_cstdio
 #endif
 
-extern "C" struct XDR;
-
 // /////////////////////////////////////////////////////////////////////////////
 namespace { class PotExpAccess; }                  // forward declaration       
 // /////////////////////////////////////////////////////////////////////////////
@@ -473,7 +471,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     enum { closed=0, writing=1, reading=2 };
     int  open;  ///< state
-    XDR *xdrs;  ///< xdr stream
+    void*xdrs;  ///< xdr stream
     FILE*file;  ///< C file stream
     //--------------------------------------------------------------------------
   protected:
