@@ -124,7 +124,6 @@ endif
 # 5.6 additional targets for any private sandboxes
 ifdef DWALTER
 -include walter/make
--include pjm/make
 endif
 
 #
@@ -171,7 +170,7 @@ ifdef NEMO
 manip		:	links $(MANT) $(manip_pub) $(manip_pro) $(manip_walter)
 
 # 6.6 falcON accelerations
-acc		:	$(ACCT) $(acc_pub) $(acc_pro) $(acc_walter) $(acc_pjm)	
+acc		:	$(ACCT) $(acc_pub) $(acc_pro) $(acc_sph) $(acc_walter) $(acc_pjm)	
 
 # 6.7 copy falcON man pages to nemo
 ifdef DPROPER
@@ -210,7 +209,6 @@ cleanall	:	cleanrelease cleanbackup
 
 # 6.8.6 everything to be done before we can checkin a public version
 beforecheckin	:	cleanbackup
-			rm doc/user_guide_proper.pdf
 			$(MAKE) -C tex public
 
 ################################################################################
