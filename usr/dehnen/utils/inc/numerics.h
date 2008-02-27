@@ -593,13 +593,16 @@ namespace WDutils {
   scalar_type rtsafe(void(*func)(scalar_type,scalar_type&,scalar_type&),
 		     scalar_type x1,
 		     scalar_type x2,
-		     scalar_type xacc)
+		     scalar_type xacc) throw(WDutils::exception)
   {
     const int   maxit=100;
     scalar_type xh,xl,dx,dxo,f,df,fh,fl,rts,temp;
     func(x1,fl,df);
     func(x2,fh,df);
-    if(fl*fh >= 0.) WDutils_ErrorF("root must be bracketed","rtsafe()");
+    if(fl*fh >= 0.) 
+      throw WDutils::exception("[%s.%d]: in rtsafe(): root must be bracketed",
+			       __FILE__,__LINE__);
+//     WDutils_ErrorF("root must be bracketed","rtsafe()");
     if(fl<0.) {
       xl  = x1;
       xh  = x2;
@@ -637,7 +640,10 @@ namespace WDutils {
 	fh  = f;
       }
     }
-    WDutils_WarningF("max number of iterations exceeded","rtsafe()");
+    throw WDutils::exception("[%s.%d]: in rtsafe(): "
+			     "max number of iterations exceeded",
+			     __FILE__,__LINE__);
+//     WDutils_WarningF("max number of iterations exceeded","rtsafe()");
     return rts;
   }
   //----------------------------------------------------------------------------
