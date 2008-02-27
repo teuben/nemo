@@ -47,9 +47,10 @@
 // v 2.4    23/11/2007  WD  steeper truncation for r_t<0                        
 // v 2.4.1  23/01/2008  WD  DF into phden, not aux data field                   
 // v 2.4.2  08/02/2008  WD  removed minor bug with RNG seed                     
+// v 2.4.3  20/02/2008  WD  change in body.h (removed old-style constructors)   
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.2"
-#define falcON_VERSION_D "08-feb-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.3"
+#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -202,8 +203,10 @@ void falcON::main()
   //----------------------------------------------------------------------------
   // 3. sample snapshot and write to output                                     
   //----------------------------------------------------------------------------
-  if(getuparam("nbody")) {
-    snapshot shot(getdparam("time"), getuparam("nbody"), data);
+  unsigned N = getuparam("nbody");
+  if(N) {
+    unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = N;
+    snapshot shot(getdparam("time"), nbod, data);
     HaloSample.sample(shot, getbparam("q-ran"), Ran,
 		      getdparam("f_pos"), 
 #ifdef falcON_PROPER

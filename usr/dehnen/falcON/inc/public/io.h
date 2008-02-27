@@ -900,8 +900,7 @@ namespace falcON {
     /// construction: open NEMO snapshot set
     ///
     /// \param out  (input) NEMO output stream
-    /// \param Nbod (input) total # bodies
-    /// \param Nsph (input) # SPH bodies (must come first)
+    /// \param Nbod (input) total # bodies per bodytype
     /// \param time (input) simulation time
     snap_out(nemo_out const&out,
 	     const unsigned Nbod[BT_NUM],

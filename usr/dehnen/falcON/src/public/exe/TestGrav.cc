@@ -3,7 +3,7 @@
 //                                                                             |
 // TestGrav.cc                                                                 |
 //                                                                             |
-// Copyright (C) 2000-2004 Walter Dehnen                                       |
+// Copyright (C) 2000-2004, 2008 Walter Dehnen                                 |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -150,7 +150,8 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
   MAC_type          MAC = Default::mac;
   kern_type         K   = Default::kernel;
   unsigned          Seed;
-  unsigned          N, Nact, split=1, Ngrow=0;
+  unsigned          N, Nbod[BT_NUM]={0}, Nact;
+  unsigned          split=1, Ngrow=0;
   int               Ncrit=Default::Ncrit, 
                     DIR[4]={Default::direct[0],Default::direct[1],
 			    Default::direct[2],Default::direct[3]};
@@ -159,7 +160,8 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
   MOD  = atoi(argv[p++]);
   real GAM;
   GAM  = atof(argv[p++]);
-  N    = atoi(argv[p++]); Nact=N;
+  N    = atoi(argv[p++]); Nbod[bodytype::std]=N;
+  Nact = N;
   Seed = atoi(argv[p++]);
   EPS  = atof(argv[p++]);
   if(argc>p) Ngrow  = atoi(argv[p++]);
@@ -189,7 +191,7 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
   if(argc>p) DIR[3] = atoi(argv[p++]);
   if(argc>p) rmax   = atoi(argv[p++]);
   if(argc>p) dump   = atoi(argv[p++]);
-  bodies __BODIES(N), *BODIES=&__BODIES;
+  bodies __BODIES(Nbod), *BODIES=&__BODIES;
 #ifdef falcON_INDI
   if(indiv_soft) BODIES->add_fields(fieldset::e);
 #endif

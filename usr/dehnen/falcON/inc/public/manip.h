@@ -186,10 +186,27 @@ namespace falcON {
     /// auxiliary static function for parsing parameters to array of double     
     ///                                                                         
     /// \return number of parsed parameters                                     
-    /// \param params (input) string with parameters                            
-    /// \param pars   (output) array with parsed parameters                     
-    /// \param maxp   (input) maximum number of parsed parameters               
+    /// \param[in]  params string with parameters                               
+    /// \param[out] pars  array with parsed parameters                          
+    /// \param[in]  maxp   maximum number of parsed parameters                  
     static int parse(const char*params, double*pars, int maxp);
+    //--------------------------------------------------------------------------
+    /// auxiliary static function for parsing lists with given separator        
+    ///                                                                         
+    /// For example if \a parss = "0.4,0.2,0;1;;6.5" and \a sep=';', then we    
+    /// shall return 4 elements (lists in this case), which are:                
+    /// \a pars[0]="0.4,0.2,0", \a pars[1]="1", \a pars[2]="", \a pars[3]="6.5" 
+    ///
+    /// If there are more than \a maxp-1 separators, we shall only parse the    
+    /// first \a maxp elements, but return the full number of elements          
+    ///                                                                         
+    /// \return number of parsed elements                                       
+    /// \param[in,out] parss  separator-separated list of elements, on          
+    ///                       output seperator are replaced by NULL             
+    /// \param[in]     sep    separator character                               
+    /// \param[out]    pars   array with elements                               
+    /// \param[in]     maxp   maximum number of parsed elements                 
+    static int parse(char*parss, char sep, char**pars, int maxp);
 #define MANIP_PARSE_AT_INIMANIP
   };
 #endif // falcON_NEMO

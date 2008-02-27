@@ -100,17 +100,17 @@ inline double SphericalSampler::F0(double Psi) const
     return DF(Psi);
 }
 ////////////////////////////////////////////////////////////////////////////////
-void SphericalSampler::sample(body   const&B0,     // I: first body to sample   
-			      unsigned     N,      // I: # bodies to sample     
-			      bool         q,      // I: quasi random?          
-			      Random const&R,      // I: pseudo & quasi RNG     
-			      double       f_,     //[I: fraction with vphi>0]  
+void SphericalSampler::sample(body   const&B0,
+			      unsigned     N,
+			      bool         q,
+			      Random const&R,
+			      double       f_,
 #ifdef falcON_PROPER
-			      double       epar,   //[I: factor: setting eps_i] 
+			      double       epar,
 #endif
-			      bool         givef,  //[I: write DF       -> aux?]
-			      bool         giveP,  //[I: write Phi      -> pot?]
-			      bool         giveA)  //[I: write -dPhi/dr -> acc?]
+			      bool         givef,
+			      bool         giveP,
+			      bool         giveA) falcON_THROWING
   const {
   if(givef && !has_phden(B0))
     warning("SphericalSampler: bodies not supporting phden: cannot give DF");
@@ -119,7 +119,10 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
   if(giveA && !has_acc(B0))
     warning("SphericalSampler: bodies not supporting acc: cannot give dPhi/dr");
   if(!(B0+(N-1)).is_valid())
-    error("SphericalSampler: not enough bodies free");
+    falcON_THROW("SphericalSampler::sample(): not enough bodies free");
+  if(q && R.Nsob() < 6)
+    falcON_THROW("SphericalSampler::sample(): "
+		 "too few quasi-random number generators\n");
   const body BN(B0,N);
   givef = givef && has_aux(B0);
   giveP = giveP && has_pot(B0);
@@ -144,12 +147,13 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
       } while(Q<=0.);                              //   WHILE (non-positive)    
       f = DF(Q);                                   //   get g(Q)                
       if(std::isnan(f))
-	error("sampling error: %s is NaN: Eps=%g [r=%g, we=%g, w=%g]\n",
-	      (beta? (iraq==0? "g(E)" : "g(Q)"): (iraq==0? "f(E)" : "f(Q)")),
-	       Q,r,we,w);
-      if(f>f0)                                     //   IF f>f(w=0)             
-	error("sampling error: DF non-monotonic"   //     ERROR                 
-	      ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n", Q,f,Psi,f0,r);
+	falcON_THROW("SphericalSampler::sample(): "
+		     "%s is NaN; Eps=%g [r=%g, we=%g, w=%g]\n",
+		     (beta? (iraq==0? "g(E)" : "g(Q)"):
+		      (iraq==0? "f(E)" : "f(Q)")), Q,r,we,w);
+      if(f>f0)                                     //   IF f>f(w=0) ERROR       
+	falcON_THROW("SphericalSampler::sample(): DF non-monotonic"
+		     ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n", Q,f,Psi,f0,r);
     } while(f0 * R() > f);                         // WHILE ( rejected )        
     double vr,vt;                                  // v_r, v_t                  
     if(beta) {                                     // IF b0 != 0                
@@ -158,8 +162,8 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
       vr = w * SC[1];                              //   radial velocity         
       if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);//   distribution function   
       if(givef && std::isnan(f))
-	error("sampling error: f(E,L^2) is NaN"
-	      ": Eps=%g, [vt=%g, r=%g]\n",Psi-0.5*w*w,vt,r);
+	falcON_THROW("SphericalSampler::sample(): f(E,L^2) is NaN"
+		     ": Eps=%g, [vt=%g, r=%g]\n",Psi-0.5*w*w,vt,r);
     } else {                                       // ELSE                      
       double ce = q? R(1,-1.,1.) : R(-1.,1.);      //   sample cos(eta)         
       vr = w * ce;                                 //   radial velocity         
@@ -226,12 +230,16 @@ void SphericalSampler::sample(body   const&B0,     // I: first body to sample
 #endif
 }
 ////////////////////////////////////////////////////////////////////////////////
-void SphericalSampler::sample_pos(body const  &B0, // I: first body to sample   
-				  unsigned     N,  // I: # bodies to sample     
-				  bool         q,  // I: quasi random?          
-				  Random const&R)  // I: pseudo & quasi RNG     
+void SphericalSampler::sample_pos(body const  &B0,
+				  unsigned     N,
+				  bool         q,
+				  Random const&R) falcON_THROWING
   const {
-  if(!(B0+(N-1)).is_valid()) error("SphericalSampler: not enough bodies free");
+  if(!(B0+(N-1)).is_valid())
+    falcON_THROW("SphericalSampler::sample_pos(): not enough bodies free");
+  if(q && R.Nsob() < 6)
+    falcON_THROW("SphericalSampler::sample_pos(): "
+		 "too few quasi-random number generators\n");
   const body BN(B0,N);
   const double m  (Mt/double(N));                  // Mt/N: body mass           
   for(body Bi(B0); Bi!=BN; ++Bi) {                 // LOOP bodies               

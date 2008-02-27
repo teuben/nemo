@@ -3,7 +3,7 @@
 //                                                                             |
 // mkdehnen.cc                                                                 |
 //                                                                             |
-// Copyright (C) 2004, 2005, 2007 Walter Dehnen                                |
+// Copyright (C) 2004-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -44,9 +44,10 @@
 // v 3.2   13/06/2005  WD changes in fieldset                                  |
 // v 3.3   02/05/2007  WD made Ossipkov-Merritt anisotropic models public      |
 // v 3.3.1 23/01/2008  WD DF in phden (previous: aux) if giveF=true            |
+// v 3.3.2 20/02/2008  WD change in body.h (removed old-style constructors)    |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.3.1"
-#define falcON_VERSION_D "23-jan-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.3.2"
+#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile mkdehnen
@@ -132,7 +133,8 @@ void falcON::main() falcON_THROWING
 			getbparam("peri")
 #endif
 			);
-  snapshot shot(getdparam("time"), getiparam("nbody"), data);
+  unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
+  snapshot shot(getdparam("time"), nbod, data);
   GS.sample(shot,getbparam("q-ran"),Ran,getdparam("f_pos"),
 #ifdef falcON_PROPER
 	    getdparam("epar"),

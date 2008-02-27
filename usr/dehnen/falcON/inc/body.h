@@ -291,7 +291,7 @@ namespace falcON {
       friend class bodies;
       friend class bodies::block;
       //------------------------------------------------------------------------
-      /// useful constants, determines interpretation of index::I
+      /// useful constants, determine interpretation of index::I
       enum
       {
 	block_bits = 8,                 ///< number of bits used for blocks No. 
@@ -415,8 +415,7 @@ namespace falcON {
   public:
     block *const&first_block() const { return FIRST; }
     //==========================================================================
-    /// \name Functions providing information about the number of bodies        
-    //@{                                                                        
+    // \name Functions providing information about the number of bodies
     /// # bodies allocated for a given bodytype.
     unsigned const&N_alloc (bodytype t) const { return NALL[int(t)]; }
     /// total # bodies allocated.
@@ -447,13 +446,11 @@ namespace falcON {
     unsigned       N_free  (bodytype t) const { return N_alloc(t)-N_bodies(t); }
     /// total # bodies allocated but not used.
     unsigned       N_free  ()           const { return N_alloc() -N_bodies(); }
-    //@}
     //--------------------------------------------------------------------------
     bool const&srce_data_changed() const { return SRCC; }
     bool const&sph_data_changed() const { return SPHC; }
     //==========================================================================
-    /// \name Functions providing information about body data hold              
-    //@{                                                                        
+    // \name Functions providing information about body data hold
     /// sum of all body data hold.
     fieldset const&all_data  ()           const { return  BITS; }
     /// do we have none of these data?
@@ -465,48 +462,38 @@ namespace falcON {
     /// do we have this datum?
     bool           have      (fieldbit f) const { return  BITS.contain(f); }
     /// do we hold the body datum indicated?
-#define HAVE(BIT,NAME)						\
+#define HaveField(BIT,NAME)						\
     bool have_##NAME() const { return BITS.contain(BIT); }
-    DEF_NAMED(HAVE)
-#undef HAVE
-    //@}
+    DEF_NAMED(HaveField);
+#undef HaveField
     //==========================================================================
-    //                                                                          
-    /// \name non-const data access using bodies::index                         
-    //@{                                                                        
-    //==========================================================================
+    // \name non-const data access using bodies::index
     /// return lvalue (can be changed)
     template<int BIT>
     typename field_traits<BIT>::type&datum(index i) const {
       return BLOCK[i.no()]->datum<BIT>(i.in());
     }
-#define NonConstAcess(BIT,NAME)					\
+#define NonConstAccess(BIT,NAME)				\
     field_traits<BIT>::type      &    NAME    (index i) const {	\
       return datum<BIT>(i);					\
     }
-    DEF_NAMED(NonConstAcess);
-#undef NonConstAcess
-    //@}
+    DEF_NAMED(NonConstAccess);
+#undef NonConstAccess
     //==========================================================================
-    //                                                                          
-    /// \name const data access using bodies::index                             
-    //@{                                                                        
-    //==========================================================================
+    // \name const data access using bodies::index
     /// return const datum
     template<int BIT>
     typename field_traits<BIT>::type const&const_datum(index i) const {
       return BLOCK[i.no()]->const_datum<BIT>(i.in());
     }
-#define ConstAcess(BIT,NAME)					\
+#define ConstAccess(BIT,NAME)					\
     field_traits<BIT>::type const&c_##NAME    (index i) const {	\
       return const_datum<BIT>(i);				\
     }
-    DEF_NAMED(ConstAcess);
-#undef ConstAcess
-    //@}
+    DEF_NAMED(ConstAccess);
+#undef ConstAccess
     //==========================================================================
-    /// \name further methods using bodies::index                               
-    //@{                                                                        
+    // \name further methods using bodies::index
     /// return true if the named or indicated datum is hold
     bool has_field(index i, fieldbit f) const {
       return BLOCK[i.no()] && BLOCK[i.no()]->has_field(f);
@@ -536,10 +523,8 @@ namespace falcON {
     bodytype const&type(index i) const {
       return BLOCK[i.no()]->type();
     }
-    //@}
     //==========================================================================
-    /// \name support for time steps (including access via bodies::index)       
-    //@{                                                                        
+    // \name support for time steps (including access via bodies::index)
     /// do we have time step data?
     bool have_steps() const { return TSTEPS!=0; }
     /// let the user provide time step data
@@ -567,7 +552,6 @@ namespace falcON {
     double const&tauh(index i) const {
       return have_level()? tauh(level(i)) : tauh(0);
     }
-    //@}
     //==========================================================================
     //                                                                          
     // sub-type bodies::iterator                                                
@@ -599,7 +583,6 @@ namespace falcON {
 	       unsigned    k=0) : B(b), K(k), N(B? B->N_bodies() : 0u) {}
       //------------------------------------------------------------------------
       // auxiliary                                                              
-      //------------------------------------------------------------------------
       void next_block() {
 	B = B? B->next() : 0;                      //   get next block          
 	K = 0;                                     //   set index to 0          
@@ -615,9 +598,6 @@ namespace falcON {
 # define CheckInvalid(NAME)
 #endif
 
-      //------------------------------------------------------------------------
-      /// \name access to bodies, block, sub-index, and total index             
-      //@{
       /// return pointer to my bodies::block
       const block *const&my_block () const {
 	return B;
@@ -647,26 +627,19 @@ namespace falcON {
       friend unsigned const&subindex(iterator const&);
       /// friend returning running body index (between 0, N-1)
       friend unsigned bodyindex(iterator const&);
-      //@}
-      //------------------------------------------------------------------------
-      /// conversion to bodies::index                                           
+      /// conversion to bodies::index
       operator index() const {
 	CheckInvalid("operator index");
 	return index(B->my_No(), K);
       }
-      //------------------------------------------------------------------------
       /// are we refering to a valid body?
       bool is_valid() const {
 	return B != 0;
       }
-      //------------------------------------------------------------------------
       /// conversion to bool: are we referring to a valid body?
       operator bool() const {
 	return is_valid();
       }
-      //------------------------------------------------------------------------
-      /// \name comparison operations                                           
-      //@{
       /// are we identical to another iterator?
       bool operator== (iterator const&i) const {
 	return K==i.K && B==i.B;
@@ -695,19 +668,13 @@ namespace falcON {
 	CheckInvalid("operator>=");
 	return B==i.B? K>=i.K : B->first()>i.B->first();
       }
-      //@}
       //------------------------------------------------------------------------
 #define HasDatum(Bit,Name) friend bool has_##Name(iterator const&);
-      /// \name information about data hold                                     
-      //@{
       /// has our body the datum indicated?
       friend bool has_field(iterator const&, fieldbit);
       DEF_NAMED(HasDatum);
-      //@}
 #undef HasDatum
       //------------------------------------------------------------------------
-      /// \name forward iteration                                               
-      //@{
       /// pre-fix: get next body (note: there is no post-fix operator++)
       iterator& operator++() {
 	CheckInvalid("operator++");
@@ -729,10 +696,7 @@ namespace falcON {
       iterator operator+ (unsigned k) const {
 	return iterator(*this) += k;
       }
-      //@}
       //------------------------------------------------------------------------
-      /// \name public construction and assignment                              
-      //@{
       /// default constructor makes an invalid body
       iterator() : B(0) {}
       /// copy constructor
@@ -749,10 +713,7 @@ namespace falcON {
  	N = i.N;
 	return *this;
       }
-      //@}
       //------------------------------------------------------------------------
-      /// \name non-const data access (allows change of data)                   
-      //@{
       /// return lvalue (can be changed)
       template<int BIT>
       typename field_traits<BIT>::type &datum() {
@@ -771,10 +732,7 @@ namespace falcON {
       }
       DEF_NAMED(NonConstAccess);
 #undef NonConstAccess
-      //@}
       //------------------------------------------------------------------------
-      /// \name const data access                                               
-      //@{
       /// return const datum
       template<int BIT>
       typename field_traits<BIT>::type const&const_dat() const {
@@ -799,10 +757,7 @@ namespace falcON {
       friend double const&tauq(iterator const&);
       /// return half time step of body 
       friend double const&tauh(iterator const&);
-      //@}
       //------------------------------------------------------------------------
-      /// \name flag manipulations                                              
-      //@{
       /// conversion to flags
       operator const flags&() const {
 	return const_dat<fieldbit::f>();
@@ -845,10 +800,7 @@ namespace falcON {
       void mark_SPH_special  () { flag().add(flags::sph_special); }
       /// flag this body as not being specially SPH marked
       void unmark_SPH_special() { flag().un_set(flags::sph_special); }
-      //@}
       //------------------------------------------------------------------------
-      /// \name const boolean flag informations via members                     
-      //@{
       /// is body active?
       bool is_active     () const {
 	return falcON::is_active(const_dat<fieldbit::f>()); }
@@ -878,18 +830,12 @@ namespace falcON {
       /// is this body allowed to use a shorter time step?
       bool may_go_shorter() const {
 	return !flag_is_set(flags::not_shorter); }
-      //@}
       //------------------------------------------------------------------------
-      /// \name miscellaneous                                                   
-      //@{
       /// increment until next body in subset
       iterator& next_in_subset();
       /// increment until next active body
       iterator& next_active();
-      //@}
       //------------------------------------------------------------------------
-      /// \name const boolean flag informations via friends                     
-      //@{
       /// friend: is body active?
       friend bool is_active(const iterator&);
       /// is body to be removed?
@@ -910,10 +856,8 @@ namespace falcON {
       friend bool may_go_longer(const iterator&);
       /// friend: is this body allowed to use a shorter time step?
       friend bool may_go_shorter(const iterator&);
-      //@}
       //------------------------------------------------------------------------
       // I/O                                                                    
-      //------------------------------------------------------------------------
       /// formatted output: write bodyindex
       friend std::ostream& operator<<(std::ostream&, const iterator&);
       //------------------------------------------------------------------------
@@ -933,10 +877,9 @@ namespace falcON {
     };// class iterator
 #undef CheckInvalid
     //==========================================================================
-    /// \name generate iterators                                                
-    /// use these methods to obtain begin and end iterators when looping over   
-    /// all or a subset of all bodies                                           
-    //@{                                                                        
+    // \name generate iterators                                                
+    // \detail use these methods to obtain begin and end iterators when
+    // looping over all or a subset of all bodies
     /// begin of all bodies
     iterator begin_all_bodies() const { return iterator(FIRST); }
     /// end of all bodies == invalid iterator
@@ -972,38 +915,25 @@ namespace falcON {
     }
     /// an invalid body (useful as default argument)
     static iterator bodyNil() { return iterator(0); }
-    //@}
     //==========================================================================
-    /// \name construction, destruction, and management of bodies and body data 
-    //@{                                                                        
+    // \name construction, destruction, and management of bodies and body data
     /// Constructor 0: construction with N=0, but data fields
     explicit 
     bodies(fieldset Bd=fieldset(DefaultBits)) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// Constructor 1, backward compatible version
-    ///
-    /// \param Ntot(input) total number of bodies
-    /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
-    /// \param Nsph (input, optional) number of SPH bodies
-    /// \param Nsink (input, optional) number of SINK bodies
-    /// \note Nsph + Nsink must not exceed Ntot
-    explicit 
-    bodies(unsigned Ntot, fieldset Bd=fieldset(DefaultBits),
-	   unsigned Nsph=0u, unsigned Nsink=0u) falcON_THROWING;
-    //--------------------------------------------------------------------------
     /// Constructor 1, new version
     ///
-    /// \param N  (input) array with number of bodies per bodytype
-    /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
+    /// \param[in] N  array with number of bodies per bodytype
+    /// \param[in] Bd body data fields to allocate (default: mxvapfHRVJFC)
     explicit 
     bodies(const unsigned N[BT_NUM], fieldset Bd=fieldset(DefaultBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Constructor 2: copy constructor
     ///
-    /// \param B  (input) bodies to copy
-    /// \param Bd (input) body data fields to copy
-    /// \param C  (input) if non-zero: copy only bodies which have this flag set
+    /// \param[in] B  bodies to copy
+    /// \param[in] Bd body data fields to copy
+    /// \param[in] C  if non-zero: copy only bodies which have this flag set
     bodies(bodies const&B, fieldset Bd=fieldset::all, flags C=flags::empty)
       falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -1012,21 +942,21 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// Add an unsupported body data field
     ///
-    /// If the body data field \e f is not yet supported, then we allocate body
-    /// data indicated by \e f for all bodies which can have it (i.e. a SPH data
+    /// If the body data field \a f is not yet supported, then we allocate body
+    /// data indicated by \a f for all bodies which can have it (i.e. a SPH data
     /// field is only allocated for SPH bodies).
     void add_field (fieldbit f) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Add unsupported body data fields
     ///
-    /// Those body data fields in \e b which are not yet supported are allocated
+    /// Those body data fields in \a b which are not yet supported are allocated
     /// for all bodies which can have it (i.e. SPH data fields are only
     /// allocated for SPH bodies)
     void add_fields(fieldset b) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Delete a supported body data field
     ///
-    /// If the body data field \e f is presently allocated, it is deleted
+    /// If the body data field \a f is presently allocated, it is deleted
     void del_field (fieldbit f) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Delete supported body data fields
@@ -1038,18 +968,18 @@ namespace falcON {
     /// Resets N, data: equivalent to destructor followed by constructor 1
     /// (new version)
     ///
-    /// \param N  (input) array with number of bodies per bodytype
-    /// \param Bd (input) body data fields to allocate (default: mxvapfHRVJFC)
+    /// \param[in] N  array with number of bodies per bodytype
+    /// \param[in] Bd body data fields to allocate (default: mxvapfHRVJFC)
     void reset(const unsigned N[BT_NUM], fieldset Bd= fieldset(DefaultBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Resets N, data: equivalent destructor followed by constructor 1 (old
     /// version)
     ///
-    /// \param Ntot (input) total number of bodies
-    /// \param Bd (input, optional) data fields (default: mxvapfHRVJFC)
-    /// \param Nsph (input, optional) number of SPH bodies
-    /// \param Nsink (input, optional) number of SINK bodies
+    /// \param[in] Ntot total number of bodies
+    /// \param[in] Bd data fields (default: mxvapfHRVJFC)
+    /// \param[in] Nsph number of SPH bodies
+    /// \param[in] Nsink number of SINK bodies
     /// \note Nsph + Nsink must not exceed Ntot
     void reset(unsigned Ntot, fieldset Bd=fieldset(DefaultBits),
 	       unsigned Nsph=0u, unsigned Nsink=0u)
@@ -1064,25 +994,16 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// Resets N, keeps data the same (N[] = bodies per bodytype)
     ///
-    /// \param N  (input) array with number of bodies per bodytype
+    /// \param[in] N number of bodies per bodytype
     void resetN(const unsigned N[BT_NUM]) falcON_THROWING
     {
       reset(N,BITS);
     }
-//     //--------------------------------------------------------------------------
-//     /// Resets N, keeps data the same
-//     ///
-//     /// \param Nb (input) total number of bodies
-//     /// \param Ns (input) number of SPH bodies, must be <= Nb
-//     void resetN(unsigned Nb, unsigned Ns= 0u) falcON_THROWING
-//     {
-//       reset(Nb,BITS,Ns);
-//     }
     //--------------------------------------------------------------------------
     /// Reset some body data to zero
     ///
-    /// Body data of fields in b, which are allocated, are set to zero
-    /// \param f  (input) body data fields to be reset
+    /// Body data of fields in \a f, which are allocated, are set to zero
+    /// \param[in] f body data fields to be reset
     void reset_data(fieldset f) const falcON_THROWING
     {
       for(const block*p=FIRST; p; p=p->next()) p->reset_data(f);
@@ -1091,15 +1012,11 @@ namespace falcON {
   protected:
     /// swap the bytes (little-endian <-> bit-endian)
     ///
-    /// \param b body data field to swap bytes for
+    /// \param[in] b body data field to swap bytes for
     void swap_bytes(fieldbit b) falcON_THROWING;
-    //@}
   public:
     //==========================================================================
-    //                                                                          
-    /// \name methods using another set of bodies                               
-    //@{                                                                        
-    //==========================================================================
+    // \name methods using another set of bodies
     /// Copy: replace our data (if any) with those of other bodies (\b not \b 
     /// yet \b implemented)
     ///
@@ -1109,9 +1026,9 @@ namespace falcON {
     ///
     /// \note \b NOT \b YET \b IMPLEMENTED
     ///
-    /// \param B  (input) bodies to be copied
-    /// \param Bd (input, optional) body data to be copied
-    /// \param f  (input, optional) flag for bodies to be copied
+    /// \param[in] B  bodies to be copied
+    /// \param[in] Bd body data to be copied
+    /// \param[in] f  flag for bodies to be copied
     void copy(bodies const&B, fieldset Bd=fieldset::all, int f=0)
       falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -1123,9 +1040,9 @@ namespace falcON {
     ///
     /// \note \b NOT \b YET \b IMPLEMENTED
     ///
-    /// \param B  (input) bodies to be added
-    /// \param Bd (input, optional) body data to be copied
-    /// \param f  (input, optional) flag for bodies to be copied
+    /// \param[in] B  bodies to be added
+    /// \param[in] Bd body data to be copied
+    /// \param[in] f  flag for bodies to be copied
     void add(bodies const&B,  fieldset Bd=fieldset::all, int f=0)
       falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -1135,14 +1052,10 @@ namespace falcON {
     /// by this will be deleted before merging. Body data previously supported
     /// by this but not by that will be allocated but remain unitialized.
     ///
-    /// \param B (input/output) bodies to merge, will be empty after call
+    /// \param[in] B bodies to merge, will be empty after call
     void merge(bodies&B) falcON_THROWING;
-    //@}
     //==========================================================================
-    //                                                                          
-    /// \name removing and creation of bodies                                   
-    //@{                                                                        
-    //==========================================================================
+    // \name removing and creation of bodies
     /// Remove bodies which have been flagged for removal, eg by
     /// iterator::flag_for_removal().
     ///
@@ -1154,8 +1067,8 @@ namespace falcON {
     /// \note alters to body order.
     void remove() falcON_THROWING; 
     //--------------------------------------------------------------------------
-    /// Create \e N new bodies of bodytype \e t, which can then be activated
-    /// using new_body()
+    /// \brief Create \a N new bodies of bodytype \a t, which can then be 
+    /// activated using bodies::new_body()
     ///
     /// Will allocate a new block of bodies of given bodytype. However, the
     /// number of bodies used remains unchanged. In order to activate the new
@@ -1164,8 +1077,8 @@ namespace falcON {
     ///
     /// \note bodies created are always made the first of their type
     ///
-    /// \param N (input) number of bodies to allocate
-    /// \param t (input) type of bodies to allocate
+    /// \param[in] N number of bodies to allocate
+    /// \param[in] t type of bodies to allocate
     void create(unsigned N, bodytype t) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// make a body available which is allocated but not currently used.
@@ -1177,30 +1090,30 @@ namespace falcON {
     /// activated use bodies::N_free().
     ///
     /// \return a bodies::iterator to a new body or an invalid bodies::iterator
-    /// \param  t (input) type of body requested
+    /// \param[in] t type of body requested
     iterator new_body(bodytype t) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// make a new body of type \e t; if none available, allocate a block of
-    /// \e N new bodies first.
+    /// \brief make a new body of type \a t; if none available, allocate a 
+    /// block of \a N new bodies first.
     ///
     /// This simple routine combines N_free(), create(), and new_body()
     /// \return a valid bodies::iterator to a body of type \e t
-    /// \param t (input) bodytype of body requested
-    /// \param N (input) if no body available, allocate this many
+    /// \param[in] t bodytype of body requested
+    /// \param[in] N if no body available, allocate this many
     iterator new_body(bodytype t, unsigned N) falcON_THROWING
     {
       if(0 == N_free(t)) create(max(1u,N),t);
       return new_body(t);
     }
     //--------------------------------------------------------------------------
-    /// returns the number of bodies created by \a new_body since last call of
-    /// \a reset_Nnew(), if any.
+    /// \brief returns the number of bodies of type \a t created by new_body() 
+    /// since last call of reset_Nnew(), if any.
     unsigned const&N_new(bodytype t) const {
       return NNEW[t];
     }
     //--------------------------------------------------------------------------
-    /// returns the number of bodies created by \a new_body since last call of
-    /// \a reset_Nnew(), if any.
+    /// \brief returns the number of bodies of types \a t created by new_body()
+    /// since last call of reset_Nnew(), if any.
     unsigned N_new(bodytypes t) const {
       unsigned N(0u);
       for(bodytype b; b; ++b)
@@ -1209,26 +1122,26 @@ namespace falcON {
       return N;
     }
     //--------------------------------------------------------------------------
-    /// returns the number of bodies created by \a new_body() since last call of
-    /// \a reset_Nnew(), if any.
+    /// \brief returns the number of bodies of all types created by new_body()
+    /// since last call of reset_Nnew(), if any.
     unsigned N_new() const {
       return sum<BT_NUM>(NNEW);
     }
     //--------------------------------------------------------------------------
-    /// resets the counters of bodies created by \a new_body
+    /// resets the counters of bodies created by new_body()
     void reset_Nnew() {
       for(bodytype t; t; ++t)
 	NNEW[t] = 0u;
     }
     //--------------------------------------------------------------------------
-    /// returns the number of bodies removed by \a remove() since last call of
-    /// \a reset_Ndel(), if any.
+    /// \brief returns the number of bodies of type \a t removed by remove() 
+    /// since last call of reset_Ndel(), if any.
     unsigned const&N_del(bodytype t) const {
       return NDEL[t];
     }
     //--------------------------------------------------------------------------
-    /// returns the number of bodies created by \a new_body since last call of
-    /// \a reset_Nnew(), if any.
+    /// \brief returns the number of bodies of types \a t created by new_body()
+    /// since last call of reset_Nnew(), if any.
     unsigned N_del(bodytypes t) const {
       unsigned N(0u);
       for(bodytype b; b; ++b)
@@ -1237,13 +1150,13 @@ namespace falcON {
       return N;
     }
     //--------------------------------------------------------------------------
-    /// returns the number of bodies removed by \a remove() since last call of
-    /// \a reset_Ndel(), if any.
+    /// \brief returns the number of bodies of any type removed by remove()
+    /// since last call of reset_Ndel(), if any.
     unsigned N_del() const {
       return sum<BT_NUM>(NDEL);
     }
     //--------------------------------------------------------------------------
-    /// resets the counters of bodies removed by \a remove()
+    /// resets the counters of bodies removed by remove()
     void reset_Ndel() {
       for(bodytype t; t; ++t)
 	NDEL[t] = 0u;
@@ -1257,30 +1170,25 @@ namespace falcON {
     /// number of blocks.
     /// \note \b NOT \b YET \b IMPLEMENTED 
     void shrink() falcON_THROWING; 
-    //@}
     //==========================================================================
-    //                                                                          
-    /// \name I/O to file in various formats                                    
-    //@{                                                                        
-    //                                                                          
-    //==========================================================================
+    // \name I/O to file in various formats
 #ifdef falcON_NEMO
     //--------------------------------------------------------------------------
-    /// Read a single NEMO snapshot
+    /// Read from a single NEMO snapshot
     ///
-    /// We start reading into the body given by the 3rd argument. There must
-    /// be enough space allocated to accomodate input (we do not reset
-    /// N). Body data fields are added, if required, by calls to
+    /// We start reading into the body \a start. There must be enough space
+    /// allocated to accomodate input (we do not reset the number of bodies).
+    /// Body data fields are added, if required, by calls to
     /// bodies::add_field().
     ///
     /// \note this routine is used from snapshot::read_nemo()
     ///
-    /// \return       body data fields that have been read
-    /// \param Si     (input) snapshot input to read from
-    /// \param Bd     (input) body data fields to be read
-    /// \param start  (input) start position for reading
-    /// \param Nread  (input,optional) read this many (default: all in input)
-    /// \param warn   (input,optional) issue falcON::warning() for missing data
+    /// \return           body data fields that have been read
+    /// \param[in] Si     snapshot input to read from
+    /// \param[in] Bd     body data fields to be read
+    /// \param[in] start  start position for reading
+    /// \param[in] Nread  read this many (default: as many as possible)
+    /// \param[in] warn   issue falcON::warning() for missing data
   protected:
     fieldset read_snapshot(snap_in  const&Si,
 			   fieldset       Bd,
@@ -1288,17 +1196,17 @@ namespace falcON {
 			   unsigned       Nread = 0,
 			   bool           warn  = 1) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// Write a single NEMO snapshot
+    /// Write to a single NEMO snapshot
     ///
-    /// We start writing from the body given by the 3rd argument. The snapshot
-    /// output must accomodate the required number of bodies to write.
+    /// We start writing from the body \a start. The snapshot output must
+    /// accomodate the required number of bodies to write.
     ///
     /// \note this routine is used from snapshot::write_nemo()
     ///
-    /// \param So     (input) snapshot output to write to
-    /// \param Bd     (input) body data fields to be written
-    /// \param start  (input) start position for writing
-    /// \param Nwrite (input,optional) write this many (default: all in output)
+    /// \param[in] So     snapshot output to write to
+    /// \param[in] Bd     body data fields to be written
+    /// \param[in] start  start position for writing
+    /// \param[in] Nwrite write this many (default: all in output)
     void write_snapshot(snap_out const&So,
 			fieldset       Bd,
 			iterator const&start,
@@ -1309,41 +1217,20 @@ namespace falcON {
     /// Read simple ascii formatted input                                       
     ///
     /// Read data from an ASCII file. Any lines starting with '\#' are ignored.
-    /// the number of lines must match (or exceed) the 4th (and 5th) argument.
-    /// The order and number of entries in each line must match the 2nd and 3rd
-    /// argument. SPH data are assumed present in the first Ns (5th arg) lines
-    /// only.
+    /// the number of lines must match (or exceed) \a N. The order and number
+    /// of entries in each line must match \a Bd and \a Nd, respectively. Data
+    /// are assumed to have \a N[bodytype::sink] lines for sink bodies, followed
+    /// by \a N[bodytype::gas] lines for SPH bodies, and \a N[bodytype::std]
+    /// lines of standard bodies.
     ///
-    /// \param In (input) input stream to read from
-    /// \param Bd (input) array of body data fields to read in given order
-    /// \param Nd (input) number of entries in that array
-    /// \param N  (input) number of lines to read per body type
+    /// \param[in] In (input) input stream to read from
+    /// \param[in] Bd (input) array of body data fields to read in given order
+    /// \param[in] Nd (input) number of entries in that array
+    /// \param[in] N  (input) number of lines to read per body type
     void read_simple_ascii(std::istream  &In,
 			   const fieldbit*Bd,			   
 			   unsigned       Nd,
 			   const unsigned N[BT_NUM]);
-    /// Read simple ascii formatted input backward compatible
-    ///
-    /// \param In (input) input stream to read from
-    /// \param Bd (input) array of body data fields to read in given order
-    /// \param Nd (input) number of entries in that array
-    /// \param Ntot (input) number of lines to read
-    /// \param Nsph (input, optional) number of lines with SPH bodies
-    /// \param Nsink (input, optional) number of lines with SINK bodies
-    /// \note Nsink+Nsph must not exceed Ntot
-    void read_simple_ascii(std::istream  &In,
-			   const fieldbit*Bd,			   
-			   unsigned       Nd,
-			   unsigned       Ntot,
-			   unsigned       Nsph = 0,
-			   unsigned       Nsink= 0) falcON_THROWING
-    {
-      if(Nsink+Nsph > Ntot)
-	falcON_THROW("bodies::read_simple_ascii: Nsink+Nsph=%u > Ntot=%u\n",
-		     Nsink+Nsph, Ntot);
-      const unsigned N[BT_NUM] = {Nsink, Nsph, Ntot-Nsink-Nsph};
-      read_simple_ascii(In,Bd,Nd,N);
-    }
 #ifdef falcON_REAL_IS_FLOAT
     //--------------------------------------------------------------------------
     /// Reads a single snapshot from file(s) written in gadget2 data format 1
@@ -1353,45 +1240,41 @@ namespace falcON {
     /// given as fname.0 fname.1 etc.
     ///
     /// \return simulation time of snapshot
-    /// \param  fname (input) basename of data file(s).
-    /// \param  read  (input) data to read (maximum is mxvkURH)
-    /// \param  got   (output) data which actually have been read
-    /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
+    /// \param[in]  fname basename of data file(s).
+    /// \param[in]  read  data to read (maximum is mxvkURH)
+    /// \param[out] got   data which actually have been read
+    /// \param[in]  rec   size of FORTRAN record header; must be 4 or 8
     double read_gadget(const char*fname, fieldset read, fieldset&got,
 		       unsigned rec=4) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// writes snapshot in gadget format to a single data file
     ///
-    /// gadget data files MUST contain at least m,x,v,k,U. In additions, they
+    /// gadget data files MUST contain at least m,x,v,k,U. In addition, they
     /// may contain R,H or R,H,p,a, partly dependent on whether the file is a
-    /// full dump or a initial-conditions file only. Here we allow for these
-    /// three options.\n
+    /// full dump or a initial-conditions file only. Here we allow for all of
+    /// these three options.\n
+    ///
     /// Data not existent in the snapshot but obliged to be written out will be
     /// reset to zero and a warning will issued, unless explicitly suppressed.
     ///
-    /// \param  out   (input) falcON::output to write to
-    /// \param  time  (input) time to write to snapshot
-    /// \param  write (input) data to write (minimum: mxvkU, maximum mxvkURHpa
-    /// \param  warn  (input) warn about missing data?
-    /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
+    /// \param[in] out   falcON::output to write to
+    /// \param[in] time  time to write to snapshot
+    /// \param[in] write data to write (minimum: mxvkU, maximum mxvkURHpa
+    /// \param[in] warn  warn about missing data?
+    /// \param[in] rec   size of FORTRAN record header; must be 4 or 8
     void write_gadget(output&out, double time, fieldset write, bool warn=0,
 		      unsigned rec=4)
       const falcON_THROWING;
 #endif
-    //--------------------------------------------------------------------------
-    //@}
     //==========================================================================
-    //                                                                          
-    /// \name miscellaneous                                                     
-    //@{                                                                        
-    //==========================================================================
+    // \name miscellaneous
     /// set body keys to first+i, i=0...Nbody-1
     void reset_keys(int k=0) {
       if(BITS.contain(fieldbit::k))
 	for(iterator b = begin_all_bodies(); b; ++b,++k) b.key() = k;
     }
     //--------------------------------------------------------------------------
-    /// reset body flags
+    /// reset body flags to hold only body type information
     void reset_flags() const {
       if(BITS.contain(fieldbit::f))
 	for(const block* p=FIRST; p; p=p->next())
@@ -1413,31 +1296,26 @@ namespace falcON {
 	M += TotalMass(t);
       return M;
     }
-    //@}
     //==========================================================================
-    //                                                                          
-    /// \name creating sorted index tables                                      
-    //@{                                                                        
-    //==========================================================================
-    /// Create an index table sorted in func(body) for all bodies flagged not
-    /// to be ignored (in_subset()).
+    // \name creating sorted index tables
+    //
+    /// \brief Create an index table sorted in \a func(body) for all bodies 
+    /// flagged not to be ignored (in_subset()).
     ///
-    /// \param T     (output)  table of bodies::index, sorted
-    /// \param func  (input)   function for property to be sorted
+    /// \param[out] T    table of bodies::index, sorted
+    /// \param[in]  func function for property to be sorted
     void sorted(Array<index>&T,
 		real       (*func)(iterator const&)) const falcON_THROWING;
-    //--------------------------------------------------------------------------
-    /// Create an index table sorted in func(body) for all bodies flagged not
-    /// to be ignored (in_subset()) and also generate a sorted table of 
-    /// quantities
+    /// \brief Create an index table sorted in \a func(body) for all bodies
+    /// flagged not to be ignored (in_subset()) and also generate a sorted table
+    /// of quantities
     ///
-    /// \param T     (output)  table of bodies::index, sorted
-    /// \param Q     (output)  table of quantity, sorted
-    /// \param func  (input)   function for property to be sorted
+    /// \param[out] T    table of bodies::index, sorted
+    /// \param[out] Q    table of quantity, sorted
+    /// \param[in]  func function for property to be sorted
     void sorted(Array<index>&T,
 		Array<real> &Q,
 		real       (*func)(iterator const&)) const falcON_THROWING;
-    //@}
     //--------------------------------------------------------------------------
     void CheckData(fieldset s, const char*f, int l) const
     {
@@ -1600,23 +1478,19 @@ namespace falcON {
     //--------------------------------------------------------------------------
   public:
     //==========================================================================
-    /// \name initial-time information and manipulation                         
-    //@{
+    // \name initial-time information and manipulation                         
     bool const&has_initial_time() const { return INIT; }  ///< has initial time?
     double const&initial_time() const { return TINI; }    ///< get initial time
     void init_time(double t) {                            ///< set initial time
       INIT = true;
       TINI = t;
     }
-    //@}
     //==========================================================================
-    /// \name time information and manipulation                                 
-    //@{
+    // \name time information and manipulation                                 
     double const&time() const { return TIME; }            ///< get time
     void advance_time_by(double d) const { TIME += d; }   ///< advance time
     void set_time(double t) const { TIME  = t; }          ///< set time
     void reset_time() const { TIME  = 0.; }               ///< set time to zero
-    //@}
   private:
     void __add_pointer(const void*, const char*, size_t, const char*)
       const falcON_THROWING;
@@ -1628,56 +1502,53 @@ namespace falcON {
       falcON_THROWING;
   public:
     //==========================================================================
-    /// \name pointer bank: support for communication between manipulators      
-    ///
+    // \name pointer bank: support for communication between manipulators      
+    //
+    /// add a pointer to pointer bank (see also set_pointer()).
     /// The idea is that two or more manipulators may communicate data, for
     /// instance one manipulator determines the centre with respect to which
     /// another manipulator analyses the snapshot. For this purpose, the first
     /// manipulator registers a pointer to the centre position with the pointer
-    /// bank under a key, say \c "xcen", using members \a add_pointer() or
-    /// \a set_pointer(). Any other manipulator may access that pointer with the
-    /// same key using the member \a pointer() or \a get_pointer().
-    //@{
-    /// add a pointer to pointer bank
-    /// (see also set_pointer())
+    /// bank under a key, say \c "xcen", using members add_pointer() or
+    /// set_pointer(). Any other manipulator may access that pointer with the
+    /// same key using the member pointer() or get_pointer().\n
     ///
     /// The sizeof(T) and nameof(T) are also remembered in the pointer bank.
     /// If the key is already known to the bank, an error is thrown.
     /// A NULL pointer will not be added to the bank.
-    /// \param T    (template parameter) type of object pointed to
-    /// \param pter (input)  pointer to be stored in bank
-    /// \param key  (input)  handle to be used as key to pointer
+    /// \param T        (template parameter) type of object pointed to
+    /// \param[in] pter pointer to be stored in bank
+    /// \param[in] key  handle to be used as key to pointer
     template<typename T>
     void add_pointer(const T*pter, const char*key) const falcON_THROWING {
       __add_pointer(pter, key, sizeof(T), nameof(T));
     }
-    /// set a pointer to pointer bank
-    /// (see also add_pointer())
+    /// set a pointer to pointer bank (see also add_pointer()).
     ///
     /// If the key is already known to the bank, the old pointer is overridden.
     /// nameof(T) and sizeof(T) must match with old entry (if present).
     /// In case of a NULL pointer, any existing pointer will be deleted.
-    /// \param T    (template parameter) type of object pointed to
-    /// \param pter (input)  pointer to be stored in bank
-    /// \param key  (input)  handle to be used as key to pointer
+    /// \param T        (template parameter) type of object pointed to
+    /// \param[in] pter pointer to be stored in bank
+    /// \param[in] key  handle to be used as key to pointer
     template<typename T>
     void set_pointer(const T*pter, const char*key) const falcON_THROWING {
       __set_pointer(pter, key, sizeof(T), nameof(T));
     }
-    /// return pointer to a given key
+    /// return pointer to a given key (see also add_pointer()).
     ///
     /// If the key is unknown in the pointer bank, a zero pointer is returned.
     /// If the key is known, but either the sizeof(T) or nameof(T) don't match,
     /// an error is thrown.
     /// \return          pointer referred to by key (or null)
-    /// \param T   (template parameter) type of object pointed to
-    /// \param key (input) key handle used as key for pointer wanted
+    /// \param T       (template parameter) type of object pointed to
+    /// \param[in] key key handle used as key for pointer wanted
     ///
     /// Example code: \code
     ///   const snapshot*shot;
     ///   const vect    *x0 = shot->pointer<vect>("xcen");
     /// \endcode
-    /// Note that a template specification "<vect>" is required, because the
+    /// \note A template specification "<vect>" is required, because the
     /// compiler cannot determine the return type from the arguments.
     template<typename T>
     const T*pointer(const char*key) const falcON_THROWING { 
@@ -1689,16 +1560,16 @@ namespace falcON {
     /// If the key is known, but either the sizeof(T) or nameof(T) don't match,
     /// an error is thrown.
     /// \param T    (template parameter) type of object pointed to
-    /// \param pter (output) pointer referred to by key (or null)
-    /// \param key  (input)  handle used as key for pointer wanted
+    /// \param[out] pter pointer referred to by key (or null)
+    /// \param[in]  key  handle used as key for pointer wanted
     ///
     /// Example code: \code
     ///   const snapshot*shot;
     ///   const vect    *x0;
     ///   shot->get_pointer(x0,"xcen");
     /// \endcode
-    /// Note that, in contrast to pointer(), no template specification
-    /// "<vect>" is required.
+    /// \note In contrast to pointer(), no template specification "<vect>" is
+    /// required.
     template<typename T>
     void get_pointer(const T* &pter, const char*key) const falcON_THROWING {
       pter = static_cast<const T*>(__get_pointer(key, sizeof(T), nameof(T)));
@@ -1706,12 +1577,11 @@ namespace falcON {
     /// delete an entry from the pointer bank
     ///
     /// if key not found in pointer bank, no action is taken
-    /// \param key handle for pointer to be deleted from bank
+    /// \param[in] key handle for pointer to be deleted from bank
     void del_pointer(const char*key) const;
     //@}
     //==========================================================================
-    /// \name construction & related                                            
-    //@{
+    // \name construction & related
     //--------------------------------------------------------------------------
     /// Constructor 0: just give the fields to be supported,
     /// used in NBodyCode::NBodyCode() of file nbody.h
@@ -1720,27 +1590,11 @@ namespace falcON {
     bodies(Bd), INIT(false), TINI(0.), TIME(0.), PBNK(0)
     {}
     //--------------------------------------------------------------------------
-    /// Constructor 1 (old version)
-    ///
-    /// \param t  (input) time of snapshot
-    /// \param Ntot (input) total number of bodies
-    /// \param Bd (input, optional) body data fields to be allocated
-    /// \param Nsph (input, optional) number of SPH bodies
-    /// \param Nsink (input, optional) number of SINK particles
-    snapshot(double   t,
-	     unsigned Ntot = 0,
-	     fieldset Bd   = fieldset(DefaultBits),
-	     unsigned Nsph = 0,
-	     unsigned Nsink= 0) falcON_THROWING :
-    bodies(Ntot, Bd, Nsph, Nsink),
-    INIT(true), TINI(t), TIME(t), PBNK(0)
-    {}
-    //--------------------------------------------------------------------------
     /// Constructor 1 (new version)
     ///
-    /// \param t  (input) time of snapshot
-    /// \param N  (input) number of bodies per bodytype
-    /// \param Bd (input, optional) body data fields to be allocated
+    /// \param[in] t   time of snapshot
+    /// \param[in] N   number of bodies per bodytype
+    /// \param[in] Bd  body data fields to be allocated
     explicit 
     snapshot(double         t,
 	     const unsigned N[BT_NUM],
@@ -1753,10 +1607,10 @@ namespace falcON {
     ///
     /// make a partial copy, only copying data specified by 3rd arg
     ///
-    /// \param t  (input) time of snapshot
-    /// \param B  (input) set of bodies
-    /// \param Bd (input, optional) only copy these body data fields
-    /// \param F  (input, optional) only copy bodies matching this flag
+    /// \param[in] t   time of snapshot
+    /// \param[in] B   set of bodies
+    /// \param[in] Bd  only copy these body data fields
+    /// \param[in] F   only copy bodies matching this flag
     snapshot(double       t,
 	     bodies const&B,
 	     fieldset     Bd=fieldset::all,
@@ -1768,9 +1622,9 @@ namespace falcON {
     ///
     /// make a partial copy, only copying data specified by 3rd arg
     ///
-    /// \param S  (input) set of bodies
-    /// \param Bd (input, optional) only copy these body data fields
-    /// \param F  (input, optional) only copy bodies matching this flag
+    /// \param[in] S   set of bodies
+    /// \param[in] Bd  only copy these body data fields
+    /// \param[in] F   only copy bodies matching this flag
     explicit
     snapshot(snapshot const&S,
 	     fieldset       Bd=fieldset::all,
@@ -1785,23 +1639,19 @@ namespace falcON {
     ///
     /// \note \b NOT \b YET \b IMPLEMENTED
     ///
-    /// \param S  (input) snapshot to be copied
-    /// \param Bd (input, optional) body data to be copied
-    /// \param F  (input, optional) flag for bodies to be copied
+    /// \param[in] S   snapshot to be copied
+    /// \param[in] Bd  body data to be copied
+    /// \param[in] F   flag for bodies to be copied
     void copy(snapshot const&S,
 	      fieldset       Bd=fieldset::all,
 	      flags          F =flags::empty) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// destruction
     ~snapshot();
-    //@}
     //==========================================================================
 #ifdef falcON_NEMO
     //==========================================================================
-    //                                                                          
-    /// \name NEMO data I/O                                                     
-    //@{                                                                        
-    //                                                                          
+    // \name NEMO data I/O
     //==========================================================================
     /// Read a single NEMO snapshot if time in input is in desired time range;
     /// on return this mirrors the snapshot on disk (if it has been read)
@@ -1813,13 +1663,13 @@ namespace falcON {
     /// If the initial time was previously unset, we set it now.
     ///
     /// \return       true if time in input was in desired time range
-    /// \param Is     (input) NEMO input stream containing snapshot
-    /// \param Read   (output) body data fields which have been read
-    /// \param Get    (input) body data fields to be read
-    /// \param range  (input, optional) time range in NEMO range format
-    ///               (default: read next snapshot in stream)
-    /// \param warn   (input, optional) issue falcON::warning()s about missing
-    ///               data (default: issue warning)
+    /// \param[in]  Is     NEMO input stream containing snapshot
+    /// \param[out] Read   body data fields which have been read
+    /// \param[in]  Get    body data fields to be read
+    /// \param[in]  range  time range in NEMO range format
+    ///                    (default: read next snapshot in stream)
+    /// \param[in]  warn   issue falcON::warning()s about missing data
+    ///                    (default: issue warning)
     bool read_nemo(nemo_in const&Is,
 		   fieldset     &Read,
 		   fieldset      Get,
@@ -1835,12 +1685,12 @@ namespace falcON {
     /// If the initial time was previously unset, we set it now.
     ///
     /// \return      body data fields that have been read
-    /// \param Si    (input) snapshot input
-    /// \param Bd    (input) body data fields to be read
-    /// \param start (input) first body to be read into
-    /// \param warn  (input, optional) issue falcON::warning()s about missing
-    ///               data (default: issue warning)
-    /// \param Nread (input, optional) read this many (default: all in input)
+    /// \param[in] Si     snapshot input
+    /// \param[in] Bd     body data fields to be read
+    /// \param[in] start  first body to be read into
+    /// \param[in] warn   issue falcON::warning()s about missing data
+    ///                   (default: issue warning)
+    /// \param[in] Nread  read this many (default: all in input)
     fieldset read_part(snap_in const &Si,
 		       fieldset       Bd,
 		       iterator const&start,
@@ -1849,8 +1699,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// Generate a NEMO snapshot on disk from all bodies
     ///
-    /// \param  Os  (input) nemo output stream
-    /// \param  Bd  (input) body data fields to be written
+    /// \param[in] Os  nemo output stream
+    /// \param[in] Bd  body data fields to be written
     void write_nemo(nemo_out const&Os,
 		    fieldset       Bd) const falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -1860,15 +1710,14 @@ namespace falcON {
     /// Nwrite (4th argument) bodies starting at \e start (3rd argument) in
     /// NEMO snapshot format.
     ///
-    /// \param Os     (input) nemo output stream
-    /// \param Bd     (input) body data fields to be written
-    /// \param start  (input) first body to write
-    /// \param Nwrite (input, optional) write this many (default: all)
+    /// \param[in] Os     nemo output stream
+    /// \param[in] Bd     body data fields to be written
+    /// \param[in] start  first body to write
+    /// \param[in] Nwrite write this many (default: all)
     void write_nemo(nemo_out const&Os,
 		    fieldset       Bd,
 		    iterator const&start,
 		    unsigned       Nwrite=0) const falcON_THROWING;
-    //@}
 #endif // falcON_NEMO
 #ifdef falcON_REAL_IS_FLOAT
     //--------------------------------------------------------------------------
@@ -1878,10 +1727,10 @@ namespace falcON {
     /// file. In this case the file names are assumed to be derived from the one
     /// given as fname.0 fname.1 etc.
     ///
-    /// \return       data which actually have been read
-    /// \param  fname (input) basename of data file(s).
-    /// \param  read  (input) data to read (maximum is mxvkURH)
-    /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
+    /// \return     data which actually have been read
+    /// \param[in]  fname basename of data file(s).
+    /// \param[in]  read  data to read (maximum is mxvkURH)
+    /// \param[in]  rec   size of FORTRAN record header; must be 4 or 8
     fieldset read_gadget(const char*fname, fieldset read, unsigned rec=4)
       falcON_THROWING
     {
@@ -1894,17 +1743,17 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// writes snapshot in gadget format to a single data file
     ///
-    /// gadget data files MUST contain at least m,x,v,k,U. In additions, they
+    /// gadget data files MUST contain at least m,x,v,k,U. In addition, they
     /// may contain R,H or R,H,p,a, partly dependent on whether the file is a
-    /// full dump or a initial-conditions file only. Here we allow for these
-    /// three options.\n
+    /// full dump or only a initial-conditions file. Here we allow for three
+    /// options.\n
     /// Data not existent in the snapshot but obliged to be written out will be
-    /// reset to zero and a warning will issued, unless explicitly suppressed.
+    /// reset to zero and, if \a warn=true, a warning will issued.
     ///
-    /// \param  out   (input) falcON::output to write to
-    /// \param  write (input) data to write (minimum: mxvkU, maximum mxvkURHpa
-    /// \param  warn  (input) warn  about missing data?
-    /// \param  rec   (input) size of FORTRAN record header; must be 4 or 8
+    /// \param[in]  out   falcON::output to write to
+    /// \param[in]  write data to write (minimum: mxvkU, maximum mxvkURHpa
+    /// \param[in]  warn  warn  about missing data?
+    /// \param[in]  rec   size of FORTRAN record header; must be 4 or 8
     void write_gadget(output &out, fieldset write, bool warn=0, unsigned rec=4)
       const falcON_THROWING
     {
@@ -2018,7 +1867,7 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
 ///     LoopBodyPairs(bi,bj) {
 ///       real Rij_squared = dist_sq(pos(bi),pos(bj));
 ///     } \endcode
-/// \param NAME1  name of the first body in an outer loop
+/// \param NAME1  name of the body in an outer loop
 /// \param NAME2  name given to inner-loop variable (of type falcON::body)
 #define LoopBodyPairs(NAME1,NAME2)		\
   for(falcON::body NAME2(NAME1,1); NAME2; ++NAME2)

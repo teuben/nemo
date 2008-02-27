@@ -3,7 +3,7 @@
 //                                                                             |
 // getgravity.cc                                                               |
 //                                                                             |
-// Copyright (C) 2002, 2003, 2005, 2007 Walter Dehnen                          |
+// Copyright (C) 2002-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -32,9 +32,11 @@
 // v 2.1    22/06/2005  WD changes in nemo I/O support                         |
 // v 2.2    13/06/2005  WD changes in fieldset                                 |
 // v 2.3    13/06/2005  WD changes in fieldset and body.h                      |
+// v 2.3.1  19/09/2007  WD ??                                                  |
+// v 2.3.2  20/02/2008  WD more changes in body.h                              |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.3"
-#define falcON_VERSION_D "19-sep-2007 Walter Dehnen                          "
+#define falcON_VERSION   "2.3.2"
+#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO
 #error You need NEMO to compile "src/mains/getgravity.cc"
@@ -65,7 +67,7 @@ void falcON::main() falcON_THROWING
   nemo_in        srce(getparam("srce"));
   nemo_out       out(getparam("out"));
   const fieldset write(fieldset::x | fieldset::p | fieldset::a);
-  snapshot       shot(0,fieldset::gravity);
+  snapshot       shot(fieldset::gravity);
   forces         falcon(&shot,getrparam("eps"), getrparam("theta"),
 			kern_type(getiparam("kernel")));
   const fieldset srcedata(fieldset::m|fieldset::x);

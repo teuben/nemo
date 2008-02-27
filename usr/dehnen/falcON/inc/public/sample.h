@@ -140,42 +140,44 @@ namespace falcON {
     ///       scaled as well as the Psi returnd. Also the routines for
     ///       R_peri and R_circ are assummed to take arguments and return
     ///       values that are both scaled.
-    /// \param B0 (input) first body to sample
-    /// \param N  (input) number of bodies to sample
-    /// \param q  (input) use quasi (or pseudo) random numbers?
-    /// \param R  (input) quasi and pseudo random number generator
-    /// \param f  (input) fraction with vphi>0
+    /// \param[in] B0  first body to sample
+    /// \param[in] N   number of bodies to sample
+    /// \param[in] q   use quasi (or pseudo) random numbers?
+    /// \param[in] R   quasi and pseudo random number generator
+    /// \param[in] f   fraction with vphi>0
 #ifdef falcON_PROPER
-    /// \param e  (input) factor: setting eps_i
+    /// \param[in] e   factor: setting eps_i
 #endif
-    /// \param gF (input) write DF into aux?
-    /// \param gP (input) write Phi into pot?
-    /// \param gA (input) write -dPhi/dr into acc?
+    /// \param[in] gF  write DF into aux?
+    /// \param[in] gP  write Phi into pot?
+    /// \param[in] gA  write -dPhi/dr into acc?
     void sample(body const&B0, unsigned N, bool q, Random const&R, double f=0.5,
 #ifdef falcON_PROPER
 	        double e=0.0,
 #endif
-		bool gF=false, bool gP=false, bool gA=false) const;
+		bool gF=false, bool gP=false, bool gA=false)
+      const falcON_THROWING;
     /// sampling of full phase-space: non-virtual
     /// \note assuming the randomly generated (r,vr,vt) are already properly
     ///       scaled as well as the Psi returnd. Also the routines for
     ///       R_peri and R_circ are assummed to take arguments and return
     ///       values that are both scaled.
-    /// \param B  (input) bodies to sample
-    /// \param q  (input) use quasi (or pseudo) random numbers?
-    /// \param R  (input) quasi and pseudo random number generator
-    /// \param f  (input) fraction with vphi>0
+    /// \param[in] B   bodies to sample
+    /// \param[in] q   use quasi (or pseudo) random numbers?
+    /// \param[in] R   quasi and pseudo random number generator
+    /// \param[in] f   fraction with vphi>0
 #ifdef falcON_PROPER
-    /// \param e  (input) factor: setting eps_i
+    /// \param[in] e   factor: setting eps_i
 #endif
-    /// \param gF (input) write DF into aux?
-    /// \param gP (input) write Phi into pot?
-    /// \param gA (input) write -dPhi/dr into acc?
+    /// \param[in] gF  write DF into aux?
+    /// \param[in] gP  write Phi into pot?
+    /// \param[in] gA  write -dPhi/dr into acc?
     void sample(bodies const&B, bool q, Random const&R, double f=0.5,
 #ifdef falcON_PROPER
 	        double e=0.0,
 #endif
-		bool gF=false, bool gP=false, bool gA=false) const
+		bool gF=false, bool gP=false, bool gA=false)
+      const falcON_THROWING
     {
       sample(B.begin_all_bodies(), B.N_bodies(), q,R,f,
 #ifdef falcON_PROPER
@@ -185,16 +187,18 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
     /// sampling positions only: non-virtual
-    /// \param B0 (input) first body to sample
-    /// \param N  (input) number of bodies to sample
-    /// \param q  (input) use quasi (or pseudo) random numbers?
-    /// \param R  (input) quasi and pseudo random number generator
-    void sample_pos(body const&B0, unsigned N, bool q, Random const&R) const;
+    /// \param[in] B0  first body to sample
+    /// \param[in] N   number of bodies to sample
+    /// \param[in] q   use quasi (or pseudo) random numbers?
+    /// \param[in] R   quasi and pseudo random number generator
+    void sample_pos(body const&B0, unsigned N, bool q, Random const&R)
+      const falcON_THROWING;
     /// sampling positions only: non-virtual
-    /// \param B  (input) bodies to sample
-    /// \param q  (input) use quasi (or pseudo) random numbers?
-    /// \param R  (input) quasi and pseudo random number generator
-    void sample_pos(bodies const&B, bool q, Random const&R) const
+    /// \param[in] B   bodies to sample
+    /// \param[in] q   use quasi (or pseudo) random numbers?
+    /// \param[in] R   quasi and pseudo random number generator
+    void sample_pos(bodies const&B, bool q, Random const&R)
+      const falcON_THROWING
     {
       sample_pos(B.begin_all_bodies(), B.N_bodies(), q,R);
     }

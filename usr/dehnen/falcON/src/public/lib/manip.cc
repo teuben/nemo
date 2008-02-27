@@ -52,6 +52,21 @@ int falcON::Manipulator::parse(const char*params, double*pars, int maxp)
   return npar;
 }
 ////////////////////////////////////////////////////////////////////////////////
+int falcON::Manipulator::parse(char*data, char sep, char**list, int nmax)
+{
+  int  n  = 0;
+  list[0] = data;
+  char *d = data;
+  for(; *d && n!=nmax; ++d)
+    if(*d == sep) {
+      *d = 0;
+      list[++n] = d+1;
+    }
+  if(*d && n==nmax)
+    for(; *d; ++d) if(*d==sep) ++n;
+  return n+1;
+}      
+////////////////////////////////////////////////////////////////////////////////
 namespace {
   using falcON::NewArray;
   using falcON::exception;
@@ -234,11 +249,11 @@ falcON::Manipulator::Manipulator(const char*mannames,
      (manfiles == 0 || *manfiles == 0)) return;
   const static int Lnames=NMAX*16, Lparss=NMAX*32, Lfiles=NMAX*32;
   char *names=falcON_NEW(char,Lnames), *name[NMAX]={0};
-  char *parss=falcON_NEW(char,Lnames), *pars[NMAX]={0};
-  char *files=falcON_NEW(char,Lnames), *file[NMAX]={0};
+  char *parss=falcON_NEW(char,Lparss), *pars[NMAX]={0};
+  char *files=falcON_NEW(char,Lfiles), *file[NMAX]={0};
 #define CLEANUP					\
-  falcON_DEL_A(names);			\
-  falcON_DEL_A(parss);			\
+  falcON_DEL_A(names);				\
+  falcON_DEL_A(parss);				\
   falcON_DEL_A(files);
   // 1 parse input into arrays of name[], pars[], file[]
   if(mannames == 0 || *mannames == 0 || *mannames=='+') { 
@@ -294,7 +309,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
       falcON_THROW("Manipulator: too many manipulators (%d > NMAX=%d)\n",
 		   N,NMAX);
     }
-   } else {
+  } else {
     // 1.2 mannames given: assume list of manipulators
     debug_info(3,"Manipulator: initializing from\n"
 	       "  names=\"%s\"\n  parss=\"%s\"\n  files=\"%s\"\n",

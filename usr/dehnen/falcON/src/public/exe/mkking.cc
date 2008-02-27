@@ -3,7 +3,7 @@
 //                                                                             |
 // mkking.cc                                                                   |
 //                                                                             |
-// Copyright (C) 2000-2005 Walter Dehnen                                       |
+// Copyright (C) 2000-2005, 2008 Walter Dehnen                                 |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -48,9 +48,10 @@
 // v 1.4.3 20/05/2005  WD several minor updates                                |
 // v 2.0   14/06/2005  WD new falcON                                           |
 // v 2.1   13/06/2005  WD changes in fieldset                                  |
+// v 2.1.1 20/02/2008  WD change in body.h (removed old-style constructors)    |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.1"
-#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
+#define falcON_VERSION   "2.1.1"
+#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile "mkking"
@@ -142,21 +143,33 @@ void falcON::main() falcON_THROWING
   //----------------------------------------------------------------------------
   // 3. create initial conditions from King model                               
   //----------------------------------------------------------------------------
-  const int N = getiparam("nbody");
+  const int N = getuparam("nbody");
   const fieldset data(hasvalue("eps")? fieldset::basic | fieldset::e :
 		      fieldset::basic);
-  snapshot        shot(getdparam("time"),N,data);
+  unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = N;
+  snapshot        shot(getdparam("time"),nbod,data);
   const    bool   q(getbparam("q-ran"));
   const    Random Ran(getparam("seed"),6);
   const    double m = mass/double(N);
-  register double r,v,cth,R,phi;
+  double r,v,cth,R,phi;
+  bool   again;
+  int    errors=0;
   LoopAllBodies(&shot,Bi) {
     //                                                                          
     // 3.1 set mass and get r and v                                             
     //                                                                          
     Bi.mass() = m;
-    if(q) KM.random(Ran(0), Ran(1), r, v);
-    else  KM.random(Ran( ), Ran( ), r, v);
+    do {
+      again = false;
+      try {
+	if(q) KM.random(Ran(0), Ran(1), r, v);
+	else  KM.random(Ran( ), Ran( ), r, v);
+      } catch(WDutils::exception E) {
+	if(++errors > 1000) error("exceeding 100 errors \"%s\" in sampling\n",
+				  text(E));
+	again = true;
+      }
+    } while(again);
     //                                                                          
     // 3.2 get x,y,z                                                            
     //                                                                          

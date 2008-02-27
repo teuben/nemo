@@ -8,7 +8,7 @@
 ///                                                                             
 /// \author Paul McMillan                                                       
 /// \author Walter Dehnen                                                       
-/// \date   2005-2007                                                           
+/// \date   2005-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -40,9 +40,10 @@
 // v 2.0   17/09/2007   WD  using DiscPot (new) for disc's own potential        
 // v 2.1   15/11/2007   WD  fixed problem with external potentials.             
 // v 2.1.1 23/01/2008   WD  DF into phden (previous: aux) if giveF=true         
+// v 2.1.2 20/02/2008   WD  change in body.h (removed old-style constructors)   
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.1.1"
-#define falcON_VERSION_D "23-jan-2008 Paul McMillan & Walter Dehnen          "
+#define falcON_VERSION   "2.1.2"
+#define falcON_VERSION_D "20-feb-2008 Paul McMillan & Walter Dehnen          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkWD99disc
@@ -132,7 +133,8 @@ void falcON::main() falcON_THROWING
 	      aext.is_empty()?
 	      static_cast<const acceleration*>(&disc) :
 	      static_cast<const acceleration*>(&asum) );
-  snapshot shot(getdparam("time"),getiparam("nbody"), data);
+  unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
+  snapshot shot(getdparam("time"), nbod, data);
   if(getdparam("Q"))    
     DM.sample(shot,getiparam("ni"),getbparam("q-ran"),Ran,getbparam("giveF"));
   else

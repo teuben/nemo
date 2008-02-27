@@ -3,7 +3,7 @@
 //                                                                             |
 // symmetrize.cc                                                               |
 //                                                                             |
-// Copyright (C) 2002-2006 Walter Dehnen                                       |
+// Copyright (C) 2002-2006, 2008 Walter Dehnen                                 |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -35,9 +35,10 @@
 // v 2.0   14/06/2005  WD new falcON                                           |
 // v 2.1   28/06/2005  WD deBUGged                                             |
 // v 2.1.1 31/03/2006  WD BD_NQUANT -> BodyData::NQUANT                        |
+// v 2.1.2 20/02/2008  WD change in body.h (removed old-style constructors)    |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.1.1"
-#define falcON_VERSION_D "31-mar-2006 Walter Dehnen                          "
+#define falcON_VERSION   "2.1.2"
+#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "symmetrize"
@@ -141,9 +142,12 @@ void falcON::main() falcON_THROWING
       if(!out.is_open()) out.open(getparam("out"));
       shin.write_nemo(out,read);
     } else {                                       // ELSE (output != input)    
-      int Nout = shin.N_bodies()/use;
-      if(shin.N_bodies() % use) ++Nout;
-      Nout *= 1<<copy;
+      unsigned Nout[BT_NUM];
+      for(bodytype t; t; ++t) {
+	Nout[t] = shin.N_bodies(t)/use;
+	if(shin.N_bodies(t) % use) ++(Nout[t]);
+	Nout[t] *= 1<<copy;
+      }
       snapshot shou(shin.time(),Nout,read);
       if       (copy == 0u)
 	for(body
