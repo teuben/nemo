@@ -28,11 +28,13 @@ string defv[] = {
     "rank=etot\n	Value used in ranking particles",
     "times=all\n        Range of times to process ",
     "sort=qsort\n       Sort mode {qsort;...}",
-    "VERSION=1.5a\n     1-nov-07 PJT ",
+    "VERSION=1.5b\n     29-feb-08 PJT ",
     NULL,
 };
 
 string usage="sort particles according to a user-specified ranking";
+
+string cvsid="$Id$";
 
 /* #define FLOGGER 1       /* merge in the cute flogger test routines */
 
