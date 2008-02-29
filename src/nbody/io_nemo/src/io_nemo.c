@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2006                            
+|  Copyright Jean-Charles LAMBERT - 2008                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
@@ -21,6 +21,7 @@
 | 24-Apr-06      V1.31: memory leak fixed                        JCL
 | 19-Jun-06      V1.32: happy gfortran                           JCL
 | 29-May-07      V1.42: handle snapshot with different #bodies   JCL
+| 29-Feb-07      V1.50: Aux and Dens field added                 JCL
 +----------------------------------------------------------------  */
 
 /* -----------------------------------------------------------------
@@ -77,19 +78,6 @@ int   maxbodies[MAXIO];
 +------------------------------------------------------------------ */ 
 void reajust_ptr()
 {
-#if 0 
-  if (N_io)    *nbody_p    = nbody;
-  if (T_io)    *time_p     = timu;
-  if (M_io)    *mass_p     = mass;
-  if (X_io)    *pos_p      = pos;
-  if (V_io)    *vel_p      = vel;
-  if (XV_io)   *phase_p    = phase;
-  if (P_io)    *pot_p      = pot;
-  if (A_io)    *acc_p      = acc; 
-  if (K_io)    *keys_p     = keys; 
-  if (EPS_io)  *eps_p      = eps; 
-  /*  if (ST_io)   *selt_p     = selt; */
-#endif
 }
 
 /* ------------------------------------------------------------------
@@ -187,6 +175,16 @@ int io_nemo(char * iofile,
       ion->bits     = *(ion->bits_p); /* match local and parameter pointer */
       break;
 
+    case 12 : AUX_io = 1;
+      ion->aux_p   = va_arg(pa, char **);
+      ion->aux     = *(ion->aux_p); /* match local and parameter pointer */
+      break;
+
+    case 13 : D_io = 1;
+      ion->dens_p   = va_arg(pa, char **);
+      ion->dens     = *(ion->dens_p); /* match local and parameter pointer */
+      break;
+
     case 57 : ST_io = 1;
       ion->selt     = va_arg(pa, char *);
       break;
@@ -242,6 +240,8 @@ int io_nemo(char * iofile,
       if (X_io)    *(ion->pos_p  )    = ion->pos;
       if (V_io)    *(ion->vel_p  )    = ion->vel;
       if (XV_io)   *(ion->phase_p)    = ion->phase;
+      if (AUX_io)  *(ion->aux_p)      = ion->aux;
+      if (D_io)    *(ion->dens_p)     = ion->dens;
       if (P_io)    *(ion->pot_p  )    = ion->pot;
       if (A_io)    *(ion->acc_p  )    = ion->acc; 
       if (K_io)    *(ion->keys_p )    = ion->keys; 

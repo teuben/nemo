@@ -1,5 +1,5 @@
 /* ================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                           
+|  Copyright Jean-Charles LAMBERT - 2008                           
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                          
 |  address:  Dynamique des galaxies                                
 |            Laboratoire d'Astrophysique de Marseille              
@@ -36,6 +36,10 @@ int get_data_pot(stream, char *, int, int, char **);
 int get_data_acc(stream, char *, int, int, char **, int);
 
 int get_data_eps(stream, char *, int, int, char **);
+
+int get_data_aux(stream, char *, int, int, char **);
+
+int get_data_dens(stream, char *, int, int, char **);
 #ifdef __cplusplus
 }
 #endif

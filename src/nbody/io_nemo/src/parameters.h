@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                            
+|  Copyright Jean-Charles LAMBERT - 2008                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               

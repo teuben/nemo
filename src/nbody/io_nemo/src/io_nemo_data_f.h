@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                            
+|  Copyright Jean-Charles LAMBERT - 2008                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
@@ -21,6 +21,8 @@
              * mass_f,
              * eps_f,
              * keys_f,
+             * aux_f,
+             * dens_f,
              * timu_f,
              * selt_f,
              * selp_f;

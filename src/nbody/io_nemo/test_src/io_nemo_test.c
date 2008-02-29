@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                            
+|  Copyright Jean-Charles LAMBERT - 2008                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
@@ -13,7 +13,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <snapshot/snapshot.h>
-#include "io_nemo.h"
+#include <io_nemo.h>
 
 string defv[]=  
 { "in=???\n       input snapshot"      ,

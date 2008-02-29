@@ -1,5 +1,5 @@
 /* ================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                           
+|  Copyright Jean-Charles LAMBERT - 2008                           
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                          
 |  address:  Dynamique des galaxies                                
 |            Laboratoire d'Astrophysique de Marseille              
@@ -279,6 +279,56 @@ int get_data_eps(stream instr, char * DataType, int nbody, int size_type,
       if (*epsptr == NULL)
 	*epsptr = (void *) allocate(size_type * nbody);
       get_data_coerced(instr, EpsTag, DataType, *epsptr,
+		       nbody, 0);
+      status = 1; 
+    }
+  else
+    status = 0;
+  return status;
+}
+/* ----------------------------------------------------------------
+|  get_data_aux :                                                  
+|  Get Aux from a NEMO snapshot                                    
++---------------------------------------------------------------- */
+int get_data_aux(stream instr, char * DataType, int nbody, int size_type,
+		  void ** auxptr)
+{
+  int status;
+
+  if (get_tag_ok(instr, AuxTag))
+    { 
+      if (*auxptr && maxbodies[CURRENT_IO] < nbody) {
+	free((void *) *auxptr);
+	*auxptr = NULL;
+      }
+      if (*auxptr == NULL)
+	*auxptr = (void *) allocate(size_type * nbody);
+      get_data_coerced(instr, AuxTag, DataType, *auxptr,
+		       nbody, 0);
+      status = 1; 
+    }
+  else
+    status = 0;
+  return status;
+}
+/* ----------------------------------------------------------------
+|  get_data_dens :                                                 
+|  Get Dens from a NEMO snapshot                                   
++---------------------------------------------------------------- */
+int get_data_dens(stream instr, char * DataType, int nbody, int size_type,
+		  void ** densptr)
+{
+  int status;
+
+  if (get_tag_ok(instr, DensityTag))
+    { 
+      if (*densptr && maxbodies[CURRENT_IO] < nbody) {
+	free((void *) *densptr);
+	*densptr = NULL;
+      }
+      if (*densptr == NULL)
+	*densptr = (void *) allocate(size_type * nbody);
+      get_data_coerced(instr, DensityTag, DataType, *densptr,
 		       nbody, 0);
       status = 1; 
     }

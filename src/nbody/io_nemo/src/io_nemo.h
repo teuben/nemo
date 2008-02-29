@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                            
+|  Copyright Jean-Charles LAMBERT - 2008                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
@@ -20,6 +20,8 @@ typedef struct {
     * pot,   ** pot_p,      /* potential          */
     * acc,   ** acc_p,      /* acceleration       */
     * mass,  ** mass_p,     /* mass               */
+    * aux ,  ** aux_p,      /* aux                */
+    * dens,  ** dens_p,     /* density            */
     * keys,  ** keys_p,     /* keys               */
     * eps,   ** eps_p,      /* softening          */
     * timu,  ** time_p,     /* time steps         */

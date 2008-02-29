@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                            
+|  Copyright Jean-Charles LAMBERT - 2008                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
@@ -9,7 +9,6 @@
 | ==================================================================
 |* Get/Put selected Data from io_nemo_f                             
 | ==================================================================
-| 03-Mar-05 :                                                       
 +----------------------------------------------------------------- */
 
 /* ----------------------------------------------------------------
@@ -243,9 +242,14 @@ int put_data_select_f(char * outfile,
 	     NDIM, 0);
     free((char *) accptr);
   }
+  if (AUX_io)
+    put_data(outstr[no_io], AuxTag, OutType, aux_f, *nbody_f, 0);
 
   if (K_io)
     put_data(outstr[no_io], KeyTag, IntType, keys_f, *nbody_f, 0);
+
+  if (D_io)
+    put_data(outstr[no_io], DensityTag, OutType, dens_f, *nbody_f, 0);
 
   if (EPS_io)
     put_data(outstr[no_io], EpsTag, OutType, eps_f, *nbody_f, 0);
@@ -278,6 +282,8 @@ int get_data_select_f(char * infile,
     * accptr   = NULL,
     * massptr  = NULL,
     * keysptr  = NULL,
+    * auxptr   = NULL,
+    * densptr  = NULL,
     * epsptr   = NULL,
     * SelString= NULL;
   int 
@@ -680,6 +686,30 @@ int get_data_select_f(char * infile,
 	  free((char *) accptr);
 	}
       } /* if (A_io) { */
+      /* get Aux data */
+      if (AUX_io) {
+	dprintf(1,"Getting Aux....\n");
+	if (!get_data_aux(instr[no_io],OutType,*nbodyptr,
+			   rtype*4,&auxptr)) {
+	  fprintf(stderr,"Snap error ### No AuxTag\n");
+	  exit(1);
+	} 	
+	else {
+	  if (SP_io)
+	    for (i=0; i<nBodySelected; i++) {
+	      memcpy((char*)(aux_f+i_jump*i),
+		     (char*)(auxptr+(i_jump*SelectedPart[i])),
+		     i_jump);
+	    }
+	  else
+	    memcpy((char *) (aux_f),
+		   (char *) (auxptr),
+		   *nbodyptr * i_jump);
+						
+	  free(auxptr);
+	}  
+      } /* if (AUX_io) { */
+
       /* get Keys data */
       if (K_io) {
 	dprintf(1,"Getting Keys....\n");
@@ -703,6 +733,29 @@ int get_data_select_f(char * infile,
 	  free(keysptr);
 	}  
       } /* if (K_io) { */
+      /* get Dens data */
+      if (D_io) {
+	dprintf(1,"Getting Density....\n");
+	if (!get_data_dens(instr[no_io],OutType,*nbodyptr,
+			   rtype*4,&densptr)) {
+	  fprintf(stderr,"Snap error ### No DensityTag\n");
+	  exit(1);
+	} 	
+	else {
+	  if (SP_io)
+	    for (i=0; i<nBodySelected; i++) {
+	      memcpy((char*)(dens_f+i_jump*i),
+		     (char*)(densptr+(i_jump*SelectedPart[i])),
+		     i_jump);
+	    }
+	  else
+	    memcpy((char *) (dens_f),
+		   (char *) (densptr),
+		   *nbodyptr * i_jump);
+						
+	  free(densptr);
+	}  
+      } /* if (D_io) { */
       /* get Eps data */
       if (EPS_io) {
 	dprintf(1,"Getting Eps....\n");

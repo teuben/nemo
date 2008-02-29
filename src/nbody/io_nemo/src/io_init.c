@@ -35,6 +35,8 @@ int
   K_io   ,  /* key                */
   EPS_io ,  /* softening          */
   XV_io  ,  /* phasespace         */
+  AUX_io ,  /* aux                */
+  D_io   ,  /* dens               */
   B_io   ,  /* bits control       */
   C_io   ,  /* close              */
   I_io   ,  /* info               */
@@ -54,7 +56,7 @@ void init_io_one(int  * maxbodies,
 		 char **history_prog,
 		 int    MAXIO)
 { 
-  string defv[] = { "none=none","VERSION=1.41",NULL };
+  string defv[] = { "none=none","VERSION=1.50",NULL };
   string argv[] = { "IO_NEMO",NULL };
   int i;
   string * histo;
@@ -85,7 +87,7 @@ void init_io_one(int  * maxbodies,
 +----------------------------------------------------------------- */
 void init_flag_io()
 {
-  N_io= T_io= M_io= X_io= V_io= P_io= A_io= C_io = H_io=0;
+  N_io= T_io= M_io= X_io= V_io= P_io= A_io= AUX_io= D_io =C_io = H_io=0;
   B_io= K_io= XV_io = F_dim= ST_io= SP_io= I_io= EPS_io= 0;
 }
 /* -----------------------------------------------------------------

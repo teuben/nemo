@@ -14,7 +14,7 @@
 #ifndef FLAGS_DATA_H
 #define FLAGS_DATA_H
 extern int N_io, T_io, M_io, X_io, V_io, P_io, A_io, K_io, XV_io, B_io,
-           C_io, S_io, R_io, I_io, H_io, ST_io, SP_io, EPS_io,F_dim;
+  C_io, S_io, R_io, I_io, H_io, AUX_io, D_io, ST_io, SP_io, EPS_io,F_dim;
 
 #endif /* FLAGS_DATA_H */
 /* ----------------------------------------------------------------

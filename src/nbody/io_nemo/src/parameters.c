@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                            
+|  Copyright Jean-Charles LAMBERT - 2008                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
@@ -46,6 +46,8 @@ int get_case(char * field)
     {"xv"    ,   9}, {"phase"    ,   9},   /* phase              */
     {"e"     ,  10}, {"eps"      ,  10},   /* eps                */
     {"b"     ,  11}, {"bits"     ,  11},   /* bits               */
+    {"aux"   ,  12}, {"aux"      ,  12},   /* aux                */
+    {"d"     ,  13}, {"dens"     ,  13},   /* dens               */
     {"f"     ,  50}, {"n3"       ,  50},   /* n3                 */
     {"c"     ,  51}, {"3n"       ,  51},   /* 3n                 */
     {"s"     ,  52}, {"save"     ,  52},   /* save               */
@@ -159,8 +161,12 @@ int chk_parameters(bool io_op,int size_array, int rtype)
      fprintf(stderr," p");
   if (A_io)
      fprintf(stderr," a");
+  if (AUX_io)
+     fprintf(stderr," aux");
   if (EPS_io)
      fprintf(stderr," e");
+  if (D_io)
+     fprintf(stderr," d");
   if (K_io)
      fprintf(stderr," k");
 

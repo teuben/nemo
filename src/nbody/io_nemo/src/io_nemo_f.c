@@ -86,6 +86,8 @@ char
   * mass_f ,   /* mass               */
   * eps_f  ,   /* softening          */
   * keys_f ,   /* keys               */
+  * aux_f  ,   /* aux                */
+  * dens_f ,   /* dens               */
   * timu_f ,   /* time steps         */
   * selt_f ,   /* selected time      */
   * selp_f ;   /* selected particles */
@@ -173,6 +175,14 @@ int IO_NEMO_F(char * iofile,
 
     case 10  : EPS_io = 1;
       eps_f= va_arg(pa, char *);
+      break;
+
+    case 12  : AUX_io = 1;
+      aux_f = va_arg(pa, char *);
+      break;
+
+    case 13  : D_io = 1;
+      dens_f = va_arg(pa, char *);
       break;
 
     case 57 : ST_io = 1;

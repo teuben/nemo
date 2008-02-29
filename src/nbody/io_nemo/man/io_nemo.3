@@ -1,4 +1,4 @@
-.TH IO_NEMO 3NEMO "29 May 2007"
+.TH IO_NEMO 3NEMO "29 Feb 2008"
 .SH NAME
 \fBio_nemo\fP \(em High level C function to read/save NEMO snapshot from a
 C program.
@@ -78,6 +78,15 @@ Match to the particle \fIpotentials\fP.
 \fBa|acc\fP
 Match to the particle \fIaccelerations\fP.
 .TP
+\fBaux\fP
+Match to the \fIauxiliary\fP array.
+.TP
+\fBk|keys\fP
+Match to the \fIkeys\fP array.
+.TP
+\fBd|dens\fP
+Match to the particle \fIdensity\fP.
+.TP
 \fBe|eps\fP
 Match to the particle \fIsoftening\fP.
 .TP
@@ -123,9 +132,9 @@ supposed that the pointer is already allocated. For the flags \fIsp,st,h\fP
 you just have to give the pointer as argument.
 
 .SH RETURN VALUE
-The function return 1 if successfull, 0 if the end of snapshot has been
-reached, or -1 if at least one of the components requested does not exist (in that
-case you should use 'b' parameter to filter existing components).
+The function return \fI1\fP if successfull, \fI0\fP if the end of snapshot has been
+reached, \fI-2\fP if there is no ParticlesTag, or \fI-1\fP if at least one of the components requested does not exist (in that
+case you should use \fI'b'\fP parameter to filter existing components).
 
 .SH EXAMPLE
 Here is a simple NEMO C program to illustrate the use of the function
@@ -139,6 +148,7 @@ example here: $NEMOSRC/nbody/io_nemo/test_src/io_nemo_test.c).
 \\* ----------------------------------------------------- */
 #include <stdinc.h>
 #include <getparam.h>
+#include <io_nemo.h>
 
 string defv[]=  
 { "in=???\\n       input snapshot",
@@ -181,8 +191,8 @@ nemo_main()
 |* END
 \\* ----------------------------------------------------- */
 .SH IMPORTANT THINGS
-a) Notice in the example above, that in the parameter list, 'n' matches
-\'nbody', 'm' matches 'mass', 'x' matches 'pos', 'v' matches 'vel', 't' matches 'ts'. 
+a) Notice in the example above, that in the parameter list, 'n'
+matches 'nbody', 'm' matches 'mass', 'x' matches 'pos', 'v' matches 'vel', 't' matches 'ts'. 
 All the variables are in the same order that they have been
 declared in the \fIparam list\fP.
 
@@ -213,6 +223,8 @@ as described in the Makefile below.
 
 # path for NEMO Library and IO_NEMO library
 LIBS = -L$(NEMOLIB) -L/usr/local/lib
+# 
+CFLAGS = -I$(NEMOINC) -I$(NEMOLIB)
 
 io_nemo_test : io_nemo_test.o
 	$(CC) -o $@ io_nemo_test.o $(LIBS) \\
@@ -246,5 +258,6 @@ Jean-Charles.Lambert@oamp.fr
 19-Jun-06	 V1.32: happy gfortran                    JCL
 29-May-07	 V1.42: handle snapshot with different    JCL
 	                nbodies   
+29-Feb-08	 V1.50: add Aux and Dens array            JCL
 
 .fi

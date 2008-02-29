@@ -1,5 +1,5 @@
 /* =================================================================
-|  Copyright Jean-Charles LAMBERT - 2005                            
+|  Copyright Jean-Charles LAMBERT - 2008                            
 |  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
@@ -195,12 +195,30 @@ int put_data_select(char * outfile,
     }
   }
 
+  if (AUX_io) {      /* Aux */
+    if ( (B_io && ( *ion->bits & AuxBit)) || !B_io) {
+      put_data(outstr[no_io],AuxTag,OutType,ion->aux,*ion->nbody,0);
+    } 
+    else {
+      dprintf(1,"WARNING ### AuxBit control does not exist.\n");
+    }
+  }
+
   if (K_io) {     /* Keys */
     if ( (B_io && ( *ion->bits & KeyBit)) || !B_io) {
       put_data(outstr[no_io],KeyTag,IntType,ion->keys,*ion->nbody,0);
     }
     else {
       dprintf(1,"WARNING ### KeyBit control does not exist.\n");
+    }
+  }
+
+  if (D_io) {      /* Density */
+    if ( (B_io && ( *ion->bits & DensBit)) || !B_io) {
+      put_data(outstr[no_io],DensityTag,OutType,ion->dens,*ion->nbody,0);
+    } 
+    else {
+      dprintf(1,"WARNING ### DensBit control does not exist.\n");
     }
   }
 
@@ -508,6 +526,24 @@ int get_data_select(char * infile,
 	  }
 	}
       }
+      /* get auxiliary array */
+      if (AUX_io) {
+	if (!get_data_aux(instr[no_io],OutType,*nbodyptr, rtype*4,&ion->aux)) {
+	  dprintf(1,"### Snapshot WARNING ### No Auxiliary\n");
+	  status = -1;
+	  /*exit(1);*/
+	}  
+	else {
+	  keybits |= AuxBit;   /* got Auxiliary */
+	  if (SP_io) {
+	    for (i=0;i<nBodySelected;i++) {
+	      memcpy ((char *) (ion->aux+i*jump),
+		      (char *) (ion->aux+SelectedPart[i]*jump),
+		      jump);
+	    }
+	  }
+	}
+      }
       /* get keys array */
       if (K_io) {
 	if (!get_data_keys(instr[no_io],IntType,*nbodyptr, rtype*4,&ion->keys)) {
@@ -522,6 +558,24 @@ int get_data_select(char * infile,
 	      memcpy ((char *) (ion->keys+i*i_jump),
 		      (char *) (ion->keys+SelectedPart[i]*i_jump),
 		      i_jump);
+	    }
+	  }
+	}
+      }
+      /* get density array */
+      if (D_io) {
+	if (!get_data_dens(instr[no_io],OutType,*nbodyptr, rtype*4,&ion->dens)) {
+	  dprintf(1,"### Snapshot WARNING ### No Density\n");
+	  status = -1;
+	  /*exit(1);*/
+	}  
+	else {
+	  keybits |= DensBit;   /* got Density */
+	  if (SP_io) {
+	    for (i=0;i<nBodySelected;i++) {
+	      memcpy ((char *) (ion->dens+i*jump),
+		      (char *) (ion->dens+SelectedPart[i]*jump),
+		      jump);
 	    }
 	  }
 	}
