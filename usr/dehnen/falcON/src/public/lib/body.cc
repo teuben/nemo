@@ -150,6 +150,8 @@ bodies::block::block(unsigned no,                  // I: our No
 {
   if(na<nb)
     falcON_ExceptF("N_alloc < N_bodies","bodies::block::block()");
+  debug_info(6,"bodies::block: na=%d, bits=%s, type=%s allowed bits=%s\n",
+	     na, word(bits), TYPE.name(), word(bits&TYPE.allows()));
   bits &= TYPE.allows();
   for(fieldbit f; f; ++f)
     set_data_void(f,0);
@@ -621,6 +623,8 @@ void bodies::set_firsts()
 // set up blocks to hold N[t] bodies of type t
 void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
 {
+  debug_info(5,"bodies::set_data(): N=[%d,%d,%d], BITS=%s\n",
+	     N[0],N[1],N[2],word(BITS));
   NBLK = 0u;
   NTOT = 0u;
   try {
@@ -667,26 +671,7 @@ bodies::bodies(fieldset bits) falcON_THROWING :
   set_data(n);
   set_firsts();
 }
-// ////////////////////////////////////////////////////////////////////////////////
-// // construction 1, backward compatible version
-// bodies::bodies(unsigned ntot,
-// 	       fieldset bits,
-// 	       unsigned nsph,
-// 	       unsigned nsink) falcON_THROWING :
-//   BITS      ( bits ),
-//   C_FORTRAN ( 0 )
-// {
-//   debug_info(3,"bodies::bodies(): constructing bodies: "
-// 	     "ntot=%u, nsph=%u, nsink=%u, bits=%s",
-// 	     ntot,nsph,nsink,word(bits));
-//   if(nsph+nsink > ntot)
-//     falcON_THROW("bodies::bodies(): Nsph+Nsink=%u > Ntot=%u",nsph+nsink,ntot);
-//   unsigned n[BT_NUM] = {nsink, nsph, ntot-nsink-nsph};
-//   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
-//   set_data(n);
-//   set_firsts();
-// }
-////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 // construction 1, new version
 bodies::bodies(const unsigned n[BT_NUM],
 	       fieldset       bits) falcON_THROWING : 
@@ -699,7 +684,7 @@ bodies::bodies(const unsigned n[BT_NUM],
   set_data(n);
   set_firsts();
 }
-////////////////////////////////////////////////////////////////////////////////
+// /////////////////////////////////////////////////////////////////////////////
 // resets N, data; same as destruction followed by constructor 1            
 void bodies::reset(const unsigned n[BT_NUM],
 		   fieldset       bits) falcON_THROWING

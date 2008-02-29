@@ -474,7 +474,7 @@ NBodyCode::NBodyCode(const char*file,              // I: input file
     SHOT.reset_flags();                            //   reset them              
   if(!READ.contain(must))                          // IF some data missing      
     falcON_THROW("NBodyCode: couldn't read body data: %s",
-		 word(READ.missing(read)));
+		 word(READ.missing(must)));
   debug_info(4,"NBodyCode constructed\n");
 }
 //------------------------------------------------------------------------------

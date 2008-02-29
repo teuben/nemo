@@ -973,25 +973,6 @@ namespace falcON {
     void reset(const unsigned N[BT_NUM], fieldset Bd= fieldset(DefaultBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// Resets N, data: equivalent destructor followed by constructor 1 (old
-    /// version)
-    ///
-    /// \param[in] Ntot total number of bodies
-    /// \param[in] Bd data fields (default: mxvapfHRVJFC)
-    /// \param[in] Nsph number of SPH bodies
-    /// \param[in] Nsink number of SINK bodies
-    /// \note Nsph + Nsink must not exceed Ntot
-    void reset(unsigned Ntot, fieldset Bd=fieldset(DefaultBits),
-	       unsigned Nsph=0u, unsigned Nsink=0u)
-      falcON_THROWING
-    {
-      if(Nsph+Nsink > Ntot)
-	falcON_THROW("bodies::reset(): Nsph+Nsink=%u > Ntot=%u\n",
-		     Nsph+Nsink,Ntot);
-      unsigned n[BT_NUM] = {Nsink, Nsph, Ntot-Nsink-Nsph};
-      reset(n,Bd);
-    }
-    //--------------------------------------------------------------------------
     /// Resets N, keeps data the same (N[] = bodies per bodytype)
     ///
     /// \param[in] N number of bodies per bodytype
