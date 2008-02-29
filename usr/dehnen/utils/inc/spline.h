@@ -2,6 +2,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///                                                                             
 /// \file    inc/spline.h                                                       
+/// \brief   template functions & classes for cubic and penta splines           
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             

@@ -486,7 +486,7 @@ namespace WDutils {
     //@{                                                                        
     // /////////////////////////////////////////////////////////////////////////
     /// constructor: allocate first block
-    /// \param Ns (input) number of elements in 1st block
+    /// \param[in] Ns number of elements in 1st block
     explicit
     block_alloc(size_type Ns)
       : FIRST ( new block(Ns) ),
@@ -556,7 +556,7 @@ namespace WDutils {
     /// if \a E does appear not to point to an element given out by this, we
     /// return a negative number
     /// \return the running number of element pointed to by \a E
-    /// \param  E   (input) pointer to element
+    /// \param[in]  E  pointer to element
     int number_of_element(const_pointer E) const {
       if(E==0) return -99;
       register int num=0;
@@ -657,8 +657,8 @@ namespace WDutils {
       char   *DATA; ///< pter to allocated memory
       chunk  *NEXT; ///< pter to next chunk
       /// constructor
-      /// \param N  (input) number of element in chunk
-      /// \param Kp (input) sizeof(elements)
+      /// \param[in] N  number of element in chunk
+      /// \param[in] Kp sizeof(elements)
       chunk(size_type N, size_type Kp)
 	: DATA ( WDutils_NEW(char,N*Kp) ),
 	  NEXT ( 0 ) {
@@ -702,8 +702,8 @@ namespace WDutils {
     }
   public:
     /// construction
-    /// \param n (input) desired number of elements
-    /// \param k (input) sizeof elements
+    /// \param[in] n desired number of elements
+    /// \param[in] k sizeof elements
     pool(size_type n, size_type k)
       : N      ( n<1? 1 : n ),
 	Kp     ( sizeof(link)<k? k : sizeof(link) ),
@@ -773,7 +773,7 @@ namespace WDutils {
   class Pool : private pool {
   public:
     /// constructor: allocate 1st chunk
-    /// \param n (input) number of elements in first chunk
+    /// \param[in] n number of elements in first chunk
     explicit
     Pool(size_type n)
       : pool(n,sizeof(T)) {}
@@ -806,31 +806,31 @@ namespace WDutils {
   //@{                                                                          
   // ///////////////////////////////////////////////////////////////////////////
   /// allocate a 1D array of length \a N
-  /// \param A (output) pointer to array
-  /// \param N (input) number of elements
+  /// \param[out] A pointer to array
+  /// \param[in]  N number of elements
   template <typename T>
   inline void Alloc1D(T* &A, int N) WDutils_THROWING {
     A = WDutils_NEW(T,N); 
   }
   /// allocate a 1D array of length \a N and initialze it
-  /// \param A (output) pointer to array
-  /// \param N (input) number of elements
-  /// \param X (input) value to initiaize all ements with
+  /// \param[out] A pointer to array
+  /// \param[in]  N number of elements
+  /// \param[in]  X value to initiaize all ements with
   template <typename T>
   inline void Alloc1D(T* &A, int N, T const&X) WDutils_THROWING {
     A = WDutils_NEW(T,N); 
     for(T a=A; a != A+N; ++a) *a = X;
   }
   /// de-allocate 1D array previously allocated by Alloc1D()
-  /// \param A (input) pointer to array
+  /// \param[in]  A pointer to array
   template <typename T>
   inline void Free1D(T* A) WDutils_THROWING {
     WDutils_DEL_A(A);
   }
   //----------------------------------------------------------------------------
   /// allocate a 2D array of size \a N[]
-  /// \param A (output) pointer to array
-  /// \param N (input) numbers of elements in dimensions 0,1
+  /// \param[out] A pointer to array
+  /// \param[in]  N numbers of elements in dimensions 0,1
   template <typename T>
   inline void Alloc2D(T** &A, int N[2]) WDutils_THROWING {
     register int i, iN1;
@@ -840,9 +840,9 @@ namespace WDutils {
       A[i] = A[0] + iN1;
   }
   /// allocate a 2D array of size \a N[] and initialze it
-  /// \param A (output) pointer to array
-  /// \param N (input) numbers of elements in dimensions 0,1
-  /// \param X (input) value to initiaize all ements with
+  /// \param[out] A pointer to array
+  /// \param[in]  N numbers of elements in dimensions 0,1
+  /// \param[in]  X value to initiaize all ements with
   template <typename T>
   inline void Alloc2D(T** &A, int N[2], T const&X) WDutils_THROWING {
     register int i, iN1;
@@ -855,7 +855,7 @@ namespace WDutils {
     }
   }
   /// de-allocate 2D array previously allocated by Alloc2D()
-  /// \param A (input) pointer to array
+  /// \param[in]  A pointer to array
   template <typename T>
   inline void Free2D(T** A) WDutils_THROWING {
     WDutils_DEL_A(A[0]);
@@ -863,8 +863,8 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   /// allocate a 3D array of size \a N[]
-  /// \param A (output) pointer to array
-  /// \param N (input) numbers of elements in dimensions 0,1,2
+  /// \param[out] A pointer to array
+  /// \param[in]  N numbers of elements in dimensions 0,1,2
   template <typename T>
   inline void Alloc3D(T*** &A, int N[3]) WDutils_THROWING {
     register int i, iN1;
@@ -880,9 +880,9 @@ namespace WDutils {
     }
   }
   /// allocate a 3D array of size \a N[] and initialze it
-  /// \param A (output) pointer to array
-  /// \param N (input) numbers of elements in dimensions 0,1,2
-  /// \param X (input) value to initiaize all ements with
+  /// \param[out] A pointer to array
+  /// \param[in]  N numbers of elements in dimensions 0,1,2
+  /// \param[in]  X value to initiaize all ements with
   template <typename T>
   inline void Alloc3D(T*** &A, int N[3], T const&X) WDutils_THROWING {
     register int i, iN1;
@@ -900,7 +900,7 @@ namespace WDutils {
     }
   }
   /// de-allocate 3D array previously allocated by Alloc3D()
-  /// \param A (input) pointer to array
+  /// \param[in]  A pointer to array
   template <typename T>
   inline void Free3D(T*** A) WDutils_THROWING {
     WDutils_DEL_A(A[0][0]);
@@ -1124,7 +1124,7 @@ namespace WDutils {
     };
     //@}
     /// set N[d] and K[d]
-    /// \param n (input) size of array in each dimension
+    /// \param[in] n size of array in each dimension
     void set(const int*n) {
       for(int d=0; d!=D; ++d)
 	N[d] = n? n[d] : 0;
@@ -1133,7 +1133,7 @@ namespace WDutils {
 	K[d-1] = K[d] * N[d];
     }
     /// is a set \a n of sizes equal to ours?
-    /// \param n (input) size of array in each dimension
+    /// \param[in] n size of array in each dimension
     bool equal(const int n[D]) const {
       for(int d=0; d!=D; ++d)
 	if(N[d] != n[d]) return false;
@@ -1149,17 +1149,17 @@ namespace WDutils {
     /// type resulting from a const [] operation
     typedef ConstPseudoArray<T,D-1> ConstSub;
     /// return size in dimension \a d
-    /// \param d (input) dimension to return size for
+    /// \param[in] d dimension to return size for
     int const&size(int d) const {
       return N[d];
     }
     /// set all values to given constant
-    /// \param x (input) initialize each element with this value
+    /// \param[in] x initialize each element with this value
     void setval(T const&x = T(0) ) WDutils_THROWING {
       for(int i=0; i!=K[0]*N[0]; ++i) A[i] = x;
     }
     /// reset: destruct and construct again
-    /// \param n (input) new size of array in each dimension
+    /// \param[in] n new size of array in each dimension
     void reset(const int n[D]) WDutils_THROWING {
       if(A==0 || !equal(n) ) {
 	if(A) WDutils_DEL_A(A);
@@ -1168,8 +1168,8 @@ namespace WDutils {
       }
     }
     /// reset: destruct and construct again
-    /// \param n (input) new size of array in each dimension
-    /// \param x (input) initialize each element with this value
+    /// \param[in] n new size of array in each dimension
+    /// \param[in] x initialize each element with this value
     void reset(const int n[D], T const&x) WDutils_THROWING {
       reset(n);
       setval(x);
@@ -1179,53 +1179,53 @@ namespace WDutils {
       set(0);
     }
     /// construction from sizes
-    /// \param n (input) size of array in each dimension
+    /// \param[in] n size of array in each dimension
     explicit
     Array(const int n[D]) WDutils_THROWING
     : A(0) {
       reset(n);
     }
     /// construction from sizes for D=2
-    /// \param n0 (input) size of array in dimension 0
-    /// \param n1 (input) size of array in dimension 1
+    /// \param[in] n0 size of array in dimension 0
+    /// \param[in] n1 size of array in dimension 1
     Array(int n0, int n1) WDutils_THROWING
     : A(0) {
       const int n[2] = {n0,n1};
       reset(n);
     }
     /// construction from sizes for D=3
-    /// \param n0 (input) size of array in dimension 0
-    /// \param n1 (input) size of array in dimension 1
-    /// \param n2 (input) size of array in dimension 2
+    /// \param[in] n0 size of array in dimension 0
+    /// \param[in] n1 size of array in dimension 1
+    /// \param[in] n2 size of array in dimension 2
     Array(int n0, int n1, int n2) WDutils_THROWING
     : A(0) {
       const int n[3] = {n0,n1,n2};
       reset(n);
     }
     /// construction from sizes for D=4
-    /// \param n0 (input) size of array in dimension 0
-    /// \param n1 (input) size of array in dimension 1
-    /// \param n2 (input) size of array in dimension 2
-    /// \param n3 (input) size of array in dimension 3
+    /// \param[in] n0 size of array in dimension 0
+    /// \param[in] n1 size of array in dimension 1
+    /// \param[in] n2 size of array in dimension 2
+    /// \param[in] n3 size of array in dimension 3
     Array(int n0, int n1, int n2, int n3) WDutils_THROWING
     : A(0) {
       const int n[4] = {n0,n1,n2,n3};
       reset(n);
     }
     /// construction from sizes for D=5
-    /// \param n0 (input) size of array in dimension 0
-    /// \param n1 (input) size of array in dimension 1
-    /// \param n2 (input) size of array in dimension 2
-    /// \param n3 (input) size of array in dimension 3
-    /// \param n4 (input) size of array in dimension 4
+    /// \param[in] n0 size of array in dimension 0
+    /// \param[in] n1 size of array in dimension 1
+    /// \param[in] n2 size of array in dimension 2
+    /// \param[in] n3 size of array in dimension 3
+    /// \param[in] n4 size of array in dimension 4
     Array(int n0, int n1, int n2, int n3, int n4) WDutils_THROWING
     : A(0) {
       const int n[5] = {n0,n1,n2,n3,n4};
       reset(n);
     }
     /// construction from sizes and initial value
-    /// \param n (input) size of array in each dimension
-    /// \param x (input) initialize each element with this value
+    /// \param[in] n size of array in each dimension
+    /// \param[in] x initialize each element with this value
     Array(const int n[D], T const&x) WDutils_THROWING : A(0) {
       reset(n,x);
     }
@@ -1244,28 +1244,28 @@ namespace WDutils {
     /// \return const pointer to allocated memory
     const T*const&array() const { return C; }
     /// non-const array sub-scription: return PseudoArray
-    /// \param i (input) index in first dimension (dimension 0)
+    /// \param[in] i index in first dimension (dimension 0)
     /// \return sub-array of D-1 dimensions
     PseudoArray<T,D-1> operator[] (int i) THROW_BAD {
       CHECK_BAD(N[0],D);
       return PseudoArray<T,D-1>(A+i*K[0],N+1,K+1);
     }
     /// const array sub-scription: return ConstPseudoArray
-    /// \param i (input) index in first dimension (dimension 0)
+    /// \param[in] i index in first dimension (dimension 0)
     /// \return sub-array of D-1 dimensions
     ConstPseudoArray<T,D-1> operator[] (int i) const THROW_BAD {
       CHECK_BAD(N[0],D);
       return ConstPseudoArray<T,D-1>(C+i*K[0],N+1,K+1);
     }
     /// same as operator[]
-    /// \param i (input) index in first dimension (dimension 0)
+    /// \param[in] i index in first dimension (dimension 0)
     /// \return sub-array of D-1 dimensions
     PseudoArray<T,D-1> element (int i) THROW_BAD {
       CHECK_BAD(N[0],D);
       return PseudoArray<T,D-1>(A+i*K[0],N+1,K+1);
     }
     /// same as operator[]
-    /// \param i (input) index in first dimension (dimension 0)
+    /// \param[in] i index in first dimension (dimension 0)
     /// \return sub-array of D-1 dimensions
     ConstPseudoArray<T,D-1> element (int i) const THROW_BAD {
       CHECK_BAD(N[0],D);
@@ -1302,12 +1302,12 @@ namespace WDutils {
       return N;
     }
     /// set all values to given constant
-    /// \param x (input) initialize each element with this value
+    /// \param[in] x initialize each element with this value
     void setval(T const&x = T(0) ) WDutils_THROWING {
       for(int i=0; i!=N; ++i) A[i] = x;
     }
     /// reset: destruct and construct again
-    /// \param n (input) new size of array
+    /// \param[in] n new size of array
     void reset(int n) WDutils_THROWING {
       if(A==0 || n != N) {
 	if(A) WDutils_DEL_A(A);
@@ -1316,49 +1316,49 @@ namespace WDutils {
       }
     }
     /// reset: destruct and construct again
-    /// \param n (input) new size of array
+    /// \param[in] n new size of array
     void reset(const int n[1]) WDutils_THROWING {
       reset(n[0]);
     }
     /// reset: destruct and construct again
-    /// \param n (input) new size of array
-    /// \param x (input) initial value for each element
+    /// \param[in] n new size of array
+    /// \param [in]x initial value for each element
     void reset(int n, T const&x) WDutils_THROWING {
       reset(n);
       for(int i=0; i!=N; ++i) A[i] = x;
     }
     /// reset: destruct and construct again
-    /// \param n (input) new size of array
-    /// \param x (input) initial value for each element
+    /// \param[in] n new size of array
+    /// \param[in] x initial value for each element
     void reset(const int n[1], T const&x) WDutils_THROWING {
       reset(n[0],x);
     }
     /// default constructor: size equal to 0
     Array() : A(0), N(0) {}
     /// construction from sizes
-    /// \param n (input) size of array in each dimension
+    /// \param[in] n size of array in each dimension
     explicit
     Array(int n) WDutils_THROWING
     : A(0) {
       reset(n);
     }
     /// construction from sizes
-    /// \param n (input) size of array in each dimension
+    /// \param[in] n size of array in each dimension
     explicit
     Array(const int n[1]) WDutils_THROWING
     : A(0) {
       reset(n);
     }
     /// construction from size and initial value
-    /// \param n (input) size of array in each dimension
-    /// \param x (input) initialize each element with this value
+    /// \param[in] n size of array in each dimension
+    /// \param[in] x initialize each element with this value
     Array(const int n, T const&x) WDutils_THROWING
     : A(0) {
       reset(n,x);
     }
     /// construction from size and initial value
-    /// \param n (input) size of array in each dimension
-    /// \param x (input) initialize each element with this value
+    /// \param[in] n size of array in each dimension
+    /// \param[in] x initialize each element with this value
     Array(const int n[1], T const&x) WDutils_THROWING
     : A(0) {
       reset(n,x);
