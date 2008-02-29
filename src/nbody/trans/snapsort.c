@@ -8,6 +8,7 @@
  *    10-jun-95       a  declaration fix (linux) n                  pjt
  *    31-dec-02   V1.5   gcc3/SINGLEPREC                            pjt
  *     1-nov-07       a  bug when Aux is present                    pjt
+ *    29-feb-08          fix a memory leak on btab                  jcl
  */
 
 #include <stdinc.h>
@@ -37,7 +38,6 @@ string usage="sort particles according to a user-specified ranking";
 
 void snapsort(Body *, int , real , bool, bool, rproc_body, iproc);
 
-
 nemo_main()
 {
     stream instr, outstr;
@@ -65,6 +65,7 @@ nemo_main()
 	    bits |= KeyBit;
 	    put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 	}
+	if (btab) free((Body *) btab);
 	btab=NULL;	/* 'free' the snapshot */
     } while (bits != 0);
     strclose(outstr);
