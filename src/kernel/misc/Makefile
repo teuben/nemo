@@ -208,6 +208,10 @@ powtest: pow.c
 	$(CC) $(CFLAGS) -o powtest -DTESTBED pow.c $(NEMO_LIBS)
 
 
+randomizertest: randomizer.c
+	$(CC) $(CFLAGS) -o randomizertest -DTESTBED randomizer.c $(NEMO_LIBS)
+
+
 # special targets
 
 bad_fortran:
