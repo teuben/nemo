@@ -1,0 +1,27 @@
+.TH XRANDOM 3NEMO "8 September 2001"
+.SH NAME
+randomizer - select M random indices from N
+.SH SYNOPSIS
+.nf
+.B int *randomizer(int n, int m)
+.fi
+.SH DESCRIPTION
+\fIrandomizer\fP returns an index array of size \fBm\fP, containing indices
+in the range \fB0..n-1\fP, drawn randomly. The array was allocated using
+\fIallocate(3NEMO)\fP, and should be freed using standard \fIfree(3)\fP.
+.PP
+\fBm\fP is also allowed to be as large as \Bn\fP, in which case it will
+return a fully permuted index array.
+.fi
+.SH SEE ALSO
+xrandom(3NEMO), allocate(3NEMO)
+.SH FILES
+.ta +1.5i
+~/src/kernel/misc	randomize.c 
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+28-feb-08	written		PJT
+.fi
