@@ -267,8 +267,7 @@ namespace falcON {
     const ForceAndDiagnose *const SOLVER;
   private:
     mutable clock_t    C_OLD;           
-    mutable double     CPU_AEX,                    // time for ext acceleration 
-                       CPU_STEP,                   // total time for a longstep 
+    mutable double     CPU_STEP,                   // total time for a longstep 
                        CPU_TOTAL;                  // total time so far         
     //--------------------------------------------------------------------------
   public:
@@ -307,7 +306,6 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// reset CPU timing records
     void reset_CPU() const {
-      CPU_AEX  = 0.;
       CPU_STEP = 0.;
     }
     //--------------------------------------------------------------------------
