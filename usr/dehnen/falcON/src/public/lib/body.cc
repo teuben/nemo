@@ -3,7 +3,7 @@
 //                                                                             |
 // body.cc                                                                     |
 //                                                                             |
-// Copyright (C) 2000-2007 Walter Dehnen                                       |
+// Copyright (C) 2000-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -167,6 +167,7 @@ bodies::block::block(unsigned no,                  // I: our No
 ///////////////////////////////////////////////////////////////////////////////
 template<unsigned BIT=0, unsigned END=BodyData::NQUANT> struct CopyBody {
   static const fieldset::value_type BD = fieldset::one <<BIT;
+  /// copies data field BIT for a single body within the same block
   static void copy(void    **data,
 		   unsigned  from,
 		   unsigned  to  ,
@@ -203,8 +204,8 @@ template<unsigned BIT=0, unsigned END=BodyData::NQUANT> struct CopyBodies {
 		   fieldset  b,
 		   fieldset&c) {
     if(data_fr[BIT] && data_to[BIT] && b & fieldset(fieldbit(BIT)) ) {
-      memcpy(static_cast<      char*>(data_fr[BIT])+to*BodyData::ZQUANT[BIT],
-	     static_cast<const char*>(data_to[BIT])+fr*BodyData::ZQUANT[BIT],
+      memcpy(static_cast<      char*>(data_to[BIT])+to*BodyData::ZQUANT[BIT],
+	     static_cast<const char*>(data_fr[BIT])+fr*BodyData::ZQUANT[BIT],
 	     num*BodyData::ZQUANT[BIT]);
       c |= fieldset(fieldbit(BIT));
     }
@@ -233,12 +234,8 @@ fieldset bodies::block::copy_bodies(const block*other,
 inline void bodies::block::skip(unsigned&from,
 				flags    copyflag) const falcON_THROWING
 {
-  if(copyflag) {
-    if(! has_field(fieldbit::f) )
-      falcON_ExceptF("copyflag!=0 but flags not supported",
-		     "bodies::block::copy()");
+  if(copyflag)
     for(; from<NBOD && !(flag(from).are_set(copyflag)); ++from );
-  }
 }
 //------------------------------------------------------------------------------
 // copy up to NALL bodies                                                 
@@ -256,11 +253,13 @@ fieldset bodies::block::copy(const block*&From,
   if( From == this )
     falcON_ExceptF("cannot copy from self","bodies::block::copy()");
   NBOD = 0u;
-  if( From == 0)
-    return fieldset::empty;
+  if( From == 0) return fieldset::empty;
   unsigned copy;
   unsigned free = NALL;
   fieldset copied;
+  if(copyflag && ! has_field(fieldbit::f) )
+    falcON_ExceptF("copyflag!=0 but flags not supported",
+		   "bodies::block::copy()");
   // skip bodies not to be copied                                               
   From->skip(from,copyflag);
   while(free &&                              // WHILE  we have still space      

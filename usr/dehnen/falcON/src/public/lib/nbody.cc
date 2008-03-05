@@ -217,16 +217,7 @@ void Integrator::cpu_stats_body(std::ostream&to) const
 {
   SOLVER->cpu_stats_body(to);
   print_cpu(CPU_STEP,to); to<<' ';
-  int    h,m,s,c;
-  double t = CPU_TOTAL;
-  h = int(t/3600); t-= 3600*h;
-  m = int(t/60);   t-= 60*m;
-  s = int(t);      t-= s;
-  c = int(100*t);
-  to<<std::setw(3)<<std::setfill(' ')<<h<<':'
-    <<std::setw(2)<<std::setfill('0')<<m<<':'
-    <<std::setw(2)<<s<<'.'<<std::setw(2)<<c
-    <<std::setfill(' ');
+  print_cpu_hms(CPU_TOTAL,to);
 } 
 //------------------------------------------------------------------------------
 void Integrator::describe(std::ostream&out)        // I: output stream          
