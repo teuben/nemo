@@ -626,14 +626,15 @@ void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
 	     N[0],N[1],N[2],word(BITS));
   NBLK = 0u;
   NTOT = 0u;
+  for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   try {
     block   *last = 0;
     unsigned i    = 0;
     for(bodytype t; t; ++t) {
-      NBOD[t] = NALL[t] = N[t];
-      NTOT   += NBOD[t];
-      NDEL[t] = 0u;
-      NNEW[t] = 0u;
+      NBOD[t]  = NALL[t] = N[t];
+      NTOT    += NBOD[t];
+      NDEL[t]  = 0u;
+      NNEW[t]  = 0u;
       TYPES[t] = 0;
       for(unsigned a,n=0u; n < NALL[t]; n+=a) {
 	if(NBLK == index::max_blocks)
@@ -644,7 +645,7 @@ void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
 	   std::cerr<<"### falcON Debug Info:"
 		    <<" allocated "<<nameof(block)
 		    <<" @ "<<static_cast<void*>(b)<<'\n';
-	i+= a;
+	i += a;
 	if(last) last->link(b);
 	last = b;
 	if(n==0u) TYPES[t] = b;
