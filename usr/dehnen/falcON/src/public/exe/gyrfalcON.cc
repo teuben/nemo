@@ -127,9 +127,10 @@
 // v 3.2    21/11/2007  WD abandoned secondary output (use a manipulator)      |
 //                         fixed minor problem with output when resume=t       |
 // v 3.2.1  05/02/2008  WD read data needed by manipulator from input file     |
+// v 3.2.2  04/03/2008  WD minor changes in log output                         |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.2.1"
-#define falcON_VERSION_D "05-feb-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.2.2"
+#define falcON_VERSION_D "04-mar-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
@@ -141,9 +142,9 @@
 //------------------------------------------------------------------------------
 string defv[] = {
   "in=???\n           input file                                         ",
-  "out=\n             file for primary output; required, unless resume=t ",
+  "out=\n             file for output; required, unless resume=t         ",
   "tstop=\n           final integration time [default: never]            ",
-  "step=1\n           time between primary outputs; 0 -> every step      ",
+  "step=1\n           time between outputs; 0 -> every step              ",
   "logfile=-\n        file for log output                                ",
   "stopfile=\n        stop simulation as soon as file exists             ",
   "logstep=1\n        # blocksteps between log outputs                   ",
@@ -186,9 +187,8 @@ string defv[] = {
   "time=\n            time of input snapshot (default: first)            ",
   "resume=f\n         resume old simulation?  that implies:\n"
   "                   - read last snapshot from input file\n"
-  "                   - append primary output to input (unless out given)",
+  "                   - append output to input (unless out given)        ",
   "give=mxv\n         list of output specifications.                     ",
-//   "give2=mxv\n        list of specifications for secondary output        ",
   "Grav=1\n           Newton's constant of gravity (0-> no self-gravity) ",
   "root_center=\n     if given (3 numbers), forces tree-root centering   ",
   "accname=\n         name of external acceleration field                ",
@@ -199,8 +199,8 @@ string defv[] = {
   "manipfile=\n       data file required by manipulator                  ",
   "manippath=\n       path to search for manipulator                     ",
   "manipinit=f\n      manipulate initial snapshot?                       ",
-  "startout=t\n       primary output for t=tstart?                       ",
-  "lastout=t\n        primary output for t=tstop?                        ",
+  "startout=t\n       output for t=tstart?                               ",
+  "lastout=t\n        output for t=tstop?                                ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 string usage = "gyrfalcON -- a superb N-body code";
@@ -310,30 +310,31 @@ void falcON::main() falcON_THROWING
   }                                                   // ENDIF                  
   // 4. time integration & outputs                                              
   double t_out = NBDY.time()+0.999999*dt_out;         // time for next output   
-  for(int steps=1;                                    // blockstep counter      
-      (never_ending || NBDY.time() < t_end) &&        // WHILE t < t_end        
-      (!stopfile ||                                   //   AND                  
-       !file_exists(getparam("stopfile")));           //    no stopfile         
-      ++steps) {                                      //   increment counter    
+  bool HaltFile=false, HaltManip=false;
+  for(int steps=1; never_ending || NBDY.time() < t_end; ++steps) {
+    HaltFile = stopfile && file_exists(getparam("stopfile"));
+    if(HaltFile) break;
     NBDY.full_step();                                 //   make full block step 
     if(LOGOUT && steps%logstep ==0)                   //   IF(time for logout)  
       NBDY.stats(LOGOUT);                             //     statistics output  
-    if(MANIP)                                         //   IF(manipulating)     
-      if(MANIP(NBDY.my_snapshot()))                   //     IF(manip says so)  
-	break;                                        //       STOP simulation  
+    HaltManip = MANIP && MANIP(NBDY.my_snapshot());
     if(OUT && NBDY.time() >= t_out) {                 //   IF(t >= t_out)       
-      NBDY.write(OUT,write);                          //     primary output     
+      NBDY.write(OUT,write);                          //     output             
       t_out += dt_out;                                //     increment t_out    
       written = true;                                 //     written out        
     } else                                            //   ELSE                 
       written = false;                                //     not written        
+    if(HaltManip) break;
   }                                                   // END: WHILE             
   if(OUT && !written && lastout)                      // IF not yet done:       
     NBDY.write(OUT,write);                            //   write last snapshot  
-  if(LOGOUT && stopfile && file_exists(getparam("stopfile")))
+  if(LOGOUT && HaltFile)
     LOGOUT <<"# simulation STOPPED because file \""
 	   << getparam("stopfile") << "\" found to exist\n";
-  // 5. cleaning up (including implicit call of destructors)                    
+  if(LOGOUT && HaltManip)
+    LOGOUT <<"# simulation STOPPED because Manipulator \""
+	   << MANIP.stopper() << "\" returned true\n";
+ // 5. cleaning up (including implicit call of destructors)                    
   if(aex) falcON_DEL_O(aex);                          // delete external accs   
 }
 //---------------------end-of-gyrfalcON.cc------that's-it-!---------------------

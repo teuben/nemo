@@ -277,14 +277,16 @@ namespace falcON {
     ///
     /// \param c0  input: last CPU clock reading; output: current CPU clock
     /// \param CPU (output) time since \c c0 is added to CPU in seconds
-    static void record_cpu(clock_t& c0, double& CPU) {
+    static void record_cpu(clock_t& c0, double& CPU)
+    {
       register clock_t c1 = clock();
       CPU += (c1-c0)/real(CLOCKS_PER_SEC);
       c0   = c1;
     }
     //--------------------------------------------------------------------------
     /// print a CPU time
-    static void print_cpu(double const&x, std::ostream&to) {
+    static void print_cpu(double const&x, std::ostream&to)
+    {
       if(x < 100)
 	to<<std::setw(2)<<std::setfill(' ')<<int(x)<<'.'
 	  <<std::setw(2)<<std::setfill('0')<<int(100*(x-int(x)));
@@ -293,6 +295,20 @@ namespace falcON {
 	  <<std::setw(1)<<std::setfill('0')<<int(10*(x-int(x)));
       else
 	to<<std::setw(5)<<std::setfill(' ')<<int(x+0.5);
+    }
+    //--------------------------------------------------------------------------
+    /// print a CPU time in hhh:mm:ss.cc format
+    static void print_cpu_hms(double t, std::ostream&to)
+    {
+      int    h,m,s,c;
+      h = int(t/3600); t-= 3600*h;
+      m = int(t/60);   t-= 60*m;
+      s = int(t);      t-= s;
+      c = int(100*t);
+      to<<std::setw(3)<<std::setfill(' ')<<h<<':'
+	<<std::setw(2)<<std::setfill('0')<<m<<':'
+	<<std::setw(2)<<s<<'.'<<std::setw(2)<<c
+	<<std::setfill(' ');
     }
   protected:
     //--------------------------------------------------------------------------

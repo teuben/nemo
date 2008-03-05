@@ -83,10 +83,11 @@ namespace falcON {
     typedef const manipulator *cp_manip;
     //--------------------------------------------------------------------------
     static const int NMAX=100;
-    int       N;
-    cp_manip  MANIP[NMAX];
-    char     *NAME,*DSCR;
-    fieldset  NEED, CHNG, PRVD;
+    int         N;
+    cp_manip    MANIP[NMAX];
+    char       *NAME,*DSCR;
+    fieldset    NEED, CHNG, PRVD;
+    mutable int NSTOP;
   public:
     //--------------------------------------------------------------------------
     /// name of manipulator(s) loaded
@@ -107,11 +108,17 @@ namespace falcON {
     /// manipulate: call individual manipulation in order
     /// \return: stop simulation?
     bool manipulate(const snapshot*s) const {
-      int r = 0;
+      bool r = false;
       for(int i=0; i!=N; ++i)
-	r |= MANIP[i]->manipulate(s);
+	if(MANIP[i]->manipulate(s)) {
+	  if(!r) NSTOP = i;
+	  r = true;
+	}
       return r;
     }
+    //--------------------------------------------------------------------------
+    /// name of stopping manipulator
+    const char* stopper() const { return MANIP[NSTOP]->name(); }
     //--------------------------------------------------------------------------
     /// are there any manipulators loaded?
     operator bool() const { return N != 0; }
