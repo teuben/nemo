@@ -4,7 +4,7 @@
 /// \file   inc/public/nbody.h                                                  
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2006                                                           
+/// \date   2000-2008                                                           
 ///                                                                             
 /// \brief  provides classes for the efficient implementation of N-body codes   
 ///                                                                             
@@ -29,7 +29,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2006 Walter Dehnen                                        
+// Copyright (C) 2000-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         

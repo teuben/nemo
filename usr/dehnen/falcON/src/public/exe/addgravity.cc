@@ -3,7 +3,7 @@
 //                                                                             |
 // addgravity.cc                                                               |
 //                                                                             |
-// Copyright (C) 2002, 2003 Walter Dehnen                                      |
+// Copyright (C) 2002-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -40,9 +40,10 @@
 // v 1.6    16/05/2005  WD added external potential                            |
 // v 2.0    13/06/2005  WD new falcON, new body.h, new nemo I/O                |
 // v 2.1    13/06/2005  WD changes in fieldset                                 |
+// v 2.2    06/03/2008  WD debugged (problem when using external potential)    |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.1"
-#define falcON_VERSION_D "13-jul-2005 Walter Dehnen                          "
+#define falcON_VERSION   "2.2"
+#define falcON_VERSION_D "06-mar-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile addgravity
@@ -104,6 +105,7 @@ void falcON::main() falcON_THROWING
     if(READ.contain(NEED)) {
       if(!OUT.is_open()) OUT.open(getparam("out"));
       SHOT.add_fields(fieldset::gravity);
+      if(ACCEXT) SHOT.add_fields(fieldset::q);
       SHOT.reset_flags();
       if(FALCON.NewtonsG() != zero) {
 	FALCON.grow(NCRIT, RC);
