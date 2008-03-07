@@ -6,13 +6,11 @@
 /// \author  Walter Dehnen                                                      
 /// \author  Paul McMillan                                                      
 ///                                                                             
-/// \date    1994-2005                                                          
-///                                                                             
-/// \todo    add doxygen documentation                                          
+/// \date    1994-2005, 2008                                                    
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2005  Walter Dehnen                                       
+// Copyright (C) 1994-2005, 2008  Walter Dehnen                                 
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -46,7 +44,7 @@ namespace {
   const double fac   = 1./double(mbig);
 }
 //------------------------------------------------------------------------------
-Random3::Random3(long const&idum) : inext(0), inextp(31)
+Random3::Random3(long idum) : inext(0), inextp(31)
 {
   register long  mj,mk;
   register int   i,ii,k;
@@ -108,7 +106,7 @@ void set_bits(const int BITS)
   setb = (BITS<=0) ? 30 : BITS;
 }
 //------------------------------------------------------------------------------
-Sobol::Sobol(const int ACTL, const int BITS)
+Sobol::Sobol(int ACTL, int BITS)
 {
   // set degree and polynomial from the static tables. It's important, that     
   // no other object with the same degree and polynomial is currently existing, 
@@ -180,20 +178,20 @@ double Sobol::RandomDouble () const {
   return double(ix)*fac;
 }
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class WDutils::Gaussian                                                    //
-//                                                                            //
+//                                                                              
+// class WDutils::Normal                                                        
+//                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-Gaussian::Gaussian(const RandomNumberGenerator*r1,// 1st random number generator
-		   const RandomNumberGenerator*r2,// 2nd random number generator
-		   const double s)                // sigma                      
-  : sig(s), R1(r1), R2(r2)
-{ 
-  iset = 0;  
-  norm = 1./(sqrt(TPi)*sig);
+Normal::Normal(const RandomNumberGenerator*r1,
+	       const RandomNumberGenerator*r2) :
+  iset(0), R1(r1), R2(r2? r2:r1)
+{
+  if(R1==R2 && !R1->is_pseudo())
+    WDutils_THROW("trying to construct \"Normal\" with a "
+		  "single quasi-random number generator\n");
 }
 //------------------------------------------------------------------------------
-double Gaussian::operator() () const
+double Normal::operator() () const
 {
   if(iset) {
     iset = 0;
@@ -205,30 +203,11 @@ double Gaussian::operator() () const
       v2  = 2 * R2->RandomDouble() - 1.;
       rsq = v1*v1 + v2*v2;
     } while (rsq>=1. || rsq <=0. );
-    fac  = sig*sqrt(-2.*log(rsq)/rsq);
+    fac  = sqrt(-2.*log(rsq)/rsq);
     gset = v1*fac;
     iset = 1;
     return v2*fac;
   }
-}
-//------------------------------------------------------------------------------
-double Gaussian::value(const double x) const 
-{
-  return norm * exp(-0.5*power<2>(x/sig));
-}
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class WDutils::Exponential                                                 //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-double Exponential::operator() () const
-{
-  return -alf * log( Rn->RandomDouble() );
-}
-//------------------------------------------------------------------------------
-double Exponential::value(const double x) const
-{
-  return exp(-x/alf)/alf;
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -265,9 +244,9 @@ double ExpDisk::ranvar() const
   return h*y/(1.-y);
 }
 //------------------------------------------------------------------------------
-double ExpDisk::value(const double x) const
+double ExpDisk::value(double x) const
 {
-  return hqi*x*exp(-hi*x);
+  return x>=0? hqi*x*exp(-hi*x) : 0.;
 }
 //------------------------------------------------------------------------------
 double ExpDisk::radius(double p) const
