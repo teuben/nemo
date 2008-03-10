@@ -387,8 +387,17 @@ namespace falcON {
       double const&tauh(int l) const { return TAUH[l]; }
       /// time step squared, given of level l )
       double const&tauq(int l) const { return TAUQ[l]; }
+      /// return time step of body 
+      inline double const&tau(iterator const&) const;
+      /// return time step squared of body 
+      inline double const&tauq(iterator const&) const;
+      /// return half time step of body 
+      inline double const&tauh(iterator const&) const;
+      /// return table of time steps
       const double*tau () const { return TAU; }
+      /// return table of half time steps
       const double*tauq() const { return TAUQ; }
+      /// return table of time steps squared
       const double*tauh() const { return TAUH; }
     };
     //==========================================================================
@@ -888,6 +897,12 @@ namespace falcON {
     /// if no bodies of given type exist, invalid iterator is returned
     iterator begin_typed_bodies(bodytype t) const {
       return iterator(TYPES[int(t)]);
+    }
+    /// begin of active bodies
+    iterator begin_active_bodies() const {
+      iterator B(FIRST);
+      while(B && !is_active(B)) ++B;
+      return B;
     }
     /// end of bodies of given bodytype, if any.
     /// if no bodies of given type exist, invalid iterator is returned
@@ -1427,6 +1442,16 @@ namespace falcON {
   inline std::ostream& operator<<(std::ostream&o, const bodies::iterator&i) {
     return i? o << i.my_index() : o << "nil";
   }
+  // ///////////////////////////////////////////////////////////////////////////
+  inline double const&bodies::TimeSteps::tau(bodies::iterator const&i) const {
+    return tau (falcON::level(i));
+  }
+  inline double const&bodies::TimeSteps::tauq(bodies::iterator const&i) const {
+    return tauq(falcON::level(i));
+  }
+  inline double const&bodies::TimeSteps::tauh(bodies::iterator const&i) const {
+    return tauh(falcON::level(i));
+  }
 #define CheckMissingBodyData(B,F) (B)->CheckData((F),__FILE__,__LINE__);
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
@@ -1867,7 +1892,7 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
 /// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
 /// \param NAME  name given to loop variable (of type falcON::body)
 #define LoopActiveBodies(PTER,NAME)					\
-  for(falcON::body NAME=(PTER)->begin_all_bodies();			\
+  for(falcON::body NAME=(PTER)->begin_active_bodies();			\
       NAME; NAME.next_active())
 #endif
 //------------------------------------------------------------------------------

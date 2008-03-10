@@ -357,7 +357,7 @@ void BlockStepCode::adjust_levels(int low, bool all) const {
     LoopAllBodies(snap_shot(),b)
       ST->adjust_level(b, N, low, highest_level());
   else
-    LoopActiveBodies(snap_shot(),b)
+    LoopAllBodies(snap_shot(),b) if(is_active(b))
       ST->adjust_level(b, N, low, highest_level());
 }
 //------------------------------------------------------------------------------
