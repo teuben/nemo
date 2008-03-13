@@ -3,7 +3,7 @@
 //                                                                             |
 /// \file src/public/lib/PotExp.cc                                             |
 //                                                                             |
-// Copyright (C) 1994-1996, 2004-2007 Walter Dehnen                            |
+// Copyright (C) 1994-1996, 2004-2008 Walter Dehnen                            |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -1937,8 +1937,17 @@ namespace {
   // given (ar,ath,aph) and (cos[the],sin[the],cos[phi],sin[phi]), we compute   
   // in place (ax,ay,az), erasing (ar,ath,aph)                                  
   template<typename X, typename Y>
-  inline void Cartesian(tupel<3,Y> &a,
+  inline void Cartesian(tupel<3,Y> &a, X const&rd, 
 			X const&ct, X const&st, X const&cp, X const&sp) {
+    if(rd) {
+      register X ir = IR0/rd;
+      a[1] *= ir;
+      if(st) a[2] *= ir/st;
+      else   a[2]  = Y(0);
+    } else {
+      a[1] = Y(0);
+      a[2] = Y(0);
+    }
     register Y
       am = a[0] * st + a[1] * ct,                  // am = ar*st + at*ct        
       az = a[0] * ct - a[1] * st;                  // az = ar*ct - at*st        
@@ -1954,9 +1963,9 @@ namespace falcON { namespace P {
 		  const tupel<3,double>*);
   void Spherical4(fvec4&, fvec4&, fvec4&, fvec4&, fvec4&,
 		  const tupel<3,float>*);
-  void Cartesian4(tupel<3,double>*,
+  void Cartesian4(tupel<3,double>*, fvec4 const&,
 		  fvec4 const&, fvec4 const&, fvec4 const&, fvec4 const&);
-  void Cartesian4(tupel<3,float>*,
+  void Cartesian4(tupel<3,float>*, fvec4 const&,
 		  fvec4 const&, fvec4 const&, fvec4 const&, fvec4 const&);
   //----------------------------------------------------------------------------
 #else
@@ -1971,13 +1980,13 @@ namespace falcON { namespace P {
   }
   //----------------------------------------------------------------------------
   template<typename X>
-  void Cartesian4(tupel<3,X>*a,
+  void Cartesian4(tupel<3,X>*a, fvec4 const&rd,
 		  fvec4 const&ct, fvec4 const&st,
 		  fvec4 const&cp, fvec4 const&sp) {
-    Cartesian(a[0],ct[0],st[0],cp[0],sp[0]);
-    Cartesian(a[1],ct[1],st[1],cp[1],sp[1]);
-    Cartesian(a[2],ct[2],st[2],cp[2],sp[2]);
-    Cartesian(a[3],ct[3],st[3],cp[3],sp[3]);
+    Cartesian(a[0],rd[0],ct[0],st[0],cp[0],sp[0]);
+    Cartesian(a[1],rd[1],ct[1],st[1],cp[1],sp[1]);
+    Cartesian(a[2],rd[2],ct[2],st[2],cp[2],sp[2]);
+    Cartesian(a[3],rd[3],ct[3],st[3],cp[3],sp[3]);
   }
 #endif
 } }
@@ -2647,7 +2656,7 @@ namespace {
 		    ct[k],st[k],cp[k],sp[k]);      //     set Ylm, dYlm/d(th,ph)
 	P[k]=EvalG<SYM>(A[k],C,Psi,dPr,Ylm,dYt,dYp); //   set Pot, (ar,ath,aph) 
       }                                            //   END LOOP                
-      Cartesian4(A,ct,st,cp,sp);                   //   set (ax,ay,az)          
+      Cartesian4(A,rd,ct,st,cp,sp);                //   set (ax,ay,az)          
       if(add&1) for(int k=0; k!=K; ++k) p[I[k]]-= P[k]; // add potential        
       else      for(int k=0; k!=K; ++k) p[I[k]] =-P[k]; // OR assign it         
       if(add&2) for(int k=0; k!=K; ++k) a[I[k]]+= A[k]; // add acceleration     
@@ -2670,7 +2679,7 @@ namespace {
 	p-= EvalG<SYM>(Ac,C,Psi,dPr,Ylm,dYt,dYp);  //   set P, dP/d(r,the,phi)  
       else
 	p =-EvalG<SYM>(Ac,C,Psi,dPr,Ylm,dYt,dYp);
-      Cartesian(Ac,Ct,St,Cp,Sp);                   //   set (ax,ay,az)          
+      Cartesian(Ac,Rd,Ct,St,Cp,Sp);                //   set (ax,ay,az)          
       if(add&2)
 	a+= Ac;
       else
@@ -2961,7 +2970,7 @@ namespace {
 	    SetYlm<SYM>(Ylm,dYt,dYp,CT[i4][K],ST[i4][K],CP[i4][K],SP[i4][K]);
 	    P[K] = EvalG<SYM>(A[K],C,Psi,dPr,Ylm,dYt,dYp);
 	  }
-	  Cartesian4(A,CT[i4],ST[i4],CP[i4],SP[i4]);
+	  Cartesian4(A,RD[i4],CT[i4],ST[i4],CP[i4],SP[i4]);
 	  if(add&1) for(int k=0; k!=K; ++k) p[I[k]]-= P[k];
 	  else      for(int k=0; k!=K; ++k) p[I[k]] =-P[k];
 	  if(add&2) for(int k=0; k!=K; ++k) a[I[k]]+= A[k];
@@ -2975,7 +2984,7 @@ namespace {
 	    SetYlm<SYM>(Ylm,dYt,dYp,CT[i4][K],ST[i4][K],CP[i4][K],SP[i4][K]);
 	    P[K] = EvalG<SYM>(A[K],C,Psi,dPr,Ylm,dYt,dYp);
 	  }
-	  Cartesian4(A,CT[i4],ST[i4],CP[i4],SP[i4]);
+	  Cartesian4(A,RD[i4],CT[i4],ST[i4],CP[i4],SP[i4]);
 	  if(add&1) for(int k=0; k!=K; ++k) p[I[k]]-= P[k];
 	  else      for(int k=0; k!=K; ++k) p[I[k]] =-P[k];
 	  if(add&2) for(int k=0; k!=K; ++k) a[I[k]]+= A[k];
