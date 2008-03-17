@@ -28,10 +28,10 @@ e "MANIPPATH=$MANIPPATH;   export MANIPPATH"
 
 e "YAPP=$YAPP;               export YAPP"
 e "PGPLOT_DIR=$PGPLOT_DIR;   export PGPLOT_DIR"
-e "PGPLOT_FONT=$PGPLOT_FONT; export PGPLOT_DIR"
-e "PGPLOT_LIB=$PGPLOT_LIB;   export PGPLOT_LIB"
 
-e "PLPLOT_LIB=$PLPLOT_LIB;   export PLPLOT_LIB"
+# PGPLOT_DIR should be sufficient
+#e "PGPLOT_FONT=$PGPLOT_FONT; export PGPLOT_DIR"
+#e "PGPLOT_LIB=$PGPLOT_LIB;   export PGPLOT_LIB"
 
 e "VDEVICE=$VDEVICE;         export VDEVICE"
 
