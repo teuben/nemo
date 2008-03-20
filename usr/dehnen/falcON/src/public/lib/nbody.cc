@@ -522,15 +522,15 @@ void ForceDiagGrav::diagnose_grav() const
       x += mx;                                     //     add: dipole           
     }                                              //   END LOOP                
   }                                                // ENDIF                     
-  M    = m;                                        // total mass                
-  Vin  = half*vin;                                 // total int pot energy      
-  Vex  = vex;                                      // total ext pot energy      
-  W    = tr(w);                                    // total pot energy from acc 
-  CMX  = x/m;                                      // center of mass            
-  for(register int i=0; i!=Ndim; ++i)
-    for(register int j=0; j!=Ndim; ++j) 
+  M   = m;                                         // total mass                
+  Vin = half*vin;                                  // total int pot energy      
+  Vex = vex;                                       // total ext pot energy      
+  W   = tr(w);                                     // total pot energy from acc 
+  CMX = x/m;                                       // center of mass            
+  for(int i=0; i!=Ndim; ++i)
+    for(int j=0; j!=Ndim; ++j) 
       WT[i][j] = half *(w[i][j]+w[j][i]);          // pot energy tensor         
-  TIME  = snap_shot()->time();
+  TIME = snap_shot()->time();
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ForceDiagGrav::diagnose_vels() const falcON_THROWING
@@ -547,12 +547,12 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
     v += mv;                                       //   add: total momentum     
     l += vect_d(pos(b)) ^ mv;                      //   add: total ang mom      
   }                                                // END LOOP                  
-  T    = half*tr(k);                               // total kin energy          
-  TW   =-T/W;                                      // virial ratio              
-  L    = l;                                        // total angular momentum    
-  CMV  = v/m;                                      // center of mass velocity   
-  for(register int i=0; i!=Ndim; ++i)
-    for(register int j=0; j!=Ndim; ++j) 
+  T   = half*tr(k);                                // total kin energy          
+  TW  =-T/W;                                       // virial ratio              
+  L   = l;                                         // total angular momentum    
+  CMV = v/m;                                       // center of mass velocity   
+  for(int i=0; i!=Ndim; ++i)
+    for(int j=0; j!=Ndim; ++j) 
       KT[i][j] = half * k[i][j];                   // kin energy tensor         
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -588,21 +588,21 @@ void ForceDiagGrav::diagnose_full() const
       l += mx ^ vect_d(vel(b));                    //     add: total ang mom    
     }                                              //   END LOOP                
   }                                                // ENDIF                     
-  M    = m;                                        // total mass                
-  Vin  = half*vin;                                 // total int pot energy      
-  Vex  = vex;                                      // total ext pot energy      
-  W    = tr(w);                                    // total pot energy from acc 
-  T    = half*tr(k);                               // total kin energy          
-  TW   =-T/W;                                      // virial ratio              
-  L    = l;                                        // total angular momentum    
-  CMX  = x/m;                                      // center of mass            
-  CMV  = v/m;                                      // center of mass velocity   
-  for(register int i=0; i!=Ndim; ++i)
-    for(register int j=0; j!=Ndim; ++j) {
+  M   = m;                                         // total mass                
+  Vin = half*vin;                                  // total int pot energy      
+  Vex = vex;                                       // total ext pot energy      
+  W   = tr(w);                                     // total pot energy from acc 
+  T   = half*tr(k);                                // total kin energy          
+  TW  =-T/W;                                       // virial ratio              
+  L   = l;                                         // total angular momentum    
+  CMX = x/m;                                       // center of mass            
+  CMV = v/m;                                       // center of mass velocity   
+  for(int i=0; i!=Ndim; ++i)
+    for(int j=0; j!=Ndim; ++j) {
       WT[i][j] = half *(w[i][j]+w[j][i]);          // pot energy tensor         
       KT[i][j] = half * k[i][j];                   // kin energy tensor         
     }
-  TIME  = snap_shot()->time();
+  TIME = snap_shot()->time();
 }
 ////////////////////////////////////////////////////////////////////////////////
 #if 0
@@ -640,18 +640,16 @@ void ForceDiagGrav::dia_stats_body(std::ostream&to) const
   to.setf(std::ios::left | std::ios::showpoint);
   to  <<std::setprecision(ACC)<<std::setw(ACC+5)<<TIME       <<' '
       <<std::setprecision(ACC+2)<<std::setw(ACC+8)<<T+Vin+Vex  <<' '
-      <<std::setprecision(ACC)<<std::setw(ACC+5)<<T          <<' ';
+      <<std::setprecision(ACC-1)<<std::setw(ACC+4)<<T          <<' ';
   if(SELF_GRAV) 
-    to<<std::setprecision(ACC)<<std::setw(ACC+6)<<Vin        <<' ';
+    to<<std::setprecision(ACC-1)<<std::setw(ACC+5)<<Vin        <<' ';
   if(acc_ext())
-    to<<std::setprecision(ACC)<<std::setw(ACC+6)<<Vex        <<' ';
-  to  <<std::setprecision(ACC)<<std::setw(ACC+6)<<W          <<' '
-      <<std::setprecision(min(ACC,max(1,ACC-int(-log10(twice(TW))))))
-      <<std::setw(ACC+2)<<twice(TW) <<' '
-      <<std::setprecision(ACC)<<std::setw(ACC+5)
-      <<std::sqrt(norm(L))
-      <<' '
-      <<std::setprecision(ACC-3)<<std::setw(ACC+3)<<std::sqrt(norm(CMV));
+    to<<std::setprecision(ACC-1)<<std::setw(ACC+5)<<Vex        <<' ';
+  to  <<std::setprecision(ACC-1)<<std::setw(ACC+5)<<W          <<' '
+      <<std::setprecision(min(ACC,max(1,ACC-int(-log10(twice(TW)))))-1)
+      <<std::setw(ACC+1)<<twice(TW) <<' '
+      <<std::setprecision(ACC-3)<<std::setw(ACC+2)<<std::sqrt(norm(L))<<' '
+      <<std::setprecision(ACC-3)<<std::setw(ACC+2)<<std::sqrt(norm(CMV))<<' ';
   to.flags(old);
 }
 ////////////////////////////////////////////////////////////////////////////////

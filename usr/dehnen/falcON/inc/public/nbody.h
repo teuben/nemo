@@ -696,10 +696,10 @@ namespace falcON {
   protected:
     const   bool         SELF_GRAV;                // compute V_in?             
     mutable double       TIME;                     // time of diagnose          
-    mutable real         M,T,Vin,Vex,W,TW;         // mass, kin & pot E         
-    mutable vect         L;                        // total angular momentum    
+    mutable double       M,T,Vin,Vex,W,TW;         // mass, kin & pot E         
+    mutable vect_d       L;                        // total angular momentum    
     mutable tensor       KT,WT;                    // kin & pot energy          
-    mutable vect         CMX,CMV;                  // center of mass pos & vel  
+    mutable vect_d       CMX,CMV;                  // center of mass pos & vel  
     //--------------------------------------------------------------------------
     void diagnose_grav() const;
     void diagnose_vels() const falcON_THROWING;
@@ -719,8 +719,15 @@ namespace falcON {
 		      (acc_ext()? fieldset::q : fieldset::empty) );
     }
     //--------------------------------------------------------------------------
-    virtual real Ekin() const { return T; }
-    virtual real Epot() const { return Vin + Vex; }
+    virtual double Ekin() const { return T; }
+    virtual double Epot() const { return Vin + Vex; }
+    virtual double Etot() const { return Ekin() + Epot(); }
+    //--------------------------------------------------------------------------
+    double const  &Vrat() const { return TW; }
+    double         Wvir() const { return W; }
+    vect_d const  &Ltot() const { return L; }
+    vect_d const  &Xave() const { return CMX; }
+    vect_d const  &Vave() const { return CMV; }
     //--------------------------------------------------------------------------
     virtual void dia_stats_body (std::ostream&) const;
     //--------------------------------------------------------------------------
@@ -728,24 +735,27 @@ namespace falcON {
       const char *space = sizeof(real)==4? " " : "     ";
       to  << "    time  "<<space
 	  << "    E=T+V    "<<space
-	  << "   T      "<<space;
+	  << "   T     "<<space;
       if(SELF_GRAV)
-	to<< "   V_in    "<<space;
+	to<< "   V_in   "<<space;
       if(acc_ext())
-	to<< "   V_ex    "<<space;
-      to  << "   W       "<<space
-	  << " -2T/W "<<space
-	  << "   |L|    "<<space
+	to<< "   V_ex   "<<space;
+      to  << "   W      "<<space
+	  << " -2T/W"<<space
+	  << "   |L| "<<space
 	  << " |v_cm|"<<space;
     }
     //--------------------------------------------------------------------------
     virtual void dia_stats_line (std::ostream&to) const {
       const char *space = sizeof(real)==4? "-" : "-----";
-      to<<" -------------------------------------------------------------------"
+      to<<" ------------------------------------------------------------"
 	<<space<<space<<space<<space<<space<<space<<space;
       if(SELF_GRAV) to<<"-----------"<<space;
       if(acc_ext()) to<<"-----------"<<space;
     }
+    //--------------------------------------------------------------------------
+    bool const&self_grav() const { return SELF_GRAV; }
+
   };// class falcON::ForceDiagGrav
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
