@@ -33,9 +33,10 @@
 // v 0.2   09/10/2007  WD added keyword 'time'                                  
 // v 0.3   30/10/2007  WD allowed times=first and times=last                    
 // v 1.0   31/10/2007  WD added filter, etc, makes snapfilter redundant         
+// v 1.0.1 25/03/2008  WD warn if no snapshot matched times                     
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "1.0"
-#define falcON_VERSION_D "31-oct-2007 Walter Dehnen                          "
+#define falcON_VERSION   "1.0.1"
+#define falcON_VERSION_D "25-mar-2008 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2s"
@@ -144,6 +145,9 @@ void falcON::main() falcON_THROWING {
 	  SHOT.write_nemo(OUT,COPY);
 	}
       }
+    if(!OUT)
+      warning("no snapshot matching \"times=%s\" found in input\n",
+	      getparam("times"));
   }
   if(BF) falcON_DEL_O(BF);
 }
