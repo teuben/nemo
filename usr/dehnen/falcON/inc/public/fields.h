@@ -326,16 +326,16 @@ namespace falcON {
   //////////////////////////////////////////////////////////////////////////////
   namespace BodyData {
     const int         KSTD    = 0;                 // std data start here       
-    const int         KSPH    = 21;                // sph data start here       
-    const int         KSINK   = 35;                // sink data start here      
-    const int         NQUANT  = 36;                // total # data              
+    const int         KSPH    = 22;                // sph data start here       
+    const int         KSINK   = 36;                // sink data start here      
+    const int         NQUANT  = 37;                // total # data              
     //--------------------------------------------------------------------------
     /// array with the one-char data tags used as enum names
     /// \note not (to be) referred to outside of this file
-    const char* const SQUANT  ="mxvwefkspqajryzlnchdtHNUYIEKRADJFCMS";
+    const char* const SQUANT  ="mxvwefkspqajriyzlnchdtHNUYIEKRADJFCMS";
     // letters taken are marked here         
     //             abcdefghijklmnopqrstuvwxyz
-    // lower case  x xxxx x xxxxxxxxxxx xxxxx
+    // lower case  x xxxx xxxxxxxxxxxxx xxxxx
     // upper case  x xxxx xxxx xx   xx x   x 
     //--------------------------------------------------------------------------
     /// array with full-length human readable names for the N-body data
@@ -344,9 +344,9 @@ namespace falcON {
       { "mass", "position", "velocity", "predicted velocity",
 	"softening length", "body flags", "key", "time step", "potential",
 	"external potential", "acceleration", "jerk", "density",
-	"auxiliary scalar", "auxiliary vector", "time-step level",
-	"number of partners", "node number", "Peano-Hilbert key",
-	"phase-space density", "orbital period",
+	"auxiliary integer", "auxiliary scalar", "auxiliary vector",
+	"time-step level", "number of partners", "node number",
+	"Peano-Hilbert key", "phase-space density", "orbital period",
 	"SPH smoothing length", "number of SPH partners", "U_internal",
 	"U_predicted", "(dU/dt)_total", "(dU/dt)_external", "entropy function",
 	"gas density", "alpha_visc", "div(v)", "dlog(h)/dt", "factor",
@@ -357,8 +357,8 @@ namespace falcON {
     /// \note not (to be) referred to outside of this file
     const char* const QFUNCNAME[NQUANT] = 
       { "mass", "pos", "vel", "vprd", "eps", "flag", "key", "step", "pot",
-	"pex", "acc", "jerk", "rho", "aux", "zet", "level", "num", "node",
-	"peano", "phden", "torb",
+	"pex", "acc", "jerk", "rho", "integ", "aux", "zet", "level", "num",
+	"node", "peano", "phden", "torb",
 	"size", "snum", "uin", "uprd", "udot", "udex", "entr", "srho", "alfa",
 	"divv", "hdot", "fact", "csnd", "molw", "spin"
       };
@@ -367,8 +367,8 @@ namespace falcON {
     /// \note not (to be) referred to outside of this file
     const char* const QFIVENAME[NQUANT] = 
       { "mass ", "pos  ", "vel  ", "vprd ", "eps  ", "flag ", "key  ", "step ",
-	"pot  ", "pex  ", "acc  ", "jerk ", "rho  ", "aux  ", "zet  ", "level",
-	"num  ", "node ", "peano", "phden", "torb ",
+	"pot  ", "pex  ", "acc  ", "jerk ", "rho  ", "integ", "aux  ", "zet  ",
+	"level", "num  ", "node ", "peano", "phden", "torb ",
 	"size ", "snum ", "uin  ", "uprd ", "udot ", "udex ", "entr ", "srho ",
 	"alfa ", "divv ", "hdot ", "fact ", "csnd ", "molw ", "spin "
       };
@@ -390,6 +390,7 @@ namespace falcON {
       sizeof(vect),           ///< acceleration
       sizeof(vect),           ///< jerk
       sizeof(real),           ///< density (mass)
+      sizeof(int),            ///< auxiliary integer
       sizeof(real),           ///< auxiliary scalar
       sizeof(vect),           ///< auxiliary vector
       sizeof(indx),           ///< level
@@ -475,30 +476,31 @@ namespace falcON {
       a       = 10,           ///< accelaration (gravity and SPH)
       j       = 11,           ///< jerk (not used in falcON)
       r       = 12,           ///< mass-density
-      y       = 13,           ///< auxiliary scalar datum
-      z       = 14,           ///< auxiliary vector datum
-      l       = 15,           ///< time-step level (short)
-      n       = 16,           ///< number of neighbours
-      c       = 17,           ///< node number (short unsigned)
-      h       = 18,           ///< Peano-Hilbert key
-      d       = 19,           ///< phase-space density
-      t       = 20,           ///< orbital period
+      i       = 13,           ///< auxiliary integer datum
+      y       = 14,           ///< auxiliary scalar datum
+      z       = 15,           ///< auxiliary vector datum
+      l       = 16,           ///< time-step level (short)
+      n       = 17,           ///< number of neighbours
+      c       = 18,           ///< node number (short unsigned)
+      h       = 19,           ///< Peano-Hilbert key
+      d       = 20,           ///< phase-space density
+      t       = 21,           ///< orbital period
       //            SPH properties: 12
-      H       = 21,           ///< SPH smoothing length
-      N       = 22,           ///< number of SPH interaction partners
-      U       = 23,           ///< internal energy U
-      Y       = 24,           ///< predicted U
-      I       = 25,           ///< (dU/dt)_total
-      E       = 26,           ///< (dU/dt)_external
-      K       = 27,           ///< entropy function
-      R       = 28,           ///< gas-density rho
-      A       = 29,           ///< alpha_visc
-      D       = 30,           ///< div(v)
-      J       = 31,           ///< dlnh/dt
-      F       = 32,           ///< factor f_i
-      C       = 33,           ///< sound speed
-      M       = 34,           ///< molecular weight
-      S       = 35,           ///< spin vector
+      H       = 22,           ///< SPH smoothing length
+      N       = 23,           ///< number of SPH interaction partners
+      U       = 24,           ///< internal energy U
+      Y       = 25,           ///< predicted U
+      I       = 26,           ///< (dU/dt)_total
+      E       = 27,           ///< (dU/dt)_external
+      K       = 28,           ///< entropy function
+      R       = 29,           ///< gas-density rho
+      A       = 30,           ///< alpha_visc
+      D       = 31,           ///< div(v)
+      J       = 32,           ///< dlnh/dt
+      F       = 33,           ///< factor f_i
+      C       = 34,           ///< sound speed
+      M       = 35,           ///< molecular weight
+      S       = 36,           ///< spin vector
       invalid = NQUANT        ///< not corresponding to any field
     };
     //--------------------------------------------------------------------------
@@ -629,6 +631,7 @@ namespace falcON {
       a       = one << fieldbit::a,  ///< just accelarations
       j       = one << fieldbit::j,  ///< just jerks
       r       = one << fieldbit::r,  ///< just mass-densities
+      i       = one << fieldbit::i,  ///< just auxiliary integer data
       y       = one << fieldbit::y,  ///< just auxiliary scalar data
       z       = one << fieldbit::z,  ///< just auxiliary vector data
       l       = one << fieldbit::l,  ///< just time-step levels
@@ -674,9 +677,9 @@ namespace falcON {
       /// non-SPH source properties
       source  = m|x|v|w|e|f|k|s,
       /// non-SPH non-source properties
-      nonsource = p|q|a|j|r|y|z|l|n|d|h|t,
+      nonsource = p|q|a|j|r|i|y|z|l|n|d|h|t,
       /// all integer-type quantities
-      integers= f|k|c|l|n|h|N,
+      integers= f|k|c|l|i|n|h|N,
       /// all floating point scalar quantities
       scalars = m|e|s|p|q|r|y|d|t|sphscal,
       /// all vector quantities
@@ -1126,6 +1129,7 @@ namespace falcON {
   DefFieldTraits(fieldbit::a, vect);               // acceleration              
   DefFieldTraits(fieldbit::j, vect);               // jerk                      
   DefFieldTraits(fieldbit::r, real);               // mass density              
+  DefFieldTraits(fieldbit::i, int);                // auxiliary integer         
   DefFieldTraits(fieldbit::y, real);               // auxiliary scalar          
   DefFieldTraits(fieldbit::z, vect);               // auxiliary vector          
   DefFieldTraits(fieldbit::l, indx);               // time-step level           
@@ -1172,6 +1176,7 @@ namespace falcON {
   MACRO(fieldbit::a,acc);			\
   MACRO(fieldbit::j,jerk);			\
   MACRO(fieldbit::r,rho);			\
+  MACRO(fieldbit::i,integ);			\
   MACRO(fieldbit::y,aux);			\
   MACRO(fieldbit::z,zet);			\
   MACRO(fieldbit::l,level);			\
