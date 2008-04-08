@@ -336,9 +336,10 @@ namespace WDutils {
     int p,w;
     int width(X l) { // given precision, what is minimum width
       int il = 1+int(l);
-      int fw = l<0? 1+p+il : il>=p? il : p+1;
-      int ew = x<0? p+6 : p+5;
-      return fw<ew? fw : ew;
+      int fw = l<0? 3+p-il : il>=p? il : p+1;
+      int ew = p+5;
+      il = fw<ew? fw:ew;
+      return x<0? il+1 : il;
     }
     smanip_fp_width(X __x, int __w, int __p) : x(__x), p(__p), w(__w)
     {
@@ -380,4 +381,4 @@ namespace WDutils {
   using std::setiosflags;
 }
 //------------------------------------------------------------------------------
-#endif // WDutils_included_ioln_h
+#endif // WDutils_included_inline_io_h
