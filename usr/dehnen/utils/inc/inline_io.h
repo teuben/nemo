@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2000-2007                                                          
+/// \date    2000-2008                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2007  Walter Dehnen                                       
+// Copyright (C) 2000-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -50,7 +50,7 @@ namespace WDutils {
   /// \name inline functions for opening file I/O                               
   //@{                                                                          
   // ///////////////////////////////////////////////////////////////////////////
-  /// try to open an output file
+  /// try to open an output file.
   /// if not successful, we issue a warning and return false
   /// \return successfully opened?
   /// \param S ofstream to open
@@ -66,7 +66,7 @@ namespace WDutils {
     }
     return true;
   }
-  /// try to open an output file
+  /// try to open an output file.
   /// if not successful, we issue a fatal error
   /// \param S ofstream to open
   /// \param file name of file to open
@@ -78,7 +78,7 @@ namespace WDutils {
     S.open(file,mode);
     if(! S.is_open() ) error("cannot open file \"%s\" for output",file);
   }
-  /// try to open an output file for appending
+  /// try to open an output file for appending.
   /// if not successful, we issue a warning and return 0\n
   /// if file did already exist and was opened for appending, return 1\n
   /// if did not exist and but a new one has been opened, return 2
@@ -94,7 +94,7 @@ namespace WDutils {
     warning("cannot open file \"%s\" for appending",file);
     return 0;
   }
-  /// try to open an output file for appending
+  /// try to open an output file for appending.
   /// if not successful, we issue a fatal error
   /// if file did already exist and was opened for appending, return 1\n
   /// if did not exist and but a new one has been opened, return 2
@@ -110,7 +110,7 @@ namespace WDutils {
     error("cannot open file \"%s\" for appending",file);
     return 0;
   }
-  /// try to open an input file
+  /// try to open an input file.
   /// if not successful, we issue a warning and return false
   /// \return successfully opened?
   /// \param S ifstream to open
@@ -126,7 +126,7 @@ namespace WDutils {
     }
     return 1;
   }
-  /// try to open an input file
+  /// try to open an input file.
   /// if not successful, we issue a fatal error
   /// \param S ifstream to open
   /// \param file name of file to open
@@ -137,7 +137,7 @@ namespace WDutils {
     S.open(file,mode);
     if(! S.is_open() ) error("cannot open file \"%s\" for input",file);
   }
-  /// try to open a file for in-, output, or both
+  /// try to open a file for in-, output, or both.
   /// if not successful, we issue a warning an return false
   /// \return successfully opened?
   /// \param S fstream to open
@@ -153,7 +153,7 @@ namespace WDutils {
     }
     return 1;
   }
-  /// try to open a file for in-, output, or both
+  /// try to open a file for in-, output, or both.
   /// if not successful, we issue a fatal warning
   /// \param S fstream to open
   /// \param file name of file to open
@@ -166,7 +166,7 @@ namespace WDutils {
   }
   //@}
   //----------------------------------------------------------------------------
-  /// swallow the rest of the current line
+  /// swallow the rest of the current line.
   /// reads all character up to and including the next '\n'.
   /// \return istream read (this allows to put this routine in a >> >> sequence)
   /// \param from istream to read from
@@ -177,7 +177,7 @@ namespace WDutils {
     return from;
   }
   //----------------------------------------------------------------------------
-  /// return shorthand for making ordered number
+  /// return shorthand for making ordered number.
   /// given an integer, return "st", "nd", "rd" or "th" such that appended to
   /// the integer it makes correct ordered number, e.g. "3rd", "8th", "101st".
   /// \return "st", "nd", "rd" or "th"
@@ -200,7 +200,7 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   /// for a>=0 return " ", and for a<0 nothing (zero pointer), such that output
-  /// like cout << neg_space(a) << a looks aligned whatever signs a has.
+  /// like cout << neg_space(a) << a looks aligned whatever sign a has.
   template<typename scalar>
   inline const char* neg_space(scalar const&a)
   {
@@ -254,7 +254,7 @@ namespace WDutils {
   template<typename X> static void read (std::istream&s,       X*x) { s>>x[N]; }
   };
   //----------------------------------------------------------------------------
-  /// write and array in the format "a1 a2 a3 ... aN"
+  /// write and array in the format "a1 a2 a3 ... aN".
   /// \param N template parameter: size of array
   /// \param X template parameter: type of array elements
   /// \return ostream used
@@ -267,7 +267,7 @@ namespace WDutils {
     return s;
   }
   //----------------------------------------------------------------------------
-  /// read an array from a space-separated format
+  /// read an array from a space-separated format.
   /// \param N template parameter: size of array
   /// \param X template parameter: type of array elements
   /// \return istream used
@@ -292,7 +292,7 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   /// \name I/O of arrays whose size is known at run time
   //@{
-  /// write and array in the format "a1 a2 a3 ... aN"
+  /// write and array in the format "a1 a2 a3 ... aN".
   /// \param X template parameter: type of array elements
   /// \return ostream used
   /// \param s ostream to write to
@@ -306,7 +306,7 @@ namespace WDutils {
     return s;
   }
   //----------------------------------------------------------------------------
-  /// read an array from a space-separated format
+  /// read an array from a space-separated format.
   /// \param X template parameter: type of array elements
   /// \return istream used
   /// \param s istream to read from
@@ -329,6 +329,44 @@ namespace WDutils {
     return s;
   }
   //}@
+  //----------------------------------------------------------------------------
+  template<typename X>
+  struct smanip_fp_width {
+    X   x;
+    int p,w;
+    int width(X l) { // given precision, what is minimum width
+      int il = 1+int(l);
+      int fw = l<0? 1+p+il : il>=p? il : p+1;
+      int ew = x<0? p+6 : p+5;
+      return fw<ew? fw : ew;
+    }
+    smanip_fp_width(X __x, int __w, int __p) : x(__x), p(__p), w(__w)
+    {
+      if(x == 0) return;
+      X l=std::log10(std::abs(x));
+      w =std::max(w,width(l));       // minimum width to achieve
+      for(++p; width(l)<=w; ++p);    // try for more precision
+      --p;
+    }
+  };
+  template<typename X>
+  inline std::ostream& operator<<(std::ostream&o, smanip_fp_width<X> const&m) {
+    int ow = o.width(m.w);
+    int op = o.precision(m.p);
+    o << m.x;
+    o.width(ow);
+    o.precision(op);
+    return o;
+  }
+  /// manipulator: write a floating point number with minimum width but maximum
+  /// precision.
+  /// The floating point number \a x is written out with the maximum precision
+  /// possible in the \a w characters wide field. However, we will at least 
+  /// write it with precision \a p, even if this means overrunning the width.
+  template<typename X>
+  inline smanip_fp_width<X> print(X x, int w, int p) {
+    return smanip_fp_width<X>(x,w,p);
+  }
   //----------------------------------------------------------------------------
 } // namespace WDutils
 
