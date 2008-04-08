@@ -226,13 +226,13 @@ namespace falcON {
       Anlm&negate(symmetry sym=none);
       /// assign to scalar: A[n,l,m] = x
       /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&assign(scalar const&x, symmetry sym=none);
+      Anlm&assign(scalar x, symmetry sym=none);
       /// multiply by scalar: A[n,l,m]*= x
       /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&multiply(scalar const&x, symmetry sym=none);
+      Anlm&multiply(scalar x, symmetry sym=none);
       /// divide by scalar: A[n,l,m]/= x
       /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&divide(scalar const&x, symmetry sym=none);
+      Anlm&divide(scalar x, symmetry sym=none);
       /// assign element wise: A[n,l,m] = B[n,l,m]
       /// \param sym if not none: only relevant coefficients are dealt with
       Anlm&copy(Anlm const&B, symmetry sym=none);
@@ -250,10 +250,10 @@ namespace falcON {
       scalar dot(Anlm const&B, symmetry sym=none) const;
       /// add element wise times scalar: A[n,l,m] += x*B[n,l,m]
       /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&addtimes(Anlm const&B, scalar const&x, symmetry sym=none);
+      Anlm&addtimes(Anlm const&B, scalar x, symmetry sym=none);
       /// subtract element wise times scalar: A[n,l,m] -= x*B[n,l,m]
       /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&subtimes(Anlm const&B, scalar const&x, symmetry sym=none);
+      Anlm&subtimes(Anlm const&B, scalar x, symmetry sym=none);
       /// apply element wise operation: A[n,l,m] = f(A[n,l,m])
       /// \param f function to apply to each element
       Anlm&apply(scalar(*f)(scalar)) {
@@ -354,7 +354,7 @@ namespace falcON {
      \param A coefficients \f$A_{nlm}\f$ to be normalised
      \param G Newton's gravitation constant
     */
-    void Normalize(Anlm&A, scalar const&G=1) const;
+    void Normalize(Anlm&A, scalar G=1) const;
     //--------------------------------------------------------------------------
     /*!
     \brief compute potential and accelerations due to a set of coefficients 
@@ -459,6 +459,9 @@ namespace falcON {
 		     T*P, tupel<3,T>*F, const int*f,
 		     int k, bool all, int add, scalar G=1) const;
     //--------------------------------------------------------------------------
+  protected:
+    template<typename T>
+    void AddCoeffs(int m, Anlm*A, int n, const tupel<3,T>*x, const T**y) const;
   };// class PotExp
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
