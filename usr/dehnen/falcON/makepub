@@ -41,7 +41,7 @@ random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
 # header dependency lists
 # -----------------------
 
-utils_h			:= $(traits_h) $(Pi_h) $(inline.h) $(inline_io.h) $(tupel_h) $(exception_h) $(memory_h)
+utils_h			:= $(traits_h) $(Pi_h) $(inline_h) $(inline_io_h) $(tupel_h) $(exception_h) $(memory_h)
 basic_h			:= $(IPUB)basic.h $(utils_h)
 simd_h			:= $(IPUB)simd.h $(basic_h)
 PotExp_h		:= $(IPUB)PotExp.h $(tupel_h) $(basic_h)
