@@ -140,7 +140,15 @@ namespace falcON {
       case triaxial:    return "triaxial";
       case reflexion:   return "reflexion";
       case none:        return "none";
-      default:          return "ERRORNEOUS";
+      default: {
+	bool empty = true;
+	std::string name("Errorneous: ");
+	if(s & pint) { name += empty? "pint":"|pint"; empty=false; }
+	if(s & axes) { name += empty? "axes":"|axes"; empty=false; }
+	if(s & zrot) { name += empty? "zrot":"|zrot"; empty=false; }
+	if(s & arot) { name += empty? "arot":"|arot"; empty=false; }
+	return name.c_str();
+      }
       }
     }
     // /////////////////////////////////////////////////////////////////////////
