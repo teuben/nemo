@@ -5,13 +5,13 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1994-2007                                                          
+/// \date    1994-2008                                                          
 ///                                                                             
 /// \todo    finish doxygen documentation                                       
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2007  Walter Dehnen                                       
+// Copyright (C) 1994-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -139,13 +139,12 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// find position in ordered table (see NR)                                   
   ///                                                                           
-  /// \param T (template parameter) type with < and > operators, usually a      
-  ///          scalar                                                           
-  /// \param k    (in/out) jlo such that xarr[jlo] <= x < xarr[jlo+1]           
-  /// \param x    (input) array of T, must be ordered (ascending or descending) 
-  /// \param n    (input) size of array xarr                                    
-  /// \param xi   (input) value to find position for                            
-  /// \return     position jlo such that xarr[jlo] <= x < xarr[jlo+1]           
+  /// \param T (template param) type with < and > operators, usually a scalar
+  /// \param[in,out] k  jlo such that xarr[jlo] <= x < xarr[jlo+1]
+  /// \param[in]     x  array of T, must be ordered (ascending or descending) 
+  /// \param[in]     n  size of array xarr
+  /// \param[in]     xi value to find position for
+  /// \return        position jlo such that xarr[jlo] <= x < xarr[jlo+1]
   ///                                                                           
   /// If the original value for k already gives the position, we return.        
   /// Otherwise, we guess k from linear interpolation and then invoke hunt().   
@@ -158,8 +157,7 @@ namespace WDutils {
       k = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
       k = hunt(x,n,xi,k);
       if(k<0 || k>=n) 
-	error("[%s.%d]: in %s: x=%f out of range [%f,%f]\n",
-	      __FILE__,__LINE__,"find()",xi,x[0],x[n-1]);
+	error("find(): x=%f out of range [%f,%f]\n", xi,x[0],x[n-1]);
     }
   }
   //@}
@@ -354,238 +352,152 @@ namespace WDutils {
   }
   //@}
   //----------------------------------------------------------------------------
-  // polynomial interpolation on grids                                          
-  //----------------------------------------------------------------------------
-  template<typename scalar_type>
-  inline int find_for_polev(int& j, int n, int m,
-			    const scalar_type *x, scalar_type xi)
-  {
-    int M=m;
-    j = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
-    j = hunt(x,n,xi,j) - (m+1)/2 + 1;
-    if(j>=0 && j<n && x[j]==xi)	 M = 1; 	    // no interpolation required
-    else if(j<0)		 j = 0;
-    else if(j>n-M)		 j = n-M;
-    return M;
-  }
-  //----------------------------------------------------------------------------
-  template<int m, typename scalar_type>
-  inline int find_for_polev_T(int& j, int n,
-			      const scalar_type *x, scalar_type xi)
-  {
-    int M=m;
-    j = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
-    j = hunt(x,n,xi,j) - (m+1)/2 + 1;
-    if(j>=0 && j<n && x[j]==xi)	 M = 1; 	    // no interpolation required
-    else if(j<0)		 j = 0;
-    else if(j>n-M)		 j = n-M;
-    return M;
-  }
-  //----------------------------------------------------------------------------
-  template<typename scalar_type, typename num_type>
-  inline num_type polint(const scalar_type *xa,
-			 const num_type *ya,
-			 int n,
-			 scalar_type x)
-  {
-    // polynom interpolation using n values
-    num_type y,*P=WDutils_NEW(num_type,n);
-    for(int i=0;i!=n;++i) P[i]=ya[i];
-    for(int m=1;m!=n;++m)
-      for(int i=0;i<n-m;++i) {
-	if(xa[i]==xa[i+m]) WDutils_ErrorF("x's not distinct","polev()");
-	P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
-      }
-    y = P[0];
-    WDutils_DEL_A(P);
-    return y;
-  }
-  //----------------------------------------------------------------------------
-  template<int n, typename scalar_type, typename num_type>
-  inline num_type polint_T(const scalar_type*xa,
-			   const num_type   *ya,
-			   scalar_type x) 
-  {
-    // polynom interpolation using n values
-    num_type y, P[n];
-    for(int i=0;i!=n;++i) P[i]=ya[i];
-    for(int m=1;m!=n;++m)
-      for(int i=0;i<n-m;++i) {
-	if(xa[i]==xa[i+m]) WDutils_ErrorF("x's not distinct","polev()");
-	P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
-      }
-    y = P[0];    
-    return y;
-  }
-  //----------------------------------------------------------------------------
-  // polynomial interpolation using m of n values                               
-  template<typename scalar_type, typename num_type>
-  inline num_type polev(scalar_type x,
-			const scalar_type*xarr,
-			const num_type*yarr,
-			int n, int m)
-  {
-    // given the arrays xarr, yarr, polev returns y(x) using m of n values.
-    int j, M;
-    switch(m) {
-    case 2 : 
-      M = find_for_polev_T<2>(j,n,xarr,x);
-      return polint_T<2>(xarr+j, yarr+j, x);
-    case 3 : 
-      M = find_for_polev_T<3>(j,n,xarr,x);
-      return polint_T<3>(xarr+j, yarr+j, x);
-    case 4 : 
-      M = find_for_polev_T<4>(j,n,xarr,x);
-      return polint_T<4>(xarr+j, yarr+j, x);
-    case 5 : 
-      M = find_for_polev_T<5>(j,n,xarr,x);
-      return polint_T<5>(xarr+j, yarr+j, x);
-    case 6 : 
-      M = find_for_polev_T<6>(j,n,xarr,x);
-      return polint_T<6>(xarr+j, yarr+j, x);
-    default: 
-      M = find_for_polev(j,n,m,xarr,x);
-      return polint(xarr+j, yarr+j, M, x);
-    }
-  }
-  //----------------------------------------------------------------------------
-  // polynomial interpolation using 4 of n values                               
-  template<typename scalar_type, typename num_type>
-  inline num_type polev(scalar_type x,
-			const scalar_type*xarr,
-			const num_type*yarr,
-			int n)
-  {
-    // given the arrays xarr, yarr, polev returns y(x) using 4 of n values.
-    int j, M=find_for_polev_T<4>(j,n,xarr,x);
-    return polint_T<4>(xarr+j, yarr+j, x);
-  }
-  //----------------------------------------------------------------------------
-  // like polev, but taking Array<T>
-  template<typename scalar_type, typename num_type>
-  inline num_type polev(scalar_type x,
-			const Array<scalar_type,1>&xarr,
-			const Array<num_type,1>&yarr)
-  {
-    if(xarr.size() != yarr.size()) error("size mismatch in polev()\n");
-    return polev(x,xarr.array(),yarr.array(),xarr.size());
-  }
-  //----------------------------------------------------------------------------
-  // supporting macro Polev() to act like polev(), but reporting file & line
-  class polev__ {
+  class FileLineFind {
+  protected:
     const char* file;
     const int   line;
+    /// find the index of the first point to be used in interpolation
+    /// \param[in] n size of table == total number of points
+    /// \param[in] m number of points used for interpolation
+    /// \param[in] x table of points
+    /// \param[in] xi point to be interpolated at
+    /// \param[in,out] j index of first point to be used in interpolation
+    /// \return number of points required in interpolation (1 or min{m,n})
+    template<typename X>
+    int find(int&j, int n, int m, const X*x, X xi)
+    {
+      int M=m<n? m:n;
+      j = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
+      j = hunt(x,n,xi,j) - (M+1)/2 + 1;
+      if(j>=0 && j<n && x[j]==xi) M = 1;
+      else if(j<0)		  j = 0;
+      else if(j>n-M)		  j = n-M;
+      return M;
+    }
+    /// constructor: take file and line
+    FileLineFind(const char*f, int l) : file(f), line(l) {}
+  };
+  //----------------------------------------------------------------------------
+  /// \name polynomial interpolation in 1D
+  //@{
+  /// polynomial interpolation using m (default 4) of n values
+  /// \param[in] xi position to find function value at
+  /// \param[in] x  array of points
+  /// \param[in] y  array of values
+  /// \param[in] n  total size of arrays
+  /// \param[in] m  number of points used in interpolation, default: 4
+  /// \note this function is implemented via macro polev
+  template<typename X, typename Y>
+  Y polev(X xi, const X*x, const Y*y, int n, int m=4) WDutils_THROWING;
+  /// polynomial interpolation using 4 of n values, taking Array<T> arguments
+  /// \param[in] xi position to find function value at
+  /// \param[in] x  array of points
+  /// \param[in] y  array of values
+  /// \note this function is implemented via macro polev
+  template<typename X, typename Y>
+  Y polev(X xi, const Array<X,1>&x, const Array<Y,1>&y) WDutils_THROWING;
+  /// supporting macro polev.
+  class PolynomialEvaluation : private FileLineFind {
+    /// polynomial interpolation using n values; adapted from NR
+    /// \param[in] x  array of points
+    /// \param[in] y  array of values
+    /// \param[in] n  number of points
+    /// \param[in] P  auxialiary array of size n
+    /// \param[in] xi position to be interpolated at
+    /// \return y(xi) as interpolated
+    template<typename X, typename Y>
+    Y polint(int n, const X*x, const Y*y, Y*P, X xi) WDutils_THROWING
+    {
+      for(int i=0;i!=n;++i)
+	P[i]=y[i];
+      for(int m=1;m!=n;++m)
+	for(int i=0;i<n-m;++i) {
+	  if(x[i]==x[i+m]) WDutils_THROW("x's not distinct in polev()");
+	  P[i]= ( (xi-x[i+m])*P[i] + (x[i]-xi)*P[i+1] ) / (x[i] - x[i+m]);
+	}
+      return P[0];
+    }
+    //..........................................................................
   public:
-    polev__(const char*f, int l) : file(f), line(l) {}
-    //..........................................................................
-    template<typename scalar_type, typename num_type>
-    num_type polint(const scalar_type *xa, const num_type *ya,
-		    int n, scalar_type x) WDutils_THROWING
+    /// constructor: take file and line
+    PolynomialEvaluation(const char*f, int l) : FileLineFind(f,l) {}
+    /// polynomial interpolation using m of n values
+    /// \param n  total size of arrays
+    /// \param m  number of points used in interpolation
+    /// \param xi position to find function value at
+    /// \param x  array of points
+    /// \param y  array of values
+    /// \note Together with the macro polev this implements the function
+    /// polev() for given m.
+    template<typename X, typename Y>
+    Y operator()(X xi, const X*x, const Y*y, int n, int m) WDutils_THROWING
     {
-      num_type y,*P=WDutils_NEW(num_type,n);
-      for(int i=0;i!=n;++i) P[i]=ya[i];
-      for(int m=1;m!=n;++m)
-	for(int i=0;i<n-m;++i) {
-	  if(xa[i]==xa[i+m])
-	    WDutils_THROW("[%s:%d]: in Polev(): xi's not distinct (x=%g)\n",
-			  file,line,x);
-	  P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
-	}
-      y = P[0];
+      int j;
+      Y*P = WDutils_NEW(Y,n);
+      Y yi= find(j,n,m,x,xi)==1? y[j] : polint(m,x+j,y+j,P,xi);
       WDutils_DEL_A(P);
-      return y;
+      return yi;
     }
-    //..........................................................................
-    template<int n, typename scalar_type, typename num_type>
-    num_type polint_T(const scalar_type*xa, const num_type*ya, scalar_type x)
-      WDutils_THROWING
+    /// polynomial interpolation using 4 of n values
+    /// \param n  total size of arrays
+    /// \param xi position to find function value at
+    /// \param x  array of points
+    /// \param y  array of values
+    /// \note Together with the macro polev this implements the function
+    /// polev() for m=4
+    template<typename X, typename Y> inline
+    Y operator()(X xi, const X*x, const Y*y, int n) WDutils_THROWING
     {
-      num_type y, P[n];
-      for(int i=0;i!=n;++i) P[i]=ya[i];
-      for(int m=1;m!=n;++m)
-	for(int i=0;i<n-m;++i) {
-	  if(xa[i]==xa[i+m])
-	    WDutils_THROW("[%s:%d]: in Polev(): xi's not distinct (x=%g)\n",
-			  file,line,x);
-	  P[i]= ( (x-xa[i+m])*P[i] + (xa[i]-x)*P[i+1] ) / (xa[i] - xa[i+m]);
-	}
-      y = P[0];    
-      return y;
+      int j;
+      Y P[4];
+      return find(j,n,4,x,xi)==1? y[j] : polint(4,x+j,y+j,P,xi);
     }
-    //..........................................................................
-    template<typename scalar_type, typename num_type>
-    num_type operator()(scalar_type x, const scalar_type*xarr,
-			const num_type*yarr, int n, int m) WDutils_THROWING
+    /// polynomial interpolation using 4 of n values, taking Array<T> arguments
+    /// \param xi position to find function value at
+    /// \param x  array of points
+    /// \param y  array of values
+    /// \note Together with the macro polev this implements the function
+    /// polev() for m=4 and Array<> arguments
+    template<typename X, typename Y>
+    Y operator()(X xi, const Array<X,1>&x, const Array<Y,1>&y) WDutils_THROWING
     {
-      int j, M;
-      switch(m) {
-      case 2 : 
-	M = find_for_polev_T<2>(j,n,xarr,x);
-	return polint_T<2>(xarr+j, yarr+j, x);
-      case 3 : 
-	M = find_for_polev_T<3>(j,n,xarr,x);
-	return polint_T<3>(xarr+j, yarr+j, x);
-      case 4 : 
-	M = find_for_polev_T<4>(j,n,xarr,x);
-	return polint_T<4>(xarr+j, yarr+j, x);
-      case 5 : 
-	M = find_for_polev_T<5>(j,n,xarr,x);
-	return polint_T<5>(xarr+j, yarr+j, x);
-      case 6 : 
-	M = find_for_polev_T<6>(j,n,xarr,x);
-	return polint_T<6>(xarr+j, yarr+j, x);
-      default: 
-	M = find_for_polev(j,n,m,xarr,x);
-	return polint(xarr+j, yarr+j, M, x);
-      }
-    }
-    //..........................................................................
-    template<typename scalar_type, typename num_type>
-    num_type operator()(scalar_type x, const scalar_type*xarr,
-			const num_type*yarr, int n)
-    {
-      int j, M=find_for_polev_T<4>(j,n,xarr,x);
-      return polint_T<4>(xarr+j, yarr+j, x);
-    }
-    //..........................................................................
-    template<typename scalar_type, typename num_type>
-    num_type operator()(scalar_type x, const Array<scalar_type,1>&xarr,
-			const Array<num_type,1>&yarr) WDutils_THROWING
-    {
-      if(xarr.size() != yarr.size())
-	WDutils_THROW("[%s:%d]: size mismatch in Polev()\n",file,line);
-      return (*this)(x,xarr.array(),yarr.array(),xarr.size());
+      if(x.size() != y.size())
+	WDutils_THROW("[%s:%d]: Array size mismatch in polev()",file,line);
+      return operator()(xi,x.array(),y.array(),x.size());
     }
   };
-#define Polev WDutils::polev__(__FILE__,__LINE__)
+  /// macro polev: implements functions polev().
+  /// The idea is to implement the "functions" polev() via a macro such that
+  /// on error the file and line of the call to polev() can be reported. \n
+  /// The trick is simple: the macro expands code like
+  /// \code polev(xi,x,y,n); \endcode into
+  /// \code PolynomialEvaluation(__FILE__,__LINE__)(xi,x,y,n); \endcode
+  /// The first argument list invokes the constructor and the second the
+  /// operator() members of class PolynomialEvaluation.
+#define polev WDutils::PolynomialEvaluation(__FILE__,__LINE__)
   //----------------------------------------------------------------------------
-  template<typename scalar_type, typename num_type>
-  inline num_type ipolev(scalar_type x,
-			 const scalar_type*xarr,
-			 const num_type   *yarr,
-			 int n, int m)
+  /// like polev(), but no extrapolation; gives boundary values instead
+  template<typename X, typename Y>
+  inline Y ipolev(X xi, const X*x, const Y*y, int n, int m)
   {
-    // like polev, but no extrapolation. gives boundary values instead          
-    if(x < xarr[0]   && xarr[0]   < xarr[n-1]) return yarr[0];
-    if(x > xarr[0]   && xarr[0]   > xarr[n-1]) return yarr[0];
-    if(x > xarr[n-1] && xarr[n-1] > xarr[0]  ) return yarr[n-1];
-    if(x < xarr[n-1] && xarr[n-1] < xarr[0]  ) return yarr[n-1];
-    return polev<scalar_type,num_type>(x,xarr,yarr,n,m);
+    if(xi < x[0]   && x[0]   < x[n-1]) return y[0];
+    if(xi > x[0]   && x[0]   > x[n-1]) return y[0];
+    if(xi > x[n-1] && x[n-1] > x[0]  ) return y[n-1];
+    if(xi < x[n-1] && x[n-1] < x[0]  ) return y[n-1];
+    return polev(xi,x,y,n,m);
   }
   //----------------------------------------------------------------------------
-  template<typename scalar_type, typename num_type>
-  inline num_type ipolev(scalar_type x,
-			 const scalar_type*xarr,
-			 const num_type*yarr,
-			 int n)
+  /// like polev(), but no extrapolation; gives boundary values instead
+  template<typename X, typename Y>
+  inline Y ipolev(X xi, const X*x, const Y*y, int n)
   {
-    // like polev, but no extrapolation. gives boundary values instead          
-    if(x < xarr[0]   && xarr[0]   < xarr[n-1]) return yarr[0];
-    if(x > xarr[0]   && xarr[0]   > xarr[n-1]) return yarr[0];
-    if(x > xarr[n-1] && xarr[n-1] > xarr[0]  ) return yarr[n-1];
-    if(x < xarr[n-1] && xarr[n-1] < xarr[0]  ) return yarr[n-1];
-    return polev<scalar_type,num_type>(x,xarr,yarr,n);
+    if(xi < x[0]   && x[0]   < x[n-1]) return y[0];
+    if(xi > x[0]   && x[0]   > x[n-1]) return y[0];
+    if(xi > x[n-1] && x[n-1] > x[0]  ) return y[n-1];
+    if(xi < x[n-1] && x[n-1] < x[0]  ) return y[n-1];
+    return polev(xi,x,y,n);
   }
+  //@}
   //----------------------------------------------------------------------------
   // root finding                                                               
   //----------------------------------------------------------------------------
