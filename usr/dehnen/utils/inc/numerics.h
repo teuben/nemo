@@ -374,29 +374,15 @@ namespace WDutils {
       else if(j>n-M)		  j = n-M;
       return M;
     }
+    /// default constructor
+    FileLineFind() : file(0), line(0) {}
     /// constructor: take file and line
     FileLineFind(const char*f, int l) : file(f), line(l) {}
   };
   //----------------------------------------------------------------------------
   /// \name polynomial interpolation in 1D
   //@{
-  /// polynomial interpolation using m (default 4) of n values
-  /// \param[in] xi position to find function value at
-  /// \param[in] x  array of points
-  /// \param[in] y  array of values
-  /// \param[in] n  total size of arrays
-  /// \param[in] m  number of points used in interpolation, default: 4
-  /// \note this function is implemented via macro polev
-  template<typename X, typename Y>
-  Y polev(X xi, const X*x, const Y*y, int n, int m=4) WDutils_THROWING;
-  /// polynomial interpolation using 4 of n values, taking Array<T> arguments
-  /// \param[in] xi position to find function value at
-  /// \param[in] x  array of points
-  /// \param[in] y  array of values
-  /// \note this function is implemented via macro polev
-  template<typename X, typename Y>
-  Y polev(X xi, const Array<X,1>&x, const Array<Y,1>&y) WDutils_THROWING;
-  /// supporting macro polev.
+  /// supporting macro Polev.
   class PolynomialEvaluation : private FileLineFind {
     /// polynomial interpolation using n values; adapted from NR
     /// \param[in] x  array of points
@@ -412,13 +398,20 @@ namespace WDutils {
 	P[i]=y[i];
       for(int m=1;m!=n;++m)
 	for(int i=0;i<n-m;++i) {
-	  if(x[i]==x[i+m]) WDutils_THROW("x's not distinct in polev()");
+	  if(x[i]==x[i+m]) {
+	    if(file)
+	      WDutils_THROW("[%s:%d]: x's not distinct in Polev()",file,line);
+	    else
+	      WDutils_THROW("x's not distinct in polev()");
+	  }
 	  P[i]= ( (xi-x[i+m])*P[i] + (x[i]-xi)*P[i+1] ) / (x[i] - x[i+m]);
 	}
       return P[0];
     }
     //..........................................................................
   public:
+    /// default constructor
+    PolynomialEvaluation() : FileLineFind() {}
     /// constructor: take file and line
     PolynomialEvaluation(const char*f, int l) : FileLineFind(f,l) {}
     /// polynomial interpolation using m of n values
@@ -462,19 +455,53 @@ namespace WDutils {
     Y operator()(X xi, const Array<X,1>&x, const Array<Y,1>&y) WDutils_THROWING
     {
       if(x.size() != y.size())
-	WDutils_THROW("[%s:%d]: Array size mismatch in polev()",file,line);
+	if(file)
+	  WDutils_THROW("[%s:%d]: Array size mismatch in Polev()",file,line);
+	else
+	  WDutils_THROW("Array size mismatch in polev()",file,line);
       return operator()(xi,x.array(),y.array(),x.size());
     }
   };
-  /// macro polev: implements functions polev().
-  /// The idea is to implement the "functions" polev() via a macro such that
+  /// macro Polev: implements functions Polev() like polev().
+  /// The idea is to implement the "functions" Polev() via a macro such that
   /// on error the file and line of the call to polev() can be reported. \n
   /// The trick is simple: the macro expands code like
   /// \code polev(xi,x,y,n); \endcode into
   /// \code PolynomialEvaluation(__FILE__,__LINE__)(xi,x,y,n); \endcode
   /// The first argument list invokes the constructor and the second the
-  /// operator() members of class PolynomialEvaluation.
-#define polev WDutils::PolynomialEvaluation(__FILE__,__LINE__)
+  /// operator() members of class PolynomialEvaluation.\n
+  /// \note We provide ordinary functions polev() within the namespace WDutils
+  ///       with the same semantics as Polev(). The only difference being (i)
+  ///       the error reporting (with file and line number in Polev()) and (ii)
+  ///       the fact that Polev as a macro is in the global namespace
+#define Polev WDutils::PolynomialEvaluation(__FILE__,__LINE__)
+  /// polynomial interpolation using m of n values
+  /// \param[in] xi position to find function value at
+  /// \param[in] x  array of points
+  /// \param[in] y  array of values
+  /// \param[in] n  total size of arrays
+  /// \param[in] m  number of points used in interpolation
+  template<typename X, typename Y>
+  inline Y polev(X xi, const X*x, const Y*y, int n, int m) WDutils_THROWING {
+    return PolynomialEvaluation(0,0)(xi,x,y,n,m);
+  }
+  /// polynomial interpolation using 4 of n values
+  /// \param[in] xi position to find function value at
+  /// \param[in] x  array of points
+  /// \param[in] y  array of values
+  /// \param[in] n  total size of arrays
+  template<typename X, typename Y>
+  inline Y polev(X xi, const X*x, const Y*y, int n) WDutils_THROWING {
+    return PolynomialEvaluation(0,0)(xi,x,y,n);
+  }
+  /// polynomial interpolation using 4 of n values, taking Array<T> arguments
+  /// \param[in] xi position to find function value at
+  /// \param[in] x  array of points
+  /// \param[in] y  array of values
+  template<typename X, typename Y>
+  inline Y polev(X xi, const Array<X,1>&x, const Array<Y,1>&y) WDutils_THROWING{
+    return PolynomialEvaluation()(xi,x,y);
+  }
   //----------------------------------------------------------------------------
   /// like polev(), but no extrapolation; gives boundary values instead
   template<typename X, typename Y>
@@ -499,65 +526,81 @@ namespace WDutils {
   }
   //@}
   //----------------------------------------------------------------------------
-  // root finding                                                               
-  //----------------------------------------------------------------------------
-  template <typename scalar_type>
-  scalar_type rtsafe(void(*func)(scalar_type,scalar_type&,scalar_type&),
-		     scalar_type x1,
-		     scalar_type x2,
-		     scalar_type xacc) throw(WDutils::exception)
-  {
-    const int   maxit=100;
-    scalar_type xh,xl,dx,dxo,f,df,fh,fl,rts,temp;
-    func(x1,fl,df);
-    func(x2,fh,df);
-    if(fl*fh >= 0.) 
-      throw WDutils::exception("[%s.%d]: in rtsafe(): root must be bracketed",
-			       __FILE__,__LINE__);
-//     WDutils_ErrorF("root must be bracketed","rtsafe()");
-    if(fl<0.) {
-      xl  = x1;
-      xh  = x2;
-    } else {
-      xh  = x1;
-      xl  = x2;
-      temp= fl;
-      fl  = fh;
-      fh  = temp;
-    }
-    rts = 0.5*(x1+x2);
-    dxo = abs(x2-x1);
-    dx  = dxo;
-    func(rts,f,df);
-    for(int j=0; j!=maxit; ++j) {
-      if((((rts-xh)*df-f)*((rts-xl)*df-f)>= 0.) || (abs(2.*f)>abs(dxo*df))) {
-	dxo = dx;
-	dx  = 0.5*(xh-xl);
-	rts = xl+dx;
-	if(xl==rts) return rts;
-      } else {
-	dxo = dx;
-	dx  = f/df;
-	temp=rts;
-	rts-= dx;
-	if(temp==rts) return rts;
+  /// \name root finding
+  //@{
+  class RootSafe: private FileLineFind {
+  public:
+    RootSafe() : FileLineFind() {}
+    RootSafe(const char*f, int l) : FileLineFind(f,l) {}
+    template <typename X>
+    X operator() (void(*func)(X,X&,X&), X x1, X x2, X xacc)
+      throw(WDutils::exception)
+    {
+      const int maxit=100;
+      X xh,xl,dx,dxo,f,df,fh,fl,rts,temp;
+      func(x1,fl,df);
+      func(x2,fh,df);
+      if(fl*fh >= 0.) {
+	if(file)
+	  throw exception("[%s.%d]: root must be bracketed in Rtsafe()",
+			  file,line);
+	else
+	  throw exception("root must be bracketed rtsafe()");
       }
-      if(abs(dx)<xacc) return rts;
+      if(fl<0.) {
+	xl  = x1;
+	xh  = x2;
+      } else {
+	xh  = x1;
+	xl  = x2;
+	temp= fl;
+	fl  = fh;
+	fh  = temp;
+      }
+      rts = 0.5*(x1+x2);
+      dxo = abs(x2-x1);
+      dx  = dxo;
       func(rts,f,df);
-      if(f<0.) {
-	xl  = rts;
-	fl  = f;
-      } else {
-	xh  = rts;
-	fh  = f;
+      for(int j=0; j!=maxit; ++j) {
+	if((((rts-xh)*df-f)*((rts-xl)*df-f)>= 0.) || (abs(2.*f)>abs(dxo*df))) {
+	  dxo = dx;
+	  dx  = 0.5*(xh-xl);
+	  rts = xl+dx;
+	  if(xl==rts) return rts;
+	} else {
+	  dxo = dx;
+	  dx  = f/df;
+	  temp=rts;
+	  rts-= dx;
+	  if(temp==rts) return rts;
+	}
+	if(abs(dx)<xacc) return rts;
+	func(rts,f,df);
+	if(f<0.) {
+	  xl  = rts;
+	  fl  = f;
+	} else {
+	  xh  = rts;
+	  fh  = f;
+	}
       }
+      if(file)
+	throw exception("[%s.%d]: "
+			"maximum number of %d iterations exceeded in Rtsafe()",
+			file,line,maxit);
+      else
+	throw exception("maximum number of %d iterations exceeded in rtsafe()",
+			maxit);
+      return rts;
     }
-    throw WDutils::exception("[%s.%d]: in rtsafe(): "
-			     "max number of iterations exceeded",
-			     __FILE__,__LINE__);
-//     WDutils_WarningF("max number of iterations exceeded","rtsafe()");
-    return rts;
+  };
+#define Rtsafe WDutils::RootSafe(__FILE__,__LINE__)
+  template <typename X>
+  X rtsafe(void(*func)(X,X&,X&), X x1, X x2, X xacc) throw(WDutils::exception)
+  {
+    return RootSafe()(func,x1,x2,xacc);
   }
+  //@}
   //----------------------------------------------------------------------------
   // bracketing a minimum                                                       
   //----------------------------------------------------------------------------
