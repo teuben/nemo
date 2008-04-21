@@ -63,7 +63,7 @@ namespace falcON {
     real z(real y) const {                         // z(y) = 1/theta - 1        
       if(y < Y[ 0]) return std::pow(y,hA);
       if(y > Y[N1]) return std::pow(y,sA);
-      return polev(y,Y,Z,N);
+      return Polev(y,Y,Z,N);
     }    
   public:
     //--------------------------------------------------------------------------
