@@ -3,10 +3,10 @@
 #  Install GCC for NEMO ; from a source tree compilating and installation
 #  would take about XXX mins on a 2.8 GHz P4.
 #
-#  For astromake, a more typical call would be:
+#  For 'astromake', a more typical call would be:
 #  
-#  set version=4.0.2
-#  ..../gcc.install src=gcc-$version  prefix=$ASTROMAKE/opt/gcc/$version version=$version fc=f95
+#  set version=4.2.3
+#  ..../gcc.install src=gcc-$version  prefix=$ASTROMAKE/opt/gcc/$version version=$version fc=fortran
 # 
 
 if ($?NEMO == 0) set NEMO=`pwd`
