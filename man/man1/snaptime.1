@@ -1,0 +1,31 @@
+.TH SNAPTIME 1NEMO "30 April 2008"
+.SH NAME
+snaptime \- copy an N-body snapshot with a new time
+.SH SYNOPSIS
+\fBsnaptime\fP [parameter=value]
+.SH DESCRIPTION
+Copies snapshot(s) while resetting time.  It will warn if more than one
+snapshot is found. Use \fIsnapcopy(1NEMO)\fP if selections on time
+are needed.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input snapshot [???]     
+.TP 
+\fBout=\fP
+Output snapshot [???]     
+.TP 
+\fBtime=\fP
+Time to set [0.0]    
+.SH SEE ALSO
+snapcopy(1NEMO), snapmask(1NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-Apr-08	V0.1 Finally committed		PJT
+.fi
