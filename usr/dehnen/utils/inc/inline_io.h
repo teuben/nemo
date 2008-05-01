@@ -334,7 +334,7 @@ namespace WDutils {
   struct smanip_fp_width {
     X   x;
     int p,w;
-    int width(X l) { // given precision, what is minimum width
+    int width(double l) { // given precision, what is minimum width
       int il = 1+int(l);
       int fw = l<0? 3+p-il : il>=p? il : p+1;
       int ew = p+5;
@@ -344,7 +344,7 @@ namespace WDutils {
     smanip_fp_width(X __x, int __w, int __p) : x(__x), p(__p), w(__w)
     {
       if(x == 0) return;
-      X l=std::log10(std::abs(x));
+      double l=std::log10(std::abs(x));
       w =std::max(w,width(l));       // minimum width to achieve
       for(++p; width(l)<=w; ++p);    // try for more precision
       --p;
