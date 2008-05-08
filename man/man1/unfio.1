@@ -1,4 +1,4 @@
-.TH UNFIO 1NEMO "4 March 2006"
+.TH UNFIO 1NEMO "8 May 2008"
 .SH NAME
 unfio \- access fortran unformatted I/O files
 .SH SYNOPSIS
@@ -10,7 +10,7 @@ FORTRAN program with the \fIform='unformatted'\fP OPEN statement.
 It is currently only implemented for BSD-type fortran compilers with
 arbitrary endianism of the bytes (i.e. probably excluding 
 VMS and Cray compilers). Depending on the compiler, the header
-size can be 8 instead of the classic 4. See \fBheader=\P below.
+size can be 8 instead of the classic 4. See \fBheader=\fP below.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -52,12 +52,12 @@ the actual data. Programmers must still do this themselves. If using a
 specific block to display, the data bytes are swapped based on the
 data type given by \fBtype=\fP.
 .TP 
-\fBheader=|4|8\fP
+\fBheader=|0|4|8\fP
 Size of the header uses in unformatted fortran data. This used to be 4,
 but modern compilers (e.g. gfortran) may very well use 8. By default it
 is not specified, and the value determined to be the correct one during
 install (UNFIO_HDR_SIZE) is used. This keyword can be used to force
-another value.
+another value. 0 is also supported to read raw binary data.
 .SH EXAMPLES
 Suppose we have a dataset that somebody dumped via fortran, and 
 .nf
@@ -72,6 +72,13 @@ the following way
 .nf
 unfio dump.dat - 2 f maxbuf=2400000 | tabtos - pos.snap nbody=200000 time=1
 .fi
+.PP
+Here is an example of reading the frequency table of a miriad bandpass calibration
+file with 6 spectral windows, on an little endian architecture machine:
+.nf
+   % unfio vis/freqs header=0 maxbuf=152 format=%g block=1 count=1 swap=t type=d
+   % unfio vis/freqs header=0 maxbuf=152 format=%d block=1 count=t swap=t type=i
+.fi
 .SH SEE ALSO
 bswap(1NEMO), unfio(3NEMO), bswap(3NEMO)
 .SH AUTHOR
@@ -85,4 +92,5 @@ Peter Teuben
 19-mar-99	V2.1 out= also uses select= now 	PJT
 1-mar-06	V2.2 added header=4|8	PJT
 4-mar-06	V2.3 header=now blank value	PJT
+8-may-08	V2.4 support header=0	PJT
 .fi
