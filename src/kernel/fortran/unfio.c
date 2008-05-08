@@ -15,6 +15,7 @@
  *   20-jun-01  gcc3
  *    1-mar-06  added unfsize; gfortran uses int8 (long long) instead of int4
  *    4-mar-06  using new autoconf computed value appropriate for this fortran
+ *    8-may-08  support for header=0
  *   
  * 
  *   TODO: with a keyword like ssize=4::20,8::10,1::100
@@ -104,7 +105,10 @@ int unfscan(stream fp)
 	warning("unfscan8: head and tail of databuffer not the same: swap or header size error\n");
 	return -2;
       } 
-    } else
+    } else if (hdr_size == 0) {
+      warning("trying  with size=0 meaning file in one shot....");
+      return 0;
+    } else 
       error("unfscan: unsupported hdr_size = %d",hdr_size);
 
     return size0;
@@ -131,7 +135,10 @@ int unfread(stream fp, char *buf, int bufsize)
       if (n!=1) return 0;
       if (do_swap) bswap(&lsize, hdr_size, 1);
       size = lsize; /* ieck, need to switch to size_t */
-    } else
+    } else if (hdr_size == 0) {
+      size = bufsize;
+      dprintf(1,"unfread: skipping 0 header, setting size=%d\n",size);
+    } else 
       error("unfread: unsupported hdr_size=%d",hdr_size);
     dprintf(2,"unfread: header %d\n",size);
 
@@ -155,6 +162,8 @@ int unfread(stream fp, char *buf, int bufsize)
       if (n != 1) return 0;
       if (do_swap) bswap(&lsize1, hdr_size, 1);
       size1 = lsize1;
+    } else if (hdr_size == 0) {
+      size1 = size;
     } else
        error("unfread: unsupported hdr_size=%d",hdr_size);
 
@@ -181,8 +190,8 @@ string defv[] = {
         "count=f\n          display element counter too?",
         "maxbuf=10000\n     buffersize in bytes, to read a block",
 	"swap=f\n           swapped read?",
-	"header=\n          if needed, force header size of fortran unformatted files (4 or 8)",
-        "VERSION=2.4\n	    4-mar-06 PJT",
+	"header=\n          if needed, force header size of fortran unformatted files (0, 4 or 8)",
+        "VERSION=2.5\n	    8-may-08 PJT",
         NULL,
 };
 
@@ -269,7 +278,6 @@ void my_display(int n, char *buf, string type, string fmt,
             error("Error writing block");
         return;
     }
-
 
     switch (*type) {
     case 'i':
