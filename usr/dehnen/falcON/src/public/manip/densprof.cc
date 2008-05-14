@@ -4,11 +4,11 @@
 /// \file   src/public/manip/densprof.cc                                        
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006                                                                
+/// \date   2006,2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006 Walter Dehnen                                             
+// Copyright (C) 2006,2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -31,6 +31,7 @@
 // v 0.0    02/05/2006  WD created                                              
 // v 0.1    07/07/2006  WD using bodies in_subset()                             
 // v 0.2    27/07/2006  WD made public                                          
+// v 0.3    13/05/2008  WD debugged error with minor & major axes               
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -154,14 +155,14 @@ namespace falcON { namespace Manipulate {
   };
   //////////////////////////////////////////////////////////////////////////////
   densprof::densprof(const double*pars,
-		   int          npar,
-		   const char  *file) falcON_THROWING
+		     int          npar,
+		     const char  *file) falcON_THROWING
   : W    ( npar>0?     int(pars[0])    : W_default ),
     STEP ( npar>1?         pars[1]     : 0. ),
     I    ( 0 ),
     FST  ( true ),
     FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
-    PS   ( 2 )
+    PS   ( 3 )
   {
     if(debug(2) || file==0 || file[0]==0 || npar>2)
       std::cerr<<
@@ -182,8 +183,8 @@ namespace falcON { namespace Manipulate {
   inline void densprof::print_line() const
   {
     OUT <<
-      "#---------------------------------------------------------------"
-      "----------------------------------------------------------------"
+      "#--------------------------------------------------------------"
+      "---------------------------------------------------------------"
       "-------------"
       "-------------"
 	<< PS.line_dir() << PS.line_dir() << PS.line_dir() <<'\n';
@@ -229,7 +230,7 @@ namespace falcON { namespace Manipulate {
     OUT <<"# time = "<<SHOT->time()<<": "<<Nb
 	<<" bodies (of "<<SHOT->N_bodies()
         <<")\n#\n"
-	<<"#              xcen                           vcen            "
+	<<"#              xcen                          vcen           "
 	<<"   radius "
 	<<"      rho "
 	<<"  <v_rad> "
@@ -239,7 +240,7 @@ namespace falcON { namespace Manipulate {
 	<<"sigma_rot "
 	<<"      c/a "
 	<<"      b/a "
-	<<"    major axis     minor axis  rotation axis\n";
+	<<"       major axis        minor axis     rotation axis\n";
     print_line();
     Array<real> Rq(W+W);
     Array<int>  Ir(W+W);
@@ -310,21 +311,21 @@ namespace falcON { namespace Manipulate {
       double st = sqrt(Mvtq*iM);
       double sp = sqrt(M*Mvpq-Mvp*Mvp)*iM;
       // finally print out the data
-      OUT << setprecision(3)
-	  << setw(9) << X0                <<' '  // centre position
-	  << setw(9) << V0                <<' '  // centre velocity
-	  << setw(9) << mR                <<' '  // median radius
-	  << setw(9) << Rho               <<' '  // density
-	  << setw(9) << vr                <<' '  // <v_r>
-	  << setw(9) << vp                <<' '  // <v_rot>
-	  << setw(9) << sr                <<' '  // sigma_r
-	  << setw(9) << st                <<' '  // sigma_mer
-	  << setw(9) << sp                <<' '  // sigma_rot
-	  << setw(9) << sqrt(ID[2]/ID[0]) <<' '  // axis ratio c/a
-	  << setw(9) << sqrt(ID[1]/ID[0]) <<' '; // axis ratio b/a
-      PS.print_dir(OUT, vect_d(IV[0])) << ' ';
-      PS.print_dir(OUT, vect_d(IV[2])) << ' ';
-      PS.print_dir(OUT, erot) << std::endl;
+      OUT << print(X0 ,9,3)               <<' '  // centre position
+	  << print(V0 ,9,3)               <<' '  // centre velocity
+	  << print(mR ,9,3)               <<' '  // median radius
+	  << print(Rho,9,3)               <<' '  // density
+	  << print(vr ,9,3)               <<' '  // <v_r>
+	  << print(vp ,9,3)               <<' '  // <v_rot>
+	  << print(sr ,9,3)               <<' '  // sigma_r
+	  << print(st ,9,3)               <<' '  // sigma_mer
+	  << print(sp ,9,3)               <<' '  // sigma_rot
+	  << print(sqrt(ID[2]/ID[0]),9,3) <<' '  // axis ratio c/a
+	  << print(sqrt(ID[1]/ID[0]),9,3) <<' '; // axis ratio b/a
+      Transpose<3>(IV);
+      PS.print_dir(OUT,IV[0]) << ' ';
+      PS.print_dir(OUT,IV[2]) << ' ';
+      PS.print_dir(OUT,erot ) << std::endl;
     }
     return false;
   }

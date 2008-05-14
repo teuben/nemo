@@ -352,6 +352,7 @@ namespace WDutils {
   }
   //@}
   //----------------------------------------------------------------------------
+  /// class to support reporting file and line number on error
   class FileLineFind {
   protected:
     const char* file;
@@ -364,7 +365,7 @@ namespace WDutils {
     /// \param[in,out] j index of first point to be used in interpolation
     /// \return number of points required in interpolation (1 or min{m,n})
     template<typename X>
-    int find(int&j, int n, int m, const X*x, X xi)
+    static int find(int&j, int n, int m, const X*x, X xi)
     {
       int M=m<n? m:n;
       j = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
@@ -464,9 +465,9 @@ namespace WDutils {
   };
   /// macro Polev: implements functions Polev() like polev().
   /// The idea is to implement the "functions" Polev() via a macro such that
-  /// on error the file and line of the call to polev() can be reported. \n
+  /// on error the file and line of the call to Polev() can be reported. \n
   /// The trick is simple: the macro expands code like
-  /// \code polev(xi,x,y,n); \endcode into
+  /// \code Polev(xi,x,y,n); \endcode into
   /// \code PolynomialEvaluation(__FILE__,__LINE__)(xi,x,y,n); \endcode
   /// The first argument list invokes the constructor and the second the
   /// operator() members of class PolynomialEvaluation.\n
@@ -528,6 +529,7 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// \name root finding
   //@{
+  /// encodes NR rtsafe
   class RootSafe: private FileLineFind {
   public:
     RootSafe() : FileLineFind() {}
@@ -594,12 +596,21 @@ namespace WDutils {
       return rts;
     }
   };
-#define Rtsafe WDutils::RootSafe(__FILE__,__LINE__)
+  /// like NR rtsafe
+  /// \return root: x value at which f(x)=0
+  /// \param[in] func function returning f & df/dx (args 2&3) given x (1st arg)
+  /// \param[in] x1   left boundary of interval
+  /// \param[in] x2   right boundary of interval
+  /// \param[in] xacc desired accuracy for root
+  /// \note f(x1)*f(x2) \b must not be positive on input
   template <typename X>
   X rtsafe(void(*func)(X,X&,X&), X x1, X x2, X xacc) throw(WDutils::exception)
   {
     return RootSafe()(func,x1,x2,xacc);
   }
+  /// macro with same functionality as function rtsafe() above, except that on
+  /// error file and line number of the call are reported.
+#define Rtsafe WDutils::RootSafe(__FILE__,__LINE__)
   //@}
   //----------------------------------------------------------------------------
   // bracketing a minimum                                                       
@@ -725,28 +736,27 @@ namespace WDutils {
     return fx;
   }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// Burlisch-Stoer integration of 1D real integrals                           
-  //                                                                            
-  /// \return approximated value for integral                                   
-  /// \param  func  (input) pointer to function to be integrated                
-  /// \param  a     (input) lower boundary of integration interval              
-  /// \param  b     (input) upper boundary of integration interval              
-  /// \param  eps   (input) desired relative accuracy                           
-  /// \param  err   (output, optional) actual relative error of the return value
-  /// \param  abort (input, optional) abort if exceeding maximum of iterations? 
-  /// \param  miter (input, optional) maximum number of iterations              
+  //
+  /// Burlisch-Stoer integration of 1D real integrals
+  //
+  /// \return approximated value for integral
+  /// \param[in]  func  pointer to function to be integrated
+  /// \param[in]  a     lower boundary of integration interval
+  /// \param[in]  b     upper boundary of integration interval
+  /// \param[in]  eps   desired relative accuracy
+  /// \param[out] err   (optional) actual relative error of the return value
+  /// \param[in]  abort (optional) abort if exceeding maximum of iterations?
+  /// \param[in]  miter (optional) maximum number of iterations
   ///                                                                           
   /// Quadrature program using the Bulirsch sequence and rational extrapolation.
-  /// The algorithm is puplished in Bulirsch & Stoer, Num. Math. 9, 271-278     
-  /// (1967), where a routine in ALGOL is given. This is a straightforward      
-  /// translation into C++.                                                     
-  ///                                                                           
-  /// \note CAUTION:                                                            
-  /// Do not use this routine for integrating low order polynomials (up to      
-  /// fourth order) or periodic functions with period equal to the interval of  
-  /// integration or linear combinations of both.                               
-  //                                                                            
+  /// The algorithm is puplished in Bulirsch & Stoer, Num. Math. 9, 271-278
+  /// (1967), where a routine in ALGOL is given. This is a straightforward
+  /// translation into C++.
+  ///
+  /// \warning Do not use this routine for integrating low order polynomials (up
+  /// to fourth order) or periodic functions with period equal to the interval
+  /// of integration or linear combinations of both.
+  //
   // ///////////////////////////////////////////////////////////////////////////
   double qbulir(double(*func)(double),
 		double  a,
@@ -845,27 +855,23 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   void GaussLegendre(double*, double*, unsigned);
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// \name eigensystem of symmetric matrix                                     
-  //@{                                                                          
-  //                                                                            
-  /// \name eigensystem of symmetric matrix using Jacobi transformation         
-  //@{                                                                          
-  //                                                                            
+  //
+  /// \name eigensystem of symmetric matrix using Jacobi transformation
+  /// \note not fully tested
+  //@{
   // ---------------------------------------------------------------------------
-  /// Eigen values and vector for symmetric matrix using Jacobi transformation  
-  ///                                                                           
-  /// \param N (template parameter) size of matrix                              
-  /// \param X (template parameter) scalar type (either float or double)        
-  /// \param M (input)  matrix                                                  
-  /// \param V (output) matrix with Eigenvectors                                
-  /// \param D (output) vector with Eigenvalues                                 
-  /// \param R (output) number of rotations required                            
-  ///                                                                           
-  /// The eigen values and vectors of a symmetric matrix are computed using     
-  /// Jacobi transformations (see NR section 11.1). This is not efficient for   
-  /// efficient for large N, hence we have coded N as template parameter.       
-  // ---------------------------------------------------------------------------
+  /// Eigen values and vectors for symmetric matrix using Jacobi transformation
+  /// \param      N (template parameter) size of matrix
+  /// \param      X (template parameter) scalar type (either float or double)
+  /// \param[in]  M  symmetric matrix
+  /// \param[out] V  matrix with Eigenvectors of M
+  /// \param[out] D  vector with Eigenvalues of M
+  /// \param[out] R  number of rotations required
+  ///
+  /// The eigen values and vectors of a symmetric matrix are computed using
+  /// Jacobi transformations (see NR section 11.1). This is not efficient for
+  /// efficient for large N, hence we have coded N as template parameter.
+  /// --------------------------------------------------------------------------
   template<int N, typename X>
   void EigenSymJacobi(const X M[N][N], X V[N][N], X D[N], int&R)
   {
@@ -944,12 +950,12 @@ namespace WDutils {
     error("EigenSymJacobi(): number iteration exceeds %d\n",MaxIter);
   }
   // ---------------------------------------------------------------------------
-  /// function template sorting the eigenvalues & vectors                       
-  ///                                                                           
-  /// \param N (template parameter) size of matrix                              
-  /// \param X (template parameter) scalar type (either float or double)        
-  /// \param V (input/output)  matrix with Eigenvectors                         
-  /// \param D (input/output)  vector with Eigenvalues                          
+  /// function template sorting the eigenvalues & vectors by straight insertion
+  ///
+  /// \param         N (template parameter) size of matrix
+  /// \param         X (template parameter) scalar type (float or double)
+  /// \param[in,out] V  matrix with Eigenvectors
+  /// \param[in,out] D  vector with Eigenvalues
   // ---------------------------------------------------------------------------
   template<int N, typename X>
   void EigenSort(X V[N][N], X D[N])
@@ -970,21 +976,14 @@ namespace WDutils {
     }
   }
   // ---------------------------------------------------------------------------
-  /// Sorted eigen values and vector of symmetric matrix with Jacobi transform  
-  ///                                                                           
-  /// \param N (template parameter) size of matrix                              
-  /// \param X (template parameter) scalar type (either float or double)        
-  /// \param M (input)  matrix                                                  
-  /// \param V (output) matrix with Eigenvectors                                
-  /// \param D (output) vector with Eigenvalues                                 
-  /// \param R (output) number of rotations required                            
-  ///                                                                           
-  /// This combines EigenSymJacobi() and EigenSort() via                        
-  /// \code                                                                     
-  ///   EigenSymJacobi(M,V,D,R);                                                
-  ///   EigenSort(V,D);                                                         
-  /// \endcode                                                                  
-  // ---------------------------------------------------------------------------
+  /// Sorted eigen values and vectors of symmetric matrix with Jacobi transform
+  /// \param      N  (template parameter) size of matrix
+  /// \param      X  (template parameter) scalar type (float or double)
+  /// \param[in]  M  symmetric matrix
+  /// \param[out] V  matrix with Eigenvectors, sorted
+  /// \param[out] D  vector with Eigenvalues = columns, sorted
+  /// \param[out] R  number of rotations required
+  /// This routine simply combines EigenSymJacobi() and EigenSort().
   template<int N, typename X>
   void EigenSymJacobiSorted(const X M[N][N], X V[N][N], X D[N], int&R)
   {
@@ -992,75 +991,82 @@ namespace WDutils {
     EigenSort(V,D);
   }
   //@}                                                                          
-  //                                                                            
-  /// \name eigensystem of symmetric matrix using Householder transformation    
-  //@{                                                                          
-  //                                                                            
   // ---------------------------------------------------------------------------
-  /// reduce real symmetric matrix to tridiagonal form                          
-  ///                                                                           
-  /// \param T (template parameter) prepare for eigenvector extraction?         
-  /// \param X (template parameter) only \a X=float and \a X=double are         
-  ///          implemented                                                      
-  /// \param N (input)  size of matrix                                          
-  /// \param A on input: real symmetric matrix,                                 
-  ///          on putput: input required by \a EigenSystemTridiagonal()         
-  /// \param D (output) diagonal elements of tridiagonal form                   
-  /// \param E (output) off-diagonal elements of tridiagonal form               
-  ///                                                                           
-  /// Householder reduction of a real symmetric matrix                          
+  /// replaces matrix M with its transposed
+  template<int N, typename X>
+  void Transpose(X M[N][N])
+  {
+    for(int i=1; i!=N; ++i)
+      for(int j=0; j!=i; ++j)
+	swap(M[i][j], M[j][i]);
+  }
+  // ---------------------------------------------------------------------------
+  /// \name eigensystem of symmetric matrix using Householder transformation
+  /// \note not fully tested
+  //@{
+  // ---------------------------------------------------------------------------
+  /// reduce real symmetric matrix to tridiagonal form
+  /// \param T (template parameter) prepare for eigenvector extraction?
+  /// \param X (template parameter) scalar type (float or double)
+  /// \param[in]     N size of matrix
+  /// \param[in,out] A on input: real symmetric matrix,\n
+  ///                  on putput: input required by \a EigenSystemTridiagonal()
+  /// \param[out]    D diagonal elements of tridiagonal form
+  /// \param[out]    E off-diagonal elements of tridiagonal form
+  ///
+  /// Householder reduction of a real symmetric matrix
   /// \a A[0..\a N -1][0..\a N -1]. On output, \a A is replaced by an orthogonal
   /// matrix effecting the transformation. \a D[0..\a N -1] returns the diagonal
-  /// elements of the tridiagonal matrix, and \a E[0..\a N -1] the off-diagonal 
-  /// elements, with \a E[0]=0.                                                 
-  /// If \a T is set to false, \a A has no sensible meaning on output. See NR   
-  /// section 11.2 for details.                                                 
-  // ---------------------------------------------------------------------------
+  /// elements of the tridiagonal matrix, and \a E[0..\a N -1] the off-diagonal
+  /// elements, with \a E[0]=0.
+  /// If \a T is set to false, \a A has no sensible meaning on output. See NR
+  /// section 11.2 for details.
+  /// \warning not tested, may be buggy
   template<bool T, typename X> void HouseholderReduction(int N, X**A, X*D, X*E);
   // ---------------------------------------------------------------------------
-  /// compute eigensystem of tridiagonal symmetric matrix                       
-  ///                                                                           
-  /// \param X (template parameter) only X=float and X=double are implemented   
-  /// \param N (input)  size of matrix                                          
-  /// \param D on input: diagonal elements; on output: eigenvalues              
-  /// \param E on input: off-diagonal elements; on output: destroyed            
-  /// \param Z on input: see below; on output: eigenvectors corresponding to D  
-  ///                                                                           
-  /// QL algorithm with implicit shifts to determine the eigenvalues and eigen- 
-  /// vectors of a real symmetric tridiagonal matrix, or of a real symmetric    
+  /// compute eigensystem of tridiagonal symmetric matrix
+  ///
+  /// \param X (template parameter) only X=float and X=double are implemented
+  /// \param[in]     N  size of matrix
+  /// \param[in,out] D  on input: diagonal elements; on output: eigenvalues
+  /// \param[in,out] E  on input: off-diagonal elements; on output: destroyed
+  /// \param[in,out] Z  on input: see below; on output: EVs corresponding to D
+  ///
+  /// QL algorithm with implicit shifts to determine the eigenvalues and eigen-
+  /// vectors of a real symmetric tridiagonal matrix, or of a real symmetric
   /// matrix previously reduced by \a HouseholderReduction(). In the first case,
-  /// \a Z on input must be the unit matrix. In the second case, \a Z on input  
-  /// must be the matrix returned by \a HouseholderReduction(). For details,    
-  /// see NR section 11.3.                                                      
-  // ---------------------------------------------------------------------------
+  /// \a Z on input must be the unit matrix. In the second case, \a Z on input
+  /// must be the matrix returned by \a HouseholderReduction(). For details, see
+  /// NR section 11.3.
+  /// \warning not tested, may be buggy
   template<typename X> void EigenSystemTridiagonal(int N, X*D, X*E, X**Z);
   // ---------------------------------------------------------------------------
-  /// compute eigenvalues of tridiagonal symmetric matrix                       
-  ///                                                                           
-  /// \param X (template parameter) only X=float and X=double are implemented   
-  /// \param N (input) size of matrix                                           
-  /// \param D on input: diagonal elements; on output: eigenvalues              
-  /// \param E on input: off-diagonal elements; on output: destroyed            
-  ///                                                                           
-  /// QL algorithm with implicit shifts to determine the eigenvalues of a real  
-  /// symmetric tridiagonal matrix, or of a real symmetric matrix previously    
-  /// reduced by \a HouseholderReduction(). For details, see NR section 11.3.   
-  // ---------------------------------------------------------------------------
+  /// compute eigenvalues of tridiagonal symmetric matrix
+  ///
+  /// \param X (template parameter) only X=float and X=double are implemented
+  /// \param[in]     N   size of matrix
+  /// \param[in,out] D  on input: diagonal elements; on output: eigenvalues
+  /// \param[in,out] E  on input: off-diagonal elements; on output: destroyed
+  ///
+  /// QL algorithm with implicit shifts to determine the eigenvalues of a real
+  /// symmetric tridiagonal matrix, or of a real symmetric matrix previously
+  /// reduced by \a HouseholderReduction(). For details, see NR section 11.3.
+  /// \warning not tested, may be buggy
   template<typename X> void EigenValuesTridiagonal(int N, X*D, X*E);
   // ---------------------------------------------------------------------------
-  /// eigensystem of symmetric matrix, replaces original matrix                 
-  ///                                                                           
-  /// \param EIGENVECTORS (template parameter) want eigenvectors?               
-  /// \param X (template parameter) scalar type (either float or double)        
-  /// \param N (input)  size of matrix                                          
-  /// \param A on input: symmetric matrix; on output: eigenvectors              
-  /// \param D (output) vector with eigenvalues                                 
-  /// \param V (output, optional) vector with eigenvectors                      
-  ///                                                                           
-  /// This combines HouseholderReduction() and EigenSystemTridiagonal() or      
-  /// EigenValuesTridiagonal() for \a N known at run time. If \a N is known at  
-  /// compile time, use \a EigenSymmetricFixed() below.                         
-  // ---------------------------------------------------------------------------
+  /// eigensystem of symmetric matrix, replaces original matrix
+  ///
+  /// \param EIGENVECTORS (template parameter) want eigenvectors?
+  /// \param X (template parameter) scalar type (either float or double)
+  /// \param[in]     N  size of matrix
+  /// \param[in,out] A  on input: symmetric matrix; on output: eigenvectors
+  /// \param[out]    D  vector with eigenvalues 
+  /// \param[out]    V  (optional) vector with eigenvectors
+  ///
+  /// This combines HouseholderReduction() and EigenSystemTridiagonal() or
+  /// EigenValuesTridiagonal() for \a N known at run time. If \a N is known at
+  /// compile time, use \a EigenSymmetricFixed() below.
+  /// \warning not tested, may be buggy
   template<bool EIGENVECTORS, typename X>
   void EigenSymmetricReplace(int N, X**A, X*D)
   {
@@ -1071,18 +1077,18 @@ namespace WDutils {
     falcON_DEL_A(E);
   }
   // ---------------------------------------------------------------------------
-  /// eigensystem of symmetric matrix, keeps original matrix                    
-  ///                                                                           
-  /// \param X (template parameter) scalar type (either float or double)        
-  /// \param N (input)  size of matrix                                          
-  /// \param M (input)  symmetric matrix                                        
-  /// \param D (output) vector with eigenvalues                                 
-  /// \param V (output, optional) vector with eigenvectors                      
-  ///                                                                           
-  /// This combines HouseholderReduction() and EigenSystemTridiagonal() or      
-  /// EigenValuesTridiagonal() for \a N known at run time. If \a N is known at  
-  /// compile time, use \a EigenSymmetricFixed() below.                         
-  // ---------------------------------------------------------------------------
+  /// eigensystem of symmetric matrix, keeps original matrix
+  ///
+  /// \param X (template parameter) scalar type (either float or double)
+  /// \param[in]  N  size of matrix
+  /// \param[in]  M  symmetric matrix
+  /// \param[out] D  vector with eigenvalues
+  /// \param[out] V  (optional) vector with eigenvectors
+  ///
+  /// This combines HouseholderReduction() and EigenSystemTridiagonal() or
+  /// EigenValuesTridiagonal() for \a N known at run time. If \a N is known at
+  /// compile time, use \a EigenSymmetricFixed() below.
+  /// \warning not tested, may be buggy
   template<typename X>
   void EigenSymmetricKeep(int N, const X**M, X*D, X**V=0)
   {
@@ -1109,17 +1115,17 @@ namespace WDutils {
     falcON_DEL_A(E);
   }
   // ---------------------------------------------------------------------------
-  /// eigensystem of symmetric matrix, keeps original matrix, N template param  
-  ///                                                                           
-  /// \param N (template parameter) size of matrix                              
-  /// \param X (template parameter) scalar type (either float or double)        
-  /// \param M (input)  matrix                                                  
-  /// \param D (output) vector with Eigenvalues                                 
-  /// \param V (output, optional) matrix with Eigenvectors                      
-  ///                                                                           
-  /// This combines HouseholderReduction() and EigenSystemTridiagonal() for     
-  /// fixed \a N (known as template parameter at compile time).                 
-  // ---------------------------------------------------------------------------
+  /// eigensystem of symmetric matrix, keeps original matrix, N template param
+  ///
+  /// \param      N  (template parameter) size of matrix
+  /// \param      X  (template parameter) scalar type (float or double)
+  /// \param[in]  M  matrix
+  /// \param[out] D  vector with Eigenvalues
+  /// \param[out] V  (optional) matrix with Eigenvectors
+  ///
+  /// This combines HouseholderReduction() and EigenSystemTridiagonal() for
+  /// fixed \a N (known as template parameter at compile time).
+  /// \warning not tested, may be buggy
   template<int N, typename X>
   void EigenSymmetricFixed(const X M[N][N], X D[N], X**V=0)
   {
@@ -1167,7 +1173,7 @@ namespace {
     // a range is a node with an additional pointer to its upper sub-node and   
     // a center C and size S. it contains leafs with X in [C-S, C+S[.           
     //--------------------------------------------------------------------------
-    // a twig range has UP=0 and holds in LO a linked list of its leaf.         
+    // a twig range has UP=0 and holds in LO a linked list of its leafs.        
     //    NOTE that the leafs may be deleted using delete_leafs(). After call   
     //         to this method, the pointer LO becomes meaningless.              
     // a branch range has UP and LO pointing to its sub-ranges                  

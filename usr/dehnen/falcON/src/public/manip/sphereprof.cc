@@ -4,11 +4,11 @@
 /// \file   src/public/manip/sphereprof.cc                                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006                                                                
+/// \date   2006,2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006 Walter Dehnen                                             
+// Copyright (C) 2006,2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -35,6 +35,7 @@
 // v 1.2    07/07/2006  WD using flags::ignore (in_subset()) instead of subset  
 // v 1.3    09/08/2006  WD warn if non-spherical                                
 // v 1.3.1  06/11/2006  WD change in profile.h                                  
+// v 1.3.2  13/05/2008  WD debugged error with minor & major axes               
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -201,11 +202,11 @@ namespace falcON { namespace Manipulate {
     if(X0) OUT<<"# xcen   = "<<(*X0)<<'\n';
     if(V0) OUT<<"# vcen   = "<<(*V0)<<'\n';
     OUT  <<"#\n"
-	 <<"#     radius          rho        vcirc";
+	 <<"#   radius        rho      vcirc";
     if(SP.has_vels())
-      OUT<<"        <v_r>      <v_phi>"
-	 <<"      sigma_r     sigma_th    sigma_phi";
-    OUT  <<"         c/a          b/a"
+      OUT<<"      <v_r>    <v_phi>"
+	 <<"    sigma_r   sigma_th  sigma_phi";
+    OUT  <<"     c/a      b/a"
 	 <<"        major axis         minor axis";
     if(SP.has_vels())
       OUT<<"      rotation axis";
@@ -213,18 +214,17 @@ namespace falcON { namespace Manipulate {
     print_line(SP.has_vels());
     bool nonspherical = false;
     for(int i=0; i!=SP.N(); ++i) {
-      OUT  << std::setw(12) << SP.rad(i) <<' '
-	   << std::setw(12) << SP.rho(i) <<' '
-	   << std::setw(12) << sqrt(SP.vcq(i));
+      OUT  << print(SP.rad(i),10,4) << ' '
+	   << print(SP.rho(i),10,4) << ' '
+	   << print(sqrt(SP.vcq(i)),10,4) << ' ';
       if(SP.has_vels())
-	OUT<< ' '
-	   << std::setw(12) << SP.vrad(i) <<' '
-	   << std::setw(12) << SP.vphi(i) <<' '
-	   << std::setw(12) << SP.sigr(i) <<' '
-	   << std::setw(12) << SP.sigt(i) <<' '
-	   << std::setw(12) << SP.sigp(i);
-      OUT  << std::setw(12) << SP.cova(i) <<' '
-	   << std::setw(12) << SP.bova(i) <<' ';
+	OUT<< print(SP.vrad(i),10,4) << ' '
+	   << print(SP.vphi(i),10,4) << ' '
+	   << print(SP.sigr(i),10,4) << ' '
+	   << print(SP.sigt(i),10,4) << ' '
+	   << print(SP.sigp(i),10,4) << ' ';
+      OUT  << print(SP.cova(i), 8,3) << ' '
+	   << print(SP.bova(i), 8,3) << ' ';
       PS.print_dir(OUT, SP.major_axis(i)) << "  ";
       PS.print_dir(OUT, SP.minor_axis(i));
       if(SP.has_vels()) {
@@ -243,5 +243,5 @@ namespace falcON { namespace Manipulate {
   }
   //////////////////////////////////////////////////////////////////////////////
 } }
-
+////////////////////////////////////////////////////////////////////////////////
 __DEF__MAN(falcON::Manipulate::sphereprof)

@@ -5,7 +5,7 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    1996-2007                                                          
+/// \date    1996-2008                                                          
 ///                                                                             
 /// \brief   contains the definition of template class WDutild::tupel and       
 ///	     all its members and friends                                        
@@ -20,10 +20,11 @@
 /// \version jul-2006: added global function applied()                          
 /// \version sep-2006: added member method reset()                              
 /// \version mar-2007: made data protected                                      
+/// \version may-2008: output manipulator "print()" supported                   
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1996-2007  Walter Dehnen                                       
+// Copyright (C) 1996-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -657,6 +658,13 @@ namespace WDutils {
     }
     static const unsigned size = sizeof(tupel<N,T>);
   };
+#endif
+  // ///////////////////////////////////////////////////////////////////////////
+#ifdef WDutils_included_inline_io_h
+  template<int N, typename X>
+  inline smanip_fp_vec_width<X> print(tupel<N,X> const&x, int w, int p) {
+    return smanip_fp_vec_width<X>(static_cast<const X*>(x),N,w,p);
+  }
 #endif
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////

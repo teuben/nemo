@@ -4,11 +4,11 @@
 /// \file   src/public/profile.cc                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2006                                                           
+/// \date   2000-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2006 Walter Dehnen                                        
+// Copyright (C) 2000-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -196,8 +196,8 @@ spherical_profile::spherical_profile(const bodies*B,
       EigenSymJacobiSorted<3,double>(Mxx,IV,ID,IR);
       ca[i] = sqrt(ID[2]/ID[0]);
       ba[i] = sqrt(ID[1]/ID[0]);
-      xa[i] = vect_d(IV[0]);
-      xi[i] = vect_d(IV[2]);
+      xa[i] = vect_d(IV[0][0],IV[1][0],IV[2][0]);
+      xi[i] = vect_d(IV[0][2],IV[1][2],IV[2][2]);
       vect_d erot = norm(Mvp)>0.? normalized(Mvp) : vect_d(0.,0.,1.);
       double Mvpq(0.), Mvtq(0.);
       for(j=i? ir[i-1]:0; j<=ir[i+1]; ++j) {       // 2nd LOOP of bodies in bin 
@@ -234,8 +234,8 @@ spherical_profile::spherical_profile(const bodies*B,
       EigenSymJacobiSorted<3,double>(Mxx,IV,ID,IR);
       ca[i] = sqrt(ID[2]/ID[0]);
       ba[i] = sqrt(ID[1]/ID[0]);
-      xa[i] = vect_d(IV[0]);
-      xi[i] = vect_d(IV[2]);
+      xa[i] = vect_d(IV[0][0],IV[1][0],IV[2][0]);
+      xi[i] = vect_d(IV[0][2],IV[1][2],IV[2][2]);
     }
   }
   falcON_DEL_A(ir);

@@ -369,6 +369,30 @@ namespace WDutils {
     return smanip_fp_width<X>(x,w,p);
   }
   //----------------------------------------------------------------------------
+  template<typename X>
+  struct smanip_fp_vec_width {
+    const X*x;
+    int     n,p,w;
+    smanip_fp_vec_width(const X*__x, int __n, int __w, int __p)
+      : x(__x), n(__n), p(__p), w(__w) {}
+  };
+  template<typename X>
+  inline std::ostream& operator<<(std::ostream&o,
+				  smanip_fp_vec_width<X> const&m) {
+    if(m.n) {
+      o << smanip_fp_width<X>(m.x[0],m.w,m.p);
+      for(int i=1; i<m.n; ++i)
+	o << ' ' << smanip_fp_width<X>(m.x[i],m.w,m.p);
+    }
+    return o;
+  }
+  /// manipulator: write an array of floating point numbers, each with minimum
+  /// width but maximum precision.
+  template<typename X>
+  inline smanip_fp_vec_width<X> print(const X*x, int n, int w, int p) {
+    return smanip_fp_vec_width<X>(x,n,w,p);
+  }
+  //----------------------------------------------------------------------------
 } // namespace WDutils
 
 #ifndef WDutils_included_iomanip
