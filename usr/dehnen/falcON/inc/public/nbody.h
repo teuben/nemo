@@ -730,29 +730,8 @@ namespace falcON {
     vect_d const  &Vave() const { return CMV; }
     //--------------------------------------------------------------------------
     virtual void dia_stats_body (std::ostream&) const;
-    //--------------------------------------------------------------------------
-    virtual void dia_stats_head (std::ostream& to) const {
-      const char *space = sizeof(real)==4? " " : "     ";
-      to  << "    time  "<<space
-	  << "    E=T+V    "<<space
-	  << "   T     "<<space;
-      if(SELF_GRAV)
-	to<< "   V_in   "<<space;
-      if(acc_ext())
-	to<< "   V_ex   "<<space;
-      to  << "   W      "<<space
-	  << " -2T/W"<<space
-	  << "   |L| "<<space
-	  << " |v_cm|"<<space;
-    }
-    //--------------------------------------------------------------------------
-    virtual void dia_stats_line (std::ostream&to) const {
-      const char *space = sizeof(real)==4? "-" : "-----";
-      to<<" ------------------------------------------------------------"
-	<<space<<space<<space<<space<<space<<space<<space;
-      if(SELF_GRAV) to<<"-----------"<<space;
-      if(acc_ext()) to<<"-----------"<<space;
-    }
+    virtual void dia_stats_head (std::ostream&) const;
+    virtual void dia_stats_line (std::ostream&) const;
     //--------------------------------------------------------------------------
     bool const&self_grav() const { return SELF_GRAV; }
 

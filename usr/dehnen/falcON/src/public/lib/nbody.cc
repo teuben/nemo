@@ -633,23 +633,55 @@ void ForceDiagGrav::write_diag_nemo(nemo_out const&out,
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////////
+void ForceDiagGrav::dia_stats_head (std::ostream& to) const {
+  const char *space = sizeof(real)==4? " " : "     ";
+  to  << "      time  "<<space
+      << "    E=T+V    "<<space
+      << "   T     "<<space;
+  if(SELF_GRAV)
+    to<< "   V_in   "<<space;
+  if(acc_ext())
+    to<< "   V_ex   "<<space;
+  if(SELF_GRAV || acc_ext())
+    to<< "   W      "<<space
+      << " -2T/W"<<space;
+  to  << "   |L| "<<space
+      << " |v_cm|"<<space;
+}
+////////////////////////////////////////////////////////////////////////////////
+void ForceDiagGrav::dia_stats_line (std::ostream&to) const {
+  const char *space = sizeof(real)==4? "-" : "-----";
+  to  << " -----------"<<space
+      << "-------------"<<space
+      << "---------"<<space;
+  if(SELF_GRAV)
+    to<< "----------"<<space;
+  if(acc_ext())
+    to<< "----------"<<space;
+  if(SELF_GRAV || acc_ext())
+    to<< "----------"<<space;
+    to<< "------"<<space;
+  to  << "-------"<<space
+      << "-------"<<space;
+}
+////////////////////////////////////////////////////////////////////////////////
 void ForceDiagGrav::dia_stats_body(std::ostream&to) const
 {
   int ACC = 1+sizeof(real);
   std::ios::fmtflags old = to.flags();
   to.setf(std::ios::left | std::ios::showpoint);
-  to  <<std::setprecision(ACC)<<std::setw(ACC+5)<<TIME       <<' '
-      <<std::setprecision(ACC+2)<<std::setw(ACC+8)<<T+Vin+Vex  <<' '
-      <<std::setprecision(ACC-1)<<std::setw(ACC+4)<<T          <<' ';
-  if(SELF_GRAV) 
-    to<<std::setprecision(ACC-1)<<std::setw(ACC+5)<<Vin        <<' ';
+  to  << print(TIME,ACC+7,ACC+2) << ' '
+      << print(T+Vin+Vex,ACC+8,ACC+2) << ' '
+      << print(T,ACC+4,ACC-1) << ' ';
+  if(SELF_GRAV)
+    to<< print(Vin,ACC+5,ACC-1) << ' ';
   if(acc_ext())
-    to<<std::setprecision(ACC-1)<<std::setw(ACC+5)<<Vex        <<' ';
-  to  <<std::setprecision(ACC-1)<<std::setw(ACC+5)<<W          <<' '
-      <<std::setprecision(min(ACC,max(1,ACC-int(-log10(twice(TW)))))-1)
-      <<std::setw(ACC+1)<<twice(TW) <<' '
-      <<std::setprecision(ACC-3)<<std::setw(ACC+2)<<std::sqrt(norm(L))<<' '
-      <<std::setprecision(ACC-3)<<std::setw(ACC+2)<<std::sqrt(norm(CMV))<<' ';
+    to<< print(Vex,ACC+5,ACC-1) << ' ';
+  if(SELF_GRAV || acc_ext())
+    to<< print(W,ACC+5,ACC-1) << ' '
+      << print(twice(TW),ACC+1,1) << ' ';
+  to  << print(std::sqrt(norm(L)),ACC+2,ACC-3) << ' '
+      << print(std::sqrt(norm(CMV)),ACC+2,ACC-3) << ' ';
   to.flags(old);
 }
 ////////////////////////////////////////////////////////////////////////////////
