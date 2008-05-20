@@ -500,7 +500,7 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
 ////////////////////////////////////////////////////////////////////////////////
 void ForceDiagGrav::diagnose_grav() const
 {
-  double m(0.), vin(0.), vex(0.), w[Ndim][Ndim]={0.};
+  double m(0.), vin(0.), vex(0.), w[Ndim][Ndim]={0.}, dv(0.);
   vect_d x(0.);
   if(snap_shot()->have(fieldbit::q)) {             // IF have external pot      
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
@@ -511,6 +511,7 @@ void ForceDiagGrav::diagnose_grav() const
       register vect_d mx = mi * pos(b);            //     m * x                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       x += mx;                                     //     add: dipole           
+      dv-= mi*(vel(b)*acc(b));                     //     add: dV/dt            
     }                                              //   END LOOP                
   } else {                                         // ELSE: no external pot     
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
@@ -520,9 +521,11 @@ void ForceDiagGrav::diagnose_grav() const
       register vect_d mx = mi * pos(b);            //     m * x                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       x += mx;                                     //     add: dipole           
+      dv-= mi*(vel(b)*acc(b));                     //     add: dV/dt            
     }                                              //   END LOOP                
   }                                                // ENDIF                     
   M   = m;                                         // total mass                
+  DVDT= dv;                                        // dV/dt                     
   Vin = half*vin;                                  // total int pot energy      
   Vex = vex;                                       // total ext pot energy      
   W   = tr(w);                                     // total pot energy from acc 
@@ -645,6 +648,8 @@ void ForceDiagGrav::dia_stats_head (std::ostream& to) const {
   if(SELF_GRAV || acc_ext())
     to<< "   W      "<<space
       << " -2T/W"<<space;
+  if(debug(1))
+    to<< " dV/dt "<<space;
   to  << "   |L| "<<space
       << " |v_cm|"<<space;
 }
@@ -661,6 +666,8 @@ void ForceDiagGrav::dia_stats_line (std::ostream&to) const {
   if(SELF_GRAV || acc_ext())
     to<< "----------"<<space;
     to<< "------"<<space;
+  if(debug(1))
+    to<< "-------"<<space;
   to  << "-------"<<space
       << "-------"<<space;
 }
@@ -680,6 +687,8 @@ void ForceDiagGrav::dia_stats_body(std::ostream&to) const
   if(SELF_GRAV || acc_ext())
     to<< print(W,ACC+5,ACC-1) << ' '
       << print(twice(TW),ACC+1,1) << ' ';
+  if(debug(1))
+    to<< print(DVDT,ACC+2,ACC-3) << ' ';
   to  << print(std::sqrt(norm(L)),ACC+2,ACC-3) << ' '
       << print(std::sqrt(norm(CMV)),ACC+2,ACC-3) << ' ';
   to.flags(old);

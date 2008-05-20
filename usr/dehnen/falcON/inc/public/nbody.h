@@ -698,6 +698,7 @@ namespace falcON {
     mutable double       TIME;                     // time of diagnose          
     mutable double       M,T,Vin,Vex,W,TW;         // mass, kin & pot E         
     mutable vect_d       L;                        // total angular momentum    
+    mutable double       DVDT;                     // dV/dt = - dT/dt           
     mutable tensor       KT,WT;                    // kin & pot energy          
     mutable vect_d       CMX,CMV;                  // center of mass pos & vel  
     //--------------------------------------------------------------------------
@@ -725,6 +726,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     double const  &Vrat() const { return TW; }
     double         Wvir() const { return W; }
+    double const  &dVdt() const { return DVDT; }
     vect_d const  &Ltot() const { return L; }
     vect_d const  &Xave() const { return CMX; }
     vect_d const  &Vave() const { return CMV; }
