@@ -648,8 +648,8 @@ void ForceDiagGrav::dia_stats_head (std::ostream& to) const {
   if(SELF_GRAV || acc_ext())
     to<< "   W      "<<space
       << " -2T/W"<<space;
-  if(debug(1))
-    to<< " dV/dt "<<space;
+//   if(debug(1))
+//     to<< " dV/dt "<<space;
   to  << "   |L| "<<space
       << " |v_cm|"<<space;
 }
@@ -666,8 +666,8 @@ void ForceDiagGrav::dia_stats_line (std::ostream&to) const {
   if(SELF_GRAV || acc_ext())
     to<< "----------"<<space;
     to<< "------"<<space;
-  if(debug(1))
-    to<< "-------"<<space;
+//   if(debug(1))
+//     to<< "-------"<<space;
   to  << "-------"<<space
       << "-------"<<space;
 }
@@ -687,8 +687,8 @@ void ForceDiagGrav::dia_stats_body(std::ostream&to) const
   if(SELF_GRAV || acc_ext())
     to<< print(W,ACC+5,ACC-1) << ' '
       << print(twice(TW),ACC+1,1) << ' ';
-  if(debug(1))
-    to<< print(DVDT,ACC+2,ACC-3) << ' ';
+//   if(debug(1))
+//     to<< print(DVDT,ACC+2,ACC-3) << ' ';
   to  << print(std::sqrt(norm(L)),ACC+2,ACC-3) << ' '
       << print(std::sqrt(norm(CMV)),ACC+2,ACC-3) << ' ';
   to.flags(old);

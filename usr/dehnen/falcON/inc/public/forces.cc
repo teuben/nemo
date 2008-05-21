@@ -214,11 +214,6 @@ namespace falcON {
     return GMAC->describe_method();
   }
   //----------------------------------------------------------------------------
-  inline unsigned forces::No_bodies() const
-  {
-    return BODIES->N_bodies();
-  }
-  //----------------------------------------------------------------------------
   inline unsigned forces::No_bodies_used() const
   {
     return TREE->N_leafs();

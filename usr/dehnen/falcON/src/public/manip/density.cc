@@ -4,11 +4,11 @@
 /// \file   src/public/manip/density.cc                                         
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006,2007                                                           
+/// \date   2006-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006,2007 Walter Dehnen                                        
+// Copyright (C) 2006-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -33,6 +33,7 @@
 // v 0.2    27/07/2006  WD made public                                          
 // v 0.3    04/09/2007  WD new neighbours.h                                     
 // v 0.4    06/11/2007  WD order of Ferrers kernel from param, K=32 default     
+// v 0.4.1  20/05/2008  WD renamed routine from neighbour.h                     
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -169,7 +170,7 @@ namespace falcON { namespace Manipulate {
       const_cast<snapshot*>(S)->add_field(fieldbit::r);
     prepare(N);
     unsigned NIAC;
-    ProcessNeighbourList(&TREE,K,&SetDensity,NIAC,true);
+    ProcessNearestNeighbours(&TREE,K,&SetDensity,NIAC,true);
     if(falcON::debug(1)) {
       clock_t CPU1 = clock();
       falcON::debug_info(1,"density::manipulate():"

@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2006-2007                                                          
+/// \date    2006-2008                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006-2007  Walter Dehnen                                       
+// Copyright (C) 2006-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -39,9 +39,11 @@
 // v 2.1    28/07/2006  WD keyword findmax added                                
 // v 3.0    04/09/2007  WD completely new neighbours.cc (3 times faster)        
 //                         Ferrers kernel, default K=32                         
+// v 3.0.1  09/09/2007  WD ?                                                    
+// v 3.0.2  20/05/2008  WD renamed routine from neighbour.h                     
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "3.0.1"
-#define falcON_VERSION_D "09-sep-2007 Walter Dehnen                          "
+#define falcON_VERSION   "3.0.2"
+#define falcON_VERSION_D "20-may-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "density"
@@ -147,7 +149,7 @@ void falcON::main() falcON_THROWING
     // estimate density
     SHOT.add_field(fieldbit::r);
     unsigned NIAC;
-    ProcessNeighbourList(&TREE,K,&SetDensity,NIAC,true);
+    ProcessNearestNeighbours(&TREE,K,&SetDensity,NIAC,true);
 
     // for non-chosen bodies set density to zero
     if(BF)

@@ -454,21 +454,25 @@ namespace falcON {
     /// \return the current value of Newton's G
     const real& NewtonsG() const;
     //--------------------------------------------------------------------------
-    unsigned BB_interactions() const;    ///< \return # body-body interactions
-    unsigned MB_interactions() const;    ///< \return # many-body interactions
-    unsigned CB_interactions() const;    ///< \return # cell-body interactions
-    unsigned CC_interactions() const;    ///< \return # cell-cell interactions
-    unsigned total_interactions() const; ///< \return # all interactions
+    unsigned BB_interactions() const;    ///< return # body-body interactions
+    unsigned MB_interactions() const;    ///< return # many-body interactions
+    unsigned CB_interactions() const;    ///< return # cell-body interactions
+    unsigned CC_interactions() const;    ///< return # cell-cell interactions
+    unsigned total_interactions() const; ///< return # all interactions
     //--------------------------------------------------------------------------
-    const vect    &root_center() const;  ///< \return center of root
-    const real    &root_radius() const;  ///< \return radius of root
-    const int     &root_number() const;  ///< \return # bodies in root
-    const real    &root_mass  () const;  ///< \return mass of root
-    const unsigned&root_depth () const;  ///< \return depth of root
+    /// return tree
+    const OctTree *tree       () const { return TREE; }
+    /// return bodies
+    const bodies  *Bodies     () const { return BODIES; }
+    const vect    &root_center() const;  ///< return center of root
+    const real    &root_radius() const;  ///< return radius of root
+    const int     &root_number() const;  ///< return # bodies in root
+    const real    &root_mass  () const;  ///< return mass of root
+    const unsigned&root_depth () const;  ///< return depth of root
     //@}                                                                        
     //==========================================================================
   protected:
-    unsigned No_bodies        () const;
+    unsigned No_bodies        () const { return BODIES->N_bodies(); }
     OctTree* const& my_tree   () const { return TREE; }
   private:
     forces                    ();

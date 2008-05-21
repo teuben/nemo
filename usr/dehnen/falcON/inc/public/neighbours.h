@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2007                                                               
+/// \date    2008                                                               
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2007  Walter Dehnen                                            
+// Copyright (C) 2008  Walter Dehnen                                            
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -30,6 +30,7 @@
 // \version 31/08/2007 WD initial hack (based on code from code/dens)           
 // \version 04/09/2007 WD debugged and working version                          
 // \version 04/09/2007 WD moved to neighbours.h (which is superseeded)          
+// \version 20/05/2008 WD added FindLeaf(), ProcessNeighbours()                 
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_neighbours_h
@@ -63,10 +64,29 @@ namespace falcON {
   /// \param f function for processing neighbour list
   /// \param Ni (output) number of leaf interactions
   /// \param all (optional) consider all bodies to be active?
-  void ProcessNeighbourList(const OctTree*T, int K,
-			    void(*f)(const bodies*, const OctTree::Leaf*,
-				     const Neighbour*, int),
-			    unsigned&Ni, bool all=0) falcON_THROWING;
+  void ProcessNearestNeighbours(const OctTree*T, int K,
+				void(*f)(const bodies*, const OctTree::Leaf*,
+					 const Neighbour*, int),
+				unsigned&Ni, bool all=0) falcON_THROWING;
+  //----------------------------------------------------------------------------
+  /// given a body, find smallest surrounding cell
+  /// \return (pter to) smallest cell containing body
+  /// \param[in]  T tree to search
+  /// \param[in]  B body to find leaf for
+  /// \note The tree must not be have been re-used, but grown.
+  const OctTree::Cell*FindCell(const OctTree*T, body const&B);
+  //----------------------------------------------------------------------------
+  /// Process all leafs within a certain distance from body B
+  /// \param[in] T tree to use
+  /// \param[in] B body to process neighbours for
+  /// \param[in] Q radius^2 of sphere to look for neighbours in
+  /// \param[in] f function to call for each neighbour found
+  /// \note The leaf, if any, corresponding to B is not processed
+  /// \note The tree must not be have been re-used, but grown.
+  /// \note The 3rd argument of f() is the distance to the leaf
+  void ProcessNeighbours(const OctTree*T, body const&B, real Q,
+			 void(*f)(const bodies*, const OctTree::Leaf*, real q))
+    falcON_THROWING;
 } // namespace falcON
 ////////////////////////////////////////////////////////////////////////////////
 falcON_TRAITS(falcON::Neighbour,"Neighbour");

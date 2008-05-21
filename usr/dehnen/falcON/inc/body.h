@@ -1864,6 +1864,22 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
   LoopTypedBodies(PTER,NAME,bodytype::std)
 #endif
 //------------------------------------------------------------------------------
+#ifndef LoopSinkBodies           /* loop all STD bodies                   */
+/// This macro provides an easy way to loop over all SINK bodies
+///
+/// A typical usage would look like this \code
+///   snapshot *S;
+///   LoopSinkBodies(S,b,t) {
+///     b.pos() += dt*vel(b);
+///     b.vel() += dt*acc(b);
+///   } \endcode
+///
+/// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
+/// \param NAME  name given to loop variable (of type falcON::body)
+#define LoopSinkBodies(PTER,NAME)		\
+  LoopTypedBodies(PTER,NAME,bodytype::sink)
+#endif
+//------------------------------------------------------------------------------
 #ifndef LoopBodyPairs           /* loop all bodies after a given body        */
 /// This macro provides an easy way to loop over all body pairs
 ///

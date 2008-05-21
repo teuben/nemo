@@ -700,6 +700,14 @@ namespace falcON {
       leaf_child last_leaf_desc() const { return end_leaf_desc()-1; }
       //@}
       //------------------------------------------------------------------------
+      /// does this cell contain a given position?
+      bool contains(const vect& pos) {
+	const real r = radius();
+	return abs(C->centre()[0]-pos[0]) <= r
+	  &&   abs(C->centre()[1]-pos[1]) <= r
+	  &&   abs(C->centre()[2]-pos[2]) <= r ;
+      }
+      //------------------------------------------------------------------------
     };// class CellIter<CELL>
     //--------------------------------------------------------------------------
     /// \name public types, to be superseeded by any derived tree
