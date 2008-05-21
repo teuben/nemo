@@ -247,7 +247,7 @@ namespace {
     /// \param t the tree to be used 
     /// \param n direct-loop control; default: k/4
     NeighbourSearch(const OctTree*t, vect const&x, real q,
-		    void(*f)(const bodies*, const leaf*), int n=1)
+		    void(*f)(const bodies*, const leaf*, real), int n=1)
       : NeighbourSearchBase(t,x), NDIR(n), Q(q), F(f) {}
     //--------------------------------------------------------------------------
     /// process neighbours
