@@ -23,6 +23,7 @@
 #include <public/types.h>
 #include <public/kernel.h>
 #include <public/tensor_set.h>
+#include <utils/WDMath.h>
 
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -140,6 +141,27 @@ void GravKernBase::eval_grav_all(cell_iter    const&C,
   }                                                // END LOOP                  
   LoopCellKids(cell_iter,C,c)                      // LOOP C's cell kids        
     eval_grav_all(c,G);                            //   recursive call          
+}
+//------------------------------------------------------------------------------
+real GravKernBase::Psi(kern_type k, real Xq, real Eq)
+{
+  switch(k) {
+  case p1: {
+    real   x = one/(Xq+Eq), d0=sqrt(x), d1=d0*x, hq=half*Eq;
+    return d0 + hq*d1;
+  }
+  case p2: {
+    real   x = one/(Xq+Eq), d0=sqrt(x), d1=d0*x, d2=3*d1*x, hq=half*Eq;
+    return d0 + hq*(d1+hq*d2);
+  }
+  case p3: {
+    real   x = one/(Xq+Eq), d0=sqrt(x), d1=d0*x, d2=3*d1*x, d3=5*d2*x, 
+      hq=half*Eq;
+    return d0 + hq*(d1+half*hq*(d2+hq*d3));
+  }
+  default:
+    return invsqrt(Xq+Eq);
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

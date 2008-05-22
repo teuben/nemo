@@ -3,7 +3,7 @@
 //                                                                             |
 /// /file inc/public/kernel.h                                                  |
 //                                                                             |
-// Copyright (C) 2000-2005  Walter Dehnen                                      |
+// Copyright (C) 2000-2008  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -233,6 +233,8 @@ namespace falcON {
     int      const&coeffs_used() const { return MAXNC; }
     unsigned       chunks_used() const {
       return COEFF_POOL?  COEFF_POOL->N_chunks() : 0u; }
+    /// given X^2 and Eps^2, compute negative gravitational potential
+    static real Psi(kern_type k, real Xq, real Eq);
     //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////

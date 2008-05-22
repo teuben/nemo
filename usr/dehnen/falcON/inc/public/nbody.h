@@ -104,10 +104,11 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class ForceAndDiagnose {
     //--------------------------------------------------------------------------
-    // data                                                                     
-    //--------------------------------------------------------------------------
-    snapshot*          const SNAPSHOT;
-    const acceleration*const ACCEXTERN;
+    /// \name data
+    //{@
+    snapshot*          const SNAPSHOT;   ///< particle snapshot
+    const acceleration*const ACCEXTERN;  ///< external potential/acceleration
+    //}@
     //--------------------------------------------------------------------------
     /// \name type tensor and related operations
     //@{
@@ -157,80 +158,63 @@ namespace falcON {
     }
     //@}
     //--------------------------------------------------------------------------
-    /// construction                                                            
+    /// construction
     ForceAndDiagnose(snapshot          *s,
 		     const acceleration*a) :
       SNAPSHOT(s), ACCEXTERN(a) {}
     //--------------------------------------------------------------------------
-    /// \name abstract methods                                                  
-    //@{                                                                        
-    //--------------------------------------------------------------------------
-    ///  compute forces (and other time derivatives if applicable)
-    ///
-    ///  IF \e dia is true, prepare for \c diagnose() to be called later.
-    ///  \e tau may be needed for the time integration of auxiliary quantities,
-    ///  such as SPH smoothing lengths.
-    ///
+    /// \name abstract methods
+    //@{
+    /// compute forces (and other time derivatives if applicable).
+    /// IF \e dia is true, prepare for \c diagnose() to be called later.
+    /// \e tau may be needed for the time integration of auxiliary quantities,
+    /// such as SPH smoothing lengths.
     /// \param all (input) compute forces for all bodies or only the active?
     /// \param dia (input) diagnostics will be done (prepare for it)
     /// \param tau (input) size of elementary time step
     virtual void setforces  (bool   all,
 			     bool   dia,
 			     double tau) const = 0;
-    //--------------------------------------------------------------------------
     /// perform a diagnose; only called after \c setforces(all,true,tau);
     virtual void     diagnose   ()   const = 0;
-    //--------------------------------------------------------------------------
     /// which quantities are required in force computation and diagnosis?
     virtual fieldset requires   ()   const = 0;
-    //--------------------------------------------------------------------------
     /// which SPH quantities are required in force computation and diagnosis?
     virtual fieldset requiresSPH()   const = 0;
-    //--------------------------------------------------------------------------
     /// which quantities are computed by setforces()
     virtual fieldset computes   ()   const = 0;
-    //--------------------------------------------------------------------------
     /// which SPH quantities are computed by setforces()
     virtual fieldset computesSPH()   const = 0;
+    /// write diagnostic statistics
+    virtual void dia_stats_body(std::ostream&) const=0;
+    /// write CPU statistics
+    virtual void cpu_stats_body(std::ostream&) const=0;
+    /// write diagnostic statistics header
+    virtual void dia_stats_head(std::ostream&) const=0;
+    /// write CPU statistics header
+    virtual void cpu_stats_head(std::ostream&) const=0;
+    /// write diagnostic statistics line
+    virtual void dia_stats_line(std::ostream&) const=0;
+    /// write CPU statistics line
+    virtual void cpu_stats_line(std::ostream&) const=0;
+    //@}
     //--------------------------------------------------------------------------
     /// is a particular quantity computed?
     bool computes(fieldbit b) const {
       return computes().contain(fieldset(b));
     }
-    //--------------------------------------------------------------------------
     /// is a particular quantity required?
     bool requires(fieldbit b) const {
       return requires().contain(fieldset(b));
     }
-    //--------------------------------------------------------------------------
     /// is a particular SPH quantity computed?
     bool computesSPH(fieldbit b) const {
       return computesSPH().contain(fieldset(b));
     }
-    //--------------------------------------------------------------------------
     /// is a particular SPH quantity required?
     bool requiresSPH(fieldbit b) const {
       return requiresSPH().contain(fieldset(b));
     }
-    //--------------------------------------------------------------------------
-    /// write diagnostic statistics
-    virtual void dia_stats_body(std::ostream&) const=0;
-    //--------------------------------------------------------------------------
-    /// write CPU statistics
-    virtual void cpu_stats_body(std::ostream&) const=0;
-    //--------------------------------------------------------------------------
-    /// write diagnostic statistics header
-    virtual void dia_stats_head(std::ostream&) const=0;
-    //--------------------------------------------------------------------------
-    /// write CPU statistics header
-    virtual void cpu_stats_head(std::ostream&) const=0;
-    //--------------------------------------------------------------------------
-    /// write diagnostic statistics line
-    virtual void dia_stats_line(std::ostream&) const=0;
-    //--------------------------------------------------------------------------
-    /// write CPU statistics line
-    virtual void cpu_stats_line(std::ostream&) const=0;
-    //@}
     //--------------------------------------------------------------------------
     /// \name public data access
     //@{
@@ -274,7 +258,6 @@ namespace falcON {
     /// \name record CPU timings
     //@{
     /// add elapsed CPU time to CPU time record \c CPU
-    ///
     /// \param c0  input: last CPU clock reading; output: current CPU clock
     /// \param CPU (output) time since \c c0 is added to CPU in seconds
     static void record_cpu(clock_t& c0, double& CPU)
@@ -283,7 +266,6 @@ namespace falcON {
       CPU += (c1-c0)/real(CLOCKS_PER_SEC);
       c0   = c1;
     }
-    //--------------------------------------------------------------------------
     /// print a CPU time
     static void print_cpu(double const&x, std::ostream&to)
     {
@@ -296,7 +278,6 @@ namespace falcON {
       else
 	to<<std::setw(5)<<std::setfill(' ')<<int(x+0.5);
     }
-    //--------------------------------------------------------------------------
     /// print a CPU time in hhh:mm:ss.cc format
     static void print_cpu_hms(double t, std::ostream&to)
     {
@@ -311,7 +292,6 @@ namespace falcON {
 	<<std::setfill(' ');
     }
   protected:
-    //--------------------------------------------------------------------------
     /// record a CPU timing and cumulative CPU time after a full step
     void add_to_cpu_step() const {
       register clock_t c1 = clock();
@@ -319,21 +299,17 @@ namespace falcON {
       CPU_TOTAL   += (c1-C_OLD)/real(CLOCKS_PER_SEC);
       C_OLD        = c1;
     }
-    //--------------------------------------------------------------------------
     /// reset CPU timing records
     void reset_CPU() const {
       CPU_STEP = 0.;
     }
-    //--------------------------------------------------------------------------
     /// print CPU statistics, implements abstract method of base class
     void cpu_stats_body(std::ostream&) const;
-    //--------------------------------------------------------------------------
     /// print CPU statistics header, implements abstract method of base class
     void cpu_stats_head(std::ostream&to) const {
       SOLVER->cpu_stats_head(to);
       to<< " step  accumulated";
     }
-    //--------------------------------------------------------------------------
     /// print CPU statistics line, implements abstract method of base class
     void cpu_stats_line(std::ostream&to) const {
       SOLVER->cpu_stats_line(to);
@@ -343,18 +319,15 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// protected access to N-body data
     snapshot* const&snap_shot() const { return SOLVER->snap_shot(); }
-    //--------------------------------------------------------------------------
     /// compute forces & SPH time derivatives, records CPU_GRAV, AEX, SPH
     void set_time_derivs(bool all,
 			 bool dia,
 			 double t) const {
       SOLVER->setforces(all,dia,t);
     }
-    //--------------------------------------------------------------------------
     /// finish the diagnostics;
     /// previous call to \c set_time_derivs() had \c dia true
     void finish_diagnose() const { SOLVER->diagnose(); }
-    //--------------------------------------------------------------------------
     /// specify which quantities will be predicted by this scheme
     fieldset const&predicted   () const { return predALL; }
     /// specify which SPH quantities will be predicted by this scheme
@@ -363,9 +336,7 @@ namespace falcON {
     fieldset const&required    () const { return requALL; }
     /// specify which SPH quantities will be required by this scheme
     fieldset const&requiredSPH () const { return requSPH; }
-    //--------------------------------------------------------------------------
-    /// drift by \c dt body properties in \a predicted() and \a predictedSPH()  
-    ///                                                                         
+    /// drift by \c dt body properties in \a predicted() and \a predictedSPH().
     /// for all bodies: properties \a predicted() are moved by \e dt          \n
     /// for SPH bodies: properties \a predictedSPH() are moved by \e dt       \n
     /// currently we support the following drifts:                            \n
@@ -375,32 +346,25 @@ namespace falcON {
     /// \param dt  (input) time step to drift                                   
     /// \param all (input) drift all or active bodies only?                     
     void drift   (double dt, bool all = true) const;
-    //--------------------------------------------------------------------------
-    /// kick by \c dt body properties to in \a kickALL and \a kickSPH           
-    ///                                                                         
+    /// kick by \c dt body properties to in \a kickALL and \a kickSPH.
     /// currently we support the following kicks:                             \n
     /// <b> v += a * dt  </b>  velocity; for all bodies                       \n
     /// <b> U += I * dt  </b>  internal gas energy; for SPH bodies only         
     /// \param dt  (input) time step to kick                                    
     /// \param all (input) kick all or active bodies only?                      
     void kick    (double dt, bool all = true) const;
-    //--------------------------------------------------------------------------
     /// similar to \a kick(), except that bodies are kicked by their individual 
     /// time step, given by \e dt[level(B)]                                     
     /// \param dt  (input) table with time step per level                       
     /// \param all (input) kick all or active bodies only?                      
     void kick_i  (const double*dt, bool all = true) const;
-    //--------------------------------------------------------------------------
-    /// remember properties to be predicted: in \a rembALL and \a rembSPH       
-    ///                                                                         
+    /// remember properties to be predicted: in \a rembALL and \a rembSPH.
     /// currently we support the following remembrances:                      \n
     /// <b> w = v  </b>  remember velocity                                    \n
     /// <b> Y = U  </b>  remember SPH internal energy                           
     /// \param all (input) remember for all or active bodies only?              
     void remember(bool all = true) const;
-    //--------------------------------------------------------------------------
-    /// construction: set properties for \a drift(), \a kick(), \a remember()   
-    ///                                                                         
+    /// construction: set properties for \a drift(), \a kick(), \a remember().
     /// we will double check that the input is sensible                         
     /// \param solver  pointer to solver for time derivatives                   
     /// \param p_all   -> \a predALL                                            
@@ -420,24 +384,20 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// \name virtual and pure virtual methods
     //@{
-    //--------------------------------------------------------------------------
     /// perform a full time step
     virtual void fullstep() const = 0;
-    //--------------------------------------------------------------------------
     /// print full statistic
     virtual void stats_body(std::ostream&to) const {
       SOLVER -> dia_stats_body(to);
       cpu_stats_body(to);
       to<<std::endl;
     }
-    //--------------------------------------------------------------------------
     /// print statistic header
     virtual void stats_head(std::ostream&to) const {
       SOLVER -> dia_stats_head(to);
       cpu_stats_head(to);
       to<<std::endl;
     }
-    //--------------------------------------------------------------------------
     /// print statistic line
     virtual void stats_line(std::ostream&to) const {
       SOLVER -> dia_stats_line(to);
@@ -446,14 +406,10 @@ namespace falcON {
     }
     //@}
     //--------------------------------------------------------------------------
-    // non-virtual public methods:                                              
-    //--------------------------------------------------------------------------
     /// print some details 
     void describe(std::ostream&) const;
 #ifdef falcON_NEMO
-    //--------------------------------------------------------------------------
-    /// write snapshot to NEMO output
-    ///
+    /// write snapshot to NEMO output.
     /// \param o NEMO output stream
     /// \param f data to be written out; default: mass, position, velocity
     void write(nemo_out const&o,
@@ -471,9 +427,7 @@ namespace falcON {
   class LeapFrogCode : public Integrator, public bodies::TimeSteps {
     void account_new() const;
   public:
-    //--------------------------------------------------------------------------
-    /// construction
-    ///
+    /// construction.
     /// \param k       tau = 0.5^k
     /// \param solver  pointer to solver for time derivatives
     /// \param p_all   -> \a predALL
@@ -490,7 +444,6 @@ namespace falcON {
 		 fieldset p_sph,
 		 fieldset k_sph,
 		 fieldset r_sph) falcON_THROWING;
-    //--------------------------------------------------------------------------
     /// perform a full kick-drift-kick step
     void fullstep() const;
     //--------------------------------------------------------------------------
@@ -499,12 +452,11 @@ namespace falcON {
   //                                                                            
   // class falcON::BlockStepCode                                                
   //                                                                            
-  //  implements a hierarchical blockstep scheme with kick-drift-kick leap-frog 
+  /// implements a hierarchical blockstep scheme with kick-drift-kick leap-frog 
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
   class BlockStepCode : public Integrator, public bodies::TimeSteps {
   public:
-    //--------------------------------------------------------------------------
     /// abstract sub-type: interface for assigning/adjusting time-step levels   
     struct StepLevels {
       typedef double *const c_pdouble;
@@ -523,15 +475,14 @@ namespace falcON {
       /// even if there is only one level?
       virtual bool always_adjust () const { return false; }
     };
-    //--------------------------------------------------------------------------
-    // data members                                                             
-    //--------------------------------------------------------------------------
   private:
-    unsigned              *N;                      // table:  #                 
-    int                    W;                      // width in stats fields     
-    const StepLevels*const ST;                     // for adjusing levels       
     //--------------------------------------------------------------------------
-    // private methods                                                          
+    /// \name data members
+    //@{
+    unsigned              *N;                    ///< table: # bodies per level
+    int                    W;                    ///< width in stats fields     
+    const StepLevels*const ST;                   ///< for adjusing levels       
+    //@}
     //--------------------------------------------------------------------------
   private:
     void assign_levels() const;
@@ -540,19 +491,15 @@ namespace falcON {
     void account_del() const;
     void account_new() const;
     void elementary_step(int) const;
-    //--------------------------------------------------------------------------
-    // public methods                                                           
-    //--------------------------------------------------------------------------
   public:
+    //--------------------------------------------------------------------------
+    /// how many bodies are in level l?
     const unsigned&No_in_level   (int l)  const { return N[l]; }
-    //--------------------------------------------------------------------------
-    // to satisfy class Integrator::fullstep()                                  
+    /// implements Integrator::fullstep()
     void fullstep() const;
-    //--------------------------------------------------------------------------
-    // statistics output                                                        
-    // we have to superseed Integrator::stats_etc.., in order to add step stats 
+    /// implements Integrator::stats_head
     void stats_head(std::ostream&) const;
-    //--------------------------------------------------------------------------
+    /// implements Integrator::stats_line
     void stats_line(std::ostream&to) const {
       SOLVER -> dia_stats_line(to);
       if(highest_level())
@@ -561,7 +508,7 @@ namespace falcON {
       cpu_stats_line(to);
       to<<std::endl;
     }
-    //--------------------------------------------------------------------------
+    /// implements Integrator::stats_head
     void stats_body(std::ostream&to) const {
       SOLVER -> dia_stats_body(to);
       if(highest_level())
@@ -570,147 +517,158 @@ namespace falcON {
       cpu_stats_body(to);
       to<<std::endl;
     }
-    //--------------------------------------------------------------------------
-    // construction & destruction                                               
-    //--------------------------------------------------------------------------
-    BlockStepCode (int,                            // I: kmax, tau_max = 2^-kmax
-		   unsigned,                       // I: #steps                 
-		   const ForceAndDiagnose*,
-		   const StepLevels      *,
-		   fieldset, fieldset, fieldset, fieldset, fieldset, fieldset,
-		   int) falcON_THROWING;
-    //--------------------------------------------------------------------------
+    /// construction
+    /// \param[in] kmax  \f$ \tau_{\mathrm{max}}=2^{-\mathrm{kmax}} \f$
+    /// \param[in] nlev  number of time step levels
+    /// \param[in] F     code for force evaluation etc
+    /// \param[in] S     code for time-stepping levels and criteria
+    /// \param[in] p_all \a Integrator::predALL
+    /// \param[in] k_all \a Integrator::kickALL
+    /// \param[in] r_all \a Integrator::rembALL
+    /// \param[in] p_sph \a Integrator::predSPH
+    /// \param[in] k_sph \a Integrator::kickSPH
+    /// \param[in] r_sph \a Integrator::rembSPH
+    /// \param[in] w     width in stats fields
+    BlockStepCode (int kmax, unsigned nlev, const ForceAndDiagnose*F,
+		   const StepLevels*S,
+		   fieldset p_all, fieldset k_all, fieldset r_all,
+		   fieldset p_sph, fieldset k_sph, fieldset r_sph,
+		   int w) falcON_THROWING;
+    /// destruction
     ~BlockStepCode () { 
       if(N) { falcON_DEL_A(N); N=0; }
     }
   };// class falcON::BlockStepCode   
 #ifdef falcON_NEMO
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::NBodyCode                                                  //
-  //                                                                          //
-  // 10-11-2004: added parameter times to constructor                         //
-  // 06-10-2005: moved TINI (initial time) to snapshot                        //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::NBodyCode                                                    
+  //                                                                            
+  /// puts together a (virtual) N-body code.                                    
+  /// \version 10-11-2004: added parameter times to constructor                 
+  /// \version 06-10-2005: moved TINI (initial time) to snapshot                
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
   class nemo_out;
   class NBodyCode {
   protected:
-    std::string        FILE;
-    snapshot           SHOT;
-    const Integrator  *CODE;
-    fieldset           READ;
-    //--------------------------------------------------------------------------
-    // construction & related                                                   
-    //                                                                          
-    // NOTE                                                                     
-    //      for technical reasons, we must follow the following order:          
-    //      1. load initial snapshot (& allocate required memory)               
-    //      2. initialize the forcesolver (it needs the snapshot)               
-    //      3. initialize the integrator                                        
-    //      Since the force solver is dealt with in a derived class, we CANNOT  
-    //      follow this procedure in the constructor below. Therefore, we merely
-    //      load the initial snapshot and postpone the initialisation of the    
-    //      integrator, which shall be done via the routine init() below.       
-    //--------------------------------------------------------------------------
-    // read initial snapshot                                                    
-    NBodyCode(const char*,                         // I: input file             
-	      bool       ,                         // I: resume old (if nemo)   
-	      fieldset   ,                         // I: read after mxv         
-	      const char* =0,                      // I: read 1st snapshot in   
-	                                           //    1st file matching      
-	      fieldset    =fieldset::empty)        // I: try to read these data 
+    std::string        FILE;   ///< input file
+    snapshot           SHOT;   ///< snapshot: body data
+    const Integrator  *CODE;   ///< time integrator
+    fieldset           READ;   ///< which data have been read?
+    /// construction
+    /// \note For technical reasons, we must follow the following order.\n
+    ///       1. load initial snapshot (& allocate required memory);\n
+    ///       2. initialize the forcesolver (it needs the snapshot);\n
+    ///       3. initialize the integrator\n
+    ///       Since the force solver is dealt with in a derived class, we 
+    ///       cannot follow this procedure in the constructor below. Therefore,
+    ///       we merely load the initial snapshot and postpone the 
+    ///       initialisation of the integrator, which shall be done via the
+    ///       routine init() below.
+    /// \param[in] file   name of data input file (in NEMO snapshot format)
+    /// \param[in] resume resume old simulation: read last snapshot from file
+    /// \param[in] read_more which data to read in addition to mxv
+    /// \param[in] time (optional) if given, read snapshot matching time
+    /// \param[in] read_try (optional) if given, try to read these data
+    NBodyCode(const char* file, bool resume, fieldset read_more,
+	      const char* time=0, fieldset read_try=fieldset::empty)
       falcON_THROWING;
     //--------------------------------------------------------------------------
-    // initialize Integrator, see NOTE above                                    
-    void init(const ForceAndDiagnose         *,    // I: e.g. ForceALCON        
-	      int                             ,    // I: kmax: t_max=2^(-kmax)  
-	      int                             ,    // I: # time-step levels     
-	      const BlockStepCode::StepLevels*,
-	      fieldset, fieldset,
-	      fieldset=fieldset::empty,
-	      fieldset=fieldset::empty,
-	      fieldset=fieldset::empty,
-	      fieldset=fieldset::empty)
+    /// initialize Integrator, see note with constructor.
+    /// \param[in] F force solver, e.g. ForceALCON
+    /// \param[in] kmax  \f$ \tau_{\mathrm{max}}=2^{-\mathrm{kmax}} \f$
+    /// \param[in] nlev  number of time step levels
+    /// \param[in] S     time step levels (needed if nlev>1)
+    /// \param[in] p_all \a Integrator::predALL
+    /// \param[in] k_all \a Integrator::kickALL
+    /// \param[in] r_all \a Integrator::rembALL
+    /// \param[in] p_sph \a Integrator::predSPH
+    /// \param[in] k_sph \a Integrator::kickSPH
+    /// \param[in] r_sph \a Integrator::rembSPH
+    void init(const ForceAndDiagnose*F, int kmax, int nlev,
+	      const BlockStepCode::StepLevels*S,
+	      fieldset p_all, fieldset k_all,
+	      fieldset r_all=fieldset::empty,
+	      fieldset p_sph=fieldset::empty,
+	      fieldset k_sph=fieldset::empty,
+	      fieldset r_sph=fieldset::empty)
       falcON_THROWING;
-    //--------------------------------------------------------------------------
-    // destruction                                                              
-    //--------------------------------------------------------------------------
-    ~NBodyCode() {                                 // destructor                
+    /// destruction
+    ~NBodyCode() {
       falcON_DEL_O(CODE);
     }
-    //--------------------------------------------------------------------------
-    // nemo outputs                                                             
-    //--------------------------------------------------------------------------
   public:
-    void  describe(                                // describe simulation       
-		   std::ostream&o) const {         // I: output stream          
-      CODE->describe(o);
-    }
     //--------------------------------------------------------------------------
-    void  write   (nemo_out&o,                     // I: nemo output stream     
-		   fieldset w) const {             //[I: what to write out]     
-      CODE->write(o,w);
-    }
-    //--------------------------------------------------------------------------
-    // time integration                                                         
-    //--------------------------------------------------------------------------
-    void  full_step    () {
-      CODE->fullstep();
-    }
-    //--------------------------------------------------------------------------
-    // statistic outputs                                                        
-    //--------------------------------------------------------------------------
-    void  stats     (std::ostream&o) const { 
+    /// describe simulation
+    void describe(std::ostream&o) const { CODE->describe(o);  }
+    /// write N-body data to NEMO snapshot file
+    /// \param[in] o stream to NEMO snapshot file
+    /// \param[in] w what to write?
+    void write(nemo_out&o, fieldset w) const { CODE->write(o,w); }
+    /// time integration
+    void full_step() { CODE->fullstep(); }
+    /// print statistic outputs
+    /// \param[in] o ostream to print to
+    void stats(std::ostream&o) const { 
       o <<' ';
       CODE->stats_body(o);
     }
-    //--------------------------------------------------------------------------
+    /// header for statistics output
+    /// \param[in] o ostream to print to
     void  stats_head(std::ostream&o) const {
       o<<'#'; CODE->stats_head(o);
       o<<'#'; CODE->stats_line(o);
     }
-    //--------------------------------------------------------------------------
-    // data access                                                              
-    //--------------------------------------------------------------------------
+    /// \name data access
+    //@{
+    /// simulation time of initial snapshot
     double      const&initial_time   () const { return SHOT.initial_time(); }
+    /// pointer to body data
     const bodies     *my_bodies      () const { return&SHOT; }
+    /// pointer to snapshot data
     const snapshot   *my_snapshot    () const { return&SHOT; }
+    /// input file name
     std::string const&input_file     () const { return FILE; }
+    /// current simulation time
     double      const&time           () const { return SHOT.time(); }
+    //@}
     //--------------------------------------------------------------------------
   };// class falcON::NBodyCode
 #endif // #ifdef falcON_NEMO
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::ForceDiagGrav                                              //
-  //                                                                          //
-  // derived from ForceAndDiagnose                                            //
-  // provides basis diagnostics for gravity only codes                        //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class falcON::ForceDiagGrav                                                
+  //                                                                            
+  /// provides basis diagnostics for gravity only codes                         
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
   class ForceDiagGrav : public ForceAndDiagnose {
-    //--------------------------------------------------------------------------
-    // diagnostics data                                                         
-    //--------------------------------------------------------------------------
   protected:
-    const   bool         SELF_GRAV;                // compute V_in?             
-    mutable double       TIME;                     // time of diagnose          
-    mutable double       M,T,Vin,Vex,W,TW;         // mass, kin & pot E         
-    mutable vect_d       L;                        // total angular momentum    
-    mutable double       DVDT;                     // dV/dt = - dT/dt           
-    mutable tensor       KT,WT;                    // kin & pot energy          
-    mutable vect_d       CMX,CMV;                  // center of mass pos & vel  
-    //--------------------------------------------------------------------------
+    /// \name diagnostics data
+    //@{
+    const   bool         SELF_GRAV;           ///< compute V_in?
+    mutable double       TIME;                ///< time of diagnose
+    mutable double       M,T,Vin,Vex,W,TW;    ///< mass, kin & pot E
+    mutable vect_d       L;                   ///< total angular momentum
+    mutable double       DVDT;                ///< dV/dt = - dT/dt
+    mutable tensor       KT,WT;               ///< kin & pot energy
+    mutable vect_d       CMX,CMV;             ///< center of mass pos & vel
+    //@}
+    /// perform gravity part of diagnose
     void diagnose_grav() const;
+    /// perform velocity part of diagnose
     void diagnose_vels() const falcON_THROWING;
+    /// perform full diagnose
     void diagnose_full() const;
-    //--------------------------------------------------------------------------
-    ForceDiagGrav(snapshot          *s,
-		  const acceleration*a,
-		  bool               g) : ForceAndDiagnose(s,a), SELF_GRAV(g) {}
-    //--------------------------------------------------------------------------
+    /// construction
+    /// \param[in] s  pointer to snapshot to use
+    /// \param[in] a  external acceleration field (may be NULL)
+    /// \param[in] g  doing self-gravity?
+    ForceDiagGrav(snapshot*s, const acceleration*a, bool g)
+      : ForceAndDiagnose(s,a), SELF_GRAV(g) {}
   public:
+    /// which body data are required?
     virtual fieldset requires() const {
       return fieldset(fieldset::m |
 		      fieldset::x |
@@ -719,69 +677,73 @@ namespace falcON {
 		      fieldset::p |
 		      (acc_ext()? fieldset::q : fieldset::empty) );
     }
-    //--------------------------------------------------------------------------
+    /// kinetic energy
     virtual double Ekin() const { return T; }
+    /// potential energy
     virtual double Epot() const { return Vin + Vex; }
+    /// total energy
     virtual double Etot() const { return Ekin() + Epot(); }
-    //--------------------------------------------------------------------------
+    /// virial ratio
     double const  &Vrat() const { return TW; }
+    /// virial W
     double         Wvir() const { return W; }
+    /// time derivative of potential energy
     double const  &dVdt() const { return DVDT; }
+    /// total angular momentum
     vect_d const  &Ltot() const { return L; }
+    /// centre of mass (=mass-averaged) position
     vect_d const  &Xave() const { return CMX; }
+    /// centre of mass (=mass-averaged) velocity
     vect_d const  &Vave() const { return CMV; }
-    //--------------------------------------------------------------------------
+    /// print out body of diagnostics statistics
     virtual void dia_stats_body (std::ostream&) const;
+    /// print out header for diagnostics statistics
     virtual void dia_stats_head (std::ostream&) const;
+    /// print out line for diagnostics statistics
     virtual void dia_stats_line (std::ostream&) const;
-    //--------------------------------------------------------------------------
+    /// do we do self-gravity?
     bool const&self_grav() const { return SELF_GRAV; }
-
   };// class falcON::ForceDiagGrav
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::GravStepper                                                //
-  //                                                                          //
+  //                                                                            
+  // class falcON::GravStepper                                                  
+  //                                                                            
+  /// used to implement class GravSteps below                                   
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   class GravStepper {
-    //--------------------------------------------------------------------------
-    // enum used in switch() statements                                         
-    //--------------------------------------------------------------------------
+    /// enum used in switch() statements
     enum {
-      use_a = 1,
-      use_p = 2,
-      use_g = 4,
-      use_e = 8
+      use_a = 1, ///< using criterion  f/acc
+      use_p = 2, ///< using criterion  f/pot^2
+      use_g = 4, ///< using criterion  f*pot/acc
+      use_e = 8  ///< using criterion  f*eps/sqrt(acc)
     };
-    //--------------------------------------------------------------------------
     typedef BlockStepCode::StepLevels::c_pdouble c_pdouble;
-    //--------------------------------------------------------------------------
-    // data members                                                             
-    //--------------------------------------------------------------------------
-    bool    UPX;                                   // use pot+pex for potential 
-    bool    UGE;                                   // use global soften'g length
-    int     SCH;                                   // stepping scheme           
-    int     SINKL;                                 // minimum level for sinks   
-    double  EPS;                                   // global softening length   
-    double  FAQ,FPQ,FGQ,FEQ;                       // factors^2 for stepping    
-    //--------------------------------------------------------------------------
-    // private methods                                                          
-    //--------------------------------------------------------------------------
+    /// \name data members
+    //@{
+    bool    UPX;                                 ///< use pot+pex for potential 
+    bool    UGE;                                 ///< use global soften'g length
+    int     SCH;                                 ///< stepping scheme           
+    int     SINKL;                               ///< minimum level for sinks   
+    double  EPS;                                 ///< global softening length   
+    double  FAQ,FPQ,FGQ,FEQ;                     ///< factors^2 for stepping    
+    //@}
+    /// full potential (internal and external) of body
     real fpot(body const&B) const {
       return UPX? pex(B)+pot(B) : pot(B);
     }
-    //--------------------------------------------------------------------------
+    /// softening length (individual or global, whatever applies)
     real soft(body const&B) const {
       return UGE? EPS : eps(B);
     }
-    //--------------------------------------------------------------------------
+    /// minimum time-step level of given body
     int minlevel(body const&B) const {
       return is_sink(B)? SINKL : 0;
     }
     //--------------------------------------------------------------------------
-    // protected methods                                                        
-    //--------------------------------------------------------------------------
   protected:
+    /// for a given body compute actual time-step squared
     double tq_grav(body const&B) const {
       if(SCH == 0)     return zero;
       if(SCH == use_p) return FPQ/square(fpot(B));
@@ -795,21 +757,23 @@ namespace falcON {
 	return tq;
       }
     }
-    //--------------------------------------------------------------------------
-    void assign_level(body        &Bi,             // I: body                   
-		      unsigned    *N,              // I: table: # / step        
-		      int          H) const        // I: highest table index    
+    /// assign time-step level to body
+    /// \param[in]     Bi body to assign level to
+    /// \param[in,out] N  table of number of body per level, to be updated
+    /// \param[in]     H  highest time step level
+    void assign_level(body&Bi, unsigned*N, int H) const
 
     {
       double tq=twice(tq_grav(Bi));
       for(Bi.level()=minlevel(Bi); tauq(Bi)>tq && level(Bi)<H; ++(Bi.level()));
       N[level(Bi)]++;
     }
-    //--------------------------------------------------------------------------
-    void adjust_level(body        &Bi,             // I: bodies                 
-		      unsigned    *N,              // I: table: # / step        
-		      int          L,              // I: lowest  allowed level  
-		      int          H) const        // I: highest allowed level  
+    /// adjust time-step level for given body
+    /// \param[in]     Bi body to adjust time-step level for
+    /// \param[in,out] N  table of number of body per level, to be updated
+    /// \param[in]     L  lowest allowed level at present time
+    /// \param[in]     H  highest allowedtime step level
+    void adjust_level(body&Bi, unsigned*N, int L, int H) const
     {
       const double root_half=0.7071067811865475244;
       double tq=tq_grav(Bi)*root_half;             // tau^2 * sqrt(1/2)         
@@ -828,10 +792,18 @@ namespace falcON {
 	}                                          //   ENDIF                   
       }                                            // ENDIF                     
     }
-    //--------------------------------------------------------------------------
-    // public methods                                                           
-    //--------------------------------------------------------------------------
   public:
+    /// constructor
+    /// \param[in] sl  minimum time-step level for sinks
+    /// \param[in] fa  factor for criterion fa/|acc|
+    /// \param[in] fp  factor for criterion fp/pot^2
+    /// \param[in] fg  factor for criterion fg*|pot|/|acc|
+    /// \param[in] fe  factor for criterion fe*eps/sqrt(|acc|)
+    /// \param[in] up  use internal and external potentials
+    /// \param[in] ep  global softening length
+    /// \param[in] ue  (optional) use global softening length
+    /// \note if any of the factors is given as 0, we don't use the
+    /// corresponding criterium.
     GravStepper(int  sl,
 		real fa,
 		real fp,
@@ -846,40 +818,52 @@ namespace falcON {
       FGQ = fg*fg; if(FGQ) SCH |= use_g;
       FEQ = fe*fe; if(FEQ) SCH |= use_e;
     }
-    //--------------------------------------------------------------------------
+    /// full scheme: bit sum of enumeration values.
     int const&scheme() const { return SCH; }
   };// class falcON::GravStepper
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::GravSteps                                                  //
-  //                                                                          //
-  // non-abstract, derived from abstract class BlockStepCode::StepLevels      //
-  //                                                                          //
+  //                                                                            
+  // class falcON::GravSteps                                                    
+  //                                                                            
+  /// implements BlockStepCode::StepLevels for gravity-only codes               
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   class GravSteps : 
     public BlockStepCode::StepLevels,
     public GravStepper 
   {
-    //--------------------------------------------------------------------------
     typedef BlockStepCode::StepLevels::c_pdouble c_pdouble;
-    //--------------------------------------------------------------------------
-    // protected methods                                                        
-    //--------------------------------------------------------------------------
   protected:
+    /// assign time-step level to body
+    /// \param[in]     Bi body to assign level to
+    /// \param[in,out] N  table of number of body per level, to be updated
+    /// \param[in]     H  highest time step level
     void assign_level(body        &Bi,             // I: body                   
 		      unsigned    *N,              // I: table: # / step        
 		      int          H) const        // I: highest table index    
     { GravStepper::assign_level(Bi,N,H); }
-    //--------------------------------------------------------------------------
+    /// adjust time-step level for given body
+    /// \param[in]     Bi body to adjust time-step level for
+    /// \param[in,out] N  table of number of body per level, to be updated
+    /// \param[in]     L  lowest allowed level at present time
+    /// \param[in]     H  highest allowedtime step level
     void adjust_level(body        &Bi,             // I: bodies                 
 		      unsigned    *N,              // I: table: # / step        
 		      int          L,              // I: lowest  allowed level  
 		      int          H) const        // I: highest allowed level  
     { GravStepper::adjust_level(Bi,N,L,H); }
-    //--------------------------------------------------------------------------
-    // public methods                                                           
-    //--------------------------------------------------------------------------
   public:
+    /// constructor
+    /// \param[in] sl  minimum time-step level for sinks
+    /// \param[in] fa  factor for criterion fa/|acc|
+    /// \param[in] fp  factor for criterion fp/pot^2
+    /// \param[in] fg  factor for criterion fg*|pot|/|acc|
+    /// \param[in] fe  factor for criterion fe*eps/sqrt(|acc|)
+    /// \param[in] up  use internal and external potentials
+    /// \param[in] ep  global softening length
+    /// \param[in] ue  (optional) use global softening length
+    /// \note if any of the factors is given as 0, we don't use the
+    /// corresponding criterium.
     GravSteps(int  sl,
 	      real fa,
 	      real fp,
@@ -891,38 +875,41 @@ namespace falcON {
     //--------------------------------------------------------------------------
   };// class falcON::GravSteps
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::ForceALCON                                                 //
-  //                                                                          //
-  // standard force solver based on forces, providing gravity only            //
-  //                                                                          //
+  //                                                                            
+  // class falcON::ForceALCON                                                   
+  //                                                                            
+  /// standard force solver based on the falcON self-gravity,                   
+  /// providing gravity only                                                    
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   class ForceALCON : public ForceDiagGrav {
-    //--------------------------------------------------------------------------
   protected:
+    /// \name data are protected
+    //@{
 #ifdef falcON_INDI
-    soft_type         SOFTENING;
+    soft_type         SOFTENING;           ///< type of softening
 #ifdef falcON_ADAP
-    real              NSOFT;                       // #/sphere for eps_i setting
-    unsigned          NREF;                        // #/cell for eps_i setting  
-    real              EMIN;                        // lower limit for eps_i     
-    real              EFAC;                        // max change factor for epsi
+    real              NSOFT;               // #/sphere for eps_i setting
+    unsigned          NREF;                // #/cell for eps_i setting  
+    real              EMIN;                // lower limit for eps_i     
+    real              EFAC;                // max change factor for epsi
 #endif
 #endif
-    const   vect* const ROOTCENTRE;
-    const   int         NCRIT, REUSE;
-    mutable forces      FALCON;
-    mutable int         REUSED;
-    mutable double      CPU_TREE, CPU_GRAV, CPU_AEX;
-    //--------------------------------------------------------------------------
-    void set_tree_and_forces(bool,                 // I: all or only active?    
-			     bool) const;          // I: build tree anyway?     
-    //--------------------------------------------------------------------------
-    // - sets Nsoft, Nref, eps, kernel, but NOT soft_type!                      
+    const   vect* const ROOTCENTRE;        ///< centre for root, if non-NULL
+    const   int         NCRIT, REUSE;      ///< N_crit for tree, re-using
+    mutable forces      FALCON;            ///< force algorithm(s)
+    mutable int         REUSED;            ///< how often has tree been re-used
+    mutable double      CPU_TREE, CPU_GRAV, CPU_AEX; ///< CPU timings
+    //@}
+    /// build tree and compute forces
+    /// \param[in] all   for all bodies (or active only)?
+    /// \param[in] build build the tree in any case?
+    void set_tree_and_forces(bool all, bool build) const;
   public:
-    void reset_softening(                          // resets softening params   
-			 kern_type,                // I: softening kernel       
-			 real                      // I: eps                    
+    /// reset softening parameters
+    /// \param[in] kern  softening kernel
+    /// \param[in] eps   softening length
+    void reset_softening(kern_type kern, real eps
 #ifdef falcON_ADAP
 			,real     ,                // I: Nsoft                  
 			 unsigned ,                // I: Nref                   
@@ -930,31 +917,35 @@ namespace falcON {
 			 real                      // I: eps_fac                
 #endif
 			 );
-    //--------------------------------------------------------------------------
-    // construction                                                             
-    ForceALCON(snapshot          *,                // I: snapshot: time & bodies
-	       real               ,                // I: global softening length
-	       real               ,                // I: tolerance parameter    
-	       int                ,                // I: N_crit                 
-	       const vect        *,                // I: pre-set root centre    
-	       kern_type          ,                // I: softening kernel       
-	       real               ,                // I: Newton's G             
-	       real               ,                // I: theta_sink/theta       
-	       int                ,                // I: # reused of tree       
-	       const acceleration*,                // I: external acceleration  
-	       const int          [4]              // I: direct sum: gravity    
+    /// construction
+    /// \param[in] s  snapthos: time & bodies
+    /// \param[in] e  global softening length
+    /// \param[in] th tree opening parameters
+    /// \param[in] nc N_crit for tree build
+    /// \param[in] rc pter to root-centre (if non-NULL)
+    /// \param[in] k  softening kernel
+    /// \param[in] G  Newton's constant of gravity
+    /// \param[in] fs theta_sink/theta
+    /// \param[in] nr tree re-using (not recommended)
+    /// \param[in] ae external acceleration
+    /// \param[in] nd direct-summation control for gravity
 #ifdef falcON_INDI
-	       ,soft_type                          // I: softening type         
+    /// \param[in] st softening type
+#endif
+#ifdef falcON_SPH
+    /// \param[in] sd direct-summation control for SPH
+#endif
+    ForceALCON(snapshot*s, real e, real th, int nc, const vect*rc,
+	       kern_type k, real G, real fs, int nr, const acceleration*ae,
+	       const int nd[4]
+#ifdef falcON_INDI
+	       ,soft_type
 #ifdef falcON_ADAP
-	       ,real                               // I: N_soft                 
-	       ,unsigned                           // I: N_ref                  
-	       ,real                               // I: eps_min                
-	       ,real                               // I: eps_fac                
+	       , real, unsigned, real, real
 #endif
 #endif
 #ifdef falcON_SPH
-	       ,const int         [3]              //[I: direct sum: SPH]       
-	       = Default::SPHdirect
+	       ,const int sd[3]= Default::SPHdirect
 #endif
 	       ) falcON_THROWING;
     //--------------------------------------------------------------------------
