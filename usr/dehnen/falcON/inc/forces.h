@@ -358,17 +358,19 @@ namespace falcON {
 		       const ArtificialViscosity*av)
       falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// \return # bodies with mu_i < Mu - dMu
+    /// return # bodies with mu_i < Mu - dMu
     unsigned const&N_MuSmall() const;
     //--------------------------------------------------------------------------
-    /// \return # bodies with mu_i > Mu - dMu
+    /// return # bodies with mu_i > Mu - dMu
     unsigned const&N_MuLarge() const;
     //--------------------------------------------------------------------------
-    /// \return # bodies with h_i == h_max
+    /// return # bodies with h_i == h_max
     unsigned const&N_HatMax () const;
     //--------------------------------------------------------------------------
-    /// \return # acrive SPH bodies
-    unsigned       N_SPH_active(bool) const;
+    /// return # active bodies of given type
+    /// \param[in] type type of bodies wanted
+    /// \param[in] all  consider all bodies active.
+    unsigned       N_active(bodytype type, bool all) const;
     //@}                                                                        
 #endif // falcON_SPH
     //==========================================================================

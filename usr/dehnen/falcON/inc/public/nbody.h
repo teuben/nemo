@@ -8,8 +8,6 @@
 ///                                                                             
 /// \brief  provides classes for the efficient implementation of N-body codes   
 ///                                                                             
-/// \todo   complete doxygen documentation                                      
-///                                                                             
 /// Here, we disentangle the integration from force computation and diagnostics.
 /// The latter two are so tightly connected that it makes no sense to force them
 /// to divorce.                                                               \n
@@ -918,7 +916,7 @@ namespace falcON {
 #endif
 			 );
     /// construction
-    /// \param[in] s  snapthos: time & bodies
+    /// \param[in] s  snapshot: time & bodies
     /// \param[in] e  global softening length
     /// \param[in] th tree opening parameters
     /// \param[in] nc N_crit for tree build
@@ -949,53 +947,56 @@ namespace falcON {
 #endif
 	       ) falcON_THROWING;
     //--------------------------------------------------------------------------
-    // satisfy all the abstract functions of ForceDiagGrav                      
-    //                                                                          
-    // functions are virtual to allow a class derived from ForceALCON to serve  
-    // in NBodyCode (otherwise the functions below are taken).                  
-    //--------------------------------------------------------------------------
+    /// \name implementing the abstract functions of ForceDiagGrav
+    /// \note functions are virtual to allow a class derived from ForceALCON to
+    ///       serve in NBodyCode (otherwise the functions below are taken).
+    //@{
+    /// print header for CPU stats
     virtual void cpu_stats_head(std::ostream&to) const {
       if(SELF_GRAV) to << "l2R  D  tree  grav ";
       if(acc_ext()) to << " pext ";
     }
-    //--------------------------------------------------------------------------
+    /// print line for CPU stats
     virtual void cpu_stats_line(std::ostream&to) const {
       if(SELF_GRAV) to << "-------------------";
       if(acc_ext()) to << "------";
     }
-    //--------------------------------------------------------------------------
+    /// print CPU time statistics
     virtual void cpu_stats_body(std::ostream&) const;
-    //--------------------------------------------------------------------------
+    /// which fields do we compute
     virtual fieldset computes() const { 
       return fieldset(fieldset::p |
 		      fieldset::a |
 		      (acc_ext()? fieldset::q : fieldset::empty) );
     }
-    //--------------------------------------------------------------------------
-    // note: we don't require eps_i, but use them as part of force computation  
+    /// which fields to we require
+    /// \note: we don't require eps_i, but use them as part of force
+    ///        computation  
     virtual fieldset requires() const {
       return
 	( fieldset(fieldset::m | fieldset::x) | ForceDiagGrav::requires() )
 	& ~computes();
     }
-    //--------------------------------------------------------------------------
     virtual fieldset requiresSPH () const { return fieldset::empty; } 
     virtual fieldset computesSPH () const { return fieldset::empty; } 
-    //--------------------------------------------------------------------------
+    /// compute the forces.
+    /// this routine grows the tree; computes self-gravity (acc & pot), unless
+    /// self-gravity is not desired; and adds any external gravity, if any.
+    /// \param all  set forces for all bodies (or only the active ones)?
     virtual void setforces (bool all, bool, double) const {
       set_tree_and_forces(all,false);
       debug_info(5,"ForceALCON::setforces(): done\n");
     }
+    /// diagnose: compute total pot & kin energy, etc.
     virtual void diagnose  () const { ForceDiagGrav::diagnose_full(); }
-    //--------------------------------------------------------------------------
   };// class falcON::ForceALCON
 #ifdef falcON_NEMO
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::FalcONCode                                                 //
-  //                                                                          //
-  // completely inline                                                        //
-  //                                                                          //
+  //                                                                            
+  // class falcON::FalcONCode                                                   
+  //                                                                            
+  /// N-body code using the falcON force solver; fully inline                   
+  //                                                                            
   //////////////////////////////////////////////////////////////////////////////
   class FalcONCode :
     public  NBodyCode,

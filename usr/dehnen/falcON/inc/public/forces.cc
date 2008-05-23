@@ -438,13 +438,12 @@ namespace falcON {
     return SPHT->N_HatMax ();
   }
   //----------------------------------------------------------------------------
-  inline unsigned forces::N_SPH_active(bool all) const {
-    if(BODIES->N_bodies(bodytype::gas) == 0) 
-      return 0;
-    if(all) 
-      return BODIES->N_bodies(bodytype::gas);
+  inline unsigned forces::N_active(bodytype type, bool all) const {
+    if(BODIES->N_bodies(type) == 0) return 0;
+    if(all) return BODIES->N_bodies(type);
     unsigned n=0;
-    LoopSPHBodies(BODIES,B) if(is_active(B)) ++n;
+    LoopTypedBodies(BODIES,B,type)
+      if(is_active(B)) ++n;
     return n;
   }
 #endif
