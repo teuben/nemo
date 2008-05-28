@@ -155,6 +155,7 @@ exp		y=p0+p1*exp(-(x-p2)/p3)
 arm		y=p0+p1*cos(x)+p2*sin(x)
 arm3		y=p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
 loren		y=p1/PI( (x-p0)^2 + p1^2 )
+psf		y=p1*x^p2*sin(y)^p3+p4
 .fi
 .SH EXAMPLE
 Here is an example of a linear fit: a straight 
@@ -297,6 +298,11 @@ NIST non-linear: http://www.itl.nist.gov/div898/strd/lls/lls.shtml
 NIST linear: http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml
 .PP
 fityk: http://www.unipress.waw.pl/~wojdyr/fityk/
+.PP
+A new scheme for calculating weights and describing
+correlations in nonlinear least squares fits.
+(Hessler, Curent & Ogren, C.I.P. 10, 186, 1996): 
+http://dx.doi.org/10.1063/1.168569 
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -317,5 +323,6 @@ Peter Teuben
 4-apr-03	V1.8 fixed error in using dycol=, and introduced dypow=		PJT
 15-mar-04	V1.8b added fit=loren and corrected lab= setting for functions	PJT/RS
 21-nov-05	V2.0 added fit=gauss1d,gauss2d		PJT
+24-apr-08	V2.1 added psf	PJT
 .fi
 
