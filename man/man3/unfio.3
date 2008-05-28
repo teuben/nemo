@@ -1,4 +1,4 @@
-.TH UNFIO 3NEMO "4 March 2006"
+.TH UNFIO 3NEMO "8 May 2008"
 .SH NAME
 unfscan, unfread, unfswap, unfsize \- unformatted FORTRAN I/O data access from C
 .SH SYNOPSIS
@@ -26,7 +26,8 @@ must know the largest buffer size this routine can expect to see.
 .PP
 The \fIunfsize\fP routine can be set to change the default UNFIO_HDR_SIZE
 header size (as determined during NEMO configure and install). Most older
-compilers use 4, whereas gfortran use 8.
+compilers use 4, whereas gfortran use 8. There is also suppor for 0, which
+means pure headerless raw data can be read this way.
 .PP
 For example, the file created from the following snippet of code
 .PP
@@ -105,5 +106,6 @@ xx-may-94	V1.0 Created for prun       	PJT
 8-aug-95	V1.1 added support for swap for NBODY5 (u3tos)	PJT
 1-mar-06	V1.2 added unfsize for gfortran 	PJT
 4-mar-06	V1.3 use a default UNFIO_HDR_SIZE for hdr_size	PJT
+8-may-08	V1.4 support raw header=0 data	PJT
 .fi
 
