@@ -4,33 +4,50 @@ rotcurtab \- prints a table of a rotation curve
 .SH SYNOPSIS
 \fBrotcurtab\fP [parameter=value]
 .SH DESCRIPTION
-See also \fIrotcurshape\fP.
+This is a convenience hack for \fIrotcurshape(1NEMO)\fP, where it is very cumbersome
+to produce the rotation curve in tabular form.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBradii=\fP
-Radii where to sample the rotation curve []
-.TP 20
+Radii where to sample the rotation curve. A \fInemoinp(3NEM0)\fP expression
+e.g. 1:10:0.5, are effective ways to give a large set of radii. No default.
+.TP 
 \fBrotcur1=\fP
 Rotation curve <NAME>, and parameters []  
-.TP 20
+.TP 
 \fBrotcur2=\fP
 Rotation curve <NAME>, and parameters []  
-.TP 20
+.TP 
 \fBrotcur3=\fP
 Rotation curve <NAME>, and parameters []  
-.TP 20
+.TP 
 \fBrotcur4=\fP
 Rotation curve <NAME>, and parameters []  
-.TP 20
+.TP 
 \fBrotcur5=\fP
 Rotation curve <NAME>, and parameters []  
-.TP 20
+.TP 
 \fBload=\fP
 dynamically loadobject file with rotcur_<NAME> []  
 .SH SEE ALSO
 \fIrotcurshape(1NEMO)\fP
+.SH EXAMPLE
+Although it is possible to create a rotation curve using \fBrotcurshape rotcurmode=t imagemode=f\fP
+on an ascii table with given radii and 0 velocities, this is cumbersome and also produces the
+negative rotation curve since it is the residual between the data (all 0's) and the "fit"
+(forcing all parameters to be 0).
+The following two examples should thus be identical. First the rotcurshape method:
+.nf
+ % nemoinp 0:10 | tabmath - - 0.0 > rotcur0.tab 
+ % rotcurshape rotcur0.tab resid=rotcur1.tab rotcur1=core,100,2,2,0,0,0 rotcurmode=t imagemode=f
+ ## actually, this appears broken now, 
+.fi
+and the rotcurtab method:
+ % rotcurtab 0:10 rotcur1=core,100,2,2 > rotcur2.tab
+.fi
+
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
