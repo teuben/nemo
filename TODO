@@ -8,6 +8,9 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
     from makedefs and NEMORC.gen before continuing on
     Also check http://www.astro.gla.ac.uk/users/norman/note/2004/restFP/
 
+  - see also:
+    http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
+
   - src/nbody/evolve/aarseth/nbody0/Makefile
 	need to activate F77LIBS to include -lcc_dynamic (10.3 ?)
         but sometimes you to take it out again...... (10.4 ?)
@@ -108,7 +111,40 @@ general things for 3.2.x
 	gcc -> 4.0.0 (build 4061)			    template problem??
 	gcc-3.3 -> build 1809				    ok
 
+
+     On solaris  mkdir is called with --parents and --mode=
+		 they need to be -p -m $(PUBLICMODE)
+                 and solaris flags to figure out
+
+     Also:
+	inc/tupel.cc:51: error: `std::isinf' has not been declared
+	inc/tupel.cc:52: error: `std::isnan' has not been declared
+
+     On mac as well as solaris: what's the way to enable STATIC compile,
+	since the default is dynamic and doesn't work well on sun4 and darwin?
+     doxygen may be absent, so you may need to use "make -i" instead
+
+
  - need a gyrfalcON testsuite section
+
+-  falcON/utils install uses some linux dialect:
+
+   1) mkdir
+	mkdir --parents --mode=755 ...
+      on the mac this should be
+	mkdir -p -m 755 ....
+   2) linking:  -rdynamic, -shared, -rpath  are not understood
+	g++ .... -shared -o XXX.so
+
+	Walter uses:
+	-shared -o lib/libWDutils.so -march=i386 -mpreferred-stack-boundary=4
+	OSX/intel can use:
+
+
+	gcc -c -fno-common testlib.c
+	NO:  gcc -dylib -flat_namespace -undefined suppress -o libtestlib.dylib testlib.o
+	YES: gcc -dynamiclib -o libtest.dylib -dylib t.o
+	
 
  - a few snapshot I/O programs still use the old I/O, hence Position/Velocity data is 
    now difficult to make global.
@@ -132,12 +168,13 @@ code & line coverage: (gcov, lcov)
 
 - install on solaris is broken:				[fixed w/ gcc, cc/f77 minor patch needed]
 
+  for native (cc/CC/f77) compilers, use:
 	- FORLIBS needs the 
 	  -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath 
 	  type solution for pgplot, and if so,
 	- FORLIBS need to be added to YAPPLIB
-
-	- sun's make doesn't work, it need gmake
+  Also:
+	- sun's make (e.g. the one in /usr/ccs/bin/make) doesn't work, we need gmake (GnuMake)
 
 - compile under cygwin
     - macro usage of some math function?  real rlog2(real); 
@@ -162,6 +199,8 @@ code & line coverage: (gcov, lcov)
 - getparam:  an option to produce an iraf .par file?
 
 - getparam:  finish the outkeys= stuff
+
+- zeno: some more Zeno compatibility
 
 - overal design:
   separation of functionality and data format. E.g. to compute the 
@@ -253,3 +292,43 @@ gfortran -O2 -c *.f; ar cr libfoo.a *.o
 
 optimize with:   -mtune=pentium4 or -ffast-math
 
+DYLD_LIBRARY_PATH (osx) vs. -rpath-link (linux) vs. LD_LIBRARY_PATH
+
+
+==  
+
+on mac a few minor issues w/ gyrfalcON:
+ - inc/public/forces.cc:462: error: 'uint' has not been declared
+   uint must be unsigned
+
+ - src/public/lib/sample.cc:146: error: no matching function for call to 'isnan(double&)'
+   should be std::isnan()
+
+ - /usr/include/rpc/xdr.h:153: error: conflicting declaration 'typedef struct __rpc_xdr XDR'
+   need to #include <rpc/rpc.h> here
+
+    
+
+	YES: gcc -dynamiclib -o libtest.dylib -dylib t.o
+
+
+$(LIB)lib$(LIBNAME).so: $(falcON_objs)
+                        $(CXX) $^ -shared -o $@
+
+becomes:
+
+
+bad is:
+
+g++ lib/basic.o lib/body.o lib/tree.o lib/gravity.o lib/kernel.o lib/io.o lib/partner.o lib/nbody.o lib/forcesC.o lib/tools.o lib/sample.o lib/manip.o lib/profile.o lib/bodyfunc.o lib/neighbours.o lib/PotExp.o -dynamiclib -o lib/libfalcON.dylib
+
+
+and in utils/Makefile
+
+$(LIB)libWDutils.so:    $(LIB)libWDutils.dylib
+
+$(LIB)libWDutils.dylib: $(WDutils_objs)
+                        $(CXX) $^ -dynamiclib -o $@ $(CPUFLAGS)
+
+
+	 few more isnan() and isinf()  fixes  wiht std::
