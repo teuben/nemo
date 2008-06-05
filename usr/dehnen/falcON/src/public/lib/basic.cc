@@ -30,10 +30,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/basic.h>
 
-#ifdef falcON_MPI
-#  include <proper/mpi_falcON.h>                   // C implement of MPI        
-#endif
-
 #include <cstdlib>
 #include <cstdio>
 #include <cstdarg>
