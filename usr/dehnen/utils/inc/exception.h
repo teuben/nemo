@@ -168,6 +168,10 @@ namespace WDutils {
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
   struct exception : protected std::string {
+  protected:
+    /// default constructor: to be used in derived classes, if any
+    exception() {}
+  public:
     /// copy constructor
     exception(exception const&e) : std::string(e) {}
     /// construction from C-style format string + data.
@@ -282,7 +286,7 @@ namespace WDutils {
     int operator() (char*str, size_t size, const char* fmt, ... )
       WDutils_THROWING;
   };
-  /// macro WDutilsSNprintf to be used line snprintf.
+  /// macro WDutilsSNprintf to be used like snprintf.
   /// reports source file and line on error.
 #define SNprintf WDutils::snprintf__(__FILE__,__LINE__)
 

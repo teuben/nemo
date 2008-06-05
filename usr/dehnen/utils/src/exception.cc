@@ -181,7 +181,7 @@ WDutils::exception::exception(const char*fmt, ...)
   char __text[size];
   va_list  ap;
   va_start(ap,fmt);
-  int w = vsnprintf(__text,1024,fmt,ap);
+  int w = vsnprintf(__text,size,fmt,ap);
   if(w>=size) {
     warning("WDutils::exception::exception(): "
 	    "string size of %d characters exceeded\n",size);
