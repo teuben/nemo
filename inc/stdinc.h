@@ -39,6 +39,7 @@
  *  1-aug-05    nemo_string, nemo_stream for starlab interfaces
  * 29-nov-06    within() now using double's
  * 23-oct-07    added some more PI's and LN's from ZENO/Koda's mathfns.h
+ * 06-jun-08    nemo_exit                                     WD
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -432,8 +433,22 @@ extern void   strclose(stream);
 
 
 /* error.c dprintf.c */
+/*
+ * WD June 2008
+ * allow the user to specify the exit() function, but default to stdlib exit().
+ * Rationale: allow exit to call MPI_Abort()
+ */
+
+extern void (*nemo_exit)(int);
+void set_nemo_exit(void(*)(int));
+
+/* typedef void (*exiter) (int);         /\* type of exit()  WD June 2008 *\/ */
+/* extern exiter nemo_exit;              /\* invoke by compiler upen "nemo_exit()" *\/ */
+/* void set_exit(exiter);                /\* provide exiter *\/ */
+
 /* C99 stdargs example of macro usage:   #define HELLO(a,...)  error(a,__VA_ARGS__)   */
 /* GNU stdargs (deprecated now)          #define HELLO(a,args...)  error(a,##args)    */
+
 void error(string, ...);
 void errorn(string, ...);
 void warning(string, ...);

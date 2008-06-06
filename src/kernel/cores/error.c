@@ -23,12 +23,25 @@
  *       8-dec-01 V1.8 added errno reporting	 		pjt
  *      16-jan-01 V1.8a  calling abort() will be announced      pjt
  *      13-feb-03 V1.8b  revoking errno reporting		pjt
+ *      06-jun-08 V1.8c  nemo_exit                              wd
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <stdarg.h>
 #include <errno.h>
+
+/*
+ * WD June 2008
+ * allow the user to specify the exit() function, but default to stdlib exit().
+ * Rationale: allow exit to call MPI_Abort()
+ */
+
+void(*nemo_exit)(int) = &exit;
+void set_nemo_exit(void(*e)(int))
+{
+  nemo_exit = e;
+}
 
 
 extern int debug_level;    /* see also user interface getparam.c for this */
@@ -154,7 +167,7 @@ void stop(int lev)
             return;
         }
     finiparam();
-    exit(lev);
+    nemo_exit(lev);                 /* changed from exit(lev);  WD June 2008 */
     /*NOTREACHED*/
 }
 
