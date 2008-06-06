@@ -15,7 +15,7 @@
 
 string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "in=???\n                     input file name to test",
-    "VERSION=1.0b\n		  5-mar-94 PJT ",
+    "VERSION=1.0c\n		  6-jun-08 PJT ",
     NULL,
 };
 
@@ -31,12 +31,12 @@ nemo_main()
     dprintf(2,"Fileno(\"%s\") = %d\n",in,fileno(str));
     if (isatty(fileno(str))) {
         dprintf(1,"File %s is not a proper file (isatty)\n",in);
-        exit(1);
+        stop(1);
     } else if (qsf(str)) {
         dprintf(1,"File %s is a proper binary structured file\n",in);
-        exit(0);
+        stop(0);
     } else {
         dprintf(1,"File %s is not a proper binary structured file\n",in);
-        exit(1);
+        stop(1);
     }
 }

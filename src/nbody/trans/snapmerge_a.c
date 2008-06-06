@@ -42,7 +42,7 @@
 string defv[] = {
   "in1=???\n			Input NEMO snapshot",
   "in2=???\n			Input NEMO snapshot to append after in1",
-  "VERSION=1.21\n               28-Nov-06 JCL",
+  "VERSION=1.22\n               6-Jun-08 pjt",
   NULL,
 };
 

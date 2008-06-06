@@ -35,7 +35,7 @@ string defv[] = {
 	"cell=0.0625\n			cellsize : 64 pixels if size=4",
 	"vrange=-infinity:infinity\n	range in velocity space",
 	"moment=0\n			velocity moment to weigh with",
-	"VERSION=4.6a\n			1-apr-01 PJT",
+	"VERSION=4.6b\n			6-jun-08 PJT",
 	NULL,
 };
 
@@ -188,7 +188,7 @@ allocate_image()
         create_image (&iptr,nsize,nsize);       /* force square image */
 	if (iptr==NULL) {
 		dprintf (0,"Not enough memory for image\n");
-		exit(0);
+		stop(0);
 	}
 	Nx(iptr) = Ny(iptr) = nsize;			/* image will be square */
 	Xmin(iptr) = origin[0] - 0.5*size + 0.5*cell;   /* note definition of */
@@ -198,7 +198,7 @@ allocate_image()
 	Frame(iptr) = (real *) malloc(Nx(iptr)*Ny(iptr)*sizeof(real));
 	if (Frame(iptr)==NULL) {
 		dprintf (0,"Not enough memory to allocate %d*%d frame array\n",Nx(iptr),Ny(iptr));
-		exit(1);
+		stop(1);
 	}
         Namex(iptr) = axname[0];        /* may change */
         Namey(iptr) = axname[1];

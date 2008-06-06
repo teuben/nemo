@@ -73,7 +73,7 @@ string fname;			/* not used in this _fie version */
     code[codelen] = '\0';
     printf("Code = %s\n",code);
 
-	exit(0);
+    stop(0);
 }
 
 local string bodyvar[] = {	/* Bodyvars must obey 'a' <= ch <= 'z' */
@@ -192,7 +192,7 @@ string defv[] = {
     "i=1\n		Index",
     "file=\n		Filename to save expression in",
     "btnames=\n		BTNAMES filename to regenerate .o files",
-    "VERSION=1.3a\n	14-mar-90 PJT",
+    "VERSION=1.3b\n	14-mar-90 PJT",
     NULL,
 };
 
