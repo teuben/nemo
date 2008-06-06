@@ -162,7 +162,7 @@ $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
 library		: 	links $(LIBT) $(falcON) $(BFCT)
 
 # 6.4 falcON executables
-exe		:	libutils library $(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter) $(exe_pjm)
+exe		:	libutils library $(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter) $(exe_pjm) $(exe_mpi)
 
 ifdef NEMO
 

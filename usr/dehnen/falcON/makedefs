@@ -44,13 +44,13 @@ MPIDIR		:= /opt/mpich/ch-p4
 MPIINC		:= $(MPIDIR)/include
 IMPI		:= -I$(MPIINC)
 
-ifdef STATIC
+#ifdef STATIC
 MPILIB		:= $(MPIDIR)/lib
 LMPI		:= -L$(MPILIB) -lmpich
-else
-MPILIB		:= $(MPIDIR)/lib/shared
-LMPI		:= -L$(MPILIB) -lmpich -Wl,-rpath,$(MPILIB)
-endif
+#else
+#MPILIB		:= $(MPIDIR)/lib/shared
+#LMPI		:= -L$(MPILIB) -lmpich -Wl,-rpath,$(MPILIB)
+#endif
 
 endif
 

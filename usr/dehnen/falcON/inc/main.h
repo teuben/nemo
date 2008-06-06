@@ -84,7 +84,7 @@
 #    define falcON_USE_MPI                         //   then use it             
 #  endif
 #  ifndef falcON_included_mpi_falcON_h
-#    include <proper/mpi_falcON.h>
+#    include <parallel/mpi_falcON.h>
 #  endif
 
 #else                                              // else                      
@@ -322,13 +322,13 @@ int main(int argc, char *argv[])                   // global main
     falcON::report::close_file();
 #endif
 
-#ifdef falcON_USE_MPI
-    falcON::MPI::Finish();                         // finish MPI                
-#endif
-
   } catch(falcON::exception E) {                   // CATCH falcON errors       
     falcON::ERROR(text(E));
   }
+
+#ifdef falcON_USE_MPI
+  falcON::MPI::Finish();                           // finish MPI                
+#endif
 }
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
@@ -344,6 +344,11 @@ namespace falcON {
   // some utilities for getting NEMO parameters                               //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
+  //----------------------------------------------------------------------------
+  // like NEMO::hasvalue(), except that we take a const char*
+  inline bool hasvalue(const char*param) {
+    return ::hasvalue(const_cast<char*>(param));
+  }
   //----------------------------------------------------------------------------
   // read vect from nemo parameter                                              
   vect getvparam(const char* option) falcON_THROWING {
@@ -410,7 +415,6 @@ namespace falcON {
   /// \param o  name of nemo option
   /// \param a  array
   /// \param m  physical size of array
-  /// \param d  default value, if no elements given
   /// \return   number of elements actually read.
   template<typename Type>
   int getaparam_z(const char*o, Type*a, int m) falcON_THROWING {
