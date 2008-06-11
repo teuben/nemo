@@ -239,16 +239,16 @@ namespace falcON {
 #else
   extern void main(int argc, char *argv[]) falcON_THROWING;
 #endif
-  //----------------------------------------------------------------------------
-  // define falcON::ERROR() to call nemo::error() if NEMO application           
-  //----------------------------------------------------------------------------
-  inline void ERROR(const char*m) {
-#ifndef falcON_USE_NEMO
-    falcON_ErrorN(m);
-#else
-    ::error(const_cast<char*>(m));
-#endif
-  }
+//   //----------------------------------------------------------------------------
+//   // define falcON::ERROR() to call nemo::error() if NEMO application           
+//   //----------------------------------------------------------------------------
+//   inline void ERROR(const char*m) {
+// #ifndef falcON_USE_NEMO
+//     falcON_ErrorN(m);
+// #else
+//     ::error(const_cast<char*>(m));
+// #endif
+//   }
 }
 
 //------------------------------------------------------------------------------
@@ -302,7 +302,7 @@ int main(int argc, char *argv[])                   // global main
     try {                                          // TRY:                      
       falcON::main();                              //   call user program       
     } catch(falcON::exception E) {                 // CATCH falcON errors       
-      falcON::ERROR(text(E));
+      falcON_ErrorN(text(E));
     }
     finiparam();                                   // finish NEMO               
 
@@ -326,7 +326,7 @@ int main(int argc, char *argv[])                   // global main
 #endif
 
   } catch(falcON::exception E) {                   // CATCH falcON errors       
-    falcON::ERROR(text(E));
+    falcON_ErrorN(text(E));
   }
 
 #ifdef falcON_USE_MPI

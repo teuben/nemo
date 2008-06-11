@@ -110,7 +110,7 @@ namespace {
     if(name && RunInfo::name_known())
       fprintf(stderr,"[%s]: ",RunInfo::name());
     if(RunInfo::is_mpi_proc())
-      fprintf(stderr,"@ P%d: ",RunInfo::mpi_proc());
+      fprintf(stderr,"@%d: ",RunInfo::mpi_proc());
     if(file) fprintf(stderr,"[%s:%d]: ",file,line);
     vfprintf(stderr,fmt,ap);
     if (fmt[strlen(fmt)-1] != '\n')

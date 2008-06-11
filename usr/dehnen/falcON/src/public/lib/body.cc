@@ -77,7 +77,6 @@ void bodies::block::reset_data(fieldset b) const falcON_THROWING {
 #undef RESETDATA
 }
 ////////////////////////////////////////////////////////////////////////////////
-inline
 void bodies::block::add_field (fieldbit f) falcON_THROWING {
   if(TYPE.allows(f) && 0 == DATA[value(f)] ) {
     if(debug(4)) DebugInfo("bodies::block::add_field(): "
@@ -88,7 +87,6 @@ void bodies::block::add_field (fieldbit f) falcON_THROWING {
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
-inline
 void bodies::block::del_field (fieldbit f) falcON_THROWING {
   if(DATA[value(f)]) {
     if(debug(4)) DebugInfo("bodies::block::del_field(): "
@@ -99,7 +97,6 @@ void bodies::block::del_field (fieldbit f) falcON_THROWING {
   set_data_void(f,0);
 }
 ////////////////////////////////////////////////////////////////////////////////
-inline
 void bodies::block::swap_bytes(fieldbit f) falcON_THROWING {
   if(DATA[value(f)]) {
     if(debug(4)) DebugInfo("bodies::block::swap_bytes(): "
@@ -109,26 +106,22 @@ void bodies::block::swap_bytes(fieldbit f) falcON_THROWING {
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
-inline
 void bodies::block::add_fields(fieldset b) falcON_THROWING {
   for(fieldbit f; f; ++f)
     if(b.contain(f)) add_field(f);
 }
 ////////////////////////////////////////////////////////////////////////////////
-inline
 void bodies::block::del_fields(fieldset b) falcON_THROWING {
   for(fieldbit f; f; ++f) 
     if(b.contain(f)) del_field(f);
 }
 ////////////////////////////////////////////////////////////////////////////////
-inline
 void bodies::block::set_fields(fieldset b) falcON_THROWING {
   for(fieldbit f; f; ++f) 
     if(b.contain(f)) add_field(f);
     else             del_field(f);
 }
 ////////////////////////////////////////////////////////////////////////////////
-inline
 bodies::block::~block() falcON_THROWING {
   for(fieldbit f; f; ++f)
     del_field(f);
