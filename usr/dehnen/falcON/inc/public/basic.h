@@ -6,8 +6,6 @@
 /// \brief   Declarations of some basic functions needed in most source code    
 ///                                                                             
 ///          Contents:                                                          
-///          \li falcON::error, falcON::warning, falcON::message, and           
-///              falcON::debug_info                                             
 ///          \li exception handling (falcON::exception)                         
 ///          \li falcON::compile_info                                           
 ///          \li memory allocation and de-allocation support                    
@@ -67,52 +65,48 @@ namespace falcON {
   /// Returns the falcON library directory
   const char* libdir();
   //----------------------------------------------------------------------------
-  /// Print an error message to stderr and abort.
-  /// Uses a printf() style format string as first argument, further arguments
-  /// must match format, exactly as in printf, which will be called.
-  /// \param fmt gives the format in C printf() style
-  void error(const char*fmt, ... );
-  //----------------------------------------------------------------------------
-  /// Print a warning message to stderr.
-  /// Uses a printf() style format string as first argument, further arguments
-  /// must match format, exactly as in printf, which will be called.
-  /// \param fmt gives the format in C printf() style
-  void warning(const char*fmt, ...);
-  //----------------------------------------------------------------------------
-  /// Print debugging information to stderr.                                    
-  /// Uses a printf() style format string as first argument, further arguments  
-  /// must match format, exactly as in printf, which will be called.            
-  /// \param fmt gives the format in C printf() style                           
-  void debug_info(const char*fmt, ... );
-  //----------------------------------------------------------------------------
-  /// Print debugging information to stderr.                                    
-  /// Debugging information is printed if the debugging level exceeds the       
-  /// debugging depth (1st argument). The debugging level is found from         
-  /// falcON::run_info::debug_level() and initialized at start-up of main().    
-  /// Uses a printf() style format string as first argument, further arguments  
-  /// must match format, exactly as in printf, which will be called.            
-  /// \param deb gives the debugging depth: info is printed only if it is       
-  ///            less or equal to debugging level                               
-  /// \param fmt gives the format in C printf() style                           
-  void debug_info(int deb, const char*fmt, ... );
-  //----------------------------------------------------------------------------
   /// \name macros controling the usage of throw exception vs error             
   //@{                                                                          
-#if 1
+  /// error message (and exit), reporting [file:line]
+  /// use "falcON_Error(fmt, data)" instead of "error(fmt, data)"
+#define falcON_Error           WDutils::Error(__FILE__,__LINE__,"falcON")
+  /// error message (and exit), NOT reporting [file:line]
+  /// use "falcON_Error(fmt, data)" instead of "error(fmt, data)"
+#define falcON_ErrorN          WDutils::Error("falcON")
+  /// print warning message, reporting [file:line]
+  /// use "falcON_Warning(fmt, data)" instead of "warning(fmt, data)"
+#define falcON_Warning	       WDutils::Warning(__FILE__,__LINE__,"falcON")
+  /// print warning message, NOT reporting [file:line]
+  /// use "falcON_Warning(fmt, data)" instead of "warning(fmt, data)"
+#define falcON_WarningN	       WDutils::Warning("falcON")
+  //----------------------------------------------------------------------------
+#ifdef WDutils_EXCEPTIONS
+#  define falcON_EXCEPTIONS
+#  define falcON_THROWING      throw(falcON::exception)
+#  define falcON_THROW         throw WDutils::Thrower(__FILE__,__LINE__)
+#  define falcON_THROWN        throw falcON::exception
+#  define falcON_RETHROW(E)    WDutils_RETHROW(E)
+#else
+#  undef falcON_EXCEPTIONS
   /// use instead of <tt> throw(falcON::exception) </tt> after function
   /// declaration
 #  define falcON_THROWING 
+  /// instead of throwing an exception: error with [file:line]
   /// use "falcON_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
   /// falcON::exception(fmt, data)"
-#  define falcON_THROW         falcON::error
+#  define falcON_THROW         falcON_Error
+  /// instead of throwing an exception: error 
+  /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
+  /// WDutils::exception(fmt, data)"
+#  define falcON_THROWN	       falcON_ErrorN
   /// use "falcON_RETHROW(E)" to re-throw a caught exception "E"
-#  define falcON_RETHROW(E)    falcON::error(text(E))
-#else
-#  define falcON_THROWING      throw(falcON::exception)
-#  define falcON_THROW         throw falcON::exception
-#  define falcON_RETHROW(E)    throw E
+#  define falcON_RETHROW(E)    falcON_Error  (text(E))
 #endif
   //@}
+#undef  DebugInfo
+#define DebugInfo              WDutils::__DebugInfo(__FILE__,__LINE__,"falcON ")
+#undef  DebugInfoN
+#define DebugInfoN             WDutils::__DebugInfo("falcON ")
   //============================================================================
   //
   // mechanism to avoid status mismatch
@@ -163,28 +157,6 @@ namespace falcON {
     const char*compiler();            ///< compiler used
   }
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // useful macros for simple error messages                                    
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-#define falcON_Error(MSGS)					\
-  error("[%s.%d]: %s",__FILE__,__LINE__,MSGS)
-  //----------------------------------------------------------------------------
-#define falcON_Except(MSGS)					\
-  falcON_THROW("[%s.%d]: %s",__FILE__,__LINE__,MSGS)
-  //----------------------------------------------------------------------------
-#define falcON_Warning(MSGS)					\
-  warning("[%s.%d]: %s",__FILE__,__LINE__,MSGS)
-  //----------------------------------------------------------------------------
-#define falcON_ErrorF(MSGS,FUNC)				\
-  error("[%s.%d]: in %s: %s",__FILE__,__LINE__,FUNC,MSGS)
-  //----------------------------------------------------------------------------
-#define falcON_ExceptF(MSGS,FUNC)			        \
-  falcON_THROW("[%s.%d]: in %s: %s",__FILE__,__LINE__,FUNC,MSGS)
-  //----------------------------------------------------------------------------
-#define falcON_WarningF(MSGS,FUNC)				\
-  warning("[%s.%d]: in %s: %s",__FILE__,__LINE__,FUNC,MSGS)
-  //////////////////////////////////////////////////////////////////////////////
   ///                                                                           
   /// C MACRO to be used for array allocation                                   
   ///                                                                           
@@ -196,7 +168,7 @@ namespace falcON {
   /// \param  TYPE name of the element type                                     
   /// \param  SIZE number of elements                                           
 #define falcON_NEW(TYPE,SIZE)					\
-  WDutils::NewArray<TYPE>(SIZE,__FILE__,__LINE__,"falcON")
+  WDutils::NewArray<TYPE>(SIZE,__FILE__,__LINE__,"falcON ")
   //////////////////////////////////////////////////////////////////////////////
   ///                                                                           
   /// C MACRO to be used for array de-allocation                                
@@ -207,7 +179,7 @@ namespace falcON {
   /// about memory de-allocation.                                               
   ///                                                                           
   /// \param P  pointer to be de-allocated                                      
-#define falcON_DEL_A(P) WDutils::DelArray(P,__FILE__,__LINE__,"falcON")
+#define falcON_DEL_A(P) WDutils::DelArray(P,__FILE__,__LINE__,"falcON ")
   //////////////////////////////////////////////////////////////////////////////
   ///                                                                           
   /// C MACRO to be used for object de-allocation                               
@@ -216,7 +188,7 @@ namespace falcON {
   /// an error message detailing the source file and line of the call.          
   ///                                                                           
   /// \param P  pointer to object to be de-allocated                            
-#define falcON_DEL_O(P) DelObject(P,__FILE__,__LINE__,"falcON")
+#define falcON_DEL_O(P) DelObject(P,__FILE__,__LINE__,"falcON ")
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // reporting actions to narrow code position of mysterious aborts           //

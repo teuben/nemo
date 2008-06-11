@@ -81,19 +81,20 @@ namespace {
     if(!got.contain(BF->need())) {
       fieldset miss = got.missing(BF->need());
       if(ZM) {
-	warning("data '%s' required for filter but missing; "
-		"will zero them\n",word(miss));
+	falcON_Warning("data '%s' required for filter but missing; "
+		       "will zero them\n",word(miss));
 	ss->add_fields(miss);
 	ss->reset_data(miss);
       } else
-	error("data '%s' required for filter but missing "
-	      "(use 'zeromissing=t' if you want me to reset them to 0)\n",
-	      word(miss));
+	falcON_Error("data '%s' required for filter but missing (use "
+		     "'zeromissing=t' if you want me to reset them to 0)\n",
+		     word(miss));
     }
     LoopAllBodies(ss,B)
       if(! (*BF)(B) ) B.flag_for_removal();
     ss->remove();
-    debug_info(1,"%d bodies removed at time %f\n",ss->N_del(),ss->time());
+    if(debug(1))
+      DebugInfo("%d bodies removed at time %f\n",ss->N_del(),ss->time());
     return ss->N_bodies() > 0;
   }
   void apply_sort(snapshot*ss, fieldset copy) {
@@ -122,7 +123,7 @@ void falcON::main() falcON_THROWING {
 	SHOT.write_nemo(OUT,COPY);
       }
     } else
-      warning("no snapshot found in input\n");
+      falcON_Warning("no snapshot found in input\n");
   } else if(0==strcmp(getparam("times"),"last")) {
     // special case times=last
     if(IN.has_snapshot()) {
@@ -134,7 +135,7 @@ void falcON::main() falcON_THROWING {
 	SHOT.write_nemo(OUT,COPY);
       }
     } else
-      warning("no snapshot found in input\n");
+      falcON_Warning("no snapshot found in input\n");
   } else {
     // general case for times
     while(IN.has_snapshot())
@@ -146,8 +147,8 @@ void falcON::main() falcON_THROWING {
 	}
       }
     if(!OUT)
-      warning("no snapshot matching \"times=%s\" found in input\n",
-	      getparam("times"));
+      falcON_Warning("no snapshot matching \"times=%s\" found in input\n",
+		     getparam("times"));
   }
   if(BF) falcON_DEL_O(BF);
 }

@@ -5,7 +5,7 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2002-2006                                                          
+/// \date    2002-2008                                                          
 ///                                                                             
 /// \brief   implements methods declared in inc/public/basic.h                  
 ///                                                                             
@@ -53,42 +53,6 @@ const char* falcON::libdir()
     strcpy(lib_name,getenv("FALCONLIB"));
   return lib_name;
 }
-//------------------------------------------------------------------------------
-void falcON::error(const char* fmt,                // I: error message          
-		   ...             ) {             //[I: parameters]            
-  va_list  ap;
-  va_start(ap,fmt);
-  WDutils::printerr("### falcON Error: ", fmt, ap);
-  va_end(ap);
-  WDutils::exit();
-}
-//------------------------------------------------------------------------------
-void falcON::warning(const char* fmt,              // I: warning message        
-		     ...             ) {           //[I: parameters]            
-  va_list  ap;
-  va_start(ap,fmt);
-  WDutils::printerr("### falcON Warning: ", fmt, ap);
-  va_end(ap);
-}
-//------------------------------------------------------------------------------
-void falcON::debug_info(const char* fmt,           // I: debugging information  
-			...             ) {        //[I: parameters]            
-  va_list  ap;
-  va_start(ap,fmt);
-  printerr("### falcON Debug Info: ", fmt, ap, false);
-  va_end(ap);
-}
-//------------------------------------------------------------------------------
-void falcON::debug_info(int         deb,           // I: level for reporting    
-			const char* fmt,           // I: debugging information  
-			...             ) {        //[I: parameters]            
-  if(RunInfo::debug(deb)) {
-    va_list  ap;
-    va_start(ap,fmt);
-    printerr("### falcON Debug Info: ", fmt, ap, false);
-    va_end(ap);
-  }
-}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // mechanism to avoid status mismatch                                         //
@@ -104,8 +68,8 @@ void falcON::CheckAgainstLibrary(falcON::Status Current,
 {
   Status Library = CurrentStatus();
   if( Current != Library ) {
-    debug_info(5,"CheckAgainstLibrary(): Current=%d Library=%d\n",
-	       Current, Library);
+    DebugInfo(5,"CheckAgainstLibrary(): Current=%d Library=%d\n",
+	      Current, Library);
     // check proprietary versus public
     if( Current&proper_version && !(Library&proper_version) )
       falcON_THROW("STATUS mismatch: proprietary %s, "
@@ -206,7 +170,7 @@ void falcON::report::close_file()
   if(REPORT) {
     if(REPORT->STREAM) fclose(REPORT->STREAM);
     if(unlink(REPORT->FNAME) != 0)
-      warning("cannot delete file %s",REPORT->FNAME);
+      falcON_Warning("cannot delete file %s",REPORT->FNAME);
     falcON_DEL_O(REPORT);
     REPORT = 0;
   }

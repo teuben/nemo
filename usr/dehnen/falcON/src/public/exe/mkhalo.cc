@@ -48,9 +48,10 @@
 // v 2.4.1  23/01/2008  WD  DF into phden, not aux data field                   
 // v 2.4.2  08/02/2008  WD  removed minor bug with RNG seed                     
 // v 2.4.3  20/02/2008  WD  change in body.h (removed old-style constructors)   
+// v 2.4.4  11/06/2008  WD  changes in error/exception treatment (falcON)       
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.3"
-#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.4"
+#define falcON_VERSION_D "11-jun-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -141,7 +142,7 @@ string usage =
   "          will be in equilibrium with the total potential (the sum of\n"
   "          the external and the halo's own potential).";
 //------------------------------------------------------------------------------
-void falcON::main()
+void falcON::main() falcON_THROWING
 {
   const double mf = 2.2228847e5;                   // M_sun in WD_units         
   //----------------------------------------------------------------------------

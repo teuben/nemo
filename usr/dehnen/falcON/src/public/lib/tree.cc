@@ -3,7 +3,7 @@
 //                                                                             |
 /// \file src/public/tree.cc                                                   |
 //                                                                             |
-// Copyright (C) 2000-2007  Walter Dehnen                                      |
+// Copyright (C) 2000-2008  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -103,7 +103,6 @@ namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace falcON;
-  using falcON::error;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // auxiliary macros                                                         //
@@ -523,9 +522,9 @@ namespace {
     inline void shrink_to_octant(box*B, int i) {
       indx l = ++(B->LEVEL);
       if(l > DMAX)
-	error("exceeding maximum tree depth of %d\n    "
-	      "(presumably more than Ncrit=%d bodies have a common position "
-	      "which may be NaN)", DMAX,NCRIT);
+	falcON_Error("exceeding maximum tree depth of %d\n    "
+		     "(presumably more than Ncrit=%d bodies have a "
+		     "common position which may be NaN)", DMAX,NCRIT);
       real rad=RA[l];
       if(i&1) centre(B)[0] += rad;  else  centre(B)[0] -= rad;
       if(i&2) centre(B)[1] += rad;  else  centre(B)[1] -= rad;
@@ -773,10 +772,10 @@ namespace {
 #ifdef falcON_track_bug
       LEND = EndLeaf(TREE);
       if(LEND != LeafNo(TREE,N_dots()))
-	error("BoxDotTree::link(): leaf number mismatch");
+	falcON_Error("BoxDotTree::link(): leaf number mismatch");
       CEND = EndCell(TREE);
       if(CEND != CellNo(TREE,N_boxes()))
-	error("BoxDotTree::link(): cell number mismatch");
+	falcON_Error("BoxDotTree::link(): cell number mismatch");
 #endif
       OctTree::Cell* C0 = FstCell(TREE), *Cf=C0+1;
       OctTree::Leaf* Lf = FstLeaf(TREE);
@@ -1068,7 +1067,7 @@ namespace {
       if(!SP || flag(b).are_set(SP)) {
 	Di->set_up(b); 
 	if(isnan(Di->pos()))
-	  error("tree building: body position contains NaN\n");
+	  falcON_Error("tree building: body position contains NaN\n");
 	Di->pos().up_min_max(XMIN,XMAX);
 	XAVE += Di->pos();
 	Di++;
@@ -1102,7 +1101,7 @@ namespace {
 	if(is_new(b) && (!SP || flag(b).are_set(SP))) {
 	  Di->set_up(b);
 	  if(isnan(Di->pos()))
-	    error("tree building: body position contains nan\n");
+	    falcON_Error("tree building: body position contains nan\n");
 	  Di->pos().up_min_max(XMIN,XMAX);
 	  XAVE += Di->pos();
 	  Di++;
@@ -1267,7 +1266,7 @@ OctTree::OctTree(const bodies*bb,                  // I: body sources
     set_depth(TB.depth());                         //   set tree depth          
     SET_T(" time for TreeBuilder::link():         ");
   } else {                                         // ELSE                      
-    warning("nobody in tree");                     //   issue a warning         
+    falcON_Warning("nobody in tree");              //   issue a warning         
     allocate(0,0,0,zero);                          //   reset leafs & cells     
     set_depth(0);                                  //   set tree depth to zero  
   }                                                // ENDIF                     
@@ -1287,7 +1286,7 @@ OctTree::OctTree(const OctTree*par,                // I: parent tree
 {
   par->mark_for_subtree(F,Ncrit,Nc,Ns);            // mark parent tree          
   if(Ns==0 || Nc==0) {                             // IF no nodes marked        
-    warning("empty subtree");                      //   issue warning and       
+    falcON_Warning("empty subtree");               //   issue warning and       
     allocate(0,0,0,zero);                          //   reset leafs & cells     
     set_depth(0);                                  //   set tree depth to zero  
   } else {                                         // ELSE                      
@@ -1308,7 +1307,7 @@ void OctTree::build(int        const&nc,           //[I: N_crit]
   report REPORT("OctTree::build(%d,%d)",nc,dm);
   SET_I
   if(dm >= 1<<8)
-    error("OctTree: maximum tree depth must not exceed %d",1<<8-1);
+    falcON_Error("OctTree: maximum tree depth must not exceed %d",1<<8-1);
   TreeBuilder TB(this,x0,nc,dm);                   // initialize TreeBuilder    
   SET_T(" time for TreeBuilder::TreeBuilder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
@@ -1320,7 +1319,7 @@ void OctTree::build(int        const&nc,           //[I: N_crit]
     set_depth(TB.depth());                         //   set tree depth          
     SET_T(" time for TreeBuilder::link():         ");
   } else {                                         // ELSE                      
-    warning("nobody in tree");                     //   issue a warning         
+    falcON_Warning("nobody in tree");              //   issue a warning         
     allocate(0,0,0,zero);                          //   reset leafs & cells     
     set_depth(0);                                  //   set tree depth to zero  
   }                                                // ENDIF                     

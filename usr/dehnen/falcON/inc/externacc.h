@@ -161,9 +161,11 @@ namespace falcON {
 		      float       &p,
 		      vectf       &a) const {
       if(need_masses())
-	warning("single_force(): accelertion requires m; force may be wrong");
+	falcON_Warning("single_force(): "
+		       "accelertion requires m; force may be wrong");
       if(need_velocities())
-	warning("single_force(): accelertion requires v; force may be wrong");
+	falcON_Warning("single_force(): "
+		       "accelertion requires v; force may be wrong");
       const float m(one);
       const vectf v(zero);
       set(t,1,&m,&x,&v,0,&p,&a,0);
@@ -181,9 +183,11 @@ namespace falcON {
 		      double      &p,
 		      vectd       &a) const {
       if(need_masses())
-	warning("single_force(): accelertion requires m; force may be wrong");
+	falcON_Warning("single_force(): "
+		       "accelertion requires m; force may be wrong");
       if(need_velocities())
-	warning("single_force(): accelertion requires v; force may be wrong");
+	falcON_Warning("single_force(): "
+		       "accelertion requires v; force may be wrong");
       const double m(one);
       const vectd  v(zero);
       set(t,1,&m,&x,&v,0,&p,&a,0);
@@ -287,7 +291,7 @@ namespace falcON {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 extern "C" {
-  void warning(char*, ...);
+  void warning(char*, ...);   // nemo's warning
   typedef void (*pacc)(int,double,int,const void*,const void*,const void*,
 		       const int*, void*, void*, int, char);
   pacc get_acceleration(const char*, const char*, const char*, bool*, bool*);

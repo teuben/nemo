@@ -2,7 +2,7 @@
 //                                                                              
 /// \file src/public/partner.cc                                                 
 //                                                                              
-// Copyright (C) 2000-2007  Walter Dehnen                                       
+// Copyright (C) 2000-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -195,7 +195,7 @@ namespace {
 	}
       }
       N++;
-      if(N==MAX) warning("interaction list overflow");
+      if(N==MAX) falcON_Warning("interaction list overflow");
     }
     //--------------------------------------------------------------------------
     // abstract methods                                                         
@@ -505,7 +505,8 @@ falcON_TRAITS(PartnerLister<1>,"PartnerLister<1>");
 ////////////////////////////////////////////////////////////////////////////////
 void PartnerEstimator::update_leafs_sticky()
 {
-  if(TREE==0) error("PartnerEstimator: no tree");  // IF no tree, FATAL ERROR   
+  if(TREE==0)
+    falcON_Error("PartnerEstimator: no tree");     // IF no tree, FATAL ERROR   
   if(! TREE->is_used_for_stsp() )                  // IF tree not used by stsp  
     reset();                                       //   reset allocation & flags
   if(! STC_UPTODATE ) {                            // IF not up to date         
@@ -525,7 +526,7 @@ void PartnerEstimator::update_leafs_sticky()
 	  if(is_active(Li)) ++NA;
 	}
       }
-      if(NS > NL) error("PartnerEstimator: too many sticky leafs");
+      if(NS > NL) falcON_Error("PartnerEstimator: too many sticky leafs");
       NL = NS;
       ALL_STSP   = NL == TREE->N_leafs();
       ALL_ACTIVE = NL == NA;
@@ -535,7 +536,8 @@ void PartnerEstimator::update_leafs_sticky()
 }
 //------------------------------------------------------------------------------
 void PartnerEstimator::update_leafs_sph() {
-  if(TREE==0) error("PartnerEstimator: no tree");  // IF no tree, FATAL ERROR   
+  if(TREE==0)
+    falcON_Error("PartnerEstimator: no tree");     // IF no tree, FATAL ERROR   
   if(! TREE->is_used_for_stsp() )                  // IF tree not used by stsp  
     reset();                                       //   reset allocation & flags
   if(! SPH_UPTODATE) {
@@ -555,7 +557,7 @@ void PartnerEstimator::update_leafs_sph() {
 	  if(is_active(Li)) ++NA;
 	}
       }
-      if(NS > NL) error("PartnerEstimator: too many sticky leafs");
+      if(NS > NL) falcON_Error("PartnerEstimator: too many sticky leafs");
       NL = NS;
       ALL_STSP   = NL == TREE->N_leafs();
       ALL_ACTIVE = NL == NA;
@@ -723,7 +725,7 @@ void PartnerEstimator::make_sticky_list (indx_pair*bl,
 					 bool      count) falcON_THROWING
 {
   if(count && ! (TREE->my_bodies()->have(fieldbit::N))) {
-    warning("PartnerEstimator: cannot count: field 'N' not supported\n");
+    falcON_Warning("PartnerEstimator: cannot count: field 'N' not supported\n");
     count = false;
   }
   if(count) {
@@ -761,7 +763,7 @@ void PartnerEstimator::make_sph_list(indx_pair*bl,
 				     bool      count) falcON_THROWING
 {
   if(count && ! (TREE->my_bodies()->have(fieldbit::N))) {
-    warning("PartnerEstimator: cannot count: field 'N' not supported\n");
+    falcON_Warning("PartnerEstimator: cannot count: field 'N' not supported\n");
     count = false;
   }
   if(count) {
@@ -771,7 +773,7 @@ void PartnerEstimator::make_sph_list(indx_pair*bl,
     make_sp_list<0>(bl,nl,na,Max);
 }
 //------------------------------------------------------------------------------
-void PartnerEstimator::count_sph_partners(bool Max)
+void PartnerEstimator::count_sph_partners(bool Max) falcON_THROWING
 {
   prepare_sph();
   if(Max) {

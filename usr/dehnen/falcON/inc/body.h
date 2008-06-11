@@ -364,7 +364,7 @@ namespace falcON {
 	    TAUQ[n] = square(TAU[n]);
 	  }
 	} else 
-	  error("bodies::TimeSteps: ns=%d < 1\n",NSTEPS);
+	  falcON_Error("bodies::TimeSteps: ns=%d < 1\n",NSTEPS);
       }
       //------------------------------------------------------------------------
       ~TimeSteps() {
@@ -421,6 +421,10 @@ namespace falcON {
     mutable bool     SPHC;                         // SPH data changed?         
     const bool       C_FORTRAN;                    // we are used for C/FORTRAN 
     //==========================================================================
+  protected:
+    /// required by derived class ParallelSnapshot
+    block* const&typed(bodytype t) const { return TYPES[t]; }
+    //--------------------------------------------------------------------------
   public:
     block *const&first_block() const { return FIRST; }
     //==========================================================================
@@ -1264,10 +1268,14 @@ namespace falcON {
 #endif
     //==========================================================================
     // \name miscellaneous
-    /// set body keys to first+i, i=0...Nbody-1
-    void reset_keys(int k=0) {
+    /// set body keys to bodyindeces
+    /// \note the bodyindex is defined via that of the first body in each
+    /// block. In a MPI parallel situation, this is not identical to the LOCAL
+    /// running number, but reflects the global running number!
+    void reset_keys() {
       if(BITS.contain(fieldbit::k))
-	for(iterator b = begin_all_bodies(); b; ++b,++k) b.key() = k;
+	for(iterator b = begin_all_bodies(); b; ++b) 
+	  b.key() = bodyindex(b);
     }
     //--------------------------------------------------------------------------
     /// reset body flags to hold only body type information
@@ -1316,17 +1324,21 @@ namespace falcON {
     void CheckData(fieldset s, const char*f, int l) const
     {
       if(debug(6) && !have_all(s))
-	debug_info(" %s:%d: bodies data required but not present: \"%s\"\n",
-		   f,l,word(all_data().missing(s)));
+	DebugInfo(" %s:%d: bodies data required but not present: \"%s\"\n",
+		  f,l,word(all_data().missing(s)));
     }
   protected:
     //==========================================================================
-    //                                                                          
-    // protected member methods used for ebodies                                
-    //                                                                          
-    //==========================================================================
+    /// method used by ebodies
     bodies(char, const unsigned[BT_NUM]) falcON_THROWING;
+    /// method used by ebodies
     void reset(char, fieldbit, void*) falcON_THROWING;
+    //--------------------------------------------------------------------------
+    /// method used by ParallelSnapshot: set block's FIRST.
+    /// The block's FIRST data are set such that the bodyindices of bodies of
+    /// type t on start at F[t].
+    /// \param F array with first bodyindex per body type.
+    void reset_firsts(int F[BT_NUM]);
   private:
     //==========================================================================
     //                                                                          

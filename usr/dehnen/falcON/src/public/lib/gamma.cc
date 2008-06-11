@@ -50,7 +50,7 @@ double DehnenModel::YcofE(double E) const
   if(E==0.) return 1.;
   ::e   = E;
   ::eg2 = e*g2; 
-  if((g2>0 && eg2 >1) || E<0.) error("DehnenModel: Eps out of range");
+  if((g2>0 && eg2 >1) || E<0.) falcON_Error("DehnenModel: Eps out of range");
   if( g2>0. && eg2==1.) return 0.;
   if(g==1.) return 0.5*(3.-sqrt(8*E+1.));
   if(g==2.) return rtsafe(&subyce2,tiny,1.,eps);
@@ -91,7 +91,7 @@ double DehnenModel::YcofLq(double Lq) const
 double DehnenModel::SigIsoQ(double x) const
 {
   if(g>2. && x==0.)
-    error("DehnenModel: SigIsotropicSquared() diverges at x=0");
+    falcON_Error("DehnenModel: SigIsotropicSquared() diverges at x=0");
   register double x1=x+1;
   if(g==0.)  return (6.*x+1.)/(30.*x1*x1);
   register double y=x/x1;
@@ -151,7 +151,7 @@ namespace {
 //------------------------------------------------------------------------------
 double DehnenModel::SurfaceDensity(double R) const
 {
-  if(g>=1. && R==0.) error("DehnenModel: SurfaceDensity() diverges at R=0");
+  if(g>=1. && R==0.) falcON_Error("DehnenModel: SurfaceDensity() diverges at R=0");
   if(R==0.) return 1 / (Pi * g1 * g2);
   ::s  = R;
   ::sa = 1-s;
@@ -170,7 +170,7 @@ namespace {
 //------------------------------------------------------------------------------
 double DehnenModel::DSurfaceDensityDR(double R) const
 {
-  if(R==0.) error("DehnenModel: DSurfaceDensityDR() diverges at R=0");
+  if(R==0.) falcON_Error("DehnenModel: DSurfaceDensityDR() diverges at R=0");
   ::s   = R;
   ::sa  = 1-s;
   ::ts  = s+s;
@@ -231,7 +231,7 @@ namespace {
 double DehnenModel::SigIsotropicProj(double R) const
 {
   if(g>2.  && R==0.)
-    error("DehnenModel: SigIsotropicProj() diverges at R=0");
+    falcON_Error("DehnenModel: SigIsotropicProj() diverges at R=0");
   if(g==2. && R==0.) return sqrt(0.5);
   if(g>=1. && R==0.) return 0.;
   if(R==0.) return 0.75 * g1 / (3-2*g) / (5-2*g);
@@ -253,7 +253,7 @@ namespace {
 //------------------------------------------------------------------------------
 double DehnenModel::SigCircProj(double R) const 
 {
-  if(g>2.  && R==0.) error("DehnenModel: SigCircProj() diverges at R=0");
+  if(g>2.  && R==0.) falcON_Error("DehnenModel: SigCircProj() diverges at R=0");
   if(g==2. && R==0.) return 0.5;
   if(R==0.)          return 0.;
   ::s   = R;
@@ -294,15 +294,15 @@ double DehnenModel::Fsub(double E, double G) const
   ::e   = E;
   ::eg2 = e*g2;
   if(g2>0. && eg2>1.)
-    error("DehnenModel: Eps=%f > %f=1/(2-g) in DfIsotropic()",E,ig2);
+    falcON_Error("DehnenModel: Eps=%f > %f=1/(2-g) in DfIsotropic()",E,ig2);
   if(e<0.)
-    error("DehnenModel: Eps=%f < 0 in DfIsotropic()",E);
+    falcON_Error("DehnenModel: Eps=%f < 0 in DfIsotropic()",E);
   if(g2>0. && eg2==1.)
-    error("DehnenModel: DfIsotropic() diverging at E=Psi(0)");
+    falcON_Error("DehnenModel: DfIsotropic() diverging at E=Psi(0)");
   if(G<=0.) G=g;
   double dg = g-G;
   if(dg<0.)
-    error("DehnenModel: G > gamma in F(E,G)");
+    falcON_Error("DehnenModel: G > gamma in F(E,G)");
   if(g==0. && dg==0.) {
     register double e1=sqrt(e+e), e2=1-e-e, e3=sqrt(e2);
     return 1.5/Pi3*(e1*(2+1./e2)-3.*std::log((1+e1)/e3));
@@ -332,11 +332,11 @@ double DehnenModel::F(double Q, double ra) const
   ::e   = Q;
   ::eg2 = e*g2;
   if((g2>0. &&eg2>1.) ||e<0.)
-    error("DehnenModel::F(): Q out of range");
+    falcON_Error("DehnenModel::F(): Q out of range");
   if(g2>0. && eg2==1.)
-    error("DehnenModel::F(): diverging at Q=Psi(0)");
+    falcON_Error("DehnenModel::F(): diverging at Q=Psi(0)");
   if(ra==0.)
-    error("DehnenModel::F(): zero anisotropy radius");
+    falcON_Error("DehnenModel::F(): zero anisotropy radius");
   ::uq = 1./(ra*ra);
   ::g  = g;
   ::g1 = g1;
@@ -380,8 +380,8 @@ double DehnenModel::G(double E) const
   ::eg2 = e*g2;
   if(g2>0. && eg2==1.) return 0.;
   if((g2>0. && eg2>1.) || E<0.)
-    error("DehnenModel::G() E out of range");
-  if(E==0.) error("DehnenModel::G() diverging at E=0");
+    falcON_Error("DehnenModel::G() E out of range");
+  if(E==0.) falcON_Error("DehnenModel::G() diverging at E=0");
   if(g==2.) {
     return 32 * sqrt2 * Pi2 * qbulir(&sub__geC,0.,1.,eps,0,0,50);
   } else if(g<2.) {
@@ -430,10 +430,10 @@ DehnenModelSampler(double const&gamma,             // I: gamma
   fi                ( gamma>0.? 0.5*(gamma-6) : -2. ),
   fo                ( r_a<=0? 2.5 : 0.5 )
 {
-  if(radius <= 0.0) error("DehnenModel: scale radius <= 0\n");
-  if(Mtot   <= 0.0) error("DehnenModel: total mass <= 0\n");
-  if(gamma  <  0.0) error("DehnenModel: gamma < 0\n");
-  if(gamma  >= 2.5) error("DehnenModel: gamma >= 5/2: self-energy=oo\n");
+  if(radius <= 0.0) falcON_Error("DehnenModel: scale radius <= 0\n");
+  if(Mtot   <= 0.0) falcON_Error("DehnenModel: total mass <= 0\n");
+  if(gamma  <  0.0) falcON_Error("DehnenModel: gamma < 0\n");
+  if(gamma  >= 2.5) falcON_Error("DehnenModel: gamma >= 5/2: self-energy=oo\n");
   const double dy=1./double(n+1);
   for(int i=0; i!=n; ++i) { 
     y[i] = (i+1)*dy;

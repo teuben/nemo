@@ -31,9 +31,6 @@ extern "C" {
 ////////////////////////////////////////////////////////////////////////////////
 namespace MyPotExp {
   using falcON::PotExp;
-  using falcON::error;
-  using falcON::warning;
-  using falcON::debug_info;
   typedef falcON::tupel<3,float>  vectf;
   typedef falcON::tupel<3,double> vectd;
   //----------------------------------------------------------------------------
@@ -82,7 +79,7 @@ namespace MyPotExp {
 	     void      *p,
 	     void      *a,
 	     int        d,
-	     char       t) const
+	     char       t) const falcON_THROWING
     {
       clock_t cpu0 = clock();
       switch(t) {
@@ -92,8 +89,10 @@ namespace MyPotExp {
 		      static_cast<float*>(p),
 		      static_cast<vectf*>(a),
 		      f,d);
-	if(P->has_error  ()) error  (const_cast<char*>(P->error_msg()));
-	if(P->has_warning()) warning(const_cast<char*>(P->warning_msg()));
+	if(P->has_error  ())
+	  falcON_THROWN (const_cast<char*>(P->error_msg()));
+	if(P->has_warning())
+	  falcON_Warning(const_cast<char*>(P->warning_msg()));
 	break;
       case 'd':
 	P->SetGravity(P->Coef, n,
@@ -101,15 +100,17 @@ namespace MyPotExp {
 		      static_cast<double*>(p),
 		      static_cast<vectd*>(a),
 		      f,d);
-	if(P->has_error  ()) error  (const_cast<char*>(P->error_msg()));
-	if(P->has_warning()) warning(const_cast<char*>(P->warning_msg()));
+	if(P->has_error  ())
+	  falcON_THROWN (const_cast<char*>(P->error_msg()));
+	if(P->has_warning())
+	  falcON_Warning(const_cast<char*>(P->warning_msg()));
 	break;
       default:
-	error("%s unknown type : '%c'",t);
+	falcON_THROWN ("%s unknown type : '%c'",t);
       }
       clock_t cpu1 = clock();
-      nemo_dprintf(2,"PotExp: gravity computed in %f sec CPU time\n",
-		   (cpu1 - cpu0)/double(CLOCKS_PER_SEC));
+      DebugInfo(2,"PotExp: gravity computed in %f sec CPU time\n",
+		(cpu1 - cpu0)/double(CLOCKS_PER_SEC));
     }
   } // class PotExpansion
   Pexp[Nexp];                                      // array of Nexp PotExpansion
@@ -120,36 +121,37 @@ namespace MyPotExp {
   {
     // 0 checking consistency of arguments
     if(npar < 7)
-      warning("%s: recognizing 7 parameters and one data file.\n"
-	      "Parameters:\n"
-	      " omega (real)           pattern speed (ignored)              [0]\n"
-	      " alpha (real)           shape parameter of expansion basis   [%f]\n"
-	      " r0    (real)           scale radius of expansion basis      [%f]\n"
-	      " nmax  (integer > 0)    max n in radial expansion            [%d]\n"
-	      " lmax  (integer, even)  max l in angular expansion           [%d]\n"
-	      " symm  (integer)        symmetry assumed (see below)         [%d]\n"
-	      " G     (real)           constant of gravity                  [1]\n\n"
-	      "The potential is given by the expansion\n\n"
-	      "    Phi(x) =  Sum  C_nlm Phi     (x)\n"
-	      "             n,l,m          n,l,m\n\n"
-	      "with the basis functions\n\n"
-	      "    Phi_nlm = - Psi_nl(r) * Y_lm(theta,phi).\n\n"
-	      "The lowest order radial basis function is given by\n\n"
-              "                      (1/a)     -a\n"
-	      "    Psi_000 = ( [r/r0]      + 1)\n\n"
-	      "which gives a Hernquist sphere for a=alpha=1 and a Plummer sphere for a=1/2.\n"
-	      "The coefficients are such that potential approximates that of the first\n"
-	      "snapshot found in the data file.\n"
-	      "The last parameter, symm, allows to symmetrize the potential by constraining\n"
-	      "the coefficients:\n"
-	      " symm=0:   no symmetry: all coefficients used\n"
-	      " symm=1:   reflexion wrt origin: C_nlm=0 for odd (l,m)\n"
-	      " symm=2:   triaxial wrt xyz axes: C_nlm=0 for odd (l,m) and C_nlm = C_nl[-m]\n"
-	      " symm=3:   cylindrical: C_nlm=0 for odd l or m!=0\n"
-	      " symm=4:   spherical: C_nlm=0 for (l,m) != 0\n",
-	      name(),a_def,r_def,n_def,l_def,s_def);
+      falcON_Warning(
+      "%s: recognizing 7 parameters and one data file.\n"
+      "Parameters:\n"
+      " omega (real)           pattern speed (ignored)              [0]\n"
+      " alpha (real)           shape parameter of expansion basis   [%f]\n"
+      " r0    (real)           scale radius of expansion basis      [%f]\n"
+      " nmax  (integer > 0)    max n in radial expansion            [%d]\n"
+      " lmax  (integer, even)  max l in angular expansion           [%d]\n"
+      " symm  (integer)        symmetry assumed (see below)         [%d]\n"
+      " G     (real)           constant of gravity                  [1]\n\n"
+      "The potential is given by the expansion\n\n"
+      "    Phi(x) =  Sum  C_nlm Phi     (x)\n"
+      "             n,l,m          n,l,m\n\n"
+      "with the basis functions\n\n"
+      "    Phi_nlm = - Psi_nl(r) * Y_lm(theta,phi).\n\n"
+      "The lowest order radial basis function is given by\n\n"
+      "                      (1/a)     -a\n"
+      "    Psi_000 = ( [r/r0]      + 1)\n\n"
+      "which gives a Hernquist sphere for a=alpha=1 and a Plummer sphere for a=1/2.\n"
+      "The coefficients are such that potential approximates that of the first\n"
+      "snapshot found in the data file.\n"
+      "The last parameter, symm, allows to symmetrize the potential by constraining\n"
+      "the coefficients:\n"
+      " symm=0:   no symmetry: all coefficients used\n"
+      " symm=1:   reflexion wrt origin: C_nlm=0 for odd (l,m)\n"
+      " symm=2:   triaxial wrt xyz axes: C_nlm=0 for odd (l,m) and C_nlm = C_nl[-m]\n"
+      " symm=3:   cylindrical: C_nlm=0 for odd l or m!=0\n"
+      " symm=4:   spherical: C_nlm=0 for (l,m) != 0\n",
+      name(),a_def,r_def,n_def,l_def,s_def);
     if(file==0 || file[0]==0)
-      error("%s: data file required\n","PotExp");
+      falcON_THROWN("%s: data file required\n","PotExp");
     // 1 reading in parameters and initializing potential expansion
     double
       o = npar>0? pars[0] : 0,
@@ -162,77 +164,76 @@ namespace MyPotExp {
     double
       G = npar>6? pars[6] : 1.;
     if(s < 0 || s > 4) {
-      warning("%s: symm out of range, defaulting to %d (%s symmetry)\n",
-	      name(),s_def,PotExp::name_of_sym(sym(s_def)));
+      falcON_WarningN("%s: symm out of range, defaulting to %d (%s symmetry)\n",
+		      name(),s_def,PotExp::name_of_sym(sym(s_def)));
       s = s_def;
     }
-    if(npar>7) warning("%s: skipped parameters beyond 6",name());
+    if(npar>7) falcON_WarningN("%s: skipped parameters beyond 6",name());
     P = new PwithC(a,r,n,l,sym(s));
-    if(P->has_error  ()) error  (const_cast<char*>(P->error_msg()));
-    if(P->has_warning()) warning(const_cast<char*>(P->warning_msg()));
-    nemo_dprintf(2,
-		 "PotExp: initialized expansion with\n"
-		 " alpha = %f\n"
-		 " r0    = %f\n"
-		 " nmax  = %d\n"
-		 " lmax  = %d\n"
-		 " assuming %s symmetry\n",
-		 P->alpha(), P->scale(), P->Nmax(), P->Lmax(), 
-		 P->symmetry_name());
+    if(P->has_error  ()) falcON_THROWN (const_cast<char*>(P->error_msg()));
+    if(P->has_warning()) falcON_Warning(const_cast<char*>(P->warning_msg()));
+    DebugInfo(2,
+	      "PotExp: initialized expansion with\n"
+	      " alpha = %f\n"
+	      " r0    = %f\n"
+	      " nmax  = %d\n"
+	      " lmax  = %d\n"
+	      " assuming %s symmetry\n",
+	      P->alpha(), P->scale(), P->Nmax(), P->Lmax(), 
+	      P->symmetry_name());
     // 2 reading in positions and masses from snapshot
     int N;
     ::stream input = stropen(file,"r");            // open data file
     get_history(input);
-    nemo_dprintf(5,"PotExp: opened file %s for snapshot input\n",file);
+    DebugInfo(5,"PotExp: opened file %s for snapshot input\n",file);
     get_set (input,SnapShotTag);                   //  open snapshot
-    nemo_dprintf(5,"PotExp: opened snapshot\n");
+    DebugInfo(5,"PotExp: opened snapshot\n");
     get_set (input,ParametersTag);                 //   open parameter set
     get_data(input,NobjTag,IntType,&N,0);          //    read N
     get_tes (input,ParametersTag);                 //   close parameter set
-    nemo_dprintf(5,"PotExp: read N=%d\n",N);
+    DebugInfo(5,"PotExp: read N=%d\n",N);
     get_set (input,ParticlesTag);                  //   open particle set
     // 2.1 read positions:
     vectf *x = new vectf[N];                       //   allocate positions
     if(get_tag_ok(input,PhaseSpaceTag)) {          //   IF phases available
-      nemo_dprintf(5,"PotExp: found phases rather than positions\n");
+      DebugInfo(5,"PotExp: found phases rather than positions\n");
       float *p = new float[6*N];                   //     get memory for them
       get_data_coerced(input,PhaseTag,FloatType,p,N,2,3,0);  // read them
-      nemo_dprintf(5,"PotExp: read %d phases\n",N);
+      DebugInfo(5,"PotExp: read %d phases\n",N);
       for(int i=0,ip=0; i!=N; ++i,ip+=6)           //     loop bodies
 	x[i].copy(p+ip);                           //       copy positions
       delete[] p;                                  //     free mem for phases
-      nemo_dprintf(5,"PotExp: copied phases to positions\n");
+      DebugInfo(5,"PotExp: copied phases to positions\n");
     } else if(get_tag_ok(input,PosTag)) {          //   ELIF positions
       get_data_coerced(input,PosTag,FloatType,
 		       static_cast<float*>(static_cast<void*>(x)),
 		       N,3,0);
-      nemo_dprintf(5,"PotExp: read %d positions\n",N);
+      DebugInfo(5,"PotExp: read %d positions\n",N);
     } else                                         //   ENDIF
-      error("%s: no positions found in snapshot\n",name());
+      falcON_THROW("%s: no positions found in snapshot\n",name());
     // 2.2 read masses:
     float *m = new float[N];
     if(get_tag_ok(input,MassTag))
       get_data_coerced(input,MassTag,FloatType,m,N,0);
     else
-      error("%s: no masses found in snapshot\n",name());
-    nemo_dprintf(5,"PotExp: read %d masses\n",N);
+      falcON_THROW("%s: no masses found in snapshot\n",name());
+    DebugInfo(5,"PotExp: read %d masses\n",N);
     get_tes (input,ParticlesTag);                  //   close particle set
     get_tes (input,SnapShotTag);                   //  close snapshot
     strclose(input);                               // close file
-    nemo_dprintf(2,"PotExp: read %d masses and positions from file %s\n",
-		 N,file);
+    DebugInfo(2,"PotExp: read %d masses and positions from file %s\n", N,file);
     // 3 initializing coefficients
     clock_t cpu0 = clock();
     P->Coef.reset();
     P->AddCoeffs(P->Coef,N,m,x,0);
-    if(P->has_error  ()) error  (const_cast<char*>(P->error_msg()));
-    if(P->has_warning()) warning(const_cast<char*>(P->warning_msg()));
+    if(P->has_error  ()) falcON_THROWN (const_cast<char*>(P->error_msg()));
+    if(P->has_warning()) falcON_Warning(const_cast<char*>(P->warning_msg()));
     P->Normalize(P->Coef,G);
-    if(P->has_error  ()) error  (const_cast<char*>(P->error_msg()));
-    if(P->has_warning()) warning(const_cast<char*>(P->warning_msg()));
+    if(P->has_error  ()) falcON_THROWN (const_cast<char*>(P->error_msg()));
+    if(P->has_warning()) falcON_Warning(const_cast<char*>(P->warning_msg()));
     clock_t cpu1 = clock();
-    nemo_dprintf(2,"PotExp: coefficients computed in %f sec CPU time\n",
-		 (cpu1 - cpu0)/double(CLOCKS_PER_SEC));
+    DebugInfo(2,"PotExp: coefficients computed in %f sec CPU time\n",
+	      (cpu1 - cpu0)/double(CLOCKS_PER_SEC));
     if(nemo_debug(2)) {
       std::cerr<<"PotExp: coefficients:\n";
       P->Coef.table_print(P->Symmetry(),std::cerr);
@@ -256,7 +257,8 @@ namespace MyPotExp {
 		  char       type)					\
   {									\
     if(ndim != 3)							\
-      error("%s: ndim=%d not supported\n",PotExpansion::name(),ndim);	\
+      falcON_Error("%s: ndim=%d not supported\n",			\
+		   PotExpansion::name(),ndim);				\
     Pexp[NUM].acc(n,x,f,p,a,d,type);					\
   }
   ACCFUNC(0);                           // accel0() to accel(9)
@@ -285,9 +287,9 @@ void iniacceleration(
 		     bool        *needv)
 {
   if(MyPotExp::Iexp == MyPotExp::Nexp)
-    falcON::error("iniacceleration(): "
-		  "cannot have more than %d instances of '%s'\n",
-		  MyPotExp::Nexp,MyPotExp::PotExpansion::name());
+    falcON_Error("iniacceleration(): "
+		 "cannot have more than %d instances of '%s'\n",
+		 MyPotExp::Nexp,MyPotExp::PotExpansion::name());
   if(needm) *needm = 0;
   if(needv) *needv = 0;
   MyPotExp::Pexp[MyPotExp::Iexp].init(pars,npar,file);

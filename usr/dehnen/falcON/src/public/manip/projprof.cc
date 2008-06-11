@@ -4,11 +4,11 @@
 /// \file   src/public/manip/projprof.cc                                        
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006                                                                
+/// \date   2006,2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006 Walter Dehnen                                             
+// Copyright (C) 2006,2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -32,6 +32,7 @@
 // v 0.1    03/07/2006  JS changed default behavious                            
 // v 0.2    04/07/2006  WD made public (along with the tools used)              
 // v 0.3    07/07/2006  WD using flags::ignore (in_subset()) instead of subset  
+// v 0.3.1  11/06/2008  WD new DebugInfo                                        
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -130,7 +131,7 @@ namespace falcON { namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
   bool projprof::manipulate(const snapshot*S) const
   {
-    debug_info(2,"radprof::manipulate(): start\n");
+    DebugInfo(2,"radprof::manipulate(): start\n");
     const vect*X0= S->pointer<vect>("xcen");
     const vect*V0= S->pointer<vect>("vcen");
     vect proj = P; if(X0) proj -= *X0;
@@ -184,7 +185,7 @@ namespace falcON { namespace Manipulate {
       OUT  <<'\n';
     }
     OUT.flush();
-    debug_info(2,"projprof::manipulate(): finished\n");
+    DebugInfo(2,"projprof::manipulate(): finished\n");
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////

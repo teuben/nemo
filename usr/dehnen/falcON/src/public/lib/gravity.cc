@@ -5,7 +5,7 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2000-2005                                                          
+/// \date    2000-2008                                                          
 ///                                                                             
 /// \brief   includes utilities from WDutils into namespace falcON              
 ///                                                                             
@@ -714,7 +714,8 @@ namespace {
 #endif
 void GravEstimator::update_leafs()
 {
-  if(TREE==0) error("GravEstimator: no tree");     // IF no tree, FATAL ERROR   
+  if(TREE==0)
+    falcON_Error("GravEstimator: no tree");        // IF no tree, FATAL ERROR   
   if(! TREE->is_used_for_grav() )                  // IF tree not used by grav  
     reset();                                       //   reset allocation & flags
   if( TREE->my_bodies()->srce_data_changed() )     // IF body source are changed
@@ -859,7 +860,7 @@ bool GravEstimator::prepare(const GravMAC*MAC,
   SET_I
   if(al) NLA_needed = TREE->N_leafs();             // all leafs are active      
   if(NLA_needed==0) {
-    falcON_WarningF("no body active","GravEstimator::prepare()");
+    falcON_Warning("in GravEstimator::prepare(): no body active");
     return 1;
   }
   //  - allocate memory for leaf acc/pot/num properties for active leafs        
@@ -905,9 +906,9 @@ bool GravEstimator::prepare(const GravMAC*MAC,
       TREE->dump_leafs<Leaf>(dump);
       dump.open("/tmp/cells");
       TREE->dump_cells<Cell>(dump);
-      debug_info(11,"GravEstimator::prepare(): "
-		 "leafs dumped to file \"/tmp/leafs\" "
-		 "and cells to file \"/tmp/cells\"\n");
+      if(debug(11)) DebugInfo("GravEstimator::prepare(): "
+			      "leafs dumped to file \"/tmp/leafs\" "
+			      "and cells to file \"/tmp/cells\"\n");
     }
     CELLS_UPTODATE = 1;                            //   update up-to-date flag  
   } else {                                         // ELSE                      
@@ -928,7 +929,7 @@ void GravEstimator::exact(bool       al
 			  )
 {
   if(GRAV==zero) {
-    warning("[GravEstimator::exact()]: G=0\n");
+    falcON_Warning("[GravEstimator::exact()]: G=0\n");
     if(al) ResetBodiesGrav<1>(TREE->my_bodies());
     else   ResetBodiesGrav<0>(TREE->my_bodies());
     return;
@@ -939,7 +940,7 @@ void GravEstimator::exact(bool       al
 #endif
   const bool all = prepare(0,al,0);
   if(N_active_cells()==0)
-    return warning("[GravEstimator::exact()]: nobody active");
+    return falcON_Warning("[GravEstimator::exact()]: nobody active");
   STATS->reset(
 #ifdef WRITE_IACTION_INFO
 	       TREE
@@ -983,7 +984,7 @@ void GravEstimator::approx(const GravMAC*GMAC,
 			   )
 {
   if(GRAV==zero) {
-    warning("[GravEstimator::approx()]: G=0\n");
+    falcON_Warning("[GravEstimator::approx()]: G=0\n");
     if(al) ResetBodiesGrav<1>(TREE->my_bodies());
     else   ResetBodiesGrav<0>(TREE->my_bodies());
     return;
@@ -1001,7 +1002,7 @@ void GravEstimator::approx(const GravMAC*GMAC,
   // prepare tree: allocate memory (leafs & cells), pass up source, count active
   const bool all = prepare(GMAC,al,0);
   if(!all && N_active_cells()==0)
-    return warning("[GravEstimator::approx()]: nobody active");
+    return falcON_Warning("[GravEstimator::approx()]: nobody active");
   SET_T(" time: GravEstimator::prepare():       ");
   report REPORT2("interaction & evaluation");
   STATS->reset(

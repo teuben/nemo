@@ -110,14 +110,17 @@ void SphericalSampler::sample(body   const&B0,
 #endif
 			      bool         givef,
 			      bool         giveP,
-			      bool         giveA) falcON_THROWING
-  const {
+			      bool         giveA) const falcON_THROWING
+  {
   if(givef && !has_phden(B0))
-    warning("SphericalSampler: bodies not supporting phden: cannot give DF");
+    falcON_Warning("SphericalSampler: "
+		   "bodies not supporting phden: cannot give DF");
   if(giveP && !has_pot(B0))
-    warning("SphericalSampler: bodies not supporting pot: cannot give Phi");
+    falcON_Warning("SphericalSampler: "
+		   "bodies not supporting pot: cannot give Phi");
   if(giveA && !has_acc(B0))
-    warning("SphericalSampler: bodies not supporting acc: cannot give dPhi/dr");
+    falcON_Warning("SphericalSampler: "
+		   "bodies not supporting acc: cannot give dPhi/dr");
   if(!(B0+(N-1)).is_valid())
     falcON_THROW("SphericalSampler::sample(): not enough bodies free");
   if(q && R.Nsob() < 6)
@@ -233,8 +236,8 @@ void SphericalSampler::sample(body   const&B0,
 void SphericalSampler::sample_pos(body const  &B0,
 				  unsigned     N,
 				  bool         q,
-				  Random const&R) falcON_THROWING
-  const {
+				  Random const&R) const falcON_THROWING
+  {
   if(!(B0+(N-1)).is_valid())
     falcON_THROW("SphericalSampler::sample_pos(): not enough bodies free");
   if(q && R.Nsob() < 6)

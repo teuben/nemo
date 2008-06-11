@@ -81,7 +81,6 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   using falcON::message;
   using falcON::exception;
-  using falcON::debug_info;
   //----------------------------------------------------------------------------
   struct BfErr : public exception {
     BfErr(const char *m) : exception(m) {}
@@ -111,7 +110,7 @@ namespace {
 			    size);
     }
     *n=0;
-    debug_info(2,"shrink() expr = \"%s\"\n",newexpr);
+    DebugInfo(2,"shrink() expr = \"%s\"\n",newexpr);
   }
   //////////////////////////////////////////////////////////////////////////////
   inline void get_type(char*type, const char*name) throw(BfErr) {
@@ -126,7 +125,7 @@ namespace {
     case 24: SNprintf(type,MAX_TYPE_LENGTH,"vect"); break;
     default: throw BfErr("cannot resolve type of expression");
     }
-    debug_info(debug_depth,"get_type(): type=%s\n",type);
+    DebugInfo(debug_depth,"get_type(): type=%s\n",type);
   }
   //----------------------------------------------------------------------------
   inline fieldset get_need(const char*name) throw(BfErr) {
@@ -134,7 +133,7 @@ namespace {
     bd_pter Need = (bd_pter)findfn(const_cast<char*>(name));
     if(Need == 0) throw BfErr("cannot resolve fieldset need");
     fieldset need=Need();
-    debug_info(debug_depth,"get_need(): need=%s\n",word(need));
+    DebugInfo(debug_depth,"get_need(): need=%s\n",word(need));
     return need;
   }
   //----------------------------------------------------------------------------
@@ -162,7 +161,7 @@ namespace {
 	     " >& %s.log",
 	     getenv("CPATH")? "$CPATH/g++" : "g++",
 	     fname,fname,(flags? flags : " "),falcON_path,falcON_path,fname);
-    debug_info(2,"now compiling using the following command\n   %s\n",cmmd);
+    DebugInfo(2,"now compiling using the following command\n   %s\n",cmmd);
     if(system(cmmd)) {
       if(debug(debug_depth)) {
 	std::cerr<<"could not compile temporary file /tmp/"<<fname<<".cc:\n";
@@ -185,7 +184,7 @@ namespace {
     if(delete_f && !debug(debug_depth) && fname && fname[0]) {
       char cmmd[512];
       SNprintf(cmmd,512,"rm -f /tmp/%s.* >& /dev/null",fname);
-      debug_info(4,"executing \"%s\"\n",cmmd);
+      DebugInfo(4,"executing \"%s\"\n",cmmd);
       system(cmmd);
     }
   }
@@ -266,20 +265,20 @@ namespace {
       // make sure falcONlib/subdir/ exists!
       char cmmd[STR_LENGTH];
       SNprintf(cmmd,STR_LENGTH,"cd %s >& /dev/null",falcONlib);
-      debug_info(10,"executing \"%s\"\n",cmmd);
+      DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
       SNprintf(cmmd,STR_LENGTH,"cd %s/%s >& /dev/null",falcONlib,subdir);
-      debug_info(10,"executing \"%s\"\n",cmmd);
+      DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) {
-	debug_info(debug_depth,"BF_database: no directory %s/%s;"
-		   " try to make it\n", falcONlib,subdir);
+	DebugInfo(debug_depth,"BF_database: no directory %s/%s;"
+		  " try to make it\n", falcONlib,subdir);
 	SNprintf(cmmd,STR_LENGTH,"mkdir %s/%s >& /dev/null",falcONlib,subdir);
-	debug_info(10,"executing \"%s\"\n",cmmd);
+	DebugInfo(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
 
 	SNprintf(cmmd,STR_LENGTH,"chmod 777 %s/%s >& /dev/null",
 		 falcONlib,subdir);
-	debug_info(10,"executing \"%s\"\n",cmmd);
+	DebugInfo(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
       }
     }
@@ -358,7 +357,7 @@ namespace {
       char cmmd[STR_LENGTH];
       // check for existence of backup-file
       SNprintf(cmmd,STR_LENGTH,"ls %s.bak >& /dev/null",fullfile);
-      debug_info(10,"executing \"%s\"\n",cmmd);
+      DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(!system(cmmd)) throw DataBaseErr(message("file %s/%s.bak exists"));
       char fbak[STR_LENGTH];
       SNprintf(fbak,STR_LENGTH,"%s.bak",fullfile);
@@ -368,7 +367,7 @@ namespace {
 	// if fullfile is unreadable,
 	//   touch fullfile.bak and lock that; return counter = 1
 	SNprintf(cmmd,STR_LENGTH,"touch %s; chmod 000 %s",fbak,fbak);
-	debug_info(10,"executing \"%s\"\n",cmmd);
+	DebugInfo(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
 	locked = 1;
 	return 1;
@@ -377,7 +376,7 @@ namespace {
 	//   copy to fullfile.bak and lock that
 	//   read fullfile to find counter
 	SNprintf(cmmd,STR_LENGTH,"cp %s %s; chmod 000 %s", fullfile,fbak,fbak);
-	debug_info(10,"executing \"%s\"\n",cmmd);
+	DebugInfo(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
 	locked = 1;
 	char c;
@@ -397,7 +396,7 @@ namespace {
 	SNprintf(cmmd,STR_LENGTH,
 		 "mv %s.bak %s >& /dev/null; chmod 666 %s >& /dev/null",
 		 fullfile,fullfile,fullfile);
-	debug_info(10,"executing \"%s\"\n",cmmd);
+	DebugInfo(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) warning("problems unlocking database\n");
 	locked = 0;
       }
@@ -419,21 +418,21 @@ namespace {
       SNprintf(cmmd,STR_LENGTH,"cp /tmp/%s.so %s/%s.so >& /dev/null; "
 	       "chmod 444 %s/%s.so >& /dev/null",
 	       fname,dir,func,dir,func);
-      debug_info(10,"executing \"%s\"\n",cmmd);
+      DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd))
 	throw DataBaseErr(message("cannot copy file /tmp/%s.so into base",
 				  fname));
       char fbak[STR_LENGTH];
       SNprintf(fbak,STR_LENGTH,"%s.bak",fullfile);
       SNprintf(cmmd,STR_LENGTH,"chmod 600 %s >& /dev/null",fbak);
-      debug_info(10,"executing \"%s\"\n",cmmd);
+      DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw DataBaseErr(message("cannot %s",cmmd));
       std::ofstream file;
       if(!open_to_append(file,fbak) )
 	throw DataBaseErr(message("cannot open file %s",fbak));
       file  <<expr<<' '<<type<<' '<<npar<<' '<<need<<' '<<func<<std::endl;
       SNprintf(cmmd,STR_LENGTH,"chmod 000 %s >& /dev/null",fbak);
-      debug_info(10,"executing \"%s\"\n",cmmd);
+      DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw DataBaseErr(message("cannot %s",cmmd));
     }
     //--------------------------------------------------------------------------
@@ -1067,10 +1066,10 @@ namespace {
       SNprintf(_func,FNAME_SIZE,"%s%d",fname,function++);
       ffunc = _func;
     }
-    debug_info(debug_depth,
-	       "bodiesfunc::bodiesfunc(): must make function\n"
-	       "      base name = %s\n"
-	       "      func name = %s\n",fname,ffunc);
+    DebugInfo(debug_depth,
+	      "bodiesfunc::bodiesfunc(): must make function\n"
+	      "      base name = %s\n"
+	      "      func name = %s\n",fname,ffunc);
     SNprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
     std::ofstream file(ffile);
     if(!file) 
@@ -1140,19 +1139,19 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
   BF_database*BD = 0;
   try {
     BD = new BF_database("bodyfunc","BFNAMES");
-    debug_info(debug_depth,"bodyfunc::bodyfunc(): looking up database\n");
+    DebugInfo(debug_depth,"bodyfunc::bodyfunc(): looking up database\n");
     // 1.1 try to find function in database
     funcname = BD->findfunc(nexpr,TYPE,NPAR,NEED);
     if(funcname) {                                  // found one!               
-      debug_info(debug_depth,"bodyfunc::bodyfunc(): found one: %s\n",funcname);
+      DebugInfo(debug_depth,"bodyfunc::bodyfunc(): found one: %s\n",funcname);
       char ffile[FNAME_SIZE];
       SNprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
       FUNC = (bf_pter)findfn(const_cast<char*>(funcname));
       if(FUNC) return;                              // SUCCESS !!!              
-      debug_info(debug_depth,
-		 "bodyfunc::bodyfunc(): couldn't find %s in %s/%s.so\n",
-		 funcname,BD->directory(),funcname);
+      DebugInfo(debug_depth,
+		"bodyfunc::bodyfunc(): couldn't find %s in %s/%s.so\n",
+		funcname,BD->directory(),funcname);
     }
     // 1.2 function not found, so try to get unique new function name
     SNprintf(fname,FNAME_SIZE,"bf_%s%d",RunInfo::pid(),function++);
@@ -1165,8 +1164,8 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
     if(BD) falcON_DEL_O(BD);
     funcname = 0;
     BD = 0;
-    debug_info(debug_depth,
-	       "bodyfunc::bodyfunc(): database problems: %s,",text(E));
+    DebugInfo(debug_depth,
+	      "bodyfunc::bodyfunc(): database problems: %s,",text(E));
   }
   // 2 function was not found in database, so must try to make it
   try {
@@ -1202,7 +1201,7 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
       try {
 	BD->put(fname,funcname,nexpr,TYPE,NPAR,NEED);
       } catch(DataBaseErr E) {
-	debug_info(debug_depth,"database problems: %s,",text(E));
+	DebugInfo(debug_depth,"database problems: %s,",text(E));
       }
     }
     falcON_DEL_O(BD);
@@ -1381,20 +1380,20 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
   BF_database*BD = 0;
   try {
     BD = new BF_database("bodiesfunc","BFNAMES");
-    debug_info(debug_depth,"bodiesfunc::bodiesfunc(): looking up database\n");
+    DebugInfo(debug_depth,"bodiesfunc::bodiesfunc(): looking up database\n");
     // 1.1 try to find function in database
     funcname = BD->findfunc(nexpr,TYPE,NPAR,NEED);
     if(funcname) {                                  // found one!               
-      debug_info(debug_depth,
-		 "bodiesfunc::bodiesfunc(): found one: %s\n",funcname);
+      DebugInfo(debug_depth,
+		"bodiesfunc::bodiesfunc(): found one: %s\n",funcname);
       char ffile[FNAME_SIZE];
       SNprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
       FUNC = (Bf_pter)findfn(const_cast<char*>(funcname));
       if(FUNC) return;                            // SUCCESS !!!              
-      debug_info(debug_depth,
-		 "bodiesfunc::bodiesfunc(): couldn't find %s in %s/%s.so\n",
-		 funcname,BD->directory(),funcname);
+      DebugInfo(debug_depth,
+		"bodiesfunc::bodiesfunc(): couldn't find %s in %s/%s.so\n",
+		funcname,BD->directory(),funcname);
     }
     // 1.2 function not found, so try to get unique new function name
     SNprintf(fname,FNAME_SIZE,"Bf_%s%d",RunInfo::pid(),function++);
@@ -1407,8 +1406,8 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
     if(BD) falcON_DEL_O(BD);
     funcname = 0;
     BD = 0;
-    debug_info(debug_depth,
-	       "bodiesfunc::bodiesfunc(): database problems: %s,",text(E));
+    DebugInfo(debug_depth,
+	      "bodiesfunc::bodiesfunc(): database problems: %s,",text(E));
   }
   // 2 function was not found in database, so must try to make it
   try {
@@ -1457,7 +1456,7 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
       try {
 	BD->put(fname,funcname,nexpr,TYPE,NPAR,NEED);
       } catch(DataBaseErr E) {
-	debug_info(debug_depth,"database problems: %s,",text(E));
+	DebugInfo(debug_depth,"database problems: %s,",text(E));
       }
     }
     falcON_DEL_O(BD);
@@ -1635,8 +1634,8 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
   // 0 eliminate white space from expression
   shrink(nexpr,MAX_LENGTH_EXPR,oexpr);
   // 1 check against simple expressions
-  debug_info(debug_depth,"bodiesmethod::bodiesmethod(): "
-	     "checking for basic expression\n");
+  DebugInfo(debug_depth,"bodiesmethod::bodiesmethod(): "
+	    "checking for basic expression\n");
   for(int n=0; F_BM[n]; ++n) {
     if(0==strcmp(nexpr,E_BM[n])) {
       FUNC = F_BM[n];
@@ -1653,21 +1652,21 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
   BF_database*BD = 0;
   try {
     BD = new BF_database("bodiesmethod","BFNAMES");
-    debug_info(debug_depth,
-	       "bodiesmethod::bodiesmethod(): looking up database\n");
+    DebugInfo(debug_depth,
+	      "bodiesmethod::bodiesmethod(): looking up database\n");
     // 2.1 try to find function in database
     funcname = BD->findfunc(nexpr,TYPE,NPAR,NEED);
     if(funcname) {                                  // found one!               
-      debug_info(debug_depth,
-		 "bodiesmethod::bodiesmethod(): found one: %s\n",funcname);
+      DebugInfo(debug_depth,
+		"bodiesmethod::bodiesmethod(): found one: %s\n",funcname);
       char ffile[FNAME_SIZE];
       SNprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
       FUNC = (Bm_pter)findfn(const_cast<char*>(funcname));
       if(FUNC) return;                              // SUCCESS !!!              
-      debug_info(debug_depth,"bodiesmethod::bodiesmethod(): "
-		 "couldn't find %s in %s/%s.so\n",
-		 funcname,BD->directory(),funcname);
+      DebugInfo(debug_depth,"bodiesmethod::bodiesmethod(): "
+		"couldn't find %s in %s/%s.so\n",
+		funcname,BD->directory(),funcname);
     }
     // 2.2 function not found, so try to get unique new function name
     SNprintf(fname,FNAME_SIZE,"Bm_%s%d",RunInfo::pid(),function++);
@@ -1680,8 +1679,8 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
     if(BD) falcON_DEL_O(BD);
     funcname = 0;
     BD = 0;
-    debug_info(debug_depth,"bodiesmethod::bodiesmethod(): "
-	       "database problems: %s,",text(E));
+    DebugInfo(debug_depth,"bodiesmethod::bodiesmethod(): "
+	      "database problems: %s,",text(E));
   }
   // 3 function was not found in database, so must try to make it
   try {
@@ -1717,7 +1716,7 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
       try {
 	BD->put(fname,funcname,nexpr,TYPE,NPAR,NEED);
       } catch(DataBaseErr E) {
-	debug_info(debug_depth,"database problems: %s,",text(E));
+	DebugInfo(debug_depth,"database problems: %s,",text(E));
       }
     }
     falcON_DEL_O(BD);

@@ -41,7 +41,7 @@ endif
 ifdef DMPI
 
 MPIDIR		:= /opt/mpich/ch-p4
-MPIINC		:= $(MPIDIR)/include
+MPIINC		:= $(MPIDIR)/include/
 IMPI		:= -I$(MPIINC)
 
 #ifdef STATIC

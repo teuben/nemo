@@ -3294,7 +3294,7 @@ SelfGravity<double>(Anlm&, int, const double*, const tupel<3,double>*,
 //------------------------------------------------------------------------------
 void AnlmIO::open_for_write(const char*file_name) falcON_THROWING
 {
-  debug_info(6,"AnlmIO::open_for_write(\"%s\")\n",file_name);
+  DebugInfo(6,"AnlmIO::open_for_write(\"%s\")\n",file_name);
   // open file and connect xdr stream to it                                     
   if(open != closed)
     falcON_THROW("AnlmIO::open_for_write(): already open");
@@ -3320,7 +3320,7 @@ void AnlmIO::open_for_write(const char*file_name) falcON_THROWING
 //------------------------------------------------------------------------------
 void AnlmIO::open_for_read(const char*file_name) falcON_THROWING
 {
-  debug_info(6,"AnlmIO::open_for_read(\"%s\")\n",file_name);
+  DebugInfo(6,"AnlmIO::open_for_read(\"%s\")\n",file_name);
   // open file and connect xdr stream to it                                     
   if(open != closed)
     falcON_THROW("AnlmIO::open_for_read(): already open");

@@ -328,7 +328,7 @@ namespace falcON {
     double operator()(double x, double&rh1, double&rh2) const;
     /// total mass if multiplied with a truncation factor and used with core
     /// \param M modifier, specifying truncation and core
-    double Mtot(const HaloModifier&M) const;
+    double Mtot(const HaloModifier&M) const falcON_THROWING;
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -371,7 +371,7 @@ namespace falcON {
       if(isinf(mt) ) falcON_THROW("ModifiedDoublePowerLawHalo: M=inf\n");
       if(mt    ==0.) falcON_THROW("ModifiedDoublePowerLawHalo: M==0\n");
       if(mt     <0.) falcON_THROW("ModifiedDoublePowerLawHalo: M=%g<0\n",mt);
-      debug_info(2,"ModifiedDoublePowerLawHalo: rh0=%f\n",rh0);
+      DebugInfo(2,"ModifiedDoublePowerLawHalo: rh0=%f\n",rh0);
      }
     /// total mass
     double const&total_mass() const {

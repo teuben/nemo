@@ -1055,8 +1055,8 @@ namespace falcON {
     template<typename T>
     unsigned read(T*buf, unsigned n) throw(falcON::exception) {
       if(READ+n*sizeof(T) > SIZE) {
-	warning("FortranIRec::read(): cannot read %d, but only %d %s\n",
-		n, (SIZE-READ)/sizeof(T), nameof(T));
+	falcON_Warning("FortranIRec::read(): cannot read %d, but only %d %s\n",
+		       n, (SIZE-READ)/sizeof(T), nameof(T));
 	n = (SIZE-READ)/sizeof(T);
       }
       if(n) read_bytes(static_cast<char*>
@@ -1086,8 +1086,9 @@ namespace falcON {
 			"only %d bytes in record (required are %d)\n",
 			n,nameof(T),FIR.size(),sizeof(T)*n);
       if( sizeof(T) * n < FIR.size() )
-	warning("ReadFortranRecord(): reading %d %s: only %d of %d in record\n",
-		n,nameof(T),sizeof(T)*n,FIR.size());
+	falcON_Warning("ReadFortranRecord(): "
+		       "reading %d %s: only %d of %d in record\n",
+		       n,nameof(T),sizeof(T)*n,FIR.size());
       FIR.read(buf,n);
     }
     //--------------------------------------------------------------------------
@@ -1161,9 +1162,9 @@ namespace falcON {
     template<typename T>
     unsigned write(const T*buf, unsigned n) throw(falcON::exception) {
       if(WRITTEN + n*sizeof(T) > SIZE) {
-	warning("FortranORec::write(): "
-		"cannot write %d, but only %d %s\n",
-		n, (SIZE-WRITTEN)/sizeof(T), nameof(T));
+	falcON_Warning("FortranORec::write(): "
+		       "cannot write %d, but only %d %s\n",
+		       n, (SIZE-WRITTEN)/sizeof(T), nameof(T));
 	n = (SIZE-WRITTEN)/sizeof(T);
       }
       if(n) write_bytes(static_cast<const char*>

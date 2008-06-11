@@ -103,8 +103,9 @@ WD99disc::PlanarOrbit::PlanarOrbit(double R,
     Q(Qmin),
     sdens(Sdens)
 {
-  debug_info(4,"WD99disc.cc: constructing PlanarOrbit with R=%f, Xi=%f ...\n",
-	     R,Xi);
+  if(debug(4))
+    DebugInfo("WD99disc.cc: constructing PlanarOrbit with R=%f, Xi=%f ...\n",
+	      R,Xi);
   double d2p;
 //   POT=(*SPLPOT)(log(re));
 //   CENACC=(*SPLACC)(log(re),&d2p);
@@ -175,12 +176,13 @@ WD99disc::PlanarOrbit::PlanarOrbit(double R,
   omr=TPi/Tr;                           // Radial frequency 
   g2=kap/omr;                           // Correction factor 
   
-  debug_info(4,"  ... finished construction of PlanarOrbit\n");
+  if(debug(4))
+    DebugInfo("  ... finished construction of PlanarOrbit\n");
 }
 
 //------------------------------------------------------------------------------
 WD99disc::PlanarOrbit::~PlanarOrbit() {
-  debug_info(4,"destructing PlanarOrbit\n");
+  if(debug(4)) DebugInfo("destructing PlanarOrbit\n");
   if(ttable) falcON_DEL_A(ttable);
   if(Rtable) falcON_DEL_A(Rtable);
   if(vRtable) falcON_DEL_A(vRtable);
@@ -326,7 +328,7 @@ WD99disc::WD99disc(int    no,                 // # particles/orbit (approx)
   for(int i=0; i!=n; ++i) {
     dpdr[i] = -acc_e[i][0];
     if (dpdr[i]<0.)
-      error("WD99disc: outward acceleration at r=%g",exp(lr[i]));
+      falcON_Error("WD99disc: outward acceleration at r=%g",exp(lr[i]));
   } 
   double s0  = rmin * dpdr[0],                // Gradients for pot in ln(r) 
     sn1 = rmax * dpdr[n1];                    // at first and last point 

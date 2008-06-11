@@ -59,22 +59,9 @@ namespace falcON {
   using WDutils::pow;
   using WDutils::exception;
   using WDutils::snprintf;
-  void error(const char*, ...);
-  void warning(const char*, ...);
-  void debug_info(const char*, ...);
-  void debug_info(int, const char*, ...);
-  using falcON::error;
-  using falcON::warning;
-  using falcON::debug_info;
   namespace meta {
     using namespace WDutils::meta;
   }
-}
-// resolve ambiguities for the anonymous namespace
-namespace {
-  using falcON::error;
-  using falcON::warning;
-  using falcON::debug_info;
 }
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_utils_h

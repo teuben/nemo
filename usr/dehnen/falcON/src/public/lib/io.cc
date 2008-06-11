@@ -283,27 +283,27 @@ void output::__open(bool append)
 	  0 == FILE[0] ||
 	  0 == std::strcmp(FILE,".") ) {
     OUT = 0;
-    debug_info(2,"output: open sink\n");
+    DebugInfo(2,"output: open sink\n");
   } else if(0 == std::strcmp(FILE,"-") ) {
     open_stdout();
     OUT = &std::cout;
-    debug_info(2,"output: open stdout\n");
+    DebugInfo(2,"output: open stdout\n");
   } else {
     std::ofstream *FOUT = new std::ofstream();
     if(append) {
       FOUT->open(FILE,std::ios::out | std::ios::app);
       if(FOUT->is_open()) {
 	APPENDING = true;
-	debug_info(2,"output: append to file \"%s\"\n",FILE);
+	DebugInfo(2,"output: append to file \"%s\"\n",FILE);
       }
     }
     if(!FOUT->is_open() )
       FOUT->open(FILE,std::ios::out);
     if( FOUT->is_open() ) {
       OUT = FOUT;
-      debug_info(2,"output: open file \"%s\"\n",FILE);
+      DebugInfo(2,"output: open file \"%s\"\n",FILE);
     } else {
-      debug_info(2,"output: could not open file \"%s\"\n",FILE);
+      DebugInfo(2,"output: could not open file \"%s\"\n",FILE);
       OUT = 0;
       falcON_DEL_O(FOUT);
     }
@@ -318,7 +318,7 @@ void output::close() {
       warning("closing FortranORec before output\n");
     FREC->close();
   }
-  debug_info(2,"output: closing\n");
+  DebugInfo(2,"output: closing\n");
   if(OUT == &std::cout) close_stdout();
   else if(OUT) falcON_DEL_O(OUT);
   APPENDING = false;
@@ -332,18 +332,18 @@ void output::close() {
 void input::__open() {
   if     (0 == FILE || FILE[0] == 0) {
     IN = 0;
-    debug_info(2,"input: empty file\n");
+    DebugInfo(2,"input: empty file\n");
   } else if(0 == std::strcmp(FILE,"-") ) {
     open_stdin();
     IN= &std::cin;
-    debug_info(2,"input: stdin\n");
+    DebugInfo(2,"input: stdin\n");
   } else {
     std::ifstream *FIN = new std::ifstream(FILE);
     if( FIN->is_open() ) {
       IN = FIN;
-      debug_info(2,"input: open file \"%s\"\n",FILE);
+      DebugInfo(2,"input: open file \"%s\"\n",FILE);
     } else {
-      debug_info(2,"input: could not open file \"%s\"\n",FILE);
+      DebugInfo(2,"input: could not open file \"%s\"\n",FILE);
       IN = 0;
       falcON_DEL_O(FIN);
     }
@@ -358,7 +358,7 @@ void input::close() {
       warning("closing FortranIRec before input\n");
     FREC->close();
   }
-  debug_info(2,"input: closing\n");
+  DebugInfo(2,"input: closing\n");
   if(IN == &std::cin) close_stdin();
   else if(IN) falcON_DEL_O(IN);
   IN = 0;
@@ -397,7 +397,7 @@ void nemo_in::close() falcON_THROWING
 {
   if(STREAM == 0) return;
   if(SNAP_IN) {
-    debug_info(4,"nemo_in::close(): closing open snap_in first\n");
+    DebugInfo(4,"nemo_in::close(): closing open snap_in first\n");
     SNAP_IN->~snap_in();
   }
   if(IS_PIPE) {
@@ -405,7 +405,7 @@ void nemo_in::close() falcON_THROWING
     IS_PIPE = false;
   }
   nemo_io::close();
-  debug_info(4,"nemo_in: closed stream\n");
+  DebugInfo(4,"nemo_in: closed stream\n");
   report::info("nemo_in: closed stream\n");
 }
 //------------------------------------------------------------------------------
@@ -417,7 +417,7 @@ nemo_in& nemo_in::open(const char* file) falcON_THROWING
   if(IS_PIPE) open_stdin();
   SNAP_IN = 0;
   nemo_io::open(file,"r");
-  debug_info(4,"nemo_in: opened file '%s'\n",file);
+  DebugInfo(4,"nemo_in: opened file '%s'\n",file);
   report::info("nemo_in: opened file '%s'\n",file);
   return *this;
 }
@@ -435,7 +435,7 @@ nemo_in::~nemo_in() falcON_THROWING
 {
   if(IS_PIPE) close_stdin();
   if(SNAP_IN) {
-    debug_info(4,"nemo_in::~nemo_in(): closing open snap_in first\n");
+    DebugInfo(4,"nemo_in::~nemo_in(): closing open snap_in first\n");
     SNAP_IN->~snap_in();
   }
 }
@@ -452,7 +452,7 @@ bool nemo_in::has_snapshot() const
 snap_in::snap_in(nemo_in const&in) falcON_THROWING : 
   INPUT(in), DATA_IN(0), FIELDS_READ(0), HAS_TIME(0), NTOT(0u), TIME(0.)
 {
-  debug_info(4,"snap_in::snap_in() ...\n");
+  DebugInfo(4,"snap_in::snap_in() ...\n");
   for(bodytype t; t; ++t) NBOD[t] = 0u;
   if(! INPUT.has_snapshot())
     falcON_THROW("cannot open snapshot from nemo input stream");
@@ -461,7 +461,7 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   // 1 open snapshot set
   get_set(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
   INPUT.SNAP_IN = this;
-  debug_info(5,"  snap_in::snap_in(): snapshot opened\n");
+  DebugInfo(5,"  snap_in::snap_in(): snapshot opened\n");
   // 2 open parameter set
   if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),ParametersTag)) {
     get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
@@ -469,7 +469,7 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
     falcON_THROW("cannot read parameters from nemo input stream");
   }
   get_set(static_cast< ::stream >(INPUT.stream()),ParametersTag);
-  debug_info(5,"  snap_in::snap_in(): parameter set opened\n");
+  DebugInfo(5,"  snap_in::snap_in(): parameter set opened\n");
   // 3 read parameter set
   // 3.1 read total # bodies 
   if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),NobjTag)) {
@@ -479,19 +479,19 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
     falcON_THROW("cannot read # bodies from nemo input stream");
   }
   get_data(static_cast< ::stream >(INPUT.stream()),NobjTag,IntType,&NTOT,0);
-  debug_info(5,"  snap_in::snap_in(): read Nobj = %u\n",NTOT);
+  DebugInfo(5,"  snap_in::snap_in(): read Nobj = %u\n",NTOT);
   // 3.2 try to read # SINK bodies
   if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),NSinkTag)) {
     get_data(static_cast< ::stream >(INPUT.stream()),
 	     NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
-    debug_info(5,"  snap_in::snap_in(): read Nsink = %u\n",
+    DebugInfo(5,"  snap_in::snap_in(): read Nsink = %u\n",
 	       NBOD[bodytype::sink]);
   }
   // 3.3 try to read # SPH bodies
   if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),NGasTag)) {
     get_data(static_cast< ::stream >(INPUT.stream()),
 	     NGasTag,IntType,&(NBOD[bodytype::gas]),0);
-    debug_info(5,"  snap_in::snap_in(): read Nsph = %u\n",
+    DebugInfo(5,"  snap_in::snap_in(): read Nsph = %u\n",
 	       NBOD[bodytype::gas]);
   }
   // 3.4 set # STD bodies
@@ -516,10 +516,10 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
       warning("nemo input: unknown type '%s' for time\n",time_type);
   }
   if(HAS_TIME)
-    debug_info(5,"  read time = %f\n",TIME);
+    DebugInfo(5,"  read time = %f\n",TIME);
   // 4 close parameter set
   get_tes(static_cast< ::stream >(INPUT.stream()),ParametersTag);
-  debug_info(5,"  snap_in::snap_in(): parameter set read & closed\n");
+  DebugInfo(5,"  snap_in::snap_in(): parameter set read & closed\n");
   // 5 open particle set
   if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),ParticlesTag)) {
     get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
@@ -527,14 +527,14 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
     falcON_THROW("cannot read parameters from nemo input stream");
   }
   get_set(static_cast< ::stream >(INPUT.stream()),ParticlesTag);
-  debug_info(5,"  snap_in::snap_in(): particles set opened\n");
+  DebugInfo(5,"  snap_in::snap_in(): particles set opened\n");
   report::info("snap_in: opened for N[]=%d,%d,%d\n",NBOD[0],NBOD[1],NBOD[2]);
 }
 //------------------------------------------------------------------------------
 snap_in::~snap_in() falcON_THROWING
 {
   if(DATA_IN) {
-    debug_info(4,"snap_in::~snap_in(): closing open data_in first\n");
+    DebugInfo(4,"snap_in::~snap_in(): closing open data_in first\n");
     DATA_IN->~data_in();
   }
   HAS_TIME = false;
@@ -543,7 +543,7 @@ snap_in::~snap_in() falcON_THROWING
   get_tes(static_cast< ::stream >(INPUT.stream()),ParticlesTag);
   get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
   INPUT.SNAP_IN = 0;
-  debug_info(4,"snap_in: closed\n");
+  DebugInfo(4,"snap_in: closed\n");
   report::info("snap_in: closed\n");
 }
 //------------------------------------------------------------------------------
@@ -561,7 +561,7 @@ bool snap_in::has(nemo_io::Field f) const
 data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
   FIELD(f), INPUT(snap), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)
 {
-  debug_info(5,"data_in::data_in(%s) ...\n",NemoTag(FIELD));
+  DebugInfo(5,"data_in::data_in(%s) ...\n",NemoTag(FIELD));
   if( INPUT.DATA_IN )
     falcON_THROW("cannot read %s: nemo input still engaged",NemoTag(FIELD));
   if( !INPUT.has(f) )
@@ -576,7 +576,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
     falcON_THROW("cannot read %s: type mismatch (got %s, expect %s)",
 		 NemoTag(FIELD), NemoType(TYPE), 
 		 NemoType(nemo_io::type(FIELD)));
-  debug_info(6,"  data type: %s\n",nemo_io::type_name(TYPE));
+  DebugInfo(6,"  data type: %s\n",nemo_io::type_name(TYPE));
   // 2 get dimensions of data on file
   int*dim=get_dims(static_cast< ::stream >(INPUT.stream()),NemoTag(FIELD));
   if(!dim)
@@ -591,7 +591,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
     // 3.2 array of scalars
     if(!::is_scalar(FIELD) )
       falcON_THROW("nemo input of %s: found scalars",NemoTag(FIELD));
-    debug_info(6,"  opening data set for %d scalars\n",NTOT);
+    DebugInfo(6,"  opening data set for %d scalars\n",NTOT);
     get_data_set(static_cast< ::stream >(INPUT.stream()),
 		 NemoTag(FIELD),TypeTag,NTOT,0);
     SUBN = 1;
@@ -601,7 +601,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
       falcON_THROW("nemo input of %s: found vectors",NemoTag(FIELD));
     if(dim[1] != NDIM)
       falcON_THROW("nemo input of %s: Ndim mismatch",NemoTag(FIELD));
-    debug_info(6,"  opening data set for %d vectors\n",NTOT);
+    DebugInfo(6,"  opening data set for %d vectors\n",NTOT);
     get_data_set(static_cast< ::stream >(INPUT.stream()),
 		 NemoTag(FIELD),TypeTag,NTOT,NDIM,0);
     SUBN = NDIM;
@@ -611,7 +611,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
       falcON_THROW("nemo input of %s: found phases",NemoTag(FIELD));
     if(dim[1] != 2 && dim[2] != NDIM)
       falcON_THROW("nemo input of %s: Ndim mismatch",NemoTag(FIELD));
-    debug_info(6,"  opening data set for %d phases\n",NTOT);
+    DebugInfo(6,"  opening data set for %d phases\n",NTOT);
     get_data_set(static_cast< ::stream >(INPUT.stream()),
 		 NemoTag(FIELD),TypeTag,NTOT,2,NDIM,0);
     SUBN = 2*NDIM;
@@ -627,7 +627,7 @@ data_in::~data_in()
   get_data_tes(static_cast< ::stream >(INPUT.stream()),NemoTag(FIELD));
   INPUT.DATA_IN      = 0;
   INPUT.FIELDS_READ |= FIELD;
-  debug_info(5,"data_in(%s) closed\n",NemoTag(FIELD));
+  DebugInfo(5,"data_in(%s) closed\n",NemoTag(FIELD));
 }
 //------------------------------------------------------------------------------
 void data_in::read(void*data, unsigned n)
@@ -640,7 +640,7 @@ void data_in::read(void*data, unsigned n)
   if(n) {
     get_data_blocked(static_cast< ::stream >(INPUT.stream()),
 		     NemoTag(FIELD), data, n*SUBN);
-    debug_info(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
+    DebugInfo(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
     NREAD += n;
   }
 }
@@ -651,7 +651,7 @@ void data_in::read(void*data)
     unsigned n = NTOT - NREAD;
     get_data_blocked(static_cast< ::stream >(INPUT.stream()),
 		     NemoTag(FIELD), data, n*SUBN);
-    debug_info(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
+    DebugInfo(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
     NREAD += n;
   }
 }
@@ -664,7 +664,7 @@ void nemo_out::close() falcON_THROWING
 {
   if(STREAM == 0) return;
   if(SNAP_OUT) {
-    debug_info(4,"nemo_out::close(): closing open snap_out first\n");
+    DebugInfo(4,"nemo_out::close(): closing open snap_out first\n");
     SNAP_OUT->~snap_out();
   }
   if(IS_PIPE) {
@@ -673,7 +673,7 @@ void nemo_out::close() falcON_THROWING
   }
   IS_SINK = false;
   nemo_io::close();
-  debug_info(4,"nemo_out: closed stream\n");
+  DebugInfo(4,"nemo_out: closed stream\n");
   report::info("nemo_out: closed stream\n");
 }
 //------------------------------------------------------------------------------
@@ -690,31 +690,31 @@ nemo_out& nemo_out::open(const char* file,
   if(appending) {                         // appending anyway?
     if(is_appended(file,'!',copy)) {        // overwrite & append
       nemo_io::open(copy,"a!");
-      debug_info(4,"nemo_out: opened file '%s' for appending with overwrite\n",
+      DebugInfo(4,"nemo_out: opened file '%s' for appending with overwrite\n",
  		 copy);
       report::info("nemo_out: opened file '%s' for appending with overwrite\n",
  		 copy);
     } else if(is_appended(file,'@',copy)) { // append 
       nemo_io::open(copy,"a");
-      debug_info(4,"nemo_out: opened file '%s' for appending\n",copy);
+      DebugInfo(4,"nemo_out: opened file '%s' for appending\n",copy);
       report::info("nemo_out: opened file '%s' for appending\n",copy);
     } else {                                // append
       nemo_io::open(file,"a");
-      debug_info(4,"nemo_out: opened file '%s' for appending\n",file);
+      DebugInfo(4,"nemo_out: opened file '%s' for appending\n",file);
       report::info("nemo_out: opened file '%s' for appending\n",file);
     }
   } else {                                // append only with trailing '@'
     if       (is_appended(file,'!',copy)) { // overwrite existing file 
       nemo_io::open(copy,"w!");
-      debug_info(4,"nemo_out: opened file '%s' with overwrite\n",copy);
+      DebugInfo(4,"nemo_out: opened file '%s' with overwrite\n",copy);
       report::info("nemo_out: opened file '%s' with overwrite\n",copy);
     } else if(is_appended(file,'@',copy)) { // append to existing file
       nemo_io::open(copy,"a");
-      debug_info(4,"nemo_out: opened file '%s' for appending\n",copy);
+      DebugInfo(4,"nemo_out: opened file '%s' for appending\n",copy);
       report::info("nemo_out: opened file '%s' for appending\n",copy);
     } else {                                // open new file
       nemo_io::open(file,"w");
-      debug_info(4,"nemo_out: opened file '%s'\n",file);
+      DebugInfo(4,"nemo_out: opened file '%s'\n",file);
       report::info("nemo_out: opened file '%s'\n",file);
     }
   }
@@ -730,7 +730,7 @@ snap_out::snap_out(nemo_out const&out,
 		   double         time) falcON_THROWING :
   OUTPUT(out), DATA_OUT(0), FIELDS_WRITTEN(0), NTOT(0u)
 {
-  debug_info(4,"snap_out::snap_out() ...\n");
+  DebugInfo(4,"snap_out::snap_out() ...\n");
   // 0 set # bodies
   for(bodytype t; t; ++t) NTOT += NBOD[t] = nbod[t];
   if(OUTPUT.SNAP_OUT)
@@ -738,7 +738,7 @@ snap_out::snap_out(nemo_out const&out,
   // 1 open snapshot set
   put_set(static_cast< ::stream >(OUTPUT.stream()),SnapShotTag);
   OUTPUT.SNAP_OUT = this;
-  debug_info(5,"  snapshot opened\n");
+  DebugInfo(5,"  snapshot opened\n");
   // 2 write parameter set
   put_set(static_cast< ::stream >(OUTPUT.stream()),ParametersTag);
   put_data(static_cast< ::stream >(OUTPUT.stream()),
@@ -750,7 +750,7 @@ snap_out::snap_out(nemo_out const&out,
   put_data(static_cast< ::stream >(OUTPUT.stream()),
 	   TimeTag,DoubleType,&time,0);
   put_tes(static_cast< ::stream >(OUTPUT.stream()),ParametersTag);
-  debug_info(5,"  snap_out::snap_out(): parameter written:"
+  DebugInfo(5,"  snap_out::snap_out(): parameter written:"
 	     " Nbod=%d, Nsph=%d, Nsink=%d, time=%f\n",
 	     NTOT, NBOD[bodytype::gas], NBOD[bodytype::sink], time);
   // 3 open particle set
@@ -765,7 +765,7 @@ snap_out::snap_out(nemo_out const&out,
 snap_out::~snap_out() falcON_THROWING
 {
   if(DATA_OUT) {
-    debug_info(4,"snap_out::~snap_out(): closing open data_out first\n");
+    DebugInfo(4,"snap_out::~snap_out(): closing open data_out first\n");
     DATA_OUT->~data_out();
   }
   NTOT = 0;
@@ -773,7 +773,7 @@ snap_out::~snap_out() falcON_THROWING
   put_tes(static_cast< ::stream >(OUTPUT.stream()),ParticlesTag);
   put_tes(static_cast< ::stream >(OUTPUT.stream()),SnapShotTag);
   OUTPUT.SNAP_OUT = 0;
-  debug_info(4,"snap_out closed\n");
+  DebugInfo(4,"snap_out closed\n");
   report::info("snap_out closed\n");
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -786,7 +786,7 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
     NTOT(OUTPUT.N(FIELD)), TYPE(nemo_io::type(FIELD)),
     SUBN(::is_scalar(FIELD)? 1: ::is_vector(FIELD)? NDIM : 2*NDIM)
 {
-  debug_info(5,"data_out::data_out(%s) ...\n",NemoTag(FIELD));
+  DebugInfo(5,"data_out::data_out(%s) ...\n",NemoTag(FIELD));
   if( OUTPUT.DATA_OUT )
     falcON_THROW("cannot write %s: nemo output still engaged",
 		 NemoTag(FIELD));
@@ -796,15 +796,15 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
   if(::is_scalar(FIELD)) {
     put_data_set(static_cast< ::stream >(OUTPUT.stream()),
 		 NemoTag(FIELD),NemoType(TYPE),NTOT,0);
-    debug_info(6,"  opening data set for %d scalars\n",NTOT);
+    DebugInfo(6,"  opening data set for %d scalars\n",NTOT);
   } else if(::is_vector(FIELD)) {
     put_data_set(static_cast< ::stream >(OUTPUT.stream()),
 		 NemoTag(FIELD),NemoType(TYPE),NTOT,NDIM,0);
-    debug_info(6,"  opening data set for %d vectors\n",NTOT);
+    DebugInfo(6,"  opening data set for %d vectors\n",NTOT);
   } else {
     put_data_set(static_cast< ::stream >(OUTPUT.stream()),
 		 NemoTag(FIELD),NemoType(TYPE),NTOT,2,NDIM,0);
-    debug_info(6,"  opening data set for %d phases\n",NTOT);
+    DebugInfo(6,"  opening data set for %d phases\n",NTOT);
   }
   OUTPUT.DATA_OUT = this;
   report::info("data_out: opened for %d '%s'\n",
@@ -819,7 +819,7 @@ data_out::~data_out()
   put_data_tes(static_cast< ::stream >(OUTPUT.stream()),NemoTag(FIELD));
   OUTPUT.DATA_OUT        = 0;
   OUTPUT.FIELDS_WRITTEN |= FIELD;
-  debug_info(5,"data_out(%s) closed\n",NemoTag(FIELD));
+  DebugInfo(5,"data_out(%s) closed\n",NemoTag(FIELD));
   report::info("data_out: closed output of '%s'\n",NemoTag(FIELD));
 }
 //------------------------------------------------------------------------------
@@ -832,7 +832,7 @@ void data_out::write(const void*data, unsigned n)
   }
   put_data_blocked(static_cast< ::stream >(OUTPUT.stream()),
 		   NemoTag(FIELD), const_cast<void*>(data), n*SUBN);
-  debug_info(6,"  %d %s written\n",n,NemoTag(FIELD));
+  DebugInfo(6,"  %d %s written\n",n,NemoTag(FIELD));
   NWRITTEN += n;
 }
 //------------------------------------------------------------------------------
@@ -842,7 +842,7 @@ void data_out::write(const void*data)
     unsigned n = NTOT - NWRITTEN;
     put_data_blocked(static_cast< ::stream >(OUTPUT.stream()),
 		     NemoTag(FIELD), const_cast<void*>(data), n*SUBN);
-    debug_info(6,"  %d %s written\n",n,NemoTag(FIELD));
+    DebugInfo(6,"  %d %s written\n",n,NemoTag(FIELD));
     NWRITTEN += n;
   }
 }
@@ -931,13 +931,13 @@ unsigned falcON::FortranIRec::read_size() throw(falcON::exception)
 falcON::FortranIRec::FortranIRec(input& in, unsigned rec, bool swap)
   throw(falcON::exception) : IN(in), HSZE(rec), SWAP(swap), READ(0)
 {
-  debug_info(8,"FortranIRec: opening ... \n");
+  DebugInfo(8,"FortranIRec: opening ... \n");
   if(!IN) throw exception("FortranIRec::FortranIRec(): input corrupted");
   if(IN.FREC)
     throw exception("trying to open 2nd FortranIRec to same input\n");
   IN.FREC = this;
   SIZE = read_size();
-  debug_info(6,"FortranIRec: opened with %u bytes\n",SIZE);
+  DebugInfo(6,"FortranIRec: opened with %u bytes\n",SIZE);
 }
 //------------------------------------------------------------------------------
 unsigned falcON::FortranIRec::read_bytes(char*buf, unsigned n)
@@ -952,7 +952,7 @@ unsigned falcON::FortranIRec::read_bytes(char*buf, unsigned n)
   IN.read(buf,n);
   if(!IN) throw exception("FortranIRec: input corrupted");
   READ += n;
-  debug_info(6,"FortranIRec: read %u bytes\n",n);
+  DebugInfo(6,"FortranIRec: read %u bytes\n",n);
   return n;
 }
 //------------------------------------------------------------------------------
@@ -973,7 +973,7 @@ void falcON::FortranIRec::close() throw(falcON::exception)
   unsigned S = read_size();
   IN.FREC = 0;
   if(S != SIZE) throw exception("FortranIRec: record size mismatch");
-  debug_info(6,"FortranIRec: closed with %u bytes\n",SIZE);
+  DebugInfo(6,"FortranIRec: closed with %u bytes\n",SIZE);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
@@ -1000,7 +1000,7 @@ falcON::FortranORec::FortranORec(output& out, unsigned size, unsigned rec)
     throw exception("trying to open 2nd FortranORec to same output\n");
   OUT.FREC = this;
   write_size();
-  debug_info(6,"FortranORec: opened for %u bytes\n",SIZE);
+  DebugInfo(6,"FortranORec: opened for %u bytes\n",SIZE);
 }
 //------------------------------------------------------------------------------
 unsigned falcON::FortranORec::write_bytes(const char*buf, unsigned n)
@@ -1015,7 +1015,7 @@ unsigned falcON::FortranORec::write_bytes(const char*buf, unsigned n)
   OUT.write(buf,n);
   if(!OUT) throw exception("FortranORec: ostream corrupted");
   WRITTEN += n;
-  debug_info(6,"FortranORec: written %u bytes\n",n);
+  DebugInfo(6,"FortranORec: written %u bytes\n",n);
   return n;
 }
 //------------------------------------------------------------------------------
@@ -1034,7 +1034,7 @@ void falcON::FortranORec::close() throw(falcON::exception)
   }
   write_size();
   OUT.FREC = 0;
-  debug_info(6,"FortranORec: closed with %u bytes\n",SIZE);
+  DebugInfo(6,"FortranORec: closed with %u bytes\n",SIZE);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              

@@ -65,7 +65,7 @@ void bodies::block::flag_all_as_active() const falcON_THROWING
     for(int n=0; n!=NALL; ++n)
       datum<fieldbit::f>(n).add(flags::active);
   else 
-    falcON_ExceptF("flags not supported","bodies::flag_all_as_active()");
+    falcON_THROW("in bodies::flag_all_as_active(): flags not supported");
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::block::reset_data(fieldset b) const falcON_THROWING {
@@ -80,9 +80,9 @@ void bodies::block::reset_data(fieldset b) const falcON_THROWING {
 inline
 void bodies::block::add_field (fieldbit f) falcON_THROWING {
   if(TYPE.allows(f) && 0 == DATA[value(f)] ) {
-    debug_info(4,"bodies::block::add_field(): "
-	       "allocating data for %s bodies: %u %c (%s)\n",
-	       TYPE.name(),NALL,letter(f),fullname(f));
+    if(debug(4)) DebugInfo("bodies::block::add_field(): "
+			   "allocating data for %s bodies: %u %c (%s)\n",
+			   TYPE.name(),NALL,letter(f),fullname(f));
     set_data_void(f, falcON_NEW(char,NALL*falcON::size(f)));
     if(f == fieldbit::f) reset_flags();
   }
@@ -91,8 +91,9 @@ void bodies::block::add_field (fieldbit f) falcON_THROWING {
 inline
 void bodies::block::del_field (fieldbit f) falcON_THROWING {
   if(DATA[value(f)]) {
-    debug_info(4,"bodies::block::del_field(): "
-	       "de-allocating data for %c (%s)\n",letter(f),fullname(f));
+    if(debug(4)) DebugInfo("bodies::block::del_field(): "
+			   "de-allocating data for %s bodies: %c (%s)\n",
+			   TYPE.name(),letter(f),fullname(f));
     falcON_DEL_A(static_cast<char*>(DATA[value(f)]));
   }
   set_data_void(f,0);
@@ -101,8 +102,9 @@ void bodies::block::del_field (fieldbit f) falcON_THROWING {
 inline
 void bodies::block::swap_bytes(fieldbit f) falcON_THROWING {
   if(DATA[value(f)]) {
-    debug_info(4,"bodies::block::swap_bytes(): "
-	       "swapping bytes for %c (%s)\n",letter(f),fullname(f));
+    if(debug(4)) DebugInfo("bodies::block::swap_bytes(): "
+			   "swapping bytes for %c (%s)\n",
+			   letter(f),fullname(f));
     falcON::swap_bytes(DATA[value(f)], falcON::size(f), NALL);
   }
 }
@@ -149,9 +151,10 @@ bodies::block::block(unsigned no,                  // I: our No
     BODS ( bods )
 {
   if(na<nb)
-    falcON_ExceptF("N_alloc < N_bodies","bodies::block::block()");
-  debug_info(6,"bodies::block: na=%d, bits=%s, type=%s allowed bits=%s\n",
-	     na, word(bits), TYPE.name(), word(bits&TYPE.allows()));
+    falcON_THROW("in bodies::block::block(): N_alloc < N_bodies");
+  if(debug(6))
+    DebugInfo("bodies::block: na=%d, bits=%s, type=%s allowed bits=%s\n",
+	      na, word(bits), TYPE.name(), word(bits&TYPE.allows()));
   bits &= TYPE.allows();
   for(fieldbit f; f; ++f)
     set_data_void(f,0);
@@ -225,7 +228,7 @@ fieldset bodies::block::copy_bodies(const block*other,
 {
   fieldset copied;
   if(this == other)
-    falcON_ExceptF("this == other","bodies::block::copy_bodies()");
+    falcON_THROW("in bodies::block::copy_bodies(): this == other");
   else
     CopyBodies<0>::copy(other->DATA,DATA,from,to,num,copy,copied);
   return copied;
@@ -251,15 +254,15 @@ fieldset bodies::block::copy(const block*&From,
 			     flags        copyflag) falcON_THROWING
 {
   if( From == this )
-    falcON_ExceptF("cannot copy from self","bodies::block::copy()");
+    falcON_THROW("in bodies::block::copy(): cannot copy from self");
   NBOD = 0u;
   if( From == 0) return fieldset::empty;
   unsigned copy;
   unsigned free = NALL;
   fieldset copied;
   if(copyflag && ! has_field(fieldbit::f) )
-    falcON_ExceptF("copyflag!=0 but flags not supported",
-		   "bodies::block::copy()");
+    falcON_THROW("in bodies::block::copy(): "
+		 "copyflag!=0 but flags not supported");
   // skip bodies not to be copied                                               
   From->skip(from,copyflag);
   while(free &&                              // WHILE  we have still space      
@@ -288,7 +291,7 @@ fieldset bodies::block::copy(const block*&From,
     if(from == From->NBOD) {
       From = From->NEXT;
       if(From == this) 
-	falcON_ExceptF("cannot copy from self","bodies::block::copy()");
+	falcON_THROW("in bodies::block::copy(): cannot copy from self");
       from = 0;
       if(From) From->skip(from,copyflag);
     }
@@ -300,7 +303,7 @@ void bodies::block::remove(unsigned &removed) falcON_THROWING
 {
   if(NBOD == 0) return;
   if(0 == DATA[fieldbit::f] )
-    falcON_ExceptF("flags needed but not supported","bodies::remove()");
+    falcON_THROW("in bodies::remove(): flags needed but not supported");
   unsigned lo=0u, hi=NBOD-1;
   while(lo < hi) {
     while(! to_remove(const_datum<fieldbit::f>(lo)) && lo < hi) ++lo;
@@ -326,10 +329,11 @@ void bodies::block::read_data(data_in &inpt,
 		 letter(f));
   add_field(f);
   if(inpt.must_coerce()) {
-    debug_info(1,"bodies::block::read_data(%c): must convert from %s to %s",
-	       letter(f),
-	       nemo_io::type_name(nemo_io::NotReal),
-	       nemo_io::type_name(nemo_io::Real));
+    if(debug(1))
+      DebugInfo("bodies::block::read_data(%c): must convert from %s to %s",
+		letter(f),
+		nemo_io::type_name(nemo_io::NotReal),
+		nemo_io::type_name(nemo_io::Real));
     unsigned ntot = N*inpt.sub_N();
     notreal* data = falcON_NEW(notreal, ntot);
     inpt.read(data, N);
@@ -355,10 +359,10 @@ void bodies::block::read_posvel(data_in &inpt,
   if(from + N > NBOD)
     falcON_THROW("bodies::block::read_posvel(): cannot read that many");
   const bool coerce = inpt.must_coerce();
-  if(coerce)
-    debug_info(1,"bodies::read_posvel(): must convert from %s to %s",
-	       nemo_io::type_name(nemo_io::NotReal),
-	       nemo_io::type_name(nemo_io::Real));
+  if(coerce && debug(1))
+    DebugInfo("bodies::read_posvel(): must convert from %s to %s",
+	      nemo_io::type_name(nemo_io::NotReal),
+	      nemo_io::type_name(nemo_io::Real));
   void* phases = coerce?
     static_cast<void*>(falcON_NEW(Vect,2*N)) : 
     static_cast<void*>(falcON_NEW(vect,2*N)) ;
@@ -387,8 +391,8 @@ void bodies::block::read_posvel(data_in &inpt,
   }
   if(coerce) falcON_DEL_A(static_cast<Vect*>(phases));
   else       falcON_DEL_A(static_cast<vect*>(phases));
-  debug_info(2,"bodies::block::read_posvel(): read %s",
-	     word(want&fieldset::phases));
+  if(debug(2)) DebugInfo("bodies::block::read_posvel(): read %s",
+			 word(want&fieldset::phases));
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::block::write_data(data_out&outp,
@@ -445,7 +449,8 @@ void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
   if(R != N*falcON::size(f))
     falcON_THROW("bodies::block::read_Fortran(%c): "
 		 "could only read %u of %u bytes\n",R,N*falcON::size(f));
-  debug_info(4,"bodies::block::read_Fortran(): read %u `%s'\n",N,fullname(f));
+  if(debug(4))
+    DebugInfo("bodies::block::read_Fortran(): read %u `%s'\n",N,fullname(f));
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
@@ -462,8 +467,9 @@ void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
   if(W != N*falcON::size(f))
     falcON_THROW("bodies::block::write_Fortran(%c): "
 		 "could only write %u of %u bytes\n",W,N*falcON::size(f));
-  debug_info(4,"bodies::block::write_Fortran(): written %u `%s'\n",
-	     N,fullname(f));
+  if(debug(4))
+    DebugInfo("bodies::block::write_Fortran(): written %u `%s'\n",
+	      N,fullname(f));
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////////
@@ -573,6 +579,18 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
 // class falcON::bodies                                                         
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
+// reset blocks' FIRST entries
+void bodies::reset_firsts(int first[BT_NUM])
+{
+  for(bodytype t; t; ++t) {
+    int F = first[t];
+    for(block*B=TYPES[t]; B; B=B->next_of_same_type()) {
+      B->set_first(F);
+      F += B->N_bodies();
+    }
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
 // # bodies not flagged to be ignored
 unsigned bodies::N_subset() const
 {
@@ -600,7 +618,7 @@ void bodies::del_data() falcON_THROWING
 // destruction: delete all data
 bodies::~bodies() falcON_THROWING
 {
-  debug_info(6,"bodies::~bodies(): destructing bodies");
+  if(debug(6)) DebugInfo("bodies::~bodies(): destructing bodies");
   BITS = fieldset::empty;
   if(C_FORTRAN)
     for(fieldbit f; f; ++f)
@@ -622,8 +640,8 @@ void bodies::set_firsts()
 // set up blocks to hold N[t] bodies of type t
 void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
 {
-  debug_info(5,"bodies::set_data(): N=[%d,%d,%d], BITS=%s\n",
-	     N[0],N[1],N[2],word(BITS));
+  if(debug(5)) DebugInfo("bodies::set_data(): N=[%d,%d,%d], BITS=%s\n",
+			 N[0],N[1],N[2],word(BITS));
   NBLK = 0u;
   NTOT = 0u;
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
@@ -638,13 +656,11 @@ void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
       TYPES[t] = 0;
       for(unsigned a,n=0u; n < NALL[t]; n+=a) {
 	if(NBLK == index::max_blocks)
-	  falcON_ExceptF("# blocks exceeds limit","bodies");
+	  falcON_THROW("bodies: # blocks exceeds limit");
 	a = min(NALL[t]-n, unsigned(index::max_bodies));
 	block *b = new block(NBLK,a,a,i,t,BITS,this);
-	if(debug(10))
-	   std::cerr<<"### falcON Debug Info:"
-		    <<" allocated "<<nameof(block)
-		    <<" @ "<<static_cast<void*>(b)<<'\n';
+	if(debug(10)) DebugInfo("allocated %s @ %p\n",
+				nameof(block),static_cast<void*>(b));
 	i += a;
 	if(last) last->link(b);
 	last = b;
@@ -665,8 +681,9 @@ bodies::bodies(fieldset bits) falcON_THROWING :
   C_FORTRAN ( 0 )
 {
   unsigned n[BT_NUM]={0u};
-  debug_info(3,"bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
-	     n[0],n[1],n[2],word(BITS));
+  if(debug(3))
+    DebugInfo("bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
+	      n[0],n[1],n[2],word(BITS));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   set_firsts();
@@ -678,8 +695,9 @@ bodies::bodies(const unsigned n[BT_NUM],
   BITS      ( bits ),
   C_FORTRAN ( 0 )
 {
-  debug_info(3,"bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
-	     n[0],n[1],n[2],word(bits));
+  if(debug(3))
+    DebugInfo("bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
+	      n[0],n[1],n[2],word(bits));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   set_firsts();
@@ -722,8 +740,8 @@ bodies::bodies(bodies const&Other,
   C_FORTRAN ( 0 )
 {
   if(copyflag && !Other.have_flag() ) 
-    falcON_ExceptF("copyflag !=0, but other bodies not supporting flag",
-		   "bodies::bodies()");
+    falcON_THROW("in bodies::bodies(): "
+		 "copyflag !=0, but other bodies not supporting flag");
   unsigned n[BT_NUM];
   for(bodytype t; t; ++t) {
     if(copyflag) {
@@ -750,8 +768,9 @@ bodies::bodies(char, const unsigned n[BT_NUM]) falcON_THROWING
 : BITS      ( fieldset::empty ),
   C_FORTRAN ( 1 )
 {
-  debug_info(3,"bodies::bodies(): constructing bodies for C & FORTRAN: n=%u,%u",
-	     n[0],n[1]);
+  if(debug(3))
+    DebugInfo("bodies::bodies(): constructing bodies for C & FORTRAN: n=%u,%u",
+	      n[0],n[1]);
   for(bodytype t; t; ++t)
     if(n[t] > index::max_bodies)
       falcON_THROW("too many bodies\n");
@@ -889,8 +908,9 @@ void bodies::create(unsigned N, bodytype t) falcON_THROWING
   link_blocks();
   // set block::FIRST                                                           
   set_firsts();
-  debug_info(2,"bodies::create(): created %u new bodies of type %s\n",
-	     N,t.name());
+  if(debug(2))
+    DebugInfo("bodies::create(): created %u new bodies of type %s\n",
+	      N,t.name());
 }
 ////////////////////////////////////////////////////////////////////////////////
 bodies::iterator bodies::new_body(bodytype t) falcON_THROWING
@@ -952,15 +972,16 @@ fieldset bodies::read_snapshot(snap_in  const&snap,
     b.read_posvel(inpt,get,Nread);
     if(inpt.N_read() != Nread)
       falcON_THROW("bodies::read_snapshot(): couldn't read all phase data");
-    debug_info(2,"bodies::read_snapshot(): phases read");
+    if(debug(2)) DebugInfo("bodies::read_snapshot(): phases read");
     read |= get & fieldset::phases;
     BITS |= get & fieldset::phases;
   }
   // now read data field by field
   for(fieldbit f; f; ++f) if(get.contain(f)) {
-    debug_info(6,"bodies::read_snapshot(): f=%c: %s\n",letter(f),
-	       read.contain(f)? "already read" :
-	       !snap.has(nemo_io::field(f))? "not present" : "to be read");
+    if(debug(6))
+      DebugInfo("bodies::read_snapshot(): f=%c: %s\n",letter(f),
+		read.contain(f)? "already read" :
+		!snap.has(nemo_io::field(f))? "not present" : "to be read");
     if( !read.contain(f) && snap.has(nemo_io::field(f)) ) {
       data_in inpt(snap,nemo_io::field(f));
       body b(start);
@@ -969,13 +990,13 @@ fieldset bodies::read_snapshot(snap_in  const&snap,
 	falcON_THROW("bodies::read_snapshot(): "
 		     "could only read %u of %u %c data",
 		     inpt.N_read(), inpt.N(), letter(f));
-      debug_info(2,"bodies::read_snapshot(): %u %c read",
-		 inpt.N_read(), letter(f));
+      if(debug(2)) DebugInfo("bodies::read_snapshot(): %u %c read",
+			     inpt.N_read(), letter(f));
       BITS |= fieldset(f);
       read |= fieldset(f);
     }
   }
-  debug_info(1,"bodies::read_snapshot(): read=%s\n",word(read));
+  if(debug(1)) DebugInfo("bodies::read_snapshot(): read=%s\n",word(read));
   if(read & fieldset::source) mark_srce_data_changed();
   if(read & fieldset::sphmax) mark_sph_data_changed();
   if(warn && want != read) warning("bodies::read_snapshot: couldn't read %s",
@@ -1002,7 +1023,7 @@ void bodies::write_snapshot(snap_out const&snap,
     b.write_potpex(outp,Nwrite);
     if(outp.N_written() != Nwrite)
       falcON_THROW("bodies::write_snapshot(): couldn't write all pq data");
-    debug_info(2,"bodies::write_snapshot(): written pq");
+    if(debug(2)) DebugInfo("bodies::write_snapshot(): written pq");
     written |= fieldset::potent;
   }
   for(fieldbit f; f; ++f)
@@ -1015,13 +1036,13 @@ void bodies::write_snapshot(snap_out const&snap,
 	falcON_THROW("bodies::write_snapshot(): "
 		     "could only write %u of %u %c data",
 		     outp.N_written(), outp.N(), letter(f));
-      debug_info(2,"bodies::write_snapshot(): written %u %c",
-		 outp.N_written(), letter(f));
+      if(debug(2)) DebugInfo("bodies::write_snapshot(): written %u %c",
+		outp.N_written(), letter(f));
       written |= fieldset(f);
     }
-  debug_info(1,"bodies::write_snapshot(): "
-	     "written=%s for %u SPH & %u STD bodies\n",
-	     word(written), N_sph(), N_std());
+  if(debug(1)) DebugInfo("bodies::write_snapshot(): "
+			 "written=%s for %u SPH & %u STD bodies\n",
+			 word(written), N_sph(), N_std());
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
@@ -1053,8 +1074,8 @@ void bodies::read_simple_ascii(std::istream  &in,
     warning(" can only read the first 100 data entries\n");
   }
   for(int i=0; i!=Ni; ++i) {
-    debug_info(6,"bodies::read_simple_ascii(): item[%d]=%c\n",
-	       i,letter(item[i]));
+    if(debug(6)) DebugInfo("bodies::read_simple_ascii(): item[%d]=%c\n",
+			   i,letter(item[i]));
     if(get.contain(item[i]))
       warning("bodies::read_simple_ascii(): reading item '%c' more than once",
 	      letter(item[i]));
@@ -1082,15 +1103,13 @@ void bodies::read_simple_ascii(std::istream  &in,
   // 3. loop bodies & read data whereby ignoring lines starting with '#'        
   for(bodytype t; t; ++t)
     if(N[t]) {
-      debug_info(4,"bodies::read_simple_ascii(): now reading %d %s bodies...\n",
-		 N[t],t.name());
+      if(debug(4))
+	DebugInfo("bodies::read_simple_ascii(): now reading %d %s bodies...\n",
+		  N[t],t.name());
       LoopTypedBodies(this,Bi,t) {
 	while( in && eat_line(in,'#') );
-	if(!in) falcON_ExceptF("end of input before data have been read",
-			       "bodies::read_simple_ascii()");
-	if(debug(20))
-	  std::cerr<<"### falcON Debug Info: "
-		   <<"bodies::read_simple_ascii(): body "<<Bi<<" reading";
+	if(!in) falcON_THROW("bodies::read_simple_ascii(): "
+			     "end of input before data have been read");
 	for(int i=0; i!=Ni; ++i)
 	  if(read[t][i]) {
 	    read [t][i](in,Bi);
@@ -1291,7 +1310,8 @@ void snapshot::__add_pointer(const void*p,
 			     size_t     s,
 			     const char*n) const falcON_THROWING
 {
-  debug_info(4,"snapshot::add_pointer() %p to '%s' under \"%s\"\n",p,n,k);
+  if(debug(4))
+    DebugInfo("snapshot::add_pointer() %p to '%s' under \"%s\"\n",p,n,k);
   if(p) {
     if(PBNK == 0) const_cast<snapshot*>(this)->PBNK = new PointerBank();
     static_cast<PointerBank*>(PBNK)->add(p,k,s,n);
@@ -1306,7 +1326,8 @@ void snapshot::__set_pointer(const void*p,
 			     size_t     s,
 			     const char*n) const falcON_THROWING
 {
-  debug_info(4,"snapshot::set_pointer() %p to '%s' under \"%s\"\n",p,n,k);
+  if(debug(4))
+    DebugInfo("snapshot::set_pointer() %p to '%s' under \"%s\"\n",p,n,k);
   if(p) {
     // non-NULL pointer: add or replace (if type & size match)
     if(PBNK == 0) const_cast<snapshot*>(this)->PBNK = new PointerBank();
@@ -1322,13 +1343,15 @@ const void* snapshot::__get_pointer(const char*k,
 {
   const void*p = PBNK? static_cast<PointerBank*>(PBNK)->get(k,s,n,
 							    "get_pointer") : 0;
-  debug_info(4,"snapshot::get_pointer() %p to '%s' under \"%s\"\n",p,n,k);
+  if(debug(4))
+    DebugInfo("snapshot::get_pointer() %p to '%s' under \"%s\"\n",p,n,k);
   return p;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void snapshot::del_pointer(const char*k) const
 {
-  debug_info(4,"snapshot::del_pointer() under \"%s\"\n",k);
+  if(debug(4))
+    DebugInfo("snapshot::del_pointer() under \"%s\"\n",k);
   if(PBNK) static_cast<PointerBank*>(PBNK)->del(k);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -1474,13 +1497,13 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 	body std(STD);							\
         std.read_Fortran(F, BIT, nd, swap);				\
       }									\
-      debug_info(2,"bodies::read_gadget(): read %u %c\n",		\
-	         nr, field_traits<BIT>::word());			\
+      if(debug(2)) DebugInfo("bodies::read_gadget(): read %u %c\n",	\
+	                     nr, field_traits<BIT>::word());		\
       fgot |= fieldset(BIT);						\
     } else {								\
       F.skip_bytes(F.size());						\
-      debug_info(3,"bodies::read_gadget(): skip %u %c\n",		\
-                 nr, field_traits<BIT>::word());			\
+      if(debug(3)) DebugInfo("bodies::read_gadget(): skip %u %c\n",	\
+			     nr, field_traits<BIT>::word());		\
     }									\
     fsze += fr;								\
   }
@@ -1511,11 +1534,11 @@ double bodies::read_gadget(const char*fname,
     }
     catch(exception E) { falcON_RETHROW(E); }
     if(swap && debug(1))
-      debug_info("bodies::read_gadget(): need to swap bytes ...\n");
+      DebugInfo("bodies::read_gadget(): need to swap bytes ...\n");
     nfile = header->num_files;
     if(nfile==0) nfile=1;
     if(debug(1)) {
-      debug_info("bodies::read_gadget(): header read from file \"%s\":\n",
+      DebugInfo("bodies::read_gadget(): header read from file \"%s\":\n",
 		 fname);
       header->dump(std::clog);
     }
@@ -1538,10 +1561,10 @@ double bodies::read_gadget(const char*fname,
     }
     catch(exception E) { falcON_RETHROW(E); }
     if(swap && debug(1))
-      debug_info("bodies::read_gadget(): need to swap bytes ...\n");
+      DebugInfo("bodies::read_gadget(): need to swap bytes ...\n");
     nfile = header->num_files;
     if(debug(1)) {
-      debug_info("bodies::read_gadget(): header read from file \"%s\":\n",file);
+      DebugInfo("bodies::read_gadget(): header read from file \"%s\":\n",file);
       header->dump(std::clog);
     }
   }
@@ -1611,11 +1634,11 @@ double bodies::read_gadget(const char*fname,
 	  else
 	    std.read_Fortran(F, fieldbit::m, header->npart[k], swap);
 	}
-	debug_info(2,"bodies::read_gadget(): read %u m\n", nm);
+	if(debug(2)) DebugInfo("bodies::read_gadget(): read %u m\n", nm);
 	fgot |= fieldset(fieldbit::m);
       } else {
 	F.skip_bytes(F.size());
-	debug_info(3,"bodies::read_gadget(): skip %u m\n", nm);
+	if(debug(3)) DebugInfo("bodies::read_gadget(): skip %u m\n", nm);
       }
       fsze += fr;
     } else if(read.contain(fieldbit::m)) {
@@ -1670,14 +1693,15 @@ double bodies::read_gadget(const char*fname,
 	falcON_THROW("bodies::read_gadget(): header mismatch\n");
       header = &headeri;
       if(debug(2)) {
-	debug_info("bodies::read_gadget(): header read from file \"%s\":\n",
+	DebugInfo("bodies::read_gadget(): header read from file \"%s\":\n",
 		   file);
 	header->dump(std::clog);
       }
     }
   }
-  debug_info(1,"bodies::read_gadget(): read %s for %u SPH & %u STD bodies\n",
-	     word(got), NB[bodytype::gas], NB[bodytype::std]);
+  if(debug(2))
+    DebugInfo("bodies::read_gadget(): read %s for %u SPH & %u STD bodies\n",
+	      word(got), NB[bodytype::gas], NB[bodytype::std]);
   return header->time;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -1690,15 +1714,17 @@ double bodies::read_gadget(const char*fname,
 	begin_typed_bodies(bodytype::gas).write_Fortran(F, BIT, N_sph()); \
       if(!is_sph(BIT) && N_std())					\
         begin_typed_bodies(bodytype::std).write_Fortran(F, BIT, N_std()); \
-      debug_info(2,"bodies::write_gadget(): written %u %c\n",		\
-	         nw, field_traits<BIT>::word());			\
+      if(debug(2)) DebugInfo("bodies::write_gadget(): written %u %c\n",	\
+			     nw, field_traits<BIT>::word());		\
     } else {								\
       if(warn)								\
-	warning("bodies::write_gadget(): don't have %c, write out zeros\n", \
-		field_traits<BIT>::word());				\
+	falcON_Warning("bodies::write_gadget(): "			\
+                       "don't have %c, write out zeros\n",		\
+                       field_traits<BIT>::word());			\
       F.fill_bytes(nw);							\
-      debug_info(2,"bodies::write_gadget(): written %u 0 for %c\n",	\
-	         nw, field_traits<BIT>::word());			\
+      if(debug(2))							\
+        DebugInfo(2,"bodies::write_gadget(): written %u 0 for %c\n",	\
+		  nw, field_traits<BIT>::word());			\
     }									\
     written |= fieldset(BIT);						\
   }
@@ -1732,8 +1758,9 @@ void bodies::write_gadget(output&out, double time, fieldset write,
   if(write & fieldset::a)
   WRITE(fieldbit::a);               // accelerations:     optional
   } } }
-  debug_info(1,"bodies::write_gadget(): written %s for "
-	     "%u SPH & %u STD bodies\n", word(written), N_sph(), N_std());
+  if(debug(1))
+    DebugInfo("bodies::write_gadget(): written %s for "
+	      "%u SPH & %u STD bodies\n", word(written), N_sph(), N_std());
   // make sure we have no keys if we didn't have them before ...
   if(!had_keys) const_cast<bodies*>(this)->del_field(fieldbit::k);
 }

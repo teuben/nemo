@@ -4,11 +4,11 @@
 /// \file   src/public/manip/dens_centre.cc                                     
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006                                                                
+/// \date   2006,2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006 Walter Dehnen                                             
+// Copyright (C) 2006,2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -35,6 +35,7 @@
 // v 1.1    06/07/2006  WD using 'filter' rather than 'subset'                  
 // v 1.2    06/07/2006  WD using useful bodies, rather than filter function     
 // v 2.0    11/07/2006  WD warning and no output out if no converging           
+// v 2.0.1  11/06/2008  WD new DebugInfo and falcON_Warning                     
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/tools.h>
@@ -116,34 +117,34 @@ namespace falcON { namespace Manipulate {
   bool dens_centre::manipulate(const snapshot*S) const
   {
     if(FIRST && debug(1))
-      debug_info(2,"dens_centre::manipulate(): "
-		 "first call: obtain initial guess using tree:\n");
+      DebugInfo(2,"dens_centre::manipulate(): "
+		"first call: obtain initial guess using tree:\n");
     if(FIRST) {
       // get initial guess for centre position
       // (after first manipulation, we will use the previous centre)
       clock_t CPU0 = clock();
       flags F = flags::empty;
       if(S->N_bodies() != S->N_subset()) {
-	debug_info(2,"dens_centre::manipulate(): subset < all, so"
-		   "must first mark subset bodies\n");
+	DebugInfo(2,"dens_centre::manipulate(): subset < all, so"
+		  "must first mark subset bodies\n");
 	F = flags::marked;
 	if(!S->have(fieldbit::f))
 	  const_cast<snapshot*>(S)->add_field(fieldbit::f);
 	LoopAllBodies(S,b)
 	  if(in_subset(b)) b.mark(); else b.unmark();
       }
-      debug_info(2,"dens_centre::manipulate(): "
-		 "   ... then build a tree ... \n");
+      DebugInfo(2,"dens_centre::manipulate(): "
+		"   ... then build a tree ... \n");
       OctTree TREE(S,W/4,0,Default::MaxDepth,F);
       if(debug(1)) {
 	clock_t CPU1 = clock();
-	debug_info(1,"dens_centre::manipulate(): "
-		   "   tree build took %f sec\n",
+	DebugInfo(1,"dens_centre::manipulate(): "
+		  "   tree build took %f sec\n",
 		   (CPU1 - CPU0)/real(CLOCKS_PER_SEC));
 	CPU0 = CPU1;
       }
-      debug_info(2,"dens_centre::manipulate():    ... and finally"
-		 " estimate position of density peak ...\n");
+      DebugInfo(2,"dens_centre::manipulate():    ... and finally"
+		" estimate position of density peak ...\n");
       estimate_density_peak(&TREE,0u,W,XCEN,RAD);
       RAD *= three;
       FIRST = false;
@@ -172,12 +173,12 @@ namespace falcON { namespace Manipulate {
     // any call: refine centre estimate
     RAD *= three;
     real RHO;
-    debug_info(2,"dens_centre::manipulate(): initial guess: (%f,%f,%f)\n",
-	       XCEN[0],XCEN[1],XCEN[2]);
+    DebugInfo(2,"dens_centre::manipulate(): initial guess: (%f,%f,%f)\n",
+	      XCEN[0],XCEN[1],XCEN[2]);
     if(find_density_centre(S,W,XCEN,RAD,&VCEN,&RHO)) {
-      debug_info(2,"dens_centre::manipulate():    found density "
-		 "centre: x0=(%f,%f,%f), v0=(%f,%f,%f), radius=%f, rho=%f\n",
-		 XCEN[0],XCEN[1],XCEN[2],VCEN[0],VCEN[1],VCEN[2],RAD,RHO);
+      DebugInfo(2,"dens_centre::manipulate():    found density "
+		"centre: x0=(%f,%f,%f), v0=(%f,%f,%f), radius=%f, rho=%f\n",
+		XCEN[0],XCEN[1],XCEN[2],VCEN[0],VCEN[1],VCEN[2],RAD,RHO);
       if(OUT)
 	OUT <<"  "
 	    << std::setw(15) << std::setprecision(8) << S->time() << "  "
@@ -192,8 +193,8 @@ namespace falcON { namespace Manipulate {
       S->set_pointer(&XCEN,"xcen");
       S->set_pointer(&VCEN,"vcen");
     } else {
-      warning("dens_centre::manipulate(): no convergence at time %f\n",
-	      S->time());
+      falcON_WarningN("dens_centre::manipulate(): no convergence at time %f\n",
+		      S->time());
       if(OUT)
 	OUT << "# WARNING: could not find centre at time " 
 	    << S->time() << std::endl;

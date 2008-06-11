@@ -2,7 +2,7 @@
 //                                                                             |
 // nbody.cc                                                                    |
 //                                                                             |
-// Copyright (C) 2000-2007  Walter Dehnen                                      |
+// Copyright (C) 2000-2008  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -260,7 +260,7 @@ LeapFrogCode::LeapFrogCode(int kstep, const ForceAndDiagnose *F,
   set_time_derivs(1,1,0.);                         // eg: a = F(x,w)            
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
-  debug_info(4,"LeapFrogCode constructed\n");
+  DebugInfo(4,"LeapFrogCode constructed\n");
 }
 //------------------------------------------------------------------------------
 void LeapFrogCode::account_new() const {
@@ -347,7 +347,7 @@ inline void BlockStepCode::account_new() const {
 //------------------------------------------------------------------------------
 void BlockStepCode::assign_levels() const {
   if(!snap_shot()->have_steps())
-    error("BlockStepCode::assign_levels(): steps not set\n");
+    falcON_Error("BlockStepCode::assign_levels(): steps not set\n");
   LoopAllBodies(snap_shot(),b)
     ST->assign_level(b, N, highest_level());
 }
@@ -400,7 +400,7 @@ BlockStepCode::BlockStepCode(int      km,          // I: tau_max = 2^-kmax
   assign_levels();                                 // get bodies into levels    
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
-  debug_info(4,"BlockStepCode constructed\n");
+  DebugInfo(4,"BlockStepCode constructed\n");
 }
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
@@ -466,7 +466,7 @@ NBodyCode::NBodyCode(const char*file,              // I: input file
   if(!READ.contain(must))                          // IF some data missing      
     falcON_THROW("NBodyCode: couldn't read body data: %s",
 		 word(READ.missing(must)));
-  debug_info(4,"NBodyCode constructed\n");
+  DebugInfo(4,"NBodyCode constructed\n");
 }
 //------------------------------------------------------------------------------
 void NBodyCode::init(const ForceAndDiagnose         *FS,
@@ -476,7 +476,7 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
 		     fieldset p, fieldset k, fieldset r,
 		     fieldset P, fieldset K, fieldset R) falcON_THROWING
 {
-  debug_info(5,"NBodyCode::init(): called ... \n");
+  DebugInfo(5,"NBodyCode::init(): called ... \n");
   try {
     if(FS->acc_ext()) SHOT.add_fields(fieldset::q);
     if(Nlev <= 1 || St == 0)
@@ -487,10 +487,10 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
 	( new BlockStepCode(kmax,Nlev,FS,St,p,k,r,P,K,R,
 			    int(1+std::log10(double(SHOT.N_bodies())))));
   } catch(falcON::exception E) {
-    debug_info(2,"NBodyCode::init(): caught error \"%s\"\n",E.text());
+    DebugInfo(2,"NBodyCode::init(): caught error \"%s\"\n",E.text());
     falcON_RETHROW(E);
   }
-  debug_info(4,"NBodyCode::init(): done\n");
+  DebugInfo(4,"NBodyCode::init(): done\n");
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
@@ -778,7 +778,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 #else
   reset_softening(ke,e);
 #endif
-  debug_info(4,"ForceALCON constructed\n");
+  DebugInfo(4,"ForceALCON constructed\n");
 }
 //------------------------------------------------------------------------------
 void ForceALCON::set_tree_and_forces(bool all, bool build_tree) const

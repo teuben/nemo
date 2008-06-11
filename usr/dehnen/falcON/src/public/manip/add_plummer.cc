@@ -4,11 +4,11 @@
 /// \file   src/public/manip/add_plummer.cc                                     
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
+/// \date   2004-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
+// Copyright (C) 2004-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -29,6 +29,7 @@
 // history:                                                                     
 //                                                                              
 // v 1.0    11/07/2006  WD namespace falcON::Manipulate; doxygen docu added     
+// v 1.0.1  11/06/2008  WD new DebugInfo and falcON_Warning                     
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/utils.h>
@@ -136,9 +137,9 @@ namespace falcON { namespace Manipulate {
 	LoopAllBodies(S,b) if(level(b) > lmax) lmax = level(b);
 	B.level() = lmax;
       }
-      debug_info(8,"Manipulator \"add_plummer\": "
-		 "added new body with block No %d and sub-index %d\n",
-		 block_No(B), subindex(B));
+      DebugInfo(8,"Manipulator \"add_plummer\": "
+		"added new body with block No %d and sub-index %d\n",
+		block_No(B), subindex(B));
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::o; }
@@ -172,10 +173,11 @@ namespace falcON { namespace Manipulate {
 	  " par[5] : # bodies to be added each time (default: 1)\n"
 	  " par[6] : individual softening length (if needed, default: 0.1)\n\n";
       if(npar>7 && nemo_debug(1))
-	warning(" Manipulator \"add_plummer\":"
-		" skipping parameters beyond 7\n");
+	falcON_WarningN(" Manipulator \"add_plummer\":"
+			" skipping parameters beyond 7\n");
       if(N <= 0)
-	warning("Manipulator \"add_plummer\": N=%d: nothing to be done\n",N);
+	falcON_WarningN("Manipulator \"add_plummer\":"
+			" N=%d: nothing to be done\n",N);
     }
     //--------------------------------------------------------------------------
     ~add_plummer() {}
@@ -185,9 +187,9 @@ namespace falcON { namespace Manipulate {
     int I=0;
     for(; I!=NP && K < N; ++I) add_body(S);
     if(I==1)
-      debug_info(5,"Manipulator \"add_plummer\": added new body\n");
+      DebugInfo(5,"Manipulator \"add_plummer\": added new body\n");
     else if(I> 1)
-      debug_info(5,"Manipulator \"add_plummer\": added %d new bodies\n",I);
+      DebugInfo(5,"Manipulator \"add_plummer\": added %d new bodies\n",I);
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////

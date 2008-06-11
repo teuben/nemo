@@ -4,11 +4,11 @@
 /// \file   src/public/tools.cc                                                 
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2002-2006                                                           
+/// \date   2002-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2006 Walter Dehnen                                        
+// Copyright (C) 2002-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -287,7 +287,7 @@ namespace {
 
     double FindLagrangeRadius(double const&M) {
       // find radius containing the fraction M of the total mass
-      if(M > 1.) warning("M/Mtot > 1 -> Lagrange radius = oo");
+      if(M > 1.) falcON_Warning("M/Mtot > 1 -> Lagrange radius = oo");
       return
 	M<=0. ? 0. :
 	M>=1. ? sqrt(Root->q[1]) : sqrt(findQ(M*Mtot));
@@ -295,7 +295,7 @@ namespace {
 #if(0)
     double FindRankRadius(int const&R) {
       // find radius of the particle with radial rank R
-      if(R >=Ntot) warning("rank >= N -> rank radius = oo");
+      if(R >=Ntot) falcON_Warning("rank >= N -> rank radius = oo");
       return
 	R<0       ? 0. :
 	R==0      ? sqrt(Root->q[0]) :
@@ -306,7 +306,7 @@ namespace {
 				 double   &Mcum) {
       // find radius of the particle X with radial rank R
       // also return mass within that radius, counting particle X half
-      if(Rank > Ntot) warning("rank > N -> rank radius = oo");
+      if(Rank > Ntot) falcON_Warning("rank > N -> rank radius = oo");
       range *R = findrange(Rank);
       Mcum = 0.5*(R->m[0]+R->m[1]);
       return sqrt(R->begin_points()->q);
@@ -379,14 +379,14 @@ namespace {
     LoopSubsetBodies(B,b) {
       t = c? dist_sq(pos(b),*c) : norm(pos(b));
 #ifdef DEBUG
-      if(std::isnan(t)) error("body position contains nan\n");
+      if(std::isnan(t)) falcON_Error("body position contains nan\n");
 #endif
       update_min(q[0],t);
       update_max(q[1],t);
       PointsA[bodyindex(b)].q = t;
       t    = mass(b);
 #ifdef DEBUG
-      if(std::isnan(t)) error("body mass is nan\n");
+      if(std::isnan(t)) falcON_Error("body mass is nan\n");
 #endif
       PointsA[bodyindex(b)].m = t;
       Mtot+= t;

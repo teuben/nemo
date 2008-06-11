@@ -145,8 +145,8 @@ namespace falcON {
 #endif
       SET_T(" time: OctTree::build():               ");
       if(debug(4))
-	debug_info("forces::grow(): tree re-grown with %d leafs\n",
-		   TREE->N_leafs());
+	DebugInfo("forces::grow(): tree re-grown with %d leafs\n",
+		  TREE->N_leafs());
     } else {
       TREE = new OctTree(BODIES,Ncrit,x0);
       GRAV->new_tree(TREE);
@@ -155,8 +155,8 @@ namespace falcON {
 #endif
       SET_T(" time: OctTree::OctTree():            ");
       if(debug(4))
-	debug_info("forces::grow(): new tree made with %d leafs\n",
-		   TREE->N_leafs());
+	DebugInfo("forces::grow(): new tree made with %d leafs\n",
+		  TREE->N_leafs());
     }
   }
   //----------------------------------------------------------------------------
@@ -165,7 +165,7 @@ namespace falcON {
     // This routine merely updates the leaf's positions                         
     SET_I
       if(TREE == 0) {
-	warning("no old tree to be re-used","forces::reuse()");
+	falcON_Warning("no old tree to be re-used","forces::reuse()");
 	return grow();
       }
     TREE->reuse();
@@ -225,6 +225,7 @@ namespace falcON {
   }
   //----------------------------------------------------------------------------
   inline void forces::dump_nodes(const char* fcells, const char* fleafs) const
+    falcON_THROWING
   {
     if(fcells) {
       std::ofstream o(fcells);
@@ -344,21 +345,21 @@ namespace falcON {
   inline void forces::estimate_n(unsigned Nx, bool all) falcON_THROWING
   {
     if(BODIES && !BODIES->have(fieldbit::r))
-      error("[forces::estimate_nd()]: nobody has memory for rho");
+      falcON_Error("[forces::estimate_nd()]: nobody has memory for rho");
     GRAV->estimate_nd(all,Nx);
   }
   //----------------------------------------------------------------------------
   inline void forces::estimate_sd(unsigned Nx, bool all) falcON_THROWING
   {
     if(BODIES && !BODIES->have(fieldbit::r))
-      error("[forces::estimate_sd()]: nobody has memory for rho");
+      falcON_Error("[forces::estimate_sd()]: nobody has memory for rho");
     GRAV->estimate_sd(all,Nx);
   }
   //----------------------------------------------------------------------------
   inline void forces::estimate_rho(unsigned Nx, bool all) falcON_THROWING
   {
     if(BODIES && !BODIES->have(fieldbit::r))
-      error("[forces::estimate_md()]: nobody has memory for rho");
+      falcON_Error("[forces::estimate_md()]: nobody has memory for rho");
     GRAV->estimate_md(all,Nx);
   }
   //---------------------------------------------------------------------------+

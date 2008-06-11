@@ -71,7 +71,7 @@ namespace falcON {
       Psi0(W), N(0), r(0), ps(0), m(0), rh(0),
       vscal(1), rscal(1), Pscal(1), rhscl(1), mscal(1), sdscl(1), drscl(1)
     {
-      if(W <= 0.0) error("king_model: W0 [%f] must be positive\n",W);
+      if(W <= 0.0) falcON_Error("king_model: W0 [%f] must be positive\n",W);
       setup(n);
     }
     //--------------------------------------------------------------------------

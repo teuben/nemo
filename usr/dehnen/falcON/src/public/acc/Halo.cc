@@ -27,8 +27,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace falcON;
-  using falcON::warning;
-  using falcON::error;
 
   class Halo : 
     private ModifiedDoublePowerLawHalo,
@@ -48,10 +46,9 @@ namespace {
 				 npar>5? pars[5] : 0.44444444444444444444),
       HaloPotential(*this,0)
     {
-      if(npar<8 && nemo_debug(1) || nemo_debug(2) )
+      if(npar<8 && nemo_debug(1) || nemo_debug(2) ) {
+	DebugInfo("external potential \"Halo\" recognizes 8 parameters:\n");
 	std::cerr<<
-	  "### nemo debug info:\n"
-	  " external potential \"Halo\" recognizes 8 parameters:\n"
 	  "   omega   pattern speed (ignored)   [0]\n"
 	  "   r_s     scale radius              [1]\n"
 	  "   m_t     total mass                [1]\n"
@@ -68,12 +65,13 @@ namespace {
 	  " with\n"
 	  "             2    2\n"
 	  "   x = sqrt(r +r_c )/r_s.\n\n";
+      }
       if(file)
-	warning("external potential \"Halo\": file \"%s\" ignored\n",file);
-      if(nemo_debug(2))
+	falcON_WarningN("external potential \"Halo\": "
+			"file \"%s\" ignored\n",file);
+      if(nemo_debug(2)) {
+	DebugInfo("external potential \"Halo\" initialized with:\n");
 	std::cerr<<
-	  "### nemo debug info:\n"
-	  " external potential \"Halo\" initialized with:\n"
 	  "   r_s = "<<scale_radius()<<"\n"
 	  "   m_t = "<<total_mass()<<"\n"
 	  "   g_i = "<<(npar>3? pars[3] : 0.77777777777777777778)<<"\n"
@@ -81,8 +79,10 @@ namespace {
 	  "   eta = "<<transition()<<"\n"
 	  "   r_t = "<<trunc_radius()<<"\n"
 	  "   r_c = "<<core_radius()<<"\n";
+      }
       if(npar>8)
-	warning("external potential \"Halo\": skipping parameters beyond 8\n");
+	falcON_Warning("external potential \"Halo\": "
+		       "skipping parameters beyond 8\n");
     }
     //--------------------------------------------------------------------------
     template<typename scalar>

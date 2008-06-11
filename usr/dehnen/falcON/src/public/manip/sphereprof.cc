@@ -36,6 +36,7 @@
 // v 1.3    09/08/2006  WD warn if non-spherical                                
 // v 1.3.1  06/11/2006  WD change in profile.h                                  
 // v 1.3.2  13/05/2008  WD debugged error with minor & major axes               
+// v 1.3.2  11/06/2008  WD new DebugInfo                                        
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -174,7 +175,7 @@ namespace falcON { namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
   bool sphereprof::manipulate(const snapshot*S) const
   {
-    debug_info(2,"sphereprof::manipulate(): start\n");
+    DebugInfo(2,"sphereprof::manipulate(): start\n");
     const vect*X0= S->pointer<vect>("xcen");
     const vect*V0= S->pointer<vect>("vcen");
     spherical_profile SP(S,W,L,X0,V0);
@@ -238,7 +239,7 @@ namespace falcON { namespace Manipulate {
     if(nonspherical)
       warning("Manipulator sphereprof: "
 	      "shape seems significantly non-spherical at t=%f\n",S->time());
-    debug_info(2,"sphereprof::manipulate(): finished\n");
+    DebugInfo(2,"sphereprof::manipulate(): finished\n");
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////

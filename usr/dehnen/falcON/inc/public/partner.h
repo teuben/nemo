@@ -249,8 +249,10 @@ namespace falcON {
     void prepare_sticky     ();
     void prepare_sph        ();
     //--------------------------------------------------------------------------
-    template<bool> void make_st_list (indx_pair*, unsigned, unsigned&, real);
-    template<bool> void make_sp_list (indx_pair*, unsigned, unsigned&, bool);
+    template<bool>
+    void make_st_list (indx_pair*, unsigned, unsigned&, real) falcON_THROWING;
+    template<bool>
+    void make_sp_list (indx_pair*, unsigned, unsigned&, bool) falcON_THROWING;
     //--------------------------------------------------------------------------
     // tree stuff to be superseeded                                             
     //--------------------------------------------------------------------------

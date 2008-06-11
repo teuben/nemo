@@ -3,7 +3,7 @@
 //                                                                             |
 // default.h                                                                   |
 //                                                                             |
-// Copyright (C) 2000, 2001, 2002, 2003  Walter Dehnen                         |
+// Copyright (C) 2000, 2001, 2002, 2003, 2008  Walter Dehnen                   |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -127,7 +127,8 @@ namespace falcON {
     case  2: return p2;
     case  3: return p3;
     case  9: return newton;
-    default: warning("kernel unknown, defaulting to " falcON_KERNEL_NAME );
+    default:
+      falcON_Warning("kernel unknown, defaulting to " falcON_KERNEL_NAME );
       return Default::kernel;
     }
   }

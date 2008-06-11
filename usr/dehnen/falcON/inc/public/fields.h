@@ -986,6 +986,8 @@ namespace falcON {
       default:   return "std";
       }
     }
+    /// return the integer value
+    char const&value() const { return val; }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            

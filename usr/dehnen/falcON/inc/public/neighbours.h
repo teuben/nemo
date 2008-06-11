@@ -74,7 +74,7 @@ namespace falcON {
   /// \param[in]  T tree to search
   /// \param[in]  B body to find leaf for
   /// \note The tree must not be have been re-used, but grown.
-  const OctTree::Cell*FindCell(const OctTree*T, body const&B);
+  const OctTree::Cell*FindCell(const OctTree*T, body const&B) falcON_THROWING;
   //----------------------------------------------------------------------------
   /// Process all leafs within a certain distance from body B
   /// \param[in] T tree to use

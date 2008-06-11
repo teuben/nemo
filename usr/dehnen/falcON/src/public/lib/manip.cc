@@ -3,7 +3,7 @@
 //                                                                             |
 /// \file /src/public/manip.cc                                                 |
 //                                                                             |
-// Copyright (C) 2004-2005  Walter Dehnen                                      |
+// Copyright (C) 2004-2008  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -28,6 +28,7 @@
 // version 1.4  12/07/2005 WD  if manippath given, do not search elsewhere     |
 // version 1.5  08/11/2005 WD  if no manippath given, try $MANIPPATH           |
 // version 1.6  04/08/2006 WD  if manippath given, put it in top of seach path |
+// version 1.7  10/06/2008 WD  debug_info -> DebugInfo                         |
 //-----------------------------------------------------------------------------+
 #include <public/manip.h>              // the header we are implementing
 #include <fstream>                     // C++ file I/O
@@ -73,7 +74,6 @@ namespace {
   using falcON::message;
   using falcON::manipulator;
   using falcON::Manipulator;
-  using falcON::debug_info;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
   // single_manipulator()                                                       
@@ -125,9 +125,9 @@ namespace {
     // NOTE: the present implementation will NOT try to compile a source code
     //       but abort if no .so file is found.
     //
-    debug_info(3,"Manipulator: trying to initialize manipulator with\n"
-	       "  name=\"%s\",\n  pars=\"%s\",\n  file=\"%s\"\n",
-	       manname,manpars,manfile);
+    DebugInfo(3,"Manipulator: trying to initialize manipulator with\n"
+	      "  name=\"%s\",\n  pars=\"%s\",\n  file=\"%s\"\n",
+	      manname,manpars,manfile);
     // 1. parse the parameters
 #ifndef MANIP_PARSE_AT_INIMANIP
     const int MAXPAR = 256;
@@ -143,8 +143,8 @@ namespace {
     // 3. try to find manname in list of mannames already done
     for(int i=0; i!=IniMnInd; ++i)
       if(0 == strcmp(manname, MnNames[i])) {
-	debug_info(3,"Manipulator: name=\"%s\": known already: "
-		   "no need to load it again\n",manname);
+	DebugInfo(3,"Manipulator: name=\"%s\": known already: "
+		  "no need to load it again\n",manname);
 #ifdef MANIP_PARSE_AT_INIMANIP
 	(*IniMn[i])(&manip,manpars,manfile);
 #else
@@ -177,13 +177,13 @@ namespace {
     char name[256];
     strcpy(name,manname);
     strcat(name,".so");
-    debug_info(3,"Manipulator: searching file \"%s\" in path \"%s\" ...\n",
-	       name,manpaths);
+    DebugInfo(3,"Manipulator: searching file \"%s\" in path \"%s\" ...\n",
+	      name,manpaths);
     char*fullname = pathfind(manpaths,name);       // seek for file in manpaths
     if(fullname == 0)
       falcON_THROW("Manipulator: cannot find file \"%s\" in path \"%s\"",
 		   name,manpaths);
-    debug_info(3,"             found one: \"%s\"; now loading it\n",fullname);
+    DebugInfo(3,"             found one: \"%s\"; now loading it\n",fullname);
     loadobj(fullname);
 
     // 5. try to get inimanip()
@@ -264,7 +264,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
       falcON_THROW("Manipulator: neither names nor files given:"
 		   " cannot initialize\n");
     }
-    debug_info(3,"Manipulator: initializing from file \"%s\"\n",manfiles);
+    DebugInfo(3,"Manipulator: initializing from file \"%s\"\n",manfiles);
     std::ifstream in(manfiles);
     if(! in.is_open() ) {
       CLEANUP;
@@ -311,9 +311,9 @@ falcON::Manipulator::Manipulator(const char*mannames,
     }
   } else {
     // 1.2 mannames given: assume list of manipulators
-    debug_info(3,"Manipulator: initializing from\n"
-	       "  names=\"%s\"\n  parss=\"%s\"\n  files=\"%s\"\n",
-	       mannames,manparss,manfiles);
+    DebugInfo(3,"Manipulator: initializing from\n"
+	      "  names=\"%s\"\n  parss=\"%s\"\n  files=\"%s\"\n",
+	      mannames,manparss,manfiles);
     // 1.2.1 split mannames and count number of manipulators
     if(strlen(mannames) > Lnames) {
       CLEANUP;

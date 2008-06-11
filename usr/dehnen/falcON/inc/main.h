@@ -3,7 +3,7 @@
 //                                                                             |
 // main.h                                                                      |
 //                                                                             |
-// Copyright (C) 2002-2006  Walter Dehnen                                      |
+// Copyright (C) 2002-2008  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -244,7 +244,7 @@ namespace falcON {
   //----------------------------------------------------------------------------
   inline void ERROR(const char*m) {
 #ifndef falcON_USE_NEMO
-    falcON::error(m);
+    falcON_ErrorN(m);
 #else
     ::error(const_cast<char*>(m));
 #endif
@@ -260,14 +260,17 @@ int main(int argc, char *argv[])                   // global main
 
   try {                                            // TRY:                      
 
+#ifdef falcON_USE_MPI
+    falcON::MPI::Init(&argc,&argv);                // start MPI: spawm processes
+    falcON::set_exit(&falcON::MPI::Exit);          // make sure MPI_Abort() is  
+    set_nemo_exit(&falcON::MPI::Exit);             //   called on exit()        
+    falcON::RunInfo::set_mpi_proc(falcON::MPI::World.rank()); // inform RunInfo 
+#endif
+
     falcON::CheckAgainstLibrary(falcON::CurrentStatus(),
 				falcON::RunInfo::name_known() ?
 				falcON::RunInfo::name() : "executable");
                                                    // assert status matches     
-
-#ifdef falcON_USE_MPI
-    falcON::MPI::Init(&argc,&argv);                // start MPI: spawm processes
-#endif
 
     falcON::compile_info::init();                  // initialize compile_info   
 
@@ -546,9 +549,9 @@ namespace falcON {
     if(! read.contain(need)) {
       fieldset::wlist wneed(&need);
       fieldset::wlist wread(&read);
-      warning("insufficient data: need \'%s\' but got only \'%s\'",
-	      static_cast<const char*>(wneed),
-	      static_cast<const char*>(wread) );
+      falcON_Warning("insufficient data: need \'%s\' but got only \'%s\'",
+		     static_cast<const char*>(wneed),
+		     static_cast<const char*>(wread) );
       return true;
     }
     return false;

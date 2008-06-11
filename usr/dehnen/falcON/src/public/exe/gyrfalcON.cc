@@ -128,6 +128,7 @@
 //                         fixed minor problem with output when resume=t       |
 // v 3.2.1  05/02/2008  WD read data needed by manipulator from input file     |
 // v 3.2.2  04/03/2008  WD minor changes in log output                         |
+// v 3.2.3  10/06/2008  WD macros falcON_Error, falcON_Warning, DebugInfo      |
 //-----------------------------------------------------------------------------+
 #define falcON_VERSION   "3.2.2"
 #define falcON_VERSION_D "04-mar-2008 Walter Dehnen                          "
@@ -281,7 +282,7 @@ void falcON::main() falcON_THROWING
 		  getparam_z("time"),                 //   initial time         
 		  need);                              //   read these data too  
   if(!never_ending && t_end < NBDY.initial_time()) {  // IF(t_end < t_start)    
-    warning("tstop < t_ini: nothing to be done\n");   //   THEN we are done     
+    falcON_Warning("tstop < t_ini: nothing to be done\n"); // THEN we are done  
     return;                                           //   and can stop here    
   }                                                   // ENDIF                  
   if(MANIP) {                                         // IF manipulating        

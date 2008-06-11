@@ -127,7 +127,7 @@ HaloModifier::HaloModifier(double c, double t) falcON_THROWING
 {
   if(std::isinf(t)) falcON_THROW("HaloModifier: truncation radius == inf\n");
   if(std::isnan(t)) falcON_THROW("HaloModifier: truncation radius == nan\n");
-  if(c<0.) warning("HaloModifier: core radius = %g<0; will use %g\n",c,rc);
+  if(c<0.) falcON_Warning("HaloModifier: core radius = %g<0; will use %g\n",c,rc);
 //   std::cerr<<" Testing HaloModifier::trunc(): (irt="
 // 	   <<irt<<", sechtr="<<sechtr<<")\n";
 //   for(;;) {
@@ -358,8 +358,8 @@ HaloPotential::HaloPotential(HaloDensity const&model,
   // 0. compute min/max radius for tables
   const double rmin = Rmin(model);
   const double rmax = Rmax(model);
-  debug_info(2,"HaloPotential: minimum & maximum tabulated radii = %g, %g\n",
-	     rmin,rmax);
+  DebugInfo(2,"HaloPotential: minimum & maximum tabulated radii = %g, %g\n",
+	    rmin,rmax);
 
   // 1. set r,lr,mh
   n1 = int(200*log10(rmax/rmin));
@@ -380,7 +380,7 @@ HaloPotential::HaloPotential(HaloDensity const&model,
       M     = rk4(M,lr[i-1],dlr,dM);            // integrate mass outwards
       mh[i] = FPi*M;                            // set cumulative halo mass
     }
-    debug_info(4,"HaloPotential: M_halo(<%g)=%g\n",r[n1],mh[n1]);
+    DebugInfo(4,"HaloPotential: M_halo(<%g)=%g\n",r[n1],mh[n1]);
   }
   // 2. set mt,rh,ps,ec
   // 2.1 set effects of external potential
@@ -403,7 +403,7 @@ HaloPotential::HaloPotential(HaloDensity const&model,
       ps[i] =-pot_e[i];                         // get Psi_e(r)
       mt[i] =-square(r[i])*acc_e[i][0];         // get M_e(<r)
       if(i && ps[i]>ps[i-1])
-	error("HaloPotential: external Ps(%g)=%g > Ps(%g)=%g\n",
+	falcON_Error("HaloPotential: external Ps(%g)=%g > Ps(%g)=%g\n",
 	      r[i],ps[i],r[i-1],ps[i-1]);
     }
     //    find density generating external monopole
@@ -415,7 +415,7 @@ HaloPotential::HaloPotential(HaloDensity const&model,
       Sext(lr[i], &(rh[i]));                    // G*rho = d(G*M)/dlnr
       rh[i] /= FPi * cube(r[i]);                //       / (4 Pi r^3)
     }
-    debug_info(4,"HaloPotential: M_mono(<%g)=%g\n",r[n1],mt[n1]);
+    DebugInfo(4,"HaloPotential: M_mono(<%g)=%g\n",r[n1],mt[n1]);
   }
   // 2.2 make mt hold the total cumulative mass and rh the total density
   for(int i=0; i!=n; ++i) {
@@ -603,7 +603,7 @@ double HaloPotential::Ra(double E, double Lq) const {
 double HaloPotential::RMh(double M) const {
   if(M<= 0.)   return 0.;
   if(M<= mh[ 0]) return r[0]*pow(M/mh[0],1/(3-Ah));
-  if(M>  mh[nm]) error("HaloPotential::rMh(): M>M_halo(oo)\n");
+  if(M>  mh[nm]) falcON_Error("HaloPotential::rMh(): M>M_halo(oo)\n");
   return exp(Polev(M,mh.array(),lr.array(),nm));
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -803,7 +803,7 @@ HaloModel::HaloModel(HaloDensity const&model,
       if(in[i]<0.) integrand_negative = true;
     }
     if(integrand_negative)
-      warning("HaloModel: integrand for DF is negative;\n");
+      falcON_Warning("HaloModel: integrand for DF is negative;\n");
   } else if(B >=-0.5) {        // -0.5 <= beta <  0.5:  tabulate d^2 red/ dpsi^2
     bool integrand_negative = false;
     for(int i=0; i!=n; ++i) {
@@ -815,9 +815,9 @@ HaloModel::HaloModel(HaloDensity const&model,
       if(in[i]<0.) integrand_negative = true;
     }
     if(integrand_negative)
-      warning("HaloModel: integrand for DF is negative;\n");
+      falcON_Warning("HaloModel: integrand for DF is negative;\n");
   } else
-    error("HaloModel: beta < -0.5 not supported\n");
+    falcON_Error("HaloModel: beta < -0.5 not supported\n");
   // 1.2 compute g(Q) of f=L^-2B * g(Q)                                         
   lg.reset(n);
   const double
@@ -840,12 +840,12 @@ HaloModel::HaloModel(HaloDensity const&model,
     for(int i=0; i!=n; ++i) {
       Q = ps[i];
       double err, g = qbulir(intgQ,0.,1.,1.e-8,&err,0,50);
-      if(g<0.) error("HaloModel: g(Q=%g)=%g < 0, err=%g\n",Q,g,err);
+      if(g<0.) falcON_Error("HaloModel: g(Q=%g)=%g < 0, err=%g\n",Q,g,err);
       if(err>1.e-3) 
-	warning("HaloModel: inaccurate integration for g(Q) at Q=%g\n",Q);
+	falcON_Warning("HaloModel: inaccurate integration for g(Q) at Q=%g\n",Q);
       lg[i] = lfc + p1*log(Q) + log(nu*g);
       if(i && lg[i]>lg[i-1])
-	warning("HaloModel: non-monotinic DF at E=%g\n",ps[i]);
+	falcON_Warning("HaloModel: non-monotinic DF at E=%g\n",ps[i]);
     }
     delete SPLINE;
   }
@@ -856,7 +856,7 @@ HaloModel::HaloModel(HaloDensity const&model,
 double HaloModel::lnG(double Q) const {
   if(Q < ps[n1]) {
     // 1 at small Q (large radii)
-    if(Q < 0.) error("HaloModel::lnG(): Q=%g < 0\n",Q);
+    if(Q < 0.) falcON_Error("HaloModel::lnG(): Q=%g < 0\n",Q);
     if(RA) // 1.1 finite anisotropy radius
       return lg[n1] + (3.5-Ch-B) * (lnRPsi(Q)-lr[n1]);
     else   // 1.2 infinite anisotropy radius (recognised as RA=0)

@@ -3,7 +3,7 @@
 //                                                                             |
 // gamma.h                                                                     |
 //                                                                             |
-// Copyright (C) 1994, 1995, 2004-2007  Walter Dehnen                          |
+// Copyright (C) 1994, 1995, 2004-2008  Walter Dehnen                          |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -318,7 +318,7 @@ namespace falcON {
     g4  (4-g),
     eps (e)
   {
-    if(gamma<0. || gamma>3.) error("DehnenModel: gamma out of range");
+    if(gamma<0. || gamma>3.) falcON_Error("DehnenModel: gamma out of range");
   }
   //----------------------------------------------------------------------------
   // potential, density, and cumulative mass                                    
@@ -336,7 +336,7 @@ namespace falcON {
     if(p==0.) return 1.;
     if(g==2.) return exp(-p);
     register double pg2=p*g2;
-    if(g2>0. && pg2>1.) error("DehnenModel: psi out of range");
+    if(g2>0. && pg2>1.) falcON_Error("DehnenModel: psi out of range");
     return pow(1.-pg2, ig2);
   }
   template<> inline double DehnenModel::Y <DehnenModel::mm>(double m) const
@@ -362,7 +362,7 @@ namespace falcON {
     return p;
   }
   template<> inline double DehnenModel::Ps<DehnenModel::ym>(double y) const { 
-    if(y==0. && g>=2.) error("DehnenModel: potential diverges at r=0");
+    if(y==0. && g>=2.) falcON_Error("DehnenModel: potential diverges at r=0");
     if(g==2.) return -std::log(y);
     return (y==0.) ?  ig2 : ig2*(1.-pow(y,g2));
   }
@@ -373,7 +373,7 @@ namespace falcON {
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Ps1<DehnenModel::ym>(double y,
 							     double&dP) const { 
-    if(y==0. && g>1.) error("DehnenModel: dPsi/dr diverges at r=0");
+    if(y==0. && g>1.) falcON_Error("DehnenModel: dPsi/dr diverges at r=0");
     if(g==2.) {
       dP = - square(1-y)/y;
       return -std::log(y);
@@ -393,7 +393,7 @@ namespace falcON {
 							     double&d1P,
 							     double&d2P) const
   { 
-    if(y==0. && g>0.) error("DehnenModel: d^2Psi/dr^2 diverges at r=0");
+    if(y==0. && g>0.) falcON_Error("DehnenModel: d^2Psi/dr^2 diverges at r=0");
     if(g==2.) {
       d1P = - square(1-y)/y;
       d2P = - square(d1P);
@@ -427,7 +427,7 @@ namespace falcON {
   template<> inline double DehnenModel::Rh<DehnenModel::ym>(double y) const
   { 
     if(g==0.) return iFPit*power<4>(1-y);
-    if(y==0.) error("DehnenModel: density diverges at r=0");
+    if(y==0.) falcON_Error("DehnenModel: density diverges at r=0");
     return g3f*pow(y,-g)*power<4>(1-y);
   }
   template<DehnenModel::mass __M> inline double DehnenModel::Rh(double a) const
@@ -439,7 +439,7 @@ namespace falcON {
 							     double&dR) const
   { 
     if(y==0. && g!=0)
-      error("DehnenModel: density diverges at r=0");
+      falcON_Error("DehnenModel: density diverges at r=0");
     const double y1 = 1-y;
     const double rh = power<4>(y1) * ( g==0.? iFPit : g3f*pow(y,-g) );
     dR = -y1 * rh * ( g==0.? 4. : 4.+g*y1/y );
@@ -456,7 +456,7 @@ namespace falcON {
 							     double&d2R) const
   { 
     if(y==0. && g!=0)
-      error("DehnenModel: density diverges at r=0");
+      falcON_Error("DehnenModel: density diverges at r=0");
     const double
       y1 = 1-y,
       rh = g==0.? iFPit * power<4>(y1) : g3f * pow(y,-g)  * power<4>(y1),

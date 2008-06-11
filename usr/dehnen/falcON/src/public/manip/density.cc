@@ -34,6 +34,7 @@
 // v 0.3    04/09/2007  WD new neighbours.h                                     
 // v 0.4    06/11/2007  WD order of Ferrers kernel from param, K=32 default     
 // v 0.4.1  20/05/2008  WD renamed routine from neighbour.h                     
+// v 0.4.2  11/06/2008  WD new DebugInfo and falcON_Warning                     
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -126,9 +127,11 @@ namespace falcON { namespace Manipulate {
 	falcON_THROW("Manipulator \"%s\": "
 		     "# neighbours (%d) must be positive",name(),K);
       if(file && file[0])
-	warning("Manipulator \"%s\": file given but not used\n",name());
+	falcON_WarningN("Manipulator \"%s\": "
+			"file given but not used\n",name());
       if(npar>2)
-	warning("Manipulator \"%s\": skipping parameters beyond 2\n",name());
+	falcON_WarningN("Manipulator \"%s\": "
+			"skipping parameters beyond 2\n",name());
     }
     //--------------------------------------------------------------------------
     ~density() {}
@@ -160,9 +163,8 @@ namespace falcON { namespace Manipulate {
     OctTree TREE(S, K+1, 0, Default::MaxDepth, FLAG);
     if(falcON::debug(1)) {
       clock_t CPU1 = clock();
-      falcON::debug_info(1,"density::manipulate():"
-			 "%f sec needed for tree build\n",
-			 (CPU1 - CPU0)/real(CLOCKS_PER_SEC));
+      DebugInfo("density::manipulate(): %f sec needed for tree build\n",
+		(CPU1 - CPU0)/real(CLOCKS_PER_SEC));
       CPU0 = CPU1;
     }
     // 2. find Kth nearest neighbours and estimate density
@@ -173,10 +175,9 @@ namespace falcON { namespace Manipulate {
     ProcessNearestNeighbours(&TREE,K,&SetDensity,NIAC,true);
     if(falcON::debug(1)) {
       clock_t CPU1 = clock();
-      falcON::debug_info(1,"density::manipulate():"
-		 " %f sec needed for density estimation;"
-		 " %d neighbour updates\n",
-		 (CPU1 - CPU0)/real(CLOCKS_PER_SEC),NIAC);
+      DebugInfo("density::manipulate(): %f sec needed for density estimation;"
+		" %d neighbour updates\n",
+		(CPU1 - CPU0)/real(CLOCKS_PER_SEC),NIAC);
     }
     // 3. set new TMAN
     TMAN += STEP;
