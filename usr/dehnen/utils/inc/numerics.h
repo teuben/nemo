@@ -151,13 +151,13 @@ namespace WDutils {
   /// If x is not in range, we throw an error.                                  
   //                                                                            
   template<typename T>
-  inline void find(int&k, int n, const T*x, T xi)
+  inline void find(int&k, int n, const T*x, T xi) WDutils_THROWING
   {
     if(k<0 || k>=n-1 || x[k]>xi || x[k+1]<xi) {
       k = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
       k = hunt(x,n,xi,k);
       if(k<0 || k>=n) 
-	error("find(): x=%f out of range [%f,%f]\n", xi,x[0],x[n-1]);
+	WDutils_THROW("find(): x=%f out of range [%f,%f]\n", xi,x[0],x[n-1]);
     }
   }
   //@}
@@ -259,8 +259,8 @@ namespace WDutils {
   /// \param A (input) Array or values to be sorted
   /// \param I (output) index table so that A[I[i]] is sorted
   template<typename sortable>
-  void HeapIndex(Array<sortable,1>const&A, Array<int,1>&I) {
-    if(A.size() != I.size()) error("size mismatch in HeapIndex()\n");
+  void HeapIndex(Array<sortable,1>const&A, Array<int,1>&I) WDutils_THROWING {
+    if(A.size() != I.size()) WDutils_THROW("size mismatch in HeapIndex()\n");
     HeapIndex(A.array(),A.size(),I.array());
   }
   //----------------------------------------------------------------------------
@@ -313,8 +313,9 @@ namespace WDutils {
     /// \param F (input) Array<> with elements
     /// \param W (input) Array<> of weights
     FindPercentile(Array<scalar,1>const&F,
-		   Array<scalar,1>const&W) : DATA(0) {
-      if(F.size() != W.size()) error("size mismatch in FindPercentile\n");
+		   Array<scalar,1>const&W) WDutils_THROWING : DATA(0) {
+      if(F.size() != W.size())
+	WDutils_THROW("size mismatch in FindPercentile\n");
       setup(F.array(),F.size(),W.array());
     }
     /// dtor: de-allocate sorttree
@@ -731,7 +732,7 @@ namespace WDutils {
 	}
       }
     }
-    WDutils_ErrorF("exceeding iterations","brent()");
+    WDutils_Error("in brent(): exceeding iterations");
     xmin   =x;
     return fx;
   }
@@ -947,7 +948,7 @@ namespace WDutils {
 	Z[ip]  = zero;
       }
     }
-    error("EigenSymJacobi(): number iteration exceeds %d\n",MaxIter);
+    WDutils_THROW("EigenSymJacobi(): number iteration exceeds %d\n",MaxIter);
   }
   // ---------------------------------------------------------------------------
   /// function template sorting the eigenvalues & vectors by straight insertion

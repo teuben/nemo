@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2000-2007                                                          
+/// \date    2000-2008                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2007  Walter Dehnen                                       
+// Copyright (C) 2000-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -65,29 +65,18 @@ namespace WDutils {
   /// \param lib (optional) name of calling library (default: "WDutils")        
   template<typename T> inline
   T* NewArray(size_t n, const char*f, int l, const char*lib = "WDutils")
-    WDutils_THROWING {
-    if(RunInfo::debug(10)) {
-      std::cerr<<"### "<< lib <<" Debug Info: "<<f<<':'<<l 
-	       <<" allocating "<<n <<' ' 
-	       << nameof(T) <<" = "
-	       << n*sizeof(T)
-	       << (n*sizeof(T)>1? " bytes ... " : "byte ... ") ;
-      T* t;
-      try {
-	t = new T[n];
-      } catch(std::bad_alloc E) {
-	std::cerr<<'\n';
-	WDutils_THROW("[%s:%d]: caught std::bad_alloc\n",f,l);
-      }
-      std::cerr<< "@ " << static_cast<void*>(t) << '\n';
-      return t;
-    }
+    WDutils_THROWING
+  {
+    T*t;
     try {
-      return new T[n];
+      t = new T[n];
     } catch(std::bad_alloc E) {
-      WDutils_THROW("[%s:%d]: caught std::bad_alloc\n",f,l);
+      t = 0;
+      WDutils_THROWN("[%s:%d]: caught std::bad_alloc\n",f,l);
     }
-    return 0;
+    if(debug(10)) DebugInfoN("[%s:%d]: allocating %d %s = %d bytes @ %p\n",
+			     f,l,n,nameof(T),n*sizeof(T),static_cast<void*>(t));
+    return t;
   }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -122,58 +111,38 @@ namespace WDutils {
   void DelArray(T* a, const char*f, int l, const char*lib = "WDutils")
     WDutils_THROWING {
     if(0==a) {
-      warning("[%s:%d]: trying to delete zero pointer to array of '%s'",
-	      f,l,nameof(T));
+      WDutils_WarningN("[%s:%d]: "
+		       "trying to delete zero pointer to array of '%s'",
+		       f,l,nameof(T));
       return;
     }
-    if(RunInfo::debug(10)) {
-      std::cerr<<"### "<< lib << " Debug Info: "<<f<<':'<<l
-	       <<" de-allocating array of " << nameof(T)
-	       <<" @ "<<static_cast<void*>(a) << std::endl;
-      try {
-	delete[] a;
-      } catch(...) {
-	std::cerr<<'\n';
-	WDutils_THROW("[%s:%d]: deleting array of '%s' @ %p' failed\n",
-		      f,l,nameof(T),a);
-      }
-    } else {
-      try {
-	delete[] a;
-      } catch(...) {
-	WDutils_THROW("[%s:%d]: deleting array of '%s' @ %p' failed\n",
-		      f,l,nameof(T),a);
-      }
+    try {
+      delete[] a;
+    } catch(...) {
+      WDutils_THROWN("[%s:%d]: deleting array of '%s' @ %p' failed\n",
+		     f,l,nameof(T),a);
     }
+    if(debug(10)) DebugInfoN("[%s:%d]: de-allocating array of %s @ %p\n",
+			     f,l,nameof(T), static_cast<void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   void DelArray(const T* a, const char*f, int l, const char*lib = "WDutils")
     WDutils_THROWING {
     if(0==a) {
-      warning("[%s:%d]: trying to delete zero pointer to array of '%s'",
-	      f,l,nameof(T));
+      WDutils_WarningN("[%s:%d]: "
+		       "trying to delete zero pointer to array of '%s'",
+		       f,l,nameof(T));
       return;
     }
-    if(RunInfo::debug(10)) {
-      std::cerr<<"### "<< lib << " Debug Info: "<<f<<':'<<l
-	       <<" de-allocating array of " << nameof(T)
-	       <<" @ "<<static_cast<const void*>(a) << std::endl;
-      try {
-	delete[] a;
-      } catch(...) {
-	std::cerr<<'\n';
-	WDutils_THROW("[%s:%d]: deleting array of '%s' @ %p' failed\n",
-		      f,l,nameof(T),a);
-      }
-    } else {
-      try {
-	delete[] a;
-      } catch(...) {
-	WDutils_THROW("[%s:%d]: deleting array of '%s' @ %p' failed\n",
-		      f,l,nameof(T),a);
-      }
+    try {
+      delete[] a;
+    } catch(...) {
+      WDutils_THROWN("[%s:%d]: deleting array of '%s' @ %p' failed\n",
+		     f,l,nameof(T),a);
     }
+    if(debug(10)) DebugInfoN("[%s:%d]: de-allocating array of %s @ %p\n",
+			     f,l,nameof(T), static_cast<const void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -204,59 +173,37 @@ namespace WDutils {
   void DelObject(T* a, const char*f, int l, const char*lib="WDutils")
     WDutils_THROWING {
     if(0==a) {
-      warning("[%s:%d]: trying to delete zero pointer to object '%s'",
-	      f,l,nameof(T));
+      WDutils_WarningN("[%s:%d]: "
+		       "trying to delete zero pointer to object '%s'",
+		       f,l,nameof(T));
       return;
     }
-    if(RunInfo::debug(10)) {
-      std::cerr<<"### "<< lib << " Debug Info: "<<f<<':'<<l
-	       <<" de-allocating " << nameof(T)
-	       <<" object @ "<<static_cast<void*>(a)<< std::endl;
-      try {
-	delete a;
-      } catch(...) {
-	std::cerr<<'\n';
-	WDutils_THROW("[%s:%d]: deleting object '%s' @ %p failed\n",
-		      f,l,nameof(T),a);
-      }
-    } else {
-      try {
-	delete a;
-      } catch(...) {
-	WDutils_THROW("[%s:%d]: deleting object '%s' @ %p failed\n",
-		      f,l,nameof(T),a);
-      }
+    try {
+      delete a;
+    } catch(...) {
+      WDutils_THROWN("[%s:%d]: deleting object '%s' @ %p failed\n",
+		     f,l,nameof(T),a);
     }
+    if(debug(10)) DebugInfoN("[%s:%d]: de-allocated %s object @ %p\n",
+			     f,l,nameof(T), static_cast<void*>(a));
   }
   //////////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   void DelObject(const T* a, const char*f, int l, const char*lib="WDutils")
     WDutils_THROWING {
     if(0==a) {
-      warning("[%s:%d]: trying to delete zero pointer to object '%s'",
-	      f,l,nameof(T));
+      WDutils_WarningN("[%s:%d]: trying to delete zero pointer to object '%s'",
+		       f,l,nameof(T));
       return;
     }
-    if(RunInfo::debug(10)) {
-      std::cerr<< lib << " Debug Info: "<<f<<':'<<l
-	       <<" de-allocating " << nameof(T)
-	       <<" object @ "<<static_cast<const void*>(a)<<" ... ";
-      try {
-	delete a;
-      } catch(...) {
-	std::cerr<<'\n';
-	WDutils_THROW("[%s:%d]: deleting object '%s' @ %p failed\n",
-		      f,l,nameof(T),a);
-      }
-      std::cerr<<"done\n";
-    } else {
-      try {
-	delete a;
-      } catch(...) {
-	WDutils_THROW("[%s:%d]: deleting object '%s' @ %p failed\n",
-		      f,l,nameof(T),a);
-      }
+    try {
+      delete a;
+    } catch(...) {
+      WDutils_THROWN("[%s:%d]: deleting object '%s' @ %p failed\n",
+		     f,l,nameof(T),a);
     }
+    if(debug(10)) DebugInfoN("[%s:%d]: de-allocated %s object @ %p\n",
+			     f,l,nameof(T), static_cast<const void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   ///                                                                           

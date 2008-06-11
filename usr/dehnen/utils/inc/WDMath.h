@@ -172,17 +172,17 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   /// natural logarithm
   inline double ln(double x) {
-    if(x<=0) WDutils_ErrorF("argument <= 0","ln()");
+    if(x<=0) WDutils_Error("in ln(): argument <= 0");
     return std::log(x);
   }
   /// logarithm to base 2
   inline double ld(double x) {
-    if(x<=0) WDutils_ErrorF("argument <= 0","ld()");
+    if(x<=0) WDutils_Error("in ld(): argument <= 0");
     return LogofTwoInv*std::log(x);
   }
   /// logarithm to base 10
   inline double lg(double x) {
-    if(x<=0) WDutils_ErrorF("argument <= 0","lg()");
+    if(x<=0) WDutils_Error("in lg(): argument <= 0");
     return std::log10(x);
   }
   /// ten to the power \a x

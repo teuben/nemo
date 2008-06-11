@@ -160,8 +160,8 @@ double WDutils::qbulir(double(*func)(double),
   if(err<v) err = v;
   if(erro) *erro = err/(tab*w);
   if(m==mx) {
-    if(abort) WDutils_ErrorF("max number of iterations exceeded","qbulir()");
-    else      WDutils_WarningF("max number of iterations exceeded","qbulir()");
+    if(abort) WDutils_Error("in qbulir(): max number of iterations exceeded");
+    else    WDutils_Warning("in qbulir(): max number of iterations exceeded");
   }
   return c;
 }
@@ -292,8 +292,8 @@ namespace WDutils {
 	  if(abs(e[m])+dd == dd) break;
 	}
 	if(m != l) {
-	  if(iter++ == 30) WDutils_ErrorF("max number of iterations exceeded",
-					  "EigenSystemTridiagonal()");
+	  if(iter++ == 30) WDutils_Error("in EigenSystemTridiagonal(): "
+					 "max number of iterations exceeded");
 	  X g = (d[l+1]-d[l])/twice(e[l]);
 	  X r = hypot(g,one);
 	  g   = d[m]-d[l]+e[l]/(g+sign(r,g));
@@ -347,8 +347,8 @@ namespace WDutils {
 	  if(abs(e[m])+dd == dd) break;
 	}
 	if(m != l) {
-	  if(iter++ == 30) WDutils_ErrorF("max number of iterations exceeded",
-					  "EigenValuesTridiagonal()");
+	  if(iter++ == 30) WDutils_Error("in EigenValuesTridiagonal(): "
+					 "max number of iterations exceeded");
 	  X g = (d[l+1]-d[l])/twice(e[l]);
 	  X r = hypot(g,one);
 	  g   = d[m]-d[l]+e[l]/(g+sign(r,g));
@@ -455,7 +455,7 @@ namespace WDutils {
     /// \param F array with values to be sorted
     /// \param N number of values
     /// \param W array with weights
-    PercentileFinder(const scalar*F, int N, const scalar*W=0);
+    PercentileFinder(const scalar*F, int N, const scalar*W=0) WDutils_THROWING;
 
     /// dtor: de-allocate points and destruct RangeAlloc
     ~PercentileFinder()
@@ -467,8 +467,8 @@ namespace WDutils {
     /// find value containing a given fraction of the total weight
     /// \param f fraction of the total weight
     /// \return value so that the cumulative weight equals f*Wtot
-    scalar FindValue(scalar f) {
-      if(f<0. || f>1.) error("error in percentile finding\n");
+    scalar FindValue(scalar f) WDutils_THROWING {
+      if(f<0. || f>1.) WDutils_THROW("error in percentile finding\n");
       return
 	f==0 ? Root->q[0] :
 	f==1 ? Root->q[1] : findQ(f*Wtot);
@@ -477,8 +477,8 @@ namespace WDutils {
     /// value corresponding to given rank
     /// \param r rank
     /// \return value at rank r
-    scalar FindValue(int r) {
-      if(r<0. || r>Ntot) error("error in percentile finding\n");
+    scalar FindValue(int r) WDutils_THROWING {
+      if(r<0. || r>Ntot) WDutils_THROW("error in percentile finding\n");
       return
 	r==0    ? Root->q[0] :
 	r==Ntot ? Root->q[1] : findQ(r);
@@ -498,7 +498,7 @@ namespace WDutils {
   template<typename scalar>
   PercentileFinder<scalar>::PercentileFinder(const scalar*F, 
 					     int          N,
-					     const scalar*W) :
+					     const scalar*W) WDutils_THROWING :
     Ntot       ( N ),
     PointsA    ( WDutils_NEW(point,Ntot) ),
     PointsB    ( WDutils_NEW(point,Ntot) ),
@@ -513,7 +513,7 @@ namespace WDutils {
       update_max(q[1],f);
       PointsA[n].q = f;
       scalar w = W? W[n] : 1;
-      if(w <= 0) error("PercentileFinder: weight=%f <= 0\n",w);
+      if(w <= 0) WDutils_THROW("PercentileFinder: weight=%f <= 0\n",w);
       PointsA[n].w = w;
       Wtot += w;
     }

@@ -117,13 +117,14 @@ Sobol::Sobol(int ACTL, int BITS)
   else {
     for(actl=0; actl!=MO && f[actl]; ++actl) {}
     if(actl>=MO)
-      WDutils_ErrorF("trying to create the 53th object","Sobol::Sobol()");
+      WDutils_Error("in Sobol::Sobol(): trying to create the 53th object");
   }
   f[actl] += 1;
   if(BITS==0)
     bits = setb;
   else if((bits=BITS)<10)
-    WDutils_WarningF("creating object with less than 10 bits","Sobol::Sobol()");
+    WDutils_Warning("in Sobol::Sobol(): "
+		    "creating object with less than 10 bits");
   in       = 0;
   ix       = 0;
   fac      = 1./(1L<<bits);
@@ -172,8 +173,8 @@ double Sobol::RandomDouble () const {
     im >>= 1;
   }
   if(j>bits)
-    WDutils_ErrorF("trying to call more than 2^BITS times",
-		  "Sobol::RandomDouble()");
+    WDutils_Error("in Sobol::RandomDouble(): "
+		  "trying to call more than 2^BITS times");
   ix^= v[j];
   return double(ix)*fac;
 }
@@ -183,7 +184,7 @@ double Sobol::RandomDouble () const {
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 Normal::Normal(const RandomNumberGenerator*r1,
-	       const RandomNumberGenerator*r2) :
+	       const RandomNumberGenerator*r2) WDutils_THROWING :
   iset(0), R1(r1), R2(r2? r2:r1)
 {
   if(R1==R2 && !R1->is_pseudo())

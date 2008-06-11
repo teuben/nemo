@@ -61,7 +61,7 @@ namespace WDutils {
   {
     S.open(file,mode);
     if(! S.is_open() ) {
-      warning("cannot open file \"%s\" for output",file);
+      WDutils_Warning("cannot open file \"%s\" for output",file);
       return false;
     }
     return true;
@@ -76,7 +76,7 @@ namespace WDutils {
 		  std::ios::openmode mode = std::ios::out | std::ios::trunc)
   {
     S.open(file,mode);
-    if(! S.is_open() ) error("cannot open file \"%s\" for output",file);
+    if(! S.is_open() ) WDutils_Error("cannot open file \"%s\" for output",file);
   }
   /// try to open an output file for appending.
   /// if not successful, we issue a warning and return 0\n
@@ -91,7 +91,7 @@ namespace WDutils {
     if(S.is_open() ) return 1;
     S.open(file,std::ios::out);
     if(S.is_open() ) return 2;
-    warning("cannot open file \"%s\" for appending",file);
+    WDutils_Warning("cannot open file \"%s\" for appending",file);
     return 0;
   }
   /// try to open an output file for appending.
@@ -107,7 +107,7 @@ namespace WDutils {
     if(S.is_open() ) return 1;
     S.open(file,std::ios::out);
     if(S.is_open() ) return 2;
-    error("cannot open file \"%s\" for appending",file);
+    WDutils_Error("cannot open file \"%s\" for appending",file);
     return 0;
   }
   /// try to open an input file.
@@ -121,7 +121,7 @@ namespace WDutils {
   {
     S.open(file,mode);
     if(! S.is_open() ) {
-      warning("cannot open file \"%s\" for input",file);
+      WDutils_Warning("cannot open file \"%s\" for input",file);
       return 0;
     }
     return 1;
@@ -135,7 +135,7 @@ namespace WDutils {
 			 std::ios::openmode mode=std::ios::in)
   {
     S.open(file,mode);
-    if(! S.is_open() ) error("cannot open file \"%s\" for input",file);
+    if(! S.is_open() ) WDutils_Error("cannot open file \"%s\" for input",file);
   }
   /// try to open a file for in-, output, or both.
   /// if not successful, we issue a warning an return false
@@ -148,7 +148,7 @@ namespace WDutils {
   {
     S.open(file,mode);
     if(! S.is_open() ) {
-      warning("cannot open file \"%s\"",file);
+      WDutils_Warning("cannot open file \"%s\"",file);
       return 0;
     }
     return 1;
@@ -162,7 +162,7 @@ namespace WDutils {
 			 std::ios::openmode mode)
   {
     S.open(file,mode);
-    if(! S.is_open() ) error("cannot open file \"%s\"",file);
+    if(! S.is_open() ) WDutils_Error("cannot open file \"%s\"",file);
   }
   //@}
   //----------------------------------------------------------------------------

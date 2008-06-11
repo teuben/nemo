@@ -38,8 +38,8 @@ using std::cos;
 using std::sin;
 using std::complex;
 
-#define MathError(A,B)   WDutils_ErrorF(A,B)
-#define MathWarning(A,B) WDutils_WarningF(A,B)
+#define MathError(A,B)   WDutils_Error("in %s: %s",B,A)
+#define MathWarning(A,B) WDutils_Warning("in %s: %s",B,A)
 #define maxit            100
 #define fpmin            1.e-40
 #define eps              1.e-10

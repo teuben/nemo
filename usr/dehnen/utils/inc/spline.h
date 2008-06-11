@@ -249,7 +249,7 @@ namespace WDutils {
 	y2(WDutils_NEW(table_type,n)), lo(0)
     {
       if(_x.size() != _y.size())
-	error("size mismatch in spline construction\n");
+	WDutils_Error("size mismatch in spline construction\n");
       construct(n,x,y,y2,yp1,ypn);
     }
     //@}
@@ -373,7 +373,7 @@ namespace WDutils {
     {
       const scalar_type ife=1./48.;
       scalar_type h =x1-x0;
-      if(h==0) error("penta_splines::evaluate(): bad x input");
+      if(h==0) WDutils_Error("penta_splines::evaluate(): bad x input");
       scalar_type
 	hi = scalar_type(1)/h,
 	hf = h*h,
@@ -492,7 +492,7 @@ namespace WDutils {
       y3(WDutils_NEW(table_type,n)), lo(0)
     {
       if(_x.size() != _y.size() || _x.size() != _y1.size())
-	error("size mismatch in Pspline construction\n");
+	WDutils_Error("size mismatch in Pspline construction\n");
       construct(n,x,y,y1,y3);
     }
     //@}

@@ -50,6 +50,7 @@ WDutils::RunInfo::RunInfo()
     __user_known(0),
     __pid_known(0),
     __name_known(0),
+    __is_mpi_proc(0),
     __debug(0)
 {
   try {
@@ -94,87 +95,89 @@ WDutils::RunInfo::RunInfo()
 }
 WDutils::RunInfo WDutils::RunInfo::Info;
 ////////////////////////////////////////////////////////////////////////////////
-void WDutils::exit(int signal) {                   // I: error signal           
-#ifdef _MPI_INCLUDE                                // IF MPI exists             
-  register int MPI_running;
-  MPI_Initialized(&MPI_running);                   //   does MPI run?           
-  if(MPI_running)                                  //   IF MPI runs             
-    MPI_Abort(MPI_COMM_WORLD,signal);              //     MPI-abort             
-  else                                             //   ELSE(no MPI running)    
-#endif                                             // ELSE no MPI existing      
-    std::exit(signal);                             //   ordinary exit()         
-}
+WDutils::exiter WDutils::exit = &std::exit;
 ////////////////////////////////////////////////////////////////////////////////
-template<typename VA_LIST>
-void WDutils::printerr(const char*header,
+namespace {
+  using namespace WDutils;
+  inline void printerr(const char*header,
 		       const char*fmt,
-		       VA_LIST   &ap,
-		       bool       give_name)
-{
-  fprintf(stderr,header);
-  if(give_name && RunInfo::name_known())
-    fprintf(stderr,"[%s]: ",RunInfo::name());
-#ifdef _MPI_INCLUDE
-  register int MPI_running;
-  MPI_Initialized(&MPI_running);
-  if(MPI_running) {
-    register int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-    fprintf(stderr,"on node %d",rank);
+		       va_list   &ap,
+		       const char*file = 0,
+		       int        line = 0,
+		       bool       name = true)
+  {
+    fprintf(stderr,header);
+    if(name && RunInfo::name_known())
+      fprintf(stderr,"[%s]: ",RunInfo::name());
+    if(RunInfo::is_mpi_proc())
+      fprintf(stderr,"@ P%d: ",RunInfo::mpi_proc());
+    if(file) fprintf(stderr,"[%s:%d]: ",file,line);
+    vfprintf(stderr,fmt,ap);
+    if (fmt[strlen(fmt)-1] != '\n')
+      fprintf(stderr,"\n");
+    fflush(stderr);
   }
-#endif
-  vfprintf(stderr,fmt,ap);
-  if (fmt[strlen(fmt)-1] != '\n')
-    fprintf(stderr,"\n");
-  fflush(stderr);
 }
-template 
-void WDutils::printerr<va_list>(const char*,  const char*, va_list&, bool);
 //------------------------------------------------------------------------------
-void WDutils::error(const char* fmt,               // I: error message          
-		    ...             )              //[I: parameters]            
+void WDutils::Error::operator()(const char* fmt, ...) const
 {
+  char header[35];
+  SNprintf(header,35,"### %s Error: ",lib);
   va_list  ap;
   va_start(ap,fmt);
-  printerr("### WDutils Error: ", fmt, ap);
+  printerr(header, fmt, ap, file, line);
   va_end(ap);
-  WDutils::exit();
+  WDutils::exit(1);
 }
 //------------------------------------------------------------------------------
-void WDutils::warning(const char* fmt,             // I: warning message        
-		      ...             )            //[I: parameters]            
+void WDutils::Warning::operator()(const char* fmt, ...) const
 {
+  char header[37];
+  SNprintf(header,37,"### %s Warning: ",lib);
   va_list  ap;
   va_start(ap,fmt);
-  printerr("### WDutils Warning: ", fmt, ap);
+  printerr(header, fmt, ap, file, line);
   va_end(ap);
 }
 //------------------------------------------------------------------------------
-void WDutils::debug_info(const char* fmt,          // I: debugging information  
-			 ...             )         //[I: parameters]            
+void WDutils::__DebugInfo::operator()(const char* fmt, ...) const
 {
+  char header[40];
+  SNprintf(header,40,"### %s Debug Info: ",lib);
   va_list  ap;
   va_start(ap,fmt);
-  printerr("### WDutils Debug Info: ", fmt, ap, false);
+  printerr(header, fmt, ap, file, line, false);
   va_end(ap);
 }
 //------------------------------------------------------------------------------
-void WDutils::debug_info(int         deb,          // I: level for reporting    
-			 const char* fmt,          // I: debugging information  
-			 ...             )         //[I: parameters]            
+void WDutils::__DebugInfo::operator()(int deb, const char* fmt, ...) const
 {
   if(RunInfo::debug(deb)) {
+    char header[40];
+    SNprintf(header,40,"### %s Debug Info: ",lib);
     va_list  ap;
     va_start(ap,fmt);
-    printerr("### WDutils Debug Info: ", fmt, ap, false);
+    printerr(header, fmt, ap, file, line, false);
     va_end(ap);
   }
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// WDutils::exception                                                         //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
+WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
+{
+  size_t size = 1024;
+  char   buffer[1024], *buf=buffer;
+  if(file) {
+    int len = SNprintf(buf,size,"in [%s:%d]: ",file,line);
+    buf  += len;
+    size -= len;
+  }
+  va_list  ap;
+  va_start(ap,fmt);
+  vsnprintf(buf, size, fmt, ap);
+  va_end(ap);
+  return exception(buffer);
+}
+//------------------------------------------------------------------------------
 WDutils::exception::exception(const char*fmt, ...)
 {
   const int size=1024;
@@ -183,20 +186,16 @@ WDutils::exception::exception(const char*fmt, ...)
   va_start(ap,fmt);
   int w = vsnprintf(__text,size,fmt,ap);
   if(w>=size) {
-    warning("WDutils::exception::exception(): "
-	    "string size of %d characters exceeded\n",size);
+    WDutils_Warning("WDutils::exception::exception(): "
+		    "string size of %d characters exceeded\n",size);
     __text[size-1]=0;
   }
   if(w<0)
-    warning("WDutils::exception::exception(): formatting error\n");
+    WDutils_Warning("WDutils::exception::exception(): formatting error\n");
   va_end(ap);
   std::string::operator= (__text);
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// WDutils::message                                                           //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 WDutils::message::message(const char*fmt, ...) throw(exception)
 {
   va_list  ap;
@@ -208,11 +207,7 @@ WDutils::message::message(const char*fmt, ...) throw(exception)
 			      "formatting error\n");
   va_end(ap);
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// WDutils::snprintf                                                          //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
   WDutils_THROWING
 {
@@ -225,11 +220,7 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
   if(w <0) WDutils_THROW("snprintf(): formatting error");
   return w;
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// WDutils::snprintf__                                                        //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 int WDutils::snprintf__::operator()(char*str, size_t l, const char* fmt, ...)
   WDutils_THROWING
 {
