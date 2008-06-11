@@ -331,7 +331,7 @@ void bodies::block::read_data(data_in &inpt,
     notreal* data = falcON_NEW(notreal, ntot);
     inpt.read(data, N);
     const notreal* d = data;
-    real         * D = static_cast<real*>(DATA[value(f)]);
+    real         * D = static_cast<real*>(DATA[value(f)])+from;
     for(unsigned i=0; i!=ntot; ++i,++d,++D) *D = *d;
     falcON_DEL_A(data);
   } else
