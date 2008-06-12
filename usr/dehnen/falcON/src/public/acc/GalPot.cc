@@ -43,18 +43,19 @@
 //-----------------------------------------------------------------------------+
 //                                                                             |
 // Versions                                                                    |
-// 0.0   06-jun-2002    created                                           WD   |
-// 0.1   28-dec-2002    replaced NEMO's <stdinc.h> for gcc3              PJT   |
-// 0.2   23-aug-2004    added acceleration support using defacc.h         WD   |
-// 0.3   18-feb-2005    bug (Fx,Fy=nan for x=y=0) removed                 WD   |
+// 0.0   06-jun-2002    created                                            WD  |
+// 0.1   28-dec-2002    replaced NEMO's <stdinc.h> for gcc3                PJT |
+// 0.2   23-aug-2004    added acceleration support using defacc.h          WD  |
+// 0.3   18-feb-2005    bug (Fx,Fy=nan for x=y=0) removed                  WD  |
+// 0.4   12-jun-2008    "using namespace std" behind "#include <defacc.h>" WD  |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <iostream>
 #include <fstream>
-using namespace std;
 #define POT_DEF
 #include <defacc.h>
 ////////////////////////////////////////////////////////////////////////////////
+using namespace std;
 #include "acc/GalPot.cc"
 ////////////////////////////////////////////////////////////////////////////////
 namespace {

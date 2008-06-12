@@ -45,14 +45,15 @@
 // Versions                                                                    |
 // 0.0   18-sep-2007    created                                             WD |
 // 0.1   19-sep-2007    small change in debug info                          WD |
+// 0.2   12-jun-2008    "using namespace std" behind "#include <defacc.h>"  WD |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <iostream>
 #include <fstream>
-using namespace std;
 #define POT_DEF
 #include <defacc.h>
 ////////////////////////////////////////////////////////////////////////////////
+using namespace std;
 #include "acc/GalPot.cc"
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
