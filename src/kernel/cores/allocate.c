@@ -14,46 +14,47 @@
  *         jan-02       experimenting with exception handling	pjt/nas
  *       7-sep-05       TOOLBOX benchmark pjt/chapman
  *      31-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@oamp.fr>
+ *      12-jun-08       allocate_FL etc, see stdinc.h           WD
+ *      12-jun-08       removed tests for size_t < 0            WD
  */
 
 #include <stdinc.h>
 #include <errno.h>
 
-void *allocate(size_t nb)
+void *allocate_FL(size_t nb, const_string file, int line)
 {
     void *mem;
 
     if (sizeof(size_t) == 4 && nb > 2147483647)
       warning("allocate: 32bit machine allocate");
-
-    /* how should this kind of error be processed ? */
-    if (nb < 0) error("allocate < 0: cannot allocate %d bytes",nb);
     if (nb==0) nb++;       /* never allocate 0 bytes */
     mem = (void *) calloc(nb, 1);
     if (mem == NULL)  {
 	nemo_dprintf(0,"solaris csh: limit datasize unlimited\n");
         nemo_dprintf(0,"solaris ksh: ulimit -d unlimited\n");
-	error("allocate: not enough memory for %ld bytes", nb);
+	if(file) error("[%s:%d]: cannot allocate %ld bytes",file,line,nb);
+	else     error("cannot allocate %ld bytes",nb);
     }
-    nemo_dprintf(8,"allocate: %ld bytes @ %ld (0x%x)\n",nb, mem, mem);
+    if(file) nemo_dprintfN(8,"[%s:%d]: allocate %ld bytes @ %p\n",file,line,nb,mem);
+    else     nemo_dprintfN(8,"allocate %ld bytes @ %p\n",nb,mem);
     return mem;
 }
 
-void *reallocate(void *bp, size_t nb)
+void *reallocate_FL(void *bp, size_t nb, const_string file, int line)
 {
     void *mem;
 
-    /* how should this kind of error be processed ? */
-    if (nb < 0) error("reallocate: cannot allocate %ld bytes",nb);
     if (nb == 0) nb++;
     if(bp==NULL)
         mem = (void *) calloc(nb, 1);
     else
         mem = (void *) realloc((void *)bp,nb);
     if (mem == NULL)  {
-	error("reallocate: not enough memory for %ld bytes", nb);
+	if(file) error("[%s:%d]: cannot reallocate %ld bytes",file,line,nb);
+	else     error("cannot reallocate %ld bytes",nb);
     }
-    nemo_dprintf(8,"reallocate: %ld bytes @ %ld \n",nb, mem);
+    if(file) nemo_dprintfN(8,"[%s:%d]: reallocate %ld bytes @ %p\n",file,line,nb,mem);
+    else     nemo_dprintfN(8,"reallocate %ld bytes @ %p\n",nb,mem);
     return mem;
 }
 

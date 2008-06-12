@@ -24,6 +24,7 @@
  *      16-jan-01 V1.8a  calling abort() will be announced      pjt
  *      13-feb-03 V1.8b  revoking errno reporting		pjt
  *      06-jun-08 V1.8c  nemo_exit                              wd
+ *      12-jun-08 V1.8d  report MPI proc                        wd
  */
 
 #include <stdinc.h>
@@ -67,12 +68,22 @@ void errorn(string fmt, ...)
     error("errorn is sadly not implemented; use debug>0 to get errno messages");
 }
 
+/* Start changes WD 12/06/2008 */
+extern bool mpi_proc;   /* dprintf.c */
+extern int  mpi_rank;   /* dprintf.c */
+/* End changes WD 12/06/2008 */
+
 void error(string fmt, ...)
 {
     va_list ap;
 
     report_errno();
     fprintf(stderr,"### Fatal error [%s]: ",getargv0());  /* report name */
+
+    /* Start changes WD 12/06/2008 */
+    if(mpi_proc)
+      fprintf(stderr,"@%d: ",mpi_rank);
+    /* End changes WD 12/06/2008 */
     
     va_start(ap, fmt);              /* ap starts with string 'fmt' */
 
@@ -132,6 +143,11 @@ void warning(string fmt, ...)
     va_list ap;
 
     fprintf(stderr,"### Warning [%s]: ",getargv0());  /* report name */
+
+    /* Start changes WD 12/06/2008 */
+    if(mpi_proc)
+      fprintf(stderr,"@%d: ",mpi_rank);
+    /* End changes WD 12/06/2008 */
 
     va_start(ap, fmt);               /* ap starts with string 'fmt' */
 
