@@ -553,8 +553,8 @@ dprintf_pter get_dprintf(const_string, int);
 #else
   /* in C++ make allocate() and reallocate() inlined functions
      NOTE: these will not report [file:line] */
-  inline void *allocate(size_t n) { allocate_FL(n,0,0); }
-  inline void *reallocate(void*p,size_t n) { reallocate_FL(p,n,0,0); }
+  inline void *allocate(size_t n) { return allocate_FL(n,0,0); }
+  inline void *reallocate(void*p,size_t n) { return reallocate_FL(p,n,0,0); }
 #endif
 
 #if(0) /* commented out old code 12/06/2008 WD */
