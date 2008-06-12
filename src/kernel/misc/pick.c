@@ -14,7 +14,7 @@
  * PICKSHELL: pick point on shell.
  */
 
-void pickshell(real vec[], int ndim, real rad)
+void pickshell(real *vec, int ndim, double rad)
 {
     real rsq, rscale;
     int i;
@@ -35,7 +35,7 @@ void pickshell(real vec[], int ndim, real rad)
  * PICKBALL: pick point within ball.
  */
 
-void pickball(real vec[], int ndim, real rad)
+void pickball(real *vec, int ndim, double rad)
 {
     real rsq;
     int i;
@@ -55,7 +55,7 @@ void pickball(real vec[], int ndim, real rad)
  * PICKBOX: pick point within box.
  */
 
-void pickbox(real vec[], int ndim, real size)
+void pickbox(real *vec, int ndim, double size)
 {
     int i;
 
