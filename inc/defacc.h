@@ -3,7 +3,7 @@
  *                                                                              
  * defacc.h                                                                     
  *                                                                              
- * Copyright Walter Dehnen, 2003-2007                                           
+ * Copyright Walter Dehnen, 2003-2008                                           
  * e-mail:   walter.dehnen@astro.le.ac.uk                                       
  * address:  Department of Physics and Astronomy, University of Leicester       
  *           University Road, Leicester LE1 7RH, United Kingdom                 
@@ -30,6 +30,7 @@
  * version 3.1  17/09/2004  WD  somewhat improved documentation                 
  * version 3.2  12/11/2004  WD  catching std::bad_alloc and report error        
  * version 3.3  04/05/2007  WD  added global scope resolution operators         
+ * version 3.4  12/06/2008  WD  #including stdinc.h                             
  *                                                                              
  *******************************************************************************
  *                                                                              
@@ -55,6 +56,7 @@
 #ifdef __cplusplus
   extern "C" {
 #endif
+#include <stdinc.h>                         /* for error, warning, dprintf    */
 
 /*
  *******************************************************************************
@@ -110,10 +112,10 @@ void iniacceleration(                 /* return: void                         */
  * nemo.h) 
  */
 
-void warning(char *, ...);
-void error  (char *, ...);
-bool nemo_debug(int);
-int  nemo_dprintf(int, const char *, ...);
+/* void warning(char *, ...); */
+/* void error  (char *, ...); */
+/* bool nemo_debug(int); */
+/* int  nemo_dprintf(int, const char *, ...); */
 
 #ifdef POT_DEF
 /*
@@ -374,7 +376,7 @@ namespace {
 	  Acc.template set_time<3>(Time,nbod,mas,pos,vel);
 	  break;
 	default:
-	  error("acceleration: ndim=%d not supported", ndim);
+	  ::error("acceleration: ndim=%d not supported", ndim);
 	}
       }
     }
@@ -452,13 +454,13 @@ namespace {
       if(need_mass)
 	*need_mass = Acc.NeedMass();
       else if(Acc.NeedMass())
-	error("inipotential: cannot use \"%s\", since masses are needed",
-	      Acceleration::name());
+	::error("inipotential: cannot use \"%s\", since masses are needed",
+		Acceleration::name());
       if(need_vels)
 	*need_vels = Acc.NeedVels();
       else if(Acc.NeedVels())
-	error("inipotential: cannot use \"%s\", since velocities are needed",
-	      Acceleration::name());
+	::error("inipotential: cannot use \"%s\", since velocities are needed",
+		Acceleration::name());
     }
     //--------------------------------------------------------------------------
     bool differ(const double*pars, int npar, const char*file)
@@ -503,8 +505,8 @@ namespace {
 				  static_cast<double*>(p),
 				  static_cast<double*>(a),
 				  add);
-	default: error("acceleration \"%s\": unknown type ('%s')",
-		       Acceleration::name(),type);
+	default: ::error("acceleration \"%s\": unknown type ('%s')",
+			 Acceleration::name(),type);
 	} break;
       case 3:
 	switch(type) {
@@ -524,11 +526,11 @@ namespace {
 				  static_cast<double*>(p),
 				  static_cast<double*>(a),
 				  add);
-	default: error("acceleration \"%s\": unknown type ('%s')",
-		       Acceleration::name(),type);
+	default: ::error("acceleration \"%s\": unknown type ('%s')",
+			 Acceleration::name(),type);
 	} break;
-      default: error("acceleration \"%s\": ndim=%d unsupported",
-		     Acceleration::name(),nd);
+      default: ::error("acceleration \"%s\": ndim=%d unsupported",
+		       Acceleration::name(),nd);
       }
     }
     //--------------------------------------------------------------------------
@@ -551,8 +553,8 @@ namespace {
       case 3: Acc.template acc<3>(static_cast<const scalar*>(0), pos, 
 				  static_cast<const scalar*>(0), *pot, acc);
 	break;
-      default: error("potential \"%s\": ndim=%d not supported",
-		     Acceleration::name(),ndim);
+      default: ::error("potential \"%s\": ndim=%d not supported",
+		       Acceleration::name(),ndim);
       }
     }
 #endif

@@ -39,7 +39,9 @@
  *  1-aug-05    nemo_string, nemo_stream for starlab interfaces
  * 29-nov-06    within() now using double's
  * 23-oct-07    added some more PI's and LN's from ZENO/Koda's mathfns.h
- * 06-jun-08    nemo_exit                                     WD
+ * 06-jun-08    nemo_exit                                           WD
+ * 12-jun-08    nemo_dprintf  is macro, reports [file:line]         WD
+ * 12-jun-08    allocate, reallocate are macros (not under C++)     WD
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -432,29 +434,81 @@ extern bool LittleEndian(void);
 extern void   strclose(stream);
 
 
-/* error.c dprintf.c */
 /*
- * WD June 2008
- * allow the user to specify the exit() function, but default to stdlib exit().
- * Rationale: allow exit to call MPI_Abort()
+ * WD 6th/12th June 2008
+ * allow the user to specify the exit() function, but default to stdlib's exit().
+ * Rationale: If we are part of an MPI parallel run, exiting one process leaves
+ *            the reamining in a zombie (defunct) state. In this case, the user
+ *            can provide an alternative function, which avoids this problem,
+ *            for instance by calling MPI_Abort(). With this construction, we
+ *            avoid the need to compile nemo against the MPI header files.
  */
 
+/* exit function (default: stdlib's exit) used via "nemo_exit(1);" (error.c) */
 extern void (*nemo_exit)(int);
+
+/* set alternative exit function (error.c) */
 void set_nemo_exit(void(*)(int));
 
-/* typedef void (*exiter) (int);         /\* type of exit()  WD June 2008 *\/ */
-/* extern exiter nemo_exit;              /\* invoke by compiler upen "nemo_exit()" *\/ */
-/* void set_exit(exiter);                /\* provide exiter *\/ */
+/* tell nemo that this process is part of an MPI run: give its rank (dprintf.c) */
+void set_mpi_rank(int rank);
 
+/* END of changes WD 6/12th June 2008 */
+
+/* error and warning */
 /* C99 stdargs example of macro usage:   #define HELLO(a,...)  error(a,__VA_ARGS__)   */
 /* GNU stdargs (deprecated now)          #define HELLO(a,args...)  error(a,##args)    */
 
+/* prints error message (printf-style) to stderr and exits (via nemo_exit) */
 void error(string, ...);
 void errorn(string, ...);
+/* prints warning message (printf-style) to stderr */
 void warning(string, ...);
 int progress(double dtime, string, ...);
-int nemo_dprintf(int, const_string, ...);    /* NEMO has same name as libc */
-bool nemo_debug(int);
+
+/* dprintf.c */
+/* is a given depth below the current debugging level ? */
+bool nemo_debug(int depth);
+
+/*
+ * WD 12th June 2008
+   improved debugging info: report [file:line]
+   
+   nemo_dprintf() reports the source file name and line number of its call if 
+   debug_level >= DEBUG_LEVEL_FOR_REPORTING_FILE (see dprintf.c).
+
+   We implement this by a C-macro "nemo_dprintf" which expands to calling a 
+   function which (i) takes file name and line number and (ii) returns a
+   pointer to a function with nemo_dprintf style syntax.
+
+   NOTE Since nemo_dprintf is a macro, one must not declare it as an external 
+        function anywhere else (and rely on the library to resolve it).
+
+   NOTE It seems that our way to implement this functionality is the only way.
+        The possible simpler alternative of using a C macro with variable number
+	of arguments fails if there are no additional arguments after the format
+	string.
+*/
+
+/* pointer to function of same syntax as nemo_dprintf() */
+typedef int (*dprintf_pter)(int, const_string, ...);
+
+/* return pointer to function with nemo_dprintf() syntax */
+dprintf_pter get_dprintf(const_string, int);
+
+/* implement nemo_dprintf() as macro */
+#define nemo_dprintf  get_dprintf(__FILE__,__LINE__)
+
+/* 
+   identical to old-style nemo_dprintf:
+ */
+#define nemo_dprintfN get_dprintf(0,0)
+
+#if(0) /* commented out WD 12th June 2008 */
+  int nemo_dprintf(int, const_string, ...);    /* NEMO has same name as libc */
+#endif
+
+/* END of changes WD 12th June 2008 */
 
 #ifndef HAVE_DPRINTF
 #define dprintf		nemo_dprintf
@@ -466,8 +520,49 @@ bool nemo_debug(int);
 #define eprintf warning
 
 /* core/allocate.c */
-extern void *allocate(size_t);
-extern void *reallocate(void *, size_t);
+
+/*
+ * WD 12th June 2008
+   allocate() and reallocate to report [file:line] with nemo_dprintf
+
+   Rationale: At debug_level >= 8, allocate() reports number of bytes
+              allocated as well as the memory address. Here, we add to that
+	      the source code file and line number.
+
+   NOTE  This is implemented by C macros which call extended versions
+         of allocate and reallocate().
+
+   NOTE  This implies that every source code using allocate() or 
+         reallocate() MUST #include this file.
+
+   NOTE  With C++ this will not work, as the C++ std header file <new>
+         has a member function allocate() (so that our macror definition
+	 causes a compilation error). Therefore, under C++, we simply
+	 define allocate and reallocate as inline functions, which however
+	 never report source file and line number.
+*/
+
+/* extended functions taking file and line information */
+  extern void *allocate_FL(size_t,const_string,int); 
+  extern void *reallocate_FL(void *, size_t,const_string,int);
+
+#if !defined(__cplusplus)
+  /* in C: implement allocate() and reallocate() as macros */
+# define allocate(SIZE) allocate_FL(SIZE,__FILE__,__LINE__)
+# define reallocate(PTER,SIZE) reallocate_FL(PTER,SIZE,__FILE__,__LINE__)
+#else
+  /* in C++ make allocate() and reallocate() inlined functions
+     NOTE: these will not report [file:line] */
+  inline void *allocate(size_t n) { allocate_FL(n,0,0); }
+  inline void *reallocate(void*p,size_t n) { reallocate_FL(p,n,0,0); }
+#endif
+
+#if(0) /* commented out old code 12/06/2008 WD */
+  extern void *allocate(size_t);
+  extern void *reallocate(void *, size_t);
+#endif
+/* END of changes WD 12th June 2008 */
+
 /* this is to shut up e.g. gcc when allocate(n*sizeof(T)) is used */
 #define  sizeof  (size_t)sizeof
 
