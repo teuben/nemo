@@ -40,7 +40,7 @@ endif
 
 ifdef DMPI
 
-MPIDIR		:= /opt/mpich/ch-p4
+MPIDIR		:= mpich/
 MPIINC		:= $(MPIDIR)/include/
 IMPI		:= -I$(MPIINC)
 
