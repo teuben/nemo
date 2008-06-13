@@ -35,26 +35,6 @@ endif
 endif
 
 # -----------
-# MPI library
-# -----------
-
-ifdef DMPI
-
-MPIDIR		:= mpich/
-MPIINC		:= $(MPIDIR)/include/
-IMPI		:= -I$(MPIINC)
-
-#ifdef STATIC
-MPILIB		:= $(MPIDIR)/lib
-LMPI		:= -L$(MPILIB) -lmpich
-#else
-#MPILIB		:= $(MPIDIR)/lib/shared
-#LMPI		:= -L$(MPILIB) -lmpich -Wl,-rpath,$(MPILIB)
-#endif
-
-endif
-
-# -----------
 # directories
 # -----------
 
@@ -213,12 +193,12 @@ endif
 
 ifdef STATIC
 
-LFALCON		:= -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO) $(LMPI)
+LFALCON		:= -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO)
 falcON		:= $(links) $(LIB)lib$(LIBNAME).a
 
 else
 
-LFALCON		:= -L$(LIB) -l$(LIBNAME) -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO) $(LMPI)
+LFALCON		:= -L$(LIB) -l$(LIBNAME) -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO)
 falcON		:= $(links) $(LIB)lib$(LIBNAME).so
 
 endif

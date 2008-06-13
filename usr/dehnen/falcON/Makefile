@@ -151,7 +151,7 @@ libutils		: utils utils/lib/libWDutils.a
 
 # 6.3 falcON library
 # NOTE: $(falcON) defined in makedefs, depending on value of STATIC
-falcON_objs	=	$(public_objs) $(proper_objs) $(sph_objs) $(parallel_objs)
+falcON_objs	=	$(public_objs) $(proper_objs) $(sph_objs)
 
 $(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 			$(AR) $@ $?
