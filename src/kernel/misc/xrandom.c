@@ -24,6 +24,7 @@
  *  24-nov-03   V2.0b  some prototypes for -Wall added            PJT
  *  13-may-05   
  *  23-oct-07   added random0() and srandom0(), from Koda, based on ran1 from NumRec     PJT
+ *  19-jun-08   enable init_xrandom(0) (previously caused Segmentation fault)  WD
  */
 
 #include <stdinc.h>
@@ -110,7 +111,7 @@ int init_xrandom(string init)
 
     return (int) gsl_rng_default_seed;
 #else
-    return set_xrandom(natoi(init));
+    return set_xrandom(init? natoi(init) : 0);     /*  18/06/2008: allow for init=0 WD */
 #endif
 }
 
