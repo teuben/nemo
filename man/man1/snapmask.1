@@ -43,6 +43,15 @@ before it is compared with the key field in the above mentioned \fIkeyfile\fP.
 E.g. An input file \fIsnap-in\fP with 10 bodies is compared with a
 keyfile \fIsnap-key\fP with 5 bodies numbered 5:9 and  ...
 - Don't use this option, still under development.
+.SH EXAMPLE
+The \fBselect=\fP keyword can easily become very long, longer than an interactive
+shell allows. You might see a  \fI"word too long"\fP error message in this case.
+One solution is to write the numbers into a simple table and use the construct
+.nf
+    snapmask in=... out=... select=@particles.tab
+.fi
+where \fBparticles.tab\fP is an ASCII file with a single column of all selected
+particles.
 .SH AUTHOR
 Peter Teuben
 .SH SEE ALSO
