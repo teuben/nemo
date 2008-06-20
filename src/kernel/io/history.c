@@ -28,6 +28,7 @@
  *       1-aug-02       V2.5    increased memory a bit 256->1024        
  *                              and free up memory in reset_history     PJT
  *      28-dec-04       V2.5a   tag headline properly when free'd       PJT
+ *      20-jun-08       V2.5b   history -> nemo_history (MAC library conflict)  PJT
  *
  *  ToDo: not all local variables free up memory, despite that some
  *        have clearly come from allocate'd memory. 
@@ -55,7 +56,7 @@ local string histbuf[MAXHIST+1];	/* history string array             */
 local string headline = NULL;		/* last headline read in            */
 local bool freeup[MAXHIST+1];           /* if space should be free'd        */
 
-int history = 1;               /* 1=history is auto-mode  0=no history done */
+int nemo_history = 1;          /* 1=history is auto-mode  0=no history done */
                                /* this item should eventually disappear     */
                                /* it is defined by the user interface,      */
                                /* see getparam.c                            */
@@ -97,7 +98,7 @@ int put_history(stream outstr)
 {				
     int i;
 
-    if (!history) {
+    if (!nemo_history) {
     	dprintf(5, "put_history: history data suppressed\n");    
         return 0;
     }

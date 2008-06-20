@@ -324,7 +324,7 @@ extern string defv[];   /* see program.c or defv.c */
 extern string outdefv[];/* see program.c or outdefv.c */
 extern char **environ;  /* environment variables */
 
-extern int history;     /* 0=no history written; see history.c */
+extern int nemo_history;     /* 0=no history written; see history.c */
 
 int yapp_dev = 0;       /* interface hidden keyword yapp to plotting pkg */
 int help_level = 0;     /* hidden keyword help for interactive prompting */
@@ -855,7 +855,7 @@ local void scan_environment()
         if (streq("BELL", parname(environ[i])))
             bell_level = atoi(parvalue(environ[i]));
         else if (streq("HISTORY", parname(environ[i])))
-            history = atoi(parvalue(environ[i]));
+            nemo_history = atoi(parvalue(environ[i]));
         else if (streq("DEBUG", parname(environ[i])))
             set_debug(parvalue(environ[i]));
         else if (streq("YAPP", parname(environ[i])))
@@ -871,7 +871,7 @@ local void scan_environment()
     }
     dprintf(5, 
     "scan_environment: debug=%d yapp=%d help=%d history=%d review=%d error=%d\n",
-     debug_level, yapp_dev, help_level, history, review_flag, error_level);
+     debug_level, yapp_dev, help_level, nemo_history, review_flag, error_level);
     dprintf(5,"date_id = %s\n",date_id());
 #if defined(INTERACT)
     if ((ev=getenv("NEMODEF")) != NULL) {
@@ -888,7 +888,7 @@ local void save_history(string *argv)
     int i, histlen;
     string hist;
 
-    if (!history) return;
+    if (!nemo_history) return;
 
     if (help_level) {         /* if external help, argv[] is not appropriate */
         histlen = 0;
@@ -1402,7 +1402,7 @@ bool updparam(string name)
  */
 
 int getparamstat(string name) {
-  error("getparamstat not implemented in NEMO");
+  error("getparamstat is a ZENO feature, not implemented in NEMO yet");
 }
 
 
