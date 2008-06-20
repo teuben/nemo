@@ -109,12 +109,13 @@ int put_data_select(char * outfile,
     set_history[no_io]=TRUE;
 		
     /* raz history */
-    reset_history();
+    if (!( H_io  && ! strcmp(hist_file,"-"))) { // do not reset history if hist_file = "-"
+      reset_history();
+      /* build command line's history */
+      app_history(history_prog); 
+    }
 		
-    /* build command line's history */
-    app_history(history_prog); 
-		
-    if (H_io) { /* request for history file name */
+    if (H_io && strcmp(hist_file,"-")) { /* request for history file name */
       /* get history from input file */
       get_history_input_file(hist_file);
     }

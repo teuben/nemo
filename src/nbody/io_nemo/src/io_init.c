@@ -56,7 +56,7 @@ void init_io_one(int  * maxbodies,
 		 char **history_prog,
 		 int    MAXIO)
 { 
-  string defv[] = { "none=none","VERSION=1.50",NULL };
+  string defv[] = { "none=none","VERSION=1.60",NULL };
   string argv[] = { "IO_NEMO",NULL };
   int i;
   string * histo;
