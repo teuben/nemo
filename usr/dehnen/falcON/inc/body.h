@@ -69,6 +69,7 @@ namespace falcON {
 
   class ebodies;                                   // declared in forcesC.cc    
   class BodyFileter;                               // declared in bodyfunc.h    
+  class ParallelSnapshot;                          // parallel/snapshot.h       
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -87,6 +88,7 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
 
   class bodies {
+    friend class ParallelSnapshot;
     //==========================================================================
     //                                                                          
     // static data                                                              
@@ -112,9 +114,10 @@ namespace falcON {
     class block {
       friend class bodies;
       friend class bodies::iterator;
+      friend class ParallelSnapshot;
       //------------------------------------------------------------------------
-      const unsigned     NALL;                     // # data                    
       const bodytype     TYPE;                     // type of bodies hold       
+      unsigned           NALL;                     // # data                    
       unsigned           NBOD;                     // # bodies hold             
       unsigned           NO;                       // this==bodies::BLOCK[NO]   
       unsigned           FIRST;                    // total index of first body 
@@ -218,6 +221,8 @@ namespace falcON {
       block();                                     // not implemented           
       block(block const&);                         // not implemented           
       //------------------------------------------------------------------------
+      void clone(block*);
+      //------------------------------------------------------------------------
     public:
       block(unsigned,                              // I: our No                 
 	    unsigned,                              // I: # data to allocate     
@@ -290,6 +295,7 @@ namespace falcON {
     class index {
       friend class bodies;
       friend class bodies::block;
+      friend class ParallelSnapshot;
       //------------------------------------------------------------------------
       /// useful constants, determine interpretation of index::I
       enum
@@ -420,11 +426,8 @@ namespace falcON {
     mutable bool     SRCC;                         // source data changed?      
     mutable bool     SPHC;                         // SPH data changed?         
     const bool       C_FORTRAN;                    // we are used for C/FORTRAN 
-    //==========================================================================
-  protected:
-    /// required by derived class ParallelSnapshot
-    block* const&typed(bodytype t) const { return TYPES[t]; }
     //--------------------------------------------------------------------------
+    void erase_block(block*B);
   public:
     block *const&first_block() const { return FIRST; }
     //==========================================================================
@@ -1334,7 +1337,7 @@ namespace falcON {
     /// method used by ebodies
     void reset(char, fieldbit, void*) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// method used by ParallelSnapshot: set block's FIRST.
+    /// set block's FIRST.
     /// The block's FIRST data are set such that the bodyindices of bodies of
     /// type t on start at F[t].
     /// \param F array with first bodyindex per body type.

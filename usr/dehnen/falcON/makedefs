@@ -213,6 +213,5 @@ MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS) -share
 MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS)
 MAKE_EXE_C	= $(CC)  -o $@ $< -I$(INC) $(IUTIL) $(IMPI) $(CFLAGS)
 MAKE_EXE_F	= $(FC)  -o $@ $< -I$(INC) $(IUTIL) $(IMPI) $(OPTFLAGS)
-MAKE_EXE_P	= $(MAKE_EXE) -DfalcON_PARALLEL
 NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) -lm
 

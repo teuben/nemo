@@ -198,7 +198,7 @@ namespace falcON { namespace compile_info {
 #  include <getparam.h>                            // NEMO parameter handling   
 #  include <history.h>                             // NEMO history              
 #  include <public/io.h>                           // my NEMO I/O & in/output   
-
+#  undef local
 extern string defv[];                              // MUST be supplied by user  
 extern string usage;	                           // MUST be supplied by user  
 namespace falcON { namespace defv_info {

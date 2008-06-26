@@ -43,6 +43,24 @@ falcON_TRAITS(falcON::bodies::block,"bodies::block");
 // struct falcON::bodies::block                                                 
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
+void bodies::block::clone(block*that)
+{
+  if(that == this) return;
+  DebugInfo(3,"bodies::block::clone(): cloning block with %d [%d] %s\n",
+	    that->NBOD,that->NALL,that->TYPE.name());
+  if(this->TYPE != that->TYPE)
+    falcON_THROW("bodies::block::clone(): bodytype mismatch ('%s' vs '%s')\n",
+		 this->TYPE.name(), that->TYPE.name());
+  for(fieldbit f; f; ++f) {
+    this->del_field(f);
+    this->set_data_void(f,that->data_void(f));
+    that->set_data_void(f,0);
+  }
+  this->NALL  = that->NALL;
+  this->NBOD  = that->NBOD;
+  this->FIRST = that->FIRST;
+}
+////////////////////////////////////////////////////////////////////////////////
 void bodies::block::reset_flags() const
 {
   if(0 != DATA[fieldbit::f]) {
@@ -73,7 +91,7 @@ void bodies::block::reset_data(fieldset b) const falcON_THROWING {
   if(DATA[BIT] && b.contain(BIT) && NBOD)	\
     for(int n=0; n!=NBOD; ++n)			\
       field_traits<BIT>::set_zero(datum<BIT>(n));
-  DEF_NAMED(RESETDATA)
+ DEF_NAMED(RESETDATA)
 #undef RESETDATA
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,10 +153,10 @@ bodies::block::block(unsigned no,                  // I: our No
 		     fieldset bits,                // I: data to allocate       
 		     bodies  *bods)                // I: pointer to my bodies   
   falcON_THROWING
-  : NALL ( na ), 
+  : TYPE ( type ),
+    NALL ( na ), 
     NBOD ( nb ), 
     NO   ( no ),
-    TYPE ( type ),
     FIRST( fst ),
     NEXT ( 0 ),
     BODS ( bods )
@@ -571,6 +589,33 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
 //                                                                              
 // class falcON::bodies                                                         
 //                                                                              
+////////////////////////////////////////////////////////////////////////////////
+// replace a given block
+#if(0)
+void bodies::replace_block(block*Bold, block*Bnew)
+{
+  // 1  get entry in BLOCK[]
+  if(Bold == 0) falcON_THROW("bodies::replace_block(): Bold=0\n");
+  bool found = false;
+  for(int p=0; p!=index::max_blocks; ++p)
+    if(BLOCK[p] == Bold) {
+      BLOCK[p] = Bnew;
+      found = true;
+      break;
+    }
+  if(!found) falcON_THROW("bodies::replace_block(): Bold (%p) not found\n",
+			  Bold);
+  // 2  get block::NEXT correct
+  Bnew->NEXT = Bold->NEXT;
+  for(int p=0; p!=index::max_blocks; ++p)
+    if(BLOCK[p] && BLOCK[p]->NEXT == Bold)
+      BLOCK[p]->NEXT = Bnew;
+  // 3  check for TYPES[] and FIRST
+  for(bodytype t; t; ++t)
+    if(TYPES[t] == Bold) TYPES[t] = Bnew;
+  if(FIRST == Bold) FIRST = Bnew;
+}
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 // reset blocks' FIRST entries
 void bodies::reset_firsts(int first[BT_NUM])

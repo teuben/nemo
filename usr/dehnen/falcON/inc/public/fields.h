@@ -87,8 +87,9 @@ namespace falcON {
     };
     //--------------------------------------------------------------------------
     /// data: 32 bits -> up to 32 flags can be supported
+    typedef int value_type;
   private:
-    int val;
+    value_type val;
     //--------------------------------------------------------------------------
     /// \name constructors and assignment
     //@{
@@ -569,6 +570,8 @@ namespace falcON {
     friend bool is_scalar(fieldbit);
     /// is the data field a vector?
     friend bool is_vector(fieldbit);
+    /// print datum of type known only at run time
+    friend std::ostream& print_field(std::ostream&, const char*, fieldbit);
   };// class fieldbit
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -675,7 +678,7 @@ namespace falcON {
       /// masses, phases, potentials, forces, flags
       gravity = basic|p|a|f,
       /// non-SPH source properties
-      source  = m|x|v|w|e|f|k|s,
+      source  = m|x|v|w|e|f|k|c|s,
       /// non-SPH non-source properties
       nonsource = p|q|a|j|r|i|y|z|l|n|d|h|t,
       /// all integer-type quantities
@@ -840,6 +843,13 @@ namespace falcON {
 	if(contain(f)) n += size(f);
       return n;
     }
+    /// the smallest # bytes to hold any one of the fields for a single body
+    size_t maxsize() const {
+      size_t n = 0;
+      for(fieldbit f; f; ++f)
+	if(contain(f)) update_max(n,size(f));
+      return n;
+    }
     /// formatted output: just give string of the letters corresponding to the
     /// fields in the set
     friend std::ostream& operator<< (std::ostream&, const fieldset&);
@@ -879,6 +889,54 @@ namespace falcON {
   inline bool is_integer(fieldbit f) { return fieldset::integers & 1<<f.val; }
   inline bool is_scalar (fieldbit f) { return fieldset::scalars & 1<<f.val; }
   inline bool is_vector (fieldbit f) { return fieldset::vectors & 1<<f.val; }
+  inline std::ostream& print_field(std::ostream&s, const char*x, fieldbit f)
+  {
+#define CAST(TYPE) *(static_cast<const TYPE*>(static_cast<const void*>(x)))
+    switch(value(f)) {
+    case fieldbit::m: return s << CAST(real);
+    case fieldbit::x: return s << CAST(vect);
+    case fieldbit::v: return s << CAST(vect);
+    case fieldbit::w: return s << CAST(vect);
+    case fieldbit::e: return s << CAST(real);
+    case fieldbit::f: return s << CAST(flags);
+    case fieldbit::k: return s << CAST(unsigned);
+    case fieldbit::s: return s << CAST(double);
+    case fieldbit::p: return s << CAST(real);
+    case fieldbit::q: return s << CAST(real);
+    case fieldbit::a: return s << CAST(vect);
+    case fieldbit::j: return s << CAST(vect);
+    case fieldbit::r: return s << CAST(real);
+    case fieldbit::i: return s << CAST(int);
+    case fieldbit::y: return s << CAST(real);
+    case fieldbit::z: return s << CAST(vect);
+    case fieldbit::l: return s << CAST(indx);
+    case fieldbit::n: return s << CAST(unsigned);
+    case fieldbit::c: return s << CAST(indx);
+    case fieldbit::h: return s << CAST(peanokey);
+    case fieldbit::d: return s << CAST(real);
+    case fieldbit::t: return s << CAST(real);
+    case fieldbit::H: return s << CAST(real);
+    case fieldbit::N: return s << CAST(unsigned);
+    case fieldbit::U: return s << CAST(real);
+    case fieldbit::Y: return s << CAST(real);
+    case fieldbit::I: return s << CAST(real);
+    case fieldbit::E: return s << CAST(real);
+    case fieldbit::K: return s << CAST(real);
+    case fieldbit::R: return s << CAST(real);
+    case fieldbit::A: return s << CAST(real);
+    case fieldbit::D: return s << CAST(real);
+    case fieldbit::J: return s << CAST(real);
+    case fieldbit::F: return s << CAST(real);
+    case fieldbit::C: return s << CAST(real);
+    case fieldbit::M: return s << CAST(real);
+    case fieldbit::S: return s << CAST(vect);
+#undef CAST
+    default:
+      falcON_THROWN("falcON::print(fieldbit %c): unknown field\n",
+		    letter(f));
+      return s;
+    }
+  }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // inline definitions of a friend of class fieldbit                         //
