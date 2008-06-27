@@ -14,7 +14,7 @@
  *      saferead -> fread()         fwrite()
  *
  * V 1.0: Joshua Barnes 4/87	basic I/O operators implemented,
- * V 1.X: Lyman Hurd 8/87	added f-d coercion, deferred input,
+ * V 1.X: Lyman Hurd 8/87	adde f-d coercion, deferred input,
  * V 2.0: Joshua Barnes 4/88	new types, operators, external format.
  * V 2.1: Peter Teuben:	4/90	bug in stacklength in filesecret.h removed
  * V 2.2: Peter Teuben: 9/90    random access I/O - swap
@@ -225,7 +225,7 @@ void put_tes(stream str, string tag)
     ss_pop(sspt);				/* flush stacked item       */
     put_data(str, NULL, TesType, NULL, 0);	/* output external token    */
     if (sspt->ss_stp == -1) {                   /* if at top level          */
-      dprintf(1,"\nput_tes(%s) flushing\n",tag);
+      dprintf(1,"put_tes(%s) flushing\n",tag);  /* removed '\n' 27/06/08 WD */
       fflush(str);                              /* flush buffer for Walter  */ 
     }
 }
