@@ -862,14 +862,14 @@ namespace WDutils {
   //////////////////////////////////////////////////////////////////////////////
 #if defined(DEBUG) || defined(EBUG)
 #  define THROW_BAD WDutils_THROWING
-#  define CHECK_BAD(M,R)					\
-  if(i< 0) {							\
-    warning("i=%d <  0 in Array subscript #%d",i,R);		\
-    WDutils_THROW("i=%d <  0 in Array subscript #%d",i,R);	\
-  }								\
-  if(i>=M) {							\
-    warning("i=%d >= N=%d in Array subscript #%d",i,M,R);	\
-    WDutils_THROW("i=%d >= N=%d in Array subscript #%d",i,M,R);	\
+#  define CHECK_BAD(M,R)						\
+  if(i< 0) {								\
+    WDutils_Warning("i=%d <  0 in Array subscript #%d",i,R);		\
+    WDutils_THROW("i=%d <  0 in Array subscript #%d",i,R);		\
+  }									\
+  if(i>=M) {								\
+    WDutils_Warning("i=%d >= N=%d in Array subscript #%d",i,M,R);	\
+    WDutils_THROW("i=%d >= N=%d in Array subscript #%d",i,M,R);		\
   }
 #else
 #  define THROW_BAD
