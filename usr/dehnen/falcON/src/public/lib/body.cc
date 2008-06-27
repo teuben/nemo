@@ -954,7 +954,7 @@ void bodies::create(unsigned N, bodytype t) falcON_THROWING
 bodies::iterator bodies::new_body(bodytype t) falcON_THROWING
 {
   if(0 == N_free(t)) {
-    warning("bodies::new_body(): no body available\n");
+    falcON_Warning("bodies::new_body(): no body available\n");
     return iterator(0);
   }
   for(const block* b=TYPES[t]; b; b=b->next_of_same_type())
@@ -1037,8 +1037,9 @@ fieldset bodies::read_snapshot(snap_in  const&snap,
   if(debug(1)) DebugInfo("bodies::read_snapshot(): read=%s\n",word(read));
   if(read & fieldset::source) mark_srce_data_changed();
   if(read & fieldset::sphmax) mark_sph_data_changed();
-  if(warn && want != read) warning("bodies::read_snapshot: couldn't read %s",
-				  word(read.missing(want)));
+  if(warn && want != read)
+    falcON_Warning("bodies::read_snapshot: couldn't read %s",
+		   word(read.missing(want)));
   return read;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -1109,13 +1110,14 @@ void bodies::read_simple_ascii(std::istream  &in,
   p_writer write[BT_NUM][100] = {0};
   if(Ni > 100) {
     Ni = 100;
-    warning(" can only read the first 100 data entries\n");
+    falcON_Warning(" can only read the first 100 data entries\n");
   }
   for(int i=0; i!=Ni; ++i) {
     if(debug(6)) DebugInfo("bodies::read_simple_ascii(): item[%d]=%c\n",
 			   i,letter(item[i]));
     if(get.contain(item[i]))
-      warning("bodies::read_simple_ascii(): reading item '%c' more than once",
+      falcON_Warning("bodies::read_simple_ascii(): "
+		     "reading item '%c' more than once",
 	      letter(item[i]));
     get |= fieldset(item[i]);
     switch(value(item[i])) {
@@ -1135,7 +1137,7 @@ void bodies::read_simple_ascii(std::istream  &in,
     }
   }
   if(Ni==100)
-    warning("bodies::read_simple_ascii(): cannot read >100 items\n");
+    falcON_Warning("bodies::read_simple_ascii(): cannot read >100 items\n");
   // 2. reset N & add fields                                                    
   reset(N, BITS|get);
   // 3. loop bodies & read data whereby ignoring lines starting with '#'        
@@ -1314,8 +1316,8 @@ namespace {
 	  falcON_DEL_O(P);
 	}
       if(warn)
-	warning("snapshot::del_pointer()"
-		"key '%s' not found in bank\n",k);
+	falcON_Warning("snapshot::del_pointer(): "
+		       "key '%s' not found in bank\n",k);
     }
     //--------------------------------------------------------------------------
     /// return a pointer referred to by a given key
@@ -1483,8 +1485,8 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
     falcON_THROW("snapshot::write_nemo() start body is not ours\n");
   if(n == 0) n = N_bodies()-i;
   else if(i + n > N_bodies()) {
-    warning("snapshot::write_nemo() cannot write %u bodies, "
-	    "will only write %u\n",n,N_bodies()-i);
+    falcON_Warning("snapshot::write_nemo() cannot write %u bodies, "
+		   "will only write %u\n",n,N_bodies()-i);
     n = N_bodies()-i;
   }
   unsigned nb[BT_NUM]={0}, nt=n, nc(0u);
@@ -1509,13 +1511,15 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_REAL_IS_FLOAT
 //------------------------------------------------------------------------------
-#define READ(BIT) if(!is_sph(BIT) && nd || ns) {			\
+#define READ(BIT)							\
+  if(!is_sph(BIT) && nd || ns) {					\
     unsigned nr = is_sph(BIT)? ns : ns+nd;				\
     unsigned fr = rec+rec + nr*field_traits<BIT>::size;			\
     if(fsze+fr > fsize) {						\
       fieldset miss = fgot.missing(read);				\
-      warning("bodies::read_gadget(): reached end of file \"%s\"; "	\
-	      "cannot read %s\n", file, word(miss));			\
+      falcON_Warning("bodies::read_gadget(): "				\
+		     "reached end of file \"%s\"; "			\
+		     "cannot read %s\n", file, word(miss));		\
       read &= fgot;							\
       goto NextFile;							\
     }									\
@@ -1645,8 +1649,8 @@ double bodies::read_gadget(const char*fname,
       unsigned fr = rec+rec + nm*sizeof(real);
       if(fsze+fr > fsize) {
 	fieldset miss = fgot.missing(read);
-	warning("bodies::read_gadget(): reached end of file \"%s\"; "
-		"cannot read %s\n", file, word(miss));
+	falcON_Warning("bodies::read_gadget(): reached end of file \"%s\"; "
+		       "cannot read %s\n", file, word(miss));
 	read &= fgot;
 	goto NextFile;
       }
@@ -1743,28 +1747,28 @@ double bodies::read_gadget(const char*fname,
   return header->time;
 }
 ////////////////////////////////////////////////////////////////////////////////
-#define WRITE(BIT)							\
-  if(!is_sph(BIT) || N_sph()) {						\
-    unsigned nw = is_sph(BIT)? N_sph() : N_bodies();			\
-    FortranORec F(out, nw * field_traits<BIT>::size, rec);		\
-    if(have(BIT)) {							\
-      if(N_sph())							\
+#define WRITE(BIT)							  \
+  if(!is_sph(BIT) || N_sph()) {						  \
+    unsigned nw = is_sph(BIT)? N_sph() : N_bodies();			  \
+    FortranORec F(out, nw * field_traits<BIT>::size, rec);		  \
+    if(have(BIT)) {							  \
+      if(N_sph())							  \
 	begin_typed_bodies(bodytype::gas).write_Fortran(F, BIT, N_sph()); \
-      if(!is_sph(BIT) && N_std())					\
+      if(!is_sph(BIT) && N_std())					  \
         begin_typed_bodies(bodytype::std).write_Fortran(F, BIT, N_std()); \
-      if(debug(2)) DebugInfo("bodies::write_gadget(): written %u %c\n",	\
-			     nw, field_traits<BIT>::word());		\
-    } else {								\
-      if(warn)								\
-	falcON_Warning("bodies::write_gadget(): "			\
-                       "don't have %c, write out zeros\n",		\
-                       field_traits<BIT>::word());			\
-      F.fill_bytes(nw);							\
-      if(debug(2))							\
-        DebugInfo(2,"bodies::write_gadget(): written %u 0 for %c\n",	\
-		  nw, field_traits<BIT>::word());			\
-    }									\
-    written |= fieldset(BIT);						\
+      if(debug(2)) DebugInfo("bodies::write_gadget(): written %u %c\n",	  \
+			     nw, field_traits<BIT>::word());		  \
+    } else {								  \
+      if(warn)								  \
+	falcON_Warning("bodies::write_gadget(): "			  \
+                       "don't have %c, write out zeros\n",		  \
+                       field_traits<BIT>::word());			  \
+      F.fill_bytes(nw);							  \
+      if(debug(2))							  \
+        DebugInfo(2,"bodies::write_gadget(): written %u 0 for %c\n",	  \
+		  nw, field_traits<BIT>::word());			  \
+    }									  \
+    written |= fieldset(BIT);						  \
   }
 //------------------------------------------------------------------------------
 void bodies::write_gadget(output&out, double time, fieldset write,
@@ -1784,7 +1788,7 @@ void bodies::write_gadget(output&out, double time, fieldset write,
   fieldset written;
   WRITE(fieldbit::x);               // positions:   compulsary in gadget
   WRITE(fieldbit::v);               // velocities:  compulsary in gadget
-  WRITE(fieldbit::k);               // kyes:        compulsary in gadget
+  WRITE(fieldbit::k);               // keys:        compulsary in gadget
   WRITE(fieldbit::m);               // masses:      compulsary in gadget
   WRITE(fieldbit::U);               // U_internal:  compulsary in gadget
   if(write & fieldset("RHpa")) {

@@ -347,7 +347,7 @@ WD99disc::WD99disc(int    no,                 // # particles/orbit (approx)
     d2pdr2/=Rsig;
     epfreq = sqrt(d2pdr2+3*gradp/Rsig);
     sig0=3.36*Dens0*Qmin*exp(1-(rsig*iRd))/epfreq;
-    warning("FYI, vel. disp. at R=0 is %lf",sig0);
+    DebugInfo(1,"WD99disc: vel. disp. at R=0 is %lf",sig0);
   } 
 }
 //------------------------------------------------------------------------------

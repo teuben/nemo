@@ -47,11 +47,11 @@ Integrator::Integrator(const ForceAndDiagnose*S,
   char     comp[32];
   fieldset test;
   if( (test=predALL & ~fieldset(fieldset::x|fieldset::w)) ) 
-    warning("Integration: will not predict '%s'", test.make_word(comp));
+    falcON_Warning("Integration: will not predict '%s'", test.make_word(comp));
   if( (test=kickALL & ~fieldset(fieldset::v)) )
-    warning("Integration: will not kick '%s'", test.make_word(comp));
+    falcON_Warning("Integration: will not kick '%s'", test.make_word(comp));
   if( (test=rembALL & ~fieldset(fieldset::w)) )
-    warning("Integration: will not remember '%s'", test.make_word(comp));
+    falcON_Warning("Integration: will not remember '%s'", test.make_word(comp));
   if( predALL & fieldset::w && !(kickALL & fieldset::v) )
     falcON_THROW("Integration: cannot predict w without kicking v");
   if( predALL & fieldset::x && !(kickALL & fieldset::v) )
@@ -62,11 +62,11 @@ Integrator::Integrator(const ForceAndDiagnose*S,
 #ifdef falcON_SPH
   if( (test=predSPH & ~fieldset(fieldset::x|fieldset::H|fieldset::R|
 				fieldset::Y|fieldset::V)) ) 
-    warning("Integration: will not predict '%s'", test.make_word(comp));
+    falcON_Warning("Integration: will not predict '%s'", test.make_word(comp));
   if( (test=kickSPH & ~fieldset(fieldset::U|fieldset::v)) )
-    warning("Integration: will not kick '%s'", test.make_word(comp));
+    falcON_Warning("Integration: will not kick '%s'", test.make_word(comp));
   if( (test=rembSPH & ~fieldset(fieldset::V|fieldset::Y)) )
-    warning("Integration: will not remember '%s'", test.make_word(comp));
+    falcON_Warning("Integration: will not remember '%s'", test.make_word(comp));
   if( predSPH & fieldset::V && !((kickSPH|kickALL) & fieldset::v) )
     falcON_THROW("Integration: cannot predict V without kicking v");
   if( predSPH & fieldset::Y && !(kickSPH & fieldset::U) )

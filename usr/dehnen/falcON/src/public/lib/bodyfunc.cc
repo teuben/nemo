@@ -397,7 +397,7 @@ namespace {
 		 "mv %s.bak %s >& /dev/null; chmod 666 %s >& /dev/null",
 		 fullfile,fullfile,fullfile);
 	DebugInfo(10,"executing \"%s\"\n",cmmd);
-	if(system(cmmd)) warning("problems unlocking database\n");
+	if(system(cmmd)) falcON_Warning("problems unlocking database\n");
 	locked = 0;
       }
     }
@@ -1251,10 +1251,10 @@ falcON::Bodyfunc::Bodyfunc(const char*expr, const char*pars)
 		      "expression \"%s\" requires %d parameters, "
 		      "but only %d are given", expr,NPAR,n);
     if(n > NPAR)
-      warning("Bodyfunc::Bodyfunc(): "
-	      "expression \"%s\" requires %d parameters, "
-	      "but %d are given; will ignore last %d",
-	      expr,NPAR,n,n-NPAR);
+      falcON_Warning("Bodyfunc::Bodyfunc(): "
+		     "expression \"%s\" requires %d parameters, "
+		     "but %d are given; will ignore last %d",
+		     expr,NPAR,n,n-NPAR);
   }
 }
 //------------------------------------------------------------------------------
@@ -1273,10 +1273,10 @@ falcON::Bodyfunc::Bodyfunc(const char*expr, const real*pars, int npar)
 		      "expression \"%s\" requires %d parameters, "
 		      "but only %d are given", expr,NPAR,npar);
     if(npar > NPAR)
-      warning("Bodyfunc::Bodyfunc(): "
-	      "expression \"%s\" requires %d parameters, "
-	      "but %d are given; will ignore last %d",
-	      expr,NPAR,npar,npar-NPAR);
+      falcON_Warning("Bodyfunc::Bodyfunc(): "
+		     "expression \"%s\" requires %d parameters, "
+		     "but %d are given; will ignore last %d",
+		     expr,NPAR,npar,npar-NPAR);
     if(npar > 0) {
       int _len = npar*16;
       PARS = falcON_NEW(char,_len);

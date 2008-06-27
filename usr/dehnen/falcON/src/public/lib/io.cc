@@ -313,9 +313,10 @@ void output::__open(bool append)
 void output::close() {
   if(FREC) {
     if(FILE)
-      warning("closing FortranORec before output from file \"%s\"\n",FILE);
+      falcON_Warning("closing FortranORec before output from file \"%s\"\n",
+		     FILE);
     else
-      warning("closing FortranORec before output\n");
+      falcON_Warning("closing FortranORec before output\n");
     FREC->close();
   }
   DebugInfo(2,"output: closing\n");
@@ -353,9 +354,10 @@ void input::__open() {
 void input::close() {
   if(FREC) {
     if(FILE)
-      warning("closing FortranIRec before input from file \"%s\"\n",FILE);
+      falcON_Warning("closing FortranIRec before input from file \"%s\"\n",
+		     FILE);
     else
-      warning("closing FortranIRec before input\n");
+      falcON_Warning("closing FortranIRec before input\n");
     FREC->close();
   }
   DebugInfo(2,"input: closing\n");
@@ -513,7 +515,7 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
 	       TimeTag,FloatType,&__TIME,0);
       TIME = __TIME;
     } else
-      warning("nemo input: unknown type '%s' for time\n",time_type);
+      falcON_Warning("nemo input: unknown type '%s' for time\n",time_type);
   }
   if(HAS_TIME)
     DebugInfo(5,"  read time = %f\n",TIME);
@@ -633,8 +635,8 @@ data_in::~data_in()
 void data_in::read(void*data, unsigned n)
 {
   if(NREAD + n > NTOT) {
-    warning("nemo input of %s: cannot read %d, only %d data left",
-	    NemoTag(FIELD), n, NTOT-NREAD);
+    falcON_Warning("nemo input of %s: cannot read %d, only %d data left",
+		   NemoTag(FIELD), n, NTOT-NREAD);
     n = NTOT - NREAD;
   }
   if(n) {
@@ -814,8 +816,8 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
 data_out::~data_out()
 {
   if(NWRITTEN != NTOT)
-    warning("nemo output of %s: assigned %d, written only %d bodies\n",
-	    NemoTag(FIELD), NTOT, NWRITTEN);
+    falcON_Warning("nemo output of %s: assigned %d, written only %d bodies\n",
+		   NemoTag(FIELD), NTOT, NWRITTEN);
   put_data_tes(static_cast< ::stream >(OUTPUT.stream()),NemoTag(FIELD));
   OUTPUT.DATA_OUT        = 0;
   OUTPUT.FIELDS_WRITTEN |= FIELD;
@@ -826,8 +828,9 @@ data_out::~data_out()
 void data_out::write(const void*data, unsigned n)
 {
   if(NWRITTEN + n > NTOT) {
-    warning("nemo output of %s: cannot write %d, only %d free spaces left",
-	    NemoTag(FIELD), n, NTOT-NWRITTEN);
+    falcON_Warning("nemo output of %s: "
+		   "cannot write %d, only %d free spaces left\n",
+		   NemoTag(FIELD), n, NTOT-NWRITTEN);
     n = NTOT - NWRITTEN;
   }
   put_data_blocked(static_cast< ::stream >(OUTPUT.stream()),
@@ -945,8 +948,8 @@ unsigned falcON::FortranIRec::read_bytes(char*buf, unsigned n)
 {
   if(!IN) throw exception("FortranIRec::read_bytes(): input corrupted");
   if(READ + n > SIZE) {
-    warning("FortranIRec::read(): cannot read %u, but only %u bytes\n",
-	    n, SIZE-READ);
+    falcON_Warning("FortranIRec::read(): cannot read %u, but only %u bytes\n",
+		   n, SIZE-READ);
     n = SIZE - READ;
   }
   IN.read(buf,n);
@@ -966,8 +969,8 @@ void falcON::FortranIRec::close() throw(falcON::exception)
 {
   if(!IN) throw exception("FortranIRec::close(): input corrupted");
   if(READ != SIZE) {
-    warning("FortranIRec: only %u of %u bytes read on closing record\n",
-	    READ, SIZE);
+    falcON_Warning("FortranIRec: only %u of %u bytes read on closing record\n",
+		   READ, SIZE);
     for(char C; READ!=SIZE; ++READ) IN.read(&C,1);
   }
   unsigned S = read_size();
@@ -1008,8 +1011,8 @@ unsigned falcON::FortranORec::write_bytes(const char*buf, unsigned n)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(WRITTEN + n > SIZE) {
-    warning("FortranORec::write(): cannot read %u, but only %u bytes\n",
-	    n, SIZE-WRITTEN);
+    falcON_Warning("FortranORec::write(): cannot read %u, but only %u bytes\n",
+		   n, SIZE-WRITTEN);
     n = SIZE - WRITTEN;
   }
   OUT.write(buf,n);
@@ -1028,8 +1031,8 @@ void falcON::FortranORec::close() throw(falcON::exception)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(WRITTEN!=SIZE) {
-    warning("FortranORec: only %u of %u bytes written on closing record"
-	    " ... padding with 0\n", WRITTEN, SIZE);
+    falcON_Warning("FortranORec: only %u of %u bytes written on closing record"
+		   " ... padding with 0\n", WRITTEN, SIZE);
     for(char C=0; WRITTEN!=SIZE; ++WRITTEN) OUT.write(&C,1);
   }
   write_size();
@@ -1106,7 +1109,7 @@ bool falcON::GadgetHeader::Read(input& in, unsigned rec, bool& swap)
     in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32));
     if(swap) swap_bytes(S);
     if(S != sizeof(GadgetHeader)) {
-      warning("GadgetHeader::Read(): record size mismatch\n");
+      falcON_Warning("GadgetHeader::Read(): record size mismatch\n");
       return false;
     }
   } else if(rec == 8) {
@@ -1114,7 +1117,7 @@ bool falcON::GadgetHeader::Read(input& in, unsigned rec, bool& swap)
     in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64));
     if(swap) swap_bytes(S);
     if(S != sizeof(GadgetHeader)) {
-      warning("GadgetHeader::Read(): record size mismatch\n");
+      falcON_Warning("GadgetHeader::Read(): record size mismatch\n");
       return false;
     }
   }
@@ -1126,14 +1129,14 @@ bool falcON::GadgetHeader::mismatch(GadgetHeader const&H) const {
 #define CHECK_I(FIELD,FIELDNAME)				\
   if(FIELD != H.FIELD) {					\
     okay = false;						\
-    warning("GadgetHeader \"%s\" mismatch (%u vs %u)\n",	\
-	    FIELDNAME, FIELD, H.FIELD);				\
+    falcON_Warning("GadgetHeader \"%s\" mismatch (%u vs %u)\n",	\
+		   FIELDNAME, FIELD, H.FIELD);			\
   }
-#define CHECK_D(FIELD,FIELDNAME)			\
-  if(FIELD != H.FIELD) {				\
-    okay = false;					\
-    warning("GadgetHeader\"%s\" mismatch (%f vs %f)\n",	\
-	    FIELDNAME, FIELD, H.FIELD);			\
+#define CHECK_D(FIELD,FIELDNAME)				\
+  if(FIELD != H.FIELD) {					\
+    okay = false;						\
+    falcON_Warning("GadgetHeader\"%s\" mismatch (%f vs %f)\n",	\
+		   FIELDNAME, FIELD, H.FIELD);			\
   }
   CHECK_D(time,"time");
   CHECK_D(redshift,"redshift");
@@ -1168,9 +1171,9 @@ bool falcON::GadgetHeader::mismatch(GadgetHeader const&H) const {
 void falcON::GadgetHeader::check_simple_npart_error() {
   for(int k=0; k!=6; ++k)
     if(npart[k] > npartTotal[k]) {
-      warning("GadgetHeader: npart[%u]=%u > npartTotal[%u]=%u: "
-	      "we will try to fix by setting npartTotal[%u]=%u\n",
-	      k,npart[k],k,npartTotal[k],k,npart[k]);
+      falcON_Warning("GadgetHeader: npart[%u]=%u > npartTotal[%u]=%u: "
+		     "we will try to fix by setting npartTotal[%u]=%u\n",
+		     k,npart[k],k,npartTotal[k],k,npart[k]);
       npartTotal[k] = npart[k];
     }
 }
