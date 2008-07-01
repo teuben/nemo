@@ -53,7 +53,7 @@ namespace falcON {
   protected:
     static uint8   &level_ (OctTree::Cell* const&C) { return C->LEVEL; }
     static uint8   &octant_(OctTree::Cell* const&C) { return C->OCTANT; }
-#ifdef falcON_PROPER
+#ifdef falcON_MPI
     static PeanoMap&peano_ (OctTree::Cell* const&C) { return C->PEANO; }
     static uint8   &key_   (OctTree::Cell* const&C) { return C->KEY; }
 #endif
@@ -519,16 +519,14 @@ namespace {
     }
     //--------------------------------------------------------------------------
     // shrink box to its octant i                                               
-    inline void shrink_to_octant(box*B, int i) {
+    inline bool shrink_to_octant(box*B, int i) {
       indx l = ++(B->LEVEL);
-      if(l > DMAX)
-	falcON_Error("exceeding maximum tree depth of %d\n    "
-		     "(presumably more than Ncrit=%d bodies have a "
-		     "common position which may be NaN)", DMAX,NCRIT);
+      if(l > DMAX) return false;
       real rad=RA[l];
       if(i&1) centre(B)[0] += rad;  else  centre(B)[0] -= rad;
       if(i&2) centre(B)[1] += rad;  else  centre(B)[1] -= rad;
       if(i&4) centre(B)[2] += rad;  else  centre(B)[2] -= rad;
+      return true;
     }
     //--------------------------------------------------------------------------
     inline box* new_box(size_t const&nl) {
@@ -544,8 +542,16 @@ namespace {
       box* P = new_box(nl);                        // get box off the stack     
       P->LEVEL    = B->LEVEL;                      // set level                 
       P->centre() = B->centre();                   // copy centre of parent     
-      shrink_to_octant(P,i);                       // shrink to correct octant  
-#ifdef falcON_PROPER
+      if(!shrink_to_octant(P,i))                   // shrink to correct octant  
+	falcON_Error("exceeding maximum tree depth of %d\n    "
+		     "(presumably more than Ncrit=%d bodies have a "
+		     "common position which may be NaN;\n          "
+		     "first dot in this box has i=%d, x=%g,%g,%g)\n",
+		     DMAX,NCRIT,TREE->my_bodies()->bodyindex(B->DOTS->LINK),
+		     B->DOTS->pos()[0],B->DOTS->pos()[1],B->DOTS->pos()[2]);
+	
+
+#ifdef falcON_MPI
       P->PEANO    = B->PEANO;                      // copy peano map            
       P->PEANO.shift_to_kid(i);                    // shift peano map           
 #endif
@@ -728,7 +734,7 @@ namespace {
       for(int l=0; l!=DMAX; ++l) RA[l+1] = half * RA[l];
       P0->LEVEL = 0;
       P0->centre() = x0;
-#ifdef falcON_PROPER
+#ifdef falcON_MPI
       P0->PEANO.set_root();
 #endif
     }
@@ -809,7 +815,7 @@ namespace {
     int dep=0;                                     // depth of cell             
     level_ (C) = P->LEVEL;                         // copy level                
     octant_(C) = o;                                // set octant                
-#ifdef falcON_PROPER
+#ifdef falcON_MPI
     peano_ (C) = P->PEANO;                         // copy peano map            
     key_   (C) = k;                                // set local peano key       
 #endif
@@ -841,7 +847,7 @@ namespace {
 	if(*N && P->marked_as_box(i)) {            //     IF sub-box            
 	  pacell_(Ci) = c;                         //       sub-cell's parent   
 	  int de = link_cells_1(static_cast<box*>(*N), i,
-#ifdef falcON_PROPER
+#ifdef falcON_MPI
 				P->PEANO.key(i),
 #else
 				0,
@@ -884,7 +890,7 @@ namespace {
     int dep=0;                                     // depth of cell             
     level_ (C) = P->LEVEL;                         // copy level                
     octant_(C) = o;                                // set octant                
-#ifdef falcON_PROPER
+#ifdef falcON_MPI
     peano_ (C) = P->PEANO;                         // copy peano map            
     key_   (C) = k;                                // set local peano key       
 #endif
@@ -931,7 +937,7 @@ namespace {
 	  if(*N && P->marked_as_box(i)) {          //       IF sub-box          
 	    pacell_(Ci) = c;                       //         sub-cell's parent 
 	    int de = link_cells_N(static_cast<box*>(*N), i,
-#ifdef falcON_PROPER
+#ifdef falcON_MPI
 				  P->PEANO.key(i),
 #else
 				  0,

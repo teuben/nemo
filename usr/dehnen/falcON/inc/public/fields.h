@@ -570,6 +570,8 @@ namespace falcON {
     friend bool is_scalar(fieldbit);
     /// is the data field a vector?
     friend bool is_vector(fieldbit);
+    /// is the data field a vector?
+    friend bool is_vector(bits);
     /// print datum of type known only at run time
     friend std::ostream& print_field(std::ostream&, const char*, fieldbit);
   };// class fieldbit
@@ -889,6 +891,7 @@ namespace falcON {
   inline bool is_integer(fieldbit f) { return fieldset::integers & 1<<f.val; }
   inline bool is_scalar (fieldbit f) { return fieldset::scalars & 1<<f.val; }
   inline bool is_vector (fieldbit f) { return fieldset::vectors & 1<<f.val; }
+  inline bool is_vector (fieldbit::bits b) { return fieldset::vectors & 1<<b; }
   inline std::ostream& print_field(std::ostream&s, const char*x, fieldbit f)
   {
 #define CAST(TYPE) *(static_cast<const TYPE*>(static_cast<const void*>(x)))
