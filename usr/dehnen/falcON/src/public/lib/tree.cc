@@ -53,7 +53,7 @@ namespace falcON {
   protected:
     static uint8   &level_ (OctTree::Cell* const&C) { return C->LEVEL; }
     static uint8   &octant_(OctTree::Cell* const&C) { return C->OCTANT; }
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
     static PeanoMap&peano_ (OctTree::Cell* const&C) { return C->PEANO; }
     static uint8   &key_   (OctTree::Cell* const&C) { return C->KEY; }
 #endif
@@ -545,7 +545,7 @@ namespace {
       P->LEVEL    = B->LEVEL;                      // set level                 
       P->centre() = B->centre();                   // copy centre of parent     
       shrink_to_octant(P,i);                       // shrink to correct octant  
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
       P->PEANO    = B->PEANO;                      // copy peano map            
       P->PEANO.shift_to_kid(i);                    // shift peano map           
 #endif
@@ -728,7 +728,7 @@ namespace {
       for(int l=0; l!=DMAX; ++l) RA[l+1] = half * RA[l];
       P0->LEVEL = 0;
       P0->centre() = x0;
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
       P0->PEANO.set_root();
 #endif
     }
@@ -809,7 +809,7 @@ namespace {
     int dep=0;                                     // depth of cell             
     level_ (C) = P->LEVEL;                         // copy level                
     octant_(C) = o;                                // set octant                
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
     peano_ (C) = P->PEANO;                         // copy peano map            
     key_   (C) = k;                                // set local peano key       
 #endif
@@ -841,7 +841,7 @@ namespace {
 	if(*N && P->marked_as_box(i)) {            //     IF sub-box            
 	  pacell_(Ci) = c;                         //       sub-cell's parent   
 	  int de = link_cells_1(static_cast<box*>(*N), i,
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
 				P->PEANO.key(i),
 #else
 				0,
@@ -884,7 +884,7 @@ namespace {
     int dep=0;                                     // depth of cell             
     level_ (C) = P->LEVEL;                         // copy level                
     octant_(C) = o;                                // set octant                
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
     peano_ (C) = P->PEANO;                         // copy peano map            
     key_   (C) = k;                                // set local peano key       
 #endif
@@ -931,7 +931,7 @@ namespace {
 	  if(*N && P->marked_as_box(i)) {          //       IF sub-box          
 	    pacell_(Ci) = c;                       //         sub-cell's parent 
 	    int de = link_cells_N(static_cast<box*>(*N), i,
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
 				  P->PEANO.key(i),
 #else
 				  0,

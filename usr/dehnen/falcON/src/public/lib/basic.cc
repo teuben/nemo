@@ -95,15 +95,6 @@ void falcON::CheckAgainstLibrary(falcON::Status Current,
       falcON_THROW("STATUS mismatch: "
 		   "%s was not compiled for SPH, "
 		   "but library was.\n",Program);
-    // check MPI
-    if( Current&mpi_version && !(Library&mpi_version) )
-      falcON_THROW("STATUS mismatch: "
-		   "%s was compiled for MPI, "
-		   "but library was not.\n",Program);
-    else if( Library&mpi_version && !(Current&mpi_version) )
-      falcON_THROW("STATUS mismatch: "
-		   "%s was not compiled for MPI, "
-		   "but library was.\n",Program);
     // check real
     if( Current&real_is_double && !(Library&real_is_double) )
       falcON_THROW("STATUS mismatch: "

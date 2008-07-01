@@ -1496,8 +1496,12 @@ namespace falcON {
     double           TINI;
     mutable double   TIME;
     void            *PBNK;
+    ParallelSnapshot*PARA;                         // parent if MPI parallel    
     //--------------------------------------------------------------------------
+  protected:
+    void set_parallel(ParallelSnapshot*P) { PARA = P; }
   public:
+    ParallelSnapshot*parallel() { return PARA; }
     //==========================================================================
     // \name initial-time information and manipulation                         
     bool const&has_initial_time() const { return INIT; }  ///< has initial time?
@@ -1608,7 +1612,7 @@ namespace falcON {
     /// used in NBodyCode::NBodyCode() of file nbody.h
     explicit
     snapshot(fieldset Bd= fieldset(DefaultBits)) falcON_THROWING :
-    bodies(Bd), INIT(false), TINI(0.), TIME(0.), PBNK(0)
+    bodies(Bd), INIT(false), TINI(0.), TIME(0.), PBNK(0), PARA(0)
     {}
     //--------------------------------------------------------------------------
     /// Constructor 1 (new version)
@@ -1621,7 +1625,7 @@ namespace falcON {
 	     const unsigned N[BT_NUM],
 	     fieldset       Bd= fieldset(DefaultBits)) falcON_THROWING :
     bodies(N,Bd),
-    INIT(true), TINI(t), TIME(t), PBNK(0)
+    INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0)
     {}
     //--------------------------------------------------------------------------
     /// copy constructor from bodies
@@ -1636,7 +1640,7 @@ namespace falcON {
 	     bodies const&B,
 	     fieldset     Bd=fieldset::all,
 	     flags        F =flags::empty) falcON_THROWING :
-    bodies(B,Bd,F), INIT(true), TINI(t), TIME(t), PBNK(0)
+    bodies(B,Bd,F), INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0)
     {}
     //--------------------------------------------------------------------------
     /// copy constructor from snapshot

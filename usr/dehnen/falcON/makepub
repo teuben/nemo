@@ -51,9 +51,6 @@ types_h			:= $(IPUB)types.h $(basic_h) $(tensor_h)
 default_h		:= $(IPUB)default.h $(types_h)
 interact_h		:= $(IPUB)interact.h $(basic_h)
 fields_h		:= $(IPUB)fields.h $(types_h)
-ifdef DMPI
-peano_h			:= $(IPAR)peano.h $(types_h)
-endif
 ifdef DPROPER
 gravity_ind_cc		:= $(IPRO)gravity_ind.cc
 gravity_pro		:= $(gravity_ind_cc)

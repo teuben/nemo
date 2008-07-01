@@ -118,8 +118,7 @@ namespace falcON {
     debug_version   = 2,
     nemo_version    = 4,
     sph_version     = 8,
-    mpi_version     = 16,
-    real_is_double  = 32 };
+    real_is_double  = 16 };
   //----------------------------------------------------------------------------
   inline Status CurrentStatus() {
     int status = public_version;
@@ -134,9 +133,6 @@ namespace falcON {
 #endif
 #ifdef falcON_SPH
     status |= sph_version;
-#endif
-#ifdef falcON_MPI
-    status |= mpi_version;
 #endif
 #ifdef falcON_DOUBLE
     status |= real_is_double;

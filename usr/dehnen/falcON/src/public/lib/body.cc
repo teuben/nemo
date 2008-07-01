@@ -1402,7 +1402,8 @@ snapshot::snapshot(snapshot const&S,
   INIT   ( S.INIT ),
   TINI   ( S.TINI ),
   TIME   ( S.TIME ),
-  PBNK   ( S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) : 0 )
+  PBNK   ( S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) : 0 ),
+  PARA   ( 0 )
 {}
 ////////////////////////////////////////////////////////////////////////////////
 #if(0) // not yet implemented due to bodies::copy() missing

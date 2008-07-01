@@ -43,9 +43,9 @@
 #  include <iomanip>
 #  define falcON_included_iomanip
 #endif
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
 #  ifndef falcON_included_peano_h
-#    include <parallel/peano.h>
+#    include <proper/peano.h>
 #  endif
 #else
 namespace falcON {
@@ -272,7 +272,7 @@ namespace falcON {
       friend bool     has_leaf_kids (const Cell*);
       friend bool     is_twig       (const Cell*);
       friend bool     is_branch     (const Cell*);
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
       friend PeanoMap const&peano   (const Cell*);
       friend uint8    const&localkey(const Cell*);
 #endif
@@ -805,7 +805,7 @@ namespace falcON {
   // also serve to inject these functions into namespace falcON               //
   //                                                                          //
   // ///////////////////////////////////////////////////////////////////////////
-#ifdef falcON_MPI
+#ifdef falcON_PROPER
   inline PeanoMap const&peano(const OctTree::Cell*C) { return C->PEANO; }
   inline uint8 const&localkey(const OctTree::Cell*C) { return C->KEY; }
 #endif

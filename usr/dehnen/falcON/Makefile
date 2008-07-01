@@ -46,23 +46,18 @@ ifdef DWALTER
 DSPH			:= -DfalcON_SPH
 endif
 
-ifdef DWALTER
-# 3.3 MPI parallel code (under development)
-#DMPI			:= -DfalcON_MPI
-endif
-
-# 3.4 individual softening lengths (default: non-adaptive)
+# 3.3 individual softening lengths (default: non-adaptive)
 DSOFT 			:= -DfalcON_INDI# -DfalcON_ADAP
 
-# 3.5 precision of floating point numbers (default: 32 bit)
+# 3.4 precision of floating point numbers (default: 32 bit)
 DPRECISION		:= -DfalcON_SINGLE#       32 bit    default
 #DPRECISION		:= -DfalcON_DOUBLE#       64 bit
 
 
-# 3.6 compile with little optimisation
+# 3.5 compile with little optimisation
 #DEBUG			:= -DEBUG -DDEBUG
 
-# 3.7 use static library
+# 3.6 use static library
 #     NOTE: this will break make since executables are no re-made if library is
 ifdef DEBUG
 #STATIC		:= -static
@@ -116,12 +111,7 @@ ifdef DSPH
 -include sph/make
 endif
 
-# 5.5 parallel/make: additional targets for MPI parallel version
-ifdef DMPI
--include parallel/make
-endif
-
-# 5.6 additional targets for any private sandboxes
+# 5.5 additional targets for any private sandboxes
 ifdef DWALTER
 -include walter/make
 endif

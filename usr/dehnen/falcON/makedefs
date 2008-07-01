@@ -171,10 +171,10 @@ RL		:= ranlib
 # compiler and linker flags
 # -------------------------
 
-NBDYFLAGS	:= $(DMPI) $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) $(DWALTER)
+NBDYFLAGS	:= $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) $(DWALTER)
 
-CFLAGS		:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DMPI) $(DEBUG)
-CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DMPI) $(DEBUG)
+CFLAGS		:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DEBUG)
+CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DEBUG)
 
 # ---------------
 # WDutils library
@@ -207,11 +207,11 @@ endif
 # compile and link commands
 # -------------------------
 
-MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS)
-MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS) $(NBDYFLAGS) -shared
-MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS) -shared
-MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(IMPI) $(CXXFLAGS)
-MAKE_EXE_C	= $(CC)  -o $@ $< -I$(INC) $(IUTIL) $(IMPI) $(CFLAGS)
-MAKE_EXE_F	= $(FC)  -o $@ $< -I$(INC) $(IUTIL) $(IMPI) $(OPTFLAGS)
+MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS)
+MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS) $(NBDYFLAGS) -shared
+MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS) -shared
+MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS)
+MAKE_EXE_C	= $(CC)  -o $@ $< -I$(INC) $(IUTIL) $(CFLAGS)
+MAKE_EXE_F	= $(FC)  -o $@ $< -I$(INC) $(IUTIL) $(OPTFLAGS)
 NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) -lm
 
