@@ -108,10 +108,12 @@ namespace {
   {
     fprintf(stderr,header);
     if(name && RunInfo::name_known())
-      fprintf(stderr,"[%s]: ",RunInfo::name());
+      fprintf(stderr," [%s]",RunInfo::name());
     if(RunInfo::is_mpi_proc())
-      fprintf(stderr,"@%d: ",RunInfo::mpi_proc());
-    if(file) fprintf(stderr,"[%s:%d]: ",file,line);
+      fprintf(stderr," @%d",RunInfo::mpi_proc());
+    if(file)
+      fprintf(stderr," [%s:%d]",file,line);
+    fprintf(stderr,": ",file,line);
     vfprintf(stderr,fmt,ap);
     if (fmt[strlen(fmt)-1] != '\n')
       fprintf(stderr,"\n");
@@ -130,24 +132,24 @@ namespace {
     const int size=1024;
     int s=size, w=0;
     char ffmt[size], *t=ffmt;
-    w=snprintf(t,s,"### %s %s :",lib,issue);
+    w=snprintf(t,s,"### %s %s",lib,issue);
     t+=w; s-=w;
     if(name && RunInfo::name_known()) {
-      w=snprintf(t,s,"[%s]: ",RunInfo::name());
+      w=snprintf(t,s," [%s]",RunInfo::name());
       t+=w; s-=w;
     }
     if(RunInfo::is_mpi_proc()) {
-      w=snprintf(t,s,"@%d: ",RunInfo::mpi_proc());
+      w=snprintf(t,s," @%d",RunInfo::mpi_proc());
       t+=w; s-=w;
     }
     if(file) {
-      w=snprintf(t,s,"[%s:%d]: ",file,line);
+      w=snprintf(t,s," [%s:%d]",file,line);
       t+=w; s-=w;
     }
     if (fmt[strlen(fmt)-1] != '\n')
-      w=snprintf(t,s,"%s\n",fmt);
+      w=snprintf(t,s,": %s\n",fmt);
     else
-      w=snprintf(t,s,"%s",fmt);
+      w=snprintf(t,s,": %s",fmt);
     t+=w; s-=w;
     vfprintf(stderr,ffmt,ap);
     fflush(stderr);
@@ -162,7 +164,7 @@ void WDutils::Error::operator()(const char* fmt, ...) const
 {
 #ifdef PRINTERR_STEP
   char header[35];
-  SNprintf(header,35,"### %s Error: ",lib);
+  SNprintf(header,35,"### %s Error",lib);
   va_list  ap;
   va_start(ap,fmt);
   printerr(header, fmt, ap, file, line);
@@ -179,7 +181,7 @@ void WDutils::Warning::operator()(const char* fmt, ...) const
 {
 #ifdef PRINTERR_STEP
   char header[37];
-  SNprintf(header,37,"### %s Warning: ",lib);
+  SNprintf(header,37,"### %s Warning",lib);
   va_list  ap;
   va_start(ap,fmt);
   printerr(header, fmt, ap, file, line);
@@ -195,7 +197,7 @@ void WDutils::__DebugInfo::operator()(const char* fmt, ...) const
 {
 #ifdef PRINTERR_STEP
   char header[40];
-  SNprintf(header,40,"### %s Debug Info: ",lib);
+  SNprintf(header,40,"### %s Debug Info",lib);
   va_list  ap;
   va_start(ap,fmt);
   printerr(header, fmt, ap, file, line, false);
