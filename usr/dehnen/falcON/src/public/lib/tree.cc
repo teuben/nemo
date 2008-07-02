@@ -537,20 +537,24 @@ namespace {
     inline box* make_subbox(                       // R: new box                
 			    const box*B,           // I: parent box             
 			    int       i,           // I: parent box's octant    
-			    size_t    nl)          // I: # dots added sofar     
+			    size_t    nl,          // I: # dots added sofar     
+			    dot      *L=0)         // I: dot of octant          
     {
       box* P = new_box(nl);                        // get box off the stack     
       P->LEVEL    = B->LEVEL;                      // set level                 
       P->centre() = B->centre();                   // copy centre of parent     
       if(!shrink_to_octant(P,i))                   // shrink to correct octant  
-	falcON_Error("exceeding maximum tree depth of %d\n    "
-		     "(presumably more than Ncrit=%d bodies have a "
-		     "common position which may be NaN;\n          "
-		     "first dot in this box has i=%d, x=%g,%g,%g)\n",
-		     DMAX,NCRIT,TREE->my_bodies()->bodyindex(B->DOTS->LINK),
-		     B->DOTS->pos()[0],B->DOTS->pos()[1],B->DOTS->pos()[2]);
-	
-
+	if(L)
+	  falcON_Error("exceeding maximum tree depth of %d\n         "
+		       "(presumably more than Ncrit=%d bodies have a "
+		       "common position which may be NaN; "
+		       "dot has i=%d, x=%g,%g,%g)\n",
+		       DMAX,NCRIT, TREE->my_bodies()->bodyindex(L->LINK),
+		       L->pos()[0],L->pos()[1],L->pos()[2]);
+	else
+	  falcON_Error("exceeding maximum tree depth of %d\n         "
+		       "(presumably more than Ncrit=%d bodies have a "
+		       "common position which may be NaN)\n",DMAX,NCRIT);
 #ifdef falcON_MPI
       P->PEANO    = B->PEANO;                      // copy peano map            
       P->PEANO.shift_to_kid(i);                    // shift peano map           
@@ -566,7 +570,7 @@ namespace {
 			      dot      *const&L,   // I: dot of octant          
 			      size_t    const&nl)  // I: # dots added sofar     
     {
-      box* P = make_subbox(B,i,nl);                // make new sub-box          
+      box* P = make_subbox(B,i,nl,L);              // make new sub-box          
       P->adddot_to_octs(L);                        // add dot to its octant     
       return P;                                    // return new box            
     }
@@ -579,7 +583,7 @@ namespace {
 			      dot      *const&L,   // I: dot of octant          
 			      size_t    const&nl)  // I: # dots added sofar     
     {
-      box* P = make_subbox(B,i,nl);                // make new sub-box          
+      box* P = make_subbox(B,i,nl,L);              // make new sub-box          
       P->adddot_to_list(L);                        // add old dot to list       
       return P;                                    // return new box            
     }
@@ -608,7 +612,8 @@ namespace {
 	for(ne=b=0; b!=Nsub; ++b) if(NUM[b]) {     //   LOOP non-empty octs     
 	  ne++;                                    //     count them            
 	  if(NUM[b]>1) {                           //     IF many dots          
-	    sub = make_subbox(P,b,nl);             //       make sub-box        
+	    sub = make_subbox(P,b,nl,static_cast<dot*>(P->OCT[b]));
+	                                           //       make sub-box        
 	    sub->DOTS = static_cast<dot*>(P->OCT[b]); //    assign sub-box's    
 	    sub->NUMBER = NUM[b];                  //       dot list & number   
 	    P->OCT[b] = sub;                       //       set octant=sub-box  

@@ -50,6 +50,11 @@
 # include <cstdio>
 # define falcON_included_cstdio
 #endif
+#ifdef falcON_MPI
+# ifndef falcON_included_mpi_falcON_h
+#  include <parallel/mpi_falcON.h>
+# endif
+#endif
 
 // /////////////////////////////////////////////////////////////////////////////
 namespace { class PotExpAccess; }                  // forward declaration       
@@ -270,6 +275,11 @@ namespace falcON {
 	  *a = f(*a);
 	return *this;
       }
+      //------------------------------------------------------------------------
+#ifdef falcON_MPI
+      /// set to sum of A_nlm over all MPI processes
+      Anlm&global_sum(Anlm const&A, MPI::Communicator const&C);
+#endif
       //------------------------------------------------------------------------
       /// make formated nice print
       /// \param sym symmetry to assume (suppress printing of ignored terms)

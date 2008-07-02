@@ -262,12 +262,6 @@ int main(int argc, char *argv[])                   // global main
 
 #ifdef falcON_USE_MPI
     falcON::MPI::Init(&argc,&argv);                // start MPI: spawm processes
-    falcON::set_exit(&falcON::MPI::Exit);          // make sure MPI_Abort() is  
-    set_nemo_exit(&falcON::MPI::Exit);             //   called on exit()        
-    falcON::RunInfo::set_mpi_proc(falcON::MPI::World.rank()); // inform RunInfo 
-#ifdef falcON_NEMO
-    ::set_mpi_rank(falcON::MPI::World.rank());
-#endif
 #endif
 
     falcON::CheckAgainstLibrary(falcON::CurrentStatus(),

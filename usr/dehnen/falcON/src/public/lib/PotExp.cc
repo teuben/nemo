@@ -35,6 +35,9 @@
 #  include <stdinc.h>
 #  include <cstring>
 #endif
+#ifdef falcON_MPI
+#  include <parallel/mpi_falcON.h>
+#endif
 
 namespace falcON {
   bool is_appended(const char*name, char c, char*copy);
@@ -2492,6 +2495,15 @@ void Anlm::table_print(symmetry     s,
   }
   o.flush();
 }
+//------------------------------------------------------------------------------
+#ifdef falcON_MPI
+Anlm& Anlm::global_sum(Anlm const&C, MPI::Communicator const&Comm)
+{
+  reset(C.nmax(),C.lmax());
+  Comm.AllReduce(C.A, A, N1*L1Q, MPI::Sum);
+  return*this;
+}
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // class falcON::PotExp                                                       //

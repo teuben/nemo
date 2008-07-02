@@ -1501,7 +1501,8 @@ namespace falcON {
   protected:
     void set_parallel(ParallelSnapshot*P) { PARA = P; }
   public:
-    ParallelSnapshot*parallel() { return PARA; }
+    ParallelSnapshot      *parallel()       { return PARA; }
+    const ParallelSnapshot*parallel() const { return PARA; }
     //==========================================================================
     // \name initial-time information and manipulation                         
     bool const&has_initial_time() const { return INIT; }  ///< has initial time?
