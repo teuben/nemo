@@ -193,7 +193,7 @@ void WDutils::Warning::operator()(const char* fmt, ...) const
   va_end(ap);
 }
 //------------------------------------------------------------------------------
-void WDutils::__DebugInfo::operator()(const char* fmt, ...) const
+void WDutils::DebugInformation::operator()(const char* fmt, ...) const
 {
 #ifdef PRINTERR_STEP
   char header[40];
@@ -209,7 +209,7 @@ void WDutils::__DebugInfo::operator()(const char* fmt, ...) const
   va_end(ap);
 }
 //------------------------------------------------------------------------------
-void WDutils::__DebugInfo::operator()(int deb, const char* fmt, ...) const
+void WDutils::DebugInformation::operator()(int deb, const char* fmt, ...) const
 {
   if(RunInfo::debug(deb)) {
 #ifdef PRINTERR_STEP

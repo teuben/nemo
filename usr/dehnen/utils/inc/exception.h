@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2000-2006                                                          
+/// \date    2000-2008                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2007  Walter Dehnen                                       
+// Copyright (C) 2000-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -129,14 +129,14 @@ namespace WDutils {
   /// \name print debugging information to stderr, reporting [file:line]        
   //@{                                                                          
   /// to be used for reporting debug info
-  struct __DebugInfo {
+  struct DebugInformation {
     const char*file, *lib;    ///< file and library name
     const int  line;          ///< line number
     /// constructor: get library name
-    __DebugInfo(const char*__lib)
+    DebugInformation(const char*__lib = "WDutils")
       : file(0), line(0), lib(__lib) {}
     /// constructor: get file name, line number, and library name
-    __DebugInfo(const char*__file, int __line, const char*__lib)
+    DebugInformation(const char*__file, int __line, const char*__lib= "WDutils")
       : file(__file), line(__line), lib(__lib) {}
     /// print info message to stderr, report [file:line] if known.
     /// \param[in] fmt debug info message (C-type format string)
@@ -154,14 +154,14 @@ namespace WDutils {
   /// void DebugInfo(int debug_level, const char*format, ...);
   /// void DebugInfo(const char*format, ...); 
   /// \endcode
-#define DebugInfo  WDutils::__DebugInfo(__FILE__,__LINE__,"WDutils")
+#define DebugInfo  WDutils::DebugInformation(__FILE__,__LINE__)
   /// print debug info to stderr (without reporting [file:line]).
   /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax.
   /// \code
   /// void DebugInfoN(int debug_level, const char*format, ...);
   /// void DebugInfoN(const char*format, ...); 
   /// \endcode
-#define DebugInfoN WDutils::__DebugInfo("WDutils")
+#define DebugInfoN WDutils::DebugInformation()
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   /// \name exception treatment                                                 
@@ -221,10 +221,10 @@ namespace WDutils {
     const char*file, *lib;    ///< file and library name
     const int  line;          ///< line number
     /// constructor: get library name
-    Error(const char*__lib)
+    Error(const char*__lib = "WDutils")
       : file(0), line(0), lib(__lib) {}
     /// constructor: get file name, line number, and library name
-    Error(const char*__file, int __line, const char*__lib)
+    Error(const char*__file, int __line, const char*__lib = "WDutils")
       : file(__file), line(__line), lib(__lib) {}
     /// print error message to stderr, report [file:line] if known.
     void operator() (const char*fmt, ...) const;
@@ -234,13 +234,13 @@ namespace WDutils {
   /// \code
   /// void WDutils_Error(const char*format, ...);
   /// \endcode
-#define WDutils_Error      WDutils::Error(__FILE__,__LINE__,"WDutils")
+#define WDutils_Error      WDutils::Error(__FILE__,__LINE__)
   /// print error message to stderr and exit.
   /// use like NEMO's error(), i.e. with the same syntax:
   /// \code
   /// void WDutils_ErrorN(const char*format, ...);
   /// \endcode
-#define WDutils_ErrorN     WDutils::Error("WDutils")
+#define WDutils_ErrorN     WDutils::Error()
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   /// \name warning treatment                                                   
@@ -250,10 +250,10 @@ namespace WDutils {
     const char*file, *lib;    ///< file and library name
     const int  line;          ///< line number
     /// constructor: get library name
-    Warning(const char*__lib)
+    Warning(const char*__lib = "WDutils")
       : file(0), line(0), lib(__lib) {}
     /// constructor: get file name, line number, and library name
-    Warning(const char*__file, int __line, const char*__lib)
+    Warning(const char*__file, int __line, const char*__lib = "WDutils")
       : file(__file), line(__line), lib(__lib) {}
     /// print error message to stderr, report [file:line] if known.
     void operator() (const char*fmt, ...) const;
@@ -263,13 +263,13 @@ namespace WDutils {
   /// \code
   /// void WDutils_Warning(const char*format, ...);
   /// \endcode
-#define WDutils_Warning	     WDutils::Warning(__FILE__,__LINE__,"WDutils")
+#define WDutils_Warning	     WDutils::Warning(__FILE__,__LINE__)
   /// print warning message to stderr (without reporting [file:line]).
   /// use like NEMO's warning(), i.e. with the same syntax:
   /// \code
   /// void WDutils_WarningN(const char*format, ...);
   /// \endcode
-#define WDutils_WarningN     WDutils::Warning("WDutils")
+#define WDutils_WarningN     WDutils::Warning()
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   /// \name macros and code controling the usage of throw exception vs error    
