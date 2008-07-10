@@ -39,6 +39,9 @@ extern "C" {
 #include <loadobj.h>                   // loading shared object files
 #include <filefn.h>                    // finding a function in a loaded file
 }
+#ifdef falcON_MPI
+# include <parallel/mpi_falcON.h>
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 int falcON::Manipulator::parse(const char*params, double*pars, int maxp)
 {
@@ -156,22 +159,26 @@ namespace {
     // 4. seek file manname.so and load it
     // 4.1 put search path together
     char manpaths[2048] = {0};
-    if(manpath && *manpath) {                      // get input path
+    if(manpath && *manpath) {                     // get input path
       strcpy(manpaths,manpath);
       strcat(manpaths,"/:");
     }
-    strcat(manpaths,".");                          // try "."
+    strcat(manpaths,".");                         // try "."
     const char *path;
-    path = getenv("MANIPPATH");                    // try $MANIPPATH
+    path = falcON::directory();                   // try falcON/manip/
     if(path) {
       strcat(manpaths,":");
       strcat(manpaths,path);
-    }
-    path = falcON::directory();                    // try falcON/manip/
-    if(path) {
-      strcat(manpaths,":");
-      strcat(manpaths,path);
+#ifdef falcON_MPI
+      if(falcON::MPI::Initialized())
+	strcat(manpaths,"/parallel");             // try $falcON/parallel/manip/
+#endif
       strcat(manpaths,"/manip/");
+    }
+    path = getenv("MANIPPATH");                   // try $MANIPPATH
+    if(path) {
+      strcat(manpaths,":");
+      strcat(manpaths,path);
     }
     // 4.2 seek file in path and load it
     char name[256];
@@ -179,7 +186,7 @@ namespace {
     strcat(name,".so");
     DebugInfo(3,"Manipulator: searching file \"%s\" in path \"%s\" ...\n",
 	      name,manpaths);
-    char*fullname = pathfind(manpaths,name);       // seek for file in manpaths
+    char*fullname = pathfind(manpaths,name);      // seek for file in manpaths
     if(fullname == 0)
       falcON_THROW("Manipulator: cannot find file \"%s\" in path \"%s\"",
 		   name,manpaths);
@@ -199,6 +206,10 @@ namespace {
       im (&manip,manpars,manfile);
 #else
       im (&manip,pars,npar,manfile);
+#endif
+#ifdef falcON_MPI
+      if(falcON::MPI::Initialized() && !manip->is_mpi())
+	falcON_THROW("Manipulator \"%s\" does not support MPI\n",manip->name());
 #endif
     } else {
       manip = 0;
@@ -243,7 +254,8 @@ falcON::Manipulator::Manipulator(const char*mannames,
   N     ( 0 ),
   NEED  ( fieldset::o ),
   CHNG  ( fieldset::o ),
-  PRVD  ( fieldset::o )
+  PRVD  ( fieldset::o ),
+  IS_MPI( true )
 {
   if((mannames == 0 || *mannames == 0) &&
      (manfiles == 0 || *manfiles == 0)) return;
@@ -378,6 +390,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
     NEED     |= MANIP[i]->need() & ~PRVD;
     CHNG     |= MANIP[i]->change();
     PRVD     |= MANIP[i]->provide();
+    IS_MPI    = IS_MPI && MANIP[i]->is_mpi();
   }
   CLEANUP;
   NAME = falcON_NEW(char,namesize+N);

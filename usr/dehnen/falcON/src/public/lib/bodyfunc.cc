@@ -947,7 +947,7 @@ namespace {
       file<<"    while(! cond("<<scond[s]
 	  <<") && b != B.end_all_bodies()) ++b;\n";
     file  <<"    if(b == B.end_all_bodies()) {\n"
-	  <<"      warning(\"Max{";
+	  <<"      falcON_Warning(\"Max{";
     if(scond[s])
       file<<scond[s]<<' '<<sep<<' ';
     file  <<sexpr[s]<<"}: nobody "
@@ -976,7 +976,7 @@ namespace {
       file<<"    while(! cond("<<scond[s]
 	  <<") && b != B.end_all_bodies()) ++b;\n";
     file  <<"    if(b == B.end_all_bodies()) {\n"
-	  <<"      warning(\"Min{";
+	  <<"      falcON_Warning(\"Min{";
     if(scond[s])
       file<<scond[s]<<' '<<sep<<' ';
     file  <<sexpr[s]<<"}: nobody "

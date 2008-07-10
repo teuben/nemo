@@ -50,6 +50,9 @@
 #ifndef falcON_included_body_h
 #  include <body.h>
 #endif
+#ifndef falcON_included_io_h
+#  include <public/io.h>
+#endif
 #ifndef falcON_included_externacc_h
 #  include <externacc.h>
 #endif
@@ -184,17 +187,17 @@ namespace falcON {
     /// which SPH quantities are computed by setforces()
     virtual fieldset computesSPH()   const = 0;
     /// write diagnostic statistics
-    virtual void dia_stats_body(std::ostream&) const=0;
+    virtual void dia_stats_body(output&) const=0;
     /// write CPU statistics
-    virtual void cpu_stats_body(std::ostream&) const=0;
+    virtual void cpu_stats_body(output&) const=0;
     /// write diagnostic statistics header
-    virtual void dia_stats_head(std::ostream&) const=0;
+    virtual void dia_stats_head(output&) const=0;
     /// write CPU statistics header
-    virtual void cpu_stats_head(std::ostream&) const=0;
+    virtual void cpu_stats_head(output&) const=0;
     /// write diagnostic statistics line
-    virtual void dia_stats_line(std::ostream&) const=0;
+    virtual void dia_stats_line(output&) const=0;
     /// write CPU statistics line
-    virtual void cpu_stats_line(std::ostream&) const=0;
+    virtual void cpu_stats_line(output&) const=0;
     //@}
     //--------------------------------------------------------------------------
     /// is a particular quantity computed?
@@ -302,16 +305,16 @@ namespace falcON {
       CPU_STEP = 0.;
     }
     /// print CPU statistics, implements abstract method of base class
-    void cpu_stats_body(std::ostream&) const;
+    void cpu_stats_body(output&) const;
     /// print CPU statistics header, implements abstract method of base class
-    void cpu_stats_head(std::ostream&to) const {
+    void cpu_stats_head(output&to) const {
       SOLVER->cpu_stats_head(to);
-      to<< " step  accumulated";
+      if(to) to<< " step  accumulated";
     }
     /// print CPU statistics line, implements abstract method of base class
-    void cpu_stats_line(std::ostream&to) const {
+    void cpu_stats_line(output&to) const {
       SOLVER->cpu_stats_line(to);
-      to<< "------------------";
+      if(to) to<< "------------------";
     }
     //@}
     //--------------------------------------------------------------------------
@@ -385,27 +388,27 @@ namespace falcON {
     /// perform a full time step
     virtual void fullstep() const = 0;
     /// print full statistic
-    virtual void stats_body(std::ostream&to) const {
+    virtual void stats_body(output&to) const {
       SOLVER -> dia_stats_body(to);
       cpu_stats_body(to);
-      to<<std::endl;
+      if(to) to<<std::endl;
     }
     /// print statistic header
-    virtual void stats_head(std::ostream&to) const {
+    virtual void stats_head(output&to) const {
       SOLVER -> dia_stats_head(to);
       cpu_stats_head(to);
-      to<<std::endl;
+      if(to) to<<std::endl;
     }
     /// print statistic line
-    virtual void stats_line(std::ostream&to) const {
+    virtual void stats_line(output&to) const {
       SOLVER -> dia_stats_line(to);
       cpu_stats_line(to);
-      to<<std::endl;
+      if(to) to<<std::endl;
     }
     //@}
     //--------------------------------------------------------------------------
     /// print some details 
-    void describe(std::ostream&) const;
+    void describe(output&) const;
 #ifdef falcON_NEMO
     /// write snapshot to NEMO output.
     /// \param o NEMO output stream
@@ -496,24 +499,24 @@ namespace falcON {
     /// implements Integrator::fullstep()
     void fullstep() const;
     /// implements Integrator::stats_head
-    void stats_head(std::ostream&) const;
+    void stats_head(output&) const;
     /// implements Integrator::stats_line
-    void stats_line(std::ostream&to) const {
+    void stats_line(output&to) const {
       SOLVER -> dia_stats_line(to);
-      if(highest_level())
+      if(to && highest_level())
 	for(int l=0; l!=Nsteps(); ++l) 
 	  for(int i=0; i<=W; ++i) to<<'-';
       cpu_stats_line(to);
-      to<<std::endl;
+      if(to) to<<std::endl;
     }
     /// implements Integrator::stats_head
-    void stats_body(std::ostream&to) const {
+    void stats_body(output&to) const {
       SOLVER -> dia_stats_body(to);
-      if(highest_level())
+      if(to && highest_level())
 	for(int l=0; l!=Nsteps(); ++l)
 	  to<<std::setw(W)<<N[l]<<' ';
       cpu_stats_body(to);
-      to<<std::endl;
+      if(to) to<<std::endl;
     }
     /// construction
     /// \param[in] kmax  \f$ \tau_{\mathrm{max}}=2^{-\mathrm{kmax}} \f$
@@ -599,7 +602,7 @@ namespace falcON {
   public:
     //--------------------------------------------------------------------------
     /// describe simulation
-    void describe(std::ostream&o) const { CODE->describe(o);  }
+    void describe(output&o) const { CODE->describe(o);  }
     /// write N-body data to NEMO snapshot file
     /// \param[in] o stream to NEMO snapshot file
     /// \param[in] w what to write?
@@ -607,16 +610,18 @@ namespace falcON {
     /// time integration
     void full_step() { CODE->fullstep(); }
     /// print statistic outputs
-    /// \param[in] o ostream to print to
-    void stats(std::ostream&o) const { 
-      o <<' ';
-      CODE->stats_body(o);
+    /// \param[in] to ostream to print to
+    void stats(output&to) const { 
+      if(to) to <<' ';
+      CODE->stats_body(to);
     }
     /// header for statistics output
     /// \param[in] o ostream to print to
-    void  stats_head(std::ostream&o) const {
-      o<<'#'; CODE->stats_head(o);
-      o<<'#'; CODE->stats_line(o);
+    void  stats_head(output&to) const {
+      if(to) to<<'#';
+      CODE->stats_head(to);
+      if(to) to<<'#';
+      CODE->stats_line(to);
     }
     /// \name data access
     //@{
@@ -649,7 +654,6 @@ namespace falcON {
     mutable double       TIME;                ///< time of diagnose
     mutable double       M,T,Vin,Vex,W,TW;    ///< mass, kin & pot E
     mutable vect_d       L;                   ///< total angular momentum
-    mutable double       DVDT;                ///< dV/dt = - dT/dt
     mutable tensor       KT,WT;               ///< kin & pot energy
     mutable vect_d       CMX,CMV;             ///< center of mass pos & vel
     //@}
@@ -685,8 +689,6 @@ namespace falcON {
     double const  &Vrat() const { return TW; }
     /// virial W
     double         Wvir() const { return W; }
-    /// time derivative of potential energy
-    double const  &dVdt() const { return DVDT; }
     /// total angular momentum
     vect_d const  &Ltot() const { return L; }
     /// centre of mass (=mass-averaged) position
@@ -694,11 +696,11 @@ namespace falcON {
     /// centre of mass (=mass-averaged) velocity
     vect_d const  &Vave() const { return CMV; }
     /// print out body of diagnostics statistics
-    virtual void dia_stats_body (std::ostream&) const;
+    virtual void dia_stats_body (output&) const;
     /// print out header for diagnostics statistics
-    virtual void dia_stats_head (std::ostream&) const;
+    virtual void dia_stats_head (output&) const;
     /// print out line for diagnostics statistics
-    virtual void dia_stats_line (std::ostream&) const;
+    virtual void dia_stats_line (output&) const;
     /// do we do self-gravity?
     bool const&self_grav() const { return SELF_GRAV; }
   };// class falcON::ForceDiagGrav
@@ -952,17 +954,11 @@ namespace falcON {
     ///       serve in NBodyCode (otherwise the functions below are taken).
     //@{
     /// print header for CPU stats
-    virtual void cpu_stats_head(std::ostream&to) const {
-      if(SELF_GRAV) to << "l2R  D  tree  grav ";
-      if(acc_ext()) to << " pext ";
-    }
+    virtual void cpu_stats_head(output&) const;
     /// print line for CPU stats
-    virtual void cpu_stats_line(std::ostream&to) const {
-      if(SELF_GRAV) to << "-------------------";
-      if(acc_ext()) to << "------";
-    }
+    virtual void cpu_stats_line(output&) const;
     /// print CPU time statistics
-    virtual void cpu_stats_body(std::ostream&) const;
+    virtual void cpu_stats_body(output&) const;
     /// which fields do we compute
     virtual fieldset computes() const { 
       return fieldset(fieldset::p |

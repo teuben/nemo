@@ -239,16 +239,6 @@ namespace falcON {
 #else
   extern void main(int argc, char *argv[]) falcON_THROWING;
 #endif
-//   //----------------------------------------------------------------------------
-//   // define falcON::ERROR() to call nemo::error() if NEMO application           
-//   //----------------------------------------------------------------------------
-//   inline void ERROR(const char*m) {
-// #ifndef falcON_USE_NEMO
-//     falcON_ErrorN(m);
-// #else
-//     ::error(const_cast<char*>(m));
-// #endif
-//   }
 }
 
 //------------------------------------------------------------------------------

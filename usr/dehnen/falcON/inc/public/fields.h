@@ -765,7 +765,7 @@ namespace falcON {
     /// cross section of two sets
     friend fieldset operator& (bits, fieldset);
     /// is set empty?
-    bool is_empty() const { return val != nil; }
+    bool is_empty() const { return val == nil; }
     /// is set empty?
     operator bool() const { return val != nil; }
     /// are two sets identical?

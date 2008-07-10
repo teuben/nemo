@@ -54,6 +54,8 @@ namespace falcON {
     /// manipulation of snapshot
     /// \return shall the simulation be stopped?
     virtual bool manipulate(const snapshot*) const = 0;
+    /// is this manipulator fit for MPI?
+    virtual bool is_mpi() const { return false; }
     /// conversion to bool: is this manipulator doing anything?
     virtual operator bool() const { return true; }
     /// destruction
@@ -87,6 +89,7 @@ namespace falcON {
     cp_manip    MANIP[NMAX];
     char       *NAME,*DSCR;
     fieldset    NEED, CHNG, PRVD;
+    bool        IS_MPI;
     mutable int NSTOP;
   public:
     //--------------------------------------------------------------------------
@@ -116,6 +119,9 @@ namespace falcON {
 	}
       return r;
     }
+    //--------------------------------------------------------------------------
+    /// is this manipulator fit for MPI?
+    bool is_mpi() const { return IS_MPI; }
     //--------------------------------------------------------------------------
     /// name of stopping manipulator
     const char* stopper() const { return MANIP[NSTOP]->name(); }

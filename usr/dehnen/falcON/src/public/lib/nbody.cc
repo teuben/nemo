@@ -20,7 +20,9 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <public/nbody.h>
-#include <public/io.h>
+#ifdef falcON_MPI
+#  include <parallel/snapshot.h>
+#endif
 #include <iomanip>
 using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
@@ -213,14 +215,19 @@ void Integrator::remember(bool all) const
 #endif
 }
 //------------------------------------------------------------------------------
-void Integrator::cpu_stats_body(std::ostream&to) const
+void Integrator::cpu_stats_body(output&to) const
 {
   SOLVER->cpu_stats_body(to);
-  print_cpu(CPU_STEP,to); to<<' ';
-  print_cpu_hms(CPU_TOTAL,to);
-} 
+#ifdef falcON_MPI
+  // need to add code to sum cpu timings over all processes
+#endif
+  if(to) {
+    print_cpu(CPU_STEP,to); to<<' ';
+    print_cpu_hms(CPU_TOTAL,to);
+  } 
+}
 //------------------------------------------------------------------------------
-void Integrator::describe(std::ostream&out)        // I: output stream          
+void Integrator::describe(output&out)        // I: output stream          
 const {
   out<<"#"; stats_line(out);
   if(RunInfo::cmd_known())
@@ -410,9 +417,9 @@ namespace falcON {
   }
 }
 //------------------------------------------------------------------------------
-void BlockStepCode::stats_head(std::ostream&to) const {
+void BlockStepCode::stats_head(output&to) const {
   SOLVER -> dia_stats_head(to);
-  if(highest_level())
+  if(to && highest_level())
     for(int i=0, h=-kmax(); i!=Nsteps(); i++, h--)
       if     (h>13)  put_char(to,' ',W-4)<<"2^" <<     h  <<' ';
       else if(h> 9)  put_char(to,' ',W-4)       << (1<<h) <<' ';
@@ -428,7 +435,7 @@ void BlockStepCode::stats_head(std::ostream&to) const {
       else if(h>-10) put_char(to,' ',W-4)<<"2^" <<     h  <<' ';
       else           put_char(to,' ',W-5)<<"2^" <<     h  <<' ';
   cpu_stats_head(to);
-  to<<std::endl;
+  if(to) to<<std::endl;
 }
 #ifdef falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
@@ -500,7 +507,7 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
 ////////////////////////////////////////////////////////////////////////////////
 void ForceDiagGrav::diagnose_grav() const
 {
-  double m(0.), vin(0.), vex(0.), w[Ndim][Ndim]={0.}, dv(0.);
+  double m(0.), vin(0.), vex(0.), w[Ndim][Ndim]={0.};
   vect_d x(0.);
   if(snap_shot()->have(fieldbit::q)) {             // IF have external pot      
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
@@ -511,7 +518,6 @@ void ForceDiagGrav::diagnose_grav() const
       register vect_d mx = mi * pos(b);            //     m * x                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       x += mx;                                     //     add: dipole           
-      dv-= mi*(vel(b)*acc(b));                     //     add: dV/dt            
     }                                              //   END LOOP                
   } else {                                         // ELSE: no external pot     
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
@@ -521,18 +527,41 @@ void ForceDiagGrav::diagnose_grav() const
       register vect_d mx = mi * pos(b);            //     m * x                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       x += mx;                                     //     add: dipole           
-      dv-= mi*(vel(b)*acc(b));                     //     add: dV/dt            
     }                                              //   END LOOP                
   }                                                // ENDIF                     
+#ifdef falcON_MPI
+  if(snap_shot()->parallel()) {
+    const int Num=Ndim*(Ndim+1)+3;
+    double Loc[Num];
+    double Tmp[Num];
+    int p=0;
+    Loc[p++] = m;
+    Loc[p++] = vin;
+    Loc[p++] = vex;
+    for(int i=0; i!=Ndim; ++i) {
+      Loc[p++] = x[i];
+      for(int j=0; j!=Ndim; ++j) 
+	Loc[p++] = w[i][j];
+    }
+    Comm(snap_shot()).AllReduce(Loc,Tmp,Num,MPI::Sum);
+    m    = Tmp[p=0];
+    vin  = Tmp[++p];
+    vex  = Tmp[++p];
+    for(int i=0; i!=Ndim; ++i) {
+      x[i] = Tmp[++p];
+      for(int j=0; j!=Ndim; ++j) 
+	w[i][j] = Tmp[++p];
+    }
+  }
+#endif
   M   = m;                                         // total mass                
-  DVDT= dv;                                        // dV/dt                     
   Vin = half*vin;                                  // total int pot energy      
   Vex = vex;                                       // total ext pot energy      
-  W   = tr(w);                                     // total pot energy from acc 
   CMX = x/m;                                       // center of mass            
   for(int i=0; i!=Ndim; ++i)
     for(int j=0; j!=Ndim; ++j) 
       WT[i][j] = half *(w[i][j]+w[j][i]);          // pot energy tensor         
+  W    = tr(WT);
   TIME = snap_shot()->time();
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -550,13 +579,33 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
     v += mv;                                       //   add: total momentum     
     l += vect_d(pos(b)) ^ mv;                      //   add: total ang mom      
   }                                                // END LOOP                  
-  T   = half*tr(k);                                // total kin energy          
-  TW  =-T/W;                                       // virial ratio              
+#ifdef falcON_MPI
+  if(snap_shot()->parallel()) {
+    const int Num=Ndim*(Ndim+2);
+    double Loc[Num];
+    double Tmp[Num];
+    for(int i=0,p=0; i!=Ndim; ++i) {
+      Loc[p++] = l[i];
+      Loc[p++] = v[i];
+      for(int j=0; j!=Ndim; ++j) 
+	Loc[p++] = k[i][j];
+    }
+    Comm(snap_shot()).AllReduce(Loc,Tmp,Num,MPI::Sum);
+    for(int i=0,p=0; i!=Ndim; ++i) {
+      l[i] = Tmp[p++];
+      v[i] = Tmp[p++];
+      for(int j=0; j!=Ndim; ++j) 
+	k[i][j] = Tmp[p++];
+    }
+  }
+#endif
   L   = l;                                         // total angular momentum    
   CMV = v/m;                                       // center of mass velocity   
   for(int i=0; i!=Ndim; ++i)
     for(int j=0; j!=Ndim; ++j) 
       KT[i][j] = half * k[i][j];                   // kin energy tensor         
+  T   = tr(KT);                                    // total kin energy          
+  TW  =-T/W;                                       // virial ratio              
 }
 ////////////////////////////////////////////////////////////////////////////////
 void ForceDiagGrav::diagnose_full() const
@@ -591,6 +640,39 @@ void ForceDiagGrav::diagnose_full() const
       l += mx ^ vect_d(vel(b));                    //     add: total ang mom    
     }                                              //   END LOOP                
   }                                                // ENDIF                     
+#ifdef falcON_MPI
+  if(snap_shot()->parallel()) {
+    const int Num=Ndim*(2*Ndim+3)+3;
+    double Loc[Num];
+    double Tmp[Num];
+    int p=0;
+    Loc[p++] = m;
+    Loc[p++] = vin;
+    Loc[p++] = vex;
+    for(int i=0; i!=Ndim; ++i) {
+      Loc[p++] = x[i];
+      Loc[p++] = v[i];
+      Loc[p++] = l[i];
+      for(int j=0; j!=Ndim; ++j) {
+	Loc[p++] = w[i][j];
+	Loc[p++] = k[i][j];
+      }
+    }
+    Comm(snap_shot()).AllReduce(Loc,Tmp,Num,MPI::Sum);
+    m   = Tmp[p=0];
+    vin = Tmp[++p];
+    vex = Tmp[++p];
+    for(int i=0; i!=Ndim; ++i) {
+      x[i] = Tmp[++p];
+      v[i] = Tmp[++p];
+      l[i] = Tmp[++p];
+      for(int j=0; j!=Ndim; ++j) {
+	w[i][j] = Tmp[++p];
+	k[i][j] = Tmp[++p];
+      }
+    }
+  }
+#endif
   M   = m;                                         // total mass                
   Vin = half*vin;                                  // total int pot energy      
   Vex = vex;                                       // total ext pot energy      
@@ -636,62 +718,63 @@ void ForceDiagGrav::write_diag_nemo(nemo_out const&out,
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////////
-void ForceDiagGrav::dia_stats_head (std::ostream& to) const {
-  const char *space = sizeof(real)==4? " " : "     ";
-  to  << "      time  "<<space
-      << "    E=T+V    "<<space
-      << "   T     "<<space;
-  if(SELF_GRAV)
-    to<< "   V_in   "<<space;
-  if(acc_ext())
-    to<< "   V_ex   "<<space;
-  if(SELF_GRAV || acc_ext())
-    to<< "   W      "<<space
-      << " -2T/W"<<space;
-//   if(debug(1))
-//     to<< " dV/dt "<<space;
-  to  << "   |L| "<<space
-      << " |v_cm|"<<space;
+void ForceDiagGrav::dia_stats_head (output& to) const {
+  if(to) {
+    const char *space = sizeof(real)==4? " " : "     ";
+    to  << "      time  "<<space
+	<< "    E=T+V    "<<space
+	<< "   T     "<<space;
+    if(SELF_GRAV)
+      to<< "   V_in   "<<space;
+    if(acc_ext())
+      to<< "   V_ex   "<<space;
+    if(SELF_GRAV || acc_ext())
+      to<< "   W      "<<space
+	<< " -2T/W"<<space;
+    to  << "   |L| "<<space
+	<< " |v_cm|"<<space;
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
-void ForceDiagGrav::dia_stats_line (std::ostream&to) const {
-  const char *space = sizeof(real)==4? "-" : "-----";
-  to  << " -----------"<<space
-      << "-------------"<<space
-      << "---------"<<space;
-  if(SELF_GRAV)
-    to<< "----------"<<space;
-  if(acc_ext())
-    to<< "----------"<<space;
-  if(SELF_GRAV || acc_ext())
-    to<< "----------"<<space;
+void ForceDiagGrav::dia_stats_line (output&to) const {
+  if(to) {
+    const char *space = sizeof(real)==4? "-" : "-----";
+    to  << " -----------"<<space
+	<< "-------------"<<space
+	<< "---------"<<space;
+    if(SELF_GRAV)
+      to<< "----------"<<space;
+    if(acc_ext())
+      to<< "----------"<<space;
+    if(SELF_GRAV || acc_ext())
+      to<< "----------"<<space;
     to<< "------"<<space;
-//   if(debug(1))
-//     to<< "-------"<<space;
-  to  << "-------"<<space
-      << "-------"<<space;
+    to  << "-------"<<space
+	<< "-------"<<space;
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
-void ForceDiagGrav::dia_stats_body(std::ostream&to) const
+void ForceDiagGrav::dia_stats_body(output&o) const
 {
-  int ACC = 1+sizeof(real);
-  std::ios::fmtflags old = to.flags();
-  to.setf(std::ios::left | std::ios::showpoint);
-  to  << print(TIME,ACC+7,ACC+2) << ' '
-      << print(T+Vin+Vex,ACC+8,ACC+2) << ' '
-      << print(T,ACC+4,ACC-1) << ' ';
-  if(SELF_GRAV)
-    to<< print(Vin,ACC+5,ACC-1) << ' ';
-  if(acc_ext())
-    to<< print(Vex,ACC+5,ACC-1) << ' ';
-  if(SELF_GRAV || acc_ext())
-    to<< print(W,ACC+5,ACC-1) << ' '
-      << print(twice(TW),ACC+1,1) << ' ';
-//   if(debug(1))
-//     to<< print(DVDT,ACC+2,ACC-3) << ' ';
-  to  << print(std::sqrt(norm(L)),ACC+2,ACC-3) << ' '
-      << print(std::sqrt(norm(CMV)),ACC+2,ACC-3) << ' ';
-  to.flags(old);
+  if(o) {
+    std::ostream&to(o);
+    int ACC = 1+sizeof(real);
+    std::ios::fmtflags old = to.flags();
+    to.setf(std::ios::left | std::ios::showpoint);
+    to  << print(TIME,ACC+7,ACC+2) << ' '
+	<< print(T+Vin+Vex,ACC+8,ACC+2) << ' '
+	<< print(T,ACC+4,ACC-1) << ' ';
+    if(SELF_GRAV)
+      to<< print(Vin,ACC+5,ACC-1) << ' ';
+    if(acc_ext())
+      to<< print(Vex,ACC+5,ACC-1) << ' ';
+    if(SELF_GRAV || acc_ext())
+      to<< print(W,ACC+5,ACC-1) << ' '
+	<< print(twice(TW),ACC+1,1) << ' ';
+    to  << print(std::sqrt(norm(L)),ACC+2,ACC-3) << ' '
+	<< print(std::sqrt(norm(CMV)),ACC+2,ACC-3) << ' ';
+    to.flags(old);
+  }
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -769,6 +852,10 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   CPU_GRAV      ( 0. ),
   CPU_AEX       ( 0. )
 {
+#ifdef falcON_MPI
+  if(SELF_GRAV && MPI::Initialized())
+    falcON_THROW("ForceALCON: cannot (yet) do parallel self-gravity\n");
+#endif
 #ifdef falcON_INDI
   if(SOFTENING==individual_fixed && !snap_shot()->have(fieldbit::e)) 
     falcON_THROW("ForceALCON: individual fixed softening, but no eps_i given");
@@ -826,18 +913,46 @@ void ForceALCON::set_tree_and_forces(bool all, bool build_tree) const
   }
 }
 //------------------------------------------------------------------------------
-void ForceALCON::cpu_stats_body(std::ostream&to) const {
-  if(SELF_GRAV) {
-    to << std::setw(3) << int(log(FALCON.root_radius())/M_LN2) <<' '
-       << std::setw(2) << FALCON.root_depth() <<' ';
-    Integrator::print_cpu(CPU_TREE, to);
-    to<<' ';
-    Integrator::print_cpu(CPU_GRAV, to);
-    to<<' ';
+void ForceALCON::cpu_stats_head(output&to) const {
+  if(to) {
+    if(SELF_GRAV) to << "l2R  D  tree  grav ";
+    if(acc_ext()) to << " pext ";
   }
-  if(acc_ext()) {
-    Integrator::print_cpu(CPU_AEX, to);
-    to<<' ';
+}
+//------------------------------------------------------------------------------
+void ForceALCON::cpu_stats_line(output&to) const {
+  if(to) {
+    if(SELF_GRAV) to << "-------------------";
+    if(acc_ext()) to << "------";
+  }
+}
+//------------------------------------------------------------------------------
+void ForceALCON::cpu_stats_body(output&to) const
+{
+#ifdef falcON_MPI
+  if(snap_shot()->parallel()) {
+    double loc[3]={CPU_TREE,CPU_GRAV,CPU_AEX},cpu[3];
+    DebugInfo(4,"ForceALCON::cpu_stats_body(): "
+	      "calling Communicator::Reduce()\n");
+    Comm(snap_shot()).Reduce(0,loc,cpu,3,MPI::Sum);
+    CPU_TREE = cpu[0];
+    CPU_GRAV = cpu[1];
+    CPU_AEX  = cpu[2];
+  }
+#endif
+  if(to) {
+    if(SELF_GRAV) {
+      to << std::setw(3) << int(log(FALCON.root_radius())/M_LN2) <<' '
+	 << std::setw(2) << FALCON.root_depth() <<' ';
+      Integrator::print_cpu(CPU_TREE, to);
+      to<<' ';
+      Integrator::print_cpu(CPU_GRAV, to);
+      to<<' ';
+    }
+    if(acc_ext()) {
+      Integrator::print_cpu(CPU_AEX, to);
+      to<<' ';
+    }
   }
   CPU_TREE = 0.;
   CPU_GRAV = 0.;

@@ -25,12 +25,7 @@ ifdef NEMO
 
 INEMO		:= -I$(NEMOINC) -I$(NEMOLIB)
 DNEMO		:= -DfalcON_NEMO
-
-ifeq ($(COMPILER),icc)
 LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
-else
-LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
-endif
 
 endif
 

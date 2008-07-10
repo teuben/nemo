@@ -223,21 +223,30 @@ namespace falcON {
     //@{
     /// output of a single datum \e x
     template<typename X>
-    std::ostream& operator<< (X const&x) {
-      return (*OUT) << x;
+    output& operator<< (X const&x) {
+      if(OUT) (*OUT) << x;
+      return*this;
+    }
+    /// output of a character string
+    output& operator<< (const char*str) {
+      if(OUT) (*OUT) << str;
+      return*this;
     }
     /// output of a manipulator \e m
-    std::ostream& operator<< (std::ostream& (*p)(std::ostream&)) {
-      return (*OUT) << p;
+    output& operator<< (std::ostream& (*p)(std::ostream&)) {
+      if(OUT) (*OUT) << p;
+      return*this;
     }
     /// output of a manipulator \e m
-    std::ostream& operator<< (std::ostream::__ios_type &(*p)
+    output& operator<< (std::ostream::__ios_type &(*p)
                               (std::ostream::__ios_type &)) {
-      return (*OUT) << p;
+      if(OUT) (*OUT) << p;
+      return*this;
     }
     /// output of a manipulator \e m
-    std::ostream& operator<< (std::ios_base& (*p)(std::ios_base&)) {
-      return (*OUT) << p;
+    output& operator<< (std::ios_base& (*p)(std::ios_base&)) {
+      if(OUT) (*OUT) << p;
+      return*this;
     }
     //@}
     //--------------------------------------------------------------------------
@@ -340,21 +349,25 @@ namespace falcON {
     //@{
     /// input of single datum \e x
     template<typename X>
-    std::istream& operator>> (X&x) {
-      return (*IN) >> x;
+    input& operator>> (X&x) {
+      if(IN) (*IN) >> x;
+      return*this;
     }
     /// input of manipulator \e m
-    std::istream& operator>> (std::istream& (*p)(std::istream&)) {
-      return (*IN) >> p;
+    input& operator>> (std::istream& (*p)(std::istream&)) {
+      if(IN) (*IN) >> p;
+      return*this;
     }
     /// input of manipulator \e m
-    std::istream& operator>> (std::istream::__ios_type &(*p)
+    input& operator>> (std::istream::__ios_type &(*p)
 			      (std::istream::__ios_type &)) {
-      return (*IN) >> p;
+      if(IN) (*IN) >> p;
+      return*this;
     }
     /// input of manipulator \e m
-    std::istream& operator>> (std::ios_base& (*p)(std::ios_base&)) {
-      return (*IN) >> p;
+    input& operator>> (std::ios_base& (*p)(std::ios_base&)) {
+      if(IN) (*IN) >> p;
+      return*this;
     }
     //@}
     //--------------------------------------------------------------------------

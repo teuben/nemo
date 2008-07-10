@@ -319,9 +319,11 @@ void output::close() {
       falcON_Warning("closing FortranORec before output\n");
     FREC->close();
   }
-  DebugInfo(2,"output: closing\n");
-  if(OUT == &std::cout) close_stdout();
-  else if(OUT) falcON_DEL_O(OUT);
+  if(OUT) {
+    DebugInfo(2,"output: closing\n");
+    if(OUT == &std::cout) close_stdout();
+    else falcON_DEL_O(OUT);
+  }
   APPENDING = false;
   OUT = 0;
 }

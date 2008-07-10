@@ -104,9 +104,9 @@ namespace falcON {
 #endif
   //@}
 #undef  DebugInfo
-#define DebugInfo              WDutils::__DebugInfo(__FILE__,__LINE__,"falcON ")
+#define DebugInfo    WDutils::DebugInformation(__FILE__,__LINE__,"falcON ")
 #undef  DebugInfoN
-#define DebugInfoN             WDutils::__DebugInfo("falcON ")
+#define DebugInfoN   WDutils::DebugInformation("falcON ")
   //============================================================================
   //
   // mechanism to avoid status mismatch

@@ -69,7 +69,7 @@ endif
 .PHONY			: manip acc man
 
 ifdef NEMO
-default			: links exe manip acc doxu
+default			: links exe manip acc doxu parallel
 ifdef DPROPER
 # proprietary version: don't copy executables and manipulators
 # NOTE: this means we have to set the PATH and MANIPPATH appropriately
@@ -86,7 +86,7 @@ tonemo			: exe manip acc doxu man
 endif
 install			: tonemo
 else
-default			: exe
+default			: exe parallel
 install			: default
 endif
 
