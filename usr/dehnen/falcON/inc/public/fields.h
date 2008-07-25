@@ -803,7 +803,7 @@ namespace falcON {
     /// fields in \c b but not in this set
     fieldset missing(bits b) const { return fieldset(b^val) & b; }
     /// return the integer value (combination of all bits)
-    value_type const&value() const { return val; }
+    value_type &value() { return val; }
     /// return the integer value (combination of all bits)
     friend value_type const&value(fieldset const&);
     //@}
@@ -875,7 +875,7 @@ namespace falcON {
   inline const char*word(fieldset d) { return d.word(); }
   inline const char*word(const fieldset*d) { return d->word(); }
   inline std::ostream& operator<< (std::ostream&s, const fieldset&b) {
-    if(b.value()) {
+    if(value(b)) {
       for(fieldbit f; f; ++f)
 	if(b.contain(f)) s << letter(f);
     } else

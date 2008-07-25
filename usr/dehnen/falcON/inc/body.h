@@ -427,7 +427,8 @@ namespace falcON {
     mutable bool     SPHC;                         // SPH data changed?         
     const bool       C_FORTRAN;                    // we are used for C/FORTRAN 
     //--------------------------------------------------------------------------
-    void erase_block(block*B);
+    void  erase_block(block*B);
+    block*new_block(bodytype t, unsigned=0);
   public:
     block *const&first_block() const { return FIRST; }
     //==========================================================================

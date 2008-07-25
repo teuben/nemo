@@ -590,6 +590,61 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
 // class falcON::bodies                                                         
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
+// erase a block
+void bodies::erase_block(block*B)
+{
+  if(B==0) falcON_THROW("bodies::erase_block(): NULL pointer provided\n");
+  // remove from FIRST
+  if(FIRST == B)
+    FIRST = B->next();
+  // remove from TYPES[]
+  if(TYPES[B->type()] == B)
+    TYPES[B->type()] = B->next_of_same_type();
+  // remove from block::NEXT
+  for(int i=0; i!=NBLK; ++i)
+    if(BLOCK[i] && BLOCK[i]->next() == B) {
+      BLOCK[i]->link(B->next());
+      break;
+    }
+  // remove from BLOCK[]
+  for(int i=0; i<NBLK; ++i)
+    if(BLOCK[i] == B) {
+      BLOCK[i] = 0;
+      for(int j=i+1; j<NBLK; ++i,++j)
+	BLOCK[i] = BLOCK[j];
+      --NBLK;
+      return;
+    }
+  falcON_Warning("bodies::erase_block(): block not found in table\n");
+}
+////////////////////////////////////////////////////////////////////////////////
+// create a new block and link it in
+bodies::block* bodies::new_block(bodytype T, unsigned N)
+{
+  block*B=new block(NBLK,N,N,0,T,fieldset::empty,this);
+  // if first of its type: set TYPES[T]  link  to other type (if any)
+  if(0 == TYPES[T]) {
+    TYPES[T] = B;
+    for(bodytype t; t; ++t)
+      if(TYPES[t]) {
+        block*A = TYPES[t];
+        while(A->next_of_same_type()) A = A->next_of_same_type();
+        B->link(A->next());
+        A->link(B);
+        break;
+      }
+  // if not the first of its type: add it to the linked list
+  } else {
+    block*A = TYPES[T];
+    while(A->next_of_same_type()) A = A->next_of_same_type();
+    B->link(A->next());
+    A->link(B);
+  }
+  // update FIRST and BLOCK[]
+  if(FIRST==0) FIRST = B;
+  BLOCK[NBLK++] = B;
+}
+////////////////////////////////////////////////////////////////////////////////
 // replace a given block
 #if(0)
 void bodies::replace_block(block*Bold, block*Bnew)
