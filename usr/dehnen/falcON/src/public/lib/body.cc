@@ -613,12 +613,12 @@ void bodies::add_block(block*B)
   NBLK ++;
   // update block::FIRST and NALL[], NBOD[], NTOT
   set_firsts();
-  // TEST
-  DebugInfo("bodies::add_block(): FIRST=%p\n",FIRST);
-  for(block*P=FIRST; P; P=P->NEXT)
-    DebugInfo("bodies::add_block(): %p: NBOD=%d, NEXT=%p\n",
-	      P,P->NBOD,P->NEXT);
-  // TSET
+//   // TEST
+//   DebugInfo("bodies::add_block(): FIRST=%p\n",FIRST);
+//   for(block*P=FIRST; P; P=P->NEXT)
+//     DebugInfo("bodies::add_block(): %p: NBOD=%d, NEXT=%p\n",
+// 	      P,P->NBOD,P->NEXT);
+//   // TSET
 }
 ////////////////////////////////////////////////////////////////////////////////
 // erase a block from our linkage
