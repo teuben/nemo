@@ -123,7 +123,7 @@ namespace falcON {
       unsigned           FIRST;                    // total index of first body 
       void              *DATA[BodyData::NQUANT];   // pointers to body data     
       block             *NEXT;                     // blocks: in linked list    
-      const bodies*const BODS;                     // pointer back to bodies    
+      const bodies      *BODS;                     // pointer back to bodies    
       //------------------------------------------------------------------------
       // data access                                                            
       //------------------------------------------------------------------------
@@ -420,6 +420,7 @@ namespace falcON {
     fieldset         BITS;                         // body data allocated       
     unsigned         NBLK;                         // # blocks in use           
     block           *BLOCK[index::max_blocks];     // table: blocks             
+    // NOTE BLOCK[] may be filled randomly
     block           *TYPES[BT_NUM];                // table: bodies per bodytype
     block           *FIRST;                        // first block of bodies     
     const TimeSteps *TSTEPS;                       // time steps                
@@ -427,8 +428,6 @@ namespace falcON {
     mutable bool     SPHC;                         // SPH data changed?         
     const bool       C_FORTRAN;                    // we are used for C/FORTRAN 
     //--------------------------------------------------------------------------
-    void  erase_block(block*B);
-    block*new_block(bodytype t, unsigned=0);
   public:
     block *const&first_block() const { return FIRST; }
     //==========================================================================
@@ -1083,7 +1082,9 @@ namespace falcON {
     ///
     /// \param[in] N number of bodies to allocate
     /// \param[in] t type of bodies to allocate
-    void create(unsigned N, bodytype t) falcON_THROWING;
+    void create(unsigned N, bodytype t) falcON_THROWING {
+      new_block(t,N,0,BITS);
+    }
     //--------------------------------------------------------------------------
     /// make a body available which is allocated but not currently used.
     ///
@@ -1338,7 +1339,7 @@ namespace falcON {
     /// method used by ebodies
     void reset(char, fieldbit, void*) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// set block's FIRST.
+    /// set block::FIRST
     /// The block's FIRST data are set such that the bodyindices of bodies of
     /// type t on start at F[t].
     /// \param F array with first bodyindex per body type.
@@ -1352,14 +1353,29 @@ namespace falcON {
     // set up blocks to hold N[t] bodies of type t                              
     void set_data(const unsigned[BT_NUM]) falcON_THROWING;
     //--------------------------------------------------------------------------
-    // link the TYPES[] lists together and set FIRST                            
-    void link_blocks();
-    //--------------------------------------------------------------------------
-    // set blocks' FIRST entries                                                
+    // set block::FIRST and NALL, NBOD & NTOT
     void set_firsts();
     //--------------------------------------------------------------------------
     // delete all blocks and reset related data                                 
     void del_data() falcON_THROWING;
+    //--------------------------------------------------------------------------
+    // add a block into our linking & reset block::FIRST for all blocks
+    /// \note we do NOT check for block number overflow
+    void add_block(block*B);
+    //--------------------------------------------------------------------------
+    // erase a block from our linking & reset block::FIRST for all blocks
+    void erase_block(block*B);
+    //--------------------------------------------------------------------------
+    /// create new block and link it in
+    /// \return       new block
+    /// \param[in] t  bodytype for new block
+    /// \param[in] Na # bodies to allocate
+    /// \param[in] Nb # bodies to activate (Nb <= Na)
+    /// \param[in] f  data fields to support (data will be allocated)
+    block*new_block(bodytype t, unsigned Na=0, unsigned Nb=0,
+		    fieldset f=fieldset::empty) falcON_THROWING;
+    //--------------------------------------------------------------------------
+    void remove_empty_blocks(bool=0) falcON_THROWING;
     //==========================================================================
   };
   // ///////////////////////////////////////////////////////////////////////////

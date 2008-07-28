@@ -590,10 +590,35 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
 // class falcON::bodies                                                         
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
-// erase a block
+// link a new block in
+void bodies::add_block(block*B)
+{
+  // link to last block of same or earlier type, if any, otherwise make it first
+  block**P=&FIRST;
+  while(*P && (*P)->NEXT && (*P)->TYPE <= B->TYPE) P = &((*P)->NEXT);
+  B->link(*P);
+  *P = B;
+  // update TYPES[]
+  if(0==TYPES[B->type()])
+    TYPES[B->type()]=B;
+  // update BLOCK[] and block::NO
+  for(int I=0; I!=index::max_blocks; ++I)
+    if(BLOCK[I] == 0) {
+      BLOCK[I] = B;
+      B->NO    = I;
+      break;
+    }
+  // update NBLK and block::BODS
+  B->BODS  = this;
+  NBLK ++;
+  // update block::FIRST and NALL[], NBOD[], NTOT
+  set_firsts();
+}
+////////////////////////////////////////////////////////////////////////////////
+// erase a block from our linkage
 void bodies::erase_block(block*B)
 {
-  if(B==0) falcON_THROW("bodies::erase_block(): NULL pointer provided\n");
+  if(B==0) return;
   // remove from FIRST
   if(FIRST == B)
     FIRST = B->next();
@@ -601,78 +626,68 @@ void bodies::erase_block(block*B)
   if(TYPES[B->type()] == B)
     TYPES[B->type()] = B->next_of_same_type();
   // remove from block::NEXT
-  for(int i=0; i!=NBLK; ++i)
+  for(int i=0; i!=index::max_blocks; ++i)
     if(BLOCK[i] && BLOCK[i]->next() == B) {
       BLOCK[i]->link(B->next());
       break;
     }
   // remove from BLOCK[]
-  for(int i=0; i<NBLK; ++i)
+  bool found = false;
+  for(int i=0; i!=index::max_blocks; ++i)
     if(BLOCK[i] == B) {
       BLOCK[i] = 0;
-      for(int j=i+1; j<NBLK; ++i,++j)
-	BLOCK[i] = BLOCK[j];
-      --NBLK;
-      return;
-    }
-  falcON_Warning("bodies::erase_block(): block not found in table\n");
-}
-////////////////////////////////////////////////////////////////////////////////
-// create a new block and link it in
-bodies::block* bodies::new_block(bodytype T, unsigned N)
-{
-  block*B=new block(NBLK,N,N,0,T,fieldset::empty,this);
-  // if first of its type: set TYPES[T]  link  to other type (if any)
-  if(0 == TYPES[T]) {
-    TYPES[T] = B;
-    for(bodytype t; t; ++t)
-      if(TYPES[t]) {
-        block*A = TYPES[t];
-        while(A->next_of_same_type()) A = A->next_of_same_type();
-        B->link(A->next());
-        A->link(B);
-        break;
-      }
-  // if not the first of its type: add it to the linked list
-  } else {
-    block*A = TYPES[T];
-    while(A->next_of_same_type()) A = A->next_of_same_type();
-    B->link(A->next());
-    A->link(B);
-  }
-  // update FIRST and BLOCK[]
-  if(FIRST==0) FIRST = B;
-  BLOCK[NBLK++] = B;
-}
-////////////////////////////////////////////////////////////////////////////////
-// replace a given block
-#if(0)
-void bodies::replace_block(block*Bold, block*Bnew)
-{
-  // 1  get entry in BLOCK[]
-  if(Bold == 0) falcON_THROW("bodies::replace_block(): Bold=0\n");
-  bool found = false;
-  for(int p=0; p!=index::max_blocks; ++p)
-    if(BLOCK[p] == Bold) {
-      BLOCK[p] = Bnew;
       found = true;
       break;
     }
-  if(!found) falcON_THROW("bodies::replace_block(): Bold (%p) not found\n",
-			  Bold);
-  // 2  get block::NEXT correct
-  Bnew->NEXT = Bold->NEXT;
-  for(int p=0; p!=index::max_blocks; ++p)
-    if(BLOCK[p] && BLOCK[p]->NEXT == Bold)
-      BLOCK[p]->NEXT = Bnew;
-  // 3  check for TYPES[] and FIRST
-  for(bodytype t; t; ++t)
-    if(TYPES[t] == Bold) TYPES[t] = Bnew;
-  if(FIRST == Bold) FIRST = Bnew;
+  // reset # bodies info and block::FIRST
+  if(found) {
+    --NBLK;
+    B->BODS = 0;
+    set_firsts();
+  } else
+    falcON_Warning("bodies::erase_block(): block not found in table\n");
 }
-#endif
 ////////////////////////////////////////////////////////////////////////////////
-// reset blocks' FIRST entries
+// remove empty blocks
+void bodies::remove_empty_blocks(bool all) falcON_THROWING
+{
+  for(;;) {
+    block*B=0;
+    // search for empty block
+    for(int i=0; i!=index::max_blocks; ++i)
+      if(BLOCK[i] && (all? BLOCK[i]->N_alloc():BLOCK[i]->N_bodies())==0) {
+	B=BLOCK[i];
+	break;
+      }
+    // found one: remove it
+    if(B) {
+      erase_block(B);
+      falcON_DEL_O(B);
+    } else
+      break;
+  }
+}
+////////////////////////////////////////////////////////////////////////////////
+// create a new block and link it in
+bodies::block* bodies::new_block(bodytype t, unsigned Na, unsigned Nb,
+				 fieldset f) falcON_THROWING
+{
+  if(Nb > Na)
+    falcON_THROW("bodies::new_block(): Nb=%u > Na=%u\n",Nb,Na);
+  if(Na > index::max_bodies) 
+    falcON_THROW("bodies::new_block(): asked for %u > %u bodies\n",
+		 Na,  index::max_bodies);
+  if(NBLK >= index::max_blocks)
+    falcON_THROW("bodies::new_block(): number of blocks exceeded\n");
+  block*B=new block(0,Na,Nb,0,t,f,this);
+  add_block(B);
+  DebugInfo(2,"bodies::new_block(): "
+	    "created block for up to %u bodies (%u active) of type %s\n",
+	    Na,Nb,t.name());
+  return B;
+}
+////////////////////////////////////////////////////////////////////////////////
+// reset blocks' FIRST entries (used in parallel code)
 void bodies::reset_firsts(int first[BT_NUM])
 {
   for(bodytype t; t; ++t) {
@@ -692,11 +707,12 @@ unsigned bodies::N_subset() const
   LoopAllBodies(this,b) if(in_subset(b)) ++n;
   return n;
 }
+////////////////////////////////////////////////////////////////////////////////
 // delete all blocks and reset related data
 void bodies::del_data() falcON_THROWING
 {
-  for(unsigned i=0; i!=index::max_blocks; ++i) if(BLOCK[i]) {
-    falcON_DEL_O(BLOCK[i]);
+  for(unsigned i=0; i!=index::max_blocks; ++i) {
+    if(BLOCK[i]) falcON_DEL_O(BLOCK[i]);
     BLOCK[i] = 0;
   }
   NBLK = 0u;
@@ -705,6 +721,7 @@ void bodies::del_data() falcON_THROWING
     NBOD [t] = 0u;
     TYPES[t] = 0;
   }
+  NTOT  = 0;
   FIRST = 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -719,25 +736,30 @@ bodies::~bodies() falcON_THROWING
   del_data();
 }
 ////////////////////////////////////////////////////////////////////////////////
-// set blocks' FIRST entries
+// set block::FIRST and NALL, NBOD & NTOT
 void bodies::set_firsts()
 {
-  unsigned n = 0;
-  for(const block* p=FIRST; p; p=p->next()) {
-    const_cast<block*>(p)->set_first(n);
-    n += p->N_bodies();
+  for(bodytype t; t; ++t) {
+    NALL[t] = 0u;
+    NBOD[t] = 0u;
+  }
+  NTOT = 0u;
+  unsigned NTOTALL=0;
+  for(block*P=FIRST; P; P=P->next()) {
+    P->set_first(NTOTALL);
+    NALL[P->type()] += P->N_alloc ();
+    NTOTALL         += P->N_alloc();
+    NBOD[P->type()] += P->N_bodies();
+    NTOT            += P->N_bodies();
   }
 }
-
 ////////////////////////////////////////////////////////////////////////////////
 // set up blocks to hold N[t] bodies of type t
 void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
 {
   if(debug(5)) DebugInfo("bodies::set_data(): N=[%d,%d,%d], BITS=%s\n",
 			 N[0],N[1],N[2],word(BITS));
-  NBLK = 0u;
-  NTOT = 0u;
-  for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
+  del_data();
   try {
     block   *last = 0;
     unsigned i    = 0;
@@ -940,70 +962,26 @@ void bodies::remove() falcON_THROWING {
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
-// update FIRST and link TYPES[] together                                     
-void bodies::link_blocks() {
-  block **L = &FIRST, *P;
-  for(bodytype t; t; ++t) {
-    P = TYPES[t];
-    if(P) {
-      *L = P;
-      while(P->NEXT && P->NEXT->TYPE == t) P = P->NEXT;
-      L = &(P->NEXT);
-    }
-  }
-  *L = 0;
-}
-////////////////////////////////////////////////////////////////////////////////
 void bodies::merge(bodies&Other) falcON_THROWING {
   if(NBLK + Other.NBLK > index::max_blocks)
     falcON_THROW("bodies::merge(): too many blocks\n");
-  // loop Other.BLOCK[] and add them at the head of our TYPES[]                 
-  for(unsigned n=0; n!=Other.NBLK; ++n) {
-    block*B = Other.BLOCK[n];
-    B->set_fields(BITS);
-    BLOCK[NBLK] = B;
-    B->NO   = NBLK++;
-    B->NEXT = TYPES[B->TYPE];
-    TYPES[B->TYPE]  = B;
-    NALL [B->TYPE] += B->NALL;
-    NBOD [B->TYPE] += B->NBOD;
-    NTOT           += B->NBOD;
-  }
-  // link blocks together and reset FIRST                                       
-  link_blocks();
-  // set block::FIRST                                                           
-  set_firsts();
-  // finally reset all entries of OTHER                                         
+  // add blocks
+  for(block*P=Other.FIRST; P; P=P->next())
+    add_block(P);
+  // reset Other (so that its destructor will not harm us)
   Other.FIRST = 0;
   for(bodytype t; t; ++t) {
     Other.TYPES[t] = 0;
     Other.NALL [t] = 0;
     Other.NBOD [t] = 0;
+    Other.NNEW [t] = 0;
+    Other.NDEL [t] = 0;
   }
+  Other.BITS = fieldset::empty;
   Other.NTOT = 0;
   Other.NBLK = 0;
-}
-////////////////////////////////////////////////////////////////////////////////
-void bodies::create(unsigned N, bodytype t) falcON_THROWING
-{
-  if(N > index::max_bodies) 
-    falcON_THROW("bodies::create(): asked for %u > %u bodies\n",
-		 N,  index::max_bodies);
-  if(NBLK >= index::max_blocks)
-    falcON_THROW("bodies::create(): number of blocks exceeded\n");
-  // allocate new block and add it to the head of the list TYPES[t]             
-  block* p = new block(NBLK,N,0,0,t,BITS,this);
-  BLOCK[NBLK++]  = p;
-  p->link(TYPES[t]);
-  TYPES[t]  = p;
-  NALL [t] += N;
-  // link blocks together and reset FIRST                                       
-  link_blocks();
-  // set block::FIRST                                                           
-  set_firsts();
-  if(debug(2))
-    DebugInfo("bodies::create(): created %u new bodies of type %s\n",
-	      N,t.name());
+  for(int i=0; i!=index::max_blocks; ++i)
+    Other.BLOCK[i] = 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
 bodies::iterator bodies::new_body(bodytype t) falcON_THROWING
