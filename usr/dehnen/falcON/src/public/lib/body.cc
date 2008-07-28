@@ -595,7 +595,7 @@ void bodies::add_block(block*B)
 {
   // link to last block of same or earlier type, if any, otherwise make it first
   block**P=&FIRST;
-  while(*P && (*P)->NEXT && (*P)->TYPE <= B->TYPE) P = &((*P)->NEXT);
+  while(*P && (*P)->TYPE <= B->TYPE) P = &((*P)->NEXT);
   B->link(*P);
   *P = B;
   // update TYPES[]
@@ -613,6 +613,12 @@ void bodies::add_block(block*B)
   NBLK ++;
   // update block::FIRST and NALL[], NBOD[], NTOT
   set_firsts();
+  // TEST
+  DebugInfo("bodies::add_block(): FIRST=%p\n",FIRST);
+  for(block*P=FIRST; P; P=P->NEXT)
+    DebugInfo("bodies::add_block(): %p: NBOD=%d, NEXT=%p\n",
+	      P,P->NBOD,P->NEXT);
+  // TSET
 }
 ////////////////////////////////////////////////////////////////////////////////
 // erase a block from our linkage

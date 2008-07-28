@@ -1070,20 +1070,17 @@ namespace falcON {
     /// \note alters to body order.
     void remove() falcON_THROWING; 
     //--------------------------------------------------------------------------
-    /// \brief Create \a N new bodies of bodytype \a t, which can then be 
-    /// activated using bodies::new_body()
+    /// \brief Create \a N new bodies of bodytype \a t.
     ///
-    /// Will allocate a new block of bodies of given bodytype. However, the
-    /// number of bodies used remains unchanged. In order to activate the new
-    /// bodies, you must access each individual one using new_body(), which
-    /// also allows to set up its data.
+    /// Will allocate a new block of \a Na bodies of given bodytype. However,
+    /// the total number of bodies remains unchanged, since the new bodies are
+    /// not yet activated. The new bodies can be activated individually by using
+    /// new_body().
     ///
-    /// \note bodies created are always made the first of their type
-    ///
-    /// \param[in] N number of bodies to allocate
-    /// \param[in] t type of bodies to allocate
-    void create(unsigned N, bodytype t) falcON_THROWING {
-      new_block(t,N,0,BITS);
+    /// \param[in] Na number of bodies to allocate
+    /// \param[in] t  type of bodies to allocate
+    void create(unsigned Na, bodytype t) falcON_THROWING {
+      new_block(t,Na,0,BITS);
     }
     //--------------------------------------------------------------------------
     /// make a body available which is allocated but not currently used.
@@ -1109,6 +1106,16 @@ namespace falcON {
     {
       if(0 == N_free(t)) create(max(1u,N),t);
       return new_body(t);
+    }
+    //--------------------------------------------------------------------------
+    /// \brief make \a N new bodies of type t and activate them all.
+    ///
+    /// \return a valid bodies::iterator to the first new body
+    /// \param[in] t  bodytype of body requested
+    /// \param[in] N  # bodies to allocate
+    iterator new_bodies(bodytype t, unsigned N) falcON_THROWING
+    {
+      return iterator(new_block(t,N,N,BITS),0);
     }
     //--------------------------------------------------------------------------
     /// \brief returns the number of bodies of type \a t created by new_body() 
