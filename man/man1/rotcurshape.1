@@ -1,4 +1,4 @@
-.TH ROTCURSHAPE 1NEMO "13 June 2004"
+.TH ROTCURSHAPE 1NEMO "30 January 2008"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
@@ -374,7 +374,7 @@ to converge, and more than often complains with the message
 if \fBbeam=\fP is used, the map is also used to estimate beam smearing corrections. 
 This is still a totally untested  feature of the code.
 .SH SEE ALSO
-rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), rotcurshape(5NEMO), loadobj(3NEMO), gal(AIPS), nllsqfit(3NEMO)
+rotcurtab(1NEMO), rotcur(1NEMO), ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), pvtrace(1NEMO), ccdmom(1NEMO), tabnllsqfit(1NEMO), rotcurshape(5NEMO), loadobj(3NEMO), gal(AIPS), nllsqfit(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -387,4 +387,5 @@ Peter Teuben
 11-oct-03	fixed up for adass 2003  	PJT
 26-may-04	1.2e fixed sqrt(n) bug in sigma, improved nsigma>0 iterations	PJT
 13-jun-04	1.3: added fit= option to save a fitted map	PJT
+30-jan-08	1.4: with new rotcurtab minor overhaul of code	PJT
 .fi
