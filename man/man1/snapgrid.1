@@ -5,10 +5,10 @@ snapgrid \- grid a snapshot into a 2D or 3D image (cube)
 .PP
 \fBsnapgrid in=\fPsnapshot \fBout=\fPimage [parameter=value]
 .SH DESCRIPTION
-\fIsnapgrid\fP grids three arbitrary bodytrans expressions 
-(default: \fBx\fP, \fBy\fP and \fB-vz\fP) of a snapshot into a datacube
-(or image plane), with optional astronomical projection for direct
-comparision with astronomical images.
+\fIsnapgrid\fP grids three arbitrary \fIbodytrans(3NEMO)\fP expressions 
+(default: \fBx\fP, \fBy\fP and \fB-vz\fP) of a snapshot into a 2D or 3D
+\fIimage(5NEMO)\fP dataset, with optional astronomical projection for direct
+comparision with true astronomical images.
 .PP
 The X and Y coordinates of the datacube can only
 be regularly gridded in histogram fashion 
@@ -16,14 +16,15 @@ be regularly gridded in histogram fashion
 however the Z coordinate has the property that it can take moments in this
 variable, pick a number of planes or planes with smoothing.
 .PP
-The image cube is written as a standard \fIimage(5NEMO)\fP file, and can
-be accessed by various other programs for smoothing, display etc.
+The output image is written in standard \fIimage(5NEMO)\fP format, 
+and can be accessed by various other programs for smoothing, display etc.
 .PP 
 Although \fIsnapgrid(1NEMO)\fP can grid datacubes (e.g. X-Y-Z), 
-\fIsnapgridsmooth(1NEMO)\fP is probably easier to use, since it does not integrate
-along any lines of sight.
+\fIsnapgridsmooth(1NEMO)\fP is probably easier to use, 
+since it does not integrate along any lines of sight, whereas this
+program is more suited for taking moments along the 3rd axis.
 .SH PARAMETERS
-The following parameters ...
+The following parameters are recognized:
 .TP 20
 \fBin=\fIin-file\fP
 input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
