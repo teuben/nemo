@@ -65,20 +65,53 @@ namespace falcON {
   /// Returns the falcON library directory
   const char* libdir();
   //----------------------------------------------------------------------------
+  /// to handle error output
+  struct Error : public WDutils::Error
+  {
+    /// default constructor
+    Error()
+      : WDutils::Error("falcON") {}
+    /// constructor: get file name & line number
+    Error(const char*f, int l)
+      : WDutils::Error(f,l,"falcON") {}
+  };
+  //----------------------------------------------------------------------------
+  /// to handle warning output
+  struct Warning : public WDutils::Warning
+  {
+    /// default constructor
+    Warning()
+      : WDutils::Warning("falcON") {}
+    /// constructor: get file name & line number
+    Warning(const char*f, int l)
+      : WDutils::Warning(f,l,"falcON") {}
+  };
+  //----------------------------------------------------------------------------
+  /// to handle debug output
+  struct DebugInformation : public WDutils::DebugInformation
+  {
+    /// default constructor
+    DebugInformation()
+      : WDutils::DebugInformation("falcON ") {}
+    /// constructor: get file name & line number
+    DebugInformation(const char*f, int l)
+      : WDutils::DebugInformation(f,l,"falcON ") {}
+  };
+  //----------------------------------------------------------------------------
   /// \name macros controling the usage of throw exception vs error             
   //@{                                                                          
   /// error message (and exit), reporting [file:line]
   /// use "falcON_Error(fmt, data)" instead of "error(fmt, data)"
-#define falcON_Error           WDutils::Error(__FILE__,__LINE__,"falcON")
+#define falcON_Error           falcON::Error(__FILE__,__LINE__)
   /// error message (and exit), NOT reporting [file:line]
   /// use "falcON_Error(fmt, data)" instead of "error(fmt, data)"
-#define falcON_ErrorN          WDutils::Error("falcON")
+#define falcON_ErrorN          falcON::Error()
   /// print warning message, reporting [file:line]
   /// use "falcON_Warning(fmt, data)" instead of "warning(fmt, data)"
-#define falcON_Warning	       WDutils::Warning(__FILE__,__LINE__,"falcON")
+#define falcON_Warning	       falcON::Warning(__FILE__,__LINE__)
   /// print warning message, NOT reporting [file:line]
   /// use "falcON_Warning(fmt, data)" instead of "warning(fmt, data)"
-#define falcON_WarningN	       WDutils::Warning("falcON")
+#define falcON_WarningN	       falcON::Warning()
   //----------------------------------------------------------------------------
 #ifdef WDutils_EXCEPTIONS
 #  define falcON_EXCEPTIONS
@@ -104,9 +137,9 @@ namespace falcON {
 #endif
   //@}
 #undef  DebugInfo
-#define DebugInfo    WDutils::DebugInformation(__FILE__,__LINE__,"falcON ")
+#define DebugInfo    falcON::DebugInformation(__FILE__,__LINE__)
 #undef  DebugInfoN
-#define DebugInfoN   WDutils::DebugInformation("falcON ")
+#define DebugInfoN   falcON::DebugInformation()
   //============================================================================
   //
   // mechanism to avoid status mismatch

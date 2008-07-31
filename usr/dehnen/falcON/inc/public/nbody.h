@@ -981,7 +981,7 @@ namespace falcON {
     /// \param all  set forces for all bodies (or only the active ones)?
     virtual void setforces (bool all, bool, double) const {
       set_tree_and_forces(all,false);
-      DebugInfo(5,"ForceALCON::setforces(): done\n");
+      DebugInfo(8,"ForceALCON::setforces(): done\n");
     }
     /// diagnose: compute total pot & kin energy, etc.
     virtual void diagnose  () const { ForceDiagGrav::diagnose_full(); }

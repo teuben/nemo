@@ -543,7 +543,7 @@ void ForceDiagGrav::diagnose_grav() const
       for(int j=0; j!=Ndim; ++j) 
 	Loc[p++] = w[i][j];
     }
-    Comm(snap_shot()).AllReduce(Loc,Tmp,Num,MPI::Sum);
+    COMMUN(Comm(snap_shot()))->AllReduce(Loc,Tmp,Num,MPI::Sum);
     m    = Tmp[p=0];
     vin  = Tmp[++p];
     vex  = Tmp[++p];
@@ -590,7 +590,7 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
       for(int j=0; j!=Ndim; ++j) 
 	Loc[p++] = k[i][j];
     }
-    Comm(snap_shot()).AllReduce(Loc,Tmp,Num,MPI::Sum);
+    COMMUN(Comm(snap_shot()))->AllReduce(Loc,Tmp,Num,MPI::Sum);
     for(int i=0,p=0; i!=Ndim; ++i) {
       l[i] = Tmp[p++];
       v[i] = Tmp[p++];
@@ -658,7 +658,7 @@ void ForceDiagGrav::diagnose_full() const
 	Loc[p++] = k[i][j];
       }
     }
-    Comm(snap_shot()).AllReduce(Loc,Tmp,Num,MPI::Sum);
+    COMMUN(Comm(snap_shot()))->AllReduce(Loc,Tmp,Num,MPI::Sum);
     m   = Tmp[p=0];
     vin = Tmp[++p];
     vex = Tmp[++p];
@@ -934,7 +934,7 @@ void ForceALCON::cpu_stats_body(output&to) const
     double loc[3]={CPU_TREE,CPU_GRAV,CPU_AEX},cpu[3];
     DebugInfo(4,"ForceALCON::cpu_stats_body(): "
 	      "calling Communicator::Reduce()\n");
-    Comm(snap_shot()).Reduce(0,loc,cpu,3,MPI::Sum);
+    COMMUN(Comm(snap_shot()))->Reduce(0,loc,cpu,3,MPI::Sum);
     CPU_TREE = cpu[0];
     CPU_GRAV = cpu[1];
     CPU_AEX  = cpu[2];

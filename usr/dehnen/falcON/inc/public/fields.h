@@ -535,6 +535,8 @@ namespace falcON {
     fieldbit &operator++()                 { ++val; return *this; }
     /// conversion to bool: are we still a valid field
     operator bool       ()           const { return val<invalid; }
+    /// conversion to value_type
+    operator value_type ()           const { return val; }
     /// equality
     bool operator ==    (fieldbit f) const { return val == f.val; }
     /// equality

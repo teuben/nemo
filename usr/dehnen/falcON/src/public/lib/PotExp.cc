@@ -2497,10 +2497,10 @@ void Anlm::table_print(symmetry     s,
 }
 //------------------------------------------------------------------------------
 #ifdef falcON_MPI
-Anlm& Anlm::global_sum(Anlm const&C, MPI::Communicator const&Comm)
+Anlm& Anlm::global_sum(Anlm const&C, const MPI::Communicator*Comm)
 {
   reset(C.nmax(),C.lmax());
-  Comm.AllReduce(C.A, A, N1*L1Q, MPI::Sum);
+  COMMUN(Comm)->AllReduce(C.A, A, N1*L1Q, MPI::Sum);
   return*this;
 }
 #endif

@@ -175,6 +175,7 @@ namespace falcON {
       bool has_field(fieldbit f) const { return DATA[value(f)] != 0; }
       //------------------------------------------------------------------------
       bool               is_sph   () const { return TYPE.is_sph(); }
+      bool               is_empty () const { return NBOD == 0; }
       unsigned     const&N_alloc  () const { return NALL; }
       unsigned     const&N_bodies () const { return NBOD; }
       unsigned           N_free   () const { return NALL - NBOD; }
@@ -184,9 +185,49 @@ namespace falcON {
       unsigned     const&first    () const { return FIRST; }
       unsigned           end      () const { return FIRST+NBOD; }
       //------------------------------------------------------------------------
-      block       *const&next             () const { return NEXT; }
-      block       *      next_of_same_type() const {
+      block*const&next             () const { return NEXT; }
+      block*      next_of_same_type() const {
 	return (NEXT && NEXT->TYPE == TYPE)? NEXT : 0;
+      }
+      //------------------------------------------------------------------------
+      static const block*next(const block*&B) {
+	if(B) B=B->NEXT;
+	return B;
+      }
+      static const block*next_of_same_type(const block*&B) {
+	if(B && B->NEXT && B->NEXT->TYPE == B->TYPE) B = B->NEXT;
+	return B;
+      }
+      //  31/07/08 WD: allowance for empty blocks
+      /// replace \a B with the first non-empty block from \a B, if any.
+      static const block*non_empty(const block*&B) {
+	while(B && B->NBOD==0) B=B->NEXT;
+	return B;
+      }
+      /// replace \a B with the next non-empty block from \a B, if any.
+      static const block*non_empty_of_same_type(const block*&B) {
+	while(B && B->NBOD==0) B=B->next_of_same_type();
+	return B;
+      }
+      /// return the first non-empty block from this, if any.
+      const block*first_non_empty() const {
+	const block*B=this;
+	return non_empty(B);
+      }
+      /// return the next non-empty block from this, if any.
+      const block*next_non_empty() const {
+	const block*B=NEXT;
+	return non_empty(B);
+      }
+      /// return the first non-empty block from this of the same type, if any.
+      const block*first_non_empty_of_same_type() const {
+	const block*B=this;
+	return non_empty_of_same_type(B);
+      }
+      /// return the next non-empty block of the same type, if any.
+      const block*next_non_empty_of_same_type() const {
+	const block*B=next_of_same_type();
+	return non_empty_of_same_type(B);
       }
       //------------------------------------------------------------------------
       // flag manipulations                                                     
@@ -590,19 +631,18 @@ namespace falcON {
     //==========================================================================
     class iterator {
       friend class bodies;
-      const block* B;                              // block*: current           
-      unsigned     K, N;                           // index : current & end     
+      const block* B;                              ///< our block
+      unsigned     K;                              ///< our index within block
       //------------------------------------------------------------------------
-      /// construction from pointer to block and index within block             
+      /// construction from pointer to block and index within block
       explicit 
       iterator(const block*b,
-	       unsigned    k=0) : B(b), K(k), N(B? B->N_bodies() : 0u) {}
+	       unsigned    k=0) : B(b), K(k) {}
       //------------------------------------------------------------------------
-      // auxiliary                                                              
+      //  31/07/08 WD: allow for empty blocks
       void next_block() {
-	B = B? B->next() : 0;                      //   get next block          
+	block::non_empty(B=B->next());             //   get next non-empty block
 	K = 0;                                     //   set index to 0          
-	N = B? B->N_bodies() : 0;                  //   set end of indices      
       }
       //------------------------------------------------------------------------
     public:
@@ -617,6 +657,10 @@ namespace falcON {
       /// return pointer to my bodies::block
       const block *const&my_block () const {
 	return B;
+      }
+      /// return index within block
+      unsigned const&my_subindex() const {
+	return K;
       }
       /// return const pointer to my falcON::bodies
       const bodies*const&my_bodies() const {
@@ -694,17 +738,16 @@ namespace falcON {
       /// pre-fix: get next body (note: there is no post-fix operator++)
       iterator& operator++() {
 	CheckInvalid("operator++");
-	++K;                                       // increment subindex        
-	if(K == N) next_block();                   // end of block: next block  
+	if(++K == B->N_bodies()) next_block();
 	return *this;
       }
       /// jump k bodies forward (or to last valid body)
       iterator& operator+=(unsigned k) {
 	while(is_valid() && k) {
-	  unsigned s = min(N-K, k);
+	  unsigned s = min(B->N_bodies()-K, k);
 	  K += s;
 	  k -= s;
-	  if(K >= N) next_block();
+	  if(K >= B->N_bodies()) next_block();
 	}
 	return *this;
       }
@@ -716,17 +759,16 @@ namespace falcON {
       /// default constructor makes an invalid body
       iterator() : B(0) {}
       /// copy constructor
-      iterator(iterator const&i) : B(i.B), K(i.K), N(i.N) {}
+      iterator(iterator const&i) : B(i.B), K(i.K) {}
       /// iterator offset by \e offset from \e i
       iterator(iterator const&i,
-	       unsigned       offset) : B(i.B), K(i.K), N(i.N) {
+	       unsigned       offset) : B(i.B), K(i.K) {
 	*this += offset;
       }
       /// assignment: make exact copy
       iterator& operator=(iterator const&i) {
 	B = i.B;
 	K = i.K;
- 	N = i.N;
 	return *this;
       }
       //------------------------------------------------------------------------
@@ -897,30 +939,34 @@ namespace falcON {
     // \detail use these methods to obtain begin and end iterators when
     // looping over all or a subset of all bodies
     /// begin of all bodies
-    iterator begin_all_bodies() const { return iterator(FIRST); }
+    //  31/07/08 WD: allow for empty FIRST block
+    iterator begin_all_bodies() const {
+      return iterator(FIRST->first_non_empty());
+    }
     /// end of all bodies == invalid iterator
     iterator end_all_bodies  () const { return iterator(0); }
     /// begin of bodies of given bodytype, if any.
     /// if no bodies of given type exist, invalid iterator is returned
+    //  31/07/08 WD: allow for empty TYPES[t] block
     iterator begin_typed_bodies(bodytype t) const {
-      return iterator(TYPES[int(t)]);
+      return iterator(TYPES[t]->first_non_empty());
     }
     /// begin of active bodies
+    //  31/07/08 WD: allow for empty FIRST block
     iterator begin_active_bodies() const {
-      iterator B(FIRST);
+      iterator B=begin_all_bodies();
       while(B && !is_active(B)) ++B;
       return B;
     }
     /// end of bodies of given bodytype, if any.
     /// if no bodies of given type exist, invalid iterator is returned
     /// otherwise the next other type body, or an invalid iterator
+    //  31/07/08 WD: allow for empty TYPES[t] block
     iterator end_typed_bodies(bodytype t) const {
-      if(0==TYPES[int(t)])                      // no bodies of this type
-	return iterator(0);                     //   so return invalid
-      for(++t; t; ++t)                          // find next next type
-	if(TYPES[int(t)])                       //   for which we have bodies
-	  return iterator(TYPES[int(t)]);       //     returng
-      return iterator(0);                       // non found: return invalid
+      if(TYPES[t]==0) return iterator(0); 
+      for(++t; t; ++t)
+	if(TYPES[t]) return iterator(TYPES[t]->first_non_empty());
+      return iterator(0);
     }
     /// body of a given bodies::index
     iterator bodyIn(index i) const {
@@ -1065,66 +1111,46 @@ namespace falcON {
     /// We will fill in the gaps left by the removed bodies by bodies taken
     /// from the end. This implies that the order of bodies is altered (however,
     /// bodies of the same bodytype are kept together) and that the number of
-    /// bodies used is less than that allocated. Use bodies::shrink() to
-    /// reduce this memory overhead.
+    /// bodies used is less than that allocated.
     /// \note alters to body order.
-    void remove() falcON_THROWING; 
+    void remove();
     //--------------------------------------------------------------------------
-    /// \brief Create \a N new bodies of bodytype \a t.
+    /// Remove bodies of type t which have been flagged for removal, eg by
+    /// iterator::flag_for_removal().
     ///
-    /// Will allocate a new block of \a Na bodies of given bodytype. However,
-    /// the total number of bodies remains unchanged, since the new bodies are
-    /// not yet activated. The new bodies can be activated individually by using
-    /// new_body().
-    ///
-    /// \param[in] Na number of bodies to allocate
-    /// \param[in] t  type of bodies to allocate
-    void create(unsigned Na, bodytype t) falcON_THROWING {
-      new_block(t,Na,0,BITS);
-    }
+    /// We will fill in the gaps left by the removed bodies by bodies taken
+    /// from the end. This implies that the order of bodies is altered and that
+    /// the number of bodies used is less than that allocated. 
+    /// \note alters to body order.
+    void remove(bodytype t);
     //--------------------------------------------------------------------------
-    /// make a body available which is allocated but not currently used.
+    /// activate a bodies of type \a t.
+    /// If no body is available (i.e. isallocated but not activated), we
+    /// allocate at least \a Na bodies (though only one will be activated).
     ///
-    /// If more bodies of type \e t are currently allocated than used, we will
-    /// return a bodies::iterator to one of these and record it as being used.
-    /// Otherwise (no body available), we will issue a warning and return an
-    /// invalid bodies::iterator. To obtain the number of bodies that can be
-    /// activated use bodies::N_free().
-    ///
-    /// \return a bodies::iterator to a new body or an invalid bodies::iterator
-    /// \param[in] t type of body requested
-    iterator new_body(bodytype t) falcON_THROWING;
-    //--------------------------------------------------------------------------
-    /// \brief make a new body of type \a t; if none available, allocate a 
-    /// block of \a N new bodies first.
-    ///
-    /// This simple routine combines N_free(), create(), and new_body()
     /// \return a valid bodies::iterator to a body of type \e t
-    /// \param[in] t bodytype of body requested
-    /// \param[in] N if no body available, allocate this many
-    iterator new_body(bodytype t, unsigned N) falcON_THROWING
-    {
-      if(0 == N_free(t)) create(max(1u,N),t);
-      return new_body(t);
-    }
+    /// \param[in] t   bodytype of body requested
+    /// \param[in] Na  if no body available, allocate at least this many
+    iterator new_body(bodytype t, unsigned Na=0) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// \brief make \a N new bodies of type t and activate them all.
+    /// activate \a Nb bodies of type \a t.
+    /// If not enough bodies are available (i.e. are allocated but not
+    /// activated), we allocate at least \a Na bodies (though only \a Nb will be
+    /// activated).
     ///
-    /// \return a valid bodies::iterator to the first new body
-    /// \param[in] t  bodytype of body requested
-    /// \param[in] N  # bodies to allocate
-    iterator new_bodies(bodytype t, unsigned N) falcON_THROWING
-    {
-      return iterator(new_block(t,N,N,BITS),0);
-    }
+    /// \return a valid bodies::iterator to the first of \a Nb new bodies
+    /// \param[in] Nb  # bodies to activate
+    /// \param[in] t   bodytype of body requested
+    /// \param[in] Na  # bodies to allocate (but at least Nb)
+    iterator new_bodies(unsigned Nb, bodytype t, unsigned Na=0) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// \brief returns the number of bodies of type \a t created by new_body() 
+    /// \brief # bodies of type \a t created by new_body() or new_bodies()
     /// since last call of reset_Nnew(), if any.
     unsigned const&N_new(bodytype t) const {
       return NNEW[t];
     }
     //--------------------------------------------------------------------------
-    /// \brief returns the number of bodies of types \a t created by new_body()
+    /// \brief # bodies of types \a t created by new_body() or new_bodies()
     /// since last call of reset_Nnew(), if any.
     unsigned N_new(bodytypes t) const {
       unsigned N(0u);
@@ -1134,7 +1160,7 @@ namespace falcON {
       return N;
     }
     //--------------------------------------------------------------------------
-    /// \brief returns the number of bodies of all types created by new_body()
+    /// \brief # bodies of all types created by new_body() or new_bodies()
     /// since last call of reset_Nnew(), if any.
     unsigned N_new() const {
       return sum<BT_NUM>(NNEW);
@@ -1174,14 +1200,20 @@ namespace falcON {
 	NDEL[t] = 0u;
     }
     //--------------------------------------------------------------------------
-    /// Shrink allocation to actual usage (\b not \b yet \b implemented)
+    /// \brief ensure bodies of type \a t are contiguous, i.e. free bodies, if
+    /// any, are beyond the last activated body.
     ///
-    /// If more body data are allocated than used, we re-allocate and copy the 
-    /// data to avoid that overhead. Even if the allocation equals the usage, 
-    /// we may re-allocate the data to group the bodies in the lowest possible
-    /// number of blocks.
-    /// \note \b NOT \b YET \b IMPLEMENTED 
-    void shrink() falcON_THROWING; 
+    /// This is done without memory allocation by copying bodies across blocks.
+    void joinup(bodytype t) falcON_THROWING; 
+    //--------------------------------------------------------------------------
+    /// shrink allocation non-agressively.
+    /// After joining up bodies of all types, we de-allocate blocks with no
+    /// active bodies in them. Thus, at most one block per type will have free
+    /// space.
+    void shrink() falcON_THROWING {
+      for(bodytype t; t; ++t) joinup(t);
+      remove_empty_blocks();
+    }
     //==========================================================================
     // \name I/O to file in various formats
 #ifdef falcON_NEMO
@@ -1370,6 +1402,18 @@ namespace falcON {
     /// \note we do NOT check for block number overflow
     void add_block(block*B);
     //--------------------------------------------------------------------------
+    /// \brief find or create a block whose first free body is also the first
+    /// of a contiguous set of N free bodies.
+    ///
+    /// If no chunk of \a N contiguous free bodies of type \a t can be found,
+    /// we allocate new bodies such that a total of at least \a Na
+    /// bodies of type \a t are free.\n
+    ///
+    /// \param[in] N   # bodies to guarantee avtivatablity of
+    /// \param[in] t   type of bodies
+    /// \param[in] Na  minimum # bodies to allocate should we need to allocate
+    block*ensure_contiguous(unsigned N, bodytype t, unsigned Na=0);
+    //--------------------------------------------------------------------------
     // erase a block from our linking & reset block::FIRST for all blocks
     void erase_block(block*B);
     //--------------------------------------------------------------------------
@@ -1382,7 +1426,7 @@ namespace falcON {
     block*new_block(bodytype t, unsigned Na=0, unsigned Nb=0,
 		    fieldset f=fieldset::empty) falcON_THROWING;
     //--------------------------------------------------------------------------
-    void remove_empty_blocks(bool=0) falcON_THROWING;
+    void remove_empty_blocks(bool=1) falcON_THROWING;
     //==========================================================================
   };
   // ///////////////////////////////////////////////////////////////////////////

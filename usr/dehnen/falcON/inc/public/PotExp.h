@@ -278,7 +278,7 @@ namespace falcON {
       //------------------------------------------------------------------------
 #ifdef falcON_MPI
       /// set to sum of A_nlm over all MPI processes
-      Anlm&global_sum(Anlm const&A, MPI::Communicator const&C);
+      Anlm&global_sum(Anlm const&A, const MPI::Communicator*C);
 #endif
       //------------------------------------------------------------------------
       /// make formated nice print
