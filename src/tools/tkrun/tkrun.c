@@ -656,7 +656,7 @@ void example(void)
 {
     printf("#! /bin/csh -f\n");
     printf("#\n");
-    printf("#   Example template for tkrun\n");
+    printf("#   Example template for tkrun, generated with 'tkrun -e'\n");
     printf("#\n");
     printf("#\n");
     printf("#>  IFILE   in=\n");
@@ -673,6 +673,13 @@ void example(void)
     printf("foreach _arg ($*)\n");
     printf("  set $_arg\n");
     printf("end\n");
+    printf("\n# some example code using the variables:\n");
+    printf("echo in      =$in\n");
+    printf("echo out     =$out\n");
+    printf("echo eps     =$eps\n");
+    printf("echo mode    =$mode\n");
+    printf("echo options =$options\n");
+    printf("echo n       =$n\n");
 
 #if 0
     printf("# Here is an example of automatically setting default:\n");

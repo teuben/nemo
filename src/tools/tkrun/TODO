@@ -12,6 +12,10 @@ Short term:
 
     notice the missing a=1 in that case... is that really wise?
 
+  - if tkrun script is given with no path reference, it needs ./
+    else people that have no . in $path will get a cryptic error message
+    that it cannot execute the script! or:   set path=($path  .)
+
 Longer term:
 
   - change the geometry mananger over from 'pack' to 'grid'
