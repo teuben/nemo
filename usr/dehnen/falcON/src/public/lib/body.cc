@@ -1857,6 +1857,7 @@ void bodies::write_gadget(output&out, double time, fieldset write,
   // initialize and write header
   GadgetHeader header0, *header=&header0;
   header->num_files = 1;
+  header->time = time;
   header->npart[0] = header->npartTotal[0] = N_sph();
   header->npart[1] = header->npartTotal[1] = N_std();
   FortranORec::Write(out,header,1,rec);
