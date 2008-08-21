@@ -87,12 +87,17 @@ namespace falcON {
 #else
     GRAV    ( new GravEstimator(TREE,k,STATS,e,g,0,gd) ),
 #endif
-    PAES    ( 0 )
+    PAES    ( 0 ),
+    SPHT    ( 
 #ifdef falcON_SPH
-			  ,
-    SPHT    ( new SphEstimator(TREE,sd) )
+	      new SphEstimator(TREE,sd)
+#else
+	      0
 #endif
-  {}
+	    )
+  {
+    BODIES->set_forces(this);
+  }
   //----------------------------------------------------------------------------
   inline forces::~forces() falcON_THROWING
   {
@@ -102,8 +107,9 @@ namespace falcON {
     falcON_DEL_O(GRAV);
     if(PAES) falcON_DEL_O(PAES);
 #ifdef falcON_SPH
-    falcON_DEL_O(SPHT);
+    if(SPHT) falcON_DEL_O(SPHT);
 #endif
+    if(BODIES) BODIES->set_forces(0);
   }
   //----------------------------------------------------------------------------
 #ifdef falcON_INDI
@@ -141,7 +147,7 @@ namespace falcON {
       TREE->build(Ncrit,x0);
       GRAV->reset();
 #ifdef falcON_SPH
-      SPHT->reset();
+      const_cast<SphEstimator*>(SPHT)->reset();
 #endif
       SET_T(" time: OctTree::build():               ");
       if(debug(4))
@@ -151,7 +157,7 @@ namespace falcON {
       TREE = new OctTree(BODIES,Ncrit,x0);
       GRAV->new_tree(TREE);
 #ifdef falcON_SPH
-      SPHT->new_tree(TREE);
+      const_cast<SphEstimator*>(SPHT)->new_tree(TREE);
 #endif
       SET_T(" time: OctTree::OctTree():            ");
       if(debug(4))
@@ -171,7 +177,7 @@ namespace falcON {
     TREE->reuse();
     GRAV->reset();
 #ifdef falcON_SPH
-    SPHT->reset();
+    const_cast<SphEstimator*>(SPHT)->reset();
 #endif
   }
   //---------------------------------------------------------------------------+
@@ -403,28 +409,27 @@ namespace falcON {
   inline void forces::adjust_SPH_sizes(real mu, real hm, real dmu, bool al,
 				       unsigned ix) falcON_THROWING
   {
-    SPHT->adjust_sizes(mu,hm,dmu,al,ix);
+    const_cast<SphEstimator*>(SPHT)->adjust_sizes(mu,hm,dmu,al,ix);
   }
   //----------------------------------------------------------------------------
   inline int forces::SPH_sweep_one(real mu, real dmu, real hm, real wf,
 				   bool al) falcON_THROWING
   
   {
-    return SPHT->sweep_one(mu,dmu,hm,wf,al);
+    return const_cast<SphEstimator*>(SPHT)->sweep_one(mu,dmu,hm,wf,al);
   }
   //----------------------------------------------------------------------------
   inline void forces::SPH_between_sweeps(const EquationOfState*eos)
     falcON_THROWING
-  
   {
-    SPHT->between_sweeps(eos);
+    const_cast<SphEstimator*>(SPHT)->between_sweeps(eos);
   }
   //----------------------------------------------------------------------------
   inline void forces::SPH_sweep_two(const EquationOfState*eos,
 				    const ArtificialViscosity*av)
     falcON_THROWING
   {
-    SPHT->sweep_two(eos,av);
+    const_cast<SphEstimator*>(SPHT)->sweep_two(eos,av);
   }
   //----------------------------------------------------------------------------
   inline unsigned const&forces::N_MuSmall() const {

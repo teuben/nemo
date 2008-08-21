@@ -7,11 +7,11 @@
 ///	    joint interface for any force computation in falcON.                
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   1999-2007                                                           
+/// \date   1999-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1999-2007 Walter Dehnen                                        
+// Copyright (C) 1999-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -46,11 +46,9 @@ namespace falcON {
   class GravStats;
   class GravEstimator;
   class PartnerEstimator;
-#ifdef falcON_SPH
   class SphEstimator;
   class EquationOfState;
   class ArtificialViscosity;
-#endif
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -465,12 +463,13 @@ namespace falcON {
     /// return tree
     const OctTree *tree       () const { return TREE; }
     /// return bodies
-    const bodies  *Bodies     () const { return BODIES; }
-    const vect    &root_center() const;  ///< return center of root
-    const real    &root_radius() const;  ///< return radius of root
-    const int     &root_number() const;  ///< return # bodies in root
-    const real    &root_mass  () const;  ///< return mass of root
-    const unsigned&root_depth () const;  ///< return depth of root
+    const bodies*      const&Bodies     () const { return BODIES; }
+    vect               const&root_center() const;  ///< return center of root
+    real               const&root_radius() const;  ///< return radius of root
+    int                const&root_number() const;  ///< return # bodies in root
+    real               const&root_mass  () const;  ///< return mass of root
+    unsigned           const&root_depth () const;  ///< return depth of root
+    const SphEstimator*const&Sph        () const { return SPHT; }
     //@}                                                                        
     //==========================================================================
   protected:
@@ -488,15 +487,10 @@ namespace falcON {
     GravMAC               *GMAC;
     GravEstimator         *GRAV;
     PartnerEstimator      *PAES;
-#ifdef falcON_SPH
-    SphEstimator          *SPHT;
-#endif
+    const SphEstimator    *SPHT;
   };// class forces
   //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/forces.cc>
 #endif // falcON_included_forces_h
-
-    
-

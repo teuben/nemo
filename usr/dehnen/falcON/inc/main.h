@@ -362,8 +362,41 @@ namespace falcON {
 		     static_cast<real*>(X),Ndim);
     if(Ndim != N) {
       if(N<0) falcON_THROW("parse error: processing option \"%s\"\n",option);
-      if(N>0) warning("option \"%s\" requires %d values, but %d given\n",
-		      option,Ndim,N);
+      if(N>0) falcON_Warning("option \"%s\" requires %d values, but %d given\n",
+			     option,Ndim,N);
+      return 0;
+    }
+    return &X;
+  }
+  //----------------------------------------------------------------------------
+  // read vect from nemo parameter, but allow single value                      
+  vect getvrparam(const char* option) falcON_THROWING {
+    vect X;
+    int  N = nemoinpr(getparam(const_cast<char*>(option)),
+		      static_cast<real*>(X),Ndim);
+    if(N==1)
+      for(int d=1; d!=Ndim; ++d) X[d]=X[0];
+    if(N>Ndim)
+      warning("option \"%s\" requires %d values, but %d given\n",option,Ndim,N);
+    else if(N<0)  error("parse error: processing option \"%s\"\n",option);
+    else if(N==0) error("no data for option \"%s\"\n",option);
+    else if(N>1 && N<Ndim)
+      falcON_THROW("option \"%s\" requires %d values or 1, but %d given\n",
+		   option,Ndim,N);
+    return X;
+  }
+  //----------------------------------------------------------------------------
+  // read vect from nemo parameter into 2nd arg, allow single value, return pter
+  vect* getvrparam_z(const char* option, vect&X) falcON_THROWING {
+    if(!hasvalue(const_cast<char*>(option))) return 0;
+    int  N = nemoinpr(getparam(const_cast<char*>(option)),
+		      static_cast<real*>(X),Ndim);
+    if(N==1)
+      for(int d=1; d!=Ndim; ++d) X[d]=X[0];
+    else if(N!=Ndim) {
+      if(N<0) falcON_THROW("parse error: processing option \"%s\"\n",option);
+      if(N>0) falcON_Warning("option \"%s\" requires %d values or 1, "
+			     "but %d given\n", option,Ndim,N);
       return 0;
     }
     return &X;

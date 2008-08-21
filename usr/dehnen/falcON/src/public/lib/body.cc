@@ -770,7 +770,8 @@ void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
 // construction 0: construction with N=0, but data fields
 bodies::bodies(fieldset bits) falcON_THROWING : 
   BITS      ( bits ),
-  C_FORTRAN ( 0 )
+  C_FORTRAN ( 0 ),
+  FORCES    ( 0 )
 {
   unsigned n[BT_NUM]={0u};
   DebugInfo(3,"bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
@@ -784,7 +785,8 @@ bodies::bodies(fieldset bits) falcON_THROWING :
 bodies::bodies(const unsigned n[BT_NUM],
 	       fieldset       bits) falcON_THROWING : 
   BITS      ( bits ),
-  C_FORTRAN ( 0 )
+  C_FORTRAN ( 0 ),
+  FORCES    ( 0 )
 {
   DebugInfo(3,"bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
 	    n[0],n[1],n[2],word(bits));
@@ -827,7 +829,8 @@ bodies::bodies(bodies const&Other,
 	       fieldset     copydata,
 	       flags        copyflag) falcON_THROWING :
   BITS      ( copydata & Other.BITS ),
-  C_FORTRAN ( 0 )
+  C_FORTRAN ( 0 ),
+  FORCES    ( 0 )
 {
   if(copyflag && !Other.have_flag() ) 
     falcON_THROW("in bodies::bodies(): "
@@ -856,7 +859,8 @@ bodies::bodies(bodies const&Other,
 // construction for C & FORTRAN support                                     
 bodies::bodies(char, const unsigned n[BT_NUM]) falcON_THROWING
 : BITS      ( fieldset::empty ),
-  C_FORTRAN ( 1 )
+  C_FORTRAN ( 1 ),
+  FORCES    ( 0 )
 {
   DebugInfo(3,"bodies::bodies(): constructing bodies for C & FORTRAN: n=%u,%u",
 	    n[0],n[1]);

@@ -540,6 +540,13 @@ namespace falcON {
       if(N) { falcON_DEL_A(N); N=0; }
     }
   };// class falcON::BlockStepCode   
+} // namespace falcON {
+//------------------------------------------------------------------------------
+falcON_TRAITS(falcON::Integrator,"Integrator");
+falcON_TRAITS(falcON::LeapFrogCode,"LeapFrogCode");
+falcON_TRAITS(falcON::BlockStepCode,"BlockStepCode");
+//------------------------------------------------------------------------------
+namespace falcON {
 #ifdef falcON_NEMO
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            

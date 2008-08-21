@@ -70,6 +70,7 @@ namespace falcON {
   class ebodies;                                   // declared in forcesC.cc    
   class BodyFileter;                               // declared in bodyfunc.h    
   class ParallelSnapshot;                          // parallel/snapshot.h       
+  class forces;                                    // forces.h                  
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -468,8 +469,12 @@ namespace falcON {
     mutable bool     SRCC;                         // source data changed?      
     mutable bool     SPHC;                         // SPH data changed?         
     const bool       C_FORTRAN;                    // we are used for C/FORTRAN 
+    mutable
+    const forces    *FORCES;                       // forces, if any            
     //--------------------------------------------------------------------------
   public:
+    void set_forces(const forces*f) const { FORCES=f; }
+    const forces*const&Forces() const { return FORCES; }
     block *const&first_block() const { return FIRST; }
     //==========================================================================
     // \name Functions providing information about the number of bodies
@@ -1796,7 +1801,7 @@ namespace falcON {
     /// \param[in] Os  nemo output stream
     /// \param[in] Bd  body data fields to be written
     void write_nemo(nemo_out const&Os,
-		    fieldset       Bd) const falcON_THROWING;
+		    fieldset       Bd = fieldset::nemo) const falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Generate a NEMO snapshot on disk from a subset of all bodies
     ///
