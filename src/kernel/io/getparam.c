@@ -778,7 +778,7 @@ void finiparam()
 }
 
 
-void report(char what)
+local void report(char what)
 {
   float ticks;
 
