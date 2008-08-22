@@ -1,8 +1,8 @@
 /* 
- * GETPARAM.C: command-line processing functions for NEMO
+ * GETPARAM.C: command-line processing functions for NEMO and ZENO
  *             this also encompassed most of NEMO's user interface
  *
- *             This package has a long and winded history...
+ *             This package has a long and winded history... 
  *
  * Nov. 1986  Joshua Edward Barnes, Princeton NJ. - original version
  * Oct. 1987  Peter Teuben: added the 'host=' system keyword 
@@ -129,7 +129,8 @@
  * 14-dec-06    3.5   changed some printf()'s to fprintf(stderr,....)'s
  * 13-sep-07 WD    a  print name of name whose key is not found
  * 23-oct-07    3.6   fix bug when ZENO style defv[] is used, more ZENO compat
-
+ * 22-aug-08       a  add help=m to show memory usage at end
+ 
   TODO:
       - what if there is no VERSION=
       - process system keywords in readkeys()
@@ -172,7 +173,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.6 23-oct-07 PJT"
+#define GETPARAM_VERSION_ID  "3.6a 22-aug-08 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -332,6 +333,7 @@ int bell_level = 0;     /* noisy terminal when prompted */
 int review_flag = 0;    /* review keywords and optional help=8 chaining ? */
 int tcl_flag = 0;       /* go into TCL when all parameters set before go */
 int report_cpu = 0;     /* report time and cpu usage; activated with help=T */
+int report_mem = 0;     /* report memory usage (machine specific) */
 string yapp_string = NULL;  /* once only ? */
 string help_string = NULL;  /* cumulative ? */
 string argv_string = NULL;  /* cumulative ? */
@@ -384,6 +386,7 @@ local void set_yapp(string);
 local void set_outkeys(string);
 local void local_error(string);
 local void local_exit(int);
+local void report(char);
 
 /* external NEMO functions */
 
@@ -626,7 +629,6 @@ void initparam(string argv[], string defv[])
     error("(initparam) INTERACTIVE input not allowed; check help=?");
 #endif /* INTERACT */     
     }
-
 
 #if defined(INTERACT)
     if (help_level&HELP_DEFIO || help_level&HELP_EDIT) {     /* write keyfile */
@@ -653,11 +655,12 @@ void initparam(string argv[], string defv[])
 #endif /* INTERACT */
 
     if (help_string) {
-        if (  strpbrk(help_string,"oiapdqntkvhc?")!=NULL ||
-              ( strpbrk(help_string,"oiapdqntkvhc?")==NULL && 
+      /* also patch printhelp if you add characters to this strpbrk check */
+      if (      strpbrk(help_string,"oiapdqntkvhmc?")!=NULL ||
+              ( strpbrk(help_string,"oiapdqntkvhmc?")==NULL && 
                 strpbrk(help_string,"0123456789")==NULL
-              )  )
-            printhelp(help_string);     /* give some help and possibly */
+		) )
+	printhelp(help_string);     /* give some help and possibly */
     }
 
     useflag = FALSE;
@@ -724,20 +727,9 @@ local void initparam_out()
 void finiparam()
 {
     int i, n=0;
-    float ticks;
 
-    if (report_cpu) {
-      clock2 = times(&tms2);
-      ticks = (float) sysconf(_SC_CLK_TCK);
-      dprintf(0,"CPU_USAGE %s : %.2f    %.2f %.2f  %.2f %.2f  %ld\n",
-	      progname, 
-	      (clock2-clock1)/ticks,
-	      (tms2.tms_utime-tms1.tms_utime)/ticks,
-	      (tms2.tms_stime-tms1.tms_stime)/ticks,
-	      (tms2.tms_cutime-tms1.tms_cutime)/ticks,
-	      (tms2.tms_cstime-tms1.tms_cstime)/ticks,
-	      clock1);
-    }
+    if (report_cpu) report('c');
+    if (report_mem) report('m');
 
     for (i=1; i<nkeys; i++)
         n += keys[i].upd ? 1 : 0;
@@ -783,6 +775,39 @@ void finiparam()
     }
     free(keys);
     if (version_i) free(version_i);
+}
+
+
+void report(char what)
+{
+  float ticks;
+
+  if (what == 'c') {
+    clock2 = times(&tms2);
+    ticks = (float) sysconf(_SC_CLK_TCK);
+    dprintf(0,"CPU_USAGE %s : %.2f    %.2f %.2f  %.2f %.2f  %ld\n",
+	    progname, 
+	    (clock2-clock1)/ticks,
+	    (tms2.tms_utime-tms1.tms_utime)/ticks,
+	    (tms2.tms_stime-tms1.tms_stime)/ticks,
+	    (tms2.tms_cutime-tms1.tms_cutime)/ticks,
+	    (tms2.tms_cstime-tms1.tms_cstime)/ticks,
+	    clock1);
+    return;
+  }
+
+  if (what == 'm') {
+#if defined(linux)
+    /* http://www.gnu.org/software/libc/manual/html_node/Statistics-of-Malloc.html */
+    struct mallinfo mi = mallinfo();
+    dprintf(0,"mallinfo: hblks(d):%d %d uord=%d ford=%d keepcost=%d arena=%d ord=%d\n",
+	    mi.hblks,mi.hblkhd,mi.uordblks,mi.fordblks,mi.keepcost,mi.arena,mi.ordblks);
+#else
+    dprintf(0,"report_mem not implemented for non-linux\n");
+#endif      
+    return;
+  }
+  return;
 }
 
 /*
@@ -947,6 +972,7 @@ local void printhelp(string help)
         printf("  i       >> show some internal variables\n");
 	printf("  o       >> show the output key names\n");
 	printf("  c       >> show cpu usage at the end of the run\n");
+	printf("  m       >> show memory usage at the end of the run\n");
 	printf("  I       >> cvs id\n");
         printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
@@ -999,7 +1025,7 @@ local void printhelp(string help)
 
     numl = ((strchr(help,'n')) ? 1 : 0);    /* add newlines between key=val ? */
 
-    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzuc")==NULL) { /* arguments */
+    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzucm")==NULL) { /* arguments */
         printf("%s", progname);
         for (i=1; i<nkeys; i++) {
             newline(numl);
@@ -1111,6 +1137,9 @@ local void printhelp(string help)
     }
     if (strchr(help,'c')) {
         report_cpu = 1;
+    }
+    if (strchr(help,'m')) {
+        report_mem = 1;
     }
 }
 
