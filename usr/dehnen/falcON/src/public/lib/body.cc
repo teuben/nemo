@@ -1215,8 +1215,6 @@ void bodies::read_simple_ascii(std::istream  &in,
         read[t][i] = 0;
     }
   }
-  if(Ni==100)
-    falcON_Warning("bodies::read_simple_ascii(): cannot read >100 items\n");
   // 2. reset N & add fields                                                    
   reset(N, BITS|get);
   // 3. loop bodies & read data whereby ignoring lines starting with '#'        
