@@ -1284,6 +1284,160 @@ namespace WDutils {
       return message("Array<%s,%d>",traits<T>::name(),D);
     }
   };
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  //  class Stack<X>                                                            
+  //                                                                            
+  /// a simple stack of elements of type X                                      
+  ///                                                                           
+  // ///////////////////////////////////////////////////////////////////////////
+  template<typename X>
+  class Stack {
+    X *S;        ///< begin of stack
+    X *P;        ///< top of stack
+    X *const SN; ///< end of stack
+  public:
+    /// ctor: allocate memory, empty stack
+    Stack(unsigned n) : S(n? WDutils_NEW(X,n) : 0), P(S), SN(S+n) {}
+    /// dtor: de-allocate memory
+    ~Stack() { if(S) WDutils_DEL_A(S); S=0; }
+    /// is stack empty?
+    bool is_empty () const { return P<=S; }
+    /// is there space for more to stack?
+    bool has_space() const { return P>=SN; }
+    /// push another X onto the stack
+    /// \note we use the operator=(X,X), which must be defined and accessible
+    void push(const X&a) WDutils_THROWING {
+      if(P>=SN) WDutils_THROW("Stack<%s>::push(): exceeding stack\n",nameof(X));
+      *(P++) = a;
+    }
+    /// pop top element off the stack
+    X pop() { return *(--P); }
+    /// return top element, but don't pop it
+    X&top() { return *P; }
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  template<typename T> struct traits< Stack<T> > {
+    static const char  *name () {
+      return message("Stack<%s>",traits<T>::name());
+    }
+  };
+  //////////////////////////////////////////////////////////////////////////////
+  /// \defgroup  Mem16  memory alignment to 16 bytes
+  /// \name memory alignment to 16 bytes
+  //@{
+
+  //----------------------------------------------------------------------------
+  /// Macro enforcing memory alignment to 16 bytes
+  /// \ingroup Mem16
+  ///
+  /// Forces the corresponding variable/type to be 16-byte aligned; Works with
+  /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
+  ///    struct falcON__align16 name { ... };              \endcode
+#if defined (__INTEL_COMPILER)
+#  define falcON__align16 __declspec(align(16)) 
+#elif defined (__GNUC__) && __GNUC__ > 2
+#  define falcON__align16 __attribute__ ((aligned(16)))
+#else
+#  define falcON__align16
+#endif
+  //----------------------------------------------------------------------------
+  /// is a given memory address aligned?
+  /// \ingroup Mem16
+  /// \param p  memory address to be tested
+  /// \param al alignemt to a bytes will be tested
+  inline bool is_aligned(const void*p, int al)
+  {
+    return size_t(p) % al == 0;
+  }
+  //----------------------------------------------------------------------------
+  /// is a given memory address aligned to a 16 bytes memory location?
+  /// \param p  memory address to be tested
+  inline bool is_aligned16(const void*p)
+  {
+    return size_t(p) % 16 == 0;
+  }
+  //----------------------------------------------------------------------------
+  /// Allocate memory at a address aligned to a 16 byte memory location
+  /// \ingroup Mem16
+  ///
+  /// Will allocate slightly more memory than required to ensure we can find
+  /// the required amount at a 16b memory location. To de-allocate, you \b must
+  /// use falcON::free16(), otherwise an error will occur!
+  ///
+  /// \return   a newly allocated memory address at a 16 byte memory location
+  /// \param n  number of bytes to allocate
+  /// \version  debugged 02-09-2004 WD
+  inline void* malloc16(size_t n) WDutils_THROWING
+  {
+    // linear memory model:                                                     
+    // ^    = 16byte alignment points                                           
+    // S    = sizeof(void*) (assumed 4 in this sketch)                          
+    // PPPP = memory where p is stored (needed in deletion)                     
+    // def0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01    
+    //    ^               ^               ^               ^               ^     
+    //        |-S-|       |  ->  at least n bytes                               
+    //        |   |       |                                                     
+    //        p   q   ->  q                                                     
+    //    |--off--|-16-off|                                                     
+    //                |-S-|                                                     
+    //                PPPP|                                                     
+    //                                                                          
+    // the original allocation gave p, we return the shifted q and remember     
+    // the original allocation address at PPPP.                                 
+    char *p = WDutils_NEW(char,n+16+sizeof(void*)); // alloc: (n+16)b + pter    
+    char *q = p + sizeof(void*);                    // go sizeof pointer up     
+    size_t off = size_t(q) % 16;                    // offset from 16b alignment
+    if(off) q += 16-off;                            // IF offset, shift         
+    *((void**)(q-sizeof(void*))) = p;               // remember allocation point
+    return static_cast<void*>(q);                   // return aligned address   
+  }
+  //----------------------------------------------------------------------------
+  ///
+  /// De-allocate memory previously allocated with WDutils::malloc16()
+  /// \ingroup Mem16
+  ///
+  /// This routine \b must be used to properly de-allocate memory that has been
+  /// previously allocated by WDutils::malloc16(); other de-allocation will
+  /// inevitably result in a run-time \b error!
+  ///
+  /// \param q  pointer previously allocated by WDutils::malloc16()
+  inline void  free16  (void*q) WDutils_THROWING
+  {
+    WDutils_DEL_A( (char*)( *( (void**) ( ( (char*)q )-sizeof(void*) ) ) ) );
+  }
+  //----------------------------------------------------------------------------
+  ///
+  /// Allocate memory at a address alignged to at a 16 byte memory location
+  /// \ingroup Mem16
+  ///
+  /// Will allocate slightly more memory than required to ensure we can find
+  /// the required amount at a 16b memory location. To de-allocate, you \b must
+  /// use WDutils::delete16<>(), otherwise an error will occur!
+  ///
+  /// \return   a newly allocated memory address at a 16 byte memory location
+  /// \param T  (template parameter) type of objects to allocate
+  /// \param n  number of objects to allocate
+  template<typename T> inline T* new16(size_t n) WDutils_THROWING
+  {
+    return static_cast<T*>(malloc16(n * sizeof(T)));
+  }
+  //----------------------------------------------------------------------------
+  ///
+  /// De-allocate memory previously allocated with WDutils::new16().
+  /// \ingroup Mem16
+  ///
+  /// This routine \b must be used to properly de-allocate memory that has been
+  /// previously allocated by WDutils::new16(); other de-allocation will
+  /// inevitably result in an error.
+  ///
+  /// \param T  (template parameter) type of objects q points to.
+  /// \param q  pointer previously allocated by WDutils::new16()
+  template<typename T> inline void delete16(T* q)WDutils_THROWING 
+  {
+    free16(static_cast<void*>(q));
+  }
+  //@}
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////
