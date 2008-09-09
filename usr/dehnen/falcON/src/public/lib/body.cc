@@ -394,8 +394,8 @@ void bodies::block::write_data(data_out&outp,
     falcON_THROW("bodies::block::write_data(%c): data not supported",
 		 letter(f));
   if(from + N > NBOD)
-    falcON_THROW("bodies::block::write_data(%c): cannot write that many",
-		 letter(f));
+    falcON_THROW("bodies::block::write_data(%c): "
+		 "cannot write %d from %d (NBOD=%d)",letter(f),N,from,NBOD);
   outp.write(static_cast<char*>(DATA[value(f)])+from*falcON::size(f), N);
 }
 ////////////////////////////////////////////////////////////////////////////////

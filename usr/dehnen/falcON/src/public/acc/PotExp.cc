@@ -183,44 +183,45 @@ namespace MyPotExp {
 	      P->symmetry_name());
     // 2 reading in positions and masses from snapshot
     int N;
-    ::stream input = stropen(file,"r");            // open data file
+    ::stream input = stropen(file,const_cast<char*>("r"));
     get_history(input);
     DebugInfo(5,"PotExp: opened file %s for snapshot input\n",file);
-    get_set (input,SnapShotTag);                   //  open snapshot
+    get_set (input,const_cast<char*>(SnapShotTag));
     DebugInfo(5,"PotExp: opened snapshot\n");
-    get_set (input,ParametersTag);                 //   open parameter set
-    get_data(input,NobjTag,IntType,&N,0);          //    read N
-    get_tes (input,ParametersTag);                 //   close parameter set
+    get_set (input,const_cast<char*>(ParametersTag));
+    get_data(input,const_cast<char*>(NobjTag),const_cast<char*>(IntType),&N,0);
+    get_tes (input,const_cast<char*>(ParametersTag));
     DebugInfo(5,"PotExp: read N=%d\n",N);
-    get_set (input,ParticlesTag);                  //   open particle set
+    get_set (input,const_cast<char*>(ParticlesTag));
     // 2.1 read positions:
-    vectf *x = new vectf[N];                       //   allocate positions
-    if(get_tag_ok(input,PhaseSpaceTag)) {          //   IF phases available
+    vectf *x = new vectf[N];
+    if(get_tag_ok(input,const_cast<char*>(PhaseSpaceTag))) {
       DebugInfo(5,"PotExp: found phases rather than positions\n");
-      float *p = new float[6*N];                   //     get memory for them
-      get_data_coerced(input,PhaseTag,FloatType,p,N,2,3,0);  // read them
+      float *p = falcON_NEW(float,6*N);
+      get_data_coerced(input,const_cast<char*>(PhaseTag),
+		       const_cast<char*>(FloatType),p,N,2,3,0);
       DebugInfo(5,"PotExp: read %d phases\n",N);
-      for(int i=0,ip=0; i!=N; ++i,ip+=6)           //     loop bodies
-	x[i].copy(p+ip);                           //       copy positions
-      delete[] p;                                  //     free mem for phases
+      for(int i=0,ip=0; i!=N; ++i,ip+=6) x[i].copy(p+ip);
+      falcON_DEL_A(p);
       DebugInfo(5,"PotExp: copied phases to positions\n");
-    } else if(get_tag_ok(input,PosTag)) {          //   ELIF positions
-      get_data_coerced(input,PosTag,FloatType,
-		       static_cast<float*>(static_cast<void*>(x)),
-		       N,3,0);
+    } else if(get_tag_ok(input,const_cast<char*>(PosTag))) {
+      get_data_coerced(input,const_cast<char*>(PosTag),
+		       const_cast<char*>(FloatType),
+		       static_cast<float*>(static_cast<void*>(x)), N,3,0);
       DebugInfo(5,"PotExp: read %d positions\n",N);
-    } else                                         //   ENDIF
+    } else
       falcON_THROW("%s: no positions found in snapshot\n",name());
     // 2.2 read masses:
     float *m = new float[N];
-    if(get_tag_ok(input,MassTag))
-      get_data_coerced(input,MassTag,FloatType,m,N,0);
+    if(get_tag_ok(input,const_cast<char*>(MassTag)))
+      get_data_coerced(input,const_cast<char*>(MassTag),
+		       const_cast<char*>(FloatType),m,N,0);
     else
       falcON_THROW("%s: no masses found in snapshot\n",name());
     DebugInfo(5,"PotExp: read %d masses\n",N);
-    get_tes (input,ParticlesTag);                  //   close particle set
-    get_tes (input,SnapShotTag);                   //  close snapshot
-    strclose(input);                               // close file
+    get_tes (input,const_cast<char*>(ParticlesTag));
+    get_tes (input,const_cast<char*>(SnapShotTag));
+    strclose(input);
     DebugInfo(2,"PotExp: read %d masses and positions from file %s\n", N,file);
     // 3 initializing coefficients
     clock_t cpu0 = clock();

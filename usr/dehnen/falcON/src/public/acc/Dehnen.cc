@@ -50,7 +50,7 @@ namespace {
 		"              a    2-g         r+a\n\n"
 		"with\n\n"
 		"    r   = sqrt(x^2+e^2)\n\n",name());
-      if(file)
+      if(file && file[0])
 	warning("%s: file \"%s\" ignored",name(),file);
       double o,e,m;
       o     = npar>0? pars[0] : 0.;

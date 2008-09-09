@@ -3313,9 +3313,9 @@ void AnlmIO::open_for_write(const char*file_name) falcON_THROWING
 #ifdef falcON_NEMO
   char fname[1024];
   if(is_appended(file_name,'!',fname))
-    file = stropen(fname,"w!");
+    file = stropen(fname,const_cast<char*>("w!"));
   else
-    file = stropen(file_name,"w");
+    file = stropen(file_name,const_cast<char*>("w"));
 #else
   file = fopen(file_name,"w");
 #endif
@@ -3337,7 +3337,7 @@ void AnlmIO::open_for_read(const char*file_name) falcON_THROWING
   if(open != closed)
     falcON_THROW("AnlmIO::open_for_read(): already open");
 #ifdef falcON_NEMO
-  file = stropen(file_name,"r");
+  file = stropen(file_name,const_cast<char*>("r"));
 #else
   file = fopen(file_name,"r");
 #endif

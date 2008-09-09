@@ -38,6 +38,10 @@
 #ifndef falcON_included_fields_h
 #define falcON_included_fields_h 1
 
+#ifndef falcON_included_cstring
+#  include <cstring>
+#  define falcON_included_cstring
+#endif
 #ifndef falcON_included_types_h
 #  include <public/types.h>
 #endif

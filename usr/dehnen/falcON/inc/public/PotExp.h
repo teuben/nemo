@@ -50,6 +50,10 @@
 # include <cstdio>
 # define falcON_included_cstdio
 #endif
+#ifndef falcON_included_cstring
+# include <cstring>
+# define falcON_included_cstring
+#endif
 #ifdef falcON_MPI
 # ifndef falcON_included_mpi_falcON_h
 #  include <parallel/mpi_falcON.h>

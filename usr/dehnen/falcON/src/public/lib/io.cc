@@ -143,7 +143,7 @@ namespace {
   }
 #ifdef   falcON_NEMO
   //////////////////////////////////////////////////////////////////////////////
-  inline char* NemoTag(nemo_io::Field f) falcON_THROWING
+  inline const char* NemoTag(nemo_io::Field f) falcON_THROWING
   // returning char* rather than const char* ONLY because uses as argument to
   // nemo:: routines which don't know nothing about const
   {
@@ -196,7 +196,7 @@ namespace {
     return nemo_io::Null;
   }
   //----------------------------------------------------------------------------
-  inline char* NemoType(nemo_io::DataType t)
+  inline const char* NemoType(nemo_io::DataType t)
   {
     switch(t) {
     case nemo_io::Short  : return ShortType;
@@ -446,7 +446,8 @@ nemo_in::~nemo_in() falcON_THROWING
 //------------------------------------------------------------------------------
 bool nemo_in::has_snapshot() const
 {
-  return STREAM && get_tag_ok(static_cast< ::stream >(STREAM),SnapShotTag);
+    return STREAM && get_tag_ok(static_cast< ::stream >(STREAM),
+				const_cast<char*>(SnapShotTag));
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -463,40 +464,52 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   if(INPUT.SNAP_IN)
     falcON_THROW("trying to open 2nd snapshot from nemo input stream");
   // 1 open snapshot set
-  get_set(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
+  get_set(static_cast< ::stream >(INPUT.stream()),
+	  const_cast<char*>(SnapShotTag));
   INPUT.SNAP_IN = this;
   DebugInfo(5,"  snap_in::snap_in(): snapshot opened\n");
   // 2 open parameter set
-  if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),ParametersTag)) {
-    get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
+  if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),
+		 const_cast<char*>(ParametersTag))) {
+    get_tes(static_cast< ::stream >(INPUT.stream()),
+	    const_cast<char*>(SnapShotTag));
     INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read parameters from nemo input stream");
   }
-  get_set(static_cast< ::stream >(INPUT.stream()),ParametersTag);
+  get_set(static_cast< ::stream >(INPUT.stream()),
+	  const_cast<char*>(ParametersTag));
   DebugInfo(5,"  snap_in::snap_in(): parameter set opened\n");
   // 3 read parameter set
   // 3.1 read total # bodies 
-  if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),NobjTag)) {
-    get_tes(static_cast< ::stream >(INPUT.stream()),ParametersTag);
-    get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
+  if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),
+		 const_cast<char*>(NobjTag))) {
+    get_tes(static_cast< ::stream >(INPUT.stream()),
+	    const_cast<char*>(ParametersTag));
+    get_tes(static_cast< ::stream >(INPUT.stream()),
+	    const_cast<char*>(SnapShotTag));
     INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read # bodies from nemo input stream");
   }
-  get_data(static_cast< ::stream >(INPUT.stream()),NobjTag,IntType,&NTOT,0);
+  get_data(static_cast< ::stream >(INPUT.stream()),
+	   const_cast<char*>(NobjTag),const_cast<char*>(IntType),&NTOT,0);
   DebugInfo(5,"  snap_in::snap_in(): read Nobj = %u\n",NTOT);
   // 3.2 try to read # SINK bodies
-  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),NSinkTag)) {
+  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),
+		const_cast<char*>(NSinkTag))) {
     get_data(static_cast< ::stream >(INPUT.stream()),
-	     NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
+	     const_cast<char*>(NSinkTag),const_cast<char*>(IntType),
+	     &(NBOD[bodytype::sink]),0);
     DebugInfo(5,"  snap_in::snap_in(): read Nsink = %u\n",
 	       NBOD[bodytype::sink]);
   }
   // 3.3 try to read # SPH bodies
-  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),NGasTag)) {
+  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),
+		const_cast<char*>(NGasTag))) {
     get_data(static_cast< ::stream >(INPUT.stream()),
-	     NGasTag,IntType,&(NBOD[bodytype::gas]),0);
+	     const_cast<char*>(NGasTag),const_cast<char*>(IntType),
+	     &(NBOD[bodytype::gas]),0);
     DebugInfo(5,"  snap_in::snap_in(): read Nsph = %u\n",
-	       NBOD[bodytype::gas]);
+	      NBOD[bodytype::gas]);
   }
   // 3.4 set # STD bodies
   unsigned n(0u);
@@ -505,16 +518,20 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
     falcON_THROW("read nemo data: more non-STD bodies than total");
   NBOD[bodytype::std] = NTOT - n;
   // 3.5 try to read simulation time
-  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),TimeTag)) {
+  if(get_tag_ok(static_cast< ::stream >(INPUT.stream()),
+		const_cast<char*>(TimeTag))) {
     HAS_TIME = true;
-    char* time_type = get_type(static_cast< ::stream >(INPUT.stream()),TimeTag);
+    const char* time_type = get_type(static_cast< ::stream >(INPUT.stream()),
+				     const_cast<char*>(TimeTag));
     if(0 == std::strcmp(time_type, DoubleType))
       get_data(static_cast< ::stream >(INPUT.stream()),
-	       TimeTag,DoubleType,&TIME,0);
+	       const_cast<char*>(TimeTag),const_cast<char*>(DoubleType),
+	       &TIME,0);
     else if(0 == std::strcmp(time_type, FloatType)) {
       float __TIME;
       get_data(static_cast< ::stream >(INPUT.stream()),
-	       TimeTag,FloatType,&__TIME,0);
+	       const_cast<char*>(TimeTag),const_cast<char*>(FloatType),
+	       &__TIME,0);
       TIME = __TIME;
     } else
       falcON_Warning("nemo input: unknown type '%s' for time\n",time_type);
@@ -522,15 +539,19 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   if(HAS_TIME)
     DebugInfo(5,"  read time = %f\n",TIME);
   // 4 close parameter set
-  get_tes(static_cast< ::stream >(INPUT.stream()),ParametersTag);
+  get_tes(static_cast< ::stream >(INPUT.stream()),
+	  const_cast<char*>(ParametersTag));
   DebugInfo(5,"  snap_in::snap_in(): parameter set read & closed\n");
   // 5 open particle set
-  if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),ParticlesTag)) {
-    get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
+  if(!get_tag_ok(static_cast< ::stream >(INPUT.stream()),
+		 const_cast<char*>(ParticlesTag))) {
+    get_tes(static_cast< ::stream >(INPUT.stream()),
+	    const_cast<char*>(SnapShotTag));
     INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read parameters from nemo input stream");
   }
-  get_set(static_cast< ::stream >(INPUT.stream()),ParticlesTag);
+  get_set(static_cast< ::stream >(INPUT.stream()),
+	  const_cast<char*>(ParticlesTag));
   DebugInfo(5,"  snap_in::snap_in(): particles set opened\n");
   report::info("snap_in: opened for N[]=%d,%d,%d\n",NBOD[0],NBOD[1],NBOD[2]);
 }
@@ -544,8 +565,10 @@ snap_in::~snap_in() falcON_THROWING
   HAS_TIME = false;
   NTOT = 0;
   for(bodytype t; t; ++t) NBOD[t] = 0u;
-  get_tes(static_cast< ::stream >(INPUT.stream()),ParticlesTag);
-  get_tes(static_cast< ::stream >(INPUT.stream()),SnapShotTag);
+  get_tes(static_cast< ::stream >(INPUT.stream()),
+	  const_cast<char*>(ParticlesTag));
+  get_tes(static_cast< ::stream >(INPUT.stream()),
+	  const_cast<char*>(SnapShotTag));
   INPUT.SNAP_IN = 0;
   DebugInfo(4,"snap_in: closed\n");
   report::info("snap_in: closed\n");
@@ -555,7 +578,8 @@ bool snap_in::has(nemo_io::Field f) const
 {
   return 
     !has_been_read(f) &&
-    get_tag_ok(static_cast< ::stream >(INPUT.stream()),NemoTag(f));
+    get_tag_ok(static_cast< ::stream >(INPUT.stream()),
+	       const_cast<char*>(NemoTag(f)));
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -574,7 +598,8 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
     falcON_THROW("cannot read %s: already read from nemo input",
 		    NemoTag(FIELD));
   // 1 get type of data on file and check for mismatch
-  char*TypeTag=get_type(static_cast< ::stream >(INPUT.stream()),NemoTag(FIELD));
+  char*TypeTag=get_type(static_cast< ::stream >(INPUT.stream()),
+			const_cast<char*>(NemoTag(FIELD)));
   TYPE = Type(TypeTag);
   if(nemo_io::mismatch(TYPE, nemo_io::type(FIELD)))
     falcON_THROW("cannot read %s: type mismatch (got %s, expect %s)",
@@ -582,7 +607,8 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
 		 NemoType(nemo_io::type(FIELD)));
   DebugInfo(6,"  data type: %s\n",nemo_io::type_name(TYPE));
   // 2 get dimensions of data on file
-  int*dim=get_dims(static_cast< ::stream >(INPUT.stream()),NemoTag(FIELD));
+  int*dim=get_dims(static_cast< ::stream >(INPUT.stream()),
+		   const_cast<char*>(NemoTag(FIELD)));
   if(!dim)
     falcON_THROW("cannot read # %s data",NemoTag(FIELD));
   NTOT = dim[0];
@@ -597,7 +623,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
       falcON_THROW("nemo input of %s: found scalars",NemoTag(FIELD));
     DebugInfo(6,"  opening data set for %d scalars\n",NTOT);
     get_data_set(static_cast< ::stream >(INPUT.stream()),
-		 NemoTag(FIELD),TypeTag,NTOT,0);
+		 const_cast<char*>(NemoTag(FIELD)),TypeTag,NTOT,0);
     SUBN = 1;
   } else if(dim[2] == 0) {
     // 3.3 array of vectors
@@ -607,7 +633,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
       falcON_THROW("nemo input of %s: Ndim mismatch",NemoTag(FIELD));
     DebugInfo(6,"  opening data set for %d vectors\n",NTOT);
     get_data_set(static_cast< ::stream >(INPUT.stream()),
-		 NemoTag(FIELD),TypeTag,NTOT,NDIM,0);
+		 const_cast<char*>(NemoTag(FIELD)),TypeTag,NTOT,NDIM,0);
     SUBN = NDIM;
   } else if(dim[3] == 0) {
     // 3.4 array of phases
@@ -617,7 +643,7 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
       falcON_THROW("nemo input of %s: Ndim mismatch",NemoTag(FIELD));
     DebugInfo(6,"  opening data set for %d phases\n",NTOT);
     get_data_set(static_cast< ::stream >(INPUT.stream()),
-		 NemoTag(FIELD),TypeTag,NTOT,2,NDIM,0);
+		 const_cast<char*>(NemoTag(FIELD)),TypeTag,NTOT,2,NDIM,0);
     SUBN = 2*NDIM;
   } else {
     // 3.5 array of yet higher rank
@@ -628,7 +654,8 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
 //------------------------------------------------------------------------------
 data_in::~data_in()
 {
-  get_data_tes(static_cast< ::stream >(INPUT.stream()),NemoTag(FIELD));
+  get_data_tes(static_cast< ::stream >(INPUT.stream()),
+	       const_cast<char*>(NemoTag(FIELD)));
   INPUT.DATA_IN      = 0;
   INPUT.FIELDS_READ |= FIELD;
   DebugInfo(5,"data_in(%s) closed\n",NemoTag(FIELD));
@@ -643,7 +670,7 @@ void data_in::read(void*data, unsigned n)
   }
   if(n) {
     get_data_blocked(static_cast< ::stream >(INPUT.stream()),
-		     NemoTag(FIELD), data, n*SUBN);
+		     const_cast<char*>(NemoTag(FIELD)), data, n*SUBN);
     DebugInfo(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
     NREAD += n;
   }
@@ -654,7 +681,7 @@ void data_in::read(void*data)
   if(NREAD < NTOT) {
     unsigned n = NTOT - NREAD;
     get_data_blocked(static_cast< ::stream >(INPUT.stream()),
-		     NemoTag(FIELD), data, n*SUBN);
+		     const_cast<char*>(NemoTag(FIELD)), data, n*SUBN);
     DebugInfo(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
     NREAD += n;
   }
@@ -740,28 +767,34 @@ snap_out::snap_out(nemo_out const&out,
   if(OUTPUT.SNAP_OUT)
     falcON_THROW("cannot open 2nd snapshot from nemo output stream");
   // 1 open snapshot set
-  put_set(static_cast< ::stream >(OUTPUT.stream()),SnapShotTag);
+  put_set(static_cast< ::stream >(OUTPUT.stream()),
+	  const_cast<char*>(SnapShotTag));
   OUTPUT.SNAP_OUT = this;
   DebugInfo(5,"  snapshot opened\n");
   // 2 write parameter set
-  put_set(static_cast< ::stream >(OUTPUT.stream()),ParametersTag);
+  put_set(static_cast< ::stream >(OUTPUT.stream()),
+	  const_cast<char*>(ParametersTag));
   put_data(static_cast< ::stream >(OUTPUT.stream()),
-	   NobjTag,IntType,&NTOT,0);
+	   const_cast<char*>(NobjTag),const_cast<char*>(IntType),&NTOT,0);
   put_data(static_cast< ::stream >(OUTPUT.stream()),
-	   NGasTag,IntType,&(NBOD[bodytype::gas]),0);
+	   const_cast<char*>(NGasTag),const_cast<char*>(IntType),
+	   &(NBOD[bodytype::gas]),0);
   put_data(static_cast< ::stream >(OUTPUT.stream()),
-	   NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
+	   const_cast<char*>(NSinkTag),const_cast<char*>(IntType),
+	   &(NBOD[bodytype::sink]),0);
   put_data(static_cast< ::stream >(OUTPUT.stream()),
-	   TimeTag,DoubleType,&time,0);
-  put_tes(static_cast< ::stream >(OUTPUT.stream()),ParametersTag);
+	   const_cast<char*>(TimeTag),const_cast<char*>(DoubleType),&time,0);
+  put_tes(static_cast< ::stream >(OUTPUT.stream()),
+	  const_cast<char*>(ParametersTag));
   DebugInfo(5,"  snap_out::snap_out(): parameter written:"
 	     " Nbod=%d, Nsph=%d, Nsink=%d, time=%f\n",
 	     NTOT, NBOD[bodytype::gas], NBOD[bodytype::sink], time);
   // 3 open particle set
-  put_set(static_cast< ::stream >(OUTPUT.stream()),ParticlesTag);
+  put_set(static_cast< ::stream >(OUTPUT.stream()),
+	  const_cast<char*>(ParticlesTag));
   int CS = CSCode(Cartesian,Ndim,2);
   put_data(static_cast< ::stream>(OUTPUT.stream()),
-	   CoordSystemTag,IntType,&CS,0);
+	   const_cast<char*>(CoordSystemTag),const_cast<char*>(IntType),&CS,0);
   report::info("snap_out: opened for N[]=%d,%d,%d t=%g\n",
 	       NBOD[0],NBOD[1],NBOD[2],time);
 }
@@ -774,8 +807,10 @@ snap_out::~snap_out() falcON_THROWING
   }
   NTOT = 0;
   for(bodytype t; t; ++t) NBOD[t] = 0u;
-  put_tes(static_cast< ::stream >(OUTPUT.stream()),ParticlesTag);
-  put_tes(static_cast< ::stream >(OUTPUT.stream()),SnapShotTag);
+  put_tes(static_cast< ::stream >(OUTPUT.stream()),
+	  const_cast<char*>(ParticlesTag));
+  put_tes(static_cast< ::stream >(OUTPUT.stream()),
+	  const_cast<char*>(SnapShotTag));
   OUTPUT.SNAP_OUT = 0;
   DebugInfo(4,"snap_out closed\n");
   report::info("snap_out closed\n");
@@ -799,15 +834,18 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
 		 NemoTag(FIELD));
   if(::is_scalar(FIELD)) {
     put_data_set(static_cast< ::stream >(OUTPUT.stream()),
-		 NemoTag(FIELD),NemoType(TYPE),NTOT,0);
+		 const_cast<char*>(NemoTag(FIELD)),
+		 const_cast<char*>(NemoType(TYPE)),NTOT,0);
     DebugInfo(6,"  opening data set for %d scalars\n",NTOT);
   } else if(::is_vector(FIELD)) {
     put_data_set(static_cast< ::stream >(OUTPUT.stream()),
-		 NemoTag(FIELD),NemoType(TYPE),NTOT,NDIM,0);
+		 const_cast<char*>(NemoTag(FIELD)),
+		 const_cast<char*>(NemoType(TYPE)),NTOT,NDIM,0);
     DebugInfo(6,"  opening data set for %d vectors\n",NTOT);
   } else {
     put_data_set(static_cast< ::stream >(OUTPUT.stream()),
-		 NemoTag(FIELD),NemoType(TYPE),NTOT,2,NDIM,0);
+		 const_cast<char*>(NemoTag(FIELD)),
+		 const_cast<char*>(NemoType(TYPE)),NTOT,2,NDIM,0);
     DebugInfo(6,"  opening data set for %d phases\n",NTOT);
   }
   OUTPUT.DATA_OUT = this;
@@ -820,7 +858,8 @@ data_out::~data_out()
   if(NWRITTEN != NTOT)
     falcON_Warning("nemo output of %s: assigned %d, written only %d bodies\n",
 		   NemoTag(FIELD), NTOT, NWRITTEN);
-  put_data_tes(static_cast< ::stream >(OUTPUT.stream()),NemoTag(FIELD));
+  put_data_tes(static_cast< ::stream >(OUTPUT.stream()),
+	       const_cast<char*>(NemoTag(FIELD)));
   OUTPUT.DATA_OUT        = 0;
   OUTPUT.FIELDS_WRITTEN |= FIELD;
   DebugInfo(5,"data_out(%s) closed\n",NemoTag(FIELD));
@@ -836,7 +875,8 @@ void data_out::write(const void*data, unsigned n)
     n = NTOT - NWRITTEN;
   }
   put_data_blocked(static_cast< ::stream >(OUTPUT.stream()),
-		   NemoTag(FIELD), const_cast<void*>(data), n*SUBN);
+		   const_cast<char*>(NemoTag(FIELD)),
+		   const_cast<void*>(data), n*SUBN);
   DebugInfo(6,"  %d %s written\n",n,NemoTag(FIELD));
   NWRITTEN += n;
 }
@@ -846,7 +886,8 @@ void data_out::write(const void*data)
   if(NWRITTEN < NTOT) {
     unsigned n = NTOT - NWRITTEN;
     put_data_blocked(static_cast< ::stream >(OUTPUT.stream()),
-		     NemoTag(FIELD), const_cast<void*>(data), n*SUBN);
+		     const_cast<char*>(NemoTag(FIELD)),
+		     const_cast<void*>(data), n*SUBN);
     DebugInfo(6,"  %d %s written\n",n,NemoTag(FIELD));
     NWRITTEN += n;
   }
