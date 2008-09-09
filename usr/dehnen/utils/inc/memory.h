@@ -50,12 +50,12 @@
 namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  /// Array allocation giving useful info in case of allocation error; mostly   
-  /// used from macro WDutils_NEW.                                              
+  /// Array allocation giving useful info in case of allocation error; mostly
+  /// used from macro WDutils_NEW.
   ///                                                                           
-  /// In case of allocation error we abort or throw an exception (depending on  
-  /// the WDutils error handling settings).  If the debugging level exceeds 10, 
-  /// we always print debugging information about memory allocation.            
+  /// In case of allocation error we abort or throw an exception (depending on
+  /// the WDutils error handling settings).  If the debugging level exceeds
+  /// 10, we always print debugging information about memory allocation.
   ///                                                                           
   /// \return  a valid pointer (unless an error occurs)                         
   /// \param T (template parameter) the type of array elements                  
@@ -575,11 +575,14 @@ namespace WDutils {
     }
   };
   // ///////////////////////////////////////////////////////////////////////////
+  // does not compile with gcc 4.3.1, which seems a compiler bug
+#if defined(__GNUC__) && ( __GNUC__ < 4 || __GNUC_MINOR__ < 3)
   template<typename T> struct traits< typename block_alloc<T>::block > {
     static const char  *name () {
       return message("block_alloc<%s>::block",traits<T>::name());
     }
   };
+#endif
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   block_alloc<T>::~block_alloc() WDutils_THROWING {
