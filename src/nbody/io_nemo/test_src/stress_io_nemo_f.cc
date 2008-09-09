@@ -14,8 +14,8 @@
 #include <iostream>                                   // C++ I/O     
 #include <fstream>                                    // C++ file I/O
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>                    // changed from stdio.h  WD, Sep 2008
+#include <cstdlib>                   // changed from stdlib.h WD, Sep 2008
 #include <assert.h>
 #include <vector>
 #define _vectmath_h // put this statement to avoid conflict with C++ vector class
