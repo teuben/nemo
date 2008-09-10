@@ -30,6 +30,10 @@
 # Other places to get pgplot from
 # cvs -d :pserver:anonymous@cvs.starlink.ac.uk:/cvs co thirdparty/caltech/pgplot
 # ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot522.tar.gz   (or whichever version)
+#
+# E3D:  http://www.aip.de/Euro3D/E3D/PGPLOT_install_E3D.sh
+#
+# CARMA: 
 
 
 # Example standalone WIP install outside of MIRIAD or NEMO
