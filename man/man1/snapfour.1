@@ -4,7 +4,8 @@ snapfour \- fourier analyze a snapshot
 .SH SYNOPSIS
 \fBsnapfour in=\fPsnapshot_file  [parameters=values...]
 .SH DESCRIPTION
-\fIsnapfour\fP computes a number of requested fourier
+\fIsnapfour\fP computes a number of requested fourier (\fIcos\fP and 
+\fIsin\fP)
 coefficients in a user determined part of the snapshot
 By default the snapshot is divided in a set of concentric
 cylindrical rings, and a fourier analysis is done in 
@@ -22,6 +23,9 @@ can be any arbitrary \fIbodytrans(3NEMO)\fP expression using the
 \fBxvar\fP, \fByvar\fP and \fBfvar\fP keywords. The least squares
 is done using normalized equations, which are known for roundoff
 problem in case a large number of coefficients or points are used.
+.PP
+Optionally the cos (A) and sin (B) coefficients can be transformed
+into an amplitude (C) and phase (P), see \fBamode=\fP below.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is
 also given:
@@ -68,10 +72,36 @@ Times to select for analysis.
 [Default: \fBall\fP].
 .SH EXAMPLES
 .nf
+
   % mkexpdisk disk1 10000
   % snapfour disk1 amode=f > tab1
   % tabplot tab1 1 4,3,6,8,10 line=1,1 color=2,3,4,5 ycoord=0 
   % tabplot tab1 1 5:11:2 line=1,1 color=2,3,4,5 ycoord=0
+
+.fi
+Another case is that of an inclined disk that first needs to be 
+rectified, but preserving the position angle of the major axis.
+Lets assume the \fB$pa\fP and \fB$inc\fP are known. 
+Unlike for kinematic 
+observations (see e.g. \fIrotcur(1NEMO)\fP) we don't care which
+side of the disk is the near side. The rectify operation to get
+the galaxy back to a "face-on" view depends if you disk is
+truely 3D or (as is normally observed) a sky-projected inclined
+disk. For the former case we then get:
+.nf
+
+  % snaprotate disk1 disk2 theta=-$pa,-$inc,$pa order=zyz
+  % snapfour disk2 ...
+
+.fi
+and for the latter case
+.nf
+
+  % snaprotate disk1 -     theta=-$pa order=z         |\\
+    snapscale  -     -     rscale="1/cosd($inc),1,0"  |\\
+    snaprotate -     disk2 theta=$pa  order=z
+  % snapfour disk2 ...
+
 .fi
 .SH "SEE ALSO"
 bodytyrans(1NEMO), orbfour(1NEMO), snapshot(5NEMO)
