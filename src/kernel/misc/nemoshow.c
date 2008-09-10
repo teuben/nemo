@@ -16,6 +16,7 @@
  *	10-dec-90       2.1: few new things for new release	PJT
  *	19-feb-92	2.1a: usage
  *	24-mar-97	3.0: NEMOPATH is deprecated now		pjt
+ *      10-sep-08       3.1: fixed for g++ but deprecated       pjt
  */
 
 #include <stdinc.h>		/* also gets <stdio.h>	*/
@@ -34,7 +35,7 @@ extern string   help_string;    /* see: getparam.c */
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "env=f\n		List some used environment variables",
     "def=f\n		List various defaults",
-    "VERSION=3.0\n	24-mar-97 PJT",
+    "VERSION=3.1\n	10-sep-08 PJT",
     NULL,
 };
 
@@ -60,10 +61,13 @@ char *help[]={
    NULL,
 };
 
+void show_env(void);
+void show_def(void);
+void show (char *e, char *s);
+
+extern int nemo_history;                        /* see history.c */
 
-main(argc,argv)		/* This is an example where we don't want nemo_main */
-char *argv[];
-int  argc;
+int main(int argc, char *argv[])		/* This is an example where we don't want nemo_main */
 {
     int i;
     char *np;
@@ -87,9 +91,10 @@ int  argc;
     if (getbparam("def"))
 	show_def();
     
+    return 0;
 }
 
-show_env()
+void show_env(void)
 {
     printf ("environment variable which may be used in NEMO:\n");
     show("NEMO","where NEMO is");
@@ -114,11 +119,10 @@ show_env()
     printf ("(YAPP)       yapp= %d   - string = %s\n",yapp_dev,yapp_string);
     printf ("(DEBUG)     debug= %d\n",debug_level);
     printf ("(HELP)       help= %d   - string = %s\n",help_level,help_string);
-    printf ("(HISTORY) history= %d\n",history);
+    printf ("(HISTORY) history= %d\n",nemo_history);
 }
 
-show (e,s)
-char *e,*s;
+void show (char *e, char *s)
 {
    int i, n;
 
@@ -134,7 +138,7 @@ char *e,*s;
    dprintf (1," %s\n",s);
 }
 
-show_def()
+void show_def(void)
 {
    printf ("\nNow follow a few check on #define's:\n\n");
    printf ("\nThey can be used in code to isolate system dependancies\n");

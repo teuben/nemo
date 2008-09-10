@@ -44,7 +44,7 @@ LOBJFILES= $L(axis.o) $L(besselfunc.o) $L(erf.o) $L(fie.o) $L(layout.o) \
 	  $L(xrand.o) $L(xrandom.o) \
 	  $L(sort.o) $L(sortptr.o) $L(unwrap.o)
 
-BINFILES = nemoinp nemoshow layout xrandom scanopt 
+BINFILES = nemoinp layout xrandom scanopt 
 
 TESTFILES = vecttest axistest splinetest withintest \
 	matchtest linreg momenttest gridtest unwraptest frandomtest \
