@@ -8,6 +8,7 @@
 #  set version=4.2.3
 #  ..../gcc.install src=gcc-$version  prefix=$ASTROMAKE/opt/gcc/$version version=$version fc=fortran
 # 
+#  For latest versions, see http://gcc.gnu.org/
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
