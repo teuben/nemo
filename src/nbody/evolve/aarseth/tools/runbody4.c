@@ -278,11 +278,11 @@ nemo_main()
     fprintf(datstr,"%g %g %g %d %g %g %g\n",alpha,body1,bodyn,nbin0,zmet,epoch0,dtplot);
 
     if (kz[4] == 2)
-      fprintf(datstr,"%g %g %g %g %g %g\n",apo,ecc,n2,scale);
+      fprintf(datstr,"%g %g %d %g\n",apo,ecc,n2,scale);
     else if (kz[4] == 3) 
-      fprintf(datstr,"%g %g %g %g %g %g\n",apo,ecc,dmin,scale);
+      fprintf(datstr,"%g %g %g %g\n",apo,ecc,dmin,scale);
     else if (kz[4] == 4) 
-      fprintf(datstr,"%g %g %g %g %g %g\n",semi,ecc,m1,m2);
+      fprintf(datstr,"%g %g %g %g\n",semi,ecc,m1,m2);
 
     fprintf(datstr,"%g 0  0 0 \n",q);
 
