@@ -461,7 +461,7 @@ void set_mpi_rank(int rank);
 
 /* prints error message (printf-style) to stderr and exits (via nemo_exit) */
 void error(string, ...);
-void errorn(string, ...);
+/* void errorn(string, ...);   not implemented, commented out WD 10-09-2008 */
 /* prints warning message (printf-style) to stderr */
 void warning(string, ...);
 int progress(double dtime, string, ...);
