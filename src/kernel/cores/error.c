@@ -63,10 +63,13 @@ static void report_errno(void)
 #endif
 }
 
+/* 
+ * commented out WD 10-09-2008, also in stdinc.h
 void errorn(string fmt, ...)
 {
     error("errorn is sadly not implemented; use debug>0 to get errno messages");
 }
+*/
 
 /* Start changes WD 12/06/2008 */
 extern bool mpi_proc;   /* dprintf.c */
