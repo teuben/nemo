@@ -160,6 +160,7 @@ namespace WDutils {
   scalar_type sqrt0(scalar_type const&x)
   { return x <= scalar_type(0)? scalar_type(0) : std::sqrt(x); }
   //----------------------------------------------------------------------------
+  using std::pow;
 #ifdef WDutils_non_standard_math
   // integer power of floating point number                                     
   template<typename _Tp> inline
@@ -178,6 +179,19 @@ namespace WDutils {
 #else
   inline float  pow(float  x, unsigned i) { return std::pow(x, int(i)); }
   inline double pow(double x, unsigned i) { return std::pow(x, int(i)); }
+#endif
+  using std::sqrt;
+  using std::exp;
+  using std::log;
+#ifdef linux
+  using ::cbrt;
+#else
+  inline float cbrt(float x)          { 
+    return float( std::pow( double(x), 0.333333333333333333333 ) );
+  }
+  inline double cbrt(double x)        { 
+    return std::pow( x, 0.333333333333333333333 );
+  }
 #endif
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
