@@ -42,8 +42,8 @@
 #  include <cstring>
 #  define falcON_included_cstring
 #endif
-#ifndef falcON_included_types_h
-#  include <public/types.h>
+#ifndef falcON_included_basic_h
+#  include <public/basic.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////

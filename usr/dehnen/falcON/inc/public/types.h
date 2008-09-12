@@ -41,8 +41,8 @@
 #  include <cstdlib>
 #  define falcON_included_cstdlib
 #endif
-#ifndef falcON_included_basic_h
-#  include <public/basic.h>
+#ifndef falcON_included_utils_h
+#  include <public/utils.h>
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////

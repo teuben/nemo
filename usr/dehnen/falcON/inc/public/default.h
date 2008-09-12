@@ -27,8 +27,8 @@
 #ifndef falcON_included_default_h
 #define falcON_included_default_h
 
-#ifndef falcON_included_types_h
-#  include <public/types.h>
+#ifndef falcON_included_basic_h
+#  include <public/basic.h>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {

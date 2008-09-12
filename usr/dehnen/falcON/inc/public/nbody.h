@@ -53,6 +53,9 @@
 #ifndef falcON_included_io_h
 #  include <public/io.h>
 #endif
+#ifndef falcON_included_nemopp_h
+#  include <public/nemo++.h>
+#endif
 #ifndef falcON_included_externacc_h
 #  include <externacc.h>
 #endif

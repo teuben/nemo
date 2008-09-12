@@ -3,7 +3,7 @@
 //                                                                             |
 // defman.h                                                                    |
 //                                                                             |
-// Copyright (C) 2004, 2005  Walter Dehnen                                     |
+// Copyright (C) 2004-2008  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -47,17 +47,6 @@ extern "C" {
 		int                        ,       // I: # parameters           
 		const char                *);      // I: data file              
 #endif
-}
-//------------------------------------------------------------------------------
-//                                                                              
-// define some nemo routines (resolved in libnemo)                              
-//                                                                              
-//------------------------------------------------------------------------------
-extern "C" {
-  void warning(char *, ...);
-  void error  (char *, ...);
-  int  nemo_dprintf(int, const char *, ...);
-  bool nemo_debug(int);
 }
 //------------------------------------------------------------------------------
 //                                                                              

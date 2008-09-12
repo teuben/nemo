@@ -9,15 +9,14 @@
 ///          \li exception handling (falcON::exception)                         
 ///          \li falcON::compile_info                                           
 ///          \li memory allocation and de-allocation support                    
-///          \li 16byte memory alignment support                                
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2002-2006                                                          
+/// \date    2002-2008                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2006  Walter Dehnen                                       
+// Copyright (C) 2002-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -53,8 +52,8 @@
 #  include <cmath>
 #  define falcON_included_cmath
 #endif
-#ifndef falcON_included_utils_h
-#  include <public/utils.h>
+#ifndef falcON_included_types_h
+#  include <public/types.h>
 #endif
 
 namespace falcON {
@@ -263,44 +262,6 @@ namespace falcON {
 #  define falcON_non_standard_math
 // #  warning " you are using a known non-standard C++ compiler; compilation may fail or produce buggy code"
 #endif
-
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // elementary math functions for float                                      //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-
-  using std::sqrt;
-  using std::exp;
-  using std::log;
-  using std::pow;
-
-#if defined(falcON_non_standard_math)
-#  ifdef linux
-  inline float sqrt(float x)          { return ::sqrtf(x); }
-  inline float exp (float x)          { return ::expf (x); }
-  inline float log (float x)          { return ::logf (x); }
-  inline float pow (float x, float y) { return ::powf (x,y); }
-#  else
-  inline float sqrt(float x)          { return sqrt(double(x)); }
-  inline float exp (float x)          { return exp (double(x)); }
-  inline float log (float x)          { return log (double(x)); }
-  inline float pow (float x, float y) { return pow(double(x),double(y)); }
-#  endif
-#endif
-
-#ifdef linux
-  using ::cbrt;
-  inline float cbrt(float x)          { return ::cbrtf(x); }
-#else
-  inline float cbrt(float x)          { 
-    return float( std::pow( double(x), 0.333333333333333333333 ) );
-  }
-  inline double cbrt(double x)        { 
-    return std::pow( x, 0.333333333333333333333 );
-  }
-#endif
-  //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_basic_h
