@@ -42,21 +42,21 @@ random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
 # -----------------------
 
 utils_h			:= $(traits_h) $(Pi_h) $(inline_h) $(inline_io_h) $(tupel_h) $(exception_h) $(memory_h)
-basic_h			:= $(IPUB)basic.h $(utils_h)
+types_h			:= $(IPUB)types.h $(utils_h) $(tensor_h)
+basic_h			:= $(IPUB)basic.h $(types_h)
 simd_h			:= $(IPUB)simd.h $(basic_h)
-PotExp_h		:= $(IPUB)PotExp.h $(tupel_h) $(basic_h)
+PotExp_h		:= $(IPUB)PotExp.h $(basic_h) $(mpi_falcON_h)
 tensor_h		:= $(IPUB)tensor.h $(utils_h) $(IPUB)tensor.cc
 tensor_set_h		:= $(IPUB)tensor_set.h $(tensor_h) $(simd_h) $(IPUB)tensor_set.cc
-types_h			:= $(IPUB)types.h $(basic_h) $(tensor_h)
-default_h		:= $(IPUB)default.h $(types_h)
+default_h		:= $(IPUB)default.h $(basic_h)
 interact_h		:= $(IPUB)interact.h $(basic_h)
-fields_h		:= $(IPUB)fields.h $(types_h)
+fields_h		:= $(IPUB)fields.h $(basic_h)
 ifdef DPROPER
 gravity_ind_cc		:= $(IPRO)gravity_ind.cc
 gravity_pro		:= $(gravity_ind_cc)
 kernel_SSE_h		:= $(IPRO)kernel_SSE.h
 endif
-io_h			:= $(IPUB)io.h $(fields_h)
+io_h			:= $(IPUB)io.h $(basic_h)
 body_h			:= $(INC)body.h $(fields_h)
 externacc_h		:= $(INC)externacc.h $(body_h)
 tree_h			:= $(IPUB)tree.h $(default_h) $(body_h) $(peano_h)
@@ -66,15 +66,16 @@ kernel_h		:= $(IPUB)kernel.h $(gravity_h) $(simd_h)
 forces_h		:= $(INC)forces.h $(types_h) $(default_h) $(body_h) $(IPUB)forces.cc $(gravity_h) $(partner_h) $(sph_h)
 forces_C_h		:= $(INC)forces_C.h
 forces_f		:= $(INC)forces.f
-main_h			:= $(INC)main.h  $(body_h) $(mpi_falcON_h)
-nbody_h			:= $(IPUB)nbody.h $(body_h) $(io_h) $(forces_h) $(externacc_h)
+nemopp_h		:= $(IPUB)nemo++.h $(fields_h)
+main_h			:= $(INC)main.h $(nemopp_h) $(body_h) $(mpi_falcON_h)
+nbody_h			:= $(IPUB)nbody.h $(body_h) $(io_h) $(nemopp_h) $(forces_h) $(externacc_h)
 manip_h			:= $(IPUB)manip.h $(body_h)
 defman_h		:= $(IPUB)defman.h $(manip_h)
 profile_h		:= $(IPUB)profile.h $(body_h)
-tools_h			:= $(IPUB)tools.h $(body_h) $(bodyfunc_h)
-random_h		:= $(IPUB)random.h $(random_h_util)
+tools_h			:= $(IPUB)tools.h $(body_h) $(tree_h)
+random_h		:= $(IPUB)random.h $(basic_h) $(random_h_util)
 sample_h		:= $(IPUB)sample.h $(body_h) $(random_h)
-gamma_h			:= $(IPUB)gamma.h $(basic_h) $(sample_h)
+gamma_h			:= $(IPUB)gamma.h $(basic_h) $(sample_h) $(numerics_h)
 king_h			:= $(IPUB)king.h $(basic_h)
 bodyfunc_h		:= $(IPUB)bodyfunc.h $(body_h) 
 bodyduncdefs_h		:= $(IPUB)bodyfuncdefs.h $(body_h) 
@@ -102,6 +103,7 @@ gravity_cc		:= $(SLIB)gravity.cc $(gravity_h) $(kernel_h) $(interact_h) $(numeri
 tree_cc			:= $(SLIB)tree.cc $(tree_h) $(body_h) $(memory_h)
 nbody_cc		:= $(SLIB)nbody.cc $(nbody_h)
 manip_cc		:= $(SLIB)manip.cc $(manip_h)
+nemopp_cc		:= $(SLIB)nemo++.cc $(nemopp_h) $(basic_h)
 forcesC_cc		:= $(SLIB)forcesC.cc $(forces_C_h) $(forces_h)
 tools_cc		:= $(SLIB)tools.cc $(tools_h) $(Pi_h) $(memory_h)
 profile_cc		:= $(SLIB)profile.cc $(profile_h) $(Pi_h) $(numerics_h)
@@ -120,6 +122,8 @@ PotExp_cc		:= $(SLIB)PotExp.cc $(PotExp_h) $(simd_h)
 
 $(LIB)basic.o:		$(basic_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
+$(LIB)nemo++.o:		$(nemopp_cc) $(LIBT) $(makefile)
+			$(MAKE_OBJ) $(INEMO) $(NBDYFLAGS)
 $(LIB)body.o:		$(body_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)tree.o:		$(tree_cc) $(LIBT) $(makefiles)
@@ -129,7 +133,7 @@ $(LIB)gravity.o:	$(gravity_cc) $(LIBT) $(makefiles)
 $(LIB)partner.o:	$(partner_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)io.o:		$(io_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ) $(NBDYFLAGS)
+			$(MAKE_OBJ) $(INEMO) $(NBDYFLAGS)
 $(LIB)halo.o:		$(halo_cc) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)WD99disc.o:	$(WD99disc_cc) $(makefiles)
@@ -167,12 +171,12 @@ $(LIB)PotExp.o:		$(PotExp_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 
 ifdef NEMO
-public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
-			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
-			$(LIB)partner.o $(LIB)nbody.o $(LIB)forcesC.o \
-			$(LIB)tools.o $(LIB)sample.o $(LIB)manip.o \
-			$(LIB)profile.o $(LIB)bodyfunc.o $(LIB)neighbours.o \
-			$(LIB)PotExp.o
+public_objs	 :=	$(LIB)basic.o $(LIB)nemo++.o $(LIB)body.o \
+			$(LIB)tree.o $(LIB)gravity.o $(LIB)kernel.o \
+			$(LIB)io.o $(LIB)partner.o $(LIB)nbody.o \
+			$(LIB)forcesC.o $(LIB)tools.o $(LIB)sample.o \
+			$(LIB)manip.o $(LIB)profile.o $(LIB)bodyfunc.o \
+			$(LIB)neighbours.o $(LIB)PotExp.o
 
 else
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \

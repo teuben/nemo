@@ -131,8 +131,9 @@ utils			:
 			ln -sf ../utils
 inc/utils		: utils
 			(cd inc; ln -sf ../utils/inc utils)
-links		:=	utils inc/utils $(links_pro) $(links_sph) $(links_walter) $(links_pjm) $(links_mpi)
-links		:	$(links)
+links			:=	utils inc/utils $(links_pro) $(links_sph) $(links_walter) $(links_pjm) $(links_mpi)
+
+links			:	$(links)
 
 # 6.1 utils library
 utils/lib/libWDutils.a	: utils

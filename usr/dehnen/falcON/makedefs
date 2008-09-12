@@ -17,18 +17,6 @@ PLATFORM 	:= $(shell uname -m)
 
 KMAX		:= 6
 
-# ------------
-# NEMO library
-# ------------
-
-ifdef NEMO
-
-INEMO		:= -I$(NEMOINC) -I$(NEMOLIB)
-DNEMO		:= -DfalcON_NEMO
-LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
-
-endif
-
 # -----------
 # directories
 # -----------
@@ -64,6 +52,18 @@ $(MANT)		:
 $(ACCT)		:
 		mkdir --parents --mode=$(MODE) $(ACC)
 		touch $(ACCT)
+
+# ------------
+# NEMO library
+# ------------
+
+ifdef NEMO
+
+INEMO		:= -I$(NEMOINC) -I$(NEMOLIB)
+DNEMO		:= -DfalcON_NEMO
+LNEMO		:= $(LIB)nemo++.o -L$(NEMOLIB) -lnemo -ldl
+
+endif
 
 # -----------------------
 # compiler and linker etc
@@ -189,12 +189,12 @@ endif
 ifdef STATIC
 
 LFALCON		:= -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO)
-falcON		:= $(links) $(LIB)lib$(LIBNAME).a
+falcON		:= $(links) $(LIB)nemo++.o $(LIB)lib$(LIBNAME).a
 
 else
 
 LFALCON		:= -L$(LIB) -l$(LIBNAME) -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO)
-falcON		:= $(links) $(LIB)lib$(LIBNAME).so
+falcON		:= $(links) $(LIB)nemo++.o $(LIB)lib$(LIBNAME).so
 
 endif
 
@@ -202,10 +202,10 @@ endif
 # compile and link commands
 # -------------------------
 
-MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS)
-MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS) $(NBDYFLAGS) -shared
+MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS)
+MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS) $(NBDYFLAGS) -shared
 MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS) -shared
-MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS)
+MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS)
 MAKE_EXE_C	= $(CC)  -o $@ $< -I$(INC) $(IUTIL) $(CFLAGS)
 MAKE_EXE_F	= $(FC)  -o $@ $< -I$(INC) $(IUTIL) $(OPTFLAGS)
 NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) -lm
