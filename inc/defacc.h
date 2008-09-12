@@ -30,7 +30,8 @@
  * version 3.1  17/09/2004  WD  somewhat improved documentation                 
  * version 3.2  12/11/2004  WD  catching std::bad_alloc and report error        
  * version 3.3  04/05/2007  WD  added global scope resolution operators         
- * version 3.4  12/06/2008  WD  #including stdinc.h                             
+ * version 3.4  12/06/2008  WD  #including stdinc.h                            
+ * version 3.5  11/09/2008  WD  no inclusion of NEMO header files               
  *                                                                              
  *******************************************************************************
  *                                                                              
@@ -53,10 +54,17 @@
 #define _defacc_h
 
 #include <acceleration.h>                   /* for definition of acc_pter     */
+
 #ifdef __cplusplus
+# include <cstring>
   extern "C" {
+#else
+# include <string.h>
 #endif
+
+#if(0)
 #include <stdinc.h>                         /* for error, warning, dprintf    */
+#endif
 
 /*
  *******************************************************************************
@@ -110,12 +118,31 @@ void iniacceleration(                 /* return: void                         */
  * Declaration of NEMO functions that may be used in the implementation of the  
  * above. They are resolved in the NEMO library (this way, we avoid #including  
  * nemo.h) 
+ *                                                                              
+ * NOTE (added with version 3.5)                                                
+ * Nemo defines many functions to take pointer arguments when a const pointer   
+ * should have been used, for instance void error(char*,...).                   
+ * With g++ 4.3.1 this causes code like                                         
+ *     error("this is an error message");                                       
+ * to generate the warning message                                              
+ *     warning: deprecated conversion from string constant to ‘char*’          
+ * indicating that this will become an error in future versions. This implies   
+ * that we cannot simply include nemo header files into C++ code as easily as   
+ * we used to.                                                                 
+ * Instead, here we use a trick: declaring these routines taking const pointers.
+ * This works, as both have the same C-linkage. However, the compiler will      
+ * complain if it sees this and the nemo definitions simultaneously.            
+ *******************************************************************************
  */
 
-/* void warning(char *, ...); */
-/* void error  (char *, ...); */
-/* bool nemo_debug(int); */
-/* int  nemo_dprintf(int, const char *, ...); */
+#ifndef _stdinc_h
+  extern void warning(const char *, ...);   /* differs from stdinc.h */
+  extern void error  (const char *, ...);   /* differs from stdinc.h */
+  extern bool nemo_debug(int);
+  typedef int (*dprintf_pter)(int, const char*, ...);
+  extern dprintf_pter get_dprintf(const char*, int);
+# define nemo_dprintf  get_dprintf(__FILE__,__LINE__)
+#endif
 
 #ifdef POT_DEF
 /*
