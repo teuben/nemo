@@ -291,7 +291,7 @@ namespace falcON {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 extern "C" {
-  void warning(char*, ...);   // nemo's warning
+//   void warning(char*, ...);   // nemo's warning
   typedef void (*pacc)(int,double,int,const void*,const void*,const void*,
 		       const int*, void*, void*, int, char);
   pacc get_acceleration(const char*, const char*, const char*, bool*, bool*);

@@ -194,13 +194,11 @@ namespace falcON { namespace compile_info {
 #  ifndef falcON_USE_NEMO
 #    define falcON_USE_NEMO                        //   then use it             
 #  endif
-#  include <stdinc.h>                              // NEMO basic stuff          
-#  include <getparam.h>                            // NEMO parameter handling   
-#  include <history.h>                             // NEMO history              
+#  include <public/nemo++.h>                       // my NEMO interface
 #  include <public/io.h>                           // my NEMO I/O & in/output   
 #  undef local
-extern string defv[];                              // MUST be supplied by user  
-extern string usage;	                           // MUST be supplied by user  
+extern const char* defv[];                         // MUST be supplied by user  
+extern const char* usage;	                   // MUST be supplied by user  
 namespace falcON { namespace defv_info {
   char version [100];                              //   "VERSION=..."           
   char compiled[100];                              //   "COMPILED=..."          
@@ -227,7 +225,7 @@ namespace falcON { namespace defv_info {
      falcON::defv_info::compiled,					\
      "STATUS=\npublic version                                     "
 #  endif
-#endif
+#endif // falcON_NEMO
 
 //------------------------------------------------------------------------------
 // define main() in namespace falcON                                            
@@ -237,7 +235,7 @@ namespace falcON {
 #ifdef falcON_USE_NEMO
   extern void main(void) falcON_THROWING;
 #else
-  extern void main(int argc, char *argv[]) falcON_THROWING;
+  extern void main(int argc, const char *argv[]) falcON_THROWING;
 #endif
 }
 
@@ -245,13 +243,13 @@ namespace falcON {
 // define global main(), which calls nemo::main()                               
 //------------------------------------------------------------------------------
 
-int main(int argc, char *argv[])                   // global main               
+int main(int argc, const char *argv[])             // global main               
 {
 
   try {                                            // TRY:                      
 
 #ifdef falcON_USE_MPI
-    falcON::MPI::Init(&argc,&argv);                // start MPI: spawm processes
+    falcON::MPI::Init(argc,argv);                  // start MPI: spawm processes
 #endif
 
     falcON::CheckAgainstLibrary(falcON::CurrentStatus(),
@@ -265,25 +263,19 @@ int main(int argc, char *argv[])                   // global main
     falcON::defv_info::init();                     // initialize defv_info      
 #ifndef falcON_NoHelpDefault
     if(argc == 1) {                                // IF no command line args   
-      char *argV[3];
+      const char *argV[3];
       argV[0] = argv[0];
       argV[1] = "help=h";
       argV[2] = 0;
       std::cout << '\n' << usage << "\n\noption summary:\n";
-      initparam(argV,defv);
+      falcON::initparam(argV,defv);
     } else
 #endif
-      initparam(argv,defv);
-    {
-      int d = 100;
-      while(!nemo_debug(d--));
-      falcON::RunInfo::set_debug_level(++d);
-    }
+      falcON::initparam(argv,defv);
+      falcON::RunInfo::set_debug_level(falcON::nemo_debug_level());
 #  if defined(falcON_PROPER) &&			\
       defined(falcON_RepAction) && (falcON_RepAction==1)
-
-    falcON::report::open_file(argv[0],*(ask_history()));
-
+      falcON::report::open_file(argv[0],falcON::RunInfo::cmd());
 #  endif
 
     try {                                          // TRY:                      
@@ -291,7 +283,7 @@ int main(int argc, char *argv[])                   // global main
     } catch(falcON::exception E) {                 // CATCH falcON errors       
       falcON_ErrorN(text(E));
     }
-    finiparam();                                   // finish NEMO               
+    falcON::finiparam();                           // finish NEMO               
 
 #else // falcON_USE_NEMO
 
@@ -331,222 +323,11 @@ namespace falcON {
 #endif
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // some utilities for getting NEMO parameters                               //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  //----------------------------------------------------------------------------
-  // like NEMO::hasvalue(), except that we take a const char*
-  inline bool hasvalue(const char*param) {
-    return ::hasvalue(const_cast<char*>(param));
-  }
-  //----------------------------------------------------------------------------
-  // read vect from nemo parameter                                              
-  vect getvparam(const char* option) falcON_THROWING {
-    vect X;
-    int  N = nemoinpr(getparam(const_cast<char*>(option)),
-		      static_cast<real*>(X),Ndim);
-    if(N>Ndim)
-      warning("option \"%s\" requires %d values, but %d given\n",option,Ndim,N);
-    else if(N<0)  error("parse error: processing option \"%s\"\n",option);
-    else if(N==0) error("no data for option \"%s\"\n",option);
-    else if(N<Ndim)
-      falcON_THROW("option \"%s\" requires %d values, but %d given\n",
-		   option,Ndim,N);
-    return X;
-  }
-  //----------------------------------------------------------------------------
-  // read vect from nemo parameter into 2nd argument, return pointer            
-  vect* getvparam_z(const char* option, vect&X) falcON_THROWING {
-    if(!hasvalue(const_cast<char*>(option))) return 0;
-    int N = nemoinpr(getparam(const_cast<char*>(option)),
-		     static_cast<real*>(X),Ndim);
-    if(Ndim != N) {
-      if(N<0) falcON_THROW("parse error: processing option \"%s\"\n",option);
-      if(N>0) falcON_Warning("option \"%s\" requires %d values, but %d given\n",
-			     option,Ndim,N);
-      return 0;
-    }
-    return &X;
-  }
-  //----------------------------------------------------------------------------
-  // read vect from nemo parameter, but allow single value                      
-  vect getvrparam(const char* option) falcON_THROWING {
-    vect X;
-    int  N = nemoinpr(getparam(const_cast<char*>(option)),
-		      static_cast<real*>(X),Ndim);
-    if(N==1)
-      for(int d=1; d!=Ndim; ++d) X[d]=X[0];
-    if(N>Ndim)
-      warning("option \"%s\" requires %d values, but %d given\n",option,Ndim,N);
-    else if(N<0)  error("parse error: processing option \"%s\"\n",option);
-    else if(N==0) error("no data for option \"%s\"\n",option);
-    else if(N>1 && N<Ndim)
-      falcON_THROW("option \"%s\" requires %d values or 1, but %d given\n",
-		   option,Ndim,N);
-    return X;
-  }
-  //----------------------------------------------------------------------------
-  // read vect from nemo parameter into 2nd arg, allow single value, return pter
-  vect* getvrparam_z(const char* option, vect&X) falcON_THROWING {
-    if(!hasvalue(const_cast<char*>(option))) return 0;
-    int  N = nemoinpr(getparam(const_cast<char*>(option)),
-		      static_cast<real*>(X),Ndim);
-    if(N==1)
-      for(int d=1; d!=Ndim; ++d) X[d]=X[0];
-    else if(N!=Ndim) {
-      if(N<0) falcON_THROW("parse error: processing option \"%s\"\n",option);
-      if(N>0) falcON_Warning("option \"%s\" requires %d values or 1, "
-			     "but %d given\n", option,Ndim,N);
-      return 0;
-    }
-    return &X;
-  }
-  //----------------------------------------------------------------------------
-  // read array of type T
-  template<typename Type> struct __getA;
-  template<> struct __getA<double> {
-    static int get(const char*o, double*a, int m) falcON_THROWING {
-      return nemoinpd(getparam(const_cast<char*>(o)),a,m);
-    } };
-  template<> struct __getA<float> {
-    static int get(const char*o, float*a, int m) falcON_THROWING {
-      return nemoinpf(getparam(const_cast<char*>(o)),a,m);
-    } };
-  template<> struct __getA<int> {
-    static int get(const char*o, int*a, int m) falcON_THROWING {
-      return nemoinpi(getparam(const_cast<char*>(o)),a,m);
-    } };
-  template<> struct __getA<unsigned> {
-    static int get(const char*o, unsigned*a, int m) falcON_THROWING {
-      return nemoinpi(getparam(const_cast<char*>(o)),
-		      static_cast<int*>(static_cast<void*>(a)),m);
-    } };
-  template<> struct __getA<bool> {
-    static int get(const char*o, bool*a, int m) falcON_THROWING {
-      return nemoinpb(getparam(const_cast<char*>(o)),a,m);
-    } };
-  /// read array of type T
-  /// \param o  name of nemo option
-  /// \param a  array
-  /// \param m  physical size of array
-  /// \return   number of elements actually read.
-  template<typename Type>
-  int getaparam(const char*o, Type*a, int m) falcON_THROWING {
-    return __getA<Type>::get(o,a,m);
-  }
-  /// read array of type T, but allow for non-existence
-  /// \param o  name of nemo option
-  /// \param a  array
-  /// \param m  physical size of array
-  /// \return   number of elements actually read.
-  template<typename Type>
-  int getaparam_z(const char*o, Type*a, int m) falcON_THROWING {
-    if(!hasvalue(const_cast<char*>(o))) {
-      for(int i=0; i!=m; ++i) a[i] = Type(0);
-      return 0;
-    } else 
-      return __getA<Type>::get(o,a,m);
-  }
-  //----------------------------------------------------------------------------
-  // read float                                                                 
-  inline float getfparam(const char* option) {
-    return float(getdparam(const_cast<char*>(option)));
-  }
-  //----------------------------------------------------------------------------
-  // read real                                                                  
-#ifdef getrparam
-#  undef getrparam
-#endif
-  inline real getrparam(const char* option) { 
-    return real(getdparam(const_cast<char*>(option)));
-  }
-  //----------------------------------------------------------------------------
-  // read unsigned                                                              
-  inline unsigned getuparam(const char* option) {
-    int i = getiparam(const_cast<char*>(option));
-    if(i < 0)
-      error("getuparam(%s): expected a positive integer, got %d\n", option,i);
-    return unsigned(i);
-  }
-  //----------------------------------------------------------------------------
-  // read fieldset                                                              
-  inline fieldset getioparam(const char* option) {
-    return fieldset(getparam(const_cast<char*>(option)));
-  }
-  //----------------------------------------------------------------------------
-  // define getparam_z(arg), and related, which will return 0 if !hasvalue(arg).
-  //----------------------------------------------------------------------------
-  inline char* getparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getparam(const_cast<char*>(option)) : 0;
-  }
-  //----------------------------------------------------------------------------
-  inline int getiparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getiparam(const_cast<char*>(option)) : 0;
-  }
-  //----------------------------------------------------------------------------
-  inline unsigned getuparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getuparam(const_cast<char*>(option)) : 0u;
-  }
-  //----------------------------------------------------------------------------
-  inline long getlparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getlparam(const_cast<char*>(option)) : 0;
-  }
-  //----------------------------------------------------------------------------
-  inline bool getbparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getbparam(const_cast<char*>(option)) : false;
-  }
-  //----------------------------------------------------------------------------
-  inline double getdparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getdparam(const_cast<char*>(option)) : 0.;
-  }
-  //----------------------------------------------------------------------------
-  inline float getfparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getfparam(const_cast<char*>(option)) : 0.f;
-  }
-  //----------------------------------------------------------------------------
-  inline real getrparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getrparam(const_cast<char*>(option)) : zero;
-  }
-  //----------------------------------------------------------------------------
-  inline fieldset getioparam_z(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getioparam(const_cast<char*>(option)) : fieldset::empty;
-  }
-  //----------------------------------------------------------------------------
-  // read fieldset, if not given return fieldset::all                           
-  inline fieldset getioparam_a(const char* option) {
-    return hasvalue(const_cast<char*>(option))?
-      getioparam(const_cast<char*>(option)) : fieldset::all;
-  }
-  //----------------------------------------------------------------------------
-  // read PotExp::symmetry
-#ifdef falcON_included_PotExp_h
-  inline PotExp::symmetry getsymparam(const char*symm) {
-    int __sym (getiparam(const_cast<char*>(symm)));
-    return
-      __sym==4? PotExp::spherical   :
-      __sym==3? PotExp::cylindrical :
-      __sym==2? PotExp::triaxial    :
-      __sym==1? PotExp::reflexion   : PotExp::none;
-  }
-#endif
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
   // check for file name to relate to a real output (is given && != ".")      //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  inline bool file_for_output(const char* option) {
-    return
-      hasvalue(const_cast<char*>(option)) &&
-      strcmp  (getparam(const_cast<char*>(option)),".");
+  inline bool file_for_output(const char*file) {
+    return hasvalue(file) && strcmp(getparam(file),".");
   }
 #endif // falcON_USE_NEMO
   //////////////////////////////////////////////////////////////////////////////
