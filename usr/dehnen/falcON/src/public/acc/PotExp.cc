@@ -2,7 +2,7 @@
 //                                                                             |
 /// \file src/public/acc/PotExp.cc                                             |
 //                                                                             |
-// Copyright (C) 2004,2007 Walter Dehnen                                       |
+// Copyright (C) 2004-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -21,16 +21,12 @@
 //-----------------------------------------------------------------------------+
 #include <defacc.h>
 #include <ctime>
-#include "public/lib/PotExp.cc"                    // falcON's PotExp           
-extern "C" {
-#  include <stdinc.h>                              // general NEMO stuff
-#  include <filestruct.h>                          // NEMO file stuff
-#  include <snapshot/snapshot.h>                   // NEMO snapshot stuff
-#  include <history.h>                             // NEMO history stuff
-}
+#define falcON_NEMO
+#include <public/PotExp.h>
+#include <public/nemo++.h>
 ////////////////////////////////////////////////////////////////////////////////
-namespace MyPotExp {
-  using falcON::PotExp;
+namespace {
+  using namespace falcON;
   typedef falcON::tupel<3,float>  vectf;
   typedef falcON::tupel<3,double> vectd;
   //----------------------------------------------------------------------------
@@ -182,47 +178,57 @@ namespace MyPotExp {
 	      P->alpha(), P->scale(), P->Nmax(), P->Lmax(), 
 	      P->symmetry_name());
     // 2 reading in positions and masses from snapshot
-    int N;
-    ::stream input = stropen(file,const_cast<char*>("r"));
-    get_history(input);
-    DebugInfo(5,"PotExp: opened file %s for snapshot input\n",file);
-    get_set (input,const_cast<char*>(SnapShotTag));
-    DebugInfo(5,"PotExp: opened snapshot\n");
-    get_set (input,const_cast<char*>(ParametersTag));
-    get_data(input,const_cast<char*>(NobjTag),const_cast<char*>(IntType),&N,0);
-    get_tes (input,const_cast<char*>(ParametersTag));
-    DebugInfo(5,"PotExp: read N=%d\n",N);
-    get_set (input,const_cast<char*>(ParticlesTag));
+    nemo_in innemo(file);
+    if(!innemo.is_open())
+      falcON_ErrorN("PotExp: cannot open file %s\n",file);
+    if(!innemo.has_snapshot())
+      falcON_ErrorN("PotExp: no snapshot in file %s\n",file);
+    snap_in insnap(innemo);
+    int N = insnap.Ntot();
     // 2.1 read positions:
-    vectf *x = new vectf[N];
-    if(get_tag_ok(input,const_cast<char*>(PhaseSpaceTag))) {
-      DebugInfo(5,"PotExp: found phases rather than positions\n");
-      float *p = falcON_NEW(float,6*N);
-      get_data_coerced(input,const_cast<char*>(PhaseTag),
-		       const_cast<char*>(FloatType),p,N,2,3,0);
-      DebugInfo(5,"PotExp: read %d phases\n",N);
-      for(int i=0,ip=0; i!=N; ++i,ip+=6) x[i].copy(p+ip);
-      falcON_DEL_A(p);
-      DebugInfo(5,"PotExp: copied phases to positions\n");
-    } else if(get_tag_ok(input,const_cast<char*>(PosTag))) {
-      get_data_coerced(input,const_cast<char*>(PosTag),
-		       const_cast<char*>(FloatType),
-		       static_cast<float*>(static_cast<void*>(x)), N,3,0);
-      DebugInfo(5,"PotExp: read %d positions\n",N);
+    vectf *x = falcON_NEW(vectf,N);
+    if(insnap.has(nemo_io::pos)) {
+      data_in indata(insnap,nemo_io::pos);
+      if(indata.type() == nemo_io::Single) 
+	indata.read(x);
+      else if(indata.type() == nemo_io::Double) {
+	vectd*_x = falcON_NEW(vectd,N);
+	indata.read(_x);
+        for(int i=0; i!=N; ++i) x[i] = _x[i];
+        falcON_DEL_A(_x);
+      } else
+	falcON_ErrorN("PotExp: position not in float nor double\n");
+    } else if(insnap.has(nemo_io::posvel)) {
+      data_in indata(insnap,nemo_io::posvel);
+      if(indata.type() == nemo_io::Single) {
+	vectf*_x = falcON_NEW(vectf,2*N);
+	indata.read(_x);
+        for(int i=0,j=0; i!=N; ++i,j+=2) x[i] = _x[j];
+        falcON_DEL_A(_x);
+      } else if(indata.type() == nemo_io::Double) {
+	vectd*_x = falcON_NEW(vectd,2*N);
+	indata.read(_x);
+        for(int i=0,j=0; i!=N; ++i,j+=2) x[i] = _x[j];
+        falcON_DEL_A(_x);
+      } else
+	falcON_ErrorN("PotExp: phases not in float nor double\n");
     } else
-      falcON_THROW("%s: no positions found in snapshot\n",name());
+      falcON_ErrorN("PotExp: no positions found in snapshot\n");
     // 2.2 read masses:
-    float *m = new float[N];
-    if(get_tag_ok(input,const_cast<char*>(MassTag)))
-      get_data_coerced(input,const_cast<char*>(MassTag),
-		       const_cast<char*>(FloatType),m,N,0);
-    else
-      falcON_THROW("%s: no masses found in snapshot\n",name());
-    DebugInfo(5,"PotExp: read %d masses\n",N);
-    get_tes (input,const_cast<char*>(ParticlesTag));
-    get_tes (input,const_cast<char*>(SnapShotTag));
-    strclose(input);
-    DebugInfo(2,"PotExp: read %d masses and positions from file %s\n", N,file);
+    float *m = falcON_NEW(float,N);
+    if(insnap.has(nemo_io::mass)) {
+      data_in indata(insnap,nemo_io::mass);
+      if(indata.type() == nemo_io::Single) 
+	indata.read(m);
+      else if(indata.type() == nemo_io::Double) {
+	double*_m = falcON_NEW(double,N);
+	indata.read(_m);
+        for(int i=0; i!=N; ++i) m[i] = _m[i];
+        falcON_DEL_A(_m);
+      } else
+	falcON_ErrorN("PotExp: masses not in float nor double\n");
+    } else
+      falcON_ErrorN("PotExp: no masses found in snapshot\n");
     // 3 initializing coefficients
     clock_t cpu0 = clock();
     P->Coef.reset();
@@ -287,13 +293,13 @@ void iniacceleration(
 		     bool        *needm,
 		     bool        *needv)
 {
-  if(MyPotExp::Iexp == MyPotExp::Nexp)
+  if(Iexp == Nexp)
     falcON_Error("iniacceleration(): "
 		 "cannot have more than %d instances of '%s'\n",
-		 MyPotExp::Nexp,MyPotExp::PotExpansion::name());
+		 Nexp,PotExpansion::name());
   if(needm) *needm = 0;
   if(needv) *needv = 0;
-  MyPotExp::Pexp[MyPotExp::Iexp].init(pars,npar,file);
-  *accf = MyPotExp::ACCS[MyPotExp::Iexp++];
+  Pexp[Iexp].init(pars,npar,file);
+  *accf = ACCS[Iexp++];
 }
 //------------------------------------------------------------------------------

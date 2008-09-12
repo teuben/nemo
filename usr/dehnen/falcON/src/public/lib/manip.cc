@@ -29,16 +29,12 @@
 // version 1.5  08/11/2005 WD  if no manippath given, try $MANIPPATH           |
 // version 1.6  04/08/2006 WD  if manippath given, put it in top of seach path |
 // version 1.7  10/06/2008 WD  debug_info -> DebugInfo                         |
+// version 1.8  10/09/2008 WD  nemo++.h to avoid #including nemo headers       |
 //-----------------------------------------------------------------------------+
 #include <public/manip.h>              // the header we are implementing
+#include <public/nemo++.h>             // the header we are implementing
 #include <fstream>                     // C++ file I/O
 #include <cstring>                     // C type string manipultions
-extern "C" {
-#include <stdinc.h>                    // nemo's string (used in getparam.h)
-#include <getparam.h>                  // getting name of main()
-#include <loadobj.h>                   // loading shared object files
-#include <filefn.h>                    // finding a function in a loaded file
-}
 #ifdef falcON_MPI
 # include <parallel/mpi_falcON.h>
 #endif
@@ -46,7 +42,7 @@ extern "C" {
 int falcON::Manipulator::parse(const char*params, double*pars, int maxp)
 {
   if(params == 0 || *params == 0) return 0;
-  int npar = nemoinpd(const_cast<char*>(params),pars,maxp);
+  int npar = nemoinp(params,pars,maxp);
   if(npar > maxp)
     falcON_THROW("Manipulator::parse(): too many parameters (%d > %d)",
 		 npar,maxp);
@@ -72,11 +68,17 @@ int falcON::Manipulator::parse(char*data, char sep, char**list, int nmax)
 }      
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  using falcON::NewArray;
-  using falcON::exception;
-  using falcON::message;
-  using falcON::manipulator;
-  using falcON::Manipulator;
+  using namespace falcON;
+//   using falcON::mapsys;
+//   using falcON::findfn;
+//   using falcON::loadobj;
+//   using falcON::localsymbols;
+//   using falcON::getparam;
+//   using falcON::NewArray;
+//   using falcON::exception;
+//   using falcON::message;
+//   using falcON::manipulator;
+//   using falcON::Manipulator;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
   // single_manipulator()                                                       
@@ -139,7 +141,7 @@ namespace {
 #endif
     // 2. load local symbols
     if(first) {
-      mysymbols(getparam("argv0"));
+      localsymbols();
       first = false;
     }
 
@@ -186,7 +188,7 @@ namespace {
     strcat(name,".so");
     DebugInfo(3,"Manipulator: searching file \"%s\" in path \"%s\" ...\n",
 	      name,manpaths);
-    char*fullname = pathfind(manpaths,name);      // seek for file in manpaths
+    const char*fullname = pathfind(manpaths,name);// seek for file in manpaths
     if(fullname == 0)
       falcON_THROW("Manipulator: cannot find file \"%s\" in path \"%s\"",
 		   name,manpaths);
@@ -365,7 +367,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
       }
     }
   }
-  if(nemo_debug(2)) {
+  if(debug(2)) {
     std::cerr<<"Manipulator: parsed "<<N<<" manipulators:\n";
     for(int n=0; n!=N; ++n) {
       std::cerr<<" \""<<name[n]<<"\",";

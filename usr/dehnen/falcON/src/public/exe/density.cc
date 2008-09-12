@@ -41,9 +41,10 @@
 //                         Ferrers kernel, default K=32                         
 // v 3.0.1  09/09/2007  WD ?                                                    
 // v 3.0.2  20/05/2008  WD renamed routine from neighbour.h                     
+// v 3.0.3  20/05/2008  WD happy gcc 4.3.1                                      
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "3.0.2"
-#define falcON_VERSION_D "20-may-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.0.3"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "density"
@@ -60,7 +61,7 @@
 #include <public/bodyfunc.h>                       // body functions            
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n           input file                                         ",
   "out=???\n          output file                                        ",
   "K=32\n             number of neighbours                               ",
@@ -73,7 +74,7 @@ string defv[] = {
   "verbose=f\n        write some blurb about CPU time etc                ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string
+const char*
 usage = "estimate mass density based on distance to Kth neighbour";
 //------------------------------------------------------------------------------
 namespace {

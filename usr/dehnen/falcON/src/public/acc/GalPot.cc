@@ -48,6 +48,7 @@
 // 0.2   23-aug-2004    added acceleration support using defacc.h          WD  |
 // 0.3   18-feb-2005    bug (Fx,Fy=nan for x=y=0) removed                  WD  |
 // 0.4   12-jun-2008    "using namespace std" behind "#include <defacc.h>" WD  |
+// 0.5   08-sep-2008    avoid warning if empty file is given                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #include <iostream>
@@ -67,10 +68,10 @@ namespace {
     GalaxyFile(const char*file)
     {
       if(file==0 || file[0]==0) 
-	error("Need data file to initialize GalPot");
+	::error("Need data file to initialize GalPot");
       from.open(file);
       if(!from.is_open())
-	error("GalPot: cannot open file \"%s\"",file);
+	::error("GalPot: cannot open file \"%s\"",file);
       nemo_dprintf(4,"file \"%s\" opened\n",file);
     }
   };
@@ -96,7 +97,7 @@ namespace {
 	  " falcON debug info:\n"
 	  " external potential \"GalPot\" requires data file in GalPot format.\n";
       double omega = (npar>0)? pars[0] : 0.;
-      if (npar>1) warning("Skipped potential parameters for GalPot beyond 1");
+      if (npar>1) ::warning("Skipped potential parameters for GalPot beyond 1");
       from.close();
     }
     //--------------------------------------------------------------------------

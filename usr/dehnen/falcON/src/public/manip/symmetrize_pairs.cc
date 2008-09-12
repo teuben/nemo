@@ -4,11 +4,11 @@
 /// \file   src/public/manip/symmetrize_pairs.cc                                
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2007                                                           
+/// \date   2004-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2007 Walter Dehnen                                        
+// Copyright (C) 2004-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -106,7 +106,8 @@ namespace falcON { namespace Manipulate {
 	  " symmetrize  vectors  w.r.t. origin"
 	  " for pairs of bodies passing 'filter' (default: all)\n";
       if(pars  && debug(1))
-	warning(" Manipulator \"%s\": skipping all parameters\n",name());
+	falcON_WarningN(" Manipulator \"%s\": "
+			"skipping all parameters\n",name());
     }
     //--------------------------------------------------------------------------
     ~symmetrize_pairs() {}

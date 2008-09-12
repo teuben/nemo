@@ -4,11 +4,11 @@
 /// \file   src/public/manip/use_filter.cc                                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006                                                                
+/// \date   2006,2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006 Walter Dehnen                                             
+// Copyright (C) 2006,2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -29,6 +29,7 @@
 // history:                                                                     
 //                                                                              
 // v 0.0    07/07/2006  WD created                                              
+// v 0.1    11/09/2008  WD erase direct use of nemo functions                  
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/bodyfunc.h>
@@ -62,8 +63,9 @@ namespace falcON { namespace Manipulate {
     fieldset change () const { return fieldset::f; }
     //--------------------------------------------------------------------------
     use_filter(const char*p, const char*f) falcON_THROWING  {
-      if(p) warning("Manipulator \"%s\": parameters \"%s\" ignored",name(),p);
-      if(f) warning("Manipulator \"%s\": file \"%s\" ignored",name(),f);
+      if(p) falcON_WarningN("Manipulator \"%s\": "
+			    "parameters \"%s\" ignored",name(),p);
+      if(f) falcON_WarningN("Manipulator \"%s\": file \"%s\" ignored",name(),f);
     }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*S) const {

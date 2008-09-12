@@ -33,9 +33,10 @@
 // v 2.1   13/06/2005  WD changes in fieldset                                  |
 // v 2.2   02/05/2007  WD made Ossipkov-Merritt anisotropic model public       |
 // v 2.2.1 20/02/2008  WD change in body.h (removed old-style constructors)    |
+// v 2.2.2 10/09/2008  WD happy gcc 4.3.1                                      |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.2.1"
-#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.2.2"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkplum
@@ -47,7 +48,7 @@
 #include <public/sample.h>                         // N-body sampling           
 #include <main.h>                                  // main & NEMO stuff         
 ////////////////////////////////////////////////////////////////////////////////
-string defv[] = {
+const char*defv[] = {
   "out=???\n          output file                                        ",
   "nbody=???\n        number of bodies                                   ",
   "r_s=1\n            scale radius                                       ",
@@ -62,7 +63,7 @@ string defv[] = {
   "                   output: kpc, kpc/Gyr, G=1 (-> mass unit)           ",
   falcON_DEFV, NULL };
 ////////////////////////////////////////////////////////////////////////////////
-string usage = "mkplum -- initial conditions from a Plummer model";
+const char*usage = "mkplum -- initial conditions from a Plummer model";
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace falcON;
@@ -85,7 +86,8 @@ namespace {
       if(a!=0. && a<0.75)
 	falcON_THROW("PlummerModel: f(Q=1) negative for r_a/r_s < 3/4");
       if(a!=0. && a*a < 0.8125)
-	warning("PlummerModel: f(Q) not monotonic for (r_a/r_s)^2 < 13/16");
+	falcON_Warning("PlummerModel: "
+		       "f(Q) not monotonic for (r_a/r_s)^2 < 13/16");
     }
     //--------------------------------------------------------------------------
     double Ps(double r) const { return 1/sqrt(1+r*r); }

@@ -25,14 +25,10 @@
 #include <cstring>
 #include <iomanip>
 #include <rpc/rpc.h>
+#undef MAX
+#undef MIN
 #ifdef   falcON_NEMO
-#  ifdef   MAX               /* not only Peter Teuben, but also somebody */
-#    undef MAX               /* else had the splendid idea to define a   */
-#  endif                     /* C-macro "MAX".                           */
-#  ifdef   MIN               /* not only Peter Teuben, but also somebody */
-#    undef MIN               /* else had the splendid idea to define a   */
-#  endif                     /* C-macro "MIN".                           */
-#  include <stdinc.h>
+#  include <public/nemo++.h>
 #  include <cstring>
 #endif
 #ifdef falcON_MPI
@@ -3310,15 +3306,7 @@ void AnlmIO::open_for_write(const char*file_name) falcON_THROWING
   // open file and connect xdr stream to it                                     
   if(open != closed)
     falcON_THROW("AnlmIO::open_for_write(): already open");
-#ifdef falcON_NEMO
-  char fname[1024];
-  if(is_appended(file_name,'!',fname))
-    file = stropen(fname,const_cast<char*>("w!"));
-  else
-    file = stropen(file_name,const_cast<char*>("w"));
-#else
   file = fopen(file_name,"w");
-#endif
   if(!file)
     falcON_THROW("cannot open file \"%s\" for writing",file_name);
   if(xdrs == 0) xdrs = new XDR;
@@ -3336,11 +3324,7 @@ void AnlmIO::open_for_read(const char*file_name) falcON_THROWING
   // open file and connect xdr stream to it                                     
   if(open != closed)
     falcON_THROW("AnlmIO::open_for_read(): already open");
-#ifdef falcON_NEMO
-  file = stropen(file_name,const_cast<char*>("r"));
-#else
   file = fopen(file_name,"r");
-#endif
   if(!file)
     falcON_THROW("cannot open file \"%s\" for reading",file_name);
   if(xdrs == 0) xdrs = new XDR;
@@ -3408,11 +3392,7 @@ void AnlmIO::close()
   if(open) {
     xdr_destroy (XDRS);
     falcON_DEL_O(XDRS);
-#ifdef falcON_NEMO
-    strclose( file );
-#else
-    fclose  ( file );
-#endif
+    fclose(file);
   }
   open = closed;
   xdrs = 0;

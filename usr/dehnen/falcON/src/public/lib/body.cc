@@ -26,14 +26,9 @@
 #include <sstream>                                 // C++ string I/O            
 #include <iomanip>                                 // C++ I/O formating         
 #include <cstring>                                 // C++ strings               
-#include <public/io.h>                             // utilities for NEMO I/O    
+#include <public/io.h>                             // for fortran I/O
+#include <public/nemo++.h>                         // utilities for NEMO I/O    
 #include <numerics.h>
-
-#ifdef falcON_NEMO                                 // compiler option           
-  extern "C" {
-#   include <stdinc.h>                             // NEMO basics               
-  }
-#endif
 
 using namespace falcON;
 

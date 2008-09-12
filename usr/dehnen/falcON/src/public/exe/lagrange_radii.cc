@@ -3,7 +3,7 @@
 //                                                                             |
 // lagrange_radii.cc                                                           |
 //                                                                             |
-// Copyright (C) 2002-2006 Walter Dehnen                                       |
+// Copyright (C) 2002-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -50,9 +50,10 @@
 // v 4.1    13/06/2005  WD changes in fieldset                                 |
 // v 4.1.1  27/06/2006  WD usage of bodyset                                    |
 // v 4.1.2  27/06/2006  WD back to before bodyset                              |
+// v 4.1.3  10/09/2008  WD happy gcc 4.3.1                                     |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "4.1.2"
-#define falcON_VERSION_D "07-jul-2006 Walter Dehnen                          "
+#define falcON_VERSION   "4.1.3"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "lagrange_radii"
@@ -68,7 +69,7 @@
 #include <public/tools.h>                          // my tools for bodies       
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n           input file                                         ",
   "masses=0.01,0.03,0.1,0.3,0.5,0.7,0.9,0.97,0.99\n"
   "                   table of masses; will be parsed by nemoinp         ",
@@ -85,7 +86,7 @@ string defv[] = {
   "stopdelay=0\n      delay stopping after condition is satisfied        ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string
+const char*
 usage = "lagrange_radii -- find the Lagrange radii of a stellar system\n";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
@@ -93,7 +94,7 @@ void falcON::main() falcON_THROWING
   // set parameters for Lagrange radii                                          
   const int      NMAX    = 100;
   double         M[NMAX] = {0.}, R[NMAX];
-  int            N       = nemoinpd(getparam("masses"),M,NMAX);
+  int            N       = nemoinp(getparam("masses"),M,NMAX);
   if(N>NMAX) falcON_THROW("too many mass shells specified");
   // set stop parameters                                                        
   bool           STOPPING     ( hasvalue   ("stopfile") );
@@ -103,21 +104,22 @@ void falcON::main() falcON_THROWING
   const double   STOPAFTER    ( getdparam_z("stopafter") );
   const double   STOPDELAY    ( getdparam  ("stopdelay") );
   if(STOPPING && (STOPINDEX < 0 || STOPINDEX >= N)) {
-    warning("will not use stop condition, since stopindex not in [0,%d]",N-1);
+    falcON_Warning("will not use stop condition, since stopindex not in [0,%d]",
+		   N-1);
     STOPPING = false;
   }
   if(STOPPING && STOPVALUE == zero) {
-    warning("will not use stop condition, since stopvalue=0");
+    falcON_Warning("will not use stop condition, since stopvalue=0");
     STOPPING = false;
   }
   if(STOPPING && 
      STOPRELATIVE && (STOPVALUE>one || (STOPVALUE<zero && STOPVALUE>-one)))
-    warning("stop condition already true at initial time");
+    falcON_Warning("stop condition already true at initial time");
   // deal with I/O                                                              
   const bool     DO_OUT(file_for_output("out"));
   const bool     DO_TAB(file_for_output("tabfile"));
   if(!DO_TAB && !DO_OUT && !STOPPING) {
-    warning("no outputs wanted: nothing to be done; I'll finish\n");
+    falcON_Warning("no outputs wanted: nothing to be done; I'll finish\n");
     return;
   }
   const nemo_in  IN  (getparam("in"));
@@ -147,9 +149,10 @@ void falcON::main() falcON_THROWING
       if(!TAB.is_open()) {
 	TAB.open(getparam("tabfile"),1);
 	if(!TAB) falcON_THROW("cannot open tabfile\n");
-	TAB << "#\n"
-	    << "# \""<< (*(ask_history())) <<"\"\n"
-	    << "#\n# time       ";
+	TAB  << "#\n";
+	if(RunInfo::cmd_known())
+	  TAB<<"# \""<< RunInfo::cmd() <<"\"\n";
+	TAB  << "#\n# time       ";
 	for(int j=0; j!=N; ++j)
 	  TAB << "r[" << std::setw(4) << 100*M[j] << "%] ";
 	TAB << std::endl;
@@ -184,11 +187,12 @@ void falcON::main() falcON_THROWING
       }
       if(STOPPED && SHOT.time() >= LASTTIME) {
 	std::ofstream STOP(getparam("stopfile"));
-	STOP<<" stopfile \""<<getparam("stopfile")<<"\"\n"
-	    <<" generated by \""<< (*(ask_history())) <<"\"\n"
-	    <<" on simulation time "<<SHOT.time()
-	    <<", because the stop condition\n"
-	    <<"\n   R(M="<<M[STOPINDEX]<<"*M_tot)";
+	STOP  <<" stopfile \""<<getparam("stopfile")<<"\"\n";
+	if(RunInfo::cmd_known())
+	  STOP<<" generated by \""<< RunInfo::cmd() <<"\"\n";
+	STOP  <<" on simulation time "<<SHOT.time()
+	      <<", because the stop condition\n"
+	      <<"\n   R(M="<<M[STOPINDEX]<<"*M_tot)";
 	if(STOPRELATIVE) STOP<<"/R(M="<<M[STOPINDEX]<<"*M_tot, t=t_initial)";
 	STOP<< ((STOPVALUE<zero)? " > " : " < ")
 	    << abs(STOPVALUE) <<"\n\n"

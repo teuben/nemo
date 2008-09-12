@@ -4,11 +4,11 @@
 /// \file   src/public/manip/set_centre.cc                                      
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006                                                                
+/// \date   2006,2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006 Walter Dehnen                                             
+// Copyright (C) 2006,2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -31,9 +31,9 @@
 // v 0.0    30/05/2006  WD created                                              
 // v 0.1    31/05/2006  WD velocity centre added                                
 // v 1.0    04/07/2006  WD reset (rather than set to origin) if not given       
+// v 1.1    11/09/2008  WD erased direct use of nemo functions                 
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
-#include <public/basic.h>
 #include <public/io.h>
 
 namespace falcON { namespace Manipulate {
@@ -97,7 +97,7 @@ namespace falcON { namespace Manipulate {
 	  " and      'vcen'=(par[3],par[4],par[5]) (default: none)\n";
       }
       if(npar!=0 && npar!=3 && npar<6)
-	error("Manipulator \"set_centre\": #pars must be 0,3, or 6\n");
+	falcON_ErrorN("Manipulator \"set_centre\": #pars must be 0,3, or 6\n");
       if(npar >= 3) {
 	XC = vect(pars);
 	X0 = &XC;

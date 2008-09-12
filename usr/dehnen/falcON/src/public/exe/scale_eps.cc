@@ -3,7 +3,7 @@
 //                                                                             |
 // scale_eps.cc                                                                |
 //                                                                             |
-// Copyright (C) 2003-2005 Walter Dehnen                                       |
+// Copyright (C) 2003-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -29,9 +29,10 @@
 // v 2.0    19/05/2004  WD option give (previously write), no default.         |
 // v 2.1    20/05/2005  WD several minor updates, option give -> write         |
 // v 3.0    14/06/2005  WD new falcON                                          |
+// v 3.0.1  10/09/2008  WD happy gcc 4.3.1                                     |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.0"
-#define falcON_VERSION_D "14-jun-2005 Walter Dehnen                          "
+#define falcON_VERSION   "3.0.1"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile "scale_eps"
@@ -46,7 +47,7 @@
 #include <public/io.h>                             // my NEMO I/O               
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n           input file                                         ",
   "out=???\n          output file                                        ",
   "fac=???\n          scale factor for eps_i                             ",
@@ -54,8 +55,7 @@ string defv[] = {
   "times=all\n        times of snapshots to scale                        ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string
-usage = "scale_eps -- scales individual softening lengths";
+const char*usage = "scale_eps -- scales individual softening lengths";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -68,8 +68,8 @@ void falcON::main() falcON_THROWING
   while(in.has_snapshot()) {
     if(! shot.read_nemo(in,read,give,getparam("times"),0)) continue;
     if(! read.contain(give))
-    warning("cannot write '%s' data (only read '%s')",
-	    word(give & ~read), word(read));
+    falcON_Warning("cannot write '%s' data (only read '%s')",
+		   word(give & ~read), word(read));
     write = read & give;
     if(write.contain(fieldbit::e))
       LoopAllBodies(&shot,Bi) Bi.eps() *= fac;

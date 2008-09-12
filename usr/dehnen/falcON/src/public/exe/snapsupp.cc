@@ -4,11 +4,11 @@
 /// \file   src/public/exe/snapsupp.cc                                          
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2002-2008                                                           
+/// \date   2008                                                                
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2008 Walter Dehnen                                        
+// Copyright (C) 2008 Walter Dehnen                                             
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -29,6 +29,7 @@
 // history:                                                                     
 //                                                                              
 // v 0.0   02/04/2008  WD created.                                              
+// v 0.0.1 10/09/2008  WD created.                                              
 ////////////////////////////////////////////////////////////////////////////////
 #define falcON_VERSION   "0.0"
 #define falcON_VERSION_D "02-apr-2008 Walter Dehnen                          "
@@ -44,7 +45,7 @@
 #include <main.h>                                  // NEMO basics & main        
 #include <cstdio>                                  // C std I/O                 
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n         input snapshot file                                ",
   "out=???\n        output snapshot file                               ",
   "times=all\n      times to process                                   ",
@@ -54,7 +55,7 @@ string defv[] = {
   "pars=\n          parameters for value, if any                       ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "snapsupp -- supplement snapshot";
+const char*usage = "snapsupp -- supplement snapshot";
 //------------------------------------------------------------------------------
 namespace {
   using namespace falcON;

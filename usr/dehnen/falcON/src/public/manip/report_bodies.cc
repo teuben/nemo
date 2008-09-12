@@ -6,11 +6,11 @@
 /// \brief  provided manipulator report_bodies                                  
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2007                                                                
+/// \date   2007-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2007 Walter Dehnen                                             
+// Copyright (C) 2007-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -31,6 +31,7 @@
 // history:                                                                     
 //                                                                              
 // v 0.0    06/09/2006  WD created                                              
+// v 0.1    11/09/2008  WD erased direct use of nemo functions                 
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <fstream>                                 // C++ file I/O              
@@ -207,12 +208,12 @@ namespace falcON { namespace Manipulate {
 	KEY[f] = bodykey(b);
 	sprintf(file,FNAME,f);
 	if(NSET > 1 && 0==strcmp(file,FNAME))
-	  error("Manipulator \"%s\": %d bodies in set but "
-		"file name \"%s\" not format string\n",
-		name(),NSET,FNAME);
+	  falcON_ErrorN("Manipulator \"%s\": %d bodies in set but "
+			"file name \"%s\" not format string\n",
+			name(),NSET,FNAME);
 	OUT[f].open(file);
 	if(!OUT[f].is_open())
-	  error("Manipulator \"%s\": cannot open file \"%s\"\n",file);
+	  falcON_ErrorN("Manipulator \"%s\": cannot open file \"%s\"\n",file);
  	print_line(OUT[f],b);
 	OUT[f]   << "#\n# output from Manipulator \"" << name() << "\"\n";
 	if(RunInfo::cmd_known())
@@ -234,13 +235,15 @@ namespace falcON { namespace Manipulate {
     // 1 every call: write out body data
     int f = N_set(S);
     if(NSET != f)
-      error("Manipulator \"%s\": # bodies in set changed from %d to %d\n",
-	    name(),NSET,f);
+      falcON_ErrorN("Manipulator \"%s\": "
+		    "# bodies in set changed from %d to %d\n",
+		    name(),NSET,f);
     f = 0;
     LoopAllBodies(S,b) if(in_subset(b)) {
       if(KEY[f] != bodykey(b))
-	error("Manipulator \"%s\": %dth body changed key form %d to %d\n",
-	      name(),KEY[f],bodykey(b));
+	falcON_ErrorN("Manipulator \"%s\": "
+		      "%dth body changed key form %d to %d\n",
+		      name(),KEY[f],bodykey(b));
       print_data(OUT[f],b,S->time());
       f++;
     }

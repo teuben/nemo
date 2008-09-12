@@ -4,11 +4,11 @@
 /// \file   src/mains/snapprop.cc                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
+/// \date   2004-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
+// Copyright (C) 2004-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -38,9 +38,10 @@
 // v 2.0    24/06/2004 WD new falcON                                            
 // v 2.1    13/06/2005 WD changes in fieldset                                   
 // v 2.2    04/07/2006 WD made public (along with bodyfunc)                     
+// v 2.2.1  10/09/2008 WD happy gcc 4.3.1                                      
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.2"
-#define falcON_VERSION_D "04-jul-2006 Walter Dehnen                          "
+#define falcON_VERSION   "2.2.1"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "snapprop"
@@ -51,7 +52,7 @@
 #include <main.h>                                  // main & NEMO stuff         
 using namespace falcON;
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n           input file                                         ",
   "prop=???\n         bodiesfunc expression (see man page) to evaluate   ",
   "pars=\n            parameters, must match requirements from prop      ",
@@ -59,9 +60,8 @@ string defv[] = {
   "zeromissing=f\n    zero missing body properties (or error out)?       ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string
-usage = "snapprop "
-        " -- evaluates bodies function over snapshot, reports to stdout";
+const char*usage =
+    "snapprop -- evaluates bodies function over snapshot, reports to stdout";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -75,13 +75,7 @@ void falcON::main() falcON_THROWING
     if(!hasvalue("pars"))
       falcON_THROW("prop=\"%s\" requires %d parameters, none given",
 		   getparam("prop"),BF.npar());
-    int n = 
-#ifdef falcON_REAL_IS_FLOAT
-      nemoinpf
-#else
-      nemoinpd
-#endif
-      (getparam("pars"),__P,10);
+    int n = nemoinp(getparam("pars"),__P,10);
     if(n < BF.npar())
       falcON_THROW("prop=\"%s\" requires %d parameters, only %d given",
 		   getparam("prop"),BF.npar(),n);
@@ -94,7 +88,7 @@ void falcON::main() falcON_THROWING
     if(!got.contain(BF.need())) {
       fieldset miss = got.missing(BF.need());
       if(Z) {
-	warning("data '%s' missing; will zero them",word(miss));
+	falcON_Warning("data '%s' missing; will zero them",word(miss));
 	SHOT.reset_data(miss);
       } else
 	falcON_THROW("data on '%s' missing",word(miss));

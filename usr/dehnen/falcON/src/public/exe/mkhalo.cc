@@ -49,9 +49,10 @@
 // v 2.4.2  08/02/2008  WD  removed minor bug with RNG seed                     
 // v 2.4.3  20/02/2008  WD  change in body.h (removed old-style constructors)   
 // v 2.4.4  11/06/2008  WD  changes in error/exception treatment (falcON)       
+// v 2.4.5  10/09/2008  WD  happy gcc 4.3.1                                    
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.4"
-#define falcON_VERSION_D "11-jun-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.5"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -65,7 +66,7 @@
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
 ////////////////////////////////////////////////////////////////////////////////
-string defv[] = {
+const char*defv[] = {
   "out=???\n          output file                                        ",
   "nbody=???\n        number of bodies                                   ",
   "inner=7/9\n        inner density exponent                             ",
@@ -103,7 +104,7 @@ string defv[] = {
   "                   NOTE: external potential MUST also use these units ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage =
+const char*usage =
   "mkhalo -- initial conditions from an equilibrium distribution function\n"
   "          with spherical density\n"
   "\n"
@@ -170,9 +171,9 @@ void falcON::main() falcON_THROWING
   double       Rad[nbmax];
   int          nb=0;
   if(hasvalue("Rp")) {
-    nb=nemoinpd(getparam("Rp"),Rad,nbmax);
+    nb=getaparam("Rp",Rad,nbmax);
     if(nb+1>nbmax)
-      ::error("exceeding expected number of radii in mass adaption");
+      falcON_Error("exceeding expected number of radii in mass adaption");
     Rad[nb] = Rad[nb-1] * 1.e20;
     nb++;
   }
@@ -191,8 +192,10 @@ void falcON::main() falcON_THROWING
   double et(getdparam("eta"));
   if(WD) Mt /= mf;
   if(hasvalue("r_2")) {
-    if(rs!=1.) warning("'r_2' given: will ignore non-default 'r_s' value\n");
-    if(go<=2.) error("outer<=2 ==> gamma(r)<2 at finite r; cannot use r_2\n");
+    if(rs!=1.)
+      falcON_Warning("'r_2' given: will ignore non-default 'r_s' value\n");
+    if(go<=2.)
+      falcON_Error("outer<=2 ==> gamma(r)<2 at finite r; cannot use r_2\n");
     rs = getdparam("r_2") * pow((2-gi)/(go-2),1/et);
   }
   ModifiedDoublePowerLawHalo Halo(rs,rc,rt,Mt,gi,go,et);

@@ -45,9 +45,10 @@
 // v 3.3   02/05/2007  WD made Ossipkov-Merritt anisotropic models public      |
 // v 3.3.1 23/01/2008  WD DF in phden (previous: aux) if giveF=true            |
 // v 3.3.2 20/02/2008  WD change in body.h (removed old-style constructors)    |
+// v 3.3.3 10/09/2008  WD happy gcc 4.3.1                                      |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.3.2"
-#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.3.3"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile mkdehnen
@@ -58,7 +59,7 @@
 #include <public/gamma.h>                          // WD's gamma models         
 #include <main.h>                                  // main & NEMO stuff         
 ////////////////////////////////////////////////////////////////////////////////
-string defv[] = {
+const char*defv[] = {
   "out=???\n          output file                                        ",
   "nbody=???\n        number of bodies                                   ",
   "gamma=???\n        inner power-law slope of density, gamma in[0,2.5[  ",
@@ -81,10 +82,10 @@ string defv[] = {
   "                   output: kpc, kpc/Gyr, G=1 (-> mass unit)           ",
   falcON_DEFV, NULL };
 ////////////////////////////////////////////////////////////////////////////////
-string usage = "mkdehnen -- initial conditions from a Dehnen (1993) model"
-               "\n            possibly with Osipkov-Merritt anisotropy"
+const char*usage = "mkdehnen -- initial conditions from a Dehnen (1993) model"
+                 "\n            possibly with Osipkov-Merritt anisotropy"
 #ifdef falcON_PROPER
-               "\n            and mass adaption (proprietary version only)"
+                 "\n            and mass adaption (proprietary version only)"
 #endif
 ;
 ////////////////////////////////////////////////////////////////////////////////
@@ -109,7 +110,7 @@ void falcON::main() falcON_THROWING
   double         Rad[nbmax];
   int            nb=0;
   if(hasvalue("Rp")) {
-    nb=nemoinpd(getparam("Rp"),Rad,nbmax);
+    nb=nemoinp(getparam("Rp"),Rad,nbmax);
     if(nb+1>nbmax)
       falcON_THROW("exceeding expected number of radii in mass adaption");
     Rad[nb] = Rad[nb-1] * 1.e20;

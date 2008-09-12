@@ -41,9 +41,10 @@
 // v 2.1   15/11/2007   WD  fixed problem with external potentials.             
 // v 2.1.1 23/01/2008   WD  DF into phden (previous: aux) if giveF=true         
 // v 2.1.2 20/02/2008   WD  change in body.h (removed old-style constructors)   
+// v 2.1.3 10/09/2008   WD  happy gcc 4.3.1                                    
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.1.2"
-#define falcON_VERSION_D "20-feb-2008 Paul McMillan & Walter Dehnen          "
+#define falcON_VERSION   "2.1.3"
+#define falcON_VERSION_D "10-sep-2008 Paul McMillan & Walter Dehnen          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkWD99disc
@@ -56,7 +57,7 @@
 #include <iomanip>                                 // C++ I/O formatting        
 #include <main.h>                                  // main & NEMO stuff         
 ////////////////////////////////////////////////////////////////////////////////
-string defv[] = {
+const char*defv[] = {
   "out=???\n          output file                                        ",
   "nbody=???\n        number of bodies                                   ",
   "nbpero=100\n       number of bodies per orbit                         ",
@@ -78,7 +79,7 @@ string defv[] = {
   "accfile=\n         file required by external acceleration field       ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage =
+const char*usage =
 "mkWD99disc: construct a disc according to Dehnen (1999)\n"
 "            optionally immersed in an external gravitational potential\n"
 "\n"
@@ -106,7 +107,7 @@ void falcON::main() falcON_THROWING
   //----------------------------------------------------------------------------
   // 1. set some parameters                                                     
   //----------------------------------------------------------------------------
-  if (getiparam("ni") < 1) error("Code requires at least one iteration");
+  if (getiparam("ni") < 1) falcON_Error("Code requires at least one iteration");
 //const bool   WD (getbparam("WD_units"));         // using WD_units?           
   const Random Ran(getparam("seed"),8);
   const fieldset data( 

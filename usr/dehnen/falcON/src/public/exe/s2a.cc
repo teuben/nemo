@@ -46,9 +46,10 @@
 // v 4.4   30/08/2007  WD fivename() for field headers                          
 // v 4.5   27/09/2007  WD Nsink output                                          
 // v 4.5.1 13/02/2008  WD minor bug (added "std::" to isnan & std::isinf)       
+// v 4.5.2 10/09/2008  WD happy gcc 4.3.1                                      
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "4.5.1"
-#define falcON_VERSION_D "13-feb-2008 Walter Dehnen                          "
+#define falcON_VERSION   "4.5.2"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2a"
@@ -61,7 +62,7 @@
 #include <main.h>                                  // NEMO basics & main        
 #include <cstdio>                                  // C std I/O                 
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n         input snapshot file                                ",
   "out=-\n          file for ascii output (may contain format string)  ",
   "times=all\n      times to process                                   ",
@@ -74,7 +75,7 @@ string defv[] = {
   "pars=\n          parameters for filter, if any                      ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "s2a -- Walter's simple snapshot to ascii converter";
+const char*usage = "s2a -- Walter's simple snapshot to ascii converter";
 //------------------------------------------------------------------------------
 namespace {
   //----------------------------------------------------------------------------
@@ -155,7 +156,8 @@ void falcON::main() falcON_THROWING {
     }
     OUTPUT = READ & NEED;
     if(getbparam("header")) {
-      fprintf(OUT,"#\n# %s\n#\n", *(ask_history()));
+      if(RunInfo::cmd_known())
+	fprintf(OUT,"#\n# %s\n#\n", RunInfo::cmd());
       fprintf(OUT,"# run %s\n",RunInfo::time());
       if(RunInfo::user_known())
 	fprintf(OUT,"#  by user  %s\n",RunInfo::user());

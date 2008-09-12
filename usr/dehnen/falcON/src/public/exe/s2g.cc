@@ -3,7 +3,7 @@
 //                                                                             |
 // s2g.cc                                                                      |
 //                                                                             |
-// Copyright (C) 2007 Walter Dehnen                                            |
+// Copyright (C) 2007,2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -33,9 +33,10 @@
 // v 1.0.1  23/02/2007  WD renamed to s2g (previously nemo2gadget)             |
 // v 1.0.2  05/03/2007  WD avoid warning from bodies::read_snapshot()          |
 // v 1.0.3  30/08/2007  WD debugged error message                              |
+// v 1.0.4  10/09/2008  WD happy gcc 4.3.1                                     |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "1.0.3"
-#define falcON_VERSION_D "30-aug-2007 Walter Dehnen                          "
+#define falcON_VERSION   "1.0.4"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #include <body.h>                                  // bodies                    
 #include <public/io.h>                             // NEMO file I/O             
@@ -44,7 +45,7 @@
 #include <iomanip>     
 #include <string>
 ////////////////////////////////////////////////////////////////////////////////
-string defv[] = {	
+const char*defv[] = {	
   "in=???\n           input file (in nemo snapshot format)               ",
   "out=???\n          base name for output files (out000 out001 ...)     ", 
   "copy=mxvkU\n       data to copy (minimum mxvkU, maximum mxvkURHpa)    ",
@@ -55,7 +56,7 @@ string defv[] = {
   "warn=f\n           warn about missing data (which will be zeroed)     ",
   "header=4\n         header size for unfio (4 or 8)                     ",
   falcON_DEFV, NULL};
-string usage="NEMO to GADGET converter (better than \"nemo2gadget\")";
+const char*usage="NEMO to GADGET converter (better than \"nemo2gadget\")";
 ////////////////////////////////////////////////////////////////////////////////
 void falcON::main() falcON_THROWING
 {

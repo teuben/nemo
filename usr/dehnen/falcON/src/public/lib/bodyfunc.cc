@@ -27,16 +27,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_NEMO
 #include <public/bodyfunc.h>
+#include <public/nemo++.h>
 #include <fstream>
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
 
 extern "C" {
-#include  <stdinc.h>                     // for nemo::string, needed in getparam
-#include  <getparam.h>                   // getting name of main()              
-#include  <loadobj.h>                    // loading shared object files         
-#include  <filefn.h>                     // finding a function in a loaded file 
   typedef void        (*bf_pter)  (falcON::body const&,
 				   double const&,
 				   const falcON::real*);
@@ -115,7 +112,7 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   inline void get_type(char*type, const char*name) throw(BfErr) {
     // finds function name and determines type from sizeof(name())              
-    st_pter Size = (st_pter)findfn(const_cast<char*>(name));
+    st_pter Size = (st_pter)findfn(name);
     if(Size == 0) throw BfErr("cannot resolve type of expression");
     switch(Size()) {
     case 1:  SNprintf(type,MAX_TYPE_LENGTH,"bool"); break;
@@ -130,7 +127,7 @@ namespace {
   //----------------------------------------------------------------------------
   inline fieldset get_need(const char*name) throw(BfErr) {
     // finds function name and returns need                                     
-    bd_pter Need = (bd_pter)findfn(const_cast<char*>(name));
+    bd_pter Need = (bd_pter)findfn(name);
     if(Need == 0) throw BfErr("cannot resolve fieldset need");
     fieldset need=Need();
     DebugInfo(debug_depth,"get_need(): need=%s\n",word(need));
@@ -458,7 +455,7 @@ namespace {
   {
     // P   preparations
     if (!havesyms) {
-      mysymbols(getargv0());
+      localsymbols();
       havesyms = true;
     }
     // 1 create C++ file implementing functions fneed and fsize
@@ -530,7 +527,7 @@ namespace {
   {
     // P   preparations
     if (!havesyms) {
-      mysymbols(getargv0());
+      localsymbols();
       havesyms = true;
     }
     // 1 create C++ file implementing the function
@@ -570,7 +567,7 @@ namespace {
     // 3 load the .so file and find our function are return it
     SNprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
     loadobj(ffile);
-    bf_pter func = (bf_pter)findfn(const_cast<char*>(ffunc));
+    bf_pter func = (bf_pter)findfn(ffunc);
     if(func == 0)
       throw BfErr(message("couldn't find function \"%s\"\n",ffunc));
     return func;
@@ -595,7 +592,7 @@ namespace {
   {
     // P   preparations
     if (!havesyms) {
-      mysymbols(getargv0());
+      localsymbols();
       havesyms = true;
     }
     // 1 create C++ file implementing the method
@@ -635,7 +632,7 @@ namespace {
     // 3 load the .so file and find our function are return it
     SNprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
     loadobj(ffile);
-    Bm_pter func = (Bm_pter)findfn(const_cast<char*>(ffunc));
+    Bm_pter func = (Bm_pter)findfn(ffunc);
     if(func == 0)
       throw BfErr(message("couldn't find function \"%s\"\n",ffunc));
     return func;
@@ -788,7 +785,7 @@ namespace {
   void get_types(fieldset&need) throw(BfErr) {
     // P   preparations
     if (!havesyms) {
-      mysymbols(getargv0());
+      localsymbols();
       havesyms = true;
     }
     // 1 create C++ file implementing functions fneed() and fsize()
@@ -1053,7 +1050,7 @@ namespace {
   {
     // P   preparations
     if (!havesyms) {
-      mysymbols(getargv0());
+      localsymbols();
       havesyms = true;
     }
     // 1 create C++ file implementing the bodiesfunc function
@@ -1111,7 +1108,7 @@ namespace {
     // 3 load the .so file and find our function and return it
     SNprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
     loadobj(ffile);
-    Bf_pter func = (Bf_pter)findfn(const_cast<char*>(ffunc));
+    Bf_pter func = (Bf_pter)findfn(ffunc);
     if(func == 0)
       throw BfErr(message("findfn couldn't find \"%s\"\n",ffunc));
     return func;
@@ -1147,7 +1144,7 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
       char ffile[FNAME_SIZE];
       SNprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
-      FUNC = (bf_pter)findfn(const_cast<char*>(funcname));
+      FUNC = (bf_pter)findfn(funcname);
       if(FUNC) return;                              // SUCCESS !!!              
       DebugInfo(debug_depth,
 		"bodyfunc::bodyfunc(): couldn't find %s in %s/%s.so\n",
@@ -1239,13 +1236,7 @@ falcON::Bodyfunc::Bodyfunc(const char*expr, const char*pars)
       throw exception("Bodyfunc::Bodyfunc(): "
 		      "expression \"%s\" requires %d parameters, "
 		      "but none are given", expr,NPAR);
-    int n = 
-#ifdef falcON_REAL_IS_FLOAT
-      nemoinpf
-#else
-      nemoinpd
-#endif
-      (const_cast<char*>(pars),P,MAXPAR);
+    int n = nemoinp(pars,P,MAXPAR);
     if(n < NPAR)
       throw exception("Bodyfunc::Bodyfunc(): "
 		      "expression \"%s\" requires %d parameters, "
@@ -1389,7 +1380,7 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
       char ffile[FNAME_SIZE];
       SNprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
-      FUNC = (Bf_pter)findfn(const_cast<char*>(funcname));
+      FUNC = (Bf_pter)findfn(funcname);
       if(FUNC) return;                            // SUCCESS !!!              
       DebugInfo(debug_depth,
 		"bodiesfunc::bodiesfunc(): couldn't find %s in %s/%s.so\n",
@@ -1662,7 +1653,7 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
       char ffile[FNAME_SIZE];
       SNprintf(ffile,FNAME_SIZE,"%s/%s.so",BD->directory(),funcname);
       loadobj(ffile);
-      FUNC = (Bm_pter)findfn(const_cast<char*>(funcname));
+      FUNC = (Bm_pter)findfn(funcname);
       if(FUNC) return;                              // SUCCESS !!!              
       DebugInfo(debug_depth,"bodiesmethod::bodiesmethod(): "
 		"couldn't find %s in %s/%s.so\n",

@@ -4,11 +4,11 @@
 /// \file   src/public/manip/randomize_azimuth.cc                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
+/// \date   2004-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
+// Copyright (C) 2004-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -93,7 +93,8 @@ namespace falcON { namespace Manipulate {
 	  " 'subset' (default: all)\n"
 	  " parameter: seed for RNG (default: secs since 1970)\n";
       if(npar>1 && debug(1))
-	warning(" Manipulator \"%s\": skipping parameters beyond 1\n",name());
+	falcON_Warning(" Manipulator \"%s\": "
+		       "skipping parameters beyond 1\n",name());
     }
     //--------------------------------------------------------------------------
     ~randomize_azimuth() {}

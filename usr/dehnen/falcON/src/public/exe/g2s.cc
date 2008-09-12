@@ -3,7 +3,7 @@
 //                                                                             |
 // g2s.cc                                                                      |
 //                                                                             |
-// Copyright (C) 2007 Walter Dehnen                                            |
+// Copyright (C) 2007,2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -33,9 +33,10 @@
 // v 0.3    16/02/2007  WD checks on file size, only writes what it got        |
 // v 1.0    16/02/2007  WD moved to public part of falcON                      |
 // v 1.0.1  23/02/2007  WD renamed to g2s (previously gadget2nemo)             |
+// v 1.0.2  10/09/2008  WD happy gcc 4.3.1                                     |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "1.0.1"
-#define falcON_VERSION_D "23-feb-2007 Walter Dehnen                          "
+#define falcON_VERSION   "1.0.2"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #include <body.h>                                  // bodies                    
 #include <public/io.h>                             // NEMO file I/O             
@@ -44,7 +45,7 @@
 #include <iomanip>     
 #include <string>
 ////////////////////////////////////////////////////////////////////////////////
-string defv[] = {	
+const char*defv[] = {	
   "in=???\n           input base file (GADGET format)                    ",
   "out=???\n          output file (nemo snapshot format)                 ",
   "nshot=1\n          number of snapshots to read                        ",
@@ -52,7 +53,7 @@ string defv[] = {
   "first=0\n          first snapshot to read                             ",
   "header=4\n         header size or unfio (4 or 8)                      ",
   falcON_DEFV, NULL};
-string usage="GADGET to NEMO converter (better than \"gadget2nemo\")";
+const char*usage="GADGET to NEMO converter (better than \"gadget2nemo\")";
 ////////////////////////////////////////////////////////////////////////////////
 void falcON::main() falcON_THROWING
 {

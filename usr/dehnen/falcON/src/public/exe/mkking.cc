@@ -49,9 +49,10 @@
 // v 2.0   14/06/2005  WD new falcON                                           |
 // v 2.1   13/06/2005  WD changes in fieldset                                  |
 // v 2.1.1 20/02/2008  WD change in body.h (removed old-style constructors)    |
+// v 2.1.2 10/09/2008  WD happy gcc 4.3.1                                      |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.1.1"
-#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.1.2"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile "mkking"
@@ -68,7 +69,7 @@
 #include <main.h>                                  // main & NEMO stuff         
 using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
-string defv[] = {
+const char*defv[] = {
   "out=???\n          output file                                        ",
   "nbody=???\n        number of bodies                                   ",
   "W0=???\n           W0 = Psi0/sigma                                    ",
@@ -85,7 +86,7 @@ string defv[] = {
   "table=\n           file for table of r,Phi,rho,M(<r)                  ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "mkking -- initial conditions from a King model";
+const char*usage = "mkking -- initial conditions from a King model";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -165,8 +166,8 @@ void falcON::main() falcON_THROWING
 	if(q) KM.random(Ran(0), Ran(1), r, v);
 	else  KM.random(Ran( ), Ran( ), r, v);
       } catch(WDutils::exception E) {
-	if(++errors > 1000) error("exceeding 100 errors \"%s\" in sampling\n",
-				  text(E));
+	if(++errors > 1000)
+	    falcON_Error("exceeding 1000 errors \"%s\" in sampling\n", text(E));
 	again = true;
       }
     } while(again);

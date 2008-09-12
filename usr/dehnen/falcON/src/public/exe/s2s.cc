@@ -34,9 +34,10 @@
 // v 0.3   30/10/2007  WD allowed times=first and times=last                    
 // v 1.0   31/10/2007  WD added filter, etc, makes snapfilter redundant         
 // v 1.0.1 25/03/2008  WD warn if no snapshot matched times                     
+// v 1.0.2 10/09/2008  WD happy gc 4.3.1                                       
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "1.0.1"
-#define falcON_VERSION_D "25-mar-2008 Walter Dehnen                          "
+#define falcON_VERSION   "1.0.2"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "s2s"
@@ -49,7 +50,7 @@
 #include <main.h>                                  // NEMO basics & main        
 #include <cstdio>                                  // C std I/O                 
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n         snapshot input file                                ",
   "out=???\n        snapshot output file                               ",
   "times=all\n      time range(s) to copy (\"first\", \"last\" are allowed)",
@@ -60,7 +61,7 @@ string defv[] = {
   "copy=\n          select data to write out (default: all read)       ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "s2s -- Walter's alternative to snapcopy";
+const char*usage = "s2s -- Walter's alternative to snapcopy";
 //------------------------------------------------------------------------------
 namespace {
   using namespace falcON;

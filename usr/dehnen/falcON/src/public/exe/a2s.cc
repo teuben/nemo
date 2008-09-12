@@ -4,11 +4,11 @@
 /// \file   src/public/exe/a2s.cc                                               
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2002-2007                                                           
+/// \date   2002-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2007 Walter Dehnen                                        
+// Copyright (C) 2002-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -39,9 +39,10 @@
 // v 2.1   27/06/2005  WD deBUGged                                              
 // v 2.2   04/07/2006  WD made public (in the hope that it's bug free ... )     
 // v 2.3   27/09/2007  WD new keywords Nbod and Nsink                           
+// v 2.3.1 10/09/2008  WD happy gcc 4.3.1
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.3"
-#define falcON_VERSION_D "27-sep-2007 Walter Dehnen                          "
+#define falcON_VERSION   "2.3.1"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "a2s"
@@ -51,7 +52,7 @@
 #include <public/io.h>                             // WDs C++ NEMO I/O          
 #include <main.h>                                  // NEMO basics & main        
 //------------------------------------------------------------------------------
-string defv[] = {
+const char* defv[] = {
   "in=???\n           input ascii file                                   ",
   "out=???\n          output snapshot file                               ",
   "N=\n               total # lines (lines starting '#' are ignored)     ",
@@ -88,7 +89,7 @@ string defv[] = {
   "time=0\n           time for snapshot                                  ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "a2s -- Walter's simple ascii to snapshot converter";
+const char*usage = "a2s -- Walter's simple ascii to snapshot converter";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -102,13 +103,13 @@ void falcON::main() falcON_THROWING
   unsigned Nbod[BT_NUM]={0};
   if(hasvalue("Nbod")) {
     if(BT_NUM != getaparam("Nbod",Nbod,BT_NUM))
-      error("keyword \"Nbod\" must give %d numbers",BT_NUM);
+      falcON_Error("keyword \"Nbod\" must give %d numbers",BT_NUM);
   } else {
     unsigned N = getiparam("N");
     Nbod[0] = getiparam("Nsink");
     Nbod[1] = getiparam("Nsph");
     if(N < Nbod[0]+Nbod[1])
-      error("N=%d < Nsink+Nsph=%d",N,Nbod[0]+Nbod[1]);
+      falcON_Error("N=%d < Nsink+Nsph=%d",N,Nbod[0]+Nbod[1]);
     Nbod[2] = N-Nbod[0]-Nbod[1];
   }
   snapshot shot(getdparam("time"), Nbod, fieldset::empty);
@@ -117,7 +118,7 @@ void falcON::main() falcON_THROWING
   fieldset read (getioparam("read"));
   fieldset write(hasvalue("write")?  getioparam("write") : read);
   if(!read.contain(write))
-    warning("cannot write '%s' data (only read '%s')",
+    falcON_Warning("cannot write '%s' data (only read '%s')",
 	    word(write & ~read), word(read));
   write &= read;
   shot.write_nemo(out,write);

@@ -4,11 +4,11 @@
 /// \file   src/proper/exe/addprop.cc                                           
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2007                                                                
+/// \date   2007-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2007 Walter Dehnen                                             
+// Copyright (C) 2007-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -30,9 +30,10 @@
 //                                                                              
 // v 0.0   20/12/2007  WD created.                                              
 // v 0.1   21/12/2007  WD allow for replacement, changes in bodyfunc            
+// v 0.1.1 10/09/2008  WD happy gcc 4.3.1                                      
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.1"
-#define falcON_VERSION_D "21-dec-2007 Walter Dehnen                          "
+#define falcON_VERSION   "0.1.1"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "addprop"
@@ -44,11 +45,8 @@
 #include <public/bodyfunc.h>                       // body functions            
 #include <main.h>                                  // NEMO basics & main        
 #include <cstdio>                                  // C std I/O                 
-extern "C" {
-#  include  <stdinc.h>                             // for nemoinpd, nemoinpf    
-}
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n         snapshot input file                                ",
   "out=???\n        snapshot output file                               ",
   "times=all\n      times to process                                   ",
@@ -58,7 +56,8 @@ string defv[] = {
   "pars=\n          parameters, if any, for value                      ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "addprop -- add/replace a single body property to/in snapshots";
+const char*usage =
+    "addprop -- add/replace a single body property to/in snapshots";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING {
   nemo_in        IN(getparam("in"));
@@ -69,7 +68,7 @@ void falcON::main() falcON_THROWING {
   fieldbit       ADD(getparam("add")[0]);
   // sanity checks for added property and the value to be assigned to it
   if(ADD == fieldbit::invalid)
-    error("property '%c' not recognised \n",getparam("add")[0]);
+    falcON_Error("property '%c' not recognised \n",getparam("add")[0]);
   // loop snapshots ...
   fieldset WRITE = getioparam_a("write") | fieldset(ADD);
   fieldset GET   = NEED | getioparam_a("write"), GOT;
@@ -79,13 +78,11 @@ void falcON::main() falcON_THROWING {
     SHOT.add_field(ADD);
     if(!GOT.contain(NEED)) {
       fieldset miss = GOT.missing(NEED);
-      error("data '%s' required for value are missing in snapshot\n",
-	    word(miss));
+      falcON_Error("data '%s' required for value are missing in snapshot\n",
+		   word(miss));
     }
     switch(value(ADD)) {
-#ifdef ASSIGN_PROP
-#  error C-macro ASSIGN_PROP already #defined
-#endif
+#undef ASSIGN_PROP
 #define ASSIGN_PROP(BIT,NAME)			\
     case BIT: {					\
       BodyProp<BIT> PROP(&FUNC,SHOT.time());	\

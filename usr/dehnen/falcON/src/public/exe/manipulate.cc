@@ -3,7 +3,7 @@
 //                                                                             |
 // manipulate.cc                                                               |
 //                                                                             |
-// Copyright (C) 2005 Walter Dehnen                                            |
+// Copyright (C) 2005-2008 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -27,9 +27,10 @@
 // v 1.1   20/05/2005  WD new manip.cc; added manippath option                 |
 // v 2.0   14/06/2005  WD new falcON                                           |
 // v 2.1   27/07/2006  WD write all data out if write not given                |
+// v 2.1.1 10/09/2008  WD happy gcc 4.3.1                                      |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.0"
-#define falcON_VERSION_D "13-jun-2005 Walter Dehnen                          "
+#define falcON_VERSION   "2.1.1"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "manipulate"
@@ -40,7 +41,7 @@
 #include <public/manip.h>                          // N-body manipulators       
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n           input file                                         ",
   "out=\n             output file (default: none)                        ",
   "manipname=\n       name(s) of run-time manipulator(s)                 ",
@@ -52,7 +53,7 @@ string defv[] = {
   "stop=f\n           stop if manipulator(s) returns 0                   ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "manipulate -- use manipulators on nemo snapshots";
+const char*usage = "manipulate -- use manipulators on nemo snapshots";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {

@@ -41,9 +41,10 @@
 // v 2.0    13/06/2005  WD new falcON, new body.h, new nemo I/O                |
 // v 2.1    13/06/2005  WD changes in fieldset                                 |
 // v 2.2    06/03/2008  WD debugged (problem when using external potential)    |
+// v 2.2.1  10/09/2008  WD happy gcc 4.3.1                                     |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.2"
-#define falcON_VERSION_D "06-mar-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.2.1"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile addgravity
@@ -55,7 +56,7 @@
 #include <externacc.h>                             // external potential        
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n           input file                                         ",
   "out=???\n          output file                                        ",
   "times=all\n        time range                                         ",
@@ -73,7 +74,7 @@ string defv[] = {
   "accfile=\n         file required by external acceleration field       ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "addgravity -- adds gravity to a snapshot; using falcON";
+const char*usage = "addgravity -- adds gravity to a snapshot; using falcON";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -115,7 +116,7 @@ void falcON::main() falcON_THROWING
 	ACCEXT->set(&SHOT,true, FALCON.NewtonsG()? 2 : 0);
       SHOT.write_nemo(OUT,READ|fieldset(fieldset::a|fieldset::p|fieldset::q));
     } else
-      warning("data '%s' missing at time %f: cannot compute gravity",
-	      word(READ.missing(NEED)), SHOT.time());
+      falcON_Warning("data '%s' missing at time %f: cannot compute gravity",
+		     word(READ.missing(NEED)), SHOT.time());
   }
 }

@@ -37,6 +37,7 @@
 // v 1.3.1  06/11/2006  WD change in profile.h                                  
 // v 1.3.2  13/05/2008  WD debugged error with minor & major axes               
 // v 1.3.2  11/06/2008  WD new DebugInfo                                        
+// v 1.3.3  11/09/2008  WD erased direct use of nemo functions                 
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -237,8 +238,9 @@ namespace falcON { namespace Manipulate {
     }
     OUT.flush();
     if(nonspherical)
-      warning("Manipulator sphereprof: "
-	      "shape seems significantly non-spherical at t=%f\n",S->time());
+      falcON_Warning("Manipulator sphereprof: "
+		     "shape seems significantly non-spherical at t=%f\n",
+		     S->time());
     DebugInfo(2,"sphereprof::manipulate(): finished\n");
     return false;
   }

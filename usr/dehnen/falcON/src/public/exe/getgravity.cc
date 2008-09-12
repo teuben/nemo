@@ -34,9 +34,10 @@
 // v 2.3    13/06/2005  WD changes in fieldset and body.h                      |
 // v 2.3.1  19/09/2007  WD ??                                                  |
 // v 2.3.2  20/02/2008  WD more changes in body.h                              |
+// v 2.3.3  10/09/2008  WD happy gcc 4.3.1                                     |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.3.2"
-#define falcON_VERSION_D "20-feb-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.3.3"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO
 #error You need NEMO to compile "src/mains/getgravity.cc"
@@ -46,7 +47,7 @@
 #include <public/io.h>                             // WDs C++ NEMO I/O          
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "srce=???\n          input file: sources [m,x]       ",
   "sink=???\n          input file: sinks   [x]         ",
   "out=???\n           output file         [x,a,p]     ",
@@ -60,7 +61,8 @@ string defv[] = {
   "\n                  max # bodies in un-split cells  ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage="getgravity -- computes gravity at sink positions; using falcON";
+const char*usage =
+    "getgravity -- computes gravity at sink positions; using falcON";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {

@@ -31,9 +31,9 @@
 // v 1.0    27/06/2006  WD using bodyset in 'subset'                            
 // v 1.1    27/06/2006  WD using filter in 'filter' instead of 'subset'         
 // v 1.2    07/07/2006  WD using flags::ignore instead of filter                
+// v 1.3    11/09/2008  WD erased direct use of nemo functions                  
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
-#include <public/basic.h>
 #include <public/tools.h>
 #include <public/io.h>
 #include <ctime>
@@ -98,11 +98,11 @@ namespace falcON { namespace Manipulate {
 	  " 'filter' (default: all) and writes them given data file.\n";
       }
       if(file == 0)
-	error("Manipulator \"%s\": no output file given\n",name());
+	falcON_ErrorN("Manipulator \"%s\": no output file given\n",name());
       if(!OUT.is_open())
-	error("Manipulator \"%s\": couldn't open output\n",name());
+	falcON_ErrorN("Manipulator \"%s\": couldn't open output\n",name());
       if(npar == 0)
-	error("Manipulator \"%s\": no mass fractions given\n",name());
+	falcON_ErrorN("Manipulator \"%s\": no mass fractions given\n",name());
     }
     //--------------------------------------------------------------------------
     ~lagrange() {
@@ -113,7 +113,7 @@ namespace falcON { namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
   bool lagrange::manipulate(const snapshot*S) const {
     if(S->have_not(need())) {
-      warning("Manipulator \"%s\" insufficient data\n",name());
+      falcON_WarningN("Manipulator \"%s\" insufficient data\n",name());
       return false;
     }
     if(FST) {

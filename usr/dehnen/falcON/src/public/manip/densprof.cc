@@ -32,6 +32,7 @@
 // v 0.1    07/07/2006  WD using bodies in_subset()                             
 // v 0.2    27/07/2006  WD made public                                          
 // v 0.3    13/05/2008  WD debugged error with minor & major axes               
+// v 0.4    11/09/2008  WD erased direct use of nemo functions                  
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -177,7 +178,8 @@ namespace falcON { namespace Manipulate {
       falcON_THROW("Manipulator \"densprof\": no file given");
     if(W<=2) falcON_THROW("Manipulator \"%s\": W = %d <2\n",name(),W);
     if(npar > 2)
-      warning("Manipulator \"%s\": skipping parameters beyond 2\n",name());
+      falcON_WarningN("Manipulator \"%s\": "
+		      "skipping parameters beyond 2\n",name());
   }
   //////////////////////////////////////////////////////////////////////////////
   inline void densprof::print_line() const
@@ -203,8 +205,8 @@ namespace falcON { namespace Manipulate {
     TMAN += STEP;
     // 0.3 are data sufficient?
     if(!SHOT->have_all(need()))
-      error("densprof::manipulate(): need %s, but got %s\n",
-	    word(need()), word(SHOT->all_data()));
+      falcON_Error("densprof::manipulate(): need %s, but got %s\n",
+		   word(need()), word(SHOT->all_data()));
     // 1. sort bodies in descending density
     Array<bodies::index> T;
     SHOT->sorted(T,&neg_density);

@@ -81,7 +81,7 @@ namespace {
   const double myRNG::iRMAX = 1./(1.+double(RAND_MAX));
 }
 
-void falcON::main(int argc, char* argv[]) falcON_THROWING
+void falcON::main(int argc, const char* argv[]) falcON_THROWING
 {
   if(argc < 6) {
     cerr<<

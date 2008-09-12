@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2006                                                               
+/// \date    2006-2008                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006  Walter Dehnen                                            
+// Copyright (C) 2006-2008  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -30,9 +30,10 @@
 // history:                                                                     
 //                                                                              
 // v 0.0    28/07/2006  WD created                                              
+// v 0.0.1  10/09/2008  WD created                                              
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.0"
-#define falcON_VERSION_D "28-jul-2006 Walter Dehnen                          "
+#define falcON_VERSION   "0.0.1"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "mkbodyfunc"
@@ -45,13 +46,12 @@
 #include <public/bodyfunc.h>                       // body functions            
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "expr=\n            bodyfunc expression                                ",
   "show=f\n           show existing bodyfunc expressions?                ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string
-usage = "create a bodyfunc expression";
+const char*usage = "create a bodyfunc expression";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {

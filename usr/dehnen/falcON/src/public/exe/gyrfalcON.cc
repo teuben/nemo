@@ -129,9 +129,10 @@
 // v 3.2.1  05/02/2008  WD read data needed by manipulator from input file     |
 // v 3.2.2  04/03/2008  WD minor changes in log output                         |
 // v 3.2.3  10/06/2008  WD macros falcON_Error, falcON_Warning, DebugInfo      |
+// v 3.2.4  10/09/2008  WD happy gcc 4.3.1                                     |
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.2.2"
-#define falcON_VERSION_D "04-mar-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.2.4"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need "NEMO" to compile gyrfalcON
@@ -141,7 +142,7 @@
 #include <public/manip.h>                          // N-body manipulators       
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in=???\n           input file                                         ",
   "out=\n             file for output; required, unless resume=t         ",
   "tstop=\n           final integration time [default: never]            ",
@@ -204,7 +205,7 @@ string defv[] = {
   "lastout=t\n        output for t=tstop?                                ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string usage = "gyrfalcON -- a superb N-body code";
+const char*usage = "gyrfalcON -- a superb N-body code";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {

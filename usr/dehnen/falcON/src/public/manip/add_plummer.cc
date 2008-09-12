@@ -121,7 +121,8 @@ namespace falcON { namespace Manipulate {
     {
       body B = const_cast<snapshot*>(S)->new_body(bodytype::std, N-K);
       if(! B.is_valid() )
-	error("Manipulator \"add_plummer\": bodies::new_body() is invalid\n");
+	falcON_ErrorN("Manipulator \"add_plummer\": "
+		      "bodies::new_body() is invalid\n");
       ++K;
       if( S->have(fieldbit::x) )
 	if( S->have(fieldbit::v) ) sample(B.pos(), B.vel());
@@ -137,9 +138,9 @@ namespace falcON { namespace Manipulate {
 	LoopAllBodies(S,b) if(level(b) > lmax) lmax = level(b);
 	B.level() = lmax;
       }
-      DebugInfo(8,"Manipulator \"add_plummer\": "
-		"added new body with block No %d and sub-index %d\n",
-		block_No(B), subindex(B));
+      DebugInfoN(8,"Manipulator \"add_plummer\": "
+		 "added new body with block No %d and sub-index %d\n",
+		 block_No(B), subindex(B));
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::o; }
@@ -160,7 +161,7 @@ namespace falcON { namespace Manipulate {
       m   (npar>4?      pars[4]  : N? GM/N : 0.),
       e   (npar>6?      pars[6]  : 0.1 )
     {
-      if(npar<6 && nemo_debug(1) || nemo_debug(2))
+      if(npar<6 && debug(1) || debug(2))
 	std::cerr<<
 	  "\n Manipulator \"add_plummer\":\n"
 	  " adds N new bodies drawn from a Plummer sphere, one per time step;\n"
@@ -172,7 +173,7 @@ namespace falcON { namespace Manipulate {
 	  " par[4] : mass per new body (default: GM/N)\n"
 	  " par[5] : # bodies to be added each time (default: 1)\n"
 	  " par[6] : individual softening length (if needed, default: 0.1)\n\n";
-      if(npar>7 && nemo_debug(1))
+      if(npar>7 && debug(1))
 	falcON_WarningN(" Manipulator \"add_plummer\":"
 			" skipping parameters beyond 7\n");
       if(N <= 0)

@@ -4,11 +4,11 @@
 /// \file   src/public/exe/snapstac.cc                                          
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2005,2007                                                           
+/// \date   2005-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2005,2007 Walter Dehnen                                        
+// Copyright (C) 2005-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -31,9 +31,10 @@
 // v 0.0    21/09/2005 WD created                                               
 // v 0.1    10/09/2007 WD fixed bug with history buffer                         
 // v 0.2    19/09/2007 WD changes in fields.h, body.h, io.h; keyword time       
+// v 0.2.1  10/09/2008 WD happy gcc 4.3.1                                      
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.2"
-#define falcON_VERSION_D "19-sep-2007 Walter Dehnen                          "
+#define falcON_VERSION   "0.2.1"
+#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "snapstac"
@@ -44,7 +45,7 @@
 #include <main.h>                                  // main & NEMO stuff         
 using namespace falcON;
 //------------------------------------------------------------------------------
-string defv[] = {
+const char*defv[] = {
   "in1=???\n          input file name                                    ",
   "in2=???\n          input file name                                    ",
   "out=???\n          output file name                                   ",
@@ -55,8 +56,7 @@ string defv[] = {
   "write=\n           which data to write [default: all read]            ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
-string
-usage = "snapstac -- stack two N-body systems on top of each other";
+const char*usage = "snapstac -- stack two N-body systems on top of each other";
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -80,8 +80,8 @@ void falcON::main() falcON_THROWING
   const body b2(b1, snap1.Ntot());
   got &= shot.read_part(snap2, got, b2, 0);
   if(write && !got.contain(write))
-    warning("couldn't read %s from both %s and %s\n",
-	    word(got.missing(write)), getparam("in1"), getparam("in2"));
+    falcON_Warning("couldn't read %s from both %s and %s\n",
+		   word(got.missing(write)), getparam("in1"), getparam("in2"));
   // shift centre of snapshot 1
   const vect dx(getvparam("deltax")), dv(getvparam("deltav"));
   if(dx != zero || dv != zero)
