@@ -42,6 +42,7 @@
  * 06-jun-08    nemo_exit                                           WD
  * 12-jun-08    nemo_dprintf  is macro, reports [file:line]         WD
  * 12-jun-08    allocate, reallocate are macros (not under C++)     WD
+ * 16-sep-08    removes nemo_exit (better use stdlib's atexit)      WD
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -433,27 +434,10 @@ extern bool LittleEndian(void);
 /* io/filesecret.c */
 extern void   strclose(stream);
 
-
 /*
- * WD 6th/12th June 2008
- * allow the user to specify the exit() function, but default to stdlib's exit().
- * Rationale: If we are part of an MPI parallel run, exiting one process leaves
- *            the reamining in a zombie (defunct) state. In this case, the user
- *            can provide an alternative function, which avoids this problem,
- *            for instance by calling MPI_Abort(). With this construction, we
- *            avoid the need to compile nemo against the MPI header files.
+ * tell nemo that this process is part of an MPI run: give its rank (dprintf.c)
  */
-
-/* exit function (default: stdlib's exit) used via "nemo_exit(1);" (error.c) */
-extern void (*nemo_exit)(int);
-
-/* set alternative exit function (error.c) */
-void set_nemo_exit(void(*)(int));
-
-/* tell nemo that this process is part of an MPI run: give its rank (dprintf.c) */
 void set_mpi_rank(int rank);
-
-/* END of changes WD 6/12th June 2008 */
 
 /* error and warning */
 /* C99 stdargs example of macro usage:   #define HELLO(a,...)  error(a,__VA_ARGS__)   */
