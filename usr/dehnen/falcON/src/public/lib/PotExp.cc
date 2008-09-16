@@ -2194,11 +2194,6 @@ void AnlRec::table_print(symmetry     s,
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  template<symmetry S> inline Anlm &Anlm_multiply(Anlm&A, Anlm const&B) {
-    AUX<S>::template Connect<__mulB>(A,B,scalar(0));
-    return A;
-  }
-  //----------------------------------------------------------------------------
   template<symmetry S> inline Anlm &Anlm_assign(Anlm&A,
 						AnlRec const&P,
 						YlmRec const&Y) {
@@ -2860,9 +2855,9 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<symmetry SYM>
   inline void normalize(Anlm&C, Anlm const&K, scalar G) {
-    Anlm_multiply<SYM>(C,K);
+    AUX<SYM>::template Connect<__mulB>(C,K,scalar(0));
     if(G != 1)
-      Anlm_multiply<SYM>(C,G);
+      AUX<SYM>::template Connect<__mulX>(C,C,G);
   }
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////

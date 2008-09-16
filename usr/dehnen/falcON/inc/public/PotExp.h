@@ -202,6 +202,7 @@ namespace falcON {
       }
       //------------------------------------------------------------------------
       /// construction from given n_max & l_max, includes default constructor
+      explicit
       Anlm (int nmax=0, int lmax=0) :
 	N(nmax), L(lmax),
 	N1(N+1), L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,N1*L1Q)) {}
