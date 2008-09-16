@@ -2193,44 +2193,14 @@ void AnlRec::table_print(symmetry     s,
 // class falcON::PotExp::Anlm  and  related                                   //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-namespace {
-  template<symmetry S> inline Anlm &Anlm_assign(Anlm&A,
-						AnlRec const&P,
-						YlmRec const&Y) {
-    AUX<S>::template Connect<__setB>(A,P,Y,scalar(0));
-    return A;
+#define CONNECT(C,B,X)							   \
+  switch(S) {								   \
+  case spherical:   AUX<spherical>  :: Connect<C>(*this,B,X); return*this; \
+  case cylindrical: AUX<cylindrical>:: Connect<C>(*this,B,X); return*this; \
+  case triaxial:    AUX<triaxial>   :: Connect<C>(*this,B,X); return*this; \
+  case reflexion:   AUX<reflexion>  :: Connect<C>(*this,B,X); return*this; \
+  default:	    AUX<none>       :: Connect<C>(*this,B,X); return*this; \
   }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_add(Anlm&A,
-					     AnlRec const&P,
-					     YlmRec const&Y) {
-    AUX<S>::template Connect<__addB>(A,P,Y,scalar(0));
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_addtimes(Anlm&A,
-						  AnlRec const&P,
-						  YlmRec const&Y,
-						  scalar x) {
-    AUX<S>::template Connect<__addT>(A,P,Y,x);
-    return A;
-  }
-} // namespace {
-////////////////////////////////////////////////////////////////////////////////
-#define CONNECT(CON,THAT,SCAL)					\
-  switch(S) {							\
-  case spherical:						\
-    AUX<spherical>  :: Connect<CON>(*this,THAT,SCAL); break;	\
-  case cylindrical:						\
-    AUX<cylindrical>:: Connect<CON>(*this,THAT,SCAL); break;	\
-  case triaxial:						\
-    AUX<triaxial>   :: Connect<CON>(*this,THAT,SCAL); break;	\
-  case reflexion:						\
-    AUX<reflexion>  :: Connect<CON>(*this,THAT,SCAL); break;	\
-  default:							\
-    AUX<none>       :: Connect<CON>(*this,THAT,SCAL);		\
-  }								\
-  return *this;
 //----------------------------------------------------------------------------
 Anlm&Anlm::assign(scalar x, symmetry S) {
   CONNECT(__setX,*this,x);
@@ -2385,7 +2355,8 @@ namespace {
       for(int k=0; k!=K; ++k) {                    //   LOOP buffer             
 	SetPsi<SYM>(Psi,rd[k],M[k]);               //     set Psi_nl(r_i)       
 	SetYlm<SYM>(Ylm,ct[k],st[k],cp[k],sp[k]);  //     set Y_lm(the_i,phi_i) 
-	Anlm_add<SYM>(C,Psi,Ylm);                  //     add to C_nlm          
+	AUX<SYM>::template Connect<__addB>(C,Psi,Ylm,scalar(0));
+	                                           //     add to C_nlm          
       }                                            //   END LOOP                
       K = 0;                                       //   reset the counter       
     }
@@ -2428,7 +2399,7 @@ namespace {
 	SetPsi<SYM>(Psi,rd,T(1));
 	SetYlm<SYM>(Ylm,ct,st,cp,sp);
 	for(int j=0; j!=m; ++m)
-	  Anlm_addtimes<SYM>(C[j],Psi,Ylm,y[i][j]);
+	  AUX<SYM>::template Connect<__addT>(C[j],Psi,Ylm,y[i][j]);
       }
     }
   public:
@@ -2800,14 +2771,14 @@ namespace {
 	  for(int k=0; i!=N && k!=4; ++i,++k) if(f[i] & k && m[i]) {
 	    SetPsi<SYM>(Psi,RD[i4][k],m[i]);
 	    SetYlm<SYM>(Ylm,CT[i4][k],ST[i4][k],CP[i4][k],SP[i4][k]);
-	    Anlm_add<SYM>(C,Psi,Ylm);
+	    AUX<SYM>::template Connect<__addB>(C,Psi,Ylm,scalar(0));
 	  }
       } else {
 	for(int i=0,i4=0; i4!=N4; ++i4)
 	  for(int k=0; i!=N && k!=4; ++i,++k) if(m[i]) {
 	    SetPsi<SYM>(Psi,RD[i4][k],m[i]);
 	    SetYlm<SYM>(Ylm,CT[i4][k],ST[i4][k],CP[i4][k],SP[i4][k]);
-	    Anlm_add<SYM>(C,Psi,Ylm);
+	    AUX<SYM>::template Connect<__addB>(C,Psi,Ylm,scalar(0));
 	  }
       }
     }
@@ -2904,7 +2875,7 @@ PotExp::PotExp(scalar   a,                         // parameter alpha
   SetNlm(Nlm);
   SetKnl(Knl);
   SetAnl(Anl,Knl);
-  Anlm_assign<none>(Knlm,Anl,Nlm);
+  AUX<none>::Connect<__setB>(Knlm,Anl,Nlm,scalar(0));
 }
 //------------------------------------------------------------------------------
 #define CHECKMISMATCH(FUNC,COEFF)					\
