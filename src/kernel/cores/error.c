@@ -25,6 +25,7 @@
  *      13-feb-03 V1.8b  revoking errno reporting		pjt
  *      06-jun-08 V1.8c  nemo_exit                              wd
  *      12-jun-08 V1.8d  report MPI proc                        wd
+ *      16-sep-08 V1.8e  removed nemo_exit (see stdinc.h)       wd
  */
 
 #include <stdinc.h>
@@ -38,12 +39,13 @@
  * Rationale: allow exit to call MPI_Abort()
  */
 
+#if(0)
 void(*nemo_exit)(int) = &exit;
 void set_nemo_exit(void(*e)(int))
 {
   nemo_exit = e;
 }
-
+#endif
 
 extern int debug_level;    /* see also user interface getparam.c for this */
 
@@ -186,7 +188,7 @@ void stop(int lev)
             return;
         }
     finiparam();
-    nemo_exit(lev);                 /* changed from exit(lev);  WD June 2008 */
+    exit(lev);
     /*NOTREACHED*/
 }
 
