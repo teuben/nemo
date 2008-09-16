@@ -235,48 +235,81 @@ namespace falcON {
 	return A[n*L1Q+l*(l+1)+m];
       }
       //------------------------------------------------------------------------
-      /// reset: A[n,l,m] = 0
-      /// \param sym: if not none: only relevant coefficients are dealt with
-      Anlm&reset(symmetry sym=none);
-      /// negate: A[n,l,m] =-A[n,l,m]
-      /// \param sym: if not none: only relevant coefficients are dealt with
-      Anlm&negate(symmetry sym=none);
       /// assign to scalar: A[n,l,m] = x
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&assign(scalar x, symmetry sym=none);
+      /// \param x scalar to assign to
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&assign(scalar x, symmetry s=none);
+      /// reset: A[n,l,m] = 0
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&reset(symmetry s=none) { return assign(scalar(0),s); }
+      /// negate: A[n,l,m] =-A[n,l,m]
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&negate(symmetry s=none);
       /// multiply by scalar: A[n,l,m]*= x
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&multiply(scalar x, symmetry sym=none);
+      /// \param x scalar to multiply with
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&multiply(scalar x, symmetry s=none);
       /// divide by scalar: A[n,l,m]/= x
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&divide(scalar x, symmetry sym=none);
+      /// \param x scalar to divide by
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&divide(scalar x, symmetry s=none) { return multiply(1/x,s); }
       /// assign element wise: A[n,l,m] = B[n,l,m]
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&copy(Anlm const&B, symmetry sym=none);
+      /// \param B Anlm to copy
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&copy(Anlm const&B, symmetry s=none);
       /// add element wise: A[n,l,m] += B[n,l,m]
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&add(Anlm const&B, symmetry sym=none);
+      /// \param B Anlm to add
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&add(Anlm const&B, symmetry s=none);
       /// subtract element wise: A[n,l,m] -= B[n,l,m]
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&subtract(Anlm const&B, symmetry sym=none);
+      /// \param B Anlm to subtract
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&subtract(Anlm const&B, symmetry s=none);
       /// multiply element wise: A[n,l,m] *= B[n,l,m]
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&multiply(Anlm const&B, symmetry sym=none);
+      /// \param B Anlm to multiply element-wise with
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&multiply(Anlm const&B, symmetry s=none);
       /// dot product: return Sum_nlm A[n,l,m]*B[n,l,m]
-      /// \param sym if not none: only relevant coefficients are dealt with
-      scalar dot(Anlm const&B, symmetry sym=none) const;
+      /// \param B Anlm to perform dot product with
+      /// \param s if not none: only relevant coefficients are dealt with
+      scalar dot(Anlm const&B, symmetry s=none) const;
       /// add element wise times scalar: A[n,l,m] += x*B[n,l,m]
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&addtimes(Anlm const&B, scalar x, symmetry sym=none);
+      /// \param B Anlm operand
+      /// \param x scalar operand
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&addtimes(Anlm const&B, scalar x, symmetry s=none);
       /// subtract element wise times scalar: A[n,l,m] -= x*B[n,l,m]
-      /// \param sym if not none: only relevant coefficients are dealt with
-      Anlm&subtimes(Anlm const&B, scalar x, symmetry sym=none);
+      /// \param B Anlm operand
+      /// \param x scalar operand
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&subtimes(Anlm const&B, scalar x, symmetry s=none);
+      /// general unary operation: A[n,l,m] = f(A[n,l,m])
+      /// \param f function defining operation
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&unary(scalar(*f)(scalar), symmetry s=none);
+      /// general binary operation with Anlm: A[n,l,m] = f(A[n,l,m],B[n,l,m])
+      /// \param f function defining operation
+      /// \param B Anlm operand
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&binary(scalar(*f)(scalar,scalar), Anlm const&B, symmetry s=none);
+      /// general binary operation with scalar: A[n,l,m] = f(A[n,l,m],x)
+      /// \param f function defining operation
+      /// \param x scalar operand
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&binary(scalar(*f)(scalar,scalar), scalar x, symmetry s=none);
+      /// general tertiary operation: A[n,l,m] = f(A[n,l,m],B[n,l,m],x)
+      /// \param f function defining operation
+      /// \param B Anlm operand
+      /// \param x scalar operand
+      /// \param s if not none: only relevant coefficients are dealt with
+      Anlm&tertiary(scalar(*f)(scalar,scalar,scalar), Anlm const&B, scalar x,
+		    symmetry s=none);
       /// apply element wise operation: A[n,l,m] = f(A[n,l,m])
       /// \param f function to apply to each element
+      /// \note this is identical to unary(f,none)
       Anlm&apply(scalar(*f)(scalar)) {
 	scalar* const AN = A+(N1*L1Q);
-	for(scalar*a=A; a!=AN; ++a)
-	  *a = f(*a);
+	for(scalar*a=A; a!=AN; ++a) *a = f(*a);
 	return *this;
       }
       //------------------------------------------------------------------------

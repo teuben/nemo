@@ -114,18 +114,6 @@ namespace WDutils {
     return RunInfo::debug(d);
   }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// abort with error signal (1st argument)
-  /// type of exit function
-  typedef void (*exiter) (int);
-  /// exiter invoked by compiler when encountering WDutils::exit()
-  extern exiter exit;              
-  /// set the exiter to a user-defined function
-  inline void set_exit(exiter __e)
-  {
-     exit = __e;
-  }
-  // ///////////////////////////////////////////////////////////////////////////
   /// \name print debugging information to stderr, reporting [file:line]        
   //@{                                                                          
   /// to be used for reporting debug info

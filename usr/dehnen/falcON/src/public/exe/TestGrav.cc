@@ -134,7 +134,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       " Ncs  (default "<<std::setw(3)<<Default::direct[3]<<")  : N_cs\n"
       " Rmax (default 1e3)  : max radius\n"
       " DUMP (default   0)  : [0/1] dump nodes to tree.cells and tree.leafs\n";
-    falcON::exit(1);
+    std::exit(1);
   }
   register clock_t  cpu0 = clock(), cpu1;
 #ifdef falcON_INDI
@@ -243,7 +243,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 	break;
       default:
 	cerr<<" unknown model\n";
-	falcON::exit(1);
+	std::exit(1);
       }
     } while(rmax>zero && r>rmax);
     cth = (MOD>2) ? zero : 2*Rand()-1;

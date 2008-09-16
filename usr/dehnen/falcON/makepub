@@ -103,7 +103,7 @@ gravity_cc		:= $(SLIB)gravity.cc $(gravity_h) $(kernel_h) $(interact_h) $(numeri
 tree_cc			:= $(SLIB)tree.cc $(tree_h) $(body_h) $(memory_h)
 nbody_cc		:= $(SLIB)nbody.cc $(nbody_h)
 manip_cc		:= $(SLIB)manip.cc $(manip_h)
-nemopp_cc		:= $(SLIB)nemo++.cc $(nemopp_h) $(basic_h)
+nemopp_cc		:= $(SLIB)nemo++.cc $(nemopp_h) $(basic_h) $(NEMOINC)/stdinc.h $(NEMOINC)/loadobj.h $(NEMOINC)/getparam.h $(NEMOINC)/history.h $(NEMOINC)/filestruct.h $(NEMOINC)/snapshot/snapshot.h
 forcesC_cc		:= $(SLIB)forcesC.cc $(forces_C_h) $(forces_h)
 tools_cc		:= $(SLIB)tools.cc $(tools_h) $(Pi_h) $(memory_h)
 profile_cc		:= $(SLIB)profile.cc $(profile_h) $(Pi_h) $(numerics_h)
@@ -122,8 +122,10 @@ PotExp_cc		:= $(SLIB)PotExp.cc $(PotExp_h) $(simd_h)
 
 $(LIB)basic.o:		$(basic_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
+ifdef NEMO
 $(LIB)nemo++.o:		$(nemopp_cc) $(LIBT) $(makefile)
 			$(MAKE_OBJ) $(INEMO) $(NBDYFLAGS)
+endif
 $(LIB)body.o:		$(body_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)tree.o:		$(tree_cc) $(LIBT) $(makefiles)

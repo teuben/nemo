@@ -51,8 +51,8 @@ namespace {
   // types                                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  using falcON::tupel;
-  using falcON::fvec4;
+  using   falcON::tupel;
+  using   falcON::fvec4;
   typedef PotExp::scalar   scalar;
   typedef PotExp::symmetry symmetry;
   typedef PotExp::Anlm     Anlm;
@@ -1859,26 +1859,23 @@ namespace {
   // structs used as template parameter for AUX<>::Connect<>                  //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  struct __neg  { template<typename X> static void op (X&a, X  , X )
-    { a =-a; } };
-  struct __setX { template<typename X> static void op (X&a, X  , X x)
-    { a =x; } };
-  struct __mulX { template<typename X> static void op (X&a, X  , X x)
-    { a*=x; } };
-  struct __setB { template<typename X> static void op (X&a, X b, X )
-    { a =b; } };
-  struct __mulB { template<typename X> static void op (X&a, X b, X )
-    { a*=b; } };
-  struct __addB { template<typename X> static void op (X&a, X b, X )
-    { a+=b; } };
-  struct __subB { template<typename X> static void op (X&a, X b, X )
-    { a-=b; } };
-  struct __setT { template<typename X> static void op (X&a, X b, X x)
-    { a =x*b; } };
-  struct __addT { template<typename X> static void op (X&a, X b, X x)
-    { a+=x*b; } };
-  struct __subT { template<typename X> static void op (X&a, X b, X x)
-    { a-=x*b; } };
+  scalar(*fu)(scalar);
+  scalar(*fb)(scalar,scalar);
+  scalar(*ft)(scalar,scalar,scalar);
+  struct __neg  { static void op(scalar&a, scalar  , scalar )  {a = -a; } };
+  struct __setX { static void op(scalar&a, scalar  , scalar x) {a =  x; } };
+  struct __mulX { static void op(scalar&a, scalar  , scalar x) {a*=  x; } };
+  struct __setB { static void op(scalar&a, scalar b, scalar )  {a =  b; } };
+  struct __mulB { static void op(scalar&a, scalar b, scalar )  {a*=  b; } };
+  struct __addB { static void op(scalar&a, scalar b, scalar )  {a+=  b; } };
+  struct __subB { static void op(scalar&a, scalar b, scalar )  {a-=  b; } };
+  struct __setT { static void op(scalar&a, scalar b, scalar x) {a =x*b; } };
+  struct __addT { static void op(scalar&a, scalar b, scalar x) {a+=x*b; } };
+  struct __subT { static void op(scalar&a, scalar b, scalar x) {a-=x*b; } };
+  struct __una  { static void op(scalar&a, scalar  , scalar  ) {a =fu(a);  } };
+  struct __binX { static void op(scalar&a, scalar  , scalar x) {a =fb(a,x);} };
+  struct __binB { static void op(scalar&a, scalar b, scalar  ) {a =fb(a,b);} };
+  struct __tert { static void op(scalar&a, scalar b, scalar x) {a =ft(a,b,x);}};
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // Spherical(): computing spherical coordinates from Cartesian              //
@@ -2197,63 +2194,9 @@ void AnlRec::table_print(symmetry     s,
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  template<symmetry S> inline Anlm &Anlm_assign(Anlm&A, scalar x) {
-    AUX<S>::template Connect<__setX>(A,A,x);
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_reset(Anlm&A) {
-    return Anlm_assign<S>(A,scalar(0));
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_negate(Anlm&A) {
-    AUX<S>::template Connect<__neg>(A,A,scalar(0));
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_multiply(Anlm&A, scalar x) {
-    AUX<S>::template Connect<__mulX>(A,A,x);
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_divide(Anlm&A, scalar x) {
-    return Anlm_multiply<S>(A,scalar(1)/x);
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_copy(Anlm&A, Anlm const&B) {
-    AUX<S>::template Connect<__setB>(A,B,scalar(0));
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_add(Anlm&A, Anlm const&B) {
-    AUX<S>::template Connect<__addB>(A,B,scalar(0));
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_subtract(Anlm&A, Anlm const&B) {
-    AUX<S>::template Connect<__subB>(A,B,scalar(0));
-    return A;
-  }
-  //----------------------------------------------------------------------------
   template<symmetry S> inline Anlm &Anlm_multiply(Anlm&A, Anlm const&B) {
     AUX<S>::template Connect<__mulB>(A,B,scalar(0));
     return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_addtimes(Anlm&A, Anlm const&B,
-						  scalar x) {
-    AUX<S>::template Connect<__addT>(A,B,x);
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_subtimes(Anlm&A, Anlm const&B,
-						  scalar x) {
-    AUX<S>::template Connect<__subT>(A,B,x);
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline scalar Anlm_dot(Anlm const&A, Anlm const&B) {
-    return AUX<S>::Dot(A,B);
   }
   //----------------------------------------------------------------------------
   template<symmetry S> inline Anlm &Anlm_assign(Anlm&A,
@@ -2270,13 +2213,6 @@ namespace {
     return A;
   }
   //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_subtract(Anlm&A,
-						  AnlRec const&P,
-						  YlmRec const&Y) {
-    AUX<S>::template Connect<__subB>(A,P,Y,scalar(0));
-    return A;
-  }
-  //----------------------------------------------------------------------------
   template<symmetry S> inline Anlm &Anlm_addtimes(Anlm&A,
 						  AnlRec const&P,
 						  YlmRec const&Y,
@@ -2284,157 +2220,76 @@ namespace {
     AUX<S>::template Connect<__addT>(A,P,Y,x);
     return A;
   }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_subtimes(Anlm&A,
-						  AnlRec const&P,
-						  YlmRec const&Y,
-						  scalar x) {
-    AUX<S>::template Connect<__subT>(A,P,Y,x);
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline Anlm &Anlm_multiply(Anlm&A,
-						  AnlRec const&P,
-						  YlmRec const&Y) {
-    AUX<S>::template Connect<__mulB>(A,P,Y,scalar(0));
-    return A;
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline scalar Anlm_dot(Anlm   const&A,
-					      AnlRec const&P,
-					      YlmRec const&Y) {
-    return AUX<S>::Dot(A,P,Y);
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S, typename T>
-  inline scalar Anlm_dot(Anlm const  &A,
-			 tupel<3,T>  &d,
-			 AnlRec const&P,
-			 AnlRec const&Pr, 
-			 YlmRec const&Y,
-			 YlmRec const&Yt,
-			 YlmRec const&Yp) {
-    return AUX<S>::Dot(d,A,P,Pr,Y,Yt,Yp);
-  }
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-Anlm &Anlm::reset(symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_reset<spherical>  (*this);
-  case cylindrical: return Anlm_reset<cylindrical>(*this);
-  case triaxial:    return Anlm_reset<triaxial>   (*this);
-  case reflexion:   return Anlm_reset<reflexion>  (*this);
-  default:          return Anlm_reset<none>       (*this);
-  }
+#define CONNECT(CON,THAT,SCAL)					\
+  switch(S) {							\
+  case spherical:						\
+    AUX<spherical>  :: Connect<CON>(*this,THAT,SCAL); break;	\
+  case cylindrical:						\
+    AUX<cylindrical>:: Connect<CON>(*this,THAT,SCAL); break;	\
+  case triaxial:						\
+    AUX<triaxial>   :: Connect<CON>(*this,THAT,SCAL); break;	\
+  case reflexion:						\
+    AUX<reflexion>  :: Connect<CON>(*this,THAT,SCAL); break;	\
+  default:							\
+    AUX<none>       :: Connect<CON>(*this,THAT,SCAL);		\
+  }								\
+  return *this;
+//----------------------------------------------------------------------------
+Anlm&Anlm::assign(scalar x, symmetry S) {
+  CONNECT(__setX,*this,x);
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::assign  (scalar x, symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_assign<spherical>  (*this,x);
-  case cylindrical: return Anlm_assign<cylindrical>(*this,x);
-  case triaxial:    return Anlm_assign<triaxial>   (*this,x);
-  case reflexion:   return Anlm_assign<reflexion>  (*this,x);
-  default:          return Anlm_assign<none>       (*this,x);
-  }
+Anlm&Anlm::negate(symmetry S) {
+  CONNECT(__neg ,*this,scalar(0));
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::negate  (symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_negate<spherical>  (*this);
-  case cylindrical: return Anlm_negate<cylindrical>(*this);
-  case triaxial:    return Anlm_negate<triaxial>   (*this);
-  case reflexion:   return Anlm_negate<reflexion>  (*this);
-  default:          return Anlm_negate<none>       (*this);
-  }
+Anlm&Anlm::multiply(scalar x, symmetry S) {
+    CONNECT(__mulX,*this,x);
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::multiply  (scalar x, symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_multiply<spherical>  (*this,x);
-  case cylindrical: return Anlm_multiply<cylindrical>(*this,x);
-  case triaxial:    return Anlm_multiply<triaxial>   (*this,x);
-  case reflexion:   return Anlm_multiply<reflexion>  (*this,x);
-  default:          return Anlm_multiply<none>       (*this,x);
-  }
+Anlm&Anlm::copy(Anlm const&B, symmetry S) {
+    CONNECT(__setB,B,scalar(0));
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::divide  (scalar x, symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_divide<spherical>  (*this,x);
-  case cylindrical: return Anlm_divide<cylindrical>(*this,x);
-  case triaxial:    return Anlm_divide<triaxial>   (*this,x);
-  case reflexion:   return Anlm_divide<reflexion>  (*this,x);
-  default:          return Anlm_divide<none>       (*this,x);
-  }
+Anlm&Anlm::add(Anlm const&B, symmetry S) {
+    CONNECT(__addB,B,scalar(0));
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::copy    (Anlm   const&A, symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_copy<spherical>  (*this,A);
-  case cylindrical: return Anlm_copy<cylindrical>(*this,A);
-  case triaxial:    return Anlm_copy<triaxial>   (*this,A);
-  case reflexion:   return Anlm_copy<reflexion>  (*this,A);
-  default:          return Anlm_copy<none>       (*this,A);
-  }
+Anlm&Anlm::subtract(Anlm const&B, symmetry S) {
+    CONNECT(__subB,B,scalar(0));
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::add    (Anlm   const&A, symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_add<spherical>  (*this,A);
-  case cylindrical: return Anlm_add<cylindrical>(*this,A);
-  case triaxial:    return Anlm_add<triaxial>   (*this,A);
-  case reflexion:   return Anlm_add<reflexion>  (*this,A);
-  default:          return Anlm_add<none>       (*this,A);
-  }
+Anlm&Anlm::multiply(Anlm const&B, symmetry S) {
+    CONNECT(__mulB,B,scalar(0));
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::subtract(Anlm   const&A, symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_subtract<spherical>  (*this,A);
-  case cylindrical: return Anlm_subtract<cylindrical>(*this,A);
-  case triaxial:    return Anlm_subtract<triaxial>   (*this,A);
-  case reflexion:   return Anlm_subtract<reflexion>  (*this,A);
-  default:          return Anlm_subtract<none>       (*this,A);
-  }
+Anlm&Anlm::addtimes(Anlm const&B, scalar x, symmetry S) {
+    CONNECT(__addT,B,x);
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::multiply(Anlm   const&A, symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_multiply<spherical>  (*this,A);
-  case cylindrical: return Anlm_multiply<cylindrical>(*this,A);
-  case triaxial:    return Anlm_multiply<triaxial>   (*this,A);
-  case reflexion:   return Anlm_multiply<reflexion>  (*this,A);
-  default:          return Anlm_multiply<none>       (*this,A);
-  }
+Anlm&Anlm::subtimes(Anlm const&B, scalar x, symmetry S) {
+    CONNECT(__subT,B,x);
 }
-//------------------------------------------------------------------------------
-scalar Anlm::dot    (Anlm   const&A, symmetry S) const {
-  switch(S) {
-  case spherical:   return Anlm_dot<spherical>  (*this,A);
-  case cylindrical: return Anlm_dot<cylindrical>(*this,A);
-  case triaxial:    return Anlm_dot<triaxial>   (*this,A);
-  case reflexion:   return Anlm_dot<reflexion>  (*this,A);
-  default:          return Anlm_dot<none>       (*this,A);
-  }
+Anlm&Anlm::unary(scalar(*f)(scalar), symmetry S) {
+    ::fu = f;
+    CONNECT(__una,*this,scalar(0));
 }
-//------------------------------------------------------------------------------
-Anlm&Anlm::addtimes    (Anlm   const&A, scalar x, symmetry S) {
-  switch(S) {
-  case spherical:   return Anlm_addtimes<spherical>  (*this,A,x);
-  case cylindrical: return Anlm_addtimes<cylindrical>(*this,A,x);
-  case triaxial:    return Anlm_addtimes<triaxial>   (*this,A,x);
-  case reflexion:   return Anlm_addtimes<reflexion>  (*this,A,x);
-  default:          return Anlm_addtimes<none>       (*this,A,x);
-  }
+Anlm&Anlm::binary(scalar(*f)(scalar,scalar), scalar x, symmetry S) {
+    ::fb = f;
+    CONNECT(__binX,*this,x);
 }
+Anlm&Anlm::binary(scalar(*f)(scalar,scalar), Anlm const&B, symmetry S) {
+    ::fb = f;
+    CONNECT(__binB,B,scalar(0));
+}
+Anlm&Anlm::tertiary(scalar(*f)(scalar,scalar,scalar), Anlm const&B, scalar x,
+		    symmetry S) {
+    ::ft = f;
+    CONNECT(__tert,B,x);
+}
+#undef CONNECT
 //------------------------------------------------------------------------------
-Anlm&Anlm::subtimes    (Anlm   const&A, scalar x, symmetry S) {
+scalar Anlm::dot(Anlm const&B, symmetry S) const {
   switch(S) {
-  case spherical:   return Anlm_subtimes<spherical>  (*this,A,x);
-  case cylindrical: return Anlm_subtimes<cylindrical>(*this,A,x);
-  case triaxial:    return Anlm_subtimes<triaxial>   (*this,A,x);
-  case reflexion:   return Anlm_subtimes<reflexion>  (*this,A,x);
-  default:          return Anlm_subtimes<none>       (*this,A,x);
+  case spherical:   return AUX<spherical>  ::Dot(*this,B);
+  case cylindrical: return AUX<cylindrical>::Dot(*this,B);
+  case triaxial:    return AUX<triaxial>   ::Dot(*this,B);
+  case reflexion:   return AUX<reflexion>  ::Dot(*this,B);
+  default:          return AUX<none>       ::Dot(*this,B);
   }
 }
 //------------------------------------------------------------------------------

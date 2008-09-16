@@ -95,8 +95,6 @@ WDutils::RunInfo::RunInfo()
 }
 WDutils::RunInfo WDutils::RunInfo::Info;
 ////////////////////////////////////////////////////////////////////////////////
-WDutils::exiter WDutils::exit = &std::exit;
-////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace WDutils;
   inline void printerr(const char*header,
@@ -174,7 +172,7 @@ void WDutils::Error::operator()(const char* fmt, ...) const
   printerr(lib, "Error", fmt, ap, file, line);
 #endif
   va_end(ap);
-  WDutils::exit(1);
+  std::exit(1);
 }
 //------------------------------------------------------------------------------
 void WDutils::Warning::operator()(const char* fmt, ...) const
