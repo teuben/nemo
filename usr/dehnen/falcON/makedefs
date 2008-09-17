@@ -61,7 +61,7 @@ ifdef NEMO
 
 INEMO		:= -I$(NEMOINC) -I$(NEMOLIB)
 DNEMO		:= -DfalcON_NEMO
-LNEMO		:= $(LIB)nemo++.o -L$(NEMOLIB) -lnemo -ldl
+LNEMO		:= -L$(NEMOLIB) -lnemo -ldl
 
 endif
 
@@ -189,12 +189,12 @@ endif
 ifdef STATIC
 
 LFALCON		:= -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO)
-falcON		:= $(links) $(LIB)nemo++.o $(LIB)lib$(LIBNAME).a
+falcON		:= $(links) $(LIB)lib$(LIBNAME).a
 
 else
 
 LFALCON		:= -L$(LIB) -l$(LIBNAME) -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO)
-falcON		:= $(links) $(LIB)nemo++.o $(LIB)lib$(LIBNAME).so
+falcON		:= $(links) $(LIB)lib$(LIBNAME).so
 
 endif
 

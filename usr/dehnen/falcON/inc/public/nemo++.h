@@ -536,10 +536,8 @@ namespace falcON {
       return data;
     }
     //--------------------------------------------------------------------------
-  private:
-    std::FILE *STREAM;
   protected:
-    std::FILE* const&stream() const { return STREAM; }
+    std::FILE *STREAM;
     nemo_io&open    (const char*, const char*);    ///< open new file, close old
     void    close   ();                            ///< close open file         
     nemo_io() : STREAM (0) {}
@@ -602,13 +600,13 @@ namespace falcON {
     //--------------------------------------------------------------------------
   private:
     mutable data_in *DATA_IN;                      // if non-zero: open snapshot
-    nemo_in const   &INPUT;                        // our input stream          
+    nemo_in const   &INPUT;                        // our input          
     mutable int      FIELDS_READ;                  // fields read already       
     bool             HAS_TIME;                     // have simulation time?     
     unsigned         NTOT, NBOD[BT_NUM];           // # bodies, # bodies / type 
     double           TIME;                         // simulations time          
     //--------------------------------------------------------------------------
-    std::FILE*const&stream() const { return INPUT.stream(); }
+    std::FILE* stream() const { return INPUT.STREAM; }
     //--------------------------------------------------------------------------
   public:
     /// ctor: open a snapshot set from a NEMO input stream
@@ -774,7 +772,7 @@ namespace falcON {
     mutable int       FIELDS_WRITTEN;              // data already written out  
     unsigned          NTOT, NBOD[BT_NUM];          // # bodies, # bodies / type 
     //--------------------------------------------------------------------------
-    std::FILE*const&stream() const { return OUTPUT.stream(); }
+    std::FILE* stream() const { return OUTPUT.STREAM; }
     //--------------------------------------------------------------------------
   public:
     /// ctor: open NEMO snapshot set

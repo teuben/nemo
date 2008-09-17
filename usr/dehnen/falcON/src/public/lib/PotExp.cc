@@ -2209,42 +2209,42 @@ Anlm&Anlm::negate(symmetry S) {
   CONNECT(__neg ,*this,scalar(0));
 }
 Anlm&Anlm::multiply(scalar x, symmetry S) {
-    CONNECT(__mulX,*this,x);
+  CONNECT(__mulX,*this,x);
 }
 Anlm&Anlm::copy(Anlm const&B, symmetry S) {
-    CONNECT(__setB,B,scalar(0));
+  CONNECT(__setB,B,scalar(0));
 }
 Anlm&Anlm::add(Anlm const&B, symmetry S) {
-    CONNECT(__addB,B,scalar(0));
+  CONNECT(__addB,B,scalar(0));
 }
 Anlm&Anlm::subtract(Anlm const&B, symmetry S) {
-    CONNECT(__subB,B,scalar(0));
+  CONNECT(__subB,B,scalar(0));
 }
 Anlm&Anlm::multiply(Anlm const&B, symmetry S) {
-    CONNECT(__mulB,B,scalar(0));
+  CONNECT(__mulB,B,scalar(0));
 }
 Anlm&Anlm::addtimes(Anlm const&B, scalar x, symmetry S) {
-    CONNECT(__addT,B,x);
+  CONNECT(__addT,B,x);
 }
 Anlm&Anlm::subtimes(Anlm const&B, scalar x, symmetry S) {
-    CONNECT(__subT,B,x);
+  CONNECT(__subT,B,x);
 }
 Anlm&Anlm::unary(scalar(*f)(scalar), symmetry S) {
-    ::fu = f;
-    CONNECT(__una,*this,scalar(0));
+  ::fu = f;
+  CONNECT(__una,*this,scalar(0));
 }
 Anlm&Anlm::binary(scalar(*f)(scalar,scalar), scalar x, symmetry S) {
-    ::fb = f;
-    CONNECT(__binX,*this,x);
+  ::fb = f;
+  CONNECT(__binX,*this,x);
 }
 Anlm&Anlm::binary(scalar(*f)(scalar,scalar), Anlm const&B, symmetry S) {
-    ::fb = f;
-    CONNECT(__binB,B,scalar(0));
+  ::fb = f;
+  CONNECT(__binB,B,scalar(0));
 }
 Anlm&Anlm::tertiary(scalar(*f)(scalar,scalar,scalar), Anlm const&B, scalar x,
 		    symmetry S) {
-    ::ft = f;
-    CONNECT(__tert,B,x);
+  ::ft = f;
+  CONNECT(__tert,B,x);
 }
 #undef CONNECT
 //------------------------------------------------------------------------------
