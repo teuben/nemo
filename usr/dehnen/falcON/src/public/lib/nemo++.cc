@@ -373,14 +373,12 @@ namespace Aux {
   std::FILE* stropen(const char*file, const char*mode) {
     return ::stropen(file,const_cast<char*>(mode));
   }
-
   inline void put_set(std::FILE* file, const char*set) {
     ::put_set(file, const_cast<char*>(set));
   }
   inline void put_tes(std::FILE* file, const char*set) {
     ::put_tes(file, const_cast<char*>(set));
   }
-
   inline void put_data(std::FILE* file, const char*tag,
 		       const char*type, const void*X,
 		       int N0, int N1=0, int N2=0, int N3=0) {
@@ -400,7 +398,7 @@ namespace Aux {
     ::put_data_tes(file,const_cast<char*>(tag));
   }
   inline bool get_tag_ok(std::FILE* file, const char*tag) {
-    ::get_tag_ok(file,const_cast<char*>(tag));
+    return ::get_tag_ok(file,const_cast<char*>(tag));
   }
   inline const char*get_type(std::FILE* file, const char*tag) {
     return ::get_type(file,const_cast<char*>(tag));
@@ -458,7 +456,7 @@ void nemo_io::close()
 //------------------------------------------------------------------------------
 void nemo_in::close() falcON_THROWING
 {
-  if(stream() == 0) return;
+  if(STREAM == 0) return;
   if(SNAP_IN) {
     DebugInfo(4,"nemo_in::close(): closing open snap_in first\n");
     SNAP_IN->~snap_in();
@@ -490,6 +488,8 @@ nemo_in::nemo_in(const char* file, const char* mode)
   IS_PIPE = !std::strcmp(file,"-");
   if(IS_PIPE) input::open_std();
   nemo_io::open(file,mode);
+  DebugInfo(4,"nemo_in constructed\n");
+  report::info("nemo_in constructed\n");
 }
 nemo_in::~nemo_in() falcON_THROWING
 {
@@ -498,10 +498,12 @@ nemo_in::~nemo_in() falcON_THROWING
     DebugInfo(4,"nemo_in::~nemo_in(): closing open snap_in first\n");
     SNAP_IN->~snap_in();
   }
+  DebugInfo(4,"nemo_in destructed\n");
+  report::info("nemo_in destructed\n");
 }
 bool nemo_in::has_snapshot() const
 {
-  return stream() && get_tag_ok(stream(),SnapShotTag);
+  return STREAM && get_tag_ok(STREAM,SnapShotTag);
 }
 //------------------------------------------------------------------------------
 // class falcON::snap_in
@@ -516,36 +518,36 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   if(INPUT.SNAP_IN)
     falcON_THROW("trying to open 2nd snapshot from nemo input stream");
   // 1 open snapshot set
-  get_set(INPUT.stream(),SnapShotTag);
+  get_set(INPUT.STREAM,SnapShotTag);
   INPUT.SNAP_IN = this;
   DebugInfo(5,"  snap_in::snap_in(): snapshot opened\n");
   // 2 open parameter set
-  if(!get_tag_ok(INPUT.stream(),ParametersTag)) {
-    get_tes(INPUT.stream(),SnapShotTag);
+  if(!get_tag_ok(INPUT.STREAM,ParametersTag)) {
+    get_tes(INPUT.STREAM,SnapShotTag);
     INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read parameters from nemo input stream");
   }
-  get_set(INPUT.stream(),ParametersTag);
+  get_set(INPUT.STREAM,ParametersTag);
   DebugInfo(5,"  snap_in::snap_in(): parameter set opened\n");
   // 3 read parameter set
   // 3.1 read total # bodies 
-  if(!get_tag_ok(INPUT.stream(),NobjTag)) {
-    get_tes(INPUT.stream(),ParametersTag);
-    get_tes(INPUT.stream(),SnapShotTag);
+  if(!get_tag_ok(INPUT.STREAM,NobjTag)) {
+    get_tes(INPUT.STREAM,ParametersTag);
+    get_tes(INPUT.STREAM,SnapShotTag);
     INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read # bodies from nemo input stream");
   }
-  get_data(INPUT.stream(),NobjTag,IntType,&NTOT,0);
+  get_data(INPUT.STREAM,NobjTag,IntType,&NTOT,0);
   DebugInfo(5,"  snap_in::snap_in(): read Nobj = %u\n",NTOT);
   // 3.2 try to read # SINK bodies
-  if(get_tag_ok(INPUT.stream(),NSinkTag)) {
-    get_data(INPUT.stream(),NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
+  if(get_tag_ok(INPUT.STREAM,NSinkTag)) {
+    get_data(INPUT.STREAM,NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
     DebugInfo(5,"  snap_in::snap_in(): read Nsink = %u\n",
 	      NBOD[bodytype::sink]);
   }
   // 3.3 try to read # SPH bodies
-  if(get_tag_ok(INPUT.stream(),NGasTag)) {
-    get_data(INPUT.stream(),NGasTag,IntType,&(NBOD[bodytype::gas]),0);
+  if(get_tag_ok(INPUT.STREAM,NGasTag)) {
+    get_data(INPUT.STREAM,NGasTag,IntType,&(NBOD[bodytype::gas]),0);
     DebugInfo(5,"  snap_in::snap_in(): read Nsph = %u\n",
 	      NBOD[bodytype::gas]);
   }
@@ -556,14 +558,14 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
     falcON_THROW("read nemo data: more non-STD bodies than total");
   NBOD[bodytype::std] = NTOT - n;
   // 3.5 try to read simulation time
-  if(get_tag_ok(INPUT.stream(),TimeTag)) {
+  if(get_tag_ok(INPUT.STREAM,TimeTag)) {
     HAS_TIME = true;
-    const char* time_type = get_type(INPUT.stream(),TimeTag);
+    const char* time_type = get_type(INPUT.STREAM,TimeTag);
     if(0 == std::strcmp(time_type,DoubleType))
-	get_data(INPUT.stream(),TimeTag,DoubleType,&TIME,0);
+	get_data(INPUT.STREAM,TimeTag,DoubleType,&TIME,0);
     else if(0 == std::strcmp(time_type,FloatType)) {
       float __TIME;
-      get_data(INPUT.stream(),TimeTag,FloatType,&__TIME,0);
+      get_data(INPUT.STREAM,TimeTag,FloatType,&__TIME,0);
       TIME = __TIME;
     } else
       falcON_Warning("nemo input: unknown type '%s' for time\n",time_type);
@@ -571,15 +573,15 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   if(HAS_TIME)
     DebugInfo(5,"  read time = %f\n",TIME);
   // 4 close parameter set
-  get_tes(INPUT.stream(),ParametersTag);
+  get_tes(INPUT.STREAM,ParametersTag);
   DebugInfo(5,"  snap_in::snap_in(): parameter set read & closed\n");
   // 5 open particle set
-  if(!get_tag_ok(INPUT.stream(),ParticlesTag)) {
-    get_tes(INPUT.stream(),SnapShotTag);
+  if(!get_tag_ok(INPUT.STREAM,ParticlesTag)) {
+    get_tes(INPUT.STREAM,SnapShotTag);
     INPUT.SNAP_IN = 0;
     falcON_THROW("cannot read parameters from nemo input stream");
   }
-  get_set(INPUT.stream(),ParticlesTag);
+  get_set(INPUT.STREAM,ParticlesTag);
   DebugInfo(5,"  snap_in::snap_in(): particles set opened\n");
   report::info("snap_in: opened for N[]=%d,%d,%d\n",NBOD[0],NBOD[1],NBOD[2]);
 }
@@ -592,8 +594,8 @@ snap_in::~snap_in() falcON_THROWING
   HAS_TIME = false;
   NTOT = 0;
   for(bodytype t; t; ++t) NBOD[t] = 0u;
-  get_tes(INPUT.stream(),ParticlesTag);
-  get_tes(INPUT.stream(),SnapShotTag);
+  get_tes(INPUT.STREAM,ParticlesTag);
+  get_tes(INPUT.STREAM,SnapShotTag);
   INPUT.SNAP_IN = 0;
   DebugInfo(4,"snap_in: closed\n");
   report::info("snap_in: closed\n");
@@ -602,7 +604,7 @@ bool snap_in::has(nemo_io::Field f) const
 {
   return 
     !has_been_read(f) &&
-    get_tag_ok(INPUT.stream(),NemoTag(f));
+    get_tag_ok(INPUT.STREAM,NemoTag(f));
 }
 //------------------------------------------------------------------------------
 // class falcON::data_in
@@ -701,7 +703,7 @@ void data_in::read(void*data)
 //------------------------------------------------------------------------------
 void nemo_out::close() falcON_THROWING
 {
-  if(stream() == 0) return;
+  if(STREAM == 0) return;
   if(SNAP_OUT) {
     DebugInfo(4,"nemo_out::close(): closing open snap_out first\n");
     SNAP_OUT->~snap_out();
@@ -771,23 +773,23 @@ snap_out::snap_out(nemo_out const&out,
   if(OUTPUT.SNAP_OUT)
     falcON_THROW("cannot open 2nd snapshot from nemo output stream");
   // 1 open snapshot set
-  put_set(OUTPUT.stream(),SnapShotTag);
+  put_set(OUTPUT.STREAM,SnapShotTag);
   OUTPUT.SNAP_OUT = this;
   DebugInfo(5,"  snapshot opened\n");
   // 2 write parameter set
-  put_set      (OUTPUT.stream(),ParametersTag);
-  Aux::put_data(OUTPUT.stream(),NobjTag, IntType,&NTOT,0);
-  Aux::put_data(OUTPUT.stream(),NGasTag, IntType,&(NBOD[bodytype::gas]),0);
-  Aux::put_data(OUTPUT.stream(),NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
-  Aux::put_data(OUTPUT.stream(),TimeTag ,DoubleType,&time,0);
-  put_tes      (OUTPUT.stream(),ParametersTag);
+  put_set      (OUTPUT.STREAM,ParametersTag);
+  Aux::put_data(OUTPUT.STREAM,NobjTag, IntType,&NTOT,0);
+  Aux::put_data(OUTPUT.STREAM,NGasTag, IntType,&(NBOD[bodytype::gas]),0);
+  Aux::put_data(OUTPUT.STREAM,NSinkTag,IntType,&(NBOD[bodytype::sink]),0);
+  Aux::put_data(OUTPUT.STREAM,TimeTag ,DoubleType,&time,0);
+  put_tes      (OUTPUT.STREAM,ParametersTag);
   DebugInfo(5,"  snap_out::snap_out(): parameter written:"
 	     " Nbod=%d, Nsph=%d, Nsink=%d, time=%f\n",
 	     NTOT, NBOD[bodytype::gas], NBOD[bodytype::sink], time);
   // 3 open particle set
-  put_set (OUTPUT.stream(),ParticlesTag);
+  put_set (OUTPUT.STREAM,ParticlesTag);
   int CS = CSCode(Cartesian,Ndim,2);
-  Aux::put_data(OUTPUT.stream(),CoordSystemTag,IntType,&CS,0);
+  Aux::put_data(OUTPUT.STREAM,CoordSystemTag,IntType,&CS,0);
   report::info("snap_out: opened for N[]=%d,%d,%d t=%g\n",
 	       NBOD[0],NBOD[1],NBOD[2],time);
 }
@@ -799,8 +801,8 @@ snap_out::~snap_out() falcON_THROWING
   }
   NTOT = 0;
   for(bodytype t; t; ++t) NBOD[t] = 0u;
-  put_tes(OUTPUT.stream(),ParticlesTag);
-  put_tes(OUTPUT.stream(),SnapShotTag);
+  put_tes(OUTPUT.STREAM,ParticlesTag);
+  put_tes(OUTPUT.STREAM,SnapShotTag);
   OUTPUT.SNAP_OUT = 0;
   DebugInfo(4,"snap_out closed\n");
   report::info("snap_out closed\n");
