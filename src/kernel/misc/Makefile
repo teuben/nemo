@@ -20,7 +20,7 @@ SRCFILES= axis.c besselfunc.c erf.c fie.c \
 	  lsq.c matinv.c nemofie.c imsl.c \
 	  match.c mdarray.c median.c minmax.c moment.c \
 	  nemoinp.c nemomain.c newextn.c pick.c pow.c scanopt.c \
-	  setfblank.c spline.c sqr.c timers.c vectmath.c within.c \
+	  setfblank.c spline.c timers.c vectmath.c within.c \
 	  xrand.c xrandom.c \
 	  sort.c sortptr.c unwrap.c
 
@@ -30,7 +30,7 @@ OBJFILES= axis.o besselfunc.o erf.o fie.o \
 	  lsq.o matinv.o nemofie.o imsl.o \
 	  match.o mdarray.o median.o minmax.o moment.o \
 	  nemoinp.o nemomain.o newextn.o pick.o pow.o scanopt.o \
-	  setfblank.o spline.o sqr.o timers.o vectmath.o within.o \
+	  setfblank.o spline.o timers.o vectmath.o within.o \
 	  xrand.o xrandom.o \
 	  sort.o sortptr.o unwrap.o
 
@@ -40,7 +40,7 @@ LOBJFILES= $L(axis.o) $L(besselfunc.o) $L(erf.o) $L(fie.o) $L(layout.o) \
 	  $L(lsq.o) $L(matinv.o) $L(nemofie.o) $L(imsl.o) \
 	  $L(match.o) $L(mdarray) $L(median.o) $L(minmax.o) $L(moment.o) \
 	  $L(nemoinp.o) $L(nemomain.o) $L(newextn.o) $L(pick.o) $L(pow.o) $L(scanopt.o) \
-	  $L(setfblank.o) $L(spline.o) $L(sqr.o) $L(timers.o) $L(vectmath.o) $L(within.o) \
+	  $L(setfblank.o) $L(spline.o) $L(timers.o) $L(vectmath.o) $L(within.o) \
 	  $L(xrand.o) $L(xrandom.o) \
 	  $L(sort.o) $L(sortptr.o) $L(unwrap.o)
 
