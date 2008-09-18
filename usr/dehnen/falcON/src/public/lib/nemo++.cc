@@ -40,6 +40,7 @@ extern "C" {
 #  include <getparam.h>
 #  include <history.h>
 #  include <filestruct.h>
+#  include <filefn.h>
 #  include <snapshot/snapshot.h>
 }
 
@@ -48,6 +49,20 @@ extern "C" {
 #undef getargv0
 #undef getversion
 
+////////////////////////////////////////////////////////////////////////////////
+//
+// NOTE
+//
+// There is a good reason for not making namespace falcON available in the
+// global or anonymous namespace (via "using namespace falcON;"):
+//
+// If we did and forget to include all relevant nemo header files, then the
+// definition of falcON routines via nemo routines (which are in the global
+// namespace) with identical name and syntax will result in an infinite
+// recursive loop (because the nemo routine is accidentally not declared, so
+// instead it uses the routine to be defined itself), instead of a compile
+// time error!
+//
 ////////////////////////////////////////////////////////////////////////////////
 extern "C" {
   extern int debug_level;         // NEMO's debug_level, see nemo's dprintf.c
@@ -60,7 +75,6 @@ int falcON::nemo_debug_level() {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  using namespace falcON;
   template<typename Type> struct __inpA;
   template<> struct __inpA<double> {
     static int inp(const char*p, double*a, int m) {
@@ -259,111 +273,110 @@ void falcON::mapsys(char*f) {
 #endif
 
 namespace {
-  using namespace falcON;
-  inline const char* NemoTag(nemo_io::Field f) falcON_THROWING
+  inline const char* NemoTag(falcON::nemo_io::Field f) falcON_THROWING
   {
     switch(f) {
-    case nemo_io::mass   : return MassTag;
-    case nemo_io::pos    : return PosTag;
-    case nemo_io::vel    : return VelTag;
-    case nemo_io::eps    : return EpsTag;
-    case nemo_io::key    : return KeyTag;
-    case nemo_io::step   : return TimeStepTag;
-    case nemo_io::pot    : return PotentialTag;
-    case nemo_io::acc    : return AccelerationTag;
-    case nemo_io::jerk   : return JerkTag;
-    case nemo_io::dens   : return DensityTag;
-    case nemo_io::aux    : return AuxTag;
-    case nemo_io::zet    : return AuxVecTag;
-    case nemo_io::lev    : return LevelTag;
-    case nemo_io::num    : return NumberTag;
-    case nemo_io::phden  : return PhaseSpaceDensityTag;
-    case nemo_io::torb   : return OrbitalPeriodTag;
-    case nemo_io::posvel : return PhaseSpaceTag;
-    case nemo_io::Size   : return SmoothTag;
-    case nemo_io::Gasnum : return SPHNumberTag;
-    case nemo_io::Uin    : return UinternTag;
-    case nemo_io::Uindot : return UdotIntTag;
-    case nemo_io::Uinrad : return UdotRadTag;
-    case nemo_io::Entr   : return EntFuncTag;
-    case nemo_io::Gasdens: return GasDensTag;
-    case nemo_io::Sizedot: return GasHdotTag;
-    case nemo_io::Sphfact: return GasFactTag;
-    case nemo_io::Csound : return SoundSpeedTag;
-    case nemo_io::AlphaAV: return ArtViscTag;
-    case nemo_io::DivV   : return GasDivVTag;
-    case nemo_io::MolWght: return MolWeightTag;
-    case nemo_io::Spin   : return SpinTag;
-    case nemo_io::null:
+    case falcON::nemo_io::mass   : return MassTag;
+    case falcON::nemo_io::pos    : return PosTag;
+    case falcON::nemo_io::vel    : return VelTag;
+    case falcON::nemo_io::eps    : return EpsTag;
+    case falcON::nemo_io::key    : return KeyTag;
+    case falcON::nemo_io::step   : return TimeStepTag;
+    case falcON::nemo_io::pot    : return PotentialTag;
+    case falcON::nemo_io::acc    : return AccelerationTag;
+    case falcON::nemo_io::jerk   : return JerkTag;
+    case falcON::nemo_io::dens   : return DensityTag;
+    case falcON::nemo_io::aux    : return AuxTag;
+    case falcON::nemo_io::zet    : return AuxVecTag;
+    case falcON::nemo_io::lev    : return LevelTag;
+    case falcON::nemo_io::num    : return NumberTag;
+    case falcON::nemo_io::phden  : return PhaseSpaceDensityTag;
+    case falcON::nemo_io::torb   : return OrbitalPeriodTag;
+    case falcON::nemo_io::posvel : return PhaseSpaceTag;
+    case falcON::nemo_io::Size   : return SmoothTag;
+    case falcON::nemo_io::Gasnum : return SPHNumberTag;
+    case falcON::nemo_io::Uin    : return UinternTag;
+    case falcON::nemo_io::Uindot : return UdotIntTag;
+    case falcON::nemo_io::Uinrad : return UdotRadTag;
+    case falcON::nemo_io::Entr   : return EntFuncTag;
+    case falcON::nemo_io::Gasdens: return GasDensTag;
+    case falcON::nemo_io::Sizedot: return GasHdotTag;
+    case falcON::nemo_io::Sphfact: return GasFactTag;
+    case falcON::nemo_io::Csound : return SoundSpeedTag;
+    case falcON::nemo_io::AlphaAV: return ArtViscTag;
+    case falcON::nemo_io::DivV   : return GasDivVTag;
+    case falcON::nemo_io::MolWght: return MolWeightTag;
+    case falcON::nemo_io::Spin   : return SpinTag;
+    case falcON::nemo_io::null:
       falcON_THROW("nemo I/O: nemo_io::null not I/O able");
     default:
       falcON_THROW("nemo I/O: unknown nemo_io::Field");
     }
   }
-  inline nemo_io::DataType Type(const char* NemoType)
+  inline falcON::nemo_io::DataType Type(const char* NemoType)
   {
-    if(0 == std::strcmp(NemoType, ByteType  ) ) return nemo_io::Byte;
-    if(0 == std::strcmp(NemoType, ShortType ) ) return nemo_io::Short;
-    if(0 == std::strcmp(NemoType, IntType   ) ) return nemo_io::Integer;
-    if(0 == std::strcmp(NemoType, LongType  ) ) return nemo_io::Long;
-    if(0 == std::strcmp(NemoType, FloatType ) ) return nemo_io::Single;
-    if(0 == std::strcmp(NemoType, DoubleType) ) return nemo_io::Double;
-    return nemo_io::Null;
+    if(0==std::strcmp(NemoType, ByteType  ) ) return falcON::nemo_io::Byte;
+    if(0==std::strcmp(NemoType, ShortType ) ) return falcON::nemo_io::Short;
+    if(0==std::strcmp(NemoType, IntType   ) ) return falcON::nemo_io::Integer;
+    if(0==std::strcmp(NemoType, LongType  ) ) return falcON::nemo_io::Long;
+    if(0==std::strcmp(NemoType, FloatType ) ) return falcON::nemo_io::Single;
+    if(0==std::strcmp(NemoType, DoubleType) ) return falcON::nemo_io::Double;
+    return falcON::nemo_io::Null;
   }
-  inline const char* NemoType(nemo_io::DataType t)
+  inline const char* NemoType(falcON::nemo_io::DataType t)
   {
     switch(t) {
-    case nemo_io::Byte   : return ByteType;
-    case nemo_io::Short  : return ShortType;
-    case nemo_io::Integer: return IntType;
-    case nemo_io::Long   : return LongType;
-    case nemo_io::Single : return FloatType;
-    case nemo_io::Double : return DoubleType;
+    case falcON::nemo_io::Byte   : return ByteType;
+    case falcON::nemo_io::Short  : return ShortType;
+    case falcON::nemo_io::Integer: return IntType;
+    case falcON::nemo_io::Long   : return LongType;
+    case falcON::nemo_io::Single : return FloatType;
+    case falcON::nemo_io::Double : return DoubleType;
     default              : return AnyType;
     }
   }
-  inline bool is_scalar(nemo_io::Field f) {
+  inline bool is_scalar(falcON::nemo_io::Field f) {
     switch(f) {
-    case nemo_io::mass:
-    case nemo_io::eps:
-    case nemo_io::key:
-    case nemo_io::step:
-    case nemo_io::pot:
-    case nemo_io::dens:
-    case nemo_io::aux:
-    case nemo_io::lev:
-    case nemo_io::num:
-    case nemo_io::phden:
-    case nemo_io::torb:
-    case nemo_io::Size:
-    case nemo_io::Gasnum:
-    case nemo_io::Uin:
-    case nemo_io::Uindot:
-    case nemo_io::Uinrad:
-    case nemo_io::Entr:
-    case nemo_io::Gasdens:
-    case nemo_io::Sizedot:
-    case nemo_io::Sphfact:
-    case nemo_io::Csound:  
-    case nemo_io::AlphaAV:  
-    case nemo_io::DivV:  
-    case nemo_io::MolWght: return true;
-    default:               return false;
+    case falcON::nemo_io::mass:
+    case falcON::nemo_io::eps:
+    case falcON::nemo_io::key:
+    case falcON::nemo_io::step:
+    case falcON::nemo_io::pot:
+    case falcON::nemo_io::dens:
+    case falcON::nemo_io::aux:
+    case falcON::nemo_io::lev:
+    case falcON::nemo_io::num:
+    case falcON::nemo_io::phden:
+    case falcON::nemo_io::torb:
+    case falcON::nemo_io::Size:
+    case falcON::nemo_io::Gasnum:
+    case falcON::nemo_io::Uin:
+    case falcON::nemo_io::Uindot:
+    case falcON::nemo_io::Uinrad:
+    case falcON::nemo_io::Entr:
+    case falcON::nemo_io::Gasdens:
+    case falcON::nemo_io::Sizedot:
+    case falcON::nemo_io::Sphfact:
+    case falcON::nemo_io::Csound:  
+    case falcON::nemo_io::AlphaAV:  
+    case falcON::nemo_io::DivV:  
+    case falcON::nemo_io::MolWght: return true;
+    default:                       return false;
     }
   }
-  inline bool is_vector(nemo_io::Field f) {
+  inline bool is_vector(falcON::nemo_io::Field f) {
     switch(f) {
-    case nemo_io::pos:
-    case nemo_io::vel:
-    case nemo_io::acc:
-    case nemo_io::zet:
-    case nemo_io::jerk: 
-    case nemo_io::Spin: return true;
-    default:            return false;
+    case falcON::nemo_io::pos:
+    case falcON::nemo_io::vel:
+    case falcON::nemo_io::acc:
+    case falcON::nemo_io::zet:
+    case falcON::nemo_io::jerk: 
+    case falcON::nemo_io::Spin: return true;
+    default:                    return false;
     }
   }
-  inline bool is_phases(nemo_io::Field f) {
-    return f == nemo_io::posvel;
+  inline bool is_phases(falcON::nemo_io::Field f) {
+    return f == falcON::nemo_io::posvel;
   }
 } // namespace {
 //------------------------------------------------------------------------------
@@ -429,12 +442,11 @@ namespace Aux {
     ::get_data_tes(file,const_cast<char*>(tag));
   }
 }
-using namespace falcON;
 using namespace Aux;
 //------------------------------------------------------------------------------
 // class falcON::nemo_io                                                      //
 //------------------------------------------------------------------------------
-nemo_io&nemo_io::open(const char* file, const char* control)
+falcON::nemo_io& falcON::nemo_io::open(const char* file, const char* control)
 {
   close();
   STREAM = stropen(file,control);
@@ -446,7 +458,7 @@ nemo_io&nemo_io::open(const char* file, const char* control)
     put_history(STREAM);
   return *this;
 }
-void nemo_io::close()
+void falcON::nemo_io::close()
 {
   if(STREAM) ::strclose(STREAM);
   STREAM = 0;
@@ -454,7 +466,7 @@ void nemo_io::close()
 //------------------------------------------------------------------------------
 // class falcON::nemo_in                                                      //
 //------------------------------------------------------------------------------
-void nemo_in::close() falcON_THROWING
+void falcON::nemo_in::close() falcON_THROWING
 {
   if(STREAM == 0) return;
   if(SNAP_IN) {
@@ -469,7 +481,7 @@ void nemo_in::close() falcON_THROWING
   DebugInfo(4,"nemo_in: closed stream\n");
   report::info("nemo_in: closed stream\n");
 }
-nemo_in& nemo_in::open(const char* file) falcON_THROWING
+falcON::nemo_in& falcON::nemo_in::open(const char* file) falcON_THROWING
 {
   close();
   if(file == 0 || file[0] == 0) return *this;
@@ -477,11 +489,12 @@ nemo_in& nemo_in::open(const char* file) falcON_THROWING
   if(IS_PIPE) input::open_std();
   SNAP_IN = 0;
   nemo_io::open(file,"r");
-  DebugInfo(4,"nemo_in: opened file '%s'\n",file);
+//   DebugInfo(4,"nemo_in: opened file '%s'\n",file);
+  DebugInfo(4,"nemo_in: opened file '%d'\n",file);
   report::info("nemo_in: opened file '%s'\n",file);
   return *this;
 }
-nemo_in::nemo_in(const char* file, const char* mode)
+falcON::nemo_in::nemo_in(const char* file, const char* mode)
   : IS_PIPE(0), SNAP_IN(0)
 {
   if(file == 0 || file[0] == 0) return;
@@ -491,7 +504,7 @@ nemo_in::nemo_in(const char* file, const char* mode)
   DebugInfo(4,"nemo_in constructed\n");
   report::info("nemo_in constructed\n");
 }
-nemo_in::~nemo_in() falcON_THROWING
+falcON::nemo_in::~nemo_in() falcON_THROWING
 {
   if(IS_PIPE) input::close_std();
   if(SNAP_IN) {
@@ -501,14 +514,14 @@ nemo_in::~nemo_in() falcON_THROWING
   DebugInfo(4,"nemo_in destructed\n");
   report::info("nemo_in destructed\n");
 }
-bool nemo_in::has_snapshot() const
+bool falcON::nemo_in::has_snapshot() const
 {
   return STREAM && get_tag_ok(STREAM,SnapShotTag);
 }
 //------------------------------------------------------------------------------
 // class falcON::snap_in
 //------------------------------------------------------------------------------
-snap_in::snap_in(nemo_in const&in) falcON_THROWING : 
+falcON::snap_in::snap_in(nemo_in const&in) falcON_THROWING : 
   INPUT(in), DATA_IN(0), FIELDS_READ(0), HAS_TIME(0), NTOT(0u), TIME(0.)
 {
   DebugInfo(4,"snap_in::snap_in() ...\n");
@@ -585,7 +598,7 @@ snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   DebugInfo(5,"  snap_in::snap_in(): particles set opened\n");
   report::info("snap_in: opened for N[]=%d,%d,%d\n",NBOD[0],NBOD[1],NBOD[2]);
 }
-snap_in::~snap_in() falcON_THROWING
+falcON::snap_in::~snap_in() falcON_THROWING
 {
   if(DATA_IN) {
     DebugInfo(4,"snap_in::~snap_in(): closing open data_in first\n");
@@ -600,7 +613,7 @@ snap_in::~snap_in() falcON_THROWING
   DebugInfo(4,"snap_in: closed\n");
   report::info("snap_in: closed\n");
 }
-bool snap_in::has(nemo_io::Field f) const
+bool falcON::snap_in::has(nemo_io::Field f) const
 {
   return 
     !has_been_read(f) &&
@@ -609,7 +622,7 @@ bool snap_in::has(nemo_io::Field f) const
 //------------------------------------------------------------------------------
 // class falcON::data_in
 //------------------------------------------------------------------------------
-data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
+falcON::data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
   FIELD(f), INPUT(snap), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)
 {
   DebugInfo(5,"data_in::data_in(%s) ...\n",NemoTag(FIELD));
@@ -669,14 +682,14 @@ data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
   }
   INPUT.DATA_IN = this;
 }
-data_in::~data_in()
+falcON::data_in::~data_in()
 {
   get_data_tes(INPUT.stream(),NemoTag(FIELD));
   INPUT.DATA_IN      = 0;
   INPUT.FIELDS_READ |= FIELD;
   DebugInfo(5,"data_in(%s) closed\n",NemoTag(FIELD));
 }
-void data_in::read(void*data, unsigned n)
+void falcON::data_in::read(void*data, unsigned n)
 {
   if(NREAD + n > NTOT) {
     falcON_Warning("nemo input of %s: cannot read %d, only %d data left",
@@ -689,7 +702,7 @@ void data_in::read(void*data, unsigned n)
     NREAD += n;
   }
 }
-void data_in::read(void*data)
+void falcON::data_in::read(void*data)
 {
   if(NREAD < NTOT) {
     unsigned n = NTOT - NREAD;
@@ -701,7 +714,7 @@ void data_in::read(void*data)
 //------------------------------------------------------------------------------
 // class falcON::nemo_out
 //------------------------------------------------------------------------------
-void nemo_out::close() falcON_THROWING
+void falcON::nemo_out::close() falcON_THROWING
 {
   if(STREAM == 0) return;
   if(SNAP_OUT) {
@@ -717,7 +730,8 @@ void nemo_out::close() falcON_THROWING
   DebugInfo(4,"nemo_out: closed stream\n");
   report::info("nemo_out: closed stream\n");
 }
-nemo_out& nemo_out::open(const char* file, bool appending) falcON_THROWING
+falcON::nemo_out& falcON::nemo_out::open(const char* file, bool appending)
+falcON_THROWING
 {
   close();
   if(file == 0 || file[0] == 0) return *this;
@@ -762,9 +776,8 @@ nemo_out& nemo_out::open(const char* file, bool appending) falcON_THROWING
 //------------------------------------------------------------------------------
 // class falcON::snap_out
 //------------------------------------------------------------------------------
-snap_out::snap_out(nemo_out const&out,
-		   const unsigned nbod[BT_NUM],
-		   double         time) falcON_THROWING :
+falcON::snap_out::snap_out(nemo_out const&out, const unsigned nbod[BT_NUM],
+			   double time) falcON_THROWING :
   OUTPUT(out), DATA_OUT(0), FIELDS_WRITTEN(0), NTOT(0u)
 {
   DebugInfo(4,"snap_out::snap_out() ...\n");
@@ -793,7 +806,7 @@ snap_out::snap_out(nemo_out const&out,
   report::info("snap_out: opened for N[]=%d,%d,%d t=%g\n",
 	       NBOD[0],NBOD[1],NBOD[2],time);
 }
-snap_out::~snap_out() falcON_THROWING
+falcON::snap_out::~snap_out() falcON_THROWING
 {
   if(DATA_OUT) {
     DebugInfo(4,"snap_out::~snap_out(): closing open data_out first\n");
@@ -810,10 +823,11 @@ snap_out::~snap_out() falcON_THROWING
 //------------------------------------------------------------------------------
 // class falcON::data_out
 //------------------------------------------------------------------------------
-data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
-  : FIELD(f), OUTPUT(snap), NWRITTEN(0),
-    NTOT(OUTPUT.N(FIELD)), TYPE(nemo_io::type(FIELD)),
-    SUBN(::is_scalar(FIELD)? 1: ::is_vector(FIELD)? NDIM : 2*NDIM)
+falcON::data_out::data_out(snap_out const&snap, nemo_io::Field f)
+falcON_THROWING
+: FIELD(f), OUTPUT(snap), NWRITTEN(0),
+  NTOT(OUTPUT.N(FIELD)), TYPE(nemo_io::type(FIELD)),
+  SUBN(::is_scalar(FIELD)? 1: ::is_vector(FIELD)? NDIM : 2*NDIM)
 {
   DebugInfo(5,"data_out::data_out(%s) ...\n",NemoTag(FIELD));
   if( OUTPUT.DATA_OUT )
@@ -837,7 +851,7 @@ data_out::data_out(snap_out const&snap, nemo_io::Field f) falcON_THROWING
   report::info("data_out: opened for %d '%s'\n",
 	       NTOT,NemoTag(FIELD));
 }
-data_out::~data_out()
+falcON::data_out::~data_out()
 {
   if(NWRITTEN != NTOT)
     falcON_Warning("nemo output of %s: assigned %d, written only %d bodies\n",
@@ -848,7 +862,7 @@ data_out::~data_out()
   DebugInfo(5,"data_out(%s) closed\n",NemoTag(FIELD));
   report::info("data_out: closed output of '%s'\n",NemoTag(FIELD));
 }
-void data_out::write(const void*data, unsigned n)
+void falcON::data_out::write(const void*data, unsigned n)
 {
   if(NWRITTEN + n > NTOT) {
     falcON_Warning("nemo output of %s: "
@@ -860,7 +874,7 @@ void data_out::write(const void*data, unsigned n)
   DebugInfo(6,"  %d %s written\n",n,NemoTag(FIELD));
   NWRITTEN += n;
 }
-void data_out::write(const void*data)
+void falcON::data_out::write(const void*data)
 {
   if(NWRITTEN < NTOT) {
     unsigned n = NTOT - NWRITTEN;

@@ -129,12 +129,20 @@ namespace WDutils {
     /// print info message to stderr, report [file:line] if known.
     /// \param[in] fmt debug info message (C-type format string)
     /// \param[in] ... data to be formated
-    void operator() (const char*fmt, ...) const;
+    void operator() (const char*fmt, ...) const
+#ifdef __GNUC__
+      __attribute__ ((format (printf, 2, 3)))
+#endif
+      ;
     /// print info message to stderr, report [file:line] if known.
     /// \param[in] lev level: only report if less than debug_level()
     /// \param[in] fmt debug info message (C-type format string)
     /// \param[in] ... data to be formated
-    void operator() (int lev, const char*fmt, ...) const;
+    void operator() (int lev, const char*fmt, ...) const
+#ifdef __GNUC__
+      __attribute__ ((format (printf, 3, 4)))
+#endif
+      ;
   };
   /// print debug info to stderr and report [file:line]).
   /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax:

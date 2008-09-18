@@ -144,7 +144,6 @@ namespace {
       localsymbols();
       first = false;
     }
-
     // 3. try to find manname in list of mannames already done
     for(int i=0; i!=IniMnInd; ++i)
       if(0 == strcmp(manname, MnNames[i])) {

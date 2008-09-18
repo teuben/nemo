@@ -46,6 +46,7 @@
 namespace falcON { namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
   const char*Line ="----------------------------------------";
+    //              1234567890123456789012345678901234567890
   //////////////////////////////////////////////////////////////////////////////
   class PrintSmall {
     int N,P;
@@ -76,7 +77,7 @@ namespace falcON { namespace Manipulate {
     }
     const char*line_pos() const { return Line+(39-N); }
     const char*line    () const { return Line+(38-N); }
-    const char*line_dir() const { return Line+(38-3*(N+2)); }
+    const char*line_dir() const { return Line+(39-4*(N+1)); }
   };
   //////////////////////////////////////////////////////////////////////////////
   const int    W_default = 500;
@@ -164,11 +165,10 @@ namespace falcON { namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
   inline void sphereprof::print_line(bool vels) const
   {
-    OUT  <<"#-------------------------------------";
+    OUT  <<"#--------------------";
     if(vels)
-      OUT<<"--------------------------"
-	 <<"---------------------------------------";
-    OUT  <<"----------------------------" << PS.line_dir() << PS.line_dir();
+      OUT<<"------------------------------------------------------------------";
+    OUT  <<"--------------------" << PS.line_dir() << "--" << PS.line_dir();
     if(vels)
       OUT<< "--" << PS.line_dir();
     OUT  <<'\n';
@@ -226,7 +226,7 @@ namespace falcON { namespace Manipulate {
 	   << print(SP.sigt(i),10,4) << ' '
 	   << print(SP.sigp(i),10,4) << ' ';
       OUT  << print(SP.cova(i), 8,3) << ' '
-	   << print(SP.bova(i), 8,3) << ' ';
+	   << print(SP.bova(i), 8,3) << "  ";
       PS.print_dir(OUT, SP.major_axis(i)) << "  ";
       PS.print_dir(OUT, SP.minor_axis(i));
       if(SP.has_vels()) {
