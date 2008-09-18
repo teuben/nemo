@@ -37,6 +37,7 @@
  *      25-apr-04         b fool optimizing compilers                           PJT
  *      20-may-04         c add sqr() for dummy linker
  *      14-jul-05         d made dummy functions global, for new (FC4) linker 
+ *      18-sep-08         e make 'r' == SINGLEPREC? 'f' : 'd'              WD
  *       
  *------------------------------------------------------------------------------
  */
@@ -181,13 +182,15 @@ local proc load_potential(string fname, string parameters, string dataname, char
 	loadobj (name);
     }
 
-    dprintf (1,"[%c potential loaded from object file %s]\n",type,fullname);
-
     /*
      * changed code 17/05/02 WD
+     * debugged     18/09/08 WD
      *
      * after finding the .so file, we still need to find the proper 
      * routine to link with. This is controlled by the type.
+     * if type = 'r',  behaviour depends on the macro SINGLEPREC:
+     *                 If defined, we behave as for type='f', otherwise
+     *                 as for type='d'.
      * if type = 'r',  we look for "potential" and restore to 
      *                 "potential_double" if no "potential" found
      * if type = 'd',  we first look for "potential_double" and
@@ -196,30 +199,36 @@ local proc load_potential(string fname, string parameters, string dataname, char
      *
      * macro FIND(POTENTIAL) tries to find routine POTENTIAL          WD
      */
-#define FIND(POTENTIAL)								 \
-    strcpy(pname,POTENTIAL);                 /*   try potential           */	 \
-    mapsys(pname);								 \
-    pot = (proc) findfn (pname);             /*   try C-routine           */	 \
-    if (pot==NULL) {                         /*   IF not found          > */	 \
-      strcat(pname,"_");							 \
-      pot = (proc) findfn (pname);           /*     try F77-routine       */	 \
-      if (pot)                               /*     found!                */	 \
-	Qfortran = TRUE;	 	     /*       must be F77 then    */	 \
-    }                                        /*   <                       */
+#define FIND(POTENTIAL) {							\
+  strcpy(pname,POTENTIAL);                 /*   try potential           */	\
+  mapsys(pname);								\
+  pot = (proc) findfn (pname);             /*   try C-routine           */ 	\
+  if (pot==NULL) {                         /*   IF not found          > */ 	\
+    strcat(pname,"_");								\
+    pot = (proc) findfn (pname);           /*     try F77-routine       */	\
+    if (pot)                               /*     found!                */ 	\
+      Qfortran = TRUE;	 	     /*       must be F77 then    */ 		\
+  }                                        /*   <                       */ 	\
+  if(pot) dprintf(1,"\"%s\" loaded from file \"%s\"\n",POTENTIAL,fullname);	\
+}
 
-    if        (type=='r') {                  /* IF type==r,             > */
-      FIND("potential")                      /*   try "potential"         */
+    char search_type = type=='r'?
+#ifdef SINGLEPREC
+      'f'
+#else
+      'd'
+#endif
+      : type;
+
+    if(search_type=='f') {                   /* > ELSE, type=r          > */
+      FIND("potential_float");               /*   try "potential_float"   */
+    } else if(search_type=='d') {            /* > ELSE, type=d          > */
+      FIND("potential_double");              /*   try "potential_double"  */
       if( pot==NULL) {                       /*   IF not found          > */
-	FIND("potential_double")             /*   try "potential_double"  */
+	FIND("potential");                   /*   try "potential"         */
       }
-    } else if(type=='d') {                   /* > ELSE, type=d          > */
-      FIND("potential_double")               /*   try "potential_double"  */
-      if( pot==NULL) {                       /*   IF not found          > */
-	FIND("potential")                    /*   try "potential"         */
-      }
-    } else if(type=='f') {                   /* > ELSE, type=r          > */
-      FIND("potential_float")                /*   try "potential_float"   */
-    }
+    } else
+      error("unknown data type '%c'\n",type);
 #undef FIND
     /* it is perhaps possible that some fortran compilers will add __ for */
     /* routines that have embedded _ in their name.... we're not catching */
