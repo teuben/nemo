@@ -16,30 +16,14 @@
 //                                                                              
 // PowerPC IBM/Sparc/SGI are big-endian compliant                              
 // ============================================================================
-// 08-Nov-2006 : v 1.0 (JCL)
-//               - added into NEMO cvs
-// 19-Nov-2006 : v 1.2 (JCL)
-//               - some debugging info removed
+// 08-Nov-2006 : v 1.0 (JCL) - added into NEMO cvs
+// 19-Nov-2006 : v 1.2 (JCL) - some debugging info removed
+// 18-Sep-2008 : v 1.3 (WD)  - debugged; moved ctor & dtor to header file
 // ============================================================================
 
 #include <iostream>
+#include <cstdlib>           // added (for std::exit()) 18-Sep-2008 (WD)
 #include "gadget_endian_tools.h"
-
-
-// -----------------------------------------------------------------------------
-// Constructor
-GadgetEndianTools::GadgetEndianTools(const FILE * _fd,const  bool _swap)
-{
-  // get input paramters
-  fd   = _fd;
-  swap = _swap;
-}
-
-// -----------------------------------------------------------------------------
-// Destructor
-GadgetEndianTools::~GadgetEndianTools()
-{
-}
 
 // -----------------------------------------------------------------------------
 // swapBytes

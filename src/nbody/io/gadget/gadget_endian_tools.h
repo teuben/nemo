@@ -19,28 +19,29 @@
 #ifndef GADGET_ENDIAN_TOOLS_H
 #define GADGET_ENDIAN_TOOLS_H
 
-#include <stdio.h>
-
+#include <cstdio>          // changed from <stdio.h>  18-Sep-2008 (WD)
 #include "gadget_data_structure.h"
 
 class GadgetEndianTools {
- public:
-  enum ioop { READ,WRITE };
+public:
+  enum ioop {
+    READ,WRITE
+  };
 
   //constructor
-  GadgetEndianTools(const FILE * _fd,const  bool _swap);
+  GadgetEndianTools(const FILE*_fd, bool _swap) : swap(_swap), fd(_fd) {}
   //destructor
-  ~GadgetEndianTools();
+  ~GadgetEndianTools() {}
 
-  int ioHeader(t_io_header_1 * header,const ioop op);
-  int ioData(char * ptr,int size_bytes, int items,const ioop op);
+  int ioHeader(t_io_header_1 * header, ioop op);
+  int ioData(char * ptr,int size_bytes, int items, ioop op);
 
  private:
   bool swap;                // control swapping variable
   const FILE * fd;          // file descriptor
-
+  
   void swapBytes(void * x,const int size);
-
+  
 };
 #endif
 // -----------------------------------------------------------------------------

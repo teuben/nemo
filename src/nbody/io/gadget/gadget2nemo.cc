@@ -10,14 +10,17 @@
 // gadget2nemo.cc
 // gadget2nemo is a program to convert GADGET file to NEMO snapshot.
 // ============================================================================
-// 08-Nov-2006 : v 2.0 (JCL)
-//               - added into NEMO cvs
+// 08-Nov-2006 : v 2.0 (JCL) - added into NEMO cvs
+// 18-Sep-2008 : v 2.1 (WD)  - debugged --- (almost) happy gcc 4.3.1
+// ============================================================================
+//    NOTE: gcc 4.3.1 warns about conversion from string constant to char* 
+//          -- this is s NEMO problem to be addressedd elsewhere.
 // ============================================================================
 
 #include <iostream>                                   // C++ I/O
 #include <fstream>                                    // C++ file I/O
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <snapshot/snapshot.h>
 #include <assert.h>
 
@@ -105,7 +108,7 @@ int load_snapshot(char *fname, int files)
     if(!(fd=fopen(buf,"r"))) {
 	
       fprintf(stderr,"can't open file `%s`\n",buf);
-      exit(0);
+      std::exit(0);
     }
     GadgetEndianTools * iog = new GadgetEndianTools(fd,endian_swap);
 
@@ -271,7 +274,7 @@ int allocate_memory()
   if(!(P=(t_particle_data *) malloc(ntotstep*sizeof(t_particle_data))))
     {
       fprintf(stderr,"failed to allocate memory.\n");
-      exit(0);
+      std::exit(0);
     }
   
   P--;   /* start with offset 1 */
@@ -280,7 +283,7 @@ int allocate_memory()
   if(!(Id=(int *) malloc(ntotstep*sizeof(int))))
     {
       fprintf(stderr,"failed to allocate memory.\n");
-      exit(0);
+      std::exit(0);
     }
   
   Id--;   /* start with offset 1 */
@@ -388,7 +391,7 @@ int fill_io_nemo()
       pos  = (float * ) malloc(sizeof(float) * nbody * 3);
       if ( ! pos ) {
 	fprintf(stderr,"Unable to allocate memory...\n");
-	exit(1);
+	std::exit(1);
       }
     }
     if (strchr(comp,'v')) {
@@ -396,7 +399,7 @@ int fill_io_nemo()
       vel  = (float * ) malloc(sizeof(float) * nbody * 3);
       if ( ! vel ) {
 	fprintf(stderr,"Unable to allocate memory...\n");
-	exit(1);
+	std::exit(1);
       }
     }
 
@@ -405,7 +408,7 @@ int fill_io_nemo()
       mass = (float * ) malloc(sizeof(float) * nbody);
       if ( ! mass ) {
 	fprintf(stderr,"Unable to allocate memory...\n");
-	exit(1);
+	std::exit(1);
       }
     }
   }
