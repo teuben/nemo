@@ -69,7 +69,7 @@ local proc load_potential(string, string, string, char); /* load by name    */
  *                the calculation of potential and accelerations.
  *-----------------------------------------------------------------------------
  */
-proc  get_potential(string potname, string potpars, string potfile)
+potproc_real get_potential(string potname, string potpars, string potfile)
 {
     if (potname == NULL || *potname == 0)	/* if no name provided */
         return NULL;				/* return no potential */
