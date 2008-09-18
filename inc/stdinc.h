@@ -43,6 +43,7 @@
  * 12-jun-08    nemo_dprintf  is macro, reports [file:line]         WD
  * 12-jun-08    allocate, reallocate are macros (not under C++)     WD
  * 16-sep-08    removes nemo_exit (better use stdlib's atexit)      WD
+ * 18-sep-08    replaced sqr, qbe, dex inline in mathfns.h          WD
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -562,10 +563,13 @@ extern bool scanopt(string, string);
 /* core/cputime.c */
 extern double cputime(void);
 
-  /* misc/sqr.c */
+/*
+ * replaced by inline functions in mathfns.h
+ // misc/sqr.c
 extern double sqr(double);
 extern double qbe(double);
 extern double dex(double);
+*/
 
   /* misc/pow.c */
 extern double powi(double,int);
