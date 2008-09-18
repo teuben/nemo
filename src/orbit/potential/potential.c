@@ -191,8 +191,6 @@ local proc load_potential(string fname, string parameters, string dataname, char
      * if type = 'r',  behaviour depends on the macro SINGLEPREC:
      *                 If defined, we behave as for type='f', otherwise
      *                 as for type='d'.
-     * if type = 'r',  we look for "potential" and restore to 
-     *                 "potential_double" if no "potential" found
      * if type = 'd',  we first look for "potential_double" and
      *                 restore to "potential" if no "potential_double" found
      * if type = 'f',  we only look for "potential_float"
