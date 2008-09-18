@@ -218,12 +218,12 @@ local proc load_potential(string fname, string parameters, string dataname, char
 #endif
       : type;
 
-    if(search_type=='f') {                   /* > ELSE, type=r          > */
+    if(search_type=='f') {                   /* IF type=f                 */
       FIND("potential_float");               /*   try "potential_float"   */
-    } else if(search_type=='d') {            /* > ELSE, type=d          > */
+    } else if(search_type=='d') {            /* ELIF type=d               */
       FIND("potential_double");              /*   try "potential_double"  */
-      if( pot==NULL) {                       /*   IF not found          > */
-	FIND("potential");                   /*   try "potential"         */
+      if( pot==NULL) {                       /*   IF not found            */
+	FIND("potential");                   /*     try "potential"       */
       }
     } else
       error("unknown data type '%c'\n",type);
@@ -234,7 +234,7 @@ local proc load_potential(string fname, string parameters, string dataname, char
     /* e.g.  g77 options:  -fno-underscoring and -fno-second-underscore   */
     /* will fix this problem                                              */
     if (pot==NULL) {
-      error("Could not find a suitable potential type %c in %s",type,fname);
+      error("Couldn't find a suitable potential for type %c in %s",type,fname);
       return NULL;
     }
 
