@@ -43,7 +43,7 @@ void nemo_main(void)
   string times;
   Body *btab = NULL, *bp;
   int nbody, bits;
-  potproc_double  pot;
+  potproc_real pot;
   real ome,ome2,half_ome2,two_ome;
 
   vector lacc,lpos;
