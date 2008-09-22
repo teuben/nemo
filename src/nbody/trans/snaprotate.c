@@ -17,6 +17,7 @@
  *      18-nov-05    5.1  added option to select which vectors to rot   pjt
  *                        for Rachel's trials
  *      19-nov-05    5.1a fixed for missing  Acc , use body.h           pjt
+ *      22-sep-08    6.0  rotate around an arbitrary vector
  */
 
 #include <stdinc.h>
@@ -35,8 +36,9 @@ string defv[] = {
     "order=\n              Order to do rotations (zyz=eulerian)",
     "invert=false\n        Invert transformation?",
     "tscale=\n             If used, scalefactor for angles with time of snapshot",
+    "spinvector=\n         Alternate way to specify order= for one given theta",
     "select=pos,vel,acc\n  Select the vectors for rotation",
-    "VERSION=5.1a\n        19-nov-05 PJT",
+    "VERSION=6.0\n         19-sep-08 PJT",
     NULL,
 };
 
@@ -55,6 +57,8 @@ void xrotate(Body *btab, int nbody, real theta, int vecmask);
 void yrotate(Body *btab, int nbody, real theta, int vecmask);
 void zrotate(Body *btab, int nbody, real theta, int vecmask);
 void rotatevec(vector vec, matrix mat);
+void vrotate(real *sv, real angle, Body *btab, int nbody, int vecmask);
+void ArbitraryRotate(real *p,real theta,real *r);
 
 nemo_main()
 {
@@ -63,10 +67,11 @@ nemo_main()
     Body *btab = NULL;
     int i, nop, nopt, nbody, bits;
     real tsnap, tscale, *ang, theta[MAXANG];
+    real spinvector[NDIM], slen;
     bool   invert, need_hist = TRUE;
     bool   Qtscale = hasvalue("tscale");
     string rotvects = getparam("select");
-    bool Qpos, Qvel, Qacc;
+    bool Qpos, Qvel, Qacc, Qspinvector = FALSE;
     int vecmask = 0;
     
     if (strstr(rotvects,"pos")) vecmask |= PosBit;
@@ -81,10 +86,20 @@ nemo_main()
         error("Parsing theta=%s returns %d",getparam("theta"),nopt);
     order = getparam("order");
     nop = strlen(order);        /* number of rotations to be applied */
-    if (nop<=0) error("No order= specified");
+    if (nopt==1 && nop==0) {    /* rotate around a vector */
+      if (NDIM != 3) error("NDIM=%d not supported",NDIM);
+      nop = nemoinpr(getparam("spinvector"),spinvector,NDIM);
+      if (nop != 3) error("spinvector needs exactly %d elements, found %d",NDIM,nop);
+      for (i=0, slen=0; i<NDIM; i++)       /* get length of spinvector */
+	slen += sqr(spinvector[i]);
+      slen = sqrt(slen);
+      for (i=0; i<NDIM; i++)               /* in order to make it a unit vector */
+	spinvector[i] /= slen;
+      nop = 1;
+      Qspinvector = TRUE;
+    } else if (nop<=0) error("No order= specified");
     if (nop>MAXANG) {
-        warning("Too many rotations specified in order=, only %d processed",
-                                MAXANG);
+        warning("Too many rotations specified in order=, only %d processed",MAXANG);
         nop=MAXANG;
     }
     if (nopt>nop)
@@ -98,31 +113,35 @@ nemo_main()
 
     get_history(instr);
     while (get_tag_ok(instr, SnapShotTag)) {
-	get_snap(instr, &btab, &nbody, &tsnap, &bits);
-        if (bits & PhaseSpaceBit || bits & AccelerationBit) {
-            dprintf(1,"Processing time %g bits=0x%x\n",tsnap,bits);
-	    if (! invert) {
-            	op = order;         /* reset order pointer */
-            	ang = theta;        /* reset angle pointer */
-                for (i=0; i<nop; i++) {
-                    dprintf(2,"Rotating %g around %c\n",*ang,*op);
-                    rotate(*op++, *ang++, btab, nbody, Qtscale, tscale*tsnap, vecmask);  /* VALGRIND error */
-                }
-	    } else {
-                op = &order[nop-1];	/* reset: start at end */
-                ang = &theta[nop-1];
-                for (i=0; i<nop; i++) {
-                    dprintf(2,"Rotating %g around %c\n",-*ang,*op);
-		    rotate(*op--, -1.0*(*ang--), btab, nbody, Qtscale, tscale*tsnap, vecmask);
-                }
+      get_snap(instr, &btab, &nbody, &tsnap, &bits);
+      if (bits & PhaseSpaceBit || bits & AccelerationBit) {
+	dprintf(1,"Processing time %g bits=0x%x\n",tsnap,bits);
+	if (Qspinvector) {
+	  vrotate(spinvector,theta[0],btab,nbody,vecmask);
+	} else {
+	  if (! invert) {
+	    op = order;         /* reset order pointer */
+	    ang = theta;        /* reset angle pointer */
+	    for (i=0; i<nop; i++) {
+	      dprintf(2,"Rotating %g around %c\n",*ang,*op);
+	      rotate(*op++, *ang++, btab, nbody, Qtscale, tscale*tsnap, vecmask);  /* VALGRIND error */
 	    }
-	    if (need_hist) {
-	        put_history(outstr);
-	        need_hist = FALSE;
+	  } else {
+	    op = &order[nop-1];	/* reset: start at end */
+	    ang = &theta[nop-1];
+	    for (i=0; i<nop; i++) {
+	      dprintf(2,"Rotating %g around %c\n",-*ang,*op);
+	      rotate(*op--, -1.0*(*ang--), btab, nbody, Qtscale, tscale*tsnap, vecmask);
 	    }
-	    put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+	  }
+	} /* spinvector */
+	if (need_hist) {
+	  put_history(outstr);
+	  need_hist = FALSE;
 	}
-    }
+	put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+      } /* if bits */
+    } /* while */
     strclose(instr);
     strclose(outstr);
 }
@@ -206,3 +225,49 @@ void rotatevec(vector vec, matrix mat)
     MULMV(tmp, mat, vec);
     SETV(vec, tmp);
 }
+
+
+
+void vrotate(real *sv, double theta, Body *btab, int nbody, int vecmask)
+{
+  int i;
+  for (i = 0; i < nbody; i++) {
+    if (vecmask&PosBit)           ArbitraryRotate(sv,theta,Pos(&btab[i]));
+    if (vecmask&VelBit)           ArbitraryRotate(sv,theta,Vel(&btab[i]));
+    if (vecmask&AccelerationBit)  ArbitraryRotate(sv,theta,Acc(&btab[i]));
+  }
+}
+
+/*
+   Rotate a point p by angle theta around an arbitrary axis r
+   Return the rotated point.
+   Positive angles are anticlockwise looking down the axis
+   towards the origin.
+   Assume right hand coordinate system.
+   Assumes the r vector is normalized!!!
+*/
+
+void ArbitraryRotate(real *r,real theta,real *p)
+{
+  real q[3], costheta,sintheta;
+
+  costheta = cos(DEG2RAD * theta);
+  sintheta = sin(DEG2RAD * theta);
+
+  q[0] = (costheta + (1 - costheta) * r[0] * r[0]) * p[0]
+       + ((1 - costheta) * r[0] * r[1] - r[2] * sintheta) * p[1]
+       + ((1 - costheta) * r[0] * r[2] + r[1] * sintheta) * p[2];
+
+  q[1] = ((1 - costheta) * r[0] * r[1] + r[2] * sintheta) * p[0]
+       + (costheta + (1 - costheta) * r[1] * r[1]) * p[1]
+       + ((1 - costheta) * r[1] * r[2] - r[0] * sintheta) * p[2];
+
+  q[2] = ((1 - costheta) * r[0] * r[2] - r[1] * sintheta) * p[0]
+       + ((1 - costheta) * r[1] * r[2] + r[0] * sintheta) * p[1]
+       + (costheta + (1 - costheta) * r[2] * r[2]) * p[2];
+
+  p[0] = q[0];
+  p[1] = q[1];
+  p[2] = q[2];
+}
+
