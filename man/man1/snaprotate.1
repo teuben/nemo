@@ -1,4 +1,4 @@
-.TH SNAPROTATE 1NEMO "18 November 2005"
+.TH SNAPROTATE 1NEMO "22 September 2008"
 .SH NAME
 snaprotate \- rotate N-body snapshot file about principle axes.
 .SH SYNOPSIS
@@ -16,6 +16,9 @@ The rotation is counter clock-wise (i.e., mathematically positive, unless
 a \fBz\fP rotation will rotate the \fBx\fP axis towards the \fBy\fP axis;
 a \fBy\fP rotation will rotate the \fBz\fP axis towards the \fBx\fP axis;
 a \fBx\fP rotation will rotate the \fBy\fP axis towards the \fBz\fP axis.
+.PP
+An alternate way to specify rotations is using the \fBspinvector=\fP keyword,
+where all points are rotated around this vector.
 .PP
 Although by default all vectors are rotated by the same matrix, the
 keyword \fBselect=\fP can be used to select any set of Position,
@@ -37,6 +40,8 @@ Default: none.
 \fBorder=\fP\fItrans-order\fP
 Order to apply the rotations about the three coordinate axes.
 An Eulerian rotation would be \fBorder=zyz\fP. Default is none.
+See also the \fBspinvector\fP keyword below for an alternate way
+to specify rotations.
 .TP
 \fBinvert=\fP\fIinvert-flag\fP
 If \fBtrue\fP, invert specified transformation.
@@ -48,6 +53,14 @@ If used, this is the degrees per time-unit that the \fBtheta\fP angles
 are multiplied with in order to calculate the actual rotation angle.
 This can give interesting effects if used for simulations.
 Default not used.
+.TP
+\fBspinvector=\fP\fIx,y,z\fP
+Use this vector if you know the vector to rotate around instead of a set
+of euler angles. Only one angle \fBtheta=\fP is needed. Positive rotation
+is a counterclockwise rotation as seen down the spin vector towards the
+origin. The vector does not need to be normalized.
+**note this option still disables various other options
+such as tscale, invert
 .TP
 \fBselect=\fP\fIvec1,vec2,...\fP
 Vector variables in a snapshot that should be rotated. Valid options
@@ -107,4 +120,5 @@ xx-jan-88	V1.0 original                   	JEB
 11-jun-92	V4.0 rotation now defined in math sense             	PJT
 21-nov-98	V5.0 added tscale= keyword	PJT
 18-nov-05	V5.1a added select=, also implemented select=acc	PJT
+22-sep-08	V6.0 added spinvector=	PJT
 .fi
