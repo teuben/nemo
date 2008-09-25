@@ -401,10 +401,23 @@ int get_data_select(char * infile,
 	  keybits |= PhaseSpaceBit;   /* got PhaseSpace */
 	  if (X_io) {
 	    keybits |= PosBit;   /* got Pos */
+	    if (maxbodies[CURRENT_IO] < *nbodyptr) {
+	      if (ion->pos) {
+		free ((char *) (ion->pos));
+		ion->pos = NULL;
+	      }
+	      
+	    }
 	    ion->pos = (char *) allocate_pointer(ion->pos,*ion->nbody*3*4*rtype);
 	  }
 	  if (V_io) {
 	    keybits |= VelBit;   /* got Vel */
+	    if (maxbodies[CURRENT_IO] < *nbodyptr) {
+	      if (ion->vel) {
+		free ((char *) (ion->vel));
+		ion->vel = NULL;
+	      }
+	    }
 	    ion->vel = (char *) allocate_pointer(ion->vel,*ion->nbody*3*4*rtype);
 	  }
 					
