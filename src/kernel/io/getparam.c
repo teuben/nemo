@@ -130,6 +130,7 @@
  * 13-sep-07 WD    a  print name of name whose key is not found
  * 23-oct-07    3.6   fix bug when ZENO style defv[] is used, more ZENO compat
  * 22-aug-08       a  add help=m to show memory usage at end
+ * 26-sep-08 WD    b  add MPI proc info to some stderr output
  
   TODO:
       - what if there is no VERSION=
@@ -318,6 +319,8 @@ typedef struct keyword_out {  /* a simple keyword, only meant for outkeys=   */
 /*      some defined here, others defined elsewhere        */
 
 extern int debug_level; /* see dprintf.c   from DEBUG env.var. */
+extern bool mpi_proc;   /* dprintf.c */
+extern int  mpi_rank;   /* dprintf.c */
 extern int error_level; /* see error.c     from ERROR env.var. */
 extern string usage;    /* see program.c or usage.c */
 extern string cvsid;    /* see program.c or cvsid.c */
@@ -1243,7 +1246,9 @@ local void printusage(string *defv)
     int i;
     bool otherargs;
 
+    if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
     fprintf(stderr,"Insufficient parameters, try 'help=', 'help=?' or 'help=h',\n");
+    if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
     fprintf(stderr,"Usage: %s", progname);
     otherargs = FALSE;
     for (i=1; i<nkeys; i++)
