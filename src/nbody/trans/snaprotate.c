@@ -17,7 +17,8 @@
  *      18-nov-05    5.1  added option to select which vectors to rot   pjt
  *                        for Rachel's trials
  *      19-nov-05    5.1a fixed for missing  Acc , use body.h           pjt
- *      22-sep-08    6.0  rotate around an arbitrary vector
+ *      22-sep-08    6.0  rotate around an arbitrary vector             pjt
+ *      26-sep-08    6.0a debugged vrotate (real vs double)             wd
  */
 
 #include <stdinc.h>
@@ -228,7 +229,7 @@ void rotatevec(vector vec, matrix mat)
 
 
 
-void vrotate(real *sv, double theta, Body *btab, int nbody, int vecmask)
+void vrotate(real *sv, real theta, Body *btab, int nbody, int vecmask)
 {
   int i;
   for (i = 0; i < nbody; i++) {
