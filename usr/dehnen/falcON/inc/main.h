@@ -235,7 +235,7 @@ namespace falcON {
 #ifdef falcON_USE_NEMO
   extern void main(void) falcON_THROWING;
 #else
-  extern void main(int argc, const char *argv[]) falcON_THROWING;
+  extern void main(int argc, const char**argv) falcON_THROWING;
 #endif
 }
 
@@ -243,7 +243,7 @@ namespace falcON {
 // define global main(), which calls nemo::main()                               
 //------------------------------------------------------------------------------
 
-int main(int argc, const char *argv[])             // global main               
+int main(int argc, const char**argv)               // global main               
 {
 
   try {                                            // TRY:                      

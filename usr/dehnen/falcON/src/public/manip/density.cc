@@ -1,40 +1,41 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   src/public/manip/density.cc                                         
-///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2006-2008                                                           
-///                                                                             
+///
+/// \file   src/public/manip/density.cc
+///
+/// \author Walter Dehnen
+/// \date   2006-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2006-2008 Walter Dehnen                                        
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2006-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
+//
 // history:                                                                     
-//                                                                              
-// v 0.0    27/04/2006  WD created                                              
-// v 0.1    07/07/2006  WD replacing bodyset with flags::ignore                 
-// v 0.2    27/07/2006  WD made public                                          
-// v 0.3    04/09/2007  WD new neighbours.h                                     
-// v 0.4    06/11/2007  WD order of Ferrers kernel from param, K=32 default     
-// v 0.4.1  20/05/2008  WD renamed routine from neighbour.h                     
-// v 0.4.2  11/06/2008  WD new DebugInfo and falcON_Warning                     
+//
+// v 0.0    27/04/2006  WD created
+// v 0.1    07/07/2006  WD replacing bodyset with flags::ignore
+// v 0.2    27/07/2006  WD made public
+// v 0.3    04/09/2007  WD new neighbours.h
+// v 0.4    06/11/2007  WD order of Ferrers kernel from param, K=32 default
+// v 0.4.1  20/05/2008  WD renamed routine from neighbour.h
+// v 0.4.2  11/06/2008  WD new DebugInfo and falcON_Warning
+// v 0.4.3  25/09/2008  WD debugged (debug output only)
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
@@ -129,9 +130,9 @@ namespace falcON { namespace Manipulate {
       if(file && file[0])
 	falcON_WarningN("Manipulator \"%s\": "
 			"file given but not used\n",name());
-      if(npar>2)
+      if(npar>3)
 	falcON_WarningN("Manipulator \"%s\": "
-			"skipping parameters beyond 2\n",name());
+			"skipping parameters beyond 3\n",name());
     }
     //--------------------------------------------------------------------------
     ~density() {}
