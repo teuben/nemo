@@ -27,16 +27,22 @@ void *allocate_FL(size_t nb, const_string file, int line)
 
     if (sizeof(size_t) == 4 && nb > 2147483647)
       warning("allocate: 32bit machine allocate");
+
     if (nb==0) nb++;       /* never allocate 0 bytes */
+
+    if(file)
+	nemo_dprintfN(8,"[%s:%d]: allocating %lu bytes @ %p\n",file,line,nb,mem);
+    else
+	nemo_dprintfN(8,"allocating %lu bytes @ %p\n",nb,mem);
+
     mem = (void *) calloc(nb, 1);
+
     if (mem == NULL)  {
 	nemo_dprintf(0,"solaris csh: limit datasize unlimited\n");
         nemo_dprintf(0,"solaris ksh: ulimit -d unlimited\n");
-	if(file) error("[%s:%d]: cannot allocate %ld bytes",file,line,nb);
-	else     error("cannot allocate %ld bytes",nb);
+	if(file) error("[%s:%d]: cannot allocate %lu bytes",file,line,nb);
+	else     error("cannot allocate %lu bytes",nb);
     }
-    if(file) nemo_dprintfN(8,"[%s:%d]: allocate %ld bytes @ %p\n",file,line,nb,mem);
-    else     nemo_dprintfN(8,"allocate %ld bytes @ %p\n",nb,mem);
     return mem;
 }
 
@@ -45,16 +51,20 @@ void *reallocate_FL(void *bp, size_t nb, const_string file, int line)
     void *mem;
 
     if (nb == 0) nb++;
+
+    if(file)
+	nemo_dprintfN(8,"[%s:%d]: reallocating %lu bytes @ %p\n",file,line,nb,mem);
+    else
+	nemo_dprintfN(8,"reallocating %lu bytes @ %p\n",nb,mem);
+
     if(bp==NULL)
         mem = (void *) calloc(nb, 1);
     else
         mem = (void *) realloc((void *)bp,nb);
     if (mem == NULL)  {
-	if(file) error("[%s:%d]: cannot reallocate %ld bytes",file,line,nb);
-	else     error("cannot reallocate %ld bytes",nb);
+	if(file) error("[%s:%d]: cannot reallocate %lu bytes",file,line,nb);
+	else     error("cannot reallocate %lu bytes",nb);
     }
-    if(file) nemo_dprintfN(8,"[%s:%d]: reallocate %ld bytes @ %p\n",file,line,nb,mem);
-    else     nemo_dprintfN(8,"reallocate %ld bytes @ %p\n",nb,mem);
     return mem;
 }
 
