@@ -33,20 +33,6 @@
 #include <stdarg.h>
 #include <errno.h>
 
-/*
- * WD June 2008
- * allow the user to specify the exit() function, but default to stdlib exit().
- * Rationale: allow exit to call MPI_Abort()
- */
-
-#if(0)
-void(*nemo_exit)(int) = &exit;
-void set_nemo_exit(void(*e)(int))
-{
-  nemo_exit = e;
-}
-#endif
-
 extern int debug_level;    /* see also user interface getparam.c for this */
 
 int error_level = 0;	   /* yuck, but this needs to be globally visible */
