@@ -16,6 +16,7 @@
  *      31-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@oamp.fr>
  *      12-jun-08       allocate_FL etc, see stdinc.h           WD
  *      12-jun-08       removed tests for size_t < 0            WD
+ *      03-oct-08       debugged error in debug_info reporting  WD
  */
 
 #include <stdinc.h>
@@ -30,11 +31,6 @@ void *allocate_FL(size_t nb, const_string file, int line)
 
     if (nb==0) nb++;       /* never allocate 0 bytes */
 
-    if(file)
-	nemo_dprintfN(8,"[%s:%d]: allocating %lu bytes @ %p\n",file,line,nb,mem);
-    else
-	nemo_dprintfN(8,"allocating %lu bytes @ %p\n",nb,mem);
-
     mem = (void *) calloc(nb, 1);
 
     if (mem == NULL)  {
@@ -43,6 +39,12 @@ void *allocate_FL(size_t nb, const_string file, int line)
 	if(file) error("[%s:%d]: cannot allocate %lu bytes",file,line,nb);
 	else     error("cannot allocate %lu bytes",nb);
     }
+
+    if(file)
+	nemo_dprintfN(8,"[%s:%d]: allocated %lu bytes @ %p\n",file,line,nb,mem);
+    else
+	nemo_dprintfN(8,"allocated %lu bytes @ %p\n",nb,mem);
+
     return mem;
 }
 
@@ -52,11 +54,6 @@ void *reallocate_FL(void *bp, size_t nb, const_string file, int line)
 
     if (nb == 0) nb++;
 
-    if(file)
-	nemo_dprintfN(8,"[%s:%d]: reallocating %lu bytes @ %p\n",file,line,nb,mem);
-    else
-	nemo_dprintfN(8,"reallocating %lu bytes @ %p\n",nb,mem);
-
     if(bp==NULL)
         mem = (void *) calloc(nb, 1);
     else
@@ -65,6 +62,12 @@ void *reallocate_FL(void *bp, size_t nb, const_string file, int line)
 	if(file) error("[%s:%d]: cannot reallocate %lu bytes",file,line,nb);
 	else     error("cannot reallocate %lu bytes",nb);
     }
+
+    if(file)
+	nemo_dprintfN(8,"[%s:%d]: reallocated %lu bytes @ %p\n",file,line,nb,mem);
+    else
+	nemo_dprintfN(8,"reallocated %lu bytes @ %p\n",nb,mem);
+
     return mem;
 }
 
