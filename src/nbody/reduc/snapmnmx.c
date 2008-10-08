@@ -22,7 +22,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "mode=min,max\n             Modes: {time,min,max,mean,sigma}",
     "times=all\n                Times of snapshot",
     "format=%g\n                Format to print with",
-    "VERSION=1.2a\n		2-feb-05 pjt",
+    "VERSION=1.2b\n		8-oct-08 pjt",
     NULL,
 };
 
@@ -43,7 +43,6 @@ nemo_main()
     Body *btab = NULL, *bp, *bq;
     bool   Qmin, Qmax, Qmean, Qsig, Qtime, scanopt();
     int i, n, nbody, bits, nsep, isep, nopt, ParticlesBit;
-    double sqr(), log10(), sqrt();
     char fmt[20],*pfmt;
     string *burststring(), *opt;
     rproc btrtrans(), fopt[MAXOPT], faux;
@@ -63,9 +62,12 @@ nemo_main()
             break;
         }
     }
+    dprintf(0,"var: \n");
     for (i=0; i<nopt; i++)
         dprintf(0,"%s ",opt[i]);
     dprintf(0,"\n");
+    dprintf(0,"mode: %s\n",mnmxmode);
+
     Qmin = scanopt(mnmxmode,"min");
     Qmax = scanopt(mnmxmode,"max");
     Qmean = scanopt(mnmxmode,"mean");
