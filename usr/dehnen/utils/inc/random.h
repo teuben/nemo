@@ -201,7 +201,7 @@ namespace WDutils {
     mutable double gset;
     const RandomNumberGenerator *R1, *R2;
   public:
-    /// \construction
+    /// construction
     /// \param[in] r1 (pointer to a) random number generator
     /// \param[in] r2 (optional) (pointer to a) random number generator,
     ///               default is to use r1

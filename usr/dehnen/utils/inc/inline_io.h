@@ -253,47 +253,11 @@ namespace WDutils {
   template<typename X> static void write(std::ostream&s, const X*x) { s<<x[N]; }
   template<typename X> static void read (std::istream&s,       X*x) { s>>x[N]; }
   };
-  //----------------------------------------------------------------------------
-  /// write and array in the format "a1 a2 a3 ... aN".
-  /// \param N template parameter: size of array
-  /// \param X template parameter: type of array elements
-  /// \return ostream used
-  /// \param s ostream to write to
-  /// \param x pointer to first element
-  template<int N, typename X> inline
-  std::ostream& write_arr(std::ostream&s, const X* x)
-  { 
-    meta_io<N-1,0>::write(s,x);
-    return s;
-  }
-  //----------------------------------------------------------------------------
-  /// read an array from a space-separated format.
-  /// \param N template parameter: size of array
-  /// \param X template parameter: type of array elements
-  /// \return istream used
-  /// \param s istream to read from
-  /// \param x pointer to first element
-  template<int N, typename X> inline
-  std::istream& read_arr(std::istream&s, X* x)
-  { 
-    char c=0;
-    s >> c;
-    if(c == '(') {
-      meta_io<N-1,0>::read(s,x);
-      s >> c;
-      if(c != ')') s.clear(std::ios::badbit);
-    } else {
-      s.putback(c);
-      meta_io<N-1,0>::read(s,x);
-    }
-    return s;
-  }
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   /// \name I/O of arrays whose size is known at run time
   //@{
   /// write and array in the format "a1 a2 a3 ... aN".
-  /// \param X template parameter: type of array elements
   /// \return ostream used
   /// \param s ostream to write to
   /// \param x pointer to first element
@@ -307,7 +271,6 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   /// read an array from a space-separated format.
-  /// \param X template parameter: type of array elements
   /// \return istream used
   /// \param s istream to read from
   /// \param x pointer to first element

@@ -30,6 +30,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <numerics.h>
 #include <WDMath.h>
+#ifndef WDutils_included_cstring
+#  include <cstring>
+#  define WDutils_included_cstring
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 // Burlisch-Stoer integration of 1D real integrals                              
@@ -382,11 +386,14 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   template void EigenValuesTridiagonal<float >(int, float *, float *);
   template void EigenValuesTridiagonal<double>(int, double*, double*);
-  //////////////////////////////////////////////////////////////////////////////
-  //
-  // finding percentiles in rank or cumulative weight
-  //
-  //////////////////////////////////////////////////////////////////////////////
+} // namespace WDutils
+////////////////////////////////////////////////////////////////////////////////
+//
+// finding percentiles in rank or cumulative weight
+//
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  using namespace WDutils;
 
   template<typename scalar>
   class PercentileFinder {
@@ -567,7 +574,9 @@ namespace WDutils {
     R->r[1]->P    = P;
     if(debug(8)) R->r[1]->dump();
   }
-  //////////////////////////////////////////////////////////////////////////////
+} // namespace {
+///////////////////////////////////////////////////////////////////////////////
+namespace WDutils {
   template<typename scalar> void
   FindPercentile<scalar>::setup(const scalar*F, int N, const scalar*W)
   {
@@ -590,4 +599,156 @@ namespace WDutils {
   template class FindPercentile<float>;
 } // namespace WDutils
 ////////////////////////////////////////////////////////////////////////////////
+//
+// finding index given rank
+//
+////////////////////////////////////////////////////////////////////////////////
+namespace {
 
+  /// auxiliary for FindIndex
+  template<typename scalar>
+  class Ranker {
+    /// represents a single value
+    struct point {
+      scalar   X;       ///< value
+      unsigned I;       ///< index
+    };
+    /// represents a range of points
+    struct range {
+      unsigned R;       ///< rank of first point
+      unsigned N;       ///< number of points in range
+      range   *S;       ///< pter to left sub-range
+      range() : S(0) {}
+    };
+    unsigned           N;           ///< # points
+    point             *P;           ///< table of points
+    block_alloc<range> RangeAlloc;  ///< allocator for ranges
+    range              Root;        ///< root range
+    /// swap two points
+    static void swap(point*a, point*b)
+    {
+      point p;
+      memcpy(&p, a, sizeof(point));
+      memcpy( a, b, sizeof(point));
+      memcpy( b,&p, sizeof(point));
+    }
+    /// split a list of points
+    /// \param[in] P list of points to split
+    /// \param[in] N size of list
+    /// \param[in] S split point
+    /// \return      number of points with value < S (can be null)
+    static unsigned splitlist(point*p, unsigned np, scalar S)
+    {
+      point*l,*u,*n=p+np;
+      // find first element not smaller than S
+      for(l=p;   l!=n && l->X<S; ++l);
+      if(l==n) return np;
+      // find first element not greater than S
+      for(u=l+1; u!=n && u->X>S; ++u);
+      while(u!=n) {
+	swap(l,u);
+	for(++l; l!=n && l->X<S; ++l);
+	for(++u; u!=n && u->X>S; ++u);
+      }
+      return l - p;
+    }
+    /// split a range.
+    /// we split at the element in mid-index.
+    void split(range*A);
+  public:
+    /// ctor: create points and set root
+    Ranker(const scalar*A, unsigned n) :
+      N          ( n ),
+      P          ( WDutils_NEW(point,N) ),
+      RangeAlloc ( int(10+log(double(N))) )
+    {
+      Root.R   = 0;
+      Root.N   = N;
+      for(unsigned i=0; i!=N; ++i) {
+	P[i].X = A[i];
+	P[i].I = i;
+      }
+    }
+    /// dtor: delete points
+    ~Ranker() { WDutils_DEL_A(P); }
+    /// find index for given rank
+    unsigned Index(unsigned rank)
+    {
+      if(rank>=N) WDutils_THROW("FindRank::Index(): rank=%d >= N=$%d\n",rank,N);
+      range*A=&Root;
+      unsigned original_range_count = RangeAlloc.N_used();
+      while(A->N>1) {
+	if(A->S==0) split(A);
+	A = rank<A->S[1].R? A->S : A->S+1;
+      }
+      DebugInfo(6,"Ranker::Index(): required %d new ranges\n",
+		RangeAlloc.N_used() - original_range_count);
+      return P[A->R].I;
+    }
+    /// find value for given rank
+    scalar Value(unsigned rank)
+    {
+      if(rank>=N) WDutils_THROW("FindRank::Value(): rank=%d >= N=$%d\n",rank,N);
+      range*A=&Root;
+      unsigned original_range_count = RangeAlloc.N_used();
+      while(A->N>1) {
+	if(A->S==0) split(A);
+	A = rank<A->S[1].R? A->S : A->S+1;
+      }
+      DebugInfo(6,"Ranker::Value(%u) = %f: required %d new ranges\n",
+		rank, P[A->R].X, RangeAlloc.N_used() - original_range_count);
+      return P[A->R].X;
+    }
+  };
+}
+namespace WDutils {
+WDutils_TRAITS(::Ranker<float>::range,"<anonymous>::Ranker<float>::range");
+WDutils_TRAITS(::Ranker<float>::point,"<anonymous>::Ranker<float>::point");
+WDutils_TRAITS(::Ranker<double>::range,"<anonymous>::Ranker<double>::range");
+WDutils_TRAITS(::Ranker<double>::point,"<anonymous>::Ranker<double>::point");
+}
+namespace {
+  template<typename T>
+  void Ranker<T>::split(range*A)
+  {
+    if(A->N >= 2) {
+      unsigned L=1;
+      if(A->N > 2)
+	L = splitlist(P+A->R, A->N, P[A->R+A->N/2].X);
+      else if(P[A->R].X > P[A->R+1].X)
+	swap(P+A->R, P+A->R+1);
+      A->S = RangeAlloc.new_elements(2);
+      A->S[0].R   = A->R;    A->S[1].R   = A->R+L;
+      A->S[0].N   = L;       A->S[1].N   = A->N-L;
+    } else 
+      WDutils_Error("FindIndex: trying to split range with %d points",A->N);
+  }
+} // namespace {
+////////////////////////////////////////////////////////////////////////////////
+namespace WDutils {
+  template<typename scalar>
+  void FindRank<scalar>::setup(const scalar*F, unsigned N) 
+  {
+    if(DATA) WDutils_DEL_O(static_cast<Ranker<scalar>*>(DATA));
+    DATA = new Ranker<scalar>(F,N);
+  }
+  template<typename scalar>
+  unsigned FindRank<scalar>::Index(unsigned rank) const
+  {
+    return static_cast<Ranker<scalar>*>(DATA)->Index(rank);
+  }
+  template<typename scalar>
+  scalar FindRank<scalar>::Value(unsigned rank) const
+  {
+    return static_cast<Ranker<scalar>*>(DATA)->Value(rank);
+  }
+  template<typename scalar>
+  FindRank<scalar>::~FindRank()
+  {
+    WDutils_DEL_O(static_cast<Ranker<scalar>*>(DATA));
+    DATA = 0;
+  }
+  template class FindRank<double>;
+  template class FindRank<float>;
+} // namespace WDutils
+////////////////////////////////////////////////////////////////////////////////

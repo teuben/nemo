@@ -75,20 +75,18 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// find position in ordered table (see NR)                                   
   ///                                                                           
-  /// \param T (template parameter) type with < and > operators, usually a      
-  ///          scalar                                                           
-  /// \param xarr (input) array of T, must be ordered (ascending or descending) 
-  /// \param n    (input) size of array xarr                                    
-  /// \param x    (input) value to find position for                            
-  /// \param j    (input) initial guess for position                            
-  /// \return     position jlo such that xarr[jlo] <= x < xarr[jlo+1]           
-  ///                                                                           
-  /// The ordered table xarr is hunted for jlo such that                        
-  ///    xarr[jlo] <= x < xarr[jlo+1].                                          
-  /// For an ascendingly ordered array, we return -1 if x < xarr[0], n-1 if     
-  /// x == xarr[n-1], and n if x > xarr[n--1].                                  
-  //                                                                            
-  //----------------------------------------------------------------------------
+  /// \param T (template parameter) type with < and > operators, usually a
+  ///          scalar
+  /// \param[in] xarr  array of T, must be ordered (ascending or descending)
+  /// \param[in] n     size of array xarr
+  /// \param[in] x     value to find position fo
+  /// \param[in] j     initial guess for position
+  /// \return position jlo such that xarr[jlo] <= x < xarr[jlo+1]
+  ///
+  /// The ordered table xarr is hunted for jlo such that
+  ///    xarr[jlo] <= x < xarr[jlo+1].
+  /// For an ascendingly ordered array, we return -1 if x < xarr[0], n-1 if
+  /// x == xarr[n-1], and n if x > xarr[n--1].
   template<typename T>
   int hunt(const T*xarr, int n, T x, int j) {
     int  jlo=j,jhi,l=n-1;
@@ -137,19 +135,18 @@ namespace WDutils {
     return jlo;
   }
   //----------------------------------------------------------------------------
-  /// find position in ordered table (see NR)                                   
-  ///                                                                           
+  /// find position in ordered table (see NR)
+  ///
   /// \param T (template param) type with < and > operators, usually a scalar
   /// \param[in,out] k  jlo such that xarr[jlo] <= x < xarr[jlo+1]
   /// \param[in]     x  array of T, must be ordered (ascending or descending) 
   /// \param[in]     n  size of array xarr
   /// \param[in]     xi value to find position for
   /// \return        position jlo such that xarr[jlo] <= x < xarr[jlo+1]
-  ///                                                                           
-  /// If the original value for k already gives the position, we return.        
-  /// Otherwise, we guess k from linear interpolation and then invoke hunt().   
-  /// If x is not in range, we throw an error.                                  
-  //                                                                            
+  ///
+  /// If the original value for k already gives the position, we return.
+  /// Otherwise, we guess k from linear interpolation and then invoke hunt().
+  /// If x is not in range, we throw an error.
   template<typename T>
   inline void find(int&k, int n, const T*x, T xi) WDutils_THROWING
   {
@@ -264,30 +261,23 @@ namespace WDutils {
     HeapIndex(A.array(),A.size(),I.array());
   }
   //----------------------------------------------------------------------------
-  /// obtain approximate function values for given ranks.
-  ///
-  /// Given a table of approximately evenly distributed ranks R[i], make an 
-  /// approximate table of values Y[i] so that rank(Y[i]) ~= R[i].
-  /// For size of table of ranks m << n, this is considerably faster than  
-  /// using a full sort.
-  ///
-  /// \param sortable type of values to be sorted
-  /// \param sortit class with operator[](int) returning sortable
-  /// \param A (input) objects to be sorted
-  /// \param n (input) number of objects
-  /// \param R (input) table of ranks
-  /// \param Y (output) table of approximate values at given ranks
-  /// \param m (input) size of tables R and Y, usually m << n
-  /// \param Amin (optional input) minimum value
-  /// \param Amax (optional input) maximum value
-  template<typename sortable, typename sortit> inline
-  void set_value_table(sortit         const&A,
-		       int            const&n,
-		       const sortable*const&R,
-		       sortable      *const&Y,
-		       int            const&m,
-		       const sortable* Amin= 0,
-		       const sortable* Amax= 0);
+  /// given an array of values, produce a table of their ranks
+  template<typename sortable>
+  void HeapRank(const sortable*A, int n, int*rank)
+  {
+    if(n<=0) return;
+    int*indx = WDutils_NEW(int,n);
+    HeapIndex(A,n,indx);
+    for(int r=0; r!=n; ++r) rank[indx[r]] = r;
+    WDutils_DEL_A(indx);
+  }
+  //----------------------------------------------------------------------------
+  /// given an array of values, produce a table of their ranks
+  template<typename sortable>
+  void HeapRank(Array<sortable,1>const&A, Array<int,1>&I) WDutils_THROWING {
+    if(A.size() != I.size()) WDutils_THROW("size mismatch in HeapRank()\n");
+    HeapRank(A.array(),A.size(),I.array());
+  }
   //----------------------------------------------------------------------------
   /// find percentiles of a 1D distribution of values                           
   /// instantinations for float and double                                      
@@ -298,20 +288,20 @@ namespace WDutils {
     void setup(const scalar*, int, const scalar*);
   public:
     /// ctor: setup sort tree
-    /// \param F (input) array with elements
-    /// \param N (input) number of elements
-    /// \param W (optional input) array of weights
+    /// \param[in] F  array with elements
+    /// \param[in] N  number of elements
+    /// \param[in] W  (optional) array of weights
     FindPercentile(const scalar*F, int N, const scalar*W=0) : DATA(0) {
       setup(F,N,W);
     }
     /// ctor: setup sort tree
-    /// \param F (input) Array with elements
+    /// \param[in] F  Array with elements
     FindPercentile(Array<scalar,1>const&F) : DATA(0) {
       setup(F.array(),F.size(),0);
     }
     /// ctor: setup sort tree
-    /// \param F (input) Array<> with elements
-    /// \param W (input) Array<> of weights
+    /// \param[in] F  Array<> with elements
+    /// \param[in] W  Array<> of weights
     FindPercentile(Array<scalar,1>const&F,
 		   Array<scalar,1>const&W) WDutils_THROWING : DATA(0) {
       if(F.size() != W.size())
@@ -351,6 +341,37 @@ namespace WDutils {
     FindPercentile<scalar> FP(F,N,W);
     return FP.Percentile(f);
   }
+  //----------------------------------------------------------------------------
+  /// find index given ranks
+  /// instantinations for float and double
+  template<typename scalar> class FindRank {
+    void *DATA;
+    /// copy constructor disabled; use references instead of copies
+    FindRank(const FindRank&);
+    void setup(const scalar*, unsigned);
+  public:
+    /// ctor: setup sort tree
+    /// \param[in] F  array with elements
+    /// \param[in] N  number of elements
+    FindRank(const scalar*F, unsigned N) : DATA(0) {
+      setup(F,N);
+    }
+    /// ctor: setup sort tree
+    /// \param[in] F  Array with elements
+    FindRank(Array<scalar,1>const&F) : DATA(0) {
+      setup(F.array(),F.size());
+    }
+    /// dtor: de-allocate sorttree
+    ~FindRank();
+    /// find index given rank
+    /// \param[in] rank  rank in [0,N-1] for which index is required
+    /// \return    index of element with that rank.
+    unsigned Index(unsigned rank) const;
+    /// find value given rank
+    /// \param[in] rank  rank in [0,N-1] for which value is required
+    /// \return    value of element with that rank
+    scalar Value(unsigned rank) const;
+  };
   //@}
   //----------------------------------------------------------------------------
   /// class to support reporting file and line number on error
@@ -376,7 +397,6 @@ namespace WDutils {
       else if(j>n-M)		  j = n-M;
       return M;
     }
-    /// default constructor
     FileLineFind() : file(0), line(0) {}
     /// constructor: take file and line
     FileLineFind(const char*f, int l) : file(f), line(l) {}
@@ -402,9 +422,9 @@ namespace WDutils {
 	for(int i=0;i<n-m;++i) {
 	  if(x[i]==x[i+m]) {
 	    if(file)
-	      WDutils_THROW("[%s:%d]: x's not distinct in Polev()",file,line);
+	      WDutils_THROWN("[%s:%d]: x's not distinct in Polev()",file,line);
 	    else
-	      WDutils_THROW("x's not distinct in polev()");
+	      WDutils_THROW ("x's not distinct in polev()");
 	  }
 	  P[i]= ( (xi-x[i+m])*P[i] + (x[i]-xi)*P[i+1] ) / (x[i] - x[i+m]);
 	}
@@ -458,9 +478,9 @@ namespace WDutils {
     {
       if(x.size() != y.size())
 	if(file)
-	  WDutils_THROW("[%s:%d]: Array size mismatch in Polev()",file,line);
+	  WDutils_THROWN("[%s:%d]: Array size mismatch in Polev()",file,line);
 	else
-	  WDutils_THROW("Array size mismatch in polev()",file,line);
+	  WDutils_THROW ("Array size mismatch in polev()");
       return operator()(xi,x.array(),y.array(),x.size());
     }
   };
@@ -1149,251 +1169,6 @@ namespace WDutils {
   }
   //@}
   //////////////////////////////////////////////////////////////////////////////
-} // namespace WDutils {
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// inline functions and implementation details                                //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-namespace {
-  using namespace WDutils;
-#define PLEAF static_cast<leaf*>
-#define PRNGE static_cast<range*>
-  template<typename scalar> class sorttree {
-  public:
-    //--------------------------------------------------------------------------
-    // a node just has a pointer to its lower sub-node                          
-    //--------------------------------------------------------------------------
-    struct node { node* LO;
-      node() : LO(0) {} };
-    //--------------------------------------------------------------------------
-    // a leaf is a node holding a single scalar X                               
-    //--------------------------------------------------------------------------
-    struct leaf  : public node { scalar  X; };
-    //--------------------------------------------------------------------------
-    // a range is a node with an additional pointer to its upper sub-node and   
-    // a center C and size S. it contains leafs with X in [C-S, C+S[.           
-    //--------------------------------------------------------------------------
-    // a twig range has UP=0 and holds in LO a linked list of its leafs.        
-    //    NOTE that the leafs may be deleted using delete_leafs(). After call   
-    //         to this method, the pointer LO becomes meaningless.              
-    // a branch range has UP and LO pointing to its sub-ranges                  
-    //--------------------------------------------------------------------------
-    struct range : public node { scalar C,S; int N; range *UP;
-      scalar lo () const { return C-S; }
-      scalar up () const { return C+S; }
-      scalar dia() const { return S+S; }
-    };
-  private:
-    typedef block_alloc<range> ranger;             // allocator for new ranges  
-    //--------------------------------------------------------------------------
-    const int Ncrit;                               // split ranges with N>Ncrit 
-    ranger    RG;                                  // allocator for new ranges  
-    range    *ROOT;                                // the root range            
-    leaf     *L0;                                  // the arrays of leafs       
-    //--------------------------------------------------------------------------
-    int           A,I,NI;                          // for making value table    
-    const scalar* RANK;                            // table: ranks              
-    scalar      * VALUE;                           // table: values (to be made)
-    //--------------------------------------------------------------------------
-    range* split(range*RNGE) {
-      // split the twig range RNGE into two sub-ranges                          
-      register scalar H=scalar(0.5)*RNGE->S;
-      register range* LOWR = RG.new_element();
-      LOWR->C = RNGE->C - H;
-      LOWR->S = H;
-      LOWR->N = 0;
-      LOWR->UP= 0;
-      register range* UPPR = RG.new_element();
-      UPPR->C = RNGE->C + H;
-      UPPR->S = H;
-      UPPR->N = 0;
-      UPPR->UP= 0;
-      register leaf *LEAF,*NEXT;
-      for(LEAF=PLEAF(RNGE->LO); LEAF; LEAF=NEXT) {
-	NEXT = PLEAF(LEAF->LO);
-	if(LEAF->X < RNGE->C) {
-	  LEAF->LO = LOWR->LO;
-	  LOWR->LO= LEAF;
-	  LOWR->N++;
-	} else {
-	  LEAF->LO = UPPR->LO;
-	  UPPR->LO= LEAF;
-	  UPPR->N++;
-	}
-      }
-      RNGE->LO = LOWR;
-      RNGE->UP = UPPR;
-      if(LOWR->N == 0) return UPPR;
-      if(UPPR->N == 0) return LOWR;
-      return 0;
-    }
-    //--------------------------------------------------------------------------
-    void addleaf(register range* R, leaf* const&L) {
-      // add single leaf L to range R (usually the root range).                 
-      // if the twig range into which L falls overspills, it is splitted        
-      for(;;) {
-	if(R->UP) {
-	  R->N++;
-	  R = (L->X < R->C) ? PRNGE(R->LO) : R->UP ;
-	} else {
-	  L->LO = R->LO;
-	  R->LO = L;
-	  R->N++;
-	  if(R->N > Ncrit) while( R = split(R) );
-	  return;
-	}
-      }
-    }
-    //--------------------------------------------------------------------------
-    void treewalk(range* const&R) {
-      // create a value table VALUE, given the rank table RANK using linear     
-      // interpolation of ranks between the values of the ranges borders        
-      if(R->UP) {
-	treewalk(PRNGE(R->LO));
-	treewalk(R->UP);
-      } else if(R->N) {
-	register int nA = A+R->N;
-	if(RANK[I] >= A && RANK[I] <= nA && I < NI) {
-	  VALUE[I]  = R->lo() + (RANK[I]-A)*R->dia()/scalar(R->N);
-	  I++;
-	}
-	A = nA;
-      }
-    }
-    //--------------------------------------------------------------------------
-    void merge(range* our, const range* their) {
-      // merge two ranges which must have identical C,S                         
-      // NOTE see comments with merge() below                                   
-      if(their->UP)                                // 1   theirs is branch      
-	if(our->UP) {                              // 1.1 ours  is branch       
-	  merge(our->UP,their->UP);                //    merge upper sub-ranges 
-	  merge(PRNGE(our->LO),PRNGE(their->LO));  //    merge lower sub-ranges 
-	} else {                                   // 1.2   ours  is twig       
-	  register leaf *LEAF=PLEAF(our->LO), *NEXT;
-	  our->LO = their->LO;                     //    make our range         
-	  our->UP = their->UP;                     //    a copy of their range  
-	  our->N  = their->N;                      //    also copy number       
-	  for(; LEAF; LEAF=NEXT) {                 //    loop our leafs         
-	    NEXT = PLEAF(LEAF->LO);                //      get next in list     
-	    addleaf(our,LEAF);                     //      add them to range    
-	  }
-	}
-      else {                                       // 2   theirs  is twig       
-	register leaf *LEAF=PLEAF(their->LO), *NEXT;
-	for(; LEAF; LEAF=NEXT) {                   //    loop their leafs       
-	  NEXT = PLEAF(LEAF->LO);                  //      get next in list     
-	  addleaf(our,LEAF);                       //      add them to ours     
-	}
-      }
-    }
-    //--------------------------------------------------------------------------
-    // construction: build a tree with twigs of Ncrit leafs                     
-    //--------------------------------------------------------------------------
-  public:
-  template<typename sortit>
-    sorttree(sortit const&A,
-	     int    const&n,
-	     int    const&nc,
-	     scalar const&xmin,
-	     scalar const&xmax) :
-      Ncrit ( max(1,nc) ),
-      RG    ( max(10,n/Ncrit) ),
-      ROOT  ( RG.new_element() ),
-      L0    ( WDutils_NEW(leaf,n) )
-    {
-      ROOT->C = scalar(0.5)*( ceil(xmax) + floor(xmin) );
-      ROOT->S = scalar(0.5)*( ceil(xmax) - floor(xmin) );
-      ROOT->N = 0;
-      ROOT->UP= 0;
-      for(register int i=0; i!=n; ++i) {
-	L0[i].X = A[i];
-	addleaf(ROOT,L0+i);
-      }
-    }
-    //--------------------------------------------------------------------------
-    // delete leafs                                                             
-    //--------------------------------------------------------------------------
-    void delete_leafs()
-    {
-      if(L0) { WDutils_DEL_A(L0); L0=0; }
-    }
-    //--------------------------------------------------------------------------
-    // destruction: delete leafs and implicitly call ~ranger                    
-    //--------------------------------------------------------------------------
-    ~sorttree()
-    {
-      if(L0) WDutils_DEL_A(L0);
-    }
-    //--------------------------------------------------------------------------
-    // give const access to our root                                            
-    //--------------------------------------------------------------------------
-    const range* const&root() { return ROOT; }
-    //--------------------------------------------------------------------------
-    // make a (approximate) value table given a rank table                      
-    //--------------------------------------------------------------------------
-    void make_value_table(const scalar *const&rank,
-			  scalar *      const&value,
-			  int           const&n) {
-      A    = 0;
-      I    = 0;
-      NI   = n;
-      RANK = rank;
-      VALUE= value;
-      treewalk(ROOT);
-    }
-    //--------------------------------------------------------------------------
-    // merge with another sorttree                                              
-    // NOTE The merged tree will mix leafs and ranges allocated in this and     
-    //      that. Thus, any operation on the merged tree will cause an run-time 
-    //      error (Segmentation fault), if that sorttree has been deleted after 
-    //      the merger.                                                         
-    // NOTE While it is, of course, possible to design code without this feature
-    //      it would be less efficient.                                         
-    //--------------------------------------------------------------------------
-    void merge(const sorttree* const that) WDutils_THROWING {
-      if(that->Ncrit != this->Ncrit)
-	WDutils_THROW("sorttree::merge(): Ncrit differs: cannot merge");
-      if(that->L0==0 || this->L0==0)
-	WDutils_THROW("sorttree::merge(): leafs deleted: cannot merge");
-      if(that->ROOT->C != this->ROOT->C ||
-	 that->ROOT->S != this->ROOT->S)
-	WDutils_THROW("sorttree::merge(): ranges differ: cannot merge");
-      Ncrit;
-      merge(ROOT,that->ROOT);
-    }
-  };
-#undef PLEAF
-#undef PRNGE
-} // namespace {
-////////////////////////////////////////////////////////////////////////////////
-namespace WDutils {
-  template<typename sortable, typename sortit> inline
-  void set_value_table(sortit         const&A,      // I: objects to be sorted  
-		       int            const&nA,     // I: # objects             
-		       const sortable*const&rank,   // I: table of ranks        
-		       sortable      *const&value,  // O: table of values       
-		       int            const&nt,     // I: size of these tables  
-		       const sortable*xmin,         //[I: minimum value]        
-		       const sortable*xmax)         //[I: maximum value]        
-  {
-    if(xmin && xmax) {
-      sorttree<sortable> ST(A,nA,nA/(3*nt),*xmin,*xmax);
-      ST.make_value_table(rank,value,nt);
-      if(0    == rank[0]   ) value[0]    = *xmin;
-      if(nA-1 == rank[nt-1]) value[nt-1] = *xmax;
-    } else {
-      register sortable Xmin=A[0], Xmax=Xmin;
-      for(register int i=1; i!=nA; ++i) {
-	if(A[i] < Xmin) Xmin = A[i];
-	if(A[i] > Xmax) Xmax = A[i];
-      }
-      sorttree<sortable> ST(A,nA,nA/(3*nt),Xmin,Xmax);
-      ST.make_value_table(rank,value,nt);
-      if(0    == rank[0]   ) value[0]    = Xmin;
-      if(nA-1 == rank[nt-1]) value[nt-1] = Xmax;
-    }
-  }
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////
 #endif // WDutils_included_numerics_h

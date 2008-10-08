@@ -66,6 +66,8 @@ namespace WDutils {
   template<> struct traits<TYPE> {			\
     static const char  *name () { return NAME; }	\
   };
+  WDutils_TRAITS(void,"void");
+  WDutils_TRAITS(bool,"bool");
   WDutils_TRAITS(char,"char");
   WDutils_TRAITS(unsigned char,"unsigned char");
   WDutils_TRAITS(int,"int");

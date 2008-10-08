@@ -48,14 +48,18 @@
 #endif
 
 namespace WDutils {
+#ifndef WDutilsAllocDebugLevel
+#define WDutilsAllocDebugLevel 8
+#endif
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  /// Array allocation giving useful info in case of allocation error; mostly
+  /// array allocation giving useful info in case of allocation error; mostly
   /// used from macro WDutils_NEW.
   ///                                                                           
   /// In case of allocation error we abort or throw an exception (depending on
   /// the WDutils error handling settings).  If the debugging level exceeds
-  /// 10, we always print debugging information about memory allocation.
+  /// WDutilsAllocDebugLevel (default 8), we always print debugging
+  /// information about memory allocation.
   ///                                                                           
   /// \return  a valid pointer (unless an error occurs)                         
   /// \param T (template parameter) the type of array elements                  
@@ -79,7 +83,7 @@ namespace WDutils {
 #endif
 	(f,l)("caught std::bad_alloc\n");
     }
-    if(debug(10))
+    if(debug(WDutilsAllocDebugLevel))
       DebugInformation(f,l)("allocated %d %s = %d bytes @ %p\n",
 			    n,nameof(T),n*sizeof(T),static_cast<void*>(t));
     return t;
@@ -99,13 +103,14 @@ namespace WDutils {
 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
-  /// Array de-allocation giving useful info in case of error; mostly used from 
+  /// array de-allocation giving useful info in case of error; mostly used from 
   /// macro WDutils_DEL_A.                                                      
   ///                                                                           
-  /// In case of a de-allocation error (if the pointer provided was not valid)  
-  /// an error is generated (or an exception thrown, depending on the WDutils   
-  /// error settings). If the debugging level exceeds 10, we always print       
-  /// debugging information about memory de-allocation.                         
+  /// In case of a de-allocation error (if the pointer provided was not valid)
+  /// an error is generated (or an exception thrown, depending on the WDutils
+  /// error settings). If the debugging level exceeds WDutilsAllocDebugLevel
+  /// (default 8), we always print debugging information about memory
+  /// de-allocation.
   ///                                                                           
   /// \param T  (template parameter) the type of array elements                 
   /// \param a  pointer previously allocated with WDutils::NewArray<>()         
@@ -130,7 +135,7 @@ namespace WDutils {
 #endif
 	(f,l)("de-allocating array of '%s' @ %p' failed\n", nameof(T),a);
     }
-    if(debug(10))
+    if(debug(WDutilsAllocDebugLevel))
       DebugInformation(f,l)("de-allocated array of %s @ %p\n",
 			    nameof(T), static_cast<void*>(a));
   }
@@ -152,7 +157,7 @@ namespace WDutils {
 #endif
 	(f,l)("de-allocating array of '%s' @ %p' failed\n", nameof(T),a);
     }
-    if(debug(10))
+    if(debug(WDutilsAllocDebugLevel))
       DebugInformation(f,l)("de-allocated array of %s @ %p\n",
 			    nameof(T), static_cast<const void*>(a));
   }
@@ -198,7 +203,7 @@ namespace WDutils {
 #endif
 	(f,l)("de-allocating object '%s' @ %p failed\n", nameof(T),a);
     }
-    if(debug(10))
+    if(debug(WDutilsAllocDebugLevel))
       DebugInformation(f,l)("de-allocated %s object @ %p\n",
 			    nameof(T), static_cast<void*>(a));
   }
@@ -220,7 +225,7 @@ namespace WDutils {
 #endif
 	(f,l)("de-allocating object '%s' @ %p failed\n",nameof(T),a);
     }
-    if(debug(10))
+    if(debug(WDutilsAllocDebugLevel))
       DebugInformation(f,l)("de-allocated %s object @ %p\n",
 			    nameof(T), static_cast<const void*>(a));
   }
@@ -493,7 +498,7 @@ namespace WDutils {
     pointer new_elements(size_type Ne) {
       if(!LAST->has_free(Ne)) {
 	register size_type
-	  New=max(Ne,LAST->N_alloc());
+	  New=max(Ne,static_cast<size_type>(LAST->N_alloc()));
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
@@ -1020,7 +1025,7 @@ namespace WDutils {
       if(A==0 || !equal(n) ) {
 	if(A) WDutils_DEL_A(A);
 	set(n);
-	A = WDutils_NEW(T,K[0]*N[0]);
+	A = K[0]*N[0] ? WDutils_NEW(T,K[0]*N[0]) : 0;
       }
     }
     /// reset: destruct and construct again
@@ -1046,6 +1051,7 @@ namespace WDutils {
     /// \param[in] n1 size of array in dimension 1
     Array(int n0, int n1) WDutils_THROWING
     : A(0) {
+      WDutilsStaticAssert(D==2);
       const int n[2] = {n0,n1};
       reset(n);
     }
@@ -1055,6 +1061,7 @@ namespace WDutils {
     /// \param[in] n2 size of array in dimension 2
     Array(int n0, int n1, int n2) WDutils_THROWING
     : A(0) {
+      WDutilsStaticAssert(D==3);
       const int n[3] = {n0,n1,n2};
       reset(n);
     }
@@ -1065,6 +1072,7 @@ namespace WDutils {
     /// \param[in] n3 size of array in dimension 3
     Array(int n0, int n1, int n2, int n3) WDutils_THROWING
     : A(0) {
+      WDutilsStaticAssert(D==4);
       const int n[4] = {n0,n1,n2,n3};
       reset(n);
     }
@@ -1076,6 +1084,7 @@ namespace WDutils {
     /// \param[in] n4 size of array in dimension 4
     Array(int n0, int n1, int n2, int n3, int n4) WDutils_THROWING
     : A(0) {
+      WDutilsStaticAssert(D==5);
       const int n[5] = {n0,n1,n2,n3,n4};
       reset(n);
     }
@@ -1165,10 +1174,10 @@ namespace WDutils {
     /// reset: destruct and construct again
     /// \param[in] n new size of array
     void reset(int n) WDutils_THROWING {
-      if(A==0 || n != N) {
+      if(n!=N || n && A==0) {
 	if(A) WDutils_DEL_A(A);
 	N = n;
-	A = WDutils_NEW(T,N);
+	A = N>0? WDutils_NEW(T,N) : 0;
       }
     }
     /// reset: destruct and construct again
@@ -1178,7 +1187,7 @@ namespace WDutils {
     }
     /// reset: destruct and construct again
     /// \param[in] n new size of array
-    /// \param [in]x initial value for each element
+    /// \param[in] x initial value for each element
     void reset(int n, T const&x) WDutils_THROWING {
       reset(n);
       for(int i=0; i!=N; ++i) A[i] = x;
@@ -1397,7 +1406,7 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   ///
-  /// De-allocate memory previously allocated with WDutils::malloc16()
+  /// de-allocate memory previously allocated with WDutils::malloc16()
   /// \ingroup Mem16
   ///
   /// This routine \b must be used to properly de-allocate memory that has been
@@ -1411,7 +1420,7 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   ///
-  /// Allocate memory at a address alignged to at a 16 byte memory location
+  /// allocate memory at a address alignged to at a 16 byte memory location
   /// \ingroup Mem16
   ///
   /// Will allocate slightly more memory than required to ensure we can find
@@ -1419,7 +1428,6 @@ namespace WDutils {
   /// use WDutils::delete16<>(), otherwise an error will occur!
   ///
   /// \return   a newly allocated memory address at a 16 byte memory location
-  /// \param T  (template parameter) type of objects to allocate
   /// \param n  number of objects to allocate
   template<typename T> inline T* new16(size_t n) WDutils_THROWING
   {
@@ -1427,14 +1435,13 @@ namespace WDutils {
   }
   //----------------------------------------------------------------------------
   ///
-  /// De-allocate memory previously allocated with WDutils::new16().
+  /// de-allocate memory previously allocated with WDutils::new16().
   /// \ingroup Mem16
   ///
   /// This routine \b must be used to properly de-allocate memory that has been
   /// previously allocated by WDutils::new16(); other de-allocation will
   /// inevitably result in an error.
   ///
-  /// \param T  (template parameter) type of objects q points to.
   /// \param q  pointer previously allocated by WDutils::new16()
   template<typename T> inline void delete16(T* q)WDutils_THROWING 
   {

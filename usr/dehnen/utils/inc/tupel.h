@@ -1,45 +1,46 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    utils/inc/tupel.h                                                  
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    1996-2008                                                          
-///                                                                             
-/// \brief   contains the definition of template class WDutild::tupel and       
-///	     all its members and friends                                        
-///                                                                             
-/// \version aug-2003: template metaprogramming to unroll loops automatically   
-/// \version nov-2003: non-standard #include files redundant; pseudo_tupel      
-/// \version nov-2004: added volume(), applied();                               
-/// \version may-2005: removed tupel::add_times, ass_times, sub_times           
-/// \version jun-2005: removed pseudo_tupel, const_pseudo_tupel                 
-/// \version jul-2005: added doxygen documentation, added minnorm()             
-/// \version mar-2006: removed reliance on friend namespace injection           
-/// \version jul-2006: added global function applied()                          
-/// \version sep-2006: added member method reset()                              
-/// \version mar-2007: made data protected                                      
-/// \version may-2008: output manipulator "print()" supported                   
+///
+/// \file    utils/inc/tupel.h
+///
+/// \author  Walter Dehnen
+///
+/// \date    1996-2008
+/// 
+/// \brief   contains the definition of template class WDutild::tupel and
+///	     all its members and friends
+///
+/// \version aug-2003: template metaprogramming to unroll loops automatically
+/// \version nov-2003: non-standard #include files redundant; pseudo_tupel
+/// \version nov-2004: added volume(), applied();
+/// \version may-2005: removed tupel::add_times, ass_times, sub_times
+/// \version jun-2005: removed pseudo_tupel, const_pseudo_tupel
+/// \version jul-2005: added doxygen documentation, added minnorm()
+/// \version mar-2006: removed reliance on friend namespace injection
+/// \version jul-2006: added global function applied()
+/// \version sep-2006: added member method reset(
+/// \version mar-2007: made data protected
+/// \version may-2008: output manipulator "print()" supported
+/// \version oct-2008: added static assertion to N-specific constructors
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 1996-2008  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 1996-2008  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+// 
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_tupel_h
 #define WDutils_included_tupel_h
@@ -56,24 +57,28 @@
 #  include <tupel.cc>
 #endif
 
+#ifndef WDutilsStaticAssert
+#  define WDutilsStaticAssert(B)
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class WDutils::tupel                                                       
-  //                                                                            
-  /// \brief                                                                    
-  /// Template: a tupel of N scalars of type X, held in an array X[N].          
-  ///                                                                           
-  /// Class tupel<N,X> in essence is just a wrapper around X[N]. It is designed 
-  /// to act as a what physicists call "vector" in N-dimensional space, i.e. it 
-  /// is similar to std::valarray. Class tupel<N,X>s member methods, such as    
-  /// assign, additions, etc, are coded using meta template programming in file 
-  /// tupel.cc, resulting in maximum efficency.                                 
-  /// In the falcON project, tupel<3,real> are used to represent position,      
-  /// velocity and all other vector quantities. For N=3, the operator ^ between 
-  /// tupels refers to the usual vector cross product.                          
-  ///                                                                           
+  //
+  // class WDutils::tupel
+  //
+  /// \brief
+  /// Template: a tupel of N scalars of type X, held in an array X[N].
+  ///
+  /// Class tupel<N,X> in essence is just a wrapper around X[N]. It is designed
+  /// to act as a what physicists call "vector" in N-dimensional space, i.e. it
+  /// is similar to std::valarray, but with the number of elements as template
+  /// parameter. The member methods, such as assign, additions, etc, are coded
+  /// using meta template programming in file tupel.cc, resulting in maximum
+  /// efficency.  In the falcON project, tupel<3,real> are used to represent
+  /// position, velocity and all other vector quantities. For N=3, the operator
+  /// ^ between tupels refers to the usual vector cross product.
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   template<int N, typename X> class tupel {
     // private/protected types and data                                         
@@ -83,15 +88,15 @@ namespace WDutils {
     X a[N];                          ///< data: an array of N elements of type X
   public:
     //--------------------------------------------------------------------------
-    /// \name static members and public types                                   
+    /// \name static members and public types
     //@{
-    typedef X        element_type;               ///< type of elements          
-    static const int NDAT = N;                   ///< number of elements        
-    static const int ORD  = 1;                   ///< tensor rank or order      
-    static       int size() { return N; }        ///< number of elements        
+    typedef X        element_type;               ///< type of elements 
+    static const int NDAT = N;                   ///< number of elements 
+    static const int ORD  = 1;                   ///< tensor rank or order
+    static       int size() { return N; }        ///< number of elements
     //@}
     //--------------------------------------------------------------------------
-    /// \name constructors                                                      
+    /// \name constructors
     //@{
     /// unitialized construction
     tupel() {}
@@ -117,17 +122,20 @@ namespace WDutils {
     }
     /// from 2 elements (for N=2)
     tupel      (X const&x0, X const&x1) {
+      WDutilsStaticAssert(N==2);
       a[0]=x0;
       a[1]=x1;
     }
     /// from 3 elements (for N=3)
     tupel      (X const&x0, X const&x1, X const&x2) {
+      WDutilsStaticAssert(N==3);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
     }
     /// from 4 elements (for N=4)
     tupel      (X const&x0, X const&x1, X const&x2, X const&x3) {
+      WDutilsStaticAssert(N==4);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
@@ -135,6 +143,7 @@ namespace WDutils {
     }
     /// from 5 elements (for N=5)
     tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4) {
+      WDutilsStaticAssert(N==5);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
@@ -144,6 +153,7 @@ namespace WDutils {
     /// from 6 elements (for N=6)
     tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
 		X const&x5) { 
+      WDutilsStaticAssert(N==6);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
@@ -154,6 +164,7 @@ namespace WDutils {
     /// from 7 elements (for N=7)
     tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
 		X const&x5, X const&x6) {
+      WDutilsStaticAssert(N==7);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
@@ -165,6 +176,7 @@ namespace WDutils {
     /// from 8 elements (for N=8)
     tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
 		X const&x5, X const&x6, X const&x7) {
+      WDutilsStaticAssert(N==8);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
@@ -177,6 +189,7 @@ namespace WDutils {
     /// from 9 elements (for N=9)
     tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
 		X const&x5, X const&x6, X const&x7, X const&x8) {
+      WDutilsStaticAssert(N==9);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
@@ -190,6 +203,7 @@ namespace WDutils {
     /// from 10 elements (for N=10)
     tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
 		X const&x5, X const&x6, X const&x7, X const&x8, X const&x9) {
+      WDutilsStaticAssert(N==10);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
@@ -203,7 +217,7 @@ namespace WDutils {
     }
     //@}
     //--------------------------------------------------------------------------
-    /// \name element access                                                    
+    /// \name element access
     //@{
     /// non-const element access via sub-script operator
     X      &operator[] (int i)       { return a[i]; }
@@ -215,7 +229,7 @@ namespace WDutils {
 #endif
     //@}
     //--------------------------------------------------------------------------
-    /// \name unitary operators and methods                                     
+    /// \name unitary operators and methods
     //@{
     /// reset all elements to zero
     tupel&reset() {
@@ -267,7 +281,7 @@ namespace WDutils {
     operator const X*  () const { return a; }
     //@}
     //--------------------------------------------------------------------------
-    /// \name binary operators with scalar                                      
+    /// \name binary operators with scalar
     //@{
     /// assign all elements to scalar
     template<typename S> tupel&operator= (S const&x) {
@@ -303,7 +317,7 @@ namespace WDutils {
     }
     //@}
     //--------------------------------------------------------------------------
-    /// \name binary operators with tupel<N,X>                                  
+    /// \name binary operators with tupel<N,X>
     //@{
     /// set *this equal to x: set tupel::a[i] = x[i]
     tupel&operator= (tupel const&x) {
@@ -384,7 +398,7 @@ namespace WDutils {
     }
     //@}
     //--------------------------------------------------------------------------
-    /// \name binary operators with tupel<N,S>                                  
+    /// \name binary operators with tupel<N,S>
     //@{
     /// set *this equal to x: set tupel::a[i] = x[i]
     template<typename S> tupel&operator= (tupel<N,S> const&x) {
@@ -437,7 +451,7 @@ namespace WDutils {
     }
     //@}
     //--------------------------------------------------------------------------
-    /// \name miscellaneous                                                     
+    /// \name miscellaneous
     //@{
     /// set elements equal to array elements
     tupel&copy(const X*x) {
@@ -521,10 +535,10 @@ namespace WDutils {
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   /// \relates WDutils::tupel
-  /// \name formatted I/O                                                     
+  /// \name formatted I/O
   //@{
-  /// formatted output: space separated; a preceeding std::setw() sets the
-  /// width for the output of \b each element
+  /// formatted output: space separated; a preceeding std::setw() sets the width
+  /// for the output of \b each element
   template<int N, typename X> inline
   std::ostream&operator<<(std::ostream&s, tupel<N,X> const&x) {
     meta::taux<X,N-1,0>::v_out(s,x);

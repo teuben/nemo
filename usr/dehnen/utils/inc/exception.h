@@ -43,13 +43,34 @@
 // /////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  WDutils::RunInfo                                                          
-  //                                                                            
-  /// provides information about the running process                            
-  ///                                                                           
-  /// only one object exists, the static RunInfo::Info                          
-  ///                                                                           
+  //
+  //  macro for compile-time assertion, stolen from the boost library
+  //
+  //----------------------------------------------------------------------------
+  template<bool> struct STATIC_ASSERTION_FAILURE;
+  template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+  /// \brief macro for compile-time assertion
+  ///
+  /// \code
+  ///   StaticAssert(constant expression);
+  /// \endcode
+  /// will cause a compiler error if the expression evaluates to false. This
+  /// relies on sizeof() an incomplete type causing an error, though
+  /// "STATIC_ASSERTION_FAILURE" along with the line of the actual
+  /// instantination causing the error will also appear in the
+  /// compiler-generated error message.
+#define WDutilsStaticAssert(TEST)				\
+  enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
+    static_cast<bool>(TEST)>)					\
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  //
+  //  WDutils::RunInfo
+  //
+  /// provides information about the running process
+  ///
+  /// only one object exists, the static RunInfo::Info
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class RunInfo {
   private:
@@ -189,6 +210,7 @@ namespace WDutils {
     /// \param[in] fnc  (optional) name of calling function
     exception operator()(const char*fmt, ...) const;
   };
+  //@}
   // ///////////////////////////////////////////////////////////////////////////
   /// C++ wrapper around a C string.                                            
   /// Construction from C-type format string + data;                            
@@ -301,7 +323,7 @@ namespace WDutils {
   /// Otherwise the behaviour is identical to ANSI C99 snprintf().              
   /// \return bytes written                                                     
   /// \param str string to write into                                           
-  /// \param size maximum number of bytes to write, including trailing \0.      
+  /// \param size maximum number of bytes to write, including trailing 0.      
   /// \param fmt format string                                                  
   int snprintf(char*str, size_t size, const char* fmt, ... ) WDutils_THROWING;
   // ///////////////////////////////////////////////////////////////////////////
