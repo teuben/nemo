@@ -121,7 +121,8 @@ namespace falcON {
       unsigned           NALL;                     // # data                    
       unsigned           NBOD;                     // # bodies hold             
       unsigned           NO;                       // this==bodies::BLOCK[NO]   
-      unsigned           FIRST;                    // total index of first body 
+      unsigned           FIRST;                    // total index of first body
+      unsigned           LOCALFIRST;               // local index of first body
       void              *DATA[BodyData::NQUANT];   // pointers to body data     
       block             *NEXT;                     // blocks: in linked list    
       const bodies      *BODS;                     // pointer back to bodies    
@@ -171,20 +172,23 @@ namespace falcON {
       flags      &flag(int i)       { return datum<fieldbit::f>(i); }
       flags const&flag(int i) const { return const_datum<fieldbit::f>(i); }
       //------------------------------------------------------------------------
-      void set_first(unsigned f) { FIRST = f; }
+      void set_first(unsigned f) { FIRST=f; LOCALFIRST=f; }
+      void set_first(unsigned f, unsigned l) { FIRST=f; LOCALFIRST=l; }
       //------------------------------------------------------------------------
       bool has_field(fieldbit f) const { return DATA[value(f)] != 0; }
       //------------------------------------------------------------------------
-      bool               is_sph   () const { return TYPE.is_sph(); }
-      bool               is_empty () const { return NBOD == 0; }
-      unsigned     const&N_alloc  () const { return NALL; }
-      unsigned     const&N_bodies () const { return NBOD; }
-      unsigned           N_free   () const { return NALL - NBOD; }
-      unsigned     const&my_No    () const { return NO; }
-      const bodies*const&my_bodies() const { return BODS; }
-      bodytype     const&type     () const { return TYPE; }
-      unsigned     const&first    () const { return FIRST; }
-      unsigned           end      () const { return FIRST+NBOD; }
+      bool               is_sph     () const { return TYPE.is_sph(); }
+      bool               is_empty   () const { return NBOD == 0; }
+      unsigned     const&N_alloc    () const { return NALL; }
+      unsigned     const&N_bodies   () const { return NBOD; }
+      unsigned           N_free     () const { return NALL - NBOD; }
+      unsigned     const&my_No      () const { return NO; }
+      const bodies*const&my_bodies  () const { return BODS; }
+      bodytype     const&type       () const { return TYPE; }
+      unsigned     const&first      () const { return FIRST; }
+      unsigned     const&localfirst () const { return LOCALFIRST; }
+//       unsigned           end        () const { return FIRST+NBOD; }
+      unsigned           localend   () const { return LOCALFIRST+NBOD; }
       //------------------------------------------------------------------------
       block*const&next             () const { return NEXT; }
       block*      next_of_same_type() const {
@@ -573,10 +577,16 @@ namespace falcON {
     /// index to the first of all bodies
     index first() const { return index(FIRST->my_No(),0); }
     /// running index of body (between 0 and N-1).
+    /// \note in MPI parallel code this is a \b global index
     unsigned bodyindex(index i) const {
       return BLOCK[i.no()]->first() + i.in();
     }
-    /// comparison between indices
+    /// running index of body (between 0 and N-1).
+    /// \note in MPI parallel code this is a \b local index, starting at 0
+    unsigned localindex(index i) const {
+      return BLOCK[i.no()]->localfirst() + i.in();
+    }
+    /// comparison between indices, also works in parallel across nodes
     bool is_less(index a, index b) const {
       return  a.no() == b.no() &&  a.in() < b.in()
 	||    BLOCK[a.no()]->FIRST < BLOCK[b.no()]->FIRST;
@@ -678,9 +688,16 @@ namespace falcON {
 	return B->my_No();
       }
       /// return running body index (between 0, N-1)
+      /// \note  in parallel code, the index is global and hence unique
       unsigned my_index() const {
 	CheckInvalid("my_index");
 	return B->first() + K;
+      }
+      /// return running body index (between 0, N-1)
+      /// \note in parallel code, the index is local only
+      unsigned my_localindex() const {
+	CheckInvalid("my_index");
+	return B->localfirst() + K;
       }
       /// friend return const pointer to falcON::bodies of iterator
       friend const bodies*const&bodies_of(iterator const&);
@@ -690,8 +707,10 @@ namespace falcON {
       friend unsigned const&block_No(iterator const&);
       /// friend returning sub-index within block
       friend unsigned const&subindex(iterator const&);
-      /// friend returning running body index (between 0, N-1)
+      /// friend returning global running body index (between 0, N_global-1)
       friend unsigned bodyindex(iterator const&);
+      /// friend returning local running body index (between 0, N_local-1)
+      friend unsigned localindex(iterator const&);
       /// conversion to bodies::index
       operator index() const {
 	CheckInvalid("operator index");
@@ -980,11 +999,12 @@ namespace falcON {
       const unsigned in = i.in();
       return in < p->N_bodies()? iterator(p,in) : iterator(0);
     }
-    /// body of a given running index in [0, N_bodies()[
+    /// body of a given local running index in [0, N_bodies()[
+    /// \note this makes sense only locally
     iterator bodyNo(unsigned i) const {
       const block*p = FIRST;
-      while(p && i >= p->end()) p = p->next();
-      return p? iterator(p, i - p->first()) : iterator(0);
+      while(p && i >= p->localend()) p = p->next();
+      return p? iterator(p, i - p->localfirst()) : iterator(0);
     }
     /// an invalid body (useful as default argument)
     static iterator bodyNil() { return iterator(0); }
@@ -1320,7 +1340,8 @@ namespace falcON {
     /// set body keys to bodyindeces
     /// \note the bodyindex is defined via that of the first body in each
     /// block. In a MPI parallel situation, this is not identical to the LOCAL
-    /// running number, but reflects the global running number!
+    /// running number (available as localindex()), but reflects the global
+    /// running number!
     void reset_keys() {
       if(BITS.contain(fieldbit::k))
 	for(iterator b = begin_all_bodies(); b; ++b) 
@@ -1466,6 +1487,9 @@ namespace falcON {
   }
   inline unsigned bodyindex(bodies::iterator const&i) {
     return i.my_index();
+  }
+  inline unsigned localindex(bodies::iterator const&i) {
+    return i.my_localindex();
   }
   inline bool has_field(bodies::iterator const&i, fieldbit f) {
     return i.B && i.B->has_field(f);

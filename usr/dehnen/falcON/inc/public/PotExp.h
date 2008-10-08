@@ -315,8 +315,13 @@ namespace falcON {
       }
       //------------------------------------------------------------------------
 #ifdef falcON_MPI
-      /// set to sum of A_nlm over all MPI processes
-      Anlm&global_sum(Anlm const&A, const MPI::Communicator*C);
+      /// on all processes, set A to sum over C on each process.
+      /// \param[in] C    local coefficients to sum
+      /// \param[in] Comm MPI communicator to sum over
+      Anlm&global_sum(Anlm const&C, const MPI::Communicator*Comm);
+      /// on all processes, replace A by sum over values on each process.
+      /// \param[in] Comm MPI communicator to sum over
+      Anlm&global_sum(const MPI::Communicator*Comm);
 #endif
       //------------------------------------------------------------------------
       /// make formated nice print
@@ -389,7 +394,6 @@ namespace falcON {
     \f]
     \note The \f$A_{nlm}\f$ are not yet normalised, this must be done
           via PotExp::Normalize().
-    \param T type of scalar used for masses & positions (float or double)
     \param A coefficients \f$A_{nlm}\f$ to add to
     \param n number of bodies
     \param m array with body masses
@@ -397,7 +401,7 @@ namespace falcON {
     \param f array with body flags (can be null)
     \param k flag (see note below)
     \note If flags are provided and the last argument is non-zero, only
-          the contributions of bodies with (f[i] & k) is true are added.
+          the contributions of bodies for which (f[i]&k)==true are added.
     */
     template<typename T>
     void AddCoeffs(Anlm&A, int n, const T*m, const tupel<3,T>*x,
@@ -424,7 +428,7 @@ namespace falcON {
     \mbox{\boldmath$\nabla$}\Psi_{nlm}(\mbox{\boldmath$x$}).
     \f}
     \note The coefficients must have been normalised via PotExp::Normalize().
-    \param T type of scalar used for positions, potential, accelerations (float or double)
+    \note Instantinations for T=float and T=double
     \param A coefficients \f$A_{nlm}\f$ to be used
     \param n number of bodies
     \param x array with body positions
@@ -433,7 +437,7 @@ namespace falcON {
     \param f array with body flags (can be null)
     \param add flag (see note below)
     \note If flags are provided gravity is computed only for bodies for 
-          which f[i]&1 is true.
+          which (f[i]&1)==true.
     \note If the 1st bit of the last argument is set, potentials are      
           added, otherwise assigned.\n
 	  Likewise, if the second bit of that arguement is set,
@@ -459,7 +463,7 @@ namespace falcON {
     \Psi_{nlm}(\mbox{\boldmath$x$}) \\
     \f]
     \note The coefficients must have been normalised via PotExp::Normalize().
-    \param T type of scalar used for positions, potential (float or double)
+    \note Instantinations for T=float and T=double
     \param A coefficients \f$A_{nlm}\f$ to be used
     \param n number of bodies
     \param x array with body positions
@@ -491,7 +495,6 @@ namespace falcON {
     /// Moreover, this routine is not suitable for a body data layout in blocks
     /// (though it could be amended to fit this).
     ///
-    /// \param T type of scalar used for positions, potential (float or double)
     /// \param A coefficients \f$A_{nlm}\f$; on output: normalized coeffs
     /// \param n number of bodies
     /// \param m array with body masses

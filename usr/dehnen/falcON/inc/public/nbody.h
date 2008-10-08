@@ -626,7 +626,7 @@ namespace falcON {
       CODE->stats_body(to);
     }
     /// header for statistics output
-    /// \param[in] o ostream to print to
+    /// \param[in] to ostream to print to
     void  stats_head(output&to) const {
       if(to) to<<'#';
       CODE->stats_head(to);
@@ -949,7 +949,7 @@ namespace falcON {
 	       kern_type k, real G, real fs, int nr, const acceleration*ae,
 	       const int nd[4]
 #ifdef falcON_INDI
-	       ,soft_type
+	       , soft_type st
 #ifdef falcON_ADAP
 	       , real, unsigned, real, real
 #endif

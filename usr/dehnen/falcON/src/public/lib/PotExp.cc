@@ -2316,7 +2316,12 @@ void Anlm::table_print(symmetry     s,
 Anlm& Anlm::global_sum(Anlm const&C, const MPI::Communicator*Comm)
 {
   reset(C.nmax(),C.lmax());
-  COMMUN(Comm)->AllReduce(C.A, A, N1*L1Q, MPI::Sum);
+  COMMUN(Comm)->AllReduce(MPI::Sum,C.A,A,N1*L1Q);
+  return*this;
+}
+Anlm& Anlm::global_sum(const MPI::Communicator*Comm)
+{
+  COMMUN(Comm)->AllReduceInPlace(MPI::Sum,A,N1*L1Q);
   return*this;
 }
 #endif

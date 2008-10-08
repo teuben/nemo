@@ -365,6 +365,9 @@ namespace falcON {
     /// return # bodies with h_i == h_max
     unsigned const&N_HatMax () const;
     //--------------------------------------------------------------------------
+    /// return \f$ \min_{ij}\{|\boldsymbol{x}_i-\boldsymbol{x}_j|/h_i\} \f$
+    real const&minX() const;
+    //--------------------------------------------------------------------------
     /// return # active bodies of given type
     /// \param[in] type type of bodies wanted
     /// \param[in] all  consider all bodies active.

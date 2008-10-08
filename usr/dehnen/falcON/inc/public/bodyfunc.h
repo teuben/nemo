@@ -225,7 +225,7 @@ namespace falcON {
   /// distinctions: \n                                                          
   /// - the return type of the bodyfunc expression \b must match T            \n
   /// - the parameters are read by the constructor, ie. cannot be varied later\n
-  /// - if the bodyfunc is empty, we return: true, 0 , zero, vect(zero).        
+  /// - if the bodyfunc is empty, we return: true, 0, zero, vect(zero).
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> class BodyFunc : private Bodyfunc {
@@ -312,11 +312,9 @@ namespace falcON {
     typedef typename BodyPropType<BIT>::proptype proptype;
     /// type required by bodyfunc
     typedef typename BodyPropType<BIT>::functype functype;
-    /// construction from bodyfunc and parameters
-    /// \param f pter to bodyfunc
-    /// \param p array with parameters (may be empty)
-    /// \param n size of array p
-    /// \note n must match b->npar() (we issue a warning if it exceeds)
+    /// construction from Bodyfunc and time
+    /// \param f pter to Bodyfunc
+    /// \param t time to use
     BodyProp(const Bodyfunc*f, double t) 
       throw(falcON::exception) : F(f), T(t)
     {
@@ -341,8 +339,7 @@ namespace falcON {
     const char*parameters() const { return F->parameters(); }
     /// function call
     /// \param b body
-    /// \param t time
-    /// \return expression evaluated for body \a b at time \a t
+    /// \return expression evaluated for body \a b at time set at construction
     proptype operator()(body const&b) const {
       return convert(F->func<functype>(b,T));
     }

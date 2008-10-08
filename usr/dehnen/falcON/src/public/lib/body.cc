@@ -51,9 +51,10 @@ void bodies::block::clone(block*that)
     this->set_data_void(f,that->data_void(f));
     that->set_data_void(f,0);
   }
-  this->NALL  = that->NALL;
-  this->NBOD  = that->NBOD;
-  this->FIRST = that->FIRST;
+  this->NALL       = that->NALL;
+  this->NBOD       = that->NBOD;
+  this->FIRST      = that->FIRST;
+  this->LOCALFIRST = that->LOCALFIRST;
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::block::reset_flags() const
@@ -147,13 +148,14 @@ bodies::block::block(unsigned no,                  // I: our No
 		     fieldset bits,                // I: data to allocate       
 		     bodies  *bods)                // I: pointer to my bodies   
   falcON_THROWING
-  : TYPE ( type ),
-    NALL ( na ), 
-    NBOD ( nb ), 
-    NO   ( no ),
-    FIRST( fst ),
-    NEXT ( 0 ),
-    BODS ( bods )
+: TYPE       ( type ),
+  NALL       ( na ), 
+  NBOD       ( nb ), 
+  NO         ( no ),
+  FIRST      ( fst ),
+  LOCALFIRST ( fst ),
+  NEXT       ( 0 ),
+  BODS       ( bods )
 {
   if(na<nb)
     falcON_THROW("in bodies::block::block(): N_alloc < N_bodies");
@@ -663,10 +665,10 @@ bodies::block* bodies::new_block(bodytype t, unsigned Na, unsigned Nb,
 void bodies::reset_firsts(int first[BT_NUM])
 {
   for(bodytype t; t; ++t) {
-    int F = first[t];
+    int L=0;
     for(block*B=TYPES[t]; B; B=B->next_of_same_type()) {
-      B->set_first(F);
-      F += B->N_bodies();
+      B->set_first(L+first[t], L);
+      L+=B->N_bodies();
     }
   }
 }
@@ -708,7 +710,7 @@ bodies::~bodies() falcON_THROWING
   del_data();
 }
 ////////////////////////////////////////////////////////////////////////////////
-// set block::FIRST and NALL, NBOD & NTOT
+// set block::FIRST, LOCALFIRST, NALL, NBOD & NTOT
 void bodies::set_firsts()
 {
   for(bodytype t; t; ++t) {

@@ -444,6 +444,10 @@ namespace falcON {
     return SPHT->N_HatMax ();
   }
   //----------------------------------------------------------------------------
+  inline real const&forces::minX () const {
+    return SPHT->minX ();
+  }
+  //----------------------------------------------------------------------------
   inline unsigned forces::N_active(bodytype type, bool all) const {
     if(BODIES->N_bodies(type) == 0) return 0;
     if(all) return BODIES->N_bodies(type);

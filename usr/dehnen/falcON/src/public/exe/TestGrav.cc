@@ -171,7 +171,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 #ifdef falcON_ADAP
   if(argc>p) Nsoft  = atof(argv[p++]);
   if(Nsoft)  indiv_soft = true;
-  NREF = Nsoft>0? (Nsoft>1? falcON::uint(Nsoft+half) : 1) : 0;
+  NREF = Nsoft>0? (Nsoft>1? unsigned(Nsoft+half) : 1) : 0;
   if(argc>p) NREF   = atoi(argv[p++]);
   if(argc>p) emin   = atof(argv[p++]);
 #endif

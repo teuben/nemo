@@ -532,18 +532,17 @@ void ForceDiagGrav::diagnose_grav() const
 #ifdef falcON_MPI
   if(snap_shot()->parallel()) {
     const int Num=Ndim*(Ndim+1)+3;
-    double Loc[Num];
     double Tmp[Num];
     int p=0;
-    Loc[p++] = m;
-    Loc[p++] = vin;
-    Loc[p++] = vex;
+    Tmp[p++] = m;
+    Tmp[p++] = vin;
+    Tmp[p++] = vex;
     for(int i=0; i!=Ndim; ++i) {
-      Loc[p++] = x[i];
+      Tmp[p++] = x[i];
       for(int j=0; j!=Ndim; ++j) 
-	Loc[p++] = w[i][j];
+	Tmp[p++] = w[i][j];
     }
-    COMMUN(Comm(snap_shot()))->AllReduce(Loc,Tmp,Num,MPI::Sum);
+    COMMUN(Comm(snap_shot()))->AllReduceInPlace(MPI::Sum,Tmp,Num);
     m    = Tmp[p=0];
     vin  = Tmp[++p];
     vex  = Tmp[++p];
@@ -582,15 +581,14 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
 #ifdef falcON_MPI
   if(snap_shot()->parallel()) {
     const int Num=Ndim*(Ndim+2);
-    double Loc[Num];
     double Tmp[Num];
     for(int i=0,p=0; i!=Ndim; ++i) {
-      Loc[p++] = l[i];
-      Loc[p++] = v[i];
+      Tmp[p++] = l[i];
+      Tmp[p++] = v[i];
       for(int j=0; j!=Ndim; ++j) 
-	Loc[p++] = k[i][j];
+	Tmp[p++] = k[i][j];
     }
-    COMMUN(Comm(snap_shot()))->AllReduce(Loc,Tmp,Num,MPI::Sum);
+    COMMUN(Comm(snap_shot()))->AllReduceInPlace(MPI::Sum,Tmp,Num);
     for(int i=0,p=0; i!=Ndim; ++i) {
       l[i] = Tmp[p++];
       v[i] = Tmp[p++];
@@ -643,22 +641,21 @@ void ForceDiagGrav::diagnose_full() const
 #ifdef falcON_MPI
   if(snap_shot()->parallel()) {
     const int Num=Ndim*(2*Ndim+3)+3;
-    double Loc[Num];
     double Tmp[Num];
     int p=0;
-    Loc[p++] = m;
-    Loc[p++] = vin;
-    Loc[p++] = vex;
+    Tmp[p++] = m;
+    Tmp[p++] = vin;
+    Tmp[p++] = vex;
     for(int i=0; i!=Ndim; ++i) {
-      Loc[p++] = x[i];
-      Loc[p++] = v[i];
-      Loc[p++] = l[i];
+      Tmp[p++] = x[i];
+      Tmp[p++] = v[i];
+      Tmp[p++] = l[i];
       for(int j=0; j!=Ndim; ++j) {
-	Loc[p++] = w[i][j];
-	Loc[p++] = k[i][j];
+	Tmp[p++] = w[i][j];
+	Tmp[p++] = k[i][j];
       }
     }
-    COMMUN(Comm(snap_shot()))->AllReduce(Loc,Tmp,Num,MPI::Sum);
+    COMMUN(Comm(snap_shot()))->AllReduceInPlace(MPI::Sum,Tmp,Num);
     m   = Tmp[p=0];
     vin = Tmp[++p];
     vex = Tmp[++p];
@@ -931,10 +928,8 @@ void ForceALCON::cpu_stats_body(output&to) const
 {
 #ifdef falcON_MPI
   if(snap_shot()->parallel()) {
-    double loc[3]={CPU_TREE,CPU_GRAV,CPU_AEX},cpu[3];
-    DebugInfo(4,"ForceALCON::cpu_stats_body(): "
-	      "calling Communicator::Reduce()\n");
-    COMMUN(Comm(snap_shot()))->Reduce(0,loc,cpu,3,MPI::Sum);
+    double cpu[3]={CPU_TREE,CPU_GRAV,CPU_AEX};
+    COMMUN(Comm(snap_shot()))->ReduceInPlace(MPI::Sum,0,cpu,3);
     CPU_TREE = cpu[0];
     CPU_GRAV = cpu[1];
     CPU_AEX  = cpu[2];

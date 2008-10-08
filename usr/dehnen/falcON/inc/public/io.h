@@ -442,7 +442,6 @@ namespace falcON {
     /// If more data are wanted than left in the record, only those left
     /// in the record will be read and a warning be issued.
     ///
-    /// \param T   data type
     /// \return    number of data actually read
     /// \param buf buffer to read into
     /// \param n   number of data to read
@@ -465,7 +464,6 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// read a single FORTRAN record in one go (you have to know its size!)
     ///
-    /// \param T   type of data to read
     /// \param in  input stream to read from
     /// \param buf data buffer to read into
     /// \param n   number of data of type T to read
@@ -549,7 +547,6 @@ namespace falcON {
     /// If more data are to be written than left for the record, we only
     /// write as many as the record allows but issue a warning.
     ///
-    /// \param T   data type
     /// \return    number of data actually written
     /// \param buf buffer to write
     /// \param n   number of data to write
@@ -568,7 +565,6 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// write a single FORTRAN record in one go
     ///
-    /// \param T   type of data to write
     /// \param out output stream to write to
     /// \param buf data buffer to write from
     /// \param n   number of data of type T to write

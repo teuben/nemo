@@ -115,18 +115,15 @@ namespace falcON {
 #ifdef WDutils_EXCEPTIONS
 #  define falcON_EXCEPTIONS
 #  define falcON_THROWING      throw(falcON::exception)
-#  define falcON_THROW         throw WDutils::Thrower(__FILE__,__LINE__)
+#  define falcON_THROWER       throw WDutils::Thrower
 #  define falcON_THROWN        throw falcON::exception
 #  define falcON_RETHROW(E)    WDutils_RETHROW(E)
 #else
 #  undef falcON_EXCEPTIONS
+#  define falcON_THROWER       falcON::Error
   /// use instead of <tt> throw(falcON::exception) </tt> after function
   /// declaration
 #  define falcON_THROWING 
-  /// instead of throwing an exception: error with [file:line]
-  /// use "falcON_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
-  /// falcON::exception(fmt, data)"
-#  define falcON_THROW         falcON_Error
   /// instead of throwing an exception: error 
   /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
   /// WDutils::exception(fmt, data)"
@@ -134,6 +131,10 @@ namespace falcON {
   /// use "falcON_RETHROW(E)" to re-throw a caught exception "E"
 #  define falcON_RETHROW(E)    falcON_Error  (text(E))
 #endif
+  /// instead of throwing an exception: error with [file:line]
+  /// use "falcON_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
+  /// falcON::exception(fmt, data)"
+#  define falcON_THROW         falcON_THROWER(__FILE__,__LINE__)
   //@}
 #undef  DebugInfo
 #define DebugInfo    falcON::DebugInformation(__FILE__,__LINE__)
