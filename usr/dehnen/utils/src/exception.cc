@@ -34,12 +34,6 @@
 #include <ctime>
 #include <iostream>
 #include <fstream>
-#ifdef unix
-extern "C" {
-#  include <unistd.h>
-#  include <pwd.h>
-}
-#endif
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class RunInfo                                                                
@@ -58,14 +52,21 @@ WDutils::RunInfo::RunInfo()
     time_t now = ::time(0);
     SNprintf(__time,100,ctime(&now));
     __time[24] = 0;
-    // set host name, user name, and pid
 #ifdef unix
+    // set host name
     gethostname(__host,100);
-    SNprintf(__user,100,(getpwuid(geteuid())->pw_name));
-    SNprintf(__pid,20,"%d",getpid());
     __host_known = 1;
-    __user_known = 1;
+    // set user name
+    const char*user = getenv("USER");
+    if(user) {
+      SNprintf(__user,100,user);
+      __user_known = 1;
+    } else
+      SNprintf(__user,100,"unknown.user");
+    // set pid
+    SNprintf(__pid,20,"%d",getpid());
     __pid_known  = 1;
+    // set command and name of executable
     char file[64];
     SNprintf(file,64,"/proc/%s/cmdline",__pid);
     std::ifstream in(file);
