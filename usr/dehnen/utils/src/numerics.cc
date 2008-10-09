@@ -657,10 +657,10 @@ namespace {
     void split(range*A);
   public:
     /// ctor: create points and set root
-    Ranker(const scalar*A, unsigned n) :
+    Ranker(const scalar*A, unsigned n, unsigned k=0) :
       N          ( n ),
       P          ( WDutils_NEW(point,N) ),
-      RangeAlloc ( int(10+log(double(N))) )
+      RangeAlloc ( k? 4*k*int(1+log(double(N))) : 10*int(1+log(double(N))) )
     {
       Root.R   = 0;
       Root.N   = N;
@@ -727,10 +727,10 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
   template<typename scalar>
-  void FindRank<scalar>::setup(const scalar*F, unsigned N) 
+  void FindRank<scalar>::setup(const scalar*F, unsigned N,unsigned K) 
   {
     if(DATA) WDutils_DEL_O(static_cast<Ranker<scalar>*>(DATA));
-    DATA = new Ranker<scalar>(F,N);
+    DATA = new Ranker<scalar>(F,N,K);
   }
   template<typename scalar>
   unsigned FindRank<scalar>::Index(unsigned rank) const

@@ -348,18 +348,20 @@ namespace WDutils {
     void *DATA;
     /// copy constructor disabled; use references instead of copies
     FindRank(const FindRank&);
-    void setup(const scalar*, unsigned);
+    void setup(const scalar*, unsigned, unsigned=0);
   public:
     /// ctor: setup sort tree
     /// \param[in] F  array with elements
     /// \param[in] N  number of elements
-    FindRank(const scalar*F, unsigned N) : DATA(0) {
-      setup(F,N);
+    /// \param[in] K  (optional) expected number of calls to Index() or Value()
+    FindRank(const scalar*F, unsigned N, unsigned K=0) : DATA(0) {
+      setup(F,N,K);
     }
     /// ctor: setup sort tree
     /// \param[in] F  Array with elements
-    FindRank(Array<scalar,1>const&F) : DATA(0) {
-      setup(F.array(),F.size());
+    /// \param[in] K  (optional) expected number of calls to Index() or Value()
+    FindRank(Array<scalar,1>const&F, unsigned K=0) : DATA(0) {
+      setup(F.array(),F.size(),K);
     }
     /// dtor: de-allocate sorttree
     ~FindRank();
