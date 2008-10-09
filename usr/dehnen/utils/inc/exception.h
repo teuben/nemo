@@ -206,8 +206,8 @@ namespace WDutils {
     /// constructor: get file name, and line number
     Thrower(const char*__file, int __line) : file(__file), line(__line) {}
     /// generate an exception
-    /// \param[in] err  error code as returned by MPI routines (C-binding)
-    /// \param[in] fnc  (optional) name of calling function
+    /// \param[in] fmt  printf-style format string for error message
+    /// \note further arguments to be intepreted according to 1st argument
     exception operator()(const char*fmt, ...) const;
   };
   //@}

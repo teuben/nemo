@@ -494,6 +494,8 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   // does not compile with gcc 4.3.1, which seems a compiler bug
 #if defined(__GNUC__) && ( __GNUC__ < 4 || __GNUC_MINOR__ < 3)
+}
+namespace WDutils {
   template<typename scalar>
   struct traits<typename PercentileFinder<scalar>::point> {
     static const char* name() { return "PercentileFinder::point"; }
@@ -502,6 +504,8 @@ namespace {
   struct traits<typename PercentileFinder<scalar>::range> {
     static const char* name() { return "PercentileFinder::range"; }
   };
+}
+namespace {
 #endif
   //////////////////////////////////////////////////////////////////////////////
 
