@@ -622,6 +622,10 @@ bool falcON::snap_in::has(nemo_io::Field f) const
 //------------------------------------------------------------------------------
 // class falcON::data_in
 //------------------------------------------------------------------------------
+namespace {
+  using namespace falcON;
+  typedef tupel<Ndim,notreal> Vect;
+}
 falcON::data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
   FIELD(f), INPUT(snap), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)
 {
@@ -689,27 +693,89 @@ falcON::data_in::~data_in()
   INPUT.FIELDS_READ |= FIELD;
   DebugInfo(5,"data_in(%s) closed\n",NemoTag(FIELD));
 }
-void falcON::data_in::read(void*data, unsigned n)
+void falcON::data_in::read(void*data, unsigned N)
 {
-  if(NREAD + n > NTOT) {
+  if(NREAD >= NTOT) {
+    falcON_Warning("nemo input of %s: cannot read any more (all %d read)\n",
+		   NemoTag(FIELD),NREAD); 
+    return;
+  }
+  if(N == 0)
+    N = NTOT - NREAD;
+  else if(NREAD + N > NTOT) {
     falcON_Warning("nemo input of %s: cannot read %d, only %d data left",
-		   NemoTag(FIELD), n, NTOT-NREAD);
-    n = NTOT - NREAD;
+		   NemoTag(FIELD), N, NTOT-NREAD);
+    N = NTOT - NREAD;
   }
-  if(n) {
-    get_data_blocked(INPUT.stream(),NemoTag(FIELD), data, n*SUBN);
-    DebugInfo(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
-    NREAD += n;
-  }
+  if(nemo_io::coercing(TYPE, nemo_io::type(FIELD))) {
+    DebugInfo(1,"data_in::read(%s): must coerce\n",NemoTag(FIELD));
+    unsigned n = N*SUBN;
+    notreal*buf= falcON_NEW(notreal, N);
+    get_data_blocked(INPUT.stream(),NemoTag(FIELD), buf, n);
+    for(int i=0; i!=n; ++i) static_cast<real*>(data)[i] = buf[i];
+    falcON_DEL_A(buf);
+  } else 
+    get_data_blocked(INPUT.stream(),NemoTag(FIELD), data, N*SUBN);
+  DebugInfo(5,"data_in::read(): %d %s read\n",N,NemoTag(FIELD));
+  NREAD += N;
 }
-void falcON::data_in::read(void*data)
+void falcON::data_in::read_phases(void*pos, void*vel, unsigned N)
 {
-  if(NREAD < NTOT) {
-    unsigned n = NTOT - NREAD;
-    get_data_blocked(INPUT.stream(),NemoTag(FIELD), data, n*SUBN);
-    DebugInfo(5,"data_in::read(): %d %s read\n",n,NemoTag(FIELD));
-    NREAD += n;
+  if(FIELD != nemo_io::posvel)
+    falcON_THROW("data_in::read_phases(%d)\n",NemoTag(FIELD));
+  if(pos == 0 && vel == 0) {
+    falcON_Warning("data_in::read_phases(): pos=%p, vel=%p\n",pos,vel);
+    return;
   }
+  if(NREAD >= NTOT) {
+    falcON_Warning("data_in::read_phases() cannot read any more "
+		   "(all %d read)\n", NREAD); 
+    return;
+  }
+  if(N == 0)
+    N = NTOT - NREAD;
+  else if(NREAD + N > NTOT) {
+    falcON_Warning("nemo input of %s: cannot read %d, only %d data left",
+		   NemoTag(FIELD), N, NTOT-NREAD);
+    N = NTOT - NREAD;
+  }
+  const bool coerce = nemo_io::coercing(TYPE, nemo_io::type(FIELD));
+  if(coerce)
+    DebugInfo(1,"data_in::read_phases(): must coerce\n");
+  void* phases = coerce?
+    static_cast<void*>(falcON_NEW(Vect,2*N)) : 
+    static_cast<void*>(falcON_NEW(vect,2*N)) ;
+  get_data_blocked(INPUT.stream(),NemoTag(FIELD), phases, N*SUBN);
+  if(pos) {
+    vect*to = static_cast<vect*>(pos);
+    if(coerce) {
+      const Vect*ph = static_cast<const Vect*>(phases);
+      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
+    } else {
+      const vect*ph = static_cast<const vect*>(phases);
+      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
+    }
+  }
+  if(vel) {
+    vect*to = static_cast<vect*>(vel);
+    if(coerce) {
+      const Vect*ph = static_cast<const Vect*>(phases) + 1;
+      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
+    } else {
+      const vect*ph = static_cast<const vect*>(phases) + 1;
+      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
+    }
+  }
+  if(coerce) falcON_DEL_A(static_cast<Vect*>(phases));
+  else       falcON_DEL_A(static_cast<vect*>(phases));
+  if(pos)
+    if(vel)
+      DebugInfo(5,"data_in::read_phases(): %d %s & %s read\n",N,PosTag,VelTag);
+    else
+      DebugInfo(5,"data_in::read_phases(): %d %s read\n",N,PosTag);
+  else
+    DebugInfo(5,"data_in::read_phases(): %d %s read\n",N,VelTag);
+  NREAD += N;
 }
 //------------------------------------------------------------------------------
 // class falcON::nemo_out

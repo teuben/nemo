@@ -314,26 +314,11 @@ void bodies::block::read_data(data_in &inpt,
     falcON_THROW("bodies::block::read_data(%c): not allowed by our type",
 		 letter(f));
   if(from + N > NBOD)
-    falcON_THROW("bodies::block::read_data(%c): cannot read that many",
-		 letter(f));
+    falcON_THROW("bodies::block::read_data(%c): cannot read %d from %d "
+		 "(NBOD=%d)\n",letter(f),N,from,NBOD);
   add_field(f);
-  if(inpt.must_coerce()) {
-    DebugInfo(1,"bodies::block::read_data(%c): must convert from %s to %s",
-	      letter(f), nemo_io::type_name(nemo_io::NotReal),
-	      nemo_io::type_name(nemo_io::Real));
-    unsigned ntot = N*inpt.sub_N();
-    notreal* data = falcON_NEW(notreal, ntot);
-    inpt.read(data, N);
-    const notreal* d = data;
-    real         * D = static_cast<real*>(DATA[value(f)])+from;
-    for(unsigned i=0; i!=ntot; ++i,++d,++D) *D = *d;
-    falcON_DEL_A(data);
-  } else
-    inpt.read(static_cast<char*>(DATA[value(f)])+from*falcON::size(f), N);
-}
-////////////////////////////////////////////////////////////////////////////////
-namespace {
-  typedef tupel<Ndim,notreal> Vect;
+  inpt.read(static_cast<char*>(DATA[value(f)])+from*falcON::size(f), N);
+  DebugInfo(2,"bodies::block::read_data(): read %d %c",N,letter(f));
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::block::read_posvel(data_in &inpt,
@@ -344,41 +329,19 @@ void bodies::block::read_posvel(data_in &inpt,
   if(inpt.field() != nemo_io::posvel)
     falcON_THROW("bodies::block::read_posvel(): input has not phases");
   if(from + N > NBOD)
-    falcON_THROW("bodies::block::read_posvel(): cannot read that many");
-  const bool coerce = inpt.must_coerce();
-  if(coerce && debug(1))
-    DebugInfo("bodies::read_posvel(): must convert from %s to %s",
-	      nemo_io::type_name(nemo_io::NotReal),
-	      nemo_io::type_name(nemo_io::Real));
-  void* phases = coerce?
-    static_cast<void*>(falcON_NEW(Vect,2*N)) : 
-    static_cast<void*>(falcON_NEW(vect,2*N)) ;
-  inpt.read(phases, N);
-  if(want.contain(fieldbit::x)) {
-    add_field(fieldbit::x);
-    vect*to = static_cast<vect*>(DATA[fieldbit::x]) + from;
-    if(coerce) {
-      const Vect*ph = static_cast<const Vect*>(phases);
-      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
-    } else {
-      const vect*ph = static_cast<const vect*>(phases);
-      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
-    }
-  }
-  if(want.contain(fieldbit::v)) {
-    add_field(fieldbit::v);
-    vect*to = static_cast<vect*>(DATA[fieldbit::v]) + from;
-    if(coerce) {
-      const Vect*ph = static_cast<const Vect*>(phases) + 1;
-      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
-    } else {
-      const vect*ph = static_cast<const vect*>(phases) + 1;
-      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
-    }
-  }
-  if(coerce) falcON_DEL_A(static_cast<Vect*>(phases));
-  else       falcON_DEL_A(static_cast<vect*>(phases));
-  DebugInfo(2,"bodies::block::read_posvel(): read %s",
+    falcON_THROW("bodies::block::read_posvel(): cannot read %d from %d "
+		 "(NBOD=%d)\n",N,from,NBOD);
+  if(want.contain(fieldbit::x)) add_field(fieldbit::x);
+  if(want.contain(fieldbit::v)) add_field(fieldbit::v);
+  vect*pos=want.contain(fieldbit::x)?
+    static_cast<vect*>(DATA[fieldbit::x]) + from : 0;
+  vect*vel=want.contain(fieldbit::v)?
+    static_cast<vect*>(DATA[fieldbit::v]) + from : 0;
+  inpt.read_phases(want.contain(fieldbit::x)?
+		   static_cast<vect*>(DATA[fieldbit::x]) + from : 0,
+		   want.contain(fieldbit::v)?
+		   static_cast<vect*>(DATA[fieldbit::v]) + from : 0, N);
+  DebugInfo(2,"bodies::block::read_posvel(): read %d, %s",N,
 	    word(want&fieldset::phases));
 }
 ////////////////////////////////////////////////////////////////////////////////
