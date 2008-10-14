@@ -88,15 +88,17 @@ namespace WDutils {
     char __cmd   [1024];
     int  __debug;
     int  __mpi_proc;
+    int  __mpi_size;
     RunInfo();
     static RunInfo Info;
   public:
     /// reset the debugging level
     static void set_debug_level(int d) { Info.__debug = d; }
     /// provide info about MPI
-    static void set_mpi_proc(int p) {
+    static void set_mpi_proc(int p, int s) {
       Info.__is_mpi_proc = 1;
       Info.__mpi_proc=p;
+      Info.__mpi_size=s;
     }
     /// is host name known?
     static bool const&host_known() { return Info.__host_known; }
@@ -126,8 +128,12 @@ namespace WDutils {
     static const int &debug_level() { return Info.__debug; }
     /// return our rank within MPI, if we are part of a MPI run
     static const int &mpi_proc() { return Info.__mpi_proc; }
+    /// return our size of MPI::World, if we are part of a MPI run
+    static const int &mpi_size() { return Info.__mpi_size; }
     /// return true if debug level >= given debug depth
     static bool debug(int depth) { return Info.__debug >= depth; }
+    /// print a lof-file header
+    static void header(std::ostream&out);
   };
   /// is debugging level exceeded by debugging depth (argument)?                
   /// \param d debugging depth
@@ -206,8 +212,8 @@ namespace WDutils {
     /// constructor: get file name, and line number
     Thrower(const char*__file, int __line) : file(__file), line(__line) {}
     /// generate an exception
-    /// \param[in] fmt  printf-style format string for error message
-    /// \note further arguments to be intepreted according to 1st argument
+    /// \param[in] err  error code as returned by MPI routines (C-binding)
+    /// \param[in] fnc  (optional) name of calling function
     exception operator()(const char*fmt, ...) const;
   };
   //@}

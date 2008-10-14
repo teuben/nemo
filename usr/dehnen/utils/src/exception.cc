@@ -94,6 +94,21 @@ WDutils::RunInfo::RunInfo()
     WDutils_RETHROW(E);
   }
 }
+//------------------------------------------------------------------------------
+void WDutils::RunInfo::header(std::ostream&out)
+{
+  if(out) {
+    if(RunInfo::cmd_known())
+      out<<"# \""<<RunInfo::cmd()<<"\"\n#\n";
+    out<<"# run at  "  <<RunInfo::time()<<"\n";
+    if(RunInfo::user_known())  out<<"#     by  \""<<RunInfo::user()<<"\"\n";
+    if(RunInfo::host_known())  out<<"#     on  \""<<RunInfo::host()<<"\"\n";
+    if(RunInfo::pid_known())   out<<"#     pid  " <<RunInfo::pid() <<"\n";
+    if(RunInfo::is_mpi_proc()) out<<"#     mpi  " <<RunInfo::mpi_size()<<"\n";
+    out<<"#\n";
+  }
+}
+//------------------------------------------------------------------------------
 WDutils::RunInfo WDutils::RunInfo::Info;
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
