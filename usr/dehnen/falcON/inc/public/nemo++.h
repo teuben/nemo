@@ -465,6 +465,7 @@ namespace falcON {
       case fieldbit::k: return key;
       case fieldbit::s: return step;
       case fieldbit::p: return pot;
+      case fieldbit::q: return pot;
       case fieldbit::a: return acc;
       case fieldbit::j: return jerk;
       case fieldbit::r: return dens;
@@ -673,10 +674,6 @@ namespace falcON {
     nemo_io::Field     const&field()      const { return FIELD; }
     /// which data type are we reading?
     nemo_io::DataType  const&type()       const { return TYPE; }
-    /// to we need to coerce between float and double?
-    bool must_coerce() const { 
-      return nemo_io::coercing(TYPE, nemo_io::type(FIELD));
-    }
     /// # items per datum (i.e. 1 for scalars, 3 for vectors)
     unsigned           const&sub_N()      const { return SUBN; }
     /// total # data present in input snapshot
@@ -687,14 +684,18 @@ namespace falcON {
     unsigned                 N_unread()   const { 
       return NTOT>NREAD? NTOT-NREAD : 0u;
     }
-    //--------------------------------------------------------------------------
-    /// read all data into array given
+    /// read data into array given
     /// \param[in] data  pointer to data array, must have sufficient memory
-    void read(void*data);
-    /// read only \e n data into array given
-    /// \param[in] data  pointer to data array, must have sufficient memory
-    /// \param[in] n     number of bodies to read data for
-    void read(void*data, unsigned n);
+    /// \param[in] n     number of bodies to read data for; default: all left
+    /// \note We coerce data on the fly (convert floating point to real)
+    void read(void*data, unsigned n=0);
+    /// read position and velocity from phases
+    /// \note must only be called when field() == nemo_io::posvel
+    /// \param[in] pos   array for position data, only read if non-null
+    /// \param[in] vel   array for velocity data, only read if non-null
+    /// \param[in] n     number of bodies to read data for; default: all left
+    /// \note We coerce data on the fly (convert floating point to real)
+    void read_phases(void*pos, void*vel, unsigned n=0);
   };// class data_in
   class snap_out;
   // ///////////////////////////////////////////////////////////////////////////

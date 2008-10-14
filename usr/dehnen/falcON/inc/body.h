@@ -187,7 +187,6 @@ namespace falcON {
       bodytype     const&type       () const { return TYPE; }
       unsigned     const&first      () const { return FIRST; }
       unsigned     const&localfirst () const { return LOCALFIRST; }
-//       unsigned           end        () const { return FIRST+NBOD; }
       unsigned           localend   () const { return LOCALFIRST+NBOD; }
       //------------------------------------------------------------------------
       block*const&next             () const { return NEXT; }

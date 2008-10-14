@@ -222,6 +222,7 @@ namespace {
 #define R     sqrt(x*x+y*y)               /* cylindrical radius              */
 #define v     abs(vel)                    /* total velocity                  */
 #define a     abs(acc)                    /* total acceleration              */
+#define k     key                         /* body key                        */
 #define l     (pos^vel)                   /* specific angular momentum       */
 #define lx    (y*vz-z*vy)                 /* x-component of ---              */
 #define ly    (z*vx-x*vz)                 /* y-component of ---              */
