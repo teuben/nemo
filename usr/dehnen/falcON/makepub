@@ -95,7 +95,7 @@ GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h $(IACC)GalPot_pre.h $(tupel_h)
 # -----------------------
 
 basic_cc		:= $(SLIB)basic.cc $(basic_h)
-body_cc			:= $(SLIB)body.cc $(body_h) $(io_h) $(numerics)
+body_cc			:= $(SLIB)body.cc $(body_h) $(io_h) $(nemopp_h) $(numerics)
 io_cc			:= $(SLIB)io.cc $(io_h) $(basic_h)
 kernel_cc		:= $(SLIB)kernel.cc $(kernel_h) $(kernel_SSE_h)
 partner_cc		:= $(SLIB)partner.cc $(partner_h) $(interact_h)
