@@ -1,10 +1,14 @@
-.TH GADGET2NEMO 1NEMO "8 November 2006"
+.TH GADGET2NEMO 1NEMO "15 October 2008"
 .SH NAME
 gadget2nemo \- Convert GADGET snapshot to NEMO snapshot
 .SH SYNOPSIS
 \fBgadget2nemo\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+Convert GADGET snapshot to NEMO snapshot. Input
+snapshot can be in gadget 1 or 2 version and in little or big endian format. The
+version and the endianess is automatically detected, you have nothing
+to specify. You can select data by their name (eg disk, gas, halo
+etc....) and save them in the order requested.
 .PP
 This program is currently to be preferred over \fIgadgetsnap(1NEMO)\fP.
 .SH PARAMETERS
@@ -12,29 +16,35 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-GADGET input [???]     
+GADGET input filename. Version 1 or 2, little/big endian  [Default:required]
 .TP 20
 \fBout=\fP
-NEMO output [???]     
-.TP 20
-\fBstep=\fP
-keep one particle over step [1]  
+NEMO output filename [Default:required]
 .TP 20
 \fBcomp=\fP
-component requested to be saved [mxv]  
+components requested to be saved. m->mass, x->positions,
+v->velocities [mxv]
 .TP 20
-\fBsort=\fP
-sort particles by their Ids [t]  
+\fBselect=\fP 
+select the data you want to load . The following data can be
+requested: \fIdisk, gas, halo, bulge, stars, bndry, all\fP. You can request
+several data separated with a "," like this: select=disk,gas. The
+order of your selection will be respected in the output file [disk]
 .TP 20
-\fBfiles=\fP
-#input gadget files [1]    
-.TP 20
-\fBswap=\fP
-#swap data from/to little/big endian [f]  
+\fBverb=\fP
+verbose mode, display gadget ranges particles if activated [f]
 .TP 20
 \fBVERSION=\fP
-22-Jun-2005 - JCL [2.0]    
+15-Oct-2008 - JCL [3.1]    
 .SH EXAMPLES
+.nf
+To visualize the component of the gas particles using glnemo:
+gadget2nemo mygadget - select=gas| glnemo -
+
+To compute the mass density of the disk particles using Dehnen's
+density program:
+gedget2nemo mygadget - select=disk| density - mygadget.nemo.dens K=40
+.fi
 .SH SEE ALSO
 nemo2gadget(1NEMO),gadgetsnap(1NEMO)
 .SH FILES
@@ -43,6 +53,7 @@ src/nbody/io/gadget
 Jean-Charles Lambert
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +4.0i
+.ta +1.0i +5.0i
 08-Nov-06	V0.0 Created by mkman	NEMO
+15-Oct-08	V3.1 gadget version 2 supported		JCL
 .fi
