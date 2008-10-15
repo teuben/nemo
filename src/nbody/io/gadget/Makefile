@@ -11,7 +11,7 @@
 # ============================================================================
 
 
-include $(NEMOLIB)/makedefs
+#include $(NEMOLIB)/makedefs
 
 SHELL = /bin/csh -f
 
@@ -43,6 +43,10 @@ nem    : dirs $(FBIN)/nemo2gadget
 install: info gad
 	\cp -p $(FBIN)/gadget2nemo $(FBIN)/g2info ${NEMOBIN}
 	chmod 755  ${NEMOBIN}/gadget2nemo  ${NEMOBIN}/g2info
+
+nemo_bin: install
+
+
 
 clean:
 	@/bin/rm $(IO) $(COMP) $(USER) $(FBIN)/g2info $(FOBJ)/g2info.o  $(FOBJ)/gadget2nemo.o  $(FBIN)/nemo2gadget  $(FBIN)/gadget2nemo >& /dev/null
