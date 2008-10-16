@@ -48,8 +48,9 @@ tar zcf nemo.tar.gz.new nemo
 cp nemo/src/scripts/test_a_new_nemo_cvs .
 if (1) then
     # default gcc 3.4.1 doesn't compile falcON, so use 3.4.3 for now
-    source /n/astromake2/astromake_start
-    astroload gcc
+    # source /n/astromake2/astromake_start
+    if ($?ASTROMAKE == 0) source /astromake/astromake_start
+    astroload -v 3.4.3 gcc
 endif
 ./test_a_new_nemo_cvs reuse=1 >& LastBuild.log
 
