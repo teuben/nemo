@@ -57,6 +57,8 @@ const char*defv[] = {
   "prop=???\n         bodiesfunc expression (see man page) to evaluate   ",
   "pars=\n            parameters, must match requirements from prop      ",
   "times=all\n        times to process                                   ",
+  "givetime=t\n       print time as well as property                     ",
+  "prec=6\n           significant digits for floating-point numbers      ",
   "zeromissing=f\n    zero missing body properties (or error out)?       ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
@@ -66,16 +68,18 @@ const char*usage =
 void falcON::main() falcON_THROWING
 {
   // set up parameters                                                          
-  const bool    Z  (getbparam("zeromissing"));
-  const nemo_in IN (getparam("in"));
-  bodiesfunc    BF (getparam("prop"));
+  const bool    Z   (getbparam("zeromissing"));
+  const nemo_in IN  (getparam("in"));
+  bodiesfunc    BF  (getparam("prop"));
+  const int     prec(getiparam("prec"));
+  const bool    time(getbparam("givetime"));
   real        __P[10], *P=0;
   snapshot      SHOT;
   if(BF.npar()) {
-    if(!hasvalue("pars"))
+    int n = getaparam_z("pars",__P,10);
+    if(n == 0)
       falcON_THROW("prop=\"%s\" requires %d parameters, none given",
 		   getparam("prop"),BF.npar());
-    int n = nemoinp(getparam("pars"),__P,10);
     if(n < BF.npar())
       falcON_THROW("prop=\"%s\" requires %d parameters, only %d given",
 		   getparam("prop"),BF.npar(),n);
@@ -93,19 +97,23 @@ void falcON::main() falcON_THROWING
       } else
 	falcON_THROW("data on '%s' missing",word(miss));
     }
+    if(time)
+      std::cout << std::setprecision(prec) << SHOT.time() << ": ";
     switch(BF.type()) {
     case 'b':
-      std::cout<< BF.func<bool>(SHOT,P);
+      std::cout << BF.func<bool>(SHOT,P);
       break;
     case 'i':
-      std::cout<< BF.func<int>(SHOT,P);
+      std::cout << BF.func<int>(SHOT,P);
       break;
     case 'r':
-      std::cout<< BF.func<real>(SHOT,P);
+      std::cout << std::setprecision(prec) << BF.func<real>(SHOT,P);
       break;
     case 'v': {
       vect x = BF.func<vect>(SHOT,P);
-      std::cout<< x[0]<<','<<x[1]<<','<<x[2];
+      std::cout << std::setprecision(prec) << x[0] << ','
+		<< std::setprecision(prec) << x[1] << ','
+		<< std::setprecision(prec) << x[2];
     } break;
     default: falcON_THROW ("unknown type");
     }

@@ -33,20 +33,13 @@
 #include <cstring>
 #include <cstdlib>
 
-extern "C" {
-  typedef void        (*bf_pter)  (falcON::body const&,
-				   double const&,
-				   const falcON::real*);
-  typedef void        (*Bf_pter)  (falcON::bodies const&,
-				   double const&,
-				   const falcON::real*);
-  typedef void        (*Bm_pter)  (void*,
-				   falcON::bodies const&,
-				   double const&,
-				   const falcON::real*);
-}
-
 using namespace falcON;
+////////////////////////////////////////////////////////////////////////////////
+extern "C" {
+  typedef void (*bf_pter) (       body   const&, double, const real*);
+  typedef void (*Bf_pter) (       bodies const&, double, const real*);
+  typedef void (*Bm_pter) (void*, bodies const&, double, const real*);
+}
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
 
@@ -556,7 +549,7 @@ namespace {
       "extern \"C\" {\n"
       "  "<<ftype<<
       "  "<<ffunc<<
-      "(falcON::body const&b, double const&t, const real*__P)\n"
+      "(falcON::body const&b, double t, const real*__P)\n"
       "  {\n"
       "    return ("<<expr<<");\n"
       "  }\n"
@@ -620,7 +613,7 @@ namespace {
       "#include <public/bodyfuncdefs.h>\n\n"
       "extern \"C\" {\n"
       "  void "<<ffunc<<
-      "(void*__X, falcON::bodies const&B, double const&t, const real*__P)\n"
+      "(void*__X, falcON::bodies const&B, double t, const real*__P)\n"
       "  {\n"
       "    LoopAllBodies(&B,b)\n"
       "      static_cast<"<<ftype<<"*>(__X)[i] = ("<<expr<<");\n"
@@ -1027,7 +1020,7 @@ namespace {
   //----------------------------------------------------------------------------
   void make_sub(std::ostream&file, int s) throw(ParseErr) {
     file<<"\n  inline "<<stype[s]<<' '<<sname[s]<<'F'
-	<<"(bodies const&B, double const&t, const real*__P) {\n";
+	<<"(bodies const&B, double t, const real*__P) {\n";
     switch(soper[s]) {
     case 0: make_mean (file,s); break;
     case 1: make_mmean(file,s); break;
@@ -1095,7 +1088,7 @@ namespace {
 	  <<"\n"
 	  <<"extern \"C\"{\n"
 	  <<"  "<<stype[0]<<" "<<ffunc
-	  <<"(bodies const&B, double const&t, const real*__P) {\n";
+	  <<"(bodies const&B, double t, const real*__P) {\n";
     for(int s=sub-1; s>0; --s)
       file<<"    "<<sname[s]<<" = "<<sname[s]<<"F(B,t,__P);\n";
     file  <<"\n"
@@ -1477,117 +1470,117 @@ namespace {
   using falcON::vect;
   using namespace falcON;
   //----------------------------------------------------------------------------
-  void Bm_m(void*X, bodies const&B, double const&, const real*) {
+  void Bm_m(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = mass(b);
   }
   //----------------------------------------------------------------------------
-  void Bm_pos(void*X, bodies const&B, double const&, const real*) {
+  void Bm_pos(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<vect*>(X)[bodyindex(b)] = pos(b);
   }
   //----------------------------------------------------------------------------
-  void Bm_x(void*X, bodies const&B, double const&, const real*) {
+  void Bm_x(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = pos(b)[0];
   }
   //----------------------------------------------------------------------------
-  void Bm_y(void*X, bodies const&B, double const&, const real*) {
+  void Bm_y(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = pos(b)[1];
   }
   //----------------------------------------------------------------------------
-  void Bm_z(void*X, bodies const&B, double const&, const real*) {
+  void Bm_z(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = pos(b)[2];
   }
   //----------------------------------------------------------------------------
-  void Bm_r(void*X, bodies const&B, double const&, const real*) {
+  void Bm_r(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = abs(pos(b));
   }
   //----------------------------------------------------------------------------
-  void Bm_R(void*X, bodies const&B, double const&, const real*) {
+  void Bm_R(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = 
       sqrt(square(pos(b)[0])+square(pos(b)[1]));
   }
   //----------------------------------------------------------------------------
-  void Bm_vel(void*X, bodies const&B, double const&, const real*) {
+  void Bm_vel(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<vect*>(X)[bodyindex(b)] = vel(b);
   }
   //----------------------------------------------------------------------------
-  void Bm_vx(void*X, bodies const&B, double const&, const real*) {
+  void Bm_vx(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = vel(b)[0];
   }
   //----------------------------------------------------------------------------
-  void Bm_vy(void*X, bodies const&B, double const&, const real*) {
+  void Bm_vy(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = vel(b)[1];
   }
   //----------------------------------------------------------------------------
-  void Bm_vz(void*X, bodies const&B, double const&, const real*) {
+  void Bm_vz(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = vel(b)[2];
   }
   //----------------------------------------------------------------------------
-  void Bm_v(void*X, bodies const&B, double const&, const real*) {
+  void Bm_v(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = abs(vel(b));
   }
 
   //----------------------------------------------------------------------------
-  void Bm_acc(void*X, bodies const&B, double const&, const real*) {
+  void Bm_acc(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<vect*>(X)[bodyindex(b)] = acc(b);
   }
   //----------------------------------------------------------------------------
-  void Bm_ax(void*X, bodies const&B, double const&, const real*) {
+  void Bm_ax(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = acc(b)[0];
   }
   //----------------------------------------------------------------------------
-  void Bm_ay(void*X, bodies const&B, double const&, const real*) {
+  void Bm_ay(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = acc(b)[1];
   }
   //----------------------------------------------------------------------------
-  void Bm_az(void*X, bodies const&B, double const&, const real*) {
+  void Bm_az(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = acc(b)[2];
   }
   //----------------------------------------------------------------------------
-  void Bm_a(void*X, bodies const&B, double const&, const real*) {
+  void Bm_a(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = abs(acc(b));
   }
   //----------------------------------------------------------------------------
-  void Bm_l(void*X, bodies const&B, double const&, const real*) {
+  void Bm_l(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<vect*>(X)[bodyindex(b)] = pos(b) ^ vel(b);
   }
   //----------------------------------------------------------------------------
-  void Bm_lx(void*X, bodies const&B, double const&, const real*) {
+  void Bm_lx(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = 
       pos(b)[1]*vel(b)[2] - pos(b)[2]*vel(b)[1];
   }
   //----------------------------------------------------------------------------
-  void Bm_ly(void*X, bodies const&B, double const&, const real*) {
+  void Bm_ly(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = 
       pos(b)[2]*vel(b)[0] - pos(b)[0]*vel(b)[2];
   }
   //----------------------------------------------------------------------------
-  void Bm_lz(void*X, bodies const&B, double const&, const real*) {
+  void Bm_lz(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = 
       pos(b)[0]*vel(b)[1] - pos(b)[1]*vel(b)[0];
   }
   //----------------------------------------------------------------------------
-  void Bm_ltot(void*X, bodies const&B, double const&, const real*) {
+  void Bm_ltot(void*X, bodies const&B, double, const real*) {
     LoopAllBodies(&B,b)
       static_cast<real*>(X)[bodyindex(b)] = abs(pos(b)^vel(b));
   }

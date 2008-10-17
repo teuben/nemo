@@ -39,7 +39,7 @@ namespace falcON {
   // auxiliary class bf_type<>                                                  
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
-  template<typename T> struct bf_type_base {};
+  template<typename T> struct bf_type_base;
   template<> struct bf_type_base<bool> {
     static const char type = 'b';
     static const char*name() { return "boolean"; }
@@ -62,35 +62,37 @@ namespace falcON {
   };
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct bf_type : public bf_type_base<T> {
-    typedef T(*const bf_pter)(body   const&,double const&,const real*);
-    static T func(void(*const f)(body const&,double const&,const real*),
-		  body   const&b, double const&t, const real*p) {
+    typedef T(*const bf_pter)(body const&, double, const real*);
+    static T func(void(*const f)(body const&, double, const real*),
+		  body const&b, double t, const real*p) {
       return f? (*(bf_pter)(f))(b,t,p) : bf_type_base<T>::default_value();
     }
     //--------------------------------------------------------------------------
-    typedef T(*const Bf_pter)(bodies const&,double const&,const real*);
-    static T func(void(*const f)(bodies const&,double const&,const real*),
-		  bodies const&b, double const&t, const real*p) {
+    typedef T(*const Bf_pter)(bodies const&, double, const real*);
+    static T func(void(*const f)(bodies const&, double, const real*),
+		  bodies const&b, double t, const real*p) {
       return f? (*(Bf_pter)(f))(b,t,p) : bf_type_base<T>::default_value();
     }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class bodyfunc                                                             
-  //                                                                            
-  /// a function object taking a body, time, and possibly parameters, and       
-  /// returning bool, int, real, or vect                                        
-  ///                                                                           
-  /// A bodyfunc is constructed from an expression (C-style string, see man     
-  /// page (5bodyfunc)), which is used to generate a function (employing the    
-  /// compiler) and loading it at run time. \n                                  
-  /// A database is used to store expression and functions, which makes         
-  /// repeated access to the same function very quick.                          
-  //                                                                            
+  //
+  // class bodyfunc
+  //
+  /// \brief
+  /// a function object taking a body, time, and possibly parameters, and
+  /// returning bool, int, real, or vect
+  ///
+  /// \detail
+  /// A bodyfunc is constructed from an expression (C-style string, see man
+  /// page (5bodyfunc)), which is used to generate a function (employing the
+  /// compiler) and loading it at run time. \n A database is used to store
+  /// expression and functions, which makes repeated access to the same
+  /// function very quick.
+  //
   // ///////////////////////////////////////////////////////////////////////////
   class bodyfunc {
   protected:
-    void      (*FUNC) (body const&, double const&, const real*);
+    void      (*FUNC) (body const&, double, const real*);
     char        TYPE;
     int         NPAR;
     fieldset    NEED;
@@ -129,27 +131,25 @@ namespace falcON {
     /// \param p parameters
     /// \return expression evaluated for body \a b, time \a t, parameters \a p
     template<typename T>
-    T func (body const&b, double const&t, const real*p) const {
-#if defined(DEBUG) || defined(EBUG)
+    T func (body const&b, double t, const real*p) const {
       if(bf_type<T>::type != TYPE)
-	falcON_THROW("bodyfunc::func_safe<%s>() called, but type is %s\n",
+	falcON_THROW("bodyfunc::func<%s>() called, but type is %s\n",
 		     nameof(T), (
 		     TYPE == 'b'? "bool" :
 		     TYPE == 'i'? "int"  :
 		     TYPE == 'r'? "real" :
 		     TYPE == 'v'? "vect" : "unknown") );
       if(!b)
-	falcON_THROW("bodyfunc::func_safe<%s>() called on invalid body\n",
+	falcON_THROW("bodyfunc::func<%s>() called on invalid body\n",
 		     nameof(T));
       if(!b.my_bodies()->have_all(NEED))
-	falcON_THROW("bodyfunc::func_safe<%s>() not all data need (%s) "
-		     "known for body\n", word(NEED));
-#endif
+	falcON_THROW("bodyfunc::func<%s>(): data '%s' not known at time %f\n",
+		     nameof(T),word(b.my_bodies()->all_data().missing(NEED)),t);
       return bf_type<T>::func(FUNC,b,t,p);
     }
     /// function call operator (not very useful, since template)
     template<typename T>
-    T operator() (body const&b, double const&t, const real*p) const {
+    T operator() (body const&b, double t, const real*p) const {
       return func<T>(b,t,p);
     }
     /// is *this an empty bodyfunc?
@@ -158,11 +158,11 @@ namespace falcON {
     operator bool() const { return !is_empty(); }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class Bodyfunc                                                             
-  //                                                                            
-  /// a bodyfunc with parameters                                                
-  ///                                                                           
+  //
+  // class Bodyfunc
+  //
+  /// a bodyfunc with parameters
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class Bodyfunc : protected bodyfunc {
     real P[MAXPAR];
@@ -202,12 +202,12 @@ namespace falcON {
     /// \param t time
     /// \return expression evaluated for body \a b at time \a t
     template<typename T>
-    T func (body const&b, double const&t) const {
+    T func (body const&b, double t) const {
       return bodyfunc::func<T>(b,t,P);
     }
     /// function call operator (not very useful, since template)
     template<typename T>
-    T operator() (body const&b, double const&t) const {
+    T operator() (body const&b, double t) const {
       return func<T>(b,t);
     }
     /// is *this an empty bodyfunc?
@@ -216,17 +216,17 @@ namespace falcON {
     operator bool() const { return !is_empty(); }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class BodyFunc<T>                                                          
-  //                                                                            
-  /// a function object taking body and time, returning T (template parameter)  
-  ///                                                                           
-  /// essentially this is a wrapper around class bodyfunc with the following    
-  /// distinctions: \n                                                          
+  //
+  // class BodyFunc<T>
+  //
+  /// function object taking body and time, returning a T (template parameter)  
+  ///
+  /// essentially this is a wrapper around class bodyfunc with the following
+  /// distinctions: \n
   /// - the return type of the bodyfunc expression \b must match T            \n
   /// - the parameters are read by the constructor, ie. cannot be varied later\n
   /// - if the bodyfunc is empty, we return: true, 0, zero, vect(zero).
-  //                                                                            
+  //
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> class BodyFunc : private Bodyfunc {
   public:
@@ -259,7 +259,7 @@ namespace falcON {
     /// \param b body
     /// \param t time
     /// \return expression evaluated for body \a b at time \a t
-    T operator()(body const&b, double const&t) const {
+    T operator()(body const&b, double t) const {
       return Bodyfunc::func<T>(b,t);
     }
     /// is *this an empty bodyfunc?
@@ -295,14 +295,15 @@ namespace falcON {
     }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
+  //
   // class BodyProp<BIT>                                                        
-  //                                                                            
-  /// wrapper around Bodyfunc, returns field_traits<BIT>::type                  
-  ///                                                                           
-  /// If the return type of bodyfunc is incompatible with our return type, an   
-  /// exception is thrown.                                                      
-  //                                                                            
+  //
+  /// wrapper around Bodyfunc, returns field_traits<BIT>::type, useful for
+  /// assining a value constructed from other data to field BIT.
+  ///
+  /// If the return type of bodyfunc is incompatible with our return type, an
+  /// exception is thrown.
+  //
   // ///////////////////////////////////////////////////////////////////////////
   template<int BIT> class BodyProp : private BodyPropType<BIT> {
     const Bodyfunc*F;   ///< Bodyfunc
@@ -349,14 +350,14 @@ namespace falcON {
     operator bool() const { return !is_empty(); }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class BodyFilter                                                           
-  //                                                                            
-  /// a function object taking body, returning bool                             
-  ///                                                                           
-  /// essentially this is a wrapper around class BodyFunc<bool> with the        
-  /// distinctions that simulation time is stored separately.                   
-  //                                                                            
+  //
+  // class BodyFilter
+  //
+  /// a function object taking body, returning bool
+  ///
+  /// essentially this is a wrapper around class BodyFunc<bool> with the 
+  /// distinctions that simulation time is stored separately.
+  //
   // ///////////////////////////////////////////////////////////////////////////
   class BodyFilter : private BodyFunc<bool> {
     double TIME;           ///< simulation time at which operator() is evaluated
@@ -369,7 +370,7 @@ namespace falcON {
       throw(falcON::exception);
     /// construction from bodyfunc expression (can be empty)
     /// \param expr body_func (5falcON) expression --- or NULL
-    /// \param pars array with parameters 
+    /// \param pars array with parameters
     /// \param npar number of parameters
     /// \note there must be enough parameters given
     /// \note the bodyfunc expression must return the type T
@@ -414,21 +415,21 @@ namespace falcON {
     }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class bodiesfunc                                                           
-  //                                                                            
-  /// a function object taking bodies, time, and possibly parameters, and       
-  /// returning bool, int, real, or vect                                        
+  //
+  // class bodiesfunc
+  //
+  /// a function object taking bodies, time, and possibly parameters, and
+  /// returning bool, int, real, or vect
   ///                                                                           
-  /// A bodyfunc is constucted from an expression (C-style string), which is    
-  /// used to generate a function (employing the compiler) and loading it at    
-  /// run time. \n                                                              
-  /// A database is used to store expression and functions, which makes         
-  /// repeated access to the same function very quick.                          
-  //                                                                            
+  /// A bodyfunc is constructed from an expression (C-style string), which is
+  /// used to generate a function (employing the compiler) and loading it at
+  /// run time. \n
+  /// A database is used to store expression and functions, which makes
+  /// repeated access to the same function very quick.
+  //
   // ///////////////////////////////////////////////////////////////////////////
   class bodiesfunc {
-    void   (*FUNC) (bodies const&, double const&, const real*);
+    void   (*FUNC) (bodies const&, double, const real*);
     char     TYPE;
     int      NPAR;
     fieldset NEED;
@@ -451,8 +452,7 @@ namespace falcON {
     fieldset const&need() const { return NEED; }
     /// non-operator function call with bodies, time, and parameters
     template<typename T>
-    T func (bodies const&b, double const&t, const real*p) const {
-#if defined(DEBUG) || defined(EBUG)
+    T func (bodies const&b, double t, const real*p) const {
       if(bf_type<T>::type != TYPE)
 	falcON_THROW("bodiesfunc::func<%s>() called, but type is %s\n",
 		     nameof(T), (
@@ -461,9 +461,8 @@ namespace falcON {
 		     TYPE == 'r'? "real" :
 		     TYPE == 'v'? "vect" : "unknown") );
       if(!b.have_all(NEED))
-	falcON_THROW("bodiesfunc::func<%s>() not all data need (%s) "
-		     "known for body\n", word(NEED));
-#endif
+	falcON_THROW("bodiesfunc::func<%s>(): data '%s' not known at time %f\n",
+		     nameof(T),word(b.all_data().missing(NEED)),t);
       return bf_type<T>::func(FUNC,b,t,p);
     }
     /// non-operator function call with snapshot and parameters
@@ -473,7 +472,7 @@ namespace falcON {
     }
     /// function call operator (not very useful, since template)
     template<typename T>
-    T operator() (bodies const&b, double const&t, const real*p) const {
+    T operator() (bodies const&b, double t, const real*p) const {
       return func<T>(b,t,p);
     }
     /// function call operator (not very useful, since template)
@@ -491,29 +490,28 @@ namespace falcON {
 #ifdef falcON_PROPER
 namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class bodiesmethod                                                         
-  //                                                                            
-  /// a function object taking a pointer to anything (void*), bodies, time, and 
-  /// possibly parameters (for example reading the body angular momenta into an 
-  /// array).                                                                   
-  ///                                                                           
-  /// A bodiesmethod is constucted from an expression (C-style string), which   
-  /// is used to generate a function (employing the compiler) and loading it at 
-  /// run time. \n                                                              
-  /// A database is used to store expression and functions, which makes         
-  /// repeated access to the same function very quick.                          
-  //                                                                            
+  //
+  // class bodiesmethod
+  //
+  /// a function object taking a pointer to anything (void*), bodies, time,
+  /// and possibly parameters (for example reading the body angular momenta
+  /// into an array).
+  ///
+  /// A bodiesmethod is constucted from an expression (C-style string), which
+  /// is used to generate a function (employing the compiler) and loading it
+  /// at run time. \n
+  /// A database is used to store expression and functions, which makes
+  /// repeated access to the same function very quick.
+  //
   // ///////////////////////////////////////////////////////////////////////////
   class bodiesmethod {
-    void   (*FUNC) (void*, bodies const&, double const&, const real*);
+    void   (*FUNC) (void*, bodies const&, double, const real*);
     char     TYPE;
     int      NPAR;
     fieldset NEED;
     //--------------------------------------------------------------------------
     template<typename T>
-    void func (T*d, bodies const&b, double const&t, const real*p) const {
-#if defined(DEBUG) || defined(EBUG)
+    void func (T*d, bodies const&b, double t, const real*p) const {
       if(bf_type<T>::type != TYPE)
 	falcON_THROW("bodiesmethod::func<%s>() called, but type is %s\n",
 		     nameof(T), (
@@ -522,9 +520,8 @@ namespace falcON {
 		     TYPE == 'r'? "real" :
 		     TYPE == 'v'? "vect" : "unknown") );
       if(!b.have_all(NEED))
-	falcON_THROW("bodiesfunc::func<%s>() not all data need (%s) "
-		     "known for body\n", word(NEED));
-#endif
+	falcON_THROW("bodiesmethod::func<%s>(): data '%s' unknown at time %f\n",
+		     nameof(T),word(b.all_data().missing(NEED)),t);
       return FUNC(static_cast<void*>(d),b,t,p);
     }
     //--------------------------------------------------------------------------
@@ -542,7 +539,7 @@ namespace falcON {
     fieldset const&need() const { return NEED; }
     /// function call
     template<typename T>
-    void operator() (T*d, bodies const&b, double const&t, const real*p) const {
+    void operator() (T*d, bodies const&b, double t, const real*p) const {
       return func(d,b,t,p);
     }
     /// is *this an empty bodiesmethod?
@@ -565,7 +562,7 @@ namespace WDutils {
   };
   template<typename T> struct traits<falcON::BodyFunc<T> > {
     static const char  *name () {
-      return message("BodyFunc<%s>",traits<T>::name()); }
+      return message("BodyFunc<%s>",nameof(T)); }
   };
   template<> struct traits<falcON::bodiesfunc > {
     static const char  *name () { return "bodiesfunc"; }
