@@ -73,7 +73,7 @@ int ParticlesList::loadFile(const char * select_file,ParticlesSelectVector * psv
     // try to open file
     if (! fi.is_open()) {
       
-      //std::exit(1);
+      //exit(1);
       throw(-1);
     }
     else {

@@ -19,6 +19,7 @@
 #include <math.h> // happy gcc 3.4.x
 #include <string.h>
 #include <qdatetime.h>
+#include <cstdlib>
 #include "glbox.h"
 #include "smoke.h"
 #define LOCAL_DEBUG 0
@@ -49,7 +50,7 @@ GLBox::GLBox( QWidget* parent, const char* name,
   int status = pthread_mutex_init(&mutex,NULL);
   if (status != 0 ) {
     std::cerr <<"error during [pthread_mutex_init], aborted...\n";
-    std::exit(1);
+    exit(1);
   }
   // get options
   store_options = _options;

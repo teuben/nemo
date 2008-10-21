@@ -21,7 +21,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <assert.h>
-
+#include <cstdlib>
 #include "MessageBuffer.h"
 
 using namespace std;
@@ -94,7 +94,7 @@ char * MessageBuffer::newBuffer(int length)
   assert(buffer != NULL);
   if (!buffer) {
     std::cerr << "MessageBuffer::newBuffer() - ERROR allocation failed for the buffer\n";
-    //std::exit(1);
+    //exit(1);
   }
   p_buffer = buffer;
   // init value

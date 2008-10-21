@@ -132,7 +132,7 @@ char * ParticlesData::mallocate(char * p, int lg, bool force)
    ptr = (char *) malloc(sizeof(char)*lg);
    if (!ptr) {
      std::cerr << "[allocate_pointer], allocation memory error, aborted\n";
-     std::exit(1);
+     exit(1);
    }
    return ptr;
  }

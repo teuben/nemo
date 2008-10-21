@@ -167,12 +167,12 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   int status = pthread_mutex_init(&mutex_timer,NULL);
   if (status != 0 ) {
     std::cerr <<"error during [pthread_mutex_init], aborted...\n";
-    std::exit(1);
+    exit(1);
   }
   status = pthread_mutex_init(&mutex_data,NULL);
   if (status != 0 ) {
     std::cerr <<"error during [pthread_mutex_init], aborted...\n";
-    std::exit(1);
+    exit(1);
   }
   // Initialyze Variable
   initStuff();
@@ -484,7 +484,7 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
       if (! virtual_data->isValidData()) {
         cerr << "File [" << in << "] is neither a NEMO snapshot nor a FileList file, aborting...\n";
         delete virtual_data;
-        std::exit(1);
+        exit(1);
       }
     }
     connect(virtual_data,SIGNAL(loadedData(const ParticlesData *,

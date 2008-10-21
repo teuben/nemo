@@ -9,6 +9,7 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
+#include <cstdlib>
 #include "particles_select.h"
 
 #include "particles_range.h" // 
@@ -41,7 +42,7 @@ ParticlesSelect::ParticlesSelect(const ParticlesSelect& m)
     vps = new ParticlesList(); break;
   default: 
     std::cerr << "Unexpected type for [ParticlesSelect], aborting....\n";
-    std::exit(1);
+    exit(1);
   }
   *vps = *m.vps; // copy object
 }
@@ -56,7 +57,7 @@ const ParticlesSelect& ParticlesSelect::operator=(const ParticlesSelect& m)
     //vps = new B(); break;
   default: 
     std::cerr << "Unexpected type for [ParticlesSelect], aborting....\n";
-    std::exit(1);
+    exit(1);
   }
   *vps = *m.vps; // copy object
   return *this;

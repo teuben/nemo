@@ -12,6 +12,7 @@
 #include <iostream>
 #include <assert.h>
 #include <math.h>
+#include <cstdlib>
 
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
@@ -102,7 +103,7 @@ inline int VirtualParticlesSelect::defaultIndexTab()
 {
   std::cerr << "[VirtualParticlesSelect::defaultIndexTab()], Should not be here "
             << "\naborted....\n";
-  std::exit(1); 
+  exit(1); 
 }
 // ============================================================================
 // VirtualParticlesSelect::getIndex()                                          
@@ -112,7 +113,7 @@ int VirtualParticlesSelect::getIndex(int index)
   if (index);
   std::cerr << "[VirtualParticlesSelect::getIndex()], Should not be here "
             << "\naborted....\n";
-  std::exit(1);
+  exit(1);
 }
 // ============================================================================
 // ParticlesRange::parseString()                                               

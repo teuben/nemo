@@ -69,7 +69,7 @@ GLParticlesObject::GLParticlesObject(const ParticlesData * _p_data,
   glPointParameterfvARB = (PFNGLPOINTPARAMETERFVARBPROC) glXGetProcAddressARB((const GLubyte *) "glPointParameterfvARB");
   if( !glPointParameterfARB || !glPointParameterfvARB ) {
     std::cerr << "Error on if( !glPointParameterfARB || !glPointParameterfvARB )\n";
-    std::exit(1);
+    exit(1);
   } 
 #endif  
 
