@@ -13,7 +13,8 @@
 #include <errno.h>
 #include <netdb.h>
 #include "Socket.h"
-
+#include <cstdlib>
+#include <cstring>
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
 
