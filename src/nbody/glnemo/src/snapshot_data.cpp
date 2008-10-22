@@ -78,10 +78,10 @@ bool SnapshotData::isValidData()
 {
   bool status;
   
-  if ( ! strcmp(nemo_file,"-")) {
+  if ( ! strcmp(nemo_file,(char *)"-")) {
     return true; // we assume here that - is standard input and a NEMO stream...
   }
-  stream str=stropen(nemo_file,"r"); // open NEMO file for reading
+  stream str=stropen(nemo_file,(char *)"r"); // open NEMO file for reading
   if ( ! str ) {
     status=FALSE;
   }
@@ -194,7 +194,7 @@ int SnapshotData::loadPos(ParticlesSelectVector * psv, const bool load_vel)
     VirtualParticlesSelect::nb_select=0;
     psv->clear();
     int nobject=VirtualData::fillParticleRange(psv,full_nbody,sel2);
-    if (nobject) ; // do nothing (remove compiler warning)
+    if (nobject) {;} // do nothing (remove compiler warning)
     // copy back color and visibility
     for (unsigned int i=0; i<psv2.size();i++) {
       if (i<psv->size()) {

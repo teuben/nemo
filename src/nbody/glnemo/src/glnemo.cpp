@@ -55,53 +55,53 @@
 using namespace std;
 // ============================================================================
 // NEMO parameters                                                             
-::string defv[] = {  // use `::'string because of 'using namespace std'
-  "in=\n             Nemo input snapshot                                           \n"
-  "                   or ascii file with a list of NEMO files                       \n"
-  "                   in such case, the first line of the file                    \n"
-  "                   must be :                                                   \n"
-  "                   #glnemo_file_list                                             ",
-  "server=\n         Running simulation server hostname                              ",
-  "select=all\n      Select particles from the : range operator , separeted        \n"
-  "                   by a comma. E.g 0:999,1000:1999 would select two sets        \n"
-  "                   of 1000 particles and give them a different color              ",
-  "range_visib=t\n   toggle visibility  for the particles selected via \'select=\' \n"
-  "                   options. Can be usefull if you only want to display particles\n"
-  "                   selected via \'select_list\' options(see below). In that case\n"
-  "                   you should set \'f\'                                           ",
-  "select_list=\n    Select particles from list of indexes                           ",
-  "times=all\n       Select time                                                     ",
-  "vel=t\n           load velocity coordinates                                       ",
-  "disp_vel=f\n      display velocity vectors                                        ",
-  "blending=t\n      Activate blending colors                                        ",
-  "dbuffer=f\n       Activate OpenGL depth buffer                                    ",
-  "perspective=t\n   false means orthographic                                        ",
-  "bestzoom=t\n      automatic zoom                                                  ",
-  "play=f\n          automatically load and display next snapshot                    ",
-  "ortho_range=6.0\n xy range if orthographic projection                             ",
-  "zoom=-14\n        zoom value                                                      ",
-  "xrot=0.0\n        rotation angle on X axis                                        ",
-  "yrot=0.0\n        rotation angle on Y axis                                        ",
-  "zrot=0.0\n        rotation angle on Z axis                                        ",
-  "xtrans=0.0\n      translation on X                                                ",
-  "ytrans=0.0\n      translation on Y                                                ",
-  "ztrans=0.0\n      translation on Z                                                ",
-  "grid=f\n          Show grid                                                       ",
-  "gas=f\n           gas like particle effect                                        ",
-  "texture_s=0.15\n  texture size of gaz particle                                    ",
-  "texture_ac=125\n  texture alpha color of gaz particle                             ",
-  "psize=1.0\n       Set particles size                                              ",
-  "port=4444\n       Server's communication port                                     ",
-  "wsize=925\n       Windows's width size                                            ",
-  "hsize=685\n       Windows's height size                                           ",
-  "screenshot=\n     Screenshot name                                                 ",
-  "anim_file=\n      Animation filename                                              ",
-  "anim_play=t\n     play an animation ? (anim_file must be selected)                ",
-  "anim_bench=t\n    play an animation in benchmark mode ?                           ",
-  "VERSION=0.94.2\n    "__DATE__"  - JCL  compiled at <"__TIME__">                     ",
+const char * defv[] = {  // use `::'string because of 'using namespace std'
+  (char *) "in=\n             Nemo input snapshot                                           \n"
+           "                   or ascii file with a list of NEMO files                       \n"
+           "                   in such case, the first line of the file                    \n"
+           "                   must be :                                                   \n"
+           "                   #glnemo_file_list                                             ",
+  (char *) "server=\n         Running simulation server hostname                              ",
+  (char *) "select=all\n      Select particles from the : range operator , separeted        \n"
+           "                   by a comma. E.g 0:999,1000:1999 would select two sets        \n"
+            "                   of 1000 particles and give them a different color              ",
+  (char *) "range_visib=t\n   toggle visibility  for the particles selected via \'select=\' \n"
+           "                   options. Can be usefull if you only want to display particles\n"
+           "                   selected via \'select_list\' options(see below). In that case\n"
+           "                   you should set \'f\'                                           ",
+  (char *) "select_list=\n    Select particles from list of indexes                           ",
+  (char *) "times=all\n       Select time                                                     ",
+  (char *) "vel=t\n           load velocity coordinates                                       ",
+  (char *) "disp_vel=f\n      display velocity vectors                                        ",
+  (char *) "blending=t\n      Activate blending colors                                        ",
+  (char *) "dbuffer=f\n       Activate OpenGL depth buffer                                    ",
+  (char *) "perspective=t\n   false means orthographic                                        ",
+  (char *) "bestzoom=t\n      automatic zoom                                                  ",
+  (char *) "play=f\n          automatically load and display next snapshot                    ",
+  (char *) "ortho_range=6.0\n xy range if orthographic projection                             ",
+  (char *) "zoom=-14\n        zoom value                                                      ",
+  (char *) "xrot=0.0\n        rotation angle on X axis                                        ",
+  (char *) "yrot=0.0\n        rotation angle on Y axis                                        ",
+  (char *) "zrot=0.0\n        rotation angle on Z axis                                        ",
+  (char *) "xtrans=0.0\n      translation on X                                                ",
+  (char *) "ytrans=0.0\n      translation on Y                                                ",
+  (char *) "ztrans=0.0\n      translation on Z                                                ",
+  (char *) "grid=f\n          Show grid                                                       ",
+  (char *) "gas=f\n           gas like particle effect                                        ",
+  (char *) "texture_s=0.15\n  texture size of gaz particle                                    ",
+  (char *) "texture_ac=125\n  texture alpha color of gaz particle                             ",
+  (char *) "psize=1.0\n       Set particles size                                              ",
+  (char *) "port=4444\n       Server's communication port                                     ",
+  (char *) "wsize=925\n       Windows's width size                                            ",
+  (char *) "hsize=685\n       Windows's height size                                           ",
+  (char *) "screenshot=\n     Screenshot name                                                 ",
+  (char *) "anim_file=\n      Animation filename                                              ",
+  (char *) "anim_play=t\n     play an animation ? (anim_file must be selected)                ",
+  (char *) "anim_bench=t\n    play an animation in benchmark mode ?                           ",
+  (char *) "VERSION=0.94.3\n    "__DATE__"  - JCL  compiled at <"__TIME__">                     ",
   NULL
 };
-::string usage="Interactive 3D OpenGL visualization program for Nemo snapshots";
+const char * usage=(char *) "Interactive 3D OpenGL visualization program for Nemo snapshots";
 
 // ============================================================================
 //  The main program is here                                                   
@@ -118,17 +118,17 @@ int main( int argc, char **argv )
   QDesktopWidget  * desktop = QApplication::desktop();
   
   // initialyze NEMO engine
-  initparam(argv,defv);
+  initparam(argv,const_cast<char**>(defv));
 
   // CAUTION !!! do not call getparam function after **GLObjectWindow** object
   // instantiation bc nemo engine get corrupted by io_nemo afterwhile the     
   // snapshot has been loaded.                                                
-  const int wsize=getiparam("wsize");
-  const int hsize=getiparam("hsize");
+  const int wsize=getiparam((char *) "wsize");
+  const int hsize=getiparam((char *) "hsize");
   ::string screenshot=NULL;
   bool has_screenshot=false;
-  if ( hasvalue("screenshot")) {
-    screenshot=getparam("screenshot");
+  if ( hasvalue((char *) "screenshot")) {
+    screenshot=getparam((char *) "screenshot");
     has_screenshot=true;
   }
   // Create widget window

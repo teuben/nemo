@@ -130,7 +130,7 @@ class GLBox : public QGLWidget
   bool statusDepthBuffer() { return depth_buffer;}
   bool statusHUD() { return hud->getActivate(); };
   
-  const GLfloat  getParticlesSize() { return particles_size;}
+  GLfloat  getParticlesSize() { return particles_size;}
 
   // return gridXYZ status
   bool statusGridX() { return gridx->getActivate();};

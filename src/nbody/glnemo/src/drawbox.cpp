@@ -304,7 +304,7 @@ Texture::Texture(QString name, int _sample)
 #else  
   texture= new QImage("/home/jcl/text1.png");
 #endif
-  if (name) ; // remove compiler warning
+  if (name) {;} // remove compiler warning
   sample = _sample;                 // number of samples for the texture
   
   tex_alpha = new TexAlpha[sample]; // allocate array to store textures's alpha channel;

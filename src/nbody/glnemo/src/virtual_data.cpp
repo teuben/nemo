@@ -24,7 +24,7 @@
 // VirtualData::loadPos()                                                      
 int VirtualData::loadPos(ParticlesSelectVector * psv, const bool _vel)
 {
-  if (psv || _vel) ; // to remove compiler warning
+  if (psv || _vel) {;} // to remove compiler warning
   return 0;
 }
 // ============================================================================
@@ -67,7 +67,7 @@ float * VirtualData::getCooMax()
 // VirtualData::uploadGlData()                                                 
 void VirtualData::uploadGlData(ParticlesSelectVector * psv)
 {
-  if (psv) ; // to remove compiler warning
+  if (psv) {;} // to remove compiler warning
 }
 // ============================================================================
 // VirtualData::endOfDataMessage()                                             

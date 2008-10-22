@@ -57,8 +57,8 @@ inline int ParticlesList::defaultIndexTab()
 int ParticlesList::parseSelectedString(char * select_string, const int _nbody, 
 				      ParticlesSelectVector * psv)
 {
-  if (_nbody); // remove compiler warning
-  if (psv);   // remove compiler warning
+  if (_nbody) {;} // remove compiler warning
+  if (psv) {;}   // remove compiler warning
   loadFile(select_string,psv);
   return 1;
 }

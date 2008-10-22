@@ -87,7 +87,7 @@ NetworkData::~NetworkData()
 int NetworkData::loadPos(ParticlesSelectVector * psv, const bool vel)
 {
   int n;   // happy red hat
-  if (n) ; // remove compiler warning
+  if (n) {;} // remove compiler warning
   
   if (clientMB) {
     try {
@@ -154,7 +154,7 @@ int NetworkData::loadPos(ParticlesSelectVector * psv, const bool vel)
         //VirtualParticlesSelect * vps = new VirtualParticlesSelect();
         //nobject=vps->storeParticles<ParticlesRange>(psv,full_nbody,qselect_part);
         //int nobject=vps->A<int>();
-        if (nobject); // do nothing (remove compiler warning)
+        if (nobject) {;} // do nothing (remove compiler warning)
       }
       if (! is_loading_thread) {
         // a running Thread MUST not emit data to the GLBox      

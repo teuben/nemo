@@ -20,7 +20,7 @@
 using namespace std;
 
 // init static data
-char * GLHudObject::HUDText[n_HudKeys] = {
+const char * GLHudObject::HUDText[n_HudKeys] = {
     ""                   , // DataType
     ""                   , // Title
     "nbody"              , // Nbody

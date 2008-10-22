@@ -110,7 +110,7 @@ inline int VirtualParticlesSelect::defaultIndexTab()
 // return particle index at the requested index.                               
 int VirtualParticlesSelect::getIndex(int index)
 {
-  if (index);
+  if (index) {;}
   std::cerr << "[VirtualParticlesSelect::getIndex()], Should not be here "
             << "\naborted....\n";
   exit(1);

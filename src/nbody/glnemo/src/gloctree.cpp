@@ -265,7 +265,7 @@ int GLOctree::hackTreeDL(Node * tree, float * rmid, int level)
     
     
     // Build
-    float square_minus1=(float ) size_max/(1<<level-1);
+    float square_minus1=(float ) size_max/(1<<(level-1));
     float square=(float ) size_max/(1<<level);
     int fac[2] = { -1,1 };
     for (int i=0;i<2;i++) {
@@ -426,7 +426,7 @@ float vv[8][3]; // 8 vertex to store
     
     
     // Build
-    float square_minus1=(float ) size_max/(1<<level-1);
+    float square_minus1=(float ) size_max/(1<<(level-1));
     float square=(float ) size_max/(1<<level);
     int fac[2] = { -1,1 };
     for (int i=0;i<2;i++) {
@@ -500,6 +500,7 @@ float vv[8][3]; // 8 vertex to store
       }
     }
   }
+ return 1;
 }
 // ============================================================================
 // GLOctree::computePolygons( Node * )

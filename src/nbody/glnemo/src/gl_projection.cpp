@@ -27,7 +27,7 @@ GLProjection::~GLProjection()
 //
 void GLProjection::update(int _ratio)
 {
-  if (_ratio) ; // remove compiler warning
+  if (_ratio) {;} // remove compiler warning
 }
 
 // ============================================================================

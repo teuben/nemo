@@ -24,7 +24,7 @@ GLTextObject::GLTextObject(const QString text,const QFont &f,
                            const QColor &c, 
                            bool activated):GLObject()
 {
-  if (text);  // do nothing (remove compiler warning)
+  if (text) {;}  // do nothing (remove compiler warning)
   setColor(c);
   font = f;
   is_activated = activated;

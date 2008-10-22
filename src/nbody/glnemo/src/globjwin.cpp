@@ -105,52 +105,52 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   
   //                         Initialyze NEMO engine
   //initparam(argv,defv);
-  ::string in             = getparam("in");
-  QString  server         = getparam("server");
-  ::string select         = getparam("select");
+  ::string in             = getparam((char *) "in");
+  QString  server         = getparam((char *) "server");
+  ::string select         = getparam((char *) "select");
 
-  if ( hasvalue("select_list") )
-    select_list           = getparam("select_list");
+  if ( hasvalue((char *) "select_list") )
+    select_list           = getparam((char *) "select_list");
   else
     select_list = NULL;
-  ::string s_time         = getparam("times");
-  store_options->vel_req  = getbparam("vel");
-  store_options->show_vel = getbparam("disp_vel");
-  range_visib             = getbparam("range_visib");
-  store_options->blending = getbparam("blending");
-  store_options->dbuffer  = getbparam("dbuffer");
-  store_options->show_grid= getbparam("grid");
-  store_options->perspective=getbparam("perspective");
+  ::string s_time         = getparam((char *) "times");
+  store_options->vel_req  = getbparam((char *) "vel");
+  store_options->show_vel = getbparam((char *) "disp_vel");
+  range_visib             = getbparam((char *) "range_visib");
+  store_options->blending = getbparam((char *) "blending");
+  store_options->dbuffer  = getbparam((char *) "dbuffer");
+  store_options->show_grid= getbparam((char *) "grid");
+  store_options->perspective=getbparam((char *) "perspective");
   store_options->orthographic = !store_options->perspective;
-  bool play                   = getbparam("play");
-  bool bestzoom           = getbparam("bestzoom");
-  store_options->xrot     = getdparam("xrot");
-  store_options->yrot     = getdparam("yrot");
-  store_options->zrot     = getdparam("zrot");
-  store_options->xtrans   = getdparam("xtrans");
-  store_options->ytrans   = getdparam("ytrans");
-  store_options->ztrans   = getdparam("ztrans");
-  store_options->zoom     = getdparam("zoom");  
-  store_options->psize    = getiparam("psize");
-  store_options->port     = getiparam("port");
-  store_options->show_poly= getbparam("gas");
-  store_options->texture_size       =getdparam("texture_s");
-  store_options->texture_alpha_color=getiparam("texture_ac");
+  bool play                   = getbparam((char *) "play");
+  bool bestzoom           = getbparam((char *) "bestzoom");
+  store_options->xrot     = getdparam((char *) "xrot");
+  store_options->yrot     = getdparam((char *) "yrot");
+  store_options->zrot     = getdparam((char *) "zrot");
+  store_options->xtrans   = getdparam((char *) "xtrans");
+  store_options->ytrans   = getdparam((char *) "ytrans");
+  store_options->ztrans   = getdparam((char *) "ztrans");
+  store_options->zoom     = getdparam((char *) "zoom");  
+  store_options->psize    = getiparam((char *) "psize");
+  store_options->port     = getiparam((char *) "port");
+  store_options->show_poly= getbparam((char *) "gas");
+  store_options->texture_size       =getdparam((char *) "texture_s");
+  store_options->texture_alpha_color=getiparam((char *) "texture_ac");
   // Animation variables
   bool anim_bench=true;
   bool anim_play= true;
   QString anim_file="";
-  if ( hasvalue("anim_file")) {
+  if ( hasvalue((char *) "anim_file")) {
     
-    anim_bench = getbparam("anim_bench");
-    anim_play  = getbparam("anim_play");
-    anim_file  = getparam("anim_file");
+    anim_bench = getbparam((char *) "anim_bench");
+    anim_play  = getbparam((char *) "anim_play");
+    anim_file  = getparam((char *) "anim_file");
   }
   float range_ortho;
   if (store_options->orthographic) {
-    range_ortho=getdparam("ortho_range");
+    range_ortho=getdparam((char *) "ortho_range");
   } 
-  if (store_options->port) ; // do nothing (remove compiler warning)
+  if (store_options->port) {;} // do nothing (remove compiler warning)
   
   //                         finish NEMO
 
@@ -472,7 +472,7 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
   //
   psv.clear();   // clear particles range vectors
   VirtualParticlesSelect::nb_select = 0;
-  if (hasvalue("in")) {
+  if (hasvalue((char *)"in")) {
     // try Snapshotdata
     virtual_data = new SnapshotData(in,select,s_time,store_options->vel_req,&mutex_data);
     if (! virtual_data->isValidData()) {
@@ -517,7 +517,7 @@ GLObjectWindow::GLObjectWindow( QWidget* parent, const char* name)
     //
     // TRY TO CONNECT ON A SIMULATION SERVER
     //
-    if (hasvalue("server")) { // simulation server selected
+    if (hasvalue((char *)"server")) { // simulation server selected
       //
       // Instantiate a new NetworkData object
       //
@@ -795,7 +795,7 @@ void GLObjectWindow::selectConnexionOpen()
   static HostnameSelectForm *hsl;
   int n; // happy Red Hat 9
   
-  if (n); // remove compiler warning
+  if (n) {;} // remove compiler warning
   // first time, create Hostname selection box
   if (first) {
     first = FALSE;
@@ -996,7 +996,7 @@ void GLObjectWindow::messageWarning(QString * message, int status)
   killTimer( play_timer );
   PRINT_D cerr << "IN GLObjectWindow::messageLoad\n";
   if (0) QMessageBox::information( this,"Warning",*message,"Ok");
-  if (status); // do nothing (remove compiler warning)
+  if (status) {;} // do nothing (remove compiler warning)
 }
 // ============================================================================
 // GLObjectWindow::infoMessage()                                               
@@ -1274,7 +1274,7 @@ void GLObjectWindow::optionsParticlesRange()
 void GLObjectWindow::getData(const ParticlesData * _p_data,
                      ParticlesSelectVector  * _psv)
 {
-   if (_p_data) ;  // remove compiler warning
+   if (_p_data) {;}  // remove compiler warning
    pthread_mutex_lock(&mutex_data);
    virtual_data->uploadGlData(_psv);
    pthread_mutex_unlock(&mutex_data);
@@ -1494,7 +1494,7 @@ void GLObjectWindow::wheelEvent(QWheelEvent * e)
 void GLObjectWindow::resizeEvent( QResizeEvent *e )
 {
 
-  if ( e ) ; // do nothing...just to remove the warning :p
+  if ( e ) {;} // do nothing...just to remove the warning :p
   glbox->setWH(glframe->width(),glframe->height());
   options_form->downloadOptions(store_options);
 }
@@ -1536,7 +1536,7 @@ void GLObjectWindow::mousePressEvent( QMouseEvent *e )
 // manage mouseReleaseEvent                                                    
 void GLObjectWindow::mouseReleaseEvent( QMouseEvent *e )
 {
-  if (e) ;  // do nothing... just to remove the warning :p
+  if (e) {;}  // do nothing... just to remove the warning :p
   is_pressed_left_button = FALSE;
   is_pressed_right_button = FALSE;
   is_mouse_pressed = FALSE;

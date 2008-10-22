@@ -63,7 +63,7 @@ class GLHudObject : public GLObject {
   void display(GLBox *);
   void updateColor(const QColor);
   private:
-  static char * HUDText[n_HudKeys];
+  static const char * HUDText[n_HudKeys];
   QFont font;
 };
 #endif
