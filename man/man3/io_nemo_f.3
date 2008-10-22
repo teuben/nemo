@@ -1,4 +1,4 @@
-.TH IO_NEMO_F 3NEMO "29 May 2007"
+.TH IO_NEMO_F 3NEMO "29 Feb 2008"
 .SH NAME
 \fBio_nemo_f\fP \(em High level C function to read/save NEMO snapshot from a
 FORTRAN program.
@@ -101,6 +101,15 @@ Match to the particle \fIpotentials\fP.
 \fBa|acc\fP
 Match to the particle \fIaccelerations\fP.
 .TP
+\fBaux\fP
+Match to the \fIauxiliary\fP array.
+.TP
+\fBk|keys\fP
+Match to the \fIkeys\fP array.
+.TP
+\fBd|dens\fP
+Match to the particle \fIdensity\fP.
+.TP
 \fBe|eps\fP
 Match to the particle \fIsoftening\fP.
 
@@ -188,8 +197,8 @@ c close the snapshot 'outfile'
       end
 C----------------------------------------------------------- 
 .SH IMPORTANT THINGS
-a) Notice in the example above, that in the parameter list, 'n' matches
-\'nbody', 'm' matches 'mass', 'x' matches 'pos', 'v' matches 'vel', 't' matches 'ts'. 
+a) Notice in the example above, that in the parameter list, 'n'
+matches 'nbody', 'm' matches 'mass', 'x' matches 'pos', 'v' matches 'vel', 't' matches 'ts'. 
 All the variables are in the same order that they have been
 declared in the \fIparam list\fP. Notice also that you must add \\0 at the end of Param variable "real8,3n,read,n,m,x,v,t,info\\0".
 
@@ -281,6 +290,7 @@ Jean-Charles.Lambert@oamp.fr
 19-Jun-06	V1.32: happy gfortran                 JCL
 29-May-07	V1.42: handle snapshot with different JCL
 	               nbodies
+29-Feb-08	V1.50: add Aux and Dens array         JCL
 .fi
 
 
