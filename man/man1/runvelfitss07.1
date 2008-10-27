@@ -14,54 +14,54 @@ is also given:
 .TP 20
 \fBin=\fP
 input velocity field [???]    
-.TP 20
+.TP
 \fBout=\fP
 output model field [???]    
-.TP 20
+.TP
 \fBpar=\fP
 output parameter file [???]    
-.TP 20
+.TP
 \fBcenter=\fP
 center of vel field [0,0]   
-.TP 20
+.TP
 \fBvsys=\fP
 systemic velocity [0]     
-.TP 20
+.TP
 \fBpa=\fP
 position angle of disk (E of N) [0]
-.TP 20
+.TP
 \fBinc=\fP
 inclination angle of disk [0]   
-.TP 20
+.TP
 \fBrmsism=\fP
 ISM turbulence [0]     
-.TP 20
+.TP
 \fBflags=\fP
-Flags which to be fitted/done (geom, center, vsys,
-.TP 20
+Flags which to be fitted/done: geom (inc and pa), center, vsys, radial (m=0), bar (m=1,2...), error estimates.
+[1,1,1,0,0,0]
+.TP
 \fBm=\fP
-harmonic order of bar perturbation (1 or 2)
-.TP 20
+harmonic order of bar perturbation (1 or 2).
+[2]
+.TP
 \fBseed=\fP
 Random Seed [-50]     
-.TP 20
+.TP
 \fBbootstrap=\fP
-Number of bootstrap samples if error to be
-.TP 20
+Number of bootstrap samples if error to be determined.
+[200]
+.TP
 \fBj=\fP
 correlation length [1]     
-.TP 20
+.TP
 \fBrcirc=\fP
 Radius beyond which no non-circular rmotions fitted [50]
-.TP 20
+.TP
 \fBradii=\fP
-Ring Radii at which velocity field components are
-.TP 20
+Ring Radii at which velocity field components are are extracted.
+.TP
 \fBexe=\fP
 name of VELFITSS07 executable [velfitss07]   
-.TP 20
-\fBVERSION=\fP
-27-oct-08 PJT [1.0]     
 .SH EXAMPLES
 After copying the \fBexamp.vels\P datafile in the current directory, the standard example
 can be run as follows:
