@@ -13,16 +13,19 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-input velocity field [???]    
+input velocity field. The first 4 lines are completely ignored, each
+other line must X,Y,V,DV in 4F10.2 format. Note X is positive to the
+west. Up to 50,000 points can
+be read in the default compilation. No default.
 .TP
 \fBout=\fP
-output model field [???]    
+output model field. No default.
 .TP
 \fBpar=\fP
-output parameter file [???]    
+output parameter file. No default.
 .TP
 \fBcenter=\fP
-center of vel field [0,0]   
+center of vel field. Note X is positive to the west  [0,0].
 .TP
 \fBvsys=\fP
 systemic velocity [0]     
@@ -84,6 +87,13 @@ http://www.physics.rutgers.edu/~spekkens/velfit/
 .fi
 .SH FILES
 velfit.inc - in the local directory. This will hamper running the program in parallel
+
+'    -46.00'
+'     -4.00'
+'    563.62'
+'      1.89'
+'xxxxxxx.xx'    4f10.2
+
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
