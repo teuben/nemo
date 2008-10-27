@@ -20,41 +20,42 @@ is also given:
 .TP 20
 \fBin=\fP
 input velocity field, in \fIimage(5NEMO)\fP format. No default.
-.TP 20
+.TP
 \fBradii=\fP
 radii of the ring boundaries. For N rings, N+1 values need to be give.
 They need to be sorted by increasing radius. 
-.TP 20
+.TP
 \fBpa=\fP
 position angle of disk, in degrees. [0]
-.TP 20
+.TP
 \fBinc=\fP
 inclination angle of disk, in degrees [45]   
-.TP 20
+.TP
 \fBcenter=\fP
 rotation center (mapcenter if left blank, 0,0=lower left)
-.TP 20
+.TP
 \fBvsys=\fP
 systemic velocity [0]     
-.TP 20
+.TP
 \fBden=\fP
 input density image, used to weigh the velocities. If missing,
 weights are uniform (but see \fBcoswt=\fP below). Default: none.
-.TP 20
+.TP
 \fBfrang=\fP
 free angle around minor axis (2*frang is the total angle around
 the minor axis used).
 [Default: 0]
-.TP 20
+.TP
 \fBblank=\fP
 Value of the blank pixel to be ignored. Default: 0.0
-.TP 20
+.TP
 \fBcoswt=\fP
 power of cos(theta) weighting [1]   
-.TP 20
+.TP
 \fBwwb73=\fP
 use the classic WWB73 method. Currently there is no other 
 method. [t]  
+.TP
 \fBout=\fP
 Optional output file. If selected, it will contain the 
 nominal rotation speed as derived from the local radial
