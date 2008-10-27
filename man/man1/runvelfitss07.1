@@ -6,7 +6,7 @@ runvelfitss07 \- frontend to run Spekkens & Sellwood's 2007 velfit code
 .SH DESCRIPTION
 RUNVELFITSS07 is a NEMO frontend to VELFITSS07 , and fits a
 bisymmetric flows to disk galaxy velocity fields.
-For more details see 
+For more details and a full explanation of the paramers, see 
 Spekkens and Sellwood (2007ApJ...664..204S)
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
@@ -48,7 +48,8 @@ harmonic order of bar perturbation (1 or 2).
 Random Seed [-50]     
 .TP
 \fBbootstrap=\fP
-Number of bootstrap samples if error to be determined.
+Number of bootstrap samples if error to be determined. Note using boostrap 
+(enabling the last flag) will result in a large runtime.
 [200]
 .TP
 \fBj=\fP
@@ -63,15 +64,23 @@ Ring Radii at which velocity field components are are extracted.
 \fBexe=\fP
 name of VELFITSS07 executable [velfitss07]   
 .SH EXAMPLES
-After copying the \fBexamp.vels\P datafile in the current directory, the standard example
-can be run as follows:
+After copying the \fBexamp.vels\fP datafile in the current directory, the standard example
+from the Users Guide can be run as follows:
 .nf
-runvelfitss07 examp.vels examp.m examp.p radii=2.5:50:2.5 vsys=500 pa=80 inc=60
+runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5
 .fi
+and the next 3 examples from the users guide are run as follows:
+.nf
+runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,1,0,0 rmsism=2.0
+runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,1,0,1 rmsism=2.0
+runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,0,1,1 rmsism=2.0
+.fi
+
 .SH SEE ALSO
 rotcur(1NEMO), velfit(1NEMO), rotcurshape(1NEMO)
 .nf
 2007ApJ...664..204S (Spekkens & Sellwood, 2007)
+http://www.physics.rutgers.edu/~spekkens/velfit/
 .fi
 .SH FILES
 velfit.inc - in the local directory. This will hamper running the program in parallel
