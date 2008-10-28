@@ -4,17 +4,22 @@ runvelfitss07 \- frontend to run Spekkens & Sellwood's 2007 velfit code
 .SH SYNOPSIS
 \fBrunvelfitss07\fP [parameter=value]
 .SH DESCRIPTION
-RUNVELFITSS07 is a NEMO frontend to VELFITSS07 , and fits a
-bisymmetric flows to disk galaxy velocity fields.
-For more details and a full explanation of the paramers, see 
-Spekkens and Sellwood (2007ApJ...664..204S)
+RUNVELFITSS07 is a NEMO frontend to VELFITSS07, and fits a
+bisymmetric flows to disk galaxy velocity fields. Radial flow
+can be fitted by setting the \fBflags(4)\fP boolean, whereas
+bisymmetric (m=2) or lopsides(m=1) flow with the \fBflags(5)\fP
+boolean (see \fBflags=\fP below). The code is usually not well
+converging to fitting both.
+For more details and a full explanation of the parameters, see 
+Spekkens and Sellwood (2007ApJ...664..204S) and the Users Guide
+on the VELFIT website.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
 input velocity field. The first 4 lines are completely ignored, each
-other line must X,Y,V,DV in 4F10.2 format. Note X is positive to the
+subsequent data line must be X,Y,V,DV in 4F10.2 format. Note X is positive to the
 west. Up to 50,000 points can
 be read in the default compilation. No default.
 .TP
@@ -51,12 +56,12 @@ harmonic order of bar perturbation (1 or 2).
 Random Seed [-50]     
 .TP
 \fBbootstrap=\fP
-Number of bootstrap samples if error to be determined. Note using boostrap 
+Number of bootstrap samples if error (flags(6) to be determined. Note using bootstrap 
 (enabling the last flag) will result in a large runtime.
 [200]
 .TP
 \fBj=\fP
-correlation length [1]     
+correlation length, in case bootstrap is used [1.0]
 .TP
 \fBrcirc=\fP
 Radius beyond which no non-circular rmotions fitted [50]
@@ -86,14 +91,9 @@ rotcur(1NEMO), velfit(1NEMO), rotcurshape(1NEMO)
 http://www.physics.rutgers.edu/~spekkens/velfit/
 .fi
 .SH FILES
-velfit.inc - in the local directory. This will hamper running the program in parallel
-
-'    -46.00'
-'     -4.00'
-'    563.62'
-'      1.89'
-'xxxxxxx.xx'    4f10.2
-
+.SH CACEATS
+The parameter file (velfit.inc) is in the local run directory, and is silently overwritten.
+This will hamper running the program in parallel.
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
