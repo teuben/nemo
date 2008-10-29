@@ -55,8 +55,8 @@
 # define falcON_included_cstring
 #endif
 #ifdef falcON_MPI
-# ifndef falcON_included_mpi_falcON_h
-#  include <parallel/mpi_falcON.h>
+# ifndef falcON_included_parallel_h
+#  include <parallel/parallel.h>
 # endif
 #endif
 

@@ -83,8 +83,8 @@
 #  ifndef falcON_USE_MPI
 #    define falcON_USE_MPI                         //   then use it             
 #  endif
-#  ifndef falcON_included_mpi_falcON_h
-#    include <parallel/mpi_falcON.h>
+#  ifndef falcON_included_parallel_h
+#    include <parallel/parallel.h>
 #  endif
 
 #else                                              // else                      
