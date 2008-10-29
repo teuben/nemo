@@ -132,7 +132,7 @@ namespace WDutils {
     static const int &mpi_size() { return Info.__mpi_size; }
     /// return true if debug level >= given debug depth
     static bool debug(int depth) { return Info.__debug >= depth; }
-    /// print a lof-file header
+    /// print a log-file header
     static void header(std::ostream&out);
   };
   /// is debugging level exceeded by debugging depth (argument)?                
