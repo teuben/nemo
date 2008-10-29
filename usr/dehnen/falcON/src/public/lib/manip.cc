@@ -36,7 +36,7 @@
 #include <fstream>                     // C++ file I/O
 #include <cstring>                     // C type string manipultions
 #ifdef falcON_MPI
-# include <parallel/mpi_falcON.h>
+# include <parallel/parallel.h>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 int falcON::Manipulator::parse(const char*params, double*pars, int maxp)

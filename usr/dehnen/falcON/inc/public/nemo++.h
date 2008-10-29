@@ -545,13 +545,13 @@ namespace falcON {
     //--------------------------------------------------------------------------
   protected:
     std::FILE *STREAM;
-    nemo_io&open    (const char*, const char*);    ///< open new file, close old
-    void    close   ();                            ///< close open file         
-    nemo_io() : STREAM (0) {}
-    ~nemo_io        () { close(); }                ///< close file & free memory
+    nemo_io&open(const char*, const char*);        ///< open new file, close old
+    void close();                                  ///< close open file         
+    nemo_io() : STREAM (0) {}                      ///< default ctor: do nothing
+    ~nemo_io() { close(); }                        ///< close file & free memory
   public:
-    bool    is_open () const { return STREAM!=0; } ///< ready for output ?      
-    operator bool   () const { return is_open(); } ///< ready for output ?      
+    bool is_open() const { return STREAM!=0; }     ///< ready for I/O ?      
+    operator bool() const { return is_open(); }    ///< ready for I/O ?
   };// class nemo_io
   class snap_in;
   // ///////////////////////////////////////////////////////////////////////////
@@ -591,6 +591,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// are we a pipe?
     bool const&is_pipe() const { return IS_PIPE; }
+    /// conversion to bool: are we ready for input?
+    operator bool() const { return is_open(); }
   };// class nemo_in
   class data_in;
   // ///////////////////////////////////////////////////////////////////////////

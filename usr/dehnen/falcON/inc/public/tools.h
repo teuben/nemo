@@ -93,14 +93,14 @@ namespace falcON {
 			     vect    &xc,
 			     real    &rc);
   //----------------------------------------------------------------------------
-  /// find the lagrange radii around the origin for a given set of cumulative   
-  /// masses (relative to total) for all bodies in_subset().                    
+  /// find the lagrange radii around the origin for a given set of cumulative
+  /// masses (relative to total) for all bodies in_subset().
   ///                                                                           
-  /// \param B      (input) set of bodies to consider                           
-  /// \param n      (input) size of tables for masses and Lagrange radii        
-  /// \param M      (input) table with relative masses                          
-  /// \param R      (output) table with Lagrange radii                          
-  /// \param off    (input/optional) offset of centre from origin               
+  /// \param B[in]      set of bodies to consider
+  /// \param n[in]      size of tables for masses and Lagrange radii
+  /// \param M[in]      table with relative masses
+  /// \param R[out]     table with Lagrange radi
+  /// \param off[in]    (optional) offset of centre from origin
   void find_lagrange_rad(const bodies*B,
 			 unsigned     n,
 			 const double*M,

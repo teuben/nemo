@@ -31,9 +31,6 @@
 #  include <public/nemo++.h>
 #  include <cstring>
 #endif
-#ifdef falcON_MPI
-#  include <parallel/mpi_falcON.h>
-#endif
 
 namespace falcON {
   bool is_appended(const char*name, char c, char*copy);
@@ -2316,12 +2313,12 @@ void Anlm::table_print(symmetry     s,
 Anlm& Anlm::global_sum(Anlm const&C, const MPI::Communicator*Comm)
 {
   reset(C.nmax(),C.lmax());
-  COMMUN(Comm)->AllReduce(MPI::Sum,C.A,A,N1*L1Q);
+  COMMUN(Comm)->AllReduce<MPI::Sum>(C.A,A,N1*L1Q);
   return*this;
 }
 Anlm& Anlm::global_sum(const MPI::Communicator*Comm)
 {
-  COMMUN(Comm)->AllReduceInPlace(MPI::Sum,A,N1*L1Q);
+  COMMUN(Comm)->AllReduceInPlace<MPI::Sum>(A,N1*L1Q);
   return*this;
 }
 #endif

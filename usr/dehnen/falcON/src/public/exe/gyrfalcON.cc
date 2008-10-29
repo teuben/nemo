@@ -131,9 +131,10 @@
 // v 3.2.3  10/06/2008  WD macros falcON_Error, falcON_Warning, DebugInfo
 // v 3.2.4  10/09/2008  WD happy gcc 4.3.1
 // v 3.3    09/10/2008  WD step=100, initial manip even if tstop=tini
+// v 3.3.1  29/10/2008  WD changes in nbody.h
 //------------------------------------------------------------------------------
-#define falcON_VERSION   "3.3"
-#define falcON_VERSION_D "09-oct-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.3.1"
+#define falcON_VERSION_D "29-oct-2008 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
