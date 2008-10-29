@@ -1,38 +1,40 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   src/public/manip/report_bodies.cc                                   
-///                                                                             
-/// \brief  provided manipulator report_bodies                                  
-///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2007-2008                                                           
-///                                                                             
+///
+/// \file   src/public/manip/report_bodies.cc
+///
+/// \brief  provided manipulator report_bodies
+///
+/// \author Walter Dehnen
+/// \date   2007-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
+//
 // Copyright (C) 2007-2008 Walter Dehnen                                        
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
 //                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// history:                                                                     
-//                                                                              
-// v 0.0    06/09/2006  WD created                                              
-// v 0.1    11/09/2008  WD erased direct use of nemo functions                 
+//
+// history:
+//
+// v 0.0    06/09/2006  WD created
+// v 0.1    11/09/2008  WD erased direct use of nemo functions
+// v 0.2    29/10/2008  WD append to existing output files, output format
 ////////////////////////////////////////////////////////////////////////////////
+#include <utils/inline_io.h>
 #include <public/defman.h>
 #include <fstream>                                 // C++ file I/O              
 #include <cstring>                                 // C strings                 
@@ -82,7 +84,7 @@ namespace falcON { namespace Manipulate {
     //--------------------------------------------------------------------------
     void print_scal(std::ostream&out) const
     {
-      out << "-------";
+      out << "-----";
       for(int i=0; i!=PREC; ++i) out << '-';
     }
     //--------------------------------------------------------------------------
@@ -96,21 +98,22 @@ namespace falcON { namespace Manipulate {
     void print_line(std::ostream&out, const body&b) const
     {
       print_scal( out << '#' );
-      if(has_mass(b)) print_scal(out);
-      if(has_pos(b))  print_vect(out);
-      if(has_vel(b))  print_vect(out);
-      if(has_acc(b))  print_vect(out);
-      if(has_pot(b) || has_pex(b)) print_scal(out);
-      if(has_srho(b)) print_scal(out);
-      if(has_uin (b)) print_scal(out);
-      if(has_csnd(b)) print_scal(out);
+      if(has_mass(b)) print_scal(out << '-');
+      if(has_pos (b)) print_vect(out << "------");
+      if(has_vel (b)) print_vect(out << "------");
+      if(has_acc (b)) print_vect(out << "------");
+      if(has_pot (b) ||
+	 has_pex (b)) print_scal(out << "--");
+      if(has_srho(b)) print_scal(out << '-');
+      if(has_uin (b)) print_scal(out << '-');
+      if(has_csnd(b)) print_scal(out << '-');
       out<<std::endl;
     }
     //--------------------------------------------------------------------------
     void print_head(std::ostream&out, const body&b) const
     {
-      out << "# " << std::setw(PREC+6) << "time";
-      if(has_mass(b)) out << ' ' << std::setw(PREC+6) << "mass";
+      out << '#'                 << std::setw(PREC+5) << "time";
+      if(has_mass(b)) out << ' ' << std::setw(PREC+5) << "mass";
       if(has_pos (b)) out << ' ' << std::setw(PREC+6) << "x"
 			  << ' ' << std::setw(PREC+6) << "y"
 			  << ' ' << std::setw(PREC+6) << "z";
@@ -120,44 +123,38 @@ namespace falcON { namespace Manipulate {
       if(has_acc (b)) out << ' ' << std::setw(PREC+6) << "a_x"
 			  << ' ' << std::setw(PREC+6) << "a_y"
 			  << ' ' << std::setw(PREC+6) << "a_z";
-      if(has_pot(b) || has_pex(b)) out << ' ' << std::setw(PREC+6) << "Phi";
-      if(has_srho(b)) out << ' ' << std::setw(PREC+6) << "gas_density";
-      if(has_uin (b)) out << ' ' << std::setw(PREC+6) << "U_internal";
-      if(has_csnd(b)) out << ' ' << std::setw(PREC+6) << "sound speed";
+      if(has_pot (b) ||
+	 has_pex (b)) out << ' ' << std::setw(PREC+6) << "Phi";
+      if(has_srho(b)) out << ' ' << std::setw(PREC+5) << "gas_density";
+      if(has_uin (b)) out << ' ' << std::setw(PREC+5) << "U_internal";
+      if(has_csnd(b)) out << ' ' << std::setw(PREC+5) << "sound speed";
       out << std::endl;
     }
     //--------------------------------------------------------------------------
     void print_data(std::ostream&out, const body&b, double time) const
     {
-      out << "  " << std::setw(PREC+6) << std::setprecision(PREC) << time;
+      out    << ' ' << print(time,PREC+5,PREC);
       if(has_mass(b))
-	out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << mass(b);
+	out  << ' ' << print(mass(b),PREC+5,PREC);
       if(has_pos(b))
-	out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << pos(b)[0]
-	    << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << pos(b)[1]
-	    << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << pos(b)[2];
+	out  << ' ' << print(pos(b),PREC+6,PREC);
       if(has_vel(b))
-	out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << vel(b)[0]
-	    << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << vel(b)[1]
-	    << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << vel(b)[2];
+	out  << ' ' << print(vel(b),PREC+6,PREC);
       if(has_acc(b))
-	out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << acc(b)[0]
-	    << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << acc(b)[1]
-	    << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << acc(b)[2];
+	out  << ' ' << print(acc(b),PREC+6,PREC);
       if(has_pot(b))
 	if(has_pex(b))
-	  out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << ppp(b);
+	  out<< ' ' << print(ppp(b),PREC+6,PREC);
 	else
-	  out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << pot(b);
+	  out<< ' ' << print(pot(b),PREC+6,PREC);
 	else if(has_pex(b))
-	  out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << pex(b);
-
+	  out<< ' ' << print(pex(b),PREC+6,PREC);
       if(has_srho(b))
-	out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << srho(b);
+	out << ' ' << print(srho(b),PREC+5,PREC);
       if(has_uin (b))
-	out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << uin(b);
+	out << ' ' << print(uin(b),PREC+5,PREC);
       if(has_csnd(b))
-	out << ' ' << std::setw(PREC+6) << std::setprecision(PREC) << csnd(b);
+	out << ' ' << print(csnd(b),PREC+5,PREC);
       out << std::endl;
     }
     //--------------------------------------------------------------------------
@@ -211,22 +208,11 @@ namespace falcON { namespace Manipulate {
 	  falcON_ErrorN("Manipulator \"%s\": %d bodies in set but "
 			"file name \"%s\" not format string\n",
 			name(),NSET,FNAME);
-	OUT[f].open(file);
-	if(!OUT[f].is_open())
-	  falcON_ErrorN("Manipulator \"%s\": cannot open file \"%s\"\n",file);
+	open_to_append_error(OUT[f],file);
  	print_line(OUT[f],b);
-	OUT[f]   << "#\n# output from Manipulator \"" << name() << "\"\n";
-	if(RunInfo::cmd_known())
-	  OUT[f] << "#\n# command: \"" << RunInfo::cmd() << "\"\n";
-	OUT[f]   << "#\n# run at "<< RunInfo::time() << '\n';
-	if(RunInfo::user_known())
-	  OUT[f] << "#     by \"" << RunInfo::user() << "\"\n";
-	if(RunInfo::host_known())
-	  OUT[f] << "#     on \"" << RunInfo::host() << "\"\n";
-	if(RunInfo::pid_known())
-	  OUT[f] << "#     pid " << RunInfo::pid() << '\n';
-	OUT[f]   << "#\n# data for body " << KEY[f] << "\n#\n";
- 	print_line(OUT[f],b);
+	OUT[f]   << "#\n# output from Manipulator \"" << name() << "\"\n#\n";
+	RunInfo::header(OUT[f]);
+	OUT[f]   << "# data for body " << KEY[f] << "\n#\n";
 	print_head(OUT[f],b);
 	print_line(OUT[f],b);
 	f++;
