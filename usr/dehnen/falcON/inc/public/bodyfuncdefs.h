@@ -4,11 +4,11 @@
 /// \file   inc/public/bodyfuncdefs.h                                           
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2004-2007                                                           
+/// \date   2004-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2007 Walter Dehnen                                        
+// Copyright (C) 2004-2008 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -46,90 +46,54 @@ namespace {
   // cond(x): type conversion to bool
   template<typename T> inline
   bool cond(const T&__x) { return make_bool<T>::cond(__x); }
-}
 
 #if defined(BD_TEST)
-// this switch is used to create functions that merely compute need and type.
+  // dummy functions that aid computing need and type
 
-#define real double
-#define vect tupel<3,double>
+  template<typename T> struct TypeShift { typedef T      type; };
+  template<> struct TypeShift<flags>    { typedef int    type; };
+  template<> struct TypeShift<unsigned> { typedef int    type; };
+  template<> struct TypeShift<indx>     { typedef int    type; };
+  template<> struct TypeShift<peanokey> { typedef int    type; };
+  template<> struct TypeShift<real>     { typedef double type; };
+  template<> struct TypeShift<vect>     { typedef tupel<3,double> type; };
+  // TestType<BIT>::type is
+  // int, double,tupel<3,double>  for integers, scalars, vectors
+  template<int BIT> struct TestType:
+  public TypeShift<typename field_traits<BIT>::type> {};
 
-namespace {
-
-  fieldset need(fieldset::o);
+  fieldset need(fieldset::empty);  // to accumulate fields needed
+  // provides return value for dummy functions,
+  // preventing compiler from optimising dummy function calls away
   WDutils::Random3 RNG(1);
 
-  inline int  __index() { return int(RNG()); }
-  inline int  __key  () { need |= fieldset::k; return int(RNG()); }
-  inline int  __ntot () { return int(RNG()); }
-  inline real __vcom () { need |= fieldset::x;
-                          need |= fieldset::v; return real(RNG()); }
-  inline real __mass () { need |= fieldset::m; return real(RNG()); }
-  inline real __pot  () { need |= fieldset::p; return real(RNG()); }
-  inline real __aux  () { need |= fieldset::y; return real(RNG()); }
-  inline real __eps  () { need |= fieldset::e; return real(RNG()); }
-  inline vect __pos  () { need |= fieldset::x; return vect(RNG()); }
-  inline vect __vel  () { need |= fieldset::v; return vect(RNG()); }
-  inline vect __acc  () { need |= fieldset::a; return vect(RNG()); }
-  inline vect __jrk  () { need |= fieldset::j; return vect(RNG()); }
+  // dummy functions which are allowed but not field functions
+  inline int    bodyindex() {                      return int   (RNG()); }
+  inline int    ntot     () {                      return int   (RNG()); }
+  inline double mtot     () { need |= fieldset::m; return double(RNG()); }
+  inline double vrad     () { need |= fieldset::phases; return double(RNG()); }
+  inline double vtan     () { need |= fieldset::phases; return double(RNG()); }
+  inline double vphi     () { need |= fieldset::phases; return double(RNG()); }
+  // dummy field functions
+#define DEF_DUMMY(BIT,NAME)			\
+  inline TestType<BIT>::type NAME()		\
+  {						\
+    need |= fieldset(fieldbit(BIT));		\
+    return TestType<BIT>::type(RNG());		\
+  }
 
-#ifdef falcON_SPH
-
-  inline real __size () { need |= fieldset::H; return real(RNG()); }
-  inline real __snum () { need |= fieldset::N; return real(RNG()); }
-  inline real __uin  () { need |= fieldset::U; return real(RNG()); }
-  inline real __udot () { need |= fieldset::I; return real(RNG()); }
-  inline real __udex () { need |= fieldset::E; return real(RNG()); }
-  inline real __entr () { need |= fieldset::K; return real(RNG()); }
-  inline real __srho () { need |= fieldset::R; return real(RNG()); }
-  inline real __fact () { need |= fieldset::F; return real(RNG()); }
-  inline real __csnd () { need |= fieldset::C; return real(RNG()); }
-  inline real __molw () { need |= fieldset::M; return real(RNG()); }
-
-#endif
-
-}
-
-#define i     __index()
-#define m     __mass()
-#define pos   __pos()
-#define vel   __vel()
-#define pot   __pot()
-#define acc   __acc()
-#define jrk   __jrk()
-#define aux   __aux()
-#define key   __key()
-#define eps   __eps()
-#define vr    __vcom()
-#define vt    __vcom()
-#define vphi  __vcom()
-#define N     __ntot()
-#define M     __mass()
-#define Pi    3.141592653589793238
-#define vector(X) vect(real(X))
-
-#ifdef falcON_SPH
-
-#  define h   __size()
-#  define n   __snum()
-#  define U   __uin()
-#  define Ui  __udot()
-#  define Ue  __udex()
-#  define K   __entr()
-#  define rho __srho()
-#  define f   __fact()
-#  define c   __csnd()
-#  define my  __molw()
-
-#endif
+  DEF_NAMED(DEF_DUMMY);
+#undef DEF_DUMMY
+  // define 'b' to be empty, such that 'pos(b)' --> 'pos()'
+#define b
+  // define 'B' to be empty, such that 'mtot(B)' --> 'mtot()'
+#define B
 
 #else // defined(BD_TEST)
-// this gives the bodyfunc macros
-
-namespace {
 
   typedef bodies::iterator body;
 
+  // functions which are not field functions
   inline int ntot(bodies const&B) {
     return B.N_bodies();
   }
@@ -163,6 +127,9 @@ namespace {
     if(R==zero) return zero;
     return (pos(b)[0]*vel(b)[1] - pos(b)[1]*vel(b)[0])/R;
   }
+
+#endif // defined(BD_TEST)
+
 }
 
 // global properties of all bodies
@@ -206,8 +173,6 @@ namespace {
 #define vt    vtan(b)                     /* |tangential velocity|           */
 #define vphi  vphi(b)                     /* azimuthal component of vel      */
 #define vr    vrad(b)                     /* radial velocity                 */
-
-#endif // defined(BD_TEST)
 
 #define x     pos[0]                      /* x-position                      */
 #define y     pos[1]                      /* y-position                      */
