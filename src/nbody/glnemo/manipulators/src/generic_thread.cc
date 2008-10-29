@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <assert.h>
+#include <cstdlib>
 #include "generic_thread.h"
 
 #define LOCAL_DEBUG 0

@@ -26,7 +26,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <assert.h>
-
+#include <cstdlib>
 #include "MessageBuffer.h"
 
 using namespace std;

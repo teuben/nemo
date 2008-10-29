@@ -82,7 +82,7 @@ namespace {
   bool glnemo::manipulate(const snapshot*S) const {
     if (current_step==0) {  // this is firs time
       std::string sim_name;
-      if (hasvalue("out")) sim_name = getparam("out");
+      if (hasvalue((char *)"out")) sim_name = getparam((char *) "out");
       else                 sim_name = "noname";
       // instantiate Master GLnemo Server Thread
       glnemo_server = new MasterServerThread(sim_name,port,max_port,S);
