@@ -25,6 +25,7 @@
 // along with this program; if not, write to the Free Software                  
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
 //                                                                              
+////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_inline_io_h
 #define WDutils_included_inline_io_h
 
@@ -42,6 +43,10 @@
 #ifndef WDutils_included_cstdio
 #  include <cstdio>
 #  define WDutils_included_cstdio
+#endif
+#ifndef WDutils_included_cmath
+#  include <cmath>
+#  define WDutils_included_cmath
 #endif
 //------------------------------------------------------------------------------
 namespace WDutils {
