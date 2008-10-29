@@ -218,26 +218,25 @@ void Integrator::remember(bool all) const
 void Integrator::cpu_stats_body(output&to) const
 {
   SOLVER->cpu_stats_body(to);
+  double C_S=CPU_STEP, C_T=CPU_TOTAL;
 #ifdef falcON_MPI
-  // need to add code to sum cpu timings over all processes
+  if(snap_shot()->parallel()) {
+    COMMUN(snap_shot()->parallel()->Comm())->Reduce<MPI::Sum>(0,CPU_STEP ,C_S);
+    COMMUN(snap_shot()->parallel()->Comm())->Reduce<MPI::Sum>(0,CPU_TOTAL,C_T);
+  }
 #endif
   if(to) {
-    print_cpu(CPU_STEP,to); to<<' ';
-    print_cpu_hms(CPU_TOTAL,to);
+    print_cpu    (C_S,to); to<<' ';
+    print_cpu_hms(C_T,to);
   } 
 }
 //------------------------------------------------------------------------------
-void Integrator::describe(output&out)        // I: output stream          
-const {
-  out<<"#"; stats_line(out);
-  if(RunInfo::cmd_known())
-    out<<"# \""<<RunInfo::cmd()<<"\"\n#\n";
-  out<<"# run at  "  <<RunInfo::time()<<"\n";
-  if(RunInfo::user_known()) out<<"#     by  \""<<RunInfo::user()<<"\"\n";
-  if(RunInfo::host_known()) out<<"#     on  \""<<RunInfo::host()<<"\"\n";
-  if(RunInfo::pid_known())  out<<"#     pid  " <<RunInfo::pid() <<"\n";
-  out<<"#\n";
-  out.flush();
+void Integrator::describe(output&to) const {
+  if(to) {
+    to<<"#"; stats_line(to);
+    RunInfo::header(to);
+    to.flush();
+  }
 }
 //------------------------------------------------------------------------------
 #ifdef falcON_NEMO
@@ -245,11 +244,18 @@ const {
 void Integrator::write(nemo_out const&o,           // I: nemo output            
 		       fieldset       w) const     //[I: what to write]         
 {
-  if( o.is_sink()) return;
-  if(!o.is_open()) 
-    falcON_THROW("Integrator::write(): nemo device not open\n");
-  snap_shot()->write_nemo(o,w);
-} 
+#ifdef falcON_MPI
+  if(snap_shot()->parallel())
+    snap_shot()->parallel()->write_nemo(&o, f);
+  else
+#endif
+  {
+    if( o.is_sink()) return;
+    if(!o.is_open()) 
+      falcON_THROW("Integrator::write(): nemo device not open\n");
+    snap_shot()->write_nemo(o,w);
+  } 
+}
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -304,13 +310,18 @@ void BlockStepCode::elementary_step(int t) const { // I: number of step
   ++t;                                             // add one to t              
   int l=highest_level();                           // find lowest level moving  
   for(; !(t&1) && l; t>>=1, --l);                  // l: lowest level moving    
-  bool move=false;                                 // need to do anything?      
+  bool move = false;                               // need to do anything?      
   for(int i=l; i!=Nsteps(); ++i)                   // LOOP levels up to highest 
     if(N[i]) move = true;                          //   IF any non-empty: move  
-  if(!move) return;                                // IF not moving: DONE       
+#ifdef falcON_MPI
+  if(snap_shot()->parallel())
+    COMMUN(snap_shot()->parallel()->Comm())->
+      AllReduceInPlace<MPI::And>(move);
+#endif
+  if(!move) return;                                // none moving anywhere: DONE
   bool all=true;                                   // are all active?           
   for(int i=0; i!=l; ++i)                          // LOOP lower levels         
-    if(N[i]) all  = false;                         //   IF all empty: all active
+    if(N[i]) all = false;                          //   IF all empty: all active
   double dt=tau_min() * m;                         // dt = m*tau_min            
   drift(dt);                                       // predict @ new time        
   m = 0;                                           // reset m = 0               
@@ -443,36 +454,54 @@ void BlockStepCode::stats_head(output&to) const {
 // class falcON::NBodyCode                                                    //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-NBodyCode::NBodyCode(const char*file,              // I: input file             
-		     bool       resume,            // I: resume old (if nemo)   
-		     fieldset   read_more,         // I: further data to read   
-		     const char*time,              // I: time for initial data  
-		     fieldset   read_try)          // I: data to try to read    
-  falcON_THROWING :
+NBodyCode::NBodyCode(const char*file,
+		     bool       resume,
+		     fieldset   read_more,
+		     const char*time,
+		     fieldset   read_try) falcON_THROWING :
   FILE ( file ),
-  SHOT ( fieldset::gravity | read_more ),
+  PSHT ( 
+#ifdef falcON_MPI
+	 MPI::Initialized()? new ParallelSnapshot :
+#endif
+	 0 ),	     
+  SHOT ( 
+#ifdef falcON_MPI
+	 PSHT? PSHT->local() : 
+#endif
+	 new snapshot ), 
   CODE ( 0 ),
   READ ( fieldset::empty )
 {
+  SHOT->add_fields(fieldset::gravity | read_more);
   const fieldset must(fieldset::basic | read_more);
   const fieldset read(must | read_try);
-  nemo_in  In(file);                               // open nemo input           
-  if(resume) {                                     // IF resuming: last snapshot
-    do   SHOT.read_nemo(In,READ,read,0,0);         //   DO:  read bodies        
-    while(In.has_snapshot());                      //   WHILE more to be read   
-  } else {                                         // ELIF:                     
-    bool gotit=false;                              //   read snapshot?          
-    do   gotit=SHOT.read_nemo(In,READ,read,time,0);//   DO:  try to read them   
-    while(!gotit && In.has_snapshot());            //   WHILE snapshots present 
-    if(!gotit)                                     //   didn't read any -> ERROR
-      falcON_THROW("NBodyCode: no snapshot matching \"time=%s\""
-		   "found in file \"%s\"",time? time:"  ", file);
-  }                                                // ENDIF                     
-  if(!READ.contain(fieldset::f))                   // UNLESS flags just read    
-    SHOT.reset_flags();                            //   reset them              
-  if(!READ.contain(must))                          // IF some data missing      
+  nemo_in In;
+#ifdef falcON_MPI
+  if(!PSHT || Comm(PSHT)->rank() == 0)
+#endif
+    In.open(file);
+  bool more, gotT=true;
+  do {
+    gotT =
+#ifdef falcON_MPI
+      PSHT?
+      PSHT->read_nemo(In,READ,read,resume? 0:time, 0) :
+#endif
+      SHOT->read_nemo(In,READ,read,resume? 0:time, 0) ;
+    more = In.has_snapshot();
+#ifdef falcON_MPI
+    if(PSHT) COMMUN(Comm(PSHT))->BroadCast(0,more);
+#endif
+  } while(more && (resume || !gotT));
+  if(!gotT)
+    falcON_THROW("NBodyCode: no snapshot matching \"time=%s\""
+		 "found in file \"%s\"",time? time:"  ", file);
+  if(!READ.contain(must))
     falcON_THROW("NBodyCode: couldn't read body data: %s",
 		 word(READ.missing(must)));
+  if(!READ.contain(fieldset::f))
+    SHOT->reset_flags();
   DebugInfo(4,"NBodyCode constructed\n");
 }
 //------------------------------------------------------------------------------
@@ -485,19 +514,34 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
 {
   DebugInfo(5,"NBodyCode::init(): called ... \n");
   try {
-    if(FS->acc_ext()) SHOT.add_fields(fieldset::q);
+    if(FS->acc_ext()) SHOT->add_fields(fieldset::q);
     if(Nlev <= 1 || St == 0)
       CODE = static_cast<const Integrator*>
 	( new LeapFrogCode(kmax,FS,p,k,r,P,K,R) );
     else
       CODE = static_cast<const Integrator*>
 	( new BlockStepCode(kmax,Nlev,FS,St,p,k,r,P,K,R,
-			    int(1+std::log10(double(SHOT.N_bodies())))));
+			    int(1+std::log10(double(SHOT->N_bodies())))));
   } catch(falcON::exception E) {
     DebugInfo(2,"NBodyCode::init(): caught error \"%s\"\n",E.text());
     falcON_RETHROW(E);
   }
   DebugInfo(4,"NBodyCode::init(): done\n");
+}
+//------------------------------------------------------------------------------
+NBodyCode::~NBodyCode() {
+  if(CODE)
+    falcON_DEL_O(CODE);
+#ifdef falcON_MPI
+  if(PSHT)
+    falcON_DEL_O(PSHT);
+  else
+#endif
+  if(SHOT)
+    falcON_DEL_O(SHOT);
+  CODE = 0;
+  PSHT = 0;
+  SHOT = 0;
 }
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
@@ -542,7 +586,7 @@ void ForceDiagGrav::diagnose_grav() const
       for(int j=0; j!=Ndim; ++j) 
 	Tmp[p++] = w[i][j];
     }
-    COMMUN(Comm(snap_shot()))->AllReduceInPlace(MPI::Sum,Tmp,Num);
+    COMMUN(Comm(snap_shot()))->AllReduceInPlace<MPI::Sum>(Tmp,Num);
     m    = Tmp[p=0];
     vin  = Tmp[++p];
     vex  = Tmp[++p];
@@ -588,7 +632,7 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
       for(int j=0; j!=Ndim; ++j) 
 	Tmp[p++] = k[i][j];
     }
-    COMMUN(Comm(snap_shot()))->AllReduceInPlace(MPI::Sum,Tmp,Num);
+    COMMUN(Comm(snap_shot()))->AllReduceInPlace<MPI::Sum>(Tmp,Num);
     for(int i=0,p=0; i!=Ndim; ++i) {
       l[i] = Tmp[p++];
       v[i] = Tmp[p++];
@@ -655,7 +699,7 @@ void ForceDiagGrav::diagnose_full() const
 	Tmp[p++] = k[i][j];
       }
     }
-    COMMUN(Comm(snap_shot()))->AllReduceInPlace(MPI::Sum,Tmp,Num);
+    COMMUN(Comm(snap_shot()))->AllReduceInPlace<MPI::Sum>(Tmp,Num);
     m   = Tmp[p=0];
     vin = Tmp[++p];
     vex = Tmp[++p];
@@ -689,7 +733,7 @@ void ForceDiagGrav::diagnose_full() const
 ////////////////////////////////////////////////////////////////////////////////
 #if 0
 void ForceDiagGrav::write_diag_nemo(nemo_out const&out,
-				   double         cpu) const
+				    double         cpu) const
 {
   out.open_set(nemo_io::diags);                    // OPEN diagnostics set      
   out.single_vec(0) = Ekin() + Epot();             //     copy total energy     
@@ -715,7 +759,7 @@ void ForceDiagGrav::write_diag_nemo(nemo_out const&out,
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////////
-void ForceDiagGrav::dia_stats_head (output& to) const {
+void ForceDiagGrav::dia_stats_head (output&to) const {
   if(to) {
     const char *space = sizeof(real)==4? " " : "     ";
     to  << "      time  "<<space
@@ -929,7 +973,7 @@ void ForceALCON::cpu_stats_body(output&to) const
 #ifdef falcON_MPI
   if(snap_shot()->parallel()) {
     double cpu[3]={CPU_TREE,CPU_GRAV,CPU_AEX};
-    COMMUN(Comm(snap_shot()))->ReduceInPlace(MPI::Sum,0,cpu,3);
+    COMMUN(Comm(snap_shot()))->ReduceInPlace<MPI::Sum>(0,cpu,3);
     CPU_TREE = cpu[0];
     CPU_GRAV = cpu[1];
     CPU_AEX  = cpu[2];

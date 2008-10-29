@@ -414,8 +414,8 @@ namespace falcON {
     void describe(output&) const;
 #ifdef falcON_NEMO
     /// write snapshot to NEMO output.
-    /// \param o NEMO output stream
-    /// \param f data to be written out; default: mass, position, velocity
+    /// \param[in] o NEMO output stream
+    /// \param[in] f data to be written out; default: mass, position, velocity
     void write(nemo_out const&o,
 	       fieldset       f = fieldset::basic) const;
     //--------------------------------------------------------------------------
@@ -564,7 +564,8 @@ namespace falcON {
   class NBodyCode {
   protected:
     std::string        FILE;   ///< input file
-    snapshot           SHOT;   ///< snapshot: body data
+    snapshot          *SHOT;   ///< snapshot data
+    ParallelSnapshot  *PSHT;   ///< if MPI job: body data including remote
     const Integrator  *CODE;   ///< time integrator
     fieldset           READ;   ///< which data have been read?
     /// construction
@@ -582,6 +583,7 @@ namespace falcON {
     /// \param[in] read_more which data to read in addition to mxv
     /// \param[in] time (optional) if given, read snapshot matching time
     /// \param[in] read_try (optional) if given, try to read these data
+    /// \version 29-10-2008 enabled MPI parallelism
     NBodyCode(const char* file, bool resume, fieldset read_more,
 	      const char* time=0, fieldset read_try=fieldset::empty)
       falcON_THROWING;
@@ -606,9 +608,7 @@ namespace falcON {
 	      fieldset r_sph=fieldset::empty)
       falcON_THROWING;
     /// destruction
-    ~NBodyCode() {
-      falcON_DEL_O(CODE);
-    }
+    ~NBodyCode();
   public:
     //--------------------------------------------------------------------------
     /// describe simulation
@@ -636,15 +636,15 @@ namespace falcON {
     /// \name data access
     //@{
     /// simulation time of initial snapshot
-    double      const&initial_time   () const { return SHOT.initial_time(); }
+    double      const&initial_time   () const { return SHOT->initial_time(); }
     /// pointer to body data
-    const bodies     *my_bodies      () const { return&SHOT; }
+    const bodies     *my_bodies      () const { return SHOT; }
     /// pointer to snapshot data
-    const snapshot   *my_snapshot    () const { return&SHOT; }
+    const snapshot   *my_snapshot    () const { return SHOT; }
     /// input file name
     std::string const&input_file     () const { return FILE; }
     /// current simulation time
-    double      const&time           () const { return SHOT.time(); }
+    double      const&time           () const { return SHOT->time(); }
     //@}
     //--------------------------------------------------------------------------
   };// class falcON::NBodyCode
@@ -1010,6 +1010,17 @@ namespace falcON {
   private:
     GravSteps GS;
     //--------------------------------------------------------------------------
+    static fieldset to_read(fieldset need, bool soft, bool grav)
+    {
+      if(soft)
+	need += fieldset::e;
+      if(grav) {
+	need -= fieldset::a;
+	need -= fieldset::p;
+      }
+      return need;
+    }
+  public:
     /// constructor
     ///
     /// \param file   data input file for N-body data
@@ -1041,7 +1052,6 @@ namespace falcON {
     /// \param time   time to read input for (take first if null)
     /// \param read   data to read in addition to required for integration
     /// \param dir    number controlling direct summation
-  public:
     FalcONCode(// data input                                                    
 	       const char *       file,
 	       bool               resume,
@@ -1076,12 +1086,12 @@ namespace falcON {
 	       const char        *time = 0,
 	       fieldset           read = fieldset::empty,
 	       const int          dir[4] = Default::direct) falcON_THROWING :
-      NBodyCode ( file, resume, read | fieldset(
+      NBodyCode ( file, resume, to_read(read,
 #ifdef falcON_INDI
-		  soft != global_fixed ? fieldset::e :
+					soft!=global_fixed ? 1 :
 #endif
-		  fieldset::empty), time ),
-      ForceALCON( &SHOT, eps, theta, Ncrit, croot, kernel, Grav, sfac,
+					0, Grav || aex), time ),
+      ForceALCON( SHOT, eps, theta, Ncrit, croot, kernel, Grav, sfac,
 		  (1<<hgrow)-1, aex, dir
 #ifdef falcON_INDI
 		  ,soft
