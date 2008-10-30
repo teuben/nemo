@@ -246,7 +246,7 @@ void Integrator::write(nemo_out const&o,           // I: nemo output
 {
 #ifdef falcON_MPI
   if(snap_shot()->parallel())
-    snap_shot()->parallel()->write_nemo(&o, f);
+    snap_shot()->parallel()->write_nemo(o,w);
   else
 #endif
   {
