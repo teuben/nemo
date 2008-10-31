@@ -226,8 +226,11 @@ void Integrator::cpu_stats_body(output&to) const
   }
 #endif
   if(to) {
-    print_cpu    (C_S,to); to<<' ';
-    print_cpu_hms(C_T,to);
+    print_cpu    (C_S,to);
+    print_cpu_hms(C_T,to<<' ');
+#ifdef falcON_MPI
+    if(snap_shot()->parallel()) print_cpu_hms(MPI::WallClock(), to<<' ');
+#endif
   } 
 }
 //------------------------------------------------------------------------------

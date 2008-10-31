@@ -312,12 +312,24 @@ namespace falcON {
     /// print CPU statistics header, implements abstract method of base class
     void cpu_stats_head(output&to) const {
       SOLVER->cpu_stats_head(to);
-      if(to) to<< " step  accumulated";
+      if(to) {
+	to<< " step  accumulated";
+#ifdef falcON_MPI
+	if(snap_shot()->parallel())
+	  to<<"   wall clock";
+#endif
+      }
     }
     /// print CPU statistics line, implements abstract method of base class
     void cpu_stats_line(output&to) const {
       SOLVER->cpu_stats_line(to);
-      if(to) to<< "------------------";
+      if(to) {
+	to<< "------------------";
+#ifdef falcON_MPI
+	if(snap_shot()->parallel())
+	  to<<"-------------";
+#endif
+      }
     }
     //@}
     //--------------------------------------------------------------------------
