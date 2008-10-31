@@ -32,10 +32,6 @@
 #  include <cstring>
 #endif
 
-namespace falcON {
-  bool is_appended(const char*name, char c, char*copy);
-}
-
 using namespace falcON;
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //

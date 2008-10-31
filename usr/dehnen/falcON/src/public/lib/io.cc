@@ -167,16 +167,6 @@ void input::close() {
   IN = 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
-bool falcON::is_appended(const char*name, char c, char*copy) {
-  char *end = strrchr(name,c);
-  if(end && end[1] == 0) {
-    strcpy(copy,name);
-    copy[size_t(end-name)] = 0;
-    return true;
-  } else
-    return false;
-}
-////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::FortranIRec                                                    
 //                                                                              

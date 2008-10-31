@@ -725,6 +725,7 @@ void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
     falcON_RETHROW(E);
   }
   FIRST = BLOCK[0];
+  DebugInfo(6,"bodies::set_data(): done\n");
 }
 ////////////////////////////////////////////////////////////////////////////////
 // construction 0: construction with N=0, but data fields
@@ -734,11 +735,12 @@ bodies::bodies(fieldset bits) falcON_THROWING :
   FORCES    ( 0 )
 {
   unsigned n[BT_NUM]={0u};
-  DebugInfo(3,"bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
-	    n[0],n[1],n[2],word(BITS));
+  DebugInfo(2,"bodies::bodies(): constructing bodies @%p: n=%u,%u,%u, bits=%s",
+	    this,n[0],n[1],n[2],word(BITS));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   set_firsts();
+  DebugInfo(2,"bodies::bodies(): constructed\n");
 }
 // /////////////////////////////////////////////////////////////////////////////
 // construction 1, new version
@@ -748,8 +750,8 @@ bodies::bodies(const unsigned n[BT_NUM],
   C_FORTRAN ( 0 ),
   FORCES    ( 0 )
 {
-  DebugInfo(3,"bodies::bodies(): constructing bodies: n=%u,%u,%u, bits=%s",
-	    n[0],n[1],n[2],word(bits));
+  DebugInfo(2,"bodies::bodies(): constructing bodies @%p: n=%u,%u,%u, bits=%s",
+	    this,n[0],n[1],n[2],word(bits));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   set_firsts();

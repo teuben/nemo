@@ -564,8 +564,8 @@ namespace falcON {
   class NBodyCode {
   protected:
     std::string        FILE;   ///< input file
-    snapshot          *SHOT;   ///< snapshot data
     ParallelSnapshot  *PSHT;   ///< if MPI job: body data including remote
+    snapshot          *SHOT;   ///< snapshot data
     const Integrator  *CODE;   ///< time integrator
     fieldset           READ;   ///< which data have been read?
     /// construction

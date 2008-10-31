@@ -544,61 +544,68 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
   protected:
-    std::FILE *STREAM;
-    nemo_io&open(const char*, const char*);        ///< open new file, close old
-    void close();                                  ///< close open file         
-    nemo_io() : STREAM (0) {}                      ///< default ctor: do nothing
-    ~nemo_io() { close(); }                        ///< close file & free memory
+    std::FILE *STREAM;              ///< file handle
+    bool IN, OUT, PIPE, SINK;       ///< input?, output?, pipe?, sink?
+    /// close stream if open, then open new file
+    /// \param[in] file  name of file to open, "-": stdin/stdout, "." sink
+    /// \param[in] mode  r,w,w!,s for read, write, overwrite, scratch
+    void open(const char*file, const char*mode) falcON_THROWING;
+    /// close stream if open
+    void close();
+    /// default ctor: set stream to (nil)
+    nemo_io() : STREAM(0), IN(0), OUT(0), PIPE(0), SINK(0) {}
+    /// dtor: close stream
+    ~nemo_io() { close(); }
   public:
-    bool is_open() const { return STREAM!=0; }     ///< ready for I/O ?      
-    operator bool() const { return is_open(); }    ///< ready for I/O ?
+    /// are we a pipe?
+    bool const&is_pipe() const { return PIPE; }
+    /// are we a sink?
+    bool const&is_sink() const { return SINK; }
+    /// are we ready for I/O?
+    bool is_open() const { return STREAM!=0; }
+    /// are we ready for input?
+    bool is_reading() const { return IN; }
+    /// are we ready for ouput?
+    bool is_writing() const { return OUT && !SINK; }
   };// class nemo_io
   class snap_in;
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// represents a NEMO input stream, derived from \a nemo_io                   
+  /// represents a NEMO input stream, derived from \a nemo_io
   class nemo_in : public nemo_io {
     friend class snap_in;
     //--------------------------------------------------------------------------
   private:
-    mutable snap_in *SNAP_IN;                      // if non-zero: open snapshot
-    bool             IS_PIPE;                      // are we a pipe?            
-    nemo_in(nemo_in const&);                       // not implemented           
+    mutable snap_in *SNAP;                  ///< open snapshot, if any
+    nemo_in(nemo_in const&);                // not implemented
     //--------------------------------------------------------------------------
   public:
-    /// default ctor: do nothing
-    nemo_in() {}
-    //--------------------------------------------------------------------------
-    /// ctor from file name: open file for NEMO input.
-    /// If \a file equals "-", set pipe, ie. read from stdin instead from a file
-    /// \param[in] file name of file to be opened
-    /// \param[in] mode (optional) open mode, see nemo documentation
-    explicit nemo_in(const char*file, const char*mode="r");
-    //--------------------------------------------------------------------------
-    /// dtor: close stream; no \a snap_in must be opened
-    ~nemo_in() falcON_THROWING;
-    //--------------------------------------------------------------------------
-    /// close any old file and open new file
-    /// \param[in] file name of file to be opened
-    nemo_in&open(const char*file) falcON_THROWING;
-    //--------------------------------------------------------------------------
-    /// close open input stream
+    /// close open input stream (and close an open snap_in, if any)
     void close() falcON_THROWING;
-    //--------------------------------------------------------------------------
+    /// open new file (and close any old input stream)
+    /// \param[in] file name of file to be opened, may be (nil)
+    nemo_in&open(const char*file=0) falcON_THROWING {
+      close();
+      nemo_io::open(file,"r");
+      return *this;
+    }
+    /// default ctor and ctor from file name: open file for NEMO input.
+    /// If \a file equals "-", set pipe, ie. read from stdin instead from a file
+    /// \param[in] file name of file to be opened, may be (nil)
+    explicit nemo_in(const char*file=0) falcON_THROWING : SNAP(0) {
+      nemo_io::open(file,"r");
+    }
+    /// dtor: close()
+    ~nemo_in() falcON_THROWING { close(); }
     /// can a snapshot be opened?
     /// \return true if a \a snap_in can be constructed from *this
     bool has_snapshot() const;
-    //--------------------------------------------------------------------------
-    /// are we a pipe?
-    bool const&is_pipe() const { return IS_PIPE; }
     /// conversion to bool: are we ready for input?
-    operator bool() const { return is_open(); }
+    operator bool() const { return is_reading(); }
   };// class nemo_in
   class data_in;
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// represents a snapshot on a NEMO input stream, \a nemo_in                  
-  ///                                                                           
+  /// represents a snapshot on a NEMO input stream, \a nemo_in
+  ///
   /// At any time, only one \a snap_in can exist for any \a nemo_in.
   /// Construction of a second \a snap_in from the same \a nemo_in will cause
   /// a fatal error. A \a snap_in provides information on which data are
@@ -608,7 +615,7 @@ namespace falcON {
     friend class data_in;
     //--------------------------------------------------------------------------
   private:
-    mutable data_in *DATA_IN;                      // if non-zero: open snapshot
+    mutable data_in *DATA;                         // if non-zero: open snapshot
     nemo_in const   &INPUT;                        // our input          
     mutable int      FIELDS_READ;                  // fields read already       
     bool             HAS_TIME;                     // have simulation time?     
@@ -656,8 +663,7 @@ namespace falcON {
     }
   };// class snap_in
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// represents the data of one field from one snapshot of a NEMO input stream 
+  /// represents the data of one field from one snapshot of a NEMO input stream
   class data_in {
     //--------------------------------------------------------------------------
   private:
@@ -668,9 +674,7 @@ namespace falcON {
     nemo_io::DataType       TYPE;                  // which data type?          
     unsigned                SUBN;                  // how many items per datum  
     static const int        NDIM = Ndim;           // # spatial dimensions      
-    //--------------------------------------------------------------------------
   public:
-    //--------------------------------------------------------------------------
     /// ctor: create a valid data input with the expected number of bodies and
     ///       no type mismatch; otherwise throw an exception
     /// \param[in] s  input snapshot to be read from
@@ -707,19 +711,17 @@ namespace falcON {
   };// class data_in
   class snap_out;
   // ///////////////////////////////////////////////////////////////////////////
-  //
-  /// represents a NEMO output stream, derived from \a nemo_io                  
+  /// represents a NEMO output stream, derived from \a nemo_io
   class nemo_out : public nemo_io {
     friend class snap_out;
     //--------------------------------------------------------------------------
   private:
-    mutable snap_out *SNAP_OUT;                    // if non-zero open snapshot 
+    mutable snap_out *SNAP;                    // if non-zero open snapshot 
     bool              IS_PIPE, IS_SINK;            // are we a pipe or sink?    
     nemo_out(nemo_out const&);                     // not implemented           
-    //--------------------------------------------------------------------------
   public:
-    /// default ctor: do nothing
-    nemo_out() {}
+    /// close open output stream
+    void close() falcON_THROWING;
     /// open a nemo_out, special options by filename                            
     ///                                                                         
     /// If \e file equals "-", and no output or other nemo_out writes to
@@ -733,56 +735,43 @@ namespace falcON {
     /// the following way: If the last character of \e file is '!', an
     /// existing file of the same name (except for the trailing '!') will be
     /// overwritten. Similarly, if the last character of \e file is '@', an
-    /// existing file of the same name (except for the trailing '!') will be
+    /// existing file of the same name (except for the trailing '@') will be
     /// appended to. If no file of that name exists, we proceed as usual and
     /// open a file of name \e file (omitting any trailing '!' or '@').
     ///
     /// \return *this
     /// \param[in] file name of file to be opened, see detailled comments
     /// \param[in] append (optional) append existing file anyway?
-    nemo_out&open(const char* file, bool append = false) falcON_THROWING;
-    //--------------------------------------------------------------------------
-    /// close open output stream
-    void close() falcON_THROWING;
-    //--------------------------------------------------------------------------
-    /// ctor: open a nemo_out, special options by filename, see nemo_out::open()
-    /// \param[in] file name of file to be opened, see detailled comments
+    nemo_out&open(const char*file=0, bool append=false) falcON_THROWING;
+    /// default ctor and ctor from file name: open file for NEMO output.
+    /// If \a file equals "-", set pipe, ie. write to stdout instead to a file
+    /// \param[in] file   name of file to be opened, may be (nil)
+    /// \note             see detailled comments for open()
     /// \param[in] append (optional) append existing file anyway?
-    explicit nemo_out(const char*file, bool append = false) falcON_THROWING
-    : IS_PIPE(0), IS_SINK(0), SNAP_OUT(0) { open(file,append); }
-    //--------------------------------------------------------------------------
+    explicit nemo_out(const char*file=0, bool append=false) falcON_THROWING
+      : SNAP(0) { open(file,append); }
     /// close open output stream
     ~nemo_out() falcON_THROWING { close(); }
-    //--------------------------------------------------------------------------
-    /// are we a pipe?
-    bool const&is_pipe() const { return IS_PIPE; }
-    /// are we a sink?
-    bool const&is_sink() const { return IS_SINK; }
-    /// are we open and not a sink?
-    bool is_writing   () const { return is_open() && !is_sink(); }
     /// convertion to bool: true if is_writing()
-    operator bool     () const { return is_writing(); }
+    operator bool() const { return is_writing(); }
   };// class nemo_out
   class data_out;
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// represents a snapshot on a NEMO output stream, \a nemo_out                
-  ///                                                                           
-  /// At any time, only one \a snap_out can exist for any \a nemo_out.          
-  /// Construction of a second \a snap_out from the sane \a nemo_out will cause 
-  /// a fatal error. A \a snap_out allows to construct \a data_out for          
-  /// writing data.                                                             
+  /// represents a snapshot on a NEMO output stream, \a nemo_out
+  ///
+  /// At any time, only one \a snap_out can exist for any \a nemo_out.
+  /// Construction of a second \a snap_out from the sane \a nemo_out will
+  /// cause a fatal error. A \a snap_out allows to construct \a data_out for
+  /// writing data.
   class snap_out {
     friend class data_out;
-    //--------------------------------------------------------------------------
   private:
     nemo_out const   &OUTPUT;                      // our output stream         
-    mutable data_out *DATA_OUT;                    // if non-zero: open data_out
+    mutable data_out *DATA;                        // if non-zero: open data_out
     mutable int       FIELDS_WRITTEN;              // data already written out  
     unsigned          NTOT, NBOD[BT_NUM];          // # bodies, # bodies / type 
-    //--------------------------------------------------------------------------
+    //
     std::FILE* stream() const { return OUTPUT.STREAM; }
-    //--------------------------------------------------------------------------
   public:
     /// ctor: open NEMO snapshot set
     /// \param[in] out   NEMO output stream
@@ -790,10 +779,8 @@ namespace falcON {
     /// \param[in] time  simulation time
     snap_out(nemo_out const&out, const unsigned Nbod[BT_NUM], double time)
     falcON_THROWING;
-    //--------------------------------------------------------------------------
     /// dtor: close snapshot set in NEMO output stream
     ~snap_out() falcON_THROWING;
-    //--------------------------------------------------------------------------
     /// return total # bodies
     unsigned const&Ntot() const { return NTOT; }
     /// return # bodies per type
@@ -816,7 +803,6 @@ namespace falcON {
     }
   };// class snap_out
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
   /// represents the data of one field from one snapshot of a NEMO output stream
   class data_out {
   private:
@@ -827,16 +813,13 @@ namespace falcON {
     nemo_io::DataType      TYPE;                   // which data type?          
     unsigned               SUBN;                   // how many items per datum  
     static const int       NDIM = Ndim;            // # spatial dimensions      
-    //--------------------------------------------------------------------------
   public:
     /// ctor: open a NEMO data set
     /// \param[in] s  our \a snap_out snapshot set to write to
     /// \param[in] f  the data field to write out with this
     data_out(snap_out const&s, nemo_io::Field f) falcON_THROWING;
-    //--------------------------------------------------------------------------
     /// dtor: close data set
     ~data_out();
-    //--------------------------------------------------------------------------
     /// return out data field
     nemo_io::Field     const&field()      const { return FIELD; }
     /// return total # bodies to write (=Nbod or =Nsph)

@@ -485,7 +485,7 @@ NBodyCode::NBodyCode(const char*file,
   do {
     gotT =
 #ifdef falcON_MPI
-      PSHT?
+      PSHT ?
       PSHT->read_nemo(In,READ,read,resume? 0:time, 0) :
 #endif
       SHOT->read_nemo(In,READ,read,resume? 0:time, 0) ;
@@ -493,6 +493,8 @@ NBodyCode::NBodyCode(const char*file,
 #ifdef falcON_MPI
     if(PSHT) COMMUN(Comm(PSHT))->BroadCast(0,more);
 #endif
+    DebugInfo(3,"NBodyCode::NBodyCode: more=%d, resume=%d, gotT=%d\n",
+	      more,resume,gotT);
   } while(more && (resume || !gotT));
   if(!gotT)
     falcON_THROW("NBodyCode: no snapshot matching \"time=%s\""

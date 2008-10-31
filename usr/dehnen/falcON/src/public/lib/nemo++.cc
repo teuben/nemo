@@ -310,7 +310,7 @@ namespace {
     case falcON::nemo_io::null:
       falcON_THROW("nemo I/O: nemo_io::null not I/O able");
     default:
-      falcON_THROW("nemo I/O: unknown nemo_io::Field");
+      falcON_THROW("nemo I/O: unknown nemo_io::Field '%d'",f);
     }
   }
   inline falcON::nemo_io::DataType Type(const char* NemoType)
@@ -444,76 +444,61 @@ namespace Aux {
 }
 using namespace Aux;
 //------------------------------------------------------------------------------
-// class falcON::nemo_io                                                      //
+// class falcON::nemo_io
 //------------------------------------------------------------------------------
-falcON::nemo_io& falcON::nemo_io::open(const char* file, const char* control)
+void falcON::nemo_io::open(const char*file, const char*mode) falcON_THROWING
 {
   close();
-  STREAM = stropen(file,control);
-  if     (0 == std::strcmp(control, "r"))
-    get_history(STREAM);
-  else if(0 == std::strcmp(control, "w")  ||
-	  0 == std::strcmp(control, "w!") ||
-	  0 == std::strcmp(control, "s") )
-    put_history(STREAM);
-  return *this;
+  if(file && file[0]) {
+    PIPE = !std::strcmp(file,"-");
+    SINK = !std::strcmp(file,".");
+    if       (0 == std::strcmp(mode, "r")) {
+      if(SINK) falcON_THROW("nemo_io::open(): "
+			    "will not open file '%s' for input\n",file);
+      if(PIPE) input::open_std();
+      STREAM = stropen(file,mode);
+      get_history(STREAM);
+      IN = 1;
+      DebugInfo(4,"nemo_io: opened file '%s' for input\n",file);
+    } else if(0 == std::strcmp(mode, "w")  ||
+	      0 == std::strcmp(mode, "w!") ||
+	      0 == std::strcmp(mode, "a")  ||
+	      0 == std::strcmp(mode, "a!") ||
+	      0 == std::strcmp(mode, "s") ) {
+      if(PIPE) output::open_std();
+      STREAM = stropen(file,mode);
+      put_history(STREAM);
+      OUT  = 1;
+      DebugInfo(4,"nemo_io: opened file '%s' for output with mode '%s'\n",
+		file,mode);
+    } else
+      falcON_THROW("nemo_io::open(): unknown mode '%s'\n",mode);
+  }
 }
+//------------------------------------------------------------------------------
 void falcON::nemo_io::close()
 {
   if(STREAM) ::strclose(STREAM);
-  STREAM = 0;
+  if(PIPE) {
+    if(IN)  input ::close_std();
+    if(OUT) output::close_std();
+  }
+  if(STREAM) DebugInfo(4,"nemo_io: closed %s stream\n", IN? "input" : "output");
+  STREAM=0, IN=0, OUT=0, PIPE=0, SINK=0;
 }
 //------------------------------------------------------------------------------
-// class falcON::nemo_in                                                      //
+// class falcON::nemo_in
 //------------------------------------------------------------------------------
 void falcON::nemo_in::close() falcON_THROWING
 {
-  if(STREAM == 0) return;
-  if(SNAP_IN) {
-    DebugInfo(4,"nemo_in::close(): closing open snap_in first\n");
-    SNAP_IN->~snap_in();
-  }
-  if(IS_PIPE) {
-    input::close_std();
-    IS_PIPE = false;
+  if(SNAP) {
+    DebugInfo(4,"nemo_in::close(): closing open snap_in first ... \n");
+    SNAP->~snap_in();
+    SNAP = 0;
   }
   nemo_io::close();
-  DebugInfo(4,"nemo_in: closed stream\n");
-  report::info("nemo_in: closed stream\n");
 }
-falcON::nemo_in& falcON::nemo_in::open(const char* file) falcON_THROWING
-{
-  close();
-  if(file == 0 || file[0] == 0) return *this;
-  IS_PIPE = !std::strcmp(file,"-");
-  if(IS_PIPE) input::open_std();
-  SNAP_IN = 0;
-  nemo_io::open(file,"r");
-//   DebugInfo(4,"nemo_in: opened file '%s'\n",file);
-  DebugInfo(4,"nemo_in: opened file '%d'\n",file);
-  report::info("nemo_in: opened file '%s'\n",file);
-  return *this;
-}
-falcON::nemo_in::nemo_in(const char* file, const char* mode)
-  : IS_PIPE(0), SNAP_IN(0)
-{
-  if(file == 0 || file[0] == 0) return;
-  IS_PIPE = !std::strcmp(file,"-");
-  if(IS_PIPE) input::open_std();
-  nemo_io::open(file,mode);
-  DebugInfo(4,"nemo_in constructed\n");
-  report::info("nemo_in constructed\n");
-}
-falcON::nemo_in::~nemo_in() falcON_THROWING
-{
-  if(IS_PIPE) input::close_std();
-  if(SNAP_IN) {
-    DebugInfo(4,"nemo_in::~nemo_in(): closing open snap_in first\n");
-    SNAP_IN->~snap_in();
-  }
-  DebugInfo(4,"nemo_in destructed\n");
-  report::info("nemo_in destructed\n");
-}
+//------------------------------------------------------------------------------
 bool falcON::nemo_in::has_snapshot() const
 {
   return STREAM && get_tag_ok(STREAM,SnapShotTag);
@@ -522,22 +507,22 @@ bool falcON::nemo_in::has_snapshot() const
 // class falcON::snap_in
 //------------------------------------------------------------------------------
 falcON::snap_in::snap_in(nemo_in const&in) falcON_THROWING : 
-  INPUT(in), DATA_IN(0), FIELDS_READ(0), HAS_TIME(0), NTOT(0u), TIME(0.)
+  INPUT(in), DATA(0), FIELDS_READ(0), HAS_TIME(0), NTOT(0u), TIME(0.)
 {
   DebugInfo(4,"snap_in::snap_in() ...\n");
   for(bodytype t; t; ++t) NBOD[t] = 0u;
   if(! INPUT.has_snapshot())
     falcON_THROW("cannot open snapshot from nemo input stream");
-  if(INPUT.SNAP_IN)
+  if(INPUT.SNAP)
     falcON_THROW("trying to open 2nd snapshot from nemo input stream");
   // 1 open snapshot set
   get_set(INPUT.STREAM,SnapShotTag);
-  INPUT.SNAP_IN = this;
+  INPUT.SNAP = this;
   DebugInfo(5,"  snap_in::snap_in(): snapshot opened\n");
   // 2 open parameter set
   if(!get_tag_ok(INPUT.STREAM,ParametersTag)) {
     get_tes(INPUT.STREAM,SnapShotTag);
-    INPUT.SNAP_IN = 0;
+    INPUT.SNAP = 0;
     falcON_THROW("cannot read parameters from nemo input stream");
   }
   get_set(INPUT.STREAM,ParametersTag);
@@ -547,7 +532,7 @@ falcON::snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   if(!get_tag_ok(INPUT.STREAM,NobjTag)) {
     get_tes(INPUT.STREAM,ParametersTag);
     get_tes(INPUT.STREAM,SnapShotTag);
-    INPUT.SNAP_IN = 0;
+    INPUT.SNAP = 0;
     falcON_THROW("cannot read # bodies from nemo input stream");
   }
   get_data(INPUT.STREAM,NobjTag,IntType,&NTOT,0);
@@ -591,28 +576,28 @@ falcON::snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   // 5 open particle set
   if(!get_tag_ok(INPUT.STREAM,ParticlesTag)) {
     get_tes(INPUT.STREAM,SnapShotTag);
-    INPUT.SNAP_IN = 0;
-    falcON_THROW("cannot read parameters from nemo input stream");
+    INPUT.SNAP = 0;
+    falcON_THROW("cannot open particle set from nemo input stream");
   }
   get_set(INPUT.STREAM,ParticlesTag);
   DebugInfo(5,"  snap_in::snap_in(): particles set opened\n");
-  report::info("snap_in: opened for N[]=%d,%d,%d\n",NBOD[0],NBOD[1],NBOD[2]);
 }
+//------------------------------------------------------------------------------
 falcON::snap_in::~snap_in() falcON_THROWING
 {
-  if(DATA_IN) {
+  if(DATA) {
     DebugInfo(4,"snap_in::~snap_in(): closing open data_in first\n");
-    DATA_IN->~data_in();
+    DATA->~data_in();
   }
   HAS_TIME = false;
   NTOT = 0;
   for(bodytype t; t; ++t) NBOD[t] = 0u;
   get_tes(INPUT.STREAM,ParticlesTag);
   get_tes(INPUT.STREAM,SnapShotTag);
-  INPUT.SNAP_IN = 0;
+  INPUT.SNAP = 0;
   DebugInfo(4,"snap_in: closed\n");
-  report::info("snap_in: closed\n");
 }
+//------------------------------------------------------------------------------
 bool falcON::snap_in::has(nemo_io::Field f) const
 {
   return 
@@ -630,7 +615,7 @@ falcON::data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
   FIELD(f), INPUT(snap), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)
 {
   DebugInfo(5,"data_in::data_in(%s) ...\n",NemoTag(FIELD));
-  if( INPUT.DATA_IN )
+  if( INPUT.DATA )
     falcON_THROW("cannot read %s: nemo input still engaged",NemoTag(FIELD));
   if( !INPUT.has(f) )
     falcON_THROW("cannot read %s: not given with nemo input",NemoTag(FIELD));
@@ -684,15 +669,17 @@ falcON::data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
     // 3.5 array of yet higher rank
     falcON_THROW("nemo input of %s: found high-rank data",NemoTag(FIELD));
   }
-  INPUT.DATA_IN = this;
+  INPUT.DATA = this;
 }
+//------------------------------------------------------------------------------
 falcON::data_in::~data_in()
 {
   get_data_tes(INPUT.stream(),NemoTag(FIELD));
-  INPUT.DATA_IN      = 0;
+  INPUT.DATA = 0;
   INPUT.FIELDS_READ |= FIELD;
   DebugInfo(5,"data_in(%s) closed\n",NemoTag(FIELD));
 }
+//------------------------------------------------------------------------------
 void falcON::data_in::read(void*data, unsigned N)
 {
   if(NREAD >= NTOT) {
@@ -719,6 +706,7 @@ void falcON::data_in::read(void*data, unsigned N)
   DebugInfo(5,"data_in::read(): %d %s read\n",N,NemoTag(FIELD));
   NREAD += N;
 }
+//------------------------------------------------------------------------------
 void falcON::data_in::read_phases(void*pos, void*vel, unsigned N)
 {
   if(FIELD != nemo_io::posvel)
@@ -782,61 +770,27 @@ void falcON::data_in::read_phases(void*pos, void*vel, unsigned N)
 //------------------------------------------------------------------------------
 void falcON::nemo_out::close() falcON_THROWING
 {
-  if(STREAM == 0) return;
-  if(SNAP_OUT) {
+  if(SNAP) {
     DebugInfo(4,"nemo_out::close(): closing open snap_out first\n");
-    SNAP_OUT->~snap_out();
+    SNAP->~snap_out();
+    SNAP = 0;
   }
-  if(IS_PIPE) {
-    output::close_std();
-    IS_PIPE = false;
-  }
-  IS_SINK = false;
   nemo_io::close();
-  DebugInfo(4,"nemo_out: closed stream\n");
-  report::info("nemo_out: closed stream\n");
 }
-falcON::nemo_out& falcON::nemo_out::open(const char* file, bool appending)
+//------------------------------------------------------------------------------
+falcON::nemo_out& falcON::nemo_out::open(const char*file, bool app)
 falcON_THROWING
 {
+  // NOTE: we MUST call nemo_io::open() even if file==0
+  // If the trailing letter of file is '!' or '@', we temporarily remove it
+  // (setting it to nil), then call nemo_io::open(), and finally add it back on.
   close();
-  if(file == 0 || file[0] == 0) return *this;
-  IS_PIPE = !std::strcmp(const_cast<char*>(file),"-");
-  IS_SINK = !std::strcmp(const_cast<char*>(file),".");
-  if(IS_PIPE) output::open_std();
-  SNAP_OUT = 0;
-  char copy[1024];
-  if(appending) {                         // appending anyway?
-    if(is_appended(file,'!',copy)) {        // overwrite & append
-      nemo_io::open(copy,"a!");
-      DebugInfo(4,"nemo_out: opened file '%s' for appending with overwrite\n",
- 		 copy);
-      report::info("nemo_out: opened file '%s' for appending with overwrite\n",
- 		 copy);
-    } else if(is_appended(file,'@',copy)) { // append 
-      nemo_io::open(copy,"a");
-      DebugInfo(4,"nemo_out: opened file '%s' for appending\n",copy);
-      report::info("nemo_out: opened file '%s' for appending\n",copy);
-    } else {                                // append
-      nemo_io::open(file,"a");
-      DebugInfo(4,"nemo_out: opened file '%s' for appending\n",file);
-      report::info("nemo_out: opened file '%s' for appending\n",file);
-    }
-  } else {                                // append only with trailing '@'
-    if       (is_appended(file,'!',copy)) { // overwrite existing file 
-      nemo_io::open(copy,"w!");
-      DebugInfo(4,"nemo_out: opened file '%s' with overwrite\n",copy);
-      report::info("nemo_out: opened file '%s' with overwrite\n",copy);
-    } else if(is_appended(file,'@',copy)) { // append to existing file
-      nemo_io::open(copy,"a");
-      DebugInfo(4,"nemo_out: opened file '%s' for appending\n",copy);
-      report::info("nemo_out: opened file '%s' for appending\n",copy);
-    } else {                                // open new file
-      nemo_io::open(file,"w");
-      DebugInfo(4,"nemo_out: opened file '%s'\n",file);
-      report::info("nemo_out: opened file '%s'\n",file);
-    }
-  }
+  char*last = (file&&file[0])? const_cast<char*>(file)+std::strlen(file)-1 : 0;
+  char lett = last? *last : 0;            // remember last letter in filename
+  if     (lett=='!') { *last=0; nemo_io::open(file,app? "a!":"w!"); }
+  else if(lett=='@') { *last=0; nemo_io::open(file, "a"); }
+  else                          nemo_io::open(file,app? "a":"w");
+  if(last) *last = lett;                  // ensure file name remains unchanged
   return *this;
 }
 //------------------------------------------------------------------------------
@@ -844,16 +798,16 @@ falcON_THROWING
 //------------------------------------------------------------------------------
 falcON::snap_out::snap_out(nemo_out const&out, const unsigned nbod[BT_NUM],
 			   double time) falcON_THROWING :
-  OUTPUT(out), DATA_OUT(0), FIELDS_WRITTEN(0), NTOT(0u)
+  OUTPUT(out), DATA(0), FIELDS_WRITTEN(0), NTOT(0u)
 {
   DebugInfo(4,"snap_out::snap_out() ...\n");
   // 0 set # bodies
   for(bodytype t; t; ++t) NTOT += NBOD[t] = nbod[t];
-  if(OUTPUT.SNAP_OUT)
+  if(OUTPUT.SNAP)
     falcON_THROW("cannot open 2nd snapshot from nemo output stream");
   // 1 open snapshot set
   put_set(OUTPUT.STREAM,SnapShotTag);
-  OUTPUT.SNAP_OUT = this;
+  OUTPUT.SNAP = this;
   DebugInfo(5,"  snapshot opened\n");
   // 2 write parameter set
   put_set      (OUTPUT.STREAM,ParametersTag);
@@ -869,22 +823,20 @@ falcON::snap_out::snap_out(nemo_out const&out, const unsigned nbod[BT_NUM],
   put_set (OUTPUT.STREAM,ParticlesTag);
   int CS = CSCode(Cartesian,Ndim,2);
   Aux::put_data(OUTPUT.STREAM,CoordSystemTag,IntType,&CS,0);
-  report::info("snap_out: opened for N[]=%d,%d,%d t=%g\n",
-	       NBOD[0],NBOD[1],NBOD[2],time);
 }
+//------------------------------------------------------------------------------
 falcON::snap_out::~snap_out() falcON_THROWING
 {
-  if(DATA_OUT) {
+  if(DATA) {
     DebugInfo(4,"snap_out::~snap_out(): closing open data_out first\n");
-    DATA_OUT->~data_out();
+    DATA->~data_out();
   }
   NTOT = 0;
   for(bodytype t; t; ++t) NBOD[t] = 0u;
   put_tes(OUTPUT.STREAM,ParticlesTag);
   put_tes(OUTPUT.STREAM,SnapShotTag);
-  OUTPUT.SNAP_OUT = 0;
+  OUTPUT.SNAP = 0;
   DebugInfo(4,"snap_out closed\n");
-  report::info("snap_out closed\n");
 }
 //------------------------------------------------------------------------------
 // class falcON::data_out
@@ -896,7 +848,7 @@ falcON_THROWING
   SUBN(::is_scalar(FIELD)? 1: ::is_vector(FIELD)? NDIM : 2*NDIM)
 {
   DebugInfo(5,"data_out::data_out(%s) ...\n",NemoTag(FIELD));
-  if( OUTPUT.DATA_OUT )
+  if( OUTPUT.DATA )
     falcON_THROW("cannot write %s: nemo output still engaged",
 		 NemoTag(FIELD));
   if( OUTPUT.has_been_written(FIELD) )
@@ -913,21 +865,20 @@ falcON_THROWING
 		 NTOT,2,NDIM);
     DebugInfo(6,"  opening data set for %d phases\n",NTOT);
   }
-  OUTPUT.DATA_OUT = this;
-  report::info("data_out: opened for %d '%s'\n",
-	       NTOT,NemoTag(FIELD));
+  OUTPUT.DATA = this;
 }
+//------------------------------------------------------------------------------
 falcON::data_out::~data_out()
 {
   if(NWRITTEN != NTOT)
     falcON_Warning("nemo output of %s: assigned %d, written only %d bodies\n",
 		   NemoTag(FIELD), NTOT, NWRITTEN);
   put_data_tes(OUTPUT.stream(),NemoTag(FIELD));
-  OUTPUT.DATA_OUT        = 0;
+  OUTPUT.DATA = 0;
   OUTPUT.FIELDS_WRITTEN |= FIELD;
   DebugInfo(5,"data_out(%s) closed\n",NemoTag(FIELD));
-  report::info("data_out: closed output of '%s'\n",NemoTag(FIELD));
 }
+//------------------------------------------------------------------------------
 void falcON::data_out::write(const void*data, unsigned n)
 {
   if(NWRITTEN + n > NTOT) {
@@ -940,6 +891,7 @@ void falcON::data_out::write(const void*data, unsigned n)
   DebugInfo(6,"  %d %s written\n",n,NemoTag(FIELD));
   NWRITTEN += n;
 }
+//------------------------------------------------------------------------------
 void falcON::data_out::write(const void*data)
 {
   if(NWRITTEN < NTOT) {
