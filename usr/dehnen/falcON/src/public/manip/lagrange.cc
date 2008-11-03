@@ -1,37 +1,38 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   src/public/manip/lagrange.cc                                        
-///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
-///                                                                             
+///
+/// \file   src/public/manip/lagrange.cc
+///
+/// \author Walter Dehnen
+/// \date   2004-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2004-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
+//
 // history:                                                                     
-//                                                                              
-// v 1.0    27/06/2006  WD using bodyset in 'subset'                            
-// v 1.1    27/06/2006  WD using filter in 'filter' instead of 'subset'         
-// v 1.2    07/07/2006  WD using flags::ignore instead of filter                
-// v 1.3    11/09/2008  WD erased direct use of nemo functions                  
+//
+// v 1.0    27/06/2006  WD using bodyset in 'subset' 
+// v 1.1    27/06/2006  WD using filter in 'filter' instead of 'subset' 
+// v 1.2    07/07/2006  WD using flags::ignore instead of filter
+// v 1.3    11/09/2008  WD erased direct use of nemo functions
+// v 1.4    03/11/2008  WD appending, print(), RunInfo::header()
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/tools.h>
@@ -41,22 +42,22 @@
 
 namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class lagrange                                                             
-  //                                                                            
-  /// manipulator: computes Lagrange radii for subset, writes them to file      
-  ///                                                                           
-  /// This manipulator computes the Lagrange radii w.r.t. centre 'xcen' for     
-  /// all bodies in_subset() (default: all, see set_subset), and writes them    
-  /// to file.                                                                  
-  ///                                                                           
-  /// Meaning of the parameters:\n                                              
-  /// par[0-n]: mass fractions for which Lagrange radii shall be computed     \n
-  /// file:     file name for output of table with Lagrange radii             \n
-  ///                                                                           
-  /// Usage of pointers: uses 'xcen'\n                                          
-  /// Usage of flags:    uses in_subset()\n                                     
-  ///                                                                           
+  //
+  // class lagrange
+  //
+  /// manipulator: computes Lagrange radii for subset, writes them to file
+  ///
+  /// This manipulator computes the Lagrange radii w.r.t. centre 'xcen' for
+  /// all bodies in_subset() (default: all, see set_subset), and writes them
+  /// to file.
+  ///
+  /// Meaning of the parameters:\n
+  /// par[0-n]: mass fractions for which Lagrange radii shall be computed\n
+  /// file:     file name for output of table with Lagrange radii\n
+  ///
+  /// Usage of pointers: uses 'xcen'\n
+  /// Usage of flags:    uses in_subset()\n
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class lagrange : public manipulator {
   private:
@@ -65,6 +66,20 @@ namespace falcON { namespace Manipulate {
     mutable double     *R;
     mutable output      OUT;
     mutable bool        FST;
+    //--------------------------------------------------------------------------
+    void print_line() const {
+      OUT  << "#-----------";
+      for(int i=0; i!=N; ++i)
+	OUT<< "---------";
+      OUT  << '\n';
+    }
+    //--------------------------------------------------------------------------
+    void print_head() const {
+      OUT  << "# time      ";
+      for(int i=0; i!=N; ++i)
+	OUT<< " r[" << std::setw(4) << 100*M[i] << "%]";
+      OUT  << '\n';
+    }
     //--------------------------------------------------------------------------
   public:
     const char* name    () const { return "lagrange"; }
@@ -86,7 +101,7 @@ namespace falcON { namespace Manipulate {
       N   ( npar ),
       M   ( npar>0? falcON_NEW(double,npar) : 0 ),
       R   ( npar>0? falcON_NEW(double,npar) : 0 ),
-      OUT ( file? file : "." ),
+      OUT ( file? file : ".", true),
       FST ( true )
     {
       for(int i=0; i!=N; ++i) M[i] = pars[i];
@@ -106,8 +121,9 @@ namespace falcON { namespace Manipulate {
     }
     //--------------------------------------------------------------------------
     ~lagrange() {
-      if(M) falcON_DEL_A(M); 
-      if(R) falcON_DEL_A(R);
+      if(M) { falcON_DEL_A(M); M=0; }
+      if(R) { falcON_DEL_A(R); R=0; }
+      N=0;
     }
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -118,31 +134,18 @@ namespace falcON { namespace Manipulate {
     }
     if(FST) {
       FST = false;
-      OUT  << "#\n"
-	   << "# output from Manipulator \"lagrange\"\n";
-      if(RunInfo::cmd_known())
-	OUT<< "#\n# command: \""<<RunInfo::cmd() <<"\"\n";
-      OUT  << "# run at "<<RunInfo::time()<<'\n';
-      if(RunInfo::user_known())
-	OUT<< "#     by \""<<RunInfo::user()<<"\"\n";
-      if(RunInfo::host_known())
-	OUT<< "#     on \""<<RunInfo::host()<<"\"\n";
-      if(RunInfo::pid_known())
-	OUT<< "#     pid "<<RunInfo::pid()<<'\n';
-      OUT  << "#\n# time      ";
-      for(int i=0; i!=N; ++i)
-	OUT << " r[" << std::setw(4) << 100*M[i] << "%]";
-      OUT  << "\n#-----------";
-      for(int i=0; i!=N; ++i)
-	OUT << "---------";
-      OUT << '\n';
+      print_line();
+      OUT  << "#\n# output from Manipulator \"lagrange\"\n#\n";
+      RunInfo::header(OUT);
+      print_head();
+      print_line();
       OUT.stream().setf(std::ios::left, std::ios::adjustfield);
     }
     const vect*X0= S->pointer<vect>("xcen");
     find_lagrange_rad(S,N,M,R,X0);
-    OUT  << std::setw(12) << S->time();
+    OUT  << print(S->time(),12,8);
     for(int i=0; i!=N; ++i)
-      OUT<< ' ' << std::setw(8) << R[i];
+      OUT<< ' ' << print(R[i],8,2);
     OUT  << std::endl;
     return false;
   }
