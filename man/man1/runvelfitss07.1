@@ -1,15 +1,16 @@
-.TH RUNVELFITSS07 1NEMO "27 October 2008"
+.TH RUNVELFITSS07 1NEMO "29 October 2008"
 .SH NAME
-runvelfitss07 \- frontend to run Spekkens & Sellwood's 2007 velfit code
+runvelfitss07 \- frontend to run Spekkens & Sellwood's 2007 \fIvelfit\fP code
 .SH SYNOPSIS
 \fBrunvelfitss07\fP [parameter=value]
 .SH DESCRIPTION
-RUNVELFITSS07 is a NEMO frontend to VELFITSS07, and fits a
-bisymmetric flows to disk galaxy velocity fields. Radial flow
-can be fitted by setting the \fBflags(4)\fP boolean, whereas
-bisymmetric (m=2) or lopsides(m=1) flow with the \fBflags(5)\fP
-boolean (see \fBflags=\fP below). The code is usually not well
-converging to fitting both.
+\fBrunvelfitss07\fP is a NEMO frontend to \fBvelfitss07\fP, and fits a
+non-parametric
+non-axisymmetric flow to a planar disk galaxy velocity field. Radial (m=0) flow
+can be fitted by setting \fBflags(4)\fP, whereas
+bisymmetric (m=2) or lobsided (m=1) flow with \fBflags(5)\fP
+(see \fBflags=\fP below). The code is usually not well
+converging when fitting both.
 For more details and a full explanation of the parameters, see 
 Spekkens and Sellwood (2007ApJ...664..204S) and the Users Guide
 on the VELFIT website.
@@ -29,14 +30,15 @@ output model field. No default.
 \fBpar=\fP
 output parameter file. No default.
 .TP
-\fBcenter=\fP
-center of vel field. Note X is positive to the west  [0,0].
+\fBcenter=\fP\fIxc,yc\fP
+center of velocity field. Note X is positive to the west  [0,0].
 .TP
 \fBvsys=\fP
 systemic velocity [0]     
 .TP
 \fBpa=\fP
-position angle of disk (E of N) [0]
+(kinematic) position angle of disk (E of N), the usual convention
+applies where this means the receding side of the disk [0]
 .TP
 \fBinc=\fP
 inclination angle of disk [0]   
@@ -44,8 +46,9 @@ inclination angle of disk [0]
 \fBrmsism=\fP
 ISM turbulence [0]     
 .TP
-\fBflags=\fP
-Flags which to be fitted/done: geom (inc and pa), center, vsys, radial (m=0), bar (m=1,2...), error estimates.
+\fBflags=\fP\fIf1,f2,f3,f4,f5,f6\fP
+Siz flags which to be fitted/done: geom (inc and pa), center, vsys, radial (m=0), 
+lobsides/bisymmetric (m=1,2...), error estimates.
 [1,1,1,0,0,0]
 .TP
 \fBm=\fP
@@ -56,8 +59,8 @@ harmonic order of bar perturbation (1 or 2).
 Random Seed [-50]     
 .TP
 \fBbootstrap=\fP
-Number of bootstrap samples if error (flags(6) to be determined. Note using bootstrap 
-(enabling the last flag) will result in a large runtime.
+Number of bootstrap samples if errors (\fBflags(6)\fP set) are calculated. 
+Note using bootstrap will result in a large runtime.
 [200]
 .TP
 \fBj=\fP
@@ -66,18 +69,21 @@ correlation length, in case bootstrap is used [1.0]
 \fBrcirc=\fP
 Radius beyond which no non-circular rmotions fitted [50]
 .TP
-\fBradii=\fP
+\fBradii=\fP\fIrmin:rmax:step\fP
 Ring Radii at which velocity field components are are extracted.
 .TP
 \fBexe=\fP
-name of VELFITSS07 executable [velfitss07]   
+name of VELFITSS07 executable. It will have to be found in the user's $PATH. Note that
+although the original name of the SS07 is \fIvelfit\fP, this conflicts with
+\fIvelfit(1NEMO)\fP and within NEMO we normally rename the SS07 version fo
+\fIvelfitss07\fP.  [velfitss07]   
 .SH EXAMPLES
-After copying the \fBexamp.vels\fP datafile in the current directory, the standard example
+The standard example
 from the Users Guide can be run as follows:
 .nf
 runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5
 .fi
-and the next 3 examples from the users guide are run as follows:
+and the next 3 examples from the Users Guide are run as follows:
 .nf
 runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,1,0,0 rmsism=2.0
 runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,1,0,1 rmsism=2.0
@@ -88,12 +94,49 @@ runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 
 rotcur(1NEMO), velfit(1NEMO), rotcurshape(1NEMO)
 .nf
 2007ApJ...664..204S (Spekkens & Sellwood, 2007)
-http://www.physics.rutgers.edu/~spekkens/velfit/
+WEBSITE: http://www.physics.rutgers.edu/~spekkens/velfit/
 .fi
 .SH FILES
-.SH CACEATS
+.nf
+NEMO/usr/spekkens/velfit	- original SS07 code/examples (see their WEBSITE)
+NEMOBIN/velfitss07	- SS07 executable (see also \fBexe=\fP)
+NEMO/src/image/rotcur	- NEMO frontend 
+.fi
+.SH CAVEATS
 The parameter file (velfit.inc) is in the local run directory, and is silently overwritten.
 This will hamper running the program in parallel.
+.SH EXAMPLES
+Below is an example snippet C-shell code to output the table in the format \fBvelfitss07\fP needs:
+.nf
+#! /bin/csh -f
+#
+#  create an example input file for velfitss07 from a MIRIAD dataset
+#  1) select the inner 40x40 arcsec
+#  2) select points where flux mom0 map > 1.0
+
+
+set region="arcsec,box(-20,-20,20,20)"
+
+set map=mom0a
+set vel=mom1a
+set sig=mom2a
+
+imtab in=$map region="$region" > tmp.map1.tab
+imtab in=$vel region="$region" > tmp.vel1.tab
+
+tail -n +3 tmp.map1.tab | grep -v Found > tmp.map2.tab
+tail -n +3 tmp.vel1.tab | grep -v Found > tmp.vel2.tab
+
+
+#  here's a simple example of constant errors and only use mom0 and mom1
+
+echo "# input file for velfitss07:  $0" 
+echo "#      X          Y       VEL       EVEL"
+echo "#     asec       asec    km/s       km/s"
+echo "#----------------------------------------"
+paste tmp.map2.tab tmp.vel2.tab |\
+  awk '{ if ($3 > 1.0) printf("%10.2f%10.2f%10.2f%10.2f\n",$1,$2,$6,5.0)}'
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
