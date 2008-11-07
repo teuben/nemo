@@ -1,43 +1,44 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   src/public/manip/sphereprof.cc                                      
-///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2006,2008                                                           
-///                                                                             
+///
+/// \file   src/public/manip/sphereprof.cc
+///
+/// \author Walter Dehnen
+/// \date   2006-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2006,2008 Walter Dehnen                                        
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2006-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// history:                                                                     
-//                                                                              
-// v 0.0    31/05/2006  WD created                                              
-// v 1.0    27/06/2006  WD using bodyset in 'subset' instead of pars[1,2]       
-// v 1.0.1  03/07/2006  WD renamed: radprof -> sphereprof                       
-// v 1.1    04/07/2006  WD doxygen documented and made public                   
-// v 1.2    07/07/2006  WD using flags::ignore (in_subset()) instead of subset  
-// v 1.3    09/08/2006  WD warn if non-spherical                                
-// v 1.3.1  06/11/2006  WD change in profile.h                                  
-// v 1.3.2  13/05/2008  WD debugged error with minor & major axes               
-// v 1.3.2  11/06/2008  WD new DebugInfo                                        
-// v 1.3.3  11/09/2008  WD erased direct use of nemo functions                 
+//
+// history:
+//
+// v 0.0    31/05/2006  WD created
+// v 1.0    27/06/2006  WD using bodyset in 'subset' instead of pars[1,2]
+// v 1.0.1  03/07/2006  WD renamed: radprof -> sphereprof
+// v 1.1    04/07/2006  WD doxygen documented and made public
+// v 1.2    07/07/2006  WD using flags::ignore (in_subset()) instead of subset
+// v 1.3    09/08/2006  WD warn if non-spherical
+// v 1.3.1  06/11/2006  WD change in profile.h
+// v 1.3.2  13/05/2008  WD debugged error with minor & major axes
+// v 1.3.2  11/06/2008  WD new DebugInfo
+// v 1.3.3  11/09/2008  WD erased direct use of nemo functions
+// v 1.4    07/11/2008  WD added step as 3rd parameter
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -83,38 +84,41 @@ namespace falcON { namespace Manipulate {
   const int    W_default = 500;
   const double L_default = 0.1;
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class sphereprof                                                           
-  //                                                                            
-  /// manipulator: estimated radial spherical profiles for bodies in_subset()   
-  ///                                                                           
-  /// This manipulator estimates the radial profiles of density, velocity,      
-  /// velocity dispersion, axis ratios, and orientations from spherical binning 
-  /// of all bodies in_subset() (default: all, see set_subset) w.r.t. position  
-  /// 'xcen' and velocity 'vcen'.                                             \n
-  /// See falcON::spherical_profile for details.                                
-  /// \note                                                                     
-  /// Don't use this manipulator for analysis of non-spherical components as    
-  /// then the shape information will be biased and the density profile may     
-  /// also be affected. A warning will be issued if c/a<0.8 at any radius.      
-  ///                                                                           
-  /// Meaning of the parameters:\n                                              
-  /// par[0]: minimum # bodies in radial bin (def: 500)                       \n
-  /// par[1]: minimum bin size in log(r)     (def: 0.1)                       \n
-  /// file:   a C-type format string to form file name for writing profiles     
-  ///                                                                           
-  /// Usage of pointers: uses 'xcen' and 'vcen'\n                               
-  /// Usage of flags:    uses in_subset()\n                                     
-  ///                                                                           
+  //
+  // class sphereprof
+  //
+  /// manipulator: estimated radial spherical profiles for bodies in_subset() 
+  ///
+  /// This manipulator estimates the radial profiles of density, velocity,
+  /// velocity dispersion, axis ratios, and orientations from spherical
+  /// binning of all bodies in_subset() (default: all, see set_subset)
+  /// w.r.t. position 'xcen' and velocity 'vcen'.\n
+  /// See falcON::spherical_profile for details.
+  /// \note Don't use this manipulator for analysis of non-spherical
+  ///       components as then the shape information will be biased and the
+  ///       density profile may also be affected. A warning will be issued if
+  ///       c/a<0.8 at any radius.
+  ///
+  /// Meaning of the parameters:\n
+  /// par[0]: minimum # bodies in radial bin (def: 500)\n
+  /// par[1]: minimum bin size in log(r)     (def: 0.1)\n
+  /// file:   a C-type format string to form file name for writing profiles
+  ///
+  /// Usage of pointers: uses 'xcen' and 'vcen'\n 
+  /// Usage of flags:    uses in_subset()\n
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class sphereprof : public manipulator {
   private:
     const int        W;
     const double     L;
+    double           STEP;
     char*  const     FILE;
     mutable int      I;
     mutable output   OUT;
     const PrintSmall PS;
+    mutable double   TMAN;
+    mutable bool     FRST;
     //--------------------------------------------------------------------------
     void print_line(bool) const;
   public:
@@ -134,11 +138,13 @@ namespace falcON { namespace Manipulate {
 	       const char  *file) falcON_THROWING
     : W    ( npar>0?     int(pars[0])    : W_default ),
       L    ( npar>1?         pars[1]     : L_default ),
+      STEP ( npar>2?         pars[2]     : 0. ),
       I    ( 0 ),
       FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
-      PS   ( 3 )
+      PS   ( 3 ),
+      FRST ( 1 )
     {
-      if(debug(2) || file==0 || file[0]==0 || npar>2)
+      if(debug(2) || file==0 || file[0]==0 || npar>3)
 	std::cerr<<
 	  " Manipulator \""<<name()<<"\" measures radial profile w.r.t."
 	  " 'xcen' and\n"
@@ -146,8 +152,9 @@ namespace falcON { namespace Manipulate {
 	  " density; circ, mean & disp velocity; axis ratios are computed as\n"
 	  " function of radius and written to file.\n"
 	  " parameters:\n"
-	  " par[0]: minimum # bodies in radial bin (def: "<<W_default<<")\n"
-	  " par[1]: minimum bin size in log(r)     (def: "<<L_default<<")\n"
+	  " par[0]: minimum # bodies in radial bin   (def: "<<W_default<<")\n"
+	  " par[1]: minimum bin size in log(r)       (def: "<<L_default<<")\n"
+	  " par[2]: delta time between manipulations (def: 0)\n"
 	  " file:   format string to build file name\n";
       if(FILE) strcpy(FILE,file);
       if(file==0 || file[0]==0)
@@ -177,6 +184,11 @@ namespace falcON { namespace Manipulate {
   bool sphereprof::manipulate(const snapshot*S) const
   {
     DebugInfo(2,"sphereprof::manipulate(): start\n");
+    if(FRST) {
+      TMAN = S->initial_time();
+      FRST = false;
+    } else if(S->time() < TMAN)
+      return false;
     const vect*X0= S->pointer<vect>("xcen");
     const vect*V0= S->pointer<vect>("vcen");
     spherical_profile SP(S,W,L,X0,V0);
@@ -242,6 +254,7 @@ namespace falcON { namespace Manipulate {
 		     "shape seems significantly non-spherical at t=%f\n",
 		     S->time());
     DebugInfo(2,"sphereprof::manipulate(): finished\n");
+    TMAN += STEP;
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////
