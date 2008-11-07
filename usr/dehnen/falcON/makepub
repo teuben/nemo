@@ -399,7 +399,7 @@ symmetrize	:	$(falcON) $(BIN)symmetrize
 
 exe_pub		:=	TestGrav a2s addgravity addprop density g2s getgravity \
 			gyrfalcON manipulate mkbodiesfunc mkbodyfunc mkdehnen \
-			mkhalo mkking mkplum mkWD99disc s2a s2g s2s scale_eps \#
+			mkhalo mkking mkplum mkWD99disc s2a s2g s2s scale_eps \
 			snapprop snapstac snapsupp symmetrize mkgalaxy
 
 else
