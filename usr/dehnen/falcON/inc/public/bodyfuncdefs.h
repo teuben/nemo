@@ -74,6 +74,9 @@ namespace {
   inline double vrad     () { need |= fieldset::phases; return double(RNG()); }
   inline double vtan     () { need |= fieldset::phases; return double(RNG()); }
   inline double vphi     () { need |= fieldset::phases; return double(RNG()); }
+  inline bool   is_sph   () { return RNG() > 0.5; }
+  inline bool   is_std   () { return RNG() > 0.5; }
+  inline bool   is_sink  () { return RNG() > 0.5; }
   // dummy field functions
 #define DEF_DUMMY(BIT,NAME)			\
   inline TestType<BIT>::type NAME()		\
