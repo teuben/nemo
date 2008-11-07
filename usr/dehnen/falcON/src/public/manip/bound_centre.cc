@@ -64,14 +64,16 @@ namespace Manipulate {
   /// manipulator: sets the centre related to the most bound region.
   ///                                                                           
   /// This manipulator finds the most bound body from those in_subset()
-  /// (default: all) and finds its K nearest neighbours. From the K/8 most
-  /// bound of these, it computes the centre weighted by (E_max-E)^A.\n
+  /// (default: all) and finds its \f$K\f$ nearest neighbours (including
+  /// itself). From the \f$K/8\f$ (at least 4) most bound of these, it
+  /// computes the centre weighted by \f$ (E_{\mathrm{max}}-E)^\alpha\f$.
+  ///
   /// The centre position and velocity are put in 'xcen' and 'vcen' to be used
   /// by subsequent manipulators, such as sphereprof.
   ///
   /// Meaning of the parameters:\n
-  /// pars[0]: K number of particles to consider (default: 256)
-  /// pars[1]: A power in potential weighting (default: 3)
+  /// pars[0]: number \f$K\f$ of particles to consider (default: 256)\n
+  /// pars[1]: power \f$\alpha\f$ in energy weighting (default: 3)\n
   /// file: write centre position to file.
   ///
   /// Usage of pointers: sets 'xcen' and 'vcen'\n
@@ -186,10 +188,10 @@ namespace Manipulate {
 	En[i] = half*norm(S->vel(Nb[i])) + ppp(S,Nb[i]);
       HeapIndex(En.array(),n,In.array());
       double Emax = En[In[n-1]];
-      // 3.2 loop K/2 most bound and find weighted centre
+      // 3.2 loop K/8 most bound and find weighted centre
       double W(0.);
       vect_d X(0.), V(0.);
-      for(int i=0; i!=min(n,K/8); ++i) {
+      for(int i=0; i!=min(n,max(4u,K/8)); ++i) {
 	double w = pow(Emax-En[In[i]],A);
 	W += w;
 	X += w * S->pos(Nb[In[i]]);
