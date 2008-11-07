@@ -47,7 +47,7 @@ DSPH			:= -DfalcON_SPH
 endif
 
 # 3.3 individual softening lengths (default: non-adaptive)
-DSOFT 			:= -DfalcON_INDI# -DfalcON_ADAP
+DSOFT 			:= # -DfalcON_ADAP
 
 # 3.4 precision of floating point numbers (default: 32 bit)
 DPRECISION		:= -DfalcON_SINGLE#       32 bit    default
