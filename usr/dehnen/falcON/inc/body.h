@@ -1,33 +1,33 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
+///
+/// \file   inc/body.h
+///
+/// \brief  contains declarations of class falcON::bodies,
+///	    class falcON::snapshot and some useful macros;
+///         currently problems with doxygen documentation.
 ///                                                                             
-/// \file   inc/body.h                                                          
-///                                                                             
-/// \brief  contains declarations of class falcON::bodies,                      
-///	    class falcON::snapshot and some useful macros;                      
-///         currently problems with doxygen documentation.                      
-///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2000-2008                                                           
-///                                                                             
+/// \author Walter Dehnen
+/// \date   2000-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2000-2008 Walter Dehnen                                        
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2000-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_body_h
 #define falcON_included_body_h 1
@@ -890,7 +890,14 @@ namespace falcON {
 	return falcON::to_remove(const_dat<fieldbit::f>()); }
       /// is body SPH particle?
       bool is_sph        () const {
-	return falcON::is_sph(const_dat<fieldbit::f>()); }
+// 	return falcON::is_sph(const_dat<fieldbit::f>()); }
+	return B->type().is_sph(); }
+      /// is body STD particle?
+      bool is_std        () const {
+	return B->type().is_std(); }
+      /// is body SINK particle?
+      bool is_sink       () const {
+	return B->type().is_sink(); }
       /// is body sticky particle?
       bool is_sticky     () const {
 	return falcON::is_sticky(const_dat<fieldbit::f>()); }
@@ -923,6 +930,10 @@ namespace falcON {
       friend bool to_remove(const iterator&);
       /// is body SPH particle?
       friend bool is_sph(const iterator&);
+      /// is body STD particle?
+      friend bool is_std(const iterator&);
+      /// is body SINK particle?
+      friend bool is_sink(const iterator&);
       /// is body sticky particle?
       friend bool is_sticky(const iterator&);
       /// is body new?
@@ -979,6 +990,13 @@ namespace falcON {
     iterator begin_active_bodies() const {
       iterator B=begin_all_bodies();
       while(B && !is_active(B)) ++B;
+      return B;
+    }
+    /// begin of bodies in subset
+    //  04/11/08 WD: generated; required for macro LoopSubsetBodies
+    iterator begin_subset_bodies() const {
+      iterator B=begin_all_bodies();
+      if(have_flag()) while(B && !in_subset(B)) ++B;
       return B;
     }
     /// end of bodies of given bodytype, if any.
@@ -1377,8 +1395,8 @@ namespace falcON {
     ///
     /// \param[out] T    table of bodies::index, sorted
     /// \param[in]  func function for property to be sorted
-    void sorted(Array<index>&T,
-		real       (*func)(iterator const&)) const falcON_THROWING;
+    void sorted(Array<index>&T, real(*func)(iterator const&))
+      const falcON_THROWING;
     /// \brief Create an index table sorted in \a func(body) for all bodies
     /// flagged not to be ignored (in_subset()) and also generate a sorted table
     /// of quantities
@@ -1386,15 +1404,28 @@ namespace falcON {
     /// \param[out] T    table of bodies::index, sorted
     /// \param[out] Q    table of quantity, sorted
     /// \param[in]  func function for property to be sorted
-    void sorted(Array<index>&T,
-		Array<real> &Q,
-		real       (*func)(iterator const&)) const falcON_THROWING;
+    void sorted(Array<index>&T, Array<real>&Q,
+		real(*func)(iterator const&)) const falcON_THROWING;
+    /// \brief Create an index table of the K bodies in_subset() which are
+    /// nearest to a given body, 
+    /// \param[in]  B  body to find neighbours for
+    /// \param[in]  K  number of neighbours (including body B itself) to find
+    /// \param[out] I  indices of neighbours, sorted in ascending distance to B
+    /// \return  actual number of neighbours found in subset (could be < K).
+    /// \note Involves a (single) loop over all bodies, hence not very
+    ///       efficient. To be used occasionally only.
+    /// \note Used by manipulator bound_centre
+    unsigned findNeighbours(const iterator&B, unsigned K, Array<index>&I) const
+      falcON_THROWING;
     //--------------------------------------------------------------------------
-    void CheckData(fieldset s, const char*f, int l) const
+    bool CheckData(fieldset s, const char*f, int l) const
     {
-      if(debug(6) && !have_all(s))
-	DebugInfo(" %s:%d: bodies data required but not present: \"%s\"\n",
+      if(debug(6) && !have_all(s)) {
+	DebugInfoN(" [%s:%d]: bodies data required but not present: \"%s\"\n",
 		  f,l,word(all_data().missing(s)));
+	return false;
+      }
+      return true;
     }
   protected:
     //==========================================================================
@@ -1539,6 +1570,8 @@ namespace falcON {
   inline bool is_active     (const bodies::iterator&i) { return i.is_active(); }
   inline bool to_remove     (const bodies::iterator&i) { return i.to_remove(); }
   inline bool is_sph        (const bodies::iterator&i) { return i.is_sph(); }
+  inline bool is_std        (const bodies::iterator&i) { return i.is_std(); }
+  inline bool is_sink       (const bodies::iterator&i) { return i.is_sink(); }
   inline bool is_sticky     (const bodies::iterator&i) { return i.is_sticky(); }
   inline bool is_new        (const bodies::iterator&i) { return i.is_new(); }
   inline bool is_marked     (const bodies::iterator&i) { return i.is_marked(); }
@@ -1563,7 +1596,7 @@ namespace falcON {
   inline double const&bodies::TimeSteps::tauh(bodies::iterator const&i) const {
     return tauh(falcON::level(i));
   }
-#define CheckMissingBodyData(B,F) (B)->CheckData((F),__FILE__,__LINE__);
+#define CheckMissingBodyData(B,F) (B)->CheckData((F),__FILE__,__LINE__)
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -1930,23 +1963,6 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
                    NAME  != (PTER)->end_typed_bodies(TYPE); ++NAME)
 #endif
 //------------------------------------------------------------------------------
-#ifndef LoopSINKBodies           /* loop all SINK bodies                     */
-/// This macro provides an easy way to loop over all SPH bodies
-///
-/// A typical usage would look like this \code
-///   snapshot *S;
-///   LoopSINKBodies(S,b,t) {
-///     b.pos() += dt*vel(b);
-///     b.vel() += dt*acc(b);
-///     b.uin() += dt*udin(b);
-///   } \endcode
-///
-/// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
-/// \param NAME  name given to loop variable (of type falcON::body)
-#define LoopSINKBodies(PTER,NAME)		\
-  LoopTypedBodies(PTER,NAME,bodytype::sink)
-#endif
-//------------------------------------------------------------------------------
 #ifndef LoopSPHBodies           /* loop all SPH bodies                       */
 /// This macro provides an easy way to loop over all SPH bodies
 ///
@@ -2040,8 +2056,9 @@ falcON_TRAITS(falcON::snapshot,"snapshot");
 ///
 /// \param PTER  valid pointer to falcON::bodies (or falcON::snapshot)
 /// \param NAME  name given to loop variable (of type falcON::body)
+/// \version 04-nov-08 WD debugged
 #define LoopSubsetBodies(PTER,NAME)					\
-  for(falcON::body NAME=(PTER)->begin_all_bodies();			\
+  for(falcON::body NAME=(PTER)->begin_subset_bodies();			\
       NAME; NAME.next_in_subset())
 #endif
 //------------------------------------------------------------------------------
