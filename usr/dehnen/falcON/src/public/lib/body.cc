@@ -28,7 +28,8 @@
 #include <cstring>                                 // C++ strings               
 #include <public/io.h>                             // for fortran I/O
 #include <public/nemo++.h>                         // utilities for NEMO I/O    
-#include <numerics.h>
+#include <utils/numerics.h>
+#include <utils/heap.h>
 
 using namespace falcON;
 
@@ -1268,6 +1269,45 @@ void bodies::sorted(Array<index>&table,
   falcON_DEL_A(Q);
   falcON_DEL_A(I);
   falcON_DEL_A(R);
+}
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  struct Nbour { real Q; bodies::index I; };
+  inline bool operator<(Nbour const&a, Nbour const&b) {return a.Q<b.Q;}
+  inline bool operator>(Nbour const&a, Nbour const&b) {return a.Q>b.Q;}
+  inline bool operator<(real q, Nbour const&b) {return q<b.Q;}
+  inline bool operator>(real q, Nbour const&b) {return q>b.Q;}
+  inline bool operator<(Nbour const&a, real q) {return a.Q<q;}
+  inline bool operator>(Nbour const&a, real q) {return a.Q>q;}
+  real Huge = 1.e30;
+}
+falcON_TRAITS(Nbour,"<anonymous>::Nbour");
+//
+unsigned bodies::findNeighbours(const body&B, unsigned K, Array<index>&I) const
+  falcON_THROWING
+{ 
+  if(!have_pos())
+    falcON_THROW("bodies::findNeighbours(): have no positions\n");
+  Nbour*List = falcON_NEW(Nbour,K);
+  for(int k=0; k!=K; ++k)
+    List[k].Q = Huge;
+  int Niac=0;
+  LoopSubsetBodies(this,b) {
+    real q = dist_sq(pos(B),pos(b));
+    if(List->Q > q) {
+      List->Q = q;
+      List->I = b;
+      MaxHeap::after_top_replace(List,K);
+      ++Niac;
+    }
+  }
+  MaxHeap::sort(List,K);
+  I.reset(K);
+  if(Niac < K) K = Niac;
+  for(int k=0; k!=K; ++k)
+    I[k] = List[k].I;
+  falcON_DEL_A(List);
+  return K;
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
