@@ -33,14 +33,17 @@
 // v 1.2    07/07/2006  WD using flags::ignore instead of filter
 // v 1.3    11/09/2008  WD erased direct use of nemo functions
 // v 1.4    03/11/2008  WD appending, print(), RunInfo::header()
+// v 1.5    07/11/2008  WD using FindPercentile from numerics.h, sanity checks
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
-#include <public/tools.h>
 #include <public/io.h>
+#include <utils/heap.h>
+#include <utils/numerics.h>
 #include <ctime>
 #include <cmath>
 
-namespace falcON { namespace Manipulate {
+namespace falcON {
+namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   //
   // class lagrange
@@ -61,11 +64,10 @@ namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   class lagrange : public manipulator {
   private:
-    int                 N;
-    double             *M;
-    mutable double     *R;
-    mutable output      OUT;
-    mutable bool        FST;
+    int              N;    ///< number of mass fractions
+    double          *F;    ///< table with mass fractions
+    mutable output   OUT;  ///< output
+    mutable bool     FST;  ///< true before first manipulation
     //--------------------------------------------------------------------------
     void print_line() const {
       OUT  << "#-----------";
@@ -77,7 +79,7 @@ namespace falcON { namespace Manipulate {
     void print_head() const {
       OUT  << "# time      ";
       for(int i=0; i!=N; ++i)
-	OUT<< " r[" << std::setw(4) << 100*M[i] << "%]";
+	OUT<< " r[" << std::setw(4) << 100*F[i] << "%]";
       OUT  << '\n';
     }
     //--------------------------------------------------------------------------
@@ -99,39 +101,98 @@ namespace falcON { namespace Manipulate {
 	     int          npar,
 	     const char  *file) :
       N   ( npar ),
-      M   ( npar>0? falcON_NEW(double,npar) : 0 ),
-      R   ( npar>0? falcON_NEW(double,npar) : 0 ),
+      F   ( npar>0? falcON_NEW(double,npar) : 0 ),
       OUT ( file? file : ".", true),
       FST ( true )
     {
-      for(int i=0; i!=N; ++i) M[i] = pars[i];
-      if(file == 0 || npar == 0) {
+      if(debug(2) || file == 0 || npar == 0) {
 	std::cerr<<
 	  " Manipulator \""<<name()<<"\":\n"
 	  " computes lagrange radii w.r.t. 'xcen' (default: origin)\n"
-	  " at given mass fractions (parameters) for bodies passing\n"
-	  " 'filter' (default: all) and writes them given data file.\n";
+	  " at given mass fractions (parameters) for bodies in_subset()\n"
+	  " (default: all) and writes them given data file.\n";
       }
+      // 1 ensure that that output is okay
       if(file == 0)
 	falcON_ErrorN("Manipulator \"%s\": no output file given\n",name());
       if(!OUT.is_open())
 	falcON_ErrorN("Manipulator \"%s\": couldn't open output\n",name());
+      // 2 ensure that mass fractions are okay
       if(npar == 0)
 	falcON_ErrorN("Manipulator \"%s\": no mass fractions given\n",name());
+      // 2.1 ensure that mass are fractions in ascending order
+      bool okay=true;
+      for(int i=0; i!=N; ++i) {
+	F[i] = pars[i];
+	if(i && F[i-1] > F[i])
+	  okay=false;
+      }
+      if(!okay) {
+	falcON_WarningN("Manipulator \"%s\": "
+			"mass fractions not in ascending order: "
+			"will order them.\n",name());
+	HeapSortAsc(F,N);
+      }
+      // 2.2 ensure that mass fractions are distinct and in range [0,1[
+      int Nf=0;
+      for(int i=0; i!=N; ++i)
+	if(F[i]>0 && F[i]<1 && (i==0 || F[i]>F[i-1])) ++Nf;
+      if(Nf==0)
+	falcON_ErrorN("Manipulator \"%s\": no mass fraction in range ]0,1[\n",
+		      name());
+      if(Nf <N) {
+	falcON_WarningN("Manipulator \"%s\": "
+			"only %d of %d mass fractions given are in range "
+			"]0,1[ and distinct: will only use these.\n",
+			name(),Nf,N);
+	double *newF = falcON_NEW(double,Nf);
+	for(int i=0,j=0; i!=N; ++i)
+	  if(F[i]>0 && F[i]<1 && (i==0 || F[i]>F[i-1]))
+	    newF[j++] = F[i];
+	falcON_DEL_A(F); F=newF;
+	N=Nf;
+      }
     }
     //--------------------------------------------------------------------------
     ~lagrange() {
-      if(M) { falcON_DEL_A(M); M=0; }
-      if(R) { falcON_DEL_A(R); R=0; }
+      if(F) { falcON_DEL_A(F); F=0; }
       N=0;
     }
   };
-  //////////////////////////////////////////////////////////////////////////////
-  bool lagrange::manipulate(const snapshot*S) const {
-    if(S->have_not(need())) {
-      falcON_WarningN("Manipulator \"%s\" insufficient data\n",name());
+} }
+////////////////////////////////////////////////////////////////////////////////
+namespace {
+  using namespace falcON;
+  vect X;
+  body B;
+  void SetAll(unsigned, double&q, double&m)
+  {
+    if(B) {
+      q = dist_sq(X,pos(B));
+      m = mass(B);
+      ++B;
+    } else
+      falcON_ErrorN("Manipulator \"lagrange\": body number mismatch\n");
+  }
+  void SetSub(unsigned, double&q, double&m)
+  {
+    if(B) {
+      q = dist_sq(X,pos(B));
+      m = mass(B);
+      B.next_in_subset();
+    } else
+      falcON_ErrorN("Manipulator \"lagrange\": body number mismatch\n");
+  }
+}
+//
+namespace falcON {
+namespace Manipulate {
+  bool lagrange::manipulate(const snapshot*S) const
+  {
+    // 0 check for required data
+    if( !CheckMissingBodyData(S,need()) )
       return false;
-    }
+    // 1 first ever call: print header
     if(FST) {
       FST = false;
       print_line();
@@ -141,12 +202,27 @@ namespace falcON { namespace Manipulate {
       print_line();
       OUT.stream().setf(std::ios::left, std::ios::adjustfield);
     }
-    const vect*X0= S->pointer<vect>("xcen");
-    find_lagrange_rad(S,N,M,R,X0);
-    OUT  << print(S->time(),12,8);
-    for(int i=0; i!=N; ++i)
-      OUT<< ' ' << print(R[i],8,2);
-    OUT  << std::endl;
+    DebugInfo(4,"Manipulator \"lagrange\": working out lagrange radii ...\n");
+    // 2   find lagrange radii w.r.t. centre and write them to file.
+    // 2.1 get centre
+    const vect*pX = S->pointer<vect>("xcen");
+    if(pX) X = *pX;
+    else   X = vect(zero);
+    // 2.2 subset or all? : set first body and construct percentile finder
+    unsigned Ns = S->N_subset();
+    bool     all= Ns==S->N_bodies();
+    B = all? S->begin_all_bodies() : S->begin_subset_bodies();
+    FindPercentile<double> FP(Ns, all? SetAll : SetSub, N);
+    if(B) falcON_ErrorN("Manipulator \"lagrange\": body number mismatch\n");
+    double Mtot=FP.TotalWeight();
+    // 2.3 loop mass fractions and get lagrange radii
+    OUT << print(S->time(),12,8);
+    for(int i=0; i!=N; ++i) {
+      double M = F[i] * Mtot;
+      double R = std::sqrt(FP.PositionOfCumulativeWeight(M));
+      OUT << ' ' << print(R,8,2);
+    }
+    OUT << std::endl;
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////
