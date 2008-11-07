@@ -863,31 +863,25 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       real               f,       // I: theta_sink/theta       
 		       int                ru,      // I: # reused of tree       
 		       const acceleration*ae,      // I: external acceleration  
-		       const int          gd[4]    // I: direct sum: gravity    
-#ifdef falcON_INDI
-		       ,soft_type         sf       // I: softening type         
+		       const int          gd[4],   // I: direct sum: gravity    
+		       soft_type          sf       // I: softening type         
 #ifdef falcON_ADAP
 		       ,real              ns       // I: N_soft                 
 		       ,unsigned          nr       // I: N_ref                  
 		       ,real              em       // I: eps_min                
 		       ,real              ef       // I: eps_fac                
 #endif
-#endif
 #ifdef falcON_SPH
 		       ,const int         sd[3]    //[I: direct sum: SPH]       
 #endif
 		       ) falcON_THROWING :
   ForceDiagGrav ( s, ae, g!=zero ),
-#ifdef falcON_INDI
   SOFTENING     ( sf ),
-#endif
   ROOTCENTRE    ( x0 ),
   NCRIT         ( max(1,nc) ),
   REUSE         ( ru ),
   FALCON        ( s, abs(e), abs(th), ke,
-#ifdef falcON_INDI
 		  SOFTENING != global_fixed,
-#endif
 		  g, th < zero? const_theta : theta_of_M, f, gd
 #ifdef falcON_SPH
 		  , sd
@@ -902,10 +896,8 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   if(SELF_GRAV && MPI::Initialized())
     falcON_THROW("ForceALCON: cannot (yet) do parallel self-gravity\n");
 #endif
-#ifdef falcON_INDI
   if(SOFTENING==individual_fixed && !snap_shot()->have(fieldbit::e)) 
     falcON_THROW("ForceALCON: individual fixed softening, but no eps_i given");
-#endif
 #ifdef falcON_ADAP
   reset_softening(ke,e,ns,nr,em,ef);
 #else

@@ -88,9 +88,7 @@ namespace {
   inline void __falcON_initialize(int *F,
 				  real*M,
 				  real*X,
-#ifdef falcON_INDI
 				  real*E,
-#endif
 				  real*A, 
 				  real*P,
 				  real*R,
@@ -110,9 +108,7 @@ namespace {
     BODIES->reset(fieldbit::f,F);
     BODIES->reset(fieldbit::m,M);
     BODIES->reset(fieldbit::x,X);
-#ifdef falcON_INDI
     BODIES->reset(fieldbit::e,E);
-#endif
     BODIES->reset(fieldbit::a,A);
     BODIES->reset(fieldbit::p,P);
     BODIES->reset(fieldbit::r,R);
@@ -120,9 +116,7 @@ namespace {
 			abs(real(EPS)),
 			abs(real(TH)),
 			ktype(K),
-#ifdef falcON_INDI
 			E != 0,
-#endif
 			real(G),
 			TH<0? const_theta : theta_of_M);
     BUILT   = false;
@@ -185,9 +179,7 @@ extern "C" {
   void falcON_initialize(const int *F,
 			 const real*M,
 			 const real*X,
-#ifdef falcON_INDI
 			 const real*E,
-#endif
 			 real      *A,
 			 real      *P,
 			 real      *R,
@@ -201,40 +193,24 @@ extern "C" {
     __falcON_initialize(const_cast<int *>(F),
 			const_cast<real*>(M),
 			const_cast<real*>(X),
-#ifdef falcON_INDI
 			const_cast<real*>(E),
-#endif
 			A,P,R,Ntot,Nsph,EPS,TH,K,G);
   }
   //----------------------------------------------------------------------------
-  void falcon_initialize_ (int *F, real*M, real*X,
-#ifdef falcON_INDI
-			   real*E,
-#endif
+  void falcon_initialize_ (int *F, real*M, real*X, real*E,
 			   real*A, real*P, real*R,
 			   int *Nt, int*Ns, real*EPS,
 			   real*TH, int*K, real*G)
   {
-    __falcON_initialize(F,M,X,
-#ifdef falcON_INDI
-			E,
-#endif
-			A,P,R,*Nt,*Ns,*EPS,*TH,*K,*G);
+    __falcON_initialize(F,M,X,E,A,P,R,*Nt,*Ns,*EPS,*TH,*K,*G);
   }
   //----------------------------------------------------------------------------
-  void falcon_initialize__(int *F, real*M, real*X,
-#ifdef falcON_INDI
-			   real*E,
-#endif
+  void falcon_initialize__(int *F, real*M, real*X, real*E,
 			   real*A, real*P, real*R,
 			   int *Nt, int*Ns, real*EPS,
 			   real*TH, int*K, real*G)
   {
-    __falcON_initialize(F,M,X,
-#ifdef falcON_INDI
-			E,
-#endif
-			A,P,R,*Nt,*Ns,*EPS,*TH,*K,*G);
+    __falcON_initialize(F,M,X,E,A,P,R,*Nt,*Ns,*EPS,*TH,*K,*G);
   }
   //===========================================================================#
   void falcON_resetsoftening(real EPS, int K)
@@ -581,31 +557,19 @@ extern "C" {
   int falcON_softening()
   {
     if(__falcON_warning("falcON_softening")) return 0;
-#ifdef falcON_INDI
     return FALCON->use_individual_eps();
-#else
-    return 0;
-#endif
   }
   //----------------------------------------------------------------------------
   int falcon_softening_()
   {
     if(__falcON_warning("falcon_softening")) return 0;
-#ifdef falcON_INDI
     return FALCON->use_individual_eps();
-#else
-    return 0;
-#endif
   }
   //----------------------------------------------------------------------------
   int falcon_softening__()
   {
     if(__falcON_warning("falcon_softening")) return 0;
-#ifdef falcON_INDI
     return FALCON->use_individual_eps();
-#else
-    return 0;
-#endif
   }
   //===========================================================================#
   int falcON_No_cells()

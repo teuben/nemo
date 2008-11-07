@@ -908,14 +908,12 @@ namespace falcON {
   protected:
     /// \name data are protected
     //@{
-#ifdef falcON_INDI
     soft_type         SOFTENING;           ///< type of softening
 #ifdef falcON_ADAP
     real              NSOFT;               // #/sphere for eps_i setting
     unsigned          NREF;                // #/cell for eps_i setting  
     real              EMIN;                // lower limit for eps_i     
     real              EFAC;                // max change factor for epsi
-#endif
 #endif
     const   vect* const ROOTCENTRE;        ///< centre for root, if non-NULL
     const   int         NCRIT, REUSE;      ///< N_crit for tree, re-using
@@ -951,20 +949,16 @@ namespace falcON {
     /// \param[in] nr tree re-using (not recommended)
     /// \param[in] ae external acceleration
     /// \param[in] nd direct-summation control for gravity
-#ifdef falcON_INDI
     /// \param[in] st softening type
-#endif
 #ifdef falcON_SPH
     /// \param[in] sd direct-summation control for SPH
 #endif
     ForceALCON(snapshot*s, real e, real th, int nc, const vect*rc,
 	       kern_type k, real G, real fs, int nr, const acceleration*ae,
 	       const int nd[4]
-#ifdef falcON_INDI
 	       , soft_type st
 #ifdef falcON_ADAP
 	       , real, unsigned, real, real
-#endif
 #endif
 #ifdef falcON_SPH
 	       ,const int sd[3]= Default::SPHdirect
@@ -1053,14 +1047,12 @@ namespace falcON {
     /// \param theta  opening angle
     /// \param Grav   Newton's constant of gravity
     /// \param sfac   theta_sink/theta
-#ifdef falcON_INDI
 #ifdef falcON_ADAP
     /// \param Nsoft  # of bodies in softening shpere
     /// \param Nref   # of bodies in smallest cell to estimate eps_i
     /// \param emin   minimum eps_i
 #endif
     /// \param soft   softening type
-#endif
     /// \param time   time to read input for (take first if null)
     /// \param read   data to read in addition to required for integration
     /// \param dir    number controlling direct summation
@@ -1087,29 +1079,22 @@ namespace falcON {
 	       real               Grav,
 	       real               sfac,
 	       // default arguments                                             
-#ifdef falcON_INDI
 #ifdef falcON_ADAP
 	       real               Nsoft = zero,
 	       unsigned           Nref = 32,
 	       real               emin = zero,
 #endif
 	       soft_type          soft = global_fixed, 
-#endif
 	       const char        *time = 0,
 	       fieldset           read = fieldset::empty,
 	       const int          dir[4] = Default::direct) falcON_THROWING :
       NBodyCode ( file, resume, to_read(read,
-#ifdef falcON_INDI
-					soft!=global_fixed ? 1 :
-#endif
-					0, Grav || aex), time ),
+					soft!=global_fixed ? 1 : 0,
+					Grav || aex), time ),
       ForceALCON( SHOT, eps, theta, Ncrit, croot, kernel, Grav, sfac,
-		  (1<<hgrow)-1, aex, dir
-#ifdef falcON_INDI
-		  ,soft
+		  (1<<hgrow)-1, aex, dir ,soft
 #ifdef falcON_ADAP
 		  ,Nsoft, Nref, emin, 1.1
-#endif
 #endif
 		  ),
       GS         ( ksink-kmax, fa,fp,fc,fe, aex!=0, abs(eps), eps>=zero)

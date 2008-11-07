@@ -137,9 +137,6 @@ namespace {
 #ifdef  falcON_NEMO
 	     " -I$NEMOINC -DfalcON_NEMO"
 #endif
-#ifdef  falcON_INDI
-	     " -DfalcON_INDI"
-#endif
 #ifdef  falcON_SPH
 	     " -DfalcON_SPH"
 #endif

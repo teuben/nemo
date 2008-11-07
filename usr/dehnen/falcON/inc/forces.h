@@ -110,9 +110,7 @@ namespace falcON {
 #endif
     /// \param th  gravitational opening angle theta                            
     /// \param ker type of gravitational softening kernel                       
-#ifdef falcON_INDI
     /// \param in  use individual softening lengths eps_i?                      
-#endif
     /// \param G   Newton's gravitational constant                              
     /// \param mt  type of multipole acceptance criterion (MAC_type)            
     /// \param sfac factor theta_sink/theta                                     
@@ -124,9 +122,7 @@ namespace falcON {
 	    real         eps,
 	    real         th     = Default::theta,
 	    kern_type    kt     = Default::kernel,
-#ifdef falcON_INDI
 	    bool         in     = false,
-#endif
 	    real         G      = one,
 	    MAC_type     mt     = theta_of_M,
 	    real         sfac   = one,
@@ -442,10 +438,8 @@ namespace falcON {
     const MAC_type& MAC() const;
     /// \return a human-readable description of the currently used MAC
     const char* describe_MAC() const;
-#ifdef falcON_INDI
     /// \return are we currently using individual softening lengths?
     const bool& use_individual_eps() const;
-#endif
     /// \return the currently used softening kernel
     const kern_type& kernel() const;
     /// \return a human-readable description of the currently used kernel

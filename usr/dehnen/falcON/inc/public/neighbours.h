@@ -48,13 +48,12 @@ namespace falcON {
     const OctTree::Leaf*L;   ///< neighbouring leaf
   };
   //----------------------------------------------------------------------------
-  /// For each active body's leaf: find list of neighbours and process it.
+  /// Find neighbour list for active bodies and process it.
   ///
-  /// We first copy the body mass (to OctTree::Leaf::scalar()), and, if
-  /// all=false, also the body flags to leafs.\n
-  /// We then find for each active leaf the K nearest neighbours in ascending
-  /// order of distance.\n
-  /// This list is then processed by a user-supplied function.\n
+  /// For all leafs with active (default: all) bodies in tree, we find the K
+  /// nearest neighbours and then call a user supplied function to process it
+  /// (eg. to compute a density estimate). Upon calling the function f, the
+  /// neighbour list is sorted in ascending order of distance.\n
   /// Used in density estimation.
   /// \note The user function's 4th argument is the size K of the list.
   /// \note The user function can assume scalar(Leaf) to hold the mass.

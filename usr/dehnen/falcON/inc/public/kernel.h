@@ -71,9 +71,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
   protected:
     const kern_type       KERN;                    // softening kernel          
-#ifdef falcON_INDI
     const bool            INDI_SOFT;               // use individual eps?       
-#endif
     mutable real          EPS, EQ;                 // eps, eps^2                
 #ifdef  falcON_SSE_CODE
     mutable fvec4         fHQ, fQQ;                // eps^2/2, eps^2/4          
@@ -104,7 +102,6 @@ namespace falcON {
 	D1[NR] = Rq;
 	++NR;
       }
-#ifdef falcON_INDI
       fvec4            EQ;
       void load_i(grav::cell*a, grav::leaf*b, vect&dR, real Rq)
       {
@@ -116,7 +113,6 @@ namespace falcON {
 	D1[NR] = Rq+EQ[NR];
 	++NR;
       }
-#endif
       acl_block() : NR(0) {}
       bool is_full () const { return NR==4; }
       bool is_empty() const { return NR==0; }
@@ -140,7 +136,6 @@ namespace falcON {
 	D1[NR] = Rq;
 	++NR;
       }
-#ifdef falcON_INDI
       fvec4            EQ;
       void load_i(grav::cell*a, grav::cell*b, vect&dR, real Rq)
       {
@@ -152,14 +147,13 @@ namespace falcON {
 	D1[NR] = Rq+EQ[NR];
 	++NR;
       }
-#endif
       acc_block() : NR(0) {}
       bool is_full () const { return NR==4; }
       bool is_empty() const { return NR==0; }
       void reset   ()       { NR=0; }
     };
     mutable acc_block ACC;
-#endif
+#endif // falcON_SSE_CODE
     //--------------------------------------------------------------------------
     // protected methods                                                        
     //--------------------------------------------------------------------------
@@ -167,14 +161,10 @@ namespace falcON {
     GravKernBase(
 		 kern_type const&k,                // I: type of kernel         
 		 real      const&e,                // I: softening length       
-#ifdef falcON_INDI
 		 bool      const&s,                // I: type of softening      
-#endif
 		 unsigned  const&np) :             // I: initial pool size      
       KERN       ( k ),                            // set softening kernel      
-#ifdef falcON_INDI
       INDI_SOFT  ( s ),                            // set softening type        
-#endif
       EPS        ( e ),                            // set softening length      
       EQ         ( e*e ),
 #ifdef falcON_SSE_CODE
@@ -260,15 +250,9 @@ namespace falcON {
   protected:
     GravKern(kern_type const&k,                    // I: type of kernel         
 	     real      const&e,                    // I: softening length       
-#ifdef falcON_INDI
 	     bool      const&s,                    // I: type of softening      
-#endif
 	     unsigned  const&np) :                 // I: initial pool size      
-#ifdef falcON_INDI
       GravKernBase(k,e,s,np) {}
-#else
-      GravKernBase(k,e,np) {}
-#endif
     //--------------------------------------------------------------------------
     // single leaf-leaf interaction                                             
     //--------------------------------------------------------------------------
@@ -334,15 +318,9 @@ namespace falcON {
   protected:
     GravKernAll(kern_type const&k,                 // I: type of kernel         
 		real      const&e,                 // I: softening length       
-#ifdef falcON_INDI
 		bool      const&s,                 // I: type of softening      
-#endif
 		unsigned  const&np) :              // I: initial pool size      
-#ifdef falcON_INDI
       GravKernBase(k,e,s,np) {}
-#else
-      GravKernBase(k,e,np) {}
-#endif
     //--------------------------------------------------------------------------
     // single leaf-leaf interaction                                             
     //--------------------------------------------------------------------------
@@ -443,10 +421,8 @@ namespace falcON {
 			       vect                 &dR,
 			       real            const&Rq) const
   {
-#if falcON_INDI
-    if(INDI_SOFT) ACL.load_i(A,B,dR,Rq); else
-#endif
-      ACL.load_g(A,B,dR,Rq+EQ);
+    if(INDI_SOFT) ACL.load_i(A,B,dR,Rq);
+    else          ACL.load_g(A,B,dR,Rq+EQ);
     if(ACL.is_full()) flush_acl();
   }
   //----------------------------------------------------------------------------
@@ -455,10 +431,8 @@ namespace falcON {
 			       vect                 &dR,
 			       real            const&Rq) const
   {
-#if falcON_INDI
-    if(INDI_SOFT) ACC.load_i(A,B,dR,Rq); else
-#endif
-      ACC.load_g(A,B,dR,Rq+EQ);
+    if(INDI_SOFT) ACC.load_i(A,B,dR,Rq);
+    else          ACC.load_g(A,B,dR,Rq+EQ);
     if(ACC.is_full()) flush_acc();
   }
   //----------------------------------------------------------------------------
@@ -467,10 +441,8 @@ namespace falcON {
 				  vect                 &dR,
 				  real            const&Rq) const
   {
-#if falcON_INDI
-    if(INDI_SOFT) ACL.load_i(A,B,dR,Rq); else
-#endif
-      ACL.load_g(A,B,dR,Rq+EQ);
+    if(INDI_SOFT) ACL.load_i(A,B,dR,Rq);
+    else          ACL.load_g(A,B,dR,Rq+EQ);
     if(ACL.is_full()) flush_acl();
   }
   //----------------------------------------------------------------------------
@@ -479,10 +451,8 @@ namespace falcON {
 				  vect                 &dR,
 				  real            const&Rq) const
   {
-#if falcON_INDI
-    if(INDI_SOFT) ACC.load_i(A,B,dR,Rq); else
-#endif
-      ACC.load_g(A,B,dR,Rq+EQ);
+    if(INDI_SOFT) ACC.load_i(A,B,dR,Rq);
+    else          ACC.load_g(A,B,dR,Rq+EQ);
     if(ACC.is_full()) flush_acc();
   }
 #endif

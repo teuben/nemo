@@ -345,17 +345,11 @@ namespace {
 	     GravStats*t,                           // I: statistics           
 	     real      e,                           // I: softening length     
 	     unsigned  np,                          // I: initial pool size    
-#ifdef falcON_INDI
 	     bool      s    = Default::soften,       //[I: use individual eps?] 
-#endif
 	     int       const nd[4]= Default::direct, //[I: direct sum control]  
 	     bool      fp   = false) :               //[I: use Pth pole in pot] 
       GravIactBase  ( t,nd ),
-      GravKern      ( k,e,
-#ifdef falcON_INDI
-		      s,
-#endif
-		      np ) {}
+      GravKern      ( k,e,s,np ) {}
     //--------------------------------------------------------------------------
     // interaction phase                                                        
     //--------------------------------------------------------------------------
@@ -466,17 +460,11 @@ namespace {
 		GravStats*   t,                     // I: statistics            
 		real         e,                     // I: softening length      
 		unsigned     np,                    // I: initial pool size     
-#ifdef falcON_INDI
 		bool         s    =Default::soften, //[I: use individual eps?]  
-#endif
 		int const    nd[4]=Default::direct  //[I: direct sum control]   
 		) :
       GravIactBase ( t,nd ),
-      GravKernAll  ( k, e,
-#ifdef falcON_INDI
-		     s,
-#endif
-		     np ) {}
+      GravKernAll  ( k,e,s,np ) {}
     //--------------------------------------------------------------------------
     // interaction phase                                                        
     //--------------------------------------------------------------------------
@@ -567,14 +555,9 @@ namespace {
   // UpdateLeafs()                                                            //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  unsigned UpdateLeafs(const OctTree*tree
-#ifdef falcON_INDI
-		       , bool     i_soft
-#endif
-		       )
+  unsigned UpdateLeafs(const OctTree*tree, bool i_soft)
   {
     unsigned n=0;
-#ifdef falcON_INDI
     if(i_soft) {
       CheckMissingBodyData(tree->my_bodies(),
 			   fieldset::m|fieldset::e|fieldset::f);
@@ -598,7 +581,6 @@ namespace {
 	  if(is_active(Li)) ++n;
 	} 
     } else {
-#endif
       CheckMissingBodyData(tree->my_bodies(),fieldset::m|fieldset::f);
       if(debug(1))
 	LoopLeafs(grav::leaf,tree,Li) {
@@ -617,9 +599,7 @@ namespace {
 	  Li->copy_from_bodies_flag(tree->my_bodies());
 	  if(is_active(Li)) ++n;
 	}
-#ifdef falcON_INDI
     }
-#endif
     return n;
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -707,11 +687,6 @@ namespace {
 // class falcON::GravEstimator                                                //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-#ifdef falcON_INDI
-#  define __I_SOFT ,INDI_SOFT
-#else
-#  define __I_SOFT
-#endif
 void GravEstimator::update_leafs()
 {
   if(TREE==0)
@@ -721,7 +696,7 @@ void GravEstimator::update_leafs()
   if( TREE->my_bodies()->srce_data_changed() )     // IF body source are changed
     LEAFS_UPTODATE = 0;                            //   leafs are out of date   
   if(! LEAFS_UPTODATE ) {                          // IF leafs are out of date  
-    NLA_needed = UpdateLeafs(TREE __I_SOFT);       //   update leafs            
+    NLA_needed = UpdateLeafs(TREE, INDI_SOFT);     //   update leafs            
     LEAFS_UPTODATE = 1;                            //   leafs are up to date now
     CELLS_UPTODATE = 0;                            //   but cells are not       
     TREE->my_bodies()->mark_srce_data_read();      //   mark bodies: srce read  
@@ -743,7 +718,6 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
   // passes up: flag, mass, cofm, rmax[, eph], multipoles; sets rcrit           
   report REPORT("GravEstimator::pass_up_for_approx()");
   int n=0;                                         // counter: active cells     
-#ifdef falcON_INDI
   if(INDI_SOFT) {                                  // IF(individual eps_i)      
     // 1    with eps_i: pass flag, mass, N*eps/2, cofm, rmax, multipoles        
     LoopCellsUp(grav::cell_iter,TREE,Ci) {         //   LOOP cells upwards      
@@ -793,9 +767,7 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
       Ci->cofm() = com;                            //     set dipole = mass*cofm
       Ci->poles()= P;                              //     assign multipoles     
     }                                              //   END LOOP                
-  } else                                           // ELSE (no individual eps)  
-#endif
-  { 
+  } else {                                         // ELSE (no individual eps)  
     // 2    without eps_i: pass flag, mass, cofm, rmax, multipoles              
     LoopCellsUp(grav::cell_iter,TREE,Ci) {         //   LOOP cells upwards      
       Ci->reset_active_flag();                     //     reset activity flag   
@@ -946,21 +918,15 @@ void GravEstimator::exact(bool       al
 	       TREE
 #endif
                );
-#ifdef falcON_INDI
-#  define ARGS KERNEL,STATS,EPS,0,INDI_SOFT
-#else
-#  define ARGS KERNEL,STATS,EPS,0
-#endif
   if(all) {
-    GravIactAll K(ARGS);
+    GravIactAll K(KERNEL,STATS,EPS,0,INDI_SOFT);
     K.direct_summation(root());
     LoopLeafs(Leaf,TREE,Li) Li->normalize_grav();
   } else {
-    GravIact K(ARGS);
+    GravIact K(KERNEL,STATS,EPS,0,INDI_SOFT);
     K.direct_summation(root());
     LoopLeafs(Leaf,TREE,Li) if(is_active(Li)) Li->normalize_grav();
   }
-#undef ARGS
 #ifdef falcON_ADAP
   if(all) UpdateBodiesGrav<1>(TREE,GRAV,INDI_SOFT && Nsoft);
   else    UpdateBodiesGrav<0>(TREE,GRAV,INDI_SOFT && Nsoft);
@@ -1010,14 +976,10 @@ void GravEstimator::approx(const GravMAC*GMAC,
 	       TREE
 #endif
                );
-#ifdef falcON_INDI
-#  define ARGS KERNEL,STATS,EPS,Ncsize,INDI_SOFT,DIR
-#else
-#  define ARGS KERNEL,STATS,EPS,Ncsize,DIR
-#endif
   Ncsize = 4+(all? TREE->N_cells() : N_active_cells())/(split? 16:4);
   if(all) {                                        // IF all are active         
-    GravIactAll GK(ARGS);                          //   init gravity kernel     
+    GravIactAll GK(KERNEL,STATS,EPS,Ncsize,INDI_SOFT,DIR);
+                                                   //   init gravity kernel     
     MutualInteractor<GravIactAll> MI(&GK,split? TREE->depth()-1 : 
 				                  TREE->depth());
                                                    //   init mutual interactor  
@@ -1042,8 +1004,8 @@ void GravEstimator::approx(const GravMAC*GMAC,
     Ncoeffs = GK.coeffs_used();                    //   remember # coeffs used  
     Nchunks = GK.chunks_used();                    //   remember # chunks used  
   } else {                                         // ELSE: not all are active  
-    GravIact GK(ARGS);                             //   init gravity kernel     
-#undef ARGS
+    GravIact GK(KERNEL,STATS,EPS,Ncsize,INDI_SOFT,DIR);
+                                                   //   init gravity kernel     
     MutualInteractor<GravIact> MI(&GK,split? TREE->depth()-1 :
 					      TREE->depth());
                                                    //   init mutual interactor  

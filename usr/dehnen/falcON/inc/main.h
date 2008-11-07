@@ -108,14 +108,10 @@
 #  define falcON_Sflag
 #endif
 
-#ifdef falcON_INDI
-#  ifdef falcON_ADAP
-#    define falcON_Iflag  "IA"
-#  else
-#    define falcON_Iflag  "I"
-#  endif
+#ifdef falcON_ADAP
+#  define falcON_Iflag  "IA"
 #else
-#  define falcON_Iflag
+#  define falcON_Iflag  "I"
 #endif
 
 #ifdef falcON_USE_MPI
@@ -128,7 +124,6 @@
 
 #if  !defined(falcON_PROPER) \
   && !defined(falcON_SSE) \
-  && !defined(falcON_INDI) \
   && !defined(falcON_USE_MPI)
 #undef falcON_PSIFLAG
 #endif

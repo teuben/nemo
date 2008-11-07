@@ -66,9 +66,7 @@ namespace falcON {
 			real         e,
 			real         th,
 			kern_type    k,
-#ifdef falcON_INDI
 			bool         i_soft,
-#endif
 			real         g,
 			MAC_type     mac,
 			real         f,
@@ -82,11 +80,7 @@ namespace falcON {
     Ncrit   ( 0 ),
     TREE    ( 0 ),
     GMAC    ( new GravMAC(mac, abs(th), falcON_ORDER) ),
-#ifdef falcON_INDI
     GRAV    ( new GravEstimator(TREE,k,STATS,e,g,i_soft,f,gd) ),
-#else
-    GRAV    ( new GravEstimator(TREE,k,STATS,e,g,0,gd) ),
-#endif
     PAES    ( 0 ),
     SPHT    ( 
 #ifdef falcON_SPH
@@ -112,12 +106,10 @@ namespace falcON {
     if(BODIES) BODIES->set_forces(0);
   }
   //----------------------------------------------------------------------------
-#ifdef falcON_INDI
   inline bool const &forces::use_individual_eps() const
   {
     return GRAV->use_indiv_eps();
   }
-#endif
   //----------------------------------------------------------------------------
   inline void forces::reset_softening (real e, kern_type k) const
   {
@@ -262,15 +254,11 @@ namespace falcON {
       out<<" maximum depth:         "<<TREE->depth()          <<'\n'
 	 <<" current theta:         "<<GMAC->theta_min()      <<'\n'
 	 <<" current MAC:           "<<GMAC->describe_method()<<'\n';
-#ifdef falcON_INDI
       if(GRAV->use_indiv_eps())
 	out<<" softening:             individual\n";
       else
 	out<<" softening:             global\n"
 	   <<" softening length:      "<<GRAV->softening_length()<<'\n';
-#else
-      out<<" softening length:      "<<GRAV->softening_length()<<'\n';
-#endif
       out<<" softening kernel:      "<<describe_kernel()      <<'\n';
       if(TREE->is_used_for_grav()) {               // IF just had gravity       
 	out

@@ -160,9 +160,7 @@ namespace falcON {
       real       const&pot  () const { return acpn()->pot(); }
       real       const&rho  () const { return pot(); }
       unsigned   const&num  () const { return acpn()->num(); }
-#ifdef falcON_INDI
       real       const&eph  () const { return AUXR; }
-#endif
       //------------------------------------------------------------------------
       // non-const data access via members                                      
       //------------------------------------------------------------------------
@@ -173,9 +171,7 @@ namespace falcON {
       real    &pot  () { return acpn()->pot(); }
       real    &rho  () { return pot(); }
       unsigned&num  () { return acpn()->num(); }
-#ifdef falcON_INDI
       real    &eph  () { return AUXR; }
-#endif
       void     inc  () { ++num(); }
       symset3D<1,real>& Coeffs() { return *(acpn()); }
       //------------------------------------------------------------------------
@@ -186,11 +182,9 @@ namespace falcON {
       friend real     const&pot   (const Leaf*);
       friend real     const&rho   (const Leaf*);
       friend unsigned const&num   (const Leaf*);
-#ifdef falcON_INDI
       friend real     const&eph   (const Leaf*);
       friend real           size  (const Leaf*);
       friend real     const&sizeq (const Leaf*);
-#endif
       friend real     const&mass  (const Leaf*);
       //------------------------------------------------------------------------
       // copy data from body to leaf                                            
@@ -199,11 +193,9 @@ namespace falcON {
 	mass() = B->mass(mybody());
       }
       //------------------------------------------------------------------------
-#ifdef falcON_INDI
       void copy_from_bodies_eph(const bodies*B) {
 	eph() = half*B->eps(mybody());
       }
-#endif
       //------------------------------------------------------------------------
       // copy data to body from leaf                                            
       //------------------------------------------------------------------------
@@ -425,9 +417,7 @@ namespace falcON {
     const OctTree        *TREE;                    // the tree to be used       
     bool                  CELLS_UPTODATE;          // are cell srces up to date?
     bool                  LEAFS_UPTODATE;          // are leaf srces up to date?
-#ifdef falcON_INDI
     const bool            INDI_SOFT;               // use individual eps_i      
-#endif
     const int             DIR[4];                  // direct loop control       
     kern_type             KERNEL;                  // softening kernel          
     GravStats            *STATS;                   // interaction statistics    
@@ -502,9 +492,7 @@ namespace falcON {
       TREE           ( T ),
       LEAFS_UPTODATE ( 0 ),
       CELLS_UPTODATE ( 0 ),
-#ifdef falcON_INDI
       INDI_SOFT      ( s ),
-#endif
       KERNEL         ( k ),
       STATS          ( st ),
       EPS            ( e ),
@@ -601,9 +589,7 @@ namespace falcON {
     unsigned       const&N_coeffs        () const { return Ncoeffs; }
     unsigned       const&N_chunks        () const { return Nchunks; }
     unsigned       const&N_elems_in_chunk() const { return Ncsize; }
-#ifdef falcON_INDI
     bool           const&use_indiv_eps   () const { return INDI_SOFT; }
-#endif
   };// class GravEstimator {
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -616,11 +602,9 @@ namespace falcON {
   inline real const&pot(const GravEstimator::Leaf*L) { return L->pot(); }
   inline real const&rho(const GravEstimator::Leaf*L) { return L->rho(); }
   inline unsigned const&num(const GravEstimator::Leaf*L) { return L->num(); }
-#ifdef falcON_INDI
   inline real const&eph(const GravEstimator::Leaf*L) { return L->eph(); }
   inline real size(const GravEstimator::Leaf*L) {return twice(L->eph()); }
   inline real const&sizeq(const GravEstimator::Leaf*L) { return L->sizeq(); }
-#endif
   inline real const&mass(const GravEstimator::Leaf*L) { return L->mass(); }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //

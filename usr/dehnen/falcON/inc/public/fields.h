@@ -1,39 +1,39 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    inc/public/fields.h                                                
-///                                                                             
-/// \brief   body flags and support for body data management                    
-///                                                                             
-///          Contents:                                                          
-///          \li falcON::flags: holding boolean information about each body     
-///          \li falcON::fieldbit: representing a single body data field        
-///          \li falcON::fieldset: representing a set of body data fields       
-///          \li template falcON::field_traits                                  
-///          \li further constants and macros                                   
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2002-2008                                                          
-///                                                                             
+///
+/// \file    inc/public/fields.h
+///
+/// \brief   body flags and support for body data management
+///
+///          Contents:
+///          \li falcON::flags: holding boolean information about each body
+///          \li falcON::fieldbit: representing a single body data field
+///          \li falcON::fieldset: representing a set of body data fields
+///          \li template falcON::field_traits 
+///          \li further constants and macros
+///
+/// \author  Walter Dehnen
+///#
+/// \date    2002-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2002-2008  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2002-2008  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_fields_h
 #define falcON_included_fields_h 1
@@ -49,12 +49,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class falcON::flags                                                        
-  //                                                                            
-  /// An integer, the bits of which are used as flags for body properties;      
-  /// each body, as well as tree cells and leafs have a flag.                   
-  ///                                                                           
+  //
+  // class falcON::flags
+  //
+  /// An integer, the bits of which are used as flags for body properties;
+  /// each body, as well as tree cells and leafs have a flag.
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class flags {
   public:
@@ -247,10 +247,10 @@ namespace falcON {
     //@}
   };// class flags
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // inline definitions of friends of class flags                             //
-  // also serve to inject these functions into namespace falcON               //
-  //                                                                          //
+  //
+  // inline definitions of friends of class flags
+  // also serve to inject these functions into namespace falcON
+  //
   // ///////////////////////////////////////////////////////////////////////////
   inline flags operator| (flags::single b, flags const&f) {
     return flags( f.val | int(b) );
@@ -305,29 +305,28 @@ namespace falcON {
     return i >> f.val;
   }
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // N-body data type management                                              //
-  //                                                                          //
-  // There are many different N-body data (mass, position, etc), each with    //
-  // its unique data type and I/O requirements etc. Below are several types   //
-  // and constants designed for managing this.                                //
-  //                                                                          //
-  // class fieldbit                                                           //
-  // represents individual body data types as integer, i.e. 0 corresponds to  //
-  // mass, 1 to positions, etc. fieldbit can be used as a java-style iterator //
-  // over allowed data types.                                                 //
-  //                                                                          //
-  // class fieldset                                                           //
-  // represents a collection of body data types as integer each bit           //
-  // corresponding to the data whose fieldbit matches its position. fieldset  //
-  // are used to indicate which body data should be, e.g., allocated, read,   //
-  // written, or copied, etc.                                                 //
-  //                                                                          //
+  //
+  // N-body data type management
+  //
+  // There are many different N-body data (mass, position, etc), each with its
+  // unique data type and I/O requirements etc. Below are several types and
+  // constants designed for managing this.
+  //
+  // class fieldbit
+  // represents individual body data types as integer, i.e. 0 corresponds to
+  // mass, 1 to positions, etc. fieldbit can be used as a java-style iterator
+  // over allowed data types.
+  //
+  // class fieldset
+  // represents a collection of body data types as integer each bit
+  // corresponding to the data whose fieldbit matches its position. fieldset
+  // are used to indicate which body data should be, e.g., allocated, read,
+  // written, or copied, etc.
+  //
   //////////////////////////////////////////////////////////////////////////////
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // some constants related to N-body data                                    //
-  //                                                                          //
+  //
+  // some constants related to N-body data
+  //
   //////////////////////////////////////////////////////////////////////////////
   namespace BodyData {
     const int         KSTD    = 0;                 // std data start here       
@@ -338,7 +337,7 @@ namespace falcON {
     /// array with the one-char data tags used as enum names
     /// \note not (to be) referred to outside of this file
     const char* const SQUANT  ="mxvwefkspqajriyzlnchdtHNUYIEKRADJFCMS";
-    // letters taken are marked here         
+    // letters taken are marked here
     //             abcdefghijklmnopqrstuvwxyz
     // lower case  x xxxx xxxxxxxxxxxxx xxxxx
     // upper case  x xxxx xxxx xx   xx x   x 
@@ -357,7 +356,6 @@ namespace falcON {
 	"gas density", "alpha_visc", "div(v)", "dlog(h)/dt", "factor",
 	"sound speed", "molecular weight", "spin"
       };
-    //--------------------------------------------------------------------------
     /// array with function names for the N-body data
     /// \note not (to be) referred to outside of this file
     const char* const QFUNCNAME[NQUANT] = 
@@ -367,7 +365,6 @@ namespace falcON {
 	"size", "snum", "uin", "uprd", "udot", "udex", "entr", "srho", "alfa",
 	"divv", "hdot", "fact", "csnd", "molw", "spin"
       };
-    //--------------------------------------------------------------------------
     /// array with five-chacter names for the N-body data
     /// \note not (to be) referred to outside of this file
     const char* const QFIVENAME[NQUANT] = 
@@ -377,7 +374,6 @@ namespace falcON {
 	"size ", "snum ", "uin  ", "uprd ", "udot ", "udex ", "entr ", "srho ",
 	"alfa ", "divv ", "hdot ", "fact ", "csnd ", "molw ", "spin "
       };
-    //--------------------------------------------------------------------------
     /// array with the sizeof() the N-body data
     const size_t ZQUANT[NQUANT] = {
       //            source properties: 8
@@ -424,17 +420,17 @@ namespace falcON {
     };
   } // namespace BodyData
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class falcON::fieldbit                                                     
-  //                                                                            
-  /// Represents a single individual body data field                            
-  ///                                                                           
-  /// Each body data field corresponds to another integer: 0 means mass, 1      
-  /// positions, etc. In any application, \b never use these integer values, but
-  /// \b always the enumeration value in enum fieldbit::bits, because these are 
-  /// guaranteed to be preserved during code changes. fieldbit can be used as a 
-  /// java-style iterator over data fields.                                     
-  ///                                                                           
+  //
+  // class falcON::fieldbit
+  //
+  /// Represents a single individual body data field
+  ///
+  /// Each body data field corresponds to another integer: 0 means mass, 1
+  /// positions, etc. In any application, \b never use these integer values,
+  /// but \b always the enumeration value in enum fieldbit::bits, because
+  /// these are guaranteed to be preserved during code changes. fieldbit can
+  /// be used as a java-style iterator over data fields.
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class fieldbit {
   public:
@@ -443,7 +439,8 @@ namespace falcON {
     typedef int value_type;
     /// \name static members
     //@{
-    static const int   NQUANT= BodyData::NQUANT; ///< total # data              
+    /// total # data
+    static const int   NQUANT= BodyData::NQUANT;
     /// letter for body datum
     static const char& SNAME(int i) { return BodyData::SQUANT[i]; }
     /// 5-character function name for body dataum
@@ -582,10 +579,10 @@ namespace falcON {
     friend std::ostream& print_field(std::ostream&, const char*, fieldbit);
   };// class fieldbit
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // inline definitions of some friends of class fieldbit                     //
-  // also serve to inject these functions into namespace falcON               //
-  //                                                                          //
+  //
+  // inline definitions of some friends of class fieldbit also serve to inject
+  // these functions into namespace falcON
+  //
   // ///////////////////////////////////////////////////////////////////////////
   inline fieldbit::value_type const&value (fieldbit const&f) { return f.val; }
   inline size_t const&size  (fieldbit f) { return BodyData::ZQUANT[f.val]; }
@@ -597,20 +594,20 @@ namespace falcON {
     return f.val >= BodyData::KSPH && f.val < BodyData::KSINK;
   }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class falcON::fieldset                                                     
-  //                                                                            
-  /// Represents a set of body data fields                                      
+  //
+  // class falcON::fieldset
+  //
+  /// Represents a set of body data fields
   ///                                                                           
-  /// falcON::fieldset represents a set of body data fields. Each field         
-  /// corresponds to a unique bit in a 64bit integer (i.e. up to 64 different   
-  /// fields are possible with this implementation). The position of the bit    
-  /// is identical to the value of the corresponding fieldbit::bits. Thus, a    
-  /// set containing only, say, the position has the bit fieldbit::x set and    
-  /// all others zero; this corresponds to the integer value 1\<\<fieldbit::x.  
-  /// A combination of several fields is obtained by bit-wise or. Other bit-wise
-  /// operations allow the manipulation of individual fields.                   
-  ///                                                                           
+  /// falcON::fieldset represents a set of body data fields. Each field
+  /// corresponds to a unique bit in a 64bit integer (i.e. up to 64 different
+  /// fields are possible with this implementation). The position of the bit
+  /// is identical to the value of the corresponding fieldbit::bits. Thus, a
+  /// set containing only, say, the position has the bit fieldbit::x set and
+  /// all others zero; this corresponds to the integer value 1\<\<fieldbit::x.
+  /// A combination of several fields is obtained by bit-wise or. Other
+  /// bit-wise operations allow the manipulation of individual fields.
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class fieldset {
     //--------------------------------------------------------------------------
@@ -621,7 +618,6 @@ namespace falcON {
     value_type val;
   public:
     const static value_type nil=0, one=1;
-    //--------------------------------------------------------------------------
     /// specifies single-field sets and some combined sets
     ///
     /// Single-field sets have the same name as the corresponding fieldbit::bits
@@ -712,7 +708,7 @@ namespace falcON {
       /// an empty set (again)
       empty   = o
     };
-    //==========================================================================
+    //--------------------------------------------------------------------------
     /// \name constructors and assignment                                       
     //@{
     /// default constructor: empty set
@@ -737,7 +733,7 @@ namespace falcON {
     /// copy assignment operator
     fieldset&operator= (fieldset b) { val  = b.val; return *this; }
     //@}
-    //==========================================================================
+    //--------------------------------------------------------------------------
     /// \name operations                                                        
     //@{
     /// combine with another set
@@ -789,7 +785,7 @@ namespace falcON {
     /// complementary set
     fieldset operator~ () const { return fieldset(~val); }
     //@}
-    //==========================================================================
+    //--------------------------------------------------------------------------
     /// \name non-operator member methods and friends                           
     //@{
     /// do two sets intersect?
@@ -813,9 +809,8 @@ namespace falcON {
     /// return the integer value (combination of all bits)
     friend value_type const&value(fieldset const&);
     //@}
-    //==========================================================================
+    //--------------------------------------------------------------------------
     // description                                                              
-    //==========================================================================
     char* make_word(char* w) const {
       if(val) {
 	char *l = w;
@@ -828,7 +823,7 @@ namespace falcON {
       }
       return w;
     }
-    //--------------------------------------------------------------------------
+    //
     class wlist {
       char W[BodyData::NQUANT+1];
     public:
@@ -843,7 +838,7 @@ namespace falcON {
     /// return a string of the letters corresponding to the fields in the set;
     /// useful for ascii output
     friend const char* word(const fieldset*);
-    //==========================================================================
+    //--------------------------------------------------------------------------
     /// the number of bytes required to hold all fields for a single body
     size_t bytes() const {
       size_t n = 0;
@@ -865,10 +860,10 @@ namespace falcON {
     friend std::istream& operator>> (std::istream&, fieldset&);
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // inline definitions of friends of class fieldset and fieldset::wlist      //
-  // also serve to inject these functions into namespace falcON               //
-  //                                                                          //
+  //
+  // inline definitions of friends of class fieldset and fieldset::wlist also
+  // serve to inject these functions into namespace falcON
+  //
   // ///////////////////////////////////////////////////////////////////////////
   inline fieldset operator| (fieldset::bits a, fieldset::bits b) {
     return fieldset(fieldset::value_type(a) | fieldset::value_type(b));
@@ -947,16 +942,16 @@ namespace falcON {
     }
   }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // inline definitions of a friend of class fieldbit                         //
-  // also serves to inject this function into namespace falcON                //
-  //                                                                          //
+  //
+  // inline definitions of a friend of class fieldbit; also serves to inject
+  // this function into namespace falcON
+  //
   // ///////////////////////////////////////////////////////////////////////////
   inline bool is_nemo(fieldbit f) { return fieldset::nemo & (1 << value(f)); }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // data related to bodytype management                                      //
-  //                                                                          //
+  //
+  // data related to bodytype management
+  //
   // ///////////////////////////////////////////////////////////////////////////
   const unsigned BT_NUM = 3;
   const fieldset BT_DATA[BT_NUM] = {
@@ -965,14 +960,15 @@ namespace falcON {
     fieldset::STD
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  class falcON::bodytype                                                    
-  //                                                                            
-  /// Represents the type of bodies                                             
-  ///                                                                           
-  /// Currently only two types are supported: SPH (gas particles) and STD       
-  /// (non-SPH bodies). bodytype can be used like a jave-style iterator to loop 
-  /// over all bodytypes.                                                       
+  //
+  //  class falcON::bodytype
+  //
+  /// Represents the type of bodies
+  ///
+  /// Currently only two types are supported: SPH (gas particles) and STD
+  /// (non-SPH bodies). bodytype can be used like a jave-style iterator to
+  /// loop over all bodytypes.
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class bodytype {
   public:
@@ -993,7 +989,6 @@ namespace falcON {
     bodytype(bits b)           : val(b) {}
     /// copy contructor
     bodytype(bodytype const&b) : val(b.val) {}
-    //--------------------------------------------------------------------------
     /// copy assignment operator
     bodytype& operator= (bodytype const&b) { val=b.val; return *this; }
     /// assignment operator from bodytype::bits
@@ -1057,11 +1052,11 @@ namespace falcON {
     char const&value() const { return val; }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  class falcON::bodytypes                                                   
-  //                                                                            
-  /// Represents a set of different bodytypes                                   
-  ///                                                                           
+  //
+  //  class falcON::bodytypes
+  //
+  /// Represents a set of different bodytypes
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class bodytypes {
     /// type used in internal representation
@@ -1082,6 +1077,7 @@ namespace falcON {
     };
     //--------------------------------------------------------------------------
     /// \name constructors and assignment                                       
+    //@{
     /// default ctor: no types
     bodytypes() : val(0) {}
     /// from bodytypes::bits
@@ -1131,9 +1127,9 @@ namespace falcON {
     //@}
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // struct field_zero<type>                                                  //
-  //                                                                          //
+  //
+  // struct field_zero<type>
+  //
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct field_zero {
     static void set_zero(T&x) { x = T(0); }
@@ -1145,29 +1141,28 @@ namespace falcON {
     static void set_zero(tupel<N,T>&x) { x = T(0); }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // struct field_type<type>                                                    
-  //                                                                            
+  //
+  // struct field_type<type>
+  //
   // ///////////////////////////////////////////////////////////////////////////
   template<typename TYPE> struct field_type
   : public field_zero<TYPE> {
-    //--------------------------------------------------------------------------
+    //
     field_zero<TYPE>::set_zero;
-    //--------------------------------------------------------------------------
+    //
     static TYPE*array(void*D) {
       return static_cast<TYPE*>(D);}
-    //--------------------------------------------------------------------------
+    //
     static const TYPE*c_array(const void*D) {
       return static_cast<const TYPE*>(D);}
-    //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // struct field_traits<int>  int = fieldbit                                 //
-  //                                                                          //
-  // used in templated members of class bodies below.                         //
-  // define all related types; aid nemo I/O                                   //
-  //                                                                          //
+  //
+  // struct field_traits<int>  int = fieldbit
+  //
+  // used in templated members of class bodies below.
+  // define all related types; aid nemo I/O
+  //
   //////////////////////////////////////////////////////////////////////////////
   /// \brief Template over body data field
   /// provides information about data type and name etc for data field.
@@ -1224,12 +1219,12 @@ namespace falcON {
   DefFieldTraits(fieldbit::S, vect);               // SINK: spins               
 #undef DefFieldTraits
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // macro for defining named functions                                       //
-  //                                                                          //
-  // named functions MUST not be defined in any other way to ensure that any  //
-  // changes in the data type layout etc. are automatically reflected.        //
-  //                                                                          //
+  //
+  // macro for defining named functions
+  //
+  // named functions MUST not be defined in any other way to ensure that any
+  // changes in the data type layout etc. are automatically reflected.
+  //
   //////////////////////////////////////////////////////////////////////////////
 #define DEF_NAMED_STD(MACRO)			\
   MACRO(fieldbit::m,mass);			\
@@ -1276,9 +1271,9 @@ namespace falcON {
   DEF_NAMED_SPH(MACRO)				\
   DEF_NAMED_SINK(MACRO)
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // templates for looping fields                                             //
-  //                                                                          //
+  //
+  // templates for looping fields
+  //
   //////////////////////////////////////////////////////////////////////////////
   template< template<int> class LOOP, int BIT, int BITEND >
   struct LoopFields {

@@ -1,36 +1,36 @@
 /* -*- C -*-
  *******************************************************************************
- *                                                                             *
- * forces_C.h                                                                  *
- *                                                                             *
- * Copyright (C) 2000-2006  Walter Dehnen                                      *
- *                                                                             *
- * This program is free software; you can redistribute it and/or modify        *
- * it under the terms of the GNU General Public License as published by        *
- * the Free Software Foundation; either version 2 of the License, or (at       *
- * your option) any later version.                                             *
- *                                                                             *
- * This program is distributed in the hope that it will be useful, but         *
- * WITHOUT ANY WARRANTY; without even the implied warranty of                  *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           *
- * General Public License for more details.                                    *
- *                                                                             *
- * You should have received a copy of the GNU General Public License           *
- * along with this program; if not, write to the Free Software                 *
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   *
- *                                                                             *
+ *
+ * forces_C.h
+ *
+ * Copyright (C) 2000-2006  Walter Dehnen
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 675
+ * Mass Ave, Cambridge, MA 02139, USA.
+ *
  *******************************************************************************
- *                                                                             *
- * falcON = Force ALgorithm with Complexity O(N)                               *
- *                                                                             *
+ *
+ * falcON = Force ALgorithm with Complexity O(N)
+ *
  *******************************************************************************
- *                                                                             *
- * header file for C users.                                                    *
- * (C++ and FORTRAN users, see files forces.h and forces.f, respectively)      *
- *                                                                             *
- * C routines  implementing the code described by Dehnen (2000,2002). These    *
- * routines call the original C++ functions, declared in file forces.h.        *
- *                                                                             *
+ *
+ * header file for C users.
+ * (C++ and FORTRAN users, see files forces.h and forces.f, respectively)
+ *
+ * C routines  implementing the code described by Dehnen (2000,2002). These
+ * routines call the original C++ functions, declared in file forces.h.
+ *
  *******************************************************************************
  */
 #ifndef falcON_included_forces_C_h            /* ensure this file is seen     */
@@ -50,44 +50,42 @@ extern "C" {                                  /* forces.h.                    */
 #endif
 
 /*******************************************************************************
- *                                                                             *
- *  CONTENTS                                                                   *
- *  ========                                                                   *
- *                                                                             *
- *  1  Initialisation and clearing up                                          *
- *     1.1  Before using the code                                              *
- *     1.2  After using the code                                               *
- *  2  Meaning of the body flags                                               *
- *  3  Force approximation and related                                         *
- *     3.1  Generating a tree structure                                        *
- *     3.2  Approximating the accelerations                                    *
- *     3.3  A crude estimation of the mass- and number density                 *
- *  4  Search for and counting of neighbours and collision partners            *
- *     4.1  Collision partner search (for sticky particles) and counting       *
- *     4.2  Neighbour or interaction partner search (SPH support) and counting *
- *  5  Other features                                                          *
- *  6  Known bugs and problems                                                 *
- *     6.1  Test-bodies are not possible                                       *
- *     6.2  Bodies at identical positions                                      *
- *  References                                                                 *
- *                                                                             *
+ *
+ *  CONTENTS
+ *  ========
+ *
+ *  1  Initialisation and clearing up
+ *     1.1  Before using the code
+ *     1.2  After using the code
+ *  2  Meaning of the body flags
+ *  3  Force approximation and related
+ *     3.1  Generating a tree structure
+ *     3.2  Approximating the accelerations
+ *     3.3  A crude estimation of the mass- and number density
+ *  4  Search for and counting of neighbours and collision partners
+ *     4.1  Collision partner search (for sticky particles) and counting
+ *     4.2  Neighbour or interaction partner search (SPH support) and counting
+ *  5  Other features
+ *  6  Known bugs and problems
+ *     6.1  Test-bodies are not possible
+ *     6.2  Bodies at identical positions
+ *  References
+ *
  *******************************************************************************
- *                                                                             *
- *                                                                             *
- *  1 INITIALISATION AND CLEARING UP                                           *
- *  ================================                                           *
- *                                                                             *
- *  1.1 BEFORE USING THE CODE                                                  *
- *  -------------------------                                                  *
- *  In order to use the code, one has first to initialize it. This is done     *
- *  using the following routine, which actually does no computation at all.    *
+ *
+ *
+ *  1 INITIALISATION AND CLEARING UP
+ *  ================================
+ *
+ *  1.1 BEFORE USING THE CODE
+ *  -------------------------
+ *  In order to use the code, one has first to initialize it. This is done
+ *  using the following routine, which actually does no computation at all.
  */
 void  falcON_initialize(const int       *,        /* flags                    */
 			const INPUT_TYPE*,        /* masses                   */
 			const INPUT_TYPE*,        /* positions                */
-#ifdef falcON_INDI
 			const INPUT_TYPE*,        /* eps                      */
-#endif
 			INPUT_TYPE      *,        /* accelerations            */
 			INPUT_TYPE      *,        /* potentials               */
 			INPUT_TYPE      *,        /* densities                */
@@ -97,39 +95,37 @@ void  falcON_initialize(const int       *,        /* flags                    */
 			INPUT_TYPE       ,        /* theta= opening angle     */
 			int              ,        /* softening kernel         */
 			INPUT_TYPE       );       /* Newton's constant G      */
-/*                                                                             *
- * The first 7(6) arguments specify the sink and source properties of the      *
- * bodies. Each body has the sink properties: position (x,y,z), mass,          *
- * softening length (for the case of individual softening lengths), and flag   *
- * (see section 2 below). The source properties are: acceleration(ax,ay,az),   *
- * potential and mass-density. If individual softening is enabled (via the     *
- * preprocessor flag "falcON_INDI", see file make.defs) but global softening   *
- * is used, a NULL pointer may be used instead of an array holding eps_i. The  *
- * same applies to the arrays for density and potential: if a NULL pointer is  *
- * given, they will never be updated (but possibly computed).                  *
- *                                                                             *
- * NOTE that as of June 2005, positions and accelerations must be given in     *
- * the order                                                                   *
- *             (x0,y0,z0, x1,y1,z1, ...)                                       *
- * rather than                                                                 *
- *             (x0,x1, ..., y0,y1, ..., z0,z1, ...)                            *
- * as before.                                                                  *
- *                                                                             *
- *                                                                             *
- *                                                                             *
- * The last 5 arguments are:                                                   *
- *                                                                             *
- * Ntot:  size of arrays == total number of bodies.                            *
- * Nsph:  the 1st Nsph (<= Ntot) bodies are gas particles                      *
- *        you must give this number only if you are going to use SPH support   *
- *        (see below).                                                         *
- * EPS:   global overall softening length, unless eps_i are given.             *
- * THETA: if(THETA>0): theta = theta(M) with theta_min = THETA (Dehnen 2002)   *
- *        if(THETA<0): theta = THETA = const                                   *
- *        RECOMMENDED: THETA = 0.5 - 0.6                                       *
- * KERN:  0,1,2,3:     P_n kernels (P_0=Plummer) (Dehnen & Teuben, 2002)       *
- *                                                                             *
- * With the functions                                                          *
+/*                                                                            
+ * The first 7(6) arguments specify the sink and source properties of the
+ * bodies. Each body has the sink properties: position (x,y,z), mass,
+ * softening length (for the case of individual softening lengths), and flag
+ * (see section 2 below). The source properties are: acceleration(ax,ay,az),
+ * potential and mass-density. If global softening is used, a NULL pointer may
+ * be used instead of an array holding eps_i. The same applies to the arrays
+ * for density and potential: if a NULL pointer is given, they will never be
+ * updated (but possibly computed).
+ *
+ * NOTE that as of June 2005, positions and accelerations must be given in     
+ * the order
+ *             (x0,y0,z0, x1,y1,z1, ...)
+ * rather than
+ *             (x0,x1, ..., y0,y1, ..., z0,z1, ...)
+ * as before.
+ *
+ *
+ * The last 5 arguments are:
+ *
+ * Ntot:  size of arrays == total number of bodies.
+ * Nsph:  the 1st Nsph (<= Ntot) bodies are gas particles
+ *        you must give this number only if you are going to use SPH support
+ *        (see below).
+ * EPS:   global overall softening length, unless eps_i are given.
+ * THETA: if(THETA>0): theta = theta(M) with theta_min = THETA (Dehnen 2002)
+ *        if(THETA<0): theta = THETA = const
+ *        RECOMMENDED: THETA = 0.5 - 0.6
+ * KERN:  0,1,2,3:     P_n kernels (P_0=Plummer) (Dehnen & Teuben, 2002)
+ *
+ * With the functions
  */
 void falcON_resetsoftening(INPUT_TYPE,       /* fixed/maximum softening length*/
 			   int       );      /* softening kernel              */

@@ -138,13 +138,9 @@ C     INPUT_TYPE TH                opening angle, see below                    |
 C     INTEGER    K                 type of softening kernel, see below         |
 C     INPUT_TYPE GRAV              Newton's constant of gravity                |
 C                                                                              |
-C     CALL FALCON_INITIALIZE(FL,M,X,A,P,RH, N,NS, EPS,TH,K,GRAV)               |
-C                                                                              |
-C  or, if the C-macro "falcON_INDI" is defined, the "Makefile":                |
-C                                                                              |
 C     CALL FALCON_INITIALIZE(FL,M,X,E,A,P,RH, N,NS, EPS,TH,K,GRAV)             |
 C                                                                              |
-C  The first 7(6) arguments specify the sink and source properties of the      |
+C  The first 7 arguments specify the sink and source properties of the         |
 C  bodies. Each body has the source properties: position (x,y,z), mass,        |
 C  softening length (for the case of individual softening lengths), and flag   |
 C  (see section 2 below). The sink properties are: acceleration(ax,ay,az),     |

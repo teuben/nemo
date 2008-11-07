@@ -52,24 +52,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 //------------------------------------------------------------------------------
-// SPH code?                                                                    
-//------------------------------------------------------------------------------
-#if defined(falcON_SPH) && !defined(falcON_INDI)
-#  warning 'falcON_SPH' #defined but not 'falcON_INDI'
-#  warning will #define 'falcON_INDI' now
-#  define falcON_INDI
-#endif
-
-//------------------------------------------------------------------------------
-// adaptive individual softening?                                               
-//------------------------------------------------------------------------------
-#if defined(falcON_ADAP) && !defined(falcON_INDI)
-#  warning
-#  warning 'falcON_ADAP' #defined but not 'falcON_INDI' 
-#  warning we will #undef 'falcON_ADAP'
-#  warning
-#endif
-//------------------------------------------------------------------------------
 // expansion order used in gravity                                              
 //------------------------------------------------------------------------------
 #if defined(Walter) && !defined(falcON_included_ordr_h)

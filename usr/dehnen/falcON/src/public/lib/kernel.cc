@@ -221,7 +221,6 @@ void GravKern::single(leaf_iter const &A, leaf_iter const&B) const
 {
   register vect R  = cofm(A)-cofm(B);
   register real Rq = norm(R),x,D0;
-#ifdef falcON_INDI
   if(INDI_SOFT)
     switch(KERN) {
     case p1: { P1_I(mass(A)*mass(B)) } break;
@@ -230,7 +229,6 @@ void GravKern::single(leaf_iter const &A, leaf_iter const&B) const
     default: { P0_I(mass(A)*mass(B)) } break;
     }
   else
-#endif
     switch(KERN) {
     case p1: { P1(mass(A)*mass(B)) } break;
     case p2: { P2(mass(A)*mass(B)) } break;
@@ -245,7 +243,6 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
 {
   register vect R  = cofm(A)-cofm(B);
   register real Rq = norm(R),x,D0;
-#ifdef falcON_INDI
   if(INDI_SOFT)
     switch(KERN) {
     case p1: { P1_I(mass(A)*mass(B)) } break;
@@ -254,7 +251,6 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
     default: { P0_I(mass(A)*mass(B)) } break;
     }
   else
-#endif
     switch(KERN) {
     case p1: { P1(mass(A)*mass(B)) } break;
     case p2: { P2(mass(A)*mass(B)) } break;
@@ -489,38 +485,30 @@ namespace {
   template<> struct __direct<p0,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P0_G);
   };
-#ifdef falcON_INDI
   template<> struct __direct<p0,1> {
     DIRECT(START_I,LOAD_I,DSINGL_P0_I);
   };
-#endif
   //----------------------------------------------------------------------------
   template<> struct __direct<p1,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P1_G);
   };
-#ifdef falcON_INDI
   template<> struct __direct<p1,1> {
     DIRECT(START_I,LOAD_I,DSINGL_P1_I);
   };
-#endif
   //----------------------------------------------------------------------------
   template<> struct __direct<p2,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P2_G);
   };
-#ifdef falcON_INDI
   template<> struct __direct<p2,1> {
     DIRECT(START_I,LOAD_I,DSINGL_P2_I);
   };
-#endif
   //----------------------------------------------------------------------------
   template<> struct __direct<p3,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P3_G);
   };
-#ifdef falcON_INDI
   template<> struct __direct<p3,1> {
     DIRECT(START_I,LOAD_I,DSINGL_P3_I);
   };
-#endif
 #undef LOAD_G
 #undef LOAD_I
 #undef START_G
@@ -573,7 +561,6 @@ namespace {
 #define ARGS KERN,B,A.begin_leafs(),A.end_leaf_desc(),EQ,HQ,QQ
 void GravKern::direct(cell_iter const&A, leaf_iter const&B) const
 {
-#ifdef falcON_INDI
   if(INDI_SOFT)
     if(is_active(B)) {
       if     (al_active(A)) Direct<1>::many_YA(ARGS);
@@ -584,7 +571,6 @@ void GravKern::direct(cell_iter const&A, leaf_iter const&B) const
       else if(is_active(A)) Direct<1>::many_NS(ARGS);
     }
   else
-#endif
   {
     if(is_active(B)) {
       if     (al_active(A)) Direct<0>::many_YA(ARGS);
@@ -599,11 +585,9 @@ void GravKern::direct(cell_iter const&A, leaf_iter const&B) const
 //------------------------------------------------------------------------------
 void GravKernAll::direct(cell_iter const&A, leaf_iter const&B) const
 {
-#ifdef falcON_INDI
   if(INDI_SOFT)
     Direct<1>::many_YA(ARGS);
   else
-#endif
     Direct<0>::many_YA(ARGS);
 }
 #undef ARGS
@@ -613,7 +597,6 @@ void GravKern::direct(cell_iter const&C) const
 {
   const    unsigned  N1 = number(C)-1;
   register leaf_iter A  = C.begin_leafs();
-#ifdef falcON_INDI
   if(INDI_SOFT)
     if(al_active(C))
       for(unsigned Nk=N1; Nk; --Nk,++A) Direct<1>::many_YA(ARGS);
@@ -622,7 +605,6 @@ void GravKern::direct(cell_iter const&C) const
 	if(is_active(A))                Direct<1>::many_YS(ARGS);
 	else                            Direct<1>::many_NS(ARGS);
   else
-#endif
   {
     if(al_active(C))
       for(unsigned Nk=N1; Nk; --Nk,++A) Direct<0>::many_YA(ARGS);
@@ -637,11 +619,9 @@ void GravKernAll::direct(cell_iter const&C) const
 {
   const    unsigned  N1 = number(C)-1;
   register leaf_iter A  = C.begin_leafs();
-#ifdef falcON_INDI
   if(INDI_SOFT)
     for(unsigned Nk=N1; Nk; --Nk,++A) Direct<1>::many_YA(ARGS);
   else
-#endif
     for(unsigned Nk=N1; Nk; --Nk,++A) Direct<0>::many_YA(ARGS);
 }
 #undef ARGS
@@ -658,11 +638,9 @@ void GravKernBase::many_AA(leaf_iter const&A0, unsigned const&NA,
 			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
-#ifdef falcON_INDI
   if(INDI_SOFT)
     for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
   else
-#endif
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
@@ -670,11 +648,9 @@ void GravKernBase::many_AS(leaf_iter const&A0, unsigned const&NA,
 			   leaf_iter const&B0, unsigned const&NB) const
 {
   const    leaf_iter AN=A0+NA, BN=B0+NB;
-#ifdef falcON_INDI
   if(INDI_SOFT)
     for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
   else
-#endif
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
@@ -682,11 +658,9 @@ void GravKernBase::many_AN(leaf_iter const&A0, unsigned const&NA,
 			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
-#ifdef falcON_INDI
   if(INDI_SOFT)
     for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
   else
-#endif
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
@@ -694,13 +668,11 @@ void GravKernBase::many_SA(leaf_iter const&A0, unsigned const&NA,
 			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
-#ifdef falcON_INDI
   if(INDI_SOFT) {
     for(leaf_iter A=A0; A!=AN; ++A)
       if(is_active(A)) Direct<1>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
       else             Direct<1>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
   } else
-#endif
     for(leaf_iter A=A0; A!=AN; ++A)
       if(is_active(A)) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
       else             Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
@@ -710,13 +682,11 @@ void GravKernBase::many_SS(leaf_iter const&A0, unsigned const&NA,
 			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
-#ifdef falcON_INDI
   if(INDI_SOFT) {
     for(leaf_iter A=A0; A!=AN; ++A)
       if(is_active(A)) Direct<1>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
       else             Direct<1>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
   } else
-#endif
     for(leaf_iter A=A0; A!=AN; ++A) 
       if(is_active(A)) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
       else             Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
@@ -726,12 +696,10 @@ void GravKernBase::many_SN(leaf_iter const&A0, unsigned const&NA,
 			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
-#ifdef falcON_INDI
   if(INDI_SOFT) {
     for(leaf_iter A=A0; A!=AN; ++A)
       if(is_active(A)) Direct<1>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
   } else
-#endif
     for(leaf_iter A=A0; A!=AN; ++A) 
       if(is_active(A)) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
 }
@@ -740,11 +708,9 @@ void GravKernBase::many_NA(leaf_iter const&A0, unsigned const&NA,
 			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
-#ifdef falcON_INDI
   if(INDI_SOFT)
     for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
   else
-#endif
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
@@ -752,11 +718,9 @@ void GravKernBase::many_NS(leaf_iter const&A0, unsigned const&NA,
 			   leaf_iter const&B0, unsigned const&NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
-#ifdef falcON_INDI
   if(INDI_SOFT)
     for(leaf_iter A=A0; A!=AN; ++A) Direct<1>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
   else
-#endif
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -945,7 +909,6 @@ void GravKern::approx(cell_iter const&A, leaf_iter const&B,
 		      vect           &R, real      const&Rq) const
 {
   if(is_active(A)) give_coeffs(A);
-#ifdef falcON_INDI
   if(INDI_SOFT) 
     switch(KERN) {
     case p1: kernel<p1,ORDER,0,1>::a(ARGS); break;
@@ -954,7 +917,6 @@ void GravKern::approx(cell_iter const&A, leaf_iter const&B,
     default: kernel<p0,ORDER,0,1>::a(ARGS); break;
     }
   else
-#endif
     switch(KERN) {
     case p1: kernel<p1,ORDER,0,0>::a(ARGS); break;
     case p2: kernel<p2,ORDER,0,0>::a(ARGS); break;
@@ -967,7 +929,6 @@ void GravKernAll::approx(cell_iter const&A, leaf_iter const&B,
 			 vect           &R, real      const&Rq) const
 {
   give_coeffs(A);
-#ifdef falcON_INDI
   if(INDI_SOFT) 
     switch(KERN) {
     case p1: kernel<p1,ORDER,1,1>::a(ARGS); break;
@@ -976,7 +937,6 @@ void GravKernAll::approx(cell_iter const&A, leaf_iter const&B,
     default: kernel<p0,ORDER,1,1>::a(ARGS); break;
     }
   else
-#endif
     switch(KERN) {
     case p1: kernel<p1,ORDER,1,0>::a(ARGS); break;
     case p2: kernel<p2,ORDER,1,0>::a(ARGS); break;
@@ -990,7 +950,6 @@ void GravKern::approx(cell_iter const&A, cell_iter const&B,
 {
   if(is_active(A)) give_coeffs(A);
   if(is_active(B)) give_coeffs(B);
-#ifdef falcON_INDI
   if(INDI_SOFT) 
     switch(KERN) {
     case p1: kernel<p1,ORDER,0,1>::a(ARGS); break;
@@ -999,7 +958,6 @@ void GravKern::approx(cell_iter const&A, cell_iter const&B,
     default: kernel<p0,ORDER,0,1>::a(ARGS); break;
     }
   else
-#endif
     switch(KERN) {
     case p1: kernel<p1,ORDER,0,0>::a(ARGS); break;
     case p2: kernel<p2,ORDER,0,0>::a(ARGS); break;
@@ -1013,7 +971,6 @@ void GravKernAll::approx(cell_iter const&A, cell_iter const&B,
 {
   give_coeffs(A);
   give_coeffs(B);
-#ifdef falcON_INDI
   if(INDI_SOFT) 
     switch(KERN) {
     case p1: kernel<p1,ORDER,1,1>::a(ARGS); break;
@@ -1022,7 +979,6 @@ void GravKernAll::approx(cell_iter const&A, cell_iter const&B,
     default: kernel<p0,ORDER,1,1>::a(ARGS); break;
     }
   else
-#endif
     switch(KERN) {
     case p1: kernel<p1,ORDER,1,0>::a(ARGS); break;
     case p2: kernel<p2,ORDER,1,0>::a(ARGS); break;

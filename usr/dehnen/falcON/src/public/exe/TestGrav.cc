@@ -86,12 +86,10 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   if(argc < 6) {
     cerr<<
       " \"TestGrav MOD gam N S EPS [Ngrow theta K"
-#  ifdef falcON_INDI
-#  ifdef falcON_ADAP
+#ifdef falcON_ADAP
       " Nsoft Nref emin"
-#  endif
+#endif
       " epar"
-#  endif
       " Ncrit"
 #if (0)
       " Ncut"
@@ -102,23 +100,17 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       " gam                 : parameter of model (if any)\n"
       " N                   : number of positions\n"
       " S = long            : seed for RNG\n"
-#ifdef falcON_INDI
       " EPS                 : fixed / maximum individual softening length\n"
-#else
-      " EPS                 : softening length\n"
-#endif
       " Ngrow(default   0)  : # additional grow()s\n"
       " theta(default "<<std::setw(4)<<Default::theta
 	<<") : accuracy parameter\n"
       " K    (default   "<<falcON_KERNEL_TEXT<<")  : P_n softening kernel\n"
-#ifdef falcON_INDI
 #ifdef falcON_ADAP
       " Nsoft(default   0)  : use individual softening with Nsoft\n"
       " Nref (default Nsoft): use individual softening with Nref\n"
       " emin (default   0)  : lower limit for eps_i\n"
 #endif
       " epar (default   0)  : if > 0: mean fixed individual softening length\n"
-#endif
       " Ncrit(default "<<std::setw(3)<<Default::Ncrit
 	               <<")  : don't split cell with <= Nc bodies\n"
 #if (0)
@@ -137,14 +129,12 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
     std::exit(1);
   }
   register clock_t  cpu0 = clock(), cpu1;
-#ifdef falcON_INDI
 #ifdef falcON_ADAP
   real              Nsoft=zero,emin=zero;
   unsigned          NREF;
 #endif
   real              EPAR = zero;
   bool              indiv_soft = false;
-#endif
   real              rmax = 1.e3;
   int               p=1, MOD, dump=0;
   MAC_type          MAC = Default::mac;
@@ -167,7 +157,6 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   if(argc>p) Ngrow  = atoi(argv[p++]);
   if(argc>p) theta  = atof(argv[p++]);
   if(argc>p) K      = kern_type(atoi(argv[p++]) % 10);
-#ifdef falcON_INDI
 #ifdef falcON_ADAP
   if(argc>p) Nsoft  = atof(argv[p++]);
   if(Nsoft)  indiv_soft = true;
@@ -177,7 +166,6 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 #endif
   if(argc>p) EPAR   = atof(argv[p++]);
   if(EPAR>0) indiv_soft = true;
-#endif
   if(argc>p) Ncrit  = atoi(argv[p++]);
 #if (0)
   if(argc>p) Ncut   = atoi(argv[p++]);
@@ -192,9 +180,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   if(argc>p) rmax   = atoi(argv[p++]);
   if(argc>p) dump   = atoi(argv[p++]);
   bodies __BODIES(Nbod), *BODIES=&__BODIES;
-#ifdef falcON_INDI
   if(indiv_soft) BODIES->add_fields(fieldset::e);
-#endif
   EPS  = falcON::abs(EPS);
   vect  *A = new vect[N];
   real *RH = new real[N];
@@ -262,7 +248,6 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
     rho          += rh;
   }
   rho = N / rho;                           // inverse mean density
-#ifdef falcON_INDI
   if(indiv_soft) {
     std::cerr<<" indiv_soft = "<<indiv_soft<<'\n';
     std::cerr<<" epar       = "<<EPAR<<'\n';
@@ -274,7 +259,6 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
     emean /= double(N);
     std::cerr<<" mean eps   = "<<emean<<'\n';
   }
-#endif
   const bool all = Nact >= N;
   if(!all) {
     int *I = falcON_NEW(int,N);
@@ -300,11 +284,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       <<" time needed for set up of X_i:                  "
       <<(cpu1 - cpu0)/real(CLOCKS_PER_SEC)<<endl;
   cpu0 = cpu1;
-#ifdef falcON_INDI
   forces falcon(BODIES,EPS,theta,K,indiv_soft,one,MAC,one,DIR);
-#else
-  forces falcon(BODIES,EPS,theta,K,one,MAC,DIR);
-#endif
   for(register unsigned ig=0; ig<=Ngrow; ++ig) {
 #if (0)
     if(Ncut) falcon.re_grow(Ncut,Ncrit);
@@ -387,7 +367,6 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 //     cerr<<" "<<acc(B+i)<<" "<<neighbours(B+i)<<"\n";
 //   }
 #if(0)
-#ifdef falcON_INDI
   if(Nsoft || use_indiv) {
     std::ofstream FILE("test.in");
     if(FILE.is_open()) {
@@ -405,7 +384,6 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       FILE.close();
     }
   } else {
-#endif
     std::ofstream FILE("test.gl");
     if(FILE.is_open()) {
       FILE<<setfill(' ')<<N<<' '<<EPS<<"\n";
@@ -420,9 +398,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 	  <<setw(13)<<setprecision(8)<<Bi.acc()[2]<<"\n";
       FILE.close();
     }
-#ifdef falcON_INDI
   }
-#endif
 #endif
 
 }

@@ -132,9 +132,10 @@
 // v 3.2.4  10/09/2008  WD happy gcc 4.3.1
 // v 3.3    09/10/2008  WD step=100, initial manip even if tstop=tini
 // v 3.3.1  29/10/2008  WD changes in nbody.h
+// v 3.3.2  04/11/2008  WD individual eps_i always enabled
 //------------------------------------------------------------------------------
-#define falcON_VERSION   "3.3.1"
-#define falcON_VERSION_D "29-oct-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.3.2"
+#define falcON_VERSION_D "04-nov-2008 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
@@ -160,16 +161,12 @@ const char*defv[] = {
   "hgrow=0\n          grow fresh tree every 2^hgrow smallest steps       ",
   "Ncrit="falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells                     ",
-#ifdef falcON_INDI
-#  ifdef falcON_ADAP
+#ifdef falcON_ADAP
   "eps=0.05\n         >=0: softening length OR maximum softening length\n"
   "                   < 0: use individual but FIXED softening lengths    ",
-#  else
+#else
   "eps=0.05\n         >=0: softening length\n"
   "                   < 0: use individual fixed softening lengths        ",
-#  endif
-#else
-  "eps=0.05\n         softening length                                   ",
 #endif
   "kernel="falcON_KERNEL_TEXT
   "\n                 softening kernel of family P_n (P_0=Plummer)       ",
@@ -266,12 +263,11 @@ void falcON::main() falcON_THROWING
 #else
 		  one,
 #endif
-#ifdef falcON_INDI
-#  ifdef falcON_ADAP
+#ifdef falcON_ADAP
 		  getrparam  ("Nsoft"),
 		  getiparam  ("Nref"),
 		  getiparam  ("emin"),
-#  endif
+#endif
 		  getrparam ("eps")   <zero?
 		  individual_fixed    :
 #ifdef falcON_ADAP
@@ -279,7 +275,6 @@ void falcON::main() falcON_THROWING
 		  individual_adaptive :
 #endif
 		  global_fixed,
-#endif
 		  getparam_z("time"),
 		  need);
   if(MANIP) {

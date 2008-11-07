@@ -1,50 +1,51 @@
-// -*- C++ -*-                                                                 |
+// -*- C++ -*-
+//------------------------------------------------------------------------------
+//
+// addgravity.cc
+//
+// Copyright (C) 2002-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
+//------------------------------------------------------------------------------
+//
+// adds gravity (pot & acc) to a snapshot
+//
+//------------------------------------------------------------------------------
+//
+// history:
+//
+// v 1.0.0  19/10/2001  WD created. initial version reads all snapshots.
+// v 1.0.1  23/10/2001  WD added option times= to select time range(s)
+// v 1.0.2  28/08/2002  WD adapted to various changes in falcON
+// v 1.1    30/08/2002  WD adapted this file for usage of MPI otherwise
+// v 1.1.1  04/02/2003  WD default falcON parameters automized
+// v 1.2    20/03/2003  WD gravity, action reporting
+// v 1.3    23/05/2003  WD automated NEMO history
+// v 1.3.1  23/05/2003  WD automated version & compile information
+// v 1.4    06/05/2004  WD new body.h; write=read + gravity
+// v 1.5    25/08/2004  WD allowing for individual softening lengths
+// v 1.6    16/05/2005  WD added external potential
+// v 2.0    13/06/2005  WD new falcON, new body.h, new nemo I/O
+// v 2.1    13/06/2005  WD changes in fieldset
+// v 2.2    06/03/2008  WD debugged (problem when using external potential)
+// v 2.2.1  10/09/2008  WD happy gcc 4.3.1
+// v 2.2.2  04/11/2008  WD individual eps_i always enabled
 //-----------------------------------------------------------------------------+
-//                                                                             |
-// addgravity.cc                                                               |
-//                                                                             |
-// Copyright (C) 2002-2008 Walter Dehnen                                       |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// adds gravity (pot & acc) to a snapshot                                      |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// history:                                                                    |
-//                                                                             |
-// v 1.0.0  19/10/2001  WD created. initial version reads all snapshots.       |
-// v 1.0.1  23/10/2001  WD added option times= to select time range(s)         |
-// v 1.0.2  28/08/2002  WD adapted to various changes in falcON                |
-// v 1.1    30/08/2002  WD adapted this file for usage of MPI otherwise        |
-// v 1.1.1  04/02/2003  WD default falcON parameters automized                 |
-// v 1.2    20/03/2003  WD gravity, action reporting                           |
-// v 1.3    23/05/2003  WD automated NEMO history                              |
-// v 1.3.1  23/05/2003  WD automated version & compile information             |
-// v 1.4    06/05/2004  WD new body.h; write=read + gravity                    |
-// v 1.5    25/08/2004  WD allowing for individual softening lengths           |
-// v 1.6    16/05/2005  WD added external potential                            |
-// v 2.0    13/06/2005  WD new falcON, new body.h, new nemo I/O                |
-// v 2.1    13/06/2005  WD changes in fieldset                                 |
-// v 2.2    06/03/2008  WD debugged (problem when using external potential)    |
-// v 2.2.1  10/09/2008  WD happy gcc 4.3.1                                     |
-//-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.2.1"
-#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.2.2"
+#define falcON_VERSION_D "04-nov-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile addgravity
@@ -82,19 +83,15 @@ void falcON::main() falcON_THROWING
   nemo_out OUT;
   unsigned NCRIT(getiparam("Ncrit"));
   fieldset       READ, NEED(fieldset::m|fieldset::x);
-#ifdef falcON_INDI
   bool     SOFT(getrparam("eps") < 0);
   if(SOFT) NEED |= fieldset::e;
-#endif
   vect     X0, *RC(getvparam_z("root_center",X0));
   snapshot SHOT;
   forces   FALCON(&SHOT,
 		  getrparam("eps"),
 		  getrparam("theta"),
 		  kern_type(getiparam("kernel")),
-#ifdef falcON_INDI
 		  SOFT,
-#endif
 		  getrparam("Grav") );
   acceleration *ACCEXT = hasvalue("accname") ?
     new nemo_acc(getparam("accname"), getparam("accpars"), getparam("accfile"))

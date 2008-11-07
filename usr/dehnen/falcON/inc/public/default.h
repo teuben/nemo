@@ -62,7 +62,6 @@ namespace falcON {
   // enum falcON::soft_type                                                   //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#ifdef falcON_INDI
   enum soft_type {                                 // type of softening         
     global_fixed        = 0,                       // globally time-constant    
     individual_fixed    = 1,                       // individual but time-const 
@@ -70,7 +69,6 @@ namespace falcON {
     individual_adaptive = 2                        // individual and adaptive   
 #endif
   };
-#endif
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // enum falcON::MAC_type                                                    //
