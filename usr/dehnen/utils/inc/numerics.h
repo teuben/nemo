@@ -1,32 +1,29 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    utils/inc/numerics.h                                               
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    1994-2008                                                          
-///                                                                             
-/// \todo    finish doxygen documentation                                       
-///                                                                             
+///
+/// \file   utils/inc/numerics.h
+///
+/// \author Walter Dehnen
+/// \date   1994-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 1994-2008  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 1994-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // CONTENTS                                                                     
@@ -279,100 +276,167 @@ namespace WDutils {
     HeapRank(A.array(),A.size(),I.array());
   }
   //----------------------------------------------------------------------------
-  /// find percentiles of a 1D distribution of values                           
-  /// instantinations for float and double                                      
+  /// \brief
+  /// Find index or position of a 1D distribution given rank or percentile.
+  /// \detail
+  /// Given a 1D arrays of positions and weights (optional), we facilitate the
+  /// search of the element with given rank w.r.t. the position and return its
+  /// original index or position. If weights are provided, we also facilitate
+  /// the search of the element just below a given cumulative weight and
+  /// return its original index or position.
+  /// \note The position need not to be ordered originally (that's the point).
+  /// \note Instantinations for float and double
   template<typename scalar> class FindPercentile {
     void *DATA;
     /// copy constructor disabled; use references instead of copies
     FindPercentile(const FindPercentile&);
-    void setup(const scalar*, int, const scalar*);
+    void setup(const scalar*, unsigned, const scalar*, unsigned)
+      WDutils_THROWING;
+    void setup(unsigned, scalar(*)(unsigned), unsigned)
+      WDutils_THROWING;
+    void setup(unsigned, void(*)(unsigned, scalar&, scalar&), unsigned)
+      WDutils_THROWING;
   public:
     /// ctor: setup sort tree
-    /// \param[in] F  array with elements
+    /// \param[in] X  array with positions
     /// \param[in] N  number of elements
-    /// \param[in] W  (optional) array of weights
-    FindPercentile(const scalar*F, int N, const scalar*W=0) : DATA(0) {
-      setup(F,N,W);
+    /// \param[in] W  (optional) array with positive weights
+    /// \param[in] K  (optional) expected number of calls to functional members
+    /// \note If no weights are provided, each element is assumed to have
+    ///       weight 1. This implies that the cumulative weight and the rank
+    ///       for each element are identical.
+    FindPercentile(const scalar*X, unsigned N, const scalar*W=0, unsigned K=0)
+    WDutils_THROWING : DATA(0)
+    {
+      setup(X,N,W,K);
     }
     /// ctor: setup sort tree
-    /// \param[in] F  Array with elements
-    FindPercentile(Array<scalar,1>const&F) : DATA(0) {
-      setup(F.array(),F.size(),0);
+    /// \param[in] X  Array with positions
+    /// \param[in] K  (optional) expected number of calls to Index() or Value()
+    /// \note Each element is assumed to have weight 1. This implies that the
+    ///       cumulative weight and the rank for each element are identical.
+    FindPercentile(Array<scalar,1>const&X, unsigned K=0)
+    WDutils_THROWING : DATA(0)
+    {
+      setup(X.array(),X.size(),0,K);
     }
     /// ctor: setup sort tree
-    /// \param[in] F  Array<> with elements
-    /// \param[in] W  Array<> of weights
-    FindPercentile(Array<scalar,1>const&F,
-		   Array<scalar,1>const&W) WDutils_THROWING : DATA(0) {
-      if(F.size() != W.size())
-	WDutils_THROW("size mismatch in FindPercentile\n");
-      setup(F.array(),F.size(),W.array());
+    /// \param[in] X  Array with positions
+    /// \param[in] W  Array with weights
+    /// \param[in] K  (optional) expected number of calls to Index() or Value()
+    FindPercentile(Array<scalar,1>const&X, Array<scalar,1>const&W, unsigned K=0)
+    WDutils_THROWING : DATA(0)
+    {
+      if(X.size() != W.size())
+	WDutils_THROW("FindPercentile: positions vs weight number mismatch "
+		      "(%d vs %d)\n",X.size(),W.size());
+      setup(X.array(),X.size(),W.array(),K);
+    }
+    /// ctor: setup sort tree
+    /// \param[in] N  number of elements
+    /// \param[in] X  function retuning position given index i in [0,N-1]
+    /// \param[in] K  (optional) expected number of calls to Index() or Value()
+    /// \note Each element is assumed to have weight 1. This implies that the
+    ///       cumulative weight and the rank for each element are identical.
+    FindPercentile(unsigned N, scalar(*X)(unsigned), unsigned K=0)
+    WDutils_THROWING : DATA(0)
+    {
+      setup(N,X,K);
+    }
+    /// ctor: setup sort tree
+    /// \param[in] N  number of elements
+    /// \param[in] F  function setting position & weight given i in[0,N-1]
+    /// \param[in] K  (optional) expected number of calls to Index() or Value()
+    FindPercentile(unsigned N, void(*F)(unsigned,scalar&,scalar&), unsigned K=0)
+    WDutils_THROWING : DATA(0)
+    {
+      setup(N,F,K);
     }
     /// dtor: de-allocate sorttree
     ~FindPercentile();
-    /// \param f percentile note that P in [0,1]
-    /// \return value corresponding to cumulative weight f*W_total
-    scalar Percentile(scalar f) const;
-    /// \param r rank in [0,N]
-    /// \return value corresponding to rank r
-    scalar Percentile(int r) const;
-  };
-  //----------------------------------------------------------------------------
-  /// just find a single percentile                                             
-  /// \return percentile value: r values are less than this
-  /// \param r rank
-  /// \param F array with values
-  /// \param N size of array
-  template<typename scalar>
-  scalar percentile(int r, const scalar*F, int N) {
-    FindPercentile<scalar> FP(F,N);
-    return FP.Percentile(r);
-  }
-  //----------------------------------------------------------------------------
-  /// just find a single percentile                                             
-  /// \return percentile value: a fraction f of the total weight is at y<F
-  /// \param f fraction
-  /// \param F array with values
-  /// \param N size of array
-  /// \param W array with weights
-  template<typename scalar>
-  scalar percentile(scalar f, const scalar*F, int N, const scalar*W)
-  {
-    FindPercentile<scalar> FP(F,N,W);
-    return FP.Percentile(f);
-  }
-  //----------------------------------------------------------------------------
-  /// find index given ranks
-  /// instantinations for float and double
-  template<typename scalar> class FindRank {
-    void *DATA;
-    /// copy constructor disabled; use references instead of copies
-    FindRank(const FindRank&);
-    void setup(const scalar*, unsigned, unsigned=0);
-  public:
-    /// ctor: setup sort tree
-    /// \param[in] F  array with elements
-    /// \param[in] N  number of elements
-    /// \param[in] K  (optional) expected number of calls to Index() or Value()
-    FindRank(const scalar*F, unsigned N, unsigned K=0) : DATA(0) {
-      setup(F,N,K);
+    /// total weight of all points: beyond maximum for cumulative weight
+    scalar   TotalWeight() const;
+    /// total number of points: beyond maximum for ranks
+    unsigned TotalNumber() const;
+    /// handle for search result
+    typedef const void* handle;
+    /// find element of given rank
+    /// \param[in] r  positional rank in [0,N-1]
+    /// \return    handle to element of given rank
+    handle FindRank(unsigned r) const WDutils_THROWING;
+    /// find element of given cumulative weight
+    /// \param[in] w  cumulative weight in [0, TotalWeight()]
+    /// \return    handle to element at which cumulative weight equals w
+    /// \note If no weights were given, this is equivalent to FindRank(r=w).
+    handle FindCumulativeWeight(scalar w) const WDutils_THROWING;
+    /// given a handle, find the next element up
+    /// \param[in] h element handle
+    /// \return    handle to next element in ascending position
+    /// \note If h refers to the last element, NULL is returned
+    /// \note Looping through all elments in ascending order using this
+    ///       method, whilst in principle possible, is not efficient. If
+    ///       the rank of all elements is required, use a sorting algorithm.
+    handle Next(handle h) const WDutils_THROWING
+    {
+      unsigned r = Rank(h) + 1;
+      return r == TotalNumber()? 0 : FindRank(r);
     }
-    /// ctor: setup sort tree
-    /// \param[in] F  Array with elements
-    /// \param[in] K  (optional) expected number of calls to Index() or Value()
-    FindRank(Array<scalar,1>const&F, unsigned K=0) : DATA(0) {
-      setup(F.array(),F.size(),K);
+    /// given a handle, find the next element up
+    /// \param[in] h element handle
+    /// \return    handle to previous element in ascending position
+    /// \note If h refers to the first element, NULL is returned
+    /// \note Looping through all elments in descending order using this
+    ///       method, whilst in principle possible, is not efficient. If
+    ///       the rank of all elements is required, use a sorting algorithm.
+    handle Previous(handle h) const WDutils_THROWING
+    {
+      unsigned r = Rank(h);
+      return r? FindRank(r-1) : 0;
     }
-    /// dtor: de-allocate sorttree
-    ~FindRank();
-    /// find index given rank
-    /// \param[in] rank  rank in [0,N-1] for which index is required
-    /// \return    index of element with that rank.
-    unsigned Index(unsigned rank) const;
-    /// find value given rank
-    /// \param[in] rank  rank in [0,N-1] for which value is required
-    /// \return    value of element with that rank
-    scalar Value(unsigned rank) const;
+    /// index given handle
+    /// \param[in] h handle as returned from FindRank() or FindWeight()
+    /// \return index of element referred to by handle
+    unsigned Index(handle h, bool c=true) const WDutils_THROWING;
+    /// rank given handle
+    /// \param[in] h element handle as returned from FindRank() or FindWeight()
+    /// \return rank of element referred to by handle
+    unsigned Rank(handle h, bool=true) const WDutils_THROWING; 
+    /// position givne handle
+    /// \param[in] h element handle as returned from FindRank() or FindWeight()
+    /// \return position of element referred to by handle
+    scalar Position(handle h, bool=true) const WDutils_THROWING;
+    /// cumulative weight given handle
+    /// \param[in] h handle as returned from FindRank() or FindWeight()
+    /// \return cumulative weight at element referred to by handle
+    scalar CumulativeWeight(handle h, bool=true) const WDutils_THROWING;
+    /// local weight given handle
+    /// \param[in] h handle as returned from FindRank() or FindWeight()
+    /// \return weight of element referred to by handle
+    scalar Weight(handle h, bool=true) const WDutils_THROWING;
+    /// index given rank
+    /// \param[in] r  positional rank in [0,N-1]
+    /// \return index of element with that rank
+    unsigned IndexOfRank(unsigned r) const WDutils_THROWING {
+      return Index(FindRank(r),0);
+    }
+    /// position given rank
+    /// \param[in] r  positional rank in [0,N-1]
+    /// \return position of element with that rank
+    scalar PositionOfRank(unsigned r) const WDutils_THROWING {
+      return Position(FindRank(r),0);
+    }
+    /// index given cumulative weight
+    /// \param[in] w  cumulative weight in [0, TotalWeight()]
+    /// \return index of element with that cumulative weight
+    unsigned IndexOfCumulativeWeight(scalar w) const WDutils_THROWING {
+      return Index(FindCumulativeWeight(w),0);
+    }
+    /// position given cumulative weight
+    /// \param[in] w  cumulative weight in [0, TotalWeight()]
+    /// \return position of element with that cumulative weight
+    scalar PositionOfCumulativeWeight(scalar w) const WDutils_THROWING {
+      return Position(FindCumulativeWeight(w),0);
+    }
   };
   //@}
   //----------------------------------------------------------------------------
@@ -893,7 +957,7 @@ namespace WDutils {
   ///
   /// The eigen values and vectors of a symmetric matrix are computed using
   /// Jacobi transformations (see NR section 11.1). This is not efficient for
-  /// efficient for large N, hence we have coded N as template parameter.
+  /// large N, hence we have coded N as template parameter.
   /// --------------------------------------------------------------------------
   template<int N, typename X>
   void EigenSymJacobi(const X M[N][N], X V[N][N], X D[N], int&R)
@@ -1097,7 +1161,7 @@ namespace WDutils {
     HouseholderReduction<EIGENVECTORS>(N,A,D,E);
     if(EIGENVECTORS) EigenSystemTridiagonal(N,D,E,A);
     else             EigenValuesTridiagonal(N,D,E);
-    falcON_DEL_A(E);
+    WDutils_DEL_A(E);
   }
   // ---------------------------------------------------------------------------
   /// eigensystem of symmetric matrix, keeps original matrix
@@ -1132,10 +1196,10 @@ namespace WDutils {
       }
       HouseholderReduction<0>(N,V,D,E);
       EigenValuesTridiagonal(N,D,E);
-      falcON_DEL_A(V[0]);
-      falcON_DEL_A(V);
+      WDutils_DEL_A(V[0]);
+      WDutils_DEL_A(V);
     }
-    falcON_DEL_A(E);
+    WDutils_DEL_A(E);
   }
   // ---------------------------------------------------------------------------
   /// eigensystem of symmetric matrix, keeps original matrix, N template param
