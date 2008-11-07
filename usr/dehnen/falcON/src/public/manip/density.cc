@@ -36,17 +36,19 @@
 // v 0.4.1  20/05/2008  WD renamed routine from neighbour.h
 // v 0.4.2  11/06/2008  WD new DebugInfo and falcON_Warning
 // v 0.4.3  25/09/2008  WD debugged (debug output only)
+// v 0.5    05/11/2008  WD register time of manipulation under trho
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/io.h>
 #include <public/neighbours.h>
 #include <ctime>
 
-namespace falcON { namespace Manipulate {
+namespace falcON {
+namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // auxiliary data and function                                              //
-  //                                                                          //
+  //
+  // auxiliary data and function
+  //
   //////////////////////////////////////////////////////////////////////////////
   real FAC; ///< normalisation factor for kernel
   int  NF;  ///< order of Ferrers kernel
@@ -69,33 +71,37 @@ namespace falcON { namespace Manipulate {
     B->rho(mybody(L)) = rho;
   }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class density                                                              
-  //                                                                            
-  /// manipulator: estimates density using nearest neighbour count              
-  ///                                                                           
-  /// This manipulator finds for each body in_subset() (default: all, see       
-  /// set_subset) the Kth nearest neighbours (from the same set of bodies) and  
-  /// estimates the mass density, which is written into field 'r'.\n            
-  /// This procedure is quite expensive (more than computing gravity) and hence 
-  /// only done every STEP time units.\n                                        
-  ///                                                                           
-  /// Meaning of the parameters:\n                                              
-  /// par[0]: # nearest neighbours used in density estimate (def: 32)\n         
-  /// par[1]: order N of Ferrers kernel: W = (1-r^2/h^2)^N (def: 1)\n           
-  /// par[2]: delta time between estimation (which takes long; def: 0)\n        
-  ///                                                                           
-  /// Usage of pointers: none\n                                                 
-  /// Usage of flags:    uses in_subset()\n                                     
-  ///                                                                           
+  //
+  // class density
+  //
+  /// manipulator: estimates density using nearest neighbour count
+  ///
+  /// This manipulator finds for each body in_subset() (default: all, see
+  /// set_subset) the Kth nearest neighbours (from the same set of bodies) and
+  /// estimates the mass density, which is written into field 'r'.\n
+  ///
+  /// As this procedure is computationally expensive (more than computing
+  /// gravity) it done only every T time units. The simulation time of the
+  /// density estimation is put in 'trho' for the benefit of subsequent
+  /// manipulators, such as densprof.\n
+  ///
+  /// Meaning of the parameters:\n
+  /// par[0]: K: # nearest neighbours used in density estimate (def: 32)\n
+  /// par[1]: N: order of Ferrers kernel: W = (1-r^2/h^2)^N (def: 1)\n
+  /// par[2]: T: time between estimation (which takes long; def: 0)\n
+  ///
+  /// Usage of pointers: 'trho'\n
+  /// Usage of flags:    uses in_subset()\n
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class density : public manipulator {
   private:
     int             K;        ///< # neighbours
     int             N;        ///< # order of Ferrers kernel
     double          STEP;     ///< delta time between manipulations
+    mutable double  TRHO;     ///< time of actual density.
     mutable double  TMAN;     ///< time for next manipulation
-    mutable bool    FST;      ///< first call to manipulate() ?
+    mutable bool    FRST;     ///< first call to manipulate() ?
     //--------------------------------------------------------------------------
   public:
     const char* name    () const { return "density"; }
@@ -115,7 +121,7 @@ namespace falcON { namespace Manipulate {
     : K    ( npar>0?     int(pars[0])    : 16 ),
       N    ( npar>1?     int(pars[1])    : 1  ),
       STEP ( npar>2?         pars[2]     : 0. ),
-      FST  ( true )
+      FRST ( true )
     {
       if(npar==0 && debug(1) || debug(2))
 	std::cerr<<
@@ -141,14 +147,16 @@ namespace falcON { namespace Manipulate {
   bool density::manipulate(const snapshot*S) const
   {
     // 0. preliminaries
-    FAC  = (K-0.5)/(K*FPit);
+    S->set_pointer(&TRHO,"trho");
     // 0.1 first call ever:
-    if(FST) {
+    if(FRST) {
       TMAN = S->initial_time();
-      FST  = false;
-    }
+      FRST = false;
     // 0.2 is it time for a manipulation?
-    if(S->time() < TMAN) return false;
+    } else if(S->time() < TMAN)
+      return false;
+    // 0.3 set TRHO
+    TRHO = S->time();
     // 1. establish tree
     clock_t CPU0 = clock();
     flags FLAG   = flags::empty;
