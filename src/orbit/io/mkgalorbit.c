@@ -48,7 +48,7 @@ string defv[] = {
     "potpars=\n	          .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=0.7a\n       3-jun-05 PJT",
+    "VERSION=0.7b\n       8-nov-08 PJT",
     NULL,
 };
 
@@ -348,7 +348,7 @@ void nemo_main ()
   I1(optr) = etot;			/*  energy (zero if not used) */
   I2(optr) = lz;                          /* angular momentum */
   
-  dprintf(0,"pos: %f %f %f  \nvel: %f %f %f  \netot: %f\nlz: %f\n",
+  dprintf(0,"\npos: %f %f %f  \nvel: %f %f %f  \netot: %f\nlz: %f\n",
 	  x,y,z,u,v,w,etot,lz);
   dprintf(1,"benchmark uvw=  u = -154  v = -493  w = 97 km/s\n");
   dprintf(1,"  -153.932     -493.095      97.3592\n");
