@@ -34,9 +34,9 @@ Integrator::Integrator(const ForceAndDiagnose*S,
 		       fieldset p, fieldset k, fieldset r,
 		       fieldset P, fieldset K, fieldset R) falcON_THROWING :
   // all quantities remembered must also be predicted
-  predALL     ((S->requires()&fieldset::w ? p | fieldset::w : p) | r),
-  kickALL     ( S->requires()&fieldset::w ? k | fieldset::v : k ),
-  rembALL     ( S->requires()&fieldset::w ? r | fieldset::w : r ),
+  predALL     ((S->requires()&fieldset::u ? p | fieldset::u : p) | r),
+  kickALL     ( S->requires()&fieldset::u ? k | fieldset::v : k ),
+  rembALL     ( S->requires()&fieldset::u ? r | fieldset::u : r ),
   // don't do to SPH what has already been done for all
   predSPH     ((P|R) &~ predALL ),
   kickSPH     ( K    &~ kickALL ),
@@ -48,19 +48,19 @@ Integrator::Integrator(const ForceAndDiagnose*S,
   // sanity check prediction, kick, and rembembrance settings
   char     comp[32];
   fieldset test;
-  if( (test=predALL & ~fieldset(fieldset::x|fieldset::w)) ) 
+  if( (test=predALL & ~fieldset(fieldset::x|fieldset::u)) ) 
     falcON_Warning("Integration: will not predict '%s'", test.make_word(comp));
   if( (test=kickALL & ~fieldset(fieldset::v)) )
     falcON_Warning("Integration: will not kick '%s'", test.make_word(comp));
-  if( (test=rembALL & ~fieldset(fieldset::w)) )
+  if( (test=rembALL & ~fieldset(fieldset::u)) )
     falcON_Warning("Integration: will not remember '%s'", test.make_word(comp));
-  if( predALL & fieldset::w && !(kickALL & fieldset::v) )
+  if( predALL & fieldset::u && !(kickALL & fieldset::v) )
     falcON_THROW("Integration: cannot predict w without kicking v");
   if( predALL & fieldset::x && !(kickALL & fieldset::v) )
     falcON_THROW("Integration: request to predict x without kicking v");
   requALL = 
     kickALL & fieldset::v ? fieldset::a : fieldset::empty |
-    predALL & fieldset::w ? fieldset::a : fieldset::empty;
+    predALL & fieldset::u ? fieldset::a : fieldset::empty;
 #ifdef falcON_SPH
   if( (test=predSPH & ~fieldset(fieldset::x|fieldset::H|fieldset::R|
 				fieldset::Y|fieldset::V)) ) 
@@ -177,7 +177,7 @@ void Integrator::drift(double dt, bool all) const
   const snapshot*const&B(SOLVER->snap_shot());
   B->advance_time_by(dt);
   if(predALL & fieldset::x) move_all<fieldbit::x,fieldbit::v>(B,dt,all);
-  if(predALL & fieldset::w) move_all<fieldbit::w,fieldbit::a>(B,dt,all);
+  if(predALL & fieldset::u) move_all<fieldbit::u,fieldbit::a>(B,dt,all);
 #ifdef falcON_SPH
   if(predSPH & fieldset::x) move_sph<fieldbit::x,fieldbit::v>(B,dt,all);
   if(predSPH & fieldset::V) move_sph<fieldbit::V,fieldbit::a>(B,dt,all);
@@ -208,7 +208,7 @@ void Integrator::kick_i(const double*dt, bool all) const
 void Integrator::remember(bool all) const
 {
   const snapshot*const&B(SOLVER->snap_shot());
-  if(rembALL & fieldset::w) copy_all<fieldbit::w,fieldbit::v>(B,all);
+  if(rembALL & fieldset::u) copy_all<fieldbit::u,fieldbit::v>(B,all);
 #ifdef falcON_SPH
   if(rembSPH & fieldset::V) copy_sph<fieldbit::V,fieldbit::v>(B,all);
   if(rembSPH & fieldset::Y) copy_sph<fieldbit::Y,fieldbit::U>(B,all);

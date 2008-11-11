@@ -107,12 +107,10 @@ namespace falcON { namespace Manipulate {
 	register real
 	  c = std::cos(phi),
 	  s = std::sin(phi);
-	if(S->have(fieldbit::x)) rotate(b.pos (), c,s);
-	if(S->have(fieldbit::v)) rotate(b.vel (), c,s);
-	if(S->have(fieldbit::a)) rotate(b.acc (), c,s);
-	if(S->have(fieldbit::j)) rotate(b.jerk(), c,s);
-	if(S->have(fieldbit::w)) rotate(b.vprd(), c,s);
-	if(S->have(fieldbit::z)) rotate(b.zet (), c,s);
+#define ROTATE(BIT,NAME)					\
+	if(S->have(BIT)) rotate(b.datum<BIT>(),c,s);
+	DEF_VECTORS(ROTATE);
+#undef ROTATE
       }
     return false;
   }

@@ -115,12 +115,10 @@ namespace falcON { namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
   bool symmetrize_pairs::manipulate(const snapshot*S) const {
     if(S->have(fieldbit::m)) ensure_equal_masses(S);
-    if(S->have(fieldbit::x)) symmetrize<fieldbit::x>(S);
-    if(S->have(fieldbit::v)) symmetrize<fieldbit::v>(S);
-    if(S->have(fieldbit::a)) symmetrize<fieldbit::a>(S);
-    if(S->have(fieldbit::j)) symmetrize<fieldbit::j>(S);
-    if(S->have(fieldbit::w)) symmetrize<fieldbit::w>(S);
-    if(S->have(fieldbit::z)) symmetrize<fieldbit::z>(S);
+#define SYMMETRISE(BIT,NAME)			\
+    if(S->have(BIT)) symmetrize<BIT>(S);
+    DEF_VECTORS(SYMMETRISE);
+#undef SYMMETRISE
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////

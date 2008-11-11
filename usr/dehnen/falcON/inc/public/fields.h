@@ -336,10 +336,10 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// array with the one-char data tags used as enum names
     /// \note not (to be) referred to outside of this file
-    const char* const SQUANT  ="mxvwefkspqajriyzlnchdtHNUYIEKRADJFCMS";
+    const char* const SQUANT  ="mxvuefkspqajriyzlnchdtHNUYIEKRADJFCMS";
     // letters taken are marked here
     //             abcdefghijklmnopqrstuvwxyz
-    // lower case  x xxxx xxxxxxxxxxxxx xxxxx
+    // lower case  x xxxx xxxxxxxxxxxxxxx xxx
     // upper case  x xxxx xxxx xx   xx x   x 
     //--------------------------------------------------------------------------
     /// array with full-length human readable names for the N-body data
@@ -466,8 +466,8 @@ namespace falcON {
       m       = 0,            ///< mass
       x       = 1,            ///< position
       v       = 2,            ///< velocity
-      w       = 3,            ///< predicted velocity
-      V       = w,            ///< predicted velocity (again)
+      u       = 3,            ///< predicted velocity
+      V       = u,            ///< predicted velocity (again)
       e       = 4,            ///< individual gravitational softening length
       f       = 5,            ///< falcON::flags
       k       = 6,            ///< integer key or identifier
@@ -576,7 +576,7 @@ namespace falcON {
     /// is the data field a vector?
     friend bool is_vector(bits);
     /// print datum of type known only at run time
-    friend std::ostream& print_field(std::ostream&, const char*, fieldbit);
+    friend std::ostream& print_field(std::ostream&, const void*, fieldbit);
   };// class fieldbit
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -628,7 +628,7 @@ namespace falcON {
       m       = one << fieldbit::m,  ///< just masses
       x       = one << fieldbit::x,  ///< just positions
       v       = one << fieldbit::v,  ///< just velocities
-      w       = one << fieldbit::w,  ///< just predicted velocities
+      u       = one << fieldbit::u,  ///< just predicted velocities
       e       = one << fieldbit::e,  ///< just individual softening lengths
       f       = one << fieldbit::f,  ///< just falcON::flags
       k       = one << fieldbit::k,  ///< just integer keys
@@ -682,7 +682,7 @@ namespace falcON {
       /// masses, phases, potentials, forces, flags
       gravity = basic|p|a|f,
       /// non-SPH source properties
-      source  = m|x|v|w|e|f|k|c|s,
+      source  = m|x|v|u|e|f|k|c|s,
       /// non-SPH non-source properties
       nonsource = p|q|a|j|r|i|y|z|l|n|d|h|t,
       /// all integer-type quantities
@@ -690,7 +690,7 @@ namespace falcON {
       /// all floating point scalar quantities
       scalars = m|e|s|p|q|r|y|d|t|sphscal,
       /// all vector quantities
-      vectors = x|v|a|j|w|z|S,
+      vectors = x|v|a|j|u|z|S,
       /// all quantities supported by NEMO Input
       nemoin  = m|x|v|e|k|s|p|a|r|y|z|l|n|d|t|sphnemo|S,
       /// all quantities supported by NEMO Output
@@ -893,54 +893,6 @@ namespace falcON {
   inline bool is_scalar (fieldbit f) { return fieldset::scalars & 1<<f.val; }
   inline bool is_vector (fieldbit f) { return fieldset::vectors & 1<<f.val; }
   inline bool is_vector (fieldbit::bits b) { return fieldset::vectors & 1<<b; }
-  inline std::ostream& print_field(std::ostream&s, const char*x, fieldbit f)
-  {
-#define CAST(TYPE) *(static_cast<const TYPE*>(static_cast<const void*>(x)))
-    switch(value(f)) {
-    case fieldbit::m: return s << CAST(real);
-    case fieldbit::x: return s << CAST(vect);
-    case fieldbit::v: return s << CAST(vect);
-    case fieldbit::w: return s << CAST(vect);
-    case fieldbit::e: return s << CAST(real);
-    case fieldbit::f: return s << CAST(flags);
-    case fieldbit::k: return s << CAST(unsigned);
-    case fieldbit::s: return s << CAST(double);
-    case fieldbit::p: return s << CAST(real);
-    case fieldbit::q: return s << CAST(real);
-    case fieldbit::a: return s << CAST(vect);
-    case fieldbit::j: return s << CAST(vect);
-    case fieldbit::r: return s << CAST(real);
-    case fieldbit::i: return s << CAST(int);
-    case fieldbit::y: return s << CAST(real);
-    case fieldbit::z: return s << CAST(vect);
-    case fieldbit::l: return s << CAST(indx);
-    case fieldbit::n: return s << CAST(unsigned);
-    case fieldbit::c: return s << CAST(indx);
-    case fieldbit::h: return s << CAST(peanokey);
-    case fieldbit::d: return s << CAST(real);
-    case fieldbit::t: return s << CAST(real);
-    case fieldbit::H: return s << CAST(real);
-    case fieldbit::N: return s << CAST(unsigned);
-    case fieldbit::U: return s << CAST(real);
-    case fieldbit::Y: return s << CAST(real);
-    case fieldbit::I: return s << CAST(real);
-    case fieldbit::E: return s << CAST(real);
-    case fieldbit::K: return s << CAST(real);
-    case fieldbit::R: return s << CAST(real);
-    case fieldbit::A: return s << CAST(real);
-    case fieldbit::D: return s << CAST(real);
-    case fieldbit::J: return s << CAST(real);
-    case fieldbit::F: return s << CAST(real);
-    case fieldbit::C: return s << CAST(real);
-    case fieldbit::M: return s << CAST(real);
-    case fieldbit::S: return s << CAST(vect);
-#undef CAST
-    default:
-      falcON_THROWN("falcON::print(fieldbit %c): unknown field\n",
-		    letter(f));
-      return s;
-    }
-  }
   // ///////////////////////////////////////////////////////////////////////////
   //
   // inline definitions of a friend of class fieldbit; also serves to inject
@@ -1183,7 +1135,7 @@ namespace falcON {
   DefFieldTraits(fieldbit::m, real);               // mass                      
   DefFieldTraits(fieldbit::x, vect);               // position                  
   DefFieldTraits(fieldbit::v, vect);               // velocity                  
-  DefFieldTraits(fieldbit::w, vect);               // predicted velocity        
+  DefFieldTraits(fieldbit::u, vect);               // predicted velocity        
   DefFieldTraits(fieldbit::e, real);               // softening length          
   DefFieldTraits(fieldbit::f, flags)               // body flags                
   DefFieldTraits(fieldbit::k, unsigned);           // body key                  
@@ -1230,7 +1182,7 @@ namespace falcON {
   MACRO(fieldbit::m,mass);			\
   MACRO(fieldbit::x,pos);			\
   MACRO(fieldbit::v,vel);			\
-  MACRO(fieldbit::w,vprd);			\
+  MACRO(fieldbit::u,vprd);			\
   MACRO(fieldbit::e,eps);			\
   MACRO(fieldbit::f,flag);			\
   MACRO(fieldbit::k,key);			\
@@ -1270,6 +1222,28 @@ namespace falcON {
   DEF_NAMED_STD(MACRO)				\
   DEF_NAMED_SPH(MACRO)				\
   DEF_NAMED_SINK(MACRO)
+#define DEF_VECTORS(MACRO)			\
+  MACRO(fieldbit::x,pos);			\
+  MACRO(fieldbit::v,vel);			\
+  MACRO(fieldbit::u,vprd);			\
+  MACRO(fieldbit::a,acc);			\
+  MACRO(fieldbit::j,jerk);			\
+  MACRO(fieldbit::S,spin);
+  // ///////////////////////////////////////////////////////////////////////////
+  inline std::ostream& print_field(std::ostream&s, const void*x, fieldbit f)
+  {
+    switch(value(f)) {
+#define PRINT(BIT,NAME)							\
+  case BIT: return s <<							\
+      *(static_cast<const field_traits<BIT>::type *>(x))
+    DEF_NAMED(PRINT)
+#undef PRINT
+    default:
+      falcON_THROWN("falcON::print(fieldbit %c): unknown field\n",
+		    letter(f));
+      return s;
+    }
+  }
   //////////////////////////////////////////////////////////////////////////////
   //
   // templates for looping fields
