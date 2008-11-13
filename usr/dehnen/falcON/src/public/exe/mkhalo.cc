@@ -147,7 +147,7 @@ const char*usage =
   "          the external and the halo's own potential)."
 #ifdef falcON_PROPER
   "\n        Individual masses are supported with :"
-  "\n\n               m_min + (r/rs)^eta m_max"
+  "\n\n                 m_min + (r/rs)^eta m_max"
   "\n        m propto ------------------------"
   "\n                     1  + (r/rs)^eta\n"
   "\n        with rs and eta independent of those for the density.\n"
