@@ -146,7 +146,7 @@ namespace WDutils {
     /// instance exists (yet).
     /// \note With this implementation, actl is restricted to [0,51]
     /// \param[in] bits (optional) number of bits used
-    explicit Sobol(int actl=-1, int=30);
+    explicit Sobol(int actl=-1, int bits=30);
     /// destruction: frees our sequence for next construction
     virtual ~Sobol();
     /// generate random number in [0,1]

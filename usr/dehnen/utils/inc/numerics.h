@@ -278,7 +278,7 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// \brief
   /// Find index or position of a 1D distribution given rank or percentile.
-  /// \detail
+  /// \details
   /// Given a 1D arrays of positions and weights (optional), we facilitate the
   /// search of the element with given rank w.r.t. the position and return its
   /// original index or position. If weights are provided, we also facilitate
@@ -396,7 +396,7 @@ namespace WDutils {
     /// index given handle
     /// \param[in] h handle as returned from FindRank() or FindWeight()
     /// \return index of element referred to by handle
-    unsigned Index(handle h, bool c=true) const WDutils_THROWING;
+    unsigned Index(handle h, bool=true) const WDutils_THROWING;
     /// rank given handle
     /// \param[in] h element handle as returned from FindRank() or FindWeight()
     /// \return rank of element referred to by handle

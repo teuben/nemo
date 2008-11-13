@@ -1,30 +1,30 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
+///
+/// \file   utils/inc/memory.h
+///
+/// \author Walter Dehnen
 ///                                                                             
-/// \file    utils/inc/memory.h                                                 
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2000-2008                                                          
-///                                                                             
+/// \date   2000-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2000-2008  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2000-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_memory_h
 #define WDutils_included_memory_h
@@ -52,21 +52,20 @@ namespace WDutils {
 #define WDutilsAllocDebugLevel 8
 #endif
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
+  //
   /// array allocation giving useful info in case of allocation error; mostly
   /// used from macro WDutils_NEW.
-  ///                                                                           
+  ///
   /// In case of allocation error we abort or throw an exception (depending on
   /// the WDutils error handling settings).  If the debugging level exceeds
   /// WDutilsAllocDebugLevel (default 8), we always print debugging
   /// information about memory allocation.
-  ///                                                                           
-  /// \return  a valid pointer (unless an error occurs)                         
-  /// \param T (template parameter) the type of array elements                  
-  /// \param n number of array elements                                         
-  /// \param f name of the source file where this routines is called            
-  /// \param l number of the line in that file                                  
-  /// \param lib (optional) name of calling library (default: "WDutils")        
+  ///
+  /// \return    a valid pointer (unless an error occurs) 
+  /// \param[in] n number of array elements
+  /// \param[in] f name of the source file where this routines is called
+  /// \param[in] l number of the line in that file 
+  /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
   T* NewArray(size_t n, const char*f, int l, const char*lib = "WDutils")
     WDutils_THROWING
@@ -89,35 +88,34 @@ namespace WDutils {
     return t;
   }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// C MACRO to be used for array allocation                                   
-  ///                                                                           
-  /// Calling WDutils::NewArray<TYPE>(), which in case of an error generates an 
-  /// error message detailing the source file and line of the call. In case     
-  /// the debugging level exceeds 10, we always print debugging information     
-  /// about memory allocation.                                                  
-  ///                                                                           
-  /// \param  TYPE name of the element type                                     
-  /// \param  SIZE number of elements                                           
+  //
+  /// C MACRO to be used for array allocation
+  ///
+  /// Calling WDutils::NewArray<TYPE>(), which in case of an error generates
+  /// an error message detailing the source file and line of the call. In case
+  /// the debugging level exceeds 10, we always print debugging information
+  /// about memory allocation.
+  ///
+  /// \param  TYPE name of the element type
+  /// \param  SIZE number of elements
 #define WDutils_NEW(TYPE,SIZE) WDutils::NewArray<TYPE>(SIZE,__FILE__,__LINE__)
 
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// array de-allocation giving useful info in case of error; mostly used from 
-  /// macro WDutils_DEL_A.                                                      
-  ///                                                                           
+  //
+  /// array de-allocation giving useful info in case of error; mostly used
+  /// from macro WDutils_DEL_A.
+  ///
   /// In case of a de-allocation error (if the pointer provided was not valid)
   /// an error is generated (or an exception thrown, depending on the WDutils
   /// error settings). If the debugging level exceeds WDutilsAllocDebugLevel
   /// (default 8), we always print debugging information about memory
   /// de-allocation.
   ///                                                                           
-  /// \param T  (template parameter) the type of array elements                 
-  /// \param a  pointer previously allocated with WDutils::NewArray<>()         
-  ///           or ::operator new[].                                            
-  /// \param f  name of the source file where this routines is called           
-  /// \param l  number of the line in that file                                 
-  /// \param lib (optional) name of calling library (default: "WDutils")        
+  /// \param[in] a  pointer previously allocated with WDutils::NewArray<>()
+  ///               or ::operator new[].
+  /// \param[in] f  name of the source file where this routines is called
+  /// \param[in] l  number of the line in that file
+  /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
   void DelArray(T* a, const char*f, int l, const char*lib = "WDutils")
     WDutils_THROWING {
@@ -162,30 +160,29 @@ namespace WDutils {
 			    nameof(T), static_cast<const void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  /// C MACRO to be used for array de-allocation                                
-  ///                                                                           
-  /// Calling WDutilsN::DelArray<TYPE>(), which in case of an error generates an
-  /// error message detailing the source file and line of the call. In case     
-  /// the debugging level exceeds 10, we always print debugging information     
-  /// about memory de-allocation.                                               
-  ///                                                                           
-  /// \param P  pointer to be de-allocated                                      
+  //
+  /// C MACRO to be used for array de-allocation
+  ///
+  /// Calling WDutilsN::DelArray<TYPE>(), which in case of an error generates
+  /// an error message detailing the source file and line of the call. In case
+  /// the debugging level exceeds 10, we always print debugging information
+  /// about memory de-allocation.
+  ///
+  /// \param P  pointer to be de-allocated
 #define WDutils_DEL_A(P) WDutils::DelArray(P,__FILE__,__LINE__)
   // ///////////////////////////////////////////////////////////////////////////
-  ///                                                                           
-  /// Object de-allocation giving useful info in case of error; mostly used     
-  /// from macro WDutils_DEL_O.                                                 
-  ///                                                                           
-  /// In case of a de-allocation error (if the pointer provided was not valid)  
-  /// an error is generated (or an exception thrown, depending on the WDutils   
-  /// error settings).                                                          
-  ///                                                                           
-  /// \param T  (template parameter) the type of array elements                 
-  /// \param a  pointer previously allocated with ::operator new().             
-  /// \param f  name of the source file where this routines is called           
-  /// \param l  number of the line in that file                                 
-  /// \param lib (optional) name of calling library (default: "WDutils")        
+  //
+  /// Object de-allocation giving useful info in case of error; mostly used
+  /// from macro WDutils_DEL_O.
+  ///
+  /// In case of a de-allocation error (if the pointer provided was not valid)
+  /// an error is generated (or an exception thrown, depending on the WDutils
+  /// error settings).
+  ///
+  /// \param[in] a  pointer previously allocated with ::operator new().
+  /// \param[in] f  name of the source file where this routines is called
+  /// \param[in] l  number of the line in that file
+  /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
   void DelObject(T* a, const char*f, int l, const char*lib="WDutils")
     WDutils_THROWING {
@@ -207,7 +204,7 @@ namespace WDutils {
       DebugInformation(f,l)("de-allocated %s object @ %p\n",
 			    nameof(T), static_cast<void*>(a));
   }
-  //////////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   void DelObject(const T* a, const char*f, int l, const char*lib="WDutils")
     WDutils_THROWING {
@@ -230,45 +227,45 @@ namespace WDutils {
 			    nameof(T), static_cast<const void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
-  ///                                                                           
-  /// C MACRO to be used for object de-allocation                               
-  ///                                                                           
-  /// should be used for all object  de-allocation in WDutils.                  
-  ///                                                                           
-  /// Calling WDutils::DelObject<TYPE>(), which in case of an error generates   
-  /// an error message detailing the source file and line of the call.          
-  ///                                                                           
-  /// \param P  pointer to object to be de-allocated                            
+  ///
+  /// C MACRO to be used for object de-allocation
+  ///
+  /// should be used for all object de-allocation in WDutils.
+  ///
+  /// Calling WDutils::DelObject<TYPE>(), which in case of an error generates
+  /// an error message detailing the source file and line of the call.
+  ///
+  /// \param P pointer to object to be de-allocated
 #define WDutils_DEL_O(P) WDutils::DelObject(P,__FILE__,__LINE__)
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  WDutils::block_alloc<T>                                                   
-  //                                                                            
-  /// allocator for elements of type T                                          
-  ///                                                                           
-  /// Elements are allocated in blocks and given out either singly or in small  
-  /// contiguous chunks. A forward iterator for sequential access to all        
-  /// elements given out sofar.                                                 
-  ///                                                                           
-  /// In order to (i) guarantee the correct amount of elements (not known a     
-  /// priori) will be allocated and (ii) not to waste memory by allocating too  
-  /// many, we use the following strategy, similar to that of std::string.      
-  /// Elements are allocated in blocks, which in turn are organized in a linked 
-  /// list. When a number of new elements is to be allocated and the last block 
-  /// in the list cannot provide them, we allocated a new block and add it to   
-  /// the list. The number of elements allocated in this new block is taken to  
-  /// be a function of the total number of elements used sofar. This function   
-  /// must be provided by the user, otherwise the same number as in the last    
-  /// block is used.                                                            
-  ///                                                                           
+  //
+  //  WDutils::block_alloc<T>
+  //
+  /// allocator for elements of type T
+  ///
+  /// Elements are allocated in blocks and given out either singly or in small
+  /// contiguous chunks. A forward iterator for sequential access to all
+  /// elements given out sofar.
+  ///
+  /// In order to (i) guarantee the correct amount of elements (not known a
+  /// priori) will be allocated and (ii) not to waste memory by allocating too
+  /// many, we use the following strategy, similar to that of std::string.
+  /// Elements are allocated in blocks, which in turn are organized in a
+  /// linked list. When a number of new elements is to be allocated and the
+  /// last block in the list cannot provide them, we allocated a new block and
+  /// add it to the list. The number of elements allocated in this new block
+  /// is taken to be a function of the total number of elements used
+  /// sofar. This function must be provided by the user, otherwise the same
+  /// number as in the last block is used.
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T>
   class block_alloc {
   public:
     ////////////////////////////////////////////////////////////////////////////
-    //                                                                          
-    /// \name some public typedefs                                              
-    //@{                                                                        
+    //
+    /// \name some public typedefs
+    //@{
     ////////////////////////////////////////////////////////////////////////////
     typedef T         value_type;                ///< type of elements          
     typedef size_t    size_type;                 ///< type of number of elements
@@ -279,11 +276,11 @@ namespace WDutils {
     typedef const T&  const_reference;           ///< type of const reference   
     //@}
     // /////////////////////////////////////////////////////////////////////////
-    //                                                                          
-    //  sub-type WDutils::block_alloc::block                                    
-    //                                                                          
+    //
+    //  sub-type WDutils::block_alloc::block
+    //
     /// allocates and manages a contiguous chunk of elements                    
-    ///                                                                         
+    ///
     // /////////////////////////////////////////////////////////////////////////
   private:
     class block {
@@ -359,11 +356,11 @@ namespace WDutils {
     };
   public:
     // /////////////////////////////////////////////////////////////////////////
-    //                                                                          
+    //
     //  sub-type WDutils::block_alloc::iterator                                 
-    //                                                                          
+    //
     /// for forward sequential iteration through all elements used              
-    ///                                                                         
+    ///
     // /////////////////////////////////////////////////////////////////////////
     class iterator {
     private:
@@ -441,9 +438,9 @@ namespace WDutils {
     };
   private:
     // /////////////////////////////////////////////////////////////////////////
-    //                                                                          
-    /// \name member data of class WDutils::block_alloc                         
-    //@{                                                                        
+    //
+    /// \name member data of class WDutils::block_alloc
+    //@{
     // /////////////////////////////////////////////////////////////////////////
     block       *FIRST;  ///< first block in linked list
     block       *LAST;   ///< last block in linked list
@@ -452,9 +449,9 @@ namespace WDutils {
     //@}
   public:
     // /////////////////////////////////////////////////////////////////////////
-    //                                                                          
-    /// \name member functions of class WDutils::block_alloc                    
-    //@{                                                                        
+    //
+    /// \name member functions of class WDutils::block_alloc
+    //@{
     // /////////////////////////////////////////////////////////////////////////
     /// constructor: allocate first block
     /// \param[in] Ns number of elements in 1st block
@@ -599,24 +596,24 @@ namespace WDutils {
     }
   }
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  class WDutils::pool                                                       
-  //                                                                            
-  /// allocates blocks of K bytes (=elements) in chunks of N elements           
-  ///                                                                           
-  /// elements are defined solely by their size K in bytes. They are allocated  
-  /// in chunks of N, which are organized as linked list. Single elements can   
-  /// be handed out (allocate) or freed (de-allocated). Free elements are kept  
-  /// in a linked list. The actual number of bytes per element is at least the  
-  /// size of a pointer. Thus, for K < sizeof(void*), this class is inefficient.
-  ///                                                                           
+  //
+  //  class WDutils::pool
+  //
+  /// allocates blocks of K bytes (=elements) in chunks of N elements
+  ///
+  /// elements are defined solely by their size K in bytes. They are allocated
+  /// in chunks of N, which are organized as linked list. Single elements can be
+  /// handed out (allocate) or freed (de-allocated). Free elements are kept in a
+  /// linked list. The actual number of bytes per element is at least the size
+  /// of a pointer. Thus, for K < sizeof(void*), this class is inefficient.
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   class pool {
   public:
     // /////////////////////////////////////////////////////////////////////////
-    //                                                                          
-    /// \name sub-types of class WDutils::pool                                  
-    //@{                                                                        
+    //
+    /// \name sub-types of class WDutils::pool
+    //@{
     ////////////////////////////////////////////////////////////////////////////
     typedef size_t    size_type;         ///< type of number of elements
     typedef ptrdiff_t difference_type;   ///< type of pointer difference
@@ -649,9 +646,9 @@ namespace WDutils {
     };// struct pool::chunk
     //@}
     // /////////////////////////////////////////////////////////////////////////
-    //                                                                          
-    /// \name data of class WDutils::pool                                       
-    //@{                                                                        
+    //
+    /// \name data of class WDutils::pool
+    //@{
     // /////////////////////////////////////////////////////////////////////////
   private:
     const size_type N;                    ///< # elements / chunk
@@ -662,9 +659,9 @@ namespace WDutils {
     link           *HEAD;                 ///< pter to 1st free element
     //@}
     // /////////////////////////////////////////////////////////////////////////
-    //                                                                          
-    /// \name member functions of class WDutils::pool                           
-    //@{                                                                        
+    //
+    /// \name member functions of class WDutils::pool
+    //@{
     // /////////////////////////////////////////////////////////////////////////
     /// grow: add another chunk
     void grow() {
@@ -737,11 +734,11 @@ namespace WDutils {
   };
 #endif
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  class WDutils::Pool<>                                                     
-  //                                                                            
-  /// template class, based on WDutils::pool, for allocating elemnts of type T  
-  //                                                                            
+  //
+  //  class WDutils::Pool<>
+  //
+  /// template class, based on WDutils::pool, for allocating elemnts of type T
+  //
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T>
   class Pool : private pool {
@@ -770,9 +767,9 @@ namespace WDutils {
     }
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // Arrays<T,D> of type T and arbitrary dimension D                          //
-  //                                                                          //
+  //
+  // Arrays<T,D> of type T and arbitrary dimension D 
+  //
   //////////////////////////////////////////////////////////////////////////////
 #if defined(DEBUG) || defined(EBUG)
 #  define THROW_BAD WDutils_THROWING
@@ -794,17 +791,16 @@ namespace WDutils {
   template<typename, int> class PseudoArray;
   template<typename, int> class Array;
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  class ConstPseudoArray<T,D>                                               
-  //                                                                            
-  /// used as return type for Array<>::operator[] const                         
-  ///                                                                           
-  /// Apart from a function returning the size in the first dimension, the only 
-  /// public member functions for D>1 are the operator[] and element(), which   
-  /// both return a ConstPseudoArray<T,D-1>.                                    
-  /// For D=1, the operator[] returns a 'T const&'. Moreover for D=1, there     
-  /// is a type conversion to const T*.                                         
-  //                                                                            
+  //
+  //  class ConstPseudoArray<T,D>
+  //
+  /// used as return type for Array<>::operator[] const
+  ///
+  /// Apart from a function returning the size in the first dimension, the only
+  /// public member functions for D>1 are the operator[] and element(), which
+  /// both return a ConstPseudoArray<T,D-1>.  For D=1, the operator[] returns a
+  /// 'T const&'. Moreover for D=1, there is a type conversion to const T*.
+  // 
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T, int D> class ConstPseudoArray {
     friend class ConstPseudoArray<T,D+1>;
@@ -868,19 +864,18 @@ namespace WDutils {
     }
   };// class ConstPseudoArray<T,D=1>
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  class PseudoArray<T,D>                                                    
-  //                                                                            
+  //
+  //  class PseudoArray<T,D>
+  //
   /// used as return type for Array<>::operator[]                               
-  ///                                                                           
-  /// Apart from a function returning the size in the first dimension, the only 
-  /// public member functions for D>1 are the operator[], which returns a       
-  /// PseudoArray<T,D-1>, and the operator[] const,  which returns a            
-  /// ConstPseudoArray<T,D-1>.                                                  
-  /// For D=1, the operator[] returns a 'T&' and the operator[] const a         
-  /// 'T const&'. Moreover for D=1, there are type conversions to const T*      
-  /// and T*.                                                                   
-  //                                                                            
+  ///
+  /// Apart from a function returning the size in the first dimension, the only
+  /// public member functions for D>1 are the operator[], which returns a
+  /// PseudoArray<T,D-1>, and the operator[] const, which returns a
+  /// ConstPseudoArray<T,D-1>.\n
+  /// For D=1, the operator[] returns a 'T&' and the operator[] const a 'T
+  /// const&'. Moreover for D=1, there are type conversions to const T* and T*.
+  //
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T, int D> class PseudoArray {
     friend class PseudoArray<T,D+1>;
@@ -966,13 +961,13 @@ namespace WDutils {
     }
   };// class PseudoArray<T,D=1>
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  class Array<T,D>                                                          
-  ///                                                                           
-  /// a D-dimensional array, operator[] as expected, specialisation for D=1.    
-  /// acts like a T[N_1]...[N_D], but allocates only one chunk of memory and no 
-  /// pointers.                                                                 
-  //                                                                            
+  //
+  //  class Array<T,D>
+  ///
+  /// a D-dimensional array, operator[] as expected, specialisation for D=1.
+  /// acts like a T[N_1]...[N_D], but allocates only one chunk of memory and no
+  /// pointers.
+  //
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T, int D=1> class Array {
     /// \name data
@@ -1297,11 +1292,11 @@ namespace WDutils {
     }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  //  class Stack<X>                                                            
-  //                                                                            
-  /// a simple stack of elements of type X                                      
-  ///                                                                           
+  //
+  //  class Stack<X>
+  //
+  /// a simple stack of elements of type X
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   template<typename X>
   class Stack {

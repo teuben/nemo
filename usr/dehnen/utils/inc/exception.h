@@ -1,30 +1,30 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
+///
+/// \file   utils/inc/exception.h
+///
+/// \author Walter Dehnen
 ///                                                                             
-/// \file    utils/inc/exception.h                                              
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2000-2008                                                          
-///                                                                             
+/// \date   2000-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2000-2008  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2000-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_exception_h
 #define WDutils_included_exception_h
@@ -52,7 +52,7 @@ namespace WDutils {
   /// \brief macro for compile-time assertion
   ///
   /// \code
-  ///   StaticAssert(constant expression);
+  ///   WDutilsStaticAssert(constant expression);
   /// \endcode
   /// will cause a compiler error if the expression evaluates to false. This
   /// relies on sizeof() an incomplete type causing an error, though
@@ -212,8 +212,7 @@ namespace WDutils {
     /// constructor: get file name, and line number
     Thrower(const char*__file, int __line) : file(__file), line(__line) {}
     /// generate an exception
-    /// \param[in] err  error code as returned by MPI routines (C-binding)
-    /// \param[in] fnc  (optional) name of calling function
+    /// \param[in] fmt  gives the format in C printf() style
     exception operator()(const char*fmt, ...) const;
   };
   //@}
