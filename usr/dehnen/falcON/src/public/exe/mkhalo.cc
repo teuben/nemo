@@ -88,8 +88,8 @@ const char*defv[] = {
 #ifdef falcON_PROPER
   "MA_rs=\n           mass adaption: scale radius                        ",
   "MA_eta=\n          mass adaption: shape parameter                     ",
-  "MA_mmm=\n          mass adaption: ration m_max/m_min                  ",
-  "MA_nmax=1\n        mass adaption: max n per (E,L)                     ",
+  "MA_mmm=\n          mass adaption: ratio m_max/m_min                   ",
+  "MA_nmax=0\n        mass adaption: max n per (E,L) (default: MA_mmm)   ",
   "MA_peri=f\n        mass adaption: use R_peri(E,L) rather than R_c(E)  ",
   "epar=\n            if given, set eps_i = epar * sqrt(m_i/M_tot)       ",
 #endif
@@ -146,11 +146,11 @@ const char*usage =
   "          will be in equilibrium with the total potential (the sum of\n"
   "          the external and the halo's own potential)."
 #ifdef falcON_PROPER
-  "\n        Individual masses are supported with :"
-  "\n\n                 m_min + (r/rs)^eta m_max"
-  "\n        m propto ------------------------"
-  "\n                     1  + (r/rs)^eta\n"
-  "\n        with rs and eta independent of those for the density.\n"
+  "\n          Individual masses are supported with :"
+  "\n\n                   m_min + (r/rs)^eta m_max"
+  "\n          m propto ------------------------"
+  "\n                       1  + (r/rs)^eta\n"
+  "\n          with rs and eta independent of those for the density.\n"
 #endif
   ;
 //------------------------------------------------------------------------------
