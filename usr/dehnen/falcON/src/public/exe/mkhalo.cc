@@ -91,7 +91,7 @@ const char*defv[] = {
   "MA_mmm=\n          mass adaption: ratio m_max/m_min                   ",
   "MA_nmax=0\n        mass adaption: max n per (E,L) (default: MA_mmm)   ",
   "MA_peri=f\n        mass adaption: use R_peri(E,L) rather than R_c(E)  ",
-  "epar=\n            if given, set eps_i = epar * sqrt(m_i/M_tot)       ",
+  "epar=\n            if given, set eps_i = epar * sqrt(m_i/<m>)         ",
 #endif
   "giveF=f\n          give distribution function in phden data?          ",
   "giveP=f\n          give Phi(r) (halo+external) in pot data?           ",
@@ -201,8 +201,8 @@ void falcON::main() falcON_THROWING
   HaloSampler HaloSample(Halo,be,ra,mono,
 #ifdef falcON_PROPER
 			 getdparam_z("MA_rs"),
-			 getdparam_z("MA_eta"),
 			 getdparam_z("MA_mmm"),
+			 getdparam_z("MA_eta"),
 			 getdparam  ("MA_nmax"),
 			 getbparam  ("MA_peri"),
 #endif

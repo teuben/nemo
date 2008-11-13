@@ -79,7 +79,7 @@ const char*defv[] = {
   "MA_mmm=\n          mass adaption: ration m_max/m_min                  ",
   "MA_nmax=1\n        mass adaption: max n per (E,L)                     ",
   "MA_peri=f\n        mass adaption: use R_peri(E,L) rather than R_c(E)  ",
-  "epar=\n            if given, set eps_i = epar * sqrt(m_i/M_tot)       ",
+  "epar=\n            if given, set eps_i = epar * sqrt(m_i/<m>)         ",
 #endif
   "WD_units=f\n       input:  kpc, solar masses\n"
   "                   output: kpc, kpc/Gyr, G=1 (-> mass unit)           ",

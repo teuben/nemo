@@ -236,7 +236,7 @@ void SphericalSampler::sample(body   const&B0,
   //                                                                            
 #ifdef falcON_PROPER
   if(epar>0. && has_eps(B0)) {
-    const double iMt  = 1./Mt;
+    const double iMt  = double(N)/Mt;
     for(body Bi(B0); Bi!=BN; ++Bi)
       Bi.eps () = epar * sqrt(mass(Bi)*iMt);
   }
