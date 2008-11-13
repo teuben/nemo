@@ -24,31 +24,32 @@
 // creates N-body initial conditions from a Dehnen (1993) model                |
 //                                                                             |
 //-----------------------------------------------------------------------------+
-//                                                                             |
-// history:                                                                    |
-//                                                                             |
-// v 1.0   26/02/2004  WD created                                              |
-// v 1.1   27/02/2004  WD added some consistency checks & error messages       |
-// v 1.2   01/03/2004  WD corrected asymptotic of f at Q=0 with OM anisotropy  |
-// v 1.3   01/03/2004  WD added option f_pos; re-arranged order of options     |
-// v 2.0   03/03/2004  WD using sample.h; fixed bug with scaling & Rad[]       |
-// v 2.1   05/03/2004  WD re-written gama; improved scaling support            |
-// v 2.2   26/03/2004  WD bug fixed in this file (f(E=0)=nan -> sampling error)|
-// v 2.2.1 02/04/2004  WD put class DehnenModelSampler into gamma.h            |
-// v 2.3   04/05/2004  WD happy icc 8.0; new body.h; new make.proper           |
-// v 2.4   12/05/2004  WD made partly PUBLIC                                   |
-// v 2.5   27/10/2004  WD option giveF                                         |
-// v 2.5.1 20/05/2005  WD several minor updates                                |
-// v 3.0   10/06/2005  WD new falcON: new bodies, new nemo_io                  |
-// v 3.1   06/07/2005  WD default rmax=1000 r_s                                |
-// v 3.2   13/06/2005  WD changes in fieldset                                  |
-// v 3.3   02/05/2007  WD made Ossipkov-Merritt anisotropic models public      |
-// v 3.3.1 23/01/2008  WD DF in phden (previous: aux) if giveF=true            |
-// v 3.3.2 20/02/2008  WD change in body.h (removed old-style constructors)    |
-// v 3.3.3 10/09/2008  WD happy gcc 4.3.1                                      |
+//
+// history:
+//
+// v 1.0   26/02/2004  WD created
+// v 1.1   27/02/2004  WD added some consistency checks & error messages
+// v 1.2   01/03/2004  WD corrected asymptotic of f at Q=0 with OM anisotropy
+// v 1.3   01/03/2004  WD added option f_pos; re-arranged order of options
+// v 2.0   03/03/2004  WD using sample.h; fixed bug with scaling & Rad[]
+// v 2.1   05/03/2004  WD re-written gama; improved scaling support
+// v 2.2   26/03/2004  WD bug fixed in this file (f(E=0)=nan -> sampling error)
+// v 2.2.1 02/04/2004  WD put class DehnenModelSampler into gamma.h
+// v 2.3   04/05/2004  WD happy icc 8.0; new body.h; new make.proper
+// v 2.4   12/05/2004  WD made partly PUBLIC
+// v 2.5   27/10/2004  WD option giveF
+// v 2.5.1 20/05/2005  WD several minor updates
+// v 3.0   10/06/2005  WD new falcON: new bodies, new nemo_io 
+// v 3.1   06/07/2005  WD default rmax=1000 r_s
+// v 3.2   13/06/2005  WD changes in fieldset
+// v 3.3   02/05/2007  WD made Ossipkov-Merritt anisotropic models public
+// v 3.3.1 23/01/2008  WD DF in phden (previous: aux) if giveF=true
+// v 3.3.2 20/02/2008  WD change in body.h (removed old-style constructors)
+// v 3.3.3 10/09/2008  WD happy gcc 4.3.1
+// v 3.3.4 13/11/2008  WD new mass adaption (proprietary only)
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "3.3.3"
-#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.3.4"
+#define falcON_VERSION_D "13-nov-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile mkdehnen
@@ -73,9 +74,11 @@ const char*defv[] = {
   "rmax=1000\n        if != 0, only emit bodies with r <= rmax * r_s     ",
   "giveF=f\n          give distribution function in phden data?          ",
 #ifdef falcON_PROPER
-  "Rp=\n              for mass adaption: list of R in increasing order   ",
-  "fac=1.2\n          for mass adaption: factor between mass bins        ",
-  "peri=f\n           for mass adaption: R_peri(E,L) rather than R_c(E)  ",
+  "MA_rs=\n           mass adaption: scale radius                        ",
+  "MA_eta=\n          mass adaption: shape parameter                     ",
+  "MA_mmm=\n          mass adaption: ration m_max/m_min                  ",
+  "MA_nmax=1\n        mass adaption: max n per (E,L)                     ",
+  "MA_peri=f\n        mass adaption: use R_peri(E,L) rather than R_c(E)  ",
   "epar=\n            if given, set eps_i = epar * sqrt(m_i/M_tot)       ",
 #endif
   "WD_units=f\n       input:  kpc, solar masses\n"
@@ -85,7 +88,10 @@ const char*defv[] = {
 const char*usage = "mkdehnen -- initial conditions from a Dehnen (1993) model"
                  "\n            possibly with Osipkov-Merritt anisotropy"
 #ifdef falcON_PROPER
-                 "\n            and mass adaption (proprietary version only)"
+                 "\n            and mass adaption (proprietary version only):"
+                 "\n\n                     m_min + (r/rs)^eta m_max"
+                 "\n            m propto ------------------------"
+                 "\n                        1  + (r/rs)^eta\n";
 #endif
 ;
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,16 +112,11 @@ void falcON::main() falcON_THROWING
 #endif
     fieldset::basic);
 #ifdef falcON_PROPER
-  const int      nbmax(100);
-  double         Rad[nbmax];
-  int            nb=0;
-  if(hasvalue("Rp")) {
-    nb=nemoinp(getparam("Rp"),Rad,nbmax);
-    if(nb+1>nbmax)
-      falcON_THROW("exceeding expected number of radii in mass adaption");
-    Rad[nb] = Rad[nb-1] * 1.e20;
-    nb++;
-  }
+  const double   MArs  (getdparam_z("MA_rs"));
+  const double   MAeta (getdparam_z("MA_eta"));
+  const double   MAmmm (getdparam_z("MA_mmm"));
+  const double   MAnmax(getdparam  ("MA_nmax"));
+  const bool     MAperi(getbparam  ("MA_peri"));
 #endif
   //----------------------------------------------------------------------------
   // 2. create initial conditions from a Dehnen model using mass adaption       
@@ -129,9 +130,11 @@ void falcON::main() falcON_THROWING
 			getdparam_z("r_a"),
 			rmax,9999,1.e-8
 #ifdef falcON_PROPER
-		       ,Rad,nb,
-			getdparam("fac"),
-			getbparam("peri")
+		       ,getdparam_z("MA_rs"),
+			getdparam_z("MA_eta"),
+			getdparam_z("MA_mmm"),
+			getdparam  ("MA_nmax"),
+			getbparam  ("MA_peri")
 #endif
 			);
   unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = getuparam("nbody");

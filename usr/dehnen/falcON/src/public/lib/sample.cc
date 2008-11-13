@@ -61,7 +61,7 @@ inline void SphericalSampler::setis()
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_PROPER
 #  include <proper/sample.cc>
-#else
+#endif
 SphericalSampler::SphericalSampler(double __mt,
 				   double __ra,
 				   double __b0,
@@ -76,10 +76,18 @@ SphericalSampler::SphericalSampler(double __mt,
   ibt     ( 1./(3. - __b0 - __b0) ),
   Xe      ( beta? Ne : 0 ),
   Is      ( beta? Ne : 0 )
+#ifdef falcON_PROPER
+  ,
+  adapt_masses ( false ),
+  Peri         ( false ),
+  irs          ( 0 ),
+  eta          ( 1 ),
+  mmm          ( 1 ),
+  nmax         ( 1 )
+#endif
 {
   if(beta) setis();
 }
-#endif
 ////////////////////////////////////////////////////////////////////////////////
 inline double SphericalSampler::F0(double Psi) const
 {
@@ -176,7 +184,9 @@ void SphericalSampler::sample(body   const&B0,
     // 2. establish number of bodies at (r,vr,vt), depending on mass adaption   
     //                                                                          
 #ifdef falcON_PROPER
-    if(adapt_masses) falcON_SAMPLE_ADAPT else      //   IF mass adaption        
+    if(adapt_masses)
+      falcON_SAMPLE_ADAPT
+    else
 #endif
       n  = 1;                                      //   ELSE set n  = 1         
     if(n<1) continue;                              //   IF n<1: continue        

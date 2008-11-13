@@ -208,29 +208,36 @@ namespace falcON {
     private HaloModel,
     public  SphericalSampler {
   public:
+#ifdef falcON_PROPER
     /// constructor
     /// \param halo model for halo density
     /// \param beta beta of distritubtion function
     /// \param r_a  Ossipkov-Merritt anisotropy radius
     /// \param mono external monopole potential
-    /// \param rad  mass adaption: table of radii
-    /// \param num  mass adaption: size of table of radii
-    /// \param fac  mass adaption: factor
-    /// \param peri mass adaption: use pericentre or R_E?
+    /// \param MArs mass adaption: scale radiu
+    /// \param MAmm mass adaption: m_max/m_min
+    /// \param MAet mass adaption: shape parameter
+    /// \param MAnm mass adaption: n_max per (E,L) (default: mm)
+    /// \param MApr mass adaption: using R_peri (or R_circ) for mass adaption ?
     /// \param care care for non-monotonic DF?
-    HaloSampler(HaloDensity const&halo,
-		double beta, double r_a,
+    HaloSampler(HaloDensity const&halo, double beta, double r_a,
 		const acceleration*mono,
-#ifdef falcON_PROPER
-		const double*rad, int num, double fac, bool peri,
-#endif
+		double MArs, double MAmm, double MAet, double MAnm, bool MApr,
 		bool care) :
       HaloModel(halo,beta,r_a,mono),
-      SphericalSampler(Mh_tot(),r_a,beta,
-#ifdef falcON_PROPER
-		       rad,num,fac,peri,
+      SphericalSampler(Mh_tot(),r_a,beta,MArs,MAmm,MAet,MAnm,MApr,care)
+    {}
 #endif
-		       care)
+    /// constructor
+    /// \param halo model for halo density
+    /// \param beta beta of distritubtion function
+    /// \param r_a  Ossipkov-Merritt anisotropy radius
+    /// \param mono external monopole potential
+    /// \param care care for non-monotonic DF?
+    HaloSampler(HaloDensity const&halo, double beta, double r_a,
+		const acceleration*mono, bool care) :
+      HaloModel(halo,beta,r_a,mono),
+      SphericalSampler(Mh_tot(),r_a, beta, care)
     {}
     //--------------------------------------------------------------------------
     HaloModel const&Model() const { return *this; }

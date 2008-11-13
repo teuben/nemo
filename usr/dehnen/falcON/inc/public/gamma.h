@@ -274,18 +274,19 @@ namespace falcON {
     // public methods                                                           
     //--------------------------------------------------------------------------
   public:
-    DehnenModelSampler(double const&,              // I: gamma                  
-		       double const&,              // I: scale radius           
-		       double const&,              // I: GM (untruncated)       
-		       double const& = 0.,         //[I: anisotropy radius]     
-		       double const& = 0.,         //[I: maximum radius]        
-		       int    const& = 9999,       //[I: # points on table f(y)]
-		       double const& = 1.e-8       //[I: numerical precision]   
+    DehnenModelSampler(double,              // I: gamma
+		       double,              // I: scale radius
+		       double,              // I: GM (untruncated)
+		       double = 0.,         //[I: anisotropy radius]
+		       double = 0.,         //[I: maximum radius]
+		       int    = 9999,       //[I: # points on table f(y)
+		       double = 1.e-8       //[I: numerical precision]
 #ifdef falcON_PROPER
-		      ,const double* = 0,          //[I: mass adaption: radii]  
-		       int    const& = 0,          //[I: mass adaption: # --]   
-		       double const& = 1.2,        //[I: mass adaption: factor] 
-		       bool   const& = 0           //[I: mass adaption: R_-/Re] 
+		      ,double = 0.,         //[I: mass adaption: scale radius]
+		       double = 1.,         //[I: mass adaption: mass ratio]
+		       double = 1.,         //[I: mass adaption: shape param]
+		       double = 0.,         //[I: mass adaption: n_max]
+		       bool   = 0           //[I: mass adaption: R_-/Re]
 #endif
 		       );
     ~DehnenModelSampler(); 

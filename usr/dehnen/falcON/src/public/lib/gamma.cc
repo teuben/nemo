@@ -3,7 +3,7 @@
 //                                                                             |
 // gamma.cc                                                                    |
 //                                                                             |
-// Copyright (C) 1994, 1995, 2004, 2005  Walter Dehnen                         |
+// Copyright (C) 1994, 1995, 2004, 2005,2008  Walter Dehnen                    |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -404,26 +404,27 @@ double DehnenModel::G(double E) const
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 DehnenModelSampler::
-DehnenModelSampler(double const&gamma,             // I: gamma                  
-		   double const&radius,            // I: scale radius           
-		   double const&Mtot,              // I: GM (untruncated)       
-		   double const&r_a,               //[I: anisotropy radius]     
-		   double const&rmax,              //[I: maximum radius]        
-		   int    const&N,                 //[I: # points on table f(y)]
-		   double const&eps                //[I: numerical precision]   
+DehnenModelSampler(double gamma,             // I: gamma                  
+		   double radius,            // I: scale radius           
+		   double Mtot,              // I: GM (untruncated)       
+		   double r_a,               //[I: anisotropy radius]     
+		   double rmax,              //[I: maximum radius]        
+		   int    N,                 //[I: # points on table f(y)]
+		   double eps                //[I: numerical precision]   
 #ifdef falcON_PROPER
-		  ,const double*__r,               //[I: mass adaption: radii]  
-		   int    const&__n,               //[I: mass adaption: # --]   
-		   double const&__f,               //[I: mass adaption: factor] 
-		   bool   const&__p                //[I: mass adaption: R_-/Re] 
+		  ,double __rs,              //[I: mass adaption: scale radius]
+		   double __mm,              //[I: mass adaption: mass ratio]
+		   double __et,              //[I: mass adaption: shape param]
+		   double __nm,              //[I: mass adaption: n_max]
+		   bool   __pr               //[I: mass adaption: R_-/Re]
 #endif
 		   ) :
   ScaledDehnenModel ( gamma,radius,Mtot,eps ),
   SphericalSampler  ( rmax>0? Mr(rmax):Mtot, r_a
 #ifdef falcON_PROPER
-		      , 0., __r,__n,__f,__p
+		      ,__rs,__mm,__et,__nm,__pr
 #endif
-		      ),
+                    ),
   n                 ( N ),
   y                 ( falcON_NEW(double,n) ),
   f                 ( falcON_NEW(double,n) ),

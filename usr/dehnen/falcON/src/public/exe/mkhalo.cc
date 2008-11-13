@@ -1,70 +1,71 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   mkhalo.cc                                                           
-///                                                                             
-/// \brief  creates N-body initial conditions for a quite general spherical     
-///         halo with an optional external potential                            
-///                                                                             
-/// \author Paul McMillan                                                       
-/// \author Walter Dehnen                                                       
-/// \date   2000-2008                                                           
-///                                                                             
+///
+/// \file   mkhalo.cc
+///
+/// \brief  creates N-body initial conditions for a quite general spherical
+///         halo with an optional external potential
+///
+/// \author Paul McMillan
+/// \author Walter Dehnen
+/// \date   2000-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2000-2008  Walter Dehnen, Paul McMillan                        
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2000-2008 Walter Dehnen, Paul McMillan
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// history:                                                                     
-//                                                                              
-// v 1.0    21/03/2005  PJM bastardized mkcdm to create mkanyhalo               
-// v 1.1    29/09/2005  PJM added Ossipkov-Merritt type anisotropy radius       
-// v 1.2    09/02/2007  WD  bastardized mkanyhalo to create this                
-// v 1.3    02/05/2007  WD  somewhat stable version, improved documentation     
-// v 2.0    02/05/2007  WD  tabfile, core radius                                
-// v 2.0.1  03/05/2007  WD  debugged (qbulir)                                   
-// v 2.0.2  08/05/2007  WD  r_2                                                 
-// v 2.0.3  09/05/2007  WD  Mhalo -> M, beta->b                                 
-// v 2.1    13/09/2007  WD  added parameter eps; made public                    
-// v 2.2    19/09/2007  WD  ensured total mass                                  
-// v 2.3    01/11/2007  WD  WD_units                                            
-// v 2.3.1  02/11/2007  WD  deBUGged (r_2 to r_s conversion)                    
-// v 2.4    23/11/2007  WD  steeper truncation for r_t<0                        
-// v 2.4.1  23/01/2008  WD  DF into phden, not aux data field                   
-// v 2.4.2  08/02/2008  WD  removed minor bug with RNG seed                     
-// v 2.4.3  20/02/2008  WD  change in body.h (removed old-style constructors)   
-// v 2.4.4  11/06/2008  WD  changes in error/exception treatment (falcON)       
-// v 2.4.5  10/09/2008  WD  happy gcc 4.3.1                                    
+//
+// history:
+//
+// v 1.0    21/03/2005  PJM bastardized mkcdm to create mkanyhalo
+// v 1.1    29/09/2005  PJM added Ossipkov-Merritt type anisotropy radius
+// v 1.2    09/02/2007  WD  bastardized mkanyhalo to create this
+// v 1.3    02/05/2007  WD  somewhat stable version, improved documentation 
+// v 2.0    02/05/2007  WD  tabfile, core radius
+// v 2.0.1  03/05/2007  WD  debugged (qbulir)
+// v 2.0.2  08/05/2007  WD  r_2
+// v 2.0.3  09/05/2007  WD  Mhalo -> M, beta->b 
+// v 2.1    13/09/2007  WD  added parameter eps; made public
+// v 2.2    19/09/2007  WD  ensured total mass
+// v 2.3    01/11/2007  WD  WD_units
+// v 2.3.1  02/11/2007  WD  deBUGged (r_2 to r_s conversion)
+// v 2.4    23/11/2007  WD  steeper truncation for r_t<0
+// v 2.4.1  23/01/2008  WD  DF into phden, not aux data field
+// v 2.4.2  08/02/2008  WD  removed minor bug with RNG seed
+// v 2.4.3  20/02/2008  WD  change in body.h (removed old-style constructors)
+// v 2.4.4  11/06/2008  WD  changes in error/exception treatment (falcON)
+// v 2.4.5  10/09/2008  WD  happy gcc 4.3.1
+// v 2.4.6  13/11/2008  WD new mass adaption (proprietary only)
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.5"
-#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
-//-----------------------------------------------------------------------------+
+#define falcON_VERSION   "2.4.6"
+#define falcON_VERSION_D "13-nov-2008 Walter Dehnen                          "
+//------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
 #endif
-#define falcON_RepAction 0                         // no action reporting       
-//-----------------------------------------------------------------------------+
-#include <body.h>                                  // N-body bodies             
-#include <main.h>                                  // main & NEMO stuff         
-#include <public/io.h>                             // I/O utilities             
-#include <public/halo.h>                           // halo model                
-#include <fstream>                                 // C++ file I/O              
-#include <iomanip>                                 // C++ I/O formatting        
+#define falcON_RepAction 0                         // no action reporting
+//------------------------------------------------------------------------------
+#include <body.h>                                  // N-body bodies 
+#include <main.h>                                  // main & NEMO stuff
+#include <public/io.h>                             // I/O utilities
+#include <public/halo.h>                           // halo model
+#include <fstream>                                 // C++ file I/O 
+#include <iomanip>                                 // C++ I/O formatting
 ////////////////////////////////////////////////////////////////////////////////
 const char*defv[] = {
   "out=???\n          output file                                        ",
@@ -85,9 +86,11 @@ const char*defv[] = {
   "f_pos=0.5\n        fraction of bodies with positive sense of rotation ",
   "eps=\n             if given, set eps_i = eps                          ",
 #ifdef falcON_PROPER
-  "Rp=\n              for mass adaption: list of R in increasing order   ",
-  "fac=1.2\n          for mass adaption: factor between mass bins        ",
-  "peri=f\n           for mass adaption: R_peri(E,L) rather than R_c(E)  ",
+  "MA_rs=\n           mass adaption: scale radius                        ",
+  "MA_eta=\n          mass adaption: shape parameter                     ",
+  "MA_mmm=\n          mass adaption: ration m_max/m_min                  ",
+  "MA_nmax=1\n        mass adaption: max n per (E,L)                     ",
+  "MA_peri=f\n        mass adaption: use R_peri(E,L) rather than R_c(E)  ",
   "epar=\n            if given, set eps_i = epar * sqrt(m_i/M_tot)       ",
 #endif
   "giveF=f\n          give distribution function in phden data?          ",
@@ -141,7 +144,15 @@ const char*usage =
   "\n"
   "          If an external potential is given, the initial conditions\n"
   "          will be in equilibrium with the total potential (the sum of\n"
-  "          the external and the halo's own potential).";
+  "          the external and the halo's own potential)."
+#ifdef falcON_PROPER
+  "\n        Individual masses are supported with :"
+  "\n\n               m_min + (r/rs)^eta m_max"
+  "\n        m propto ------------------------"
+  "\n                     1  + (r/rs)^eta\n"
+  "\n        with rs and eta independent of those for the density.\n"
+#endif
+  ;
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
@@ -166,18 +177,6 @@ void falcON::main() falcON_THROWING
     new nemo_acc(getparam  ("accname"),               //   initialize external  
 		 getparam_z("accpars"),               //   accelerations        
 		 getparam_z("accfile")) : 0;          // ELSE: no potential     
-#ifdef falcON_PROPER
-  const int    nbmax(100);
-  double       Rad[nbmax];
-  int          nb=0;
-  if(hasvalue("Rp")) {
-    nb=getaparam("Rp",Rad,nbmax);
-    if(nb+1>nbmax)
-      falcON_Error("exceeding expected number of radii in mass adaption");
-    Rad[nb] = Rad[nb-1] * 1.e20;
-    nb++;
-  }
-#endif
   //----------------------------------------------------------------------------
   // 2. create initial conditions from a halo model using mass adaption         
   //----------------------------------------------------------------------------
@@ -201,7 +200,11 @@ void falcON::main() falcON_THROWING
   ModifiedDoublePowerLawHalo Halo(rs,rc,rt,Mt,gi,go,et);
   HaloSampler HaloSample(Halo,be,ra,mono,
 #ifdef falcON_PROPER
-			 Rad,nb,getdparam("fac"),getbparam("peri"),
+			 getdparam_z("MA_rs"),
+			 getdparam_z("MA_eta"),
+			 getdparam_z("MA_mmm"),
+			 getdparam  ("MA_nmax"),
+			 getbparam  ("MA_peri"),
 #endif
 			 care);
   //----------------------------------------------------------------------------

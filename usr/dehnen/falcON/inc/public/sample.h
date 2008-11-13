@@ -75,10 +75,8 @@ namespace falcON {
     Array<double> Is;
     //--------------------------------------------------------------------------
 #ifdef falcON_PROPER
-    const bool   adapt_masses, Peri;
-    const int    nR;
-    const double*Rad, fac;
-    double      *num;
+    const bool    adapt_masses, Peri;
+    const double  irs,eta,mmm,nmax;
 #endif
     //--------------------------------------------------------------------------
     // private methods                                                          
@@ -92,30 +90,24 @@ namespace falcON {
     /// \param mt total mass to be sampled
     /// \param ra Ossipkov (1979) - Merritt (1985) anisotropy radius
     /// \param b0 Cuddeford (1991) central anisotropy
-    /// \param rr radii for mass adaption
-    /// \param nr number of radii for mass adaption
-    /// \param fr factor for mass adaption
-    /// \param pr using R_peri (or R_circ) for mass adaption ?
+    /// \param rs mass adaption: scale radiu
+    /// \param mm mass adaption: m_max/m_min
+    /// \param et mass adaption: shape parameter
+    /// \param nm mass adaption: n_max per (E,L) (default: mm)
+    /// \param pr mass adaption: using R_peri (or R_circ) for mass adaption ?
     /// \param cf be extra careful when g(Q) may be non-monotonic.
     explicit 
-    SphericalSampler(double mt, double ra=0., double b0=0.,
-		     const double* rr=0, int nr=0, double fr=1.2, bool pr=0,
-		     bool cf=0);
-#else
+    SphericalSampler(double mt, double ra, double b0,
+		     double rs, double mm=1, double et=1, double nm=0,
+		     bool pr=0, bool cf=0) falcON_THROWING;
+#endif
     /// ctor
     /// \param mt total mass to be sampled
     /// \param ra Ossipkov (1979) - Merritt (1985) anisotropy radius
     /// \param b0 Cuddeford (1991) central anisotropy
     /// \param cf be extra careful when g(Q) may be non-monotonic.
+    explicit 
     SphericalSampler(double mt, double ra=0., double b0=0., bool cf=0);
-#endif
-    //--------------------------------------------------------------------------
-    /// dtor
-    ~SphericalSampler() { 
-#ifdef falcON_PROPER
-      if(num) falcON_DEL_A(num);
-#endif
-    }
     //--------------------------------------------------------------------------
     /// \name abstract methods required for sampling radius and velocity
     //@{
