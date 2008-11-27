@@ -48,8 +48,6 @@
 #  error You need NEMO to compile "a2s"
 #endif
 #define falcON_RepAction 0                         // no action reporting       
-#include <body.h>                                  // bodies etc..              
-#include <public/io.h>                             // WDs C++ NEMO I/O          
 #include <main.h>                                  // NEMO basics & main        
 //------------------------------------------------------------------------------
 const char* defv[] = {

@@ -41,8 +41,8 @@
 #ifndef WDutils_included_inline_h
 #  include <inline.h>
 #endif
-#ifndef WDutils_included_inline_io_h
-#  include <inline_io.h>
+#ifndef WDutils_included_io_h
+#  include <io.h>
 #endif
 #ifndef WDutils_included_tupel_h
 #  include <tupel.h>

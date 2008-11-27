@@ -39,7 +39,6 @@
 // v 0.5    05/11/2008  WD register time of manipulation under trho
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
-#include <public/io.h>
 #include <public/neighbours.h>
 #include <ctime>
 

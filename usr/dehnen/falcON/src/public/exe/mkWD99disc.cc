@@ -50,8 +50,6 @@
 #  error You need NEMO to compile mkWD99disc
 #endif
 //-----------------------------------------------------------------------------+
-#include <body.h>                                  // N-body bodies             
-#include <public/io.h>                             // my I/O utilities          
 #include <public/WD99disc.h>                       // my disc models            
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        

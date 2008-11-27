@@ -26,7 +26,7 @@ makefiles		:= Makefile makedefs makepub
 
 Pi_h			:= $(IUTI)Pi.h
 inline_h		:= $(IUTI)inline.h
-inline_io_h		:= $(IUTI)inline_io.h
+io_h			:= $(IUTI)io.h
 traits_h		:= $(IUTI)traits.h
 tupel_h			:= $(IUTI)tupel.h $(IUTI)tupel.cc $(traits_h)
 exception_h		:= $(IUTI)exception.h $(traits_h)
@@ -41,7 +41,7 @@ random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
 # header dependency lists
 # -----------------------
 
-utils_h			:= $(traits_h) $(Pi_h) $(inline_h) $(inline_io_h) $(tupel_h) $(exception_h) $(memory_h)
+utils_h			:= $(traits_h) $(Pi_h) $(inline_h) $(io_h) $(tupel_h) $(exception_h) $(memory_h)
 types_h			:= $(IPUB)types.h $(utils_h) $(tensor_h)
 basic_h			:= $(IPUB)basic.h $(types_h)
 simd_h			:= $(IPUB)simd.h $(basic_h)
@@ -56,7 +56,6 @@ gravity_ind_cc		:= $(IPRO)gravity_ind.cc
 gravity_pro		:= $(gravity_ind_cc)
 kernel_SSE_h		:= $(IPRO)kernel_SSE.h
 endif
-io_h			:= $(IPUB)io.h $(basic_h)
 body_h			:= $(INC)body.h $(fields_h)
 externacc_h		:= $(INC)externacc.h $(body_h)
 tree_h			:= $(IPUB)tree.h $(default_h) $(body_h) $(peano_h)
@@ -68,7 +67,7 @@ forces_C_h		:= $(INC)forces_C.h
 forces_f		:= $(INC)forces.f
 nemopp_h		:= $(IPUB)nemo++.h $(fields_h)
 main_h			:= $(INC)main.h $(nemopp_h) $(body_h) $(mpi_falcON_h)
-nbody_h			:= $(IPUB)nbody.h $(body_h) $(io_h) $(nemopp_h) $(forces_h) $(externacc_h)
+nbody_h			:= $(IPUB)nbody.h $(body_h) $(nemopp_h) $(forces_h) $(externacc_h)
 manip_h			:= $(IPUB)manip.h $(body_h)
 defman_h		:= $(IPUB)defman.h $(manip_h)
 profile_h		:= $(IPUB)profile.h $(body_h)
@@ -95,8 +94,7 @@ GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h $(IACC)GalPot_pre.h $(tupel_h)
 # -----------------------
 
 basic_cc		:= $(SLIB)basic.cc $(basic_h)
-body_cc			:= $(SLIB)body.cc $(body_h) $(io_h) $(nemopp_h) $(numerics) $(heap_h)
-io_cc			:= $(SLIB)io.cc $(io_h) $(basic_h)
+body_cc			:= $(SLIB)body.cc $(body_h) $(nemopp_h) $(numerics) $(heap_h)
 kernel_cc		:= $(SLIB)kernel.cc $(kernel_h) $(kernel_SSE_h)
 partner_cc		:= $(SLIB)partner.cc $(partner_h) $(interact_h)
 gravity_cc		:= $(SLIB)gravity.cc $(gravity_h) $(kernel_h) $(interact_h) $(numerics_h) $(gravity_pro)
@@ -123,7 +121,7 @@ PotExp_cc		:= $(SLIB)PotExp.cc $(PotExp_h) $(simd_h)
 $(LIB)basic.o:		$(basic_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 ifdef NEMO
-$(LIB)nemo++.o:		$(nemopp_cc) $(LIBT) $(makefile)
+$(LIB)nemo++.o:		$(nemopp_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(INEMO) $(NBDYFLAGS)
 endif
 $(LIB)body.o:		$(body_cc) $(LIBT) $(makefiles)
@@ -134,8 +132,6 @@ $(LIB)gravity.o:	$(gravity_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)partner.o:	$(partner_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
-$(LIB)io.o:		$(io_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ) $(INEMO) $(NBDYFLAGS)
 $(LIB)halo.o:		$(halo_cc) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)WD99disc.o:	$(WD99disc_cc) $(makefiles)
@@ -175,16 +171,16 @@ $(LIB)PotExp.o:		$(PotExp_cc) $(LIBT) $(makefiles)
 ifdef NEMO
 public_objs	 :=	$(LIB)basic.o $(LIB)nemo++.o $(LIB)body.o \
 			$(LIB)tree.o $(LIB)gravity.o $(LIB)kernel.o \
-			$(LIB)io.o $(LIB)partner.o $(LIB)nbody.o \
-			$(LIB)forcesC.o $(LIB)tools.o $(LIB)sample.o \
-			$(LIB)manip.o $(LIB)profile.o $(LIB)bodyfunc.o \
-			$(LIB)neighbours.o $(LIB)PotExp.o
+			$(LIB)partner.o $(LIB)nbody.o $(LIB)forcesC.o \
+			$(LIB)tools.o $(LIB)sample.o $(LIB)manip.o \
+			$(LIB)profile.o $(LIB)bodyfunc.o $(LIB)neighbours.o \
+			$(LIB)PotExp.o
 
 else
 public_objs	 :=	$(LIB)basic.o $(LIB)body.o $(LIB)tree.o \
-			$(LIB)gravity.o $(LIB)kernel.o $(LIB)io.o \
-			$(LIB)partner.o $(LIB)nbody.o $(LIB)forcesC.o \
-			$(LIB)sample.o $(LIB)neighbours.o $(LIB)PotExp.o
+			$(LIB)gravity.o $(LIB)kernel.o $(LIB)partner.o \
+			$(LIB)nbody.o $(LIB)forcesC.o $(LIB)sample.o \
+			$(LIB)neighbours.o $(LIB)PotExp.o
 endif
 
 ifdef NEMO
@@ -195,17 +191,17 @@ ifdef NEMO
 
 $(MAN)add_plummer.so:		$(SMAN)add_plummer.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
-$(MAN)bound_centre.so:		$(SMAN)bound_centre.cc $(MANT) $(defman_h) $(io_h) $(makefiles)
+$(MAN)bound_centre.so:		$(SMAN)bound_centre.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
-$(MAN)dens_centre.so:		$(SMAN)dens_centre.cc $(MANT) $(defman_h) $(tools_h) $(io_h) $(makefiles)
+$(MAN)dens_centre.so:		$(SMAN)dens_centre.cc $(MANT) $(defman_h) $(tools_h) $(makefiles)
 				$(MAKE_MANIP)
-$(MAN)density.so:		$(SMAN)density.cc $(MANT) $(defman_h) $(io_h) $(neighbours_h) $(makefiles)
+$(MAN)density.so:		$(SMAN)density.cc $(MANT) $(defman_h) $(neighbours_h) $(makefiles)
 				$(MAKE_MANIP)
-$(MAN)densprof.so:		$(SMAN)densprof.cc $(MANT) $(defman_h) $(io_h) $(makefiles)
+$(MAN)densprof.so:		$(SMAN)densprof.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
-$(MAN)lagrange.so:		$(SMAN)lagrange.cc $(MANT) $(defman_h) $(numerics_h) $(heap_h) $(io_h) $(makefiles)
+$(MAN)lagrange.so:		$(SMAN)lagrange.cc $(MANT) $(defman_h) $(numerics_h) $(heap_h) $(makefiles)
 				$(MAKE_MANIP)
-$(MAN)projprof.so:		$(SMAN)projprof.cc $(MANT) $(defman_h) $(io_h) $(profile_h) $(makefiles)
+$(MAN)projprof.so:		$(SMAN)projprof.cc $(MANT) $(defman_h) $(profile_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)randomize_azimuth.so:	$(SMAN)randomize_azimuth.cc $(MANT) $(defman_h) $(Pi_h) $(random_h) $(makefiles)
 				$(MAKE_MANIP)
@@ -219,7 +215,7 @@ $(MAN)set_subset.so:		$(SMAN)set_subset.cc $(MANT) $(defman_h) $(bodyfunc_h) $(m
 				$(MAKE_MANIP)
 $(MAN)shift_to_centre.so:	$(SMAN)shift_to_centre.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
-$(MAN)sphereprof.so:		$(SMAN)sphereprof.cc $(MANT) $(defman_h) $(io_h) $(profile_h) $(makefiles)
+$(MAN)sphereprof.so:		$(SMAN)sphereprof.cc $(MANT) $(defman_h) $(profile_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)symmetrize_pairs.so:	$(SMAN)symmetrize_pairs.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
@@ -306,56 +302,56 @@ $(BIN)TestPairF:	$(SEXE)TestPairF.F $(BINT) $(makefiles)
 ifdef NEMO
 
 
-$(BIN)a2s:		$(SEXE)a2s.cc $(BINT) $(main_h) $(inline_io_h) $(io_h) $(body_h) $(makefiles)
+$(BIN)a2s:		$(SEXE)a2s.cc $(BINT) $(main_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)addgravity:	$(SEXE)addgravity.cc $(BINT) $(main_h) $(body_h) $(externacc_h) $(forces_h) $(io_h) $(makefiles)
+$(BIN)addgravity:	$(SEXE)addgravity.cc $(BINT) $(main_h) $(externacc_h) $(forces_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)addprop:		$(SEXE)addprop.cc $(LIBT) $(main_h) $(bodyfunc_h) $(io_h) $(makefiles)
+$(BIN)addprop:		$(SEXE)addprop.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)density:		$(SEXE)density.cc $(BINT) $(main_h) $(neighbours_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)g2s:		$(SEXE)g2s.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(makefiles)
+$(BIN)g2s:		$(SEXE)g2s.cc $(LIBT) $(main_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)getgravity:	$(SEXE)getgravity.cc $(BINT) $(main_h) $(forces_h) $(io_h) $(makefiles)
+$(BIN)getgravity:	$(SEXE)getgravity.cc $(BINT) $(main_h) $(forces_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)gyrfalcON:	$(SEXE)gyrfalcON.cc $(BINT) $(main_h) $(nbody_h) $(manip_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)manipulate:	$(SEXE)manipulate.cc $(BINT) $(main_h) $(manip_h) $(io_h) $(makefiles)
+$(BIN)manipulate:	$(SEXE)manipulate.cc $(BINT) $(main_h) $(manip_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mkbodiesfunc:	$(SEXE)mkbodiesfunc.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mkbodyfunc:	$(SEXE)mkbodyfunc.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)mkdehnen:		$(SEXE)mkdehnen.cc $(BINT) $(main_h) $(gamma_h) $(io_h) $(LIB)gamma.o $(makefiles)
+$(BIN)mkdehnen:		$(SEXE)mkdehnen.cc $(BINT) $(main_h) $(gamma_h) $(LIB)gamma.o $(makefiles)
 			$(MAKE_EXE) $(LIB)gamma.o $(NEMO_EXE_FLGS)
 $(BIN)mkgalaxy:		doc/mkgalaxy
 			cp $< $@
 			chmod 755 $@
-$(BIN)mkhalo:		$(SEXE)mkhalo.cc $(main_h) $(io_h) $(LIB)halo.o $(makefiles)
+$(BIN)mkhalo:		$(SEXE)mkhalo.cc $(main_h) $(LIB)halo.o $(makefiles)
 			$(MAKE_EXE) $(LIB)halo.o $(NEMO_EXE_FLGS)
-$(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(io_h) $(random_h) $(Pi_h) $(LIB)king.o $(makefiles)
+$(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(random_h) $(Pi_h) $(LIB)king.o $(makefiles)
 			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
-$(BIN)mkplum:		$(SEXE)mkplum.cc $(BINT) $(main_h) $(sample_h) $(io_h) $(makefiles)
+$(BIN)mkplum:		$(SEXE)mkplum.cc $(BINT) $(main_h) $(sample_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)mkWD99disc:	$(SEXE)mkWD99disc.cc $(main_h) $(WD99disc_h) $(io_h) $(LIB)WD99disc.o $(makefiles)
+$(BIN)mkWD99disc:	$(SEXE)mkWD99disc.cc $(main_h) $(WD99disc_h) $(LIB)WD99disc.o $(makefiles)
 			$(MAKE_EXE) $(LIB)WD99disc.o $(NEMO_EXE_FLGS)
-$(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(body_h) $(inline_io_h) $(io_h) $(makefiles)
+$(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(body_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)s2g:		$(SEXE)s2g.cc $(LIBT) $(main_h) $(body_h) $(io_h) $(makefiles)
+$(BIN)s2g:		$(SEXE)s2g.cc $(LIBT) $(main_h) $(body_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)s2s:		$(SEXE)s2s.cc $(BINT) $(main_h) $(body_h) $(io_h) $(makefiles)
+$(BIN)s2s:		$(SEXE)s2s.cc $(BINT) $(main_h) $(body_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)scale_eps:	$(SEXE)scale_eps.cc $(BINT) $(main_h) $(body_h) $(io_h) $(makefiles)
+$(BIN)scale_eps:	$(SEXE)scale_eps.cc $(BINT) $(main_h) $(body_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)set_time:		$(SEXE)set_time.cc $(body_h) $(BINT) $(main_h) $(io_h) $(makefiles)
+$(BIN)set_time:		$(SEXE)set_time.cc $(body_h) $(BINT) $(main_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)snapprop:		$(SEXE)snapprop.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)snapstac:		$(SEXE)snapstac.cc $(BINT) $(body_h) $(main_h) $(io_h) $(makefiles)
+$(BIN)snapstac:		$(SEXE)snapstac.cc $(BINT) $(body_h) $(main_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)snapsupp:		$(SEXE)snapsupp.cc $(LIBT) $(main_h) $(bodyfunc_h) $(io_h) $(makefiles)
+$(BIN)snapsupp:		$(SEXE)snapsupp.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
-$(BIN)symmetrize:	$(SEXE)symmetrize.cc $(BINT) $(main_h) $(body_h) $(io_h) $(inline_io_h) $(makefiles)
+$(BIN)symmetrize:	$(SEXE)symmetrize.cc $(BINT) $(main_h) $(body_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 endif
 # -----------
@@ -415,7 +411,7 @@ endif
 dox/html/index.html:	utils/inc/tupel.h \
 			utils/inc/exception.h \
 			utils/inc/inline.h \
-			utils/inc/inline_io.h \
+			utils/inc/io.h \
 			utils/inc/traits.h \
 			utils/inc/random.h \
 			utils/inc/numerics.h \
@@ -425,7 +421,6 @@ dox/html/index.html:	utils/inc/tupel.h \
 			inc/public/types.h \
 			inc/public/basic.h \
 			inc/public/fields.h \
-			inc/public/io.h \
 			inc/body.h \
 			inc/public/manip.h \
 			inc/public/profile.h \

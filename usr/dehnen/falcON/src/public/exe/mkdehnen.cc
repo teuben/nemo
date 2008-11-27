@@ -55,8 +55,6 @@
 #error You need NEMO to compile mkdehnen
 #endif
 //-----------------------------------------------------------------------------+
-#include <body.h>                                  // N-body bodies             
-#include <public/io.h>                             // WD's NEMO file I/O        
 #include <public/gamma.h>                          // WD's gamma models         
 #include <main.h>                                  // main & NEMO stuff         
 ////////////////////////////////////////////////////////////////////////////////

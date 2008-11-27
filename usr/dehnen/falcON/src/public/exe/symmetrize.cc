@@ -50,8 +50,6 @@
 #include <iostream>                                // C++ I/O                   
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
-#include <body.h>                                  // the bodies                
-#include <public/io.h>                             // my NEMO I/O               
 #include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 const char*defv[] = {

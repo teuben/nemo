@@ -51,11 +51,9 @@
 #error You need NEMO to compile addgravity
 #endif
 //-----------------------------------------------------------------------------+
-#include <body.h>                                  // bodies etc..              
-#include <forces.h>                                // falcON                    
-#include <public/io.h>                             // WDs C++ NEMO I/O          
-#include <externacc.h>                             // external potential        
 #include <main.h>                                  // main & NEMO stuff         
+#include <externacc.h>                             // external potential        
+#include <forces.h>                                // falcON                    
 //------------------------------------------------------------------------------
 const char*defv[] = {
   "in=???\n           input file                                         ",

@@ -55,11 +55,9 @@
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>                                 // C++ I/O formatting        
 #include <ctime>
-#include <body.h>                                  // the bodies                
-#include <public/io.h>                             // my NEMO I/O               
+#include <main.h>                                  // main & NEMO stuff         
 #include <public/neighbours.h>                     // finding neighbours        
 #include <public/bodyfunc.h>                       // body functions            
-#include <main.h>                                  // main & NEMO stuff         
 //------------------------------------------------------------------------------
 const char*defv[] = {
   "in=???\n           input file                                         ",

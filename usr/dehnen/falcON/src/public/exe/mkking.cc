@@ -61,8 +61,6 @@
 #define falcON_NOT_USING_PROPER                    // not using PROPRIETARY code
 //-----------------------------------------------------------------------------+
 #include <public/king.h>                           // my king model             
-#include <body.h>                                  // my bodies                 
-#include <public/io.h>                             // my NEMO file I/O          
 #include <public/random.h>
 #include <iomanip>                                 // C++ I/O manipulators      
 #include <cmath>                                   // C++ math                  

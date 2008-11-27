@@ -152,57 +152,6 @@ falcON_TRAITS(falcON::vect_d,"vect_d");
 falcON_TRAITS(falcON::vect_f,"vect_f");
 #endif
 //------------------------------------------------------------------------------
-// integer types of given size                                                  
-//------------------------------------------------------------------------------
-namespace falcON {
-  namespace meta {
-    template<typename I, typename U> struct __ISIZE {
-      typedef I integer_s;
-      typedef U integer_u;
-      static const int size_s = sizeof(integer_s);
-      static const int size_u = sizeof(integer_u);
-    };
-
-    template<int I> struct __ITRAITS {};
-    template<> struct __ITRAITS<0> : 
-      public __ISIZE<char, unsigned char> {};
-    template<> struct __ITRAITS<1> :
-      public __ISIZE<short, unsigned short> {};
-    template<> struct __ITRAITS<2> :
-      public __ISIZE<int, unsigned int> {};
-    template<> struct __ITRAITS<3> :
-      public __ISIZE<long, unsigned long> {};
-    template<> struct __ITRAITS<4> :
-      public __ISIZE<long long, unsigned long long> {};
-
-    template<int WORDS> struct __IWORDS {
-      static const int STYPE = 
-    __ITRAITS<0>::size_s == WORDS ? 0 :
-    __ITRAITS<1>::size_s == WORDS ? 1 :
-    __ITRAITS<2>::size_s == WORDS ? 2 :
-    __ITRAITS<3>::size_s == WORDS ? 3 :
-    __ITRAITS<4>::size_s == WORDS ? 4 : 5;
-      typedef typename __ITRAITS<STYPE>::integer_s integer_s;
-      static const int UTYPE = 
-    __ITRAITS<0>::size_u == WORDS ? 0 :
-    __ITRAITS<1>::size_u == WORDS ? 1 :
-    __ITRAITS<2>::size_u == WORDS ? 2 :
-    __ITRAITS<3>::size_u == WORDS ? 3 :
-    __ITRAITS<4>::size_u == WORDS ? 4 : 5;
-      typedef typename __ITRAITS<UTYPE>::integer_u integer_u;
-    };
-  } // namespace meta {
-
-  typedef meta::__IWORDS<1>::integer_s int8;   ///<   signed integer of  8 bytes
-  typedef meta::__IWORDS<2>::integer_s int16;  ///<   signed integer of 16 bytes
-  typedef meta::__IWORDS<4>::integer_s int32;  ///<   signed integer of 32 bytes
-  typedef meta::__IWORDS<8>::integer_s int64;  ///<   signed integer of 64 bytes
-  typedef meta::__IWORDS<1>::integer_u uint8;  ///< unsigned integer of  8 bytes
-  typedef meta::__IWORDS<2>::integer_u uint16; ///< unsigned integer of 16 bytes
-  typedef meta::__IWORDS<4>::integer_u uint32; ///< unsigned integer of 32 bytes
-  typedef meta::__IWORDS<8>::integer_u uint64; ///< unsigned integer of 64 bytes
-} // namespace falcON {
-//------------------------------------------------------------------------------
 // useful constants and typedefs                                                
 //------------------------------------------------------------------------------
 namespace falcON {

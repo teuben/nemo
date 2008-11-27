@@ -190,7 +190,6 @@ namespace falcON { namespace compile_info {
 #    define falcON_USE_NEMO                        //   then use it             
 #  endif
 #  include <public/nemo++.h>                       // my NEMO interface
-#  include <public/io.h>                           // my NEMO I/O & in/output   
 #  undef local
 extern const char* defv[];                         // MUST be supplied by user  
 extern const char* usage;	                   // MUST be supplied by user  

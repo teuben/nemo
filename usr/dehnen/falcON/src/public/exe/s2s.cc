@@ -44,7 +44,6 @@
 #endif
 #define falcON_RepAction 0                         // no action reporting       
 //------------------------------------------------------------------------------
-#include <body.h>                                  // bodies etc..              
 #include <public/nemo++.h>                         // WDs C++ NEMO I/O          
 #include <public/bodyfunc.h>                       // body functions            
 #include <main.h>                                  // NEMO basics & main        

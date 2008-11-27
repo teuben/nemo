@@ -394,7 +394,7 @@ WARN_LOGFILE           =
 INPUT		=	utils/inc/tupel.h \
 			utils/inc/exception.h \
 			utils/inc/inline.h \
-			utils/inc/inline_io.h \
+			utils/inc/io.h \
 			utils/inc/traits.h \
 			utils/inc/random.h \
 			utils/inc/numerics.h \
@@ -404,7 +404,6 @@ INPUT		=	utils/inc/tupel.h \
 			inc/public/types.h \
 			inc/public/basic.h \
 			inc/public/fields.h \
-			inc/public/io.h \
 			inc/body.h \
 			inc/public/manip.h \
 			inc/public/profile.h \

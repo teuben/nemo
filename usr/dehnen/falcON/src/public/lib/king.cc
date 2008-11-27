@@ -22,7 +22,8 @@
 //-----------------------------------------------------------------------------+
 #include <public/king.h>
 #include <public/basic.h>
-#include <numerics.h>
+#include <utils/io.h>
+#include <utils/numerics.h>
 #include <fstream>
 #include <iomanip>
 #include <cmath>

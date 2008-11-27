@@ -44,7 +44,6 @@
 #define falcON_RepAction 0                         // no action reporting       
 //-----------------------------------------------------------------------------+
 #include <cmath>                                   // math standard library     
-#include <public/io.h>                             // my NEMO I/O               
 #include <public/sample.h>                         // N-body sampling           
 #include <main.h>                                  // main & NEMO stuff         
 ////////////////////////////////////////////////////////////////////////////////

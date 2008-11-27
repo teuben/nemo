@@ -36,7 +36,6 @@
 // v 0.5    05/11/2008  WD using 'trho' instead of 2nd parameter
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
-#include <public/io.h>
 #include <utils/numerics.h>
 #include <ctime>
 #include <cstring>

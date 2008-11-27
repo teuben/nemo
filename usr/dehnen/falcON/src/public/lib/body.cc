@@ -26,10 +26,13 @@
 #include <sstream>                                 // C++ string I/O            
 #include <iomanip>                                 // C++ I/O formating         
 #include <cstring>                                 // C++ strings               
-#include <public/io.h>                             // for fortran I/O
 #include <public/nemo++.h>                         // utilities for NEMO I/O    
 #include <utils/numerics.h>
 #include <utils/heap.h>
+
+namespace falcON {
+  using namespace WDutils;
+}
 
 using namespace falcON;
 
@@ -1590,6 +1593,220 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 #endif // falcON_NEMO
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_REAL_IS_FLOAT
+
+namespace {
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  /// structure modelled after gadget/allvars.h                                 
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  struct GadgetHeader {
+    int          npart[6];          ///< # particles per type in this file
+    double       masstab[6];        ///< if non-zero: mass of particle of type
+    double       time;              ///< simulation time of snapshot
+    double       redshift;          ///< redshift of snapshot
+    int          flag_sfr;
+    int          flag_feedback;
+    unsigned int npartTotal[6];     ///< # particles per type in whole snapshot
+    int          flag_cooling;
+    int          num_files;         ///< # file for this snapshot
+    double       BoxSize;
+    double       Omega0;
+    double       OmegaLambda;
+    double       HubbleParam;
+    int          flag_stellarage;
+    int          flag_metals;
+    unsigned int npartTotalHighWord[6];
+    int          flag_entropy_instead_u;
+    char         fill[60];          ///< to get sizeof(GadgetHeader)=256
+    //--------------------------------------------------------------------------
+    /// default constructor: set all data to 0
+    GadgetHeader();
+    //--------------------------------------------------------------------------
+    /// try to read a GadgetHeader from an input file
+    ///
+    /// If the size of the Fortran record == 256 == sizeof(GadgetHeader), we
+    /// read the header and return true.\n
+    /// If the size of the Fortran record == byte_swapped(256), then we assume
+    /// the file is of different endianess. We read the header, byte-swap it
+    /// and return true.\n
+    /// Otherwise, the data are not consistent with a GadgetHeader, so we return
+    /// false.
+    /// \return have read successfully
+    /// \param  in   input stream to read from
+    /// \param  rec  size of Fortran record header (must be 4 or 8)
+    /// \param  swap (output) need byte-swap?
+    bool Read(input& in, unsigned rec, bool& swap)
+      throw(falcON::exception);
+    //--------------------------------------------------------------------------
+    /// check whether two GadgetHeaders could possibly come from different data
+    /// files for the same snapshot
+    bool mismatch(GadgetHeader const&H) const;
+    //--------------------------------------------------------------------------
+    /// on some ICs, npartTotal[] = 0. Here we remedy for this error
+    void check_simple_npart_error();
+    //--------------------------------------------------------------------------
+    /// dump all the header data
+    void dump(std::ostream&out) const;
+  };
+  //
+  GadgetHeader::GadgetHeader() :
+    time(0.), redshift(0.), flag_sfr(0), flag_feedback(0), flag_cooling(0),
+    num_files(0), BoxSize(0.), Omega0(0.), OmegaLambda(0.), HubbleParam(0.),
+    flag_stellarage(0), flag_metals(0), flag_entropy_instead_u(0)
+  {
+    for(int k=0; k!=6; ++k) {
+      npart[k] = 0;
+      npartTotal[k] = 0;
+      npartTotalHighWord[k] = 0;
+      masstab[k] = 0.;
+    }
+  }
+  //----------------------------------------------------------------------------
+  bool GadgetHeader::Read(input& in, unsigned rec, bool& swap)
+    throw(falcON::exception)
+  {
+    swap = 0;
+    // read record header and determine swapping necessity
+    if(rec == 4) {
+      uint32 S;
+      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32));
+      if(S != sizeof(GadgetHeader)) {
+	swap_bytes(S);
+	if(S == sizeof(GadgetHeader)) swap = 1;
+	else return false;
+      }
+    } else if(rec == 8) {
+      uint64 S;
+      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64));
+      if(S != sizeof(GadgetHeader)) {
+	swap_bytes(S);
+	if(S == sizeof(GadgetHeader)) swap = 1;
+	else return false;
+      }
+    } else
+      throw falcON::exception("Fortran header size must be 4 or 8\n");
+    // read full GadgetHeader
+    in.read(static_cast<char*>
+	    (static_cast<void*>(this)), sizeof(GadgetHeader));
+    // if required swap bytes
+    if(swap) {
+      swap_bytes(npart,6);
+      swap_bytes(masstab,6);
+      swap_bytes(time);
+      swap_bytes(redshift);
+      swap_bytes(flag_sfr);
+      swap_bytes(flag_feedback);
+      swap_bytes(npartTotal,6);
+      swap_bytes(flag_cooling);
+      swap_bytes(num_files);
+      swap_bytes(BoxSize);
+      swap_bytes(Omega0);
+      swap_bytes(OmegaLambda);
+      swap_bytes(HubbleParam);
+      swap_bytes(flag_stellarage);
+      swap_bytes(flag_metals);
+      swap_bytes(npartTotalHighWord,6);
+      swap_bytes(flag_entropy_instead_u);
+    }
+    // read record trailer and check for consistency
+    if(rec == 4) {
+      uint32 S;
+      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32));
+      if(swap) swap_bytes(S);
+      if(S != sizeof(GadgetHeader)) {
+	falcON_Warning("GadgetHeader::Read(): record size mismatch\n");
+	return false;
+      }
+    } else if(rec == 8) {
+      uint64 S;
+      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64));
+      if(swap) swap_bytes(S);
+      if(S != sizeof(GadgetHeader)) {
+	falcON_Warning("GadgetHeader::Read(): record size mismatch\n");
+	return false;
+      }
+    }
+    return true;
+  }
+  //----------------------------------------------------------------------------
+  bool GadgetHeader::mismatch(GadgetHeader const&H) const {
+    bool okay = true;
+#define CHECK_I(FIELD,FIELDNAME)					\
+    if(FIELD != H.FIELD) {						\
+      okay = false;							\
+      falcON_Warning("GadgetHeader \"%s\" mismatch (%u vs %u)\n",	\
+		     FIELDNAME, FIELD, H.FIELD);			\
+    }
+#define CHECK_D(FIELD,FIELDNAME)					\
+    if(FIELD != H.FIELD) {						\
+      okay = false;							\
+      falcON_Warning("GadgetHeader\"%s\" mismatch (%f vs %f)\n",	\
+		     FIELDNAME, FIELD, H.FIELD);			\
+    }
+    CHECK_D(time,"time");
+    CHECK_D(redshift,"redshift");
+    CHECK_I(flag_sfr,"flag_sfr");
+    CHECK_I(flag_feedback,"flag_feedback");
+    CHECK_I(npartTotal[0],"npartTotal[0]");
+    CHECK_I(npartTotal[1],"npartTotal[1]");
+    CHECK_I(npartTotal[2],"npartTotal[2]");
+    CHECK_I(npartTotal[3],"npartTotal[3]");
+    CHECK_I(npartTotal[4],"npartTotal[4]");
+    CHECK_I(npartTotal[5],"npartTotal[5]");
+    CHECK_I(flag_cooling,"flag_cooling");
+    CHECK_I(num_files,"num_files");
+    CHECK_D(BoxSize,"BoxSize");
+    CHECK_D(Omega0,"Omega0");
+    CHECK_D(OmegaLambda,"OmegaLambda");
+    CHECK_D(HubbleParam,"HubbleParam");
+    CHECK_I(flag_stellarage,"flag_stellarage");
+    CHECK_I(flag_metals,"flag_metals");
+    CHECK_I(flag_entropy_instead_u,"flag_entropy_instead_u");
+    CHECK_I(npartTotalHighWord[0],"npartTotalHighWord[0]");
+    CHECK_I(npartTotalHighWord[1],"npartTotalHighWord[1]");
+    CHECK_I(npartTotalHighWord[2],"npartTotalHighWord[2]");
+    CHECK_I(npartTotalHighWord[3],"npartTotalHighWord[3]");
+    CHECK_I(npartTotalHighWord[4],"npartTotalHighWord[4]");
+    CHECK_I(npartTotalHighWord[5],"npartTotalHighWord[5]");
+    return !okay;
+#undef CHECK_I
+#undef CHECK_D
+  }
+  //----------------------------------------------------------------------------
+  void GadgetHeader::check_simple_npart_error() {
+    for(int k=0; k!=6; ++k)
+      if(npart[k] > npartTotal[k]) {
+	falcON_Warning("GadgetHeader: npart[%u]=%u > npartTotal[%u]=%u: "
+		       "we will try to fix by setting npartTotal[%u]=%u\n",
+		       k,npart[k],k,npartTotal[k],k,npart[k]);
+	npartTotal[k] = npart[k];
+      }
+  }
+  //----------------------------------------------------------------------------
+  void GadgetHeader::dump(std::ostream&out) const {
+    out<<" gadget header dump:";
+    for(int k=0; k!=6; ++k)
+      out<<"\n type "<<k
+	 <<": npart="<<std::setw(8)<<npart[k]
+	 <<" npartTotal="<<std::setw(8)<<npartTotal[k]
+	 <<" masstab="<<masstab[k];
+    out<<"\n redshift               = "<<redshift
+       <<"\n flag_sfr               = "<<flag_sfr
+       <<"\n flag_feedback          = "<<flag_feedback
+       <<"\n flag_cooling           = "<<flag_cooling
+       <<"\n num_files              = "<<num_files
+       <<"\n BoxSize                = "<<BoxSize
+       <<"\n Omega0                 = "<<Omega0
+       <<"\n OmegaLambda            = "<<OmegaLambda
+       <<"\n HubbleParam            = "<<HubbleParam
+       <<"\n flag_stellarage        = "<<flag_stellarage
+       <<"\n flag_metals            = "<<flag_metals
+       <<"\n flag_entropy_instead_u = "<<flag_entropy_instead_u
+       <<std::endl;
+  }
+} // namespace {
+falcON_TRAITS(::GadgetHeader,"GadgetHeader");
 //------------------------------------------------------------------------------
 #define READ(BIT)							\
   if(!is_sph(BIT) && nd || ns) {					\

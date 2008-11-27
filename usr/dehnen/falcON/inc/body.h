@@ -46,10 +46,6 @@ namespace falcON {
   class snap_out;
   class data_out;
 #endif
-  class output;
-  class input;
-  class FortranIRec;
-  class FortranORec;
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // meta programmed sum over array                                             

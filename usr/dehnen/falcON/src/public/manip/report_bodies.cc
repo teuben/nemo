@@ -34,7 +34,6 @@
 // v 0.1    11/09/2008  WD erased direct use of nemo functions
 // v 0.2    29/10/2008  WD append to existing output files, output format
 ////////////////////////////////////////////////////////////////////////////////
-#include <utils/inline_io.h>
 #include <public/defman.h>
 #include <fstream>                                 // C++ file I/O              
 #include <cstring>                                 // C strings                 

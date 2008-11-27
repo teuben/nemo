@@ -42,10 +42,8 @@
 #ifndef falcON_NEMO
 #error You need NEMO to compile "src/mains/getgravity.cc"
 #endif
-#include <body.h>                                  // bodies etc..              
-#include <forces.h>                                // falcON forces             
-#include <public/io.h>                             // WDs C++ NEMO I/O          
 #include <main.h>                                  // main & NEMO stuff         
+#include <forces.h>                                // falcON forces             
 //------------------------------------------------------------------------------
 const char*defv[] = {
   "srce=???\n          input file: sources [m,x]       ",

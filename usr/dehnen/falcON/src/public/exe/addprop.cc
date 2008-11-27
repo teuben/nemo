@@ -1,49 +1,48 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   src/proper/exe/addprop.cc                                           
-///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2007-2008                                                           
-///                                                                             
+///
+/// \file   src/public/exe/addprop.c
+///
+/// \author Walter Dehnen
+/// \date   2007-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2007-2008 Walter Dehnen                                        
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2007-2008 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// history:                                                                     
-//                                                                              
-// v 0.0   20/12/2007  WD created.                                              
-// v 0.1   21/12/2007  WD allow for replacement, changes in bodyfunc            
-// v 0.1.1 10/09/2008  WD happy gcc 4.3.1                                      
+//
+// history:
+//
+// v 0.0   20/12/2007  WD created 
+// v 0.1   21/12/2007  WD allow for replacement, changes in bodyfunc
+// v 0.1.1 10/09/2008  WD happy gcc 4.3.1
+// v 0.1.2 27/11/2008  WD WDutils::io.h
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.1.1"
-#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
+#define falcON_VERSION   "0.1.2"
+#define falcON_VERSION_D "27-nov-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "addprop"
 #endif
 #define falcON_RepAction 0                         // no action reporting       
 //-----------------------------------------------------------------------------+
-#include <body.h>                                  // bodies etc..              
-#include <public/io.h>                             // WDs C++ NEMO I/O          
-#include <public/bodyfunc.h>                       // body functions            
 #include <main.h>                                  // NEMO basics & main        
+#include <public/bodyfunc.h>                       // body functions            
 #include <cstdio>                                  // C std I/O                 
 //------------------------------------------------------------------------------
 const char*defv[] = {

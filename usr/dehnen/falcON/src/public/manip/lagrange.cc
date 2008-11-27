@@ -36,7 +36,6 @@
 // v 1.5    07/11/2008  WD using FindPercentile from numerics.h, sanity checks
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
-#include <public/io.h>
 #include <utils/heap.h>
 #include <utils/numerics.h>
 #include <ctime>

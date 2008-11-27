@@ -38,8 +38,6 @@
 #define falcON_VERSION   "1.0.4"
 #define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
-#include <body.h>                                  // bodies                    
-#include <public/io.h>                             // NEMO file I/O             
 #include <main.h>                                  // main & NEMO stuff         
 #include <fstream>                                 // C++ file I/O              
 #include <iomanip>     

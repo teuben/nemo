@@ -60,9 +60,7 @@
 #endif
 #define falcON_RepAction 0                         // no action reporting
 //------------------------------------------------------------------------------
-#include <body.h>                                  // N-body bodies 
 #include <main.h>                                  // main & NEMO stuff
-#include <public/io.h>                             // I/O utilities
 #include <public/halo.h>                           // halo model
 #include <fstream>                                 // C++ file I/O 
 #include <iomanip>                                 // C++ I/O formatting

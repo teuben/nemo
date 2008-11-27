@@ -41,7 +41,6 @@
 #endif
 #define falcON_RepAction 0                         // no action reporting       
 //-----------------------------------------------------------------------------+
-#include <body.h>                                  // bodies & I/O              
 #include <main.h>                                  // main & NEMO stuff         
 using namespace falcON;
 //------------------------------------------------------------------------------
