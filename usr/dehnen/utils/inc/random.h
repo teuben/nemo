@@ -111,10 +111,10 @@ namespace WDutils {
     mutable int  inext, inextp;
     mutable long ma[56];
   public:
-    typedef int  seed_type;
+    typedef long seed_type;
     /// construction random from seed
     /// \param[in] seed value to seed deterministic pseudo-random sequence
-    explicit Random3(long seed);
+    explicit Random3(seed_type seed);
     /// generate a random number in [0,1]
     double RandomDouble() const;
   };

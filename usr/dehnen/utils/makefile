@@ -137,9 +137,9 @@ MAKE_OBJ		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
 Pi_h			:= $(INC)Pi.h
 heap_h			:= $(INC)heap.h
 inline_h		:= $(INC)inline.h
-inline_io_h		:= $(INC)inline_io.h
 exception_h		:= $(INC)exception.h
-traits_h		:= $(INC)traits.h $(exception_h)
+traits_h		:= $(INC)traits.h $(exception_h) $(traits_h)
+io_h			:= $(INC)io.h $(exception_h)
 tupel_h			:= $(INC)tupel.h $(INC)tupel.cc $(traits_h)
 memory_h		:= $(INC)memory.h $(exception_h) $(traits_h) $(inline_h)
 numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(tupel_h)
@@ -153,6 +153,7 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 # -----------------------
 
 exception_cc		:= $(SRC)exception.cc $(exception_h)
+io_cc			:= $(SRC)io.cc $(io_h)
 numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
@@ -164,6 +165,8 @@ WDMath_cc			:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 
 $(LIB)exception.o:	$(exception_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
+$(LIB)io.o:		$(io_cc) $(LIBT) makefile
+			$(MAKE_OBJ)
 $(LIB)numerics.o:	$(numerics_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 $(LIB)random.o:		$(random_cc) $(LIBT) makefile
@@ -171,8 +174,8 @@ $(LIB)random.o:		$(random_cc) $(LIBT) makefile
 $(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 
-WDutils_objs	:=	$(LIB)exception.o $(LIB)numerics.o $(LIB)random.o \
-			$(LIB)WDMath.o
+WDutils_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)numerics.o \
+			$(LIB)random.o $(LIB)WDMath.o
 
 # -------
 # library

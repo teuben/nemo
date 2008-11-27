@@ -674,7 +674,7 @@ namespace WDutils {
   };
 #endif
   // ///////////////////////////////////////////////////////////////////////////
-#ifdef WDutils_included_inline_io_h
+#ifdef WDutils_included_io_h
   template<int N, typename X>
   inline smanip_fp_vec_width<X> print(tupel<N,X> const&x, int w, int p) {
     return smanip_fp_vec_width<X>(static_cast<const X*>(x),N,w,p);
