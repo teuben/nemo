@@ -81,7 +81,7 @@ namespace falcON {
 	zmax = 1.e4,
 	lmin = log(zmin),
 	dlz  = (log(zmax)-lmin)/double(N1);
-      for(int i=0; i!=N; ++i) {
+      for(unsigned i=0; i!=N; ++i) {
 	z    = std::exp(lmin+i*dlz);
 	Z[i] = z;
 	Y[i] = pow(z*z*pow(1+z,P),iA);
@@ -813,7 +813,7 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
     }                                              //   END LOOP                
   }                                                // ENDIF                     
   // 3  normalize multipoles                                                    
-  for(int i=0; i!=TREE->N_cells(); ++i)            // LOOP cell sources         
+  for(unsigned i=0; i!=TREE->N_cells(); ++i)       // LOOP cell sources         
     CELL_SRCE[i].normalize_poles();                //   normalize multipoles    
   // 4  set rcrit                                                               
   if(MAC) MAC->set_rcrit(this);                    // set r_crit for all cells  
@@ -1057,7 +1057,7 @@ void GravEstimator::approx(const GravMAC*GMAC,
 namespace {
   using namespace falcON;
   //============================================================================
-  unsigned NX;
+  int NX;
   real pdim(real const&x) { return cube(x); }
   //----------------------------------------------------------------------------
   struct number_density {

@@ -65,7 +65,7 @@ namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   class projprof : public manipulator {
   private:
-    const int        W;
+    const unsigned   W;
     const double     L;
     vect             P;
     char*  const     FILE;
@@ -92,8 +92,8 @@ namespace falcON { namespace Manipulate {
       W    ( npar>3?  int(pars[3]): W_default ),
       L    ( npar>4?      pars[4] : L_default ),
       P    ( npar>2? vect(pars)   : vect(zero)),
-      I    ( 0 ),
-      FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 )
+      FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
+      I    ( 0 )
     {
       if(debug(2) || file==0 || file[0]==0 || npar>5)
 	std::cerr<<

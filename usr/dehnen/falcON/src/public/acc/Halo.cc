@@ -46,7 +46,7 @@ namespace {
 				 npar>5? pars[5] : 0.44444444444444444444),
       HaloPotential(*this,0)
     {
-      if(npar<8 && nemo_debug(1) || nemo_debug(2) ) {
+      if((npar<8 && nemo_debug(1)) || nemo_debug(2) ) {
 	DebugInfo("external potential \"Halo\" recognizes 8 parameters:\n");
 	std::cerr<<
 	  "   omega   pattern speed (ignored)   [0]\n"

@@ -114,11 +114,11 @@ namespace {
     return f;
   }
   //----------------------------------------------------------------------------
-  const int   IniMnMax=256;
-  const int   MnNamMax=128;
-  int         IniMnInd=0;
-  char        MnNames[IniMnMax][MnNamMax];
-  iniman_pter IniMn[IniMnMax] = {0};
+  const unsigned IniMnMax=256;
+  const unsigned MnNamMax=128;
+  unsigned       IniMnInd=0;
+  char           MnNames[IniMnMax][MnNamMax];
+  iniman_pter    IniMn[IniMnMax] = {0};
   //----------------------------------------------------------------------------
   void single_manipulator(const manipulator*&manip,
 			  const char*manname,
@@ -145,7 +145,7 @@ namespace {
       first = false;
     }
     // 3. try to find manname in list of mannames already done
-    for(int i=0; i!=IniMnInd; ++i)
+    for(unsigned i=0; i!=IniMnInd; ++i)
       if(0 == strcmp(manname, MnNames[i])) {
 	DebugInfo(3,"Manipulator: name=\"%s\": known already: "
 		  "no need to load it again\n",manname);
@@ -260,7 +260,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
 {
   if((mannames == 0 || *mannames == 0) &&
      (manfiles == 0 || *manfiles == 0)) return;
-  const static int Lnames=NMAX*16, Lparss=NMAX*32, Lfiles=NMAX*32;
+  const static unsigned Lnames=NMAX*16, Lparss=NMAX*32, Lfiles=NMAX*32;
   char *names=falcON_NEW(char,Lnames), *name[NMAX]={0};
   char *parss=falcON_NEW(char,Lparss), *pars[NMAX]={0};
   char *files=falcON_NEW(char,Lfiles), *file[NMAX]={0};

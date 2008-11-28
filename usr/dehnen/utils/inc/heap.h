@@ -245,8 +245,9 @@ namespace WDutils {
       for(int i,j,p=0;;) {
 	i=j=Walk::child(p);
 	if(i>=n) return p;                // no children -> return p
-	if((i+1)<n)                       // 2 children? i=larger, j=smaller
+	if((i+1)<n) {                     // 2 children? i=larger, j=smaller
 	  if(compare(a[i],a[i+1])) ++i; else ++j;
+	}
 	if(!compare(x,a[i])) return p;    // x >= larger -> return p
 	p = compare(x,a[j])? j:i;         // x < smaller -> take p=smaller
       }                                   //   otherwise -> take p=larger

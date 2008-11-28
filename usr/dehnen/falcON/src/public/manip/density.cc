@@ -122,7 +122,7 @@ namespace Manipulate {
       STEP ( npar>2?         pars[2]     : 0. ),
       FRST ( true )
     {
-      if(npar==0 && debug(1) || debug(2))
+      if((npar==0 && debug(1)) || debug(2))
 	std::cerr<<
 	  " Manipulator \""<<name()<<"\":\n"
 	  " estimates density of bodies in_subset() (default: all)"

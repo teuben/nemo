@@ -516,7 +516,7 @@ namespace falcON {
     void stats_line(output&to) const {
       SOLVER -> dia_stats_line(to);
       if(to && highest_level())
-	for(int l=0; l!=Nsteps(); ++l) 
+	for(unsigned l=0; l!=Nsteps(); ++l) 
 	  for(int i=0; i<=W; ++i) to<<'-';
       cpu_stats_line(to);
       if(to) to<<std::endl;
@@ -525,7 +525,7 @@ namespace falcON {
     void stats_body(output&to) const {
       SOLVER -> dia_stats_body(to);
       if(to && highest_level())
-	for(int l=0; l!=Nsteps(); ++l)
+	for(unsigned l=0; l!=Nsteps(); ++l)
 	  to<<std::setw(W)<<N[l]<<' ';
       cpu_stats_body(to);
       if(to) to<<std::endl;
@@ -830,7 +830,7 @@ namespace falcON {
 		real fe,
 		bool up,
 		real ep = zero,
-		bool ue = 0) : UPX(up), UGE(ue), EPS(ep), SCH(0), SINKL(sl)
+		bool ue = 0) : UPX(up), UGE(ue), SCH(0), SINKL(sl), EPS(ep)
     {
       FAQ = fa*fa; if(FAQ) SCH |= use_a;
       FPQ = fp*fp; if(FPQ) SCH |= use_p;

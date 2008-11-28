@@ -102,7 +102,7 @@ void falcON::main() falcON_THROWING
     KM.reset_scales_tidal(mass, getdparam("r_t"));
   else
     KM.reset_scales_core (mass, getdparam("r_c"));
-  if(getbparam("outputs"))
+  if(getbparam("outputs")) {
     if(getbparam("WD_units"))
       std::clog<<  "# ------------------------------------------------"
 	       <<"\n# King model: "
@@ -138,6 +138,7 @@ void falcON::main() falcON_THROWING
 	       <<"\n#             E_tot =" <<KM.Etot()
 	       <<"\n#             rho_0 = " <<KM.core_density()
 	       <<"\n# ---------------------------------"<<std::endl;
+  }
   if(hasvalue("table")) KM.write_table(getparam("table"));
   //----------------------------------------------------------------------------
   // 3. create initial conditions from King model                               

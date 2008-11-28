@@ -308,7 +308,7 @@ void falcON::main() falcON_THROWING
 	 << space << "    Psi(r) "
 	 << space << "ln[g(Q=Psi)]\n"
 	 << "#\n";
-    for(unsigned n=0; n!=HM.Ntab(); ++n)
+    for(int n=0; n!=HM.Ntab(); ++n)
       Tab<< setw(w) << setprecision(p) << HM.rad(n) << ' '
 	 << setw(w) << setprecision(p) << HM.mhr(n) << ' '
 	 << setw(w) << setprecision(p) << HM.mtr(n) << ' '

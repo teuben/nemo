@@ -165,7 +165,7 @@ spherical_profile::spherical_profile(const bodies*B,
       vect_d Mvp(0.), Mam(0.);
       double Mxx[3][3] = {{0.,0.,0.},{0.,0.,0.},{0.,0.,0.}};
       for(j=i? ir[i-1]:0; j<=ir[i+1]; ++j) {       // 1st LOOP of bodies in bin 
-	double mi  = (i!=0 && j==ir[i-1]  ||  j==ir[i+1]) ?
+	double mi  = ((i!=0 && j==ir[i-1])  ||  j==ir[i+1]) ?
 	             0.5 * B->mass(I[j]) : B->mass(I[j]);
 	vect_d ri  = x0? B->pos(I[j])-(*x0) : B->pos(I[j]);
 	vect_d vi  = v0? B->vel(I[j])-(*v0) : B->vel(I[j]);
@@ -201,7 +201,7 @@ spherical_profile::spherical_profile(const bodies*B,
       vect_d erot = norm(Mvp)>0.? normalized(Mvp) : vect_d(0.,0.,1.);
       double Mvpq(0.), Mvtq(0.);
       for(j=i? ir[i-1]:0; j<=ir[i+1]; ++j) {       // 2nd LOOP of bodies in bin 
-	double mi  = (i!=0 && j==ir[i-1]  ||  j==ir[i+1]) ?
+	double mi  = ((i!=0 && j==ir[i-1])  ||  j==ir[i+1]) ?
 	             0.5 * B->mass(I[j]) : B->mass(I[j]);
 	vect_d ri  = x0? B->pos(I[j])-(*x0) : B->pos(I[j]);
 	vect_d vi  = v0? B->vel(I[j])-(*v0) : B->vel(I[j]);
@@ -221,7 +221,7 @@ spherical_profile::spherical_profile(const bodies*B,
       double M  (0.);
       double Mxx[3][3] = {{0.,0.,0.},{0.,0.,0.},{0.,0.,0.}};
       for(j=i? ir[i-1]:0; j<=ir[i+1]; ++j) {       // 1st LOOP of bodies in bin 
-	double mi  = (i!=0 && j==ir[i-1]  ||  j==ir[i+1]) ?
+	double mi  = ((i!=0 && j==ir[i-1])  ||  j==ir[i+1]) ?
 	             0.5 * B->mass(I[j]) : B->mass(I[j]);
 	vect_d ri  = x0? B->pos(I[j])-(*x0) : B->pos(I[j]);
 	M   += mi;
@@ -323,7 +323,7 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
       vect2_d Mvr(0.);
       double  Mxx[2][2] = {{0.,0.}, {0.,0.}};
       for(j=i? ir[i-1]:0; j<=ir[i+1]; ++j) {       // LOOP of bodies in bin 
-	double  mi = (i!=0 && j==ir[i-1]  ||  j==ir[i+1]) ?
+	double  mi = ((i!=0 && j==ir[i-1])  ||  j==ir[i+1]) ?
 	             0.5 * B->mass(I[j]) : B->mass(I[j]);
 	vect_d  ri = x0? B->pos(I[j])-(*x0) : B->pos(I[j]);
 	vect2_d xi = vect2_d(eX*ri, eY*ri);
@@ -355,7 +355,7 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
       double  M  (0.);
       double  Mxx[2][2] = {{0.,0.}, {0.,0.}};
       for(j=i? ir[i-1]:0; j<=ir[i+1]; ++j) {       // LOOP of bodies in bin 
-	double  mi = (i!=0 && j==ir[i-1]  ||  j==ir[i+1]) ?
+	double  mi = ((i!=0 && j==ir[i-1])  ||  j==ir[i+1]) ?
 	             0.5 * B->mass(I[j]) : B->mass(I[j]);
 	vect_d  ri = x0? B->pos(I[j])-(*x0) : B->pos(I[j]);
 	vect2_d xi = vect2_d(eX*ri, eY*ri);

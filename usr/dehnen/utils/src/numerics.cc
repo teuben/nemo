@@ -75,7 +75,7 @@ double WDutils::qbulir(double(*func)(double),
   bool   bo,bu=0,odd=1;
   int    i,m,n=2,nn=3,mr;
   double d[7],dt[7];
-  double ddt,hm,nt,err,t,ta,tab=(0),v=(0),w,sm(0),gr(0),t1(0),
+  double ddt,hm,nt,err(0),t,ta,tab=(0),v=(0),w(0),sm(0),gr(0),t1(0),
     t2 =0.5*(func(a)+func(b)),
     t2a=t2,
     tb =abs(t2a),
@@ -413,7 +413,7 @@ namespace {
       scalar   W;       ///< cumulative weight at first point
       range   *S;       ///< pter to left sub-range
       range() : S(0) {}
-      range(int n) : R(0), N(n), W(0), S(0) {}
+      range(int n) : N(n), R(0), W(0), S(0) {}
     };
     scalar             SumW;        ///< total weight
     point             *P;           ///< table of points

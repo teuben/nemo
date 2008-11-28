@@ -109,9 +109,9 @@ endif
 endif
 
 ifdef DEBUG
-OPTFLAGS	:= -ggdb3 -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
+OPTFLAGS	:= -ggdb3 -Wall -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
 else
-OPTFLAGS	:= -ggdb3 -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -rdynamic $(STATIC)
+OPTFLAGS	:= -ggdb3 -O2 -Wall -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -rdynamic $(STATIC)
 #OPTFLAGS	:= -ggdb3 -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
 endif
 

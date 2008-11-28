@@ -86,7 +86,7 @@ namespace falcON { namespace Manipulate {
 		      const char  *file) :
       Ran (npar>0? long(pars[0]) : long(time(0)) )
     {
-      if(npar<1 && debug(1) || debug(2))
+      if((npar<1 && debug(1)) || debug(2))
 	std::cerr<<
 	  " Manipulator \""<<name()<<"\":\n"
 	  " randomizes azimuth of vectors for all bodies in"

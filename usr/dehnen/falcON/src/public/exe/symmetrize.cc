@@ -134,7 +134,7 @@ void falcON::main() falcON_THROWING
   unsigned copy(min(2u,getuparam("copy")));
   snapshot shin;
   fieldset read,want(fieldset::nemoin);
-  real     Mfac(use==(1<<copy) ? one : double(use)/double(1<<copy));
+  real     Mfac(use==(1u<<copy) ? one : double(use)/double(1<<copy));
   while(in.has_snapshot()) {
     if(! shin.read_nemo(in,read,want,getparam("times"),0)) continue;
     if(use==1u && copy == 0u) {                    // IF output==input          

@@ -572,9 +572,9 @@ void PartnerEstimator::prepare_sph()
   update_leafs_sph();                              // update flags & leafs      
   if(SPH_UPTODATE) return;                         // IF up to date: DONE       
   // 2. loop cells: pass flags & number of sph leafs up; count sph cells        
-  unsigned nc = 0;                                 // counter: # sph cells      
+  int nc = 0;                                      // counter: # sph cells      
   LoopCellsUp(cell_iterator,TREE,Ci) {             // LOOP cells upwards        
-    unsigned ns = 0;                               //   counter: # sph leafs    
+    int ns = 0;                                    //   counter: # sph leafs    
     Ci->reset_active_flag();                       //   reset activity flag     
     LoopPartnerLKids(cell_iterator,Ci,l,sph) {     //   LOOP partner sub-leafs  
       Ci->add_active_flag(l);                      //     add in activity flag  
@@ -633,9 +633,9 @@ void PartnerEstimator::prepare_sticky()
   update_leafs_sticky();                           // update flags & leafs      
   if(STC_UPTODATE) return;                         // IF up to date: DONE       
   // 2. loop cells: pass flags & number of sticky leafs up; count sticky cells  
-  unsigned nc = 0;                                 // counter: # sticky cells   
+  int nc = 0;                                      // counter: # sticky cells   
   LoopCellsUp(cell_iterator,TREE,Ci) {             // LOOP cells upwards        
-    unsigned ns = 0;                               //   counter: # sticky leafs 
+    int ns = 0;                                    //   counter: # sticky leafs 
     Ci->reset_active_flag();                       //   reset activity flag     
     LoopPartnerLKids(cell_iterator,Ci,l,sticky) {  //   LOOP partner sub-leafs  
       Ci->add_active_flag(l);                      //     add in activity flag  

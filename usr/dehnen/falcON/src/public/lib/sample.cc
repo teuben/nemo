@@ -188,7 +188,10 @@ void SphericalSampler::sample(body   const&B0,
       falcON_SAMPLE_ADAPT
     else
 #endif
+    {
+      ++Ncum;                                      //   to avoid warning
       n  = 1;                                      //   ELSE set n  = 1         
+    }
     if(n<1) continue;                              //   IF n<1: continue        
     //                                                                          
     // 3. set mass, position, and velocity of n bodies with this (r,vr,vt)      

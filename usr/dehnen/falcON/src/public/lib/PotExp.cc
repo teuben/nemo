@@ -2086,7 +2086,6 @@ void YlmRec::table_print(symmetry     s,
 			 std::ostream&o,
 			 int          p) const
 {
-  int w = p + 6;
   o << "# l   m   C\n"
     << "# -----------------\n";
   int dl = (s & PotExp::pint)? 2 : 1;
@@ -2712,116 +2711,6 @@ namespace {
     else                      Potential<PotExp::none       >(x);
   }
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  //  SelfGrav used for computing Self-Gravity                                //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  template<typename T>
-  class SelfGrav {
-    typedef tupel<3,T> V;
-    //--------------------------------------------------------------------------
-    int          N,N4;                             // # bodies, size of arrays  
-    fvec4       *RD,*CT,*ST,*CP,*SP;               // arrays for spherical coord
-    Anlm        &C;                                // coeffs to use             
-    AnlRec       Psi,dPr;                          // for Psi_nl(r)             
-    YlmRec       Ylm,dYt,dYp;                      // for Y_lm(the,phi)         
-    //--------------------------------------------------------------------------
-  public:
-    SelfGrav(Anlm&c, int n, const V*x) :
-      N   (n),
-      N4  ((n+3)/4),
-      RD  (new fvec4[N4]), // MUST NOT USE falcON_NEW            
-      CT  (new fvec4[N4]), // because this is fvec4::new[], which
-      ST  (new fvec4[N4]), // calls falcON::malloc16, which      
-      CP  (new fvec4[N4]), // calls falcON_DEL() anyway!         
-      SP  (new fvec4[N4]), //                                    
-      C   (c),                                     //   get coefficients        
-      Psi (C.nmax(),C.lmax()),                     //   init AnlRec for Psi_nl  
-      dPr (C.nmax(),C.lmax()),                     //   init AnlRec for dPsi/dr 
-      Ylm (C.lmax()),                              //   init YlmRec for Y_lm    
-      dYt (C.lmax()),                              //   init YlmRec for dY/dthe 
-      dYp (C.lmax())                               //   init YlmRec for dY/dphi 
-    {
-      // compute spherical coordinates for ALL bodies                           
-      V X[4];
-      for(int i=0,i4=0; i4!=N4; ++i4) {
-	for(int k=0; i!=N && k!=4; ++i,++k)
-	  X[k] = x[i];
-	Spherical4(RD[i4],CT[i4],ST[i4],CP[i4],SP[i4],X);
-      }
-    }
-    //--------------------------------------------------------------------------
-    ~SelfGrav() {
-      delete[] RD;  // MUST NOT USE falcON_DEL_A        
-      delete[] CT;  // because this is fvec4::delete[], 
-      delete[] ST;  // which calls falcON::free16,      
-      delete[] CP;  // which calls falcON_DEL_A anyway! 
-      delete[] SP;  //                                  
-    }
-    //--------------------------------------------------------------------------
-    // add up C_nlm from all bodies or all bodies marked                        
-    template<symmetry SYM>
-    void AddCoef(const T  *m,
-		 const int*f,
-		 int       k) {
-      if(f && k) {
-	for(int i=0,i4=0; i4!=N4; ++i4)
-	  for(int k=0; i!=N && k!=4; ++i,++k) if(f[i] & k && m[i]) {
-	    SetPsi<SYM>(Psi,RD[i4][k],m[i]);
-	    SetYlm<SYM>(Ylm,CT[i4][k],ST[i4][k],CP[i4][k],SP[i4][k]);
-	    AUX<SYM>::template Connect<__addB>(C,Psi,Ylm,scalar(0));
-	  }
-      } else {
-	for(int i=0,i4=0; i4!=N4; ++i4)
-	  for(int k=0; i!=N && k!=4; ++i,++k) if(m[i]) {
-	    SetPsi<SYM>(Psi,RD[i4][k],m[i]);
-	    SetYlm<SYM>(Ylm,CT[i4][k],ST[i4][k],CP[i4][k],SP[i4][k]);
-	    AUX<SYM>::template Connect<__addB>(C,Psi,Ylm,scalar(0));
-	  }
-      }
-    }
-    //--------------------------------------------------------------------------
-    // set gravity due to coefficients for all or all active bodies             
-    template<symmetry SYM>
-    void SetGrav(T        *p,
-		 V        *a,
-		 const int*f,
-		 int       add) {
-      int I[4];
-      T   P[4];
-      V   A[4];
-      if(f) {
-	for(int i=0,i4=0,K; i4!=N4; ++i4) {
-	  for(int k=0; i!=N && k!=4; ++i,++k) if(f[i] & 1) {
-	    I[K] = i;
-	    SetPsi<SYM>(Psi,dPr,RD[i4][K]);
-	    SetYlm<SYM>(Ylm,dYt,dYp,CT[i4][K],ST[i4][K],CP[i4][K],SP[i4][K]);
-	    P[K] = EvalG<SYM>(A[K],C,Psi,dPr,Ylm,dYt,dYp);
-	  }
-	  Cartesian4(A,RD[i4],CT[i4],ST[i4],CP[i4],SP[i4]);
-	  if(add&1) for(int k=0; k!=K; ++k) p[I[k]]-= P[k];
-	  else      for(int k=0; k!=K; ++k) p[I[k]] =-P[k];
-	  if(add&2) for(int k=0; k!=K; ++k) a[I[k]]+= A[k];
-	  else      for(int k=0; k!=K; ++k) a[I[k]] = A[k];
-	}
-      } else {
-	for(int i=0,i4=0,K; i4!=N4; ++i4) {
-	  for(K=0; i!=N && K!=4; ++i,++K) {
-	    I[K] = i;
-	    SetPsi<SYM>(Psi,dPr,RD[i4][K]);
-	    SetYlm<SYM>(Ylm,dYt,dYp,CT[i4][K],ST[i4][K],CP[i4][K],SP[i4][K]);
-	    P[K] = EvalG<SYM>(A[K],C,Psi,dPr,Ylm,dYt,dYp);
-	  }
-	  Cartesian4(A,RD[i4],CT[i4],ST[i4],CP[i4],SP[i4]);
-	  if(add&1) for(int k=0; k!=K; ++k) p[I[k]]-= P[k];
-	  else      for(int k=0; k!=K; ++k) p[I[k]] =-P[k];
-	  if(add&2) for(int k=0; k!=K; ++k) a[I[k]]+= A[k];
-	  else      for(int k=0; k!=K; ++k) a[I[k]] = A[k];
-	}
-      }
-    }
-  };
-  //////////////////////////////////////////////////////////////////////////////
   template<symmetry SYM>
   inline void normalize(Anlm&C, Anlm const&K, scalar G) {
     AUX<SYM>::template Connect<__mulB>(C,K,scalar(0));
@@ -3060,56 +2949,6 @@ SetPotential<float>(Anlm const&, int, const tupel<3,float>*,
 template void PotExp::
 SetPotential<double>(Anlm const&, int, const tupel<3,double>*,
 		     double*, const int*, int) const;
-//------------------------------------------------------------------------------
-template<typename T>                               // T: double or float        
-void PotExp::SelfGravity(Anlm            &C,       // O: normalized C_nlm       
-			 int              n,       // I: # bodies               
-			 const T         *m,       // I: masses                 
-			 const tupel<3,T>*x,       // I: positions              
-			 T               *p,       // O: potentials             
-			 tupel<3,T>      *a,       // O: accelrations           
-			 const int       *f,       // I: flags        Notes 1&2 
-			 int              k,       // I: mark         see Note 1
-			 bool             l,       // I: all          see Note 2
-			 int              d,       // I: add?         see Note 3
-			 scalar           G) const //[I: const of Gravity]      
-{
-  CHECKMISMATCH("AddCoeffs",C);
-  setAL(AL);
-  setR0(R0);
-  C.reset();
-  SelfGrav<T> SG(C,n,x);
-  if       (SYM & arot) {
-    SG.template AddCoef<spherical>(m,f,k);
-    ::normalize<spherical>(C,Knlm,G);
-    SG.template SetGrav<spherical>(p, a, l?0:f, d);
-  } else if(SYM & zrot) {
-    SG.template AddCoef<cylindrical>(m,f,k);
-    ::normalize<cylindrical>(C,Knlm,G);
-    SG.template SetGrav<cylindrical>(p, a, l?0:f, d);
-  } else if(SYM & axes) {
-    SG.template AddCoef<triaxial>(m,f,k);
-    ::normalize<triaxial>(C,Knlm,G);
-    SG.template SetGrav<triaxial>(p, a, l?0:f, d);
-  } else if(SYM & pint) {
-    SG.template AddCoef<reflexion>(m,f,k);
-    ::normalize<reflexion>(C,Knlm,G);
-    SG.template SetGrav<reflexion>(p, a, l?0:f, d); 
-  } else {
-    SG.template AddCoef<none>(m,f,k);
-    ::normalize<none>(C,Knlm,G);
-    SG.template SetGrav<none>(p, a, l?0:f, d);
-  }
-}
-//------------------------------------------------------------------------------
-template void PotExp::
-SelfGravity<float>(Anlm&, int, const float*, const tupel<3,float>*,
-		   float*, tupel<3,float>*, const int*,
-		   int, bool, int, scalar) const;
-template void PotExp::
-SelfGravity<double>(Anlm&, int, const double*, const tupel<3,double>*,
-		    double*, tupel<3,double>*, const int*,
-		    int, bool, int, scalar) const;
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // class falcON::AnlmIO                                                       //
@@ -3153,8 +2992,8 @@ void AnlmIO::open_for_read(const char*file_name) falcON_THROWING
   // read identifier
   TRY_XDR(xdr_string(XDRS, &p, 10),"open_for_read","reading header");
   if( strcmp(header,shead) )
-    falcON_THROWING("file \"%s\" is not a XDR *anlmfile*, "
-		    "cannot open for reading",file_name);
+    falcON_THROW("file \"%s\" is not a XDR *anlmfile*, "
+		 "cannot open for reading",file_name);
   open = reading;
 }
 //------------------------------------------------------------------------------

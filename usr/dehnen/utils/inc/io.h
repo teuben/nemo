@@ -315,7 +315,7 @@ namespace WDutils {
   template<typename X>
   struct smanip_fp_width {
     X   x;
-    int p,w;
+    int p,w,s;
     int width(double l) { // given precision, what is minimum width
       int il = 1+int(l);
       int fw = l<0? 3+p-il : il>=p? il : p+1;
@@ -323,8 +323,13 @@ namespace WDutils {
       il = fw<ew? fw:ew;
       return x<0? il+1 : il;
     }
-    smanip_fp_width(X __x, int __w, int __p) : x(__x), p(__p), w(__w)
+    smanip_fp_width(X __x, int __w, int __p, int __s=0)
+      : x(__x), p(__p), w(__w), s(__s)
     {
+      if(s) {
+	if(x>0 && w>1) --w;
+	else           s=0;
+      }
       if(x == 0) return;
       double l=std::log10(std::abs(x));
       w =std::max(w,width(l));       // minimum width to achieve
@@ -334,6 +339,8 @@ namespace WDutils {
   };
   template<typename X>
   inline std::ostream& operator<<(std::ostream&o, smanip_fp_width<X> const&m) {
+    if(m.s)
+      o << ' ';
     int ow = o.width(m.w);
     int op = o.precision(m.p);
     o << m.x;
@@ -347,8 +354,8 @@ namespace WDutils {
   /// possible in the \a w characters wide field. However, we will at least 
   /// write it with precision \a p, even if this means overrunning the width.
   template<typename X>
-  inline smanip_fp_width<X> print(X x, int w, int p) {
-    return smanip_fp_width<X>(x,w,p);
+  inline smanip_fp_width<X> print(X x, int w, int p, int s=0) {
+    return smanip_fp_width<X>(x,w,p,s);
   }
   //----------------------------------------------------------------------------
   template<typename X>
@@ -479,7 +486,7 @@ namespace WDutils {
     /// existing file of the same name is deleted unless \e append is true, in
     /// which case, we append to that existing file.
     explicit
-    output(const char*file, bool append=0) : FREC(0), APPENDING(false) {
+    output(const char*file, bool append=0) : APPENDING(false), FREC(0) {
       setfile(file);
       __open(append);
     }
@@ -489,7 +496,7 @@ namespace WDutils {
     /// created for output. An existing file of the same name is deleted unless
     /// \e append is true, in which case, we append to that existing file.
     explicit
-    output(std::string const&file, bool append=0) : FREC(0), APPENDING(false) {
+    output(std::string const&file, bool append=0) : APPENDING(false), FREC(0) {
       setfile(file.c_str());
       __open(append);
     }

@@ -51,7 +51,7 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class WD99disc {
   private:
-    int          n,n1;                          ///< Table sizes, other
+    int          n1,n;                          ///< Table sizes, other
     double      *lr,*pot,*dpdr;                 ///< tables: log(r),Psi,dPsi/dr
     double       sig0;                          ///< parameter
     const int    No;                            ///< parameter

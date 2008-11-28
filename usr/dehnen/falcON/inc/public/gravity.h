@@ -415,8 +415,8 @@ namespace falcON {
     // data:                                                                    
     //--------------------------------------------------------------------------
     const OctTree        *TREE;                    // the tree to be used       
-    bool                  CELLS_UPTODATE;          // are cell srces up to date?
     bool                  LEAFS_UPTODATE;          // are leaf srces up to date?
+    bool                  CELLS_UPTODATE;          // are cell srces up to date?
     const bool            INDI_SOFT;               // use individual eps_i      
     const int             DIR[4];                  // direct loop control       
     kern_type             KERNEL;                  // softening kernel          
@@ -493,6 +493,7 @@ namespace falcON {
       LEAFS_UPTODATE ( 0 ),
       CELLS_UPTODATE ( 0 ),
       INDI_SOFT      ( s ),
+      DIR            (),
       KERNEL         ( k ),
       STATS          ( st ),
       EPS            ( e ),
@@ -506,8 +507,7 @@ namespace falcON {
       NCT            ( 0u ),
       NCA            ( 0u ),
       NLA            ( 0u ),
-      NLA_needed     ( 0u ),
-      DIR            ()
+      NLA_needed     ( 0u )
     {
       const_cast<int*>(DIR)[0]=d[0];
       const_cast<int*>(DIR)[1]=d[1];

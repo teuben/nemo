@@ -109,7 +109,7 @@ namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   class sphereprof : public manipulator {
   private:
-    const int        W;
+    const unsigned   W;
     const double     L;
     double           STEP;
     char*  const     FILE;
@@ -138,8 +138,8 @@ namespace falcON { namespace Manipulate {
     : W    ( npar>0?     int(pars[0])    : W_default ),
       L    ( npar>1?         pars[1]     : L_default ),
       STEP ( npar>2?         pars[2]     : 0. ),
-      I    ( 0 ),
       FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
+      I    ( 0 ),
       PS   ( 3 ),
       FRST ( 1 )
     {

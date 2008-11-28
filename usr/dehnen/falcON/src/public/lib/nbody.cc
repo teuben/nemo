@@ -59,8 +59,8 @@ Integrator::Integrator(const ForceAndDiagnose*S,
   if( predALL & fieldset::x && !(kickALL & fieldset::v) )
     falcON_THROW("Integration: request to predict x without kicking v");
   requALL = 
-    kickALL & fieldset::v ? fieldset::a : fieldset::empty |
-    predALL & fieldset::u ? fieldset::a : fieldset::empty;
+    ((kickALL & fieldset::v) ? fieldset::a : fieldset::empty) |
+    ((predALL & fieldset::u) ? fieldset::a : fieldset::empty) ;
 #ifdef falcON_SPH
   if( (test=predSPH & ~fieldset(fieldset::x|fieldset::H|fieldset::R|
 				fieldset::Y|fieldset::V)) ) 
@@ -314,7 +314,7 @@ void BlockStepCode::elementary_step(int t) const { // I: number of step
   int l=highest_level();                           // find lowest level moving  
   for(; !(t&1) && l; t>>=1, --l);                  // l: lowest level moving    
   bool move = false;                               // need to do anything?      
-  for(int i=l; i!=Nsteps(); ++i)                   // LOOP levels up to highest 
+  for(unsigned i=l; i!=Nsteps(); ++i)              // LOOP levels up to highest 
     if(N[i]) move = true;                          //   IF any non-empty: move  
 #ifdef falcON_MPI
   if(snap_shot()->parallel())
@@ -344,7 +344,7 @@ void BlockStepCode::elementary_step(int t) const { // I: number of step
 //------------------------------------------------------------------------------
 inline void BlockStepCode::account_del() const {
   if(snap_shot()->N_del()) {
-    for(int l=0; l!=Nsteps(); ++l)
+    for(unsigned l=0; l!=Nsteps(); ++l)
       N[l] = 0u;
     LoopAllBodies(snap_shot(),b)
       if(!is_new(b)) ++(N[level(b)]);
@@ -383,7 +383,7 @@ void BlockStepCode::adjust_levels(int low, bool all) const {
 }
 //------------------------------------------------------------------------------
 void BlockStepCode::update_Nlev(const bodies*B) {
-  for(int l=0; l!=Nsteps(); ++l) N[l] = 0;
+  for(unsigned l=0; l!=Nsteps(); ++l) N[l] = 0;
   LoopAllBodies(B,b)
     ++(N[level(b)]);
 }
@@ -415,7 +415,7 @@ BlockStepCode::BlockStepCode(int      km,          // I: tau_max = 2^-kmax
 {
   snap_shot()->set_steps(this);                    // set time steps in bodies  
   snap_shot()->add_fields(fieldset::l);            // make sure we have levels  
-  for(int n=0; n!=Nsteps(); ++n) N[n] = 0;
+  for(unsigned n=0; n!=Nsteps(); ++n) N[n] = 0;
   remember();                                      // to be predicted quantities
   set_time_derivs(1,1,0.);                         // set initial forces        
   assign_levels();                                 // get bodies into levels    
@@ -434,7 +434,7 @@ namespace falcON {
 void BlockStepCode::stats_head(output&to) const {
   SOLVER -> dia_stats_head(to);
   if(to && highest_level())
-    for(int i=0, h=-kmax(); i!=Nsteps(); i++, h--)
+    for(int i=0, h=-kmax(); static_cast<unsigned>(i)!=Nsteps(); i++, h--)
       if     (h>13)  put_char(to,' ',W-4)<<"2^" <<     h  <<' ';
       else if(h> 9)  put_char(to,' ',W-4)       << (1<<h) <<' ';
       else if(h> 6)  put_char(to,' ',W-4)<<' '  << (1<<h) <<' ';
@@ -556,7 +556,7 @@ NBodyCode::~NBodyCode() {
 ////////////////////////////////////////////////////////////////////////////////
 void ForceDiagGrav::diagnose_grav() const
 {
-  double m(0.), vin(0.), vex(0.), w[Ndim][Ndim]={0.};
+  double m(0.), vin(0.), vex(0.), w[Ndim][Ndim]={{0.}};
   vect_d x(0.);
   if(snap_shot()->have(fieldbit::q)) {             // IF have external pot      
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
@@ -617,7 +617,7 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
 {
   if(snap_shot()->time() != TIME)
     falcON_THROW("ForceDiagGrav::diagnose_vels(): time mismatch");
-  double m(0.), k[Ndim][Ndim]={0.};
+  double m(0.), k[Ndim][Ndim]={{0.}};
   vect_d v(0.), l(0.);
   LoopAllBodies(snap_shot(),b) {                   // LOOP bodies               
     register double mi = mass(b);                  //   m                       
@@ -657,7 +657,7 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
 ////////////////////////////////////////////////////////////////////////////////
 void ForceDiagGrav::diagnose_full() const
 {
-  double m(0.), vin(0.), vex(0.), w[Ndim][Ndim]={0.}, k[Ndim][Ndim]={0.};
+  double m(0.), vin(0.), vex(0.), w[Ndim][Ndim]={{0.}}, k[Ndim][Ndim]={{0.}};
   vect_d x(0.), v(0.), l(0.);
   if(snap_shot()->have(fieldbit::q)) {             // IF have external pot      
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             

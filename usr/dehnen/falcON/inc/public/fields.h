@@ -773,13 +773,13 @@ namespace falcON {
     /// are two sets identical?
     bool operator== (fieldset b) const { return val == b.val; }
     /// are two sets identical?
-    bool operator== (bits b) const { return val == b; }
+    bool operator== (bits b) const { return val == static_cast<value_type>(b); }
     /// are two sets identical?
     friend bool     operator== (bits b, fieldset d) { return d == b; }
     /// are two sets not identical?
     bool operator!= (fieldset b) const { return val != b.val; }
     /// are two sets not identical?
-    bool operator!= (bits b) const { return val != b; }
+    bool operator!= (bits b) const { return val != static_cast<value_type>(b); }
     /// are two sets not identical?
     friend bool operator!= (bits, fieldset);
     /// complementary set
@@ -795,7 +795,7 @@ namespace falcON {
     /// does this set contain \b all of set \c b ?
     bool contain(fieldset b) const { return (val & b.val)==b.val; }
     /// does this set contain \b all of set \c b ?
-    bool contain(bits b) const { return (val & b)==b; }
+    bool contain(bits b) const { return (val & b)==static_cast<value_type>(b); }
     /// does this set contain field \c f ?
     bool contain(fieldbit f) const { return val & (one << falcON::value(f)); }
     /// does this set contain field \c f ?
@@ -932,7 +932,8 @@ namespace falcON {
     };
     //--------------------------------------------------------------------------
   private:
-    char val;
+    typedef unsigned char value_type;
+    value_type val;
     //--------------------------------------------------------------------------
   public:
     /// unitialized: gas
@@ -1001,7 +1002,7 @@ namespace falcON {
       }
     }
     /// return the integer value
-    char const&value() const { return val; }
+    value_type const&value() const { return val; }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //

@@ -88,45 +88,45 @@ namespace WDutils {
   int hunt(const T*xarr, int n, T x, int j) {
     int  jlo=j,jhi,l=n-1;
     bool ascnd=(xarr[l]>xarr[0]);
-    if(!ascnd && xarr[l]==xarr[0] ) return -1;	    // x_0 = x_l                
-    if( ascnd && x<xarr[0] || !ascnd && x>xarr[0] ) return -1;
-    if( ascnd && x>xarr[l] || !ascnd && x<xarr[l] ) return  n;
+    if(!ascnd && xarr[l]==xarr[0] ) return -1;	    // x_0 = x_l
+    if( (ascnd && x<xarr[0]) || (!ascnd && x>xarr[0]) ) return -1;
+    if( (ascnd && x>xarr[l]) || (!ascnd && x<xarr[l]) ) return  n;
 
-    if(jlo<0 || jlo>l) {                            // input guess not useful,  
-      jlo = -1;                                     //   go to bisection below  
+    if(jlo<0 || jlo>l) {                            // input guess not useful,
+      jlo = -1;                                     //   go to bisection below
       jhi = n;
     } else {
       int inc = 1;
-      if(x>=xarr[jlo] == ascnd) {                   // hunt upward              
+      if((x>=xarr[jlo]) == ascnd) {                 // hunt upward
 	if(jlo == l) return (x==xarr[l])? l : n;
 	jhi = jlo+1;
-	while(x>=xarr[jhi] == ascnd) {              // not done hunting         
+	while((x>=xarr[jhi]) == ascnd) {            // not done hunting
 	  jlo =jhi;
-	  inc+=inc;                                 // so double the increment  
+	  inc+=inc;                                 // so double the increment
 	  jhi =jlo+inc;
-	  if(jhi>l) {                               // off end of table         
+	  if(jhi>l) {                               // off end of table
 	    jhi=n;
 	    break;
 	  }
 	}
-      } else {                                      // hunt downward            
+      } else {                                      // hunt downward
 	if(jlo == 0) return ascnd? -1 : 0;
 	jhi = jlo;
 	jlo-= 1;
-	while(x<xarr[jlo] == ascnd) {               // not done hunting         
+	while((x<xarr[jlo]) == ascnd) {             // not done hunting
 	  jhi = jlo;
-	  inc+= inc;                                // so double the increment  
+	  inc+= inc;                                // so double the increment
 	  jlo = jhi-inc;
-	  if(jlo < 0) {                             // off end of table         
+	  if(jlo < 0) {                             // off end of table 
 	    jlo = 0;
 	    break;
 	  }
 	}
       }
     }
-    while (jhi-jlo != 1) {                          // bisection phase          
+    while (jhi-jlo != 1) {                          // bisection phase
       int jm=(jhi+jlo) >> 1;
-      if(x>=xarr[jm] == ascnd) jlo=jm;
+      if((x>=xarr[jm]) == ascnd) jlo=jm;
       else jhi=jm;
     }
     return jlo;
@@ -542,11 +542,12 @@ namespace WDutils {
     template<typename X, typename Y>
     Y operator()(X xi, const Array<X,1>&x, const Array<Y,1>&y) WDutils_THROWING
     {
-      if(x.size() != y.size())
+      if(x.size() != y.size()) {
 	if(file)
 	  WDutils_THROWN("[%s:%d]: Array size mismatch in Polev()",file,line);
 	else
 	  WDutils_THROW ("Array size mismatch in polev()");
+      }
       return operator()(xi,x.array(),y.array(),x.size());
     }
   };

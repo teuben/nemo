@@ -612,7 +612,7 @@ namespace {
   typedef tupel<Ndim,notreal> Vect;
 }
 falcON::data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
-  FIELD(f), INPUT(snap), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)
+  INPUT(snap), FIELD(f), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)
 {
   DebugInfo(5,"data_in::data_in(%s) ...\n",NemoTag(FIELD));
   if( INPUT.DATA )
@@ -699,7 +699,7 @@ void falcON::data_in::read(void*data, unsigned N)
     unsigned n = N*SUBN;
     notreal*buf= falcON_NEW(notreal, N);
     get_data_blocked(INPUT.stream(),NemoTag(FIELD), buf, n);
-    for(int i=0; i!=n; ++i) static_cast<real*>(data)[i] = buf[i];
+    for(unsigned i=0; i!=n; ++i) static_cast<real*>(data)[i] = buf[i];
     falcON_DEL_A(buf);
   } else 
     get_data_blocked(INPUT.stream(),NemoTag(FIELD), data, N*SUBN);
@@ -843,7 +843,7 @@ falcON::snap_out::~snap_out() falcON_THROWING
 //------------------------------------------------------------------------------
 falcON::data_out::data_out(snap_out const&snap, nemo_io::Field f)
 falcON_THROWING
-: FIELD(f), OUTPUT(snap), NWRITTEN(0),
+: OUTPUT(snap), FIELD(f), NWRITTEN(0),
   NTOT(OUTPUT.N(FIELD)), TYPE(nemo_io::type(FIELD)),
   SUBN(::is_scalar(FIELD)? 1: ::is_vector(FIELD)? NDIM : 2*NDIM)
 {

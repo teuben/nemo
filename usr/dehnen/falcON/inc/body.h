@@ -405,7 +405,7 @@ namespace falcON {
 	  TAU [0] = pow(0.5,KMAX);
 	  TAUH[0] = 0.5*TAU[0];
 	  TAUQ[0] = square(TAU[0]);
-	  for(int n=1; n!=NSTEPS; ++n) {
+	  for(unsigned n=1; n!=NSTEPS; ++n) {
 	    TAU [n] = TAUH[n-1];
 	    TAUH[n] = 0.5*TAU[n];
 	    TAUQ[n] = square(TAU[n]);
@@ -583,7 +583,7 @@ namespace falcON {
     }
     /// comparison between indices, also works in parallel across nodes
     bool is_less(index a, index b) const {
-      return  a.no() == b.no() &&  a.in() < b.in()
+      return  (a.no() == b.no() &&  a.in() < b.in())
 	||    BLOCK[a.no()]->FIRST < BLOCK[b.no()]->FIRST;
     }
     /// bodytype of body.

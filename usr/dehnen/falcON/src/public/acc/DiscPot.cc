@@ -79,7 +79,7 @@ namespace {
 				  npar>5? pars[5]:0.),  // eps
 	GalPot::GalaxyPotential ( 1, this, 0, 0 )
     {
-      if(npar<5 && nemo_debug(1) || nemo_debug(2) )
+      if((npar<5 && nemo_debug(1)) || nemo_debug(2) )
 	std::cerr<<
 	  "### nemo debug info:\n"
 	  " external potential \"DiscPot\" recognizes 5 parameters:\n"

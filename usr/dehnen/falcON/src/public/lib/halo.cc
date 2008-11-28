@@ -208,7 +208,7 @@ double HaloModifier::operator()(HaloDensity const&Model,
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 DoublePowerLawHalo::DoublePowerLawHalo(double inner, double outer, double trans)
-  : gi(inner), go(outer), et(trans), gg(go-gi), al(gg/et)
+  : go(outer), gi(inner), et(trans), gg(go-gi), al(gg/et)
 {
   if(gi < 0.)
     falcON_THROW("DoublePowerHalo: inner power-law slope < 0\n");
@@ -764,8 +764,8 @@ namespace {
 	(*RED)(r,rd1,rd2);
  	return r/(psi*psi)*(twice(rd1) + r*rd2);
       }
-    } else
-      return (*SPLINE)(psi);
+    }
+    return (*SPLINE)(psi);
   }
   //----------------------------------------------------------------------------
   inline double intgQ(double z) {                  // q = z^4; dq = 4 z^3 dz    

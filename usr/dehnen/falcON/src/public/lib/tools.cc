@@ -352,8 +352,8 @@ bool falcON::find_density_centre(const bodies*B,
     falcON_THROW("find_density_centre(): N=% < Ncen = %\n",nb,N);
 
   const int max_i = 100;
-  unsigned          n,no;
-  double            rh,r(hc),ro,dr,d1,d2;
+  unsigned          n,no(0);
+  double            rh,r(hc),ro(0),dr,d1,d2;
   vect_d            x(xc), g, go, h, v;
   if(r <= 0.) r=0.1;
   // initialize

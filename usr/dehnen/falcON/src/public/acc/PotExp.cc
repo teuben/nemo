@@ -150,7 +150,7 @@ namespace {
       falcON_THROWN("%s: data file required\n","PotExp");
     // 1 reading in parameters and initializing potential expansion
     double
-      o = npar>0? pars[0] : 0,
+//       o = npar>0? pars[0] : 0,
       a = npar>1? pars[1] : a_def,
       r = npar>2? pars[2] : r_def;
     int

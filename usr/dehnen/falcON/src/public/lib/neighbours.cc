@@ -140,7 +140,7 @@ namespace {
     /// \param R radius (half side) of cube
     bool inside(real Q, vect const&Z, real R) const
     {
-      real q=0,D;
+      real D;
       D=abs(Z[0]-X[0]); if(D>R || Q>square(R-D)) return false;
       D=abs(Z[1]-X[1]); if(D>R || Q>square(R-D)) return false;
       D=abs(Z[2]-X[2]); if(D>R || Q>square(R-D)) return false;
@@ -383,7 +383,7 @@ namespace {
     /// \param copy_flags if true, body flags will be copied (if present)
     NearestNeighbourSearch(const OctTree*t, int n, bool copy_flags=0)
       : NeighbourSearchBase(t), NDIR(max(1,n)),
-	BIGQ(12*square(TREE->root_radius())), LIST(0), NIAC(0)
+	BIGQ(12*square(TREE->root_radius())), NIAC(0), LIST(0) 
     {
       if(copy_flags && TREE->my_bodies()->have_flag())
 	for(leaf*l=TREE->begin_leafs(); l!=TREE->end_leafs(); ++l) {

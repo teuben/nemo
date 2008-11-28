@@ -62,7 +62,6 @@ void falcON::main() falcON_THROWING {
   nemo_in        IN(getparam("in"));
   nemo_out       OUT;
   Bodyfunc       FUNC(getparam("value"),getparam("pars"));
-  real           P[bodyfunc::MAXPAR], *PARS = 0;
   fieldset       NEED = FUNC.need();
   fieldbit       ADD(getparam("add")[0]);
   // sanity checks for added property and the value to be assigned to it

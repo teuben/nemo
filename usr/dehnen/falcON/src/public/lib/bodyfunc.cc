@@ -1110,7 +1110,7 @@ namespace {
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
-  : FUNC(0), TYPE(0), EXPR(0), NPAR(0), NEED(fieldset::o)
+  : FUNC(0), TYPE(0), NPAR(0), NEED(fieldset::o), EXPR(0)
 {
   if(oexpr == 0 || *oexpr == 0) return;
   size_t len = strlen(oexpr)+1;

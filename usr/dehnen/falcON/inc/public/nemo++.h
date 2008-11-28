@@ -615,8 +615,8 @@ namespace falcON {
     friend class data_in;
     //--------------------------------------------------------------------------
   private:
-    mutable data_in *DATA;                         // if non-zero: open snapshot
     nemo_in const   &INPUT;                        // our input          
+    mutable data_in *DATA;                         // if non-zero: open snapshot
     mutable int      FIELDS_READ;                  // fields read already       
     bool             HAS_TIME;                     // have simulation time?     
     unsigned         NTOT, NBOD[BT_NUM];           // # bodies, # bodies / type 

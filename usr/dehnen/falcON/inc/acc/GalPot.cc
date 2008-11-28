@@ -123,18 +123,18 @@ namespace GalPot {                                  // v0.4
     int ascnd=(xarr[l]>xarr[0]);
 
     if(!ascnd && xarr[l]==xarr[0] ) return -1;  // x_0 = x_l
-    if( ascnd && x<xarr[0] || !ascnd && x>xarr[0] ) return -1;
-    if( ascnd && x>xarr[l] || !ascnd && x<xarr[l] ) return  n;
+    if((ascnd && x<xarr[0]) || (!ascnd && x>xarr[0]) ) return -1;
+    if((ascnd && x>xarr[l]) || (!ascnd && x<xarr[l]) ) return  n;
 
     if(jlo<0 || jlo>l) {                   // input guess not useful,
       jlo = -1;                            //    go to bisection below
       jhi = n;
     } else {
       int inc = 1;
-      if(x>=xarr[jlo] == ascnd) {          // hunt upward
+      if((x>=xarr[jlo]) == ascnd) {          // hunt upward
 	if(jlo == l) return (x==xarr[l])? l : n;
 	jhi = jlo+1;
-	while(x>=xarr[jhi] == ascnd) {     // not done hunting
+	while((x>=xarr[jhi]) == ascnd) {     // not done hunting
 	  jlo =jhi;
 	  inc+=inc;                        // so double the increment
 	  jhi =jlo+inc;
@@ -147,7 +147,7 @@ namespace GalPot {                                  // v0.4
 	if(jlo == 0) return -1;
 	jhi = jlo;
 	jlo-= 1;
-	while(x<xarr[jlo] == ascnd) {      // not done hunting
+	while((x<xarr[jlo]) == ascnd) {      // not done hunting
 	  jhi = jlo;
 	  inc+= inc;                       // so double the increment
 	  jlo = jhi-inc;
@@ -160,7 +160,7 @@ namespace GalPot {                                  // v0.4
     }
     while (jhi-jlo != 1) {                 // bisection phase
       jm=(jhi+jlo) >> 1;
-      if(x>=xarr[jm] == ascnd) jlo=jm;
+      if((x>=xarr[jm]) == ascnd) jlo=jm;
       else jhi=jm;
     }
     return jlo;

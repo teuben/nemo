@@ -83,7 +83,7 @@ namespace WDutils {
 	(f,l)("caught std::bad_alloc\n");
     }
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l)("allocated %d %s = %d bytes @ %p\n",
+      DebugInformation(f,l)("allocated %lu %s = %lu bytes @ %p\n",
 			    n,nameof(T),n*sizeof(T),static_cast<void*>(t));
     return t;
   }
@@ -678,11 +678,12 @@ namespace WDutils {
     pool(size_type n, size_type k)
       : N      ( n<1? 1 : n ),
 	Kp     ( sizeof(link)<k? k : sizeof(link) ),
-	CHUNKS ( new chunk(N,Kp) ),
-	HEAD   ( LINK(CHUNKS->DATA) ),
 	NC     ( 1u ),
 	Na     ( 0u ),
-	Nmax   ( 0u ) {}
+	Nmax   ( 0u ),
+	CHUNKS ( new chunk(N,Kp) ),
+	HEAD   ( LINK(CHUNKS->DATA) )
+	  {}
 #undef LINK
     /// destruction: delete all chunks
     ~pool() {
@@ -1169,7 +1170,7 @@ namespace WDutils {
     /// reset: destruct and construct again
     /// \param[in] n new size of array
     void reset(int n) WDutils_THROWING {
-      if(n!=N || n && A==0) {
+      if(n!=N || (n && A==0)) {
 	if(A) WDutils_DEL_A(A);
 	N = n;
 	A = N>0? WDutils_NEW(T,N) : 0;
@@ -1194,7 +1195,7 @@ namespace WDutils {
       reset(n[0],x);
     }
     /// default constructor: size equal to 0
-    Array() : A(0), N(0) {}
+    Array() : N(0), A(0){}
     /// construction from sizes
     /// \param[in] n size of array in each dimension
     explicit

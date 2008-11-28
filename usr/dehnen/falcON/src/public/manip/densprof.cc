@@ -127,7 +127,7 @@ namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   class densprof : public manipulator {
   private:
-    const int        W;         ///< window size
+    const unsigned   W;         ///< window size
     mutable int      I;         ///< index of manipulation
     mutable output   OUT;       ///< file for output table
     char*  const     FILE;      ///< format for file name
@@ -275,7 +275,7 @@ namespace falcON { namespace Manipulate {
       EigenSymJacobiSorted<3,double>(Mxx,IV,ID,IR);
       double vp = abs(Mvp)*iM;
       HeapIndex(Rq.array(),N,Ir.array());
-      double Mh = 0.5*M, Mc(0.), mR;
+      double Mh = 0.5*M, Mc(0.), mR(0.);
       for(unsigned j=0; j!=N; ++j) {
 	double mi = SHOT->mass(T[ib+Ir[j]]);
 	Mc += mi;

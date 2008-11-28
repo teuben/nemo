@@ -65,14 +65,14 @@ void bodies::block::reset_flags() const
 {
   if(0 != DATA[fieldbit::f]) {
     if(TYPE.is_sph()) 
-      for(int n=0; n!=NALL; ++n)
+      for(unsigned n=0; n!=NALL; ++n)
 	datum<fieldbit::f>(n) = flags::sph;
     else
     if(TYPE.is_sink()) 
-      for(int n=0; n!=NALL; ++n)
+      for(unsigned n=0; n!=NALL; ++n)
 	datum<fieldbit::f>(n) = flags::sink;
     else
-      for(int n=0; n!=NALL; ++n)
+      for(unsigned n=0; n!=NALL; ++n)
 	datum<fieldbit::f>(n) = flags::empty;
   }
 }
@@ -80,7 +80,7 @@ void bodies::block::reset_flags() const
 void bodies::block::flag_all_as_active() const falcON_THROWING
 {
   if(0 != DATA[fieldbit::f])
-    for(int n=0; n!=NALL; ++n)
+    for(unsigned n=0; n!=NALL; ++n)
       datum<fieldbit::f>(n).add(flags::active);
   else 
     falcON_THROW("in bodies::flag_all_as_active(): flags not supported");
@@ -89,7 +89,7 @@ void bodies::block::flag_all_as_active() const falcON_THROWING
 void bodies::block::reset_data(fieldset b) const falcON_THROWING {
 #define RESETDATA(BIT,NAME)			\
   if(DATA[BIT] && b.contain(BIT) && NBOD)	\
-    for(int n=0; n!=NBOD; ++n)			\
+    for(unsigned n=0; n!=NBOD; ++n)			\
       field_traits<BIT>::set_zero(datum<BIT>(n));
  DEF_NAMED(RESETDATA)
 #undef RESETDATA
@@ -337,10 +337,6 @@ void bodies::block::read_posvel(data_in &inpt,
 		 "(NBOD=%d)\n",N,from,NBOD);
   if(want.contain(fieldbit::x)) add_field(fieldbit::x);
   if(want.contain(fieldbit::v)) add_field(fieldbit::v);
-  vect*pos=want.contain(fieldbit::x)?
-    static_cast<vect*>(DATA[fieldbit::x]) + from : 0;
-  vect*vel=want.contain(fieldbit::v)?
-    static_cast<vect*>(DATA[fieldbit::v]) + from : 0;
   inpt.read_phases(want.contain(fieldbit::x)?
 		   static_cast<vect*>(DATA[fieldbit::x]) + from : 0,
 		   want.contain(fieldbit::v)?
@@ -374,7 +370,7 @@ void bodies::block::write_potpex(data_out&outp,
   if(from + N > NBOD)
     falcON_THROW("bodies::block::write_potpex(): cannot write that many");
   real *P = falcON_NEW(real,N);
-  for(int n=0,m=from; n!=N; ++n,++m)
+  for(unsigned n=0,m=from; n!=N; ++n,++m)
     P[n] = const_datum<fieldbit::p>(m) + const_datum<fieldbit::q>(m);
   outp.write(P,N);
   falcON_DEL_A(P);
@@ -394,12 +390,12 @@ void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
   add_field(f);
   char    *C = static_cast<char*>(DATA[value(f)])+from*falcON::size(f);
   unsigned R = I.read_bytes(C, N*falcON::size(f));
-  if(swap) 
+  if(swap) {
     if(is_vector(f))
       falcON::swap_bytes(static_cast<void*>(C), sizeof(real), Ndim*N);
     else
       falcON::swap_bytes(static_cast<void*>(C), falcON::size(f), N);
-
+  }
   if(R != N*falcON::size(f))
     falcON_THROW("bodies::block::read_Fortran(%c): "
 		 "could only read %u of %u bytes\n",R,N*falcON::size(f));
@@ -456,6 +452,7 @@ bodies::iterator& bodies::iterator::write_data(data_out&D, unsigned W)
     K += w;
     if(K >= B->N_bodies()) next_block();
   }
+  return *this;
 }
 ////////////////////////////////////////////////////////////////////////////////
 bodies::iterator& bodies::iterator::write_potpex(data_out&D, unsigned W)
@@ -469,6 +466,7 @@ bodies::iterator& bodies::iterator::write_potpex(data_out&D, unsigned W)
     K += w;
     if(K >= B->N_bodies()) next_block();
   }
+  return *this;
 }
 ////////////////////////////////////////////////////////////////////////////////
 bodies::iterator& bodies::iterator::read_posvel(data_in& D, fieldset get,
@@ -1151,13 +1149,13 @@ void bodies::read_simple_ascii(std::istream  &in,
 {
   // 1. create table of readers                                                 
   fieldset get;
-  p_reader read [BT_NUM][100] = {0};
-  p_writer write[BT_NUM][100] = {0};
+  p_reader read [BT_NUM][100] = {{0}};
+  p_writer write[BT_NUM][100] = {{0}};
   if(Ni > 100) {
     Ni = 100;
     falcON_Warning(" can only read the first 100 data entries\n");
   }
-  for(int i=0; i!=Ni; ++i) {
+  for(unsigned i=0; i!=Ni; ++i) {
     if(debug(6)) DebugInfo("bodies::read_simple_ascii(): item[%d]=%c\n",
 			   i,letter(item[i]));
     if(get.contain(item[i]))
@@ -1193,7 +1191,7 @@ void bodies::read_simple_ascii(std::istream  &in,
 	while( in && eat_line(in,'#') );
 	if(!in) falcON_THROW("bodies::read_simple_ascii(): "
 			     "end of input before data have been read");
-	for(int i=0; i!=Ni; ++i)
+	for(unsigned i=0; i!=Ni; ++i)
 	  if(read[t][i]) {
 	    read [t][i](in,Bi);
 	    if(write[t][i]) write[t][i](std::cerr,Bi);
@@ -1292,9 +1290,9 @@ unsigned bodies::findNeighbours(const body&B, unsigned K, Array<index>&I) const
   if(!have_pos())
     falcON_THROW("bodies::findNeighbours(): have no positions\n");
   Nbour*List = falcON_NEW(Nbour,K);
-  for(int k=0; k!=K; ++k)
+  for(unsigned k=0; k!=K; ++k)
     List[k].Q = Huge;
-  int Niac=0;
+  unsigned Niac=0;
   LoopSubsetBodies(this,b) {
     real q = dist_sq(pos(B),pos(b));
     if(List->Q > q) {
@@ -1307,7 +1305,7 @@ unsigned bodies::findNeighbours(const body&B, unsigned K, Array<index>&I) const
   MaxHeap::sort(List,K);
   I.reset(K);
   if(Niac < K) K = Niac;
-  for(int k=0; k!=K; ++k)
+  for(unsigned k=0; k!=K; ++k)
     I[k] = List[k].I;
   falcON_DEL_A(List);
   return K;
@@ -1330,10 +1328,11 @@ namespace {
       PterWithKey(const void* p, const char*k, size_t s, const char*n,
 		  PterWithKey*x)
 	: pter(p),
-	  size(s),
-	  next(x),
 	  key (falcON_NEW(char, strlen(k)+strlen(n)+2)),
-	  name(key + strlen(k) + 1) {
+	  name(key + strlen(k) + 1),
+	  size(s),
+	  next(x) 
+      {
 	strcpy(key ,k);
 	strcpy(name,n);
       }
@@ -1601,7 +1600,7 @@ namespace {
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
   struct GadgetHeader {
-    int          npart[6];          ///< # particles per type in this file
+    unsigned int npart[6];          ///< # particles per type in this file
     double       masstab[6];        ///< if non-zero: mass of particle of type
     double       time;              ///< simulation time of snapshot
     double       redshift;          ///< redshift of snapshot
@@ -1809,7 +1808,7 @@ namespace {
 falcON_TRAITS(::GadgetHeader,"GadgetHeader");
 //------------------------------------------------------------------------------
 #define READ(BIT)							\
-  if(!is_sph(BIT) && nd || ns) {					\
+  if((!is_sph(BIT) && nd) || ns) {					\
     unsigned nr = is_sph(BIT)? ns : ns+nd;				\
     unsigned fr = rec+rec + nr*field_traits<BIT>::size;			\
     if(fsze+fr > fsize) {						\
@@ -1961,14 +1960,14 @@ double bodies::read_gadget(const char*fname,
 	add_field(fieldbit::m);
 	if(header->npart[0]) {
 	  if(header->masstab[0])
-	    for(int b=0; b!=header->npart[0]; ++b,++sph)
+	    for(unsigned b=0; b!=header->npart[0]; ++b,++sph)
 	      sph.mass() = header->masstab[0];
 	  else
 	    sph.read_Fortran(F, fieldbit::m, header->npart[0], swap);
 	}
 	for(int k=1; k!=6; ++k) if(header->npart[k]) {
 	  if(header->masstab[k])
-	    for(int b=0; b!=header->npart[k]; ++b,++std)
+	    for(unsigned b=0; b!=header->npart[k]; ++b,++std)
 	      std.mass() = header->masstab[k];
 	  else
 	    std.read_Fortran(F, fieldbit::m, header->npart[k], swap);
@@ -1984,10 +1983,10 @@ double bodies::read_gadget(const char*fname,
       body sph(SPH), std(STD);
       add_field(fieldbit::m);
       if(header->npart[0])
-	for(int b=0; b!=header->npart[0]; ++b,++sph)
+	for(unsigned b=0; b!=header->npart[0]; ++b,++sph)
 	  sph.mass() = header->masstab[0];
       for(int k=1; k!=6; ++k) if(header->npart[k]) {
-	for(int b=0; b!=header->npart[k]; ++b,++std)
+	for(unsigned b=0; b!=header->npart[k]; ++b,++std)
 	  std.mass() = header->masstab[k];
       }
       fgot |= fieldset(fieldbit::m);

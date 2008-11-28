@@ -543,7 +543,7 @@ namespace {
       box* P = new_box(nl);                        // get box off the stack     
       P->LEVEL    = B->LEVEL;                      // set level                 
       P->centre() = B->centre();                   // copy centre of parent     
-      if(!shrink_to_octant(P,i))                   // shrink to correct octant  
+      if(!shrink_to_octant(P,i)) {                 // shrink to correct octant  
 	if(L)
 	  falcON_Error("exceeding maximum tree depth of %d\n         "
 		       "(presumably more than Ncrit=%d bodies have a "
@@ -555,6 +555,7 @@ namespace {
 	  falcON_Error("exceeding maximum tree depth of %d\n         "
 		       "(presumably more than Ncrit=%d bodies have a "
 		       "common position which may be NaN)\n",DMAX,NCRIT);
+      }
 #ifdef falcON_MPI
       P->PEANO    = B->PEANO;                      // copy peano map            
       P->PEANO.shift_to_kid(i);                    // shift peano map           
@@ -830,7 +831,7 @@ namespace {
     nleafs_(C) = 0;                                // reset cell: # leaf kids   
     int i,nsub=0;                                  // octant, counter: sub-boxes
     node*const*N;                                  // pter to sub-node          
-    for(i=0, N=P->OCT; i!=Nsub; ++i,++N) if(*N)    // LOOP non-empty octants    
+    for(i=0, N=P->OCT; i!=Nsub; ++i,++N) if(*N) {  // LOOP non-empty octants    
       if(P->marked_as_box(i)) ++nsub;              //   IF   sub-boxes: count   
       else {                                       //   ELIF sub-dots:          
 #ifdef falcON_track_bug
@@ -841,7 +842,8 @@ namespace {
 #endif
 	static_cast<dot*>(*N)->set_leaf(Lf++);     //     set leaf              
 	nleafs_(C)++;                              //     inc # sub-leafs       
-      }                                            // END LOOP                  
+      }                                            //   END IF
+    }                                              // END LOOP                  
     if(nsub) {                                     // IF sub-boxes              
       int c = NoCell(TREE,C);                      //   index of cell           
       OctTree::Cell*Ci=Cf;                         //   remember free cells     
@@ -920,7 +922,7 @@ namespace {
       nleafs_(C) = 0;                              //   reset cell: # leaf kids 
       int i,nsub=0;                                //   octant, # sub-boxes     
       node*const*N;                                //   sujb-node pointer       
-      for(i=0,N=P->OCT; i!=Nsub; ++i,++N) if(*N)   //   LOOP non-empty octants  
+      for(i=0,N=P->OCT; i!=Nsub; ++i,++N) if(*N) { //   LOOP non-empty octants  
 	if(P->marked_as_box(i)) ++nsub;            //     IF   sub-boxes: count 
 	else {                                     //     ELIF sub-dots:        
 #ifdef falcON_track_bug
@@ -931,6 +933,7 @@ namespace {
 #endif
 	  static_cast<dot*>(*N)->set_leaf(Lf++);   //       set leaf            
 	  nleafs_(C)++;                            //       inc # sub-leafs     
+	}                                          //     END IF
       }                                            //   END LOOP                
       if(nsub) {                                   //   IF has sub-boxes        
 	int c = NoCell(TREE,C);                    //     index of cell         
@@ -1318,7 +1321,7 @@ void OctTree::build(int        const&nc,           //[I: N_crit]
   report REPORT("OctTree::build(%d,%d)",nc,dm);
   SET_I
   if(dm >= 1<<8)
-    falcON_Error("OctTree: maximum tree depth must not exceed %d",1<<8-1);
+    falcON_Error("OctTree: maximum tree depth must not exceed %d",(1<<8)-1);
   TreeBuilder TB(this,x0,nc,dm);                   // initialize TreeBuilder    
   SET_T(" time for TreeBuilder::TreeBuilder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          

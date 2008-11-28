@@ -149,10 +149,10 @@ namespace WDutils {
     const int  line;          ///< line number
     /// constructor: get library name
     DebugInformation(const char*__lib = "WDutils")
-      : file(0), line(0), lib(__lib) {}
+      : file(0), lib(__lib), line(0) {}
     /// constructor: get file name, line number, and library name
     DebugInformation(const char*__file, int __line, const char*__lib= "WDutils")
-      : file(__file), line(__line), lib(__lib) {}
+      : file(__file), lib(__lib), line(__line) {}
     /// print info message to stderr, report [file:line] if known.
     /// \param[in] fmt debug info message (C-type format string)
     /// \param[in] ... data to be formated
@@ -245,10 +245,10 @@ namespace WDutils {
     const int  line;          ///< line number
     /// constructor: get library name
     Error(const char*__lib = "WDutils")
-      : file(0), line(0), lib(__lib) {}
+      : file(0), lib(__lib), line(0) {}
     /// constructor: get file name, line number, and library name
     Error(const char*__file, int __line, const char*__lib = "WDutils")
-      : file(__file), line(__line), lib(__lib) {}
+      : file(__file), lib(__lib), line(__line) {}
     /// print error message to stderr, report [file:line] if known.
     void operator() (const char*fmt, ...) const;
   };
@@ -274,10 +274,10 @@ namespace WDutils {
     const int  line;          ///< line number
     /// constructor: get library name
     Warning(const char*__lib = "WDutils")
-      : file(0), line(0), lib(__lib) {}
+      : file(0), lib(__lib), line(0) {}
     /// constructor: get file name, line number, and library name
     Warning(const char*__file, int __line, const char*__lib = "WDutils")
-      : file(__file), line(__line), lib(__lib) {}
+      : file(__file), lib(__lib), line(__line) {}
     /// print error message to stderr, report [file:line] if known.
     void operator() (const char*fmt, ...) const;
   };

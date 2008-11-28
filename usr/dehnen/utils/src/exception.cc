@@ -70,7 +70,7 @@ WDutils::RunInfo::RunInfo()
     char file[64];
     SNprintf(file,64,"/proc/%s/cmdline",__pid);
     std::ifstream in(file);
-    if(file) {
+    if(in) {
       int i,e=0;
       for(i=0; i!=1024; ++i) __cmd[i]=0;
       in.getline(__cmd,1023);
@@ -127,7 +127,7 @@ namespace {
       fprintf(stderr," @%d",RunInfo::mpi_proc());
     if(file)
       fprintf(stderr," [%s:%d]",file,line);
-    fprintf(stderr,": ",file,line);
+    fprintf(stderr,": ");
     vfprintf(stderr,fmt,ap);
     if (fmt[strlen(fmt)-1] != '\n')
       fprintf(stderr,"\n");
@@ -290,9 +290,9 @@ WDutils::message::message(const char*fmt, ...) throw(exception)
 int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
   WDutils_THROWING
 {
-  va_list  ap;
+  va_list ap;
   va_start(ap,fmt);
-  int w = std::vsnprintf(str,l,fmt,ap);
+  size_t w = std::vsnprintf(str,l,fmt,ap);
   va_end(ap);
   if(w==l) WDutils_THROW("snprintf(): trailing 0 lost");
   if(w >l) WDutils_THROW("snprintf(): string size exceeded [%d:%d]",w,l);
@@ -303,9 +303,9 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
 int WDutils::snprintf__::operator()(char*str, size_t l, const char* fmt, ...)
   WDutils_THROWING
 {
-  va_list  ap;
+  va_list ap;
   va_start(ap,fmt);
-  int w = std::vsnprintf(str,l,fmt,ap);
+  size_t w = std::vsnprintf(str,l,fmt,ap);
   va_end(ap);
   if(w==l) WDutils_THROW("[%s:%d]: snprintf(): trailing 0 lost",file,line);
   if(w >l) WDutils_THROW("[%s:%d]: snprintf(): string size exceeded [%d:%d]",

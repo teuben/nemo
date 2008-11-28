@@ -172,7 +172,7 @@ namespace falcON { namespace Manipulate {
     report_bodies(const double*pars, int npar, const char*file) falcON_THROWING
     : PREC ( npar>0? int(pars[0]) : 8 ), NSET (0), OUT(0), KEY(0)
     {
-      if(npar==0 && debug(1) || debug(2))
+      if((npar==0 && debug(1)) || debug(2))
 	std::cerr<<
 	  " Manipulator \""<<name()<<"\":\n"
 	  " writes basic data for file(s) for bodies in_subset()"

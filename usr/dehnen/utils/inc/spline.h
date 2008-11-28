@@ -89,7 +89,7 @@ namespace WDutils {
       }
       for(int i=1; i!=n1; ++i) {
 	scalar_type dx1 = x[i+1]-x[i];
-	if(ascending && dx1<=zero || !ascending && dx1>=zero )
+	if((ascending && dx1<=zero) || (!ascending && dx1>=zero) )
 	  WDutils_THROW("cubic spline: bad x input:"
 			"x[%d]=%16.12e x[%d]=%16.12e\n", i,x[i],i+1,x[i+1]);
 	scalar_type dx2 = x[i+1]-x[i-1];

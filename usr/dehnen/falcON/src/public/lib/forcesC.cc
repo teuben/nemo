@@ -128,7 +128,7 @@ namespace {
   (static_cast<falcON::forces::indx_pair*>(static_cast<void*>(ELPAIR)))
 
   inline void __falcON_iactionlist(elem_pair *IL,
-				   int        NL,
+				   unsigned   NL,
 				   int       *NS,
 				   const real*H,
 				   bool       Max,

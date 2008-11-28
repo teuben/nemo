@@ -61,9 +61,12 @@ namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   class add_plummer : public manipulator {
   private:
+    const   int     N;
+    const   double  GM,R;
     const   Random3 Ran;
-    const   int     N,NP;
-    const   double  GM,R,V,m,e;
+    const   double  m;
+    const   int     NP;
+    const   double  e,V;
     mutable int     K;
     //--------------------------------------------------------------------------
   public:
@@ -152,16 +155,16 @@ namespace falcON { namespace Manipulate {
     add_plummer(const double*pars,
 		int          npar,
 		const char  *file) :
-      N   (npar>0? int (pars[0]) : 0 ),
-      NP  (npar>5? int (pars[5]) : 1 ),
-      GM  (npar>1?      pars[1]  : 1.),
-      R   (npar>2?      pars[2]  : 1.),
-      V   ( sqrt(GM/R ) ),
+      N   (npar>0?  int (pars[0]) : 0 ),
+      GM  (npar>1?       pars[1]  : 1.),
+      R   (npar>2?       pars[2]  : 1.),
       Ran (npar>3 && int(pars[3])? long(pars[3]) : long(time(0)) ),
-      m   (npar>4?      pars[4]  : N? GM/N : 0.),
-      e   (npar>6?      pars[6]  : 0.1 )
+      m   (npar>4?       pars[4]  : N? GM/N : 0.),
+      NP  (npar>5?  int (pars[5]) : 1 ),
+      e   (npar>6?       pars[6]  : 0.1 ),
+      V   ( sqrt(GM/R ) )
     {
-      if(npar<6 && debug(1) || debug(2))
+      if((npar<6 && debug(1)) || debug(2))
 	std::cerr<<
 	  "\n Manipulator \"add_plummer\":\n"
 	  " adds N new bodies drawn from a Plummer sphere, one per time step;\n"

@@ -100,7 +100,7 @@ namespace falcON { namespace Manipulate {
     symmetrize_pairs(const char*pars,
 		     const char*file)
     {
-      if(pars && debug(1) || debug(2))
+      if((pars && debug(1)) || debug(2))
 	std::cerr<<
 	  " Manipulator \""<<name()<<"\":\n"
 	  " symmetrize  vectors  w.r.t. origin"

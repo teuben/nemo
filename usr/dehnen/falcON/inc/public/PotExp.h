@@ -479,45 +479,6 @@ namespace falcON {
     void SetPotential(Anlm const&A, int n, const tupel<3,T>*x, T*P,
 		      const int*f, int add) const;
     //--------------------------------------------------------------------------
-    /// self-gravity:\n
-    /// 1 compute \f$A_{nlm}\f$ from a set of bodies\n
-    /// 2 compute gravity from the \f$A_{nlm}\f$ for the same bodies\n
-    /// 3 return the normalized coefficients\n
-    ///                                                                         
-    /// \warning
-    /// I wrote this code in the presumption that it will be faster than the
-    /// sequence of AddCoeffs(), Normalize(), and SetGravity(), because the
-    /// spherical coordinates are computed once only (when the coefficients are
-    /// computed) and remembered for when gravity is computed from the coeffs.
-    /// However, it turns out that in fact this code is slower! Presumably, this
-    /// is because the computation of the spherical coordinates is in fact
-    /// faster than loading them from memory.\n
-    /// Moreover, this routine is not suitable for a body data layout in blocks
-    /// (though it could be amended to fit this).
-    ///
-    /// \param A coefficients \f$A_{nlm}\f$; on output: normalized coeffs
-    /// \param n number of bodies
-    /// \param m array with body masses
-    /// \param x array with body positions
-    /// \param P array with body potentials to be assigned/added to
-    /// \param F array with body accelerations to be assigned/added to
-    /// \param f array with body flags (can be null)
-    /// \param k flag (see note below)
-    /// \param all compute gravity for all (or only those with f[i]&1 == true)?
-    /// \param add flag (see note below)
-    /// \param G Newton's gravitation constant
-    /// \note If flags are provided and 'k' is non-zero, only the contributions 
-    ///       of bodies with (f[i] & k) is true are added to the \f$A_{nlm}\f$.
-    /// \note If the 1st bit of the last argument is set, potentials are      
-    ///       added, otherwise assigned.\n
-    ///       Likewise, if the second bit of that arguement  is set,
-    ///       accelerations are added, otherwise assigned. Thus, a value
-    ///       of 0 means both potentials and acclerations get assigned.
-    template<typename T>
-    void SelfGravity(Anlm&A, int n, const T*m, const tupel<3,T>*x,
-		     T*P, tupel<3,T>*F, const int*f,
-		     int k, bool all, int add, scalar G=1) const;
-    //--------------------------------------------------------------------------
   protected:
     template<typename T>
     void AddCoeffs(int m, Anlm*A, int n, const tupel<3,T>*x, const T**y) const;

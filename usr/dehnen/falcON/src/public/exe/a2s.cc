@@ -100,7 +100,7 @@ void falcON::main() falcON_THROWING
     item[K] = fieldbit(get[K]);
   unsigned Nbod[BT_NUM]={0};
   if(hasvalue("Nbod")) {
-    if(BT_NUM != getaparam("Nbod",Nbod,BT_NUM))
+    if(static_cast<int>(BT_NUM) != getaparam("Nbod",Nbod,BT_NUM))
       falcON_Error("keyword \"Nbod\" must give %d numbers",BT_NUM);
   } else {
     unsigned N = getiparam("N");

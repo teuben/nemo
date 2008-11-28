@@ -1,32 +1,32 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   src/public/lib/WD99disc.cc                                          
-///                                                                             
-/// \brief  generating initial conditions from Dehnen (1999) disc model         
-///                                                                             
-/// \author Paul McMillan                                                       
-/// \author Walter Dehnen                                                       
-/// \date   2000-2008                                                           
-///                                                                             
+///
+/// \file   src/public/lib/WD99disc.cc
+///
+/// \brief  generating initial conditions from Dehnen (1999) disc model
+///
+/// \author Paul McMillan
+/// \author Walter Dehnen
+/// \date   2000-2008
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2000-2008  Walter Dehnen, Paul McMillan                        
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2000-2008  Walter Dehnen, Paul McMillan
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/WD99disc.h>
 #include <utils/numerics.h>
@@ -120,14 +120,13 @@ WD99disc::PlanarOrbit::PlanarOrbit(double R,
   Omc=roota/rootr;                       // Omega: Circular frequency
   kap=sqrt(d2p+3*CENACC* ire);           // kappa: Epicycle frequency
   gam=2.* Omc/kap;                       // gamma (2*Omega/kappa)
-  sigre=    (rs)? s0*exp(-re/rs)  :      // sigma: Velocity disp. at Re 
+  sigre=    (rs)? s0*exp(-re/rs)  :      // sigma: Velocity disp. at Re
               3.36*sdens*Q/kap;
   sigre *= sigcorr;
   Lorb=Lc+(sigre*sigre/Omc)*log(xi);     // Ang. Mom. of THIS orbit.
   range=(Lc+Lorb<0)?  false : (Lorb == 0.)? false:
-        (Lorb == Lc)? false : true;      // Try again? 
-  
-  vect_d wo,wn;
+        (Lorb == Lc)? false : true;      // Try again?
+  vect_d wo(0.),wn(0.);
   int NforW=30000;
   W = falcON_NEW(vect_d,NforW);   // Use CashKarp integrator to integrate orbit
   dT = 0.001*TPi/kap; 
@@ -292,28 +291,29 @@ WD99disc::WD99disc(int    no,                 // # particles/orbit (approx)
 		   double z0,                 // scale height
 		   double eps,                // particle smoothing length
 		   const acceleration *pe) :             
+  
+  n1(int(200*log10(rmax/rmin))),
+  n(n1+1),
+  lr(falcON_NEW(double,n)),
+  pot(falcON_NEW(double,n)),
+  dpdr(falcON_NEW(double,n)),
+  sig0(0),
   No(no),
   Rd(rd),
   iRd(1./rd),
   Dens0(dens0),
-  Qmin(qmin),  // Not a minimum any more. Too lazy to change all the references
   Rsig(rsig),
-  sig0(0),
+  Qmin(qmin),  // Not a minimum any more. Too lazy to change all the references
   Z0(z0),
   Eps(eps),
   Mt(TPi*Dens0*Rd*Rd),
-  Pe(pe),
-  Disc(0, Rd),
   rmin(0.001*Rd),
-  rmax(1000*Rd)
+  rmax(1000*Rd),
+  Pe(pe),
+  Disc(0, Rd)
 {
   // output tab("RPA.txt");
-  n1= int(200*log10(rmax/rmin));
-  n=n1+1;
   const double dlr= log(rmax/rmin)/double(n1);
-  lr    = falcON_NEW(double,n);
-  pot   = falcON_NEW(double,n);
-  dpdr  = falcON_NEW(double,n);
   lr[0] = log(rmin);
   for(int i=1; i!=n; ++i)
     lr[i] = lr[0] + i * dlr;
@@ -557,7 +557,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
 	  Bi.eps() = Eps;
 
 	if(giveF){
-	  double Stilda;
+	  double Stilda(0.);
 	  if(Re>=RTar[Tsize-1]) Stilda=Dens;
 	  else for(int m=1;m!=Tsize;++m) 
 	    if(Re<RTar[m] && Re>=RTar[m-1]) 
@@ -670,7 +670,7 @@ void WD99disc::iterate(int tsize,
   // Function called to iterate mass distribution still closer to required
   // Same idea as above.
   
-  double rando,Re,Xi,temporary,tempminp[tsize],tmpso[tsize],tmpvo[tsize];
+  double rando,Re,Xi,temporary(0),tempminp[tsize],tmpso[tsize],tmpvo[tsize];
 
   for(int i=0;i!=tsize;++i){
     tempminp[i]=0.;
