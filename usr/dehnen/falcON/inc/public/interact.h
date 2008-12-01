@@ -508,7 +508,7 @@ namespace falcON {
     // data of class BasicIactor                                                
     //--------------------------------------------------------------------------
   private:
-    const int NCB, NCC, NCL;                         // params control direct   
+    const unsigned NCB, NCC, NCL;                    // params control direct   
     //--------------------------------------------------------------------------
     // abstract methods, MUST be provided by derived class                      
     //--------------------------------------------------------------------------
@@ -526,7 +526,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
   protected:
     explicit
-    BasicIactor(const int dir[4] = Default::direct) :
+    BasicIactor(const unsigned dir[4] = Default::direct) :
       NCB(dir[1]), NCC(dir[2]), NCL(dir[3]) {}
     //--------------------------------------------------------------------------
   public:

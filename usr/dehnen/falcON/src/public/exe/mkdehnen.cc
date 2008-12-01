@@ -109,13 +109,6 @@ void falcON::main() falcON_THROWING
     (hasvalue("epar")  ? fieldset::e : fieldset::o) |
 #endif
     fieldset::basic);
-#ifdef falcON_PROPER
-  const double   MArs  (getdparam_z("MA_rs"));
-  const double   MAeta (getdparam_z("MA_eta"));
-  const double   MAmmm (getdparam_z("MA_mmm"));
-  const double   MAnmax(getdparam  ("MA_nmax"));
-  const bool     MAperi(getbparam  ("MA_peri"));
-#endif
   //----------------------------------------------------------------------------
   // 2. create initial conditions from a Dehnen model using mass adaption       
   //----------------------------------------------------------------------------

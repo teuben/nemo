@@ -59,10 +59,10 @@ namespace falcON {
 #endif
     static indx    &nleafs_(OctTree::Cell* const&C) { return C->NLEAFS; }
     static indx    &ncells_(OctTree::Cell* const&C) { return C->NCELLS; }
-    static int     &number_(OctTree::Cell* const&C) { return C->NUMBER; }
-    static int     &fcleaf_(OctTree::Cell* const&C) { return C->FCLEAF; }
-    static int     &fccell_(OctTree::Cell* const&C) { return C->FCCELL; }
-    static int     &pacell_(OctTree::Cell* const&C) { return C->PACELL; }
+    static unsigned&number_(OctTree::Cell* const&C) { return C->NUMBER; }
+    static unsigned&fcleaf_(OctTree::Cell* const&C) { return C->FCLEAF; }
+    static unsigned&fccell_(OctTree::Cell* const&C) { return C->FCCELL; }
+    static unsigned&pacell_(OctTree::Cell* const&C) { return C->PACELL; }
     static vect    &centre_(OctTree::Cell* const&C) { return C->CENTRE; }
     //--------------------------------------------------------------------------
     static void copy_sub  (OctTree::Cell* const&C, const OctTree::Cell* const&P) {

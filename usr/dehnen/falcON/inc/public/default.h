@@ -145,7 +145,7 @@ namespace falcON {
     // the default maximum tree depth                                           
     //--------------------------------------------------------------------------
 #define falcON_MAXDEPTH_TEXT "100"
-    const int  MaxDepth     = 100;
+    const unsigned  MaxDepth     = 100;
     //--------------------------------------------------------------------------
     // the default values for the parameter controlling direct summation:       
     //-------------------------------------------------------------------------+
@@ -168,28 +168,28 @@ namespace falcON {
 #ifdef falcON_SSE_CODE
 # if   falcON_ORDER == 3
 #   define falcON_NCRIT_TEXT  "16"
-    const int  Ncrit         = 16;
-    const int  direct[4]     = {4,128,16,64};             
+    const unsigned  Ncrit         = 16;
+    const unsigned  direct[4]     = {4,128,16,64};             
 #  elif falcON_ORDER == 4
 #   define falcON_NCRIT_TEXT  "32"
-    const int  Ncrit         = 32;
-    const int  direct[4]     = {32,256,32,128};             
+    const unsigned  Ncrit         = 32;
+    const unsigned  direct[4]     = {32,256,32,128};             
 # else
 #   define falcON_NCRIT_TEXT  "48"
-    const int  Ncrit         = 48;
-    const int  direct[4]     = {48,512,48,256};             
+    const unsigned  Ncrit         = 48;
+    const unsigned  direct[4]     = {48,512,48,256};             
 # endif
 
 #else  // ! falcON_SSE_CODE
 
 # if   falcON_ORDER == 3
 #  define falcON_NCRIT_TEXT  "6"
-    const int  Ncrit        = 6;
-    const int  direct[4]    = {3,128, 6,64};             
+    const unsigned  Ncrit        = 6;
+    const unsigned  direct[4]    = {3,128, 6,64};             
 # else
 #  define falcON_NCRIT_TEXT  "20"
-    const int  Ncrit        = 20;
-    const int  direct[4]    = {20,128,20,64};             
+    const unsigned  Ncrit        = 20;
+    const unsigned  direct[4]    = {20,128,20,64};             
 # endif
 #endif //   falcON_SSE_CODE
 
@@ -198,8 +198,8 @@ namespace falcON {
     //-------------------------------------------------------------------------+
 #ifdef falcON_SPH
 #  define falcON_SPHNCRIT_TEXT "32"
-    const int  SPHNcrit     =   32;
-    const int  SPHdirect[3] = {128,32,64};
+    const unsigned  SPHNcrit     =   32;
+    const unsigned  SPHdirect[3] = {128,32,64};
 #endif
   } // namespace Default {
 } // namespace falcON {

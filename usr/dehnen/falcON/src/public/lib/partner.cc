@@ -155,7 +155,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     explicit
-    BasicFinder(const int dir[4] = Default::direct)
+    BasicFinder(const unsigned dir[4] = Default::direct)
       : BasicIactor<PartnerEstimator>(dir) {}
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -211,7 +211,7 @@ namespace {
     BasicLister(const bodies  *b,
 		const unsigned n,
 		indx_pair     *l,
-		const int dir[4] = Default::direct)
+		const unsigned dir[4] = Default::direct)
       : BasicFinder<taker>(dir), BODIES(b), MAX(n), BL(l), N(0) {}
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -321,7 +321,7 @@ namespace {
 		 const real     t,
 		 const unsigned n,
 		 indx_pair     *l,
-		 const int      dir[4] = Default::direct) :
+		 const unsigned dir[4] = Default::direct) :
       BasicLister<take_sticky>(b,n,l,dir), TAU(t) {}
     //--------------------------------------------------------------------------
     bool split_first(cell_iter const&A, cell_iter const&B) const {
@@ -359,7 +359,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
   public:
-    NeighbourCounter(const int dir[4] = Default::direct)
+    NeighbourCounter(const unsigned dir[4] = Default::direct)
       : BasicFinder<take_sph>(dir) {}
     //--------------------------------------------------------------------------
     bool split_first(cell_iter const&A, cell_iter const&B) const {
@@ -403,7 +403,7 @@ namespace {
     NeighbourLister(const bodies  *b,
 		    const unsigned n,
 		    indx_pair     *l,
-		    const int      dir[4] = Default::direct)
+		    const unsigned dir[4] = Default::direct)
       : BasicLister<take_sph>(b,n,l,dir) {}
     //--------------------------------------------------------------------------
     bool split_first(cell_iter const&A, cell_iter const&B) const {
@@ -442,7 +442,7 @@ namespace {
       return is_twig(B) || size(A) > size(B);
     }
     //--------------------------------------------------------------------------
-    explicit PartnerCounter(const int dir[4] = Default::direct)
+    explicit PartnerCounter(const unsigned dir[4] = Default::direct)
       : BasicFinder<take_sph>(dir) {}
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -480,7 +480,7 @@ namespace {
     PartnerLister(const bodies  *b,
 		  const unsigned n,
 		  indx_pair     *l,
-		  const int      dir[4] = Default::direct)
+		  const unsigned dir[4] = Default::direct)
       : BasicLister<take_sph>(b,n,l,dir) {}
     //--------------------------------------------------------------------------
     bool split_first(cell_iter const&A, cell_iter const&B) const {
@@ -572,9 +572,9 @@ void PartnerEstimator::prepare_sph()
   update_leafs_sph();                              // update flags & leafs      
   if(SPH_UPTODATE) return;                         // IF up to date: DONE       
   // 2. loop cells: pass flags & number of sph leafs up; count sph cells        
-  int nc = 0;                                      // counter: # sph cells      
+  unsigned nc = 0;                                 // counter: # sph cells      
   LoopCellsUp(cell_iterator,TREE,Ci) {             // LOOP cells upwards        
-    int ns = 0;                                    //   counter: # sph leafs    
+    unsigned ns = 0;                               //   counter: # sph leafs    
     Ci->reset_active_flag();                       //   reset activity flag     
     LoopPartnerLKids(cell_iterator,Ci,l,sph) {     //   LOOP partner sub-leafs  
       Ci->add_active_flag(l);                      //     add in activity flag  
@@ -633,9 +633,9 @@ void PartnerEstimator::prepare_sticky()
   update_leafs_sticky();                           // update flags & leafs      
   if(STC_UPTODATE) return;                         // IF up to date: DONE       
   // 2. loop cells: pass flags & number of sticky leafs up; count sticky cells  
-  int nc = 0;                                      // counter: # sticky cells   
+  unsigned nc = 0;                                 // counter: # sticky cells   
   LoopCellsUp(cell_iterator,TREE,Ci) {             // LOOP cells upwards        
-    int ns = 0;                                    //   counter: # sticky leafs 
+    unsigned ns = 0;                               //   counter: # sticky leafs 
     Ci->reset_active_flag();                       //   reset activity flag     
     LoopPartnerLKids(cell_iterator,Ci,l,sticky) {  //   LOOP partner sub-leafs  
       Ci->add_active_flag(l);                      //     add in activity flag  

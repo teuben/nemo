@@ -62,17 +62,17 @@ namespace falcON {
   // CONSTRUCTORS, DESTRUCTOR AND SUCH                                         |
   //                                                                           |
   //---------------------------------------------------------------------------+
-  inline forces::forces(const bodies*b,
-			real         e,
-			real         th,
-			kern_type    k,
-			bool         i_soft,
-			real         g,
-			MAC_type     mac,
-			real         f,
-			const int    gd[4]
+  inline forces::forces(const bodies  *b,
+			real           e,
+			real           th,
+			kern_type      k,
+			bool           i_soft,
+			real           g,
+			MAC_type       mac,
+			real           f,
+			const unsigned gd[4]
 #ifdef falcON_SPH
-		       ,const int    sd[3]
+		       ,const unsigned sd[3]
 #endif
 			) falcON_THROWING :
     STATS   ( new GravStats() ),
@@ -322,7 +322,7 @@ namespace falcON {
     return TREE->depth();
   }
   //----------------------------------------------------------------------------
-  inline int const&forces::root_number() const
+  inline unsigned const&forces::root_number() const
   {
     return number(TREE->root());
   }

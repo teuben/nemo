@@ -256,7 +256,7 @@ namespace {
     // data                                                                     
     //--------------------------------------------------------------------------
   private:
-    int                   N_PRE[3], N_POST[3];     // direct sums control       
+    unsigned              N_PRE[3], N_POST[3];     // direct sums control       
   protected:
     GravStats* const      STAT;                    // statistics                
     //--------------------------------------------------------------------------
@@ -296,7 +296,7 @@ namespace {
   protected:
     GravIactBase(
 		 GravStats* t,                      // I: statistics            
-		 int const nd[4]= Default::direct): //[I: direct sum control]   
+		 unsigned const nd[4]= Default::direct): //[I: direct sum control]   
       STAT ( t )
     {
       N_PRE [0] = nd[0];                           // C-B direct before try     
@@ -346,7 +346,7 @@ namespace {
 	     real      e,                           // I: softening length     
 	     unsigned  np,                          // I: initial pool size    
 	     bool      s    = Default::soften,       //[I: use individual eps?] 
-	     int       const nd[4]= Default::direct, //[I: direct sum control]  
+	     unsigned  const nd[4]= Default::direct, //[I: direct sum control]  
 	     bool      fp   = false) :               //[I: use Pth pole in pot] 
       GravIactBase  ( t,nd ),
       GravKern      ( k,e,s,np ) {}
@@ -461,7 +461,7 @@ namespace {
 		real         e,                     // I: softening length      
 		unsigned     np,                    // I: initial pool size     
 		bool         s    =Default::soften, //[I: use individual eps?]  
-		int const    nd[4]=Default::direct  //[I: direct sum control]   
+		unsigned const nd[4]=Default::direct  //[I: direct sum control]   
 		) :
       GravIactBase ( t,nd ),
       GravKernAll  ( k,e,s,np ) {}
@@ -1057,7 +1057,7 @@ void GravEstimator::approx(const GravMAC*GMAC,
 namespace {
   using namespace falcON;
   //============================================================================
-  int NX;
+  unsigned NX;
   real pdim(real const&x) { return cube(x); }
   //----------------------------------------------------------------------------
   struct number_density {

@@ -118,17 +118,17 @@ namespace falcON {
 #ifdef falcON_SPH
     /// \param sdr constants controlling cell-opening for SPH force computation 
 #endif
-    forces (const bodies*B,
-	    real         eps,
-	    real         th     = Default::theta,
-	    kern_type    kt     = Default::kernel,
-	    bool         in     = false,
-	    real         G      = one,
-	    MAC_type     mt     = theta_of_M,
-	    real         sfac   = one,
-	    const int    dir[4] = Default::direct
+    forces (const bodies  *B,
+	    real           eps,
+	    real           th     = Default::theta,
+	    kern_type      kt     = Default::kernel,
+	    bool           in     = false,
+	    real           G      = one,
+	    MAC_type       mt     = theta_of_M,
+	    real           sfac   = one,
+	    const unsigned dir[4] = Default::direct
 #ifdef falcON_SPH
-	   ,const int    sdr[3] =Default::SPHdirect
+	   ,const unsigned sdr[3] =Default::SPHdirect
 #endif
 	    ) falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -463,7 +463,7 @@ namespace falcON {
     const bodies*      const&Bodies     () const { return BODIES; }
     vect               const&root_center() const;  ///< return center of root
     real               const&root_radius() const;  ///< return radius of root
-    int                const&root_number() const;  ///< return # bodies in root
+    unsigned           const&root_number() const;  ///< return # bodies in root
     real               const&root_mass  () const;  ///< return mass of root
     unsigned           const&root_depth () const;  ///< return depth of root
     const SphEstimator*const&Sph        () const { return SPHT; }

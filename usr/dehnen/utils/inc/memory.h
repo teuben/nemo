@@ -1146,7 +1146,7 @@ namespace WDutils {
     };
     //@}
     /// copy constructor is disabled (private); use references instead of copies
-    Array(Array const&);
+    Array(Array const&) : N(0), A(0) {}
   public:
     /// rank: number of dimensions
     static const int rank = 1;
@@ -1200,28 +1200,28 @@ namespace WDutils {
     /// \param[in] n size of array in each dimension
     explicit
     Array(int n) WDutils_THROWING
-    : A(0) {
+    : N(0), A(0) {
       reset(n);
     }
     /// construction from sizes
     /// \param[in] n size of array in each dimension
     explicit
     Array(const int n[1]) WDutils_THROWING
-    : A(0) {
+    : N(0), A(0) {
       reset(n);
     }
     /// construction from size and initial value
     /// \param[in] n size of array in each dimension
     /// \param[in] x initialize each element with this value
     Array(const int n, T const&x) WDutils_THROWING
-    : A(0) {
+    : N(0), A(0) {
       reset(n,x);
     }
     /// construction from size and initial value
     /// \param[in] n size of array in each dimension
     /// \param[in] x initialize each element with this value
     Array(const int n[1], T const&x) WDutils_THROWING
-    : A(0) {
+    : N(0), A(0) {
       reset(n,x);
     }
     /// destruction: de-allocate memory

@@ -913,9 +913,9 @@ namespace falcON {
     real              EFAC;                // max change factor for epsi
 #endif
     const   vect* const ROOTCENTRE;        ///< centre for root, if non-NULL
-    const   int         NCRIT, REUSE;      ///< N_crit for tree, re-using
+    const   unsigned    NCRIT, REUSE;      ///< N_crit for tree, re-using
     mutable forces      FALCON;            ///< force algorithm(s)
-    mutable int         REUSED;            ///< how often has tree been re-used
+    mutable unsigned    REUSED;            ///< how often has tree been re-used
     mutable double      CPU_TREE, CPU_GRAV, CPU_AEX; ///< CPU timings
     //@}
     /// build tree and compute forces
@@ -950,15 +950,15 @@ namespace falcON {
 #ifdef falcON_SPH
     /// \param[in] sd direct-summation control for SPH
 #endif
-    ForceALCON(snapshot*s, real e, real th, int nc, const vect*rc,
-	       kern_type k, real G, real fs, int nr, const acceleration*ae,
-	       const int nd[4]
+    ForceALCON(snapshot*s, real e, real th, unsigned nc, const vect*rc,
+	       kern_type k, real G, real fs, unsigned nr, const acceleration*ae,
+	       const unsigned nd[4]
 	       , soft_type st
 #ifdef falcON_ADAP
 	       , real, unsigned, real, real
 #endif
 #ifdef falcON_SPH
-	       ,const int sd[3]= Default::SPHdirect
+	       ,const unsigned sd[3]= Default::SPHdirect
 #endif
 	       ) falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -1065,8 +1065,8 @@ namespace falcON {
 	       real               fc,
 	       real               fe,
 	       // tree related                                                  
-	       int                Ncrit,
-	       int                hgrow,
+	       unsigned           Ncrit,
+	       unsigned           hgrow,
 	       const vect        *croot,
 	       // gravity related                                               
 	       real               eps,
@@ -1084,7 +1084,7 @@ namespace falcON {
 	       soft_type          soft = global_fixed, 
 	       const char        *time = 0,
 	       fieldset           read = fieldset::empty,
-	       const int          dir[4] = Default::direct) falcON_THROWING :
+	       const unsigned     dir[4] = Default::direct) falcON_THROWING :
       NBodyCode ( file, resume, to_read(read,
 					soft!=global_fixed ? 1 : 0,
 					Grav || aex), time ),

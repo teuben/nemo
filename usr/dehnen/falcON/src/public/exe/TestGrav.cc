@@ -142,7 +142,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   unsigned          Seed;
   unsigned          N, Nbod[BT_NUM]={0}, Nact;
   unsigned          split=1, Ngrow=0;
-  int               Ncrit=Default::Ncrit, 
+  unsigned          Ncrit=Default::Ncrit,
                     DIR[4]={Default::direct[0],Default::direct[1],
 			    Default::direct[2],Default::direct[3]};
   real              EPS, theta=Default::theta, MTOT=one;

@@ -198,7 +198,7 @@ namespace {
   class NeighbourSearch : public NeighbourSearchBase {
     /// \name data
     //@{
-    const int   NDIR;             ///< direct-loop control
+    const unsigned NDIR;          ///< direct-loop control
     const real  Q;                ///< radius^2 of search sphere
     const leaf *L;                ///< leaf for which list is made (if any)
     const cell *C;                ///< cell already done
@@ -247,7 +247,7 @@ namespace {
     /// \param t the tree to be used 
     /// \param n direct-loop control; default: k/4
     NeighbourSearch(const OctTree*t, vect const&x, real q,
-		    void(*f)(const bodies*, const leaf*, real), int n=1)
+		    void(*f)(const bodies*, const leaf*, real), unsigned n=1)
       : NeighbourSearchBase(t,x), NDIR(n), Q(q), F(f) {}
     //--------------------------------------------------------------------------
     /// process neighbours
@@ -289,14 +289,14 @@ namespace {
     //--------------------------------------------------------------------------
     /// \name data
     //@{
-    const int   NDIR;             ///< direct-loop control
-    const real  BIGQ;             ///< larger than largest possible Q
-    unsigned    NIAC;             ///< interaction counter;
-    int         M;                ///< (K - N_iac) for current search
-    int         K;                ///< size of list
-    Neighbour  *LIST;             ///< neighbour list
-    const leaf *L;                ///< leaf for which list is made (if any)
-    const cell *C;                ///< cell already done
+    const unsigned NDIR;             ///< direct-loop control
+    const real     BIGQ;             ///< larger than largest possible Q
+    unsigned       NIAC;             ///< interaction counter;
+    int            M;                ///< (K - N_iac) for current search
+    int            K;                ///< size of list
+    Neighbour     *LIST;             ///< neighbour list
+    const leaf    *L;                ///< leaf for which list is made (if any)
+    const cell    *C;                ///< cell already done
     //@}
     //--------------------------------------------------------------------------
     /// is search sphere outside of a cell?
@@ -326,7 +326,8 @@ namespace {
     /// \param cL does Ci contain L?
     /// \param cC does Ci contain C?
     void add_cell(const cell*Ci, int cL=0, int cC=0) {
-      if(cC==0 && number(Ci) <= max(M,NDIR)) {
+      if(cC==0 &&
+	 number(Ci) <= (M<=0? NDIR:max(static_cast<unsigned>(M),NDIR))) {
 	// direct loop
 	if(cL) { LoopAllLeafs(TREE,Ci,l) if(l!=L) add_leaf(l); }
 	else   { LoopAllLeafs(TREE,Ci,l) add_leaf(l); }
@@ -381,8 +382,8 @@ namespace {
     /// \param k number of neighbours
     /// \param n direct-loop control; default: k/4
     /// \param copy_flags if true, body flags will be copied (if present)
-    NearestNeighbourSearch(const OctTree*t, int n, bool copy_flags=0)
-      : NeighbourSearchBase(t), NDIR(max(1,n)),
+    NearestNeighbourSearch(const OctTree*t, unsigned n, bool copy_flags=0)
+      : NeighbourSearchBase(t), NDIR(max(1u,n)),
 	BIGQ(12*square(TREE->root_radius())), NIAC(0), LIST(0) 
     {
       if(copy_flags && TREE->my_bodies()->have_flag())

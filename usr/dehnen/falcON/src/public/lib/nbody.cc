@@ -77,9 +77,9 @@ Integrator::Integrator(const ForceAndDiagnose*S,
     falcON_THROW("Integration: request to predict x without kicking v");
   requSPH =
 //     predSPH & fieldset::H ? fieldset::J : fieldset::empty |
-    predSPH & fieldset::V ? fieldset::a : fieldset::empty |
+    (predSPH & fieldset::V ? fieldset::a : fieldset::empty) |
 //     predSPH & fieldset::R ? fieldset::D : fieldset::empty |
-    kickSPH & fieldset::U ? fieldset::I : fieldset::empty;
+    (kickSPH & fieldset::U ? fieldset::I : fieldset::empty) ;
 #endif
   // sanity check requirements and delivieries
   reset_CPU();
@@ -856,14 +856,14 @@ void ForceALCON::reset_softening(
 ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       real               e,       // I: global softening length
 		       real               th,      // I: tolerance parameter    
-		       int                nc,      // I: N_crit                 
+		       unsigned           nc,      // I: N_crit                 
 		       const vect        *x0,      // I: pre-set root centre    
 		       kern_type          ke,      // I: softening kernel       
 		       real               g,       // I: Newton's G             
 		       real               f,       // I: theta_sink/theta       
-		       int                ru,      // I: # reused of tree       
+		       unsigned           ru,      // I: # reused of tree       
 		       const acceleration*ae,      // I: external acceleration  
-		       const int          gd[4],   // I: direct sum: gravity    
+		       const unsigned     gd[4],   // I: direct sum: gravity    
 		       soft_type          sf       // I: softening type         
 #ifdef falcON_ADAP
 		       ,real              ns       // I: N_soft                 
@@ -872,13 +872,13 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       ,real              ef       // I: eps_fac                
 #endif
 #ifdef falcON_SPH
-		       ,const int         sd[3]    //[I: direct sum: SPH]       
+		       ,const unsigned   sd[3]    //[I: direct sum: SPH]       
 #endif
 		       ) falcON_THROWING :
   ForceDiagGrav ( s, ae, g!=zero ),
   SOFTENING     ( sf ),
   ROOTCENTRE    ( x0 ),
-  NCRIT         ( max(1,nc) ),
+  NCRIT         ( max(1u,nc) ),
   REUSE         ( ru ),
   FALCON        ( s, abs(e), abs(th), ke,
 		  SOFTENING != global_fixed,

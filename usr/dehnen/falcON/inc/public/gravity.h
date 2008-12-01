@@ -418,7 +418,7 @@ namespace falcON {
     bool                  LEAFS_UPTODATE;          // are leaf srces up to date?
     bool                  CELLS_UPTODATE;          // are cell srces up to date?
     const bool            INDI_SOFT;               // use individual eps_i      
-    const int             DIR[4];                  // direct loop control       
+    const unsigned        DIR[4];                  // direct loop control       
     kern_type             KERNEL;                  // softening kernel          
     GravStats            *STATS;                   // interaction statistics    
     real                  EPS;                     // global softening length   
@@ -488,7 +488,7 @@ namespace falcON {
 		  real           g = one,          //[I: Newton's G]            
 		  bool           s = 0,            //[I: use individual eps?]   
 		  real           f = one,          //[I: theta_sink/theta]      
-		  const int d[4]=Default::direct): //[I: N_direct for gravity]  
+		  const unsigned d[4]=Default::direct): //[I: N_direct for grav]
       TREE           ( T ),
       LEAFS_UPTODATE ( 0 ),
       CELLS_UPTODATE ( 0 ),
@@ -509,10 +509,10 @@ namespace falcON {
       NLA            ( 0u ),
       NLA_needed     ( 0u )
     {
-      const_cast<int*>(DIR)[0]=d[0];
-      const_cast<int*>(DIR)[1]=d[1];
-      const_cast<int*>(DIR)[2]=d[2];
-      const_cast<int*>(DIR)[3]=d[3];
+      const_cast<unsigned*>(DIR)[0]=d[0];
+      const_cast<unsigned*>(DIR)[1]=d[1];
+      const_cast<unsigned*>(DIR)[2]=d[2];
+      const_cast<unsigned*>(DIR)[3]=d[3];
     }
     //--------------------------------------------------------------------------
     // reset allocations                                                        

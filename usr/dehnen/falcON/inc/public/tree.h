@@ -224,10 +224,10 @@ namespace falcON {
       uint8    KEY;                          ///< 1byte : local Peano key       
       indx     NLEAFS;                       ///< 2bytes: # leaf children       
       indx     NCELLS;                       ///< 2bytes: # cell children       
-      int      NUMBER;                       ///< 4bytes: # leaf descendants    
-      int      FCLEAF;                       ///< 4bytes: index of fst leaf desc
-      int      FCCELL;                       ///< 4bytes: index of fst cell kid 
-      int      PACELL;                       ///< 4bytes: index of parent cell  
+      unsigned NUMBER;                       ///< 4bytes: # leaf descendants    
+      unsigned FCLEAF;                       ///< 4bytes: index of fst leaf desc
+      unsigned FCCELL;                       ///< 4bytes: index of fst cell kid 
+      unsigned PACELL;                       ///< 4bytes: index of parent cell  
       vect     CENTRE;                       ///<12bytes: centre of cube        
       // 40 bytes
       //@}
@@ -259,15 +259,15 @@ namespace falcON {
       friend uint8    const&octant  (const Cell*);
       friend indx     const&nleafs  (const Cell*);
       friend indx     const&ncells  (const Cell*);
-      friend int      const&number  (const Cell*);
-      friend int      const&fcleaf  (const Cell*);
-      friend int      const&fccell  (const Cell*);
-      friend int      const&pacell  (const Cell*);
+      friend unsigned const&number  (const Cell*);
+      friend unsigned const&fcleaf  (const Cell*);
+      friend unsigned const&fccell  (const Cell*);
+      friend unsigned const&pacell  (const Cell*);
       friend vect     const&centre  (const Cell*);
       friend vect     const&center  (const Cell*);
-      friend int      ecleaf        (const Cell*);
-      friend int      ncleaf        (const Cell*);
-      friend int      eccell        (const Cell*);
+      friend unsigned ecleaf        (const Cell*);
+      friend unsigned ncleaf        (const Cell*);
+      friend unsigned eccell        (const Cell*);
       friend bool     has_cell_kids (const Cell*);
       friend bool     has_leaf_kids (const Cell*);
       friend bool     is_twig       (const Cell*);
@@ -813,15 +813,15 @@ namespace falcON {
   inline uint8 const&octant(const OctTree::Cell*C) { return C->OCTANT; }
   inline indx const&nleafs(const OctTree::Cell*C) { return C->NLEAFS; }
   inline indx const&ncells(const OctTree::Cell*C) { return C->NCELLS; }
-  inline int const&number(const OctTree::Cell*C) { return C->NUMBER; }
-  inline int const&fcleaf(const OctTree::Cell*C) { return C->FCLEAF; }
-  inline int const&fccell(const OctTree::Cell*C) { return C->FCCELL; }
-  inline int const&pacell(const OctTree::Cell*C) { return C->PACELL; }
+  inline unsigned const&number(const OctTree::Cell*C) { return C->NUMBER; }
+  inline unsigned const&fcleaf(const OctTree::Cell*C) { return C->FCLEAF; }
+  inline unsigned const&fccell(const OctTree::Cell*C) { return C->FCCELL; }
+  inline unsigned const&pacell(const OctTree::Cell*C) { return C->PACELL; }
   inline vect const&center(const OctTree::Cell*C) { return C->CENTRE; }
   inline vect const&centre(const OctTree::Cell*C) { return C->CENTRE; }
-  inline int ecleaf(const OctTree::Cell*C) { return C->FCLEAF+C->NLEAFS; }
-  inline int ncleaf(const OctTree::Cell*C) { return C->FCLEAF+C->NUMBER; }
-  inline int eccell(const OctTree::Cell*C) { return C->FCCELL+C->NCELLS; }
+  inline unsigned ecleaf(const OctTree::Cell*C) { return C->FCLEAF+C->NLEAFS; }
+  inline unsigned ncleaf(const OctTree::Cell*C) { return C->FCLEAF+C->NUMBER; }
+  inline unsigned eccell(const OctTree::Cell*C) { return C->FCCELL+C->NCELLS; }
   inline bool has_cell_kids(const OctTree::Cell*C) { return C->NCELLS != 0; }
   inline bool has_leaf_kids(const OctTree::Cell*C) { return C->NLEAFS != 0; }
   inline bool is_twig(const OctTree::Cell*C) { return C->NCELLS == 0; }
