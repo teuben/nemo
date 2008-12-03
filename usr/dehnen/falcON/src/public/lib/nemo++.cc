@@ -501,6 +501,7 @@ void falcON::nemo_in::close() falcON_THROWING
 //------------------------------------------------------------------------------
 bool falcON::nemo_in::has_snapshot() const
 {
+  get_history(STREAM);
   return STREAM && get_tag_ok(STREAM,SnapShotTag);
 }
 //------------------------------------------------------------------------------

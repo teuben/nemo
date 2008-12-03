@@ -884,7 +884,7 @@ namespace falcON {
     return s;
   }
   inline std::istream& operator>> (std::istream&s, fieldset&b) {
-    char c[32];
+    char c[BodyData::NQUANT+1];
     s >> c;
     b = fieldset(c);
     return s;
