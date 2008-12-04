@@ -80,6 +80,8 @@ namespace WDutils {
     }
     /// is this a pseudo- (or quasi-) random number generator?
     virtual bool is_pseudo() const { return true; }
+    /// noop dtor
+    virtual~RandomNumberGenerator() {}
   }; 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
