@@ -223,6 +223,8 @@ namespace falcON {
       return p;
     }
     //@}
+    /// noon dtor
+    virtual~acceleration() {}
     //--------------------------------------------------------------------------
   };
   // ///////////////////////////////////////////////////////////////////////////
@@ -281,6 +283,8 @@ namespace falcON {
       }
     }
     //@}
+    /// noon dtor
+    virtual~sum_acceleration() {}
   };
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
@@ -411,6 +415,8 @@ namespace falcON {
 	     const char*accpars,
 	     const char*accfile) : 
       ACC ( get_acceleration(accname,accpars,accfile,&NeedM,&NeedV) ) {}
+    /// noon dtor
+    virtual~nemo_acc() {}
   };
   //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {

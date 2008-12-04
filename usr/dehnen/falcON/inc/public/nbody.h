@@ -163,6 +163,8 @@ namespace falcON {
     ForceAndDiagnose(snapshot          *s,
 		     const acceleration*a) :
       SNAPSHOT(s), ACCEXTERN(a) {}
+    /// noop dtor
+    virtual~ForceAndDiagnose() {}
     //--------------------------------------------------------------------------
     /// \name abstract methods
     //@{
@@ -394,6 +396,8 @@ namespace falcON {
 	       fieldset k_sph,
 	       fieldset r_sph) falcON_THROWING;
   public:
+    /// noop dtor
+    virtual~Integrator() {}
     //--------------------------------------------------------------------------
     /// \name virtual and pure virtual methods
     //@{
@@ -487,6 +491,8 @@ namespace falcON {
       /// virtual function: shall adjust_level() always be called,
       /// even if there is only one level?
       virtual bool always_adjust () const { return false; }
+      /// noop dtor
+      virtual~StepLevels() {}
     };
   private:
     //--------------------------------------------------------------------------

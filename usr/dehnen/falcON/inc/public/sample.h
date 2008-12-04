@@ -194,6 +194,8 @@ namespace falcON {
     {
       sample_pos(B.begin_all_bodies(), B.N_bodies(), q,R);
     }
+    /// noop dtor
+    virtual~SphericalSampler() {}
     //--------------------------------------------------------------------------
   };// class SphericalSampler
 } // namespace falcON {

@@ -219,11 +219,14 @@ namespace {
       // most the size of the current radius far.                               
       //                                                                        
       // It seems that the algorithm converges, even if initially set off by    
-      // more than the initial radius.                                          
+      // more than the initial radius.
+
+	/// WARNING: this seems to need debugging as ro,io,no are not sensibly
+	///          initialized.
       
       const int max_i = 200;
-      int       n,nr,no;
-      double    rh,r(H),rr,ro,dr,d1,d2;
+      int       n,nr,no(0);
+      double    rh,r(H),rr,ro(H),dr,d1,d2;
       tupel<NDIM,double> x(C),g,go,h;
       // initialize
       gr<NDIM,scalar>(M,X,N,x,r,n,rh,g);
@@ -238,7 +241,7 @@ namespace {
 // 	  <<" i: x="<<x<<" r="<<r<<" rh="<<rh<<" g="<<g<<" n="<<n<<'\n';
 //       // TSET
       // iterate using cg method
-      int i=0, ir, io;
+      int i=0, ir, io(0);
       for(; i < max_i; ++i) {
 	di<NDIM,scalar>(M,X,N,x,r,h,d1,d2);
 	dr = ro-r;

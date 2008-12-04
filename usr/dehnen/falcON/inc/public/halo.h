@@ -7,11 +7,11 @@
 ///                                                                             
 /// \author Paul McMillan                                                       
 /// \author Walter Dehnen                                                       
-/// \date   2000-2007                                                           
+/// \date   2000-2008                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2007  Walter Dehnen, Paul McMillan                        
+// Copyright (C) 2000-2008  Walter Dehnen, Paul McMillan                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -78,6 +78,8 @@ namespace falcON {
     /// \param rh1 (output) drho/dr
     /// \param rh2 (output) d^2rho/dr^2
     virtual double operator()(double r, double&rh1, double&rh2) const = 0;
+    /// noop dtor
+    virtual~HaloDensity() {}
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            

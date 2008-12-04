@@ -80,7 +80,7 @@ void falcON::find_centre_alpha(const bodies*B,
   const real faq = square(f<one? f : 1./f);        // reduction factor squared  
   vect     Xc;                                     // initial/current position  
   real     Rq;                                     // initial/current radius^2  
-  double   W;                                      // Sum w_i                   
+  double   W(0.);                                  // Sum w_i                   
   vect_d   X;                                      // Sum w_i x_i               
   unsigned N;                                      // counter: # bodies         
   // 1. find starting position & radius for iteration                           

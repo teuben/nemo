@@ -54,6 +54,8 @@ namespace GalPot {                               // v0.4
     virtual double Density  (double, double) const=0;
     // residual density (input for multipole expansion) at given (r,sin/cos(th))
     virtual double Residual (double, double, double)  const=0;
+    // noop dtor (to make compiler happy)
+    virtual~PotResidual() {}
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //

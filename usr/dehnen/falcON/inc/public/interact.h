@@ -528,6 +528,7 @@ namespace falcON {
     explicit
     BasicIactor(const unsigned dir[4] = Default::direct) :
       NCB(dir[1]), NCC(dir[2]), NCL(dir[3]) {}
+    virtual~BasicIactor() {}
     //--------------------------------------------------------------------------
   public:
     bool interact(cell_iter const&A, leaf_iter const&B) const {
