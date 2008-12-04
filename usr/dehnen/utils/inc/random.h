@@ -96,6 +96,8 @@ namespace WDutils {
     /// \param[in] x value at which to compute \f$ p(x)\f$
     /// \return value of \f$ p(x)\f$
     virtual double value(double x) const = 0;
+    /// noop dtor
+    virtual~RandomDeviate() {}
   }; 
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -117,6 +119,8 @@ namespace WDutils {
     explicit Random3(seed_type seed);
     /// generate a random number in [0,1]
     double RandomDouble() const;
+    /// noop dtor
+    virtual~Random3() {}
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
