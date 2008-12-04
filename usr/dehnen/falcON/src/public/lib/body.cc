@@ -627,10 +627,10 @@ bodies::block* bodies::new_block(bodytype t, unsigned Na, unsigned Nb,
 }
 ////////////////////////////////////////////////////////////////////////////////
 // reset blocks' FIRST entries (used in parallel code)
-void bodies::reset_firsts(int first[BT_NUM])
+void bodies::reset_firsts(unsigned first[BT_NUM])
 {
   for(bodytype t; t; ++t) {
-    int L=0;
+    unsigned L=0;
     for(block*B=TYPES[t]; B; B=B->next_of_same_type()) {
       B->set_first(L+first[t], L);
       L+=B->N_bodies();

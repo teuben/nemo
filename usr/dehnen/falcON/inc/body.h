@@ -776,7 +776,7 @@ namespace falcON {
       }
       //------------------------------------------------------------------------
       /// default constructor makes an invalid body
-      iterator() : B(0) {}
+      iterator() : B(0), K(0) {}
       /// copy constructor
       iterator(iterator const&i) : B(i.B), K(i.K) {}
       /// iterator offset by \e offset from \e i
@@ -1434,7 +1434,7 @@ namespace falcON {
     /// The block's FIRST data are set such that the bodyindices of bodies of
     /// type t on start at F[t].
     /// \param F array with first bodyindex per body type.
-    void reset_firsts(int F[BT_NUM]);
+    void reset_firsts(unsigned F[BT_NUM]);
   private:
     //==========================================================================
     //                                                                          

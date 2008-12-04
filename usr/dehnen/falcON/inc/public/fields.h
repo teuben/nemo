@@ -979,6 +979,8 @@ namespace falcON {
     //@}
     /// conversion to int: return No of type
     operator int        () const { return val; }
+    /// conversion to unsigned: return No of type
+    operator unsigned   () const { return val; }
     /// conversion to long: return No of type
     operator long       () const { return val; }
     /// is bodytype STD

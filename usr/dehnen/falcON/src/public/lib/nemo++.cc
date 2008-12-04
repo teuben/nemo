@@ -501,6 +501,8 @@ void falcON::nemo_in::close() falcON_THROWING
 //------------------------------------------------------------------------------
 bool falcON::nemo_in::has_snapshot() const
 {
+  // added to read any history padded between snapshots (note that gyrfalcON
+  // does that upon appending to an existing file when resuming a simulation)
   get_history(STREAM);
   return STREAM && get_tag_ok(STREAM,SnapShotTag);
 }
@@ -595,6 +597,9 @@ falcON::snap_in::~snap_in() falcON_THROWING
   for(bodytype t; t; ++t) NBOD[t] = 0u;
   get_tes(INPUT.STREAM,ParticlesTag);
   get_tes(INPUT.STREAM,SnapShotTag);
+  // added to read any history padded between snapshots (note that gyrfalcON
+  // does that upon appending to an existing file when resuming a simulation)
+  get_history(INPUT.STREAM);
   INPUT.SNAP = 0;
   DebugInfo(4,"snap_in: closed\n");
 }
