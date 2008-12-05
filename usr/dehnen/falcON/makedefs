@@ -108,7 +108,11 @@ endif
 endif
 endif
 
+ifeq ($(HOSTNAME),spectrum)
+WARNINGS	:= -Wall -Wsign-compare   # old compiler: no -Wtype-limits
+else
 WARNINGS	:= -Wall -Wtype-limits -Wsign-compare
+endif
 
 ifdef DEBUG
 OPTFLAGS	:= -ggdb3 $(WARNINGS) -Wextra -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
