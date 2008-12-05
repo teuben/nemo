@@ -110,8 +110,10 @@ namespace falcON { namespace Manipulate {
       if(FILE) strcpy(FILE,file);
       if(file==0 || file[0]==0)
 	falcON_THROW("Manipulator \"projprof\": no file given\n");
-      if(W <0) falcON_THROW("Manipulator \"projprof\": W = %d < 0\n",W);
-      if(L<0.) falcON_THROW("Manipulator \"projprof\": L = %f < 0\n",L);
+      if(npar>3 && pars[3]<0)
+        falcON_THROW("Manipulator \"projprof\": W = %d < 0\n",W);
+      if(L<0.)
+	falcON_THROW("Manipulator \"projprof\": L = %f < 0\n",L);
     }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;

@@ -250,6 +250,8 @@ namespace falcON {
       Cell() {}  ///< construction: do nothing
       //------------------------------------------------------------------------
     public:
+      /// value used for invalid parent cell
+      static const unsigned INVALID = static_cast<unsigned>(-1);
       /// leaf_type to be superseeded in derived classes
       typedef Leaf leaf_type;
       //------------------------------------------------------------------------
@@ -337,7 +339,7 @@ namespace falcON {
 	o<<' '<<std::setw(7)<< flags(*this)
 	 <<' '<<std::setw(3)<< int(LEVEL)
 	 <<' '<<std::setw(3)<< int(OCTANT);
-	if(PACELL < 0)
+	if(PACELL==INVALID)
 	  o<<"     -";
 	else
 	  o<<' '<<std::setw(5)<<PACELL;
@@ -665,12 +667,12 @@ namespace falcON {
       //@{
       /// parent cell (if not root)
       CellIter parent() const {
-	return pacell(C) < 0?
+	return pacell(C) == CELL::INVALID?
 	  CellIter(0,0) : 
 	  CellIter(T, static_cast<CELL*>(T->CellNo(pacell(C)))); }
       /// promote to parent cell
       CellIter& to_parent() {
-	if(pacell(C) < 0) { T=0; C=0; }
+	if(pacell(C) == CELL::INVALID) { T=0; C=0; }
 	else C = static_cast<CELL*>(T->CellNo(pacell(C)));
 	return *this;
       }
@@ -856,7 +858,7 @@ namespace falcON {
   void OctTree::dump_cells(std::ostream &o) const {
     CELL_TYPE::dump_head(o);
     o <<'\n';
-    for(register cell_iterator Ci=begin_cells(); Ci!=end_cells(); ++Ci) {
+    for(cell_iterator Ci=begin_cells(); Ci!=end_cells(); ++Ci) {
       o <<' '<< std::setw(5)<<falcON::index(Ci);
       static_cast<CELL_TYPE*>(static_cast<OctTree::Cell*>(Ci))->dump(o);
       o <<'\n';

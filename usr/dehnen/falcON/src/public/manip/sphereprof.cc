@@ -158,8 +158,10 @@ namespace falcON { namespace Manipulate {
       if(FILE) strcpy(FILE,file);
       if(file==0 || file[0]==0)
 	falcON_THROW("Manipulator \"%s\": no file given\n",name());
-      if(W <0) falcON_THROW("Manipulator \"%s\": W = %d < 0\n",name(),W);
-      if(L<0.) falcON_THROW("Manipulator \"%s\": L = %f < 0\n",name(),L);
+      if(npar>0 && pars[0]<0)
+	falcON_THROW("Manipulator \"%s\": W = %d < 0\n",name(),W);
+      if(L<0.)
+	falcON_THROW("Manipulator \"%s\": L = %f < 0\n",name(),L);
     }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;

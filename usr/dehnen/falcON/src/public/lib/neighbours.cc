@@ -95,7 +95,7 @@ namespace {
     /// parent cell, if any, of given cell in TREE
     const cell*parent (const cell*c) const
     {
-      return pacell(c)<0? 0 : TREE->CellNo(pacell(c));
+      return pacell(c) == cell::INVALID? 0 : TREE->CellNo(pacell(c));
     }
     /// does a cell contain point X?
     /// \return point X is within cell C

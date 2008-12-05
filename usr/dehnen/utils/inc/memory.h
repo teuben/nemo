@@ -83,8 +83,8 @@ namespace WDutils {
 	(f,l)("caught std::bad_alloc\n");
     }
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l)("allocated %lu %s = %lu bytes @ %p\n",
-			    n,nameof(T),n*sizeof(T),static_cast<void*>(t));
+      DebugInformation(f,l,lib)("allocated %lu %s = %lu bytes @ %p\n",
+				n,nameof(T),n*sizeof(T),static_cast<void*>(t));
     return t;
   }
   // ///////////////////////////////////////////////////////////////////////////
@@ -134,8 +134,8 @@ namespace WDutils {
 	(f,l)("de-allocating array of '%s' @ %p' failed\n", nameof(T),a);
     }
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l)("de-allocated array of %s @ %p\n",
-			    nameof(T), static_cast<void*>(a));
+      DebugInformation(f,l,lib)("de-allocated array of %s @ %p\n",
+				nameof(T), static_cast<void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
@@ -156,8 +156,8 @@ namespace WDutils {
 	(f,l)("de-allocating array of '%s' @ %p' failed\n", nameof(T),a);
     }
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l)("de-allocated array of %s @ %p\n",
-			    nameof(T), static_cast<const void*>(a));
+      DebugInformation(f,l,lib)("de-allocated array of %s @ %p\n",
+				nameof(T), static_cast<const void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -201,8 +201,8 @@ namespace WDutils {
 	(f,l)("de-allocating object '%s' @ %p failed\n", nameof(T),a);
     }
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l)("de-allocated %s object @ %p\n",
-			    nameof(T), static_cast<void*>(a));
+      DebugInformation(f,l,lib)("de-allocated %s object @ %p\n",
+				nameof(T), static_cast<void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
@@ -223,8 +223,8 @@ namespace WDutils {
 	(f,l)("de-allocating object '%s' @ %p failed\n",nameof(T),a);
     }
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l)("de-allocated %s object @ %p\n",
-			    nameof(T), static_cast<const void*>(a));
+      DebugInformation(f,l,lib)("de-allocated %s object @ %p\n",
+				nameof(T), static_cast<const void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   ///
@@ -467,7 +467,7 @@ namespace WDutils {
     /// \return pointer to allocated element
     pointer new_element() {
       if(LAST->is_full()) {
-	register size_type New = LAST->N_alloc();
+	size_type New = LAST->N_alloc();
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
@@ -481,7 +481,7 @@ namespace WDutils {
     template<class estimator>
     pointer new_element(estimator const&F) {
       if(LAST->is_full()) {
-	register size_type New = F(NUSED);
+	size_type New = F(NUSED);
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
@@ -494,8 +494,7 @@ namespace WDutils {
     /// \param Ne number of elements to return pointer to
     pointer new_elements(size_type Ne) {
       if(!LAST->has_free(Ne)) {
-	register size_type
-	  New=max(Ne,static_cast<size_type>(LAST->N_alloc()));
+	size_type New=max(Ne,static_cast<size_type>(LAST->N_alloc()));
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
@@ -511,7 +510,7 @@ namespace WDutils {
     pointer new_elements(size_type       Ne,
 			 estimator const&F) {
       if(!LAST->has_free(Ne)) {
-	register size_type New=max(Ne,F(NUSED));
+	size_type New=max(Ne,F(NUSED));
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
@@ -527,8 +526,8 @@ namespace WDutils {
     /// \param[in]  E  pointer to element
     int number_of_element(const_pointer E) const {
       if(E==0) return -99;
-      register int num=0;
-      for(register block*B=FIRST; B; B=B->next())
+      int num=0;
+      for(block*B=FIRST; B; B=B->next())
 	if(E >= B->front() && E < B->end())
 	  return num + int(E-B->front());
 	else
@@ -588,7 +587,7 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   block_alloc<T>::~block_alloc() WDutils_THROWING {
-    register block *A=FIRST, *N;
+    block *A=FIRST, *N;
     while(A) {
       N = A->next();
       WDutils_DEL_O(A);

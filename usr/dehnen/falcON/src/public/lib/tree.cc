@@ -196,7 +196,7 @@ namespace {
     {
       OctTree::Leaf* Lf=FstLeaf(DT);
       OctTree::Cell* Cf=FstCell(DT)+1;
-      pacell_(FstCell(DT)) = -1;
+      pacell_(FstCell(DT)) = OctTree::Cell::INVALID;
       return link(PT,FstCell(PT), DT, FstCell(DT), Cf, Lf);
     }
   };
@@ -791,7 +791,7 @@ namespace {
 #endif
       OctTree::Cell* C0 = FstCell(TREE), *Cf=C0+1;
       OctTree::Leaf* Lf = FstLeaf(TREE);
-      pacell_(C0) = -1;
+      pacell_(C0) = OctTree::Cell::INVALID;
       DEPTH = NCRIT > 1?
 	link_cells_N(P0,0,0,C0,Cf,Lf BUG_LINK_PARS) :
 	link_cells_1(P0,0,0,C0,Cf,Lf BUG_LINK_PARS) ;
@@ -801,7 +801,11 @@ namespace {
   int BoxDotTree::                                 // R:   tree depth of cell   
   link_cells_1(const box*     P,                   // I:   current box          
 	       int            o,                   // I:   octant of current box
-	       int            k,                   // I:   local peano key      
+#ifdef falcON_MPI
+	       int            k,
+#else
+	       int             ,
+#endif
 	       OctTree::Cell* C,                   // I:   current cell         
 	       OctTree::Cell*&Cf,                  // I/O: index: free cells    
 	       OctTree::Leaf*&Lf                   // I/O: index: free leafs    
@@ -877,7 +881,11 @@ namespace {
   int BoxDotTree::                                 // R:   tree depth of cell   
   link_cells_N(const box*     P,                   // I:   current box          
 	       int            o,                   // I:   octant of current box
-	       int            k,                   // I:   local peano key      
+#ifdef falcON_MPI
+	       int            k,
+#else
+	       int             ,
+#endif
 	       OctTree::Cell* C,                   // I:   current cell         
 	       OctTree::Cell*&Cf,                  // I/O: index: free cells    
 	       OctTree::Leaf*&Lf                   // I/O: index: free leafs    

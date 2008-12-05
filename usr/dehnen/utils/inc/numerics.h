@@ -53,6 +53,10 @@
 #  include <cstdlib>
 #  define WDutils_included_cstdlib
 #endif
+#ifndef WDutils_included_algorithm
+#  include <algorithm>
+#  define WDutils_included_algorithm
+#endif
 #ifndef WDutils_included_inline_h
 #  include <inline.h>
 #endif
@@ -1086,7 +1090,7 @@ namespace WDutils {
   {
     for(int i=1; i!=N; ++i)
       for(int j=0; j!=i; ++j)
-	swap(M[i][j], M[j][i]);
+	std::swap(M[i][j], M[j][i]);
   }
   // ---------------------------------------------------------------------------
   /// \name eigensystem of symmetric matrix using Householder transformation

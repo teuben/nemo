@@ -153,10 +153,6 @@ namespace WDutils {
   { return x*x*x; }
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
-  void      swap    (scalar_type&a, scalar_type&b)
-  { register scalar_type t=a; a=b; b=t; }
-  //----------------------------------------------------------------------------
-  template<typename scalar_type> inline
   scalar_type sqrt0(scalar_type const&x)
   { return x <= scalar_type(0)? scalar_type(0) : std::sqrt(x); }
   //----------------------------------------------------------------------------

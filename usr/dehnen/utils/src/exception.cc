@@ -280,10 +280,12 @@ WDutils::message::message(const char*fmt, ...) throw(exception)
   va_list  ap;
   va_start(ap,fmt);
   int w = vsnprintf(__text,size,fmt,ap);
-  if(w>=size) throw exception("WDutils::message::message(): "
-			      "string size of %d characters exceeded\n",size);
-  if(w <   0) throw exception("WDutils::message::message(): "
-			      "formatting error\n");
+  if(w>=static_cast<int>(size))
+    throw exception("WDutils::message::message(): "
+		    "string size of %d characters exceeded\n",size);
+  if(w < 0)
+    throw exception("WDutils::message::message(): "
+		    "formatting error\n");
   va_end(ap);
 }
 //------------------------------------------------------------------------------
@@ -292,11 +294,14 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
 {
   va_list ap;
   va_start(ap,fmt);
-  size_t w = std::vsnprintf(str,l,fmt,ap);
+  int w = std::vsnprintf(str,l,fmt,ap);
   va_end(ap);
-  if(w==l) WDutils_THROW("snprintf(): trailing 0 lost");
-  if(w >l) WDutils_THROW("snprintf(): string size exceeded [%d:%d]",w,l);
-  if(w <0) WDutils_THROW("snprintf(): formatting error");
+  if(w==static_cast<int>(l))
+    WDutils_THROW("snprintf(): trailing 0 lost");
+  if(w >static_cast<int>(l))
+    WDutils_THROW("snprintf(): string size exceeded [%d:%d]",w,l);
+  if(w <0)
+    WDutils_THROW("snprintf(): formatting error");
   return w;
 }
 //------------------------------------------------------------------------------
@@ -305,12 +310,15 @@ int WDutils::snprintf__::operator()(char*str, size_t l, const char* fmt, ...)
 {
   va_list ap;
   va_start(ap,fmt);
-  size_t w = std::vsnprintf(str,l,fmt,ap);
+  int w = std::vsnprintf(str,l,fmt,ap);
   va_end(ap);
-  if(w==l) WDutils_THROW("[%s:%d]: snprintf(): trailing 0 lost",file,line);
-  if(w >l) WDutils_THROW("[%s:%d]: snprintf(): string size exceeded [%d:%d]",
-			 w,l,file,line);
-  if(w <0) WDutils_THROW("[%s:%d]: snprintf(): formatting error",file,line);
+  if(w==static_cast<int>(l))
+    WDutils_THROW("[%s:%d]: snprintf(): trailing 0 lost",file,line);
+  if(w >static_cast<int>(l))
+    WDutils_THROW("[%s:%d]: snprintf(): string size exceeded [%d:%d]",
+		  file,line,w,l);
+  if(w <0)
+    WDutils_THROW("[%s:%d]: snprintf(): formatting error",file,line);
   return w;
 }
 ////////////////////////////////////////////////////////////////////////////////

@@ -230,7 +230,7 @@ namespace WDutils {
     template<typename T>
     static void sort(T*a, int n) {
       for(int i=n-1; i; --i) {
-	swap(a[i],a[0]);
+	std::swap(a[i],a[0]);
 	Walk::down(a,0,--n,Comparator<T>());
       }
     }

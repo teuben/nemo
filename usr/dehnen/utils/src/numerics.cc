@@ -175,7 +175,7 @@ double WDutils::qbulir(double(*func)(double),
 void WDutils::GaussLegendre(double *x, double *w, const unsigned n)
 {
   register double eps=1.e-10;
-  for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps);
+  for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps) ;
 //   register double eps;
 //   for(eps=1.e-10; (eps+1.)!=1.; eps*=0.5);
   eps *=2.;
@@ -443,11 +443,11 @@ namespace {
       for(l=p;   l!=n && l->X<s; ++l)            w += l->W;
       if(l==n) return np;
       // find u first element beyond l which is not greater than S
-      for(u=l+1; u!=n && u->X>s; ++u);
+      for(u=l+1; u!=n && u->X>s; ++u) {}
       while(u!=n) {
 	swap(l,u);                               w += l->W;
 	for(++l;            l!=n && l->X<s; ++l) w += l->W;
-	for(u=max(u+1,l+1); u!=n && u->X>s; ++u);
+	for(u=max(u+1,l+1); u!=n && u->X>s; ++u) {}
       }
       return l - p;
     }

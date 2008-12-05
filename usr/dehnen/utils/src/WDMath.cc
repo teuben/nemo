@@ -74,7 +74,7 @@ double WDutils::SphVol(int d)
 complex<double> WDutils::lnsin(complex<double> const&x)
 {
 #ifdef __GNUC__
-  register double s,c;
+  double s,c;
   sincos(std::real(x),s,c);
   register double 
   ep = exp(-2*abs(std::imag(x))),
@@ -93,7 +93,7 @@ complex<double> WDutils::lnsin(complex<double> const&x)
 complex<double> WDutils::lncos(complex<double> const&x)
 {
 #ifdef __GNUC__
-  register double s,c;
+  double s,c;
   sincos(std::real(x),s,c);
   register double 
   ep = exp(-2*abs(std::imag(x))),
@@ -112,7 +112,7 @@ complex<double> WDutils::lncos(complex<double> const&x)
 complex<double> WDutils::lnsinh(complex<double> const&x)
 {
 #ifdef __GNUC__
-  register double s,c;
+  double s,c;
   sincos(std::imag(x),s,c);
   register double 
   ep = exp(-2*abs(std::real(x))),
@@ -131,7 +131,7 @@ complex<double> WDutils::lnsinh(complex<double> const&x)
 complex<double> WDutils::lncosh(complex<double> const&x)
 {
 #ifdef __GNUC__
-  register double s,c;
+  double s,c;
   sincos(std::imag(x),s,c);
   register double 
   ep = exp(-2*abs(std::real(x))),

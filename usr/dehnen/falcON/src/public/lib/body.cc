@@ -230,7 +230,7 @@ inline void bodies::block::skip(unsigned&from,
 				flags    copyflag) const falcON_THROWING
 {
   if(copyflag)
-    for(; from<NBOD && !(flag(from).are_set(copyflag)); ++from );
+    for(; from<NBOD && !(flag(from).are_set(copyflag)); ++from ) {}
 }
 //------------------------------------------------------------------------------
 // copy up to NALL bodies                                                 
@@ -266,7 +266,7 @@ fieldset bodies::block::copy(const block*&From,
       copy = 0u;
       for(unsigned to=from;
 	  to < From->NBOD && From->flag(to).are_set(copyflag) && copy<free;
-	  ++copy, ++to);
+	  ++copy, ++to) {}
     } else
       copy = min(free, From->NBOD - from);
     // if any body to be copied, copy data, adjust free, NBOD, from, copied     
@@ -1188,7 +1188,7 @@ void bodies::read_simple_ascii(std::istream  &in,
 	DebugInfo("bodies::read_simple_ascii(): now reading %d %s bodies...\n",
 		  N[t],t.name());
       LoopTypedBodies(this,Bi,t) {
-	while( in && eat_line(in,'#') );
+	while( in && eat_line(in,'#') ) {}
 	if(!in) falcON_THROW("bodies::read_simple_ascii(): "
 			     "end of input before data have been read");
 	for(unsigned i=0; i!=Ni; ++i)

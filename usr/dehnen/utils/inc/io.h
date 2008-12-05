@@ -333,7 +333,7 @@ namespace WDutils {
       if(x == 0) return;
       double l=std::log10(std::abs(x));
       w =std::max(w,width(l));       // minimum width to achieve
-      for(++p; width(l)<=w; ++p);    // try for more precision
+      for(++p; width(l)<=w; ++p) ;   // try for more precision
       --p;
     }
   };
@@ -915,7 +915,7 @@ namespace WDutils {
     inline void swap_char(char&A, char&B) { char T(A); A=B; B=T; }
     template<int B> struct __bswap {};
     template<> struct __bswap<1> {
-      static void swap(void*vdat, unsigned cnt) { return; }
+      static void swap(void*, unsigned) {}
     };
     template<> struct __bswap<2> {
       static void swap(void*vdat, unsigned cnt) {

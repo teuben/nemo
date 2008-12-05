@@ -223,7 +223,7 @@ namespace WDutils {
   /// Useful for generating a C-style string containing formatted data.         
   class message {
     message(message const&);                       // no copy constructor       
-    static const int size = 1024;
+    static const size_t size = 1024;
     char __text[size];
   public:
     /// Generate a string from format + data.
