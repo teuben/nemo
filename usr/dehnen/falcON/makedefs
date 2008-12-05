@@ -108,7 +108,7 @@ endif
 endif
 endif
 
-ifeq ($(HOSTNAME),spectrum)
+ifeq ($(HOST),spectrum)
 WARNINGS	:= -Wall -Wsign-compare   # old compiler: no -Wtype-limits
 else
 WARNINGS	:= -Wall -Wtype-limits -Wsign-compare
