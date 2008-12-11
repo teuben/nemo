@@ -15,6 +15,7 @@ set nemo=nemo           # root directory name
 
 set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
+set gfortran=0          # pick gfortran compiler
 set gcc=0		# pick gcc version (version number via astromake)
 set glnemo=1            # compile glnemo
 set anonymous=1		# anonymous CVS ?
@@ -77,6 +78,12 @@ if ($intel) then
   setenv CC  icc
   setenv CXX icpc
   setenv F77 ifort
+endif
+
+if ($gfortran) then
+  setenv CC  gcc
+  setenv CXX g++
+  setenv F77 gfortran
 endif
 
 if ($clean) then
