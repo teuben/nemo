@@ -50,10 +50,11 @@
 // v 2.4.3  20/02/2008  WD  change in body.h (removed old-style constructors)
 // v 2.4.4  11/06/2008  WD  changes in error/exception treatment (falcON)
 // v 2.4.5  10/09/2008  WD  happy gcc 4.3.1
-// v 2.4.6  13/11/2008  WD new mass adaption (proprietary only)
+// v 2.4.6  13/11/2008  WD  new mass adaption (proprietary only)
+// v 2.4.7  15/12/2008  WD  debugged r_2 -> r_s conversion
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.6"
-#define falcON_VERSION_D "13-nov-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.7"
+#define falcON_VERSION_D "15-dec-2008 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -71,7 +72,7 @@ const char*defv[] = {
   "inner=7/9\n        inner density exponent                             ",
   "outer=31/9\n       outer density exponent                             ",
   "r_s=1\n            scale radius                                       ",
-  "r_2=\n             use r_s = r_2*((2-inner)/(outer-2))^(1/eta)        ",
+  "r_2=\n             use r_s = r_2*((2-inner)/(outer-2))^(-1/eta)       ",
   "M=1\n              total mass of halo                                 ",
   "eta=4/9\n          transition parameter between inner/outer power law ",
   "r_c=0\n            core radius                                        ",
@@ -193,7 +194,7 @@ void falcON::main() falcON_THROWING
       falcON_Warning("'r_2' given: will ignore non-default 'r_s' value\n");
     if(go<=2.)
       falcON_Error("outer<=2 ==> gamma(r)<2 at finite r; cannot use r_2\n");
-    rs = getdparam("r_2") * pow((2-gi)/(go-2),1/et);
+    rs = getdparam("r_2") * pow((2-gi)/(go-2),-1./et);
   }
   ModifiedDoublePowerLawHalo Halo(rs,rc,rt,Mt,gi,go,et);
   HaloSampler HaloSample(Halo,be,ra,mono,
