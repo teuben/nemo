@@ -56,22 +56,28 @@ void init_io_one(int  * maxbodies,
 		 char **history_prog,
 		 int    MAXIO)
 { 
-  string defv[] = { "none=none","VERSION=1.60",NULL };
+  string defv[] = { "none=none","VERSION=1.51",NULL };
   string argv[] = { "IO_NEMO",NULL };
   int i;
   string * histo;
-
-  initparam(argv,defv); 
+  static bool first=FALSE;
   
-  /* initialyze files control arrays */
+  initparam(argv,defv);     
+  if (first) {
+    first=FALSE;
+
+    /* initialyze files control arrays */
+    for (i=0; i< MAXIO; i++) {
+      maxbodies[i]   = 0;
+      read_one[i]    = FALSE;
+      save_one[i]    = FALSE;
+      //set_history[i] = FALSE;
+    }
+  }
   for (i=0; i< MAXIO; i++) {
-    maxbodies[i]   = 0;
-    read_one[i]    = FALSE;
-    save_one[i]    = FALSE;
     set_history[i] = FALSE;
   }
-
-  /* get command line history */
+    /* get command line history */
   histo         = (char **) ask_history();
   *history_prog = (char * ) allocate_pointer(*history_prog,
 					     sizeof(char)*(strlen(histo[0])+1));
@@ -79,6 +85,7 @@ void init_io_one(int  * maxbodies,
   strcpy(*history_prog, histo[0]);
 
   /*fprintf(stderr,"history prog : <%s> \n", *history_prog); */
+ 
 }
 
 /* -----------------------------------------------------------------
