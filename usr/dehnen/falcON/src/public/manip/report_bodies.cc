@@ -227,7 +227,7 @@ namespace falcON { namespace Manipulate {
     LoopAllBodies(S,b) if(in_subset(b)) {
       if(KEY[f] != bodykey(b))
 	falcON_ErrorN("Manipulator \"%s\": "
-		      "%dth body changed key form %d to %d\n",
+		      "%dth body changed key to %d\n",
 		      name(),KEY[f],bodykey(b));
       print_data(OUT[f],b,S->time());
       f++;

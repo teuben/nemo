@@ -195,14 +195,14 @@ endif
 ifdef STATIC
 
 LFALCON		:= -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO)
-falcON		:= $(links) $(LIB)lib$(LIBNAME).a
 
 else
 
 LFALCON		:= -L$(LIB) -l$(LIBNAME) -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO)
-falcON		:= $(links) $(LIB)lib$(LIBNAME).so
 
 endif
+
+falcON		:= $(links) $(LIB)lib$(LIBNAME).a $(LIB)lib$(LIBNAME).so
 
 # -------------------------
 # compile and link commands

@@ -163,7 +163,7 @@ namespace falcON {
     // This routine merely updates the leaf's positions                         
     SET_I
       if(TREE == 0) {
-	falcON_Warning("no old tree to be re-used","forces::reuse()");
+	  falcON_Warning("forces::reuse(): no old tree to be re-used");
 	return grow();
       }
     TREE->reuse();

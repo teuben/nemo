@@ -398,7 +398,8 @@ void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
   }
   if(R != N*falcON::size(f))
     falcON_THROW("bodies::block::read_Fortran(%c): "
-		 "could only read %u of %u bytes\n",R,N*falcON::size(f));
+		 "could only read %u of %lu bytes\n",
+		 letter(f),R,N*falcON::size(f));
   DebugInfo(4,"bodies::block::read_Fortran(): read %u `%s'\n",N,fullname(f));
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -415,7 +416,8 @@ void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
 			     +from*falcON::size(f), N*falcON::size(f));
   if(W != N*falcON::size(f))
     falcON_THROW("bodies::block::write_Fortran(%c): "
-		 "could only write %u of %u bytes\n",W,N*falcON::size(f));
+		 "could only write %u of %lu bytes\n",
+		 letter(f),W,N*falcON::size(f));
   DebugInfo(4,"bodies::block::write_Fortran(): written %u `%s'\n",
 	    N,fullname(f));
 }
@@ -491,8 +493,8 @@ bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I, fieldbit f,
   falcON_THROWING
 {
   if(R * falcON::size(f) > I.bytes_unread())
-    falcON_THROW("body::read_Fortran: want %u `%s' (%u bytes) but "
-		 "only %u bytes left on Fortran record\n",
+    falcON_THROW("body::read_Fortran(%c): want %u `%s' (%lu bytes) but "
+		 "only %u bytes left on Fortran record\n",letter(f),
 		 R, fullname(f), R*falcON::size(f), I.bytes_unread());
   while(is_valid() && R) {
     unsigned r = min(B->N_bodies()-K, R);
@@ -510,8 +512,8 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
   falcON_THROWING
 {
   if(W * falcON::size(f) > O.bytes_free())
-    falcON_THROW("body::write_Fortran: want %u `%s' (%u bytes) but "
-		 "only %u bytes left free on Fortran record\n",
+    falcON_THROW("body::write_Fortran(%c): want %u `%s' (%lu bytes) but "
+		 "only %u bytes left free on Fortran record\n",letter(f),
 		 W, fullname(f), W*falcON::size(f), O.bytes_free());
   while(is_valid() && W) {
     unsigned w = min(B->N_bodies()-K, W);
@@ -1381,7 +1383,7 @@ namespace {
 			 "name mismatch ('%s' : '%s')",P->name,n);
 	  if(P->size != s)
 	    falcON_THROW("snapshot::set_pointer(): "
-			 "size mismatch (%u : %u)",P->size,s);
+			 "size mismatch (%lu : %lu)",P->size,s);
 	  P->pter = p;
 	  return;
 	}
@@ -1408,7 +1410,7 @@ namespace {
 	if(0==strcmp(P->key, k)) {
 	  if(s != P->size)
 	    falcON_THROW("snapshot::%s(): "
-			 "size (%u) does not match value in bank (%u)\n",
+			 "size (%lu) does not match value in bank (%lu)\n",
 			 func,s,P->size);
 	  if(strcmp(n,P->name))
 	    falcON_THROW("snapshot::%s(): "
@@ -1823,7 +1825,7 @@ falcON_TRAITS(::GadgetHeader,"GadgetHeader");
     if(read.contain(BIT)) {						\
       if(F.size() != nr*field_traits<BIT>::size)			\
 	falcON_THROW("bodies::read_gadget(): mismatch reading %u %c: "	\
-		     "expected %u bytes, found %u\n",			\
+		     "expected %lu bytes, found %u\n",			\
 		     nr,field_traits<BIT>::word(),			\
 		     nr*field_traits<BIT>::size,F.size());		\
       add_field(BIT);							\
@@ -1954,7 +1956,7 @@ double bodies::read_gadget(const char*fname,
       if(read.contain(fieldbit::m)) {
 	if(F.size() != nm*sizeof(real))
 	  falcON_THROW("bodies::read_gadget(): mismatch reading %u m: "
-		       "expected %u bytes, found %u\n",
+		       "expected %lu bytes, found %u\n",
 		       nm,nm*sizeof(real), F.size());
 	body sph(SPH), std(STD);
 	add_field(fieldbit::m);

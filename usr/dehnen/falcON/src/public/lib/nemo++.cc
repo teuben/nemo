@@ -716,7 +716,7 @@ void falcON::data_in::read(void*data, unsigned N)
 void falcON::data_in::read_phases(void*pos, void*vel, unsigned N)
 {
   if(FIELD != nemo_io::posvel)
-    falcON_THROW("data_in::read_phases(%d)\n",NemoTag(FIELD));
+    falcON_THROW("data_in::read_phases(%s)\n",NemoTag(FIELD));
   if(pos == 0 && vel == 0) {
     falcON_Warning("data_in::read_phases(): pos=%p, vel=%p\n",pos,vel);
     return;

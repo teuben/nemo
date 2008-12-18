@@ -3298,3 +3298,15 @@ int main()
 #endif
 }
 #endif // TESTING
+////////////////////////////////////////////////////////////////////////////////
+namespace falcON {
+  void SetYlm(double*a, int l, tupel<3,double> const&x)
+  {
+    YlmRec Y(l);
+    double rd,ct,st,cp,sp;
+    Spherical(rd,ct,st,cp,sp,x);
+    ::SetYlm<PotExp::none>(Y,ct,st,cp,sp);
+    double*end=a+square(l+1);
+    for(double*b=&(Y(0,0)); a!=end; ++a,++b) *a = *b;
+  }
+}
