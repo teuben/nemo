@@ -44,19 +44,8 @@
 //------------------------------------------------------------------------------
 namespace WDutils {
   using std::abs;
-#ifndef __GNUC__
-  template<typename scalar_type> inline
-  scalar_type   abs     (const scalar_type&x)
-  { return (x<0)? -x : x; }
-  //----------------------------------------------------------------------------
-  template<> inline
-  double abs<double> (const double&x)
-  { return fabs(x); }
-  //----------------------------------------------------------------------------
-  template<> inline
-  float abs<float>   (const float &x) 
-  { return fabs(x); }
-#endif
+  using std::min;
+  using std::max;
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
   int sign    (const scalar_type&x)
@@ -65,10 +54,6 @@ namespace WDutils {
   template<typename scalar_type> inline
   scalar_type sign (const scalar_type&x, const scalar_type&s)
   { return ( s>=0 )?  abs(x) : -abs(x); }
-  //----------------------------------------------------------------------------
-  // use min & max from <algorithm>
-  using std::min;
-  using std::max;
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
   const scalar_type&min(const scalar_type&x,
