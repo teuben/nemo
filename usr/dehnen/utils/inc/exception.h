@@ -213,7 +213,11 @@ namespace WDutils {
     Thrower(const char*__file, int __line) : file(__file), line(__line) {}
     /// generate an exception
     /// \param[in] fmt  gives the format in C printf() style
-    exception operator()(const char*fmt, ...) const;
+    exception operator()(const char*fmt, ...) const
+#ifdef __GNUC__
+      __attribute__ ((format (printf, 2, 3)))
+#endif
+      ;
   };
   //@}
   // ///////////////////////////////////////////////////////////////////////////
@@ -250,7 +254,11 @@ namespace WDutils {
     Error(const char*__file, int __line, const char*__lib = "WDutils")
       : file(__file), lib(__lib), line(__line) {}
     /// print error message to stderr, report [file:line] if known.
-    void operator() (const char*fmt, ...) const;
+    void operator() (const char*fmt, ...) const
+#ifdef __GNUC__
+      __attribute__ ((noreturn, format (printf, 2, 3)))
+#endif
+      ;
   };
   /// print error message to stderr, reporting [file:line], and exit.
   /// use like NEMO's error(), i.e. with the same syntax:
@@ -279,7 +287,11 @@ namespace WDutils {
     Warning(const char*__file, int __line, const char*__lib = "WDutils")
       : file(__file), lib(__lib), line(__line) {}
     /// print error message to stderr, report [file:line] if known.
-    void operator() (const char*fmt, ...) const;
+    void operator() (const char*fmt, ...) const
+#ifdef __GNUC__
+      __attribute__ ((format (printf, 2, 3)))
+#endif
+      ;
   };
   /// print warning message to stderr, reporting [file:line].
   /// use like NEMO's warning(), i.e. with the same syntax:
@@ -337,7 +349,11 @@ namespace WDutils {
     const int   line;
     snprintf__(const char*f, int l) : file(f), line(l) {}
     int operator() (char*str, size_t size, const char* fmt, ... )
-      WDutils_THROWING;
+      WDutils_THROWING
+#ifdef __GNUC__
+      __attribute__ ((format (printf, 4, 5)))
+#endif
+      ;
   };
   /// macro WDutilsSNprintf to be used like snprintf.
   /// reports source file and line on error.
