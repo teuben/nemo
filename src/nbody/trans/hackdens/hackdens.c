@@ -11,6 +11,7 @@
  *     29-may-02  V2.1   add nudge= keyword to nudge overlapping particles
  *     25-apr-06  V2.2b  use global to isolate extern's (for Mac linking)
  *     28-jul-06  V2.2c  default for tag is now Density
+ *                V2.2d  clarify D vs. P, working with std snapshot, not archaic
  *
  * TODO:  this program seems to assume m_i = 1, so for unequal masses wrong
  */
@@ -20,23 +21,22 @@
 #include "defs.h"
 #include <getparam.h>
 #include <filestruct.h>
-
-#include <archaic/snapshot.h>
+#include <snapshot/snapshot.h>
 
 string defv[] = {	
-    "in=???\n			  input file with mass coordinates ",
+    "in=???\n			  input snapshot",
     "out=\n			  output file with f.c. results ",
-    "neib=6\n			  number of neibours to define local density ",
+    "neib=6\n			  number of neighbours to define local density ",
     "rneib=0.1\n		  initial guess for neighbour sphere radius ",
-    "write_at_phi=f\n		  flag to write Density in place of Potential",
+    "write_at_phi=f\n		  flag to write density with Potential instead of Density tag",
     "rsize=4.0\n		  side-length of initial box",
     "rmin=\n			  lower left corner of initial box",
     "options=phase,mass\n	  misc. control options {phase, mass}",
     "fcells=0.9\n		  cell/body allocation ratio ",
     "nudge=0\n                    nudge overlapping particles with this dispersion",
     "verbose=f\n		  flag to print # of particles finished ",
-    "density=t\n                  write density, or distance of Kth particle",
-    "VERSION=2.2c\n		  28-jul-06 PJT",
+    "density=t\n                  write density, or distance to Kth particle",
+    "VERSION=2.2d\n		  6-jan-09 PJT",
     NULL,
 };
 
@@ -147,7 +147,7 @@ dencalc()
     neibnum=getiparam("neib")+1;
     nudge = getdparam("nudge");
     if (nudge > 0) {
-      set_xrandom(0);
+      set_xrandom(0);   /* should use seed= */
 #if 0
       warning("Nudging all particles by +/-%s",nudge);
       for (bp=massdata; bp<massdata+nmass; bp++) {
@@ -241,11 +241,9 @@ writesnapshot()
 	put_data(outstr, MassTag, RealType, mbuf, ntest, 0);
     if (scanopt(options, "phase"))
 	put_data(outstr, PhaseSpaceTag, RealType, pspbuf, ntest, 2, NDIM, 0);
-    if(getbparam("write_at_phi")){
-	put_data(outstr, PotentialTag, RealType, dendata, ntest, 0);
-    }else{
-	put_data(outstr, "Density", RealType, dendata, ntest, 0);
-    }
+    put_data(outstr, 
+	     getbparam("write_at_phi") ? PotentialTag : DensityTag,
+	     RealType, dendata, ntest, 0);
     put_tes(outstr, ParticlesTag);
     put_set(outstr, DiagnosticsTag);
     put_data(outstr, "cputree", RealType, &cputree, 0);
