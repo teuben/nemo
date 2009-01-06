@@ -1,13 +1,15 @@
-.TH HACKDENS 1NEMO "29 May 2002"
+.TH HACKDENS 1NEMO "6 January 2009"
 .SH NAME
 hackdens \- local density estimator using tree algorithm
 .SH SYNOPSIS
 \fBhackdens in=\fPsnapshot \fBout=\fPimage [parameter=value]
 .SH DESCRIPTION
-\fIhackdens\fP calculates the local density in the configulation space
+\fIhackdens\fP calculates the local density in the configuration space
 using the hierarchical
 N-body algorithm (J. Barnes and P. Hut, \fINature\fP \fB324\fP, 446).
-For small N or systems with complex geometry SNAPDENS(1NEMO) may be preferred.
+For small N or systems with complex geometry \fBsnapdens(1NEMO)\fP may
+be preferred. For even more performance, \fBdensity(1falcON)\fP can be
+used.
 .PP
 The density can be writtin in the slot normally used for Potentials (the default),
 or if \fBwrite_at_phi=f\fP be written to a tag named \fIDensity\fP.
@@ -36,7 +38,7 @@ that the neighboring particles have similar local density. (See NOTES)
 \fBwrite_at_phi\fP=\fIt|f\fP
 Logical if the density data is written in the "Potential" slot of the
 snapshot file. If false, the density will be written with tag "Density".
-[default: t]
+[default: f]
 .TP
 \fBrsize\fP=\fIvalue\fP
 Intial size of the root box. Box will automatically expanded to keep
@@ -91,7 +93,7 @@ in the order of the distance from the C.M., and calculate local density.
 \fP
 .fi
 .SH SEE ALSO
-hackforce(1NEMO), snapdens(1NEMO).
+hackforce(1NEMO), snapdens(1NEMO), density(1falcON)
 .SH BUGS
 The local density is calculated using (neib-1)th neighbor.
 Calculation can become very slow if the input snap shot is not
