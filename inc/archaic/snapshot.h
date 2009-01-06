@@ -19,6 +19,7 @@
 #define     PhaseSpaceTag       "PhaseSpace"
 #define	    AccelerationTag	"Acceleration"
 #define	    PotentialTag	"Potential"
+#define	    DensityTag		"Density"
 #define     AuxTag              "Aux"
 #define     KeyTag              "Key"
 
