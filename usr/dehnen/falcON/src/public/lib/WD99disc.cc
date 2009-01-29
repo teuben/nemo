@@ -7,11 +7,11 @@
 ///
 /// \author Paul McMillan
 /// \author Walter Dehnen
-/// \date   2000-2008
+/// \date   2000-2009
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2008  Walter Dehnen, Paul McMillan
+// Copyright (C) 2000-2009  Walter Dehnen, Paul McMillan
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -614,7 +614,7 @@ void WD99disc::coldsample(bodies const&B,            // I/O: bodies to sample
       if(Z0){
 	double tmp1=q? RNG(5,0.,1.) : RNG(0.,1.);
 	z=0.5*Z0*log((2.*tmp1)/(2.-2.*tmp1)); // sample z from sech^2 disc
-	double tmp2,tmp3,spare;
+	double tmp2,tmp3,spare(0);
 	if (iset) {
 	  iset=0;
 	  vz=spare;

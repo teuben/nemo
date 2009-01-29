@@ -525,7 +525,7 @@ namespace falcON {
     /// do we hold the body datum indicated?
 #define HaveField(BIT,NAME)						\
     bool have_##NAME() const { return BITS.contain(BIT); }
-    DEF_NAMED(HaveField);
+    DEF_NAMED(HaveField)
 #undef HaveField
     //==========================================================================
     // \name non-const data access using bodies::index
@@ -538,7 +538,7 @@ namespace falcON {
     field_traits<BIT>::type      &    NAME    (index i) const {	\
       return datum<BIT>(i);					\
     }
-    DEF_NAMED(NonConstAccess);
+    DEF_NAMED(NonConstAccess)
 #undef NonConstAccess
     //==========================================================================
     // \name const data access using bodies::index
@@ -551,7 +551,7 @@ namespace falcON {
     field_traits<BIT>::type const&c_##NAME    (index i) const {	\
       return const_datum<BIT>(i);				\
     }
-    DEF_NAMED(ConstAccess);
+    DEF_NAMED(ConstAccess)
 #undef ConstAccess
     //==========================================================================
     // \name further methods using bodies::index
@@ -751,7 +751,7 @@ namespace falcON {
 #define HasDatum(Bit,Name) friend bool has_##Name(iterator const&);
       /// has our body the datum indicated?
       friend bool has_field(iterator const&, fieldbit);
-      DEF_NAMED(HasDatum);
+      DEF_NAMED(HasDatum)
 #undef HasDatum
       //------------------------------------------------------------------------
       /// pre-fix: get next body (note: there is no post-fix operator++)
@@ -807,7 +807,7 @@ namespace falcON {
 	CheckInvalid(field_traits<Bit>::funcname());	\
         return B-> datum<Bit>(K);			\
       }
-      DEF_NAMED(NonConstAccess);
+      DEF_NAMED(NonConstAccess)
 #undef NonConstAccess
       //------------------------------------------------------------------------
       /// return const datum
@@ -822,7 +822,7 @@ namespace falcON {
       }
 #define ConstAccess(Bit,Name)						\
       friend field_traits<Bit>::type const&Name(iterator const&);
-      DEF_NAMED(ConstAccess);
+      DEF_NAMED(ConstAccess)
 #undef ConstAccess
       /// return angular momentum
       friend vect angmom(iterator const&);
@@ -1530,7 +1530,7 @@ namespace falcON {
   inline field_traits<Bit>::type const&Name(bodies::iterator const&i) {	\
     return i.B-> const_datum<Bit>(i.K);					\
   }
-  DEF_NAMED(ConstAccess);
+  DEF_NAMED(ConstAccess)
 #undef ConstAccess
   inline bodies::iterator& bodies::iterator::next_in_subset() {
     do ++(*this);

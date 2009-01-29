@@ -299,7 +299,7 @@ namespace falcON {
   // class BodyProp<BIT>                                                        
   //
   /// wrapper around Bodyfunc, returns field_traits<BIT>::type, useful for
-  /// assining a value constructed from other data to field BIT.
+  /// assigning a value constructed from other data to field BIT.
   ///
   /// If the return type of bodyfunc is incompatible with our return type, an
   /// exception is thrown.

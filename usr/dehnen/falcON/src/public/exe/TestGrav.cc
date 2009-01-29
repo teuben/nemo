@@ -57,22 +57,6 @@ namespace {
     return (3-gamma)*f;
   }
 
-  double ms_density_gamma(const double gamma)
-  {
-    register double x=3-3*gamma,f;
-    if(x < 0.) return 0.;
-    f = 1/x;
-    f-= 8/(x+=1);
-    f+=28/(x+=1);
-    f-=56/(x+=1);
-    f+=70/(x+=1);
-    f-=56/(x+=1);
-    f+=28/(x+=1);
-    f-= 8/(x+=1);
-    f+= 1/(x+=1);
-    return cube(3-gamma)*f/square(4*Pi);
-  }
-
   struct myRNG {
     static const double iRMAX;
     myRNG(unsigned seed) { std::srand(seed); }

@@ -5,11 +5,11 @@
 //
 /// \brief   provides an interfact to any NEMO library functionality
 /// \author  Walter Dehnen
-/// \date    2008
+/// \date    2008-2009
 //
 // /////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2008  Walter Dehnen
+// Copyright (C) 2008-2009  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -58,7 +58,7 @@ namespace falcON {
   /// \param[in]  e expression
   /// \param[out] x array with values
   /// \param[in]  n size of array
-  /// \note implementations exist for int,double,float,long,bool
+  /// \note implementations exist for int,unsigned,long,bool,float,double
   /// \note implemented in nemo++.cc using NEMO
   template<typename T>
   int nemoinp(const char*e, T*x, int n);

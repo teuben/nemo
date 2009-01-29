@@ -1,32 +1,32 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    src/public/nemo++.cc                                               
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2008                                                              
-///                                                                             
-/// \brief   implements methods declared in inc/nemo++.h                       
-///                                                                             
+///
+/// \file    src/public/nemo++.cc
+///
+/// \author  Walter Dehnen
+///
+/// \date    2008-2009
+///
+/// \brief   implements methods declared in inc/nemo++.h
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2008  Walter Dehnen                                           
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2008-2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/nemo++.h>
 #include <utils/io.h>
@@ -108,12 +108,12 @@ int falcON::nemoinp(const char*e, T*x, int n) {
   return __inpA<T>::inp(e,x,n);
 }
 
-template int falcON::nemoinp(const char*, bool    *, int) falcON_THROWING;
-template int falcON::nemoinp(const char*, int     *, int) falcON_THROWING;
-template int falcON::nemoinp(const char*, long    *, int) falcON_THROWING;
-template int falcON::nemoinp(const char*, unsigned*, int) falcON_THROWING;
-template int falcON::nemoinp(const char*, float   *, int) falcON_THROWING;
-template int falcON::nemoinp(const char*, double  *, int) falcON_THROWING;
+template int falcON::nemoinp(const char*, bool    *, int);
+template int falcON::nemoinp(const char*, int     *, int);
+template int falcON::nemoinp(const char*, long    *, int);
+template int falcON::nemoinp(const char*, unsigned*, int);
+template int falcON::nemoinp(const char*, float   *, int);
+template int falcON::nemoinp(const char*, double  *, int);
 
 int nemoinpx(const char*e, double*x, int n) {
   return ::nemoinpx(const_cast<char*>(e),x,n);
@@ -910,7 +910,7 @@ void falcON::data_out::write(const void*data)
 //------------------------------------------------------------------------------
 namespace {
   int within_count = 0;
-  inline bool within(double const&val, char*range, falcON::real const&fuzz)
+  inline bool Within(double const&val, char*range, falcON::real const&fuzz)
     // almost identical to nemo::within
   {
     char*endptr, *subptr, *sepptr, *colptr;
@@ -949,7 +949,7 @@ bool falcON::time_in_range(double t, const char*times)
 {
   return  times == 0
     ||    std::strcmp(const_cast<char*>(times),"all") == 0
-    ||    within(t,const_cast<char*>(times),0.0005);
+    ||    Within(t,const_cast<char*>(times),0.0005);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

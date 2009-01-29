@@ -1,25 +1,31 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// sample.cc                                                                   |
-//                                                                             |
-// Copyright (C) 2004-2008  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \file    src/public/lib/sample.cc
+///
+/// \author  Walter Dehnen
+///
+/// \date    2004-2009
+///
+////////////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2004-2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
+////////////////////////////////////////////////////////////////////////////////
 #include <public/sample.h>
 #include <public/basic.h>
 #include <numerics.h>
@@ -157,7 +163,7 @@ void SphericalSampler::sample(body   const&B0,
 	Q = Psi-0.5*w*w;                           //     get Q                 
       } while(Q<=0.);                              //   WHILE (non-positive)    
       f = DF(Q);                                   //   get g(Q)                
-      if(std::isnan(f))
+      if(WDutils::isnan(f))
 	falcON_THROW("SphericalSampler::sample(): "
 		     "%s is NaN; Eps=%g [r=%g, we=%g, w=%g]\n",
 		     (beta? (iraq==0? "g(E)" : "g(Q)"):
@@ -172,7 +178,7 @@ void SphericalSampler::sample(body   const&B0,
       vt = w * SC[0]/sqrt(1+r*r*iraq);             //   tangential velocity     
       vr = w * SC[1];                              //   radial velocity         
       if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);//   distribution function   
-      if(givef && std::isnan(f))
+      if(givef && WDutils::isnan(f))
 	falcON_THROW("SphericalSampler::sample(): f(E,L^2) is NaN"
 		     ": Eps=%g, [vt=%g, r=%g]\n",Psi-0.5*w*w,vt,r);
     } else {                                       // ELSE                      

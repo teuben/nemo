@@ -13,7 +13,7 @@
 ///          \li further constants and macros
 ///
 /// \author  Walter Dehnen
-///#
+///
 /// \date    2002-2008
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -442,15 +442,15 @@ namespace falcON {
     /// total # data
     static const int   NQUANT= BodyData::NQUANT;
     /// letter for body datum
-    static const char& SNAME(int i) { return BodyData::SQUANT[i]; }
+    static const char& SNAME(int _i) { return BodyData::SQUANT[_i]; }
     /// 5-character function name for body dataum
-    static const char* FIVENAME(int i) { return BodyData::QFIVENAME[i]; }
+    static const char* FIVENAME(int _i) { return BodyData::QFIVENAME[_i]; }
     /// function name for body dataum
-    static const char* FUNCNAME(int i) { return BodyData::QFUNCNAME[i]; }
+    static const char* FUNCNAME(int _i) { return BodyData::QFUNCNAME[_i]; }
     /// full name for body dataum
-    static const char* FULLNAME(int i) { return BodyData::QFULLNAME[i]; }
+    static const char* FULLNAME(int _i) { return BodyData::QFULLNAME[_i]; }
     /// size of type for body datum
-    static size_t const& SIZE(int i) { return BodyData::ZQUANT[i]; }
+    static size_t const& SIZE(int _i) { return BodyData::ZQUANT[_i]; }
     //@}
     //--------------------------------------------------------------------------
   private:
@@ -519,10 +519,10 @@ namespace falcON {
     /// from unsigned: use value
     explicit fieldbit(unsigned i) : val(i) {}
     /// from char: match against \b name of enum values in fieldbit::bits
-    explicit fieldbit(char     l) : val(invalid) {
-      for(int v=0; v!=invalid; ++v)
-	if(l == BodyData::SQUANT[v] ) {
-	  val = v;
+    explicit fieldbit(char _l) : val(invalid) {
+      for(int _v=0; _v!=invalid; ++_v)
+	if(_l == BodyData::SQUANT[_v] ) {
+	  val = _v;
 	  return;
 	}
     }
@@ -539,13 +539,13 @@ namespace falcON {
     /// conversion to value_type
     operator value_type ()           const { return val; }
     /// equality
-    bool operator ==    (fieldbit f) const { return val == f.val; }
+    bool operator ==    (fieldbit _f) const { return val == _f.val; }
     /// equality
-    bool operator ==    (bits     b) const { return val == b; }
+    bool operator ==    (bits     _b) const { return val == _b; }
     /// unequality
-    bool operator !=    (fieldbit f) const { return val != f.val; }
+    bool operator !=    (fieldbit _f) const { return val != _f.val; }
     /// unequality
-    bool operator !=    (bits     b) const { return val != b; }
+    bool operator !=    (bits     _b) const { return val != _b; }
     //@}
     //--------------------------------------------------------------------------
     /// the integer value
@@ -726,9 +726,9 @@ namespace falcON {
     /// from string: match each character against a single-field set's name, 
     /// corresponding to the name of the fieldset::bits value; for example,
     /// fieldset("mxv") yields a fieldset with masses, positions and velocities
-    explicit fieldset(const char*c) : val(0) {
-      for(fieldbit f; f; ++f)
-	if(std::strchr(c,letter(f))) val |= one << falcON::value(f);
+    explicit fieldset(const char*_c) : val(0) {
+      for(fieldbit _f; _f; ++_f)
+	if(std::strchr(_c,letter(_f))) val |= one << falcON::value(_f);
     }
     /// copy assignment operator
     fieldset&operator= (fieldset b) { val  = b.val; return *this; }
@@ -737,33 +737,33 @@ namespace falcON {
     /// \name operations                                                        
     //@{
     /// combine with another set
-    fieldset&operator|= (fieldset b) { val |= b.val; return *this; }
+    fieldset&operator|= (fieldset _b) { val |= _b.val; return *this; }
     /// add: combine with another set
-    fieldset&operator+= (fieldset b) { val |= b.val; return *this; }
+    fieldset&operator+= (fieldset _b) { val |= _b.val; return *this; }
     /// subtract: delete fields from other set
-    fieldset&operator-= (fieldset b) { val &= ~(b.val); return *this; }
+    fieldset&operator-= (fieldset _b) { val &= ~(_b.val); return *this; }
     /// subtract: delete fields from other set
-    fieldset&operator-= (bits b) { val &= ~b; return *this; }
+    fieldset&operator-= (bits _b) { val &= ~_b; return *this; }
     /// difference: fields in this set and not in other
-    fieldset operator- (fieldset b) const { return fieldset(val & ~(b.val)); }
+    fieldset operator- (fieldset _b) const { return fieldset(val & ~(_b.val)); }
     /// difference: fields in this set and not in other
-    fieldset operator- (bits b) const { return fieldset(val & ~b); }
+    fieldset operator- (bits _b) const { return fieldset(val & ~_b); }
     /// overlap: fields present in both set
-    fieldset&operator&= (fieldset b) { val &= b.val; return *this; }
+    fieldset&operator&= (fieldset _b) { val &= _b.val; return *this; }
     /// overlap: fields present in both set
-    fieldset&operator&= (bits b) { val &= b; return *this; }
+    fieldset&operator&= (bits _b) { val &= _b; return *this; }
     /// combination of two sets
-    fieldset operator| (fieldset b) const { return fieldset(val | b.val); }
+    fieldset operator| (fieldset _b) const { return fieldset(val | _b.val); }
     /// combination of two sets
-    fieldset operator| (bits b) const { return fieldset(val | b); }
+    fieldset operator| (bits _b) const { return fieldset(val | _b); }
     /// combination of two sets
     friend fieldset operator| (bits, bits);
     /// combination of two sets
     friend fieldset operator| (bits, fieldset);
     /// cross section of two sets
-    fieldset operator& (fieldset b) const { return fieldset(val & b.val); }
+    fieldset operator& (fieldset _b) const { return fieldset(val & _b.val); }
     /// cross section of two sets
-    fieldset operator& (bits b) const { return fieldset(val & b); }
+    fieldset operator& (bits _b) const { return fieldset(val & _b); }
     /// cross section of two sets
     friend fieldset operator& (bits, fieldset);
     /// is set empty?
@@ -771,15 +771,15 @@ namespace falcON {
     /// is set empty?
     operator bool() const { return val != nil; }
     /// are two sets identical?
-    bool operator== (fieldset b) const { return val == b.val; }
+    bool operator== (fieldset _b) const { return val == _b.val; }
     /// are two sets identical?
-    bool operator== (bits b) const { return val == static_cast<value_type>(b); }
+    bool operator== (bits _b) const { return val==static_cast<value_type>(_b); }
     /// are two sets identical?
-    friend bool     operator== (bits b, fieldset d) { return d == b; }
+    friend bool     operator== (bits _b, fieldset _d) { return _d == _b; }
     /// are two sets not identical?
-    bool operator!= (fieldset b) const { return val != b.val; }
+    bool operator!= (fieldset _b) const { return val != _b.val; }
     /// are two sets not identical?
-    bool operator!= (bits b) const { return val != static_cast<value_type>(b); }
+    bool operator!= (bits _b) const { return val!=static_cast<value_type>(_b); }
     /// are two sets not identical?
     friend bool operator!= (bits, fieldset);
     /// complementary set
@@ -789,21 +789,21 @@ namespace falcON {
     /// \name non-operator member methods and friends                           
     //@{
     /// do two sets intersect?
-    bool intersect(fieldset b) const { return val & b.val; }
+    bool intersect(fieldset _b) const { return val & _b.val; }
     /// do two sets intersect?
-    bool intersect(bits b) const { return val & b; }
+    bool intersect(bits _b) const { return val & _b; }
     /// does this set contain \b all of set \c b ?
-    bool contain(fieldset b) const { return (val & b.val)==b.val; }
+    bool contain(fieldset _b) const { return (val & _b.val)==_b.val; }
     /// does this set contain \b all of set \c b ?
-    bool contain(bits b) const { return (val & b)==static_cast<value_type>(b); }
+    bool contain(bits _b) const { return(val&_b)==static_cast<value_type>(_b); }
     /// does this set contain field \c f ?
-    bool contain(fieldbit f) const { return val & (one << falcON::value(f)); }
+    bool contain(fieldbit _f) const { return val & (one << falcON::value(_f)); }
     /// does this set contain field \c f ?
-    bool contain(fieldbit::bits f) const { return contain(fieldbit(f)); }
+    bool contain(fieldbit::bits _f) const { return contain(fieldbit(_f)); }
     /// fields in \c b but not in this set
-    fieldset missing(fieldset b) const { return fieldset(b.val^val) & b; }
+    fieldset missing(fieldset _b) const { return fieldset(_b.val^val) & _b; }
     /// fields in \c b but not in this set
-    fieldset missing(bits b) const { return fieldset(b^val) & b; }
+    fieldset missing(bits _b) const { return fieldset(_b^val) & _b; }
     /// return the integer value (combination of all bits)
     value_type &value() { return val; }
     /// return the integer value (combination of all bits)
@@ -811,23 +811,23 @@ namespace falcON {
     //@}
     //--------------------------------------------------------------------------
     // description                                                              
-    char* make_word(char* w) const {
+    char* make_word(char* _w) const {
       if(val) {
-	char *l = w;
-	for(fieldbit f; f; ++f)
-	  if(contain(f)) *(l++) = letter(f);
-	*l = 0;
+	char *_l = _w;
+	for(fieldbit _f; _f; ++_f)
+	  if(contain(_f)) *(_l++) = letter(_f);
+	*_l = 0;
       } else {
-	w[0] = 'o';
-	w[1] = 0;
+	_w[0] = 'o';
+	_w[1] = 0;
       }
-      return w;
+      return _w;
     }
     //
     class wlist {
       char W[BodyData::NQUANT+1];
     public:
-      explicit wlist(const fieldset*d) { d->make_word(W); }
+      explicit wlist(const fieldset*_d) { _d->make_word(W); }
       operator const char* () const { return W; }
       friend const char*word(wlist const&);
     };
@@ -841,17 +841,17 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// the number of bytes required to hold all fields for a single body
     size_t bytes() const {
-      size_t n = 0;
-      for(fieldbit f; f; ++f)
-	if(contain(f)) n += size(f);
-      return n;
+      size_t _n = 0;
+      for(fieldbit _f; _f; ++_f)
+	if(contain(_f)) _n += size(_f);
+      return _n;
     }
     /// the smallest # bytes to hold any one of the fields for a single body
     size_t maxsize() const {
-      size_t n = 0;
-      for(fieldbit f; f; ++f)
-	if(contain(f)) update_max(n,size(f));
-      return n;
+      size_t _n = 0;
+      for(fieldbit _f; _f; ++_f)
+	if(contain(_f)) update_max(_n,size(_f));
+      return _n;
     }
     /// formatted output: just give string of the letters corresponding to the
     /// fields in the set
@@ -1182,70 +1182,68 @@ namespace falcON {
   //
   //////////////////////////////////////////////////////////////////////////////
 #define DEF_NAMED_STD(MACRO)			\
-  MACRO(fieldbit::m,mass);			\
-  MACRO(fieldbit::x,pos);			\
-  MACRO(fieldbit::v,vel);			\
-  MACRO(fieldbit::u,vprd);			\
-  MACRO(fieldbit::e,eps);			\
-  MACRO(fieldbit::f,flag);			\
-  MACRO(fieldbit::k,key);			\
-  MACRO(fieldbit::s,step);			\
-  MACRO(fieldbit::p,pot);			\
-  MACRO(fieldbit::q,pex);			\
-  MACRO(fieldbit::a,acc);			\
-  MACRO(fieldbit::j,jerk);			\
-  MACRO(fieldbit::r,rho);			\
-  MACRO(fieldbit::i,integ);			\
-  MACRO(fieldbit::y,aux);			\
-  MACRO(fieldbit::z,zet);			\
-  MACRO(fieldbit::l,level);			\
-  MACRO(fieldbit::n,num);			\
-  MACRO(fieldbit::c,node);			\
-  MACRO(fieldbit::h,peano);			\
-  MACRO(fieldbit::d,phden);			\
-  MACRO(fieldbit::t,torb);
+  MACRO(fieldbit::m,mass)			\
+  MACRO(fieldbit::x,pos)			\
+  MACRO(fieldbit::v,vel)			\
+  MACRO(fieldbit::u,vprd)			\
+  MACRO(fieldbit::e,eps)			\
+  MACRO(fieldbit::f,flag)			\
+  MACRO(fieldbit::k,key)			\
+  MACRO(fieldbit::s,step)			\
+  MACRO(fieldbit::p,pot)			\
+  MACRO(fieldbit::q,pex)			\
+  MACRO(fieldbit::a,acc)			\
+  MACRO(fieldbit::j,jerk)			\
+  MACRO(fieldbit::r,rho)			\
+  MACRO(fieldbit::i,integ)			\
+  MACRO(fieldbit::y,aux)			\
+  MACRO(fieldbit::z,zet)			\
+  MACRO(fieldbit::l,level)			\
+  MACRO(fieldbit::n,num)			\
+  MACRO(fieldbit::c,node)			\
+  MACRO(fieldbit::h,peano)			\
+  MACRO(fieldbit::d,phden)			\
+  MACRO(fieldbit::t,torb)
 #define DEF_NAMED_SPH(MACRO)			\
-  MACRO(fieldbit::H,size);			\
-  MACRO(fieldbit::N,snum);			\
-  MACRO(fieldbit::U,uin);			\
-  MACRO(fieldbit::Y,uprd);			\
-  MACRO(fieldbit::I,udot);			\
-  MACRO(fieldbit::E,udex);			\
-  MACRO(fieldbit::K,entr);			\
-  MACRO(fieldbit::R,srho);			\
-  MACRO(fieldbit::A,alfa);			\
-  MACRO(fieldbit::D,divv);			\
-  MACRO(fieldbit::J,hdot);			\
-  MACRO(fieldbit::F,fact);			\
-  MACRO(fieldbit::C,csnd);			\
-  MACRO(fieldbit::M,molw);
+  MACRO(fieldbit::H,size)			\
+  MACRO(fieldbit::N,snum)			\
+  MACRO(fieldbit::U,uin)			\
+  MACRO(fieldbit::Y,uprd)			\
+  MACRO(fieldbit::I,udot)			\
+  MACRO(fieldbit::E,udex)			\
+  MACRO(fieldbit::K,entr)			\
+  MACRO(fieldbit::R,srho)			\
+  MACRO(fieldbit::A,alfa)			\
+  MACRO(fieldbit::D,divv)			\
+  MACRO(fieldbit::J,hdot)			\
+  MACRO(fieldbit::F,fact)			\
+  MACRO(fieldbit::C,csnd)			\
+  MACRO(fieldbit::M,molw)
 #define DEF_NAMED_SINK(MACRO)			\
-  MACRO(fieldbit::S,spin);
+  MACRO(fieldbit::S,spin)
 #define DEF_NAMED(MACRO)			\
   DEF_NAMED_STD(MACRO)				\
   DEF_NAMED_SPH(MACRO)				\
   DEF_NAMED_SINK(MACRO)
 #define DEF_VECTORS(MACRO)			\
-  MACRO(fieldbit::x,pos);			\
-  MACRO(fieldbit::v,vel);			\
-  MACRO(fieldbit::u,vprd);			\
-  MACRO(fieldbit::a,acc);			\
-  MACRO(fieldbit::j,jerk);			\
-  MACRO(fieldbit::S,spin);
+  MACRO(fieldbit::x,pos)			\
+  MACRO(fieldbit::v,vel)			\
+  MACRO(fieldbit::u,vprd)			\
+  MACRO(fieldbit::a,acc)			\
+  MACRO(fieldbit::j,jerk)			\
+  MACRO(fieldbit::S,spin)
   // ///////////////////////////////////////////////////////////////////////////
   inline std::ostream& print_field(std::ostream&s, const void*x, fieldbit f)
   {
     switch(value(f)) {
 #define PRINT(BIT,NAME)							\
-  case BIT: return s <<							\
-      *(static_cast<const field_traits<BIT>::type *>(x))
+    case BIT: s << *(static_cast<const field_traits<BIT>::type *>(x)); break;
     DEF_NAMED(PRINT)
 #undef PRINT
-    default:
-      falcON_THROWN("falcON::print(fieldbit %c): unknown field\n",
-		    letter(f));
-      return s;
+    default: falcON_THROWN("falcON::print(fieldbit %c): unknown field\n",
+			   letter(f));
     }
+    return s;
   }
   //////////////////////////////////////////////////////////////////////////////
   //

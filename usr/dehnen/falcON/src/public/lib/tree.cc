@@ -1,25 +1,31 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-/// \file src/public/tree.cc                                                   |
-//                                                                             |
-// Copyright (C) 2000-2008  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///                                                                             
+/// \file    src/public/tree.cc
+///                                                                             
+/// \author  Walter Dehnen                                                      
+///                                                                             
+/// \date    2000-2009                                                          
+///                                                                             
+////////////////////////////////////////////////////////////////////////////////
+//                                                                              
+// Copyright (C) 2000-2009  Walter Dehnen                                       
+//                                                                              
+// This program is free software; you can redistribute it and/or modify         
+// it under the terms of the GNU General Public License as published by         
+// the Free Software Foundation; either version 2 of the License, or (at        
+// your option) any later version.                                              
+//                                                                              
+// This program is distributed in the hope that it will be useful, but          
+// WITHOUT ANY WARRANTY; without even the implied warranty of                   
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+// General Public License for more details.                                     
+//                                                                              
+// You should have received a copy of the GNU General Public License            
+// along with this program; if not, write to the Free Software                  
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
+//                                                                              
+////////////////////////////////////////////////////////////////////////////////
 // #define TEST_TIMING
 #include <public/tree.h>
 #include <memory.h>
@@ -62,6 +68,8 @@ namespace falcON {
     static unsigned&number_(OctTree::Cell* const&C) { return C->NUMBER; }
     static unsigned&fcleaf_(OctTree::Cell* const&C) { return C->FCLEAF; }
     static unsigned&fccell_(OctTree::Cell* const&C) { return C->FCCELL; }
+    static int     &fcCell_(OctTree::Cell* const&C) {
+      return reinterpret_cast<int&>(C->FCCELL); }
     static unsigned&pacell_(OctTree::Cell* const&C) { return C->PACELL; }
     static vect    &centre_(OctTree::Cell* const&C) { return C->CENTRE; }
     //--------------------------------------------------------------------------
@@ -243,7 +251,7 @@ namespace {
 	  number_(C)+= number_(Ci++);              //       count leaf descends 
 	}                                          //     ENDIF                 
     } else                                         // ELSE                      
-      fccell_(C) =-1;                              //   set pter to cell kids   
+      fcCell_(C) =-1;                              //   set pter to cell kids   
     return dep+1;                                  // return cells depth        
   }
   // ///////////////////////////////////////////////////////////////////////////
@@ -288,11 +296,11 @@ namespace {
       LIST = this;
       ++COUNTER;
     }
-    //--------------------------------------------------------------------------
-    void  set_up  (const OctTree::Leaf*L) {
-      pos() = falcON::pos(L);
-      LINK  = falcON::mybody(L);
-    }
+//     //--------------------------------------------------------------------------
+//     void  set_up  (const OctTree::Leaf*L) {
+//       pos() = falcON::pos(L);
+//       LINK  = falcON::mybody(L);
+//     }
     //--------------------------------------------------------------------------
     void  set_up  (const bodies*B, bodies::index const&i) {
       LINK  = i;
@@ -308,38 +316,6 @@ namespace {
       L->set_link_and_pos(LINK,pos());
     }
   }; // class dot {
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::dot_list                                                   //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  struct dot_list {
-    dot *HEAD;                                     // head of list              
-    int  SIZE;                                     // size of list              
-    //--------------------------------------------------------------------------
-    dot_list() : HEAD(0), SIZE(0) {}
-    dot_list(dot* const&L, int const&N) : HEAD(L), SIZE(N) {}
-  private:
-    dot_list(const dot_list&L);                    // not implemented           
-    dot_list& operator=(const dot_list&);          // not implemented           
-    //--------------------------------------------------------------------------
-  public:
-    bool is_empty() { return SIZE == 0; }          // R: list empty?            
-    //--------------------------------------------------------------------------
-    void add_dot(dot*const&L) {                    // I: dot to be added        
-      L->NEXT = HEAD;                              // set L' next to our list   
-      HEAD    = L;                                 // update head of list       
-      ++SIZE;                                      // increment size of list    
-    }
-    //--------------------------------------------------------------------------
-    void append(dot_list const&L) {                // I: list to be appended    
-      dot* T=L.HEAD;                               // take head of list L       
-      while(T->NEXT) T=T->NEXT;                    // find tail of list L       
-      T->NEXT = HEAD;                              // let it point to our list  
-      HEAD    = L.HEAD;                            // update head of our list   
-      SIZE   += L.SIZE;                            // update size               
-    }
-  }; // class dot_list
   //////////////////////////////////////////////////////////////////////////////
   // this macro requires you to close the curly bracket or use macro EndDotList 
 #define BeginDotList(LIST,NAME)		           /* loop elements of list  */\
@@ -383,26 +359,26 @@ namespace {
     bool marked_as_box  (int const&i) const { return TYPE & (1<<i); }
     bool marked_as_dot  (int const&i) const { return !marked_as_box(i); }
     vect const&centre   ()            const { return pos(); }
-    //--------------------------------------------------------------------------
+#if 0 // not used
     /// octant of position \e x within box (not checked)
     int octant(const vect&x) const {
       return ::octant(pos(),x);
     }
-    //--------------------------------------------------------------------------
+#endif
     /// octant of dot within box (not checked)
     int octant(const dot*D) const {
       return ::octant(pos(),D->pos());
     }
-    //--------------------------------------------------------------------------
+#if 0 // not used
     /// octant of box within this box (not checked)
     int octant(const box*P) const {
       return ::octant(pos(),P->pos());
     }
-    //--------------------------------------------------------------------------
     /// octant of Cell within this box (not checked)
     int octant(const OctTree::Cell*C) const {
       return ::octant(pos(),falcON::centre(C));
     }
+#endif
     //--------------------------------------------------------------------------
     bool is_twig() const {
       return DOTS != 0;
@@ -437,6 +413,7 @@ namespace {
       OCT[b] = L;                                  // fill into octant          
       ++NUMBER;                                    // increment number          
     }
+#if 0 // not used
     //--------------------------------------------------------------------------
     void addbox_to_octs(box *const&P) {            // add box P to octants      
       int b = octant(P);                           // find appropriate octant   
@@ -444,16 +421,18 @@ namespace {
       mark_as_box(b);                              // mark octant as box        
       NUMBER += P->NUMBER;                         // increment number          
     }
+#endif
     //--------------------------------------------------------------------------
     // const friends                                                            
     //--------------------------------------------------------------------------
     friend vect      &centre (      box*const&B) {return B->centre();  }
+#if 0 // not used
     friend vect const&centre (const box*const&B) {return B->centre();  }
+#endif
   };// struct box {
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 falcON_TRAITS(::dot,"{tree.cc}::dot");
-falcON_TRAITS(::dot_list,"{tree.cc}::dot_list");
 falcON_TRAITS(::box,"{tree.cc}::box");
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
@@ -503,22 +482,21 @@ namespace {
     //--------------------------------------------------------------------------
     // protected methods are all inlined                                        
     //--------------------------------------------------------------------------
-    // radius of box                                                            
+#if 0 // not used
+    /// radius of box
     inline real const& radius(const box*B) const {
       return RA[B->LEVEL];
     }
-    //--------------------------------------------------------------------------
-    // does box contain a given position?                                       
+    /// does box contain a given position?
     inline bool contains(const box*B, const vect&x) const {
       return ::contains(centre(B),radius(B),x);
     }
-    //--------------------------------------------------------------------------
-    // does box contain a given dot?                                            
+    /// does box contain a given dot?
     inline bool contains(const box*B, const dot*D) const {
       return contains(B,D->pos());
     }
-    //--------------------------------------------------------------------------
-    // shrink box to its octant i                                               
+#endif
+    /// shrink box to its octant i
     inline bool shrink_to_octant(box*B, int i) {
       indx l = ++(B->LEVEL);
       if(l > DMAX) return false;
@@ -528,7 +506,7 @@ namespace {
       if(i&4) centre(B)[2] += rad;  else  centre(B)[2] -= rad;
       return true;
     }
-    //--------------------------------------------------------------------------
+    //
     inline box* new_box(size_t const&nl) {
       return &(BM->new_element(estimate_N_alloc(NDOTS,nl))->reset());
     }
@@ -754,16 +732,18 @@ namespace {
     // const public methods (all inlined)                                       
     //--------------------------------------------------------------------------
   public:
+    inline size_t       N_boxes    () const { return BM->N_used(); }
+#if 0 // not used
     inline size_t       N_allocated() const { return BM->N_allocated(); }
     inline size_t       N_used     () const { return BM->N_used(); }
-    inline size_t       N_boxes    () const { return BM->N_used(); }
     inline size_t       N_free     () const { return N_allocated()-N_used(); }
-    inline int    const&depth      () const { return DEPTH; }
     inline int    const&maxdepth   () const { return DMAX; }
+    inline box   *const&root       () const { return P0; }
+#endif
+    inline int    const&depth      () const { return DEPTH; }
     inline int    const&Ncrit      () const { return NCRIT; }
     inline size_t const&N_dots     () const { return NDOTS; }
     inline int          N_levels   () const { return DMAX - P0->LEVEL; }
-    inline box   *const&root       () const { return P0; }
     inline real   const&root_rad   () const { return RA[P0->LEVEL]; }
     //--------------------------------------------------------------------------
     // non-const public methods                                                 
@@ -867,7 +847,7 @@ namespace {
 	  if(de>dep) dep=de;                       //       update depth        
 	}                                          //   END LOOP                
     } else {                                       // ELSE (no sub-boxes)       
-      fccell_(C) =-1;                              //   set cell: 1st sub-cell  
+      fcCell_(C) =-1;                              //   set cell: 1st sub-cell  
       ncells_(C) = 0;                              //   set cell: # sub-cells   
     }                                              // ENDIF                     
     dep++;                                         // increment depth           
@@ -913,7 +893,7 @@ namespace {
     number_(C) = P->NUMBER;                        // copy number               
     fcleaf_(C) = NoLeaf(TREE,Lf);                  // set cell: leaf kids       
     if(P->is_twig()) {                             // IF box==twig              
-      fccell_(C) =-1;                              //   set cell: sub-cells     
+      fcCell_(C) =-1;                              //   set cell: sub-cells     
       ncells_(C) = 0;                              //   set cell: # cell kids   
       nleafs_(C) = P->NUMBER;                      //   set cell: # leaf kids   
       dot*Di=P->DOTS;                              //   sub-dot pointer         
@@ -962,7 +942,7 @@ namespace {
 	    if(de>dep) dep=de;                     //         update depth      
 	  }                                        //     END LOOP              
       } else {                                     //   ELSE (no sub-boxes)     
-	fccell_(C) =-1;                            //     set cell: 1st sub-cell
+	fcCell_(C) =-1;                            //     set cell: 1st sub-cell
 	ncells_(C) = 0;                            //     set cell: # sub-cells 
       }                                            //   ENDIF                   
     }                                              // ENDIF                     

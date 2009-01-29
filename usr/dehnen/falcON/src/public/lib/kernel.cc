@@ -1,25 +1,31 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// kernel.cc                                                                   |
-//                                                                             |
-// Copyright (C) 2000-2007  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-
+// /////////////////////////////////////////////////////////////////////////////
+//
+/// \file    src/public/kernel.cc
+//
+/// \brief   implements inc/public/kernel.h
+/// \author  Walter Dehnen
+/// \date    2000-2009
+//
+// /////////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2008-2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
+// /////////////////////////////////////////////////////////////////////////////
 #include <public/types.h>
 #include <public/kernel.h>
 #include <public/tensor_set.h>
@@ -160,7 +166,7 @@ real GravKernBase::Psi(kern_type k, real Xq, real Eq)
     return d0 + hq*(d1+half*hq*(d2+hq*d3));
   }
   default:
-    return invsqrt(Xq+Eq);
+      return WDutils::invsqrt(Xq+Eq);
   }
 }
 ////////////////////////////////////////////////////////////////////////////////

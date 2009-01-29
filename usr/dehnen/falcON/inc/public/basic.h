@@ -252,7 +252,8 @@ namespace falcON {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
 
-#if !defined(__GNUC__) && !defined (__PGCC__) && !defined (__INTEL_COMPILER)
+#if !defined(__GNUC__) && !defined (__PGCC__) && \
+    !defined (__INTEL_COMPILER)	&& !defined (__PATHCC__)
 #  warning " "
 #  warning " falcON: you are using an unknown compiler"
 #  warning " compilation may fail or produce buggy code"

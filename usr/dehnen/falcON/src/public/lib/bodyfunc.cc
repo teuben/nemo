@@ -1,29 +1,32 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   src/public/bodyfunc.cc                                              
-///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2004-2006                                                           
-///                                                                             
+///
+/// \file    src/public/lib/bodyfunc.cc
+///
+/// \author  Walter Dehnen
+///
+/// \date    2004-2009
+///
+/// \brief   implements inc/public/bodyfunc.h
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2004-2006 Walter Dehnen                                        
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2004-2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_NEMO
 #include <public/bodyfunc.h>
@@ -274,9 +277,11 @@ namespace {
       return dir;
     }
     //--------------------------------------------------------------------------
+#if 0 // not used
     bool const&is_locked() const {
       return locked;
     }
+#endif
     //--------------------------------------------------------------------------
     // print info about bodyfuncs in base to output
     bool printinfo(std::ostream&out) const {
@@ -564,71 +569,6 @@ namespace {
   } // make_func()
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // make_method                                                              //
-  //                                                                          //
-  // make a bodiesmethod function of given type and name.                     //
-  // On successful return, the function                                       //
-  //   type name(b,t);                                                        //
-  // will be in file "/tmp/name.so"                                           //
-  // The files "/tmp/name.cc" and "/tmp/name.log" will NOT be deleted         //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  Bm_pter make_method(                      // R: bodiesmethod                  
-		      const char*expr,      // I: C-expression to be encoded    
-		      const char*ftype,     // I: function return type          
-		      const char*fname,     // I: file base name                
-		      const char*funcn)     //[I: function name]                
-    throw(BfErr)
-  {
-    // P   preparations
-    if (!havesyms) {
-      localsymbols();
-      havesyms = true;
-    }
-    // 1 create C++ file implementing the method
-    const size_t FNAME_SIZE=256;
-    char ffile[FNAME_SIZE], _func[FNAME_SIZE];
-    const char*ffunc;
-    if(funcn && funcn[0])
-      ffunc = funcn;
-    else {
-      SNprintf(_func,FNAME_SIZE,"%s%d",fname,function++);
-      ffunc = _func;
-    }
-    SNprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
-    std::ofstream file(ffile);
-    if(!file) 
-      throw BfErr(message("cannot create temporary file \"%s\"",ffile));
-    file << 
-      "//\n//\n"
-      "// file "<<ffile<<" generated by make_method\n//\n"
-      "#include <cmath>\n"
-      "#include <body.h>\n\n"
-      "using namespace falcON;\n\n"
-      "#undef BD_TEST\n"
-      "#define body_func\n"
-      "#include <public/bodyfuncdefs.h>\n\n"
-      "extern \"C\" {\n"
-      "  void "<<ffunc<<
-      "(void*__X, falcON::bodies const&B, double t, const real*__P)\n"
-      "  {\n"
-      "    LoopAllBodies(&B,b)\n"
-      "      static_cast<"<<ftype<<"*>(__X)[i] = ("<<expr<<");\n"
-      "  }\n"
-      "}\n";
-    file.close();
-    // 2 compile the C++ file and create a shared object file
-    compile(OPTFLAGS,fname);
-    // 3 load the .so file and find our function are return it
-    SNprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
-    loadobj(ffile);
-    Bm_pter func = (Bm_pter)findfn(ffunc);
-    if(func == 0)
-      throw BfErr(message("couldn't find function \"%s\"\n",ffunc));
-    return func;
-  } // make_method()
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
   // auxiliary data used for get_bodiesfunc()                                 //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
@@ -636,7 +576,6 @@ namespace {
 
   const char sep = '@';        // seperator between subcondition & subexpression
 
-  const size_t MAX_OPNAME_LENGTH  = 6;
   const size_t MAX_NUMBER_SUBEXPR = 17;
   const size_t MAX_LENGTH_SUBEXPR = 128;
   const size_t MAX_LENGTH_EXPR    = 1024;
@@ -1463,6 +1402,71 @@ bool bodiesfunc::print_db(std::ostream&out)
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
+  //----------------------------------------------------------------------------
+  // make_method
+  //
+  // make a bodiesmethod function of given type and name.
+  // On successful return, the function
+  //   type name(b,t);
+  // will be in file "/tmp/name.so"
+  // The files "/tmp/name.cc" and "/tmp/name.log" will NOT be deleted
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  Bm_pter make_method(                      // R: bodiesmethod                  
+		      const char*expr,      // I: C-expression to be encoded    
+		      const char*ftype,     // I: function return type          
+		      const char*fname,     // I: file base name                
+		      const char*funcn)     //[I: function name]                
+    throw(BfErr)
+  {
+    // P   preparations
+    if (!havesyms) {
+      localsymbols();
+      havesyms = true;
+    }
+    // 1 create C++ file implementing the method
+    const size_t FNAME_SIZE=256;
+    char ffile[FNAME_SIZE], _func[FNAME_SIZE];
+    const char*ffunc;
+    if(funcn && funcn[0])
+      ffunc = funcn;
+    else {
+      SNprintf(_func,FNAME_SIZE,"%s%d",fname,function++);
+      ffunc = _func;
+    }
+    SNprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
+    std::ofstream file(ffile);
+    if(!file) 
+      throw BfErr(message("cannot create temporary file \"%s\"",ffile));
+    file << 
+      "//\n//\n"
+      "// file "<<ffile<<" generated by make_method\n//\n"
+      "#include <cmath>\n"
+      "#include <body.h>\n\n"
+      "using namespace falcON;\n\n"
+      "#undef BD_TEST\n"
+      "#define body_func\n"
+      "#include <public/bodyfuncdefs.h>\n\n"
+      "extern \"C\" {\n"
+      "  void "<<ffunc<<
+      "(void*__X, falcON::bodies const&B, double t, const real*__P)\n"
+      "  {\n"
+      "    LoopAllBodies(&B,b)\n"
+      "      static_cast<"<<ftype<<"*>(__X)[i] = ("<<expr<<");\n"
+      "  }\n"
+      "}\n";
+    file.close();
+    // 2 compile the C++ file and create a shared object file
+    compile(OPTFLAGS,fname);
+    // 3 load the .so file and find our function are return it
+    SNprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
+    loadobj(ffile);
+    Bm_pter func = (Bm_pter)findfn(ffunc);
+    if(func == 0)
+      throw BfErr(message("couldn't find function \"%s\"\n",ffunc));
+    return func;
+  } // make_method()
+  //----------------------------------------------------------------------------
   using falcON::real;
   using falcON::vect;
   using namespace falcON;

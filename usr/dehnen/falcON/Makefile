@@ -23,9 +23,10 @@ endif
 # 2 set compiler
 # this should be set by a configure file
 #
-COMPILER		:= gcc
-#COMPILER		:= pgcc#	 problems with linking
-#COMPILER		:= icc
+
+COMPILER		:= gcc#		# GNU C compiler
+#COMPILER		:= pgcc#	# problems with linking
+#COMPILER		:= icc#		# intel compiler
 
 #
 # 3 activate options (some only apply to proprietary and private versions)

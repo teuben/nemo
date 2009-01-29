@@ -135,9 +135,9 @@ CC		:= pgcc
 FC		:= pgf77
 #OPTFLAGS	:= -fast -Minline=levels:10 -Mcache_align --no_exceptions -Minform=inform -D__PGCC__
 ifdef DEBUG
-OPTFLAGS	:= -g -inline_debug_info -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
+OPTFLAGS	:= -g -inline_debug_info -fastsse -fPIC --no_using_std -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
 else
-OPTFLAGS	:= -O2 -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
+OPTFLAGS	:= -fast -fastsse -fPIC --no_using_std -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
 endif
 
 else
@@ -152,10 +152,11 @@ ifdef DEBUG
 OPTFLAGS	:= -g  $(STATIC)
 else
 #OPTFLAGS	:= -O2 -unroll -tpp7 -xW -i_dynamic -prefetch
-OPTFLAGS	:= -O2 -unroll -tpp7 -wd177,1572 -i_dynamic -prefetch  $(STATIC)
+OPTFLAGS	:= -O2 -unroll -tpp7 -wd177,1572 -fPIC -i_dynamic -prefetch  $(STATIC)
 endif
 
 else
+
 
 top		:
 		@echo "unknown compiler"

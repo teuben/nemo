@@ -63,6 +63,10 @@
 #  include <iomanip>
 #  define falcON_included_iomanip
 #endif
+#ifndef falcON_included_ctime
+#  include <ctime>
+#  define falcON_included_ctime
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
   namespace meta {
@@ -253,9 +257,9 @@ namespace falcON {
     /// pointer to the force solver
     const ForceAndDiagnose *const SOLVER;
   private:
-    mutable clock_t    C_OLD;           
-    mutable double     CPU_STEP,                   // total time for a longstep 
-                       CPU_TOTAL;                  // total time so far         
+    mutable std::clock_t  C_OLD;           
+    mutable double        CPU_STEP,                // total time for a longstep 
+                          CPU_TOTAL;               // total time so far         
     //--------------------------------------------------------------------------
   public:
     /// \name record CPU timings
@@ -263,9 +267,9 @@ namespace falcON {
     /// add elapsed CPU time to CPU time record \c CPU
     /// \param c0  input: last CPU clock reading; output: current CPU clock
     /// \param CPU (output) time since \c c0 is added to CPU in seconds
-    static void record_cpu(clock_t& c0, double& CPU)
+    static void record_cpu(std::clock_t& c0, double& CPU)
     {
-      register clock_t c1 = clock();
+      register std::clock_t c1 = std::clock();
       CPU += (c1-c0)/real(CLOCKS_PER_SEC);
       c0   = c1;
     }
@@ -297,7 +301,7 @@ namespace falcON {
   protected:
     /// record a CPU timing and cumulative CPU time after a full step
     void add_to_cpu_step() const {
-      register clock_t c1 = clock();
+      register std::clock_t c1 = clock();
       CPU_STEP    += (c1-C_OLD)/real(CLOCKS_PER_SEC);
       CPU_TOTAL   += (c1-C_OLD)/real(CLOCKS_PER_SEC);
       C_OLD        = c1;

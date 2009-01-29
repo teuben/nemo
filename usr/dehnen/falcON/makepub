@@ -306,8 +306,10 @@ $(BIN)a2s:		$(SEXE)a2s.cc $(BINT) $(main_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)addgravity:	$(SEXE)addgravity.cc $(BINT) $(main_h) $(externacc_h) $(forces_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+ifneq ($(COMPILER),icc)
 $(BIN)addprop:		$(SEXE)addprop.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+endif
 $(BIN)density:		$(SEXE)density.cc $(BINT) $(main_h) $(neighbours_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)g2s:		$(SEXE)g2s.cc $(LIBT) $(main_h) $(makefiles)
@@ -349,8 +351,10 @@ $(BIN)snapprop:		$(SEXE)snapprop.cc $(BINT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)snapstac:		$(SEXE)snapstac.cc $(BINT) $(body_h) $(main_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+ifneq ($(COMPILER),icc)
 $(BIN)snapsupp:		$(SEXE)snapsupp.cc $(LIBT) $(main_h) $(bodyfunc_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+endif
 $(BIN)symmetrize:	$(SEXE)symmetrize.cc $(BINT) $(main_h) $(body_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 endif
@@ -368,7 +372,9 @@ TestPairF	:	$(falcON) $(BIN)TestPairF
 ifdef NEMO
 
 a2s		:	$(falcON) $(BIN)a2s
+ifneq ($(COMPILER),icc)
 addprop		:	$(falcON) $(BIN)addprop
+endif
 addgravity	:	$(falcON) $(BIN)addgravity
 density		:	$(falcON) $(BIN)density
 g2s		:	$(falcON) $(BIN)g2s
@@ -390,13 +396,22 @@ scale_eps	:	$(falcON) $(BIN)scale_eps
 set_time	:	$(falcON) $(BIN)set_time
 snapprop	:	$(falcON) $(BIN)snapprop
 snapstac	:	$(falcON) $(BIN)snapstac
+ifneq ($(COMPILER),icc)
 snapsupp	:	$(falcON) $(BIN)snapsupp
+endif
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
+ifeq ($(COMPILER),icc)
+exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
+			gyrfalcON manipulate mkbodiesfunc mkbodyfunc mkdehnen \
+			mkhalo mkking mkplum mkWD99disc s2a s2g s2s scale_eps \
+			snapprop snapstac symmetrize mkgalaxy
+else
 exe_pub		:=	TestGrav a2s addgravity addprop density g2s getgravity \
 			gyrfalcON manipulate mkbodiesfunc mkbodyfunc mkdehnen \
 			mkhalo mkking mkplum mkWD99disc s2a s2g s2s scale_eps \
 			snapprop snapstac snapsupp symmetrize mkgalaxy
+endif
 
 else
 

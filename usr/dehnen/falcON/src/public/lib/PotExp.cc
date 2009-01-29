@@ -3,7 +3,7 @@
 //                                                                             |
 /// \file src/public/lib/PotExp.cc                                             |
 //                                                                             |
-// Copyright (C) 1994-1996, 2004-2008 Walter Dehnen                            |
+// Copyright (C) 1994-1996, 2004-2009 Walter Dehnen                            |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -51,53 +51,6 @@ namespace {
   typedef PotExp::Anlm     Anlm;
   //----------------------------------------------------------------------------
   //                                                                            
-  // class CasRec                                                               
-  //                                                                            
-  // holds the numbers a_m with m=-L...L                                        
-  //                                                                            
-  // this type is actually not really needed; we keep it for reference.         
-  //                                                                            
-  // NOTE                                                                       
-  //    Depending on the adopted symmetry, we ASSUME certain elements to be     
-  //    zero or trivial copies, but do NOT ENFORCE this. In particular:         
-  //    1. spherical or cylindrical symmetry: only the m=0 element is used.     
-  //    2. triaxial symmetry: only elements with even m>0 are used and it is    
-  //       implicitly assumed that A[-m]=A[m], i.e. only  cos(m phi)  terms.    
-  //    3. reflexion symmetry: only elements with even m are used.              
-  //                                                                            
-  class CasRec {
-    friend class PotExpAccess;
-    int     L;                                     // m in [-L,L]               
-    scalar *D, *A;                                 // pointer to memory         
-  public:
-    // construction & destruction                                               
-    CasRec(int l) : L(l), D( falcON_NEW(scalar,l+l+1) ), A(l+D) {}
-    ~CasRec() { falcON_DEL_A(D); }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // element access                                                           
-    //    NOTE: that elements ASSUMED to be zero may have any value!            
-    scalar      &operator() (int m)       { return A[m]; }
-    scalar const&operator() (int m) const { return A[m]; }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    int const& mmax() const { return L; }
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    // set to cas(m*phi) := cos(m*phi) + sin(m*phi)                             
-    template<symmetry>
-    CasRec&set(scalar, scalar);                    // I: cos(phi), sin(phi)     
-    // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    template<symmetry> CasRec&reset   ();              // A[m] = 0              
-    template<symmetry> CasRec&assign  (scalar);        // A[m] = x              
-    template<symmetry> CasRec&multiply(scalar);        // A[m]*= x              
-    template<symmetry> CasRec&divide  (scalar);        // A[m]/= x              
-    template<symmetry> CasRec&copy    (CasRec const&); // A[m] = B[m]           
-    template<symmetry> CasRec&add     (CasRec const&); // A[m]+= B[m]           
-    template<symmetry> CasRec&sub     (CasRec const&); // A[m]-= B[m]           
-    template<symmetry> scalar dot     (CasRec const&) const; // dot product     
-    template<symmetry> CasRec&addtimes(CasRec const&, scalar); // A[m]+= x*B[m] 
-    template<symmetry> CasRec&subtimes(CasRec const&, scalar); // A[m]-= x*B[m] 
-  }; // class CasRec
-  //----------------------------------------------------------------------------
-  //                                                                            
   // class YlmRec                                                               
   //                                                                            
   // holds the numbers a_lm with l=0...L, m=-l...l                              
@@ -115,24 +68,30 @@ namespace {
     int     L,L1,L1Q;                              // L, L+1, (L+1)^2           
     scalar *A;
     scalar      &e (int l, int m)       { return A[l*(l+1)+m]; }
+#if 0 // not used
     scalar const&e (int l, int m) const { return A[l*(l+1)+m]; }
+#endif
   public:
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // construction & destruction                                               
     YlmRec(int l)
       : L(l),   L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,L1Q)) {}
+#if 0 // not used
     YlmRec(YlmRec const&a)
       : L(a.L), L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,L1Q)) {
       memcpy(A,a.A,L1Q*sizeof(scalar));
     }
+#endif
     ~YlmRec() { falcON_DEL_A(A); }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // element access                                                           
     //    NOTE: that elements ASSUMED to be zero may have any value!            
     scalar      &operator() (int l, int m)       { return e(l,m); }
+#if 0 // not used
     scalar const&operator() (int l, int m) const { return e(l,m); }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     int const& lmax() const { return L; }
+#endif
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     void table_print(symmetry, std::ostream&, int=6) const;
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -147,8 +106,10 @@ namespace {
 	       scalar ct, scalar st,               // I: cos(the),sin(the)      
 	       scalar cp, scalar sp);              // I: cos(phi),sin(phi)      
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#if 0 // not used
     // set Ylm to N_lm multiplied by 4Pi := (2l+1) (l-|m|)! / (l+|m|)!          
     YlmRec& Nlm();
+#endif
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     template<symmetry> YlmRec&reset   ();              // A[l,m] = 0            
     template<symmetry> YlmRec&assign  (scalar);        // A[l,m] = x            
@@ -184,10 +145,12 @@ namespace {
     // construction & destruction                                               
     AnlRec(int n, int l)
       : N1(n+1), L1(l+1), A(falcON_NEW(scalar,N1*L1)) {}
+#if 0 // not used
     AnlRec(AnlRec const&a)
       : N1(a.N1), L1(a.L1), A(falcON_NEW(scalar,N1*L1)) {
       memcpy(A,a.A,N1*L1*sizeof(scalar));
     }
+#endif
     ~AnlRec() { falcON_DEL_A(A); }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     // element access                                                           
@@ -242,6 +205,8 @@ namespace falcON { namespace P {
 } } // namespace falcON::P
 namespace {
   using namespace falcON::P;
+  using falcON::P::R0;
+  using falcON::P::IR0;
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
   // auxiliary inline functions                                                 
@@ -251,9 +216,11 @@ namespace {
     return PotExp::symmetry(int(a) & int(b));
   }
   //----------------------------------------------------------------------------
+#if 0 // not used
   inline symmetry operator | (symmetry a, symmetry b) {
     return PotExp::symmetry(int(a) | int(b));
   }
+#endif
   //----------------------------------------------------------------------------
   inline scalar lambda(int l) {
     return AL*(l+l+1)+0.5;
@@ -356,20 +323,19 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   class PotExpAccess {
   protected:
-    static int const &L  (CasRec const&C) { return C.L; }
     static int const &L  (YlmRec const&Y) { return Y.L; }
     static int const &L1 (YlmRec const&Y) { return Y.L1; }
     static int const &L1Q(YlmRec const&Y) { return Y.L1Q; }
     static int const &N1 (AnlRec const&A) { return A.N1; }
     static int const &L1 (AnlRec const&A) { return A.L1; }
+#if 0 // not used
     static int const &N  (Anlm   const&A) { return A.N; }
-    static int const &N1 (Anlm   const&A) { return A.N1; }
     static int const &L  (Anlm   const&A) { return A.L; }
+#endif
+    static int const &N1 (Anlm   const&A) { return A.N1; }
     static int const &L1 (Anlm   const&A) { return A.L1; }
     static int const &L1Q(Anlm   const&A) { return A.L1Q; }
 
-    static scalar      &e(CasRec      &C, int i) { return C.A[i]; }
-    static scalar const&e(CasRec const&C, int i) { return C.A[i]; }
     static scalar      &e(YlmRec      &C, int i) { return C.A[i]; }
     static scalar const&e(YlmRec const&C, int i) { return C.A[i]; }
     static scalar      &e(AnlRec      &C, int i) { return C.A[i]; }
@@ -377,11 +343,11 @@ namespace {
     static scalar      &e(Anlm        &C, int i) { return C.A[i]; }
     static scalar const&e(Anlm   const&C, int i) { return C.A[i]; }
 
-    static scalar      *p(CasRec      &C) { return C.A; }
-    static scalar const*p(CasRec const&C) { return C.A; }
+#if 0 // not used
     static scalar      *p(YlmRec      &C) { return C.A; }
-    static scalar const*p(YlmRec const&C) { return C.A; }
     static scalar      *p(AnlRec      &C) { return C.A; }
+#endif
+    static scalar const*p(YlmRec const&C) { return C.A; }
     static scalar const*p(AnlRec const&C) { return C.A; }
     static scalar      *p(Anlm        &C) { return C.A; }
     static scalar const*p(Anlm   const&C) { return C.A; }
@@ -400,12 +366,6 @@ namespace {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   template<> struct AUX<PotExp::none> : private PotExpAccess {
-    //--------------------------------------------------------------------------
-    template<class Connector>
-    static void Connect(CasRec&A, CasRec const&B, scalar x) {
-      for(int m=-L(A); m<=L(A); ++m)
-	Connector::op(e(A,m),e(B,m),x);
-    }
     //--------------------------------------------------------------------------
     template<class Connector>
     static void Connect(YlmRec&A, YlmRec const&B, scalar x) {
@@ -439,13 +399,7 @@ namespace {
       }
     }
     //--------------------------------------------------------------------------
-    static scalar Dot(CasRec const&A, CasRec const&B) {
-      register scalar x=0.;
-      for(int m=-L(A); m<=L(A); ++m)
-	x+=e(A,m)*e(B,m);
-      return x;
-    }
-    //--------------------------------------------------------------------------
+#if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
       register scalar x=0.;
       for(int i=0; i!=L1Q(A); ++i)
@@ -459,6 +413,7 @@ namespace {
 	x += e(A,i)*e(B,i);
       return x;
     }
+#endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
       register scalar x=0.;
@@ -484,8 +439,8 @@ namespace {
       return x;
     }
     //--------------------------------------------------------------------------
-    template<typename T>
-    static scalar Dot(tupel<3,T>&dx,
+    template<typename _T>
+    static scalar Dot(tupel<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&T, YlmRec const&Q) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -515,14 +470,6 @@ namespace {
       dx[1] = xt;
       dx[2] = xp;
       return x;
-    }
-    //--------------------------------------------------------------------------
-    static void SetCas(CasRec&A, scalar c, scalar s) {
-      e(A,0) = 1;
-      for(int m=0,m1=1; m<L(A); ++m,++m1) {
-	e(A, m1) = c * e(A, m) + s * e(A,-m);
-	e(A,-m1) = c * e(A,-m) - s * e(A, m);
-      }
     }
     //--------------------------------------------------------------------------
     static void SetPlm(YlmRec&Y, scalar ct, scalar st) {
@@ -788,12 +735,6 @@ namespace {
   template<> struct AUX<PotExp::reflexion> : private PotExpAccess {
     //--------------------------------------------------------------------------
     template<class Connector> static
-    void Connect(CasRec&A, CasRec const&B, scalar x) {
-      for(int m=-L(A); m<=L(A); m+=2)
-	Connector::op(e(A,m),e(B,m),x);
-    }
-    //--------------------------------------------------------------------------
-    template<class Connector> static
     void Connect(YlmRec&A, YlmRec const&B, scalar x) {
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2)
 	for(int m=-l; m<=l; m+=2)
@@ -833,13 +774,7 @@ namespace {
       }
     }
     //--------------------------------------------------------------------------
-    static scalar Dot(CasRec const&A, CasRec const&B) {
-      register scalar x=0.;
-      for(int m=-L(A); m<=L(A); m+=2)
-	x += e(A,m)*e(B,m);
-      return x;
-    }
-    //--------------------------------------------------------------------------
+#if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
       register scalar x=0.;
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2)
@@ -855,6 +790,7 @@ namespace {
 	  x += e(A,i) * e(B,i);
       return x;
     }
+#endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
       register scalar x=0.;
@@ -884,8 +820,8 @@ namespace {
       return x;
     }
     //--------------------------------------------------------------------------
-    template<typename T>
-    static scalar Dot(tupel<3,T>&dx,
+    template<typename _T>
+    static scalar Dot(tupel<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&T, YlmRec const&Q) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -919,15 +855,6 @@ namespace {
       dx[1] = xt;
       dx[2] = xp;
       return x;
-    }
-    //--------------------------------------------------------------------------
-    static void SetCas(CasRec&A, scalar c, scalar s) {
-      e(A,0) = 1;
-      const scalar cc=c*c-s*s, ss=2*c*s;
-      for(int m=0,m2=2; m2<=L(A); m+=2,m2+=2) {
-	e(A, m2) = cc * e(A, m) + ss * e(A,-m);
-	e(A,-m2) = cc * e(A,-m) - ss * e(A, m);
-      }
     }
     //--------------------------------------------------------------------------
     static void SetPlm(YlmRec&Y, scalar ct, scalar st) {
@@ -1168,12 +1095,6 @@ namespace {
   template<> struct AUX<PotExp::triaxial> : private PotExpAccess {
     //--------------------------------------------------------------------------
     template<class Connector>
-    static void Connect(CasRec&A, CasRec const&B, scalar x) {
-      for(int m=0; m<=L(A); m+=2)
-	Connector::op(e(A,m),e(B,m),x);
-    }
-    //--------------------------------------------------------------------------
-    template<class Connector>
     static void Connect(YlmRec&A, YlmRec const&B, scalar x) {
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2)
 	for(int m=0; m<=l; m+=2)
@@ -1209,13 +1130,7 @@ namespace {
       }
     }
     //--------------------------------------------------------------------------
-    static scalar Dot(CasRec const&A, CasRec const&B) {
-      register scalar x=e(A,0)*e(B,0);
-      for(int m=2; m<=L(A); m+=2)
-	x+= twice(e(A,m)*e(B,m));
-      return x;
-    }
-    //--------------------------------------------------------------------------
+#if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
       register scalar x=0.;
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2) {
@@ -1229,6 +1144,7 @@ namespace {
     static scalar Dot(AnlRec const&A, AnlRec const&B) {
       return AUX<PotExp::reflexion>::Dot(A,B);
     }
+#endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
       register scalar x=0.;
@@ -1258,8 +1174,8 @@ namespace {
       return x;
     }
     //--------------------------------------------------------------------------
-    template<typename T>
-    static scalar Dot(tupel<3,T>&dx,
+    template<typename _T>
+    static scalar Dot(tupel<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&T, YlmRec const&Q) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -1297,17 +1213,6 @@ namespace {
       dx[1] = xt;
       dx[2] = xp;
       return x;
-    }
-    //--------------------------------------------------------------------------
-    static void SetCas(CasRec&A, scalar c, scalar s) {
-      e(A,0) = 1;
-      const scalar cc=c*c-s*s, ss=2*c*s;
-      for(int m=0,m2=2; m2<=L(A); m+=2,m2+=2) {
-	e(A, m2) = cc * e(A, m) + ss * e(A,-m);
-	e(A,-m2) = cc * e(A,-m) - ss * e(A, m);
-      }
-      for(int m=2; m<=L(A); m+=2)
-	e(A,m) = scalar(0.5) * (e(A,m) + e(A,-m));
     }
     //--------------------------------------------------------------------------
     static void SetYlm(YlmRec&Y,
@@ -1378,11 +1283,6 @@ namespace {
   template<> struct AUX<PotExp::cylindrical> : private PotExpAccess {
     //--------------------------------------------------------------------------
     template<class Connector>
-    static void Connect(CasRec&A, CasRec const&B, scalar x) {
-      Connector::op(e(A,0),e(B,0),x);
-    }
-    //--------------------------------------------------------------------------
-    template<class Connector>
     static void Connect(YlmRec&A, YlmRec const&B, scalar x) {
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2)
 	Connector::op(e(A,i),e(B,i),x);
@@ -1413,10 +1313,7 @@ namespace {
       }
     }
     //--------------------------------------------------------------------------
-    static scalar Dot(CasRec const&A, CasRec const&B) {
-      return e(A,0) * e(B,0);
-    }
-    //--------------------------------------------------------------------------
+#if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
       register scalar x=0.;
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2)
@@ -1427,6 +1324,7 @@ namespace {
     static scalar Dot(AnlRec const&A, AnlRec const&B) {
       return AUX<PotExp::reflexion>::Dot(A,B);
     }
+#endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
       register scalar x=0.;
@@ -1451,8 +1349,8 @@ namespace {
       return x;
     }
     //--------------------------------------------------------------------------
-    template<typename T>
-    static scalar Dot(tupel<3,T>&dx,
+    template<typename _T>
+    static scalar Dot(tupel<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&T, YlmRec const&) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -1477,10 +1375,6 @@ namespace {
       dx[1] = xt;
       dx[2] = 0;
       return x;
-    }
-    //--------------------------------------------------------------------------
-    static void SetCas(CasRec&A, scalar, scalar) {
-      e(A,0) = 1;
     }
     //--------------------------------------------------------------------------
     static void SetYlm(YlmRec&Y,
@@ -1549,11 +1443,6 @@ namespace {
   template<> struct AUX<PotExp::spherical> : private PotExpAccess {
     //--------------------------------------------------------------------------
     template<class Connector>
-    static void Connect(CasRec&A, CasRec const&B, scalar x) {
-      Connector::op(e(A,0),e(B,0),x);
-    }
-    //--------------------------------------------------------------------------
-    template<class Connector>
     static void Connect(YlmRec&A, YlmRec const&B, scalar x) {
       Connector::op(e(A,0),e(B,0),x);
     }
@@ -1582,10 +1471,7 @@ namespace {
 	  Connector::op(*An, *Pn * e(Y,0), x);
     }
     //--------------------------------------------------------------------------
-    static scalar Dot(CasRec const&A, CasRec const&B) {
-      return e(A,0) * e(B,0);
-    }
-    //--------------------------------------------------------------------------
+#if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
       return e(A,0) * e(B,0);
     }
@@ -1596,6 +1482,7 @@ namespace {
 	x += e(A,i)*e(B,i);
       return x;
     }
+#endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
       register scalar x=0;
@@ -1618,8 +1505,8 @@ namespace {
       return x;
     }
     //--------------------------------------------------------------------------
-    template<typename T>
-    static scalar Dot(tupel<3,T>&dx,
+    template<typename _T>
+    static scalar Dot(tupel<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&, YlmRec const&) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -1642,10 +1529,6 @@ namespace {
       dx[1] = 0;
       dx[2] = 0;
       return x;
-    }
-    //--------------------------------------------------------------------------
-    static void SetCas(CasRec&A, scalar, scalar) {
-      e(A,0) = 1;
     }
     //--------------------------------------------------------------------------
     static void SetYlm(YlmRec&Y, scalar, scalar, scalar, scalar) {
@@ -1735,11 +1618,6 @@ namespace {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   template<symmetry S> inline
-  void SetCas (CasRec&Y, scalar c, scalar s) {
-    AUX<S>::SetCas(Y,c,s);
-  }
-  //----------------------------------------------------------------------------
-  template<symmetry S> inline
   void SetYlm (YlmRec&Y, scalar ct, scalar st, scalar cp, scalar sp) {
     AUX<S>::SetYlm(Y,ct,st,cp,sp);
   }
@@ -1771,71 +1649,7 @@ namespace {
   scalar EvalP(Anlm const&C, AnlRec const&P, YlmRec const&Y) {
     return R0 * AUX<S>::Dot(C,P,Y);
   }
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // symmetry as run-time argument                                            //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
-  void SetCas(symmetry sym, CasRec&C, scalar c, scalar s) {
-    if(sym & PotExp::zrot)
-      return SetCas<PotExp::cylindrical>(C,c,s);
-    if(sym & PotExp::axes)
-      return SetCas<PotExp::triaxial>   (C,c,s);
-    if(sym & PotExp::pint)
-      return SetCas<PotExp::reflexion>  (C,c,s);
-    return   SetCas<PotExp::none>       (C,c,s);
-  }
   //----------------------------------------------------------------------------
-  void SetYlm(symmetry sym, YlmRec&Y, 
-	      scalar ct, scalar st, scalar cp, scalar sp) {
-    if(sym & PotExp::arot)
-      return SetYlm<PotExp::spherical>  (Y,ct,st,cp,sp);
-    if(sym & PotExp::zrot)
-      return SetYlm<PotExp::cylindrical>(Y,ct,st,cp,sp);
-    if(sym & PotExp::axes)
-      return SetYlm<PotExp::triaxial>   (Y,ct,st,cp,sp);
-    if(sym & PotExp::pint)
-      return SetYlm<PotExp::reflexion>  (Y,ct,st,cp,sp);
-    return   SetYlm<PotExp::none>       (Y,ct,st,cp,sp);
-  }
-  //----------------------------------------------------------------------------
-  void SetYlm(symmetry sym, YlmRec&Y, YlmRec&T, YlmRec&P,
-	      scalar ct, scalar st, scalar cp, scalar sp) {
-    if(sym & PotExp::arot)
-      return SetYlm<PotExp::spherical>  (Y,T,P,ct,st,cp,sp);
-    if(sym & PotExp::zrot)
-      return SetYlm<PotExp::cylindrical>(Y,T,P,ct,st,cp,sp);
-    if(sym & PotExp::axes)
-      return SetYlm<PotExp::triaxial>   (Y,T,P,ct,st,cp,sp);
-    if(sym & PotExp::pint)
-      return SetYlm<PotExp::reflexion>  (Y,T,P,ct,st,cp,sp);
-    return   SetYlm<PotExp::none>       (Y,T,P,ct,st,cp,sp);
-  }
-  //----------------------------------------------------------------------------
-  void SetPsi(symmetry sym, AnlRec&P, scalar r, scalar m) {
-    if(sym & PotExp::arot)
-      return SetPsi<PotExp::spherical>  (P,r,m);
-    if(sym & PotExp::zrot)
-      return SetPsi<PotExp::cylindrical>(P,r,m);
-    if(sym & PotExp::axes)
-      return SetPsi<PotExp::triaxial>   (P,r,m);
-    if(sym & PotExp::pint)
-      return SetPsi<PotExp::reflexion>  (P,r,m);
-    return   SetPsi<PotExp::none>       (P,r,m);
-  }
-  //----------------------------------------------------------------------------
-  void SetPsi(symmetry sym, AnlRec&P, AnlRec&Pr, scalar r) {
-    if(sym & PotExp::arot)
-      return SetPsi<PotExp::spherical>  (P,Pr,r);
-    if(sym & PotExp::zrot)
-      return SetPsi<PotExp::cylindrical>(P,Pr,r);
-    if(sym & PotExp::axes)
-      return SetPsi<PotExp::triaxial>   (P,Pr,r);
-    if(sym & PotExp::pint)
-      return SetPsi<PotExp::reflexion>  (P,Pr,r);
-    return   SetPsi<PotExp::none>       (P,Pr,r);
-  }
-  //////////////////////////////////////////////////////////////////////////////
   inline void SetKnl (AnlRec&K) {
     AUX<PotExp::none>::SetKnl(K);
   }
@@ -1862,7 +1676,9 @@ namespace {
   struct __mulB { static void op(scalar&a, scalar b, scalar )  {a*=  b; } };
   struct __addB { static void op(scalar&a, scalar b, scalar )  {a+=  b; } };
   struct __subB { static void op(scalar&a, scalar b, scalar )  {a-=  b; } };
+#if 0 // not used
   struct __setT { static void op(scalar&a, scalar b, scalar x) {a =x*b; } };
+#endif
   struct __addT { static void op(scalar&a, scalar b, scalar x) {a+=x*b; } };
   struct __subT { static void op(scalar&a, scalar b, scalar x) {a-=x*b; } };
   struct __una  { static void op(scalar&a, scalar  , scalar  ) {a =fu(a);  } };
@@ -1958,62 +1774,6 @@ namespace falcON { namespace P {
 using namespace falcON::P;
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
-// class CasRec                                                               //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
-template<symmetry S> inline CasRec &CasRec::set(scalar cp, scalar sp) {
-  AUX<S>::SetCas(*this,cp,sp);
-  return *this;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::assign(scalar x) {
-  AUX<S>::template Connect<__setX>(*this,*this,x);
-  return *this;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::reset() {
-  return assign<S>(scalar(0));
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::multiply(scalar x) {
-  AUX<S>::template Connect<__mulX>(*this,*this,x);
-  return *this;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::divide(scalar x) {
-  return multiply<S>(scalar(1)/x);
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::copy(CasRec const&B) {
-  AUX<S>::template Connect<__setB>(*this,B,scalar(0));
-  return *this;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::add(CasRec const&B) {
-  AUX<S>::template Connect<__addB>(*this,B,scalar(0));
-  return *this;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::addtimes(CasRec const&B, scalar x) {
-  AUX<S>::template Connect<__addT>(*this,B,x);
-  return *this;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::sub(CasRec const&B) {
-  AUX<S>::template Connect<__subB>(*this,B,scalar(0));
-  return *this;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline CasRec &CasRec::subtimes(CasRec const&B, scalar x) {
-  AUX<S>::template Connect<__subT>(*this,B,x);
-  return *this;
-}
-//------------------------------------------------------------------------------
-template<symmetry S> inline scalar CasRec::dot(CasRec const&B) const {
-  return AUX<S>::Dot(*this,B);
-}
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
 // class YlmRec                                                               //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
@@ -2077,10 +1837,12 @@ template<symmetry S> inline scalar YlmRec::dot(YlmRec const&B) const {
   return AUX<S>::Dot(*this,B);
 }
 //------------------------------------------------------------------------------
+#if 0 // not used
 inline YlmRec& YlmRec::Nlm() {
   SetNlm(*this);
   return *this;
 }
+#endif
 //------------------------------------------------------------------------------
 void YlmRec::table_print(symmetry     s,
 			 std::ostream&o,
@@ -2680,9 +2442,11 @@ namespace {
 		      const int*,                  // I: body flags             
 		      int);                        // I: add or assign?         
     //--------------------------------------------------------------------------
+#if 0 // not used
     T Potential(                                   // R: potential: single body 
 		symmetry,                          // I: symmetry at run time   
 		const   V&);                       // I: position               
+#endif
   }; // class PBlock                                                            
   //----------------------------------------------------------------------------
   template<typename T>
@@ -2700,6 +2464,7 @@ namespace {
     else                      AddPotential<PotExp::none       >(n,x,p,f,add);
   }
   //----------------------------------------------------------------------------
+#if 0 // not used
   template<typename T>
   T PBlock<T>::Potential(                          // R: potential: single body 
 			 symmetry  s,              // I: symmetry at run time   
@@ -2710,6 +2475,7 @@ namespace {
     else if(s & PotExp::pint) Potential<PotExp::reflexion  >(x);
     else                      Potential<PotExp::none       >(x);
   }
+#endif
   //////////////////////////////////////////////////////////////////////////////
   template<symmetry SYM>
   inline void normalize(Anlm&C, Anlm const&K, scalar G) {
