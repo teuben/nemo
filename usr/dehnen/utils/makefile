@@ -31,13 +31,13 @@ $(LIBT)			:
 
 #DEBUG			:= -DDEBUG
 
-COMPILER		:= gcc
-#COMPILER		:= pgcc#         problems with linking
-#COMPILER		:= icc
+COMPILER		:= gcc#		# GNU C compiler
+#COMPILER		:= pgcc#	# problems with linking
+#COMPILER		:= icc#		# intel compiler
 
-
-ifeq ($(COMPILER),gcc)
+# -----------------------
 # GNU's gcc compiler
+ifeq ($(COMPILER),gcc)
 
 CXX			:= $(CPATH)g++
 CC			:= $(CPATH)gcc
@@ -75,24 +75,25 @@ OPTFLAGS		:= -ggdb3 -Wall -Wextra -O2 -fPIC $(CPUFLAGS) -ffast-math -funroll-loo
 endif
 
 else
+# -----------------------
+# portland group compiler
 ifeq ($(COMPILER),pgcc)
-# portland groups compiler
 
 CXX			:= pgCC
 CC			:= pgcc
 FC			:= pgf77
-#OPTFLAGS		:= -fast -Minline=levels:10 -Mcache_align --no_exceptions -Minform=inform -D__PGCC__
+
 ifdef DEBUG
-OPTFLAGS		:= -g -inline_debug_info -O2 -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__
+OPTFLAGS		:= -g -inline_debug_info -fPIC -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform -D__PGCC__
 else
-OPTFLAGS		:= -O2 -fastsse --no_using_std --no_exceptions -Msafeptr -Minform=inform
--D__PGCC__
+OPTFLAGS		:= -fast -fastsse -fPIC --no_using_std -Msafeptr -Minform=inform -D__PGCC__
 endif
 
 
 else
-ifeq ($(COMPILER),icc)
+# -----------------------
 # intel compiler
+ifeq ($(COMPILER),icc)
 
 CXX			:= $(CPATH)icpc
 CC			:= $(CPATH)icc

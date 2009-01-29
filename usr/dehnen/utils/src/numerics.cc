@@ -502,14 +502,6 @@ namespace {
       return A;
     }
   };
-}
-namespace WDutils {
-  WDutils_TRAITS(::Ranker<float >::point,"<anonymous>::Ranker<float>::point");
-  WDutils_TRAITS(::Ranker<float >::range,"<anonymous>::Ranker<float>::range");
-  WDutils_TRAITS(::Ranker<double>::point,"<anonymous>::Ranker<double>::point");
-  WDutils_TRAITS(::Ranker<double>::range,"<anonymous>::Ranker<double>::range");
-}
-namespace {
   // Ranker::Ranker
   template<typename T>
   Ranker<T>::Ranker(const T*a, unsigned n, const T*w, unsigned k)

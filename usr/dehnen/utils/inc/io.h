@@ -561,12 +561,12 @@ namespace WDutils {
       if(OUT) (*OUT) << p;
       return*this;
     }
-    /// output of a manipulator \e m
-    output& operator<< (std::ostream::__ios_type &(*p)
-                              (std::ostream::__ios_type &)) {
-      if(OUT) (*OUT) << p;
-      return*this;
-    }
+//     /// output of a manipulator \e m
+//     output& operator<< (std::ostream::__ios_type &(*p)
+//                               (std::ostream::__ios_type &)) {
+//       if(OUT) (*OUT) << p;
+//       return*this;
+//     }
     /// output of a manipulator \e m
     output& operator<< (std::ios_base& (*p)(std::ios_base&)) {
       if(OUT) (*OUT) << p;
@@ -689,12 +689,12 @@ namespace WDutils {
       if(IN) (*IN) >> p;
       return*this;
     }
-    /// input of manipulator \e p
-    input& operator>> (std::istream::__ios_type &(*p)
-			      (std::istream::__ios_type &)) {
-      if(IN) (*IN) >> p;
-      return*this;
-    }
+//     /// input of manipulator \e p
+//     input& operator>> (std::istream::__ios_type &(*p)
+// 			      (std::istream::__ios_type &)) {
+//       if(IN) (*IN) >> p;
+//       return*this;
+//     }
     /// input of manipulator \e p
     input& operator>> (std::ios_base& (*p)(std::ios_base&)) {
       if(IN) (*IN) >> p;
@@ -874,7 +874,7 @@ namespace WDutils {
     unsigned write(const T*buf, unsigned n) throw(WDutils::exception) {
       if(WRITTEN + n*sizeof(T) > SIZE) {
 	WDutils_Warning("FortranORec::write(): "
-			"cannot write %d, but only %d %s\n",
+			"cannot write %u, but only %lu  %s\n",
 		       n, (SIZE-WRITTEN)/sizeof(T), nameof(T));
 	n = (SIZE-WRITTEN)/sizeof(T);
       }

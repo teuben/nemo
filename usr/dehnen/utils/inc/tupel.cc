@@ -14,7 +14,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1996-2006  Walter Dehnen                                       
+// Copyright (C) 1996-2009  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -38,6 +38,10 @@
 #  include <algorithm>
 #  define WDutils_included_algorithm
 #endif
+#ifndef WDutils_included_limits
+#  include <limits>
+#  define WDutils_included_limits
+#endif
 #ifndef WDutils_included_cmath
 #  include <cmath>
 #  define WDutils_included_cmath
@@ -48,8 +52,23 @@ namespace WDutils { namespace meta {
   using std::min;
   using std::max;
   using std::abs;
-  using std::isinf;
-  using std::isnan;
+  using std::numeric_limits;
+  template<typename X> inline
+  bool isinf(X x)
+  {
+    return
+      std::numeric_limits<X>::has_infinity &&
+      std::numeric_limits<X>::infinity() == x ;
+  }
+  template<typename X> inline
+  bool isnan(X x)
+  {
+    return
+      (std::numeric_limits<X>::has_quiet_NaN &&
+       std::numeric_limits<X>::quiet_NaN()      == x   ) ||
+      (std::numeric_limits<X>::has_signaling_NaN &&
+       std::numeric_limits<X>::signaling_NaN() == x   );
+  }
   //----------------------------------------------------------------------------
   template<int N> struct times__ {
     template<typename X> static X is(X const&x) { return N * x; } };

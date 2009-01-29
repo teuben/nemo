@@ -184,7 +184,7 @@ unsigned WDutils::FortranIRec::read_size() throw(WDutils::exception)
     return S;
   } else 
     throw exception("FortranIRec: header size must be 4 or 8\n");
-  return 0;
+  return 0; // not reachable; avoids warnings about not returning a value
 }
 //------------------------------------------------------------------------------
 WDutils::FortranIRec::FortranIRec(input& in, unsigned rec, bool swap)

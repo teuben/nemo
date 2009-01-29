@@ -1,30 +1,30 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    utils/inc/inline.h                                                 
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    1994-2005, 2007                                                    
-///                                                                             
+///
+/// \file    utils/inc/inline.h
+///
+/// \author  Walter Dehnen
+///
+/// \date    1994-2009
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 1994-2005, 2007  Walter Dehnen                                 
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 1994-2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_inline_h
 #define WDutils_included_inline_h
@@ -41,11 +41,45 @@
 #  include <algorithm>
 #  define WDutils_included_algorithm
 #endif
+#ifndef WDutils_included_limits
+#  include <limits>
+#  define WDutils_included_limits
+#endif
 //------------------------------------------------------------------------------
 namespace WDutils {
+#ifdef __PGCC__ // deal with non-Ansi compilers
+  template<typename T> struct __abs {
+    static T abs(T x) { return x < T(0)? -x : x; }
+  };
+  template<> struct __abs<double> {
+    static double abs(double x) { return std::abs(x); }
+  };
+  template<typename T> inline T abs(T x) { return __abs<T>::abs(x); }
+  template<typename T> inline T min(T x, T y) { return x<y? x : y; }
+  template<typename T> inline T max(T x, T y) { return x>y? x : y; }
+#else
   using std::abs;
   using std::min;
   using std::max;
+#endif
+  //----------------------------------------------------------------------------
+  using std::numeric_limits;
+  template<typename X> inline
+  bool isinf(X x)
+  {
+    return
+      std::numeric_limits<X>::has_infinity &&
+      std::numeric_limits<X>::infinity() == x ;
+  }
+  template<typename X> inline
+  bool isnan(X x)
+  {
+    return
+      (std::numeric_limits<X>::has_quiet_NaN &&
+       std::numeric_limits<X>::quiet_NaN()      == x   ) ||
+      (std::numeric_limits<X>::has_signaling_NaN &&
+       std::numeric_limits<X>::signaling_NaN() == x   );
+  }
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
   int sign    (const scalar_type&x)

@@ -1,30 +1,30 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    src/exception.cc                                                   
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2000-2006                                                          
-///                                                                             
+///
+/// \file    src/exception.cc
+///
+/// \author  Walter Dehnen
+///
+/// \date    2000-2009
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2000-2006  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2000-2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #include <exception.h>
 #include <cstdlib>
@@ -54,8 +54,17 @@ WDutils::RunInfo::RunInfo()
     __time[24] = 0;
 #ifdef unix
     // set host name
+#ifdef __PGCC__
+    const char*host = getenv("HOST");
+    if(host) {
+      SNprintf(__host,100,host);
+      __host_known = 1;
+    } else
+      SNprintf(__host,100,"unknown.host");
+#else
     gethostname(__host,100);
     __host_known = 1;
+#endif
     // set user name
     const char*user = getenv("USER");
     if(user) {
@@ -64,8 +73,10 @@ WDutils::RunInfo::RunInfo()
     } else
       SNprintf(__user,100,"unknown.user");
     // set pid
+#ifndef __PGCC__
     SNprintf(__pid,20,"%d",getpid());
     __pid_known  = 1;
+#endif
     // set command and name of executable
     char file[64];
     SNprintf(file,64,"/proc/%s/cmdline",__pid);
@@ -113,6 +124,21 @@ WDutils::RunInfo WDutils::RunInfo::Info;
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace WDutils;
+
+#if defined(__PGCC__) || defined(__CC__)
+  using ::snprintf;
+  using ::vsnprintf;
+#else
+  using std::snprintf;
+  using std::vsnprintf;
+#endif
+
+#define PRINTERR_STEP   // old style: print message in bits
+#undef  PRINTERR_STEP   // new style: print message in one
+                        // to avoid problems if more than one of several MPI 
+                        // processes isses a message at the same time
+
+#ifdef PRINTERR_STEP
   inline void printerr(const char*header,
 		       const char*fmt,
 		       va_list   &ap,
@@ -133,8 +159,7 @@ namespace {
       fprintf(stderr,"\n");
     fflush(stderr);
   }
-
-  using std::snprintf;
+#else
   inline void printerr(const char*lib,
 		       const char*issue,
 		       const char*fmt,
@@ -168,11 +193,8 @@ namespace {
     vfprintf(stderr,ffmt,ap);
     fflush(stderr);
   }
+#endif
 }
-#define PRINTERR_STEP   // old style: print message in bits
-#undef  PRINTERR_STEP   // new style: print message in one
-                        // to avoid problems if more than one of several MPI 
-                        // processes isses a message at the same time
 //------------------------------------------------------------------------------
 void WDutils::Error::operator()(const char* fmt, ...) const
 {
@@ -294,12 +316,12 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
 {
   va_list ap;
   va_start(ap,fmt);
-  int w = std::vsnprintf(str,l,fmt,ap);
+  int w = vsnprintf(str,l,fmt,ap);
   va_end(ap);
   if(w==static_cast<int>(l))
     WDutils_THROW("snprintf(): trailing 0 lost");
   if(w >static_cast<int>(l))
-    WDutils_THROW("snprintf(): string size exceeded [%d:%d]",w,l);
+    WDutils_THROW("snprintf(): string size exceeded [%d:%lu]",w,l);
   if(w <0)
     WDutils_THROW("snprintf(): formatting error");
   return w;
@@ -310,12 +332,12 @@ int WDutils::snprintf__::operator()(char*str, size_t l, const char* fmt, ...)
 {
   va_list ap;
   va_start(ap,fmt);
-  int w = std::vsnprintf(str,l,fmt,ap);
+  int w = vsnprintf(str,l,fmt,ap);
   va_end(ap);
   if(w==static_cast<int>(l))
     WDutils_THROW("[%s:%d]: snprintf(): trailing 0 lost",file,line);
   if(w >static_cast<int>(l))
-    WDutils_THROW("[%s:%d]: snprintf(): string size exceeded [%d:%d]",
+    WDutils_THROW("[%s:%d]: snprintf(): string size exceeded [%d:%lu]",
 		  file,line,w,l);
   if(w <0)
     WDutils_THROW("[%s:%d]: snprintf(): formatting error",file,line);
