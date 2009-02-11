@@ -67,7 +67,7 @@ int main(int argc, char ** argv )
     if (verb) glnemo::ComponentRange::list(&crv);
     int index=glnemo::ComponentRange::print(&crv,select);
     if (index >= 0 ) {
-      std::cout << crv[index].range << "\n";
+      std::cout << *(gadget_io->getTime()) << " " << crv[index].range << "\n";
     }
   } 
   else {
