@@ -33,11 +33,9 @@
 
 using namespace falcON;
 
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class falcON::SphericalSampler                                             //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
+//
+// class falcON::SphericalSampler
+//
 namespace {
   const int Ne1=1000, Ne=Ne1+1;
   double __p;
@@ -46,9 +44,9 @@ namespace {
     return pow(sin(eta),__p);
   }
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 inline void SphericalSampler::setis()
-  // set table with int(sin(eta)^(1-2b), eta=0..x)                              
+  // set table with int(sin(eta)^(1-2b), eta=0..x)
 {
   if(!beta) return;
   Is[0]    = 0.;
@@ -64,7 +62,7 @@ inline void SphericalSampler::setis()
     Xe[i][1] = cos(eta);
   }
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 #ifdef falcON_PROPER
 #  include <proper/sample.cc>
 #endif
@@ -94,7 +92,7 @@ SphericalSampler::SphericalSampler(double __mt,
 {
   if(beta) setis();
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 inline double SphericalSampler::F0(double Psi) const
 {
   if(careful) {
@@ -113,7 +111,7 @@ inline double SphericalSampler::F0(double Psi) const
   } else
     return DF(Psi);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void SphericalSampler::sample(body   const&B0,
 			      unsigned     N,
 			      bool         q,
@@ -144,105 +142,105 @@ void SphericalSampler::sample(body   const&B0,
   givef = givef && has_aux(B0);
   giveP = giveP && has_pot(B0);
   giveA = giveA && has_acc(B0);
-  const double m  (Mt/double(N));                  // Mt/N: body mass           
-  const double fp (2*f_-1);                        // fraction: swap sign(vphi) 
-  int    n, k=0;                                   // # bodies / (r,vr,vt)      
-  double Ncum=0.,Mcum=0.,mu=m;                     // cumulated num, mu         
-  for(body Bi(B0); Bi!=BN; ) {                     // LOOP bodies               
-    //                                                                          
-    // 1. get Mr,r,Psi,vr,vt,f                                                  
-    //                                                                          
-    double Mr = (q? R(0):R())*Mt;                  // get enclosed mass         
-    double r  = rM(Mr);                            // get Lagrange radius from M
-    double Psi= Ps(r),Q;                           // get potential             
-    double w, we=sqrt(2*Psi);                      // escape velocity           
-    double f0=F0(Psi),f;                           // DF(w=0)                   
-    do {                                           // DO                        
-      do {                                         //   DO                      
-	w = we * pow(R(),ibt);                     //     sample velocity w     
-	Q = Psi-0.5*w*w;                           //     get Q                 
-      } while(Q<=0.);                              //   WHILE (non-positive)    
-      f = DF(Q);                                   //   get g(Q)                
+  const double m  (Mt/double(N));
+  const double fp (2*f_-1);
+  int    n, k=0;
+  double Ncum=0.,Mcum=0.,mu=m;
+  for(body Bi(B0); Bi!=BN; ) {
+    //
+    // 1. get Mr,r,Psi,vr,vt,f
+    //
+    double Mr = (q? R(0):R())*Mt;
+    double r  = rM(Mr);
+    double Psi= Ps(r),Q;
+    double w, we=sqrt(2*Psi);
+    double f0=F0(Psi),f;
+    do {
+      do {
+	w = we * pow(R(),ibt);
+	Q = Psi-0.5*w*w;
+      } while(Q<=0.);
+      f = DF(Q);
       if(WDutils::isnan(f))
 	falcON_THROW("SphericalSampler::sample(): "
 		     "%s is NaN; Eps=%g [r=%g, we=%g, w=%g]\n",
 		     (beta? (iraq==0? "g(E)" : "g(Q)"):
 		      (iraq==0? "f(E)" : "f(Q)")), Q,r,we,w);
-      if(f>f0)                                     //   IF f>f(w=0) ERROR       
+      if(f>f0)
 	falcON_THROW("SphericalSampler::sample(): DF non-monotonic"
 		     ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n", Q,f,Psi,f0,r);
-    } while(f0 * R() > f);                         // WHILE ( rejected )        
-    double vr,vt;                                  // v_r, v_t                  
-    if(beta) {                                     // IF b0 != 0                
-      pair_d SC=polev((q? R(1):R())*Is[Ne1],Is,Xe);//   sample eta              
-      vt = w * SC[0]/sqrt(1+r*r*iraq);             //   tangential velocity     
-      vr = w * SC[1];                              //   radial velocity         
-      if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);//   distribution function   
+    } while(f0 * R() > f);
+    double vr,vt;
+    if(beta) {
+      pair_d SC=polev((q? R(1):R())*Is[Ne1],Is,Xe);
+      vt = w * SC[0]/sqrt(1+r*r*iraq);
+      vr = w * SC[1];
+      if(b0<zero || vt>zero) f *= pow(vt*r,-b0-b0);
       if(givef && WDutils::isnan(f))
 	falcON_THROW("SphericalSampler::sample(): f(E,L^2) is NaN"
 		     ": Eps=%g, [vt=%g, r=%g]\n",Psi-0.5*w*w,vt,r);
-    } else {                                       // ELSE                      
-      double ce = q? R(1,-1.,1.) : R(-1.,1.);      //   sample cos(eta)         
-      vr = w * ce;                                 //   radial velocity         
-      vt = w * sqrt((1-ce*ce)/(1+r*r*iraq));       //   tangential velocity     
-    }                                              // ENDIF                     
-    //                                                                          
-    // 2. establish number of bodies at (r,vr,vt), depending on mass adaption   
-    //                                                                          
+    } else {
+      double ce = q? R(1,-1.,1.) : R(-1.,1.);
+      vr = w * ce;
+      vt = w * sqrt((1-ce*ce)/(1+r*r*iraq));
+    }
+    //
+    // 2. establish number of bodies at (r,vr,vt), depending on mass adaption
+    //#
 #ifdef falcON_PROPER
     if(adapt_masses)
       falcON_SAMPLE_ADAPT
     else
 #endif
     {
-      ++Ncum;                                      //   to avoid warning
-      n  = 1;                                      //   ELSE set n  = 1         
+      ++Ncum;
+      n  = 1;
     }
-    if(n<1) continue;                              //   IF n<1: continue        
-    //                                                                          
-    // 3. set mass, position, and velocity of n bodies with this (r,vr,vt)      
-    //                                                                          
-    for(int i=0; i!=n && Bi!=BN; ++i,++k,++Bi) {   //   LOOP n bodies           
-      Bi.mass() = mu;                              //     set mass              
-      Mcum     += mu;                              //     cumulate total mass   
-      register double                              //     some auxiliary vars:  
-	cth = q? R(2,-1.,1.):R(-1.,1.),            //     sample cos(theta)     
-	sth = std::sqrt(1.-cth*cth),               //     sin(theta)            
-	phi = q? R(3,0.,TPi):R(0.,TPi),            //     sample azimuth phi    
-	cph = std::cos(phi),                       //     cos(phi)              
-	sph = std::sin(phi);                       //     sin(phi)              
-      Bi.pos()[0] = r * sth * cph;                 //     x=r*sin(th)*cos(ph)   
-      Bi.pos()[1] = r * sth * sph;                 //     y=r*sin(th)*sin(ph)   
-      Bi.pos()[2] = r * cth;                       //     z=r*cos(th)           
-      register double                              //     some auxiliary vars:  
-	psi = q? R(4,0.,TPi):R(0.,TPi),            //     sample angle psi      
-        vth = vt * std::cos(psi),                  //     v_theta               
-        vph = vt * std::sin(psi),                  //     v_phi                 
-        vm  = vr * sth + vth * cth;                //     v_meridional          
-      if       (fp>0.) {                           //     IF flip sign to pos?  
-	if(fp>  (q? R(5):R())) vph= abs(vph);      //       draw -> flip        
-      } else if(fp<0.) {                           //     ELIF flip sign to neg?
-	if(fp< -(q? R(5):R())) vph=-abs(vph);      //       draw -> flip        
-      }                                            //     ENDIF                 
-      Bi.vel()[0] = vm * cph - vph * sph;          //     v_x= ...              
-      Bi.vel()[1] = vm * sph + vph * cph;          //     v_y= ...              
-      Bi.vel()[2] = vr * cth - vth * sth;          //     v_z= ...              
-      if(givef) Bi.phden() = f;                    //     set phden = DF        
-      if(giveP) Bi.pot() =-Psi;                    //     set pot = Phi         
-      if(giveA) Bi.acc() = pos(Bi)*(-Mr/(r*r));    //     set acc = -dPhi/dr    
-    }                                              //   END LOOP                
-  }                                                // END LOOP                  
-  //                                                                            
-  // 4. adjust total mass [& set eps]                                           
-  //                                                                            
+    if(n<1) continue;
+    //
+    // 3. set mass, position, and velocity of n bodies with this (r,vr,vt)
+    //
+    for(int i=0; i!=n && Bi!=BN; ++i,++k,++Bi) {
+      Bi.mass() = mu;
+      Mcum     += mu;
+      register double
+	cth = q? R(2,-1.,1.):R(-1.,1.),
+	sth = std::sqrt(1.-cth*cth),
+	phi = q? R(3,0.,TPi):R(0.,TPi),
+	cph = std::cos(phi),
+	sph = std::sin(phi);
+      Bi.pos()[0] = r * sth * cph;
+      Bi.pos()[1] = r * sth * sph;
+      Bi.pos()[2] = r * cth;
+      register double
+	psi = q? R(4,0.,TPi):R(0.,TPi),
+        vth = vt * std::cos(psi),
+        vph = vt * std::sin(psi),
+        vm  = vr * sth + vth * cth;
+      if       (fp>0.) {
+	if(fp>  (q? R(5):R())) vph= abs(vph);
+      } else if(fp<0.) {
+	if(fp< -(q? R(5):R())) vph=-abs(vph);
+      }
+      Bi.vel()[0] = vm * cph - vph * sph;
+      Bi.vel()[1] = vm * sph + vph * cph;
+      Bi.vel()[2] = vr * cth - vth * sth;
+      if(givef) Bi.phden() = f;
+      if(giveP) Bi.pot() =-Psi;
+      if(giveA) Bi.acc() = pos(Bi)*(-Mr/(r*r));
+    }
+  }
+  //
+  // 4. adjust total mass
+  //
   if(Mcum != Mt) {
     const double mfac = Mt/Mcum;
     for(body Bi(B0); Bi!=BN; ++Bi)
       Bi.mass()*= mfac;
   }
-  //                                                                            
+  //
   // 5. set eps_i                                                               
-  //                                                                            
+  //
 #ifdef falcON_PROPER
   if(epar>0. && has_eps(B0)) {
     const double iMt  = double(N)/Mt;
@@ -251,7 +249,7 @@ void SphericalSampler::sample(body   const&B0,
   }
 #endif
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void SphericalSampler::sample_pos(body const  &B0,
 				  unsigned     N,
 				  bool         q,
@@ -263,17 +261,18 @@ void SphericalSampler::sample_pos(body const  &B0,
     falcON_THROW("SphericalSampler::sample_pos(): "
 		 "too few quasi-random number generators\n");
   const body BN(B0,N);
-  const double m  (Mt/double(N));                  // Mt/N: body mass           
-  for(body Bi(B0); Bi!=BN; ++Bi) {                 // LOOP bodies               
-    double Mr = (q? R(0):R())*Mt;                  // get enclosed mass         
-    double r  = rM(Mr);                            // get Lagrange radius from M
-    Bi.mass() = m;                                 //   set mass                
-    double                                         //   some auxiliary vars:    
-      cth = q? R(1,-1.,1.):R(-1.,1.),              //   sample cos(theta)       
-      sth = std::sqrt(1.-cth*cth),                 //   sin(theta)              
-      phi = q? R(2,0.,TPi):R(0.,TPi);              //   sample azimuth phi      
-    Bi.pos()[0] = r * sth * std::cos(phi);         //   x=r*sin(th)*cos(ph)     
-    Bi.pos()[1] = r * sth * std::sin(phi);         //   y=r*sin(th)*sin(ph)     
-    Bi.pos()[2] = r * cth;                         //   z=r*cos(th)             
-  }                                                // END LOOP                  
+  const double m  (Mt/double(N));
+  for(body Bi(B0); Bi!=BN; ++Bi) {
+    double Mr = (q? R(0):R())*Mt;
+    double r  = rM(Mr);
+    Bi.mass() = m;
+    double
+      cth = q? R(1,-1.,1.):R(-1.,1.),
+      sth = std::sqrt(1.-cth*cth),
+      phi = q? R(2,0.,TPi):R(0.,TPi);
+    Bi.pos()[0] = r * sth * std::cos(phi);
+    Bi.pos()[1] = r * sth * std::sin(phi);
+    Bi.pos()[2] = r * cth;
+  }
 }
+//
