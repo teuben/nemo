@@ -1,6 +1,7 @@
 /*
  *  convert mody's 'pos-vel' dumps to snapshot - in single precision
- *    23-feb-09    created
+ *
+ *    23-feb-09  PJT  created 
  */
  
 #define SinglePrec
@@ -24,14 +25,14 @@ string defv[] = {
 string usage = "convert Mody's pos-vel files to snapshot";
 
 extern void bswap(void *vdat, int len, int cnt);
- 
+ 
 void nemo_main()
 {
     stream instr, outstr;
     real *fbuf, *mbuf, tsnap, mass1;
     bool Qswap = getbparam("swap");
     long nread;
-    int nbody, i,j;
+    int nbody, i;
     int cs = CSCode(Cartesian, NDIM, 2);
     int ipar[5];
     float rpar[5], posvel[6];
@@ -48,34 +49,39 @@ void nemo_main()
     dprintf(0,"ipar: %d  nbody=%d mods=%d\n",nread,ipar[0],ipar[1]);
 
     nread = unfread(instr, (char *)rpar, 5*sizeof(float));
-    dprintf(0,"rpar: %d  totms=%f tnow=%f tdyn=%f vir=%f\n",nread,rpar[0],rpar[1],rpar[2],rpar[3]);
+    dprintf(0,"rpar: %d  totms=%f tnow=%f tdyn=%f vir=%f\n",
+	    nread,rpar[0],rpar[1],rpar[2],rpar[3]);
 
     nbody = ipar[0];
     tsnap = rpar[1];
     mass1 = rpar[0]/nbody;
 
-    fbuf = (real *) allocate(nbody*6*sizeof(real));
-    mbuf = (real *) allocate(nbody*sizeof(real));
+    /* fbuf holds the array of posvel's
+     * mbuf holds the (all the same ) masses 
+     */
+    fbuf = (real *) allocate(nbody*6*sizeof(real)); 
+    mbuf = (real *) allocate(nbody*sizeof(real));   
 
     for (i=0; i<nbody; i++) {
-      mbuf[i] = mass1;
-      nread = unfread(instr, (char *) &fbuf[i*6], 6*sizeof(real));
+      mbuf[i] = mass1;                              
+      nread = unfread(instr, (char *) &fbuf[i*6], 6*sizeof(real)); 
       if (nread<1) error("Early EOF for i=%d",i);
     }
     
+    /* write out snapshot for NEMO */
+
     put_set(outstr,SnapShotTag);
-    put_set(outstr,ParametersTag);
-    put_data(outstr, NobjTag, IntType, &nbody, 0);
-    put_data(outstr, TimeTag, RealType, &tsnap, 0);
-    put_tes(outstr,ParametersTag);
-    put_set(outstr,ParticlesTag);
-    put_data(outstr,CoordSystemTag, IntType, &cs, 0);
-    put_data(outstr,MassTag,RealType,mbuf,nbody,0);
-    put_data(outstr,PhaseSpaceTag,RealType,fbuf,nbody,2,NDIM,0);
-    put_tes(outstr,ParticlesTag);
+      put_set(outstr,ParametersTag);
+       put_data(outstr, NobjTag, IntType, &nbody, 0);
+       put_data(outstr, TimeTag, RealType, &tsnap, 0);
+      put_tes(outstr,ParametersTag);
+      put_set(outstr,ParticlesTag);
+        put_data(outstr,CoordSystemTag, IntType, &cs, 0);
+        put_data(outstr,MassTag,RealType,mbuf,nbody,0);
+        put_data(outstr,PhaseSpaceTag,RealType,fbuf,nbody,2,NDIM,0);
+      put_tes(outstr,ParticlesTag);
     put_tes(outstr,SnapShotTag);
 
-    free(fbuf);
     strclose(instr);
     strclose(outstr);
 }
