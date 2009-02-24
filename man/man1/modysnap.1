@@ -4,26 +4,65 @@ modysnap \- convert Mody's pos-vel files to snapshot
 .SH SYNOPSIS
 \fBmodysnap\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+\fBmodesnap\fP converts snapshot-style datasets for/from
+the \fIn-mody\fI MOND Nbody integrator to a standard
+NEMO \fPsnapshot(5NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input mody pos-vel file [???]   
-.TP 20
+Input mody pos-vel file (moutXX.bin style) [???]   
+.TP
 \fBout=\fP
 Output snapshot file [???]    
-.TP 20
+.TP
 \fBheadline=\fP
 Random verbiage []     
-.TP 20
+.TP
 \fBswap=\fP
-Swap bytes in each float if endianism differs .
-Not implemented.
+Swap bytes in each int/float if endianism differs .
+Not implemented yet.
 .SH EXAMPLES
+Here is an example of running n-mody. First create in input file:
+.nf
+  % cd <your-run-directory>
+  % cp $NEMO/usr/n_mody/example_init/newgalaxy.data .
+  % rungb
+   ...
+  18.645u 6.961s 0:25.74 99.4%	0+0k 0+0io 6pf+0w
+  20.013u 7.036s 0:27.05 99.9%	0+0k 0+0io 0pf+0w
+  % modysnap mout00.bin snap0
+   ...	nbody=2048000 mods=1
+   ...	totms=1.000000 tnow=0.000000 tdyn=8.332943 vir=0.000000
+.fi
+then get the parameters for the integration and run it:
+.fi
+  % cp $NEMO/usr/n_mody/run/input.data .
+  % rmond
+  584.854u 6.630s 9:52.05 99.9%	0+0k 0+0io 1pf+0w
+  565.048u 6.426s 9:31.90 99.9%	0+0k 0+0io 0pf+0w
+.nf
+.fi
+.SH LIMITATION
+Currently only the \fImoutXX.bin\fP can be processed. However,
+it's not hard to have a \fIpoutXX.bin\fP type to be merged
+in and produce a snapshot with potentials as well.
+.PP
+There is no good alternative for the \fImondXX.bin\fP files in
+NEMO yet.
+.SH FILES
+There are a number of files used by \fIrmond\fP:
+.PP
+\fBmoutXX.bin\fP: a small 5 integer and 5 real header, followed by nbody
+float "posvel" vectors.
+.PP
+\fBmondXX.bin\fP: grid data
+.PP
+\fBpoutXX.bin\fP: particle potentials. Same header
+
 .SH SEE ALSO
-snapshot(5NEMO)
+rungb, rmond, snapshot(5NEMO)
 .SH FILES
 $NEMO/src/nbody/io
 .SH AUTHOR
