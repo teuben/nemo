@@ -4,18 +4,19 @@ modysnap \- convert Mody's pos-vel files to snapshot
 .SH SYNOPSIS
 \fBmodysnap\fP [parameter=value]
 .SH DESCRIPTION
-\fBmodesnap\fP converts snapshot-style datasets for/from
-the \fIn-mody\fI MOND Nbody integrator to a standard
-NEMO \fPsnapshot(5NEMO)\fP.
+\fBmodysnap\fP converts snapshot-style datasets from
+the \fIn-mody\fP MOND N-body integrator to a standard
+NEMO \fIsnapshot(5NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input mody pos-vel file (moutXX.bin style) [???]   
+Input mody pos-vel file (moutXX.bin style).
+No default.
 .TP
 \fBout=\fP
-Output snapshot file [???]    
+Output snapshot file. No default.
 .TP
 \fBheadline=\fP
 Random verbiage []     
@@ -26,11 +27,9 @@ Not implemented yet.
 .SH EXAMPLES
 Here is an example of running n-mody. First create in input file:
 .nf
-  % cd <your-run-directory>
   % cp $NEMO/usr/n_mody/example_init/newgalaxy.data .
   % rungb
    ...
-  18.645u 6.961s 0:25.74 99.4%	0+0k 0+0io 6pf+0w
   20.013u 7.036s 0:27.05 99.9%	0+0k 0+0io 0pf+0w
   % modysnap mout00.bin snap0
    ...	nbody=2048000 mods=1
@@ -40,13 +39,12 @@ then get the parameters for the integration and run it:
 .fi
   % cp $NEMO/usr/n_mody/run/input.data .
   % rmond
-  584.854u 6.630s 9:52.05 99.9%	0+0k 0+0io 1pf+0w
   565.048u 6.426s 9:31.90 99.9%	0+0k 0+0io 0pf+0w
 .nf
 .fi
 .SH LIMITATION
-Currently only the \fImoutXX.bin\fP can be processed. However,
-it's not hard to have a \fIpoutXX.bin\fP type to be merged
+Currently only the \fImoutXX.bin\fP (pos-vel) files can be processed. 
+However, it's not hard to have a \fIpoutXX.bin\fP type to be merged
 in and produce a snapshot with potentials as well.
 .PP
 There is no good alternative for the \fImondXX.bin\fP files in
@@ -64,7 +62,7 @@ float "posvel" vectors.
 .SH SEE ALSO
 rungb, rmond, snapshot(5NEMO)
 .SH FILES
-$NEMO/src/nbody/io
+$NEMO/src/nbody/io/modysnap.c  -- code
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
