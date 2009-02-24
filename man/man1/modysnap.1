@@ -35,13 +35,14 @@ Here is an example of running n-mody. First create in input file:
    ...	nbody=2048000 mods=1
    ...	totms=1.000000 tnow=0.000000 tdyn=8.332943 vir=0.000000
 .fi
-then get the parameters for the integration and run it:
+then get the parameters for the integration and run the standard benchmark
 .fi
   % cp $NEMO/usr/n_mody/run/input.data .
   % rmond
   565.048u 6.426s 9:31.90 99.9%	0+0k 0+0io 0pf+0w
 .nf
 .fi
+though notice this benchmark does not produce extra mout01.bin etc. files (nout=0)
 .SH LIMITATION
 Currently only the \fImoutXX.bin\fP (pos-vel) files can be processed. 
 However, it's not hard to have a \fIpoutXX.bin\fP type to be merged
