@@ -46,11 +46,12 @@ void nemo_main()
 
 
     nread = unfread(instr, (char *)ipar, 5*sizeof(int));
-    dprintf(0,"ipar: %d  nbody=%d mods=%d\n",nread,ipar[0],ipar[1]);
+    dprintf(0,"ipar: nbody=%d mods=%d\n",
+	    ipar[0],ipar[1]);
 
     nread = unfread(instr, (char *)rpar, 5*sizeof(float));
-    dprintf(0,"rpar: %d  totms=%f tnow=%f tdyn=%f vir=%f\n",
-	    nread,rpar[0],rpar[1],rpar[2],rpar[3]);
+    dprintf(0,"rpar: totms=%f tnow=%f tdyn=%f vir=%f\n",
+	    rpar[0],rpar[1],rpar[2],rpar[3]);
 
     nbody = ipar[0];
     tsnap = rpar[1];
