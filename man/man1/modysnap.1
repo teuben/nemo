@@ -1,4 +1,4 @@
-.TH MODYSNAP 1NEMO "23 February 2009"
+.TH MODYSNAP 1NEMO "26 February 2009"
 .SH NAME
 modysnap \- convert Mody's pos-vel files to snapshot
 .SH SYNOPSIS
@@ -12,7 +12,7 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input mody pos-vel file (moutXX.bin style).
+Input mody pos-vel file (moutXX.bin style). Multiple files can be given.
 No default.
 .TP
 \fBout=\fP
@@ -22,7 +22,9 @@ Output snapshot file. No default.
 Random verbiage []     
 .TP
 \fBswap=\fP
-Swap bytes in each int/float if endianism differs .
+Swap bytes in each int/float if endianism differs . This is only needed if
+the input files come from a machine with the opposite endianism as your
+local host.
 Not implemented yet.
 .SH EXAMPLES
 Here is an example of running n-mody. First create in input file:
@@ -43,6 +45,11 @@ then get the parameters for the integration and run the standard benchmark
 .nf
 .fi
 though notice this benchmark does not produce extra mout01.bin etc. files (nout=0)
+.PP
+To process multiple files, a Unix pipe should be used:
+.nf
+  % cat mout??.bin | modysnap - mout.snap
+.fi
 .SH LIMITATION
 Currently only the \fImoutXX.bin\fP (pos-vel) files can be processed. 
 However, it's not hard to have a \fIpoutXX.bin\fP type to be merged
@@ -61,7 +68,7 @@ float "posvel" vectors.
 \fBpoutXX.bin\fP: particle potentials. Same header
 
 .SH SEE ALSO
-rungb, rmond, snapshot(5NEMO)
+rungb, rmond, snapmody(1NEMO), snapshot(5NEMO)
 .SH FILES
 $NEMO/src/nbody/io/modysnap.c  -- code
 .SH AUTHOR
@@ -69,5 +76,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-23-Feb-09	V1.0 Created 
+23-Feb-09	V1.0 Created	PJT
+26-feb-09	V1.2 process multiple files if present	PJT
 .fi
