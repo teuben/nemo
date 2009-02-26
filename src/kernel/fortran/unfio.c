@@ -16,6 +16,7 @@
  *    1-mar-06  added unfsize; gfortran uses int8 (long long) instead of int4
  *    4-mar-06  using new autoconf computed value appropriate for this fortran
  *    8-may-08  support for header=0
+ *   25-feb-09  added unfwrite()
  *   
  * 
  *   TODO: with a keyword like ssize=4::20,8::10,1::100
@@ -172,6 +173,48 @@ int unfread(stream fp, char *buf, int bufsize)
     if (size1 != size) 
         warning("Reading block size_s=%d start_e=%d",size,size1);
 
+    return size;
+}
+
+/*
+ * unfwrite: write another block; return the number of bytes in that block
+ *           or 0 if some error (e..g disk full).
+ *
+ * TODO: support swapping
+ */
+
+int unfwrite(stream fp, char *buf, int bufsize)
+{
+    int n, size;
+    long long lsize;
+
+    size = lsize = bufsize;
+
+    if (hdr_size == sizeof(int)) {
+      n = fwrite(&size,hdr_size,1,fp);
+      if (n!=1) return 0;
+    } else if (hdr_size == sizeof(long long)) {
+      n = fwrite(&lsize,hdr_size,1,fp);
+      if (n!=1) return 0;
+      size = lsize; /* ieck, need to switch to size_t */
+    } else if (hdr_size == 0) {
+      size = bufsize;
+      dprintf(1,"unfwrite: skipping 0 header, setting size=%d\n",size);
+    } else 
+      error("unfwrite: unsupported hdr_size=%d",hdr_size);
+    dprintf(2,"unfwrite: header %d\n",size);
+
+    n = fwrite(buf, sizeof(char), size, fp);
+    dprintf(2,"unfwrite: data %d\n",n);
+    if (n != size) return 0;
+
+    if (hdr_size == sizeof(int)) {
+      n = fwrite(&size, hdr_size, 1, fp);
+      if (n != 1) return 0;
+    } else if  (hdr_size == sizeof(long long)) {
+      n = fwrite(&lsize, hdr_size, 1, fp);
+      if (n != 1) return 0;
+    } 
     return size;
 }
 
