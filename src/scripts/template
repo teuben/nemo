@@ -3,7 +3,7 @@
 #
 if ( $#argv == 0 ) then
   echo "Usage: $0 progname key1=def1 ..."
-  echo "version 15-mar-2005"
+  echo "version 26-feb-2009"
   echo "Write template NEMO program based on keywords and default values"
   echo "Output will be in a file progname.c, which cannot be overwritten"
   
@@ -52,6 +52,13 @@ e '  /* e.g.   real   r = getrparam("r"); */'  >> $name
 e '  /* e.g.   double d = getdparam("d"); */'  >> $name
 e '  /* followed by lots of lovely calculations */' >> $name
 e '  warning("New program");'                       >> $name
+e '  /*'                                            >> $name
+foreach a ($argv)
+    set k=`echo $a | awk -F= '{print $1}'`
+e '    '$k' = getparam("'$k'");'                    >> $name
+
+end
+e '   */'                                           >> $name
 e '}'				>> $name
 
 echo "All done, $name created. You can compile it using the command"
