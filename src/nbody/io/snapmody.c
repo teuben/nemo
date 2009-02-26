@@ -47,7 +47,7 @@ void nemo_main()
     get_set(instr,SnapShotTag);
       get_set(instr,ParametersTag);
        get_data(instr, NobjTag, IntType, &nbody, 0);
-       get_data(instr, TimeTag, RealType, &tsnap, 0);
+       get_data_coerced(instr, TimeTag, RealType, &tsnap, 0);
       get_tes(instr,ParametersTag);
 
       fbuf = (real *) allocate(nbody*6*sizeof(real)); 
@@ -55,8 +55,8 @@ void nemo_main()
 
       get_set(instr,ParticlesTag);
         get_data(instr,CoordSystemTag, IntType, &cs, 0);
-        get_data(instr,MassTag,RealType,mbuf,nbody,0);
-        get_data(instr,PhaseSpaceTag,RealType,fbuf,nbody,2,NDIM,0);
+        get_data_coerced(instr,MassTag,RealType,mbuf,nbody,0);
+        get_data_coerced(instr,PhaseSpaceTag,RealType,fbuf,nbody,2,NDIM,0);
       get_tes(instr,ParticlesTag);
     get_tes(instr,SnapShotTag);
 
