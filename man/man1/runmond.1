@@ -1,0 +1,115 @@
+.TH RUNMOND 1NEMO "26 February 2009"
+.SH NAME
+runmond \- frontend to the rmond program
+.SH SYNOPSIS
+\fBrunmond\fP [parameter=value]
+.SH DESCRIPTION
+\fBrunmond\fP is a frontend to N-MODY, a parallel code for
+collisionless N-body simulations in modified Newtonian dynamics
+(see also  Ciotti, Nipoti, Londrillo 2006)
+The input file is a standard NEMO snapshot, except that 
+all masses are taken equal to that of the first particle.
+All output is accumulated in a run directory, as specified
+with \fBoutdir=\fP. See the detailed description in the
+N-MODY users guide for their meaning. Particle positions and
+velocities are dumped one per snapshot, and can be converted
+back to NEMO files with \fImodysnap(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input snapshot. No default. All masses are assumed equal the
+first one found in the snapshot. No Default. 
+.TP
+\fBoutdir=\fP
+Run directory in which all files produced by N-MODY are placed.
+No default.    
+.TP
+\fBout=\fP
+Output snapshot file name if to 
+convert the \fImoutXX.bin\fP files back to a nemo file. Unless
+an absolute pathname is given, this file is placed in the 
+\fBoutdir\fP. Default: not used.
+.TP
+\fBnr=\fP
+some help [128]     
+.TP
+\fBnth=\fP
+some help [64]     
+.TP
+\fBnph=\fP
+some help [128]     
+.TP
+\fBlmax=\fP
+some help [32]     
+.TP
+\fBmodel=\fP
+reads particles on mout00.bin file (where n=id_new) **do
+.TP
+\fBmond_ind=\fP
+0=Newtonian, 1=MOND, 2=deepMOND [1]    
+.TP
+\fBspl_ord=\fP
+some help [2]     
+.TP
+\fBrmap=\fP
+some help [1]     
+.TP
+\fBa0=\fP
+some help [1.0]     
+.TP
+\fBdt_iter=\fP
+some help [0.3]     
+.TP
+\fBscale=\fP
+some help [1.0]     
+.TP
+\fBiter_max=\fP
+some help [30]     
+.TP
+\fBtol=\fP
+some help [5]     
+.TP
+\fBnew=\fP
+some help [0]     
+.TP
+\fBid_new=\fP
+index to read from for initial conditions [0]
+.TP
+\fBnout=\fP
+some help [10]     
+.TP
+\fBiene=\fP
+some help [5]     
+.TP
+\fBmrate=\fP
+some help [10]     
+.TP
+\fBtmax=\fP
+some help [10.0]     
+.TP
+\fBdt_min=\fP
+some help [1.e-5]     
+.TP
+\fBcfl=\fP
+some help [0.3]     
+.TP
+\fBlp_ord=\fP
+some help [2]     
+.SH EXAMPLES
+.SH BENCHMARK
+The default 2,048,000 particle distribution takes about 32 minutes to integrate 1 timeunit.
+.SH SEE ALSO
+N_MODY_userguide.pdf
+.PP
+Ciotti, Nipoti, Londrillo (2006ApJ...640..741C)
+.SH FILES
+
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Feb-09	V1.0 Created	PJT
+.fi
