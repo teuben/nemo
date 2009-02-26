@@ -1,7 +1,8 @@
 /*
  *  convert mody's 'pos-vel' dumps to snapshot - in single precision
  *
- *    23-feb-09  PJT  created 
+ *    23-feb-09  PJT  created ; 
+ *    25-feb-09  PJT  added pin= (but not processing) , wrote out few more pars
  */
  
 #define SinglePrec
@@ -14,11 +15,12 @@
 #include <snapshot/body.h>
 
 string defv[] = {
-    "in=???\n       Input mody pos-vel file",
+    "in=???\n       Input mody moutXX.bin pos-vel file",
     "out=???\n      Output snapshot file",
-    "headline=\n    Random verbiage",
+    "pin=\n         Input mbody poutXX.bin potential file (optional)",
     "swap=f\n       Swap bytes in each float if endianism differs",
-    "VERSION=1.0\n  23-feb-09 pjt",
+    "headline=\n    Random verbiage",
+    "VERSION=1.1\n  25-feb-09 pjt",
     NULL,
 };
 
@@ -29,10 +31,10 @@ extern void bswap(void *vdat, int len, int cnt);
 void nemo_main()
 {
     stream instr, outstr;
-    real *fbuf, *mbuf, tsnap, mass1;
+    real *fbuf, *mbuf, tsnap, mass0, mass1, tdyn;
     bool Qswap = getbparam("swap");
     long nread;
-    int nbody, i;
+    int nbody, i, mond_ind, model;
     int cs = CSCode(Cartesian, NDIM, 2);
     int ipar[5];
     float rpar[5], posvel[6];
@@ -44,6 +46,9 @@ void nemo_main()
     outstr = stropen(getparam("out"),"w");
     put_history(outstr);
 
+    if (hasvalue("pin")) 
+      warning("pin=%s not yet processed",getparam("pin"));
+
 
     nread = unfread(instr, (char *)ipar, 5*sizeof(int));
     dprintf(0,"ipar: nbody=%d mods=%d\n",
@@ -54,8 +59,15 @@ void nemo_main()
 	    rpar[0],rpar[1],rpar[2],rpar[3]);
 
     nbody = ipar[0];
+    model = ipar[1];
+    mond_ind = ipar[2];
+    /* ipar[3,4] still unused */
+
+    mass0 = rpar[0];
+    mass1 = mass0/nbody;
     tsnap = rpar[1];
-    mass1 = rpar[0]/nbody;
+    tdyn  = rpar[2];
+    /* rpar[3,4] still unused */
 
     /* fbuf holds the array of posvel's
      * mbuf holds the (all the same ) masses 
@@ -75,6 +87,10 @@ void nemo_main()
       put_set(outstr,ParametersTag);
        put_data(outstr, NobjTag, IntType, &nbody, 0);
        put_data(outstr, TimeTag, RealType, &tsnap, 0);
+       put_data(outstr, "mass",      RealType, &mass0, 0);
+       put_data(outstr, "tdyn",      RealType, &tdyn, 0);
+       put_data(outstr, "model",     IntType, &model, 0);
+       put_data(outstr, "mond_ind",  IntType, &mond_ind, 0);
       put_tes(outstr,ParametersTag);
       put_set(outstr,ParticlesTag);
         put_data(outstr,CoordSystemTag, IntType, &cs, 0);
