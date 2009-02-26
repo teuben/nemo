@@ -1,6 +1,6 @@
-.TH UNFIO 3NEMO "8 May 2008"
+.TH UNFIO 3NEMO "25 February 2009"
 .SH NAME
-unfscan, unfread, unfswap, unfsize \- unformatted FORTRAN I/O data access from C
+unfscan, unfread, unfwrite, unfswap, unfsize \- unformatted FORTRAN I/O data access from C
 .SH SYNOPSIS
 .nf
 .B #include <stdinc.h>
@@ -8,6 +8,7 @@ unfscan, unfread, unfswap, unfsize \- unformatted FORTRAN I/O data access from C
 .PP
 \fBint unfscan(stream instr)\fP
 \fBint unfread(stream instr, char *buf, int bufsize)\fP
+\fBint unfwrite(stream instr, char *buf, int bufsize)\fP
 \fBint unfswap(bool do_swap)\fP
 \fBint unfsize(int size)\fP
 .PP
@@ -23,6 +24,7 @@ errors are returned as 0 and some negative number resp.
 \fIunfread\fP can be used in the same way, except you give it a buffer
 in which the data can be stored. In good old fortran tradition you
 must know the largest buffer size this routine can expect to see.
+\fIunfwrite\fP is the opposite of read.
 .PP
 The \fIunfsize\fP routine can be set to change the default UNFIO_HDR_SIZE
 header size (as determined during NEMO configure and install). Most older
@@ -107,5 +109,6 @@ xx-may-94	V1.0 Created for prun       	PJT
 1-mar-06	V1.2 added unfsize for gfortran 	PJT
 4-mar-06	V1.3 use a default UNFIO_HDR_SIZE for hdr_size	PJT
 8-may-08	V1.4 support raw header=0 data	PJT
+25-feb-09	V1.5 add non-swapping version of unfwrite	PJT
 .fi
 
