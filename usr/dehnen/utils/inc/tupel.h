@@ -18,7 +18,7 @@
 /// \version jul-2005: added doxygen documentation, added minnorm()
 /// \version mar-2006: removed reliance on friend namespace injection
 /// \version jul-2006: added global function applied()
-/// \version sep-2006: added member method reset(
+/// \version sep-2006: added member method reset()
 /// \version mar-2007: made data protected
 /// \version may-2008: output manipulator "print()" supported
 /// \version oct-2008: added static assertion to N-specific constructors

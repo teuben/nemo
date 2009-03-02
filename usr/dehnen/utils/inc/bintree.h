@@ -73,13 +73,10 @@ namespace WDutils {
   template<int Dim, typename _X=float>
   class BinaryTree {
   public :
-    //==========================================================================
     /// \name public types
     //@{
     typedef _X               real;    ///< type for scalars
     typedef tupel<Dim,real>  point;   ///< type for positions
-    //--------------------------------------------------------------------------
-    //  struct Dot
     /// represents a particle in Dim-dimensional space.
     /// \note This type is designed to be memory minimal to reduce the costs
     ///       of splitting a list of dots (during box splitting).
@@ -87,8 +84,6 @@ namespace WDutils {
       unsigned I;                     ///< index
       point    X;                     ///< position
     };
-    //--------------------------------------------------------------------------
-    //  struct Box
     /// represents a Box in Dim-dimensional space.
     /// The auxiliary data (K/S, R, and S) are not used during tree build, but
     /// may be used afterwards to hold/point to satellite data.\n
@@ -120,9 +115,6 @@ namespace WDutils {
       /// left child
       Box*      left () const { return C+1; }
     };
-    //--------------------------------------------------------------------------
-    //  class Initializer
-    /// abstract base class specifying functionality for tree splitting.
     /// BinaryTree requires a (pointer to) Initializer (argument to the
     /// constructor): it is used to initialize and re-initialize Dots.
     class Initializer {
@@ -136,13 +128,11 @@ namespace WDutils {
       /// \param[in] D Dot to be re-initialized
       virtual void ReInitDot(Dot*D) const = 0;
     };
-    //--------------------------------------------------------------------------
     /// associated mutual tree walker
     typedef MutualBinaryTreeWalker<BinaryTree> MutualWalker;
     /// associated interactor
     typedef typename MutualWalker::Interactor Interactor;
     //@}
-    //==========================================================================
     /// \name data for class BinaryTree<Dim>
     //@{
   protected:
@@ -159,7 +149,6 @@ namespace WDutils {
     Box*              ROOT;           ///< root box
     Box*              BOXN;           ///< end of boxes / free box
     //@}
-    //--------------------------------------------------------------------------
 #ifdef DEBUG
     /// write box No to stderr; used only for extensive debugging
     void WriteBox(const Box*B) const
@@ -167,7 +156,6 @@ namespace WDutils {
       std::cerr<<"Box #" << NoBox(B)
 	       << (B->is_final()? " F" : " T");
     }
-    //--------------------------------------------------------------------------
     /// check whether dot is in box; used only for extensive debugging
     bool CheckDot(const Box*B, const Dot*D) const
     {
@@ -189,7 +177,6 @@ namespace WDutils {
       }
       return err;
     }
-    //--------------------------------------------------------------------------
     /// return number of dots not in the box; used only for extensive debugging
     int CheckDots(const Box*B) const
     {
@@ -198,7 +185,6 @@ namespace WDutils {
 	if(CheckDot(B,D)) ++err;
       return err;
     }
-    //--------------------------------------------------------------------------
     /// print list of x[i]; used only for extensive debugging
     void PrintList(const Box*B, int i, real s, size_t l)
     {
@@ -212,7 +198,6 @@ namespace WDutils {
       for(; D!=U; ++D)
 	std::cerr << "   i="<<D->I<<" x=" << D->X[i] <<'\n';
     }
-    //--------------------------------------------------------------------------
     /// check result of SplitList(); used only for extensive debugging
     bool CheckListSplit(const Box*B, int i, real s, size_t l)
     {
@@ -247,8 +232,7 @@ namespace WDutils {
       return err;
     }
 #endif
-    //--------------------------------------------------------------------------
-    /// swap two dots; used in SplitList only
+    /// swap two dots; used in SplitList only.
     /// using memcpy for maximum efficiency
     static void swap(Dot*A, Dot*B)
     {
@@ -257,8 +241,7 @@ namespace WDutils {
       memcpy( A, B, sizeof(Dot));
       memcpy( B,&T, sizeof(Dot));
     }
-    //--------------------------------------------------------------------------
-    /// split list of dots, return number of left dots
+    /// split list of dots, return number of left dots.
     ///
     /// the list of dots of box B is re-shuffled (by swapping dots) such that
     /// on return the first l dots have x[i] <= s and the remaining dots have
@@ -281,7 +264,6 @@ namespace WDutils {
       }
       return  l - B->D0;
     };
-    //--------------------------------------------------------------------------
     /// give a guess for the number of boxes needed; add safety margin
     size_t Nbox_alloc(unsigned nbox=0) const
     {
@@ -293,8 +275,7 @@ namespace WDutils {
       }
       return 1+nbox+size_t(sqrt(double(nbox)));
     }
-    //--------------------------------------------------------------------------
-    /// makes a box final, updated DPTH & NFIN; called from SplitBox()
+    /// makes a box final, updates DPTH & NFIN; called from SplitBox()
     void SetFinal(Box*B)
     {
       B->C = 0;
@@ -306,7 +287,6 @@ namespace WDutils {
       }
       ++NFIN;
     }
-    //--------------------------------------------------------------------------
     /// initializes dots and sets values for root cell.
     void SetRoot(int in)
     {
@@ -338,7 +318,6 @@ namespace WDutils {
       std::cerr<<" Root has: Xmin="<<ROOT->Xmin <<" Xmax="<<ROOT->Xmax<<'\n';
 #endif
     }
-    //--------------------------------------------------------------------------
     /// build the tree and set DPTH, NFIN.
     /// \return true if successfull (otherwise not enough boxes were allocated)
     bool stack_build() WDutils_THROWING
@@ -418,7 +397,7 @@ namespace WDutils {
       } // while(!STCK.is_empty())
       return true;
     }
-    //--------------------------------------------------------------------------
+    //
     void build() WDutils_THROWING
     {
       while(!stack_build()) {
@@ -435,9 +414,7 @@ namespace WDutils {
 	SetRoot(0);
       }
     }
-    //==========================================================================
   public:
-    //--------------------------------------------------------------------------
     /// constructor: build the binary tree
     /// \param[in] nd # dots
     /// \param[in] it Initializer to initialize dots
@@ -463,10 +440,8 @@ namespace WDutils {
 	SetFinal(ROOT);
       NBOX = BOXN - ROOT;
     }
-    //--------------------------------------------------------------------------
     /// destructor
     ~BinaryTree();
-    //--------------------------------------------------------------------------
     /// build the tree again, re-initializing the dots.
     /// \param[in] nc (optional) if non-zero, reset N_crit to this value
     void rebuild(unsigned nc=0)
@@ -492,7 +467,6 @@ namespace WDutils {
 	SetFinal(ROOT);
       NBOX = BOXN - ROOT;
     }
-    //--------------------------------------------------------------------------
     /// \name functionality of a build tree
     //@{
     /// root box
@@ -507,12 +481,10 @@ namespace WDutils {
     Box*      REndBoxes() const { return ROOT-1; }
     /// running number of a given box
     unsigned NoBox(const Box*B) const { return B-ROOT; }
-    //--------------------------------------------------------------------------
     /// first dot
     Dot*const&BeginDots() const { return DOTS; }
     /// end of dots
     Dot*EndDots() const { return DOTS+NDOT; }
-    //--------------------------------------------------------------------------
     /// tree depth of root cell
     unsigned const&Depth() const { return DPTH; }
     /// N_crit
@@ -632,7 +604,6 @@ namespace WDutils {
   public:
     typedef typename BinTree::Dot Dot;
     typedef typename BinTree::Box Box;
-    // /////////////////////////////////////////////////////////////////////////
     /// specifies how to walk the tree and what kind of interaction to do.
     ///
     /// The members interact() specify the interactions between tree nodes as
@@ -690,19 +661,18 @@ namespace WDutils {
       }
     };
   private:
-    //--------------------------------------------------------------------------
+    //
     typedef std::pair<*Box,*Dot>  BoxDot;
     typedef std::pair<*Box,*Box>  BoxBox;
-    //--------------------------------------------------------------------------
+    //
     const Interactor*IA;         ///< pter to interactor
     Stack<BoxDot>    BD;         ///< stack of box-dot interactions
     Stack<BoxBox>    BB;         ///< stack of box-box interactions
-    //--------------------------------------------------------------------------
+    //
     void perform(Dot*A, Dot*B) { IA->interact(A,B); }
     void perform(Box*A, Dot*B) { if(!IA->interact(A,B)) BD.push(BoxDot(A,B)); }
     void perform(Box*A, Box*B) { if(!IA->interact(A,B)) BB.push(BoxBox(A,B)); }
     void perform(Box*A)        { if(!IA->interact(A))   BB.push(BoxBox(A,0)); }
-    //--------------------------------------------------------------------------
     /// clear the stack of box-dot interactions
     void clear_BD_stack()
     {
@@ -717,7 +687,6 @@ namespace WDutils {
 	}
       }
     }
-    //--------------------------------------------------------------------------
     /// split a mutual box-box interaction
     /// \param[in] A box to be split
     /// \param[in] B box to be kept
@@ -736,7 +705,6 @@ namespace WDutils {
 	}
       }
     }
-    //--------------------------------------------------------------------------
     /// split a mutual box self-interaction
     /// \param[in] A box to be split
     void split(Box*A)
@@ -758,7 +726,6 @@ namespace WDutils {
 	}
       }
     }
-    //--------------------------------------------------------------------------
     /// clear the stack of box-box interactions, keep box-dot stack clear too
     void clear_BB_stack()
     {
@@ -771,20 +738,17 @@ namespace WDutils {
       }
     }
   public:
-    //--------------------------------------------------------------------------
     /// construction for interaction within one binary tree
     /// \param[in] i pter to interactor
     /// \param[in] d depth of tree
     MutualBinaryTreeWalker(const Interactor*i, size_t d) :
       IA(i), BD(d), BB(d+d) {}
-    //--------------------------------------------------------------------------
     /// construction for interaction between two binary trees
     /// \param[in] i pter to interactor
     /// \param[in] d1 depth of tree of sources
     /// \param[in] d2 depth of tree of sinks
     MutualBinaryTreeWalker(const Interactor*i, size_t d1, size_t d2) :
       IA(i), BD(max(d1,d2)), BB(d1+d2) {}
-    //--------------------------------------------------------------------------
     /// perform a mutual tree walk.
     /// If two distinct boxes are given, the mutual interaction between these is
     /// performed, including splitting them until no unresolved interaction
