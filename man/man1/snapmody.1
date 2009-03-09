@@ -1,4 +1,4 @@
-.TH SNAPMODY 1NEMO "26 February 2009"
+.TH SNAPMODY 1NEMO "9 March 2009"
 .SH NAME
 snapmody \- convert snapshot to Mody's pos-vel files 
 .SH SYNOPSIS
@@ -7,6 +7,11 @@ snapmody \- convert snapshot to Mody's pos-vel files
 \fBsnapmody\fP converts snapshot-style datasets from
 the \fIn-mody\fP MOND N-body integrator to a standard
 NEMO \fIsnapshot(5NEMO)\fP. 
+.PP
+It is also automatically called by \fIrunmond(1NEMO)\fP
+to convert the input conditions, from \fIsnapshot(5NEMO)\fP
+format, into the format that the \fIrmond\fP program
+understands.
 .PP
 Note: this program is forced
 to convert to single precision, even if the input dataset
@@ -28,7 +33,7 @@ Not implemented yet.
 .SH CAVEAT
 Will only process the first snapshot.
 .SH SEE ALSO
-rungb, rmond, modysnap(1NEMO), snapshot(5NEMO)
+rungb, rmond, runmond(1NEMO), modysnap(1NEMO), snapshot(5NEMO)
 .SH FILES
 $NEMO/src/nbody/io/snapmody.c  -- code
 .SH AUTHOR
