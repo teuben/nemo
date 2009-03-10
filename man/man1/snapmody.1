@@ -1,4 +1,4 @@
-.TH SNAPMODY 1NEMO "9 March 2009"
+.TH SNAPMODY 1NEMO "10 March 2009"
 .SH NAME
 snapmody \- convert snapshot to Mody's pos-vel files 
 .SH SYNOPSIS
@@ -27,6 +27,9 @@ No default.
 \fBout=\fP
 Output  mody pos-vel file (moutXX.bin style).
 .TP
+\fBout2=\fP
+If given, this NEMO history of the input dataset is written here. Default: none
+.TP
 \fBswap=\fP
 Swap bytes in each int/float if endianism differs .
 Not implemented yet.
@@ -42,4 +45,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 25-Feb-09	V1.0 Created 
+10-mar-09	V1.1 added out2=	PJT
 .fi
