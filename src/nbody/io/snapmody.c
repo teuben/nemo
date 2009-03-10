@@ -17,8 +17,9 @@
 string defv[] = {
     "in=???\n       Input snapshot file",
     "out=???\n      Output mody moutXX.bin pos-vel file",
+    "out2=\n        Output of history/headlines",
     "swap=f\n       Swap bytes in each float if endianism differs",
-    "VERSION=1.0\n  25-feb-09 pjt",
+    "VERSION=1.1\n  10-mar-09 pjt",
     NULL,
 };
 
@@ -28,7 +29,8 @@ extern void bswap(void *vdat, int len, int cnt);
  
 void nemo_main()
 {
-    stream instr, outstr;
+    stream instr, outstr, out2str;
+    string hl;
     real *fbuf, *mbuf, tsnap, mass0, mass1, mass2;
     bool Qswap = getbparam("swap");
     long nread;
@@ -41,9 +43,11 @@ void nemo_main()
     instr = stropen(getparam("in"),"r");
     outstr = stropen(getparam("out"),"w");
 
+
     /* read snapshot */
 
     get_history(instr);
+    hl = ask_headline();
     get_set(instr,SnapShotTag);
       get_set(instr,ParametersTag);
        get_data(instr, NobjTag, IntType, &nbody, 0);
@@ -93,6 +97,12 @@ void nemo_main()
     
     strclose(instr);
     strclose(outstr);
+
+    if (hasvalue("out2")) {
+      outstr = stropen(getparam("out2"),"w");
+      put_history(outstr);
+      strclose(outstr);
+    }
 }
 
 
