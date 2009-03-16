@@ -19,6 +19,7 @@
  *       3-may-05  1.9b add x/x0+y/y0=1 variant for a linear fit 
  *      25-aug-05  1.10 poly2 for Rahul
  *      21-nov-05  2.0  gauss2d, fix error in gauss1d
+ *      24-apr-08  2.1  psf (phase structure function)
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -29,6 +30,7 @@
  *  loren      (p1/PI) / ( (x-p0)^2 + p1^2 )
  *  gauss1d    p0+p1*exp(-(x-p2)^2/(2*p3^2))
  *  gauss2d    p0+p1*exp(-[(x-x0)^2 + (y-y0)^2]/2b^2)
+ *  psf        p0*x**p1*sin(y)**p2+p3
  *  
  */ 
 
@@ -61,7 +63,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=2.0a\n     23-aug-07 PJT",
+    "VERSION=2.1\n      24-apr-08 PJT",
     NULL
 };
 
@@ -352,6 +354,26 @@ static void derv_arm3(real *x, real *p, real *e, int np)
   e[4] = sin(3*y);
 }
 
+static real func_psf(real *x, real *p, int np)
+{
+  real x1 = pow(x[0],p[1]);
+  real x2 = pow(sin(x[1]),p[2]);
+
+  return p[0] * x1 * x2   +   p[3];
+}
+
+static void derv_psf(real *x, real *p, real *e, int np)
+{
+  real x1 = pow(x[0],p[1]);
+  real x2 = pow(sin(x[1]),p[2]);
+
+  e[0] =      x1*x2;
+  e[1] = p[0]*x1*x2*log(x[0]);
+  e[2] = p[0]*x1*x2*log(x[1]);
+  e[3] =                        1.0;
+}
+
+
 
 /****************************** START OF PROGRAM **********************/
 
@@ -387,6 +409,8 @@ nemo_main()
     	do_loren();
     } else if (scanopt(method,"arm3")) {
     	do_arm3();
+    } else if (scanopt(method,"psf")) {
+    	do_psf();
     } else
         error("fit=%s invalid; try [line,plane,poly,poly2,gauss1d,gauss2d,exp,arm,loren,arm3]",
 	      getparam("fit"));
@@ -562,7 +586,7 @@ read_data()
     if (npt==0) error("No data");
 
     for (i=0; i<npt; i++)
-      dprintf(2,"DATA(x,y,w): %g %g %g\n",xcol[0].dat[i],ycol[0].dat[i], dycolnr>0 ? dycol.dat[i] : 1.0);
+      dprintf(2,"DATA(x[0],y,wt): %g %g %g\n",xcol[0].dat[i],ycol[0].dat[i], dycolnr>0 ? dycol.dat[i] : 1.0);
 }
 
 
@@ -1380,4 +1404,64 @@ do_arm3()
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
 
+}
+
+
+/*
+ * PSF:       z = a * x^b * sin(y)^c + d
+ *
+ */
+ 
+do_psf()
+{
+  real *x1, *x2, *x, *y, *dy, *d;
+  int i,j,k, nrt, npt1, iter, mpar[4];
+  real fpar[4], epar[4];
+  int lpar = 4;
+
+  if (nxcol != 2) error("bad nxcol=%d",nxcol);
+  if (nycol<1) error("Need 1 value for ycol=");
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.01;
+  sprintf(fmt,"Fitting a * x^b * sin(y)^c + d::  \n"
+	  "a= %s %s \nb= %s %s \nc= %s %s\nd= %s %s\n",
+	  format,format,format,format,format,format,format,format);
+
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+  x = (real *) allocate(2 * npt * sizeof(real));
+  for (i=0, j=0; i<npt; i++) {
+    for (k=0; k<2; k++)
+      x[j++] = xcol[k].dat[i];
+  }
+
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+    epar[i] = 0.0;
+  }
+  
+  fitfunc = func_psf;
+  fitderv = derv_psf;
+
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf(fmt,fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+
+    npt1 = remove_data(x,2,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
+  bootstrap(nboot, npt,2,x,y,dy,d, lpar,fpar,epar,mpar);    
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+  printf("rms/chi = %g\n",data_rms(npt,d,dy,4));
 }
