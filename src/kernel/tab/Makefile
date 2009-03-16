@@ -136,6 +136,10 @@ funtab: funtab.c
 	$(CC) -DTOOLBOX $(CFLAGS) -o funtab funtab.c \
 		$(NEMO_LIBS) $(EL) -lm
 
+tabfft: tabfft.c
+	$(CC) $(CFLAGS) -o tabfft tabfft.c \
+		$(NEMO_LIBS) $(EL) -lm
+
 
 getaline:	getaline.c
 	$(CC) -DTESTBED $(CFLAGS) -o getaline getaline.c \
