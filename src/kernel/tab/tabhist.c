@@ -45,6 +45,8 @@
  * TODO:
  *     option to do dual-pass to subtract the mean before computing
  *     the higher order moments - needed for accuracy
+ *   allow bins= to give the actual bin edges, e.g.
+ *     bins=1:100:0.5
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -81,7 +83,7 @@ string defv[] = {
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
-    "VERSION=5.3\n		  1-dec-05 PJT",
+    "VERSION=5.4\n		  11-feb-07 PJT",
     NULL
 };
 
@@ -394,7 +396,10 @@ local void histogram(void)
 	if (npt != n_moment(&m))
 	  error("Counting error, probably in removing outliers...");
 	dprintf (0,"Number of points     : %d\n",npt);
-	dprintf (0,"Mean and dispersion  : %g %g\n",mean,sigma);
+	if (npt>1)
+	  dprintf (0,"Mean and dispersion  : %g %g %g\n",mean,sigma,sigma/sqrt(npt-1.0));
+	else
+	  dprintf (0,"Mean and dispersion  : %g %g 0.0\n",mean,sigma);
 	dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
 	if (Qmedian) {
 
