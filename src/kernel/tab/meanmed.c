@@ -1,7 +1,7 @@
 /*
  * MEANMED: NEMO version of a CARMA program with the same intent:
  *
- *      12-dec-2007   PJT    quick hack for running local quality
+ *      12-dec-2007   PJT    quick hack for running local 'quality'
  *
  */
 
@@ -10,10 +10,8 @@
 #include <moment.h>
 
 
-#define MAXCOL     1024
-#define MAXLINELEN 2048
 
-string defv[] = {                /* DEFAULT INPUT PARAMETERS */
+string defv[] = {              
     "infile=???\n        Input file name (table)",
     "maxpnt=10000\n      Max number of points that can be read",
     "carma=t\n           Special CARMA output",
@@ -29,6 +27,10 @@ local stream instr;
 
 #ifndef MAX_LINELEN
 #define MAX_LINELEN  2048
+#endif
+
+#ifndef MAXCOL
+#define MAXCOL     1024
 #endif
 
 local char  line[MAX_LINELEN];
@@ -53,8 +55,10 @@ nemo_main()
     n = strlen(line);
     if (line[n-1]=='\n') line[n-1]='\0';
     n = nemoinpr(line,data,MAXCOL);
-    for (i=0; i<n; i++)
+    for (i=0; i<n; i++) {
+      if (Qcarma && data[i]<=0.0) continue;
       accum_moment(&m,data[i],1.0);
+    }
   }
 
   /* The CARMA version of meanmed outputs this:
