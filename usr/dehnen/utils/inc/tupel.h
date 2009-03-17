@@ -243,7 +243,7 @@ namespace WDutils {
     }
     /// return negative of this
     tupel operator- () const {
-      register tupel y;
+      tupel y;
       M::v_nega(y.a,a);
       return y;
     }
@@ -299,7 +299,7 @@ namespace WDutils {
     }
     /// return product with scalar
     template<typename S> tupel operator* (S const&x) const {
-      register tupel y;
+      tupel y;
       M::v_ast(y.a,a,x);
       return y;
     }
@@ -354,13 +354,13 @@ namespace WDutils {
     }
     /// sum: return *this + x
     tupel operator+ (tupel const&x) const {
-      register tupel y;
+      tupel y;
       M::v_sum(y.a,a,x.a);
       return y;
     }
     /// difference: return *this - x
     tupel operator- (tupel const&x) const {
-      register tupel y;
+      tupel y;
       M::v_dif(y.a,a,x.a);
       return y;
     }
@@ -417,13 +417,13 @@ namespace WDutils {
     }
     /// sum: return *this + x
     template<typename S> tupel operator+ (tupel<N,S> const&x) const {
-      register tupel y;
+      tupel y;
       M::v_sum(y.a,a,static_cast<const S*>(x));
       return y;
     }
     /// difference: return *this - x
     template<typename S> tupel operator- (tupel<N,S> const&x) const {
-      register tupel y;
+      tupel y;
       M::v_dif(y.a,a,static_cast<const S*>(x));
       return y;
     }
@@ -480,7 +480,7 @@ namespace WDutils {
     }
     /// return element-wise function call: return f(tupel::a[i])
     tupel applied(X(*f)(X)) const {
-      register tupel y;
+      tupel y;
       M::v_appl(y.a,a,f);
       return y;
     }
@@ -491,7 +491,7 @@ namespace WDutils {
     }
     /// replace by element-wise function: tupel::a[i] = f(x[i])
     tupel connected(tupel const&x, X(*f)(X)) {
-      register tupel y(*this);
+      tupel y(*this);
       M::v_appl(y.a,x.a,f);
       return y;
     }

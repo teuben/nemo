@@ -379,6 +379,7 @@ namespace WDutils {
     // add or subtract, depending on whether template parameter is even or odd
     template<int> struct __AddSubOdd;
     template<> struct __AddSubOdd<0> {
+      template<typename Real> static void neg (Real&) {}
       template<typename Real> static void ass (Real&x, Real y) { x =y; }
       template<typename Real> static void add (Real&x, Real y) { __IncAdd(); x+=y; }
       template<typename Real> static void sub (Real&x, Real y) { __IncAdd(); x-=y; }
@@ -388,6 +389,7 @@ namespace WDutils {
       template<typename Real> static Real diff(Real x, Real y) { __IncAdd(); return x-y; }
     };
     template<> struct __AddSubOdd<1> {
+      template<typename Real> static void neg (Real&x) { x=-x; }
       template<typename Real> static void ass (Real&x, Real y) { x =-y; }
       template<typename Real> static void add (Real&x, Real y) { __IncAdd(); x-=y; }
       template<typename Real> static void sub (Real&x, Real y) { __IncAdd(); x+=y; }
@@ -401,6 +403,10 @@ namespace WDutils {
     /// \param[in]     y rvalue
     template<int N, typename Real> inline
     void Assign(Real&x, Real y) { __AddSubOdd<N&1>::ass(x,y); }
+    /// switches sign of x if N is odd
+    /// \param[in,out] x lvalue, replaced by -x if N is odd
+    template<int N, typename Real> inline
+    void Negate(Real&x) { __AddSubOdd<N&1>::neg(x); }
     /// adds or subtracts, depending on whether N is even or odd
     /// \param[in,out] x lvalue, replaced by x+y if N is even, x-y if N is odd
     /// \param[in]     y rvalue
