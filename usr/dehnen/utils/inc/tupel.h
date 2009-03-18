@@ -444,10 +444,11 @@ namespace WDutils {
       return M::v_suq(a,(const S*)x);
     }
     /// update minimum and maximum element-wise:
-    /// min[i] = min(min[i], tupel::a[i]); and
-    /// max[i] = max(max[i], tupel::a[i]);
-    template<typename S> void up_min_max(tupel<N,S>&min, tupel<N,S>&max) const {
-      M::v_umia((S*)min,(S*)max,a);
+    /// \param[in,out] xmin replace by xmin[i] = min(xmin[i], tupel::a[i]); and
+    /// \param[in,out] xmax replace by xmax[i] = max(xmax[i], tupel::a[i]);
+    template<typename S> void up_min_max(tupel<N,S>&xmin,
+					 tupel<N,S>&xmax) const {
+      M::v_umia((S*)xmin,(S*)xmax,a);
     }
     //@}
     //--------------------------------------------------------------------------

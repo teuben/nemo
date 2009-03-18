@@ -55,9 +55,9 @@ WDutils::RunInfo::RunInfo()
 #ifdef unix
     // set host name
 #ifdef __PGCC__
-    const char*host = getenv("HOST");
-    if(host) {
-      SNprintf(__host,100,host);
+    const char*host__ = getenv("HOST");
+    if(host__) {
+      SNprintf(__host,100,host__);
       __host_known = 1;
     } else
       SNprintf(__host,100,"unknown.host");
@@ -66,9 +66,9 @@ WDutils::RunInfo::RunInfo()
     __host_known = 1;
 #endif
     // set user name
-    const char*user = getenv("USER");
-    if(user) {
-      SNprintf(__user,100,user);
+    const char*user__ = getenv("USER");
+    if(user__) {
+      SNprintf(__user,100,user__);
       __user_known = 1;
     } else
       SNprintf(__user,100,"unknown.user");
@@ -281,15 +281,15 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
 //------------------------------------------------------------------------------
 WDutils::exception::exception(const char*fmt, ...)
 {
-  const int size=1024;
-  char __text[size];
+  const int msize=1024;
+  char __text[msize];
   va_list  ap;
   va_start(ap,fmt);
-  int w = vsnprintf(__text,size,fmt,ap);
-  if(w>=size) {
+  int w = vsnprintf(__text,msize,fmt,ap);
+  if(w>=msize) {
     WDutils_Warning("WDutils::exception::exception(): "
-		    "string size of %d characters exceeded\n",size);
-    __text[size-1]=0;
+		    "string size of %d characters exceeded\n",msize);
+    __text[msize-1]=0;
   }
   if(w<0)
     WDutils_Warning("WDutils::exception::exception(): formatting error\n");

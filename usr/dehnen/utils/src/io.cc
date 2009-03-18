@@ -6,11 +6,11 @@
 /// \brief  contains definitions of methods declared in utils/inc/io.h         
 ///
 /// \author Walter Dehnen
-/// \date   2000-2008
+/// \date   2000-2009
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2008 Walter Dehnen
+// Copyright (C) 2000-2009 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -251,8 +251,8 @@ void WDutils::FortranORec::write_size() throw(WDutils::exception)
     throw exception("FortranORec: header size must be 4 or 8\n");
 }
 //------------------------------------------------------------------------------
-WDutils::FortranORec::FortranORec(output& out, unsigned size, unsigned rec)
-  throw(WDutils::exception) : OUT(out), HSZE(rec), SIZE(size), WRITTEN(0)
+WDutils::FortranORec::FortranORec(output& out, unsigned rsize, unsigned rec)
+  throw(WDutils::exception) : OUT(out), HSZE(rec), SIZE(rsize), WRITTEN(0)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(OUT.FREC)

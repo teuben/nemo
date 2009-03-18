@@ -308,8 +308,8 @@ namespace WDutils {
 	WDutils_DEL_A(FIRST);
       }
       /// link block to next block
-      void link(block* next) {
-	NEXT = next;
+      void link(block*__n) {
+	NEXT = __n;
       }
       /// give out: another element
       pointer new_element() {

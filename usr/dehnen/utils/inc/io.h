@@ -7,11 +7,11 @@
 ///         as well as WDutils::FortranIRec and WDutils::FortranORec
 ///
 /// \author Walter Dehnen
-/// \date   2000-2008
+/// \date   2000-2009
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2008 Walter Dehnen
+// Copyright (C) 2000-2009 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -405,9 +405,9 @@ namespace WDutils {
     char             FNAME[FNAME_MAX_SIZE];
     const char      *FILE;
     iofile() : FILE(0) {}
-    void setfile(const char*file) {
-      if(file && file[0]) {
-	strncpy(FNAME,file,FNAME_MAX_SIZE);
+    void setfile(const char*fname) {
+      if(fname && fname[0]) {
+	strncpy(FNAME,fname,FNAME_MAX_SIZE);
 	FILE = FNAME;
       } else
 	FILE = 0;
@@ -480,36 +480,36 @@ namespace WDutils {
     /// construction from nothing: nothing is opened
     output() : OUT(0) , APPENDING(false), FREC(0) {}
     /// construction from file name and potential option for appending.
-    /// If \e file equals 0 or ".", nothing is opened.  If \e file equals "-",
+    /// If \e fname equals 0 or ".", nothing is opened.  If \e fname equals "-",
     /// and no other output or nemo_out is opened to \c stdout, we map to \c
-    /// stdout.  Otherwise, a file of name \e file is created for output. An
+    /// stdout.  Otherwise, a file of name \e fname is created for output. An
     /// existing file of the same name is deleted unless \e append is true, in
     /// which case, we append to that existing file.
     explicit
-    output(const char*file, bool append=0) : APPENDING(false), FREC(0) {
-      setfile(file);
+    output(const char*fname, bool append=0) : APPENDING(false), FREC(0) {
+      setfile(fname);
       __open(append);
     }
     /// construction from file and potential option for appending.
-    /// If \e file equals "-", and no other output or nemo_out is opened to 
-    /// \c stdout, we map to \c stdout.  Otherwise, a file of name \e file is
+    /// If \e fname equals "-", and no other output or nemo_out is opened to 
+    /// \c stdout, we map to \c stdout.  Otherwise, a file of name \e fname is
     /// created for output. An existing file of the same name is deleted unless
     /// \e append is true, in which case, we append to that existing file.
     explicit
-    output(std::string const&file, bool append=0) : APPENDING(false), FREC(0) {
-      setfile(file.c_str());
+    output(std::string const&fname, bool append=0) : APPENDING(false), FREC(0) {
+      setfile(fname.c_str());
       __open(append);
     }
     /// close possible old stream, then proceed as in construction
-    void open(const char*file, bool append = 0) {
+    void open(const char*fname, bool append = 0) {
       close();
-      setfile(file);
+      setfile(fname);
       __open(append);
     }
     /// close possible old stream, then proceed as in construction
-    void open(std::string const&file, bool append = 0) {
+    void open(std::string const&fname, bool append = 0) {
       close();
-      setfile(file.c_str());
+      setfile(fname.c_str());
       __open(append);
     }
     /// open file with name made from \e format string and \e tag.
@@ -645,34 +645,34 @@ namespace WDutils {
     /// construction from nothing: nothing is opened
     input() : IN(0), FREC(0) {}
     /// construction from file name.
-    /// If \e file equals "-", and no other input or nemo_in is opened to \c
-    /// stdin, we map to \c stdin.  Otherwise, a file of name \e file is opened
-    /// for input.
+    /// If \e fname equals "-", and no other input or nemo_in is opened to \c
+    /// stdin, we map to \c stdin.  Otherwise, a file of name \e fname is
+    /// opened for input.
     explicit
-    input(const char*file) : FREC(0) {
-      setfile(file);
+    input(const char*fname) : FREC(0) {
+      setfile(fname);
       __open();
     }
     /// construction from file name.
-    /// If \e file equals "-", and no other input or nemo_in is opened to \c
-    /// stdin, we map to \c stdin.  Otherwise, a file of name \e file is opened
-    /// for input.
+    /// If \e fname equals "-", and no other input or nemo_in is opened to \c
+    /// stdin, we map to \c stdin.  Otherwise, a file of name \e fname is
+    /// opened for input.
     explicit
-    input(std::string const&file) : FREC(0) {
-      setfile(file.c_str());
+    input(std::string const&fname) : FREC(0) {
+      setfile(fname.c_str());
       __open();
     }
     /// close possible old stream, then proceed as in construction
-    void open(const char*file) {
+    void open(const char*fname) {
       close();
-      setfile(file);
+      setfile(fname);
       __open();
     }
     //@}
     /// close possible old stream, then proceed as in construction
-    void open(std::string const&file) {
+    void open(std::string const&fname) {
       close();
-      setfile(file.c_str());
+      setfile(fname.c_str());
       __open();
     }
     //--------------------------------------------------------------------------
