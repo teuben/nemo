@@ -1060,7 +1060,7 @@ namespace falcON {
     /// \param emin   minimum eps_i
 #endif
     /// \param soft   softening type
-    /// \param time   time to read input for (take first if null)
+    /// \param trange time range to read input for (take first if null)
     /// \param read   data to read in addition to required for integration
     /// \param dir    number controlling direct summation
     FalcONCode(// data input                                                    
@@ -1092,12 +1092,12 @@ namespace falcON {
 	       real               emin = zero,
 #endif
 	       soft_type          soft = global_fixed, 
-	       const char        *time = 0,
+	       const char        *trange = 0,
 	       fieldset           read = fieldset::empty,
 	       const unsigned     dir[4] = Default::direct) falcON_THROWING :
       NBodyCode ( file, resume, to_read(read,
 					soft!=global_fixed ? 1 : 0,
-					Grav || aex), time ),
+					Grav || aex), trange ),
       ForceALCON( SHOT, eps, theta, Ncrit, croot, kernel, Grav, sfac,
 		  (1<<hgrow)-1, aex, dir ,soft
 #ifdef falcON_ADAP

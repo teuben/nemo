@@ -123,12 +123,12 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<int NDIM, typename scalar>
   inline void MiyamotoNagai::acc(const scalar*,
-				 const scalar*pos,
+				 const scalar*x,
 				 const scalar*,
-				 scalar      &pot,
-				 scalar      *acc) const
+				 scalar      &p,
+				 scalar      *a) const
   { 
-    __helper<NDIM>::__acc(*this,pos,pot,acc);
+    __helper<NDIM>::__acc(*this,x,p,a);
   }
 } // namespace {
 //------------------------------------------------------------------------------

@@ -1,36 +1,37 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-/// \file /src/public/manip.cc                                                 |
-//                                                                             |
-// Copyright (C) 2004-2008  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-// version 0.0  17/09/2004 WD  created based on acceleration.cc v3.2           |
-// version 1.0  19/05/2005 WD  allowed for manips given in single file         |
-// version 1.1  20/05/2005 WD  added manpath as 4th argument to Manipulator    |
-// version 1.2  14/06/2005 WD  fixed bug (if empty arguments)                  |
-// version 1.3  22/06/2005 WD  no $FALCON, nemo_dprintf -> debug_info          |
-// version 1.4  12/07/2005 WD  if manippath given, do not search elsewhere     |
-// version 1.5  08/11/2005 WD  if no manippath given, try $MANIPPATH           |
-// version 1.6  04/08/2006 WD  if manippath given, put it in top of seach path |
-// version 1.7  10/06/2008 WD  debug_info -> DebugInfo                         |
-// version 1.8  10/09/2008 WD  nemo++.h to avoid #including nemo headers       |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-
+////////////////////////////////////////////////////////////////////////////////
+//
+/// \file /src/public/manip.cc
+//
+// Copyright (C) 2004-2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
+////////////////////////////////////////////////////////////////////////////////
+// version 0.0  17/09/2004 WD  created based on acceleration.cc v3.2
+// version 1.0  19/05/2005 WD  allowed for manips given in single file
+// version 1.1  20/05/2005 WD  added manpath as 4th argument to Manipulator
+// version 1.2  14/06/2005 WD  fixed bug (if empty arguments)
+// version 1.3  22/06/2005 WD  no $FALCON, nemo_dprintf -> debug_info
+// version 1.4  12/07/2005 WD  if manippath given, do not search elsewhere
+// version 1.5  08/11/2005 WD  if no manippath given, try $MANIPPATH
+// version 1.6  04/08/2006 WD  if manippath given, put it in top of seach path
+// version 1.7  10/06/2008 WD  debug_info -> DebugInfo 
+// version 1.8  10/09/2008 WD  nemo++.h to avoid #including nemo headers
+// version 1.9  18/03/2009 WD  avoid warnings from -Wshadow
+////////////////////////////////////////////////////////////////////////////////
 #include <public/manip.h>              // the header we are implementing
 #include <public/nemo++.h>             // the header we are implementing
 #include <fstream>                     // C++ file I/O
@@ -261,17 +262,17 @@ falcON::Manipulator::Manipulator(const char*mannames,
   if((mannames == 0 || *mannames == 0) &&
      (manfiles == 0 || *manfiles == 0)) return;
   const static unsigned Lnames=NMAX*16, Lparss=NMAX*32, Lfiles=NMAX*32;
-  char *names=falcON_NEW(char,Lnames), *name[NMAX]={0};
-  char *parss=falcON_NEW(char,Lparss), *pars[NMAX]={0};
-  char *files=falcON_NEW(char,Lfiles), *file[NMAX]={0};
+  char *_names=falcON_NEW(char,Lnames), *_name[NMAX]={0};
+  char *_parss=falcON_NEW(char,Lparss), *_pars[NMAX]={0};
+  char *_files=falcON_NEW(char,Lfiles), *_file[NMAX]={0};
 #define CLEANUP					\
-  falcON_DEL_A(names);				\
-  falcON_DEL_A(parss);				\
-  falcON_DEL_A(files);
-  // 1 parse input into arrays of name[], pars[], file[]
+  falcON_DEL_A(_names);				\
+  falcON_DEL_A(_parss);				\
+  falcON_DEL_A(_files);
+  // 1 parse input into arrays of _name[], _pars[], _file[]
   if(mannames == 0 || *mannames == 0 || *mannames=='+') { 
     // 1.1 no mannames given: 
-    //     read names, parss, & files from file given in manfiles
+    //     read _names, _parss, & _files from _file given in manfiles
     if(manfiles == 0 || manfiles[0] == 0) {
       CLEANUP;
       falcON_THROW("Manipulator: neither names nor files given:"
@@ -284,33 +285,33 @@ falcON::Manipulator::Manipulator(const char*mannames,
       falcON_THROW("Manipulator: cannot open file \"%s\"\n",manfiles);
     }
     N = 0;
-    char* n=name[N]=names; *names=0;
-    char* p=pars[N]=parss; *parss=0;
-    char* f=file[N]=files; *files=0;
+    char* n=_name[N]=_names; *_names=0;
+    char* p=_pars[N]=_parss; *_parss=0;
+    char* f=_file[N]=_files; *_files=0;
     while(! in.eof() && N != NMAX) {
       char  line[1024], *l=line;
-      in.getline(line,1023);                            // read line
-      while(*l &&  isspace(*l)) l++;                    // skip space @ start
-      if(*l ==  0 ) continue;                           // skip empty line
-      if(*l == '#') continue;                           // skip line if '#'
-      while(*l && !isspace(*l)) *n++ = *l++;            // copy name
-      if(name[N][0]==0) continue;                       // no name? next line!
-      *n++ = 0;                                         // close name
-      if(*l && *l=='#') continue;                       // skip line if '#'
-      while(*l &&  isspace(*l)) l++;                    // skip space after name
-      if(*l && *l=='#') continue;                       // skip line if '#'
+      in.getline(line,1023);                           // read line
+      while(*l &&  isspace(*l)) l++;                   // skip space @ start
+      if(*l ==  0 ) continue;                          // skip empty line
+      if(*l == '#') continue;                          // skip line if '#'
+      while(*l && !isspace(*l)) *n++ = *l++;           // copy _name
+      if(_name[N][0]==0) continue;                     // no _name? next line!
+      *n++ = 0;                                        // close _name
+      if(*l && *l=='#') continue;                      // skip line if '#'
+      while(*l &&  isspace(*l)) l++;                   // skip space after _name
+      if(*l && *l=='#') continue;                      // skip line if '#'
       if(!isalpha(*l) && *l !='/')
-	while(*l && !isspace(*l)) *p++ = *l++;          // copy pars
-      *p++ = 0;                                         // close pars
-      if(*l && *l=='#') continue;                       // skip line if '#'
-      while(*l &&  isspace(*l)) l++;                    // skip space after pars
-      if(*l && *l=='#') continue;                       // skip line if '#'
-      while(*l && !isspace(*l)) *f++ = *l++;            // copy file
-      *f++ = 0;                                         // close file
-      N++;                                              // increment N
-      name[N] = n;                                      // make ready for next
-      pars[N] = p;                                      //   line
-      file[N] = f;
+	while(*l && !isspace(*l)) *p++ = *l++;         // copy _pars
+      *p++ = 0;                                        // close _pars
+      if(*l && *l=='#') continue;                      // skip line if '#'
+      while(*l &&  isspace(*l)) l++;                   // skip space after _pars
+      if(*l && *l=='#') continue;                      // skip line if '#'
+      while(*l && !isspace(*l)) *f++ = *l++;           // copy _file
+      *f++ = 0;                                        // close _file
+      N++;                                             // increment N
+      _name[N] = n;                                    // make ready for next
+      _pars[N] = p;                                    //   line
+      _file[N] = f;
     }
     if(N == 0) {
       CLEANUP;
@@ -332,34 +333,34 @@ falcON::Manipulator::Manipulator(const char*mannames,
       CLEANUP;
       falcON_THROW("Manipulator: names too long (>%d)\n",Lnames);
     }
-    strcpy(names,mannames);
-    N = splitstring<NMAX>(names,name,NameSeps);
+    strcpy(_names,mannames);
+    N = splitstring<NMAX>(_names,_name,NameSeps);
     if(N > NMAX) {
       CLEANUP;
       falcON_THROW("Manipulator: too many manipulators (%d > NMAX=%d)\n",
 		   N,NMAX);
     }
-    // 1.2.2 split manparss, allow for empty manparss -> all pars[]=0
+    // 1.2.2 split manparss, allow for empty manparss -> all _pars[]=0
     if(manparss) {
       if(strlen(manparss) > Lparss) {
 	CLEANUP;
 	falcON_THROW("Manipulator: manpars too long (>%d)\n",Lparss);
       }
-      strcpy(parss,manparss);
-      int n = splitstring<NMAX>(parss,pars,ParsSeps);
+      strcpy(_parss,manparss);
+      int n = splitstring<NMAX>(_parss,_pars,ParsSeps);
       if(N != n) {
 	CLEANUP;
 	falcON_THROW("Manipulator: %d names but %d parss",N,n);
       }
     }
-    // 1.2.3 split manfiles, allow for empty manfiles -> all file[]=0
+    // 1.2.3 split manfiles, allow for empty manfiles -> all _file[]=0
     if(manfiles) {
       if(strlen(manfiles) > Lfiles) {
 	CLEANUP;
 	falcON_THROW("Manipulator: manfile too long (>%d)\n",Lfiles);
       }
-      strcpy(files,manfiles);
-      int n = splitstring<NMAX>(files,file,FileSeps);
+      strcpy(_files,manfiles);
+      int n = splitstring<NMAX>(_files,_file,FileSeps);
       if(N != n) {
 	CLEANUP;
 	falcON_THROW("Manipulator: %d names but %d files",N,n);
@@ -369,11 +370,11 @@ falcON::Manipulator::Manipulator(const char*mannames,
   if(debug(2)) {
     std::cerr<<"Manipulator: parsed "<<N<<" manipulators:\n";
     for(int n=0; n!=N; ++n) {
-      std::cerr<<" \""<<name[n]<<"\",";
-      if(pars[n]) std::cerr<<" pars=\""<<pars[n]<<"\",";
-      else        std::cerr<<" no pars,";
-      if(file[n]) std::cerr<<" file=\""<<file[n]<<"\"\n";
-      else        std::cerr<<" no file\n";
+      std::cerr<<" \""<<_name[n]<<"\",";
+      if(_pars[n]) std::cerr<<" pars=\""<<_pars[n]<<"\",";
+      else         std::cerr<<" no pars,";
+      if(_file[n]) std::cerr<<" file=\""<<_file[n]<<"\"\n";
+      else         std::cerr<<" no file\n";
     }
   }
   // 2 get manipulators and set data fields
@@ -381,7 +382,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
   size_t dscrsize = 0;
   for(int i=0; i!=N; ++i) {
     try {
-      single_manipulator(MANIP[i], name[i], pars[i], file[i], manpaths);
+      single_manipulator(MANIP[i], _name[i], _pars[i], _file[i], manpaths);
     } catch (falcON::exception E) {
       CLEANUP;
       falcON_RETHROW(E);

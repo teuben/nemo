@@ -2,7 +2,7 @@
 //                                                                             |
 // Monopole.cc                                                                 |
 //                                                                             |
-// Copyright (C) 2005-2006 Walter Dehnen                                       |
+// Copyright (C) 2005-2006,2009 Walter Dehnen                                  |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -108,12 +108,12 @@ namespace {
     void acc(int        ndim,                // I: number of dimensions         
 	     double     time,                // I: simulation time              
 	     int        nbod,                // I: number bodies =size of arrays
-	     const void*mass,                // I: masses:         m[i]         
-	     const void*pos,                 // I: positions       (x,y,z)[i]   
-	     const void*vel,                 // I: velocities      (u,v,w)[i]   
-	     const int *flag,                // I: flags           f[i]         
-	     void      *pot,                 // O: potentials      p[i]         
-	     void      *acc,                 // O: accelerations   (ax,ay,az)[i]
+	     const void*m,                   // I: masses:         m[i]         
+	     const void*x,                   // I: positions       (x,y,z)[i]   
+	     const void*v,                   // I: velocities      (u,v,w)[i]   
+	     const int *f,                   // I: flags           f[i]         
+	     void      *p,                   // O: potentials      p[i]         
+	     void      *a,                   // O: accelerations   (ax,ay,az)[i]
 	     int        add,                 // I: indicator (see note 6 above) 
 	     char       type)                // I: type: 'f' or 'd'             
     {
@@ -121,20 +121,20 @@ namespace {
       case 'f':
 	switch(ndim) {
 	case 2: return acc_T<2>(time,nbod,
-				static_cast<const float*>(mass),
-				static_cast<const float*>(pos),
-				static_cast<const float*>(vel),
-				flag,
-				static_cast<      float*>(pot),
-				static_cast<      float*>(acc),
+				static_cast<const float*>(m),
+				static_cast<const float*>(x),
+				static_cast<const float*>(v),
+				f,
+				static_cast<      float*>(p),
+				static_cast<      float*>(a),
 				add);
 	case 3: return acc_T<3>(time,nbod,
-				static_cast<const float*>(mass),
-				static_cast<const float*>(pos),
-				static_cast<const float*>(vel),
-				flag,
-				static_cast<      float*>(pot),
-				static_cast<      float*>(acc),
+				static_cast<const float*>(m),
+				static_cast<const float*>(x),
+				static_cast<const float*>(v),
+				f,
+				static_cast<      float*>(p),
+				static_cast<      float*>(a),
 				add);
 	default: error("Monopole: unsupported ndim: %d",ndim);
 	}
@@ -142,20 +142,20 @@ namespace {
       case 'd':
 	switch(ndim) {
 	case 2: return acc_T<2>(time,nbod,
-				static_cast<const double*>(mass),
-				static_cast<const double*>(pos),
-				static_cast<const double*>(vel),
-				flag,
-				static_cast<      double*>(pot),
-				static_cast<      double*>(acc),
+				static_cast<const double*>(m),
+				static_cast<const double*>(x),
+				static_cast<const double*>(v),
+				f,
+				static_cast<      double*>(p),
+				static_cast<      double*>(a),
 				add);
 	case 3: return acc_T<3>(time,nbod,
-				static_cast<const double*>(mass),
-				static_cast<const double*>(pos),
-				static_cast<const double*>(vel),
-				flag,
-				static_cast<      double*>(pot),
-				static_cast<      double*>(acc),
+				static_cast<const double*>(m),
+				static_cast<const double*>(x),
+				static_cast<const double*>(v),
+				f,
+				static_cast<      double*>(p),
+				static_cast<      double*>(a),
 				add);
 	default: error("Monopole: unsupported ndim: %d",ndim);
 	}
@@ -528,12 +528,12 @@ namespace {
     //
     nemo_dprintf(4,"Monopole: scanning file \"%s\"\n",file);
     const int size=256;
-    std::ifstream in(file);
-    if(! in.good())
+    std::ifstream inpt(file);
+    if(! inpt.good())
       error("Monopole: couldn't open file \"%s\" for input\n",file);
     char Line[size], AccName[size], AccPars[size], AccFile[size];
     char*accname=0, *accpars=0, *accfile=0, unknown[9];
-    if(! read_line(in,Line,size))
+    if(! read_line(inpt,Line,size))
       error("Monopole: couldn't read data from file \"%s\"\n",file);
     do {
       if       (0==strncmp(Line,"accname=",8)) {
@@ -563,7 +563,7 @@ namespace {
 		unknown,file);
       }
     }
-    while(read_line(in,Line,size));
+    while(read_line(inpt,Line,size));
     if(accname == 0)
       error("Monopole: no accname= entry found in file \"%s\"\n",file);
     nemo_dprintf(4,"Monopole: successfully scanned accfile:\n");
@@ -651,18 +651,15 @@ namespace {
   template <int NDIM, typename scalar, bool ADD_P, bool ADD_A>
   void Monopole::set_monopole(scalar       ampl,
 			      int          nbod,
-			      const scalar*pos,
-			      const int   *flg,
-			      scalar      *pot,
-			      scalar      *acc) const
+			      const scalar*x,
+			      const int   *f,
+			      scalar      *p,
+			      scalar      *a) const
   {
     const scalar pmono = 1-ampl, fmono = -2*pmono;
-    const scalar *x = pos;
-    scalar       *p = pot;
-    scalar       *a = acc;
     nemo_dprintf(4,"Monopole: setting P = %f * Phi_0\n",pmono);
     for(int n=0; n!=nbod; ++n,x+=NDIM,p++,a+=NDIM)
-      if(flg==0 || flg[n] & 1) {
+      if(f==0 || f[n] & 1) {
 	double xq = v_norm<NDIM>(x), f0, p0;
 	if(xq > RQMAX) {
 	  double r = sqrt(RQMAX/xq);
@@ -682,11 +679,11 @@ namespace {
   void Monopole::acc_T(double       time,
 		       int          nbod,
 		       const scalar*,
-		       const scalar*pos,
+		       const scalar*x,
 		       const scalar*,
-		       const int   *flg,
-		       scalar      *pot,
-		       scalar      *acc,
+		       const int   *f,
+		       scalar      *p,
+		       scalar      *a,
 		       int          add) const
   {
     // obtain amplitude of growth factor
@@ -697,21 +694,18 @@ namespace {
     //
     if(ampl == 1.) {
       nemo_dprintf(4,"Monopole: setting P = Phi\n");
-      PHI(NDIM,time,nbod,0,
-	  static_cast<const void*>(pos),0,flg,
-	  static_cast<void*>(pot),
-	  static_cast<void*>(acc),add,__type<scalar>::t);
+      PHI(NDIM,time,nbod,0,x,0,f,p,a,add,__type<scalar>::t);
       return;                                                     // DONE !
     }
     //
     // 2. set/add [1-A(t)] times monopole
     //
     if(add & 1)
-      if(add & 2) set_monopole<NDIM,scalar,1,1>(ampl,nbod,pos,flg,pot,acc);
-      else        set_monopole<NDIM,scalar,1,0>(ampl,nbod,pos,flg,pot,acc);
+      if(add & 2) set_monopole<NDIM,scalar,1,1>(ampl,nbod,x,f,p,a);
+      else        set_monopole<NDIM,scalar,1,0>(ampl,nbod,x,f,p,a);
     else
-      if(add & 2) set_monopole<NDIM,scalar,0,1>(ampl,nbod,pos,flg,pot,acc);
-      else        set_monopole<NDIM,scalar,0,0>(ampl,nbod,pos,flg,pot,acc);
+      if(add & 2) set_monopole<NDIM,scalar,0,1>(ampl,nbod,x,f,p,a);
+      else        set_monopole<NDIM,scalar,0,0>(ampl,nbod,x,f,p,a);
     if(ampl == 0.) return;                                        // DONE !
     //
     // 3. add A(t) times external potential
@@ -719,16 +713,11 @@ namespace {
     nemo_dprintf(4,"Monopole: adding P += %f * Phi\n",ampl);
     scalar *pots = new scalar[nbod];
     scalar *accs = new scalar[NDIM*nbod];
-    PHI(NDIM,time,nbod,0,
-	static_cast<const void*>(pos),0,flg,
-	static_cast<void*>(pots),
-	static_cast<void*>(accs),0,__type<scalar>::t);
-    scalar       *p  = pot;
-    scalar       *a  = acc;
+    PHI(NDIM,time,nbod,0,x,0,f,pots,accs,0,__type<scalar>::t);
     scalar       *ps = pots;
     scalar       *as = accs;
     for(int n=0; n!=nbod; ++n,p++,ps++,a+=NDIM,as+=NDIM) 
-      if(flg==0 || flg[n] & 1) {
+      if(f==0 || f[n] & 1) {
 	p[0] += ampl * ps[0];
 	v_addtimes<NDIM>(a,as,ampl);
       }

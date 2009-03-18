@@ -1,33 +1,33 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// gravity.h                                                                   |
-//                                                                             |
-// Copyright (C) 2000-2006  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// defines                                                                     |
-//                                                                             |
-// class GravMAC                                                               |
-// class GravEstimator                                                         |
-// class GravStats                                                             |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-                                                                 
+////////////////////////////////////////////////////////////////////////////////
+//                                                                             
+// gravity.h
+//
+// Copyright (C) 2000-2006,2009 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+// defines
+//
+// class GravMAC
+// class GravEstimator
+// class GravStats
+//
+////////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_gravity_h
 #define falcON_included_gravity_h
 
@@ -45,70 +45,58 @@
 #undef  WRITE_IACTION_INFO
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // namespace falcON::grav                                                   //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+  //
+  // namespace falcON::grav
+  //
   namespace grav {
-    static const int ORDER = falcON_ORDER;         // expansion order is fixed  
-    static const int D_DIM = ORDER+1;              // # terms in D[]            
-    static const int P_ORD = ORDER-1;              // order of highest multipole
-    typedef symset3D<ORDER,real> Cset;             // set of Taylor coeffs      
-    typedef poles3D <P_ORD,real> Mset;             // set of multipoles         
-    static const int NCOEF = Cset::NDAT;           // # reals in taylor coeffs  
+    static const int ORDER = falcON_ORDER;    ///< expansion order is fixed
+    static const int D_DIM = ORDER+1;         ///< # terms in D[]
+    static const int P_ORD = ORDER-1;         ///< order of highest multipol
+    typedef symset3D<ORDER,real> Cset;        ///< set of Taylor coeffs
+    typedef poles3D <P_ORD,real> Mset;        ///< set of multipoles
+    static const int NCOEF = Cset::NDAT;      //</ # reals in taylor coeffs
   }
-  //////////////////////////////////////////////////////////////////////////////
-  class InvertZ;                                   // forward declaration       
-  class GravEstimator;                             // forward declaration       
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::GravMAC                                                    //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+  //
+  class InvertZ;                              // forward declaration
+  class GravEstimator;                        // forward declaration
+  //
+  // class falcON::GravMAC
+  //
   class GravMAC {
-    //--------------------------------------------------------------------------
-    // data:                                                                    
-    //--------------------------------------------------------------------------
+    // data:
   private:
-    MAC_type          MAC;                         // type of MAC               
-    unsigned          P;                           // expansion order           
-    real              TH0, iTH0;                   // params for theta(Y)       
-    InvertZ          *IZ;                          // inversion method          
-    //--------------------------------------------------------------------------
-    // private methods:                                                         
-    //--------------------------------------------------------------------------
+    MAC_type          MAC;                    ///< type of MAC 
+    unsigned          P;                      ///< expansion order
+    real              TH0, iTH0;              ///< params for theta(Y)
+    InvertZ          *IZ;                     ///< inversion method
   private:
-    real inv_theta_of_M(                           // R: 1/theta(M)             
-			const real) const;         // I: log(M/M_tot)           
-    //--------------------------------------------------------------------------
-    // public methods:                                                          
-    //--------------------------------------------------------------------------
+    /// \return 1/theta(M)
+    /// \param[in] __x log(M/M_tot)
+    real inv_theta_of_M(real __x) const;
   public:
-    GravMAC   (                                    // constructor               
-	       MAC_type,                           // I: type of MAC            
-	       real,                               // I: parameter: theta_0     
-	       unsigned);                          // I: expansion order        
-    //--------------------------------------------------------------------------
-    void reset(MAC_type,                           // I: type of MAC            
-	       real,                               // I: parameter: theta_0     
-	       unsigned);                          // I: expansion order        
-    //--------------------------------------------------------------------------
-    void reset_theta(real);                        // I: parameter: theta_0     
-    //--------------------------------------------------------------------------
-    ~GravMAC   ();                                 // destructor                
-    //--------------------------------------------------------------------------
-    // const method                                                             
-    //--------------------------------------------------------------------------
-    void set_rcrit(const GravEstimator*) const;    // set rcrit for all cells   
-    //--------------------------------------------------------------------------
-    // const inlined methods                                                    
-    //--------------------------------------------------------------------------
-    real const &theta_min() const { return TH0; }  // theta_0                   
-    MAC_type const&method() const { return MAC; }  // MAC                       
-    const char* describe_method() const            // describes MAC             
-    { return describe(MAC); }
-    //--------------------------------------------------------------------------
+    /// ctor
+    /// \param[in] mac type of MAC
+    /// \param[in] th0 theta_0
+    /// \param[in] p   expansion order
+    GravMAC(MAC_type mac, real th0, unsigned p);
+    /// reset: effects to destruction followed by construction
+    /// \param[in] mac type of MAC
+    /// \param[in] th0 theta_0
+    /// \param[in] p   expansion order
+    void reset(MAC_type mac, real th0, unsigned p);
+    /// reset only theta_0
+    /// \param[in] th0 theta_0
+    void reset_theta(real th0);
+    /// dtor
+    ~GravMAC();
+    /// set rcrit for all cells
+    void set_rcrit(const GravEstimator*) const;
+    /// return theta_0
+    real const &theta_min() const { return TH0; }
+    /// return type of MAC
+    MAC_type const&method() const { return MAC; }
+    /// return string describing MAC
+    const char* describe_method() const { return describe(MAC); }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -253,8 +241,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       // simple manipulations                                                   
       //------------------------------------------------------------------------
-      void set_acpn  (acpn_data*acpn) { PROP = static_cast<void*>(acpn); }
-      void reset_acpn()               { acpn()->reset(); }
+      void set_acpn(acpn_data*acp) { PROP = static_cast<void*>(acp); }
+      void reset_acpn() { acpn()->reset(); }
       //------------------------------------------------------------------------
       void normalize_grav () {                     // acc,pot     /= mass       
 	if(mass()>zero) {

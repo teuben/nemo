@@ -1,115 +1,114 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// tensor.h                                                                    |
-//                                                                             |
-// Copyright (C) 1999-2006  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// symmetric tensors of order K in 3 dimensions                                |
-//                                                                             |
-// A tensor of order K in D dimensions has K indices which each can have the D |
-// values 0,...,D-1. Thus in 3D, these are 0,1, or 2. A tensor is symmetric    |
-// if it is unchanged by any permutation of its indices. Thus, for a symmetric |
-// tensor the ordering of the indices does not matter, only the number of      |
-// indices with given value. This allows us to greatly reduce the indexing by  |
-// introducing a set of "super indices":                                       |
-//                                                                             |
-//     k_j := number of indices i_0,...,i_K that are equal to j.               |
-//                                                                             |
-// Since                                                                       |
-//                                                                             |
-//     Sum_{j=0}^{D-1} k_j = K,                                                |
-//                                                                             |
-// there is some redundancy, if we are going to keep the order K as a useful   |
-// number.                                                                     |
-// In 3D, kx,ky,kz may be replaced by an alternative set of super indices:     |
-//                                                                             |
-//     K  = kx + ky + kz  :  number of indices;                                |
-//     L  =      ky + kz  :  number of indices with value >= 1;                |
-//     M  =           kz  :  number of indices with value >= 2.                |
-//                                                                             |
-// Conversely                                                                  |
-//                                                                             |
-//     kx = K - L,                                                             |
-//     ky = L - M,                                                             |
-//     kz = M.                                                                 |
-//                                                                             |
-// At given K, we have                                                         |
-//                                                                             |
-//     0 <= L <= K;                                                            |
-//     0 <= M <= L.                                                            |
-//                                                                             |
-// This implies that at given order K, there are                               |
-//                                                                             |
-//     (K+1)*(K+2)/2                                                           |
-//                                                                             |
-// independent tensor elements (for a general asymmetric tensor it's 3^K).     |
-//                                                                             |
-// The number of possible permutations of the set of indices (i1,...,iK) is    |
-// given by                                                                    |
-//                                                                             |
-//     P(K,L,M) = binomial(K,L) * binomial(L,M)                                |
-//              = K! / (kx! * ky! * kz!)                                       |
-//                                                                             |
-// There are numerous possible operations that can be done with symmetric      |
-// tensors. Here, we support only those of immediate interest for falcON.      |
-//                                                                             |
-// 1. elementary operations and connections with scalar                        |
-// 2. the K-fold outer product of a vector with itself                         |
-// 3. the symmetrized outer product between tensors: T_K = T_K1 o T_K2, K=K1+K2|
-// 4. the symmetrized outer product between a tensor and the (symmetrized)     |
-//    N-fold outer product of delta_ij                                         |
-// 5. the complete inner product: T_K = T_K1 * T_K2, K=K1-K2, K1 > K2          |
-//    which sums over all indices of T_K2.                                     |
-//                                                                             |
-// In particular, we do NOT support intermediate products, such as for example |
-// the ordinary matrix product, which may be considered an inner product over  |
-// one index and an outer product over the second.                             |
-// Note, however, that such an intermediate type of product may be equivalent  |
-// to first a symmetrized outer product with the delta tensor of some order    |
-// followed by an complete inner product.                                      |
-//                                                                             |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// RULES                                                                       |
-//                                                                             |
-// 0. Notations                                                                |
-// ------------                                                                |
-//                                                       (n)                   |
-// 0.1 n-fold outer product of vector with itself:      X                      |
-//                                                                             |
-// 0.2 symmetric outer product between tensors:         X o Y                  |
-//                                                                             |
-//                                                                             |
-// 1. Outer Product of a Sum of Tensors                                        |
-// ------------------------------------                                        |
-//                                                                             |
-// The outer self-product of a sum of tensors is equal to                      |
-//                                                                             |
-//         (n)      n   (k)    (n-k)                                           |
-//   (A + B)   = Sum   A    o B                                                |
-//                 k=0                                                         |
-//                                                                             |
-// The usual binomial coefficient is absorbed into the symmetric product.      |
-//                                                                             |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-                                                                 
+////////////////////////////////////////////////////////////////////////////////
+//
+// tensor.h
+//
+// Copyright (C) 1999-2006,2009 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+// symmetric tensors of order K in 3 dimensions
+//
+// A tensor of order K in D dimensions has K indices which each can have the D
+// values 0,...,D-1. Thus in 3D, these are 0,1, or 2. A tensor is symmetric if
+// it is unchanged by any permutation of its indices. Thus, for a symmetric
+// tensor the ordering of the indices does not matter, only the number of
+// indices with given value. This allows us to greatly reduce the indexing by
+// introducing a set of "super indices":
+//
+//     k_j := number of indices i_0,...,i_K that are equal to j.
+//
+// Since
+//
+//     Sum_{j=0}^{D-1} k_j = K,
+//
+// there is some redundancy, if we are going to keep the order K as a useful
+// number.
+// In 3D, kx,ky,kz may be replaced by an alternative set of super indices:
+//
+//     K  = kx + ky + kz  :  number of indices;
+//     L  =      ky + kz  :  number of indices with value >= 1;
+//     M  =           kz  :  number of indices with value >= 2.
+//
+// Conversely
+//
+//     kx = K - L,
+//     ky = L - M,
+//     kz = M.
+//
+// At given K, we have
+//
+//     0 <= L <= K;
+//     0 <= M <= L.
+//
+// This implies that at given order K, there are
+//
+//     (K+1)*(K+2)/2
+//
+// independent tensor elements (for a general asymmetric tensor it's 3^K).
+//
+// The number of possible permutations of the set of indices (i1,...,iK) is
+// given by
+//
+//     P(K,L,M) = binomial(K,L) * binomial(L,M)
+//              = K! / (kx! * ky! * kz!)
+//
+// There are numerous possible operations that can be done with symmetric
+// tensors. Here, we support only those of immediate interest for falcON.
+//
+// 1. elementary operations and connections with scalar
+// 2. the K-fold outer product of a vector with itself
+// 3. the symmetrized outer product between tensors: T_K = T_K1 o T_K2,
+//    K=K1+K2
+// 4. the symmetrized outer product between a tensor and the (symmetrized)
+//    N-fold outer product of delta_ij
+// 5. the complete inner product: T_K = T_K1 * T_K2, K=K1-K2, K1 > K2 which
+//    sums over all indices of T_K2.
+//
+// In particular, we do NOT support intermediate products, such as for example
+// the ordinary matrix product, which may be considered an inner product over
+// one index and an outer product over the second.  Note, however, that such
+// an intermediate type of product may be equivalent to first a symmetrized
+// outer product with the delta tensor of some order followed by an complete
+// inner product.
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+// RULES
+//
+// 0. Notations
+//                                                       (n)
+// 0.1 n-fold outer product of vector with itself:      X
+//
+// 0.2 symmetric outer product between tensors:         X o Y
+//
+//
+// 1. Outer Product of a Sum of Tensors
+//
+// The outer self-product of a sum of tensors is equal to
+//
+//         (n)      n   (k)    (n-k)
+//   (A + B)   = Sum   A    o B
+//                 k=0
+//
+// The usual binomial coefficient is absorbed into the symmetric product.
+//
+////////////////////////////////////////////////////////////////////////////////
+
 #ifndef falcON_included_tensor_h
 #define falcON_included_tensor_h
 
@@ -158,8 +157,8 @@ namespace falcON {
     // element access                                                           
     T      &operator[] (int i)              { return a[i]; }
     T const&operator[] (int i)        const { return a[i]; }
-    T      &operator() (int L, int M)       { return a[(L*(L+1))/2+M]; }
-    T const&operator() (int L, int M) const { return a[(L*(L+1))/2+M]; }
+    T      &operator() (int l, int m)       { return a[(l*(l+1))/2+m]; }
+    T const&operator() (int l, int m) const { return a[(l*(l+1))/2+m]; }
     // unitary operators                                                        
     T&negate         ()               { M::v_neg(a); return*this; }
     T&set_zero       ()               { M::s_ze (a); return*this; }
@@ -299,8 +298,8 @@ namespace falcON {
     // element access                                                           
     T      &operator[] (int i)              { return a[i]; }
     T const&operator[] (int i)        const { return a[i]; }
-    T      &operator() (int L, int M)       { return a[(L*(L+1))/2+M]; }
-    T const&operator() (int L, int M) const { return a[(L*(L+1))/2+M]; }
+    T      &operator() (int l, int m)       { return a[(l*(l+1))/2+m]; }
+    T const&operator() (int l, int m) const { return a[(l*(l+1))/2+m]; }
     // unitary operators                                                        
     T  &negate   ()                     { M::v_neg(a); return*this; }
     T  &set_zero ()                     { M::s_ze (a); return*this; }

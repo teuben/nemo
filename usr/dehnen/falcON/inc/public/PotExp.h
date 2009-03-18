@@ -6,7 +6,7 @@
 /// \brief  potential expansion in to basis functions of Zhao (1996) type.      
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   1996, 2004-2008                                                     
+/// \date   1996, 2004-2009                                                     
 ///                                                                             
 /// \note                                                                       
 /// The code and its implementation in PotExp.cc are supposed to be included in 
@@ -19,7 +19,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2008  Walter Dehnen, Paul McMillan                        
+// Copyright (C) 1994-2009  Walter Dehnen, Paul McMillan                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -189,11 +189,11 @@ namespace falcON {
       /// like destruction followed by construction
       /// \param nmax maximum for n
       /// \param lmax maximum for l
-      void reset(int nmax, int lmax) {
-	if(nmax!=N || lmax!=L) {
+      void reset(int __nmax, int __lmax) {
+	if(__nmax!=N || __lmax!=L) {
 	  falcON_DEL_A(A);
-	  *(const_cast<int*>(&N)) = nmax;    // dirty trick to change const data
-	  *(const_cast<int*>(&L)) = lmax;
+	  *(const_cast<int*>(&N)) = __nmax;  // dirty trick to change const data
+	  *(const_cast<int*>(&L)) = __lmax;
 	  *(const_cast<int*>(&N1)) = N+1;
 	  *(const_cast<int*>(&L1)) = L+1;
 	  *(const_cast<int*>(&L1Q)) = L1*L1;
@@ -203,8 +203,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// construction from given n_max & l_max, includes default constructor
       explicit
-      Anlm (int nmax=0, int lmax=0) :
-	N(nmax), L(lmax),
+      Anlm (int __nmax=0, int __lmax=0) :
+	N(__nmax), L(__lmax),
 	N1(N+1), L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,N1*L1Q)) {}
       /// construction form a potential expansion
       template<typename POTEXP>

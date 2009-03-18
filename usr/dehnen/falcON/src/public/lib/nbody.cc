@@ -1,24 +1,31 @@
-//-----------------------------------------------------------------------------+
-//                                                                             |
-// nbody.cc                                                                    |
-//                                                                             |
-// Copyright (C) 2000-2008  Walter Dehnen                                      |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \file    src/public/lib/nbody.cc
+///
+/// \author  Walter Dehnen
+///
+/// \date    2000-2009
+///
+////////////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2000-2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
+////////////////////////////////////////////////////////////////////////////////
 #include <public/nbody.h>
 #ifdef falcON_MPI
 #  include <parallel/snapshot.h>
@@ -460,7 +467,7 @@ void BlockStepCode::stats_head(output&to) const {
 NBodyCode::NBodyCode(const char*file,
 		     bool       resume,
 		     fieldset   read_more,
-		     const char*time,
+		     const char*trange,
 		     fieldset   read_try) falcON_THROWING :
   FILE ( file ),
   PSHT ( 
@@ -489,9 +496,9 @@ NBodyCode::NBodyCode(const char*file,
     gotT =
 #ifdef falcON_MPI
       PSHT ?
-      PSHT->read_nemo(In,READ,read,resume? 0:time, 0) :
+      PSHT->read_nemo(In,READ,read,resume? 0:trange, 0) :
 #endif
-      SHOT->read_nemo(In,READ,read,resume? 0:time, 0) ;
+      SHOT->read_nemo(In,READ,read,resume? 0:trange, 0) ;
     more = In.has_snapshot();
 #ifdef falcON_MPI
     if(PSHT) COMMUN(Comm(PSHT))->BroadCast(0,more);
@@ -501,7 +508,7 @@ NBodyCode::NBodyCode(const char*file,
   } while(more && (resume || !gotT));
   if(!gotT)
     falcON_THROW("NBodyCode: no snapshot matching \"time=%s\""
-		 "found in file \"%s\"",time? time:"  ", file);
+		 "found in file \"%s\"",trange? trange:"  ", file);
   if(!READ.contain(must))
     falcON_THROW("NBodyCode: couldn't read body data: %s",
 		 word(READ.missing(must)));

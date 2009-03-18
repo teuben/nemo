@@ -222,12 +222,12 @@ namespace falcON {
     /// \param MAnm mass adaption: n_max per (E,L) (default: mm)
     /// \param MApr mass adaption: using R_peri (or R_circ) for mass adaption ?
     /// \param care care for non-monotonic DF?
-    HaloSampler(HaloDensity const&halo, double beta, double r_a,
+    HaloSampler(HaloDensity const&halo, double bet, double r_a,
 		const acceleration*mono,
 		double MArs, double MAmm, double MAet, double MAnm, bool MApr,
 		bool care) :
-      HaloModel(halo,beta,r_a,mono),
-      SphericalSampler(Mh_tot(),r_a,beta,MArs,MAmm,MAet,MAnm,MApr,care)
+      HaloModel(halo,bet,r_a,mono),
+      SphericalSampler(Mh_tot(),r_a,bet,MArs,MAmm,MAet,MAnm,MApr,care)
     {}
 #endif
     /// constructor
@@ -236,17 +236,17 @@ namespace falcON {
     /// \param r_a  Ossipkov-Merritt anisotropy radius
     /// \param mono external monopole potential
     /// \param care care for non-monotonic DF?
-    HaloSampler(HaloDensity const&halo, double beta, double r_a,
+    HaloSampler(HaloDensity const&halo, double bet, double r_a,
 		const acceleration*mono, bool care) :
-      HaloModel(halo,beta,r_a,mono),
-      SphericalSampler(Mh_tot(),r_a, beta, care)
+      HaloModel(halo,bet,r_a,mono),
+      SphericalSampler(Mh_tot(),r_a, bet, care)
     {}
     //--------------------------------------------------------------------------
     HaloModel const&Model() const { return *this; }
     //--------------------------------------------------------------------------
     double Mt() const { return HaloModel::Mh_tot(); }
     double DF(double q)           const { return exp(HaloModel::lnG(q)); }
-    double Ps(double r)           const { return HaloModel::Ps(r); }
+    double Ps(double _r)          const { return HaloModel::Ps(_r); }
     double rM(double m)           const { return HaloModel::RMh(m); }
     double Re(double e)           const { return HaloModel::RcE(e); } 
     double Rp(double e, double l) const { return HaloModel::Rp(e,l*l); }

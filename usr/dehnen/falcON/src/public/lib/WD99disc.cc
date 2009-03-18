@@ -208,18 +208,18 @@ PlanarOrbit::sample(Random const&RNG,         // I: random
 //------------------------------------------------------------------------------
 // Integrator for orbits                                                        
 //------------------------------------------------------------------------------
-void WD99disc::PlanarOrbit::CashKarpStep(vect_d&W, double  eps)
+void WD99disc::PlanarOrbit::CashKarpStep(vect_d&W_, double  eps)
 {
-  vect_d W0=W;
+  vect_d W0=W_;
   register double h;
   do {
     h   = CashKarp(W0,dT,eps);
     dT *= h;
   } while(h<0.8);
-  W = W0;
+  W_ = W0;
 }
 //------------------------------------------------------------------------------
-double WD99disc::PlanarOrbit::CashKarp(vect_d&W, double dt, double eps)
+double WD99disc::PlanarOrbit::CashKarp(vect_d&W_, double dt, double eps)
 {
   const double
     b10=1./5,
@@ -232,21 +232,21 @@ double WD99disc::PlanarOrbit::CashKarp(vect_d&W, double dt, double eps)
     cs0=2825./27648, cs2=18575./48384, cs3=13525./55296,
     cs4=277./14336,  cs5=1./4;
   
-  vect_d Kx0, Kx1, Kx2, Kx3, Kx4, Kx5, Ws(W);
+  vect_d Kx0, Kx1, Kx2, Kx3, Kx4, Kx5, Ws(W_);
   
-  Kx0=dt*Dt(W); 
-  Kx1=dt*Dt(W+b10*Kx0); 
-  Kx2=dt*Dt(W+b20*Kx0+b21*Kx1); 
-  Kx3=dt*Dt(W+b30*Kx0+b31*Kx1+b32*Kx2); 
-  Kx4=dt*Dt(W+b40*Kx0+b41*Kx1+b42*Kx2+b43*Kx3); 
-  Kx5=dt*Dt(W+b50*Kx0+b51*Kx1+b52*Kx2+b53*Kx3+b54*Kx4); 
+  Kx0=dt*Dt(W_); 
+  Kx1=dt*Dt(W_+b10*Kx0); 
+  Kx2=dt*Dt(W_+b20*Kx0+b21*Kx1); 
+  Kx3=dt*Dt(W_+b30*Kx0+b31*Kx1+b32*Kx2); 
+  Kx4=dt*Dt(W_+b40*Kx0+b41*Kx1+b42*Kx2+b43*Kx3); 
+  Kx5=dt*Dt(W_+b50*Kx0+b51*Kx1+b52*Kx2+b53*Kx3+b54*Kx4); 
   
-  Ws+= cs0*Kx0+cs2*Kx2+cs3*Kx3+cs4*Kx4+cs5*Kx5;
-  W += c0*Kx0+c2*Kx2+c3*Kx3+c5*Kx5;
+  Ws += cs0*Kx0+cs2*Kx2+cs3*Kx3+cs4*Kx4+cs5*Kx5;
+  W_ += c0*Kx0+c2*Kx2+c3*Kx3+c5*Kx5;
   
-  register double h = maxnorm(W-Ws);
-  if(h>1.e-19*maxnorm(W) ) h = pow(eps/h,0.2);
-  else                            h = 1.e3;
+  register double h = maxnorm(W_-Ws);
+  if(h>1.e-19*maxnorm(W_) ) h = pow(eps/h,0.2);
+  else                      h = 1.e3;
   return min(h,2.);
 }
 //------------------------------------------------------------------------------

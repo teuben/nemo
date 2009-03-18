@@ -3,7 +3,7 @@
 //                                                                             |
 // gamma.h                                                                     |
 //                                                                             |
-// Copyright (C) 1994, 1995, 2004-2008  Walter Dehnen                          |
+// Copyright (C) 1994, 1995, 2004-2009  Walter Dehnen                          |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -308,8 +308,8 @@ namespace falcON {
   // inlined member methods of DehnenModel                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  inline DehnenModel::DehnenModel(double gamma, double e) :
-    g   (gamma),
+  inline DehnenModel::DehnenModel(double gam, double e) :
+    g   (gam),
     g1  (1-g),
     g2  (2-g),
     ig2 (g2? 1/g2 : 0),
@@ -319,7 +319,7 @@ namespace falcON {
     g4  (4-g),
     eps (e)
   {
-    if(gamma<0. || gamma>3.) falcON_Error("DehnenModel: gamma out of range");
+    if(gam<0. || gam>3.) falcON_Error("DehnenModel: gamma out of range");
   }
   //----------------------------------------------------------------------------
   // potential, density, and cumulative mass                                    
@@ -623,11 +623,11 @@ namespace falcON {
   // inlined member methods of ScaledDehnenModel                              //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  inline ScaledDehnenModel::ScaledDehnenModel(double g,
+  inline ScaledDehnenModel::ScaledDehnenModel(double gam,
 					      double a,
 					      double m,
 					      double e) :
-    DehnenModel ( g, e ), 
+    DehnenModel ( gam, e ), 
     sR ( a             ), iR ( 1./sR ),
     sM ( m             ), iM ( 1./sM ),
     sE ( sM/sR         ), iE ( 1./sE ),
@@ -716,9 +716,9 @@ namespace falcON {
   template<> inline
   double ScaledDehnenModel::Ps1<DehnenModel::ym>(double y, double&dP) const
   {
-    register double ps = sE*DehnenModel::Ps1<ym>(y,dP);
+    register double __ps = sE*DehnenModel::Ps1<ym>(y,dP);
     dP *= sA;
-    return ps;
+    return __ps;
   }
   template<DehnenModel::mass __M> inline
   double ScaledDehnenModel::Ps1(double a, double&dP) const
@@ -731,10 +731,10 @@ namespace falcON {
 						 double&d1P,
 						 double&d2P) const
   {
-    register double ps = sE*DehnenModel::Ps2<ym>(y,d1P,d2P);
+    register double __ps = sE*DehnenModel::Ps2<ym>(y,d1P,d2P);
     d1P *= sA;
     d2P *= sS;
-    return ps;
+    return __ps;
   }
   template<DehnenModel::mass __M> inline
   double ScaledDehnenModel::Ps2(double a, double&d1P, double&d2P) const
@@ -1007,9 +1007,9 @@ namespace falcON {
   {
     return sF*DehnenModel::F(e*iE);
   }
-  inline double ScaledDehnenModel::Fsub(double e, double G) const
+  inline double ScaledDehnenModel::Fsub(double e, double __G) const
   {
-    return sF*DehnenModel::Fsub(e*iE,G);
+    return sF*DehnenModel::Fsub(e*iE,__G);
   }
   inline double ScaledDehnenModel::G(double e) const
   {
@@ -1059,9 +1059,9 @@ namespace falcON {
     return ScaledDehnenModel::Ps<DehnenModel::xm>(r);
   }
   //----------------------------------------------------------------------------
-  inline double DehnenModelSampler::Psy(double y) const
+  inline double DehnenModelSampler::Psy(double __y) const
   {
-    return ScaledDehnenModel::Ps<DehnenModel::ym>(y);
+    return ScaledDehnenModel::Ps<DehnenModel::ym>(__y);
   }
   //----------------------------------------------------------------------------
   inline double DehnenModelSampler::Mr(double r) const

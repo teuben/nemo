@@ -154,11 +154,11 @@ bodies::block::block(unsigned no,                  // I: our No
 		     unsigned na,                  // I: data to allocate       
 		     unsigned nb,                  // I: # bodies <= na_b       
 		     unsigned fst,                 // I: first body index       
-		     bodytype type,                // I: hold sph bodies?       
+		     bodytype typ,                 // I: hold sph bodies?       
 		     fieldset bits,                // I: data to allocate       
 		     bodies  *bods)                // I: pointer to my bodies   
   falcON_THROWING
-: TYPE       ( type ),
+: TYPE       ( typ ),
   NALL       ( na ), 
   NBOD       ( nb ), 
   NO         ( no ),
@@ -184,7 +184,7 @@ bodies::block::block(unsigned no,                  // I: our No
   }
 }
 ///////////////////////////////////////////////////////////////////////////////
-fieldset bodies::block::copy_body(unsigned fr, unsigned to, fieldset copy)
+fieldset bodies::block::copy_body(unsigned fr, unsigned to, fieldset _copy)
 {
   if(fr>=NALL)
     falcON_THROW("in bodies::block::copy_body(): "
@@ -195,7 +195,7 @@ fieldset bodies::block::copy_body(unsigned fr, unsigned to, fieldset copy)
   fieldset copied(fieldset::empty);
   if(fr!=to) {
     for(fieldbit f; f; ++f)
-      if(copy.contain(f) && data_void(f)) {
+      if(_copy.contain(f) && data_void(f)) {
 	memcpy(static_cast<      char*>(data_void(f))+to*falcON::size(f),
 	       static_cast<const char*>(data_void(f))+fr*falcON::size(f),
 	       falcON::size(f));
@@ -211,7 +211,7 @@ fieldset bodies::block::copy_bodies(const block*that,
 				    unsigned    fr,
 				    unsigned    to,
 				    unsigned    n,
-				    fieldset    copy) falcON_THROWING
+				    fieldset   _copy) falcON_THROWING
 {
   if(this == that)
     falcON_THROW("in bodies::block::copy_bodies() from same block");
@@ -223,7 +223,7 @@ fieldset bodies::block::copy_bodies(const block*that,
 		 "from+n=%d > that->NALL=%d\n", fr+n,that->NALL);
   fieldset copied(fieldset::empty);
   for(fieldbit f; f; ++f)
-    if(copy.contain(f) && data_void(f) && that->data_void(f)) {
+    if(_copy.contain(f) && data_void(f) && that->data_void(f)) {
       memcpy(static_cast<      char*>(this->data_void(f))+to*falcON::size(f),
 	     static_cast<const char*>(that->data_void(f))+fr*falcON::size(f),
 	     n*falcON::size(f));
@@ -254,8 +254,8 @@ fieldset bodies::block::copy(const block*&From,
   if( From == this )
     falcON_THROW("in bodies::block::copy(): cannot copy from self");
   NBOD = 0u;
-  if( From == 0) return fieldset::empty;
-  unsigned copy;
+  if(From == 0) return fieldset::empty;
+  unsigned _copy;
   unsigned free = NALL;
   fieldset copied;
   if(copyflag && ! has_field(fieldbit::f) )
@@ -269,18 +269,18 @@ fieldset bodies::block::copy(const block*&From,
 	from < From->NBOD ) {                //   AND  the index is valid too   
     // determine number of bodies to be copied to position from                 
     if(copyflag) {
-      copy = 0u;
+      _copy = 0u;
       for(unsigned to=from;
-	  to < From->NBOD && From->flag(to).are_set(copyflag) && copy<free;
-	  ++copy, ++to) {}
+	  to < From->NBOD && From->flag(to).are_set(copyflag) && _copy<free;
+	  ++_copy, ++to) {}
     } else
-      copy = min(free, From->NBOD - from);
+      _copy = min(free, From->NBOD - from);
     // if any body to be copied, copy data, adjust free, NBOD, from, copied     
-    if(copy) {
-      fieldset c = copy_bodies(From, from, NBOD, copy, copydata);
-      free -= copy;
-      NBOD += copy;
-      from += copy;
+    if(_copy) {
+      fieldset c = copy_bodies(From, from, NBOD, _copy, copydata);
+      free -= _copy;
+      NBOD += _copy;
+      from += _copy;
       copied = copied? c : copied & c;
     }
     // skip bodies not to be copied                                             
@@ -635,12 +635,12 @@ bodies::block* bodies::new_block(bodytype t, unsigned Na, unsigned Nb,
 }
 ////////////////////////////////////////////////////////////////////////////////
 // reset blocks' FIRST entries (used in parallel code)
-void bodies::reset_firsts(unsigned first[BT_NUM])
+void bodies::reset_firsts(unsigned fst[BT_NUM])
 {
   for(bodytype t; t; ++t) {
     unsigned L=0;
     for(block*B=TYPES[t]; B; B=B->next_of_same_type()) {
-      B->set_first(L+first[t], L);
+      B->set_first(L+fst[t], L);
       L+=B->N_bodies();
     }
   }
@@ -1513,20 +1513,15 @@ snapshot::~snapshot()
 }
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef falcON_NEMO
-bool snapshot::read_nemo(                          // R: was time in range?     
-			 nemo_in const&i,          // I: nemo input             
-			 fieldset     &r,          // O: what has been read     
-			 fieldset      g,          //[I: what to read]          
-			 const char   *t,          //[I: time range]            
-			 bool          w)          //[I: warn: missing data]    
-  falcON_THROWING
+bool snapshot::read_nemo(nemo_in const&i, fieldset&r, fieldset g,
+			 const char*range, bool w) falcON_THROWING
 {
   if(!i.has_snapshot())
     falcON_THROW("snapshot::read_nemo(): no snapshot to read");
   snap_in s(i);
 
   if(s.has_time()) {
-    if(t && !time_in_range(s.time(),t)) {
+    if(range && !time_in_range(s.time(),range)) {
       r = fieldset::empty;
       return false;
     }
@@ -1545,13 +1540,8 @@ bool snapshot::read_nemo(                          // R: was time in range?
   return true;
 }
 ////////////////////////////////////////////////////////////////////////////////
-fieldset snapshot::read_part(                      // R: what has been read     
-			     snap_in  const&s,     // I: nemo input             
-			     fieldset       g,     // I: what to read           
-			     iterator const&b,     // I: start position         
-			     bool           w,     //[I: warn: missing data]    
-			     unsigned       n)     //[I: #, def: all in input]  
-  falcON_THROWING
+fieldset snapshot::read_part(snap_in  const&s, fieldset g, iterator const&b,
+			     bool w, unsigned n) falcON_THROWING
 {
   if(s.has_time()) {
     TIME = s.time();

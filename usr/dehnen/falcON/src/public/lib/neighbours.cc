@@ -1,38 +1,39 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    src/public/neighbours.cc                                           
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2008                                                               
-///                                                                             
+///
+/// \file    src/public/neighbours.cc
+///
+/// \author  Walter Dehnen
+///
+/// \date    2008,2009
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2008  Walter Dehnen                                            
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2008,2009  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// \version 31/08/2007 WD initial hack (based on code from code/dens)           
-// \version 04/09/2007 WD debugged and working version                          
-// \version 04/09/2007 WD moved to neighbours.cc (which is superseeded)         
-// \version 06/11/2007 WD copy flags only if required.                          
-// \version 20/05/2008 WD added FindLeaf(), ProcessNeighbours()                 
-//                                                                              
+//
+// \version 31/08/2007 WD initial hack (based on code from code/dens)
+// \version 04/09/2007 WD debugged and working version 
+// \version 04/09/2007 WD moved to neighbours.cc (which is superseeded)
+// \version 06/11/2007 WD copy flags only if required.
+// \version 20/05/2008 WD added FindLeaf(), ProcessNeighbours()
+// \version 18/03/2009 WD avoid warnings from -Wshadow
+//
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/neighbours.h>
 #include <utils/heap.h>
@@ -362,9 +363,9 @@ namespace {
     /// \param l leaf to make list for
     /// \param P cell surrounding leaf (this is not checked, but required)
   public:
-    void make_list(const leaf*l, const cell*P, Neighbour*List, int k)
+    void make_list(const leaf*l, const cell*P, Neighbour*List, int __k)
     {
-      K = k;
+      K = __k;
       LIST = List;
       L = l;
       X = pos(L);

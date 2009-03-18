@@ -4,11 +4,11 @@
 /// \file   src/public/tools.cc                                                 
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2002-2008                                                           
+/// \date   2002-2009                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2008 Walter Dehnen                                        
+// Copyright (C) 2002-2009 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -132,8 +132,9 @@ void falcON::find_centre_alpha(const bodies*B,
   rc = sqrt(Rq);                                   // set output value: radius  
   // 4. estimate velocity and density of center                                 
   if(vc || rhc) {                                  // IF V OR rho wanted        
-    register double M(0.), W(0.);                  //   Sum m_i, Sum w_i        
-    register vect_d V(0.);                         //   Sum w_i v_i             
+    W = 0.;                                        //   Sum w_i        
+    double M(0.);                                  //   Sum m_i       
+    vect_d V(0.);                                  //   Sum w_i v_i             
     LoopSubsetBodies(B,b)                          //   LOOP bodies             
       if(dist_sq(pos(b),Xc) < Rq) {                //     IF |X-Xc| < R         
 	M+= mass(b);                               //       Sum m_i             

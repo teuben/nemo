@@ -2763,16 +2763,16 @@ void AnlmIO::open_for_read(const char*file_name) falcON_THROWING
   open = reading;
 }
 //------------------------------------------------------------------------------
-void AnlmIO::write(PotExp::symmetry sym, double a, double r,
+void AnlmIO::write(PotExp::symmetry sym, double al, double r,
 		   PotExp::Anlm const& A, double t)
   falcON_THROWING
 {
   if(open != writing)
     falcON_THROW("AnlmIO::write(): stream not opened for writing");
   int s = sym;
-  TRY_XDR(xdr_double(XDRS,&t),"write","writing time");
-  TRY_XDR(xdr_double(XDRS,&a),"write","writing alpha");
-  TRY_XDR(xdr_double(XDRS,&r),"write","writing scale");
+  TRY_XDR(xdr_double(XDRS,&t ),"write","writing time");
+  TRY_XDR(xdr_double(XDRS,&al),"write","writing alpha");
+  TRY_XDR(xdr_double(XDRS,&r ),"write","writing scale");
   TRY_XDR(xdr_int(XDRS,&s),"write","writing symmetry");
   TRY_XDR(xdr_int(XDRS,const_cast<int*>(&(A.nmax()))),"write","writing nmax");
   TRY_XDR(xdr_int(XDRS,const_cast<int*>(&(A.lmax()))),"write","writing lmax");
@@ -2783,7 +2783,7 @@ void AnlmIO::write(PotExp::symmetry sym, double a, double r,
 #undef TRY_XDR
 //------------------------------------------------------------------------------
 #define TRY_XDR(x,func,name) if(!(x)) return false;
-bool AnlmIO::read(PotExp::symmetry&sym, double&a, double&r,
+bool AnlmIO::read(PotExp::symmetry&sym, double&al, double&r,
 		  PotExp::Anlm&A, double &t)
   falcON_THROWING
 {
@@ -2792,9 +2792,9 @@ bool AnlmIO::read(PotExp::symmetry&sym, double&a, double&r,
   if(feof(file)) falcON_THROW("AnlmIO::read(): seen end of file\n");
   if(ferror(file)) falcON_THROW("AnlmIO::read(): I/O error\n");
   int n,l,s;
-  TRY_XDR(xdr_double(XDRS,&t),"read","reading time");
-  TRY_XDR(xdr_double(XDRS,&a),"read","reading alpha");
-  TRY_XDR(xdr_double(XDRS,&r),"read","reading scale");
+  TRY_XDR(xdr_double(XDRS,&t ),"read","reading time");
+  TRY_XDR(xdr_double(XDRS,&al),"read","reading alpha");
+  TRY_XDR(xdr_double(XDRS,&r ),"read","reading scale");
   TRY_XDR(xdr_int(XDRS,&s),"read","reading symmetry");
   TRY_XDR(xdr_int(XDRS,&n),"read","reading nmax");
   TRY_XDR(xdr_int(XDRS,&l),"read","reading lmax");

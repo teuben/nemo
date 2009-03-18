@@ -1178,30 +1178,30 @@ falcON::Bodyfunc::Bodyfunc(const char*expr, const char*pars)
   }
 }
 //------------------------------------------------------------------------------
-falcON::Bodyfunc::Bodyfunc(const char*expr, const real*pars, int npar)
+falcON::Bodyfunc::Bodyfunc(const char*expr, const real*pars, int _npar)
   throw(falcON::exception)
   : bodyfunc(expr), PARS(0)
 {
   if(is_empty()) return;
   if(NPAR) {
-    if(npar == 0 || pars == 0)
+    if(_npar == 0 || pars == 0)
       throw exception("Bodyfunc::Bodyfunc(): "
 		      "expression \"%s\" requires %d parameters, "
 		      "but none are given", expr,NPAR);
-    if(npar < NPAR)
+    if(_npar < NPAR)
       throw exception("Bodyfunc::Bodyfunc(): "
 		      "expression \"%s\" requires %d parameters, "
-		      "but only %d are given", expr,NPAR,npar);
-    if(npar > NPAR)
+		      "but only %d are given", expr,NPAR,_npar);
+    if(_npar > NPAR)
       falcON_Warning("Bodyfunc::Bodyfunc(): "
 		     "expression \"%s\" requires %d parameters, "
 		     "but %d are given; will ignore last %d",
-		     expr,NPAR,npar,npar-NPAR);
-    if(npar > 0) {
-      int _len = npar*16;
+		     expr,NPAR,_npar,_npar-NPAR);
+    if(_npar > 0) {
+      int _len = _npar*16;
       PARS = falcON_NEW(char,_len);
       char par[64], *PA=PARS;
-      for(int ipar=0; ipar!=npar; ++ipar) {
+      for(int ipar=0; ipar!=_npar; ++ipar) {
 	P[ipar] = pars[ipar];
 	SNprintf(par,64,"%f",pars[ipar]);
 	strncpy(PA,par,_len);
@@ -1251,9 +1251,9 @@ template falcON::BodyFunc<falcON::vect>::BodyFunc(const char*,const char*)
   throw(falcON::exception);
 //------------------------------------------------------------------------------
 template<typename T>
-falcON::BodyFunc<T>::BodyFunc(const char*expr, const real*pars, int npar)
+falcON::BodyFunc<T>::BodyFunc(const char*expr, const real*pars, int _npar)
   throw(falcON::exception)
-  : Bodyfunc(expr,pars,npar)
+  : Bodyfunc(expr,pars,_npar)
 {
   if(is_empty()) return;
   if(TYPE != bf_type<T>::type)
@@ -1281,9 +1281,9 @@ falcON::BodyFilter::BodyFilter(const char*expr, const char*pars)
   throw(falcON::exception)
   : BodyFunc<bool>(expr,pars), TIME(0.) {}
 ////////////////////////////////////////////////////////////////////////////////
-falcON::BodyFilter::BodyFilter(const char*expr, const real*pars, int npar)
+falcON::BodyFilter::BodyFilter(const char*expr, const real*pars, int _npar)
   throw(falcON::exception)
-  : BodyFunc<bool>(expr,pars,npar), TIME(0.) {}
+  : BodyFunc<bool>(expr,pars,_npar), TIME(0.) {}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // implementing falcON::bodiesfunc::bodiesfunc()                              //

@@ -8,11 +8,11 @@
 ///         currently problems with doxygen documentation.
 ///                                                                             
 /// \author Walter Dehnen
-/// \date   2000-2008
+/// \date   2000-2009
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2008 Walter Dehnen
+// Copyright (C) 2000-2009 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -1652,45 +1652,45 @@ namespace falcON {
     //==========================================================================
     // \name pointer bank: support for communication between manipulators      
     //
-    /// add a pointer to pointer bank (see also set_pointer()).
-    /// The idea is that two or more manipulators may communicate data, for
-    /// instance one manipulator determines the centre with respect to which
-    /// another manipulator analyses the snapshot. For this purpose, the first
+    /// add a pointer to pointer bank (see also set_pointer()).  The idea is
+    /// that two or more manipulators may communicate data, for instance one
+    /// manipulator determines the centre with respect to which another
+    /// manipulator analyses the snapshot. For this purpose, the first
     /// manipulator registers a pointer to the centre position with the pointer
-    /// bank under a key, say \c "xcen", using members add_pointer() or
+    /// bank under a handle, say \c "xcen", using members add_pointer() or
     /// set_pointer(). Any other manipulator may access that pointer with the
-    /// same key using the member pointer() or get_pointer().\n
+    /// same handle using the member pointer() or get_pointer().\n
     ///
     /// The sizeof(T) and nameof(T) are also remembered in the pointer bank.
-    /// If the key is already known to the bank, an error is thrown.
+    /// If the handle is already known to the bank, an error is thrown.
     /// A NULL pointer will not be added to the bank.
     /// \param T        (template parameter) type of object pointed to
     /// \param[in] pter pointer to be stored in bank
-    /// \param[in] key  handle to be used as key to pointer
+    /// \param[in] hand handle for the pointer
     template<typename T>
-    void add_pointer(const T*pter, const char*key) const falcON_THROWING {
-      __add_pointer(pter, key, sizeof(T), nameof(T));
+    void add_pointer(const T*pter, const char*hand) const falcON_THROWING {
+      __add_pointer(pter, hand, sizeof(T), nameof(T));
     }
     /// set a pointer to pointer bank (see also add_pointer()).
     ///
-    /// If the key is already known to the bank, the old pointer is overridden.
-    /// nameof(T) and sizeof(T) must match with old entry (if present).
-    /// In case of a NULL pointer, any existing pointer will be deleted.
+    /// If the handle is already known to the bank, the old pointer is
+    /// overridden. nameof(T) and sizeof(T) must match with old entry (if
+    /// present). In case of a NULL pointer, any existing pointer will be
+    /// deleted.
     /// \param T        (template parameter) type of object pointed to
     /// \param[in] pter pointer to be stored in bank
-    /// \param[in] key  handle to be used as key to pointer
+    /// \param[in] hand handle for the pointer
     template<typename T>
-    void set_pointer(const T*pter, const char*key) const falcON_THROWING {
-      __set_pointer(pter, key, sizeof(T), nameof(T));
+    void set_pointer(const T*pter, const char*hand) const falcON_THROWING {
+      __set_pointer(pter, hand, sizeof(T), nameof(T));
     }
-    /// return pointer to a given key (see also add_pointer()).
+    /// return pointer to a given handle (see also add_pointer()).
     ///
-    /// If the key is unknown in the pointer bank, a zero pointer is returned.
-    /// If the key is known, but either the sizeof(T) or nameof(T) don't match,
-    /// an error is thrown.
-    /// \return          pointer referred to by key (or null)
-    /// \param T       (template parameter) type of object pointed to
-    /// \param[in] key key handle used as key for pointer wanted
+    /// If the handle is unknown in the pointer bank, a zero pointer is
+    /// returned. If the handle is known, but either the sizeof(T) or nameof(T)
+    /// don't match, an error is thrown.
+    /// \return         pointer referred to by handle (or null)
+    /// \param[in] hand handle for pointer wanted
     ///
     /// Example code: \code
     ///   const snapshot*shot;
@@ -1699,17 +1699,16 @@ namespace falcON {
     /// \note A template specification "<vect>" is required, because the
     /// compiler cannot determine the return type from the arguments.
     template<typename T>
-    const T*pointer(const char*key) const falcON_THROWING { 
-      return static_cast<const T*>(__get_pointer(key, sizeof(T), nameof(T)));
+    const T*pointer(const char*hand) const falcON_THROWING { 
+      return static_cast<const T*>(__get_pointer(hand, sizeof(T), nameof(T)));
     }
-    /// get a pointer to a given key, routine version of pointer()
+    /// get a pointer to a given handle, routine version of pointer()
     ///
-    /// If the key is unknown in the pointer bank, a zero pointer is returned.
-    /// If the key is known, but either the sizeof(T) or nameof(T) don't match,
-    /// an error is thrown.
-    /// \param T    (template parameter) type of object pointed to
-    /// \param[out] pter pointer referred to by key (or null)
-    /// \param[in]  key  handle used as key for pointer wanted
+    /// If the handle is unknown in the pointer bank, a zero pointer is
+    /// returned. If the handle is known, but either the sizeof(T) or nameof(T)
+    /// don't match, an error is thrown.
+    /// \param[out] pter pointer referred to by handle (or null)
+    /// \param[in]  hand handle for pointer wanted
     ///
     /// Example code: \code
     ///   const snapshot*shot;
@@ -1717,16 +1716,16 @@ namespace falcON {
     ///   shot->get_pointer(x0,"xcen");
     /// \endcode
     /// \note In contrast to pointer(), no template specification "<vect>" is
-    /// required.
+    ///       required.
     template<typename T>
-    void get_pointer(const T* &pter, const char*key) const falcON_THROWING {
-      pter = static_cast<const T*>(__get_pointer(key, sizeof(T), nameof(T)));
+    void get_pointer(const T* &pter, const char*hand) const falcON_THROWING {
+      pter = static_cast<const T*>(__get_pointer(hand, sizeof(T), nameof(T)));
     }
     /// delete an entry from the pointer bank
     ///
     /// if key not found in pointer bank, no action is taken
-    /// \param[in] key handle for pointer to be deleted from bank
-    void del_pointer(const char*key) const;
+    /// \param[in] hand handle for pointer to be deleted from bank
+    void del_pointer(const char*hand) const;
     //@}
     //==========================================================================
     // \name construction & related

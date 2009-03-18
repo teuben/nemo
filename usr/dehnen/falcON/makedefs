@@ -115,9 +115,9 @@ WARNINGS	:= -Wall -Wtype-limits -Wsign-compare
 endif
 
 ifdef DEBUG
-OPTFLAGS	:= -ggdb3 $(WARNINGS) -Wextra -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
+OPTFLAGS	:= -ggdb3 $(WARNINGS) -Wextra -Wshadow -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
 else
-OPTFLAGS	:= -ggdb3 -O2 $(WARNINGS) -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -rdynamic $(STATIC)
+OPTFLAGS	:= -ggdb3 -O2 $(WARNINGS) -Wshadow -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -rdynamic $(STATIC)
 #OPTFLAGS	:= -ggdb3 -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
 endif
 

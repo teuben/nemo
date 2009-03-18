@@ -509,15 +509,15 @@ namespace falcON {
     /// \name construction and assignment
     //@{
     /// unitialized: mass
-    fieldbit()                    : val(0) {}
+    fieldbit() : val(0) {}
     /// copy constructor
-    fieldbit(fieldbit const   &b) : val(b.val) {}
+    fieldbit(fieldbit const&_b) : val(_b.val) {}
     /// from fieldbit::bits
-    fieldbit(bits              b) : val(b) {}
+    fieldbit(bits _b) : val(_b) {}
     /// from integer: use value
-    explicit fieldbit(int      i) : val(i) {}
+    explicit fieldbit(int _i) : val(_i) {}
     /// from unsigned: use value
-    explicit fieldbit(unsigned i) : val(i) {}
+    explicit fieldbit(unsigned _i) : val(_i) {}
     /// from char: match against \b name of enum values in fieldbit::bits
     explicit fieldbit(char _l) : val(invalid) {
       for(int _v=0; _v!=invalid; ++_v)
@@ -535,36 +535,36 @@ namespace falcON {
     /// prefix increment: get next field
     fieldbit &operator++()                 { ++val; return *this; }
     /// conversion to bool: are we still a valid field
-    operator bool       ()           const { return val<invalid; }
+    operator bool() const { return val<invalid; }
     /// conversion to value_type
-    operator value_type ()           const { return val; }
+    operator value_type() const { return val; }
     /// equality
-    bool operator ==    (fieldbit _f) const { return val == _f.val; }
+    bool operator == (fieldbit _f) const { return val == _f.val; }
     /// equality
-    bool operator ==    (bits     _b) const { return val == _b; }
+    bool operator == (bits _b) const { return val == _b; }
     /// unequality
-    bool operator !=    (fieldbit _f) const { return val != _f.val; }
+    bool operator != (fieldbit _f) const { return val != _f.val; }
     /// unequality
-    bool operator !=    (bits     _b) const { return val != _b; }
+    bool operator != (bits _b) const { return val != _b; }
     //@}
     //--------------------------------------------------------------------------
     /// the integer value
     /// \note taking const ref instead of plain value, because otherwise gcc
     /// version 4.1.2 issues a nonsense warning (obviously a compiler BUG)
-    friend value_type const&value(fieldbit const&f);
+    friend value_type const&value(fieldbit const&);
     /// the sizeof() the datum corresponding to the data field
-    friend size_t const&size(fieldbit f);
+    friend size_t const&size(fieldbit);
     /// the single character abbreviating the data field, same as
     /// the name of the corresponding enum value in fieldbit::bits
-    friend char const&letter(fieldbit f);
+    friend char const&letter(fieldbit);
     /// the full name of the data field
-    friend const char*fullname(fieldbit f);
+    friend const char*fullname(fieldbit);
     /// the 5-character function name of the data field
-    friend const char*fivename(fieldbit f);
+    friend const char*fivename(fieldbit);
     /// the function name of the data field
-    friend const char*funcname(fieldbit f);
+    friend const char*funcname(fieldbit);
     /// is the data field a SPH quantity?
-    friend bool is_sph(fieldbit f);
+    friend bool is_sph(fieldbit);
     /// is the data field supported by NEMO I/O?
     friend bool is_nemo(fieldbit);
     /// is the data field an integer?
@@ -714,15 +714,15 @@ namespace falcON {
     /// default constructor: empty set
     fieldset() : val(0) {}
     /// copy constructor
-    fieldset(fieldset const&b) : val(b.val) {}
+    fieldset(fieldset const&_b) : val(_b.val) {}
     /// from fieldset::bits
-    fieldset(bits b) : val(b) {}
+    fieldset(bits _b) : val(_b) {}
     /// from fieldbit::bits
-    fieldset(fieldbit::bits b) : val(one << b) {}
+    fieldset(fieldbit::bits _b) : val(one << _b) {}
     /// from value_type: take value
-    explicit fieldset(value_type i) : val(i) {}
+    explicit fieldset(value_type _i) : val(_i) {}
     /// from falcON::fieldbit: single-field set
-    explicit fieldset(fieldbit f) : val(one << falcON::value(f)) {}
+    explicit fieldset(fieldbit _f) : val(one << falcON::value(_f)) {}
     /// from string: match each character against a single-field set's name, 
     /// corresponding to the name of the fieldset::bits value; for example,
     /// fieldset("mxv") yields a fieldset with masses, positions and velocities
@@ -731,27 +731,27 @@ namespace falcON {
 	if(std::strchr(_c,letter(_f))) val |= one << falcON::value(_f);
     }
     /// copy assignment operator
-    fieldset&operator= (fieldset b) { val  = b.val; return *this; }
+    fieldset&operator= (fieldset _b) { val  = _b.val; return *this; }
     //@}
     //--------------------------------------------------------------------------
     /// \name operations                                                        
     //@{
     /// combine with another set
-    fieldset&operator|= (fieldset _b) { val |= _b.val; return *this; }
+    fieldset&operator|=(fieldset _b) { val |= _b.val; return *this; }
     /// add: combine with another set
-    fieldset&operator+= (fieldset _b) { val |= _b.val; return *this; }
+    fieldset&operator+=(fieldset _b) { val |= _b.val; return *this; }
     /// subtract: delete fields from other set
-    fieldset&operator-= (fieldset _b) { val &= ~(_b.val); return *this; }
+    fieldset&operator-=(fieldset _b) { val &= ~(_b.val); return *this; }
     /// subtract: delete fields from other set
-    fieldset&operator-= (bits _b) { val &= ~_b; return *this; }
+    fieldset&operator-=(bits _b) { val &= ~_b; return *this; }
     /// difference: fields in this set and not in other
-    fieldset operator- (fieldset _b) const { return fieldset(val & ~(_b.val)); }
+    fieldset operator-(fieldset _b) const { return fieldset(val& ~(_b.val)); }
     /// difference: fields in this set and not in other
-    fieldset operator- (bits _b) const { return fieldset(val & ~_b); }
+    fieldset operator-(bits _b) const { return fieldset(val & ~_b); }
     /// overlap: fields present in both set
-    fieldset&operator&= (fieldset _b) { val &= _b.val; return *this; }
+    fieldset&operator&=(fieldset _b) { val &= _b.val; return *this; }
     /// overlap: fields present in both set
-    fieldset&operator&= (bits _b) { val &= _b; return *this; }
+    fieldset&operator&=(bits _b) { val &= _b; return *this; }
     /// combination of two sets
     fieldset operator| (fieldset _b) const { return fieldset(val | _b.val); }
     /// combination of two sets
@@ -761,9 +761,9 @@ namespace falcON {
     /// combination of two sets
     friend fieldset operator| (bits, fieldset);
     /// cross section of two sets
-    fieldset operator& (fieldset _b) const { return fieldset(val & _b.val); }
+    fieldset operator&(fieldset _b) const { return fieldset(val & _b.val); }
     /// cross section of two sets
-    fieldset operator& (bits _b) const { return fieldset(val & _b); }
+    fieldset operator&(bits _b) const { return fieldset(val & _b); }
     /// cross section of two sets
     friend fieldset operator& (bits, fieldset);
     /// is set empty?
@@ -775,7 +775,7 @@ namespace falcON {
     /// are two sets identical?
     bool operator== (bits _b) const { return val==static_cast<value_type>(_b); }
     /// are two sets identical?
-    friend bool     operator== (bits _b, fieldset _d) { return _d == _b; }
+    friend bool operator== (bits _b, fieldset _d) { return _d == _b; }
     /// are two sets not identical?
     bool operator!= (fieldset _b) const { return val != _b.val; }
     /// are two sets not identical?

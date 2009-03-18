@@ -686,34 +686,34 @@ falcON::data_in::~data_in()
   DebugInfo(5,"data_in(%s) closed\n",NemoTag(FIELD));
 }
 //------------------------------------------------------------------------------
-void falcON::data_in::read(void*data, unsigned N)
+void falcON::data_in::read(void*data, unsigned Num)
 {
   if(NREAD >= NTOT) {
     falcON_Warning("nemo input of %s: cannot read any more (all %d read)\n",
 		   NemoTag(FIELD),NREAD); 
     return;
   }
-  if(N == 0)
-    N = NTOT - NREAD;
-  else if(NREAD + N > NTOT) {
+  if(Num == 0)
+    Num = NTOT - NREAD;
+  else if(NREAD + Num > NTOT) {
     falcON_Warning("nemo input of %s: cannot read %d, only %d data left",
-		   NemoTag(FIELD), N, NTOT-NREAD);
-    N = NTOT - NREAD;
+		   NemoTag(FIELD), Num, NTOT-NREAD);
+    Num = NTOT - NREAD;
   }
   if(nemo_io::coercing(TYPE, nemo_io::type(FIELD))) {
     DebugInfo(1,"data_in::read(%s): must coerce\n",NemoTag(FIELD));
-    unsigned n = N*SUBN;
-    notreal*buf= falcON_NEW(notreal, N);
+    unsigned n = Num*SUBN;
+    notreal*buf= falcON_NEW(notreal, Num);
     get_data_blocked(INPUT.stream(),NemoTag(FIELD), buf, n);
     for(unsigned i=0; i!=n; ++i) static_cast<real*>(data)[i] = buf[i];
     falcON_DEL_A(buf);
   } else 
-    get_data_blocked(INPUT.stream(),NemoTag(FIELD), data, N*SUBN);
-  DebugInfo(5,"data_in::read(): %d %s read\n",N,NemoTag(FIELD));
-  NREAD += N;
+    get_data_blocked(INPUT.stream(),NemoTag(FIELD), data, Num*SUBN);
+  DebugInfo(5,"data_in::read(): %d %s read\n",Num,NemoTag(FIELD));
+  NREAD += Num;
 }
 //------------------------------------------------------------------------------
-void falcON::data_in::read_phases(void*pos, void*vel, unsigned N)
+void falcON::data_in::read_phases(void*pos, void*vel, unsigned Num)
 {
   if(FIELD != nemo_io::posvel)
     falcON_THROW("data_in::read_phases(%s)\n",NemoTag(FIELD));
@@ -726,50 +726,51 @@ void falcON::data_in::read_phases(void*pos, void*vel, unsigned N)
 		   "(all %d read)\n", NREAD); 
     return;
   }
-  if(N == 0)
-    N = NTOT - NREAD;
-  else if(NREAD + N > NTOT) {
+  if(Num == 0)
+    Num = NTOT - NREAD;
+  else if(NREAD + Num > NTOT) {
     falcON_Warning("nemo input of %s: cannot read %d, only %d data left",
-		   NemoTag(FIELD), N, NTOT-NREAD);
-    N = NTOT - NREAD;
+		   NemoTag(FIELD), Num, NTOT-NREAD);
+    Num = NTOT - NREAD;
   }
   const bool coerce = nemo_io::coercing(TYPE, nemo_io::type(FIELD));
   if(coerce)
     DebugInfo(1,"data_in::read_phases(): must coerce\n");
   void* phases = coerce?
-    static_cast<void*>(falcON_NEW(Vect,2*N)) : 
-    static_cast<void*>(falcON_NEW(vect,2*N)) ;
-  get_data_blocked(INPUT.stream(),NemoTag(FIELD), phases, N*SUBN);
+    static_cast<void*>(falcON_NEW(Vect,2*Num)) : 
+    static_cast<void*>(falcON_NEW(vect,2*Num)) ;
+  get_data_blocked(INPUT.stream(),NemoTag(FIELD), phases, Num*SUBN);
   if(pos) {
     vect*to = static_cast<vect*>(pos);
     if(coerce) {
       const Vect*ph = static_cast<const Vect*>(phases);
-      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
+      for(unsigned n=0; n!=Num; ++n,++to,ph+=2) *to = *ph;
     } else {
       const vect*ph = static_cast<const vect*>(phases);
-      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
+      for(unsigned n=0; n!=Num; ++n,++to,ph+=2) *to = *ph;
     }
   }
   if(vel) {
     vect*to = static_cast<vect*>(vel);
     if(coerce) {
       const Vect*ph = static_cast<const Vect*>(phases) + 1;
-      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
+      for(unsigned n=0; n!=Num; ++n,++to,ph+=2) *to = *ph;
     } else {
       const vect*ph = static_cast<const vect*>(phases) + 1;
-      for(unsigned n=0; n!=N; ++n,++to,ph+=2) *to = *ph;
+      for(unsigned n=0; n!=Num; ++n,++to,ph+=2) *to = *ph;
     }
   }
   if(coerce) falcON_DEL_A(static_cast<Vect*>(phases));
   else       falcON_DEL_A(static_cast<vect*>(phases));
   if(pos)
     if(vel)
-      DebugInfo(5,"data_in::read_phases(): %d %s & %s read\n",N,PosTag,VelTag);
+      DebugInfo(5,"data_in::read_phases(): %d %s & %s read\n",
+		Num,PosTag,VelTag);
     else
-      DebugInfo(5,"data_in::read_phases(): %d %s read\n",N,PosTag);
+      DebugInfo(5,"data_in::read_phases(): %d %s read\n",Num,PosTag);
   else
-    DebugInfo(5,"data_in::read_phases(): %d %s read\n",N,VelTag);
-  NREAD += N;
+    DebugInfo(5,"data_in::read_phases(): %d %s read\n",Num,VelTag);
+  NREAD += Num;
 }
 //------------------------------------------------------------------------------
 // class falcON::nemo_out

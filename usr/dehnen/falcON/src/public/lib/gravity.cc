@@ -76,15 +76,15 @@ namespace falcON {
       Z   ( falcON_NEW(real,N) ),
       Y   ( falcON_NEW(real,N) )
     {
-      double z,iA=1./A,
+      double _z,iA=1./A,
 	zmin = 1.e-4,
 	zmax = 1.e4,
 	lmin = log(zmin),
 	dlz  = (log(zmax)-lmin)/double(N1);
       for(unsigned i=0; i!=N; ++i) {
-	z    = std::exp(lmin+i*dlz);
-	Z[i] = z;
-	Y[i] = pow(z*z*pow(1+z,P),iA);
+	_z   = std::exp(lmin+i*dlz);
+	Z[i] = _z;
+	Y[i] = pow(_z*_z*pow(1+_z,P),iA);
       }
     }
     //--------------------------------------------------------------------------

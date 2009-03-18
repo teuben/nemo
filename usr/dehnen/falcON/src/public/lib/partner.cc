@@ -2,7 +2,7 @@
 //                                                                              
 /// \file src/public/partner.cc                                                 
 //                                                                              
-// Copyright (C) 2000-2008  Walter Dehnen                                       
+// Copyright (C) 2000-2009  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -74,13 +74,13 @@ namespace {
     // private and protected methods                                            
     //--------------------------------------------------------------------------
   private:
-    void many(bool      const&take_all,
+    void many(bool      const&take__all,
 	      bool      const&all_active,
 	      leaf_iter const&A,
 	      leaf_iter const&B0,
 	      leaf_iter const&BN) const
     {
-      if(take_all) {
+      if(take__all) {
 	if(all_active) {
 	  for(leaf_iter B=B0; B!=BN; ++B)
 	    check_pair(A,B);
@@ -700,8 +700,8 @@ inline void PartnerEstimator::copy_to_bodies_num(bool sph) const
     LoopLeafs(leaf_type,TREE,Li) if(is_sph(Li)    && is_active(Li))
       Li->copy_to_bodies_num(TREE->my_bodies());
   else
-    LoopLeafs(leaf_type,TREE,Li) if(is_sticky(Li) && is_active(Li))
-      Li->copy_to_bodies_num(TREE->my_bodies());
+    LoopLeafs(leaf_type,TREE,Ls) if(is_sticky(Ls) && is_active(Ls))
+      Ls->copy_to_bodies_num(TREE->my_bodies());
 }
 //------------------------------------------------------------------------------
 template<bool COUNT>

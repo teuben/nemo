@@ -52,14 +52,14 @@ inline void SphericalSampler::setis()
   Is[0]    = 0.;
   Xe[0][0] = 0.;
   Xe[0][1] = 1.;
-  const double    de =Pi/Ne1;
-  double eta = 0.;
+  const double de =Pi/Ne1;
+  double __eta = 0.;
   __p = 1-b0-b0;
   for(register int i=1; i!=Ne; ++i) {
-    Is[i]    = rk4(Is[i-1],eta,de,dI);
-    eta     += de;
-    Xe[i][0] = sin(eta);
-    Xe[i][1] = cos(eta);
+    Is[i]    = rk4(Is[i-1],__eta,de,dI);
+    __eta   += de;
+    Xe[i][0] = sin(__eta);
+    Xe[i][1] = cos(__eta);
   }
 }
 //

@@ -110,12 +110,12 @@ namespace {
     template <int NDIM, typename scalar> inline
     void acc_T(double       time,            // I: simulation time              
 	       int          nbod,            // I: number bodies =size of arrays
-	       const scalar*mass,            // I: masses:         m[i]         
-	       const scalar*pos,             // I: positions       (x,y,z)[i]   
-	       const scalar*vel,             // I: velocities      (u,v,w)[i]   
-	       const int   *flag,            // I: flags           f[i]         
-	       scalar      *pot,             // O: potentials      p[i]         
-	       scalar      *acc,             // O: accelerations   (ax,ay,az)[i]
+	       const scalar*m,               // I: masses:         m[i]         
+	       const scalar*x,               // I: positions       (x,y,z)[i]   
+	       const scalar*v,               // I: velocities      (u,v,w)[i]   
+	       const int   *f,               // I: flags           f[i]         
+	       scalar      *p,               // O: potentials      p[i]         
+	       scalar      *a,               // O: accelerations   (ax,ay,az)[i]
 	       int          add)             // I: add or assign pot & acc?     
     {
       // obtain amplitude of growth factor
@@ -125,12 +125,12 @@ namespace {
       if(ampl == 0.) {
 	if(! (add&1))
 	  for(int n=0; n!=nbod; ++n)
-	    if(flag==0 || flag[n] & 1) 
-	      pot[n] = scalar(0);
+	    if(f==0 || f[n] & 1) 
+	      p[n] = scalar(0);
 	if(! (add&2))
 	  for(int n=0,nn=0; n!=nbod; ++n,nn+=NDIM)
-	    if(flag==0 || flag[n] & 1) 
-	      v_set<NDIM>(acc+nn,scalar(0));
+	    if(f==0 || f[n] & 1) 
+	      v_set<NDIM>(a+nn,scalar(0));
 	return;
       }
     
@@ -140,16 +140,16 @@ namespace {
       scalar*_acc = ampl!=1 ? new scalar[nbod*NDIM] : 0;
 
       // define references to the arrays actually passed to accelerations
-      scalar*&pots = ampl!=1 ? _pot : pot;
-      scalar*&accs = ampl!=1 ? _acc : acc;
+      scalar*&pots = ampl!=1 ? _pot : p;
+      scalar*&accs = ampl!=1 ? _acc : a;
 
       // add/assign gravity from all the acceleration fields
       for(int i=0; i<N; ++i)
 	(*(AC[i]))(NDIM,time,nbod,
-		   static_cast<const void*>(mass),
-		   static_cast<const void*>(pos),
-		   static_cast<const void*>(vel),
-		   flag,
+		   static_cast<const void*>(m),
+		   static_cast<const void*>(x),
+		   static_cast<const void*>(v),
+		   f,
 		   static_cast<      void*>(pots),
 		   static_cast<      void*>(accs),
 		   i    != 0? 3 :           // further? add pot & acc           
@@ -162,24 +162,24 @@ namespace {
 	// add or assign potential times amplitude
 	if(add & 1) {
 	  for(int n=0; n!=nbod; ++n)
-	    if(flag==0 || flag[n] & 1) 
-	      pot[n] += ampl * pots[n];
+	    if(f==0 || f[n] & 1) 
+	      p[n] += ampl * pots[n];
 	} else {
 	  for(int n=0; n!=nbod; ++n)
-	    if(flag==0 || flag[n] & 1) 
-	      pot[n]  = ampl * pots[n];
+	    if(f==0 || f[n] & 1) 
+	      p[n]  = ampl * pots[n];
 	}
 	delete[] _pot;
 
 	// add or assign acceleration times amplitude
 	if(add & 2) {
 	  for(int n=0,nn=0; n!=nbod; ++n,nn+=2)
-	    if(flag==0 || flag[n] & 1)
-	      v_addtimes<NDIM>(acc+nn, accs+nn, ampl);
+	    if(f==0 || f[n] & 1)
+	      v_addtimes<NDIM>(a+nn, accs+nn, ampl);
 	} else {
 	  for(int n=0,nn=0; n!=nbod; ++n,nn+=2)
-	    if(flag==0 || flag[n] & 1)
-	      v_asstimes<NDIM>(acc+nn, accs+nn, ampl);
+	    if(f==0 || f[n] & 1)
+	      v_asstimes<NDIM>(a+nn, accs+nn, ampl);
 	}
 	delete[] _acc;
       }
@@ -220,24 +220,24 @@ namespace {
       timer::index
 	timin = (timer::index)(npar>0? int(pars[0]) : 9);
       double
-	t0    = npar>1? pars[1] : 0.,
-	tau   = npar>2? pars[2] : 1.;
-      timer::init(timin,t0,tau);
+	_t0    = npar>1? pars[1] : 0.,
+	_tau   = npar>2? pars[2] : 1.;
+      timer::init(timin,_t0,_tau);
       if(npar>3) warning("Combined: skipped parameters beyond 3");
       nemo_dprintf (1,
 		    "initializing Combined\n"
 		    " parameters : timer::index  = %f -> %s\n"
 		    "              t0            = %f\n"
 		    "              tau           = %f\n",
-		    timin,timer::describe(timin),t0,tau);
+		    timin,timer::describe(timin),_t0,_tau);
       // now scan datafile and initialize accs
       const int size=200;
-      std::ifstream in(file);
-      if(!in.good())
+      std::ifstream inpt(file);
+      if(!inpt.good())
 	error("Combined: couldn't open file \"%s\" for input\n",file);
       char Line[size], AccName[size], AccPars[size], AccFile[size];
       char*accname=0, *accpars=0, *accfile=0, unknown[9];
-      read_line(in,Line,size);
+      read_line(inpt,Line,size);
       if(*Line == 0)
 	error("Combined: couldn't read data from file \"%s\"\n",file);
       if(strncmp(Line,"accname=",8))
@@ -252,7 +252,7 @@ namespace {
 	  accpars=0;
 	  accfile=0;
 	}
-	read_line(in,Line,size);
+	read_line(inpt,Line,size);
 	if        (*Line == 0 || 0==strncmp(Line,"accname=",8)) {
 	  if(N == NMAX)
 	    error("Combined: file \"%s\" contains more accname= "
@@ -302,12 +302,12 @@ namespace {
     void acc(int        ndim,                // I: number of dimensions         
 	     double     time,                // I: simulation time              
 	     int        nbod,                // I: number bodies =size of arrays
-	     const void*mass,                // I: masses:         m[i]         
-	     const void*pos,                 // I: positions       (x,y,z)[i]   
-	     const void*vel,                 // I: velocities      (u,v,w)[i]   
-	     const int *flag,                // I: flags           f[i]         
-	     void      *pot,                 // O: potentials      p[i]         
-	     void      *acc,                 // O: accelerations   (ax,ay,az)[i]
+	     const void*m,                   // I: masses:         m[i]         
+	     const void*x,                   // I: positions       (x,y,z)[i]   
+	     const void*v,                   // I: velocities      (u,v,w)[i]   
+	     const int *f,                   // I: flags           f[i]         
+	     void      *p,                   // O: potentials      p[i]         
+	     void      *a,                   // O: accelerations   (ax,ay,az)[i]
 	     int        add,                 // I: indicator (see note 6 above) 
 	     char       type)                // I: type: 'f' or 'd'             
     {
@@ -315,20 +315,20 @@ namespace {
       case 'f':
 	switch(ndim) {
 	case 2: return acc_T<2>(time,nbod,
-				static_cast<const float*>(mass),
-				static_cast<const float*>(pos),
-				static_cast<const float*>(vel),
-				flag,
-				static_cast<      float*>(pot),
-				static_cast<      float*>(acc),
+				static_cast<const float*>(m),
+				static_cast<const float*>(x),
+				static_cast<const float*>(v),
+				f,
+				static_cast<      float*>(p),
+				static_cast<      float*>(a),
 				add);
 	case 3: return acc_T<3>(time,nbod,
-				static_cast<const float*>(mass),
-				static_cast<const float*>(pos),
-				static_cast<const float*>(vel),
-				flag,
-				static_cast<      float*>(pot),
-				static_cast<      float*>(acc),
+				static_cast<const float*>(m),
+				static_cast<const float*>(x),
+				static_cast<const float*>(v),
+				f,
+				static_cast<      float*>(p),
+				static_cast<      float*>(a),
 				add);
 	default: error("Combined: unsupported ndim: %d",ndim);
 	}
@@ -336,20 +336,20 @@ namespace {
       case 'd':
 	switch(ndim) {
 	case 2: return acc_T<2>(time,nbod,
-				static_cast<const double*>(mass),
-				static_cast<const double*>(pos),
-				static_cast<const double*>(vel),
-				flag,
-				static_cast<      double*>(pot),
-				static_cast<      double*>(acc),
+				static_cast<const double*>(m),
+				static_cast<const double*>(x),
+				static_cast<const double*>(v),
+				f,
+				static_cast<      double*>(p),
+				static_cast<      double*>(a),
 				add);
 	case 3: return acc_T<3>(time,nbod,
-				static_cast<const double*>(mass),
-				static_cast<const double*>(pos),
-				static_cast<const double*>(vel),
-				flag,
-				static_cast<      double*>(pot),
-				static_cast<      double*>(acc),
+				static_cast<const double*>(m),
+				static_cast<const double*>(x),
+				static_cast<const double*>(v),
+				f,
+				static_cast<      double*>(p),
+				static_cast<      double*>(a),
 				add);
 	default: error("Combined: unsupported ndim: %d",ndim);
 	}
