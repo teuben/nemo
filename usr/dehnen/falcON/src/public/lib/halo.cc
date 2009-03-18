@@ -1,35 +1,35 @@
-// -*- C++ -*-                                                                 |
-//-----------------------------------------------------------------------------+
-//                                                                             |
-/// \file src/public/lib/halo.cc                                               |
-//                                                                             |
-// Copyright (C) 2000-2008  Walter Dehnen, Paul McMillan                       |
-//                                                                             |
-// This program is free software; you can redistribute it and/or modify        |
-// it under the terms of the GNU General Public License as published by        |
-// the Free Software Foundation; either version 2 of the License, or (at       |
-// your option) any later version.                                             |
-//                                                                             |
-// This program is distributed in the hope that it will be useful, but         |
-// WITHOUT ANY WARRANTY; without even the implied warranty of                  |
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU           |
-// General Public License for more details.                                    |
-//                                                                             |
-// You should have received a copy of the GNU General Public License           |
-// along with this program; if not, write to the Free Software                 |
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
-//                                                                             |
-//-----------------------------------------------------------------------------+
+// -*- C++ -*-
+////////////////////////////////////////////////////////////////////////////////
+//
+/// \file src/public/lib/halo.cc
+//
+// Copyright (C) 2000-2004 Walter Dehnen
+// Copyright (C) 2005-2007 Walter Dehnen, Paul McMillan
+// Copyright (C) 2008-2009 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
+////////////////////////////////////////////////////////////////////////////////
 #include <public/halo.h>
 #include <public/basic.h>
 #include <utils/spline.h>
 #include <utils/WDMath.h>
 using namespace falcON;
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class falcON::HaloModifier                                                 //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
+//
+// class falcON::HaloModifier
+//
 namespace {
   /// z(y) = 2/(y+1/y) = 2*y/(1+y^2)
   /// \return z(y)
@@ -83,7 +83,7 @@ inline double HaloModifier::trunc(double r) const {
   else
     return ::z(::z(exp(-r*irt)));
 }
-//------------------------------------------------------------------------------
+//
 inline double HaloModifier::trunc(double r, double&t1) const {
   double y=exp(-r*irt), y1=-irt*y;
   if(sechtr)
@@ -93,7 +93,7 @@ inline double HaloModifier::trunc(double r, double&t1) const {
     return ::z(z,z1,t1);
   }
 }
-//------------------------------------------------------------------------------
+//
 inline double HaloModifier::trunc(double r, double&t1, double&t2) const {
   double y=exp(-r*irt), y1=-irt*y, y2=-irt*y1;
   if(sechtr)
@@ -103,58 +103,40 @@ inline double HaloModifier::trunc(double r, double&t1, double&t2) const {
     return ::z(z,z1,z2,t1,t2);
   }
 }
-//------------------------------------------------------------------------------
+//
 inline double HaloModifier::core(double r) const {
   return sqrt(r*r+rcq);
 }
-//------------------------------------------------------------------------------
+//
 inline double HaloModifier::core(double r, double&t1) const {
   double c=sqrt(r*r+rcq);
   t1 = r/c;
   return c;
 }
-//------------------------------------------------------------------------------
+//
 inline double HaloModifier::core(double r, double&t1, double&t2) const {
   double c=sqrt(r*r+rcq),ic=1./c;
   t1 = r*ic;
   t2 = rcq*ic*ic*ic;
   return c;
 }
-//------------------------------------------------------------------------------
+//
 HaloModifier::HaloModifier(double c, double t) falcON_THROWING
 : rc(abs(c)), rcq(c*c),
   rt(abs(t)), irt(rt? 1/rt : 0.), sechtr(t>=0)
 {
   if(std::isinf(t)) falcON_THROW("HaloModifier: truncation radius == inf\n");
   if(std::isnan(t)) falcON_THROW("HaloModifier: truncation radius == nan\n");
-  if(c<0.) falcON_Warning("HaloModifier: core radius = %g<0; will use %g\n",c,rc);
-//   std::cerr<<" Testing HaloModifier::trunc(): (irt="
-// 	   <<irt<<", sechtr="<<sechtr<<")\n";
-//   for(;;) {
-//     double r;
-//     std::cout<<" r="; std::cin>>r;
-//     if(r<0) break;
-//     double dr=0.0001*r;
-//     double rl=r-dr, rh=r+dr;
-//     double t =trunc(r),tl=trunc(rl),th=trunc(rh);
-//     double t1,t1l,t1h,t1r,t2;
-//     double tr=trunc(r,t1),trl=trunc(rl,t1l),trh=trunc(rh,t1h);
-//     double trr=trunc(r,t1r,t2);
-//     std::cerr<<" tr="<<t<<" ="<<tr<<" ="<<trr<<'\n'
-// 	     <<" t1="<<t1<<" ="<<t1r
-// 	     <<" ="<<((th-tl)/(dr+dr))<<'\n'
-// 	     <<" t2="<<t2
-// 	     <<" ="<<((tl-th-t-t)/(dr*dr))
-// 	     <<" ="<<((t1h-t1l)/(dr+dr))<<'\n';
-//   }
+  if(c<0.) falcON_Warning("HaloModifier: core radius = %g<0; will use %g\n",
+			  c,rc);
 }
-//------------------------------------------------------------------------------
+//
 inline double HaloModifier::cored(HaloDensity const&Model,
 				  double r) const
 {
   return rcq? Model(core(r)) : Model(r);
 }
-//------------------------------------------------------------------------------
+//
 inline double HaloModifier::cored(HaloDensity const&Model,
 				  double r, double&rh1) const
 {
@@ -164,7 +146,7 @@ inline double HaloModifier::cored(HaloDensity const&Model,
   rh1 = dr1*dx1;
   return rh;
 }
-//------------------------------------------------------------------------------
+//
 inline double HaloModifier::cored(HaloDensity const&Model,
 				  double r, double&rh1, double&rh2) const
 {
@@ -175,13 +157,13 @@ inline double HaloModifier::cored(HaloDensity const&Model,
   rh2 = dr2*dx1*dx1 + dr1*dx2;
   return rh;
 }
-//------------------------------------------------------------------------------
+//
 double HaloModifier::operator()(HaloDensity const&Model,
 				double r) const
 {
   return irt? trunc(r)*cored(Model,r) : cored(Model,r);
 }
-//------------------------------------------------------------------------------
+//
 double HaloModifier::operator()(HaloDensity const&Model,
 				double r, double&rh1) const
 {
@@ -191,7 +173,7 @@ double HaloModifier::operator()(HaloDensity const&Model,
   rh1 = dr1*tr + rh*dt1;
   return rh*tr;
 }
-//------------------------------------------------------------------------------
+//
 double HaloModifier::operator()(HaloDensity const&Model,
 				double r, double&rh1, double&rh2) const
 {
@@ -202,11 +184,9 @@ double HaloModifier::operator()(HaloDensity const&Model,
   rh2 = dr2*tr + twice(dr1*dt1) + rh*dt2;
   return rh*tr;
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class falcON::DoublePowerLawHalo                                           //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
+//
+// class falcON::DoublePowerLawHalo
+//
 DoublePowerLawHalo::DoublePowerLawHalo(double inner, double outer, double trans)
   : go(outer), gi(inner), et(trans), gg(go-gi), al(gg/et)
 {
@@ -217,11 +197,11 @@ DoublePowerLawHalo::DoublePowerLawHalo(double inner, double outer, double trans)
   if(et <= 0.)
     falcON_THROW("DoublePowerHalo: transition steepness <= 0\n");
 }
-//------------------------------------------------------------------------------
+//
 double DoublePowerLawHalo::operator()(double x) const {
   return pow(x,-gi) * pow(1.+pow(x,et),-al);
 }
-//------------------------------------------------------------------------------
+//
 double DoublePowerLawHalo::operator()(double x, double&rh1) const {
   double q = pow(x,et), q1=1./(1+q);
   double f = pow(x,-gi) * pow(q1,al);
@@ -229,7 +209,7 @@ double DoublePowerLawHalo::operator()(double x, double&rh1) const {
   rh1 = -f*g/x;
   return f;
 }
-//------------------------------------------------------------------------------
+//
 double DoublePowerLawHalo::operator()(double x, double&rh1, double&rh2) const {
   double q = pow(x,et), q1=1./(1+q);
   double f = pow(x,-gi) * pow(q1,al);
@@ -241,7 +221,7 @@ double DoublePowerLawHalo::operator()(double x, double&rh1, double&rh2) const {
   rh1*=-g;
   return f;
 }
-//------------------------------------------------------------------------------
+//
 namespace {
   const HaloModifier* __HM;
   double __z0,__iE,__Ai,__Ao,__Rc,__Yo;
@@ -279,18 +259,15 @@ double DoublePowerLawHalo::Mtot(const HaloModifier&hm) const
     return FPi*Beta((3-gi)/et,(go-3)/et)/et;
   }
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// auxiliary stuff for class HaloPotential                                      
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//
+// class HaloPotential
+//
 namespace {
   /// for the maximum table radius in case of trunction: gamma(Rmax)=gam_trunc
   const double gam_trunc = 100.;
   /// for the table extrema in case of no trunction: 
   ///    |gamma(r)-gamma_asymptotic| < eps_gamma * gamma_asymptotic
   const double eps_gamma = 0.002;
-  //////////////////////////////////////////////////////////////////////////////
   /// find an appropriate maximum radius for the tables in HaloModel
   double Rmax(HaloDensity const&halo)
   {
@@ -314,7 +291,6 @@ namespace {
     }
     return r;
   }
-  //////////////////////////////////////////////////////////////////////////////
   /// find an appropriate minimum radius for the tables in HaloModel
   double Rmin(HaloDensity const&halo)
   {
@@ -330,26 +306,20 @@ namespace {
     }
     return r;
   }
-  //////////////////////////////////////////////////////////////////////////////
+  //
   const HaloDensity *RHO;
   spline<double>    *SPLINE;
-  //----------------------------------------------------------------------------
   /// give dM/dln r for HaloDensity pointed to by RHO
   inline double dM(double lr, double const&M) {
     const double r = exp(lr);
     return cube(r)*(*RHO)(r);
   }
-  //----------------------------------------------------------------------------
   /// give dPsi_h / dln r, assuming SPLINE holds M(ln r)
   inline double dP(double lr, double const&P) {
     return -(*SPLINE)(lr) * exp(-lr);              // dPsi = -M/r * dlnr        
   }
 } // namespace {
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// class falcON::HaloPotential                                                  
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//
 HaloPotential::HaloPotential(HaloDensity const&model,
 			     const acceleration*mono)
   : DEN(model), MON(mono),
@@ -451,12 +421,10 @@ HaloPotential::HaloPotential(HaloDensity const&model,
     dp[i] = -mt[i]/r[i];
   PS = new Pspline<double>(lr,ps,dp);
 }
-//------------------------------------------------------------------------------
 // destructor
 HaloPotential::~HaloPotential() {
   if(PS) falcON_DEL_O(PS);
 }
-//------------------------------------------------------------------------------
 // potential Phi(r) and (-dPhi/dr)/r using penta spline
 double HaloPotential::PotAcc(double Rq, double&A) const {
   double P, lR=0.5*log(Rq);
@@ -476,7 +444,6 @@ double HaloPotential::PotAcc(double Rq, double&A) const {
                       A/= Rq; }
   return -P;
 }
-//------------------------------------------------------------------------------
 // potential Psi(r)
 double HaloPotential::Ps(double R) const {
   if(R<= 0.)   return ps0;
@@ -488,7 +455,6 @@ double HaloPotential::Ps(double R) const {
   if(R> r[n1]) return mt[n1]/R;
   else         return Polev(log(R),lr,ps);
 }
-//------------------------------------------------------------------------------
 // log R_psi(E)
 double HaloPotential::lnRPsi(double P) const {
   if(P> ps[n0]) {
@@ -499,7 +465,6 @@ double HaloPotential::lnRPsi(double P) const {
   if(P<ps[n1]) return log(mt[n1]/P);
   else         return Polev(P,ps.array()+n0,lr.array()+n0,n-n0);
 }
-//------------------------------------------------------------------------------
 // R_psi(E)
 double HaloPotential::RPsi(double P) const {
   if(P> ps[n0]) {
@@ -510,7 +475,6 @@ double HaloPotential::RPsi(double P) const {
   if(P<ps[n1]) return mt[n1]/P;
   else         return exp(Polev(P,ps.array()+n0,lr.array()+n0,n-n0));
 }
-//------------------------------------------------------------------------------
 // total cumulative mass
 double HaloPotential::Mt(double R) const {
   if(R<= 0.)  return 0.;
@@ -518,7 +482,6 @@ double HaloPotential::Mt(double R) const {
   if(R>r[n1]) return mt[n1];
   else        return Polev(log(R),lr,mt);
 }
-//------------------------------------------------------------------------------
 // cumulative halo mass
 double HaloPotential::Mh(double R) const {
   if(R<= 0.)  return 0.;
@@ -526,7 +489,6 @@ double HaloPotential::Mh(double R) const {
   if(R>r[n1]) return mh[n1];
   else        return Polev(log(R),lr,mh);
 }
-//------------------------------------------------------------------------------
 // total mass density
 double HaloPotential::rhot(double R) const {
   if(R<= 0.)  return 0.;
@@ -534,25 +496,21 @@ double HaloPotential::rhot(double R) const {
   if(R>r[n1]) return 0.;
   else        return Polev(log(R),lr,rh);
 }
-//------------------------------------------------------------------------------
 // v_circ^2(r)
 double HaloPotential::vcq(double R) const {
   if(R<= 0.) return 0.;
   return Mt(R)/R;
 }
-//------------------------------------------------------------------------------
 // Omega^2(r)
 double HaloPotential::omq(double R) const {
   if(R <= 0.) return 0.;
   return Mt(R)/cube(R);
 }
-//------------------------------------------------------------------------------
 // kappa^2(r)
 double HaloPotential::kpq(double R) const {
   if(R <= 0.) return 0.;
   return omq(R) + FPi * rhot(R);
 }
-//------------------------------------------------------------------------------
 // gamma := 2*Omega/kappa 
 double HaloPotential::gam(double R) const {
   if(R < r[ 0]) return 2./sqrt(4.-At);
@@ -560,7 +518,6 @@ double HaloPotential::gam(double R) const {
   double oq = Mt(R)/cube(R);
   return 2.*sqrt(oq/(oq + FPi*rhot(R)));
 }
-//------------------------------------------------------------------------------
 // Eps_c(r)
 double HaloPotential::Epc(double R) const {
   if(R<=0.)    return ps0;
@@ -568,7 +525,6 @@ double HaloPotential::Epc(double R) const {
   if(R> r[n1]) return 0.5*mt[n1]/R;
   else         return Polev(log(R),lr,ec);
 }
-//------------------------------------------------------------------------------
 // R_circ(E)
 double HaloPotential::RcE(double E) const {
   if(At>=2 && E>=ps0) return 0.;
@@ -580,7 +536,6 @@ double HaloPotential::RcE(double E) const {
   if(E< ec[n1]) return 0.5*mt[n1]/E;
   else          return exp(Polev(E,ec.array()+n0,lr.array()+n0,n-n0));
 }
-//------------------------------------------------------------------------------
 // estimate for R(E, L^2, cos[eta])
 double HaloPotential::Rap(double E, double Lq, double ce) const {
   const double
@@ -588,17 +543,14 @@ double HaloPotential::Rap(double E, double Lq, double ce) const {
     ecc = sqrt(1-Lq/(Mt(Rc)*Rc));
   return Rc * pow(1+ecc*ce, 0.5*gam(Rc));
 }
-//------------------------------------------------------------------------------
 // estimate for R_peri(E, L^2)
 double HaloPotential::Rp(double E, double Lq) const {
   return Rap(E,Lq,-1.);
 }
-//------------------------------------------------------------------------------
 // estimate for R_apo(E, L^2)
 double HaloPotential::Ra(double E, double Lq) const {
   return Rap(E,Lq,1.);
 }
-//------------------------------------------------------------------------------
 // radius given halo mass
 double HaloPotential::RMh(double M) const {
   if(M<= 0.)   return 0.;
@@ -606,37 +558,33 @@ double HaloPotential::RMh(double M) const {
   if(M>  mh[nm]) falcON_Error("HaloPotential::rMh(): M>M_halo(oo)\n");
   return exp(Polev(M,mh.array(),lr.array(),nm));
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// auxiliary stuff for class HaloModel                                          
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//
+// class HaloModel
+//
 namespace {
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                            
+  //
   // class ReducedDensity                                                       
+  //
+  // to be used with complete DF : L^-2b g(Q=Eps-u^2*L^2/2)
   //                                                                            
-  // to be used with complete DF : L^-2b g(Q=Eps-u^2*L^2/2)                     
-  //                                                                            
-  // returns reduced density  f(r) * rho(r)  with reduction factor              
-  //                                                                            
-  //                          1-b   2b                                          
-  //      f(r) = (1 + r^2 u^2)     r                                            
-  //                                            b                               
-  //           = (1 + r^2 u^2) (r^2/[1+r^2 u^2])                                
-  //                                                                            
-  //////////////////////////////////////////////////////////////////////////////
+  // returns reduced density f(r) * rho(r) with reduction factor
+  //
+  //                          1-b   2b
+  //      f(r) = (1 + r^2 u^2)     r 
+  //                                            b
+  //           = (1 + r^2 u^2) (r^2/[1+r^2 u^2])
+  //
   class ReducedDensity : public HaloDensity {
     const HaloDensity&Model;
     const double uq, b, tb, tb1;
-    //--------------------------------------------------------------------------
+    //
     double reduc(double r) const {
       if(b == 0.) return 1+r*r*uq;
       if(uq== 0.) return pow(r,tb);
       const double rq=r*r, ft=1+rq*uq;
       return ft * pow(rq/ft,b);
     }
-    //--------------------------------------------------------------------------
+    //
     double reduc(double r, double &d1) const {
       if(b == 0.) {
 	double t=r*uq;
@@ -653,7 +601,7 @@ namespace {
       d1 = twice(b+qq)*fc/r;
       return ft*fc;
     }
-    //--------------------------------------------------------------------------
+    //
     double reduc(double r, double&d1, double&d2) const {
       if(b == 0.) {
 	double t=r*uq;
@@ -674,7 +622,7 @@ namespace {
       d1*= al;
       return fc;
     }
-    //--------------------------------------------------------------------------
+    //
   public:
     ReducedDensity(const HaloDensity&m, double r_a, double beta)
       : Model(m), uq(r_a>0? 1/square(r_a):0), b(beta), tb(b+b), tb1(tb-1)
@@ -700,34 +648,34 @@ namespace {
 // 		 <<" ="<<((t1h-t1l)/(dr+dr))<<'\n';
 //       }
     }
-    //--------------------------------------------------------------------------
+    //
     double inner_gamma() const {
       return Model.inner_gamma() - tb;
     }
-    //--------------------------------------------------------------------------
+    //
     double scale_radius() const {
       return Model.scale_radius();
     }
-    //--------------------------------------------------------------------------
+    //
     double trunc_radius() const {
       return Model.trunc_radius();
     }
-    //--------------------------------------------------------------------------
+    //
     double outer_gamma() const {
       return Model.outer_gamma() - (uq? 2 : tb);
     }
-    //--------------------------------------------------------------------------
+    //
     double operator() (double r) const {
       return reduc(r)*Model(r);
     }
-    //--------------------------------------------------------------------------
+    //
     double operator() (double r, double &d1) const {
       double r1,re=reduc(r,r1);
       double m1,mo=Model(r,m1);
       d1 = re*m1 + r1*mo;
       return re*mo;
     }
-    //--------------------------------------------------------------------------
+    //
     double operator()(double r, double&d1, double&d2) const {
       double r1,r2,re=reduc(r,r1,r2);
       double m1,m2,mo=Model(r,m1,m2);
@@ -767,19 +715,17 @@ namespace {
     }
     return (*SPLINE)(psi);
   }
-  //----------------------------------------------------------------------------
+  //
   inline double intgQ(double z) {                  // q = z^4; dq = 4 z^3 dz    
     const double f=cube(z);
     return 4*f*intgQ_of_q(z*f);
   }
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 falcON_TRAITS(ReducedDensity,"ReducedDensity");
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// class falcON::HaloModel                                                      
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//
+// class falcON::HaloModel
+//
 HaloModel::HaloModel(HaloDensity const&model,
 		     double beta, double r_a,
 		     const acceleration*mono)
@@ -842,7 +788,8 @@ HaloModel::HaloModel(HaloDensity const&model,
       double err, g = qbulir(intgQ,0.,1.,1.e-8,&err,0,50);
       if(g<0.) falcON_Error("HaloModel: g(Q=%g)=%g < 0, err=%g\n",Q,g,err);
       if(err>1.e-3) 
-	falcON_Warning("HaloModel: inaccurate integration for g(Q) at Q=%g\n",Q);
+	falcON_Warning("HaloModel: inaccurate integration for g(Q) at Q=%g\n",
+		       Q);
       lg[i] = lfc + p1*log(Q) + log(nu*g);
       if(i && lg[i]>lg[i-1])
 	falcON_Warning("HaloModel: non-monotinic DF at E=%g\n",ps[i]);
@@ -851,7 +798,6 @@ HaloModel::HaloModel(HaloDensity const&model,
   }
   falcON_DEL_O(RED); RED=0;
 }
-//------------------------------------------------------------------------------
 // g(Q)
 double HaloModel::lnG(double Q) const {
   if(Q < ps[n1]) {
@@ -868,9 +814,8 @@ double HaloModel::lnG(double Q) const {
     // 3 within tabulated interval
     return Polev(Q,ps,lg);
 }
-//------------------------------------------------------------------------------
 // distribution function f(Eps,L^2)
 double HaloModel::fEL (double E, double Lq) const {
   return pow(Lq,-B) * exp(lnG(RA? E-0.5*Lq/(RA*RA) : E));
 }
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////

@@ -68,7 +68,6 @@ namespace falcON {
   class ParallelSnapshot;                          // parallel/snapshot.h       
   class forces;                                    // forces.h                  
   // ///////////////////////////////////////////////////////////////////////////
-  // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   //  class falcON::bodies                                                      
   //                                                                            
@@ -81,7 +80,6 @@ namespace falcON {
   /// alternative data access via members of bodies. class falcON::bodies also  
   /// supports data I/O and adding/removing of data fields and bodies.          
   ///                                                                           
-  // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
 
   class bodies {
@@ -1023,11 +1021,12 @@ namespace falcON {
     static iterator bodyNil() { return iterator(0); }
     //==========================================================================
     // \name construction, destruction, and management of bodies and body data
-    /// Constructor 0: construction with N=0, but data fields
+    ///
+    /// default constructor
     explicit 
     bodies(fieldset Bd=fieldset(DefaultBits)) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// Constructor 1, new version
+    /// constructor
     ///
     /// \param[in] N  array with number of bodies per bodytype
     /// \param[in] Bd body data fields to allocate (default: mxvapfHRVJFC)
@@ -1035,15 +1034,16 @@ namespace falcON {
     bodies(const unsigned N[BT_NUM], fieldset Bd=fieldset(DefaultBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// Constructor 2: copy constructor
+    /// copy constructor
     ///
     /// \param[in] B  bodies to copy
     /// \param[in] Bd body data fields to copy
     /// \param[in] C  if non-zero: copy only bodies which have this flag set
     bodies(bodies const&B, fieldset Bd=fieldset::all, flags C=flags::empty)
       falcON_THROWING;
+
     //--------------------------------------------------------------------------
-    /// Destruction: delete all data
+    /// destructor: delete all data
     ~bodies() falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Add an unsupported body data field
@@ -1051,7 +1051,7 @@ namespace falcON {
     /// If the body data field \a f is not yet supported, then we allocate body
     /// data indicated by \a f for all bodies which can have it (i.e. a SPH data
     /// field is only allocated for SPH bodies).
-    void add_field (fieldbit f) falcON_THROWING;
+    void add_field(fieldbit f) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Add unsupported body data fields
     ///
@@ -1063,16 +1063,15 @@ namespace falcON {
     /// Delete a supported body data field
     ///
     /// If the body data field \a f is presently allocated, it is deleted
-    void del_field (fieldbit f) falcON_THROWING;
+    void del_field(fieldbit f) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Delete supported body data fields
     ///
-    /// Those body data fields in \e b which are presently allocated will be
+    /// Those body data fields in \a b which are presently allocated will be
     /// deleted. Fields not allocated are not affected
     void del_fields(fieldset b) falcON_THROWING;
     //--------------------------------------------------------------------------
-    /// Resets N, data: equivalent to destructor followed by constructor 1
-    /// (new version)
+    /// Resets N, data: equivalent to destructor followed by constructor
     ///
     /// \param[in] N  array with number of bodies per bodytype
     /// \param[in] Bd body data fields to allocate (default: mxvapfHRVJFC)
@@ -1097,13 +1096,15 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
   protected:
-    /// swap the bytes (little-endian <-> bit-endian)
+    /// swap the bytes (little-endian <-> big-endian)
     ///
     /// \param[in] b body data field to swap bytes for
     void swap_bytes(fieldbit b) falcON_THROWING;
   public:
     //==========================================================================
     // \name methods using another set of bodies
+#if(0)
+    ///
     /// Copy: replace our data (if any) with those of other bodies (\b not \b 
     /// yet \b implemented)
     ///
@@ -1132,17 +1133,18 @@ namespace falcON {
     /// \param[in] f  flag for bodies to be copied
     void add(bodies const&B,  fieldset Bd=fieldset::all, int f=0)
       falcON_THROWING;
+#endif
     //--------------------------------------------------------------------------
     /// Merge: merge two sets of bodies
     ///
     /// The bodies merged in will be emptied. Body data not previously supported
     /// by this will be deleted before merging. Body data previously supported
-    /// by this but not by that will be allocated but remain unitialized.
+    /// by this but not by \a B will be allocated but remain unitialized.
     ///
-    /// \param[in] B bodies to merge, will be empty after call
+    /// \param[in] B bodies to merge with, will be empty after call
     void merge(bodies&B) falcON_THROWING;
     //==========================================================================
-    // \name removing and creation of bodies
+    // \name removal and creation of bodies
     /// Remove bodies which have been flagged for removal, eg by
     /// iterator::flag_for_removal().
     ///
@@ -1150,7 +1152,7 @@ namespace falcON {
     /// from the end. This implies that the order of bodies is altered (however,
     /// bodies of the same bodytype are kept together) and that the number of
     /// bodies used is less than that allocated.
-    /// \note alters to body order.
+    /// \note alters the body order, affecting iterator::bodyindex()
     void remove();
     //--------------------------------------------------------------------------
     /// Remove bodies of type t which have been flagged for removal, eg by
@@ -1162,19 +1164,18 @@ namespace falcON {
     /// \note alters to body order.
     void remove(bodytype t);
     //--------------------------------------------------------------------------
-    /// activate a bodies of type \a t.
-    /// If no body is available (i.e. isallocated but not activated), we
-    /// allocate at least \a Na bodies (though only one will be activated).
+    /// activate a body of type \a t.
+    /// If no body is available for activation, we allocate at least \a Na
+    /// bodies (though only one will be activated).
     ///
-    /// \return a valid bodies::iterator to a body of type \e t
+    /// \return a valid bodies::iterator to a body of type \a t
     /// \param[in] t   bodytype of body requested
     /// \param[in] Na  if no body available, allocate at least this many
     iterator new_body(bodytype t, unsigned Na=0) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// activate \a Nb bodies of type \a t.
-    /// If not enough bodies are available (i.e. are allocated but not
-    /// activated), we allocate at least \a Na bodies (though only \a Nb will be
-    /// activated).
+    /// If not enough bodies are available for activation, we allocate at
+    /// least \a Na bodies (though only \a Nb will be activated).
     ///
     /// \return a valid bodies::iterator to the first of \a Nb new bodies
     /// \param[in] Nb  # bodies to activate
@@ -1594,16 +1595,13 @@ namespace falcON {
   }
 #define CheckMissingBodyData(B,F) (B)->CheckData((F),__FILE__,__LINE__)
   // ///////////////////////////////////////////////////////////////////////////
-  // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // falcON::body                                                               
   //                                                                            
   /// a body is simply synonymous to bodies::iterator                           
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
-  // ///////////////////////////////////////////////////////////////////////////
   typedef bodies::iterator body;
-  // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   //  class falcON::snapshot                                                    
@@ -1613,7 +1611,6 @@ namespace falcON {
   /// Derived from class falcON::bodies, inheriting all public members.         
   /// In addition, methods for snapshot I/O to file are provided.               
   ///                                                                           
-  // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
   class snapshot : public bodies
   {
