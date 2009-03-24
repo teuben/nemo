@@ -14,7 +14,7 @@
 #   where /usr/nemo is the ultimate location of $NEMO (the default is the
 #   current directory)
 #
-#   For problems consult:   nemo@astro.umd.edu
+#   This script is not needed anymore, CVS has been taken its functionality.
 #
 #   Known problems:
 #       convex: instead of make, use src/scripts/make.convex as $NEMOBIN/make
