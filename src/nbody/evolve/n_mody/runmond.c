@@ -7,7 +7,7 @@
 string defv[] = {
   "in=???\n         Input snapshot",
   "outdir=???\n     Run directory",
-  "out=t\n          Output snapshot if to convert back to NEMO?",
+  "out=\n           Output snapshot if to convert back to NEMO?",
   "nr=128\n         some help",
   "nth=64\n         some help",
   "nph=128\n        some help",
@@ -30,7 +30,7 @@ string defv[] = {
   "dt_min=1.e-5\n   some help",
   "cfl=0.3\n        some help",
   "lp_ord=2\n       some help",
-  "VERSION=0.1\n    26-feb-2009 PJT",
+  "VERSION=0.2\n    10-mar-2009 PJT",
   NULL,
 };
 
