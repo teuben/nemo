@@ -121,20 +121,20 @@ namespace WDutils {
       M::v_as(a,x);
     }
     /// from 2 elements (for N=2)
-    tupel      (X const&x0, X const&x1) {
+    tupel      (X x0, X x1) {
       WDutilsStaticAssert(N==2);
       a[0]=x0;
       a[1]=x1;
     }
     /// from 3 elements (for N=3)
-    tupel      (X const&x0, X const&x1, X const&x2) {
+    tupel      (X x0, X x1, X x2) {
       WDutilsStaticAssert(N==3);
       a[0]=x0;
       a[1]=x1;
       a[2]=x2;
     }
     /// from 4 elements (for N=4)
-    tupel      (X const&x0, X const&x1, X const&x2, X const&x3) {
+    tupel      (X x0, X x1, X x2, X x3) {
       WDutilsStaticAssert(N==4);
       a[0]=x0;
       a[1]=x1;
@@ -142,7 +142,7 @@ namespace WDutils {
       a[3]=x3;
     }
     /// from 5 elements (for N=5)
-    tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4) {
+    tupel      (X x0, X x1, X x2, X x3, X x4) {
       WDutilsStaticAssert(N==5);
       a[0]=x0;
       a[1]=x1;
@@ -151,8 +151,7 @@ namespace WDutils {
       a[4]=x4;
     }
     /// from 6 elements (for N=6)
-    tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
-		X const&x5) { 
+    tupel      (X x0, X x1, X x2, X x3, X x4, X x5) { 
       WDutilsStaticAssert(N==6);
       a[0]=x0;
       a[1]=x1;
@@ -162,8 +161,7 @@ namespace WDutils {
       a[5]=x5;
     }
     /// from 7 elements (for N=7)
-    tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
-		X const&x5, X const&x6) {
+    tupel      (X x0, X x1, X x2, X x3, X x4, X x5, X x6) {
       WDutilsStaticAssert(N==7);
       a[0]=x0;
       a[1]=x1;
@@ -174,8 +172,7 @@ namespace WDutils {
       a[6]=x6;
     }
     /// from 8 elements (for N=8)
-    tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
-		X const&x5, X const&x6, X const&x7) {
+    tupel      (X x0, X x1, X x2, X x3, X x4, X x5, X x6, X x7) {
       WDutilsStaticAssert(N==8);
       a[0]=x0;
       a[1]=x1;
@@ -187,8 +184,7 @@ namespace WDutils {
       a[7]=x7;
     }
     /// from 9 elements (for N=9)
-    tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
-		X const&x5, X const&x6, X const&x7, X const&x8) {
+    tupel      (X x0, X x1, X x2, X x3, X x4, X x5, X x6, X x7, X x8) {
       WDutilsStaticAssert(N==9);
       a[0]=x0;
       a[1]=x1;
@@ -201,8 +197,7 @@ namespace WDutils {
       a[8]=x8;
     }
     /// from 10 elements (for N=10)
-    tupel      (X const&x0, X const&x1, X const&x2, X const&x3, X const&x4,
-		X const&x5, X const&x6, X const&x7, X const&x8, X const&x9) {
+    tupel      (X x0, X x1, X x2, X x3, X x4, X x5, X x6, X x7, X x8, X x9) {
       WDutilsStaticAssert(N==10);
       a[0]=x0;
       a[1]=x1;
@@ -284,35 +279,35 @@ namespace WDutils {
     /// \name binary operators with scalar
     //@{
     /// assign all elements to scalar
-    template<typename S> tupel&operator= (S const&x) {
+    template<typename S> tupel&operator= (S x) {
       M::s_as(a,x);
       return*this;
     }
     /// multiply all elements by scalar
-    template<typename S> tupel&operator*= (S const&x) {
+    template<typename S> tupel&operator*= (S x) {
       M::s_ml(a,x);
       return*this;
     }
     /// divide all elements by scalar
-    template<typename S> tupel&operator/= (S const&x) {
+    template<typename S> tupel&operator/= (S x) {
       return operator*=(S(1)/x);
     }
     /// return product with scalar
-    template<typename S> tupel operator* (S const&x) const {
+    template<typename S> tupel operator* (S x) const {
       tupel y;
       M::v_ast(y.a,a,x);
       return y;
     }
     /// return product with inverse of scalar
-    template<typename S> tupel operator/ (S const&x) const {
+    template<typename S> tupel operator/ (S x) const {
       return operator*(S(1)/x);
     }
     /// are all elements equal to scalar?
-    bool operator== (X const&x) const {
+    bool operator== (X x) const {
       return M::s_eq(a,x);
     }
     /// is any element un-equal to scalar?
-    bool operator!= (X const&x) const {
+    bool operator!= (X x) const {
       return M::s_neq(a,x);
     }
     //@}
@@ -465,12 +460,12 @@ namespace WDutils {
       return*this;
     }
     /// update maximum element-wise: tupel::a[i] = max(tupel::a[i], x_i + f)
-    tupel&up_max(tupel const&x, X const&f) {
+    tupel&up_max(tupel const&x, X f) {
       M::v_umax(a,x.a,f);
       return*this;
     }
     /// update minimum element-wise: tupel::a[i] = min(tupel::a[i], x_i - f)
-    tupel&up_min(tupel const&x, X const&f) {
+    tupel&up_min(tupel const&x, X f) {
       M::v_umix(a,x.a,f);
       return*this;
     }
@@ -558,12 +553,12 @@ namespace WDutils {
   //@{
   /// is y[i] == x for all i?
   template<int N, typename X> inline
-  bool operator==(X const&x,tupel<N,X> const&y) {
+  bool operator==(X x,tupel<N,X> const&y) {
     return y==x;
   }
   /// is y[i] != x for any i?
   template<int N, typename X> inline
-  bool operator!=(X const&x,tupel<N,X> const&y) {
+  bool operator!=(X x,tupel<N,X> const&y) {
     return y!=x;
   }
   /// return maximum element of tupel
@@ -618,7 +613,7 @@ namespace WDutils {
   }
   /// product with scalar: x[i] = y * v[i]
   template<int N, typename X, typename S> inline
-  tupel<N,X> operator*(S const&y, tupel<N,X> const&v) {
+  tupel<N,X> operator*(S y, tupel<N,X> const&v) {
     return v*y;
   }
   /// return element-wise function call: return f(tupel::a[i])

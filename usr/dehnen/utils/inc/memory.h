@@ -82,6 +82,14 @@ namespace WDutils {
 #endif
 	(f,l)("caught std::bad_alloc\n");
     }
+    if(n && t==0)
+#ifdef WDutils_EXCEPTIONS
+      throw Thrower
+#else
+      Error
+#endif
+	(f,l)("could not allocate %lu %s = %lu bytes\n",
+	      n,nameof(T),n*sizeof(T));
     if(debug(WDutilsAllocDebugLevel))
       DebugInformation(f,l,lib)("allocated %lu %s = %lu bytes @ %p\n",
 				n,nameof(T),n*sizeof(T),static_cast<void*>(t));
@@ -1332,6 +1340,11 @@ namespace WDutils {
       return message("Stack<%s>",traits<T>::name());
     }
   };
+} // namespace WDutils {
+#ifdef __GNUC__
+#include <mm_malloc.h>
+#endif
+namespace WDutils {
   //////////////////////////////////////////////////////////////////////////////
   /// \defgroup  Mem16  memory alignment to 16 bytes
   /// \name memory alignment to 16 bytes
@@ -1380,6 +1393,30 @@ namespace WDutils {
   /// \version  debugged 02-09-2004 WD
   inline void* malloc16(size_t n) WDutils_THROWING
   {
+#ifdef __GNUC__
+    void*t;
+    try {
+      t = _mm_malloc(n,16);
+    } catch(...) {
+      t = 0;
+#ifdef WDutils_EXCEPTIONS
+      throw Thrower
+#else
+      Error
+#endif
+	()("allocation of %lu bytes aligned to 16 failed\n",n);
+    }
+    if(n && t==0)
+#ifdef WDutils_EXCEPTIONS
+      throw Thrower
+#else
+      Error
+#endif
+	()("could not allocate %lu bytes aligned to 16\n",n);
+    if(debug(WDutilsAllocDebugLevel))
+      DebugInformation()("allocated %lu bytes aligned to 16 @ %p\n",n,t);
+    return t;
+#else
     // linear memory model:                                                     
     // ^    = 16byte alignment points                                           
     // S    = sizeof(void*) (assumed 4 in this sketch)                          
@@ -1401,6 +1438,7 @@ namespace WDutils {
     if(off) q += 16-off;                            // IF offset, shift         
     *((void**)(q-sizeof(void*))) = p;               // remember allocation point
     return static_cast<void*>(q);                   // return aligned address   
+#endif
   }
   //----------------------------------------------------------------------------
   ///
@@ -1412,9 +1450,28 @@ namespace WDutils {
   /// inevitably result in a run-time \b error!
   ///
   /// \param q  pointer previously allocated by WDutils::malloc16()
-  inline void  free16  (void*q) WDutils_THROWING
+  inline void free16(void*q) WDutils_THROWING
   {
+#ifdef __GNUC__
+    if(0==q) {
+      Warning()("free16: trying to delete zero pointer");
+      return;
+    }
+    try {
+      _mm_free(q);
+    } catch(...) {
+#ifdef WDutils_EXCEPTIONS
+      throw Thrower
+#else
+      Error
+#endif
+	()("free16: de-allocating %p failed\n", q);
+    }
+    if(debug(WDutilsAllocDebugLevel))
+      DebugInformation()("free16: de-allocated array @ %p\n",q);
+#else
     WDutils_DEL_A( (char*)( *( (void**) ( ( (char*)q )-sizeof(void*) ) ) ) );
+#endif
   }
   //----------------------------------------------------------------------------
   ///
