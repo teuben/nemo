@@ -88,10 +88,14 @@ namespace WDutils {
 #else
       Error
 #endif
-	(f,l)("could not allocate %lu %s = %lu bytes\n",
+	(f,l)(sizeof(size_t)==8? 
+	      "could not allocate %lu %s = %lu bytes\n" :
+	      "could not allocate %du %s = %du bytes\n",
 	      n,nameof(T),n*sizeof(T));
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)("allocated %lu %s = %lu bytes @ %p\n",
+      DebugInformation(f,l,lib)(sizeof(size_t)==8?
+				"allocated %lu %s = %lu bytes @ %p\n" :
+				"allocated %du %s = %du bytes @ %p\n",
 				n,nameof(T),n*sizeof(T),static_cast<void*>(t));
     return t;
   }
@@ -1404,7 +1408,9 @@ namespace WDutils {
 #else
       Error
 #endif
-	()("allocation of %lu bytes aligned to 16 failed\n",n);
+	()(sizeof(size_t)==8?
+	   "allocation of %lu bytes aligned to 16 failed\n":
+	   "allocation of %du bytes aligned to 16 failed\n",n);
     }
     if(n && t==0)
 #ifdef WDutils_EXCEPTIONS
@@ -1412,9 +1418,13 @@ namespace WDutils {
 #else
       Error
 #endif
-	()("could not allocate %lu bytes aligned to 16\n",n);
+	()(sizeof(size_t)==8?
+	   "could not allocate %lu bytes aligned to 16\n":
+	   "could not allocate %du bytes aligned to 16\n",n);
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation()("allocated %lu bytes aligned to 16 @ %p\n",n,t);
+      DebugInformation()(sizeof(size_t)==8?
+			 "allocated %lu bytes aligned to 16 @ %p\n":
+			 "allocated %du bytes aligned to 16 @ %p\n",n,t);
     return t;
 #else
     // linear memory model:                                                     
