@@ -54,6 +54,11 @@
 ## those used in generating the file SPHEROID.                                 #
 ##                                                                             #
 ################################################################################
+##                                                                             #
+## history                                                                     #
+## 27-03-2009 WD  replaced snapfilter (non-existent) with s2s                  #
+##                                                                             #
+################################################################################
 echo "mkgalaxy:    building a N-body model of a disc galaxy"
 
 ################################################################################
@@ -426,7 +431,7 @@ if ( $Nb > 0 ) then
     ############################################################################
     ## split halo and bulge
     echo "mkgalaxy:    extracting bulge into file $name.b (needed for bulge potential)"
-    snapfilter $spheroid $name.b filter="i<#0"  params=$Nb debug=$debug >>& $name.err
+    s2s $spheroid $name.b filter="i<#0"  params=$Nb debug=$debug >>& $name.err
 
     if(! -f $name.b) then
 	echo "ERROR [mkgalaxy]: could not isolate adjusted bulge component; see also file $name.err."
@@ -434,7 +439,7 @@ if ( $Nb > 0 ) then
     endif
 
     echo "mkgalaxy:    extracting halo into file $name.h (needed for halo potential)"
-    snapfilter $spheroid $name.h filter="i>=#0" params=$Nb debug=$debug >>& $name.err
+    s2s $spheroid $name.h filter="i>=#0" params=$Nb debug=$debug >>& $name.err
 
     if(! -f $name.h) then
 	echo "ERROR [mkgalaxy]: could not isolate adjusted halo component; see also file $name.err."
