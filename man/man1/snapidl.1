@@ -98,6 +98,9 @@ In fortran, without any error control and array overflow checking,
 	end
 
 .fi
+.SH CAVEAT
+Some versions of IDL (e.g. 6.3) do not properly read/write 8 byte headers
+where needed on 64 bit systems. See also \fIunfio(1NEMO)\fP for a description.
 .SH SEE ALSO
 snapprint(1NEMO), unfio(1NEMO), snapshot(5NEMO), 
 .SH FILES
