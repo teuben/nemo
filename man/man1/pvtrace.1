@@ -1,4 +1,4 @@
-.TH PVTRACE 1NEMO "6 May 2001"
+.TH PVTRACE 1NEMO "18 March 2009"
 .SH NAME
 pvtrace \- PV diagram envelope tracing 
 .SH SYNOPSIS
@@ -26,7 +26,7 @@ becomes equal to
 .nf
 	I_t = sqrt( (eta*I_max)^2 + (I_lc)^2 )
 .fi
-where I_max is the maximum intensity in the map, and I_lc the lowest counter
+where I_max is the maximum intensity in the map, and I_lc the lowest contour
 (usually 3 times the noise in the PV diagram). Both eta and I_lc can be
 set via parameters to the program. Typical values for eta = 0.2 - 0.5.
 .PP
@@ -85,6 +85,12 @@ Inclination of the galaxy. Each rotation speed is corrected by sin(inc).
 \fBcenter=\fP
 Center of the galaxy along the Position axis. 
 [Default: 0]
+.TP
+\fBrotcur=t|f\fP
+Should a folded rotation curve be tabulated? If so, negative positions will have
+both position and velocity with a positive sign, thus creating two rotation
+curves, receding and approaching, which can be plotted on top of each other
+and compared. [Default: false]
 .SH OUTPUT
 Output of the program will be an ASCII table, with various derived velocities
 as function of position along the P axis in the PV-diagram. The following
@@ -108,8 +114,9 @@ rotcur(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO), ccdmom(1NEMO)
 Sancisi & Allen 1979
 Sofue, Y. 1996 ApJ 458, 120
 Sofue et al 1997 PASJ 49, 17
-Sofue et al 523, 136
-Gentile et al. 2004MNRAS.351..903G (MET/WAMET method)
+Sofue et al 523, 136 
+Sofue et al (1997AJ....114.2428S)
+Gentile et al. (2004MNRAS.351..903G) - MET/WAMET method
 .fi
 .SH FILES
 .nf
@@ -123,4 +130,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 5-May-01	V1.0 Created	PJT
 6-may-01	V1.1 clip=, interpolated to find trace  	PJT
+18-mar-09	V1.3 added rotcur=	PJT
 .fi
