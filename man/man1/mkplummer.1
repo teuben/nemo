@@ -15,6 +15,8 @@ and finite spatial extent which can be regulated by specifying
 distribution function of a Plummer model is spherically symmetric and
 isotropic, and is a polytrope of index n = 5. 
 See also Aarseth et al. (1974) and Plummer (1911)
+.PP
+There is also an implementation in Dehnen's falcON suite: \fImkplum(1NEMO)\fP
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 25
@@ -111,7 +113,7 @@ a Salpeter mass spectrum with
   % mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
 .fi
 .SH SEE ALSO
-snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0)
+snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO)
 .PP
 H.C.Plummer (1911), \fIMNRAS\fP, \fB71\fP, 460.
 .PP
