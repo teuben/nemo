@@ -38,7 +38,10 @@ R. W. Hockney and J. W. Eastwood
 
 {\it "Effective Fortran"} - Metcalf. Oxford: Clarendon Press (1985).
 
-{\it "Numerical Recepies"} - Press et. al. ...
+{\it "Numerical Recepies"} - Press et. al. ... Various editions in various languages.
 
 {\it "Galactic Dynamics"} - Binney, J. and Tremaine, S.
-(Princeton U. Press; Princeton; 1987)
+(Princeton U. Press; Princeton; 1987) [BT1]
+
+{\it "Galactic Dynamics 2nd Ed."} - Binney, J. and Tremaine, S.
+(Princeton U. Press; Princeton; 2008) [BT2]
