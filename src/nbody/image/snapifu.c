@@ -1,5 +1,5 @@
 /* 
- *  SNAPIFS:   generate spectra at a grid of points
+ *  SNAPIFU:   generate spectra at a grid of points
  *
  *	 8-apr-09  V1.0 - cloned off snapgrid             PJT
  *
@@ -21,30 +21,28 @@
 #include <image.h>              /* images */
 
 string defv[] = {		/* keywords/default values/help */
-	"in=???\n			  input filename (a snapshot)",
-	"out=???\n			  output filename (an image)",
-	"times=all\n			  standard selection of times",
-	"grid=\n                          file of X,Y grid positions",
-	"xgrid=0\n                        X grid position",
-	"ygrid=0\n                        Y grid position",
-	"size=1\n                         size  (circular) of fiber",
-	"xvar=x\n			  x-variable to grid",
-	"yvar=y\n			  y-variable to grid",
-	"zvar=-vz\n			  z-variable to grid",
-        "evar=m\n                         emission variable(s)",
-        "tvar=0\n                         absorbtion variable",
-        "dvar=z\n                         depth variable w/ tvar=",
-	"zrange=-infinity:infinity\n	  z-range in gridding",
-	"nz=1\n			  	  z size of image",
-	"moment=0\n			  moment in zvar (-2,-1,0,1,2...)",
-	"mean=f\n			  mean (moment=0) or sum per cell",
-	"stack=f\n			  Stack all selected snapshots?",
-	"integrate=f\n                    Sum or Integrate along 'dvar'?",
-	"VERSION=1.0\n			  8-apr-09 PJT",
-	NULL,
+  "in=???\n			  input filename (a snapshot)",
+  "out=???\n			  output filename (an image)",
+  "times=all\n			  standard selection of times",
+  "xgrid=0\n                      X grid position(s)",
+  "ygrid=0\n                      Y grid position(s)",
+  "size=0.1\n                     diameter of IFU fiber",
+  "xvar=x\n			  x-variable to grid",
+  "yvar=y\n			  y-variable to grid",
+  "zvar=-vz\n			  z-variable to grid",
+  "evar=m\n                       emission variable(s)",
+  "tvar=0\n                       absorbtion variable",
+  "dvar=z\n                       depth variable w/ tvar=",
+  "zrange=-infinity:infinity\n	  z-range in gridding",
+  "nz=1\n			  z size of image",
+  "moment=0\n			  moment in zvar (-2,-1,0,1,2...)",
+  "mean=f\n			  mean (moment=0) or sum per cell",
+  "stack=f\n			  Stack all selected snapshots?",
+  "VERSION=1.0\n		  8-apr-09 PJT",
+  NULL,
 };
 
-string usage="take spectra from a snapshot at a set of specified points";
+string usage="take spectra from a snapshot at a set of specified grid points";
 
 string cvsid="$Id$"; 
 
@@ -52,6 +50,7 @@ string cvsid="$Id$";
 #define TIMEFUZZ  0.000001
 #define CUTOFF    4.0		/* cutoff of gaussian in terms of sigma */
 #define MAXVAR	  16		/* max evar's */
+#define MAXPOINTS 1024          /* max # gridpoints */
 
 local stream  instr, outstr;				/* file streams */
 
@@ -69,7 +68,9 @@ local real   zrange[3];                 /* range of spectra */
 local real   zbeam;                     /* >0 if convolution beams */
 local int    zedge;                     /* check if infinite edges */
 
-local real   xgrid, ygrid, size;        /* grid where spectra defined */
+local real   xgrid[MAXPOINTS], ygrid[MAXPOINTS];   /* IFU grid points */
+local real   size;                                 /* size of each point */
+local int    ngridx, ngridy;                       /* number of gridpoints */
 
 local string xvar, yvar, zvar;  	/* expression for axes */
 local string xlab, ylab, zlab;          /* labels for output */
@@ -85,7 +86,6 @@ local real   zsig;			/* positive if convolution in Z used */
 local real   zmin, zmax;
 
 local bool   Qmean;			/* adding or taking mean for image ?? */
-local bool   Qint;                      /* integrate, instead of sum, along the 3rd dimension */
 local bool   Qstack;                    /* stacking snapshots ?? */
 local bool   Qdepth;                    /* need dfunc/tfunc for depth integration */
 
@@ -123,12 +123,12 @@ nemo_main ()
     while (read_snap())	{                   /* read next N-body snapshot */
         for (i=0; i<nvar; i++) {
             if (!Qstack) {
-            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
 		clear_image();
+            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
 	    }
             bin_data(i);	            /* bin and accumulate */
             if (!Qstack) {                  /* if multiple images: */
-	      if (Qdepth||Qint)
+	      if (Qdepth)
 		los_data();
 	      rescale_data(i);            /* rescale */
 	      write_image(outstr,iptr);   /* and write them out */
@@ -138,7 +138,7 @@ nemo_main ()
         free_snap();
     }
     if (Qstack) {
-      if (Qdepth||Qint)
+      if (Qdepth)
 	los_data();
       rescale_data(0);                    /* and rescale before ... */
       write_image (outstr,iptr);	    /* write the image */
@@ -157,15 +157,7 @@ void setparams()
     times = getparam("times");
     Qmean = getbparam("mean");
     Qstack = getbparam("stack");
-    Qint = getbparam("integrate");
-
-    if (Qint) {
-      warning("new version with integrate=t, only for MWP");
-      warning("only use moment=0 stack=f mean=f etc.");
-    }
-
       
-    nx = 1;
     ny = 1;
     nz = getiparam("nz");
     if (nz<1) error("Bad grid size (%d)",nz);
@@ -202,8 +194,14 @@ void setparams()
     ylab = yvar;
     zlab = zvar;
 
-    xgrid = getdparam("xgrid");
-    ygrid = getdparam("ygrid");
+    ngridx = nemoinpd(getparam("xgrid"),xgrid,MAXPOINTS);
+    ngridy = nemoinpd(getparam("ygrid"),ygrid,MAXPOINTS);
+    if (ngridx < 0) error("xgrid parsing error");
+    if (ngridy < 0) error("ygrid parsing error");
+    if (ngridx != ngridy) error("xgrid and ygrid need equal number");
+
+    nx = ngridx;
+    
     size = getdparam("size");
 
     moment=getiparam("moment");
@@ -215,39 +213,39 @@ void setparams()
 
 void compfuncs()
 {
-    int i;
+  int i;
     
-    xfunc = btrtrans(xvar);
-    yfunc = btrtrans(yvar);
-    zfunc = btrtrans(zvar);
-    for (i=0; i<nvar; i++)
-        efunc[i] = btrtrans(evar[i]);
-    Qdepth = !streq(tvar,"0");
-    if (Qdepth || Qint) {
-        dfunc = btrtrans(dvar);
-        tfunc = btrtrans(tvar);
-    }
+  xfunc = btrtrans(xvar);
+  yfunc = btrtrans(yvar);
+  zfunc = btrtrans(zvar);
+  for (i=0; i<nvar; i++)
+    efunc[i] = btrtrans(evar[i]);
+  Qdepth = !streq(tvar,"0");
+  if (Qdepth) {
+    dfunc = btrtrans(dvar);
+    tfunc = btrtrans(tvar);
+  }
 }
 
 int read_snap()
 {		
-    for(;;) {		
-        get_history(instr);
-        get_snap(instr,&btab,&nobj,&tnow,&bits);
-        if (bits==0) 
-            break;           /* no snapshot at all */
-        if ( (bits&PhaseSpaceBit)==0 )
-            continue;       /* skip, no data, probably diagnostics */
-        if (streq(times,"all") || within(tnow, times, TIMEFUZZ))
-            break;          /* take it, if time in timerange */
-    }
-    if (bits) {
-    	if (Qstack)
-	    dprintf(1,"Adding data for times=%g; bits=0x%x\n",tnow,bits);
-	else
-	    dprintf(1,"New data for times=%g; bits=0x%x\n",tnow,bits);
-    }
-    return bits;
+  for(;;) {		
+    get_history(instr);
+    get_snap(instr,&btab,&nobj,&tnow,&bits);
+    if (bits==0) 
+      break;           /* no snapshot at all */
+    if ( (bits&PhaseSpaceBit)==0 )
+      continue;       /* skip, no data, probably diagnostics */
+    if (streq(times,"all") || within(tnow, times, TIMEFUZZ))
+      break;          /* take it, if time in timerange */
+  }
+  if (bits) {
+    if (Qstack)
+      dprintf(1,"Adding data for times=%g; bits=0x%x\n",tnow,bits);
+    else
+      dprintf(1,"New data for times=%g; bits=0x%x\n",tnow,bits);
+  }
+  return bits;
 }
 
 #define CV(i)  (CubeValue(i,ix,iy,iz))
@@ -325,17 +323,15 @@ bin_data(int ivar)
 {
     real brightness, cell_factor, x, y, z, z0, t,sum;
     real expfac, fac, sfac, flux, b, emtau, depth;
-    real e, emax, twosqs, r2, size2;
-    int    i, j, k, ix, iy, iz, n, nneg, ioff;
-    int    ix0, iy0, ix1, iy1, m, mmax;
+    real r2, r2max;
+    int    i, j, k, l, ix, iy, iz, n, nneg, ioff;
     Body   *bp;
     Point  *pp, *pf,*pl, **ptab;
-    bool   done;
 
-    size2 = size * size;
+    r2max = 0.25 * size * size;    /* size is the diameter, we need r^2 here */
     
-    if (Qdepth || Qint) {
-      /* first time around allocate a map[] of pointers to Point's */
+    if (Qdepth) {
+        /* first time around allocate a map[] of pointers to Point's */
         if (map==NULL)
             map = (Point **) allocate(Nx(iptr)*Ny(iptr)*sizeof(Point *));
         if (map==NULL || !Qstack) {
@@ -348,31 +344,24 @@ bin_data(int ivar)
     if (Qmean)
         cell_factor = 1.0;
     else
-        cell_factor = 1.0 / ABS(Dx(iptr)*Dy(iptr));
-
-    if (Qint)
-        cell_factor = 1.0;   
+        cell_factor = 1.0 / (r2max*PI);
 
     nbody += nobj;
-    mmax = 1;
-    emax = 10.0;
-
-		/* big loop: walk through all particles and accumulate ccd data */
-    for (i=0, bp=btab; i<nobj; i++, bp++) {
-        x = xfunc(bp,tnow,i);            /* transform */
-	y = yfunc(bp,tnow,i);
-        z = zfunc(bp,tnow,i);
-        flux = efunc[ivar](bp,tnow,i);
-        if (Qdepth || Qint) {
-            emtau = odepth( tfunc(bp,tnow,i) );
-            depth = dfunc(bp,tnow,i);
-	}
-
-	r2 = sqr(x-xgrid)+sqr(y-ygrid);
-	if (r2>size2) {
-	  noutxy++;
+    
+    for (i=0, bp=btab; i<nobj; i++, bp++) {    /* loop over all particles */
+      x = xfunc(bp,tnow,i);                    /* transform */
+      y = yfunc(bp,tnow,i);
+      z = zfunc(bp,tnow,i);
+      flux = efunc[ivar](bp,tnow,i);
+      if (Qdepth) {
+	emtau = odepth( tfunc(bp,tnow,i) );
+	depth = dfunc(bp,tnow,i);
+      }
+      for (l=0; l<ngridx; l++) {                   /* loop over all grid positions */
+	ix = l;
+	r2 = sqr(x-xgrid[l])+sqr(y-ygrid[l]);
+	if (r2>r2max)
 	  continue;
-	}
 
         if (z<zmin || z>zmax) {         /* initial check in Z */
             noutz++;
@@ -383,79 +372,51 @@ bin_data(int ivar)
             continue;
         }
 
-        for (m=0; m<mmax; m++) {        /* loop over smoothing area */
-            done = TRUE;
-            for (iy1=-m; iy1<=m; iy1++)
-            for (ix1=-m; ix1<=m; ix1++) {       /* current smoothing edge */
-                ix = ix0 + ix1;
-                iy = iy0 + iy1;
-        	if (ix<0 || iy<0 || ix >= Nx(iptr) || iy >= Ny(iptr))
-        	    continue;
+	brightness =   flux * cell_factor;	/* normalize */
+	b = brightness;
+	for (k=0; k<ABS(moment); k++) brightness *= z;  /* moments in Z */
+	if (brightness == 0.0) continue;
 
-                if (m>0 && ABS(ix1) != m && ABS(iy1) != m) continue;
-                if (m>0)
-                    if (twosqs > 0)
-                        e = (sqr(ix1*Dx(iptr))+sqr(iy1*Dy(iptr)))/twosqs;
-                    else 
-                        e = 2 * emax;
-                else 
-                    e = 0.0;
-                if (e < emax) {
-                    sfac = exp(-e);
-                    done = FALSE;
-                } else
-                    sfac = 0.0;
+	if (Qdepth) {	   /* stack away relevant particle info */
+	  pp = (Point *) allocate(sizeof(Point));
+	  pp->em = brightness;
+	  pp->ab = emtau;
+	  pp->z  = z;
+	  pp->i  = i;
+	  pp->depth = depth;
+	  pp->next = NULL;
+	  ioff = ix + Nx(iptr)*iy;      /* location in grid map[] */
+	  pf = map[ioff];
+	  if (pf==NULL) {
+	    map[ioff] = pp;
+	    pp->last = pp;
+	  } else {
+	    pl = pf->last;
+	    pl->next = pp;
+	    pf->last = pp;
+	  }
+	  continue;       /* goto next accumulation now    CHECK */
+	}
 
-                brightness =   sfac * flux * cell_factor;	/* normalize */
-                b = brightness;
-        	for (k=0; k<ABS(moment); k++) brightness *= z;  /* moments in Z */
-                if (brightness == 0.0) continue;
-
-                if (Qdepth || Qint) {	   /* stack away relevant particle info */
-                    pp = (Point *) allocate(sizeof(Point));
-                    pp->em = brightness;
-                    pp->ab = emtau;
-                    pp->z  = z;
-		    pp->i  = i;
-		    pp->depth = depth;
-                    pp->next = NULL;
-                    ioff = ix + Nx(iptr)*iy; /* location in grid map[] */
-                    pf = map[ioff];
-                    if (pf==NULL) {
-                        map[ioff] = pp;
-                        pp->last = pp;
-                    } else {
-                        pl = pf->last;
-                        pl->next = pp;
-                        pf->last = pp;
-                    }
-
-                    continue;       /* goto next accumulation now    CHECK */
-                }
-
-
-                if (zsig > 0.0) {           /* with Gaussian convolve in Z */
-                    for (iz=0, z0=Zmin(iptr); iz<nz; iz++, z0 += Dz(iptr)) {
-        	        fac = (z-z0)/zsig;
-	        	if (ABS(fac)>CUTOFF)    /* if too far from gaussian center */
-		            continue;           /* no contribution added */
-        		fac = expfac*exp(-0.5*fac*fac);
-                        CV(iptr) += brightness*fac;     /* moment */
-                        if(iptr1) CV(iptr1) += b*fac;   /* moment -1,-2 */
-                        if(iptr2) CV(iptr2) += b*z*fac; /* moment -2 */
-        	    }
-        	} else {
-                    iz = zbox(z);
-                    CV(iptr) +=   brightness;   /* moment */
-                    if(iptr0) CV(iptr0) += 1.0; /* for mean */
-                    if(iptr1) CV(iptr1) += b;   /* moment -1,-2 */
-                    if(iptr2) CV(iptr2) += b*z; /* moment -2 */
-                }
-
-            } /* for (iy1/ix1) */
-            if (done) break;
-        } /* m */
-    }  /*-- end particles loop --*/
+	if (zsig > 0.0) {                   /* with Gaussian convolve in Z */
+	  for (iz=0, z0=Zmin(iptr); iz<nz; iz++, z0 += Dz(iptr)) {
+	    fac = (z-z0)/zsig;
+	    if (ABS(fac)>CUTOFF)            /* if too far from gaussian center */
+	      continue;                     /* no contribution added */
+	    fac = expfac*exp(-0.5*fac*fac);
+	    CV(iptr) += brightness*fac;     /* moment */
+	    if(iptr1) CV(iptr1) += b*fac;   /* moment -1,-2 */
+	    if(iptr2) CV(iptr2) += b*z*fac; /* moment -2 */
+	  }
+	} else {                            /* straight box gridding */
+	  iz = zbox(z);
+	  CV(iptr) +=   brightness;         /* moment */
+	  if(iptr0) CV(iptr0) += 1.0;       /* for mean */
+	  if(iptr1) CV(iptr1) += b;         /* moment -1,-2 */
+	  if(iptr2) CV(iptr2) += b*z;       /* moment -2 */
+	}
+      } /*-- (l) end grid loop --*/
+    }  /*-- (i) end particles loop --*/
 }
 
 
@@ -471,7 +432,9 @@ void los_data(void)
   bool   done;
   int    nzero = 0, none = 0;
 
-  if (Qdepth || Qint) {
+  error("code not adapted yet for IFU");
+
+  if (Qdepth) {
     
     /* a hack, need to fix checking before we do this */
     if (iptr0) {
@@ -642,7 +605,7 @@ rescale_data(int ivar)
         warning("There were %d stars with zero emissivity in the grid",nzero);
 }
 
-/*	compute integerized coordinates in X Y and Z, return < 0 if
+/*	compute integerized coordinates in Z, return < 0 if
  *	outside the range's - handle Z a little differently, as it
  *	allows edges at infinity
  */
