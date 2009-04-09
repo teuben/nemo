@@ -18,9 +18,6 @@ is also given:
 \fBin=\fP
 input file name(s). No default.
 .TP
-\fBout=\fP
-output file name. No default.
-.TP
 \fBselect=\fP
 list of columns to select. Any \fInemoinp(1NEMO)\fP  expression can be used.
 Columns can be repeated, and in any order. The output will be in exactly
@@ -33,15 +30,18 @@ Column separator. Valid are: \fBs\fP (space), \fBn\fP (newline),
 \fBr\fP (carriage return), as well as the literal symbols '\fB,\fP' 
 and '\fB:\fP'.
 [Default: \fBs\fP]
+.TP
+\fBout=-\fP
+output file name. By default standard output it used.
 .SH EXAMPLE
 Here is an example of how to reverse the columns from a table with 4 columns:
 .nf
-    tabcols in.tab out.tab 4:1:-1
+    tabcols in.tab 4:1:-1 > out.tab
 .fi
 and here is an example that
 re-arranges all the numbers in a table in one long column
 .nf
-    tabcols in.tab out.tab all n
+    tabcols in.tab all n > out.tab
 .fi
 .SH SEE ALSO
 tablines(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1)
@@ -53,4 +53,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 26-Jan-00	V1.0 Created 	PJT
+9-apr-09	V2.0 out=- now default and last argument	PJT
 .fi
