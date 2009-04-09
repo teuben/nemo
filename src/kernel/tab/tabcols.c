@@ -12,14 +12,14 @@
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n           input file name(s)",
-    "out=???\n          output file name",
     "select=all\n       columns to select",
     "colsep=SP\n        Column separator (SP,TAB,NL)",    
-    "VERSION=1.0a\n     1-jan-04 PJT",
+    "out=-\n            output file name",
+    "VERSION=2.0\n      9-apr-09 PJT",
     NULL
 };
 
-string usage = "Select columns from a table";
+string usage = "Select column(s) from a table";
 
 
 string input, output;			/* file names */
