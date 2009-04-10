@@ -36,6 +36,9 @@ string defv[] = {
 };
 
 string usage = "sub/average of an image";
+
+string cvsid="$Id$";
+
 
 
 #define MAXDIM 16384
