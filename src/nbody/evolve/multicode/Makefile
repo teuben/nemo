@@ -3,7 +3,7 @@ include $(NEMOLIB)/makedefs
 #	22-nov-89	HOSTTYPE
 #	12-nov-91	new Nemo V2. : location now in new $NEMO/src
 #			also deleted code_io.c and defs.h
-MBODY=4096
+MBODY=100000
 
 QFLAGS =  -DMBODY=$(MBODY)
 

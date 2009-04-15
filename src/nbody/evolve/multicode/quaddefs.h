@@ -41,7 +41,7 @@ int nbody;			/* number of bodies simulated               */
 Body *bodytab;			/* array representing state                 */
 
 #if !defined(MBODY)
-#  define MBODY 4096		/* max number of bodies, for orbstep        */
+#  define MBODY 100000		/* max number of bodies, for orbstep        */
 #endif
 
 /* quadcode_io.c */
