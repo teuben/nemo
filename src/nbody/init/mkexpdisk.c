@@ -9,6 +9,8 @@
  *	29-mar-97	SINGLEPREC fixed, ndisk= now nbody=	pjt
  *      29-may-01       Add time      PJT
  *       8-sep-01       gsl/xrandom
+ *      16-apr-09       clean up Z distribution, add zmode=     pjt
+ *
  */
 
 #include <stdinc.h>
@@ -24,30 +26,34 @@
 
 string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "out=???\n		  output file name ",
-    "nbody=1024\n	  number of particles ",
+    "nbody=???\n	  number of particles ",
     "alpha=4.0\n	  inverse exponential scale length ",
     "rcut=1.25\n	  outer cutoff radius ",
     "mdisk=1.0\n	  disk mass ",
     "Qtoomre=1.0\n	  Toomre's Q parameter ",
     "gamma=1.0\n	  fudge factor for v_eff(r) if > 0 ",
     "z0=0.025\n	          vertical scaleheight (softening) ",
-    "seed=12345\n	  usual random number seed ",
+    "seed=0\n	          usual random number seed ",
     "mode=1\n             creation mode: 1=josh 2=kruit/searle ",
+    "zmode=1\n            Z density mode: 1=gauss 2=exp 3=sech^2",
     "time=0.0\n           tag a time, normally skipped",
     "tab=f\n		  table output also? ",
     "zerocm=t\n           center the snapshot?",
     "headline=\n	  text headline for output ",
-    "VERSION=1.2d\n	  7-nov-05 PJT",
+    "VERSION=1.3\n	  16-apr-09 PJT",
     NULL,
 };
 
 string usage="set up a (bare) exponential disk";
 
+string cvsid="$Id$";
+
 local real alpha, rcut, mdisk, Qtoomre, gammas, z0;
 
 local bool Qtab;
 local int  ndisk;
-local int  cmode;
+local int  cmode;       /*   1=orig     2=vdKruit & Searle */
+local int  zmode;       /*   1=gauss (old)   2=exp   3=sech  */
 
 local Body *disktab;
 
@@ -59,8 +65,6 @@ local void centersnap(Body *btab, int nb);
 local void writesnap(string name, string headline);
 
 extern double bessi0(double), bessk0(double), bessi1(double), bessk1(double);
-extern double xrandom(double,double), grandom(double,double);
-
 
 nemo_main()
 {
@@ -72,8 +76,9 @@ nemo_main()
     Qtoomre = getdparam("Qtoomre");
     gammas = getdparam("gamma");
     ndisk = getiparam("nbody");
-    z0 = getdparam("z0");
+    z0 = getdparam("z0");             /* was called epsi in mkbaredisk */
     cmode = getiparam("mode");
+    zmode = getiparam("zmode");
     seed = init_xrandom(getparam("seed"));
     Qtab = getbparam("tab");
     inittables();
@@ -89,13 +94,24 @@ local real vcir[4*NTAB];
 local real mdsk[NTAB];
 local real rdsk[4*NTAB];
 
+local real mysech2(real z)
+{
+  real y = exp(z);
+  return sqr(2.0/(y+1.0/y));
+}
 
+local real myexp(real z)
+{
+  return 1.0/exp(z);
+}
 
 
 local void inittables()
 {
 
     int i;
+    real z;
+    real zmax= 10.0;
 
     rcir[0] = vcir[0] = 0.0;
     for (i = 1; i < NTAB; i++) {
@@ -108,6 +124,7 @@ local void inittables()
 	mdsk[i] = 1 - (1 + alpha * rdsk[i]) * exp(- alpha * rdsk[i]);
     }
     spline(&rdsk[NTAB], &mdsk[0], &rdsk[0], NTAB);
+
 }
 
 local real gdisk(real rad)
@@ -125,6 +142,8 @@ local void makedisk()
     int i, nzero=0;
     real mdsk_i, rad_i, theta_i, vcir_i, omega, Aoort, kappa;
     real mu, sig_r, sig_t, sig_z, vrad_i, veff_i, vorb_i;
+    real z1;
+    static bool first = TRUE;
 
     disktab = (Body *) allocate(ndisk * sizeof(Body));
     for (bp = disktab, i = 0; i < ndisk; bp++, i++) {
@@ -134,7 +153,23 @@ local void makedisk()
 	theta_i = xrandom(0.0, TWO_PI);
 	Pos(bp)[0] = rad_i * sin(theta_i);		/* assign positions */
 	Pos(bp)[1] = rad_i * cos(theta_i);
-	Pos(bp)[2] = grandom(0.0, 0.5 * z0);
+	if (zmode==0) 
+	  Pos(bp)[2] = grandom(0.0, 0.5 * z0);          /* gauss */
+	else if (zmode==1) {
+	  z1 = xrandom(-1.0,1.0);
+	  Pos(bp)[2] = log(1-ABS(z1)) * z0;             /* exp */
+	  if (z1<0) Pos(bp)[2] = -Pos(bp)[2]; 
+	} else if (zmode==2) {
+	  z1 = frandom(0.0,10.0,mysech2) * z0;          /* sech^2 */
+	  if (xrandom(-1.0,1.0) < 0) z1 = -z1;
+	  Pos(bp)[2] = z1;
+	} else if (zmode==3) {
+	  z1 = frandom(0.0,10.0,myexp) * z0;            /* exp */
+	  if (xrandom(-1.0,1.0) < 0) z1 = -z1;
+	  Pos(bp)[2] = z1;
+	} else
+	  error("zmode=%d not supported yet",zmode);
+
 	vcir_i = seval(rad_i, &rcir[0], &vcir[0], &vcir[NTAB], NTAB);
 	omega = vcir_i / rad_i;
 	Aoort = - 0.5 *
@@ -159,7 +194,7 @@ local void makedisk()
 	if (gammas > 0.0) 			/* Josh' method: averaged */
 	   veff_i = (vcir_i*vcir_i +
 			(gammas - 3*alpha*rad_i) * sig_r*sig_r);
-	else				/* a little more accurate */
+	else				/* a little more accurate ? */
 	   veff_i = sqr(vcir_i) - sqr(sig_r) * 
 	      (sqr(sig_t/sig_r) - 1.5 + 0.5*sqr(sig_z/sig_r) + 2*alpha*rad_i);
 	if (veff_i < 0.0) {
@@ -174,7 +209,11 @@ local void makedisk()
 	  (vrad_i * Pos(bp)[1] - vorb_i * Pos(bp)[0]) / rad_i;
 	Vel(bp)[2] = grandom(0.0, sig_z);
 	if (Qtab) {
-            printf ("%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
+	  if (first) {
+	    first = FALSE;
+	    printf ("# R    M   V_circ  Ome  Kap  Aoort   mu sig_r  sig_t  sig_z v_eff  Qtoomre   sig_t/sig_r  sig_z/sig_r   fac\n");
+	  }
+	  printf ("%g %g %g %g %g %g %g %g %g %g %g %g %g %g %g\n",
             rad_i,mdsk_i,vcir_i,omega,kappa,Aoort,mu,sig_r,sig_t,sig_z,veff_i,
             Qtoomre,
             sig_t/sig_r,sig_z/sig_r,
