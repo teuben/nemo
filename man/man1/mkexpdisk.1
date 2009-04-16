@@ -1,4 +1,4 @@
-.TH MKEXPDISK 1NEMO "7 June 2001"
+.TH MKEXPDISK 1NEMO "16 April 2009"
 .SH NAME
 mkexpdisk \- make an exponential disk
 .SH SYNOPSIS
@@ -6,13 +6,18 @@ mkexpdisk \- make an exponential disk
 .SH DESCRIPTION
 \fImkexpdisk\fP makes an N-body realization of an exponential disk,
 assuming no other mass distribution is present.  Such disks are wildly
-unstable, but fun to play with.
+unstable, but fun to play with. It can also produce tables that as function
+of radius prints out various properties of the streaming velocities and
+velocity dispersion.
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
 \fBout=\fP\fIout_file\fP
 Write to \fIout_file\fP in \fIsnapshot\fP(5NEMO) form.
 Default: \fIrequired\fP.
+.TP
+\fBnbody=\fP\fInum_bodies\fP
+Usual number of particles. Default: 1024.
 .TP
 \fBalpha=\fP\fIdisk_alpha\fP
 Inverse exponential scale length of disk. Default: \fB4.0\fP.
@@ -24,25 +29,32 @@ Outer cutoff radius of disk. Default: \fB1.25\fP.
 Total disk mass. Default: \fB1.0\fP.
 .TP
 \fBQtoomre=\fP\fIdisk_Q_value\fP
-Toomre's Q parameter for disk. Default: \fB1.0\fP.
+Toomre's Q parameter for disk.  For mode=1 this is constant over the disk
+for mode=2 it is ignored and z0 determines the velocity dispersions.
+Default: \fB1.0\fP.
 .TP
 \fBgamma=\fP\fIfudge_factor\fP
 Used when correcting for pressure support (asymmetric drift)
 When negative attempt is made to use correct radial dependance
-of gamma. Default: \fB1.0\fP.
-.TP
-\fBnbody=\fP\fInum_bodies\fP
-Usual number of particles. Default: \fB1024\fP.
+of gamma. By setting this negative, another relationship is used
+to ensure positive streaming.
+Default: \fB1.0\fP.
 .TP
 \fBz0=\fP\fIz_scaleheight\fP
-Softening, which sets the vertical scale of the disk.
+Softening, which sets the vertical scale of the disk. See also
+\fBzmode=\fP below. For gauss z0/2 is used, for exp and sech^2
+z0 is used.
 Default: \fB0.025\fP.
 .TP
 \fBseed=\fP\fIrandom_seed\fP
 Usual random number seed. Default: \fB12345\fP.
 .TP
 \fBmode=\fP\fIcreation-mode\fP
-Creation mode. 1=As original (in \fBmkbaredisk\fP), 2=vdKruit/Searle isothermal sech sheet. 
+Creation mode. 1=As original (in \fBmkbaredisk\fP), 2=vdKruit/Searle isothermal sech-square sheet. 
+[default: \fB1\fP].
+.TP
+\fBzmode=\fP\fIzdensity-mode\fP
+Mode for drawing particles in Z. 1=As original (in \fBmkbaredisk\fP), 2=exponential   3=sech^2 (v/d Kruit & Searle)
 [default: \fB1\fP].
 .TP
 \fBtime=\fP
@@ -52,7 +64,7 @@ If given,  this will be the time tagged with this snapshot.
 \fBtab=\fP\fIt|f\fP
 Logical set if additional table output is wanted. If so, its printing
 \fIr,m,v_c,omega,kappa,Aoort,mu,sig_r,sig_t,sig_z,v_eff,Qtoomre,\fP
-\fIsig_t/sig_r,sig_z/sig_r\fP. [default: \fBf\fP].
+\fIsig_t/sig_r,sig_z/sig_r,factor\fP. [default: \fBf\fP].
 .TP
 \fBzerocm=\fP\fIt|f\fP
 Center the snapshot? [Default: \fBt\fP].
@@ -60,13 +72,15 @@ Center the snapshot? [Default: \fBt\fP].
 \fBheadline=\fP\fImessage\fP
 Text headline for output. Default: \fInone\fP.
 .SH "SEE ALSO"
-mkbaredisk(1NEMO), mktestdisk(1NEMO), mkkd95(1NEMO), mkexphot(1NEMO), magalie(1NEMO)
+mkbaredisk(1NEMO), mktestdisk(1NEMO), mkkd95(1NEMO), mkexphot(1NEMO), magalie(1NEMO), snapshot(5NEMO)
 .SH AUTHOR
-Joshua E. Barnes
+Joshua E. Barnes, Peter Teuben
 .SH HISTORY
 .nf
 .ta +1.0i +4.0i
+1990		cloned off mkbaredisk	PJT
 29-may-01	added time=	PJT
+16-apr-09	cleanup of Z and added zmode=	PJT
 .fi
 
 
