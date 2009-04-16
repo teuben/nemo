@@ -1,4 +1,4 @@
-.TH CCDSUB 1NEMO "17 June 2003"
+.TH CCDSUB 1NEMO "9 April 2009"
 .SH NAME
 ccdsub \- sub/average of an image
 .SH SYNOPSIS
@@ -11,7 +11,7 @@ be bogus).
 .PP
 Since cubes/images produced by this program may have dummy
 axes (length 1), you will need to use \fIccdslice(1NEMO)\fP to
-get rid of them.
+get rid of them, or use the \fBdummy=\fP keyword below.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -29,14 +29,10 @@ Valid numbers are 1..nx. By default all will be selected.
 \fBy=\fP
 Y coordinates to select.
 Valid numbers are 1..ny. By default all will be selected.
-
 .TP
 \fBz=\fP
 Z coordinates to select.
 Valid numbers are 1..nz. By default all will be selected.
-.TP
-\fBaver=\fP
-Coordinates to average     
 .TP
 \fBnxaver=\fP
 Number X to aver (size remains same) 
@@ -44,8 +40,17 @@ Number X to aver (size remains same)
 \fBnyaver=\fP
 Number Y to aver (size remains same) 
 .TP
-\fBskip=\fP
-Coordinates to skip     
+\fBnzaver=\fP
+Number Y to aver (size remains same) 
+.TP
+\fBdummy=t|f\fP
+Write out dummy axes as well? [true]
+.TP
+\fBreorder=xyz\fP
+New order of axes after all previous actions have been taken.
+The default is no reordering, i.e. keep it in \fBxyz\fP order.
+To reverse only the X and Y axis, \fBreorder=yxz\fP is needed.
+** NOT IMPLEMENTED YET **
 .SH SEE ALSO
 ccdslice(1NEMO), ccdmom(1NEMO), image(5NEMO)
 .SH AUTHOR
@@ -57,4 +62,5 @@ Peter Teuben
 22-Feb-97	man page written	PJT
 12-aug-02	more doc	PJT
 17-jun-03	WCS for simple subsetting	PJT
+9-apr-09	V1.6 replace skip= with dummy=, fix bug nzaver=  	PJT
 .fi
