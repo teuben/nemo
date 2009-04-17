@@ -3,6 +3,10 @@ include $(NEMOLIB)/makedefs
 #need some modfs for MacOS-X            -lcc_dynamic
 #    for MacOSX 10.4 might also need:   -lSystemStubs
 #
+# some history on how C and Fortran was linked in this file: (5 files: genhalo, genbulge, gendisk, tobinary,  vcirc)
+# Version 1.6    $(F77) $(CFLAGS) $(MYFLIBS)             *.o -o foobar
+# Version 1.7    $(CC) $(CFLAGS) $(MYFLIBS) $(FORLIBS)   *.o -o foobar
+# Version 1.8    $(CC) $(CFLAGS) $(MYFLIBS)  *.o  $(FORLIBS) -o foobar
 
 #     override default rules
 .f.o:
@@ -33,15 +37,15 @@ dbh: dbh.o dbhplot.o polardens.o bulgepotential.o totdens.o halopotential.o pot.
 	$(F77) $(FFLAGS) $(MYFLIBS) dbh.o dbhplot.o polardens.o bulgepotential.o totdens.o halopotential.o pot.o diskdens.o dens.o appdiskpot.o plgndr1.o bulgedenspsi.o densrpsi.o polarbulgedens.o polarhalodens.o appdiskdens.o halodens.o erfcen.o modstamp.o  -o dbh
 
 genhalo: genhalo.o readmassrad.o query.o ran1.o readharmfile.o pot.o halodens.o appdiskpot.o plgndr1.o densrpsi.o erfcen.o
-	$(CC) $(CFLAGS) $(MYFLIBS) $(FORLIBS) genhalo.o readmassrad.o query.o ran1.o readharmfile.o appdiskpot.o plgndr1.o densrpsi.o pot.o halodens.o erfcen.o -o genhalo
+	$(CC) $(CFLAGS) $(MYFLIBS) genhalo.o readmassrad.o query.o ran1.o readharmfile.o appdiskpot.o plgndr1.o densrpsi.o pot.o halodens.o erfcen.o $(FORLIBS) -o genhalo
 
 genbulge: genbulge.o readmassrad.o query.o ran1.o readharmfile.o pot.o bulgedens.o appdiskpot.o plgndr1.o bulgedenspsi.o erfcen.o
-	$(CC) $(MYFLAGS) $(MYFLIBS) $(FORLIBS) genbulge.o readmassrad.o query.o ran1.o readharmfile.o appdiskpot.o plgndr1.o bulgedenspsi.o pot.o bulgedens.o erfcen.o -o genbulge
+	$(CC) $(MYFLAGS) $(MYFLIBS) genbulge.o readmassrad.o query.o ran1.o readharmfile.o appdiskpot.o plgndr1.o bulgedenspsi.o pot.o bulgedens.o erfcen.o $(FORLIBS) -o genbulge
 
 gendisk: gendisk.o ran1.o query.o \
 	readdiskdf.o golden.o simpson.o diskdf5ez.o diskdensf.o readharmfile.o sigr2.o sigz2.o omekap.o diskdens.o splined.o splintd.o diskdf3ez.o diskdenspsi.o pot.o fnamidden.o appdiskpot.o plgndr1.o rcirc.o
-	$(CC) $(MYFLAGS) $(MYFLIBS) $(FORLIBS) gendisk.o ran1.o query.o diskdf5ez.o diskdensf.o readharmfile.o sigr2.o sigz2.o omekap.o diskdens.o splined.o splintd.o diskdf3ez.o diskdenspsi.o pot.o fnamidden.o appdiskpot.o plgndr1.o rcirc.o \
-	readdiskdf.o golden.o simpson.o -o gendisk
+	$(CC) $(MYFLAGS) $(MYFLIBS) gendisk.o ran1.o query.o diskdf5ez.o diskdensf.o readharmfile.o sigr2.o sigz2.o omekap.o diskdens.o splined.o splintd.o diskdf3ez.o diskdenspsi.o pot.o fnamidden.o appdiskpot.o plgndr1.o rcirc.o \
+	readdiskdf.o golden.o simpson.o $(FORLIBS) -o gendisk
 
 diskdf: diskdf.o diskdf5intez.o diskdensf.o splintd.o splined.o readharmfile.o sigr2.o sigz2.o omekap.o pot.o diskdf3intez.o appdiskpot.o plgndr1.o fnamidden.o rcirc.o diskdens.o modstamp.o
 	$(F77) $(FFLAGS)  $(MYFLIBS) diskdf.o diskdf5intez.o diskdf3intez.o appdiskpot.o plgndr1.o diskdensf.o splintd.o splined.o readharmfile.o sigr2.o sigz2.o fnamidden.o rcirc.o diskdens.o omekap.o pot.o modstamp.o  -o diskdf
@@ -50,10 +54,10 @@ getfreqs: getfreqs.o pot.o appdiskpot.o plgndr1.o erfcen.o
 	$(F77) $(FFLAGS)  $(MYFLIBS) getfreqs.o pot.o appdiskpot.o plgndr1.o erfcen.o -o getfreqs
 
 tobinary: tobinary.o
-	$(CC) $(MYFLAGS) $(MYFLIBS) $(FORLIBS) tobinary.o -o tobinary
+	$(CC) $(MYFLAGS) $(MYFLIBS) tobinary.o $(FORLIBS) -o tobinary
 
 vcirc: vcirc.o query.o readharmfile.o force.o appdiskforce.o appdiskpot.o plgndr1.o
-	$(CC) $(MYFLAGS) $(MYFLIBS) $(FORLIBS) vcirc.o query.o  readharmfile.o force.o appdiskforce.o appdiskpot.o plgndr1.o -o vcirc
+	$(CC) $(MYFLAGS) $(MYFLIBS) vcirc.o query.o  readharmfile.o force.o appdiskforce.o appdiskpot.o plgndr1.o $(FORLIBS) -o vcirc
 
 plothalo: plothalo.o contourden.o readdiskdf.o diskdens.o halodens.o bulgedens.o bulgedenspsi.o diskdensf.o readharmfile.o sigr2.o densrpsi.o omekap.o pot.o splined.o appdiskpot.o splintd.o diskdenspsi.o erfcen.o plgndr1.o  modstamp.o
 	$(F77) $(FFLAGS) $(MYFLIBS)  plothalo.o contourden.o readdiskdf.o diskdens.o halodens.o diskdensf.o bulgedens.o bulgedenspsi.o readharmfile.o sigr2.o densrpsi.o omekap.o pot.o splined.o appdiskpot.o splintd.o diskdenspsi.o erfcen.o plgndr1.o modstamp.o  -o plothalo
