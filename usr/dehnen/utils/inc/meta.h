@@ -37,6 +37,17 @@
 
 namespace WDutils {
   namespace meta {
+    ///
+    /// type comparison
+    template<typename __T1, typename __T2> struct TypeCompare {
+      static const bool identical = false;
+      static const bool different = true;
+    };
+    template<typename __T> struct TypeCompare<__T,__T> {
+      static const bool identical = true;
+      static const bool different = false;
+    };
+    ///
     /// support for operation count
     class OpCounting {
       static int M, A, D, S;
@@ -213,7 +224,7 @@ namespace WDutils {
     DEFINVERSE(  98, 0.010204081632653061224);
     DEFINVERSE(  99, 0.010101010101010101010);
     DEFINVERSE( 100, 0.01);
-    // all products of 2 numbers up to 16 and some more
+    // all products of two numbers up to 16 and some more
     DEFINVERSE( 104, 0.0096153846153846153846);
     DEFINVERSE( 105, 0.0095238095238095238095);
     DEFINVERSE( 108, 0.0092592592592592592593);
@@ -369,7 +380,7 @@ namespace WDutils {
       template<typename Real> static void Exponentiate(Real&X) { __CountMA(2,0); X*=X*X; }
       template<typename Real> static Real Power       (Real X) { __CountMA(2,0); return X*X*X; }
     };
-    /// Ratio with integer: convert into real multiplication
+    /// Ratio with integer: convert into real-valued multiplication
     template<int N, typename Real> inline
     Real Over(Real x) { return Integer<N>::Ratio(x); }
     /// Product with integer: convert to sum for N=0,1,2,3

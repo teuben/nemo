@@ -595,8 +595,8 @@ namespace WDutils {
   /// We implement an "Early-testing" mutual tree walk, which means that we try
   /// to perform any interaction as soon as it is generated and only put it on a
   /// stack if it needs splitting.  Consequently, any interaction taken from the
-  /// stack is splitted without further ado.\n This is faster than "late
-  /// testing".
+  /// stack is splitted without further ado.\n
+  /// This is faster than "late testing".
   ///
   // ///////////////////////////////////////////////////////////////////////////
   template<typename BinTree>
