@@ -17,6 +17,7 @@
  *      10-mar-01 V1.7  allow sigma= to have 3 parameters
  *       8-sep-01       a   init_xrandom
  *       8-apr-03       b   timebit
+ *      22-apr-09 V1.8  linear/logarithm spiral option
  */
 
 #include <stdinc.h>
@@ -47,7 +48,8 @@ string defv[] = {
     "sigma=0\n            velocity dispersion, plus optional central offset and exp scalelength",
     "nmodel=1\n           number of models",
     "headline=\n	  text headline for output ",
-    "VERSION=1.7c\n	  15-jul-04 PJT",
+    "linear=t\n           Linear or Logarithmic spiral?",
+    "VERSION=1.8\n	  22-apr-09 PJT",
     NULL,
 };
 
@@ -59,6 +61,7 @@ local int  ndisk, nmodel, nsigma, sign;
 local real SPa, SPk, SPw;     /* spiral parameters */
 local real width;
 local real totmass;
+local bool Qlinear;
 
 local Body *disk = NULL;
 
@@ -80,6 +83,7 @@ nemo_main()
     sign = getiparam("sign");
     nsigma = nemoinpr(getparam("sigma"),sigma,3);
     totmass = getdparam("mass");
+    Qlinear = getbparam("linear");
     
     SPa = getdparam("a");
     SPk = - getdparam("k");	/* corrected for rot counter clock wise */
@@ -160,7 +164,10 @@ testdisk(int n)
             f = xrandom(0.0,1.0);		/* pick which spiral arm      */
             if (f<0.5)                     
                 theta_i += PI;
-            theta_i -= SPk * r_i * TWO_PI;    /* positive SPk is trailing SP  */
+	    if (Qlinear)
+	      theta_i -= SPk * r_i * TWO_PI;    /* positive SPk is trailing SP  */
+	    else
+	      theta_i -= SPk * log(r_i) * TWO_PI;    /* positive SPk is trailing SP  */
         }
         cost = cos(theta_i);
         sint = sin(theta_i);
