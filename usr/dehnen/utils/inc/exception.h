@@ -322,16 +322,18 @@ namespace WDutils {
   /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
   /// WDutils::exception(fmt, data)"
 #  define WDutils_THROWN	WDutils_ErrorN
+#  define WDutils_THROWER       WDutils::Error
   //----------------------------------------------------------------------------
   /// use "WDutils_RETHROW(E)" to re-throw a caught exception "E"
 #  define WDutils_RETHROW(E)    WDutils_Error  (text(E))
 #else
 #  define WDutils_EXCEPTIONS
 #  define WDutils_THROWING      throw(WDutils::exception)
-#  define WDutils_THROW         throw WDutils::Thrower(__FILE__,__LINE__)
+#  define WDutils_THROWER       throw WDutils::Thrower
 #  define WDutils_THROWN        throw WDutils::exception
 #  define WDutils_RETHROW(E)    throw E
 #endif
+#define WDutils_THROW  WDutils_THROWER(__FILE__,__LINE__)
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   /// a safer snprintf.                                                         

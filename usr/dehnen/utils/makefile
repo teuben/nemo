@@ -13,6 +13,14 @@ install			: library cleanobj
 # -----------------
 PLATFORM 		:= $(shell uname -m)
 
+# ---------
+# MPI stuff
+# ---------
+MPIDIR			:= $(shell ls | grep mpich)
+MPICC			:= $(MPIDIR)/bin/mpicc
+MPIINC			:= $(MPIDIR)/include/
+IMPI			:= -I$(MPIINC)
+
 # -----------
 # directories
 # -----------
@@ -140,7 +148,7 @@ heap_h			:= $(INC)heap.h
 meta_h			:= $(INC)meta.h
 inline_h		:= $(INC)inline.h
 exception_h		:= $(INC)exception.h
-traits_h		:= $(INC)traits.h $(exception_h) $(traits_h)
+traits_h		:= $(INC)traits.h $(exception_h)
 io_h			:= $(INC)io.h $(exception_h)
 tupel_h			:= $(INC)tupel.h $(INC)tupel.cc $(traits_h)
 memory_h		:= $(INC)memory.h $(exception_h) $(traits_h) $(inline_h)
@@ -149,6 +157,7 @@ spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
 WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 				$(inline_h) 
+parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
 
 # -----------------------
 # source dependency lists
@@ -160,7 +169,8 @@ io_cc			:= $(SRC)io.cc $(io_h)
 numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
-WDMath_cc			:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
+WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
+parallel_cc		:= $(SRC)parallel.cc $(parallel_h) $(meta_h) $(io_h)
 
 # ---------------
 # library modules
@@ -193,6 +203,37 @@ $(LIB)libWDutils.so:	$(WDutils_objs)
 			$(CXX) $^ -shared -o $@ $(CPUFLAGS)
 
 library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
+
+ifeq ($(MPIDIR),mpich)
+# -------------------
+# MPI library modules
+# -------------------
+
+$(LIB)parallel.o:	$(parallel_cc) $(makefiles)
+			$(MAKE_OBJ) $(IMPI)
+
+WDutilsP_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
+			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o \
+			$(LIB)parallel.o
+
+# -----------
+# MPI library
+# -----------
+
+$(LIB)libWDutilsMPI.a:	$(WDutilsP_objs)
+			$(AR) $@ $?
+			$(RL) $@
+$(LIB)libWDutilsMPI.so:	$(WDutilsP_objs)
+			$(CXX) $^ -shared -o $@ $(CPUFLAGS)
+
+library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so \
+			$(LIB)libWDutilsMPI.a $(LIB)libWDutilsMPI.so
+
+else
+
+library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
+
+endif
 
 # --------
 # cleaning
