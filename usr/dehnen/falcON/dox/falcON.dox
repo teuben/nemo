@@ -401,6 +401,7 @@ INPUT		=	utils/inc/tupel.h \
 			utils/inc/Pi.h \
 			utils/inc/memory.h \
 			utils/inc/WDMath.h \
+			utils/inc/parallel.h \
 			inc/public/types.h \
 			inc/public/basic.h \
 			inc/public/fields.h \
