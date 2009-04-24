@@ -3,7 +3,7 @@
  *                                                                              
  * defacc.h                                                                     
  *                                                                              
- * Copyright Walter Dehnen, 2003-2008                                           
+ * Copyright Walter Dehnen, 2003-2009                                           
  * e-mail:   walter.dehnen@astro.le.ac.uk                                       
  * address:  Department of Physics and Astronomy, University of Leicester       
  *           University Road, Leicester LE1 7RH, United Kingdom                 
@@ -31,7 +31,8 @@
  * version 3.2  12/11/2004  WD  catching std::bad_alloc and report error        
  * version 3.3  04/05/2007  WD  added global scope resolution operators         
  * version 3.4  12/06/2008  WD  #including stdinc.h                            
- * version 3.5  11/09/2008  WD  no inclusion of NEMO header files               
+ * version 3.5  11/09/2008  WD  no inclusion of NEMO header files
+ * version 3.6  24/04/2009  WD  avoid compiler warning with -Wshadow            
  *                                                                              
  *******************************************************************************
  *                                                                              
@@ -407,50 +408,50 @@ namespace {
     }
     //--------------------------------------------------------------------------
     template<int NDIM, typename scalar>
-    void acc_T(double       t,
-	       int          nb,
-	       const scalar*m,
-	       const scalar*x,
-	       const scalar*v,
-	       const int   *f,
-	       scalar      *pot,
-	       scalar      *acc,
-	       int          add)
+    void acc_T(double       __t,
+	       int          __nb,
+	       const scalar*__m,
+	       const scalar*__x,
+	       const scalar*__v,
+	       const int   *__f,
+	       scalar      *__pot,
+	       scalar      *__acc,
+	       int          __add)
       // compute gravity and add/assign pot/acc
     {
-      set_time<scalar>(NDIM,t,nb,m,x,v);
-      if(add & 1) 
-	if(add & 2) {
+      set_time<scalar>(NDIM,__t,__nb,__m,__x,__v);
+      if(__add & 1) 
+	if(__add & 2) {
 	  // add both potential and acceleration
-	  for(int n=0,nn=0; n!=nb; ++n,nn+=NDIM)
-	    if(f==0 || f[n] & 1) {
+	  for(int n=0,nn=0; n!=__nb; ++n,nn+=NDIM)
+	    if(__f==0 || __f[n] & 1) {
 	      register scalar P,A[NDIM];
-	      Acc.template acc<NDIM>(m+n, x+nn, v+nn, P, A);
-	      pot[n] += P;
-	      v_add<NDIM>(acc+nn,A);
+	      Acc.template acc<NDIM>(__m+n, __x+nn, __v+nn, P, A);
+	      __pot[n] += P;
+	      v_add<NDIM>(__acc+nn,A);
 	    }
 	} else {
 	  // add potential, assign acceleration
-	  for(int n=0,nn=0; n!=nb; ++n,nn+=NDIM)
-	    if(f==0 || f[n] & 1) {
+	  for(int n=0,nn=0; n!=__nb; ++n,nn+=NDIM)
+	    if(__f==0 || __f[n] & 1) {
 	      register scalar P;
-	      Acc.template acc<NDIM>(m+n, x+nn, v+nn, P, acc+nn);
-	      pot[n] += P;
+	      Acc.template acc<NDIM>(__m+n, __x+nn, __v+nn, P, __acc+nn);
+	      __pot[n] += P;
 	    }
       } else {
-        if(add & 2) {
+        if(__add & 2) {
 	  // assign potential, add acceleration
-	  for(int n=0,nn=0; n!=nb; ++n,nn+=NDIM)
-	    if(f==0 || f[n] & 1) {
+	  for(int n=0,nn=0; n!=__nb; ++n,nn+=NDIM)
+	    if(__f==0 || __f[n] & 1) {
 	      register scalar A[NDIM];
-	      Acc.template acc<NDIM>(m+n, x+nn, v+nn, pot[n], A);
-	      v_add<NDIM>(acc+nn,A);
+	      Acc.template acc<NDIM>(__m+n, __x+nn, __v+nn, __pot[n], A);
+	      v_add<NDIM>(__acc+nn,A);
 	    }
         } else {
 	  // assign both potential and acceleration
-	  for(int n=0,nn=0; n!=nb; ++n,nn+=NDIM)
-	    if(f==0 || f[n] & 1) {
-	      Acc.template acc<NDIM>(m+n, x+nn, v+nn, pot[n], acc+nn);
+	  for(int n=0,nn=0; n!=__nb; ++n,nn+=NDIM)
+	    if(__f==0 || __f[n] & 1) {
+	      Acc.template acc<NDIM>(__m+n, __x+nn, __v+nn, __pot[n], __acc+nn);
 	    }
 	}
       }
@@ -561,25 +562,25 @@ namespace {
     //--------------------------------------------------------------------------
 #ifdef POT_DEF
     template<typename scalar>
-    void pot_T(const int   *ndim,
-	       const scalar*pos,
-	       scalar      *acc,
-	       scalar      *pot,
-	       const scalar*time)
+    void pot_T(const int   *__ndim,
+	       const scalar*__pos,
+	       scalar      *__acc,
+	       scalar      *__pot,
+	       const scalar*__time)
     {
-      set_time(*ndim,*time,0,
+      set_time(*__ndim,*__time,0,
 	       static_cast<const scalar*>(0),
 	       static_cast<const scalar*>(0),
 	       static_cast<const scalar*>(0));
-      switch(*ndim) {
-      case 2: Acc.template acc<2>(static_cast<const scalar*>(0), pos, 
-				  static_cast<const scalar*>(0), *pot, acc);
+      switch(*__ndim) {
+      case 2: Acc.template acc<2>(static_cast<const scalar*>(0), __pos, 
+				  static_cast<const scalar*>(0), *__pot, __acc);
 	break;
-      case 3: Acc.template acc<3>(static_cast<const scalar*>(0), pos, 
-				  static_cast<const scalar*>(0), *pot, acc);
+      case 3: Acc.template acc<3>(static_cast<const scalar*>(0), __pos, 
+				  static_cast<const scalar*>(0), *__pot, __acc);
 	break;
       default: ::error("potential \"%s\": ndim=%d not supported",
-		       Acceleration::name(),ndim);
+		       Acceleration::name(),__ndim);
       }
     }
 #endif
@@ -763,14 +764,14 @@ namespace {
     //--------------------------------------------------------------------------
     template<int NDIM, typename scalar>
     inline void acc(const scalar*,
-		    const scalar*pos,
+		    const scalar*__pos,
 		    const scalar*,
-		    scalar      &pot,
-		    scalar      *acc) const
+		    scalar      &__pot,
+		    scalar      *__acc) const
     {
       register scalar dpdr_over_r;
-      StaticSphericalModel::potacc(v_norm<NDIM>(pos), pot, dpdr_over_r);
-      v_asstimes<NDIM>(acc, pos, dpdr_over_r);
+      StaticSphericalModel::potacc(v_norm<NDIM>(__pos), __pot, dpdr_over_r);
+      v_asstimes<NDIM>(__acc, __pos, dpdr_over_r);
     }
   };
   //////////////////////////////////////////////////////////////////////////////
