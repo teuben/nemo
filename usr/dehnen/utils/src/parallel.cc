@@ -39,7 +39,7 @@
 // /////////////////////////////////////////////////////////////////////////////
 // auxiliary stuff
 namespace {
-    using namespace WDutils;
+  using namespace WDutils;
 #ifdef WDutils_EXCEPTIONS
   //----------------------------------------------------------------------------
   /// for generating exceptions from errors in MPI library functions
@@ -105,46 +105,51 @@ namespace {
     if(MPI::Initialized())
       MPI_Abort(MPI::World.Comm(),0);
   }
+  // data type support
+  const unsigned MaxNewTypes = 32, MaxTypeNameLen=16; 
+  unsigned NewTypes = 0;
+  MPI::DataType NewType[MaxNewTypes] = {0};
+  char NewTypeName[MaxNewTypes][MaxTypeNameLen] = {{0}};
   //
   inline const char* name(MPI::DataType T) {
-    switch(T) {
-    case MPI::Byte: return "Byte";
-    case MPI::Bool: return "Bool";
-    case MPI::Int8: return "Int8";
-    case MPI::Int16: return "Int16";
-    case MPI::Int32: return "Int32";
-    case MPI::Int64: return "Int64";
-    case MPI::Uint8: return "Uint8";
-    case MPI::Uint16: return "Uint16";
-    case MPI::Uint32: return "Uint32";
-    case MPI::Uint64: return "Uint64";
-    case MPI::Float: return "Float";
-    case MPI::Double: return "Double";
-    case MPI::VectF: return "VectF";
-    case MPI::VectD: return "VectD";
-    default: return "Unknown";                        // to make compiler happy
+    if(T > MPI::MaxPresetType) {
+      for(unsigned t=0; t!=NewTypes; ++t)
+	if(T == NewType[t]) return NewTypeName[t];
+    } else {
+      switch(T) {
+      case MPI::Byte:   return "Byte";
+      case MPI::Bool:   return "Bool";
+      case MPI::Int8:   return "Int8";
+      case MPI::Int16:  return "Int16";
+      case MPI::Int32:  return "Int32";
+      case MPI::Int64:  return "Int64";
+      case MPI::Uint8:  return "Uint8";
+      case MPI::Uint16: return "Uint16";
+      case MPI::Uint32: return "Uint32";
+      case MPI::Uint64: return "Uint64";
+      case MPI::Float:  return "Float";
+      case MPI::Double: return "Double";
+      default:          return "unknown";
+      }
     }
+    return "unknown";
   }
   //
-  MPI_Datatype MPI_VECT_FLOAT, MPI_VECT_DOUBLE;
   inline MPI_Datatype type(MPI::DataType T) {
     switch(T) {
-    case MPI::Byte: return MPI_BYTE;
-    case MPI::Bool: return MPI_CHAR;
-    case MPI::Int8: return MPI_CHAR;
-    case MPI::Int16: return MPI_SHORT;
-    case MPI::Int32: return MPI_INT;
-    case MPI::Int64: return MPI_LONG_LONG_INT;
-    case MPI::Uint8: return MPI_CHAR;                 // not quite correct
+    case MPI::Byte:   return MPI_BYTE;
+    case MPI::Bool:   return MPI_CHAR;
+    case MPI::Int8:   return MPI_CHAR;
+    case MPI::Int16:  return MPI_SHORT;
+    case MPI::Int32:  return MPI_INT;
+    case MPI::Int64:  return MPI_LONG_LONG_INT;
+    case MPI::Uint8:  return MPI_UNSIGNED_CHAR;
     case MPI::Uint16: return MPI_UNSIGNED_SHORT;
     case MPI::Uint32: return MPI_UNSIGNED;
     case MPI::Uint64: return MPI_LONG_LONG_INT;       // not quite correct
-    case MPI::Float: return MPI_FLOAT;
+    case MPI::Float:  return MPI_FLOAT;
     case MPI::Double: return MPI_DOUBLE;
-    case MPI::VectF: return MPI_VECT_FLOAT;
-    case MPI::VectD: return MPI_VECT_DOUBLE;
-    default: WDutils_Error("unknown MPI::DataType\n");// to make compiler happy
-      return MPI_BYTE;
+    default:          return T;
     }
   }
   //
@@ -166,21 +171,50 @@ namespace {
   }
   // ensure that:
   // -- MPI_Comm is int
+  // -- MPI_Datatype is MPI::DataType
   // -- MPI::Status and MPI_Status are of the same size
   // -- MPI::Request and MPI_Request are of the same size
   struct __TMP {
-    WDutilsStaticAssert(( meta::TypeCompare<int,MPI_Comm>::identical  &&
-			  sizeof(MPI::Status)  == sizeof(MPI_Status)  &&
-			  sizeof(MPI::Request) == sizeof(MPI_Request) ));
+    WDutilsStaticAssert((meta::TypeCompare<int,MPI_Comm>::identical  &&
+			 meta::TypeCompare<MPI::DataType,MPI_Datatype>::identical &&
+			 sizeof(MPI::Status)  == sizeof(MPI_Status)  &&
+			 sizeof(MPI::Request) == sizeof(MPI_Request) ));
   };
 } // namespace {
 // /////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
 namespace MPI {
+  // ///////////////////////////////////////////////////////////////////////////
+  // static data with external linkage
   Communicator Communicator::world;
   Communicator const& World = Communicator::world;
   int Communicator::DEBUG_LEVEL = 1;
   int Undefined = MPI_UNDEFINED;
+  // ///////////////////////////////////////////////////////////////////////////
+  // MPI::ContiguousType()
+  DataType ContiguousType(int num, DataType etype, const char*tname)
+			  WDutils_THROWING
+  {
+    // check whether there is still space for a new DataType
+    if(NewTypes == MaxNewTypes)
+      WDutils_THROW("MPI::ContiguousType(): cannot support more than %du"
+		    "additional DataTypes\n",MaxNewTypes);
+    // construct and commit the new type
+    DataType ntype;
+    int err;
+    err = MPI_Type_contiguous(num,type(etype),&ntype);
+    if(err != MPI_SUCCESS) MPI_THROW(err,"MPI::ContiguousType()");
+    err = MPI_Type_commit    (&ntype);
+    if(err != MPI_SUCCESS) MPI_THROW(err,"MPI::ContiguousType()");
+    // check consistency
+    if(ntype <= MaxPresetType)
+      WDutils_THROW("MPI::ContiguousType(): internal problem\n");
+    // add to list of new DataTypes
+    NewType[NewTypes] = ntype;
+    std::strncpy(NewTypeName[NewTypes],tname,MaxTypeNameLen-1);
+    NewTypes++;
+    return ntype;
+  }
   // ///////////////////////////////////////////////////////////////////////////
   // MPI::Status
   unsigned Status::count(DataType t) const WDutils_THROWING
@@ -232,16 +266,7 @@ namespace MPI {
       // 3 set exit() functions and tell about MPI
       std::atexit(&AbortMPI);
       RunInfo::set_mpi_proc(World.rank(),World.size());
-      // 4 construct and commit DataTypes VectF and VectD
-      err = MPI_Type_contiguous(3,Float,&MPI_VECT_FLOAT);
-      if(err != MPI_SUCCESS) MPI_THROW(err,"MPI::Init()");
-      err = MPI_Type_commit    (&MPI_VECT_FLOAT);
-      if(err != MPI_SUCCESS) MPI_THROW(err,"MPI::Init()");
-      err = MPI_Type_contiguous(3,Double,&MPI_VECT_DOUBLE);
-      if(err != MPI_SUCCESS) MPI_THROW(err,"MPI::Init()");
-      err = MPI_Type_commit    (&MPI_VECT_DOUBLE);
-      if(err != MPI_SUCCESS) MPI_THROW(err,"MPI::Init()");
-      // 5 ensure environment variables are set
+      // 4 ensure environment variables are set
       //   this is more complicated than you may think
       if(VAR && VAR[0]) {
 	const unsigned NMAX=128;
@@ -250,7 +275,7 @@ namespace MPI {
 	if(NENV == NMAX)
 	  WDutils_THROW("MPI::Init(): # environments vars exceeds %d",NMAX);
 	DebugInfo(8,"MPI::Init(): trying to set %du environment vars\n",NENV);
-	// 5.1 Do we have first environment variable on all processes?
+	// 4.1 Do we have first environment variable on all processes?
 
 	char haveEnv = getenv(VAR[0])!=0;
 	char*HaveEnv = WDutils_NEW(char,World.size());
@@ -266,7 +291,7 @@ namespace MPI {
 	    DebugInfo(8,"MPI::Init(): all processes have full environment\n");
 	} else if(HaveEnv[0]) {
 	  const size_t SENV=1024;
-	  // 5.2 NO, only root has VAR[0]: getenv() on root, then broadcast
+	  // 4.2 NO, only root has VAR[0]: getenv() on root, then broadcast
 	  if(World.rank() == 0) {
 	    DebugInfo(10,"MPI::Init(): only root as full environment "
 		      "but will broadcast it now...\n");
@@ -293,7 +318,7 @@ namespace MPI {
 		      "MPI::Init(): successfully set environment variables\n");
 	  }
 	} else {
-	  // 5.3 NO, nobody has VAR[0]: try to get env vars from file
+	  // 4.3 NO, nobody has VAR[0]: try to get env vars from file
 	  if(file==0)
 	    WDutils_THROW("MPI::Init(): "
 			  "unable to set environment variables: "
@@ -344,10 +369,6 @@ namespace MPI {
   void Finish() WDutils_THROWING
   {
     int err;
-    err = MPI_Type_free(&MPI_VECT_FLOAT);
-    if(err != MPI_SUCCESS) goto MPIError;
-    err = MPI_Type_free(&MPI_VECT_DOUBLE);
-    if(err != MPI_SUCCESS) goto MPIError;
     err = MPI_Finalize();
     if(err != MPI_SUCCESS) goto MPIError;
     const_cast<Communicator*>(&World)->COMM = 0;

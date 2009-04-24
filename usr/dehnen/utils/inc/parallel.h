@@ -32,9 +32,6 @@
 #ifndef WDutils_included_memory_h
 #  include <memory.h>
 #endif
-#ifndef WDutils_included_tupel_h
-#  include <tupel.h>
-#endif
 // /////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
   /// \brief   defines a partial C++ interface for MPI.
@@ -54,24 +51,22 @@ namespace WDutils {
 namespace MPI {
   /// \name MPI::DataType and related functionality
   //@{
-  /// \note We cannot define DataType as typedef from MPI_DataType, since
-  ///       the latter is not known (as we do not include mpi.h).
-  enum DataType {
-    Byte,    ///< refers to a single byte of raw memory
-    Bool,    ///< refers to a C++ type bool
-    Int8,    ///< refers to a signed 8bit integer, usually char
-    Int16,   ///< refers to a signed 16bit integer, usually short
-    Int32,   ///< refers to a signed 32bit integer, usually int
-    Int64,   ///< refers to a signed 64bit integer
-    Uint8,   ///< refers to a unsigned 8bit integer, usually unsigned char
-    Uint16,  ///< refers to a unsigned 16bit integer, usually unsigned short
-    Uint32,  ///< refers to a unsigned 32bit integer, usually unsigned int
-    Uint64,  ///< refers to a unsigned 64bit integer
-    Float,   ///< refers to C type float: 32bit 
-    Double,  ///< refers to C type double: 64bit
-    VectF,   ///< refers to tupel<3,float>
-    VectD    ///< refers to tupel<3,double>
+  typedef int DataType;
+  enum {
+    Byte  = 1,   ///< refers to a single byte of raw memory
+    Bool  = 2,   ///< refers to a C++ type bool
+    Int8  = 3,   ///< refers to a signed 8bit integer, usually char
+    Int16 = 4,   ///< refers to a signed 16bit integer, usually short
+    Int32 = 5,   ///< refers to a signed 32bit integer, usually int
+    Int64 = 6,   ///< refers to a signed 64bit integer
+    Uint8 = 7,   ///< refers to a unsigned 8bit integer, usually unsigned char
+    Uint16= 8,   ///< refers to a unsigned 16bit integer, usually unsigned short
+    Uint32= 9,   ///< refers to a unsigned 32bit integer, usually unsigned int
+    Uint64= 10,  ///< refers to a unsigned 64bit integer
+    Float = 11,  ///< refers to C type float: 32bit 
+    Double= 12   ///< refers to C type double: 64bit
   };
+  const static DataType MaxPresetType = 12;
   // auxiliary struct template
   // 1 generic template definition, must be incomplete so it cannot be used
   template<typename T> struct __DataType;
@@ -109,17 +104,19 @@ namespace MPI {
   template<> struct __DataType<double> {
     static DataType type() { return Double; }
   };
-  template<> struct __DataType<tupel<3,float> > {
-    static DataType type() { return VectF; }
-  };
-  template<> struct __DataType<tupel<3,double> > {
-    static DataType type() { return VectD; }
-  };
   /// return MPI::DataType given a type.
   /// use as in \code Type<vect>(); \endcode
   template<typename T> inline DataType Type() WDutils_THROWING {
     return __DataType<T>::type();
   }
+  /// construct a contiguous DataType
+  /// \param[in] num  number of elements
+  /// \param[in] type datatype of elements
+  /// \param[in] name name for new DataType
+  /// \return         handle to be used for new type
+  /// \note May only be called a limited number of times, so use with care!
+  DataType ContiguousType(int num, DataType type, const char*name)
+    WDutils_THROWING;
   //@}
   /// implementing a status
   class Status {
@@ -165,7 +162,6 @@ namespace MPI {
   /// - MPI::World::init() is called.\n
   /// - std::atexit() is called to allow MPI_Abort() on std::exit().\n
   /// - RunInfo is informed about MPI and proc number.\n
-  /// - MPI::DataTypes VectF and VectD are constructed and committed.\n
   /// - optionally some environment variables are spawned.\n
   /// \param[in,out] argc  number of command-line arguments
   /// \param[in,out] argv  values of command-line arguments
@@ -180,7 +176,7 @@ namespace MPI {
   ///       if the first environment variable is present, so are all the others.
   void Init(int&argc, const char**&argv,
 	    const char**env=0, const char*file=0) WDutils_THROWING;
-  /// Finalise MPI
+  /// Finalise MPI and destruct World
   void Finish() WDutils_THROWING;
   /// wall-clock time in seconds since call to MPI::Init()
   double WallClock();
@@ -246,7 +242,7 @@ namespace MPI {
     // Init() must call init() on World, for it is constructed before Init()
     friend void Init(int&, const char**&, const char**, const char*)
       WDutils_THROWING;
-    /// Finish() will undo the call to init() and set COMM to NULL
+    // Finish() will undo the call to init() and set COMM to NULL
     friend void Finish() WDutils_THROWING;
     //--------------------------------------------------------------------------
   public:
@@ -351,7 +347,7 @@ namespace MPI {
     void Gather(unsigned root, T const&send, Array<T>&recv=Array<T>())
       const WDutils_THROWING
     {
-      DEBUGINFO("MPI::Communicator::Gather(): %s at %d\n",
+      DEBUGINFO("MPI::Communicator::Gather(): 1 %s at %d\n",
 		nameof(T),root);
       if(root == RANK && recv.size() < SIZE) {
 	Warning(FILE,SIZE)("MPI::Communicator::Gather(): at root: "
@@ -466,7 +462,7 @@ namespace MPI {
     template<typename T>
       void AllGather(const T&send, Array<T>&recv) const WDutils_THROWING
     {
-      DEBUGINFO("MPI::Communicator::AllGather(): %s\n", nameof(T));
+      DEBUGINFO("MPI::Communicator::AllGather(): 1 %s\n", nameof(T));
       if(recv.size() != SIZE) {
 	Warning(FILE,SIZE)("MPI::Communicator::AllGather(): "
 			   "recv.size() mismatch ([%d] vs [%d]:"
@@ -568,7 +564,7 @@ namespace MPI {
     template<Operator O, typename T>
     void Reduce(unsigned root, T const&send, T&recv) const WDutils_THROWING
     {
-      DEBUGINFO("MPI::Communicator::Reduce<%s> %s\n",
+      DEBUGINFO("MPI::Communicator::Reduce<%s> 1 %s\n",
 		OpName(O),nameof(T));
       Reduce(O,root,&send,&recv,1,Type<T>(),"Reduce<%s>");
     }
@@ -622,7 +618,7 @@ namespace MPI {
     template<Operator O, typename T>
     void ReduceInPlace(unsigned root, T&buf) const WDutils_THROWING
     {
-      DEBUGINFO("MPI::Communicator::ReduceInPlace<%s> %s\n",
+      DEBUGINFO("MPI::Communicator::ReduceInPlace<%s> 1 %s\n",
 		OpName(O),nameof(T));
       if(RANK==root) {
 	T send(buf);
@@ -669,7 +665,7 @@ namespace MPI {
     template<Operator O, typename T>
     void AllReduce(T const&send, T&recv) const WDutils_THROWING
     {
-      DEBUGINFO("MPI::Communicator::AllReduce<%s> %s\n", OpName(O),nameof(T));
+      DEBUGINFO("MPI::Communicator::AllReduce<%s> 1 %s\n", OpName(O),nameof(T));
       AllReduce(O,&send,&recv,1,Type<T>(),"AllReduce<%s>");
     }
     /// reduce data at all processes, using Array<> arguments
@@ -714,7 +710,7 @@ namespace MPI {
     template<Operator O, typename T>
     void AllReduceInPlace(T&buf) const WDutils_THROWING
     {
-      DEBUGINFO("MPI::Communicator::AllReduceInPlace<%s> %s\n",
+      DEBUGINFO("MPI::Communicator::AllReduceInPlace<%s> 1 %s\n",
 		OpName(O),nameof(T));
       T send(buf);
       AllReduce(O,&send,&buf,1,Type<T>(),"AllReduceInPlace<%s>");
