@@ -594,7 +594,7 @@ namespace WDutils {
   ///
   /// We implement an "Early-testing" mutual tree walk, which means that we try
   /// to perform any interaction as soon as it is generated and only put it on a
-  /// stack if it needs splitting.  Consequently, any interaction taken from the
+  /// stack if it needs splitting. Consequently, any interaction taken from the
   /// stack is splitted without further ado.\n
   /// This is faster than "late testing".
   ///
@@ -662,8 +662,8 @@ namespace WDutils {
     };
   private:
     //
-    typedef std::pair<*Box,*Dot>  BoxDot;
-    typedef std::pair<*Box,*Box>  BoxBox;
+    typedef std::pair<Box*,Dot*>  BoxDot;
+    typedef std::pair<Box*,Box*>  BoxBox;
     //
     const Interactor*IA;         ///< pter to interactor
     Stack<BoxDot>    BD;         ///< stack of box-dot interactions
@@ -705,7 +705,7 @@ namespace WDutils {
 	}
       }
     }
-    /// split a mutual box self-interaction
+    /// split a box self-interaction
     /// \param[in] A box to be split
     void split(Box*A)
     {

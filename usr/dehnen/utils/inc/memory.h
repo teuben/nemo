@@ -1337,6 +1337,8 @@ namespace WDutils {
     X pop() { return *(--P); }
     /// return top element, but don't pop it
     X&top() { return *P; }
+    /// empty stack
+    void reset() { P=S; }
   };
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct traits< Stack<T> > {
