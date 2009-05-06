@@ -186,9 +186,9 @@ namespace WDutils {
   //@}
   //----------------------------------------------------------------------------
   /// swallow the rest of the current line.
-  /// reads all character up to and including the next '\n'.
+  /// reads all characters up to and including the next '\n'.
   /// \return istream read (this allows to put this routine in a >> >> sequence)
-  /// \param from istream to read from
+  /// \param[in,out] from istream to read from
   inline std::istream&SwallowRestofLine(std::istream& from)
   {
     char c;
@@ -200,7 +200,7 @@ namespace WDutils {
   /// given an integer, return "st", "nd", "rd" or "th" such that appended to
   /// the integer it makes correct ordered number, e.g. "3rd", "8th", "101st".
   /// \return "st", "nd", "rd" or "th"
-  /// \param i integer
+  /// \param[in] i integer
   inline const char* stndrdth(int i)
   {
     if(i<0) i=-i;
@@ -561,12 +561,6 @@ namespace WDutils {
       if(OUT) (*OUT) << p;
       return*this;
     }
-//     /// output of a manipulator \e m
-//     output& operator<< (std::ostream::__ios_type &(*p)
-//                               (std::ostream::__ios_type &)) {
-//       if(OUT) (*OUT) << p;
-//       return*this;
-//     }
     /// output of a manipulator \e m
     output& operator<< (std::ios_base& (*p)(std::ios_base&)) {
       if(OUT) (*OUT) << p;
@@ -689,12 +683,6 @@ namespace WDutils {
       if(IN) (*IN) >> p;
       return*this;
     }
-//     /// input of manipulator \e p
-//     input& operator>> (std::istream::__ios_type &(*p)
-// 			      (std::istream::__ios_type &)) {
-//       if(IN) (*IN) >> p;
-//       return*this;
-//     }
     /// input of manipulator \e p
     input& operator>> (std::ios_base& (*p)(std::ios_base&)) {
       if(IN) (*IN) >> p;

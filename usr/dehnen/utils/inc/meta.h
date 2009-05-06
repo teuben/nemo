@@ -38,16 +38,6 @@
 namespace WDutils {
   namespace meta {
     ///
-    /// type comparison
-    template<typename __T1, typename __T2> struct TypeCompare {
-      static const bool identical = false;
-      static const bool different = true;
-    };
-    template<typename __T> struct TypeCompare<__T,__T> {
-      static const bool identical = true;
-      static const bool different = false;
-    };
-    ///
     /// support for operation count
     class OpCounting {
       static int M, A, D, S;

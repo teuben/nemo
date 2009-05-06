@@ -27,7 +27,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <parallel.h>
-#include <meta.h>
 #include <io.h>
 #define MPICH_SKIP_MPICXX
 #include <mpi.h>

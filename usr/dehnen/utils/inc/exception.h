@@ -63,6 +63,23 @@ namespace WDutils {
   enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
     static_cast<bool>(TEST)>)					\
   }
+  namespace meta {
+    /// static type comparison.
+    /// useful together with static assertion, for instance
+    /// \code
+    ///   WDutilsStaticAssert((   meta::TypeCompare<double,__T>::identical
+    ///                        || meta::TypeCompare<float, __T>::identical));
+    /// \endcode
+    /// will generate a compiler error unless type __T is double or float.
+    template<typename __T1, typename __T2> struct TypeCompare {
+      static const bool identical = false;
+      static const bool different = true;
+    };
+    template<typename __T> struct TypeCompare<__T,__T> {
+      static const bool identical = true;
+      static const bool different = false;
+    };
+  }
   // ///////////////////////////////////////////////////////////////////////////
   //
   //  WDutils::RunInfo
