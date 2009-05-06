@@ -1,4 +1,6 @@
 #! /bin/csh 
+## $ -cwd
+## $ -l h_rt=10:00:00
 ################################################################################
 ##                                                                             #
 ## mkgalaxy                                                                    #
@@ -237,11 +239,20 @@ echo >> $name.err
 if ($?spheroid) then
     if ( ! -f $spheroid ) then
 	echo "ERROR [mkgalaxy]: file $spheroid does not exist."
+	echo " " >> $name.err
+	echo "ERROR [mkgalaxy]: file $spheroid does not exist." >> $name.err
+	echo " " >> $name.err
 	exit
     endif
     echo "mkgalaxy:    file $spheroid assumed to contain halo & bulge adjusted to disc"
     echo "             skipping steps 1 & 2"
     echo "             NOTE: the user MUST ensure that parameters match!"
+
+    echo " " >> $name.err
+    echo "mkgalaxy:    file $spheroid assumed to contain halo & bulge adjusted to disc" >> $name.err
+    echo "             skipping steps 1 & 2" >> $name.err
+    echo "             NOTE: the user MUST ensure that parameters match!" >> $name.err
+    echo " " >> $name.err
     set skip=1
     goto populatedisc
 endif
@@ -261,6 +272,10 @@ endif
 
 echo "mkgalaxy: 1  Building the initial spheroid models"
 
+echo " " >> $name.err
+echo "mkgalaxy: 1  Building the initial spheroid models" >> $name.err
+echo " " >> $name.err
+
 rm -f $name.h $name.b $name.s $name.prm >& /dev/null
 
 ################################################################################
@@ -270,12 +285,18 @@ echo "accpars=0,$Sd_dp,$Rd,$Zd_dp,0,0"        >> $name.prm # parameters of disc
 
 if(! -f $name.prm) then
     echo "ERROR [mkgalaxy]: could not create file $name.prm"
+    echo " " >> $name.err
+    echo "ERROR [mkgalaxy]: could not create file $name.prm" >> $name.err
+    echo " " >> $name.err
     exit
 endif
 
 ################################################################################
 ## Create the initial halo in file $name.h with only half of the intended bodies
 echo "mkgalaxy:    creating the initial halo with N=$Nh_half in file $name.h"
+echo " " >> $name.err
+echo "mkgalaxy:    creating the initial halo with N=$Nh_half in file $name.h" >> $name.err
+echo " " >> $name.err
 
 if ( $Nb > 0 ) then
     ## case A: we have a bulge: must provide its potential
@@ -294,6 +315,9 @@ endif
 
 if(! -f $name.h) then
     echo "ERROR [mkgalaxy]: could not build initial halo model; see also file $name.err."
+    echo " " >> $name.err
+    echo "ERROR [mkgalaxy]: could not build initial halo model; see also file $name.err." >> $name.err
+    echo " " >> $name.err
     exit
 endif
 
@@ -303,6 +327,9 @@ endif
 
 if ( $Nb > 0 ) then
 echo "mkgalaxy:    creating the initial bulge with N=$Nb_half in file $name.b"
+echo " " >> $name.err
+echo "mkgalaxy:    creating the initial bulge with N=$Nb_half in file $name.b" >> $name.err
+echo " " >> $name.err
 
     mkhalo out=$name.b! nbody=$Nb_half M=$Mb inner=$innerb outer=$outerb \
 	eta=$etab r_s=$Rb r_t=$Rtb r_c=$Rcoreb b=$betab r_a=$r_ab        \
@@ -312,6 +339,9 @@ echo "mkgalaxy:    creating the initial bulge with N=$Nb_half in file $name.b"
 
     if(! -f $name.b) then
 	echo "ERROR [mkgalaxy]: could not build initial bulge model; see also file $name.err."
+	echo " " >> $name.err
+	echo "ERROR [mkgalaxy]: could not build initial bulge model; see also file $name.err." >> $name.err
+	echo " " >> $name.err
 	exit
     endif
 
@@ -321,16 +351,24 @@ endif
 ## stack halo and bulge as one snapshot in file $name.s
 
 if ( $Nb > 0 ) then
-    echo "mkgalaxy:    stacking initial halo and bulge in file $name.s"
+    echo " " >> $name.err
+    echo "mkgalaxy:    stacking initial halo and bulge in file $name.s" >> $name.err
+    echo " " >> $name.err
     snapstac $name.b $name.h $name.s! debug=$debug >>& $name.err
     rm -f $name.h $name.b >& /dev/null
 else
     mv $name.h $name.s
     echo "mkgalaxy:    initial halo in file $name.s"
+    echo " " >> $name.err
+    echo "mkgalaxy:    initial halo in file $name.s" >> $name.err
+    echo " " >> $name.err
 endif
 
 if(! -f $name.s) then
     echo "ERROR [mkgalaxy]: could not build initial halo & bulge models; see also file $name.err."
+    echo " " >> $name.err
+    echo "ERROR [mkgalaxy]: could not build initial halo & bulge models; see also file $name.err." >> $name.err
+    echo " " >> $name.err
     exit
 endif
 
@@ -348,11 +386,17 @@ endif
 ##                                                                             #
 ################################################################################
 echo "mkgalaxy: 2  Growing the full disc potential"
+echo " " >> $name.err
+echo "mkgalaxy: 2  Growing the full disc potential" >> $name.err
+echo " " >> $name.err
 
 ################################################################################
 ## sanity check
 if(-f $name.S) then
     echo "ERROR [mkgalaxy]: file $name.S already exists."
+    echo " " >> $name.err
+    echo "ERROR [mkgalaxy]: file $name.S already exists." >> $name.err
+    echo " " >> $name.err
     exit
 endif
 
@@ -365,6 +409,9 @@ symmetrize $name.s $name.sym use=1 debug=$debug >>& $name.err
 
 if(! -f $name.sym) then
     echo "ERROR [mkgalaxy]: could generated symmetrised halo & bulge model; see also file $name.err."
+    echo " " >> $name.err
+    echo "ERROR [mkgalaxy]: could generated symmetrised halo & bulge model; see also file $name.err." >> $name.err
+    echo " " >> $name.err
     exit
 endif
 
@@ -373,6 +420,10 @@ endif
 ## run simulation during which disc is grown from its mono-pole.
 echo "mkgalaxy:    start simulation to grow disc potential from monopole"
 echo "mkgalaxy:    (log output into $name.grow) ..."
+echo " " >> $name.err
+echo "mkgalaxy:    start simulation to grow disc potential from monopole" >> $name.err
+echo "mkgalaxy:    (log output into $name.grow) ..." >> $name.err
+echo " " >> $name.err
 
 gyrfalcON in=$name.sym logfile=$name.grow                     \
     out=$name.S step=$tend tstop=$tend startout=f             \
@@ -382,6 +433,9 @@ gyrfalcON in=$name.sym logfile=$name.grow                     \
 
 if(! -f $name.S) then
     echo "ERROR [mkgalaxy]: could not adjust halo & bulge to full disc; see also file $name.err."
+    echo " " >> $name.err
+    echo "ERROR [mkgalaxy]: could not adjust halo & bulge to full disc; see also file $name.err." >> $name.err
+    echo " " >> $name.err
     exit
 endif
 
@@ -408,6 +462,9 @@ set skip=0
 populatedisc:
 
 echo "mkgalaxy: 3  Populating the disc"
+echo " " >> $name.err
+echo "mkgalaxy: 3  Populating the disc" >> $name.err
+echo " " >> $name.err
 
 rm -f $name.d $name.h $name.b >& /dev/null
 
@@ -424,6 +481,9 @@ if ( $Nb > 0 ) then
 	set Nhb = `nemoinp "$Nh+$Nb"`
 	if( $Nsp != $Nhb) then
 	    echo "ERROR [mkgalaxy]: $spheroid has $Nsp bodies, but halo & bulge have $Nhb."
+	    echo " " >> $name.err
+	    echo "ERROR [mkgalaxy]: $spheroid has $Nsp bodies, but halo & bulge have $Nhb." >> $name.err
+	    echo " " >> $name.err
 	    exit
 	endif
     endif
@@ -435,19 +495,31 @@ if ( $Nb > 0 ) then
 
     if(! -f $name.b) then
 	echo "ERROR [mkgalaxy]: could not isolate adjusted bulge component; see also file $name.err."
+	echo " " >> $name.err
+	echo "ERROR [mkgalaxy]: could not isolate adjusted bulge component; see also file $name.err." >> $name.err
+	echo " " >> $name.err
 	exit
     endif
 
     echo "mkgalaxy:    extracting halo into file $name.h (needed for halo potential)"
+    echo " " >> $name.err
+    echo "mkgalaxy:    extracting halo into file $name.h (needed for halo potential)" >> $name.err
+    echo " " >> $name.err
     s2s $spheroid $name.h filter="i>=#0" params=$Nb debug=$debug >>& $name.err
 
     if(! -f $name.h) then
 	echo "ERROR [mkgalaxy]: could not isolate adjusted halo component; see also file $name.err."
+	echo " " >> $name.err
+	echo "ERROR [mkgalaxy]: could not isolate adjusted halo component; see also file $name.err." >> $name.err
+	echo " " >> $name.err
 	exit
     endif
     ############################################################################
     ## sample disc
     echo "mkgalaxy:    creating the initial disc with N=$Nd in file $name.d"
+    echo " " >> $name.err
+    echo "mkgalaxy:    creating the initial disc with N=$Nd in file $name.d" >> $name.err
+    echo " " >> $name.err
 
     mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q      \
 	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF          \
@@ -463,6 +535,9 @@ else
     ## sample disc
 
     echo "mkgalaxy:    creating the initial disc with N=$Nd in file $name.d"
+    echo " " >> $name.err
+    echo "mkgalaxy:    creating the initial disc with N=$Nd in file $name.d" >> $name.err
+    echo " " >> $name.err
 
     mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q   \
 	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF       \
@@ -473,6 +548,9 @@ endif
     
 if(! -f $name.d) then
     echo "ERROR [mkgalaxy]: could not build disc model; see also file $name.err."
+    echo " " >> $name.err
+    echo "ERROR [mkgalaxy]: could not build disc model; see also file $name.err." >> $name.err
+    echo " " >> $name.err
     exit
 endif
 
@@ -483,6 +561,9 @@ snapstac $name.d $spheroid $name.snp time=0 debug=$debug >>& $name.err
 
 if(! -f $name.snp) then
     echo "ERROR [mkgalaxy]: could not stack disc with spheroid model, see also file $name.err."
+    echo " " >> $name.err
+    echo "ERROR [mkgalaxy]: could not stack disc with spheroid model, see also file $name.err." >> $name.err
+    echo " " >> $name.err
     exit
 endif
 
@@ -494,10 +575,15 @@ rm -f $name.d $name.prm >& /dev/null
 ## done!
 
 echo "mkgalaxy:    finished. snapshots generated:"
+echo " " >> $name.err
+echo "mkgalaxy:    finished. snapshots generated:" >> $name.err
 if(! $?skip) then
 echo "             $spheroid:  spheroids adjusted to disc"
+echo "             $spheroid:  spheroids adjusted to disc" >> $name.err
 endif
 echo "             $name.snp:  complete galaxy model ready to use"
+echo "             $name.snp:  complete galaxy model ready to use" >> $name.err
+echo "END" >> $name.err
 
 ################################################################################
 #end
