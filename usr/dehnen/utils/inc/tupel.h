@@ -105,7 +105,7 @@ namespace WDutils {
       M::v_as(a,x.a);
     }
     /// all elements equal a scalar
-    explicit tupel(X const&x) {
+    explicit tupel(X x) {
       M::s_as(a,x);
     }
     /// set elements equal to elements of an array

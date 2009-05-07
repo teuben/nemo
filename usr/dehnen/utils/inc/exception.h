@@ -33,6 +33,10 @@
 # define WDutils_included_string
 # include <string>
 #endif
+#ifndef WDutils_included_limits
+# define WDutils_included_limits
+# include <limits>
+#endif
 // /////////////////////////////////////////////////////////////////////////////
 //                                                                              
 //  WDutils                                                                     
@@ -78,6 +82,22 @@ namespace WDutils {
     template<typename __T> struct TypeCompare<__T,__T> {
       static const bool identical = true;
       static const bool different = false;
+    };
+    template<typename __T> struct TypeInfo :
+      public std::numeric_limits<__T> {
+      static const bool is_floating_point = false;
+    };
+    template<> struct TypeInfo<float> :
+      public std::numeric_limits<float> {
+      static const bool is_floating_point = true;
+    };
+    template<> struct TypeInfo<double> :
+      public std::numeric_limits<double> {
+      static const bool is_floating_point = true;
+    };
+    template<> struct TypeInfo<long double> :
+      public std::numeric_limits<long double> {
+      static const bool is_floating_point = true;
     };
   }
   // ///////////////////////////////////////////////////////////////////////////
