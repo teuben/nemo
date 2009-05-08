@@ -72,9 +72,9 @@ namespace WDutils {
   /// try to open an output file.
   /// if not successful, we issue a warning and return false
   /// \return successfully opened?
-  /// \param S ofstream to open
-  /// \param file name of file to open
-  /// \param mode (optional) open mode, default: output & truncation
+  /// \param[in,out] S ofstream to open
+  /// \param[in]     file name of file to open
+  /// \param[in]     mode (optional) open mode, default: output & truncation
   inline bool open(std::ofstream& S, const char* file,
 		   std::ios::openmode mode = std::ios::out | std::ios::trunc)
   {
@@ -87,9 +87,9 @@ namespace WDutils {
   }
   /// try to open an output file.
   /// if not successful, we issue a fatal error
-  /// \param S ofstream to open
-  /// \param file name of file to open
-  /// \param mode (optional) open mode, default: output & truncation
+  /// \param[in,out] S ofstream to open
+  /// \param[in]     file name of file to open
+  /// \param[in]     mode (optional) open mode, default: output & truncation
   inline
   void open_error(std::ofstream& S, const char* file,
 		  std::ios::openmode mode = std::ios::out | std::ios::trunc)
@@ -102,8 +102,8 @@ namespace WDutils {
   /// if file did already exist and was opened for appending, return 1\n
   /// if did not exist and but a new one has been opened, return 2
   /// \return see above
-  /// \param S ofstream to open
-  /// \param file name of file to open
+  /// \param[in,out] S ofstream to open
+  /// \param[in]     file name of file to open
   inline int open_to_append(std::ofstream& S, const char* file)
   {
     S.open(file,std::ios::out | std::ios::app);
@@ -118,8 +118,8 @@ namespace WDutils {
   /// if file did already exist and was opened for appending, return 1\n
   /// if did not exist and but a new one has been opened, return 2
   /// \return see above
-  /// \param S ofstream to open
-  /// \param file name of file to open
+  /// \param[in,out] S ofstream to open
+  /// \param[in]     file name of file to open
   inline int open_to_append_error(std::ofstream& S, const char* file)
   {
     S.open(file,std::ios::out | std::ios::app);
@@ -132,9 +132,9 @@ namespace WDutils {
   /// try to open an input file.
   /// if not successful, we issue a warning and return false
   /// \return successfully opened?
-  /// \param S ifstream to open
-  /// \param file name of file to open
-  /// \param mode (optoinal) opening mode, default: input
+  /// \param[in,out] S ifstream to open
+  /// \param[in]     file name of file to open
+  /// \param[in]     mode (optoinal) opening mode, default: input
   inline bool open(std::ifstream& S, const char* file,
 		   std::ios::openmode mode=std::ios::in)
   {
@@ -147,9 +147,9 @@ namespace WDutils {
   }
   /// try to open an input file.
   /// if not successful, we issue a fatal error
-  /// \param S ifstream to open
-  /// \param file name of file to open
-  /// \param mode (optoinal) opening mode, default: input
+  /// \param[in,out] S ifstream to open
+  /// \param[in]     file name of file to open
+  /// \param[in]     mode (optoinal) opening mode, default: input
   inline void open_error(std::ifstream& S, const char* file,
 			 std::ios::openmode mode=std::ios::in)
   {
@@ -159,9 +159,9 @@ namespace WDutils {
   /// try to open a file for in-, output, or both.
   /// if not successful, we issue a warning an return false
   /// \return successfully opened?
-  /// \param S fstream to open
-  /// \param file name of file to open
-  /// \param mode opening mode
+  /// \param[in,out] S fstream to open
+  /// \param[in]     file name of file to open
+  /// \param[in]     mode opening mode
   inline bool open(std::fstream& S, const char* file,
 		   std::ios::openmode mode)
   {
@@ -174,9 +174,9 @@ namespace WDutils {
   }
   /// try to open a file for in-, output, or both.
   /// if not successful, we issue a fatal warning
-  /// \param S fstream to open
-  /// \param file name of file to open
-  /// \param mode opening mode
+  /// \param[in,out] S fstream to open
+  /// \param[in]     file name of file to open
+  /// \param[in]     mode opening mode
   inline void open_error(std::fstream& S, const char* file,
 			 std::ios::openmode mode)
   {
@@ -228,8 +228,8 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// eat the next char in an istream, if it equals a specific one
   /// \return istream used
-  /// \param i istream to read from
-  /// \param c character to eat
+  /// \param[in,out] i istream to read from
+  /// \param[in]     c character to eat
   inline std::istream& skip_char(std::istream& i, const char c) {
     char x;
     i>>x;
@@ -239,8 +239,8 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// eat the next entire line, if next character equals a specific one
   /// \return istream used
-  /// \param i istream to read from
-  /// \param c character to match if the entire line is to be skipped
+  /// \param[in,out] i istream to read from
+  /// \param[in]     c character to match if the entire line is to be skipped
   inline std::istream& skip_line(std::istream& i, const char c) {
     char x;
     i>>x;
@@ -250,8 +250,8 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// eat the next entire line, if next character equals a specific one
   /// \return has line been skipped?
-  /// \param i istream to read from
-  /// \param c character to match if the entire line is to be skipped
+  /// \param[in,out] i istream to read from
+  /// \param[in]     c character to match if the entire line is to be skipped
   inline bool eat_line(std::istream& i, const char c) {
     char x;
     i>>x;
@@ -278,9 +278,9 @@ namespace WDutils {
   //@{
   /// write and array in the format "a1 a2 a3 ... aN".
   /// \return ostream used
-  /// \param s ostream to write to
-  /// \param x pointer to first element
-  /// \param N size of array
+  /// \param[in,out] s ostream to write to
+  /// \param[in]     x pointer to first element
+  /// \param[in]     N size of array
   template<typename X> inline
   std::ostream& write_array(std::ostream&s, const X* x, unsigned N)
   {
@@ -291,9 +291,9 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// read an array from a space-separated format.
   /// \return istream used
-  /// \param s istream to read from
-  /// \param x pointer to first element
-  /// \param N size of array
+  /// \param[in,out] s istream to read from
+  /// \param[in]     x pointer to first element
+  /// \param[in]     N size of array
   template<typename X> inline
   std::istream& read_array(std::istream&s, X* x, unsigned N) {
     register X y[N];
@@ -513,21 +513,27 @@ namespace WDutils {
       __open(append);
     }
     /// open file with name made from \e format string and \e tag.
+    ///
     /// A new file name is created from the C-style \e format string and the
-    /// data \e tag provided via \code sprintf(filename, format, tag) \endcode
+    /// data \e tag provided via
+    /// \code
+    /// sprintf(filename, format, tag);
+    /// \endcode
     /// If this file name differs from the current, the old file is closed and
     /// the new one opened. The idea is to provide the possibility of numbered
-    /// output files as in the following code \code
+    /// output files as in the following code
+    /// \code
     /// output out;
     /// for(int i=0; i!=20; ++i) {
     ///   out.re_open("file%02d.dat",i);
     ///   out << i << std::endl;
-    /// } \endcode creating the files \c file00.dat, \c file01.dat, ...
-    /// \c file19.dat
+    /// }
+    /// \endcode
+    /// creating the files \c file00.dat, \c file01.dat, ... \c file19.dat
     /// \return whether a new file has been opened (and the old closed)
-    /// \param  format (input) C-style format string for file to open
-    /// \param  tag    (input) datum needed in generating file to open
-    /// \param  append (input, optional) append (or overwrite) existing file?
+    /// \param[in]  format C-style format string for file to open
+    /// \param[in]  tag    datum needed in generating file to open
+    /// \param[in]  append (optional) append (or overwrite) existing file?
     template<typename T> 
     bool reopen(const char*format, T const&tag, bool append=0) {
       char FNEW[FNAME_MAX_SIZE];
@@ -723,9 +729,9 @@ namespace WDutils {
   public:
     //--------------------------------------------------------------------------
     /// constructor: read buffer with size information
-    /// \param in  WDutils::input to read from
-    /// \param rec (optional) size of Fortran record header: 4 or 8
-    /// \param bswap (optional) swap bytes for size information?
+    /// \param[in,out] in  WDutils::input to read from
+    /// \param[in]     rec (optional) size of Fortran record header: 4 or 8
+    /// \param[in]     bswap (optional) swap bytes for size information?
     FortranIRec(input&in, unsigned rec=4, bool bswap=0)
       throw(WDutils::exception);
     //--------------------------------------------------------------------------
@@ -740,9 +746,9 @@ namespace WDutils {
     /// If more bytes are wanted than left in the record, only those left
     /// in the record will be read and a warning be issued.
     ///
-    /// \return    number of bytes actually read
-    /// \param buf buffer to read into
-    /// \param n   number of bytes to read
+    /// \return     number of bytes actually read
+    /// \param[out] buf buffer to read into
+    /// \param[in]  n   number of bytes to read
     unsigned read_bytes(char*buf, unsigned n) throw(WDutils::exception);
     //--------------------------------------------------------------------------
     /// read some data of any type
@@ -750,9 +756,9 @@ namespace WDutils {
     /// If more data are wanted than left in the record, only those left
     /// in the record will be read and a warning be issued.
     ///
-    /// \return    number of data actually read
-    /// \param buf buffer to read into
-    /// \param n   number of data to read
+    /// \return     number of data actually read
+    /// \param[out] buf buffer to read into
+    /// \param[in]  n   number of data to read
     template<typename T>
     unsigned read(T*buf, unsigned n) throw(WDutils::exception) {
       if(READ+n*sizeof(T) > SIZE) {
@@ -822,9 +828,9 @@ namespace WDutils {
   public:
     //--------------------------------------------------------------------------
     /// constructor: write buffer with size information
-    /// \param out output stream to write to
-    /// \param size size (in bytes) of record
-    /// \param rec (optional) size of Fortran record header must be 4 or 8
+    /// \param[in,out] out  output stream to write to
+    /// \param[in]     size size (in bytes) of record
+    /// \param[in]     rec  (optional) size of header must be 4 or 8
     FortranORec(output&out, unsigned size, unsigned rec=4)
       throw(WDutils::exception);
     //--------------------------------------------------------------------------
@@ -846,8 +852,8 @@ namespace WDutils {
     //--------------------------------------------------------------------------
     /// fill some bytes with a given value
     ///
-    /// \param n   number of bytes to fill
-    /// \param val value to fill them with
+    /// \param[in]   n   number of bytes to fill
+    /// \param[in]   val value to fill them with
     void fill_bytes(unsigned n, char val=0);
     //--------------------------------------------------------------------------
     /// write some data of any type
@@ -856,8 +862,8 @@ namespace WDutils {
     /// write as many as the record allows but issue a warning.
     ///
     /// \return    number of data actually written
-    /// \param buf buffer to write
-    /// \param n   number of data to write
+    /// \param[in] buf buffer to write
+    /// \param[in] n   number of data to write
     template<typename T>
     unsigned write(const T*buf, unsigned n) throw(WDutils::exception) {
       if(WRITTEN + n*sizeof(T) > SIZE) {
@@ -873,10 +879,10 @@ namespace WDutils {
     //--------------------------------------------------------------------------
     /// write a single FORTRAN record in one go
     ///
-    /// \param out output stream to write to
-    /// \param buf data buffer to write from
-    /// \param n   number of data of type T to write
-    /// \param rec size of FORTRAN record header; must be 4 or 8
+    /// \param[in,out] out output stream to write to
+    /// \param[in]     buf data buffer to write from
+    /// \param[in]     n   number of data of type T to write
+    /// \param[in]     rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
     static void Write(output&out, const T*buf, unsigned n, unsigned rec=4)
       throw(WDutils::exception)
@@ -954,7 +960,7 @@ namespace WDutils {
   ///
   /// in order for this to work, the sizeof() the type must be 1,2,4,8, or 16
   ///
-  /// \param bdat element to swap bytes for
+  /// \param[in,out] bdat element to swap bytes for
   template<typename B> inline
   void swap_bytes(B&bdat) {
     __bswap<sizeof(B)>::swap(static_cast<void*>(&bdat), 1);
@@ -963,17 +969,17 @@ namespace WDutils {
   ///
   /// in order for this to work, the sizeof() the type must be 1,2,4,8, or 16
   ///
-  /// \param bdat first element to swap bytes for
-  /// \param cnt  number of elments to swap bytes for
+  /// \param[in,out] bdat first element to swap bytes for
+  /// \param[in]     cnt  number of elments to swap bytes for
   template<typename B> inline
   void swap_bytes(B*bdat, unsigned cnt) {
     __bswap<sizeof(B)>::swap(static_cast<void*>(bdat), cnt);
   }
   /// swap the bytes of elements of unknown type but known size
   ///
-  /// \param vdat pointer to first element
-  /// \param len  size of the elements, must be 1,2,4,8, or 16
-  /// \param cnt  number of elments to swap bytes for
+  /// \param[in,out] vdat pointer to first element
+  /// \param[in]     len  size of the elements, must be 1,2,4,8, or 16
+  /// \param[in]     cnt  number of elments to swap bytes for
   inline
   void swap_bytes(void*vdat, unsigned len, unsigned cnt) WDutils_THROWING {
     switch(len) {
