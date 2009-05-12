@@ -55,8 +55,8 @@
 // v 2.4.7  15/12/2008  WD  debugged r_2 -> r_s conversion
 // v 2.4.8  12/03/2009  WD  warning if accpars of accfile given but no accname 
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.7"
-#define falcON_VERSION_D "15-dec-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.8"
+#define falcON_VERSION_D "12-mar-2009 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
