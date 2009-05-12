@@ -12,7 +12,8 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2008 Walter Dehnen, Paul McMillan
+// Copyright (C) 2005      Walter Dehnen, Paul McMillan
+// Copyright (C) 2005-2009 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -52,6 +53,7 @@
 // v 2.4.5  10/09/2008  WD  happy gcc 4.3.1
 // v 2.4.6  13/11/2008  WD  new mass adaption (proprietary only)
 // v 2.4.7  15/12/2008  WD  debugged r_2 -> r_s conversion
+// v 2.4.8  12/03/2009  WD  warning if accpars of accfile given but no accname 
 ////////////////////////////////////////////////////////////////////////////////
 #define falcON_VERSION   "2.4.7"
 #define falcON_VERSION_D "15-dec-2008 Walter Dehnen                          "
@@ -155,9 +157,9 @@ const char*usage =
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
-  const double mf = 2.2228847e5;                   // M_sun in WD_units         
+  const double mf = 2.2228847e5;                   // M_sun in WD_units
   //----------------------------------------------------------------------------
-  // 1. set some parameters                                                     
+  // 1. set some parameters
   //----------------------------------------------------------------------------
   const bool WD   (getbparam("WD_units"));
   const bool care (getbparam("careful"));
@@ -171,13 +173,19 @@ void falcON::main() falcON_THROWING
     (getbparam("giveP") ? fieldset::p : fieldset::o) |
     (getbparam("giveA") ? fieldset::a : fieldset::o) |
     fieldset::basic );
-
-  const nemo_acc*mono= hasvalue("accname")?           // IF(accname given) THEN 
-    new nemo_acc(getparam  ("accname"),               //   initialize external  
-		 getparam_z("accpars"),               //   accelerations        
-		 getparam_z("accfile")) : 0;          // ELSE: no potential     
+  const nemo_acc*mono=0;
+  if(hasvalue("accname"))                             // IF(accname given) THEN
+    mono = new nemo_acc(getparam  ("accname"),        //   initialize external
+			getparam_z("accpars"),        //   accelerations
+			getparam_z("accfile"));
+  else if(hasvalue("accpars"))
+    falcON_Warning("'accpars' given but no 'accname': "
+		   "will have no external potential\n");
+  else if(hasvalue("accfile"))
+    falcON_Warning("'accfile' given but no 'accname': "
+		   "will have no external potential\n");
   //----------------------------------------------------------------------------
-  // 2. create initial conditions from a halo model using mass adaption         
+  // 2. create initial conditions from a halo model using mass adaption
   //----------------------------------------------------------------------------
   double rs(getdparam("r_s"));
   double rc(getdparam("r_c"));
@@ -207,7 +215,7 @@ void falcON::main() falcON_THROWING
 #endif
 			 care);
   //----------------------------------------------------------------------------
-  // 3. sample snapshot and write to output                                     
+  // 3. sample snapshot and write to output
   //----------------------------------------------------------------------------
   unsigned N = getuparam("nbody");
   if(N) {
@@ -238,7 +246,7 @@ void falcON::main() falcON_THROWING
     shot.write_nemo(out,data);
   }
   //----------------------------------------------------------------------------
-  // 4. optional output of table                                                
+  // 4. optional output of table
   //----------------------------------------------------------------------------
   if(hasvalue("tabfile")) {
     HaloModel const&HM (HaloSample.Model());
