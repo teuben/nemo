@@ -57,7 +57,7 @@ namespace falcON {
   // for 4 floating point values that are (supposed to be) alligned to 16 bytes 
   //                                                                            
   //////////////////////////////////////////////////////////////////////////////
-  struct falcON__align16 fvec4 {
+  struct WDutils__align16 fvec4 {
     float W,X,Y,Z;
     //--------------------------------------------------------------------------
     // constructors                                                             
