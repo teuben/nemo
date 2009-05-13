@@ -1362,13 +1362,13 @@ namespace WDutils {
   ///
   /// Forces the corresponding variable/type to be 16-byte aligned; Works with
   /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
-  ///    struct falcON__align16 name { ... };              \endcode
+  ///    struct WDutils__align16 name { ... };              \endcode
 #if defined (__INTEL_COMPILER)
-#  define falcON__align16 __declspec(align(16)) 
+#  define WDutils__align16 __declspec(align(16)) 
 #elif defined (__GNUC__) && __GNUC__ > 2
-#  define falcON__align16 __attribute__ ((aligned(16)))
+#  define WDutils__align16 __attribute__ ((aligned(16)))
 #else
-#  define falcON__align16
+#  define WDutils__align16
 #endif
   //----------------------------------------------------------------------------
   /// is a given memory address aligned?
@@ -1392,7 +1392,7 @@ namespace WDutils {
   ///
   /// Will allocate slightly more memory than required to ensure we can find
   /// the required amount at a 16b memory location. To de-allocate, you \b must
-  /// use falcON::free16(), otherwise an error will occur!
+  /// use WDutils::free16(), otherwise an error will occur!
   ///
   /// \return   a newly allocated memory address at a 16 byte memory location
   /// \param n  number of bytes to allocate
