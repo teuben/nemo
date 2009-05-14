@@ -243,13 +243,15 @@ string defv[] = {
     "ycol=2\n       Column for Y coordinates",
     "mode=0\n       Output mode (0=all, 1..6=various methods",
     "maxline=10000\n Maximum size of columns",
-    "VERSION=1.2b\n 17-apr-04 PJT",
+    "VERSION=1.2c\n 14-may-09 PJT",
     NULL,
 };
 
 string usage = "six linear regressions";
 
-#define MAXCOL  32
+string cvsid="$Id$";
+
+#define MAXCOL  256
 
 
 patch_line(char *cp)      /* replace TAB and CR/NL with spaces */
@@ -274,7 +276,7 @@ nemo_main()
     }
     xcol = getiparam("xcol");
     ycol = getiparam("ycol");
-    dprintf(0,"Reading from columns %d and %d\n",xcol,ycol);
+    dprintf(0,"%s: Reading from columns %d and %d\n",getparam("in"),xcol,ycol);
 /*
  *   OPEN FILE, READ THE DATA and CLOSE THE FILE
  */
@@ -310,7 +312,7 @@ nemo_main()
  */
 
     if (linreg (ntot,x,y,a,va,b,vb)) {
-        dprintf(0," Linear regression\n file: %s # of data: %d\n",
+        dprintf(1," Linear regression\n file: %s # of data: %d\n",
             getparam("in"),ntot);
         if (mode==0 || mode==1)    
             printf("OLS(Y/X): %g %g %g %g\n", a[0],va[0],b[0],vb[0]);
