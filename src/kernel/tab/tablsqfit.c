@@ -222,6 +222,9 @@ read_data()
     real *coldat[2*MAXCOL+1];
     int colnr[2*MAXCOL+1], ncols = 0, i, j;
 
+    dprintf(0,"%s: reading X column(s) %s and Y column(s) %s\n",
+	    getparam("in"),getparam("xcol"),getparam("ycol"));
+
     for (i=0; i<nxcol; i++) {
         coldat[ncols] = xcol[i].dat = (real *) allocate(nmax * sizeof(real));
         colnr[ncols] = xcolnr[i];        
@@ -265,8 +268,7 @@ read_data()
 }
 
 
-write_data(outstr)              /* only for straight line fit */
-stream outstr;
+write_data(stream outstr)              /* only for straight line fit */
 {
 #if 0    
     int i;
@@ -640,7 +642,7 @@ do_ellipse()
 do_imageshift()
 {
     real *x, *y, *u, *v;
-    /* this code was on 3b1 ... which we've lost by now */
+    /* this code was on 3b1 ... before CVS ... lost for now */
 }
 
 
