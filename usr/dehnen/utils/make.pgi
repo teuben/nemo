@@ -1,0 +1,20 @@
+#
+# sets library sub-directory and flags for portland group compiler
+# to be included by makefile 
+#
+
+LIB		:= libpgi/
+CXX		:= pgCC
+CC		:= pgcc
+FC		:= pgf90
+
+# general optimasation and warning flags
+OPTFLAGS	:= -g -fast -fastsse -fPIC -Msafeptr -Mlre -Minline=levels:10 \
+		-Mvect=sse -Mcache_align
+
+# these are actually to be set
+CFLAGS		:= $(OPTFLAGS)
+CXXFLAGS	:= $(OPTFLAGS)
+
+# end
+

@@ -1,0 +1,22 @@
+#
+# sets library sub-directory and flags for Sun compiler
+# to be included by makefile 
+#
+
+LIB		:= lib/
+CXX		:= $(CPATH)CC
+CC		:= $(CPATH)cc
+FC		:= $(CPATH)f90
+
+PLATFORM 	:= $(shell uname -m)
+
+# general optimasation and warning flags
+OPTFLAGS	:= -g0 -Kpic -fast -xipo -xvector -xbuiltin -xalias_level \
+			-xmemalign=4s -xO3 -xunroll=8
+
+
+# these are actually to be set
+CFLAGS		:= $(OPTFLAGS) -D__SSE__ -S__SSE2__
+CXXFLAGS	:= $(OPTFLAGS) -D__SSE__ -S__SSE2__
+
+# end

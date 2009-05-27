@@ -1,0 +1,23 @@
+#
+# sets library sub-directory and flags for intel compiler
+# to be included by makefile 
+#
+# NOTE I have not been using the icc compiler, so this file is presumably not
+#      very up-to-date (options wrong and/or useless). You may want to edit it
+#      (then please tell me about it by email to wd11@astro.le.ac.uk)
+#
+
+LIB		:= libicc/
+CXX		:= icpc
+CC		:= icc
+FC		:= ifc
+
+# general optimasation and warning flags
+OPTFLAGS	:= -O2 -unroll -tpp7 -wd177,1572 -i_dynamic -prefetch
+
+# these are actually to be set
+CFLAGS		:= $(OPTFLAGS)
+CXXFLAGS	:= $(OPTFLAGS)
+
+# end
+
