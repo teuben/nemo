@@ -46,7 +46,7 @@ namespace WDutils {
   ///    without any try to make it a proper C++ (STL-style) code.\n
   /// 3. Our implementation here is driven by our needs in falcON and provides
   ///    basic two-point and collective communications of all built-in data
-  ///    types, tupel<3,float> and tupel<3,double> only, either as array or
+  ///    types, plus contiguous types built from these, either as array or
   ///    Array<> (which allows some additional checks on buffer size).\n
 namespace MPI {
   /// \name MPI::DataType and related functionality
@@ -218,7 +218,7 @@ namespace MPI {
 #undef  NonTemplateCommunications
   /// \brief
   /// implements some functionality of MPI communicators as C++ class.
-  /// \detail
+  /// \details
   /// We provide the point-to-point and collective communications as templates
   /// over datatype with the same type for send and receive.
   /// \note 
@@ -612,9 +612,8 @@ namespace MPI {
 	Reduce(O,root,buf,   0,count,Type<T>(),"ReduceInPlace<%s>");
     }
     /// reduce a single datum in place
-    /// \param[in]  root      recipient
-    /// \param[in]  send      datum to be reduced
-    /// \param[out] recv      datum to be received
+    /// \param[in]     root     recipient
+    /// \param[in,out] buf      datum to be reduced (output only at root)
     template<Operator O, typename T>
     void ReduceInPlace(unsigned root, T&buf) const WDutils_THROWING
     {
@@ -690,10 +689,9 @@ namespace MPI {
     }
     // --- AllReduceInPlace ---------------------------------------------------
     /// reduce data at all processes in place
-    /// \param[in]     op     reduction operator
     /// \param[in,out] buf    buffer with data to be reduced
     /// \param[in]     count  amount of data to be reduced
-    /// \note on output buf will contain the reduce data
+    /// \note on output buf will contain the reduced data
     template<Operator O, typename T>
     void AllReduceInPlace(T*buf, unsigned count) const WDutils_THROWING
     {
@@ -705,7 +703,6 @@ namespace MPI {
       WDutils_DEL_A(send);
     }
     /// reduce a single datum at all processes in place
-    /// \param[in]      op     reduction operator
     /// \param[in,out]  buf    datum to be reduced
     template<Operator O, typename T>
     void AllReduceInPlace(T&buf) const WDutils_THROWING
@@ -716,7 +713,6 @@ namespace MPI {
       AllReduce(O,&send,&buf,1,Type<T>(),"AllReduceInPlace<%s>");
     }
     /// reduce data at all processes in place, using Array<> argument
-    /// \param[in]     op     reduction operator
     /// \param[in,out] buf    buffer with data to be reduced
     /// \note on output buf will contain the reduce data
     /// \note This is a specialisation of AllReduceInPlace with a single datum
@@ -758,7 +754,7 @@ namespace MPI {
     /// \param[in]  buf    buffer to receive data
     /// \param[in]  count  size of receive buffer
     /// \param[in]  tag    identifier: only receive matching message
-    /// \param[in[  warn   optional: warn about count mismatch (default: true)
+    /// \param[in]  warn   optional: warn about count mismatch (default: true)
     template<typename T>
     unsigned Recv(unsigned srce, T*buf, unsigned count, int tag, bool warn=true)
       const WDutils_THROWING
@@ -807,7 +803,7 @@ namespace MPI {
     // --- Waits and Tests ----------------------------------------------------
     /// blocking: wait for a completion of a operations
     /// \param[in,out] request  Request as issued by IssueSend() or IssueRecv()
-    /// \param[out]    count    count of operation
+    /// \param[out]    status   status of operation
     /// \note the request is void after return.
     void Wait(Request&request, Status&status) const WDutils_THROWING;
     /// blocking: wait for completion of any of several requests

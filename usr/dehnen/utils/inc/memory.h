@@ -1364,8 +1364,8 @@ namespace WDutils {
   /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
   ///    struct WDutils__align16 name { ... };              \endcode
 #if defined (__INTEL_COMPILER)
-#  define WDutils__align16 __declspec(align(16)) 
-#elif defined (__GNUC__) && __GNUC__ > 2
+#  define WDutils__align16 __declspec(align(16))
+#elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
 #  define WDutils__align16 __attribute__ ((aligned(16)))
 #else
 #  define WDutils__align16

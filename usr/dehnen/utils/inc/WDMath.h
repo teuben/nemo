@@ -60,7 +60,7 @@
 #if  defined(__COMPLEX__)					\
   || defined(_CPP_COMPLEX)					\
   || defined(__STD_COMPLEX)					\
-  || defined(__PGCC__) && defined(_STLP_template_complex)	\
+  || defined(__PGI) && defined(_STLP_template_complex)		\
   || defined(__GNUC__) && defined(_GLIBCXX_COMPLEX)		\
   || defined(WDutils_included_complex)
 #  define WDutils_COMPLEX
@@ -205,7 +205,7 @@ namespace WDutils {
   };
   template<> struct __sincos<float> {
     static void sc(float x, float&s, float&c) {
-#if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGCC__)
+#if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGI)
     __asm __volatile__ ("fsincos" : "=t" (s), "=u" (c) : "0" (x) );
 #else
     s = std::sin(x);
@@ -215,7 +215,7 @@ namespace WDutils {
   };
   template<> struct __sincos<double> {
     static void sc(double x, double&s, double&c) {
-#if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGCC__)
+#if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGI)
     __asm __volatile__ ("fsincos" : "=t" (s), "=u" (c) : "0" (x) );
 #else
     s = std::sin(x);

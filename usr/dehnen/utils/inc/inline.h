@@ -47,21 +47,9 @@
 #endif
 //------------------------------------------------------------------------------
 namespace WDutils {
-#ifdef __PGCC__ // deal with non-Ansi compilers
-  template<typename T> struct __abs {
-    static T abs(T x) { return x < T(0)? -x : x; }
-  };
-  template<> struct __abs<double> {
-    static double abs(double x) { return std::abs(x); }
-  };
-  template<typename T> inline T abs(T x) { return __abs<T>::abs(x); }
-  template<typename T> inline T min(T x, T y) { return x<y? x : y; }
-  template<typename T> inline T max(T x, T y) { return x>y? x : y; }
-#else
   using std::abs;
   using std::min;
   using std::max;
-#endif
   //----------------------------------------------------------------------------
   using std::numeric_limits;
   template<typename X> inline

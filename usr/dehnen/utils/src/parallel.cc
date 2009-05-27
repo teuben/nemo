@@ -45,14 +45,12 @@ namespace {
   struct Thrower {
     const char*file;          ///< file name
     const int  line;          ///< line number
-    /// default constructor: set data to NULL
-    Thrower() : file(0), line(0) {}
     /// constructor: get file name, and line number
     Thrower(const char*__file, int __line) : file(__file), line(__line) {}
     /// generate an exception
     /// \param[in] err  error code as returned by MPI routines (C-binding)
     /// \param[in] fnc  (optional) name of calling function
-    exception operator()(int errcode, const char*func = 0) const
+    WDutils::exception operator()(int errcode, const char*func = 0) const
     {
       int size = 512+MPI_MAX_ERROR_STRING, len;
       char buffer[size], *buf=buffer;
@@ -66,7 +64,7 @@ namespace {
 	SNprintf(buf,size,"MPI Error: ") ;
       buf += len;
       MPI_Error_string(errcode, buf, &len);
-      return exception(buffer);
+      return WDutils::exception(buffer);
     }
   };
 #  define MPI_THROWER  throw ::Thrower
@@ -275,7 +273,6 @@ namespace MPI {
 	  WDutils_THROW("MPI::Init(): # environments vars exceeds %d",NMAX);
 	DebugInfo(8,"MPI::Init(): trying to set %du environment vars\n",NENV);
 	// 4.1 Do we have first environment variable on all processes?
-
 	char haveEnv = getenv(VAR[0])!=0;
 	char*HaveEnv = WDutils_NEW(char,World.size());
 	err = MPI_Allgather(&haveEnv,1,MPI_CHAR,HaveEnv,1,

@@ -54,7 +54,7 @@ WDutils::RunInfo::RunInfo()
     __time[24] = 0;
 #ifdef unix
     // set host name
-#ifdef __PGCC__
+#ifdef __PGI
     const char*host__ = getenv("HOST");
     if(host__) {
       SNprintf(__host,100,host__);
@@ -73,7 +73,7 @@ WDutils::RunInfo::RunInfo()
     } else
       SNprintf(__user,100,"unknown.user");
     // set pid
-#ifndef __PGCC__
+#ifndef __PGI
     SNprintf(__pid,20,"%d",getpid());
     __pid_known  = 1;
 #endif
@@ -125,7 +125,7 @@ WDutils::RunInfo WDutils::RunInfo::Info;
 namespace {
   using namespace WDutils;
 
-#if defined(__PGCC__) || defined(__CC__)
+#if defined(__PGI) || defined(__CC__)
   using ::snprintf;
   using ::vsnprintf;
 #else
