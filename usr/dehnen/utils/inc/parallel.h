@@ -272,13 +272,15 @@ namespace MPI {
     /// inequality
     bool operator!=(Communicator const&C) const { return COMM != C.COMM; }
     /// set file and line information
-    virtual Communicator* set(const char*f, int l) {
+    virtual Communicator* set(const char*f, int l)
+    {
       FILE = f;
       LINE = l;
       return this;
     }
     /// set file and line information
-    virtual const Communicator* set(const char*f, int l) const {
+    virtual const Communicator* set(const char*f, int l) const
+    {
       FILE = f;
       LINE = l;
       return this;
@@ -296,7 +298,8 @@ namespace MPI {
     /// \param[in,out] buf       buffer both for send and receive
     /// \param[in]     count     amount of data to be send
     template<typename T>
-    void BroadCast(unsigned root, T*buf, unsigned count) const WDutils_THROWING {
+    void BroadCast(unsigned root, T*buf, unsigned count) const WDutils_THROWING
+    {
       DEBUGINFO("MPI::Communicator::BroadCast(): %d -> %d %s\n",
 		root,count,nameof(T));
       BroadCast(root,buf,count,Type<T>(),"BroadCast()");
@@ -305,7 +308,8 @@ namespace MPI {
     /// \param[in]      root      sender
     /// \param[in,out]  buf       buffer both for send and receive
     template<typename T>
-    void BroadCast(unsigned root, T&buf) const WDutils_THROWING {
+    void BroadCast(unsigned root, T&buf) const WDutils_THROWING
+    {
       DEBUGINFO("MPI::Communicator::BroadCast(): %d -> 1 %s\n",
 		root,nameof(T));
       BroadCast(root,&buf,1,Type<T>(),"BroadCast()");
@@ -315,14 +319,16 @@ namespace MPI {
     /// \param[in,out] buf       buffer both for send and receive
     /// \note This routine is a specialisation of BCast with a single datum
     template<typename T>
-    void BroadCast(unsigned root, Array<T>&buf) const WDutils_THROWING {
+    void BroadCast(unsigned root, Array<T>&buf) const WDutils_THROWING
+    {
       DEBUGINFO("MPI::Communicator::BroadCast(): %d -> Array<%s>(%d)\n",
 		root,nameof(T),buf.size());
       BroadCast(root,buf.array(),buf.size(),Type<T>(),"BroadCast()");
     }
     // --- Gather --------------------------------------------------------------
     void Gather(unsigned root, const void*send, unsigned count,
-		void*recv, DataType type, const char* =0) const WDutils_THROWING;
+		void*recv, DataType type, const char* =0)
+      const WDutils_THROWING;
     /// gather multiple data at root
     /// \param[in]  root   recipient
     /// \param[in]  send   buffer with data to be send
