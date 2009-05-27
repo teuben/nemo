@@ -125,7 +125,7 @@ WDutils::RunInfo WDutils::RunInfo::Info;
 namespace {
   using namespace WDutils;
 
-#if defined(__PGI) || defined(__CC__)
+#if defined(__PGI) || defined(__SUNPRO_CC)
   using ::snprintf;
   using ::vsnprintf;
 #else

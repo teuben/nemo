@@ -8,7 +8,7 @@ CXX		:= pgCC
 CC		:= pgcc
 FC		:= pgf90
 
-# general optimasation and warning flags
+# general optimisation and warning flags
 OPTFLAGS	:= -g -fast -fastsse -fPIC -Msafeptr -Mlre -Minline=levels:10 \
 		-Mvect=sse -Mcache_align
 

@@ -10,7 +10,7 @@ FC		:= $(CPATH)gfortran
 
 PLATFORM 	:= $(shell uname -m)
 
-# CPU dependent optimization flags
+# CPU dependent optimisation flags
 # EDIT to match your hardware
 
 # i386
@@ -28,7 +28,7 @@ ifeq ($(PLATFORM),x86_64)
 CPUFLAGS	:= -march=k8 -mpreferred-stack-boundary=4
 endif
 
-# general optimasation and warning flags
+# general optimisation and warning flags
 OPTFLAGS	:= -ggdb3 -Wall -Wextra -Wshadow -O2 -fPIC -ffast-math \
 		-funroll-loops -fforce-addr -rdynamic
 

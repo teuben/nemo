@@ -330,7 +330,7 @@ namespace WDutils {
       IntegerInverse<1>::Inverse;
       IntegerInverse<1>::Divide;
       IntegerInverse<1>::Ratio;
-      template<typename Real> static Real Inverse() { return Real(1); }
+//       template<typename Real> static Real Inverse() { return Real(1); }
       template<typename Real> static void Multiply    (Real& ) {}
       template<typename Real> static Real Product     (Real X) { return X; }
       template<typename Real> static void Exponentiate(Real& ) {}
@@ -348,7 +348,7 @@ namespace WDutils {
       IntegerInverse<2>::Inverse;
       IntegerInverse<2>::Divide;
       IntegerInverse<2>::Ratio;
-      template<typename Real> static Real Inverse() { return Real(0.5); }
+//       template<typename Real> static Real Inverse() { return Real(0.5); }
       template<typename Real> static void Multiply    (Real&X) { __IncAdd(); X+=X; }
       template<typename Real> static Real Product     (Real X) { __IncAdd(); return X+X; }
       template<typename Real> static void Exponentiate(Real&X) { __IncMul(); X*=X; }
@@ -364,7 +364,7 @@ namespace WDutils {
       IntegerInverse<3>::Inverse;
       IntegerInverse<3>::Divide;
       IntegerInverse<3>::Ratio;
-      template<typename Real> static Real Inverse() { return Real(0.333333333333333333); }
+//       template<typename Real> static Real Inverse() { return Real(0.333333333333333333); }
       template<typename Real> static void Multiply    (Real&X) { __CountMA(0,2); X+=X+X; }
       template<typename Real> static Real Product     (Real X) { __CountMA(0,2); return X+X+X; }
       template<typename Real> static void Exponentiate(Real&X) { __CountMA(2,0); X*=X*X; }
