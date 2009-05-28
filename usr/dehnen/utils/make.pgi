@@ -3,7 +3,7 @@
 # to be included by makefile 
 #
 
-LIB		:= libpgi/
+EXT		:= pgi
 CXX		:= pgCC
 CC		:= pgcc
 FC		:= pgf90

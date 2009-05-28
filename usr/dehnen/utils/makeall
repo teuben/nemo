@@ -51,6 +51,7 @@ IMPI			:= -I$(MPIINC)
 # -----------
 
 INC             	:= inc/
+LIB			:= lib$(EXT)/
 SRC             	:= src/
 LIBT			:= $(LIB).dummy
 $(LIBT)			:

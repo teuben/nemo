@@ -34,6 +34,11 @@
 #include <ctime>
 #include <iostream>
 #include <fstream>
+#ifdef unix
+  extern "C" {
+#   include <unistd.h>
+  }
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class RunInfo                                                                
@@ -54,17 +59,8 @@ WDutils::RunInfo::RunInfo()
     __time[24] = 0;
 #ifdef unix
     // set host name
-#ifdef __PGI
-    const char*host__ = getenv("HOST");
-    if(host__) {
-      SNprintf(__host,100,host__);
-      __host_known = 1;
-    } else
-      SNprintf(__host,100,"unknown.host");
-#else
     gethostname(__host,100);
     __host_known = 1;
-#endif
     // set user name
     const char*user__ = getenv("USER");
     if(user__) {
@@ -73,10 +69,8 @@ WDutils::RunInfo::RunInfo()
     } else
       SNprintf(__user,100,"unknown.user");
     // set pid
-#ifndef __PGI
     SNprintf(__pid,20,"%d",getpid());
     __pid_known  = 1;
-#endif
     // set command and name of executable
     char file[64];
     if(__pid_known) {
