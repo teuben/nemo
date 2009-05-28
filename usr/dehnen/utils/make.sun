@@ -18,5 +18,6 @@ OPTFLAGS	:= -g0 -KPIC -fast -xvector -xbuiltin -xalias_level \
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS) -D__SSE__ -D__SSE2__
 CXXFLAGS	:= $(OPTFLAGS) -D__SSE__ -D__SSE2__
+LDFLAGS		:= -G
 
 # end

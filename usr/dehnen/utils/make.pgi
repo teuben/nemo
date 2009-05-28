@@ -15,6 +15,7 @@ OPTFLAGS	:= -g -fast -fastsse -fPIC -Msafeptr -Mlre -Minline=levels:10 \
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
 CXXFLAGS	:= $(OPTFLAGS)
+LDFLAGS		:= -shared
 
 # end
 

@@ -35,6 +35,7 @@ OPTFLAGS	:= -ggdb3 -Wall -Wextra -Wshadow -O2 -fPIC -ffast-math \
 # these are actually to be set
 CFLAGS		:= $(CPUFLAGS) $(OPTFLAGS)
 CXXFLAGS	:= $(CPUFLAGS) $(OPTFLAGS)
+LDFLAGS		:= -shared
 
 # end
 

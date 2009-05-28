@@ -23,35 +23,35 @@ __ICC		:= $(shell which icc    |& wc -w)
 #    used for developing and verifying the code (version 4.3.1)
 ifeq ($(__GCC),1)
 lib		:
-		make -f Makefile COMPILER=gcc
+		make -f makeall COMPILER=gcc
 endif
 
 # PGI compiler
 #    somewhat tested, seems to work under version 7.2.1
 ifeq ($(__PGI),1)
 libpgi		:
-		make -f Makefile COMPILER=pgi
+		make -f makeall COMPILER=pgi
 endif
 
 # Pathscale compiler
 #    NOT TESTED
 ifeq ($(__PTH),1)
 libpath		:
-		make -f Makefile COMPILER=pth
+		make -f makeall COMPILER=pth
 endif
 
 # Sun compiler
 #    NOT TESTED
 ifeq ($(__SUN),1)
 libsun		:
-		make -f Makefile COMPILER=sun
+		make -f makeall COMPILER=sun
 endif
 
 # Intel compiler
 #    NOT TESTED
 ifeq ($(__ICC),1)
 libicc		:
-		make -f Makefile COMPILER=icc
+		make -f makeall COMPILER=icc
 endif
 
 # END

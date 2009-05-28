@@ -127,7 +127,7 @@ $(LIB)libWDutils.a:	$(WDutils_objs)
 			$(AR) $@ $?
 			$(RL) $@
 $(LIB)libWDutils.so:	$(WDutils_objs)
-			$(CXX) $^ -shared -o $@ $(CPUFLAGS)
+			$(CXX) $^ $(LDFLAGS) -o $@
 
 library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
 
@@ -151,7 +151,7 @@ $(LIB)libWDutilsMPI.a:	$(WDutilsP_objs)
 			$(AR) $@ $?
 			$(RL) $@
 $(LIB)libWDutilsMPI.so:	$(WDutilsP_objs)
-			$(CXX) $^ -shared -o $@ $(CPUFLAGS)
+			$(CXX) $^ $(LDFLAGS) -o $@
 
 library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so \
 			$(LIB)libWDutilsMPI.a $(LIB)libWDutilsMPI.so

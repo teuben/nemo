@@ -52,8 +52,9 @@ namespace {
     /// \param[in] fnc  (optional) name of calling function
     WDutils::exception operator()(int errcode, const char*func = 0) const
     {
-      int size = 512+MPI_MAX_ERROR_STRING, len;
-      char buffer[size], *buf=buffer;
+      const int msize = 512+MPI_MAX_ERROR_STRING;
+      int size = msize, len;
+      char buffer[msize], *buf=buffer;
       if(file) {
 	len   = SNprintf(buf,size,"in [%s:%d]: ",file,line);
 	buf  += len;
@@ -98,7 +99,7 @@ namespace {
 #define MPI_THROW    MPI_THROWER(__FILE__,__LINE__)
   //
   double Itime = 0.;
-  void AbortMPI() {
+  extern "C" void AbortMPI() {
     if(MPI::Initialized())
       MPI_Abort(MPI::World.Comm(),0);
   }
