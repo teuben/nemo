@@ -50,24 +50,8 @@ namespace WDutils {
   using std::abs;
   using std::min;
   using std::max;
-  //----------------------------------------------------------------------------
-  using std::numeric_limits;
-  template<typename X> inline
-  bool isinf(X x)
-  {
-    return
-      std::numeric_limits<X>::has_infinity &&
-      std::numeric_limits<X>::infinity() == x ;
-  }
-  template<typename X> inline
-  bool isnan(X x)
-  {
-    return
-      (std::numeric_limits<X>::has_quiet_NaN &&
-       std::numeric_limits<X>::quiet_NaN()      == x   ) ||
-      (std::numeric_limits<X>::has_signaling_NaN &&
-       std::numeric_limits<X>::signaling_NaN() == x   );
-  }
+  using ::isnan;   // with some compilers (pgCC, CC) these are not in std
+  using ::isinf;
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
   int sign    (const scalar_type&x)

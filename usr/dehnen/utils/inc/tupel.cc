@@ -49,26 +49,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils { namespace meta {
   //////////////////////////////////////////////////////////////////////////////
+#ifndef WDutils_included_inline_h
   using std::min;
   using std::max;
   using std::abs;
-  using std::numeric_limits;
-  template<typename X> inline
-  bool isinf(X x)
-  {
-    return
-      std::numeric_limits<X>::has_infinity &&
-      std::numeric_limits<X>::infinity() == x ;
-  }
-  template<typename X> inline
-  bool isnan(X x)
-  {
-    return
-      (std::numeric_limits<X>::has_quiet_NaN &&
-       std::numeric_limits<X>::quiet_NaN()      == x   ) ||
-      (std::numeric_limits<X>::has_signaling_NaN &&
-       std::numeric_limits<X>::signaling_NaN() == x   );
-  }
+  using ::isnan;   // with some compilers (pgCC, CC) these are not in std
+  using ::isinf;
+#endif
   //----------------------------------------------------------------------------
   template<int N> struct times__ {
     template<typename X> static X is(X const&x) { return N * x; } };
@@ -668,14 +655,14 @@ namespace WDutils { namespace meta {
 #endif
   };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // struct ONE<N>                                                            //
-  //                                                                          //
-  // F: factorial N!!                                                         //
-  // G: N!!                                                                   //
-  // H: (2*N-1)!!                                                             //
-  // P: 2^N                                                                   //
-  //                                                                          //
+  //
+  // struct ONE<N>
+  //
+  // F: factorial N!
+  // G: N!!
+  // H: (2*N-1)!!
+  // P: 2^N
+  //
   //////////////////////////////////////////////////////////////////////////////
   template<int N> struct ONE {
     enum {
@@ -687,12 +674,12 @@ namespace WDutils { namespace meta {
   template<> struct ONE<1> { enum { F=1, G=1, H=1, P=2 }; };
   template<> struct ONE<0> { enum { F=1, G=1, H=1, P=1 }; };
   //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // struct TWO<L,M>                                                          //
-  //                                                                          //
-  // B: binomial (L,M)                                                        //
-  // I: index of (L,M)                                                        //
-  //                                                                          //
+  //
+  // struct TWO<L,M>
+  //
+  // B: binomial (L,M)
+  // I: index of (L,M)
+  //
   //////////////////////////////////////////////////////////////////////////////
   template<int L, int M> struct TWO {
     enum { B = TWO<L-1,M-1>::B + TWO<L-1,M>::B,
