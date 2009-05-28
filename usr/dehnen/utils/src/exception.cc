@@ -79,27 +79,29 @@ WDutils::RunInfo::RunInfo()
 #endif
     // set command and name of executable
     char file[64];
-    SNprintf(file,64,"/proc/%s/cmdline",__pid);
-    std::ifstream in(file);
-    if(in) {
-      int i,e=0;
-      for(i=0; i!=1024; ++i) __cmd[i]=0;
-      in.getline(__cmd,1023);
-      for(i=1023; i!=0; --i)
-	if(__cmd[i]==0 || isspace(__cmd[i])) __cmd[i] = ' ';
-	else if(e==0) e=i;
-      __cmd[e+1] = 0;
-      for(i=0; !isspace(__cmd[i]); ++i)
-	__name[i] = __cmd[i];
-      __name[i] = 0;
-      __name[i] = 0;
-      __cmd_known  = 1;
-      __name_known = 1;
+    if(__pid_known) {
+      SNprintf(file,64,"/proc/%s/cmdline",__pid);
+      std::ifstream in(file);
+      if(in) {
+	int i,e=0;
+	for(i=0; i!=1024; ++i) __cmd[i]=0;
+	in.getline(__cmd,1023);
+	for(i=1023; i!=0; --i)
+	  if(__cmd[i]==0 || isspace(__cmd[i])) __cmd[i] = ' ';
+	  else if(e==0) e=i;
+	__cmd[e+1] = 0;
+	for(i=0; !isspace(__cmd[i]); ++i)
+	  __name[i] = __cmd[i];
+	__name[i] = 0;
+	__name[i] = 0;
+	__cmd_known  = 1;
+	__name_known = 1;
+      }
     }
-#else
+#else // unix
     SNprintf(__host,100,"unknown.host");
     SNprintf(__user,100,"unknown.user");
-    SNprintf(__user,100,"unknown.main");
+    SNprintf(__name,100,"unknown.name");
 #endif
   } catch(exception E) {
     WDutils_RETHROW(E);
