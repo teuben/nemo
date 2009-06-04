@@ -138,7 +138,7 @@ links			:	$(links)
 
 # 6.1 utils library
 utils/lib/libWDutils.a	: utils
-			$(MAKE) -C utils library
+			$(MAKE) -C utils
 libutils		: utils utils/lib/libWDutils.a
 
 # 6.3 falcON library
