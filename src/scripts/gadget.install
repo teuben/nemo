@@ -5,7 +5,8 @@
 #  you probably want to edit this file, or use the commandline parameters,
 #  to make it work for you. See an example below.
 #  Of course it's quite possible that some, or all, of the needed libraries already
-#  exist on your system. In that case, this script may not be as useful for you.
+#  exist on your system. In that case, this script may not be as useful for you,
+#  or just replace the particular library with a silly value, e.g. gsl=0
 #
 #  For gadget, see       http://www.mpa-garching.mpg.de/gadget/
 #  For NEMO suport, see  http://www.astro.umd.edu/nemo/
@@ -28,6 +29,7 @@
 #  The original CVS version of this script can be found in $NEMO/src/scripts
 #  but has been written to be NEMO agnostic. Using manybody= a MANYBODY install
 #  can be facilitated (http://www.manybody.org)
+#  It was also used at PITP-2009
 #
 #  $Id$
 
@@ -38,9 +40,10 @@ set lam_base=http://www.lam-mpi.org/download/files/
 set gadget_base=http://www.mpa-garching.mpg.de/gadget/
 
 set fftw=fftw-2.1.5.tar.gz 
-set gsl=gsl-1.8.tar.gz
-set hdf=hdf5-1.6.5.tar.gz
-set lam=lam-7.1.1.tar.gz
+set gsl=gsl-1.12.tar.gz
+set hdf=hdf5-1.8.3.tar.gz
+set lam=lam-7.1.4.tar.gz
+#set lam=lam-7.1.5b1.tar.gz
 set gadget=gadget-2.0.3.tar.gz
 
 set prefix=`pwd`/opt
@@ -93,7 +96,7 @@ echo "# automatically created by $0, careful with editing"   > $rc
 echo "# date:  `date`"                                      >> $rc
 echo "# args:  $*"                                          >> $rc
 
-#                                               lam
+#                                               lam (gcc 4.3.0 and up don't know bool - need newer LAM)
 if (-e $lam) tar zxf $lam
 set dir=`basename $lam .tar.gz`
 if (-e $dir) then
@@ -103,8 +106,9 @@ if (-e $dir) then
    make install
    popd
    # the new mpicc better be in the path now
-   echo 'set path=($prefix/bin $path) ' >> $rc
-   echo 'rehash'                        >> $rc
+   echo 'set prefix='$prefix             >> $rc
+   echo 'set path=($prefix/bin $path) '  >> $rc
+   echo 'rehash'                         >> $rc
    source $rc
    echo "$lam `date`" >> $prefix/installed.log
 else 
@@ -201,17 +205,26 @@ if ($bench) then
    # "standard benchmark on single processor : 60000 particles 2019 steps"
    # ---------------------------------------------------------------------------------------
    # time mpirun -np 1 Gadget2/Gadget2 Gadget2/parameterfiles/galaxy.param >& galaxy.log
+   # time mpirun -np 2 Gadget2.galaxy  Gadget2/parameterfiles/galaxy.param >& galaxy.log
    # AMD64/3200:           2126.093u 2.983s 35:29.48 99.9%
    #                       3294.859u 7.763s 55:10.38 99.7%   ???
-   # np=1 0.000u 0.000s 55:04.35 0.0%     0+0k 0+0io 0pf+0w
-   # np=2 0.000u 0.002s 36:44.69 0.0%     0+0k 0+0io 0pf+0w
-   # np=4 0.000u 0.002s 39:18.13 0.0%     0+0k 0+0io 0pf+0w
+   # np=1                     0.000u 0.000s 55:04.35 0.0% 
+   # np=2                     0.000u 0.002s 36:44.69 0.0% 
+   # np=4                     0.000u 0.002s 39:18.13 0.0% 
    # AMD Opteron 246/2000  2160.138u 2.687s 36:02.81 100.0%
    # P4/3300 desktop:   about 1h18m/2 = 78/2 = 2340" ?
    # P4/1600 laptop:    about 4h35m           16508"
    # P4/64/3000            3292.062u 7.109s 55:05.93 99.7%
    # G5/1600               4263.6u  51.5s 1:19:07.64 90.8%
    # P3/3200 dualEMT64 (gh2006 cluster)     51:12.84 
+   # T7300 (2.0GHz) [T61p] 3393.587u 250.692s 1:02:57.11 96.4%
+   #        np=2           0.000u 0.004s       39:08.47 
+   # Q6600 (2.4GHz)        2485.531u 0.604s 41:27.54 99.9%
+   # i7/940 (2.93 GHz)     1453.172u 0.365s 24:13.58 99.9%
+   #        np=2              0.000u 0.001s 15:48.74 0.0%
+   #        np=4              0.002u 0.000s  9:39.38 0.0%
+   #        np=6              0.001u 0.004s  9:16.66 0.0%
+   #        np=8              0.000u 0.002s  7:49.30 0.0%
    # ---------------------------------------------------------------------------------------
 endif
 
