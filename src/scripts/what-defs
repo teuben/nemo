@@ -28,3 +28,6 @@ cc -E /tmp/$$.c |
 sed -n '/%/s/[%"]//gp'
 
 rm -f /tmp/$$.c
+
+touch /tmp/$$.c
+cpp -dM /tmp/$$.c
