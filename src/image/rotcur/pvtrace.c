@@ -8,6 +8,7 @@
  *     29-dec-01      b     added extra security
  *
  *     13-jul-02    V1.2    If input file is a cube, reduce the cube to a velocity field
+ *     18-mar-09    V1.3    Added rotcur=
  *
  * Shane, W.W. \& Bieger-Smith, G.P. 1966 B.A.N. 18, 263
  *      v_x = v_m + 1/Y_m \int_(v_M)^(V+T) { Y(v) dv }
@@ -32,8 +33,9 @@ string defv[] = {
   "vsys=0\n       Systemic velocity",
   "inc=90\n       Inclination of disk (ignored for cubes)",
   "center=0\n     Center of galaxy along position axis",
+  "rotcur=f\n     Fold all numbers positive so two rotation curves can be overplotted",
   "out=\n         Output velocity field if input was cube",
-  "VERSION=1.2\n  13-jul-02 PJT",
+  "VERSION=1.3\n  18-mar-09 PJT",
   NULL,
 };
 
@@ -46,12 +48,14 @@ string usage="PV diagram envelope tracing ";
 
 local void pv_trace(imageptr iptr, int vsign, 
 		    real eta, real ilc, real sigma, real vsys, real sini, real psys,
-                    real *clip);
+                    real *clip, bool Qrotcur);
 local void xyv_trace(imageptr iptr, int vsign, 
 		    real eta, real ilc, real sigma, real xsys, real ysys, real vsys,
                     real *clip);
 local int get_vels(int n, real *s, real v, real dv, real it, real *clip,
 		   real *vels);
+
+local real qabs(real x, bool Q);
 
 
 nemo_main()
@@ -60,6 +64,7 @@ nemo_main()
     imageptr iptr = NULL;
     real vel, eta, ilc, sigma, sini, vsys, psys, clip[2], center[2], xsys, ysys;
     int nc, vsign = getiparam("sign");
+    bool Qrotcur = getbparam("rotcur");
     string mode;
 
     instr = stropen(getparam("in"), "r");     /* get file name and open file */
@@ -83,7 +88,7 @@ nemo_main()
 
     if (Nz(iptr)==1) {
       psys = getdparam("center");
-      pv_trace(iptr, vsign, eta, ilc, sigma, vsys, sini, psys, clip);
+      pv_trace(iptr, vsign, eta, ilc, sigma, vsys, sini, psys, clip, Qrotcur);
     } else {
       nc = nemoinpd(getparam("center"),center,2);
       if (nc == 2) {
@@ -109,7 +114,7 @@ nemo_main()
 
 local void pv_trace(imageptr iptr, int vsign, 
 		    real eta, real ilc, real sigma, real vsys, real sini, real psys,
-		    real *clip)
+		    real *clip, bool Qrotcur)
 {
   int  ix, iy, j, nx, ny, nv;
   real pos, v0, dv, it, imax, vel_corr;
@@ -148,16 +153,16 @@ local void pv_trace(imageptr iptr, int vsign,
       dv = -dv;
     }
     nv = get_vels(ny,spec,v0,dv,it,clip,vels);    /* get the vel's */
-    printf("%g ",pos);
+    printf("%g ",qabs(pos,Qrotcur));
     vel_corr = (vels[0]-vsys)/sini;
     if (vel_corr > 0)
       vel_corr -= sigma;
     else
       vel_corr += sigma;
-    printf(" %g", vel_corr);
+    printf(" %g", qabs(vel_corr,Qrotcur));
 
     for (j=1; j<nv; j++) {
-      printf(" %g",(vels[j]-vsys)/sini);
+      printf(" %g",qabs((vels[j]-vsys)/sini,Qrotcur));
     }
     printf("\n");
   }
@@ -299,6 +304,8 @@ local int get_vels(int n, real *s, real v0, real dv, real smin, real *clip, real
 
 
 
-
-
-
+local real qabs(real x, bool Q)
+{
+  if (Q && x < 0) return -x;
+  return x;
+}
