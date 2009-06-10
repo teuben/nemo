@@ -43,6 +43,9 @@ string defv[] = {
 
 string usage="PV diagram envelope tracing ";
 
+string cvsid="$Id$";
+
+
 #define RPD (PI/180.0)
 #ifndef HUGE
 #define HUGE 1.0e20
