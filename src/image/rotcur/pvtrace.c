@@ -9,6 +9,7 @@
  *
  *     13-jul-02    V1.2    If input file is a cube, reduce the cube to a velocity field
  *     18-mar-09    V1.3    Added rotcur=
+ *      8-jun-09    V1.4    Gentile et al's. MET - not very robust yet
  *
  * Shane, W.W. \& Bieger-Smith, G.P. 1966 B.A.N. 18, 263
  *      v_x = v_m + 1/Y_m \int_(v_M)^(V+T) { Y(v) dv }
@@ -29,13 +30,14 @@ string defv[] = {
   "ilc=0\n        Lowest Contour value",
   "sign=1\n       1: Rotation largest for positive coordinates, -1: reverse",
   "sigma=0\n	  Velocity dispersion correction factor",
-  "clip=\n        One (for -clip:clip) or Two clipping values",
+  "clip=\n        One (for -clip:clip) or Two clipping values, else includes all",
   "vsys=0\n       Systemic velocity",
   "inc=90\n       Inclination of disk (ignored for cubes)",
   "center=0\n     Center of galaxy along position axis",
   "rotcur=f\n     Fold all numbers positive so two rotation curves can be overplotted",
   "out=\n         Output velocity field if input was cube",
-  "VERSION=1.3\n  18-mar-09 PJT",
+  "mode=2\n       Tracing mode to output for cube->map  (2=ET, 3=moment, 4=peak etc.)",
+  "VERSION=1.4a\n 10-jun-09 PJT",
   NULL,
 };
 
@@ -51,9 +53,11 @@ local void pv_trace(imageptr iptr, int vsign,
                     real *clip, bool Qrotcur);
 local void xyv_trace(imageptr iptr, int vsign, 
 		    real eta, real ilc, real sigma, real xsys, real ysys, real vsys,
-                    real *clip);
+		    real *clip, int mode);
 local int get_vels(int n, real *s, real v, real dv, real it, real *clip,
 		   real *vels);
+
+local real gfit1(int n, real *s, real *clip, int ipeak, real sig, int mode);
 
 local real qabs(real x, bool Q);
 
@@ -65,7 +69,7 @@ nemo_main()
     real vel, eta, ilc, sigma, sini, vsys, psys, clip[2], center[2], xsys, ysys;
     int nc, vsign = getiparam("sign");
     bool Qrotcur = getbparam("rotcur");
-    string mode;
+    int mode = getiparam("mode");
 
     instr = stropen(getparam("in"), "r");     /* get file name and open file */
     read_image( instr, &iptr);                /* read image */
@@ -79,7 +83,7 @@ nemo_main()
     nc = nemoinpd(getparam("clip"),clip,2);
     if (nc == 1) {
       clip[1] = clip[0];
-      clip[0] = -clip[0];
+      clip[0] = -clip[1];
     } else if (nc == 0) {
       clip[0] = clip[1] = 0.0;
     } else if (nc != 2)
@@ -90,6 +94,7 @@ nemo_main()
       psys = getdparam("center");
       pv_trace(iptr, vsign, eta, ilc, sigma, vsys, sini, psys, clip, Qrotcur);
     } else {
+      warning("cube mode");
       nc = nemoinpd(getparam("center"),center,2);
       if (nc == 2) {
 	xsys = center[0];
@@ -101,7 +106,7 @@ nemo_main()
       } else if (nc != 2)
 	error("Syntax error; need 0, 1 or 2 numbers for center=%s",
 	      getparam("center"));      
-      xyv_trace(iptr, vsign, eta, ilc, sigma, xsys, ysys, vsys, clip);
+      xyv_trace(iptr, vsign, eta, ilc, sigma, xsys, ysys, vsys, clip, mode);
     }
 }
 
@@ -174,7 +179,7 @@ local void pv_trace(imageptr iptr, int vsign,
 local void xyv_trace(imageptr iptr, int vsign, 
 		    real eta, real ilc, real sigma, 
 		    real xsys, real ysys, real vsys, 
-		    real *clip)
+		    real *clip, int mode)
 {
   int  ix, iy, iz, j, nx, ny, nz, nv;
   real xpos, ypos, v0, dv, it, imax, vel_corr, vmin,vmax, dmin, dmax;
@@ -212,20 +217,21 @@ local void xyv_trace(imageptr iptr, int vsign,
       for (iz=0; iz<nz; iz++)
 	spec[iz] = CubeValue(iptr,ix,iy,iz);
       nv = get_vels(nz,spec,v0,dv,it,clip,vels);    /* get the vel's */
-      vel_corr = (vels[0]-vsys);
+      if (mode<2 || mode-1>nv) error("Illegal mode=%d found %d vel values",mode,nv);
+      vel_corr = (vels[mode-2]-vsys);
       if (vel_corr > 0)
 	vel_corr -= sigma;
       else
 	vel_corr += sigma;
+      CubeValue(optr,ix,iy,0) = vel_corr;
+      dmin = MIN(dmin, vel_corr);
+      dmax = MAX(dmax, vel_corr);
     }
-    vel_corr /= 1000.0;
-    CubeValue(optr,ix,iy,1) = vel_corr;
-    dmin = MIN(dmin, vel_corr);
-    dmax = MAX(dmax, vel_corr);
   }
   free(spec);
   MapMin(optr) = dmin;
   MapMax(optr) = dmax;
+  dprintf(0,"MinMax in map: %g %g\n",dmin,dmax);
   write_image(ostr,optr);
 }
 
@@ -239,21 +245,21 @@ local void xyv_trace(imageptr iptr, int vsign,
 
 local int get_vels(int n, real *s, real v0, real dv, real smin, real *clip, real *vels)
 {
-  real sum1=0.0, sum0=0.0, v = v0, speak = s[0], vpeak, vfit;
-  real v1, v2, v3;
+  real sum1=0.0, sum0=0.0, sum2=0.0, v, speak = s[0], vpeak=0, vfit;
+  real v1, v2, v3, sig;
   int i, nret = 0, ipeak = 0, itrace = -1;
 
-  for (i=0; i<n; i++) {       /* loop over spectrum and get basics: mom1 and peak */
+  for (i=0,v=v0; i<n; i++,v+=dv) {     /* loop over spectrum and get basics: mom1 and peak */
     if (s[i] <= clip[0] || s[i] >= clip[1]) { /* but only outside clipping interval */
       sum0 += s[i];
       sum1 += s[i]*v;
-      if (s[i] >= speak) {
+      sum2 += s[i]*v*v;
+      if (s[i] >= speak) {  /* find maximum */
 	ipeak = i;
 	vpeak = v;
 	speak = s[i];
       }
     }
-    v += dv;
   }
 
   for (i=n-1; i>=0; i--) {      /* find the highest pixels above smin */
@@ -263,7 +269,7 @@ local int get_vels(int n, real *s, real v0, real dv, real smin, real *clip, real
     }
   }
 
-  /* envelope trace */
+  /* envelope trace (Sofue method) */
   vfit = v0 + dv*itrace;      /* pixel at which s[i] > smin */
   if (itrace > 0) {
     vfit += dv * (smin-s[itrace])/(s[itrace+1]-s[itrace]); /* small linear correction */
@@ -275,6 +281,14 @@ local int get_vels(int n, real *s, real v0, real dv, real smin, real *clip, real
 
   /* simple 1st order moment */
   vels[nret++] = (sum0 == 0.0 ? 0.0 : sum1/sum0);
+
+  /* estimste sigma to aid in gaussian fitting */
+  if (sum0 == 0.0)
+    sig = 1.0;
+  else {
+    sig = sqrt(sum2/sum0-sum1*sum1/(sum0*sum0))/ABS(dv);
+  }
+
 
   /* peak location */
   vels[nret++] = vpeak;
@@ -295,9 +309,28 @@ local int get_vels(int n, real *s, real v0, real dv, real smin, real *clip, real
   }
   vels[nret++] = vfit;
 
-  /* AIPS++ window method */
-
   /* simple gaussian fit */
+  vfit = gfit1(n,s,clip,ipeak,sig,0);
+  if (vfit > 0) {
+    vels[nret++] = v0 + dv*vfit;
+  } else
+    vels[nret++] = 0.0;
+  
+  /* half gaussian fit */
+  vfit = gfit1(n,s,clip,ipeak,sig,1);
+  if (vfit > 0) {
+    vels[nret++] = v0 + dv*vfit;
+  } else
+    vels[nret++] = 0.0;
+
+  /* half gaussian fit minus corrections (MET) */
+  vfit = gfit1(n,s,clip,ipeak,sig,2);
+  if (vfit > 0) {
+    vels[nret++] = v0 + dv*vfit;
+  } else
+    vels[nret++] = 0.0;
+
+  /* AIPS++ window method */
 
   return nret;
 }
@@ -308,4 +341,117 @@ local real qabs(real x, bool Q)
 {
   if (Q && x < 0) return -x;
   return x;
+}
+
+
+/*
+ * fit GAUSS1d:       y = a + b * exp( - (x-c)^2/(2*d^2) )
+ *
+ */
+
+
+static real func_gauss1d(real *x, real *p, int np)
+{
+  real a,b,arg;
+  a = p[2]-x[0];
+  b = p[3];
+  arg = a*a/(2*b*b);
+  return p[0] + p[1] * exp(-arg);
+}
+
+static void derv_gauss1d(real *x, real *p, real *e, int np)
+{
+  real a,b,arg;
+  a = p[2]-x[0];
+  b = p[3];
+  arg = a*a/(2*b*b);
+  e[0] = 1.0;
+  e[1] = exp(-arg);
+  e[2] = -p[1]*e[1] * a   / (b*b);
+  e[3] =  p[1]*e[1] * a*a / (b*b*b);
+}
+
+#define MAXP  1024
+
+/*
+ *  gfit fits a gauss, returns the central velocity
+ *  in integer coordinates, which must be 0..n-1
+ *  returns -1 if bad fit, no data etc.
+ *  mode = 0: full gaussian
+ *  mode = 1: half gaussian
+ *  mode = 2: half gaussian + 0.5*FWHM (needed for MET)
+ *
+ */
+
+local real gfit1(int n, real *s, real *clip, int ipeak, real sig, int mode)
+{
+  real x[MAXP], y[MAXP], fpar[4], epar[4], tol, lab;
+  int i, npt, mpar[4], nrt, itmax;
+
+  if (ipeak+1 >= n) return -1.0;
+
+  /* accumulate the points; for half-gaussian, take one point before the peak
+   * and then all after, as long as it's not inside the clip range 
+   */
+
+  if (mode == 0) {         /* gaussian */
+    for (i=0, npt=0; i<n;  i++) {
+      if (s[i] <= clip[0] || s[i] >= clip[1]) {
+	if (npt==MAXP) error("Too many points, MAXP=%d",MAXP);
+	x[npt] = i;
+	y[npt] = s[i];
+	npt++;
+      }
+    }
+  } else {                /* half gaussian */
+    for (i=ipeak-1, npt=0; i<n;  i++) {
+      if (s[i] <= clip[0] || s[i] >= clip[1]) {
+	if (npt==MAXP) error("Too many points, MAXP=%d",MAXP);
+	x[npt] = i;
+	y[npt] = s[i];
+	npt++;
+      }
+    }
+  } 
+
+  if (npt < 3) return -1.0;    /* not enuf points for fit */
+
+
+  while (sig > 0.5) {
+    /* determine some reasonable initial estimates */
+    fpar[0] = 0.0;      /* we'll fix this, there better be no continuum here */
+    fpar[1] = s[ipeak]; /* peak value */
+    fpar[2] = ipeak;    /* fitting is done in integer channel space */
+    fpar[3] = sig;      /* this is the tricky one : we iterate on it */
+
+    mpar[0] = 0;
+    mpar[1] = mpar[2] = mpar[3] = 1;
+
+    tol = 0.001;
+    lab = 0.001;
+    itmax = 50;
+    
+    nrt = nllsqfit(x,1,y,NULL,NULL,npt,fpar,epar,mpar,4,tol,itmax,lab, 
+		 func_gauss1d, derv_gauss1d);
+    if (nrt < 0) {
+      sig = sig - 1.0;  /* lower sig (units are channel #s) for next iter */
+      continue;
+    }
+
+    dprintf(1,"@ %d/%d %d %d %g: %g %g    %g %g  %d\n",ipeak,n,npt,mode,sig,
+	    fpar[2],epar[2], fpar[3],epar[3],nrt);
+
+    if (nrt > 0) {
+      if (mode==2) return fpar[2] + 1.1774*fpar[3];   /* MET ;  1.1774 = sqrt(2ln2) */
+      return fpar[2];
+    } else {
+#if 0
+      printf("# %g %g %d %g\n",0.0,s[ipeak],ipeak,sig);
+      for(i=0; i<npt; i++)
+	printf("%g %g\n",x[i],y[i]);
+#endif
+      return -1;
+    }
+  }
+  return -1;
 }
