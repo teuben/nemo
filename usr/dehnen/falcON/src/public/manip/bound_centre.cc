@@ -232,14 +232,14 @@ namespace Manipulate {
       unsigned n = S->findNeighbours(B,K,Nb);
       // 4   get |Phi|^A weigted centre of K/2 most bound of those
       // 4.1 sort neighbours according to their energy
-      for(unsigned i=0; i!=n; ++i)
+      for(i=0; i!=n; ++i)
 	En[i] = half*norm(S->vel(Nb[i])) + ppp(S,Nb[i]);
       HeapIndex(En.array(),n,In.array());
       double Emax = En[In[n-1]];
       // 4.2 loop K/8 most bound and find weighted centre
       double W(0.);
       vect_d X(0.), V(0.);
-      for(unsigned i=0; i!=min(n,max(4u,K/8)); ++i) {
+      for(i=0; i!=min(n,max(4u,K/8)); ++i) {
 	double w = pow(Emax-En[In[i]],A);
 	W += w;
 	X += w * S->pos(Nb[In[i]]);

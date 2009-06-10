@@ -328,12 +328,12 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
 	vect_d  ri = x0? B->pos(I[j])-(*x0) : B->pos(I[j]);
 	vect2_d xi = vect2_d(eX*ri, eY*ri);
 	vect_d  vi = v0? B->vel(I[j])-(*v0) : B->vel(I[j]);
-	double  vl = elos * vi;
+	double  vp = elos * vi;
 	vect2_d ei = normalized(xi);
 	M    += mi;
-	Mvl  += mi * vl;
-	Mvlq += mi * vl*vl;
-	Mvr  += xi * (mi*vl);
+	Mvl  += mi * vp;
+	Mvlq += mi * vp*vp;
+	Mvr  += xi * (mi*vp);
 	add_outer_product2(Mxx,xi,mi);
       }
       sd[i] = M / (Pi * i? square(R[ir[i+1]]) - square(R[ir[i-1]])

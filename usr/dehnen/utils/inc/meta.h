@@ -35,6 +35,14 @@
 # include <exception.h>
 #endif
 
+#ifndef WD_HOT
+#  if defined(__GNUC__) && (__GNUC__ > 4 && __GNUC_MINOR__ > 2)
+#    define WD_HOT __attribute__((hot))
+#  else
+#    define WD_HOT
+#  endif
+#endif
+
 namespace WDutils {
   namespace meta {
     ///
@@ -444,6 +452,40 @@ namespace WDutils {
       const static int S = N<0? -1 : N>0? 1 : 0;
     };
     ////////////////////////////////////////////////////////////////////////////
+    /// \name simple functors for assign-type operations (see also functional)
+    //@{
+
+    /// functor base class
+    template<typename _lVal, typename _rVal>
+    struct assign_function {
+      typedef _lVal result_type;
+      typedef _rVal argument_type;
+    };
+    /// =
+    template<typename _Tp>
+    struct assign : assign_function<_Tp,_Tp>
+    {
+      _Tp operator()(_Tp& __x, _Tp const&__y) const { return __x = __y; }
+    };
+    /// +=
+    template<typename _Tp>
+    struct add_assign : assign_function<_Tp,_Tp>
+    {
+      _Tp operator()(_Tp& __x, _Tp const&__y) const { return __x += __y; }
+    };
+    /// -=
+    template<typename _Tp>
+    struct subtract_assign : assign_function<_Tp,_Tp>
+    {
+      _Tp operator()(_Tp& __x, _Tp const&__y) const { return __x -= __y; }
+    };
+    /// *=
+    template<typename _Tp>
+    struct multiply_assign : assign_function<_Tp,_Tp>
+    {
+      _Tp operator()(_Tp& __x, _Tp const&__y) const { return __x *= __y; }
+    };
+    //@}
   }
 }
 

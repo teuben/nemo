@@ -52,7 +52,12 @@ namespace WDutils { namespace meta {
 #ifndef WDutils_included_inline_h
   using std::min;
   using std::max;
+#ifndef __PGI
   using std::abs;
+#else
+  // the pgCC compiler is faulty: std::abs(float) returns double
+  template<typename T> T abs(T x) { return x<T(0)? -x:x; }
+#endif
   using ::isnan;   // with some compilers (pgCC, CC) these are not in std
   using ::isinf;
 #endif

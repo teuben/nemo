@@ -448,7 +448,7 @@ namespace WDutils {
     /// appending output?
     bool   is_appending() const { return APPENDING; }
     /// writes to file?
-    bool   is_file     () const {  return OUT && OUT != &std::cout; }
+    bool   is_file     () const { return OUT && OUT != &std::cout; }
     /// writes to stdout?
     bool   is_stdout   () const { return OUT == &std::cout; }
     /// ready for output?
@@ -480,21 +480,18 @@ namespace WDutils {
     /// construction from nothing: nothing is opened
     output() : OUT(0) , APPENDING(false), FREC(0) {}
     /// construction from file name and potential option for appending.
-    /// If \e fname equals 0 or ".", nothing is opened.  If \e fname equals "-",
+    /// If \a fname equals 0 or ".", nothing is opened.  If \a fname equals "-",
     /// and no other output or nemo_out is opened to \c stdout, we map to \c
-    /// stdout.  Otherwise, a file of name \e fname is created for output. An
-    /// existing file of the same name is deleted unless \e append is true, in
+    /// stdout.  Otherwise, a file of name \a fname is created for output. An
+    /// existing file of the same name is deleted unless \a append is true, in
     /// which case, we append to that existing file.
     explicit
     output(const char*fname, bool append=0) : APPENDING(false), FREC(0) {
       setfile(fname);
       __open(append);
     }
-    /// construction from file and potential option for appending.
-    /// If \e fname equals "-", and no other output or nemo_out is opened to 
-    /// \c stdout, we map to \c stdout.  Otherwise, a file of name \e fname is
-    /// created for output. An existing file of the same name is deleted unless
-    /// \e append is true, in which case, we append to that existing file.
+    /// construction from file name and potential option for appending.
+    /// same as above, except for type of first argument
     explicit
     output(std::string const&fname, bool append=0) : APPENDING(false), FREC(0) {
       setfile(fname.c_str());
@@ -512,25 +509,25 @@ namespace WDutils {
       setfile(fname.c_str());
       __open(append);
     }
-    /// open file with name made from \e format string and \e tag.
+    /// open file with name made from \a format string and \a tag.
     ///
-    /// A new file name is created from the C-style \e format string and the
-    /// data \e tag provided via
+    /// A new file name is created from the C-style \a format string and the
+    /// data \a tag provided via code equivalent to
     /// \code
     /// sprintf(filename, format, tag);
     /// \endcode
     /// If this file name differs from the current, the old file is closed and
     /// the new one opened. The idea is to provide the possibility of numbered
-    /// output files as in the following code
+    /// output files as in the following code snippet
     /// \code
     /// output out;
     /// for(int i=0; i!=20; ++i) {
-    ///   out.re_open("file%02d.dat",i);
+    ///   out.reopen("file%02d.dat",i);
     ///   out << i << std::endl;
     /// }
     /// \endcode
     /// creating the files \c file00.dat, \c file01.dat, ... \c file19.dat
-    /// \return whether a new file has been opened (and the old closed)
+    /// \return     has a new file been opened (and the old closed)?
     /// \param[in]  format C-style format string for file to open
     /// \param[in]  tag    datum needed in generating file to open
     /// \param[in]  append (optional) append (or overwrite) existing file?

@@ -43,9 +43,10 @@
 // v 2.2    06/03/2008  WD debugged (problem when using external potential)
 // v 2.2.1  10/09/2008  WD happy gcc 4.3.1
 // v 2.2.2  04/11/2008  WD individual eps_i always enabled
+// v 2.2.3  26/03/2009  WD no error is masses missing and not required
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.2.2"
-#define falcON_VERSION_D "04-nov-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.2.3"
+#define falcON_VERSION_D "26-may-2009 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile addgravity
@@ -80,9 +81,10 @@ void falcON::main() falcON_THROWING
   nemo_in  IN (getparam("in"));
   nemo_out OUT;
   unsigned NCRIT(getiparam("Ncrit"));
-  fieldset       READ, NEED(fieldset::m|fieldset::x);
+  fieldset       READ, NEED(fieldset::x);
   bool     SOFT(getrparam("eps") < 0);
   if(SOFT) NEED |= fieldset::e;
+  if(getrparam("Grav") != zero) NEED |= fieldset::m;
   vect     X0, *RC(getvparam_z("root_center",X0));
   snapshot SHOT;
   forces   FALCON(&SHOT,
@@ -94,6 +96,8 @@ void falcON::main() falcON_THROWING
   acceleration *ACCEXT = hasvalue("accname") ?
     new nemo_acc(getparam("accname"), getparam("accpars"), getparam("accfile"))
     : 0;
+  if(ACCEXT && ACCEXT->need_masses    ()) NEED |= fieldset::m;
+  if(ACCEXT && ACCEXT->need_velocities()) NEED |= fieldset::v;
   if(ACCEXT) SHOT.add_fields(fieldset::q);
   while(IN.has_snapshot()) {
     if(! SHOT.read_nemo(IN, READ, fieldset::all, getparam("times"), 0))

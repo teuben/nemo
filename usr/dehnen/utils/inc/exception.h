@@ -83,6 +83,10 @@ namespace WDutils {
       static const bool identical = true;
       static const bool different = false;
     };
+    /// static type information: an extension of std::numeric_limits<>
+    /// \note The only additional member indicates a floating point type; @c
+    ///       std::numeric_limits<>::is_integer cannot be used instead as it's
+    ///       @c false for all non-fundamental types.
     template<typename __T> struct TypeInfo :
       public std::numeric_limits<__T> {
       static const bool is_floating_point = false;

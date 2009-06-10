@@ -37,19 +37,20 @@
 #  include <cmath>
 #  define WDutils_included_cmath
 #endif
-#ifndef WDutils_included_algorithm
-#  include <algorithm>
-#  define WDutils_included_algorithm
-#endif
 #ifndef WDutils_included_limits
 #  include <limits>
 #  define WDutils_included_limits
 #endif
 //------------------------------------------------------------------------------
 namespace WDutils {
-  using std::abs;
   using std::min;
   using std::max;
+#ifndef __PGI
+  using std::abs;
+#else
+  // the pgCC compiler is faulty: std::abs(float) returns double
+  template<typename T> T abs(T x) { return x<T(0)? -x:x; }
+#endif
   using ::isnan;   // with some compilers (pgCC, CC) these are not in std
   using ::isinf;
   //----------------------------------------------------------------------------
