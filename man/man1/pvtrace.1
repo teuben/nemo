@@ -1,4 +1,4 @@
-.TH PVTRACE 1NEMO "18 March 2009"
+.TH PVTRACE 1NEMO "9 June 2009"
 .SH NAME
 pvtrace \- PV diagram envelope tracing 
 .SH SYNOPSIS
@@ -37,6 +37,11 @@ lower inclinations, the envelope tracing method should give
 simular results to the other methods.
 .PP
 MET = Modified Envelope Tracing method  (Gentile et al., see below)
+.nf
+	V = [ |V_t - V_sys| - 0.5 sqrt(sigma^2 * 8ln2) ] / sin(i)
+.fi
+where sigma is really the quadrature sum of three components representing
+the ISM, instrumental resolution and beam smearing.
 .PP
 WAMET = WArped Modified Envelope-Tracing method
 
@@ -69,7 +74,8 @@ resolution as well as the velocity dispersion of the tracer component that is
 being observed. [Default: 0]
 .TP
 \fBclip=\fP
-Clipping values. If value(s) given, signal will be clipped as follows:
+Clipping values to aid removing noisy values around 0. 
+If value(s) given, signal will be clipped as follows:
 if one value given, clipping occurs between -clip and clip. If two numbers
 given, clipping occurs between clip(1) and clip(2). Default: None
 .TP
@@ -103,12 +109,17 @@ columns are returned:
 3	first moment (sum(I*v)/sum(I))  (corrected with vsys, sini)
 4	velocity at peak of signal
 5	velocity at peak of parabolic fit of 3 points at peak signal
+6	gaussian fit
+7	half gaussian fit, used for MET
 .fi
 .SH CAVEATS
 Position axis must be carefully created such that the galaxy center is at P=0,
-whereas for velocity it can be corrected with VSYS=.
+whereas for velocity it can be corrected with VSYS=. This is easy for theoretical
+data, but cumbersome for real data.
+.PP
+The MET mode is still not very robust, clipping helps.
 .SH SEE ALSO
-rotcur(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO), ccdmom(1NEMO)
+rotcur(1NEMO), runvelfitss07(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO), ccdmom(1NEMO)
 .PP
 .nf
 Sancisi & Allen 1979
@@ -131,4 +142,5 @@ Peter Teuben
 5-May-01	V1.0 Created	PJT
 6-may-01	V1.1 clip=, interpolated to find trace  	PJT
 18-mar-09	V1.3 added rotcur=	PJT
+9-jun-09	V1.4 implemented MET=	PJT
 .fi
