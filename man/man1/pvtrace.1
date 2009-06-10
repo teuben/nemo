@@ -97,10 +97,17 @@ Should a folded rotation curve be tabulated? If so, negative positions will have
 both position and velocity with a positive sign, thus creating two rotation
 curves, receding and approaching, which can be plotted on top of each other
 and compared. [Default: false]
+.TP
+\fBout=\fP
+Output file in case input file was a cube and output is now a map, not a table.
+.TP
+\fBmode=\fP
+Which of the output modes (see OUTPUT below) will be used for the output map.
+[Default: 2]
 .SH OUTPUT
 Output of the program will be an ASCII table, with various derived velocities
 as function of position along the P axis in the PV-diagram. The following
-columns are returned:
+columns are returned (see also \fBmode=\fP above):
 .PP
 .nf
 .ta +0.5i
@@ -110,7 +117,8 @@ columns are returned:
 4	velocity at peak of signal
 5	velocity at peak of parabolic fit of 3 points at peak signal
 6	gaussian fit
-7	half gaussian fit, used for MET
+7	half gaussian fit
+8	half gaussian fit, with for MET correction
 .fi
 .SH CAVEATS
 Position axis must be carefully created such that the galaxy center is at P=0,
