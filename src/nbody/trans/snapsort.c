@@ -9,6 +9,7 @@
  *    31-dec-02   V1.5   gcc3/SINGLEPREC                            pjt
  *     1-nov-07       a  bug when Aux is present                    pjt
  *    29-feb-08          fix a memory leak on btab                  jcl
+ *    19-Jun-09          fix a bug when Aux is present              jcl
  */
 
 #include <stdinc.h>
@@ -28,7 +29,7 @@ string defv[] = {
     "rank=etot\n	Value used in ranking particles",
     "times=all\n        Range of times to process ",
     "sort=qsort\n       Sort mode {qsort;...}",
-    "VERSION=1.5b\n     29-feb-08 PJT ",
+    "VERSION=1.5c\n     19-jun-09 PJT ",
     NULL,
 };
 
@@ -110,7 +111,8 @@ void snapsort(
 
     if (Qaux) {   /* stuff it back */
       for (i = 0, b = btab; i < nbody; i++, b++)
-	Aux(b) = aux[i];
+	Aux(b) = aux[Key(b)];
+
       free(aux);
     }
 }
