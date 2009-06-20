@@ -23,6 +23,9 @@ Although \fIsnapgrid(1NEMO)\fP can grid datacubes (e.g. X-Y-Z),
 \fIsnapgridsmooth(1NEMO)\fP is probably easier to use, 
 since it does not integrate along any lines of sight, whereas this
 program is more suited for taking moments along the 3rd axis.
+.PP
+For images that require more accurate interpolation, 
+use \fIsnapmap(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized:
 .TP 20
@@ -75,7 +78,8 @@ Variable to denote the optical depth of a particle. [Default: 0]
 Variable to denote the line of sight. [Default: z]
 .TP
 \fBsvar=\fIsmoothing\fP
-Variable to denote gaussian smoothing 
+Variable to denote gaussian smoothing  Note this is the
+gaussian sigma, not the FWHM (FMHW = 2.355 * sigma).
 .TP
 \fBnx=\fIx-pixels\fP
 Number of pixels along the X axis of the cube [default: \fB64\fP].
@@ -216,7 +220,7 @@ snapshot and the image.
 .PP
 Sky projections do not guarantee flux conservation. 
 .SH "SEE ALSO"
-snapgridsmooth(1NEMO), 
+snapgridsmooth(1NEMO), snapmap(1NEMO),
 snaprotate(1NEMO), snapslit(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), wcs(1NEMO),
 tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), image(5NEMO)
 .PP

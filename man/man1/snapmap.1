@@ -1,0 +1,109 @@
+.TH SNAPMAP 1NEMO "20 June 2009"
+.SH NAME
+snapmap \- grid a snapshot into a 2D map
+.SH SYNOPSIS
+.PP
+\fBsnapmap in=\fPsnapshot \fBout=\fPimage [parameter=value]
+.SH DESCRIPTION
+\fIsnapgrid\fP grids two arbitrary \fIbodytrans(3NEMO)\fP expressions 
+(default: \fBx\fP, and \fBy\fP) of a snapshot into a 2D map, using
+another \fIbodytrans(3NEMO)\fP expression as the map value. The result
+is an \fIimage(5NEMO)\fP, with optional astronomical projection for direct
+comparision with true astronomical images.
+.PP
+The X and Y coordinates of the datacube can only
+be regularly gridded in histogram fashion 
+(for spatial XY-smoothing see \fIccdsmooth(1NEMO)\fP),
+.PP
+The output image is written in standard \fIimage(5NEMO)\fP format, 
+and can be accessed by various other programs for smoothing, display etc.
+.PP 
+Use \fIsnapgrid(1NEMO)\fP to grid datacubes (e.g. X-Y-Z), which is also
+able to use line of sight properties.
+.SH PARAMETERS
+The following parameters are recognized:
+.TP 20
+\fBin=\fIin-file\fP
+input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
+be stacked uses the \fBtimes=\fP keyword: see \fBstack=\fP below.  [no default].
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIimage(5NEMO)\fP format [no default].
+.TP
+\fBtimes=\fP\fIt1:t2,t3,..\fP
+Selection of the times of snapshots to be selected for gridding.
+For \fBstack=t\fP all snapshots will be co-added into one image,
+however selecting \fBstack=f\fP or selecting multiple \fBevar\fP's
+one can request multiple output images.
+[Default: \fBall\fP].
+.TP
+\fBxrange=\fIxb:xe\fP
+Range in \fBxvar\fP to bin [default: \fB-2:2\fP].
+.TP
+\fByrange=\fIxb:xe\fP
+Range in \fByvar\fP to bin [default: \fB-2:2\fP].
+.TP
+\fBxvar=\fP\fIx-expression\fP
+The value of \fIx-expression\fP is gridded along the X axis.
+[default: \fBx\fP].
+.TP
+\fByvar=\fP\fIy-expression\fP
+The value of \fIy-expression\fP is gridded along the Y axis.
+[default: \fBy\fP].
+.TP
+\fBevar=\fIemissivity\fP
+Variable to denote the emissivity per particle. 
+[default: \fBm\fP].
+.TP
+\fBsvar=\fIsmoothing\fP
+Variable to denote gaussian smoothing  Note this is the
+gaussian sigma, not the FWHM (FMHW = 2.355 * sigma).
+.TP
+\fBnx=\fIx-pixels\fP
+Number of pixels along the X axis of the cube [default: \fB64\fP].
+.TP
+\fBny=\fIy-pixels\fP
+Number of pixels along the Y axis of the cube [default: \fB64\fP].
+.TP
+\fBxlab=\fIx-label\fP
+Text used to label the X-axis. By default the \fBxvar\fP expression is used.
+It may be useful in certain astronomical environment to label the axis
+with recognized labels like RA---TAN, DEC--SIN, GLON etc.
+.TP
+\fBylab=\fIy-label\fP
+Same for the Y-axis.
+.TP
+\fBmode=\fP\fIgridding-mode\fP
+mean, linear, weighted.
+[Default: \fBmean\fP].
+.TP
+\fBstack=t|f\fP
+Should all snapshots from the input file be stacked, or write one
+image per selected (see \fBtimes=\fP) time? [default: \fBf\fP].
+.TP
+\fBproj=\fP
+If a valid projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT)
+but see also \fIwcs(1NEMO)\fP, the input coordinates are interpreted
+in angular degrees, and griddes with the appropriate sky projection.
+Default: no sky projection.
+.SH BUGS
+Combinations of large snapshots and large images may run into memory
+problems since both the snapshot and the image(s) must fit into memory
+to obtain turbo speeds.
+.PP
+Sky projections do not guarantee flux conservation, interpolation is done
+in linear space.
+.SH "SEE ALSO"
+snapgrid(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/nbody/image  	snapmap.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+20-jun-09	V1.0: created	PJT
+.fi
