@@ -10,10 +10,10 @@ MAN1FILES =
 MAN3FILES = 
 MAN5FILES = 
 INCFILES = 
-SRCFILES = snapccd.c snapgrid.c snapslit.c
+SRCFILES = snapccd.c snapgrid.c snapmap.c snapslit.c
 OBJFILES=  
 LOBJFILES= 
-BINFILES = snapccd snapgrid snapslit
+BINFILES = snapccd snapgrid snapmap snapslit
 TESTFILES= 
 
 help:
