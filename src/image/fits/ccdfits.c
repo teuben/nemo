@@ -69,15 +69,19 @@ string defv[] = {
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
-        "VERSION=5.3a\n  8-may-04 PJT",
+	"select=1\n      Which image (if more than 1 present) to select",
+        "VERSION=5.4\n   20-jun-09 PJT",
         NULL,
 };
 
 string usage = "convert image to a fits file";
 
+string cvsid = "$Id$";
+
 stream  instr, outstr;                         /* file streams */
 
 imageptr iptr=NULL;                     /* image, allocated dynamically */
+int  isel = 0;
 
 double scale[3];        /* scale conversion for FITS (CDELT) */
 double iscale[2];	/* intensity rescale */
@@ -102,19 +106,25 @@ void permute(int *x ,int *idx, int n);
 
 void nemo_main()
 {
-    setparams();                               /* set cmdln par's */
-    instr = stropen (getparam("in"), "r");     /* open image file */
-    read_image (instr,&iptr);                  /* read image */
-    headline = ask_headline();                 /* possible headline */
-    strclose(instr);                           /* close image file */
-    write_fits(getparam("out"),iptr);          /* write fits file */
-    free_image(iptr);
+  int i;
+
+  setparams();                               /* set cmdln par's */
+  instr = stropen (getparam("in"), "r");     /* open image file */
+  for (i=0; i<isel; i++)
+    if (read_image (instr,&iptr)==0)
+      error("Cannot process image select=%d",i);
+  headline = ask_headline();                 /* possible headline */
+  strclose(instr);                           /* close image file */
+  write_fits(getparam("out"),iptr);          /* write fits file */
+  free_image(iptr);
 }
 
 void setparams(void)
 {
   int i,n;
   real tmpr[3];
+
+  isel = getiparam("select");
 
   switch (nemoinpd(getparam("scale"),scale,3)) {
   case 1:
