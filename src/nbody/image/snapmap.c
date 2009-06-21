@@ -1,7 +1,12 @@
 /* 
  *  SNAPMAP:   program grids body variable snapshot into a 2D image
  *
- *	20-jun-09  V1.0 -- derived from snapgrid - GalaxyMasses09     PJT
+ *	20-jun-09  V1.0 -- derived from snapgrid - GalaxyMasses09 - mean mode works   PJT
+ *
+ *   TODO:
+ *     fix gaussian weighted (still has the old svar= code from snapgrid)
+ *     implement linear, i.e. ccdintpol, code
+ *
  */
 
 #include <stdinc.h>		/* nemo general */
@@ -24,7 +29,7 @@ string defv[] = {		/* keywords/default values/help */
 	"yrange=-2:2\n	  	 	  y-range in gridding",
 	"xvar=x\n			  x-variable to grid",
 	"yvar=y\n			  y-variable to grid",
-        "evar=m\n                         emission variable(s)",
+        "evar=-vz\n                       emission variable(s)",
         "svar=\n                          smoothing size variable",
 	"nx=64\n			  x size of image",
 	"ny=64\n			  y size of image",
