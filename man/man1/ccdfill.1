@@ -39,7 +39,9 @@ are re-fitted with a planar fit, effectively smoothing the map.
 Default: f
 .TP
 \fBm=\fP
-Minimum number of neighbors needed to allow a fit. Normally 3 is enough.
+Minimum number of neighbors needed to allow a fit. Normally 3 is enough,
+though this tends to add to edges. 4 would be more conservative, in
+which case iter>1 can be used.
 Default: 3
 .TP
 \fBiter=\fP
