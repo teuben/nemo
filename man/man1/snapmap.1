@@ -1,26 +1,26 @@
 .TH SNAPMAP 1NEMO "20 June 2009"
 .SH NAME
-snapmap \- grid a snapshot into a 2D map
+snapmap \- map a snapshot into a 2D image
 .SH SYNOPSIS
 .PP
 \fBsnapmap in=\fPsnapshot \fBout=\fPimage [parameter=value]
 .SH DESCRIPTION
-\fIsnapmap\fP grids two arbitrary \fIbodytrans(3NEMO)\fP expressions 
+\fIsnapmap\fP "grids" two arbitrary \fIbodytrans(3NEMO)\fP expressions 
 (default: \fBx\fP, and \fBy\fP) of a snapshot into a 2D map, using
 another \fIbodytrans(3NEMO)\fP expression (default: \fB-vz\fP) as the map
 value. The result is an
 \fIimage(5NEMO)\fP, with optional astronomical projection for direct
-comparision with true astronomical images.
-.PP
-The X and Y coordinates of the datacube can only
-be regularly gridded in histogram fashion 
-(for spatial XY-smoothing see \fIccdsmooth(1NEMO)\fP),
-.PP
-The output image is written in standard \fIimage(5NEMO)\fP format, 
-and can be accessed by various other programs for smoothing, display etc.
+comparision with true astronomical images. There are a number of way
+implemented to "grid" the particles: mean value, with or without gaussian
+weighting, and forms of linear interpolation.
 .PP 
-Use \fIsnapgrid(1NEMO)\fP to grid datacubes (e.g. X-Y-Z), which is also
-able to use line of sight properties.
+Use \fIsnapgrid(1NEMO)\fP instead to grid datacubes (e.g. X-Y-Z), or
+if you need various styles of
+line of sight integrations. \fBsnapmap\fP is more appropriate
+to obtain well interpolated maps from \fIirregularly sampled\fP data where the
+input mapping \fII(x,y)\fP is still a smooth function, although good results
+can also be ontained by averaging the values (the default mode) or
+using a smoothing length \fIsvar=\fB.
 .SH PARAMETERS
 The following parameters are recognized:
 .TP 20
@@ -29,7 +29,10 @@ input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
 be stacked uses the \fBtimes=\fP keyword: see \fBstack=\fP below.  [no default].
 .TP
 \fBout=\fIout-file\fP
-output file, will be in \fIimage(5NEMO)\fP format [no default].
+output file, will be in \fIimage(5NEMO)\fP format. Note that
+multiple \fBtimes\fP and/or multiple \fBevar\fP's will produce
+multiple images in this file.
+[no default].
 .TP
 \fBtimes=\fP\fIt1:t2,t3,..\fP
 Selection of the times of snapshots to be selected for gridding.
@@ -39,7 +42,8 @@ one can request multiple output images.
 [Default: \fBall\fP].
 .TP
 \fBxrange=\fIxb:xe\fP
-Range in \fBxvar\fP to bin [default: \fB-2:2\fP].
+Range in \fBxvar\fP to bin. Note these are the outer edges, not their cell centers.
+[default: \fB-2:2\fP].
 .TP
 \fByrange=\fIxb:xe\fP
 Range in \fByvar\fP to bin [default: \fB-2:2\fP].
@@ -52,21 +56,22 @@ The value of \fIx-expression\fP is gridded along the X axis.
 The value of \fIy-expression\fP is gridded along the Y axis.
 [default: \fBy\fP].
 .TP
-\fBevar=\fIemissivity\fP
-Variable to denote the emissivity per particle.  The default matches that
-of \fIsnapgrid(1NEMO)\fP's \fBzvar=\fP.
+\fBevar=\fIe1,e2,...\fP
+Variable(s) to denote the emissivity per particle.  The default matches that
+of \fIsnapgrid(1NEMO)\fP's \fBzvar=\fP. Multiple expressions, separated
+by commas, can be given, each of them generating an image.
 [default: \fB-vz\fP].
 .TP
 \fBsvar=\fIsmoothing\fP
 Variable to denote gaussian weighting size in X and Y. Note this is the
 gaussian sigma, not the FWHM (FMHW = 2.355 * sigma). Only used
-if \fBmode=gauss\fP. 
+if \fBmode=mean\fP. 
 .TP
 \fBnx=\fIx-pixels\fP
-Number of pixels along the X axis of the cube [default: \fB64\fP].
+Number of pixels along the X axis of the image [default: \fB64\fP].
 .TP
 \fBny=\fIy-pixels\fP
-Number of pixels along the Y axis of the cube [default: \fB64\fP].
+Number of pixels along the Y axis of the image [default: \fB64\fP].
 .TP
 \fBxlab=\fIx-label\fP
 Text used to label the X-axis. By default the \fBxvar\fP expression is used.
@@ -77,7 +82,7 @@ with recognized labels like RA---TAN, DEC--SIN, GLON etc.
 Same for the Y-axis.
 .TP
 \fBmode=\fP\fIgridding-mode\fP
-mean, linear, gaussian weighted.
+mean (can be optionally with gaussian weighting),  linear interpolation
 [Default: \fBmean\fP].
 .TP
 \fBstack=t|f\fP
