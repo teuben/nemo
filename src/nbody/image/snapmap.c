@@ -1,11 +1,14 @@
 /* 
  *  SNAPMAP:   program grids body variable snapshot into a 2D image
  *
- *	20-jun-09  V1.0 -- derived from snapgrid - GalaxyMasses09 - mean mode works   PJT
+ *	20-jun-09  V1.0 -- derived from snapgrid - GalaxyMasses09 - PJT
+ *                      quick and dirty: only mean and svar used
  *
  *   TODO:
  *     fix gaussian weighted (still has the old svar= code from snapgrid)
  *     implement linear, i.e. ccdintpol, code
+ *     check multiple evar's
+ *     check stacking
  *
  */
 
@@ -35,10 +38,10 @@ string defv[] = {		/* keywords/default values/help */
 	"ny=64\n			  y size of image",
 	"xlab=\n                          Optional X label [xvar]",
 	"ylab=\n                          Optional Y label [yvar]",
-	"mode=mean\n                      Mode: mean, planar interpolation, weighted average",
+	"mode=mean\n                      Mode: mean, linear",
 	"stack=f\n			  Stack all selected snapshots?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=1.0\n			  20-jun-09 PJT",
+	"VERSION=1.0\n			  21-jun-09 PJT",
 	NULL,
 };
 
@@ -80,6 +83,7 @@ local int    moment;	                /* moment to take in velocity */
 local bool   Qmean;			/* adding or taking mean for image ?? */
 local bool   Qstack;                    /* stacking snapshots ?? */
 local bool   Qsmooth;                   /* (variable) smoothing */
+local bool   Qmap;                      /* make map of linked list to the points for interpolation */
 
 local bool   Qwcs;                      /* use a real astronomical WCS in "fits" degrees */
 local string proj;         
@@ -186,7 +190,9 @@ void setparams()
     char  *cp;
 
     times = getparam("times");
-    Qmean = TRUE;                 /* use mode= later on */
+    cp = getparam("mode");
+    Qmean = (*cp == 'm');   /* mean mode */
+    Qmap  = (*cp == 'l');   /* linear mode */
     Qstack = getbparam("stack");
       
     nx = getiparam("nx");
@@ -245,7 +251,13 @@ void setparams()
     evar = burststring(getparam("evar"),",");
     nvar = xstrlen(evar,sizeof(string)) - 1;
     Qsmooth = hasvalue("svar");
-    if (Qsmooth) svar = getparam("svar");
+    if (Qsmooth) {
+      if (Qmap) {
+	warning("Cannot smooth in mode=linear map mode, smooth disabled");
+	Qsmooth = FALSE;
+      } else 
+	svar = getparam("svar");
+    }
     if (nvar < 1) error("Need evar=");
     if (nvar > MAXVAR) error("Too many evar's (%d > MAXVAR = %d)",nvar,MAXVAR);
     if (Qstack && nvar>1) error("stack=t with multiple (%d) evar=",nvar);
@@ -348,8 +360,7 @@ clear_image()
 
 
 typedef struct point {
-  real em, ab, z, depth;          /* emit, absorb, moment var, depth var */
-  int i;                          /* particle id */
+  real x, y, e;                   /* point info */
   struct point *next, *last;      /* pointers to aid */
 } Point;
 
@@ -360,118 +371,162 @@ local Point **map =NULL;
 
 bin_data(int ivar)
 {
-    real brightness, x, y, z, z0, t,sum;
-    real expfac, fac, sfac, flux, b, emtau, depth;
-    real e, emax, twosqs;
-    int    i, j, k, ix, iy, iz, n, nneg, ioff;
-    int    ix0, iy0, ix1, iy1, m, mmax;
-    Body   *bp;
-    Point  *pp, *pf,*pl, **ptab;
-    bool   done;
+  real brightness, x, y, z, z0, t,sum;
+  real expfac, fac, sfac, flux, emtau, depth;
+  real e, emax, twosqs;
+  int    i, j, k, ix, iy, iz, n, nneg, ioff;
+  int    ix0, iy0, ix1, iy1, m, mmax;
+  Body   *bp;
+  Point  *pp, *pf,*pl;
+  bool   done;
     
-    if (FALSE) {
-      /* first time around allocate a map[] of pointers to Point's */
-        if (map==NULL)
-            map = (Point **) allocate(Nx(iptr)*Ny(iptr)*sizeof(Point *));
-        if (map==NULL || !Qstack) {
-            for (iy=0; iy<Ny(iptr); iy++)
-            for (ix=0; ix<Nx(iptr); ix++)
-                map[ix+Nx(iptr)*iy] = NULL;
-        }
+  if (Qmap) {
+    /* first time around allocate a map[] of pointers to Point's */
+    warning("new linear mapping mode");
+    if (map==NULL)
+      map = (Point **) allocate(Nx(iptr)*Ny(iptr)*sizeof(Point *));
+    if (map==NULL || !Qstack) {
+      for (iy=0; iy<Ny(iptr); iy++)
+	for (ix=0; ix<Nx(iptr); ix++)
+	  map[ix+Nx(iptr)*iy] = NULL;
     }
+  }
+  
+  nbody += nobj;
+  if (Qsmooth) 
+    mmax = MAX(Nx(iptr),Ny(iptr));
+  else
+    mmax = 1;
+  emax = 10.0;
 
-    nbody += nobj;
-    if (Qsmooth) 
-        mmax = MAX(Nx(iptr),Ny(iptr));
-    else
-        mmax = 1;
-    emax = 10.0;
+		/* big loop: walk through all particles and accumulate data */
+  for (i=0, bp=btab; i<nobj; i++, bp++) {
+    x = xfunc(bp,tnow,i);            /* transform */
+    y = yfunc(bp,tnow,i);
+    if (Qwcs) wcs(&x,&y);            /* convert to an astronomical WCS, if requested */
+    flux = efunc[ivar](bp,tnow,i);
+    if (Qsmooth) {
+      twosqs = sfunc(bp,tnow,i);
+      twosqs = 2.0 * sqr(twosqs);
+    }
+    
+    ix0 = xbox(x);                  /* direct gridding in X and Y */
+    iy0 = ybox(y);
+    
+    
+    if (ix0<0 || iy0<0) {           /* outside area (>= nx,ny never occurs */
+      noutxy++;
+      continue;
+    }
+    
+    if (flux == 0.0) {              /* discard zero flux cases */
+      nzero++;
+      continue;
+    }
+    
+    dprintf(4,"%d @ (%d,%d) from (%g,%g)\n",i+1,ix0,iy0,x,y);
 
-		/* big loop: walk through all particles and accumulate ccd data */
-    for (i=0, bp=btab; i<nobj; i++, bp++) {
-        x = xfunc(bp,tnow,i);            /* transform */
-	y = yfunc(bp,tnow,i);
-	if (Qwcs) wcs(&x,&y);            /* convert to an astronomical WCS, if requested */
-        flux = efunc[ivar](bp,tnow,i);
-        if (Qsmooth) {
-            twosqs = sfunc(bp,tnow,i);
-            twosqs = 2.0 * sqr(twosqs);
-        }
+    if (Qmap) {
+      dprintf(1,"i=%d %g %g %g\n",i,x,y,e);
+      pp = (Point *) allocate(sizeof(Point));
+      pp->x = x;
+      pp->y = y;
+      pp->e = flux;
+      pp->next = NULL;
+      ioff = ix0 + Nx(iptr)*iy0; /* location in grid map[] */
+      pf = map[ioff];
+      if (pf==NULL) {          /* first point in this cell */
+	dprintf(1,"first point\n");
+	map[ioff] = pp;
+	pp->last = pp;
+      } else {                 /* append to last point in this cell, adjust pointers */
+	dprintf(1,"continuing point\n");
+	pl = pf->last;
+	pl->next = pp;
+	pf->last = pp;
+      }      
+    } else {
+      for (m=0; m<mmax; m++) {        /* loop over smoothing area */
+	done = TRUE;
+	for (iy1=-m; iy1<=m; iy1++)
+	  for (ix1=-m; ix1<=m; ix1++) {       /* current smoothing edge */
+	    ix = ix0 + ix1;
+	    iy = iy0 + iy1;
+	    if (ix<0 || iy<0 || ix >= Nx(iptr) || iy >= Ny(iptr))
+	      continue;
 
-	ix0 = xbox(x);                  /* direct gridding in X and Y */
-	iy0 = ybox(y);
+	    if (m>0 && ABS(ix1) != m && ABS(iy1) != m) continue;
+	    if (m>0)
+	      if (twosqs > 0)
+		e = (sqr(ix1*Dx(iptr))+sqr(iy1*Dy(iptr)))/twosqs;
+	      else 
+		e = 2 * emax;
+	    else 
+	      e = 0.0;
+	    if (e < emax) {
+	      sfac = exp(-e);
+	      done = FALSE;
+	    } else
+	      sfac = 0.0;
+	    
+	    brightness =   sfac * flux;	/* normalize */
+	    if (brightness == 0.0) continue;
+	    
+	    CV(iptr) +=   brightness;       /* mean */
+	    if(iptr0) CV(iptr0) += sfac;    /* for svar smoothing */
 
-
-	if (ix0<0 || iy0<0) {           /* outside area (>= nx,ny never occurs */
-	    noutxy++;
-	    continue;
-	}
-
-        if (flux == 0.0) {              /* discard zero flux cases */
-            nzero++;
-            continue;
-        }
-
-      	dprintf(4,"%d @ (%d,%d) from (%g,%g)\n",i+1,ix0,iy0,x,y);
-
-        for (m=0; m<mmax; m++) {        /* loop over smoothing area */
-            done = TRUE;
-            for (iy1=-m; iy1<=m; iy1++)
-            for (ix1=-m; ix1<=m; ix1++) {       /* current smoothing edge */
-                ix = ix0 + ix1;
-                iy = iy0 + iy1;
-        	if (ix<0 || iy<0 || ix >= Nx(iptr) || iy >= Ny(iptr))
-        	    continue;
-
-                if (m>0 && ABS(ix1) != m && ABS(iy1) != m) continue;
-                if (m>0)
-                    if (twosqs > 0)
-                        e = (sqr(ix1*Dx(iptr))+sqr(iy1*Dy(iptr)))/twosqs;
-                    else 
-                        e = 2 * emax;
-                else 
-                    e = 0.0;
-                if (e < emax) {
-                    sfac = exp(-e);
-                    done = FALSE;
-                } else
-                    sfac = 0.0;
-
-                brightness =   sfac * flux;	/* normalize */
-                b = brightness;
-                if (brightness == 0.0) continue;
-
-		CV(iptr) +=   brightness;   /* moment */
-		if(iptr0) CV(iptr0) += 1.0; /* for mean */
-
-            } /* for (iy1/ix1) */
-            if (done) break;
-        } /* m */
-    }  /*-- end particles loop --*/
+	  } /* for (iy1/ix1) */
+	if (done) break;
+      } /* m */
+    }
+  }  /*-- end particles loop --*/
 }
 
 
 free_snap()
 {
-    free(btab);         /* free snapshot */
-    btab = NULL;        /* and make sure it can realloc at next get_snap() */
+  free(btab);         /* free snapshot */
+  btab = NULL;        /* and make sure it can realloc at next get_snap() */
 }    
 
 rescale_data(int ivar)
 {
-    real m_min, m_max, brightness, total, x, y, z, b;
-    int    i, j, k, ix, iy, iz, nneg, ndata;
+  real m_min, m_max, brightness, total, x, y, z, b, sum0, sum1;
+  int    i, j, k, ix, iy, iz, nneg, ndata;
+  Point  *pp, *pf,*pl;
 
-    dprintf(1,"rescale(%d)\n",ivar);
-    m_max = -HUGE;
-    m_min = HUGE;
-    total = 0.0;
-    ndata = 0;
+  dprintf(1,"rescale(%d)\n",ivar);
+  m_max = -HUGE;
+  m_min = HUGE;
+  total = 0.0;
+  ndata = 0;
 
-    /* Add the variable 4th and 5th dimension coordinates */
-    Unit(iptr) = evar[ivar]; /* for Qmean=t should use proper mean cell units */
-    Time(iptr) = tnow;
-    
+  /* Add the variable 4th and 5th dimension coordinates */
+  Unit(iptr) = evar[ivar]; /* for Qmean=t should use proper mean cell units */
+  Time(iptr) = tnow;
+  
+  if (Qmap) {
+    warning("rescale: Linear interpolating, but testing it as mean");
+    for (ix=0; ix<nx; ix++)         /* loop over whole cube */
+      for (iy=0; iy<ny; iy++) {
+	pp = map[ix + Nx(iptr)*iy];
+	if (pp) {
+	  sum0 = 1.0;
+	  sum1 = pp->e;
+	  while (pp->next) {
+	    pp = pp->next;
+	    sum0 += 1.0;
+	    sum1 += pp->e;
+	  }
+	  sum1 /= sum0;
+	  m_max =  MAX(m_max,sum1);
+	  m_min =  MIN(m_min,sum1);
+	  CV(iptr) = sum1;
+	  ndata++;
+	} else
+	  CV(iptr) = 0.0;
+      }
+  } else {
     if(iptr0) {
         dprintf(1,"rescale(%d) iptr0\n",ivar);
         for (ix=0; ix<nx; ix++)         /* loop over whole cube */
@@ -482,27 +537,28 @@ rescale_data(int ivar)
     }
 
     for (ix=0; ix<nx; ix++)         	/* determine maximum in picture */
-    for (iy=0; iy<ny; iy++) {
+      for (iy=0; iy<ny; iy++) {
        	  brightness = CV(iptr);
 	  total += brightness;
 	  m_max =  MAX(m_max,brightness);
 	  m_min =  MIN(m_min,brightness);
 	  if (brightness!=0.0)
 	  	ndata++;
-    }
+      }
+  }
    
-    MapMin(iptr) = m_min;               /* min and max of data */
-    MapMax(iptr) = m_max;
-    BeamType(iptr) = NONE;              /* no smoothing yet */
+  MapMin(iptr) = m_min;               /* min and max of data */
+  MapMax(iptr) = m_max;
+  BeamType(iptr) = NONE;              /* no smoothing yet */
 
-    dprintf (1,"Total %d particles within grid\n",nbody-noutxy);
-    dprintf (1,"     (%d were outside XY range)\n",
-                    noutxy);
-    dprintf (1,"%d cells contain non-zero data,  min and max in map are %f %f\n",
-    		ndata, m_min, m_max);
-    dprintf (1,"Total mass in map is %f\n",total*Dx(iptr)*Dy(iptr));
-    if (nzero)
-        warning("There were %d stars with zero emissivity in the grid",nzero);
+  dprintf (1,"Total %d particles within grid\n",nbody-noutxy);
+  dprintf (1,"     (%d were outside XY range)\n",
+	   noutxy);
+  dprintf (1,"%d cells contain non-zero data,  min and max in map are %f %f\n",
+	   ndata, m_min, m_max);
+  dprintf (1,"Total mass in map is %f\n",total*Dx(iptr)*Dy(iptr));
+  if (nzero)
+    warning("There were %d stars with zero emissivity in the grid",nzero);
 }
 
 /*	compute integerized coordinates in X Y and Z, return < 0 if
