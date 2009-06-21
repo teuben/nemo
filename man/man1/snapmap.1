@@ -5,10 +5,11 @@ snapmap \- grid a snapshot into a 2D map
 .PP
 \fBsnapmap in=\fPsnapshot \fBout=\fPimage [parameter=value]
 .SH DESCRIPTION
-\fIsnapgrid\fP grids two arbitrary \fIbodytrans(3NEMO)\fP expressions 
+\fIsnapmap\fP grids two arbitrary \fIbodytrans(3NEMO)\fP expressions 
 (default: \fBx\fP, and \fBy\fP) of a snapshot into a 2D map, using
-another \fIbodytrans(3NEMO)\fP expression as the map value. The result
-is an \fIimage(5NEMO)\fP, with optional astronomical projection for direct
+another \fIbodytrans(3NEMO)\fP expression (default: \fB-vz\fP) as the map
+value. The result is an
+\fIimage(5NEMO)\fP, with optional astronomical projection for direct
 comparision with true astronomical images.
 .PP
 The X and Y coordinates of the datacube can only
@@ -52,12 +53,14 @@ The value of \fIy-expression\fP is gridded along the Y axis.
 [default: \fBy\fP].
 .TP
 \fBevar=\fIemissivity\fP
-Variable to denote the emissivity per particle. 
-[default: \fBm\fP].
+Variable to denote the emissivity per particle.  The default matches that
+of \fIsnapgrid(1NEMO)\fP's \fBzvar=\fP.
+[default: \fB-vz\fP].
 .TP
 \fBsvar=\fIsmoothing\fP
-Variable to denote gaussian smoothing  Note this is the
-gaussian sigma, not the FWHM (FMHW = 2.355 * sigma).
+Variable to denote gaussian weighting size in X and Y. Note this is the
+gaussian sigma, not the FWHM (FMHW = 2.355 * sigma). Only used
+if \fBmode=gauss\fP. 
 .TP
 \fBnx=\fIx-pixels\fP
 Number of pixels along the X axis of the cube [default: \fB64\fP].
@@ -74,7 +77,7 @@ with recognized labels like RA---TAN, DEC--SIN, GLON etc.
 Same for the Y-axis.
 .TP
 \fBmode=\fP\fIgridding-mode\fP
-mean, linear, weighted.
+mean, linear, gaussian weighted.
 [Default: \fBmean\fP].
 .TP
 \fBstack=t|f\fP
