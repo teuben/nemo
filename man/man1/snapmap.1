@@ -96,6 +96,18 @@ to obtain turbo speeds.
 .PP
 Sky projections do not guarantee flux conservation, interpolation is done
 in linear space.
+.SH EXAMPLE
+This program was written to create maps with more accurate interpolated
+velocity fields from models. However, in the default mode it used
+the same \fImean\fP pixel value as \fIsnapgrid(1NEMO)\fP:
+.nf
+   snapmap  snap101 ccd101 
+   snapgrid snap101 ccd102 evar=-vz mean=t
+   ccdmath ccd101,ccd102 - %1-%2 | ccdstat -
+      Min=0.000000  Max=0.000000
+      ...
+.fi
+produces the same images \fIccd101\fP and \fIccd102\fP from the input snapshot \fIsnap101\fP
 .SH "SEE ALSO"
 snapgrid(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), image(5NEMO)
 .SH AUTHOR
