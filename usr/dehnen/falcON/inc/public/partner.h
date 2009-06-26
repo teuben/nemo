@@ -1,25 +1,30 @@
-// -*- C++ -*-                                                                  
-//------------------------------------------------------------------------------
-//                                                                              
-/// \file inc/public/partner.h                                                  
-//                                                                              
-// Copyright (C) 2000-2005  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
-//------------------------------------------------------------------------------
+///
+/// \file   incpublic/partner.h
+///
+/// \brief  contains code for finding partners using octtrees
+///                                                                             
+/// \author Walter Dehnen
+/// \date   2000-2005,2009
+///
+////////////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2000-2005,2009 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
+////////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_partner_h
 #define falcON_included_partner_h
 
@@ -99,13 +104,12 @@ namespace falcON {
       //------------------------------------------------------------------------
       // const data access via friends                                          
       //------------------------------------------------------------------------
-      friend bodies::index const&mybody(const Leaf*L) {
-	return L->mybody(); } 
-      friend unsigned const&num   (const Leaf*L) { return L->num(); }
-      friend vect     const&pos   (const Leaf*L) { return L->pos(); } 
-      friend vect     const&vel   (const Leaf*L) { return L->vel(); } 
-      friend real     const&size  (const Leaf*L) { return L->size(); } 
-      friend real     const&sizeq (const Leaf*L) { return L->sizeq(); } 
+      friend bodies::index const&mybody(const Leaf*);
+      friend unsigned const&num(const Leaf*);
+      friend vect const&pos(const Leaf*);
+      friend vect const&vel(const Leaf*);
+      friend real const&size(const Leaf*);
+      friend real const&sizeq(const Leaf*);
       //------------------------------------------------------------------------
       // copy data from body to leaf                                            
       //------------------------------------------------------------------------
@@ -199,12 +203,12 @@ namespace falcON {
       //------------------------------------------------------------------------
       // const data access via friends                                          
       //------------------------------------------------------------------------
-      friend vect     const&vel   (const Cell*C) { return C->vel(); } 
-      friend vect     const&pos   (const Cell*C) { return C->pos(); } 
-      friend real     const&size  (const Cell*C) { return C->size(); } 
-      friend real     const&vrad  (const Cell*C) { return C->vrad(); } 
-      friend real     const&rmax  (const Cell*C) { return C->rmax(); } 
-      friend unsigned const&numb  (const Cell*C) { return C->numb(); } 
+      friend vect     const&vel   (const Cell*);
+      friend vect     const&pos   (const Cell*);
+      friend real     const&size  (const Cell*);
+      friend real     const&vrad  (const Cell*);
+      friend real     const&rmax  (const Cell*);
+      friend unsigned const&numb  (const Cell*);
       //------------------------------------------------------------------------
       // dump  data                                                             
       //------------------------------------------------------------------------
@@ -319,6 +323,24 @@ namespace falcON {
 			    bool) falcON_THROWING; // I: r < max(hi,hj) or hi+hj
     //--------------------------------------------------------------------------
   };
+  //////////////////////////////////////////////////////////////////////////////
+  // inline definitions of friends
+  inline bodies::index const&mybody(const PartnerEstimator::Leaf*L)
+  { return L->mybody(); } 
+  inline unsigned const&num(const PartnerEstimator::Leaf*L) { return L->num(); }
+  inline vect const&pos(const PartnerEstimator::Leaf*L) { return L->pos(); } 
+  inline vect const&vel(const PartnerEstimator::Leaf*L) { return L->vel(); } 
+  inline real const&size(const PartnerEstimator::Leaf*L) { return L->size(); } 
+  inline real const&sizeq(const PartnerEstimator::Leaf*L) { return L->sizeq(); }
+  //----------------------------------------------------------------------------
+  inline vect const&vel(const PartnerEstimator::Cell*C) { return C->vel(); } 
+  inline vect const&pos(const PartnerEstimator::Cell*C) { return C->pos(); } 
+  inline real const&size(const PartnerEstimator::Cell*C) { return C->size(); } 
+  inline real const&vrad(const PartnerEstimator::Cell*C) { return C->vrad(); } 
+  inline real const&rmax(const PartnerEstimator::Cell*C) { return C->rmax(); } 
+  inline unsigned const&numb(const PartnerEstimator::Cell*C)
+  { return C->numb(); } 
+  //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
 ////////////////////////////////////////////////////////////////////////////////
 falcON_TRAITS(falcON::PartnerEstimator::Leaf,"PartnerEstimator::Leaf");
