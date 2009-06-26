@@ -124,7 +124,7 @@ namespace falcON {
     /// halo cumulative mass
     double Mh(double R) const;
     /// total halo mass
-    double Mh_tot() const { return mh[n1]; }
+    double Mh_tot() const { return mh[nm]; }
     /// total mass density
     double rhot(double R) const;
     /// v_circ^2(r)
