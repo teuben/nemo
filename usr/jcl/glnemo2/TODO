@@ -1,0 +1,64 @@
+
+GLNEMO version 4 TODO
+
+MEMORY USAGE IN GADGET:
+-----------------------
+read in temporary variable instead of a buffer P
+and store value read directly in the respecting arrays.
+
+Camera Path
+------------
+ use the viewer to save camera path coordinates. Flytru camera path using bezier splines.
+
+Orbit displaying
+-------------------
+ Display orbits history. Specify a maximum number of orbits per particles (maxorb=100)
+and a maximum number of time steps (maxorbt=100). If maxorbt has been reached,
+then shift orbit array of 1 orbits. Put a new tab for orbit history in particles selection box.
+
+Play :
+--------
+ Play forward/backward. Should be easy to implement with SnapshotList interface type: Use vector to store filename then go forward or backward on this vector. A bit more complicated with NEMO snapshots and multiple time steps. We should rewrite io_nemo to save in a vector the stream position....
+ 
+Different data to display :
+---------------------------
+- gyrfalcON simulation
+- ASCII
+- (done) Gadget 
+- (done) FTM, Cmayton Heller's file format 
+- Ramses
+
+Different way of input:
+-----------------------
+- (done) by single snapshot
+- (done) by list of snapshot with range of particles (usefull for simulation with 
+        variables number of particles in their components: stars,gas...)
+
+     file01 0:1000,1200:1500
+     file02 0:950,1210:1508
+     ...
+     ...
+     file01 0:877,1240:1530
+     
+Data properties:
+---------------
+ component :
+  - positions
+  - velocities
+ familly selected :
+  - by range
+  - by list of indexes
+ type of data
+  - gaz
+  - particles
+  - velocity vector
+  - orbits
+Options :
+---------
+ while loading snapshots, toggle options to enable loading while moving the scene
+Object Form:
+------------
+- lock properties of the object fom one file to another (color and visibility)
+Texure:
+--------
+- (done) rewrite texture loading protocole. Load textures only one time and store them in a vector.

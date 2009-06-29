@@ -1,0 +1,14 @@
+current version
+---------------
+- huge speed up on the rendering engine (500% !), thanks to :
+   - vertex buffer object
+   - vertex and pixel shader
+   - GL_POINT_SPRITE_ARB and GL_VERTEX_PROGRAM_POINT_SIZE_NV
+
+- offscreen rendering, using frame buffer object, to take screenshot from the command line and from the GUI
+
+- many bugs fixed
+
+1.preview.080327
+----------------
+First public release

@@ -1,0 +1,30 @@
+# Specific Win32 config
+#GLOBAL           = console debug_and_release
+#COMPILEMODE          = release
+COMPILEMODE          = debug
+GLOBAL           = console $$COMPILEMODE
+win32 {
+        COMPILEMODE  = release
+        GLOBAL   = console $$COMPILEMODE
+        ARCH     = win32
+        NEMOLIB = ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE
+        NEMOINC = ../plugins/nemolight/inc
+}
+# specific Unix config
+unix {
+        ARCH     = unix
+        #NEMOLIB = $(NEMOLIB)
+        #NEMOINC = $(NEMOINC)
+        NEMOLIB = ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE
+        NEMOINC = ../plugins/nemolight/inc
+        QMAKE_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+}
+# specific Mac Os X config
+macx {
+        ARCH     = macx
+        NEMOLIB = ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE
+        NEMOINC = ../plugins/nemolight/inc
+        INCLUDEPATH += /usr/include/malloc
+        QMAKE_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+}
+
