@@ -81,8 +81,10 @@ numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(tupel_h)
 spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
 WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
-				$(inline_h) 
+				$(inline_h)
 parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
+octtree_h		:= $(INC)octtree.h $(memory_h) $(traits_h) $(tupel_h)
+sse_h			:= $(INC)sse.h $(exception_h)
 
 # -----------------------
 # source dependency lists
@@ -96,6 +98,8 @@ random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 parallel_cc		:= $(SRC)parallel.cc $(parallel_h) $(meta_h) $(io_h)
+octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(memory_h)
+sse_cc			:= $(SRC)sse.cc $(sse_h)
 
 # ---------------
 # library modules
@@ -113,9 +117,14 @@ $(LIB)random.o:		$(random_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 $(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
+$(LIB)octtree.o:	$(octtree_cc) $(LIBT) makefile
+			$(MAKE_OBJ)
+$(LIB)sse.o:		$(sse_cc) $(LIBT) makefile
+			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o
+			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o \
+			$(LIB)octtree.o $(LIB)sse.o
 
 # -------
 # library
@@ -142,7 +151,7 @@ $(LIB)parallel.o:	$(parallel_cc) $(makefiles)
 
 WDutilsP_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o \
-			$(LIB)parallel.o
+			$(LIB)octtree.o $(LIB)sse.o $(LIB)parallel.o
 
 # -----------
 # MPI library
