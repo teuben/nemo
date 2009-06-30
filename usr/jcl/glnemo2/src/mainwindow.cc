@@ -935,7 +935,7 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
 
     gl_window->resize(size.width(),size.height());
     // !!! activate the following line if you want to see OSD
-#if 0
+#if 1
     gl_window->setGeometry(geom.x(),geom.y(),             // give to the widget the new size
                            size.width(),size.height());   // bc width() and height() are used by
                                                           // renderText
