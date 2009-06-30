@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           PÙle de l'Etoile, site de Ch‚teau-Gombert                         
-//           38, rue FrÈdÈric Joliot-Curie                                     
+//           P√¥le de l'Etoile, site de Ch√¢teau-Gombert                         
+//           38, rue Fr√©d√©ric Joliot-Curie                                     
 //   <        13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -38,7 +38,7 @@ SnapshotPhiGrape::~SnapshotPhiGrape()
   
   if (pos)   free ((float *) pos);
   if (vel)   free ((float *) vel);
-  
+
   if (valid) close();
 }
 // ============================================================================
@@ -151,6 +151,7 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
     int cpt=0;
     char buff[KB];
     std::stringstream ss;
+    bool first=true;
     for (int i=0; i<full_nbody; i++) {
   
       gzgets(file, buff, KB);   // read a line from the file
@@ -168,10 +169,30 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
         if (load_vel) 
           for (int j=0; j<3; j++)
             part_data->vel[cpt*3+j] = *(v+j);
+        float rho1,hsml;
+        
+        ss >> rho1 >> hsml;    // try to read RHO and HSML
+        
+        if (first && !ss.eof()) { // first time and rho+hsml exist
+          first = false;
+          if (nsel > *part_data->nbody|| !part_data->rho) {
+            if (part_data->rho) delete [] part_data->rho;
+            part_data->rho = new float[nsel];
+          }
+          if (nsel > *part_data->nbody || !part_data->rneib) {
+            if (part_data->rneib) delete [] part_data->rneib;
+            part_data->rneib = new float[nsel];
+          }
+        }
+        if (!ss.eof()) {
+          part_data->rho[cpt]   = rho1;
+          part_data->rneib[cpt] = hsml;
+        }
+        ss.clear(); // clear error state flag like eof()
       }
       cpt++;
     }
-    
+    part_data->computeMinMaxRho();
   }
   end_of_data = true;
 }
