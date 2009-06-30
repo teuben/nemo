@@ -115,6 +115,7 @@ MainWindow::MainWindow(std::string _ver)
   reload = false;
   //mainLayout->addWidget(qgl);
   setCentralWidget(gl_window);
+  
 }
 // -----------------------------------------------------------------------------
 // Start                                                                        
@@ -143,6 +144,7 @@ void MainWindow::start(std::string shot)
   }
   if (play) actionPlay(); // start playing time step
   if (shot != "") takeScreenshot(wsize,hsize,shot);
+  gl_window->setFocus();
 }
 // -----------------------------------------------------------------------------
 // MainMainWindow destructor                                                    

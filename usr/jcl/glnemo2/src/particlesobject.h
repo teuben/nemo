@@ -31,7 +31,7 @@ typedef std::vector <OrbitsList> OrbitsVector;
 // #particles, type of particles, color, indexes.                              
 class ParticlesObject{
   public:
-    enum ObjFrom { Range, File, ntype };
+    enum ObjFrom { Range, File, Select, ntype };
     //ParticlesObject();
     ParticlesObject(const ObjFrom _of=Range,
                     const std::string _name="none");
