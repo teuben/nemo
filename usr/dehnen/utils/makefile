@@ -7,6 +7,17 @@
 
 SHELL	:=	csh
 
+# -----------
+# directories
+# -----------
+
+INC             := inc/
+SRC             := src/
+
+# ---------
+# libraries
+# ---------
+
 .PHONY		: lib libpgi libpath libsun libicc
 
 default		: lib
@@ -53,5 +64,19 @@ ifeq ($(__ICC),1)
 libicc		:
 		make -f makeall COMPILER=icc
 endif
+
+# --------
+# cleaning
+# --------
+
+.PHONY		: 	cleanbackup cleandirs clean cleanall
+cleanbackup	:
+			rm -f *~ $(INC)*~ $(SRC)*~
+cleandirs	:
+			rm -rf lib libpgi libpath libsun libicc
+
+clean		:	cleandirs
+
+cleanall	:	cleandirs cleanbackup
 
 # END

@@ -1,8 +1,8 @@
 # -*- makefile -*-
 ################################################################################
 #
-# Makefile for WDutils
 #
+# Makefile for WDutils
 ################################################################################
 
 default			: library
@@ -51,8 +51,8 @@ IMPI			:= -I$(MPIINC)
 # -----------
 
 INC             	:= inc/
-LIB			:= lib$(EXT)/
 SRC             	:= src/
+LIB			:= lib$(EXT)/
 LIBT			:= $(LIB).dummy
 $(LIBT)			:
 			mkdir --parents --mode=755 $(LIB)
@@ -172,16 +172,4 @@ library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
 
 endif
 
-# --------
-# cleaning
-# --------
-
-.PHONY		: 	cleanbackup cleandirs clean cleanall
-cleanbackup	:
-			rm -f *~ $(INC)*~ $(SRC)*~
-cleandirs	:
-			rm -rf $(LIB)
-
-clean		:	cleandirs
-
-cleanall	:	cleandirs cleanbackup
+#END

@@ -3,7 +3,6 @@
 # to be included by makefile 
 #
 
-LIB		:= lib/
 CXX		:= $(CPATH)c++
 CC		:= $(CPATH)gcc
 FC		:= $(CPATH)gfortran
