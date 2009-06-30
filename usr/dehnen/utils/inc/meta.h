@@ -79,6 +79,79 @@ namespace WDutils {
 # define __IncDiv();
 # define __IncSqr();
 #endif
+    ////////////////////////////////////////////////////////////////////////////
+    // operational dependence on even or odd integer
+    template<int> struct __EvenOdd;
+    template<> struct __EvenOdd<0> {
+      template<typename Real> static void neg (Real&) {}
+      template<typename Real> static Real pow (Real ) { return Real(1); }
+      template<typename Real> static Real powp(Real ,  Real y) { return y; }
+      template<typename Real> static void ass (Real&x, Real y) { x =y; }
+      template<typename Real> static void add (Real&x, Real y) { __IncAdd(); x+=y; }
+      template<typename Real> static void sub (Real&x, Real y) { __IncAdd(); x-=y; }
+      template<typename Real> static void add2(Real&x, Real y) { __CountMA(0,2); x+=y; x+=y; }
+      template<typename Real> static void sub2(Real&x, Real y) { __CountMA(0,2); x-=y; x-=y; }
+      template<typename Real> static Real sum (Real x, Real y) { __IncAdd(); return x+y; }
+      template<typename Real> static Real diff(Real x, Real y) { __IncAdd(); return x-y; }
+    };
+    template<> struct __EvenOdd<1> {
+      template<typename Real> static void neg (Real&x) { x=-x; }
+      template<typename Real> static Real pow (Real x) { return x; }
+      template<typename Real> static Real powp(Real x, Real y) { __IncMul(); return x*y; }
+      template<typename Real> static void ass (Real&x, Real y) { x =-y; }
+      template<typename Real> static void add (Real&x, Real y) { __IncAdd(); x-=y; }
+      template<typename Real> static void sub (Real&x, Real y) { __IncAdd(); x+=y; }
+      template<typename Real> static void add2(Real&x, Real y) { __CountMA(0,2); x-=y; x-=y; }
+      template<typename Real> static void sub2(Real&x, Real y) { __CountMA(0,2); x+=y; x+=y; }
+      template<typename Real> static Real sum (Real x, Real y) { __IncAdd(); return x-y; }
+      template<typename Real> static Real diff(Real x, Real y) { __IncAdd(); return x+y; }
+    };
+    /// assigns positive or negative, depending on whether N is even or odd
+    /// \param[in,out] x lvalue, replaced by y if N is even, -y if N is odd
+    /// \param[in]     y rvalue
+    template<int N, typename Real> inline
+    void Assign(Real&x, Real y) { __EvenOdd<N&1>::ass(x,y); }
+    /// switches sign of x if N is odd
+    /// \param[in,out] x lvalue, replaced by -x if N is odd
+    template<int N, typename Real> inline
+    void Negate(Real&x) { __EvenOdd<N&1>::neg(x); }
+    /// adds or subtracts, depending on whether N is even or odd
+    /// \param[in,out] x lvalue, replaced by x+y if N is even, x-y if N is odd
+    /// \param[in]     y rvalue
+    template<int N, typename Real> inline
+    void Add(Real&x, Real y) { __EvenOdd<N&1>::add(x,y); }
+    /// adds or subtracts twice, depending on whether N is even or odd
+    /// \param[in,out] x lvalue, replaced by x+2y if N is even, x-2y if N is odd
+    /// \param[in]     y rvalue
+    template<int N, typename Real> inline
+    void AddTwice(Real&x, Real y) { __EvenOdd<N&1>::add2(x,y); }
+    /// subtracts or adds, depending on whether N is even or odd
+    /// \param[in,out] x lvalue, replaced by x-y if N is even, x+y if N is odd
+    /// \param[in]     y rvalue
+    template<int N, typename Real> inline
+    void Sub(Real&x, Real y) { __EvenOdd<N&1>::sub(x,y); }
+    /// subtracts or adds twice, depending on whether N is even or odd
+    /// \param[in,out] x lvalue, replaced by x-2y if N is even, x+2y if N is odd
+    /// \param[in]     y rvalue
+    template<int N, typename Real> inline
+    void SubTwice(Real&x, Real y) { __EvenOdd<N&1>::sub2(x,y); }
+    /// sum or difference, depending on whether N is even or odd
+    /// \param[in] x rvalue
+    /// \param[in] y rvalue
+    /// \return x+y if N is even, x-y if N is odd
+    template<int N, typename Real> inline
+    Real Sum(Real x, Real y) { return __EvenOdd<N&1>::sum(x,y); }
+    /// difference or sum, depending on whether N is even or odd
+    /// \param[in] x rvalue
+    /// \param[in] y rvalue
+    /// \return x-y if N is even, x+y if N is odd
+    template<int N, typename Real> inline
+    Real Diff(Real x, Real y) { return __EvenOdd<N&1>::diff(x,y); }
+    ////////////////////////////////////////////////////////////////////////////
+    /// sign of an integer
+    template<int N> struct Sign {
+      const static int S = N<0? -1 : N>0? 1 : 0;
+    };
     /// Inverse of an integer: replace integer divisions of real numbers by
     /// multiplications to generate faster code.
     /// \note instantinated for all integers up to 100
@@ -311,6 +384,21 @@ namespace WDutils {
       /// \param[in,out] X scalar, replaced by N*X on output
       template<typename Real>
       static void Multiply(Real&X) { __IncMul(); X *= N; }
+      /// scalar to power N
+      /// \param[in] X scalar
+      /// \return X^N
+      template<typename Real>
+      static Real Power(Real X)
+      {
+	__IncMul();
+	Real t = Integer<(N>>1)>::Power(X);
+	return __EvenOdd<N&1>::powp(X, t*t);
+      }
+      /// replace X with X^N
+      template<typename Real> static void Exponentiate(Real&X)
+      {
+	X = Power(X);
+      }
       /// product of scalar with N
       /// \param[in] X scalar
       /// \return    X*N
@@ -382,75 +470,6 @@ namespace WDutils {
     /// Product with integer: convert to sum for N=0,1,2,3
     template<int N, typename Real> inline
     Real Times(Real x) { return Integer<N>::Product(x); }
-    ////////////////////////////////////////////////////////////////////////////
-    // add or subtract, depending on whether template parameter is even or odd
-    template<int> struct __AddSubOdd;
-    template<> struct __AddSubOdd<0> {
-      template<typename Real> static void neg (Real&) {}
-      template<typename Real> static void ass (Real&x, Real y) { x =y; }
-      template<typename Real> static void add (Real&x, Real y) { __IncAdd(); x+=y; }
-      template<typename Real> static void sub (Real&x, Real y) { __IncAdd(); x-=y; }
-      template<typename Real> static void add2(Real&x, Real y) { __CountMA(0,2); x+=y; x+=y; }
-      template<typename Real> static void sub2(Real&x, Real y) { __CountMA(0,2); x-=y; x-=y; }
-      template<typename Real> static Real sum (Real x, Real y) { __IncAdd(); return x+y; }
-      template<typename Real> static Real diff(Real x, Real y) { __IncAdd(); return x-y; }
-    };
-    template<> struct __AddSubOdd<1> {
-      template<typename Real> static void neg (Real&x) { x=-x; }
-      template<typename Real> static void ass (Real&x, Real y) { x =-y; }
-      template<typename Real> static void add (Real&x, Real y) { __IncAdd(); x-=y; }
-      template<typename Real> static void sub (Real&x, Real y) { __IncAdd(); x+=y; }
-      template<typename Real> static void add2(Real&x, Real y) { __CountMA(0,2); x-=y; x-=y; }
-      template<typename Real> static void sub2(Real&x, Real y) { __CountMA(0,2); x+=y; x+=y; }
-      template<typename Real> static Real sum (Real x, Real y) { __IncAdd(); return x-y; }
-      template<typename Real> static Real diff(Real x, Real y) { __IncAdd(); return x+y; }
-    };
-    /// assigns positive or negative, depending on whether N is even or odd
-    /// \param[in,out] x lvalue, replaced by y if N is even, -y if N is odd
-    /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void Assign(Real&x, Real y) { __AddSubOdd<N&1>::ass(x,y); }
-    /// switches sign of x if N is odd
-    /// \param[in,out] x lvalue, replaced by -x if N is odd
-    template<int N, typename Real> inline
-    void Negate(Real&x) { __AddSubOdd<N&1>::neg(x); }
-    /// adds or subtracts, depending on whether N is even or odd
-    /// \param[in,out] x lvalue, replaced by x+y if N is even, x-y if N is odd
-    /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void Add(Real&x, Real y) { __AddSubOdd<N&1>::add(x,y); }
-    /// adds or subtracts twice, depending on whether N is even or odd
-    /// \param[in,out] x lvalue, replaced by x+2y if N is even, x-2y if N is odd
-    /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void AddTwice(Real&x, Real y) { __AddSubOdd<N&1>::add2(x,y); }
-    /// subtracts or adds, depending on whether N is even or odd
-    /// \param[in,out] x lvalue, replaced by x-y if N is even, x+y if N is odd
-    /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void Sub(Real&x, Real y) { __AddSubOdd<N&1>::sub(x,y); }
-    /// subtracts or adds twice, depending on whether N is even or odd
-    /// \param[in,out] x lvalue, replaced by x-2y if N is even, x+2y if N is odd
-    /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void SubTwice(Real&x, Real y) { __AddSubOdd<N&1>::sub2(x,y); }
-    /// sum or difference, depending on whether N is even or odd
-    /// \param[in] x rvalue
-    /// \param[in] y rvalue
-    /// \return x+y if N is even, x-y if N is odd
-    template<int N, typename Real> inline
-    Real Sum(Real x, Real y) { return __AddSubOdd<N&1>::sum(x,y); }
-    /// difference or sum, depending on whether N is even or odd
-    /// \param[in] x rvalue
-    /// \param[in] y rvalue
-    /// \return x-y if N is even, x+y if N is odd
-    template<int N, typename Real> inline
-    Real Diff(Real x, Real y) { return __AddSubOdd<N&1>::diff(x,y); }
-    ////////////////////////////////////////////////////////////////////////////
-    /// sign of an integer
-    template<int N> struct Sign {
-      const static int S = N<0? -1 : N>0? 1 : 0;
-    };
     ////////////////////////////////////////////////////////////////////////////
     /// \name simple functors for assign-type operations (see also functional)
     //@{
