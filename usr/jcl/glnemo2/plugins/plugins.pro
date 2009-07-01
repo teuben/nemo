@@ -36,6 +36,7 @@ INCLUDEPATH += ftm \
     ramses \
     ../src \
     ../plugins \
+    zlib \
     $$NEMOINC \
     $$NEMOLIB
 DEPENDPATH += ../src \

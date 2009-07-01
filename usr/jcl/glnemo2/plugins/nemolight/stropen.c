@@ -52,7 +52,9 @@
 #include <limits.h>
 #define MAXPATHLEN      PATH_MAX
 
+#ifndef __MINGW32__
 extern int unlink (string);		/* POSIX ??? unistd.h */
+#endif
 extern int dup (int);			/* POSIX ??? unistd.h */
 
 /* normally already defined via maxsizes.h */
