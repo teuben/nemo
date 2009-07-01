@@ -9,6 +9,7 @@ win32 {
         ARCH     = win32
         NEMOLIB = ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE
         NEMOINC = ../plugins/nemolight/inc
+        QMAKE_CFLAGS +=
 }
 # specific Unix config
 unix {
