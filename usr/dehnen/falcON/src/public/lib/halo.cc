@@ -263,9 +263,9 @@ double DoublePowerLawHalo::Mtot(const HaloModifier&hm) const
 // class HaloPotential
 //
 namespace {
-  /// for the maximum table radius in case of trunction: gamma(Rmax)=gam_trunc
+  /// for the maximum table radius in case of truncation: gamma(Rmax)=gam_trunc
   const double gam_trunc = 100.;
-  /// for the table extrema in case of no trunction: 
+  /// for the table extrema in case of no truncation: 
   ///    |gamma(r)-gamma_asymptotic| < eps_gamma * gamma_asymptotic
   const double eps_gamma = 0.002;
   /// find an appropriate maximum radius for the tables in HaloModel
@@ -304,7 +304,7 @@ namespace {
       rh  = halo(r,gam);
       gam*=-r/rh;
     }
-    return r;
+    return min(r,0.01*halo.scale_radius());
   }
   //
   const HaloDensity *RHO;
@@ -377,8 +377,8 @@ HaloPotential::HaloPotential(HaloDensity const&model,
 	      r[i],ps[i],r[i-1],ps[i-1]);
     }
     //    find density generating external monopole
-    double extA  = (log(mt[1])-log(mt[0]))/dlr; // gamma_0 for monopole
-    if(extA > At) At = extA;                    // gamma_0 for potential
+    double extA  = (log(mt[1])-log(mt[0]))/dlr; // dlnM/dlnr for monopole
+    if(3-extA > At) At = 3-extA;                // gamma_0 for potential
     double dmdlr = mt[0] * extA;                // dM_e/dlnr assuming power law
     spline<double> Sext(lr,mt,&dmdlr);
     for(int i=0; i!=n; ++i) {
@@ -626,28 +626,7 @@ namespace {
   public:
     ReducedDensity(const HaloDensity&m, double r_a, double beta)
       : Model(m), uq(r_a>0? 1/square(r_a):0), b(beta), tb(b+b), tb1(tb-1)
-    {
-//       std::cerr<<" Testing ReducedDensity(): "
-// 	       <<" r_a="<<r_a<<" uq="<<uq<<'\n'
-// 	       <<" beta="<<beta<<" b="<<b<<" tb="<<tb<<" tb1="<<tb1<<'\n';
-//       for(;;) {
-// 	double r;
-// 	std::cout<<" r="; std::cin>>r;
-// 	if(r<0) break;
-// 	double dr=0.0001*r;
-// 	double rl=r-dr, rh=r+dr;
-// 	double t =(*this)(r),tl=(*this)(rl),th=(*this)(rh);
-// 	double t1,t1l,t1h,t1r,t2;
-// 	double tr=(*this)(r,t1),trl=(*this)(rl,t1l),trh=(*this)(rh,t1h);
-// 	double trr=(*this)(r,t1r,t2);
-// 	std::cerr<<" rd="<<t<<" ="<<tr<<" ="<<trr<<'\n'
-// 		 <<" d1="<<t1<<" ="<<t1r
-// 		 <<" ="<<((th-tl)/(dr+dr))<<'\n'
-// 		 <<" d2="<<t2
-// 		 <<" ="<<((tl+th-t-t)/(dr*dr))
-// 		 <<" ="<<((t1h-t1l)/(dr+dr))<<'\n';
-//       }
-    }
+    {}
     //
     double inner_gamma() const {
       return Model.inner_gamma() - tb;
@@ -809,7 +788,7 @@ double HaloModel::lnG(double Q) const {
       return lg[n1] + (1.5-Ch+B) * (lnRPsi(Q)-lr[n1]);
   } else if(Q > ps[0])
     // 2 at large Q (small radii)
-    return lg[0] + (B+B-Ah-(1.5-B)*(2-At)) * (lnRPsi(Q)-lr[0]);
+    return lg[0] + (3+Ah-1.5*At-B*(4-At)) * (lr[0]-lnRPsi(Q));
   else
     // 3 within tabulated interval
     return Polev(Q,ps,lg);
