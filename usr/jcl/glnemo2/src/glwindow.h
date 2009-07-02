@@ -44,7 +44,7 @@ public:
       setTranslation(0,0,0);
       resetEvents();
     }
-    static unsigned int m_program;    
+    static GLuint m_program;    
     static bool GLSL_support;
     void setFBO(bool _b) { fbo = _b; };
     void setFBOSize(GLuint w, GLuint h) { texWidth=w; texHeight=h;};
@@ -53,6 +53,8 @@ public:
   
     // select area
     GLSelection * gl_select;
+    static void checkGLErrors(std::string s);
+    
   signals:
     void sigKeyMouse(const bool, const bool);
     void sigScreenshot();

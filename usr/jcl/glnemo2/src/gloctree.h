@@ -66,6 +66,7 @@ public:
   public slots:
     void buildDisplayList();
     void computeDensity();
+    
   private:
     Node * root;
     int level_max;     // level tree

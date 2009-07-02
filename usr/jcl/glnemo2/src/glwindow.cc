@@ -99,7 +99,9 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   f.setStyleHint(QFont::SansSerif, QFont::PreferAntialias);
   osd = new GLObjectOsd(wwidth,wheight,f,Qt::yellow);
   initializeGL();
+  checkGLErrors("initializeGL");
   initShader();
+  checkGLErrors("initShader");
   // FBO
   // Set the width and height appropriately for you image
   fbo = false;
@@ -111,6 +113,7 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
     glGenFramebuffersEXT(1, &framebuffer);
     glGenRenderbuffersEXT(1, &renderbuffer);
   }
+  checkGLErrors("GLWindow constructor");
 }
 
 // ============================================================================
@@ -392,7 +395,7 @@ void GLWindow::initShader()
   GLSL_support = true;
   std::cerr << "begining init shader\n";
   glewInit();
-  if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
+  if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader && GL_VERSION_2_0)
     qDebug() << "Ready for GLSL\n";
   else {
     qDebug() << "BE CAREFULL : No GLSL support\n";
@@ -417,13 +420,15 @@ void GLWindow::initShader()
     
     GLint compile_status;
     glCompileShader(m_vertexShader);
+    checkGLErrors("compile Vertex Shader");
     glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &compile_status);
     if(compile_status != GL_TRUE) {
       qDebug() << "Unable to COMPILE VERTEX SHADER.....\n";
       exit(1);
     }
-
+    
     glCompileShader(m_pixelShader);
+    checkGLErrors("compile Pixel Shader");
     glGetShaderiv(m_pixelShader, GL_COMPILE_STATUS, &compile_status);
     if(compile_status != GL_TRUE) {
       qDebug() << "Unable to COMPILE PIXEL SHADER.....\n";
@@ -436,8 +441,9 @@ void GLWindow::initShader()
     glAttachShader(m_program, m_pixelShader);
 
      // bind attribute
-    glBindAttribLocation(m_program, 100, "a_sprite_size");
+    //glBindAttribLocation(m_program, 100, "a_sprite_size");
     glLinkProgram(m_program);
+    checkGLErrors("link Shader program");
     int  link_status;
     glGetProgramiv(m_program, GL_LINK_STATUS, &link_status);
     if(link_status != GL_TRUE) {
@@ -447,6 +453,16 @@ void GLWindow::initShader()
     glDeleteShader(m_vertexShader);
     glDeleteShader(m_pixelShader);
     std::cerr << "ending init shader\n";
+  }
+}
+// ============================================================================
+// check OpenGL error message                                                  
+void GLWindow::checkGLErrors(std::string s) 
+{
+  GLenum error;
+  while ((error = glGetError()) != GL_NO_ERROR) {
+    std::cerr << "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * \n";
+    std::cerr << s << ": error - " << (char *) gluErrorString(error)<<"\n";
   }
 }
 // ============================================================================

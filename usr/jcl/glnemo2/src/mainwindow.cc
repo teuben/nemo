@@ -710,9 +710,11 @@ void MainWindow::killPlayingEvent()
 // actionMenuFileOpen()                                                         
 void MainWindow::actionMenuFileOpen()
 {
+  static QString menudir("");
   killPlayingEvent();       // wait the end of loading thread
-  QString fileName = QFileDialog::getOpenFileName(this);
+  QString fileName = QFileDialog::getOpenFileName(this,tr("Select snapshot"),menudir);
   if (!fileName.isEmpty()) {
+    menudir = fileName;
     snapshot = fileName.toStdString();
     SnapshotInterface * new_data = plugins->getObject(snapshot);
     if (new_data)  { // valid object
