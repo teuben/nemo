@@ -35,6 +35,7 @@ public:
     int frame_height;
     int frame_width;
     QString base_frame_name;
+    QString base_frame_ext;
     int auto_screen_size_index;
     // from OpenGL TAB
     bool show_part;

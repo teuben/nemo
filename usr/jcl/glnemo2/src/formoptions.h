@@ -79,6 +79,8 @@ class FormOptions: public QDialog {
     void on_auto_save_clicked() { go->auto_play_screenshot = form.auto_save->isChecked();}
     void on_auto_save_gl_clicked() { go->auto_gl_screenshot = form.auto_save_gl->isChecked();}
     void on_screen_size_activated(int index);
+    void on_frame_png_clicked() { go->base_frame_ext = "png";}
+    void on_frame_jpg_clicked() { go->base_frame_ext = "jpg";}
     
     
   signals:

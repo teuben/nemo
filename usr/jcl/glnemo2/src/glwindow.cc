@@ -375,7 +375,7 @@ void GLWindow::paintGL()
   if (fbo && GLWindow::GLSL_support) {
     fbo = false;
     //imgFBO = grabFrameBuffer();
-     imgFBO = QImage( texWidth, texHeight,QImage::Format_ARGB32);
+     imgFBO = QImage( texWidth, texHeight,QImage::Format_RGB32);
      glReadPixels( 0, 0, texWidth, texHeight, GL_RGBA, GL_UNSIGNED_BYTE, imgFBO.bits() );
     // Make the window the target
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);

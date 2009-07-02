@@ -34,6 +34,7 @@ int Colormap::load(const int _cmap)
 {
   cmap = _cmap;
   load();
+  return cmap;
 }
 // ============================================================================
 // load                                                                        
@@ -76,17 +77,20 @@ int Colormap::load()
   go->G = &G;
   go->B = &B;
   emit newColorMap();
+  return cpt;
 }
 // ============================================================================
 // next                                                                        
 int Colormap::next()
 {
   load(cmap+1);
+  return (cmap+1);
 }
 // ============================================================================
 // prev                                                                        
 int Colormap::prev()
 {
   load(cmap-1);
+  return (cmap-1);
 }
 }

@@ -909,7 +909,8 @@ void MainWindow::startAutoScreenshot()
   // string index
   stm1 << std::setfill('0')<< std::setw(5)<<store_options->frame_index;
   // frame name (jpg)
-  std::string framename = store_options->base_frame_name.toStdString()+"."+stm1.str()+".jpg";
+  std::string framename = store_options->base_frame_name.toStdString()+"."+stm1.str()+"."+
+                          store_options->base_frame_ext.toStdString();
   
   //gl_window->rotateAroundAxis(1);
   std::string mess="Offscreen rendering : "+framename;
@@ -949,7 +950,7 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
     
     gl_window->updateGL();                                // draw in FBO
     
-    QImage img=((gl_window->grabFrameBufferObject()).mirrored()).rgbSwapped(); // convert FBO to img
+    QImage img=(((gl_window->grabFrameBufferObject()).mirrored()).rgbSwapped()); // convert FBO to img
 
     gl_window->resize(sizegl.width(),sizegl.height());    // revert to the previous Ogl windows's size
 
@@ -969,7 +970,11 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
       //resize(width(),height());
         }
      } else {          // screenshot from the command line
-          img.save(QString(name.c_str()),"jpg",95);
+          int quality=-1;
+          if (store_options->base_frame_ext=="jpg") {
+            quality=95;
+          }
+          img.save(QString(name.c_str()),(store_options->base_frame_ext.toStdString()).c_str(),quality);
      }
     }
 }
@@ -1088,6 +1093,7 @@ void MainWindow::uploadNewFrame()
   if (loading_thread->isValidLoading()) {
     if (  current_data->getInterfaceType() == "List of Ftm"      ||
 	  current_data->getInterfaceType() == "List of Gadget 2" ||
+          current_data->getInterfaceType() == "List of PhiGRAPE" ||
           current_data->getInterfaceType() == "List of Nemo") { 
       //mutex_data.lock();
       //pov2=pov;

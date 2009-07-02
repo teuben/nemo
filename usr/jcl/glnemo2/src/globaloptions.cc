@@ -29,6 +29,7 @@ GlobalOptions::GlobalOptions()
   play_fps             = 25;
   frame_index          = 0;
   base_frame_name      = "frame";
+  base_frame_ext       = "png";
   auto_screen_size_index = 1;
   frame_width          = 1280;
   frame_height         = 720;
@@ -146,6 +147,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   play_fps             = m.play_fps;
   frame_index          = m.frame_index;
   base_frame_name      = m.base_frame_name;
+  base_frame_ext       = m.base_frame_ext;
   auto_screen_size_index = m.auto_screen_size_index;
   frame_width          = m.frame_width;
   frame_height         = m.frame_height;

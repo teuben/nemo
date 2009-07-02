@@ -1120,7 +1120,7 @@ void GLObjectParticles::sortByDensity()
   }
   nind_sorted = 0;
     // creates vertex indices array for gLDrawElements
-  if (! indexes_sorted || nind_sorted < po->npart) {
+  if (! indexes_sorted || ((int) nind_sorted) < po->npart) {
     if (indexes_sorted) delete [] indexes_sorted;
     indexes_sorted = new GLuint[po->npart];
     nind_sorted = 0;
