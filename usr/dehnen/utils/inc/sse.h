@@ -31,14 +31,18 @@
 #ifndef WDutils_included_sse_h
 #define WDutils_included_sse_h
 
-#ifndef WDutils_included_xmmintrin_h
-#  define WDutils_included_xmmintrin_h
-#  include <xmmintrin.h>
-#endif
+#ifdef __SSE__
+#  ifndef WDutils_included_xmmintrin_h
+#    define WDutils_included_xmmintrin_h
+#    include <xmmintrin.h>
+#  endif
 
-#ifndef WDutils_included_emmintrin_h
-#  define WDutils_included_emmintrin_h
-#  include <emmintrin.h>
+# ifdef __SSE2__
+#  ifndef WDutils_included_emmintrin_h
+#    define WDutils_included_emmintrin_h
+#    include <emmintrin.h>
+#  endif
+# endif
 #endif
 
 #ifndef WDutils_included_exception_h

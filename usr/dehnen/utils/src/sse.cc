@@ -60,6 +60,9 @@ using namespace WDutils;
   }
 #else
 # warning SSE instructions not supported: will implement simple code
+# ifdef __GNUC__
+# warning perhaps using the -msse compiler option helps
+# endif
 # define __FloatSSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
   for(size_t i=0; i!=n; ++i) { __WORKS; }
 #endif
@@ -91,6 +94,9 @@ using namespace WDutils;
   }
 #else
 # warning SSE2 instructions not supported: will implement simple code
+# ifdef __GNUC__
+# warning perhaps using the -msse2 compiler option helps
+# endif
 # define __DoubleSSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
   for(size_t i=0; i!=n; ++i) { __WORKS; }
 #endif

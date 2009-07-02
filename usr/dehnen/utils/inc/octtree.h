@@ -158,6 +158,10 @@ namespace WDutils {
       Cell*EndCells() const { return Cf? const_cast<Cell*>(this)+(Cf+Nc) : 0; }
       /// pointer to parent cell (null pointer if this is the root cell)
       Cell*Parent() const { return Pa? const_cast<Cell*>(this)-Pa : 0; }
+      /// does this cell contain a certain leaf?
+      bool Contains(const Leaf*L) const {
+	return L >= BeginLeafs() && L < EndLeafDesc(); 
+      }
     };
     /// used to initialize and/or re-initialize Dots in tree building
     class Initialiser {
