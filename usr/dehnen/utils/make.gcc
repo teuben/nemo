@@ -9,31 +9,14 @@ FC		:= $(CPATH)gfortran
 
 PLATFORM 	:= $(shell uname -m)
 
-# CPU dependent optimisation flags
-# EDIT to match your hardware
-
-# i386
-ifeq ($(PLATFORM),i386)
-CPUFLAGS	:= -march=i386 -mpreferred-stack-boundary=4
-endif
-
-# i686
-ifeq ($(PLATFORM),i686)
-CPUFLAGS	:= -march=i686 -mpreferred-stack-boundary=4
-endif
-
-# x86-64
-ifeq ($(PLATFORM),x86_64)
-CPUFLAGS	:= -march=k8 -mpreferred-stack-boundary=4
-endif
-
 # general optimisation and warning flags
-OPTFLAGS	:= -ggdb3 -Wall -Wextra -Wshadow -O2 -fPIC -ffast-math \
+OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
+		-ggdb3 -Wall -Wextra -Wshadow -O2 -fPIC -ffast-math \
 		-funroll-loops -fforce-addr -rdynamic
 
 # these are actually to be set
-CFLAGS		:= $(CPUFLAGS) $(OPTFLAGS)
-CXXFLAGS	:= $(CPUFLAGS) $(OPTFLAGS)
+CFLAGS		:= $(OPTFLAGS)
+CXXFLAGS	:= $(OPTFLAGS)
 LDFLAGS		:= -shared
 
 # end
