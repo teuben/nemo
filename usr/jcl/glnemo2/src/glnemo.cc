@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.preview.2009-Jun-24"
+#define RELEASE_VERSION "1.preview.2009-Jul-02"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -54,6 +54,7 @@ using namespace std;
     "perspective=t\n   false means orthographic                         ",
     "bestzoom=t\n      automatic zoom                                   ",
     "play=f\n          automatically load and display next snapshot     ",
+    "glsl=t\n          try to initialyze GLSL engine                    ",
     "ortho_range=6.0\n xy range if orthographic projection              ",
     "zoom=-14\n        zoom value                                       ",
     "xrot=0.0\n        rotation angle on X axis                         ",

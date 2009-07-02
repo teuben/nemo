@@ -45,6 +45,7 @@ GlobalOptions::GlobalOptions()
   orthographic=false;
   use_shaders = true;
   render_mode = 2;
+  init_glsl   = true;
   // from Scene Orientation TAB
   zoom=-1.0;
   zoomo=1.0;
@@ -163,6 +164,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   orthographic=m.orthographic;
   use_shaders =m.use_shaders;
   render_mode =m.render_mode;
+  init_glsl   =m.init_glsl;
   // from Scene Orientation TAB
   
   // from Grids TAB

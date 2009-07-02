@@ -49,6 +49,7 @@ public:
     bool orthographic;
     bool use_shaders;
     int render_mode;
+    bool init_glsl;
     // from camera tab
     bool cam_mode;
     bool cam_display_ctrl;

@@ -647,6 +647,7 @@ void MainWindow::parseNemoParameters()
   store_options->perspective=getbparam((char *) "perspective");
   store_options->orthographic = !store_options->perspective;
   play                   = getbparam((char *) "play");
+  store_options->init_glsl=getbparam((char *) "glsl");
   bestzoom           = getbparam((char *) "bestzoom");
   store_options->xrot     = getdparam((char *) "xrot");
   store_options->yrot     = getdparam((char *) "yrot");
@@ -955,10 +956,12 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
     gl_window->resize(sizegl.width(),sizegl.height());    // revert to the previous Ogl windows's size
 
      // !!! activate the following line if you want to see OSDr
-#if 1
+#if 0
     
     gl_window->setGeometry(geom.x(),geom.y(),             
                            sizegl.width(),sizegl.height());
+#else
+    
 #endif
     //gl_window->setFixedSize(sizegl);                   // revert to the previous Ogl Widget's size
     //

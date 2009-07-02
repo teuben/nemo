@@ -392,67 +392,73 @@ void GLWindow::paintGL()
 // ============================================================================
 void GLWindow::initShader()
 {
-  GLSL_support = true;
-  std::cerr << "begining init shader\n";
-  glewInit();
-  if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader && GL_VERSION_2_0)
-    qDebug() << "Ready for GLSL\n";
-  else {
-    qDebug() << "BE CAREFULL : No GLSL support\n";
-    GLSL_support = false;
-    //exit(1);
+  if (store_options->init_glsl) {
+    GLSL_support = true;
+    std::cerr << "begining init shader\n";
+    glewInit();
+    if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader && GL_VERSION_2_0)
+      qDebug() << "Ready for GLSL\n";
+    else {
+      qDebug() << "BE CAREFULL : No GLSL support\n";
+      GLSL_support = false;
+      //exit(1);
+    }
+    if (GLSL_support ) {
+      m_vertexShader = glCreateShader(GL_VERTEX_SHADER);
+      if (!m_vertexShader) {
+        qDebug() << "Unable to create VERTEX SHADER.....\n";
+        exit(1);
+      }
+      m_pixelShader = glCreateShader(GL_FRAGMENT_SHADER);
+      if (!m_pixelShader) {
+        qDebug() << "Unable to create PIXEL SHADER.....\n";
+        exit(1);
+      }
+      const char* v = vertexShader;
+      const char* p = pixelShader;
+      glShaderSource(m_vertexShader, 1, &v, NULL);
+      glShaderSource(m_pixelShader, 1, &p, NULL);
+      
+      GLint compile_status;
+      glCompileShader(m_vertexShader);
+      checkGLErrors("compile Vertex Shader");
+      glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &compile_status);
+      if(compile_status != GL_TRUE) {
+        qDebug() << "Unable to COMPILE VERTEX SHADER.....\n";
+        exit(1);
+      }
+      
+      glCompileShader(m_pixelShader);
+      checkGLErrors("compile Pixel Shader");
+      glGetShaderiv(m_pixelShader, GL_COMPILE_STATUS, &compile_status);
+      if(compile_status != GL_TRUE) {
+        qDebug() << "Unable to COMPILE PIXEL SHADER.....\n";
+        exit(1);
+      }
+      
+      m_program = glCreateProgram();
+      
+      glAttachShader(m_program, m_vertexShader);
+      glAttachShader(m_program, m_pixelShader);
+      
+      // bind attribute
+      //glBindAttribLocation(m_program, 100, "a_sprite_size");
+      glLinkProgram(m_program);
+      checkGLErrors("link Shader program");
+      int  link_status;
+      glGetProgramiv(m_program, GL_LINK_STATUS, &link_status);
+      if(link_status != GL_TRUE) {
+        qDebug() << "Unable to LINK Shader program.....\n";
+        exit(1);
+      }
+      glDeleteShader(m_vertexShader);
+      glDeleteShader(m_pixelShader);
+      std::cerr << "ending init shader\n";
+    }
   }
-  if (GLSL_support ) {
-    m_vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    if (!m_vertexShader) {
-      qDebug() << "Unable to create VERTEX SHADER.....\n";
-      exit(1);
-    }
-    m_pixelShader = glCreateShader(GL_FRAGMENT_SHADER);
-    if (!m_pixelShader) {
-      qDebug() << "Unable to create PIXEL SHADER.....\n";
-      exit(1);
-    }
-    const char* v = vertexShader;
-    const char* p = pixelShader;
-    glShaderSource(m_vertexShader, 1, &v, NULL);
-    glShaderSource(m_pixelShader, 1, &p, NULL);
-    
-    GLint compile_status;
-    glCompileShader(m_vertexShader);
-    checkGLErrors("compile Vertex Shader");
-    glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &compile_status);
-    if(compile_status != GL_TRUE) {
-      qDebug() << "Unable to COMPILE VERTEX SHADER.....\n";
-      exit(1);
-    }
-    
-    glCompileShader(m_pixelShader);
-    checkGLErrors("compile Pixel Shader");
-    glGetShaderiv(m_pixelShader, GL_COMPILE_STATUS, &compile_status);
-    if(compile_status != GL_TRUE) {
-      qDebug() << "Unable to COMPILE PIXEL SHADER.....\n";
-      exit(1);
-    }
-  
-    m_program = glCreateProgram();
-  
-    glAttachShader(m_program, m_vertexShader);
-    glAttachShader(m_program, m_pixelShader);
-
-     // bind attribute
-    //glBindAttribLocation(m_program, 100, "a_sprite_size");
-    glLinkProgram(m_program);
-    checkGLErrors("link Shader program");
-    int  link_status;
-    glGetProgramiv(m_program, GL_LINK_STATUS, &link_status);
-    if(link_status != GL_TRUE) {
-      qDebug() << "Unable to LINK Shader program.....\n";
-      exit(1);
-    }
-    glDeleteShader(m_vertexShader);
-    glDeleteShader(m_pixelShader);
-    std::cerr << "ending init shader\n";
+  else { // Initialisation of GLSL not requested
+    std::cerr << "GLSL desactivated from user request, slow rendering ...\n";
+    GLSL_support = false;
   }
 }
 // ============================================================================
