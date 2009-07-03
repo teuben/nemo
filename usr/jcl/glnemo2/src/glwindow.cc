@@ -413,24 +413,24 @@ void GLWindow::initShader()
     }
     if (GLSL_support ) {
       std::cerr << "Creating vertex shader\n";
-      m_vertexShader = glCreateShader(GL_VERTEX_SHADER);
+      m_vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER);
       if (!m_vertexShader) {
         qDebug() << "Unable to create VERTEX SHADER.....\n";
         exit(1);
       }
       std::cerr << "Creating Pixel shader\n";
-      m_pixelShader = glCreateShader(GL_FRAGMENT_SHADER);
+      m_pixelShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
       if (!m_pixelShader) {
         qDebug() << "Unable to create PIXEL SHADER.....\n";
         exit(1);
       }
       const char* v = vertexShader;
       const char* p = pixelShader;
-      glShaderSource(m_vertexShader, 1, &v, NULL);
-      glShaderSource(m_pixelShader, 1, &p, NULL);
+      glShaderSourceARB(m_vertexShader, 1, &v, NULL);
+      glShaderSourceARB(m_pixelShader, 1, &p, NULL);
       std::cerr << "Compiling vertex shader\n";
       GLint compile_status;
-      glCompileShader(m_vertexShader);
+      glCompileShaderARB(m_vertexShader);
       checkGLErrors("compile Vertex Shader");
       glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &compile_status);
       if(compile_status != GL_TRUE) {
@@ -438,7 +438,7 @@ void GLWindow::initShader()
         exit(1);
       }
       std::cerr << "Compiling pixel shader\n";
-      glCompileShader(m_pixelShader);
+      glCompileShaderARB(m_pixelShader);
       checkGLErrors("compile Pixel Shader");
       glGetShaderiv(m_pixelShader, GL_COMPILE_STATUS, &compile_status);
       if(compile_status != GL_TRUE) {
@@ -446,16 +446,16 @@ void GLWindow::initShader()
         exit(1);
       }
       std::cerr << "Creating program\n";
-      m_program = glCreateProgram();
+      m_program = glCreateProgramObjectARB();
       std::cerr << "Attaching vertex shader\n";
-      glAttachShader(m_program, m_vertexShader);
+      glAttachObjectARB(m_program, m_vertexShader);
       std::cerr << "Attaching pixel shader\n";
-      glAttachShader(m_program, m_pixelShader);
+      glAttachObjectARB(m_program, m_pixelShader);
       
       // bind attribute
       //glBindAttribLocation(m_program, 100, "a_sprite_size");
       std::cerr << "Linking  program\n";
-      glLinkProgram(m_program);
+      glLinkProgramARB(m_program);
       checkGLErrors("link Shader program");
       int  link_status;
       glGetProgramiv(m_program, GL_LINK_STATUS, &link_status);

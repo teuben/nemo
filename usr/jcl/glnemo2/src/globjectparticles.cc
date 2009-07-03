@@ -994,7 +994,7 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
   }
 
   glTexEnvi(GL_POINT_SPRITE,GL_COORD_REPLACE,GL_TRUE); 
-  glUseProgram(GLWindow::m_program);
+  glUseProgramObjectARB(GLWindow::m_program);
   if ((err = glGetError())) { fprintf(stderr,"c error %x\n", (unsigned int)err); }
     
   // Send windows'height data to Vertex Shader
