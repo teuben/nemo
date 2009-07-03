@@ -251,9 +251,14 @@ namespace falcON {
     /// \param r_a  Ossipkov-Merritt anisotropy radius
     /// \param mono external monopole potential
     /// \param care care for non-monotonic DF?
+    /// \param r_max maximum radius for tables
+    /// \note When using an external potential the density of which extends
+    ///       well beyond that of \a halo, it is advisable to give \a r_max
+    ///       to be a radius beyond which the \b total potential is well
+    ///       approximated by GM/r.
     HaloSampler(HaloDensity const&halo, double bet, double r_a,
-		const acceleration*mono, bool care) :
-      HaloModel(halo,bet,r_a,mono),
+		const acceleration*mono, bool care, double r_max=0) :
+      HaloModel(halo,bet,r_a,mono,r_max),
       SphericalSampler(Mh_tot(),r_a, bet, care)
     {}
     //--------------------------------------------------------------------------
