@@ -25,13 +25,14 @@
 
 namespace glnemo {
 #define DOF 4000000
+  #if 0
 const char  GLWindow::vertexShader[] = {
   "void main()                                                            \n"
   "{                                                                      \n"   
   "    gl_Position = ftransform();                                        \n"
   "}                                                                      \n"
 };
-#if 0
+#else
   const char  GLWindow::vertexShader[] = {
         "// with ATI hardware, uniform variable MUST be used by output          \n"
         "// variables. That's why win_height is used by gl_FrontColor           \n"
