@@ -53,10 +53,11 @@
 // v 2.4.5  10/09/2008  WD  happy gcc 4.3.1
 // v 2.4.6  13/11/2008  WD  new mass adaption (proprietary only)
 // v 2.4.7  15/12/2008  WD  debugged r_2 -> r_s conversion
-// v 2.4.8  12/03/2009  WD  warning if accpars of accfile given but no accname 
+// v 2.4.8  12/03/2009  WD  warning if accpars of accfile given but no accname
+// v 2.4.9  03/07/2009  WD  keyword r_max 
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.8"
-#define falcON_VERSION_D "12-mar-2009 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.9"
+#define falcON_VERSION_D "03-jun-2009 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -81,6 +82,7 @@ const char*defv[] = {
   "r_t=0\n            truncation radius (0 maps to infinity)             ",
   "b=0\n              anisotropy parameter; -1.5 <= b <= min(1,g/2)      ",
   "r_a=0\n            anisotropy radius (0 maps to infinity)             ",
+  "max_r=\n           radius beyond which total Pot ~= GM/r              ",
   "seed=0\n           seed for the randum number generator               ",
   "q-ran=f\n          use quasi- instead of pseudo-random numbers        ",
   "time=0\n           simulation time of snapshot                        ",
@@ -213,7 +215,7 @@ void falcON::main() falcON_THROWING
 			 getdparam  ("MA_nmax"),
 			 getbparam  ("MA_peri"),
 #endif
-			 care);
+			 care, getdparam_z("max_r"));
   //----------------------------------------------------------------------------
   // 3. sample snapshot and write to output
   //----------------------------------------------------------------------------

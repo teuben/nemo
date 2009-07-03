@@ -107,9 +107,15 @@ namespace falcON {
     Pspline<double,double>   *PS;                  ///< penta spline: Psi(r)    
   public:
     /// constructor
-    /// \param halo density model for halo
-    /// \param mono external monopole potential
-    HaloPotential(HaloDensity const&halo, const acceleration*mono);
+    /// \param halo  density model for halo
+    /// \param mono  external monopole potential
+    /// \param r_max maximum radius for tables
+    /// \note When using an external potential the density of which extends
+    ///       well beyond that of \a halo, it is advisable to give \a r_max
+    ///       to be a radius beyond which the \b total potential is well
+    ///       approximated by GM/r.
+    HaloPotential(HaloDensity const&halo, const acceleration*mono,
+		  double r_max=0.);
     /// destructor
     ~HaloPotential();
     /// potential Psi(r) using polynomial interpolation
@@ -190,9 +196,13 @@ namespace falcON {
     /// \param beta anisotropy parameter beta 
     /// \param r_a anisotropy radius (0 maps to infinity)
     /// \param mono external monopole potential
-    HaloModel(HaloDensity const&halo,
-	      double beta, double r_a,
-	      const acceleration*mono);
+    /// \param r_max maximum radius for tables
+    /// \note When using an external potential the density of which extends
+    ///       well beyond that of \a halo, it is advisable to give \a r_max
+    ///       to be a radius beyond which the \b total potential is well
+    ///       approximated by GM/r.
+    HaloModel(HaloDensity const&halo, double beta, double r_a,
+	      const acceleration*mono, double r_max=0.);
     /// ln g(Q)
     double lnG(double Q) const;
     /// distribution function f(Eps,L^2)
@@ -222,11 +232,16 @@ namespace falcON {
     /// \param MAnm mass adaption: n_max per (E,L) (default: mm)
     /// \param MApr mass adaption: using R_peri (or R_circ) for mass adaption ?
     /// \param care care for non-monotonic DF?
+    /// \param r_max maximum radius for tables
+    /// \note When using an external potential the density of which extends
+    ///       well beyond that of \a halo, it is advisable to give \a r_max
+    ///       to be a radius beyond which the \b total potential is well
+    ///       approximated by GM/r.
     HaloSampler(HaloDensity const&halo, double bet, double r_a,
 		const acceleration*mono,
 		double MArs, double MAmm, double MAet, double MAnm, bool MApr,
-		bool care) :
-      HaloModel(halo,bet,r_a,mono),
+		bool care, double r_max=0) :
+      HaloModel(halo,bet,r_a,mono,r_max),
       SphericalSampler(Mh_tot(),r_a,bet,MArs,MAmm,MAet,MAnm,MApr,care)
     {}
 #endif

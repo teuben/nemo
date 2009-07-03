@@ -321,13 +321,14 @@ namespace {
 } // namespace {
 //
 HaloPotential::HaloPotential(HaloDensity const&model,
-			     const acceleration*mono)
+			     const acceleration*mono,
+			     double r_max)
   : DEN(model), MON(mono),
     Ah(model.inner_gamma()), At(Ah), Ch(model.outer_gamma()), PS(0)
 {
   // 0. compute min/max radius for tables
   const double rmin = Rmin(model);
-  const double rmax = Rmax(model);
+  const double rmax = r_max? max(r_max,Rmax(model)) : Rmax(model);
   DebugInfo(2,"HaloPotential: minimum & maximum tabulated radii = %g, %g\n",
 	    rmin,rmax);
 
@@ -707,8 +708,8 @@ falcON_TRAITS(ReducedDensity,"ReducedDensity");
 //
 HaloModel::HaloModel(HaloDensity const&model,
 		     double beta, double r_a,
-		     const acceleration*mono)
-  : HaloPotential(model,mono), B(beta), RA(r_a)
+		     const acceleration*mono, double r_max)
+  : HaloPotential(model,mono,r_max), B(beta), RA(r_a)
 {
   // 0. perform some sanity checks
   if(Ah < B+B) falcON_THROW("HaloModel: 2*beta > gamma_0: unphysical model\n");
