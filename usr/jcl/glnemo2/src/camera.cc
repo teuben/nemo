@@ -153,7 +153,7 @@ namespace glnemo {
   void Camera::display()
   {
     if (display_path) displayCameraPath();
-    if (display_ctrl) ;
+    if (display_ctrl) {;}
   }
   // ============================================================================
   // setSplineParam                                                              

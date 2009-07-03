@@ -25,7 +25,13 @@
 
 namespace glnemo {
 #define DOF 4000000
-
+const char  GLWindow::vertexShader[] = {
+  "void main()                                                            \n"
+  "{                                                                      \n"   
+  "    gl_Position = ftransform();                                        \n"
+  "}                                                                      \n"
+};
+#if 0
   const char  GLWindow::vertexShader[] = {
         "// with ATI hardware, uniform variable MUST be used by output          \n"
         "// variables. That's why win_height is used by gl_FrontColor           \n"
@@ -43,6 +49,7 @@ namespace glnemo {
         "    gl_FrontColor =  vec4(gl_Color.r+win_height-win_height,gl_Color.g,gl_Color.b,gl_Color.a*alpha); \n"
         "}                                                                      \n"
   };
+#endif
   const char  GLWindow::pixelShader[] = {
         "uniform sampler2D splatTexture;                                        \n"
 

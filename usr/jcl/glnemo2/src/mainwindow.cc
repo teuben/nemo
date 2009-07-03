@@ -570,8 +570,16 @@ void MainWindow::loadNewData(const std::string select,
     form_o_c->update( current_data->part_data, &pov2,store_options);
     updateOsd();
     tbench.restart();
+    
+    if (interact && !reload && store_options->rho_exist) {
+      store_options->render_mode = 2; // density mode
+    }
+    if (interact && !reload && !store_options->rho_exist) {
+      store_options->render_mode = 0; // alpha blending accumulation mode
+    }
+    
     gl_window->update( current_data->part_data, &pov2,store_options);
-    qDebug("Time elapsed to update GL with new date: %d s", tbench.elapsed()/1000);
+    qDebug("Time elapsed to update GL with new data: %d s", tbench.elapsed()/1000);
     if (!reload && bestzoom) gl_window->bestZoomFit();
     statusBar()->showMessage(tr("Snapshot loaded."));
 
@@ -939,7 +947,7 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
 
     gl_window->resize(size.width(),size.height());
     // !!! activate the following line if you want to see OSD
-#if 1
+#if 0
     gl_window->setGeometry(geom.x(),geom.y(),             // give to the widget the new size
                            size.width(),size.height());   // bc width() and height() are used by
                                                           // renderText

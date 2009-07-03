@@ -195,17 +195,20 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
     part_data->computeMinMaxRho();
   }
   end_of_data = true;
+  return 1;
 }
 // ============================================================================
 // close()                                                                     
 int SnapshotPhiGrape::close()
 {
+  int ret=0;
   if (valid) {
     gzclose(file);
     end_of_data=false;
     valid = false;
-    return 1; 
+    ret=1; 
   }
+  return ret;
 }
 // ============================================================================
 // endendOfDataMessage()                                                       

@@ -34,6 +34,8 @@ FormOptions::FormOptions(GlobalOptions * _go, QWidget *parent):QDialog(parent)
   // default screen resolution for offscreen rendering set to 1280x720
   form.screen_size->setCurrentIndex(8);
   form.frame_name_text->setText(QString(go->base_frame_name));
+  // activate the first TAB by default
+  form.options_dialog->setCurrentIndex(0);
 }
 
 // ============================================================================
