@@ -32,6 +32,7 @@ const char  GLWindow::vertexShader[] = {
         "attribute float a_sprite_size;                                         \n"
   "void main()                                                            \n"
   "{                                                                      \n"   
+  "    float pointSize =  win_height*a_sprite_size*gl_Point.size;  \n"
   "    gl_Position = ftransform();                                        \n"
   "}                                                                      \n"
 };
