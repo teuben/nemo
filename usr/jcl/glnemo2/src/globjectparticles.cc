@@ -956,7 +956,7 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
   //float quadratic[] =  { 0.0f, 0.0f, 0.01f };
   //glPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic );
-  glPointSize(po->getGazSize());
+  glPointSize(po->getGazSize()*win_height);
   GLObject::setColor(po->getColor()); // set the color 
   glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),po->getGazAlpha());
   //glNormal3f(2.0,1.,1.);
@@ -996,7 +996,7 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
   glTexEnvi(GL_POINT_SPRITE,GL_COORD_REPLACE,GL_TRUE); 
   glUseProgramObjectARB(GLWindow::m_program);
   if ((err = glGetError())) { fprintf(stderr,"c error %x\n", (unsigned int)err); }
-    
+#if 0    
   // Send windows'height data to Vertex Shader
   int h_loc  = glGetUniformLocation(GLWindow::m_program, "win_height");
   if (h_loc == -1) {
@@ -1004,7 +1004,7 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
     exit(1);
   }
   glUniform1i(h_loc, win_height); // send windows height
-  
+#endif
   // Send alpha channel color to Vertex Shader
   int alpha_loc  = glGetUniformLocation(GLWindow::m_program, "alpha");
   if (alpha_loc == -1) {
@@ -1048,6 +1048,7 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
     std::cerr << "Error occured when getting \"a_sprite_size\" attribute\n";
     exit(1);
   }
+
   if (go->render_mode == 1 || go->render_mode == 2) { // individual size and color
   
     // Send vertex object colors

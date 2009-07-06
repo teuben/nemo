@@ -25,36 +25,26 @@
 
 namespace glnemo {
 #define DOF 4000000
-  #if 0
-const char  GLWindow::vertexShader[] = {
-  "uniform int win_height;                                                \n"
-        "uniform float alpha;                                                   \n"
-        "attribute float a_sprite_size;                                         \n"
-  "void main()                                                            \n"
-  "{                                                                      \n"   
-  "    float pointSize =  win_height*a_sprite_size*gl_Point.size;  \n"
-  "    gl_Position = ftransform();                                        \n"
-  "}                                                                      \n"
-};
-#else
   const char  GLWindow::vertexShader[] = {
         "// with ATI hardware, uniform variable MUST be used by output          \n"
         "// variables. That's why win_height is used by gl_FrontColor           \n"
-        "uniform int win_height;                                                \n"
+        "// uniform int win_height;                                                \n"
         "uniform float alpha;                                                   \n"
         "attribute float a_sprite_size;                                         \n"
         "void main()                                                            \n"
         "{                                                                      \n"
         "    vec4 vert = gl_Vertex;                                             \n"
-        "    float pointSize =  float(win_height)*a_sprite_size*gl_Point.size;  \n"
+        "    //float pointSize =  float(win_height)*a_sprite_size*gl_Point.size;  \n"
+        "    float pointSize =  a_sprite_size*gl_Point.size;  \n"
         "    vec3 pos_eye = vec3 (gl_ModelViewMatrix * vert);                   \n"
         "    gl_PointSize = max(0.00001, pointSize / (1.0 - pos_eye.z));        \n"
         "    gl_TexCoord[0] = gl_MultiTexCoord0;                                \n"
         "    gl_Position = ftransform();                                        \n"
-        "    gl_FrontColor =  vec4(gl_Color.r+float(win_height)-float(win_height),gl_Color.g,gl_Color.b,gl_Color.a*alpha); \n"
+        "    //gl_FrontColor =  vec4(gl_Color.r+float(win_height)-float(win_height),gl_Color.g,gl_Color.b,gl_Color.a*alpha); \n"
+        "    gl_FrontColor =  vec4(gl_Color.r,gl_Color.g,gl_Color.b,gl_Color.a*alpha); \n"
         "}                                                                      \n"
   };
-#endif
+
   const char  GLWindow::pixelShader[] = {
         "uniform sampler2D splatTexture;                                        \n"
 
