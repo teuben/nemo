@@ -27,6 +27,9 @@ namespace glnemo {
 #define DOF 4000000
   #if 1
 const char  GLWindow::vertexShader[] = {
+  "uniform int win_height;                                                \n"
+        "uniform float alpha;                                                   \n"
+        "attribute float a_sprite_size;                                         \n"
   "void main()                                                            \n"
   "{                                                                      \n"   
   "    gl_Position = ftransform();                                        \n"
