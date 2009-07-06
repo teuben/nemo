@@ -164,7 +164,7 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
     
         if (block_name=="VEL") { // Velocities block
           ok=true;
-          if (load_vel) {
+          if (load_vel || version==1) {
             bytes_counter=0;
             len1 = readFRecord();
             pc_new=pc;
@@ -172,8 +172,8 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
             for(int k=0;k<6;k++)
               for(int n=0;n<header.npart[k];n++){
                 int idx=index[pc_new++];
-                if (idx != -1) {
-                  ioData((char *) &vel[3*ic++], sizeof(float), 3,READ);
+                if (idx != -1 && load_vel) {
+                    ioData((char *) &vel[3*ic++], sizeof(float), 3,READ);                  
                 } else {
                   //skipData(sizeof(float)*3);
                   float tmp3[3];
@@ -198,7 +198,8 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
 
         if (block_name=="MASS") { // MASS block
           ok=true;
-          skipBlock();
+          if (ntot_withmasses>0)
+            skipBlock();  
           if (version==1) stop=true; // we stop reading for gadget1
         }
 
