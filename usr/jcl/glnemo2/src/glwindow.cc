@@ -25,7 +25,7 @@
 
 namespace glnemo {
 #define DOF 4000000
-  #if 0
+  #if 1
 const char  GLWindow::vertexShader[] = {
   "void main()                                                            \n"
   "{                                                                      \n"   
