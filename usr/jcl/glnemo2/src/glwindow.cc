@@ -32,13 +32,13 @@ const char  GLWindow::vertexShader[] = {
         "attribute float a_sprite_size;                                         \n"
   "void main()                                                            \n"
   "{                                                                      \n"   
-  "    float pointSize =  win_height*a_sprite_size*gl_Point.size;  \n"
+  "    float pointSize =  float(win_height)*a_sprite_size*gl_Point.size;  \n"
   "    gl_Position = ftransform();                                        \n"
   "}                                                                      \n"
 };
 #else
   const char  GLWindow::vertexShader[] = {
-        "// with ATI hardware, uniform variable MUST be used by output          \n"
+        "// with AT"    float pointSize =  win_height*a_sprite_size*gl_Point.size;  \n"I hardware, uniform variable MUST be used by output          \n"
         "// variables. That's why win_height is used by gl_FrontColor           \n"
         "uniform int win_height;                                                \n"
         "uniform float alpha;                                                   \n"
