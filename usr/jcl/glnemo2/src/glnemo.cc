@@ -71,7 +71,7 @@ using namespace std;
     "psize=1.0\n       Set particles size                               ",
     "port=4444\n       Server's communication port                      ",
     "wsize=931\n       Windows's width size                             ",
-    "hsize=887\n       Windows's height size                            ",
+    "hsize=750\n       Windows's height size                            ",
     "screenshot=\n     Screenshot name                                  ",
     "anim_file=\n      Animation filename                               ",
     "anim_play=t\n     play animation ?                                 ",
