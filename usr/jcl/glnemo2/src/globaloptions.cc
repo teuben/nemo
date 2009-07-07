@@ -35,6 +35,7 @@ GlobalOptions::GlobalOptions()
   frame_height         = 720;
   // from OpenGL TAB
   show_part=true;
+  show_points=false;
   show_vel=false;
   vel_vector_size=MAX_VEL_VECTOR_SIZE/2;
   psize=2.0;
@@ -154,6 +155,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   frame_height         = m.frame_height;
   // from OpenGL TAB
   show_part=m.show_part;
+  show_points=m.show_points;
   show_vel=m.show_vel;
   vel_vector_size=m.vel_vector_size;
   psize=m.psize;

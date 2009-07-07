@@ -65,7 +65,7 @@ using namespace std;
     "ztrans=0.0\n      translation on Z                                 ",
     "grid=t\n          Show grid                                        ",
     "osd=t\n           Show On Screen Display                           ",
-    "part=f\n          show particles as points                         ",
+    "point=f\n         show particles as points                         ",
     "texture=t\n       show particles as textures                       ",
     "texture_s=0.15\n  texture size of gaz particle                     ",
     "texture_ac=125\n  texture alpha color of gaz particle              ",

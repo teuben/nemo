@@ -637,7 +637,7 @@ void MainWindow::listObjects()
 void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
   for (int i=0; i<(int)pov.size();i++) {
     pov[i].setPartSize(store_options->psize);
-    pov[i].setPart(store_options->show_part);
+    pov[i].setPart(store_options->show_points);
     pov[i].setGaz(store_options->show_poly);
   }
 }
@@ -681,7 +681,7 @@ void MainWindow::parseNemoParameters()
   store_options->zoom     = getdparam((char *) "zoom");
   store_options->psize    = getdparam((char *) "psize");
   store_options->port     = getiparam((char *) "port");
-  store_options->show_part= getbparam((char *) "part");
+  store_options->show_points= getbparam((char *) "point");
   store_options->show_poly= getbparam((char *) "texture");
   store_options->texture_size       =getdparam((char *) "texture_s");
   store_options->texture_alpha_color=getiparam((char *) "texture_ac");

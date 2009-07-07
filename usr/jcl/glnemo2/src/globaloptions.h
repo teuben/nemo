@@ -39,6 +39,7 @@ public:
     int auto_screen_size_index;
     // from OpenGL TAB
     bool show_part;
+    bool show_points;
     bool show_vel;
     float psize;
     float vel_vector_size;

@@ -572,7 +572,7 @@ bool GadgetIO::readBlockName()
     ioData((char *) &dummy, sizeof(int),  1, READ); // read
     ioData((char *) name  , sizeof(char), 8, READ); // read
     ioData((char *) &dummy, sizeof(int),  1, READ); // read
-    int i=0; while (isupper(name[i])&& i<4) i++;
+    int i=0; while ((isupper(name[i])||isdigit(name[i]))&& i<4) i++;
     name[i]='\0';
     block_name=name;
     status = in.good();
