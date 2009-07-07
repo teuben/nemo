@@ -936,7 +936,7 @@ p, li { white-space: pre-wrap; }
        <item row="2" column="0">
         <widget class="QGroupBox" name="dens_loc_box">
          <property name="title">
-          <string>Density treshold</string>
+          <string>Density threshold</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0" colspan="2">
@@ -1070,7 +1070,7 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="0">
            <widget class="QRadioButton" name="dens_loc_button">
             <property name="text">
-             <string>treshold</string>
+             <string>threshold</string>
             </property>
             <property name="checked">
              <bool>true</bool>
