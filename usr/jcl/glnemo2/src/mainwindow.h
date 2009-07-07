@@ -107,7 +107,7 @@ class MainWindow : public QMainWindow {
     // -------------------------------
     void interactiveSelect(std::string s="");
     void loadNewData(const std::string, const std::string ,
-                            const bool , const bool, const bool);
+                            const bool , const bool, const bool, const bool first=false);
     void killPlayingEvent();
     // OSD
     void updateOsd();
@@ -175,6 +175,7 @@ class MainWindow : public QMainWindow {
     ParticlesObjectVector pov,pov2;
     ComponentRangeVector * crv;
     void listObjects();
+    void setDefaultParamObject(ParticlesObjectVector&);
     // NEMO parameters
     std::string snapshot,select,server, s_times,version;
     bool keep_all;

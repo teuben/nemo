@@ -135,10 +135,11 @@ void MainWindow::start(std::string shot)
         if (shot == "") interactiveSelect();
       }
       else 
-  	loadNewData(select,s_times,keep_all,store_options->vel_req, false);
+  	loadNewData(select,s_times,keep_all,store_options->vel_req, false,true);
       if (!store_options->rho_exist) {
         store_options->render_mode = 0;
       }
+      
       gl_window->updateGL();
     }
   }
@@ -532,7 +533,8 @@ void MainWindow::selectPart(const std::string _select)
 // -----------------------------------------------------------------------------
 void MainWindow::loadNewData(const std::string select,
                              const std::string s_time,
-                             const bool keep_all, const bool load_vel, const bool interact)
+                             const bool keep_all, const bool load_vel, const bool interact,
+                             const bool first)
 {
   ParticlesObjectVector povold;
   
@@ -566,6 +568,9 @@ void MainWindow::loadNewData(const std::string select,
     ParticlesObject::clearOrbitsVectorPOV(pov2); // clear orbits vectors if present
     if (reload) { // copy back povold properties to pov2
       ParticlesObject::backupVVProperties(povold,pov2,pov.size());
+    }
+    if (first) {
+      setDefaultParamObject(pov2); // set some default parameter if first loading
     }
     form_o_c->update( current_data->part_data, &pov2,store_options);
     updateOsd();
@@ -627,6 +632,16 @@ void MainWindow::listObjects()
   }
 }
 // -----------------------------------------------------------------------------
+// Set default parameters to all the object                                     
+// -----------------------------------------------------------------------------
+void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
+  for (int i=0; i<(int)pov.size();i++) {
+    pov[i].setPartSize(store_options->psize);
+    pov[i].setPart(store_options->show_part);
+    pov[i].setGaz(store_options->show_poly);
+  }
+}
+// -----------------------------------------------------------------------------
 // parse Nemo parameters                                                        
 // -----------------------------------------------------------------------------
 void MainWindow::parseNemoParameters()
@@ -664,9 +679,10 @@ void MainWindow::parseNemoParameters()
   store_options->ytrans   = getdparam((char *) "ytrans");
   store_options->ztrans   = getdparam((char *) "ztrans");
   store_options->zoom     = getdparam((char *) "zoom");
-  store_options->psize    = getiparam((char *) "psize");
+  store_options->psize    = getdparam((char *) "psize");
   store_options->port     = getiparam((char *) "port");
-  store_options->show_poly= getbparam((char *) "gas");
+  store_options->show_part= getbparam((char *) "part");
+  store_options->show_poly= getbparam((char *) "texture");
   store_options->texture_size       =getdparam((char *) "texture_s");
   store_options->texture_alpha_color=getiparam((char *) "texture_ac");
   store_options->duplicate_mem = getbparam((char *) "smooth_gui");
