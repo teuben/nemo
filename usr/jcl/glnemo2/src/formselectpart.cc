@@ -29,11 +29,13 @@ FormSelectPart::~FormSelectPart()
 }
 // ============================================================================
 // update                                                                      
-void FormSelectPart::update(SnapshotInterface * _si,ComponentRangeVector * _crv, const std::string previous_sel)
+void FormSelectPart::update(SnapshotInterface * _si,
+                            ComponentRangeVector * _crv, 
+                            const std::string previous_sel, const bool first)
 {
   current_data = _si;
   crv = _crv;
-
+  first_snapshot = first;
   // update nbody,time and data type
   std::ostringstream stm1,stm2;
   stm1 << current_data->nbody_first; // nbody

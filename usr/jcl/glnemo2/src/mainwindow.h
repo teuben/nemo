@@ -86,7 +86,7 @@ class MainWindow : public QMainWindow {
     void pressedKeyMouse(const bool, const bool);
     void uploadNewFrame();
     void takeScreenshot(const int, const int, std::string name="");
-    void selectPart(const std::string);
+    void selectPart(const std::string, const bool);
     void startBench(const bool);
     void updateBenchFrame();
     void startAutoScreenshot();
@@ -105,7 +105,7 @@ class MainWindow : public QMainWindow {
     // -------------------------------
     // method                         
     // -------------------------------
-    void interactiveSelect(std::string s="");
+    void interactiveSelect(std::string s="", const bool first_snaphot=false);
     void loadNewData(const std::string, const std::string ,
                             const bool , const bool, const bool, const bool first=false);
     void killPlayingEvent();
@@ -193,6 +193,7 @@ class MainWindow : public QMainWindow {
     int total_frame;
     // divers stuff
     void initVariables();
+    
     // timers
     void startTimers();
     // mouse and keys and zoom

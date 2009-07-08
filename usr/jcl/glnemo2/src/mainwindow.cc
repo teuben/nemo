@@ -132,7 +132,7 @@ void MainWindow::start(std::string shot)
     if (current_data) {
       if (! exist ) {
         current_data->initLoading(store_options->vel_req, s_times); 
-        if (shot == "") interactiveSelect();
+        if (shot == "") interactiveSelect("",true);
       }
       else 
   	loadNewData(select,s_times,keep_all,store_options->vel_req, false,true);
@@ -233,8 +233,8 @@ void MainWindow::createForms()
   // sig/slot
   connect(form_sshot,SIGNAL(screenshot(const int, const int)),
 	  this,SLOT(takeScreenshot(const int, const int)));
-  connect(form_spart,SIGNAL(selectPart(const std::string)),
-	  this,SLOT(selectPart(const std::string)));
+  connect(form_spart,SIGNAL(selectPart(const std::string,const bool)),
+	  this,SLOT(selectPart(const std::string, const bool)));
   connect(form_options,SIGNAL(start_bench(const bool)),this,SLOT(startBench(const bool)));
   // some init
   form_about->setVersion(QString(version.c_str()));
@@ -489,21 +489,14 @@ void MainWindow::createActions()
 // interactiveSelect                                                            
 // Lauch select particles dialog box                                            
 // -----------------------------------------------------------------------------
-void MainWindow::interactiveSelect(std::string _select)
+void MainWindow::interactiveSelect(std::string _select, const bool first_snapshot)
 {
   if (current_data) {
-    //crv = current_data->getSnapshotRange();
-#if 1
     if (!reload) {
-        
       crv = current_data->getSnapshotRange();
     }
-
-    form_spart->update(current_data,&current_data->crv_first,_select);
+    form_spart->update(current_data,&current_data->crv_first,_select, first_snapshot);
     form_spart->show();
-#else
-  selectPart("all");
-#endif
   }
 }
 // -----------------------------------------------------------------------------
@@ -511,7 +504,7 @@ void MainWindow::interactiveSelect(std::string _select)
 // Slots connected to "select particles dialog box" to allow to load particles  
 // according to the user's selection.                                           
 // -----------------------------------------------------------------------------
-void MainWindow::selectPart(const std::string _select)
+void MainWindow::selectPart(const std::string _select, const bool first_snapshot)
 {
   select = _select;
   if (reload && current_data) {// reload action requested   
@@ -526,7 +519,7 @@ void MainWindow::selectPart(const std::string _select)
   }
   std::cerr << "MainWindow::selectPart s_times = " << s_times << "\n";
   loadNewData(select,s_times,  // load data
-	      keep_all,store_options->vel_req,true);
+	      keep_all,store_options->vel_req,true,first_snapshot);
 }
 // -----------------------------------------------------------------------------
 // loadNewData                                                                  

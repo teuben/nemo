@@ -26,30 +26,31 @@ class FormSelectPart: public QDialog {
     FormSelectPart(QWidget *parent = 0);
 
     ~FormSelectPart();
-  void update(SnapshotInterface *,ComponentRangeVector *, const std::string);
+  void update(SnapshotInterface *,ComponentRangeVector *, const std::string, const bool first_snapshot=false);
   signals:
-      void selectPart(const std::string);
+      void selectPart(const std::string, const bool);
   private slots:
-    void on_all_check_clicked()   { updateSelect(); };
-    void on_disk_check_clicked()  { updateSelect(); };
-    void on_gas_check_clicked()   { updateSelect(); };
-    void on_halo_check_clicked()  { updateSelect(); };
-    void on_bulge_check_clicked() { updateSelect(); };
-    void on_stars_check_clicked() { updateSelect(); };
-    void on_bndry_check_clicked() { updateSelect(); };
+    void on_all_check_clicked()   { updateSelect(); }
+    void on_disk_check_clicked()  { updateSelect(); }
+    void on_gas_check_clicked()   { updateSelect(); }
+    void on_halo_check_clicked()  { updateSelect(); }
+    void on_bulge_check_clicked() { updateSelect(); }
+    void on_stars_check_clicked() { updateSelect(); }
+    void on_bndry_check_clicked() { updateSelect(); }
     void on_manual_range_textChanged(QString s) { updateSelect(); s="";}
     void on_button_box_accepted() {
       accept();
-      emit selectPart(form.final_select->text().toStdString());
+      emit selectPart(form.final_select->text().toStdString(), first_snapshot);
     };
-    void on_button_clear_clicked() { reset(false); form.manual_range->clear();};
-    void on_button_clear_man_clicked() { form.manual_range->clear();};
+    void on_button_clear_clicked() { reset(false); form.manual_range->clear();}
+    void on_button_clear_man_clicked() { form.manual_range->clear();}
   private:
     Ui::FormSelectPart form;
     ComponentRangeVector * crv;
     SnapshotInterface * current_data;
     void reset(bool range=true);
     void updateSelect();
+    bool first_snapshot;
 };
 
 }
