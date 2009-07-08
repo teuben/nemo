@@ -397,8 +397,8 @@ void GLWindow::initShader()
   if (store_options->init_glsl) {
     GLSL_support = true;
     std::cerr << "begining init shader\n";
-    glewInit();
-    if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader && GL_VERSION_2_0)
+    int err=glewInit();
+    if (err==GLEW_OK && GLEW_ARB_multitexture && GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader && GL_VERSION_2_0)
       qDebug() << "Ready for GLSL\n";
     else {
       qDebug() << "BE CAREFULL : No GLSL support\n";
