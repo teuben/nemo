@@ -1,0 +1,20 @@
+#! /bin/csh -f
+#
+#  
+
+set dir=$NEMO/usr/jcl/glnemo2
+
+if (-e $dir) then
+  cd $dir
+  qmake-qt4 -recursive
+  if ($status) then
+    echo "It appears as if the Qt library , or at least the development"
+    echo "package, has not been installed on your system."
+    exit 1
+  endif
+  make
+  mv bin/*/glnemo2.debug $NEMOBIN/glnemo2
+else
+  echo mknemo.d: $dir does not exist
+endif
+
