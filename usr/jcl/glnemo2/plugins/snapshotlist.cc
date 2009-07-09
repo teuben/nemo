@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           Pôle de l'Etoile, site de Château-Gombert                         
-//           38, rue Frédéric Joliot-Curie                                     
+//           PÃ´le de l'Etoile, site de ChÃ¢teau-Gombert                         
+//           38, rue FrÃ©dÃ©ric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -130,8 +130,19 @@ bool SnapshotList::openFile()
     std::string header(magic);
     if (line == header) status=true;
     else {
-      status=false;
-      fi.close();
+      fi.seekg(0, std::ios::beg); // go back to the beginning
+      if (getLine(true)) { // read the first file
+        SnapshotInterface * test_data = plugins->getObject(snapshot);
+        if (test_data) { // it's a valid snaphot
+          delete test_data;
+          status = true;
+          fi.seekg(0, std::ios::beg); // go back to the beginning
+        }
+      } 
+      else {        
+        status=false;
+        fi.close();
+      }
     }
   }
   return status;
@@ -147,10 +158,10 @@ int SnapshotList::nextFrame(const int * index_tab, const int nsel)
   return status;
 }
 // ============================================================================
-bool SnapshotList::getLine()
+bool SnapshotList::getLine(const bool force)
 {
   bool status=false,stop=false;
-  if (valid) {
+  if (valid || force) {
     while (!stop && ! fi.eof()) {           // while ! eof
       std::string line;
       getline(fi,line);

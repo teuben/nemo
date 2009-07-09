@@ -45,7 +45,7 @@ private:
     static const char * magic;
     bool valid;
     bool openFile();
-    bool getLine();
+    bool getLine(const bool force=false);
     std::string snapshot;
     SnapshotInterface * current_data;
     PluginsManage * plugins;

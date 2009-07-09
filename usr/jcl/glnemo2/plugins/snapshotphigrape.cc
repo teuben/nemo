@@ -19,7 +19,8 @@
 namespace glnemo {
 #define KB        512
 #define N_MAX     128*KB
-
+// ============================================================================
+// constructor                                                                 
 SnapshotPhiGrape::SnapshotPhiGrape():SnapshotInterface()
 { 
   valid=false;
@@ -96,7 +97,7 @@ bool SnapshotPhiGrape::detectHeader()
   ss.str(buff);
   ss >> n2;
 
-  if (n2 == n1+1) {
+  if (n2 == n1+1) { // BINGO !! , it's a valid phiGRAPE file
     ok = true;
     gzseek(file, fpos, SEEK_SET); // go back to the first record
   }
