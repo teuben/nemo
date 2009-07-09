@@ -1,54 +1,61 @@
+                             
+                             --  Glnemo2 --
+                                 
+                   Copyright © Jean-Charles LAMBERT 2007-2009
+                              Version preview
+                              
+                       Jean-Charles.Lambert@oamp.fr
+                         Dynamique des Galaxies
+               Observatoire Astronomique de Marseille-Provence
+                  Laboratoire d'Astrophysique de Marseille
+                           (CNRS U.M.R 6110)
+                 Pôle de l'Étoile Site de Château-Gombert
+                       38, rue Frédéric Joliot-Curie
+                          13388 Marseille cedex 13
+                                  FRANCE
 
-Installing:
-==========
+                      
+                      
+ Glnemo2 is  an interactive visualization 3D program  , using OpenGL and trolltech 
+QT 4.X API. It displays in 3D, particles positions of the different components of an 
+nbody snapshot. 
 
-qmake -recursive
+ You can zoom in/out, rotate, scale, translate, select different particles 
+and plot them in different blending colors, color particles according to their density,
+play with the density threshold, trace orbits, play different time steps, take automatic
+screenshots to make movies, select particles using the mouse, fly over your simulation 
+using camera path. All this features are accessible from a very intuitive graphic user interface.
 
-(make sure you have the one for qt4, not qt3)
+Currently, glnemo2 reads NEMO files (http://carma.astro.umd.edu/nemo),
+Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/),
+FTM files (Clayton Heller's sph/nbody code), 
+phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE) and a list of files
+stored in a file. 
 
-make
-cp bin/unix/glnemo2.debug $NEMOBIN/glnemo2
+ Noticed that a "lite" version of the NEMO's engine I/O  is included inside the glnemo2 
+package so you don't longer need to download the whole NEMO package to compile it.
 
+ Glnemo2 uses a plugin mechanism to load data, so it's easy to add a new file reader.
+It uses the latest OpenGL technology like, shaders (glsl), vertex buffer object, 
+frame buffer object, and takes in account the power of your graphic card to accelerate the
+rendering. Millions of particles can be rendered, in real time, with a fast GPU. With this
+technology, glnemo2 can be 1000% times faster than glnemo1 !
 
-
-Some possible issues:
-=====================
-
-* compiling on mac:
-
-on mac you might need:
-
-qmake -recursive -spec macx-g++
-
-
-but right now there are some other run-time issues (jun 2009)
-
-
-* fontconfig (FcFreeTypeQueryFac) linking error
-
-If you get a linking error such as this one:
-
-..../libQtGui.so: undefined reference to `FcFreeTypeQueryFace'
-
-(see e.g.
-http://theitdepartment.wordpress.com/2009/03/15/centos-qt-fcfreetypequeryface/
+ Glnemo2 runs fine on Linux, Windows(using minGW compiler), and MaxOSX, thanks to the QT4 API.
 
 
-1. Compile fontconfig from source
+0) how to compile and install glnemo2, see "INSTALL".
+ 
+1) how to use it, see "MANUAL".
+ 
+2) test purpose files: see "snapshot/README"
 
-wget http://fontconfig.org/release/fontconfig-2.7.0.tar.gz
-cd fontconfig-2.7.0
-./configure --prefix=$NEMO/opt/fontconfig-2.7.0
-make
-make install
 
-2. Add the fontconfig library location to the src/src.pro file
-
-LIBS += -L/home/nemo/opt/fontconfig-2.7.0/lib
-or better perhaps
-LIBS += -L../../../../opt/fontconfig-2.7.0/lib
-
-(for some reason $$NEMO didn't work, so spell it out as /home/nemo or whichever)
-
-3. Recompile and thatâ€™s it! 8-)
-
+ License :
+ -------
+Glnemo2 is governed by the CeCILL2  license under French law and
+abiding by the rules of distribution of free software.  You can  use, 
+modify and/ or redistribute the software under the terms of the CeCILL
+license as circulated by CEA, CNRS and INRIA at the following URL
+"http://www.cecill.info/index.en.html" and/or LICENSE file.                       
+              
