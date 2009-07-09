@@ -1,18 +1,30 @@
 #! /bin/csh -f
 #
-#  
+# a quick hack   - June 2009
+#
 
 set dir=$NEMO/usr/jcl/glnemo2
 
+# for mac
+set args="-spec macx-g++"
+
+# for linux
+set args=""
+
+# for some implementations it is called 'qmake'
+set qmake=qmake-qt4
+
+
 if (-e $dir) then
   cd $dir
-  qmake-qt4 -recursive
+  $qmake -recursive $args
   if ($status) then
     echo "It appears as if the Qt library , or at least the development"
     echo "package, has not been installed on your system."
     exit 1
   endif
   make
+  # hopefully only 1 subdir in bin
   mv bin/*/glnemo2.debug $NEMOBIN/glnemo2
 else
   echo mknemo.d: $dir does not exist
