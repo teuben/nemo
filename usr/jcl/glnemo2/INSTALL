@@ -7,7 +7,7 @@
 ------------------  
  Glnemo2 compiles and runs fine on Linux, Windows and MacOSX platform.
   In order to compile it, you need Trolltech QT development  library (qt > 4.3).
-See http://www.qtsoftware.com/downloads to download QT.  You also need a descent 
+See http://www.qtsoftware.com/downloads to download QT.  You also need a decent 
 video card with a fast opengl driver. Glnemo2 has been successfully tested on Nvidia and
 ATI GPU cards. If the installed OpenGL driver is not fully compatible with the requirement, it
 can also run in software mode.
@@ -16,7 +16,8 @@ can also run in software mode.
 1) Compilation :
 ------------------
   Check that you have 'qmake' utility in your path ('qmake' is normally included 
-with qt package). Change to 'glnemo2' directory and enter the command :
+with qt package, but on for example fedora9 it is called qmake-qt4 since both qt3 and
+qt4 are still installed there). Change to 'glnemo2' directory and enter the command :
 
     a) Linux and Windows only
        - - - - - - - - - - - -
@@ -40,3 +41,4 @@ you architecture, and could be "unix", "win32" or "macx".
 2) Installation :
 -------------------
    You'll find glnemo2.debug binary file in the "bin" directory.
+   You can copy this somewhere else in your $PATH, e.g. in $NEMOBIN/glnemo2
