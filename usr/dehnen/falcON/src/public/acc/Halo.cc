@@ -66,7 +66,7 @@ namespace {
 	  "             2    2\n"
 	  "   x = sqrt(r +r_c )/r_s.\n\n";
       }
-      if(file)
+      if(file && file[0])
 	falcON_WarningN("external potential \"Halo\": "
 			"file \"%s\" ignored\n",file);
       if(nemo_debug(2)) {

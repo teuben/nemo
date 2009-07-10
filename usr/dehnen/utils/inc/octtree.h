@@ -95,6 +95,8 @@ namespace WDutils {
     /// represents a particle in the tree
     /// \note not memory critical during tree build.
     /// \note Only @a Dot data @a X and @a I will be set at tree build.
+    /// \note On 64bit machines and in 3D, the sizeof(Leaf) is 32 and 48 for
+    ///       float and double.
     struct Leaf : public Dot 
     {
       // additional auxiliary data
@@ -111,7 +113,7 @@ namespace WDutils {
     /// \note not memory critical during tree build.
     /// \note auxiliary data will not be set at tree build.
     struct Cell {
-      // data set at tree build
+      // data set at tree build (20+sizeof(*void)+Dim*sizeof(Float) bytes)
       uint8       Le; ///< level in tree
       uint8       Oc; ///< octant in parent Cell
       uint16      Rk; ///< rank of mother domain (currently not used)
@@ -123,11 +125,11 @@ namespace WDutils {
       uint32      Pa; ///< pointer difference to parent cell
       point       X;  ///< center position of cube
       // additional auxiliary data
-      point       Z;  ///< auxiliary position, e.g. centre of mass
-      Float       M;  ///< auxiliary scalar, e.g. mass
-      Float       R;  ///< auxiliary scalar, e.g. radius
-      int         F;  ///< auxiliary integer, e.g. bitfield
       void       *P;  ///< auxiliary pointer to more data
+      point       Z;  ///< auxiliary position, e.g. centre of mass
+      Float       R;  ///< auxiliary scalar, e.g. radius
+      Float       M;  ///< auxiliary scalar, e.g. mass
+      int         F;  ///< auxiliary integer, e.g. bitfield
       union {
 	int      aI;  ///< auxiliary int
 	unsigned aU;  ///< auxiliary unsigned
@@ -324,12 +326,12 @@ namespace WDutils {
     /// dump leaf data
     /// \param[in] out   ostream to write to
     /// \param[in] dump  pointer to DumpTreeData or derived
-    void DumpLeafs(std::ostream&out, const DumpTreeData*D=0) const {
-      if(D==0) D=&DUMP;
-      D->Head(BeginLeafs(),out);
+    void DumpLeafs(std::ostream&out, const DumpTreeData*dump=0) const {
+      if(dump==0) dump=&DUMP;
+      dump->Head(BeginLeafs(),out);
       out <<'\n';
       for(const Leaf*L=BeginLeafs(); L!=EndLeafs(); ++L) {
-	D->Data(L,this,out);
+	dump->Data(L,this,out);
 	out <<'\n';
       }
       out.flush();
@@ -337,13 +339,13 @@ namespace WDutils {
     /// dump cell data
     /// \param[in] out   ostream to write to
     /// \param[in] dump  pointer to DumpTreeData or derived
-    void DumpCells(std::ostream&out, const DumpTreeData*D=0) const
+    void DumpCells(std::ostream&out, const DumpTreeData*dump=0) const
     {
-      if(D==0) D=&DUMP;
-      D->Head(BeginCells(),out);
+      if(dump==0) dump=&DUMP;
+      dump->Head(BeginCells(),out);
       out <<'\n';
       for(const Cell*C=BeginCells(); C!=EndCells(); ++C) {
-	D->Data(C,this,out);
+	dump->Data(C,this,out);
 	out <<'\n';
       }
       out.flush();

@@ -115,7 +115,7 @@ namespace falcON {
     ///       to be a radius beyond which the \b total potential is well
     ///       approximated by GM/r.
     HaloPotential(HaloDensity const&halo, const acceleration*mono,
-		  double r_max=0.);
+		  double r_max=0.) falcON_THROWING;
     /// destructor
     ~HaloPotential();
     /// potential Psi(r) using polynomial interpolation
@@ -156,7 +156,7 @@ namespace falcON {
     /// estimate for R_apo(Eps, L^2)
     double Ra(double E, double Lq) const;
     /// radius given cumulative halo mass
-    double RMh(double M) const;
+    double RMh(double M) const falcON_THROWING;
     //--------------------------------------------------------------------------
     /// \name constant access to some data
     //{@
@@ -190,6 +190,7 @@ namespace falcON {
     const double       B;                          ///< beta parameter of DF    
     const double       RA;                         ///< anisotropy radius of DF 
     Array<double,1>    lg;                         ///< table: log(g(Q))        
+    bool               g_nonmon;
   public:
     /// constructor
     /// \param halo density model for halo
@@ -202,13 +203,15 @@ namespace falcON {
     ///       to be a radius beyond which the \b total potential is well
     ///       approximated by GM/r.
     HaloModel(HaloDensity const&halo, double beta, double r_a,
-	      const acceleration*mono, double r_max=0.);
+	      const acceleration*mono, double r_max=0.) falcON_THROWING;
     /// ln g(Q)
-    double lnG(double Q) const;
+    double lnG(double Q) const falcON_THROWING;
     /// distribution function f(Eps,L^2)
     double fEL(double E, double Lq) const;
     /// ln g(Q=Psi_tot(r_i))
     double const&lng(int i) const { return lg[i]; }
+    /// is g(Q) non-monotinic?
+    bool const& non_monotonic() const { return g_nonmon; }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -240,9 +243,10 @@ namespace falcON {
     HaloSampler(HaloDensity const&halo, double bet, double r_a,
 		const acceleration*mono,
 		double MArs, double MAmm, double MAet, double MAnm, bool MApr,
-		bool care, double r_max=0) :
+		double r_max=0) :
       HaloModel(halo,bet,r_a,mono,r_max),
-      SphericalSampler(Mh_tot(),r_a,bet,MArs,MAmm,MAet,MAnm,MApr,care)
+      SphericalSampler(Mh_tot(),r_a,bet,MArs,MAmm,MAet,MAnm,MApr,
+		       non_monotonic())
     {}
 #endif
     /// constructor
@@ -257,9 +261,9 @@ namespace falcON {
     ///       to be a radius beyond which the \b total potential is well
     ///       approximated by GM/r.
     HaloSampler(HaloDensity const&halo, double bet, double r_a,
-		const acceleration*mono, bool care, double r_max=0) :
+		const acceleration*mono, double r_max=0) :
       HaloModel(halo,bet,r_a,mono,r_max),
-      SphericalSampler(Mh_tot(),r_a, bet, care)
+      SphericalSampler(Mh_tot(),r_a,bet,non_monotonic())
     {}
     //--------------------------------------------------------------------------
     HaloModel const&Model() const { return *this; }
@@ -401,7 +405,17 @@ namespace falcON {
       if(mt    ==0.) falcON_THROW("ModifiedDoublePowerLawHalo: M==0\n");
       if(mt     <0.) falcON_THROW("ModifiedDoublePowerLawHalo: M=%g<0\n",mt);
       DebugInfo(2,"ModifiedDoublePowerLawHalo: rh0=%f\n",rh0);
-     }
+    }
+    /// re-set the model's total mass
+    void reset_mass(double Mt) {
+      const double fac = Mt/mt;
+      if(fac != 1.0) {
+	const_cast<double&>(mt)   = Mt;
+	const_cast<double&>(rh0) *= fac;
+	const_cast<double&>(fc1) *= fac;
+	const_cast<double&>(fc2) *= fac;
+      }
+    }
     /// total mass
     double const&total_mass() const {
       return mt;

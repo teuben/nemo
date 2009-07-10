@@ -165,15 +165,17 @@ namespace MPI {
   /// - optionally some environment variables are spawned.\n
   /// \param[in,out] argc  number of command-line arguments
   /// \param[in,out] argv  values of command-line arguments
-  /// \note these arguments are input on the master node and output on all
-  ///       others: this call spawns the command-line arguments via MPI_Init()
   /// \param[in]     env   null-terminated list of environment variables
   /// \param[in]     file  file to look for environment variables
-  /// \note argument env must be the same on all nodes. We will try to ensure
-  ///       that all nodes have the environment variables in the list env. If
-  ///       they don't initially, we try to find them at root and, failing
-  ///       that, read them from the file provided, if any. It is assumed that
-  ///       if the first environment variable is present, so are all the others.
+  /// \note arguments \a argc and \a argv are input on the master node and
+  ///       output on all others: this call spawns the command-line arguments
+  ///       via MPI_Init()
+  /// \note argument \a env must be the same on all nodes. We will try to
+  ///       ensure that all nodes have the environment variables in the list
+  ///       env. If they don't initially, we try to find them at root and,
+  ///       failing that, read them from the \a file provided, if any. It is
+  ///       assumed that if the first environment variable is present, so are
+  ///       all the others.
   void Init(int&argc, const char**&argv,
 	    const char**env=0, const char*file=0) WDutils_THROWING;
   /// Finalise MPI and destruct World

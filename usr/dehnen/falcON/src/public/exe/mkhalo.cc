@@ -44,7 +44,7 @@
 // v 2.1    13/09/2007  WD  added parameter eps; made public
 // v 2.2    19/09/2007  WD  ensured total mass
 // v 2.3    01/11/2007  WD  WD_units
-// v 2.3.1  02/11/2007  WD  deBUGged (r_2 to r_s conversion)
+// v 2.3.1  02/11/2007  WD  debugged r_2 -> r_s conversion
 // v 2.4    23/11/2007  WD  steeper truncation for r_t<0
 // v 2.4.1  23/01/2008  WD  DF into phden, not aux data field
 // v 2.4.2  08/02/2008  WD  removed minor bug with RNG seed
@@ -53,11 +53,12 @@
 // v 2.4.5  10/09/2008  WD  happy gcc 4.3.1
 // v 2.4.6  13/11/2008  WD  new mass adaption (proprietary only)
 // v 2.4.7  15/12/2008  WD  debugged r_2 -> r_s conversion
-// v 2.4.8  12/03/2009  WD  warning if accpars of accfile given but no accname
-// v 2.4.9  03/07/2009  WD  keyword r_max 
+// v 2.4.8  12/03/2009  WD  warning if accpars or accfile given but no accname
+// v 2.4.9  03/07/2009  WD  keyword r_max
+// v 2.5    08/07/2009  WD  automatically careful if DF non-monotonic
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.4.9"
-#define falcON_VERSION_D "03-jun-2009 Walter Dehnen                          "
+#define falcON_VERSION   "2.5"
+#define falcON_VERSION_D "08-jun-2009 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -104,7 +105,6 @@ const char*defv[] = {
   "accfile=\n         file required by external acceleration field       ",
   "tabfile=\n         write table with r, M(r), rho, Psi, g(Q) to file   ",
   "prec=8\n           # significant digits in table                      ",
-  "careful=f\n        possibly non-monotonic DF?                         ",
   "WD_units=f\n       input  units: kpc, Msun\n"
   "                   output units: kpc, 222288*Msun, Gyr (=> G=1)\n"
   "                   NOTE: external potential MUST also use these units ",
@@ -164,7 +164,6 @@ void falcON::main() falcON_THROWING
   // 1. set some parameters
   //----------------------------------------------------------------------------
   const bool WD   (getbparam("WD_units"));
-  const bool care (getbparam("careful"));
   const Random Ran(getiparam("seed"),6);
   const fieldset data((
 #ifdef falcON_PROPER
@@ -215,7 +214,7 @@ void falcON::main() falcON_THROWING
 			 getdparam  ("MA_nmax"),
 			 getbparam  ("MA_peri"),
 #endif
-			 care, getdparam_z("max_r"));
+			 getdparam_z("max_r"));
   //----------------------------------------------------------------------------
   // 3. sample snapshot and write to output
   //----------------------------------------------------------------------------

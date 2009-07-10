@@ -125,8 +125,8 @@ HaloModifier::HaloModifier(double c, double t) falcON_THROWING
 : rc(abs(c)), rcq(c*c),
   rt(abs(t)), irt(rt? 1/rt : 0.), sechtr(t>=0)
 {
-  if(std::isinf(t)) falcON_THROW("HaloModifier: truncation radius == inf\n");
-  if(std::isnan(t)) falcON_THROW("HaloModifier: truncation radius == nan\n");
+  if(std::isinf(t)) falcON_THROW("HaloModifier: truncation radius == inf");
+  if(std::isnan(t)) falcON_THROW("HaloModifier: truncation radius == nan");
   if(c<0.) falcON_Warning("HaloModifier: core radius = %g<0; will use %g\n",
 			  c,rc);
 }
@@ -191,11 +191,11 @@ DoublePowerLawHalo::DoublePowerLawHalo(double inner, double outer, double trans)
   : go(outer), gi(inner), et(trans), gg(go-gi), al(gg/et)
 {
   if(gi < 0.)
-    falcON_THROW("DoublePowerHalo: inner power-law slope < 0\n");
+    falcON_THROW("DoublePowerHalo: inner power-law slope < 0");
   if(gi > go)
-    falcON_THROW("DoublePowerHalo: inner power-law slope > outer\n");
+    falcON_THROW("DoublePowerHalo: inner power-law slope > outer");
   if(et <= 0.)
-    falcON_THROW("DoublePowerHalo: transition steepness <= 0\n");
+    falcON_THROW("DoublePowerHalo: transition steepness <= 0");
 }
 //
 double DoublePowerLawHalo::operator()(double x) const {
@@ -243,7 +243,7 @@ double DoublePowerLawHalo::Mtot(const HaloModifier&hm) const
   if(hm.cored() || hm.truncated()) {
     if(go < 3+et && !hm.truncated())
       falcON_THROW("DoublePowerLawHalo::Mtot(): cannot compute total mass"
-		   "for outer<3+eta and no truncation\n");
+		   "for outer<3+eta and no truncation");
     __HM = &hm;
     __iE = 1./et;
     __Ai = __iE*(3-gi)-1;
@@ -255,7 +255,7 @@ double DoublePowerLawHalo::Mtot(const HaloModifier&hm) const
     return FPi*qbulir(&__dM,__z0,1.,1.e-9)/et;
   } else {
     if(gi >= 3. || go <= 3.)
-      falcON_THROW("DoublePowerLawHalo::Mtot(): total mass diverges\n");
+      falcON_THROW("DoublePowerLawHalo::Mtot(): total mass diverges");
     return FPi*Beta((3-gi)/et,(go-3)/et)/et;
   }
 }
@@ -322,7 +322,7 @@ namespace {
 //
 HaloPotential::HaloPotential(HaloDensity const&model,
 			     const acceleration*mono,
-			     double r_max)
+			     double r_max) falcON_THROWING
   : DEN(model), MON(mono),
     Ah(model.inner_gamma()), At(Ah), Ch(model.outer_gamma()), PS(0)
 {
@@ -374,7 +374,7 @@ HaloPotential::HaloPotential(HaloDensity const&model,
       ps[i] =-pot_e[i];                         // get Psi_e(r)
       mt[i] =-square(r[i])*acc_e[i][0];         // get M_e(<r)
       if(i && ps[i]>ps[i-1])
-	falcON_Error("HaloPotential: external Ps(%g)=%g > Ps(%g)=%g\n",
+	falcON_THROW("HaloPotential: external Ps(%g)=%g > Ps(%g)=%g",
 	      r[i],ps[i],r[i-1],ps[i-1]);
     }
     //    find density generating external monopole
@@ -553,10 +553,10 @@ double HaloPotential::Ra(double E, double Lq) const {
   return Rap(E,Lq,1.);
 }
 // radius given halo mass
-double HaloPotential::RMh(double M) const {
+double HaloPotential::RMh(double M) const falcON_THROWING {
   if(M<= 0.)   return 0.;
   if(M<= mh[ 0]) return r[0]*pow(M/mh[0],1/(3-Ah));
-  if(M>  mh[nm]) falcON_Error("HaloPotential::rMh(): M>M_halo(oo)\n");
+  if(M>  mh[nm]) falcON_THROW("HaloPotential::rMh(): M>M_halo(oo)");
   return exp(Polev(M,mh.array(),lr.array(),nm));
 }
 //
@@ -708,13 +708,14 @@ falcON_TRAITS(ReducedDensity,"ReducedDensity");
 //
 HaloModel::HaloModel(HaloDensity const&model,
 		     double beta, double r_a,
-		     const acceleration*mono, double r_max)
-  : HaloPotential(model,mono,r_max), B(beta), RA(r_a)
+		     const acceleration*mono, double r_max) falcON_THROWING
+  : HaloPotential(model,mono,r_max), B(beta), RA(r_a),
+    g_nonmon(false)
 {
   // 0. perform some sanity checks
-  if(Ah < B+B) falcON_THROW("HaloModel: 2*beta > gamma_0: unphysical model\n");
-  if(B >  1.0) falcON_THROW("HaloModel: beta > 1: unphysical model\n");
-  if(B < -0.5) falcON_THROW("HaloModel: beta < -1/2 not supported\n");
+  if(Ah < B+B) falcON_THROW("HaloModel: 2*beta > gamma_0: unphysical model");
+  if(B >  1.0) falcON_THROW("HaloModel: beta > 1: unphysical model");
+  if(B < -0.5) falcON_THROW("HaloModel: beta < -1/2 not supported");
   // 1 compute distribution function                                           
   // 1.1 tabulate integrand on grid considering possible cases for beta
   Array<double,1> in(n);
@@ -743,16 +744,28 @@ HaloModel::HaloModel(HaloDensity const&model,
     if(integrand_negative)
       falcON_Warning("HaloModel: integrand for DF is negative;\n");
   } else
-    falcON_Error("HaloModel: beta < -0.5 not supported\n");
+    falcON_THROW("HaloModel: beta < -0.5 not supported");
   // 1.2 compute g(Q) of f=L^-2B * g(Q)                                         
   lg.reset(n);
   const double
     Logalfa = (1.5-B) * LogofTwo + LogBeta(0.5,1-B) - LogofPi +
               log( (B >= 0.5 ? 1 : ( 0.5-B)) *
 	           (B >=-0.5 ? 1 : (-0.5-B)) );
+  bool   g_negative = false;
+  double negative_g = 0.;
+  int    negative_i = 0;
   if(B == 0.5  ||  B ==-0.5 ||  B ==-1.5)     // trivial cases: no integration  
-    for(int i=0; i!=n; ++i)
+    for(int i=0; i!=n; ++i) {
+      if(in[i] < 0) {
+	g_negative = true;
+	if(in[i] < negative_g) { 
+	  negative_g = in[i];
+	  negative_i = i;
+	}
+      }
       lg[i] = log(in[i]) - Logalfa;
+      if(i && lg[i]>lg[i-1]) g_nonmon=true;
+    }
   else {
     const int mm = int(1.5-B);
     const double
@@ -766,23 +779,35 @@ HaloModel::HaloModel(HaloDensity const&model,
     for(int i=0; i!=n; ++i) {
       Q = ps[i];
       double err, g = qbulir(intgQ,0.,1.,1.e-8,&err,0,50);
-      if(g<0.) falcON_Error("HaloModel: g(Q=%g)=%g < 0, err=%g\n",Q,g,err);
-      if(err>1.e-3) 
+      if(g<0.) {
+	g_negative = true;
+	g *= pow(Q,p1);
+	if(g < negative_g) { 
+	  negative_g = g;
+	  negative_i = i;
+	}
+      }
+      else if(err>1.e-3) 
 	falcON_Warning("HaloModel: inaccurate integration for g(Q) at Q=%g\n",
 		       Q);
       lg[i] = lfc + p1*log(Q) + log(nu*g);
-      if(i && lg[i]>lg[i-1])
-	falcON_Warning("HaloModel: non-monotinic DF at E=%g\n",ps[i]);
+      if(i && lg[i]>lg[i-1]) g_nonmon=true;
     }
+    if(g_negative) negative_g *= exp(lfc);
     delete SPLINE;
   }
+  if(g_negative)
+    falcON_THROW("HaloModel: g(Q)<0 g_min=%g at Q=%g = Ps(%g)",
+		 negative_g,ps[negative_i],r[negative_i]);
+  if(g_nonmon)
+    falcON_Warning("HaloModel: g(Q) non-monotinic\n");
   falcON_DEL_O(RED); RED=0;
 }
 // g(Q)
-double HaloModel::lnG(double Q) const {
+double HaloModel::lnG(double Q) const falcON_THROWING {
   if(Q < ps[n1]) {
     // 1 at small Q (large radii)
-    if(Q < 0.) falcON_Error("HaloModel::lnG(): Q=%g < 0\n",Q);
+    if(Q < 0.) falcON_THROW("HaloModel::lnG(): Q=%g < 0",Q);
     if(RA) // 1.1 finite anisotropy radius
       return lg[n1] + (3.5-Ch-B) * (lnRPsi(Q)-lr[n1]);
     else   // 1.2 infinite anisotropy radius (recognised as RA=0)

@@ -98,16 +98,16 @@ inline double SphericalSampler::F0(double Psi) const
   if(careful) {
     // be careful in finding a value f0 so that f(Eps) < f0 for Eps in [0,Psi]
     // but not that f0 is MUCH larger than the maximum of f in that range
-    const int    n = 5;
-    const double s[n] = {0.9,0.8,0.7,0.6,0.5};
-    // 1st find maximum of f at 0.5, 0.6, 0.7, 0.8, 0.9, and 1.0 times Psi
+    const int    n = 11;
+    const double s[n] = {0.975,0.95,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1};
+    // 1st find maximum of f several points
     double f0=DF(Psi);
     for(int i=0; i!=n; ++i) {
       double fi = DF(s[i]*Psi);
       if(fi > f0) f0 = fi;
     }
-    // 2nd allow for an extra 50% higher maximum (extra safe)
-    return 1.5*f0;
+    // 2nd allow for an extra 200% higher maximum (extra safe)
+    return f0+f0+f0;
   } else
     return DF(Psi);
 }
@@ -168,7 +168,7 @@ void SphericalSampler::sample(body   const&B0,
 		      (iraq==0? "f(E)" : "f(Q)")), Q,r,we,w);
       if(f>f0)
 	falcON_THROW("SphericalSampler::sample(): DF non-monotonic"
-		     ": f(Psi=%g)=%g < f(Eps=%g)=%g [r=%g]\n", Q,f,Psi,f0,r);
+		     ": f(Psi=%g)=%g > f(Eps=%g)=%g [r=%g]\n", Q,f,Psi,f0,r);
     } while(f0 * R() > f);
     double vr,vt;
     if(beta) {
