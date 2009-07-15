@@ -50,7 +50,8 @@ WAMET = WArped Modified Envelope-Tracing method
 \fBin=\fP
 Input image file - must be an PV \fIimage(5NEMO)\fP with position
 along the 1st axis, and velocity along the 2nd. Units are not
-important.
+important. Use \fBccdsub reorder=xzy\fP for an X-Y-VZ cube to 
+be properly reordered. No default.
 .TP
 \fBeta=\fP
 [0..1] weight factor for I_max adding to I_lc. [Default: 0.2]
@@ -127,7 +128,7 @@ data, but cumbersome for real data.
 .PP
 The MET mode is still not very robust, clipping helps.
 .SH SEE ALSO
-rotcur(1NEMO), runvelfitss07(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO), ccdmom(1NEMO)
+rotcur(1NEMO), runvelfitss07(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO), ccdmom(1NEMO), ccdsub(1NEMO)
 .PP
 .nf
 Sancisi & Allen 1979
