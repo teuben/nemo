@@ -190,8 +190,9 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
           part_data->rneib[cpt] = hsml;
         }
         ss.clear(); // clear error state flag like eof()
+        cpt++;
       }
-      cpt++;
+      
     }
     part_data->computeMinMaxRho();
   }
