@@ -97,7 +97,7 @@ bool SnapshotPhiGrape::detectHeader()
   ss.str(buff);
   ss >> n2;
 
-  if (n2 == n1+1) { // BINGO !! , it's a valid phiGRAPE file
+  if (n2 == n1+1 && full_nbody>0 && n1 >=0 && n2 >0) { // BINGO !! , it's a valid phiGRAPE file
     ok = true;
     gzseek(file, fpos, SEEK_SET); // go back to the first record
   }
