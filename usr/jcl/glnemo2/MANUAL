@@ -77,6 +77,11 @@ mouse (LMB or RMB)
 
 - to toggle fullscreen : press f ( or click 'squared + 4 red arrows' icon).
 
+- to toggle auto-rotation around X axis : C+X
+
+- to toggle auto-rotation around Y axis : C+Y
+
+- to toggle auto-rotation around Z axis : C+Z
 
 - toggle options : press o ( or click 'tools' icon)
 
