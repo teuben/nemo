@@ -130,7 +130,7 @@ bool SnapshotList::openFile()
     std::string header(magic);
     if (line == header) status=true;
     else {
-#if 0
+#if 1
       fi.seekg(0, std::ios::beg); // go back to the beginning
       if (getLine(true)) { // read the first file
         SnapshotInterface * test_data = plugins->getObject(snapshot);
