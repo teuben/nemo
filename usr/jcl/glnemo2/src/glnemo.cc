@@ -1,10 +1,10 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2008                                  
+// Copyright Jean-Charles LAMBERT - 2007-2009                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           P�le de l'Etoile, site de Ch�teau-Gombert                         
-//           38, rue Fr�d�ric Joliot-Curie                                     
+//           Pôle de l'Etoile, site de Château-Gombert                         
+//           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.preview.2009-Jul-02"
+#define RELEASE_VERSION "1.preview.2009-Jul-15"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -83,12 +83,11 @@ using namespace std;
     NULL
   };
   const char * usage="Interactive 3D OpenGL NBody simulation Snapshots rendering program";
-  Q_IMPORT_PLUGIN(listplugin);
   Q_IMPORT_PLUGIN(nemoplugin);
   Q_IMPORT_PLUGIN(ftmplugin);
   Q_IMPORT_PLUGIN(gadgetplugin);
   Q_IMPORT_PLUGIN(phigrapeplugin); 
-
+  Q_IMPORT_PLUGIN(listplugin);
 
 // ============================================================================
 //  The main program is here                                                   
