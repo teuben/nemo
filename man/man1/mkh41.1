@@ -1,0 +1,71 @@
+.TH MKH41 1NEMO "15 July 2009"
+.SH NAME
+mkh41 \- Create a Holmberk 1941 disk
+.SH SYNOPSIS
+\fBmkh41\fP [parameter=value]
+.SH DESCRIPTION
+\fBmkh41\fP creates a disk of particles similar to the one 
+used in Holmberg's 1941
+paper (1972ApJ...178..623T). Currently each ring is placed in a separate snapshot. Use
+\fIsnapmerge(1NEMO)\fP if they must be in a single snapshot.
+.PP
+The disk is rotating counter clock wise. Use \fIsnapscale(1NEMO)\fP to flip
+the sign of velocities.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+output file name, each ring in a separate \fIsnapshot(5NEMO)\fP. Use
+\fIsnapmerge(1NEMO)\fP
+.TP
+\fBnbody=\fP
+number of particles in each ring. 
+.TP
+\fBradius=\fP
+radii of rings. 
+.TP
+\fBmass=\fP
+Mass of a particle in each ring.
+.TP
+\fPphi=\fP
+The angle of the first particle in each ring.
+.TP
+\fBeps=\fP
+Standard softening length applied between central mass and
+test particles to compute the forces that set the particles.
+.TP
+\fBheadline=\fP
+verbiage for output []    
+.SH EXAMPLES
+The defaults create 
+(and about 160 in the outer ring).
+.nf
+
+   % mkh41 
+
+.fi
+Here is a test to see if the force computations are ok, and rings stay at the same radius.
+A large value of  eps= is used to make sure the first few rings are not pure 1/r^2:
+.nf
+
+  % mktt72 - 10 radius=0.1:1:0.1 central=t eps=0.2 |\\
+	 snapmerge - - | hackcode1 - snap.out tstop=5 freq=100 freqout=10 eps=0.2
+  % snapxyz snap.out - | xyzview -
+
+.fi
+.SH CAVEAT
+It is hard to create the exact same initial conditions H41 paper.
+.SH SEE ALSO
+.nf
+mkconfig(1NEMO), mktt72(1NEMO), mkdisk(1NEMO), snapscale(1NEMO)
+.PP
+Holmberg, E. (1941) - \fI On the clustering tendencies among the nebulae\fP. ApJ. 94, 385.
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+15-Jul-09	V1.0 Created at PiTP (IAS @ Princeton)	PJT + AT
+.fi
