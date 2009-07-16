@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2008                                  
+// Copyright Jean-Charles LAMBERT - 2007-2009                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -29,7 +29,7 @@ Orbits::Orbits(const ParticlesData * p_data, const int index):GLObject()
 }
 // ============================================================================
 // Copy Constructor                                                            
-Orbits::Orbits(const Orbits & m)
+Orbits::Orbits(const Orbits & m):GLObject()
 {
   time  = m.time;
 

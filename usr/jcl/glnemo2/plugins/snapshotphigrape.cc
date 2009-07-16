@@ -5,7 +5,7 @@
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
-//   <        13388 Marseille cedex 13 France                                   
+//           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
@@ -27,6 +27,7 @@ SnapshotPhiGrape::SnapshotPhiGrape():SnapshotInterface()
   part_data = NULL;
   part_data = new ParticlesData();
   interface_type    ="PhiGRAPE";
+  full_nbody = 0;
 }
 
 // ============================================================================
@@ -61,27 +62,35 @@ bool SnapshotPhiGrape::isValidData()
   valid=false;
   file = gzopen(filename.c_str(),"r");
   if (file) {
-    valid = detectHeader();
+    try {
+      valid = detectHeader();
+    }
+    catch (int e) {
+      std::cerr << "SnapshotPhiGrape::detectHeader failed...\n";
+    }
   }
  return valid; 
 }
 // ============================================================================
 // detectHeader()                                                              
-// returne true if it's a valid phiBar snapshot                                
+// return  true if it's a valid phiBar snapshot                                
 bool SnapshotPhiGrape::detectHeader()
 {
   bool ok=false;
   char buff[KB];
   std::stringstream ss;
-  gzgets(file, buff, KB);          //  frame number
+  if (gzgets(file, buff, KB)==Z_NULL)          //  frame number
+    throw 10;
   ss.str(buff);
   ss >> frame_number;
   
-  gzgets(file, buff, KB);          //  particle number
+  if (gzgets(file, buff, KB)==Z_NULL)          //  particle number
+    throw 10;
   ss.str(buff);
   ss >> full_nbody;
   
-  gzgets(file, buff, KB);          //  snapshot time
+  if (gzgets(file, buff, KB)==Z_NULL)          //  snapshot time
+    throw 10;
   ss.str(buff);
   ss >> *part_data->timu;
   
@@ -89,11 +98,13 @@ bool SnapshotPhiGrape::detectHeader()
   z_off_t fpos;
   fpos = gztell(file); // save the current position
   
-  gzgets(file, buff, KB);          // particle record #0
+  if (gzgets(file, buff, KB)==Z_NULL)          // particle record #0
+    throw 10;
   ss.str(buff);
   ss >> n1;
   
-  gzgets(file, buff, KB);          // particle record #1
+  if (gzgets(file, buff, KB)==Z_NULL)          // particle record #1
+    throw 10;
   ss.str(buff);
   ss >> n2;
 

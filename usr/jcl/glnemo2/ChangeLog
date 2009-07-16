@@ -1,13 +1,25 @@
-current version
+current version (1.preview.2009-Jul-16)
 ---------------
-- huge speed up on the rendering engine (500% !), thanks to :
+- huge speed up on the rendering engine (up to 1000% !), thanks to :
    - vertex buffer object
-   - vertex and pixel shader
+   - vertex and pixel shader (via glsl)
    - GL_POINT_SPRITE_ARB and GL_VERTEX_PROGRAM_POINT_SIZE_NV
+
+- density rendering engine, to display and color particles according to their
+  density and the distance of their Kth neighbours. It works with gadget2
+  snapshots with gas components, and with NEMO snapshots with density field.
 
 - offscreen rendering, using frame buffer object, to take screenshot from the command line and from the GUI
 
-- many bugs fixed
+- new input file format phiGRAPE
+
+- possibility to record and display orbits
+
+- list of files does not need header anymore
+
+- camera path using b-splines, to fly over the simulation
+
+- **TONS** of bugs fixed
 
 1.preview.080327
 ----------------

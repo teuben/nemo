@@ -1,10 +1,10 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2008                                  
+// Copyright Jean-Charles LAMBERT - 2007-2009                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           P�le de l'Etoile, site de Ch�teau-Gombert                         
-//           38, rue Fr�d�ric Joliot-Curie                                     
+//           Pôle de l'Etoile, site de Château-Gombert                         
+//           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
