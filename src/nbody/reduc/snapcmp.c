@@ -31,6 +31,7 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "obs=r\n				  observable used in comparison",
     "diffpart=true\n			  difference particles first",
     "relative=false\n			  scale difference by ref value",
+    "log=f\n                              use logarithm ",
 #if HISTOGRAM
     "nbins=8\n				  number of bins in histogram",
     "xrange=0.0:1.0\n			  range of values to histogram",
@@ -53,7 +54,7 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "formal=false\n			  if true, make publication plot",
     "headline=\n                          header",
 #endif
-    "VERSION=1.5c\n			  21-sep-05 PJT",
+    "VERSION=1.6\n			  16-jul-09 PJT",
     NULL,
 };
 
@@ -75,6 +76,8 @@ string headline;
 #endif
 
 local real small_dt = 1.0e-14;
+
+local bool Qlog;
 
 
 
@@ -103,6 +106,7 @@ void nemo_main()
     obsfunc = btrtrans(getparam("obs"));
     diffpart = getbparam("diffpart");
     relative = getbparam("relative");
+    Qlog = getbparam("log");
 #if HISTOGRAM || SCATTERPLOT
     headline = getparam("headline");
 #endif
@@ -175,6 +179,11 @@ local real *snapcmp(Body *btab1, Body *btab2, int nbody, real tsnap)
     return result;
 }
 
+real show(real x) {
+  if (!Qlog) return x;
+  if (x==0.0) return -99.99;
+  return log10(x);
+}
 #if STATISTICS
 
 local void printquart(real result[], int nbody, real tsnap)
@@ -193,13 +202,13 @@ local void printquart(real result[], int nbody, real tsnap)
     accum_moment(&m,result[i],1.0);
   printf("%g   %g %g %g %g %g  %g %g\n",
 	 tsnap,
-	 result[0],
-	 result[nbody/4],
-	 result[nbody/2-1],
-	 result[3*nbody/4-1],
-	 result[nbody-1],
-	 mean_moment(&m),
-	 sigma_moment(&m));
+	 show(result[0]),
+	 show(result[nbody/4]),
+	 show(result[nbody/2-1]),
+	 show(result[3*nbody/4-1]),
+	 show(result[nbody-1]),
+	 show(mean_moment(&m)),
+	 show(sigma_moment(&m)));
 	 
 }
 
