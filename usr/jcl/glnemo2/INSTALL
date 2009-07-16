@@ -32,7 +32,7 @@ qt4 are still installed there). Change to 'glnemo2' directory and enter the comm
        make
 
  if the compilation fails, please send me a full report by e-mail : 
-  jean-charles.lambertXXXXX@XXXXXoamp.XXXXXfr  (remove XXXXX)
+  jean-charles.lambert@oamp.fr 
    
 it should take a while to compile, at the end you should have a 'glnemo2' binary located in
 "PATH/glnemo2/bin/ARCH" directory. PATH is where is located glnemo2 directory. ARCH depends on
