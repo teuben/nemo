@@ -1,10 +1,11 @@
 /* 
- * MKTT77 - each ring in its own snapshot, use snapmerge to merge them
+ * MKH41 - each ring in its own snapshot, use snapmerge to merge them
  *
- *   19-nov-2002	0.1 Created - Q&D
- *    4-dec-2002        0.2 Added mass=, eps= (mode= not implemetned)
- *    5-dec-2002        0.3 add central=, grow=
- *   19-feb-2006        0.4 dynamic memory using mdarray
+ * Some units from Holmberg's paper:
+ *   mass     = 10^11 M_solar
+ *   diameter = 2500 pc
+ *
+ *   15-jul-2009     1.0   Created at PiTP - Alar Toomre & Peter Teuben
  *
  */
 
@@ -22,8 +23,8 @@ string defv[] = {
     "nbody=1,6,8,10,12\n          number of particles per ring",
     "radius=0,1,2,3,4\n	          radii of rings",
     "mass=1.0,1.0,1.0,0.7,0.3\n   masses of each particle",
-    "phi=0,0,0,0,0\n              angles of first particle",
-    "eps=0.0\n                    softening length for central particle",
+    "phi=0,0,0,0,0\n              angles of first particle (deg)",
+    "candlepower=1\n              Alar's candlepower scaling factor",
     "headline=\n	          verbiage for output",
     "VERSION=1.0\n                15-jul-09 PJT+AT",
     NULL,
@@ -44,9 +45,7 @@ local int    nbody[MAXRAD];
 local real   radius[MAXRAD];
 local real   mass[MAXRAD];
 local real   phi[MAXRAD];
-
-local real eps2;
-local real sqrtm=1; /* NO !!! */
+local real   cp;
 
 local stream outstr;
 local string headline;
@@ -58,6 +57,8 @@ local bool Qgrow;
 void nemo_main()
 {
     int i, nrad, n;
+
+    cp = getdparam("candlepower");
 
     nrad = nemoinpi(getparam("nbody"),nbody,MAXRAD);
     n = nemoinpd(getparam("radius"),radius,MAXRAD);
@@ -75,9 +76,6 @@ void nemo_main()
     pphase = allocate_mdarray3(nobj_max,2,NDIM);
     headline = getparam("headline");
 
-    eps2 = getdparam("eps");
-    eps2 = eps2*eps2;
-
     for (i=0; i<nrad; i++) {
       makering(nbody[i],mass[i],radius[i],phi[i]);
       writesnap(nbody[i]);
@@ -89,16 +87,13 @@ void nemo_main()
 makering(int n, real m, real r, real p)
 {
   int i;
-  real theta, v;
+  real theta, v = 0;
 
-  if (r>0) 
-    v = sqrtm*r*pow(r*r+eps2,-0.75);
-  else
-    v = 0;
+  if (r>0) v = r*pow(r*r,-0.75);         /* some fake keplerian vel */
 
   for (i = 0; i < n; i++) {
     pmass[i] = m;
-    theta = p + TWO_PI * ((real) i) / n;
+    theta = TWO_PI * ( ((real) i) / n   + p/360.0 + 0.25);
     CLRV(pphase[i][0]);
     pphase[i][0][0] = r * cos(theta);
     pphase[i][0][1] = r * sin(theta);
@@ -108,7 +103,7 @@ makering(int n, real m, real r, real p)
   }
 }
 
-
+
 writesnap(int n)
 {
     int cs = CSCode(Cartesian, NDIM, 2);
