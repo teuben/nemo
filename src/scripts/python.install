@@ -1,13 +1,21 @@
 #! /bin/csh -f
 #
-#  MIRIAD/install/python.install:
-#  A sample shell script to install python and some friends to 
+#  MIRIAD/install/python.install:   (the master)
+#  NEMO/src/scripts/python.install:
+#
+#  An example shell script to install python and some friends to 
 #  your choice of a prefix directory (prefix=)
+#
+#  By default the current directory needs to contain all the tar files
+#  and the binaries are installed in a new local subdirectory 'opt' 
+#  It will also use a local 'build' subdirectory in which builds take place.
+#  Before you start you can safely "rm -rf opt build"
+#  After installation, you only need to add opt/bin to $PATH
 #
 #  Count on diskspace:
 #  tar tree:     20 MB
-#  build tree:  135 MB
-#  opt tree:     66 MB
+#  build tree:  365 MB
+#  opt tree:    166 MB
 #
 #  Examples of usage:
 #    python.install  download=1
@@ -23,8 +31,9 @@
 #  - scipy still missing numerous things (now solved with blas and lapack)
 #
 #  History:
-#     sometime-2006  Written for miriad                                          PJT
-#     oct-2006       updated some of the versions to current, added numdisplay   PJT
+#     sometime-2006  Written for miriad                                           PJT
+#     oct-2006       updated some of the versions to current, added numdisplay    PJT
+#     jul-2009       updated to current, fix some g77/gfortran issues, added zlib PJT
 
 #                         binaries
 set prefix=`pwd`/opt
@@ -41,29 +50,36 @@ set url_numarray=http://%s.dl.sourceforge.net/numpy/numarray-%s.tar.gz
 set url_numpy=http://%s.dl.sourceforge.net/numpy/numpy-%s.tar.gz
 set url_scipy=http://%s.dl.sourceforge.net/scipy/scipy-%s.tar.gz
 set url_ppgplot=http://efault.net/npat/hacks/ppgplot/dist/ppgplot-%s.tar.gz
-set url_pyfits=ftp://ra.stsci.edu/pub/pyfits/pyfits_v%s.tar.gz
-set url_numdisplay=http://stsdas.stsci.edu/numdisplay/download/numdisplay_%s.tar
+#set url_pyfits=ftp://ra.stsci.edu/pub/pyfits/pyfits_v%s.tar.gz
+set url_pyfits=http://www.stsci.edu/resources/software_hardware/pyfits/pyfits-2.1.1.tar.gz
+#set url_numdisplay=http://stsdas.stsci.edu/numdisplay/download/numdisplay_%s.tar
+set url_numdisplay=http://stsdas.stsci.edu/numdisplay/download/numdisplay-%s.tar
 set url_TableIO=http://php.iupui.edu/~mmiller3/python/TableIO.tar.gz
 set url_blas=http://www.netlib.org/blas/blas.tgz
 set url_lapack=http://www.netlib.org/lapack/lapack.tgz
 set url_matplotlib=http://%s.dl.sourceforge.net/matplotlib/matplotlib-%s.tar.gz
 set url_gnuplot=http://%s.dl.sourceforge.net/sourceforge/gnuplot-py/gnuplot-py-%s.tar.gz 
+set url_pyephem=http://pypi.python.org/packages/source/p/pyephem/pyephem-%s.tar.gz
+set url_aipy=n/a
 #                         the versions of the tar balls
-set Python=2.4.2
-set ipython=0.7.1.fix1
+#set Python=2.6.2
+set Python=2.5.4
+set ipython=0.9.1
 set Numeric=24.2
 set numarray=1.5.2
-set numpy=1.0rc1
-set scipy=0.5.1
+set numpy=1.3.0
+set scipy=0.7.0
 set ppgplot=1.3
-set pyfits=1.0
-set numdisplay=10
+set pyfits=2.1.1
+set numdisplay=1.5.4
 set TableIO=0
 set blas=0
 set lapack=0
-set matplotlib=0.87.6
+set matplotlib=0.98.5.3
 set gnuplot=1.7
-
+set pyephem=3.7.3.4
+set aipy=0.9.0
+set zlib=1.2.3
 #                         poor mans command line parser....
 foreach arg ($*)
   set $arg
@@ -107,9 +123,35 @@ if ($download) then
   set url=`printf $url_lapack`                          ; url_get $url
   set url=`printf $url_matplotlib $sf       $matplotlib`; url_get $url
   set url=`printf $url_gnuplot    $sf       $gnuplot`   ; url_get $url
+  set url=`printf $url_pyephem    $sf       $pyephem`   ; url_get $url
 
   popd
 endif
+
+# pick one, but also mark some other changes below that depend on the choice
+# some of the packages explain how to tailor these for e.g. the intel compiler
+# but i've not tried those yet.
+if (0) then
+  setenv FC g77
+  set    gnu=gnu
+else
+  setenv FC gfortran
+  set    gnu=gnu95
+endif
+
+#                                                   zlib, test  python
+echo -n "zlib $zlib "
+set p=zlib-$zlib
+tar jxf $dir/zlib-$zlib.tar.bz2
+(cd $p; ./configure --shared --prefix=$prefix ; make ; make install) >& install.zlib.log
+report_status
+
+
+#  
+
+set path=($prefix/bin $path)
+rehash
+setenv LD_LIBRARY_PATH $prefix/lib
 
 
 #                                                   python
@@ -119,15 +161,14 @@ tar jxf $dir/$p.tar.bz2
 (cd $p ; ./configure --prefix=$prefix ; make ; make install) >& install.python.log
 report_status
 
-
-set path=($prefix/bin $path)
+#
 rehash
 
 #                                                   blas
 echo -n "blas "
 set p=blas
 (mkdir -p $p ; cd $p; tar zxf $dir/$p.tgz;\
-  g77 -fno-second-underscore -O2 -c *.f;\
+  $FC -fno-second-underscore -O2 -c *.f;\
   ar r libfblas.a *.o;\
   ranlib libfblas.a;\
   mv libfblas.a $prefix/lib) >& install.blas.log
@@ -140,7 +181,7 @@ set p=lapack
 tar zxf $dir/$p.tgz
 (cd LAPACK;\
   cp INSTALL/make.inc.LINUX make.inc;\
-  make lapacklib OPTS=-O2;\
+  make lapacklib OPTS=-O2 FORTRAN=$FC LOADER=$FC;\
   mv lapack_LINUX.a $prefix/lib/libflapack.a) >& install.lapack.log
 report_status
 setenv LAPACK $prefix/lib/libflapack.a
@@ -166,18 +207,18 @@ tar zxf $dir/$p.tar.gz
 (cd $p ; python setup.py install) >& install.numarray.log
 report_status
 
-#                                                   numpy
+#                                                   numpy (g77 needs gnu; gfortran needs gnu95)
 echo -n "numpy $numpy "
 set p=numpy-$numpy
 tar zxf $dir/$p.tar.gz
-(cd $p ; python setup.py install) >& install.numpy.log
+(cd $p ; python setup.py build --fcompiler=$gnu; python setup.py install) >& install.numpy.log
 report_status
 
 #                                                   scipy
 echo -n "scipy $scipy "
 set p=scipy-$scipy
 tar zxf $dir/$p.tar.gz
-(cd $p ; python setup.py install) >& install.scipy.log
+(cd $p ; python setup.py build --fcompiler=$gnu; python setup.py install) >& install.scipy.log
 report_status
 
 #                                                   ppgplot
@@ -190,15 +231,16 @@ report_status
 
 #                                                   pyfits
 echo -n "pyfits $pyfits "
-set p=pyfits_v$pyfits
+set p=pyfits-$pyfits
 tar zxf $dir/$p.tar.gz
-(cd pyfits ; python setup.py install) >& install.pyfits.log
+(cd $p ; python setup.py install) >& install.pyfits.log
 report_status
 
 #                                                   numdisplay
 echo -n "numdisplay $numdisplay "
-set p=numdisplay_v$numdisplay
-tar xf $dir/$p.tar
+#set p=numdisplay_v$numdisplay
+set p=numdisplay-$numdisplay
+tar xf $dir/$p.tar.gz
 (cd numdisplay ; python setup.py install) >& install.numdisplay.log
 report_status
 
@@ -222,6 +264,21 @@ set p=gnuplot-py-$gnuplot
 tar zxf $dir/$p.tar.gz
 (cd $p ; python setup.py install) >& install.gnuplot.log
 report_status
+
+#                                                   pyephem
+echo -n "pyephem $pyephem "
+set p=pyephem-$pyephem
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.pyephem.log
+report_status
+
+#                                                   aipy
+echo -n "aipy $aipy "
+set p=aipy-$aipy
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.aipy.log
+report_status
+
 
 
 
