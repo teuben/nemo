@@ -6,6 +6,7 @@
  *     22-feb-04  V1.1   leapfrog corrected                  PJT
  *     25-feb-04   1.1a  corrected the last correction       PJT
  *     24-dec-04   1.1b  use global for MacOSX               PJT
+ *     21-jul-09   1.1c  added code to check euler steps at PiTP09
  */
 
 #define global
@@ -31,7 +32,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "freqout=4.0\n		  major data-output frequency ",
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
-    "VERSION=1.1b\n		  24-dec-04 PJT",
+    "VERSION=1.1c\n		  21-jul-09 PJT",
     NULL,
 };
 
@@ -39,7 +40,12 @@ string usage = "simple direct N-body code";
 
 string headline = "DirectCode";
 
+string cvsid="$Id$";
+
 extern  bool scanopt(string, string);
+
+
+#define stepsystem stepsystem_leapfrog
 
 void nemo_main(void)
 {
@@ -112,7 +118,7 @@ void testdata(bool cencon)
  * STEPSYSTEM: advance N-body system one time-step using a leapfrog stepper
  */
 
-void stepsystem(void)
+void stepsystem_leapfrog(void)
 {
   real dthf, dt;
   bodyptr p;
@@ -135,6 +141,35 @@ void stepsystem(void)
   for (p = bodytab; p < bodytab+nbody; p++) {   /* loop over all bodies     */
     ADDMULVS(Vel(p), Acc(p), dthf);             /* advance v by 1/2 step    */
   }
+  nstep++;					/* count another mu-step    */
+  tnow = tnow + dt;				/* finally, advance time    */
+}
+
+/*
+ * STEPSYSTEM: advance N-body system one time-step using a forward euler stepper
+ */
+
+void stepsystem_euler(void)
+{
+  real dthf, dt;
+  bodyptr p;
+
+  dt = 1.0 / freq;				/* get basic time-step      */
+
+  if (nstep==0) {
+    for (p = bodytab; p < bodytab+nbody; p++) {
+      hackgrav(p);				/*   compute new acc for p  */
+    }
+  }
+  output();					/* do major or minor output */
+  for (p = bodytab; p < bodytab+nbody; p++) {	/* loop advancing bodies    */
+    ADDMULVS(Pos(p), Vel(p), dt);               /* advance r by 1 step      */
+    ADDMULVS(Vel(p), Acc(p), dt);               /* advance v by 1 step      */
+  }
+  for (p = bodytab; p < bodytab+nbody; p++) {	/* loop getting new forces  */
+    hackgrav(p);				/*   compute new acc for p  */
+  }
+
   nstep++;					/* count another mu-step    */
   tnow = tnow + dt;				/* finally, advance time    */
 }
