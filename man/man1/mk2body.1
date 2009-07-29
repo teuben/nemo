@@ -1,0 +1,54 @@
+.TH MK2BODY 1NEMO "29 July 2009"
+.SH NAME
+mk2body \- make a 2 body system
+.SH SYNOPSIS
+\fBmk2body\fP [parameter=value]
+.SH DESCRIPTION
+Creates initial conditions for a 2-body problem but where the main body
+is initially at the origin with unit mass. Only the mass and phase space
+coordinates of the 2nd body can given. 
+.PP
+Alternatively orbital parameters for the 2nd body can be given, though 
+not  implemented yet.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+output file name. No default.
+.TP
+\fBm=\fP
+mass of 2nd particle [0.1]   
+.TP
+\fBx=\fP
+X position of 2nd particle [1]  
+.TP
+\fBy=\fP
+Y position of 2nd particle [0]  
+.TP
+\fBz=\fP
+Z position of 2nd particle [0]  
+.TP
+\fBvx=\fP
+VX velocity of 2nd particle [0]  
+.TP
+\fBvy=\fP
+VY velocity of 2nd particle [1]  
+.TP
+\fBvz=\fP
+VY velocity of 2nd particle [0]  
+.TP
+\fBzerocm=\fP
+if true, zero the center of mass [true]
+.TP
+\fBheadline=\fP
+verbiage for output []    
+.SH SEE ALSO
+mkconfig(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+29-Jul-09	V1.0 Created by mkman	NEMO
+.fi
