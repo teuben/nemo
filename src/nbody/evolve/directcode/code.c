@@ -7,6 +7,7 @@
  *     25-feb-04   1.1a  corrected the last correction       PJT
  *     24-dec-04   1.1b  use global for MacOSX               PJT
  *     21-jul-09   1.1c  added code to check euler steps at PiTP09
+ *     29-jul-09   1.2   added option eps < 0 for PN force   PJT
  */
 
 #define global
@@ -32,7 +33,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "freqout=4.0\n		  major data-output frequency ",
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
-    "VERSION=1.1c\n		  21-jul-09 PJT",
+    "VERSION=1.2\n		  29-jul-09 PJT",
     NULL,
 };
 
