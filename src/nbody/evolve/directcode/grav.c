@@ -2,6 +2,7 @@
  * GRAV.C: routines to compute gravity.
  *   
  *      16-feb-04    cloned from hackcode1 for DirectCode
+ *      29-jul-09    eps < 0 allowed for pseudo-newtonian
  *
  */
 
@@ -34,19 +35,31 @@ void hackgrav(bodyptr p)
   SETV(pos0, Pos(p));				/* set field point          */
   phi0 = 0.0;					/* init potential, etc      */
   CLRV(acc0);
-  
+
   for (p=bodytab; p<bodytab+nbody; p++) {
     if (p == p0) continue;
     SUBV(dr,Pos(p),pos0);
     DOTVP(drsq,dr,dr);
 
-    drsq += eps*eps;                            /* use standard softening   */
-    drabs = sqrt(drsq);
-    phii = Mass(p) / drabs;
-    phi0 -= phii;                               /* add to grav. pot.        */
-    mor3 = phii / drsq;
-    MULVS(ai, dr, mor3);
-    ADDV(acc0, acc0, ai);                       /* add to net accel.        */
+    if (eps >= 0.0) {
+      drsq += eps*eps;                         /* use standard softening   */
+      drabs = sqrt(drsq);
+      phii = Mass(p) / drabs;
+      phi0 -= phii;                               /* add to grav. pot.        */
+      mor3 = phii / drsq;
+      MULVS(ai, dr, mor3);
+      ADDV(acc0, acc0, ai);                       /* add to net accel.        */
+    } else if (eps < 0) {
+      drabs = sqrt(drsq) + eps;
+      if (drabs < 0) error("PN violation at time=%g",tnow);
+      drsq = drabs*drabs;                         
+      phii = Mass(p) / drabs;
+      phi0 -= phii;                               /* add to grav. pot.        */
+      mor3 = phii / drsq;
+      MULVS(ai, dr, mor3);
+      ADDV(acc0, acc0, ai);                       /* add to net accel.        */
+      
+    }
   }
 
   Phi(p0) = phi0;				/* stash the pot.           */

@@ -25,7 +25,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
 
     /* params to control N-body integration */
     "freq=32.0\n		  fundamental integration frequency ",
-    "eps=0.05\n			  usual potential softening ",
+    "eps=0.05\n			  if > 0 usual potential softening, if < 0, pseudo-newtonion ",
     "options=mass,phase\n	  misc. control options ",
 
     "tstop=2.0\n		  time to stop integration ",
