@@ -6,6 +6,7 @@
  *   diameter = 2500 pc
  *
  *   15-jul-2009     1.0   Created at PiTP - Alar Toomre & Peter Teuben
+ *   22-jul-2009     1.1   added sign=
  *
  */
 
@@ -24,9 +25,9 @@ string defv[] = {
     "radius=0,1,2,3,4\n	          radii of rings",
     "mass=1.0,1.0,1.0,0.7,0.3\n   masses of each particle",
     "phi=0,0,0,0,0\n              angles of first particle (deg)",
-    "candlepower=1\n              Alar's candlepower scaling factor",
+    "sign=1\n                     Sign of angular momentum",
     "headline=\n	          verbiage for output",
-    "VERSION=1.0\n                15-jul-09 PJT+AT",
+    "VERSION=1.1\n                22-jul-09 PJT+AT",
     NULL,
 };
 
@@ -45,7 +46,7 @@ local int    nbody[MAXRAD];
 local real   radius[MAXRAD];
 local real   mass[MAXRAD];
 local real   phi[MAXRAD];
-local real   cp;
+local real   sign_L;
 
 local stream outstr;
 local string headline;
@@ -58,7 +59,7 @@ void nemo_main()
 {
     int i, nrad, n;
 
-    cp = getdparam("candlepower");
+    sign_L = getdparam("sign");
 
     nrad = nemoinpi(getparam("nbody"),nbody,MAXRAD);
     n = nemoinpd(getparam("radius"),radius,MAXRAD);
@@ -98,8 +99,8 @@ makering(int n, real m, real r, real p)
     pphase[i][0][0] = r * cos(theta);
     pphase[i][0][1] = r * sin(theta);
     CLRV(pphase[i][1]);
-    pphase[i][1][0] = -v * sin(theta);
-    pphase[i][1][1] =  v * cos(theta);
+    pphase[i][1][0] = -v * sin(theta) * sign_L;
+    pphase[i][1][1] =  v * cos(theta) * sign_L;
   }
 }
 
