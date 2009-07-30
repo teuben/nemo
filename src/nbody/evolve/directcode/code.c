@@ -38,7 +38,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
 
     "gravc=1\n                    Gravitatonal constant",
 
-    "VERSION=1.3\n		  30-jul-09 PJT",
+    "VERSION=1.3a\n		  30-jul-09 PJT",
     NULL,
 };
 
@@ -83,6 +83,7 @@ void startrun(void)
   }
   freq = getdparam("freq");		/*   get various parameters */
   eps = getdparam("eps");               /*   softening length       */
+  gravc = getdparam("gravc");           /*   grav constant          */  
   tstop = getdparam("tstop");           /*   stop time              */
   freqout = getdparam("freqout");       /*   output frequency       */
   minor_freqout = getdparam("minor_freqout");
