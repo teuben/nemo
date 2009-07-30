@@ -1,4 +1,4 @@
-.TH DIRECTCODE1 1NEMO "17 February 2004"
+.TH DIRECTCODE1 1NEMO "30 July 2009"
 .SH NAME
 directcode \- simple direct N-body code
 .SH SYNOPSIS
@@ -9,6 +9,9 @@ directcode \- simple direct N-body code
 The infra-structure of the code is derived from \fIhackcode1(1NEMO)\fP,
 though most of the save and restore state code has been removed to keep
 the code simple.
+.PP
+It is possible with this code to change the softening to mean a pseudo-Newtonian
+interaction, using 1/r -> 1/(r-eps), where eps=3GM/c^2.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order
 if supplied with their keyword.
@@ -39,7 +42,8 @@ Inverse time-step, to be used with a leap-frog integrator.
 Default is \fB32.0\fP (32 steps per unit time).
 .TP
 \fBeps\fP=\fIsoft-length\fP
-Force softening parameter.
+Force softening parameter. If a negative value is given, the potential
+is turned into a pseudo-Newtonian one with the meaning of -eps = 3GM/c^2.
 Default is \fB0.05\fP.
 .TP
 \fBoptions\fP=\fIoption-string\fP
@@ -67,6 +71,16 @@ Frequency of minor diagnostic outputs.
 If this frequency is not a simple fraction of \fBfreq\fP (see above),
 the program can waiste significant amounts of time.
 Default is \fB32.0\fP (32 diagnostic measurements per unit time).
+.TP
+\fBgravc=\fP
+Value for the gravitational constant. Although normally 1 in N-body units
+(see also \fIunits(1NEMO)\fP), this allows you to work in more natural units.
+[Default: 1]
+.SH CAVEATS
+Using eps<0 to activate the pseudo-Newtonian option does not change
+the units, all units need to be absorbed into eps. For example, for given
+eps<0, the precession rate of a planet around a star should then be
+\fI2.pi.eps/(a*(1-e^2))\fP.
 .SH SEE ALSO
 newton0(1NEMO), hackcode1(1NEMO)
 .SH AUTHOR
@@ -80,4 +94,6 @@ src/nbody/evolve/directcode/	source code
 .nf
 .ta +1i +4i
 17-feb-04	V1.0  code written, cloned off hackcode1	PJT
+29-jul-09	V1.2  allow eps<0 for pseudo-Newtonian hack	PJT
+30-jul-09	V1.3  added gravc=	PJT
 .fi
