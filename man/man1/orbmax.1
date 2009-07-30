@@ -1,0 +1,30 @@
+.TH ORBMAX 1NEMO "30 July 2009"
+.SH NAME
+orbmax \- Tabulate radial maxima (or minima) along an orbit
+.SH SYNOPSIS
+\fBorbmax\fP [parameter=value]
+.SH DESCRIPTION
+Finds the extrema in radius (currently X-Y plane only) or an orbit.
+Tabulates:
+.nf
+  time    angle(radians)     x     y     radius
+.fi
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input orbit [???]     
+.TP 20
+\fBmode=\fP
+1: show max 2: show min 3: show [1]
+.TP 20
+\fBfirst=\fP
+Also try and figure out if first point. [f]
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-Jul-09	V1.0 Created	PJT
+.fi
