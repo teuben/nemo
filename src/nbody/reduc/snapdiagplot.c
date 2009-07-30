@@ -25,7 +25,7 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "exactpot=false\n		if true, compute O(N^2) PE",
     "eps=0.05\n			using this softening",
     "formal=false\n		publication-style plot",
-    "VERSION=1.4d\n		15-jul-04 PJT",
+    "VERSION=1.4e\n		29-jul-09 PJT",
     NULL,
 };
 
@@ -45,7 +45,7 @@ local bool formal;
 
 local int ndiagfr = 0;			/* number of observations */
 
-#define MAXDIAGFR 10000			/* max. no. of observations */
+#define MAXDIAGFR 100000		/* max. no. of observations */
 
 local real Time[MAXDIAGFR];			/* time of observation */
 local real deltar[MAXDIAGFR];		/* offset in position */
