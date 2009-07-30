@@ -50,15 +50,13 @@ void hackgrav(bodyptr p)
       MULVS(ai, dr, mor3);
       ADDV(acc0, acc0, ai);                       /* add to net accel.        */
     } else if (eps < 0) {
-      drabs = sqrt(drsq) + eps;
+      drabs = sqrt(drsq) + eps;                   /* r-e */
       if (drabs < 0) error("PN violation at time=%g",tnow);
-      drsq = drabs*drabs;                         
       phii = Mass(p) / drabs;
       phi0 -= phii;                               /* add to grav. pot.        */
-      mor3 = phii / drsq;
+      mor3 = phii / drabs / sqrt(drsq);
       MULVS(ai, dr, mor3);
       ADDV(acc0, acc0, ai);                       /* add to net accel.        */
-      
     }
   }
 

@@ -33,7 +33,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "freqout=4.0\n		  major data-output frequency ",
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
-    "VERSION=1.2\n		  29-jul-09 PJT",
+    "VERSION=1.2a\n		  29-jul-09 PJT",
     NULL,
 };
 
