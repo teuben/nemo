@@ -31,6 +31,8 @@ global bodyptr bodytab;		/* points to array of bodies */
 
 global real eps;                       /* grav softening length */
 
+global real gravc;                     /* gravitational constant [1] */
+
 /* code.c */
 void nemo_main(void);
 void startrun(void);

@@ -8,6 +8,7 @@
  *     24-dec-04   1.1b  use global for MacOSX               PJT
  *     21-jul-09   1.1c  added code to check euler steps at PiTP09
  *     29-jul-09   1.2   added option eps < 0 for PN force   PJT
+ *     30-jul-09   1.3   added option gravc=                 PJT
  */
 
 #define global
@@ -33,7 +34,11 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "freqout=4.0\n		  major data-output frequency ",
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
-    "VERSION=1.2a\n		  29-jul-09 PJT",
+    /* constants */
+
+    "gravc=1\n                    Gravitatonal constant",
+
+    "VERSION=1.3\n		  30-jul-09 PJT",
     NULL,
 };
 

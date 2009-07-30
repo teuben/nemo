@@ -44,7 +44,7 @@ void hackgrav(bodyptr p)
     if (eps >= 0.0) {
       drsq += eps*eps;                         /* use standard softening   */
       drabs = sqrt(drsq);
-      phii = Mass(p) / drabs;
+      phii = gravc * Mass(p) / drabs;
       phi0 -= phii;                               /* add to grav. pot.        */
       mor3 = phii / drsq;
       MULVS(ai, dr, mor3);
@@ -52,7 +52,7 @@ void hackgrav(bodyptr p)
     } else if (eps < 0) {
       drabs = sqrt(drsq) + eps;                   /* r-e */
       if (drabs < 0) error("PN violation at time=%g",tnow);
-      phii = Mass(p) / drabs;
+      phii = gravc * Mass(p) / drabs;
       phi0 -= phii;                               /* add to grav. pot.        */
       mor3 = phii / drabs / sqrt(drsq);
       MULVS(ai, dr, mor3);
