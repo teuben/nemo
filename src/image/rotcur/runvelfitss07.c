@@ -30,12 +30,12 @@ string defv[] = {
   "m=2\n                 harmonic order of bar perturbation (1 or 2)",
   "seed=-50\n            Random Seed",
   "bootstrap=200\n       Number of bootstrap samples if error to be determined",
-  "j=1\n                 correlation length",
+  "j=1.0\n               correllation length",
   "rcirc=50\n            Radius beyond which no non-circular rmotions fitted",
   "radii=\n              Ring Radii at which velocity field components are extracted",
 
-  "exe=velfitss07\n      name of VELFITSS07 executable",
-  "VERSION=1.0\n         27-oct-08 PJT",
+  "exe=velfitss07\n      name of VELFITSS07 executable in your $PATH",
+  "VERSION=1.0\n         28-oct-08 PJT",
   NULL,
 };
 
@@ -87,25 +87,25 @@ int nemo_main()
   sprintf(dname,"%s","velfit.inp");
   datstr = stropen(dname,"w!");    
   fprintf(datstr,"# input file for velfitss07\n");
-  fprintf(datstr,"'%s'\n",infile);
-  fprintf(datstr,"'%s'\n",parfile);
-  fprintf(datstr,"'%s'\n",outfile);
-  fprintf(datstr,"%g\n",center[0]);
-  fprintf(datstr,"%g\n",center[1]);
-  fprintf(datstr,"%g\n",getrparam("vsys"));
-  fprintf(datstr,"%g\n",getrparam("pa"));
-  fprintf(datstr,"%g\n",getrparam("inc"));
-  fprintf(datstr,"%g\n",getrparam("rmsism"));
+  fprintf(datstr,"'%s'\n",infile);                 /* invfile */
+  fprintf(datstr,"'%s'\n",parfile);                /* outpfile */
+  fprintf(datstr,"'%s'\n",outfile);                /* outmfile */
+  fprintf(datstr,"%g\n",center[0]);                /* xcen*/
+  fprintf(datstr,"%g\n",center[1]);                /* ycen*/
+  fprintf(datstr,"%g\n",getrparam("vsys"));        /* vsys */
+  fprintf(datstr,"%g\n",getrparam("pa"));          /* pa */
+  fprintf(datstr,"%g\n",getrparam("inc"));         /* incl */
+  fprintf(datstr,"%g\n",getrparam("rmsism"));      /* eISM */
   for (i=0; i<MAXFLAGS; i++)
-    fprintf(datstr,"%s ", flags[i] ? "T" : "F");
+    fprintf(datstr,"%s ", flags[i] ? "T" : "F");   /* disk,centre,systemic,radial,bisymm,uncert */
   fprintf(datstr,"\n");
-  fprintf(datstr,"%d\n",getiparam("m"));
+  fprintf(datstr,"%d\n",getiparam("m"));           /* order */
   fprintf(datstr,"%d\n",seed);
-  fprintf(datstr,"%d\n",getiparam("bootstrap"));
-  fprintf(datstr,"%d\n",getiparam("j"));
-  fprintf(datstr,"%g\n",getrparam("rcirc"));
+  fprintf(datstr,"%d\n",getiparam("bootstrap"));   /* nunc */
+  fprintf(datstr,"%g\n",getrparam("j"));           /* junc */
+  fprintf(datstr,"%g\n",getrparam("rcirc"));       /* maxr */
   for (i=0; i<nradii; i++)
-    fprintf(datstr,"%g\n", radii[i]);
+    fprintf(datstr,"%g\n", radii[i]);              /* sma(i) */
   
 
   strclose(datstr);
