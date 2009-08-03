@@ -7,6 +7,8 @@
  *  24-mar-06   1.2b   fixed bulge radius encoding error   PJT
  *  12-jul-06   1.2c   merged two versions - PJT
  *  19-jul-06   1.3    use header=   PJT
+
+ * TODO: merge in history of how magalie was called...
  */
 
 #include <stdinc.h>
