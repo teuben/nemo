@@ -1,4 +1,4 @@
-.TH MKSPIRAL 1NEMO "30 October 2006"
+cd .TH MKSPIRAL 1NEMO "3 August 2008"
 .SH NAME
 mkspiral \- uniform-density test disk plus spiral in spherical potential
 .SH SYNOPSIS
@@ -83,6 +83,11 @@ dependant seed. [default: \fB0\fP].
 Sign of the angular moment vector. Positive means counter-clock wise 
 rotation. Not
 .TP
+\fBsigma=\fP\fIs1,s2,s3\fP
+Velocity dispersion (isotropic) in the X-Y plane, plus optionally
+an offset and exponential dropoff: s = s1 + s2 * exp(-r/s3).
+Default: 0
+.TP
 \fBnmodel=\fP\fIn_models\fP
 Number of output models. [Default: \fB1\fP].
 .TP
@@ -135,4 +140,5 @@ mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), hackcode3(1NEM0)
 26-feb-93	V1.4 new potential keywrds	PJT
 16-sep-95	V1.5 added nmodel=, sign= ; radii now random	PJT
 26-may-02	added benchmark data for >2GB files	PJT
+3-aug-09	V1.8 documented forgotten stuff		PJT
 .fi

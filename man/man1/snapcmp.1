@@ -1,4 +1,4 @@
-.TH SNAPCMP 1NEMO "15 April 2004"
+.TH SNAPCMP 1NEMO "16 July 2009"
 .SH NAME
 snapcmp \- compare two N-body snapshots
 .SH SYNOPSIS
@@ -48,6 +48,10 @@ differenced.  Default: \fBtrue\fP.
 If \fIflag\fP is true, the differenced observable is divided by the
 value of \fBobs\fP computed from the particle in \fIsnap_file1\fP.
 Otherwise, the differenced observable is used.  Default: \fBfalse\fP.
+.TP
+\fBlog=t|f\fP
+Show (10-base) logarithms of the values instead of their linear values
+Default: false.
 .SH SEE ALSO
 snapcmphist(1NEMO), snapdiff(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
 .SH FILES
@@ -62,4 +66,5 @@ Joshua E. Barnes.
 23-may-88	V1.0 created?	Josh
 29-mar-94	V1.3 added time to output	Peter
 15-apr-04	V1.5 added headline= to the plotting versions and  mean,sigma  to the output	PJT
+16-jul-09	V1.6 added log=	PJT
 .fi

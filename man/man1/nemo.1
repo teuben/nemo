@@ -5,7 +5,7 @@
 \fBNEMO\fP is a \fIStellar Dynamics Toolbox\fP for users and
 programmers. It has various
 programs to create, integrate and analyze N-body systems. In addition
-there are various tools to operate images, tables and orbits,
+there are various tools to operate on images, tables and orbits,
 including FITS files to export/import to/from other astronomical
 data reduction packages.
 .PP
@@ -22,15 +22,12 @@ to demonstrate how experiments can be orchestrated.
 .SH GETTING STARTED
 What you need to do to set yourself up for \fBNEMO\fP:
 .PP
-The easiest way is to add the following two lines to your \fI.cshrc\fP 
-file AFTER the command search path (\fBPATH\fP environment
-variable or \fBpath\fP shell variable in the \fIcsh\fP shell) has been set:
+The easiest way is to add the appropriate line to your \fI.cshrc\fP or
+\fI.bashrc\fP file:
 .nf
-        ...
-        \fIset path = ( ... )\fP
-        ...
-        \fIsetenv NEMO /home/nemo\fP
-        \fIif(-e $NEMO/nemo.rc) source $NEMO/nemo.rc\fP
+        \fIsource $NEMO/nemo-start.csh\fP
+or
+        \fIsource $NEMO/nemo-start.sh\fP
 .fi
 .PP
 If you need more control over your environment, there are other methods
