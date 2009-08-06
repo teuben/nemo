@@ -1,0 +1,27 @@
+.TH GADGET1T2 1NEMO "6 August 2009"
+.SH NAME
+gadget1t2 \- Convert GADGET 1 to 2 format
+.SH SYNOPSIS
+\fBgadget1t2\fP [parameter=value]
+.SH DESCRIPTION
+Convert from old-style gadget-1 dataformat to a new style (gadget-2)
+format that includes extra headers for each block
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+GADGET 1 file . No Default.
+.TP 20
+\fBout=\fP
+GADGET 2 file . No Default
+.SH SEE ALSO
+gadget2nemo(1NEMO), nemo2gadget(1NEMO)
+.SH FILES
+src/nbody/io/gadget
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+july-2009	V0.1	created at PiTP	- Andrew Davis
+aug-2009	V1.0	added nemo getparam	PJT
+.fi
