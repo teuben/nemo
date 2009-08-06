@@ -36,7 +36,7 @@ string cvsid="$Id$";
 
 void fortout(stream os, int nz);
 
-int header= 0;
+int header= -1;
 
 void nemo_main()
 {
@@ -112,8 +112,10 @@ void fortout(stream os, int nz)
   int ivar4       = nz;
   long long ivar8 = nz;
 
-  if (header == 0)
+  if (header < 0)
     fwrite(&nz,sizeof(int),1,os);
+  else if (header == 0)
+    dprintf(1,"Skip writing fortran block counter\n");
   else if (header == sizeof(ivar4))
     fwrite(&ivar4,sizeof(ivar4),1,os);
   else if (header == sizeof(ivar8))
