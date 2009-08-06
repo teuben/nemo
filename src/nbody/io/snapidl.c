@@ -3,6 +3,7 @@
  *
  *      26-nov-2002    1.0 Test example for Walter Dehnen             Peter Teuben
  *                     1.1 add fortran= and output nvec also          PJT
+ *       5-aug-2009    1.2 header 4 or 8 issue
  */
 
 #include <stdinc.h>
@@ -22,15 +23,20 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		Times to select snapshot",
     "out=-\n                    Output file - normally a pipe for IDL",
     "fortran=f\n                Add fortran unformatted I/O tags",
+    "header=\n                  Header size (4, 8, or auto)",
     "VERSION=1.1\n		26-nov-02 PJT",
     NULL,
 };
 
 string usage="tabulate a snapshot for IDL in binary mode";
 
+string cvsid="$Id$";
+
 #define MAXOPT    50
 
 void fortout(stream os, int nz);
+
+int header= 0;
 
 void nemo_main()
 {
@@ -49,6 +55,7 @@ void nemo_main()
             AuxBit | KeyBit | DensBit | EpsBit);
     instr = stropen(getparam("in"), "r");	
     outstr = stropen(getparam("out"), "w");
+    header = getiparam("header");
     setbuf(outstr,(char *)0);                   /* suggested by IDL, inc */
 
     opt = burststring(getparam("options"),", ");
@@ -96,9 +103,23 @@ void nemo_main()
 /*
  *  this is quite possibly quite unportable, but works on at least solaris
  *  and linux.
+ *
+ *  TODO: should really use unfio() routines for this !!!
  */
 
 void fortout(stream os, int nz)
 {
-  fwrite(&nz,sizeof(int),1,os);
+  int ivar4       = nz;
+  long long ivar8 = nz;
+
+  if (header == 0)
+    fwrite(&nz,sizeof(int),1,os);
+  else if (header == sizeof(ivar4))
+    fwrite(&ivar4,sizeof(ivar4),1,os);
+  else if (header == sizeof(ivar8))
+    fwrite(&ivar8,sizeof(ivar8),1,os);
+  else
+    error("header=%d does not match a sizeof(type) for fortran I/O: %d or %d",
+	  header,sizeof(ivar4),sizeof(ivar8));
+
 }
