@@ -41,8 +41,8 @@ info   : dirs $(FBIN)/g2info
 gad    : dirs $(FBIN)/gadget2nemo
 nem    : dirs $(FBIN)/nemo2gadget
 install: info gad
-	\cp -p $(FBIN)/gadget2nemo $(FBIN)/g2info ${NEMOBIN}
-	chmod 755  ${NEMOBIN}/gadget2nemo  ${NEMOBIN}/g2info
+	\cp -p $(FBIN)/gadget2nemo $(FBIN)/g2info $(FBIN)/gadget1t2 ${NEMOBIN}
+	chmod 755  ${NEMOBIN}/gadget2nemo  ${NEMOBIN}/g2info ${NEMOBIN}/gadget1t2
 
 nemo_bin: install
 
@@ -91,6 +91,16 @@ $(FBIN)/g2info :  $(OBJ3) $(OBJTOOLS)
 
 $(OBJ3) : $(FSRC)/g2info.cc  $(FSRC)/gadgetio.h
 	$(CPP) 	$(CPPFLAGS)  -o $@ -c  $(FSRC)/g2info.cc
+
+#--
+OBJ4    := $(FOBJ)/gadget1t2.o
+$(FBIN)/gadget1t2 :  $(OBJ4) 
+	$(CPP)  -o $@  $(OBJ4) $(LNEMO) ${LDL} -lstdc++ -lm 
+
+$(OBJ4) : $(FSRC)/gadget1t2.cc  
+	$(CPP) 	$(CPPFLAGS)  -o $@ -c  $(FSRC)/gadget1t2.cc
+
+
 
 
 
