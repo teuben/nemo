@@ -7,35 +7,54 @@
 		WARNING: I've also assumend you have not turned on the output potential, accellerations, entropy
 				 or timesteps in the makefile
  
-		
+	
 
+
+        History: July 2009 - written for PiTP summerschool - Andrew David
+                 Aug  2009 - added to NEMO, added getparam's  - Peter Teuben
 
 */
-
 
 #include<iostream>
 #include<cstdio>
 #include<cstdlib>
+#include <stdio.h>
+#include <stdlib.h>
+
+extern "C" {
+#include <nemo.h>                                     // NEMO basics
+}
+
+const char * defv[] = {
+  "in=???\n             GADGET 1 file",
+  "out=???\n            GADGET 2 file",
+  "VERSION=1.0\n        compiled on <"__DATE__"> PJT",
+  0,
+};
+
+const char * usage="Convert GADGET 1 to 2 format";
+
+
 
 #define SKIP fread(&dummy, sizeof(dummy), 1, fp);
 
 #define PUT fwrite(&dummy, sizeof(dummy), 1, fout);
 
 struct io_header {
-	long npart[6];
-	double mass[6];
-	double time;
-	double redshift;
-	int flag_sfr;
-	int flag_feedback;
-	long npartTotal[6];
-	int flag_cooling;
-	int num_files;
-	double BoxSize;
-	double Omega0;
-	double OmegaL;
-	double H0; // in km/s/Mpc
-	char fill[256-6*4-6*8-2*8-2*4-6*4-2*4-4*8]; //fill to 256 bytes
+  long    npart[6];
+  double  mass[6];
+  double  time;
+  double  redshift;
+  int     flag_sfr;
+  int     flag_feedback;
+  long    npartTotal[6];
+  int     flag_cooling;
+  int     num_files;
+  double  BoxSize;
+  double  Omega0;
+  double  OmegaL;
+  double  H0; // in km/s/Mpc
+  char    fill[256-6*4-6*8-2*8-2*4-6*4-2*4-4*8]; //fill to 256 bytes
 };
 
 void show(io_header &in);
@@ -45,21 +64,18 @@ using namespace std;
 int main(int argc, char * argv[]) {
 	
 	FILE *fp, *fout;
-	string InFile,OutFile;
+	std::string InFile,OutFile;
 	unsigned int junk,ct,id,size;
 	int dummy,i,j, blksize, next_blksize;
 	long ntot, ngas, ndm, nmass;
 	io_header header1;
 	float tmp;
 	bool individual_mass = false;
-	
-	if (argc != 3) {
-		cout << "Wrong number of inputs!" << endl;
-		cout << "Usage: ./ConvertSnap INFILE OUTFILE\n";
-		exit(1);
-	}
-	InFile=argv[1];
-	OutFile=argv[2];
+
+	//   start  NEMO
+	initparam(const_cast<char**>(argv),const_cast<char**>(defv));
+	InFile  = getparam((char *) "in");
+	OutFile = getparam((char *) "out");
 	
 	
    	fp=fopen(InFile.c_str(),"r");
