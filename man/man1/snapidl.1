@@ -1,4 +1,4 @@
-.TH SNAPIDL 1NEMO "26 November 2002"
+.TH SNAPIDL 1NEMO "6 August 2009"
 .SH NAME
 snapidl \- tabulate a snapshot for IDL in binary mode
 .SH SYNOPSIS
@@ -10,8 +10,11 @@ The output format is a local host
 binary  format(see \fIsnapprint(1NEMO)\fP for an ascii table
 version), and should only be used on that local host to
 prevent endianism and floating point format
-conversion problems. See Examples below on how to read the binary
-data into IDL and fortran
+conversion problems. See examples below on how to read the binary
+data into IDL and fortran.
+.PP
+Note that this program write all variables as float (single precision),
+including integers.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -33,6 +36,9 @@ Output file - normally a pipe for IDL.
 Attempt to format the binary data suitable for
 a series of FORTRAN unformatted READ's. 
 [Default: \fBf\fP]
+.TP
+\fBheader=0|4|8|\fP
+Header size in bytes that unformatted files use. Default: 4
 .SH FORMAT
 The output format is binary encoded, and only meant to
 be transported to other machines (e.g. is uses the
@@ -115,4 +121,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 26-Nov-02	V1.0 Created	PJT
 5-aug-09	it seems IDL now needs /GET_LUN in the 2nd example
+6-aug-09	V1.2 added header=	PJT
 .fi
