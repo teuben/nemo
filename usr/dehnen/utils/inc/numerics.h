@@ -506,30 +506,13 @@ namespace WDutils {
     PolynomialEvaluation() : FileLineFind() {}
     /// constructor: take file and line
     PolynomialEvaluation(const char*f, int l) : FileLineFind(f,l) {}
-    /// polynomial interpolation using m of n values
-    /// \param n  total size of arrays
-    /// \param m  number of points used in interpolation
-    /// \param xi position to find function value at
-    /// \param x  array of points
-    /// \param y  array of values
-    /// \note Together with the macro polev this implements the function
-    /// polev() for given m.
-    template<typename X, typename Y>
-    Y operator()(X xi, const X*x, const Y*y, int n, int m) WDutils_THROWING
-    {
-      int j;
-      Y*P = WDutils_NEW(Y,n);
-      Y yi= find(j,n,m,x,xi)==1? y[j] : polint(m,x+j,y+j,P,xi);
-      WDutils_DEL_A(P);
-      return yi;
-    }
     /// polynomial interpolation using 4 of n values
     /// \param n  total size of arrays
     /// \param xi position to find function value at
     /// \param x  array of points
     /// \param y  array of values
-    /// \note Together with the macro polev this implements the function
-    /// polev() for m=4
+    /// \note Together with the macro Polev this implements the function
+    ///       polev() for m=M
     template<typename X, typename Y> inline
     Y operator()(X xi, const X*x, const Y*y, int n) WDutils_THROWING
     {
@@ -568,16 +551,6 @@ namespace WDutils {
   ///       the error reporting (with file and line number in Polev()) and (ii)
   ///       the fact that Polev as a macro is in the global namespace
 #define Polev WDutils::PolynomialEvaluation(__FILE__,__LINE__)
-  /// polynomial interpolation using m of n values
-  /// \param[in] xi position to find function value at
-  /// \param[in] x  array of points
-  /// \param[in] y  array of values
-  /// \param[in] n  total size of arrays
-  /// \param[in] m  number of points used in interpolation
-  template<typename X, typename Y>
-  inline Y polev(X xi, const X*x, const Y*y, int n, int m) WDutils_THROWING {
-    return PolynomialEvaluation(0,0)(xi,x,y,n,m);
-  }
   /// polynomial interpolation using 4 of n values
   /// \param[in] xi position to find function value at
   /// \param[in] x  array of points
@@ -594,17 +567,6 @@ namespace WDutils {
   template<typename X, typename Y>
   inline Y polev(X xi, const Array<X,1>&x, const Array<Y,1>&y) WDutils_THROWING{
     return PolynomialEvaluation()(xi,x,y);
-  }
-  //----------------------------------------------------------------------------
-  /// like polev(), but no extrapolation; gives boundary values instead
-  template<typename X, typename Y>
-  inline Y ipolev(X xi, const X*x, const Y*y, int n, int m)
-  {
-    if(xi < x[0]   && x[0]   < x[n-1]) return y[0];
-    if(xi > x[0]   && x[0]   > x[n-1]) return y[0];
-    if(xi > x[n-1] && x[n-1] > x[0]  ) return y[n-1];
-    if(xi < x[n-1] && x[n-1] < x[0]  ) return y[n-1];
-    return polev(xi,x,y,n,m);
   }
   //----------------------------------------------------------------------------
   /// like polev(), but no extrapolation; gives boundary values instead

@@ -290,6 +290,7 @@ namespace WDutils {
     /// class whose member specify the data dumped
     struct DumpTreeData {
       DumpTreeData() {}
+      virtual ~DumpTreeData() {} // make gcc version 4.1.0 happy
       virtual
       void Head(const Leaf*, std::ostream&out) const {
 	out << " Leaf    I                     X           ";
