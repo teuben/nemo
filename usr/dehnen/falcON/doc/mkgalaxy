@@ -174,11 +174,11 @@ endif
 ################################################################################
 ## initialize error output file
 
-echo > $name.err
+echo "========================================" > $name.err
 echo "file $name.err" >> $name.err
-echo >> $name.err
+echo "========================================" >> $name.err
 echo "mkgalaxy error output" >> $name.err
-echo >> $name.err
+echo "========================================" >> $name.err
 echo "disc parameters:" >> $name.err
 echo "Md     = $Md\t(disc mass)" >> $name.err
 echo "Nd     = $Nd\t(number of disc bodies)" >> $name.err
@@ -253,11 +253,23 @@ endif
 ################################################################################
 
 echo "mkgalaxy: 1  Building the initial spheroid models"
-
+if ( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    rm -f $name.h $name.b $name.s $name.prm >& /dev/null" >> $name.err
+    echo >> $name.err
+endif
 rm -f $name.h $name.b $name.s $name.prm >& /dev/null
 
 ################################################################################
 ## Create accfile for "Monopole": the disc potential
+if ( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing commands:\
+    echo accname=DiscPot                 >  $name.prm\
+    echo accpars=0,$Sd_dp,$Rd,$Zd_dp,0,0     >> $name.prm" >> $name.err
+    echo >> $name.err
+endif
 echo "accname=DiscPot"                        >  $name.prm # using "DiscPot"
 echo "accpars=0,$Sd_dp,$Rd,$Zd_dp,0,0"        >> $name.prm # parameters of disc
 
@@ -272,6 +284,16 @@ echo "mkgalaxy:    creating the initial halo with N=$Nh_half in file $name.h"
 
 if ( $Nb > 0 ) then
     ## case A: we have a bulge: must provide its potential
+if ( $debug>0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    mkhalo out=$name.h! nbody=$Nh_half M=$Mh inner=$innerh outer=$outerh \
+	eta=$etah r_s=$Rh r_t=$Rth r_c=$Rcoreh b=$betah r_a=$r_ah        \
+	seed=$seed eps=$epsh giveF=$giveF accname=Halo+Monopole          \
+	accpars=0,$Rb,$Mb,$innerb,$outerb,$etab,$Rtb,$Rcoreb;1,10        \
+	accfile=;$name.prm debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
     mkhalo out=$name.h! nbody=$Nh_half M=$Mh inner=$innerh outer=$outerh \
 	eta=$etah r_s=$Rh r_t=$Rth r_c=$Rcoreh b=$betah r_a=$r_ah        \
 	seed=$seed eps=$epsh giveF=$giveF accname=Halo+Monopole          \
@@ -279,6 +301,15 @@ if ( $Nb > 0 ) then
 	accfile=";$name.prm" debug=$debug >>& $name.err
 else
     ## case B: no bulge
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    mkhalo out=$name.h! nbody=$Nh_half M=$Mh inner=$innerh outer=$outerh \
+	eta=$etah r_s=$Rh r_t=$Rth r_c=$Rcoreh b=$betah r_a=$r_ah        \
+	seed=$seed eps=$epsh giveF=$giveF accname=Monopole accpars=1,10  \
+	accfile=$name.prm debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
     mkhalo out=$name.h! nbody=$Nh_half M=$Mh inner=$innerh outer=$outerh \
 	eta=$etah r_s=$Rh r_t=$Rth r_c=$Rcoreh b=$betah r_a=$r_ah        \
 	seed=$seed eps=$epsh giveF=$giveF accname=Monopole accpars=1,10  \
@@ -297,6 +328,16 @@ endif
 if ( $Nb > 0 ) then
 echo "mkgalaxy:    creating the initial bulge with N=$Nb_half in file $name.b"
 
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    mkhalo out=$name.b! nbody=$Nb_half M=$Mb inner=$innerb outer=$outerb \
+	eta=$etab r_s=$Rb r_t=$Rtb r_c=$Rcoreb b=$betab r_a=$r_ab        \
+	seed=$seed eps=$epsb giveF=$giveF accname=Halo+Monopole          \
+	accpars=0,$Rh,$Mh,$innerh,$outerh,$etah,$Rth,$Rcoreh;1,10        \
+	accfile=;$name.prm debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
     mkhalo out=$name.b! nbody=$Nb_half M=$Mb inner=$innerb outer=$outerb \
 	eta=$etab r_s=$Rb r_t=$Rtb r_c=$Rcoreb b=$betab r_a=$r_ab        \
 	seed=$seed eps=$epsb giveF=$giveF accname=Halo+Monopole          \
@@ -315,9 +356,27 @@ endif
 
 if ( $Nb > 0 ) then
     echo "mkgalaxy:    stacking initial halo and bulge in file $name.s"
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    snapstac $name.b $name.h $name.s! debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
     snapstac $name.b $name.h $name.s! debug=$debug >>& $name.err
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    rm -f $name.h $name.b >& /dev/null" >> $name.err
+    echo >> $name.err
+endif
     rm -f $name.h $name.b >& /dev/null
 else
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    mv $name.h $name.s" >> $name.err
+    echo >> $name.err
+endif
     mv $name.h $name.s
     echo "mkgalaxy:    initial halo in file $name.s"
 endif
@@ -349,11 +408,23 @@ if(-f $name.S) then
     exit
 endif
 
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    rm -f $name.sym >& /dev/null" >> $name.err
+    echo >> $name.err
+endif
 rm -f $name.sym >& /dev/null
 
 ################################################################################
 ## symmetrise initial spheroid snapshot, whereby doubling N
 echo "mkgalaxy:    symmetrize initial spheroid snapshot (and doubling body number)"
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    symmetrize $name.s $name.sym use=1 debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
 symmetrize $name.s $name.sym use=1 debug=$debug >>& $name.err
 
 if(! -f $name.sym) then
@@ -367,6 +438,16 @@ endif
 echo "mkgalaxy:    start simulation to grow disc potential from monopole"
 echo "mkgalaxy:    (log output into $name.grow) ..."
 
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    gyrfalcON in=$name.sym logfile=$name.grow                 \
+    out=$name.S step=$tend tstop=$tend startout=f             \
+    kmax=$kmax Nlev=$Nlev fac=$fac fph=$fph eps=-1 give=mxve  \
+    accname=Monopole accpars=0,$tgrow accfile=$name.prm       \
+    manipname=symmetrize_pairs debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
 gyrfalcON in=$name.sym logfile=$name.grow                     \
     out=$name.S step=$tend tstop=$tend startout=f             \
     kmax=$kmax Nlev=$Nlev fac=$fac fph=$fph eps=-1 give=mxve  \
@@ -380,6 +461,12 @@ endif
 
 ################################################################################
 ## delete temporary files
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    rm -f $name.s $name.sym $name.prm >& /dev/null" >> $name.err
+    echo >> $name.err
+endif
 rm -f $name.s $name.sym $name.prm >& /dev/null
 
 ################################################################################
@@ -402,6 +489,12 @@ populatedisc:
 
 echo "mkgalaxy: 3  Populating the disc"
 
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    rm -f $name.d $name.h $name.b >& /dev/null" >> $name.err
+    echo >> $name.err
+endif
 rm -f $name.d $name.h $name.b >& /dev/null
 
 ################################################################################
@@ -412,10 +505,10 @@ if ( $Nb > 0 ) then
     ## case A: two-component spheriod (bulge and halo): 
     ############################################################################
     ## sanity check
-    if($skip) then
-	set Nsp = `snapprop $spheroid prop=N`
-	set Nhb = `nemoinp "$Nh+$Nb"`
-	if( $Nsp != $Nhb) then
+    if( $skip ) then
+	set Nsp = `snapprop $spheroid prop=N givetime=f`
+	set Nhb = `nemoinp "$Nh+$Nb" format=%d`
+	if( $Nsp != $Nhb ) then
 	    echo "ERROR [mkgalaxy]: $spheroid has $Nsp bodies, but halo & bulge have $Nhb."
 	    exit
 	endif
@@ -424,7 +517,13 @@ if ( $Nb > 0 ) then
     ############################################################################
     ## split halo and bulge
     echo "mkgalaxy:    extracting bulge into file $name.b (needed for bulge potential)"
-    snapfilter $spheroid $name.b filter="i<#0"  params=$Nb debug=$debug >>& $name.err
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    s2s $spheroid $name.b filter=i<#0  params=$Nb debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
+    s2s $spheroid $name.b filter="i<#0"  params=$Nb debug=$debug >>& $name.err
 
     if(! -f $name.b) then
 	echo "ERROR [mkgalaxy]: could not isolate adjusted bulge component; see also file $name.err."
@@ -432,7 +531,13 @@ if ( $Nb > 0 ) then
     endif
 
     echo "mkgalaxy:    extracting halo into file $name.h (needed for halo potential)"
-    snapfilter $spheroid $name.h filter="i>=#0" params=$Nb debug=$debug >>& $name.err
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    s2s $spheroid $name.h filter=i>=#0 params=$Nb debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
+    s2s $spheroid $name.h filter="i>=#0" params=$Nb debug=$debug >>& $name.err
 
     if(! -f $name.h) then
 	echo "ERROR [mkgalaxy]: could not isolate adjusted halo component; see also file $name.err."
@@ -442,21 +547,47 @@ if ( $Nb > 0 ) then
     ## sample disc
     echo "mkgalaxy:    creating the initial disc with N=$Nd in file $name.d"
 
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q      \
+	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF          \
+	accname=PotExp+PotExp                                                 \
+	accpars=0,$alphab,$Rb,$nmax,$lmax,3,1;0,$alphah,$Rh,$nmax,$lmax,3,1   \
+	accfile=$name.b;$name.h debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
     mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q      \
 	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF          \
 	accname=PotExp+PotExp                                                 \
 	accpars="0,$alphab,$Rb,$nmax,$lmax,3,1;0,$alphah,$Rh,$nmax,$lmax,3,1" \
 	accfile="$name.b;$name.h" debug=$debug >>& $name.err
 
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    rm -f $name.b $name.h >& /dev/null" >> $name.err
+    echo >> $name.err
+endif
     rm -f $name.b $name.h >& /dev/null
 
 else
+
     ## case B: one-component spheroid (no bulge, only halo)
     ############################################################################
     ## sample disc
 
     echo "mkgalaxy:    creating the initial disc with N=$Nd in file $name.d"
 
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q   \
+	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF       \
+	accname=PotExp accpars=0,$alphah,$Rh,$nmax,$lmax,3,1               \
+	accfile=$spheroid debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
     mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q   \
 	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF       \
 	accname=PotExp accpars="0,$alphah,$Rh,$nmax,$lmax,3,1"             \
@@ -472,6 +603,12 @@ endif
 ################################################################################
 ## Stack all components into one file and reset simulation time to zero
 echo "mkgalaxy:    stacking all components into file $name.snp"
+if( $debug > 0 ) then
+    echo "========================================" >> $name.err
+    echo "mkgalaxy: issuing command:\
+    snapstac $name.d $spheroid $name.snp time=0 debug=$debug >>& $name.err" >> $name.err
+    echo >> $name.err
+endif
 snapstac $name.d $spheroid $name.snp time=0 debug=$debug >>& $name.err
 
 if(! -f $name.snp) then
