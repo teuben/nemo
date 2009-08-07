@@ -95,41 +95,45 @@ namespace WDutils {
     /// represents a particle in the tree
     /// \note not memory critical during tree build.
     /// \note Only @a Dot data @a X and @a I will be set at tree build.
-    /// \note On 64bit machines and in 3D, the sizeof(Leaf) is 32 and 48 for
-    ///       float and double.
+    /// \note On 64bit machines and in 3D, the sizeof(Leaf) is 32=2*16 and
+    ///       48=3*16 for float and double (with g++). Note that the order of
+    ///       the data is chosen carefully to achieve this minimal goal.
     struct Leaf : public Dot 
     {
-      // additional auxiliary data
+      // additional auxiliary data (order important for sizeof(Leaf))
+      int         F; ///< any int, e.g. bitfield of flags
+      Float       M; ///< any scalar, e.g. mass
       union {
 	int      aI; ///< auxiliary int
 	unsigned aU; ///< auxiliary unsigned
 	Real     aR; ///< auxiliary scalar
 	void    *aP; ///< auxiliary pointer to more data
       };
-      int         F; ///< any int, e.g. bitfield of flags
-      Float       M; ///< any scalar, e.g. mass
     };
     /// represents a cubic (square for 2D) cell 
     /// \note not memory critical during tree build.
     /// \note auxiliary data will not be set at tree build.
+    /// \note On 64bit machines and in 3D, the sizeof(Cell) is 80=5*16 and
+    ///       112=7*16 for float and double (with g++). Note that the order of
+    ///       the data is chosen carefully to achieve this minimal goal.
     struct Cell {
-      // data set at tree build (20+sizeof(*void)+Dim*sizeof(Float) bytes)
+      // data set at tree build
       uint8       Le; ///< level in tree
       uint8       Oc; ///< octant in parent Cell
       uint16      Rk; ///< rank of mother domain (currently not used)
       uint16      Nc; ///< # cell children
       uint16      Nl; ///< # leaf children (coming first amongst the desc)
       uint32      N;  ///< # leaf descendants
-      Leaf       *L0; ///< pointer to first leaf
       uint32      Cf; ///< pointer difference to first cell daughter, if any
-      uint32      Pa; ///< pointer difference to parent cell
+      Leaf       *L0; ///< pointer to first leaf
       point       X;  ///< center position of cube
+      uint32      Pa; ///< pointer difference to parent cell
       // additional auxiliary data
-      void       *P;  ///< auxiliary pointer to more data
+      int         F;  ///< auxiliary integer, e.g. bitfield
       point       Z;  ///< auxiliary position, e.g. centre of mass
       Float       R;  ///< auxiliary scalar, e.g. radius
       Float       M;  ///< auxiliary scalar, e.g. mass
-      int         F;  ///< auxiliary integer, e.g. bitfield
+      void       *P;  ///< auxiliary pointer to more data
       union {
 	int      aI;  ///< auxiliary int
 	unsigned aU;  ///< auxiliary unsigned
