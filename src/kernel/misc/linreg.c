@@ -9,6 +9,7 @@
  *      22-sep-95 1.2a  allow xcol=, ycol= and fixed counting bug at maxpt PJT
  *      17-apr-04 1.2b  TAB's in the data were confused with numbers   PJT
  *                      blank lines were not handled properly either
+ *       7-aug-09 1.2d  output of 6th method more friendly for parsers  PJT
  *
  */
 
@@ -243,7 +244,7 @@ string defv[] = {
     "ycol=2\n       Column for Y coordinates",
     "mode=0\n       Output mode (0=all, 1..6=various methods",
     "maxline=10000\n Maximum size of columns",
-    "VERSION=1.2c\n 14-may-09 PJT",
+    "VERSION=1.2d\n  7-aug-09 PJT",
     NULL,
 };
 
@@ -325,7 +326,7 @@ nemo_main()
         if (mode==0 || mode==5)    
             printf("RED.AX.:  %g %g %g %g\n", a[4],va[4],b[4],vb[4]);
         if (mode==0 || mode==6)    
-            printf("MEAN OLS: %g %g %g %g\n", a[5],va[5],b[5],vb[5]);
+            printf("MEAN.OLS: %g %g %g %g\n", a[5],va[5],b[5],vb[5]);
     }
 }
 
