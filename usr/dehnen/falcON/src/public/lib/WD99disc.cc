@@ -92,7 +92,7 @@ WD99disc::PlanarOrbit::PlanarOrbit(double R,
 				   double Xi,
 				   double Rs,
 				   double S0,
-				   double Qmin,
+				   double Qtoo,
 				   double Sdens,
 				   double sigcorr)
   : re(R),
@@ -100,7 +100,7 @@ WD99disc::PlanarOrbit::PlanarOrbit(double R,
     rs(Rs),
     s0(S0),
     ire(1./re),
-    Q(Qmin),
+    Q(Qtoo),
     sdens(Sdens)
 {
   if(debug(4))
@@ -151,10 +151,11 @@ WD99disc::PlanarOrbit::PlanarOrbit(double R,
       CashKarpStep(wn,1.e-14); // integrate over full orbit (plus a tiny bit)
       W[i]=wn;  
       Npoints=i;
-  }
-  step_back_to_R_equal(re,wn); 
-  // Step back so table covers exactly one period.
-  } else {Npoints=0;}
+    }
+    step_back_to_R_equal(re,wn); 
+    // Step back so table covers exactly one period.
+  } else
+    Npoints=0;
   W[Npoints]=wn;
   Npoints++;
  
@@ -175,7 +176,7 @@ WD99disc::PlanarOrbit::PlanarOrbit(double R,
   omr=TPi/Tr;                           // Radial frequency 
   g2=kap/omr;                           // Correction factor 
   
-  if(debug(4))
+  if(debug(5))
     DebugInfo("  ... finished construction of PlanarOrbit\n");
 }
 
@@ -201,8 +202,8 @@ PlanarOrbit::sample(Random const&RNG,         // I: random
   phi= q? TPi*(RNG(3,0.,1.)) : TPi*(RNG(0.,1.));      // Azimuth
   double t = q? RNG(4,0.,1.) : RNG(0.,1.);
   t *=Tr;
-  rad  = polev(t, ttable,  Rtable, Npoints);
-  vrad = polev(t, ttable, vRtable, Npoints);
+  rad  = Polev(t, ttable,  Rtable, Npoints);
+  vrad = Polev(t, ttable, vRtable, Npoints);
   vphi = Lorb/rad;
 }
 //------------------------------------------------------------------------------
@@ -287,32 +288,30 @@ WD99disc::WD99disc(int    no,                 // # particles/orbit (approx)
 		   double rd,                 // Disc scale radius
 		   double dens0,              // Disc scale surface density
 		   double rsig,               // Vdisp scale radius
-		   double qmin,               // Toomre's Q
+		   double qtoo,               // Toomre's Q
 		   double z0,                 // scale height
 		   double eps,                // particle smoothing length
 		   const acceleration *pe) :             
-  
-  n1(int(200*log10(rmax/rmin))),
-  n(n1+1),
-  lr(falcON_NEW(double,n)),
-  pot(falcON_NEW(double,n)),
-  dpdr(falcON_NEW(double,n)),
-  sig0(0),
-  No(no),
-  Rd(rd),
-  iRd(1./rd),
-  Dens0(dens0),
-  Rsig(rsig),
-  Qmin(qmin),  // Not a minimum any more. Too lazy to change all the references
-  Z0(z0),
-  Eps(eps),
-  Mt(TPi*Dens0*Rd*Rd),
-  rmin(0.001*Rd),
-  rmax(1000*Rd),
-  Pe(pe),
-  Disc(0, Rd)
+  Rd    ( rd ),
+  iRd   ( 1./Rd ),
+  Dens0 ( dens0 ),
+  Rsig  ( rsig ),
+  Qtoo  ( qtoo ),
+  Z0    ( z0 ),
+  Eps   ( eps ),
+  Mt    ( TPi*Dens0*Rd*Rd ),
+  rmin  ( 0.001*Rd ),
+  rmax  ( 1000.*Rd ),
+  n1    ( 1200 ),  // (int(200*log10(rmax/rmin))
+  n     ( n1+1),
+  lr    ( falcON_NEW(double,n) ),
+  pot   ( falcON_NEW(double,n) ),
+  dpdr  ( falcON_NEW(double,n) ),
+  sig0  ( 0 ),
+  No    ( no ),
+  Pe    ( pe ),
+  Disc  ( 0,Rd )
 {
-  // output tab("RPA.txt");
   const double dlr= log(rmax/rmin)/double(n1);
   lr[0] = log(rmin);
   for(int i=1; i!=n; ++i)
@@ -346,7 +345,7 @@ WD99disc::WD99disc(int    no,                 // # particles/orbit (approx)
     gradp = (*SPLACC)(lrsig,&d2pdr2);
     d2pdr2/=Rsig;
     epfreq = sqrt(d2pdr2+3*gradp/Rsig);
-    sig0=3.36*Dens0*Qmin*exp(1-(rsig*iRd))/epfreq;
+    sig0=3.36*Dens0*Qtoo*exp(1-(rsig*iRd))/epfreq;
     DebugInfo(1,"WD99disc: vel. disp. at R=0 is %lf",sig0);
   } 
 }
@@ -394,7 +393,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
     SOut[i] = 0.;
     SInp[i] = 1.;
   }
-  RTar[Tsize-1] = 6.*Rd;  //Truncate to avoid numerical trouble from polev
+  RTar[Tsize-1] = 6.*Rd;  //Truncate to avoid numerical trouble from Polev
 
   //--- Create a table of the target sigma_R ------------------//
   for(int i=1; i!=5000000;) {                                //
@@ -404,7 +403,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
 // 	              3*(*SPLACC)(log(Re),&temporary);       //
 	              3*SplAcc(Re,&temporary);               //
       sigtmp = (Rsig)? sigtmp :                              //
-	       3.36*Qmin*Dens0*exp(-Re*iRd)/sqrt((temporary+sigtmp)/Re); 
+	       3.36*Qtoo*Dens0*exp(-Re*iRd)/sqrt((temporary+sigtmp)/Re); 
       STar[counter]+=sigtmp;                                 //
       i++;                                                   //
     } else {                                                 //
@@ -424,7 +423,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
     } while(Re>rmax || Re<rmin);                      // If in pot table range 
 
     double Densit=Dens0*exp(-Re/Rd);
-    PlanarOrbit PO(Re,Xi,Rsig,sig0,Qmin,Densit,1.);  
+    PlanarOrbit PO(Re,Xi,Rsig,sig0,Qtoo,Densit,1.);  
     // sample an orbit (else try again)
     
     if(PO.range){                           // Then if ang mom is in range
@@ -486,7 +485,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
   for(body Bi=B.begin_all_bodies(); Bi; ) { // until all bodies are sampled
     do{
       double rando=q? RNG(0,0.,1.) : RNG(0.,1.);
-      Re= (rando< (1- 7*exp(-6.)))? polev(rando,MInp,RTar,Tsize): 
+      Re= (rando< (1- 7*exp(-6.)))? Polev(rando,MInp,RTar,Tsize): 
 	// use polynomial interpolator
 	Disc.radius(rando);
       Xi= q? RNG(1,0.,1.) : RNG(0.,1.);
@@ -498,7 +497,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
       for(int m=1;m!=Tsize;++m)
 	if(Re<RTar[m] && Re>=RTar[m-1]) temporary= SInp[m];
     
-    PlanarOrbit PO(Re,Xi,Rsig,sig0,Qmin,Dens,temporary); // sample an orbit
+    PlanarOrbit PO(Re,Xi,Rsig,sig0,Qtoo,Dens,temporary); // sample an orbit
  
     if(PO.range){                              // Then if ang mom is in range
       double corr=No*(PO.g2);                  // Get correction factor
@@ -603,10 +602,10 @@ void WD99disc::coldsample(bodies const&B,            // I/O: bodies to sample
   for(body Bi=B.begin_all_bodies(); Bi; ++Bi) { // until all bodies are sampled
     do{
       Re= Disc.radius(q? RNG(0,0.,1.) : RNG(0.,1.));
-    }while(Re>rmax || Re<rmin);                 // If in table range 
+    } while(Re>rmax || Re<rmin);                // If in table range 
 //       double vph=sqrt(Re*(*SPLACC)(log(Re)));
       double vph=sqrt(Re*SplAcc(Re));
-      double phi= q? TPi*(RNG(3,0.,1.)) : TPi*(RNG(0.,1.));      // Azimuth
+      double phi=q? TPi*(RNG(3,0.,1.)) : TPi*(RNG(0.,1.));      // Azimuth
 
       //----------------------------------------------------------------------
       // The vertical component
@@ -682,7 +681,7 @@ void WD99disc::iterate(int tsize,
   for (int i=0;i != npit;){
     do{
       rando= q? RNG(0,0.,1.) : RNG(0.,1.);
-      Re= (rando< (1- 7.*exp(-6.)))? polev(rando,minp,rtar,tsize):
+      Re= (rando< (1- 7.*exp(-6.)))? Polev(rando,minp,rtar,tsize):
 	Disc.radius(rando);
       Xi= q? RNG(1,0.,1.) : RNG(0.,1.);
     } while(Re>rmax || Re<rmin);                 // If in potential table range 
@@ -693,7 +692,7 @@ void WD99disc::iterate(int tsize,
       for(int m=1;m!=tsize;++m)
 	if(Re<rtar[m] && Re>=rtar[m-1]) temporary= sinp[m];
     
-     PlanarOrbit PO(Re,Xi,Rsig,sig0,Qmin,Densit,temporary); // sample an orbit 
+     PlanarOrbit PO(Re,Xi,Rsig,sig0,Qtoo,Densit,temporary); // sample an orbit 
  
     if(PO.range){                           // Then if ang mom is in range
       double corrit=No*(PO.g2);             // Get correction factor

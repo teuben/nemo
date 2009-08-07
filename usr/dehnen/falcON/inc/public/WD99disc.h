@@ -51,11 +51,11 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class WD99disc {
   private:
+    const double Rd,iRd,Dens0,Rsig,Qtoo,Z0,Eps,Mt,rmin,rmax; ///< paramters
     int          n1,n;                          ///< Table sizes, other
     double      *lr,*pot,*dpdr;                 ///< tables: log(r),Psi,dPsi/dr
     double       sig0;                          ///< parameter
     const int    No;                            ///< parameter
-    const double Rd,iRd,Dens0,Rsig,Qmin,Z0,Eps,Mt,rmin,rmax; ///< paramters
     const        acceleration *Pe;              ///< External combi-potential
     const        ExpDisk Disc;                  ///< disc for particles
 
@@ -88,7 +88,7 @@ namespace falcON {
 		  double Xi, 
 		  double Rs, 
 		  double S0, 
-		  double Qmin, 
+		  double Qtoo, 
 		  double Sdens,
 		  double Sigcorr);
       /// samples a point on the orbit

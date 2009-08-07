@@ -1,50 +1,51 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   mkWD99disc.cc                                                       
-///                                                                             
-/// \brief  creates N-body initial conditions far a galactic disc based on the  
+///
+/// \file   mkWD99disc.cc
+///
+/// \brief  creates N-body initial conditions far a galactic disc based on the
 ///         distribution function f_new of Dehnen (1999).                       
-///                                                                             
-/// \author Paul McMillan                                                       
-/// \author Walter Dehnen                                                       
-/// \date   2005-2008                                                           
-///                                                                             
+///
+/// \author Paul McMillan
+/// \author Walter Dehnen
+/// \date   2005-2009                                                           
+///
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2005-2007 Paul McMillan, Walter Dehnen                         
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+// Copyright (C) 2005-2009 Walter Dehnen, Paul McMillan
+// 
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// history:                                                                     
-//                                                                              
-// v 1.0   24/06/2005   PJM started the process of making this                  
-// v 1.1      09/2005   PJM added iteration of the density profile              
-// v 1.2      01/2006   PJM added iteration of the velocity distribution        
-// v 1.3   30/04/2007   WD  making ready for release                            
-// v 1.4   13/09/2007   WD  some changes in parameter names                     
-// v 2.0   17/09/2007   WD  using DiscPot (new) for disc's own potential        
-// v 2.1   15/11/2007   WD  fixed problem with external potentials.             
-// v 2.1.1 23/01/2008   WD  DF into phden (previous: aux) if giveF=true         
-// v 2.1.2 20/02/2008   WD  change in body.h (removed old-style constructors)   
-// v 2.1.3 10/09/2008   WD  happy gcc 4.3.1                                    
+//
+// history:
+//
+// v 1.0   24/06/2005  PJM started the process of making this
+// v 1.1      09/2005  PJM added iteration of the density profile
+// v 1.2      01/2006  PJM added iteration of the velocity distribution
+// v 1.3   30/04/2007  WD  making ready for release 
+// v 1.4   13/09/2007  WD  some changes in parameter names
+// v 2.0   17/09/2007  WD  using DiscPot (new) for disc's own potential 
+// v 2.1   15/11/2007  WD  fixed problem with external potentials
+// v 2.1.1 23/01/2008  WD  DF into phden (previous: aux) if giveF=true 
+// v 2.1.2 20/02/2008  WD  change in body.h (removed old-style constructors)
+// v 2.1.3 10/09/2008  WD  happy gcc 4.3.1
+// v 2.2   07/08/2009  WD  serious bug in WD99disc removed (PJM original)
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.1.3"
-#define falcON_VERSION_D "10-sep-2008 Paul McMillan & Walter Dehnen          "
+#define falcON_VERSION   "2.2"
+#define falcON_VERSION_D "07-aug-2009 Walter Dehnen & Paul McMillan          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkWD99disc
@@ -100,13 +101,8 @@ const char*usage =
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
-//const double vf = 0.977775320024919;             // km/s  in WD_units         
   const double mf = 2.2228847e5;                   // M_sun in WD_units         
-  //----------------------------------------------------------------------------
-  // 1. set some parameters                                                     
-  //----------------------------------------------------------------------------
   if (getiparam("ni") < 1) falcON_Error("Code requires at least one iteration");
-//const bool   WD (getbparam("WD_units"));         // using WD_units?           
   const Random Ran(getparam("seed"),8);
   const fieldset data( 
     (hasvalue ("eps")   ? fieldset::e : fieldset::o) |
@@ -138,10 +134,7 @@ void falcON::main() falcON_THROWING
     DM.sample(shot,getiparam("ni"),getbparam("q-ran"),Ran,getbparam("giveF"));
   else
     DM.coldsample(shot,getbparam("q-ran"),Ran);
-
-  //----------------------------------------------------------------------------
-  // 3. output of snapshot                                                      
-  //----------------------------------------------------------------------------
+  // output of snapshot                                                      
   nemo_out out(getparam("out"));
   shot.write_nemo(out,data);
 }
