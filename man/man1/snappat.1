@@ -25,6 +25,10 @@ Times to select snapshot [all]
 .TP
 \fBntime=\fP
 if used, pre-allocate this number of snapshots []
+.SH CAVEATS
+It is useful to know the number of snapshots ahead of time, using the \fBntime=\fP
+keyword. If the number of snapshots was larger, the last few planes in the cube
+are garbage, if fewers, snapshots are written in sets of that size.
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
