@@ -90,7 +90,10 @@ void nemo_main()
 	  k = 0;
 	}
     }
-    if (k) warning("something not written");
+    if (k) {
+      warning("k=%d something not written yet, possible trailing garbage written",k);
+      write_image(outstr,iptr);
+    }
     strclose(instr);
     strclose(outstr);
 }
