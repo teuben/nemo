@@ -15,6 +15,11 @@ data into IDL and fortran.
 .PP
 Note that this program write all variables as float (single precision),
 including integers.
+.PP
+For an alternative approach, use \fIsnappat(1NEMO)\fP to create
+a Particle-Attribute-Time datacube, convert this to FITS using
+\fIccdfits(1NEMO)\fP and read this into IDL. For simulations with a
+large number of snapshots this can be significantly faster.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -111,7 +116,7 @@ where needed on 64 bit systems. See also \fIunfio(1NEMO)\fP for a description.
 Careful cutting and pasting examples from man pages, hidden characters can 
 slip unseen into your session.
 .SH SEE ALSO
-snapprint(1NEMO), unfio(1NEMO), snapshot(5NEMO), 
+snapprint(1NEMO), snappat(1NEMO), unfio(1NEMO), snapshot(5NEMO), 
 .SH FILES
 src/nbody/io	- snapidl.c
 .SH AUTHOR
