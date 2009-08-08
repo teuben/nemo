@@ -1,0 +1,34 @@
+.TH SNAPPAT 1NEMO "8 August 2009"
+.SH NAME
+snappat \- convert snapshot to a regular Particle-Attribute-Time image
+.SH SYNOPSIS
+\fBsnappat\fP [parameter=value]
+.SH DESCRIPTION
+Convert a snapshot to a Particle-Attribute-Time (PAT) datacube. Use
+\fIccdfits(1NEMO)\fP to convert to a \fIfits(5NEMO)\fP file for usage
+in other programs.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (snapshot) [???]    
+.TP
+\fBout=\fP
+Output file (image) [???]    
+.TP
+\fBoptions=\fP
+Things to output [x,y,z,vx,vy,vz]    
+.TP
+\fBtimes=\fP
+Times to select snapshot [all]   
+.TP
+\fBntime=\fP
+if used, pre-allocate this number of snapshots []
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+8-Aug-09	V0.1 Created	PJT
+.fi
