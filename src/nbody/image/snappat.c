@@ -71,7 +71,7 @@ void nemo_main()
             continue;                   /* skip work on this snapshot */
         if ( (bits & ParticlesBit) == 0)
             continue;                   /* skip work, only diagnostics here */
-	dprintf(0,"Time=%g\n",tsnap);
+	dprintf(1,"Time=%g\n",tsnap);
 	if (iptr == NULL) {
 	  create_cube(&iptr,nbody,nopt,ntime);
 	  k=0;
