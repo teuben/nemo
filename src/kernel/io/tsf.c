@@ -19,6 +19,7 @@
  * V3.0   pjt 14-jun-02         integer output not in octal anymore
  * V3.1   pjt 29-aug-02         confirmed bug item=XXX doesn't work anymore
  * V3.1a  pjt 25-nov-03         fix minor (but fatal) xml syntax error
+ * V3.1e  pjt 10-aug-09         fix bug handled items > 2GB
  *
  */
 
@@ -36,7 +37,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSION=3.1d\n		  15-mar-05 PJT ",
+    "VERSION=3.1e\n		  10-aug-09 PJT ",
     NULL,
 };
 
@@ -183,7 +184,7 @@ void print_header(string tag, string type, int *dims)
 void print_data(string tag, string type, int *dims)
 {
     string fmt;
-    int dlen;
+    size_t dlen;
     char buf[BUFLEN];  /* danger: buffer overflow */
     byte *dat, *dp;
     bool Qprint;

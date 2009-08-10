@@ -66,7 +66,8 @@ extern int convert_f2d (int, float *, double *);
 void copy_item(stream ostr, stream istr, string tag)
 {
     string type, *tags, *tp;
-    int *dims, dlen;
+    int *dims;
+    size_t dlen;
     byte *buf;
 
     if (! get_tag_ok(istr, tag))		/* prevent obvious errors   */
@@ -108,7 +109,8 @@ void copy_item(stream ostr, stream istr, string tag)
 void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 {
     string type, *tags, *tp;
-    int *dims, dlen, cvtlen;
+    int *dims, cvtlen;
+    size_t dlen;
     char *cp;
     byte *bufin, *bufout=NULL;
     itemptr ipt;
@@ -659,7 +661,8 @@ string get_string(
 ) {
     strstkptr sspt;
     itemptr ipt;
-    int *dp, dlen;
+    int *dp;
+    size_t dlen;
     char *dat;
 
     sspt = findstream(str);			/* access assoc. info	    */
@@ -774,7 +777,7 @@ int *get_dims(
 	return (NULL);
 }
 
-int get_dlen(
+size_t get_dlen(
     stream str,			/* input stream obtained from stropen */
     string tag			/* tag of item being looked for */
 ) {
@@ -787,7 +790,7 @@ int get_dlen(
 	error("get_dlen: at EOF");
     if (sspt->ss_stp == -1)			/* was input at top level?  */
 	sspt->ss_stk[0] = ipt;			/*   put back for next time */
-    return (datlen(ipt, 0));			/* return count of bytes    */
+    return datlen(ipt, 0);			/* return count of bytes    */
 }
 
 /*

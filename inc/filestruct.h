@@ -77,7 +77,7 @@ extern bool skip_item ( stream);
 extern string *list_tags ( stream);
 extern string get_type ( stream, string);
 extern int *get_dims ( stream, string);
-extern int get_dlen ( stream, string);
+extern size_t get_dlen ( stream, string);
 
 extern void strclose ( stream);
 
