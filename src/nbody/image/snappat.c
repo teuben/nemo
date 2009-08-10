@@ -23,7 +23,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		Times to select snapshot",
     "ntime=\n                   if used, pre-allocate this number of snapshots",
     "first=f\n                  only write first cube?",
-    "VERSION=0.1\n		8-aug-09 PJT",
+    "VERSION=0.2\n		9-aug-09 PJT",
     NULL,
 };
 
