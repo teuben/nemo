@@ -22,6 +22,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "options=x,y,z,vx,vy,vz\n	Things to output",
     "times=all\n		Times to select snapshot",
     "ntime=\n                   if used, pre-allocate this number of snapshots",
+    "first=f\n                  only write first cube?",
     "VERSION=0.1\n		8-aug-09 PJT",
     NULL,
 };
@@ -32,10 +33,14 @@ string cvsid="$Id$";
 
 #define MAXOPT    64
 
+
+
+void fixheader(imageptr iptr, string options, real t0, real dt);
+
 void nemo_main()
 {
     stream instr, outstr;
-    real   tsnap, dr, aux;
+    real   tsnap, dr, aux, t0, dt;
     string times;
     Body *btab = NULL, *bp, *bq;
     int i, j, k, n, nbody, bits, nopt, ParticlesBit, ntime;
@@ -43,6 +48,7 @@ void nemo_main()
     string *burststring(), *opt;
     rproc btrtrans(), fopt[MAXOPT];
     imageptr iptr = NULL; 
+    bool Qfirst = getbparam("first");
 
     ParticlesBit = (MassBit | PhaseSpaceBit | PotentialBit | AccelerationBit |
             AuxBit | KeyBit | DensBit | EpsBit);
@@ -75,7 +81,10 @@ void nemo_main()
 	if (iptr == NULL) {
 	  create_cube(&iptr,nbody,nopt,ntime);
 	  k=0;
+	  t0 = tsnap;
+	  if (k==0) dt = 0.0;
 	} 
+	if (k==1) dt=tsnap-t0;    /* should be good for the whole snapshot */
 	for (j=0; j<nopt; j++) {
 	  for (bp = btab, i=0; bp < btab+nbody; bp++, i++) {
 	    CubeValue(iptr,i,j,k) = fopt[j](bp,tsnap,i);
@@ -84,17 +93,40 @@ void nemo_main()
 	k++;
 
 	if (k==ntime)  { /* cube is full */
+	  fixheader(iptr,getparam("options"),t0,dt);
 	  write_image(outstr,iptr);
 	  free_image(iptr);
 	  iptr = NULL;
 	  k = 0;
+	  if (Qfirst) break;
 	}
     }
-    if (k) {
+    if (!Qfirst && k) {
       warning("k=%d something not written yet, possible trailing garbage written",k);
+      fixheader(iptr,getparam("options"),t0,dt);
       write_image(outstr,iptr);
     }
     strclose(instr);
     strclose(outstr);
 }
 
+
+void fixheader(imageptr iptr, string options, real t0, real dt)
+{
+  char *ap = allocate(sizeof(options) + sizeof("Attribute") + 10);
+  sprintf(ap,"Attribute: %s",options);
+
+  Namex(iptr) = strdup("Particle");
+  Xmin(iptr)  = 0.0;
+  Dx(iptr)    = 1.0;
+
+  Namey(iptr) = strdup(ap);
+  Ymin(iptr)  = 0.0;
+  Dy(iptr)    = 1.0;
+
+  Namez(iptr) = strdup("Time");
+  Zmin(iptr)  = t0;
+  Dz(iptr)    = dt;
+
+  free(ap);
+}
