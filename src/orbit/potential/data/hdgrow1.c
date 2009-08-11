@@ -52,6 +52,8 @@ void inipotential (int *npar, double *par, char *name)
 
   dprintf(1,"INI_POTENTIAL hdgrow1 %s\n",name);
   dprintf(1,"  Parameters : Pattern Speed = %f\n",omega);
+  dprintf(1,"  Parameters : Halo:  m,a,me,tau=%f %f %f %f\n",m_h,r_h,m_he,t_h);
+  dprintf(1,"  Parameters : Disk:  m,a,me,tau=%f %f %f %f\n",m_d,r_d,m_de,t_d);
 
   /* only the mass changes, the shapes don't */
   r2_h = r_h*r_h;
