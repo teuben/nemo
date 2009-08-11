@@ -25,7 +25,7 @@ INCFILES =
 
 POT_CC = \
 	bar83.c bulge1.c ccd.c cp80.c dehnen.c dublinz.c expdisk.c flatz.c halo.c \
-	grow_plum.c grow_plum2.c \
+	grow_plum.c grow_plum2.c hdgrow1.c \
 	harmonic.c hernquist.c hom.c hubble.c kuzmindisk.c \
 	isochrone.c jaffe.c log.c log2.c mestel.c miyamoto.c nfw.c nfw2.c null.c \
 	op73.c plummer.c plummer2.c rh84.c rotcur0.c rotcur.c teusan85.c triax.c \
