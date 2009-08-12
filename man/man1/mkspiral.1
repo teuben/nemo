@@ -1,4 +1,4 @@
-cd .TH MKSPIRAL 1NEMO "3 August 2008"
+cd .TH MKSPIRAL 1NEMO "11 August 2009"
 .SH NAME
 mkspiral \- uniform-density test disk plus spiral in spherical potential
 .SH SYNOPSIS
@@ -88,6 +88,13 @@ Velocity dispersion (isotropic) in the X-Y plane, plus optionally
 an offset and exponential dropoff: s = s1 + s2 * exp(-r/s3).
 Default: 0
 .TP
+\fBsigmator=\fP
+The ratio of the tangential to radial velocity dispersion. By default 1,
+but if you need realistic values, our local solar neighbor measures about
+0.5 but the best self-consistent (despite these models are NOT)
+estimate can be set by using the value -1, in which case 0.5*kappa/omega
+is used. Default: 1
+.TP
 \fBnmodel=\fP\fIn_models\fP
 Number of output models. [Default: \fB1\fP].
 .TP
@@ -140,5 +147,6 @@ mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), hackcode3(1NEM0)
 26-feb-93	V1.4 new potential keywrds	PJT
 16-sep-95	V1.5 added nmodel=, sign= ; radii now random	PJT
 26-may-02	added benchmark data for >2GB files	PJT
-3-aug-09	V1.8 documented forgotten stuff		PJT
+3-aug-09	V1.8 and documented forgotten stuff		PJT
+11-aug-09	V1.9 added sigmator=	PJT
 .fi
