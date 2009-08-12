@@ -9,6 +9,8 @@
  *             Note that RK, PC and PC1 don't work for rotating
  *             potentials.					PJT
  * march-2003  added epistep() for epicycle orbits
+ *
+ * aug-2009    added modified Euler and finally implemented leapfrog
  */
 
 #include "defs.h"
@@ -82,9 +84,10 @@ int mode;		/* select integration algorithm */
     } else if (mode == 0) {                     /* simplest Eulerian */
         eulerstep(btab, nb, tptr, force, dt);
         (*force)(btab, nb, *tptr);              /* compute new force */
+    } else if (mode == 6) {                     /* modified Eulerian */
+        modeulerstep(btab, nb, tptr, force, dt);  /* embeds a force calc */
     } else if (mode == 5) {			/* use leapfrog ? */
         leapfrogstep(btab, nb, tptr, force, dt);/* take step */
-	(*force)(btab, nb, *tptr);		/* compute final force ? */
     } else if (mode == 4) {			/* use 4th order RK ? */
         rk4step(btab, nb, tptr, force, dt);	/* take RK4 step */
 	(*force)(btab, nb, *tptr);		/* compute final force */
@@ -230,6 +233,34 @@ real dt;		/* integration time step */
     *tptr += dt;
 }
 
+modeulerstep(btab, nb, tptr, force, dt)
+bodyptr btab;		/* array of bodies */
+int nb;			/* number of bodies */
+real *tptr;		/* current time */
+proc force;		/* acceleration calculation */
+real dt;		/* integration time step */
+{
+    bodyptr p;
+    int k;
+    register real *pptr, *vptr, *aptr;
+
+    for (p=btab; p<btab+nb; p++) {
+        pptr = Pos(p);    
+        vptr = Vel(p);
+        for (k=0; k<NDIM; k++)
+            *pptr++ += dt * (*vptr++);
+    }
+    (*force)(btab,nb,*tptr);
+    for (p=btab; p<btab+nb; p++) {
+        vptr = Vel(p);
+	aptr = Acc(p);
+        for (k=0; k<NDIM; k++)
+            *vptr++ += dt * (*aptr++);
+    }
+
+    *tptr += dt;
+}
+
 leapfrogstep(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
@@ -237,7 +268,33 @@ real *tptr;		/* current time */
 proc force;		/* acceleration calculation */
 real dt;		/* integration time step */
 {
-    error("leapfrog stepping not implemented");
+    bodyptr p;
+    int k;
+    register real *pptr, *vptr, *aptr;
+    real dt2 = 0.5*dt;
+
+    for (p=btab; p<btab+nb; p++) {
+        pptr = Pos(p);    
+        vptr = Vel(p);
+        for (k=0; k<NDIM; k++)
+            *pptr++ += dt2 * (*vptr++);
+    }
+    (*force)(btab,nb,*tptr);
+    for (p=btab; p<btab+nb; p++) {
+        vptr = Vel(p);
+	aptr = Acc(p);
+        for (k=0; k<NDIM; k++)
+            *vptr++ += dt * (*aptr++);
+    }
+    for (p=btab; p<btab+nb; p++) {
+        pptr = Pos(p);    
+        vptr = Vel(p);
+        for (k=0; k<NDIM; k++)
+            *pptr++ += dt2 * (*vptr++);
+    }
+
+    *tptr += dt;
+
 }
 
 

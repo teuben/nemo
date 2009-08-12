@@ -18,6 +18,7 @@
  *      6-may-03     a  missing factor 2 for A ???              pjt
  *      6-jul-03     b  computed the guiding center             PJT/RPO
  *     29-sep-05     c  variuos gcc4 fixes in other routines    PJT
+ *     12-aug-09 V5.1  modified Euler and Leapfrog implemented  PJT
  *
  * To improve:  use allocate() for number of particles; not static
  */
@@ -43,7 +44,7 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=5.0c\n       29-sep-05 PJT",
+    "VERSION=5.1\n        12-aug-09 PJT",
     NULL,
 };
 
@@ -80,6 +81,8 @@ void setparams(void)
     infile = getparam("in");
     outfile = getparam("out");
     savefile = getparam("save");
+
+    dprintf(1,"Compiled with MBODY=%d\n",MBODY);
 
     pot = get_potential (getparam("potname"),
        			 getparam("potpars"), 
