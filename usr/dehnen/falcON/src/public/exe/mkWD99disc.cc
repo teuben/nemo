@@ -43,9 +43,10 @@
 // v 2.1.2 20/02/2008  WD  change in body.h (removed old-style constructors)
 // v 2.1.3 10/09/2008  WD  happy gcc 4.3.1
 // v 2.2   07/08/2009  WD  serious bug in WD99disc removed (PJM original)
+// v 2.2.1 12/08/2009  WD  change in WD99disc to avoid problem with PotExp
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.2"
-#define falcON_VERSION_D "07-aug-2009 Walter Dehnen & Paul McMillan          "
+#define falcON_VERSION   "2.2.1"
+#define falcON_VERSION_D "12-aug-2009 Walter Dehnen & Paul McMillan          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkWD99disc

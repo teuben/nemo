@@ -300,9 +300,9 @@ WD99disc::WD99disc(int    no,                 // # particles/orbit (approx)
   Z0    ( z0 ),
   Eps   ( eps ),
   Mt    ( TPi*Dens0*Rd*Rd ),
-  rmin  ( 0.001*Rd ),
-  rmax  ( 1000.*Rd ),
-  n1    ( 1200 ),  // (int(200*log10(rmax/rmin))
+  rmin  ( 0.01*Rd ),
+  rmax  ( 100.*Rd ),
+  n1    ( 800 ),  // (int(200*log10(rmax/rmin))
   n     ( n1+1),
   lr    ( falcON_NEW(double,n) ),
   pot   ( falcON_NEW(double,n) ),
@@ -324,11 +324,29 @@ WD99disc::WD99disc(int    no,                 // # particles/orbit (approx)
   }
   // Find Psi and Acc from external potential
   Pe->set(0.,n,0,pos_e,0,0,pot,acc_e,0);
+  double outward_acc_rad=0;
   for(int i=0; i!=n; ++i) {
     dpdr[i] = -acc_e[i][0];
-    if (dpdr[i]<0.)
-      falcON_Error("WD99disc: outward acceleration at r=%g",exp(lr[i]));
-  } 
+    if(dpdr[i]<0. && outward_acc_rad==0.) outward_acc_rad=exp(lr[i]);
+  }
+  if(outward_acc_rad) {
+    if(debug(1)) {
+      std::ofstream debug_out("WD99disc_debug.out");
+      debug_out  << "# file generated automatically by WD99disc\n"
+		 << "# reason: found outward acceleration\n"
+		 << "#\n"
+		 << "# radius       Phi       dPhi/dr\n";
+      for(int i=0; i!=n; ++i)
+	debug_out<< std::setw(12) << exp(lr[i]) << ' '
+		 << std::setw(12) << pot[i] << ' '
+		 << std::setw(12) << dpdr[i] << '\n';
+      debug_out.close();
+      falcON_Error("WD99disc: outward acceleration at r=%g:"
+		   " wrote table to file \"WD99disc_debug.out\"",
+		   outward_acc_rad);
+    } else 
+      falcON_Error("WD99disc: outward acceleration at r=%g",outward_acc_rad);
+  }
   double s0  = rmin * dpdr[0],                // Gradients for pot in ln(r) 
     sn1 = rmax * dpdr[n1];                    // at first and last point 
   // (wanted for spline)        
