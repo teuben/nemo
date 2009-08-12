@@ -18,6 +18,7 @@
  *       8-sep-01       a   init_xrandom
  *       8-apr-03       b   timebit
  *      22-apr-09 V1.8  linear/logarithm spiral option
+ *      11-aug-09 V1.9  add sigmator= to control anisotropy     PJT
  */
 
 #include <stdinc.h>
@@ -25,6 +26,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <potential.h>
+#include <spline.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -46,17 +48,20 @@ string defv[] = {
     "seed=0\n		  random number seed",
     "sign=1\n             sign of angular momentum of disk",
     "sigma=0\n            velocity dispersion, plus optional central offset and exp scalelength",
+    "sigmator=1\n         Ratio sigma_t/sigma_r:  use < 0 to compute it from kappa/2.omega",
     "nmodel=1\n           number of models",
     "headline=\n	  text headline for output ",
     "linear=t\n           Linear or Logarithmic spiral?",
-    "VERSION=1.8\n	  22-apr-09 PJT",
+    "VERSION=1.9\n	  11-aug-09 PJT",
     NULL,
 };
 
 string usage = "toy spiral density perturbation in a uniform disk";
 
+string cvsid="$Id$";
 
-local real rmin, rmax, sigma[3];
+
+local real rmin, rmax, sigma[3], sigmator;
 local int  ndisk, nmodel, nsigma, sign;
 local real SPa, SPk, SPw;     /* spiral parameters */
 local real width;
@@ -70,6 +75,8 @@ local proc potential;
 extern double xrandom(double, double);
 extern double grandom(double, double);
 
+local void inittables(void);
+
 nemo_main()
 {
     stream outstr;
@@ -82,6 +89,7 @@ nemo_main()
     nmodel = getiparam("nmodel");
     sign = getiparam("sign");
     nsigma = nemoinpr(getparam("sigma"),sigma,3);
+    sigmator = getrparam("sigmator");
     totmass = getdparam("mass");
     Qlinear = getbparam("linear");
     
@@ -95,6 +103,7 @@ nemo_main()
     } else
         width = SPw;
     init_xrandom(getparam("seed"));
+    if (sigmator<1) inittables();
 
     outstr = stropen(getparam("out"), "w");
     put_history(outstr);
@@ -108,6 +117,32 @@ nemo_main()
     strclose(outstr);
     free(disk);
 }
+
+#define NTAB 256
+
+local real rcir[NTAB];
+local real vcir[4*NTAB];
+
+
+local void inittables()
+{
+
+  int i, ndim=3;
+  double pos_d[3], acc_d[3], pot_d, time_d = 0.0;
+
+  pos_d[0] = pos_d[1] = pos_d[2] = 0.0;
+
+  rcir[0] = vcir[0] = 0.0;
+  for (i = 1; i < NTAB; i++) {
+    pos_d[0] = rcir[i] = rmax * ((real) i) / (NTAB - 1);
+    (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d);      /* get forces    */	
+    vcir[i] = -acc_d[0] * rcir[i];
+    if (vcir[i] < 0) error(" (inittables) force not inward bound at r=%g",rcir[i]);
+    vcir[i] = sqrt(vcir[i]);
+  }
+  spline(&vcir[NTAB], &rcir[0], &vcir[0], NTAB);
+}
+
 
 /*
  * WRITEGALAXY: write galaxy model to output.
@@ -131,11 +166,12 @@ testdisk(int n)
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, msph_i, vcir_i, pot_i, mass_i, sigma_i;
     real uni, gau, unifrac, f;
-    real cost, sint;
+    real cost, sint, Aoort, omega, kappa, sigma_t;
     vector acc_i;
     bool Qsigma = (sigma[0]>0.0 || sigma[1]>0.0);
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
+    
 
     if (disk == NULL) disk = (Body *) allocate(ndisk * sizeof(Body));
     rmin2 = rmin * rmin;
@@ -171,21 +207,31 @@ testdisk(int n)
         }
         cost = cos(theta_i);
         sint = sin(theta_i);
-	Phase(dp)[0][0] = pos_d[0] = r_i * sint;        /* set positions      */
-	Phase(dp)[0][1] = pos_d[1] = r_i * cost;
+	Phase(dp)[0][0] = pos_d[0] = r_i * cost;        /* set positions      */
+	Phase(dp)[0][1] = pos_d[1] = r_i * sint;
 	Phase(dp)[0][2] = pos_d[2] = 0.0;
         (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d);      /* get forces    */
         SETV(acc_i,acc_d);
 	vcir_i = sqrt(r_i * absv(acc_i));
-        dprintf(1,"r=%g vcir=%g acc=%g %g %g\n",
-            r_i,vcir_i,acc_i[0],acc_i[1],acc_i[2]);
-	Phase(dp)[1][0] = - sign * vcir_i * cost;     /* sign > 0 */
-	Phase(dp)[1][1] =   sign * vcir_i * sint;     /* is counter clock */
-	Phase(dp)[1][2] = 0.0;
+        dprintf(1,"r=%g vcir=%g acc=%g %g\n",r_i,vcir_i,acc_i[0],acc_i[1]);
         if (Qsigma) {
 	    sigma_i = sigma[0] + sigma[1]*exp(-r_i/sigma[2]);
-    	    Phase(dp)[1][0] += grandom(0.0, sigma_i);
-	    Phase(dp)[1][1] += grandom(0.0, sigma_i);
-        }            
+	    if (sigmator < 0) {
+	      omega = vcir_i / r_i;
+	      Aoort = -0.5 * (spldif(r_i, &rcir[0], &vcir[0], &vcir[NTAB], NTAB) - omega);
+	      if (omega - Aoort < 0.0)
+		dprintf(0,"R, omega, Aoort = %f %f %f\n", r_i, omega, Aoort);
+	      kappa = 2 * sqrt(omega*omega - Aoort * omega);
+	      sigma_t = 0.5 * sigma_i * kappa / omega;
+	    } else
+	      sigma_t = sigmator * sigma_i;
+	    sigma_i = grandom(0.0,sigma_i);
+	    sigma_t = grandom(0.0,sigma_t);
+        } else
+	  sigma_i = sigma_t = 0.0;
+	/* sign > 0 makes for counter clock wise */
+	Phase(dp)[1][0] = - sign * (vcir_i+sigma_t) * sint + sigma_i * cost;
+	Phase(dp)[1][1] =   sign * (vcir_i+sigma_t) * cost + sigma_i * sint;
+	Phase(dp)[1][2] = 0.0;
     }
 }
