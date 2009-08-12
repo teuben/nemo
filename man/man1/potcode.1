@@ -1,4 +1,4 @@
-.TH POTCODE 1NEMO "6 July 2003"
+.TH POTCODE 1NEMO "12 August 2009"
 .SH NAME
 potcode \- non-selfconsistent N-body code with options to dissipate/diffuse orbits
 .SH SYNOPSIS
@@ -62,13 +62,18 @@ Inverse time-step, to be used with the time integrator.
 [Default: \fB64.0\fP (64 steps per unit time)].
 .TP
 \fBmode\fP=\fImode-number\fP
-Integration mode number: 0=simpel Eulerian, 
-0=Euler, 
+Integration modes, must be a number:
+.nf
+0=Euler (kick and drift at same time)
 1=PC (Predictor Corrector) algorithm, 
 2=modified PC algorithm, 
 3=Runge-Kutta (JEB modified)
 4=4th order Runge-Kutta.
--1,-2=special epicyclic motion (-2 shows only epi motion, -1 full motion)
+5=leapfrog
+6=modified Euler (kick done after drift)
+-1=special epicyclic motion, full motion)
+-2=special epicyclic motion, shows only epi motion
+.nf
 [default: \fB3\fp].
 .TP
 \fBtstop\fP=\fIstop-time\fP
@@ -175,4 +180,5 @@ Peter Teuben
 24-oct-92	V4.1 added fheat=        	PJT
 5-mar-03	V5.0 added mode=-1 to "integrate" orbits numerically on epicyclic orbits	PJT
 6-jul-03	(V5.1) compute guiding center	PJT/RPO
+12-aug-09	V5.1 added leapfrog and modified euler	PJT
 .fi
