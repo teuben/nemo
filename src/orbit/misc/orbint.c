@@ -54,11 +54,13 @@ string defv[] = {
     "mode=rk4\n           integration method (euler,leapfrog,rk2,rk4)",
     "eta=\n               if used, stop if abs(de/e) > eta",
     "variable=f\n         Use variable timesteps (needs eta=)",
-    "VERSION=4.1b\n       14-aug-09 PJT",
+    "VERSION=4.1c\n       14-aug-09 PJT",
     NULL,
 };
 
 string usage = "integrate stellar orbits";
+
+string cvsid="$Id$";
 
 
 #ifndef HUGE
