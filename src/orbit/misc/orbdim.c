@@ -4,6 +4,9 @@
  *		8-jun-88 initial version?			pjt
  *		3-dec-93 nemo v2.x installed?			pjt
  *	       11-jan-95 linux declaration fix			pjt
+ *  Tancredi, G., Sanchez, A., and Roig, F. (2000). 
+ *  "A Comparison between Methods to Compute Lyapunov Exponents", 
+ *  Astron. J. 121, 1171-1179.
  */
 
 #include <stdinc.h>
