@@ -31,6 +31,8 @@
  *				well enough			PJT
  *      29-oct-00       a    don't report of ndiag=0 given      PJT
  *      10-feb-04       V4.0 variable timestepping              PJT
+ *      14-jul-09       V4.1 Bastille Day @ PiTP - added some extra integration modes PJT
+ *                           after Tremaines nice lecture
  *
  */
 
@@ -52,7 +54,7 @@ string defv[] = {
     "mode=rk4\n           integration method (euler,leapfrog,rk2,rk4)",
     "eta=\n               if used, stop if abs(de/e) > eta",
     "variable=f\n         Use variable timesteps (needs eta=)",
-    "VERSION=4.0a\n       15-mar-04 PJT",
+    "VERSION=4.1b\n       14-aug-09 PJT",
     NULL,
 };
 
@@ -85,7 +87,8 @@ extern int match(string, string, int *);
 proc pot;				/* pointer to the potential */
 real print_diag();                      /* returns total energy/hamiltonian */
 void setparams(), prepare();
-void integrate_euler(), integrate_leapfrog1(), integrate_leapfrog2(),
+void integrate_euler1(), integrate_euler2(), 
+     integrate_leapfrog1(), integrate_leapfrog2(),
      integrate_rk2(), integrate_rk4();
 
 
@@ -124,9 +127,9 @@ void nemo_main ()
 
     outstr = stropen (outfile,"w");
     prepare();
-    match(getparam("mode"),"euler leapfrog test rk2 rk4",&imode);
+    match(getparam("mode"),"euler leapfrog test rk2 rk4 me end",&imode);
     if (imode==0x01)
-        integrate_euler();
+        integrate_euler1();
     else if (imode==0x02)
         integrate_leapfrog1();
     else if (imode==0x04)
@@ -135,6 +138,8 @@ void nemo_main ()
         integrate_rk2();
     else if (imode==0x10)
         integrate_rk4();
+    else if (imode==0x20)
+        integrate_euler2();
     else
         error("imode=0x%x; Illegal integration mode=",imode);
 
@@ -167,7 +172,7 @@ void prepare()
 }
 
 /* Standard Euler integration */
-void integrate_euler()
+void integrate_euler1()
 {
     int i, ndim, kdiag, ksave, isave;
     double time,epot,e_last;
@@ -224,6 +229,78 @@ void integrate_euler()
 	    Vorb(o_out,isave) = vel[1];
 	    Worb(o_out,isave) = vel[2];
 	}
+    } /* for(;;) */
+    if (ndiag)
+    dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
+}
+
+/* Modified Euler integration (drift/kick) */
+void integrate_euler2()
+{
+    int i, ndim, kdiag, ksave, isave;
+    double time,epot,e_last;
+    double pos[3],vel[3],acc[3], xvel;
+
+    dprintf (0,"Modified EULER integration\n");
+    /* take last step of input file and set first step for outfile */
+    time = Torb(o_out,0) = Torb(o_in,Nsteps(o_in)-1);
+    pos[0] = Xorb(o_out,0) = Xorb(o_in,Nsteps(o_in)-1);
+    pos[1] = Yorb(o_out,0) = Yorb(o_in,Nsteps(o_in)-1);
+    pos[2] = Zorb(o_out,0) = Zorb(o_in,Nsteps(o_in)-1);
+    vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
+    vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
+    vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
+
+    ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
+    kdiag=0;			/* counter for diagnostics output */
+    ksave=0;
+    isave=0;
+    i=0;				/* counter of timesteps */
+    for(;;) {
+        if (Qstop) break;
+
+	/* first update the positions */
+
+	pos[0] += dt*vel[0];
+	pos[1] += dt*vel[1];
+	pos[2] += dt*vel[2];
+
+	/* get forces at new positions */
+
+	(*pot)(&ndim,pos,acc,&epot,&time);
+
+	time += dt;                     /* advance particle */
+	if (omega != 0) {
+	  acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
+	  acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
+	}
+
+	vel[0] += dt*acc[0];
+	vel[1] += dt*acc[1];
+	vel[2] += dt*acc[2];
+	i++;
+
+        if (i==0) I1(o_out) = print_diag(time,pos,vel,epot);
+	if (ndiag && kdiag++ == ndiag) {	/* see if output needed */
+	    e_last = print_diag(time,pos,vel,epot);
+	    kdiag=0;
+	}
+
+	if (++ksave == nsave) {		/* see if need to store particle */
+	    ksave=0;
+	    isave++;
+	    dprintf(2,"writing isave=%d for i=%d\n",isave,i);
+            if (isave>=Nsteps(o_out)) error("Storage error modified EULER");
+	    Torb(o_out,isave) = time;
+	    Xorb(o_out,isave) = pos[0];
+	    Yorb(o_out,isave) = pos[1];
+	    Zorb(o_out,isave) = pos[2];
+	    Uorb(o_out,isave) = vel[0];
+	    Vorb(o_out,isave) = vel[1];
+	    Worb(o_out,isave) = vel[2];
+	}
+	if (i>=nsteps) break;           /* see if need to quit looping */
+
     } /* for(;;) */
     if (ndiag)
     dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
