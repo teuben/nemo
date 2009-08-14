@@ -12,7 +12,7 @@ INCFILES =
 SRCFILES = 
 OBJFILES=  
 LOBJFILES= 
-BINFILES = orbfour orbint orbplot otos perorb stoo orbsos orbstat
+BINFILES = orbfour orbint orbplot otos perorb stoo orbsos orbstat orblist
 TESTFILES=  orbdim orblist
 
 help:
