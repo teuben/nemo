@@ -1,0 +1,48 @@
+DIR = src/orbit/misc
+BIN = mkorbit orbint otos orblist 
+NEED = $(BIN) potcode snapprint
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+clean:
+	@echo Cleaning $(DIR)
+	@rm -f orb1.in snap1.in orb?.out snap?.out
+
+NBODY = 10
+
+all:    $(BIN)
+
+mkorbit:
+	@echo Running $@
+	$(EXEC) mkorbit orb1.in x=1 vy=1 potname=plummer
+
+otos:
+	@echo Running $@
+	$(EXEC) otos orb1.in snap1.in
+	$(EXEC) potcode snap1.in snap1.out plummer freq=10 tstop=1 freqout=10 mode=0
+	$(EXEC) potcode snap1.in snap2.out plummer freq=10 tstop=1 freqout=10 mode=6
+	$(EXEC) potcode snap1.in snap3.out plummer freq=10 tstop=1 freqout=10 mode=5
+	$(EXEC) potcode snap1.in snap4.out plummer freq=10 tstop=1 freqout=10 mode=4
+	
+	
+orbint:
+	@echo Running $@
+	$(EXEC) orbint orb1.in orb1.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=euler
+	$(EXEC) orbint orb1.in orb2.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=me
+	$(EXEC) orbint orb1.in orb3.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=leapfrog
+	$(EXEC) orbint orb1.in orb4.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=rk4
+
+orblist:
+	@echo Running $@
+	$(EXEC) orblist   orb1.out
+	$(EXEC) snapprint snap1.out
+	$(EXEC) orblist   orb2.out
+	$(EXEC) snapprint snap2.out
+	$(EXEC) orblist   orb3.out
+	$(EXEC) snapprint snap3.out
+	$(EXEC) orblist   orb4.out
+	$(EXEC) snapprint snap4.out
