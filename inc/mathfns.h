@@ -48,7 +48,7 @@ extern "C" {
 
 #if defined(SINGLEPREC)
 
-#if defined(LINUX) || defined(linux)
+#if defined(LINUX) || defined(linux) || defined (__CYGWIN__)
 
 #define rsqrt    sqrtf
 #define rsin     sinf
@@ -127,7 +127,7 @@ inline static float fdex(float x) { return rexp(M_LN10*x); }
 /* real rqbe(real); */
 /* real rdex(real); */
 
-real rlog2(real);
+/* real rlog2(real);*/
 real rexp2(real);
 
 #if defined(SINGLEPREC)

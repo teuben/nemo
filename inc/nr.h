@@ -187,7 +187,7 @@ void fleg(float x, float pl[], int nl);
 void flmoon(int n, int nph, long *jd, float *frac);
 #if !defined(darwin) && !defined(cygwin) && !defined(linux)
 /* double fmin(double,double); for darwin */
-float fmin(float x[]);
+/*float fmin(float x[]);*/
 #endif
 void four1(float data[], unsigned long nn, int isign);
 void fourew(FILE *file[5], int *na, int *nb, int *nc, int *nd);
