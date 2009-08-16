@@ -25,7 +25,7 @@
 # 31-aug-06     add optional png
 # 26-sep-06     use fix64bit.csh if on 64 bit (or use int8=1)
 # 25-oct-07     note that gcc 4.2.2 compiles GI/PP/
-
+# 16-aug-09     added support for Cygwin (JM)
 
 # Other places to get pgplot from
 # cvs -d :pserver:anonymous@cvs.starlink.ac.uk:/cvs co thirdparty/caltech/pgplot
@@ -218,6 +218,23 @@ switch ($host)
     breaksw
   case sgi:
     $dir/pgplot/makemake  $dir/pgplot irix
+    breaksw
+  case *cygwin:
+    if (-e /usr/X11R6) then
+        ln -s /usr/X11R6 /usr/X11R6.4
+	#
+	# for whatever reason, on Cygwin makefile created
+	# assumes /usr/X11R6.4
+	#
+    endif
+    #
+    # need to patch the file pgplot/pgdispd/proccom.c
+    #
+    if ( ! ( -e $dir/pgplot/pgdispd/proccom.c.orignal ) ) then
+      mv $dir/pgplot/pgdispd/proccom.c  $dir/pgplot/pgdispd/proccom.c.orignal
+      sed -e 's/#include <values.h>/ /g' $dir/pgplot/pgdispd/proccom.c.orignal >$dir/pgplot/pgdispd/proccom.c
+    endif
+    $dir/pgplot/makemake  $dir/pgplot  cygwin g77_gcc
     breaksw
   default:
     if (-d $dir/sys_$host) then
