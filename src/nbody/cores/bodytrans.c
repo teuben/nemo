@@ -59,6 +59,7 @@
  *  14-jul-04   fix K&R style code which can give problems for -DSINGLE_PREC code
  *  27-jul-05   add dummy loader for lazy gcc4 type linkers
  *  28-jul-06   add show= options
+ *  15-Aug-09   add support for Cygwin DLL by LOADOBJDLL
  *
  *  Used environment variables (normally set through .cshrc/NEMORC files)
  *      NEMO        used in case NEMOOBJ was not available
@@ -79,6 +80,12 @@
 #include <unistd.h>
 #include <mathlinker.h>
 #include <bodytransc.h>
+
+#if defined(__CYGWIN__)
+#undef LOADOBJ3
+#define LOADOBJDLL
+#endif
+
 
 /*  note: MAXNAMLEN is the Posix max filename (normally 255) */
 #define SHORT_FNAMELEN   64
@@ -142,6 +149,8 @@ local proc bodytrans(string type, string expr, string fname)
 
 #if defined(LOADOBJ3)
     dprintf(1,"bodytrans: V3 .so for %s\n",expr);
+#elif defined(LOADOBJDLL)
+    dprintf(1,"bodytrans: DLL .dll for %s\n",expr);
 #else
     dprintf(1,"bodytrans: V2 .o for %s\n",expr);
 #endif
@@ -158,6 +167,8 @@ local proc bodytrans(string type, string expr, string fname)
     if ((int)strlen(hexpr) < SHORT_FNAMELEN) {
 #if defined(LOADOBJ3)
         sprintf(file, "bt%c_%s.so", type[0], hexpr);     /* make filename */
+#elif defined(LOADOBJDLL)
+        sprintf(file, "bt%c_%s.dll", type[0], hexpr);     /* make filename */
 #else
         sprintf(file, "bt%c_%s.o", type[0], hexpr);     /* make filename */
 #endif
@@ -181,6 +192,8 @@ local proc bodytrans(string type, string expr, string fname)
 	strcat(file, cp);		 /* cp points to 'btX_NAME */
 #if defined(LOADOBJ3)
         strcat(file, ".so");
+#elif defined(LOADOBJDLL)
+        strcat(file, ".dll");
 #else
         strcat(file, ".o");
 #endif
@@ -213,6 +226,9 @@ local proc bodytrans(string type, string expr, string fname)
 	cflags = getenv("CFLAGS");
 #if defined(LOADOBJ3)
         sprintf(cmmd, "cd /tmp;make -f $NEMOLIB/Makefile.lib %s.so > %s.log 2>&1",name,name);
+#elif defined(LOADOBJDLL)
+        sprintf(cmmd, "cd /tmp;cc -I$NEMOINC  -I$NEMOLIB %s -shared  %s.c -o  %s.dll",
+		(cflags==NULL) ? "" : cflags,name,name);
 #else
         sprintf(cmmd, "cd /tmp;cc %s -c %s.c",
 		(cflags==NULL) ? "" : cflags,name);
@@ -227,6 +243,8 @@ local proc bodytrans(string type, string expr, string fname)
 	}
 #if defined(LOADOBJ3)
         sprintf(file, "/tmp/%s.so", name);
+#elif defined(LOADOBJDLL)
+        sprintf(file, "/tmp/%s.dll", name);
 #else
 	sprintf(cmmd,"ldso /tmp/%s",name);
 	dprintf(2,"bodytrans: %s\n",cmmd);
@@ -242,6 +260,10 @@ local proc bodytrans(string type, string expr, string fname)
             sprintf(cmmd, 
 	     "cp /tmp/%s.so $NEMOOBJ/bodytrans/%s.so;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.so; rm /tmp/%s.*",
 	     name,sname,edbbak,sname,name);
+#elif defined(LOADOBJDLL)
+            sprintf(cmmd, 
+             "cp /tmp/%s.dll $NEMOOBJ/bodytrans/%s.dll;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.dll; rm /tmp/%s.*",
+             name,sname,edbbak,sname,name);
 #else
             sprintf(cmmd, 
              "cp /tmp/%s.o $NEMOOBJ/bodytrans/%s.o;chmod a+rw %s;chmod a+r $NEMOOBJ/bodytrans/%s.o; rm /tmp/%s.*",
