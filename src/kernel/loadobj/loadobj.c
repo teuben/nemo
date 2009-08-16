@@ -97,6 +97,10 @@ char *loadobj_version="loadobjMIPS";
 char *loadobj_version="loadobjLINUX";
 #include "loadobjLINUX.c"		/* Linux - testing */
 
+#elif defined(__CYGWIN__)
+char *loadobj_version="loadobjCYGWIN";
+#include "loadobjCYGWIN.c"		/* Cygwin  - testing by JM*/
+
 #else
 				/* if all else failed....*/
 char *loadobj_version="loadobjSTUB";
