@@ -1,6 +1,6 @@
 DIR = src/kernel/misc
-BIN = xrandom nemoinp
-NEED = $(BIN)
+BIN = xrandom nemoinp linreg
+NEED = $(BIN) tabmath
 
 help:
 	@echo Directory $(DIR)
@@ -43,3 +43,7 @@ nemoinp:
 	$(EXEC) nemoinp 1:10:2 newline=f	 ; nemo.coverage nemoinp.c
 	@echo ""
 	
+
+linreg:
+	@nemoinp 1:10 | tabmath - - '%1+rang(0,0.5)' seed=123 > linreg.tab
+	$(EXEC) linreg linreg.tab
