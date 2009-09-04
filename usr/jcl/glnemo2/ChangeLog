@@ -1,5 +1,9 @@
-current version (1.preview.2009-Jul-16)
----------------
+current version
+
+- experimental temperature display
+
+1.preview.2009-Jul-16
+----------------------
 - huge speed up on the rendering engine (up to 1000% !), thanks to :
    - vertex buffer object
    - vertex and pixel shader (via glsl)

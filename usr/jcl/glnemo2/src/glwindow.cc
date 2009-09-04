@@ -70,7 +70,7 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   camera        = _camera;
   //setAttribute(Qt::WA_NoSystemBackground);
   // reset coordinates
-  resetEvents();
+  resetEvents(true);
   is_mouse_pressed   = FALSE;
   is_mouse_zoom      = FALSE;
   is_key_pressed     = FALSE;
@@ -90,6 +90,9 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   setFocus();
   wwidth=894;wheight=633;
   zoom_dynam = 0;
+  // leave events : reset event when we leave opengl windows
+  connect(this,SIGNAL(leaveEvent()),this,SLOT(resetEvents()));
+  
   // OSD
   //QFont f=QFont("Courier", 12, QFont::Light);
   QFont f;
@@ -603,10 +606,12 @@ void GLWindow::computeOrthoFactor()
 }
 // ============================================================================
 // reset rotation and translation to 0,0,0 coordinates
-void GLWindow::resetEvents()
+void GLWindow::resetEvents(bool pos)
 {
-   x_mouse= y_mouse= z_mouse=0;
-  tx_mouse=ty_mouse=tz_mouse=0;
+  if (pos) {
+    x_mouse= y_mouse= z_mouse=0;
+    tx_mouse=ty_mouse=tz_mouse=0;
+  }
   is_pressed_left_button  =FALSE;
   is_pressed_right_button =FALSE;
   is_pressed_middle_button=FALSE;
@@ -920,6 +925,15 @@ void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const QString text, bool ugl
 void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const float value, bool ugl)
 {
   osd->setText(k,(const float) value);
+  if (ugl) updateGL();
+}
+// ============================================================================
+// GLWindow::setOsd()                                                             
+// Set Float value to the specified HudObject                                  
+void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const float value1, 
+                      const float value2, const float value3, bool ugl)
+{
+  osd->setText(k,(const float) value1,(const float) value2,(const float) value3);
   if (ugl) updateGL();
 }
 // ============================================================================

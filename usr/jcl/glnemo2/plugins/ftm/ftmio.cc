@@ -163,11 +163,11 @@ int FtmIO::read(glnemo::ParticlesData * part_data, const int *index, const int n
         part_data->vel = new float[nsel*3];
       }
       if (dmpindx>2 && n2>0) { // gas density and hsml
-        if (part_data->rho) delete [] part_data->rho;
-        part_data->rho = new float[nsel];
-        for (int i=0; i<nsel; i++) part_data->rho[i]=-1.;
-        if (part_data->rneib) delete [] part_data->rneib;
-        part_data->rneib = new float[nsel];
+        if (part_data->rho) delete part_data->rho;
+        part_data->rho = new glnemo::PhysicalData(glnemo::PhysicalData::rho,nsel);
+        for (int i=0; i<nsel; i++) part_data->rho->data[i]=-1.;
+        if (part_data->rneib) delete part_data->rneib;
+        part_data->rneib = new glnemo::PhysicalData(glnemo::PhysicalData::neib,nsel);
       }
     }
     *part_data->nbody = nsel;
@@ -218,11 +218,11 @@ int FtmIO::read(glnemo::ParticlesData * part_data, const int *index, const int n
       for (int i=0, k=0; i<n0; i++) {
         if (index[i]!=-1) {
           if (i>=n1) {
-            part_data->rho[k] = tmp3n[k];
+            part_data->rho->data[k] = tmp3n[k];
             k++;
           }
           else {
-            part_data->rho[k] = 1;
+            part_data->rho->data[k] = 1;
           }
         }
       }
@@ -241,11 +241,11 @@ int FtmIO::read(glnemo::ParticlesData * part_data, const int *index, const int n
       for (int i=0, k=0; i<n0; i++) {
         if (index[i]!=-1) {
           if (i>=n1) {
-            part_data->rneib[k] = tmp3n[k];
+            part_data->rneib->data[k] = tmp3n[k];
             k++;
           }
           else {
-            part_data->rneib[k] = 1;
+            part_data->rneib->data[k] = 1;
           }
         }
       }

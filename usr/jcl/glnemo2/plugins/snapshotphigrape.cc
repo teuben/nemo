@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           PÃ´le de l'Etoile, site de ChÃ¢teau-Gombert                         
-//           38, rue FrÃ©dÃ©ric Joliot-Curie                                     
+//           Pôle de l'Etoile, site de Château-Gombert                         
+//           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -188,24 +188,24 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
         if (first && !ss.eof()) { // first time and rho+hsml exist
           first = false;
           if (nsel > *part_data->nbody|| !part_data->rho) {
-            if (part_data->rho) delete [] part_data->rho;
-            part_data->rho = new float[nsel];
+            if (part_data->rho) delete part_data->rho;
+            part_data->rho = new PhysicalData(PhysicalData::rho,nsel);
           }
           if (nsel > *part_data->nbody || !part_data->rneib) {
-            if (part_data->rneib) delete [] part_data->rneib;
-            part_data->rneib = new float[nsel];
+            if (part_data->rneib) delete part_data->rneib;
+            part_data->rneib = new PhysicalData(PhysicalData::neib,nsel);
           }
         }
         if (!ss.eof()) {
-          part_data->rho[cpt]   = rho1;
-          part_data->rneib[cpt] = hsml;
+          part_data->rho->data[cpt]   = rho1;
+          part_data->rneib->data[cpt] = hsml;
         }
         ss.clear(); // clear error state flag like eof()
         cpt++;
       }
       
     }
-    part_data->computeMinMaxRho();
+    if (part_data->rho) part_data->rho->computeMinMax();
   }
   end_of_data = true;
   return 1;

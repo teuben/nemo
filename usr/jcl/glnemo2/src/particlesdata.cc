@@ -20,29 +20,32 @@ namespace glnemo {
 
 // ============================================================================
 // Constructor                                                                 
-ParticlesData::ParticlesData(const ALLOC _model):cmodel(_model)
+ParticlesData::ParticlesData(const ALLOC _model)
 {
   pos      = NULL;
   vel      = NULL;
   vel_norm = NULL;
-#if 1
+
   rneib    = NULL;
   rho      = NULL;
   temp     = NULL;
-#endif
+  pressure = NULL;
   timu     = NULL;
   nbody    = NULL;
   nemobits = NULL;
-  valid_rho=false;
+  cmodel   = _model;
   allocVar();
   coo_max[0] = coo_max[1] = coo_max[2] = 0.0;
   i_max[0]   = i_max[1]   = i_max[2]   = 0;
+  ipvs = 1; // density by default
 }
 // ============================================================================
 // copy Constructor                                                            
 const ParticlesData& ParticlesData::operator=(const ParticlesData& m)
 {
   if (m.nbody) {
+    cmodel = m.cmodel;
+    ipvs   = m.ipvs;
     if (cmodel)
       nbody = (int *) mallocate((char *) nbody, sizeof(int), true);
     else {
@@ -108,83 +111,59 @@ const ParticlesData& ParticlesData::operator=(const ParticlesData& m)
       }
       vel_norm = NULL;
     }
-#if 1
     // Density "rho"
     if (m.rho) {
-      max_rho = m.max_rho;
-      min_rho = m.min_rho;
-      if (cmodel)
-	rho = (float *) mallocate((char *) rho, sizeof (float) * (*nbody), true);
-      else {
-	if (rho) delete [] rho;
-	rho = new float[*nbody];
-      }
-      //memcpy((float *) rho, (float *) m.rho, sizeof(float)* (*nbody));
-      for (int i=0; i < (*nbody); i++) {
-	rho[i] = m.rho[i];
-      }
-      for (int i=0; i < 100; i++) {
-        density_histo[i] =m.density_histo[i];
-      }
+      if (rho) delete rho;	
+      rho = new PhysicalData(PhysicalData::rho,*nbody);
+      *rho = *m.rho;
     }
     else {
       if (rho) {
 	if (cmodel) { free ((float *) rho); }
-        else        { delete [] rho;        }
+        else        { delete rho;        }
       }
       rho = NULL;
     }
     // neibourgh radius "rneib"
     if (m.rneib) {
-      if (cmodel)
-	rneib = (float *) mallocate((char *) rneib, sizeof (float) * (*nbody), true);
-      else {
-	if (rneib) delete [] rneib;
-	rneib = new float[*nbody];
-      }
-      //memcpy((float *) rneib, (float *) m.rneib, sizeof(float)* (*nbody));
-      for (int i=0; i < (*nbody); i++) {
-	rneib[i] = m.rneib[i];
-      }
+      if (rneib) delete rneib;
+      rneib = new PhysicalData(PhysicalData::neib,*nbody);
+      *rneib = *m.rneib;
     }
     else {
       if (rneib) {
 	if (cmodel) { free ((float *) rneib); }
-        else        { delete [] rneib;        }
+        else        { delete rneib;        }
       }
       rneib = NULL;
     }
     // Temperature "temp"
     if (m.temp) {
-      max_temp = m.max_temp;
-      min_temp = m.min_temp;
-      if (cmodel)
-        temp = (float *) mallocate((char *) temp, sizeof (float) * (*nbody), true);
-      else {
-        if (temp) delete [] temp;
-        temp = new float[*nbody];
-      }
-      //memcpy((float *) temp, (float *) m.temp, sizeof(float)* (*nbody));
-      for (int i=0; i < (*nbody); i++) {
-        temp[i] = m.temp[i];
-      }
-      for (int i=0; i < 100; i++) {
-        density_histo[i] =m.density_histo[i];
-      }
+      if (temp) delete temp;
+      temp = new PhysicalData(PhysicalData::temperature,*nbody);
+      *temp = *m.temp;
     }
     else {
       if (temp) {
         if (cmodel) { free ((float *) temp); }
-        else        { delete [] temp;        }
+        else        { delete temp;           }
       }
       temp = NULL;
     }
+    // Pressure "pressure"
+    if (m.pressure) {
+      if (pressure) delete pressure;
+      pressure = new PhysicalData(PhysicalData::pressure,*nbody);
+      *pressure = *m.pressure;
+    }
+    else {
+      if (pressure) {
+        if (cmodel) { free ((float *) pressure); }
+        else        { delete  pressure;        }
+      }
+      pressure = NULL;
+    }
 
-#endif
-    valid_temp = m.valid_temp;
-    valid_rho = m.valid_rho;
-    //memcpy((float *) coo_max, (float *) m.coo_max, sizeof(float)* 3);
-    //memcpy((int *) i_max, (int *) m.i_max, sizeof(int)* 3);
     for (int i=0; i <3; i++) {
       coo_max[i] = m.coo_max[i];
       i_max[i]   = m.i_max[i];
@@ -233,15 +212,19 @@ ParticlesData::~ParticlesData()
 
   if (rho) {
     if (cmodel) { free ((float *) rho); }
-    else        { delete [] rho;        }
+    else        { delete rho;        }
   }
   if (rneib) {
     if (cmodel) { free ((float *) rneib); }
-    else        { delete [] rneib;        }
+    else        { delete rneib;        }
   }
   if (temp) {
     if (cmodel) { free ((float *) temp); }
-    else        { delete [] temp;        }
+    else        { delete temp;        }
+  }
+  if (pressure) {
+    if (cmodel) { free ((float *) pressure); }
+    else        { delete pressure;        }
   }
   if (timu) {
     if (cmodel) { free ((float *) timu); }
@@ -260,6 +243,7 @@ ParticlesData::~ParticlesData()
   vel_norm = NULL;
   rho      = NULL;
   temp     = NULL;
+  pressure = NULL;
   rneib    = NULL;
   timu     = NULL;
   nbody    = NULL;
@@ -330,88 +314,149 @@ void ParticlesData::computeVelNorm()
   }
 }
 // ============================================================================
-// ParticlesData::computeMinMaxRho()                                           
-int ParticlesData::computeMinMaxRho()
+// ParticlesData::getPhysData()                                                
+// Return data at the index of the Physical value selected ipvs                
+// index = 0 -> rho, 1 -> temp, 2 -> pressure
+PhysicalData * ParticlesData::getPhysData(int index) const
 {
-  if (rho) {
-    max_rho = -1E9;
-    min_rho = 1E9;
-    // compute Min/Max
-    for (int i=0; i<(*nbody); i++) {
-      if (rho[i] != -1 ) {
-	max_rho=std::max(max_rho,rho[i]);
-	min_rho=std::min(min_rho,rho[i]);
-      }
-    }
-    if (max_rho == -1E9 && min_rho == 1E9) {
-      valid_rho = false;
-    } 
-    else {
-      GlobalOptions::rho_exist = true;
-      valid_rho = true;
-    }
-    std::cerr << "min rho="<<min_rho<<" max rho="<<max_rho<<"\n";
-    // compute density histogram                                      
-    // in a array of 100 bins, going from log(min rho) to log(max rho)
-    // we compute the index in that range for the particles's density,
-    // and we increment the index for that bin                        
-    for (int i=0; i<100; i++) {
-      density_histo[i] = 0;
-    }
-    if (valid_rho) {
-      for (int i=0; i<(*nbody); i++) {
-        if (rho[i] != -1 && rho[i] != 0) {
-          int index=(log(rho[i])-log(min_rho))*99./(log(max_rho)-log(min_rho));
-          //int index=((rho[i])-(min_rho))*99./((max_rho)-(min_rho));
-          assert(index<100);
-          density_histo[index]++;
-        }
-      }
-    }
+  if (index==-1) {
+    index=ipvs;
   }
-  return 1;
+  PhysicalData * ptr;
+  switch (index) {
+  case 0:
+    //assert(rneib!=NULL);
+    ptr = rneib;
+    break;
+  case 1:
+    //assert(rho!=NULL);
+    ptr = rho;
+    break;
+  case 2:
+    //assert(temp!=NULL);
+    ptr = temp;
+    break;
+  case 3:
+    //assert(pressure!=NULL);
+    ptr = pressure;
+    break;
+    default:
+    assert(0);
+  }
+  return ptr;
 }
+
+
 // ============================================================================
-// ParticlesData::computeMinMaxTemp()                                           
-int ParticlesData::computeMinMaxTemp()
-{
-  if (temp) {
-    max_temp = -1E9;
-    min_temp = 1E9;
-    // compute Min/Max
-    for (int i=0; i<(*nbody); i++) {
-      if (temp[i] != -1 ) {
-        max_temp=std::max(max_temp,temp[i]);
-        min_temp=std::min(min_temp,temp[i]);
-      }
-    }
-    if (max_temp == min_temp) {
-      valid_temp = false;
-    } 
-    else {
-      valid_temp = true;
-    }
-    std::cerr << "min temp="<<min_temp<<" max temp="<<max_temp<<"\n";
-    // compute density histogram                                      
-    // in a array of 100 bins, going from log(min temp) to log(max temp)
-    // we compute the index in that range for the particles's density,
-    // and we increment the index for that bin                        
-    for (int i=0; i<100; i++) {
-      temp_histo[i] = 0;
-    }
-    if (valid_temp) {
-      for (int i=0; i<(*nbody); i++) {
-        if (temp[i] != -1 && temp[i] != 0) {
-          int index=(log(temp[i])-log(min_temp))*99./(log(max_temp)-log(min_temp));
-          //int index=((temp[i])-(min_temp))*99./((max_temp)-(min_temp));
-          assert(index<100);
-          temp_histo[index]++;
-        }
-      }
-    }
-  }
-  return 1;
-}
+// PhysicalData Class implementation                                           
 // ============================================================================
 
+// ============================================================================
+// Constructor                                                                 
+PhysicalData::PhysicalData(const PHYS _type,const int _nbody,const ALLOC _model)
+{
+  data = NULL;
+  type = _type;
+  nbody = _nbody;
+  cmodel = _model;
+  if (nbody>0) {
+    if (cmodel)
+      data = (float *) ParticlesData::mallocate((char *) data, sizeof (float) * (nbody), true);
+    else {
+      data = new float[nbody];
+    }
+  }
+  valid = false;
 }
+// ============================================================================
+// copy Constructor                                                            
+const PhysicalData& PhysicalData::operator=(const PhysicalData& m)
+{
+  nbody = m.nbody;
+  valid = m.valid;
+  cmodel= m.cmodel;
+  type  = m.type;
+  if (nbody) {
+    max = m.max;
+    min = m.min;
+    if (cmodel) {
+      if (data) free ((float *) data);
+      data = (float *) ParticlesData::mallocate((char *) data, sizeof (float) * (nbody), true);
+    }
+    else {
+      if (data) delete [] data;
+      data = new float[nbody];
+    }
+    for (int i=0; i < (nbody); i++) {
+      data[i] = m.data[i];
+    }
+    for (int i=0; i < 100; i++) {
+      data_histo[i] =m.data_histo[i];
+    }
+  }
+  return *this;
+}
+// ============================================================================
+// Destructor                                                                  
+PhysicalData::~PhysicalData()
+{
+  if (data) {
+    if (cmodel) { free ((float *) data); }
+    else        { delete [] data;        }
+  }
+}
+// ============================================================================
+// PhysicalData::computeMinMax()                                           
+int PhysicalData::computeMinMax()
+{
+  if (data) {
+    max = -1E9;
+    min = 1E9;
+    // compute Min/Max
+    for (int i=0; i<(nbody); i++) {
+      if (data[i] != -1 ) {
+	max=std::max(max,data[i]);
+	min=std::min(min,data[i]);
+      }
+    }
+    if (max == -1E9 && min == 1E9) {
+      valid = false;
+    } 
+    else {
+      switch (type) {
+          case PhysicalData::neib : 
+            break;
+          case PhysicalData::rho : 
+            GlobalOptions::rho_exist         = true;
+            break;
+          case PhysicalData::temperature : 
+            GlobalOptions::temperature_exist = true;
+            break;            
+          case PhysicalData::pressure :
+            GlobalOptions::pressure_exist    = true;
+            break;                        
+     }
+      valid = true;
+    }
+    std::cerr << "min data="<<min<<" max data="<<max<<"\n";
+    // compute density histogram                                      
+    // in a array of 100 bins, going from log(min data) to log(max data)
+    // we compute the index in that range for the particles's density,
+    // and we increment the index for that bin                        
+    for (int i=0; i<100; i++) {
+      data_histo[i] = 0;
+    }
+    if (valid) {
+      for (int i=0; i<(nbody); i++) {
+        if (data[i] != -1 && data[i] != 0) {
+          int index=(log(data[i])-log(min))*99./(log(max)-log(min));
+          //int index=((data[i])-(min))*99./((max)-(min));
+          assert(index<100);
+          data_histo[index]++;
+        }
+      }
+    }
+  }
+  return 1;
+}
+} // namespace glnemo

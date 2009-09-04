@@ -83,6 +83,7 @@ namespace glnemo {
   signals:
       void cellClicked(const int, const int);
       void comboActivated(const int, const int);
+      void updateIpvs(const int);
       
   private slots:
     void  my_editTextChanged ( const QString & text ) {
@@ -108,7 +109,7 @@ namespace glnemo {
   FormObjectControl(QWidget *parent = 0);
 
     ~FormObjectControl();
-    void update(const ParticlesData   * ,
+    void update(ParticlesData   * ,
                 ParticlesObjectVector * ,
                 GlobalOptions         * ,
 	        bool reset_table=true  );
@@ -123,12 +124,13 @@ namespace glnemo {
   void densityProfileObjectChanged(const int);
   void textureObjectChanged(const int , const int);
   void leaveEvent();
+  void updateIpvs(const int);
   public slots:
     void changeColorMap() {
       dens_color_bar->draw(form.dens_slide_min->value(),form.dens_slide_max->value());
     }
   private slots:
-    void reject() {}; // allow to de activate escape key to close the box
+    void reject() {} // allow to de activate escape key to close the box
     // global slots
     void checkVisib();
     void updateVisib(const bool _b,const int _r,const int _t);
@@ -163,13 +165,19 @@ namespace glnemo {
     void on_orbit_max_spin_valueChanged(int);
     void on_orbit_history_spin_valueChanged(int);
 
-    // -- Density Tab --
+    // -- Physical quantities  Tab --
     void on_dens_slide_min_valueChanged(int);
     void on_dens_slide_max_valueChanged(int);
     void on_dens_apply_button_clicked();
     void on_dens_set_uselect_clicked();
+    void setPhysicalTabName();
+    //
+    void on_dens_phys_radio_clicked();  
+    void on_temp_phys_radio_clicked();  
+    void on_pressure_phys_radio_clicked();  
+    void on_physical_selected();
+    //
     void on_objects_properties_currentChanged(int index) {
-      
       if (index==1) { // tab density
         std::cerr << "index tab="<<index<<" dens_histo_view width="<<form.dens_histo_view->width()<<"\n";
         form.dens_histo_view->resize(form.dens_histo_view->width(),form.dens_histo_view->height());
@@ -197,7 +205,7 @@ namespace glnemo {
     }
     bool ignoreCloseEvent;
     Ui::FormObjectControl form;
-    const ParticlesData * current_data;
+    ParticlesData * current_data;
     ParticlesObjectVector * pov;
     GlobalOptions * go;
     QComboBoxTable * combobox;
@@ -220,6 +228,7 @@ namespace glnemo {
     bool lock;
     DensityHisto * dens_histo;
     DensityColorBar * dens_color_bar;
+    PhysicalData * phys_select;
 
 };
 

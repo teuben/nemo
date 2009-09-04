@@ -29,10 +29,8 @@
 #define BENCH 1
 #define GLDRAWARRAYS 1
 namespace glnemo {
-float DENS_MIN=-1.;;
-float DENS_MAX=0.000006;
-float TMIN=0.;
-float TMAX=1.;
+float PHYS_MIN=-1.;;
+float PHYS_MAX=0.000006;
 int index_min, index_max;
 // ============================================================================
 // constructor                                                                 
@@ -140,14 +138,16 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
   part_data = _part_data;
   po        = _po;
   go        = _go;
+  
+  // get physical value data array
+  phys_select = part_data->getPhysData();
+              
   // color
   mycolor   = po->getColor();
   
-  if (DENS_MIN == -1 && part_data->rho) {
-    DENS_MIN = part_data->getMinRho();
-    DENS_MAX = part_data->getMaxRho();
-    TMIN     = part_data->getMinTemp();
-    TMAX     = part_data->getMaxTemp();
+  if (PHYS_MIN == -1 && phys_select && phys_select->isValid()) {
+    PHYS_MIN = phys_select->getMin();
+    PHYS_MAX = phys_select->getMax();
   }
   //setColor();
   if (!GLWindow::GLSL_support) buildDisplayList();
@@ -160,7 +160,9 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
     glEndList();
   }
   if (GLWindow::GLSL_support) {
-
+    //!!!!!!!!
+    //PHYS_MIN = TMIN;
+    //PHYS_MAX = TMAX;
     buildVboPos();
     buildVboColor();
     buildVboSize2();
@@ -168,36 +170,40 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
     sortByDensity();
 #endif
   }
-  std::cerr << "DENS min="<< DENS_MIN<<" DENS max="<< DENS_MAX << "\n";
+  std::cerr << "DENS min="<< PHYS_MIN<<" DENS max="<< PHYS_MAX << "\n";
 }
 // ============================================================================
 // updateVbo                                                                   
 void GLObjectParticles::updateVbo()
 {
+  // get physical value data array
+  if (phys_select != part_data->getPhysData()) { // new physical quantity
+    phys_select=part_data->getPhysData();
+    buildVboPos();
+  }
+  
   if (GLWindow::GLSL_support && po->isGazEnable()) {
 
     if (go->render_mode == 1 || go->render_mode == 2) {
-      if (go->dens_local) {
-        DENS_MAX = po->getMaxDensity();
-        DENS_MIN = po->getMinDensity();
-        TMIN     = po->getMinTemperature();
-        TMAX     = po->getMaxTemperature();
+      if (go->phys_local) {
+        PHYS_MAX = po->getMaxPhys();
+        PHYS_MIN = po->getMinPhys();
       } else {
-        DENS_MAX = go->dens_max_glob;
-        DENS_MIN = go->dens_min_glob;
+        PHYS_MAX = go->phys_max_glob;
+        PHYS_MIN = go->phys_min_glob;
       }
       // We must re ordering indexes
-      if (part_data->rho) {
+      if (phys_select && phys_select->isValid()) {
 #if ! GLDRAWARRAYS
         rho.clear();
 #endif
         for (int i=0; i < po->npart; i+=po->step) {         
-          if (part_data->rho) {
+          if (phys_select && phys_select->isValid()) {
 #if ! GLDRAWARRAYS
             int index=po->index_tab[i];
             GLObjectIndexTab myrho;
             myrho.index   = index;
-            myrho.value   = part_data->rho[index];
+            myrho.value   = phys_select[index];
             myrho.i_point = i;
             rho.push_back(myrho);
 #endif
@@ -325,17 +331,19 @@ void GLObjectParticles::buildVboPos()
   
   GLfloat* vertices = new GLfloat[((po->npart/po->step)+1)*3]; // create vertex array
   
-  rho.clear();    // clear rho density vector
-  zdepth.clear(); // clear zdepth vector     
+  rho.clear();      // clear rho density vector
+  phys_itv.clear(); // clear ohysical value vector
+  zdepth.clear();   // clear zdepth vector     
   for (int i=0; i < po->npart; i+=po->step) {
     int index=po->index_tab[i];
-    if (part_data->rho) {
-      GLObjectIndexTab myrho;
-      myrho.index   = index;
-      myrho.value   = part_data->rho[index];
-      myrho.i_point = i;
-      rho.push_back(myrho);
+    if (phys_select && phys_select->isValid()) {
+      GLObjectIndexTab myphys;
+      myphys.index   = index;
+      myphys.value   = phys_select->data[index];
+      myphys.i_point = i;
+      phys_itv.push_back(myphys);
     }
+    
 #if 0 // used if z depth test activated
     GLObjectIndexTab myz;
     myz.index = index;
@@ -345,12 +353,13 @@ void GLObjectParticles::buildVboPos()
   }
   // sort by density
 #if GLDRAWARRAYS
-  sort(rho.begin(),rho.end(),GLObjectIndexTab::compareLow);
+  sort(phys_itv.begin(),phys_itv.end(),GLObjectIndexTab::compareLow);
+  //sort(rho.begin(),rho.end(),GLObjectIndexTab::compareHigh);
 #endif
   // fill vertices array sorted by density
   for (int i=0; i < po->npart; i+=po->step) {
     int index;
-    if (part_data->rho) index = rho[i].index;
+    if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
     else                index = po->index_tab[i];
     vertices[nvert_pos*3+0] = part_data->pos[index*3  ];
     vertices[nvert_pos*3+1] = part_data->pos[index*3+1];
@@ -381,170 +390,6 @@ void GLObjectParticles::buildVboPos()
 void GLObjectParticles::buildVboColor()
 {
   buildVboColorGasGasSorted();
-  //buildVboColorTempGasSorted();
-}
-// ============================================================================
-// buildVboColor                                                               
-// Build Vector Buffer Object for colors array                                 
-void GLObjectParticles::buildVboColorTempGasSorted()
-{
-  QTime tbench,vbobench;
-  tbench.restart();
-  nvert_pos=0;
-  GLfloat * colors = new GLfloat[((po->npart/po->step)+1)*4]; // create colors array
-
-  std::cerr << "buildVboColor Densmin="<<DENS_MIN<<"\n";
-  std::cerr << "buildVboColor Densmax="<<DENS_MAX<<"\n";
-  // density
-  float LOGDMIN = log(DENS_MIN);
-  float LOGDMAX = log(DENS_MAX);
-  float DIFMM   = LOGDMAX - LOGDMIN;
-  float INVDIFMM= 1./DIFMM;
-  //float LOGMPMINRHO = log(part_data->getMinRho());
-  //float LOGMPMAXRHO = log(part_data->getMaxRho());
-  // temperature
-  
-  // Compute TMIN and TMAX according to the selected density
-  bool first=true;
-  
-  for (int i=0; i < po->npart; i+=po->step) {
-    int index;
-    if (part_data->rho) index = rho[i].index;
-    else                index = po->index_tab[i];
-    if (part_data->rho && part_data->temp) {
-      float partrhoindex=part_data->rho[index];
-      if (partrhoindex >= DENS_MIN && partrhoindex <= DENS_MAX) {
-        if (first) {
-          TMIN = TMAX = part_data->temp[index];
-          first=false;
-        }
-        TMIN = std::min(TMIN,part_data->temp[index]);
-        TMAX = std::max(TMIN,part_data->temp[index]);
-      }
-    }
-  }
-  std::cerr << "TMIN = "<< TMIN <<" TMAX = " << TMAX << "\n";
-  float LOGTMIN = log(TMIN);
-  float LOGTMAX = log(TMAX);
-  float TDIFMM   = LOGTMAX - LOGTMIN;
-  float INVTDIFMM= 1./TDIFMM;
-  float LOGMPMINTEMP = log(part_data->getMinTemp());
-  float LOGMPMAXTEMP = log(part_data->getMaxTemp());
-  for (int i=0; i < po->npart; i+=po->step) {
-    int index;
-    if (part_data->rho) index = rho[i].index;
-    else                index = po->index_tab[i];
-    float log_temp, log_rho;
-    log_temp=0.0;
-    if (part_data->rho && part_data->temp) {
-      float partrhoindex=part_data->rho[index];
-      float logpri=log(partrhoindex);
-      float parttempindex=part_data->temp[index];
-      float logpti=log(parttempindex);
-      
-#if 0
-      log_temp=((log(part_data->rho[index])-log(part_data->getMinRho()))/
-          (log(part_data->getMaxRho())-log(part_data->getMinRho())));
-#endif
-      if (partrhoindex >= DENS_MIN && partrhoindex <= DENS_MAX) {
-
-        // log of the density
-        log_rho=((logpri-LOGDMIN)*INVDIFMM);
-        // log of temperature
-        log_temp=((logpti-LOGTMIN)*INVTDIFMM);
-          
-        if (go->reverse_cmap) { // reversed colormap
-          log_temp=((LOGTMAX-logpti)*INVTDIFMM);
-        }
-        else {                  // normal colormap
-
-          if (! go->constant_cmap ) {
-              // good density colors according to the selection
-            log_temp=((logpti- LOGMPMINTEMP)/
-                (LOGMPMAXTEMP-LOGMPMINTEMP));
-          } else {
-              // keep color map constant between 2 frames
-            log_temp=((logpti-LOGTMIN)/
-                (TDIFMM));
-          }
-
-        }
-      }
-      else {
-        log_temp = 0.;
-      }
-    }
-    GLObject::setColor(po->getColor());
-    float powcolor=go->powercolor;
-    float powalpha=go->poweralpha;
-    float col=mycolor.redF();
-    //int cindex=(int) (log_temp*(R.size()-1));
-    int cindex=(int) (log_temp*(go->R->size()-1));
-    bool ok=true;
-    if (part_data->rho && part_data->rho[index] == -1) ok=false;
-    if (part_data->rho && ok) {
-      colors[nvert_pos*4+0] =  pow((*go->R)[cindex],powcolor);
-    } else {
-      colors[nvert_pos*4+0] = mycolor.redF();
-    }
-    col=mycolor.greenF();
-    if (part_data->rho && ok) {
-      colors[nvert_pos*4+1] =  pow((*go->G)[cindex],powcolor);
-    } else {
-      colors[nvert_pos*4+1] = mycolor.greenF();
-    }
-    col=mycolor.blueF();
-    if (part_data->rho && ok) {
-      colors[nvert_pos*4+2] =  pow((*go->B)[cindex],powcolor);
-    } else {
-      colors[nvert_pos*4+2] = mycolor.blueF();
-    }
-
-    if (part_data->rho) {
-      if (part_data->rho[index] != -1) { // Normalize rho for alpha color
-#if 1
-	//colors[nvert_pos*4+3] = pow(alpha * log_rho,2.);
-        colors[nvert_pos*4+3] = pow(log_rho,powalpha);//* log_rho;
-#else
-        // Normalize rho for alpha color
-        float alpha=po->getGazAlpha()/255.;
-        colors[nvert_pos*4+3] = alpha+(1-alpha)*(part_data->rho[index]-part_data->getMinRho())/
-            (part_data->getMaxRho()-part_data->getMinRho());
-#endif
-        if (colors[nvert_pos*4+3] > 1.0 || colors[nvert_pos*4+3] <0.0) {
-          std::cerr << "Erreur alpha = "<<colors[nvert_pos*4+3]<<"\n";
-        }
-      } 
-      else {
-        colors[nvert_pos*4+3] = 1.0;
-      }
-    } 
-    else {
-      colors[nvert_pos*4+3] = 1.0;
-    }
-    nvert_pos++;
-  }
-  vbobench.restart();
-  // bind VBO in order to use
-  //glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_color);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
-  //std::cerr << "vbo_pos = " << vbo_pos << "\n";
-  assert( nvert_pos <= (po->npart/po->step)+1);
-  // upload data to VBO
-#if 0
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, nvert_pos * 4 * sizeof(float), colors, GL_STATIC_DRAW_ARB);
-#else
-  glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, nvert_pos * 3 * sizeof(float), nvert_pos * 4 * sizeof(float), colors);
-#endif
-  //checkVboAllocation((int) (nvert_pos * 3 * sizeof(float)));
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-
-  if (BENCH) qDebug("WALL Time elapsed to build VBO color: %f s", tbench.elapsed()/1000.);
-  if (BENCH) qDebug("TRANSFERT Time elapsed to build VBO color: %f sec %f MB/s", vbobench.elapsed()/1000.,
-      (nvert_pos * 4 * sizeof(float)/1024./1024.)/(vbobench.elapsed()/1000.));
-  
-  delete [] colors;
-
 }
 // ============================================================================
 // buildVboColor                                                               
@@ -555,79 +400,72 @@ void GLObjectParticles::buildVboColorGasGasSorted()
   tbench.restart();
   nvert_pos=0;
   GLfloat * colors = new GLfloat[((po->npart/po->step)+1)*4]; // create colors array
-#if 0
-  QColor mycolor(255,255,255);
-  QColor leftcolor= po->getColor();
-  int VV=256;
-  float R0 = (leftcolor.red()-mycolor.red())/(VV-1.);
-  float G0 = (leftcolor.green()-mycolor.green())/(VV-1.);
-  float B0 = (leftcolor.blue()-mycolor.blue())/(VV-1.);
-  //std::cerr << "RO="<<R0<<"  B0="<<B0<<"  G0="<<G0<<"\n";
-  for (int i=0; i<VV; i++) {
-    int r = (int)(leftcolor.red()-i*R0);
-    int g = (int)(leftcolor.green()-i*G0);
-    int b = (int)(leftcolor.blue()-i*B0);
-      //std::cerr << "r="<<r<<"  g="<<g<<"  b="<<b<<"\n";   
-    R.push_back(r);
-    G.push_back(g);
-    B.push_back(b);
-  }
-#endif
-  std::cerr << "buildVboColor Densmin="<<DENS_MIN<<"\n";
-  std::cerr << "buildVboColor Densmax="<<DENS_MAX<<"\n";
+  std::cerr << "buildVboColor Densmin="<<PHYS_MIN<<"\n";
+  std::cerr << "buildVboColor Densmax="<<PHYS_MAX<<"\n";
   
-  float LOGDMIN = log(DENS_MIN);
-  float LOGDMAX = log(DENS_MAX);
+  float LOGDMIN = log(PHYS_MIN);
+  float LOGDMAX = log(PHYS_MAX);
 #if 0  
-  DENS_MIN = part_data->getMinRho();
-  DENS_MAX = part_data->getMaxRho();CCCC
+  PHYS_MIN = part_data->getMinRho();
+  PHYS_MAX = part_data->getMaxRho();CCCC
   LOGDMIN = log(part_data->getMinRho());
   LOGDMAX = log(part_data->getMaxRho());
 #endif
   
   float DIFMM   = LOGDMAX - LOGDMIN;
   float INVDIFMM= 1./DIFMM;
-  float LOGMPMINRHO = log(part_data->getMinRho());
-  float LOGMPMAXRHO = log(part_data->getMaxRho());
+  float LOGMPMINRHO,LOGMPMAXRHO;
+  LOGMPMINRHO = LOGMPMAXRHO =0;
+  if (phys_select && phys_select->isValid()) {
+    LOGMPMINRHO = log(phys_select->getMin());
+    LOGMPMAXRHO = log(phys_select->getMax());
+    
+  }
+  float LOGRNEIBMIN,LOGRNEIBMAX,INVDIFFRNEIB;
+  if (part_data->rneib) {
+    LOGRNEIBMIN = log(part_data->rneib->getMin());
+    LOGRNEIBMAX = log(part_data->rneib->getMax());
+    INVDIFFRNEIB = 1./(LOGRNEIBMAX-LOGRNEIBMIN);
+  }
   for (int i=0; i < po->npart; i+=po->step) {
     int index;
-    if (part_data->rho) index = rho[i].index;
+    if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
     else                index = po->index_tab[i];
     float log_rho;
     log_rho=0.0;
-    if (part_data->rho) {
-      float partrhoindex=part_data->rho[index];
+    if (phys_select && phys_select->isValid()) {
+      float partrhoindex=phys_select->data[index];
       float logpri=log(partrhoindex);
 #if 0
-      log_rho=((log(part_data->rho[index])-log(part_data->getMinRho()))/
-          (log(part_data->getMaxRho())-log(part_data->getMinRho())));
+      log_rho=((log(phys_select[index])-log(part_data->getMinRho()))/
+               (log(part_data->getMaxRho())-log(part_data->getMinRho())));
 #endif
-  
-      if (partrhoindex >= DENS_MIN && partrhoindex <= DENS_MAX) {
-
-          // log of the density
+      
+      if (partrhoindex >= PHYS_MIN && partrhoindex <= PHYS_MAX) {
+        
+        // log of the density
         log_rho=((logpri-LOGDMIN)*INVDIFMM);
-          
-          if (go->reverse_cmap) { // reversed colormap
-            log_rho=((LOGDMAX-logpri)*INVDIFMM);
-          }
-          else {                  // normal colormap
-
-            if (! go->constant_cmap ) {
-              // good density colors according to the selection
-              log_rho=((logpri- LOGMPMINRHO)/
-                  (LOGMPMAXRHO-LOGMPMINRHO));
-            } else {
-              // keep color map constant between 2 frames
-              log_rho=((logpri-LOGDMIN)/
-                  (DIFMM));
-            }
-
-          }
-	}
-        else {
-           log_rho = 0.;
+        
+        if (go->reverse_cmap) { // reversed colormap
+          log_rho=((LOGDMAX-logpri)*INVDIFMM);
         }
+        else {                  // normal colormap
+          
+          if (! go->constant_cmap ) {
+            // good density colors according to the selection
+            log_rho=((logpri- LOGMPMINRHO)/
+                     (LOGMPMAXRHO-LOGMPMINRHO));
+          } else {
+            // keep color map constant between 2 frames
+            log_rho=((logpri-LOGDMIN)/
+                     (DIFMM));
+          }
+          
+        }
+      }
+      else {
+        log_rho = 0.;
+      }
     }
     GLObject::setColor(po->getColor());
     float powcolor=go->powercolor;
@@ -636,34 +474,42 @@ void GLObjectParticles::buildVboColorGasGasSorted()
     //int cindex=(int) (log_rho*(R.size()-1));
     int cindex=(int) (log_rho*(go->R->size()-1));
     bool ok=true;
-    if (part_data->rho && part_data->rho[index] == -1) ok=false;
-    if (part_data->rho && ok) {
+    if (phys_select && phys_select->data[index] == -1) ok=false;
+    if (phys_select && ok) {
       colors[nvert_pos*4+0] =  pow((*go->R)[cindex],powcolor);
     } else {
       colors[nvert_pos*4+0] = mycolor.redF();
     }
     col=mycolor.greenF();
-    if (part_data->rho && ok) {
+    if (phys_select && ok) {
       colors[nvert_pos*4+1] =  pow((*go->G)[cindex],powcolor);
     } else {
       colors[nvert_pos*4+1] = mycolor.greenF();
     }
     col=mycolor.blueF();
-    if (part_data->rho && ok) {
+    if (phys_select && ok) {
       colors[nvert_pos*4+2] =  pow((*go->B)[cindex],powcolor);
     } else {
       colors[nvert_pos*4+2] = mycolor.blueF();
     }
 
-    if (part_data->rho) {
-      if (part_data->rho[index] != -1) { // Normalize rho for alpha color
+    if (phys_select && phys_select->isValid()) {
+      if (phys_select->data[index] != -1) { // Normalize rho for alpha color
 #if 1
 	//colors[nvert_pos*4+3] = pow(alpha * log_rho,2.);
-        colors[nvert_pos*4+3] = pow(log_rho,powalpha);//* log_rho;
+        if (0 && part_data->rneib) {
+          float alpha=(log(part_data->rneib->data[index])-LOGRNEIBMIN)*
+                      INVDIFFRNEIB;
+          colors[nvert_pos*4+3] = pow((1-alpha)*log_rho,powalpha);//rpow(alpha,powalpha);
+          
+          //std::cerr << "rneib = " << part_data->rneib->data[index] << " alpha = " << alpha << "\n";
+        } else {
+          colors[nvert_pos*4+3] = pow(log_rho,powalpha);//* log_rho;
+        }
 #else
         // Normalize rho for alpha color
         float alpha=po->getGazAlpha()/255.;
-	colors[nvert_pos*4+3] = alpha+(1-alpha)*(part_data->rho[index]-part_data->getMinRho())/
+	colors[nvert_pos*4+3] = alpha+(1-alpha)*(phys_select[index]-part_data->getMinRho())/
 	    (part_data->getMaxRho()-part_data->getMinRho());
 #endif
 	if (colors[nvert_pos*4+3] > 1.0 || colors[nvert_pos*4+3] <0.0) {
@@ -713,21 +559,21 @@ void GLObjectParticles::buildVboSize()
   QColor mycolor = po->getColor();
   for (int i=0; i < po->npart; i+=po->step) {
     int index;
-    if (part_data->rho) index = rho[i].index;
+    if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
     else                index = po->index_tab[i];
     
     size_neib[nvert_pos*3+1] = 0.;
     size_neib[nvert_pos*3+2] = 0.;
     float log_rho;
-    if (part_data->rho) {
-      log_rho=((log(part_data->rho[index])-log(part_data->getMinRho()))/
-	  (log(part_data->getMaxRho())-log(part_data->getMinRho())));
+    if (phys_select && phys_select->isValid()) {
+      log_rho=((log(phys_select->data[index])-log(phys_select->getMin()))/
+	  (log(phys_select->getMax())-log(phys_select->getMin())));
     }
     if (part_data->rneib) {
-      if (part_data->rneib[index] != -1) { // Normalize rho for alpha color
+      if (part_data->rneib->data[index] != -1) { // Normalize rho for alpha color
 
 	if (log_rho > 0.0000 ) {
-	  size_neib[nvert_pos*3+0] = part_data->rneib[index];
+	  size_neib[nvert_pos*3+0] = part_data->rneib->data[index];
 	} else {
 	  size_neib[nvert_pos*3+0] = 0.0;
 	}
@@ -761,23 +607,23 @@ void GLObjectParticles::buildVboSize2()
   QTime tbench;
   tbench.restart();
   nvert_pos=0;
-  //float LOGDMIN = log(DENS_MIN);
-  //float LOGDMAX = log(DENS_MAX);
-  //float DIFMM   = log(DENS_MAX)-log(DENS_MIN);
+  //float LOGDMIN = log(PHYS_MIN);
+  //float LOGDMAX = log(PHYS_MAX);
+  //float DIFMM   = log(PHYS_MAX)-log(PHYS_MIN);
   //float INVDIFMM= 1./DIFMM;
 
   GLfloat * size_neib = new GLfloat[((po->npart/po->step)+1)]; // create size_neib array
   QColor mycolor = po->getColor();
   for (int i=0; i < po->npart; i+=po->step) {
     int index;
-    if (part_data->rho) index = rho[i].index;
+    if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
     else                index = po->index_tab[i];
     
     float log_rho;
-    if (part_data->rho) {
+    if (phys_select && phys_select->isValid()) {
 
-	if (part_data->rho[index] >= DENS_MIN && part_data->rho[index] <= DENS_MAX) {
-          //log_rho=((log(part_data->rho[index])-LOGDMIN))*INVDIFMM;
+	if (phys_select->data[index] >= PHYS_MIN && phys_select->data[index] <= PHYS_MAX) {
+          //log_rho=((log(phys_select[index])-LOGDMIN))*INVDIFMM;
           log_rho=1.;
 	}
         else {
@@ -785,10 +631,10 @@ void GLObjectParticles::buildVboSize2()
         }
     }
     if (part_data->rneib) {
-      if (part_data->rneib[index] != -1) { // Normalize rho for alpha color
+      if (part_data->rneib->data[index] != -1) { // Normalize rho for alpha color
 
         if (log_rho > 0.0000 ) {
-          size_neib[nvert_pos] = part_data->rneib[index];
+            size_neib[nvert_pos] = part_data->rneib->data[index];
         } else {
           size_neib[nvert_pos] = 0.0;
         }
@@ -937,9 +783,9 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
   //  detect if rho exist for the component
   int index;
   bool is_rho=false;
-  if (part_data->rho) {
-    index = rho[0].index;
-    if (part_data->rho[index] != -1) is_rho = true;
+  if (phys_select && phys_select->isValid()) {
+    index = phys_itv[0].index;
+    if (phys_select->data[index] != -1) is_rho = true;
   }
   if (go->zsort) { // Z sort particles
       zsort = true;
@@ -1136,7 +982,7 @@ void GLObjectParticles::sortByDensity()
     if (part_data->rho) {
         index = rho[i].i_point;
         int index2 = rho[i].index;
-    	if (part_data->rho[index2] >= DENS_MIN && part_data->rho[index2] <= DENS_MAX) {
+    	if (part_data->rho->data[index2] >= PHYS_MIN && part_data->rho->data[index2] <= PHYS_MAX) {
         indexes_sorted[cpt++] = index;
 	}
     } else {
@@ -1170,7 +1016,7 @@ void GLObjectParticles::sortByDepth()
   nind_sorted=0;
   for (int i=0; i < po->npart; i+=po->step) {
     int index=po->index_tab[i];
-    if (part_data->rho[index] >= DENS_MIN && part_data->rho[index] <= DENS_MAX) {
+    if (part_data->rho->data[index] >= PHYS_MIN && part_data->rho->data[index] <= PHYS_MAX) {
     float
         x=part_data->pos[index*3  ],
         y=part_data->pos[index*3+1],

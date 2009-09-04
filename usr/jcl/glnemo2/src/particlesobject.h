@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           P√¥le de l'Etoile, site de Ch√¢teau-Gombert                         
-//           38, rue Fr√©d√©ric Joliot-Curie                                     
+//           PÙle de l'Etoile, site de Ch‚teau-Gombert                         
+//           38, rue FrÈdÈric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -69,66 +69,61 @@ class ParticlesObject{
     //
     // Object managing method
     //
-    bool isVisible()   const  { return visible;};
-    void setVisible(const bool _v)  { visible = _v;  };
-    const QColor getColor()  const  { return color;  };
-    void setColor(const QColor _v)  { color = _v;    };
+    bool isVisible()   const  { return visible;}
+    void setVisible(const bool _v)  { visible = _v;  }
+    const QColor getColor()  const  { return color;  }
+    void setColor(const QColor _v)  { color = _v;    }
     // particles
-    bool isPartEnable() const { return part;  };
-    void setPart(const bool _v)     { part = _v; };
-    void setPartSize(const float _v){ part_size=_v;  };
-    void setPartAlpha(const int _v) { part_alpha=_v; };
-    float getPartSize()       { return part_size;};
-    int getPartAlpha()        { return part_alpha;};
+    bool isPartEnable() const { return part;  }
+    void setPart(const bool _v)     { part = _v; }
+    void setPartSize(const float _v){ part_size=_v;  }
+    void setPartAlpha(const int _v) { part_alpha=_v; }
+    float getPartSize()       { return part_size;}
+    int getPartAlpha()        { return part_alpha;}
     // gas
-    bool isGazEnable() const  { return gaz;    };
-    void setGaz(const bool _v)      { gaz = _v; };
-    void setGazSize(const float _v) { gaz_size=_v;   };
-    void setGazAlpha(const int _v)  { gaz_alpha=_v;  };
-    float getGazSize()        { return gaz_size;};
-    int getGazAlpha()        { return gaz_alpha; };
-    bool isGazRotate()         { return gaz_rotate; };
-    float getGazSizeMax()    { return gaz_size_max;};
-    void setGazSizeMax(const float _v) { gaz_size_max = _v;};
-    void setGazRotate( const bool _b) { gaz_rotate = _b; };
-    void setTextureIndex(const int _tex) { texture_index = _tex;};
-    int getTextureIndex()     { return texture_index; };
-    void setGazGlsl(const bool _v)  { gaz_glsl=_v;};
-    bool  isGazGlsl()         { return gaz_glsl;};
+    bool isGazEnable() const  { return gaz;    }
+    void setGaz(const bool _v)      { gaz = _v; }
+    void setGazSize(const float _v) { gaz_size=_v;  }
+    void setGazAlpha(const int _v)  { gaz_alpha=_v;  }
+    float getGazSize()        { return gaz_size;}
+    int getGazAlpha()        { return gaz_alpha; }
+    bool isGazRotate()         { return gaz_rotate; }
+    float getGazSizeMax()    { return gaz_size_max;}
+    void setGazSizeMax(const float _v) { gaz_size_max = _v;}
+    void setGazRotate( const bool _b) { gaz_rotate = _b; }
+    void setTextureIndex(const int _tex) { texture_index = _tex;}
+    int getTextureIndex()     { return texture_index; }
+    void setGazGlsl(const bool _v)  { gaz_glsl=_v;}
+    bool  isGazGlsl()         { return gaz_glsl;}
     
     // velocity
-    bool isVelEnable() const  { return vel;    };
-    void setVel(const bool _v)      { vel = _v; };
-    void setVelSize(const float _v)   { vel_size=_v;   };
-    void setVelAlpha(const int _v)  { vel_alpha=_v;  };
-    float getVelSize()         { return vel_size;};
-    int getVelAlpha()        { return vel_alpha; };
-    void setVelFactor(const float _v) { vel_factor =_v;  };
-    float getVelFactor()        {return vel_factor;};
-    void setVelSizeMax(const float _v){ vel_size_max =_v; };
-    float getVelSizeMax()       { return vel_size_max;};
+    bool isVelEnable() const  { return vel;    }
+    void setVel(const bool _v)      { vel = _v; }
+    void setVelSize(const float _v)   { vel_size=_v;   }
+    void setVelAlpha(const int _v)  { vel_alpha=_v;  }
+    float getVelSize()         { return vel_size;}
+    int getVelAlpha()        { return vel_alpha; }
+    void setVelFactor(const float _v) { vel_factor =_v;  }
+    float getVelFactor()        {return vel_factor;}
+    void setVelSizeMax(const float _v){ vel_size_max =_v; }
+    float getVelSizeMax()       { return vel_size_max;}
     // orbits
-    bool isOrbitsEnable() const  { return orbits; };
-    bool isOrbitsRecording() const  { return o_record; };
-    void setOrbits(const bool _o)      { orbits=_o;};
-    void setOrbitsRecord(const bool _o){ o_record=_o;};
-    void setOrbitsMax(const int _m)    { orbits_max = _m;};
-    void setOrbitsHistory(const int _h)    { orbits_history = _h;};
-    void setOrbitsAnimate(const bool _a) { orbits_animate = _a;};
-    int getOrbitsMax()           { return orbits_max; };
-    int getOrbitsHistory()       { return orbits_history;};
-    bool getOrbitsAnimate()      { return orbits_animate;};
-    ObjFrom selectFrom()        { return obj_from;};
+    bool isOrbitsEnable() const  { return orbits; }
+    bool isOrbitsRecording() const  { return o_record; }
+    void setOrbits(const bool _o)      { orbits=_o;}
+    void setOrbitsRecord(const bool _o){ o_record=_o;}
+    void setOrbitsMax(const int _m)    { orbits_max = _m;}
+    void setOrbitsHistory(const int _h)    { orbits_history = _h;}
+    void setOrbitsAnimate(const bool _a) { orbits_animate = _a;}
+    int getOrbitsMax()           { return orbits_max; }
+    int getOrbitsHistory()       { return orbits_history;}
+    bool getOrbitsAnimate()      { return orbits_animate;}
+    ObjFrom selectFrom()        { return obj_from;}
     // density
-    void setMinDensity(const float _v) { min_density = _v; };
-    void setMaxDensity(const float _v) { max_density = _v; };
-    float getMinDensity()  const { return min_density; };
-    float getMaxDensity()  const { return max_density; };
-    // temperature
-    void setMinTemperature(const float _v) { min_temp = _v; };
-    void setMaxTemperature(const float _v) { max_temp = _v; };
-    float getMinTemperature()  const { return min_temp; };
-    float getMaxTemperature()  const { return max_temp; };    
+    void setMinPhys(const float _v) { min_phys = _v; }
+    void setMaxPhys(const float _v) { max_phys = _v; }
+    float getMinPhys()  const { return min_phys; }
+    float getMaxPhys()  const { return max_phys; }
   private:
 
     QColor color;    // object color                    
@@ -156,12 +151,9 @@ class ParticlesObject{
     int orbits_max;
     int orbits_history;
     bool orbits_animate;
-    // density
-    float min_density;
-    float max_density;
-    // temperature
-    float min_temp;
-    float max_temp;
+    // physicial value
+    float min_phys;
+    float max_phys;
     void setColor();
     std::string obj_name;  // or file name
     ObjFrom obj_from;

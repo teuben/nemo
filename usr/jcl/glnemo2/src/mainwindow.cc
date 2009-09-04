@@ -86,6 +86,10 @@ MainWindow::MainWindow(std::string _ver)
           gl_window,SLOT(updateColorVbo(const int)));
   connect(form_o_c,SIGNAL(densityProfileObjectChanged(const int)),
           gl_window,SLOT(updateVbo(const int)));
+  connect(form_o_c,SIGNAL(updateIpvs(int)),
+          gl_window,SLOT(updateIpvs(int)));
+  connect(form_o_c,SIGNAL(updateIpvs(int)),
+          this,SLOT(updateIpvs(int)));
   // Interactive select/ glselect connections
   connect(gl_window->gl_select, SIGNAL(updatePareticlesSelected(const int)),
           form_options,SLOT(updateParticlesSelect(const int)));
@@ -708,6 +712,7 @@ void MainWindow::initVariables()
   }
   is_key_pressed   = false;
   is_mouse_pressed = false;
+  gl_window->setMouseRot(store_options->xrot,store_options->yrot,store_options->zrot);
 }
 // -----------------------------------------------------------------------------
 // killPlayingEvent                                                             
@@ -831,10 +836,17 @@ void MainWindow::actionCenterToCom(const bool ugl)
   double com[3] = {0., 0., 0.};
   int np=0;
   mutex_data->lock();
+  mutex_loading.lock();
   if (current_data ) {
-    for (int i=0; i<(int)pov2.size();i++) {
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // September 2009, 4th                               
+    // Change "pov2" by "pov", seems to fix              
+    // a bug regarding bad COM when interactive centering
+    // while loading snapshot...                         
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    for (int i=0; i<(int)pov.size();i++) {
 	 // loop on all the objects
-	const ParticlesObject * po = &(pov2[i]);        // object
+	const ParticlesObject * po = &(pov[i]);        // object
 	if (po->isVisible()) {                                   // is visible  
 	  ParticlesData * part_data = current_data->part_data;// get its Data
 	  // loop on all the particles of the object
@@ -853,6 +865,7 @@ void MainWindow::actionCenterToCom(const bool ugl)
     if (ugl) gl_window->updateGL();
   }
   mutex_data->unlock();
+  mutex_loading.unlock();
 }
 // -----------------------------------------------------------------------------
 // actionReset()                                                                
@@ -1115,11 +1128,11 @@ void MainWindow::uploadNewFrame()
 	  current_data->getInterfaceType() == "List of Gadget 2" ||
           current_data->getInterfaceType() == "List of PhiGRAPE" ||
           current_data->getInterfaceType() == "List of Nemo") { 
-      //mutex_data.lock();
+      //mutex_data->lock();
       //pov2=pov;
       ParticlesObject::copyVVkeepProperties(pov,pov2,user_select->getNSel()); 
       form_o_c->update( current_data->part_data, &pov2,store_options,false); // update Form
-      //mutex_data.unlock();
+      //mutex_data->unlock();
     } else {
       //pov2=pov; // modif orbits
     }
@@ -1158,6 +1171,10 @@ void MainWindow::updateOsd()
   gl_window->setOsd(GLObjectOsd::Getdata,
 		    QString((current_data->getInterfaceType()).c_str()),false);
   gl_window->setOsd(GLObjectOsd::Zoom,(const float) store_options->zoom);
+  gl_window->setOsd(GLObjectOsd::Rot,(const float) store_options->xrot,
+                    (const float) store_options->yrot,(const float) store_options->zrot);
+  gl_window->setOsd(GLObjectOsd::Trans,(const float) store_options->xtrans,
+                    (const float) store_options->ytrans,(const float) store_options->ztrans);
 }
 // -----------------------------------------------------------------------------
 // startBench()                                                                 

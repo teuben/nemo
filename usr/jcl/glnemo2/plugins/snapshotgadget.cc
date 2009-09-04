@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           PÃ´le de l'Etoile, site de ChÃ¢teau-Gombert                         
-//           38, rue FrÃ©dÃ©ric Joliot-Curie                                     
+//           Pôle de l'Etoile, site de Château-Gombert                         
+//           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -101,21 +101,21 @@ int SnapshotGadget::nextFrame(const int * index_tab, const int nsel)
         part_data->vel = new float[nsel*3];
       }
       //rho
-      if (part_data->rho) delete [] part_data->rho;
-      part_data->rho = new float[nsel];
-      for (int i=0; i<nsel; i++) part_data->rho[i]=-1.;
+      if (part_data->rho) delete part_data->rho;
+      part_data->rho = new PhysicalData(PhysicalData::rho,nsel);
+      for (int i=0; i<nsel; i++) part_data->rho->data[i]=-1.;
       //rneib
-      if (part_data->rneib) delete [] part_data->rneib;
-      part_data->rneib = new float[nsel];
-      for (int i=0; i<nsel; i++) part_data->rneib[i]=-1.;
+      if (part_data->rneib) delete part_data->rneib;
+      part_data->rneib = new PhysicalData(PhysicalData::neib,nsel);
+      for (int i=0; i<nsel; i++) part_data->rneib->data[i]=-1.;
       //temp
-      if (part_data->temp) delete [] part_data->temp;
-      part_data->temp = new float[nsel];
-      for (int i=0; i<nsel; i++) part_data->temp[i]=-1.;
+      if (part_data->temp) delete part_data->temp;
+      part_data->temp = new PhysicalData(PhysicalData::temperature,nsel);
+      for (int i=0; i<nsel; i++) part_data->temp->data[i]=-1.;
     }
     *part_data->nbody = nsel;
 #if 1
-    if (gadget_io->read2(part_data->pos,part_data->vel,part_data->rho, part_data->rneib,part_data->temp,
+    if (gadget_io->read2(part_data->pos,part_data->vel,part_data->rho->data, part_data->rneib->data,part_data->temp->data,
 	index_tab,nsel,load_vel)) {
 #else
     if (gadget_io->read(part_data->pos,part_data->vel,part_data->rho, part_data->rneib,
@@ -123,13 +123,16 @@ int SnapshotGadget::nextFrame(const int * index_tab, const int nsel)
 
 #endif
       part_data->computeVelNorm();
-      part_data->computeMinMaxRho();
-      part_data->computeMinMaxTemp();
-      if ( ! part_data->isRhoValid() ) {
-        if (part_data->rho) delete [] part_data->rho;
+      part_data->rho->computeMinMax();
+      part_data->temp->computeMinMax();
+      part_data->rneib->computeMinMax();
+      if ( ! part_data->rho->isValid()) {
+        if (part_data->rho) delete part_data->rho;
         part_data->rho=NULL;
-        if (part_data->rneib) delete [] part_data->rneib;
+        if (part_data->rneib) delete part_data->rneib;
         part_data->rneib=NULL;
+        if (part_data->temp) delete part_data->temp;
+        part_data->temp=NULL;
       }
       if (! part_data->timu ) part_data->timu = new float;
       *part_data->timu = gadget_io->getTime();

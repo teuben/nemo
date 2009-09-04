@@ -93,7 +93,7 @@
    <iconset>
     <normaloff>../../../../../../../../../../../../../../home/jcl/.designer/backup</normaloff>../../../../../../../../../../../../../../home/jcl/.designer/backup</iconset>
   </property>
-  <layout class="QGridLayout" name="gridLayout_7">
+  <layout class="QGridLayout" name="gridLayout_6">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="sizePolicy">
@@ -572,7 +572,7 @@ p, li { white-space: pre-wrap; }
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab_particles">
       <attribute name="title">
@@ -878,11 +878,11 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_density">
+     <widget class="QWidget" name="tab_physical_value">
       <attribute name="title">
        <string>Density</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_4">
+      <layout class="QGridLayout" name="gridLayout_5">
        <item row="0" column="0">
         <widget class="QGraphicsView" name="dens_histo_view">
          <property name="sizePolicy">
@@ -934,9 +934,9 @@ p, li { white-space: pre-wrap; }
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QGroupBox" name="dens_loc_box">
+        <widget class="QGroupBox" name="phys_threshold">
          <property name="title">
-          <string>Density threshold</string>
+          <string>Threshold</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
           <item row="0" column="0" colspan="2">
@@ -1061,16 +1061,13 @@ p, li { white-space: pre-wrap; }
        <item row="3" column="0">
         <widget class="QGroupBox" name="groupBox_6">
          <property name="title">
-          <string>Density color range</string>
+          <string>Physical value to display</string>
          </property>
-         <layout class="QFormLayout" name="formLayout">
-          <property name="fieldGrowthPolicy">
-           <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-          </property>
+         <layout class="QGridLayout" name="gridLayout_4">
           <item row="0" column="0">
-           <widget class="QRadioButton" name="dens_loc_button">
+           <widget class="QRadioButton" name="dens_phys_radio">
             <property name="text">
-             <string>threshold</string>
+             <string>density</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -1078,50 +1075,21 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QRadioButton" name="dens_glob_button">
+           <widget class="QRadioButton" name="temp_phys_radio">
             <property name="text">
-             <string>min/max</string>
+             <string>temperature</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QRadioButton" name="dens_glob_button_2">
+          <item row="2" column="0">
+           <widget class="QRadioButton" name="pressure_phys_radio">
             <property name="text">
-             <string>user select</string>
+             <string>pressure</string>
             </property>
            </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="4" column="0">
-        <widget class="QGroupBox" name="dens_glob_box">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="title">
-          <string>User select</string>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_6">
-          <item row="0" column="0">
-           <widget class="QLabel" name="label_9">
-            <property name="text">
-             <string>Min</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLineEdit" name="dens_min_user"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_10">
-            <property name="text">
-             <string>Max</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QLineEdit" name="dens_max_user"/>
           </item>
          </layout>
         </widget>
@@ -1278,54 +1246,6 @@ p, li { white-space: pre-wrap; }
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>dens_loc_button</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>dens_loc_box</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>53</x>
-     <y>693</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>67</x>
-     <y>547</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>dens_loc_button</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>dens_glob_box</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>37</x>
-     <y>694</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>28</x>
-     <y>756</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>dens_glob_button</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>dens_glob_box</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>92</x>
-     <y>715</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>206</x>
-     <y>748</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>dens_slide_min</sender>
    <signal>valueChanged(int)</signal>

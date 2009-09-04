@@ -234,17 +234,19 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
       if (( *nnemobits & DensBit) && ( *nnemobits & AuxBit)) {
         cpt=0;
         if (nsel > *part_data->nbody || !part_data->rho) {
-          if (part_data->rho) delete [] part_data->rho;
-          part_data->rho = new float[nsel];
+          if (part_data->rho) delete part_data->rho;
+          //!!!part_data->rho = new float[nsel];
+          part_data->rho = new PhysicalData(PhysicalData::rho,nsel);
+          
         }
         if (nsel > *part_data->nbody || !part_data->rneib) {
           if (part_data->rneib) delete [] part_data->rneib;
-          part_data->rneib = new float[nsel];
+          part_data->rneib = new PhysicalData(PhysicalData::neib,nsel);
         }
         for (int i=0; i<*nnbody; i++) {
           int idx=index_tab[i];
           if (idx!=-1) {
-              part_data->rho[cpt]   = nrho[idx];
+              part_data->rho->data[cpt]   = nrho[idx];
               cpt++;
           }
         }
@@ -255,13 +257,14 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
         for (int i=0; i<*nnbody; i++) {
           int idx=index_tab[i];
           if (idx!=-1) {
-            part_data->rneib[cpt] = nrneib[idx];
+            part_data->rneib->data[cpt] = nrneib[idx];
             //std::cerr << "rneib="<< part_data->rneib[cpt] <<"\n";
             cpt++;
           }
         }
         assert(cpt==nsel);
-        part_data->computeMinMaxRho();
+        part_data->rho->computeMinMax();
+        part_data->rneib->computeMinMax();
       }
 
       *part_data->timu=*ntimu;

@@ -101,7 +101,9 @@ int SnapshotFtm::nextFrame(const int * index_tab, const int nsel)
   if (valid) {
   if (ftm_io->read(part_data,index_tab,nsel,load_vel)) {
     part_data->computeVelNorm();
-    part_data->computeMinMaxRho();
+    if (part_data->rho) {
+      part_data->rho->computeMinMax();
+    }
     end_of_data=true; // only one frame from an ftm snapshot
   }
     else {

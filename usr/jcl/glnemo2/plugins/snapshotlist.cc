@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           PÃ´le de l'Etoile, site de ChÃ¢teau-Gombert                         
-//           38, rue FrÃ©dÃ©ric Joliot-Curie                                     
+//           Pôle de l'Etoile, site de Château-Gombert                         
+//           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -52,9 +52,11 @@ ComponentRangeVector * SnapshotList::getSnapshotRange()
   bool stop=false;
   ComponentRangeVector * crv=NULL;
   
-
-  while (!stop && getLine()) {
-    if (current_data) delete current_data;
+  int ipvs = part_data->getIpvs(); // backup ipvsr
+  while (!stop && getLine()) {  
+    if (current_data) {
+      delete current_data;
+    }
     current_data = plugins->getObject(snapshot);
     if (current_data) {
       stop=true;
@@ -68,6 +70,7 @@ ComponentRangeVector * SnapshotList::getSnapshotRange()
       //user_select->setSelection(select,crv,&pov);
       std::cerr << "SnapshotList::getSnapshotRange select_time=" << select_time << "\n";
       current_data->initLoading(load_vel, select_time);
+      current_data->part_data->setIpvs(ipvs); // copy ipvs from the previous shots
       // load from disk
       //current_data->nextFrame(user_select->getIndexesTab(),user_select->getNSel());
       if (first) {

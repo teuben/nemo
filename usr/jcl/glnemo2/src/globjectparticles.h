@@ -26,6 +26,7 @@ namespace glnemo {
 class GLObject;
 class GLObjectParticles;
 class ParticlesData;
+class PhysicalData;
 class ParticlesObject;
 class GlobalOptions;
 class GLTexture;
@@ -77,7 +78,6 @@ class GLObjectParticles : public GLObject {
     void buildOrbitsDisplayList();
     void buildVboPos();
     void buildVboColor();
-    void buildVboColorTempGasSorted();
     void buildVboColorGasGasSorted();
     void buildVboSize();
     void buildVboSize2();
@@ -96,6 +96,7 @@ class GLObjectParticles : public GLObject {
     GLuint vel_dp_list, orb_dp_list;
     GLTexture * texture;
     GLTextureVector * gtv;
+    const PhysicalData * phys_select;
     // method
     void displaySprites(const double *mModel);
     void displayVboSprites(int,const bool);
@@ -106,7 +107,7 @@ class GLObjectParticles : public GLObject {
     GLuint vbo_pos, vbo_color , vbo_size, vbo_index, vbo_index2;
     int nvert_pos;
     // Rho
-    GLObjectIndexTabVector rho,zdepth;
+    GLObjectIndexTabVector rho,zdepth,phys_itv;
     GLuint * indexes_sorted, nind_sorted;
     //
     void initShader();

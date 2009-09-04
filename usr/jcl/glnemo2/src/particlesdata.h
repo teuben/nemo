@@ -18,6 +18,30 @@
 
 namespace glnemo {
 
+class PhysicalData {
+  public:
+  enum ALLOC {New,Malloc};
+  enum PHYS {neib,rho,temperature,pressure};
+  PhysicalData(const PHYS, const int _nbody=0, const ALLOC model=New);
+  ~PhysicalData();
+  const PhysicalData& operator=(const PhysicalData& m);
+  void setNbody(const int n) {
+    nbody = n;
+  }
+  int computeMinMax();
+  float getMin() const { return min;}
+  float getMax() const { return max;}
+  bool isValid() const { return valid;}
+  int getType()  const { return type;};
+  float * data;
+  int data_histo[100];
+  private:
+  int nbody;
+  float min,max;
+  bool valid;
+  ALLOC cmodel;
+  PHYS type;
+};
 class ParticlesData{
 public:
     enum ALLOC {New,Malloc};
@@ -31,28 +55,26 @@ public:
     int   * nbody, i_max[3], * nemobits;;
     float * pos, 
     * vel, * vel_norm,
-    * timu, coo_max[3],* rneib, * rho, * temp;
+    * timu, coo_max[3];//* rneib, * rho, * temp, * pressure;
     int tree_size_max;
-    char * mallocate(char *, int, bool force=false);
+    PhysicalData * rneib, * rho, * temp, * pressure;
+    static char * mallocate(char *, int, bool force=false);
     void computeVelNorm();
-    float getMaxVelNorm() const { return max_vel_norm; };
-    float getMaxRho() const { return max_rho; };
-    float getMinRho() const { return min_rho; };
-    float getMaxTemp() const { return max_temp; };
-    float getMinTemp() const { return min_temp; };
-    bool isRhoValid() const { return valid_rho;}
-    bool isTempValid() const { return valid_temp;}
-    int computeMinMaxRho();
-    int computeMinMaxTemp();
-    int density_histo[100];
-    int temp_histo[100];
+    float getMaxVelNorm() const { return max_vel_norm; }
+    void setIpvs(const int i=1)  { // set the index of the physical value selected
+      if (i!=-1) {
+        ipvs = i; 
+      }
+    }
+    int getIpvs() {
+      return ipvs;
+    }
+    PhysicalData * getPhysData(int=-1) const;
     private:
       float max_vel_norm;
-      float max_rho, min_rho;
-      float max_temp, min_temp;
-      bool valid_rho, valid_temp;
-      const ALLOC cmodel;
+      ALLOC cmodel;
       int allocVar();
+      int ipvs; // Index of the physical value selected
 };
 
 }

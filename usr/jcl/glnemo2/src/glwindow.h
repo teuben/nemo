@@ -38,19 +38,23 @@ public:
 
     void bestZoomFit();
     void resize(const int w, const int h ) { resizeGL(w,h);}
-    void resizeOsd(const int w, const int h ) { osd->setWH(w,h);};
+    void resizeOsd(const int w, const int h ) { osd->setWH(w,h);}
     void resetView() {    // reset view to initial
       setRotation(0,0,0);
       setTranslation(0,0,0);
-      resetEvents();
+      resetEvents(true);
     }
     static GLuint m_program;    
     static bool GLSL_support;
-    void setFBO(bool _b) { fbo = _b; };
-    void setFBOSize(GLuint w, GLuint h) { texWidth=w; texHeight=h;};
-    QImage grabFrameBufferObject() { return imgFBO;};
+    void setFBO(bool _b) { fbo = _b; }
+    void setFBOSize(GLuint w, GLuint h) { texWidth=w; texHeight=h;}
+    QImage grabFrameBufferObject() { return imgFBO;}
     void rotateAroundAxis(const int); 
-  
+    void setMouseRot(const float x,const float y, const float z) {
+      x_mouse = (int) y;
+      y_mouse = (int) x;
+      z_mouse = (int) z;
+    }
     // select area
     GLSelection * gl_select;
     static void checkGLErrors(std::string s);
@@ -58,6 +62,7 @@ public:
   signals:
     void sigKeyMouse(const bool, const bool);
     void sigScreenshot();
+    void leaveEvent();
 public slots:
    void  update(ParticlesData   * ,
                 ParticlesObjectVector * ,
@@ -73,8 +78,10 @@ public slots:
    void setOsd(const GLObjectOsd::OsdKeys k,const QString text, bool b=true);
    void setOsd(const GLObjectOsd::OsdKeys k,const int value, bool b=true);
    void setOsd(const GLObjectOsd::OsdKeys k,const float value, bool b=true);
-   void resetFrame() { nframe=0; };
-   int getFrame() { return nframe;};
+   void setOsd(const GLObjectOsd::OsdKeys k, const float value1, 
+                      const float value2, const float value3, bool b=true);
+   void resetFrame() { nframe=0; }
+   int getFrame() { return nframe;}
 
 protected:
   void	initializeGL();
@@ -83,13 +90,21 @@ protected:
 
 private slots:
   void updateVel(const  int); // update velocity vector
-  void rotateAroundX() { rotateAroundAxis(0);};
-  void rotateAroundY() { rotateAroundAxis(1);};
-  void rotateAroundZ() { rotateAroundAxis(2);};
-  void translateX()    { translateAlongAxis(0); };
-  void translateY()    { translateAlongAxis(1); };
-  void translateZ()    { translateAlongAxis(2); };
+  void updateIpvs(const int ipvs=-1) {
+    p_data->setIpvs(ipvs);
+  }
+  void leaveEvent ( QEvent * event ) {
+      if (event) {;}
+      emit leaveEvent();
+    }
+  void rotateAroundX() { rotateAroundAxis(0);}
+  void rotateAroundY() { rotateAroundAxis(1);}
+  void rotateAroundZ() { rotateAroundAxis(2);}
+  void translateX()    { translateAlongAxis(0); }
+  void translateY()    { translateAlongAxis(1); }
+  void translateZ()    { translateAlongAxis(2); }
   void setTextureObject(const int, const int);
+  void resetEvents(bool pos=false);
 private:
   // my parent
   QWidget * parent;
@@ -116,7 +131,7 @@ private:
   void wheelEvent       ( QWheelEvent *e );
   void keyReleaseEvent  ( QKeyEvent   *k );
   void keyPressEvent    ( QKeyEvent   *k );
-  void resetEvents();
+  
   bool is_pressed_left_button;
   bool is_pressed_right_button;
   bool is_pressed_middle_button;

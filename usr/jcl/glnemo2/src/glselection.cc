@@ -140,11 +140,13 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
     // loop on all the objects
     for (int i=0; i<nobj; i++) {
       const ParticlesObject * po = (*gpv)[i].getPartObj();        // object
-      float DMIN = po->getMinDensity();
-      float DMAX = po->getMaxDensity();
+      float DMIN = po->getMinPhys();
+      float DMAX = po->getMaxPhys();
 
       if (po->isVisible()) {                                   // is visible  
         part_data = (*gpv)[i].getPartData();// get its Data
+        // get physical value data array
+        PhysicalData * phys_select = part_data->getPhysData();
         // loop on all the particles of the object
         for (int j  = 0; j  <  po->npart; j ++) {
           int jndex= po->index_tab[j];
@@ -160,9 +162,9 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
           float winy=viewport[1] + (1 + v3d.y) * viewport[3] / 2;
           winy = viewport[3]-winy;
           bool indensity=true;
-          if (part_data->rho) { 
-            if (part_data->rho[jndex] >= DMIN && 
-                part_data->rho[jndex] <= DMAX) {
+          if (phys_select && phys_select->isValid()) { 
+            if (phys_select->data[jndex] >= DMIN && 
+                phys_select->data[jndex] <= DMAX) {
                 indensity=true;
             } else {
                 indensity=false;

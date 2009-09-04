@@ -247,18 +247,18 @@ void GLOctree::computeDensity()
   // display list
   if (pov && store_options->octree_enable) {
     if (!p_data->rho) {
-      p_data->rho = new float[*p_data->nbody];
+      p_data->rho = new PhysicalData(PhysicalData::rho,*p_data->nbody);
       for (int i=0; i<*p_data->nbody; i++) {
-        p_data->rho[i] = -1.;
+        p_data->rho->data[i] = -1.;
       }
     }
     if (!p_data->rneib) {
-      p_data->rneib = new float[*p_data->nbody];
+      p_data->rneib = new PhysicalData(PhysicalData::neib,*p_data->nbody);
     }
     hackTreeDensity(root,1);
     PRINT_D std::cerr << "Stop build display List #bodies kept ["<<nbody_keeped<<"]\n";
     std::cerr << "Density estimation completed...\n";
-    p_data->computeMinMaxRho();
+    p_data->rho->computeMinMax();
   }
 }
 // ============================================================================
@@ -280,13 +280,13 @@ int GLOctree::hackTreeDensity(Node * tree, const int level)
       density = 0.000000001;
     }
       //int index=(*pov)[tree->obj].index_tab[tree->index];
-      p_data->rho[tree->index] = density;
+      p_data->rho->data[tree->index] = density;
       int level2;
       if (level-3>0) level2=level-3;
       else if (level-2>0) level2=level-2;
         else if (level-1>0) level2=level-1;
           else level2 = level;
-      p_data->rneib[tree->index] = (float ) size_max/(1<<(level2));
+      p_data->rneib->data[tree->index] = (float ) size_max/(1<<(level2));
       return 1;
    }
    else { // a node

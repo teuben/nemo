@@ -15,6 +15,8 @@
 
 namespace glnemo {
 
+// ============================================================================
+// constructor                                                                 
 LoadingThread::LoadingThread(SnapshotInterface * si,
                              UserSelection * _user_select,
                              ParticlesObjectVector * _pov,
@@ -32,30 +34,30 @@ LoadingThread::LoadingThread(SnapshotInterface * si,
   valid_new_frame = false;
 }
 
-
+// ============================================================================
+// Destructor                                                                  
 LoadingThread::~LoadingThread()
 {
 }
-
+// ============================================================================
+// run()                                                                       
+// this function will run in parallel in a thread                              
 void LoadingThread::run()
 {
+  mutex_data->lock(); // lock data access
   // get snapshot component ranges
   ComponentRangeVector * crv = current_data->getSnapshotRange();
   //ComponentRange::list(crv);
   if (crv) {
     assert(crv);
     assert(crv->size());
-    mutex_data->lock();
-#if 0
-    if (current_data->getInterfaceType() == "SnapshotList")
-#endif
-      user_select->setSelection(select,crv,pov);
+    user_select->setSelection(select,crv,pov);
     if (current_data->nextFrame(user_select->getIndexesTab(),user_select->getNSel())) {
       valid_new_frame = true;
       store_options->new_frame = true;
     }
-    mutex_data->unlock();
   }
+  mutex_data->unlock(); // unlock data access
 }
 
 }

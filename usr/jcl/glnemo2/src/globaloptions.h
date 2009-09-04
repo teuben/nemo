@@ -93,10 +93,14 @@ public:
     // memory
     bool duplicate_mem;
     // density
-    bool dens_local;
-    float dens_max_glob;
-    float dens_min_glob;
+    bool  phys_local;
+    float phys_max_glob;
+    float phys_min_glob;
     static bool rho_exist;
+    // temperature
+    static bool temperature_exist;
+    // pressure
+    static bool pressure_exist;
     // colormap
     int colormap;
     bool reverse_cmap; // reverse colormap

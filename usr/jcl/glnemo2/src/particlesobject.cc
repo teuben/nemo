@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           P√¥le de l'Etoile, site de Ch√¢teau-Gombert                         
-//           38, rue Fr√©d√©ric Joliot-Curie                                     
+//           PÙle de l'Etoile, site de Ch‚teau-Gombert                         
+//           38, rue FrÈdÈric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -74,8 +74,8 @@ ParticlesObject::ParticlesObject(const ParticlesObject&m)
   orbits_max   = m.orbits_max;
   orbits_history=m.orbits_history;
   orbits_animate=m.orbits_animate;
-  min_density   = m.min_density;
-  max_density   = m.max_density;
+  min_phys   = m.min_phys;
+  max_phys   = m.max_phys;
   OrbitsVector oo = m.ov;
   // loop on orbits_max
   for (OrbitsVector::iterator oit =oo.begin();oit!=oo.end() ; oit++) {
@@ -130,8 +130,8 @@ const ParticlesObject::ParticlesObject&
   orbits_max   = m.orbits_max;
   orbits_history=m.orbits_history;
   orbits_animate=m.orbits_animate;
-  min_density   = m.min_density;
-  max_density   = m.max_density;
+  min_phys   = m.min_phys;
+  max_phys   = m.max_phys;
 
   OrbitsVector oo = m.ov;
   // loop on orbits_max
@@ -182,8 +182,8 @@ void ParticlesObject::copyProperties(const ParticlesObject&m)
   orbits_max   = m.orbits_max;
   orbits_history=m.orbits_history;
   orbits_animate=m.orbits_animate;
-  min_density   = m.min_density;
-  max_density   = m.max_density;
+  min_phys   = m.min_phys;
+  max_phys   = m.max_phys;
 
   //ol           = m.ol;
   //pos          = m.pos;
@@ -291,8 +291,8 @@ void ParticlesObject::init(const ObjFrom _of, const std::string _name)
   orbits_max   = 20;
   orbits_history=50;
   orbits_animate=false;
-  min_density   = 0.;
-  max_density   = 10000000000.;
+  min_phys   = 0.;
+  max_phys   = 10000000000.;
 
   setColor();
 

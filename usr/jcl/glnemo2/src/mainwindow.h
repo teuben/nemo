@@ -91,6 +91,11 @@ class MainWindow : public QMainWindow {
     void updateBenchFrame();
     void startAutoScreenshot();
     void saveIndexList();
+    void updateIpvs(const int ipvs=-1) {
+       if (current_data) {
+         current_data->part_data->setIpvs(ipvs);
+       }
+    }
   private:
 
     // ------------------------------

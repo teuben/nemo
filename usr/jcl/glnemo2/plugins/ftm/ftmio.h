@@ -79,12 +79,12 @@ public:
     int read();
     int read(glnemo::ParticlesData * pdata, const int *index, const int nsel,
              const bool); 
-    float * getMass()   const { return mass; };
-    float * getPos()    const { return pos; };
-    float * getVel()    const { return vel; };
+    float * getMass()   const { return mass; }
+    float * getPos()    const { return pos; }
+    float * getVel()    const { return vel; }
     float   getTime()   const { return float(tframe);}
-    int     getNtotal() const { return n0;};
-    const FtmComponent * getComp() const { return comp;};
+    int     getNtotal() const { return n0;}
+    const FtmComponent * getComp() const { return comp;}
     
 private:
   std::string filename;

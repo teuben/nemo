@@ -17,7 +17,9 @@ namespace glnemo {
   float GlobalOptions::MAX_PARTICLES_SIZE   = 15.0;
   float GlobalOptions::MAX_TEXTURE_SIZE     = 1.0;
   float GlobalOptions::MAX_VEL_VECTOR_SIZE  = 2.0;
-  bool  GlobalOptions::rho_exist = false;
+  bool  GlobalOptions::rho_exist         = false;
+  bool  GlobalOptions::temperature_exist = false;
+  bool  GlobalOptions::pressure_exist    = false;
 // ============================================================================
 // constructor                                                                 
 GlobalOptions::GlobalOptions()
@@ -87,9 +89,9 @@ GlobalOptions::GlobalOptions()
   duplicate_mem = true;
   octree_enable = false;
   // density
-  dens_local = true;
-  dens_min_glob = -1.;
-  dens_max_glob = -1.;
+  phys_local = true;
+  phys_min_glob = -1.;
+  phys_max_glob = -1.;
   // colormap
   colormap=108;
   reverse_cmap = false;
@@ -210,10 +212,10 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   new_frame = m.new_frame;
   // memory
   duplicate_mem = m.duplicate_mem;
-  // density
-  dens_local = m.dens_local;
-  dens_max_glob = m.dens_max_glob;
-  dens_min_glob = m.dens_min_glob;
+  // physical value
+  phys_local = m.phys_local;
+  phys_max_glob = m.phys_max_glob;
+  phys_min_glob = m.phys_min_glob;
   // colormap
   colormap = m.colormap;
   reverse_cmap = m.reverse_cmap;
