@@ -23,6 +23,7 @@
  * To improve:  use allocate() for number of particles; not static
  */
 
+#define global
 #include "defs.h"
 
 string defv[] = {	
@@ -44,11 +45,13 @@ string defv[] = {
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=5.1\n        12-aug-09 PJT",
+    "VERSION=5.1a\n       5-sep-09 PJT",
     NULL,
 };
 
 string usage = "Analytical potential orbit integrator";
+
+string cvsid="$Id$";
 
 local proc  pot;
 
