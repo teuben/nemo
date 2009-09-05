@@ -145,6 +145,8 @@ void force(
  *        - (x0,y0) is the guiding center, (u,v) can be the deviant into the epicycle 
  *          and a (u0,v0) is the deviation from circular motion
  *    *** for now the Z oscillations are not solved for ***
+ * 
+ *   Note added later: does this have anything to do with Hill's equation?
  *
  *   Recall:                                           flat rotcur:
  *      A = -1/2 R d(Omega)/dR                         1/2 V/R
