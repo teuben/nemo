@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           PÃ´le de l'Etoile, site de ChÃ¢teau-Gombert                         
-//           38, rue FrÃ©dÃ©ric Joliot-Curie                                     
+//           Pôle de l'Etoile, site de Château-Gombert                         
+//           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
@@ -836,7 +836,7 @@ void MainWindow::actionCenterToCom(const bool ugl)
   double com[3] = {0., 0., 0.};
   int np=0;
   mutex_data->lock();
-  mutex_loading.lock();
+  //mutex_loading.lock();
   if (current_data ) {
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // September 2009, 4th                               
@@ -865,7 +865,7 @@ void MainWindow::actionCenterToCom(const bool ugl)
     if (ugl) gl_window->updateGL();
   }
   mutex_data->unlock();
-  mutex_loading.unlock();
+  //mutex_loading.unlock();
 }
 // -----------------------------------------------------------------------------
 // actionReset()                                                                
