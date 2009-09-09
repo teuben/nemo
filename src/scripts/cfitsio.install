@@ -30,11 +30,11 @@ if (! -e $src) then
   echo CFITSIO source directory src=$src does not exist, try NEMO=
   echo or:
   echo " cd $NEMO/local"
-  echo " wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3100.tar.gz"
+  echo " wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3200.tar.gz"
   echo " tar zxf cfitsio3020.tar.gz"
   echo " ../src/scripts/cfitsio.install"
   echo "Alternatively you can also try curl:"
-  echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3100.tar.gz | tar zxf -"
+  echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3200.tar.gz | tar zxf -"
   echo "CCfits:  http://heasarc.gsfc.nasa.gov/docs/software/fitsio/ccfits/CCfits-1.6.tar.gz"
   exit 1
 endif
