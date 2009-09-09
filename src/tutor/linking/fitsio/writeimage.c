@@ -1,5 +1,5 @@
 /*
- * write a simple 3D image, taken from the 2D write_image example in 
+ * write a simple 3D FITS image, taken from the 2D write_image example in 
  * cookbook.c , which comes distributed with cfitsio
  *
  * In NEMO the command "bake writeimage" should suffice to compile/link,
@@ -47,6 +47,9 @@ int main( void )
   if ( fits_create_img(fptr,  bitpix, naxis, naxes, &status) )
     printerror( status );
 
+  if ( fits_write_comment(fptr, "Code parameters:", & status) )
+    printerror( status );
+
   nelements = naxes[0] * naxes[1];          /* number of pixels to write */
 
   for (kk = 0; kk < naxes[2]; kk++) { 
@@ -73,7 +76,10 @@ int main( void )
   ncode = 10;
   if ( fits_update_key(fptr, TLONG, "NCODE", &ncode, "Code Version", &status) )
     printerror( status );           
-  
+
+  if ( fits_write_comment(fptr, "Note: code is experimental", & status) )
+      printerror( status );           
+
   if ( fits_close_file(fptr, &status) ) 
     printerror( status );           
 
