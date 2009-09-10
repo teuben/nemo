@@ -1,0 +1,5 @@
+this is a hotchpotch of code fragments, some to exersize peculiar
+behaviors of the compiler (e.g. fortran/big), others to benchmark,
+others to show simple usages examples and otherwise useless, templates
+etcetc. Anything that doesn't belong in code trees that produce
+binaries.
