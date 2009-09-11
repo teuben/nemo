@@ -28,8 +28,8 @@ int main( void )
 {
   fitsfile *fptr;  
   int status, ii, jj, kk;
-  long  fpixel, nelements, ncode;
-  float eps, tol, *array[NY];
+  long  fpixel, nelements, ncode=10;
+  float eps=0.05, tol=0.7, *array[NY];
 
   char filename[] = "cube.fits";                    /* name for output FITS file */
   int bitpix      =  FLOAT_IMG;                 /* single precision pixel values */
@@ -51,8 +51,29 @@ int main( void )
   if ( fits_create_img(fptr,  bitpix, naxis, naxes, &status) )
     printerror( status );
 
-  if ( fits_write_comment(fptr, "Code parameters:", & status) )
-    printerror( status );
+  fits_write_key_dbl(fptr,"CRPIX1",1.0,10,"X reference pixel",&status);   /* WCS */
+  fits_write_key_dbl(fptr,"CRPIX2",1.0,10,"Y reference pixel",&status);
+  fits_write_key_dbl(fptr,"CRPIX3",1.0,10,"Z reference pixel",&status);
+
+  fits_write_key_dbl(fptr,"CRVAL1",2.0,10,"X reference value",&status);
+  fits_write_key_dbl(fptr,"CRVAL2",1.0,10,"Y reference value",&status);
+  fits_write_key_dbl(fptr,"CRVAL3",0.0,10,"Z reference value",&status);
+
+  fits_write_key_dbl(fptr,"CDELT1",1.0,10,"X pixel increment",&status);
+  fits_write_key_dbl(fptr,"CDELT2",0.1,10,"Y pixel increment",&status);
+  fits_write_key_dbl(fptr,"CDELT3",1.0,10,"Z pixel increment",&status);
+
+  fits_write_key_str(fptr,"CTYPE1","X----CAR","X axis label",&status);
+  fits_write_key_str(fptr,"CTYPE2","Y----CAR","Y axis label",&status);
+  fits_write_key_str(fptr,"CTYPE3","Z----CAR","Z axis label",&status);
+
+  fits_write_comment(fptr, "Code parameters:", & status);     /* some other pars */
+  fits_write_key_flt(fptr, "EPS", eps, 10, "Softening", &status);
+  fits_write_key_flt(fptr, "TOL", tol, 10, "Tolerance", &status);
+  fits_write_key_lng(fptr, "NCODE", ncode, "Code Version", &status);
+  fits_write_comment(fptr, "Note: code is experimental", & status);
+  fits_write_history(fptr, "Code History:", & status);
+  fits_write_history(fptr, " - none", & status);
 
   nelements = naxes[0] * naxes[1];                  /* number of pixels to write */
 
@@ -70,19 +91,6 @@ int main( void )
   }
   free( array[0] ); 
 
-  eps = 0.05;
-  if ( fits_update_key(fptr, TFLOAT, "EPS", &eps, "Softening", &status) )
-    printerror( status );           
-
-  tol = 0.7;
-  if ( fits_update_key(fptr, TFLOAT, "TOL", &tol, "Tolerance", &status) )
-    printerror( status );           
-  ncode = 10;
-  if ( fits_update_key(fptr, TLONG, "NCODE", &ncode, "Code Version", &status) )
-    printerror( status );           
-
-  if ( fits_write_comment(fptr, "Note: code is experimental", & status) )
-      printerror( status );           
 
   if ( fits_close_file(fptr, &status) ) 
     printerror( status );           
