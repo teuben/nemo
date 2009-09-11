@@ -3,11 +3,12 @@
  * cookbook.c , which comes distributed with cfitsio
  *
  * In NEMO the command "bake writeimage" should suffice to compile/link,
- * but otherwise something like this will probably do (where you'll
- * have to find
+ * although make sure $NEMOLIB/makedefs contains CFITSIO_LIB = -lcfitsio
  *
- * gcc -I/usr/local/include -L/usr/local/lib -o writeimage \
- *     writeimage.c -lcfitsio -lm
+ * Otherwise something like this will probably work:
+ *
+ * gcc -I/usr/local/include -L/usr/local/lib \
+ *     -o writeimage writeimage.c -lcfitsio -lm
  *
  */
 
@@ -19,29 +20,32 @@
 
 void printerror( int status);
 
+#define NX 300
+#define NY 200
+#define NZ 100
 
 int main( void )
 {
-  fitsfile *fptr;       /* pointer to the FITS file, defined in fitsio.h */
+  fitsfile *fptr;  
   int status, ii, jj, kk;
   long  fpixel, nelements, ncode;
-  float eps, tol, *array[200];
+  float eps, tol, *array[NY];
 
-  char filename[] = "cube.fits";                        /* name for new FITS file */
-  int bitpix      =  FLOAT_IMG;            /* single precision pixel values       */
-  long naxis      =   3;                              /* 2-dimensional image      */    
-  long naxes[3]   = { 300, 200, 100 };    /* X=300 wide, Y=200 rows, Z=100 planes */
+  char filename[] = "cube.fits";                    /* name for output FITS file */
+  int bitpix      =  FLOAT_IMG;                 /* single precision pixel values */
+  long naxis      =   3;                             /* 3-dimensional image cube */  
+  long naxes[3]   = { NX, NY, NZ };      /* X=300 cols, Y=200 rows, Z=100 planes */
   
-  array[0] = (float *)malloc( naxes[0] * naxes[1] * sizeof(float) );
+  array[0] = (float *)malloc( naxes[0] * naxes[1] * sizeof(float) );  /* a plane */
 
-  for( ii=1; ii<naxes[1]; ii++ )
+  for( ii=1; ii<naxes[1]; ii++ )                            /* array of pointers */
     array[ii] = array[ii-1] + naxes[0];
 
-  remove(filename);               /* Delete old file if it already exists */
+  remove(filename);                      /* Delete old file if it already exists */
 
-  status = 0;         /* initialize status before calling fitsio routines */
+  status = 0;                /* initialize status before calling fitsio routines */
 
-  if (fits_create_file(&fptr, filename, &status)) /* create new FITS file */
+  if (fits_create_file(&fptr, filename, &status))        /* create new FITS file */
     printerror( status );
 
   if ( fits_create_img(fptr,  bitpix, naxis, naxes, &status) )
@@ -50,16 +54,16 @@ int main( void )
   if ( fits_write_comment(fptr, "Code parameters:", & status) )
     printerror( status );
 
-  nelements = naxes[0] * naxes[1];          /* number of pixels to write */
+  nelements = naxes[0] * naxes[1];                  /* number of pixels to write */
 
   for (kk = 0; kk < naxes[2]; kk++) { 
-    for (jj = 0; jj < naxes[1]; jj++) {      /* create some simple linear ramp */
-      for (ii = 0; ii < naxes[0]; ii++) {    /* foreach plane 'kk' */
+    for (jj = 0; jj < naxes[1]; jj++) {        /* create some simple linear ramp */
+      for (ii = 0; ii < naxes[0]; ii++) {                  /* foreach plane 'kk' */
 	array[jj][ii] = ii + jj + kk;
       }
     }
 
-    fpixel = 1 + kk*nelements;               /* offset */
+    fpixel = 1 + kk*nelements;                                         /* offset */
 
     if ( fits_write_img(fptr, TFLOAT, fpixel, nelements, array[0], &status) )
       printerror( status );
@@ -88,8 +92,8 @@ int main( void )
 void printerror( int status)
 {
   if (status) {
-    fits_report_error(stderr, status); /* print error report */
-    exit( status );    /* terminate the program, returning error status */
+    fits_report_error(stderr, status);
+    exit( status );  
   }
   return;
 }
