@@ -98,8 +98,10 @@ bool SnapshotNemo::isValidData()
       if (status)  {                // it's a NEMO snapshot
 	int * ptr=NULL;      // get the full nbody
 	ntimu=NULL;nnemobits = NULL; 
-	if (io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&ntimu,&nnemobits) > 0)
-	    io_nemo(filename.c_str(),"close");
+	int status1=io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&ntimu,&nnemobits);
+        if (status1 > 0 || status1 == -1) {
+          io_nemo(filename.c_str(),"close");
+        }
 	assert(ptr);
 	full_nbody=*ptr;
 	free((int *) ptr);
@@ -193,13 +195,14 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
   if (first_stream || status != 0) {
     if (first_stream) first_stream=false;
     if (status ==  0) end_of_data=true;
-    if (status == -1) {  // Bad nemobits
-      if ( ! ( *nnemobits & TimeBit)) { // no TimeBit
-        if ( ! part_data->timu )
-          part_data->timu = (float *) malloc(sizeof(float));
-        std::cerr << "Forcing time to [0.0]\n";
-        *(part_data->timu) = 0.0;
-      }
+    
+    if ( ! ( *nnemobits & TimeBit)) { // no TimeBit
+      if ( ! part_data->timu )
+        part_data->timu = (float *) malloc(sizeof(float));
+      std::cerr << "Forcing time to [0.0]\n";
+      *(part_data->timu) = 0.0;
+    } else {
+      *part_data->timu=*ntimu;
     }
     if (status != -2) { // NEMO snapshot must have particles TAG
       // copy data from NEMO array to glnemo
@@ -267,7 +270,6 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
         part_data->rneib->computeMinMax();
       }
 
-      *part_data->timu=*ntimu;
       // garbage collecting
       if (nrneib)   free ((float *) nrneib);
       if (ntimu)    free ((float *) ntimu);
