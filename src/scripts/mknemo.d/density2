@@ -13,7 +13,8 @@ if (-e $dir) then
   cd $dir/build
   cmake .
   make
-  # make install
+  # ? make install ?
+  cp ../bin/density2 $NEMOBIN
 else
   echo mknemo.d: $dir does not exist
 endif
