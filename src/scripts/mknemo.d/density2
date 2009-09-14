@@ -1,0 +1,20 @@
+#! /bin/csh -f
+#
+# a quick hack   - Sept 2009
+#
+
+set dir=$NEMO/usr/jcl/density2
+
+# for linux
+set args=""
+
+
+if (-e $dir) then
+  cd $dir/build
+  cmake .
+  make
+  # make install
+else
+  echo mknemo.d: $dir does not exist
+endif
+
