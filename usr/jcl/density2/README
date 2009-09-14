@@ -1,0 +1,34 @@
+
+Density2 is a modification of Dehnen's density code. This version give an estimation
+of the density for each particles, plus the distance of the kth neighbours. Moreover, an option allow
+you to choose the density estimator between a plummer sphere or the one used
+in hackdens method (20 times faster !!!).
+
+It can be very usefull to use this program to display your NEMO snapshot using glnemo2.
+Density2 program will add density plus the distance of the kth neighbours for each particles. 
+These values will be used by glnemo to display a very nice and usefull rendering based on
+the density of the particles.
+
+Examples :
+==========
+
+mkconfig - 10000 shape=shell | density2 - - | glnemo2 - all
+
+mkconfig - 10000 shape=cusp  | density2 - - | glnemo2 - all
+
+mkplummer - 10000 | density2 - - | glnemo2 - all
+
+# expential disk + gyrfalcON
+mkexpdisk - 10000 | gyrfalcON - - kmax=6 step=0 logfile=/dev/null | density2 - - | glnemo2 - all play=t
+
+Compilation :
+=============
+
+To compile, you need "cmake" tools.
+
+cd build
+cmake .
+make
+make install
+
+
