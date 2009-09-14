@@ -8,6 +8,7 @@
  *	27-mar-97  0.3  pjt	moved nbody= as 2nd keyword
  *       9-sep-01       a       gsl/xrandom
  *      10-feb-06  0.4  pjt     using mdarray, no more need for MOBJ, but slightly ugly syntax
+ *      13-sep-09  0.4b pjt     added snapshot time
  */
 
 #include <stdinc.h>
@@ -27,7 +28,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "seed=123\n		seed for random numbers",
     "zerocm=false\n	if true, zero center of mass",
     "headline=\n	verbiage for output",
-    "VERSION=0.4a\n	19-feb-06 PJT",
+    "VERSION=0.4b\n	13-sep-09 PJT",
     NULL,
 };
 
@@ -138,6 +139,7 @@ writesnap()
     stream outstr;
     string headline = getparam("headline");
     int cs = CSCode(Cartesian, NDIM, 2);
+    real tsnap = 0.0;
 
     if (! streq(headline, ""))
 	set_headline(headline);
@@ -147,6 +149,7 @@ writesnap()
     put_set(outstr, SnapShotTag);
      put_set(outstr, ParametersTag);
       put_data(outstr, NobjTag, IntType, &nobj, 0);
+      put_data(outstr, TimeTag, RealType, &tsnap, 0);
      put_tes(outstr, ParametersTag);
      put_set(outstr, ParticlesTag);
       put_data(outstr, CoordSystemTag, IntType, &cs, 0);
