@@ -5,7 +5,7 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2003-2006                                                          
+/// \date    2003-2009                                                          
 ///                                                                             
 /// \brief   definition of auxiliary methods for template class tupel<>         
 ///                                                                             
@@ -322,14 +322,15 @@ namespace WDutils { namespace meta {
       M::v_appl(a,b,f);
     }
     /// used in v_out
-    static void v_outw(std::ostream&o, cX*a, unsigned w) {
+    static void v_outwp(std::ostream&o, cX*a, unsigned w, unsigned p) {
       o.width(w);
+      o.precision(p);
       o<<a[I]<<' ';
-      M::v_outw(o,a,w);
+      M::v_outwp(o,a,w,p);
     }
     /// used in operator<< (std::ostream, tupel)
     static void v_out(std::ostream&o, cX*a) {
-      v_outw(o,a,o.width());
+      v_outwp(o,a,o.width(),o.precision());
     }
     /// used in operator>> (std::istream, tupel)
     static void v_in(std::istream&i, X*a) {
@@ -586,9 +587,10 @@ namespace WDutils { namespace meta {
     static void v_appl(X*a, cX*b, X(*f)(X)) {
       a[I]=f(b[I]);
     } 
-    static void v_outw(std::ostream&o, cX*a, unsigned w) {
+    static void v_outwp(std::ostream&o, cX*a, unsigned w, unsigned p) {
       o.width(w);
-      o<<a[I];
+      o.precision(p);
+      o<<a[I]<<' ';
     }
     static void v_out(std::ostream&o, cX*a) {
       v_outw(o,a,o.width());
@@ -659,42 +661,6 @@ namespace WDutils { namespace meta {
     }
 #endif
   };
-  //////////////////////////////////////////////////////////////////////////////
-  //
-  // struct ONE<N>
-  //
-  // F: factorial N!
-  // G: N!!
-  // H: (2*N-1)!!
-  // P: 2^N
-  //
-  //////////////////////////////////////////////////////////////////////////////
-  template<int N> struct ONE {
-    enum {
-      F  = N*ONE<N-1>::F,
-      G  = N*ONE<N-2>::G,
-      H  = (N+N-1)*ONE<N-1>::H,
-      P  = 4*ONE<N-2>::P
-    }; };
-  template<> struct ONE<1> { enum { F=1, G=1, H=1, P=2 }; };
-  template<> struct ONE<0> { enum { F=1, G=1, H=1, P=1 }; };
-  //////////////////////////////////////////////////////////////////////////////
-  //
-  // struct TWO<L,M>
-  //
-  // B: binomial (L,M)
-  // I: index of (L,M)
-  //
-  //////////////////////////////////////////////////////////////////////////////
-  template<int L, int M> struct TWO {
-    enum { B = TWO<L-1,M-1>::B + TWO<L-1,M>::B,
-	   I = (L*(L+1))/2+M
-    }; };
-  template<int M> struct TWO<0,M> { enum { B=1, I=0 }; };
-  template<int L> struct TWO<L,0> { enum { B=1, I=(L*(L+1))/2 }; };
-  template<int L> struct TWO<L,L> { enum { B=1, I=(L*(L+3))/2 }; };
-  template<>      struct TWO<0,0> { enum { B=1, I=0 }; };
-  //////////////////////////////////////////////////////////////////////////////
 } // namespace meta {
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////

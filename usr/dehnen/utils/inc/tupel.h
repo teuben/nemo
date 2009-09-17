@@ -22,6 +22,7 @@
 /// \version mar-2007: made data protected
 /// \version may-2008: output manipulator "print()" supported
 /// \version oct-2008: added static assertion to N-specific constructors
+/// \version sep-2009: formatted output preserves width and precision
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -57,12 +58,18 @@
 #  include <tupel.cc>
 #endif
 
-#ifndef WDutilsStaticAssert
-#  define WDutilsStaticAssert(B)
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
+
+#ifndef WDutilsStaticAssert
+  template<bool> struct STATIC_ASSERTION_FAILURE;
+  template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+#  define WDutilsStaticAssert(TEST)				\
+  enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
+    static_cast<bool>((TEST))>)					\
+  }
+#endif
+
   // ///////////////////////////////////////////////////////////////////////////
   //
   // class WDutils::tupel
@@ -71,13 +78,13 @@ namespace WDutils {
   /// Template: a tupel of N scalars of type X, held in an array X[N].
   ///
   /// Class tupel<N,X> in essence is just a wrapper around X[N]. It is designed
-  /// to act as a what physicists call "vector" in N-dimensional space, i.e. it
-  /// is similar to std::valarray, but with the number of elements as template
-  /// parameter. The member methods, such as assign, additions, etc, are coded
-  /// using meta template programming in file tupel.cc, resulting in maximum
-  /// efficency.  In the falcON project, tupel<3,real> are used to represent
-  /// position, velocity and all other vector quantities. For N=3, the operator
-  /// ^ between tupels refers to the usual vector cross product.
+  /// to act as a what physicists call "vector" in N-dimensional Euclidian
+  /// space, similar to std::valarray, but with the number of elements as
+  /// template parameter. The member methods, such as assign, additions, etc,
+  /// are coded using meta template programming in file tupel.cc, resulting in
+  /// maximum efficency. For N=3, the operator ^ between tupels refers to the
+  /// usual vector cross product. In the falcON project, tupel<3,real> are used
+  /// to represent position, velocity and all other vector quantities.
   ///
   // ///////////////////////////////////////////////////////////////////////////
   template<int N, typename X> class tupel {
@@ -533,8 +540,7 @@ namespace WDutils {
   /// \relates WDutils::tupel
   /// \name formatted I/O
   //@{
-  /// formatted output: space separated; a preceeding std::setw() sets the width
-  /// for the output of \b each element
+  /// formatted output: space separated; keeps width and precision
   template<int N, typename X> inline
   std::ostream&operator<<(std::ostream&s, tupel<N,X> const&x) {
     meta::taux<X,N-1,0>::v_out(s,x);

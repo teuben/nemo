@@ -476,7 +476,7 @@ namespace WDutils {
       //@}
       /// resets elements with _N <= i < _S
       void reset_tail() const
-      { for(size_t i=_N; i!=_S; ++i) const_cast<_F&>(_A[i]) = _F(0); }
+      { for(size_t i=_N; i!=_S; ++i) _A[i] = _F(0); }
       /// check for size mismatch
       void check_size(Array16 const&B, const char*name) const WDutils_THROWING
       {
@@ -503,7 +503,7 @@ namespace WDutils {
       /// const access
       _F const&operator[] (int i) const { return _A[i]; }
       /// non-const access
-      _F &operator[] (int i) { return _A[i]; }
+      _F&operator[] (int i) { return _A[i]; }
       /// \name unary operations
       //@{
       /// reset element-wise to 0

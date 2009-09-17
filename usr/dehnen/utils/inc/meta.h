@@ -3,7 +3,7 @@
 ///
 /// \file   utils/inc/meta.h
 ///
-/// \brief  support for metaprogramming
+/// \brief  support for (mostly numerical) metaprogramming
 ///
 /// \author Walter Dehnen
 ///                                                                             
@@ -45,6 +45,11 @@
 
 namespace WDutils {
   namespace meta {
+
+    /// to be used instead of bool variables true
+    struct True {};
+    /// to be used instead of bool variables false
+    struct False {};
     ///
     /// support for operation count
     class OpCounting {
@@ -505,6 +510,41 @@ namespace WDutils {
       _Tp operator()(_Tp& __x, _Tp const&__y) const { return __x *= __y; }
     };
     //@}
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // struct ONE<N>
+    //
+    // F: factorial N!
+    // G: N!!
+    // H: (2*N-1)!!
+    // P: 2^N
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    template<int N> struct ONE {
+      enum {
+	F  = N*ONE<N-1>::F,
+	G  = N*ONE<N-2>::G,
+	H  = (N+N-1)*ONE<N-1>::H,
+	P  = 4*ONE<N-2>::P
+      }; };
+    template<> struct ONE<1> { enum { F=1, G=1, H=1, P=2 }; };
+    template<> struct ONE<0> { enum { F=1, G=1, H=1, P=1 }; };
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    // struct TWO<L,M>
+    //
+    // B: binomial (L,M)
+    // I: index of (L,M)
+    //
+    ////////////////////////////////////////////////////////////////////////////
+    template<int L, int M> struct TWO {
+      enum { B = TWO<L-1,M-1>::B + TWO<L-1,M>::B,
+	     I = (L*(L+1))/2+M
+      }; };
+    template<int M> struct TWO<0,M> { enum { B=1, I=0 }; };
+    template<int L> struct TWO<L,0> { enum { B=1, I=(L*(L+1))/2 }; };
+    template<int L> struct TWO<L,L> { enum { B=1, I=(L*(L+3))/2 }; };
+    template<>      struct TWO<0,0> { enum { B=1, I=0 }; };
   }
 }
 

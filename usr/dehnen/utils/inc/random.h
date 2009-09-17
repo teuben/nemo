@@ -191,7 +191,7 @@ namespace WDutils {
     /// compute parent distribution
     /// \return \f$ p(x) \f$
     /// \param[in] x potential value for random number
-    double value(double x) const { return (a<=x && x<=b)? 1. : 0.; }
+    double value(double x) const { return (a<=x && x<=b)? 1/ba : 0.; }
   };
   WDutils_TRAITS(Uniform,"Uniform");
   // ///////////////////////////////////////////////////////////////////////////

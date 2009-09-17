@@ -505,6 +505,7 @@ void SSE::Sqrt16(double*a, size_t n, const double*b)
 template<typename _F>
 SSE::Array16<_F>&SSE::Array16<_F>::reset(size_t n)
 {
+  if(n==_N) return;
   size_t s = Top<_F>(n);
   if(s != _S) {
     if(_A) delete16(_A);

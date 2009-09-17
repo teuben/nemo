@@ -65,7 +65,7 @@ namespace WDutils {
   /// compiler-generated error message.
 #define WDutilsStaticAssert(TEST)				\
   enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
-    static_cast<bool>(TEST)>)					\
+    static_cast<bool>((TEST))>)					\
   }
   namespace meta {
     /// static type comparison.
