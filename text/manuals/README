@@ -8,3 +8,12 @@ This directory contains manuals:
 	*.sty		latex style files 
 				(currently nemo.sty absorbes all style mods)
 
+
+
+they still use the old-style latex. A more modern approach would be
+
+
+- Use pdflatex instead of latex (most people want a pdf as output anyway)
+- Convert ps/eps file to pdf
+- include it using \includegraphics[foo]  (note the lack of extension)
+
