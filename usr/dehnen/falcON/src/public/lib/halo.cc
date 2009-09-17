@@ -191,11 +191,12 @@ DoublePowerLawHalo::DoublePowerLawHalo(double inner, double outer, double trans)
   : go(outer), gi(inner), et(trans), gg(go-gi), al(gg/et)
 {
   if(gi < 0.)
-    falcON_THROW("DoublePowerHalo: inner power-law slope < 0");
+      falcON_THROW("DoublePowerHalo: inner power-law slope = %g < 0",gi);
   if(gi > go)
-    falcON_THROW("DoublePowerHalo: inner power-law slope > outer");
+    falcON_THROW("DoublePowerHalo: inner power-law slope = %g > outer = %g",
+		 gi,go);
   if(et <= 0.)
-    falcON_THROW("DoublePowerHalo: transition steepness <= 0");
+      falcON_THROW("DoublePowerHalo: transition steepness = %g <= 0",et);
 }
 //
 double DoublePowerLawHalo::operator()(double x) const {

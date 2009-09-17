@@ -26,6 +26,9 @@
 #ifndef falcON_included_tensor_h
 #  include <public/tensor.h>
 #endif
+#ifndef Wdutils_included_meta_h
+#  include <utils/meta.h>
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 #define tm    template
