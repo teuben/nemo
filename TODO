@@ -78,7 +78,9 @@ general things for 3.2.x
   - use some kind of global MAXBODY where we often use different values
 	**mostly done**
 
-  - gyrfalcON: still has some compiler dependant problems
+  - gyrfalcON: still has some compiler dependant problems, is also hardcoded for
+    the GNU compiler (g++) and assumes Linux tools. Not mac friendly, though
+    a patch exists now.
 
      The new version (V3.0.5; 22-mar-2006) has the one between []
      On intel architecture:
@@ -100,6 +102,7 @@ general things for 3.2.x
 	4.1.0	fail  [fail]  falcON::fieldset::fieldset(falcON::fieldbit)
                       might need to remove -ffast-math if you get segfaults
 	4.1.1   ok
+ 	4.1.2   ok
 
      For MacOSX a bit more work is needed, since isnan() and isinf() are not known?
 	add:	-Wno-long-double
@@ -144,6 +147,10 @@ general things for 3.2.x
 	gcc -c -fno-common testlib.c
 	NO:  gcc -dylib -flat_namespace -undefined suppress -o libtestlib.dylib testlib.o
 	YES: gcc -dynamiclib -o libtest.dylib -dylib t.o
+
+   on some (linux) distributions you may need to have to edit the
+	utils/make.gcc file (remove -march=native from OPTFLAGS :=), and edit
+	falcON/makedefs (remove -Wtype-limits from WARNINGS :=)
 	
 
  - a few snapshot I/O programs still use the old I/O, hence Position/Velocity data is 
@@ -160,6 +167,7 @@ code & line coverage: (gcov, lcov)
   
 - io_nemo library written by JCL in Marseille
 	has problems in -DSINGLEPREC
+	problems with intel compiler
 
 - use cfortran?  cfitsio also uses it.
 
@@ -266,6 +274,17 @@ setenv F77 /opt/sfw/gcc-3/bin/g77
 
 	
 	Problem:   loadobj doesn't work, testloadobj doesn't find dprintf
+
+Linking:
+--------
+
+Linking can be done with ld, or with the compiler. But which compiler?
+Should it be the one main() is written in, i.e. gcc for C programs,
+and gfortran/g77 for PROGRAM's ?
+The FLIBS macro from autoconf defines a bunch of -L..... -lg2c (-lgfortran)
+The example where this linking got problematic is the mkkd95 tools.
+    mknemo  mkkd95
+shows the complexity in failure and success.
 
 
 
