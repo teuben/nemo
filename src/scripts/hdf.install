@@ -10,8 +10,8 @@
 if ($?NEMO == 0) set NEMO=`pwd`
 
 #			 	.. command line keywords ..
-set HDF=HDF4.2r1
-set hdf=hdf4.2r1
+set HDF=HDF4.2r4
+set hdf=hdf4.2r4
 set src=$NEMO/local/$hdf
 set SRC=$NEMO/local/$HDF
 
