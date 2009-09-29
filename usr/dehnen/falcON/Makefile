@@ -159,7 +159,7 @@ exe		:	libutils library $(exe_pub) $(exe_pro) $(exe_sph) $(exe_walter) $(exe_pjm
 ifdef NEMO
 
 # 6.5 falcON manipulators
-manip		:	links $(MANT) $(manip_pub) $(manip_pro) $(manip_mpi) $(manip_walter)
+manip		:	links $(MANT) $(manip_pub) $(manip_pro) $(manip_sph) $(manip_mpi) $(manip_walter)
 
 # 6.6 falcON accelerations
 acc		:	$(ACCT) $(acc_pub) $(acc_pro) $(acc_sph) $(acc_walter) $(acc_pjm)	
