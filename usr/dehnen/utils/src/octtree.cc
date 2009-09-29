@@ -415,7 +415,6 @@ namespace {
     /// \param[in,out] C  current cell to be linked
     /// \param[in]     B  current box to link with C
     /// \param[in]     o  octant of box B in parent
-    /// \param[in]     k  local peano key
     /// \return           tree depth of cell C
     /// \note recursive.
     /// \node uses data CF and LF
@@ -428,19 +427,18 @@ namespace {
     /// \param[in,out] C  current cell to be linked
     /// \param[in]     B  current box to link with C
     /// \param[in]     o  octant of box B in parent
-    /// \param[in]     k  local peano key
     /// \return           tree depth of cell C, always 1 for final boxes
-    unsigned LinkFinal(Cell*C, const Box*P, unsigned o) const
+    unsigned LinkFinal(Cell*C, const Box*B, unsigned o) const
     {
-      C->Le = P->LEV;
+      C->Le = B->LEV;
       C->Oc = o;
-      C->X  = P->X;
-      C->N  = P->NUM;
+      C->X  = B->X;
+      C->N  = B->NUM;
       C->L0 = LF;
       C->Cf = 0;
       C->Nc = 0;
-      C->Nl = P->NUM;
-      for(Dot*Di = P->DOT; Di; Di=Di->Next)
+      C->Nl = B->NUM;
+      for(Dot*Di = B->DOT; Di; Di=Di->Next)
 	Di-> template SetLeaf<Float>(LF++);
       return 1;
     }

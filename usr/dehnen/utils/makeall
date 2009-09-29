@@ -73,6 +73,7 @@ heap_h			:= $(INC)heap.h
 meta_h			:= $(INC)meta.h
 inline_h		:= $(INC)inline.h
 exception_h		:= $(INC)exception.h
+sse_h			:= $(INC)sse.h $(exception_h)
 traits_h		:= $(INC)traits.h $(exception_h)
 io_h			:= $(INC)io.h $(exception_h)
 tupel_h			:= $(INC)tupel.h $(INC)tupel.cc $(traits_h)
@@ -84,7 +85,7 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 				$(inline_h)
 parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
 octtree_h		:= $(INC)octtree.h $(memory_h) $(traits_h) $(tupel_h)
-sse_h			:= $(INC)sse.h $(exception_h)
+Octtree_h		:= $(INC)Octtree.h $(memory_h) $(traits_h) $(tupel_h)
 
 # -----------------------
 # source dependency lists
@@ -92,6 +93,7 @@ sse_h			:= $(INC)sse.h $(exception_h)
 
 meta_cc			:= $(SRC)meta.cc $(meta_h)
 exception_cc		:= $(SRC)exception.cc $(exception_h)
+sse_cc			:= $(SRC)sse.cc $(sse_h)
 io_cc			:= $(SRC)io.cc $(io_h)
 numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
@@ -99,13 +101,15 @@ random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 parallel_cc		:= $(SRC)parallel.cc $(parallel_h) $(meta_h) $(io_h)
 octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(memory_h)
-sse_cc			:= $(SRC)sse.cc $(sse_h)
+Octtree_cc		:= $(SRC)Octtree.cc $(Octtree_h) $(memory_h)
 
 # ---------------
 # library modules
 # ---------------
 
 $(LIB)exception.o:	$(exception_cc) $(LIBT) makefile
+			$(MAKE_OBJ)
+$(LIB)sse.o:		$(sse_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 $(LIB)io.o:		$(io_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
@@ -119,12 +123,12 @@ $(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 $(LIB)octtree.o:	$(octtree_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
-$(LIB)sse.o:		$(sse_cc) $(LIBT) makefile
+$(LIB)Octtree.o:	$(Octtree_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 
-WDutils_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
+WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o \
-			$(LIB)octtree.o $(LIB)sse.o
+			$(LIB)octtree.o
 
 # -------
 # library
