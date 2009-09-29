@@ -793,13 +793,15 @@ void bodies::reset(const unsigned n[BT_NUM],
   set_firsts();
 }
 ////////////////////////////////////////////////////////////////////////////////
-// construction 2:                                                          
-// just make a copy of existing bodies:                                     
-// - only copy data specified by 2nd argument                               
-// - only copy bodies whose flags matches 3rd argument                      
+// construction 2:
+// just make a copy of existing bodies:
+// - only copy data specified by 2nd argument
+// - only copy bodies whose flags matches 3rd argument
+// - only copy bodies whose type is contained in 4th argument
 bodies::bodies(bodies const&Other,
 	       fieldset     copydata,
-	       flags        copyflag) falcON_THROWING :
+	       flags        copyflag,
+	       bodytypes    copytypes) falcON_THROWING :
   BITS      ( copydata & Other.BITS ),
   C_FORTRAN ( 0 ),
   FORCES    ( 0 )
@@ -807,14 +809,15 @@ bodies::bodies(bodies const&Other,
   if(copyflag && !Other.have_flag() ) 
     falcON_THROW("in bodies::bodies(): "
 		 "copyflag !=0, but other bodies not supporting flag");
-  unsigned n[BT_NUM];
-  for(bodytype t; t; ++t) {
+  unsigned n[BT_NUM]={0};
+  for(bodytype t; t; ++t) if(copytypes.contain(t)) {
     if(copyflag) {
       LoopTypedBodies(&Other,i,t)
 	if( flag(i).are_set(copyflag) ) ++(n[t]);
     } else 
       n[t] = Other.NBOD[t];
   }
+  for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
   set_data(n);
   for(bodytype t; t; ++t) if(TYPES[t]) {
     block      *p =TYPES[t];
@@ -1486,8 +1489,9 @@ void snapshot::del_pointer(const char*k) const
 ////////////////////////////////////////////////////////////////////////////////
 snapshot::snapshot(snapshot const&S,
 		   fieldset       Bd,
-		   flags          F) falcON_THROWING
-: bodies ( S,Bd,F ),
+		   flags          F,
+		   bodytypes      T) falcON_THROWING
+: bodies ( S,Bd,F,T ),
   INIT   ( S.INIT ),
   TINI   ( S.TINI ),
   TIME   ( S.TIME ),

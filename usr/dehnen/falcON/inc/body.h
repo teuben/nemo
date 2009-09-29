@@ -1039,9 +1039,9 @@ namespace falcON {
     /// \param[in] B  bodies to copy
     /// \param[in] Bd body data fields to copy
     /// \param[in] C  if non-zero: copy only bodies which have this flag set
-    bodies(bodies const&B, fieldset Bd=fieldset::all, flags C=flags::empty)
-      falcON_THROWING;
-
+    /// \param[in] T  only copy bodies with type contained in T
+    bodies(bodies const&B, fieldset Bd=fieldset::all, flags C=flags::empty,
+	   bodytypes T=bodytypes::all) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// destructor: delete all data
     ~bodies() falcON_THROWING;
@@ -1082,18 +1082,14 @@ namespace falcON {
     ///
     /// \param[in] N number of bodies per bodytype
     void resetN(const unsigned N[BT_NUM]) falcON_THROWING
-    {
-      reset(N,BITS);
-    }
+    { reset(N,BITS); }
     //--------------------------------------------------------------------------
     /// Reset some body data to zero
     ///
     /// Body data of fields in \a f, which are allocated, are set to zero
     /// \param[in] f body data fields to be reset
     void reset_data(fieldset f) const falcON_THROWING
-    {
-      for(const block*p=FIRST; p; p=p->next()) p->reset_data(f);
-    }
+    { for(const block*p=FIRST; p; p=p->next()) p->reset_data(f); }
     //--------------------------------------------------------------------------
   protected:
     /// swap the bytes (little-endian <-> big-endian)
@@ -1758,10 +1754,12 @@ namespace falcON {
     /// \param[in] B   set of bodies
     /// \param[in] Bd  only copy these body data fields
     /// \param[in] F   only copy bodies matching this flag
+    /// \param[in] T   only copy bodies of type contained in T
     snapshot(double       t,
 	     bodies const&B,
 	     fieldset     Bd=fieldset::all,
-	     flags        F =flags::empty) falcON_THROWING :
+	     flags        F =flags::empty,
+	     bodytypes    T =bodytypes::all) falcON_THROWING :
     bodies(B,Bd,F), INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0)
     {}
     //--------------------------------------------------------------------------
@@ -1772,10 +1770,12 @@ namespace falcON {
     /// \param[in] S   set of bodies
     /// \param[in] Bd  only copy these body data fields
     /// \param[in] F   only copy bodies matching this flag
+    /// \param[in] T   only copy bodies of type contained in T
     explicit
     snapshot(snapshot const&S,
 	     fieldset       Bd=fieldset::all,
-	     flags          F =flags::empty) falcON_THROWING;
+	     flags          F =flags::empty,
+	     bodytypes      T =bodytypes::all) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Copy: replace our data (if any) with those of other bodies (\b not 
     /// \b yet \b implemented)

@@ -703,7 +703,7 @@ void falcON::data_in::read(void*data, unsigned Num)
   if(nemo_io::coercing(TYPE, nemo_io::type(FIELD))) {
     DebugInfo(1,"data_in::read(%s): must coerce\n",NemoTag(FIELD));
     unsigned n = Num*SUBN;
-    notreal*buf= falcON_NEW(notreal, Num);
+    notreal*buf= falcON_NEW(notreal, n);
     get_data_blocked(INPUT.stream(),NemoTag(FIELD), buf, n);
     for(unsigned i=0; i!=n; ++i) static_cast<real*>(data)[i] = buf[i];
     falcON_DEL_A(buf);
