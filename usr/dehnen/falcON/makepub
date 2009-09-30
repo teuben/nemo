@@ -133,9 +133,9 @@ $(LIB)gravity.o:	$(gravity_cc) $(LIBT) $(makefiles)
 $(LIB)partner.o:	$(partner_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)halo.o:		$(halo_cc) $(makefiles)
-			$(MAKE_OBJ)
+			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)WD99disc.o:	$(WD99disc_cc) $(makefiles)
-			$(MAKE_OBJ) $(DNEMO)
+			$(MAKE_OBJ) $(NBDYFLAGS)
 ifdef NEMO
 $(LIB)manip.o:		$(manip_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
@@ -160,11 +160,11 @@ $(LIB)profile.o:	$(profile_cc) $(LIBT) $(makefiles)
 $(LIB)tools.o:		$(tools_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)sample.o:		$(sample_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ) $(DNEMO)
+			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)gamma.o:		$(gamma_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ)
+			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)king.o:		$(king_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ)
+			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)PotExp.o:		$(PotExp_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 
@@ -254,7 +254,7 @@ $(ACC)DiscPot.so:		$(SACC)DiscPot.cc $(ACCT) $(GalPot_h) $(makefiles)
 $(ACC)GalPot.so:		$(SACC)GalPot.cc $(ACCT) $(GalPot_h) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)Halo.so:			$(SACC)Halo.cc $(ACCT) $(halo_cc) $(makefiles)
-				$(MAKE_ACC) -I$(SRC)
+				$(MAKE_ACC) -I$(SRC) $(NBDYFLAGS)
 $(ACC)MiyamotoNagai.so:		$(SACC)MiyamotoNagai.cc $(ACCT) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)Monopole.so:		$(SACC)Monopole.cc $(ACCT) $(timer_h) $(makefiles)
@@ -266,7 +266,7 @@ $(ACC)Plummer.so:		$(SACC)Plummer.cc $(ACCT) $(makefiles)
 $(ACC)Point.so:			$(SACC)Point.cc $(ACCT) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)PotExp.so:                $(SACC)PotExp.cc $(ACCT) $(PotExp_cc) $(makefiles)
-				$(MAKE_ACC) -I$(SRC)
+				$(MAKE_ACC) -I$(SRC) $(NBDYFLAGS)
 
 acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
@@ -381,7 +381,10 @@ addprop		:	$(falcON) $(BIN)addprop
 endif
 addgravity	:	$(falcON) $(BIN)addgravity
 density		:	$(falcON) $(BIN)density
+ifneq ($(DPRECISION),-DfalcON_DOUBLE)
 g2s		:	$(falcON) $(BIN)g2s
+g2s		:=	g2s
+endif
 getgravity	:	$(falcON) $(BIN)getgravity
 gyrfalcON	:	$(falcON) $(BIN)gyrfalcON
 manipulate	:	$(falcON) $(BIN)manipulate
@@ -394,7 +397,10 @@ mkking		:	$(falcON) $(BIN)mkking
 mkplum		:	$(falcON) $(BIN)mkplum
 mkWD99disc	:	$(falcON) $(BIN)mkWD99disc
 s2a		:	$(falcON) $(BIN)s2a
+ifneq ($(DPRECISION),-DfalcON_DOUBLE)
 s2g		:	$(falcON) $(BIN)s2g
+s2g		:=	s2g
+endif
 s2s		:	$(falcON) $(BIN)s2s
 scale_eps	:	$(falcON) $(BIN)scale_eps
 set_time	:	$(falcON) $(BIN)set_time
@@ -406,14 +412,14 @@ endif
 symmetrize	:	$(falcON) $(BIN)symmetrize
 
 ifeq ($(COMPILER),icc)
-exe_pub		:=	TestGrav a2s addgravity density g2s getgravity \
+exe_pub		:=	TestGrav a2s addgravity density $(g2s) getgravity \
 			gyrfalcON manipulate mkbodiesfunc mkbodyfunc mkdehnen \
-			mkhalo mkking mkplum mkWD99disc s2a s2g s2s scale_eps \
+			mkhalo mkking mkplum mkWD99disc s2a $(s2g) s2s scale_eps \
 			snapprop snapstac symmetrize mkgalaxy
 else
-exe_pub		:=	TestGrav a2s addgravity addprop density g2s getgravity \
+exe_pub		:=	TestGrav a2s addgravity addprop density $(g2s) getgravity \
 			gyrfalcON manipulate mkbodiesfunc mkbodyfunc mkdehnen \
-			mkhalo mkking mkplum mkWD99disc s2a s2g s2s scale_eps \
+			mkhalo mkking mkplum mkWD99disc s2a $(s2g) s2s scale_eps \
 			snapprop snapstac snapsupp symmetrize mkgalaxy
 endif
 

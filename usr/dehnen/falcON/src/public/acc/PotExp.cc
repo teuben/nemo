@@ -21,7 +21,9 @@
 //-----------------------------------------------------------------------------+
 #include <defacc.h>
 #include <ctime>
-#define falcON_NEMO
+#ifndef falcON_NEMO
+#  define falcON_NEMO
+#endif
 #include <public/PotExp.h>
 #include <public/nemo++.h>
 ////////////////////////////////////////////////////////////////////////////////
