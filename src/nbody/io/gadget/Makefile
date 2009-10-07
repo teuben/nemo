@@ -36,11 +36,13 @@ FBIN = bin
 FSRC = ./
 
 # targets
-bin    : dirs info gad
+bin    : dirs info gad gt1t2
 info   : dirs $(FBIN)/g2info
 gad    : dirs $(FBIN)/gadget2nemo
 nem    : dirs $(FBIN)/nemo2gadget
-install: info gad
+gt1t2  : dirs $(FBIN)/gadget1t2
+
+install: info gad gt1t2
 	\cp -p $(FBIN)/gadget2nemo $(FBIN)/g2info $(FBIN)/gadget1t2 ${NEMOBIN}
 	chmod 755  ${NEMOBIN}/gadget2nemo  ${NEMOBIN}/g2info ${NEMOBIN}/gadget1t2
 
