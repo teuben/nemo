@@ -62,6 +62,7 @@ int main(int argc, char ** argv )
   if (!fail) {
     std::ostringstream stm;
     stm << gadget_io->getVersion();
+    std::cerr <<"Gadget Version : "<<stm.str()<<"\n";
     glnemo::ComponentRangeVector crv = gadget_io->getCRV();
 
     if (verb) glnemo::ComponentRange::list(&crv);
