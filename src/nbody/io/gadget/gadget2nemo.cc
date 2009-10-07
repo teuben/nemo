@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008                                       
+// Copyright Jean-Charles LAMBERT - 2008 / 2009                                    
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -10,7 +10,8 @@
 // ============================================================================
 // ----------------------------------------------------------------------------
 // gadget2nemo.cc                                                              
-// 15-Oct-08 : V 3.1 new version, gadget2 support, happy g++ 4.3.2  (JCL)      
+// 15-Oct-08 : V 3.1 new version, gadget2 support, happy g++ 4.3.2  (JCL)    
+// 07-Oct-09 : V 3.2 new gadget2 reader
 // ----------------------------------------------------------------------------
 #include <iostream>                                   // C++ I/O
 #include <fstream>                                    // C++ file I/O
@@ -42,7 +43,7 @@ const char * defv[] = {
   "                   you can request several data separated with   \n"
   "                   \",\" like select=disk,stars,gas                ",
   "verb=f\n             verbose mode                                  ",
-  "VERSION=3.1\n         compiled on <"__DATE__"> JCL                 ",
+  "VERSION=3.2\n         compiled on <"__DATE__"> JCL                 ",
   NULL
 };
 const char * usage="Convert GADGET (1 or 2 little/big endian) snapshot to NEMO snapshot";
@@ -107,7 +108,7 @@ int main(int argc, char ** argv )
   
 
   // Read GADGET snapshot
-  gadget::GadgetIO * gadget_io = new gadget::GadgetIO(in);
+  gadget::GadgetIO * gadget_io = new gadget::GadgetIO(in,verb);
   int fail = gadget_io->open(in);
   if (!fail) {
     std::ostringstream stm;
@@ -122,7 +123,7 @@ int main(int argc, char ** argv )
       new glnemo::UserSelection();                             // new user select obj       
     user_select->setSelection(select,&crv);                    // select according to crv   
     gadget_io->read(user_select->getIndexesTab(),user_select->getNSel()); // read Gadget    
-    outNemo(gadget_io,user_select,out);
+    outNemo(gadget_io,user_select,out);                        // save to NEMO format
   } 
   else {
     std::cerr << "File["<<in<<"] is not a Gadget file, aborting...\n";

@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008                                       
+// Copyright Jean-Charles LAMBERT  2008 / 2009                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -18,7 +18,7 @@ namespace gadget {
 
 // ============================================================================
 // Constructor
-GadgetIO::GadgetIO(const std::string & _f)
+  GadgetIO::GadgetIO(const std::string & _f, const bool _verb)
 {
   filename = _f;
   status=false;
@@ -34,6 +34,7 @@ GadgetIO::GadgetIO(const std::string & _f)
   bytes_counter = 0;
   multiplefiles = 0;
   lonely_file   = true;
+  verbose = _verb;
   ntotmasses = 0.0;
 }
 
@@ -123,63 +124,92 @@ int GadgetIO::read(const glnemo::t_indexes_tab *index, const int nsel)
         }
       }
       else infile=filename;        // lonely file
-      int len1,len2;
-      // Postions block
-      readBlockName();
-      bytes_counter=0;
-      len1 = readFRecord();
-      pc_new=pc;
-      for(int k=0;k<6;k++)
-        for(int n=0;n<header.npart[k];n++)
-          ioData((char *) &P[pc_new++].Pos[0], sizeof(float), 3,READ);
-      len2 = readFRecord();
-      assert(in.good() && len1==len2 && len1==bytes_counter);
-    
-      // Velocities block
-      readBlockName();
-      bytes_counter=0;
-      len1 = readFRecord();
-      pc_new=pc;
-      for(int k=0;k<6;k++)
-        for(int n=0;n<header.npart[k];n++)
-          ioData((char *) &P[pc_new++].Vel[0], sizeof(float), 3,READ);
-      len2 = readFRecord();
-      assert(in.good() && len1==len2 && len1==bytes_counter);
-  
-      // IDs block
-      readBlockName();
-      bytes_counter=0;
-      len1 = readFRecord();
-      pc_new=pc;
-      for(int k=0;k<6;k++)
-        for(int n=0;n<header.npart[k];n++)
-          ioData((char *) &P[pc_new++].Id, sizeof(int), 1,READ);
-      len2 = readFRecord();
-      assert(in.good() && len1==len2 && len1==bytes_counter);
+      int len1=0,len2=0;
+      bool stop=false;
+      std::string next_block_name;
+      if (version==1) next_block_name="POS";
 
-      // MASS block
-      readBlockName();
-      bytes_counter=0;
-      if (ntotmasses > 0.)
-	len1 = readFRecord();
-      pc_new=pc;
-      for(int k=0;k<6;k++)
-        for(int n=0;n<header.npart[k];n++) {
-	  if (header.mass[k] == 0 ) {  // variable mass
-	    ioData((char *) &P[pc_new++].Mass, sizeof(float), 1,READ);
-	  }
-	  else {                       // constant mass
-	    P[pc_new++].Mass = header.mass[k];
+      while (readBlockName() && !stop) {
+	if (version==1) block_name=next_block_name;
+	bool ok=false;
+	if (block_name=="POS") { // Postions block
+	  ok=true;
+	  bytes_counter=0;
+	  len1 = readFRecord();
+	  pc_new=pc;
+	  for(int k=0;k<6;k++)
+	    for(int n=0;n<header.npart[k];n++)
+	      ioData((char *) &P[pc_new++].Pos[0], sizeof(float), 3, READ);
+	  len2 = readFRecord();
+	  assert(in.good() && len1==len2 && len1==bytes_counter);
+	  if (version==1) next_block_name="VEL";
+	}
+    
+	if (block_name=="VEL") { // Velocities block
+	  ok=true;
+	  bytes_counter=0;
+	  len1 = readFRecord();
+	  pc_new=pc;
+	  for(int k=0;k<6;k++)
+	    for(int n=0;n<header.npart[k];n++)
+	      ioData((char *) &P[pc_new++].Vel[0], sizeof(float), 3, READ);
+	  len2 = readFRecord();
+	  assert(in.good() && len1==len2 && len1==bytes_counter);
+	  if (version==1) next_block_name="ID";
+	}
+  
+	if (block_name=="ID") { // IDs block
+	  ok=true;
+	  bytes_counter=0;
+	  len1 = readFRecord();
+	  pc_new=pc;
+	  for(int k=0;k<6;k++)
+	    for(int n=0;n<header.npart[k];n++)
+	      ioData((char *) &P[pc_new++].Id, sizeof(int), 1, READ);
+	  len2 = readFRecord();
+	  assert(in.good() && len1==len2 && len1==bytes_counter);
+	  if (version==1) next_block_name="MASS";
+	}
+
+	if (block_name=="MASS") { // MASS block
+	  ok=true;
+	  bytes_counter=0;
+	  if (ntotmasses > 0.)
+	    len1 = readFRecord();
+	  pc_new=pc;
+	  for(int k=0;k<6;k++)
+	    for(int n=0;n<header.npart[k];n++) {
+	      if (header.mass[k] == 0 ) {  // variable mass
+		ioData((char *) &P[pc_new++].Mass, sizeof(float), 1, READ);
+	      }
+	      else {                       // constant mass
+		P[pc_new++].Mass = header.mass[k];
+	      }
+	    }
+	  if (ntotmasses > 0.) {
+	    len2 = readFRecord();
+	    assert(in.good() && len1==len2 && len1==bytes_counter);
 	  }
 	}
-      if (ntotmasses > 0.) {
-	len2 = readFRecord();
-	assert(in.good() && len1==len2 && len1==bytes_counter);
+
+	if (!ok) {
+	  skipBlock();
+	}
       }
-      
-  
     } // end of loop on numfiles
-  
+
+    // set masses in case of missing mass block name
+    if (ntotmasses == 0) {
+      if (verbose) {
+	std::cerr << "Adding constant masses...\n";
+      }
+      pc_new=0;
+      for(int k=0;k<6;k++)
+	for(int n=0;n<header.npartTotal[k];n++) {
+	  P[pc_new++].Mass = header.mass[k];
+	}
+    
+    }
     // sort particles according to their indexes
     //qsort(P,npartTotal,sizeof(t_particle_data_lite),gadget::compare);
     
@@ -257,8 +287,9 @@ int GadgetIO::readHeader(const int id)
 }
 // ============================================================================
 // readBlockName : read Gadget2 file format block                              
-void GadgetIO::readBlockName()
+bool GadgetIO::readBlockName()
 {
+  bool status=true;
   if (version == 2 ) { // gadget2 file format
     int dummy,dummy1;
     char name[9];
@@ -268,8 +299,13 @@ void GadgetIO::readBlockName()
     int i=0; while (isupper(name[i])&& i<4) i++;
     name[i]='\0';
     block_name=name;
-    //std::cerr << "Block Name : <" << block_name << ">\n";
+    block_name=name;
+    status = in.good();
+    if (verbose) {
+      std::cerr << "Block Name : <" << block_name << ">\n";
+    }
   }
+  return status;
 }
 // ============================================================================
 // guessVersion()                                                              
@@ -311,8 +347,8 @@ int GadgetIO::ioData(char * ptr,const size_t size_bytes,const int items,const io
   case READ :
     // get data from file
     in.read(ptr,size_bytes*items);
-    assert(in.good());
-    
+    //assert(in.good());
+    if (! in.good()) return 0;
     // We SWAP data
     if (swap && (size_bytes != CHAR)) { // swapping requested
       for (int i=0; i<items; i++) {

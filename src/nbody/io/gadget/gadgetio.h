@@ -99,7 +99,7 @@ typedef struct particle_data_lite
 class GadgetIO{
 public:
 
-    GadgetIO(const std::string&);
+  GadgetIO(const std::string&, const bool verbose=false);
 
     ~GadgetIO();
 
@@ -119,6 +119,7 @@ private:
   std::ofstream out;
   int multiplefiles;
   bool lonely_file;
+  bool verbose;
   //data
   float * mass, * pos, * vel;
   int * id;
@@ -137,7 +138,7 @@ private:
   bool status;
   int bytes_counter;
   // method
-  void readBlockName();
+  bool readBlockName();
   std::string block_name;
   int readHeader(const int);
   int ioData(char * ptr,const size_t size_bytes,const  int items,const ioop op);
@@ -160,6 +161,16 @@ private:
     }
     assert(in.good());
     return len;
+  }
+  // skip Block
+  inline void skipBlock() {
+    int len1 = readFRecord();
+    in.seekg(len1,std::ios::cur);
+    int len2 = readFRecord();
+    assert(in.good() && len1==len2);
+    if (block_name == "AGE" || block_name == "Z" ) {
+      //std::cerr << "len1 = " << len1 << "\nlen2 = " << len2 << "\n";
+    }
   }
 };
 
