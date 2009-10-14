@@ -85,7 +85,6 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 				$(inline_h)
 parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
 octtree_h		:= $(INC)octtree.h $(memory_h) $(traits_h) $(tupel_h)
-Octtree_h		:= $(INC)Octtree.h $(memory_h) $(traits_h) $(tupel_h)
 
 # -----------------------
 # source dependency lists
@@ -101,7 +100,6 @@ random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 parallel_cc		:= $(SRC)parallel.cc $(parallel_h) $(meta_h) $(io_h)
 octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(memory_h)
-Octtree_cc		:= $(SRC)Octtree.cc $(Octtree_h) $(memory_h)
 
 # ---------------
 # library modules
@@ -123,13 +121,10 @@ $(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 $(LIB)octtree.o:	$(octtree_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
-$(LIB)Octtree.o:	$(Octtree_cc) $(LIBT) makefile
-			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o
-
-objects		:	$(LIB)octtree.o $(LIB)Octtree.o
+			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
+			$(LIB)WDMath.o
 
 # -------
 # library
