@@ -303,27 +303,27 @@ namespace WDutils {
       }
       virtual
       void Head(const Cell*, std::ostream&out) const {
-	out << "Cell le  up   Cf Nc  Lf   Nl    N "
+	out << "Cell  le   up    Cf Nc  Lf   Nl     N "
 	    << "       R                 X         ";
       }
       virtual
       void Data(const Cell*C, const OctalTree*T, std::ostream&out) const {
 	unsigned no = T->NoCell(C);
-	out  << 'C' << std::setfill('0') << std::setw(3) << no <<' '
+	out  << 'C' << std::setfill('0') << std::setw(4) << no <<' '
 	     << std::setw(2) << std::setfill(' ') << int(C->Le) <<' ';
 	if(C->Pa)
-	  out<< 'C' << std::setfill('0') << std::setw(3) << no-C->Pa <<' ';
+	  out<< 'C' << std::setfill('0') << std::setw(4) << no-C->Pa <<' ';
 	else
-	  out<< " nil ";
+	  out<< "  nil ";
 	if(C->Cf)
-	  out<< 'C' << std::setfill('0') << std::setw(3) << no+C->Cf <<' ';
+	  out<< 'C' << std::setfill('0') << std::setw(4) << no+C->Cf <<' ';
 	else
 	  out<< " nil ";
 	out  << std::setfill(' ') << std::setw(1) << C->Nc << ' '
 	     << 'L' << std::setfill('0') << std::setw(4) << T->NoLeaf(C->L0)
 	     << ' ' << std::setfill(' ')
 	     << std::setw(2) << C->Nl << ' '
-	     << std::setw(4) << C->N  << ' '
+	     << std::setw(5) << C->N  << ' '
 	     << std::setw(8) << T->Radius(C) << ' '
 	     << std::setw(8) << C->X;
       }

@@ -5,7 +5,7 @@
 # Makefile for WDutils
 ################################################################################
 
-default			: library
+default			: library objects
 install			: library cleanobj
 
 # ----------------
@@ -127,8 +127,9 @@ $(LIB)Octtree.o:	$(Octtree_cc) $(LIBT) makefile
 			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o \
-			$(LIB)octtree.o
+			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o
+
+objects		:	$(LIB)octtree.o $(LIB)Octtree.o
 
 # -------
 # library
@@ -153,9 +154,7 @@ ifeq ($(MPIDIR),mpich)
 $(LIB)parallel.o:	$(parallel_cc) $(makefiles)
 			$(MAKE_OBJ) $(IMPI)
 
-WDutilsP_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)random.o $(LIB)WDMath.o \
-			$(LIB)octtree.o $(LIB)sse.o $(LIB)parallel.o
+WDutilsP_objs	:=	$(WDutils_objs) $(LIB)parallel.o
 
 # -----------
 # MPI library
@@ -169,7 +168,6 @@ $(LIB)libWDutilsMPI.so:	$(WDutilsP_objs)
 
 library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so \
 			$(LIB)libWDutilsMPI.a $(LIB)libWDutilsMPI.so
-
 else
 
 library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
