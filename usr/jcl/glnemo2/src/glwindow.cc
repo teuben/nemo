@@ -248,7 +248,7 @@ void GLWindow::changeColorMap()
 // reverseColorMap                                                             
 void GLWindow::reverseColorMap()
 {
-  store_options->reverse_cmap = !store_options->reverse_cmap;
+  //store_options->reverse_cmap = !store_options->reverse_cmap;
   for (unsigned int i=0; i<pov->size() ;i++) {
     gpv[i].buildVboColor();
   }

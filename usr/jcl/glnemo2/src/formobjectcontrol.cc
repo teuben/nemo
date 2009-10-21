@@ -98,6 +98,7 @@ FormObjectControl::FormObjectControl(QWidget *parent):QDialog(parent)
   
   form.objects_properties->setTabEnabled(1,false);
   form.objects_properties->setCurrentIndex(0); // set position to first tab
+  
 }
 
 // ============================================================================
@@ -175,6 +176,7 @@ void FormObjectControl::update(ParticlesData   * _p_data,
 
   go           = _go;
   dens_color_bar->setGo(go);
+  form.dynamic_cmap->setChecked(go->dynamic_cmap);
   if (go  && ! go->duplicate_mem) mutex_data->lock();
   lock=false;
   current_data = _p_data;

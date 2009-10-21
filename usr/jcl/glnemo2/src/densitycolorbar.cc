@@ -40,7 +40,12 @@ void DensityColorBar::draw()
     int R,G,B;
     for (int i=0; i<parent->width();i++) {
       //QPainterPath path;
-      int index=i*ncolors/(parent->width());
+      int index;
+      if (!go->reverse_cmap) 
+        index=i*ncolors/(parent->width()-1);
+      else
+        index=(parent->width()-1-i)*ncolors/(parent->width()-1);
+      
       //path.moveTo(i,0);
       //path.lineTo(i,parent->height());
       R=pow((*go->R)[index],go->powercolor)*255;
@@ -55,10 +60,10 @@ void DensityColorBar::draw()
 // Draw                                                                        
 void DensityColorBar::draw(const int min, const int max)
 {
-  if (go && !go->constant_cmap) {
-    draw();
-  }
-  else {
+  if (go && !go->dynamic_cmap) {
+    draw();  // constant colormap
+  } 
+  else {     // Dynamic colormap 
     clearScene();
     if (go) {
         clearScene();
@@ -66,9 +71,16 @@ void DensityColorBar::draw(const int min, const int max)
         setSceneRect(0,0,parent->width(),parent->height());
         //QPainterPath path;
         int R,G,B;
+        
+        // loop from min to max range
         for (int i=min*parent->width()/100.; i<max*parent->width()/100.;i++) {
 
+          //int index=(i-min*parent->width()/100.)*ncolors/((max-min)*parent->width()/100.);
           int index=(i-min*parent->width()/100.)*ncolors/((max-min)*parent->width()/100.);
+          if (go->reverse_cmap) {
+             index = ncolors-1-index;
+          }
+          
           //path.moveTo(i,0);
           //path.lineTo(i,parent->height());
           R=pow((*go->R)[index],go->powercolor)*255;

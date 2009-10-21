@@ -152,7 +152,7 @@ class MainWindow : public QMainWindow {
     QAction * next_cmap_action;
     QAction * prev_cmap_action;
     QAction * reverse_cmap_action;
-    QAction * constant_cmap_action;
+    QAction * dynamic_cmap_action;
     // auto rotate
     QAction * rotatex_action, * rotatey_action,* rotatez_action;
     // auto translate

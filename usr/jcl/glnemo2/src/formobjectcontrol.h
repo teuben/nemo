@@ -113,7 +113,7 @@ namespace glnemo {
                 ParticlesObjectVector * ,
                 GlobalOptions         * ,
 	        bool reset_table=true  );
-    void init(QMutex * _m) { mutex_data = _m;};
+    void init(QMutex * _m) { mutex_data = _m;}
   signals:
   void objectSettingsChanged();
   void objectUpdateVel(const int);
@@ -125,8 +125,16 @@ namespace glnemo {
   void textureObjectChanged(const int , const int);
   void leaveEvent();
   void updateIpvs(const int);
+  // cmap signals
+  void nextColorMap();
+  void prevColorMap();
+  void constantColorMap(const bool);
+  void reverseColorMap(const bool);
+  void customColormap();
   public slots:
     void changeColorMap() {
+      form.dynamic_cmap->setChecked(go->dynamic_cmap);
+      form.reverse_cmap->setChecked(go->reverse_cmap);
       dens_color_bar->draw(form.dens_slide_min->value(),form.dens_slide_max->value());
     }
   private slots:
@@ -176,6 +184,22 @@ namespace glnemo {
     void on_temp_phys_radio_clicked();  
     void on_pressure_phys_radio_clicked();  
     void on_physical_selected();
+    // colormap group
+    void on_next_cmap_clicked() {
+       emit nextColorMap();
+    }
+    void on_prev_cmap_clicked(){
+       emit prevColorMap();
+    }
+    void on_custom_cmap_clicked() { 
+      
+    }
+    void on_dynamic_cmap_clicked(bool b) {
+      emit constantColorMap(b);
+    }
+    void on_reverse_cmap_clicked(bool b) {
+      emit reverseColorMap(b);
+    }
     //
     void on_objects_properties_currentChanged(int index) {
       if (index==1) { // tab density

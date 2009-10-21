@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.preview.2009-Sep-04"
+#define RELEASE_VERSION "preview.2009-Nov-21"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -65,10 +65,14 @@ using namespace std;
     "ztrans=0.0\n      translation on Z                                 ",
     "grid=t\n          Show grid                                        ",
     "osd=t\n           Show On Screen Display                           ",
+    "com=f\n           centering according Center Of Mass               ", 
     "point=f\n         show particles as points                         ",
+    "mindens=\n        set minimal density                              ",
+    "maxdens=\n        set maximal density                              ",
     "texture=t\n       show particles as textures                       ",
     "texture_s=0.15\n  texture size of gaz particle                     ",
     "texture_ac=125\n  texture alpha color of gaz particle              ",
+    "cmapindex=0\n     Color map index                                  ",
     "psize=1.0\n       Set particles size                               ",
     "port=4444\n       Server's communication port                      ",
     "wsize=931\n       Windows's width size                             ",

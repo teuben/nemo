@@ -106,7 +106,7 @@ public:
     bool reverse_cmap; // reverse colormap
     std::vector <float> *R,*G,*B;
     float powercolor, poweralpha;
-    bool constant_cmap;
+    bool dynamic_cmap;
     // z sorting
     bool zsort;
 };

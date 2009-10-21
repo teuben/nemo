@@ -95,7 +95,7 @@ GlobalOptions::GlobalOptions()
   // colormap
   colormap=108;
   reverse_cmap = false;
-  constant_cmap=true;
+  dynamic_cmap=true;
   powercolor = 0.8;
   poweralpha = 1.2;
   // Z sorting
@@ -219,7 +219,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   // colormap
   colormap = m.colormap;
   reverse_cmap = m.reverse_cmap;
-  constant_cmap=m.constant_cmap;
+  dynamic_cmap=m.dynamic_cmap;
   R = m.R;
   G = m.G;
   B = m.B;

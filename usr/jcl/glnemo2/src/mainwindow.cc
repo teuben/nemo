@@ -103,7 +103,12 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_options,SIGNAL(startStopPlay()),camera,SLOT(startStopPlay()));
   // colormap
   connect(colormap,SIGNAL(newColorMap()),gl_window,SLOT(changeColorMap()));
+  connect(colormap,SIGNAL(newColorMap()),gl_window,SLOT(reverseColorMap()));
   connect(colormap,SIGNAL(newColorMap()),form_o_c,SLOT(changeColorMap()));
+  connect(form_o_c,SIGNAL(nextColorMap()),colormap,SLOT(next()));
+  connect(form_o_c,SIGNAL(prevColorMap()),colormap,SLOT(prev()));
+  connect(form_o_c,SIGNAL(constantColorMap(bool)),colormap,SLOT(constant(bool)));
+  connect(form_o_c,SIGNAL(reverseColorMap(bool)),colormap,SLOT(reverse(bool)));
   // options play tab
   connect(form_options,SIGNAL(playPressed()),this,SLOT(actionPlay()));
   connect(this,SIGNAL(endOfSnapshot()),form_options,SLOT(on_play_pressed()));
@@ -441,16 +446,16 @@ void MainWindow::createActions()
   prev_cmap_action->setShortcut(tr("Alt+Shift+p"));
   connect( prev_cmap_action, SIGNAL( activated() ), colormap, SLOT( prev() ) );
   addAction(prev_cmap_action);
-  // inverse colormap
+  // reverse colormap
   reverse_cmap_action = new QAction(this);
   reverse_cmap_action->setShortcut(tr("Alt+Shift+i"));
-  connect( reverse_cmap_action, SIGNAL( activated() ), gl_window, SLOT( reverseColorMap() ) );
+  connect( reverse_cmap_action, SIGNAL( activated() ), colormap, SLOT( reverse() ) );
   addAction(reverse_cmap_action);
   // constant colormap
-  constant_cmap_action = new QAction(this);
-  constant_cmap_action->setShortcut(tr("Alt+Shift+c"));
-  connect( constant_cmap_action, SIGNAL( activated() ), colormap, SLOT( constant() ) );
-  addAction(constant_cmap_action);
+  dynamic_cmap_action = new QAction(this);
+  dynamic_cmap_action->setShortcut(tr("Alt+Shift+c"));
+  connect( dynamic_cmap_action, SIGNAL( activated() ), colormap, SLOT( constant() ) );
+  addAction(dynamic_cmap_action);
 
   // Z sorting
   zsorting_action = new QAction(this);
@@ -579,7 +584,9 @@ void MainWindow::loadNewData(const std::string select,
     if (interact && !reload && !store_options->rho_exist) {
       store_options->render_mode = 0; // alpha blending accumulation mode
     }
-    
+    if (store_options->auto_com) {
+       actionCenterToCom(false);
+    } 
     gl_window->update( current_data->part_data, &pov2,store_options);
     qDebug("Time elapsed to update GL with new data: %d s", tbench.elapsed()/1000);
     if (!reload && bestzoom) gl_window->bestZoomFit();
@@ -680,6 +687,17 @@ void MainWindow::parseNemoParameters()
   store_options->port     = getiparam((char *) "port");
   store_options->show_points= getbparam((char *) "point");
   store_options->show_poly= getbparam((char *) "texture");
+  // density
+  if ( hasvalue((char *) "mindens") ) {
+      store_options->phys_min_glob=getdparam((char *) "mindens");
+      store_options->phys_local=false;
+  } 
+  if ( hasvalue((char *) "maxdens") ) {
+      store_options->phys_max_glob=getdparam((char *) "maxdens");
+  }
+  // color map
+  store_options->colormap += getiparam((char *) "cmapindex");
+  store_options->auto_com           =getbparam((char *) "com");
   store_options->texture_size       =getdparam((char *) "texture_s");
   store_options->texture_alpha_color=getiparam((char *) "texture_ac");
   store_options->duplicate_mem = getbparam((char *) "smooth_gui");

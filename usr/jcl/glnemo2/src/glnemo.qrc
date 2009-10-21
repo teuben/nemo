@@ -32,6 +32,8 @@
         <file>../images/colors.png</file>
         <file>../images/connect.png</file>
         <file>../images/exit.png</file>
+        <file>../images/next.png</file>
+        <file>../images/previous.png</file>
         <file>../images/fileprint.png</file>
         <file>../images/fitscreen.png</file>
         <file>../images/folder_open.png</file>
@@ -62,5 +64,4 @@
         <file>../images/zoom-best-fit.png</file>
         <file>../camera/path_01</file>
     </qresource>
-    <qresource prefix="/new/prefix1" />
 </RCC>

@@ -33,12 +33,19 @@ class Colormap: public QObject {
     void getRGB(std::vector <float> * r,std::vector <float> * g,std::vector <float> *b) {
       r=&R; g=&G; b=&B;
     }
-    int getIndexMap() { return cmap; };
+    int getIndexMap() { return cmap; }
   public slots:
     int next();
     int prev();
-    void constant() { go->constant_cmap = !go->constant_cmap;
-      emit newColorMap(); };
+    void constant() { go->dynamic_cmap = !go->dynamic_cmap;
+      emit newColorMap(); }
+    void constant(bool b) { go->dynamic_cmap = b;
+      emit newColorMap(); }
+        void reverse() { go->reverse_cmap = !go->reverse_cmap;
+      emit newColorMap(); }
+    void reverse(bool b) { go->reverse_cmap = b;
+      emit newColorMap(); }
+    
   signals:
     void newColorMap();
   private:
