@@ -1,4 +1,12 @@
 current version
+preview.2009-Nov-21
+-------------------
+- new input parameters enhance screenshot from the command line:
+   - mindens   : set minimum density threshold
+   - maxdens   : set maximum density threshold
+   - com       : boolean to center according to the center of mass 
+   - cmapindex : give the colormap index
+- colormap can be selected directly from the user interface
 
 - experimental temperature display
 
