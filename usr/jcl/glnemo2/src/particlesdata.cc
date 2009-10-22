@@ -419,7 +419,7 @@ int PhysicalData::computeMinMax()
 	min=std::min(min,data[i]);
       }
     }
-    if (max == -1E9 && min == 1E9) {
+    if ((max == -1E9 && min == 1E9 )|| (max == min)) {
       valid = false;
     } 
     else {
@@ -435,7 +435,7 @@ int PhysicalData::computeMinMax()
           case PhysicalData::pressure :
             GlobalOptions::pressure_exist    = true;
             break;                        
-     }
+          }
       valid = true;
     }
     std::cerr << "min data="<<min<<" max data="<<max<<"\n";
