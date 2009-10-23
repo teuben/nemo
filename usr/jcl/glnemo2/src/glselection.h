@@ -37,20 +37,20 @@ public:
     void reset();
     void update(const GLObjectParticlesVector *,
                 GlobalOptions   *, QMutex * );
-    bool isEnable()   { return enable;};
-    void setEnable(bool _b) { enable=_b;    };
+    bool isEnable()   { return enable;}
+    void setEnable(bool _b) { enable=_b;    }
     void getMouse(QMouseEvent *);
     void display(const int, const int);
     void zoomOnArea(const int nobj, double mProj[16],double mModel[16],
                     const int viewport[4]);
-    float X0() { return x0;};
-    float X1() { return x1;};
-    float Y0() { return y0;};
-    float Y1() { return y1;};
-    std::vector <int> * getList() { return &list; };
+    float X0() { return x0;}
+    float X1() { return x1;}
+    float Y0() { return y0;}
+    float Y1() { return y1;}
+    std::vector <int> * getList() { return &list; }
 public slots:
- void setZoom(bool _b)     { zoom      = _b; };
- void setAnimZoom(bool _b) { anim_zoom = _b; };
+ void setZoom(bool _b)     { zoom      = _b; }
+ void setAnimZoom(bool _b) { anim_zoom = _b; }
 
 private slots:
   void playZoomAnim();
