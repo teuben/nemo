@@ -152,8 +152,17 @@ void MainWindow::start(std::string shot)
       gl_window->updateGL();
     }
   }
-  if (play) actionPlay(); // start playing time step
-  if (shot != "") takeScreenshot(wsize,hsize,shot);
+  if (shot != "" && play) {
+      store_options->enable_gui=false;
+      store_options->auto_play_screenshot=true;
+      store_options->frame_width=wsize;
+      store_options->frame_height=hsize;
+      store_options->base_frame_name=QString(shot.c_str());
+  }
+  if (play) {
+      actionPlay(); // start playing time step
+  }
+  if (shot != "" && !play) takeScreenshot(wsize,hsize,shot);
   gl_window->setFocus();
 }
 // -----------------------------------------------------------------------------
@@ -960,7 +969,7 @@ void MainWindow::startAutoScreenshot()
   // frame name (jpg)
   std::string framename = store_options->base_frame_name.toStdString()+"."+stm1.str()+"."+
                           store_options->base_frame_ext.toStdString();
-  
+  std::cerr << "-----> framename = "<<framename<<"\n";
   //gl_window->rotateAroundAxis(1);
   std::string mess="Offscreen rendering : "+framename;
   statusBar()->showMessage(tr(mess.c_str()));
@@ -971,62 +980,63 @@ void MainWindow::startAutoScreenshot()
 // takeScreenshot()                                                             
 void MainWindow::takeScreenshot(const int width, const int height,  std::string name)
 {
-  if ( width!=0 && height!=0) { // valid dimensions
-    QSize size,sizegl;
-    sizegl=gl_window->size();   // get the current Ogl windows's size
-    if (width != -1) { // standard resolution or custom
-      size.setWidth(width);
-      size.setHeight(height);
-    }
-    else {           // screen resolution
-      size  = sizegl;
-    }
-    //gl_window->resizeOsd(size.width(),size.height());
-    
-    QRect geom = gl_window->geometry(); // save the current geometry of the GL's window
-
-    gl_window->resize(size.width(),size.height());
-    // !!! activate the following line if you want to see OSD
-#if 0
-    gl_window->setGeometry(geom.x(),geom.y(),             // give to the widget the new size
-                           size.width(),size.height());   // bc width() and height() are used by
-                                                          // renderText
-#endif
-    
-    //std::cerr << "GLWINDOW width = " << gl_window->width() << "\n";
-    gl_window->setFBO(true);                              // activate Frame Buffer Object
-    gl_window->setFBOSize(size.width(),size.height());    // set the offscreen rendering size
-    
-    gl_window->updateGL();                                // draw in FBO
-    
-    QImage img=(((gl_window->grabFrameBufferObject()).mirrored()).rgbSwapped()); // convert FBO to img
-
-    gl_window->resize(sizegl.width(),sizegl.height());    // revert to the previous Ogl windows's size
-
-     // !!! activate the following line if you want to see OSDr
-#if 0
-    
-    gl_window->setGeometry(geom.x(),geom.y(),             
-                           sizegl.width(),sizegl.height());
-#else
-    
-#endif
-    //gl_window->setFixedSize(sizegl);                   // revert to the previous Ogl Widget's size
-    //
-     if (name == "") { // interactive screenshot
-        QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),"",
-      tr("Images (*.png *.jpg)"));
-        if (!fileName.isEmpty()) {
-          img.save(fileName);
-      //resize(width(),height());
+    if ( width!=0 && height!=0) { // valid dimensions
+        QSize size,sizegl;
+        sizegl=gl_window->size();   // get the current Ogl windows's size
+        if (width != -1) { // standard resolution or custom
+            size.setWidth(width);
+            size.setHeight(height);
         }
-     } else {          // screenshot from the command line
-          int quality=-1;
-          if (store_options->base_frame_ext=="jpg") {
-            quality=95;
-          }
-          img.save(QString(name.c_str()),(store_options->base_frame_ext.toStdString()).c_str(),quality);
-     }
+        else {           // screen resolution
+            size  = sizegl;
+        }
+        //gl_window->resizeOsd(size.width(),size.height());
+
+        QRect geom = gl_window->geometry(); // save the current geometry of the GL's window
+
+        gl_window->resize(size.width(),size.height());
+        // !!! activate the following line if you want to see OSD
+#if 0
+        gl_window->setGeometry(geom.x(),geom.y(),             // give to the widget the new size
+                               size.width(),size.height());   // bc width() and height() are used by
+        // renderText
+#endif
+
+        //std::cerr << "GLWINDOW width = " << gl_window->width() << "\n";
+        gl_window->setFBO(true);                              // activate Frame Buffer Object
+        gl_window->setFBOSize(size.width(),size.height());    // set the offscreen rendering size
+
+        gl_window->updateGL();                                // draw in FBO
+
+        QImage img=(((gl_window->grabFrameBufferObject()).mirrored()).rgbSwapped()); // convert FBO to img
+
+        gl_window->resize(sizegl.width(),sizegl.height());    // revert to the previous Ogl windows's size
+
+        // !!! activate the following line if you want to see OSDr
+#if 0
+
+        gl_window->setGeometry(geom.x(),geom.y(),
+                               sizegl.width(),sizegl.height());
+#else
+
+#endif
+        //gl_window->setFixedSize(sizegl);                   // revert to the previous Ogl Widget's size
+        //
+        if (name == "") { // interactive screenshot
+            QString fileName = QFileDialog::getSaveFileName(this, tr("Save File"),"",
+                                                            tr("Images (*.png *.jpg)"));
+            if (!fileName.isEmpty()) {
+                img.save(fileName);
+                //resize(width(),height());
+            }
+        } else {          // screenshot from the command line
+            int quality=-1;
+            if (store_options->base_frame_ext=="jpg") {
+                quality=95;
+            }
+            std::cerr << "base_frame_ext="<<store_options->base_frame_ext.toStdString()<<"\n";
+            img.save(QString(name.c_str()),(store_options->base_frame_ext.toStdString()).c_str(),quality);
+        }
     }
 }
 // -----------------------------------------------------------------------------
@@ -1095,7 +1105,12 @@ void MainWindow::actionPlay()
     play_animation = !play_animation;
     if (play_animation) {
       if ( current_data->isEndOfData() ) {
-        QMessageBox::information( this,tr("Warning"),current_data->endOfDataMessage(),"Ok");
+        if (store_options->enable_gui)
+            QMessageBox::information( this,tr("Warning"),current_data->endOfDataMessage(),"Ok");
+        else {
+            killPlayingEvent();
+            actionQuit();
+        }
         //play_animation = false;
         emit endOfSnapshot();
       }
@@ -1168,7 +1183,13 @@ void MainWindow::uploadNewFrame()
       //std::cerr << "current_data is end of data\n";
       play_animation = false;
       play_timer->stop();
-      QMessageBox::information( this,tr("Warning"),current_data->endOfDataMessage(),"Ok");
+      if (store_options->enable_gui)
+          QMessageBox::information( this,tr("Warning"),current_data->endOfDataMessage(),"Ok");
+      else {
+          mutex_loading.unlock();
+          //killPlayingEvent();
+          actionQuit();
+      }
     }
   }
 }

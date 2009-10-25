@@ -1,5 +1,8 @@
 current version
-preview.2009-Nov-21
+  glnemo2 can render automatically all the time steps of a snapshot, if 
+  from the command line, input parameters screensht has a value  and play=t.  
+
+preview.2009-Oct-23
 -------------------
 - new input parameters enhance screenshot from the command line:
    - mindens   : set minimum density threshold

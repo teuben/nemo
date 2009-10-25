@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "preview.2009-Oct-23"
+#define RELEASE_VERSION "preview.2009-Oct-25"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -140,5 +140,6 @@ int main(int argc, char *argv[])
   main_win.start(shot);
   finiparam();  // garbage collecting for nemo
 
-  if (interact) return app.exec();
+  //if (interact) return app.exec();
+  return app.exec();
 }

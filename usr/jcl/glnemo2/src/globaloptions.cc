@@ -31,7 +31,7 @@ GlobalOptions::GlobalOptions()
   play_fps             = 25;
   frame_index          = 0;
   base_frame_name      = "frame";
-  base_frame_ext       = "png";
+  base_frame_ext       = "jpg";
   auto_screen_size_index = 1;
   frame_width          = 1280;
   frame_height         = 720;
@@ -100,6 +100,7 @@ GlobalOptions::GlobalOptions()
   poweralpha = 1.2;
   // Z sorting
   zsort = false;
+  enable_gui=true;
 }
 // ============================================================================
 // destructor                                                                  
@@ -227,6 +228,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   poweralpha = m.poweralpha;
   // z sorting
   zsort = m.zsort;
+  enable_gui = m.enable_gui;
   return *this;
 }
 // ============================================================================

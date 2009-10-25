@@ -109,6 +109,7 @@ public:
     bool dynamic_cmap;
     // z sorting
     bool zsort;
+    bool enable_gui;
 };
 
 }
