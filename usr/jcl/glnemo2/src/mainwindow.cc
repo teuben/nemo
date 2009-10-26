@@ -652,6 +652,8 @@ void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
     pov[i].setPartSize(store_options->psize);
     pov[i].setPart(store_options->show_points);
     pov[i].setGaz(store_options->show_poly);
+    pov[i].setGazSize(store_options->texture_size);
+    pov[i].setGazSizeMax(store_options->texture_size);
   }
 }
 // -----------------------------------------------------------------------------

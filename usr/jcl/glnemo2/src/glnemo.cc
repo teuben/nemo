@@ -70,7 +70,7 @@ using namespace std;
     "mindens=\n        set minimal density                              ",
     "maxdens=\n        set maximal density                              ",
     "texture=t\n       show particles as textures                       ",
-    "texture_s=0.15\n  texture size of gaz particle                     ",
+    "texture_s=1.0\n   texture size of gaz particle                     ",
     "texture_ac=125\n  texture alpha color of gaz particle              ",
     "cmapindex=0\n     Color map index                                  ",
     "psize=1.0\n       Set particles size                               ",
