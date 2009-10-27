@@ -399,147 +399,161 @@ void GLObjectParticles::buildVboColor()
 // Build Vector Buffer Object for colors array                                 
 void GLObjectParticles::buildVboColorGasGasSorted()
 {
-  QTime tbench,vbobench;
-  tbench.restart();
-  nvert_pos=0;
-  GLfloat * colors = new GLfloat[((po->npart/po->step)+1)*4]; // create colors array
-  std::cerr << "buildVboColor Densmin="<<PHYS_MIN<<"\n";
-  std::cerr << "buildVboColor Densmax="<<PHYS_MAX<<"\n";
-  
-  float LOGDMIN = log(PHYS_MIN);
-  float LOGDMAX = log(PHYS_MAX);
-#if 0  
-  PHYS_MIN = part_data->getMinRho();
-  PHYS_MAX = part_data->getMaxRho();CCCC
-             LOGDMIN = log(part_data->getMinRho());
-  LOGDMAX = log(part_data->getMaxRho());
-#endif
-  
-  float DIFMM   = LOGDMAX - LOGDMIN;
-  float INVDIFMM= 1./DIFMM;
-  float LOGMPMINRHO,LOGMPMAXRHO;
-  LOGMPMINRHO = LOGMPMAXRHO =0;
-  if (phys_select && phys_select->isValid()) {
-    LOGMPMINRHO = log(phys_select->getMin());
-    LOGMPMAXRHO = log(phys_select->getMax());
-    
-  }
-  float LOGRNEIBMIN,LOGRNEIBMAX,INVDIFFRNEIB;
-  if (part_data->rneib) {
-    LOGRNEIBMIN = log(part_data->rneib->getMin());
-    LOGRNEIBMAX = log(part_data->rneib->getMax());
-    INVDIFFRNEIB = 1./(LOGRNEIBMAX-LOGRNEIBMIN);
-  }
-  for (int i=0; i < po->npart; i+=po->step) {
-    int index;
-    if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
-    else                index = po->index_tab[i];
-    float log_rho;
-    log_rho=0.0;
-    if (phys_select && phys_select->isValid()) {
-      float partrhoindex=phys_select->data[index];
-      float logpri=log(partrhoindex);
-      
-      if (partrhoindex >= PHYS_MIN && partrhoindex <= PHYS_MAX) {
-        
-        // log of the density
-        log_rho=((logpri-LOGDMIN)*INVDIFMM);
-        
-        if (! go->dynamic_cmap ) { // keep color map constant between 2 frames0
-          log_rho=((logpri- LOGMPMINRHO)/
-                   (LOGMPMAXRHO-LOGMPMINRHO));
-        } else {                   // dynamic colormap
-          // use the ful range of color
-          log_rho=((logpri-LOGDMIN)*INVDIFMM);                  
-        }                
-      }
-      else {
-        log_rho = 0.;
-      }
+    QTime tbench,vbobench;
+    tbench.restart();
+    nvert_pos=0;
+    GLfloat * colors = new GLfloat[((po->npart/po->step)+1)*4]; // create colors array
+    std::cerr << "buildVboColor mindens="<<PHYS_MIN<<"\n";
+    std::cerr << "buildVboColor maxdens="<<PHYS_MAX<<"\n";
+
+    // compute some constants
+    float LOGDMIN = log(PHYS_MIN);
+    float LOGDMAX = log(PHYS_MAX);
+    float DIFMM   = LOGDMAX - LOGDMIN;
+    float INVDIFMM= 1./DIFMM;
+    float LOGMPMINRHO,LOGMPMAXRHO;
+    LOGMPMINRHO = LOGMPMAXRHO =0;
+
+    if (phys_select && phys_select->isValid()) { // density or temperature
+        LOGMPMINRHO = log(phys_select->getMin());
+        LOGMPMAXRHO = log(phys_select->getMax());
     }
-    // Process RGB components
+
+    float LOGRNEIBMIN,LOGRNEIBMAX,INVDIFFRNEIB;
+    if (part_data->rneib) { // neighbours exists
+        LOGRNEIBMIN = log(part_data->rneib->getMin());
+        LOGRNEIBMAX = log(part_data->rneib->getMax());
+        INVDIFFRNEIB = 1./(LOGRNEIBMAX-LOGRNEIBMIN);
+    }
+    //
     GLObject::setColor(po->getColor());
     float powcolor=go->powercolor;
     float powalpha=go->poweralpha;
-    float col=mycolor.redF();
-    //int cindex=(int) (log_rho*(R.size()-1));
-    int cindex;
-    if (!go->reverse_cmap)  // normal colormap
-      cindex = (int) (log_rho*(go->R->size()-1));  
-    else                    // reversed colormap
-      cindex = go->R->size()-1 - (int) (log_rho*(go->R->size()-1));  
-    bool ok=true;
-    if (phys_select && phys_select->data[index] == -1) ok=false;
-    if (phys_select && ok) {
-      colors[nvert_pos*4+0] =  pow((*go->R)[cindex],powcolor);
-    } else {
-      colors[nvert_pos*4+0] = mycolor.redF();
+    // create a colormap index lookup table
+    float * rcmap = new float[go->R->size()];
+    float * gcmap = new float[go->R->size()];
+    float * bcmap = new float[go->R->size()];
+    for (unsigned int i=0; i<go->R->size(); i++) {
+        rcmap[i] = pow((*go->R)[i],powcolor);
+        gcmap[i] = pow((*go->G)[i],powcolor);
+        bcmap[i] = pow((*go->B)[i],powcolor);
     }
-    col=mycolor.greenF();
-    if (phys_select && ok) {
-      colors[nvert_pos*4+1] =  pow((*go->G)[cindex],powcolor);
-    } else {
-      colors[nvert_pos*4+1] = mycolor.greenF();
-    }
-    col=mycolor.blueF();
-    if (phys_select && ok) {
-      colors[nvert_pos*4+2] =  pow((*go->B)[cindex],powcolor);
-    } else {
-      colors[nvert_pos*4+2] = mycolor.blueF();
-    }
-    // Process ALPHA component
-    if (phys_select && phys_select->isValid()) {
-      if (phys_select->data[index] != -1) { // Normalize rho for alpha color
-#if 1
-        //colors[nvert_pos*4+3] = pow(alpha * log_rho,2.);
-        if (0 && part_data->rneib) {
-          float alpha=(log(part_data->rneib->data[index])-LOGRNEIBMIN)*
-                      INVDIFFRNEIB;
-          colors[nvert_pos*4+3] = pow((1-alpha)*log_rho,powalpha);//rpow(alpha,powalpha);
-          
-          //std::cerr << "rneib = " << part_data->rneib->data[index] << " alpha = " << alpha << "\n";
-        } else {
-          colors[nvert_pos*4+3] = pow(log_rho,powalpha);//* log_rho;
-        }
-#else
-        // Normalize rho for alpha color
-        float alpha=po->getGazAlpha()/255.;
-        colors[nvert_pos*4+3] = alpha+(1-alpha)*(phys_select[index]-part_data->getMinRho())/
-                                (part_data->getMaxRho()-part_data->getMinRho());
-#endif
-        if (colors[nvert_pos*4+3] > 1.0 || colors[nvert_pos*4+3] <0.0) {
-          std::cerr << "Erreur alpha = "<<colors[nvert_pos*4+3]<<"\n";
-        }
-      } 
-      else {
-        colors[nvert_pos*4+3] = 1.0;
-      }
-    } 
-    else {
-      colors[nvert_pos*4+3] = 1.0;
-    }
-    nvert_pos++;
-  }
-  vbobench.restart();
-  // bind VBO in order to use
-  //glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_color);
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
-  //std::cerr << "vbo_pos = " << vbo_pos << "\n";
-  assert( nvert_pos <= (po->npart/po->step)+1);
-  // upload data to VBO
 #if 0
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, nvert_pos * 4 * sizeof(float), colors, GL_STATIC_DRAW_ARB);
-#else
-  glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, nvert_pos * 3 * sizeof(float), nvert_pos * 4 * sizeof(float), colors);
+    // create a lookup table for alpha channel
+    int nlookup=1000000;
+    float alpha_lookup[nlookup];
+    alpha_lookup[0] = 0.;
+    for (int i=1; i<nlookup; i++) {
+        alpha_lookup[i] = exp(log((float)(i)/(nlookup-1.))/powalpha);
+        //std::cerr << "alpha lookup = "<<alpha_lookup[i]<<"\n";
+    }
 #endif
-  //checkVboAllocation((int) (nvert_pos * 3 * sizeof(float)));
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-  
-  if (BENCH) qDebug("WALL Time elapsed to build VBO color: %f s", tbench.elapsed()/1000.);
-  if (BENCH) qDebug("TRANSFERT Time elapsed to build VBO color: %f sec %f MB/s", vbobench.elapsed()/1000.,
-                    (nvert_pos * 4 * sizeof(float)/1024./1024.)/(vbobench.elapsed()/1000.));
-  
-  delete [] colors;
+    // loop on all the particles
+    for (int i=0; i < po->npart; i+=po->step) {
+        int index;
+        if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
+        else                index = po->index_tab[i];
+        float log_rho;
+        log_rho=0.0;
+        if (phys_select && phys_select->isValid()) {
+            float partrhoindex=phys_select->data[index];
+            float logpri=log(partrhoindex);
+
+            if (partrhoindex >= PHYS_MIN && partrhoindex <= PHYS_MAX) {
+                if (! go->dynamic_cmap ) { // keep color map constant between 2 frames0
+                    log_rho=((logpri- LOGMPMINRHO)/
+                             (LOGMPMAXRHO-LOGMPMINRHO));
+                } else {                   // dynamic colormap
+                    // use the full range of color
+                    log_rho=((logpri-LOGDMIN)*INVDIFMM);
+                }
+            }
+            else {
+                log_rho = 0.;
+            }
+        }
+        // Process RGB components
+        int cindex;
+        if (!go->reverse_cmap)  // normal colormap
+            cindex = (int) (log_rho*(go->R->size()-1));
+        else                    // reversed colormap
+            cindex = go->R->size()-1 - (int) (log_rho*(go->R->size()-1));
+        bool ok=true;
+        if (phys_select && phys_select->data[index] == -1) ok=false;
+        if (phys_select && ok) {
+            colors[nvert_pos*4+0] =  rcmap[cindex];//pow((*go->R)[cindex],powcolor);
+        } else {
+            colors[nvert_pos*4+0] = mycolor.redF();
+        }
+
+        if (phys_select && ok) {
+            colors[nvert_pos*4+1] =  gcmap[cindex];//pow((*go->G)[cindex],powcolor);
+        } else {
+            colors[nvert_pos*4+1] = mycolor.greenF();
+        }
+
+        if (phys_select && ok) {
+            colors[nvert_pos*4+2] =  bcmap[cindex];//pow((*go->B)[cindex],powcolor);
+        } else {
+            colors[nvert_pos*4+2] = mycolor.blueF();
+        }
+        // Process ALPHA component
+        if (phys_select && phys_select->isValid()) {
+            if (phys_select->data[index] != -1) { // Normalize rho for alpha color
+#if 1
+                //colors[nvert_pos*4+3] = pow(alpha * log_rho,2.);
+                if (0 && part_data->rneib) {
+                    float alpha=(log(part_data->rneib->data[index])-LOGRNEIBMIN)*
+                                INVDIFFRNEIB;
+                    colors[nvert_pos*4+3] = pow((1-alpha)*log_rho,powalpha);//rpow(alpha,powalpha);
+
+                    //std::cerr << "rneib = " << part_data->rneib->data[index] << " alpha = " << alpha << "\n";
+                } else {
+                    colors[nvert_pos*4+3] = pow(log_rho,powalpha);
+                    //colors[nvert_pos*4+3] = alpha_lookup[(int) (log_rho*(nlookup-1))];
+                }
+#else
+                // Normalize rho for alpha color
+                float alpha=po->getGazAlpha()/255.;
+                colors[nvert_pos*4+3] = alpha+(1-alpha)*(phys_select[index]-part_data->getMinRho())/
+                                        (part_data->getMaxRho()-part_data->getMinRho());
+#endif
+                if (colors[nvert_pos*4+3] > 1.0 || colors[nvert_pos*4+3] <0.0) {
+                    std::cerr << "Erreur alpha = "<<colors[nvert_pos*4+3]<<"\n";
+                }
+            }
+            else {
+                colors[nvert_pos*4+3] = 1.0;
+            }
+        }
+        else {
+            colors[nvert_pos*4+3] = 1.0;
+        }
+        nvert_pos++;
+    }
+    delete [] rcmap;
+    delete [] gcmap;
+    delete [] bcmap;
+    vbobench.restart();
+    // bind VBO in order to use
+    //glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_color);
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
+    //std::cerr << "vbo_pos = " << vbo_pos << "\n";
+    assert( nvert_pos <= (po->npart/po->step)+1);
+    // upload data to VBO
+#if 0
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, nvert_pos * 4 * sizeof(float), colors, GL_STATIC_DRAW_ARB);
+#else
+    glBufferSubDataARB(GL_ARRAY_BUFFER_ARB, nvert_pos * 3 * sizeof(float), nvert_pos * 4 * sizeof(float), colors);
+#endif
+    //checkVboAllocation((int) (nvert_pos * 3 * sizeof(float)));
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+    if (BENCH) qDebug("WALL Time elapsed to build VBO color: %f s", tbench.elapsed()/1000.);
+    if (BENCH) qDebug("TRANSFERT Time elapsed to build VBO color: %f sec %f MB/s", vbobench.elapsed()/1000.,
+                      (nvert_pos * 4 * sizeof(float)/1024./1024.)/(vbobench.elapsed()/1000.));
+
+    delete [] colors;
 }
 // ============================================================================
 // buildVboSize                                                                
