@@ -18,7 +18,8 @@ unix {
         #NEMOINC = $(NEMOINC)
         NEMOLIB = ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE
         NEMOINC = ../plugins/nemolight/inc
-        QMAKE_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
+        QMAKE_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -O2
+        QMAKE_CXXFLAGS_DEBUG += -O2
 }
 # specific Mac Os X config
 macx {

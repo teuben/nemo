@@ -450,8 +450,7 @@ void GLObjectParticles::buildVboColorGasGasSorted()
                    (LOGMPMAXRHO-LOGMPMINRHO));
         } else {                   // dynamic colormap
           // use the ful range of color
-          log_rho=((logpri-LOGDMIN)/
-                   (DIFMM));
+          log_rho=((logpri-LOGDMIN)*INVDIFMM);                  
         }                
       }
       else {
