@@ -32,6 +32,8 @@ namespace glnemo {
 float PHYS_MIN=-1.;;
 float PHYS_MAX=0.000006;
 int index_min, index_max;
+float GLObjectParticles::alpha_lookup[ALPHA_LOOKUP_TABLE];
+float GLObjectParticles::lognlookup;
 // ============================================================================
 // constructor                                                                 
 GLObjectParticles::GLObjectParticles(GLTextureVector * _gtv ):GLObject()
@@ -395,6 +397,29 @@ void GLObjectParticles::buildVboColor()
   buildVboColorGasGasSorted();
 }
 // ============================================================================
+// initAlphaLookupTable
+void GLObjectParticles::initAlphaLookupTable(GlobalOptions * go)
+{
+    // create a lookup table for alpha channel
+    int nlookup=ALPHA_LOOKUP_TABLE;
+    GLObjectParticles::alpha_lookup[0] = 0.;
+    GLObjectParticles::alpha_lookup[nlookup-1] = 1.;
+    GLObjectParticles::lognlookup=log(nlookup-1);
+    for (int i=1; i<nlookup; i++) GLObjectParticles::alpha_lookup[i] = 0.0;
+    for (int i=1; i<nlookup; i++) {
+        //alpha_lookup[i] = exp(log((float)(i)/(nlookup-1.))/powalpha);        
+        float val=log(i)/log(nlookup-1.);
+        GLObjectParticles::alpha_lookup[(int) exp((val)*GLObjectParticles::lognlookup)] = 
+            pow(val,go->poweralpha);
+        //std::cerr << "alpha lookup = "<<alpha_lookup[(int) ((val)*(nlookup-1))]<<" index="<<(int) ((val)*(nlookup-1))<<"\n";
+    }
+    for (int i=nlookup-2; i>1; i--) {
+      if (GLObjectParticles::alpha_lookup[i] == 0.) 
+        GLObjectParticles::alpha_lookup[i] = GLObjectParticles::alpha_lookup[i+1];
+    }
+
+}
+// ============================================================================
 // buildVboColor                                                               
 // Build Vector Buffer Object for colors array                                 
 void GLObjectParticles::buildVboColorGasGasSorted()
@@ -438,16 +463,7 @@ void GLObjectParticles::buildVboColorGasGasSorted()
         gcmap[i] = pow((*go->G)[i],powcolor);
         bcmap[i] = pow((*go->B)[i],powcolor);
     }
-#if 0
-    // create a lookup table for alpha channel
-    int nlookup=1000000;
-    float alpha_lookup[nlookup];
-    alpha_lookup[0] = 0.;
-    for (int i=1; i<nlookup; i++) {
-        alpha_lookup[i] = exp(log((float)(i)/(nlookup-1.))/powalpha);
-        //std::cerr << "alpha lookup = "<<alpha_lookup[i]<<"\n";
-    }
-#endif
+
     // loop on all the particles
     for (int i=0; i < po->npart; i+=po->step) {
         int index;
@@ -510,7 +526,10 @@ void GLObjectParticles::buildVboColorGasGasSorted()
                     //std::cerr << "rneib = " << part_data->rneib->data[index] << " alpha = " << alpha << "\n";
                 } else {
                     colors[nvert_pos*4+3] = pow(log_rho,powalpha);
-                    //colors[nvert_pos*4+3] = alpha_lookup[(int) (log_rho*(nlookup-1))];
+                    //colors[nvert_pos*4+3] = 
+                    //    GLObjectParticles::alpha_lookup[(int) exp(log_rho*GLObjectParticles::lognlookup)];
+                    
+                    //std::cerr << colors[nvert_pos*4+3] << " " << pow(log_rho,powalpha) << "\n";
                 }
 #else
                 // Normalize rho for alpha color
@@ -573,7 +592,7 @@ void GLObjectParticles::buildVboSize()
     
     size_neib[nvert_pos*3+1] = 0.;
     size_neib[nvert_pos*3+2] = 0.;
-    float log_rho;
+    float log_rho=0.;
     if (phys_select && phys_select->isValid()) {
       log_rho=((log(phys_select->data[index])-log(phys_select->getMin()))/
 	  (log(phys_select->getMax())-log(phys_select->getMin())));
@@ -625,7 +644,7 @@ void GLObjectParticles::buildVboSize2()
     if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
     else                index = po->index_tab[i];
     
-    float log_rho;
+    float log_rho=0.;
     if (phys_select && phys_select->isValid()) {
 
 	if (phys_select->data[index] >= PHYS_MIN && phys_select->data[index] <= PHYS_MAX) {

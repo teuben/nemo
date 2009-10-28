@@ -19,7 +19,7 @@
 #include "globject.h"
 #include "gltexture.h"
 #include <QObject>
-
+#define ALPHA_LOOKUP_TABLE 1000000
 //#include "particlesdata.h"
 namespace glnemo {
 
@@ -87,8 +87,11 @@ class GLObjectParticles : public GLObject {
     void setTexture();
     void toto();
     void checkVboAllocation(const int sizebuf);
-
+    static void initAlphaLookupTable(GlobalOptions *);
   private:
+    // lookup table
+    static float alpha_lookup[ALPHA_LOOKUP_TABLE];
+    static float lognlookup;
     // Data
     const ParticlesData * part_data;
     ParticlesObject * po;

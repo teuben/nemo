@@ -24,6 +24,7 @@
 #include "pluginsmanage.h"
 #include "particlesselectrange.h"
 #include "snapshotinterface.h"
+#include "globjectparticles.h"
 
 #include "ftmio.h"
 #include "nemo.h"
@@ -124,7 +125,8 @@ MainWindow::MainWindow(std::string _ver)
   reload = false;
   //mainLayout->addWidget(qgl);
   setCentralWidget(gl_window);
-  
+  // initialyse lookup tables
+  GLObjectParticles::initAlphaLookupTable(store_options);
 }
 // -----------------------------------------------------------------------------
 // Start                                                                        
