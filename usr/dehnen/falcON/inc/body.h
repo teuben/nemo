@@ -1373,7 +1373,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// return the total mass in bodies of given type
     real TotalMass(bodytype) const;
-    /// return to total mass bodies of all types
+    /// return to total mass in bodies of all types
     real TotalMass() const {
       real M(zero);
       for(bodytype t; t; ++t)

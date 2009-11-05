@@ -299,6 +299,7 @@ namespace MPI {
     /// \param[in]     root      sender
     /// \param[in,out] buf       buffer both for send and receive
     /// \param[in]     count     amount of data to be send
+    /// \note root must be the same for all processes
     template<typename T>
     void BroadCast(unsigned root, T*buf, unsigned count) const WDutils_THROWING
     {

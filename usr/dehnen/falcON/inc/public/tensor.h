@@ -155,10 +155,10 @@ namespace falcON {
     symt3D()                   {}
     explicit symt3D(X const&x) { M::s_as(a,x); }
     // element access                                                           
-    T      &operator[] (int i)              { return a[i]; }
-    T const&operator[] (int i)        const { return a[i]; }
-    T      &operator() (int l, int m)       { return a[(l*(l+1))/2+m]; }
-    T const&operator() (int l, int m) const { return a[(l*(l+1))/2+m]; }
+    X      &operator[] (int i)              { return a[i]; }
+    X const&operator[] (int i)        const { return a[i]; }
+    X      &operator() (int l, int m)       { return a[(l*(l+1))/2+m]; }
+    X const&operator() (int l, int m) const { return a[(l*(l+1))/2+m]; }
     // unitary operators                                                        
     T&negate         ()               { M::v_neg(a); return*this; }
     T&set_zero       ()               { M::s_ze (a); return*this; }
@@ -296,10 +296,10 @@ namespace falcON {
     symt3D()                   {}
     explicit symt3D(X const&x) { M::s_as(a,x); }
     // element access                                                           
-    T      &operator[] (int i)              { return a[i]; }
-    T const&operator[] (int i)        const { return a[i]; }
-    T      &operator() (int l, int m)       { return a[(l*(l+1))/2+m]; }
-    T const&operator() (int l, int m) const { return a[(l*(l+1))/2+m]; }
+    X      &operator[] (int i)              { return a[i]; }
+    X const&operator[] (int i)        const { return a[i]; }
+    X      &operator() (int l, int m)       { return a[(l*(l+1))/2+m]; }
+    X const&operator() (int l, int m) const { return a[(l*(l+1))/2+m]; }
     // unitary operators                                                        
     T  &negate   ()                     { M::v_neg(a); return*this; }
     T  &set_zero ()                     { M::s_ze (a); return*this; }

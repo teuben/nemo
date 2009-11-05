@@ -258,7 +258,7 @@ namespace {
     const static uint32 Nsub = 1<<Dim; ///< number of octants per cell
     //
     typedef OctalTree<Dim,Real,Float> OctTree;
-    typedef typename OctTree::point   point;
+    typedef typename OctTree::Point   Point;
     typedef ::Node<Dim,Real>          Node;
     typedef ::Dot <Dim,Real>          Dot;
     typedef ::Box <Dim,Real>          Box;
@@ -422,7 +422,7 @@ namespace {
     void SetLeaf(uint32 L, const Dot*D) const
     {
       TREE->XL[L] = D->X;
-      TREE->IL[L] = D->I;
+      TREE->PL[L] = D->I;
     }
     /// link a final box to a cell
     /// \param[in] C  index of current cell to be linked
@@ -585,19 +585,19 @@ namespace {
     TREE->NL[C] = ndot;
     TREE->NC[C] = nbox;
     if(nbox) {
-      TREE->CF[C] = CF-C;
+      TREE->CF[C] = CF;
       uint32 dp = 1;
       uint32 Ci = CF;
       CF += nbox;
       for(i=0,N=P->OCT; i!=Nsub; ++i,++N)
 	if(*N && P->MarkedAsBox(i)) {
-	  TREE->PA[Ci] = Ci-C;
+	  TREE->PA[Ci] = C;
 	  uint32 de = LinkCellsS(Ci++,cpBOX(*N),i);
           if(de>dp) dp=de;
         }
       return ++dp;
     } else {
-      TREE->CF[C] = CF-C;
+      TREE->CF[C] = CF;
       if(NMAX > uint32(Nsub))
 	WDutils_THROW("LinkCells: found non-final box without daughters\n");
       return 1;
@@ -640,19 +640,19 @@ namespace {
     TREE->NL[C] = ndot;
     TREE->NC[C] = nbox;
     if(nbox) {
-      TREE->CF[C] = CF-C;
+      TREE->CF[C] = CF;
       uint32 dp = 1;
       uint32 Ci = CF;
       CF += nbox;
       for(i=0,N=P->OCT; i!=Nsub; ++i,++N)
 	if(*N && P->MarkedAsBox(i)) {
-	  TREE->PA[Ci] = Ci-C;
+	  TREE->PA[Ci] = C;
 	  unsigned de = LinkCellsA(Ci++,cpBOX(*N),i);
           if(de>dp) dp=de;
         }
       return ++dp;
     } else {
-      TREE->CF[C] = CF-C;
+      TREE->CF[C] = CF;
       if(NMAX > unsigned(Nsub))
 	WDutils_THROW("LinkCells: found non-final box without daughters\n");
       return 1;
@@ -671,18 +671,18 @@ namespace {
       RA  (WDutils_NEW(Real,MAXD+1))
   {
     if(NDOT == 0) WDutils_THROW("OctalTree: N=0\n");
-    point Xmin, Xmax, Xave;
+    Point Xmin, Xmax, Xave;
     // 1  set dots
     if(Tree && Tree->Nleafs()) {
       // 1.1 in old tree order
       uint32 Li=0;
-      D0->I = Tree->IL[Li++];
+      D0->I = Tree->PL[Li++];
       Init->ReInit(reinterpret_cast<typename OctTree::Dot*>(D0));
       if(isnan(D0->X)) WDutils_THROW("OctalTree: position contains NaN\n");
       Xmin = Xmax = Xave = D0->X;
       Dot*Di=D0+1;
       for(; Di!=DN && Li!=Tree->Nleafs(); ++Di) {
-	Di->I = Tree->IL[Li++];
+	Di->I = Tree->PL[Li++];
 	Init->ReInit(reinterpret_cast<typename OctTree::Dot*>(Di));
 	if(isnan(Di->X)) WDutils_THROW("OctalTree: position contains NaN\n");
 	Di->X.up_min_max(Xmin,Xmax);
@@ -733,9 +733,9 @@ namespace WDutils {
   void OctalTree<D,Real,Float>::Allocate()
   {
     unsigned need =
-      NLEAF * (sizeof(point) + sizeof(index_type)) +
-      NCELL * (3*sizeof(uint8) + sizeof(uint16) + 4*sizeof(uint32) +
-	       sizeof(point)) +
+      NLEAF * (sizeof(Point) + sizeof(part_index)) +
+      NCELL * (3*sizeof(uint8) + sizeof(uint16) + 4*sizeof(size_type) +
+	       sizeof(Point)) +
       (MAXD+1)*sizeof(Real);
     if((need > NALLOC) || (need+need < NALLOC)) {
       if(ALLOC) delete16(ALLOC);
@@ -743,17 +743,17 @@ namespace WDutils {
       NALLOC = need;
     }
     char* A = ALLOC;
-    XL = reinterpret_cast<point*>      (A); A += NLEAF * sizeof(point);
-    IL = reinterpret_cast<index_type*> (A); A += NLEAF * sizeof(index_type);
+    XL = reinterpret_cast<Point*>      (A); A += NLEAF * sizeof(Point);
+    PL = reinterpret_cast<part_index*> (A); A += NLEAF * sizeof(part_index);
     LE = reinterpret_cast<uint8*>      (A); A += NCELL * sizeof(uint8);
     OC = reinterpret_cast<uint8*>      (A); A += NCELL * sizeof(uint8);
-    XC = reinterpret_cast<point*>      (A); A += NCELL * sizeof(point);
-    L0 = reinterpret_cast<uint32*>     (A); A += NCELL * sizeof(uint32);
+    XC = reinterpret_cast<Point*>      (A); A += NCELL * sizeof(Point);
+    L0 = reinterpret_cast<size_type*>  (A); A += NCELL * sizeof(size_type);
     NL = reinterpret_cast<uint16*>     (A); A += NCELL * sizeof(uint16);
-    NM = reinterpret_cast<uint32*>     (A); A += NCELL * sizeof(uint32);
-    CF = reinterpret_cast<uint32*>     (A); A += NCELL * sizeof(uint32);
+    NM = reinterpret_cast<size_type*>  (A); A += NCELL * sizeof(size_type);
+    CF = reinterpret_cast<size_type*>  (A); A += NCELL * sizeof(size_type);
     NC = reinterpret_cast<uint8*>      (A); A += NCELL * sizeof(uint8);
-    PA = reinterpret_cast<uint32*>     (A); A += NCELL * sizeof(uint32);
+    PA = reinterpret_cast<size_type*>  (A); A += NCELL * sizeof(size_type);
     RAD= reinterpret_cast<Real*>       (A);
   }
   //

@@ -5,7 +5,7 @@
 # Makefile for WDutils
 ################################################################################
 
-default			: library objects
+default			: library
 install			: library cleanobj
 
 # ----------------

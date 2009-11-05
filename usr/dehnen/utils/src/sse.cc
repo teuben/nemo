@@ -32,86 +32,32 @@
 #include <cmath>
 #include <cstring>
 
-using namespace WDutils;
 
-#ifdef __SSE__
-# define __FloatTmp							\
-  __m128 Tm = _mm_setzero_ps(); float tm(0.f);
-# define __FloatRet							\
-  __attribute__ ((aligned(16))) float tmp[4];				\
-  _mm_store_ps(tmp,Tm);							\
-  return tmp[0]+tmp[1]+tmp[2]+tmp[3]+tm;
-# define __FloatTmp16							\
-  __m128 Tm = _mm_setzero_ps();
-# define __FloatRet16							\
-  __attribute__ ((aligned(16))) float tmp[4];				\
-  _mm_store_ps(tmp,Tm);							\
-  return tmp[0]+tmp[1]+tmp[2]+tmp[3]
-# define __FloatSSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
-  size_t i=size_t(f)&16;						\
-  if(n<4 || i&4) {		      /* small or unaligned     */	\
-    if(i&4)								\
-      WDutils_Warning("SSE::%s(): "					\
-		      "array of floats @ %p not 4-byte aligned: "	\
-		      "unaligned (slow) SSE instructions forced\n",	\
-		      __NAME,f);					\
-    i=0;								\
-    size_t n4=SSE::bottom<4>(n);					\
-    __INIT;								\
-    for(; i!=n4; i+=4) { __WORKU; }   /* unaligned blocks work  */	\
-    for(; i!=n ;  ++i) { __WORKS; }   /* final few elements     */	\
-  } else {								\
-    i >>= 2;                          /* begin: shifted pointer */	\
-    n  += i;                          /* end:   shifted pointer */	\
-    f  -= i;                          /* shift pointer          */	\
-    size_t i4=SSE::top<4>(i);         /* begin: aligned blocks  */	\
-    size_t n4=SSE::bottom<4>(n);      /* end:   aligned blocks  */	\
-    __INIT;								\
-    for(; i!=i4;  ++i) { __WORKS; }   /* STD work @ begin       */	\
-    for(; i!=n4; i+=4) { __WORKA; }   /* SSE work in blocks     */	\
-    for(; i!=n ;  ++i) { __WORKS; }   /* STD work @ end         */	\
-  }
-# define __FloatSSE16(__INIT,__WORKS,__WORKA)				\
-  __INIT;								\
-  for(size_t i=0; i!=n; i+=4) { __WORKA; }
-#else
+#ifndef __SSE__
 # warning SSE instructions not supported: will implement simple code
 # ifdef __GNUC__
 # warning perhaps using the -msse compiler option helps
 # endif
-# define __FloatTmp							\
-  float tm(0.f);
-# define __FloatRet							\
-  return tm;
-# define __FloatTmp16 __FloatTmp
-# define __FloatRet16 __FloatRet
-# define __FloatSSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
-  for(size_t i=0; i!=n; ++i) { __WORKS; }
-# define __FloatSSE16(__INIT,__WORKS,__WORKA)				\
-  for(size_t i=0; i!=n; ++i) { __WORKS; }
 #endif
 
+#ifndef __SSE2__
+# warning SSE2 instructions not supported: will implement simple code
+# ifdef __GNUC__
+# warning perhaps using the -msse2 compiler option helps
+# endif
+#endif
+
+using namespace WDutils;
+
 #ifdef __SSE2__
-# define __DoubleTmp							\
-  __m128d Tm = _mm_setzero_pd(); double tm(0.0);
-# define __DoubleRet							\
-  __attribute__ ((aligned(16))) double tmp[2];				\
-  _mm_store_pd(tmp,Tm);							\
-  return tmp[0]+tmp[1]+tm;
-# define __DoubleTmp16							\
-  __m128d Tm = _mm_setzero_pd();
-# define __DoubleRet16							\
-  __attribute__ ((aligned(16))) double tmp[2];				\
-  _mm_store_pd(tmp,Tm);							\
-  return tmp[0]+tmp[1];
-# define __DoubleSSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+# define __Loop2SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,__TYPE)	\
   size_t i=size_t(f)&16;						\
   if(n<2 || i&8) {		      /* small or unaligned     */	\
     if(i&8) 								\
       WDutils_Warning("SSE::%s(): "					\
-		      "array of doubles @ %p not 8-byte aligned: "	\
+		      "array of %ss @ %p not 8-byte aligned: "		\
 		      "unaligned (slow) SSE instructions forced\n",	\
-		      __NAME,f);					\
+		      __NAME,__TYPE,f);					\
     i=0;								\
     size_t n2=SSE::bottom<2>(n); 					\
     __INIT;								\
@@ -128,23 +74,69 @@ using namespace WDutils;
     for(; i!=n2; i+=2) { __WORKA; }   /* SSE work in blocks     */	\
     for(; i!=n ;  ++i) { __WORKS; }   /* STD work @ end         */	\
   }
-# define __DoubleSSE16(__INIT,__WORKS,__WORKA)				\
+# define __Loop2SSE16(__INIT,__WORKA)					\
+  __INIT;								\
+  for(size_t i=0; i!=n; i+=2) { __WORKA; }
+#endif 
+#ifdef __SSE__
+#define __Loop4SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,__TYPE)	\
+  size_t i=size_t(f)&16;						\
+  if(n<4 || i&4) {		      /* small or unaligned     */	\
+    if(i&4)								\
+      WDutils_Warning("SSE::%s(): "					\
+		      "array of %ss @ %p not 4-byte aligned: "		\
+		      "unaligned (slow) SSE instructions forced\n",	\
+		      __NAME,__TYPE,f);					\
+    i=0;								\
+    size_t n4=SSE::bottom<4>(n);					\
+    __INIT;								\
+    for(; i!=n4; i+=4) { __WORKU; }   /* unaligned blocks work  */	\
+    for(; i!=n ;  ++i) { __WORKS; }   /* final few elements     */	\
+  } else {								\
+    i >>= 2;                          /* begin: shifted pointer */	\
+    n  += i;                          /* end:   shifted pointer */	\
+    f  -= i;                          /* shift pointer          */	\
+    size_t i4=SSE::top<4>(i);         /* begin: aligned blocks  */	\
+    size_t n4=SSE::bottom<4>(n);      /* end:   aligned blocks  */	\
+    __INIT;								\
+    for(; i!=i4;  ++i) { __WORKS; }   /* STD work @ begin       */	\
+    for(; i!=n4; i+=4) { __WORKA; }   /* SSE work in blocks     */	\
+    for(; i!=n ;  ++i) { __WORKS; }   /* STD work @ end         */	\
+  }
+# define __Loop4SSE16(__INIT,__WORKA)					\
   __INIT;								\
   for(size_t i=0; i!=n; i+=4) { __WORKA; }
+#endif 
+
+#ifdef __SSE__
+#define __LoopFloat(__NAME,__INIT,__WORKS,__WORKU,__WORKA)	\
+  __Loop4SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,"float")
+#define __LoopFloat16(__INIT,__WORKS,__WORKA)	\
+  __Loop4SSE16(__INIT,__WORKA)
 #else
-# warning SSE2 instructions not supported: will implement simple code
-# ifdef __GNUC__
-# warning perhaps using the -msse2 compiler option helps
-# endif
-# define __DoubleTmp							\
-  double tm(0.0);
-# define __DoubleRet							\
-  return tm;
-# define __DoubleTmp16 __DoubleTmp
-# define __DoubleRet16 __DoubleRet
-# define __DoubleSSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+#define __LoopFloat(__NAME,__INIT,__WORKS,__WORKU,__WORKA)	\
   for(size_t i=0; i!=n; ++i) { __WORKS; }
-# define __DoubleSSE16(__INIT,__WORKS,__WORKA)	\
+#define __LoopFloat16(__INIT,__WORKS,__WORKA)	\
+  for(size_t i=0; i!=n; ++i) { __WORKS; }
+#endif
+
+#ifdef __SSE2__
+#define __LoopDouble(__NAME,__INIT,__WORKS,__WORKU,__WORKA)	\
+  __Loop2SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,"double")
+#define __LoopDouble16(__INIT,__WORKS,__WORKA)	\
+  __Loop2SSE16(__INIT,__WORKA)
+#define __LoopInt(__NAME,__INIT,__WORKS,__WORKU,__WORKA)	\
+  __Loop4SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,"int")
+#define __LoopInt16(__INIT,__WORKS,__WORKA)	\
+  __Loop4SSE16(__INIT,__WORKA)
+#else
+#define __LoopDouble(__NAME,__INIT,__WORKS,__WORKU,__WORKA)	\
+  for(size_t i=0; i!=n; ++i) { __WORKS; }
+#define __LoopDouble16(__INIT,__WORKS,__WORKA)	\
+  for(size_t i=0; i!=n; ++i) { __WORKS; }
+#define __LoopInt(__NAME,__INIT,__WORKS,__WORKU,__WORKA)	\
+  for(size_t i=0; i!=n; ++i) { __WORKS; }
+#define __LoopInt16(__INIT,__WORKS,__WORKA)	\
   for(size_t i=0; i!=n; ++i) { __WORKS; }
 #endif
 
@@ -154,9 +146,9 @@ using namespace WDutils;
 #define __Worku _mm_storeu_ps(f+i,V);
 #define __Worka _mm_store_ps(f+i,V);
 void SSE::Ass(float*f, size_t n, float v)
-{ __FloatSSE("Ass",__Init,__Works,__Worku,__Worka); }
+{ __LoopFloat("Ass",__Init,__Works,__Worku,__Worka); }
 void SSE::Ass16(float*f, size_t n, float v)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -165,9 +157,20 @@ void SSE::Ass16(float*f, size_t n, float v)
 #define __Worku _mm_storeu_pd(f+i,V);
 #define __Worka _mm_store_pd(f+i,V);
 void SSE::Ass(double*f, size_t n, double v)
-{ __DoubleSSE("Ass",__Init,__Works,__Worku,__Worka); }
+{ __LoopDouble("Ass",__Init,__Works,__Worku,__Worka); }
 void SSE::Ass16(double*f, size_t n, double v)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worku
+#undef  __Worka
+
+#define __Init  __m128i V = _mm_set1_epi32(v);
+#define __Worku _mm_storeu_si128((__m128i*)(f+i),V);
+#define __Worka _mm_store_si128((__m128i*)(f+i),V);
+void SSE::Ass(int*f, size_t n, int v)
+{ __LoopInt("Ass",__Init,__Works,__Worku,__Worka); }
+void SSE::Ass16(int*f, size_t n, int v)
+{ __LoopInt16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -178,9 +181,9 @@ void SSE::Ass16(double*f, size_t n, double v)
 #define __Worku _mm_storeu_ps(f+i,_mm_sub_ps(V,_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_sub_ps(V,_mm_load_ps(f+i)));
 void SSE::Neg(float*f, size_t n)
-{ __FloatSSE("Ass",__Init,__Works,__Worku,__Worka); }
+{ __LoopFloat("Ass",__Init,__Works,__Worku,__Worka); }
 void SSE::Neg16(float*f, size_t n)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -189,9 +192,9 @@ void SSE::Neg16(float*f, size_t n)
 #define __Worku _mm_storeu_pd(f+i,_mm_sub_pd(V,_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_sub_pd(V,_mm_load_pd(f+i)));
 void SSE::Neg(double*f, size_t n)
-{ __DoubleSSE("Ass",__Init,__Works,__Worku,__Worka); }
+{ __LoopDouble("Ass",__Init,__Works,__Worku,__Worka); }
 void SSE::Neg16(double*f, size_t n)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -202,9 +205,9 @@ void SSE::Neg16(double*f, size_t n)
 #define __Worku _mm_storeu_ps(f+i,_mm_add_ps(_mm_loadu_ps(f+i),V));
 #define __Worka _mm_store_ps(f+i,_mm_add_ps(_mm_load_ps(f+i),V));
 void SSE::Add(float*f, size_t n, float v)
-{ __FloatSSE("Add",__Init,__Works,__Worku,__Worka); }
+{ __LoopFloat("Add",__Init,__Works,__Worku,__Worka); }
 void SSE::Add16(float*f, size_t n, float v)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -213,9 +216,22 @@ void SSE::Add16(float*f, size_t n, float v)
 #define __Worku _mm_storeu_pd(f+i,_mm_add_pd(_mm_loadu_pd(f+i),V));
 #define __Worka _mm_store_pd(f+i,_mm_add_pd(_mm_load_pd(f+i),V));
 void SSE::Add(double*f, size_t n, double v)
-{ __DoubleSSE("Add",__Init,__Works,__Worku,__Worka); }
+{ __LoopDouble("Add",__Init,__Works,__Worku,__Worka); }
 void SSE::Add16(double*f, size_t n, double v)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worku
+#undef  __Worka
+
+#define __Init  __m128i V = _mm_set1_epi32(v);
+#define __Worku _mm_storeu_si128((__m128i*)(f+i),			\
+		_mm_add_epi32(_mm_loadu_si128((__m128i*)(f+i)),V));
+#define __Worka _mm_store_si128 ((__m128i*)(f+i),			\
+		_mm_add_epi32(_mm_load_si128 ((__m128i*)(f+i)),V));
+void SSE::Add(int*f, size_t n, int v)
+{ __LoopInt("Add",__Init,__Works,__Worku,__Worka); }
+void SSE::Add16(int*f, size_t n, int v)
+{ __LoopInt16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -225,32 +241,81 @@ void SSE::Add16(double*f, size_t n, double v)
 #define __Works a[i] += b[i];
 #define __Worka _mm_store_ps(a+i,_mm_add_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
 void SSE::Add16(float*a, size_t n, const float*b)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_add_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
 void SSE::Add16(double*a, size_t n, const double*b)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
-#undef  __Init
+{ __LoopDouble16(__Init,__Works,__Worka); }
+
+#undef  __Worka
+#define __Worka _mm_store_si128((__m128i*)(a+i),			\
+		_mm_add_epi32(_mm_load_si128((__m128i*)(a+i)),	        \
+                              _mm_load_si128((__m128i*)(b+i))));
+void SSE::Add16(int*a, size_t n, const int*b)
+{ __LoopInt16(__Init,__Works,__Worka); }
 #undef  __Works
 #undef  __Worka
+#undef  __Init
 
 #define __Init  __m128 W = _mm_set1_ps(w);
 #define __Works a[i] += w*b[i];
 #define __Worka _mm_store_ps(a+i,_mm_add_ps(_mm_load_ps(a+i), \
 					    _mm_mul_ps(W,_mm_load_ps(b+i))));
 void SSE::Add16(float*a, size_t n, float w, const float*b)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
 #define __Init  __m128d W = _mm_set1_pd(w);
 #define __Worka _mm_store_pd(a+i,_mm_add_pd(_mm_load_pd(a+i), \
 					    _mm_mul_pd(W,_mm_load_pd(b+i))));
 void SSE::Add16(double*a, size_t n, double w, const double*b)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
 #undef  __Worka
 // SSE::Sum, SSE::Sum16
+#ifdef __SSE__
+# define __FloatTmp							\
+  __m128 Tm = _mm_setzero_ps(); float tm(0.f);
+# define __FloatRet							\
+  __attribute__ ((aligned(16))) float tmp[4];				\
+  _mm_store_ps(tmp,Tm);							\
+  return tmp[0]+tmp[1]+tmp[2]+tmp[3]+tm;
+# define __FloatTmp16							\
+  __m128 Tm = _mm_setzero_ps();
+# define __FloatRet16							\
+  __attribute__ ((aligned(16))) float tmp[4];				\
+  _mm_store_ps(tmp,Tm);							\
+  return tmp[0]+tmp[1]+tmp[2]+tmp[3]
+#ifdef __SSE2__
+# define __DoubleTmp							\
+  __m128d Tm = _mm_setzero_pd(); double tm(0.0);
+# define __DoubleRet							\
+  __attribute__ ((aligned(16))) double tmp[2];				\
+  _mm_store_pd(tmp,Tm);							\
+  return tmp[0]+tmp[1]+tm;
+# define __DoubleTmp16							\
+  __m128d Tm = _mm_setzero_pd();
+# define __DoubleRet16							\
+  __attribute__ ((aligned(16))) double tmp[2];				\
+  _mm_store_pd(tmp,Tm);							\
+  return tmp[0]+tmp[1];
+#else // __SSE2__
+# define __DoubleTmp							\
+  double tm(0.0);
+# define __DoubleRet							\
+  return tm;
+# define __DoubleTmp16 __DoubleTmp
+# define __DoubleRet16 __DoubleRet
+#endif// __SSE2__
+#else // __SSE__
+# define __FloatTmp							\
+  float tm(0.f);
+# define __FloatRet							\
+  return tm;
+# define __FloatTmp16 __FloatTmp
+# define __FloatRet16 __FloatRet
+#endif// __SSE__
 #define __Init
 #define __Works tm += f[i];
 #define __Worka Tm = _mm_add_ps(Tm,_mm_load_ps(f+i));
@@ -258,13 +323,13 @@ void SSE::Add16(double*a, size_t n, double w, const double*b)
 float SSE::Sum(const float*f, size_t n)
 {
   __FloatTmp;
-  __FloatSSE("Sum",__Init,__Works,__Worku,__Worka);
+  __LoopFloat("Sum",__Init,__Works,__Worku,__Worka);
   __FloatRet;
 }
 float SSE::Sum16(const float*f, size_t n)
 {
   __FloatTmp16;
-  __FloatSSE16(__Init,__Works,__Worka);
+  __LoopFloat16(__Init,__Works,__Worka);
   __FloatRet16;
 }
 #undef  __Worku
@@ -274,13 +339,13 @@ float SSE::Sum16(const float*f, size_t n)
 double SSE::Sum(const double*f, size_t n)
 {
   __DoubleTmp;
-  __DoubleSSE("Sum",__Init,__Works,__Worku,__Worka);
+  __LoopDouble("Sum",__Init,__Works,__Worku,__Worka);
   __DoubleRet;
 }
 double SSE::Sum16(const double*f, size_t n)
 {
   __DoubleTmp16;
-  __DoubleSSE16(__Init,__Works,__Worka);
+  __LoopDouble16(__Init,__Works,__Worka);
   __DoubleRet16;
 }
 #undef  __Init
@@ -295,7 +360,7 @@ double SSE::Sum16(const double*f, size_t n)
 float SSE::Dot16(const float*a, size_t n, const float*b)
 {
   __FloatTmp16;
-  __FloatSSE16(__Init,__Works,__Worka);
+  __LoopFloat16(__Init,__Works,__Worka);
   __FloatRet16;
 }
 #undef  __Worka
@@ -304,21 +369,31 @@ float SSE::Dot16(const float*a, size_t n, const float*b)
 double SSE::Dot16(const double*a, size_t n, const double*b)
 {
   __DoubleTmp16;
-  __DoubleSSE16(__Init,__Works,__Worka);
+  __LoopDouble16(__Init,__Works,__Worka);
   __DoubleRet16;
 }
 #undef  __Init
 #undef  __Works
 #undef  __Worka
+#undef  __FloatTmp
+#undef  __FloatRet
+#undef  __FloatTmp16
+#undef  __FloatRet16
+#undef  __DoubleTmp
+#undef  __DoubleRet
+#undef  __DoubleTmp16
+#undef  __DoubleRet16
+
+
 // SSE::Sub, SSE::Sub16
 #define __Works f[i] -= v;
 #define __Init  __m128 V = _mm_set1_ps(v);
 #define __Worku _mm_storeu_ps(f+i,_mm_sub_ps(_mm_loadu_ps(f+i),V));
 #define __Worka _mm_store_ps(f+i,_mm_sub_ps(_mm_load_ps(f+i),V));
 void SSE::Sub(float*f, size_t n, float v)
-{ __FloatSSE("Sub",__Init,__Works,__Worku,__Worka); }
+{ __LoopFloat("Sub",__Init,__Works,__Worku,__Worka); }
 void SSE::Sub16(float*f, size_t n, float v)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -327,9 +402,9 @@ void SSE::Sub16(float*f, size_t n, float v)
 #define __Worku _mm_storeu_pd(f+i,_mm_sub_pd(_mm_loadu_pd(f+i),V));
 #define __Worka _mm_store_pd(f+i,_mm_sub_pd(_mm_load_pd(f+i),V));
 void SSE::Sub(double*f, size_t n, double v)
-{ __DoubleSSE("Sub",__Init,__Works,__Worku,__Worka); }
+{ __LoopDouble("Sub",__Init,__Works,__Worku,__Worka); }
 void SSE::Sub16(double*f, size_t n, double v)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -339,11 +414,11 @@ void SSE::Sub16(double*f, size_t n, double v)
 #define __Works a[i] -= b[i];
 #define __Worka _mm_store_ps(a+i,_mm_sub_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
 void SSE::Sub16(float*a, size_t n, const float*b)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_sub_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
 void SSE::Sub16(double*a, size_t n, const double*b)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
 #undef  __Worka
@@ -353,14 +428,14 @@ void SSE::Sub16(double*a, size_t n, const double*b)
 #define __Worka _mm_store_ps(a+i,_mm_sub_ps(_mm_load_ps(a+i), \
 					    _mm_mul_ps(W,_mm_load_ps(b+i))));
 void SSE::Sub16(float*a, size_t n, float w, const float*b)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
 #define __Init  __m128d W = _mm_set1_pd(w);
 #define __Worka _mm_store_pd(a+i,_mm_sub_pd(_mm_load_pd(a+i), \
 					    _mm_mul_pd(W,_mm_load_pd(b+i))));
 void SSE::Sub16(double*a, size_t n, double w, const double*b)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
 #undef  __Worka
@@ -370,9 +445,9 @@ void SSE::Sub16(double*a, size_t n, double w, const double*b)
 #define __Worku _mm_storeu_ps(f+i,_mm_mul_ps(_mm_loadu_ps(f+i),V));
 #define __Worka _mm_store_ps(f+i,_mm_mul_ps(_mm_load_ps(f+i),V));
 void SSE::Mul(float*f, size_t n, float v)
-{ __FloatSSE("Mul",__Init,__Works,__Worku,__Worka); }
+{ __LoopFloat("Mul",__Init,__Works,__Worku,__Worka); }
 void SSE::Mul16(float*f, size_t n, float v)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -381,9 +456,9 @@ void SSE::Mul16(float*f, size_t n, float v)
 #define __Worku _mm_storeu_pd(f+i,_mm_mul_pd(_mm_loadu_pd(f+i),V));
 #define __Worka _mm_store_pd(f+i,_mm_mul_pd(_mm_load_pd(f+i),V));
 void SSE::Mul(double*f, size_t n, double v)
-{ __DoubleSSE("Mul",__Init,__Works,__Worku,__Worka); }
+{ __LoopDouble("Mul",__Init,__Works,__Worku,__Worka); }
 void SSE::Mul16(double*f, size_t n, double v)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -393,11 +468,11 @@ void SSE::Mul16(double*f, size_t n, double v)
 #define __Works a[i] -= b[i];
 #define __Worka _mm_store_ps(a+i,_mm_mul_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
 void SSE::Mul16(float*a, size_t n, const float*b)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_mul_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
 void SSE::Mul16(double*a, size_t n, const double*b)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
 #undef  __Worka
@@ -406,11 +481,11 @@ void SSE::Mul16(double*a, size_t n, const double*b)
 #define __Works a[i] -= b[i];
 #define __Worka _mm_store_ps(a+i,_mm_div_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
 void SSE::Div16(float*a, size_t n, const float*b)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_div_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
 void SSE::Div16(double*a, size_t n, const double*b)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
 #undef  __Worka
@@ -420,9 +495,9 @@ void SSE::Div16(double*a, size_t n, const double*b)
 #define __Worku _mm_storeu_ps(f+i,_mm_div_ps(X,_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_div_ps(X,_mm_load_ps(f+i)));
 void SSE::Inv(float*f, size_t n, float x)
-{ __FloatSSE("Inv",__Init,__Works,__Worku,__Worka); }
+{ __LoopFloat("Inv",__Init,__Works,__Worku,__Worka); }
 void SSE::Inv16(float*f, size_t n, float x)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -431,9 +506,9 @@ void SSE::Inv16(float*f, size_t n, float x)
 #define __Worku _mm_storeu_pd(f+i,_mm_div_pd(X,_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_div_pd(X,_mm_load_pd(f+i)));
 void SSE::Inv(double*f, size_t n, double x)
-{ __DoubleSSE("Inv",__Init,__Works,__Worku,__Worka); }
+{ __LoopDouble("Inv",__Init,__Works,__Worku,__Worka); }
 void SSE::Inv16(double*f, size_t n, double x)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -443,13 +518,13 @@ void SSE::Inv16(double*f, size_t n, double x)
 #define __Works a[i] = x/b[i];
 #define __Worka _mm_store_ps(a+i,_mm_div_ps(X,_mm_load_ps(b+i)));
 void SSE::Inv16(float*a, size_t n, float x, const float*b)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
 #define __Init  __m128d X = _mm_set1_pd(x);
 #define __Worka _mm_store_pd(a+i,_mm_div_pd(X,_mm_load_pd(b+i)));
 void SSE::Inv16(double*a, size_t n, double x, const double*b)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
 #undef  __Worka
@@ -459,18 +534,18 @@ void SSE::Inv16(double*a, size_t n, double x, const double*b)
 #define __Worku _mm_storeu_ps(f+i,_mm_sqrt_ps(_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_sqrt_ps(_mm_load_ps(f+i)));
 void SSE::Sqrt(float*f, size_t n)
-{ __FloatSSE("Sqrt",__Init,__Works,__Worku,__Worka); }
+{ __LoopFloat("Sqrt",__Init,__Works,__Worku,__Worka); }
 void SSE::Sqrt16(float*f, size_t n)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worku
 #undef  __Worka
 
 #define __Worku _mm_storeu_pd(f+i,_mm_sqrt_pd(_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_sqrt_pd(_mm_load_pd(f+i)));
 void SSE::Sqrt(double*f, size_t n)
-{ __DoubleSSE("Sqrt",__Init,__Works,__Worku,__Worka); }
+{ __LoopDouble("Sqrt",__Init,__Works,__Worku,__Worka); }
 void SSE::Sqrt16(double*f, size_t n)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
@@ -480,27 +555,25 @@ void SSE::Sqrt16(double*f, size_t n)
 #define __Works a[i] = std::sqrt(b[i]);
 #define __Worka _mm_store_ps(a+i,_mm_sqrt_ps(_mm_load_ps(b+i)));
 void SSE::Sqrt16(float*a, size_t n, const float*b)
-{ __FloatSSE16(__Init,__Works,__Worka); }
+{ __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_sqrt_pd(_mm_load_pd(b+i)));
 void SSE::Sqrt16(double*a, size_t n, const double*b)
-{ __DoubleSSE16(__Init,__Works,__Worka); }
+{ __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
 #undef  __Worka
 //
-#undef __FloatTmp
-#undef __FloatSSE
-#undef __FloatRet
-#undef __FloatTmp16
-#undef __FloatSSE16
-#undef __FloatRet16
-#undef __DoubleTmp
-#undef __DoubleSSE
-#undef __DoubleRet
-#undef __DoubleTmp16
-#undef __DoubleSSE16
-#undef __DoubleRet16
+#undef __Loop2SSE
+#undef __Loop2SSE16
+#undef __Loop4SSE
+#undef __Loop4SSE16
+#undef __LoopInt
+#undef __LoopInt16
+#undef __LoopFloat
+#undef __LoopFloat16
+#undef __LoopDouble
+#undef __LoopDouble16
 // SSE::Array16
 template<typename _F>
 SSE::Array16<_F>&SSE::Array16<_F>::reset(size_t n)

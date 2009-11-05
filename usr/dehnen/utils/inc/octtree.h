@@ -10,9 +10,8 @@
 ///
 /// \date   2009
 ///
-/// \version        2009 WD  based on falcON's tree.h and interact.h
-/// \version    May-2009 WD  has been tested and seems okay (May 2009)
-/// \version 14-Oct-2009 WD  new design avoiding classes for leafs and cells
+/// \version May-2009 WD  first tested version
+/// \version Oct-2009 WD  new design using indices for leafs and cells
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -36,6 +35,10 @@
 #ifndef WDutils_included_octtree_h
 #define WDutils_included_octtree_h
 
+#ifndef WDutils_included_fstream
+#  include <fstream>
+#  define WDutils_included_fstream
+#endif
 #ifndef WDutils_included_iomanip
 #  include <iomanip>
 #  define WDutils_included_iomanip
@@ -52,12 +55,11 @@
 
 namespace { template<int, typename, typename> struct BoxDotTree; }
 namespace WDutils {
+  template<typename> struct TreeWalker;
+  template<typename> struct DumpTreeData;
   //
   /// A spatial tree of square (2D) or cubic (3D) cells
   //
-  /// Cells and Leafs are only represented by indices, wrapped in member
-  /// classes Cell and Leaf (access to the leaf and cell data via member
-  /// methods of class OctalTree).\n
   /// Cells with more than \a nmax (argument to constructor and member
   /// rebuild) are split and octants (or quarters for Dim=2) with more than
   /// one particle are assigned a new cell. After tree construction, the
@@ -69,11 +71,13 @@ namespace WDutils {
   /// referred to as 'leaf kids' as opposed to 'leaf descendants', which
   /// includes all leafs contained within a cell.
   ///
-  /// \note type __X for positions, type __F for other foating point variables
-  /// \note implementations for __X,__F = float,double and Dim=2,3
+  /// \note Access to leafs and cells via struct TreeWalker<OctalTree> below
+  /// \note Type __X for positions, type __F for other foating point variables
+  /// \note Implementations for __X,__F = float,double and Dim=2,3
   template<int __D, typename __X=float, typename __F=__X>
   class OctalTree {
     friend struct BoxDotTree<__D,__X,__F>;
+    friend struct TreeWalker<OctalTree>;
     /// ensure that the only valid instantinations are those implemented in
     /// octtree.cc
     WDutilsStaticAssert
@@ -87,15 +91,16 @@ namespace WDutils {
     /// \name public static constants some types
     //@{
     const static int        Dim = __D;       ///< number of dimensions
-    const static uint32     Nsub= 1<<Dim;    ///< number of octants per cell
     typedef __X             Real;            ///< floating point type: position
     typedef __F             Float;           ///< floating point type: other
-    typedef tupel<Dim,Real> point;           ///< type for positions
-    typedef uint32          index_type;      ///< type used to index particles
+    typedef tupel<Dim,Real> Point;           ///< type for positions
+    typedef uint32          part_index;      ///< type for indexing particles
+    typedef uint32          size_type;       ///< type for indexing leaf & cells
+    const static size_type  Nsub= 1<<Dim;    ///< number of octants per cell
     /// holds the particle data required to build a tree
     struct Dot {
-      point       X; ///< position
-      index_type  I; ///< index to identify the associated particle
+      Point       X;                  ///< position
+      part_index  I;                  ///< identifier of associated particle
     };
     /// used to initialize and/or re-initialize Dots in tree building
     class Initialiser {
@@ -120,160 +125,32 @@ namespace WDutils {
     char*             ALLOC;          ///< actually allocated memory
     unsigned          NALLOC;         ///< # bytes allocated at ALLOC
     void Allocate();                  ///< allocates memory
-    const uint32      MAXD;           ///< maximum tree depth
+    const size_type   MAXD;           ///< maximum tree depth
     const bool        AVSPC;          ///< avoid single-parent cells?
-    uint32            NMAX;           ///< N_max
-    uint32            DEPTH;          ///< tree depth
+    size_type         NMAX;           ///< N_max
+    size_type         DEPTH;          ///< tree depth
     //@}
-    /// \name leafs and related: types, data, and methods
+    /// \name leaf data (access via TreeWalker<OctalTree>)
     //@{
-    uint32            NLEAF;          ///< # leafs
-    point            *XL;             ///< leaf positions
-    index_type       *IL;             ///< index of associated particle
-  public:
-    /// iterator used for leafs
-    struct Leaf {
-      uint32 I;
-      /// ctor
-      explicit Leaf(uint32 i) : I(i) {}
-      /// increment
-      Leaf& operator++() { ++I; return*this; }
-      /// comparison <
-      bool operator < (Leaf l) const { return I< l.I; }
-      /// comparison <=
-      bool operator <=(Leaf l) const { return I<=l.I; }
-      /// comparison ==
-      bool operator ==(Leaf l) const { return I==l.I; }
-      /// comparison !=
-      bool operator !=(Leaf l) const { return I!=l.I; }
-      /// conversion to leaf's index within tree
-      operator uint32() const { return I; }
-    };
-    /// # leafs
-    uint32 const&Nleafs() const
-    { return NLEAF; }
-    /// first leaf
-    Leaf BeginLeafs() const
-    { return Leaf(0u); }
-    /// end of leafs (beyond last leaf)
-    Leaf EndLeafs() const
-    { return Leaf(NLEAF); }
-    /// is this a valid leaf?
-    bool IsValid(Leaf l) const
-    { return l.I < NLEAF; }
-    /// const access to leaf position
-    point const&X(Leaf l) const
-    { return XL[l]; }
-    /// const access to index of associated particle
-    index_type const&I(Leaf l) const
-    { return IL[l]; }
+    size_type         NLEAF;          ///< # leafs
+    Point            *XL;             ///< leaf positions
+    part_index       *PL;             ///< index of associated particle
     //@}
-    /// \name cells and related: data and methods
+    /// \name cells data (access via TreeWalker<OctalTree>)
     //@{
-  private:
-    uint32            NCELL;          ///< # leafs
+    size_type         NCELL;          ///< # leafs
     uint8            *LE;             ///< cells' tree level
     uint8            *OC;             ///< cells' octant in parent cell
-    point            *XC;             ///< cells' centre (of cube)
-    uint32           *L0;             ///< cells' first leaf
+    Point            *XC;             ///< cells' centre (of cube)
+    size_type        *L0;             ///< cells' first leaf
     uint16           *NL;             ///< number of cells' daughter leafs
-    uint32           *NM;             ///< number of cells' leafs
-    uint32           *CF;             ///< difference to first daughter cell
+    size_type        *NM;             ///< number of cells' leafs
+    size_type        *CF;             ///< first daughter cell
     uint8            *NC;             ///< number of cells' daughter cells
-    uint32           *PA;             ///< difference to parent cell
+    size_type        *PA;             ///< parent cell
     Real             *RAD;            ///< table: radius[level]
-  public:
-    /// iterator used for cells
-    struct Cell {
-      uint32 I;
-      /// ctor
-      explicit Cell(uint32 i) : I(i) {}
-      /// increment
-      Cell& operator++() { ++I; return*this; }
-      /// decrement
-      Cell& operator--() { --I; return*this; }
-      /// comparison <
-      bool operator < (Cell c) const { return I< c.I; }
-      /// comparison <=
-      bool operator <=(Cell c) const { return I<=c.I; }
-      /// comparison >
-      bool operator > (Cell c) const { return I> c.I; }
-      /// comparison >=
-      bool operator >=(Cell c) const { return I>=c.I; }
-      /// comparison ==
-      bool operator ==(Cell c) const { return I==c.I; }
-      /// comparison !=
-      bool operator !=(Cell c) const { return I!=c.I; }
-      /// conversion to cell's index within tree
-      operator uint32() const { return I; }
-    };
-    /// # cells
-    uint32 const&Ncells() const
-    { return NCELL; }
-    /// root cell
-    Cell Root() const
-    { return Cell(0u); }
-    /// first cell
-    Cell BeginCells() const
-    { return Cell(0u); }
-    /// end of cells (beyond last cell)
-    Cell EndCells() const
-    { return Cell(NCELL); }
-    /// first cell in reversed order: last cell
-    Cell RBeginCells() const
-    { return Cell(NCELL-1); }
-    /// end cell in reversed order: invalid Cell
-    Cell REndCells() const
-    { return --(Cell(0)); }
-    /// is a cell index valid (refers to an actual cell)?
-    bool IsValid(Cell c) const
-    { return c.I < NCELL; }
-    /// tree level of cell
-    uint8 const&Le(Cell c) const
-    { return LE[c.I]; }
-    /// radius (half-side-length of box) of cell
-    Real const&Rad(Cell c) const
-    { return RAD[LE[c.I]]; }
-    /// octant of cell in parent
-    uint8 const&Oc(Cell c) const
-    { return OC[c.I]; }
-    /// cell's geometric centre (of cubic box)
-    point const&X(Cell c) const
-    { return XC[c.I]; }
-    /// first of cell's leafs
-    Leaf BeginLeafs(Cell c) const
-    { return Leaf(L0[c.I]); }
-    /// end of cell's leaf children 
-    Leaf EndLeafKids(Cell c) const
-    { return Leaf(L0[c.I]+NL[c.I]); }
-    /// end of all of cell's leafs
-    Leaf EndLeafDesc(Cell c) const
-    { return Leaf(L0[c.I]+NM[c.I]); }
-    /// number of cell's leaf children
-    uint16 const&NumLeafKids(Cell c) const
-    { return NL[c.I]; }
-    /// total number of cell's leafs
-    uint32 const&Number(Cell c) const
-    { return NM[c.I]; }
-    /// has this cell any daughter leafs?
-    bool HasLeafKids(Cell c) const
-    { return NL[c.I] > 0u; }
-    /// number of daughter cells
-    uint8 const&NumCells(Cell c) const
-    { return NC[c.I]; }
-    /// first of cell's daughter cells
-    Cell BeginCells(Cell c) const
-    { return Cell(CF[c.I]? c.I+CF[c.I]:NCELL); }
-    /// end of cell's daughter cells
-    Cell EndCells(Cell c) const
-    { return Cell(CF[c.I]? c.I+CF[c.I]+NC[c.I]:NCELL); }
-    /// cell's parent cell
-    Cell Parent(Cell c) const
-    { return Cell(PA[c.I]? c.I-PA[c.I]:NCELL); }
-    /// does this cell contain a certain leaf
-    bool Contains(Cell c, Leaf l) const 
-    { return l >= BeginLeafs(c) && l < EndLeafDesc(c); }
     //@}
+  public:
     /// ctor: build octtree from scratch.
     ///
     /// The tree is build in two stages. First, a `box-dot' tree is built
@@ -293,8 +170,8 @@ namespace WDutils {
     ///       mother and daughter cells may be more than one level apart and
     ///       the tree depth may be less than the highest cell level.
     /// \param[in] maxd maximum tree depth
-    OctalTree(uint32 n, const Initialiser*init, uint32 nmax,
-	      bool avsc=true, uint32 maxd=100) WDutils_THROWING;
+    OctalTree(size_type n, const Initialiser*init, size_type nmax,
+	      bool avsc=true, size_type maxd=100) WDutils_THROWING;
     /// dtor
     ~OctalTree();
     /// build the tree again, re-initialising the dots
@@ -312,156 +189,304 @@ namespace WDutils {
     /// \note Calls Initialiser::ReInit(), to set Dot::X. If \a n is larger
     ///       than previously, Initialiser::Init() is called on the extra
     ///       particles to set Dot::I as well as Dot::X.
-    void rebuild(uint32 n=0, uint32 nmax=0) WDutils_THROWING;
+    void rebuild(size_type n=0, size_type nmax=0) WDutils_THROWING;
     /// tree depth
-    uint32 const&Depth() const { return DEPTH; }
+    size_type const&Depth() const { return DEPTH; }
     /// are single-parent cells avoided?
     bool const&AvoidedSingleParentCells() const { return AVSPC; }
     /// N_max
-    uint32 const&Nmax() const { return NMAX; }
-    /// \name dump leaf or cell data to output (for debugging purposes)
+    size_type const&Nmax() const { return NMAX; }
+    /// # leafs
+    size_type const&Nleafs() const { return NLEAF; }
+    /// # cells
+    size_type const&Ncells() const { return NCELL; }
+  };// class OctalTree<>
+
+  ///
+  /// support for walking an OctalTree
+  ///
+  /// Holds just a pointer to an OctalTree and provides access to leaf and
+  /// cell data, as well as member methods for walking the tree.\n
+  ///
+  /// Useful as base class for tree-walking algorithms
+  template<typename OctTree>
+  struct TreeWalker {
+    typedef typename OctTree::Real Real;
+    typedef typename OctTree::Point Point;
+    typedef typename OctTree::part_index part_index;
+    typedef typename OctTree::size_type size_type;
+    /// pointer to tree
+    const OctTree*const TREE;
+    /// ctor
+    TreeWalker(const OctTree*t) : TREE(t) {}
+    /// copy ctor
+    TreeWalker(const TreeWalker&t) : TREE(t.TREE) {}
+    /// virtual dtor (to make gcc version 4.1.0 happy)
+    virtual ~TreeWalker() {}
+    /// \name leaf and leaf data access
     //@{
-    /// class whose member specify the data dumped
-    struct DumpTreeData {
-      DumpTreeData() {}
-      virtual ~DumpTreeData() {} // make gcc version 4.1.0 happy
-      virtual
-      void Head(Leaf, std::ostream&out) const {
-	out << " Leaf    I                     X           ";
-      }
-      virtual
-      void Data(Leaf L, const OctalTree*T, std::ostream&out) const {
-	out << 'L' << std::setfill('0') << std::setw(4) << L.I
-	    << ' ' << std::setfill(' ') << std::setw(4) << T->I(L) << ' '
-	    << std::setw(10) << T->X(L);
-      }
-      virtual
-      void Head(Cell, std::ostream&out) const {
-	out << "Cell  le   up    Cf Nc  Lf   Nl     N "
-	    << "       R                 X         ";
-      }
-      virtual
-      void Data(Cell C, const OctalTree*T, std::ostream&out) const {
-	out  << 'C' << std::setfill('0') << std::setw(4) << C.I <<' '
-	     << std::setw(2) << std::setfill(' ') << int(T->Le(C)) <<' ';
-	if(C > Cell(0))
-	  out<< 'C' << std::setfill('0') << std::setw(4) << T->Parent(C) <<' ';
-	else
-	  out<< "  nil ";
-	if(T->NumCells(C))
-	  out<< 'C' << std::setfill('0') << std::setw(4)
-	     << static_cast<uint32>(T->BeginCells(C)) <<' '
-	     << std::setfill(' ') << std::setw(1) << int(T->NumCells(C)) << ' ';
-	else
-	  out<< " nil 0 ";
-	out  << 'L' << std::setfill('0') << std::setw(4)
-	     << static_cast<uint32>(T->BeginLeafs(C))
-	     << ' ' << std::setfill(' ')
-	     << std::setw(2) << T->NumLeafKids(C) << ' '
-	     << std::setw(5) << T->Number(C) << ' '
-	     << std::setw(8) << T->Rad(C) << ' '
-	     << std::setw(8) << T->X(C);
-      }
-    } DUMP;  ///< no memory required, purely abstract data member
+    /// iterator used for leafs
+    struct Leaf {
+      size_type I;
+      /// default ctor
+      explicit Leaf() {}
+      /// ctor from index
+      explicit Leaf(size_type i) : I(i) {}
+      /// increment
+      Leaf& operator++() { ++I; return*this; }
+      /// comparison <
+      bool operator < (Leaf l) const { return I< l.I; }
+      /// comparison <=
+      bool operator <=(Leaf l) const { return I<=l.I; }
+      /// comparison ==
+      bool operator ==(Leaf l) const { return I==l.I; }
+      /// comparison !=
+      bool operator !=(Leaf l) const { return I!=l.I; }
+      /// conversion to leaf's index within tree
+      operator size_type() const { return I; }
+    };
+    /// const access to leaf position
+    Point const&X(Leaf l) const { return TREE->XL[l.I]; }
+    /// const access to index of associated particle
+    part_index const&P(Leaf l) const { return TREE->PL[l.I]; }
+    //@}
+    /// \name cell and cell data access
+    //@{
+    /// iterator used for cells
+    struct Cell {
+      size_type I;
+      /// default ctor
+      explicit Cell() {}
+      /// ctor from index
+      explicit Cell(size_type i) : I(i) {}
+      /// increment
+      Cell& operator++() { ++I; return*this; }
+      /// decrement
+      Cell& operator--() { --I; return*this; }
+      /// comparison <
+      bool operator < (Cell c) const { return I< c.I; }
+      /// comparison <=
+      bool operator <=(Cell c) const { return I<=c.I; }
+      /// comparison >
+      bool operator > (Cell c) const { return I> c.I; }
+      /// comparison >=
+      bool operator >=(Cell c) const { return I>=c.I; }
+      /// comparison ==
+      bool operator ==(Cell c) const { return I==c.I; }
+      /// comparison !=
+      bool operator !=(Cell c) const { return I!=c.I; }
+      /// conversion to cell's index within tree
+      operator size_type() const { return I; }
+    };
+    /// tree level of cell
+    uint8 const&Le(Cell c) const { return TREE->LE[c.I]; }
+    /// octant of cell in parent
+    uint8 const&Oc(Cell c) const { return TREE->OC[c.I]; }
+    /// cell's geometric centre (of cubic box)
+    Point const&X(Cell c) const { return TREE->XC[c.I]; }
+    /// index of cell's first leaf
+    size_type const&L0(Cell c) const { return TREE->L0[c.I]; }
+    /// number of leaf kids
+    uint16 const&Nl(Cell c) const { return TREE->NL[c.I]; }
+    /// total number of leafs
+    size_type const&N (Cell c) const { return TREE->NM[c.I]; }
+    /// index of cell's first daughter cell, if any
+    size_type const&Cf(Cell c) const { return TREE->CF[c.I]; }
+    /// number of daughter cells
+    uint8  const&Nc(Cell c) const { return TREE->NC[c.I]; }
+    /// difference from parent cell, if any
+    size_type const&Pa(Cell c) const { return TREE->PA[c.I]; }
+    /// radius (half-side-length of box) of cell
+    Real const&Rd(Cell c) const { return TREE->RAD[Le(c)]; }
+    //@}
+    /// \name tree walking and related
+    //@{
+    /// tree depth
+    size_type const&Depth() const { return TREE->DEPTH; }
+    /// # leafs
+    size_type const&Nleafs() const { return TREE->NLEAF; }
+    /// next leaf
+    Leaf next(Leaf l) const { return Leaf(l.I+1); }
+    /// first leaf
+    Leaf BeginLeafs() const { return Leaf(0u); }
+    /// end of leafs (beyond last leaf)
+    Leaf EndLeafs() const { return Leaf(TREE->NLEAF); }
+    /// is this a valid leaf?
+    bool IsValid(Leaf l) const { return l.I < TREE->NLEAF; }
+    /// # cells
+    size_type const&Ncells() const { return TREE->NCELL; }
+    /// next cell
+    Cell next(Cell c) const { return Cell(c.I+1); }
+    /// first cell
+    Cell BeginCells() const { return Cell(0u); }
+    /// end of cells (beyond last cell)
+    Cell EndCells() const { return Cell(TREE->NCELL); }
+    /// first cell in reversed order: last cell
+    Cell RBeginCells() const { return Cell(TREE->NCELL-1); }
+    /// end cell in reversed order: invalid Cell
+    Cell REndCells() const { return --(Cell(0)); }
+    /// is a cell index valid (refers to an actual cell)?
+    bool IsValid(Cell c) const { return c.I < TREE->NCELL; }
+    /// first of cell's leafs
+    Leaf BeginLeafs(Cell c) const { return Leaf(L0(c)); }
+    /// end of cell's leaf children 
+    Leaf EndLeafKids(Cell c) const { return Leaf(L0(c)+Nl(c)); }
+    /// end of all of cell's leafs
+    Leaf EndLeafDesc(Cell c) const { return Leaf(L0(c)+N(c)); }
+    /// first of cell's daughter cells
+    /// \note if there are no daughter cells, this returns c
+    Cell BeginCells(Cell c) const { return Cell(Cf(c)); }
+    /// end of cell's daughter cells
+    /// \note if there are no daughter cells, this returns c
+    Cell EndCells(Cell c) const { return Cell(Cf(c)+Nc(c)); }
+    /// cell's parent cell
+    Cell Parent(Cell c) const { return Cell(c.I? Pa(c):TREE->NCELL); }
+    /// does this cell contain a certain leaf
+    bool Contains(Cell c, Leaf l) const
+    { return l.I >= L0(c) && l.I < L0(c)+N(c); }
+    /// is either cell ancestor of the other?
+    bool IsAncestor(Cell a, Cell b) const
+    { return maxnorm(X(a)-X(b)) < max(R(a),R(b)); }
+    //@}
+    /// \name macros for tree walking from within a TreeWalker
+    //@{
+    /// loop cells down: root first
+    /// \note useful for an down-ward pass
+#ifndef LoopCellsDown
+# define LoopCellsDown(NAME)			\
+    for(Cell NAME = this->BeginCells();		\
+	NAME != this->EndCells(); ++NAME)
+#endif
+    /// loop cells up: root last
+    /// \note useful for an up-ward pass
+#ifndef LoopCellsUp
+# define LoopCellsUp(NAME)			\
+    for(Cell NAME = this->RBeginCells();	\
+	NAME != this->REndCells(); --NAME)
+#endif
+    /// loop leafs
+#ifndef LoopLeafs
+# define LoopLeafs(NAME)			\
+    for(Leaf NAME = this->BeginLeafs();		\
+	NAME != this->EndLeafs(); ++NAME)
+#endif
+    /// loop cell kids of a given cell
+#ifndef LoopCellKids
+# define LoopCellKids(CELL,NAME)		\
+    for(Cell NAME = this->BeginCells(CELL);	\
+    NAME != this->EndCells(CELL); ++NAME)
+#endif
+    /// loop cell kids of a given cell, starting somewhere
+#ifndef LoopCellSecd
+# define LoopCellSecd(CELL,START,NAME)		\
+    for(Cell NAME = START;			\
+	NAME != this->EndCells(CELL); ++NAME)
+#endif
+    /// loop leaf kids of a given cell
+#ifndef LoopLeafKids
+# define LoopLeafKids(CELL,NAME)			\
+    for(Leaf NAME = this->BeginLeafs(CELL);		\
+	NAME != this->EndLeafKids(CELL); ++NAME)
+#endif
+    /// loop leaf kids of a given cell, starting somewhere
+#ifndef LoopLeafSecd
+# define LoopLeafSecd(CELL,START,NAME)			\
+    for(Leaf NAME = START;				\
+	NAME != this->EndLeafKids(CELL); ++NAME)
+#endif
+    /// loop leaf descendants of a given cell
+#ifndef LoopAllLeafs
+# define LoopAllLeafs(CELL,NAME)			\
+    for(Leaf NAME = this->BeginLeafs(CELL);		\
+	NAME != this->EndLeafDesc(CELL); ++NAME)
+#endif
+    /// loop leaf descendants of a given cell, starting somewhere
+#ifndef LoopSecLeafs
+# define LoopSecLeafs(CELL,START,NAME)			\
+    for(Leaf NAME = START;				\
+	NAME != this->EndLeafDesc(CELL); ++NAME)
+#endif
+    /// loop all except the last leaf descendants of a given cell
+#ifndef LoopLstLeafs
+# define LoopLstLeafs(CELL,NAME)			\
+    for(Leaf NAME = this->BeginLeafs(CELL);		\
+	NAME != this->LastLeafDesc(CELL); ++NAME)
+#endif
+    //@}
+    /// \name dumping leaf and cell data (for debugging purposes)
+    //@{
+    /// header for leaf dump, may be overridden/extended in derived class
+    virtual std::ostream&Head(Leaf, std::ostream&out) const
+    {
+      return out << "  Leaf     I                     X            ";
+    }
+    /// dump leaf data, may be overridden/extended in derived class
+    virtual std::ostream&Data(Leaf l, std::ostream&out) const
+    {
+      return out << 'L' << std::setfill('0') << std::setw(5) << l.I
+	  << ' ' << std::setfill(' ') << std::setw(5) << P(l) << ' '
+	  << std::setw(10) << X(l);
+    }
+    /// header for cell dump, may be overridden/extended in derived class
+    virtual std::ostream&Head(Cell, std::ostream&out) const
+    {
+      return out << "Cell   le up     Cf    Nc Lf     Nl      N "
+		 << "       R                 X          ";
+    }
+    /// dump cell data, may be overridden/extended in derived class
+    virtual std::ostream&Data(Cell c, std::ostream&out) const
+    {
+      out  << 'C' << std::setfill('0') << std::setw(5) << c.I <<' '
+	   << std::setw(2) << std::setfill(' ') << int(Le(c)) <<' ';
+      if(c.I > 0u)
+	out<< 'C' << std::setfill('0') << std::setw(5) << Pa(c) <<' ';
+      else
+	out<< "nil    ";
+      if(Nc(c))
+	out<< 'C' << std::setfill('0') << std::setw(5) << Cf(c) << ' '
+	   << std::setfill(' ') << std::setw(1) << int(Nc(c)) << ' ';
+      else
+	out<< "nil    0 ";
+      return 
+	out<< 'L' << std::setfill('0') << std::setw(5) << L0(c) << ' ' 
+	   << std::setfill(' ')
+	   << std::setw(2) << Nl(c) << ' '
+	   << std::setw(6) << N (c) << ' '
+	   << std::setw(8) << Rd(c) << ' '
+	   << std::setw(8) << X (c);
+    }
     /// dump leaf data
     /// \param[in] out   ostream to write to
-    /// \param[in] dump  pointer to DumpTreeData or derived
-    void DumpLeafs(std::ostream&out, const DumpTreeData*dump=0) const {
-      if(dump==0) dump=&DUMP;
-      dump->Head(BeginLeafs(),out);
-      out <<'\n';
-      for(Leaf L=BeginLeafs(); L!=EndLeafs(); ++L) {
-	dump->Data(L,this,out);
-	out <<'\n';
-      }
+    void DumpLeafs(std::ostream&out) const
+    {
+      Head(Leaf(0),out) << '\n';
+      LoopLeafs(L) Data(L,out) << '\n';
       out.flush();
+    }
+    /// dump leaf data
+    /// \param[in] file name of file to write to
+    void DumpLeafs(const char*file) const
+    {
+      std::ofstream out(file);
+      DumpLeafs(out);
     }
     /// dump cell data
     /// \param[in] out   ostream to write to
-    /// \param[in] dump  pointer to DumpTreeData or derived
-    void DumpCells(std::ostream&out, const DumpTreeData*dump=0) const
+    void DumpCells(std::ostream&out) const
     {
-      if(dump==0) dump=&DUMP;
-      dump->Head(BeginCells(),out);
-      out <<'\n';
-      for(Cell C=BeginCells(); C!=EndCells(); ++C) {
-	dump->Data(C,this,out);
-	out <<'\n';
-      }
+      Head(Cell(0),out) << '\n';
+      LoopCellsDown(C) Data(C,out) << '\n';
       out.flush();
     }
+    /// dump cell data
+    /// \param[in] file name of file to write to
+    void DumpCells(const char*file) const
+    {
+      std::ofstream out(file);
+      DumpCells(out);
+    }
     //@}
-  };
-  /// running index of a tree leaf
-  template<int __D, typename __X, typename __F>
-  inline uint32 No(typename OctalTree<__D,__X,__F>::Leaf l) { return l.I; }
-  /// running index of a tree cell
-  template<int __D, typename __X, typename __F>
-  inline uint32 No(typename OctalTree<__D,__X,__F>::Cell c) { return c.I; }
-  /// \name macros for looping leafs and cells in an OctalTree    
-  //@{
-  /// loop cells down: root first
-#ifndef LoopCellsDown
-# define LoopCellsDown(TREE,NAME)		\
-  for(Cell *NAME = (TREE)->BeginCells();	\
-      NAME != (TREE)->EndCells(); ++NAME)
-#endif
-  /// loop cells up: root last
-  /// \note useful for an up-ward pass, e.g. computation of centre of mass
-#ifndef LoopCellsUp
-# define LoopCellsUp(TREE,NAME)			\
-  for(Cell *NAME = (TREE)->RBeginCells();	\
-      NAME != (TREE)->REndCells(); --NAME)
-#endif
-  /// loop leafs
-#ifndef LoopLeafs
-# define LoopLeafs(TREE,NAME)			\
-  for(Leaf *NAME = (TREE)->BeginLeafs();	\
-      NAME != (TREE)->EndLeafs(); ++NAME)
-#endif
-  /// loop cell kids of a given cell
-#ifndef LoopCellKids
-# define LoopCellKids(TREE,CELL,NAME)		\
-  for(Cell *NAME = (TREE)->BeginCells(CELL);	\
-      NAME != (TREE)->EndCells(CELL); ++NAME)
-#endif
-  /// loop cell kids of a given cell, starting somewhere
-#ifndef LoopCellSecd
-# define LoopCellSecd(TREE,CELL,START,NAME)	\
-  for(Cell *NAME = START;			\
-      NAME != (TREE)->EndCells(CELL); ++NAME)
-#endif
-  /// loop leaf kids of a given cell
-#ifndef LoopLeafKids
-# define LoopLeafKids(TREE,CELL,NAME)		\
-  for(Leaf *NAME = (TREE)->BeginLeafs(CELL);	\
-      NAME != (TREE)->EndLeafKids(CELL); ++NAME)
-#endif
-  /// loop leaf kids of a given cell, starting somewhere
-#ifndef LoopLeafSecd
-# define LoopLeafSecd(TREE,CELL,START,NAME)	\
-  for(Leaf *NAME = START;			\
-      NAME != (TREE)->EndLeafKids(CELL); ++NAME)
-#endif
-  /// loop leaf descendants of a given cell
-#ifndef LoopAllLeafs
-# define LoopAllLeafs(TREE,CELL,NAME)		\
-  for(Leaf *NAME = (TREE)->BeginLeafs(CELL);	\
-      NAME != (TREE)->EndLeafDesc(CELL); ++NAME)
-#endif
-  /// loop leaf descendants of a given cell, starting somewhere
-#ifndef LoopSecLeafs
-# define LoopSecLeafs(TREE,CELL,START,NAME)	\
-  for(Leaf *NAME = START;			\
-      NAME != (TREE)->EndLeafDesc(CELL); ++NAME)
-#endif
-  /// loop all except the last leaf descendants of a given cell
-#ifndef LoopLstLeafs
-# define LoopLstLeafs(TREE,CELL,NAME)		\
-  for(Leaf *NAME = (TREE)->BeginLeafs(CELL);	\
-      NAME != (TREE)->LastLeafDesc(CELL); ++NAME)
-#endif
-  //@}
+  };// struct TreeWalker<>
 
   ///
   /// A mutual walk of an OctalTree
@@ -473,17 +498,19 @@ namespace WDutils {
   ///
   /// \note fully inline
   template<typename OctTree>
-  class MutualOctTreeWalker {
+  class MutualOctTreeWalker : private TreeWalker<OctTree> {
   public:
-    typedef typename OctTree::Leaf Leaf;
-    typedef typename OctTree::Cell Cell;
+    typedef typename TreeWalker<OctTree>::Leaf Leaf;
+    typedef typename TreeWalker<OctTree>::Cell Cell;
+    typedef typename TreeWalker<OctTree>::size_type size_type;
     /// specifies how to walk the tree and what kind of interactions to do.
-    class Interactor {
-      friend class MutualOctTreeWalker;
-    protected:
-      const OctTree*TREE;
-      Interactor(const OctTree*t) : TREE(t) {}
+    class Interactor : public TreeWalker<OctTree> {
+//       friend class MutualOctTreeWalker;
+//       typedef typename OctTree::Real Real;
+//       typedef typename OctTree::Point Point;
     public:
+      /// ctor
+      Interactor(const OctTree*t) : TreeWalker<OctTree>(t) {}
       /// perform single leaf-leaf interaction
       virtual void interact(Leaf, Leaf) = 0;
       /// try to perform cell-leaf interaction, return true if success
@@ -493,72 +520,74 @@ namespace WDutils {
       /// try to perform cell self-interaction, return true if success
       virtual bool interact(Cell) = 0;
       /// which of two cells of an interaction to split?
-      virtual bool split_left(Cell A, Cell B) const {
-	return TREE->Number(A) > TREE->Number(B);
-      }
+      virtual bool split_left(Cell A, Cell B) const
+      { return N(A) > N(B); }
       /// perform all leaf-leaf interactions between a set of leafs
       /// \note Not abstract, but virtual: default calls individual leaf-leaf
       ///       interact N*(N-1)/2 times (probably very inefficient).
-      virtual void interact_many(Leaf L0, Leaf LN) {
-	for(Leaf Li=L0; Li<LN; ++Li)
-	  for(Leaf Lj=Li+1; Lj<LN; ++Lj)
-	    interact(Li,Lj);
-      }
+      virtual void interact_many(Leaf li, Leaf ln)
+      { for(; li<ln; ++li) for(Leaf lj=next(li); lj<ln; ++lj) interact(li,lj); }
+      /// perform all leaf-leaf interactions between one left and some right
+      /// \note Not abstract, but virtual: default calls individual leaf-leaf
+      ///       interact N times (probably not too efficient)
+      virtual void interact_many(Leaf ll, Leaf lr, Leaf ln)
+      { for(; lr<ln; ++lr) interact(ll,lr); }
     };
   private:
     //
     typedef std::pair<Cell,Leaf> pCL;   ///< represents a cell-leaf interaction
     typedef std::pair<Cell,Cell> pCC;   ///< represents a cell-cell interaction
     //
-    const OctTree   *TREE;              ///< tree to walk
     Interactor*const IA;                ///< pter to interactor
     Stack<pCL>       CL;                ///< stack of cell-leaf interactions
     Stack<pCC>       CC;                ///< stack of cell-cell interactions
     //
-    void perform(Cell A, Leaf B) { if(!IA->interact(A,B)) CL.push(pCL(A,B)); }
-    void perform(Cell A, Cell B) { if(!IA->interact(A,B)) CC.push(pCC(A,B)); }
-    void perform(Cell A)         { if(!IA->interact(A))   CC.push(pCC(A,0)); }
+    void perform(Cell A, Leaf B)
+    { if(!IA->interact(A,B)) CL.push(pCL(A,B)); }
+    void perform(Cell A, Cell B)
+    { if(!IA->interact(A,B)) CC.push(pCC(A,B)); }
+    void perform(Cell A)
+    { if(!IA->interact(A)) CC.push(pCC(A,Cell(0u))); }
     /// clear the stack of cell-leaf interactions
     void clear_CL_stack()
     {
       while(!CL.is_empty()) {
-	pCL P = CL.pop();
-	if(TREE->HasLeafKids(P.first))
-	  LoopLeafKids(TREE,P.first,Li)
-	    IA->interact(Li,P.second);
-	if(TREE->NumCells(P.first))
-	  LoopCellKids(TREE,P.first,Ci)
-	    perform(Ci,P.second);
+	pCL p = CL.pop();
+	if(Nl(p.first))
+	  IA->interact_many(p.second,BeginLeafs(p.first),EndLeafKids(p.first));
+	if(Nc(p.first))
+	  LoopCellKids(p.first,Ci)
+	    perform(Ci,p.second);
       }
     }
     /// split a mutual cell-cell interaction
     /// \param[in] A cell to be split
     /// \param[in] B cell to be kept
-    void split(Cell*A, Cell*B)
+    void split(Cell A, Cell B)
     {
-      if(TREE->HasLeafKids(A))
-	LoopLeafKids(TREE,A,Li)
+      if(Nl(A))
+	LoopLeafKids(A,Li)
 	  perform(B,Li);
-      if(TREE->NumCells(A))
-	LoopCellKids(TREE,A,Ci)
+      if(Nc(A))
+	LoopCellKids(A,Ci)
 	  perform(Ci,B);
     }
     /// split a cell self-interaction
     /// \param[in] A cell to be split
-    void split(Cell*A)
+    void split(Cell A)
     {
       // leaf-leaf sub-interactions
-      if(TREE->NumLeafKids(A) > 1)
-	IA->interact_many(TREE->BeginLeafs(A),TREE->EndLeafKids(A));
+      if(Nl(A) > 1u)
+	IA->interact_many(BeginLeafs(A),EndLeafKids(A));
       // self-interactions between sub-cells
-      if(TREE->NumCells(A)) {
-	LoopCellKids(TREE,A,Ci)
+      if(Nc(A)) {
+	LoopCellKids(A,Ci)
 	  perform(Ci);
       // mutual interaction between sub-cells and sub-leafs
-	LoopCellKids(TREE,A,Ci) {
-	  LoopCellSecd(TREE,A,Ci+1,Cj)
+	LoopCellKids(A,Ci) {
+	  LoopCellSecd(A,next(Ci),Cj)
 	    perform(Ci,Cj);
-	  LoopLeafKids(TREE,A,Li)
+	  LoopLeafKids(A,Li)
 	    perform(Ci,Li);
 	}
       }
@@ -567,29 +596,29 @@ namespace WDutils {
     void clear_CC_stack()
     {
       while(!CC.is_empty()) {
-	pCC P = CC.pop();
-	if     (0 == P.second)                    split(P.first);
-	else if(IA->split_left(P.first,P.second)) split(P.first,P.second);
-	else                                      split(P.second,P.first);
+	pCC p = CC.pop();
+	if     (Cell(0) == p.second)              split(p.first);
+	else if(IA->split_left(p.first,p.second)) split(p.first,p.second);
+	else                                      split(p.second,p.first);
 	clear_CL_stack();
       }
     }
   public:
-    /// construction for interaction within one octal tree
+    /// construction for interaction within octal tree
     /// \param[in] i  pter to interactor
     /// \param[in] d  depth of tree
     MutualOctTreeWalker(Interactor*i)
-      : TREE ( i.TREE ),
+      : TreeWalker<OctTree>(*i),
 	IA   ( i ), 
-	CL   ( OctTree::Nsub*TREE->Depth()),
-	CC   ( 2*(OctTree::Nsub-1)*(TREE->Depth()+1)+1 )
+	CL   ( OctTree::Nsub*this->Depth()),
+	CC   ( 2*(OctTree::Nsub-1)*(this->Depth()+1)+1 )
     {}
     /// perform a mutual tree walk.
     void walk()
     {
       CC.reset();
       CL.reset();
-      perform(TREE->Root());
+      perform(Cell(0));
       clear_CC_stack();
     }
   };
