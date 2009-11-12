@@ -26,11 +26,12 @@ class ComponentRange{
 public:
     ComponentRange();
     ComponentRange(const ComponentRange&);  // copy constructor
-    ~ComponentRange();
+    const ComponentRange& operator=(const ComponentRange&);
+  ~ComponentRange();
 
   void setData(const int _f,const  int _l, const std::string _type="");
   void setType(std::string _type) { type = _type; };
-  static int getIndexMatchType(const ComponentRangeVector * crv, const std::string type);
+  static int getIndexMatchType(const ComponentRangeVector * crv, const std::string type, int & offset);
   static void list(const ComponentRangeVector * crv);
   static int print(const ComponentRangeVector * crv, std::string select);
    std::string range,   // "0:99999"

@@ -35,7 +35,8 @@ public:
     ~UserSelection();
     bool setSelection(const std::string,const ComponentRangeVector *);
      const t_indexes_tab * getIndexesTab() const { return indx; };
-     const int   getNSel()       const { return nsel   ; };
+     int   getNSel()       const { return nsel   ; };
+     static std::string parseString(std::string&);
 
 private:
      static int comparePos(const void * a, const void * b) {
@@ -45,10 +46,10 @@ private:
      }
      std::string select;           // input range (console | GUI)
      bool parse();                 // parse selection
-     std::string parseString(std::string&);
      int parseComponent(const std::string);
      bool checkComponent(const std::string);
      int isComponent(const std::string);
+     int isRange(const std::string);
      std::string out_range;            // range selected             
      int nbody;                        // #bodies max                
      int nsel;                         // #bodies selected           

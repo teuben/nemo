@@ -36,12 +36,12 @@ using namespace std; // prevent writing statment like 'std::cerr'
 const char * defv[] = {
   "in=???\n             GADGET (1 or 2 little/big endian) input       ",
   "out=???\n            NEMO output                                   ",
-  "comp=mxv\n           component requested to be saved             \n"
-  "                   m->mass, x->positions, v->velocities          ",
   "select=disk\n        requested data:                             \n"
   "                   disk, gas, halo, bulge, stars, bndry, all     \n"
   "                   you can request several data separated with   \n"
   "                   \",\" like select=disk,stars,gas                ",
+  "comp=mxv\n           component requested to be saved             \n"
+  "                   m->mass, x->positions, v->velocities          ",
   "verb=f\n             verbose mode                                  ",
   "VERSION=3.2\n         compiled on <"__DATE__"> JCL                 ",
   NULL

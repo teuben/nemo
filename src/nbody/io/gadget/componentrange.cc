@@ -34,6 +34,17 @@ ComponentRange::ComponentRange(const ComponentRange&m)
   type  = m.type;
 }
 // ============================================================================
+// Copy Constructor                                                            
+const ComponentRange::ComponentRange & ComponentRange::operator=(const ComponentRange & m)
+{
+  n     = m.n;
+  first = m.first;
+  last  = m.last;
+  range = m.range;
+  type  = m.type;
+  return *this;
+}
+// ============================================================================
 ComponentRange::~ComponentRange()
 {
 }
@@ -61,17 +72,29 @@ void ComponentRange::buildRange()
   range = stm1.str()+":"+stm2.str();
 };
 // ============================================================================
-int ComponentRange::getIndexMatchType(const ComponentRangeVector * crv, const std::string type)
+// getIndexMatchType                                                           
+// return the index vector matching the type of object in the component range  
+// vector. Return also the object offset in the index tab                      
+int ComponentRange::getIndexMatchType(const ComponentRangeVector * crv, const std::string type,int &offset)
 {
   int status=-1;
+  offset=0;
   assert(crv);
-  for (unsigned int i=0; i<crv->size()&&status==-1; i++)
+  for (unsigned int i=0; i<crv->size()&&status==-1; i++) {
+    //std::cerr << "crv.type =" <<(*crv)[i].type<<" type="<<type<<"\n"; 
     if ((*crv)[i].type == type)  status=i;
+    else {
+      if (i>0) { // skip first which match "all" component
+	offset+=(*crv)[i].n;
+      }
+    }
+  }
   return status;
 }
 // ============================================================================
 void ComponentRange::list(const ComponentRangeVector * crv)
 {
+  std::cerr << "ComponentRange::list size"<<crv->size()<<"\n";
   for (unsigned int i=0; i<crv->size(); i++) {
     std::cerr << "-----------------------------------------------------------\n";
     std::cerr << "Component #"<<i<<"\n";
