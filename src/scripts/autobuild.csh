@@ -10,7 +10,7 @@
 # $Id$
 
 set sleep=0
-set dir=/chara2/teuben/redo_nemo/autobuild
+set dir=/chara/teuben/redo_nemo/autobuild
 
 foreach arg ($*)
   set $arg
