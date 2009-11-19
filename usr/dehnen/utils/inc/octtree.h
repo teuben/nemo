@@ -12,6 +12,7 @@
 ///
 /// \version May-2009 WD  first tested version
 /// \version Oct-2009 WD  new design using indices for leafs and cells
+/// \version Nov-2009 WD  removed redundant template parameter
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -53,7 +54,7 @@
 #  include <tupel.h>
 #endif
 
-namespace { template<int, typename, typename> struct BoxDotTree; }
+namespace { template<int, typename> struct BoxDotTree; }
 namespace WDutils {
   template<typename> struct TreeWalker;
   template<typename> struct DumpTreeData;
@@ -72,18 +73,16 @@ namespace WDutils {
   /// includes all leafs contained within a cell.
   ///
   /// \note Access to leafs and cells via struct TreeWalker<OctalTree> below
-  /// \note Type __X for positions, type __F for other foating point variables
-  /// \note Implementations for __X,__F = float,double and Dim=2,3
-  template<int __D, typename __X=float, typename __F=__X>
+  /// \note Implementations for __X = float,double and Dim=2,3
+  template<int __D, typename __X>
   class OctalTree {
-    friend struct BoxDotTree<__D,__X,__F>;
+    friend struct BoxDotTree<__D,__X>;
     friend struct TreeWalker<OctalTree>;
     /// ensure that the only valid instantinations are those implemented in
     /// octtree.cc
     WDutilsStaticAssert
     (( (  __D == 2 || __D == 3 )              &&
-       meta::TypeInfo<__X>::is_floating_point &&
-       meta::TypeInfo<__F>::is_floating_point    ));
+       meta::TypeInfo<__X>::is_floating_point    ));
     // disable default and copy ctor
     OctalTree           (const OctalTree&);  // not implemented
     OctalTree& operator=(const OctalTree&);  // not implemented
@@ -92,7 +91,6 @@ namespace WDutils {
     //@{
     const static int        Dim = __D;       ///< number of dimensions
     typedef __X             Real;            ///< floating point type: position
-    typedef __F             Float;           ///< floating point type: other
     typedef tupel<Dim,Real> Point;           ///< type for positions
     typedef uint32          part_index;      ///< type for indexing particles
     typedef uint32          size_type;       ///< type for indexing leaf & cells

@@ -54,6 +54,10 @@
 #ifndef WDutils_included_exception_h
 #  include <exception.h>
 #endif
+#ifndef WDutils_included_cstring
+#  define WDutils_included_cstring
+#  include <cstring>
+#endif
 
 namespace WDutils {
 
@@ -112,371 +116,331 @@ namespace WDutils {
     /// largest multiple of N not greater than i
     template<int N, typename __I> inline
     __I bottom(__I i) { return __Aux<N>::bot(i); }
-    /// \name simple manipulations applied to each element of an array
+
+    // auxiliary for routines below
+    template<typename T> struct U16
+    {
+      WDutilsStaticAssert((// meta::TypeCompare<T,int>::identical    ||
+			   meta::TypeCompare<T,float>::identical  ||
+			   meta::TypeCompare<T,double>::identical ));
+      static void Ass(T*, size_t, T);
+      static void Neg(T*, size_t);
+      static void Add(T*, size_t, T);
+      static void Sub(T*, size_t, T);
+      static void Mul(T*, size_t, T);
+      static void Div(T*f, size_t n, T x) WDutils_THROWING
+      { 
+// 	WDutilsStaticAssert(meta::TypeInfo<T>::is_floating_point);
+	if(x==T(0)) WDutils_THROW("SSE::Div() by 0\n");
+	Mul(f,n,T(1)/x);
+      }
+      static void Inv(T*, size_t n, T x);
+      static void Sqrt(T*f, size_t n);
+      static T Sum(const T*, size_t);
+    };
+    // special case: T=int not all implemented (yet?)
+    template<> struct U16<int>
+    {
+      typedef int T;
+      static void Ass(T*, size_t, T);
+//       static void Neg(T*, size_t);
+      static void Add(T*, size_t, T);
+//       static void Sub(T*, size_t, T);
+//       static void Mul(T*, size_t, T);
+//       static T Sum(const T*, size_t);
+    };
+
+
+    /// \name simple manipulations of each array element
+    /// \note up to about 16/sizeof(T) times faster than simple code
     //@{
 
     /// assign same value to all elements
     /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
-    /// \note up to 4 times faster than simple code
-    void Ass(int*f, size_t n, int x);
-    /// assign same value to all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
-    /// \note up to 4 times faster than simple code
-    void Ass(float*f, size_t n, float x);
-    /// assign same value to all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
-    /// \note up to twice as fast than simple code
-    void Ass(double*f, size_t n, double x);
-    /// assign same value to all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    void Ass16(int*f, size_t n, int x);
-    /// assign same value to all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    void Ass16(float*f, size_t n, float x);
-    /// assign same value to all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    void Ass16(double*f, size_t n, double x);
+    template<typename T>
+    inline void Ass(int*f, size_t n, int x)
+    { U16<T>::Ass(f,n,x); }
+
+    /// assign element-wise to another array
+    /// \code for(size_t i=0; i!=n; ++i) a[i] = b[i]; \endcode
+    template<typename T>
+    inline void Ass(T*a, size_t n, const T*b)
+    { std::memcpy(a,b,n*sizeof(T)); }
 
     /// negate all elements
     /// \code for(size_t i=0; i!=n; ++i) f[i] = -f[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    void Neg(float*f, size_t n);
-    /// negate all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = -f[i]; \endcode
-    /// \note up to twice as fast than simple code
-    void Neg(double*f, size_t n);
-    /// negate all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = -f[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    void Neg16(float*f, size_t n);
-    /// negate all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = -f[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    void Neg16(double*f, size_t n);
+    template<typename T>
+    inline void Neg(T*f, size_t n)
+    { U16<T>::Neg(f,n); }
 
-    /// set all elements to zero
+    /// set eaqch element to zero
     /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
-    /// \note up to 4 times faster than simple code
-    inline void Reset(int*f, size_t n) { Ass(f,n,0); }
-    /// set all elements to zero
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
-    /// \note up to 4 times faster than simple code
-    inline void Reset(float*f, size_t n) { Ass(f,n,0.f); }
-    /// set all elements to zero
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
-    /// \note up to twice as fast than simple code
-    inline void Reset(double*f, size_t n) { Ass(f,n,0.0); }
-    /// set all elements to zero
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    inline void Reset16(int*f, size_t n) { Ass16(f,n,0); }
-    /// set all elements to zero
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    inline void Reset16(float*f, size_t n) { Ass16(f,n,0.f); }
-    /// set all elements to zero
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    inline void Reset16(double*f, size_t n) { Ass16(f,n,0.0); }
+    template<typename T>
+    inline void Reset(T*f, size_t n)
+    { Ass(f,n,T(0)); }
 
     /// add same value to each elements
     /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
-    /// \note up to 4 times faster than simple code
-    void Add(float*f, size_t n, float x);
-    /// add same value to each elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
-    /// \note up to twice as fast than simple code
-    void Add(double*f, size_t n, double x);
-    /// add same value to each elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
-    /// \note up to twice as fast than simple code
-    void Add(int*f, size_t n, int x);
-    /// add same value to each elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    void Add16(float*f, size_t n, float x);
-    /// add same value to each elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    void Add16(double*f, size_t n, double x);
-    /// add same value to each elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    void Add16(int*f, size_t n, int x);
-    /// add another array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] += b[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    void Add16(float*a, size_t n, const float*b);
-    /// add another array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] += b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Add16(double*a, size_t n, const double*b);
-    /// add another array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] += b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Add16(int*a, size_t n, const int*b);
-    /// add weighted array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] += w*b[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    void Add16(float*a, size_t n, float w, const float*b);
-    /// add weighted array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] += w*b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Add16(double*a, size_t n, double w, const double*b);
+    template<typename T>
+    inline void Add(T*f, size_t n, T x)
+    { U16<T>::Add(f,n,x); }
 
     /// subtract same value from each element
     /// \code for(size_t i=0; i!=n; ++i) f[i] -= x; \endcode
-    /// \note up to 4 times faster than simple code
-    void Sub(float*f, size_t n, float x);
-    /// subtract same value from each element
-    /// \code for(size_t i=0; i!=n; ++i) f[i] -= x; \endcode
-    /// \note up to twice as fast than simple code
-    void Sub(double*f, size_t n, double x);
-    /// subtract same value from each element
-    /// \code for(size_t i=0; i!=n; ++i) f[i] -= x; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    void Sub16(float*f, size_t n, float x);
-    /// subtract same value from each element
-    /// \code for(size_t i=0; i!=n; ++i) f[i] -= x; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    void Sub16(double*f, size_t n, double x);
-    /// subtract another array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] -= b[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    void Sub16(float*a, size_t n, const float*b);
-    /// subtract another array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] -= b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Sub16(double*a, size_t n, const double*b);
-    /// subtract weighted array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] -= w*b[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    void Sub16(float*a, size_t n, float w, const float*b);
-    /// subtract weighted array element wise
-    /// \code for(size_t i=0; i!=n; ++i) a[i] -= w*b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Sub16(double*a, size_t n, double w, const double*b);
+    template<typename T>
+    inline void Sub(T*f, size_t n, T x)
+    { U16<T>::Sub(f,n,x); }
 
     /// multiply each element with same value
     /// \code for(size_t i=0; i!=n; ++i) f[i] *= x; \endcode
     /// \note up to 4 times faster than simple code
-    void Mul(float*f, size_t n, float x);
-    /// multiply each element with same value
-    /// \code for(size_t i=0; i!=n; ++i) f[i] *= x; \endcode
-    /// \note up to twice as fast than simple code
-    void Mul(double*f, size_t n, double x);
-    /// multiply each element with same value
-    /// \code for(size_t i=0; i!=n; ++i) f[i] *= x; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    void Mul16(float*f, size_t n, float x);
-    /// multiply each element with same value
-    /// \code for(size_t i=0; i!=n; ++i) f[i] *= x; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    void Mul16(double*f, size_t n, double x);
-    /// multiply by elemnts of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] *= b[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    void Mul16(float*a, size_t n, const float*b);
-    /// multiply by elemnts of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] *= b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Mul16(double*a, size_t n, const double*b);
+    template<typename T>
+    inline void Mul(T*f, size_t n, T x)
+    { U16<T>::Mul(f,n,x); }
 
     /// sum of all elements
     /// \code float S(0); for(size_t i=0; i!=n; ++i) S+=f[i]; return S;
     /// \endcode
-    /// \note up to 4 times faster than simple code
-    float Sum(const float*f, size_t n);
-    /// sum of all elements
-    /// \code double S(0); for(size_t i=0; i!=n; ++i) S+=f[i]; return S;
-    /// \note up to twice as fast than simple code
-    /// \endcode
-    double Sum(const double*f, size_t n);
-    /// sum of all elements
-    /// \code float S(0); for(size_t i=0; i!=n; ++i) S+=f[i]; return S;
-    /// \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    float Sum16(const float*f, size_t n);
-    /// sum of all elements
-    /// \code double S(0); for(size_t i=0; i!=n; ++i) S+=f[i]; return S;
-    /// \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    double Sum16(const double*f, size_t n);
-
-    /// dot of all elements
-    /// \code float S(0); for(size_t i=0; i!=n; ++i) S+=a[i]*b[i]; return S;
-    /// \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    float Dot16(const float*a, size_t n, const float*b);
-    /// dot of all elements
-    /// \code double S(0); for(size_t i=0; i!=n; ++i) S+=a[i]*b[i]; return S;
-    /// \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    double Dot16(const double*a, size_t n, const double*b);
+    template<typename T>
+    inline T Sum(const T*f, size_t n)
+    { return U16<T>::Sum(f,n); }
 
     /// divide each element by same value
     /// \code for(size_t i=0; i!=n; ++i) f[i] /= x; \endcode
-    /// \note up to 4 times faster than simple code
-    inline void Div(float*f, size_t n, float x) WDutils_THROWING { 
-      if(x==0.f) WDutils_THROW("SSE::Div() by 0\n");
-      Mul(f,n,1.f/x);
-    }
-    /// divide each element by same value
-    /// \code for(size_t i=0; i!=n; ++i) f[i] /= x; \endcode
-    /// \note up to twice as fast than simple code
-    inline void Div(double*f, size_t n, double x) WDutils_THROWING { 
-      if(x==0.0) WDutils_THROW("SSE::Div() by 0\n");
-      Mul(f,n,1.0/x);
-    }
-    /// divide each element by same value
-    /// \code for(size_t i=0; i!=n; ++i) f[i] /= x; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    inline void Div16(float*f, size_t n, float x) WDutils_THROWING { 
-      if(x==0.f) WDutils_THROW("SSE::Div16() by 0\n");
-      Mul16(f,n,1.f/x);
-    }
-    /// divide each element by same value
-    /// \code for(size_t i=0; i!=n; ++i) f[i] /= x; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    inline void Div16(double*f, size_t n, double x) WDutils_THROWING { 
-      if(x==0.0) WDutils_THROW("SSE::Div16() by 0\n");
-      Mul16(f,n,1.0/x);
-    }
-    /// divide by elements of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] /= b[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    void Div16(float*a, size_t n, const float*b);
-    /// divide by elements of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] /= b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Div16(double*a, size_t n, const double*b);
+    template<typename T>
+    inline void Div(T*f, size_t n, T x)
+    { U16<T>::Div(f,n,x); }
 
     /// replace each elements by its inverse times a constant
     /// \code for(size_t i=0; i!=n; ++i) f[i] = x/f[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    void Inv(float*f, size_t n, float x);
-    /// replace each elements by its inverse times a constant
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x/f[i]; \endcode
-    /// \note up to twice as fast than simple code
-    void Inv(double*f, size_t n, double x);
-    /// replace each elements by its inverse times a constant
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x/f[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    void Inv16(float*f, size_t n, float x);
-    /// replace each elements by its inverse times a constant
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x/f[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    void Inv16(double*f, size_t n, double x);
-    /// set to constant divided by element of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] = x/b[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    void Inv16(float*a, size_t n, float x, const float*b);
-    /// set to constant divided by element of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] = x/b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Inv16(double*a, size_t n, double x, const double*b);
+    template<typename T>
+    inline void Inv(float*f, size_t n, float x)
+    { U16<T>::Inv(f,n,x); }
 
     /// replace each element by its inverse
     /// \code for(size_t i=0; i!=n; ++i) f[i] = 1/f[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    inline void Reciprocal(float*f, size_t n) { Inv(f,n,1.f); }
-    /// replace each element by its inverse
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 1/f[i]; \endcode
-    /// \note up to twice as fast than simple code
-    inline void Reciprocal(double*f, size_t n) { Inv(f,n,1.0); }
-    /// replace each element by its inverse
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 1/f[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    inline void Reciprocal16(float*f, size_t n) { Inv16(f,n,1.f); }
-    /// replace each element by its inverse
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 1/f[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    inline void Reciprocal16(double*f, size_t n) { Inv16(f,n,1.0); }
-    /// set each element to the inverse of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] = 1/b[i]; \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    inline void Reciprocal16(float*a, size_t n, const float*b)
-    { Inv16(a,n,1.f,b); }
-    /// set each element to the inverse of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] = 1/b[i]; \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    inline void Reciprocal16(double*a, size_t n, const double*b)
-    { Inv16(a,n,1.0,b); }
+    template<typename T>
+    inline void Reciprocal(T*f, size_t n)
+    { Inv(f,n,T(1)); }
 
     /// replace each element by its square root
     /// \code for(size_t i=0; i!=n; ++i) f[i] = std::sqrt(f[i]); \endcode
-    /// \note up to 4 times faster than simple code
-    void Sqrt(float*f, size_t n);
-    /// replace each element by its square root
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = std::sqrt(f[i]); \endcode
-    /// \note up to twice as fast than simple code
-    void Sqrt(double*f, size_t n);
-    /// replace each element by its square root
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = std::sqrt(f[i]); \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 4
-    void Sqrt16(float*f, size_t n);
-    /// replace each element by its square root
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = std::sqrt(f[i]); \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that f is 16byte aligned and n a multiple of 2
-    void Sqrt16(double*f, size_t n);
-    /// set each element to the square root of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] = std::sqrt(b[i]); \endcode
-    /// \note up to 4 times faster than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 4
-    void Sqrt16(float*a, size_t n, const float*b);
-    /// set each element to the square root of another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] = std::sqrt(b[i]); \endcode
-    /// \note up to twice as fast than simple code
-    /// \note assumes that a and b are 16byte aligned and n a multiple of 2
-    void Sqrt16(double*a, size_t n, const double*b);
+    template<typename T>
+    inline void Sqrt(float*f, size_t n)
+    { U16<T>::Sqrt(f,n); }
     //@}
+
+    // auxiliary for struct Align below
+    template<typename T> struct A16
+    {
+      WDutilsStaticAssert((// meta::TypeCompare<T,int>::identical    ||
+			   meta::TypeCompare<T,float>::identical  ||
+			   meta::TypeCompare<T,double>::identical));
+      static void Ass(T*, size_t, T);
+      static void Ass(T*, size_t, T, const T*);
+      static void Neg(T*, size_t);
+      static void Add(T*, size_t, T);
+      static void Add(T*, size_t, const T*);
+      static void Add(T*, size_t, T, const T*);
+      static void Sub(T*, size_t, T);
+      static void Sub(T*, size_t, const T*);
+      static void Sub(T*, size_t, T, const T*);
+      static void Mul(T*, size_t, T);
+      static void Mul(T*, size_t, const T*);
+      static void Div(T*f, size_t n, T x) WDutils_THROWING { 
+// 	WDutilsStaticAssert(meta::TypeInfo<T>::is_floating_point);
+	if(x==T(0)) WDutils_THROW("SSE::Aligned::Div() by 0\n");
+	Mul(f,n,T(1)/x);
+      }
+      static void Div(T*, size_t, const T*);
+      static void Inv(T*, size_t, T);
+      static void Inv(T*, size_t, T, const T*);
+      static void Sqrt(T*, size_t);
+      static void Sqrt(T*, size_t, const T*);
+      static T Sum(const T*, size_t);
+      static T Dot(const T*, size_t, const T*);
+    };
+    // special case: T=int not all implemented (yet?)
+    template<> struct A16<int>
+    {
+      typedef int T;
+      static void Ass(T*, size_t, T);
+//       static void Ass(T*, size_t, T, const T*);
+//       static void Neg(T*, size_t);
+      static void Add(T*, size_t, T);
+      static void Add(T*, size_t, const T*);
+//       static void Add(T*, size_t, T, const T*);
+//       static void Sub(T*, size_t, T);
+//       static void Sub(T*, size_t, const T*);
+//       static void Sub(T*, size_t, T, const T*);
+//       static void Mul(T*, size_t, T);
+//       static void Mul(T*, size_t, const T*);
+//       static void Div(T*, size_t, const T*);
+//       static void Inv(T*, size_t, T);
+//       static void Inv(T*, size_t, T, const T*);
+//       static T Sum(const T*, size_t);
+//       static T Dot(const T*, size_t, const T*);
+    };
+
+    ///
+    /// simple array manipulations for aligned arrays
+    ///
+    /// \note all array arguments must be 16-byte aligned and array sizes
+    ///       multiples of 16/sizeof(T) where T is the array type.
+    /// \note routines are about 16/sizeof(T) times faster than simple code
+    ///
+    struct Aligned {
+      /// \name assign to each element of array
+      //@{
+      /// assign each element to scalar
+      /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
+      template<typename T>
+      static void Ass(T*f, size_t n, T x)
+      { A16<T>::Ass(f,n,x); }
+
+      /// assign element-wise to another array
+      /// \code for(size_t i=0; i!=n; ++i) a[i] = b[i]; \endcode
+      /// \note this does not require 16-byte alignment
+      template<typename T>
+      static void Ass(T*a, size_t n, const T*b)
+      { std::memcpy(a,b,n*sizeof(T)); }
+
+      /// assign element-wise to weighted array
+      /// \code for(size_t i=0; i!=n; ++i) a[i] = w*b[i]; \endcode
+      template<typename T>
+      static void Ass(T*a, size_t n, T w, const T*b)
+      { A16<T>::Ass(a,n,w,b); }
+
+      /// replace each element with its negative
+      /// \code for(size_t i=0; i!=n; ++i) f[i] = -f[i]; \endcode
+      template<typename T>
+      static void Neg(T*f, size_t n)
+      { A16<T>::Neg(f,n); }
+
+      /// set each element to zero
+      /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
+      template<typename T>
+      static void Reset(T*f, size_t n)
+      { Aligned::Ass(f,n,T(0)); }
+
+      /// add same scalar to each element
+      /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
+      template<typename T>
+      static void Add(T*f, size_t n, T x)
+      { A16<T>::Add(f,n,x); }
+
+      /// add another array element wise
+      /// \code for(size_t i=0; i!=n; ++i) a[i] += b[i]; \endcode
+      template<typename T>
+      static void Add(T*a, size_t n, const T*b)
+      { A16<T>::Add(a,n,b); }
+
+      /// add weighted array element wise
+      /// \code for(size_t i=0; i!=n; ++i) a[i] += w*b[i]; \endcode
+      template<typename T>
+      static void Add(T*a, size_t n, T w, const T*b)
+      { A16<T>::Add(a,n,w,b); }
+
+      /// subtract same scalar from each element
+      /// \code for(size_t i=0; i!=n; ++i) f[i] -= x; \endcode
+      template<typename T>
+      static void Sub(T*f, size_t n, T x)
+      { A16<T>::Sub(f,n,x); }
+
+      /// subtract another array element wise
+      /// \code for(size_t i=0; i!=n; ++i) a[i] -= b[i]; \endcode
+      template<typename T>
+      static void Sub(T*a, size_t n, const T*b)
+      { A16<T>::Sub(a,n,b); }
+
+      /// subtract weighted array element wise
+      /// \code for(size_t i=0; i!=n; ++i) a[i] -= w*b[i]; \endcode
+      template<typename T>
+      static void Sub(T*a, size_t n, T w, const T*b)
+      { A16<T>::Sub(a,n,w,b); }
+
+      /// multiply each element by same scalar
+      /// \code for(size_t i=0; i!=n; ++i) f[i] *= x; \endcode
+      template<typename T>
+      static void Mul(T*f, size_t n, T x)
+      { A16<T>::Mul(f,n,x); }
+
+      /// multiply element-wise with another array
+      /// \code for(size_t i=0; i!=n; ++i) a[i] *= b[i]; \endcode
+      template<typename T>
+      static void Mul(T*a, size_t n, const T*b)
+      { A16<T>::Mul(a,n,b); }
+
+      /// divide each element by same scalar
+      /// \code for(size_t i=0; i!=n; ++i) f[i] /= x; \endcode
+      template<typename T>
+      static void Div(T*f, size_t n, T x)
+      { A16<T>::Div(f,n); }
+
+      /// divide by elements of another array
+      /// \code for(size_t i=0; i!=n; ++i) a[i] /= b[i]; \endcode
+      template<typename T>
+      static void Div(T*a, size_t n, const T*b)
+      { A16<T>::Div(a,n,b); }
+
+      /// replace each elements by its inverse times a constant
+      /// \code for(size_t i=0; i!=n; ++i) f[i] = x/f[i]; \endcode
+      template<typename T>
+      static void Inv(T*f, size_t n, T x)
+      { A16<T>::Inv(f,n,x); }
+
+      /// set to constant divided by element of another array
+      /// \code for(size_t i=0; i!=n; ++i) a[i] = x/b[i]; \endcode
+      template<typename T>
+      static void Inv(T*a, size_t n, T x, const T*b)
+      { A16<T>::Inv(a,n,x,b); }
+
+      /// replace each element by its inverse
+      /// \code for(size_t i=0; i!=n; ++i) f[i] = 1/f[i]; \endcode
+      template<typename T>
+      static void Reciprocal(T*f, size_t n)
+      { Inv(f,n,T(1)); }
+
+      /// set each element to the inverse of another array
+      /// \code for(size_t i=0; i!=n; ++i) a[i] = 1/b[i]; \endcode
+      template<typename T>
+      static void Reciprocal(T*a, size_t n, const T*b)
+      { Inv(a,n,T(1),b); }
+
+      /// replace each element by its square root
+      /// \code for(size_t i=0; i!=n; ++i) f[i] = std::sqrt(f[i]); \endcode
+      template<typename T>
+      static void Sqrt(T*f, size_t n)
+      { A16<T>::Sqrt(f,n); }
+
+      /// set each element to the square root of another array
+      /// \code for(size_t i=0; i!=n; ++i) a[i] = std::sqrt(b[i]); \endcode
+      template<typename T>
+      static void Sqrt(T*a, size_t n, const T*b)
+      { A16<T>::Sqrt(a,n,b); }
+
+      //@}
+      /// \name compute property of whole array
+      //{@
+
+      /// sum of all elements
+      /// \code float S(0); for(size_t i=0; i!=n; ++i) S+=f[i]; return S;
+      /// \endcode
+      template<typename T>
+      static T Sum(const T*f, size_t n)
+      { return A16<T>::Sum(f,n); }
+
+      /// dot product between two arrays
+      /// \code float S(0); for(size_t i=0; i!=n; ++i) S+=a[i]*b[i]; return S;
+      /// \endcode
+      template<typename T>
+      static T Dot(const T*a, size_t n, const T*b)
+      { return A16<T>::Dot(a,n,b); }
+
+      //@}
+    };// class SSE::Aligned
+
+
 
     /// contains some constants and code relevant for SSE coding
     /// instantinations for float and double
@@ -627,15 +591,23 @@ namespace WDutils {
       /// \code for(int i=0; i!=size(); ++i) A[i] = 0; \endcode
       Array16&reset()
       {
-	Reset16(_A,_S);
+	A16<_F>::Ass(_A,_S,_F(0));
 	return*this;
       }
       /// negate element-wise
       /// \code for(int i=0; i!=size(); ++i) A[i] = -A[i]; \endcode
       Array16&negate()
       {
-	Neg16(_A,_S);
+	A16<_F>::Neg(_A,_S);
 	return*this;
+      }
+      /// sum of all elements
+      /// \code _F x(0); for(int i=0; i!=size(); ++i) x+=A[i]; return x;
+      /// \endcode
+      _F sum() const
+      {
+	reset_tail();
+	return A16<_F>::Sum(_A,_S);
       }
       //@}
       /// \name binary operations with scalar
@@ -644,35 +616,35 @@ namespace WDutils {
       /// \code for(int i=0; i!=size(); ++i) A[i] = x; \endcode
       Array16&operator=(_F x)
       {
-	Ass16(_A,_S,x);
+	A16<_F>::Ass(_A,_S,x);
 	return*this;
       }
       /// add a scalar to each element
       /// \code for(int i=0; i!=size(); ++i) A[i] += x; \endcode
       Array16&operator+=(_F x)
       {
-	Add16(_A,_S,x);
+	A16<_F>::Add(_A,_S,x);
 	return*this;
       }
       /// subtract a scalar from each element
       /// \code for(int i=0; i!=size(); ++i) A[i] -= x; \endcode
       Array16&operator-=(_F x)
       {
-	Sub16(_A,_S,x);
+	A16<_F>::Sub(_A,_S,x);
 	return*this;
       }
       /// multiply each element by a scalar
       /// \code for(int i=0; i!=size(); ++i) A[i] *= x; \endcode
       Array16&operator*=(_F x)
       {
-	Mul16(_A,_S,x);
+	A16<_F>::Mul(_A,_S,x);
 	return*this;
       }
       /// divide each element by a scalar
       /// \code for(int i=0; i!=size(); ++i) A[i] *= x; \endcode
       Array16&operator/=(_F x) WDutils_THROWING
       {
-	Div16(_A,_S,x);
+	A16<_F>::Div(_A,_S,x);
 	return*this;
       }
       //@}
@@ -688,7 +660,7 @@ namespace WDutils {
       Array16&operator+=(Array16 const&B) WDutils_THROWING
       {
 	check_size(B,"operator+=(Array16&)");
-	Add16(_A,_S,B._A);
+	A16<_F>::Add(_A,_S,B._A);
 	return*this;
       }
       /// subtract element-wise
@@ -697,7 +669,7 @@ namespace WDutils {
       Array16&operator-=(Array16 const&B) WDutils_THROWING
       {
 	check_size(B,"operator-=(Array16&)");
-	Sub16(_A,_S,B._A);
+	A16<_F>::Sub(_A,_S,B._A);
 	return*this;
       }
       /// dot product
@@ -708,7 +680,7 @@ namespace WDutils {
       {
 	check_size(B,"operator*(Array16&)");
 	reset_tail();
-	return Dot16(_A,_S,B._A);
+	return A16<_F>::Dot(_A,_S,B._A);
       }
       //@}
       /// \name tertiary operations with scalar and another Array16
@@ -718,7 +690,7 @@ namespace WDutils {
       Array16&addtimes(Array16 const&B, _F w) WDutils_THROWING
       {
 	check_size(B,"addtimes(Array16&)");
-	Add16(_A,_S,w,B._A);
+	A16<_F>::Add(_A,_S,w,B._A);
 	return*this;
       }
       /// subtract weighted element-wise
@@ -726,7 +698,7 @@ namespace WDutils {
       Array16&subtimes(Array16 const&B, _F w) WDutils_THROWING
       {
 	check_size(B,"subtimes(Array16&)");
-	Sub16(_A,_S,w,B._A);
+	A16<_F>::Sub(_A,_S,w,B._A);
 	return*this;
       }
       //@}

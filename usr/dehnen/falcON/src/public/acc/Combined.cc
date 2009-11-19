@@ -173,11 +173,11 @@ namespace {
 
 	// add or assign acceleration times amplitude
 	if(add & 2) {
-	  for(int n=0,nn=0; n!=nbod; ++n,nn+=2)
+	  for(int n=0,nn=0; n!=nbod; ++n,nn+=NDIM)
 	    if(f==0 || f[n] & 1)
 	      v_addtimes<NDIM>(a+nn, accs+nn, ampl);
 	} else {
-	  for(int n=0,nn=0; n!=nbod; ++n,nn+=2)
+	  for(int n=0,nn=0; n!=nbod; ++n,nn+=NDIM)
 	    if(f==0 || f[n] & 1)
 	      v_asstimes<NDIM>(a+nn, accs+nn, ampl);
 	}

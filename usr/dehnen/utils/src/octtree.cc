@@ -252,12 +252,12 @@ namespace {
   ///
   /// An OctalTree is build by first making a BoxDotTree, then mapping it to
   /// an OctalTree via BoxDotTree::Link()
-  template<int Dim, typename Real, typename Float>
+  template<int Dim, typename Real>
   struct BoxDotTree
   {
     const static uint32 Nsub = 1<<Dim; ///< number of octants per cell
     //
-    typedef OctalTree<Dim,Real,Float> OctTree;
+    typedef OctalTree<Dim,Real>       OctTree;
     typedef typename OctTree::Point   Point;
     typedef ::Node<Dim,Real>          Node;
     typedef ::Dot <Dim,Real>          Dot;
@@ -555,8 +555,8 @@ namespace {
 #endif // TESTING
   };
   //
-  template<int D, typename Real, typename Float>
-  uint32 BoxDotTree<D,Real,Float>::LinkCellsS(uint32 C, const Box*P, uint32 o)
+  template<int D, typename Real>
+  uint32 BoxDotTree<D,Real>::LinkCellsS(uint32 C, const Box*P, uint32 o)
     const WDutils_THROWING
   {
     // final box: use LinkFinal()
@@ -604,8 +604,8 @@ namespace {
     }
   }
   //
-  template<int D, typename Real, typename Float>
-  uint32 BoxDotTree<D,Real,Float>::LinkCellsA(uint32 C, const Box*P, uint32 o)
+  template<int D, typename Real>
+  uint32 BoxDotTree<D,Real>::LinkCellsA(uint32 C, const Box*P, uint32 o)
     const WDutils_THROWING
   {
     // final box: use LinkFinal()
@@ -659,11 +659,11 @@ namespace {
     }
   }
   //
-  template<int D, typename Real, typename Float>
-  BoxDotTree<D,Real,Float>::BoxDotTree(unsigned Ndot,
-				       const typename OctTree::Initialiser*Init,
-				       unsigned Nmax, unsigned maxD,
-				       const OctTree*Tree)
+  template<int D, typename Real>
+  BoxDotTree<D,Real>::BoxDotTree(unsigned Ndot,
+				 const typename OctTree::Initialiser*Init,
+				 unsigned Nmax, unsigned maxD,
+				 const OctTree*Tree)
     WDutils_THROWING
     : NMAX(Nmax), MAXD(maxD),
       NDOT(Ndot), D0(WDutils_NEW(Dot,NDOT)), DN(D0+NDOT),
@@ -729,8 +729,8 @@ namespace {
 }
 //
 namespace WDutils {
-  template<int D, typename Real, typename Float>
-  void OctalTree<D,Real,Float>::Allocate()
+  template<int D, typename Real>
+  void OctalTree<D,Real>::Allocate()
   {
     unsigned need =
       NLEAF * (sizeof(Point) + sizeof(part_index)) +
@@ -757,23 +757,23 @@ namespace WDutils {
     RAD= reinterpret_cast<Real*>       (A);
   }
   //
-  template<int D, typename Real, typename Float>
-  OctalTree<D,Real,Float>::~OctalTree()
+  template<int D, typename Real>
+  OctalTree<D,Real>::~OctalTree()
   {
     if(ALLOC) delete16(ALLOC);
     ALLOC = 0;
     NALLOC= 0;
   }
   //
-  template<int D, typename Real, typename Float>
-  OctalTree<D,Real,Float>::OctalTree(unsigned n, const Initialiser*init,
-				     unsigned nmax, bool avspc, unsigned maxd)
+  template<int D, typename Real>
+  OctalTree<D,Real>::OctalTree(unsigned n, const Initialiser*init,
+			       unsigned nmax, bool avspc, unsigned maxd)
     WDutils_THROWING
     : INIT(init), ALLOC(0), NALLOC(0), MAXD(maxd), AVSPC(avspc), NMAX(nmax)
   {
     if(NMAX<2)
       WDutils_THROW("OctalTree<%d,%s>: nmax=%du < 2\n",D,nameof(Real),nmax);
-    BoxDotTree<D,Real,Float> BDT(n,INIT,NMAX,MAXD);
+    BoxDotTree<D,Real> BDT(n,INIT,NMAX,MAXD);
     NLEAF = BDT.NDOT;
     NCELL = BDT.NBox();
     Allocate();
@@ -783,14 +783,14 @@ namespace WDutils {
     std::memcpy(RAD,BDT.RA,(MAXD+1)*sizeof(Real));
   }
   //
-  template<int D, typename Real, typename Float>
-  void OctalTree<D,Real,Float>::rebuild(unsigned n, unsigned nmax)
+  template<int D, typename Real>
+  void OctalTree<D,Real>::rebuild(unsigned n, unsigned nmax)
     WDutils_THROWING
   {
     if(nmax) NMAX = nmax;
     if(NMAX<2)
       WDutils_THROW("OctalTree<%d,%s>: nmax=%du < 2\n",D,nameof(Real),nmax);
-    BoxDotTree<D,Real,Float> BDT(n? n:NLEAF,INIT,NMAX,MAXD,this);
+    BoxDotTree<D,Real> BDT(n? n:NLEAF,INIT,NMAX,MAXD,this);
     NLEAF = BDT.NDOT;
     NCELL = BDT.NBox();
     Allocate();
@@ -802,11 +802,9 @@ namespace WDutils {
 }
 //
 namespace WDutils {
-  template class OctalTree<2,float,float>;
-  template class OctalTree<2,double,float>;
-  template class OctalTree<2,double,double>;
-  template class OctalTree<3,float,float>;
-  template class OctalTree<3,double,float>;
-  template class OctalTree<3,double,double>;
+  template class OctalTree<2,float>;
+  template class OctalTree<2,double>;
+  template class OctalTree<3,float>;
+  template class OctalTree<3,double>;
 }
 //
