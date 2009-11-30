@@ -907,12 +907,15 @@ void bodies::remove(bodytype t) {
   for(block*P=TYPES[t]; P && P->TYPE == t; P=P->NEXT)
     P->remove(NDEL[t]);
   set_firsts();
+  DebugInfo(5,"bodies::remove(%s): removed %d bodies\n", t.name(), NDEL[t]);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::remove() {
   for(block*P=FIRST; P; P=P->NEXT)
     P->remove(NDEL[P->TYPE]);
   set_firsts();
+  DebugInfo(5,"bodies::remove(): removed %d,%d,%d bodies\n",
+	    NDEL[0],NDEL[1],NDEL[2]);
 }
 ////////////////////////////////////////////////////////////////////////////////
 void bodies::merge(bodies&Other) falcON_THROWING {

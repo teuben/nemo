@@ -355,7 +355,6 @@ inline void BlockStepCode::account_del() const {
       N[l] = 0u;
     LoopAllBodies(snap_shot(),b)
       if(!is_new(b)) ++(N[level(b)]);
-    snap_shot()->reset_Ndel();
   }
 }
 //------------------------------------------------------------------------------
@@ -369,7 +368,6 @@ inline void BlockStepCode::account_new() const {
       b.unflag_new();
       ST->assign_level(b, N, highest_level());
     }
-    snap_shot()->reset_Nnew();
   }
 }
 //------------------------------------------------------------------------------
@@ -405,6 +403,8 @@ void BlockStepCode::fullstep() const {
     elementary_step(t);                            //   elementary step         
   finish_diagnose();                               // finish diagnosis          
   add_to_cpu_step();                               // record CPU time           
+  snap_shot()->reset_Nnew();
+  snap_shot()->reset_Ndel();
 }
 //------------------------------------------------------------------------------
 BlockStepCode::BlockStepCode(int      km,          // I: tau_max = 2^-kmax      
