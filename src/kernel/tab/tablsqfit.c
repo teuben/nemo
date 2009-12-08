@@ -63,6 +63,22 @@ or
 #include <stdinc.h>  
 #include <getparam.h>
 
+
+/* pick (n)one */
+// #define TESTNR 1
+#define TESTMP 1
+
+
+#ifdef TESTNR
+#include "testnr.h"
+#endif
+
+
+#ifdef TESTMP
+#include <mpfit.h>
+#endif
+
+
 /*    we don't allow this code with GSL yet, output is
  *    not unified with older version - compile tablsqfit_gsl
  */
@@ -83,8 +99,9 @@ string defv[] = {
     "nsigma=-1\n        delete points more than nsigma away?",
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
+    "dxcol=\n           Allow special case for linear fit to have X errors",
     "tab=f\n            short one-line output?",
-    "VERSION=3.4d\n     23-aug-07 PJT",
+    "VERSION=4.0b\n      7-dec-09 PJT",
     NULL
 };
 
@@ -110,8 +127,8 @@ typedef struct column {
     int colnr;      /* column number this data came from */ /* not used */
 } a_column;
 
-int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr; 
-a_column            xcol[MAXCOL],   ycol[MAXCOL],   dycol;
+int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dxcolnr, dycolnr; 
+a_column            xcol[MAXCOL],   ycol[MAXCOL],   dxcol, dycol;
 
 real xrange[MAXCOL*2];      /* ??? */
 
@@ -183,6 +200,12 @@ setparams()
     if (nxcol<0) error("Illegal xcol= nxcol=%d",nxcol);
     nycol = nemoinpi(getparam("ycol"),ycolnr,MAXCOL);
     if (nycol<0) error("Illegal ycol= nycol=%d",nycol);
+
+    if (hasvalue("dxcol"))
+        dxcolnr = getiparam("dxcol");
+    else
+        dxcolnr = 0;
+
     if (hasvalue("dycol"))
         dycolnr = getiparam("dycol");
     else
@@ -235,6 +258,11 @@ read_data()
         colnr[ncols] = ycolnr[i];        
         ncols++;
     }
+    if (dxcolnr>0) {
+        coldat[ncols] = dxcol.dat = (real *) allocate(nmax * sizeof(real));
+        colnr[ncols] = dxcolnr;
+        ncols++;
+    }
     if (dycolnr>0) {
         coldat[ncols] = dycol.dat = (real *) allocate(nmax * sizeof(real));
         colnr[ncols] = dycolnr;
@@ -256,6 +284,7 @@ read_data()
           if(xrange[0] <= xcol[0].dat[i] && xcol[0].dat[i] <= xrange[1]) {    /* sub-select on X */
               xcol[0].dat[j] = xcol[0].dat[i];
               ycol[0].dat[j] = ycol[0].dat[i];
+              if (dxcolnr>0) dxcol.dat[j] = dxcol.dat[i];
               if (dycolnr>0) dycol.dat[j] = dycol.dat[i];
               j++;
            }
@@ -281,11 +310,45 @@ write_data(stream outstr)              /* only for straight line fit */
 #endif    
 }
 
+/* helper stuff for CMPFIT */
+struct vars_struct {
+  double *x;
+  double *y;
+  double *ex;
+  double *ey;
+};
+
+int linfitex(int m, int n, double *p, double *dy, double **dvec, void *vars)
+{
+  int i;
+  struct vars_struct *v = (struct vars_struct *) vars;
+  double *x, *y, *ex, *ey, f;
+  static int count=0;
+
+  x = v->x;
+  y = v->y;
+  ex = v->ex;
+  ey = v->ey;
+
+  if (count==0) {
+    count++;
+    for (i=0; i<m; i++) {
+      printf("%d : %g %g %g %g\n",i,x[i],y[i],ex[i],ey[i]);
+    }
+  }
+
+  for (i=0; i<m; i++) {
+    f = p[0] + p[1]*x[i];     /* Linear fit function */
+    dy[i] = (y[i] - f)/sqrt(ey[i]*ey[i] + p[1]*p[1]*ex[i]*ex[i]);
+  }
+}
+
+
 do_line()
 {
-    real *x, *y, *dy;
+    real *x, *y, *dx, *dy, *dz;
     int i,j, mwt;
-    real chi2,q,siga,sigb, sigma, d;
+    real chi2,q,siga,sigb, sigma, d, sa, sb;
     real cov00, cov01, cov11, sumsq;
     real r, prob, z;
     void fit(), pearsn();
@@ -294,9 +357,11 @@ do_line()
     if (nycol < 1) error("nycol=%d",nycol);
     x = xcol[0].dat;
     y = ycol[0].dat;
+    dx = (dxcolnr>0 ? dxcol.dat : NULL);
     dy = (dycolnr>0 ? dycol.dat : NULL);
 
 #if HAVE_GSL
+    if (dx) error("Cannot use GSL with errors in X column");
     gsl_fit_linear (x, 1, y, 1, npt, &b, &a, 
 		    &cov00, &cov01, &cov11, &sumsq);
     printf("y=ax+b:  a=%g b=%g  cov00,01,11=%g %g %g   sumsq=%g\n",
@@ -313,69 +378,120 @@ do_line()
     }
 #else
 
-    for(mwt=0;mwt<=1;mwt++) {
+    if (dx) {
+#if defined(TESTNR)
+      warning("new FITEXY method");
+      dz = (real *) allocate(npt*sizeof(real));
+      for (i=0; i<npt; i++) dz[i] = 0.0;
+      fitexy(x,y,npt,dx,dy,&b,&a,&sigb,&siga,&chi2,&q);
+      fitexy(x,y,npt,dz,dy,&a,&b,&siga,&sigb,&chi2,&q);
+      fit   (x,y,npt,dy, 1,&a,&b,&siga,&sigb,&chi2,&q);
+      fitexy(x,y,npt,dx,dz,&a,&b,&siga,&sigb,&chi2,&q);
+      fit   (y,x,npt,dx, 1,&a,&b,&siga,&sigb,&chi2,&q);
+      sa=sqrt(siga*siga+sqr(sigb*(a/b)))/b;
+      sb=sigb/(b*b);
+      printf("FITEXY: %11.6f %11.6f %11.6f %11.6f %11.6f %11.6f\n",
+	     -a/b,1.0/b,sa,sb,chi2,q); 
+#elif defined(TESTMP)
+      struct vars_struct v;      /* private data for mpfit() */
+      int status;
+      mp_result result;
+      double p[2] = {1.0, 1.0};
+      double perror[2];
 
-#if 1
-      if (mwt>0 && nsigma>0) {
-	fit(x,y,npt,dy,0,&b,&a,&sigb,&siga,&chi2,&q);
-      } else {
-	if (mwt>0 && dycolnr==0)
-	  continue;             
-	fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+      warning("new MPFIT method");
+
+      bzero(&result,sizeof(result));
+      result.xerror = perror;
+
+      v.x = xcol[0].dat;
+      v.y = ycol[0].dat;
+      v.ex = dxcol.dat;
+      v.ey = dycol.dat;
+      
+      status = mpfit(linfitex, npt, 2, p, 0, 0, (void *) &v, &result);
+      dprintf(0,"*** mpfit status = %d\n", status);
+
+      printf("  CHI-SQUARE = %f    (%d DOF)\n", 
+	     result.bestnorm, result.nfunc-result.nfree);
+      printf("        NPAR = %d\n", result.npar);
+      printf("       NFREE = %d\n", result.nfree);
+      printf("     NPEGGED = %d\n", result.npegged);
+      printf("     NITER = %d\n", result.niter);
+      printf("      NFEV = %d\n", result.nfev);
+      printf("\n");
+      for (i=0; i<result.npar; i++) {
+	printf("  P[%d] = %f +/- %f\n", 
+	       i, p[i], result.xerror[i]);
       }
 #else
-      if (mwt==0)
-	fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
-      else
-	myfit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+      error("no dycol= implemented yet");
 #endif
-      dprintf(2,"\n");
-      dprintf (1,"Fit:   y=ax+b\n");
-      if (mwt == 0)
-	dprintf(1,"Ignoring standard deviations\n");
-      else
-	dprintf(1,"Including standard deviation\n");
-      printf("%12s %9.6f %18s %9.6f \n",
-	     "a  =  ",a,"uncertainty:",siga);
-      printf("%12s %9.6f %18s %9.6f \n",
-	     "b  =  ",b,"uncertainty:",sigb);
+    } else {
 
-      printf("%12s %9.6f %18s %9.6f \n",
-	     "x0 =  ",-b/a,"uncertainty:",sqrt(sqr(sigb/a)+sqr(siga*b/(a*a))));
-      printf("%12s %9.6f %18s %9.6f \n",
-	     "y0 =  ",b,"uncertainty:",sigb);
+      for(mwt=0;mwt<=1;mwt++) {
 
-      printf("%19s %14.6f \n","chi-squared: ",chi2);
-      printf("%23s %10.6f %s\n","goodness-of-fit: ",q,
-	     q==1 ? "(no Y errors supplied [dycol=])" : "");
-      
-      pearsn(x, y, npt, &r, &prob, &z);
-      
-      printf("%9s %g\n","r: ",r);
-      printf("%12s %g\n","prob: ",prob);
-      printf("%9s %g\n","z: ",z);
-      
-      if (mwt==0 && nsigma>0) {                
-	sigma = 0.0;
-	for(i=0; i<npt; i++)
-	  sigma += sqr(y[i] - a*x[i] - b);
-	sigma /= (real) npt;
-	sigma = nsigma * sqrt(sigma);   /* critical distance */
-	
-	for(i=0, j=0; i<npt; i++) {     /* loop over points */
-	  d = ABS(y[i] - a*x[i] - b);
-	  if (d > sigma) continue;
-	  x[j] = x[i];                  /* shift them over */
-	  y[j] = y[i];
-	  if (dy) dy[j] = dy[i];
-	  j++;
+#if 1
+	if (mwt>0 && nsigma>0) {
+	  fit(x,y,npt,dy,0,&b,&a,&sigb,&siga,&chi2,&q);
+	} else {
+	  if (mwt>0 && dycolnr==0)
+	    continue;             
+	  fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
 	}
-	dprintf(0,"%d/%d points outside %g*sigma (%g)\n",
-		npt-j,npt,nsigma,sigma);
-	npt = j;
-      }
+#else
+	if (mwt==0)
+	  fit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+	else
+	  myfit(x,y,npt,dy,mwt,&b,&a,&sigb,&siga,&chi2,&q);
+#endif
+	dprintf(2,"\n");
+	dprintf (1,"Fit:   y=ax+b\n");
+	if (mwt == 0)
+	  dprintf(1,"Ignoring standard deviations\n");
+	else
+	  dprintf(1,"Including standard deviation\n");
+	printf("%12s %9.6f %18s %9.6f \n",
+	       "a  =  ",a,"uncertainty:",siga);
+	printf("%12s %9.6f %18s %9.6f \n",
+	       "b  =  ",b,"uncertainty:",sigb);
+
+	printf("%12s %9.6f %18s %9.6f \n",
+	       "x0 =  ",-b/a,"uncertainty:",sqrt(sqr(sigb/a)+sqr(siga*b/(a*a))));
+	printf("%12s %9.6f %18s %9.6f \n",
+	       "y0 =  ",b,"uncertainty:",sigb);
+
+	printf("%19s %14.6f \n","chi-squared: ",chi2);
+	printf("%23s %10.6f %s\n","goodness-of-fit: ",q,
+	       q==1 ? "(no Y errors supplied [dycol=])" : "");
       
-    } /* mwt */
+	pearsn(x, y, npt, &r, &prob, &z);
+      
+	printf("%9s %g\n","r: ",r);
+	printf("%12s %g\n","prob: ",prob);
+	printf("%9s %g\n","z: ",z);
+      
+	if (mwt==0 && nsigma>0) {                
+	  sigma = 0.0;
+	  for(i=0; i<npt; i++)
+	    sigma += sqr(y[i] - a*x[i] - b);
+	  sigma /= (real) npt;
+	  sigma = nsigma * sqrt(sigma);   /* critical distance */
+	
+	  for(i=0, j=0; i<npt; i++) {     /* loop over points */
+	    d = ABS(y[i] - a*x[i] - b);
+	    if (d > sigma) continue;
+	    x[j] = x[i];                  /* shift them over */
+	    y[j] = y[i];
+	    if (dy) dy[j] = dy[i];
+	    j++;
+	  }
+	  dprintf(0,"%d/%d points outside %g*sigma (%g)\n",
+		  npt-j,npt,nsigma,sigma);
+	  npt = j;
+	}
+      } /* mwt */
+    } /* dxcol */
     
     if (outstr) write_data(outstr);
 #endif
@@ -986,89 +1102,85 @@ do_area()
 }
 
 
-myfit(x,y,npt,dy,mwt,b,a,sigb,siga,chi2,q)    /* NumRec emulator - no chi^2 */
-real *x, *y, *dy;
-int npt, mwt;
-real *b, *a, *siga, *sigb, *chi2, *q;
+    /* NumRec emulator - no chi^2 */
+myfit(real *x,real *y,int npt,real *dy,int mwt,
+      real *b, real *a,real *sigb,real *siga,real *chi2, real *q)
 {
-    real mat[4], vec[2], sol[2], aa[3];
-    int i;
+  real mat[4], vec[2], sol[2], aa[3];
+  int i;
 
-    dprintf(0,"local fit\n");
-    lsq_zero(2,mat,vec);
-    for (i=0; i<npt; i++) {
-        aa[0] = 1.0;       /* mat */
-        aa[1] = x[i];
-        aa[2] = y[i];       /* rsh */
-        lsq_accum(2, mat,  vec, aa, 1.0);    /* 1.0 -> dy */
-    }
-    dprintf(0,"fit: mat = %f %f %f %f\n", mat[0], mat[1], mat[2], mat[3]);
-    dprintf(0,"fit: vec = %f %f\n", vec[0], vec[1]);
-    lsq_solve(2, mat, vec, sol);
-    *a = sol[1];
-    *b = sol[0];
+  dprintf(0,"local fit\n");
+  lsq_zero(2,mat,vec);
+  for (i=0; i<npt; i++) {
+    aa[0] = 1.0;       /* mat */
+    aa[1] = x[i];
+    aa[2] = y[i];       /* rsh */
+    lsq_accum(2, mat,  vec, aa, 1.0);    /* 1.0 -> dy */
+  }
+  dprintf(0,"fit: mat = %f %f %f %f\n", mat[0], mat[1], mat[2], mat[3]);
+  dprintf(0,"fit: vec = %f %f\n", vec[0], vec[1]);
+  lsq_solve(2, mat, vec, sol);
+  *a = sol[1];
+  *b = sol[0];
 }
 
 /* NR version of fit(), using gamma functions */
 
 extern real gammq(real a, real x);
 
-void fit(x,y,ndata,sig,mwt,a,b,siga,sigb,chi2,q)
-real x[],y[],sig[],*a,*b,*siga,*sigb,*chi2,*q;
-int ndata,mwt;
+void fit(real *x, real *y,int ndata,real *sig,int mwt,
+	 real *a, real *b,real *siga,real *sigb,real *chi2,real *q)
 {
-        int i;
-        real wt,t,sxoss,sx=0.0,sy=0.0,st2=0.0,ss,sigdat;
+  int i;
+  real wt,t,sxoss,sx=0.0,sy=0.0,st2=0.0,ss,sigdat;
 
-
-
-        *b=0.0;
-        if (mwt) {
-                ss=0.0;
-                for (i=0;i<ndata;i++) {
-                        wt=1.0/sqr(sig[i]);
-                        ss += wt;
-                        sx += x[i]*wt;
-                        sy += y[i]*wt;
-                }
-        } else {
-                for (i=0;i<ndata;i++) {
-                        sx += x[i];
-                        sy += y[i];
-                }
-                ss=ndata;
-        }
-        sxoss=sx/ss;
-        if (mwt) {
-                for (i=0;i<ndata;i++) {
-                        t=(x[i]-sxoss)/sig[i];
-                        st2 += t*t;
-                        *b += t*y[i]/sig[i];
-                }
-        } else {
-                for (i=0;i<ndata;i++) {
-                        t=x[i]-sxoss;
-                        st2 += t*t;
-                        *b += t*y[i];
-                }
-        }
-        *b /= st2;
-        *a=(sy-sx*(*b))/ss;
-        *siga=sqrt((1.0+sx*sx/(ss*st2))/ss);
-        *sigb=sqrt(1.0/st2);
-        *chi2=0.0;
-        if (mwt == 0) {
-                for (i=0;i<ndata;i++)
-                        *chi2 += sqr(y[i]-(*a)-(*b)*x[i]);
-                *q=1.0;
-                sigdat=sqrt((*chi2)/(ndata-2));
-                *siga *= sigdat;
-                *sigb *= sigdat;
-        } else {
-                for (i=0;i<ndata;i++)
-                        *chi2 += sqr((y[i]-(*a)-(*b)*x[i])/sig[i]);
-                *q=gammq(0.5*(ndata-2),0.5*(*chi2));	
-        }
+  *b=0.0;
+  if (mwt) {
+    ss=0.0;
+    for (i=0;i<ndata;i++) {
+      wt=1.0/sqr(sig[i]);
+      ss += wt;
+      sx += x[i]*wt;
+      sy += y[i]*wt;
+    }
+  } else {
+    for (i=0;i<ndata;i++) {
+      sx += x[i];
+      sy += y[i];
+    }
+    ss=ndata;
+  }
+  sxoss=sx/ss;
+  if (mwt) {
+    for (i=0;i<ndata;i++) {
+      t=(x[i]-sxoss)/sig[i];
+      st2 += t*t;
+      *b += t*y[i]/sig[i];
+    }
+  } else {
+    for (i=0;i<ndata;i++) {
+      t=x[i]-sxoss;
+      st2 += t*t;
+      *b += t*y[i];
+    }
+  }
+  *b /= st2;
+  *a=(sy-sx*(*b))/ss;
+  *siga=sqrt((1.0+sx*sx/(ss*st2))/ss);
+  *sigb=sqrt(1.0/st2);
+  *chi2=0.0;
+  if (mwt == 0) {
+    for (i=0;i<ndata;i++)
+      *chi2 += sqr(y[i]-(*a)-(*b)*x[i]);
+    *q=1.0;
+    sigdat=sqrt((*chi2)/(ndata-2));
+    *siga *= sigdat;
+    *sigb *= sigdat;
+  } else {
+    for (i=0;i<ndata;i++)
+      *chi2 += sqr((y[i]-(*a)-(*b)*x[i])/sig[i]);
+    *q=gammq(0.5*(ndata-2),0.5*(*chi2));	
+  }
 }
 
 
