@@ -244,7 +244,7 @@ string defv[] = {
     "ycol=2\n       Column for Y coordinates",
     "mode=0\n       Output mode (0=all, 1..6=various methods",
     "maxline=10000\n Maximum size of columns",
-    "VERSION=1.2d\n  7-aug-09 PJT",
+    "VERSION=1.2e\n  27-aug-09 PJT",
     NULL,
 };
 
@@ -277,7 +277,7 @@ nemo_main()
     }
     xcol = getiparam("xcol");
     ycol = getiparam("ycol");
-    dprintf(0,"%s: Reading from columns %d and %d\n",getparam("in"),xcol,ycol);
+    dprintf(1,"%s: Reading from columns %d and %d\n",getparam("in"),xcol,ycol);
 /*
  *   OPEN FILE, READ THE DATA and CLOSE THE FILE
  */
