@@ -65,8 +65,8 @@ or
 
 
 /* pick (n)one TESTNR= numrec    TESTMP = mpfit */
-#define TESTNR 1
-//#define TESTMP 1
+//#define TESTNR 1
+#define TESTMP 1
 
 
 #ifdef TESTNR
@@ -340,7 +340,7 @@ int linfitex(int m, int n, double *p, double *dy, double **dvec, void *vars)
   if (count==0) {
     count++;
     for (i=0; i<m; i++) {
-      printf("%d : %g %g %g %g\n",i,x[i],y[i],ex[i],ey[i]);
+      dprintf(1,"%d : %g %g %g %g\n",i,x[i],y[i],ex[i],ey[i]);
     }
   }
 
@@ -420,7 +420,7 @@ do_line()
       double p[2] = {1.0, 1.0};
       double perror[2];
 
-      warning("new MPFIT method; mode=%d",mpfit_mode);
+      warning("MPFIT method; mode mpfit=%d",mpfit_mode);
 
       bzero(&result,sizeof(result));
       result.xerror = perror;
@@ -432,15 +432,15 @@ do_line()
       v.mode = mpfit_mode;
       
       status = mpfit(linfitex, npt, 2, p, 0, 0, (void *) &v, &result);
-      dprintf(0,"*** mpfit status = %d\n", status);
+      dprintf(1,"*** mpfit status = %d\n", status);
 
       printf("  CHI-SQUARE = %f    (%d DOF)\n", 
 	     result.bestnorm, result.nfunc-result.nfree);
       printf("        NPAR = %d\n", result.npar);
       printf("       NFREE = %d\n", result.nfree);
       printf("     NPEGGED = %d\n", result.npegged);
-      printf("     NITER = %d\n", result.niter);
-      printf("      NFEV = %d\n", result.nfev);
+      printf("       NITER = %d\n", result.niter);
+      printf("        NFEV = %d\n", result.nfev);
       printf("\n");
       for (i=0; i<result.npar; i++) {
 	printf("  P[%d] = %f +/- %f\n", 
