@@ -1,0 +1,39 @@
+.TH MPFIT 3NEMO "9 December 2009"
+.SH NAME
+mpfit - 
+.SH SYNOPSIS
+.nf
+int mpfit(mp_func funct, int m, int npar, double *xall, mp_par *pars, mp_config *config, void *private, mp_result *result)
+.PP
+int myfunct(int npt, int npar, double *par, double *deviates, double **derivs, void *private)
+.fi
+.SH DESCRIPTION
+\fImpfit\fP uses the Levenberg-Marquardt technique to solve the least-squares
+problem. In its typical use, MPFIT will be used to fit a user-supplied
+function (the "model") to user-supplied data points (the "data") by
+adjusting a set of parameters. MPFIT is based upon MINPACK-1 (LMDIF.F)
+by More' and collaborators.
+.PP
+This document is merely a placeholder and link to the full online 
+documentation. See below.
+.fi
+.SH SEE ALSO
+lsq(3NEMO)
+.PP
+http://www.physics.wisc.edu/~craigm/idl/cmpfit.html
+.SH AUTHOR
+Original public domain version by B. Garbow, K. Hillstrom, J. More' 
+.PP
+Tranlation to C Language by S. Moshier (moshier.net) 
+.PP
+Enhancements, documentation and packaging by C. Markwardt 
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/misc  	mpfit.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+9-dec-09	Added to NEMO, tested in tablsqfit	PJT
+.fi
