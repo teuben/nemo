@@ -64,9 +64,9 @@ or
 #include <getparam.h>
 
 
-/* pick (n)one */
-// #define TESTNR 1
-#define TESTMP 1
+/* pick (n)one TESTNR= numrec    TESTMP = mpfit */
+#define TESTNR 1
+//#define TESTMP 1
 
 
 #ifdef TESTNR
@@ -91,7 +91,8 @@ string defv[] = {
     "in=???\n           input (table) file name",
     "xcol=1\n           column(s) for x",
     "ycol=2\n           column(s) for y",
-    "dycol=\n           column for sigma-y, if used",
+    "dxcol=\n           column for X errors (only used in fit=line)",
+    "dycol=\n           column for Y errors",
     "xrange=\n          in case restricted range is used (1D only)",
     "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak, area, zero, gauss2d)",
     "order=0\n		Order of plane/poly fit",
@@ -99,9 +100,9 @@ string defv[] = {
     "nsigma=-1\n        delete points more than nsigma away?",
     "estimate=\n        optional estimates (e.g. for ellipse center)",
     "nmax=10000\n       Default max allocation",
-    "dxcol=\n           Allow special case for linear fit to have X errors",
+    "mpfit=0\n          fit mode for mpfit",
     "tab=f\n            short one-line output?",
-    "VERSION=4.0b\n      7-dec-09 PJT",
+    "VERSION=4.0d\n     9-dec-09 PJT",
     NULL
 };
 
@@ -142,6 +143,8 @@ real   nsigma;              /* fractional sigma removal */
 
 real  a,b;                  /* fit parameters in: y=ax+b  */
 int order;
+
+int mpfit_mode;
 
 bool Qtab;                  /* do table output ? */
 
@@ -223,6 +226,8 @@ setparams()
     order = getiparam("order");
     if (order<0) error("order=%d of %s cannot be negative",order,method);
     Qtab = getbparam("tab");
+
+    mpfit_mode = getiparam("mpfit");
 }
 
 setrange(real *rval, string rexp)
@@ -316,11 +321,12 @@ struct vars_struct {
   double *y;
   double *ex;
   double *ey;
+  int mode;
 };
 
 int linfitex(int m, int n, double *p, double *dy, double **dvec, void *vars)
 {
-  int i;
+  int i, mode;
   struct vars_struct *v = (struct vars_struct *) vars;
   double *x, *y, *ex, *ey, f;
   static int count=0;
@@ -329,6 +335,7 @@ int linfitex(int m, int n, double *p, double *dy, double **dvec, void *vars)
   y = v->y;
   ex = v->ex;
   ey = v->ey;
+  mode = v->mode;
 
   if (count==0) {
     count++;
@@ -339,7 +346,14 @@ int linfitex(int m, int n, double *p, double *dy, double **dvec, void *vars)
 
   for (i=0; i<m; i++) {
     f = p[0] + p[1]*x[i];     /* Linear fit function */
-    dy[i] = (y[i] - f)/sqrt(ey[i]*ey[i] + p[1]*p[1]*ex[i]*ex[i]);
+    if (mode==0)
+      dy[i] = (y[i] - f);
+    else if (mode==1)
+      dy[i] = (y[i] - f)/(p[1]*ex[i]);
+    else if (mode==2)
+      dy[i] = (y[i] - f)/ey[i];
+    else
+      dy[i] = (y[i] - f)/sqrt(ey[i]*ey[i] + p[1]*p[1]*ex[i]*ex[i]);
   }
 }
 
@@ -383,11 +397,18 @@ do_line()
       warning("new FITEXY method");
       dz = (real *) allocate(npt*sizeof(real));
       for (i=0; i<npt; i++) dz[i] = 0.0;
+
       fitexy(x,y,npt,dx,dy,&b,&a,&sigb,&siga,&chi2,&q);
+      printf("fitexy(x,y,dx,dy)    a=%g   b=%g  %g %g\n",b,a,sigb,siga);
       fitexy(x,y,npt,dz,dy,&a,&b,&siga,&sigb,&chi2,&q);
-      fit   (x,y,npt,dy, 1,&a,&b,&siga,&sigb,&chi2,&q);
+      printf("fitexy(x,y, 0,dy)    a=%g   b=%g  %g %g\n",a,b,siga,sigb);
       fitexy(x,y,npt,dx,dz,&a,&b,&siga,&sigb,&chi2,&q);
+      printf("fitexy(x,y,dx, 0)    a=%g   b=%g  %g %g\n",a,b,siga,sigb);
+      fit   (x,y,npt,dy, 1,&a,&b,&siga,&sigb,&chi2,&q);
+      printf("fit   (x,y, 0,dy)    a=%g   b=%g  %g %g\n",a,b,siga,sigb);
       fit   (y,x,npt,dx, 1,&a,&b,&siga,&sigb,&chi2,&q);
+      printf("fit   (y,x, 0,dx)    a=%g   b=%g  %g %g\n",a,b,siga,sigb);
+
       sa=sqrt(siga*siga+sqr(sigb*(a/b)))/b;
       sb=sigb/(b*b);
       printf("FITEXY: %11.6f %11.6f %11.6f %11.6f %11.6f %11.6f\n",
@@ -399,7 +420,7 @@ do_line()
       double p[2] = {1.0, 1.0};
       double perror[2];
 
-      warning("new MPFIT method");
+      warning("new MPFIT method; mode=%d",mpfit_mode);
 
       bzero(&result,sizeof(result));
       result.xerror = perror;
@@ -408,6 +429,7 @@ do_line()
       v.y = ycol[0].dat;
       v.ex = dxcol.dat;
       v.ey = dycol.dat;
+      v.mode = mpfit_mode;
       
       status = mpfit(linfitex, npt, 2, p, 0, 0, (void *) &v, &result);
       dprintf(0,"*** mpfit status = %d\n", status);
