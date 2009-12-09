@@ -1,4 +1,4 @@
-.TH TABLSQFIT 1NEMO "21 November 2005"
+.TH TABLSQFIT 1NEMO "9 December 2009"
 .SH NAME
 tablsqfit \- general purpose least squares fitting program
 .SH SYNOPSIS
@@ -38,6 +38,10 @@ is called 1 by definition [default: \fB1\fP].
 \fBycol=\fIcol,...\fP
 The column(s) from which the (dependant) 
 Y-values are taken [default: \fB2\fP].
+.TP
+\fBdxcol=\fIint\fP
+Optional column from which the DX-values (errors in X) are taken. 
+Currently only a straight line fit can use this option. See below.
 .TP
 \fBdycol=\fIint\fP
 Optional column from which the DY-values (errors in Y) are taken. The
@@ -84,6 +88,11 @@ from a pipe. If not, the routine \fIfile_lines(3NEMO)\fP is used
 to allocate space for the table.
 [Default: \fB10000\fP].
 .TP
+\fBmpfit=\fP\fImode\fP
+The fitting mode in which \fImpfit(3NEMO)\fP is used. 0=no errors.
+1=only errors in X used  (dxcol=), 2=only errors in Y used (dycol=),
+3=errors in both X and Y used. See also \fIlinreg(1NEMO)\fP.
+.TP
 \fBtab=t|f\fP
 Output results in simple tabular format.
 Default: false.
@@ -107,6 +116,8 @@ with their (x0,y0) intercepts as \fBx/x0 + y/y0=1\fP.
 .SH SEE ALSO
 tabhist(1NEMO), tabmath(1NEMO), gaussfit(1NEMO), linreg(1NEMO), tabnllsqfit(1NEMO)
 \fINumerical Recipies in C, Ch.14\fP
+.PP
+mpfit: http://www.physics.wisc.edu/~craigm/idl/cmpfit.html (author: Craig B. Markwardt)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -131,5 +142,6 @@ Peter Teuben
 8-aug-01	V3.1c added area, using natof, error in ellipse	PJT
 24-feb-03	V3.4: added fit=zero	PJT
 21-nov-05	V3.4b: added fit=gauss1d,gauss2d	PJT
+9-dec-09	V4.0: added xcol= and mpfit=	PJT
 .fi
 
