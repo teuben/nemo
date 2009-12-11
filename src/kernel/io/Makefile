@@ -16,13 +16,15 @@ INCFILES = story.h
 SRCFILES = dprintf.c command.c convert.c cvsid.c defv.c endian.c extstring.c \
 	   filesecret.[ch] getparam.[ch] history.[ch] memio.c outdefv.c \
 	   story.[ch] stropen.c mstropen.c usage.c \
+	   ieeehalfprecision.c \
 	   filestruct.h Makefile
 OBJFILES=  dprintf.o command.o convert.o cvsid.o defv.o endian.o extstring.o \
 	   filesecret.o getparam.o history.o memio.o outdefv.o \
+	   ieeehalfprecision.o \
 	   stropen.o mstropen.o usage.o 
 LOBJFILES= $L(dprintf.o) $L(command.o) $L(convert.o) $L(cvsid.o) $L(defv.o) $L(endian.o) $L(extstring.o) \
            $L(filesecret.o) $L(getparam.o) $L(history.o) $L(memio.o) $L(outdefv.o) \
-	   $L(stropen.o) $L(mstropen(.o) $L(usage.o)
+	   $L(ieeehalfprecision.o) $L(stropen.o) $L(mstropen(.o) $L(usage.o)
 BINFILES = csf tsf rsf qsf hisf endian
 TESTFILES= getpartest stropentest extstrtest commandtest \
            testio testfs testprompt memiotest mstropentest
