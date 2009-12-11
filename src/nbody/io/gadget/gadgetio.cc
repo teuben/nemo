@@ -174,6 +174,7 @@ int GadgetIO::read(const glnemo::t_indexes_tab *index, const int nsel)
 	if (block_name=="MASS") { // MASS block
 	  ok=true;
 	  bytes_counter=0;
+	  if (version==1) stop=true;
 	  if (ntotmasses > 0.)
 	    len1 = readFRecord();
 	  pc_new=pc;
