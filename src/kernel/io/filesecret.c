@@ -138,6 +138,12 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
                 convert_d2f(eltcnt(ipt,0),(double*)bufin,(float*)bufin);
 	        put_data_sub(ostr, tag, FloatType, bufin,  dims, FALSE); 
                 freeitem(ipt,FALSE);
+	    } else if (streq(cp,"d2h")) {
+                dprintf(1,"Converting %s in %s\n",cp,tag);
+                ipt = makeitem(HalfpType,tag,NULL,dims);    /* silly */
+                convert_d2h(eltcnt(ipt,0),(double*)bufin,(halfp*)bufin);
+	        put_data_sub(ostr, tag, HalfpType, bufin,  dims, FALSE); 
+                freeitem(ipt,FALSE);
             } else {
             	warning("Cannot convert %s yet in %s",cp,tag);
 	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
@@ -152,10 +158,29 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
                 convert_f2d(eltcnt(ipt,0),(float*)bufin,(double*)bufout);
 	        put_data_sub(ostr, tag, DoubleType, bufout,  dims, FALSE); 
                 freeitem(ipt,0);
+	    } else if (streq(cp,"f2h")) {
+	        error("Cannot convert f2h yet");
             } else {
             	warning("Cannot convert %s yet in %s",cp,tag);
 	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
 
+	    }
+	} else if (streq(type,HalfpType)) {
+            if (streq(cp,"h2d")) {		/* convert halfp to double */
+	        error("Testing");
+                dprintf(1,"Converting %s in %s\n",cp,tag);
+                ipt = makeitem(DoubleType,tag,NULL,dims);    /* silly */
+                bufout = (byte *) allocate(datlen(ipt,0));
+                if (bufout == NULL)
+               	    error("copy_item_cvt: item %s: (h2d) not enuf memory", tag);
+                convert_h2d(eltcnt(ipt,0),(halfp*)bufin,(double*)bufout);
+	        put_data_sub(ostr, tag, DoubleType, bufout,  dims, FALSE); 
+                freeitem(ipt,0);
+	    } else if (streq(cp,"h2f")) {
+	        error("Cannot convert f2h yet");
+            } else {
+            	warning("Cannot convert %s yet in %s",cp,tag);
+	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
 	    }
 	} else if (streq(type,IntType)) {
             warning("Cannot convert %s yet in %s",cp,tag);
@@ -774,7 +799,7 @@ int *get_dims(
 	return ((int *) copxstr(ItemDim(ipt), sizeof(int)));
 						/*   return copy of dims    */
     else
-	return (NULL);
+	return NULL;
 }
 
 size_t get_dlen(
@@ -808,13 +833,13 @@ bool skip_item(
     if (sspt->ss_stp == -1) {			/* input from top level?    */
 	ipt = nextitem(sspt);			/*   get item read next     */
 	if (ipt == NULL)			/*   nothing left in input? */
-	    return (FALSE);			/*     then nothing to skip */
+	    return FALSE;			/*     then nothing to skip */
 	freeitem(ipt, TRUE);			/*   reclaim storage space  */
 	sspt->ss_stk[0] = NULL;			/*   and flush that item    */
-	return (TRUE);				/*   handled an item        */
+	return TRUE;				/*   handled an item        */
     } else {
 	printf("skip_item: within set");
-	return (TRUE);				/*    a lie                 */
+	return TRUE;				/*    a lie                 */
     }
 }
 
@@ -1370,6 +1395,7 @@ local typlen tl_tab[] = {
     { ShortType,  sizeof(short),  },
     { IntType,	  sizeof(int),    },
     { LongType,	  sizeof(long),   },
+    { HalfpType,  sizeof(short),  },
     { FloatType,  sizeof(float),  },
     { DoubleType, sizeof(double), },
     { SetType,    0,              },

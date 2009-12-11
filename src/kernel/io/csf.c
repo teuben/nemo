@@ -14,6 +14,7 @@
  *	26-mar-95   V1.5  fixed counting bug in select= and item=, 1 is now
  *			  the first item in all item= selected (as meant)
  *			a fixed NULL vs. 0 warning
+ *      11-dec-09   V1.6  experimenting with half precision
  */
 
 #include <stdinc.h>
@@ -27,8 +28,8 @@ string defv[] = {
     "out=???\n		Output file",
     "item=\n		Top level selection items [default: all]",
     "select=\n          Selection numbers (1...) [default: all]",
-    "convert=\n		Conversion options {d2f,f2d,i2f,f2i,d2i,i2d}",
-    "VERSION=1.5a\n	14-apr-96 PJT",
+    "convert=\n		Conversion options {d2f,f2d,i2f,f2i,d2i,i2d,h2d,d2h}",
+    "VERSION=1.6\n	11-dec-09 PJT",
     NULL,
 };
 

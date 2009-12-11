@@ -216,6 +216,9 @@ void print_data(string tag, string type, int *dims)
 	} else if (streq(type, LongType)) {	/*   output long integers?  */
 	    sprintf(buf, fmt, *((long *) dp));
 	    dp += sizeof(long);
+	} else if (streq(type, HalfpType)) {	/*   output short int? */
+	    sprintf(buf, fmt, *((short *) dp));
+	    dp += sizeof(short);
 	} else if (streq(type, FloatType)) {	/*   output floating point? */
 	    sprintf(buf, fmt, *((float *) dp));
 	    dp += sizeof(float);
@@ -260,6 +263,7 @@ struct typeinfo typetab_o[] = {
     { ShortType,  "short",    "%#o ",     "%#o ",     "%#d ", },
     { IntType,    "int",      "%#o ",     "%#o ",     "%#d ", },
     { LongType,   "long",     "%#lo ",    "%#lo ",    "%#d ", },
+    { HalfpType,  "halfp",    "%#o ",     "%#o ",     "%#d ", },
     { FloatType,  "float",    "%#g ",     "%15.8e ",  "%#g ", },
     { DoubleType, "double",   "%#g ",     "%23.16e ", "%#g ", },
     { SetType,    "set",      NULL,       NULL,        NULL, },
@@ -275,6 +279,7 @@ struct typeinfo typetab_d[] = {
     { ShortType,  "short",    "%#d ",     "%#d ",     "%#d ", },
     { IntType,    "int",      "%#d ",     "%#d ",     "%#d ", },
     { LongType,   "long",     "%#ld ",    "%#ld ",    "%#d ", },
+    { HalfpType,  "halfp",    "%#d ",     "%#d ",     "%#d ", },
     { FloatType,  "float",    "%#g ",     "%15.8e ",  "%#g ", },
     { DoubleType, "double",   "%#g ",     "%23.16e ", "%#g ", },
     { SetType,    "set",      NULL,       NULL,        NULL, },
