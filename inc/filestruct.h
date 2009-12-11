@@ -4,6 +4,7 @@
  *	6-may-92  random data access routines	PJT
  *     12-apr-95  prototypes without ARGS       PJT
  *      2-jun-05  blocked I/O as a flavor of random I/O     PJT
+ *     11-dec-09  half precision type                       PJT
  */
 #ifndef _filestruct_h
 #define _filestruct_h
@@ -17,6 +18,7 @@
 #define ShortType  "s"       /* short integers */
 #define IntType    "i"       /* standard integers */
 #define LongType   "l"       /* long integers */
+#define HalfpType  "h"       /* half precision floating */
 #define FloatType  "f"       /* short floating */
 #define DoubleType "d"       /* long floating */
 #define SetType    "("       /* begin compound item */

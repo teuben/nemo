@@ -44,6 +44,7 @@
  * 12-jun-08    allocate, reallocate are macros (not under C++)     WD
  * 16-sep-08    removes nemo_exit (better use stdlib's atexit)      WD
  * 18-sep-08    replaced sqr, qbe, dex inline in mathfns.h          WD
+ * 11-dec-09    tinkering with halfp                                PJT
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -192,16 +193,19 @@ typedef struct _mstr {     /* see mstropen(3) */
 /*
  * REAL, REALPTR: default type is double; if single precision calculation is
  * supported and desired, compile with -DSINGLEPREC. 
- *      DOUBLEPREC:     everything (variables & functions) is double.
- *      MIXEDPREC:      user values are float, -lm functions are double.
+ *      DOUBLEPREC:     everything (variables & functions) is double. *      MIXEDPREC:      user values are float, -lm functions are double.
  *      SINGLEPREC:     everything (variables & functions) is float.
  * Note: The whole package must be compiled in one floating point
  *       type, although some routines are compiled in both single
  *       and double. Using this conmpile directive we can keep one
  *       version of the source code.
+ * Warning:
  * The "D" language defines a "real" as a floating point with the largest
  * number of bits the hardware supports (e.g. 80 bit on intel). Don't confuse
  * that with the real here, which is either float *or* double.
+ * Also:
+ * For convenient storage we also define a 'halfp' type, which has half the 
+ * number of bits of a float.
  */
 
 /*   first off, by default, NEMO will be in DOUBLEPREC mode */
@@ -231,6 +235,9 @@ typedef float *realptr, real;
 typedef float real, *realptr;
 #define Precision "SINGLEPREC"
 #endif
+
+/* halfp needs to be 2 bytes */
+typedef short halfp, *halfpptr;
 
 /* NOTE: to be deprecated
  * The following conveniences cannot be used in full ANSI C or C++:
