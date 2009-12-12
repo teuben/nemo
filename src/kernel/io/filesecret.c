@@ -37,6 +37,7 @@
  * V 3.1  15-mar-05   pjt    C++ compilable
  * V 3.2   2-jun-05   pjt    blocked (sequential) I/O
  * V 3.3  25-may-07   pjt    handle > 2GB objects in memory (Pierre Fortin <pierre.fortin@oamp.fr>)
+ * V 3.4  12-dec-09   pjt    support the new halfp type for I/O (see also csf)
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -54,8 +55,12 @@
 #include "filesecret.h"
 #include <stdarg.h>
 
-extern int convert_d2f (int, double *, float *);
-extern int convert_f2d (int, float *, double *);
+extern int convert_d2f(int, double *, float  *);
+extern int convert_f2d(int, float  *, double *);
+extern int convert_h2f(int, halfp  *, float  *);
+extern int convert_h2d(int, halfp  *, double *);
+extern int convert_f2h(int, float  *, halfp  *);
+extern int convert_d2h(int, double *, halfp  *);
 
 
 /*
@@ -159,7 +164,14 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 	        put_data_sub(ostr, tag, DoubleType, bufout,  dims, FALSE); 
                 freeitem(ipt,0);
 	    } else if (streq(cp,"f2h")) {
-	        error("Cannot convert f2h yet");
+                dprintf(1,"Converting %s in %s\n",cp,tag);
+                ipt = makeitem(HalfpType,tag,NULL,dims);    /* silly */
+                bufout = (byte *) allocate(datlen(ipt,0));
+                if (bufout == NULL)
+               	    error("copy_item_cvt: item %s: (f2h) not enuf memory", tag);
+                convert_f2h(eltcnt(ipt,0),(float*)bufin,(halfp*)bufout);
+	        put_data_sub(ostr, tag, HalfpType, bufout,  dims, FALSE); 
+                freeitem(ipt,0);
             } else {
             	warning("Cannot convert %s yet in %s",cp,tag);
 	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
@@ -167,7 +179,6 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 	    }
 	} else if (streq(type,HalfpType)) {
             if (streq(cp,"h2d")) {		/* convert halfp to double */
-	        error("Testing");
                 dprintf(1,"Converting %s in %s\n",cp,tag);
                 ipt = makeitem(DoubleType,tag,NULL,dims);    /* silly */
                 bufout = (byte *) allocate(datlen(ipt,0));
@@ -177,7 +188,14 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 	        put_data_sub(ostr, tag, DoubleType, bufout,  dims, FALSE); 
                 freeitem(ipt,0);
 	    } else if (streq(cp,"h2f")) {
-	        error("Cannot convert f2h yet");
+                dprintf(1,"Converting %s in %s\n",cp,tag);
+                ipt = makeitem(FloatType,tag,NULL,dims);    /* silly */
+                bufout = (byte *) allocate(datlen(ipt,0));
+                if (bufout == NULL)
+               	    error("copy_item_cvt: item %s: (h2f) not enuf memory", tag);
+                convert_h2f(eltcnt(ipt,0),(halfp*)bufin,(float*)bufout);
+	        put_data_sub(ostr, tag, FloatType, bufout,  dims, FALSE); 
+                freeitem(ipt,0);
             } else {
             	warning("Cannot convert %s yet in %s",cp,tag);
 	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
@@ -1425,13 +1443,15 @@ local string findtype(string *a, string type)
     for (i=0; a[i]; i++) {
         cp = a[i];
         if (streq(type,DoubleType) && *cp=='d')
-            return(cp);
+            return cp;
         else if (streq(type,FloatType) && *cp=='f')
-            return(cp);
+            return cp;
+        else if (streq(type,HalfpType) && *cp=='h')
+            return cp;
         else if (streq(type,IntType) && *cp=='i')
-            return(cp);
+            return cp;
         else if (streq(type,IntType) && *cp=='s')
-            return(cp);
+            return cp;
     }
     return NULL;
 }

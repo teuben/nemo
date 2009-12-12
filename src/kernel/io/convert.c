@@ -52,22 +52,22 @@ extern int doubles2halfp(void *target, void *source, int numel);
 extern int halfp2singles(void *target, void *source, int numel);
 extern int halfp2doubles(void *target, void *source, int numel);
 
-int convert_h2f(int n,void *from,float *to)
+int convert_h2f(int n,halfp *from,float *to)
 {
   return halfp2singles(to,from,n);
 }
 
-int convert_h2d(int n,float *from,double *to)
+int convert_h2d(int n,halfp *from,double *to)
 {
   return halfp2doubles(to,from,n);
 }
 
-int convert_d2h(int n,float *from,double *to)
+int convert_d2h(int n,double *from,halfp *to)
 {
   return doubles2halfp(to,from,n);  
 }
 
-int convert_f2h(int n,float *from,double *to)
+int convert_f2h(int n,float *from,halfp *to)
 {
   return singles2halfp(to,from,n);  
 }
