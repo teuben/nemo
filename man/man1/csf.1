@@ -1,4 +1,4 @@
-.TH CSF 1NEMO "26 March 1995"
+.TH CSF 1NEMO "12 December 2009"
 .SH NAME
 csf \- copy structured file
 .SH SYNOPSIS
@@ -49,9 +49,13 @@ If none are provided, all are copied.
 \fBconvert\fP=\fIconvert-list\fP
 List of conversions to make, separated by comma's or spaces. Each conversion
 is of the format \fIfrom\fP2\fIto\fP, where both the \fIfrom\fP and
-\fIto\fP part are any of: \fBd\fP (double), \fBf\fP (float),
-\fBl\fP (long), \fBi\fP (int) or \fBs\fP (short)
+\fIto\fP part are any of: \fBd\fP (double), \fBf\fP (float), \fBh\fP 
+(half precision) ,
+\fBl\fP (long), \fBi\fP (int) or \fBs\fP (short). 
 [Default: -blank-].
+.SH CAVEAT
+Some of the conversions in \fBconvert=\fP
+are not supported or are in danger of loosing more than just precision.
 .SH EXAMPLES
 An image with too much data-history can be cut by only copying the \fIImage\fP
 items:
@@ -78,4 +82,5 @@ xx-xxx-87	V1.0: created	JEB
 4-mar-91	V1.4 added data conversion option via convert=    	PJT
 13-feb-92	documentation added	PJT
 26-mar-95	V1.5 fixed selection bug and clarified doc	PJT
+12-dec-09	V1.6 added support for half precision (halfp) type	PJT
 .fi
