@@ -110,6 +110,8 @@ public:
     // z sorting
     bool zsort;
     bool enable_gui;
+    // texture size
+    bool auto_texture_size;
 };
 
 }

@@ -572,7 +572,7 @@ p, li { white-space: pre-wrap; }
       <string/>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_particles">
       <attribute name="title">
@@ -1135,7 +1135,7 @@ Physical value can be:
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="glnemo.qrc">
+               <iconset>
                 <normaloff>:/images/previous.png</normaloff>:/images/previous.png</iconset>
               </property>
              </widget>
@@ -1161,7 +1161,7 @@ Physical value can be:
                <string/>
               </property>
               <property name="icon">
-               <iconset resource="glnemo.qrc">
+               <iconset>
                 <normaloff>:/images/next.png</normaloff>:/images/next.png</iconset>
               </property>
              </widget>
@@ -1370,9 +1370,7 @@ Physical value can be:
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="glnemo.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>dens_slide_min</sender>

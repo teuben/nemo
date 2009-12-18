@@ -101,6 +101,7 @@ GlobalOptions::GlobalOptions()
   // Z sorting
   zsort = false;
   enable_gui=true;
+  auto_texture_size=true;
 }
 // ============================================================================
 // destructor                                                                  
@@ -229,6 +230,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   // z sorting
   zsort = m.zsort;
   enable_gui = m.enable_gui;
+  auto_texture_size = m.auto_texture_size;
   return *this;
 }
 // ============================================================================

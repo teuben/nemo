@@ -16,6 +16,8 @@
 #include <iostream>
 #include <math.h>
 #include "globaloptions.h"
+#define MAX(A,B) ((A)>(B)?(A):(B))
+#define PRINT_D if (1)
 namespace glnemo {
 
 // ============================================================================
@@ -36,6 +38,7 @@ ParticlesData::ParticlesData(const ALLOC _model)
   cmodel   = _model;
   allocVar();
   coo_max[0] = coo_max[1] = coo_max[2] = 0.0;
+  max_size=0.;
   i_max[0]   = i_max[1]   = i_max[2]   = 0;
   ipvs = 1; // density by default
 }
@@ -345,8 +348,26 @@ PhysicalData * ParticlesData::getPhysData(int index) const
   }
   return ptr;
 }
-
-
+// ============================================================================
+// ParticlesData::computeMaxSize()                                           
+void ParticlesData::computeMaxSize()
+{
+  if (pos && max_size==0.) {
+    coo_max[0] = pos[0];
+    coo_max[1] = pos[1];
+    coo_max[2] = pos[2];
+    for (int i=1; i<(*nbody); i++) {
+      coo_max[0] = std::max(coo_max[0],pos[i*3+0]); 
+      coo_max[1] = std::max(coo_max[1],pos[i*3+1]); 
+      coo_max[2] = std::max(coo_max[2],pos[i*3+2]);
+    }
+    max_size=sqrt(coo_max[0]*coo_max[0]+coo_max[1]*coo_max[1]+coo_max[2]*coo_max[2]);
+    if (1) {
+      PRINT_D std::cerr << "Max coordinates \n";
+      PRINT_D std::cerr << coo_max[0] << " " << coo_max[1] << " " << coo_max[2] << "\n";
+    }
+  }
+}
 // ============================================================================
 // PhysicalData Class implementation                                           
 // ============================================================================

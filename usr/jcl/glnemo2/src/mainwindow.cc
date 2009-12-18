@@ -583,8 +583,13 @@ void MainWindow::loadNewData(const std::string select,
       ParticlesObject::backupVVProperties(povold,pov2,pov.size());
     }
     if (first) {
+      if (store_options->auto_texture_size && !store_options->rho_exist) {
+        store_options->texture_size = current_data->part_data->getMaxSize()/100.0;
+        std::cerr << "Resampled Texture Size = "<< store_options->texture_size <<"\n";
+      }
       setDefaultParamObject(pov2); // set some default parameter if first loading
     }
+
     form_o_c->update( current_data->part_data, &pov2,store_options);
     updateOsd();
     tbench.restart();
@@ -597,7 +602,7 @@ void MainWindow::loadNewData(const std::string select,
     }
     if (store_options->auto_com) {
        actionCenterToCom(false);
-    } 
+    }
     gl_window->update( current_data->part_data, &pov2,store_options);
     qDebug("Time elapsed to update GL with new data: %d s", tbench.elapsed()/1000);
     if (!reload && bestzoom) gl_window->bestZoomFit();
@@ -710,9 +715,13 @@ void MainWindow::parseNemoParameters()
   }
   // color map
   store_options->colormap += getiparam((char *) "cmapindex");
+  
   store_options->auto_com           =getbparam((char *) "com");
+  // textures
+  store_options->auto_texture_size  =getbparam((char *) "auto_ts");
   store_options->texture_size       =getdparam((char *) "texture_s");
   store_options->texture_alpha_color=getiparam((char *) "texture_ac");
+  
   store_options->duplicate_mem = getbparam((char *) "smooth_gui");
   // Animation variables
   bool anim_bench=true;

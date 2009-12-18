@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "preview.2009-Oct-25"
+#define RELEASE_VERSION "preview.2009-Dec-18"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -69,6 +69,7 @@ using namespace std;
     "point=f\n         show particles as points                         ",
     "mindens=\n        set minimal density                              ",
     "maxdens=\n        set maximal density                              ",
+    "auto_ts=t\n       automatic texture size                           ",
     "texture=t\n       show particles as textures                       ",
     "texture_s=1.0\n   texture size of gaz particle                     ",
     "texture_ac=125\n  texture alpha color of gaz particle              ",

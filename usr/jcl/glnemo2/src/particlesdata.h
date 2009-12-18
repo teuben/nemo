@@ -32,7 +32,7 @@ class PhysicalData {
   float getMin() const { return min;}
   float getMax() const { return max;}
   bool isValid() const { return valid;}
-  int getType()  const { return type;};
+  int getType()  const { return type;}
   float * data;
   int data_histo[100];
   private:
@@ -60,6 +60,9 @@ public:
     PhysicalData * rneib, * rho, * temp, * pressure;
     static char * mallocate(char *, int, bool force=false);
     void computeVelNorm();
+    void computeMaxSize();
+    float  getMaxSize() { computeMaxSize(); 
+                          return max_size; }
     float getMaxVelNorm() const { return max_vel_norm; }
     void setIpvs(const int i=1)  { // set the index of the physical value selected
       if (i!=-1) {
@@ -71,7 +74,9 @@ public:
     }
     PhysicalData * getPhysData(int=-1) const;
     private:
+     
       float max_vel_norm;
+      float max_size;
       ALLOC cmodel;
       int allocVar();
       int ipvs; // Index of the physical value selected
