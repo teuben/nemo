@@ -192,7 +192,7 @@ int main(int argc, char **argv)
 
 
     fprintf(tp,"proc my_save {} {\n");
-    fprintf(tp,"  puts \"my_save: STILL TESTING\"\n");
+    fprintf(tp,"  puts \"my_save:\"\n");
     fprintf(tp,"  set filename \"%s.key\"\n",runpath);
     fprintf(tp,"  set file [open $filename w]\n");
     for (i=0; i<nw; i++) {
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
     fprintf(tp,"}\n");
 
     fprintf(tp,"proc my_load {} {\n");
-    fprintf(tp,"  puts \"my_load: STILL TESTING\"\n");
+    fprintf(tp,"  puts \"my_load:\"\n");
     for (i=0; i<nw; i++) {
       sprintf(key,widgets[i].key);
       fprintf(tp,"  global var_%s\n",key);
@@ -216,7 +216,10 @@ int main(int argc, char **argv)
     fprintf(tp,"    set val [lindex [split $line =] 1]\n");
     for (i=0; i<nw; i++) {
       sprintf(key,widgets[i].key);
-      fprintf(tp,"    if {$key == \"%s\"} { set var_%s $val }\n",key,key);
+      if (widgets[i].type == W_CHECK)
+	fprintf(tp,"    if {$key == \"%s\"} { set var_%s $val; load_var_%s }\n",key,key,key);
+      else
+	fprintf(tp,"    if {$key == \"%s\"} { set var_%s $val }\n",key,key);
     }
     fprintf(tp,"  }\n");
     fprintf(tp,"  close $file\n");
@@ -525,13 +528,14 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                 nw++;
 
             } else if (strcmp(wp[1],"CHECK")==0) {
+                /* tricky one; the 'load' from file needs special handling */
                 vp = strchr(wp[2],'=');
                 if (vp==NULL) {
                     fprintf(tp,"### Warning: missing '=' in keyword %s\n",wp[1]);
                     continue;
                 }
                 *vp++ = 0;
-                w[nw].type = W_CHECK;
+                w[nw].type = W_CHECK; 
                 w[nw].key = (char *) strdup(wp[2]);
                 w[nw].val = (char *) strdup(vp);
                 w[nw].par = (char *) strdup(wp[3]);
@@ -581,6 +585,20 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                                     tvar,ip[i], tvar, tvar, tvar, ip[i]);
                 }
                 fprintf(sp,"   set %s [join $%s \",\"]\n",tvar,tvar);
+                fprintf(sp,"}\n");
+
+                fprintf(sp,"# For: %s\n",line);
+                fprintf(sp,"proc load_%s {} {\n",tvar);
+                fprintf(sp,"   global arr_%s %s\n",tvar,tvar);
+                for (i=0; ip[i] != 0; i++) {
+		  fprintf(sp,"   global %s_%s\n",tvar,ip[i]);
+		}
+		fprintf(sp,"   foreach i [split \"%s\" \",\"] {\n",wp[3]);
+		fprintf(sp,"     set %s_$i 0\n",tvar);
+                fprintf(sp,"   }\n");
+		fprintf(sp,"   foreach i [split $%s \",\"] {\n",tvar);
+		fprintf(sp,"     set %s_$i 1\n",tvar);
+                fprintf(sp,"   }\n");
                 fprintf(sp,"}\n");
 
                 fprintf(tp,"pack append %s ",tframe);
