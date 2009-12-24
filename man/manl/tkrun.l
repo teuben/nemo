@@ -1,4 +1,4 @@
-.TH TKRUN 1 "22 April 2003"
+.TH TKRUN 1 "24 December 2009"
 .SH NAME
 tkrun \- automatic GUI builder and frontend to run shell scripts or programs
 .SH SYNOPSIS
@@ -73,6 +73,8 @@ in e.g. c-shell scripts, e.g.:
 .nf
     set a=1    #> SCALE  a=1     0:10:0.1
 .fi
+but this is a new feature and will possibly be modified to not have to specify
+the variable setting "a=1"  twice.
 .SH CAVEATS
 Resetting (right click on the keyword) a checkbutton doesn't work properly.
 .PP
@@ -96,6 +98,7 @@ wish(1)
 .ta +2i
 http://sunscript.sun.com/	Home Page of Tcl/Tk (now outdated)
 http://www.neosoft.com/		Archive of Tcl/Tk tools 
+http://tcl.sourceforge.net/	Current home page and source code repo
 .fi
 .SH EXAMPLES
 .nf
@@ -153,7 +156,7 @@ Peter Teuben (teuben@astro.umd.edu) Astronomy Department,University of Maryland,
 .nf
 .ta +2.0i
 ~/.tkrunrc	(optional) global configuration file
-$run.def	keyword file in which keywords can be maintained
+$run.key	keyword file in which key=val pairs are maintained
 .fi
 .SH "UPDATE HISTORY"
 .nf
@@ -161,4 +164,6 @@ $run.def	keyword file in which keywords can be maintained
 18-aug-97	V0.1 released for ADASS97 paper (tcl/tk 7.6/4.2) 	PJT
 30-jan-98	V0.2 added -e, and some minor features	PJT
 22-apr-04	V1.2 added option to share the set and #> comment on one line	PJT
+12-jun-08	V1.4 updated doc and minor code cleanup	PJT
+24-dec-09	V1.7 implemented the load/save of key=val files    	PJT
 .fi
