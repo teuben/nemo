@@ -216,7 +216,7 @@ int main(int argc, char **argv)
     fprintf(tp,"    set val [lindex [split $line =] 1]\n");
     for (i=0; i<nw; i++) {
       sprintf(key,widgets[i].key);
-      fprintf(tp,"    if {$key == \"%s\"} { puts \"got %s: $val\"}\n",key,key);
+      fprintf(tp,"    if {$key == \"%s\"} { set var_%s $val }\n",key,key);
     }
     fprintf(tp,"  }\n");
     fprintf(tp,"  close $file\n");
