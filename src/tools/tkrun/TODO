@@ -6,13 +6,15 @@ Short term:
 	or else just click on the keyword to make it say something helpful
   - a QUITCOMMAND and HELPCOMMAND helper
   - read keyword files for persistent execution
+    it needs to read/write a keyword file, and to be compatible with
+    drpacs, it ought to be a shell-neutral "key=val" text file
   - allow in /bin/csh script to also accept the following type of construct
 
 	set a=1		#> SLIDER 	0,10,0.1
 
     notice the missing a=1 in that case... is that really wise?
 
-  - if tkrun script is given with no path reference, it needs ./
+  - if tkrun script is given with no path reference, it might need ./
     else people that have no . in $path will get a cryptic error message
     that it cannot execute the script! or:   set path=($path  .)
 
