@@ -545,6 +545,24 @@ namespace WDutils {
     template<int L> struct TWO<L,0> { enum { B=1, I=(L*(L+1))/2 }; };
     template<int L> struct TWO<L,L> { enum { B=1, I=(L*(L+3))/2 }; };
     template<>      struct TWO<0,0> { enum { B=1, I=0 }; };
+    //
+    /// array operations to unroll at compile time
+    template<int I> struct ArrayLoop {
+      /// f(a[i],x)
+      template<typename X, typename AssignFunctor>
+      static void assign(X*a, X x, AssignFunctor f)
+      { ArrayLoop<I-1>::assign(a,x,f); f(a[I],x); }
+      /// f(a[i],b[i])
+      template<typename X, typename AssignFunctor>
+      static void assign(X*a, const X*b, AssignFunctor f)
+      { ArrayLoop<I-1>::assign(a,b,f); f(a[I],b[I]); }
+    };
+    template<> struct ArrayLoop<0> {
+      template<typename X, typename AssignFunctor>
+      static void assign(X*a, X x, AssignFunctor f) { f(a[0],x); }
+      template<typename X, typename AssignFunctor>
+      static void assign(X*a, const X*b, AssignFunctor f) { f(a[0],b[0]); }
+    };
   }
 }
 
