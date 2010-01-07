@@ -845,6 +845,8 @@ namespace WDutils {
   };// class ConstPseudoArray<T,D>
   // ///////////////////////////////////////////////////////////////////////////
   /// special case D=1
+  /// \note we must not include operator const*T(), for this will make array
+  ///       subsciption ambiguous.
   template<typename T> class ConstPseudoArray<T,1> {
     friend class ConstPseudoArray<T,2>;
     friend class PseudoArray<T,2>;
@@ -861,10 +863,6 @@ namespace WDutils {
     /// return size in 1st dimension
     unsigned const& size() const {
       return N[0];
-    }
-    /// conversion to pointer to constant element
-    operator const T* () const {
-      return A;
     }
     /// acts like the operator[] on a pointer const T*
     T const & operator[](unsigned i) const THROW_BAD {
@@ -930,6 +928,8 @@ namespace WDutils {
   };// class PseudoArray<T,D>
   // ///////////////////////////////////////////////////////////////////////////
   /// special case D=1
+  /// \note we must not include operator const*T(), for this will make array
+  ///       subsciption ambiguous.
   template<typename T> class PseudoArray<T,1> {
     friend class PseudoArray<T,2>;
     friend class Array<T,2>;
@@ -944,14 +944,6 @@ namespace WDutils {
     /// return size in 1st dimension
     unsigned const& size() const {
       return N[0];
-    }
-    /// conversion to pointer to element
-    operator T* () {
-      return A;
-    }
-    /// conversion to pointer to constant element
-    operator const T* () const {
-      return A;
     }
     /// acts like the operator[] on a pointer T*
     T       & operator[](unsigned i)       THROW_BAD {
