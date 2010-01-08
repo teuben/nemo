@@ -394,10 +394,24 @@ HaloPotential::HaloPotential(HaloDensity const&model,
     mt[i] += mh[i];
     rh[i] += DEN(r[i]);
   }
-  // 2.3 find total potential & Ec: add psi_halo to ps[]; get ec
+  // 2.3 find the smallest index beyond which mh does not seem to change
+  for(nm=1; nm!=n; ++nm)
+    if(mh[nm-1]==mh[nm]) break;
+  // 2.4 set parameters for extrapolation at r>rmax
+  tr  = DEN.trunc_radius() > 0;
+  go  = DEN.outer_gamma();
+  g2  = 2-go;
+  g3  = 3-go;
+  g4  = 4-go;
+  Mtt = mt[n1]+fmh;
+  fps = tr? 0. : FPi*rh[n1]*r[n1]*r[n1]/g3/g2;
+  fmt = tr? 0. : FPi*rh[n1]*r[n1]*r[n1]*r[n1]/g3;
+  Mht = mh[nm]+fmh;
+  fmh = tr? 0. : FPi*rh[nm]*r[nm]*r[nm]*r[nm]/g3;
+  // 2.5 find total potential & Ec: add psi_halo to ps[]; get ec
   ec.reset(n);
   {
-    double P = mh[n1] / r[n1],                  // Psi_h(r_max)
+    double P = Mht/r[n1]-fps,                  // Psi_h(r_max)
       s0h = FPi * cube(r[ 0]) *  DEN(r[ 0]),
       sNh = FPi * cube(r[n1]) *  DEN(r[n1]);
     SPLINE = new spline<double>(lr,mh,&s0h,&sNh);
@@ -410,9 +424,7 @@ HaloPotential::HaloPotential(HaloDensity const&model,
     falcON_DEL_O(SPLINE);
   }
   ps0 = At<2? ps[0] + mt[0]/(r[0]*(2-At)) : 0.;
-  // 2.4 find smallest index beyond which mh does not seem to change
-  for(nm=0; nm!=n1; ++nm) if(mh[nm+1]==mh[nm]) break;
-  // 2.5 find smallest index beyond which ps and ec do change
+  // 2.6 find largest index below which ps and ec do change
   for(n0=1; n0!=n1; ++n0) 
     if(ps[n0-1]!=ps[n0] && ps[n0]!=ps[n0+1] &&
        ec[n0-1]!=ec[n0] && ec[n0]!=ec[n0+1]) break;
@@ -427,7 +439,7 @@ HaloPotential::HaloPotential(HaloDensity const&model,
 HaloPotential::~HaloPotential() {
   if(PS) falcON_DEL_O(PS);
 }
-// potential Phi(r) and (-dPhi/dr)/r using penta spline
+// potential Psi(r) and (dPsi/dr)/r using penta spline
 double HaloPotential::PotAcc(double Rq, double&A) const {
   double P, lR=0.5*log(Rq);
   if     (Rq <= 0.) { A=0.; P=ps0; }
@@ -440,8 +452,10 @@ double HaloPotential::PotAcc(double Rq, double&A) const {
     else            { P = ps[0]*exp((2-At)*(lR-lr[0]));
                       A = (2-At)*P/Rq; }
   }
-  else if(lR>lr[n1]){ P = mt[n1]/sqrt(Rq);
-                      A =-P/Rq; }
+  else if(lR>lr[n1]){ P = Mtt/sqrt(Rq);
+                      A =-P/Rq;
+	    if(!tr) { P-= fps*exp(g2*(lR-lr[n1]));
+	              A+= fmt*exp(g3*(lR-lr[n1]))/(Rq*sqrt(Rq)); } }
   else              { P = (*PS)(lR,&A);
                       A/= Rq; }
   return -P;
@@ -454,7 +468,7 @@ double HaloPotential::Ps(double R) const {
     if(At==2.) return ps[0] * (log(R)-lr[0]);
     else       return ps[0] * pow(R/r[0],2-At);
   }
-  if(R> r[n1]) return mt[n1]/R;
+  if(R> r[n1]) return Mtt/R - fps*pow(R/r[1],g2);
   else         return Polev(log(R),lr,ps);
 }
 // log R_psi(E)
@@ -464,7 +478,14 @@ double HaloPotential::lnRPsi(double P) const {
     if(At==2.) return lr[n0]-P/ps[n0];
     else       return lr[n0]+log(P/ps[n0])/(2-At);
   }
-  if(P<ps[n1]) return log(mt[n1]/P);
+  if(P<ps[n1]) {
+    double R=Mtt/P, dP=fps*pow(R/r[n1],g2);
+    for(int mi=4; mi && dP; mi--) {
+      P+= dP;
+      R = Mtt/P;
+      dP= fps*pow(R/r[n1],g2);
+    }          return log(R);
+  }
   else         return Polev(P,ps.array()+n0,lr.array()+n0,n-n0);
 }
 // R_psi(E)
@@ -474,28 +495,35 @@ double HaloPotential::RPsi(double P) const {
     if(At==2.) return r[n0]*exp(-P/ps[n0]);
     else       return r[n0]*pow(P/ps[n0],1/(2-At));
   }
-  if(P<ps[n1]) return mt[n1]/P;
+  if(P<ps[n1]) {
+    double R=Mtt/P, dP=fps*pow(R/r[n1],g2);
+    for(int mi=4; mi && dP; mi--) {
+      P+= dP;
+      R = Mtt/P;
+      dP= fps*pow(R/r[n1],g2);
+    }          return R;
+  }
   else         return exp(Polev(P,ps.array()+n0,lr.array()+n0,n-n0));
 }
 // total cumulative mass
 double HaloPotential::Mt(double R) const {
   if(R<= 0.)  return 0.;
   if(R<r[0] ) return mt[0]*pow(R/r[0],3-At);
-  if(R>r[n1]) return mt[n1];
+  if(R>r[n1]) return Mtt - fmt*pow(R/r[n1],g3);
   else        return Polev(log(R),lr,mt);
 }
 // cumulative halo mass
 double HaloPotential::Mh(double R) const {
   if(R<= 0.)  return 0.;
   if(R<r[ 0]) return mh[0]*pow(R/r[0],3-Ah);
-  if(R>r[n1]) return mh[n1];
+  if(R>r[nm]) return Mht - fmh*pow(R/r[nm],g3);
   else        return Polev(log(R),lr,mh);
 }
 // total mass density
 double HaloPotential::rhot(double R) const {
-  if(R<= 0.)  return 0.;
-  if(R<r[0] ) return rh[0]*pow(R/r[0],-At);
-  if(R>r[n1]) return 0.;
+  if(R<=  0.) return 0.;
+  if(R<r[ 0]) return rh[ 0]*pow(R/r[ 0],-At);
+  if(R>r[n1]) return rh[n1]*pow(R/r[n1],-go);
   else        return Polev(log(R),lr,rh);
 }
 // v_circ^2(r)
@@ -524,7 +552,7 @@ double HaloPotential::gam(double R) const {
 double HaloPotential::Epc(double R) const {
   if(R<=0.)    return ps0;
   if(R< r[ 0]) return Ps(R) - 0.5*vcq(R);
-  if(R> r[n1]) return 0.5*mt[n1]/R;
+  if(R> r[n1]) return 0.5*(Mtt/R-g4*fps*pow(R/r[n1],g4));
   else         return Polev(log(R),lr,ec);
 }
 // R_circ(E)
@@ -535,7 +563,15 @@ double HaloPotential::RcE(double E) const {
     if(At==2.)  return r[n0]*exp(0.5*(E/ec[n0]-1));
     else        return r[n0]*pow(E/ec[n0],1/(2-At));
   }
-  if(E< ec[n1]) return 0.5*mt[n1]/E;
+  if(E< ec[n1]) {
+    double R=Mtt/(E+E), dE=g4*fps*pow(R/r[n1],g2);
+    for(int mi=4; mi && dE; --mi) {
+      E+= dE;
+      R = Mtt/(E+E);
+      dE= g4*fps*pow(R/r[n1],g2);
+    }
+                return R;
+  }
   else          return exp(Polev(E,ec.array()+n0,lr.array()+n0,n-n0));
 }
 // estimate for R(E, L^2, cos[eta])
@@ -555,9 +591,10 @@ double HaloPotential::Ra(double E, double Lq) const {
 }
 // radius given halo mass
 double HaloPotential::RMh(double M) const falcON_THROWING {
-  if(M<= 0.)   return 0.;
+  if(M<= 0.)     return 0.;
   if(M<= mh[ 0]) return r[0]*pow(M/mh[0],1/(3-Ah));
-  if(M>  mh[nm]) falcON_THROW("HaloPotential::rMh(): M>M_halo(oo)");
+  if(M>  Mht   ) falcON_THROW("HaloPotential::RMh(): M>M_halo(oo)");
+  if(M>  mh[nm]) return r[nm]*pow((Mht-M)/fmh,1/g3);
   return exp(Polev(M,mh.array(),lr.array(),nm));
 }
 //
