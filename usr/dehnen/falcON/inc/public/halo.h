@@ -98,8 +98,7 @@ namespace falcON {
     double             ps0;                        ///< Psi(0) (if finite)      
     int                n,n0,n1,nm;                 ///< size of tables         
     bool               tr;                         ///< truncated?
-    double             Mht,Mtt,go,g2,g3,g4;        ///< for r>r[n1]
-    double             fmt,fmh,fps;                ///< for r>r[n1]
+    double             Mht,Mtt,go,g3,g4,fmt,fmh;   ///< for r>r[n1]
     Array<double,1>    r,lr;                       ///< r_i, ln(r_i)            
     Array<double,1>    mh;                         ///< M_halo(<r_i)            
     Array<double,1>    mt;                         ///< M_tot(<r_i)             

@@ -163,9 +163,9 @@ void SphericalSampler::sample(body   const&B0,
       f = DF(Q);
       if(WDutils::isnan(f))
 	falcON_THROW("SphericalSampler::sample(): "
-		     "%s is NaN; Eps=%g [r=%g, we=%g, w=%g]\n",
+		     "%s is NaN; Eps=%g [M=%g, r=%g, we=%g, w=%g]\n",
 		     (beta? (iraq==0? "g(E)" : "g(Q)"):
-		      (iraq==0? "f(E)" : "f(Q)")), Q,r,we,w);
+		      (iraq==0? "f(E)" : "f(Q)")), Q,Mr,r,we,w);
       if(f>f0)
 	falcON_THROW("SphericalSampler::sample(): DF non-monotonic"
 		     ": f(Psi=%g)=%g > f(Eps=%g)=%g [r=%g]\n", Q,f,Psi,f0,r);
