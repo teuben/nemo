@@ -30,6 +30,7 @@
 #include <public/tree.h>
 #include <memory.h>
 #include <body.h>
+#include <sstream>
 
 #ifdef  falcON_PROPER
 #  define falcON_track_bug
@@ -413,6 +414,9 @@ namespace {
       OCT[b] = L;                                  // fill into octant          
       ++NUMBER;                                    // increment number          
     }
+    //--------------------------------------------------------------------------
+    void dump(const block_alloc<box>*, const real*, const dot*,
+	      const bodies*, std::ostream&) const;
 #if 0 // not used
     //--------------------------------------------------------------------------
     void addbox_to_octs(box *const&P) {            // add box P to octants      
@@ -430,6 +434,51 @@ namespace {
     friend vect const&centre (const box*const&B) {return B->centre();  }
 #endif
   };// struct box {
+  //----------------------------------------------------------------------------
+  void box::dump(const block_alloc<box>*A, const real*R, const dot*D0,
+		 const bodies*B, std::ostream&o)
+    const
+  {
+    o    << " box " << A->number_of_element(this)<<" with\n"
+	 << "     pos ="<<pos()      <<'\n'
+	 << "     num ="<<NUMBER     <<'\n'
+	 << "     lev ="<<int(LEVEL) <<'\n'
+	 << "     rad ="<<R[LEVEL]   <<'\n';
+    if(DOTS) {
+      o  << "     dots:";
+      for(const dot*d=DOTS; d; d=d->NEXT) {
+	if(d!=DOTS) o << "          ";
+	o<< " dot"<< int(d-D0)
+	 << " x=" << d->pos()
+	 << " l=" << d->LINK
+	 << " b=" << B->bodyindex(d->LINK)
+	 << " n=";
+	if(d->NEXT) o << int(d->NEXT-D0) << '\n';
+	else        o << "null\n";
+      }
+    } else {
+      o  << "     octs:";
+      for(int i=0; i!=Nsub; ++i) {
+	if(i) o << "          ";
+	o << i << ':';
+	if(OCT[i] == 0)
+	  o << " empty\n";
+	else if(TYPE & 1<<i)
+	  o << " box"
+	    << A->number_of_element(static_cast<box*>(OCT[i])) << '\n';
+	else {
+	  const dot* d = static_cast<dot*>(OCT[i]);
+	  o<< " dot"<< int(d-D0)
+	   << " x=" << d->pos()
+	   << " l=" << d->LINK
+	   << " b=" << B->bodyindex(d->LINK)
+	   << " n=";
+	  if(d->NEXT) o << int(d->NEXT-D0) << '\n';
+	  else        o << "null\n";
+	}
+      }
+    }
+  }
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 falcON_TRAITS(::dot,"{tree.cc}::dot");
@@ -475,6 +524,7 @@ namespace {
     const OctTree     *TREE;                       // tree to link              
     real              *RA;                         // array with radius(level)  
     box               *P0;                         // root of box-dot tree      
+    dot               *D0, *DN;                    // begin/end of dots         
 #ifdef falcON_track_bug
     OctTree::Leaf     *LEND;                       // beyond leaf pter range    
     OctTree::Cell     *CEND;                       // beyond cell pter range    
@@ -516,23 +566,41 @@ namespace {
 			    const box*B,           // I: parent box             
 			    int       i,           // I: parent box's octant    
 			    size_t    nl,          // I: # dots added sofar     
-			    dot      *L=0)         // I: dot of octant          
+			    dot      *L,           // I: dot of octant          
+			    bool      S)           // I: called by split_box?
     {
       box* P = new_box(nl);                        // get box off the stack     
       P->LEVEL    = B->LEVEL;                      // set level                 
       P->centre() = B->centre();                   // copy centre of parent     
       if(!shrink_to_octant(P,i)) {                 // shrink to correct octant  
-	if(L)
-	  falcON_Error("exceeding maximum tree depth of %d\n         "
-		       "(presumably more than Ncrit=%d bodies have a "
-		       "common position which may be NaN; "
-		       "dot has i=%d, x=%g,%g,%g)\n",
-		       DMAX,NCRIT, TREE->my_bodies()->bodyindex(L->LINK),
-		       L->pos()[0],L->pos()[1],L->pos()[2]);
-	else
-	  falcON_Error("exceeding maximum tree depth of %d\n         "
-		       "(presumably more than Ncrit=%d bodies have a "
-		       "common position which may be NaN)\n",DMAX,NCRIT);
+	std::ostringstream out;
+	if(S) {
+	  for(const dot*d=L; d; d=d->NEXT)
+	    out << "###  dot " << int(d-D0) <<':'
+		<< " x=" << d->pos()
+		<< " l=" << d->LINK
+		<< " b=" << TREE->my_bodies()->bodyindex(d->LINK)
+		<< '\n';
+	  falcON_Error("exceeding maximum tree depth of %d\n"
+		       "###  presumably more than Ncrit=%d bodies have common"
+		       " position.\n###  dots to be added to octant %d of"
+		       " box %d (x=%g,%g,%g; n=%d; l=%d; r=%g):\n%s",
+		       DMAX,NCRIT,i,BM->number_of_element(B),
+		       B->pos()[0],B->pos()[1],B->pos()[2],
+		       B->NUMBER, int(B->LEVEL), RA[B->LEVEL],
+		       out.str().c_str());
+	} else {
+	  B->dump(BM,RA,D0,TREE->my_bodies(),out);
+	  falcON_Error("exceeding maximum tree depth of %d\n"
+		       " presumably more than Ncrit=%d bodies have common"
+		       " position.\n problem occured when adding dot %d"
+		       " (l=%d:%d, x=%g %g %g, body %d) to make sub-box in"
+		       " octant %d of\n%s",
+		       DMAX,NCRIT,int(L-D0),L->LINK.no(),L->LINK.in(),
+		       L->pos()[0],L->pos()[1],L->pos()[2],
+		       TREE->my_bodies()->bodyindex(L->LINK),i,
+		       out.str().c_str());
+	}
       }
 #ifdef falcON_MPI
       P->PEANO    = B->PEANO;                      // copy peano map            
@@ -540,16 +608,17 @@ namespace {
 #endif
       return P;                                    // return new box            
     }
+#if(0)
     //--------------------------------------------------------------------------
     // provides a new (daughter) box in the i th octant of B containing dot L   
     // requires that NCRIT == 1                                                 
     inline box* make_subbox_1(                     // R: new box                
-			      const box*const&B,   // I: parent box             
-			      int       const&i,   // I: parent box's octant    
-			      dot      *const&L,   // I: dot of octant          
-			      size_t    const&nl)  // I: # dots added sofar     
+			      const box*B,         // I: parent box             
+			      int       i,         // I: parent box's octant    
+			      size_t    nl,        // I: # dots added sofar     
+			      dot      *L)         // I: dot of octant          
     {
-      box* P = make_subbox(B,i,nl,L);              // make new sub-box          
+      box* P = make_subbox(B,i,nl,L,0);            // make new sub-box          
       P->adddot_to_octs(L);                        // add dot to its octant     
       return P;                                    // return new box            
     }
@@ -557,15 +626,16 @@ namespace {
     // provides a new (daughter) box in the i th octant of B containing dot L   
     // requires that NCRIT >  1                                                 
     inline box* make_subbox_N(                     // R: new box                
-			      const box*const&B,   // I: parent box             
-			      int       const&i,   // I: parent box's octant    
-			      dot      *const&L,   // I: dot of octant          
-			      size_t    const&nl)  // I: # dots added sofar     
+			      const box*B,         // I: parent box             
+			      int       i,         // I: parent box's octant    
+			      size_t    nl,        // I: # dots added sofar     
+			      dot      *L)         // I: dot of octant          
     {
-      box* P = make_subbox(B,i,nl,L);              // make new sub-box          
+      box* P = make_subbox(B,i,nl,L,0);            // make new sub-box          
       P->adddot_to_list(L);                        // add old dot to list       
       return P;                                    // return new box            
     }
+#endif
     //--------------------------------------------------------------------------
     // This routines splits a box:                                              
     // The dots in the linked list are sorted into octants. Octants with one    
@@ -591,7 +661,7 @@ namespace {
 	for(ne=b=0; b!=Nsub; ++b) if(NUM[b]) {     //   LOOP non-empty octs     
 	  ne++;                                    //     count them            
 	  if(NUM[b]>1) {                           //     IF many dots          
-	    sub = make_subbox(P,b,nl,static_cast<dot*>(P->OCT[b]));
+	    sub = make_subbox(P,b,nl,static_cast<dot*>(P->OCT[b]),1);
 	                                           //       make sub-box        
 	    sub->DOTS = static_cast<dot*>(P->OCT[b]); //    assign sub-box's    
 	    sub->NUMBER = NUM[b];                  //       dot list & number   
@@ -619,7 +689,8 @@ namespace {
 	} else if(P->marked_as_dot(b)) {           //   ELIF octant=dot         
 	  dot*Do = static_cast<dot*>(*oc);         //     get old dot           
 	  P->mark_as_box(b);                       //     mark octant as box    
-	  P = make_subbox_1(P,b,Do,nl);            //     create sub-box        
+	  P = make_subbox(P,b,nl,Do,0);            //     create sub-box        
+	  P->adddot_to_octs(Do);                   //     add dot to its octant 
 	  *oc = P;                                 //     assign sub-box to oc  
 	} else                                     //   ELSE octant=box         
 	  P = static_cast<box*>(*oc);              //     set current box       
@@ -647,7 +718,8 @@ namespace {
 	  } else if(P->marked_as_dot(b)) {         //     ELIF octant=dot       
 	    dot*Do = static_cast<dot*>(*oc);       //       get old dot         
 	    P->mark_as_box(b);                     //       mark octant as box  
-	    P = make_subbox_N(P,b,Do,nl);          //       create sub-box      
+	    P = make_subbox(P,b,nl,Do,0);          //       create sub-box      
+	    P->adddot_to_list(Do);                 //       add old dot to list 
 	    *oc = P;                               //       assign sub-box to oc
 	  } else                                   //     ELSE octant=box       
 	    P = static_cast<box*>(*oc);            //       set current box     
@@ -665,13 +737,8 @@ namespace {
 		     int            ,              // I:   local peano key      
 		     OctTree::Cell* ,              // I:   current cell         
 		     OctTree::Cell*&,              // I/O: index: free cells    
-		     OctTree::Leaf*&               // I/O: index: free leafs    
-#ifdef falcON_track_bug
-		     ,
-		     const dot *    ,
-		     const dot *
-#endif
-		                     ) const;
+		     OctTree::Leaf*&)              // I/O: index: free leafs    
+      const;
     //--------------------------------------------------------------------------
     // RECURSIVE                                                                
     // This routines transforms the box-dot tree into the cell-leaf tree,       
@@ -683,13 +750,8 @@ namespace {
 		     int            ,              // I:   local peano key      
 		     OctTree::Cell* ,              // I:   current cell         
 		     OctTree::Cell*&,              // I/O: index: free cells    
-		     OctTree::Leaf*&               // I/O: index: free leafs    
-#ifdef falcON_track_bug
-		     ,
-		     const dot *    ,
-		     const dot *
-#endif
-		                     ) const;
+		     OctTree::Leaf*&)              // I/O: index: free leafs    
+      const;
     //--------------------------------------------------------------------------
     BoxDotTree()
       : BM(0), TREE(0), RA(0), P0(0) {}
@@ -748,17 +810,7 @@ namespace {
     //--------------------------------------------------------------------------
     // non-const public methods                                                 
     //--------------------------------------------------------------------------
-#ifdef falcON_track_bug
-#  define BUG_LINK_PARS ,D0,DN
-#else
-#  define BUG_LINK_PARS
-#endif
-    void link(
-#ifdef falcON_track_bug
-	      const dot*const&D0,
-	      const dot*const&DN
-#endif
-	      )
+    void link()
     {
       report REPORT("BoxDotTree::link()");
 #ifdef falcON_track_bug
@@ -773,8 +825,8 @@ namespace {
       OctTree::Leaf* Lf = FstLeaf(TREE);
       pacell_(C0) = OctTree::Cell::INVALID;
       DEPTH = NCRIT > 1?
-	link_cells_N(P0,0,0,C0,Cf,Lf BUG_LINK_PARS) :
-	link_cells_1(P0,0,0,C0,Cf,Lf BUG_LINK_PARS) ;
+	link_cells_N(P0,0,0,C0,Cf,Lf) :
+	link_cells_1(P0,0,0,C0,Cf,Lf) ;
     }
   };// class BoxDotTree
   //----------------------------------------------------------------------------
@@ -788,13 +840,8 @@ namespace {
 #endif
 	       OctTree::Cell* C,                   // I:   current cell         
 	       OctTree::Cell*&Cf,                  // I/O: index: free cells    
-	       OctTree::Leaf*&Lf                   // I/O: index: free leafs    
-#ifdef falcON_track_bug
-	       ,
-	       const dot*     D0,
-	       const dot*     DN
-#endif
-	       ) const
+	       OctTree::Leaf*&Lf)                   // I/O: index: free leafs    
+    const
   {
 #ifdef falcON_track_bug
     if(C == CEND)
@@ -843,7 +890,7 @@ namespace {
 #else
 				0,
 #endif
-				Ci++, Cf, Lf BUG_LINK_PARS);
+				Ci++, Cf, Lf);
 	  if(de>dep) dep=de;                       //       update depth        
 	}                                          //   END LOOP                
     } else {                                       // ELSE (no sub-boxes)       
@@ -868,13 +915,8 @@ namespace {
 #endif
 	       OctTree::Cell* C,                   // I:   current cell         
 	       OctTree::Cell*&Cf,                  // I/O: index: free cells    
-	       OctTree::Leaf*&Lf                   // I/O: index: free leafs    
-#ifdef falcON_track_bug
-	       ,
-	       const dot     *D0,
-	       const dot     *DN
-#endif
-	       ) const
+	       OctTree::Leaf*&Lf)                  // I/O: index: free leafs    
+    const
   {
 #ifdef falcON_track_bug
     if(C == CEND)
@@ -938,7 +980,7 @@ namespace {
 #else
 				  0,
 #endif
-				  Ci++, Cf, Lf BUG_LINK_PARS);
+				  Ci++, Cf, Lf);
 	    if(de>dep) dep=de;                     //         update depth      
 	  }                                        //     END LOOP              
       } else {                                     //   ELSE (no sub-boxes)     
@@ -964,7 +1006,6 @@ namespace {
     //--------------------------------------------------------------------------
     const vect *ROOTCENTRE;                        // pre-determined root centre
     vect        XAVE, XMIN, XMAX;                  // extreme positions         
-    dot        *D0, *DN;                           // begin/end of dots         
     //--------------------------------------------------------------------------
     // This routines returns the root centre nearest to the mean position       
     inline vect root_centre() {
@@ -979,7 +1020,8 @@ namespace {
 	R=max(abs(XMAX[d]-X[d]),abs(XMIN[d]-X[d]));//   distance to xmin, xmax  
 	update_max(D,R);                           //   update maximum distance 
       }                                            // END LOOP                  
-      return pow(two,int(one+log(D)/M_LN2));       // M_LN2 == log(2) (math.h)  
+      R=pow(two,int(one+log(D)/M_LN2));            // M_LN2 == log(2) (math.h) 
+      return R>zero? R : one;
     }
     //--------------------------------------------------------------------------
     void setup_from_scratch(const bodies*,
@@ -994,12 +1036,6 @@ namespace {
     // This routine simply calls adddots() with the root box as argument.       
   public:
     void build();                                  // build box-dot tree        
-    //--------------------------------------------------------------------------
-#ifdef falcON_track_bug
-    void link() {
-      BoxDotTree::link(D0,DN);
-    }
-#endif
     //--------------------------------------------------------------------------
     // constructors of class TreeBuilder                                        
     //--------------------------------------------------------------------------
