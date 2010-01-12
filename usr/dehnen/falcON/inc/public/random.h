@@ -54,13 +54,11 @@ extern "C" {
 
 namespace falcON {
   using namespace WDutils;
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::PseudoRandom                                               //
-  //                                                                          //
-  // supplies Random3 or NEMO's xrandom (depending on falcON_NEMO)            //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+  //
+  // class falcON::PseudoRandom
+  //
+  /// supplies Random3 or NEMO's xrandom (depending on falcON_NEMO)
+  //
 #ifdef falcON_NEMO
 
   class PseudoRandom : public RandomNumberGenerator {
@@ -76,61 +74,59 @@ namespace falcON {
   typedef Random3 PseudoRandom;
 
 #endif
-  //////////////////////////////////////////////////////////////////////////////
-  //                                                                          //
-  // class falcON::Random                                                     //
-  //                                                                          //
-  // supplies falcON::PseudoRandom AND falcON::Sobol[]                        //
-  //                                                                          //
-  //////////////////////////////////////////////////////////////////////////////
+
+  //
+  // class falcON::Random
+  //
+  /// supplies falcON::PseudoRandom AND falcON::Sobol[]
+  //
   class Random : public PseudoRandom {
   private:
     const unsigned N;
     const Sobol   *S;
-    //--------------------------------------------------------------------------
-    // construction:                                                            
-    //--------------------------------------------------------------------------
   public:
-    Random(seed_type s,                            // I: seed for pseudo RNG    
-	   unsigned  n) :                          // I: # Sobols               
-      PseudoRandom(s), N(n), S(falcON_NEW(Sobol,n)) {}
+    /// construction
+    /// \param[in] s random seed for pseudo RNG
+    /// \param[in] n number of Sobol RNGs to be generated
+    Random(seed_type s, unsigned  n)
+      : PseudoRandom(s), N(n), S(falcON_NEW(Sobol,n)) {}
 #ifdef falcON_NEMO
-    Random(const char*s,                           // I: seed for NEMO::xrandom 
-	   unsigned   n) :                         // I: # Sobols               
-      PseudoRandom(s), N(n), S(falcON_NEW(Sobol,n)) {}
+    /// construction
+    /// \param[in] s random seed encoded as character string
+    /// \param[in] n number of Sobol RNGs to be generated
+    Random(const char*s, unsigned n)
+      : PseudoRandom(s), N(n), S(falcON_NEW(Sobol,n)) {}
 #endif
-    //--------------------------------------------------------------------------
+    /// destruction
     ~Random() { falcON_DEL_A(S); }
-    //--------------------------------------------------------------------------
-    // pseudo random numbers                                                    
-    //--------------------------------------------------------------------------
+    /// pseudo random numbers
     PseudoRandom::operator();
-    //--------------------------------------------------------------------------
-    // quasi random numbers: must give No of Sobol to be used                   
-    //--------------------------------------------------------------------------
+    /// number of Sobol RNGs
     unsigned const& Nsob() const { return N; }
-    //--------------------------------------------------------------------------
-    double operator()(                             // R: ith RNG in (0,1)       
-		      int    const&i) const {      // I: i                      
+    /// quasi random number in [0,1]
+    /// \param[in] i  index for Sobol RNG
+    double operator()(int i) const {
       return (S+i)->RandomDouble();
     }
-    //--------------------------------------------------------------------------
-    double operator()(                             // R: ith RNG in (a,b)       
-		      int    const&i,              // I: i                      
-		      double const&a,              // I: a = lower limit        
-		      double const&b) const {      // I: b = upper limit        
+    /// quasi random number in [a,b]
+    /// \param[in] i  index for Sobol RNG
+    /// \param[in] a  lower interval limit
+    /// \param[in] b  upper interval limit
+    double operator()(int i, double a, double b) const
+    {
       return a<b? a + (b-a) * (S+i)->RandomDouble() :
 	          b + (a-b) * (S+i)->RandomDouble() ;
     }
+    /// give RNG
+    /// \param[in] i index of Sobol RNG
+    /// \param[in] q return Sobol or PseudoRanom?
+    /// \note if q=true, i must be in range [0,Nsob()-1]
     //--------------------------------------------------------------------------
-    // miscellaneous                                                            
-    //--------------------------------------------------------------------------
-    const RandomNumberGenerator*rng(               // R: pter to RNG            
-			            int  const&i,  // I: No of RNG              
-			            bool const&q)  // I: quasi or pseudo?       
-      const {
-      if(q) return S+i;
-      else  return this;
+    const RandomNumberGenerator*rng(int i, bool q) const
+    {
+      return q?
+	static_cast<const RandomNumberGenerator*>(S+i) :
+	static_cast<const RandomNumberGenerator*>(this);
     }
   };
   //////////////////////////////////////////////////////////////////////////////

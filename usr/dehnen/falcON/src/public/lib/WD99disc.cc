@@ -499,7 +499,8 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
   //----------------------------------------------------------------------
   
   // Now
-
+  SechSquared SechQ(RNG.rng(5,q));
+  Normal      Norml(RNG.rng(6,q),RNG.rng(7,q));
   for(body Bi=B.begin_all_bodies(); Bi; ) { // until all bodies are sampled
     do{
       double rando=q? RNG(0,0.,1.) : RNG(0.,1.);
@@ -533,9 +534,14 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
 	// The vertical component
 	//----------------------------------------------------------------------
 	if(Z0){
-	  double tmp1=q? RNG(5,0.,1.) : RNG(0.,1.);
-	  z=0.5*Z0*log((2*tmp1)/(2-2*tmp1)); // sample z from sech^2 disc
-	  double tmp2,tmp3,spare=0;
+	  z  = Z0 * SechQ();
+	  vz = sqrt(Pi*Z0*Dens) * Norml();
+#if(0)
+	  double tmp1,tmp2,tmp3,spare=0;
+	  do {
+	    tmp1 = q? RNG(5,0.,1.) : RNG(0.,1.);
+	    z    = 0.5*Z0*log(tmp1/(1-tmp1));        // sample z from sech^2
+	  } while(isinf(z) || isnan(z));
 	  if(iset) {
 	    iset=0;
 	    vz=spare;
@@ -553,6 +559,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
 	  }
 	  
 	  vz *= sqrt(Pi*Z0*Dens);      // Sigma for isothermal disc
+#endif
 	} else {
 	  z  = 0.;
 	  vz = 0.;
