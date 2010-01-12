@@ -1021,15 +1021,24 @@ namespace {
 	update_max(D,R);                           //   update maximum distance 
       }                                            // END LOOP                  
       R=pow(two,int(one+log(D)/M_LN2));            // M_LN2 == log(2) (math.h) 
-      return R>zero? R : one;
+      if(R==zero) R=one;
+      DebugInfo(4,"TreeBuilder: Xave=%g,%g,%g;  Xmin=%g,%g,%g;  Xmax=%g,%g,%g;"
+		"  Root centre=%g,%g,%g;  Root radius=%g\n",
+		XAVE[0],XAVE[2],XAVE[2],
+		XMIN[0],XMIN[2],XMIN[2],
+		XMAX[0],XMAX[2],XMAX[2],
+		X[0],X[2],X[2], R);
+      return R;
     }
+    //--------------------------------------------------------------------------
+    void report_infnan() const falcON_THROWING;
     //--------------------------------------------------------------------------
     void setup_from_scratch(const bodies*,
 			    flags        ,
 			    const vect  * =0,
-			    const vect  * =0);
+			    const vect  * =0) falcON_THROWING;
     //--------------------------------------------------------------------------
-    void setup_leaf_order  (const bodies*);
+    void setup_leaf_order  (const bodies*) falcON_THROWING;
     //--------------------------------------------------------------------------
     // non-const public methods (almost all non-inline)                         
     //--------------------------------------------------------------------------
@@ -1048,7 +1057,7 @@ namespace {
 		const bodies *,                    // I: body sources           
 		flags         ,                    // I: flag specifying bodies 
 		const vect   * =0,                 //[I: x_min]                 
-		const vect   * =0);                //[I: x_max]                 
+		const vect   * =0) falcON_THROWING;//[I: x_max]                 
     //--------------------------------------------------------------------------
     // 2   from scratch, but aided by old tree                                  
     //     we put the dots to be added in the same order as the leafs of the    
@@ -1062,7 +1071,7 @@ namespace {
     TreeBuilder(const OctTree*,                    // I: old/new tree           
 		const vect   *,                    // I: pre-determined centre  
 		int           ,                    // I: Ncrit                  
-		int           );                   // I: Dmax                   
+		int           ) falcON_THROWING;   // I: Dmax                   
     //--------------------------------------------------------------------------
     // destructor                                                               
     //--------------------------------------------------------------------------
@@ -1087,10 +1096,19 @@ namespace {
 	adddot_1(P0,Di,nl);                        //     add dots              
   }
   //----------------------------------------------------------------------------
+  void TreeBuilder::report_infnan() const falcON_THROWING
+  {
+    for(const dot*D=D0; D!=DN; ++D)
+      if(D->pos().isinf() || D->pos().isnan())
+	falcON_THROW("TreeBuilder: body %d: x=%g,%g,%g\n",
+		     TREE->my_bodies()->bodyindex(D->LINK),
+		     D->pos()[0],D->pos()[1],D->pos()[2]);
+  }
+  //----------------------------------------------------------------------------
   void TreeBuilder::setup_from_scratch(const bodies*BB,
 				       flags        SP,
 				       const vect  *xmin,
-				       const vect  *xmax)
+				       const vect  *xmax) falcON_THROWING
   {
     if(!BB->have_pos())
       falcON_THROW("bodies have no position in tree building\n");
@@ -1112,11 +1130,12 @@ namespace {
       }
     DN    = Di;
     XAVE /= real(DN-D0);
+    if(XAVE.isnan() || XAVE.isinf()) report_infnan();
     if(xmin) XMIN = *xmin;
     if(xmax) XMAX = *xmax;
   }
   //----------------------------------------------------------------------------
-  void TreeBuilder::setup_leaf_order(const bodies*BB)
+  void TreeBuilder::setup_leaf_order(const bodies*BB) falcON_THROWING
   {
     flags     SP = TREE->SP_flag();
     if(!BB->have_pos())
@@ -1146,6 +1165,7 @@ namespace {
 	}
     DN    = Di;
     XAVE /= real(DN-D0);
+    if(XAVE.isnan() || XAVE.isinf()) report_infnan();
   }
   //----------------------------------------------------------------------------
   // constructor 1                                                              
@@ -1156,10 +1176,11 @@ namespace {
 			   const bodies *bb,
 			   flags         sp,
 			   const vect   *xmin,
-			   const vect   *xmax)
-    : ROOTCENTRE(x0)
+			   const vect   *xmax) falcON_THROWING
+  : ROOTCENTRE(x0)
   {
     report REPORT("TreeBuilder::TreeBuilder(): 1");
+    TREE = tr;
     setup_from_scratch(bb,sp,xmin,xmax);
     vect X0 = root_centre();
     BoxDotTree::reset(tr,nc,dm,size_t(DN-D0),X0,root_radius(X0));
@@ -1169,8 +1190,8 @@ namespace {
   TreeBuilder::TreeBuilder(const OctTree*tr,
 			   const vect   *x0,
 			   int           nc,
-			   int           dm) : 
-    ROOTCENTRE(x0)
+			   int           dm) falcON_THROWING
+  : ROOTCENTRE(x0)
   {
     report REPORT("TreeBuilder::TreeBuilder(): 2");
     TREE = tr;
