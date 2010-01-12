@@ -215,7 +215,7 @@ double Normal::operator() () const
 // class WDutils::ExpDisk                                                     //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-ExpDisk::ExpDisk(RandomNumberGenerator* r, const double H) : 
+ExpDisk::ExpDisk(const RandomNumberGenerator* r, const double H) : 
   N(256), N1(N+1), R(r), h(H), hi(1./h), hqi(hi*hi)
 {
   register int    i;

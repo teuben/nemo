@@ -87,7 +87,7 @@ namespace WDutils {
     OctalTree           (const OctalTree&);  // not implemented
     OctalTree& operator=(const OctalTree&);  // not implemented
   public:
-    /// \name public static constants some types
+    /// \name public constants and types
     //@{
     const static int        Dim = __D;       ///< number of dimensions
     typedef __X             Real;            ///< floating point type: position
@@ -103,15 +103,15 @@ namespace WDutils {
     /// used to initialize and/or re-initialize Dots in tree building
     class Initialiser {
     public:
-      /// virtual dtor: only needed with older compiler versions
+      // virtual dtor: only needed with older compiler versions
       virtual ~Initialiser() {}
       /// initializes @a Dot::I and @a Dot::X
-      /// used in tree construction (and possibly in rebuild())
+      /// \note used in tree construction (and possibly in OctalTree::rebuild())
       /// \param[in] D Dot to be initialized
       virtual void Init(Dot*D) const = 0;
       /// re-initializes @a Dot::X, may also change @a Dot::I
-      /// will be called in rebuild()
-      /// \param[in] D Dot to be re-initialized
+      /// \note will be called in OctalTree::rebuild()
+      /// \param[in] D  Dot to be re-initialized
       virtual void ReInit(Dot*D) const = 0;
     };
     //@}
@@ -130,19 +130,19 @@ namespace WDutils {
     //@}
     /// \name leaf data (access via TreeWalker<OctalTree>)
     //@{
-    size_type         NLEAF;          ///< # leafs
+    size_type         NLEAF;          ///< total number of leafs
     Point            *XL;             ///< leaf positions
     part_index       *PL;             ///< index of associated particle
     //@}
-    /// \name cells data (access via TreeWalker<OctalTree>)
+    /// \name cell data (access via TreeWalker<OctalTree>)
     //@{
-    size_type         NCELL;          ///< # leafs
+    size_type         NCELL;          ///< total number of cells
     uint8            *LE;             ///< cells' tree level
     uint8            *OC;             ///< cells' octant in parent cell
     Point            *XC;             ///< cells' centre (of cube)
     size_type        *L0;             ///< cells' first leaf
-    uint16           *NL;             ///< number of cells' daughter leafs
-    size_type        *NM;             ///< number of cells' leafs
+    uint16           *NL;             ///< number of cells' leaf kids
+    size_type        *NM;             ///< number of cells' leaf descendants
     size_type        *CF;             ///< first daughter cell
     uint8            *NC;             ///< number of cells' daughter cells
     size_type        *PA;             ///< parent cell
@@ -158,15 +158,15 @@ namespace WDutils {
     ///
     /// \param[in] n    number of particles
     /// \param[in] init Initialiser to set initial particle position and index
-    /// \note Calls Initialiser::Init(), to set Dot::I and Dot::X for all \a n
+    /// \note Calls Initialiser::Init(), to set Dot::I and Dot::X for all @a n
     ///       particles.
     /// \param[in] nmax maximum number of leafs in unsplit cells
     /// \param[in] avsc avoid single-parent cells?
     /// \note Single-parent cells occur if all leafs of a cell live in just
-    ///       one octant. When \a avsc is set to true, such a cell is
-    ///       eliminated in favour of its only daughter. With this option on,
-    ///       mother and daughter cells may be more than one level apart and
-    ///       the tree depth may be less than the highest cell level.
+    ///       one octant. When @a avsc is true, such a cell is eliminated in
+    ///       favour of its only daughter. With this option on, mother and
+    ///       daughter cells may be more than one level apart and the tree
+    ///       depth may be less than the highest cell level.
     /// \param[in] maxd maximum tree depth
     OctalTree(size_type n, const Initialiser*init, size_type nmax,
 	      bool avsc=true, size_type maxd=100) WDutils_THROWING;
@@ -184,9 +184,10 @@ namespace WDutils {
     /// \param[in] nmax maximum number of leafs in unsplit cell
     ///
     /// \note If any of the arguments equals 0, we take the old value instead
-    /// \note Calls Initialiser::ReInit(), to set Dot::X. If \a n is larger
-    ///       than previously, Initialiser::Init() is called on the extra
-    ///       particles to set Dot::I as well as Dot::X.
+    /// \note Calls Initialiser::ReInit(), to set Dot::X, but possibly also
+    ///       change Dot::I. If @a n is larger than previously,
+    ///       Initialiser::Init() is called on the extra particles to set
+    ///       Dot::I as well as Dot::X.
     void rebuild(size_type n=0, size_type nmax=0) WDutils_THROWING;
     /// tree depth
     size_type const&Depth() const { return DEPTH; }
@@ -194,14 +195,14 @@ namespace WDutils {
     bool const&AvoidedSingleParentCells() const { return AVSPC; }
     /// N_max
     size_type const&Nmax() const { return NMAX; }
-    /// # leafs
+    /// total number of leafs
     size_type const&Nleafs() const { return NLEAF; }
-    /// # cells
+    /// total number of cells
     size_type const&Ncells() const { return NCELL; }
   };// class OctalTree<>
 
   ///
-  /// support for walking an OctalTree
+  /// support for walking an OctalTree.
   ///
   /// Holds just a pointer to an OctalTree and provides access to leaf and
   /// cell data, as well as member methods for walking the tree.\n
@@ -223,7 +224,9 @@ namespace WDutils {
     virtual ~TreeWalker() {}
     /// \name leaf and leaf data access
     //@{
-    /// iterator used for leafs
+    /// iterator used for leafs.
+    /// A simple wrapper around an index, which, being a separate type, avoids
+    /// confusion with other indices.
     struct Leaf {
       size_type I;
       /// default ctor
@@ -251,6 +254,8 @@ namespace WDutils {
     /// \name cell and cell data access
     //@{
     /// iterator used for cells
+    /// A simple wrapper around an index, which, being a separate type, avoids
+    /// confusion with other indices.
     struct Cell {
       size_type I;
       /// default ctor
@@ -487,7 +492,7 @@ namespace WDutils {
   };// struct TreeWalker<>
 
   ///
-  /// A mutual walk of an OctalTree
+  /// The mutual tree-walking interaction algorithm of Dehnen (2002)
   ///
   /// We implement an "Early-testing" mutual tree walk, which means that we try
   /// to perform any interaction as soon as it is generated and only stack it
@@ -496,16 +501,13 @@ namespace WDutils {
   ///
   /// \note fully inline
   template<typename OctTree>
-  class MutualOctTreeWalker : private TreeWalker<OctTree> {
+  class MutualInteractionAlgorithm : private TreeWalker<OctTree> {
   public:
     typedef typename TreeWalker<OctTree>::Leaf Leaf;
     typedef typename TreeWalker<OctTree>::Cell Cell;
     typedef typename TreeWalker<OctTree>::size_type size_type;
     /// specifies how to walk the tree and what kind of interactions to do.
     class Interactor : public TreeWalker<OctTree> {
-//       friend class MutualOctTreeWalker;
-//       typedef typename OctTree::Real Real;
-//       typedef typename OctTree::Point Point;
     public:
       /// ctor
       Interactor(const OctTree*t) : TreeWalker<OctTree>(t) {}
@@ -605,7 +607,7 @@ namespace WDutils {
     /// construction for interaction within octal tree
     /// \param[in] i  pter to interactor
     /// \param[in] d  depth of tree
-    MutualOctTreeWalker(Interactor*i)
+    MutualInteractionAlgorithm(Interactor*i)
       : TreeWalker<OctTree>(*i),
 	IA   ( i ), 
 	CL   ( OctTree::Nsub*this->Depth()),
@@ -622,10 +624,10 @@ namespace WDutils {
   };
   /// walk an oct-tree: simple wrapper around MutualTreeWalker.
   template<typename OctTree>
-  void MutualOctTreeWalk(typename MutualOctTreeWalker<OctTree>::Interactor*I)
+  void MutualInteraction(typename MutualInteractionAlgorithm<OctTree>::Interactor*I)
   {
-    MutualOctTreeWalker<OctTree> MTW(I);
-    MTW.walk();
+    MutualInteractionAlgorithm<OctTree> MIA(I);
+    MIA.walk();
   }
 } // namespace WDutils
 ////////////////////////////////////////////////////////////////////////////////

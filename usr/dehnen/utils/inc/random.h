@@ -270,17 +270,53 @@ namespace WDutils {
   class Exponential : public RandomDeviate {
   private:
     double alf;
-    RandomNumberGenerator *Rn;
+    const RandomNumberGenerator *Rn;
   public:
     /// construction
     /// \param[in] R random number generator
     /// \param[in] a (optional) decay rate: \f$ p(x) = 1/a \exp(-x/a) \f$
-    explicit  Exponential(RandomNumberGenerator* R, double a=1.)
+    explicit  Exponential(const RandomNumberGenerator* R, double a=1.)
       : alf(a), Rn(R) {}
     /// generate random number in [0,oo]
     double operator() () const { return -alf * log( Rn->RandomDouble() ); }
     /// give parent distribution
     double value(double x) const { return exp(-x/alf)/alf; }
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  //                                                                            
+  // class WDutils::SechSquared                                                 
+  //                                                                            
+  /// random distribution: \f$ p(x) = sech^2(x) / 2 \f$                        
+  //                                                                            
+  // ///////////////////////////////////////////////////////////////////////////
+  class SechSquared : public RandomDeviate {
+  private:
+    const RandomNumberGenerator *Rn;
+  public:
+    /// construction
+    /// \param[in] R random number generator
+    explicit SechSquared(const RandomNumberGenerator* R)
+      : Rn(R) {}
+    /// generate random number in [0,oo]
+    double operator() () const
+    {
+#if(0)
+      return std::atanh( 2*Rn->RandomDouble()-1 );
+#else
+      double p,x;
+      do {
+	p=2*Rn->RandomDouble()-1;
+	x=0.5*std::log(p/(1-p));
+      } while(isinf(x) || isnan(x));
+      return x;
+#endif
+    }
+    /// give parent distribution
+    double value(double x) const
+    {
+      double etx=x<0? std::exp(x+x) : std::exp(-x-x);
+      return (1-etx)/(1+etx);
+    }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -293,14 +329,14 @@ namespace WDutils {
     // gives x in [0,oo] with probability proportional to  x*Exp[-x/h]
   private:
     const int N,N1;
-    RandomNumberGenerator *R;
+    const RandomNumberGenerator *R;
     double    h, hi, hqi, *Y, *P;
     double    ranvar() const;
   public:
     /// construction
     /// \param[in] R random number generator
     /// \param[in] h scale length
-    explicit ExpDisk(RandomNumberGenerator*R, double h=1.);
+    explicit ExpDisk(const RandomNumberGenerator*R, double h=1.);
     virtual ~ExpDisk();
     /// give parent distribution
     /// \return p(r)

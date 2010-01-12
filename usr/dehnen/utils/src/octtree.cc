@@ -456,6 +456,9 @@ namespace {
       const_cast<uint32&>(DEPTH) = a? LinkCellsA(0,P0,0) : LinkCellsS(0,P0,0);
       const_cast<uint32&>(NCELL) = CF;
     }
+    /// report first invalid position
+    /// \note never returns
+    void ReportInvalidPos() const WDutils_THROWING;
     /// ctor: build a BoxDotTree
     /// If old tree given, we add the dots in the order of its leafs
     /// \param[in] Ndot number of positions
@@ -659,6 +662,20 @@ namespace {
     }
   }
   //
+  template<int Dim, typename Real>
+  void BoxDotTree<Dim,Real>::ReportInvalidPos() const WDutils_THROWING
+  {
+    for(const Dot*Di=D0; Di!=DN; ++Di)
+      if(isnan(Di->X) || isinf(Di->X))
+	Dim==2?
+	  WDutils_THROW("OctalTree: Dot %d (particle %d): invalid X=%g,%g\n",
+			int(Di-D0), Di->I, Di->X[0],Di->X[1])
+	  :
+	  WDutils_THROW("OctalTree: Dot %d (particle %d): invalid X=%g,%g,%g\n",
+			int(Di-D0), Di->I, Di->X[0],Di->X[1],Di->X[2]);
+    WDutils_THROW("OctalTree: unidentified invalid position(s)\n");
+  }
+  //
   template<int D, typename Real>
   BoxDotTree<D,Real>::BoxDotTree(unsigned Ndot,
 				 const typename OctTree::Initialiser*Init,
@@ -678,34 +695,30 @@ namespace {
       uint32 Li=0;
       D0->I = Tree->PL[Li++];
       Init->ReInit(reinterpret_cast<typename OctTree::Dot*>(D0));
-      if(isnan(D0->X)) WDutils_THROW("OctalTree: position contains NaN\n");
       Xmin = Xmax = Xave = D0->X;
       Dot*Di=D0+1;
       for(; Di!=DN && Li!=Tree->Nleafs(); ++Di) {
 	Di->I = Tree->PL[Li++];
 	Init->ReInit(reinterpret_cast<typename OctTree::Dot*>(Di));
-	if(isnan(Di->X)) WDutils_THROW("OctalTree: position contains NaN\n");
 	Di->X.up_min_max(Xmin,Xmax);
 	Xave += Di->X;
       }
       for(; Di!=DN; ++Di) {
 	Init->Init(reinterpret_cast<typename OctTree::Dot*>(Di));
-	if(isnan(Di->X)) WDutils_THROW("OctalTree: position contains NaN\n");
 	Di->X.up_min_max(Xmin,Xmax);
 	Xave += Di->X;
       }
     } else {
       // 1.2 from scratch: loop dots: initialise, find Xmin, Xmax
       Init->Init(reinterpret_cast<typename OctTree::Dot*>(D0));
-      if(isnan(D0->X)) WDutils_THROW("OctalTree: position contains NaN\n");
       Xmin = Xmax = Xave = D0->X;
       for(Dot*Di=D0+1; Di!=DN; ++Di) {
 	Init->Init(reinterpret_cast<typename OctTree::Dot*>(Di));
-	if(isnan(Di->X)) WDutils_THROW("OctalTree: position contains NaN\n");
 	Di->X.up_min_max(Xmin,Xmax);
 	Xave += Di->X;
       }
     }
+    if(isnan(Xave) || isinf(Xave)) ReportInvalidPos();
     // 2 set root box, RA[]
     Xave   /= Real(NDOT);
     P0      = NewBox(1);

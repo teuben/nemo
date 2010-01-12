@@ -11,10 +11,11 @@
 ///                                                                             
 /// \version 14-06-2007 WD created from scratch 
 /// \version 31-08-2007 WD transferred to utils
+/// \version 08-12-2009 WD removed argument n from Walk::up()
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2007 Walter Dehnen
+// Copyright (C) 2007,2009 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -84,10 +85,9 @@ namespace WDutils {
     /// upwards pass using swap()
     /// \param[in,out] a array[0..n-1] to be heapified
     /// \param[in]     c index of element to be walked up the tree
-    /// \param[in]     n size of array
     /// \param[in]     compare Comparator (see <functional>), e.g. std::less
     template<typename T, class Comparator>
-    static void up(T*a, int c, int n, Comparator compare) {
+    static void up(T*a, int c, Comparator compare) {
       for(int p=parent(c); c; c=p,to_parent(p)) {
 	if(compare(a[p],a[c])) std::swap(a[p],a[c]);
 	else break;
@@ -135,7 +135,7 @@ namespace WDutils {
     /// \param[in]     n size of array
     /// \param[in]     compare Comparator (see <functional>), e.g. std::less
     template<typename T, class Comparator>
-    static void up(T*a, int c, int n, Comparator compare) {
+    static void up(T*a, int c, Comparator compare) {
       if(c<1) return;
       T tmp=a[c];
       int i=c;
@@ -181,7 +181,7 @@ namespace WDutils {
     /// \param[in]     n size of array
     template<typename T>
     static void after_last_replace(T*a, int n) {
-      Walk::up(a,n-1,n,Comparator<T>());
+      Walk::up(a,n-1,Comparator<T>());
     }
     /// put array back into heap order after the ith element (only) has
     /// been replaced
@@ -193,7 +193,7 @@ namespace WDutils {
       int p=Walk::parent(i);
       Comparator<T> compare;
       if(compare(a[p],a[i]))
-	Walk::up(a,i,n,compare);
+	Walk::up(a,i,compare);
       else {
 	int c=Walk::child(i);
 	if(c  <n && compare(a[i],a[c]) || 
