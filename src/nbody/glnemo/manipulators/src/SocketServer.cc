@@ -20,6 +20,7 @@
 #include <iostream>
 #include <errno.h>
 #include <cstring>
+#include <cstdio>
 #include "SocketServer.h"
 
 
