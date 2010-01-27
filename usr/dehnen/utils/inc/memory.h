@@ -37,11 +37,8 @@
 #  include <iostream>
 #  define WDutils_included_iostream
 #endif
-#ifndef WDutils_included_exception_h
-#  include <exception.h>
-#endif
 #ifndef WDutils_included_traits_h
-# include <traits.h>
+#  include <traits.h>
 #endif
 #ifndef WDutils_included_inline_h
 #  include <inline.h>

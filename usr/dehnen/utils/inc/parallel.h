@@ -55,14 +55,14 @@ namespace MPI {
   enum {
     Byte  = 1,   ///< refers to a single byte of raw memory
     Bool  = 2,   ///< refers to a C++ type bool
-    Int8  = 3,   ///< refers to a signed 8bit integer, usually char
+    Int8  = 3,   ///< refers to a signed 8 bit integer, usually char
     Int16 = 4,   ///< refers to a signed 16bit integer, usually short
     Int32 = 5,   ///< refers to a signed 32bit integer, usually int
-    Int64 = 6,   ///< refers to a signed 64bit integer
-    Uint8 = 7,   ///< refers to a unsigned 8bit integer, usually unsigned char
+    Int64 = 6,   ///< refers to a signed 64bit integer, usually long
+    Uint8 = 7,   ///< refers to a unsigned 8 bit integer, usually unsigned char
     Uint16= 8,   ///< refers to a unsigned 16bit integer, usually unsigned short
     Uint32= 9,   ///< refers to a unsigned 32bit integer, usually unsigned int
-    Uint64= 10,  ///< refers to a unsigned 64bit integer
+    Uint64= 10,  ///< refers to a unsigned 64bit integer, usually unsigned long
     Float = 11,  ///< refers to C type float: 32bit 
     Double= 12   ///< refers to C type double: 64bit
   };
@@ -145,7 +145,7 @@ namespace MPI {
     Request(Request const&r) : R(r.R) {}
     operator bool() const { return R != 0; }
   };
-  /// return for undefined index values etc.
+  /// return value for undefined index values etc.
   extern int    Undefined;
   //----------------------------------------------------------------------------
   /// \name some global functions which do not need a communicator
@@ -165,15 +165,15 @@ namespace MPI {
   /// - optionally some environment variables are spawned.\n
   /// \param[in,out] argc  number of command-line arguments
   /// \param[in,out] argv  values of command-line arguments
-  /// \param[in]     env   null-terminated list of environment variables
-  /// \param[in]     file  file to look for environment variables
-  /// \note arguments \a argc and \a argv are input on the master node and
+  /// \note arguments @a argc and @a argv are input on the master node and
   ///       output on all others: this call spawns the command-line arguments
   ///       via MPI_Init()
-  /// \note argument \a env must be the same on all nodes. We will try to
+  /// \param[in]     env   null-terminated list of environment variables
+  /// \param[in]     file  file to look for environment variables
+  /// \note argument @a env must be the same on all nodes. We will try to
   ///       ensure that all nodes have the environment variables in the list
-  ///       env. If they don't initially, we try to find them at root and,
-  ///       failing that, read them from the \a file provided, if any. It is
+  ///       @a env. If they don't initially, we try to find them at root and,
+  ///       failing that, read them from the @a file provided, if any. It is
   ///       assumed that if the first environment variable is present, so are
   ///       all the others.
   void Init(int&argc, const char**&argv,
@@ -218,17 +218,15 @@ namespace MPI {
   //----------------------------------------------------------------------------
 #define NonTemplateCommunications
 #undef  NonTemplateCommunications
-  /// \brief
-  /// implements some functionality of MPI communicators as C++ class.
+  /// \brief implements some functionality of MPI communicators as C++ class.
+  ///
   /// \details
   /// We provide the point-to-point and collective communications as templates
   /// over datatype with the same type for send and receive.
-  /// \note 
-  /// We deviate from MPI standard by setting the error handler to 
-  /// MPI_ERRORS_RETURN (MPI standard: MPI_ERRORS_ARE_FATAL), to enable us
-  /// to throw exceptions in the member methods.
-  /// \note
-  /// This is not complete: I will add stuff as I need it
+  /// \note We deviate from MPI standard by setting the error handler to
+  ///       MPI_ERRORS_RETURN (MPI standard: MPI_ERRORS_ARE_FATAL), to enable
+  ///       us to throw exceptions in the member methods.
+  /// \note This is not complete: I will add stuff as I need it
   class Communicator {
     int                 COMM;          ///< MPI handle for communicator
     unsigned            SIZE;          ///< size of communicator
@@ -241,10 +239,10 @@ namespace MPI {
 #define DEBUGINFO if(debug(DEBUG_LEVEL)) DebugInformation(FILE,LINE)
     /// sets SIZE and RANK as well as the error handler to MPI_ERRORS_RETURN
     void init() WDutils_THROWING;
-    // Init() must call init() on World, for it is constructed before Init()
+    //  MPI::Init() is friend, for it must call World.init().
     friend void Init(int&, const char**&, const char**, const char*)
       WDutils_THROWING;
-    // Finish() will undo the call to init() and set COMM to NULL
+    //  MPI::Finish() is friend to undo the call to init() and set COMM to NULL
     friend void Finish() WDutils_THROWING;
     //--------------------------------------------------------------------------
   public:
@@ -254,11 +252,12 @@ namespace MPI {
     static int const&DebugLevel() { return DEBUG_LEVEL; }
     /// default constructor: World
     /// \note This constructor is (implicitly) called to construct the static
-    /// member world, which is visible outside the class as MPI::World. Since
-    /// this is done \b before MPI::Init() is called in main(), we cannot do
-    /// any MPI related stuff here. This is deferred to member init(), which
-    /// is called for Communicator::world from MPI::Init(), which in turn also
-    /// sets member World.COMM to MPI_COMM_WORLD.
+    ///       member world, which is visible outside the class as
+    ///       MPI::World. Since this is done @b before MPI::Init() is called
+    ///       in main(), we cannot do any MPI related stuff here. This is
+    ///       deferred to member init(), which is called for
+    ///       Communicator::world from MPI::Init(), which in turn also sets
+    ///       member World.COMM to MPI_COMM_WORLD.
     /// \note There is only one World, so a second call is errorneous.
     Communicator() WDutils_THROWING : COMM(0)
     {
@@ -297,9 +296,10 @@ namespace MPI {
 		   const char* =0) const WDutils_THROWING;
     /// broadcast a buffer
     /// \param[in]     root      sender
-    /// \param[in,out] buf       buffer both for send and receive
+    /// \note @a root must be the same for all processes
+    /// \param[in,out] buf       (pointer to) data to send or receive
+    /// \note data send on root and received elsewhere
     /// \param[in]     count     amount of data to be send
-    /// \note root must be the same for all processes
     template<typename T>
     void BroadCast(unsigned root, T*buf, unsigned count) const WDutils_THROWING
     {
@@ -309,7 +309,9 @@ namespace MPI {
     }
     /// broadcast a single datum
     /// \param[in]      root      sender
-    /// \param[in,out]  buf       buffer both for send and receive
+    /// \note @a root must be the same for all processes
+    /// \param[in,out]  buf       datum to send or receive
+    /// \note datum send on root and received elsewhere
     template<typename T>
     void BroadCast(unsigned root, T&buf) const WDutils_THROWING
     {
@@ -319,7 +321,9 @@ namespace MPI {
     }
     /// broadcast an Array<>
     /// \param[in]     root      sender
-    /// \param[in,out] buf       buffer both for send and receive
+    /// \note @a root must be the same for all processes
+    /// \param[in,out] buf       data send or receive
+    /// \note data send on root and received elsewhere
     /// \note This routine is a specialisation of BCast with a single datum
     template<typename T>
     void BroadCast(unsigned root, Array<T>&buf) const WDutils_THROWING
@@ -334,11 +338,12 @@ namespace MPI {
       const WDutils_THROWING;
     /// gather multiple data at root
     /// \param[in]  root   recipient
-    /// \param[in]  send   buffer with data to be send
+    /// \note @a root must be the same for all processes
+    /// \param[in]  send   (pointer to) data to be send
     /// \param[in]  count  amount of data to be send
-    /// \param[out] recv   at root only: buffer for data to be received
-    /// \note count must be the same on all processes and at root recv must
-    ///       hold memory for count*this->size() elements
+    /// \param[out] recv   at @a root only: (pointer to) data to be received
+    /// \note @a count must be the same on all processes and at @a root @a recv
+    ///       must hold memory for @a count * this->size() elements
     template<typename T>
     void Gather(unsigned root, const T*send, unsigned count, T*recv=0)
       const WDutils_THROWING
@@ -349,9 +354,10 @@ namespace MPI {
     }
     /// gather a single datum into Array<>
     /// \param[in]  root  recipient
+    /// \note @a root must be the same for all processes
     /// \param[in]  send  datum to be gather by root
-    /// \param[out] recv  buffer for data to be received at root
-    /// \note If at root recv.size() < this->size(), we reset recv
+    /// \param[out] recv  data to be received at root
+    /// \note If at @a root @a recv.size() < this->size(), we reset @a recv
     template<typename T>
     void Gather(unsigned root, T const&send, Array<T>&recv=Array<T>())
       const WDutils_THROWING
@@ -369,10 +375,11 @@ namespace MPI {
     }
     /// gather multiple data using Array<> arguments
     /// \param[in]  root  recipient
-    /// \param[in]  send  data to be send to root
-    /// \param[out] recv  at root only: buffer for data to be received
-    /// \note send.size() must be the same on each process (not checked)
-    /// \note We enforce that at root recv has correct size to hold the data
+    /// \note @a root must be the same for all processes
+    /// \param[in]  send  (pointer to) data to be send to root
+    /// \param[out] recv  at @a root only: (pointer to) data to be received
+    /// \note @a send.size() must be the same on each process (not checked).
+    /// \note We enforce that at @a root @a recv has correct size to hold data.
     template<typename T>
     void Gather(unsigned root, Array<T> const&send,
 		Array<T,2>&recv=(Array<T,2>()))
@@ -398,10 +405,11 @@ namespace MPI {
 		   const char* =0) const WDutils_THROWING;
     /// contiguously gather multiple data of variable size: template over type
     /// \param[in]  root       recipient
-    /// \param[in]  send       buffer with data to be send
+    /// \note @a root must be the same for all processes
+    /// \param[in]  send       (pointer to) data to be send
     /// \param[in]  sendcount  amount of data to be send
-    /// \param[out] recv       at root only: buffer for data to be received
-    /// \param[in]  recvcounts at root only: # data to be received per proc
+    /// \param[out] recv       at @a root only: (pointer to) data to be received
+    /// \param[in]  recvcounts at @a root only: # data to be received per proc
     template<typename T>
     void GatherVar(unsigned root, const T*send, unsigned sendcount,
 		   T*recv=0, const unsigned*recvcounts=0) const WDutils_THROWING
@@ -412,14 +420,15 @@ namespace MPI {
     }
     /// contiguously gather multiple data of variable size, using Array<> args
     /// \param[in]  root       recipient
-    /// \param[in]  send       Array with data to be send from this proc
+    /// \note @a root must be the same for all processes
+    /// \param[in]  send       data to be send from this proc
     /// \param[in]  counts     Array: # data gathered from proc p
-    /// \param[out] recv       at root only: Array for data to be received
+    /// \param[out] recv       at @a root only: data to be received
     /// \note Unlike the non-Array<> version, we require counts to be correct
-    ///       not just at root, but at all processes, allowing more stringent
+    ///       not just at @a root, but at all processes, allowing more stringent
     ///       error checking.
-    /// \note It is not permissible that send.size() != counts[RANK], but
-    ///       it is permissible that recv.size() >= Sum counts[p]
+    /// \note It is not permissible that @a send.size() != counts[RANK], but
+    ///       it is permissible that @a recv.size() >= Sum counts[p]
     template<typename T>
     void GatherVar(unsigned root, Array<T> const&send,
 		   Array<unsigned> const&counts,
@@ -453,11 +462,11 @@ namespace MPI {
     void AllGather(const void*send, unsigned count, void*recv, DataType type,
 		   const char* =0) const WDutils_THROWING;
     /// gather data at all processes: template over type
-    /// \param[in]  send   buffer with data to be send
+    /// \param[in]  send   (pointer to) data to be send
     /// \param[in]  count  amount of data to be send and received
-    /// \param[out] recv   buffer for data to be received
-    /// \note count must be the same on all processes (not checked)
-    /// \note recv must hold memory for count*this->size() elements
+    /// \param[out] recv   (pointer to) data to be received
+    /// \note @a count must be the same on all processes (not checked)
+    /// \note @a recv must hold memory for @a count * this->size() elements
     template<typename T>
     void AllGather(const T*send, unsigned count, T*recv) const WDutils_THROWING
     {
@@ -466,8 +475,8 @@ namespace MPI {
     }
     /// gather single datum at all processes
     /// \param[in]  send  datum to be send
-    /// \param[out] recv  buffer for data to be received
-    /// \note If needed, we reset recv to match size requirements
+    /// \param[out] recv  data to be received
+    /// \note If needed, we reset @a recv to match size requirements
     template<typename T>
       void AllGather(const T&send, Array<T>&recv) const WDutils_THROWING
     {
@@ -481,10 +490,10 @@ namespace MPI {
       AllGather(&send,1,recv.array(),Type<T>(),"AllGather()");
     }
     /// gather data at all processes, using Array<> arguments
-    /// \param[in]  send   buffer with data to be send
-    /// \param[out] recv   buffer for data to be received
-    /// \note send.size() must be the same on all processes (not checked)
-    /// \note If needed, we reset recv to match size requirements
+    /// \param[in]  send   data to be send
+    /// \param[out] recv   data to be received
+    /// \note @a send.size() must be the same on all processes (not checked)
+    /// \note If needed, we reset @a recv to match size requirements
     template<typename T>
       void AllGather(const Array<T>&send, Array<T,2>&recv)
       const WDutils_THROWING
@@ -513,9 +522,9 @@ namespace MPI {
     /// send data between all processes
     /// \param[in]  send   data to be send to each process
     /// \param[in]  count  # data to be send to each process
-    /// \param[out] recv   buffer for data to be received from all processes
-    /// \note send must contain count*this->size() data and, equally,
-    ///       recv must be able to hold the same amount of data
+    /// \param[out] recv   data to be received from all processes
+    /// \note @a send must contain @a count * this->size() data and, equally,
+    ///       @a recv must be able to hold the same amount of data
     template<typename T>
     void AllToAll(const T*send, unsigned count, T*recv) const WDutils_THROWING
     {
@@ -524,10 +533,10 @@ namespace MPI {
     }
     /// send data between all processes using Array<> arguments
     /// \param[in]  send   data to be send to each process
-    /// \param[out] recv   buffer for data to be received from all processes
-    /// \note send.size(0) must equal this->size(); the same holds for recv.
-    ///       Similarly, send.size(1) must equal recv.size(1). We reset recv
-    ///       if necessary.
+    /// \param[out] recv   data to be received from all processes
+    /// \note @a send.size(0) must equal this->size(); the same holds for @a
+    ///       recv. Similarly, @a send.size(1) must equal @a recv.size(1). We
+    ///       reset @a recv if necessary.
     template<typename T>
     void AllToAll(Array<T,2>const&send, Array<T,2>&recv) const WDutils_THROWING
     {
@@ -554,10 +563,11 @@ namespace MPI {
       const WDutils_THROWING;
     /// reduce data at one process: template over type and reduction operator
     /// \param[in]  root   recipient
-    /// \param[in]  send   buffer with data to be reduced
-    /// \param[out] recv   at root only: buffer for data to be received
+    /// \note @a root must be the same for all processes
+    /// \param[in]  send   (pointer to) data to be reduced
+    /// \param[out] recv   at @a root only: (pointer to) data to be received
     /// \param[in]  count  amount of data to be reduced
-    /// \note count must be the same on all processes (not checked)
+    /// \note @a count must be the same on all processes (not checked)
     template<Operator O, typename T>
     void Reduce(unsigned root, const T*send, T*recv, unsigned count)
       const WDutils_THROWING
@@ -568,6 +578,7 @@ namespace MPI {
     }
     /// reduce a single datum at one process
     /// \param[in]  root      recipient
+    /// \note @a root must be the same for all processes
     /// \param[in]  send      datum to be reduced
     /// \param[out] recv      datum to be received
     template<Operator O, typename T>
@@ -579,11 +590,12 @@ namespace MPI {
     }
     /// reduce data at one process, using Array<> arguments
     /// \param[in]  root   recipient
-    /// \param[in]  send   buffer with data to be reduced
-    /// \param[out] recv   at root only: buffer for data to be received
-    /// \note send.size() must be the same on all processes (not checked)
-    /// \note At root, we enforce that recv.size() >= send.size()
-    /// \note This routine is a specialisation of Reduce with a single datum
+    /// \note @a root must be the same for all processes
+    /// \param[in]  send   (pointer to) data to be reduced
+    /// \param[out] recv   at @a root only: (pointer to) data to be received
+    /// \note @a send.size() must be the same on all processes (not checked)
+    /// \note At @a root, we enforce that @a recv.size() >= @a send.size()
+    /// \note This routine is a specialisation of Reduce() with a single datum
     template<Operator O, typename T>
     void Reduce(unsigned root, Array<T>const&send, Array<T>&recv=(Array<T>()))
       const WDutils_THROWING
@@ -603,9 +615,10 @@ namespace MPI {
     // --- ReduceInPlace ------------------------------------------------------
     /// reduce data at one process in place: template over type & reduction op
     /// \param[in]     root  recipient
-    /// \param[in,out] buf   buffer with data to be reduced
+    /// \note @a root must be the same for all processes
+    /// \param[in,out] buf   (pointer to) data to be reduced
     /// \param[in]     count amount of data to be reduced
-    /// \note at root buf will on output contain the reduce data
+    /// \note at @a root buf will on output contain the reduce data
     template<Operator O, typename T>
     void ReduceInPlace(unsigned root, T*buf, unsigned count)
       const WDutils_THROWING
@@ -622,7 +635,8 @@ namespace MPI {
     }
     /// reduce a single datum in place
     /// \param[in]     root     recipient
-    /// \param[in,out] buf      datum to be reduced (output only at root)
+    /// \note @a root must be the same for all processes
+    /// \param[in,out] buf      datum to be reduced (output only at @a root)
     template<Operator O, typename T>
     void ReduceInPlace(unsigned root, T&buf) const WDutils_THROWING
     {
@@ -636,9 +650,10 @@ namespace MPI {
     }
     /// reduce data at one process in place, using Array<> argument
     /// \param[in]     root  recipient
-    /// \param[in,out] buf   buffer with data to be reduced
-    /// \note at root buf will on output contain the reduce data
-    /// \note This is a specialisation of ReduceInPlace with a single datum
+    /// \note @a root must be the same for all processes
+    /// \param[in,out] buf   (pointer to) data to be reduced
+    /// \note At @a root buf will on output contain the reduced data.
+    /// \note This is a specialisation of ReduceInPlace() with a single datum.
     template<Operator O, typename T>
     void ReduceInPlace(unsigned root, Array<T,1>&buf) const WDutils_THROWING
     {
@@ -657,8 +672,8 @@ namespace MPI {
     void AllReduce(Operator op, const void*send, void*recv, unsigned count,
 		   DataType type, const char* =0) const WDutils_THROWING;
     /// reduce data at all processes: template over type and reduction operator
-    /// \param[in]  send   buffer with data to be reduced
-    /// \param[out] recv   buffer for data to be received
+    /// \param[in]  send   (pointer to) data to be reduced
+    /// \param[out] recv   (pointer to) data to be received
     /// \param[in]  count  amount of data to be reduced
     template<Operator O, typename T>
     void AllReduce(const T*send, T*recv, unsigned count) const WDutils_THROWING
@@ -677,10 +692,10 @@ namespace MPI {
       AllReduce(O,&send,&recv,1,Type<T>(),"AllReduce<%s>");
     }
     /// reduce data at all processes, using Array<> arguments
-    /// \param[in]  send   buffer with data to be reduced
-    /// \param[out] recv   buffer for data to be received
-    /// \note we enforce recv to hold enough memory to receive data
-    /// \note This is a specialisation of AllReduce with a single datum
+    /// \param[in]  send   data to be reduced
+    /// \param[out] recv   data to be received
+    /// \note We enforce @a recv to hold enough memory to receive data.
+    /// \note This is a specialisation of AllReduce() with a single datum.
     template<Operator O, typename T>
     void AllReduce(Array<T> const&send, Array<T> &recv) const WDutils_THROWING
     {
@@ -698,9 +713,9 @@ namespace MPI {
     }
     // --- AllReduceInPlace ---------------------------------------------------
     /// reduce data at all processes in place
-    /// \param[in,out] buf    buffer with data to be reduced
+    /// \param[in,out] buf    (pointer to) data to be reduced
     /// \param[in]     count  amount of data to be reduced
-    /// \note on output buf will contain the reduced data
+    /// \note On output @a buf will contain the reduced data
     template<Operator O, typename T>
     void AllReduceInPlace(T*buf, unsigned count) const WDutils_THROWING
     {
@@ -722,9 +737,9 @@ namespace MPI {
       AllReduce(O,&send,&buf,1,Type<T>(),"AllReduceInPlace<%s>");
     }
     /// reduce data at all processes in place, using Array<> argument
-    /// \param[in,out] buf    buffer with data to be reduced
-    /// \note on output buf will contain the reduce data
-    /// \note This is a specialisation of AllReduceInPlace with a single datum
+    /// \param[in,out] buf    data to be reduced
+    /// \note On output @a buf will contain the reduce data.
+    /// \note Specialisation of AllReduceInPlace() with a single datum.
     template<Operator O, typename T>
     void AllReduceInPlace(Array<T>&buf) const WDutils_THROWING
     {
@@ -739,13 +754,15 @@ namespace MPI {
     /// \name blocking point to point communications (not complete)
     //@{
     // --- Send ---------------------------------------------------------------
-    void Send(unsigned dest, const void*buf, unsigned count, int tag, DataType type,
-	      const char* =0) const WDutils_THROWING;
-    /// send data
+    void Send(unsigned dest, const void*buf, unsigned count, int tag,
+	      DataType type, const char* =0) const WDutils_THROWING;
+    /// send data (blocking)
     /// \param[in]  dest  destination process
-    /// \param[in]  buf   buffer with data to be send
+    /// \param[in]  buf   (pointer to) data to be send
     /// \param[in]  count amount of data to be send
     /// \param[in]  tag   identifier
+    /// \note Must be matched by a call to Recv() on @a dest with same @a tag.
+    /// \note On return communication has been made.
     template<typename T>
     void Send(unsigned dest, const T*buf, unsigned count, int tag)
       const WDutils_THROWING
@@ -757,13 +774,15 @@ namespace MPI {
     unsigned Recv(unsigned srce, void*buf, unsigned count, int tag,
 		  DataType type, bool warn, const char* =0)
       const WDutils_THROWING;
-    /// receive data
+    /// receive data (blocking)
     /// \return            # data actually received
     /// \param[in]  srce   source process: only receive matching message
-    /// \param[in]  buf    buffer to receive data
+    /// \param[out] buf    (pointer to) data received
     /// \param[in]  count  size of receive buffer
     /// \param[in]  tag    identifier: only receive matching message
     /// \param[in]  warn   optional: warn about count mismatch (default: true)
+    /// \note Must be matched by a call to Send() on @a srce with same @a tag.
+    /// \note On return data have been received into buf.
     template<typename T>
     unsigned Recv(unsigned srce, T*buf, unsigned count, int tag, bool warn=true)
       const WDutils_THROWING
@@ -780,10 +799,13 @@ namespace MPI {
 		      DataType type, const char* =0) const WDutils_THROWING;
     /// issue send request
     /// \param[in]  dest  destination process
-    /// \param[in]  buf   buffer with data to be send
+    /// \param[in]  buf   (pointer to) data to be send
     /// \param[in]  count amount of data to be send
     /// \param[in]  tag   identifier
     /// \return           request issued
+    /// \note On return communication may not be complete and @a buf must not
+    ///       be written into until after completion of communication, as
+    ///       indicated by Test() or Wait().
     template<typename T>
     Request IssueSend(unsigned dest, const T*buf, unsigned count, int tag)
       const WDutils_THROWING
@@ -797,10 +819,13 @@ namespace MPI {
 		      DataType type, const char* =0) const WDutils_THROWING;
     /// issue receive request
     /// \param[in]  srce  source process: only receive matching message
-    /// \param[in]  buf   buffer to receive data
+    /// \param[in]  buf   (pointer to) data to be received
     /// \param[in]  count size of receive buffer
     /// \param[in]  tag   identifier: only receive matching message
     /// \return           request issued
+    /// \note On return communication may not be complete and @a buf must not
+    ///       be tampered with until after completion of communication, as
+    ///       indicated by Test() or Wait().
     template<typename T>
     Request IssueRecv(unsigned srce, T*buf, unsigned count, int tag)
       const WDutils_THROWING
@@ -810,47 +835,47 @@ namespace MPI {
       return IssueRecv(srce,buf,count,tag,Type<T>(),"IssueRecv()");
     }
     // --- Waits and Tests ----------------------------------------------------
-    /// blocking: wait for a completion of a operations
+    /// wait for a completion of an operations (blocking)
     /// \param[in,out] request  Request as issued by IssueSend() or IssueRecv()
     /// \param[out]    status   status of operation
-    /// \note the request is void after return.
+    /// \note The request is void after return.
     void Wait(Request&request, Status&status) const WDutils_THROWING;
-    /// blocking: wait for completion of any of several requests
+    /// wait for completion of one of several operations (blocking)
     /// \param[in]     num     number of operations to be completed
     /// \param[in,out] reqs    array of requests to be completed
     /// \param[out]    status  optional: status of completed operation
     /// \return                index of completed operation
-    /// \note The request[index] is void after return.
+    /// \note The @a request[@a index] is void after return.
     /// \note If none of the requests was valid, MPI::Undefined is returned
     unsigned WaitAny(unsigned num, Request*reqs, Status*status=0)
       const WDutils_THROWING;
-    /// blocking: wait for completion of all of several operations
+    /// wait for completion of all of several operations (blocking)
     /// \param[in]     num     number of operations to be completed
     /// \param[in,out] reqs    array of requests to be completed
     /// \param[out]    status  optional: status of completed operations
-    /// \note The request[] are void after return.
+    /// \note The @a request[] are void after return.
     /// \note If none of the requests was valid, MPI::Undefined is returned
     void WaitAll(unsigned num, Request*reqs, Status*status=0)
       const WDutils_THROWING;
-    /// non-blocking: test for completion of a single operation
+    /// test for completion of a single operation (non-blocking)
     /// \param[in,out] request Request as issued by IssueSend() or IssueRecv()
     /// \param[out]    status  if success: status of operation
     /// \return        true    if operation is complete
     /// \note if true is returned, the Request is void after the call
     bool Test(Request&request, Status&status) const WDutils_THROWING;
-    /// non-blocking: test for completion of one or none of severeal operations
+    /// test for completion of one or none of severeal operations (non-blocking)
     /// \param[in]     num     number of operations to be tested
     /// \param[in,out] request array of requests to be tested
     /// \param[out]    index   index of completed operation, if any
-    /// \note index is set to MPI::Undefined if no operation completed.
+    /// \note @a index is set to MPI::Undefined if no operation has completed.
     /// \param[out]    status  status of completed operation, if any
-    /// \return true if either one operation completed or no request was active
+    /// \return true if any one operation completed or no request was active
     /// \note If one operation finished, the associated request becomes void.
     /// \note If none of the requests was valid, true is returned and index is
     ///       MPI::Undefined.
     bool TestAny(unsigned num, Request*request, int&index, Status&status)
       const WDutils_THROWING;
-    /// non-blocking: test for completion of any of several operations
+    /// test for completion of any number of several operations (non-blocking)
     /// \param[in]     num      number of operations to be tested
     /// \param[in,out] request  array: requests to be tested
     /// \param[in,out] indices  indices of operations completed, if any

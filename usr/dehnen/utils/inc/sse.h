@@ -150,7 +150,6 @@ namespace WDutils {
 //       static T Sum(const T*, size_t);
     };
 
-
     /// \name simple manipulations of each array element
     /// \note up to about 16/sizeof(T) times faster than simple code
     //@{

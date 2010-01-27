@@ -33,11 +33,11 @@
 
 using namespace WDutils;
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// class WDutils::Random3                                                      //
-//                                                                            //
-// as in Numerical Recipes                                                    //
-//                                                                            //
+//
+// class WDutils::Random3
+//
+// as in Numerical Recipes
+//
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   const long   mbig  = 1000000000, mseed = 161803398;
