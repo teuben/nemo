@@ -132,7 +132,7 @@ utils			:
 			ln -sf ../utils
 inc/utils		: utils
 			(cd inc; ln -sf ../utils/inc utils)
-links			:=	utils inc/utils $(links_pro) $(links_sph) $(links_walter) $(links_pjm) $(links_mpi)
+links			:=	$(links_pro) utils inc/utils $(links_sph) $(links_walter) $(links_pjm) $(links_mpi)
 
 links			:	$(links)
 

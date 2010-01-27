@@ -378,7 +378,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
 		       bool         giveF) const // I: give phase space density?
 {
   
-  int iset=0,Tsize=3,counter=1,lasti=0;
+  int Tsize=3,counter=1,lasti=0;
   int Np=B.N_bodies();
   double mpart=Mt/double(Np);
   double Mcum=0.;
