@@ -136,6 +136,7 @@ private:
   bool swap;
   glnemo::ComponentRangeVector  crv;
   void storeComponents();
+  int npartOffset[6];
   //fortran offset record length
   int frecord_offset;
   //control

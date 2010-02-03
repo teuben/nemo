@@ -161,10 +161,12 @@ void MainWindow::start(std::string shot)
       store_options->frame_height=hsize;
       store_options->base_frame_name=QString(shot.c_str());
   }
+  if (shot != "") takeScreenshot(wsize,hsize,shot);
+  
   if (play) {
       actionPlay(); // start playing time step
   }
-  if (shot != "" && !play) takeScreenshot(wsize,hsize,shot);
+  
   gl_window->setFocus();
 }
 // -----------------------------------------------------------------------------
@@ -802,7 +804,11 @@ void MainWindow::actionQuit()
     killPlayingEvent();        // wait the end of loading thread
     mutex_loading.unlock();    // release area
   }
-  close();
+  if (store_options->enable_gui)
+    close();  
+  else
+    //QCoreApplication::quit();
+    exit(1);
 }
 // -----------------------------------------------------------------------------
 // actionReload()                                                               
@@ -1118,14 +1124,19 @@ void MainWindow::actionPlay()
     play_animation = !play_animation;
     if (play_animation) {
       if ( current_data->isEndOfData() ) {
-        if (store_options->enable_gui)
-            QMessageBox::information( this,tr("Warning"),current_data->endOfDataMessage(),"Ok");
+        if (store_options->enable_gui) {
+            std::cerr << "store_options->enable_gui.......\n";
+            QMessageBox::information( this,tr("Warning"),
+                                      current_data->endOfDataMessage(),"Ok");
+            emit endOfSnapshot();
+        }
         else {
-            killPlayingEvent();
+            //killPlayingEvent();
             actionQuit();
+            close();
         }
         //play_animation = false;
-        emit endOfSnapshot();
+        //emit endOfSnapshot();
       }
       else { // start timer
         play_timer->start( 20 );

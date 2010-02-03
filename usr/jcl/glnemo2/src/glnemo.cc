@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "preview.2009-Dec-18"
+#define RELEASE_VERSION "preview.2010-Feb-03"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -122,6 +122,7 @@ int main(int argc, char *argv[])
   const int hsize=getiparam((char* )"hsize");
   std::string shot;
   bool interact=true;
+  bool play=getbparam((char* )"play");
   if ( hasvalue((char *) "screenshot") )  {
     shot           = getparam((char *) "screenshot");
     interact       = false;
@@ -142,5 +143,6 @@ int main(int argc, char *argv[])
   finiparam();  // garbage collecting for nemo
 
   //if (interact) return app.exec();
-  return app.exec();
+  if (interact || play) 
+    return app.exec();
 }
