@@ -1,6 +1,11 @@
 current version
+
+preview.2010-Feb-03
+-------------------
   glnemo2 can render automatically all the time steps of a snapshot, if 
-  from the command line, input parameters screensht has a value  and play=t.  
+  from the command line, input parameters screenshot has a value  and play=t.  
+
+  Support added for Gadget2 file in multiple data file. 
 
 preview.2009-Oct-23
 -------------------
