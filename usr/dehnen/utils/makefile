@@ -65,6 +65,9 @@ libicc		:
 		make -f makeall COMPILER=icc
 endif
 
+doxu		:
+		make -f makeall COMPILER=gcc doxu
+
 # --------
 # cleaning
 # --------

@@ -1,8 +1,8 @@
 # -*- makefile -*-
 ################################################################################
 #
-#
 # Makefile for WDutils
+#
 ################################################################################
 
 default			: library
@@ -168,5 +168,18 @@ else
 library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
 
 endif
+
+# ---------------------
+# doxygen documentation
+# ---------------------
+
+dox/html/index.htlm:	$(INC)Pi.h $(INC)heap.h $(INC)meta.h $(INC)inline.h \
+			$(INC)exception.h $(INC)sse.h $(INC)traits.h \
+			$(INC)io.h $(INC)tupel.h $(INC)memory.h \
+			$(INC)numerics.h $(INC)spline.h $(INC)random.h \
+			$(INC)WDMath.h $(INC)parallel.h $(INC)octtree.h
+			doxygen utils.dox
+
+doxu		:	dox/html/index.htlm
 
 #END

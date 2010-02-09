@@ -9,13 +9,15 @@
 ///                                                                             
 /// \date    2009,2010                                                          
 ///                                                                             
-/// \note    based on falcON's tree.cc (by the same author)
+/// \note    originally based on falcON's tree.cc (by the same author)
 ///                                                                             
 /// \version 08-may-2009 WD  real test: debugged error in linking
 /// \version 13-may-2009 WD  abolished Peano-Hilbert support
 /// \version 25-sep-2009 WD  new version using indices for Leaf & Cell
 /// \version 14-oct-2009 WD  new version tested against old, old abolished.
-/// \version 27-jan-2010 WD  added leaf's parent cell
+/// \version 27-jan-2010 WD  added leaf's parent cell, changed Node magic
+/// \version 28-jan-2010 WD  TreeWalker::SmallestContainingCell tested
+/// \version 29-jan-2010 WD  NeighbourFinder, NearestNeighbourFinder tested
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -37,6 +39,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <octtree.h>
+#include <memory.h>
+#include <heap.h>
 #include <cstring>
 
 #define TESTING
@@ -55,6 +59,9 @@
 # endif
 #endif
 
+//
+// Wdutils::OctalTree<Dim,Real>
+//
 namespace {
   using std::setw;
   using std::setfill;
@@ -66,27 +73,18 @@ namespace {
 #define  pBOX(d) static_cast<Box*>((d))
 #define cpBOX(d) static_cast<const Box*>((d))
   //////////////////////////////////////////////////////////////////////////////
-  /// base class for Dot and Box
-  template<int Dim, typename Real>
-  struct Node
-  {
-    tupel<Dim,Real> X;    ///< position
-  };
-  /// position and index: same as OctalTree::Dot
-  /// \note In the code, this type is reinterpret_cast<> to OctalTree::Dot, so
-  ///       it MUST match one to one.
-  template<int Dim, typename Real>
-  struct DotBase : public Node<Dim,Real>
-  {
-    typedef typename OctalTree<Dim,Real>::node_index node_index;
-    node_index I;         ///< index of asociated particle
-  };
+  /// dummy base class for Dot and Box
+  /// \note must be empty so that a cast from Dot to OctTree::Dot is valid!
+  struct Node {};
   /// represents leafs
   template<int Dim, typename Real>
-  struct Dot : public DotBase<Dim,Real>
+  struct Dot : 
+    public Node,
+    public OctalTree<Dim,Real>::Dot
   {
     typedef typename OctalTree<Dim,Real>::node_index node_index;
-    mutable Dot *Next;    ///< next dot in a linked lisst
+    /// next dot in a linked list
+    mutable Dot *Next;
     /// add this to a linked list of dots
     void AddToList(Dot* &List, node_index&Counter)
     {
@@ -95,30 +93,30 @@ namespace {
       ++Counter;
     }
     /// add this to a linked list of nodes
-    void AddToList(Node<Dim,Real>*&List, node_index&Counter)
+    void AddToList(Node*&List, node_index&Counter)
     {
       Next = pDOT(List);
       List = this;
       ++Counter;
     }
   };
-  /// type used for octants (really only needs to count to 8, but using a
-  /// integer type with fewer bytes doesn't increase speed)
+  /// type used for octants
   typedef unsigned octant_type;
   /// represents cells
   template<int Dim, typename Real>
-  struct Box : public Node<Dim,Real>
+  struct Box : public Node
   {
-    typedef ::Node<Dim,Real> Node;
+    const static octant_type Nsub = 1<<Dim;
     typedef ::Dot <Dim,Real> Dot;
     typedef typename Dot::node_index node_index;
-    const static octant_type Nsub = 1<<Dim;
-    uint16     TYP;          ///< bitfield: 1=cell, 0=dot
-    uint8      LEV;          ///< tree level of box
-    uint8      PEA;          ///< Peano-Hilbert map (currently not used)
-    Node      *OCT[Nsub];    ///< octants
-    node_index NUM;          ///< # dots
-    Dot       *DOT;          ///< linked list of dots, if any.
+    //
+    tupel<Dim,Real> CEN;          ///< centre position
+    uint16          TYP;          ///< bitfield: 1=cell, 0=dot
+    uint8           LEV;          ///< tree level of box
+    uint8           PEA;          ///< Peano-Hilbert map (currently not used)
+    Node*           OCT[Nsub];    ///< octants
+    node_index      NUM;          ///< # dots
+    Dot            *DOT;          ///< linked list of dots, if any.
     /// is octant i a box?
     bool MarkedAsBox(octant_type i) const { return TYP & (1<<i); }
     /// is octant i a dot?
@@ -159,90 +157,202 @@ namespace {
       return this;
     }
   };
-  //////////////////////////////////////////////////////////////////////////////
-  namespace meta {
-    template<int Dim, typename Real> struct Helper;
-    template<typename Real> struct Helper<2,Real>
+  /// \name some geometrical methods, only for D=2,3
+  //@{
+  /// is pos in the interval [cen-rad, cen+rad) ?
+  template<typename Real> inline
+  bool ininterval(Real cen, Real rad, Real pos)
+  // necessary to trick emacs, which otherwise confused "<" for a bracket
+#define LessThan <
+  { return cen LessThan pos?  cen <= pos+rad : pos < cen+rad; }
+#undef  LessThan
+  /// contains geometrical methods in Dim dimensions, only D=2,3
+  template<int Dim, typename Real> struct Helper;
+  //
+  template<typename Real> struct Helper<2,Real>
+  {
+    typedef tupel<2,Real> Point;
+    typedef ::Box<2,Real> Box;
+    static octant_type octant(Point const&cen, Point const&pos)
     {
-      typedef tupel<2,Real> point;
-      typedef ::Box<2,Real> Box;
-      static octant_type octant(point const&cen, point const&pos)
-      {
-	octant_type oct(0);
-	if(pos[0] > cen[0]) oct |= 1;
-	if(pos[1] > cen[1]) oct |= 2;
-	return oct;
-      }
-      static tupel<2,Real> Integer(point const&x)
-      {
-	tupel<2,Real> c;
-	c[0]=int(x[0]+Real(0.5));
-	c[1]=int(x[1]+Real(0.5));
-	return c;
-      }
-      static bool ShrinkToOctant(Box*B, octant_type i, uint8 m, const Real*ra)
-      {
-	uint8 l = ++(B->LEV);
-	if(l > m) return false;
-	Real rad=ra[l];
-	if(i&1) B->X[0] += rad;  else  B->X[0] -= rad;
-	if(i&2) B->X[1] += rad;  else  B->X[1] -= rad;
-	return true;
-      }      
-      static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
-      {
-	Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-	Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
-	if(R1>D) D=R1;
-	return pow(Real(2), int(1+std::log(D)/M_LN2));
-      }
-    };
-    template<typename Real> struct Helper<3,Real>
+      octant_type oct(0);
+      if(pos[0] > cen[0]) oct |= 1;
+      if(pos[1] > cen[1]) oct |= 2;
+      return oct;
+    }
+    static bool contains(Point const&cen, Real rad, Point const&pos)
     {
-      typedef tupel<3,Real> point;
-      typedef ::Box<3,Real> Box;
-      static octant_type octant(point const&cen, point const&pos)
-      {
-	octant_type oct(0);
-	if(pos[0] > cen[0]) oct |= 1;
-	if(pos[1] > cen[1]) oct |= 2;
-	if(pos[2] > cen[2]) oct |= 4;
-	return oct;
-      }
-      static tupel<3,Real> Integer(point const&x)
-      {
-	tupel<3,Real> c;
-	c[0]=int(x[0]+Real(0.5));
-	c[1]=int(x[1]+Real(0.5));
-	c[2]=int(x[2]+Real(0.5));
-	return c;
-      }
-      static bool ShrinkToOctant(Box*B, octant_type i, uint8 md, const Real*ra)
-      {
-	uint8 l = ++(B->LEV);
-	if(l > md) return false;
-	Real rad=ra[l];
-	if(i&1) B->X[0] += rad;  else  B->X[0] -= rad;
-	if(i&2) B->X[1] += rad;  else  B->X[1] -= rad;
-	if(i&4) B->X[2] += rad;  else  B->X[2] -= rad;
-	return true;
-      }      
-      static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
-      {
-	Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-	Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
-	R1 = max(Xmax[2]-X[2], X[2]-Xmin[2]); if(R1>D) D=R1;
-	return pow(Real(2), int(1+std::log(D)/M_LN2));
-      }
-    };
-  } // namespace meta
-  //////////////////////////////////////////////////////////////////////////////
+      return ininterval(cen[0],rad,pos[0])
+	&&   ininterval(cen[1],rad,pos[1]);
+    }
+    static Real outside_dist_sq(Point const&cen, Real rad, Point const&pos)
+    {
+      Real q(0),D;
+      D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
+      D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
+      return q;
+    }
+    static bool outside(Point const&cen, Real rad, Point const&pos, Real Q)
+    {
+      Real q(0),D;
+      D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      return false;
+    }
+    static bool inside(Point const&cen, Real rad, Point const&pos, Real Q)
+    {
+      Real D;
+      D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
+      D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
+      return true;
+    }
+    static tupel<2,Real> Integer(Point const&x)
+    {
+      tupel<2,Real> c;
+      c[0]=int(x[0]+Real(0.5));
+      c[1]=int(x[1]+Real(0.5));
+      return c;
+    }
+    static bool ShrinkToOctant(Box*B, octant_type i, uint8 m, const Real*ra)
+    {
+      uint8 l = ++(B->LEV);
+      if(l > m) return false;
+      Real rad=ra[l];
+      if(i&1) B->CEN[0] += rad;  else  B->CEN[0] -= rad;
+      if(i&2) B->CEN[1] += rad;  else  B->CEN[1] -= rad;
+      return true;
+    }      
+    static Real RootRadius(Point const&X, Point const&Xmin, Point const&Xmax)
+    {
+      Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
+      if(R1>D) D=R1;
+      return pow(Real(2), int(1+std::log(D)/M_LN2));
+    }
+  };
+  //
+  template<typename Real> struct Helper<3,Real>
+  {
+    typedef tupel<3,Real> Point;
+    typedef ::Box<3,Real> Box;
+    static octant_type octant(Point const&cen, Point const&pos)
+    {
+      octant_type oct(0);
+      if(pos[0] > cen[0]) oct |= 1;
+      if(pos[1] > cen[1]) oct |= 2;
+      if(pos[2] > cen[2]) oct |= 4;
+      return oct;
+    }
+    static bool contains(Point const&cen, Real rad, Point const&pos)
+    {
+      return ininterval(cen[0],rad,pos[0])
+	&&   ininterval(cen[1],rad,pos[1])
+	&&   ininterval(cen[2],rad,pos[2]);
+    }
+    static Real outside_dist_sq(Point const&cen, Real rad, Point const&pos)
+    {
+      Real q(0),D;
+      D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
+      D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
+      D = abs(cen[2]-pos[2]); if(D>rad) q+=square(D-rad);
+      return q;
+    }
+    static bool outside(Point const&cen, Real rad, Point const&pos, Real Q)
+    {
+      Real q(0),D;
+      D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      D=abs(cen[2]-pos[2]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      return false;
+    }
+    static bool inside(Point const&cen, Real rad, Point const&pos, Real Q)
+    {
+      Real D;
+      D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
+      D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
+      D=abs(cen[2]-pos[2]); if(D>rad || Q>square(D-rad)) return false;
+      return true;
+    }
+    static tupel<3,Real> Integer(Point const&x)
+    {
+      tupel<3,Real> c;
+      c[0]=int(x[0]+Real(0.5));
+      c[1]=int(x[1]+Real(0.5));
+      c[2]=int(x[2]+Real(0.5));
+      return c;
+    }
+    static bool ShrinkToOctant(Box*B, octant_type i, uint8 md, const Real*ra)
+    {
+      uint8 l = ++(B->LEV);
+      if(l > md) return false;
+      Real rad=ra[l];
+      if(i&1) B->CEN[0] += rad;  else  B->CEN[0] -= rad;
+      if(i&2) B->CEN[1] += rad;  else  B->CEN[1] -= rad;
+      if(i&4) B->CEN[2] += rad;  else  B->CEN[2] -= rad;
+      return true;
+    }      
+    static Real RootRadius(Point const&X, Point const&Xmin, Point const&Xmax)
+    {
+      Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
+      R1 = max(Xmax[2]-X[2], X[2]-Xmin[2]); if(R1>D) D=R1;
+      return pow(Real(2), int(1+std::log(D)/M_LN2));
+    }
+  };
+  /// octant of pos with respect to cen.
+  /// \note if pos[i]>=cen[i], the ith bit of octant is set to 1, otherwise 0
+  template<int D, typename Real> inline
+  octant_type octant(tupel<D,Real> const&cen,
+		     tupel<D,Real> const&pos)
+  { return Helper<D,Real>::octant(cen,pos); }
+  /// does a cubic box contain a given position
+  /// \param[in] cen  geometric centre of cube
+  /// \param[in] rad  radius = half side length of cube
+  /// \param[in] pos  position to test for containment
+  /// \return         is pos[i] in [cen[i]-rad, cen[i]+rad) for i=0...D-1 ?
+  /// \note This definition of containment matches the way positions are
+  ///       sorted into the OctalTree.
+  template<int D, typename Real> inline
+  bool contains(tupel<D,Real> const&cen, Real rad, tupel<D,Real> const&pos)
+  { return Helper<D,Real>::contains(cen,rad,pos); }
+  /// distance^2 from given position to the nearest point on a cube
+  /// \param[in] cen  geometric centre of cube
+  /// \param[in] rad  radius = half side length of cube
+  /// \param[in] pos  position to compute distance^2 for
+  /// \return    squared distance of @a pos to cube
+  /// \note If pos is inside the cube, zero is returned
+  template<int D, typename Real> inline
+  Real outside_dist_sq(tupel<D,Real> const&cen, Real rad,
+		       tupel<D,Real> const&pos)
+  { return Helper<D,Real>::outside_dist_sq(cen,rad,pos); }
+  /// is a sphere outside of a cubic box?
+  /// \param[in] cen  geometric centre of cube
+  /// \param[in] rad  radius = half side length of cube
+  /// \param[in] pos  centre of sphere
+  /// \param[in] q    radius^2 of sphere
+  /// \return is sphere outside cube?
+  /// \note Equivalent to, but on average faster than, 
+  ///       \code q < outside_dist_sq(cen,rad,pos) \endcode
+  template<int D, typename Real> inline
+  bool outside(tupel<D,Real> const&cen, Real rad,
+	       tupel<D,Real> const&pos, Real q)
+  { return Helper<D,Real>::outside(cen,rad,pos,q); }
+  /// is a sphere inside of a cubic box?
+  /// \param[in] cen  geometric centre of cube
+  /// \param[in] rad  radius = half side length of cube
+  /// \param[in] pos  centre of sphere
+  /// \param[in] q    radius^2 of sphere
+  template<int D, typename Real> inline
+  bool inside(tupel<D,Real> const&cen, Real rad,
+	      tupel<D,Real> const&pos, Real q)
+  { return Helper<D,Real>::inside(cen,rad,pos,q); }
+  //
   template<int Dim, typename Real> inline
   octant_type Box<Dim,Real>::octant(const Dot*D) const
   {
-    return meta::Helper<Dim,Real>::octant(this->X,D->X);
+    return Helper<Dim,Real>::octant(this->CEN,D->X);
   }
-  //////////////////////////////////////////////////////////////////////////////
+  /// type to estimate the number of tree boxes needed.
   class EstimateNalloc
   {
     const size_t Ndots;
@@ -255,7 +365,6 @@ namespace {
       return size_t(x+4*std::sqrt(x)+16);
     }
   };
-  //////////////////////////////////////////////////////////////////////////////
   //
   /// auxiliary class for OctalTree.
   ///
@@ -270,7 +379,6 @@ namespace {
     typedef typename OctTree::node_index node_index;
     typedef typename OctTree::depth_type depth_type;
     typedef typename OctTree::Point      Point;
-    typedef ::Node<Dim,Real>             Node;
     typedef ::Dot <Dim,Real>             Dot;
     typedef ::Box <Dim,Real>             Box;
     /// \name data
@@ -312,7 +420,7 @@ namespace {
     /// \param[in]     i octant
     bool ShrinkToOctant(Box*B, octant_type i)
     {
-      return meta::Helper<Dim,Real>::ShrinkToOctant(B,i,MAXD,RA);
+      return Helper<Dim,Real>::ShrinkToOctant(B,i,MAXD,RA);
     }
     /// get a new box, resetted.
     Box* NewBox(size_t nl)
@@ -327,8 +435,8 @@ namespace {
     Box*MakeSubBox(const Box*B, octant_type i, size_t nl) WDutils_THROWING
     {
       Box*P = NewBox(nl);
-      P->LEV  = B->LEV;
-      P->X    = B->X;
+      P->LEV = B->LEV;
+      P->CEN = B->CEN;
       if(!ShrinkToOctant(P,i))
 	WDutils_THROW("exceeding maximum tree depth of %d\n         "
 		      "(perhaps more than Nmax=%du positions are identical "
@@ -446,7 +554,7 @@ namespace {
     {
       TREE->LE[C] = B->LEV;
       TREE->OC[C] = o;
-      TREE->XC[C] = B->X;
+      TREE->XC[C] = B->CEN;
       TREE->L0[C] = LF;
       TREE->NL[C] = B->NUM;
       TREE->NM[C] = B->NUM;
@@ -541,7 +649,7 @@ namespace {
       out<<" B"<<setfill('0')<<setw(5)
 	 <<BM.number_of_element(NonSingleParent(const_cast<Box*>(B)));
       out<<' '<<setfill(' ')<<setw(8)<<RA[B->LEV]
-	 <<' '<<setw(8)<<B->X<<'\n';
+	 <<' '<<setw(8)<<B->CEN<<'\n';
     }
     /// dump tree, recursive
     void Dump(const Box*B, std::ostream&outd, std::ostream&outb, node_index&ns)
@@ -596,7 +704,7 @@ namespace {
       }
     // copy more data and link subcells (recursive)
     TREE->LE[C] = P->LEV;
-    TREE->XC[C] = P->X;
+    TREE->XC[C] = P->CEN;
     TREE->NM[C] = P->NUM;
     TREE->NL[C] = ndot;
     TREE->NC[C] = nbox;
@@ -652,7 +760,7 @@ namespace {
     }
     // copy some simple data
     TREE->LE[C] = P->LEV;
-    TREE->XC[C] = P->X;
+    TREE->XC[C] = P->CEN;
     TREE->NM[C] = P->NUM;
     TREE->NL[C] = ndot;
     TREE->NC[C] = nbox;
@@ -736,9 +844,9 @@ namespace {
     // 2 set root box, RA[]
     Xave   /= Real(NDOT);
     P0      = NewBox(1);
-    P0->X   = meta::Helper<D,Real>::Integer(Xave);
+    P0->CEN = Helper<D,Real>::Integer(Xave);
     P0->LEV = 0;
-    RA[0]   = meta::Helper<D,Real>::RootRadius(P0->X,Xmin,Xmax);
+    RA[0]   = Helper<D,Real>::RootRadius(P0->CEN,Xmin,Xmax);
     for(unsigned l=0; l!=MAXD; ++l)
       RA[l+1] = Real(0.5)*RA[l];
 #ifdef OctalTreeSupportPeano
@@ -754,6 +862,11 @@ namespace {
 #endif
   }
 }
+//
+#undef   pDOT
+#undef  cpDOT
+#undef   pBOX
+#undef  cpBOX
 //
 namespace WDutils {
   template<int D, typename Real>
@@ -829,10 +942,310 @@ namespace WDutils {
   }
 }
 //
+// Wdutils::TreeWalker<OctTree>
+//
 namespace WDutils {
-  template class OctalTree<2,float>;
-  template class OctalTree<2,double>;
-  template class OctalTree<3,float>;
-  template class OctalTree<3,double>;
+  template<typename OctTree>
+  typename TreeWalker<OctTree>::Cell
+  TreeWalker<OctTree>::SmallestContainingCell(Point const&x) const
+  {
+    Cell c=Root();
+    if(!::contains(centre(c),radius(c),x) )
+      return InvalidCell();
+    for(;;) {
+      if(Ncells(c)==0) return c;
+      uint8 o=::octant(centre(c),x);
+      Cell cc=BeginCells(c), ce=EndCells(c);
+      while(cc!=ce && o!=octant(cc)) ++cc;
+      if(cc==ce) return c;
+      c=cc;
+    }
+  }
+}
+//
+// Wdutils::NeighbourFinder<OctTree>
+//
+namespace {
+  /// Processor: add neighbours to neighbour list
+  template<typename OctTree>
+  struct Lister : public NeighbourFinder<OctTree>::Processor
+  {
+    typedef typename TreeWalker<OctTree>::Leaf Leaf;
+    typedef typename TreeWalker<OctTree>::Real Real;
+    typedef typename TreeWalker<OctTree>::node_index node_index;
+    //
+    Neighbour<OctTree> *LIST;
+    const node_index    K;
+    mutable node_index  I;
+    //
+    Lister(Neighbour<OctTree>*list, node_index size)
+      : LIST(list), K(size), I(0) {}
+    /// process: add neighbour to list
+    void process(Leaf l, Real q) const
+    {
+      if(I<K) {
+	LIST[I].Q = q;
+	LIST[I].L = l;
+      }
+      ++I;
+    }
+  };
+}
+//
+namespace WDutils {
+  template<typename OctTree> inline
+  bool NeighbourFinder<OctTree>::Outside(Cell c) const
+  { return ::outside(centre(c),radius(c),X,Q); }
+  //
+  template<typename OctTree> inline
+  bool NeighbourFinder<OctTree>::Inside(Cell c) const
+  { return ::inside(centre(c),radius(c),X,Q); }
+  //
+  template<typename OctTree> inline
+  void NeighbourFinder<OctTree>::ProcessLeaf(Leaf l) const
+  {
+    // testing after adding the contributions to q from each dimension does
+    // make the code run more slowly
+    Real q = dist_sq(X,position(l));
+    if(q<Q) PROC->process(l,q);
+  }
+  //
+  template<typename OctTree>
+  void NeighbourFinder<OctTree>::ProcessCell(Cell Ci, node_index cL,
+					     node_index cC) const
+  {
+    if(cC==0 && Number(Ci) <= NDIR) {
+      if(cL) { LoopAllLeafs(Ci,l) if(l!=L) ProcessLeaf(l); }
+      else   { LoopAllLeafs(Ci,l) ProcessLeaf(l); }
+    } else {
+      if(Nleafkids(Ci)) {
+	if(cL) { LoopLeafKids(Ci,l) if(l!=L) ProcessLeaf(l); }
+	else   { LoopLeafKids(Ci,l) ProcessLeaf(l); }
+      }
+      if(Ncells(Ci)>cC) {
+	if(cC) { LoopCellKids(Ci,c) if(c!=C && !Outside(c)) ProcessCell(c);}
+	else   { LoopCellKids(Ci,c) if(!Outside(c)) ProcessCell(c); }
+      }
+    }
+  }
+  //
+  template<typename OctTree>
+  void NeighbourFinder<OctTree>::Process(Leaf l, Real q,
+					 const Processor*p) WDutils_THROWING
+  {
+    if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
+    PROC = p;
+    Q    = q;
+    L    = l;
+    X    = position(L);
+    C    = Parent(L);
+    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
+      ProcessCell(P, C==P, C!=P);
+  }
+  //
+  template<typename OctTree>
+  void NeighbourFinder<OctTree>::Process(Point const&x, Real q,
+					 const Processor*p) WDutils_THROWING
+  {
+    if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
+    PROC = p;
+    Q    = q;
+    L    = Base::InvalidLeaf();
+    X    = x;
+    C    = SmallestContainingCell(X);
+    if(IsValid(C))
+      for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
+	ProcessCell(P, 0, C!=P);
+    else
+      ProcessCell(Base::Root(), 0, 0);
+  }
+  //
+  template<typename OctTree>
+  typename NeighbourFinder<OctTree>::node_index
+  NeighbourFinder<OctTree>::Find(Leaf l, Real q,
+				 Neighbour<OctTree>*nb, node_index m)
+  {
+    ::Lister<OctTree> LL(nb,m);
+    PROC =&LL;
+    Q    = q;
+    L    = l;
+    X    = position(L);
+    C    = Parent(L);
+    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
+      ProcessCell(P, C==P, C!=P);
+    return LL.I;
+  }
+  //
+  template<typename OctTree>
+  typename NeighbourFinder<OctTree>::node_index
+  NeighbourFinder<OctTree>::Find(Point const&x, Real q,
+				 Neighbour<OctTree>*nb, node_index m)
+  {
+    ::Lister<OctTree> LL(nb,m);
+    PROC =&LL;
+    Q    = q;
+    L    = Base::InvalidLeaf();
+    X    = x;
+    C    = SmallestContainingCell(X);
+    if(IsValid(C))
+      for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
+	ProcessCell(P, 0, C!=P);
+    else
+      ProcessCell(Base::Root(), 0, 0);
+    return LL.I;
+  }
+}
+//
+// Wdutils::NearestNeighbourFinder<OctTree>
+//
+namespace {
+  /// type used for sorting daughter cells in NearestNeighbourFinder::AddCell
+  template<typename OctTree>
+  struct CellQ {
+    typename TreeWalker<OctTree>::Real Q;
+    typename TreeWalker<OctTree>::Cell C;
+    void set(typename TreeWalker<OctTree>::Real q,
+	     typename TreeWalker<OctTree>::Cell c)
+    { Q=q; C=c; }
+    bool operator<(CellQ const&x) const { return Q < x.Q; }
+    bool operator>(CellQ const&x) const { return Q > x.Q; }
+    bool operator<(typename TreeWalker<OctTree>::Real q) const { return Q < q; }
+    bool operator>(typename TreeWalker<OctTree>::Real q) const { return Q > q; }
+  };
+}
+//
+namespace WDutils {
+  template<typename OctTree> inline
+  typename NearestNeighbourFinder<OctTree>::Real
+  NearestNeighbourFinder<OctTree>::OutsideDistSq(Cell c) const
+  { return outside_dist_sq(centre(c),radius(c),X); }
+  //
+  template<typename OctTree> inline
+  bool NearestNeighbourFinder<OctTree>::Outside(Cell c) const
+  { return outside(centre(c),radius(c),X,LIST->Q); }
+  //
+  template<typename OctTree> inline
+  bool NearestNeighbourFinder<OctTree>::Inside(Cell c) const
+  { return inside(centre(c),radius(c),X,LIST->Q); }
+  //
+  template<typename OctTree> inline
+  typename NearestNeighbourFinder<OctTree>::node_index
+  NearestNeighbourFinder<OctTree>::Ndir() const
+  { return M<=0? NDIR : max(static_cast<node_index>(M),NDIR); }
+  //
+  template<typename OctTree> inline
+  void NearestNeighbourFinder<OctTree>::AddLeaf(Leaf l) const
+  {
+    // testing after adding the contributions to q from each dimension does
+    // make the code run more slowly
+    Real q = dist_sq(X,position(l));
+    if(LIST->Q > q) {
+      LIST->Q = q;
+      LIST->L = l;
+      MaxHeap::after_top_replace(LIST,K);
+      --M;
+      ++NIAC;
+    }
+  }
+  //
+  template<typename OctTree>
+  void NearestNeighbourFinder<OctTree>::AddCell(Cell Ci, node_index cL,
+						node_index cC) const
+  {
+    if(cC==0 && Number(Ci) <= Ndir()) {
+      // direct loop
+      if(cL) { LoopAllLeafs(Ci,l) if(l!=L) AddLeaf(l); }
+      else   { LoopAllLeafs(Ci,l) AddLeaf(l); }
+    } else {
+      // process leaf kids
+      if(Nleafkids(Ci)) {
+	if(cL) { LoopLeafKids(Ci,l) if(l!=L) AddLeaf(l); }
+	else   { LoopLeafKids(Ci,l) AddLeaf(l); }
+      }
+      // process cell kids
+      if(Ncells(Ci)>cC+1) {
+	// more than one sub-cell: process in order of increasing distance
+	CellQ<OctTree> Z[Base::Nsub];
+	int J(0);
+	LoopCellKids(Ci,c)
+	  if(c!=C) Z[J++].set(OutsideDistSq(c),c);
+	MinHeap::build(Z,J);
+	while(J && LIST->Q > Z->Q) {
+	  AddCell(Z->C);
+	  Z[0] = Z[J-1];
+	  MinHeap::after_top_replace(Z,--J);
+	}
+      } else if(Ncells(Ci)>cC) {
+	// only 1 sub-cell to process
+	if(cC) { LoopCellKids(Ci,c) if(c!=C && !Outside(c)) AddCell(c);}
+	else   { LoopCellKids(Ci,c) if(!Outside(c)) AddCell(c); }
+      }
+    }
+  }
+  /// comparison of Neighbours on distance, needed below
+  template<typename OctTree> inline
+  bool operator< (Neighbour<OctTree> const&x, Neighbour<OctTree> const&y)
+  { return x.Q < y.Q; }
+  //
+  template<typename OctTree>
+  typename NearestNeighbourFinder<OctTree>::node_index
+  NearestNeighbourFinder<OctTree>::Find(Leaf l, Neighbour<OctTree>*nb)
+    WDutils_THROWING
+  {
+    if(K >= Base::Nleafs())
+      WDutils_THROW("NearestNeighbourFinder: K=%d >= Nl=%d\n",
+		    K,Base::Nleafs());
+    LIST = nb;
+    L    = l;
+    X    = position(L);
+    C    = Parent(L);
+    NIAC = 0;
+    M    = K;
+    Real Q = 12*square(Base::RootRadius());
+    for(node_index k=0; k!=K; ++k)
+      LIST[k].Q = Q;
+    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
+      AddCell(P,C==P,C!=P);
+    MaxHeap::sort(LIST,K);
+    return NIAC;
+  }
+  //
+  template<typename OctTree>
+  typename NearestNeighbourFinder<OctTree>::node_index
+  NearestNeighbourFinder<OctTree>::Find(Point const&x, Neighbour<OctTree>*nb)
+    WDutils_THROWING
+  {
+    if(K > Base::Nleafs())
+      WDutils_THROW("NearestNeighbourFinder: K=%d > Nl=%d\n",
+		    K,Base::Nleafs());
+    LIST = nb;
+    L    = Base::InvalidLeaf();
+    X    = x;
+    C    = SmallestContainingCell(X);
+    NIAC = 0;
+    M    = K;
+    Real Q = 12*square(Base::RootRadius());
+    for(node_index k=0; k!=K; ++k)
+      LIST[k].Q = Q;
+    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
+      AddCell(P, 0, C!=P);
+    MaxHeap::sort(LIST,K);
+    return NIAC;
+  }
+}
+//
+// instantinations
+//
+namespace WDutils {
+#define  INST(DIM,TYPE)						\
+  template class  OctalTree <DIM,TYPE>;				\
+  template struct TreeWalker<OctalTree<DIM,TYPE> >;		\
+  template struct NeighbourFinder<OctalTree<DIM,TYPE> >;	\
+  template struct NearestNeighbourFinder<OctalTree<DIM,TYPE> >;
+
+  INST(2,float)
+  INST(2,double)
+  INST(3,float)
+  INST(3,double)
 }
 //

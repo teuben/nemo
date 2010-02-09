@@ -30,11 +30,11 @@
 #define WDutils_included_traits_h
 
 #ifndef WDutils_included_typeinfo_h
-# include <typeinfo>
-# define WDutils_included_typeinfo_h
+#  include <typeinfo>
+#  define WDutils_included_typeinfo_h
 #endif
-#ifndef WDutils_included_basic_h
-# include <exception.h>
+#ifndef WDutils_included_exception_h
+#  include <exception.h>
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {

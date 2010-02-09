@@ -244,7 +244,7 @@ namespace WDutils {
     const RandomNumberGenerator *R;
   public:
     /// construction
-    /// \param[in] R random number generator
+    /// \param[in] r random number generator
     explicit Gaussian2D(const RandomNumberGenerator*r) : R(r) {}
     /// generate radius of 2D normal distribution
     /// \note The return value is in [0,oo]
