@@ -4,11 +4,11 @@
 /// \file   src/public/manip/bound_centre.cc
 ///
 /// \author Walter Dehnen
-/// \date   2006-2008
+/// \date   2006-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2006-2008 Walter Dehnen
+// Copyright (C) 2006-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@
 // v 0.2    29/10/2008  WD append to existing output files, output format
 // v 1.0    06/11/2008  WD new algorithm for centre
 // v 1.1    21/11/2008  WD subtract sinks' contribution to gravity
+// v 2.0    09/02/2010  WD fixed bug in subtraction of sink potential
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/default.h>
@@ -71,6 +72,11 @@ namespace Manipulate {
   /// (default: all) and finds its \f$K\f$ nearest neighbours (including
   /// itself). From the \f$K/8\f$ (at least 4) most bound of these, it
   /// computes the centre weighted by \f$ (E_{\mathrm{max}}-E)^\alpha\f$.
+  /// \note Initially, we ignore the contribution of the velocity to the
+  ///       binding energy, since it is not clear which velocity reference
+  ///       frame would be appropriate (we must be Galileian invariant).
+  ///       Only in the second step (if K>1), we use the mean velocity of
+  ///       the K particles as velocity reference.
   ///
   /// If sink particles are present and are not in_subset() and have
   /// individual softening lengths, we subtract their contribution to the
@@ -97,8 +103,9 @@ namespace Manipulate {
     mutable output  OUT;
     mutable vect    XCEN,VCEN;
     mutable bool    FIRST;
-    mutable Array<bodies::index> Nb;
-    mutable Array<double>        En;
+    mutable Array<real>          Pot;  // potential for subset
+    mutable Array<bodies::index> Nb;   // K nearest neighbours
+    mutable Array<double>        En;   // energy of K nearest neighbours
     mutable Array<int>           In;
     //--------------------------------------------------------------------------
     static std::ostream&print_line(std::ostream&to) {
@@ -196,50 +203,46 @@ namespace Manipulate {
       print_head(OUT);
       print_line(OUT);
     }
-    // 1   subtract sink particles' contribution to potential
-    // 1.1 are there sini particles not in_subset() with eps_i ?
-    bool correct_sink = true;
-    if(!S->have_eps()) correct_sink = false;
-    if(correct_sink) {
-      unsigned Nss = 0;  // sinks not in subset
-      LoopSinkBodies(S,b)
-	if(!in_subset(b)) ++Nss;
-      if(Nss == 0) correct_sink = false;
-    }
-    // 1.2 correct for potential of sink particles
-    Array<real,1> Ps(S->N_subset());
-    unsigned i=0;
+    // 1   obtain potential corrected for sink particles' contribution
+    //     and find particle with deepest potential
+    Pot.reset(S->N_bodies());
+    real Pmin=zero;
+    body Bmin;
     LoopSubsetBodies(S,b) {
-      Ps[i]  = zero;
-      LoopSinkBodies(S,s) if(!in_subset(b)) {
-	Ps[i] -= mass(s) * GravKernBase::Psi(KERN,dist_sq(pos(b),pos(s)),
-					     square(half*(eps(b)+eps(s))));
-      }
-      poq(b) -= Ps[i++];
-    }
-    // 2   find most bound body
-    real Emin = 1.e10;
-    body B;
-    LoopSubsetBodies(S,b) {
-      real E = half*norm(vel(b)) + ppp(b);
-      if(E < Emin) {
-	Emin = E;
-	B    = b;
+      real phi=zero;
+      if(S->have_pot()) phi += pot(b);
+      if(S->have_pex()) phi += pex(b);
+      LoopSinkBodies(S,s) if(!in_subset(s))
+	phi += mass(s) * GravKernBase::Psi(KERN,dist_sq(pos(b),pos(s)),
+					   square(half*(eps(b)+eps(s))));
+      Pot[bodyindex(b)] = phi;
+      if(phi < Pmin) {
+	Pmin = phi;
+	Bmin = b;
       }
     }
     if(K>1) {
-      // 3   find K nearest neighbours of most bound body
-      unsigned n = S->findNeighbours(B,K,Nb);
-      // 4   get |Phi|^A weigted centre of K/2 most bound of those
-      // 4.1 sort neighbours according to their energy
-      for(i=0; i!=n; ++i)
-	En[i] = half*norm(S->vel(Nb[i])) + ppp(S,Nb[i]);
+      // 2   find K nearest neighbours of most bound body
+      unsigned n = S->findNeighbours(Bmin,K,Nb);
+      // 3   obtain their mean velocity (as reference for velocity frame)
+      double W(0.);
+      vect_d V(0.);
+      for(unsigned i=0; i!=n; ++i) {
+	W += S->mass(Nb[i]);
+	V += S->mass(Nb[i]) * S->vel(Nb[i]);
+      }
+      V /= W;
+      // 4   get (E_max-E)^A weigted centre of K/2 most bound of those
+      // 4.1 sort neighbours according to their energy w.r.t. mean velocity
+      for(unsigned i=0; i!=n; ++i)
+	En[i] = half*dist_sq(S->vel(Nb[i]),V) + Pot[S->bodyindex(Nb[i])];
       HeapIndex(En.array(),n,In.array());
       double Emax = En[In[n-1]];
       // 4.2 loop K/8 most bound and find weighted centre
-      double W(0.);
-      vect_d X(0.), V(0.);
-      for(i=0; i!=min(n,max(4u,K/8)); ++i) {
+      W = 0.;
+      V = 0.;
+      vect_d X(0.);
+      for(unsigned i=0; i!=min(n,max(4u,K/8)); ++i) {
 	double w = pow(Emax-En[In[i]],A);
 	W += w;
 	X += w * S->pos(Nb[In[i]]);
@@ -250,20 +253,16 @@ namespace Manipulate {
       XCEN = X;
       VCEN = V;
     } else {
-      XCEN = pos(B);
-      VCEN = vel(B);
+      XCEN = pos(Bmin);
+      VCEN = vel(Bmin);
     }
-    // 5   add sink particles' contribution to potential back
-    i=0;
-    LoopSubsetBodies(S,b)
-      poq(b) += Ps[i++];
-    // 6   output
+    // 5   output
     if(OUT)
       OUT << ' '
 	  << print(S->time(),12,8) << ' '
 	  << print(XCEN,15,8) << ' '
 	  << print(VCEN,15,8) << std::endl;
-    // 7   put centre under 'xcen' and 'vcen'
+    // 6   put centre under 'xcen' and 'vcen'
     S->set_pointer(&XCEN,"xcen");
     S->set_pointer(&VCEN,"vcen");
     return false;

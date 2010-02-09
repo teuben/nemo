@@ -3,7 +3,7 @@
 //
 // addgravity.cc
 //
-// Copyright (C) 2002-2008 Walter Dehnen
+// Copyright (C) 2002-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -44,14 +44,15 @@
 // v 2.2.1  10/09/2008  WD happy gcc 4.3.1
 // v 2.2.2  04/11/2008  WD individual eps_i always enabled
 // v 2.2.3  26/03/2009  WD no error is masses missing and not required
-//-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.2.3"
-#define falcON_VERSION_D "26-may-2009 Walter Dehnen                          "
-//-----------------------------------------------------------------------------+
+// v 2.3    09/02/2010  WD keyword fsink (proprietary only)
+//------------------------------------------------------------------------------
+#define falcON_VERSION   "2.3"
+#define falcON_VERSION_D "09-feb-2010 Walter Dehnen                          "
+//------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile addgravity
 #endif
-//-----------------------------------------------------------------------------+
+//------------------------------------------------------------------------------
 #include <main.h>                                  // main & NEMO stuff         
 #include <externacc.h>                             // external potential        
 #include <forces.h>                                // falcON                    
@@ -60,11 +61,15 @@ const char*defv[] = {
   "in=???\n           input file                                         ",
   "out=???\n          output file                                        ",
   "times=all\n        time range                                         ",
-  "eps=0.05\n         softening length [ <0: use eps_i from snapshot]    ",
+  "eps=0.05\n         >=0: softening length\n"
+  "                   < 0: use individual fixed softening lengths        ",
   "kernel="falcON_KERNEL_TEXT
   "\n                 softening kernel                                   ",
   "theta="falcON_THETA_TEXT
   "\n                 tolerance parameter at M=M_tot                     ",
+#ifdef falcON_PROPER
+  "fsink=1\n          theta_sink / theta (only values <=1 are used)      ",
+#endif
   "Ncrit="falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells                     ",
   "Grav=1\n           Newton's constant of gravity (0-> no self-gravity) ",
@@ -86,13 +91,21 @@ void falcON::main() falcON_THROWING
   if(SOFT) NEED |= fieldset::e;
   if(getrparam("Grav") != zero) NEED |= fieldset::m;
   vect     X0, *RC(getvparam_z("root_center",X0));
+  real     TH(getrparam("theta"));
   snapshot SHOT;
   forces   FALCON(&SHOT,
 		  getrparam("eps"),
-		  getrparam("theta"),
+		  TH,
 		  kern_type(getiparam("kernel")),
 		  SOFT,
-		  getrparam("Grav") );
+		  getrparam("Grav"),
+		  TH< zero? const_theta : theta_of_M,
+#ifdef falcON_PROPER
+		  getrparam("fsink")
+#else
+		  one
+#endif
+      );
   acceleration *ACCEXT = hasvalue("accname") ?
     new nemo_acc(getparam("accname"), getparam("accpars"), getparam("accfile"))
     : 0;

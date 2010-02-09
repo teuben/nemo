@@ -294,7 +294,6 @@ void LeapFrogCode::account_new() const {
     set_time_derivs(0,0,0.);
     LoopAllBodies(snap_shot(),b) 
       if(is_new(b)) b.unflag_new();
-    snap_shot()->reset_Nnew();
   }
 }
 //------------------------------------------------------------------------------
@@ -307,6 +306,7 @@ void LeapFrogCode::fullstep() const {
   kick(tauh(0));                                   // eg: v+= a*tau/2           
   remember();                                      // eg: w = v                 
   finish_diagnose();                               // finish diagnosis          
+  snap_shot()->reset_Nnew();
   add_to_cpu_step();                               // record CPU time           
 }    
 ////////////////////////////////////////////////////////////////////////////////
@@ -402,9 +402,9 @@ void BlockStepCode::fullstep() const {
   for(int t=0; t!=1<<highest_level(); ++t)         // LOOP elementary steps     
     elementary_step(t);                            //   elementary step         
   finish_diagnose();                               // finish diagnosis          
-  add_to_cpu_step();                               // record CPU time           
   snap_shot()->reset_Nnew();
   snap_shot()->reset_Ndel();
+  add_to_cpu_step();                               // record CPU time           
 }
 //------------------------------------------------------------------------------
 BlockStepCode::BlockStepCode(int      km,          // I: tau_max = 2^-kmax      

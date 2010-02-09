@@ -4,41 +4,42 @@
 /// \file   src/public/exe/snapsupp.cc                                          
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2008                                                                
+/// \date   2008-2010                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2008 Walter Dehnen                                             
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+// Copyright (C) 2008-2010 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
+//
 // history:                                                                     
-//                                                                              
-// v 0.0   02/04/2008  WD created.                                              
-// v 0.0.1 10/09/2008  WD created.                                              
+//
+// v 0.0   02/04/2008  WD created
+// v 0.0.1 10/09/2008  WD created
+// v 0.0.2 09/02/2010  WD adapted to change in fields.h
 ////////////////////////////////////////////////////////////////////////////////
 #define falcON_VERSION   "0.0"
 #define falcON_VERSION_D "02-apr-2008 Walter Dehnen                          "
-//-----------------------------------------------------------------------------+
+//------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "snapsupp"
 #endif
 #define falcON_RepAction 0                         // no action reporting       
-//-----------------------------------------------------------------------------+
+//------------------------------------------------------------------------------
 #include <public/bodyfunc.h>                       // body functions            
 #include <main.h>                                  // NEMO basics & main        
 #include <cstdio>                                  // C std I/O                 
@@ -85,7 +86,7 @@ void falcON::main() falcON_THROWING {
     if(! SHOT.read_nemo(IN,READ,NEED,getparam("times"),0)) continue;
     check_sufficient(READ,FUNC->need());
     SHOT.add_field(PROP);
-    LoopAllFields<SetVal>::const_loop(0);
+    LoopFields<SetVal>::const_all(0);
     if(!OUT) OUT.open(getparam("out"));
     SHOT.write_nemo(OUT,COPY);
   }

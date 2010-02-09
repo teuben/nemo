@@ -1245,68 +1245,68 @@ namespace falcON {
     }
     return s;
   }
-  //////////////////////////////////////////////////////////////////////////////
-  //
-  // templates for looping fields
-  //
-  //////////////////////////////////////////////////////////////////////////////
-  template< template<int> class LOOP, int BIT, int BITEND >
+  /// templated loop over data fields.
+  /// this is useful (i.e. preferrable over a non-templated loop) if the
+  /// action to be taken depends on the type associated with each data field,
+  /// for instance when printing a field.
+  template<template<int> class LOOP, int BIT=BodyData::NQUANT-1>
   struct LoopFields {
-    template< typename T > static void loop(T&x) { 
-      LOOP<BIT>::act(x);
-      LoopFields<LOOP, BIT+1, BITEND>::loop(x);
-    }
-    template< typename T > static void const_loop(T const&x) { 
-      LOOP<BIT>::act(x);
-      LoopFields<LOOP, BIT+1, BITEND>::const_loop(x);
-    }
+    /// call LOOP<BIT>::act() for BIT equal to all valid fieldbit values
+    /// \param[in] x  non-constant datum of any type
+    /// \note LOOP<BIT>::act(x) must exists (otherwise compile error)
+    /// a typical application looks like \code
+    /// template<int BIT> struct JOB { static void act(body&b); };
+    /// LoopFields<JOB>::all(b);
+    /// \endcode
+    template<typename T> static void all(T&x)
+    { LoopFields<LOOP, BIT-1>::all(x);
+      LOOP<BIT>::act(x); }
+    /// call LOOP<BIT>::act() for BIT equal to all valid fieldbit values
+    /// \param[in] x  constant datum of any type
+    /// \note LOOP<BIT>::act(x) must exists (otherwise compile error)
+    /// a typical application looks like \code
+    /// template<int BIT> struct JOB { static void act(body const&b); };
+    /// LoopFields<JOB>::const_all(b);
+    /// \endcode
+    template<typename T> static void const_all(T const&x)
+    { LoopFields<LOOP, BIT-1>::const_all(x);
+      LOOP<BIT>::act(x); }
+    /// call LOOP<BIT>::act() for BIT equal to fieldbit values contained in set
+    /// \param[in] x  non-constant datum of any type
+    /// \note LOOP<BIT>::act(x) must exists (otherwise compile error)
+    /// \param[in] s  only call LOOP<BIT>::act() for fields in set @a s
+    /// a typical application looks like \code
+    /// template<int BIT> struct JOB { static void act(body&b); };
+    /// fieldset set;
+    /// LoopFields<JOB>::some(b,set);
+    /// \endcode
+    template<typename T> static void some(T&x, fieldset s)
+    { LoopFields<LOOP, BIT-1>::some(x,s);
+      if(s.contain(fieldbit(BIT))) LOOP<BIT>::act(x); }
+    /// call LOOP<BIT>::act() for BIT equal to fieldbit values contained in set
+    /// \param[in] x  constant datum of any type
+    /// \note LOOP<BIT>::act(x) must exists (otherwise compile error)
+    /// \param[in] s  only call LOOP<BIT>::act() for fields in set @a s
+    /// a typical application looks like \code
+    /// template<int BIT> struct JOB { static void act(body const&b); };
+    /// fieldset set;
+    /// LoopFields<JOB>::const_some(b,set);
+    /// \endcode
+    template<typename T> static void const_some(T const&x, fieldset s)
+    { LoopFields<LOOP, BIT-1>::const_some(x,s);
+      if(s.contain(fieldbit(BIT))) LOOP<BIT>::act(x); }
   };
-  template< template<int> class LOOP, int BIT >
-  struct LoopFields<LOOP, BIT, BIT>  {
-    template< typename T > static void loop(T&) {}
-    template< typename T > static void const_loop(T const&) {}
+  template<template<int> class LOOP>
+  struct LoopFields<LOOP,0> {
+    template<typename T> static void all(T&x)
+    { LOOP<0>::act(x); }
+    template<typename T> static void const_all(T const&x)
+    { LOOP<0>::act(x); }
+    template<typename T> static void some(T&x, fieldset s)
+    { if(s.contain(fieldbit(0))) LOOP<0>::act(x); }
+    template<typename T> static void const_some(T const&x, fieldset s)
+    { if(s.contain(fieldbit(0))) LOOP<0>::act(x); }
   };
-  //----------------------------------------------------------------------------
-  template< template<int> class LOOP>
-  struct LoopAllFields {
-    template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, 0, BodyData::NQUANT>::loop(x);
-    }
-    template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, 0, BodyData::NQUANT>::const_loop(x);
-    }
-  };
-  //----------------------------------------------------------------------------
-  template< template<int> class LOOP>
-  struct LoopSINKFields {
-    template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, BodyData::KSINK, BodyData::NQUANT>::loop(x);
-    }
-    template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, BodyData::KSINK, BodyData::NQUANT>::const_loop(x);
-    }
-  };
-  //----------------------------------------------------------------------------
-  template< template<int> class LOOP>
-  struct LoopSPHFields {
-    template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, BodyData::KSPH, BodyData::KSINK>::loop(x);
-    }
-    template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, BodyData::KSPH, BodyData::KSINK>::const_loop(x);
-    }
-  };
-  //----------------------------------------------------------------------------
-  template< template<int> class LOOP>
-  struct LoopSTDFields {
-    template< typename T > static void loop(T&x) {
-      LoopFields<LOOP, 0, BodyData::KSPH>::loop(x);
-    }
-    template< typename T > static void const_loop(T const&x) {
-      LoopFields<LOOP, 0, BodyData::KSPH>::const_loop(x);
-    }
-  };
-  //////////////////////////////////////////////////////////////////////////////
 } // namespace falcON {
 falcON_TRAITS(falcON::flags,"flags");
 falcON_TRAITS(falcON::fieldbit,"fieldbit");

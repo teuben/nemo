@@ -4,11 +4,11 @@
 /// \file   src/public/exe/s2a.cc
 ///
 /// \author Walter Dehnen
-/// \date   2002-2008
+/// \date   2002-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2002-2008 Walter Dehnen
+// Copyright (C) 2002-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -48,9 +48,10 @@
 // v 4.5.1 13/02/2008  WD minor bug (added "std::" to isnan & std::isinf)
 // v 4.5.2 10/09/2008  WD happy gcc 4.3.1
 // v 4.5.3 21/08/2009  WD duBUGged (very minor)
+// v 4.6   09/02/2010  WD fixed problem with sink bodies
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "4.5.3"
-#define falcON_VERSION_D "21-aug-2009 Walter Dehnen                          "
+#define falcON_VERSION   "4.6"
+#define falcON_VERSION_D "09-feb-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program
 #  error You need NEMO to compile "s2a"
@@ -173,27 +174,13 @@ void falcON::main() falcON_THROWING {
 	  fprintf(OUT," '%s'",fivename(f));
       fprintf(OUT,"\n#\n");
     }
-    if(F) {
-      LoopSPHBodies(&SHOT,b)
-	if( is_marked(b) ) {
-	  LoopAllFields<BodyPrint>::const_loop(b);
+    for(bodytype t; t; ++t) {
+      fieldset set=t.allows();
+      LoopTypedBodies(&SHOT,b,t)
+	if(!F || is_marked(b)) {
+	  LoopFields<BodyPrint>::const_some(b,set);
 	  fprintf(OUT,"\n");
 	}
-      LoopSTDBodies(&SHOT,b)
-	if( is_marked(b) ) {
-	  LoopSTDFields<BodyPrint>::const_loop(b);
-	  fprintf(OUT,"\n");
-	}
-    } else
-    {
-      LoopSPHBodies(&SHOT,b) {
-	LoopAllFields<BodyPrint>::const_loop(b);
-	fprintf(OUT,"\n");
-      }
-      LoopSTDBodies(&SHOT,b) {
-	LoopSTDFields<BodyPrint>::const_loop(b);
-	fprintf(OUT,"\n");
-      }
     }
   }
   if(FOUT && OUT) fclose(OUT);
