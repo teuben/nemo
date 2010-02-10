@@ -871,6 +871,9 @@ namespace WDutils {
       CHECK_BAD(N[0],1);
       return A[i];
     }
+    /// type conversion to const pointer: return first element
+    /// \return const pointer to allocated memory
+    const T*const&array() const { return A; }
   };// class ConstPseudoArray<T,D=1>
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -962,6 +965,12 @@ namespace WDutils {
       CHECK_BAD(N[0],1);
       return A[i];
     }
+    /// type conversion to pointer: return first element
+    /// \return pointer to allocated memory
+    T      *const&array()       { return A; }
+    /// type conversion to const pointer: return first element
+    /// \return const pointer to allocated memory
+    const T*      array() const { return A; }
   };// class PseudoArray<T,D=1>
   // ///////////////////////////////////////////////////////////////////////////
   //
