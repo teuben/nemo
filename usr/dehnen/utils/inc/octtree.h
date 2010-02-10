@@ -726,8 +726,8 @@ namespace WDutils {
   /// type representing a tree leaf and its squared distance.
   ///
   /// \note Used in classes NeighbourFinder and FindNearestNeighbours
-  /// \note We don't supply comparison operations, for it's not clear whether
-  ///       to compare on distance or leaf.
+  /// \note We don't supply comparison operations here, for it's not clear
+  ///       whether to compare on distance or leaf (both is conceivable).
   template<typename OctTree>
   struct Neighbour {
     typename TreeWalker<OctTree>::Real Q;  ///< distance^2 to search position
@@ -749,6 +749,8 @@ namespace WDutils {
     /// functor for processing a Neighbour
     /// \note used as interface with Process() below
     struct Processor {
+      /// virtual dtor: make old versions of gcc happy
+      virtual ~Processor() {}
       /// process a neighbour
       /// \param[in] l  neighbour leaf
       /// \param[in] q  squared distance of @a l from search position
@@ -884,6 +886,7 @@ namespace WDutils {
       : Base(tree), K(k), NDIR(ndir? ndir : K+K) {}
     /// ctor
     /// \param[in] walk  tree walker
+    /// \param[in] k     number K of nearest neighbours to find
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     NearestNeighbourFinder(Base const&walk, node_index k, node_index ndir=0)
       : Base(walk), K(k), NDIR(ndir? ndir : K+K) {}
