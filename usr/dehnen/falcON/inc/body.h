@@ -451,16 +451,16 @@ namespace falcON {
     //                                                                          
     //==========================================================================
   private:
-    unsigned         NALL[BT_NUM];                 // # bodies allocated        
-    unsigned         NBOD[BT_NUM];                 // # bodies in use           
-    unsigned         NNEW[BT_NUM];                 // # bodies created new      
-    unsigned         NDEL[BT_NUM];                 // # bodies removed          
+    unsigned         NALL[bodytype::NUM];          // # bodies allocated        
+    unsigned         NBOD[bodytype::NUM];          // # bodies in use           
+    unsigned         NNEW[bodytype::NUM];          // # bodies created new      
+    unsigned         NDEL[bodytype::NUM];          // # bodies removed          
     unsigned         NTOT;                         // total # bodies in use     
     fieldset         BITS;                         // body data allocated       
     unsigned         NBLK;                         // # blocks in use           
     block           *BLOCK[index::max_blocks];     // table: blocks             
     // NOTE BLOCK[] may be filled randomly
-    block           *TYPES[BT_NUM];                // table: bodies per bodytype
+    block           *TYPES[bodytype::NUM];         // table: bodies per bodytype
     block           *FIRST;                        // first block of bodies     
     const TimeSteps *TSTEPS;                       // time steps                
     mutable bool     SRCC;                         // source data changed?      
@@ -476,13 +476,17 @@ namespace falcON {
     //==========================================================================
     // \name Functions providing information about the number of bodies
     /// # bodies allocated for a given bodytype.
-    unsigned const&N_alloc (bodytype t) const { return NALL[int(t)]; }
+    unsigned const&N_alloc (bodytype t) const
+    { return NALL[int(t)]; }
     /// total # bodies allocated.
-    unsigned       N_alloc ()           const { return sum<BT_NUM>(NALL); }
+    unsigned       N_alloc ()           const
+    { return sum<bodytype::NUM>(NALL); }
     /// array with # bodies in use per bodytype.
-    const unsigned*N_bodies_per_type()  const { return NBOD; }
+    const unsigned*N_bodies_per_type()  const
+    { return NBOD; }
     /// # bodies in use for a given bodytype.
-    unsigned const&N_bodies(bodytype t) const { return NBOD[int(t)]; }
+    unsigned const&N_bodies(bodytype t) const
+    { return NBOD[int(t)]; }
     /// # bodies in use for given set of bodytypes.
     unsigned N_bodies(bodytypes T) const {
       unsigned N(0u);
@@ -1031,7 +1035,7 @@ namespace falcON {
     /// \param[in] N  array with number of bodies per bodytype
     /// \param[in] Bd body data fields to allocate (default: mxvapfHRVJFC)
     explicit 
-    bodies(const unsigned N[BT_NUM], fieldset Bd=fieldset(DefaultBits))
+    bodies(const unsigned N[bodytype::NUM], fieldset Bd=fieldset(DefaultBits))
       falcON_THROWING;
     //--------------------------------------------------------------------------
     /// copy constructor
@@ -1075,13 +1079,13 @@ namespace falcON {
     ///
     /// \param[in] N  array with number of bodies per bodytype
     /// \param[in] Bd body data fields to allocate (default: mxvapfHRVJFC)
-    void reset(const unsigned N[BT_NUM], fieldset Bd= fieldset(DefaultBits))
-      falcON_THROWING;
+    void reset(const unsigned N[bodytype::NUM],
+	       fieldset Bd= fieldset(DefaultBits)) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// Resets N, keeps data the same (N[] = bodies per bodytype)
     ///
     /// \param[in] N number of bodies per bodytype
-    void resetN(const unsigned N[BT_NUM]) falcON_THROWING
+    void resetN(const unsigned N[bodytype::NUM]) falcON_THROWING
     { reset(N,BITS); }
     //--------------------------------------------------------------------------
     /// Reset some body data to zero
@@ -1197,9 +1201,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// \brief # bodies of all types created by new_body() or new_bodies()
     /// since last call of reset_Nnew(), if any.
-    unsigned N_new() const {
-      return sum<BT_NUM>(NNEW);
-    }
+    unsigned N_new() const
+    { return sum<bodytype::NUM>(NNEW); }
     //--------------------------------------------------------------------------
     /// resets the counters of bodies created by new_body()
     void reset_Nnew() {
@@ -1225,9 +1228,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// \brief returns the number of bodies of any type removed by remove()
     /// since last call of reset_Ndel(), if any.
-    unsigned N_del() const {
-      return sum<BT_NUM>(NDEL);
-    }
+    unsigned N_del() const
+    { return sum<bodytype::NUM>(NDEL); }
     //--------------------------------------------------------------------------
     /// resets the counters of bodies removed by remove()
     void reset_Ndel() {
@@ -1309,7 +1311,7 @@ namespace falcON {
     void read_simple_ascii(std::istream  &In,
 			   const fieldbit*Bd,			   
 			   unsigned       Nd,
-			   const unsigned N[BT_NUM]);
+			   const unsigned N[bodytype::NUM]);
 #ifdef falcON_REAL_IS_FLOAT
     //--------------------------------------------------------------------------
     /// Reads a single snapshot from file(s) written in gadget2 data format 1
@@ -1423,7 +1425,7 @@ namespace falcON {
   protected:
     //==========================================================================
     /// method used by ebodies
-    bodies(char, const unsigned[BT_NUM]) falcON_THROWING;
+    bodies(char, const unsigned[bodytype::NUM]) falcON_THROWING;
     /// method used by ebodies
     void reset(char, fieldbit, void*) falcON_THROWING;
     //--------------------------------------------------------------------------
@@ -1431,7 +1433,7 @@ namespace falcON {
     /// The block's FIRST data are set such that the bodyindices of bodies of
     /// type t on start at F[t].
     /// \param F array with first bodyindex per body type.
-    void reset_firsts(unsigned F[BT_NUM]);
+    void reset_firsts(unsigned F[bodytype::NUM]);
   private:
     //==========================================================================
     //                                                                          
@@ -1439,7 +1441,7 @@ namespace falcON {
     //                                                                          
     //==========================================================================
     // set up blocks to hold N[t] bodies of type t                              
-    void set_data(const unsigned[BT_NUM]) falcON_THROWING;
+    void set_data(const unsigned[bodytype::NUM]) falcON_THROWING;
     //--------------------------------------------------------------------------
     // set block::FIRST and NALL, NBOD & NTOT
     void set_firsts();
@@ -1740,7 +1742,7 @@ namespace falcON {
     /// \param[in] Bd  body data fields to be allocated
     explicit 
     snapshot(double         t,
-	     const unsigned N[BT_NUM],
+	     const unsigned N[bodytype::NUM],
 	     fieldset       Bd= fieldset(DefaultBits)) falcON_THROWING :
     bodies(N,Bd),
     INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0)

@@ -98,10 +98,10 @@ void falcON::main() falcON_THROWING
   const char*get = getparam("read");
   for(; K!=32 && get[K]; ++K)
     item[K] = fieldbit(get[K]);
-  unsigned Nbod[BT_NUM]={0};
+  unsigned Nbod[bodytype::NUM]={0};
   if(hasvalue("Nbod")) {
-    if(static_cast<int>(BT_NUM) != getaparam("Nbod",Nbod,BT_NUM))
-      falcON_Error("keyword \"Nbod\" must give %d numbers",BT_NUM);
+    if(static_cast<int>(bodytype::NUM) != getaparam("Nbod",Nbod,bodytype::NUM))
+      falcON_Error("keyword \"Nbod\" must give %d numbers",bodytype::NUM);
   } else {
     unsigned N = getiparam("N");
     Nbod[0] = getiparam("Nsink");

@@ -198,7 +198,7 @@ void falcON::main() falcON_THROWING
   const Random Ran (getparam("seed"),6);           // random-number-generators  
   if(hasvalue("rmax") && getdparam("rmax")<=0.) falcON_THROW("rmax <= 0");
   if(hasvalue("r_a")  && getdparam("r_a") <=0.) falcON_THROW("r_a <= 0");
-  unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
+  unsigned nbod[bodytype::NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
   snapshot shot(getdparam("time"), nbod, fieldset(fieldset::basic));
   PlummerModelSampler PS(getdparam("r_s"),
 			 WD? getdparam("mass")/mf : getdparam("mass"),

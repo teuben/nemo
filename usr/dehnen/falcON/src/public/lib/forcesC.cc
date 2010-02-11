@@ -29,7 +29,7 @@ using namespace falcON;
 //=============================================================================#
 namespace {
   struct ebodies : public bodies {
-    ebodies(const unsigned n[BT_NUM]) : bodies('e', n) {}
+    ebodies(const unsigned n[bodytype::NUM]) : bodies('e', n) {}
     void reset(falcON::fieldbit f, void *D) { bodies::reset('e',f,D); }
   }     *BODIES = 0;
   forces*FALCON = 0;
@@ -103,7 +103,7 @@ namespace {
     if(FALCON) falcON_DEL_O(FALCON);
     if(Nsph > Ntot)
       falcON_Error("falcON_initialize(): Ntot (%d) < Nsph (%d)\n", Ntot, Nsph);
-    unsigned Nbod[BT_NUM] = {Nsph, Ntot-Nsph};
+    unsigned Nbod[bodytype::NUM] = {Nsph, Ntot-Nsph};
     BODIES = new ebodies(Nbod);
     BODIES->reset(fieldbit::f,F);
     BODIES->reset(fieldbit::m,M);

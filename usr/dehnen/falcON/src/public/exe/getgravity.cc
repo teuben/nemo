@@ -79,7 +79,7 @@ void falcON::main() falcON_THROWING
     // open snapshot with sinks and ensure we have enough bodies
     nemo_in sink   (getparam("sink"));
     snap_in sink_in(sink);
-    unsigned nbod[BT_NUM] = {0};
+    unsigned nbod[bodytype::NUM] = {0};
     for(bodytype t; t; ++t)
       nbod[t] = srce_in.Nbod(t) + sink_in.Nbod(t);
     shot.resetN(nbod);

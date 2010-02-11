@@ -619,7 +619,7 @@ namespace falcON {
     mutable data_in *DATA;                         // if non-zero: open snapshot
     mutable int      FIELDS_READ;                  // fields read already       
     bool             HAS_TIME;                     // have simulation time?     
-    unsigned         NTOT, NBOD[BT_NUM];           // # bodies, # bodies / type 
+    unsigned         NTOT, NBOD[bodytype::NUM];    // # bodies, # bodies / type 
     double           TIME;                         // simulations time          
     //--------------------------------------------------------------------------
     std::FILE* stream() const { return INPUT.STREAM; }
@@ -769,7 +769,7 @@ namespace falcON {
     nemo_out const   &OUTPUT;                      // our output stream         
     mutable data_out *DATA;                        // if non-zero: open data_out
     mutable int       FIELDS_WRITTEN;              // data already written out  
-    unsigned          NTOT, NBOD[BT_NUM];          // # bodies, # bodies / type 
+    unsigned          NTOT, NBOD[bodytype::NUM];   // # bodies, # bodies / type 
     //
     std::FILE* stream() const { return OUTPUT.STREAM; }
   public:
@@ -777,8 +777,8 @@ namespace falcON {
     /// \param[in] out   NEMO output stream
     /// \param[in] Nbod  total # bodies per bodytype
     /// \param[in] time  simulation time
-    snap_out(nemo_out const&out, const unsigned Nbod[BT_NUM], double time)
-    falcON_THROWING;
+    snap_out(nemo_out const&out, const unsigned Nbod[bodytype::NUM],
+	     double time) falcON_THROWING;
     /// dtor: close snapshot set in NEMO output stream
     ~snap_out() falcON_THROWING;
     /// return total # bodies

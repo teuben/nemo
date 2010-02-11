@@ -128,7 +128,7 @@ void falcON::main() falcON_THROWING
 			getbparam  ("MA_peri")
 #endif
 			);
-  unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
+  unsigned nbod[bodytype::NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
   snapshot shot(getdparam("time"), nbod, data);
   GS.sample(shot,getbparam("q-ran"),Ran,getdparam("f_pos"),
 #ifdef falcON_PROPER

@@ -141,7 +141,7 @@ void falcON::main() falcON_THROWING
       if(!out.is_open()) out.open(getparam("out"));
       shin.write_nemo(out,read);
     } else {                                       // ELSE (output != input)    
-      unsigned Nout[BT_NUM];
+      unsigned Nout[bodytype::NUM];
       for(bodytype t; t; ++t) {
 	Nout[t] = shin.N_bodies(t)/use;
 	if(shin.N_bodies(t) % use) ++(Nout[t]);

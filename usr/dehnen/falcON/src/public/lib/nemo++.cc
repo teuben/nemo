@@ -803,7 +803,8 @@ falcON_THROWING
 //------------------------------------------------------------------------------
 // class falcON::snap_out
 //------------------------------------------------------------------------------
-falcON::snap_out::snap_out(nemo_out const&out, const unsigned nbod[BT_NUM],
+falcON::snap_out::snap_out(nemo_out const&out,
+			   const unsigned nbod[bodytype::NUM],
 			   double time) falcON_THROWING :
   OUTPUT(out), DATA(0), FIELDS_WRITTEN(0), NTOT(0u)
 {

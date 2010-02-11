@@ -129,7 +129,7 @@ void falcON::main() falcON_THROWING {
   if(!FOUT) OUT = stdout;
   while(IN.has_snapshot()) {
     if(! SHOT.read_nemo(IN,READ,NEED,getparam("times"),0)) continue;
-    unsigned Nb[BT_NUM]={0u}, Ntot=0u;
+    unsigned Nb[bodytype::NUM]={0u}, Ntot=0u;
     if(F) {
       SHOT.add_field(fieldbit::f);
       for(bodytype t; t; ++t) {

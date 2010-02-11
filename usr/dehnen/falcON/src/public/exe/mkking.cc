@@ -146,7 +146,7 @@ void falcON::main() falcON_THROWING
   const int N = getuparam("nbody");
   const fieldset data(hasvalue("eps")? fieldset::basic | fieldset::e :
 		      fieldset::basic);
-  unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = N;
+  unsigned nbod[bodytype::NUM]={0}; nbod[bodytype::std] = N;
   snapshot        shot(getdparam("time"),nbod,data);
   const    bool   q(getbparam("q-ran"));
   const    Random Ran(getparam("seed"),6);

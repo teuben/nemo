@@ -41,6 +41,7 @@ namespace falcON {
 }
 
 using namespace falcON;
+typedef long unsigned lu; // will convert size_t to this type in printf
 
 falcON_TRAITS(falcON::bodies::block,"bodies::block");
 ////////////////////////////////////////////////////////////////////////////////
@@ -405,7 +406,7 @@ void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
   if(R != N*falcON::size(f))
     falcON_THROW("bodies::block::read_Fortran(%c): "
 		 "could only read %u of %lu bytes\n",
-		 letter(f),R,N*falcON::size(f));
+		 letter(f),R,lu(N*falcON::size(f)));
   DebugInfo(4,"bodies::block::read_Fortran(): read %u `%s'\n",N,fullname(f));
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -423,7 +424,7 @@ void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
   if(W != N*falcON::size(f))
     falcON_THROW("bodies::block::write_Fortran(%c): "
 		 "could only write %u of %lu bytes\n",
-		 letter(f),W,N*falcON::size(f));
+		 letter(f),W,lu(N*falcON::size(f)));
   DebugInfo(4,"bodies::block::write_Fortran(): written %u `%s'\n",
 	    N,fullname(f));
 }
@@ -501,7 +502,7 @@ bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I, fieldbit f,
   if(R * falcON::size(f) > I.bytes_unread())
     falcON_THROW("body::read_Fortran(%c): want %u `%s' (%lu bytes) but "
 		 "only %u bytes left on Fortran record\n",letter(f),
-		 R, fullname(f), R*falcON::size(f), I.bytes_unread());
+		 R, fullname(f), lu(R*falcON::size(f)), I.bytes_unread());
   while(is_valid() && R) {
     unsigned r = min(B->N_bodies()-K, R);
     const_cast<block*>(B)->read_Fortran(I,f,K,r,swap);
@@ -520,7 +521,7 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
   if(W * falcON::size(f) > O.bytes_free())
     falcON_THROW("body::write_Fortran(%c): want %u `%s' (%lu bytes) but "
 		 "only %u bytes left free on Fortran record\n",letter(f),
-		 W, fullname(f), W*falcON::size(f), O.bytes_free());
+		 W, fullname(f), lu(W*falcON::size(f)), O.bytes_free());
   while(is_valid() && W) {
     unsigned w = min(B->N_bodies()-K, W);
     B->write_Fortran(O,f,K,w);
@@ -635,7 +636,7 @@ bodies::block* bodies::new_block(bodytype t, unsigned Na, unsigned Nb,
 }
 ////////////////////////////////////////////////////////////////////////////////
 // reset blocks' FIRST entries (used in parallel code)
-void bodies::reset_firsts(unsigned fst[BT_NUM])
+void bodies::reset_firsts(unsigned fst[bodytype::NUM])
 {
   for(bodytype t; t; ++t) {
     unsigned L=0;
@@ -702,7 +703,7 @@ void bodies::set_firsts()
 }
 ////////////////////////////////////////////////////////////////////////////////
 // set up blocks to hold N[t] bodies of type t
-void bodies::set_data(const unsigned N[BT_NUM]) falcON_THROWING
+void bodies::set_data(const unsigned N[bodytype::NUM]) falcON_THROWING
 {
   DebugInfo(5,"bodies::set_data(): N=[%d,%d,%d], BITS=%s\n",
 	    N[0],N[1],N[2],word(BITS));
@@ -744,7 +745,7 @@ bodies::bodies(fieldset bits) falcON_THROWING :
   C_FORTRAN ( 0 ),
   FORCES    ( 0 )
 {
-  unsigned n[BT_NUM]={0u};
+  unsigned n[bodytype::NUM]={0u};
   DebugInfo(2,"bodies::bodies(): constructing bodies @%p: n=%u,%u,%u, bits=%s",
 	    this,n[0],n[1],n[2],word(BITS));
   for(unsigned i=0; i!=index::max_blocks; ++i) BLOCK[i] = 0;
@@ -754,7 +755,7 @@ bodies::bodies(fieldset bits) falcON_THROWING :
 }
 // /////////////////////////////////////////////////////////////////////////////
 // construction 1, new version
-bodies::bodies(const unsigned n[BT_NUM],
+bodies::bodies(const unsigned n[bodytype::NUM],
 	       fieldset       bits) falcON_THROWING : 
   BITS      ( bits ),
   C_FORTRAN ( 0 ),
@@ -768,7 +769,7 @@ bodies::bodies(const unsigned n[BT_NUM],
 }
 // /////////////////////////////////////////////////////////////////////////////
 // resets N, data; same as destruction followed by constructor 1            
-void bodies::reset(const unsigned n[BT_NUM],
+void bodies::reset(const unsigned n[bodytype::NUM],
 		   fieldset       bits) falcON_THROWING
 {
   bool keepN = true;
@@ -809,7 +810,7 @@ bodies::bodies(bodies const&Other,
   if(copyflag && !Other.have_flag() ) 
     falcON_THROW("in bodies::bodies(): "
 		 "copyflag !=0, but other bodies not supporting flag");
-  unsigned n[BT_NUM]={0};
+  unsigned n[bodytype::NUM]={0};
   for(bodytype t; t; ++t) if(copytypes.contain(t)) {
     if(copyflag) {
       LoopTypedBodies(&Other,i,t)
@@ -832,7 +833,7 @@ bodies::bodies(bodies const&Other,
 }
 ////////////////////////////////////////////////////////////////////////////////
 // construction for C & FORTRAN support                                     
-bodies::bodies(char, const unsigned n[BT_NUM]) falcON_THROWING
+bodies::bodies(char, const unsigned n[bodytype::NUM]) falcON_THROWING
 : BITS      ( fieldset::empty ),
   C_FORTRAN ( 1 ),
   FORCES    ( 0 )
@@ -1159,12 +1160,12 @@ namespace {
 void bodies::read_simple_ascii(std::istream  &in,
 			       const fieldbit*item,
 			       unsigned       Ni,
-			       const unsigned N[BT_NUM])
+			       const unsigned N[bodytype::NUM])
 {
   // 1. create table of readers                                                 
   fieldset get;
-  p_reader read [BT_NUM][100] = {{0}};
-  p_writer write[BT_NUM][100] = {{0}};
+  p_reader read [bodytype::NUM][100] = {{0}};
+  p_writer write[bodytype::NUM][100] = {{0}};
   if(Ni > 100) {
     Ni = 100;
     falcON_Warning(" can only read the first 100 data entries\n");
@@ -1395,7 +1396,7 @@ namespace {
 			 "name mismatch ('%s' : '%s')",P->name,n);
 	  if(P->size != s)
 	    falcON_THROW("snapshot::set_pointer(): "
-			 "size mismatch (%lu : %lu)",P->size,s);
+			 "size mismatch (%lu : %lu)",lu(P->size),lu(s));
 	  P->pter = p;
 	  return;
 	}
@@ -1423,7 +1424,7 @@ namespace {
 	  if(s != P->size)
 	    falcON_THROW("snapshot::%s(): "
 			 "size (%lu) does not match value in bank (%lu)\n",
-			 func,s,P->size);
+			 func,lu(s),lu(P->size));
 	  if(strcmp(n,P->name))
 	    falcON_THROW("snapshot::%s(): "
 			 "name (%s) does not match value in bank (%s)\n",
@@ -1576,7 +1577,7 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 		   "will only write %u\n",n,N_bodies()-i);
     n = N_bodies()-i;
   }
-  unsigned nb[BT_NUM]={0}, nt=n, nc(0u);
+  unsigned nb[bodytype::NUM]={0}, nt=n, nc(0u);
   for(bodytype t; t; ++t)
     if(i < (nc+=N_bodies(t))) {
       nb[t] = min(nc-i, nt);
@@ -1830,7 +1831,7 @@ falcON_TRAITS(::GadgetHeader,"GadgetHeader");
 	falcON_THROW("bodies::read_gadget(): mismatch reading %u %c: "	\
 		     "expected %lu bytes, found %u\n",			\
 		     nr,field_traits<BIT>::word(),			\
-		     nr*field_traits<BIT>::size,F.size());		\
+		     lu(nr*field_traits<BIT>::size),F.size());		\
       add_field(BIT);							\
       if(ns) {								\
 	body sph(SPH);							\
@@ -1912,7 +1913,7 @@ double bodies::read_gadget(const char*fname,
     }
   }
   // 2 establish number of SPH and non-SPH particles and allocate memory.
-  unsigned NB[BT_NUM] = {0}, NP[6] ={0};
+  unsigned NB[bodytype::NUM] = {0}, NP[6] ={0};
   NB[bodytype::gas] = header->npartTotal[0];
   for(int k=1; k!=6; ++k) NB[bodytype::std] += header->npartTotal[k];
   if(NB[bodytype::gas] == 0) read &= fieldset(fieldset::nonSPH);
@@ -1960,7 +1961,7 @@ double bodies::read_gadget(const char*fname,
 	if(F.size() != nm*sizeof(real))
 	  falcON_THROW("bodies::read_gadget(): mismatch reading %u m: "
 		       "expected %lu bytes, found %u\n",
-		       nm,nm*sizeof(real), F.size());
+		       nm,lu(nm*sizeof(real)), F.size());
 	body sph(SPH), std(STD);
 	add_field(fieldbit::m);
 	if(header->npart[0]) {

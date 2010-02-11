@@ -124,7 +124,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   MAC_type          MAC = Default::mac;
   kern_type         K   = Default::kernel;
   unsigned          Seed;
-  unsigned          N, Nbod[BT_NUM]={0}, Nact;
+  unsigned          N, Nbod[bodytype::NUM]={0}, Nact;
   unsigned          split=1, Ngrow=0;
   unsigned          Ncrit=Default::Ncrit,
                     DIR[4]={Default::direct[0],Default::direct[1],

@@ -210,7 +210,9 @@ namespace falcON { namespace Manipulate {
     }
     print_line(SP.has_vels());
     OUT  <<"#\n"
-	 <<"# time   = "<<S->time()<<'\n';
+	 <<"# time   = "<<S->time()
+	 <<" Mtot  = "<<std::setprecision(8)<<SP.Mtot()
+	 <<'\n';
     const std::string *SUB = S->pointer<std::string>("subset_description");
     if(SUB)
       OUT<<"# subset: "<< (*SUB) <<'\n';

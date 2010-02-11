@@ -220,7 +220,7 @@ void falcON::main() falcON_THROWING
   //----------------------------------------------------------------------------
   unsigned N = getuparam("nbody");
   if(N) {
-    unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = N;
+    unsigned nbod[bodytype::NUM]={0}; nbod[bodytype::std] = N;
     snapshot shot(getdparam("time"), nbod, data);
     HaloSample.sample(shot, getbparam("q-ran"), Ran,
 		      getdparam("f_pos"), 

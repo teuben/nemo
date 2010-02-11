@@ -69,7 +69,7 @@ void falcON::main() falcON_THROWING
   snap_in        snap1(in1), snap2(in2);
   const double   time(snap1.has_time()? snap1.time() :
 		      snap2.has_time()? snap2.time() : 0.);
-  unsigned nbod[BT_NUM] = {0};
+  unsigned nbod[bodytype::NUM] = {0};
   for(bodytype t; t; ++t)
     nbod[t] = snap1.Nbod(t) + snap2.Nbod(t);
   snapshot shot(time, nbod, fieldset::o);

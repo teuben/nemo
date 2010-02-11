@@ -129,7 +129,7 @@ void falcON::main() falcON_THROWING
 	      aext.is_empty()?
 	      static_cast<const acceleration*>(&disc) :
 	      static_cast<const acceleration*>(&asum) );
-  unsigned nbod[BT_NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
+  unsigned nbod[bodytype::NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
   snapshot shot(getdparam("time"), nbod, data);
   if(getdparam("Q"))    
     DM.sample(shot,getiparam("ni"),getbparam("q-ran"),Ran,getbparam("giveF"));
