@@ -5,7 +5,7 @@
 //
 // Copyright (C) 2000-2004 Walter Dehnen
 // Copyright (C) 2005-2007 Walter Dehnen, Paul McMillan
-// Copyright (C) 2008-2009 Walter Dehnen
+// Copyright (C) 2008-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -402,10 +402,15 @@ HaloPotential::HaloPotential(HaloDensity const&model,
   go  = DEN.outer_gamma();
   g3  = 3-go;
   g4  = 4-go;
-  fmt = tr? 0. : -FPi*rh[n1]*r[n1]*r[n1]*r[n1]/g3;
-  fmh = tr? 0. : -FPi*rh[nm]*r[nm]*r[nm]*r[nm]/g3;
+  fmt = tr? 0. : -FPi*  rh[n1]  *r[n1]*r[n1]*r[n1]/g3;
+  fmh = tr? 0. : -FPi*DEN(r[nm])*r[nm]*r[nm]*r[nm]/g3;
   Mtt = mt[n1]+fmt;
   Mht = mh[nm]+fmh;
+  // TEST
+  std::cerr<<" n1="<<n1<<" nm="<<nm<<'\n'
+	   <<" mt[n1]="<<mt[n1]<<" fmt="<<fmt<<" Mtt="<<Mtt<<'\n'
+	   <<" mh[nm]="<<mh[nm]<<" fmh="<<fmh<<" Mht="<<Mht<<'\n';
+  // TSET
   // 2.5 find total potential & Ec: add psi_halo to ps[]; get ec
   ec.reset(n);
   {
