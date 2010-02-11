@@ -9,9 +9,16 @@ FC		:= $(CPATH)gfortran
 
 PLATFORM 	:= $(shell uname -m)
 
+# warning flags
+ifdef LIMITED_WARNINGS
+WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow
+else
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow
+endif
+
 # general optimisation and warning flags
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
-		-ggdb3 -Wall -Wextra -Wshadow -O2 -fPIC -ffast-math \
+		-ggdb3 $(WARNING) -O2 -fPIC -ffast-math \
 		-funroll-loops -fforce-addr -rdynamic
 
 # these are actually to be set
