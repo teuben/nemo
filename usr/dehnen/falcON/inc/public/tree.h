@@ -1,19 +1,17 @@
 // -*- C++ -*-                                                                  
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file   inc/public/tree.h                                                   
-///                                                                             
-/// \author Walter Dehnen                                                       
-/// \date   2000-2007                                                           
-///                                                                             
-/// \brief  contains definition of class \a OctTree and                         
-///         macros for access to cells & leafs of a tree                        
-///                                                                             
-/// \todo   support parallel code                                               
-///                                                                             
+///
+/// \file   inc/public/tree.h
+///
+/// \author Walter Dehnen
+/// \date   2000-2007,2010
+///
+/// \brief  contains definition of class \a OctTree and macros for access to
+///         cells & leafs of a tree
+///
 // /////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2006  Walter Dehnen                                       
+// Copyright (C) 2000-2010  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -901,7 +899,7 @@ namespace WDutils {
 #define LoopCellsDown(CELL_ITER_TYPE,              /* type of cell iterator  */\
 		      TREE_PTER,                   /* pointer to parent tree */\
 		      NAME)                        /* name for cells         */\
-  for(register CELL_ITER_TYPE	                   /* tree::cell_iterator    */\
+  for(CELL_ITER_TYPE	                           /* tree::cell_iterator    */	\
       NAME((TREE_PTER)->begin_cells());            /* from root cell         */\
       NAME!=(TREE_PTER)->end_cells();              /* until beyond last cell */\
     ++NAME)                                        // get next cell             
@@ -911,7 +909,7 @@ namespace WDutils {
 #define LoopCellsUp(CELL_ITER_TYPE,                /* type of cell iterator  */\
 		    TREE_PTER,                     /* pointer to parent tree */\
 	            NAME)                          /* name for cell* s       */\
-  for(register CELL_ITER_TYPE	                   /* type of cell           */\
+  for(CELL_ITER_TYPE	                           /* type of cell           */\
       NAME((TREE_PTER)->rbegin_cells());           /* from last cell         */\
       NAME!=(TREE_PTER)->rend_cells();             /* until beyond root cell */\
     --NAME)                                        // get previous cell         
@@ -921,7 +919,7 @@ namespace WDutils {
 #define LoopLeafs(LEAF_TYPE,                       /* type of leaf           */\
 		  TREE_PTER,                       /* pointer to parent tree */\
 	          NAME)                            /* name for cell* s       */\
-  for(register LEAF_TYPE*	                   /* type of leaf           */\
+  for(LEAF_TYPE*	                           /* type of leaf           */\
       NAME =static_cast<LEAF_TYPE*>((TREE_PTER)->begin_leafs()); /*from begin*/\
       NAME!=static_cast<LEAF_TYPE*>((TREE_PTER)->end_leafs());   /*until end */\
     ++NAME)                                        // get next leaf             
@@ -931,7 +929,7 @@ namespace WDutils {
                        BEGIN,                      /* index: first leaf      */\
 		       END,                        /* index: beyond last leaf*/\
 	               NAME)                       /* name for cell* s       */\
-  for(register LEAF_TYPE*	                   /* type of leaf           */\
+  for(LEAF_TYPE*	                           /* type of leaf           */\
       NAME =static_cast<LEAF_TYPE*>((TREE_PTER)->leaf_No(BEGIN));/*from begin*/\
       NAME!=static_cast<LEAF_TYPE*>((TREE_PTER)->leaf_No(END));  /*until end */\
     ++NAME)                                        // get next leaf             
@@ -946,7 +944,7 @@ namespace WDutils {
 #define LoopCellKids(CELL_TYPE,                    /* type of parent cell    */\
 		     CELL,                         /* parent cell            */\
 		     NAME)                         /* name for child cells   */\
-  for(register CELL_TYPE::cell_child               /* type of child cell     */\
+  for(CELL_TYPE::cell_child                        /* type of child cell     */\
       NAME  = CELL.begin_cell_kids();              /* from first child       */\
       NAME != CELL.end_cell_kids();                /* until beyond last      */\
     ++NAME)                                        // get next child            
@@ -957,7 +955,7 @@ namespace WDutils {
 		     CELL,                         /* parent cell            */\
 		     CELL_START,                   /* start loop here        */\
 		     NAME)                         /* name for child cells   */\
-  for(register CELL_TYPE::cell_child               /* type of child cell     */\
+  for(CELL_TYPE::cell_child                        /* type of child cell     */\
       NAME  = CELL_START;                          /* from start child       */\
       NAME != CELL.end_cell_kids();                /* until beyond last      */\
     ++NAME)                                        // get next child            
@@ -967,7 +965,7 @@ namespace WDutils {
 #define LoopLeafKids(CELL_TYPE,                    /* type of parent cell    */\
 		     CELL,                         /* parent cell            */\
 		     NAME)                         /* name for child leafs   */\
-  for(register CELL_TYPE::leaf_child	           /* pter to leaf child     */\
+  for(CELL_TYPE::leaf_child	                   /* pter to leaf child     */\
       NAME  = CELL.begin_leafs();                  /* from first child       */\
       NAME != CELL.end_leaf_kids();                /* until beyond last      */\
     ++NAME)                                        // get next child            
@@ -978,7 +976,7 @@ namespace WDutils {
 		     CELL,                         /* parent cell            */\
                      LEAF_START,                   /* start loop here        */\
 		     NAME)                         /* name for child leafs   */\
-  for(register CELL_TYPE::leaf_child	           /* type of child cell     */\
+  for(CELL_TYPE::leaf_child	                   /* type of child cell     */\
       NAME  = LEAF_START;                          /* from start child       */\
       NAME != CELL.end_leaf_kids();                /* until beyond last      */\
     ++NAME)                                        // get next child            
@@ -988,7 +986,7 @@ namespace WDutils {
 #define LoopAllLeafs(CELL_TYPE,                    /* type of parent cell    */\
 		     CELL,                         /* parent cell            */\
 		     NAME)                         /* name for child leafs   */\
-  for(register CELL_TYPE::leaf_child               /* type of child cell     */\
+  for(CELL_TYPE::leaf_child                        /* type of child cell     */\
       NAME  = CELL.begin_leafs();                  /* from first child       */\
       NAME != CELL.end_leaf_desc();                /* until beyond last      */\
     ++NAME)                                        // get next child            
@@ -999,7 +997,7 @@ namespace WDutils {
 		     CELL,                         /* parent cell            */\
                      LEAF_START,                   /* start loop here        */\
 		     NAME)                         /* name for child leafs   */\
-  for(register CELL_TYPE::leaf_child               /* type of child cell     */\
+  for(CELL_TYPE::leaf_child                        /* type of child cell     */\
       NAME  = LEAF_START;                          /* from start child       */\
       NAME != CELL.end_leaf_desc();                /* until beyond last      */\
     ++NAME)                                        // get next child            
@@ -1009,7 +1007,7 @@ namespace WDutils {
 #define LoopLstLeafs(CELL_TYPE,                    /* type of parent cell    */\
 		     CELL,                         /* parent cell            */\
 		     NAME)                         /* name for child leafs   */\
-  for(register CELL_TYPE::leaf_child               /* type of child cell     */\
+  for(CELL_TYPE::leaf_child                        /* type of child cell     */\
       NAME  = CELL.begin_leafs();                  /* from start child       */\
       NAME != CELL.last_leaf_desc();               /* until last             */\
     ++NAME)                                        // get next child            
