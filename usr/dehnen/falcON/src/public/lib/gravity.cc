@@ -5,13 +5,13 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2000-2009
+/// \date    2000-2010
 ///
 /// \brief   implements inc/public/gravity.h
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2009  Walter Dehnen
+// Copyright (C) 2000-2010  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -749,15 +749,15 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
       Mset P(zero);                                //     reset multipoles      
       real dmax(zero);                             //     reset d_max           
       LoopLeafKids(cell_iter,Ci,l) {               //     LOOP sub-leafs s      
-	register vect Xi = cofm(l); Xi-= com;      //       distance vector     
+	vect Xi = cofm(l); Xi-= com;               //       distance vector     
 	update_max(dmax,norm(Xi));                 //       update d_max^2      
 	P.add_body(Xi,mass(l));                    //       add multipoles      
       }                                            //     END LOOP              
       if(has_leaf_kids(Ci)) dmax = sqrt(dmax);     //     d_max due to sub-leafs
       LoopCellKids(cell_iter,Ci,c) {               //     LOOP sub-cells c      
-	register vect Xi = cofm(c); Xi-= com;      //       distance vector     
-	register real Xq = norm(Xi);               //       distance^2          
-	register real x  = dmax - rmax(c);         //       auxiliary           
+	vect Xi = cofm(c); Xi-= com;               //       distance vector     
+	real Xq = norm(Xi);                        //       distance^2          
+	real x  = dmax - rmax(c);                  //       auxiliary           
 	if(zero>x || Xq>square(x))                 //       IF(d>d_max)         
 	  dmax = sqrt(Xq) + rmax(c);               //         set d_max = d     
 	P.add_cell(Xi,mass(c),poles(c));           //       add multipoles      
@@ -793,15 +793,15 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
       Mset P(zero);                                //     reset multipoles      
       real dmax(zero);                             //     reset d_max           
       LoopLeafKids(cell_iter,Ci,l) {               //     LOOP sub-leafs s      
-	register vect Xi = cofm(l); Xi-= com;      //       distance vector     
+	vect Xi = cofm(l); Xi-= com;               //       distance vector     
 	update_max(dmax,norm(Xi));                 //       update d_max^2      
 	P.add_body(Xi,mass(l));                    //       add multipoles      
       }                                            //     END LOOP              
       if(has_leaf_kids(Ci)) dmax = sqrt(dmax);     //     d_max due to sub-leafs
       LoopCellKids(cell_iter,Ci,c) {               //     LOOP sub-cells c      
-	register vect Xi = cofm(c); Xi-= com;      //       distance vector     
-	register real Xq = norm(Xi);               //       distance^2          
-	register real x  = dmax - rmax(c);         //       auxiliary           
+	vect Xi = cofm(c); Xi-= com;               //       distance vector     
+	real Xq = norm(Xi);                        //       distance^2          
+	real x  = dmax - rmax(c);                  //       auxiliary           
 	if(zero>x || Xq>square(x))                 //       IF(d>d_max)         
 	  dmax = sqrt(Xq) + rmax(c);               //         set d_max = d     
 	P.add_cell(Xi,mass(c),poles(c));           //       add multipoles      
