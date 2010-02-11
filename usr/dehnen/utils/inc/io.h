@@ -866,7 +866,8 @@ namespace WDutils {
       if(WRITTEN + n*sizeof(T) > SIZE) {
 	WDutils_Warning("FortranORec::write(): "
 			"cannot write %u, but only %lu  %s\n",
-		       n, (SIZE-WRITTEN)/sizeof(T), nameof(T));
+			n, (unsigned long)((SIZE-WRITTEN)/sizeof(T)),
+			nameof(T));
 	n = (SIZE-WRITTEN)/sizeof(T);
       }
       if(n) write_bytes(static_cast<const char*>

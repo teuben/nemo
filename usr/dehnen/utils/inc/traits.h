@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2005-2007
+/// \date   2005-2007, 2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2005-2007 Walter Dehnen
+// Copyright (C) 2005-2007, 2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -80,6 +80,9 @@ namespace WDutils {
       typedef typename __ITRAITS<UTYPE>::integer_u integer_u;
     };
   } // namespace meta {
+
+  /// printf style format for arguments of type size_t
+  static const char size_t_format[4] = sizeof(size_t)==4? "%du" : "%lu";
 
   typedef meta::__IWORDS<1>::integer_s int8;   ///<   signed integer of  8 bytes
   typedef meta::__IWORDS<2>::integer_s int16;  ///<   signed integer of 16 bytes
