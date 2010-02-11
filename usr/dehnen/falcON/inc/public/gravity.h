@@ -715,47 +715,40 @@ namespace falcON {
 #endif
     }
 
+#ifdef WRITE_IACTION_INFO
     void record_approx_CC(cell_iter const&A, cell_iter const&B)
-    { ++A_CC;
-#ifdef WRITE_IACTION_INFO
-      std::cerr<<" 0 "<< A.index() << ' ' << B.index() << '\n';
-#endif
-    }
-
+    { ++A_CC; std::cerr<<" 0 "<< A.index() << ' ' << B.index() << '\n'; }
     void record_approx_CB(cell_iter const&A, leaf_iter const&B)
-    { ++A_CB;
-#ifdef WRITE_IACTION_INFO
-      std::cerr<<" 1 "<< A.index() << ' ' << TREE->index(B) << '\n';
-#endif
-    }
-
+    { ++A_CB; std::cerr<<" 1 "<< A.index() << ' ' << TREE->index(B) << '\n'; }
     void record_direct_CX(cell_iter const&A)
     { ++D_CX; ADD_SS(P_CX, (number(A)*(number(A)-1))>>1 );
-#ifdef WRITE_IACTION_INFO
-      std::cerr<<" 2 "<< A.index() << " 0 \n";
-#endif
-    }
-
+      std::cerr<<" 2 "<< A.index() << " 0 \n"; }
     void record_direct_CC(cell_iter const&A, cell_iter const&B)
     { ++D_CC; ADD_SS(P_CC, number(A)*number(B));
-#ifdef WRITE_IACTION_INFO
-      std::cerr<<" 3 "<< A.index() << ' ' << B.index() << '\n';
-#endif
-    }
-
+      std::cerr<<" 3 "<< A.index() << ' ' << B.index() << '\n'; }
     void record_direct_CB(cell_iter const&A, leaf_iter const&B)
     { ++D_CB; ADD_SS(P_CB, number(A));
-#ifdef WRITE_IACTION_INFO
-      std::cerr<<" 4 "<< A.index() << ' ' << TREE->index(B) << '\n';
-#endif
-    }
+      std::cerr<<" 4 "<< A.index() << ' ' << TREE->index(B) << '\n'; }
+    void record_BB(leaf_iter const&A, leaf_iter const&B)
+    { ++D_BB;
+      std::cerr<<" 5 " << TREE->index(A) << ' ' << TREE->index(B) << '\n'; }
+#else
+    void record_approx_CC(cell_iter const&, cell_iter const&)
+    { ++A_CC; }
+    void record_approx_CB(cell_iter const&, leaf_iter const&)
+    { ++A_CB; }
+    void record_direct_CX(cell_iter const&A)
+    { ++D_CX; ADD_SS(P_CX, (number(A)*(number(A)-1))>>1 ); }
 
-    void record_BB(leaf_iter const&A, leaf_iter const&B) {
-      ++D_BB;
-#ifdef WRITE_IACTION_INFO
-      std::cerr<<" 5 " << TREE->index(A) << ' ' << TREE->index(B) << '\n';
+    void record_direct_CC(cell_iter const&A, cell_iter const&B)
+    { ++D_CC; ADD_SS(P_CC, number(A)*number(B)); }
+
+    void record_direct_CB(cell_iter const&A, leaf_iter const&B)
+    { ++D_CB; ADD_SS(P_CB, number(A)); }
+    void record_BB(leaf_iter const&, leaf_iter const&)
+    { ++D_BB; }
 #endif
-    }
+
 
 #undef ADD_SS
     // 2 reporting                                                              
