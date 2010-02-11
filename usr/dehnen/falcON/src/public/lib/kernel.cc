@@ -5,11 +5,11 @@
 //
 /// \brief   implements inc/public/kernel.h
 /// \author  Walter Dehnen
-/// \date    2000-2009
+/// \date    2000-2010
 //
 // /////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2008-2009  Walter Dehnen
+// Copyright (C) 2008-2010  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -874,24 +874,24 @@ namespace {
   template<kern_type,int,bool,bool=0> struct kernel;
   //////////////////////////////////////////////////////////////////////////////
   template<kern_type P, int K> struct kernel<P,K,0,0> : private __block<P,K> {
-    enum { ND=K+1 };
+    enum { ND = __block<P,K>::ND };
     sv a(ARGS_B) { LOAD_G b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_G b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
   };
   template<kern_type P, int K> struct kernel<P,K,0,1> : private __block<P,K> {
-    enum { ND=K+1 };
+    enum { ND = __block<P,K>::ND };
     sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
   };
   template<kern_type P, int K> struct kernel<P,K,1,0> : private __block<P,K> {
-   enum { ND=K+1 };
+    enum { ND = __block<P,K>::ND };
     sv a(ARGS_B) { LOAD_G b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_G b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
   };
 #if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 1) 
   // gcc 4.1.2 gives crashing code, if this is inlined.
   template<kern_type P, int K> struct kernel<P,K,1,1> : private __block<P,K> {
-    enum { ND=K+1 };
+    enum { ND = __block<P,K>::ND };
     sv a(ARGS_B);
     sv a(ARGS_C);
   };
@@ -901,7 +901,8 @@ namespace {
     { LOAD_I b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
 #else
   template<kern_type P, int K> struct kernel<P,K,1,1> : private __block<P,K> {
-    enum { ND=K+1 };
+//     enum { ND=K+1 };
+    enum { ND = __block<P,K>::ND };
     sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
   };
