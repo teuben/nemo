@@ -1732,8 +1732,7 @@ namespace falcON {
     /// used in NBodyCode::NBodyCode() of file nbody.h
     explicit
     snapshot(fieldset Bd= fieldset(DefaultBits)) falcON_THROWING :
-    bodies(Bd), INIT(false), TINI(0.), TIME(0.), PBNK(0), PARA(0)
-    {}
+    bodies(Bd), INIT(false), TINI(0.), TIME(0.), PBNK(0), PARA(0) {}
     //--------------------------------------------------------------------------
     /// Constructor 1 (new version)
     ///
@@ -1745,8 +1744,7 @@ namespace falcON {
 	     const unsigned N[bodytype::NUM],
 	     fieldset       Bd= fieldset(DefaultBits)) falcON_THROWING :
     bodies(N,Bd),
-    INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0)
-    {}
+    INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0) {}
     //--------------------------------------------------------------------------
     /// copy constructor from bodies
     ///
@@ -1762,8 +1760,7 @@ namespace falcON {
 	     fieldset     Bd=fieldset::all,
 	     flags        F =flags::empty,
 	     bodytypes    T =bodytypes::all) falcON_THROWING :
-    bodies(B,Bd,F), INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0)
-    {}
+    bodies(B,Bd,F,T), INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0) {}
     //--------------------------------------------------------------------------
     /// copy constructor from snapshot
     ///
