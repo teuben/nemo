@@ -69,114 +69,46 @@ endif
 # compiler and linker etc
 # -----------------------
 
-FILEIO		:= -D_FILE_OFFSET_BITS=64
 
+# if no compiler set, use GNU compiler
+ifeq ($(COMPILER),)
+COMPILER := gcc
+endif
+
+# GNU compiler
 ifeq ($(COMPILER),gcc)
-# ------------------
-# GNU's gcc compiler
-
-CXX		:= $(CPATH)g++
-CC		:= $(CPATH)gcc
-FC		:= $(CPATH)g77
-
-# CPU dependent optimization flags
-# EDIT to match your hardware
-
-ifeq ($(HOSTNAME),rigel)
-# on virgo use
-CPUFLAGS	:= -march=pentium-m -mpreferred-stack-boundary=4
-
-else
-
-ifeq ($(PLATFORM),i386)
-# on i386 use
-CPUFLAGS	:= -march=i386 -mpreferred-stack-boundary=4
+LIMITED_WARNINGS	:= -Winit-self -Wtype-limits -Wsign-compare -Wuninitialized
+-include utils/make.gcc
 endif
 
-ifeq ($(PLATFORM),i686)
-# on i686 use
-CPUFLAGS	:= -march=i686 -mpreferred-stack-boundary=4
+# Portland group compiler
+ifeq ($(COMPILER),pgi)
+-include utils/make.pgi
 endif
 
-ifeq ($(PLATFORM),x86_64)
-# on opteron (x86-64) use
-ifdef DSSE
-CPUFLAGS	:= -march=k8 -mpreferred-stack-boundary=4 -DfalcON_SSE16
-else
-CPUFLAGS	:= -march=k8 -mpreferred-stack-boundary=4
-endif
-endif
+# Pathscale compiler
+ifeq ($(COMPILER),pth)
+-include utils/make.pth
 endif
 
-ifeq ($(HOST),spectrum)
-WARNINGS	:= -Wall -Wshadow -Winit-self -Wsign-compare   # old compiler: no -Wtype-limits
-else
-WARNINGS	:= -Wall -Wshadow -Winit-self -Wtype-limits -Wsign-compare
+# Sun compiler
+ifeq ($(COMPILER),sun)
+-include utils/make.sun
 endif
 
-ifdef DEBUG
-OPTFLAGS	:= -ggdb3 $(WARNINGS) -Wextra -fPIC $(CPUFLAGS) -rdynamic $(STATIC)
-else
-OPTFLAGS	:= -ggdb3 -O2 $(WARNINGS) -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -rdynamic $(STATIC)
-#OPTFLAGS	:= -ggdb3 -O2 -fPIC $(CPUFLAGS) -funroll-loops -fforce-addr -fomit-frame-pointer -rdynamic $(STATIC)
-endif
-
-# this is used for compilation of code with inline assembly SSE instructions
-# it prevents the compiler to mess with SSE and break the code.
-NOSSE		:= -mno-sse -mno-sse2 -mno-sse3 -mfpmath=387
-
-else
-ifeq ($(COMPILER),pgcc)
-# ------------------------
-# portland groups compiler
-
-CXX		:= pgCC
-CC		:= pgcc
-FC		:= pgf77
-#OPTFLAGS	:= -fast -Minline=levels:10 -Mcache_align --no_exceptions -Minform=inform -D__PGCC__
-ifdef DEBUG
-OPTFLAGS	:= -g -inline_debug_info -fastsse -fPIC --no_using_std -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
-else
-OPTFLAGS	:= -fast -fastsse -fPIC --no_using_std -Msafeptr -Minform=inform -D__PGCC__  $(STATIC)
-endif
-
-else
+# Intel compiler
 ifeq ($(COMPILER),icc)
-# --------------
-# intel compiler
-
-CXX		:= $(CPATH)icpc
-CC		:= $(CPATH)icc
-FC		:= $(CPATH)ifc
-ifdef DEBUG
-OPTFLAGS	:= -g  $(STATIC)
-else
-#OPTFLAGS	:= -O2 -unroll -tpp7 -xW -i_dynamic -prefetch
-OPTFLAGS	:= -O2 -unroll -tpp7 -wd177,1572 -fPIC -i_dynamic -prefetch  $(STATIC)
+-include utils/make.icc
 endif
 
-else
-
-
-top		:
-		@echo "unknown compiler"
-		@echo "please set COMPILER in makefile"
-
-endif
-endif
-endif
+# final compiler and linker flags
+FILEIO		:= -D_FILE_OFFSET_BITS=64
+NBDYFLAGS	:= $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) $(DWALTER)
+CFLAGS		:= $(FILEIO) $(CFLAGS) $(DPROPER) $(DEBUG)
+CXXFLAGS	:= $(FILEIO) $(CXXFLAGS) $(DPROPER) $(DEBUG)
 
 AR		:= ar rc
 RL		:= ranlib
-
-# -------------------------
-# compiler and linker flags
-# -------------------------
-
-NBDYFLAGS	:= $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) $(DWALTER)
-
-CFLAGS		:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DEBUG)
-CXXFLAGS	:= $(FILEIO) $(OPTFLAGS) $(DPROPER) $(DEBUG)
 
 # ---------------
 # WDutils library
@@ -213,7 +145,7 @@ MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS)
 MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS) $(NBDYFLAGS) -shared
 MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS) -shared
 MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS)
-MAKE_EXE_C	= $(CC)  -o $@ $< -I$(INC) $(IUTIL) $(CFLAGS)
-MAKE_EXE_F	= $(FC)  -o $@ $< -I$(INC) $(IUTIL) $(OPTFLAGS)
+MAKE_EXE_C	= $(CC) -o $@ $< -I$(INC) $(IUTIL) $(CFLAGS)
+MAKE_EXE_F	= $(FC) -o $@ $< -I$(INC) $(IUTIL) $(OPTFLAGS)
 NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) -lm
 
