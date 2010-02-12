@@ -5,13 +5,13 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2004-2009
+/// \date    2004-2010
 ///
 /// \brief   implements inc/public/bodyfunc.h
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2004-2009  Walter Dehnen
+// Copyright (C) 2004-2010  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -1181,26 +1181,24 @@ falcON::Bodyfunc::Bodyfunc(const char*expr, const char*pars)
 		     expr,NPAR,n,n-NPAR);
   }
 }
-//------------------------------------------------------------------------------
-falcON::Bodyfunc::Bodyfunc(const char*expr, const real*pars, int _npar)
+//
+void falcON::Bodyfunc::getpars(const real*pars, int _npar)
   throw(falcON::exception)
-  : bodyfunc(expr), PARS(0)
 {
-  if(is_empty()) return;
   if(NPAR) {
     if(_npar == 0 || pars == 0)
       throw exception("Bodyfunc::Bodyfunc(): "
 		      "expression \"%s\" requires %d parameters, "
-		      "but none are given", expr,NPAR);
+		      "but none are given", expression(),NPAR);
     if(_npar < NPAR)
       throw exception("Bodyfunc::Bodyfunc(): "
 		      "expression \"%s\" requires %d parameters, "
-		      "but only %d are given", expr,NPAR,_npar);
+		      "but only %d are given", expression(),NPAR,_npar);
     if(_npar > NPAR)
       falcON_Warning("Bodyfunc::Bodyfunc(): "
 		     "expression \"%s\" requires %d parameters, "
 		     "but %d are given; will ignore last %d",
-		     expr,NPAR,_npar,_npar-NPAR);
+		     expression(),NPAR,_npar,_npar-NPAR);
     if(_npar > 0) {
       int _len = _npar*16;
       PARS = falcON_NEW(char,_len);
@@ -1234,48 +1232,20 @@ namespace {
     }
   }
 }
-//------------------------------------------------------------------------------
+//
 template<typename T>
-falcON::BodyFunc<T>::BodyFunc(const char*expr, const char*pars)
-  throw(falcON::exception)
-  : Bodyfunc(expr,pars)
+void falcON::BodyFunc<T>::checktype() const throw(falcON::exception)
 {
   if(is_empty()) return;
   if(TYPE != bf_type<T>::type )
     throw exception("BodyFunc<%s>::BodyFunc(): expression \"%s\" is of type %s",
-		    nameof(T),expr,Typeof(TYPE));
+		    nameof(T),expression(),Typeof(TYPE));
 }
-template falcON::BodyFunc<bool>::BodyFunc(const char*,const char*)
-  throw(falcON::exception);
-template falcON::BodyFunc<int >::BodyFunc(const char*,const char*)
-  throw(falcON::exception);
-template falcON::BodyFunc<falcON::real>::BodyFunc(const char*,const char*)
-  throw(falcON::exception);
-template falcON::BodyFunc<falcON::vect>::BodyFunc(const char*,const char*)
-  throw(falcON::exception);
-//------------------------------------------------------------------------------
-template<typename T>
-falcON::BodyFunc<T>::BodyFunc(const char*expr, const real*pars, int _npar)
-  throw(falcON::exception)
-  : Bodyfunc(expr,pars,_npar)
-{
-  if(is_empty()) return;
-  if(TYPE != bf_type<T>::type)
-    throw exception("BodyFunc<%s>::BodyFunc(): expression \"%s\" is of type %s",
-		    nameof(T),expr,Typeof(TYPE));
-}
-template
-falcON::BodyFunc<bool>::BodyFunc(const char*,const falcON::real*,int)
-  throw(falcON::exception);
-template
-falcON::BodyFunc<int >::BodyFunc(const char*,const falcON::real*,int)
-  throw(falcON::exception);
-template
-falcON::BodyFunc<falcON::real>::BodyFunc(const char*,const falcON::real*,int)
-  throw(falcON::exception);
-template
-falcON::BodyFunc<falcON::vect>::BodyFunc(const char*,const falcON::real*,int)
-  throw(falcON::exception);
+//
+template class falcON::BodyFunc<bool>;
+template class falcON::BodyFunc<int >;
+template class falcON::BodyFunc<real>;
+template class falcON::BodyFunc<vect>;
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // implementing falcON::BodyFilter::BodyFilter                                  
