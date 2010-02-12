@@ -1044,17 +1044,14 @@ namespace {
   } // make_func()
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// implementing falcON::bodyfunc::bodyfunc()                                    
-//                                                                              
-////////////////////////////////////////////////////////////////////////////////
+//
+// implementing falcON::bodyfunc::bodyfunc(const char*)
+//
 bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
   : FUNC(0), TYPE(0), NPAR(0), NEED(fieldset::o), EXPR(0)
 {
   if(oexpr == 0 || *oexpr == 0) return;
-  size_t len = strlen(oexpr)+1;
-  EXPR = falcON_NEW(char,len);
-  strncpy(EXPR,oexpr,len);
+  getexpr(oexpr);
   // 0 eliminate white space from expression
   shrink(nexpr,MAX_LENGTH_EXPR,oexpr);
   if(*nexpr == 0) return;
@@ -1135,7 +1132,14 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
   // 4 delete temporary files
   delete_files(fname);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
+void bodyfunc::getexpr(const char*expr)
+{
+  size_t len = strlen(expr)+1;
+  EXPR = falcON_NEW(char,len);
+  strncpy(EXPR,expr,len);
+}
+//
 bool bodyfunc::print_db(std::ostream&out)
 {
   try {

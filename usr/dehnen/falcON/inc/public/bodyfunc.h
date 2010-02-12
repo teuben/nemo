@@ -97,6 +97,8 @@ namespace falcON {
     int         NPAR;
     fieldset    NEED;
     char       *EXPR;
+    //
+    void getexpr(const char*expr);
     //--------------------------------------------------------------------------
   public:
     /// maximum number of parameters allowed
@@ -106,8 +108,76 @@ namespace falcON {
     /// \return true if something was printed out
     /// \param  out  ostream to print to
     static bool print_db(std::ostream&out);
-    /// ctor from bodyfunc expression (see man pages)
-    explicit bodyfunc(const char*) throw(falcON::exception);
+    /// ctor from expression (see man pages)
+    /// \param[in] expr  suitable expression (see man pages)
+    explicit bodyfunc(const char*expr) throw(falcON::exception);
+    /// copy ctor
+    bodyfunc(bodyfunc const&bf)
+      : FUNC(bf.FUNC), TYPE(bf.TYPE), NPAR(bf.NPAR), NEED(bf.NEED), EXPR(0)
+    { getexpr(bf.EXPR); }
+#if(0)
+    /// ctor from boolean function
+    /// \param[in] func  pter to function to be used
+    /// \param[in] npar  number of parameters used by @a func
+    /// \param[in] need  body data required by @a func
+    /// \param[in] expr  expression implemented by func
+    /// \note This allows the user to generate a bodyfunc @b without invoking
+    ///       the compiler at run time. The price paid for this convenience is
+    ///       that the correctness of @a npar, @a need, and @a expr cannot be
+    ///       guaranteed here.
+    bodyfunc(bool(*func)(body const&, double, const real*),
+	     int npar, fieldset need, const char*expr);
+    /// ctor from integer function
+    /// \param[in] func  pter to function to be used
+    /// \param[in] npar  number of parameters used by @a func
+    /// \param[in] need  body data required by @a func
+    /// \param[in] expr  expression implemented by func
+    /// \note This allows the user to generate a bodyfunc @b without invoking
+    ///       the compiler at run time. The price paid for this convenience is
+    ///       that the correctness of @a npar, @a need, and @a expr cannot be
+    ///       guaranteed here.
+    bodyfunc(int(*func)(body const&, double, const real*),
+	     int npar, fieldset need, const char*expr);
+    /// ctor from scalar function
+    /// \param[in] func  pter to function to be used
+    /// \param[in] npar  number of parameters used by @a func
+    /// \param[in] need  body data required by @a func
+    /// \param[in] expr  expression implemented by func
+    /// \note This allows the user to generate a bodyfunc @b without invoking
+    ///       the compiler at run time. The price paid for this convenience is
+    ///       that the correctness of @a npar, @a need, and @a expr cannot be
+    ///       guaranteed here.
+    bodyfunc(real(*func)(body const&, double, const real*),
+	     int npar, fieldset need, const char*expr);
+    /// ctor from vector function
+    /// \param[in] func  pter to function to be used
+    /// \param[in] npar  number of parameters used by @a func
+    /// \param[in] need  body data required by @a func
+    /// \param[in] expr  expression implemented by func
+    /// \note This allows the user to generate a bodyfunc @b without invoking
+    ///       the compiler at run time. The price paid for this convenience is
+    ///       that the correctness of @a npar, @a need, and @a expr cannot be
+    ///       guaranteed here.
+    bodyfunc(vect(*func)(body const&, double, const real*),
+	     int npar, fieldset need, const char*expr);
+#else
+    /// ctor from function
+    /// \param[in] _func  pter to function to be used
+    /// \param[in] _npar  number of parameters used by @a func
+    /// \param[in] _need  body data required by @a func
+    /// \param[in] _expr  expression implemented by func
+    /// \note @a Type must be either bool, int, real, or vect.
+    /// \note This allows the user to generate a bodyfunc @b without invoking
+    ///       the compiler at run time. The price paid for this convenience is
+    ///       that the correctness of @a npar, @a need, and @a expr cannot be
+    ///       guaranteed here.
+    template<typename Type>
+    bodyfunc(Type(*_func)(body const&, double, const real*),
+	     int _npar, fieldset _need, const char*_expr)
+      : FUNC(_func), TYPE(bf_type_base<Type>::b),
+	NPAR(_npar), NEED(_need), EXPR(0)
+    { getexpr(_expr); }
+#endif
     /// dtor: delete data
     ~bodyfunc() { if(EXPR) falcON_DEL_A(EXPR); EXPR=0; }
     /// return type: 'b', 'i', 'r', 'v' for bool, int, real, vect
@@ -116,7 +186,7 @@ namespace falcON {
     template<typename T>
     bool is_type() const { return bf_type<T>::type == TYPE; }
     /// number of parameters
-    int  const&npar() const { return NPAR; }
+    int const&npar() const { return NPAR; }
     /// return data needed
     fieldset const&need() const { return NEED; }
     /// do we need this datum?
@@ -149,13 +219,14 @@ namespace falcON {
     }
     /// function call operator (not very useful, since template)
     template<typename T>
-    T operator() (body const&b, double t, const real*p) const {
-      return func<T>(b,t,p);
-    }
+    T operator() (body const&b, double t, const real*p) const
+    { return func<T>(b,t,p); }
     /// is *this an empty bodyfunc?
-    bool is_empty() const { return FUNC == 0; }
+    bool is_empty() const
+    { return FUNC == 0; }
     /// is *this valid (non-empty)?
-    operator bool() const { return !is_empty(); }
+    operator bool() const
+    { return !is_empty(); }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -169,14 +240,14 @@ namespace falcON {
     char*PARS;
   public:
     /// construction from bodyfunc expression (can be empty)
-    /// \param expr bodyfunc (5falcON) expression --- or NULL
-    /// \param pars comma separated list of parameters
+    /// \param[in] expr bodyfunc (5falcON) expression --- or NULL
+    /// \param[in] pars comma separated list of parameters
     Bodyfunc(const char*expr, const char*pars)
       throw(falcON::exception);
     /// construction from bodyfunc expression (can be empty)
-    /// \param expr bodyfunc (5falcON) expression --- or NULL
-    /// \param pars array with parameters 
-    /// \param npar number of parameters
+    /// \param[in] expr bodyfunc (5falcON) expression --- or NULL
+    /// \param[in] pars array with parameters 
+    /// \param[in] npar number of parameters
     /// \note there must be enough parameters given
     Bodyfunc(const char*expr, const real*pars, int npar)
       throw(falcON::exception);
@@ -189,7 +260,7 @@ namespace falcON {
     /// return number of parameters used
     bodyfunc::npar;
     /// return nth parameter
-    /// \param  n number of parameter asked
+    /// \param[in]  n number of parameter asked
     real const&param(int n) const { return P[n]; }
     /// return fields required
     bodyfunc::need;
@@ -198,32 +269,32 @@ namespace falcON {
     /// return parameters
     const char*parameters() const { return PARS; }
     /// function call, non-operator
-    /// \param b body
-    /// \param t time
-    /// \return expression evaluated for body \a b at time \a t
+    /// \param[in] b body
+    /// \param[in] t time
+    /// \return expression evaluated for body @a b at time @a t
     template<typename T>
-    T func (body const&b, double t) const {
-      return bodyfunc::func<T>(b,t,P);
-    }
+    T func (body const&b, double t) const
+    { return bodyfunc::func<T>(b,t,P); }
     /// function call operator (not very useful, since template)
     template<typename T>
-    T operator() (body const&b, double t) const {
-      return func<T>(b,t);
-    }
+    T operator() (body const&b, double t) const
+    { return func<T>(b,t); }
     /// is *this an empty bodyfunc?
     bodyfunc::is_empty;
     /// is *this valid (non-empty)?
-    operator bool() const { return !is_empty(); }
+    operator bool() const
+    { return !is_empty(); }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //
   // class BodyFunc<T>
   //
-  /// function object taking body and time, returning a T (template parameter)  
+  /// function object taking body and time, returning a @a T (template
+  /// parameter)
   ///
   /// essentially this is a wrapper around class bodyfunc with the following
   /// distinctions: \n
-  /// - the return type of the bodyfunc expression \b must match T            \n
+  /// - the return type of the bodyfunc expression \b must match @a T         \n
   /// - the parameters are read by the constructor, ie. cannot be varied later\n
   /// - if the bodyfunc is empty, we return: true, 0, zero, vect(zero).
   //
@@ -231,15 +302,15 @@ namespace falcON {
   template<typename T> class BodyFunc : private Bodyfunc {
   public:
     /// construction from bodyfunc expression (can be empty)
-    /// \param expr body_func (5falcON) expression --- or NULL
-    /// \param pars comma separated list of parameters
+    /// \param[in] expr body_func (5falcON) expression --- or NULL
+    /// \param[in] pars comma separated list of parameters
     /// \note the bodyfunc expression must return the type T
     BodyFunc(const char*expr, const char*pars)
       throw(falcON::exception);
     /// construction from bodyfunc expression (can be empty)
-    /// \param expr body_func (5falcON) expression --- or NULL
-    /// \param pars array with parameters 
-    /// \param npar number of parameters
+    /// \param[in] expr body_func (5falcON) expression --- or NULL
+    /// \param[in] pars array with parameters 
+    /// \param[in] npar number of parameters
     /// \note there must be enough parameters given
     /// \note the bodyfunc expression must return the type T
     BodyFunc(const char*expr, const real*pars, int npar)
@@ -247,7 +318,7 @@ namespace falcON {
     /// return number of parameters used
     Bodyfunc::npar;
     /// return nth parameter
-    /// \param  n number of parameter asked
+    /// \param[in] n number of parameter asked
     Bodyfunc::param;
     /// return fields required
     Bodyfunc::need;
@@ -256,16 +327,16 @@ namespace falcON {
     /// return parameters
     Bodyfunc::parameters;
     /// function call
-    /// \param b body
-    /// \param t time
-    /// \return expression evaluated for body \a b at time \a t
-    T operator()(body const&b, double t) const {
-      return Bodyfunc::func<T>(b,t);
-    }
+    /// \param[in] b body
+    /// \param[in] t time
+    /// \return expression evaluated for body @a b at time @a t
+    T operator()(body const&b, double t) const
+    { return Bodyfunc::func<T>(b,t); }
     /// is *this an empty bodyfunc?
     Bodyfunc::is_empty;
     /// is *this valid (non-empty)?
-    operator bool() const { return !is_empty(); }
+    operator bool() const
+    { return !is_empty(); }
   };
   // ///////////////////////////////////////////////////////////////////////////
   template<int BIT> struct BodyPropMap {
@@ -314,8 +385,8 @@ namespace falcON {
     /// type required by bodyfunc
     typedef typename BodyPropType<BIT>::functype functype;
     /// construction from Bodyfunc and time
-    /// \param f pter to Bodyfunc
-    /// \param t time to use
+    /// \param[in] f pter to Bodyfunc
+    /// \param[in] t time to use
     BodyProp(const Bodyfunc*f, double t) 
       throw(falcON::exception) : F(f), T(t)
     {
@@ -329,25 +400,31 @@ namespace falcON {
 				nameof(functype));
     }
     /// number of parameters
-    int  const&npar() const { return F->npar(); }
+    int  const&npar() const
+    { return F->npar(); }
     /// return nth parameter
-    real const&param(int n) const { return F->param(n); }
+    real const&param(int n) const
+    { return F->param(n); }
     /// return fields required
-    fieldset const&need() const { return F->need(); }
+    fieldset const&need() const
+    { return F->need(); }
     /// return original expression
-    const char* expression() const { return F->expression(); }
+    const char* expression() const
+    { return F->expression(); }
     /// return parameters
-    const char*parameters() const { return F->parameters(); }
+    const char*parameters() const
+    { return F->parameters(); }
     /// function call
-    /// \param b body
+    /// \param[in] b body
     /// \return expression evaluated for body \a b at time set at construction
-    proptype operator()(body const&b) const {
-      return convert(F->func<functype>(b,T));
-    }
+    proptype operator()(body const&b) const
+    { return convert(F->func<functype>(b,T)); }
     /// is *this an empty bodyfunc?
-    bool is_empty() const { return F->is_empty(); }
+    bool is_empty() const
+    { return F->is_empty(); }
     /// is *this valid (non-empty)?
-    operator bool() const { return !is_empty(); }
+    operator bool() const
+    { return !is_empty(); }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -363,26 +440,27 @@ namespace falcON {
     double TIME;           ///< simulation time at which operator() is evaluated
   public:
     /// construction from bodyfunc expression (can be empty)
-    /// \param expr body_func (5falcON) expression --- or NULL
-    /// \param pars comma separated list of parameters
+    /// \param[in] expr body_func (5falcON) expression --- or NULL
+    /// \param[in] pars comma separated list of parameters
     /// \note the bodyfunc expression must return the type T
     BodyFilter(const char*expr, const char*pars)
       throw(falcON::exception);
     /// construction from bodyfunc expression (can be empty)
-    /// \param expr body_func (5falcON) expression --- or NULL
-    /// \param pars array with parameters
-    /// \param npar number of parameters
+    /// \param[in] expr body_func (5falcON) expression --- or NULL
+    /// \param[in] pars array with parameters
+    /// \param[in] npar number of parameters
     /// \note there must be enough parameters given
     /// \note the bodyfunc expression must return the type T
     BodyFilter(const char*expr, const real*pars, int npar)
       throw(falcON::exception);
     /// set the time for future function calls
-    /// \param t (input) simulation time
-    void set_time(double t) { TIME = t; }
+    /// \param[in] t (input) simulation time
+    void set_time(double t)
+    { TIME = t; }
     /// return number of parameters used
     BodyFunc<bool>::npar;
     /// return nth parameter
-    /// \param  n number of parameter asked
+    /// \param[in] n number of parameter asked
     BodyFunc<bool>::param;
     /// return fields required
     BodyFunc<bool>::need;
@@ -391,24 +469,25 @@ namespace falcON {
     /// return parameters
     BodyFunc<bool>::parameters;
     /// function call
-    /// \param b body
+    /// \param[in] b body
     /// \return expression evaluated for body \a b at time set by set_time()
-    bool operator()(body const&b) const {
-      return BodyFunc<bool>::operator() (b,TIME);
-    }
+    bool operator()(body const&b) const
+    { return BodyFunc<bool>::operator() (b,TIME); }
     /// is *this an empty bodyfunc?
     BodyFunc<bool>::is_empty;
     /// is *this valid (non-empty)?
     operator bool() const { return !is_empty(); }
     /// return number of bodies passing the filter
-    /// \param B (input) bodies
-    unsigned N_bodies(const bodies*B) const {
+    /// \param[in] B (input) bodies
+    unsigned N_bodies(const bodies*B) const
+    {
       unsigned n = 0;
       LoopAllBodies(B,b) if(operator()(b)) ++n;
       return n;
     }
     /// return first filtered body
-    body first(const bodies*B) const {
+    body first(const bodies*B) const
+    {
       LoopAllBodies(B,b)
 	if(operator()(b)) return b;
       return bodies::bodyNil();
