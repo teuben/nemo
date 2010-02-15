@@ -114,8 +114,9 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
     assert(nsel<=npartTotal);
     // compute offset in case of multiple gadget file
     npartOffset[0] = 0;
-    for (int i=1;i<5;i++) {
+    for (int i=1;i<=5;i++) {
       npartOffset[i] = npartOffset[i-1]+header.npartTotal[i-1];
+      std::cerr << "npartOffset[i]="<<npartOffset[i]<<" npartOffset[i-1]="<<npartOffset[i-1]<<" header.npartTotal[i-1]="<<header.npartTotal[i-1]<<"\n";
     }
     //for (int i=0;i<6;i++)   std::cerr << "npartOffset["<<i<<"]="<<npartOffset[i] <<"\n";
     

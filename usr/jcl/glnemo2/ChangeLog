@@ -1,5 +1,8 @@
 current version
-
+preview.2010-Feb-15
+-------------------
+  fix a bug on gadget2 file with BNDRY data
+  
 preview.2010-Feb-03
 -------------------
   glnemo2 can render automatically all the time steps of a snapshot, if 
