@@ -1,22 +1,44 @@
+// -*- C++ -*-                                                                  
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \file  acceleration.cc
+///
+/// \brief implements acceleration.h
+///
+/// \author Walter Dehnen
+/// \date   2004,2010
+/// \note   acceleration.h is a C header file, while this implementation is C++
+///
+////////////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2004,2010 Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify 
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 //------------------------------------------------------------------------------
-//                                                                              
-// acceleration.cc                                                              
-//                                                                              
-// implements acceleration.h                                                    
-//                                                                              
-// Note that acceleration.h is a C header file, while this implementation       
-// is in C++.                                                                   
-//------------------------------------------------------------------------------
-//                                                                              
-// version 0.0  17/06/2004  WD   It works!                                      
-// version 1.0  22/06/2004  WD   allow for up to 10 fallbacks, no last_...      
-// version 2.0  24/08/2004  WD   have iniacceleration() give the acc_pter       
-// version 2.1  26/08/2004  WD   check for 2nd use of same potential            
-//                               16 fallbacks                                   
-// version 3.0  26/08/2004  WD   allow for multiple accnames                    
-// version 3.1  26/08/2004  WD   avoid array allocation in fallback             
-// version 3.2  26/08/2004  WD   check for 2nd use of same acceleration         
-//                                                                              
+//
+// version 0.0  17/06/2004  WD   It works!
+// version 1.0  22/06/2004  WD   allow for up to 10 fallbacks, no last_...
+// version 2.0  24/08/2004  WD   have iniacceleration() give the acc_pter
+// version 2.1  26/08/2004  WD   check for 2nd use of same potential
+//                               16 fallbacks
+// version 3.0  26/08/2004  WD   allow for multiple accnames
+// version 3.1  26/08/2004  WD   avoid array allocation in fallback
+// version 3.2  26/08/2004  WD   check for 2nd use of same acceleration
+// version 3.3  17/02/2010  WD   allow for nemo string bug
+//
 //------------------------------------------------------------------------------
 
 extern "C" {
@@ -31,7 +53,6 @@ extern "C" {
 #include  <filefn.h>            // finding a function in a loaded file
 }
 
-//==============================================================================
 //                                                                              
 // 1 Fall-back mechanism.                                                       
 //                                                                              
@@ -228,7 +249,7 @@ namespace {
       switch(ndim) {
       case 2: acc_TT<2,scalar>(nbod,pos,flag,pot,acc,add); break;
       case 3: acc_TT<3,scalar>(nbod,pos,flag,pot,acc,add); break;
-      default: error("acceleration: unsupported ndim (%d)",ndim);
+      default: error(const_cast<char*>("acceleration: unsupported ndim (%d)"),ndim);
       }
     }
     
@@ -263,7 +284,7 @@ namespace {
 	       char       type)
     {
       if(!is_set())
-	warning("fallback::acceleration: potential not set");
+	warning(const_cast<char*>("fallback::acceleration: potential not set"));
       
       // set ndim and time
       ndim     = nd;
@@ -277,7 +298,7 @@ namespace {
       else if(type=='d')
 	acc_T(n, static_cast<const double*>(x),
 	      f, static_cast<double*>(p), static_cast<double*>(a), add);
-      else error("fallback::acceleration: unknown type ('%s')",type);
+      else error(const_cast<char*>("fallback::acceleration: unknown type ('%s')"),type);
     }
 
   } 
@@ -301,22 +322,22 @@ namespace {
 		        char       y)				\
   { (FallBack[NUM]).accel(d,t,n,m,x,v,f,p,a,i,y); }
 
-  ACC_FALLBACK(0);
-  ACC_FALLBACK(1);
-  ACC_FALLBACK(2);
-  ACC_FALLBACK(3);
-  ACC_FALLBACK(4);
-  ACC_FALLBACK(5);
-  ACC_FALLBACK(6);
-  ACC_FALLBACK(7);
-  ACC_FALLBACK(8);
-  ACC_FALLBACK(9);
-  ACC_FALLBACK(10);
-  ACC_FALLBACK(11);
-  ACC_FALLBACK(12);
-  ACC_FALLBACK(13);
-  ACC_FALLBACK(14);
-  ACC_FALLBACK(15);
+  ACC_FALLBACK(0)
+  ACC_FALLBACK(1)
+  ACC_FALLBACK(2)
+  ACC_FALLBACK(3)
+  ACC_FALLBACK(4)
+  ACC_FALLBACK(5)
+  ACC_FALLBACK(6)
+  ACC_FALLBACK(7)
+  ACC_FALLBACK(8)
+  ACC_FALLBACK(9)
+  ACC_FALLBACK(10)
+  ACC_FALLBACK(11)
+  ACC_FALLBACK(12)
+  ACC_FALLBACK(13)
+  ACC_FALLBACK(14)
+  ACC_FALLBACK(15)
 
 #undef ACC_FALLBACK
 
@@ -340,7 +361,6 @@ namespace {
   // table of accnames used for the fallbacks sofar
   char acc_names[FbMax][256] = {0};
 
-  //============================================================================
   //                                                                            
   // 2 single_acceleration()                                                    
   //                                                                            
@@ -358,7 +378,7 @@ namespace {
   //          potential_float and potential_double, but must call               
   //          inipotential() only once                                          
   //                                                                            
-  //============================================================================
+
   // declare type of pointer to iniacceleration()
   typedef void(*iniacc_pter)       // return: void
     (const double*,                // input:  array with parameters
@@ -421,16 +441,16 @@ namespace {
     if(accpars && *accpars) {
       npar = nemoinpd(const_cast<char*>(accpars),pars,MAXPAR);
       if(npar > MAXPAR)
-	error("get_acceleration: too many parameters (%d > %d)",npar,MAXPAR);
+	error(const_cast<char*>("get_acceleration: too many parameters (%d > %d)"),npar,MAXPAR);
       if(npar < 0)
-	warning("get_acceleration: parsing error in parameters: \"%s\"",
+	warning(const_cast<char*>("get_acceleration: parsing error in parameters: \"%s\""),
 		accpars);
     } else
       npar = 0;
   
     // 2. load local symbols
     if(first) {
-      mysymbols(getparam("argv0"));
+      mysymbols(getparam(const_cast<char*>("argv0")));
       first = false;
     }
 
@@ -462,7 +482,7 @@ namespace {
     strcat(name,".so");
     char*fullname = pathfind(accpath,name);       // seek for file in path
     if(fullname == 0)
-      error("get_acceleration: cannot find file \"%s\" in path \"%s\"",
+      error(const_cast<char*>("get_acceleration: cannot find file \"%s\" in path \"%s\""),
 	    name,accpath);
     loadobj(fullname);
 
@@ -479,8 +499,8 @@ namespace {
       ia(pars,npar,accfile,&ac,need_mass,need_vels);
       return ac;
     }
-    warning("get_acceleration: no acceleration found in file \"%s\", "
-	    "trying potential instead",fullname);
+    warning(const_cast<char*>("get_acceleration: no acceleration found in file \"%s\", "
+			      "trying potential instead"),fullname);
 
     // 6. fall-back: use potential.
     //    NOTE: 1 we cannot just call get_potential(), for we want BOTH
@@ -500,14 +520,14 @@ namespace {
     if(fb < FbInd) {
       // 6.A second call for accname:
       // 6.A.1 warn about re-initialisation
-      warning("get_acceleration: re-initializing potential \"%s\"",accname);
+      warning(const_cast<char*>("get_acceleration: re-initializing potential \"%s\""),accname);
       // 6.A.2 call inipotential() again
       (FallBack[fb]).IniPotPter()(&npar,pars,const_cast<char*>(accfile));
     } else {
       // 6.B first call for accname:
       // 6.B.0 remember accname, error
       if(fb >= FbMax)
-	error("get_acceleration: cannot fallback more than %d times",FbMax);
+	error(const_cast<char*>("get_acceleration: cannot fallback more than %d times"),FbMax);
       strcpy(acc_names[fb],accname);
       ++FbInd;
       // 6.B.1 try to get inipotential and potential
@@ -516,7 +536,7 @@ namespace {
       if(pd == 0)    pd = (potproc_double) findfunc("potential");
       potproc_float  pf = (potproc_float)  findfunc("potential_float");
       if((pf==0 && pd==0) || ip==0)
-	error("get_acceleration: no potential found either");
+	error(const_cast<char*>("get_acceleration: no potential found either"));
       // 6.B.2 call inipotential() once
       ip(&npar,pars,const_cast<char*>(accfile));
       // 6.B.3 initialize FallBack[fb] and return AccFallBack[fb]
@@ -524,11 +544,9 @@ namespace {
     }
     return AccFallBack[fb];
   }
-  //============================================================================
   //                                                                            
   // 3 added accelerations                                                      
   //                                                                            
-  //============================================================================
   const int AcMax = 10;                      // max number of added accs        
   int       AcInd = 0;                       // next free added acc             
   //----------------------------------------------------------------------------
@@ -546,14 +564,14 @@ namespace {
 	     bool       *need_vels)
     {
       if(nacc > NMAX)
-	error("get_acceleration: more accnames than expected (%d)",NMAX);
+	error(const_cast<char*>("get_acceleration: more accnames than expected (%d)"),NMAX);
       N = nacc;
       if(need_mass) *need_mass = 0;
       if(need_vels) *need_vels = 0;
       for(int n=0; n!=N; ++n) {
 	if(accname[n]==0 || accname[n][0] == 0)
-	  error("get_acceleration: accname #%d empty "
-		"(parse error in \"accname=...\"?)",n);
+	  error(const_cast<char*>("get_acceleration: accname #%d empty "
+				  "(parse error in \"accname=...\"?)"),n);
 	bool nm,nv;
 	AC[n] = single_acceleration(accname[n],
 				    (accpars[n] && accpars[n][0])? accpars[n]:0,
@@ -646,7 +664,7 @@ namespace {
     do {                                      // LOOP list
       if(*l == 0 || is_sep(*l,seps)) {        //   IF end or seperator found
 	*w++ = 0;                             //     close word
-	if(++n == 128) error("too many words in list");
+	if(++n == 128) error(const_cast<char*>("too many words in list"));
 	wlist[n] = w;                         //     get begin of new word
       } else                                  //   ELSE
 	*w++ = *l;                            //     copy character
@@ -668,12 +686,11 @@ namespace {
 
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// finally, after all this, we can define get_acceleration() itself!          //
-//                                                                            //
+//
+// finally, after all this, we can define get_acceleration() itself!
+//
 ////////////////////////////////////////////////////////////////////////////////
-acc_pter get_acceleration(
-			  const char*accnames,
+acc_pter get_acceleration(const char*accnames,
 			  const char*accparss,
 			  const char*accfiles,
 			  bool      *need_mass,
@@ -685,7 +702,7 @@ acc_pter get_acceleration(
   c_string*accname = splitstring(accnames,NameSeps);
   int nacc=0;
   while(accname[nacc]) nacc++;
-  if(nacc == 0) error("get_acceleration: empty accname");
+  if(nacc == 0) error(const_cast<char*>("get_acceleration: empty accname"));
   // 1. just one accname, then return single acceleration()
   if(nacc == 1) {
     freestrings(accname);
@@ -699,7 +716,7 @@ acc_pter get_acceleration(
     accpars = splitstring(accparss,ParsSeps);
     int n=0; while(accpars[n]) n++;
     if(n!=nacc)
-      error("get_acceleration: %d names but %d parameter sets",nacc,n);
+      error(const_cast<char*>("get_acceleration: %d names but %d parameter sets"),nacc,n);
   }
   // 2.2 split accfiles, allow for empty accfiles -> all accfile=0
   c_string accfile_[1024] = {0}, *accfile = accfile_;
@@ -707,11 +724,11 @@ acc_pter get_acceleration(
     accfile = splitstring(accfiles,FileSeps);
     int n=0; while(accfile[n]) n++;
     if(n!=nacc)
-      error("get_acceleration: %d names but %d data files",nacc,n);
+      error(const_cast<char*>("get_acceleration: %d names but %d data files"),nacc,n);
   }
   // 2.3 check for availability of another added acceleration
   if(AcInd >= AcMax)
-    error("get_acceleration: called more than %d times with multiple accnames",
+    error(const_cast<char*>("get_acceleration: called more than %d times with multiple accnames"),
 	  AcMax);
   // 2.4 initialize added acceleration and return function using it
   (Added[AcInd]).set(nacc,accname,accpars,accfile,need_mass,need_vels);
