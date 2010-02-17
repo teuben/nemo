@@ -50,17 +50,19 @@ namespace {
 #if defined(BD_TEST)
   // dummy functions that aid computing need and type
 
-  template<typename T> struct TypeShift { typedef T      type; };
-  template<> struct TypeShift<flags>    { typedef int    type; };
-  template<> struct TypeShift<unsigned> { typedef int    type; };
-  template<> struct TypeShift<indx>     { typedef int    type; };
-  template<> struct TypeShift<peanokey> { typedef int    type; };
-  template<> struct TypeShift<real>     { typedef double type; };
-  template<> struct TypeShift<vect>     { typedef tupel<3,double> type; };
-  // TestType<BIT>::type is
-  // int, double,tupel<3,double>  for integers, scalars, vectors
-  template<int BIT> struct TestType:
-  public TypeShift<typename field_traits<BIT>::type> {};
+  template<typename T> struct BfTypeInfo { const static char type='u'; };
+  template<> struct BfTypeInfo<bool    > { const static char type='b'; };
+  template<> struct BfTypeInfo<int     > { const static char type='i'; };
+  template<> struct BfTypeInfo<unsigned> { const static char type='i'; };
+  template<> struct BfTypeInfo<peanokey> { const static char type='i'; };
+  template<> struct BfTypeInfo<indx    > { const static char type='i'; };
+  template<> struct BfTypeInfo<flags   > { const static char type='i'; };
+  template<> struct BfTypeInfo<float   > { const static char type='r'; };
+  template<> struct BfTypeInfo<double  > { const static char type='r'; };
+  template<> struct BfTypeInfo<vect    > { const static char type='v'; };
+
+  template<typename T>
+  char TypeLetter(T const&) { return BfTypeInfo<T>::type; }
 
   fieldset need(fieldset::empty);  // to accumulate fields needed
   // provides return value for dummy functions,
@@ -77,14 +79,18 @@ namespace {
   inline bool   is_sph   () { return RNG() > 0.5; }
   inline bool   is_std   () { return RNG() > 0.5; }
   inline bool   is_sink  () { return RNG() > 0.5; }
-  // dummy field functions
+  // need to define Return<BIT>::Type to be a type similar (at best equal) to
+  // field_traits<BIT>::type, but allowing for construction from "RNG()"
+  template<int BIT> struct Return
+  { typedef typename field_traits<BIT>::type Type; };
+  template<> struct Return<fieldbit::f> { typedef int Type; };
+  // dummy field functions, take no body argument
 #define DEF_DUMMY(BIT,NAME)			\
-  inline TestType<BIT>::type NAME()		\
+  inline Return<BIT>::Type NAME()		\
   {						\
     need |= fieldset(fieldbit(BIT));		\
-    return TestType<BIT>::type(RNG());		\
+    return Return<BIT>::Type(RNG());		\
   }
-
   DEF_NAMED(DEF_DUMMY);
 #undef DEF_DUMMY
   // define 'b' to be empty, such that 'pos(b)' --> 'pos()'
