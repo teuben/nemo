@@ -65,7 +65,18 @@ namespace {
   int  testfunc  = 1; 
 
   typedef falcON::fieldset(*bd_pter)();
-  typedef size_t          (*st_pter)();
+  typedef fieldset        (*bt_pter)(char&);
+
+  inline const char*TypeName(char t)
+  {
+    switch(t) {
+    case 'b': return "bool";
+    case 'i': return "int";
+    case 'r': return "real";
+    case 'v': return "vect";
+    default : return "unknown";
+    }
+  }
 
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -106,31 +117,24 @@ namespace {
     DebugInfo(2,"shrink() expr = \"%s\"\n",newexpr);
   }
   //////////////////////////////////////////////////////////////////////////////
-  inline void get_type(char*type, const char*name) throw(BfErr) {
-    // finds function name and determines type from sizeof(name())              
-    st_pter Size = (st_pter)findfn(name);
-    if(Size == 0) throw BfErr("cannot resolve type of expression");
-    switch(Size()) {
-    case 1:  SNprintf(type,MAX_TYPE_LENGTH,"bool"); break;
-    case 2: 
-    case 4:  SNprintf(type,MAX_TYPE_LENGTH,"int");  break;
-    case 8:  SNprintf(type,MAX_TYPE_LENGTH,"real"); break;
-    case 24: SNprintf(type,MAX_TYPE_LENGTH,"vect"); break;
-    default: throw BfErr("cannot resolve type of expression");
-    }
-    DebugInfo(debug_depth,"get_type(): type=%s\n",type);
-  }
-  //----------------------------------------------------------------------------
-  inline fieldset get_need(const char*name) throw(BfErr) {
-    // finds function name and returns need                                     
-    bd_pter Need = (bd_pter)findfn(name);
-    if(Need == 0) throw BfErr("cannot resolve fieldset need");
-    fieldset need=Need();
-    DebugInfo(debug_depth,"get_need(): need=%s\n",word(need));
+  inline fieldset get_type_and_need(char&type, const char*name, const char*expr)
+    throw(BfErr)
+  {
+    // finds function name and determines type
+    bt_pter Type = (bt_pter)findfn(name);
+    if(Type == 0) throw BfErr(message("cannot resolve type and need for"
+				      "expression \"%s\"",expr));
+    fieldset need = Type(type);
+    DebugInfo(debug_depth,"get_type_and_need(): expr=\"%s\": type=%c need=%s\n",
+	      expr,type,word(need));
     return need;
   }
   //----------------------------------------------------------------------------
-  void compile(const char*flags, const char*fname) throw(BfErr) {
+  // NOTE: we must use exactly the same code-relevant flags (such as
+  // "-DfalcON_DOUBLE") as are used to compile this file, since otherwise 
+  // loading the running the generated code will result in rubbish (at best).
+  void compile(const char*flags, const char*fname)
+    throw(BfErr) {
     // compiles a falcON C++ program in fname using compiler flags              
     const char* falcON_path = falcON::directory();
     if(falcON_path == 0) throw BfErr("cannot locate falcON directory");
@@ -443,9 +447,9 @@ namespace {
   // desired information.                                                     //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  void get_type(char      *type,            // O: return type                   
-		fieldset  &need,            // O: body data required            
-		const char*expr)            // I: C-expression encoded in func  
+  void get_type(char       &type,            // O: return type
+		fieldset   &need,            // O: body data required 
+		const char *expr)            // I: C-expression encoded in func 
     throw(BfErr)
   {
     // P   preparations
@@ -455,12 +459,10 @@ namespace {
     }
     // 1 create C++ file implementing functions fneed and fsize
     const size_t FNAME_SIZE=128;
-    char fname[FNAME_SIZE], fneed[FNAME_SIZE], fsize[FNAME_SIZE],
-         ffile[FNAME_SIZE];
+    char fname[FNAME_SIZE], ftype[FNAME_SIZE], ffile[FNAME_SIZE];
     SNprintf(fname,FNAME_SIZE,"bf_t_%s_%d",RunInfo::pid(),testfunc);
     SNprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
-    SNprintf(fneed,FNAME_SIZE,"bf_need_%d",testfunc);
-    SNprintf(fsize,FNAME_SIZE,"bf_size_%d",testfunc++);
+    SNprintf(ftype,FNAME_SIZE,"bf_type_%d",testfunc++);
     std::ofstream file(ffile);
     if(!file) 
       throw BfErr(message("cannot create temporary file \"%s\"",ffile));
@@ -475,16 +477,12 @@ namespace {
       "#include <public/bodyfuncdefs.h>\n\n"
       "real   __P[10]={RNG()};\n\n"
       "extern \"C\" {\n"
-      "  fieldset "<<fneed<<"()\n"
+      "  fieldset "<<ftype<<"(char&type)\n"
       "  {\n"
       "    double t=0.;\n"
-      "    double __X = abs("<<expr<<");\n"
+      "    need = fieldset::o;\n"
+      "    type = TypeLetter("<<expr<<");\n"
       "    return need;\n"
-      "  }\n\n"
-      "  size_t "<<fsize<<"()\n"
-      "  {\n"
-      "    double t=0.;\n"
-      "    return sizeof("<<expr<<");\n"
       "  }\n"
       "}\n";
     file.close();
@@ -494,8 +492,7 @@ namespace {
       // 3 load the .so file and find out about need and type
       SNprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
       loadobj(ffile);
-      get_type(type,fsize);
-      need = get_need(fneed);
+      need = get_type_and_need(type,ftype,expr);
     } catch(BfErr E) {
       delete_files(fname);
       throw E;
@@ -582,12 +579,13 @@ namespace {
   typedef char *pchar;
 
   char  nexpr  [MAX_LENGTH_EXPR];
-  char  subtype[MAX_NUMBER_SUBEXPR][MAX_TYPE_LENGTH];
+//   char  subtype[MAX_NUMBER_SUBEXPR][MAX_TYPE_LENGTH];
   char  subname[MAX_NUMBER_SUBEXPR][MAX_TYPE_LENGTH];
   char  subexpr[MAX_NUMBER_SUBEXPR][MAX_LENGTH_SUBEXPR];
   pchar sexpr  [MAX_NUMBER_SUBEXPR] = {0};
   pchar scond  [MAX_NUMBER_SUBEXPR] = {0};
-  pchar stype  [MAX_NUMBER_SUBEXPR] = {0};
+//   pchar stype  [MAX_NUMBER_SUBEXPR] = {0};
+  char  stype  [MAX_NUMBER_SUBEXPR] = {0};
   pchar sname  [MAX_NUMBER_SUBEXPR] = {0};
   int   soper  [MAX_NUMBER_SUBEXPR];
   int   sub, par;
@@ -717,14 +715,12 @@ namespace {
       localsymbols();
       havesyms = true;
     }
-    // 1 create C++ file implementing functions fneed() and fsize()
+    // 1 create C++ file implementing functions fneed() and ftype()
     const size_t FNAME_SIZE=256;
-    char fname[FNAME_SIZE], fneed[FNAME_SIZE], fsize[FNAME_SIZE],
-         ffile[FNAME_SIZE];
+    char fname[FNAME_SIZE], ftype[FNAME_SIZE], ffile[FNAME_SIZE];
     SNprintf(fname,FNAME_SIZE,"Bf_t_%s_%d",RunInfo::pid(),testfunc);
     SNprintf(ffile,FNAME_SIZE,"/tmp/%s.cc",fname);
-    SNprintf(fneed,FNAME_SIZE,"Bf_need_%d",testfunc);
-    SNprintf(fsize,FNAME_SIZE,"Bf_size_%d",testfunc++);
+    SNprintf(ftype,FNAME_SIZE,"Bf_type_%d",testfunc++);
     std::ofstream file(ffile);
     if(!file)
       throw BfErr(message("cannot create temporary file \"%s\"",ffile));
@@ -753,19 +749,13 @@ namespace {
       else
 	file<<"\n"
 	    <<"# define "<<sname[s]<<" ("<<sexpr[s]<<")\n"
-	    <<"  size_t "<<fsize<<'_'<<s<<"() {\n"
-	    <<"    return sizeof("<<sexpr[s]<<"); }\n";
-    file    <<"\n"
-	    <<"  fieldset "<<fneed<<"() {\n";
-    for(int s=0; s != sub; ++s) {
-      if(scond[s])
-	file<<"    bool   __B"<<s<<" = cond("<<scond[s]<<");\n";
-      if(soper[s] != 7)
-	file<<"    double __X"<<s<<" = abs ("<<sexpr[s]<<");\n";
-    }
-    file    <<"    return need;\n"
-	    <<"  }\n"
-	    <<"} // extern \"C\"\n";
+	    <<"  fieldset "<<ftype<<'_'<<s<<"(char&type)\n"
+	    <<"  {\n"
+	    <<"    need = fieldset::o;\n"
+	    <<"    type = TypeLetter("<<sexpr[s]<<");\n"
+	    <<"    return need;\n"
+	    <<"  }\n";
+    file    <<"} // extern \"C\"\n";
     file.close();
     try {
       // 2 compile the C++ file and create a shared object file
@@ -773,16 +763,15 @@ namespace {
       // 3 load the .so file and find out about need and types
       SNprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
       loadobj(ffile);
-      need = get_need(fneed);
+      need = fieldset::o;
       for(int s=0; s!=sub; ++s) {
 	if(soper[s] == 1) need |= fieldset::m;
-	stype[s] = subtype[s];
 	if(soper[s] == 7)
-	  SNprintf(stype[s],MAX_TYPE_LENGTH,"int");
+	  stype[s] = 'i';
 	else {
-	  char fsizesub[FNAME_SIZE];
-	  SNprintf(fsizesub,FNAME_SIZE,"%s_%d",fsize,s);
-	  get_type(stype[s],fsizesub);
+	  char ftypesub[FNAME_SIZE];
+	  SNprintf(ftypesub,FNAME_SIZE,"%s_%d",ftype,s);
+	  need |= get_type_and_need(stype[s],ftypesub,sexpr[s]);
 	}
       }
     } catch (BfErr E) {
@@ -803,15 +792,15 @@ namespace {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   inline void make_mean(std::ostream&file, int s) throw(ParseErr) {
-    if(stype[s][0] == 'b')
+    if(stype[s] == 'b')
       throw ParseErr("operator 'Mean' must have non-boolean expression");
     const char *space = scond[s]? "      " : "    ";
     file  <<"    // encoding \"Mean{"<<sexpr[s];
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n"
-	  <<"    register "<<stype[s]<<" __X("
-	  << (stype[s][0]=='i'? "0":"zero)") << ";\n"
+	  <<"    register "<<TypeName(stype[s])<<" __X("
+	  << (stype[s]=='i'? "0":"zero)") << ";\n"
 	  <<"    register int __N = 0;\n"
 	  <<"    LoopAllBodies(&B, b)";
     if(scond[s])
@@ -820,19 +809,20 @@ namespace {
 	  <<space<<"  __X += "<<sexpr[s]<<";\n"
 	  <<space<<"  __N ++;\n"
 	  <<space<<"}\n"
-	  <<"    return __X / "<<(stype[s][0]=='i'? "__N":"real(__N)")<<";\n";
+	  <<"    return __X / "<<(stype[s]=='i'? "__N":"real(__N)")
+	  <<";\n";
   }
   //----------------------------------------------------------------------------
   inline void make_mmean(std::ostream&file, int s) throw(ParseErr) {
-    if(stype[s][0] == 'b')
+    if(stype[s] == 'b')
       throw ParseErr("operator 'Mmean' must have non-boolean expression");
     const char *space = scond[s]? "      " : "    ";
     file  <<"    // encoding \"Mmean{"<<sexpr[s];
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n"
-	  <<"    register "<<stype[s]<<" __X("
-	  << (stype[s][0]=='i'? "0":"zero)") << ";\n"
+	  <<"    register "<<TypeName(stype[s])<<" __X("
+	  << (stype[s]=='i'? "0":"zero)") << ";\n"
 	  <<"    register real __M(zero);\n"
 	  <<"    LoopAllBodies(&B, b)";
     if(scond[s])
@@ -845,14 +835,14 @@ namespace {
   }
   //----------------------------------------------------------------------------
   inline void make_sum(std::ostream&file, int s) throw(ParseErr) {
-    if(stype[s][0] == 'b')
+    if(stype[s] == 'b')
       throw ParseErr("operator 'Sum' must have non-boolean expression");
     file  <<"    // encoding \"Sum{"<<sexpr[s];
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n"
-	  <<"    register "<<stype[s]<<" __X("
-	  << (stype[s][0]=='i'? "0":"zero)") << ";\n"
+	  <<"    register "<<TypeName(stype[s])<<" __X("
+	  << (stype[s]=='i'? "0":"zero)") << ";\n"
 	  <<"    LoopAllBodies(&B, b)\n";
     if(scond[s])
       file<<"      if(cond("<<scond[s]<<"))\n  ";
@@ -861,7 +851,7 @@ namespace {
   }
   //----------------------------------------------------------------------------
   inline void make_max(std::ostream&file, int s) throw(ParseErr) {
-    if(stype[s][0] == 'b')
+    if(stype[s] == 'b')
       throw ParseErr("operator 'Max' must have non-boolean expression");
     const char *space = scond[s]? "      " : "    ";
     file  <<"    // encoding \"Max{"<<sexpr[s];
@@ -878,10 +868,10 @@ namespace {
       file<<scond[s]<<' '<<sep<<' ';
     file  <<sexpr[s]<<"}: nobody "
 	  <<(scond[s]?"satisfies condition":"present")<<"\");\n"
-	  <<"      return "<<(stype[s][0]=='i'? "0":
-			      stype[s][0]=='v'? "vect(zero)":"zero") << ";\n"
+	  <<"      return "<<(stype[s]=='i'? "0":
+			      stype[s]=='v'? "vect(zero)":"zero") <<";\n"
 	  <<"    }\n"
-	  <<"    register "<<stype[s]<<" __X = "<<sexpr[s]<<";\n"
+	  <<"    register "<<TypeName(stype[s])<<" __X = "<<sexpr[s]<<";\n"
 	  <<"    for(++b; b!=B.end_all_bodies(); ++b)\n";
     if(scond[s])
       file<<"      if(cond("<<scond[s]<<"))\n";
@@ -890,7 +880,7 @@ namespace {
   }
   //----------------------------------------------------------------------------
   inline void make_min(std::ostream&file, int s) throw(ParseErr) {
-    if(stype[s][0] == 'b')
+    if(stype[s] == 'b')
       throw ParseErr("operator 'Min' must have non-boolean expression");
     const char *space = scond[s]? "      " : "    ";
     file  <<"    // encoding \"Min{"<<sexpr[s];
@@ -907,10 +897,10 @@ namespace {
       file<<scond[s]<<' '<<sep<<' ';
     file  <<sexpr[s]<<"}: nobody "
 	  <<(scond[s]?"satisfies condition":"present")<<"\");\n"
-	  <<"      return "<<(stype[s][0]=='i'? "0":
-			      stype[s][0]=='v'? "vect(zero)":"zero") << ";\n"
+	  <<"      return "<<(stype[s]=='i'? "0":
+			      stype[s]=='v'? "vect(zero)":"zero") << ";\n"
 	  <<"    }\n"
-	  <<"    register "<<stype[s]<<" __X = "<<sexpr[s]<<";\n"
+	  <<"    register "<<TypeName(stype[s])<<" __X = "<<sexpr[s]<<";\n"
 	  <<"    for(++b; b!=B.end_all_bodies(); ++b)\n";
     if(scond[s])
       file<<"      if(cond("<<scond[s]<<"))\n";
@@ -955,7 +945,7 @@ namespace {
   }
   //----------------------------------------------------------------------------
   void make_sub(std::ostream&file, int s) throw(ParseErr) {
-    file<<"\n  inline "<<stype[s]<<' '<<sname[s]<<'F'
+    file<<"\n  inline "<<TypeName(stype[s])<<' '<<sname[s]<<'F'
 	<<"(bodies const&B, double t, const real*__P) {\n";
     switch(soper[s]) {
     case 0: make_mean (file,s); break;
@@ -969,7 +959,7 @@ namespace {
     default: throw ParseErr("unknown operator");
     }
     file<<"  }\n"
-	<<"  "<<stype[s]<<' '<<sname[s]<<";\n";
+	<<"  "<<TypeName(stype[s])<<' '<<sname[s]<<";\n";
   }
   //----------------------------------------------------------------------------
   Bf_pter make_func(                        // R: bodiesfunc                    
@@ -1023,7 +1013,7 @@ namespace {
 	  <<"\n"
 	  <<"\n"
 	  <<"extern \"C\"{\n"
-	  <<"  "<<stype[0]<<" "<<ffunc
+	  <<"  "<<TypeName(stype[0])<<" "<<ffunc
 	  <<"(bodies const&B, double t, const real*__P) {\n";
     for(int s=sub-1; s>0; --s)
       file<<"    "<<sname[s]<<" = "<<sname[s]<<"F(B,t,__P);\n";
@@ -1057,7 +1047,7 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
   if(*nexpr == 0) return;
   // 1 employ database
   const size_t FNAME_SIZE = 256;
-  char fname[FNAME_SIZE],ffunc[FNAME_SIZE],ftype[MAX_TYPE_LENGTH];
+  char fname[FNAME_SIZE],ffunc[FNAME_SIZE];
   const char *funcname;
   BF_database*BD = 0;
   try {
@@ -1100,9 +1090,8 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
       full_parse(rexpr,pexpr,Pexpr+MAX_LENGTH_EXPR,NPAR);
       *pexpr = 0;
     }
-    get_type(ftype,NEED,Pexpr);
-    TYPE = ftype[0];
-    FUNC = make_func(Pexpr,ftype,fname,funcname);
+    get_type(TYPE,NEED,Pexpr);
+    FUNC = make_func(Pexpr,TypeName(TYPE),fname,funcname);
   }
   catch(ParseErr E) {
     if(BD) falcON_DEL_O(BD);
@@ -1323,9 +1312,9 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
     if(debug(debug_depth)) {
       std::cerr<<" need     = \""<<NEED<<"\"\n";
       for(int s=0; s!=sub; ++s)
-	std::cerr<<" stype["<<s<<"] = \""<<stype[s]<<"\"\n";
+	std::cerr<<" stype["<<s<<"] = '"<<stype[s]<<"'\n";
     }
-    TYPE = stype[0][0];
+    TYPE = stype[0];
     // 2.3 generate function and obtain pointer
     FUNC = make_func(fname,funcname);
   }
@@ -1606,7 +1595,7 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
   }
   // 2 employ database
   const size_t FNAME_SIZE=256;
-  char fname[FNAME_SIZE],ffunc[FNAME_SIZE],ftype[MAX_TYPE_LENGTH];
+  char fname[FNAME_SIZE],ffunc[FNAME_SIZE];
   const char *funcname;
   BF_database*BD = 0;
   try {
@@ -1651,9 +1640,8 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
       full_parse(rexpr,pexpr,Pexpr+MAX_LENGTH_EXPR,NPAR);
       *pexpr = 0;
     }
-    get_type(ftype,NEED,Pexpr);
-    TYPE = ftype[0];
-    FUNC = make_method(Pexpr,ftype,fname,funcname);
+    get_type(TYPE,NEED,Pexpr);
+    FUNC = make_method(Pexpr,TypeName(TYPE),fname,funcname);
   }
   catch(ParseErr E) {
     if(BD) falcON_DEL_O(BD);
