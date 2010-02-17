@@ -400,7 +400,7 @@ namespace falcON {
       if(!F->is_type<functype>())
 	throw falcON::exception("BodyProp<%c>: type mismatch: "
 				"bodyfunc returns %s, but need %s",
-				field_traits<BIT>::word,
+				field_traits<BIT>::word(),
 				F->type() == 'b'? "bool" :
 				F->type() == 'i'? "int" :
 				F->type() == 'r'? "real" : "vect",
