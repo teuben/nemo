@@ -1,31 +1,31 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    inc/spline.h                                                       
-/// \brief   template functions & classes for cubic and penta splines           
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    1994-2007                                                          
-///                                                                             
+///
+/// \file    inc/spline.h
+/// \brief   template functions & classes for cubic and penta splines
+///
+/// \author  Walter Dehnen
+///
+/// \date    1994-2007, 2010
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 1994-2007  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 1994-2007, 2010  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or (at
+// your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License 
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_spline_h
 #define WDutils_included_spline_h
@@ -39,30 +39,24 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
-  // ///////////////////////////////////////////////////////////////////////////
-  //                                                                            
-  // class WDutils::cubic_splines                                               
-  //                                                                            
-  /// this is a mere collection of (static) methods                             
-  ///                                                                           
-  // ///////////////////////////////////////////////////////////////////////////
-  template<class scalar_type, class table_type = scalar_type>
+  //
+  // class WDutils::cubic_splines
+  //
+  /// this is a mere collection of (static) methods
+  /// 
   class cubic_splines {
   public:
-    //--------------------------------------------------------------------------
     /// construct cubic spline
-    /// \param n  (input) size of tables
-    /// \param x  (input) table of points, must be ascending OR descending
-    /// \param y  (input) table of function values
-    /// \param y2 (output) table of y''
-    /// \param yp1 (optional input) pter to y' at x[0], use y''=0 if not given
-    /// \param ypn (optional input) pter to y' at x[n-1], use y''=0 if not given
-    static void construct(int n,
-			  const scalar_type*x,
-			  const table_type *y,
-			  table_type *const y2,
-			  const table_type *yp1=0,
-			  const table_type *ypn=0)
+    /// \param[in]  n   size of tables
+    /// \param[in]  x   table of points, must be ascending OR descending
+    /// \param[in]  y   table of function values
+    /// \param[out] y2  table of y''
+    /// \param[in]  yp1 (optional) pter to y' at x[0], use y''=0 if not given
+    /// \param[in]  ypn (optional) pter to y' at x[n-1], use y''=0 if not given
+    template<class scalar_type, class table_type>
+    static void construct(int n, const scalar_type*x, const table_type *y,
+			  table_type *const y2, const table_type *yp1=0,
+			  const table_type *ypn=0) WDutils_THROWING
     { 
       const scalar_type
 	zero =scalar_type(0),
@@ -113,40 +107,34 @@ namespace WDutils {
       WDutils_DEL_A(u);
       WDutils_DEL_A(v);
     }
-    //--------------------------------------------------------------------------
-    /// construct cubic spline                                                  
-    /// \param n  (input) size of tables
-    /// \param x  (input) table of points
-    /// \param y  (input) table of function values
-    /// \param y2 (output) table of y''
-    /// \param yp1 (input) y' at x[0]
-    /// \param ypn (input) y' at x[n-1]
-    /// \param y2 (output) table of y''(x)
-    /// \param n1 (optional input) use natural boundary at x[0]?
-    /// \param nn (optional input) use natural boundary at x[n-1]?
-    static void construct(int n,
-			  const scalar_type*x,
-			  const table_type *y,
-			  table_type const&yp1,
-			  table_type const&ypn,
-			  table_type*const y2,
-			  bool n1=false,
-			  bool nn=false)
-    {
-      construct(n,x,y,y2, n1? &yp1 : 0, nn? &ypn : 0);
-    }
-    //--------------------------------------------------------------------------
+    /// construct cubic spline
+    /// \param[in]  n   size of tables
+    /// \param[in]  x   table of points
+    /// \param[in]  y   table of function values
+    /// \param[out] y2  table of y''
+    /// \param[in]  yp1 y' at @a x[0]
+    /// \param[in]  ypn y' at @a x[n-1]
+    /// \param[out] y2  table of y''(x)
+    /// \param[in]  n1  (optional) use natural boundary at @a x[0]?
+    /// \param[in]  nn  (optional) use natural boundary at @a x[n-1]?
+    template<class scalar_type, class table_type>
+    static void construct(int n, const scalar_type*x, const table_type *y,
+			  table_type const&yp1, table_type const&ypn,
+			  table_type*const y2, bool n1=false, bool nn=false)
+      WDutils_THROWING
+    { construct(n,x,y,y2, n1? &yp1 : 0, nn? &ypn : 0); }
     /// evaluate spline at x=xi with xl <= xi <= xh and yl=y(xl) etc...
-    /// \param xi (input) x-value where spline is desired
-    /// \param xl (input) x-point left to xi: xl <= xi
-    /// \param xh (input) x-point right to xi: xi <= xh
-    /// \param yl (input) y(xl)
-    /// \param yh (input) y(xh)
-    /// \param y2l (input) y''(xl)
-    /// \param y2h (input) y''(xh)
-    /// \param yi  (output) y(xi)
-    /// \param dyi (optional output) y'(xi)
-    /// \param d2yi (optional output) y''(xi)
+    /// \param[in]  xi   x-value where spline is desired
+    /// \param[in]  xl   x-point left to xi: xl <= xi
+    /// \param[in]  xh   x-point right to xi: xi <= xh
+    /// \param[in]  yl   y(xl)
+    /// \param[in]  yh   y(xh)
+    /// \param[in]  y2l  y''(xl)
+    /// \param[in]  y2h  y''(xh)
+    /// \param[out] yi   y(xi)
+    /// \param[out] dyi  (optional) y'(xi)
+    /// \param[out] d2yi (optional) y''(xi)
+    template<class scalar_type, class table_type>
     static void evaluate(scalar_type const&xi,
 			 scalar_type const&xl,
 			 scalar_type const&xh,
@@ -156,7 +144,7 @@ namespace WDutils {
 			 table_type  const&y2h,
 			 table_type       *yi,
 			 table_type       *dyi = 0,
-			 table_type       *d2yi= 0)
+			 table_type       *d2yi= 0) WDutils_THROWING
     {
       const scalar_type sixth=scalar_type(0.16666666666666666666667);
       scalar_type 
@@ -166,20 +154,20 @@ namespace WDutils {
 	B  = 1-A,
 	Aq = A*A,
 	Bq = B*B;
-      if(h==0) WDutils_Error("cubic spline: bad x input");
+      if(h==0) WDutils_THROW("cubic spline: bad x input");
       if(dyi ) *dyi  = (yh-yl)/h + h6*((3*Bq-1)*y2h-(3*Aq-1)*y2l);
       if(d2yi) *d2yi = A*y2l + B*y2h;
       *yi = A*yl +B*yh +((Aq-1)*A*y2l+(Bq-1)*B*y2h)*(h*h6);
     }
-    //--------------------------------------------------------------------------
     /// evaluate spline at x=xi                                                 
     /// \return y(xi)
-    /// \param xi (input) x-value where spline is desired
-    /// \param x  (input) array with x[0] <= xi <= x[1]
-    /// \param y  (input) array with y(x)
-    /// \param y2 (input) array with y''(x)
-    /// \param dyi (optional output) y'(xi)
-    /// \param d2yi (optional output) y''(xi)
+    /// \param[in]  xi   x-value where spline is desired
+    /// \param[in]  x    array with x[0] <= xi <= x[1]
+    /// \param[in]  y    array with y(x)
+    /// \param[in]  y2   array with y''(x)
+    /// \param[out] dyi  (optional) y'(xi)
+    /// \param[out] d2yi (optional) y''(xi)
+    template<class scalar_type, class table_type>
     static table_type evaluate(scalar_type const &xi,
 			       const scalar_type *x,
 			       const table_type  *y,
@@ -192,18 +180,15 @@ namespace WDutils {
       return yi;
     }
   };
-  // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class WDutils::spline                                                      
   //                                                                            
   /// a cubic spline for arbitrary x- and y-type                                
   //                                                                            
-  // ///////////////////////////////////////////////////////////////////////////
   template<class scalar_type, class table_type = scalar_type>
-  class spline : private cubic_splines<scalar_type,table_type>
+  class spline : private cubic_splines
   {
   private:
-    //--------------------------------------------------------------------------
     /// \name data (private)
     //@{
     const int          n;                         ///< size of tables
@@ -213,64 +198,58 @@ namespace WDutils {
     mutable int        lo;                        ///< x[lo] <= xi <= x[lo+1]
     //@}
   public:
-    //--------------------------------------------------------------------------
-    /// \name construction: establish a cubic spline
-    //{@
     /// constructor from arrays
-    /// \param _n size of tables
-    /// \param _x table of points
-    /// \param _y table of function values
-    /// \param yp1 (optional) first derivative at _x[0]
-    /// \param ypn (optional) first derivative at _x[_n-1]
-    /// If null pointers are given for the first derivative of y at _x[0] and
-    /// _x[_n-1] (which is the default), natural boundary conditions are used.
+    /// \param[in]  _n size of tables
+    /// \param[in]  _x table of points
+    /// \param[in]  _y table of function values
+    /// \param[in]  yp1 (optional) first derivative at _x[0]
+    /// \param[in]  ypn (optional) first derivative at _x[_n-1]
+    /// \note If null pointers are given for the first derivative of y at @a
+    ///       _x[0] and @a _x[_n-1] (which is the default), natural boundary
+    ///       conditions are used.
     spline(int _n,
 	   const scalar_type*_x,
 	   const table_type *_y,
 	   const table_type *yp1=0,
-	   const table_type *ypn=0)
+	   const table_type *ypn=0) WDutils_THROWING
       : n(_n), x(_x), y(_y), y2(WDutils_NEW(table_type,n)), lo(0)
     {
       construct(n,x,y,y2,yp1,ypn);
     }
-    //--------------------------------------------------------------------------
     /// constructor from Array<>s
-    /// \param _x Array<> with points
-    /// \param _y Array<> with function values
-    /// \param yp1 (optional) first derivative at _x[0]
-    /// \param ypn (optional) first derivative at _x[_n-1]
-    /// If null pointers are given for the first derivative of y at _x[0] and
-    /// _x[_n-1] (which is the default), natural boundary conditions are used.
+    /// \param[in]  _x Array<> with points
+    /// \param[in]  _y Array<> with function values
+    /// \param[in]  yp1 (optional) first derivative at _x[0]
+    /// \param[in]  ypn (optional) first derivative at _x[_n-1]
+    /// \note If null pointers are given for the first derivative of y at @a
+    ///       _x[0] and @a _x[_n-1] (which is the default), natural boundary
+    ///       conditions are used.
     spline(Array<scalar_type,1> const&_x,
 	   Array<table_type ,1> const&_y,
 	   const table_type *yp1=0,
-	   const table_type *ypn=0)
+	   const table_type *ypn=0) WDutils_THROWING
       : n(_x.size()), x(_x.array()), y(_y.array()),
 	y2(WDutils_NEW(table_type,n)), lo(0)
     {
       if(_x.size() != _y.size())
-	WDutils_Error("size mismatch in spline construction\n");
+	WDutils_THROW("size mismatch in spline construction\n");
       construct(n,x,y,y2,yp1,ypn);
     }
-    //@}
-    //--------------------------------------------------------------------------
     /// destructor
     ~spline() { WDutils_DEL_A(y2); }
-    //--------------------------------------------------------------------------
     /// spline evaluation
     /// \return y(xi)
-    /// \param xi point at which to compute spline
-    /// \param dy (optional output) y'(xi)
-    /// \param d2y (optional output) y''(xi)
+    /// \param[in]  xi  point at which to compute spline
+    /// \param[out] dy  (optional) y'(xi)
+    /// \param[out] d2y (optional) y''(xi)
     table_type operator() (scalar_type xi,
 			   table_type *dy = 0,
-			   table_type *d2y= 0) const
+			   table_type *d2y= 0) const WDutils_THROWING
     {
       find(lo,n,x,xi);
       if(lo==n-1) --lo;
       return evaluate(xi,x+lo,y+lo,y2+lo,dy,d2y);
     }
-    //--------------------------------------------------------------------------
     /// \name direct constant access to data
     //{@
     /// size of tables
@@ -289,6 +268,47 @@ namespace WDutils {
     table_type  const& last_Y ()      const { return y[n-1]; } 
     //@}
   };
+  /// differentiate tabulated function at all points using spline
+  /// \param[in]  n   size of tables
+  /// \param[in]  x   table of points, must be ascending OR descending
+  /// \param[in]  y   table of values: y(x)
+  /// \param[out] yp  table of spline values for y' at points
+  /// \param[in]  yp1 (optional) pter to value for y' at @a x[0]
+  /// \param[in]  ypn (optional) pter to value for y' at @a x[n-1]
+  /// \note We just construct a spline and obtain f'(x) at each point.
+  /// \note This is not optimised for speed.
+  template<class scalar_type, class table_type>
+  void SplineDifferentiate(int n, const scalar_type*x, const table_type *y,
+			   table_type *yp,
+			   const table_type *yp1=0,
+			   const table_type *ypn=0) WDutils_THROWING
+  {
+    table_type*y2 = WDutils_NEW(table_type,n);
+    cubic_splines::construct(n,x,y,y2,yp1,ypn);
+    for(int i=0; i!=n; ++i)
+      cubic_splines::evaluate(x[i],x,y,y2,yp+i);
+    WDutils_DEL_A(y2);
+  }
+  /// differentiate tabulated function at all points using spline
+  /// \param[in]  x   table of points, must be ascending OR descending
+  /// \param[in]  y   table of values: y(x)
+  /// \param[out] yp  table of spline values for y' at points
+  /// \param[in]  yp1 (optional) pter to value for y' at @a x[0]
+  /// \param[in]  ypn (optional) pter to value for y' at @a x[n-1]
+  /// \note We just construct a spline and obtain f'(x) at each point.
+  /// \note This is not optimised for speed.
+  template<class scalar_type, class table_type>
+  void SplineDifferentiate(Array<scalar_type> const&x,
+			   Array<table_type> const&y,
+			   Array<table_type> &yp,
+			   const table_type *yp1=0,
+			   const table_type *ypn=0) WDutils_THROWING
+  {
+    if(x.size() != y.size() )
+      WDutils_THROW("SplineDifferentiate: input array size mismatch\n");
+    if(yp.size() < x.size()) yp.reset(x.size());
+    SplineDifferentiate(x.size(), x.array(), y.array(), yp.array(), yp1, ypn);
+  }
   //////////////////////////////////////////////////////////////////////////////
   template<class scalar_type, class table_type>
   struct traits<spline<scalar_type,table_type> > {
