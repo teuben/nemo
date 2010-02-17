@@ -9,46 +9,62 @@
  *           University Road, Leicester LE1 7RH, United Kingdom                 
  *                                                                              
  *******************************************************************************
- *                                                                              
- *  declaration of functions that any implementation of an external,            
- *  dynamically loadable acceleration must define. See also acceleration.h      
- *                                                                              
+ * 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or (at
+ * your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
  *******************************************************************************
- *                                                                              
- *  to ensure that your implementation of external acceleration is consistent,  
- *  include this header file into your C or C++ source code.                    
- *                                                                              
+ *
+ *  declaration of functions that any implementation of an external,
+ *  dynamically loadable acceleration must define. See also acceleration.h
+ *
  *******************************************************************************
- * version 0.0  17/06/2004  WD                                                  
- * version 1.0  22/06/2004  WD  support for acc & pot via C++ & macros          
- * version 1.1  25/06/2004  WD  somewhat improved documentation                 
- * version 2.0  18/08/2004  WD  seperate accelertion and potential              
- *                              no array allocation in case of adding           
- *                              StaticSphericalModel, _NO_AUX_DEFACC            
+ *
+ *  to ensure that your implementation of external acceleration is consistent,
+ *  include this header file into your C or C++ source code.
+ *
+ *******************************************************************************
+ * version 0.0  17/06/2004  WD 
+ * version 1.0  22/06/2004  WD  support for acc & pot via C++ & macros
+ * version 1.1  25/06/2004  WD  somewhat improved documentation
+ * version 2.0  18/08/2004  WD  seperate accelertion and potential
+ *                              no array allocation in case of adding
+ *                              StaticSphericalModel, _NO_AUX_DEFACC 
  * version 3.0  24/08/2004  WD  no re-initialisation but independent acc fields;
- *                              allows superpositions using GrowCombined        
- * version 3.1  17/09/2004  WD  somewhat improved documentation                 
- * version 3.2  12/11/2004  WD  catching std::bad_alloc and report error        
- * version 3.3  04/05/2007  WD  added global scope resolution operators         
- * version 3.4  12/06/2008  WD  #including stdinc.h                            
+ *                              allows superpositions using GrowCombined
+ * version 3.1  17/09/2004  WD  somewhat improved documentation
+ * version 3.2  12/11/2004  WD  catching std::bad_alloc and report error
+ * version 3.3  04/05/2007  WD  added global scope resolution operators
+ * version 3.4  12/06/2008  WD  #including stdinc.h
  * version 3.5  11/09/2008  WD  no inclusion of NEMO header files
- * version 3.6  24/04/2009  WD  avoid compiler warning with -Wshadow            
- *                                                                              
+ * version 3.6  24/04/2009  WD  avoid compiler warning with -Wshadow
+ *
  *******************************************************************************
- *                                                                              
- * Contents:                                                                    
- *                                                                              
+ *
+ * Contents:
+ *
  * 1 Declaration of C-linkable routines required by implementations of external 
- *   acceleration fields and, optionally, external potential.                   
- *                                                                              
- * C++ only:                                                                    
- *                                                                              
- * 2 Definition of helper templates for manipulating arrays or scalar like      
- *   NDIM dimensional vectores.                                                 
- *                                                                              
- * 3 Definitions of templates and macros that ease the implementation of the    
- *   C-linkable routines in C++.                                                
- *                                                                              
+ *   acceleration fields and, optionally, external potential.
+ *
+ * C++ only:
+ *
+ * 2 Definition of helper templates for manipulating arrays or scalar like
+ *   NDIM dimensional vectores.
+ *
+ * 3 Definitions of templates and macros that ease the implementation of the
+ *   C-linkable routines in C++.
+ *
  *******************************************************************************
  */
 #ifndef _defacc_h
