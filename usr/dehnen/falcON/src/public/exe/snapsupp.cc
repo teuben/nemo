@@ -88,9 +88,6 @@ namespace {
 }
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING {
-  // TEST
-  std::cerr<<" sizeof(vect(zero)) = "<<sizeof(vect(zero))<<'\n';
-  // TSET
 
   nemo_in IN(getparam("in"));
   nemo_out OUT;
@@ -99,23 +96,12 @@ void falcON::main() falcON_THROWING {
   fieldset COPY(getioparam_a("copy")), NEED(FUNC->need()), READ;
   COPY |= fieldset(PROP);
   FILTER = 0;
-  // TEST
-  std::cerr<<" COPY           = "<<COPY<<'\n'
-	   <<" FUNC->need()   = "<<FUNC->need()<<'\n'
-	   <<" fieldset(PROP) = "<<fieldset(PROP)<<'\n';
-  // TSET
   if(hasvalue("filter")) {
     FILTER = new BodyFilter(getparam("filter"),getparam_z("fpars"));
     NEED |= FILTER->need();
     NEED |= fieldset(PROP);
-  // TEST
-    std::cerr<<" FILTER->need() = "<<FILTER->need()<<'\n';
-  // TSET
   } else if (hasvalue("fpars"))
     WDutils_WarningN("fpars given but no filter (will ignore fpars)\n");
-  // TEST
-  std::cerr<<" NEED           = "<<NEED<<'\n';
-  // TSET
   while(IN.has_snapshot()) {
     if(! SHOT.read_nemo(IN,READ,COPY|NEED,getparam("times"),0)) continue;
     check_sufficient(READ,NEED);
