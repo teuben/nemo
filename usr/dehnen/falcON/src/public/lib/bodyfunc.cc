@@ -122,9 +122,11 @@ namespace {
   {
     // finds function name and determines type
     bt_pter Type = (bt_pter)findfn(name);
-    if(Type == 0) throw BfErr(message("cannot resolve type and need for"
-				      "expression \"%s\"",expr));
+    if(Type==0) throw BfErr(message("cannot resolve type and need for"
+				    "expression \"%s\"",expr));
     fieldset need = Type(type);
+    if(type==0) throw BfErr(message("cannot resolve type for"
+				    "expression \"%s\"",expr));
     DebugInfo(debug_depth,"get_type_and_need(): expr=\"%s\": type=%c need=%s\n",
 	      expr,type,word(need));
     return need;

@@ -50,7 +50,7 @@ namespace {
 #if defined(BD_TEST)
   // dummy functions that aid computing need and type
 
-  template<typename T> struct BfTypeInfo { const static char type='u'; };
+  template<typename T> struct BfTypeInfo { const static char type=0; };
   template<> struct BfTypeInfo<bool    > { const static char type='b'; };
   template<> struct BfTypeInfo<int     > { const static char type='i'; };
   template<> struct BfTypeInfo<unsigned> { const static char type='i'; };

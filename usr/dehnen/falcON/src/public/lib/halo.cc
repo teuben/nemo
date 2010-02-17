@@ -406,11 +406,6 @@ HaloPotential::HaloPotential(HaloDensity const&model,
   fmh = tr? 0. : -FPi*DEN(r[nm])*r[nm]*r[nm]*r[nm]/g3;
   Mtt = mt[n1]+fmt;
   Mht = mh[nm]+fmh;
-  // TEST
-  std::cerr<<" n1="<<n1<<" nm="<<nm<<'\n'
-	   <<" mt[n1]="<<mt[n1]<<" fmt="<<fmt<<" Mtt="<<Mtt<<'\n'
-	   <<" mh[nm]="<<mh[nm]<<" fmh="<<fmh<<" Mht="<<Mht<<'\n';
-  // TSET
   // 2.5 find total potential & Ec: add psi_halo to ps[]; get ec
   ec.reset(n);
   {
