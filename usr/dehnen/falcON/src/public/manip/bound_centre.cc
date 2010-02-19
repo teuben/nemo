@@ -150,8 +150,8 @@ namespace Manipulate {
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::p | fieldset::basic; }
-    fieldset provide() const { return fieldset::o; }
-    fieldset change () const { return fieldset::o; }
+    fieldset provide() const { return fieldset::empty; }
+    fieldset change () const { return fieldset::empty; }
     //--------------------------------------------------------------------------
     bound_centre(const double*pars,
 		 int          npar,

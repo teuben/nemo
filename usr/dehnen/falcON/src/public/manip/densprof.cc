@@ -144,8 +144,8 @@ namespace falcON { namespace Manipulate {
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::basic | fieldset::r; }
-    fieldset provide() const { return fieldset::o; }
-    fieldset change () const { return fieldset::o; }
+    fieldset provide() const { return fieldset::empty; }
+    fieldset change () const { return fieldset::empty; }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------

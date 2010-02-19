@@ -107,7 +107,7 @@ void falcON::main() falcON_THROWING
   const fieldset SRCE(fieldset::m | fieldset::x);
   const fieldset GIVE(getioparam_z("give") | fieldset::r);
   const fieldset WANT((GIVE & ~fieldset(fieldset::r)) | SRCE |
-		      (BF? BF.need() : fieldset(fieldset::o)));
+		      (BF? BF.need() : fieldset(fieldset::empty)));
   const unsigned K   (getiparam("K"));
   const bool     VERB(getbparam("verbose"));
   prepare(getiparam("N"));

@@ -1543,7 +1543,7 @@ bool snapshot::read_nemo(nemo_in const&i, fieldset&r, fieldset g,
   bool need_reset = false;
   for(bodytype t; t; ++t)
     if(s.Nbod(t) != N_bodies(t)) need_reset = true;
-  if(need_reset) reset(s.Nbod(), fieldset::o);
+  if(need_reset) reset(s.Nbod(), fieldset::empty);
   r = read_snapshot(s,g,begin_all_bodies(),N_bodies(),w);
   return true;
 }

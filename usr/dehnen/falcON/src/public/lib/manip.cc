@@ -254,9 +254,9 @@ falcON::Manipulator::Manipulator(const char*mannames,
 				 const char*manfiles,
 				 const char*manpaths) falcON_THROWING :
   N     ( 0 ),
-  NEED  ( fieldset::o ),
-  CHNG  ( fieldset::o ),
-  PRVD  ( fieldset::o ),
+  NEED  ( fieldset::empty ),
+  CHNG  ( fieldset::empty ),
+  PRVD  ( fieldset::empty ),
   IS_MPI( true )
 {
   if((mannames == 0 || *mannames == 0) &&

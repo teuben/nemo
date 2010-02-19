@@ -104,9 +104,9 @@ void falcON::main() falcON_THROWING
   const bool     WD  (getbparam("WD_units"));      // using WD_units?           
   const Random   Ran (getparam("seed"),6);         // random-number-generators  
   const fieldset data( 
-    (getbparam("giveF")? fieldset::d : fieldset::o) |
+    (getbparam("giveF")? fieldset::d : fieldset::empty) |
 #ifdef falcON_PROPER
-    (hasvalue("epar")  ? fieldset::e : fieldset::o) |
+    (hasvalue("epar")  ? fieldset::e : fieldset::empty) |
 #endif
     fieldset::basic);
   //----------------------------------------------------------------------------

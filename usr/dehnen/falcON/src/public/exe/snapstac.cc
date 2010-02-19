@@ -72,7 +72,7 @@ void falcON::main() falcON_THROWING
   unsigned nbod[bodytype::NUM] = {0};
   for(bodytype t; t; ++t)
     nbod[t] = snap1.Nbod(t) + snap2.Nbod(t);
-  snapshot shot(time, nbod, fieldset::o);
+  snapshot shot(time, nbod, fieldset::empty);
   // read snapshots
   const body b1(shot.begin_all_bodies());
   got &= shot.read_part(snap1, got, b1, 0);

@@ -76,10 +76,10 @@ namespace falcON { namespace Manipulate {
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { 
-      return (BF && *BF)? BF->need() - fieldset::k : fieldset::o;
+      return (BF && *BF)? BF->need() - fieldset::k : fieldset::empty;
     }
-    fieldset provide() const { return fieldset::o; }
-    fieldset change () const { return fieldset::o; }
+    fieldset provide() const { return fieldset::empty; }
+    fieldset change () const { return fieldset::empty; }
     //--------------------------------------------------------------------------
     set_filter(const char*params, const char*filter) falcON_THROWING
     : BF(0) {

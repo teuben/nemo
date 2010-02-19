@@ -169,10 +169,10 @@ void falcON::main() falcON_THROWING
 #ifdef falcON_PROPER
      hasvalue ("epar") |
 #endif
-     hasvalue ("eps")   ? fieldset::e : fieldset::o) |
-    (getbparam("giveF") ? fieldset::d : fieldset::o) |
-    (getbparam("giveP") ? fieldset::p : fieldset::o) |
-    (getbparam("giveA") ? fieldset::a : fieldset::o) |
+     hasvalue ("eps")   ? fieldset::e : fieldset::empty) |
+    (getbparam("giveF") ? fieldset::d : fieldset::empty) |
+    (getbparam("giveP") ? fieldset::p : fieldset::empty) |
+    (getbparam("giveA") ? fieldset::a : fieldset::empty) |
     fieldset::basic );
   const nemo_acc*mono=0;
   if(hasvalue("accname"))                             // IF(accname given) THEN

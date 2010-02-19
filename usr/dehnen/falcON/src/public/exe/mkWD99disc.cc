@@ -106,8 +106,8 @@ void falcON::main() falcON_THROWING
   if (getiparam("ni") < 1) falcON_Error("Code requires at least one iteration");
   const Random Ran(getparam("seed"),8);
   const fieldset data( 
-    (hasvalue ("eps")   ? fieldset::e : fieldset::o) |
-    (getbparam("giveF") ? fieldset::d : fieldset::o) |
+    (hasvalue ("eps")   ? fieldset::e : fieldset::empty) |
+    (getbparam("giveF") ? fieldset::d : fieldset::empty) |
     fieldset::basic );
   // add disc potential using potential DiscPot
   char discpars[128];

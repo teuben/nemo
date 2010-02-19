@@ -91,8 +91,8 @@ namespace falcON { namespace Manipulate {
 	"passing 'filter' (default: all)";
     }
     //--------------------------------------------------------------------------
-    fieldset          need    () const { return fieldset::o; }
-    fieldset          provide () const { return fieldset::o; }
+    fieldset          need    () const { return fieldset::empty; }
+    fieldset          provide () const { return fieldset::empty; }
     fieldset          change  () const { return fieldset::vectors; }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;

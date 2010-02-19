@@ -189,6 +189,8 @@ ifdef NEMO
 # manipulators
 # ------------
 
+$(MAN)addgravity.so:		$(SMAN)addgravity.cc $(MANT) $(defman_h) $(forces_h) $(makefiles)
+				$(MAKE_MANIP)
 $(MAN)add_plummer.so:		$(SMAN)add_plummer.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)bound_centre.so:		$(SMAN)bound_centre.cc $(MANT) $(defman_h) $(makefiles)
@@ -222,7 +224,8 @@ $(MAN)symmetrize_pairs.so:	$(SMAN)symmetrize_pairs.cc $(MANT) $(defman_h) $(make
 $(MAN)use_filter.so:		$(SMAN)use_filter.cc $(MANT) $(defman_h) $(bodyfunc_h) $(makefiles)
 				$(MAKE_MANIP)
 
-manip_pub		:=	$(MAN)add_plummer.so \
+manip_pub		:=	$(MAN)addgravity.so \
+				$(MAN)add_plummer.so \
 				$(MAN)bound_centre.so \
 				$(MAN)dens_centre.so \
 				$(MAN)density.so \

@@ -58,7 +58,7 @@ namespace falcON { namespace Manipulate {
       return "chooses subset of bodies according to 'filter'";
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::o; }
+    fieldset need   () const { return fieldset::empty; }
     fieldset provide() const { return fieldset::f; }
     fieldset change () const { return fieldset::f; }
     //--------------------------------------------------------------------------

@@ -78,9 +78,9 @@ namespace falcON { namespace Manipulate {
 	return "resets 'xcen' and 'vcen' to null";
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::o; }
-    fieldset provide() const { return fieldset::o; }
-    fieldset change () const { return fieldset::o; }
+    fieldset need   () const { return fieldset::empty; }
+    fieldset provide() const { return fieldset::empty; }
+    fieldset change () const { return fieldset::empty; }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------

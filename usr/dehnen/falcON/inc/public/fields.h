@@ -319,7 +319,7 @@ namespace falcON {
     const char* const SQUANT  ="mxvuefkspqajriyzlnchdtHNUYIEKRADJFCMS";
     // letters taken are marked here
     //             abcdefghijklmnopqrstuvwxyz
-    // lower case  x xxxx xxxxxxxxxxxxxxx xxx
+    // lower case  x xxxx xxxxxxx xxxxxxx xxx
     // upper case  x xxxx xxxx xx   xx x   x 
     //--------------------------------------------------------------------------
     /// array with full-length human readable names for the N-body data
@@ -591,7 +591,6 @@ namespace falcON {
     /// value. They are useful as building blocks for combined sets.
     enum bits {
       empty   = nil,                 ///< empty set
-      o       = nil,                 ///< empty set, to be made redundant
       // STD & SPH:
       m       = one << fieldbit::m,  ///< just masses
       x       = one << fieldbit::x,  ///< just positions
@@ -780,7 +779,7 @@ namespace falcON {
 	  if(contain(_f)) *(_l++) = letter(_f);
 	*_l = 0;
       } else {
-	_w[0] = 'o';
+	_w[0] = '0';
 	_w[1] = 0;
       }
       return _w;
@@ -938,7 +937,7 @@ namespace falcON {
       case sink: return fieldset::STD | fieldset::SPH | fieldset::SINK;
       case gas:  return fieldset::STD | fieldset::SPH;
       case std:  return fieldset::STD;
-      default:   return fieldset::o;
+      default:   return fieldset::empty;
       }
     }
     /// can bodies of this bodytype hold field \c f?

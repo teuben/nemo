@@ -48,9 +48,9 @@ namespace falcON { namespace Manipulate {
 	"shifts snapshot to 'xcen' and 'vcen' (default: origin)";
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::o; }
-    fieldset provide() const { return fieldset::o; }
-    fieldset change () const { return fieldset::o; }
+    fieldset need   () const { return fieldset::empty; }
+    fieldset provide() const { return fieldset::empty; }
+    fieldset change () const { return fieldset::empty; }
     //--------------------------------------------------------------------------
     shift_to_centre(const double*pars,
 		    int          npar,

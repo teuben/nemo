@@ -110,7 +110,7 @@ namespace Manipulate {
     //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::m | fieldset::x; }
     fieldset provide() const { return fieldset::r; }
-    fieldset change () const { return fieldset::o; }
+    fieldset change () const { return fieldset::empty; }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------

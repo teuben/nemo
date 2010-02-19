@@ -75,8 +75,8 @@ namespace falcON { namespace Manipulate {
 	"randomize azimuth of vectors for bodies in_subset() (default: all)";
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::o; }
-    fieldset provide() const { return fieldset::o; }
+    fieldset need   () const { return fieldset::empty; }
+    fieldset provide() const { return fieldset::empty; }
     fieldset change () const { return fieldset::vectors; }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;

@@ -79,7 +79,7 @@ const char*usage = "s2a -- Walter's simple snapshot to ascii converter";
 //------------------------------------------------------------------------------
 namespace {
   //----------------------------------------------------------------------------
-  falcON::fieldset OUTPUT = falcON::fieldset::o;
+  falcON::fieldset OUTPUT = falcON::fieldset::empty;
   FILE*            OUT    = 0;
   char             RFORMAT[32], IFORMAT[32];
   //----------------------------------------------------------------------------

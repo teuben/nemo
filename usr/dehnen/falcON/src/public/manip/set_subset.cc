@@ -96,7 +96,7 @@ namespace Manipulate {
     }
     //--------------------------------------------------------------------------
     fieldset need() const { 
-      return (BF && *BF)?  BF->need() - fieldset::k : fieldset::o;
+      return (BF && *BF)?  BF->need() - fieldset::k : fieldset::empty;
     }
     fieldset provide() const { return fieldset::f; }
     fieldset change () const { return fieldset::f; }

@@ -146,9 +146,9 @@ namespace falcON { namespace Manipulate {
 		 block_No(B), subindex(B));
     }
     //--------------------------------------------------------------------------
-    fieldset need   () const { return fieldset::o; }
-    fieldset provide() const { return fieldset::o; }
-    fieldset change () const { return fieldset::o; }
+    fieldset need   () const { return fieldset::empty; }
+    fieldset provide() const { return fieldset::empty; }
+    fieldset change () const { return fieldset::empty; }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const falcON_THROWING;
     //--------------------------------------------------------------------------
