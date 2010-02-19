@@ -794,7 +794,7 @@ namespace falcON {
 
     {
       double tq=twice(tq_grav(Bi));
-      for(Bi.level()=minlevel(Bi); tauq(Bi)>tq && level(Bi)<H; ++(Bi.level()));
+      for(Bi.level()=minlevel(Bi); tauq(Bi)>tq && level(Bi)<H; ++(Bi.level())) ;
       N[level(Bi)]++;
     }
     /// adjust time-step level for given body

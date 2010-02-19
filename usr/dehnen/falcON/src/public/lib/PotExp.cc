@@ -612,8 +612,8 @@ namespace {
       //                                                                        
       // where G denote the Gegenbauer polynomials.                             
       // see also Zhao (1996, MNRAS 278, 488)                                   
-      register scalar xi;                          // (r^(1/a)-1)/(r^(1/a)+1)   
-      register scalar fi;                          // 1/(1+r^(1/a))^a           
+      scalar xi;                                   // (r^(1/a)-1)/(r^(1/a)+1)   
+      scalar fi;                                   // 1/(1+r^(1/a))^a           
       SetXiFi(xi,fi,r);
       e(P,0) = GM*fi;                              // P(0,0) = G*M/(1+r^(1/a))^a
       fi  *= r*fi;                                 // fi = r / (1+r^(1/a))^(2a) 
@@ -646,8 +646,8 @@ namespace {
     //--------------------------------------------------------------------------
     static void SetPsi(AnlRec&P, AnlRec&D, scalar r) {
       // sets Psi_nl(r) and d Psi_nl(r) / dr                                    
-      register scalar xi,dxi;                      // (r^(1/a)-1)/(r^(1/a)+1)   
-      register scalar fi,dfi;                      // 1/(1+r^(1/a))^a           
+      scalar xi,dxi;                               // (r^(1/a)-1)/(r^(1/a)+1)   
+      scalar fi,dfi;                               // 1/(1+r^(1/a))^a           
       SetXiFi(xi,dxi,fi,dfi,r);
       e(P,0) = fi;                                 // P(0,0) = 1/(1+r^(1/a))^a  
       e(D,0) =dfi;                                 // D(0,0) = dP(0,0)/dr       
@@ -1003,8 +1003,8 @@ namespace {
       //                                                                        
       // where G denote the Gegenbauer polynomials.                             
       // see also Zhao (1996, MNRAS 278, 488)                                   
-      register scalar xi;                          // (r^(1/a)-1)/(r^(1/a)+1)   
-      register scalar fi;                          // 1/(1+r^(1/a))^a           
+      scalar xi;                                   // (r^(1/a)-1)/(r^(1/a)+1)   
+      scalar fi;                                   // 1/(1+r^(1/a))^a           
       SetXiFi(xi,fi,r);
       e(P,0) = GM*fi;                              // P(0,0) = G*M/(1+r^(1/a))^a
       fi    *= r*fi;                               // fi = r / (1+r^(1/a))^(2a) 
@@ -1040,8 +1040,8 @@ namespace {
     //--------------------------------------------------------------------------
     static void SetPsi(AnlRec&P, AnlRec&D, scalar r) {
       // sets Psi_nl(r) and d Psi_nl(r) / dr                                    
-      register scalar xi,dxi;                      // (r^[1/a]-1)/(r^[1/a]+1)   
-      register scalar fi,dfi;                      // 1/(1+r^(1/a))^a           
+      scalar xi,dxi;                               // (r^[1/a]-1)/(r^[1/a]+1)   
+      scalar fi,dfi;                               // 1/(1+r^(1/a))^a           
       SetXiFi(xi,dxi,fi,dfi,r);
       e(P,0) = fi;                                 // P(0,0) = 1/(1+r^(1/a))^a  
       e(D,0) =dfi;                                 // D(0,0) = dP(0,0)/dr       
@@ -1378,7 +1378,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     static void SetYlm(YlmRec&Y,
-		       scalar ct, scalar st, scalar, scalar) {
+		       scalar ct, scalar, scalar, scalar) {
       e(Y,0) = 1;                                  // Y(0,0) = 1                
       e(Y,2) = ct;                                 // Y(1,0) = cos(theta)       
       for(int l = 1,                               // LOOP l+1=1...L            
@@ -1553,8 +1553,8 @@ namespace {
       //                                                                        
       // where G denote the Gegenbauer polynomials.                             
       // see also Zhao (1996, MNRAS 278, 488)                                   
-      register scalar xi;                          // (r^(1/a)-1)/(r^(1/a)+1)   
-      register scalar fi;                          // 1/(1+r^(1/a))^a           
+      scalar xi;                                   // (r^(1/a)-1)/(r^(1/a)+1)   
+      scalar fi;                                   // 1/(1+r^(1/a))^a           
       SetXiFi(xi,fi,r);
       e(P,0) = GM*fi;                              // P(0,0) = G*M/(1+r^(1/a))^a
       if(N1(P)==1) return;                         // no terms n>0 --> DONE     
@@ -1579,8 +1579,8 @@ namespace {
     //--------------------------------------------------------------------------
     static void SetPsi (AnlRec&P, AnlRec&D, scalar r) {
       // sets Psi_nl(r) and dPsi_nl/dr                                          
-      register scalar xi,dxi;                      // (r^(1/a)-1)/(r^(1/a)+1)   
-      register scalar fi,dfi;                      // 1/(1+r^(1/a))^a           
+      scalar xi,dxi;                               // (r^(1/a)-1)/(r^(1/a)+1)   
+      scalar fi,dfi;                               // 1/(1+r^(1/a))^a           
       SetXiFi(xi,dxi,fi,dfi,r);
       e(P,0) =  fi;                                // P(0,0) = 1/(1+r^(1/a))^a  
       e(D,0) = dfi;                                // D(0,0) = dP(0,0)/dr       
@@ -1846,7 +1846,7 @@ inline YlmRec& YlmRec::Nlm() {
 //------------------------------------------------------------------------------
 void YlmRec::table_print(symmetry     s,
 			 std::ostream&o,
-			 int          p) const
+			 int           ) const
 {
   o << "# l   m   C\n"
     << "# -----------------\n";

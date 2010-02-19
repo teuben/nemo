@@ -202,8 +202,8 @@ namespace falcON {
       }
     }
     //--------------------------------------------------------------------------
-#define ARGS__ grav::leaf_iter const&, unsigned const&, 	\
-               grav::leaf_iter const&, unsigned const&
+#define ARGS__ grav::leaf_iter const&, unsigned, 	\
+               grav::leaf_iter const&, unsigned
     void many_AA(ARGS__) const;
     void many_AS(ARGS__) const;
     void many_AN(ARGS__) const;
@@ -273,12 +273,12 @@ namespace falcON {
     // cell-leaf interaction via approximation                                  
     //--------------------------------------------------------------------------
     void approx(grav::cell_iter const&, grav::leaf_iter const&,
-		vect&, real const&) const;
+		vect&, real) const;
     //--------------------------------------------------------------------------
     // cell-cell interaction via approximation                                  
     //--------------------------------------------------------------------------
     void approx(grav::cell_iter const&, grav::cell_iter const&,
-		vect&, real const&) const;
+		vect&, real) const;
     //--------------------------------------------------------------------------
     void flush_buffers() const {
 #ifdef falcON_SSE_CODE
@@ -341,12 +341,12 @@ namespace falcON {
     // cell-leaf interaction via approximation                                  
     //--------------------------------------------------------------------------
     void approx(grav::cell_iter const&, grav::leaf_iter const&,
-		vect&, real const&) const;
+		vect&, real) const;
     //--------------------------------------------------------------------------
     // cell-cell interaction via approximation                                  
     //--------------------------------------------------------------------------
     void approx(grav::cell_iter const&, grav::cell_iter const&,
-		vect&, real const&) const;
+		vect&, real) const;
     //--------------------------------------------------------------------------
     void flush_buffers() const {
 #ifdef falcON_SSE_CODE

@@ -254,11 +254,11 @@ namespace {
   //----------------------------------------------------------------------------
 #define ACCFUNC(NUM)							\
   void accel##NUM(int        ndim,					\
-		  double     time,					\
+		  double     ,						\
 		  int        n,						\
-		  const void*m,						\
+		  const void*,						\
 		  const void*x,						\
-		  const void*v,						\
+		  const void*,						\
 		  const int *f,						\
 		  void      *p,						\
 		  void      *a,						\

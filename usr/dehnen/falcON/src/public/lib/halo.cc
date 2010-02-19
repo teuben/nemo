@@ -311,12 +311,12 @@ namespace {
   const HaloDensity *RHO;
   spline<double>    *SPLINE;
   /// give dM/dln r for HaloDensity pointed to by RHO
-  inline double dM(double lr, double const&M) {
+  inline double dM(double lr, double const&) {
     const double r = exp(lr);
     return cube(r)*(*RHO)(r);
   }
   /// give dPsi_h / dln r, assuming SPLINE holds M(ln r)
-  inline double dP(double lr, double const&P) {
+  inline double dP(double lr, double const&) {
     return -(*SPLINE)(lr) * exp(-lr);              // dPsi = -M/r * dlnr        
   }
 } // namespace {

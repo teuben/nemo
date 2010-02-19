@@ -423,7 +423,7 @@ namespace {
   void GaussLegendre(double *x, double *w, int n)
   {
     register double eps=1.e-10;
-    for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps);
+    for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps) ;
     eps  *=2.;                       // eps = actual computing accuracy
     register int j,i,m=(n+1)/2;
     register double z1,z,pp,p3,p2,p1;

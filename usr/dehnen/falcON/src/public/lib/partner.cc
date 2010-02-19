@@ -227,8 +227,8 @@ namespace {
       if(is_active(B)) B->inc();
     } };
   template<> struct Counter<false> {
-    static void count(PartnerEstimator::leaf_iterator const&A,
-		      PartnerEstimator::leaf_iterator const&B) {}
+    static void count(PartnerEstimator::leaf_iterator const&,
+		      PartnerEstimator::leaf_iterator const&) {}
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            

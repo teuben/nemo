@@ -353,7 +353,7 @@ namespace falcON {
 	__cell_l<N,2,HL>::ad(a,b,v,c);             //   go ahead with l=2       
       } };
     tm<> struct __cell_l<2,0,0> {                  // special case L=0; N=2     
-      tX sv ad(X*a, cX*v, cX*c) {
+      tX sv ad(X*a, cX*, cX*c) {
 	taux<X,ONE3D<2>::PD-1>::v_ad(a,c);         //   add all poles; DONE     
       } };
     tm<> struct __cell_l<3,1,1> {                  // special case L=1, N=3     
@@ -871,7 +871,7 @@ namespace falcON {
     tm<int ORD> struct __c_body {
       sci P=ORD-1;
       tX sv ad(symset3D<1,X>&c, symset3D<ORD,X> const&f, poles3D<P,X> const&m) {
-	register symset3D<1,X> cc=f.template subset<1>();
+	symset3D<1,X> cc=f.template subset<1>();
 	__coef_m<ORD,1,2,P,1>::job(cc,f,m);
 	c.template tensor<0>() -= cc.template tensor<0>();
 	c.template tensor<1>() += cc.template tensor<1>();

@@ -87,9 +87,7 @@ namespace {
     bool NeedMass() const { return false; }
     bool NeedVels() const { return false; }
     //--------------------------------------------------------------------------
-    GalaxyPot(const double*pars,
-	      int          npar,
-	      const char  *file)
+    GalaxyPot(const double*, int, const char*file)
       : GalaxyFile     ( file ),
 	GalaxyPotential( from )
     {
@@ -97,7 +95,6 @@ namespace {
 	std::cerr<<
 	  " falcON debug info:\n"
 	  " external potential \"GalPot\" requires data file in GalPot format.\n";
-      if (npar>1) ::warning("Skipped potential parameters for GalPot beyond 1");
       from.close();
     }
     //--------------------------------------------------------------------------
@@ -115,7 +112,7 @@ namespace {
 	     scalar      &P,
 	     scalar      *A) const
     {
-      register double fR,fz,R=hypot(X[0],X[1]);
+      double fR,fz,R=hypot(X[0],X[1]);
       if(NDIM > 2) {
 	P    = 1.e6 * GalaxyPotential::operator()(R, X[2], fR, fz);
 	if(R) {

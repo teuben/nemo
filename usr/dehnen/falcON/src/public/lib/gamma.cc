@@ -97,7 +97,7 @@ double DehnenModel::SigIsoQ(double x) const
   register double y=x/x1;
   if(g==0.5) return 0.2*sqrt(y)/x1;
   if(x>=10.) { // use formula (9) of Tremaine et al. (1994)
-    register double xi=1./x, al=2.*g-6., fac=1., xi5=power<5>(xi), sum=0.2*xi5;
+    double xi=1./x, al=2.*g-6., fac=1., xi5=power<5>(xi), sum=0.2*xi5;
     for(register int k=1; k<10; k++)
       {
 	al  -= 1.;
@@ -321,7 +321,7 @@ namespace {
   //----------------------------------------------------------------------------
   inline double subfom(double t)
   {
-    register double y = subyofp(e*(1-t*t));
+    double y = subyofp(e*(1-t*t));
     return (power<2>(1-y)*(g+y*(2+g4*y))/power<3>(y) + uq*(g4*y-g3))/pow(y,g1);
   }
 }

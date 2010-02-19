@@ -111,7 +111,8 @@ namespace {
       while(isspace(*e)) ++e;
       *(n++) = *(e++);
       if(n==u)
-	falcON_THROW("shrinking expression exceeds size limit of %lu\n", size);
+	falcON_THROW("shrinking expression exceeds size limit of %lu\n",
+		     (long unsigned)(size));
     }
     *n=0;
     DebugInfo(2,"shrink() expr = \"%s\"\n",newexpr);

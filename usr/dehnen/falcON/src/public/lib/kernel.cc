@@ -44,7 +44,7 @@
 #endif
 
 #define CellLeaf(A,B,D,J,R) {						       \
-  register grav::Cset F;                           /* to hold F^(n)        */  \
+  grav::Cset F;                                    /* to hold F^(n)        */  \
   if(is_active(A)) {                               /* IF A is active       */  \
     set_dPhi(F,R,__ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
     add_C_B2C(A->Coeffs(),F);                      /*   C_A   = ...        */  \
@@ -60,7 +60,7 @@
 }
 
 #define CellLeafAll(A,B,D,J,R) {					       \
-  register grav::Cset F;                           /* to hold F^(n)        */  \
+  grav::Cset F;                                    /* to hold F^(n)        */  \
   set_dPhi(F,R,__ARG_D);                           /* F^(n) = d^nPhi/dR^n  */  \
   add_C_B2C(A->Coeffs(),F);                        /* C_A   = ...          */  \
   F.flip_sign_odd();                               /* F^(n) = d^nPhi/dR^n  */  \
@@ -68,7 +68,7 @@
 }
 
 #define CellCell(A,B,D,J,R) {						       \
-  register grav::Cset F;                           /* to hold F^(n)        */  \
+  grav::Cset F;                                    /* to hold F^(n)        */  \
   if(is_active(A)) {                               /* IF A is active       */  \
     set_dPhi(F,R,__ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
     add_C_C2C(A->Coeffs(),F,B->poles());           /*   C_A   = ...        */  \
@@ -84,7 +84,7 @@
 }
 
 #define CellCellAll(A,B,D,J,R) {					       \
-  register grav::Cset F;                           /* to hold F^(n)        */  \
+  grav::Cset F;                                    /* to hold F^(n)        */  \
   set_dPhi(F,R,__ARG_D);                           /* F^(n) = d^nPhi/dR^n  */  \
   add_C_C2C(A->Coeffs(),F,B->poles());             /* C_A   = ...          */  \
   F.flip_sign_odd();                               /* F^(n) = d^nPhi/dR^n  */  \
@@ -103,7 +103,7 @@ using namespace falcON::grav;
 inline void TaylorSeries::
 shift_and_add(const grav::cell*const&c) {          // I: cell & its coeffs      
   if(hasCoeffs(c)) {                               // IF(cell has had iaction)  
-    register vect dX = cofm(c) - X;                //   vector to shift by      
+    vect dX = cofm(c) - X;                         //   vector to shift by      
     if(dX != zero && C != zero) {                  //   IF(dX != 0 AND C != 0)  
       shift_by(C,dX);                              //     shift expansion       
     }                                              //   ENDIF                   
@@ -225,8 +225,8 @@ real GravKernBase::Psi(kern_type k, real Xq, real Eq)
 //==============================================================================
 void GravKern::single(leaf_iter const &A, leaf_iter const&B) const
 {
-  register vect R  = cofm(A)-cofm(B);
-  register real Rq = norm(R),x,D0;
+  vect R  = cofm(A)-cofm(B);
+  real Rq = norm(R),x,D0;
   if(INDI_SOFT)
     switch(KERN) {
     case p1: { P1_I(mass(A)*mass(B)) } break;
@@ -247,8 +247,8 @@ void GravKern::single(leaf_iter const &A, leaf_iter const&B) const
 //------------------------------------------------------------------------------
 void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
 {
-  register vect R  = cofm(A)-cofm(B);
-  register real Rq = norm(R),x,D0;
+  vect R  = cofm(A)-cofm(B);
+  real Rq = norm(R),x,D0;
   if(INDI_SOFT)
     switch(KERN) {
     case p1: { P1_I(mass(A)*mass(B)) } break;
@@ -322,7 +322,7 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
   XX  = one/D1;					\
   D0 *= sqrt(XX);				\
   D1  = XX * D0;				\
-  XX *= 3  * D1;     /* XX == T2 */		\
+  XX *= 3  * D1;          /* XX == T2 */	\
   D0 += HQ * D1;				\
   D1 += HQ * XX;
 # define DSINGL_P1_I				\
@@ -434,23 +434,17 @@ for(register leaf_iter B=B0; B!=BN; ++B)	\
     PUT_RGHT					\
   } 
 //------------------------------------------------------------------------------
-#define ARGS					\
-  leaf_iter const&A,				\
-  leaf_iter const&B0,				\
-  leaf_iter const&BN,				\
-  real&EQ, real&HQ, real&QQ 
-//------------------------------------------------------------------------------
 #define START_G					\
   const    real      M0=mass(A);		\
   const    vect      X0=cofm(A);		\
-  register vect      dR;			\
+           vect      dR;			\
   register real      D0,D1;
 //------------------------------------------------------------------------------
 #define START_I					\
   const    real      E0=eph(A);			\
   const    real      M0=mass(A);		\
   const    vect      X0=cofm(A);		\
-  register vect      dR;			\
+           vect      dR;			\
   register real      D0,D1;
 //==============================================================================
 // now defining auxiliary inline functions for the computation of  N            
@@ -463,17 +457,17 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
 #define DIRECT(START,LOAD,DSINGL)				\
     static void many_YA(ARGS) {					\
-      START; register real P0(zero); register vect F0(zero);	\
+      START; register real P0(zero); vect F0(zero);		\
       GRAV_ALL(LOAD,DSINGL,PUT_BOTH)				\
       A->pot()+=P0;  A->acc()+=F0;				\
     }								\
     static void many_YS(ARGS) {					\
-      START; register real P0(zero); register vect F0(zero);	\
+      START; register real P0(zero); vect F0(zero);		\
       GRAV_ALL(LOAD,DSINGL,PUT_SOME)				\
       A->pot()+=P0; A->acc()+=F0;				\
     }								\
     static void many_YN(ARGS) {					\
-      START; register real P0(zero); register vect F0(zero);	\
+      START; register real P0(zero); vect F0(zero);		\
       GRAV_ALL(LOAD,DSINGL,PUT_LEFT)				\
       A->pot()+=P0; A->acc()+=F0;				\
     }								\
@@ -488,6 +482,12 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<kern_type, bool> struct __direct;
   //----------------------------------------------------------------------------
+#define ARGS					\
+  leaf_iter const&A,				\
+  leaf_iter const&B0,				\
+  leaf_iter const&BN,				\
+  real&EQ, real&, real& 
+
   template<> struct __direct<p0,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P0_G);
   };
@@ -495,6 +495,13 @@ namespace {
     DIRECT(START_I,LOAD_I,DSINGL_P0_I);
   };
   //----------------------------------------------------------------------------
+#undef  ARGS
+#define ARGS					\
+  leaf_iter const&A,				\
+  leaf_iter const&B0,				\
+  leaf_iter const&BN,				\
+  real&EQ, real&HQ, real& 
+
   template<> struct __direct<p1,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P1_G);
   };
@@ -509,6 +516,13 @@ namespace {
     DIRECT(START_I,LOAD_I,DSINGL_P2_I);
   };
   //----------------------------------------------------------------------------
+#undef  ARGS
+#define ARGS					\
+  leaf_iter const&A,				\
+  leaf_iter const&B0,				\
+  leaf_iter const&BN,				\
+  real&EQ, real&HQ, real&QQ 
+
   template<> struct __direct<p3,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P3_G);
   };
@@ -522,35 +536,35 @@ namespace {
 #undef DIRECT
   //////////////////////////////////////////////////////////////////////////////
   template<bool I> struct Direct {
-    static void many_YA(kern_type const&KERN, ARGS) {
+    static void many_YA(kern_type KERN, ARGS) {
       switch(KERN) {
       case p1: __direct<p1,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
       case p2: __direct<p2,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
       case p3: __direct<p3,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
       default: __direct<p0,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
       } }
-    static void many_YS(kern_type const&KERN, ARGS) {
+    static void many_YS(kern_type KERN, ARGS) {
       switch(KERN) {
       case p1: __direct<p1,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
       case p2: __direct<p2,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
       case p3: __direct<p3,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
       default: __direct<p0,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
       } }
-    static void many_YN(kern_type const&KERN, ARGS) {
+    static void many_YN(kern_type KERN, ARGS) {
       switch(KERN) {
       case p1: __direct<p1,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
       case p2: __direct<p2,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
       case p3: __direct<p3,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
       default: __direct<p0,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
       } }
-    static void many_NA(kern_type const&KERN, ARGS) {
+    static void many_NA(kern_type KERN, ARGS) {
       switch(KERN) {
       case p1: __direct<p1,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
       case p2: __direct<p2,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
       case p3: __direct<p3,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
       default: __direct<p0,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
       } }
-    static void many_NS(kern_type const&KERN, ARGS) {
+    static void many_NS(kern_type KERN, ARGS) {
       switch(KERN) {
       case p1: __direct<p1,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
       case p2: __direct<p2,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
@@ -601,8 +615,8 @@ void GravKernAll::direct(cell_iter const&A, leaf_iter const&B) const
 #define ARGS KERN,A,A+1,A+1+Nk,EQ,HQ,QQ
 void GravKern::direct(cell_iter const&C) const
 {
-  const    unsigned  N1 = number(C)-1;
-  register leaf_iter A  = C.begin_leafs();
+  const unsigned  N1 = number(C)-1;
+  leaf_iter       A  = C.begin_leafs();
   if(INDI_SOFT)
     if(al_active(C))
       for(unsigned Nk=N1; Nk; --Nk,++A) Direct<1>::many_YA(ARGS);
@@ -623,8 +637,8 @@ void GravKern::direct(cell_iter const&C) const
 //------------------------------------------------------------------------------
 void GravKernAll::direct(cell_iter const&C) const
 {
-  const    unsigned  N1 = number(C)-1;
-  register leaf_iter A  = C.begin_leafs();
+  const unsigned  N1 = number(C)-1;
+  leaf_iter       A  = C.begin_leafs();
   if(INDI_SOFT)
     for(unsigned Nk=N1; Nk; --Nk,++A) Direct<1>::many_YA(ARGS);
   else
@@ -640,8 +654,8 @@ void GravKernAll::direct(cell_iter const&C) const
 // these functions are called by GravKern::direct(cell,cell), which is inline   
 // in kernel.h, or by GravKern::flush_scc() below.                              
 //==============================================================================
-void GravKernBase::many_AA(leaf_iter const&A0, unsigned const&NA,
-			   leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_AA(leaf_iter const&A0, unsigned NA,
+			   leaf_iter const&B0, unsigned NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
   if(INDI_SOFT)
@@ -650,8 +664,8 @@ void GravKernBase::many_AA(leaf_iter const&A0, unsigned const&NA,
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void GravKernBase::many_AS(leaf_iter const&A0, unsigned const&NA,
-			   leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_AS(leaf_iter const&A0, unsigned NA,
+			   leaf_iter const&B0, unsigned NB) const
 {
   const    leaf_iter AN=A0+NA, BN=B0+NB;
   if(INDI_SOFT)
@@ -660,8 +674,8 @@ void GravKernBase::many_AS(leaf_iter const&A0, unsigned const&NA,
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void GravKernBase::many_AN(leaf_iter const&A0, unsigned const&NA,
-			   leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_AN(leaf_iter const&A0, unsigned NA,
+			   leaf_iter const&B0, unsigned NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
   if(INDI_SOFT)
@@ -670,8 +684,8 @@ void GravKernBase::many_AN(leaf_iter const&A0, unsigned const&NA,
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void GravKernBase::many_SA(leaf_iter const&A0, unsigned const&NA,
-			   leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_SA(leaf_iter const&A0, unsigned NA,
+			   leaf_iter const&B0, unsigned NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
   if(INDI_SOFT) {
@@ -684,8 +698,8 @@ void GravKernBase::many_SA(leaf_iter const&A0, unsigned const&NA,
       else             Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void GravKernBase::many_SS(leaf_iter const&A0, unsigned const&NA,
-			   leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_SS(leaf_iter const&A0, unsigned NA,
+			   leaf_iter const&B0, unsigned NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
   if(INDI_SOFT) {
@@ -698,8 +712,8 @@ void GravKernBase::many_SS(leaf_iter const&A0, unsigned const&NA,
       else             Direct<0>::many_NS(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void GravKernBase::many_SN(leaf_iter const&A0, unsigned const&NA,
-			   leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_SN(leaf_iter const&A0, unsigned NA,
+			   leaf_iter const&B0, unsigned NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
   if(INDI_SOFT) {
@@ -710,8 +724,8 @@ void GravKernBase::many_SN(leaf_iter const&A0, unsigned const&NA,
       if(is_active(A)) Direct<0>::many_YN(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void GravKernBase::many_NA(leaf_iter const&A0, unsigned const&NA,
-			   leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_NA(leaf_iter const&A0, unsigned NA,
+			   leaf_iter const&B0, unsigned NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
   if(INDI_SOFT)
@@ -720,8 +734,8 @@ void GravKernBase::many_NA(leaf_iter const&A0, unsigned const&NA,
     for(leaf_iter A=A0; A!=AN; ++A) Direct<0>::many_NA(KERN,A,B0,BN,EQ,HQ,QQ);
 }
 //------------------------------------------------------------------------------
-void GravKernBase::many_NS(leaf_iter const&A0, unsigned const&NA,
-			   leaf_iter const&B0, unsigned const&NB) const
+void GravKernBase::many_NS(leaf_iter const&A0, unsigned NA,
+			   leaf_iter const&B0, unsigned NB) const
 {
   const leaf_iter AN=A0+NA, BN=B0+NB;
   if(INDI_SOFT)
@@ -738,14 +752,14 @@ namespace {
   using namespace falcON; using namespace falcON::grav;
   //////////////////////////////////////////////////////////////////////////////
 #define LOAD_G					\
-  register real D[ND];				\
-  register real XX=one/(Rq+EQ);			\
+  real D[ND];					\
+  real XX=one/(Rq+EQ);				\
   D[0] = mass(A)*mass(B);
   //////////////////////////////////////////////////////////////////////////////
 #define LOAD_I					\
-  register real D[ND];				\
+  real D[ND];					\
   EQ   = square(eph(A)+eph(B));			\
-  register real XX=one/(Rq+EQ);			\
+  real XX=one/(Rq+EQ);				\
   D[0] = mass(A)*mass(B);			\
   __setE<P>::s(EQ,HQ,QQ); 
   //////////////////////////////////////////////////////////////////////////////
@@ -775,18 +789,18 @@ namespace {
   // kern_type = p0                                                             
   //////////////////////////////////////////////////////////////////////////////
   template<> struct __setE<p0> {
-    sv s(real const&,real&,real&) {
+    sv s(real,real&,real&) {
     } };
   //----------------------------------------------------------------------------
   template<> struct __block<p0,1> : public __setE<p0> {
     enum { ND=2 };
-    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+    sv b(real&X, real*D, real, real, real) {
       D[0] *= sqrt(X);
       D[1]  = X * D[0];
     } };
   template<int K> struct __block<p0,K> : public __setE<p0> {
     enum { ND=K+1, F=K+K-1 };
-    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+    sv b(real&X, real*D, real EQ, real HQ, real QQ) {
       __block<p0,K-1>::b(X,D,EQ,HQ,QQ);
       D[K] = int(F) * X * D[K-1];
     } };
@@ -794,13 +808,13 @@ namespace {
   // kern_type = p1                                                             
   //////////////////////////////////////////////////////////////////////////////
   template<> struct __setE<p1> {
-    sv s(real const&EQ, real&HQ, real&QQ) {
+    sv s(real EQ, real&HQ, real&) {
       HQ = half * EQ;
     } };
   //----------------------------------------------------------------------------
   template<> struct __block<p1,1> : public __setE<p1> {
     enum { ND=3 };
-    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+    sv b(real&X, real*D, real, real HQ, real) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
       D[2]  = 3 * X * D[1];
@@ -809,7 +823,7 @@ namespace {
     } };
   template<int K> struct __block<p1,K> : public __setE<p1> {
     enum { ND=K+2, F=K+K+1 };
-    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+    sv b(real&X, real*D, real EQ, real HQ, real QQ) {
       __block<p1,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+1] = int(F) * X * D[K];
       D[K]  += HQ  * D[K+1];
@@ -818,13 +832,13 @@ namespace {
   // kern_type = p2                                                             
   //////////////////////////////////////////////////////////////////////////////
   template<> struct __setE<p2> {
-    sv s(real const&EQ, real&HQ, real&QQ) {
+    sv s(real EQ, real&HQ, real&) {
       HQ = half * EQ;
     } };
   //----------------------------------------------------------------------------
   template<> struct __block<p2,1> : public __setE<p2> {
     enum { ND=4 };
-    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+    sv b(real&X, real*D, real, real HQ, real) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
       D[2]  = 3 * X * D[1];
@@ -834,7 +848,7 @@ namespace {
     } };
   template<int K> struct __block<p2,K> : public __setE<p2> {
     enum { ND=K+3, F=K+K+3 };
-    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+    sv b(real&X, real*D, real EQ, real HQ, real QQ) {
       __block<p2,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+2] = int(F) * X * D[K+1];
       D[K]  += HQ*(D[K+1]+HQ*D[K+2]);
@@ -843,14 +857,14 @@ namespace {
   // kern_type = p3                                                             
   //////////////////////////////////////////////////////////////////////////////
   template<> struct __setE<p3> {
-    sv s(real const&EQ, real&HQ, real&QQ) {
+    sv s(real EQ, real&HQ, real&QQ) {
       HQ = half * EQ;
       QQ = half * QQ;
     } };
   //----------------------------------------------------------------------------
   template<> struct __block<p3,1> : public __setE<p3> {
     enum { ND=5 };
-    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+    sv b(real&X, real*D, real, real HQ, real QQ) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
       D[2]  = 3 * X * D[1];
@@ -861,7 +875,7 @@ namespace {
     } };
   template<int K> struct __block<p3,K> : public __setE<p3> {
     enum { ND=K+4, F=K+K+5 };
-    sv b(real&X, real*D, real const&EQ, real const&HQ, real const&QQ) {
+    sv b(real&X, real*D, real EQ, real HQ, real QQ) {
       __block<p3,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+3] = int(F) * X * D[K+2];
       D[K]  += HQ*(D[K+1]+QQ*(D[K+2]+HQ*D[K+3]));
@@ -913,7 +927,7 @@ namespace {
 ////////////////////////////////////////////////////////////////////////////////
 #define ARGS A,B,R,Rq,EQ,HQ,QQ
 void GravKern::approx(cell_iter const&A, leaf_iter const&B,
-		      vect           &R, real      const&Rq) const
+		      vect           &R, real      Rq) const
 {
   if(is_active(A)) give_coeffs(A);
   if(INDI_SOFT) 
@@ -933,7 +947,7 @@ void GravKern::approx(cell_iter const&A, leaf_iter const&B,
 }
 //------------------------------------------------------------------------------
 void GravKernAll::approx(cell_iter const&A, leaf_iter const&B,
-			 vect           &R, real      const&Rq) const
+			 vect           &R, real      Rq) const
 {
   give_coeffs(A);
   if(INDI_SOFT) 
@@ -953,7 +967,7 @@ void GravKernAll::approx(cell_iter const&A, leaf_iter const&B,
 }
 //------------------------------------------------------------------------------
 void GravKern::approx(cell_iter const&A, cell_iter const&B,
-		      vect           &R, real      const&Rq) const
+		      vect           &R, real      Rq) const
 {
   if(is_active(A)) give_coeffs(A);
   if(is_active(B)) give_coeffs(B);
@@ -974,7 +988,7 @@ void GravKern::approx(cell_iter const&A, cell_iter const&B,
 }
 //------------------------------------------------------------------------------
 void GravKernAll::approx(cell_iter const&A, cell_iter const&B,
-			 vect           &R, real      const&Rq) const
+			 vect           &R, real      Rq) const
 {
   give_coeffs(A);
   give_coeffs(B);

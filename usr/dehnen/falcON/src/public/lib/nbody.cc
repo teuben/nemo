@@ -319,7 +319,7 @@ void BlockStepCode::elementary_step(int t) const { // I: number of step
   ++m;                                             // count shortest steps      
   ++t;                                             // add one to t              
   int l=highest_level();                           // find lowest level moving  
-  for(; !(t&1) && l; t>>=1, --l);                  // l: lowest level moving    
+  for(; !(t&1) && l; t>>=1, --l) ;                 // l: lowest level moving    
   bool move = false;                               // need to do anything?      
   for(unsigned i=l; i!=Nsteps(); ++i)              // LOOP levels up to highest 
     if(N[i]) move = true;                          //   IF any non-empty: move  
@@ -571,7 +571,7 @@ void ForceDiagGrav::diagnose_grav() const
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
       vex+= mi * pex(b);                           //     add: ext pot energy   
-      register vect_d mx = mi * pos(b);            //     m * x                 
+      vect_d mx = mi * pos(b);                     //     m * x                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       x += mx;                                     //     add: dipole           
     }                                              //   END LOOP                
@@ -580,7 +580,7 @@ void ForceDiagGrav::diagnose_grav() const
       register double mi = mass(b);                //     m                     
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
-      register vect_d mx = mi * pos(b);            //     m * x                 
+      vect_d mx = mi * pos(b);                     //     m * x                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       x += mx;                                     //     add: dipole           
     }                                              //   END LOOP                
@@ -629,7 +629,7 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
   LoopAllBodies(snap_shot(),b) {                   // LOOP bodies               
     register double mi = mass(b);                  //   m                       
     m  += mi;                                      //   add: total mass         
-    register vect_d mv = mi * vel(b);              //   m * v                   
+    vect_d mv = mi * vel(b);                       //   m * v                   
     AddTensor(k,mv,vel(b));                        //   add to K_ij             
     v += mv;                                       //   add: total momentum     
     l += vect_d(pos(b)) ^ mv;                      //   add: total ang mom      
@@ -672,8 +672,8 @@ void ForceDiagGrav::diagnose_full() const
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
       vex+= mi * pex(b);                           //     add: ext pot energy   
-      register vect_d mx = mi * pos(b);            //     m * x                 
-      register vect_d mv = mi * vel(b);            //     m * v                 
+      vect_d mx = mi * pos(b);                     //     m * x                 
+      vect_d mv = mi * vel(b);                     //     m * v                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       AddTensor(k,mv,vel(b));                      //     add to K_ij           
       x += mx;                                     //     add: dipole           
@@ -685,8 +685,8 @@ void ForceDiagGrav::diagnose_full() const
       register double mi = mass(b);                //     m                     
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
-      register vect_d mx = mi * pos(b);            //     m * x                 
-      register vect_d mv = mi * vel(b);            //     m * v                 
+      vect_d mx = mi * pos(b);                     //     m * x                 
+      vect_d mv = mi * vel(b);                     //     m * v                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       AddTensor(k,mv,vel(b));                      //     add to K_ij           
       x += mx;                                     //     add: dipole           

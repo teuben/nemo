@@ -119,7 +119,7 @@ spherical_profile::spherical_profile(const bodies*B,
     int j = ir[m-1];                               //   begin of bin            
     const double rm = R[j] * fac;                  //   maximum radius in bin   
     j    += kmin;                                  //   minimum rank in bin     
-    while(R[j++] < rm && j < nb);                  //   increase rank to r=rmax 
+    while(R[j++] < rm && j < nb) ;                 //   increase rank to r=rmax 
     if(j + kmin >= nb) j = nb;                     //   enough left for next?   
     ir[m] = min(nb-1, j-1);                        //   highest rank in bin     
     if(ir[m] == nb-1) break;                       //   all bodies used? DONE!  
@@ -281,7 +281,7 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
     int j = ir[m-1];                               //   begin of bin            
     const double rm = R[j] * fac;                  //   maximum radius in bin   
     j    += kmin;                                  //   minimum rank in bin     
-    while(R[j++] < rm && j < nb);                  //   increase rank to r=rmax 
+    while(R[j++] < rm && j < nb) ;                 //   increase rank to r=rmax 
     if(j + kmin >= nb) j = nb;                     //   enough left for next?   
     ir[m] = min(nb-1, j-1);                        //   highest rank in bin     
     if(ir[m] == nb-1) break;                       //   all bodies used? DONE!  

@@ -52,9 +52,7 @@ namespace falcON { namespace Manipulate {
     fieldset provide() const { return fieldset::empty; }
     fieldset change () const { return fieldset::empty; }
     //--------------------------------------------------------------------------
-    shift_to_centre(const double*pars,
-		    int          npar,
-		    const char  *file) falcON_THROWING
+    shift_to_centre(const double*, int npar, const char*file) falcON_THROWING
     {
       if(debug(2) || npar  || file)
 	std::cerr<<" Manipulator \"shift_to_centre\":\n"

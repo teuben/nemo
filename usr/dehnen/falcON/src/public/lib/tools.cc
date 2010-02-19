@@ -34,8 +34,8 @@ using namespace falcON;
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 vect falcON::centre_of_mass(const bodies*B) {
-  register vect_d X(0.);
-  register double W(0.);
+  vect_d X(0.);
+  double W(0.);
   LoopSubsetBodies(B,b) {
     W += mass(b);
     X += mass(b) * pos(b);
@@ -259,10 +259,10 @@ namespace {
     g   = 0.;
     if(B->have_vel()) {
       LoopSubsetBodies(B,b) {
-	register vect_d R(x); R -= pos(b);
-	register double Rq = norm(R);
+	vect_d R(x); R -= pos(b);
+	double Rq = norm(R);
 	if(Rq < rq) {
-	  register double D[2];
+	  double D[2];
 	  ferrers<3>::diff1(mass(b),Rq*irq,D);
 	  rho+= D[0];
 	  v  += D[0] * vel(b);
@@ -273,10 +273,10 @@ namespace {
       v /= rho;
     } else {
       LoopSubsetBodies(B,b) {
-	register vect_d R(x); R -= pos(b);
-	register double Rq = norm(R);
+	vect_d R(x); R -= pos(b);
+	double Rq = norm(R);
 	if(Rq < rq) {
-	  register double D[2];
+	  double D[2];
 	  ferrers<3>::diff1(mass(b),Rq*irq,D);
 	  rho+= D[0];
 	  g  += D[1] * R;
@@ -284,7 +284,7 @@ namespace {
 	}
       }
     }
-    register double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
+    double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
     rho *= tmp;
     tmp *= irq;
     g   *= tmp;
@@ -302,17 +302,17 @@ namespace {
     register double _d1 = 0.;
     register double _d2 = 0.;
     LoopSubsetBodies(B,b) {
-      register vect_d R(x); R -= pos(b);
-      register double tmp = norm(R);
+      vect_d R(x); R -= pos(b);
+      double tmp = norm(R);
       if(tmp < rq) {
-	register double D[3];
+	double D[3];
 	ferrers<3>::diff(mass(b),tmp*irq,D);
 	tmp  = h * R * irq;
 	_d1 += tmp * D[1];
 	_d2 += hqirq  * D[1] +  tmp * tmp * D[2];
       }
     }
-    register double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
+    double tmp = 1. / ( ferrers<3>::norm()*power<3>(r) );
     d1 = _d1 * tmp;
     d2 = _d2 * tmp;
   }
@@ -334,20 +334,6 @@ bool falcON::find_density_centre(const bodies*B,
   // 
   // It seems that the algorithm converges, even if initially set off by more
   // than the initial radius (which already was 3 times the expectation).
-
-//   // TEST
-//   {
-//     std::cerr<<" initial xc="<<xc<<" hc="<<hc<<'\n'
-// 	     <<" do you want to change the initial xc,hc (1/0)? ";
-//     bool want;
-//     std::cin >> want;
-//     if(want) {
-//       std::cerr<<" give xc"; std::cin>>xc;
-//       std::cerr<<" give hc"; std::cin>>hc;
-//     }
-//   }
-//   // TSET
-
   const unsigned nb = B->N_subset();
   if(nb < N)
     falcON_THROW("find_density_centre(): N=%u < Ncen = %u\n",nb,N);
@@ -364,9 +350,6 @@ bool falcON::find_density_centre(const bodies*B,
     gr(B,x,r,n,rh,g,v);
   }
   h = g;
-//   // TEST
-//   std::cerr<<" i: x="<<x<<" r="<<r<<" rh="<<rh<<" g="<<g<<" n="<<n<<'\n';
-//   // TSET
   // iterate using cg method
   int i=0;
   for(; i < max_i; ++i) {
@@ -377,7 +360,7 @@ bool falcON::find_density_centre(const bodies*B,
       r += dr * double(N-n)/double(no-n);
     else if(n!=N)
       r *= 0.7+0.3*cbrt(double(N)/double(n));
-    register vect_d dx(h);
+    vect_d dx(h);
     if(d2*r >=-abs(d1))    // 2nd derivate not really negative -> cannot use it
       dx /= d1;
     else                   // 2nd derivative < 0 as it should be near maximum  
@@ -391,14 +374,6 @@ bool falcON::find_density_centre(const bodies*B,
       r += r;
       gr(B,x,r,n,rh,g,v);
     }
-//     // TEST
-//     std::cerr<<std::setw(2)<<i
-// 	     <<": x="<<x<<" r="<<r<<" rh="<<rh<<" g="<<g<<" h="<<h
-// 	     <<" d1="<<d1
-// 	     <<" d2="<<d2
-// 	     <<" dx="<<dx
-// 	     <<" n="<<n<<'\n';
-//     // TSET
     if(abs(g)*r<1.e-8*rh && n==N) break;
     h  = g + h * (((g-go)*g)/(go*go));
   }

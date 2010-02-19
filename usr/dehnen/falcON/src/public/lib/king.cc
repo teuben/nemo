@@ -48,7 +48,7 @@ namespace {
   inline vec2D integrand1(double r, vec2D const&Y)
     // takes x=r as independent, Y[0]=Psi, Y[1]=Psi'
   {
-    register vec2D F;
+    vec2D F;
     F[0] = Y[1];
     F[1] = (r>0.)? -FPi*rhok(Y[0])-2*Y[1]/r : -c00;
     return F;
@@ -57,7 +57,7 @@ namespace {
   inline vec2D integrand2(double Psi, vec2D const&Y)
     // takes Psi as independent, Y[0]=r, Y[1]=Psi'
   {
-    register vec2D F;
+    vec2D F;
     F[0] = 1./Y[1];
     F[1] = -FPi*rhok(Psi)/Y[1] -2/Y[0];
     return F;
@@ -85,9 +85,9 @@ void king_model::setup(const unsigned n)
   r0    = 1.5/sqrt(Pi*rh0);            // r_0 = sqrt(9/4PiG rho_0)
   c00   = FPi*rh0/3.;                  // 4PiG rho_0/3
 
-  register unsigned        i,Ni=N/2;
-  register double          dx=2.*r0/double(Ni-1);
-  register vec2D y;
+  unsigned i,Ni=N/2;
+  double   dx=2.*r0/double(Ni-1);
+  vec2D    y;
   y[0] = ps[0];
   y[1] = 0.;
   for(i=1; i<Ni; i++) {

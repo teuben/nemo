@@ -152,9 +152,7 @@ namespace falcON { namespace Manipulate {
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const falcON_THROWING;
     //--------------------------------------------------------------------------
-    add_plummer(const double*pars,
-		int          npar,
-		const char  *file) :
+    add_plummer(const double*pars, int npar, const char*) :
       N   (npar>0?  int (pars[0]) : 0 ),
       GM  (npar>1?       pars[1]  : 1.),
       R   (npar>2?       pars[2]  : 1.),

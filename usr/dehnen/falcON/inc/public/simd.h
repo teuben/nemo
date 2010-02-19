@@ -65,9 +65,9 @@ namespace falcON {
     fvec4() {}
     fvec4(fvec4 const&v) : W(v.W), X(v.X), Y(v.Y), Z(v.Z) {}
     fvec4(int   const&t) : W(t),   X(t),   Y(t),   Z(t)   {}
-    fvec4(float const&t) : W(t),   X(t),   Y(t),   Z(t)   {}
-    fvec4(float const&w, float const&x) : W(w), X(x), Y(x), Z(x) {}
-    fvec4(float const&w, float const&x, float const&y, float const&z)
+    fvec4(float t) : W(t),   X(t),   Y(t),   Z(t)   {}
+    fvec4(float w, float x) : W(w), X(x), Y(x), Z(x) {}
+    fvec4(float w, float x, float y, float z)
       : W(w), X(x), Y(y), Z(z) {}
     fvec4(const float*const&v) : W(v[0]), X(v[1]), Y(v[2]), Z(v[3]) {}
     //--------------------------------------------------------------------------
@@ -75,9 +75,9 @@ namespace falcON {
     //--------------------------------------------------------------------------
     fvec4& operator=(fvec4 const&v)       { W=v.W;  X=v.X;  Y=v.Y;  Z=v.Z;
                                             return *this; }
-    fvec4& operator=(float const&t)       { W=t;    X=t;    Y=t;    Z=t;
+    fvec4& operator=(float t)             { W=t;    X=t;    Y=t;    Z=t;
                                             return *this; }
-    fvec4& operator=(const float*const&v) { W=v[0]; X=v[1]; Y=v[2]; Z=v[3];
+    fvec4& operator=(const float*v)       { W=v[0]; X=v[1]; Y=v[2]; Z=v[3];
                                             return *this; }
     //--------------------------------------------------------------------------
     // non-const methods                                                        
@@ -107,10 +107,10 @@ namespace falcON {
     fvec4& operator-=(fvec4 const&v)      { W-=v.W;  X-=v.X;  Y-=v.Y;  Z-=v.Z;
                                             return *this; }
     //--------------------------------------------------------------------------
-    fvec4& operator*=(float const&t)      { W*=t;    X*=t;    Y*=t;    Z*=t;
+    fvec4& operator*=(float t)            { W*=t;    X*=t;    Y*=t;    Z*=t;
                                             return *this; }
     //--------------------------------------------------------------------------
-    fvec4& operator/=(float const&t)      { register float x=1./t;
+    fvec4& operator/=(float t)            { register float x=1./t;
                                             return operator*=(x);  }
     //--------------------------------------------------------------------------
     fvec4& ass_sum (fvec4 const&v, fvec4 const&w) {
@@ -121,7 +121,7 @@ namespace falcON {
       return *this;
     }
     //--------------------------------------------------------------------------
-    fvec4& ass_times (fvec4 const&v, float const&t) {
+    fvec4& ass_times (fvec4 const&v, float t) {
       W = v.W * t;
       X = v.X * t;
       Y = v.Y * t;
@@ -129,7 +129,7 @@ namespace falcON {
       return *this;
     }
     //--------------------------------------------------------------------------
-    fvec4& add_times (fvec4 const&v, float const&t) {
+    fvec4& add_times (fvec4 const&v, float t) {
       W += v.W * t;
       X += v.X * t;
       Y += v.Y * t;
@@ -137,7 +137,7 @@ namespace falcON {
       return *this;
     }
     //--------------------------------------------------------------------------
-    fvec4& sub_times (fvec4 const&v, float const&t) {
+    fvec4& sub_times (fvec4 const&v, float t) {
       W -= v.W * t;
       X -= v.X * t;
       Y -= v.Y * t;
@@ -169,7 +169,7 @@ namespace falcON {
       return *this;
     }
     //--------------------------------------------------------------------------
-    fvec4& ass_times (fvec4 const&v, fvec4 const&w, float const&t) {
+    fvec4& ass_times (fvec4 const&v, fvec4 const&w, float t) {
       W = v.W * w.W * t;
       X = v.X * w.X * t;
       Y = v.Y * w.Y * t;
@@ -177,7 +177,7 @@ namespace falcON {
       return *this;
     }
     //--------------------------------------------------------------------------
-    fvec4& add_times (fvec4 const&v, fvec4 const&w, float const&t) {
+    fvec4& add_times (fvec4 const&v, fvec4 const&w, float t) {
       W += v.W * w.W * t;
       X += v.X * w.X * t;
       Y += v.Y * w.Y * t;
@@ -185,7 +185,7 @@ namespace falcON {
       return *this;
     }
     //--------------------------------------------------------------------------
-    fvec4& sub_times (fvec4 const&v, fvec4 const&w, float const&t) {
+    fvec4& sub_times (fvec4 const&v, fvec4 const&w, float t) {
       W -= v.W * w.W * t;
       X -= v.X * w.X * t;
       Y -= v.Y * w.Y * t;
@@ -290,30 +290,23 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // binary operations (the use of which should be minimized)                 
     //--------------------------------------------------------------------------
-    fvec4 operator+ (fvec4 const&v) const { register fvec4 y(*this);
-                                            return y+=v; }
+    fvec4 operator+ (fvec4 const&v) const { fvec4 y(*this); return y+=v; }
     //--------------------------------------------------------------------------
-    fvec4 operator- (fvec4 const&v) const { register fvec4 y(*this);
-                                            return y-=v; }
+    fvec4 operator- (fvec4 const&v) const { fvec4 y(*this); return y-=v; }
     //--------------------------------------------------------------------------
-    fvec4 operator* (fvec4 const&v) const { register fvec4 y(*this);
-                                            return y*=v; }
+    fvec4 operator* (fvec4 const&v) const { fvec4 y(*this); return y*=v; }
     //--------------------------------------------------------------------------
-    fvec4 operator* (float const&t) const { register fvec4 y(*this);
-                                            return y*=t; }
+    fvec4 operator* (float t) const { fvec4 y(*this); return y*=t; }
     //--------------------------------------------------------------------------
-    fvec4 operator/ (float const&t) const { register fvec4 y(*this);
-                                            return y*=1./t; }
+    fvec4 operator/ (float t) const { fvec4 y(*this); return y*=1./t; }
     //--------------------------------------------------------------------------
     // unary minus (preferrably use negate())                                   
     //--------------------------------------------------------------------------
-    fvec4 operator- () const { register fvec4 y(*this); return y.negate(); }
+    fvec4 operator- () const { fvec4 y(*this); return y.negate(); }
     //--------------------------------------------------------------------------
     // const methods                                                            
     //--------------------------------------------------------------------------
-    float norm() const {
-      return W*W + X*X + Y*Y + Z*Z;
-    }
+    float norm() const { return W*W + X*X + Y*Y + Z*Z; }
     //--------------------------------------------------------------------------
     float dot(fvec4 const&v) const { return W*v.W + X*v.X + Y*v.Y + Z*v.Z; }
     //--------------------------------------------------------------------------
@@ -322,17 +315,17 @@ namespace falcON {
     friend float norm(fvec4 const&v) { return v.norm(); }
     //--------------------------------------------------------------------------
     friend fvec4 rcp (fvec4 const&v) {
-      register fvec4 w;
+      fvec4 w;
       return w.rcp(v);
     }
     //--------------------------------------------------------------------------
     friend fvec4 sqrt (fvec4 const&v) {
-      register fvec4 w;
+      fvec4 w;
       return w.sqrt(v);
     }
     //--------------------------------------------------------------------------
     friend fvec4 rsqrt (fvec4 const&v) {
-      register fvec4 w;
+      fvec4 w;
       return w.rsqrt(v);
     }
     //--------------------------------------------------------------------------
@@ -347,7 +340,7 @@ namespace falcON {
     // allocation of many fvec4                                                 
     //--------------------------------------------------------------------------
     void* operator new   [](        size_t n) { return malloc16(n); }
-    void  operator delete[](void*q, size_t n) { return free16(q); }
+    void  operator delete[](void*q, size_t  ) { return free16(q); }
     //--------------------------------------------------------------------------
     // output to std::ostream; there is no input from std::istream              
     //--------------------------------------------------------------------------

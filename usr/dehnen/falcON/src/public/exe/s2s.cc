@@ -97,7 +97,7 @@ namespace {
       DebugInfo("%d bodies removed at time %f\n",ss->N_del(),ss->time());
     return ss->N_bodies() > 0;
   }
-  void apply_sort(snapshot*ss, fieldset copy) {
+  void apply_sort(snapshot*, fieldset) {
     if(BS==0) return;
   }
 }

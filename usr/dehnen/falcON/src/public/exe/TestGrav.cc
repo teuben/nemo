@@ -301,9 +301,9 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 #ifdef WRITE_OUT_ACC
   std::ofstream accout("test.acc");
 #endif
-  register real ase=0.,damx=0.,dacc;
-  register vect_d SF(0.);
-  register bool pot_pos=0;
+  real ase=0.,damx=0.,dacc;
+  vect_d SF(0.);
+  bool pot_pos=0;
   LoopAllBodies(BODIES,Bi) if(is_active(Bi)) {
     vect&Acc(A[bodyindex(Bi)]);
     dacc = norm(Acc - acc(Bi));

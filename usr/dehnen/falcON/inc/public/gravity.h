@@ -447,8 +447,7 @@ namespace falcON {
     //  - pass source properties up the tree, count active cells                
     bool prepare(                                  // R: ALL || all are active  
 		 const GravMAC*,                   // I: MAC                    
-		 bool          ,                   // I: all or active only?    
-		 bool          );                  // I: allocate cell coeffs?  
+		 bool          );                  // I: all or active only?    
     //--------------------------------------------------------------------------
     // tree stuff to be superseeded                                             
     //--------------------------------------------------------------------------
@@ -672,6 +671,9 @@ namespace falcON {
 #ifdef ENHANCED_IACT_STATS
     unsigned P_CB, P_CC, P_CX;                     // # BB pairs in direct      
 #  define ADD_SS(COUNTER,NUMBER)  COUNTER += NUMBER;
+#  define CELL_A cell_iter const&A
+#  define CELL_B cell_iter const&B
+#  define LEAF_B leaf_iter const&B
     static const char* trick_SS(unsigned n, int&w)
     {
       if(n < 10) { w=1; return "         ("; }
@@ -686,7 +688,10 @@ namespace falcON {
       w=10; return "(";
     }
 #else
-#  define ADD_SS(COUNTER,NUMBER) 
+#  define ADD_SS(COUNTER,NUMBER)
+#  define CELL_A cell_iter const&
+#  define CELL_B cell_iter const&
+#  define LEAF_B leaf_iter const&
 #endif
     static int trick(real x, int w)
     {
@@ -737,19 +742,19 @@ namespace falcON {
     { ++A_CC; }
     void record_approx_CB(cell_iter const&, leaf_iter const&)
     { ++A_CB; }
-    void record_direct_CX(cell_iter const&A)
+    void record_direct_CX(CELL_A)
     { ++D_CX; ADD_SS(P_CX, (number(A)*(number(A)-1))>>1 ); }
-
-    void record_direct_CC(cell_iter const&A, cell_iter const&B)
+    void record_direct_CC(CELL_A, CELL_B)
     { ++D_CC; ADD_SS(P_CC, number(A)*number(B)); }
-
-    void record_direct_CB(cell_iter const&A, leaf_iter const&B)
+    void record_direct_CB(CELL_A, LEAF_B)
     { ++D_CB; ADD_SS(P_CB, number(A)); }
     void record_BB(leaf_iter const&, leaf_iter const&)
     { ++D_BB; }
 #endif
 
-
+#undef CELL_A
+#undef CELL_B
+#undef LEAF_B
 #undef ADD_SS
     // 2 reporting                                                              
     unsigned const&BB_direct_iacts   () const { return D_BB; }

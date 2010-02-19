@@ -81,9 +81,7 @@ namespace falcON { namespace Manipulate {
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------
-    randomize_azimuth(const double*pars,
-		      int          npar,
-		      const char  *file) :
+    randomize_azimuth(const double*pars, int npar, const char*) :
       Ran (npar>0? long(pars[0]) : long(time(0)) )
     {
       if((npar<1 && debug(1)) || debug(2))
@@ -104,9 +102,7 @@ namespace falcON { namespace Manipulate {
     if(S->have_some(fieldset::vectors)) 
       LoopSubsetBodies(S,b) {
 	double phi = TPi * Ran();
-	register real
-	  c = std::cos(phi),
-	  s = std::sin(phi);
+	real c = std::cos(phi), s = std::sin(phi);
 #define ROTATE(BIT,NAME)					\
 	if(S->have(BIT)) rotate(b.datum<BIT>(),c,s);
 	DEF_VECTORS(ROTATE);

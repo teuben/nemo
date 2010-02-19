@@ -93,9 +93,9 @@ namespace {
     template<int NDIM, typename scalar> static
     void gr(const scalar            *M,            // I: masses                 
 	    const tupel<NDIM,scalar>*X,            // I: positions              
-	    int                const&N,            // I: size of arrays         
+	    int                      N,            // I: size of arrays         
 	    tupel<NDIM,double> const&x,            // I: trial position         
-	    double             const&r,            // I: trial radius           
+	    double                   r,            // I: trial radius           
 	    int                     &n,            // O: N(|r-x|<h)             
 	    double                  &rho,          // O: rho_h(r)               
 	    tupel<NDIM,double>      &g)            // O: - drho/dr              
@@ -105,17 +105,17 @@ namespace {
       rho = 0.;
       g   = 0.;
       for(int b=0; b!=N; ++b) {
-	register tupel<NDIM,double> R(x); R -= X[b];
-	register double Rq = norm(R);
+	tupel<NDIM,double> R(x); R -= X[b];
+	double Rq = norm(R);
 	if(Rq < rq) {
-	  register double D[2];
+	  double D[2];
 	  kernel::diff1(M[b],Rq*irq,D);
 	  rho  += D[0];
 	  g    += R * D[1];
 	  ++n;
 	}
       }
-      register double tmp = 1. / ( kernel::norm<NDIM>() *r*r*r );
+      double tmp = 1. / ( kernel::norm<NDIM>() *r*r*r );
       rho *= tmp;
       tmp *= irq;
       g   *= tmp;
@@ -126,9 +126,9 @@ namespace {
     template<int NDIM, typename scalar> static
     void di(const scalar            *M,            // I: masses                 
 	    const tupel<NDIM,scalar>*X,            // I: positions              
-	    int                const&N,            // I: size of arrays         
+	    int                      N,            // I: size of arrays         
 	    tupel<NDIM,double> const&x,            // I: trial position         
-	    double             const&r,            // I: trial radius           
+	    double                   r,            // I: trial radius           
 	    tupel<NDIM,double> const&h,            // I: trial direction        
 	    double                  &d1,           // O: directional deriv ->h  
 	    double                  &d2)           // O: 2nd ---                
@@ -137,17 +137,17 @@ namespace {
       d1 = 0.;
       d2 = 0.;
       for(int b=0; b!=N; ++b) {
-	register tupel<NDIM,double> R(x); R -= X[b];
-	register double tmp = norm(R);
+	tupel<NDIM,double> R(x); R -= X[b];
+	double tmp = norm(R);
 	if(tmp < rq) {
-	  register double D[3];
+	  double D[3];
 	  kernel::diff(M[b],tmp*irq,D);
 	  tmp = (h*R) * irq;
 	  d1 += tmp * D[1];
 	  d2 += hqirq  * D[1] +  tmp * tmp * D[2];
 	}
       }
-      register double tmp = 1. / ( kernel::norm<NDIM>() *r*r*r );
+      double tmp = 1. / ( kernel::norm<NDIM>() *r*r*r );
       d1 *= tmp;
       d2 *= tmp;
     }
@@ -157,7 +157,7 @@ namespace {
     template<int NDIM, typename scalar> static
     void centre_of_mass(const scalar            *M,// I: masses                 
 			const tupel<NDIM,scalar>*X,// I: positions              
-			int                const&N,// I: size of arrays         
+			int                      N,// I: size of arrays         
 			tupel<NDIM,double>      &c,// O: centre of mass         
 			double                  &r)// O: rms radius             
     {
@@ -185,9 +185,9 @@ namespace {
     int  centre_of_mass(                           // R: number satisfying crit 
 			const scalar            *M,// I: masses                 
 			const tupel<NDIM,scalar>*X,// I: positions              
-			int                const&N,// I: size of arrays         
+			int                      N,// I: size of arrays         
 			tupel<NDIM,double> const&x,// I: consider only |X-x|    
-			double             const&r,// I:                < r     
+			double                   r,// I:                < r     
 			tupel<NDIM,double>      &c)// O: centre of mass         
     {
       const double rq=r*r;
@@ -210,7 +210,7 @@ namespace {
     bool iterate(                                  // R: was okay?              
 		 const scalar            *M,       // I: masses                 
 		 const tupel<NDIM,scalar>*X,       // I: positions              
-		 int                const&N) const // I: size of arrays         
+		 int                      N) const // I: size of arrays         
     {
       // We use a conjugate gradient method, whereby approximating the line     
       // maximisation by the 1st and 2nd directional derivatives. Near the      
@@ -255,7 +255,7 @@ namespace {
 	  r += dr * double(Nmin-n)/double(no-n);
 	else if(n!=Nmin)
 	  r *= 0.6+0.4*cbrt(double(Nmin)/double(n));
-	register tupel<NDIM,double> dx(h);
+	tupel<NDIM,double> dx(h);
 	if(d2*r >=-abs(d1)) dx /= d1;
 	else                dx *=-d1/d2;
 	dx*= r/sqrt(norm(dx)+r*r);
@@ -308,7 +308,7 @@ namespace {
     bool _update(                                  // R: was okay?              
 		 const scalar            *M,       // I: masses                 
 		 const tupel<NDIM,scalar>*X,       // I: positions              
-		 int                const&N) const // I: size of arrays         
+		 int                      N) const // I: size of arrays         
     {
       if(H == 0.) {                                // IF first time centering   
 	tupel<NDIM,double> x;                      //   we need a trial position
@@ -350,9 +350,9 @@ namespace {
     //--------------------------------------------------------------------------
     template<int NDIM, typename scalar>
     bool update(                                   // converged?                
-		const scalar*const&M,              // I: masses                 
-		const scalar*const&X,              // I: positions              
-		int          const&N) const        // I: size of arrays         
+		const scalar*M,                    // I: masses                 
+		const scalar*X,                    // I: positions              
+		int          N) const              // I: size of arrays         
     {
       return _update(M,static_cast<const tupel<NDIM,scalar>*>
 		     (static_cast<const void*>(X)), N);

@@ -97,8 +97,7 @@ namespace falcON { namespace Manipulate {
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------
-    symmetrize_pairs(const char*pars,
-		     const char*file)
+    symmetrize_pairs(const char*pars, const char*)
     {
       if((pars && debug(1)) || debug(2))
 	std::cerr<<

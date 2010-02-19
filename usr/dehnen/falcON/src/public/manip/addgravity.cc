@@ -84,7 +84,7 @@ namespace Manipulate {
     //
     bool manipulate(const snapshot*) const;
     //
-    addgravity(const double*pars, int npar, const char*file) falcON_THROWING
+    addgravity(const double*pars, int npar, const char*) falcON_THROWING
     : Eps ( npar>0? pars[0] : 0.05 ),
       The ( npar>1? pars[1] : Default::theta ),
       Kern( npar>2? kern_type(int(pars[2])) : Default::kernel ),

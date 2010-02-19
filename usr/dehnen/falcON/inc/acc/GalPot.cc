@@ -195,7 +195,7 @@ namespace GalPot {                                  // v0.4
     const S  zero=0., half=0.5, one=1., two=2., three=3., six=6.;
     register int i;
     register S   qn,p,sig,dx,dx1,dx2;
-    register T   un,dy,dy1;
+    T   un,dy,dy1;
     T *u = new T[n-1];
     S *v = new S[n-1];
     dx   = x[1] - x[0];
@@ -687,7 +687,7 @@ namespace GalPot {                                  // v0.4
   void GaussLegendre(double *x, double *w, int n)
   {
     register double eps=1.e-10;
-    for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps);
+    for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps) ;
     eps  *=2.;                       // eps = actual computing accuracy
     register int j,i,m=(n+1)/2;
     register double z1,z,pp,p3,p2,p1;
@@ -1359,9 +1359,7 @@ void Multipole::setup(double      ri,
     dlr =(lRmax-lRmin)/double(K[0]-1);
   register int    i,l,k,ll,lli1;
   register double dx,dx2,xl_ll,xh_ll,risq,ril2,dP;
-  DBN    A[4],P2l,dP2l;
-
-  register DBN    EX;
+  DBN    A[4],P2l,dP2l,EX;
   //
   // 0  check for inconsistencies in input
   //
@@ -1580,7 +1578,7 @@ Multipole::~Multipole()
 double Multipole::operator() (double r, double ct, double st, double* dP) const
 {
   double Xi[2];
-  register double lr=log(r), Phi;
+  double lr=log(r), Phi;
   Xi[0] = min(lRmax,max(lRmin,lr));
   Xi[1] = abs(ct);
   Phi   = Psplev2D(X,Y,Z,K,Xi,dP);
@@ -1616,7 +1614,7 @@ double Multipole::vcsquare(double R, double &dvcqdR) const
 {
   const int n2[2]={2,2};
   double Xi[2], dP[2], **d2P;
-  register double lr=log(R), Phi;
+  double lr=log(R), Phi;
   Alloc2D(d2P,n2);
   Xi[0] = min(lRmax,max(lRmin,lr));
   Xi[1] = 0.;
@@ -1643,8 +1641,8 @@ double Multipole::vcsquare(double R, double &dvcqdR) const
 
 double Multipole::Laplace(double r, double ct) const
 {
-  const    int    m[2]={2,2};
-  register double lr=log(r), Phi, Lap;
+  const int m[2]={2,2};
+  double lr=log(r), Phi, Lap;
   double Xi[2], *dP, **d2P;
   Alloc1D(dP,2);
   Alloc2D(d2P,m);
@@ -1676,8 +1674,8 @@ double Multipole::Laplace(double r, double ct) const
 Frequs Multipole::kapnuom(double R) const
 // returns dPhi/dR, d^2Phi/dR^2/ d^2Phi/dz^2
 {
-  const    int    m[2]={2,2};
-  register double lr=log(R), Rq=R*R, Phi;
+  const int m[2]={2,2};
+  double lr=log(R), Rq=R*R, Phi;
   double Xi[2], *dP, **d2P;
   Alloc1D(dP,2);
   Alloc2D(d2P,m);

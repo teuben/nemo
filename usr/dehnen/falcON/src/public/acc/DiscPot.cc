@@ -69,9 +69,7 @@ namespace {
     bool NeedMass() const { return false; }
     bool NeedVels() const { return false; }
     //--------------------------------------------------------------------------
-    DiscPot(const double*pars,
-	    int          npar,
-	    const char  *file)
+    DiscPot(const double*pars, int npar, const char*)
       : GalPot::DiskPar         ( npar>1? pars[1]:1.,   // Sigma_0
 				  npar>2? pars[2]:1.,   // R_d
 				  npar>3? pars[3]:0.1,  // z_d
@@ -121,7 +119,7 @@ namespace {
 	     scalar      &P,
 	     scalar      *A) const
     {
-      register double fR,fz,R=hypot(X[0],X[1]);
+      double fR,fz,R=hypot(X[0],X[1]);
       if(NDIM > 2) {
 	P    = 1.e6 * GalaxyPotential::operator()(R, X[2], fR, fz);
 	if(R) {

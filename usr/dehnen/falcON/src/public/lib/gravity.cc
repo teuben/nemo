@@ -262,12 +262,12 @@ namespace {
     //--------------------------------------------------------------------------
     // protected methods                                                        
     //--------------------------------------------------------------------------
-    bool do_direct_pre (cell_iter const&A, leaf_iter const&B) const
+    bool do_direct_pre (cell_iter const&A, leaf_iter const&) const
     {
       return number(A) < N_PRE[0];
     }
     //--------------------------------------------------------------------------
-    bool do_direct_post(cell_iter const&A, leaf_iter const&B) const
+    bool do_direct_post(cell_iter const&A, leaf_iter const&) const
     {
       return is_twig(A) || number(A) < N_POST[0];
     }
@@ -288,7 +288,7 @@ namespace {
       return Rq > square(rcrit(A)+rcrit(B));
     }
     //--------------------------------------------------------------------------
-    static bool well_separated(cell_iter const&A, leaf_iter const&B, real Rq)
+    static bool well_separated(cell_iter const&A, leaf_iter const&, real Rq)
     { 
       return Rq > rcrit2(A);
     }
@@ -345,11 +345,10 @@ namespace {
 	     GravStats*t,                           // I: statistics           
 	     real      e,                           // I: softening length     
 	     unsigned  np,                          // I: initial pool size    
-	     bool      s    = Default::soften,       //[I: use individual eps?] 
-	     unsigned  const nd[4]= Default::direct, //[I: direct sum control]  
-	     bool      fp   = false) :               //[I: use Pth pole in pot] 
-      GravIactBase  ( t,nd ),
-      GravKern      ( k,e,s,np ) {}
+	     bool      s    = Default::soften,      //[I: use individual eps?] 
+	     unsigned  const nd[4]= Default::direct)//[I: direct sum control]  
+	: GravIactBase  ( t,nd ),
+	  GravKern      ( k,e,s,np ) {}
     //--------------------------------------------------------------------------
     // interaction phase                                                        
     //--------------------------------------------------------------------------
@@ -612,7 +611,7 @@ namespace {
     template<typename T> static bool is(T const&t) { return is_active(t); }
   };
   template<> struct __IsAct<1> {
-    template<typename T> static bool is(T const&t) { return 1; }
+    template<typename T> static bool is(T const&) { return 1; }
   };
 
   template<bool ALL> inline
@@ -826,8 +825,7 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
 }
 //------------------------------------------------------------------------------
 bool GravEstimator::prepare(const GravMAC*MAC,
-			    bool          al,
-			    bool          alloc_cell_coeffs)
+			    bool          al)
 {
   SET_I
   if(al) NLA_needed = TREE->N_leafs();             // all leafs are active      
@@ -910,7 +908,7 @@ void GravEstimator::exact(bool       al
 #ifdef falcON_ADAP
   adjust_eph(al,Nsoft,emin,EPS,Nref,efac);
 #endif
-  const bool all = prepare(0,al,0);
+  const bool all = prepare(0,al);
   if(N_active_cells()==0)
     return falcON_Warning("[GravEstimator::exact()]: nobody active");
   STATS->reset(
@@ -966,7 +964,7 @@ void GravEstimator::approx(const GravMAC*GMAC,
   SET_T(" time: GravEstimator::adjust_eph():    ");
 #endif
   // prepare tree: allocate memory (leafs & cells), pass up source, count active
-  const bool all = prepare(GMAC,al,0);
+  const bool all = prepare(GMAC,al);
   if(!all && N_active_cells()==0)
     return falcON_Warning("[GravEstimator::approx()]: nobody active");
   SET_T(" time: GravEstimator::prepare():       ");
@@ -1121,7 +1119,7 @@ void GravEstimator::estimate_nd(bool al, unsigned Nx) const
 void GravEstimator::estimate_sd(bool al, unsigned Nx)
 {
   update_leafs();
-  prepare(0,al,0);
+  prepare(0,al);
   NX = Nx;
   if(al) guess<surface_density,1>::do_it(root(),zero);
   else   guess<surface_density,0>::do_it(root(),zero);
@@ -1132,7 +1130,7 @@ void GravEstimator::estimate_sd(bool al, unsigned Nx)
 void GravEstimator::estimate_md(bool al, unsigned Nx)
 {
   update_leafs();
-  prepare(0,al,0);
+  prepare(0,al);
   NX = Nx;
   if(al) guess<mass_density,1>::do_it(root(),zero);
   else   guess<mass_density,0>::do_it(root(),zero);
