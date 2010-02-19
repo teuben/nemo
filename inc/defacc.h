@@ -441,7 +441,7 @@ namespace {
 	  // add both potential and acceleration
 	  for(int n=0,nn=0; n!=__nb; ++n,nn+=NDIM)
 	    if(__f==0 || __f[n] & 1) {
-	      register scalar P,A[NDIM];
+	      scalar P,A[NDIM];
 	      Acc.template acc<NDIM>(__m+n, __x+nn, __v+nn, P, A);
 	      __pot[n] += P;
 	      v_add<NDIM>(__acc+nn,A);
@@ -450,7 +450,7 @@ namespace {
 	  // add potential, assign acceleration
 	  for(int n=0,nn=0; n!=__nb; ++n,nn+=NDIM)
 	    if(__f==0 || __f[n] & 1) {
-	      register scalar P;
+	      scalar P;
 	      Acc.template acc<NDIM>(__m+n, __x+nn, __v+nn, P, __acc+nn);
 	      __pot[n] += P;
 	    }
@@ -459,7 +459,7 @@ namespace {
 	  // assign potential, add acceleration
 	  for(int n=0,nn=0; n!=__nb; ++n,nn+=NDIM)
 	    if(__f==0 || __f[n] & 1) {
-	      register scalar A[NDIM];
+	      scalar A[NDIM];
 	      Acc.template acc<NDIM>(__m+n, __x+nn, __v+nn, __pot[n], A);
 	      v_add<NDIM>(__acc+nn,A);
 	    }
@@ -772,11 +772,8 @@ namespace {
     bool NeedVels() const { return false; }
     //--------------------------------------------------------------------------
     template<int NDIM, typename scalar>
-    void set_time(double       time,
-		  int          nbod,
-		  const scalar*mas,
-		  const scalar*pos,
-		  const scalar*vel) const {}
+    void set_time(double, int,
+		  const scalar*, const scalar*, const scalar*) const {}
     //--------------------------------------------------------------------------
     template<int NDIM, typename scalar>
     inline void acc(const scalar*,
@@ -785,7 +782,7 @@ namespace {
 		    scalar      &__pot,
 		    scalar      *__acc) const
     {
-      register scalar dpdr_over_r;
+      scalar dpdr_over_r;
       StaticSphericalModel::potacc(v_norm<NDIM>(__pos), __pot, dpdr_over_r);
       v_asstimes<NDIM>(__acc, __pos, dpdr_over_r);
     }
