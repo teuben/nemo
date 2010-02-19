@@ -84,9 +84,7 @@ namespace falcON { namespace Manipulate {
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------
-    set_centre(const double*pars,
-	       int          npar,
-	       const char  *file) :
+    set_centre(const double*pars, int npar, const char*) :
       X0(0), V0(0)
     {
       if(npar == 0 || debug(2)) {
