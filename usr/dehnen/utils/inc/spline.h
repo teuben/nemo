@@ -285,8 +285,9 @@ namespace WDutils {
   {
     table_type*y2 = WDutils_NEW(table_type,n);
     cubic_splines::construct(n,x,y,y2,yp1,ypn);
-    for(int i=0; i!=n; ++i)
-      cubic_splines::evaluate(x[i],x,y,y2,yp+i);
+    cubic_splines::evaluate(x[0],x,y,y2,yp);
+    for(int l=0,h=1; h!=n; ++l,++h)
+      cubic_splines::evaluate(x[h],x+l,y+l,y2+l,yp+h);
     WDutils_DEL_A(y2);
   }
   /// differentiate tabulated function at all points using spline
