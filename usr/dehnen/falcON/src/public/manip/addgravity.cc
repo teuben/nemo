@@ -65,15 +65,16 @@ namespace Manipulate {
 #else
     const static int MaxNumPar = 4;
 #endif
-    real Eps, The, Grav, fsnk;
-    kern_type Kern;
-    forces *FALC;
+    real            Eps, The;
+    kern_type       Kern;
+    real            Grav, fsnk;
+    mutable forces *FALC;
   public:
     const char* name    () const { return "addgravity"; }
     const char* describe() const
     { return message("adds self-gravity using "
 		     "eps=%g, theta=%g, kernel=%s, G=%g",
-		     Eps,The,describe(Kern),Grav);
+		     Eps,The,falcON::describe(Kern),Grav);
     }
     //
     fieldset need   () const
@@ -124,7 +125,7 @@ namespace Manipulate {
     if(FALC && FALC != S->Forces()) { falcON_DEL_O(FALC); FALC=0; }
     if(S->Forces() == 0)
       FALC = new forces(S,Eps,The,Kern,Eps<0,Grav,theta_of_M,fsnk);
-    const forces*Forces=S->Forces();
+    forces*Forces = const_cast<forces*>(S->Forces());
     Forces->grow();
     bool all = true;
     if(S->have(fieldbit::f)) {
