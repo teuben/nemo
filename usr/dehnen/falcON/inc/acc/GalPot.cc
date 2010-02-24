@@ -684,20 +684,17 @@ namespace GalPot {                                  // v0.4
     S operator() (S x) const { return (o->*f)(x); }
   };
 
-  void GaussLegendre(double *x, double *w, int n)
+  void GaussLegendre(double *x, double *w, const unsigned n)
   {
-    register double eps=1.e-10;
-    for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps) ;
-    eps  *=2.;                       // eps = actual computing accuracy
-    register int j,i,m=(n+1)/2;
-    register double z1,z,pp,p3,p2,p1;
-    for (i=0;i<m;i++) {
-      z=cos(Pi*(i+0.75)/(n+0.5));
+    const double eps=std::numeric_limits<double>::epsilon();
+    const int m=(n+1)/2;
+    for(int i=0; i!=m; ++i) {
+      double z1,pp,z=std::cos(Pi*(i+0.75)/(n+0.5));
       do {
-	p1 = 1.0;
-	p2 = 0.0;
-	for(j=0;j<n;j++) {
-	  p3 = p2;
+	double p1 = 1.0;
+	double p2 = 0.0;
+	for(unsigned j=0; j!=n; ++j) {
+	  double p3 = p2;
 	  p2 = p1;
 	  p1 = ( (2*j+1)*z*p2 - j*p3 ) / double(j+1);
 	}
