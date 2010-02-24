@@ -1,38 +1,42 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    src/numerics.cc                                                    
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    1994-2008                                                          
-///                                                                             
-/// \todo    add doxygen documentation                                          
-///                                                                             
+///
+/// \file    src/numerics.cc
+///
+/// \author  Walter Dehnen
+///
+/// \date    1994-2008,2010
+///
+/// \todo    add doxygen documentation
+///
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 1994-2008  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 1994-2008  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #include <numerics.h>
 #include <WDMath.h>
 #ifndef WDutils_included_cstring
 #  include <cstring>
 #  define WDutils_included_cstring
+#endif
+#ifndef WDutils_included_limits
+#  include <limits>
+#  define WDutils_included_limits
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -174,20 +178,15 @@ double WDutils::qbulir(double(*func)(double),
 //------------------------------------------------------------------------------
 void WDutils::GaussLegendre(double *x, double *w, const unsigned n)
 {
-  register double eps=1.e-10;
-  for(register double ep1=1.0+eps; 1.!=ep1; eps*=0.5, ep1=1.0+eps) ;
-//   register double eps;
-//   for(eps=1.e-10; (eps+1.)!=1.; eps*=0.5);
-  eps *=2.;
-  register int    i,m=(n+1)/2;
-  register double z1,z,pp,p3,p2,p1;
-  for (i=0;i<m;i++) {
-    z=std::cos(Pi*(i+0.75)/(n+0.5));
+  const double eps=std::numeric_limits<double>::epsilon();
+  const int m=(n+1)/2;
+  for(int i=0; i!=m; ++i) {
+    double z1,pp,z=std::cos(Pi*(i+0.75)/(n+0.5));
     do {
-      p1 = 1.0;
-      p2 = 0.0;
-      for(register unsigned j=0; j!=n; ++j) {
-	p3 = p2;
+      double p1 = 1.0;
+      double p2 = 0.0;
+      for(unsigned j=0; j!=n; ++j) {
+	double p3 = p2;
 	p2 = p1;
 	p1 = ( (2*j+1)*z*p2 - j*p3 ) / double(j+1);
       }
