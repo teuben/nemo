@@ -185,7 +185,7 @@ namespace WDutils {
     static void after_last_replace(T*a, int n) {
       Walk::up(a,n-1,Comparator<T>());
     }
-    /// put array back into heap order after the ith element (only) has
+    /// put array back into heap order after the @a i th element (only) has
     /// been replaced
     /// \param[in,out] a  array[0..@a n -1] in heap order, except for element @a
     ///                   i

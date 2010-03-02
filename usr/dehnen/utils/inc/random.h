@@ -297,7 +297,7 @@ namespace WDutils {
     /// \param[in] R random number generator
     explicit SechSquared(const RandomNumberGenerator* R)
       : Rn(R) {}
-    /// generate random number in [0,oo]
+    /// generate random number in [-oo,oo]
     double operator() () const
     {
 #if(0)
@@ -305,17 +305,17 @@ namespace WDutils {
 #else
       double p,x;
       do {
-	p=2*Rn->RandomDouble()-1;
+	p=Rn->RandomDouble();        // p in [0,1]
 	x=0.5*std::log(p/(1-p));
       } while(isinf(x) || isnan(x));
       return x;
 #endif
     }
-    /// give parent distribution
+    /// give parent distribution f(x)=(1/2)*sech^2(x)
     double value(double x) const
     {
-      double etx=x<0? std::exp(x+x) : std::exp(-x-x);
-      return (1-etx)/(1+etx);
+      double ex=x<0? std::exp(x) : std::exp(-x);
+      return 2*square(ex/(1+ex*ex));
     }
   };
   // ///////////////////////////////////////////////////////////////////////////

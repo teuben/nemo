@@ -1,16 +1,16 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
+///
 /// \file    utils/src/octtree.cc
-///                                                                             
+/// 
 /// \brief   implements utils/inc/octtree.h
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2009,2010                                                          
-///                                                                             
+///
+/// \author  Walter Dehnen
+///
+/// \date    2009,2010
+///
 /// \note    originally based on falcON's tree.cc (by the same author)
-///                                                                             
+/// 
 /// \version 08-may-2009 WD  real test: debugged error in linking
 /// \version 13-may-2009 WD  abolished Peano-Hilbert support
 /// \version 25-sep-2009 WD  new version using indices for Leaf & Cell
@@ -18,7 +18,8 @@
 /// \version 27-jan-2010 WD  added leaf's parent cell, changed Node magic
 /// \version 28-jan-2010 WD  TreeWalker::SmallestContainingCell tested
 /// \version 29-jan-2010 WD  NeighbourFinder, NearestNeighbourFinder tested
-///                                                                             
+/// \version 26-feb-2010 WD  new initialiser interface
+///
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Copyright (C) 2009,2010 Walter Dehnen
@@ -78,13 +79,15 @@ namespace {
   struct Node {};
   /// represents leafs
   template<int Dim, typename Real>
-  struct Dot : 
-    public Node,
-    public OctalTree<Dim,Real>::Dot
+  struct Dot : public Node
   {
     typedef typename OctalTree<Dim,Real>::node_index node_index;
-    /// next dot in a linked list
-    mutable Dot *Next;
+    typedef typename OctalTree<Dim,Real>::particle_key particle_key;
+    typedef typename OctalTree<Dim,Real>::Point Point;
+    //
+    Point        X;               ///< position
+    particle_key I;               ///< identifier of associated particle
+    mutable Dot *Next;            ///< next dot in a linked list
     /// add this to a linked list of dots
     void AddToList(Dot* &List, node_index&Counter)
     {
@@ -107,8 +110,8 @@ namespace {
   struct Box : public Node
   {
     const static octant_type Nsub = 1<<Dim;
-    typedef ::Dot <Dim,Real> Dot;
-    typedef typename Dot::node_index node_index;
+    typedef ::Dot<Dim,Real> Dot;
+    typedef typename OctalTree<Dim,Real>::node_index node_index;
     //
     tupel<Dim,Real> CEN;          ///< centre position
     uint16          TYP;          ///< bitfield: 1=cell, 0=dot
@@ -349,9 +352,7 @@ namespace {
   //
   template<int Dim, typename Real> inline
   octant_type Box<Dim,Real>::octant(const Dot*D) const
-  {
-    return Helper<Dim,Real>::octant(this->CEN,D->X);
-  }
+  { return Helper<Dim,Real>::octant(this->CEN,D->X); }
   /// type to estimate the number of tree boxes needed.
   class EstimateNalloc
   {
@@ -379,8 +380,8 @@ namespace {
     typedef typename OctTree::node_index node_index;
     typedef typename OctTree::depth_type depth_type;
     typedef typename OctTree::Point      Point;
-    typedef ::Dot <Dim,Real>             Dot;
-    typedef ::Box <Dim,Real>             Box;
+    typedef ::Dot<Dim,Real>              Dot;
+    typedef ::Box<Dim,Real>              Box;
     /// \name data
     //@{
     depth_type          NMAX;          ///< maximum number dots/box
@@ -810,38 +811,34 @@ namespace {
       RA  (WDutils_NEW(Real,MAXD+1))
   {
     if(NDOT == 0) WDutils_THROW("OctalTree: N=0\n");
-    Point Xmin, Xmax, Xave;
-    // 1  set dots
+    // 1 initialise dots
     if(Tree && Tree->Nleafs()) {
-      // 1.1 in old tree order
-      node_index Li=0;
-      D0->I = Tree->PL[Li++];
-      Init->ReInit(reinterpret_cast<typename OctTree::Dot*>(D0));
-      Xmin = Xmax = Xave = D0->X;
-      Dot*Di=D0+1;
-      for(; Di!=DN && Li!=Tree->Nleafs(); ++Di) {
-	Di->I = Tree->PL[Li++];
-	Init->ReInit(reinterpret_cast<typename OctTree::Dot*>(Di));
-	Di->X.up_min_max(Xmin,Xmax);
-	Xave += Di->X;
+      // 1.1   if building from old tree: set dots in old tree order
+      Dot*Di=D0, *List=0, *DN1=D0+min(NDOT,Tree->Nleafs());
+      // 1.1.1 try to re-initialise dots for which we have an old key
+      for(node_index i=0; Di!=DN1; ++Di,++i) {
+	Di->I = Tree->PL[i];
+	if(! Init->ReInitialiseValid(Di->I,Di->X) ) { Di->Next=List; List=Di; }
       }
-      for(; Di!=DN; ++Di) {
-	Init->Init(reinterpret_cast<typename OctTree::Dot*>(Di));
-	Di->X.up_min_max(Xmin,Xmax);
-	Xave += Di->X;
-      }
-    } else {
-      // 1.2 from scratch: loop dots: initialise, find Xmin, Xmax
-      Init->Init(reinterpret_cast<typename OctTree::Dot*>(D0));
-      Xmin = Xmax = Xave = D0->X;
-      for(Dot*Di=D0+1; Di!=DN; ++Di) {
-	Init->Init(reinterpret_cast<typename OctTree::Dot*>(Di));
-	Di->X.up_min_max(Xmin,Xmax);
-	Xave += Di->X;
-      }
+      // 1.1.2 re-initialise dots for which the old key was invalid
+      for(Di=List; Di; Di=Di->Next)
+	Init->ReInitialiseInvalid(Di->I,Di->X);
+      // 1.1.3 initialise dots in excess of those present with the old tree
+      for(Di=DN1; Di!=DN; ++Di)
+	Init->ReInitialiseInvalid(Di->I,Di->X);
+    } else
+      // 1.2 otherwise: set dots from scratch
+      for(Dot*Di=D0; Di!=DN; ++Di)
+	Init->Initialise(Di->I,Di->X);
+    // 2 find min, max and average position
+    Dot*Di=D0;
+    Point Xmin(D0->X), Xmax(D0->X), Xave(D0->X);
+    for(++Di; Di!=DN; ++Di) {
+      Di->X.up_min_max(Xmin,Xmax);
+      Xave += Di->X;
     }
     if(isnan(Xave) || isinf(Xave)) ReportInvalidPos();
-    // 2 set root box, RA[]
+    // 3 set root box, RA[]
     Xave   /= Real(NDOT);
     P0      = NewBox(1);
     P0->CEN = Helper<D,Real>::Integer(Xave);
@@ -852,9 +849,9 @@ namespace {
 #ifdef OctalTreeSupportPeano
     P0->PEA.set_root();
 #endif
-    // add dots
+    // 4 add dots
     size_t nl = 0;
-    for(Dot*Di=D0; Di!=DN; ++Di,++nl)
+    for(Di=D0; Di!=DN; ++Di,++nl)
       AddDotN(P0,Di,nl);
 #ifdef TESTING
     std::ofstream dumpD("dots.dat"), dumpB("boxs.dat");
@@ -873,7 +870,7 @@ namespace WDutils {
   void OctalTree<D,Real>::Allocate()
   {
     unsigned need =
-      NLEAF * (sizeof(Point) + sizeof(particle_index) + sizeof(node_index)) +
+      NLEAF * (sizeof(Point) + sizeof(particle_key) + sizeof(node_index)) +
       NCELL * (3*sizeof(uint8) + sizeof(uint16) + 4*sizeof(node_index) +
 	       sizeof(Point)) +
       (MAXD+1)*sizeof(Real);
@@ -883,19 +880,19 @@ namespace WDutils {
       NALLOC = need;
     }
     char* A = ALLOC;
-    XL = reinterpret_cast<Point*>         (A); A += NLEAF * sizeof(Point);
-    PL = reinterpret_cast<particle_index*>(A); A += NLEAF * sizeof(particle_index);
-    PC = reinterpret_cast<node_index *>   (A); A += NLEAF * sizeof(node_index);
-    LE = reinterpret_cast<uint8*>         (A); A += NCELL * sizeof(uint8);
-    OC = reinterpret_cast<uint8*>         (A); A += NCELL * sizeof(uint8);
-    XC = reinterpret_cast<Point*>         (A); A += NCELL * sizeof(Point);
-    L0 = reinterpret_cast<node_index*>    (A); A += NCELL * sizeof(node_index);
-    NL = reinterpret_cast<uint16*>        (A); A += NCELL * sizeof(uint16);
-    NM = reinterpret_cast<node_index*>    (A); A += NCELL * sizeof(node_index);
-    CF = reinterpret_cast<node_index*>    (A); A += NCELL * sizeof(node_index);
-    NC = reinterpret_cast<uint8*>         (A); A += NCELL * sizeof(uint8);
-    PA = reinterpret_cast<node_index*>    (A); A += NCELL * sizeof(node_index);
-    RAD= reinterpret_cast<Real*>          (A);
+    XL = reinterpret_cast<Point*>       (A); A += NLEAF * sizeof(Point);
+    PL = reinterpret_cast<particle_key*>(A); A += NLEAF * sizeof(particle_key);
+    PC = reinterpret_cast<node_index *> (A); A += NLEAF * sizeof(node_index);
+    LE = reinterpret_cast<uint8*>       (A); A += NCELL * sizeof(uint8);
+    OC = reinterpret_cast<uint8*>       (A); A += NCELL * sizeof(uint8);
+    XC = reinterpret_cast<Point*>       (A); A += NCELL * sizeof(Point);
+    L0 = reinterpret_cast<node_index*>  (A); A += NCELL * sizeof(node_index);
+    NL = reinterpret_cast<uint16*>      (A); A += NCELL * sizeof(uint16);
+    NM = reinterpret_cast<node_index*>  (A); A += NCELL * sizeof(node_index);
+    CF = reinterpret_cast<node_index*>  (A); A += NCELL * sizeof(node_index);
+    NC = reinterpret_cast<uint8*>       (A); A += NCELL * sizeof(uint8);
+    PA = reinterpret_cast<node_index*>  (A); A += NCELL * sizeof(node_index);
+    RAD= reinterpret_cast<Real*>        (A);
   }
   //
   template<int D, typename Real>

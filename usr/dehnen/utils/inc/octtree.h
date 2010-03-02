@@ -15,6 +15,7 @@
 /// \version Nov-2009 WD  removed redundant template parameter
 /// \version Jan-2010 WD  renamed methods in TreeWalker; added leaf's parent
 /// \version Jan-2010 WD  neighbour search methods
+/// \version Feb-2010 WD  new initialisation: removed need for OctalTree::Dot
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -53,14 +54,17 @@
 #  include <tupel.h>
 #endif
 
-namespace { template<int, typename> struct BoxDotTree; }
+namespace {
+  template<int, typename> struct Dot;
+  template<int, typename> struct BoxDotTree;
+}
 namespace WDutils {
   template<typename> struct TreeWalker;
   template<typename> struct DumpTreeData;
   //
   /// A spatial tree of square (2D) or cubic (3D) cells
   //
-  /// Cells with more than \a nmax (argument to constructor and member
+  /// Cells with more than @a nmax (argument to constructor and member
   /// rebuild) are split and octants (or quarters for Dim=2) with more than
   /// one particle are assigned a new cell. After tree construction, the
   /// octants are dissolved (though each cell still knows its octant in its
@@ -77,8 +81,7 @@ namespace WDutils {
   class OctalTree {
     friend struct BoxDotTree<__D,__X>;
     friend struct TreeWalker<OctalTree>;
-    /// ensure that the only valid instantinations are those implemented in
-    /// octtree.cc
+    /// ensure that the only valid instantinations are those in octtree.cc
     WDutilsStaticAssert
     (( (  __D == 2 || __D == 3 )              &&
        meta::TypeInfo<__X>::is_floating_point    ));
@@ -92,27 +95,50 @@ namespace WDutils {
     const static int Nsub= 1<<Dim;           ///< number of octants per cell
     typedef __X             Real;            ///< floating point type: position
     typedef tupel<Dim,Real> Point;           ///< type: positions
-    typedef uint32          particle_index;  ///< type: indexing particles
+    typedef uint32          particle_key;    ///< type: indexing particles
     typedef uint32          node_index;      ///< type: indexing leafs & cells
     typedef uint32          depth_type;      ///< type: tree depth & related
-    /// holds the particle data required to build a tree
-    struct Dot {
-      Point           X;             ///< position
-      particle_index  I;             ///< identifier of associated particle
-    };
-    /// used to initialize and/or re-initialize Dots in tree building
+    /// \brief
+    /// Interface for initialising particle keys and positions.
+    /// \detail
+    /// The interface here is intended to allow for a general data layout (of
+    /// the particle data) in any application and at the same time ensure that
+    /// at OctalTree::rebuild() we keep the particles order (as much as
+    /// possible) which enables significant speed-up.
     class Initialiser {
-    public:
+      friend struct BoxDotTree<__D,__X>;
+    protected:
       // virtual dtor: only needed with older compiler versions
       virtual ~Initialiser() {}
-      /// initializes Dot::I and Dot::X
-      /// \note used in tree construction (and possibly in OctalTree::rebuild())
-      /// \param[in] D  Dot to be initialized
-      virtual void Init(Dot*D) const = 0;
-      /// re-initializes Dot::X, may also change Dot::I
-      /// \note will be called in OctalTree::rebuild()
-      /// \param[in] D  Dot to be re-initialized
-      virtual void ReInit(Dot*D) const = 0;
+      /// initialise key and position for one particle.
+      /// \param[out] I  key for particle
+      /// \param[out] X  position for particle
+      /// \note Will be called @a N times in the constructor. The implementation
+      ///       (the non-abstract version in any derived class) must ensure that
+      ///       each call initialises another particle.
+      virtual void Initialise(particle_key&I, Point&X) const = 0;
+      /// re-initialise position for valid key (only)
+      /// \param[in]  I  original particle key, may have become invalid
+      /// \param[out] X  if key @a I is valid: position for associated particle
+      /// \return Was key @a I valid and position initialised?
+      /// \note Will be called min(@a Nnew, @a Nold) times in
+      ///       OctalTree::rebuild() in an attempt to re-initialise all
+      ///       particles in the particle order of the old tree. The option to
+      ///       return false allows for the possibility that a particle key has
+      ///       become invalid by some data re-arrangement. See also the
+      ///       documentation for ReInitialiseInvalid() below.
+      virtual bool ReInitialiseValid(particle_key I, Point&X) const = 0;
+      /// re-initialise key and position.
+      /// \param[out] I  valid key for particle
+      /// \param[out] X  position for particle
+      /// \note Will be called in OctalTree::rebuild() @b after calling
+      ///       ReInitialiseValid() min(@a Nnew, @a Nold) times. This is to
+      ///       re-initialise (1) particles for which the original key from
+      ///       the tree prior to rebuilding has become invalid and (2) any
+      ///       surplus particles (if @a Nnew > @a Nold).
+      /// \note The implementation (the non-abstract version in any derived
+      ///       class) must ensure that each call initialises another particle.
+      virtual void ReInitialiseInvalid(particle_key&I, Point&X) const = 0;
     };
     //@}
     /// \name general data for class OctalTree
@@ -131,7 +157,7 @@ namespace WDutils {
     //@{
     node_index        NLEAF;          ///< total number of leafs
     Point            *XL;             ///< leaf positions
-    particle_index   *PL;             ///< index of associated particle
+    particle_key     *PL;             ///< index of associated particle
     node_index       *PC;             ///< index of parent cell
     //@}
     /// \name cell data (access via TreeWalker<OctalTree>)
@@ -152,44 +178,49 @@ namespace WDutils {
   public:
     /// ctor: build octtree from scratch.
     ///
-    /// The tree is build in two stages. First, a 'box-dot' tree is built
-    /// using an algorithm which adds one dot (representing a particle) at a
-    /// time. Second, this tree is linked to leafs and cells such that 
-    /// leaf and cell descendants of any cell are contiguous in memory.
+    /// The tree is build in two stages. First, a 'box-dot' tree is built using
+    /// an algorithm which adds one dot (representing a particle) at a time.
+    /// Second, this tree is linked to leafs and cells such that leaf and cell
+    /// descendants of any cell are contiguous in memory.
     ///
-    /// \param[in] n    number of particles
-    /// \param[in] init Initialiser to set initial particle position and index
-    /// \note Calls Initialiser::Init(), to set Dot::I and Dot::X for all @a n
-    ///       particles.
-    /// \param[in] nmax maximum number of leafs in unsplit cells
-    /// \param[in] avsc avoid single-parent cells?
-    /// \note Single-parent cells occur if all leafs of a cell live in just
-    ///       one octant. When @a avsc is true, such a cell is eliminated in
-    ///       favour of its only daughter. With this option on, mother and
-    ///       daughter cells may be more than one level apart and the tree
-    ///       depth may be less than the highest cell level.
-    /// \param[in] maxd maximum tree depth
+    /// \param[in] n     number of particles
+    /// \param[in] init  Initialiser for particle keys and positions
+    /// \note Calls Initialiser::Initialise(), to set key and position for all
+    ///       @a n particles.
+    /// \param[in] nmax  maximum number of leafs in unsplit cells
+    /// \param[in] avsc  avoid single-parent cells?
+    /// \note Single-parent cells occur if all leafs of a cell live in just one
+    ///       octant. When @a avsc is true, such a cell is eliminated in favour
+    ///       of its only daughter. With this option on, mother and daughter
+    ///       cells may be more than one level apart and the tree depth may be
+    ///       less than the highest cell level.
+    /// \param[in] maxd  maximum tree depth
     OctalTree(node_index n, const Initialiser*init, depth_type nmax,
 	      bool avsc=true, depth_type maxd=100) WDutils_THROWING;
     /// dtor
     ~OctalTree();
-    /// build the tree again, re-initialising the dots
+    /// build the tree again utilised by the old tree
     ///
-    /// The tree is build exactly in the same way as with the constructor,
-    /// only the order in which the dots are added to the `box-dot' tree is
-    /// that of the original tree rather than increasing index. This change
-    /// alone results in a speed-up by about a factor 2 for the whole process
-    /// (including linking the final tree), because it avoids cache misses.
+    /// The tree is build exactly in the same way as with the constructor, only
+    /// the order in which the particles are added to the 'box-dot' tree is the
+    /// leaf order of the original tree (rather than increasing particle index).
+    /// This change alone results in a speed-up by about a factor 2 for the
+    /// whole process (including linking the final tree), because it avoids
+    /// cache misses.
     ///
-    /// \param[in] n    new number of particles
-    /// \param[in] nmax maximum number of leafs in unsplit cell
+    /// \param[in] Nnew  new number of particles
+    /// \param[in] nmax  maximum number of leafs in unsplit cells
     ///
-    /// \note If any of the arguments equals 0, we take the old value instead
-    /// \note Calls Initialiser::ReInit(), to set Dot::X, but possibly also
-    ///       change Dot::I. If @a n is larger than previously,
-    ///       Initialiser::Init() is called on the extra particles to set
-    ///       Dot::I as well as Dot::X.
-    void rebuild(node_index n=0, depth_type nmax=0) WDutils_THROWING;
+    /// \note If any of the arguments equals 0, we take the old value instead.
+    ///
+    /// \note First calls Initialiser::ReInitialiseValid() min(@a Nnew, @a Nold)
+    ///       times in an attempt to re-initialise all particles in the particle
+    ///       order of the old tree. Then Initialiser::ReInitialiseInvalid() is
+    ///       called for all particles from the old tree whose keys have become
+    ///       invalid as indicated by Initialiser::ReInitialiseValid(). Finally,
+    ///       Initialiser::ReInitialiseInvalid() is called max(0,@a Nnew - @a
+    ///       Nold) times to initialise any additional particles.
+    void rebuild(node_index Nnew=0, depth_type nmax=0) WDutils_THROWING;
     /// tree depth
     depth_type const&Depth() const
     { return DEPTH; }
@@ -226,7 +257,7 @@ namespace WDutils {
   struct TreeWalker {
     typedef typename OctTree::Real Real;
     typedef typename OctTree::Point Point;
-    typedef typename OctTree::particle_index particle_index;
+    typedef typename OctTree::particle_key particle_key;
     typedef typename OctTree::node_index node_index;
     typedef typename OctTree::depth_type depth_type;
     const static depth_type Dim  = OctTree::Dim;
@@ -274,10 +305,10 @@ namespace WDutils {
     Point const&position(Leaf l) const
     { return TREE->XL[l.I]; }
     /// index of associated particle
-    particle_index const&particle(Leaf l) const
+    particle_key const&particle(Leaf l) const
     { return TREE->PL[l.I]; }
     /// index of parent cell
-    particle_index const&parentcellindex(Leaf l) const
+    particle_key const&parentcellindex(Leaf l) const
     { return TREE->PC[l.I]; }
     //@}
     /// \name cell and cell data access
