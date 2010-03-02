@@ -372,12 +372,12 @@ WD99disc::WD99disc(int    no,                 // # particles/orbit (approx)
 //------------------------------------------------------------------------------
 
 void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
-		       int          NI,             // I: No. iterations
+		       unsigned     NI,          // I: No. iterations
 		       bool         q,           // I: quasi random?          
 		       Random const&RNG,         // I: pseudo or quasi RNG 
-		       bool         giveF) const // I: give phase space density?
+		       bool         giveF,       // I: give phase space density?
+		       double       Rmax) const  // I: maximum disc radius
 {
-  
   int Tsize=3,counter=1,lasti=0;
   int Np=B.N_bodies();
   double mpart=Mt/double(Np);
@@ -490,15 +490,17 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
   // We have just used information from sampling to improve accuracy. 
   // See Dehnen '99 for details 
   //                   (though this is not that implementation)
-
-  for (int i=1;i!=NI;++i) iterate(Tsize,Np,q,RNG,RTar,MInp,STar,SInp);
-
+  do {
+    iterate(Tsize,Np,q,RNG,RTar,MInp,STar,SInp);
+  } while(NI--);
+  
   // Function that iterates to improve this still further
 
   // Iteration finished
   //----------------------------------------------------------------------
   
   // Now
+  if(Rmax <= 0.0) Rmax = rmax;
   SechSquared SechQ(RNG.rng(5,q));
   Normal      Norml(RNG.rng(6,q),RNG.rng(7,q));
   for(body Bi=B.begin_all_bodies(); Bi; ) { // until all bodies are sampled
@@ -508,7 +510,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
 	// use polynomial interpolator
 	Disc.radius(rando);
       Xi= q? RNG(1,0.,1.) : RNG(0.,1.);
-    } while(Re>rmax || Re<rmin);                 // If in table range 
+    } while(Re>Rmax || Re<rmin);                 // while not in range 
     
     double Dens=Dens0*exp(-Re/Rd);
     if(Re>RTar[Tsize-1]) temporary=1.;

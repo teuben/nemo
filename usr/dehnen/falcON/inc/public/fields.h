@@ -79,6 +79,11 @@ namespace falcON {
       all_sink      = 1 << 21,  ///< all leafs in cell are SPH particles
       all_sticky    = 1 << 23,  ///< all leafs in cell are sticky particles
       subtree_cell  = 1 << 24
+#ifdef falcON_2
+      // flags needed in OctTree::rebuild()
+      ,
+      added2tree    = 1 << 25
+#endif
     };
     /// enumeration holding some combinations of flags
     enum combined {
@@ -107,7 +112,7 @@ namespace falcON {
     /// construction from combined flag
     flags(combined f) : val(f) {}
     /// assign from flags
-    flags& operator=(flags const&f) {
+    flags& operator=(flags f) {
       val = f.val;
       return *this;
     }
@@ -126,7 +131,7 @@ namespace falcON {
     /// \name operations
     //@{
     /// add another set of flags
-    flags& operator|= (flags const&f) {
+    flags& operator|= (flags f) {
       val |= f.val;
       return *this;
     }
@@ -141,7 +146,7 @@ namespace falcON {
       return *this;
     }
     /// combine sets of flags
-    flags operator| (flags const&f) const {
+    flags operator| (flags f) const {
       return flags( val | f.val );
     }
     /// combine set of flags with a single flag
@@ -153,9 +158,9 @@ namespace falcON {
       return flags( val | b );
     }
     /// combine single flag with set of flags
-    friend flags operator| (single b, flags const&f);
+    friend flags operator| (single b, flags f);
     /// combine single flag with set of flags
-    friend flags operator| (combined b, flags const&f);
+    friend flags operator| (combined b, flags f);
     /// combine single flags
     friend flags operator| (single b, single c);
     /// combine combined with single flags
@@ -168,27 +173,27 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// \name general boolean methods
     //@{
-    bool operator== (flags const&f) const { return val == f.val; }
-    bool operator!= (flags const&f) const { return val != f.val; }
-    bool are_set    (flags const&f) const { return val & f.val; }
-    bool is_set     (single        b) const { return val & b; }
+    bool operator== (flags  f) const { return val == f.val; }
+    bool operator!= (flags  f) const { return val != f.val; }
+    bool are_set    (flags  f) const { return val & f.val; }
+    bool is_set     (single b) const { return val & b; }
     //@}
     //--------------------------------------------------------------------------
     /// \name specific boolean methods taking reference to flags
     //@{
-    friend bool is_active  (flags const&f);
-    friend bool to_remove  (flags const&f);
-    friend bool is_sph     (flags const&f);
-    friend bool is_sink    (flags const&f);
-    friend bool is_sticky  (flags const&f);
-    friend bool is_new     (flags const&f);
-    friend bool in_subtree (flags const&f);
-    friend bool is_marked  (flags const&f);
-    friend bool al_active  (flags const&f);
-    friend bool al_sph     (flags const&f);
-    friend bool al_sink    (flags const&f);
-    friend bool al_sticky  (flags const&f);
-    friend bool in_subset  (flags const&f);
+    friend bool is_active  (flags f);
+    friend bool to_remove  (flags f);
+    friend bool is_sph     (flags f);
+    friend bool is_sink    (flags f);
+    friend bool is_sticky  (flags f);
+    friend bool is_new     (flags f);
+    friend bool in_subtree (flags f);
+    friend bool is_marked  (flags f);
+    friend bool al_active  (flags f);
+    friend bool al_sph     (flags f);
+    friend bool al_sink    (flags f);
+    friend bool al_sticky  (flags f);
+    friend bool in_subset  (flags f);
     //@}
     //--------------------------------------------------------------------------
     /// \name specific boolean methods taking pointer to flags
@@ -213,24 +218,24 @@ namespace falcON {
     /// reset all bits to zero
     void reset() { val = 0; }
     /// set equal to part of another set of flags
-    void set_to_part(flags const&f, int mask) { val = f.val & mask;}
+    void set_to_part(flags f, int mask) { val = f.val & mask;}
     /// add a single flag
     void add(single f) { (*this) |= f; }
     /// add another set of flags
-    void add(flags const&f) { (*this) |= f; }
+    void add(flags f) { (*this) |= f; }
     /// add part of another set of flags
-    void add_part(flags const&f, int mask) { val |= f.val & mask; }
+    void add_part(flags f, int mask) { val |= f.val & mask; }
     /// add part of another set of flags
-    void add_part(flags const&f, single mask) { val |= f.val & mask; }
+    void add_part(flags f, single mask) { val |= f.val & mask; }
     /// set part equal to corresponding part of another set of flags
-    void set_part(flags const&f, int mask) { 
+    void set_part(flags f, int mask) { 
       val &= ~mask;
       val |= f.val & mask;
     }
     /// reset a single flag
     void un_set(single f) { val &= ~ int(f); }
     /// reset all flags in a given set of flags
-    void un_set(flags const&f) { val &= ~(f.val); }
+    void un_set(flags f) { val &= ~(f.val); }
     //@}
     //--------------------------------------------------------------------------
     /// type conversion to bool
@@ -239,7 +244,7 @@ namespace falcON {
     /// \name formatted I/O                                                     
     //@{
     /// formatted output: simply write integer value
-    friend std::ostream& operator<< (std::ostream&, flags const&);
+    friend std::ostream& operator<< (std::ostream&, flags );
     /// formatted input: read as integer
     friend std::istream& operator>> (std::istream&, flags&);
     //@}
@@ -248,10 +253,10 @@ namespace falcON {
   // inline definitions of friends of class flags
   // also serve to inject these functions into namespace falcON
   //
-  inline flags operator| (flags::single b, flags const&f) {
+  inline flags operator| (flags::single b, flags f) {
     return flags( f.val | int(b) );
   }
-  inline flags operator| (flags::combined b, flags const&f) {
+  inline flags operator| (flags::combined b, flags f) {
     return flags( f.val | int(b) );
   }
   inline flags operator| (flags::single b, flags::single c) {
@@ -266,20 +271,20 @@ namespace falcON {
   inline flags operator| (flags::combined b, flags::combined c) {
     return flags( int(b) | int(c) );
   }
-  inline bool is_active (flags const&f) { return f.is_set(flags::active); }
-  inline bool to_remove (flags const&f) { return f.is_set(flags::remove); }
-  inline bool is_sph    (flags const&f) { return f.is_set(flags::sph); }
-  inline bool is_sink   (flags const&f) { return f.is_set(flags::sink); }
-  inline bool is_sticky (flags const&f) { return f.is_set(flags::sticky); }
-  inline bool is_new    (flags const&f) { return f.is_set(flags::newbody); }
-  inline bool in_subtree(flags const&f) { return f.is_set(flags::subtree); }
-  inline bool is_marked (flags const&f) { return f.is_set(flags::marked); }
-  inline bool al_active (flags const&f) { return f.is_set(flags::all_active); }
-  inline bool al_sph    (flags const&f) { return f.is_set(flags::all_sph); }
-  inline bool al_sink   (flags const&f) { return f.is_set(flags::all_sink); }
-  inline bool al_sticky (flags const&f) { return f.is_set(flags::all_sticky); }
-  inline bool ignore    (flags const&f) { return f.is_set(flags::ignore); }
-  inline bool in_subset (flags const&f) { return !f.is_set(flags::ignore); }
+  inline bool is_active (flags f) { return f.is_set(flags::active); }
+  inline bool to_remove (flags f) { return f.is_set(flags::remove); }
+  inline bool is_sph    (flags f) { return f.is_set(flags::sph); }
+  inline bool is_sink   (flags f) { return f.is_set(flags::sink); }
+  inline bool is_sticky (flags f) { return f.is_set(flags::sticky); }
+  inline bool is_new    (flags f) { return f.is_set(flags::newbody); }
+  inline bool in_subtree(flags f) { return f.is_set(flags::subtree); }
+  inline bool is_marked (flags f) { return f.is_set(flags::marked); }
+  inline bool al_active (flags f) { return f.is_set(flags::all_active); }
+  inline bool al_sph    (flags f) { return f.is_set(flags::all_sph); }
+  inline bool al_sink   (flags f) { return f.is_set(flags::all_sink); }
+  inline bool al_sticky (flags f) { return f.is_set(flags::all_sticky); }
+  inline bool ignore    (flags f) { return f.is_set(flags::ignore); }
+  inline bool in_subset (flags f) { return !f.is_set(flags::ignore); }
   inline bool is_active (const flags*f) { return f->is_set(flags::active); }
   inline bool to_remove (const flags*f) { return f->is_set(flags::remove); }
   inline bool is_sph    (const flags*f) { return f->is_set(flags::sph); }
@@ -294,7 +299,7 @@ namespace falcON {
   inline bool al_sticky (const flags*f) { return f->is_set(flags::all_sticky); }
   inline bool ignore    (const flags*f) { return f->is_set(flags::ignore); }
   inline bool in_subset (const flags*f) { return !f->is_set(flags::ignore); }
-  inline std::ostream& operator<< (std::ostream& o, flags const&f) {
+  inline std::ostream& operator<< (std::ostream& o, flags f) {
     return o << f.val;
   }
   inline std::istream& operator>> (std::istream& i, flags&f) {

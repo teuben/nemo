@@ -131,12 +131,14 @@ namespace falcON {
     /// used to ensure that the density distribution and velocity dispersion of
     /// the resulting N-body distribution is as close to the required as
     /// possible.
-    /// \param B bodies to sample
-    /// \param Ni # iterations
-    /// \param q use quasi-random number?
-    /// \param RNG random number generator
-    /// \param g write DF to bodies?
-    void sample(bodies const&B, int Ni, bool q, Random const&RNG, bool g) const;
+    /// \param[in,out] B    bodies to sample
+    /// \param[in]     Ni   # iterations
+    /// \param[in]     q    use quasi-random number?
+    /// \param[in]     RNG  random number generator
+    /// \param[in]     g    write DF to bodies?
+    /// \param[in]     Rmax maximum disc radius (0 maps to infinity)
+    void sample(bodies const&B, unsigned Ni, bool q, Random const&RNG, bool g,
+		double Rmax=0) const;
     /// sampling a cold disc
     /// \param B bodies to sample
     /// \param q use quasi-random number?

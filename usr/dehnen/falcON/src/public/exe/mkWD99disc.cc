@@ -4,15 +4,15 @@
 /// \file   mkWD99disc.cc
 ///
 /// \brief  creates N-body initial conditions far a galactic disc based on the
-///         distribution function f_new of Dehnen (1999).                       
+///         distribution function f_new of Dehnen (1999).
 ///
 /// \author Paul McMillan
 /// \author Walter Dehnen
-/// \date   2005-2009                                                           
+/// \date   2005-2010
 ///
-////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2005-2009 Walter Dehnen, Paul McMillan
+/////////////////////////////////////////////////////////////////////////////////
+//
+// Copyright (C) 2005-2010 Walter Dehnen, Paul McMillan
 // 
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -44,9 +44,11 @@
 // v 2.1.3 10/09/2008  WD  happy gcc 4.3.1
 // v 2.2   07/08/2009  WD  serious bug in WD99disc removed (PJM original)
 // v 2.2.1 12/08/2009  WD  change in WD99disc to avoid problem with PotExp
+// v 2.2.2 02/03/2010  WD  new keyword Rmax
+//
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.2.1"
-#define falcON_VERSION_D "12-aug-2009 Walter Dehnen & Paul McMillan          "
+#define falcON_VERSION   "2.2.2"
+#define falcON_VERSION_D "02-mar-2010 Walter Dehnen & Paul McMillan          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkWD99disc
@@ -66,6 +68,7 @@ const char*defv[] = {
   "R_sig=0\n          vel. disp. scale radius, sigr propto e^(-R/R_sig)  ",
   "Q=???\n            Toomre's Q, const if R_sig=0, else Q(R_sig)        ",
   "z_d=0.1\n          vertical scale height                              ",
+  "Rmax=\n            maximum disc radius                                ",
   "eps=0\n            particle smoothing length (undefined if 0)         ",
   "seed=0\n           seed for the randum number generator               ",
   "q-ran=f\n          use quasi- instead of pseudo-random numbers        ",
@@ -132,7 +135,8 @@ void falcON::main() falcON_THROWING
   unsigned nbod[bodytype::NUM]={0}; nbod[bodytype::std] = getuparam("nbody");
   snapshot shot(getdparam("time"), nbod, data);
   if(getdparam("Q"))    
-    DM.sample(shot,getiparam("ni"),getbparam("q-ran"),Ran,getbparam("giveF"));
+    DM.sample(shot,getuparam("ni"),getbparam("q-ran"),Ran,getbparam("giveF"),
+	      getdparam_z("Rmax"));
   else
     DM.coldsample(shot,getbparam("q-ran"),Ran);
   // output of snapshot                                                      
