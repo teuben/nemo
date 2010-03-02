@@ -1,5 +1,9 @@
 #! /bin/csh 
 ################################################################################
+# 
+#  DO NOT EDIT, unless this is the source version falcON/doc/mkgalaxy
+#
+################################################################################
 ##                                                                             #
 ## mkgalaxy                                                                    #
 ##                                                                             #
@@ -16,7 +20,7 @@
 ##                                                                             #
 ################################################################################
 ##                                                                             #
-## Copyright (C) 2007  Paul McMillan, Walter Dehnen                            #
+## Copyright (C) 2007-2010  Paul McMillan, Walter Dehnen                       #
 ##                                                                             #
 ## This program is free software; you can redistribute it and/or modify        #
 ## it under the terms of the GNU General Public License as published by        #
@@ -82,6 +86,7 @@ set Md=1             # disc mass
 set Rd=1             # disc scale radius
 set Zd=0.1           # disc scale height (rho \propto sech^2(z/Zd))
 set Rsig=0           # if non-zero, rad. vel. disp. sigma \propto exp(-R/Rsig)
+set Rdmax=4.5        # maximum disc radius
 set Q=1.2            # Toomre's Q (const if Rsig=0, else value Q(Rsig)
 set Nbpo=50          # number of disc bodies sampled per orbit
 set ni=4             # number of iterations in disc sampling
@@ -94,6 +99,7 @@ set innerh=7/9       # halo inner logarithmic density slope
 set outerh=31/9      # halo outer logarithmic density slope
 set etah=4/9         # halo transition exponent
 set Rcoreh=0         # halo core radius
+set Rscaleh=
 set Rh=6             # halo scale length
 set Rth=60           # halo truncation radius
 set betah=0          # halo anisotropy parameter
@@ -183,6 +189,7 @@ echo "disc parameters:" >> $name.err
 echo "Md     = $Md\t(disc mass)" >> $name.err
 echo "Nd     = $Nd\t(number of disc bodies)" >> $name.err
 echo "Rd     = $Rd\t(disc scale radius)" >> $name.err
+echo "Rdmax  = $Rdmax\t(disc truncation radius)" >> $name.err
 echo "Zd     = $Zd\t(disc scale height)" >> $name.err
 echo "Rsig   = $Rsig\t(if !=0 : scale radius for sigma_R)" >> $name.err
 echo "Q      = $Q\t(Toomre's Q: constant if Rsig=0, otherwise Q(Rsig))" >> $name.err
@@ -266,7 +273,7 @@ rm -f $name.h $name.b $name.s $name.prm >& /dev/null
 if ( $debug > 0 ) then
     echo "========================================" >> $name.err
     echo "mkgalaxy: issuing commands:\
-    echo accname=DiscPot                 >  $name.prm\
+    echo accname=DiscPot                     >  $name.prm\
     echo accpars=0,$Sd_dp,$Rd,$Zd_dp,0,0     >> $name.prm" >> $name.err
     echo >> $name.err
 endif
@@ -363,14 +370,24 @@ if( $debug > 0 ) then
     echo >> $name.err
 endif
     snapstac $name.b $name.h $name.s! debug=$debug >>& $name.err
-if( $debug > 0 ) then
+
+if( $debug >  0 ) then
     echo "========================================" >> $name.err
+if( $debug <= 1 ) then
     echo "mkgalaxy: issuing command:\
     rm -f $name.h $name.b >& /dev/null" >> $name.err
+else
+    echo "mkgalaxy: suppressing command:\
+    rm -f $name.h $name.b >& /dev/null" >> $name.err
+endif
     echo >> $name.err
 endif
+if( $debug <= 1 ) then
     rm -f $name.h $name.b >& /dev/null
+endif
+
 else
+
 if( $debug > 0 ) then
     echo "========================================" >> $name.err
     echo "mkgalaxy: issuing command:\
@@ -550,26 +567,34 @@ endif
 if( $debug > 0 ) then
     echo "========================================" >> $name.err
     echo "mkgalaxy: issuing command:\
-    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q      \
-	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF          \
-	accname=PotExp+PotExp                                                 \
+    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Rmax=$Rdmax            \
+	Sig_0=$sdens Q=$Q R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed     \
+        giveF=$giveF accname=PotExp+PotExp                                    \
 	accpars=0,$alphab,$Rb,$nmax,$lmax,3,1;0,$alphah,$Rh,$nmax,$lmax,3,1   \
 	accfile=$name.b;$name.h debug=$debug >>& $name.err" >> $name.err
     echo >> $name.err
 endif
-    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q      \
-	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF          \
-	accname=PotExp+PotExp                                                 \
+    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Rmax=$Rdmax            \
+	Sig_0=$sdens Q=$Q R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed     \
+	giveF=$giveF accname=PotExp+PotExp                                    \
 	accpars="0,$alphab,$Rb,$nmax,$lmax,3,1;0,$alphah,$Rh,$nmax,$lmax,3,1" \
 	accfile="$name.b;$name.h" debug=$debug >>& $name.err
 
-if( $debug > 0 ) then
+if( $debug >  0 ) then
     echo "========================================" >> $name.err
+if( $debug <= 1 ) then
     echo "mkgalaxy: issuing command:\
-    rm -f $name.b $name.h >& /dev/null" >> $name.err
+    rm -f $name.h $name.b >& /dev/null" >> $name.err
+else
+    echo "mkgalaxy: suppressing command:\
+    rm -f $name.h $name.b >& /dev/null" >> $name.err
+endif
     echo >> $name.err
 endif
-    rm -f $name.b $name.h >& /dev/null
+if( $debug <= 1 ) then
+    rm -f $name.h $name.b >& /dev/null
+endif
+
 
 else
 
@@ -582,15 +607,15 @@ else
 if( $debug > 0 ) then
     echo "========================================" >> $name.err
     echo "mkgalaxy: issuing command:\
-    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q   \
-	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF       \
-	accname=PotExp accpars=0,$alphah,$Rh,$nmax,$lmax,3,1               \
+    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Rmax=$Rdmax            \
+	Sig_0=$sdens Q=$Q R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed     \
+	giveF=$giveF accname=PotExp accpars=0,$alphah,$Rh,$nmax,$lmax,3,1     \
 	accfile=$spheroid debug=$debug >>& $name.err" >> $name.err
     echo >> $name.err
 endif
-    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Sig_0=$sdens Q=$Q   \
-	R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed giveF=$giveF       \
-	accname=PotExp accpars="0,$alphah,$Rh,$nmax,$lmax,3,1"             \
+    mkWD99disc $name.d! nbody=$Nd nbpero=$Nbpo R_d=$Rd Rmax=$Rdmax             \
+	Sig_0=$sdens Q=$Q R_sig=$Rsig ni=$ni z_d=$Zd eps=$epsd seed=$seed      \
+	giveF=$giveF accname=PotExp accpars="0,$alphah,$Rh,$nmax,$lmax,3,1"    \
 	accfile="$spheroid" debug=$debug >>& $name.err
 
 endif
@@ -618,16 +643,31 @@ endif
 
 ################################################################################
 ## delete temporary files
-rm -f $name.d $name.prm >& /dev/null
+
+if( $debug >  0 ) then
+    echo "========================================" >> $name.err
+if( $debug <= 1 ) then
+    echo "mkgalaxy: issuing command:\
+    rm -f $name.d" >> $name.err
+else
+    echo "mkgalaxy: suppressing command:\
+    rm -f $name.d >& /dev/null" >> $name.err
+endif
+    echo >> $name.err
+endif
+if( $debug <= 1 ) then
+    rm -f $name.d >& /dev/null
+endif
+
 
 ################################################################################
 ## done!
 
 echo "mkgalaxy:    finished. snapshots generated:"
 if(! $?skip) then
-echo "             $spheroid:  spheroids adjusted to disc"
+echo "             $spheroid: spheroids adjusted to disc"
 endif
-echo "             $name.snp:  complete galaxy model ready to use"
+echo "             $name.snp: complete galaxy model ready to use"
 
 ################################################################################
 #end
