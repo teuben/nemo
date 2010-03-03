@@ -18,6 +18,10 @@ Short term:
     else people that have no . in $path will get a cryptic error message
     that it cannot execute the script! or:   set path=($path  .)
 
+  - now that save/load works, the code should warn if it has modified
+    parameters after a load or start. to give user an option to save key
+    file
+
 Longer term:
 
   - change the geometry mananger over from 'pack' to 'grid'
