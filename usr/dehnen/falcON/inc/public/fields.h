@@ -79,11 +79,6 @@ namespace falcON {
       all_sink      = 1 << 21,  ///< all leafs in cell are SPH particles
       all_sticky    = 1 << 23,  ///< all leafs in cell are sticky particles
       subtree_cell  = 1 << 24
-#ifdef falcON_2
-      // flags needed in OctTree::rebuild()
-      ,
-      added2tree    = 1 << 25
-#endif
     };
     /// enumeration holding some combinations of flags
     enum combined {

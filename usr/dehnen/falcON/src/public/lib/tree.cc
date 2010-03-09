@@ -297,11 +297,6 @@ namespace {
       LIST = this;
       ++COUNTER;
     }
-//     //--------------------------------------------------------------------------
-//     void  set_up  (const OctTree::Leaf*L) {
-//       pos() = falcON::pos(L);
-//       LINK  = falcON::mybody(L);
-//     }
     //--------------------------------------------------------------------------
     void  set_up  (const bodies*B, bodies::index const&i) {
       LINK  = i;
@@ -309,7 +304,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     void  set_up  (body const&b) {
-      LINK  = b;
+      LINK  = bodies::index(b);
       pos() = falcON::pos(b);
     }
     //--------------------------------------------------------------------------
