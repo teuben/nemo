@@ -788,78 +788,72 @@ namespace WDutils {
     WDutilsStaticAssert((D>2));
     friend class SubArray<T,D+1>;
     friend class ConstSubArray<T,D+1>;
-    const unsigned*const Ns; ///< sizes in all dimensions
-    const unsigned*const Ks; ///< offsets in all dimensions
-    const T       *const As; ///< pointer to first element
-  protected:
-    /// constructor is protected: accessible only from friends and derived
-    ConstSubArray(const T*a, const unsigned*n, const unsigned*k)
-      : Ns(n), Ks(k), As(a) {}
+    const unsigned*const N; // sizes in all dimensions
+    const unsigned*const K; // offsets in all dimensions
+    const T       *const A; // pointer to first element
+    // private constructor: accessible from friends only
+    ConstSubArray(const unsigned*n, const unsigned*k, const T*a)
+      : N(n), K(k), A(a) {}
   public:
     /// rank: number of dimensions
     static const unsigned rank = D;
     /// return size in dimension @a d
     unsigned size(unsigned d) const
-    { return Ns[d]; }
+    { return N[d]; }
     /// return size in 1st dimension
     unsigned size() const
-    { return Ns[0]; }
+    { return N[0]; }
     /// type resulting from a const [] operation
     typedef ConstSubArray<T,D-1> ConstSub;
     /// acts like the operator[] on a const pointer
     ConstSub operator[] (unsigned i) const
-    { return ConstSub(As+i*Ks[0],Ks+1); }
+    { return ConstSub(N+1, K+1, A+i*K[0]); }
+    /// type conversion to const pointer: return first element
+    const T*array() const { return A; }
   };
   /// a const array of arbitrary type in 2 dimensions
   template<typename T> class ConstSubArray<T,2> {
     friend class SubArray<T,3>;
     friend class ConstSubArray<T,3>;
-    const unsigned*const Ns; ///< sizes in all dimensions
-    const unsigned*const Ks; ///< offsets in all dimensions
-    const T       *const As; ///< pointer to first element
-  protected:
-    /// constructor is protected: accessible only from friends and derived
-    ConstSubArray(const T*a, const unsigned*n, const unsigned*k)
-      : Ns(n), Ks(k), As(a) {}
+    const unsigned*const N; ///< sizes in all dimensions
+    const unsigned*const K; ///< offsets in all dimensions
+    const T       *const A; ///< pointer to first element
+    /// private constructor: accessible from friends only
+    ConstSubArray(const unsigned*n, const unsigned*k, const T*a)
+      : N(n), K(k), A(a) {}
   public:
     /// rank: number of dimensions
     static const unsigned rank = 2;
-    /// return size in dimension \a d
-    unsigned size(unsigned d) const
-    { return Ns[d]; }
-    /// return size in 1st dimension
-    unsigned size() const
-    { return Ns[0]; }
+    /// return size in dimension @a d, default: in lowest dimension
+    unsigned size(unsigned d=0) const
+    { return N[d]; }
     /// type resulting from a const [] operation
     typedef const T* ConstSub;
     /// acts like the operator[] on a const pointer
     ConstSub operator[] (unsigned i) const
-    { return As+i*Ks[0]; }
+    { return A+i*K[0]; }
+    /// type conversion to const pointer: return first element
+    const T*array() const { return A; }
   };
   //
-  /// an array of arbitrary type in D dimensions
+  /// an array of arbitrary type in D dimensions.
+  /// used as base and return type for class Array<T,D>
   template<typename T, unsigned D> class SubArray {
     WDutilsStaticAssert((D>2));
     friend class SubArray<T,D+1>;
-    const unsigned*const Ns; ///< sizes in all dimensions
-    const unsigned*const Ks; ///< offsets in all dimensions
-    T             *const As; ///< pointer to first element
   protected:
-    /// reset pointer
-    void reset(T*a) { const_cast<T*&>(As) = a; }
-    /// constructor is protected: accessible only from friends and derived
-    SubArray(T*a, const unsigned*n, const unsigned*k) : Ns(n), Ks(k), As(a) {}
+    const unsigned*const N; // sizes in all dimensions
+    const unsigned*const K; // offsets in all dimensions
+    T             *const A; // pointer to allocated memory 
+    // protected constructor: accessible from friends and derived
+    SubArray(const unsigned*n, const unsigned*k, T*a) : N(n), K(k), A(a) {}
   public:
     /// rank: number of dimensions
     static const unsigned rank = D;
-    /// return size in dimension \a d
-    /// \param[in] d  dimention to ask size for
-    /// \note @a d must be in [0, @a rank [
-    unsigned size(unsigned d) const
-    { return Ns[d]; }
-    /// return size in 1st dimension
-    unsigned size() const
-    { return Ns[0]; }
+    /// return size in dimension @a d, default: in lowest dimension
+    /// \note We assume 0 <= @a d < @a rank. For efficiency, this is not tested.
+    unsigned size(unsigned d=0) const
+    { return N[d]; }
     /// type resulting from a non-const [] operation
     typedef SubArray<T,D-1> Sub;
     /// type resulting from a const [] operation
@@ -867,34 +861,32 @@ namespace WDutils {
     /// acts like the operator[] on a pointer
     /// \param[in] i  index in lowest dimension
     Sub operator[] (unsigned i)
-    { return Sub(As+i*Ks[0],Ns+1,Ks+1); }
+    { return Sub(N+1,K+1,A+i*K[0]); }
     /// acts like the operator[] on a const pointer
     /// \param[in] i  index in lowest dimension
     ConstSub operator[] (unsigned i) const
-    { return ConstSub(As+i*Ks[0],Ks+1); }
+    { return ConstSub(N+1,K+1,A+i*K[0]); }
+    /// type conversion to pointer: return first element
+    T      *array()       { return A; }
+    /// type conversion to const pointer: return first element
+    const T*array() const { return A; }
   };
   /// an array of arbitrary type in 2 dimensions
   template<typename T> class SubArray<T,2> {
     friend class SubArray<T,3>;
-    const unsigned*const Ns; ///< sizes in all dimensions
-    const unsigned*const Ks; ///< offsets in all dimensions
-    T             *const As; ///< pointer to first element
   protected:
-    /// reset pointer
-    void reset(T*a) { const_cast<T*&>(As) = a; }
-    /// constructor is protected: accessible only from friends and derived
-    SubArray(T*a, const unsigned*n, const unsigned*k) : Ns(n), Ks(k), As(a) {}
+    const unsigned*const N; // sizes in all dimensions
+    const unsigned*const K; // offsets in all dimensions
+    T             *const A; // pointer to allocated memory 
+    // protected constructor: accessible from friends and derived
+    SubArray(const unsigned*n, const unsigned*k, T*a) : N(n), K(k), A(a) {}
   public:
     /// rank: number of dimensions
     static const unsigned rank = 2;
-    /// return size in dimension \a d
-    /// \param[in] d  dimention to ask size for
-    /// \note @a d must be in [0, @a rank [
-    unsigned size(unsigned d) const
-    { return Ns[d]; }
-    /// return size in 1st dimension
-    unsigned size() const
-    { return Ns[0]; }
+    /// return size in dimension @a d, default: in lowest dimension
+    /// \note We assume 0 <= @a d < @a rank. For efficiency, this is not tested.
+    unsigned size(unsigned d=0) const
+    { return N[d]; }
     /// type resulting from a non-const [] operation
     typedef T* Sub;
     /// type resulting from a const [] operation
@@ -902,11 +894,15 @@ namespace WDutils {
     /// acts like the operator[] on a pointer
     /// \param[in] i  index in lowest dimension
     Sub operator[] (unsigned i)
-    { return As+i*Ks[0]; }
+    { return A+i*K[0]; }
     /// acts like the operator[] on a const pointer
     /// \param[in] i  index in lowest dimension
     ConstSub operator[] (unsigned i) const
-    { return As+i*Ks[0]; }
+    { return A+i*K[0]; }
+    /// type conversion to pointer: return first element
+    T      *array()       { return A; }
+    /// type conversion to const pointer: return first element
+    const T*array() const { return A; }
   };
   //
   // class Array<T,D>
@@ -919,77 +915,77 @@ namespace WDutils {
   template<typename T, unsigned D=1> class Array : public SubArray<T,D>
   {
     typedef SubArray<T,D> Base;
+    Base::N;
+    Base::K;
+    Base::A;
     /// \name data
     //@{
-    unsigned  N[D];  ///< N[d]: size in dimension d 
-    unsigned  K[D];  ///< K[d] = Prod_i>d N[i]      
-    union {
-      T      *A;     ///< pointer to allocated memory 
-      const T*C;     ///< const pointer to allocated memory 
-    };
+    unsigned __N[D];  ///< __N[d]: size in dimension d 
+    unsigned __K[D];  ///< __K[d] = Prod_i>d __N[i]      
     //@}
     /// set N[d] and K[d]
     /// \param[in] n size of array in each dimension
     void set(const unsigned*n) {
       for(unsigned d=0; d!=D; ++d)
-	N[d] = n? n[d] : 0;
-      K[D-1] = 1;
+	__N[d] = n? n[d] : 0;
+      __K[D-1] = 1;
       for(unsigned d=D-1; d!=0; --d)
-	K[d-1] = K[d] * N[d];
+	__K[d-1] = K[d] * N[d];
     }
-    /// is a set \a n of sizes equal to ours?
-    /// \param[in] n size of array in each dimension
+    /// is a set @a n of sizes equal to ours?
+    /// \param[in] n  size of array in each dimension
     bool equal(const unsigned n[D]) const {
       for(unsigned d=0; d!=D; ++d)
 	if(N[d] != n[d]) return false;
       return true;
     }
-    /// copy constructor is disabled (private); use references instead of copies
-    Array(Array const&);
+    //
+    Array           (Array const&);  // disabled
+    Array& operator=(Array const&);  // disabled
   public:
     Base::Sub;
     Base::ConstSub;
     /// default constructor: sizes are all equal to 0
     Array()
-      : Base(A,N,K), A(0) { set(0); }
+      : Base(__N,__K,0) { set(0); }
     /// construction from sizes
     /// \param[in] n size of array in each dimension
     explicit Array(const unsigned n[D]) WDutils_THROWING
-      : Base(A,N,K), A(0) { reset(n); }
-    /// construction from sizes for D=2
+      : Base(__N,__K,0) { reset(n); }
+    /// construction from sizes for D=2 (compile-time error otherwise)
     /// \param[in] n0 size of array in dimension 0
     /// \param[in] n1 size of array in dimension 1
     Array(unsigned n0, unsigned n1) WDutils_THROWING
-    : Base(A,N,K), A(0)
+    : Base(__N,__K,0)
     {
       WDutilsStaticAssert(D==2);
       const unsigned n[2] = {n0,n1};
       reset(n);
     }
-    /// construction from sizes for D=3
+    /// construction from sizes for D=3 (compile-time error otherwise)
     /// \param[in] n0 size of array in dimension 0
     /// \param[in] n1 size of array in dimension 1
     /// \param[in] n2 size of array in dimension 2
     Array(unsigned n0, unsigned n1, unsigned n2) WDutils_THROWING
-    : Base(A,N,K), A(0)
+    : Base(__N,__K,0)
     {
       WDutilsStaticAssert(D==3);
       const unsigned n[3] = {n0,n1,n2};
       reset(n);
     }
-    /// construction from sizes for D=4
+    /// construction from sizes for D=4 (compile-time error otherwise)
     /// \param[in] n0 size of array in dimension 0
     /// \param[in] n1 size of array in dimension 1
     /// \param[in] n2 size of array in dimension 2
     /// \param[in] n3 size of array in dimension 3
     Array(unsigned n0, unsigned n1, unsigned n2, unsigned n3) WDutils_THROWING
-    : Base(A,N,K), A(0)
+    : Base(__N,__K,0)
     {
       WDutilsStaticAssert(D==4);
       const unsigned n[4] = {n0,n1,n2,n3};
       reset(n);
     }
-    /// construction from sizes for D=5
+    /// construction from sizes for D=5 (compile-time error otherwise)
     /// \param[in] n0 size of array in dimension 0
     /// \param[in] n1 size of array in dimension 1
     /// \param[in] n2 size of array in dimension 2
@@ -997,7 +993,7 @@ namespace WDutils {
     /// \param[in] n4 size of array in dimension 4
     Array(unsigned n0, unsigned n1, unsigned n2, unsigned n3, unsigned n4)
     WDutils_THROWING
-    : Base(A,N,K), A(0)
+    : Base(__N,__K,0)
     {
       WDutilsStaticAssert(D==5);
       const unsigned n[5] = {n0,n1,n2,n3,n4};
@@ -1007,14 +1003,13 @@ namespace WDutils {
     /// \param[in] n size of array in each dimension
     /// \param[in] x initialize each element with this value
     Array(const unsigned n[D], T const&x) WDutils_THROWING
-    : Base(A,N,K), A(0) { reset(n,x); }
+    : Base(__N,__K,0) { reset(n,x); }
     /// destruction: de-allocate memory
     ~Array() WDutils_THROWING
     {
       if(A) {
 	WDutils_DEL_A(A);
-	A = 0;
-	Base::reset(A);
+	const_cast<T*&>(A) = 0;
       }
       set(0);
     }
@@ -1024,15 +1019,15 @@ namespace WDutils {
     { for(unsigned i=0; i!=K[0]*N[0]; ++i) A[i]=x; }
     /// reset: destruct and construct again
     /// \param[in] n new size of array in each dimension
-    void reset(const unsigned n[D]) WDutils_THROWING {
+    void reset(const unsigned n[D]) WDutils_THROWING
+    {
       if(A==0 || !equal(n) ) {
 	if(A) WDutils_DEL_A(A);
 	set(n);
-	A = K[0]*N[0] ? WDutils_NEW(T,K[0]*N[0]) : 0;
-	Base::reset(A);
+	const_cast<T*&>(A) = K[0]*N[0] ? WDutils_NEW(T,K[0]*N[0]) : 0;
       }
     }
-    /// reset for D=2
+    /// reset for D=2 (compile-time error otherwise)
     /// \param[in] n0 new size of array in dimension 0
     /// \param[in] n1 new size of array in dimension 1
     void reset(unsigned n0, unsigned n1) WDutils_THROWING
@@ -1041,7 +1036,7 @@ namespace WDutils {
       const unsigned n[D] = {n0,n1};
       reset(n);
     }
-    /// reset for D=3
+    /// reset for D=3 (compile-time error otherwise)
     /// \param[in] n0 new size of array in dimension 0
     /// \param[in] n1 new size of array in dimension 1
     /// \param[in] n2 new size of array in dimension 2
@@ -1051,7 +1046,7 @@ namespace WDutils {
       const unsigned n[D] = {n0,n1,n2};
       reset(n);
     }
-    /// reset for D=4
+    /// reset for D=4 (compile-time error otherwise)
     /// \param[in] n0 new size of array in dimension 0
     /// \param[in] n1 new size of array in dimension 1
     /// \param[in] n2 new size of array in dimension 2
@@ -1063,7 +1058,7 @@ namespace WDutils {
       const unsigned n[D] = {n0,n1,n2,n3};
       reset(n);
     }
-    /// reset for D=5
+    /// reset for D=5 (compile-time error otherwise)
     /// \param[in] n0 new size of array in dimension 0
     /// \param[in] n1 new size of array in dimension 1
     /// \param[in] n2 new size of array in dimension 2
@@ -1083,10 +1078,6 @@ namespace WDutils {
       reset(n);
       setval(x);
     }
-    /// type conversion to pointer: return first element
-    T      *const&array()       { return A; }
-    /// type conversion to const pointer: return first element
-    const T*const&array() const { return C; }
   };// class Array<T,D>
   //
   /// \brief  Specialisation for D=1
@@ -1096,10 +1087,7 @@ namespace WDutils {
     /// \name data
     //@{
     unsigned  N;     ///< N[d]: size in dimension d 
-    union {
-      T      *A;     ///< pointer to allocated memory 
-      const T*C;     ///< const pointer to allocated memory 
-    };
+    T        *A;     ///< pointer to allocated memory 
     //@}
     /// copy constructor is disabled (private); use references instead of copies
     Array(Array const&);
@@ -1172,9 +1160,9 @@ namespace WDutils {
       N = 0;
     }
     /// type conversion to pointer: return first element
-    T      *const&array()       { return A; }
+    T      *array()       { return A; }
     /// type conversion to const pointer: return first element
-    const T*const&array() const { return C; }
+    const T*array() const { return A; }
     /// type resulting from a non-const [] operation
     typedef T& Sub;
     /// type resulting from a const [] operation
@@ -1184,7 +1172,7 @@ namespace WDutils {
     { return A[i]; }
     /// const array sub-scription: return const reference to element
     ConstSub operator[] (unsigned i) const
-    { return C[i]; }
+    { return A[i]; }
   };// class Array<T,1>
   //
   /// \brief  Specialisation for D=0, provided for completeness only
