@@ -103,8 +103,8 @@ namespace WDutils {
     /// \detail
     /// The interface here is intended to allow for a general data layout (of
     /// the particle data) in any application and at the same time ensure that
-    /// at OctalTree::rebuild() we keep the particles order (as much as
-    /// possible) which enables significant speed-up.
+    /// at OctalTree::rebuild() we keep the particle order (as much as possible)
+    /// which enables significant speed-up.
     class Initialiser {
       friend struct BoxDotTree<__D,__X>;
     protected:
@@ -308,7 +308,7 @@ namespace WDutils {
     particle_key const&particle(Leaf l) const
     { return TREE->PL[l.I]; }
     /// index of parent cell
-    particle_key const&parentcellindex(Leaf l) const
+    node_index const&parentcellindex(Leaf l) const
     { return TREE->PC[l.I]; }
     //@}
     /// \name cell and cell data access
@@ -543,6 +543,7 @@ namespace WDutils {
     //@}
     /// \name dumping leaf and cell data (for debugging purposes)
     //@{
+  protected:
     /// header for leaf dump
     /// \note virtual: may be overridden/extended in derived class
     virtual std::ostream&Head(Leaf, std::ostream&out) const
@@ -594,6 +595,7 @@ namespace WDutils {
 	   << std::setw(8) << radius   (c) << ' '
 	   << std::setw(8) << centre   (c);
     }
+  public:
     /// dump leaf data
     /// \param[in] out  ostream to write to
     void DumpLeafs(std::ostream&out) const
