@@ -5,11 +5,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2000-2009
+/// \date    2000-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2009  Walter Dehnen
+// Copyright (C) 2000-2010  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -33,6 +33,7 @@
 #include <iomanip>                                 // C++ I/O formating         
 #include <cstring>                                 // C++ strings               
 #include <public/nemo++.h>                         // utilities for NEMO I/O    
+#include <public/bodyfunc.h>
 #include <utils/numerics.h>
 #include <utils/heap.h>
 
@@ -44,11 +45,9 @@ using namespace falcON;
 typedef long unsigned lu; // will convert size_t to this type in printf
 
 falcON_TRAITS(falcON::bodies::block,"bodies::block");
-////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // struct falcON::bodies::block                                                 
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
 void bodies::block::clone(block*that)
 {
   if(that == this) return;
@@ -67,7 +66,7 @@ void bodies::block::clone(block*that)
   this->FIRST      = that->FIRST;
   this->LOCALFIRST = that->LOCALFIRST;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::block::reset_flags() const
 {
   if(0 != DATA[fieldbit::f]) {
@@ -83,7 +82,7 @@ void bodies::block::reset_flags() const
 	datum<fieldbit::f>(n) = flags::empty;
   }
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::block::flag_all_as_active() const falcON_THROWING
 {
   if(0 != DATA[fieldbit::f])
@@ -92,17 +91,19 @@ void bodies::block::flag_all_as_active() const falcON_THROWING
   else 
     falcON_THROW("in bodies::flag_all_as_active(): flags not supported");
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::block::reset_data(fieldset b) const falcON_THROWING {
-#define RESETDATA(BIT,NAME)			\
-  if(DATA[BIT] && b.contain(BIT) && NBOD)	\
+//
+void bodies::block::reset_data(fieldset b) const falcON_THROWING
+{
+#define RESETDATA(BIT,NAME)				\
+  if(DATA[BIT] && b.contain(BIT) && NBOD)		\
     for(unsigned n=0; n!=NBOD; ++n)			\
       field_traits<BIT>::set_zero(datum<BIT>(n));
  DEF_NAMED(RESETDATA)
 #undef RESETDATA
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::block::add_field (fieldbit f) falcON_THROWING {
+//
+void bodies::block::add_field (fieldbit f) falcON_THROWING
+{
   if(TYPE.allows(f) && 0 == DATA[value(f)] ) {
     DebugInfo(4,"bodies::block::add_field(): "
 	      "allocating data for %s bodies: %u %c (%s)\n",
@@ -111,8 +112,9 @@ void bodies::block::add_field (fieldbit f) falcON_THROWING {
     if(f == fieldbit::f) reset_flags();
   }
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::block::del_field (fieldbit f) falcON_THROWING {
+//
+void bodies::block::del_field (fieldbit f) falcON_THROWING
+{
   if(DATA[value(f)]) {
     DebugInfo(4,"bodies::block::del_field(): "
 	      "de-allocating data for %s bodies: %c (%s)\n",
@@ -121,36 +123,41 @@ void bodies::block::del_field (fieldbit f) falcON_THROWING {
   }
   set_data_void(f,0);
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::block::swap_bytes(fieldbit f) falcON_THROWING {
+//
+void bodies::block::swap_bytes(fieldbit f) falcON_THROWING
+{
   if(DATA[value(f)]) {
     DebugInfo(4,"bodies::block::swap_bytes(): swapping bytes for %c (%s)\n",
 	      letter(f),fullname(f));
     falcON::swap_bytes(DATA[value(f)], falcON::size(f), NALL);
   }
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::block::add_fields(fieldset b) falcON_THROWING {
+//
+void bodies::block::add_fields(fieldset b) falcON_THROWING
+{
   for(fieldbit f; f; ++f)
     if(b.contain(f)) add_field(f);
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::block::del_fields(fieldset b) falcON_THROWING {
+//
+void bodies::block::del_fields(fieldset b) falcON_THROWING
+{
   for(fieldbit f; f; ++f) 
     if(b.contain(f)) del_field(f);
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::block::set_fields(fieldset b) falcON_THROWING {
+//
+void bodies::block::set_fields(fieldset b) falcON_THROWING
+{
   for(fieldbit f; f; ++f) 
     if(b.contain(f)) add_field(f);
     else             del_field(f);
 }
-////////////////////////////////////////////////////////////////////////////////
-bodies::block::~block() falcON_THROWING {
+//
+bodies::block::~block() falcON_THROWING
+{
   for(fieldbit f; f; ++f)
     del_field(f);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 bodies::block::block(unsigned no,                  // I: our No                 
 		     unsigned na,                  // I: data to allocate       
 		     unsigned nb,                  // I: # bodies <= na_b       
@@ -184,7 +191,7 @@ bodies::block::block(unsigned no,                  // I: our No
     falcON_RETHROW(E);
   }
 }
-///////////////////////////////////////////////////////////////////////////////
+//
 fieldset bodies::block::copy_body(unsigned fr, unsigned to, fieldset _copy)
 {
   if(fr>=NALL)
@@ -207,7 +214,7 @@ fieldset bodies::block::copy_body(unsigned fr, unsigned to, fieldset _copy)
   }
   return copied;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 fieldset bodies::block::copy_bodies(const block*that,
 				    unsigned    fr,
 				    unsigned    to,
@@ -232,14 +239,14 @@ fieldset bodies::block::copy_bodies(const block*that,
     }
   return copied;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 inline void bodies::block::skip(unsigned&from,
 				flags    copyflag) const falcON_THROWING
 {
   if(copyflag)
     for(; from<NBOD && !(flag(from).are_set(copyflag)); ++from ) {}
 }
-//------------------------------------------------------------------------------
+//
 // copy up to NALL bodies                                                 
 // - we copy only bodies of the same type as hold here                    
 // - we only copy bodies whose flag matches last argument                 
@@ -297,7 +304,7 @@ fieldset bodies::block::copy(const block*&From,
   }
   return copied;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::block::remove(unsigned &removed) falcON_THROWING
 {
   if(NBOD == 0) return;
@@ -315,7 +322,7 @@ void bodies::block::remove(unsigned &removed) falcON_THROWING
   DebugInfo(6,"bodies::block::remove(): removed %d: NBOD=%d\n",removed,NBOD);
 }
 #ifdef falcON_NEMO
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::block::read_data(data_in &inpt,
 			      unsigned from,
 			      unsigned N) falcON_THROWING
@@ -331,7 +338,7 @@ void bodies::block::read_data(data_in &inpt,
   inpt.read(static_cast<char*>(DATA[value(f)])+from*falcON::size(f), N);
   DebugInfo(2,"bodies::block::read_data(): read %d %c",N,letter(f));
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::block::read_posvel(data_in &inpt,
 				unsigned from,
 				unsigned N,
@@ -351,7 +358,7 @@ void bodies::block::read_posvel(data_in &inpt,
   DebugInfo(2,"bodies::block::read_posvel(): read %d, %s",N,
 	    word(want&fieldset::phases));
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::block::write_data(data_out&outp,
 			       unsigned from,
 			       unsigned N) const falcON_THROWING
@@ -365,7 +372,7 @@ void bodies::block::write_data(data_out&outp,
 		 "cannot write %d from %d (NBOD=%d)",letter(f),N,from,NBOD);
   outp.write(static_cast<char*>(DATA[value(f)])+from*falcON::size(f), N);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::block::write_potpex(data_out&outp,
 				 unsigned from,
 				 unsigned N) const falcON_THROWING
@@ -383,7 +390,7 @@ void bodies::block::write_potpex(data_out&outp,
   falcON_DEL_A(P);
 }
 #endif // falcON_NEMO
-////////////////////////////////////////////////////////////////////////////////
+//
 #ifdef falcON_REAL_IS_FLOAT
 void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
 				 unsigned N, bool swap) falcON_THROWING
@@ -409,7 +416,7 @@ void bodies::block::read_Fortran(FortranIRec&I, fieldbit f, unsigned from,
 		 letter(f),R,lu(N*falcON::size(f)));
   DebugInfo(4,"bodies::block::read_Fortran(): read %u `%s'\n",N,fullname(f));
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
 				  unsigned N) const falcON_THROWING
 {
@@ -429,13 +436,11 @@ void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
 	    N,fullname(f));
 }
 #endif
-////////////////////////////////////////////////////////////////////////////////
+//
 #ifdef falcON_NEMO
-////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::bodies::iterator                                               
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
 bodies::iterator& bodies::iterator::read_data(data_in&D, unsigned R)
   falcON_THROWING
 {
@@ -449,7 +454,7 @@ bodies::iterator& bodies::iterator::read_data(data_in&D, unsigned R)
   }
   return *this;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 bodies::iterator& bodies::iterator::write_data(data_out&D, unsigned W)
   falcON_THROWING
 {
@@ -463,7 +468,7 @@ bodies::iterator& bodies::iterator::write_data(data_out&D, unsigned W)
   }
   return *this;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 bodies::iterator& bodies::iterator::write_potpex(data_out&D, unsigned W)
   falcON_THROWING
 {
@@ -477,7 +482,7 @@ bodies::iterator& bodies::iterator::write_potpex(data_out&D, unsigned W)
   }
   return *this;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 bodies::iterator& bodies::iterator::read_posvel(data_in& D, fieldset get,
 						unsigned R)
   falcON_THROWING
@@ -493,7 +498,7 @@ bodies::iterator& bodies::iterator::read_posvel(data_in& D, fieldset get,
   return *this;
 }
 #endif // falcON_NEMO
-////////////////////////////////////////////////////////////////////////////////
+//
 #ifdef falcON_REAL_IS_FLOAT
 bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I, fieldbit f, 
 						 unsigned R, bool swap)
@@ -513,7 +518,7 @@ bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I, fieldbit f,
   if(R) falcON_THROW("body::read_Fortran: %u data remain unread\n",R);
   return *this;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
 						  fieldbit f, unsigned W)
   falcON_THROWING
@@ -533,11 +538,10 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
   return *this;
 }
 #endif
-////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::bodies                                                         
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
+
 // link a new block in
 void bodies::add_block(block*B)
 {
@@ -562,7 +566,6 @@ void bodies::add_block(block*B)
   // update block::FIRST and NALL[], NBOD[], NTOT
   set_firsts();
 }
-////////////////////////////////////////////////////////////////////////////////
 // erase a block from our linkage
 void bodies::erase_block(block*B)
 {
@@ -595,7 +598,6 @@ void bodies::erase_block(block*B)
   } else
     falcON_Warning("bodies::erase_block(): block not found in table\n");
 }
-////////////////////////////////////////////////////////////////////////////////
 // remove empty blocks
 void bodies::remove_empty_blocks(bool all) falcON_THROWING
 {
@@ -615,7 +617,6 @@ void bodies::remove_empty_blocks(bool all) falcON_THROWING
       break;
   }
 }
-////////////////////////////////////////////////////////////////////////////////
 // create a new block and link it in
 bodies::block* bodies::new_block(bodytype t, unsigned Na, unsigned Nb,
 				 fieldset f) falcON_THROWING
@@ -634,7 +635,6 @@ bodies::block* bodies::new_block(bodytype t, unsigned Na, unsigned Nb,
 	    "(%u active) of type %s\n", Na,Nb,t.name());
   return B;
 }
-////////////////////////////////////////////////////////////////////////////////
 // reset blocks' FIRST entries (used in parallel code)
 void bodies::reset_firsts(unsigned fst[bodytype::NUM])
 {
@@ -646,7 +646,6 @@ void bodies::reset_firsts(unsigned fst[bodytype::NUM])
     }
   }
 }
-////////////////////////////////////////////////////////////////////////////////
 // # bodies not flagged to be ignored
 unsigned bodies::N_subset() const
 {
@@ -655,7 +654,6 @@ unsigned bodies::N_subset() const
   LoopAllBodies(this,b) if(in_subset(b)) ++n;
   return n;
 }
-////////////////////////////////////////////////////////////////////////////////
 // delete all blocks and reset related data
 void bodies::del_data() falcON_THROWING
 {
@@ -672,7 +670,6 @@ void bodies::del_data() falcON_THROWING
   NTOT  = 0;
   FIRST = 0;
 }
-////////////////////////////////////////////////////////////////////////////////
 // destruction: delete all data
 bodies::~bodies() falcON_THROWING
 {
@@ -683,7 +680,6 @@ bodies::~bodies() falcON_THROWING
       const_cast<block*>(FIRST)->set_data_void(f,0);
   del_data();
 }
-////////////////////////////////////////////////////////////////////////////////
 // set block::FIRST, LOCALFIRST, NALL, NBOD & NTOT
 void bodies::set_firsts()
 {
@@ -701,7 +697,6 @@ void bodies::set_firsts()
     NTOT            += P->N_bodies();
   }
 }
-////////////////////////////////////////////////////////////////////////////////
 // set up blocks to hold N[t] bodies of type t
 void bodies::set_data(const unsigned N[bodytype::NUM]) falcON_THROWING
 {
@@ -738,7 +733,6 @@ void bodies::set_data(const unsigned N[bodytype::NUM]) falcON_THROWING
   FIRST = BLOCK[0];
   DebugInfo(6,"bodies::set_data(): done\n");
 }
-////////////////////////////////////////////////////////////////////////////////
 // construction 0: construction with N=0, but data fields
 bodies::bodies(fieldset bits) falcON_THROWING : 
   BITS      ( bits ),
@@ -753,7 +747,6 @@ bodies::bodies(fieldset bits) falcON_THROWING :
   set_firsts();
   DebugInfo(2,"bodies::bodies(): constructed\n");
 }
-// /////////////////////////////////////////////////////////////////////////////
 // construction 1, new version
 bodies::bodies(const unsigned n[bodytype::NUM],
 	       fieldset       bits) falcON_THROWING : 
@@ -767,7 +760,6 @@ bodies::bodies(const unsigned n[bodytype::NUM],
   set_data(n);
   set_firsts();
 }
-// /////////////////////////////////////////////////////////////////////////////
 // resets N, data; same as destruction followed by constructor 1            
 void bodies::reset(const unsigned n[bodytype::NUM],
 		   fieldset       bits) falcON_THROWING
@@ -793,7 +785,6 @@ void bodies::reset(const unsigned n[bodytype::NUM],
   }
   set_firsts();
 }
-////////////////////////////////////////////////////////////////////////////////
 // construction 2:
 // just make a copy of existing bodies:
 // - only copy data specified by 2nd argument
@@ -814,7 +805,7 @@ bodies::bodies(bodies const&Other,
   for(bodytype t; t; ++t) if(copytypes.contain(t)) {
     if(copyflag) {
       LoopTypedBodies(&Other,i,t)
-	if( flag(i).are_set(copyflag) ) ++(n[t]);
+	  if( falcON::flag(i).are_set(copyflag) ) ++(n[t]);
     } else 
       n[t] = Other.NBOD[t];
   }
@@ -831,7 +822,6 @@ bodies::bodies(bodies const&Other,
   }
   set_firsts();
 }
-////////////////////////////////////////////////////////////////////////////////
 // construction for C & FORTRAN support                                     
 bodies::bodies(char, const unsigned n[bodytype::NUM]) falcON_THROWING
 : BITS      ( fieldset::empty ),
@@ -847,7 +837,7 @@ bodies::bodies(char, const unsigned n[bodytype::NUM]) falcON_THROWING
   set_data(n);
   set_firsts();
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::reset(char, fieldbit f, void*D) falcON_THROWING
 {
   if(!C_FORTRAN || !FIRST || BLOCK[0] != FIRST)
@@ -862,14 +852,14 @@ void bodies::reset(char, fieldbit f, void*D) falcON_THROWING
       }
   }
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::swap_bytes(fieldbit f) falcON_THROWING
 {
   if(!BITS.contain(f))
     for(const block*p=FIRST; p; p=p->next())
       const_cast<block*>(p)->swap_bytes(f);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::add_field(fieldbit f) falcON_THROWING
 {
   if(!BITS.contain(f)) {
@@ -879,7 +869,7 @@ void bodies::add_field(fieldbit f) falcON_THROWING
     if(f == fieldbit::k) reset_keys();
   }
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::add_fields(fieldset b) falcON_THROWING
 {
   if(!BITS.contain(b)) {
@@ -889,28 +879,29 @@ void bodies::add_fields(fieldset b) falcON_THROWING
     BITS |= b;
   }
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::del_field(fieldbit f) falcON_THROWING
 {
   for(const block *p=FIRST; p; p=p->next())
     const_cast<block*>(p)->del_field(f);
   BITS &= ~(fieldset(f));
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::del_fields(fieldset b) falcON_THROWING
 {
   for(const block *p=FIRST; p; p=p->next())
     const_cast<block*>(p)->del_fields(b);
   BITS &= ~b;
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::remove(bodytype t) {
+//
+void bodies::remove(bodytype t)
+{
   for(block*P=TYPES[t]; P && P->TYPE == t; P=P->NEXT)
     P->remove(NDEL[t]);
   set_firsts();
   DebugInfo(5,"bodies::remove(%s): removed %d bodies\n", t.name(), NDEL[t]);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::remove() {
   for(block*P=FIRST; P; P=P->NEXT)
     P->remove(NDEL[P->TYPE]);
@@ -918,8 +909,44 @@ void bodies::remove() {
   DebugInfo(5,"bodies::remove(): removed %d,%d,%d bodies\n",
 	    NDEL[0],NDEL[1],NDEL[2]);
 }
-////////////////////////////////////////////////////////////////////////////////
-void bodies::merge(bodies&Other) falcON_THROWING {
+//
+void bodies::apply_filter(BodyFilter const&F, bool zm, bool warn)
+  falcON_THROWING
+{
+  if(F.is_empty()) return;
+  // remember original data fields
+  fieldset ORIG = BITS;
+  // ensure we have flags (needed for removal)
+  if(!have(fieldbit::f)) {
+    add_field(fieldbit::f);
+    reset_flags();
+  }
+  // ensure we have all data needed for filter
+  if(!BITS.contain(F.need())) {
+    fieldset miss = BITS.missing(F.need());
+    if(zm) {
+      if(warn) 
+	falcON_Warning("snapshot::apply_filter(): data '%s' required for filter"
+		       " are not supported; will assume zero values instead\n",
+		       word(miss));
+      add_fields(miss);
+      reset_data(miss);
+    } else {
+      if(!ORIG.contain(fieldbit::f)) del_field(fieldbit::f);
+      falcON_THROW("snapshot::apply_filter(): data '%s' required for filter"
+		   " are not supported\n", word(miss));
+    }
+  }
+  // apply filter: remove bodies not matching the filter
+  LoopAllBodies(this,b)
+    if(!F(b)) b.flag_for_removal();
+  remove();
+  // delete any fields added
+  del_fields(BITS-ORIG);
+}
+//
+void bodies::merge(bodies&Other) falcON_THROWING
+{
   if(NBLK + Other.NBLK > index::max_blocks)
     falcON_THROW("bodies::merge(): too many blocks\n");
   // add blocks
@@ -940,7 +967,70 @@ void bodies::merge(bodies&Other) falcON_THROWING {
   for(int i=0; i!=index::max_blocks; ++i)
     Other.BLOCK[i] = 0;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
+namespace {
+  bodies *CopyFrom, *CopyTo;
+  Array<bodies::index> IndexTable;
+  template<int BIT> struct CopyInOrder {
+    static void act(bodytype t)
+    {
+      unsigned i=0;
+      LoopTypedBodies(CopyTo,b,t)
+	b.datum<BIT>() = CopyFrom->const_datum<BIT>(IndexTable[i++]);
+    }
+  };
+}
+//
+void bodies::apply_sort(BodyFunc<real> const&F, double time, fieldset copy,
+			bool zm, bool warn) falcON_THROWING
+{
+  if(F.is_empty()) return;
+  copy &= BITS;
+  // ensure we have all data needed for function
+  if(!BITS.contain(F.need())) {
+    fieldset miss = BITS.missing(F.need());
+    if(zm) {
+      if(warn) 
+	falcON_Warning("snapshot::apply_sort(): data '%s' required for function"
+		       " are not supported; will assume zero values instead\n",
+		       word(miss));
+      add_fields(miss);
+      reset_data(miss);
+    } else
+      falcON_THROW("snapshot::apply_sort(): data '%s' required for function"
+		   " are not supported\n", word(miss));
+  }
+  // prepare other set of bodies to copy into
+  bodies Other(NBOD,copy);
+  CopyFrom = this;
+  CopyTo   =&Other;
+  // loop bodytypes
+  for(bodytype t; t; ++t)
+    if(NBOD[t]) {
+      // obtain index table in ascending order of F(b)
+      {
+	Array<real>  Qf(NBOD[t]);
+	Array<index> If(NBOD[t]);
+	unsigned i=0;
+	LoopTypedBodies(this,b,t) {
+	  Qf[i] = F(b,time);
+	  If[i] = index(b);
+	  ++i;
+	}
+	Array<int> In(NBOD[t]);
+	HeapIndex(Qf,In);
+	IndexTable.reset(NBOD[t]);
+	for(i=0; i!=NBOD[t]; ++i)
+	  IndexTable[i] = If[In[i]];
+      }
+      // loop fields and copy data
+      LoopFields<CopyInOrder>::const_some(t, copy & t.allows());
+    }
+  // replace us with Other
+  del_data();
+  merge(Other);
+}
+//
 bodies::block* bodies::ensure_contiguous(unsigned N, bodytype t, unsigned Na)
 {
   // do we have a contiguous set of at least N free bodies?
@@ -966,8 +1056,7 @@ bodies::block* bodies::ensure_contiguous(unsigned N, bodytype t, unsigned Na)
   DebugInfo(5,"bodies::ensure_contiguous(): making new block ...\n");
   return new_block(t,max(Na,N),0,BITS);
 }
-
-////////////////////////////////////////////////////////////////////////////////
+//
 bodies::iterator bodies::new_bodies(unsigned N, bodytype t, unsigned Na)
   falcON_THROWING
 {
@@ -993,7 +1082,7 @@ bodies::iterator bodies::new_bodies(unsigned N, bodytype t, unsigned Na)
   }
   return I0;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 bodies::iterator bodies::new_body(bodytype t, unsigned Na) falcON_THROWING
 {
   // ensure we have a body to activate
@@ -1007,7 +1096,7 @@ bodies::iterator bodies::new_body(bodytype t, unsigned Na) falcON_THROWING
   if(have(fieldbit::f)) I0.flag().add(flags::newbody);
   return I0;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::joinup(bodytype t) falcON_THROWING
 {
   block*To=TYPES[t];
@@ -1029,7 +1118,7 @@ void bodies::joinup(bodytype t) falcON_THROWING
   }
   if(copy) set_firsts();
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 falcON::real bodies::TotalMass(bodytype t) const
 {
   if(!t || TYPES[t]==0 || !(TYPES[t]->has_field(fieldbit::m)) )
@@ -1041,11 +1130,9 @@ falcON::real bodies::TotalMass(bodytype t) const
   return M;
 }
 #ifdef falcON_NEMO
-////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // data I/O                                                                     
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
 // read a single nemo snapshot:                                             
 // - start at body position given                                           
 // - we must have enough space to accomodate input                          
@@ -1100,7 +1187,7 @@ fieldset bodies::read_snapshot(snap_in  const&snap,
 		   word(read.missing(want)));
   return read;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::write_snapshot(snap_out const&snap,
 			    fieldset       put,
 			    iterator const&start,
@@ -1142,7 +1229,7 @@ void bodies::write_snapshot(snap_out const&snap,
 			 word(written), N_sph(), N_std());
 }
 #endif // falcON_NEMO
-////////////////////////////////////////////////////////////////////////////////
+//
 namespace {
   template<int BIT> 
   void Read(std::istream&in, body &B) {
@@ -1156,7 +1243,7 @@ namespace {
   typedef void (*p_reader)(std::istream&, body&);
   typedef void (*p_writer)(std::ostream&, const body&);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void bodies::read_simple_ascii(std::istream  &in,
 			       const fieldbit*item,
 			       unsigned       Ni,
@@ -1216,11 +1303,7 @@ void bodies::read_simple_ascii(std::istream  &in,
       }
     }
 }
-////////////////////////////////////////////////////////////////////////////////
-//                                                                            //
-// sorted index table                                                         //
-//                                                                            //
-////////////////////////////////////////////////////////////////////////////////
+// sorted index table
 void bodies::sorted(Array<index>&table, 
 		    real       (*func)(iterator const&)) const falcON_THROWING
 {
@@ -1230,14 +1313,14 @@ void bodies::sorted(Array<index>&table,
   if(have(fieldbit::f)) {
     int i = 0;
     LoopSubsetBodies(this,b) {
-      I[i] = static_cast<index>(b);
+      I[i] = index(b);
       Q[i] = func(b);
       ++i;
     }
   } else {
     int i = 0;
     LoopAllBodies(this,b) {
-      I[i] = static_cast<index>(b);
+      I[i] = index(b);
       Q[i] = func(b);
       ++i;
     }
@@ -1251,7 +1334,38 @@ void bodies::sorted(Array<index>&table,
   falcON_DEL_A(I);
   falcON_DEL_A(R);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
+void bodies::sorted(Array<index>&table, double time,
+		    BodyFunc<real> const&func) const falcON_THROWING
+{
+  const int n = N_subset();
+  real *Q = falcON_NEW(real, n);
+  index*I = falcON_NEW(index,n);
+  if(have(fieldbit::f)) {
+    int i = 0;
+    LoopSubsetBodies(this,b) {
+      I[i] = index(b);
+      Q[i] = func(b,time);
+      ++i;
+    }
+  } else {
+    int i = 0;
+    LoopAllBodies(this,b) {
+      I[i] = index(b);
+      Q[i] = func(b,time);
+      ++i;
+    }
+  }
+  int*R = falcON_NEW(int,n);
+  HeapIndex(Q,n,R);
+  table.reset(n);
+  for(int i=0; i!=n; ++i)
+    table[i] = I[R[i]];
+  falcON_DEL_A(Q);
+  falcON_DEL_A(I);
+  falcON_DEL_A(R);
+}
+//
 void bodies::sorted(Array<index>&table, 
 		    Array<real> &quant, 
 		    real       (*func)(iterator const&)) const falcON_THROWING
@@ -1262,14 +1376,14 @@ void bodies::sorted(Array<index>&table,
   if(have(fieldbit::f)) {
     int i = 0;
     LoopSubsetBodies(this,b) {
-      I[i] = static_cast<index>(b);
+      I[i] = index(b);
       Q[i] = func(b);
       ++i;
     }
   } else {
     int i = 0;
     LoopAllBodies(this,b) {
-      I[i] = static_cast<index>(b);
+      I[i] = index(b);
       Q[i] = func(b);
       ++i;
     }
@@ -1286,7 +1400,7 @@ void bodies::sorted(Array<index>&table,
   falcON_DEL_A(I);
   falcON_DEL_A(R);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 namespace {
   struct Nbour { real Q; bodies::index I; };
   inline bool operator<(Nbour const&a, Nbour const&b) {return a.Q<b.Q;}
@@ -1309,10 +1423,10 @@ unsigned bodies::findNeighbours(const body&B, unsigned K, Array<index>&I) const
     List[k].Q = Huge;
   unsigned Niac=0;
   LoopSubsetBodies(this,b) {
-    real q = dist_sq(pos(B),pos(b));
+    real q = dist_sq(falcON::pos(B),falcON::pos(b));
     if(List->Q > q) {
       List->Q = q;
-      List->I = b;
+      List->I = bodies::index(b);
       MaxHeap::after_top_replace(List,K);
       ++Niac;
     }
@@ -1325,21 +1439,17 @@ unsigned bodies::findNeighbours(const body&B, unsigned K, Array<index>&I) const
   falcON_DEL_A(List);
   return K;
 }
-////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class falcON::snapshot                                                       
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
 namespace {
   class PointerBank {
-    //--------------------------------------------------------------------------
     struct PterWithKey {
       friend class falcON::traits<PterWithKey>;
       const void  *pter;
       char        *key,*name;
       size_t       size;
       PterWithKey *next;
-      //........................................................................
       PterWithKey(const void* p, const char*k, size_t s, const char*n,
 		  PterWithKey*x)
 	: pter(p),
@@ -1351,23 +1461,21 @@ namespace {
 	strcpy(key ,k);
 	strcpy(name,n);
       }
-      //........................................................................
       ~PterWithKey() {
 	falcON_DEL_A(key);
       }
     } *HEAD;
-    //--------------------------------------------------------------------------
+    //
   public:
-    //--------------------------------------------------------------------------
     /// default constructor
-    PointerBank() : HEAD(0) {}
-    //--------------------------------------------------------------------------
+    PointerBank()
+      : HEAD(0) {}
     /// copy constructor
-    PointerBank(PointerBank const&PB) : HEAD(0) {
+    PointerBank(PointerBank const&PB) : HEAD(0)
+    {
       for(PterWithKey*P=PB.HEAD; P; P=P->next)
 	HEAD = new PterWithKey(P->pter, P->key, P->size, P->name, HEAD);
     }
-    //--------------------------------------------------------------------------
     /// destructor
     ~PointerBank() {
       PterWithKey*P=HEAD,*N;
@@ -1377,18 +1485,18 @@ namespace {
 	P=N;
       }
     }
-    //--------------------------------------------------------------------------
     /// add a pointer: key must not yet be known in bank
-    void add(const void*p, const char* k, size_t s, const char* n) {
+    void add(const void*p, const char* k, size_t s, const char* n)
+    {
       for(PterWithKey*P=HEAD; P; P=P->next)
 	if(0==strcmp(P->key, k))
 	  falcON_THROW("snapshot::add_pointer(): "
 		       "key '%s' is already in bank\n",k);
       HEAD = new PterWithKey(p,k,s,n,HEAD);
     }
-    //--------------------------------------------------------------------------
     /// set a pointer: add if new key, else replace (type & size must match)
-    void set(const void*p, const char* k, size_t s, const char* n) {
+    void set(const void*p, const char* k, size_t s, const char* n)
+    {
       for(PterWithKey*P=HEAD; P; P=P->next)
 	if(0==strcmp(P->key, k)) {
 	  if(strcmp(P->name, n))
@@ -1402,9 +1510,9 @@ namespace {
 	}
       HEAD = new PterWithKey(p,k,s,n,HEAD);
     }
-    //--------------------------------------------------------------------------
     /// delete an entry from the bank
-    void del(const char* k, bool warn = 0) {
+    void del(const char* k, bool warn = 0)
+    {
       PterWithKey **PP=&HEAD, *P=HEAD;
       for(; P; PP=&(P->next), P=P->next)
 	if(0==strcmp(P->key, k)) {
@@ -1415,10 +1523,10 @@ namespace {
 	falcON_Warning("snapshot::del_pointer(): "
 		       "key '%s' not found in bank\n",k);
     }
-    //--------------------------------------------------------------------------
     /// return a pointer referred to by a given key
     const void*get(const char*k, size_t s, const char*n, const char*func) const
-      falcON_THROWING {
+      falcON_THROWING
+    {
       for(PterWithKey*P=HEAD; P; P=P->next)
 	if(0==strcmp(P->key, k)) {
 	  if(s != P->size)
@@ -1440,7 +1548,7 @@ falcON_TRAITS(::PointerBank,"{body.cc}::PointerBank");
 falcON_TRAITS(::PointerBank::PterWithKey,
 	      "{body.cc}::PointerBank::PterWithKey");
 #endif
-////////////////////////////////////////////////////////////////////////////////
+//
 void snapshot::__add_pointer(const void*p,
 			     const char*k,
 			     size_t     s,
@@ -1456,7 +1564,7 @@ void snapshot::__add_pointer(const void*p,
     if(static_cast<PointerBank*>(PBNK)->get(k,s,n,"add_pointer"))
       falcON_THROW("snapshot::add_pointer(): key '%s' is already in bank\n",k);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void snapshot::__set_pointer(const void*p,
 			     const char*k,
 			     size_t     s,
@@ -1472,7 +1580,7 @@ void snapshot::__set_pointer(const void*p,
     // NULL pointer: delete from bank
     static_cast<PointerBank*>(PBNK)->del(k);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 const void* snapshot::__get_pointer(const char*k,
 				    size_t     s,
 				    const char*n) const falcON_THROWING
@@ -1483,14 +1591,14 @@ const void* snapshot::__get_pointer(const char*k,
     DebugInfo("snapshot::get_pointer() %p to '%s' under \"%s\"\n",p,n,k);
   return p;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void snapshot::del_pointer(const char*k) const
 {
   if(debug(4))
     DebugInfo("snapshot::del_pointer() under \"%s\"\n",k);
   if(PBNK) static_cast<PointerBank*>(PBNK)->del(k);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 snapshot::snapshot(snapshot const&S,
 		   fieldset       Bd,
 		   flags          F,
@@ -1502,7 +1610,7 @@ snapshot::snapshot(snapshot const&S,
   PBNK   ( S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) : 0 ),
   PARA   ( 0 )
 {}
-////////////////////////////////////////////////////////////////////////////////
+//
 #if(0) // not yet implemented due to bodies::copy() missing
 void snapshot::copy(snapshot const&S,
 		    fieldset       Bd,
@@ -1514,12 +1622,18 @@ void snapshot::copy(snapshot const&S,
   PBNK = S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) : 0;
 }
 #endif
-////////////////////////////////////////////////////////////////////////////////
+//
 snapshot::~snapshot()
 {
   if(PBNK) { falcON_DEL_O(static_cast<PointerBank*>(PBNK)); PBNK = 0; }
 }
-////////////////////////////////////////////////////////////////////////////////
+//
+void snapshot::apply_filter(BodyFilter&F, bool zm, bool warn) falcON_THROWING
+{
+  F.set_time(TIME);
+  bodies::apply_filter(F,zm,warn);
+}
+//
 #ifdef falcON_NEMO
 bool snapshot::read_nemo(nemo_in const&i, fieldset&r, fieldset g,
 			 const char*range, bool w) falcON_THROWING
@@ -1547,7 +1661,7 @@ bool snapshot::read_nemo(nemo_in const&i, fieldset&r, fieldset g,
   r = read_snapshot(s,g,begin_all_bodies(),N_bodies(),w);
   return true;
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 fieldset snapshot::read_part(snap_in  const&s, fieldset g, iterator const&b,
 			     bool w, unsigned n) falcON_THROWING
 {
@@ -1561,14 +1675,14 @@ fieldset snapshot::read_part(snap_in  const&s, fieldset g, iterator const&b,
     TIME = 0.;
   return read_snapshot(s,g,b,n,w);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void snapshot::write_nemo(nemo_out const&o,        // I: nemo output            
 			  fieldset       w,        // I: what to write          
 			  iterator const&b,        // I: starting here          
 			  unsigned       n) const  //[I: #, default: all]       
   falcON_THROWING
 {
-  unsigned i = bodyindex(b);
+  unsigned i = falcON::bodyindex(b);
   if(this != b.my_bodies())
     falcON_THROW("snapshot::write_nemo() start body is not ours\n");
   if(n == 0) n = N_bodies()-i;
@@ -1587,7 +1701,7 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
   snap_out s(o,nb,TIME);
   write_snapshot(s,w,b,n);
 }
-////////////////////////////////////////////////////////////////////////////////
+//
 void snapshot::write_nemo(nemo_out const&o,        // I: nemo output            
 			  fieldset       w) const  // I: what to write          
   falcON_THROWING
@@ -1596,15 +1710,13 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
   write_snapshot(s,w,begin_all_bodies(),N_bodies());
 }
 #endif // falcON_NEMO
-////////////////////////////////////////////////////////////////////////////////
+//
 #ifdef falcON_REAL_IS_FLOAT
 
 namespace {
-  // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   /// structure modelled after gadget/allvars.h                                 
   //                                                                            
-  // ///////////////////////////////////////////////////////////////////////////
   struct GadgetHeader {
     unsigned int npart[6];          ///< # particles per type in this file
     double       masstab[6];        ///< if non-zero: mass of particle of type
@@ -1624,10 +1736,8 @@ namespace {
     unsigned int npartTotalHighWord[6];
     int          flag_entropy_instead_u;
     char         fill[60];          ///< to get sizeof(GadgetHeader)=256
-    //--------------------------------------------------------------------------
     /// default constructor: set all data to 0
     GadgetHeader();
-    //--------------------------------------------------------------------------
     /// try to read a GadgetHeader from an input file
     ///
     /// If the size of the Fortran record == 256 == sizeof(GadgetHeader), we
@@ -1643,14 +1753,11 @@ namespace {
     /// \param  swap (output) need byte-swap?
     bool Read(input& in, unsigned rec, bool& swap)
       throw(falcON::exception);
-    //--------------------------------------------------------------------------
     /// check whether two GadgetHeaders could possibly come from different data
     /// files for the same snapshot
     bool mismatch(GadgetHeader const&H) const;
-    //--------------------------------------------------------------------------
     /// on some ICs, npartTotal[] = 0. Here we remedy for this error
     void check_simple_npart_error();
-    //--------------------------------------------------------------------------
     /// dump all the header data
     void dump(std::ostream&out) const;
   };
@@ -1667,7 +1774,7 @@ namespace {
       masstab[k] = 0.;
     }
   }
-  //----------------------------------------------------------------------------
+  //
   bool GadgetHeader::Read(input& in, unsigned rec, bool& swap)
     throw(falcON::exception)
   {
@@ -1734,7 +1841,7 @@ namespace {
     }
     return true;
   }
-  //----------------------------------------------------------------------------
+  //
   bool GadgetHeader::mismatch(GadgetHeader const&H) const {
     bool okay = true;
 #define CHECK_I(FIELD,FIELDNAME)					\
@@ -1778,7 +1885,7 @@ namespace {
 #undef CHECK_I
 #undef CHECK_D
   }
-  //----------------------------------------------------------------------------
+  //
   void GadgetHeader::check_simple_npart_error() {
     for(int k=0; k!=6; ++k)
       if(npart[k] > npartTotal[k]) {
@@ -1788,7 +1895,7 @@ namespace {
 	npartTotal[k] = npart[k];
       }
   }
-  //----------------------------------------------------------------------------
+  //
   void GadgetHeader::dump(std::ostream&out) const {
     out<<" gadget header dump:";
     for(int k=0; k!=6; ++k)
@@ -1812,7 +1919,7 @@ namespace {
   }
 } // namespace {
 falcON_TRAITS(::GadgetHeader,"GadgetHeader");
-//------------------------------------------------------------------------------
+//
 #define READ(BIT)							\
   if((!is_sph(BIT) && nd) || ns) {					\
     unsigned nr = is_sph(BIT)? ns : ns+nd;				\
@@ -1851,7 +1958,7 @@ falcON_TRAITS(::GadgetHeader,"GadgetHeader");
     }									\
     fsze += fr;								\
   }
-//------------------------------------------------------------------------------
+//
 double bodies::read_gadget(const char*fname,
 			   fieldset   read,
 			   fieldset  &got,
@@ -2072,7 +2179,7 @@ double bodies::read_gadget(const char*fname,
     }									  \
     written |= fieldset(BIT);						  \
   }
-//------------------------------------------------------------------------------
+//
 void bodies::write_gadget(output&out, double time, fieldset write,
 			  bool warn, unsigned rec) const falcON_THROWING
 {
@@ -2109,6 +2216,6 @@ void bodies::write_gadget(output&out, double time, fieldset write,
   // make sure we have no keys if we didn't have them before ...
   if(!had_keys) const_cast<bodies*>(this)->del_field(fieldbit::k);
 }
-//------------------------------------------------------------------------------
+//
 #endif // falcON_REAL_IS_FLOAT
 ////////////////////////////////////////////////////////////////////////////////
