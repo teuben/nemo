@@ -840,7 +840,7 @@ namespace falcON {
       for(fieldbit f; f; ++f)
 	if(b.contain(f)) s << letter(f);
     } else
-      s << 'o';
+      s << '0';
     return s;
   }
   inline std::istream& operator>> (std::istream&s, fieldset&b) {

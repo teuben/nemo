@@ -195,6 +195,8 @@ $(MAN)add_plummer.so:		$(SMAN)add_plummer.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)bound_centre.so:		$(SMAN)bound_centre.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
+$(MAN)centre_of_mass.so:	$(SMAN)centre_of_mass.cc $(MANT) $(defman_h) $(makefiles)
+				$(MAKE_MANIP)
 $(MAN)dens_centre.so:		$(SMAN)dens_centre.cc $(MANT) $(defman_h) $(tools_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)density.so:		$(SMAN)density.cc $(MANT) $(defman_h) $(neighbours_h) $(makefiles)
@@ -227,6 +229,7 @@ $(MAN)use_filter.so:		$(SMAN)use_filter.cc $(MANT) $(defman_h) $(bodyfunc_h) $(m
 manip_pub		:=	$(MAN)addgravity.so \
 				$(MAN)add_plummer.so \
 				$(MAN)bound_centre.so \
+				$(MAN)centre_of_mass.so \
 				$(MAN)dens_centre.so \
 				$(MAN)density.so \
 				$(MAN)densprof.so \

@@ -77,7 +77,7 @@ namespace {
   inline double vtan     () { need |= fieldset::phases; return double(RNG()); }
   inline double vphi     () { need |= fieldset::phases; return double(RNG()); }
   inline bool   is_sph   () { return RNG() > 0.5; }
-  inline bool   is_std   () { return RNG() > 0.5; }
+  inline bool   is_std   () { std::cerr<<" calling is_std()\n"; return RNG() > 0.5; }
   inline bool   is_sink  () { return RNG() > 0.5; }
   // need to define Return<BIT>::Type to be a type similar (at best equal) to
   // field_traits<BIT>::type, but allowing for construction from "RNG()"

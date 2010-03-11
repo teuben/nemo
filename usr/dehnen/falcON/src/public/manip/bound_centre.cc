@@ -169,7 +169,7 @@ namespace Manipulate {
     {
       if(debug(2) || npar > 3)
 	std::cerr <<
-	  " Manipulator \"bound_centre\" centre:\n"
+	  " Manipulator \"bound_centre\":\n"
 	  " find centre of most bound region and put it in 'xcen' and 'vcen'\n"
 	  " Of the K nearest neighbours of the most bound particle, we \n"
 	  " compute the |Phi|^A weighted centre.\n"

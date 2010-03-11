@@ -795,7 +795,7 @@ namespace {
       file<<sep<<scond[s];
     file  <<"}\"\n"
 	  <<"    register "<<TypeName(stype[s])<<" __X("
-	  << (stype[s]=='i'? "0":"zero)") << ";\n"
+	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
 	  <<"    register int __N = 0;\n"
 	  <<"    LoopAllBodies(&B, b)";
     if(scond[s])
@@ -817,7 +817,7 @@ namespace {
       file<<sep<<scond[s];
     file  <<"}\"\n"
 	  <<"    register "<<TypeName(stype[s])<<" __X("
-	  << (stype[s]=='i'? "0":"zero)") << ";\n"
+	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
 	  <<"    register real __M(zero);\n"
 	  <<"    LoopAllBodies(&B, b)";
     if(scond[s])
@@ -837,7 +837,7 @@ namespace {
       file<<sep<<scond[s];
     file  <<"}\"\n"
 	  <<"    register "<<TypeName(stype[s])<<" __X("
-	  << (stype[s]=='i'? "0":"zero)") << ";\n"
+	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
 	  <<"    LoopAllBodies(&B, b)\n";
     if(scond[s])
       file<<"      if(cond("<<scond[s]<<"))\n  ";
