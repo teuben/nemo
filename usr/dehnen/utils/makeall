@@ -5,8 +5,8 @@
 #
 ################################################################################
 
-default			: library
-install			: library cleanobj
+default			: library doxu
+install			: library cleanobj doxu
 
 # ----------------
 # Compiler related
