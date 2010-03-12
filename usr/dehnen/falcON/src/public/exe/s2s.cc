@@ -89,7 +89,6 @@ namespace {
 	shot.apply_sort(SortFunc,Copy,zm);
 	if(hasvalue("time")) shot.set_time(getdparam("time"));
 	if(!Out) Out.open(getparam("out"));
-	shot.write_nemo(Out,Copy);
       }
     }
   };

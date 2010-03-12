@@ -49,9 +49,10 @@
 // v 4.5.2 10/09/2008  WD happy gcc 4.3.1
 // v 4.5.3 21/08/2009  WD duBUGged (very minor)
 // v 4.6   09/02/2010  WD fixed problem with sink bodies
+// v 4.7   12/03/2010  WD using snapshot::apply_filter, add keys if wanted
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "4.6"
-#define falcON_VERSION_D "09-feb-2010 Walter Dehnen                          "
+#define falcON_VERSION   "4.7"
+#define falcON_VERSION_D "12-mar-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program
 #  error You need NEMO to compile "s2a"
@@ -117,6 +118,7 @@ namespace {
 //------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING {
   nemo_in        IN   (getparam("in"));
+  bool           KEYS (getioparam_z("write").contain(fieldbit::k));
   const fieldset NEED (getioparam_a("write"));
   fieldset       READ;
   snapshot       SHOT;
@@ -129,8 +131,10 @@ void falcON::main() falcON_THROWING {
   while(IN.has_snapshot()) {
     if(! SHOT.read_nemo(IN,READ,NEED,getparam("times"),0))
       continue;
-    if(NEED.contain(fieldbit::k))
+    if(KEYS) {
       SHOT.add_field(fieldbit::k);
+      READ |= fieldset::k;
+    }
     SHOT.apply_filter(F,getbparam("zeromissing"));
     if(0 == SHOT.N_bodies()) {
       falcON_Warning("nobody left in snapshot after filtering at time %g\n",
@@ -146,7 +150,7 @@ void falcON::main() falcON_THROWING {
       } else if(OUT==0)
 	OUT = fopen(FNAME,"w");
     }
-    OUTPUT = (READ|fieldset::k) & NEED;
+    OUTPUT = READ & NEED;
     if(getbparam("header")) {
       if(RunInfo::cmd_known())
 	fprintf(OUT,"#\n# %s\n#\n", RunInfo::cmd());
