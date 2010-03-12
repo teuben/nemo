@@ -688,11 +688,9 @@ void bodies::set_firsts()
     NBOD[t] = 0u;
   }
   NTOT = 0u;
-  unsigned NTOTALL=0;
   for(block*P=FIRST; P; P=P->next()) {
-    P->set_first(NTOTALL);
+    P->set_first(NTOT);
     NALL[P->type()] += P->N_alloc ();
-    NTOTALL         += P->N_alloc ();
     NBOD[P->type()] += P->N_bodies();
     NTOT            += P->N_bodies();
   }
@@ -1197,7 +1195,9 @@ void bodies::write_snapshot(snap_out const&snap,
     falcON_THROW("bodies::write_snapshot(): start body is not ours");
   if(Nwrite == 0 || Nwrite > snap.Ntot()) Nwrite = snap.Ntot();
   if(start.my_index() + Nwrite > N_bodies())
-    falcON_THROW("bodies::write_snapshot(): not enough data to write");
+    falcON_THROW("bodies::write_snapshot(): not enough data to write: "
+		 "start=%d, Nwrite=%d, Nbodies=%d\n",
+		 start.my_index(), Nwrite, N_bodies());
   put &= BITS;
   put &= fieldset::nemo;
   fieldset written;
