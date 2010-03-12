@@ -64,7 +64,8 @@ namespace {
   template<typename T>
   char TypeLetter(T const&) { return BfTypeInfo<T>::type; }
 
-  fieldset need(fieldset::empty);  // to accumulate fields needed
+  int      __test(0);                // to sum boolean tests
+  fieldset __need(fieldset::empty);  // to accumulate fields needed
   // provides return value for dummy functions,
   // preventing compiler from optimising dummy function calls away
   WDutils::Random3 RNG(1);
@@ -72,12 +73,12 @@ namespace {
   // dummy functions which are allowed but not field functions
   inline int    bodyindex() {                      return int   (RNG()); }
   inline int    ntot     () {                      return int   (RNG()); }
-  inline double mtot     () { need |= fieldset::m; return double(RNG()); }
-  inline double vrad     () { need |= fieldset::phases; return double(RNG()); }
-  inline double vtan     () { need |= fieldset::phases; return double(RNG()); }
-  inline double vphi     () { need |= fieldset::phases; return double(RNG()); }
+  inline double mtot     () { __need |= fieldset::m; return double(RNG()); }
+  inline double vrad     () { __need |= fieldset::phases; return double(RNG()); }
+  inline double vtan     () { __need |= fieldset::phases; return double(RNG()); }
+  inline double vphi     () { __need |= fieldset::phases; return double(RNG()); }
   inline bool   is_sph   () { return RNG() > 0.5; }
-  inline bool   is_std   () { std::cerr<<" calling is_std()\n"; return RNG() > 0.5; }
+  inline bool   is_std   () { return RNG() > 0.5; }
   inline bool   is_sink  () { return RNG() > 0.5; }
   // need to define Return<BIT>::Type to be a type similar (at best equal) to
   // field_traits<BIT>::type, but allowing for construction from "RNG()"
@@ -88,7 +89,7 @@ namespace {
 #define DEF_DUMMY(BIT,NAME)			\
   inline Return<BIT>::Type NAME()		\
   {						\
-    need |= fieldset(fieldbit(BIT));		\
+    __need |= fieldset(fieldbit(BIT));		\
     return Return<BIT>::Type(RNG());		\
   }
   DEF_NAMED(DEF_DUMMY);

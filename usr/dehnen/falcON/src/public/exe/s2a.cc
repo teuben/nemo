@@ -73,6 +73,7 @@ const char*defv[] = {
   "header=t\n       write header                                       ",
   "filter=\n        bodyfunc filter (boolean): which bodies to write   ",
   "pars=\n          parameters for filter, if any                      ",
+  "zeromissing=f\n  set body properties missing for filter to zero?    ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 const char*usage = "s2a -- Walter's simple snapshot to ascii converter";
@@ -123,28 +124,19 @@ void falcON::main() falcON_THROWING {
   const bool     FOUT (hasvalue("out") && strcmp(getparam("out"),"-"));
   strcpy(IFORMAT,getparam("iformat")); strcat(IFORMAT," ");
   strcpy(RFORMAT,getparam("rformat")); strcat(RFORMAT," ");
-  BodyFunc<bool>*F=
-    hasvalue("filter")? new BodyFunc<bool>(getparam("filter"),
-					   getparam_z("pars")) : 0;
+  BodyFilter F(getparam_z("filter"),getparam_z("pars"));
   if(!FOUT) OUT = stdout;
   while(IN.has_snapshot()) {
-    if(! SHOT.read_nemo(IN,READ,NEED,getparam("times"),0)) continue;
-    unsigned Nb[bodytype::NUM]={0u}, Ntot=0u;
-    if(F) {
-      SHOT.add_field(fieldbit::f);
-      for(bodytype t; t; ++t) {
-	LoopTypedBodies(&SHOT,b,t)
-	  if( (*F)(b,SHOT.time()) ) {
-	    b.mark();
-	    ++(Nb[t]);
-	  }
-	Ntot += Nb[t];
-      }
-    } else
-      for(bodytype t; t; ++t) {
-	Nb[t] = SHOT.N_bodies(t);
-	Ntot += Nb[t];
-      }
+    if(! SHOT.read_nemo(IN,READ,NEED,getparam("times"),0))
+      continue;
+    if(NEED.contain(fieldbit::k))
+      SHOT.add_field(fieldbit::k);
+    SHOT.apply_filter(F,getbparam("zeromissing"));
+    if(0 == SHOT.N_bodies()) {
+      falcON_Warning("nobody left in snapshot after filtering at time %g\n",
+		     SHOT.time());
+      continue;
+    }
     if(FOUT) {
       char FNAME[256];
       sprintf(FNAME,getparam("out"),INDEX++);
@@ -154,7 +146,7 @@ void falcON::main() falcON_THROWING {
       } else if(OUT==0)
 	OUT = fopen(FNAME,"w");
     }
-    OUTPUT = READ & NEED;
+    OUTPUT = (READ|fieldset::k) & NEED;
     if(getbparam("header")) {
       if(RunInfo::cmd_known())
 	fprintf(OUT,"#\n# %s\n#\n", RunInfo::cmd());
@@ -167,8 +159,10 @@ void falcON::main() falcON_THROWING {
 	fprintf(OUT,"#  with pid %s\n",RunInfo::pid());
       fprintf(OUT,"#\n# time: %f\n"
 	      "# Ntot: %d, Nsink:%d, Ngas: %d, Nstd: %d\n#\n#",
-	      SHOT.time(),Ntot,Nb[bodytype::sink],Nb[bodytype::gas],
-	      Nb[bodytype::std]);
+	      SHOT.time(), SHOT.N_bodies(),
+	      SHOT.N_bodies(bodytype::sink),
+	      SHOT.N_bodies(bodytype::gas),
+	      SHOT.N_bodies(bodytype::std) );
       for(fieldbit f; f; ++f)
 	if(OUTPUT.contain(f) && SHOT.have(f))
 	  fprintf(OUT," '%s'",fivename(f));
@@ -176,13 +170,11 @@ void falcON::main() falcON_THROWING {
     }
     for(bodytype t; t; ++t) {
       fieldset set=t.allows();
-      LoopTypedBodies(&SHOT,b,t)
-	if(!F || is_marked(b)) {
-	  LoopFields<BodyPrint>::const_some(b,set);
-	  fprintf(OUT,"\n");
-	}
+      LoopTypedBodies(&SHOT,b,t) {
+	LoopFields<BodyPrint>::const_some(b,set);
+	fprintf(OUT,"\n");
+      }
     }
   }
   if(FOUT && OUT) fclose(OUT);
-  if(F) falcON_DEL_O(F);
 }

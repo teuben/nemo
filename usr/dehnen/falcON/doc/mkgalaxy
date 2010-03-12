@@ -155,7 +155,10 @@ if(! $?giveF) then
     set giveF=f
 endif
 
-set sdens=`nemoinp "$Md/(2*3.141592*$Rd*$Rd)"` # Central surface dens. of disc
+set fac=`nemoinp "$Rdmax/$Rd"`
+set reduce=`nemoinp "(1+$fac)*exp(-$fac)"`
+set sdens=`nemoinp "$Md/(2*3.141592*$Rd*$Rd*(1-$reduce))"`
+                                               # Central surface dens. of disc
 set Nlev=`nemoinp "$kmin-$kmax+1"`             # Number of different timestep lengths
 set tend=`nemoinp "1.5*$tgrow"`                # End point for disc growth
 set Nh_half=`nemoinp "$Nh/2"`
