@@ -718,7 +718,8 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
   report REPORT("GravEstimator::pass_up_for_approx()");
   int n=0;                                         // counter: active cells     
   if(INDI_SOFT) {                                  // IF(individual eps_i)      
-    // 1    with eps_i: pass flag, mass, N*eps/2, cofm, rmax, multipoles        
+    // 1    with eps_i: pass flag, mass, N*eps/2, cofm, rmax, multipoles
+#define MASS_WEIGHTED_SOFTENING 1
     LoopCellsUp(grav::cell_iter,TREE,Ci) {         //   LOOP cells upwards      
       Ci->reset_active_flag();                     //     reset activity flag   
       Ci->reset_sink_flag();                       //     reset sink flag       
@@ -726,14 +727,24 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
       real mon(zero);                              //     reset monopole        
       vect com(zero);                              //     reset dipole          
       LoopCellKids(cell_iter,Ci,c) {               //     LOOP sub-cells c      
-	eh  += eph (c) * number(c);                //       sum up N * eps/2    
+	eh  += eph (c) *
+#ifdef MASS_WEIGHTED_SOFTENING
+	    mass(c)                                //       sum up M * eps/2    
+#else
+	    number(c)
+#endif
+	    ;
 	mon += mass(c);                            //       sum up monopole     
 	com += mass(c) * cofm(c);                  //       sum up dipole       
 	Ci->add_active_flag(c);                    //       add in activity flag
 	Ci->add_sink_flag(c);                      //       add in sink flag    
       }                                            //     END LOOP              
       LoopLeafKids(cell_iter,Ci,l) {               //     LOOP sub-leafs s      
+#ifdef MASS_WEIGHTED_SOFTENING
+	eh  += mass(l) * eph(l);                   //       sum up M * eps/2    
+#else
 	eh  += eph (l);                            //       sum up eps/2        
+#endif
 	mon += mass(l);                            //       sum up monopole     
 	com += mass(l) * cofm(l);                  //       sum up dipole       
 	Ci->add_active_flag(l);                    //       add in activity flag
@@ -743,7 +754,11 @@ unsigned GravEstimator::pass_up(const GravMAC*MAC,
       Ci->mass() = mon;                            //     set mass              
       mon        = (mon==zero)? zero:one/mon;      //     1/mass                
       com       *= mon;                            //     cofm = dipole/mass    
+#ifdef MASS_WEIGHTED_SOFTENING
+      eh        /= mass(Ci);                       //     mean eps/2            
+#else
       eh        /= number(Ci);                     //     mean eps/2            
+#endif
       Ci->eph()  = eh;                             //     set eps/2             
       Mset P(zero);                                //     reset multipoles      
       real dmax(zero);                             //     reset d_max           
