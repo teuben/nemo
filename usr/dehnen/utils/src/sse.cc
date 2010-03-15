@@ -59,7 +59,7 @@ namespace WDutils { namespace SSE {
 		      "unaligned (slow) SSE instructions forced\n",	\
 		      __NAME,__TYPE,f);					\
     i=0;								\
-    size_t n2=SSE::bottom<2>(n); 					\
+    size_t n2=bottom<2>(n);						\
     __INIT;								\
     for(; i!=n2; i+=2) { __WORKU; }   /* unaligned blocks work  */	\
     for(; i!=n ;  ++i) { __WORKS; }   /* final few elements     */	\
@@ -67,8 +67,8 @@ namespace WDutils { namespace SSE {
     i >>= 3;                          /* begin: shifted pointer */	\
     n  += i;                          /* end:   shifted pointer */	\
     f  -= i;                          /* shift pointer          */	\
-    size_t i2=SSE::top<2>(i);         /* begin: aligned blocks  */	\
-    size_t n2=SSE::bottom<2>(n);      /* end:   aligned blocks  */	\
+    size_t i2=top<2>(i);              /* begin: aligned blocks  */	\
+    size_t n2=bottom<2>(n);           /* end:   aligned blocks  */	\
     __INIT;								\
     for(; i!=i2;  ++i) { __WORKS; }   /* STD work @ begin       */	\
     for(; i!=n2; i+=2) { __WORKA; }   /* SSE work in blocks     */	\
@@ -88,7 +88,7 @@ namespace WDutils { namespace SSE {
 		      "unaligned (slow) SSE instructions forced\n",	\
 		      __NAME,__TYPE,f);					\
     i=0;								\
-    size_t n4=SSE::bottom<4>(n);					\
+    size_t n4=bottom<4>(n);						\
     __INIT;								\
     for(; i!=n4; i+=4) { __WORKU; }   /* unaligned blocks work  */	\
     for(; i!=n ;  ++i) { __WORKS; }   /* final few elements     */	\
@@ -96,8 +96,8 @@ namespace WDutils { namespace SSE {
     i >>= 2;                          /* begin: shifted pointer */	\
     n  += i;                          /* end:   shifted pointer */	\
     f  -= i;                          /* shift pointer          */	\
-    size_t i4=SSE::top<4>(i);         /* begin: aligned blocks  */	\
-    size_t n4=SSE::bottom<4>(n);      /* end:   aligned blocks  */	\
+    size_t i4=top<4>(i);              /* begin: aligned blocks  */	\
+    size_t n4=bottom<4>(n);           /* end:   aligned blocks  */	\
     __INIT;								\
     for(; i!=i4;  ++i) { __WORKS; }   /* STD work @ begin       */	\
     for(; i!=n4; i+=4) { __WORKA; }   /* SSE work in blocks     */	\
@@ -146,10 +146,10 @@ namespace WDutils { namespace SSE {
 #define __Worku _mm_storeu_ps(f+i,V);
 #define __Worka _mm_store_ps(f+i,V);
 template<>
-void SSE::U16<float>::Ass(float*f, size_t n, float v)
+void U16<float>::Ass(float*f, size_t n, float v)
 { __LoopFloat("Ass",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<float>::Ass(float*f, size_t n, float v)
+void A16<float>::Ass(float*f, size_t n, float v)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -159,10 +159,10 @@ void SSE::A16<float>::Ass(float*f, size_t n, float v)
 #define __Worku _mm_storeu_pd(f+i,V);
 #define __Worka _mm_store_pd(f+i,V);
 template<>
-void SSE::U16<double>::Ass(double*f, size_t n, double v)
+void U16<double>::Ass(double*f, size_t n, double v)
 { __LoopDouble("Ass",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<double>::Ass(double*f, size_t n, double v)
+void A16<double>::Ass(double*f, size_t n, double v)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -171,9 +171,9 @@ void SSE::A16<double>::Ass(double*f, size_t n, double v)
 #define __Init  __m128i V = _mm_set1_epi32(v);
 #define __Worku _mm_storeu_si128((__m128i*)(f+i),V);
 #define __Worka _mm_store_si128((__m128i*)(f+i),V);
-void SSE::U16<int>::Ass(int*f, size_t n, int v)
+void U16<int>::Ass(int*f, size_t n, int v)
 { __LoopInt("Ass",__Init,__Works,__Worku,__Worka); }
-void SSE::A16<int>::Ass(int*f, size_t n, int v)
+void A16<int>::Ass(int*f, size_t n, int v)
 { __LoopInt16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -184,14 +184,14 @@ void SSE::A16<int>::Ass(int*f, size_t n, int v)
 #define __Works a[i] = w*b[i];
 #define __Worka _mm_store_ps(a+i,_mm_mul_ps(W,_mm_load_ps(b+i)));
 template<>
-void SSE::A16<float>::Ass(float*a, size_t n, float w, const float*b)
+void A16<float>::Ass(float*a, size_t n, float w, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
 #define __Init  __m128d W = _mm_set1_pd(w);
 #define __Worka _mm_store_pd(a+i,_mm_mul_pd(W,_mm_load_pd(b+i)));
 template<>
-void SSE::A16<double>::Ass(double*a, size_t n, double w, const double*b)
+void A16<double>::Ass(double*a, size_t n, double w, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
@@ -203,10 +203,10 @@ void SSE::A16<double>::Ass(double*a, size_t n, double w, const double*b)
 #define __Worku _mm_storeu_ps(f+i,_mm_sub_ps(V,_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_sub_ps(V,_mm_load_ps(f+i)));
 template<>
-void SSE::U16<float>::Neg(float*f, size_t n)
+void U16<float>::Neg(float*f, size_t n)
 { __LoopFloat("Ass",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<float>::Neg(float*f, size_t n)
+void A16<float>::Neg(float*f, size_t n)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -216,10 +216,10 @@ void SSE::A16<float>::Neg(float*f, size_t n)
 #define __Worku _mm_storeu_pd(f+i,_mm_sub_pd(V,_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_sub_pd(V,_mm_load_pd(f+i)));
 template<>
-void SSE::U16<double>::Neg(double*f, size_t n)
+void U16<double>::Neg(double*f, size_t n)
 { __LoopDouble("Ass",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<double>::Neg(double*f, size_t n)
+void A16<double>::Neg(double*f, size_t n)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -232,10 +232,10 @@ void SSE::A16<double>::Neg(double*f, size_t n)
 #define __Worku _mm_storeu_ps(f+i,_mm_add_ps(_mm_loadu_ps(f+i),V));
 #define __Worka _mm_store_ps(f+i,_mm_add_ps(_mm_load_ps(f+i),V));
 template<>
-void SSE::U16<float>::Add(float*f, size_t n, float v)
+void U16<float>::Add(float*f, size_t n, float v)
 { __LoopFloat("Add",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<float>::Add(float*f, size_t n, float v)
+void A16<float>::Add(float*f, size_t n, float v)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -245,10 +245,10 @@ void SSE::A16<float>::Add(float*f, size_t n, float v)
 #define __Worku _mm_storeu_pd(f+i,_mm_add_pd(_mm_loadu_pd(f+i),V));
 #define __Worka _mm_store_pd(f+i,_mm_add_pd(_mm_load_pd(f+i),V));
 template<>
-void SSE::U16<double>::Add(double*f, size_t n, double v)
+void U16<double>::Add(double*f, size_t n, double v)
 { __LoopDouble("Add",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<double>::Add(double*f, size_t n, double v)
+void A16<double>::Add(double*f, size_t n, double v)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -259,9 +259,9 @@ void SSE::A16<double>::Add(double*f, size_t n, double v)
 		_mm_add_epi32(_mm_loadu_si128((__m128i*)(f+i)),V));
 #define __Worka _mm_store_si128 ((__m128i*)(f+i),			\
 		_mm_add_epi32(_mm_load_si128 ((__m128i*)(f+i)),V));
-void SSE::U16<int>::Add(int*f, size_t n, int v)
+void U16<int>::Add(int*f, size_t n, int v)
 { __LoopInt("Add",__Init,__Works,__Worku,__Worka); }
-void SSE::A16<int>::Add(int*f, size_t n, int v)
+void A16<int>::Add(int*f, size_t n, int v)
 { __LoopInt16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -272,19 +272,19 @@ void SSE::A16<int>::Add(int*f, size_t n, int v)
 #define __Works a[i] += b[i];
 #define __Worka _mm_store_ps(a+i,_mm_add_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
 template<>
-void SSE::A16<float>::Add(float*a, size_t n, const float*b)
+void A16<float>::Add(float*a, size_t n, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_add_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
 template<>
-void SSE::A16<double>::Add(double*a, size_t n, const double*b)
+void A16<double>::Add(double*a, size_t n, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 
 #undef  __Worka
 #define __Worka _mm_store_si128((__m128i*)(a+i),			\
 		_mm_add_epi32(_mm_load_si128((__m128i*)(a+i)),	        \
                               _mm_load_si128((__m128i*)(b+i))));
-void SSE::A16<int>::Add(int*a, size_t n, const int*b)
+void A16<int>::Add(int*a, size_t n, const int*b)
 { __LoopInt16(__Init,__Works,__Worka); }
 #undef  __Works
 #undef  __Worka
@@ -295,7 +295,7 @@ void SSE::A16<int>::Add(int*a, size_t n, const int*b)
 #define __Worka _mm_store_ps(a+i,_mm_add_ps(_mm_load_ps(a+i), \
 					    _mm_mul_ps(W,_mm_load_ps(b+i))));
 template<>
-void SSE::A16<float>::Add(float*a, size_t n, float w, const float*b)
+void A16<float>::Add(float*a, size_t n, float w, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
@@ -303,7 +303,7 @@ void SSE::A16<float>::Add(float*a, size_t n, float w, const float*b)
 #define __Worka _mm_store_pd(a+i,_mm_add_pd(_mm_load_pd(a+i), \
 					    _mm_mul_pd(W,_mm_load_pd(b+i))));
 template<>
-void SSE::A16<double>::Add(double*a, size_t n, double w, const double*b)
+void A16<double>::Add(double*a, size_t n, double w, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
@@ -357,14 +357,14 @@ void SSE::A16<double>::Add(double*a, size_t n, double w, const double*b)
 #define __Worka Tm = _mm_add_ps(Tm,_mm_load_ps(f+i));
 #define __Worku Tm = _mm_add_ps(Tm,_mm_loadu_ps(f+i));
 template<>
-float SSE::U16<float>::Sum(const float*f, size_t n)
+float U16<float>::Sum(const float*f, size_t n)
 {
   __FloatTmp;
   __LoopFloat("Sum",__Init,__Works,__Worku,__Worka);
   __FloatRet;
 }
 template<>
-float SSE::A16<float>::Sum(const float*f, size_t n)
+float A16<float>::Sum(const float*f, size_t n)
 {
   __FloatTmp16;
   __LoopFloat16(__Init,__Works,__Worka);
@@ -375,14 +375,14 @@ float SSE::A16<float>::Sum(const float*f, size_t n)
 #define __Worka Tm = _mm_add_pd(Tm,_mm_load_pd(f+i));
 #define __Worku Tm = _mm_add_pd(Tm,_mm_loadu_pd(f+i));
 template<>
-double SSE::U16<double>::Sum(const double*f, size_t n)
+double U16<double>::Sum(const double*f, size_t n)
 {
   __DoubleTmp;
   __LoopDouble("Sum",__Init,__Works,__Worku,__Worka);
   __DoubleRet;
 }
 template<>
-double SSE::A16<double>::Sum(const double*f, size_t n)
+double A16<double>::Sum(const double*f, size_t n)
 {
   __DoubleTmp16;
   __LoopDouble16(__Init,__Works,__Worka);
@@ -399,7 +399,7 @@ double SSE::A16<double>::Sum(const double*f, size_t n)
 #define __Worka Tm = _mm_add_ps(Tm,_mm_mul_ps(_mm_load_ps(a+i),		\
 					      _mm_load_ps(b+i)));
 template<>
-float SSE::A16<float>::Dot(const float*a, size_t n, const float*b)
+float A16<float>::Dot(const float*a, size_t n, const float*b)
 {
   __FloatTmp16;
   __LoopFloat16(__Init,__Works,__Worka);
@@ -409,7 +409,7 @@ float SSE::A16<float>::Dot(const float*a, size_t n, const float*b)
 #define __Worka Tm = _mm_add_pd(Tm,_mm_mul_pd(_mm_load_pd(a+i),		\
 					      _mm_load_pd(b+i)));
 template<>
-double SSE::A16<double>::Dot(const double*a, size_t n, const double*b)
+double A16<double>::Dot(const double*a, size_t n, const double*b)
 {
   __DoubleTmp16;
   __LoopDouble16(__Init,__Works,__Worka);
@@ -434,10 +434,10 @@ double SSE::A16<double>::Dot(const double*a, size_t n, const double*b)
 #define __Worku _mm_storeu_ps(f+i,_mm_sub_ps(_mm_loadu_ps(f+i),V));
 #define __Worka _mm_store_ps(f+i,_mm_sub_ps(_mm_load_ps(f+i),V));
 template<>
-void SSE::U16<float>::Sub(float*f, size_t n, float v)
+void U16<float>::Sub(float*f, size_t n, float v)
 { __LoopFloat("Sub",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<float>::Sub(float*f, size_t n, float v)
+void A16<float>::Sub(float*f, size_t n, float v)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -447,10 +447,10 @@ void SSE::A16<float>::Sub(float*f, size_t n, float v)
 #define __Worku _mm_storeu_pd(f+i,_mm_sub_pd(_mm_loadu_pd(f+i),V));
 #define __Worka _mm_store_pd(f+i,_mm_sub_pd(_mm_load_pd(f+i),V));
 template<>
-void SSE::U16<double>::Sub(double*f, size_t n, double v)
+void U16<double>::Sub(double*f, size_t n, double v)
 { __LoopDouble("Sub",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<double>::Sub(double*f, size_t n, double v)
+void A16<double>::Sub(double*f, size_t n, double v)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -461,12 +461,12 @@ void SSE::A16<double>::Sub(double*f, size_t n, double v)
 #define __Works a[i] -= b[i];
 #define __Worka _mm_store_ps(a+i,_mm_sub_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
 template<>
-void SSE::A16<float>::Sub(float*a, size_t n, const float*b)
+void A16<float>::Sub(float*a, size_t n, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_sub_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
 template<>
-void SSE::A16<double>::Sub(double*a, size_t n, const double*b)
+void A16<double>::Sub(double*a, size_t n, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
@@ -477,7 +477,7 @@ void SSE::A16<double>::Sub(double*a, size_t n, const double*b)
 #define __Worka _mm_store_ps(a+i,_mm_sub_ps(_mm_load_ps(a+i), \
 					    _mm_mul_ps(W,_mm_load_ps(b+i))));
 template<>
-void SSE::A16<float>::Sub(float*a, size_t n, float w, const float*b)
+void A16<float>::Sub(float*a, size_t n, float w, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
@@ -485,7 +485,7 @@ void SSE::A16<float>::Sub(float*a, size_t n, float w, const float*b)
 #define __Worka _mm_store_pd(a+i,_mm_sub_pd(_mm_load_pd(a+i), \
 					    _mm_mul_pd(W,_mm_load_pd(b+i))));
 template<>
-void SSE::A16<double>::Sub(double*a, size_t n, double w, const double*b)
+void A16<double>::Sub(double*a, size_t n, double w, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
@@ -497,10 +497,10 @@ void SSE::A16<double>::Sub(double*a, size_t n, double w, const double*b)
 #define __Worku _mm_storeu_ps(f+i,_mm_mul_ps(_mm_loadu_ps(f+i),V));
 #define __Worka _mm_store_ps(f+i,_mm_mul_ps(_mm_load_ps(f+i),V));
 template<>
-void SSE::U16<float>::Mul(float*f, size_t n, float v)
+void U16<float>::Mul(float*f, size_t n, float v)
 { __LoopFloat("Mul",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<float>::Mul(float*f, size_t n, float v)
+void A16<float>::Mul(float*f, size_t n, float v)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -510,10 +510,10 @@ void SSE::A16<float>::Mul(float*f, size_t n, float v)
 #define __Worku _mm_storeu_pd(f+i,_mm_mul_pd(_mm_loadu_pd(f+i),V));
 #define __Worka _mm_store_pd(f+i,_mm_mul_pd(_mm_load_pd(f+i),V));
 template<>
-void SSE::U16<double>::Mul(double*f, size_t n, double v)
+void U16<double>::Mul(double*f, size_t n, double v)
 { __LoopDouble("Mul",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<double>::Mul(double*f, size_t n, double v)
+void A16<double>::Mul(double*f, size_t n, double v)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -524,12 +524,12 @@ void SSE::A16<double>::Mul(double*f, size_t n, double v)
 #define __Works a[i] -= b[i];
 #define __Worka _mm_store_ps(a+i,_mm_mul_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
 template<>
-void SSE::A16<float>::Mul(float*a, size_t n, const float*b)
+void A16<float>::Mul(float*a, size_t n, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_mul_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
 template<>
-void SSE::A16<double>::Mul(double*a, size_t n, const double*b)
+void A16<double>::Mul(double*a, size_t n, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
@@ -540,12 +540,12 @@ void SSE::A16<double>::Mul(double*a, size_t n, const double*b)
 #define __Works a[i] -= b[i];
 #define __Worka _mm_store_ps(a+i,_mm_div_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
 template<>
-void SSE::A16<float>::Div(float*a, size_t n, const float*b)
+void A16<float>::Div(float*a, size_t n, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_div_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
 template<>
-void SSE::A16<double>::Div(double*a, size_t n, const double*b)
+void A16<double>::Div(double*a, size_t n, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
@@ -557,10 +557,10 @@ void SSE::A16<double>::Div(double*a, size_t n, const double*b)
 #define __Worku _mm_storeu_ps(f+i,_mm_div_ps(X,_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_div_ps(X,_mm_load_ps(f+i)));
 template<>
-void SSE::U16<float>::Inv(float*f, size_t n, float x)
+void U16<float>::Inv(float*f, size_t n, float x)
 { __LoopFloat("Inv",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<float>::Inv(float*f, size_t n, float x)
+void A16<float>::Inv(float*f, size_t n, float x)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -570,10 +570,10 @@ void SSE::A16<float>::Inv(float*f, size_t n, float x)
 #define __Worku _mm_storeu_pd(f+i,_mm_div_pd(X,_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_div_pd(X,_mm_load_pd(f+i)));
 template<>
-void SSE::U16<double>::Inv(double*f, size_t n, double x)
+void U16<double>::Inv(double*f, size_t n, double x)
 { __LoopDouble("Inv",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<double>::Inv(double*f, size_t n, double x)
+void A16<double>::Inv(double*f, size_t n, double x)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -584,14 +584,14 @@ void SSE::A16<double>::Inv(double*f, size_t n, double x)
 #define __Works a[i] = x/b[i];
 #define __Worka _mm_store_ps(a+i,_mm_div_ps(X,_mm_load_ps(b+i)));
 template<>
-void SSE::A16<float>::Inv(float*a, size_t n, float x, const float*b)
+void A16<float>::Inv(float*a, size_t n, float x, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
 #define __Init  __m128d X = _mm_set1_pd(x);
 #define __Worka _mm_store_pd(a+i,_mm_div_pd(X,_mm_load_pd(b+i)));
 template<>
-void SSE::A16<double>::Inv(double*a, size_t n, double x, const double*b)
+void A16<double>::Inv(double*a, size_t n, double x, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
@@ -603,10 +603,10 @@ void SSE::A16<double>::Inv(double*a, size_t n, double x, const double*b)
 #define __Worku _mm_storeu_ps(f+i,_mm_sqrt_ps(_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_sqrt_ps(_mm_load_ps(f+i)));
 template<>
-void SSE::U16<float>::Sqrt(float*f, size_t n)
+void U16<float>::Sqrt(float*f, size_t n)
 { __LoopFloat("Sqrt",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<float>::Sqrt(float*f, size_t n)
+void A16<float>::Sqrt(float*f, size_t n)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worku
 #undef  __Worka
@@ -614,10 +614,10 @@ void SSE::A16<float>::Sqrt(float*f, size_t n)
 #define __Worku _mm_storeu_pd(f+i,_mm_sqrt_pd(_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_sqrt_pd(_mm_load_pd(f+i)));
 template<>
-void SSE::U16<double>::Sqrt(double*f, size_t n)
+void U16<double>::Sqrt(double*f, size_t n)
 { __LoopDouble("Sqrt",__Init,__Works,__Worku,__Worka); }
 template<>
-void SSE::A16<double>::Sqrt(double*f, size_t n)
+void A16<double>::Sqrt(double*f, size_t n)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -628,12 +628,12 @@ void SSE::A16<double>::Sqrt(double*f, size_t n)
 #define __Works a[i] = std::sqrt(b[i]);
 #define __Worka _mm_store_ps(a+i,_mm_sqrt_ps(_mm_load_ps(b+i)));
 template<>
-void SSE::A16<float>::Sqrt(float*a, size_t n, const float*b)
+void A16<float>::Sqrt(float*a, size_t n, const float*b)
 { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
 #define __Worka _mm_store_pd(a+i,_mm_sqrt_pd(_mm_load_pd(b+i)));
 template<>
-void SSE::A16<double>::Sqrt(double*a, size_t n, const double*b)
+void A16<double>::Sqrt(double*a, size_t n, const double*b)
 { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
@@ -651,7 +651,7 @@ void SSE::A16<double>::Sqrt(double*a, size_t n, const double*b)
 #undef __LoopDouble16
 // SSE::Array16
 template<typename _F>
-SSE::Array16<_F>&SSE::Array16<_F>::reset(size_t n)
+Array16<_F>&Array16<_F>::reset(size_t n)
 {
   if(n==_N) return*this;
   size_t s = Top<_F>(n);
@@ -665,7 +665,7 @@ SSE::Array16<_F>&SSE::Array16<_F>::reset(size_t n)
 }
 
 template<typename _F>
-SSE::Array16<_F>&SSE::Array16<_F>::assign(Array16 const&a)
+Array16<_F>&Array16<_F>::assign(Array16 const&a)
 {
   if(a._S != _S) {
     if(_A) delete16(_A);
@@ -678,15 +678,15 @@ SSE::Array16<_F>&SSE::Array16<_F>::assign(Array16 const&a)
 }
 
 template<typename _F>
-SSE::Array16<_F>&SSE::Array16<_F>::operator=(Array16 const&B) WDutils_THROWING
+Array16<_F>&Array16<_F>::operator=(Array16 const&B) WDutils_THROWING
 {
   check_size(B,"operator=(Array16&)");
   std::memcpy(_A,B._A,_N*sizeof(_F));
   return*this;
 }
 
-template class WDutils::SSE::Array16<float>;
-template class WDutils::SSE::Array16<double>;
+template class Array16<float>;
+template class Array16<double>;
 
-} }
+} } // namespace WDutils::SSE
 //

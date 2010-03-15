@@ -5,7 +5,7 @@
 #
 ################################################################################
 
-SHELL	:=	csh
+SHELL		:= csh
 
 # -----------
 # directories
@@ -65,8 +65,12 @@ libicc		:
 		make -f makeall COMPILER=icc
 endif
 
+# ---------------------
+# doxygen documentation
+# ---------------------
+
 doxu		:
-		make -f makeall COMPILER=gcc doxu
+			make -f makeall COMPILER=gcc doxu
 
 # --------
 # cleaning
@@ -76,7 +80,7 @@ doxu		:
 cleanbackup	:
 			rm -f *~ $(INC)*~ $(SRC)*~
 cleandirs	:
-			rm -rf lib libpgi libpath libsun libicc
+			rm -rf lib lib.pgi lib.path lib.sun lib.icc
 
 clean		:	cleandirs
 

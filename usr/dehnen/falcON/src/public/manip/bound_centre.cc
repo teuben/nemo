@@ -44,9 +44,6 @@ namespace {
   using namespace falcON;
   const unsigned K_default = 256;
   const double   A_default = 3;
-  inline real&poq(body&b) {
-    return has_pot(b)? b.pot() : b.pex();
-  }
   inline real ppp(body const&b) {
     real p = zero;
     if(has_pot(b)) p += pot(b);
@@ -221,6 +218,10 @@ namespace Manipulate {
 	Bmin = b;
       }
     }
+    // TEST
+    std::cerr<<" most bound particle: b"<<bodyindex(Bmin)
+	     <<" @ x="<<pos(Bmin)<<" Phi="<<Pmin<<" pot="<<pot(Bmin)<<'\n';
+    // TSET
     if(K>1) {
       // 2   find K nearest neighbours of most bound body
       unsigned n = S->findNeighbours(Bmin,K,Nb);

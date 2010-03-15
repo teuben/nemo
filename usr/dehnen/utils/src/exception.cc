@@ -5,11 +5,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2000-2009
+/// \date    2000-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2009  Walter Dehnen
+// Copyright (C) 2000-2010  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -39,11 +39,9 @@
 #   include <unistd.h>
   }
 #endif
-////////////////////////////////////////////////////////////////////////////////
 //                                                                              
 // class RunInfo                                                                
 //                                                                              
-////////////////////////////////////////////////////////////////////////////////
 WDutils::RunInfo::RunInfo()
   : __host_known(0),
     __user_known(0),
@@ -101,7 +99,7 @@ WDutils::RunInfo::RunInfo()
     WDutils_RETHROW(E);
   }
 }
-//------------------------------------------------------------------------------
+//
 void WDutils::RunInfo::header(std::ostream&out)
 {
   if(out) {
@@ -115,9 +113,11 @@ void WDutils::RunInfo::header(std::ostream&out)
     out<<"#\n";
   }
 }
-//------------------------------------------------------------------------------
+//
 WDutils::RunInfo WDutils::RunInfo::Info;
-////////////////////////////////////////////////////////////////////////////////
+
+//
+
 namespace {
   using namespace WDutils;
 
@@ -191,7 +191,7 @@ namespace {
   }
 #endif
 }
-//------------------------------------------------------------------------------
+//
 void WDutils::Error::operator()(const char* fmt, ...) const
 {
 #ifdef PRINTERR_STEP
@@ -208,7 +208,7 @@ void WDutils::Error::operator()(const char* fmt, ...) const
   va_end(ap);
   std::exit(1);
 }
-//------------------------------------------------------------------------------
+//
 void WDutils::Warning::operator()(const char* fmt, ...) const
 {
 #ifdef PRINTERR_STEP
@@ -224,7 +224,7 @@ void WDutils::Warning::operator()(const char* fmt, ...) const
 #endif
   va_end(ap);
 }
-//------------------------------------------------------------------------------
+//
 void WDutils::DebugInformation::operator()(const char* fmt, ...) const
 {
 #ifdef PRINTERR_STEP
@@ -240,7 +240,7 @@ void WDutils::DebugInformation::operator()(const char* fmt, ...) const
 #endif
   va_end(ap);
 }
-//------------------------------------------------------------------------------
+//
 void WDutils::DebugInformation::operator()(int deb, const char* fmt, ...) const
 {
   if(RunInfo::debug(deb)) {
@@ -258,7 +258,7 @@ void WDutils::DebugInformation::operator()(int deb, const char* fmt, ...) const
     va_end(ap);
   }
 }
-//------------------------------------------------------------------------------
+//
 WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
 {
   size_t size = 1024;
@@ -274,7 +274,7 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
   va_end(ap);
   return exception(buffer);
 }
-//------------------------------------------------------------------------------
+//
 WDutils::exception::exception(const char*fmt, ...)
 {
   const int msize=1024;
@@ -292,7 +292,7 @@ WDutils::exception::exception(const char*fmt, ...)
   va_end(ap);
   std::string::operator= (__text);
 }
-//------------------------------------------------------------------------------
+//
 WDutils::message::message(const char*fmt, ...) throw(exception)
 {
   va_list  ap;
@@ -306,7 +306,7 @@ WDutils::message::message(const char*fmt, ...) throw(exception)
 		    "formatting error\n");
   va_end(ap);
 }
-//------------------------------------------------------------------------------
+//
 int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
   WDutils_THROWING
 {
@@ -322,7 +322,7 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
     WDutils_THROW("snprintf(): formatting error");
   return w;
 }
-//------------------------------------------------------------------------------
+//
 int WDutils::snprintf__::operator()(char*str, size_t l, const char* fmt, ...)
   WDutils_THROWING
 {

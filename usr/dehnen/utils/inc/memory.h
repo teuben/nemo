@@ -781,9 +781,9 @@ namespace WDutils {
   //
   //////////////////////////////////////////////////////////////////////////////
   template<typename T, unsigned D> class SubArray;
-  /// \brief   a const array of arbitrary type in D dimensions
-  /// \detail  used as a return type to support A[i0][i1][i2][i3] (in this case
-  ///          for an Array<T,4>.
+  /// \brief    a const array of arbitrary type in D dimensions
+  /// \details  used as a return type to support A[i0][i1][i2][i3] (in this case
+  ///           for an Array<T,4>.
   template<typename T, unsigned D> class ConstSubArray {
     WDutilsStaticAssert((D>2));
     friend class SubArray<T,D+1>;
@@ -907,11 +907,11 @@ namespace WDutils {
   //
   // class Array<T,D>
   //
-  /// \brief  A @a D dimensional array on the heap.
-  /// \detail Acts like a @a T[N1]...[ND], but @a N1 ...@a ND can be chosen at
-  ///         run-time and only one chunk of memory is ever allocated. The
-  ///         operator[] behaves as for an array and is implemented via types
-  ///         SubArray and ConstSubArray.
+  /// \brief   A @a D dimensional array on the heap.
+  /// \details Acts like a @a T[N1]...[ND], but @a N1 ...@a ND can be chosen at
+  ///          run-time and only one chunk of memory is ever allocated. The
+  ///          operator[] behaves as for an array and is implemented via types
+  ///          SubArray and ConstSubArray.
   template<typename T, unsigned D=1> class Array : public SubArray<T,D>
   {
     typedef SubArray<T,D> Base;
@@ -1080,9 +1080,9 @@ namespace WDutils {
     }
   };// class Array<T,D>
   //
-  /// \brief  Specialisation for D=1
-  /// \detail Acts like a simple T[N], except that memory is on the heap not
-  ///         the stack.
+  /// \brief   Specialisation for D=1
+  /// \details Acts like a simple T[N], except that memory is on the heap not
+  ///          the stack.
   template<typename T> class Array<T,1> {
     /// \name data
     //@{

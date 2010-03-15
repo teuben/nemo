@@ -7,7 +7,7 @@
 #      (then please tell me about it by email to wd11@astro.le.ac.uk)
 #
 
-EXT		:= icc
+EXT		:= .icc
 CXX		:= icpc
 CC		:= icc
 FC		:= ifc

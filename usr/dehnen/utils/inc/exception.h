@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2000-2008
+/// \date   2000-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2008 Walter Dehnen
+// Copyright (C) 2000-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,20 +37,16 @@
 # define WDutils_included_limits
 # include <limits>
 #endif
-// /////////////////////////////////////////////////////////////////////////////
 //                                                                              
 //  WDutils                                                                     
 //                                                                              
 /// generally useful code of Walter Dehnen, used in project falcON,             
 /// public under the GNU public licence                                         
 ///                                                                             
-// /////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
-  // ///////////////////////////////////////////////////////////////////////////
   //
   //  macro for compile-time assertion, stolen from the boost library
   //
-  //----------------------------------------------------------------------------
   template<bool> struct STATIC_ASSERTION_FAILURE;
   template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
   /// \brief macro for compile-time assertion
@@ -104,7 +100,6 @@ namespace WDutils {
       static const bool is_floating_point = true;
     };
   }
-  // ///////////////////////////////////////////////////////////////////////////
   //
   //  WDutils::RunInfo
   //
@@ -112,7 +107,6 @@ namespace WDutils {
   ///
   /// only one object exists, the static RunInfo::Info
   ///
-  // ///////////////////////////////////////////////////////////////////////////
   class RunInfo {
   private:
     bool __host_known;
@@ -134,54 +128,72 @@ namespace WDutils {
     static RunInfo Info;
   public:
     /// reset the debugging level
-    static void set_debug_level(int d) { Info.__debug = d; }
+    static void set_debug_level(int d)
+    { Info.__debug = d; }
     /// provide info about MPI
-    static void set_mpi_proc(int p, int s) {
+    static void set_mpi_proc(int p, int s)
+    {
       Info.__is_mpi_proc = 1;
       Info.__mpi_proc=p;
       Info.__mpi_size=s;
     }
     /// is host name known?
-    static bool const&host_known() { return Info.__host_known; }
+    static bool host_known()
+    { return Info.__host_known; }
     /// is user name known?
-    static bool const&user_known() { return Info.__user_known; }
+    static bool user_known()
+    { return Info.__user_known; }
     /// is user pid known?
-    static bool const&pid_known() { return Info.__pid_known; }
+    static bool pid_known()
+    { return Info.__pid_known; }
     /// is name of the running program known?
-    static bool const&name_known() { return Info.__name_known; }
+    static bool name_known()
+    { return Info.__name_known; }
     /// is command line is known?
-    static bool const&cmd_known() { return Info.__cmd_known; }
+    static bool cmd_known()
+    { return Info.__cmd_known; }
     /// is this process part of an MPI run?
-    static bool const&is_mpi_proc() { return Info.__is_mpi_proc; }
+    static bool is_mpi_proc()
+    { return Info.__is_mpi_proc; }
     /// string with full time of run
-    static const char*time() { return Info.__time; }
+    static const char*time()
+    { return Info.__time; }
     /// string with host nam
-    static const char*host() { return Info.__host; }
+    static const char*host()
+    { return Info.__host; }
     /// string with user name
-    static const char*user() { return Info.__user; }
+    static const char*user()
+    { return Info.__user; }
     /// string with user pid
-    static const char*pid() { return Info.__pid; }
+    static const char*pid()
+    { return Info.__pid; }
     /// string with name of the running program
-    static const char*name() { return Info.__name; }
+    static const char*name()
+    { return Info.__name; }
     /// string with command line
-    static const char*cmd() { return Info.__cmd; }
+    static const char*cmd()
+    { return Info.__cmd; }
     /// return debugging level
-    static const int &debug_level() { return Info.__debug; }
+    static int debug_level()
+    { return Info.__debug; }
     /// return our rank within MPI, if we are part of a MPI run
-    static const int &mpi_proc() { return Info.__mpi_proc; }
+    static int mpi_proc()
+    { return Info.__mpi_proc; }
     /// return our size of MPI::World, if we are part of a MPI run
-    static const int &mpi_size() { return Info.__mpi_size; }
+    static int mpi_size()
+    { return Info.__mpi_size; }
     /// return true if debug level >= given debug depth
-    static bool debug(int depth) { return Info.__debug >= depth; }
+    static bool debug(int depth)
+    { return Info.__debug >= depth; }
     /// print a log-file header
     static void header(std::ostream&out);
   };
-  /// is debugging level exceeded by debugging depth (argument)?                
+  /// is debugging level exceeded by debugging depth (argument)?
+  /// \relates DebugInformation
   /// \param d debugging depth
-  inline bool debug(int d) {
-    return RunInfo::debug(d);
-  }
-  // ///////////////////////////////////////////////////////////////////////////
+  inline bool debug(int d)
+  { return RunInfo::debug(d); }
+  //
   /// \name print debugging information to stderr, reporting [file:line]        
   //@{                                                                          
   /// to be used for reporting debug info
@@ -227,27 +239,30 @@ namespace WDutils {
   /// \endcode
 #define DebugInfoN WDutils::DebugInformation()
   //@}
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   /// \name exception treatment                                                 
   //@{                                                                          
   /// simple exception with error message
   struct exception : protected std::string {
     /// copy constructor
-    exception(exception const&e) : std::string(e) {}
+    exception(exception const&e)
+      : std::string(e) {}
     /// construction from C-style format string + data.
     /// Uses a printf() style format string as first argument, further arguments
     /// must match format, exactly as in printf, which will be called.
     /// \param[in] fmt gives the format in C printf() style
     explicit exception(const char*fmt, ...);
     /// return error message 
-    const char*text() const { return c_str(); }
+    const char*text() const
+    { return c_str(); }
   };
   /// return error message given an exception
-  inline const char*text(exception const&e) { return e.text(); }
+  inline const char*text(exception const&e)
+  { return e.text(); }
   /// for generating exceptions
   struct Thrower {
-    const char*file;          ///< file name
-    const int  line;          ///< line number
+    const char *file;          ///< file name
+    const int   line;          ///< line number
     /// default constructor: set data to NULL
     Thrower() : file(0), line(0) {}
     /// constructor: get file name, and line number
@@ -261,7 +276,7 @@ namespace WDutils {
       ;
   };
   //@}
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   /// C++ wrapper around a C string.                                            
   /// Construction from C-type format string + data;                            
   /// Type conversion to const char*                                            
@@ -281,7 +296,7 @@ namespace WDutils {
     /// return C-style string
     const char* text() const { return __text; }
   };
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   /// \name error treatment (alternative to throwing an exception)              
   //@{                                                                          
   /// to be used for error reporting
@@ -314,7 +329,7 @@ namespace WDutils {
   /// \endcode
 #define WDutils_ErrorN     WDutils::Error()
   //@}
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   /// \name warning treatment                                                   
   //@{                                                                          
   /// to be used for warning reporting
@@ -347,7 +362,7 @@ namespace WDutils {
   /// \endcode
 #define WDutils_WarningN     WDutils::Warning()
   //@}
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   /// \name macros and code controling the usage of throw exception vs error    
   //@{                                                                          
 #if 0
@@ -369,14 +384,17 @@ namespace WDutils {
 #  define WDutils_RETHROW(E)    WDutils_Error  (text(E))
 #else
 #  define WDutils_EXCEPTIONS
+  /// use instead of <tt> throw(WDutils::exception) </tt> after function
+  /// declaration
 #  define WDutils_THROWING      throw(WDutils::exception)
 #  define WDutils_THROWER       throw WDutils::Thrower
 #  define WDutils_THROWN        throw WDutils::exception
 #  define WDutils_RETHROW(E)    throw E
 #endif
+  /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
 #define WDutils_THROW  WDutils_THROWER(__FILE__,__LINE__)
   //@}
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   /// a safer snprintf.                                                         
   /// If the string size is too small or if a formatting error occurs,          
   /// an exception is thrown, which also gives source file name and line number.
@@ -398,7 +416,7 @@ namespace WDutils {
 #endif
       ;
   };
-  /// macro WDutilsSNprintf to be used like snprintf.
+  /// macro to be used like snprintf.
   /// reports source file and line on error.
 #define SNprintf WDutils::snprintf__(__FILE__,__LINE__)
 

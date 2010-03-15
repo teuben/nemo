@@ -3,7 +3,7 @@
 # to be included by makefile 
 #
 
-EXT		:= sun
+EXT		:= .sun
 CXX		:= $(CPATH)CC
 CC		:= $(CPATH)cc
 FC		:= $(CPATH)f90

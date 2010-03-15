@@ -1104,10 +1104,14 @@ namespace {
     void set(typename TreeWalker<OctTree>::Real q,
 	     typename TreeWalker<OctTree>::Cell c)
     { Q=q; C=c; }
-    bool operator<(CellQ const&x) const { return Q < x.Q; }
-    bool operator>(CellQ const&x) const { return Q > x.Q; }
-    bool operator<(typename TreeWalker<OctTree>::Real q) const { return Q < q; }
-    bool operator>(typename TreeWalker<OctTree>::Real q) const { return Q > q; }
+//     bool operator<(CellQ const&x) const
+//     { return Q < x.Q; }
+    bool operator>(CellQ const&x) const 
+    { return Q > x.Q; }
+//     bool operator<(typename TreeWalker<OctTree>::Real q) const
+//     { return Q < q; }
+//     bool operator>(typename TreeWalker<OctTree>::Real q) const
+//     { return Q > q; }
   };
 }
 //

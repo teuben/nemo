@@ -3,7 +3,7 @@
 # to be included by makefile 
 #
 
-EXT		:= pgi
+EXT		:= .pgi
 CXX		:= pgCC
 CC		:= pgcc
 FC		:= pgf90

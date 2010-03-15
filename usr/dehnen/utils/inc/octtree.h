@@ -776,7 +776,7 @@ namespace WDutils {
     typedef TreeWalker<OctTree> Base;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
-    typedef typename Base::Real Real;;            ///< type: scalars
+    typedef typename Base::Real Real;             ///< type: scalars
     typedef typename Base::Point Point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
     /// functor for processing a Neighbour
@@ -907,7 +907,7 @@ namespace WDutils {
     typedef TreeWalker<OctTree> Base;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
-    typedef typename Base::Real Real;;            ///< type: scalars
+    typedef typename Base::Real Real;             ///< type: scalars
     typedef typename Base::Point Point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
     /// ctor

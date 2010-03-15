@@ -72,23 +72,25 @@ namespace {
     BodyFunc<real> SortFunc;
     fieldset       Copy,Need;
     nemo_out       Out;
-    bool           zm;
+    bool           keys,zm;
 
     FilterSortWrite()
       : Filter(getparam_z("filter"),getparam_z("params")),
 	SortFunc(getparam_z("sorting"),getparam_z("sortpars")),
 	Copy(getioparam_a("copy")),
 	Need(Copy | Filter.need() | SortFunc.need()),
+	keys(getioparam_z("copy").contain(fieldbit::k)),
 	zm(getbparam("zeromissing"))
-    {}
+    { if(keys) Copy |= fieldset::k; }
     void operator()(snapshot&shot)
     {
-      if(Need.contain(fieldbit::k)) shot.add_field(fieldbit::k);
+      if(keys) shot.add_field(fieldbit::k);
       shot.apply_filter(Filter,zm);
       if(shot.N_bodies()) {
 	shot.apply_sort(SortFunc,Copy,zm);
 	if(hasvalue("time")) shot.set_time(getdparam("time"));
 	if(!Out) Out.open(getparam("out"));
+	shot.write_nemo(Out,Copy);
       }
     }
   };
