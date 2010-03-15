@@ -218,10 +218,10 @@ namespace Manipulate {
 	Bmin = b;
       }
     }
-    // TEST
-    std::cerr<<" most bound particle: b"<<bodyindex(Bmin)
-	     <<" @ x="<<pos(Bmin)<<" Phi="<<Pmin<<" pot="<<pot(Bmin)<<'\n';
-    // TSET
+//     // TEST
+//     std::cerr<<" most bound particle: b"<<bodyindex(Bmin)
+// 	     <<" @ x="<<pos(Bmin)<<" Phi="<<Pmin<<" pot="<<pot(Bmin)<<'\n';
+//     // TSET
     if(K>1) {
       // 2   find K nearest neighbours of most bound body
       unsigned n = S->findNeighbours(Bmin,K,Nb);
