@@ -25,24 +25,33 @@
 #  ToDo: 
 #  - should really do this script in python!!!
 #  - write a -help
+#  - python setup.py install --prefix $foo
+#    setenv PYTHONPATH $foo/lib/python2.5/site-packages
 #
 #  Known Problems:
 #  - ppgplot and gfortran seem not to work together
 #  - scipy still missing numerous things (now solved with blas and lapack)
 #
-#  See also:
+#  See also
 #  - http://www.astro.rug.nl/software/kapteyn/
+#  - http://www.amusecode.org/doc/install/howto-install-prerequisites.html
 #
 #  History:
 #     sometime-2006  Written for miriad                                           PJT
 #     oct-2006       updated some of the versions to current, added numdisplay    PJT
 #     jul-2009       updated to current, fix some g77/gfortran issues, added zlib PJT
+#     aug-2009       allow build to take place someplace else                     PJT
+#     mar-2010       merged various version
+#
+#  TODO:
+#     figure out the issue with not using zlib, why python does not recognize my system's version
 
 #                         binaries
 set prefix=`pwd`/opt
 #                         control the sources
 set dir=`pwd`             # place where tar balls live
 set download=0            # or download them from scratch
+set build=build
 set sf=superb             # sourceforge mirror ($sf.dl.sourceforge.net)   [superb,easynews,umn,internap]
 
 #                         basenames for url to get source from
@@ -82,6 +91,7 @@ set matplotlib=0.98.5.3
 set gnuplot=1.7
 set pyephem=3.7.3.4
 set aipy=0.9.0
+set aplpy=0.9.3
 set zlib=1.2.3
 #                         poor mans command line parser....
 foreach arg ($*)
@@ -89,9 +99,9 @@ foreach arg ($*)
 end
 
 #                         we'll do all the work in a clean build tree
-mkdir -p build
+mkdir -p $build
 mkdir -p $prefix
-cd build
+cd $build
 
 #                         useful aliases
 alias report_status 'set err=$status;\
@@ -280,6 +290,13 @@ echo -n "aipy $aipy "
 set p=aipy-$aipy
 tar zxf $dir/$p.tar.gz
 (cd $p ; python setup.py install) >& install.aipy.log
+report_status
+
+#                                                   aplpy
+echo -n "aplpy $aplpy "
+set p=APLpy-$aplpy
+tar zxf $dir/$p.tar.gz
+(cd $p ; python setup.py install) >& install.aplpy.log
 report_status
 
 
