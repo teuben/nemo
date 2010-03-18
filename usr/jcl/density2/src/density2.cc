@@ -132,7 +132,7 @@ void falcON::main() falcON_THROWING
   const fieldset GIVE( getioparam_z("give") | fieldset::x | fieldset::y | fieldset::r);
 
   const fieldset WANT((GIVE & ~fieldset(fieldset::r) & ~fieldset(fieldset::y) ) | SRCE |
-		      (BF? BF.need() : fieldset(fieldset::o)));
+		      (BF? BF.need() : fieldset(fieldset::empty)));
   const unsigned K   (getiparam("K"));
   const unsigned method(getiparam("m"));
   const bool     VERB(getbparam("verbose"));
