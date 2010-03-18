@@ -30,6 +30,9 @@
 #  - ppgplot and gfortran seem not to work together
 #  - scipy still missing numerous things (now solved with blas and lapack)
 #
+#  See also:
+#  - http://www.astro.rug.nl/software/kapteyn/
+#
 #  History:
 #     sometime-2006  Written for miriad                                           PJT
 #     oct-2006       updated some of the versions to current, added numdisplay    PJT
