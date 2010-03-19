@@ -5,11 +5,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2000-2009
+/// \date    2000-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2009  Walter Dehnen
+// Copyright (C) 2000-2010  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -836,7 +836,8 @@ void ForceDiagGrav::dia_stats_body(output&o) const
 ////////////////////////////////////////////////////////////////////////////////
 void ForceALCON::reset_softening(
 				  kern_type ker,
-				  real      e
+				  real      e,
+				  real      es
 #ifdef falcON_ADAP
 				 ,real      ns,
 				  unsigned  nr,
@@ -857,7 +858,7 @@ void ForceALCON::reset_softening(
     falcON_THROW("ForceALCON: using individual adaptive softening, "
 		 "but Nsoft=0\n");
 #endif
-  FALCON.reset_softening(abs(e),ker);
+  FALCON.reset_softening(abs(e),abs(es),ker);
 }
 ////////////////////////////////////////////////////////////////////////////////
 ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
@@ -867,7 +868,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       const vect        *x0,      // I: pre-set root centre    
 		       kern_type          ke,      // I: softening kernel       
 		       real               g,       // I: Newton's G             
-		       real               f,       // I: theta_sink/theta       
+		       real               es,      // I: eps for sink particles
 		       unsigned           ru,      // I: # reused of tree       
 		       const acceleration*ae,      // I: external acceleration  
 		       const unsigned     gd[4],   // I: direct sum: gravity    
@@ -879,7 +880,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       ,real              ef       // I: eps_fac                
 #endif
 #ifdef falcON_SPH
-		       ,const unsigned   sd[3]    //[I: direct sum: SPH]       
+		       ,const unsigned    sd[3]    //[I: direct sum: SPH]       
 #endif
 		       ) falcON_THROWING :
   ForceDiagGrav ( s, ae, g!=zero ),
@@ -889,7 +890,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   REUSE         ( ru ),
   FALCON        ( s, abs(e), abs(th), ke,
 		  SOFTENING != global_fixed,
-		  g, th < zero? const_theta : theta_of_M, f, gd
+		  g, th < zero? const_theta : theta_of_M, abs(es), gd
 #ifdef falcON_SPH
 		  , sd
 #endif
@@ -897,7 +898,9 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   REUSED        ( ru ),
   CPU_TREE      ( 0. ),
   CPU_GRAV      ( 0. ),
-  CPU_AEX       ( 0. )
+  CPU_AEX       ( 0. ),
+  __EPS         ( e ),
+  __EPSSINK     ( es? es:e )
 {
 #ifdef falcON_MPI
   if(SELF_GRAV && MPI::Initialized())
@@ -910,6 +913,8 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 #else
   reset_softening(ke,e);
 #endif
+  s->add_pointer(&__EPS,"eps");
+  s->add_pointer(&__EPSSINK,"epssink");
   DebugInfo(4,"ForceALCON constructed\n");
 }
 //------------------------------------------------------------------------------
@@ -932,10 +937,10 @@ void ForceALCON::set_tree_and_forces(bool all, bool build_tree) const
     // 2.1 compute self-gravity
 #ifdef falcON_ADAP
     if(SOFTENING==individual_adaptive)             // IF adaptive softening     
-      FALCON.approximate_gravity(true,all,NSOFT,NREF,EMIN,EFAC);
+      FALCON.approximate_gravity(all,NSOFT,NREF,EMIN,EFAC);
     else                                           // ELIF: fixed softening     
 #endif
-      FALCON.approximate_gravity(true,all);        // ELIF: fixed softening     
+      FALCON.approximate_gravity(all);             // ELIF: fixed softening     
     Integrator::record_cpu(cpu,CPU_GRAV);          // record CPU consumption    
   } else {
     // 2.2 no self-gravity: //   reset pot and acc

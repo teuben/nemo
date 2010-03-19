@@ -3,7 +3,7 @@
 //
 // gyrfalcON.cc
 //
-// Copyright (C) 2000-2008 Walter Dehnen
+// Copyright (C) 2000-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -133,9 +133,10 @@
 // v 3.3    09/10/2008  WD step=100, initial manip even if tstop=tini
 // v 3.3.1  29/10/2008  WD changes in nbody.h
 // v 3.3.2  04/11/2008  WD individual eps_i always enabled
+// v 3.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink
 //------------------------------------------------------------------------------
-#define falcON_VERSION   "3.3.2"
-#define falcON_VERSION_D "04-nov-2008 Walter Dehnen                          "
+#define falcON_VERSION   "3.4"
+#define falcON_VERSION_D "19-mar-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
@@ -155,9 +156,6 @@ const char*defv[] = {
   "logstep=1\n        # blocksteps between log outputs                   ",
   "theta="falcON_THETA_TEXT
   "\n                 tolerance parameter at M=M_tot                     ",
-#ifdef falcON_PROPER
-  "fsink=1\n          theta_sink / theta (only values <=1 are used)      ",
-#endif
   "hgrow=0\n          grow fresh tree every 2^hgrow smallest steps       ",
   "Ncrit="falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells                     ",
@@ -167,6 +165,9 @@ const char*defv[] = {
 #else
   "eps=0.05\n         >=0: softening length\n"
   "                   < 0: use individual fixed softening lengths        ",
+#endif
+#ifdef falcON_PROPER
+  "epssink=\n         softening length for sink particles (default: eps) ",
 #endif
   "kernel="falcON_KERNEL_TEXT
   "\n                 softening kernel of family P_n (P_0=Plummer)       ",
@@ -254,14 +255,14 @@ void falcON::main() falcON_THROWING
 		  getuparam  ("hgrow"),
 		  getvparam_z("root_center",X0),
 		  getrparam  ("eps"),
-		  kern(getiparam  ("kernel")),
+	     kern(getiparam  ("kernel")),
 		  aex,
 		  getrparam  ("theta"),
 		  getrparam  ("Grav"),
 #ifdef falcON_PROPER
-		  getrparam  ("fsink"),
+		  getrparam_z("epssink"),
 #else
-		  one,
+		  zero,
 #endif
 #ifdef falcON_ADAP
 		  getrparam  ("Nsoft"),

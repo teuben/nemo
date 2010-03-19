@@ -63,8 +63,8 @@ namespace {
   using namespace falcON;
   using falcON::real;
   fieldbit     PROP;
-  Bodyfunc    *FUNC;
-  BodyFilter  *FILTER;
+  Bodyfunc    *FUNC = 0;
+  BodyFilter  *FILTER = 0;
   snapshot     SHOT;
   template<int BIT> struct SetVal {
     static void act(int const&) {
@@ -110,6 +110,6 @@ void falcON::main() falcON_THROWING {
     if(!OUT) OUT.open(getparam("out"));
     SHOT.write_nemo(OUT,COPY);
   }
-  falcON_DEL_O(FILTER);
+  if(FILTER) falcON_DEL_O(FILTER);
   falcON_DEL_O(FUNC);
 }

@@ -3,7 +3,7 @@
 //                                                                             |
 /// /file inc/public/kernel.h                                                  |
 //                                                                             |
-// Copyright (C) 2000-2008  Walter Dehnen                                      |
+// Copyright (C) 2000-2010  Walter Dehnen                                      |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -226,6 +226,15 @@ namespace falcON {
     /// given X^2 and Eps^2, compute negative gravitational potential
     static real Psi(kern_type k, real Xq, real Eq);
     //--------------------------------------------------------------------------
+    const real&current_eps  ()     const { return EPS; }
+    const real&current_epsq ()     const { return EQ; }
+    //--------------------------------------------------------------------------
+    void reset_eps(real e)
+    {
+      const_cast<real&>(EPS) = e;
+      const_cast<real&>(EQ)  = e*e;
+    }
+    //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -291,10 +300,6 @@ namespace falcON {
     //--------------------------------------------------------------------------
     ~GravKern() { flush_buffers(); }
     //--------------------------------------------------------------------------
-  public:
-    const real&current_eps  ()     const { return EPS; }
-    const real&current_epsq ()     const { return EQ; }
-    //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -358,10 +363,6 @@ namespace falcON {
     // destruction: flush buffers                                               
     //--------------------------------------------------------------------------
     ~GravKernAll() { flush_buffers(); }
-    //--------------------------------------------------------------------------
-  public:
-    const real&current_eps  ()     const { return EPS; }
-    const real&current_epsq ()     const { return EQ; }
     //--------------------------------------------------------------------------
   };
   //////////////////////////////////////////////////////////////////////////////

@@ -138,7 +138,7 @@ namespace Manipulate {
 	  b.unflag_active();
       all = Nsub == S->N_bodies();
     }
-    Forces->approximate_gravity(true,all);
+    Forces->approximate_gravity(all);
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////

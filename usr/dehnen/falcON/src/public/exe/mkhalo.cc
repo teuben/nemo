@@ -56,9 +56,10 @@
 // v 2.4.8  12/03/2009  WD  warning if accpars or accfile given but no accname
 // v 2.4.9  03/07/2009  WD  keyword r_max
 // v 2.5    08/07/2009  WD  automatically careful if DF non-monotonic
+// v 2.5.1  15/03/2010  WD  inserted explanation of max_r
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.5"
-#define falcON_VERSION_D "08-jun-2009 Walter Dehnen                          "
+#define falcON_VERSION   "2.5.1"
+#define falcON_VERSION_D "15-mar-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -83,7 +84,10 @@ const char*defv[] = {
   "r_t=0\n            truncation radius (0 maps to infinity)             ",
   "b=0\n              anisotropy parameter; -1.5 <= b <= min(1,g/2)      ",
   "r_a=0\n            anisotropy radius (0 maps to infinity)             ",
-  "max_r=\n           radius beyond which total Pot ~= GM/r              ",
+  "max_r=\n           radius beyond which total Pot ~= GM/r\n"
+  "                   (NOT a truncation radius)\n"
+  "                   use when external potential's mass extends much\n"
+  "                   further than that of halo sampled                  ",
   "seed=0\n           seed for the randum number generator               ",
   "q-ran=f\n          use quasi- instead of pseudo-random numbers        ",
   "time=0\n           simulation time of snapshot                        ",

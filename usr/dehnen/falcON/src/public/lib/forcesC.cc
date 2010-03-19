@@ -362,21 +362,21 @@ extern "C" {
   {
     __falcON_error("falcON_adjust_epsi_and_approx_gravity");
     __falcON_grown("falcON_adjust_epsi_and_approx_gravity");
-    FALCON->approximate_gravity(true,false,real(Nsoft),Nref,real(fac));
+    FALCON->approximate_gravity(false,real(Nsoft),Nref,real(fac));
   }
   //----------------------------------------------------------------------------
   void falcon_adjust_epsi_and_approx_grav_(real*Nsoft, int*Nref, real*fac)
   {
     __falcON_error("falcon_adjust_epsi_and_approx_gravity");
     __falcON_grown("falcon_adjust_epsi_and_approx_gravity");
-    FALCON->approximate_gravity(true,false,real(*Nsoft),*Nref,real(*fac));
+    FALCON->approximate_gravity(false,real(*Nsoft),*Nref,real(*fac));
   }
   //----------------------------------------------------------------------------
   void falcon_adjust_epsi_and_approx_grav__(real*Nsoft, int*Nref, real*fac)
   {
     __falcON_error("falcon_adjust_epsi_and_approx_gravity");
     __falcON_grown("falcon_adjust_epsi_and_approx_gravity");
-    FALCON->approximate_gravity(true,false,real(*Nsoft),*Nref,real(*fac));
+    FALCON->approximate_gravity(false,real(*Nsoft),*Nref,real(*fac));
   }
   //===========================================================================#
 #endif

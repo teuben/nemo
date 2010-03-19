@@ -7,11 +7,11 @@
 ///	    joint interface for any force computation in falcON.                
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   1999-2008                                                           
+/// \date   1999-2010                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1999-2008 Walter Dehnen                                        
+// Copyright (C) 1999-2010 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -104,19 +104,19 @@ namespace falcON {
     /// arguments are obligatory.                                               
     /// \param B   pter to set of bodies for which forces etc shall be computed 
 #ifdef falcON_ADAP
-    /// \param eps global or maximal gravitational softening length.            
+    /// \param eps   global or maximal gravitational softening length 
 #else
-    /// \param eps gravitational softening length; ignored if individual eps_i  
+    /// \param eps   gravitational softening length; ignored if individual eps_i 
 #endif
-    /// \param th  gravitational opening angle theta                            
-    /// \param ker type of gravitational softening kernel                       
-    /// \param in  use individual softening lengths eps_i?                      
-    /// \param G   Newton's gravitational constant                              
-    /// \param mt  type of multipole acceptance criterion (MAC_type)            
-    /// \param sfac factor theta_sink/theta                                     
-    /// \param dir constants controlling usage of direct summation for gravity  
+    /// \param th    gravitational opening angle theta 
+    /// \param ker   type of gravitational softening kernel 
+    /// \param in    use individual softening lengths eps_i?
+    /// \param G     Newton's gravitational constant
+    /// \param mt    type of multipole acceptance criterion (MAC_type) 
+    /// \param epssk global softening length for sink particles
+    /// \param dir   constants controlling usage of direct summation for gravity 
 #ifdef falcON_SPH
-    /// \param sdr constants controlling cell-opening for SPH force computation 
+    /// \param sdr   constants controlling cell-opening for SPH force computation
 #endif
     forces (const bodies  *B,
 	    real           eps,
@@ -125,7 +125,7 @@ namespace falcON {
 	    bool           in     = false,
 	    real           G      = one,
 	    MAC_type       mt     = theta_of_M,
-	    real           sfac   = one,
+	    real           epssk  = zero,
 	    const unsigned dir[4] = Default::direct
 #ifdef falcON_SPH
 	   ,const unsigned sdr[3] =Default::SPHdirect
@@ -133,9 +133,11 @@ namespace falcON {
 	    ) falcON_THROWING;
     //--------------------------------------------------------------------------
     /// reset the gravitational softening parameters                            
-    /// \param eps gravitational softening length                               
-    /// \param ker type of gravitational softening kernel                       
+    /// \param eps   gravitational softening length
+    /// \param epssk softening length for sink particles 0: same as @a eps
+    /// \param ker   type of gravitational softening kernel
     void reset_softening(real      eps,
+			 real      epssk=zero,
 			 kern_type ker=Default::kernel) const;
     //--------------------------------------------------------------------------
     /// reset the gravitational force approximation parameters                  
@@ -222,9 +224,12 @@ namespace falcON {
     /// \note                                                                   
     /// Bodies not loaded into tree at grow() will neither receive gravity nor  
     /// will their masses matter. Note that by default sink bodies are NOT      
-    /// loaded into the tree                                                    
+    /// loaded into the tree
+    ///
+    /// \note
+    /// Since Mar-2010, the option not to combine the interaction and evluation
+    /// phase (used to be the first argument) is no longer possible.
     ///                                                                         
-    /// \param com combine phases 2 and 3? (saves some memory)                  
     /// \param all compute forces for all or only active bodies?                
 #ifdef falcON_ADAP
     /// \param Nsoft # bodies within individual adaptive softening volumes      
@@ -232,8 +237,7 @@ namespace falcON {
     /// \param emin  minimum eps_i                                              
     /// \param efac  maximum change factor for eps_i                            
 #endif
-    void approximate_gravity(bool     com   = true,
-			     bool     all   = false
+    void approximate_gravity(bool     all   = false
 #ifdef falcON_ADAP
 			    ,real     Nsoft = zero,
 			     unsigned Nref  = 0u,

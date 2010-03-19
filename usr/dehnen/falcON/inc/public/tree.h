@@ -410,13 +410,15 @@ namespace falcON {
     /// \param S  (optional input) specific flag: only use bodies flagged
     /// \param xmin (optional input) minimum position in each dimension
     /// \param xmax (optional input) maximum position in each dimension
+    /// \param putsinksout put leaf for sink particles in root cell
     OctTree(const bodies*B,
 	    int          Nc,
 	    const vect*  C= 0,
 	    int          D= Default::MaxDepth,
 	    flags        S= flags::empty,
 	    const vect  *xmin = 0,
-	    const vect  *xmax = 0);
+	    const vect  *xmax = 0,
+	    bool putsinksout  = true);
     //--------------------------------------------------------------------------
     /// construct as sub-tree
     /// \param T  (input) parent tree
@@ -472,9 +474,11 @@ namespace falcON {
     /// \param Nc (input) Ncrit: minimum # bodies/cell
     /// \param C  (optional input): root centre
     /// \param D  (optional input): maximum tree depth
+    /// \param putsinksout put leaf for sink particles under root
     void build(int        const&Nc,
 	       const vect*const&C= 0,
-	       int        const&D= Default::MaxDepth);
+	       int        const&D= Default::MaxDepth,
+	       bool putsinksout=true);
     //--------------------------------------------------------------------------
     /// tree-re-use: just update the leafs' positions
     void reuse();

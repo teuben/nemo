@@ -4,13 +4,13 @@
 /// \file   inc/public/forces.cc                                                
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   1999-2008                                                           
+/// \date   1999-2010                                                           
 ///                                                                             
 /// \brief  defines all function members of class forces                        
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1999-2008 Walter Dehnen                                        
+// Copyright (C) 1999-2010 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -69,7 +69,7 @@ namespace falcON {
 			bool           i_soft,
 			real           g,
 			MAC_type       mac,
-			real           f,
+			real           es,
 			const unsigned gd[4]
 #ifdef falcON_SPH
 		       ,const unsigned sd[3]
@@ -80,7 +80,7 @@ namespace falcON {
     Ncrit   ( 0 ),
     TREE    ( 0 ),
     GMAC    ( new GravMAC(mac, abs(th), falcON_ORDER) ),
-    GRAV    ( new GravEstimator(TREE,k,STATS,e,g,i_soft,f,gd) ),
+    GRAV    ( new GravEstimator(TREE,k,STATS,e,g,i_soft,es,gd) ),
     PAES    ( 0 ),
     SPHT    ( 
 #ifdef falcON_SPH
@@ -111,9 +111,9 @@ namespace falcON {
     return GRAV->use_indiv_eps();
   }
   //----------------------------------------------------------------------------
-  inline void forces::reset_softening (real e, kern_type k) const
+  inline void forces::reset_softening (real e, real es, kern_type k) const
   {
-    GRAV->reset_softening(e,k);
+    GRAV->reset_softening(e,es,k);
   }
   //----------------------------------------------------------------------------
   inline void forces::reset_NewtonsG (real g) const
@@ -361,8 +361,7 @@ namespace falcON {
   // APPROXIMATION OF GRAVITY                                                  |
   //                                                                           |
   //---------------------------------------------------------------------------+
-  inline void forces::approximate_gravity(bool     split,
-					  bool     all
+  inline void forces::approximate_gravity(bool     all
 #ifdef falcON_ADAP
 					 ,real     Nsoft,
 					  unsigned Nref,
@@ -374,7 +373,7 @@ namespace falcON {
 #endif
 					  ) falcON_THROWING
   {
-    GRAV->approx(GMAC,all,split ADAP_ARGS);
+    GRAV->approx(GMAC,all ADAP_ARGS);
   }
   //----------------------------------------------------------------------------
   inline void forces::exact_gravity(bool     all

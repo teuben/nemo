@@ -3,7 +3,7 @@
 //                                                                             
 // gravity.h
 //
-// Copyright (C) 2000-2006,2009 Walter Dehnen
+// Copyright (C) 2000-2006,2009-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -409,9 +409,9 @@ namespace falcON {
     const unsigned        DIR[4];                  // direct loop control       
     kern_type             KERNEL;                  // softening kernel          
     GravStats            *STATS;                   // interaction statistics    
-    real                  EPS;                     // global softening length   
+    real                  EPS;                     // global softening length
+    real                  EPSSINK;                 // softening length for sinks
     real                  GRAV;                    // Newton's G (can be 0)     
-    real                  SFAC;                    // factor theta_sink/theta   
     unsigned              Ncoeffs,Nchunks,Ncsize;  // # coeffs, chunks, bytes/c 
     Cell::srce_data      *CELL_SRCE;               // memory for cell srce      
     Leaf::acpn_data      *LEAF_ACPN;               // memory for leafs          
@@ -474,7 +474,7 @@ namespace falcON {
 		  real           e,                // I: global/max eps         
 		  real           g = one,          //[I: Newton's G]            
 		  bool           s = 0,            //[I: use individual eps?]   
-		  real           f = one,          //[I: theta_sink/theta]      
+		  real           es= zero,         //[I: eps_sink]      
 		  const unsigned d[4]=Default::direct): //[I: N_direct for grav]
       TREE           ( T ),
       LEAFS_UPTODATE ( 0 ),
@@ -484,8 +484,8 @@ namespace falcON {
       KERNEL         ( k ),
       STATS          ( st ),
       EPS            ( e ),
+      EPSSINK        ( es? es : e ),
       GRAV           ( g ),
-      SFAC           ( f ),
       Ncoeffs        ( 0u ),
       Nchunks        ( 0u ),
       Ncsize         ( 0u ),
@@ -515,8 +515,11 @@ namespace falcON {
     }
     //--------------------------------------------------------------------------
     void reset_softening(real      e,
-			 kern_type k) {
+			 real      es,
+			 kern_type k)
+    {
       EPS    = e;
+      EPSSINK= es? es:e;
       KERNEL = k;
     }
     //--------------------------------------------------------------------------
@@ -543,8 +546,7 @@ namespace falcON {
     //   if enabled, also adapt the individual softening lengths                
     //--------------------------------------------------------------------------
     void approx(const GravMAC*,                    // I: MAC                    
-		bool          =false,              //[I: for all or active only]
-		bool          =true                //[I: combine phases]        
+		bool          =false               //[I: for all or active only]
 #ifdef falcON_ADAP
 	       ,real          =zero,               //[I: Nsoft: adjust eps_i]   
 		unsigned      =0u,                 //[I: Nref:  adjust eps_i]   
@@ -568,9 +570,9 @@ namespace falcON {
     kern_type      const&kernel          () const { return KERNEL; }
     GravStats     *const&stats           () const { return STATS; }
     real           const&NewtonsG        () const { return GRAV; }
-    real           const&sink_fac        () const { return SFAC; }
     bool                 ZeroGravity     () const { return GRAV==zero; }
     real           const&softening_length() const { return EPS; }
+    real           const&softening_length_for_sinks() const { return EPSSINK; }
     unsigned       const&N_active_cells  () const { return NCA; }
     unsigned       const&N_active_leafs  () const { return NLA; }
     unsigned       const&N_coeffs        () const { return Ncoeffs; }

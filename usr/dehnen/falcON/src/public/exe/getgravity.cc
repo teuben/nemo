@@ -3,7 +3,7 @@
 //                                                                             |
 // getgravity.cc                                                               |
 //                                                                             |
-// Copyright (C) 2002-2008 Walter Dehnen                                       |
+// Copyright (C) 2002-2010 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -35,9 +35,10 @@
 // v 2.3.1  19/09/2007  WD ??                                                  |
 // v 2.3.2  20/02/2008  WD more changes in body.h                              |
 // v 2.3.3  10/09/2008  WD happy gcc 4.3.1                                     |
+// v 2.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.3.3"
-#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
+#define falcON_VERSION   "2.4"
+#define falcON_VERSION_D "19-mar-2010 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO
 #error You need NEMO to compile "src/mains/getgravity.cc"
@@ -51,12 +52,16 @@ const char*defv[] = {
   "out=???\n           output file         [x,a,p]     ",
   "times=all\n         time range (for srce only)      ",
   "eps=0.05\n          softening length                ",
+#ifdef falcON_PROPER
+  "epssink=\n          softening length for sink particles (default: eps) ",
+#endif
   "kernel="falcON_KERNEL_TEXT
   "\n                  softening kernel                ",
   "theta="falcON_THETA_TEXT
   "\n                  tolerance parameter at M=M_tot  ",
   "Ncrit="falcON_NCRIT_TEXT
   "\n                  max # bodies in un-split cells  ",
+  "Grav=1\n           Newton's constant of gravity (0-> no self-gravity) ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
 const char*usage =
@@ -68,8 +73,21 @@ void falcON::main() falcON_THROWING
   nemo_out       out(getparam("out"));
   const fieldset write(fieldset::x | fieldset::p | fieldset::a);
   snapshot       shot(fieldset::gravity);
-  forces         falcon(&shot,getrparam("eps"), getrparam("theta"),
-			kern_type(getiparam("kernel")));
+  bool           SOFT(getrparam("eps") < 0);
+  real           TH(getrparam("theta"));
+  forces         falcon(&shot,
+			getrparam("eps"),
+			TH,
+			kern_type(getiparam("kernel")),
+			SOFT,
+			getrparam("Grav"),
+			TH< zero? const_theta : theta_of_M,
+#ifdef falcON_PROPER
+			getrparam_z("epssink")
+#else
+			zero
+#endif
+      );
   const fieldset srcedata(fieldset::m|fieldset::x);
   while(srce.has_snapshot()) {
     // open snapshot with sources and check for time in range, if both given

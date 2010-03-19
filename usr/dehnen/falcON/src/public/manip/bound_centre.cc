@@ -34,6 +34,7 @@
 // v 1.0    06/11/2008  WD new algorithm for centre
 // v 1.1    21/11/2008  WD subtract sinks' contribution to gravity
 // v 2.0    09/02/2010  WD fixed bug in subtraction of sink potential
+// v 2.1    19/03/2010  WD epssink
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/default.h>
@@ -85,10 +86,17 @@ namespace Manipulate {
   /// Meaning of the parameters:\n
   /// pars[0]: number \f$K\f$ of particles to consider (default: 256)\n
   /// pars[1]: power \f$\alpha\f$ in energy weighting (default: 3)\n
-  /// pars[2]: (0,1,2,3): kernel for subtracting off satellite
+  /// pars[2]: (0,1,2,3): kernel for subtracting off satellite\n
+  /// pars[3]: softening length for sink particles
   /// file: write centre position to file.
   ///
-  /// Usage of pointers: sets 'xcen' and 'vcen'\n
+  /// \note If individual softening length are provided with the snapshot, we
+  ///       use them to correct for the sink potential. If they are not
+  ///       provided, we use the value provided with pars[3]. If none is
+  ///       provided, we use the value given by pointer 'epssink', if present,
+  ///       otherwise a fatal error is thrown.
+  ///
+  /// Usage of pointers: sets 'xcen' and 'vcen', may use 'epssink'
   /// Usage of flags:    uses in_subset()\n
   ///
   // ///////////////////////////////////////////////////////////////////////////
@@ -97,6 +105,8 @@ namespace Manipulate {
     unsigned        K;
     double          A;
     const kern_type KERN;
+    const real      EQ;
+    const bool      HaveE;
     mutable output  OUT;
     mutable vect    XCEN,VCEN;
     mutable bool    FIRST;
@@ -156,6 +166,8 @@ namespace Manipulate {
     : K    ( npar>0? max(1,int(pars[0])) : K_default ),
       A    ( npar>1? pars[1]  : A_default ),
       KERN ( npar>2? kernel(int(pars[2])) : Default::kernel ),
+      EQ   ( npar>3? square(pars[3]) : zero ),
+      HaveE( npar>3 ),
       OUT  ( file, true ),
       XCEN ( vect(zero) ),
       VCEN ( vect(zero) ),
@@ -175,7 +187,8 @@ namespace Manipulate {
 	  " as indicated by par[2]\n"
 	  " pars[0] K (default "<<K_default<<")\n"
 	  " pars[1] A (default "<<A_default<<")\n"
-	  " pars[2] k (default 1)\n";
+	  " pars[2] k (default 1)\n"
+	  " pars[3] e softening length to correct for sink contribution\n";
       if(A < 0)
 	falcON_THROW("Manipulator \"%s\": "
 		     "A=%f < 0",name(),A);
@@ -205,13 +218,22 @@ namespace Manipulate {
     Pot.reset(S->N_bodies());
     real Pmin=zero;
     body Bmin;
+    if(S->N_bodies(bodytype::sink) && !S->have_eps() && !HaveE) {
+      const real*es=S->pointer<real>("epssink");
+      if(!es)
+	falcON_THROW("Manipulator bound_centre: cannot determine "
+		     "softening lenght required for correcting "
+		     "contribution of sink particles to potential\n");
+      const_cast<real&>(EQ) = square(*es);
+    }
     LoopSubsetBodies(S,b) {
       real phi=zero;
       if(S->have_pot()) phi += pot(b);
       if(S->have_pex()) phi += pex(b);
       LoopSinkBodies(S,s) if(!in_subset(s))
-	phi += mass(s) * GravKernBase::Psi(KERN,dist_sq(pos(b),pos(s)),
-					   square(half*(eps(b)+eps(s))));
+	phi+= mass(s) *
+	  GravKernBase::Psi(KERN,dist_sq(pos(b),pos(s)),
+			    S->have_eps()? square(half*(eps(b)+eps(s))) : EQ);
       Pot[bodyindex(b)] = phi;
       if(phi < Pmin) {
 	Pmin = phi;

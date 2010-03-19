@@ -4,7 +4,7 @@
 /// \file   inc/public/nbody.h                                                  
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2008                                                           
+/// \date   2000-2010                                                           
 ///                                                                             
 /// \brief  provides classes for the efficient implementation of N-body codes   
 ///                                                                             
@@ -24,10 +24,11 @@
 ///                        allow for the new schemes in DirectCode.cc           
 ///                     WD increase precision of log output if real==double     
 /// \version 13-07-2005 WD adapt for new falcON                                 
-///                                                                             
+/// \version 19-03-2010 WD epssink
+///
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2008 Walter Dehnen                                        
+// Copyright (C) 2000-2010 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -927,6 +928,7 @@ namespace falcON {
     mutable forces      FALCON;            ///< force algorithm(s)
     mutable unsigned    REUSED;            ///< how often has tree been re-used
     mutable double      CPU_TREE, CPU_GRAV, CPU_AEX; ///< CPU timings
+    const real          __EPS,__EPSSINK;
     //@}
     /// build tree and compute forces
     /// \param[in] all   for all bodies (or active only)?
@@ -934,9 +936,10 @@ namespace falcON {
     void set_tree_and_forces(bool all, bool build) const;
   public:
     /// reset softening parameters
-    /// \param[in] kern  softening kernel
-    /// \param[in] eps   softening length
-    void reset_softening(kern_type kern, real eps
+    /// \param[in] kern    softening kernel
+    /// \param[in] eps     softening length
+    /// \param[in] epssink softening length for sink particles
+    void reset_softening(kern_type kern, real eps, real epssink=zero
 #ifdef falcON_ADAP
 			,real     ,                // I: Nsoft                  
 			 unsigned ,                // I: Nref                   
@@ -952,7 +955,7 @@ namespace falcON {
     /// \param[in] rc pter to root-centre (if non-NULL)
     /// \param[in] k  softening kernel
     /// \param[in] G  Newton's constant of gravity
-    /// \param[in] fs theta_sink/theta
+    /// \param[in] es softening for sink particles
     /// \param[in] nr tree re-using (not recommended)
     /// \param[in] ae external acceleration
     /// \param[in] nd direct-summation control for gravity
@@ -961,7 +964,7 @@ namespace falcON {
     /// \param[in] sd direct-summation control for SPH
 #endif
     ForceALCON(snapshot*s, real e, real th, unsigned nc, const vect*rc,
-	       kern_type k, real G, real fs, unsigned nr, const acceleration*ae,
+	       kern_type k, real G, real es, unsigned nr, const acceleration*ae,
 	       const unsigned nd[4]
 	       , soft_type st
 #ifdef falcON_ADAP
@@ -1053,7 +1056,7 @@ namespace falcON {
     /// \param aex    pter to external acceleration field
     /// \param theta  opening angle
     /// \param Grav   Newton's constant of gravity
-    /// \param sfac   theta_sink/theta
+    /// \param epssk  softening length for sink particles
 #ifdef falcON_ADAP
     /// \param Nsoft  # of bodies in softening shpere
     /// \param Nref   # of bodies in smallest cell to estimate eps_i
@@ -1084,7 +1087,7 @@ namespace falcON {
 	       const acceleration*aex,
 	       real               theta,
 	       real               Grav,
-	       real               sfac,
+	       real               epssk,
 	       // default arguments                                             
 #ifdef falcON_ADAP
 	       real               Nsoft = zero,
@@ -1098,7 +1101,7 @@ namespace falcON {
       NBodyCode ( file, resume, to_read(read,
 					soft!=global_fixed ? 1 : 0,
 					Grav || aex), trange ),
-      ForceALCON( SHOT, eps, theta, Ncrit, croot, kernel, Grav, sfac,
+      ForceALCON( SHOT, eps, theta, Ncrit, croot, kernel, Grav, epssk,
 		  (1<<hgrow)-1, aex, dir ,soft
 #ifdef falcON_ADAP
 		  ,Nsoft, Nref, emin, 1.1

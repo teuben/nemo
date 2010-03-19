@@ -3,7 +3,7 @@
 //                                                                             |
 // TestGrav.cc                                                                 |
 //                                                                             |
-// Copyright (C) 2000-2004, 2008 Walter Dehnen                                 |
+// Copyright (C) 2000-2004, 2008, 2010 Walter Dehnen                           |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -69,7 +69,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 {
   if(argc < 6) {
     cerr<<
-      " \"TestGrav MOD gam N S EPS [Ngrow theta K"
+      " \"TestGrav MOD gam N S EPS [Ngrow Ns theta K"
 #ifdef falcON_ADAP
       " Nsoft Nref emin"
 #endif
@@ -78,7 +78,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 #if (0)
       " Ncut"
 #endif
-      " Nact MAC s Ncb0 Ncb1 Ncc Ncs Rmax DUMP]\" with \n"
+      " Nact MAC Ncb0 Ncb1 Ncc Ncs Rmax DUMP]\" with \n"
       " MOD = 0/1/2/3/4     : hom. sphere / Plummer / gamma-model"
       " / Kuzmin disk / hom. disk\n"
       " gam                 : parameter of model (if any)\n"
@@ -86,6 +86,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       " S = long            : seed for RNG\n"
       " EPS                 : fixed / maximum individual softening length\n"
       " Ngrow(default   0)  : # additional grow()s\n"
+      " Ns   (default   0)  : # sink particles\n"
       " theta(default "<<std::setw(4)<<Default::theta
 	<<") : accuracy parameter\n"
       " K    (default   "<<falcON_KERNEL_TEXT<<")  : P_n softening kernel\n"
@@ -103,7 +104,6 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       " Nact (default   N)  : # active bodies\n"
       " MAC  (default   "<<falcON_MAC_TEXT
 	<<")  : 0/1/2/3: theta=const, f(M), f(M/rmax^2), f(M/rmax)\n"
-      " s    (default   1)  : interweave interaction & evaluation phase?\n"
       " Ncb0 (default "<<std::setw(3)<<Default::direct[0]<<")  : N_cb^pre\n"
       " Ncb1 (default "<<std::setw(3)<<Default::direct[1]<<")  : N_cb^post\n"
       " Ncc  (default "<<std::setw(3)<<Default::direct[2]<<")  : N_cc^post\n"
@@ -125,7 +125,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   kern_type         K   = Default::kernel;
   unsigned          Seed;
   unsigned          N, Nbod[bodytype::NUM]={0}, Nact;
-  unsigned          split=1, Ngrow=0;
+  unsigned          Ngrow=0, Nsink=0;
   unsigned          Ncrit=Default::Ncrit,
                     DIR[4]={Default::direct[0],Default::direct[1],
 			    Default::direct[2],Default::direct[3]};
@@ -134,11 +134,14 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   MOD  = atoi(argv[p++]);
   real GAM;
   GAM  = atof(argv[p++]);
-  N    = atoi(argv[p++]); Nbod[bodytype::std]=N;
+  N    = atoi(argv[p++]);
   Nact = N;
   Seed = atoi(argv[p++]);
   EPS  = atof(argv[p++]);
   if(argc>p) Ngrow  = atoi(argv[p++]);
+  if(argc>p) Nsink  = atoi(argv[p++]); if(Nsink>N) Nsink=0;
+  Nbod[bodytype::sink] = Nsink;
+  Nbod[bodytype::std ] = N-Nsink;
   if(argc>p) theta  = atof(argv[p++]);
   if(argc>p) K      = kern_type(atoi(argv[p++]) % 10);
 #ifdef falcON_ADAP
@@ -156,7 +159,6 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 #endif
   if(argc>p) Nact   = atoi(argv[p++]); if(Nact==0 || Nact>N) Nact=N;
   if(argc>p) MAC    = MAC_type (atoi(argv[p++]) % 10);
-  if(argc>p) split  = atoi(argv[p++]);
   if(argc>p) DIR[0] = atoi(argv[p++]);
   if(argc>p) DIR[1] = atoi(argv[p++]);
   if(argc>p) DIR[2] = atoi(argv[p++]);
@@ -284,9 +286,9 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
 
   cpu0 = clock();
 #ifdef falcON_ADAP
-  falcon.approximate_gravity(split,all,Nsoft,NREF,emin,0.);
+  falcon.approximate_gravity(all,Nsoft,NREF,emin,0.);
 #else
-  falcon.approximate_gravity(split,all);
+  falcon.approximate_gravity(all);
 #endif
   if(dump) falcon.dump_nodes("tree.cells","tree.leafs");
 

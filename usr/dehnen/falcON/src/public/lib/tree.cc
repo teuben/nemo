@@ -5,11 +5,11 @@
 ///                                                                             
 /// \author  Walter Dehnen                                                      
 ///                                                                             
-/// \date    2000-2009                                                          
+/// \date    2000-2010                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2000-2009  Walter Dehnen                                       
+// Copyright (C) 2000-2010  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -511,11 +511,11 @@ namespace {
     //--------------------------------------------------------------------------
     // data of class BoxDotTree                                                 
     //--------------------------------------------------------------------------
+  protected:
     int                NCRIT;                      // Ncrit                     
     int                DMAX, DEPTH;                // max/actual tree depth     
     size_t             NDOTS;                      // # dots (to be) added      
     block_alloc<box>  *BM;                         // allocator for boxes       
-  protected:
     const OctTree     *TREE;                       // tree to link              
     real              *RA;                         // array with radius(level)  
     box               *P0;                         // root of box-dot tree      
@@ -802,27 +802,6 @@ namespace {
     inline size_t const&N_dots     () const { return NDOTS; }
     inline int          N_levels   () const { return DMAX - P0->LEVEL; }
     inline real   const&root_rad   () const { return RA[P0->LEVEL]; }
-    //--------------------------------------------------------------------------
-    // non-const public methods                                                 
-    //--------------------------------------------------------------------------
-    void link()
-    {
-      report REPORT("BoxDotTree::link()");
-#ifdef falcON_track_bug
-      LEND = EndLeaf(TREE);
-      if(LEND != LeafNo(TREE,N_dots()))
-	falcON_Error("BoxDotTree::link(): leaf number mismatch");
-      CEND = EndCell(TREE);
-      if(CEND != CellNo(TREE,N_boxes()))
-	falcON_Error("BoxDotTree::link(): cell number mismatch");
-#endif
-      OctTree::Cell* C0 = FstCell(TREE), *Cf=C0+1;
-      OctTree::Leaf* Lf = FstLeaf(TREE);
-      pacell_(C0) = OctTree::Cell::INVALID;
-      DEPTH = NCRIT > 1?
-	link_cells_N(P0,0,0,C0,Cf,Lf) :
-	link_cells_1(P0,0,0,C0,Cf,Lf) ;
-    }
   };// class BoxDotTree
   //----------------------------------------------------------------------------
   int BoxDotTree::                                 // R:   tree depth of cell   
@@ -835,7 +814,7 @@ namespace {
 #endif
 	       OctTree::Cell* C,                   // I:   current cell         
 	       OctTree::Cell*&Cf,                  // I/O: index: free cells    
-	       OctTree::Leaf*&Lf)                   // I/O: index: free leafs    
+	       OctTree::Leaf*&Lf)                  // I/O: index: free leafs    
     const
   {
 #ifdef falcON_track_bug
@@ -1000,6 +979,8 @@ namespace {
     // data of class TreeBuilder                                                
     //--------------------------------------------------------------------------
     const vect *ROOTCENTRE;                        // pre-determined root centre
+    const bool  OUT;                               // # put sink in root only?
+    size_t      NOUT;                              // # dots only in root
     vect        XAVE, XMIN, XMAX;                  // extreme positions         
     //--------------------------------------------------------------------------
     // This routines returns the root centre nearest to the mean position       
@@ -1037,9 +1018,47 @@ namespace {
     //--------------------------------------------------------------------------
     // non-const public methods (almost all non-inline)                         
     //--------------------------------------------------------------------------
-    // This routine simply calls adddots() with the root box as argument.       
   public:
+    //--------------------------------------------------------------------------
+    // This routine simply calls adddots() with the root box as argument.       
+    //--------------------------------------------------------------------------
     void build();                                  // build box-dot tree        
+    //--------------------------------------------------------------------------
+    // This routine calls BoxDotTree::link() and adds root-only dots
+    //--------------------------------------------------------------------------
+    void link()
+    {
+      report REPORT("TreeBuilder::link()");
+#ifdef falcON_track_bug
+      LEND = EndLeaf(TREE);
+      if(LEND != LeafNo(TREE,N_dots()))
+	falcON_Error("TreeBuilder::link(): leaf number mismatch");
+      CEND = EndCell(TREE);
+      if(CEND != CellNo(TREE,N_boxes()))
+	falcON_Error("TreeBuilder::link(): cell number mismatch");
+#endif
+      OctTree::Cell*C0 = FstCell(TREE), *Cf=C0+1;
+      OctTree::Leaf*Lf = FstLeaf(TREE) + NOUT;
+      pacell_(C0) = OctTree::Cell::INVALID;
+      DEPTH = NCRIT > 1?
+	link_cells_N(P0,0,0,C0,Cf,Lf) :
+	link_cells_1(P0,0,0,C0,Cf,Lf) ;
+      if(NOUT) {
+	number_(C0) += NOUT;
+	nleafs_(C0) += NOUT;
+	fcleaf_(C0)  = 0;
+	Lf = FstLeaf(TREE);
+	for(dot*Di=D0,*Dn=D0+NOUT; Di!=Dn; ++Di) {
+#ifdef falcON_track_bug
+	  if(Lf == LEND)
+	    report::info("TreeBuilder::link_cells_N(): >max # leafs in twig");
+	  if(Di<D0 || Di>=DN)
+	    report::info("TreeBuilder::link_cells_N(): invalid dot* in twig");
+#endif
+	  Di->set_leaf(Lf++);
+	}
+      }
+    }
     //--------------------------------------------------------------------------
     // constructors of class TreeBuilder                                        
     //--------------------------------------------------------------------------
@@ -1052,7 +1071,8 @@ namespace {
 		const bodies *,                    // I: body sources           
 		flags         ,                    // I: flag specifying bodies 
 		const vect   * =0,                 //[I: x_min]                 
-		const vect   * =0) falcON_THROWING;//[I: x_max]                 
+		const vect   * =0,                 //[I: x_max]
+		bool           =1) falcON_THROWING;//[I: sinks are out?]
     //--------------------------------------------------------------------------
     // 2   from scratch, but aided by old tree                                  
     //     we put the dots to be added in the same order as the leafs of the    
@@ -1066,7 +1086,8 @@ namespace {
     TreeBuilder(const OctTree*,                    // I: old/new tree           
 		const vect   *,                    // I: pre-determined centre  
 		int           ,                    // I: Ncrit                  
-		int           ) falcON_THROWING;   // I: Dmax                   
+		int           ,                    // I: Dmax                   
+		bool        =1) falcON_THROWING;   //[I: sinks are out?]
     //--------------------------------------------------------------------------
     // destructor                                                               
     //--------------------------------------------------------------------------
@@ -1084,10 +1105,10 @@ namespace {
     size_t nl=0;                                   // counter: # dots added     
     dot   *Di;                                     // actual dot loaded         
     if(Ncrit() > 1)                                // IF(N_crit > 1)            
-      for(Di=D0; Di!=DN; ++Di,++nl)                //   LOOP(dots)              
+      for(Di=D0+NOUT; Di!=DN; ++Di,++nl)           //   LOOP(dots)              
 	adddot_N(P0,Di,nl);                        //     add dots              
     else                                           // ELSE                      
-      for(Di=D0; Di!=DN; ++Di,++nl)                //   LOOP(dots)              
+      for(Di=D0+NOUT; Di!=DN; ++Di,++nl)           //   LOOP(dots)              
 	adddot_1(P0,Di,nl);                        //     add dots              
   }
   //----------------------------------------------------------------------------
@@ -1110,7 +1131,9 @@ namespace {
     if(SP && !BB->have_flag())
       falcON_THROW("selecting flag given, "
 		   "but bodies have no flag in tree building\n");
-    dot*Di = D0 = falcON_NEW(dot,BB->N_bodies());
+    NOUT   = OUT? BB->N_bodies(bodytype::sink) : 0;
+    D0     = falcON_NEW(dot,BB->N_bodies());
+    dot*Di = D0;
     body b = BB->begin_all_bodies();
     XAVE = zero;
     XMAX = XMIN = pos(b);
@@ -1139,6 +1162,7 @@ namespace {
       falcON_THROW("selecting flag given, "
 		   "but bodies have no flag in tree building\n");
     if(BB->N_del()) return setup_from_scratch(BB,SP);
+    NOUT   = OUT? BB->N_bodies(bodytype::sink) : 0;
     dot*Di = D0 = falcON_NEW(dot,BB->N_bodies());
     XAVE = zero;
     XMAX = XMIN = BB->pos(mybody(LeafNo(TREE,0)));
@@ -1171,8 +1195,9 @@ namespace {
 			   const bodies *bb,
 			   flags         sp,
 			   const vect   *xmin,
-			   const vect   *xmax) falcON_THROWING
-  : ROOTCENTRE(x0)
+			   const vect   *xmax,
+			   bool          out) falcON_THROWING
+  : ROOTCENTRE(x0), OUT(out)
   {
     report REPORT("TreeBuilder::TreeBuilder(): 1");
     TREE = tr;
@@ -1185,8 +1210,9 @@ namespace {
   TreeBuilder::TreeBuilder(const OctTree*tr,
 			   const vect   *x0,
 			   int           nc,
-			   int           dm) falcON_THROWING
-  : ROOTCENTRE(x0)
+			   int           dm,
+			   bool          out) falcON_THROWING
+  : ROOTCENTRE(x0), OUT(out)
   {
     report REPORT("TreeBuilder::TreeBuilder(): 2");
     TREE = tr;
@@ -1304,12 +1330,13 @@ OctTree::OctTree(const bodies*bb,                  // I: body sources
 		 int          dm,                  // I: max tree depth         
 		 flags        sp,                  // I: flag specifying bodies 
 		 const vect  *xi,                  // I: x_min                  
-		 const vect  *xa) :                // I: x_max                  
+		 const vect  *xa,                  // I: x_max                  
+		 bool         out) :               // I: sink under root?
   BSRCES(bb), SPFLAG(sp), LEAFS(0), CELLS(0), ALLOC(0), NALLOC(0u),
   STATE(fresh), USAGE(un_used)
 {
   SET_I
-  TreeBuilder TB(this,x0,nc,dm,bb,sp,xi,xa);       // initialize TreeBuilder    
+    TreeBuilder TB(this,x0,nc,dm,bb,sp,xi,xa,out); // initialize TreeBuilder    
   SET_T(" time for TreeBuilder::TreeBuilder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
     TB.build();                                    //   build box-dot tree      
@@ -1356,13 +1383,14 @@ OctTree::OctTree(const OctTree*par,                // I: parent tree
 //------------------------------------------------------------------------------
 void OctTree::build(int        const&nc,           //[I: N_crit]                
 		    const vect*const&x0,           //[I: pre-determined centre] 
-		    int        const&dm)           //[I: max tree depth]        
+		    int        const&dm,           //[I: max tree depth]        
+		    bool             out)          //[I: sink under root?]
 {
   report REPORT("OctTree::build(%d,%d)",nc,dm);
   SET_I
   if(dm >= 1<<8)
     falcON_Error("OctTree: maximum tree depth must not exceed %d",(1<<8)-1);
-  TreeBuilder TB(this,x0,nc,dm);                   // initialize TreeBuilder    
+  TreeBuilder TB(this,x0,nc,dm,out);               // initialize TreeBuilder    
   SET_T(" time for TreeBuilder::TreeBuilder(): ");
   if(TB.N_dots()) {                                // IF(dots in tree)          
     TB.build();                                    //   build box-dot tree      

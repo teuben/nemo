@@ -45,9 +45,10 @@
 // v 2.2.2  04/11/2008  WD individual eps_i always enabled
 // v 2.2.3  26/03/2009  WD no error is masses missing and not required
 // v 2.3    09/02/2010  WD keyword fsink (proprietary only)
+// v 2.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink
 //------------------------------------------------------------------------------
-#define falcON_VERSION   "2.3"
-#define falcON_VERSION_D "09-feb-2010 Walter Dehnen                          "
+#define falcON_VERSION   "2.4"
+#define falcON_VERSION_D "19-mar-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile addgravity
@@ -68,7 +69,7 @@ const char*defv[] = {
   "theta="falcON_THETA_TEXT
   "\n                 tolerance parameter at M=M_tot                     ",
 #ifdef falcON_PROPER
-  "fsink=1\n          theta_sink / theta (only values <=1 are used)      ",
+  "epssink=\n         softening length for sink particles (default: eps) ",
 #endif
   "Ncrit="falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells                     ",
@@ -101,9 +102,9 @@ void falcON::main() falcON_THROWING
 		  getrparam("Grav"),
 		  TH< zero? const_theta : theta_of_M,
 #ifdef falcON_PROPER
-		  getrparam("fsink")
+		  getrparam_z("epssink")
 #else
-		  one
+		  zero
 #endif
       );
   acceleration *ACCEXT = hasvalue("accname") ?
@@ -122,7 +123,7 @@ void falcON::main() falcON_THROWING
       SHOT.reset_flags();
       if(FALCON.NewtonsG() != zero) {
 	FALCON.grow(NCRIT, RC);
-	FALCON.approximate_gravity(1,1);
+	FALCON.approximate_gravity(1);
       }
       if(ACCEXT)
 	ACCEXT->set(&SHOT,true, FALCON.NewtonsG()? 2 : 0);
