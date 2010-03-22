@@ -19,6 +19,7 @@
 /// \version 28-jan-2010 WD  TreeWalker::SmallestContainingCell tested
 /// \version 29-jan-2010 WD  NeighbourFinder, NearestNeighbourFinder tested
 /// \version 26-feb-2010 WD  new initialiser interface
+/// \version 22-mar-2010 WD  FastNeighbourFinder
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -172,8 +173,77 @@ namespace {
   /// contains geometrical methods in Dim dimensions, only D=2,3
   template<int Dim, typename Real> struct Helper;
   //
-  template<typename Real> struct Helper<2,Real>
+  template<> struct Helper<2,float>
   {
+    typedef float         Real;
+    typedef tupel<2,Real> Point;
+    typedef ::Box<2,Real> Box;
+    static octant_type octant(Point const&cen, Point const&pos)
+    {
+#if defined(__GNUC__) && defined(__SSE__)
+      return 3&_mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
+					    _mm_loadu_ps(pos)));
+#else
+      octant_type oct(0);
+      if(pos[0] > cen[0]) oct |= 1;
+      if(pos[1] > cen[1]) oct |= 2;
+      return oct;
+#endif
+    }
+    static bool contains(Point const&cen, Real rad, Point const&pos)
+    {
+      return ininterval(cen[0],rad,pos[0])
+	&&   ininterval(cen[1],rad,pos[1]);
+    }
+    static Real outside_dist_sq(Point const&cen, Real rad, Point const&pos)
+    {
+      Real q(0),D;
+      D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
+      D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
+      return q;
+    }
+    static bool outside(Point const&cen, Real rad, Point const&pos, Real Q)
+    {
+      Real q(0),D;
+      D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      return false;
+    }
+    static bool inside(Point const&cen, Real rad, Point const&pos, Real Q)
+    {
+      Real D;
+      D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
+      D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
+      return true;
+    }
+    static tupel<2,Real> Integer(Point const&x)
+    {
+      tupel<2,Real> c;
+      c[0]=int(x[0]+Real(0.5));
+      c[1]=int(x[1]+Real(0.5));
+      return c;
+    }
+    static bool ShrinkToOctant(Box*B, octant_type i, uint8 m, const Real*ra)
+    {
+      uint8 l = ++(B->LEV);
+      if(l > m) return false;
+      Real rad=ra[l];
+      if(i&1) B->CEN[0] += rad;  else  B->CEN[0] -= rad;
+      if(i&2) B->CEN[1] += rad;  else  B->CEN[1] -= rad;
+      return true;
+    }      
+    static Real RootRadius(Point const&X, Point const&Xmin, Point const&Xmax)
+    {
+      Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
+      if(R1>D) D=R1;
+      return pow(Real(2), int(1+std::log(D)/M_LN2));
+    }
+  };
+  //
+  template<> struct Helper<2,double>
+  {
+    typedef double        Real;
     typedef tupel<2,Real> Point;
     typedef ::Box<2,Real> Box;
     static octant_type octant(Point const&cen, Point const&pos)
@@ -234,8 +304,84 @@ namespace {
     }
   };
   //
-  template<typename Real> struct Helper<3,Real>
+  template<> struct Helper<3,float>
   {
+    typedef float         Real;
+    typedef tupel<3,Real> Point;
+    typedef ::Box<3,Real> Box;
+    static octant_type octant(Point const&cen, Point const&pos)
+    {
+#if defined(__GNUC__) && defined(__SSE__)
+      return 7&_mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
+					    _mm_loadu_ps(pos)));
+#else
+      octant_type oct(0);
+      if(pos[0] > cen[0]) oct |= 1;
+      if(pos[1] > cen[1]) oct |= 2;
+      if(pos[2] > cen[2]) oct |= 4;
+      return oct;
+#endif
+    }
+    static bool contains(Point const&cen, Real rad, Point const&pos)
+    {
+      return ininterval(cen[0],rad,pos[0])
+	&&   ininterval(cen[1],rad,pos[1])
+	&&   ininterval(cen[2],rad,pos[2]);
+    }
+    static Real outside_dist_sq(Point const&cen, Real rad, Point const&pos)
+    {
+      Real q(0),D;
+      D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
+      D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
+      D = abs(cen[2]-pos[2]); if(D>rad) q+=square(D-rad);
+      return q;
+    }
+    static bool outside(Point const&cen, Real rad, Point const&pos, Real Q)
+    {
+      Real q(0),D;
+      D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      D=abs(cen[2]-pos[2]); if(D>rad && Q<(q+=square(D-rad))) return true;
+      return false;
+    }
+    static bool inside(Point const&cen, Real rad, Point const&pos, Real Q)
+    {
+      Real D;
+      D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
+      D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
+      D=abs(cen[2]-pos[2]); if(D>rad || Q>square(D-rad)) return false;
+      return true;
+    }
+    static tupel<3,Real> Integer(Point const&x)
+    {
+      tupel<3,Real> c;
+      c[0]=int(x[0]+Real(0.5));
+      c[1]=int(x[1]+Real(0.5));
+      c[2]=int(x[2]+Real(0.5));
+      return c;
+    }
+    static bool ShrinkToOctant(Box*B, octant_type i, uint8 md, const Real*ra)
+    {
+      uint8 l = ++(B->LEV);
+      if(l > md) return false;
+      Real rad=ra[l];
+      if(i&1) B->CEN[0] += rad;  else  B->CEN[0] -= rad;
+      if(i&2) B->CEN[1] += rad;  else  B->CEN[1] -= rad;
+      if(i&4) B->CEN[2] += rad;  else  B->CEN[2] -= rad;
+      return true;
+    }      
+    static Real RootRadius(Point const&X, Point const&Xmin, Point const&Xmax)
+    {
+      Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
+      R1 = max(Xmax[2]-X[2], X[2]-Xmin[2]); if(R1>D) D=R1;
+      return pow(Real(2), int(1+std::log(D)/M_LN2));
+    }
+  };
+  //
+  template<> struct Helper<3,double>
+  {
+    typedef double        Real;
     typedef tupel<3,Real> Point;
     typedef ::Box<3,Real> Box;
     static octant_type octant(Point const&cen, Point const&pos)
@@ -960,21 +1106,57 @@ namespace WDutils {
   }
 }
 //
+// Wdutils::NeighbourLoop<OctTree>
+//
+namespace WDutils {
+  template<typename OctTree> inline
+  bool NeighbourLoop<OctTree>::Outside(Cell c) const
+  { return ::outside(centre(c),radius(c),X,Q); }
+  //
+  template<typename OctTree> inline
+  bool NeighbourLoop<OctTree>::Inside(Cell c) const
+  { return ::inside(centre(c),radius(c),X,Q); }
+  //
+  template<typename OctTree>
+  void NeighbourLoop<OctTree>::ProcessCell(Cell Ci, node_index cC) const
+  {
+    if(cC==0 && Number(Ci) <= NDIR)
+      ProcessLeafs(BeginLeafs(Ci),EndLeafDesc(Ci));
+    else {
+      if(Nleafkids(Ci))
+	ProcessLeafs(BeginLeafs(Ci),EndLeafKids(Ci));
+      if(Ncells(Ci)>cC) {
+	if(cC) { LoopCellKids(Ci,c) if(c!=C && !Outside(c)) ProcessCell(c);}
+	else   { LoopCellKids(Ci,c) if(!Outside(c)) ProcessCell(c); }
+      }
+    }
+  }
+  //
+  template<typename OctTree> inline
+  void NeighbourLoop<OctTree>::Process()
+  {
+    if(IsValid(C))
+      for(Cell P=C; IsValid(P) && (C==P || !Inside(C)); C=P,P=Parent(C))
+	ProcessCell(P, C!=P);
+    else
+      ProcessCell(Base::Root(), 0);
+  }
+}
+//
 // Wdutils::NeighbourFinder<OctTree>
 //
 namespace {
   /// Processor: add neighbours to neighbour list
   template<typename OctTree>
-  struct Lister : public NeighbourFinder<OctTree>::Processor
-  {
-    typedef typename TreeWalker<OctTree>::Leaf Leaf;
-    typedef typename TreeWalker<OctTree>::Real Real;
-    typedef typename TreeWalker<OctTree>::node_index node_index;
+  struct Lister : public NeighbourFinder<OctTree>::Processor {
+    typedef typename NeighbourFinder<OctTree>::Leaf Leaf;
+    typedef typename NeighbourFinder<OctTree>::Real Real;
+    typedef typename NeighbourFinder<OctTree>::node_index node_index;
     //
-    Neighbour<OctTree> *LIST;
-    const node_index    K;
-    mutable node_index  I;
-    //
+    Neighbour<OctTree> *LIST;    ///< neighbour list
+    const   node_index  K;       ///< size of list
+    mutable node_index  I;       ///< index of current element
+    /// ctor: take data
     Lister(Neighbour<OctTree>*list, node_index size)
       : LIST(list), K(size), I(0) {}
     /// process: add neighbour to list
@@ -991,53 +1173,52 @@ namespace {
 //
 namespace WDutils {
   template<typename OctTree> inline
-  bool NeighbourFinder<OctTree>::Outside(Cell c) const
-  { return ::outside(centre(c),radius(c),X,Q); }
-  //
-  template<typename OctTree> inline
-  bool NeighbourFinder<OctTree>::Inside(Cell c) const
-  { return ::inside(centre(c),radius(c),X,Q); }
-  //
-  template<typename OctTree> inline
-  void NeighbourFinder<OctTree>::ProcessLeaf(Leaf l) const
+  void NeighbourFinder<OctTree>::ProcessLeafs(Leaf b, Leaf e) const
   {
-    // testing after adding the contributions to q from each dimension does
-    // make the code run more slowly
-    Real q = dist_sq(X,position(l));
-    if(q<Q) PROC->process(l,q);
-  }
-  //
-  template<typename OctTree>
-  void NeighbourFinder<OctTree>::ProcessCell(Cell Ci, node_index cL,
-					     node_index cC) const
-  {
-    if(cC==0 && Number(Ci) <= NDIR) {
-      if(cL) { LoopAllLeafs(Ci,l) if(l!=L) ProcessLeaf(l); }
-      else   { LoopAllLeafs(Ci,l) ProcessLeaf(l); }
-    } else {
-      if(Nleafkids(Ci)) {
-	if(cL) { LoopLeafKids(Ci,l) if(l!=L) ProcessLeaf(l); }
-	else   { LoopLeafKids(Ci,l) ProcessLeaf(l); }
-      }
-      if(Ncells(Ci)>cC) {
-	if(cC) { LoopCellKids(Ci,c) if(c!=C && !Outside(c)) ProcessCell(c);}
-	else   { LoopCellKids(Ci,c) if(!Outside(c)) ProcessCell(c); }
-      }
+    for(Leaf l=b; l!=e; ++l) {
+      Real q = dist_sq(X,position(l));
+      if(q<Q) PROC->process(l,q);
     }
   }
   //
   template<typename OctTree>
-  void NeighbourFinder<OctTree>::Process(Leaf l, Real q,
-					 const Processor*p) WDutils_THROWING
+  typename NeighbourFinder<OctTree>::node_index
+  NeighbourFinder<OctTree>::Find(Leaf l, Real q, Neighbour<OctTree>*nb,
+				 node_index m)
+  {
+    Lister<OctTree> LL(nb,m);
+    PROC =&LL;
+    Q    = q;
+    X    = position(l);
+    C    = Parent(l);
+    Base::Process();
+    return LL.I;
+  }
+  //
+  template<typename OctTree>
+  typename NeighbourFinder<OctTree>::node_index
+  NeighbourFinder<OctTree>::Find(Point const&x, Real q, Neighbour<OctTree>*nb,
+				 node_index m)
+  {
+    Lister<OctTree> LL(nb,m);
+    PROC =&LL;
+    Q    = q;
+    X    = x;
+    C    = SmallestContainingCell(X);
+    Base::Process();
+    return LL.I;
+  }
+  //
+  template<typename OctTree>
+  void NeighbourFinder<OctTree>::Process(Leaf l, Real q, const Processor*p)
+    WDutils_THROWING
   {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
     PROC = p;
     Q    = q;
-    L    = l;
-    X    = position(L);
-    C    = Parent(L);
-    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
-      ProcessCell(P, C==P, C!=P);
+    X    = position(l);
+    C    = Parent(l);
+    Base::Process();
   }
   //
   template<typename OctTree>
@@ -1047,51 +1228,269 @@ namespace WDutils {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
     PROC = p;
     Q    = q;
-    L    = Base::InvalidLeaf();
     X    = x;
     C    = SmallestContainingCell(X);
-    if(IsValid(C))
-      for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
-	ProcessCell(P, 0, C!=P);
-    else
-      ProcessCell(Base::Root(), 0, 0);
-  }
-  //
-  template<typename OctTree>
-  typename NeighbourFinder<OctTree>::node_index
-  NeighbourFinder<OctTree>::Find(Leaf l, Real q,
-				 Neighbour<OctTree>*nb, node_index m)
-  {
-    ::Lister<OctTree> LL(nb,m);
-    PROC =&LL;
-    Q    = q;
-    L    = l;
-    X    = position(L);
-    C    = Parent(L);
-    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
-      ProcessCell(P, C==P, C!=P);
-    return LL.I;
-  }
-  //
-  template<typename OctTree>
-  typename NeighbourFinder<OctTree>::node_index
-  NeighbourFinder<OctTree>::Find(Point const&x, Real q,
-				 Neighbour<OctTree>*nb, node_index m)
-  {
-    ::Lister<OctTree> LL(nb,m);
-    PROC =&LL;
-    Q    = q;
-    L    = Base::InvalidLeaf();
-    X    = x;
-    C    = SmallestContainingCell(X);
-    if(IsValid(C))
-      for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
-	ProcessCell(P, 0, C!=P);
-    else
-      ProcessCell(Base::Root(), 0, 0);
-    return LL.I;
+    Base::Process();
   }
 }
+//
+// Wdutils::FastNeighbourFinder<OctTree>
+//
+#if defined(__GNUC__) && defined(__SSE__)
+namespace WDutils {
+  template<typename OctTree>
+  void FastNeighbourFinder<OctTree>::UpdatePositions()
+  {
+    unsigned i=0;
+    if(Dim==2)
+      LoopLeafs(l) {
+	PP[i] = 0;
+	XX[i] = position(l)[0];
+	YY[i] = position(l)[1];
+	++i;
+      }
+    else
+      LoopLeafs(l) {
+	PP[i] = 0;
+	XX[i] = position(l)[0];
+	YY[i] = position(l)[1];
+	ZZ[i] = position(l)[2];
+	++i;
+      }
+  }
+  //
+  template<typename OctTree>
+  FastNeighbourFinder<OctTree>::FastNeighbourFinder(OctTree const*tree,
+						    node_index ndir)
+    : Base( tree, ndir ),
+      PP  ( new16<bool>(SSE::Traits<Real>::Top(this->Nleafs())) ),
+      XX  ( new16<Real>(SSE::Traits<Real>::Top(this->Nleafs())) ),
+      YY  ( new16<Real>(SSE::Traits<Real>::Top(this->Nleafs())) ),
+      ZZ  ( Dim==3? new16<Real>(SSE::Traits<Real>::Top(this->Nleafs())) : 0 ),
+      C0  ( new16<chunk>(SSE::Traits<Real>::Top(this->Nleafs()/K)) )
+  {
+    UpdatePositions();
+  }
+  //
+  template<typename OctTree>
+  FastNeighbourFinder<OctTree>::FastNeighbourFinder(Walker const&walk,
+						    node_index ndir)
+    : Base( walk, ndir ),
+      PP  ( new16<bool>(SSE::Traits<Real>::Top(this->Nleafs())) ),
+      XX  ( new16<Real>(SSE::Traits<Real>::Top(this->Nleafs())) ),
+      YY  ( new16<Real>(SSE::Traits<Real>::Top(this->Nleafs())) ),
+      ZZ  ( Dim==3? new16<Real>(SSE::Traits<Real>::Top(this->Nleafs())) : 0 ),
+      C0  ( new16<chunk>(SSE::Traits<Real>::Top(this->Nleafs()/K)) )
+  {
+    UpdatePositions();
+  }
+  //
+  template<typename OctTree>
+  FastNeighbourFinder<OctTree>::~FastNeighbourFinder()
+  {
+    if(PP) free16(PP); const_cast<bool *&>(PP)=0;
+    if(XX) free16(XX); const_cast<Real *&>(XX)=0;
+    if(YY) free16(YY); const_cast<Real *&>(YY)=0;
+    if(ZZ) free16(ZZ); const_cast<Real *&>(ZZ)=0;
+    if(C0) free16(C0); const_cast<chunk*&>(C0)=0;
+  }
+  //
+  template<>
+  unsigned FastNeighbourFinder<OctalTree<2,float> >::
+  ProcessBlocks(qandi*List, unsigned Nl) const
+  {
+    __m128 HQ = _mm_set1_ps(Q);
+    __m128 X0 = _mm_set1_ps(X[0]);
+    __m128 Y0 = _mm_set1_ps(X[1]);
+    SSE::Traits<Real>::vector QQ;
+    unsigned n=0;
+    ++CL;
+    for(chunk*Ch=C0; Ch!=CL; ++Ch) {
+      for(unsigned iK=Ch->I0; iK!=Ch->IN; iK+=K) {
+	PP[iK] = 0;
+	__m128
+	  __D = _mm_sub_ps(X0,_mm_load_ps(XX+iK)),
+	  __Q = _mm_mul_ps(__D,__D);
+	__D   = _mm_sub_ps(Y0,_mm_load_ps(YY+iK));
+	__Q   = _mm_add_ps(__Q,_mm_mul_ps(__D,__D));
+	int s = _mm_movemask_ps(_mm_cmplt_ps(__Q,HQ));
+	if(s) {
+	  _mm_store_ps(QQ,__Q);
+	  if(s&1) { if(n<Nl) { List[n].Q=QQ[0]; List[n].I=iK  ; } ++n; }
+	  if(s&2) { if(n<Nl) { List[n].Q=QQ[1]; List[n].I=iK+1; } ++n; }
+	  if(s&4) { if(n<Nl) { List[n].Q=QQ[2]; List[n].I=iK+2; } ++n; }
+	  if(s&8) { if(n<Nl) { List[n].Q=QQ[3]; List[n].I=iK+3; } ++n; }
+	}
+      }
+    }
+    return n;
+  }
+  //
+  template<>
+  unsigned FastNeighbourFinder<OctalTree<3,float> >::
+  ProcessBlocks(qandi*List, unsigned Nl) const
+  {
+    __m128 HQ = _mm_set1_ps(Q);
+    __m128 X0 = _mm_set1_ps(X[0]);
+    __m128 Y0 = _mm_set1_ps(X[1]);
+    __m128 Z0 = _mm_set1_ps(X[2]);
+    SSE::Traits<Real>::vector QQ;
+    unsigned n=0;
+    ++CL;
+    for(chunk*Ch=C0; Ch!=CL; ++Ch) {
+      for(unsigned iK=Ch->I0; iK!=Ch->IN; iK+=K) {
+	PP[iK] = 0;
+	__m128
+	  __D = _mm_sub_ps(X0,_mm_load_ps(XX+iK)),
+	  __Q = _mm_mul_ps(__D,__D);
+	__D   = _mm_sub_ps(Y0,_mm_load_ps(YY+iK));
+	__Q   = _mm_add_ps(__Q,_mm_mul_ps(__D,__D));
+	__D   = _mm_sub_ps(Z0,_mm_load_ps(ZZ+iK));
+	__Q   = _mm_add_ps(__Q,_mm_mul_ps(__D,__D));
+	int s = _mm_movemask_ps(_mm_cmplt_ps(__Q,HQ));
+	if(s) {
+	  _mm_store_ps(QQ,__Q);
+	  if(s&1) { if(n<Nl) { List[n].Q=QQ[0]; List[n].I=iK  ; } ++n; }
+	  if(s&2) { if(n<Nl) { List[n].Q=QQ[1]; List[n].I=iK+1; } ++n; }
+	  if(s&4) { if(n<Nl) { List[n].Q=QQ[2]; List[n].I=iK+2; } ++n; }
+	  if(s&8) { if(n<Nl) { List[n].Q=QQ[3]; List[n].I=iK+3; } ++n; }
+	}
+      }
+    }
+    return n;
+  }
+  //
+#ifdef __SSE2__
+  template<>
+  unsigned FastNeighbourFinder<OctalTree<2,double> >::
+  ProcessBlocks(qandi*List, unsigned Nl) const
+  {
+    __m128d HQ = _mm_set1_pd(Q);
+    __m128d X0 = _mm_set1_pd(X[0]);
+    __m128d Y0 = _mm_set1_pd(X[1]);
+    SSE::Traits<Real>::vector QQ;
+    unsigned n=0;
+    ++CL;
+    for(chunk*Ch=C0; Ch!=CL; ++Ch) {
+      for(unsigned iK=Ch->I0; iK!=Ch->IN; iK+=K) {
+	PP[iK] = 0;
+	__m128d
+	  __D = _mm_sub_pd(X0,_mm_load_pd(XX+iK)),
+	  __Q = _mm_mul_pd(__D,__D);
+	__D   = _mm_sub_pd(Y0,_mm_load_pd(YY+iK));
+	__Q   = _mm_add_pd(__Q,_mm_mul_pd(__D,__D));
+	int s = _mm_movemask_pd(_mm_cmplt_pd(__Q,HQ));
+	if(s) {
+	  _mm_store_pd(QQ,__Q);
+	  if(s&1) { if(n<Nl) { List[n].Q=QQ[0]; List[n].I=iK  ; } ++n; }
+	  if(s&2) { if(n<Nl) { List[n].Q=QQ[1]; List[n].I=iK+1; } ++n; }
+	}
+      }
+    }
+    return n;
+  }
+  //
+  template<>
+  unsigned FastNeighbourFinder<OctalTree<3,double> >::
+  ProcessBlocks(qandi*List, unsigned Nl) const
+  {
+    __m128d HQ = _mm_set1_pd(Q);
+    __m128d X0 = _mm_set1_pd(X[0]);
+    __m128d Y0 = _mm_set1_pd(X[1]);
+    __m128d Z0 = _mm_set1_pd(X[2]);
+    SSE::Traits<Real>::vector QQ;
+    unsigned n=0;
+    ++CL;
+    for(chunk*Ch=C0; Ch!=CL; ++Ch) {
+      for(unsigned iK=Ch->I0; iK!=Ch->IN; iK+=K) {
+	PP[iK] = 0;
+	__m128d
+	  __D = _mm_sub_pd(X0,_mm_load_pd(XX+iK)),
+	  __Q = _mm_mul_pd(__D,__D);
+	__D   = _mm_sub_pd(Y0,_mm_load_pd(YY+iK));
+	__Q   = _mm_add_pd(__Q,_mm_mul_pd(__D,__D));
+	__D   = _mm_sub_pd(Z0,_mm_load_pd(ZZ+iK));
+	__Q   = _mm_add_pd(__Q,_mm_mul_pd(__D,__D));
+	int s = _mm_movemask_pd(_mm_cmplt_pd(__Q,HQ));
+	if(s) {
+	  _mm_store_pd(QQ,__Q);
+	  if(s&1) { if(n<Nl) { List[n].Q=QQ[0]; List[n].I=iK  ; } ++n; }
+	  if(s&2) { if(n<Nl) { List[n].Q=QQ[1]; List[n].I=iK+1; } ++n; }
+	}
+      }
+    }
+    return n;
+  }
+#endif // __SSE2__
+  //
+  template<typename OctTree> inline
+  void FastNeighbourFinder<OctTree>::ProcessLeafs(Leaf L0, Leaf LN) const
+  {
+    unsigned i0K = L0.I    & nL;     // first block
+    unsigned iEK =(LN.I-1) & nL;     // last block
+    if(i0K==iEK) {
+      // 1   range within a single block
+      if(!PP[i0K]) {
+	PP[i0K] = 1;
+	if(CL->IN != i0K) (++CL)->I0 = i0K;
+	CL->IN = i0K+K;
+      }
+    } else {
+      // 2   range in more than one block 
+      // 2.1 deal with incomplete first block: ignore if already in list
+      if(L0.I&L) {
+	if(PP[i0K]) i0K    += K;
+	else        PP[i0K] = 1;
+      }
+      // 2.2 deal with incomplete last block: ignore if already in list
+      if(LN.I&L) {
+	if(PP[iEK]) iEK    -= K;
+	else        PP[iEK] = 1;
+      }
+      // 2.3 add blocks to chunk list of blocks
+      iEK += K;
+      if(i0K < iEK) {
+	if(CL->IN != i0K) (++CL)->I0 = i0K;
+	CL->IN = iEK;
+      }
+    }
+  }
+  //
+  template<typename OctTree>
+  typename FastNeighbourFinder<OctTree>::node_index
+  FastNeighbourFinder<OctTree>::
+  Find(Leaf l, Real q, Neighbour<OctTree>*nb, node_index m)
+  {
+    Q    = q;
+    X    = position(l);
+    C    = Parent(l);
+    while(C != Base::Root() && IsValid(C) && Number(Parent(C)) < Base::NDIR)
+      C = Parent(C);
+    CL     = C0;
+    CL->I0 = 0;
+    CL->IN = 0;
+    Base::Process();
+    return ProcessBlocks(reinterpret_cast<qandi*>(nb),m);
+  }
+  //
+  template<typename OctTree>
+  typename FastNeighbourFinder<OctTree>::node_index
+  FastNeighbourFinder<OctTree>::
+  Find(Point const&x, Real q, Neighbour<OctTree>*nb, node_index m)
+  {
+    Q    = q;
+    X    = x;
+    C    = SmallestContainingCell(Base::X);
+    while(C != Base::Root() && IsValid(C) && Number(Parent(C)) < Base::NDIR)
+      C = Parent(C);
+    CL     = C0;
+    CL->I0 = 0;
+    CL->IN = 0;
+    Base::Process();
+    return ProcessBlocks(reinterpret_cast<qandi*>(nb),m);
+  }
+}
+#endif
 //
 // Wdutils::NearestNeighbourFinder<OctTree>
 //
@@ -1150,18 +1549,15 @@ namespace WDutils {
   }
   //
   template<typename OctTree>
-  void NearestNeighbourFinder<OctTree>::AddCell(Cell Ci, node_index cL,
-						node_index cC) const
+  void NearestNeighbourFinder<OctTree>::AddCell(Cell Ci, node_index cC) const
   {
     if(cC==0 && Number(Ci) <= Ndir()) {
       // direct loop
-      if(cL) { LoopAllLeafs(Ci,l) if(l!=L) AddLeaf(l); }
-      else   { LoopAllLeafs(Ci,l) AddLeaf(l); }
+      LoopAllLeafs(Ci,l) AddLeaf(l);
     } else {
       // process leaf kids
       if(Nleafkids(Ci)) {
-	if(cL) { LoopLeafKids(Ci,l) if(l!=L) AddLeaf(l); }
-	else   { LoopLeafKids(Ci,l) AddLeaf(l); }
+	LoopLeafKids(Ci,l) AddLeaf(l);
       }
       // process cell kids
       if(Ncells(Ci)>cC+1) {
@@ -1189,49 +1585,16 @@ namespace WDutils {
   { return x.Q < y.Q; }
   //
   template<typename OctTree>
-  typename NearestNeighbourFinder<OctTree>::node_index
-  NearestNeighbourFinder<OctTree>::Find(Leaf l, Neighbour<OctTree>*nb)
-    WDutils_THROWING
+  void NearestNeighbourFinder<OctTree>::FillList()
   {
-    if(K >= Base::Nleafs())
-      WDutils_THROW("NearestNeighbourFinder: K=%d >= Nl=%d\n",
-		    K,Base::Nleafs());
-    LIST = nb;
-    L    = l;
-    X    = position(L);
-    C    = Parent(L);
     NIAC = 0;
     M    = K;
     Real Q = 12*square(Base::RootRadius());
     for(node_index k=0; k!=K; ++k)
       LIST[k].Q = Q;
     for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
-      AddCell(P,C==P,C!=P);
+      AddCell(P, C!=P);
     MaxHeap::sort(LIST,K);
-    return NIAC;
-  }
-  //
-  template<typename OctTree>
-  typename NearestNeighbourFinder<OctTree>::node_index
-  NearestNeighbourFinder<OctTree>::Find(Point const&x, Neighbour<OctTree>*nb)
-    WDutils_THROWING
-  {
-    if(K > Base::Nleafs())
-      WDutils_THROW("NearestNeighbourFinder: K=%d > Nl=%d\n",
-		    K,Base::Nleafs());
-    LIST = nb;
-    L    = Base::InvalidLeaf();
-    X    = x;
-    C    = SmallestContainingCell(X);
-    NIAC = 0;
-    M    = K;
-    Real Q = 12*square(Base::RootRadius());
-    for(node_index k=0; k!=K; ++k)
-      LIST[k].Q = Q;
-    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
-      AddCell(P, 0, C!=P);
-    MaxHeap::sort(LIST,K);
-    return NIAC;
   }
 }
 //
@@ -1248,5 +1611,14 @@ namespace WDutils {
   INST(2,double)
   INST(3,float)
   INST(3,double)
+
+#if defined(__GNUC__) && defined(__SSE__)
+  template struct FastNeighbourFinder<OctalTree<2,float> >;
+  template struct FastNeighbourFinder<OctalTree<3,float> >;
+#ifdef __SSE2__
+  template struct FastNeighbourFinder<OctalTree<2,double> >;
+  template struct FastNeighbourFinder<OctalTree<3,double> >;
+#endif
+#endif
 }
 //

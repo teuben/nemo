@@ -229,7 +229,7 @@ namespace WDutils {
     /// For a max-heap, i.e. if @a Comparator is std::less, the array will be
     /// ascendingly ordered, while a min-heap will be descendingly ordered
     /// \param[in,out] a  array[0..@a n -1]; input heap; output ordered
-    /// \param[in]     n  size of array
+    /// \param[in]     n  size of array, assuming @a n > 0
     template<typename T>
     static void sort(T*a, int n) {
       for(int i=n-1; i; --i) {
@@ -288,26 +288,34 @@ namespace WDutils {
   /// ascending heapsort in place, avoiding std::swap()
   template<typename T>
   void HeapSortAsc(T*a, int n) {
-    MaxHeap::build(a,n);
-    MaxHeap::sort(a,n);
+    if(n>0) {
+      MaxHeap::build(a,n);
+      MaxHeap::sort(a,n);
+    }
   }
   /// descending heapsort in place, avoiding std::swap()
   template<typename T>
   void HeapSortDesc(T*a, int n) {
-    MinHeap::build(a,n);
-    MinHeap::sort(a,n);
+    if(n>0) {
+      MinHeap::build(a,n);
+      MinHeap::sort(a,n);
+    }
   }
   /// ascending heapsort in place, using std::swap()
   template<typename T>
   void HeapSortAscSwap(T*a, int n) {
-    MaxHeapSwap::build(a,n);
-    MaxHeapSwap::sort(a,n);
+    if(n>0) {
+      MaxHeapSwap::build(a,n);
+      MaxHeapSwap::sort(a,n);
+    }
   }
   /// descending heapsort in place, using std::swap()
   template<typename T>
   void HeapSortDescSwap(T*a, int n) {
-    MinHeapSwap::build(a,n);
-    MinHeapSwap::sort(a,n);
+    if(n>0) {
+      MinHeapSwap::build(a,n);
+      MinHeapSwap::sort(a,n);
+    }
   }
   //@}
   // ///////////////////////////////////////////////////////////////////////////

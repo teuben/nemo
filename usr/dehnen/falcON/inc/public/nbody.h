@@ -935,6 +935,7 @@ namespace falcON {
     /// \param[in] build build the tree in any case?
     void set_tree_and_forces(bool all, bool build) const;
   public:
+#if(0)
     /// reset softening parameters
     /// \param[in] kern    softening kernel
     /// \param[in] eps     softening length
@@ -947,6 +948,7 @@ namespace falcON {
 			 real                      // I: eps_fac                
 #endif
 			 );
+#endif
     /// construction
     /// \param[in] s  snapshot: time & bodies
     /// \param[in] e  global softening length

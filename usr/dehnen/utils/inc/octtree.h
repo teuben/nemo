@@ -16,6 +16,7 @@
 /// \version Jan-2010 WD  renamed methods in TreeWalker; added leaf's parent
 /// \version Jan-2010 WD  neighbour search methods
 /// \version Feb-2010 WD  new initialisation: removed need for OctalTree::Dot
+/// \version Mar-2010 WD  class FastNeighbourFinder
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -52,6 +53,9 @@
 #endif
 #ifndef WDutils_included_tupel_h
 #  include <tupel.h>
+#endif
+#ifndef WDutils_included_sse_h
+#  include <sse.h>
 #endif
 
 namespace {
@@ -756,6 +760,52 @@ namespace WDutils {
     }
   };
   ///
+  /// base class for NeighbourFinder and FastNeighbourFinder
+  ///
+  template<typename OctTree>
+  struct NeighbourLoop : public TreeWalker<OctTree>
+  {
+  protected:
+    typedef TreeWalker<OctTree> Base;
+    typedef typename Base::Leaf Leaf;             ///< type: tree leaf
+    typedef typename Base::Cell Cell;             ///< type: tree cell
+    typedef typename Base::Real Real;             ///< type: scalars
+    typedef typename Base::Point Point;           ///< type: position vectors
+    typedef typename Base::node_index node_index; ///< type: index & counters
+    Base::Dim;
+    /// ctor
+    /// \param[in] tree  OctTree to use for searches
+    /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
+    NeighbourLoop(OctTree const*tree, node_index ndir)
+      : Base(tree), NDIR(ndir) {}
+    /// ctor
+    /// \param[in] walk  tree walker
+    /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
+    NeighbourLoop(Base const&walk, node_index ndir)
+      : Base(walk), NDIR(ndir) {}
+    //
+    const node_index NDIR;       ///< direct-loop control
+    Real             Q;          ///< radius^2 of search sphere
+    Cell             C;          ///< cell containing X, already searched
+    Point            X;          ///< centre of search sphere
+    /// is search sphere outside of a cell (and vice versa)?
+    inline bool Outside(Cell) const;
+    /// is search sphere inside of a cell?
+    inline bool Inside (Cell) const;
+    /// process a range of leafs
+    virtual void ProcessLeafs(Leaf b, Leaf e) const = 0;
+    /// does the actual work
+    /// \note the data @a C, @a X, and @a Q must have been set by derived
+    inline void Process();
+  private:
+    /// process a cell: process all leafs within cell and search sphere
+    /// \note recursive
+    /// \param[in] Ci   Cell to search
+    /// \param[in] cC   does @a Ci contain @a C ?
+    void ProcessCell(Cell Ci, node_index cC=0) const;
+  };// class NeighbourLoop
+
+  ///
   /// type representing a tree leaf and its squared distance.
   ///
   /// \note Used in classes NeighbourFinder and FindNearestNeighbours
@@ -771,14 +821,16 @@ namespace WDutils {
   ///
   /// \note Implementations for OctalTree<D,R> with D=2,3 and R=float,double
   template<typename OctTree>
-  struct NeighbourFinder : public TreeWalker<OctTree>
+  struct NeighbourFinder : public NeighbourLoop<OctTree>
   {
-    typedef TreeWalker<OctTree> Base;
+    typedef NeighbourLoop<OctTree> Base;
+    typedef TreeWalker<OctTree> Walker;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
     typedef typename Base::Real Real;             ///< type: scalars
     typedef typename Base::Point Point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
+    Base::Dim;
     /// functor for processing a Neighbour
     /// \note used as interface with Process() below
     struct Processor {
@@ -793,17 +845,17 @@ namespace WDutils {
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     NeighbourFinder(OctTree const*tree, node_index ndir)
-      : Base(tree), NDIR(ndir) {}
+      : Base(tree,ndir) {}
     /// ctor
     /// \param[in] walk  tree walker
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    NeighbourFinder(Base const&walk, node_index ndir)
-      : Base(walk), NDIR(ndir) {}
+    NeighbourFinder(Walker const&walk, node_index ndir)
+      : Base(walk,ndir) {}
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
-    /// \note Leaf @a l is not considered a neighbour of itself.
+    /// \note Leaf @a l itself will be entered into the list.
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance @a q are @b not put on the list.
+    /// \note leafs at distance^2 @a q are @b not put on the list.
     /// \param[out] nb   list of neighbours (unsorted)
     /// \param[in]  m    maximum size of list @a nb
     /// \return          number of neighbours found, may exceed @a m
@@ -812,19 +864,19 @@ namespace WDutils {
     node_index Find(Leaf l, Real q, Neighbour<OctTree>*nb, node_index m);
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
-    /// \note Leaf @a l is not considered a neighbour of itself.
+    /// \note Leaf @a l itself will be entered into the list.
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance @a q are @b not put on the list.
+    /// \note leafs at distance^2 @a q are @b not put on the list.
     /// \param[out] nb   list of neighbours (unsorted)
     /// \return          number of neighbours found, may exceed @a nb.size()
     /// \note If the actual number of neighbours exceeds @a nb.size(), only
-    ///       the first @a m neighbours found will be copied into @a nb.
+    ///       the first @a nb.size() neighbours found will be copied into @a nb.
     node_index Find(Leaf l, Real q, Array<Neighbour<OctTree> >&nb)
     { return Find(l,q,nb.array(),nb.size()); }
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance @a q are @b not put on the list.
+    /// \note leafs at distance^2 @a q are @b not put on the list.
     /// \param[out] nb   list of neighbours (unsorted)
     /// \param[in]  m    maximum size of list @a nb
     /// \return          number of neighbours found, may exceed @a m
@@ -832,66 +884,154 @@ namespace WDutils {
     ///       @a m neighbours found will be copied into the list @a nb.
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
-    ///       about where to search the tree than the position @a x. Another
-    ///       difference in this case is that here leaf @a l will be put on
-    ///       the neighbour list, but not with the above routine.
+    ///       about where to search the tree than the position @a x.
     node_index Find(Point const&x, Real q, Neighbour<OctTree>*nb, node_index m);
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance @a q are @b not put on the list.
+    /// \note leafs at distance^2 @a q are @b not put on the list.
     /// \param[out] nb   list of neighbours (unsorted)
     /// \return          number of neighbours found, may exceed @a nb.size()
     /// \note If the actual number of neighbours exceeds @a nb.size(), only
-    ///       the first @a m neighbours found will be copied into @a nb.
+    ///       the first @a nb.size() neighbours found will be copied into @a nb.
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
-    ///       about where to search the tree than the position @a x. Another
-    ///       difference in this case is that here leaf @a l will be put on
-    ///       the neighbour list, but not with the above routine.
+    ///       about where to search the tree than the position @a x.
     node_index Find(Point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
     { return Find(x,q,nb.array(),nb.size()); }
     /// find all leafs within certain distance from leaf @a l and process them.
     /// \param[in]  l    leaf to find neighbours of
-    /// \note Leaf @a l is not considered a neighbour of itself and hence is
-    ///       not processed.
+    /// \note Leaf @a l itself will also be processed.
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance @a q are @b not put on the list.
+    /// \note leafs at distance^2 @a q are @b not processed
     /// \param[in]  p    functor for processing neighbours found
     void Process(Leaf l, Real q, const Processor*p) WDutils_THROWING;
     /// find all leafs within certain distance from @a x and process them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance @a q are @b not put on the list.
+    /// \note leafs at distance^2 @a q are @b not processed
     /// \param[in]  p    functor for processing neighbours found
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
-    ///       about where to search the tree than the position @a x. Another
-    ///       difference in this case is that here leaf @a l will be
-    ///       processed, but not with the above routine.
+    ///       about where to search the tree than the position @a x.
     void Process(Point const&x, Real q, const Processor*p) WDutils_THROWING;
-    //
-  private:
-    const node_index    NDIR;     ///< direct-loop control
-    const Processor    *PROC;     ///< function to call
-    Leaf                L;        ///< leaf for which list is made (if any)
-    Cell                C;        ///< cell already done
-    Point               X;        ///< centre of search sphere
-    Real                Q;        ///< radius^2 of search sphere
-    /// is search sphere outside of a cell (and vice versa)?
-    inline bool Outside(Cell) const;
-    /// is search sphere inside of a cell?
-    inline bool Inside (Cell) const;
-    /// process a leaf if within search sphere
-    /// \note if PROC==0, we add the leaf to the list (assuming it's valid)
-    inline void ProcessLeaf(Leaf l) const;
-    /// process a cell: process all leafs within cell and search sphere
-    /// \note recursive
-    /// \param[in] Ci   Cell to search
-    /// \param[in] cL   does @a Ci contain @a L ?
-    /// \param[in] cC   does @a Ci contain @a C ?
-    void ProcessCell(Cell Ci, node_index cL=0, node_index cC=0) const;
+  protected:
+    const Processor *PROC;        ///< function to call
+    Base::Q;
+    Base::C;
+    Base::X;
+    /// process a range of leafs
+    void ProcessLeafs(Leaf b, Leaf e) const;
   };// class NeighbourFinder
+
+#if defined(__GNUC__) && defined(__SSE__)
+  ///
+  /// Similar functionality to NeighbourFinder, but slightly faster due to SSE
+  ///
+  /// \note While the individual neighbour search is faster than with class
+  ///       NeighbourFinder, this requires some overhead in memory and cpu
+  ///       time, which is dealt with in the constructor. Thus, this class 
+  ///       should be used instead of NeighbourFinder only if neighbours for
+  ///       some number of particles or positions needs to be found.
+  /// \note Implementations for OctalTree<D,R> with D=2,3 and R=float,double
+  template<typename OctTree>
+  struct FastNeighbourFinder : private NeighbourLoop<OctTree>
+  {
+    //
+    typedef TreeWalker<OctTree> Walker;
+    typedef NeighbourLoop<OctTree> Base;
+    typedef typename Base::Leaf Leaf;             ///< type: tree leaf
+    typedef typename Base::Cell Cell;             ///< type: tree cell
+    typedef typename Base::Real Real;             ///< type: scalars
+    typedef typename Base::Point Point;           ///< type: position vectors
+    typedef typename Base::node_index node_index; ///< type: index & counters
+    Base::Dim;
+    /// ensure that the only valid instantinations are those in octtree.cc
+    WDutilsStaticAssert( SSE::Traits<Real>::sse );
+    /// ctor
+    /// \param[in] tree  OctTree to use for searches
+    /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
+    FastNeighbourFinder(OctTree const*tree, node_index ndir);
+    /// ctor
+    /// \param[in] walk  tree walker
+    /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
+    FastNeighbourFinder(Walker const&walk, node_index ndir);
+    /// dtor
+    ~FastNeighbourFinder();
+    /// update positions
+    /// \note Must be called after every rebuild() of the tree.
+    void UpdatePositions();
+    /// find all leafs within a certain distance from leaf @a l and store them.
+    /// \param[in]  l    leaf to find neighbours of
+    /// \note Leaf @a l itself will be entered into the list.
+    /// \param[in]  q    square of radius of search sphere
+    /// \note leafs at distance^2 @a q are @b not put on the list.
+    /// \param[out] nb   list of neighbours (unsorted)
+    /// \param[in]  m    maximum size of list @a nb
+    /// \return          number of neighbours found, may exceed @a m
+    /// \note If the actual number of neighbours exceeds @a m, only the first
+    ///       @a m neighbours found will be copied into @a nb.
+    node_index Find(Leaf l, Real q, Neighbour<OctTree>*nb, node_index m);
+    /// find all leafs within certain distance from @a x and store them.
+    /// \param[in]  x    position to find neighbours of
+    /// \param[in]  q    square of radius of search sphere
+    /// \note leafs at distance^2 @a q are @b not put on the list.
+    /// \param[out] nb   list of neighbours (unsorted)
+    /// \param[in]  m    maximum size of list @a nb
+    /// \return          number of neighbours found, may exceed @a m
+    /// \note If the actual number of neighbours exceeds @a m, only the first
+    ///       @a m neighbours found will be copied into the list @a nb.
+    /// \note If @a x is the position of a leaf @a l in the tree, the above
+    ///       routine is preferrable, as a leaf provides better information
+    ///       about where to search the tree than the position @a x.
+    node_index Find(Point const&x, Real q, Neighbour<OctTree>*nb, node_index m);
+    /// find all leafs within a certain distance from leaf @a l and store them.
+    /// \param[in]  l    leaf to find neighbours of
+    /// \note Leaf @a l itself will be entered into the list.
+    /// \param[in]  q    square of radius of search sphere
+    /// \note leafs at distance^2 @a q are @b not put on the list.
+    /// \param[out] nb   list of neighbours (unsorted)
+    /// \return          number of neighbours found, may exceed @a nb.size()
+    /// \note If the actual number of neighbours exceeds @a nb.size(), only
+    ///       the first @a nb.size() neighbours found will be copied into @a nb.
+    node_index Find(Leaf l, Real q, Array<Neighbour<OctTree> >&nb)
+    { return Find(l,q,nb.array(),nb.size()); }
+    /// find all leafs within certain distance from @a x and store them.
+    /// \param[in]  x    position to find neighbours of
+    /// \param[in]  q    square of radius of search sphere
+    /// \note leafs at distance^2 @a q are @b not put on the list.
+    /// \param[out] nb   list of neighbours (unsorted)
+    /// \return          number of neighbours found, may exceed @a nb.size()
+    /// \note If the actual number of neighbours exceeds @a nb.size(), only
+    ///       the first @a nb.size() neighbours found will be copied into @a nb.
+    /// \note If @a x is the position of a leaf @a l in the tree, the above
+    ///       routine is preferrable, as a leaf provides better information
+    ///       about where to search the tree than the position @a x.
+    node_index Find(Point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
+    { return Find(x,q,nb.array(),nb.size()); }
+  protected:
+    /// process a range of leafs
+    void ProcessLeafs(Leaf b, Leaf e) const;
+    Base::Q;
+    Base::C;
+    Base::X;
+  private:
+    const static unsigned K = SSE::Traits<Real>::K;
+    const static unsigned L = K-1;
+    const static unsigned nL= ~L;
+    struct chunk { unsigned I0, IN; };
+    struct qandi { Real Q; unsigned I; };
+    //
+    bool   *const PP;                   ///< indicator: incomplete block added
+    Real   *const XX;                   ///< x positions in aligned memory
+    Real   *const YY;                   ///< y positions in aligned memory
+    Real   *const ZZ;                   ///< z positions in aligned memory
+    chunk  *const C0;                   ///< chunks of blocks to process
+    mutable chunk*CL;                   ///< last active chunk
+    unsigned ProcessBlocks(qandi*,unsigned) const;
+  };
+#endif // __GNUC__ && __SSE__
+
   ///
   /// find @a K nearest tree leafs to a given position or tree leaf.
   ///
@@ -931,17 +1071,26 @@ namespace WDutils {
       const_cast<node_index&>(K)    = k;
       const_cast<node_index&>(NDIR) = ndir? ndir : K+K;
     }
-    /// find nearest @a k neighbours to leaf @a l
+    /// find the @a k nearest neighbours to leaf @a l (including itself).
     /// \param[in]  l    leaf to find neighbours of
     /// \param[out] nb   list of @a K neighbours, sorted in ascending distance
     /// \return          number of leafs tested for neighbourhood
-    /// \note Leaf @a l is not considered a neighbour of itself.
     /// \note The buffer @a nb must hold memory for @a k Neighbours.
     /// \note The order of leafs at identical distance (within floating point
     ///       accuracy) is undetermined (which may affect the inclusion into
     ///       the neighbour list).
-    node_index Find(Leaf l, Neighbour<OctTree>*nb) WDutils_THROWING;
-    /// find nearest @a k neighbours to @a x
+    node_index Find(Leaf l, Neighbour<OctTree>*nb) WDutils_THROWING
+    {
+      if(K > Base::Nleafs())
+	WDutils_THROW("NearestNeighbourFinder: K=%d >= Nl=%d\n",
+		      K,Base::Nleafs());
+      LIST = nb;
+      X    = position(l);
+      C    = Parent(l);
+      FillList();
+      return NIAC;
+    }
+    /// find the @a k nearest neighbours to position @a x
     /// \param[in]  x    position to find neighbours of
     /// \param[out] nb   list of @a K neighbours, sorted in ascending distance
     /// \return          number of leafs tested for neighbourhood
@@ -954,15 +1103,23 @@ namespace WDutils {
     ///       about where to search the tree than the position @a x. Another
     ///       difference in this case is that here leaf @a l will be put on
     ///       the neighbour list, but not with the above routine.
-    node_index Find(Point const&x, Neighbour<OctTree>*nb)
-      WDutils_THROWING;
+    node_index Find(Point const&x, Neighbour<OctTree>*nb) WDutils_THROWING
+    {
+      if(K > Base::Nleafs())
+	WDutils_THROW("NearestNeighbourFinder: K=%d > Nl=%d\n",
+		      K,Base::Nleafs());
+      LIST = nb;
+      X    = x;
+      C    = SmallestContainingCell(X);
+      FillList();
+      return NIAC;
+    }
     //
   private:
     const node_index    K;        ///< size of list
     const node_index    NDIR;     ///< direct-loop control
     Neighbour<OctTree> *LIST;     ///< neighbour list
-    Leaf                L;        ///< leaf for which list is made (if any)
-    Cell                C;        ///< cell already done
+    Cell                C;        ///< cell containing X, to be searched
     Point               X;        ///< centre of search sphere
     mutable node_index  NIAC;     ///< interaction counter
     mutable int         M;        ///< K - # interactions for current search
@@ -979,9 +1136,10 @@ namespace WDutils {
     /// updates the list w.r.t. a cell
     /// \note recursive
     /// \param[in] Ci   Cell to search
-    /// \param[in] cL   does @a Ci contain @a L ?
     /// \param[in] cC   does @a Ci contain @a C ?
-    void AddCell(Cell Ci, node_index cL=0, node_index cC=0) const;
+    void AddCell(Cell Ci, node_index cC=0) const;
+    /// does the actual work
+    void FillList();
   };// class NearestNeighbourFinder
 } // namespace WDutils
 #endif // WDutils_included_octtree_h

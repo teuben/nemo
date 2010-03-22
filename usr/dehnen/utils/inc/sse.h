@@ -456,6 +456,8 @@ namespace WDutils {
 #endif
       /// alignment number: K floats align to 128 bytes
       const static int K=4;
+      /// 16-byte alligned array
+      typedef __attribute__ ((aligned(16))) float vector[K];
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }
@@ -483,6 +485,8 @@ namespace WDutils {
 #endif
       /// alignment number: K floats align to 128 bytes
       const static int K=4;
+      /// 16-byte alligned array
+      typedef __attribute__ ((aligned(16))) int vector[K];
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }
@@ -510,6 +514,8 @@ namespace WDutils {
 #endif
       /// alignment number: K doubles align to 128 bytes
       const static int K=2;
+      /// 16-byte alligned array
+      typedef __attribute__ ((aligned(16))) double vector[K];
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }

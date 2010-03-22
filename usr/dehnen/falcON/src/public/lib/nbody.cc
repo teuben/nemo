@@ -834,6 +834,7 @@ void ForceDiagGrav::dia_stats_body(output&o) const
 // class falcON::ForceALCON                                                   //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+#if(0)
 void ForceALCON::reset_softening(
 				  kern_type ker,
 				  real      e,
@@ -860,6 +861,7 @@ void ForceALCON::reset_softening(
 #endif
   FALCON.reset_softening(abs(e),abs(es),ker);
 }
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       real               e,       // I: global softening length
@@ -909,9 +911,16 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   if(SOFTENING==individual_fixed && !snap_shot()->have(fieldbit::e)) 
     falcON_THROW("ForceALCON: individual fixed softening, but no eps_i given");
 #ifdef falcON_ADAP
-  reset_softening(ke,e,ns,nr,em,ef);
-#else
-  reset_softening(ke,e);
+  NSOFT = ns;
+  NREF  = nr;
+  EMIN  = abs(em);
+  EFAC  = abs(ef);
+  if(SOFTENING == individual_adaptive && EFAC  == zero)
+    falcON_THROW("ForceALCON: using individual adaptive softening, "
+		 " but eps_fac=0\n");
+  if(SOFTENING == individual_adaptive && NSOFT == zero)
+    falcON_THROW("ForceALCON: using individual adaptive softening, "
+		 "but Nsoft=0\n");
 #endif
   s->add_pointer(&__EPS,"eps");
   s->add_pointer(&__EPSSINK,"epssink");
