@@ -258,7 +258,8 @@ namespace {
   private:
     unsigned              N_PRE[3], N_POST[3];     // direct sums control       
   protected:
-    GravStats* const      STAT;                    // statistics                
+    GravStats* const      STAT;                    // statistics
+    real                  RFAQ;
     //--------------------------------------------------------------------------
     // protected methods                                                        
     //--------------------------------------------------------------------------
@@ -288,14 +289,14 @@ namespace {
       return Rq > square(rcrit(A)+rcrit(B));
     }
     //--------------------------------------------------------------------------
-    static bool well_separated(cell_iter const&A, leaf_iter const&, real Rq)
+    bool well_separated(cell_iter const&A, leaf_iter const&, real Rq) const
     { 
-      return Rq > rcrit2(A);
+      return RFAQ * Rq > rcrit2(A);
     }
     //--------------------------------------------------------------------------
   protected:
     GravIactBase(GravStats* t, unsigned const nd[4]= Default::direct)
-      : STAT ( t )
+      : STAT ( t ), RFAQ ( one )
     {
       N_PRE [0] = nd[0];                           // C-B direct before try     
       N_PRE [1] = 0u;                              // C-C direct before try     
@@ -352,6 +353,10 @@ namespace {
     //--------------------------------------------------------------------------
     void direct_summation(cell_iter const&A) const { 
       direct(A);
+    }
+    //--------------------------------------------------------------------------
+    void direct_summation(cell_iter const&A, leaf_iter const&B) const {
+      direct(A,B);
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A) const {
@@ -435,6 +440,18 @@ namespace {
       flush_buffers();                             // finish interactions       
       eval_grav(C,TaylorSeries(cofm(C)));          // start recursion           
     }
+    //--------------------------------------------------------------------------
+    void set_sink(real e, real f)
+    {
+      reset_eps(e);
+      RFAQ = f*f;
+    }
+    //--------------------------------------------------------------------------
+    void unset_sink(real e)
+    {
+      reset_eps(e);
+      RFAQ = one;
+    }
   };
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -467,6 +484,10 @@ namespace {
     //--------------------------------------------------------------------------
     void direct_summation(cell_iter const&A) const { 
       direct(A);
+    }
+    //--------------------------------------------------------------------------
+    void direct_summation(cell_iter const&A, leaf_iter const&B) const { 
+      direct(A,B);
     }
     //--------------------------------------------------------------------------
     bool interact(cell_iter const&A) const {
@@ -545,6 +566,18 @@ namespace {
     void evaluate(cell_iter const&C) const {       // evaluation phase          
       flush_buffers();                             // finish interactions       
       eval_grav_all(C,TaylorSeries(cofm(C)));      // start recursion           
+    }
+    //--------------------------------------------------------------------------
+    void set_sink(real e, real f)
+    {
+      reset_eps(e);
+      RFAQ = f*f;
+    }
+    //--------------------------------------------------------------------------
+    void unset_sink(real e)
+    {
+      reset_eps(e);
+      RFAQ = one;
     }
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -993,21 +1026,32 @@ void GravEstimator::approx(const GravMAC*GMAC,
       MI.cell_self(c1);                            //     self-iaction c1     
       LoopCellSecd(cell_iter,root(),c1+1,c2)       //     LOOP kids c2>c1     
 	MI.cell_cell(c1,c2);                       //       interaction c1,2  
-      LoopLeafKids(cell_iter,root(),s2) {          //     LOOP leaf kids s    
-	if(is_sink(s2)) GK.reset_eps(EPSSINK);     //       sink: switch eps
-	MI.cell_leaf(c1,s2);                       //       interaction c1,s  
-	if(is_sink(s2)) GK.reset_eps(EPS);         //       sink: switch back
+      LoopLeafKids(cell_iter,root(),s2) {          //     LOOP leaf kids s2    
+	if(is_sink(s2)) {                          //       IF s2 is sink
+	  GK.set_sink(EPSSINK,FSINK);              //         switch to sink
+// 	  GK.direct_summation(c1,s2);              //         interaction c1,s2
+	  MI.cell_leaf(c1,s2);                     //         interaction c1,s2
+	  GK.unset_sink(EPS);                      //         switch back
+	} else                                     //       ELSE
+	  MI.cell_leaf(c1,s2);                     //         interaction c1,s2
       }                                            //     END LOOP
       GK.evaluate(c1);                             //     evaluation phase    
     }                                              //   END LOOP              
-    LoopLeafKids(cell_iter,root(),s1) {            //   LOOP leaf kids s1     
-      LoopLeafSecd(cell_iter,root(),s1+1,s2) {     //     LOOP kids s2>s1     
-	if(is_sink(s1) || is_sink(s2))             //       IF either is sink
-	  GK.reset_eps(EPSSINK);                   //         switch eps
-	GK.interact(s1,s2);                        //       interaction s1,s2 
-	if(is_sink(s1) || is_sink(s2))             //       IF either is sink
-	  GK.reset_eps(EPS);                       //         switch eps back
-      }                                            //     END LOOP
+    LoopLeafKids(cell_iter,root(),s1) {            //   LOOP leaf kids s1
+      if(is_sink(s1)) {                            //     IF s1 is sink
+	GK.set_sink(EPSSINK,FSINK);                //       switch to sink
+	LoopLeafSecd(cell_iter,root(),s1+1,s2)     //       LOOP kids s2>s1
+	  GK.interact(s1,s2);                      //         interaction s1,s2 
+	GK.unset_sink(EPS);                        //       switch back
+      } else {                                     //     ELSE
+	LoopLeafSecd(cell_iter,root(),s1+1,s2)     //       LOOP kids s2>s1
+	if(is_sink(s2)) {                          //       IF s2 is sink
+	  GK.set_sink(EPSSINK,FSINK);              //         switch to sink
+	  GK.interact(s1,s2);                      //         interaction s1,s2
+	  GK.unset_sink(EPS);                      //         switch back
+	} else                                     //       ELSE
+	  GK.interact(s1,s2);                      //         interaction s1,s2
+      }                                            //     ENDIF
       s1->normalize_grav();                        //     evaluation phase    
     }                                              //   END LOOP              
     Ncoeffs = GK.coeffs_used();                    //   remember # coeffs used  
@@ -1023,40 +1067,48 @@ void GravEstimator::approx(const GravMAC*GMAC,
 	LoopCellSecd(cell_iter,root(),c1+1,c2)     //       LOOP kids c2>c1     
 	  MI.cell_cell(c1,c2);                     //         interaction c1,2  
 	LoopLeafKids(cell_iter,root(),s2) {        //       LOOP leaf kids s
-	  if(is_sink(s2)) GK.reset_eps(EPSSINK);   //         sink: switch eps
-	  MI.cell_leaf(c1,s2);                     //         interaction c1,s
-	  if(is_sink(s2)) GK.reset_eps(EPS);       //         sink: switch back
+	  if(is_sink(s2)) {                        //        IF s2 is sink
+	    GK.set_sink(EPSSINK,FSINK);            //         switch to sink
+	    GK.direct_summation(c1,s2);            //         interact by direct
+	    GK.unset_sink(EPS);                    //         switch back
+	  } else                                   //        ELSE
+	    MI.cell_leaf(c1,s2);                   //         interaction c1,s2
 	}                                          //       END LOOP
 	GK.evaluate(c1);                           //       evaluation phase    
       } else {                                     //     ELSE: inactive c1    
 	LoopCellSecd(cell_iter,root(),c1+1,c2)     //       LOOP kids c2>c1    
-	  if(is_active(c2))MI.cell_cell(c1,c2);    //         interaction c1,2 
+	  if(is_active(c2)) MI.cell_cell(c1,c2);   //         interaction c1,2 
 	LoopLeafKids(cell_iter,root(),s2)          //       LOOP leaf kids s
 	  if(is_active(s2)) {
-	    if(is_sink(s2)) GK.reset_eps(EPSSINK); //         sink: switch eps
-	    MI.cell_leaf(c1,s2);                   //         interaction c1,s
-	    if(is_sink(s2)) GK.reset_eps(EPS);     //         sink: switch back
+	    if(is_sink(s2)) {                      //        IF s2 is sink
+	      GK.set_sink(EPSSINK,FSINK);          //         switch to sink
+	      GK.direct_summation(c1,s2);          //         interact by direct
+	      GK.unset_sink(EPS);                  //         switch back
+	    } else                                 //        ELSE
+	      MI.cell_leaf(c1,s2);                 //         interaction c1,s2
 	  }                                        //       END LOOP
       }                                            //     ENDIF                
     }                                              //   END LOOP              
     LoopLeafKids(cell_iter,root(),s1) {            //   LOOP leaf kids s1     
       if(is_active(s1)) {                          //     IF active s1:        
 	LoopLeafSecd(cell_iter,root(),s1+1,s2) {   //       LOOP kids s2>s1     
-	  if(is_sink(s1) || is_sink(s2))           //         IF either is sink
-	    GK.reset_eps(EPSSINK);                 //           switch eps
-	  GK.interact(s1,s2);                      //         interaction s1,2  
-	  if(is_sink(s1) || is_sink(s2))           //         IF either is sink
-	    GK.reset_eps(EPS);                     //           switch eps back
+	  if(is_sink(s1) || is_sink(s2)) {         //        IF either is sink
+	    GK.set_sink(EPSSINK,FSINK);            //         switch to sink
+	    GK.interact(s1,s2);                    //         interaction s1,2  
+	    GK.unset_sink(EPS);                    //         switch back
+	  } else                                   //        ELSE
+	    GK.interact(s1,s2);                    //         interaction s1,2  
 	}                                          //       END LOOP
 	s1->normalize_grav();                      //       evaluation phase    
       } else {                                     //     ELSE: inactive s1    
 	LoopLeafSecd(cell_iter,root(),s1+1,s2)     //       LOOP kids s2>s1     
 	  if(is_active(s2)) {                      //         active s2 only
-	    if(is_sink(s1) || is_sink(s2))         //         IF either is sink
-	      GK.reset_eps(EPSSINK);               //           switch eps
-	    GK.interact(s1,s2);                    //         interaction s1,2  
-	    if(is_sink(s1) || is_sink(s2))         //         IF either is sink
-	      GK.reset_eps(EPS);                   //           switch eps back
+	    if(is_sink(s1) || is_sink(s2)) {       //         IF either is sink
+	      GK.set_sink(EPSSINK,FSINK);          //          switch to sink
+	      GK.interact(s1,s2);                  //          interaction s1,s2
+	      GK.unset_sink(EPS);                  //          switch back
+	    } else                                 //         ELSE
+	      GK.interact(s1,s2);                  //          interaction s1,s2
 	  }                                        //       END LOOP
       }                                            //     ENDIF                
     }                                              //   END LOOP              

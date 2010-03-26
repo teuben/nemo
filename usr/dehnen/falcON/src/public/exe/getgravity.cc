@@ -35,10 +35,11 @@
 // v 2.3.1  19/09/2007  WD ??                                                  |
 // v 2.3.2  20/02/2008  WD more changes in body.h                              |
 // v 2.3.3  10/09/2008  WD happy gcc 4.3.1                                     |
-// v 2.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink
+// v 2.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink |
+// v 2.4.1  25/03/2010  WD debugged sink particle gravity, fsink back
 //-----------------------------------------------------------------------------+
-#define falcON_VERSION   "2.4"
-#define falcON_VERSION_D "19-mar-2010 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.1"
+#define falcON_VERSION_D "25-mar-2010 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO
 #error You need NEMO to compile "src/mains/getgravity.cc"
@@ -47,20 +48,21 @@
 #include <forces.h>                                // falcON forces             
 //------------------------------------------------------------------------------
 const char*defv[] = {
-  "srce=???\n          input file: sources [m,x]       ",
-  "sink=???\n          input file: sinks   [x]         ",
-  "out=???\n           output file         [x,a,p]     ",
-  "times=all\n         time range (for srce only)      ",
-  "eps=0.05\n          softening length                ",
+  "srce=???\n         input file: sources [m,x]       ",
+  "sink=???\n         input file: sinks   [x]         ",
+  "out=???\n          output file         [x,a,p]     ",
+  "times=all\n        time range (for srce only)      ",
+  "eps=0.05\n         softening length                ",
 #ifdef falcON_PROPER
-  "epssink=\n          softening length for sink particles (default: eps) ",
+  "epssink=\n         softening length for sink particles (default: eps) ",
+  "fsink=0.2\n        theta_sink/theta <= 1                              ",
 #endif
   "kernel="falcON_KERNEL_TEXT
-  "\n                  softening kernel                ",
+  "\n                 softening kernel                ",
   "theta="falcON_THETA_TEXT
-  "\n                  tolerance parameter at M=M_tot  ",
+  "\n                 tolerance parameter at M=M_tot  ",
   "Ncrit="falcON_NCRIT_TEXT
-  "\n                  max # bodies in un-split cells  ",
+  "\n                 max # bodies in un-split cells  ",
   "Grav=1\n           Newton's constant of gravity (0-> no self-gravity) ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
@@ -83,9 +85,10 @@ void falcON::main() falcON_THROWING
 			getrparam("Grav"),
 			TH< zero? const_theta : theta_of_M,
 #ifdef falcON_PROPER
-			getrparam_z("epssink")
+			getrparam_z("epssink"),
+			getrparam  ("fsink")
 #else
-			zero
+			zero, one
 #endif
       );
   const fieldset srcedata(fieldset::m|fieldset::x);

@@ -411,6 +411,7 @@ namespace falcON {
     GravStats            *STATS;                   // interaction statistics    
     real                  EPS;                     // global softening length
     real                  EPSSINK;                 // softening length for sinks
+    real                  FSINK;                   // theta reduction for sinks
     real                  GRAV;                    // Newton's G (can be 0)     
     unsigned              Ncoeffs,Nchunks,Ncsize;  // # coeffs, chunks, bytes/c 
     Cell::srce_data      *CELL_SRCE;               // memory for cell srce      
@@ -474,7 +475,8 @@ namespace falcON {
 		  real           e,                // I: global/max eps         
 		  real           g = one,          //[I: Newton's G]            
 		  bool           s = 0,            //[I: use individual eps?]   
-		  real           es= zero,         //[I: eps_sink]      
+		  real           es= zero,         //[I: eps_sink]
+		  real           fs= one,          //[I: f_sink]
 		  const unsigned d[4]=Default::direct): //[I: N_direct for grav]
       TREE           ( T ),
       LEAFS_UPTODATE ( 0 ),
@@ -485,6 +487,7 @@ namespace falcON {
       STATS          ( st ),
       EPS            ( e ),
       EPSSINK        ( es? es : e ),
+      FSINK          ( fs<one? fs : one/fs ),
       GRAV           ( g ),
       Ncoeffs        ( 0u ),
       Nchunks        ( 0u ),
@@ -573,6 +576,7 @@ namespace falcON {
     bool                 ZeroGravity     () const { return GRAV==zero; }
     real           const&softening_length() const { return EPS; }
     real           const&softening_length_for_sinks() const { return EPSSINK; }
+    real           const&reduction_factor_for_sinks() const { return FSINK; }
     unsigned       const&N_active_cells  () const { return NCA; }
     unsigned       const&N_active_leafs  () const { return NLA; }
     unsigned       const&N_coeffs        () const { return Ncoeffs; }

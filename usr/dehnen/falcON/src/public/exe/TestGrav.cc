@@ -270,7 +270,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       <<" time needed for set up of X_i:                  "
       <<(cpu1 - cpu0)/real(CLOCKS_PER_SEC)<<endl;
   cpu0 = cpu1;
-  forces falcon(BODIES,EPS,theta,K,indiv_soft,one,MAC,one,DIR);
+  forces falcon(BODIES,EPS,theta,K,indiv_soft,one,MAC,EPS,one,DIR);
   for(register unsigned ig=0; ig<=Ngrow; ++ig) {
 #if (0)
     if(Ncut) falcon.re_grow(Ncut,Ncrit);

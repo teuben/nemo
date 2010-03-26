@@ -958,6 +958,7 @@ namespace falcON {
     /// \param[in] k  softening kernel
     /// \param[in] G  Newton's constant of gravity
     /// \param[in] es softening for sink particles
+    /// \param[in] fs opening-angle reduction for sink particles
     /// \param[in] nr tree re-using (not recommended)
     /// \param[in] ae external acceleration
     /// \param[in] nd direct-summation control for gravity
@@ -966,7 +967,8 @@ namespace falcON {
     /// \param[in] sd direct-summation control for SPH
 #endif
     ForceALCON(snapshot*s, real e, real th, unsigned nc, const vect*rc,
-	       kern_type k, real G, real es, unsigned nr, const acceleration*ae,
+	       kern_type k, real G, real es, real fs,
+	       unsigned nr, const acceleration*ae,
 	       const unsigned nd[4]
 	       , soft_type st
 #ifdef falcON_ADAP
@@ -1059,6 +1061,7 @@ namespace falcON {
     /// \param theta  opening angle
     /// \param Grav   Newton's constant of gravity
     /// \param epssk  softening length for sink particles
+    /// \param fsink  theta_sink/theta <= 1
 #ifdef falcON_ADAP
     /// \param Nsoft  # of bodies in softening shpere
     /// \param Nref   # of bodies in smallest cell to estimate eps_i
@@ -1090,6 +1093,7 @@ namespace falcON {
 	       real               theta,
 	       real               Grav,
 	       real               epssk,
+	       real               fsink,
 	       // default arguments                                             
 #ifdef falcON_ADAP
 	       real               Nsoft = zero,
@@ -1101,9 +1105,9 @@ namespace falcON {
 	       fieldset           read = fieldset::empty,
 	       const unsigned     dir[4] = Default::direct) falcON_THROWING :
       NBodyCode ( file, resume, to_read(read,
-					soft!=global_fixed ? 1 : 0,
-					Grav || aex), trange ),
-      ForceALCON( SHOT, eps, theta, Ncrit, croot, kernel, Grav, epssk,
+				      soft!=global_fixed ? 1 : 0,
+				      Grav || aex), trange ),
+      ForceALCON( SHOT, eps, theta, Ncrit, croot, kernel, Grav, epssk, fsink,
 		  (1<<hgrow)-1, aex, dir ,soft
 #ifdef falcON_ADAP
 		  ,Nsoft, Nref, emin, 1.1

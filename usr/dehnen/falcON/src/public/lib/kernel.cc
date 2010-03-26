@@ -399,21 +399,21 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
   F0 -= dR;
 //------------------------------------------------------------------------------
 #define PUT_RGHT				\
-  dR          *= D1;				\
+  dR       *= D1;				\
   B->pot() -= D0;				\
   B->acc() += dR;
 //------------------------------------------------------------------------------
 #define PUT_BOTH				\
-  dR          *= D1;				\
-  P0          -= D0;				\
-  F0          -= dR;				\
+  dR       *= D1;				\
+  P0       -= D0;				\
+  F0       -= dR;				\
   B->pot() -= D0;				\
   B->acc() += dR;
 //------------------------------------------------------------------------------
 #define PUT_SOME				\
-  dR   *= D1;					\
-  P0   -= D0;					\
-  F0   -= dR;					\
+  dR *= D1;					\
+  P0 -= D0;					\
+  F0 -= dR;					\
   if(is_active(B)) {				\
     B->pot() -= D0;				\
     B->acc() += dR;				\
@@ -575,7 +575,7 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
 }                                                  // END: unnamed namespace    
 #undef ARGS
-//==============================================================================
+//=============================================================================
 // we now can define the cell-leaf and cell-self interaction via direct sums    
 //==============================================================================
 #define ARGS KERN,B,A.begin_leafs(),A.end_leaf_desc(),EQ,HQ,QQ
@@ -915,7 +915,6 @@ namespace {
     { LOAD_I b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
 #else
   template<kern_type P, int K> struct kernel<P,K,1,1> : private __block<P,K> {
-//     enum { ND=K+1 };
     enum { ND = __block<P,K>::ND };
     sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }

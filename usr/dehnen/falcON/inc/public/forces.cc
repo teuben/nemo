@@ -70,6 +70,7 @@ namespace falcON {
 			real           g,
 			MAC_type       mac,
 			real           es,
+			real           fs,
 			const unsigned gd[4]
 #ifdef falcON_SPH
 		       ,const unsigned sd[3]
@@ -80,7 +81,7 @@ namespace falcON {
     Ncrit   ( 0 ),
     TREE    ( 0 ),
     GMAC    ( new GravMAC(mac, abs(th), falcON_ORDER) ),
-    GRAV    ( new GravEstimator(TREE,k,STATS,e,g,i_soft,es,gd) ),
+    GRAV    ( new GravEstimator(TREE,k,STATS,e,g,i_soft,es,fs,gd) ),
     PAES    ( 0 ),
     SPHT    ( 
 #ifdef falcON_SPH

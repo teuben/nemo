@@ -114,6 +114,7 @@ namespace falcON {
     /// \param G     Newton's gravitational constant
     /// \param mt    type of multipole acceptance criterion (MAC_type) 
     /// \param epssk global softening length for sink particles
+    /// \param fsink theta reduction factor for sink particles
     /// \param dir   constants controlling usage of direct summation for gravity 
 #ifdef falcON_SPH
     /// \param sdr   constants controlling cell-opening for SPH force computation
@@ -126,6 +127,7 @@ namespace falcON {
 	    real           G      = one,
 	    MAC_type       mt     = theta_of_M,
 	    real           epssk  = zero,
+	    real           fsink  = one,
 	    const unsigned dir[4] = Default::direct
 #ifdef falcON_SPH
 	   ,const unsigned sdr[3] =Default::SPHdirect

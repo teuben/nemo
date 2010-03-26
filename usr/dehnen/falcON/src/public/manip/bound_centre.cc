@@ -192,7 +192,7 @@ namespace Manipulate {
       if(A < 0)
 	falcON_THROW("Manipulator \"%s\": "
 		     "A=%f < 0",name(),A);
-      if(npar>2)
+      if(npar>4)
 	falcON_WarningN("Manipulator \"%s\": "
 			"skipping parameters beyond 2\n",name());
     }
@@ -228,22 +228,18 @@ namespace Manipulate {
     }
     LoopSubsetBodies(S,b) {
       real phi=zero;
-      if(S->have_pot()) phi += pot(b);
-      if(S->have_pex()) phi += pex(b);
       LoopSinkBodies(S,s) if(!in_subset(s))
-	phi+= mass(s) *
+	phi += mass(s) *
 	  GravKernBase::Psi(KERN,dist_sq(pos(b),pos(s)),
 			    S->have_eps()? square(half*(eps(b)+eps(s))) : EQ);
+      if(S->have_pot()) phi += pot(b);
+      if(S->have_pex()) phi += pex(b);
       Pot[bodyindex(b)] = phi;
       if(phi < Pmin) {
 	Pmin = phi;
 	Bmin = b;
       }
     }
-//     // TEST
-//     std::cerr<<" most bound particle: b"<<bodyindex(Bmin)
-// 	     <<" @ x="<<pos(Bmin)<<" Phi="<<Pmin<<" pot="<<pot(Bmin)<<'\n';
-//     // TSET
     if(K>1) {
       // 2   find K nearest neighbours of most bound body
       unsigned n = S->findNeighbours(Bmin,K,Nb);

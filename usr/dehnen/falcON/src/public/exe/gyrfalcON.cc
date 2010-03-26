@@ -134,9 +134,10 @@
 // v 3.3.1  29/10/2008  WD changes in nbody.h
 // v 3.3.2  04/11/2008  WD individual eps_i always enabled
 // v 3.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink
+// v 3.4.1  25/03/2010  WD debugged sink particle gravity, fsink back
 //------------------------------------------------------------------------------
-#define falcON_VERSION   "3.4"
-#define falcON_VERSION_D "19-mar-2010 Walter Dehnen                          "
+#define falcON_VERSION   "3.4.1"
+#define falcON_VERSION_D "25-mar-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
@@ -168,6 +169,7 @@ const char*defv[] = {
 #endif
 #ifdef falcON_PROPER
   "epssink=\n         softening length for sink particles (default: eps) ",
+  "fsink=0.2\n        theta_sink/theta <= 1                              ",
 #endif
   "kernel="falcON_KERNEL_TEXT
   "\n                 softening kernel of family P_n (P_0=Plummer)       ",
@@ -261,8 +263,9 @@ void falcON::main() falcON_THROWING
 		  getrparam  ("Grav"),
 #ifdef falcON_PROPER
 		  getrparam_z("epssink"),
+		  getrparam  ("fsink"),
 #else
-		  zero,
+		  zero, one,
 #endif
 #ifdef falcON_ADAP
 		  getrparam  ("Nsoft"),

@@ -871,6 +871,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       kern_type          ke,      // I: softening kernel       
 		       real               g,       // I: Newton's G             
 		       real               es,      // I: eps for sink particles
+		       real               fs,      // I: theta_sink/theta
 		       unsigned           ru,      // I: # reused of tree       
 		       const acceleration*ae,      // I: external acceleration  
 		       const unsigned     gd[4],   // I: direct sum: gravity    
@@ -892,7 +893,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   REUSE         ( ru ),
   FALCON        ( s, abs(e), abs(th), ke,
 		  SOFTENING != global_fixed,
-		  g, th < zero? const_theta : theta_of_M, abs(es), gd
+		  g, th < zero? const_theta : theta_of_M, abs(es), abs(fs), gd
 #ifdef falcON_SPH
 		  , sd
 #endif

@@ -81,7 +81,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
   private:
     falcON::pool         *COEFF_POOL;              // pool for TaylorCoeffs     
-    mutable int           NC, MAXNC;               // # TaylorCoeffs ever used  
+    mutable int           NC, MAXNC;               // # TaylorCoeffs ever used
     //--------------------------------------------------------------------------
     // blocking of 4 cell-leaf interactions                                     
     //--------------------------------------------------------------------------
@@ -231,8 +231,15 @@ namespace falcON {
     //--------------------------------------------------------------------------
     void reset_eps(real e)
     {
-      const_cast<real&>(EPS) = e;
-      const_cast<real&>(EQ)  = e*e;
+      EPS = e;
+      EQ  = e*e;
+#ifdef falcON_SSE_CODE
+      fHQ = half * EQ;
+      fQQ = quarter * EQ;
+#else
+      HQ  = half * EQ;
+      QQ  = quarter * EQ;
+#endif
     }
     //--------------------------------------------------------------------------
   };

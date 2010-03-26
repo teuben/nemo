@@ -794,10 +794,16 @@ falcON_THROWING
   close();
   char*last = (file&&file[0])? const_cast<char*>(file)+std::strlen(file)-1 : 0;
   char lett = last? *last : 0;            // remember last letter in filename
-  if     (lett=='!') { *last=0; nemo_io::open(file,app? "a!":"w!"); }
-  else if(lett=='@') { *last=0; nemo_io::open(file, "a"); }
-  else                          nemo_io::open(file,app? "a":"w");
-  if(last) *last = lett;                  // ensure file name remains unchanged
+  if       (lett=='!') {
+    *last=0;
+    nemo_io::open(file,app? "a!":"w!");
+    *last=lett;
+  } else if(lett=='@') {
+    *last=0;
+    nemo_io::open(file, "a");
+    *last=lett;
+  } else
+    nemo_io::open(file,app? "a":"w");
   return *this;
 }
 //------------------------------------------------------------------------------

@@ -46,9 +46,10 @@
 // v 2.2.3  26/03/2009  WD no error is masses missing and not required
 // v 2.3    09/02/2010  WD keyword fsink (proprietary only)
 // v 2.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink
+// v 2.4.1  25/03/2010  WD debugged sink particle gravity, fsink back
 //------------------------------------------------------------------------------
-#define falcON_VERSION   "2.4"
-#define falcON_VERSION_D "19-mar-2010 Walter Dehnen                          "
+#define falcON_VERSION   "2.4.1"
+#define falcON_VERSION_D "25-mar-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #error You need NEMO to compile addgravity
@@ -70,6 +71,7 @@ const char*defv[] = {
   "\n                 tolerance parameter at M=M_tot                     ",
 #ifdef falcON_PROPER
   "epssink=\n         softening length for sink particles (default: eps) ",
+  "fsink=0.2\n        theta_sink/theta <= 1                              ",
 #endif
   "Ncrit="falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells                     ",
@@ -102,9 +104,10 @@ void falcON::main() falcON_THROWING
 		  getrparam("Grav"),
 		  TH< zero? const_theta : theta_of_M,
 #ifdef falcON_PROPER
-		  getrparam_z("epssink")
+		  getrparam_z("epssink"),
+		  getrparam  ("fsink")
 #else
-		  zero
+		  zero, one
 #endif
       );
   acceleration *ACCEXT = hasvalue("accname") ?
