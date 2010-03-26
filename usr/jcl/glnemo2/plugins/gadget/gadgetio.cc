@@ -103,6 +103,7 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
                     const int nsel,   const bool load_vel)
 {
   bool is_temp=true;
+  bool is_intenerg=false;
   if (! is_read ) {
     use_gas = false;
     s_gas=1e9;  // starting gas index according to the user
@@ -215,13 +216,16 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
 
         if (block_name=="MASS") { // MASS block
           ok=true;
-          if (ntot_withmasses>0)
+          if (ntot_withmasses>0) {
+            std::cerr << "ntot_withmasses>0 ==> skipblock";
             skipBlock();  
+          }
           if (version==1) stop=true; // we stop reading for gadget1
         }
 
         if (block_name=="U") { // U block (Internal energy)
           assert(header.npart[0]>0);
+          is_intenerg=true;
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
@@ -346,7 +350,13 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
         }
 
         if (!ok) {
-          skipBlock();
+          std::cerr << "I am here...\n";
+          if (in.eof()) {
+            stop=true;
+          }
+          else {
+            skipBlock();
+          }
         }
       } // end of while readBlock
       
@@ -367,10 +377,10 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
     //qsort(P,npartTotal,sizeof(t_particle_data_lite),gadget::compare);
     
     // convert to temperature units only if user has selected gas particles
-    if (use_gas && is_temp && header.npartTotal[0] > 0) {
+    if (use_gas && is_temp && header.npartTotal[0] > 0) {    
       rhop  = rho;
       tempp = temp;
-      unitConversion();
+      unitConversion(is_intenerg);
     }
     if (! is_temp) {
       delete [] temp;
@@ -614,7 +624,7 @@ bool GadgetIO::readBlockName()
     name[i]='\0';
     block_name=name;
     status = in.good();
-    std::cerr <<">> Blockname ="<<block_name<<"\n";
+    std::cerr <<">> Blockname ="<<block_name<<" status="<<status<<"\n";
   }
   return status;
 }
@@ -728,7 +738,7 @@ void GadgetIO::storeComponents()
 }
 // ============================================================================
 // unitConversion()                                                            
-void GadgetIO::unitConversion()
+void GadgetIO::unitConversion(const bool is_intenerg)
 {
   double GRAVITY, BOLTZMANN, PROTONMASS;
   double UnitLength_in_cm, UnitMass_in_g, UnitVelocity_in_cm_per_s;
@@ -765,7 +775,7 @@ void GadgetIO::unitConversion()
   RhoUniverse_omegabar=1.9e-29*0.04;
 
   assert(intenerg != NULL);
-
+  gamma= 5.0/3; 
   for(int i=s_gas;i<e_gas;i++) {
 
     MeanWeight= 4.0/(3*Xh+1+4*Xh*tempp[i]) * PROTONMASS;
@@ -773,12 +783,14 @@ void GadgetIO::unitConversion()
     /* convert internal energy to cgs units */
 
     //u  = intenerg[i-s_gas] * UnitEnergy_in_cgs/ UnitMass_in_g;
-    u  = intenerg[s_gas] * UnitEnergy_in_cgs/ UnitMass_in_g;
-    gamma= 5.0/3;
+    if (is_intenerg) {
+      u  = intenerg[s_gas] * UnitEnergy_in_cgs/ UnitMass_in_g;
+      tempp[i] = MeanWeight/BOLTZMANN * (gamma-1) * u;
+    }    
 
     /* get temperature in Kelvin */
 
-    tempp[i] = MeanWeight/BOLTZMANN * (gamma-1) * u;
+    
     if (rhop) {
       rhop[i] *= UnitDensity_in_cgs/RhoUniverse_omegabar;
     }

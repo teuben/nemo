@@ -18,6 +18,7 @@
 #define GLNEMOSNAPSHOTINTERFACE_H
 #include <iostream>
 #include <assert.h>
+#include <cmath>
 #include <QFile>
 #include "particlesobject.h"
 #include "particlesdata.h"
@@ -25,7 +26,26 @@
 
 namespace glnemo {
 //class ParticlesData;
+  class CSelectTime;
+  typedef std::vector<CSelectTime> CSelectTimeVector;
 
+  //                             
+  // Class to store selected time
+  //                             
+  class CSelectTime {
+  public:
+    CSelectTime(const float _i, const float _s, 
+		const float _o, const float _l):inf(_i),sup(_s),offset(_o),lastt(_l) {
+    };
+    const CSelectTime & operator=(const CSelectTime& m) {
+      inf=m.inf;
+      sup=m.sup;
+      lastt=m.lastt;
+      offset=m.offset;
+      return *this;
+    }
+    float inf,sup,offset,lastt;
+  };
 class SnapshotInterface
 {
   public:
@@ -36,6 +56,8 @@ class SnapshotInterface
       end_of_data=false;
       first=true;
       crv.clear();
+      stv.clear();
+      parseSelectTime();
     };
     virtual ~SnapshotInterface() {};
     // ---------------------------------------------------
@@ -72,6 +94,14 @@ class SnapshotInterface
     ComponentRangeVector crv;
     float * pos, *vel;
     bool first;
+    CSelectTimeVector stv;
+    void parseSelectTime();
+    std::string parseString(std::string & next_string);
+    inline bool diffTime(const float t,const float fuzz=0.000001) {
+      return ((fabs(t)<fuzz)?true:false);
+    }
+    void getRangeTime(std::string);
+    bool checkRangeTime(const float);
 
 };
 

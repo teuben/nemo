@@ -84,13 +84,19 @@ int SnapshotGadget::initLoading(const bool _load_vel, const std::string _select_
 {
   load_vel = _load_vel;
   select_time = _select_time;
+  std::cerr << "select_time ="<<select_time<<"\n";
+  
   return 1;
 }
 // ============================================================================
 // nextFrame()                                                                 
 int SnapshotGadget::nextFrame(const int * index_tab, const int nsel)
 {
-  if (valid) {
+  int status=0;
+  stv.clear();
+  parseSelectTime();
+  if (valid ) { //&& checkRangeTime(gadget_io->getTime())) {
+    status=1;
     if (nsel > *part_data->nbody) {
       //pos
       if (part_data->pos) delete [] part_data->pos;

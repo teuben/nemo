@@ -4,7 +4,6 @@
 # Target is an application: ../bin/architecture/glnemo2
 # include global configuration
 include(../config.arch)
-
 DEFINES += GLEW_STATIC
 FORMS += formobjectcontrol.ui \
     formabout.ui \
@@ -77,28 +76,26 @@ SOURCES += glnemo.cc \
     colormap.cc \
     densitycolorbar.cc \
     camera.cc \
-    catmull_rom_spline.cc
+    catmull_rom_spline.cc \
+    snapshotinterface.cc
 RESOURCES = glnemo.qrc
 CONFIG += $$GLOBAL \
     warn_on \
     opengl \
     thread
-
-
 CONFIG(debug, debug|release) { 
     TARGET = ../bin/$$ARCH/glnemo2.debug
     win32 { 
         DESTDIR = ../bin/$$ARCH
         TARGET = glnemo2_debug
     }
-    unix {
-        #TARGET = ../bin/$$ARCH/glnemo2
-        #INSTALLS += target
-        #NEMOBIN = $(NEMOBIN)
-        #target.path += $$NEMOBIN
-    } 
-    
+    unix:
 }
+
+# TARGET = ../bin/$$ARCH/glnemo2
+# INSTALLS += target
+# NEMOBIN = $(NEMOBIN)
+# target.path += $$NEMOBIN
 else { 
     TARGET = ../bin/$$ARCH/glnemo2.release
     win32 { 
@@ -117,6 +114,7 @@ QMAKE_LIBDIR = ../plugins/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/ftm/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/gadget/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/zlib/lib/$${ARCH}/$$COMPILEMODE
+
 # !!!!!!
 # DESTDIR = .
 # !!!!!!

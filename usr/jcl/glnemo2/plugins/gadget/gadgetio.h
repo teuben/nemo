@@ -155,7 +155,7 @@ private:
   // if yes we'll have to do unit conversion for temperature and rho
   bool use_gas;
   int  s_gas, e_gas; // start  end gas indexes
-  void unitConversion();
+  void unitConversion(const bool);
   
   // swap bytes
   inline void swapBytes(void * x,const int size) {

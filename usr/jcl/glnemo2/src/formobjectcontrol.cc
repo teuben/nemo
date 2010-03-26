@@ -224,6 +224,7 @@ void FormObjectControl::update(ParticlesData   * _p_data,
   if (go  && ! go->duplicate_mem) mutex_data->unlock();
   
   on_range_table_cellClicked(last_row,1);
+  //on_physical_selected();
 }
 // ============================================================================
 // updateTable()                                                               

@@ -142,7 +142,7 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
       const ParticlesObject * po = (*gpv)[i].getPartObj();        // object
       float DMIN = po->getMinPhys();
       float DMAX = po->getMaxPhys();
-
+      //std::cerr << "obj="<<i<<" DMIN="<<DMIN<<" DMAX="<<DMAX<<"\n";
       if (po->isVisible()) {                                   // is visible  
         part_data = (*gpv)[i].getPartData();// get its Data
         // get physical value data array
