@@ -924,7 +924,7 @@ namespace WDutils {
     void ProcessLeafs(Leaf b, Leaf e) const;
   };// class NeighbourFinder
 
-#if defined(__GNUC__) && defined(__SSE__)
+#ifdef __SSE__
   ///
   /// Similar functionality to NeighbourFinder, but slightly faster due to SSE
   ///
@@ -1028,9 +1028,10 @@ namespace WDutils {
     Real   *const ZZ;                   ///< z positions in aligned memory
     chunk  *const C0;                   ///< chunks of blocks to process
     mutable chunk*CL;                   ///< last active chunk
+    inline void AddBlocks(unsigned, unsigned) const;
     unsigned ProcessBlocks(qandi*,unsigned) const;
   };
-#endif // __GNUC__ && __SSE__
+#endif // __SSE__
 
   ///
   /// find @a K nearest tree leafs to a given position or tree leaf.

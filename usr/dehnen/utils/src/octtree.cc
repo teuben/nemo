@@ -168,7 +168,7 @@ namespace {
   bool ininterval(Real cen, Real rad, Real pos)
   // necessary to trick emacs, which otherwise confused "<" for a bracket
 #define LessThan <
-  { return cen LessThan pos?  cen <= pos+rad : pos < cen+rad; }
+  { return pos LessThan cen?  cen <= pos+rad : pos < cen+rad; }
 #undef  LessThan
   /// contains geometrical methods in Dim dimensions, only D=2,3
   template<int Dim, typename Real> struct Helper;
@@ -180,7 +180,7 @@ namespace {
     typedef ::Box<2,Real> Box;
     static octant_type octant(Point const&cen, Point const&pos)
     {
-#if defined(__GNUC__) && defined(__SSE__)
+#ifdef __SSE__
       return 3&_mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
 					    _mm_loadu_ps(pos)));
 #else
@@ -311,9 +311,9 @@ namespace {
     typedef ::Box<3,Real> Box;
     static octant_type octant(Point const&cen, Point const&pos)
     {
-#if defined(__GNUC__) && defined(__SSE__)
-      return 7&_mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
-					    _mm_loadu_ps(pos)));
+#ifdef __SSE__
+      return 7 & _mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
+					      _mm_loadu_ps(pos)));
 #else
       octant_type oct(0);
       if(pos[0] > cen[0]) oct |= 1;
@@ -324,25 +324,49 @@ namespace {
     }
     static bool contains(Point const&cen, Real rad, Point const&pos)
     {
+#ifdef __SSE__
+      __m128 CC = _mm_loadu_ps(cen);
+      __m128 RR = _mm_set1_ps (rad);
+      __m128 XX = _mm_loadu_ps(pos);
+      return 7 == (7 & 
+      _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(CC,_mm_add_ps(XX,RR)),
+				 _mm_cmplt_ps(XX,_mm_add_ps(CC,RR)))));
+#else
       return ininterval(cen[0],rad,pos[0])
 	&&   ininterval(cen[1],rad,pos[1])
 	&&   ininterval(cen[2],rad,pos[2]);
+#endif
     }
     static Real outside_dist_sq(Point const&cen, Real rad, Point const&pos)
     {
+#ifdef __SSE__
+      SSE::Traits<float>::vector Q;
+      __m128 R = _mm_set1_ps (rad);
+      __m128 C = _mm_loadu_ps(cen);
+      __m128 X = _mm_loadu_ps(pos);
+      __m128 D = _mm_sub_ps(_mm_max_ps(C,X),_mm_min_ps(C,X));
+      __m128 DR= _mm_sub_ps(D,R);
+      _mm_store_ps(Q,_mm_and_ps(_mm_cmplt_ps(R,D),_mm_mul_ps(DR,DR)));
+      return Q[0]+Q[1]+Q[2];
+#else
       Real q(0),D;
-      D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
-      D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
-      D = abs(cen[2]-pos[2]); if(D>rad) q+=square(D-rad);
+      D=abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
+      D=abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
+      D=abs(cen[2]-pos[2]); if(D>rad) q+=square(D-rad);
       return q;
+#endif
     }
     static bool outside(Point const&cen, Real rad, Point const&pos, Real Q)
     {
+#ifdef __SSE__
+      return  outside_dist_sq(cen,rad,pos) > Q;
+#else
       Real q(0),D;
       D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
       D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
       D=abs(cen[2]-pos[2]); if(D>rad && Q<(q+=square(D-rad))) return true;
       return false;
+#endif
     }
     static bool inside(Point const&cen, Real rad, Point const&pos, Real Q)
     {
@@ -1236,7 +1260,7 @@ namespace WDutils {
 //
 // Wdutils::FastNeighbourFinder<OctTree>
 //
-#if defined(__GNUC__) && defined(__SSE__)
+#ifdef __SSE__
 namespace WDutils {
   template<typename OctTree>
   void FastNeighbourFinder<OctTree>::UpdatePositions()
@@ -1424,6 +1448,20 @@ namespace WDutils {
 #endif // __SSE2__
   //
   template<typename OctTree> inline
+  void FastNeighbourFinder<OctTree>::AddBlocks(unsigned i0, unsigned iN) const
+  {
+    if     (CL->IN == i0)
+      CL ->IN = iN;
+    else if(CL->I0 == iN)
+      CL ->I0 = i0;
+    else {
+      ++CL;
+      CL->I0 = i0;
+      CL->IN = iN;
+    }
+  }
+  //
+  template<typename OctTree> inline
   void FastNeighbourFinder<OctTree>::ProcessLeafs(Leaf L0, Leaf LN) const
   {
     unsigned i0K = L0.I    & nL;     // first block
@@ -1432,8 +1470,7 @@ namespace WDutils {
       // 1   range within a single block
       if(!PP[i0K]) {
 	PP[i0K] = 1;
-	if(CL->IN != i0K) (++CL)->I0 = i0K;
-	CL->IN = i0K+K;
+	AddBlocks(i0K,iEK+=K);
       }
     } else {
       // 2   range in more than one block 
@@ -1448,11 +1485,8 @@ namespace WDutils {
 	else        PP[iEK] = 1;
       }
       // 2.3 add blocks to chunk list of blocks
-      iEK += K;
-      if(i0K < iEK) {
-	if(CL->IN != i0K) (++CL)->I0 = i0K;
-	CL->IN = iEK;
-      }
+      if(i0K<=iEK)
+	AddBlocks(i0K,iEK+=K);
     }
   }
   //
@@ -1587,6 +1621,23 @@ namespace WDutils {
   template<typename OctTree>
   void NearestNeighbourFinder<OctTree>::FillList()
   {
+//     // TEST
+//     {
+//       Real  r;
+//       Point c,x;
+//       for(;;) {
+// 	std::cerr<<" c="; std::cin>>c;
+// 	std::cerr<<" r="; std::cin>>r;
+// 	std::cerr<<" x="; std::cin>>x;
+// 	Real q(0),D;
+// 	D = abs(c[0]-x[0]); if(D>r) q+=square(D-r);
+// 	D = abs(c[1]-x[1]); if(D>r) q+=square(D-r);
+// 	D = abs(c[2]-x[2]); if(D>r) q+=square(D-r);
+// 	std::cerr<<" outside_dist_sq(c,r,x) = "<<q<<'\n';
+// 	std::cerr<<" SSE version:             "<<outside_dist_sq(c,r,x)<<'\n';
+//       }
+//     }
+//     // TSET
     NIAC = 0;
     M    = K;
     Real Q = 12*square(Base::RootRadius());
