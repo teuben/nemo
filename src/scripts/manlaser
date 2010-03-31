@@ -6,6 +6,9 @@
 #   print out man pages in good quality. Try:
 #   http://homex.coolconnect.com/user/xkwang/gman
 #   http://homex.s-one.net.sg/user/xkwang/gman   
+# 
+#   An alternative may be : mdocml
+#   http://mdocml.bsd.lv/snapshots/mdocml.tar.gz
 #
 #   If troff doesn't work on your system, try setting MANLASER
 #   to 'groff -M$NEMO/man -man' or 'ditroff -man'   
