@@ -9,6 +9,8 @@
 #  ..../gcc.install src=gcc-$version  prefix=$ASTROMAKE/opt/gcc/$version version=$version fc=fortran
 # 
 #  For latest versions, see http://gcc.gnu.org/
+#
+#  new (4.4.0) versions require GMP 4.1+ and MPFR 2.3.2+. to build...????
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
