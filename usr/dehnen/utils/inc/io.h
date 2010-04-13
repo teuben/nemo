@@ -532,7 +532,8 @@ namespace WDutils {
     /// \param[in]  tag    datum needed in generating file to open
     /// \param[in]  append (optional) append (or overwrite) existing file?
     template<typename T> 
-    bool reopen(const char*format, T const&tag, bool append=0) {
+    bool reopen(const char*format, T const&tag, bool append=0)
+    {
       char FNEW[FNAME_MAX_SIZE];
       SNprintf(FNEW,FNAME_MAX_SIZE,format,tag);
       if(OUT==0 || strcmp(FNEW,FNAME)) {
@@ -542,6 +543,27 @@ namespace WDutils {
 	return false;
     }
     //@}
+    /// does file with name generated from \a format plus data \a tag exist?
+    /// \param[in]  format C-style format string for file name
+    /// \param[in]  tag    datum needed in generating file to open
+    /// \return     true if file with name exists
+    /// \note For non-unix systems, we try to construct an std::ifstream, which
+    ///       essentially tests for existence and read permission.
+    template<typename T>
+    static bool file_exists(const char*format, T const&tag)
+    {
+      char FNEW[FNAME_MAX_SIZE];
+      SNprintf(FNEW,FNAME_MAX_SIZE,format,tag);
+#ifdef unix
+      // simply use the access system call. F_OK asks for existence only.
+      return 0 == access(FNEW, F_OK);
+#else
+      // in fact, this test is different, as existence and read permission are
+      // required to open an ifstream.
+      std::ifstream IN(FNEW);
+      return IN.is_open();
+#endif
+    }
     //--------------------------------------------------------------------------
     /// flush() output
     void flush() { if(OUT) OUT->flush(); }
