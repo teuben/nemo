@@ -1604,8 +1604,6 @@ snapshot::snapshot(snapshot const&S,
 		   flags          F,
 		   bodytypes      T) falcON_THROWING
 : bodies ( S,Bd,F,T ),
-//   INIT   ( S.INIT ),
-//   TINI   ( S.TINI ),
   TIME   ( S.TIME ),
   PBNK   ( S.PBNK? new PointerBank(*(static_cast<PointerBank*>(S.PBNK))) : 0 ),
   PARA   ( 0 )
@@ -1648,10 +1646,6 @@ bool snapshot::read_nemo(nemo_in const&i, fieldset&r, fieldset g,
       return false;
     }
     TIME = s.time();
-//     if(!INIT) { 
-//       TINI = TIME;
-//       INIT = true;
-//     }
   } else
     TIME = 0.;
   bool need_reset = false;
@@ -1665,14 +1659,7 @@ bool snapshot::read_nemo(nemo_in const&i, fieldset&r, fieldset g,
 fieldset snapshot::read_part(snap_in  const&s, fieldset g, iterator const&b,
 			     bool w, unsigned n) falcON_THROWING
 {
-  if(s.has_time()) {
-    TIME = s.time();
-//     if(!INIT) { 
-//       TINI = TIME;
-//       INIT = true;
-//     }
-  } else
-    TIME = 0.;
+  TIME = s.has_time()? s.time() : 0.0;
   return read_snapshot(s,g,b,n,w);
 }
 //

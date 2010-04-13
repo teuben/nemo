@@ -656,8 +656,6 @@ namespace falcON {
     }
     /// \name data access
     //@{
-//     /// simulation time of initial snapshot
-//     double      const&initial_time   () const { return SHOT->initial_time(); }
     /// pointer to body data
     const bodies     *my_bodies      () const { return SHOT; }
     /// pointer to snapshot data
