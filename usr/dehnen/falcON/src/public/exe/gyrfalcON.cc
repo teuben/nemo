@@ -1,7 +1,14 @@
 // -*- C++ -*-
-//------------------------------------------------------------------------------
-//
-// gyrfalcON.cc
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \file   src/public/exe/gyrfalcON.cc
+///
+/// \author Walter Dehnen
+/// \date   2001-2010
+///                                                                             
+/// \brief  N-body code using the falcON force solver
+///
+////////////////////////////////////////////////////////////////////////////////
 //
 // Copyright (C) 2000-2010 Walter Dehnen
 //
@@ -19,7 +26,7 @@
 // with this program; if not, write to the Free Software Foundation, Inc., 675
 // Mass Ave, Cambridge, MA 02139, USA.
 //
-//------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////
 //
 // history:
 //
@@ -135,9 +142,10 @@
 // v 3.3.2  04/11/2008  WD individual eps_i always enabled
 // v 3.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink
 // v 3.4.1  25/03/2010  WD debugged sink particle gravity, fsink back
-//------------------------------------------------------------------------------
-#define falcON_VERSION   "3.4.1"
-#define falcON_VERSION_D "25-mar-2010 Walter Dehnen                          "
+// v 3.4.2  13/04/2010  WD  removed use of initial_time()
+////////////////////////////////////////////////////////////////////////////////
+#define falcON_VERSION   "3.4.2"
+#define falcON_VERSION_D "13-apr-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
@@ -286,7 +294,7 @@ void falcON::main() falcON_THROWING
     if(getbparam("manipinit"))
       MANIP(NBDY.my_snapshot());
   }
-  if(!never_ending && t_end < NBDY.initial_time()) {
+  if(!never_ending && t_end < NBDY.time()) {
     falcON_Warning("tstop < t_ini: nothing to be done\n");
     return;
   }

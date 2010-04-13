@@ -1588,8 +1588,8 @@ namespace falcON {
   ///                                                                           
   class snapshot : public bodies
   {
-    bool             INIT;
-    double           TINI;
+//     bool             INIT;
+//     double           TINI;
     mutable double   TIME;
     void            *PBNK;
     ParallelSnapshot*PARA;                         // parent if MPI parallel    
@@ -1599,14 +1599,14 @@ namespace falcON {
   public:
     ParallelSnapshot      *parallel()       { return PARA; }
     const ParallelSnapshot*parallel() const { return PARA; }
-    //==========================================================================
-    // \name initial-time information and manipulation                         
-    bool const&has_initial_time() const { return INIT; }  ///< has initial time?
-    double const&initial_time() const { return TINI; }    ///< get initial time
-    void init_time(double t) {                            ///< set initial time
-      INIT = true;
-      TINI = t;
-    }
+//     //==========================================================================
+//     // \name initial-time information and manipulation                         
+//     bool const&has_initial_time() const { return INIT; }  ///< has initial time?
+//     double const&initial_time() const { return TINI; }    ///< get initial time
+//     void init_time(double t) {                            ///< set initial time
+//       INIT = true;
+//       TINI = t;
+//     }
     //==========================================================================
     // \name time information and manipulation                                 
     double const&time() const { return TIME; }            ///< get time
@@ -1708,7 +1708,7 @@ namespace falcON {
     /// used in NBodyCode::NBodyCode() of file nbody.h
     explicit
     snapshot(fieldset Bd= fieldset(DefaultBits)) falcON_THROWING :
-    bodies(Bd), INIT(false), TINI(0.), TIME(0.), PBNK(0), PARA(0) {}
+    bodies(Bd), /* INIT(false), TINI(0.), */ TIME(0.), PBNK(0), PARA(0) {}
     //--------------------------------------------------------------------------
     /// Constructor 1 (new version)
     ///
@@ -1719,8 +1719,7 @@ namespace falcON {
     snapshot(double         t,
 	     const unsigned N[bodytype::NUM],
 	     fieldset       Bd= fieldset(DefaultBits)) falcON_THROWING :
-    bodies(N,Bd),
-    INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0) {}
+    bodies(N,Bd), /* INIT(true), TINI(t), */ TIME(t), PBNK(0), PARA(0) {}
     //--------------------------------------------------------------------------
     /// copy constructor from bodies
     ///
@@ -1736,7 +1735,7 @@ namespace falcON {
 	     fieldset     Bd=fieldset::all,
 	     flags        F =flags::empty,
 	     bodytypes    T =bodytypes::all) falcON_THROWING :
-    bodies(B,Bd,F,T), INIT(true), TINI(t), TIME(t), PBNK(0), PARA(0) {}
+    bodies(B,Bd,F,T), /* INIT(true), TINI(t), */ TIME(t), PBNK(0), PARA(0) {}
     //--------------------------------------------------------------------------
     /// copy constructor from snapshot
     ///
@@ -1818,8 +1817,6 @@ namespace falcON {
     /// by 3rd argument for all bodies in input (re-allocating if necessary).
     /// Previous data are lost.
     ///
-    /// If the initial time was previously unset, we set it now.
-    ///
     /// \return       true if time in input was in desired time range
     /// \param[in]  Is     NEMO input stream containing snapshot
     /// \param[out] Read   body data fields which have been read
@@ -1836,8 +1833,6 @@ namespace falcON {
     /// Here, we read data for \e Nread (4th argument) bodies from the snapshot
     /// input (1st arg) into the bodies starting at \e start (3rd argument).
     /// Enough bodies must be have been allocated previously.
-    ///
-    /// If the initial time was previously unset, we set it now.
     ///
     /// \return      body data fields that have been read
     /// \param[in] Si     snapshot input
@@ -1887,7 +1882,7 @@ namespace falcON {
       fieldset got;
       double t = bodies::read_gadget(fname, read, got, rec);
       set_time(t);
-      if(!has_initial_time()) init_time(t);
+//       if(!has_initial_time()) init_time(t);
       return got;
     }
     //--------------------------------------------------------------------------

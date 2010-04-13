@@ -4,7 +4,7 @@
 /// \file   src/public/manip/density.cc
 ///
 /// \author Walter Dehnen
-/// \date   2006-2008
+/// \date   2006-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -37,6 +37,7 @@
 // v 0.4.2  11/06/2008  WD new DebugInfo and falcON_Warning
 // v 0.4.3  25/09/2008  WD debugged (debug output only)
 // v 0.5    05/11/2008  WD register time of manipulation under trho
+// v 0.5.1  13/04/2010  WD removed use of initial_time()
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/neighbours.h>
@@ -149,7 +150,7 @@ namespace Manipulate {
     S->set_pointer(&TRHO,"trho");
     // 0.1 first call ever:
     if(FRST) {
-      TMAN = S->initial_time();
+      TMAN = S->time();
       FRST = false;
     // 0.2 is it time for a manipulation?
     } else if(S->time() < TMAN)

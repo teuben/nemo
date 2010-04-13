@@ -4,11 +4,11 @@
 /// \file   src/public/manip/projprof.cc                                        
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2006,2008                                                           
+/// \date   2006,2010                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006,2008 Walter Dehnen                                        
+// Copyright (C) 2006,2010 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -33,6 +33,7 @@
 // v 0.2    04/07/2006  WD made public (along with the tools used)              
 // v 0.3    07/07/2006  WD using flags::ignore (in_subset()) instead of subset  
 // v 0.3.1  11/06/2008  WD new DebugInfo                                        
+// v 0.3.2  13/04/2010  WD set initial file index to non-existing file
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -71,6 +72,7 @@ namespace falcON { namespace Manipulate {
     char*  const     FILE;
     mutable int      I;
     mutable output   OUT;
+    mutable bool     FRST;
     void print_line(bool) const;
     //--------------------------------------------------------------------------
   public:
@@ -93,7 +95,8 @@ namespace falcON { namespace Manipulate {
       L    ( npar>4?      pars[4] : L_default ),
       P    ( npar>2? vect(pars)   : vect(zero)),
       FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
-      I    ( 0 )
+      I    ( 0 ),
+      FRST ( true )
     {
       if(debug(2) || file==0 || file[0]==0 || npar>5)
 	std::cerr<<
@@ -132,7 +135,13 @@ namespace falcON { namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
   bool projprof::manipulate(const snapshot*S) const
   {
-    DebugInfo(2,"radprof::manipulate(): start\n");
+    DebugInfo(2,"projprof::manipulate(): start\n");
+    // make sure I refers to a non-existing file
+    if(FRST) {
+      if(std::strchr(FILE,'%'))
+	while(output::file_exists(FILE,I)) ++I;
+      FRST = false;
+    }
     const vect*X0= S->pointer<vect>("xcen");
     const vect*V0= S->pointer<vect>("vcen");
     vect proj = P; if(X0) proj -= *X0;

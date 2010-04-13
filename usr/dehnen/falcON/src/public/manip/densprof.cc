@@ -4,11 +4,11 @@
 /// \file   src/public/manip/densprof.cc
 ///
 /// \author Walter Dehnen
-/// \date   2006-2008
+/// \date   2006-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2006-2008 Walter Dehnen
+// Copyright (C) 2006-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@
 // v 0.3    13/05/2008  WD debugged error with minor & major axes
 // v 0.4    11/09/2008  WD erased direct use of nemo functions
 // v 0.5    05/11/2008  WD using 'trho' instead of 2nd parameter
+// v 0.5.1  13/04/2010  WD set initial file index to non-existing file
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <utils/numerics.h>
@@ -132,6 +133,7 @@ namespace falcON { namespace Manipulate {
     mutable output   OUT;       ///< file for output table
     char*  const     FILE;      ///< format for file name
     const PrintSmall PS;        ///< for printing out number in [0,1]
+    mutable bool     FRST;
     //--------------------------------------------------------------------------
     void print_line() const;
     //--------------------------------------------------------------------------
@@ -160,7 +162,8 @@ namespace falcON { namespace Manipulate {
   : W    ( npar>0?     int(pars[0])    : W_default ),
     I    ( 0 ),
     FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
-    PS   ( 3 )
+    PS   ( 3 ),
+    FRST ( true )  
   {
     if(debug(2) || file==0 || file[0]==0 || npar>1 || (debug(1) && npar<1))
       std::cerr<<
@@ -190,6 +193,12 @@ namespace falcON { namespace Manipulate {
   //////////////////////////////////////////////////////////////////////////////
   bool densprof::manipulate(const snapshot*SHOT) const
   {
+    // make sure I refers to a non-existing file
+    if(FRST) {
+      if(std::strchr(FILE,'%'))
+	while(output::file_exists(FILE,I)) ++I;
+      FRST = false;
+    }
     const double dt=1.e-8;
     // 0  check whether density is up-to-date
     const double*Trho = SHOT->pointer<double>("trho");

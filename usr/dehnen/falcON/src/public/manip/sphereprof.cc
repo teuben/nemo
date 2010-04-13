@@ -4,11 +4,11 @@
 /// \file   src/public/manip/sphereprof.cc
 ///
 /// \author Walter Dehnen
-/// \date   2006-2008
+/// \date   2006-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2006-2008 Walter Dehnen
+// Copyright (C) 2006-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -39,6 +39,8 @@
 // v 1.3.2  11/06/2008  WD new DebugInfo
 // v 1.3.3  11/09/2008  WD erased direct use of nemo functions
 // v 1.4    07/11/2008  WD added step as 3rd parameter
+// v 1.4.1  13/04/2010  WD removed use of initial_time()
+// v 1.4.2  13/04/2010  WD set initial file index to non-existing file
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -186,7 +188,9 @@ namespace falcON { namespace Manipulate {
   {
     DebugInfo(2,"sphereprof::manipulate(): start\n");
     if(FRST) {
-      TMAN = S->initial_time();
+      TMAN = S->time();
+      if(std::strchr(FILE,'%'))
+	while(output::file_exists(FILE,I)) ++I;
       FRST = false;
     } else if(S->time() < TMAN)
       return false;

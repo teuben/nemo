@@ -577,7 +577,8 @@ namespace falcON {
   //                                                                            
   /// puts together a (virtual) N-body code.                                    
   /// \version 10-11-2004: added parameter times to constructor                 
-  /// \version 06-10-2005: moved TINI (initial time) to snapshot                
+  /// \version 06-10-2005: moved TINI (initial time) to snapshot
+  /// \version 13-04-2010: removed initial time
   //                                                                            
   // ///////////////////////////////////////////////////////////////////////////
   class nemo_out;
@@ -655,8 +656,8 @@ namespace falcON {
     }
     /// \name data access
     //@{
-    /// simulation time of initial snapshot
-    double      const&initial_time   () const { return SHOT->initial_time(); }
+//     /// simulation time of initial snapshot
+//     double      const&initial_time   () const { return SHOT->initial_time(); }
     /// pointer to body data
     const bodies     *my_bodies      () const { return SHOT; }
     /// pointer to snapshot data
