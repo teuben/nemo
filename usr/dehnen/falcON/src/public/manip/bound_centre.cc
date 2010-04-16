@@ -35,6 +35,7 @@
 // v 1.1    21/11/2008  WD subtract sinks' contribution to gravity
 // v 2.0    09/02/2010  WD fixed bug in subtraction of sink potential
 // v 2.1    19/03/2010  WD epssink
+// v 2.2    14/04/2010  WD replaced energy by potential in weighting
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/default.h>
@@ -112,7 +113,7 @@ namespace Manipulate {
     mutable bool    FIRST;
     mutable Array<real>          Pot;  // potential for subset
     mutable Array<bodies::index> Nb;   // K nearest neighbours
-    mutable Array<double>        En;   // energy of K nearest neighbours
+    mutable Array<double>        En;   // potential of K nearest neighbours
     mutable Array<int>           In;
     //--------------------------------------------------------------------------
     static std::ostream&print_line(std::ostream&to) {
@@ -243,25 +244,17 @@ namespace Manipulate {
     if(K>1) {
       // 2   find K nearest neighbours of most bound body
       unsigned n = S->findNeighbours(Bmin,K,Nb);
-      // 3   obtain their mean velocity (as reference for velocity frame)
-      double W(0.);
-      vect_d V(0.);
-      for(unsigned i=0; i!=n; ++i) {
-	W += S->mass(Nb[i]);
-	V += S->mass(Nb[i]) * S->vel(Nb[i]);
-      }
-      V /= W;
-      // 4   get (E_max-E)^A weigted centre of K/2 most bound of those
-      // 4.1 sort neighbours according to their energy w.r.t. mean velocity
+      // 3   get (P_max-E)^A weigted centre of K/4 most bound of those
+      // 3.1 sort neighbours according to their energy w.r.t. mean velocity
       for(unsigned i=0; i!=n; ++i)
-	En[i] = half*dist_sq(S->vel(Nb[i]),V) + Pot[S->bodyindex(Nb[i])];
+	En[i] = Pot[S->bodyindex(Nb[i])];
       HeapIndex(En.array(),n,In.array());
       double Emax = En[In[n-1]];
-      // 4.2 loop K/8 most bound and find weighted centre
-      W = 0.;
-      V = 0.;
+      // 3.2 loop K/4 most bound and find weighted centre
+      double W(0.);
+      vect_d V(0.);
       vect_d X(0.);
-      for(unsigned i=0; i!=min(n,max(4u,K/8)); ++i) {
+      for(unsigned i=0; i!=min(n,max(4u,K/4)); ++i) {
 	double w = pow(Emax-En[In[i]],A);
 	W += w;
 	X += w * S->pos(Nb[In[i]]);
@@ -275,13 +268,13 @@ namespace Manipulate {
       XCEN = pos(Bmin);
       VCEN = vel(Bmin);
     }
-    // 5   output
+    // 4   output
     if(OUT)
       OUT << ' '
 	  << print(S->time(),12,8) << ' '
 	  << print(XCEN,15,8) << ' '
 	  << print(VCEN,15,8) << std::endl;
-    // 6   put centre under 'xcen' and 'vcen'
+    // 5   put centre under 'xcen' and 'vcen'
     S->set_pointer(&XCEN,"xcen");
     S->set_pointer(&VCEN,"vcen");
     return false;
