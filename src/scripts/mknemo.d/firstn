@@ -1,0 +1,10 @@
+#! /bin/csh -f
+#
+#  first N body code, revived by Aarseth
+
+set dir=$NEMO/usr/aarseth/firstn
+
+cd $dir
+make clean firstn
+cp firstn $NEMOBIN
+
