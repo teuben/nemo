@@ -13,10 +13,11 @@
 /// \version May-2009 WD  first tested version
 /// \version Oct-2009 WD  new design using indices for leafs and cells
 /// \version Nov-2009 WD  removed redundant template parameter
-/// \version Jan-2010 WD  renamed methods in TreeWalker; added leaf's parent
+/// \version Jan-2010 WD  renamed methods in TreeAccess; added leaf's parent
 /// \version Jan-2010 WD  neighbour search methods
 /// \version Feb-2010 WD  new initialisation: removed need for OctalTree::Dot
 /// \version Mar-2010 WD  class FastNeighbourFinder
+/// \version Apr-2010 WD  class TreeWalkAlgorithm, tree pruning
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -40,9 +41,13 @@
 #ifndef WDutils_included_octtree_h
 #define WDutils_included_octtree_h
 
-#ifndef WDutils_included_fstream
-#  include <fstream>
-#  define WDutils_included_fstream
+// #ifndef WDutils_included_fstream
+// #  include <fstream>
+// #  define WDutils_included_fstream
+// #endif
+#ifndef WDutils_included_iostream
+#  include <iostream>
+#  define WDutils_included_iostream
 #endif
 #ifndef WDutils_included_iomanip
 #  include <iomanip>
@@ -59,12 +64,11 @@
 #endif
 
 namespace {
-  template<int, typename> struct Dot;
+  template<int, typename> struct DotInitialiser;
   template<int, typename> struct BoxDotTree;
 }
 namespace WDutils {
-  template<typename> struct TreeWalker;
-  template<typename> struct DumpTreeData;
+  template<typename> struct TreeAccess;
   //
   /// A spatial tree of square (2D) or cubic (3D) cells
   //
@@ -79,12 +83,13 @@ namespace WDutils {
   /// referred to as 'leaf kids' as opposed to 'leaf descendants', which
   /// includes all leafs contained within a cell.
   ///
-  /// \note Access to leafs and cells via struct TreeWalker below
+  /// \note Access to leafs and cells via struct TreeAccess
   /// \note Implementations for @a __X = float,double and @a __D = 2,3
   template<int __D, typename __X>
   class OctalTree {
+    friend struct DotInitialiser<__D,__X>;
     friend struct BoxDotTree<__D,__X>;
-    friend struct TreeWalker<OctalTree>;
+    friend struct TreeAccess<OctalTree>;
     /// ensure that the only valid instantinations are those in octtree.cc
     WDutilsStaticAssert
     (( (  __D == 2 || __D == 3 )              &&
@@ -95,43 +100,46 @@ namespace WDutils {
   public:
     /// \name public constants and types
     //@{
-    const static int Dim = __D;              ///< number of dimensions
-    const static int Nsub= 1<<Dim;           ///< number of octants per cell
     typedef __X             Real;            ///< floating point type: position
-    typedef tupel<Dim,Real> Point;           ///< type: positions
+    typedef tupel<__D,Real> point;           ///< type: positions
     typedef uint32          particle_key;    ///< type: indexing particles
     typedef uint32          node_index;      ///< type: indexing leafs & cells
-    typedef uint32          depth_type;      ///< type: tree depth & related
-    /// \brief
-    /// Interface for initialising particle keys and positions.
-    /// \detail
-    /// The interface here is intended to allow for a general data layout (of
-    /// the particle data) in any application and at the same time ensure that
-    /// at OctalTree::rebuild() we keep the particle order (as much as possible)
-    /// which enables significant speed-up.
+    typedef uint8           depth_type;      ///< type: tree depth & level
+    typedef uint8           octant_type;     ///< type: octant and # cell kids
+    typedef uint16          local_count;     ///< type: # leaf kids
+    const static depth_type Dim = __D;       ///< number of dimensions
+    const static depth_type Nsub= 1<<Dim;    ///< number of octants per cell
+    const static depth_type MaximumDepth=99; ///< maximum tree depth
+    /// Interface for initialising particles at tree building
+    ///
+    /// The interface here is intended to allow for a general particle data
+    /// layout in the user application and at the same time ensure that at
+    /// OctalTree::rebuild() we keep the particle order (as much as possible),
+    /// enabling significant speed-up of tree re-building.
     class Initialiser {
-      friend struct BoxDotTree<__D,__X>;
+      friend struct DotInitialiser<__D,__X>;
     protected:
       // virtual dtor: only needed with older compiler versions
       virtual ~Initialiser() {}
       /// initialise key and position for one particle.
       /// \param[out] I  key for particle
       /// \param[out] X  position for particle
-      /// \note Will be called @a N times in the constructor. The implementation
-      ///       (the non-abstract version in any derived class) must ensure that
-      ///       each call initialises another particle.
-      virtual void Initialise(particle_key&I, Point&X) const = 0;
-      /// re-initialise position for valid key (only)
+      /// \note Will be called @a N times in the first constructor of class
+      ///       OctalTree. The implementation (the non-abstract version in any
+      ///       derived class) must ensure that each call initialises another
+      ///       particle.
+      virtual void Initialise(particle_key&I, point&X) const = 0;
+      /// re-initialise position for valid key only
       /// \param[in]  I  original particle key, may have become invalid
       /// \param[out] X  if key @a I is valid: position for associated particle
-      /// \return Was key @a I valid and position initialised?
+      /// \return        was key @a I valid and position initialised?
       /// \note Will be called min(@a Nnew, @a Nold) times in
       ///       OctalTree::rebuild() in an attempt to re-initialise all
       ///       particles in the particle order of the old tree. The option to
       ///       return false allows for the possibility that a particle key has
       ///       become invalid by some data re-arrangement. See also the
       ///       documentation for ReInitialiseInvalid() below.
-      virtual bool ReInitialiseValid(particle_key I, Point&X) const = 0;
+      virtual bool ReInitialiseValid(particle_key I, point&X) const = 0;
       /// re-initialise key and position.
       /// \param[out] I  valid key for particle
       /// \param[out] X  position for particle
@@ -142,114 +150,215 @@ namespace WDutils {
       ///       surplus particles (if @a Nnew > @a Nold).
       /// \note The implementation (the non-abstract version in any derived
       ///       class) must ensure that each call initialises another particle.
-      virtual void ReInitialiseInvalid(particle_key&I, Point&X) const = 0;
+      virtual void ReInitialiseInvalid(particle_key&I, point&X) const = 0;
+      /// pick particles for building a pruned tree
+      /// \param[in] I  particle key of leaf in parent tree
+      /// \return       shall we include this leaf/particle in pruned tree?
+      virtual bool Pick(particle_key I) const = 0;
     };
     //@}
     /// \name general data for class OctalTree
     //@{
-  protected:
-    const Initialiser*INIT;           ///< initialising
   private:
     char*             ALLOC;          ///< actually allocated memory
     unsigned          NALLOC;         ///< # bytes allocated at ALLOC
-    const depth_type  MAXD;           ///< maximum tree depth
-    const bool        AVSPC;          ///< avoid single-parent cells?
-    depth_type        NMAX;           ///< N_max
+    const local_count NMAX;           ///< N_max
+    const local_count NMIN;           ///< N_min
     depth_type        DEPTH;          ///< tree depth
     //@}
-    /// \name leaf data (access via TreeWalker<OctalTree>)
+    /// \name leaf data (access via TreeAccess<OctalTree>)
     //@{
-    node_index        NLEAF;          ///< total number of leafs
-    Point            *XL;             ///< leaf positions
-    particle_key     *PL;             ///< index of associated particle
-    node_index       *PC;             ///< index of parent cell
+    node_index    NLEAF;              ///< total number of leafs
+    point        *XL;                 ///< leaf positions
+    particle_key *PL;                 ///< index of associated particle
+    node_index   *PC;                 ///< index of parent cell
     //@}
-    /// \name cell data (access via TreeWalker<OctalTree>)
+    /// \name cell data (access via TreeAccess<OctalTree>)
     //@{
-    node_index        NCELL;          ///< total number of cells
-    uint8            *LE;             ///< cells' tree level
-    uint8            *OC;             ///< cells' octant in parent cell
-    Point            *XC;             ///< cells' centre (of cube)
-    node_index       *L0;             ///< cells' first leaf
-    uint16           *NL;             ///< number of cells' leaf kids
-    node_index       *NM;             ///< number of cells' leaf descendants
-    node_index       *CF;             ///< first daughter cell
-    uint8            *NC;             ///< number of cells' daughter cells
-    node_index       *PA;             ///< parent cell
-    Real             *RAD;            ///< table: radius[level]
+    node_index    NCELL;              ///< total number of cells
+    depth_type   *LE;                 ///< cells' tree level
+    octant_type  *OC;                 ///< cells' octant in parent cell
+    point        *XC;                 ///< cells' centre (of cube)
+    node_index   *L0;                 ///< cells' first leaf
+    local_count  *NL;                 ///< number of cells' leaf kids
+    node_index   *NM;                 ///< number of cells' leaf descendants
+    node_index   *CF;                 ///< first daughter cell
+    octant_type  *NC;                 ///< number of cells' daughter cells
+    node_index   *PA;                 ///< parent cell
+    Real          RAD[MaximumDepth+1];///< table: radius[level]
     //@}
-    void Allocate();                  ///< allocates memory
+    /// \name workhorses, implemented in octree.cc
+    //@{
+    void Allocate();
+    void build(char, node_index, const Initialiser*, const OctalTree*)
+      WDutils_THROWING;
+    //@}
   public:
-    /// ctor: build octtree from scratch.
+    /// \name tree building
+    //@{
+    /// build tree from scratch.
     ///
-    /// The tree is build in two stages. First, a 'box-dot' tree is built using
-    /// an algorithm which adds one dot (representing a particle) at a time.
-    /// Second, this tree is linked to leafs and cells such that leaf and cell
-    /// descendants of any cell are contiguous in memory.
+    /// The tree is build in three stages. First, Initialiser::Initialise() is
+    /// called @a N times to set key and position for all particles.\n
     ///
-    /// \param[in] n     number of particles
-    /// \param[in] init  Initialiser for particle keys and positions
-    /// \note Calls Initialiser::Initialise(), to set key and position for all
-    ///       @a n particles.
-    /// \param[in] nmax  maximum number of leafs in unsplit cells
-    /// \param[in] avsc  avoid single-parent cells?
-    /// \note Single-parent cells occur if all leafs of a cell live in just one
-    ///       octant. When @a avsc is true, such a cell is eliminated in favour
-    ///       of its only daughter. With this option on, mother and daughter
+    /// Second, a 'box-dot' tree is built using an algorithm which adds one
+    /// particle at a time and splits boxes in excess of @a nmax particles. \n
+    ///
+    /// Third, the cell-leaf tree is established by mapping boxes with at
+    /// least @a nmin particles (default @a nmin = 2) to cells and dots to
+    /// leafs in such a way that leaf and cell descendants of any cell are
+    /// contiguous in memory.
+    ///
+    /// \note We only allow @a nmax > 1, thus final boxes (and hence final
+    ///       cells) will have more than one particle.
+    /// \note In the linking stage single-parent boxes (which occur if all
+    ///       particles live just in one octant) are eliminated in favour of
+    ///       their only daughter box. This implies that mother and daughter
     ///       cells may be more than one level apart and the tree depth may be
-    ///       less than the highest cell level.
-    /// \param[in] maxd  maximum tree depth
-    OctalTree(node_index n, const Initialiser*init, depth_type nmax,
-	      bool avsc=true, depth_type maxd=100) WDutils_THROWING;
-    /// dtor
-    ~OctalTree();
-    /// build the tree again utilised by the old tree
+    ///       less than the maximum cell level.
+    /// \note If @a nmin==2, all boxes are mapped to cells. If @a nmin > 2,
+    ///       there are usually less cells than boxes, but the particle order
+    ///       in the final tree does reflect their order in a tree build
+    ///       deeper.
+    ///
+    /// \param[in] N     number of particles
+    /// \param[in] init  Initialiser for particle keys and positions
+    /// \param[in] nmax  maximum number of particles in unsplit boxes
+    /// \param[in] nmin  minimum number of particles in cell
+    OctalTree(node_index N, const Initialiser*init, local_count nmax,
+	      local_count nmin=2) WDutils_THROWING
+    : ALLOC(0), NALLOC(0), NMAX(nmax<2? 2:nmax), NMIN(nmin<2? 2:nmin)
+    { 
+      if(nmax<2) WDutils_WarningN("OctalTree: nmax=%d < 2 not allowed; "
+				 "will use nmax=2\n",nmax);
+      if(nmin<2) WDutils_WarningN("OctalTree: nmin=%d < 2 not allowed; "
+				 "will use nmin=2\n",nmin);
+      if(N == 0) WDutils_THROW("OctalTree: N=0\n");
+      build('n', N, init, 0);
+    }
+    /// re-build the tree after particles have changed (position or number).
     ///
     /// The tree is build exactly in the same way as with the constructor, only
     /// the order in which the particles are added to the 'box-dot' tree is the
-    /// leaf order of the original tree (rather than increasing particle index).
+    /// leaf order of the original tree (rather than ascending particle index).
     /// This change alone results in a speed-up by about a factor 2 for the
     /// whole process (including linking the final tree), because it avoids
     /// cache misses.
     ///
-    /// \param[in] Nnew  new number of particles
-    /// \param[in] nmax  maximum number of leafs in unsplit cells
-    ///
-    /// \note If any of the arguments equals 0, we take the old value instead.
-    ///
-    /// \note First calls Initialiser::ReInitialiseValid() min(@a Nnew, @a Nold)
-    ///       times in an attempt to re-initialise all particles in the particle
-    ///       order of the old tree. Then Initialiser::ReInitialiseInvalid() is
-    ///       called for all particles from the old tree whose keys have become
-    ///       invalid as indicated by Initialiser::ReInitialiseValid(). Finally,
+    /// \param[in] init    Initialiser required to re-initialise particle data
+    /// \param[in] Nnew    new number of particles
+    /// \note If @a Nnew = 0, we take the old value instead.
+    /// \param[in] nmax    maximum number of particles in unsplit boxes
+    /// \param[in] nmin    minimum number of particles in cell
+    /// \note If @a nmax or @a nmin <= 1, we take the old value instead
+    /// \note First, Initialiser::ReInitialiseValid() is called min(@a Nnew,
+    ///       @a Nold) times in an attempt to re-initialise all particles in
+    ///       the original particle order of the existing tree. Then,
+    ///       Initialiser::ReInitialiseInvalid() is called for all particles
+    ///       whose keys have become invalid as indicated by the return value
+    ///       of Initialiser::ReInitialiseValid(). Finally,
     ///       Initialiser::ReInitialiseInvalid() is called max(0,@a Nnew - @a
     ///       Nold) times to initialise any additional particles.
-    void rebuild(node_index Nnew=0, depth_type nmax=0) WDutils_THROWING;
+    void rebuild(const Initialiser*init, node_index Nnew=0, local_count nmax=0,
+		 local_count nmin=0) WDutils_THROWING
+    {
+      if(nmax>1) const_cast<local_count&>(NMAX) = nmax;
+      if(nmin>1) const_cast<local_count&>(NMIN) = nmin;
+      build('r', Nnew?Nnew:NLEAF, init, this);
+    }
+    //@}
+    /// \name tree pruning
+    //@{
+    /// make a pruned version of another octtree
+    ///
+    /// The new tree contains all leafs of the parent tree for which @a
+    /// init->Pick(l) returns true.
+    /// \note If all parent-tree leafs are picked, a warning is issued.
+    /// \note If none of the parent-tree leafs is picked, an error is thrown.
+    ///
+    /// \param[in] parent  (pter to) parent tree to prune
+    /// \param[in] init    (pter to) Initialiser, used to pick leafs
+    /// \param[in] nsub    number of particles in pruned tree
+    /// \note If @a nsub==0, the number is actually counted, resulting in
+    ///       calling Initialiser::Pick() twice for each leaf of the parent
+    ///       tree. Otherwise, if @a nsub>0, it is assumed that at most @a
+    ///       nsub particles are in the pruned tree (an error is thrown if
+    ///       more are found).
+    /// \param[in] nmax    maximum number of leafs in unsplit boxes
+    /// \param[in] nmin    minimum number of particles in cell
+    /// \note If either of @a nmax or @a nmin is 0, we use the parent tree
+    ///       values.
+    OctalTree(const OctalTree*parent, const Initialiser*init,
+	      node_index nsub=0, local_count nmax=0, local_count nmin=0)
+    WDutils_THROWING
+    : ALLOC(0), NALLOC(0),
+      NMAX(nmax==0? parent->Nmax() : nmax==1? 2:nmax),
+      NMIN(nmin==0? parent->Nmin() : nmin==1? 2:nmin)
+    {
+      if(nmax==1) WDutils_WarningN("OctalTree: nmax=%d < 2 not allowed; "
+				   "will use nmax=2\n",nmax);
+      if(nmax==1) WDutils_WarningN("OctalTree: nmin=%d < 2 not allowed; "
+				   "will use nmin=2\n",nmin);
+      build('p', nsub, init, parent);
+    }
+    /// establish as pruned version of an existing octtree
+    ///
+    /// This is essentially identical to destruction followed by construction
+    /// as pruned version of another octtree.
+    ///
+    /// \param[in] parent  (pter to) parent tree to prune
+    /// \param[in] init    (pter to) Initialiser, used to pick leafs
+    /// \param[in] nsub    number of particles in pruned tree
+    /// \note If @a nsub==0, the number is actually counted, resulting in
+    ///       calling Initialiser::Pick() twice for each leaf of the parent
+    ///       tree. Otherwise, if @a nsub>0, it is assumed that at most @a
+    ///       nsub particles are in the pruned tree (an error is thrown if
+    ///       more are found).
+    /// \param[in] nmax    maximum number of leafs in unsplit boxes
+    /// \param[in] nmin    minimum number of particles in cell
+    /// \note If either of @a nmax or @a nmin is 0, we use the parent tree
+    ///       values.
+    void reprune(const OctalTree*parent, const Initialiser*init,
+		 node_index nsub=0, local_count nmax=0, local_count nmin=2)
+      WDutils_THROWING
+    {
+      const_cast<local_count&>(NMAX)= nmax==0? parent->Nmax(): nmax==1? 2:nmax;
+      const_cast<local_count&>(NMIN)= nmin==0? parent->Nmin(): nmin==1? 2:nmin;
+      build('p', nsub, init, parent);
+    }
+    //@}
+    /// dtor
+    ~OctalTree()
+    {
+      if(ALLOC) delete16(ALLOC);
+      ALLOC = 0;
+      NALLOC= 0;
+      NLEAF = 0;
+      NCELL = 0;
+      DEPTH = 0;
+    }
     /// tree depth
     depth_type const&Depth() const
     { return DEPTH; }
     /// root radius
     Real const&RootRadius() const
     { return RAD[0]; }
-    /// are single-parent cells avoided?
-    bool const&AvoidedSingleParentCells() const
-    { return AVSPC; }
     /// N_max
-    depth_type const&Nmax() const
+    local_count const&Nmax() const
     { return NMAX; }
+    /// N_min
+    local_count const&Nmin() const
+    { return NMIN; }
     /// total number of leafs
     node_index const&Nleafs() const
     { return NLEAF; }
     /// total number of cells
     node_index const&Ncells() const
     { return NCELL; }
-    /// initialiser
-    const Initialiser*Init() const
-    { return INIT; }
   };// class OctalTree<>
 
   ///
-  /// support for walking an OctalTree.
+  /// support for using an OctalTree.
   ///
   /// Holds just a pointer to an OctalTree and provides access to leaf and
   /// cell data, as well as member methods for walking the tree.
@@ -258,27 +367,36 @@ namespace WDutils {
   ///
   /// \relates WDutils::OctalTree
   template<typename OctTree>
-  struct TreeWalker {
+  struct TreeAccess {
+    /// floating-point type
     typedef typename OctTree::Real Real;
-    typedef typename OctTree::Point Point;
+    /// type for positions
+    typedef typename OctTree::point point;
+    /// type for particle index
     typedef typename OctTree::particle_key particle_key;
+    /// type for indexing leafs and cells
     typedef typename OctTree::node_index node_index;
+    /// type for tree depth & level
     typedef typename OctTree::depth_type depth_type;
+    /// type for cell octants
+    typedef typename OctTree::octant_type octant_type;
+    /// type for number of leaf kids and Nmax
+    typedef typename OctTree::local_count local_count;
+    /// number of dimensions
     const static depth_type Dim  = OctTree::Dim;
+    /// number of octants per cell
     const static depth_type Nsub = OctTree::Nsub;
     /// pointer to tree
     const OctTree*const TREE;
     /// ctor
-    TreeWalker(const OctTree*t) : TREE(t) {}
+    TreeAccess(const OctTree*t) : TREE(t) {}
     /// copy ctor
-    TreeWalker(const TreeWalker&t) : TREE(t.TREE) {}
+    TreeAccess(const TreeAccess&t) : TREE(t.TREE) {}
     /// virtual dtor (to make gcc version 4.1.0 happy)
-    virtual ~TreeWalker() {}
-    /// \name leaf and leaf data access
-    //@{
+    virtual ~TreeAccess() {}
     /// iterator used for leafs.
     /// A simple wrapper around an index, which, being a separate type, avoids
-    /// confusion with other indices or variables of node_index.
+    /// confusion with other indices or variables of type node_index.
     //  note A conversion to node_index is not a good idea, as it allows an
     //       implicit conversion to bool, which almost certainly results in
     //       behaviour that is not intended, i.e. instead of IsInvalid()
@@ -305,8 +423,10 @@ namespace WDutils {
       bool operator !=(Leaf l) const
       { return I!=l.I; }
     };
+    /// \name leaf data access
+    //@{
     /// leaf position
-    Point const&position(Leaf l) const
+    point const&position(Leaf l) const
     { return TREE->XL[l.I]; }
     /// index of associated particle
     particle_key const&particle(Leaf l) const
@@ -315,11 +435,9 @@ namespace WDutils {
     node_index const&parentcellindex(Leaf l) const
     { return TREE->PC[l.I]; }
     //@}
-    /// \name cell and cell data access
-    //@{
     /// iterator used for cells.
     /// A simple wrapper around an index, which, being a separate type, avoids
-    /// confusion with other indices or variables of node_index.
+    /// confusion with other indices or variables of type node_index.
     //  note A conversion to node_index is not a good idea, as it allows an
     //       implicit conversion to bool, which almost certainly results in
     //       behaviour that is not intended, i.e. instead of IsInvalid()
@@ -356,26 +474,28 @@ namespace WDutils {
       bool operator !=(Cell c) const
       { return I!=c.I; }
     };
+    /// \name cell data access
+    //@{
     /// tree level of cell
-    uint8 const&level(Cell c) const
+    depth_type const&level(Cell c) const
     { return TREE->LE[c.I]; }
     /// octant of cell in parent
-    uint8 const&octant(Cell c) const
+    octant_type const&octant(Cell c) const
     { return TREE->OC[c.I]; }
     /// cell's geometric centre (of cubic box)
-    Point const&centre(Cell c) const
+    point const&centre(Cell c) const
     { return TREE->XC[c.I]; }
     /// radius (half-side-length of box) of cell
     Real const&radius(Cell c) const
     { return TREE->RAD[level(c)]; }
     /// number of leaf kids
-    uint16 const&Nleafkids(Cell c) const
+    local_count const&Nleafkids(Cell c) const
     { return TREE->NL[c.I]; }
     /// total number of leafs
     node_index const&Number(Cell c) const
     { return TREE->NM[c.I]; }
     /// number of daughter cells
-    uint8  const&Ncells(Cell c) const
+    octant_type const&Ncells(Cell c) const
     { return TREE->NC[c.I]; }
     /// index of cell's first leaf
     node_index const&firstleafindex(Cell c) const
@@ -393,7 +513,7 @@ namespace WDutils {
     Real const&RootRadius() const
     { return TREE->RootRadius(); }
     /// N_max
-    depth_type const&Nmax() const
+    local_count const&Nmax() const
     { return TREE->Nmax(); }
     /// tree depth
     depth_type const&Depth() const
@@ -413,7 +533,7 @@ namespace WDutils {
     /// an invalid leaf
     Leaf InvalidLeaf() const
     { return Leaf(TREE->NLEAF); }
-    /// is this a valid leaf?
+    /// is @a l a valid leaf?
     bool IsValid(Leaf l) const
     { return l.I < TREE->NLEAF; }
     /// # cells
@@ -440,33 +560,39 @@ namespace WDutils {
     /// an invalid cell
     Cell InvalidCell() const
     { return Cell(TREE->NCELL); }
-    /// is a cell index valid (refers to an actual cell)?
+    /// is cell @a c valid?
     bool IsValid(Cell c) const
     { return c.I < TREE->NCELL; }
-    /// first of cell's leafs
+    /// first of cell @a c's leafs
     Leaf BeginLeafs(Cell c) const
     { return Leaf(firstleafindex(c)); }
-    /// end of cell's leaf children 
+    /// end of cell @a c's leaf children 
     Leaf EndLeafKids(Cell c) const
     { return Leaf(firstleafindex(c)+Nleafkids(c)); }
-    /// end of all of cell's leafs
+    /// end of all of cell @a c's leafs
     Leaf EndLeafDesc(Cell c) const
     { return Leaf(firstleafindex(c)+Number(c)); }
-    /// first of cell's daughter cells
-    /// \note if there are no daughter cells, this returns c
+    /// first of cell @a c's daughter cells
+    /// \note if @a c has no daughter cells, this returns @a c itself
     Cell BeginCells(Cell c) const
     { return Cell(firstcellindex(c)); }
-    /// end of cell's daughter cells
-    /// \note if there are no daughter cells, this returns c
+    /// end of cell @a c's daughter cells
+    /// \note if @a c has no daughter cells, this returns @a c itself
     Cell EndCells(Cell c) const
     { return Cell(firstcellindex(c)+Ncells(c)); }
-    /// cell's parent cell
+    /// last of cell @a c's daughter cells
+    Cell RBeginCells(Cell c) const
+    { return --(EndCells(c)); }
+    /// before first of cell @a c's daughter cells
+    Cell REndCells(Cell c) const
+    { return --(BeginCells(c)); }
+    /// cell @a c's parent cell
     Cell Parent(Cell c) const
     { return Cell(c.I? parentcellindex(c):TREE->NCELL); }
-    /// leaf's parent cell
+    /// leaf @a l's parent cell
     Cell Parent(Leaf l) const
     { return Cell(parentcellindex(l)); }
-    /// does this cell contain a certain leaf
+    /// does cell @a c contain leaf @a l ?
     bool Contains(Cell c, Leaf l) const
     { return BeginLeafs(c) <= l && l < EndLeafDesc(c); }
     /// is either cell ancestor of the other?
@@ -478,9 +604,9 @@ namespace WDutils {
     /// \note If @a x is outside the root cell, an invalid cell is returned.
     /// \note For @a x == position(Leaf), this is equivalent to, but slower
     ///       than, Parent(Leaf).
-    Cell SmallestContainingCell(Point const&x) const;
+    Cell SmallestContainingCell(point const&x) const;
     //@}
-    /// \name macros for tree walking from within a TreeWalker
+    /// \name macros for tree walking from within a TreeAccess
     //@{
     /// loop cells down: root first
     /// \note useful for a down-ward pass
@@ -507,6 +633,12 @@ namespace WDutils {
 # define LoopCellKids(CELL,NAME)		\
     for(Cell NAME = this->BeginCells(CELL);	\
     NAME != this->EndCells(CELL); ++NAME)
+#endif
+    /// loop cell kids of a given cell in reverse order
+#ifndef LoopCellKidsReverse
+# define LoopCellKidsReverse(CELL,NAME)		\
+    for(Cell NAME = this->RBeginCells(CELL);	\
+    NAME != this->REndCells(CELL); --NAME)
 #endif
     /// loop cell kids of a given cell, starting somewhere
 #ifndef LoopCellSecd
@@ -608,13 +740,6 @@ namespace WDutils {
       LoopLeafs(L) Data(L,out) << '\n';
       out.flush();
     }
-    /// dump leaf data
-    /// \param[in] file  name of file to write to
-    void DumpLeafs(const char*file) const
-    {
-      std::ofstream out(file);
-      DumpLeafs(out);
-    }
     /// dump cell data
     /// \param[in] out  ostream to write to
     void DumpCells(std::ostream&out) const
@@ -623,15 +748,57 @@ namespace WDutils {
       LoopCellsDown(C) Data(C,out) << '\n';
       out.flush();
     }
-    /// dump cell data
-    /// \param[in] file  name of file to write to
-    void DumpCells(const char*file) const
-    {
-      std::ofstream out(file);
-      DumpCells(out);
-    }
     //@}
-  };// struct TreeWalker<>
+  };// struct TreeAccess<>
+
+  ///
+  /// The standard tree-walking algorithm
+  ///
+  /// \note fully inline
+  template<typename OctTree>
+  struct TreeWalkAlgorithm : public TreeAccess<OctTree> {
+    typedef TreeAccess<OctTree> Base;
+    typedef typename Base::Leaf Leaf;
+    typedef typename Base::Cell Cell;
+    /// \name interaction interface 
+    //@{
+    /// perform an interaction with a single leaf
+    /// \param[in] L  leaf to interact with
+    virtual void interact(Leaf L) = 0;
+    /// try to perform an interaction with a cell
+    /// \param[in] C  cell to interact with
+    /// \return  whether interaction was possible, otherwise cell will be split
+    virtual bool interact(Cell C) = 0;
+    /// perform all leaf interactions for a set of leafs
+    /// \param[in] Li  first leaf to interact with
+    /// \param[in] Ln  beyond last leaf to interact with
+    /// \note Not abstract, but virtual; default: calls single leaf interact
+    ///       on each leaf (perhaps somewhat inefficient).
+    virtual void interact_many(Leaf Li, Leaf Ln)
+    { for(; Li<Ln; ++Li) interact(Li); }
+    //@}
+    /// ctor: allocate memory for stack
+    TreeWalkAlgorithm(const OctTree*t)
+      : Base(t), S(OctTree::Nsub*Base::Depth()) {}
+    /// perform a tree walk.
+    void walk()
+    {
+      if(!interact(Cell(0)))
+	S.push(Cell(0));
+      while(!S.is_empty()) {
+	Cell C = S.pop();
+	if(Nleafkids(C))
+	  interact_many(BeginLeafs(C),EndLeafKids(C));
+	if(Ncells(C))
+	  LoopCellKidsReverse(C,Ci)
+	    if(!interact(C))
+	      S.push(C);
+      }
+    }
+    //
+  private:
+    Stack<Cell> S;                    ///< stack of cells to interact with
+  };
 
   ///
   /// The mutual tree-walking interaction algorithm of Dehnen (2002, JCP,179,27)
@@ -643,9 +810,9 @@ namespace WDutils {
   ///
   /// \note fully inline
   template<typename OctTree>
-  class MutualInteractionAlgorithm : public TreeWalker<OctTree> {
+  class MutualInteractionAlgorithm : public TreeAccess<OctTree> {
   public:
-    typedef TreeWalker<OctTree> Base;
+    typedef TreeAccess<OctTree> Base;
     typedef typename Base::Leaf Leaf;
     typedef typename Base::Cell Cell;
     /// \name interaction interface 
@@ -763,14 +930,14 @@ namespace WDutils {
   /// base class for NeighbourFinder and FastNeighbourFinder
   ///
   template<typename OctTree>
-  struct NeighbourLoop : public TreeWalker<OctTree>
+  struct NeighbourLoop : public TreeAccess<OctTree>
   {
   protected:
-    typedef TreeWalker<OctTree> Base;
+    typedef TreeAccess<OctTree> Base;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
     typedef typename Base::Real Real;             ///< type: scalars
-    typedef typename Base::Point Point;           ///< type: position vectors
+    typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
     Base::Dim;
     /// ctor
@@ -779,15 +946,15 @@ namespace WDutils {
     NeighbourLoop(OctTree const*tree, node_index ndir)
       : Base(tree), NDIR(ndir) {}
     /// ctor
-    /// \param[in] walk  tree walker
+    /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    NeighbourLoop(Base const&walk, node_index ndir)
-      : Base(walk), NDIR(ndir) {}
+    NeighbourLoop(Base const&tree, node_index ndir)
+      : Base(tree), NDIR(ndir) {}
     //
     const node_index NDIR;       ///< direct-loop control
     Real             Q;          ///< radius^2 of search sphere
     Cell             C;          ///< cell containing X, already searched
-    Point            X;          ///< centre of search sphere
+    point            X;          ///< centre of search sphere
     /// is search sphere outside of a cell (and vice versa)?
     inline bool Outside(Cell) const;
     /// is search sphere inside of a cell?
@@ -813,8 +980,8 @@ namespace WDutils {
   ///       whether to compare on distance or leaf (both is conceivable).
   template<typename OctTree>
   struct Neighbour {
-    typename TreeWalker<OctTree>::Real Q;  ///< distance^2 to search position
-    typename TreeWalker<OctTree>::Leaf L;  ///< neighbour leaf
+    typename TreeAccess<OctTree>::Real Q;  ///< distance^2 to search position
+    typename TreeAccess<OctTree>::Leaf L;  ///< neighbour leaf
   };
   ///
   /// find all tree leafs within a search sphere around a position or leaf
@@ -824,11 +991,11 @@ namespace WDutils {
   struct NeighbourFinder : public NeighbourLoop<OctTree>
   {
     typedef NeighbourLoop<OctTree> Base;
-    typedef TreeWalker<OctTree> Walker;
+    typedef TreeAccess<OctTree> Access;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
     typedef typename Base::Real Real;             ///< type: scalars
-    typedef typename Base::Point Point;           ///< type: position vectors
+    typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
     Base::Dim;
     /// functor for processing a Neighbour
@@ -847,10 +1014,10 @@ namespace WDutils {
     NeighbourFinder(OctTree const*tree, node_index ndir)
       : Base(tree,ndir) {}
     /// ctor
-    /// \param[in] walk  tree walker
+    /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    NeighbourFinder(Walker const&walk, node_index ndir)
-      : Base(walk,ndir) {}
+    NeighbourFinder(Access const&tree, node_index ndir)
+      : Base(tree,ndir) {}
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
@@ -885,7 +1052,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(Point const&x, Real q, Neighbour<OctTree>*nb, node_index m);
+    node_index Find(point const&x, Real q, Neighbour<OctTree>*nb, node_index m);
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
@@ -897,7 +1064,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(Point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
+    node_index Find(point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
     { return Find(x,q,nb.array(),nb.size()); }
     /// find all leafs within certain distance from leaf @a l and process them.
     /// \param[in]  l    leaf to find neighbours of
@@ -914,7 +1081,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    void Process(Point const&x, Real q, const Processor*p) WDutils_THROWING;
+    void Process(point const&x, Real q, const Processor*p) WDutils_THROWING;
   protected:
     const Processor *PROC;        ///< function to call
     Base::Q;
@@ -926,41 +1093,77 @@ namespace WDutils {
 
 #ifdef __SSE__
   ///
+  /// SSE capable leaf positions added
+  ///
+  template<typename OctTree>
+  struct PositionsSSE
+  {
+    typedef TreeAccess<OctTree> Access;
+    typedef typename Access::Leaf Leaf;
+    typedef typename Access::Real Real;
+    /// update positions
+    /// \note Must be called after every rebuild() of the tree.
+    void Update(Access const*);
+  protected:
+    const static unsigned K = SSE::Traits<Real>::K;
+    const static unsigned L = K-1;
+    const static unsigned nL= ~L;
+    unsigned const N16;                  ///< aligned number of leafs
+    bool    *const PP;                   ///< indicator: incomplete block added
+    Real    *const XX;                   ///< leaf x positions in aligned memory
+    Real    *const YY;                   ///< leaf y positions in aligned memory
+    Real    *const ZZ;                   ///< leaf z positions in aligned memory
+    /// ensure that the only valid instantinations are those in octtree.cc
+    WDutilsStaticAssert( SSE::Traits<Real>::sse );
+    /// ctor
+    /// \param[in] tree  OctTree to use for searches
+    PositionsSSE(Access const*tree);
+    /// dtor
+    ~PositionsSSE();
+  private:
+    char*const   ALLOC;
+    const size_t NALLOC;
+    /// re-allocate
+    /// \param[in] nl number of leafs
+    void Allocate(typename Access::node_index nl);
+  };
+  ///
   /// Similar functionality to NeighbourFinder, but slightly faster due to SSE
   ///
   /// \note While the individual neighbour search is faster than with class
   ///       NeighbourFinder, this requires some overhead in memory and cpu
   ///       time, which is dealt with in the constructor. Thus, this class 
   ///       should be used instead of NeighbourFinder only if neighbours for
-  ///       some number of particles or positions needs to be found.
+  ///       some number of particles or positions need to be found.
   /// \note Implementations for OctalTree<D,R> with D=2,3 and R=float,double
   template<typename OctTree>
-  struct FastNeighbourFinder : private NeighbourLoop<OctTree>
+  struct FastNeighbourFinder : 
+    private NeighbourLoop<OctTree>,
+    private PositionsSSE <OctTree>
   {
     //
-    typedef TreeWalker<OctTree> Walker;
-    typedef NeighbourLoop<OctTree> Base;
-    typedef typename Base::Leaf Leaf;             ///< type: tree leaf
-    typedef typename Base::Cell Cell;             ///< type: tree cell
-    typedef typename Base::Real Real;             ///< type: scalars
-    typedef typename Base::Point Point;           ///< type: position vectors
-    typedef typename Base::node_index node_index; ///< type: index & counters
-    Base::Dim;
-    /// ensure that the only valid instantinations are those in octtree.cc
-    WDutilsStaticAssert( SSE::Traits<Real>::sse );
+    typedef TreeAccess   <OctTree> Access;
+    typedef PositionsSSE <OctTree> PosSSE;
+    typedef NeighbourLoop<OctTree> NLoop;
+    typedef typename Access::Leaf Leaf;             ///< type: tree leaf
+    typedef typename Access::Cell Cell;             ///< type: tree cell
+    typedef typename Access::Real Real;             ///< type: scalars
+    typedef typename Access::point point;           ///< type: position vectors
+    typedef typename Access::node_index node_index; ///< type: index & counters
+    NLoop::Dim;
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     FastNeighbourFinder(OctTree const*tree, node_index ndir);
     /// ctor
-    /// \param[in] walk  tree walker
+    /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    FastNeighbourFinder(Walker const&walk, node_index ndir);
-    /// dtor
-    ~FastNeighbourFinder();
-    /// update positions
+    FastNeighbourFinder(Access const&tree, node_index ndir);
+    /// update positions (after re-allocating if necessary)
     /// \note Must be called after every rebuild() of the tree.
     void UpdatePositions();
+    /// dtor
+    ~FastNeighbourFinder();
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
@@ -984,7 +1187,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(Point const&x, Real q, Neighbour<OctTree>*nb, node_index m);
+    node_index Find(point const&x, Real q, Neighbour<OctTree>*nb, node_index m);
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
@@ -1007,25 +1210,29 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(Point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
+    node_index Find(point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
     { return Find(x,q,nb.array(),nb.size()); }
-  protected:
+//   protected:
+  private:
     /// process a range of leafs
     void ProcessLeafs(Leaf b, Leaf e) const;
-    Base::Q;
-    Base::C;
-    Base::X;
-  private:
-    const static unsigned K = SSE::Traits<Real>::K;
-    const static unsigned L = K-1;
-    const static unsigned nL= ~L;
+    NLoop::Q;
+    NLoop::C;
+    NLoop::X;
+    PosSSE::PP;
+    PosSSE::XX;
+    PosSSE::YY;
+    PosSSE::ZZ;
+    PosSSE::K;
+    PosSSE::L;
+    PosSSE::nL;
+//   private:
+//     const static unsigned K = SSE::Traits<Real>::K;
+//     const static unsigned L = K-1;
+//     const static unsigned nL= ~L;
     struct chunk { unsigned I0, IN; };
     struct qandi { Real Q; unsigned I; };
     //
-    bool   *const PP;                   ///< indicator: incomplete block added
-    Real   *const XX;                   ///< x positions in aligned memory
-    Real   *const YY;                   ///< y positions in aligned memory
-    Real   *const ZZ;                   ///< z positions in aligned memory
     chunk  *const C0;                   ///< chunks of blocks to process
     mutable chunk*CL;                   ///< last active chunk
     inline void AddBlocks(unsigned, unsigned) const;
@@ -1043,13 +1250,13 @@ namespace WDutils {
   ///
   /// \note Implementations for OctalTree<D,R> with D=2,3 and R=float,double
   template<typename OctTree>
-  struct NearestNeighbourFinder : public TreeWalker<OctTree>
+  struct NearestNeighbourFinder : public TreeAccess<OctTree>
   {
-    typedef TreeWalker<OctTree> Base;
+    typedef TreeAccess<OctTree> Base;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
     typedef typename Base::Real Real;             ///< type: scalars
-    typedef typename Base::Point Point;           ///< type: position vectors
+    typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
     /// ctor
     /// \param[in] tree  OctTree to use for searches
@@ -1101,10 +1308,8 @@ namespace WDutils {
     ///       the neighbour list).
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
-    ///       about where to search the tree than the position @a x. Another
-    ///       difference in this case is that here leaf @a l will be put on
-    ///       the neighbour list, but not with the above routine.
-    node_index Find(Point const&x, Neighbour<OctTree>*nb) WDutils_THROWING
+    ///       about where to search the tree than the position @a x.
+    node_index Find(point const&x, Neighbour<OctTree>*nb) WDutils_THROWING
     {
       if(K > Base::Nleafs())
 	WDutils_THROW("NearestNeighbourFinder: K=%d > Nl=%d\n",
@@ -1121,7 +1326,7 @@ namespace WDutils {
     const node_index    NDIR;     ///< direct-loop control
     Neighbour<OctTree> *LIST;     ///< neighbour list
     Cell                C;        ///< cell containing X, to be searched
-    Point               X;        ///< centre of search sphere
+    point               X;        ///< centre of search sphere
     mutable node_index  NIAC;     ///< interaction counter
     mutable int         M;        ///< K - # interactions for current search
     /// is search sphere outside of a cell (and vice versa)?

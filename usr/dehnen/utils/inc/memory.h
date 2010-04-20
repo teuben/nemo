@@ -383,19 +383,21 @@ namespace WDutils {
       //@{
       /// construct from block pointer and element pointer
       iterator(block*b, pointer e)
-	: B(b),   E(e)   {}
+	: B(b), E(e) {}
       /// copy constructor
       iterator(iterator const&I)
 	: B(I.B), E(I.E) {}
       /// copy assignment
-      iterator& operator= (iterator const&I) {
+      iterator& operator= (iterator const&I)
+      {
 	B=I.B;
 	E=I.E;
 	return *this;
       }
       //@}
       /// prefix ++: increment pointer; if out of block: get next block
-      iterator& operator++() {
+      iterator& operator++()
+      {
 	++E;
 	if(E == B->end()) {
 	  B = B->next();
@@ -404,45 +406,41 @@ namespace WDutils {
 	return *this;
       }
       /// postfix ++: return temporary equal original, but increment this
-      iterator  operator++(int) {
+      iterator  operator++(int)
+      {
 	iterator tmp(*this);
 	this->operator++();
 	return tmp;
       }
       /// equality: refer to the same element?
-      bool operator==(const iterator&I) {
-	return B == I.B  &&  E == I.E;
-      }
+      bool operator==(const iterator&I)
+      { return B == I.B  &&  E == I.E; }
       /// inequality: not equal
-      bool operator!=(const iterator&I) {
-	return ! operator==(I);
-      }
+      bool operator!=(const iterator&I)
+      { return ! operator==(I); }
+      /// conversion to bool: is iterator valid?
+      operator bool()
+      { return B!=0; }
       /// \name conversions to pointer to elment or reference to element
       //@{
       /// type conversion to pointer to element
-      operator pointer() {
-	return E;
-      }
+      operator pointer()
+      { return E; }
       /// type conversion to pointer to const element
-      operator const_pointer() const {
-	return E;
-      }
+      operator const_pointer() const
+      { return E; }
       /// reference operator
-      reference operator* () {
-	return*E;
-      }
+      reference operator* ()
+      { return*E; }
       /// const reference operator
-      const_reference operator* () const {
-	return*E;
-      }
+      const_reference operator* () const
+      { return*E; }
       /// dereference operator
-      pointer operator->() {
-	return E;
-      }
+      pointer operator->()
+      { return E; }
       /// const dereference operator
-      const_pointer operator->() const {
-	return E;
-      }
+      const_pointer operator->() const
+      { return E; }
       //@}
     };
   private:
@@ -474,7 +472,8 @@ namespace WDutils {
     ~block_alloc() WDutils_THROWING;
     /// give out: another element
     /// \return pointer to allocated element
-    pointer new_element() {
+    pointer new_element()
+    {
       if(LAST->is_full()) {
 	size_type New = LAST->N_alloc();
 	LAST->link(new block(New));
@@ -488,7 +487,8 @@ namespace WDutils {
     /// \return pointer to allocated element
     /// \param F estimator = function object returning N_required(N_used yet)
     template<class estimator>
-    pointer new_element(estimator const&F) {
+    pointer new_element(estimator const&F)
+    {
       if(LAST->is_full()) {
 	size_type New = F(NUSED);
 	LAST->link(new block(New));
@@ -501,7 +501,8 @@ namespace WDutils {
     /// give out: more elements
     /// \return pointer to \a Ne allocated elements
     /// \param Ne number of elements to return pointer to
-    pointer new_elements(size_type Ne) {
+    pointer new_elements(size_type Ne)
+    {
       if(!LAST->has_free(Ne)) {
 	size_type New=max(Ne,static_cast<size_type>(LAST->N_alloc()));
 	LAST->link(new block(New));
@@ -516,8 +517,8 @@ namespace WDutils {
     /// \param Ne number of elements to return pointer to
     /// \param F estimator = function object returning N_required(N_used yet)
     template<class estimator>
-    pointer new_elements(size_type       Ne,
-			 estimator const&F) {
+    pointer new_elements(size_type Ne, estimator const&F)
+    {
       if(!LAST->has_free(Ne)) {
 	size_type New=max(Ne,F(NUSED));
 	LAST->link(new block(New));
@@ -533,7 +534,8 @@ namespace WDutils {
     /// return a negative number
     /// \return the running number of element pointed to by \a E
     /// \param[in]  E  pointer to element
-    int number_of_element(const_pointer E) const {
+    int number_of_element(const_pointer E) const
+    {
       if(E==0) return -99;
       int num=0;
       for(block*B=FIRST; B; B=B->next())
@@ -546,7 +548,8 @@ namespace WDutils {
     /// was a given element given out by this?
     /// \return true if a given pointer to element was given out by this
     /// \param E pointer to element
-    bool is_element(const_pointer E) const {
+    bool is_element(const_pointer E) const
+    {
       if(E==0) return 0;
       for(register block*B=FIRST; B; B=B->next())
 	if(E >= B->front() && E < B->end())
@@ -554,29 +557,23 @@ namespace WDutils {
       return 0;
     }
     /// return pointer to first element
-    pointer first() const {
-      return FIRST->front();
-    }
+    pointer first() const
+    { return FIRST->front(); }
     /// return iterator referring to first element
-    iterator front() const {
-      return iterator(FIRST,FIRST->front());
-    }
+    iterator front() const
+    { return iterator(FIRST,FIRST->front()); }
     /// return iterator referring to first element
-    iterator begin() const {
-      return iterator(FIRST,FIRST->front());
-    }
+    iterator begin() const
+    { return iterator(FIRST,FIRST->front()); }
     /// return iterator referring to end of elements
-    iterator end() const {
-      return iterator(0,0);
-    }
+    iterator end() const
+    { return iterator(0,0); }
     /// return number of elements given out sofar
-    size_type N_used() const {
-      return NUSED;
-    }
+    size_type N_used() const
+    { return NUSED; }
     /// return number of elements allocated sofar
-    size_type N_allocated() const {
-      return NTOT;
-    }
+    size_type N_allocated() const
+    { return NTOT; }
   };// class WDutils::block_alloc
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct traits< block_alloc<T> > {
@@ -1194,6 +1191,62 @@ namespace WDutils {
     static const char  *name () {
       return message("Array<%s,%d>",traits<T>::name(),D);
     }
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  // ///////////////////////////////////////////////////////////////////////////
+  class BitArray : private Array<uint64>
+  {
+    typedef Array<uint64> Base;
+    static const uint64 null = 0;
+    static const uint64 full = 0xffffffffffffffff;
+    static unsigned rsize(unsigned n)
+    { return (n>>6) + (n&full)? 1 : 0; }
+  public:
+    /// return size of array
+    unsigned size() const
+    { return Base::size()<<6; }
+    /// set all bits to either off (default) or on
+    /// \param[in] b  initialise each bit to this value
+    void setval(bool b=false)
+    { Base::setval(b? full:null); }
+    /// reset: destruct and construct again
+    /// \param[in] n  new size of array
+    void reset(unsigned n)
+    { Base::reset(rsize(n)); }
+    /// reset: destruct and construct again
+    /// \param[in] n  new size of array
+    /// \param[in] b  initialise each bit to this value
+    void reset(unsigned n, bool b)
+    { Base::reset(rsize(n),b? full:null); }
+    /// default constructor: size equal to 0
+    BitArray()
+      : Base() {}
+    /// construction from size
+    /// \param[in] n  size of array
+    explicit BitArray(unsigned n) WDutils_THROWING
+      : Base(rsize(n)) {}
+    /// construction from size and initial value
+    /// \param[in] n  size of array
+    /// \param[in] b  initialise each bit to this value
+    BitArray(unsigned n, bool b) WDutils_THROWING
+      : Base(rsize(n),b? full:null) {}
+    /// const data access
+    /// \param[in] i  index of bit to access
+    bool operator[] (unsigned i) const
+    { return Base::operator[](i>>6) & (1<<(i&full)); }
+    /// switch bit on
+    /// \param[in] i  index of bit to switch on
+    void on(unsigned i)
+    { Base::operator[](i>>6) |= 1<<(i&full); }
+    /// switch bit off
+    /// \param[in] i  index of bit to switch off
+    void off(unsigned i)
+    { Base::operator[](i>>6) &= ~(1<<(i&full)); }
+    /// set a bit
+    /// \param[in] i  index of bit to set
+    /// \param[in] b  value to set bit to
+    void set(unsigned i, bool b)
+    { if(b) on(i); else off(i); }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //

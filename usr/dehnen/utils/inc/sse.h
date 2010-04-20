@@ -64,50 +64,22 @@ namespace WDutils {
   /// support for coding with SSE intrinsics, code using SSE intrinsics.
   namespace SSE {
 
-    template<int N> struct __Aux {
-      template<typename __I> static __I top(__I i) {
-	__I m = i % N;
-	return m? i+N-m : i;
-      }
-      template<typename __I> static __I bot(__I i) {
-	return i - (i % N);
-      }
-    };
+    template<int N> struct __Aux;
     template<> struct __Aux<2> {
-      template<typename __I>
-      static __I top(__I i) { return i&1? i+1:i; }
-      template<typename __I>
-      static __I bot(__I i) { return i&1? i-1:i; }
+      template<typename __I> static __I top(__I i) { return (i+1) & ~1; }
+      template<typename __I> static __I bot(__I i) { return i     & ~1; }
     };
     template<> struct __Aux<4> {
-      template<typename __I>
-      static __I top(__I i) {
-	__I m = i & 3;
-	return m? i+4-m : i;
-      }
-      template<typename __I> static __I bot(__I i) {
-	return i & ~3;
-      }
+      template<typename __I> static __I top(__I i) { return (i+3) & ~3; }
+      template<typename __I> static __I bot(__I i) { return i     & ~3; }
     };
     template<> struct __Aux<8> {
-      template<typename __I>
-      static __I top(__I i) {
-	__I m = i & 7;
-	return m? i+8-m : i;
-      }
-      template<typename __I> static __I bot(__I i) {
-	return i & ~7;
-      }
+      template<typename __I> static __I top(__I i) { return (i+7) & ~7; }
+      template<typename __I> static __I bot(__I i) { return i     & ~7; }
     };
     template<> struct __Aux<16> {
-      template<typename __I>
-      static __I top(__I i) {
-	__I m = i & 15;
-	return m? i+16-m : i;
-      }
-      template<typename __I> static __I bot(__I i) {
-	return i & ~15;
-      }
+      template<typename __I> static __I top(__I i) { return (i+15)& ~15; }
+      template<typename __I> static __I bot(__I i) { return i     & ~15; }
     };
 
     /// smallest multiple of N not less than i
