@@ -453,6 +453,7 @@ namespace WDutils {
     block       *LAST;   ///< last block in linked list
     size_type    NTOT;   ///< # elements allocated
     size_type    NUSED;  ///< # elements used
+    size_type    NBLCK;  ///< # blocks
     //@}
   public:
     // /////////////////////////////////////////////////////////////////////////
@@ -467,7 +468,8 @@ namespace WDutils {
       : FIRST ( new block(Ns) ),
 	LAST  ( FIRST ),
 	NTOT  ( Ns ),
-	NUSED ( 0 )  {}
+	NUSED ( 0 ),
+	NBLCK ( 1 ) {}
     /// destructor: delete all blocks
     ~block_alloc() WDutils_THROWING;
     /// give out: another element
@@ -494,6 +496,7 @@ namespace WDutils {
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
+	++NBLCK;
       }
       ++NUSED;
       return LAST->new_element();
@@ -508,6 +511,7 @@ namespace WDutils {
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
+	++NBLCK;
       }
       NUSED+=Ne;
       return LAST->new_elements(Ne);
@@ -524,6 +528,7 @@ namespace WDutils {
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
+	++NBLCK;
       }
       NUSED+=Ne;
       return LAST->new_elements(Ne);
@@ -574,6 +579,9 @@ namespace WDutils {
     /// return number of elements allocated sofar
     size_type N_allocated() const
     { return NTOT; }
+    /// return number of blocks
+    size_type N_blocks() const
+    { return NBLCK; }
   };// class WDutils::block_alloc
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct traits< block_alloc<T> > {

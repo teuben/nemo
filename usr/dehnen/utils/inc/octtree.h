@@ -18,6 +18,7 @@
 /// \version Feb-2010 WD  new initialisation: removed need for OctalTree::Dot
 /// \version Mar-2010 WD  class FastNeighbourFinder
 /// \version Apr-2010 WD  class TreeWalkAlgorithm, tree pruning
+/// \version Apr-2010 WD  faster and memory-leaner tree-building algorithm
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -74,7 +75,7 @@ namespace WDutils {
   //
   /// Cells with more than @a nmax (argument to constructor and member
   /// rebuild) are split and octants (or quarters for Dim=2) with more than
-  /// one particle are assigned a new cell. After tree construction, the
+  /// @a nmin particles are assigned a new cell. After tree construction, the
   /// octants are dissolved (though each cell still knows its octant in its
   /// parent cell) and any leafs from single-leaf octants become direct
   /// leaf-children of their cell. Thus, a non-final cell (cell with daughter
@@ -162,8 +163,9 @@ namespace WDutils {
   private:
     char*             ALLOC;          ///< actually allocated memory
     unsigned          NALLOC;         ///< # bytes allocated at ALLOC
-    const local_count NMAX;           ///< N_max
-    const local_count NMIN;           ///< N_min
+    const depth_type  NMAX;           ///< N_max
+    const depth_type  NMIN;           ///< N_min
+    const bool        AVSPC;          ///< avoid single parent cells?
     depth_type        DEPTH;          ///< tree depth
     //@}
     /// \name leaf data (access via TreeAccess<OctalTree>)
@@ -199,41 +201,62 @@ namespace WDutils {
     /// build tree from scratch.
     ///
     /// The tree is build in three stages. First, Initialiser::Initialise() is
-    /// called @a N times to set key and position for all particles.\n
-    ///
+    /// called @a N times to obtain key and position for all @a N particles.
+    /// \n
     /// Second, a 'box-dot' tree is built using an algorithm which adds one
-    /// particle at a time and splits boxes in excess of @a nmax particles. \n
+    /// particle at a time and splits octants in excess of @a nmax particles.
+    /// \n
+    /// Third, the cell-leaf tree is established by mapping boxes and octants
+    /// with at least @a nmin particles to cells and dots to leafs in such a
+    /// way that any cell's leaf and cell descendants are contiguous in memory.
     ///
-    /// Third, the cell-leaf tree is established by mapping boxes with at
-    /// least @a nmin particles (default @a nmin = 2) to cells and dots to
-    /// leafs in such a way that leaf and cell descendants of any cell are
-    /// contiguous in memory.
+    /// \param[in] N      number of particles
+    /// \param[in] init   Initialiser for particle keys and positions
+    /// \param[in] nmax   maximum number of particles in unsplit octants
+    /// \param[in] nmin   minimum number of particles in cell
+    /// \note For @a nmin=2 (and @a nmax>1) the cell-leaf tree reflects the
+    ///       depth of the original box-dot tree. However, for @a nmin > 2,
+    ///       while the cell-leaf tree is not as deep, the tree order of the
+    ///       deeper box-dot tree is preserved in the tree order of the leafs.
+    ///       \n
+    ///       For @a nmax=nmin=1 the tree is build to maximum depth when each
+    ///       leaf has its own final cell (and tree building is most CPU time
+    ///       consuming), which is unlikely to be required by any application.
     ///
-    /// \note We only allow @a nmax > 1, thus final boxes (and hence final
-    ///       cells) will have more than one particle.
-    /// \note In the linking stage single-parent boxes (which occur if all
-    ///       particles live just in one octant) are eliminated in favour of
-    ///       their only daughter box. This implies that mother and daughter
-    ///       cells may be more than one level apart and the tree depth may be
-    ///       less than the maximum cell level.
-    /// \note If @a nmin==2, all boxes are mapped to cells. If @a nmin > 2,
-    ///       there are usually less cells than boxes, but the particle order
-    ///       in the final tree does reflect their order in a tree build
-    ///       deeper.
-    ///
-    /// \param[in] N     number of particles
-    /// \param[in] init  Initialiser for particle keys and positions
-    /// \param[in] nmax  maximum number of particles in unsplit boxes
-    /// \param[in] nmin  minimum number of particles in cell
-    OctalTree(node_index N, const Initialiser*init, local_count nmax,
-	      local_count nmin=2) WDutils_THROWING
-    : ALLOC(0), NALLOC(0), NMAX(nmax<2? 2:nmax), NMIN(nmin<2? 2:nmin)
+    /// \param[in] avspc  avoid single-parent cells
+    /// \note Single-parent cells occur if all particles are in just one
+    ///       octant. If @a avspc=true (the default) such cells are eliminated
+    ///       in favour of their only daughter cell. In this case, the parent
+    ///       and daughter cell may be more than one tree level apart and the
+    ///       tree depth less than the maximum tree level of any cell.
+    OctalTree(node_index N, const Initialiser*init, unsigned nmax,
+	      unsigned nmin=0, bool avspc=true) WDutils_THROWING
+    : ALLOC ( 0 ),
+      NALLOC( 0 ),
+      NMAX  ( min(250u, max(1u, nmax)) ), 
+      NMIN  ( min(depth_type(nmin? nmin:2u), NMAX) ),
+      AVSPC ( avspc )
     { 
-      if(nmax<2) WDutils_WarningN("OctalTree: nmax=%d < 2 not allowed; "
-				 "will use nmax=2\n",nmax);
-      if(nmin<2) WDutils_WarningN("OctalTree: nmin=%d < 2 not allowed; "
-				 "will use nmin=2\n",nmin);
-      if(N == 0) WDutils_THROW("OctalTree: N=0\n");
+      if(N == 0)
+	WDutils_THROWN  ("OctalTree<%d,%s>: N=0\n",Dim,nameof(Real));
+      if(0==init)
+	WDutils_THROW   ("OctalTree<%d,%s>: init=0\n",Dim,nameof(Real));
+      if(nmax == 0)
+	WDutils_WarningN("OctalTree<%d,%s>: "
+			 "nmax=%d; will use nmax=%d instead\n",
+			 Dim,nameof(Real), nmax,int(NMAX));
+      if(nmax > 250)
+	WDutils_WarningN("OctalTree<%d,%s>: "
+			 "nmax=%d exceeds 250; will use nmax=%d instead\n",
+			 Dim,nameof(Real),nmax, int(NMAX));
+      if(nmin > 250)
+	WDutils_WarningN("OctalTree<%d,%s>: "
+			 "nmin=%d exceeds 250; will use nmin=%d instead\n",
+			 Dim,nameof(Real),nmin, int(NMIN));
+      if(nmin > nmax)
+	WDutils_WarningN("OctalTree<%d,%s>: "
+			 "nmin=%d exceeds nmax=%d; will use nmin=%d\n",
+			 Dim,nameof(Real), nmin, nmax, int(NMIN));
       build('n', N, init, 0);
     }
     /// re-build the tree after particles have changed (position or number).
@@ -241,89 +264,145 @@ namespace WDutils {
     /// The tree is build exactly in the same way as with the constructor, only
     /// the order in which the particles are added to the 'box-dot' tree is the
     /// leaf order of the original tree (rather than ascending particle index).
-    /// This change alone results in a speed-up by about a factor 2 for the
-    /// whole process (including linking the final tree), because it avoids
-    /// cache misses.
+    /// This change alone results in a significant speed-up for the whole
+    /// process, because it avoids cache misses.
     ///
     /// \param[in] init    Initialiser required to re-initialise particle data
-    /// \param[in] Nnew    new number of particles
-    /// \note If @a Nnew = 0, we take the old value instead.
-    /// \param[in] nmax    maximum number of particles in unsplit boxes
+    /// \param[in] Nnew    new number of particles (if @a Nnew=0 we assume the
+    /// \param[in] nmax    maximum number of particles in unsplit octants
     /// \param[in] nmin    minimum number of particles in cell
-    /// \note If @a nmax or @a nmin <= 1, we take the old value instead
-    /// \note First, Initialiser::ReInitialiseValid() is called min(@a Nnew,
-    ///       @a Nold) times in an attempt to re-initialise all particles in
-    ///       the original particle order of the existing tree. Then,
+    /// \note If @a nmax=0 we take the old values for both @a nmin and @a nmax.
+    ///       Otherwise, we require @a nmin,nmax<=250 and map @a nmin=0 to @a
+    ///       nmin=min(2,nmax).
+    ///
+    /// \note First, Initialiser::ReInitialiseValid() is called min(@a Nnew, @a
+    ///       Nold) times in an attempt to re-initialise all particles in the
+    ///       original particle order of the existing tree. Then,
     ///       Initialiser::ReInitialiseInvalid() is called for all particles
     ///       whose keys have become invalid as indicated by the return value
     ///       of Initialiser::ReInitialiseValid(). Finally,
-    ///       Initialiser::ReInitialiseInvalid() is called max(0,@a Nnew - @a
-    ///       Nold) times to initialise any additional particles.
-    void rebuild(const Initialiser*init, node_index Nnew=0, local_count nmax=0,
-		 local_count nmin=0) WDutils_THROWING
+    ///       Initialiser::ReInitialiseInvalid() is called to initialise any
+    ///       additional particles.
+    void rebuild(const Initialiser*init, node_index Nnew=0,
+		 unsigned nmax=0, unsigned nmin=0) WDutils_THROWING
     {
-      if(nmax>1) const_cast<local_count&>(NMAX) = nmax;
-      if(nmin>1) const_cast<local_count&>(NMIN) = nmin;
+      if(0==init)
+	WDutils_THROW("OctalTree<%d,%s>::rebuild(): init=0\n",Dim,nameof(Real));
+      if(nmax!=0) {
+	const_cast<depth_type&>(NMAX) = min(250u,nmax);
+	const_cast<depth_type&>(NMIN) = min(depth_type(nmin? nmin:2u), NMAX);
+	if(nmax > 250)
+	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
+			   "nmax=%d exceeds 250; will use nmax=%d instead\n",
+			   Dim,nameof(Real), nmax,int(NMAX));
+	if(nmin > 250)
+	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
+			   "nmin=%d exceeds 250; will use nmin=%d instead\n",
+			   Dim,nameof(Real), nmin,int(NMIN));
+	if(nmin > nmax)
+	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
+			   "nmin=%d exceeds nmax=%d; will use nmin=%d\n",
+			   Dim,nameof(Real), nmin,nmax,int(NMIN));
+      }
       build('r', Nnew?Nnew:NLEAF, init, this);
     }
-    //@}
-    /// \name tree pruning
-    //@{
     /// make a pruned version of another octtree
     ///
-    /// The new tree contains all leafs of the parent tree for which @a
-    /// init->Pick(l) returns true.
-    /// \note If all parent-tree leafs are picked, a warning is issued.
-    /// \note If none of the parent-tree leafs is picked, an error is thrown.
+    /// The new tree contains all leafs of the parent tree for which
+    /// Initialiser::Pick(l) returns true.
     ///
-    /// \param[in] parent  (pter to) parent tree to prune
-    /// \param[in] init    (pter to) Initialiser, used to pick leafs
+    /// \note If all parent-tree leafs are picked, a warning is issued.
+    ///       Conversely, if none is picked, an error is thrown.
+    ///
+    /// \param[in] parent  parent tree to prune
+    /// \param[in] init    Initialiser, used to pick leafs
     /// \param[in] nsub    number of particles in pruned tree
-    /// \note If @a nsub==0, the number is actually counted, resulting in
-    ///       calling Initialiser::Pick() twice for each leaf of the parent
-    ///       tree. Otherwise, if @a nsub>0, it is assumed that at most @a
-    ///       nsub particles are in the pruned tree (an error is thrown if
-    ///       more are found).
-    /// \param[in] nmax    maximum number of leafs in unsplit boxes
+    /// \note If @a nsub==0, the number is actually counted (and
+    ///       Initialiser::Pick() called twice for each leaf of the parent
+    ///       tree). Otherwise, if @a nsub>0, it is expected that at most @a
+    ///       nsub particles are in the pruned tree (an error is thrown if more
+    ///       are found).
+    ///
+    /// \param[in] nmax    maximum number of leafs in unsplit octants
     /// \param[in] nmin    minimum number of particles in cell
-    /// \note If either of @a nmax or @a nmin is 0, we use the parent tree
-    ///       values.
+    /// \note If @a nmax=0 we take the values for both @a nmin and @a nmax from
+    ///       the parent tree. Otherwise, we require @a nmin,nmax<=250 but map
+    ///       @a nmin=0 to @a nmin=min(2,nmax).
+    ///
+    /// \param[in] avspc   avoid single-parent cells
     OctalTree(const OctalTree*parent, const Initialiser*init,
-	      node_index nsub=0, local_count nmax=0, local_count nmin=0)
-    WDutils_THROWING
-    : ALLOC(0), NALLOC(0),
-      NMAX(nmax==0? parent->Nmax() : nmax==1? 2:nmax),
-      NMIN(nmin==0? parent->Nmin() : nmin==1? 2:nmin)
+	      node_index nsub=0, unsigned nmax=0, unsigned nmin=0,
+	      bool avspc=true) WDutils_THROWING
+    : ALLOC ( 0 ),
+      NALLOC( 0 ),
+      NMAX  ( nmax==0? parent->Nmax() : min(250u,nmax) ),
+      NMIN  ( nmax==0? parent->Nmin() : min(depth_type(nmin? nmin:2u), NMAX) ),
+      AVSPC ( avspc )
     {
-      if(nmax==1) WDutils_WarningN("OctalTree: nmax=%d < 2 not allowed; "
-				   "will use nmax=2\n",nmax);
-      if(nmax==1) WDutils_WarningN("OctalTree: nmin=%d < 2 not allowed; "
-				   "will use nmin=2\n",nmin);
+      if(0==init)
+	WDutils_THROW   ("OctalTree<%d,%s>: init=0\n",Dim,nameof(Real));
+      if(nmax > 250)
+	WDutils_WarningN("OctalTree<%d,%s>: "
+			 "nmax=%d exceeds 250; will use nmax=%d instead\n",
+			 Dim,nameof(Real),nmax, int(NMAX));
+      if(nmin > 250)
+	WDutils_WarningN("OctalTree<%d,%s>: "
+			 "nmin=%d exceeds 250; will use nmin=%d instead\n",
+			 Dim,nameof(Real),nmin, int(NMIN));
+      if(nmin > nmax)
+	WDutils_WarningN("OctalTree<%d,%s>: "
+			 "nmin=%d exceeds nmax=%d; will use nmin=%d\n",
+			 Dim,nameof(Real), nmin, nmax, int(NMIN));
       build('p', nsub, init, parent);
     }
     /// establish as pruned version of an existing octtree
     ///
-    /// This is essentially identical to destruction followed by construction
-    /// as pruned version of another octtree.
+    /// This is equivalent to destruction followed by construction as pruned
+    /// version of another octtree: the tree will contain all leafs of the
+    /// parent tree for which Initialiser::Pick(l) returns true.
     ///
-    /// \param[in] parent  (pter to) parent tree to prune
-    /// \param[in] init    (pter to) Initialiser, used to pick leafs
+    /// \note If all parent-tree leafs are picked, a warning is issued.
+    ///       Conversely, if none is picked, an error is thrown.
+    ///
+    /// \param[in] parent  parent tree to prune
+    /// \param[in] init    Initialiser, used to pick leafs
     /// \param[in] nsub    number of particles in pruned tree
-    /// \note If @a nsub==0, the number is actually counted, resulting in
-    ///       calling Initialiser::Pick() twice for each leaf of the parent
-    ///       tree. Otherwise, if @a nsub>0, it is assumed that at most @a
-    ///       nsub particles are in the pruned tree (an error is thrown if
-    ///       more are found).
-    /// \param[in] nmax    maximum number of leafs in unsplit boxes
+    /// \note If @a nsub==0, the number is actually counted (and
+    ///       Initialiser::Pick() called twice for each leaf of the parent
+    ///       tree). Otherwise, if @a nsub>0, it is expected that at most @a
+    ///       nsub particles are in the pruned tree (an error is thrown if more
+    ///       are found).
+    ///
+    /// \param[in] nmax    maximum number of leafs in unsplit octants
     /// \param[in] nmin    minimum number of particles in cell
-    /// \note If either of @a nmax or @a nmin is 0, we use the parent tree
-    ///       values.
+    /// \note If @a nmax=0 we take the values for both @a nmin and @a nmax from
+    ///       the parent tree. Otherwise, we require @a nmin,nmax<=250 but map
+    ///       @a nmin=0 to @a nmin=min(2,nmax).
     void reprune(const OctalTree*parent, const Initialiser*init,
-		 node_index nsub=0, local_count nmax=0, local_count nmin=2)
+		 node_index nsub=0, unsigned nmax=0, unsigned nmin=0)
       WDutils_THROWING
     {
-      const_cast<local_count&>(NMAX)= nmax==0? parent->Nmax(): nmax==1? 2:nmax;
-      const_cast<local_count&>(NMIN)= nmin==0? parent->Nmin(): nmin==1? 2:nmin;
+      if(0==init)
+	WDutils_THROW("OctalTree<%d,%s>::reprune(): init=0\n",Dim,nameof(Real));
+      if(nmax==0) {
+	const_cast<depth_type&>(NMAX) = parent->Nmax();
+	const_cast<depth_type&>(NMIN) = parent->Nmin();
+      } else {
+	const_cast<depth_type&>(NMAX) = min(250u,nmax);
+	const_cast<depth_type&>(NMIN) = min(depth_type(nmin? nmin:2u), NMAX);
+	if(nmax > 250)
+	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
+			   "nmax=%d exceeds 250; will use nmax=%d instead\n",
+			   Dim,nameof(Real), nmax, int(NMAX));
+	if(nmin > 250)
+	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
+			   "nmin=%d exceeds 250; will use nmin=%d instead\n",
+			   Dim,nameof(Real), nmin, int(NMIN));
+	if(nmin > nmax)
+	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
+			   "nmin=%d exceeds nmax=%d; will use nmin=%d\n",
+			   Dim,nameof(Real), nmin, nmax, int(NMIN));
+      }
       build('p', nsub, init, parent);
     }
     //@}
@@ -344,10 +423,10 @@ namespace WDutils {
     Real const&RootRadius() const
     { return RAD[0]; }
     /// N_max
-    local_count const&Nmax() const
+    depth_type const&Nmax() const
     { return NMAX; }
     /// N_min
-    local_count const&Nmin() const
+    depth_type const&Nmin() const
     { return NMIN; }
     /// total number of leafs
     node_index const&Nleafs() const
@@ -513,8 +592,11 @@ namespace WDutils {
     Real const&RootRadius() const
     { return TREE->RootRadius(); }
     /// N_max
-    local_count const&Nmax() const
+    depth_type const&Nmax() const
     { return TREE->Nmax(); }
+    /// N_min
+    depth_type const&Nmin() const
+    { return TREE->Nmin(); }
     /// tree depth
     depth_type const&Depth() const
     { return TREE->Depth(); }
