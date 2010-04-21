@@ -10,7 +10,7 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-#include <QtGui>
+#include <QtGui> // Mandatory for plugins management
 #include <iostream>
 #include "snapshotnemo.h"
 #include "particlesdata.h"
@@ -142,11 +142,11 @@ ComponentRangeVector * SnapshotNemo::getSnapshotRange()
 }
 // ============================================================================
 // initLoading()                                                               
-int SnapshotNemo::initLoading(const bool _load_vel, const std::string _select_time)
+int SnapshotNemo::initLoading(GlobalOptions * so)
 {
-  load_vel = _load_vel;
+  load_vel = so->vel_req;
   select_part="all";
-  select_time=_select_time;
+  select_time=so->select_time;
   std::cerr << "SnapshotNemo::initLoading select_time = " << select_time << "\n";
   return 1;
 }

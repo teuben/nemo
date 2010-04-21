@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -10,7 +10,7 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-#include <QtGui>
+#include <QtGui> // Mandatory for plugins management
 #include <sstream>
 #include "snapshotgadget.h"
 
@@ -80,10 +80,10 @@ ComponentRangeVector * SnapshotGadget::getSnapshotRange()
 }
 // ============================================================================
 // initLoading()                                                               
-int SnapshotGadget::initLoading(const bool _load_vel, const std::string _select_time)
+int SnapshotGadget::initLoading(GlobalOptions * so)
 {
-  load_vel = _load_vel;
-  select_time = _select_time;
+  load_vel = so->vel_req;
+  select_time = so->select_time;
   std::cerr << "select_time ="<<select_time<<"\n";
   
   return 1;
@@ -95,7 +95,7 @@ int SnapshotGadget::nextFrame(const int * index_tab, const int nsel)
   int status=0;
   stv.clear();
   parseSelectTime();
-  if (valid ) { //&& checkRangeTime(gadget_io->getTime())) {
+  if (valid && checkRangeTime(gadget_io->getTime())) {
     status=1;
     if (nsel > *part_data->nbody) {
       //pos
@@ -148,7 +148,7 @@ int SnapshotGadget::nextFrame(const int * index_tab, const int nsel)
       end_of_data=true;
     }
   }
-  return 1;
+  return status;
 }
 // ============================================================================
 // close()                                                                     

@@ -142,11 +142,11 @@ void MainWindow::start(std::string shot)
     current_data = plugins->getObject(snapshot);
     if (current_data) {
       if (! exist ) {
-        current_data->initLoading(store_options->vel_req, s_times); 
+        current_data->initLoading(store_options); 
         if (shot == "") interactiveSelect("",true);
       }
       else 
-  	loadNewData(select,s_times,keep_all,store_options->vel_req, false,true);
+  	loadNewData(select,store_options->select_time,keep_all,store_options->vel_req, false,true);
       if (!store_options->rho_exist) {
         store_options->render_mode = 0;
       }
@@ -529,18 +529,19 @@ void MainWindow::interactiveSelect(std::string _select, const bool first_snapsho
 void MainWindow::selectPart(const std::string _select, const bool first_snapshot)
 {
   select = _select;
+  store_options->select_part = select;
   if (reload && current_data) {// reload action requested   
     current_data->close();     // close the current snapshot
     delete current_data;       // delete previous object    
     current_data = plugins->getObject(snapshot); // connect
-    current_data->initLoading(store_options->vel_req, s_times);
+    current_data->initLoading(store_options);
     crv = current_data->getSnapshotRange();
 
   } else {
     actionReset();             // reset view if menu file open
   }
-  std::cerr << "MainWindow::selectPart s_times = " << s_times << "\n";
-  loadNewData(select,s_times,  // load data
+  std::cerr << "MainWindow::selectPart store_options->select_time = " << store_options->select_time << "\n";
+  loadNewData(select,store_options->select_time,  // load data
 	      keep_all,store_options->vel_req,true,first_snapshot);
 }
 // -----------------------------------------------------------------------------
@@ -552,11 +553,11 @@ void MainWindow::loadNewData(const std::string select,
                              const bool first)
 {
   ParticlesObjectVector povold;
-  
+  store_options->select_part = select;
   if (keep_all) {;};
   if (current_data) {
     std::cerr << "MainWindow::loadNewData s_time = " << s_time << "\n";
-    current_data->initLoading(load_vel, s_time);
+    if (!interact) current_data->initLoading(store_options);
     // get snapshot component ranges
     //ComponentRangeVector * crv = current_data->getSnapshotRange();
     if (!interact) crv = current_data->getSnapshotRange();
@@ -565,51 +566,57 @@ void MainWindow::loadNewData(const std::string select,
     assert(crv->size());
     ComponentRange::list(crv);
     user_select->setSelection(select,crv,&pov); // fill pov according user sel and crv
-
+    
     // load from disk
     mutex_data->lock();
     QTime tbench;
     tbench.restart();
-    current_data->nextFrame(user_select->getIndexesTab(),user_select->getNSel());
-    qDebug("Time elapsed to load snapshot: %d s", tbench.elapsed()/1000);
-    store_options->new_frame=true;
-    mutex_data->unlock();
-    listObjects();
-    if (reload) { // backup old pov2 properties to povold
-      povold.clear();
-      ParticlesObject::backupVVProperties(pov2,povold,pov.size());
-    }
-    pov2 = pov;   // copy new pov object to pov2
-    ParticlesObject::clearOrbitsVectorPOV(pov2); // clear orbits vectors if present
-    if (reload) { // copy back povold properties to pov2
-      ParticlesObject::backupVVProperties(povold,pov2,pov.size());
-    }
-    if (first) {
-      if (store_options->auto_texture_size && !store_options->rho_exist) {
-        store_options->texture_size = current_data->part_data->getMaxSize()/100.0;
-        std::cerr << "Resampled Texture Size = "<< store_options->texture_size <<"\n";
-      }
-      setDefaultParamObject(pov2); // set some default parameter if first loading
-    }
-
-    form_o_c->update( current_data->part_data, &pov2,store_options);
-    updateOsd();
-    tbench.restart();
     
-    if (interact && !reload && store_options->rho_exist) {
-      store_options->render_mode = 2; // density mode
+    if (current_data->nextFrame(user_select->getIndexesTab(),user_select->getNSel())) {
+      qDebug("Time elapsed to load snapshot: %d s", tbench.elapsed()/1000);
+      store_options->new_frame=true;
+      mutex_data->unlock();
+      listObjects();
+      if (reload) { // backup old pov2 properties to povold
+        povold.clear();
+        ParticlesObject::backupVVProperties(pov2,povold,pov.size());
+      }
+      pov2 = pov;   // copy new pov object to pov2
+      ParticlesObject::clearOrbitsVectorPOV(pov2); // clear orbits vectors if present
+      if (reload) { // copy back povold properties to pov2
+        ParticlesObject::backupVVProperties(povold,pov2,pov.size());
+      }
+      if (first) {
+        if (store_options->auto_texture_size && !store_options->rho_exist) {
+          store_options->texture_size = current_data->part_data->getMaxSize()/100.;
+          if (store_options->texture_size>1.0) store_options->texture_size=1.0;
+          //store_options->texture_size = pow(current_data->part_data->getMaxSize(),3)/(*(current_data->part_data->nbody));
+          std::cerr << "Resampled Texture Size = "<< store_options->texture_size <<"\n";
+        }
+        setDefaultParamObject(pov2); // set some default parameter if first loading
+      }
+      
+      form_o_c->update( current_data->part_data, &pov2,store_options);
+      updateOsd();
+      tbench.restart();
+      
+      if (interact && !reload && store_options->rho_exist) {
+        store_options->render_mode = 2; // density mode
+      }
+      if (interact && !reload && !store_options->rho_exist) {
+        store_options->render_mode = 0; // alpha blending accumulation mode
+      }
+      if (store_options->auto_com) {
+        actionCenterToCom(false);
+      }
+      gl_window->update( current_data->part_data, &pov2,store_options);
+      qDebug("Time elapsed to update GL with new data: %d s", tbench.elapsed()/1000);
+      if (!reload && bestzoom) gl_window->bestZoomFit();
+      statusBar()->showMessage(tr("Snapshot loaded."));
     }
-    if (interact && !reload && !store_options->rho_exist) {
-      store_options->render_mode = 0; // alpha blending accumulation mode
+    else {
+      mutex_data->unlock();
     }
-    if (store_options->auto_com) {
-       actionCenterToCom(false);
-    }
-    gl_window->update( current_data->part_data, &pov2,store_options);
-    qDebug("Time elapsed to update GL with new data: %d s", tbench.elapsed()/1000);
-    if (!reload && bestzoom) gl_window->bestZoomFit();
-    statusBar()->showMessage(tr("Snapshot loaded."));
-
     // it may be necessary to delete "current_data"
   }
 }
@@ -677,12 +684,13 @@ void MainWindow::parseNemoParameters()
   snapshot                = getparam((char *) "in");
   server                  = getparam((char *) "server");
   select                  = getparam((char *) "select");
+  store_options->select_part = select;
   ::string select_list;
   if ( hasvalue((char *) "select_list") )
     select_list           = getparam((char *) "select_list");
   else
     select_list = NULL;
-  s_times                 = getparam((char *) "times");
+  store_options->select_time = getparam((char *) "times");
   keep_all                = getbparam((char *) "keep_all");
   store_options->vel_req  = getbparam((char *) "vel");
   store_options->show_vel = getbparam((char *) "disp_vel");
@@ -707,6 +715,14 @@ void MainWindow::parseNemoParameters()
   store_options->port     = getiparam((char *) "port");
   store_options->show_points= getbparam((char *) "point");
   store_options->show_poly= getbparam((char *) "texture");
+  store_options->xmin     = getdparam((char *) "xmin");
+  store_options->xmax     = getdparam((char *) "xmax");
+  store_options->ymin     = getdparam((char *) "ymin");
+  store_options->ymax     = getdparam((char *) "ymax");
+  store_options->zmin     = getdparam((char *) "zmin");
+  store_options->zmax     = getdparam((char *) "zmax");
+  store_options->lmax     = getiparam((char *) "lmax");
+  store_options->scale    = getdparam((char *) "scale");
   // density
   if ( hasvalue((char *) "mindens") ) {
       store_options->phys_min_glob=getdparam((char *) "mindens");
@@ -822,7 +838,7 @@ void MainWindow::actionReload()
 //   delete current_data;
 //   current_data = plugins->getObject(snapshot);
   
-//   loadNewData(select,s_times,// load data
+//   loadNewData(select,store_options->select_time,// load data
 //         keep_all,store_options->vel_req,true); //
   reload=true;
   interactiveSelect(select);
@@ -1180,6 +1196,7 @@ void MainWindow::playEvent()
 // uploadNewFrame                                                               
 void MainWindow::uploadNewFrame()
 {
+  static bool first=true;
   if (loading_thread->isValidLoading()) {
     if (  current_data->getInterfaceType() == "List of Ftm"      ||
 	  current_data->getInterfaceType() == "List of Gadget 2" ||
@@ -1194,10 +1211,20 @@ void MainWindow::uploadNewFrame()
       //pov2=pov; // modif orbits
     }
     updateOsd();
+    if (store_options->rho_exist) {
+      store_options->render_mode = 2; // density mode
+    }
+    if (!store_options->rho_exist) {
+      store_options->render_mode = 0; // alpha blending accumulation mode
+    }
     if (store_options->auto_com) {
        actionCenterToCom(false);
     } 
     gl_window->update( current_data->part_data, &pov2,store_options);
+    if (first && bestzoom) {
+      first=false;
+      gl_window->bestZoomFit();
+    }
     if (store_options->auto_play_screenshot && !store_options->auto_gl_screenshot) {
       startAutoScreenshot();
     }

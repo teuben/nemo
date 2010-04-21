@@ -10,7 +10,7 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-#include <QtGui>
+#include <QtGui> // Mandatory for plugins management
 #include <QDir>
 #include <sstream>
 #include "snapshotlist.h"
@@ -60,6 +60,8 @@ ComponentRangeVector * SnapshotList::getSnapshotRange()
     current_data = plugins->getObject(snapshot);
     if (current_data) {
       stop=true;
+      std::cerr << "SnapshotList::getSnapshotRange select_time=" << select_time << "\n";
+      current_data->initLoading(go);      
       //loadNewData(select,select_time,load_vel);
       // get snapshot component ranges
       crv = current_data->getSnapshotRange();
@@ -68,8 +70,6 @@ ComponentRangeVector * SnapshotList::getSnapshotRange()
       assert(crv);
       assert(crv->size());
       //user_select->setSelection(select,crv,&pov);
-      std::cerr << "SnapshotList::getSnapshotRange select_time=" << select_time << "\n";
-      current_data->initLoading(load_vel, select_time);
       current_data->part_data->setIpvs(ipvs); // copy ipvs from the previous shots
       // load from disk
       //current_data->nextFrame(user_select->getIndexesTab(),user_select->getNSel());
@@ -85,10 +85,11 @@ ComponentRangeVector * SnapshotList::getSnapshotRange()
   return crv;
 }
 // ============================================================================
-int SnapshotList::initLoading(const bool _load_vel, const std::string _select_time)
+int SnapshotList::initLoading(GlobalOptions * so)
 {
-  load_vel    = _load_vel;
-  select_time = _select_time;
+  go = so;
+  load_vel    = so->vel_req;
+  select_time = so->select_time;
   std::cerr << "SnapshotList::initLoading select_time=" << select_time << "\n";
   isValidData();  // call it in case of reload
   return 1;
@@ -161,7 +162,9 @@ int SnapshotList::nextFrame(const int * index_tab, const int nsel)
   int status=0;
   if (valid) {
     status = current_data->nextFrame(index_tab,nsel);
-    *part_data = *current_data->part_data;
+    if (status) {
+      *part_data = *current_data->part_data;
+    }
   }
   return status;
 }
@@ -199,6 +202,7 @@ bool SnapshotList::getLine(const bool force)
         stop   = true;
         status = false;
       }
+      std::cerr << "SnapshotList::getLine line="<<line<<"\n";
     }
   }
   else status=false;

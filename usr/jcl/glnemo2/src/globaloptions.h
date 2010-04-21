@@ -112,6 +112,13 @@ public:
     bool enable_gui;
     // texture size
     bool auto_texture_size;
+    // ramses stuffs
+    float xmin,xmax,ymin,ymax,zmin,zmax;
+    int lmax;
+    float scale;
+    // select
+    std::string select_time;
+    std::string select_part;
 };
 
 }

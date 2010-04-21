@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -18,7 +18,7 @@
 #include <QObject>
 #include "snapshotinterface.h"
 #include "gadgetio.h"
-
+#include "globaloptions.h"
 namespace glnemo {
 
 
@@ -33,7 +33,7 @@ public:
     SnapshotInterface * newObject(const std::string _filename);
     bool isValidData();
     ComponentRangeVector * getSnapshotRange();
-    int initLoading(const bool _load_vel, const std::string _select_time);
+    int initLoading(GlobalOptions * so);
     int nextFrame(const int * index_tab, const int nsel);
            // index_tab = array of selected indexes (size max=part_data->nbody)
            // nsel      = #particles selected in index_tab                     

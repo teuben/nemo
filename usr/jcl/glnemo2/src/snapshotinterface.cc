@@ -22,7 +22,7 @@ namespace glnemo {
   {
     std::string current_s,next_s;
     next_s = select_time;
-    while ((parseString(next_s)) != "") {  // || 1 force parsing
+    while ((current_s=parseString(next_s)) != "") {  // || 1 force parsing
       getRangeTime(current_s);
     }
   }
@@ -79,8 +79,8 @@ namespace glnemo {
       }
     }
     for (std::vector<float>::iterator it=store.begin(); it!=store.end(); it++) {
-      //std::cerr << " range i ="<< it-store.begin() << "\n";
-      //std::cerr << " value   =" << *it << "\n";
+      //std::cerr << "SnapshotInterface::getRangeTime range i ="<< it-store.begin() << "\n";
+      //std::cerr << "SnapshotInterface::getRangeTime value   =" << *it << "\n";
     }
     float inf=store[0];
     float sup=inf;
@@ -105,8 +105,8 @@ namespace glnemo {
   {
     assert(stv.size()>0);
     for (CSelectTimeVector::iterator it=stv.begin(); it!=stv.end(); it++) {
-      std::cerr << "t inf="<<it->inf<<" t sup="<<it->sup
-            << " c t="<<current_time <<"\n";
+      //std::cerr << "t inf="<<it->inf<<" t sup="<<it->sup
+      //      << " c t="<<current_time <<"\n";
       if (it->inf == -1. || it->sup == -1. ||   // "all" time
           ( current_time >= it->inf && current_time <= it->sup)) { // in the range
         bool status=true;

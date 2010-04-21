@@ -23,6 +23,7 @@
 #include "particlesobject.h"
 #include "particlesdata.h"
 #include "componentrange.h"
+#include "globaloptions.h"
 
 namespace glnemo {
 //class ParticlesData;
@@ -66,7 +67,7 @@ class SnapshotInterface
     virtual SnapshotInterface * newObject(const std::string _filename) = 0 ;
     virtual bool isValidData() = 0;
     virtual ComponentRangeVector * getSnapshotRange() = 0;
-    virtual int initLoading(const bool _load_vel, const std::string _select_time) = 0;
+    virtual int initLoading(GlobalOptions * so) = 0;
     virtual int nextFrame(const int * index_tab, const int nsel)= 0;
            // index_tab = array of selected indexes (size max=part_data->nbody)
            // nsel      = #particles selected in index_tab                     

@@ -26,11 +26,13 @@ play with the density threshold, trace orbits, play different time steps, take a
 screenshots to make movies, select particles using the mouse, fly over your simulation 
 using camera path. All this features are accessible from a very intuitive graphic user interface.
 
-Currently, glnemo2 reads NEMO files (http://carma.astro.umd.edu/nemo),
-Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/),
-FTM files (Clayton Heller's sph/nbody code), 
-phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE) and a list of files
-stored in a file. 
+Currently, glnemo2 reads:
+- NEMO files (http://carma.astro.umd.edu/nemo)
+- Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/)
+- RAMSES files (http://irfu.cea.fr/Projets/Site_ramses/RAMSES.html)
+- FTM files (Clayton Heller's sph/nbody code), 
+- phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE)
+- list of files stored in a file. 
 
  Noticed that a "lite" version of the NEMO's engine I/O  is included inside the glnemo2 
 package so you don't longer need to download the whole NEMO package to compile it.

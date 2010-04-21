@@ -19,6 +19,7 @@
 #include <fstream>
 #include "snapshotinterface.h"
 #include "pluginsmanage.h"
+#include "globaloptions.h"
 
 namespace glnemo {
 
@@ -35,7 +36,7 @@ public:
 
     SnapshotInterface * newObject(const std::string _filename);
     ComponentRangeVector * getSnapshotRange();
-    int initLoading(const bool _load_vel, const std::string _select_time);
+    int initLoading(GlobalOptions * so);
     bool isValidData();
     int nextFrame(const int * index_tab, const int nsel);
     int close();
@@ -50,6 +51,7 @@ private:
     SnapshotInterface * current_data;
     PluginsManage * plugins;
     std::string interface_type_ori;
+    GlobalOptions * go;
     QString dirpath;
 };
 

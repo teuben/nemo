@@ -102,6 +102,18 @@ GlobalOptions::GlobalOptions()
   zsort = false;
   enable_gui=true;
   auto_texture_size=true;
+  // ramses
+  xmin=0.;
+  xmax=1.;
+  ymin=0.;
+  ymax=1.;
+  zmin=0.;
+  zmax=1.;
+  lmax=0;
+  scale=1000.0;
+  // select
+  select_time = "";
+  select_part = "";
 }
 // ============================================================================
 // destructor                                                                  
@@ -231,6 +243,18 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   zsort = m.zsort;
   enable_gui = m.enable_gui;
   auto_texture_size = m.auto_texture_size;
+  // ramses
+  xmin = m.xmin;
+  xmax = m.xmax;
+  ymin = m.ymin;
+  ymax = m.ymax;
+  zmin = m.zmin;
+  zmax = m.zmax;
+  lmax = m.lmax;
+  scale= m.scale;
+  // select
+  select_time = m.select_time;
+  select_part = m.select_part;
   return *this;
 }
 // ============================================================================

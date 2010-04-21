@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "preview.2010-Feb-15"
+#define RELEASE_VERSION "preview.2010-April-21"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -47,6 +47,14 @@ using namespace std;
     "                   by a comma. E.g \"halo,disk,gas\" would select\n"
     "                   Halo, Disk and Gas components.\n                         ",
     "times=all\n       Select time                                      ",
+    "xmin=0.0\n        xmin box (for ramses input)                      ",
+    "xmax=1.0\n        xmax box (for ramses input)                      ",
+    "ymin=0.0\n        ymin box (for ramses input)                      ",
+    "ymax=1.0\n        ymax box (for ramses input)                      ",
+    "zmin=0.0\n        zmin box (for ramses input)                      ",
+    "zmax=1.0\n        zmax box (for ramses input)                      ",
+    "lmax=0.0\n        level max (for ramses amr input)                 ",
+    "scale=1000.\n        ramses rescaling factor                          ",
     "vel=f\n           load velocity coordinates                        ",
     "disp_vel=f\n      display velocity vectors                         ",
     "blending=t\n      Activate blending colors                         ",
@@ -65,7 +73,7 @@ using namespace std;
     "ztrans=0.0\n      translation on Z                                 ",
     "grid=t\n          Show grid                                        ",
     "osd=t\n           Show On Screen Display                           ",
-    "com=f\n           centering according Center Of Mass               ", 
+    "com=t\n           centering according Center Of Mass               ", 
     "point=f\n         show particles as points                         ",
     "mindens=\n        set minimal density                              ",
     "maxdens=\n        set maximal density                              ",
@@ -92,6 +100,7 @@ using namespace std;
   Q_IMPORT_PLUGIN(ftmplugin);
   Q_IMPORT_PLUGIN(gadgetplugin);
   Q_IMPORT_PLUGIN(phigrapeplugin); 
+  Q_IMPORT_PLUGIN(ramsesplugin); 
   Q_IMPORT_PLUGIN(listplugin);
 
 // ============================================================================

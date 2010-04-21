@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -10,16 +10,19 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
+/**
+	@author Jean-Charles Lambert <jean-charles.lambert@oamp.fr>
+*/
 #ifndef GLNEMOSNAPSHOTRAMSES_H
 #define GLNEMOSNAPSHOTRAMSES_H
 #include <QObject>
 #include "snapshotinterface.h"
+#include "camr.h"
+#include "cpart.h"
+#include "globaloptions.h"
 
 namespace glnemo {
 
-/**
-	@author Jean-Charles Lambert <jean-charles.lambert@oamp.fr>
-*/
 class SnapshotRamses: public QObject,
                       public SnapshotInterface
 {
@@ -34,11 +37,21 @@ public:
     SnapshotInterface * newObject(const std::string _filename);
     ComponentRangeVector * getSnapshotRange();
     bool isValidData();
-    int initLoading(const bool _load_vel, const std::string _select_time);
+    int initLoading(GlobalOptions * so);
     int nextFrame(const int * index_tab, const int nsel);
-    int close();
+    int close() { return 1;};
     QString endOfDataMessage();
-    
+
+private:
+    ramses::CAmr * amr;
+    ramses::CPart * part;
+    int namr;
+    int nstars;
+    int ndm;
+    bool valid;
+    int full_nbody;
+    GlobalOptions * go;
+    bool take_gas, take_halo, take_stars;
 };
 
 }

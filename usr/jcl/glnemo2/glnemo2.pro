@@ -1,4 +1,6 @@
 SUBDIRS += \
+           utils \
+           plugins/ramses    \
            plugins/gadget    \
            plugins/nemolight \
 	   plugins/ftm \

@@ -17,11 +17,13 @@ command line parameters, just enter : glnemo2
 
  Glnemo2 can read different kind of file format and detect them automatically if they are
 known.
-Currently, glnemo2 reads NEMO files (http://carma.astro.umd.edu/nemo),
-Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/),
-FTM files (Clayton Heller's sph/nbody code), 
-phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE) and a list of files
-stored in a file.
+Currently, glnemo2 reads:
+- NEMO files (http://carma.astro.umd.edu/nemo)
+- Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/)
+- RAMSES files (http://irfu.cea.fr/Projets/Site_ramses/RAMSES.html)
+- FTM files (Clayton Heller's sph/nbody code), 
+- phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE)
+- list of files stored in a file. 
 
  From the command line you can select particles to load by specifying a range of particles, or
 by the name of the component (if the file format store its data by component name).

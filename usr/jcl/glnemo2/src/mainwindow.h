@@ -216,7 +216,8 @@ class MainWindow : public QMainWindow {
     Colormap * colormap;
     // Camera
     Camera * camera;
-    //
+    // ramses boundaries
+
     signals:
     void endOfSnapshot();
 };

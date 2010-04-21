@@ -356,15 +356,26 @@ void ParticlesData::computeMaxSize()
     coo_max[0] = pos[0];
     coo_max[1] = pos[1];
     coo_max[2] = pos[2];
+    coo_min[0] = pos[0];
+    coo_min[1] = pos[1];
+    coo_min[2] = pos[2];
     for (int i=1; i<(*nbody); i++) {
       coo_max[0] = std::max(coo_max[0],pos[i*3+0]); 
       coo_max[1] = std::max(coo_max[1],pos[i*3+1]); 
       coo_max[2] = std::max(coo_max[2],pos[i*3+2]);
+      coo_min[0] = std::min(coo_min[0],pos[i*3+0]); 
+      coo_min[1] = std::min(coo_min[1],pos[i*3+1]); 
+      coo_min[2] = std::min(coo_min[2],pos[i*3+2]);
     }
-    max_size=sqrt(coo_max[0]*coo_max[0]+coo_max[1]*coo_max[1]+coo_max[2]*coo_max[2]);
+    float max=std::max(std::max(coo_max[0],coo_max[1]),coo_max[2]);
+    float min=std::min(std::min(coo_min[0],coo_min[1]),coo_min[2]);
+    max_size=sqrt(pow(coo_max[0]-coo_min[0],2)+pow(coo_max[1]-coo_min[1],2)+pow(coo_max[2]-coo_min[2],2));
+    //max_size = max-min;
     if (1) {
       PRINT_D std::cerr << "Max coordinates \n";
       PRINT_D std::cerr << coo_max[0] << " " << coo_max[1] << " " << coo_max[2] << "\n";
+      PRINT_D std::cerr << coo_min[0] << " " << coo_min[1] << " " << coo_min[2] << "\n";
+      PRINT_D std::cerr << "max_size = " << max_size << "\n";
     }
   }
 }

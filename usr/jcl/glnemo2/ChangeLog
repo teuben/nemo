@@ -1,4 +1,11 @@
 current version
+
+
+preview.2010-April-21
+---------------------
+  can select times with list of snapshots
+  add experimental Ramses reader (gas,halo,stars)
+	
 preview.2010-Feb-15
 -------------------
   fix a bug on gadget2 file with BNDRY data

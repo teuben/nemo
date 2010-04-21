@@ -17,6 +17,7 @@
 #define GLNEMOSNAPSHOTFTM_H
 #include <QObject>
 #include "snapshotinterface.h"
+#include "globaloptions.h"
 #include "ftmio.h"
 namespace glnemo {
 
@@ -35,7 +36,7 @@ public:
     SnapshotInterface * newObject(const std::string _filename);
     ComponentRangeVector * getSnapshotRange();
     bool isValidData();
-    int initLoading(const bool _load_vel, const std::string _select_time);
+    int initLoading(GlobalOptions * so);
     int nextFrame(const int * index_tab, const int nsel);
     int close();
     QString endOfDataMessage();

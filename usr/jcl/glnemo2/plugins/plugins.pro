@@ -35,11 +35,13 @@ INCLUDEPATH += ftm \
     gadget \
     ramses \
     ../src \
+    ../utils \
     ../plugins \
     zlib \
     $$NEMOINC \
     $$NEMOLIB
-DEPENDPATH += ../src \
+DEPENDPATH += \
+    ../src \
     ftm \
     gadget \
     ramses

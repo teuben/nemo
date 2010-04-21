@@ -55,7 +55,7 @@ public:
     int   * nbody, i_max[3], * nemobits;;
     float * pos, 
     * vel, * vel_norm,
-    * timu, coo_max[3];//* rneib, * rho, * temp, * pressure;
+    * timu, coo_max[3], coo_min[3];//* rneib, * rho, * temp, * pressure;
     int tree_size_max;
     PhysicalData * rneib, * rho, * temp, * pressure;
     static char * mallocate(char *, int, bool force=false);

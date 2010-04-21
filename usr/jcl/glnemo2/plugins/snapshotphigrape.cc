@@ -137,11 +137,11 @@ ComponentRangeVector * SnapshotPhiGrape::getSnapshotRange()
 }
 // ============================================================================
 // initLoading()                                                               
-int SnapshotPhiGrape::initLoading(const bool _load_vel, const std::string _select_time)
+int SnapshotPhiGrape::initLoading(GlobalOptions * so)
 {
-  load_vel = _load_vel;
+  load_vel = so->vel_req;
   select_part="all";
-  select_time=_select_time;
+  select_time=so->select_time;
   std::cerr << "SnapshotPhiGrape::initLoading select_time = " << select_time << "\n";
   return 1;
 }
@@ -149,7 +149,9 @@ int SnapshotPhiGrape::initLoading(const bool _load_vel, const std::string _selec
 // nextFrame()                                                                 
 int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
 {
+  int status=0;
   if (valid) {
+    status=1;
     if (nsel > *part_data->nbody) {
       if (part_data->pos) delete [] part_data->pos;
       part_data->pos = new float[nsel*3];
@@ -208,7 +210,7 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
     if (part_data->rho) part_data->rho->computeMinMax();
   }
   end_of_data = true;
-  return 1;
+  return status;
 }
 // ============================================================================
 // close()                                                                     

@@ -109,9 +109,12 @@ MOC_DIR = .moc/$$ARCH
 UI_DIR = ._ui/$$ARCH
 OBJECTS_DIR = .obj/$$ARCH/$$COMPILEMODE
 RCC_DIR = .res/$$ARCH/$$COMPILEMODE
-QMAKE_LIBDIR = ../plugins/lib/$$ARCH/$$COMPILEMODE \
+QMAKE_LIBDIR = \
+    ../utils/lib/$$ARCH/$$COMPILEMODE \
+    ../plugins/lib/$$ARCH/$$COMPILEMODE \
     $$NEMOLIB \
     ../plugins/ftm/lib/$$ARCH/$$COMPILEMODE \
+    ../plugins/ramses/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/gadget/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/zlib/lib/$${ARCH}/$$COMPILEMODE
 
@@ -133,10 +136,14 @@ LIBS += -lsnapshot \
     -lftm \
     -lnemo \
     -lgadget \
-    -lzlib
+    -lramses \
+    -lzlib \
+    -lutils
 TARGETDEPS += ../plugins/nemolight/lib/$${ARCH}/$$COMPILEMODE/libnemo.a \
     ../plugins/lib/$${ARCH}/$$COMPILEMODE/libsnapshot.a \
     ../plugins/ftm/lib/$${ARCH}/$$COMPILEMODE/libftm.a \
     ../plugins/gadget/lib/$${ARCH}/$$COMPILEMODE/libgadget.a \
-    ../plugins/zlib/lib/$${ARCH}/$$COMPILEMODE/libzlib.a
+    ../plugins/ramses/lib/$${ARCH}/$$COMPILEMODE/libramses.a \
+    ../plugins/zlib/lib/$${ARCH}/$$COMPILEMODE/libzlib.a \
+    ../utils/lib/$${ARCH}/$$COMPILEMODE/libutils.a
 DISTFILES += ../ChangeLog

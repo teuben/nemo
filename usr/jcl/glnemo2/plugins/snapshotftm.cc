@@ -10,7 +10,7 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-#include <QtGui>
+#include <QtGui> // Mandatory for plugins management
 #include "snapshotftm.h"
 #include "particlesdata.h"
 
@@ -88,18 +88,21 @@ ComponentRangeVector * SnapshotFtm::getSnapshotRange()
 }
 // ============================================================================
 // initLoading()                                                               
-int SnapshotFtm::initLoading(const bool _load_vel, const std::string _select_time)
+int SnapshotFtm::initLoading(GlobalOptions * so)
 {
-  load_vel = _load_vel;
-  select_time = _select_time;
+  load_vel = so->vel_req;
+  select_time = so->select_time;
   return 1;
 }
 // ============================================================================
 // nextFrame()                                                                 
 int SnapshotFtm::nextFrame(const int * index_tab, const int nsel)
 {
+  int status=0;
   if (valid) {
+    
   if (ftm_io->read(part_data,index_tab,nsel,load_vel)) {
+    status=1;
     part_data->computeVelNorm();
     if (part_data->rho) {
       part_data->rho->computeMinMax();
@@ -110,7 +113,7 @@ int SnapshotFtm::nextFrame(const int * index_tab, const int nsel)
       end_of_data=true;
     }
   }
-  return 1;
+  return status;
 }
 // ============================================================================
 // close()                                                                     
