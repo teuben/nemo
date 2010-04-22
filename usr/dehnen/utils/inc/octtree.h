@@ -42,10 +42,6 @@
 #ifndef WDutils_included_octtree_h
 #define WDutils_included_octtree_h
 
-// #ifndef WDutils_included_fstream
-// #  include <fstream>
-// #  define WDutils_included_fstream
-// #endif
 #ifndef WDutils_included_iostream
 #  include <iostream>
 #  define WDutils_included_iostream
