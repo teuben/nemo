@@ -21,7 +21,7 @@
 /// \version 26-feb-2010 WD  new initialiser interface
 /// \version 22-mar-2010 WD  FastNeighbourFinder
 /// \version 15-apr-2010 WD  tree pruning, OctTree::build()
-/// \version 20-apr-2010 WD  parameter nmin, changed in tree building
+/// \version 22-apr-2010 WD  parameter nmin, changes in tree building
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -49,9 +49,6 @@
 #define TESTING
 #undef  TESTING
 
-#define USE_BLOCK_ALLOC
-// #undef  USE_BLOCK_ALLOC
-
 #ifdef TESTING
 # include <fstream>
 # warning compilation for TESTING purposes only
@@ -68,78 +65,14 @@
 //
 // Wdutils::OctalTree<Dim,Real>
 //
+// Note. I tried to accelerate the tree building by making Dot and Box 16-byte
+//       aligned (and having size a multiple of 16) plus using aligned memory
+//       loading (into SSE) to find the octant. This trial was not successful.
+//
 namespace {
   using std::setw;
   using std::setfill;
   using namespace WDutils;
-  //////////////////////////////////////////////////////////////////////////////
-  /// dummy base class for Dot and Box
-  /// \note must be empty so that a cast from Dot to OctTree::Dot is valid!
-  struct Node {};
-  /// represents leafs
-  template<int Dim, typename Real>
-  struct Dot : public Node
-  {
-    typedef typename OctalTree<Dim,Real>::node_index node_index;
-    typedef typename OctalTree<Dim,Real>::particle_key particle_key;
-    typedef typename OctalTree<Dim,Real>::point point;
-    //
-    point        X;               ///< position
-    particle_key I;               ///< identifier of associated particle
-    mutable Dot *Next;            ///< next dot in a linked list
-  };
-  /// type used for octants
-  typedef unsigned octant_type;
-  template<int Dim, typename Real>
-  struct Box : public Node
-  {
-    const static octant_type Nsub = 1<<Dim;
-    typedef ::Dot<Dim,Real> Dot;
-    typedef typename OctalTree<Dim,Real>::node_index node_index;
-    typedef typename meta::__IWORDS<Nsub>::integer_u ndl_type;
-    //
-#ifdef USE_BLOCK_ALLOC
-    Node*           OCT[Nsub];    ///< octants
-#else
-    node_index      OCT[Nsub];    ///< octants
-#endif
-    union {
-      ndl_type      NDL__;
-      /// if 0 == NDL[i]          the octant is empty                        \n
-      /// if 0 <  NDL[i] <= NMAX  the octant holds a list of NDL[] leafs     \n
-      /// if      NDL[i]  > NMAX  the octant holds a box
-      uint8         NDL[Nsub];
-    };
-    tupel<Dim,Real> CEN;          ///< centre position
-    uint8           NBX;          ///< number of daughter boxes  <= Nsub
-    uint8           NOC;          ///< number of octant occupied <= NBX
-    uint8           LEV;          ///< tree level of box
-    uint8           PEA;          ///< Peano key, not currently used
-    node_index      NUM;          ///< total # dots in box
-    /// is box a single parent, i.e. has only one octant with a box
-    bool IsSingleParent() const
-    { return NOC==1 && NBX==1; }
-    /// octant of dot within box (not checked)
-    inline octant_type octant(const Dot*D) const;
-    /// reset data suitable for entering fresh data
-    Box*Reset()
-    {
-      for(octant_type i=0; i!=Nsub; ++i) OCT[i] = 0;
-      NDL__ = 0;
-      reinterpret_cast<uint32&>(NBX) = 0;
-      return this;
-    }
-  };
-}
-//
-namespace WDutils {
-  template<int D, typename R> struct traits< ::Dot<D,R> >
-  { static const char*name () { return message("Dot<%d,%s>",D,nameof(R)); } };
-  template<int D, typename R> struct traits< ::Box<D,R> >
-  { static const char*name () { return message("Box<%d,%s>",D,nameof(R)); } };
-}
-//
-namespace {
   /// \name some geometrical methods, only for D=2,3
   //@{
   /// is pos in the interval [cen-rad, cen+rad) ?
@@ -156,14 +89,13 @@ namespace {
   {
     typedef float         Real;
     typedef tupel<2,Real> point;
-    typedef ::Box<2,Real> Box;
-    static octant_type octant(point const&cen, point const&pos)
+    static int octant(point const&cen, point const&pos)
     {
 #ifdef __SSE__
       return 3&_mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
 					    _mm_loadu_ps(pos)));
 #else
-      octant_type oct(0);
+      int oct(0);
       if(pos[0] > cen[0]) oct |= 1;
       if(pos[1] > cen[1]) oct |= 2;
       return oct;
@@ -202,18 +134,11 @@ namespace {
       c[1]=int(x[1]+Real(0.5));
       return c;
     }
-    static void ShrinkToOctant(point&cen, octant_type i, Real rad)
+    static void ShrinkToOctant(point&cen, int i, Real rad)
     {
       if(i&1) cen[0] += rad;  else  cen[0] -= rad;
       if(i&2) cen[1] += rad;  else  cen[1] -= rad;
     }
-    static bool ShrinkToOctant(Box*B, octant_type i, uint8 md, const Real*ra)
-    {
-      uint8 l = ++(B->LEV);
-      if(l >= md) return false;
-      ShrinkToOctant(B->CEN,i,ra[l]);
-      return true;
-    }      
     static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
     {
       Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
@@ -227,10 +152,9 @@ namespace {
   {
     typedef double        Real;
     typedef tupel<2,Real> point;
-    typedef ::Box<2,Real> Box;
-    static octant_type octant(point const&cen, point const&pos)
+    static int octant(point const&cen, point const&pos)
     {
-      octant_type oct(0);
+      int oct(0);
       if(pos[0] > cen[0]) oct |= 1;
       if(pos[1] > cen[1]) oct |= 2;
       return oct;
@@ -268,18 +192,11 @@ namespace {
       c[1]=int(x[1]+Real(0.5));
       return c;
     }
-    static void ShrinkToOctant(point&cen, octant_type i, Real rad)
+    static void ShrinkToOctant(point&cen, int i, Real rad)
     {
       if(i&1) cen[0] += rad;  else  cen[0] -= rad;
       if(i&2) cen[1] += rad;  else  cen[1] -= rad;
     }
-    static bool ShrinkToOctant(Box*B, octant_type i, uint8 md, const Real*ra)
-    {
-      uint8 l = ++(B->LEV);
-      if(l >= md) return false;
-      ShrinkToOctant(B->CEN,i,ra[l]);
-      return true;
-    }      
     static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
     {
       Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
@@ -293,14 +210,13 @@ namespace {
   {
     typedef float         Real;
     typedef tupel<3,Real> point;
-    typedef ::Box<3,Real> Box;
-    static octant_type octant(point const&cen, point const&pos)
+    static int octant(point const&cen, point const&pos)
     {
 #ifdef __SSE__
       return 7 & _mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
 					      _mm_loadu_ps(pos)));
 #else
-      octant_type oct(0);
+      int oct(0);
       if(pos[0] > cen[0]) oct |= 1;
       if(pos[1] > cen[1]) oct |= 2;
       if(pos[2] > cen[2]) oct |= 4;
@@ -369,19 +285,12 @@ namespace {
       c[2]=int(x[2]+Real(0.5));
       return c;
     }
-    static void ShrinkToOctant(point&cen, octant_type i, Real rad)
+    static void ShrinkToOctant(point&cen, int i, Real rad)
     {
       if(i&1) cen[0] += rad;  else  cen[0] -= rad;
       if(i&2) cen[1] += rad;  else  cen[1] -= rad;
       if(i&4) cen[2] += rad;  else  cen[2] -= rad;
     }
-    static bool ShrinkToOctant(Box*B, octant_type i, uint8 md, const Real*ra)
-    {
-      uint8 l = ++(B->LEV);
-      if(l >= md) return false;
-      ShrinkToOctant(B->CEN,i,ra[l]);
-      return true;
-    }      
     static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
     {
       Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
@@ -395,10 +304,9 @@ namespace {
   {
     typedef double        Real;
     typedef tupel<3,Real> point;
-    typedef ::Box<3,Real> Box;
-    static octant_type octant(point const&cen, point const&pos)
+    static int octant(point const&cen, point const&pos)
     {
-      octant_type oct(0);
+      int oct(0);
       if(pos[0] > cen[0]) oct |= 1;
       if(pos[1] > cen[1]) oct |= 2;
       if(pos[2] > cen[2]) oct |= 4;
@@ -442,19 +350,12 @@ namespace {
       c[2]=int(x[2]+Real(0.5));
       return c;
     }
-    static void ShrinkToOctant(point&cen, octant_type i, Real rad)
+    static void ShrinkToOctant(point&cen, int i, Real rad)
     {
       if(i&1) cen[0] += rad;  else  cen[0] -= rad;
       if(i&2) cen[1] += rad;  else  cen[1] -= rad;
       if(i&4) cen[2] += rad;  else  cen[2] -= rad;
     }
-    static bool ShrinkToOctant(Box*B, octant_type i, uint8 md, const Real*ra)
-    {
-      uint8 l = ++(B->LEV);
-      if(l >= md) return false;
-      ShrinkToOctant(B->CEN,i,ra[l]);
-      return true;
-    }      
     static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
     {
       Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
@@ -466,8 +367,7 @@ namespace {
   /// octant of pos with respect to cen.
   /// \note if pos[i]>=cen[i], the ith bit of octant is set to 1, otherwise 0
   template<int D, typename Real> inline
-  octant_type octant(tupel<D,Real> const&cen,
-		     tupel<D,Real> const&pos)
+  int octant(tupel<D,Real> const&cen, tupel<D,Real> const&pos)
   { return Helper<D,Real>::octant(cen,pos); }
   /// does a cubic box contain a given position
   /// \param[in] cen  geometric centre of cube
@@ -510,10 +410,55 @@ namespace {
   bool inside(tupel<D,Real> const&cen, Real rad,
 	      tupel<D,Real> const&pos, Real q)
   { return Helper<D,Real>::inside(cen,rad,pos,q); }
-  //
-  template<int Dim, typename Real> inline
-  octant_type Box<Dim,Real>::octant(const Dot*D) const
-  { return Helper<Dim,Real>::octant(this->CEN,D->X); }
+  /// move @a cen by @a rad in direction of octant @a i
+  /// \note used for setting centre of daughter box from that of parent box
+  template<int D, typename Real> inline
+  void ShrinkToOctant(tupel<D,Real>&cen, int i, Real rad)
+  { return Helper<D,Real>::ShrinkToOctant(cen,i,rad); }
+  /// represents a particle in the BoxDotTree
+  template<int Dim, typename Real>
+  struct Dot
+  {
+    typedef typename OctalTree<Dim,Real>::particle_key particle_key;
+    typedef typename OctalTree<Dim,Real>::point point;
+    point        X;               ///< position
+    particle_key I;               ///< identifier of associated particle
+    mutable Dot *Next;            ///< next dot in a linked list
+  };
+  /// represents a cubic cell in the BoxDotTree
+  template<int Dim, typename Real>
+  struct Box
+  {
+    const static int Nsub = 1<<Dim;
+    typedef typename OctalTree<Dim,Real>::node_index node_index;
+    typedef typename meta::__IWORDS<Nsub>::integer_u ndl_type;
+    typedef typename OctalTree<Dim,Real>::point point;
+    //
+    point           CEN;          ///< centre position
+    void*           OCT[Nsub];    ///< octants
+    union {
+      ndl_type      NDl;
+      /// if 0 == NDL[i]          the octant is empty                        \n
+      /// if 0 <  NDL[i] <= NMAX  the octant holds a list of NDL[] leafs     \n
+      /// if      NDL[i]  > NMAX  the octant holds a box
+      uint8         NDL[Nsub];
+    };
+    uint8           NBX;          ///< number of daughter boxes  <= Nsub
+    uint8           NOC;          ///< number of octant occupied <= NBX
+    uint8           LEV;          ///< tree level of box
+    uint8           PEA;          ///< Peano key, not currently used
+    node_index      NUM;          ///< total # dots in box
+  };
+}
+//
+namespace WDutils {
+  template<int D, typename R> struct traits< ::Dot<D,R> >
+  { static const char*name () { return message("Dot<%d,%s>",D,nameof(R)); } };
+  template<int D, typename R> struct traits< ::Box<D,R> >
+  { static const char*name () { return message("Box<%d,%s>",D,nameof(R)); } };
+}
+//
+namespace {
   /// base for BoxDotTree
   template<int Dim, typename Real>
   struct DotInitialiser
@@ -531,13 +476,19 @@ namespace {
     WDutils_THROWING WD_HOT;
     /// dtor: de-allocate data
     ~DotInitialiser()
-    { if(D0) WDutils_DEL_A(D0); }
+    { if(D0) delete16(D0); }
   };
+  //
+#define  pDOT(d) static_cast<Dot*>((d))
+#define cpDOT(d) static_cast<const Dot*>((d))
+#define  pBOX(d) static_cast<Box*>((d))
+#define cpBOX(d) static_cast<const Box*>((d))
+  //
   template<int D, typename Real>
   DotInitialiser<D,Real>::DotInitialiser(char build, node_index Ndot,
 					 const Initialiser*Init,
 					 const OctTree*Tree) WDutils_THROWING
-    : NDOT(Ndot), D0(NDOT? WDutils_NEW(Dot,NDOT) : 0), DN(D0+NDOT)
+    : NDOT(Ndot), D0(NDOT? new16<Dot>(NDOT) : 0), DN(D0+NDOT)
   {
     switch(build) {
     case 'n':
@@ -555,7 +506,7 @@ namespace {
 	if(! Init->ReInitialiseValid(Di->I,Di->X) ) { Di->Next=List; List=Di; }
       }
       // 2  initialise particle keys and positions for dots in linked list
-      for(Di=List; Di; Di=Di->Next)
+      for(Di=List; Di; Di=pDOT(Di->Next))
 	Init->ReInitialiseInvalid(Di->I,Di->X);
       // 3  initialise particle keys and positions for any remaining dots
       for(Di=DN1; Di!=DN; ++Di)
@@ -629,15 +580,14 @@ namespace {
     if(x<100) x=100;
     return size_t(Dim==2? 1.5*x : x);
   }
-  //
-  /// auxiliary class for OctalTree.
+  /// tree of boxes and dots.
   ///
   /// An OctalTree is build by first making a BoxDotTree, then mapping it to
   /// an OctalTree via BoxDotTree::Link()
   template<int Dim, typename Real>
   struct BoxDotTree : public DotInitialiser<Dim,Real>
   {
-    const static octant_type Nsub = 1<<Dim; ///< number of octants per cell
+    const static int Nsub = 1<<Dim; ///< number of octants per cell
     //
     typedef DotInitialiser<Dim,Real>      Base;
     typedef OctalTree<Dim,Real>           OctTree;
@@ -654,17 +604,12 @@ namespace {
     Base::NDOT;
     Base::D0;
     Base::DN;
-    const depth_type    NMAX;          ///< maximum # particles/octant
-    const depth_type    NMIN;          ///< minimum # particles/cell
+    const uint8         NMAX;          ///< maximum # particles/octant
+    const uint8         NMIN;          ///< minimum # particles/cell
     const bool          AVSPC;         ///< avoid single-parent cells
+    const node_index    NMAX1;         ///< NMAX + 1
     depth_type          DEPTH;         ///< depth of linked tree
-#ifdef USE_BLOCK_ALLOC
     block_alloc<Box>    BM;            ///< allocator for boxes
-#else
-    const node_index    NB;            ///< number of allocated boxes
-    Box          *const B0;            ///< array with boxes
-    node_index          BF;            ///< index of next free box
-#endif
     Real                RA[MAXD+1];    ///< array with radius(level)  
     Box                *P0;            ///< root box
     /// after building: # cells required; after linking: # cells actually used
@@ -674,24 +619,12 @@ namespace {
     mutable size_t      ND;            ///< # dots added sofar
     const OctTree      *TREE;          ///< tree to be linked
     //@}
-    //
-#ifdef USE_BLOCK_ALLOC
-# define  pDOT(d) static_cast<Dot*>((d))
-# define cpDOT(d) static_cast<const Dot*>((d))
-# define  pBOX(d) static_cast<Box*>((d))
-# define cpBOX(d) static_cast<const Box*>((d))
-#else
-# define  pDOT(d) (D0+(d))
-# define cpDOT(d) (D0+(d))
-# define  pBOX(d) (B0+(d))
-# define cpBOX(d) (B0+(d))
-#endif
     /// replace (pter to) box by (pter to) its non-single-parent descendant
     /// \param[in,out] P  (pter to) given box
     void EnsureNonSingleParent(const Box*&P) const
     {
-      while(P->IsSingleParent())
-	for(octant_type i=0; i!=Nsub; ++i)
+      while(P->NOC==1 && P->NBX==1)
+	for(int i=0; i!=Nsub; ++i)
 	  if(P->NDL[i]) {
 	    P = pBOX(P->OCT[i]);
 	    break;
@@ -703,45 +636,32 @@ namespace {
     /// \return new box
     /// \param[in] B  parent box
     /// \param[in] i  parent box's octant
-#ifdef USE_BLOCK_ALLOC
-    Box*
-#else
-    node_index
-#endif
-    MakeSubBox(const Box*B, octant_type i) WDutils_THROWING
+    Box*MakeSubBox(const Box*B, int i) WDutils_THROWING
     {
-#ifdef USE_BLOCK_ALLOC
-      Box *P = BM.new_element(EstimateNalloc(NDOT,ND))->Reset();
-#else
-      if(BF == NB)
-	WDutils_THROW("OctalTree<%d,%s>: "
-		      "exceeding expected number (%d) of boxes\n",
-		      Dim,nameof(Real),NB);
-      node_index iP = BF++;
-      Box *P = B0+iP;
-#endif
-      P->LEV = B->LEV;
-      P->CEN = B->CEN;
-      if(!Helper<Dim,Real>::ShrinkToOctant(P,i,MAXD,RA))
+      Box *P = BM.new_element(EstimateNalloc(NDOT,ND));
+      P->NDl = 0;
+      P->NBX = 0;
+      P->NOC = 0;
+      P->LEV = B->LEV + 1;
+      if(P->LEV >= MAXD)
 	WDutils_THROW("exceeding maximum tree depth of %d\n         "
 		      "(perhaps more than Nmax=%du positions are identical "
 		      "within floating-point precision)\n", MAXD, NMAX);
-#ifdef USE_BLOCK_ALLOC
+      P->CEN = B->CEN;
+      ShrinkToOctant(P->CEN,i,RA[P->LEV]);
       return P;
-#else
-      return iP;
-#endif
     }
     /// adds dot @a Di to octant @a b of box @a P
-    void AddDotToOctant(Box*P, Dot*Di, octant_type b)
+    void AddDotToOctant(Box*P, Dot*Di, int b)
     {
-      Di->Next  = pDOT(P->OCT[b]);
-#ifdef USE_BLOCK_ALLOC
-      P->OCT[b] = Di;
-#else
-      P->OCT[b] = node_index(Di-D0);
-#endif
-      if(++(P->NDL[b]) == NMIN) ++NCELL;
+      if(P->NDL[b] == 0) {
+	P->NOC ++;
+	Di->Next = 0;
+      } else
+	Di->Next = pDOT(P->OCT[b]);
+      P->OCT[b]  = Di;
+      P->NDL[b] ++;
+      if(P->NDL[b] == NMIN) ++NCELL;
     }
     /// adds a dot to a box.
     ///
@@ -761,24 +681,22 @@ namespace {
       for(;;) {
 	// loop boxes down the tree
 	P->NUM++;
-	octant_type b = P->octant(Di);
+	int b = octant(P->CEN,Di->X);
 	if(P->NDL[b] > NMAX)
-	  // octant has at least NMAX dots, hence is a box
+	  // octant is a box
 	  P = pBOX(P->OCT[b]);
 	else {
-	  // octant has only up to NMAX dots (in linked list):
-	  if(P->NDL[b]==0) P->NOC++;           // octant empty? increment NOC
+	  // octant either empty or has a list of dots
 	  AddDotToOctant(P,Di,b);              // add dot to octant in box
 	  while(P->NDL[b] > NMAX) {            // WHILE dot list too long
+	    P->NBX++;                          //   increment box counter
 	    Di        = pDOT(P->OCT[b]);       //   get first dot from octant
-	    P->NBX ++;                         //   increment box counter
 	    P->OCT[b] = MakeSubBox(P,b);       //   new empty box in octant
 	    P         = pBOX(P->OCT[b]);       //   P = daughter box
-	    P->NUM    = NMAX;                  //   set P->NUM
+	    P->NUM    = NMAX1;                 //   set P->NUM
 	    for(Dot*Dn; Di; Di=Dn) {           //   sort dots into octants
 	      Dn= Di->Next;
-	      b = P->octant(Di);
-	      if(P->OCT[b]==0) P->NOC++;
+	      b = octant(P->CEN,Di->X);
 	      AddDotToOctant(P,Di,b);
 	    }
 	  }
@@ -798,13 +716,6 @@ namespace {
 	       depth_type nmax, depth_type nmin, bool avspc,
 	       const OctTree*Tree=0)
     WDutils_THROWING WD_HOT;
-#ifndef USE_BLOCK_ALLOC
-    /// dtor: free memory
-    ~BoxDotTree()
-    {
-      if(B0) WDutils_DEL_A(B0); const_cast<Box*&>(B0)=0;
-    }
-#endif
     //@}
     /// \name methods used in linking to OctalTree
     //@{
@@ -812,13 +723,13 @@ namespace {
     /// \param[in] P  parent box
     /// \param[in] C  index of current cell to be linked
     /// \param[in] o  octant of cell in @a P
-    void LinkOctantCell(const Box*P, node_index C, octant_type i) const
+    void LinkOctantCell(const Box*P, node_index C, int i) const
     {
       TREE->L0[C] = LF;
       TREE->OC[C] = i;
       TREE->LE[C] = P->LEV + 1;
       TREE->XC[C] = P->CEN;
-      Helper<Dim,Real>::ShrinkToOctant(TREE->XC[C], i, RA[TREE->LE[C]]);
+      ShrinkToOctant(TREE->XC[C], i, RA[TREE->LE[C]]);
       TREE->NM[C] = P->NDL[i];
       TREE->NL[C] = P->NDL[i];
       TREE->NC[C] = 0;
@@ -833,7 +744,7 @@ namespace {
     /// \return       tree depth of cell C
     /// \note recursive.
     /// \node uses data CF and LF
-    depth_type LinkCell(const Box*P, node_index C, octant_type o) const WD_HOT;
+    depth_type LinkCell(const Box*P, node_index C, int o) const WD_HOT;
     /// copy Dot data to Leaf
     /// \param[in] L  leaf index in tree
     /// \param[in] D  dot to link leaf to
@@ -856,6 +767,8 @@ namespace {
       const_cast<depth_type&>(DEPTH) = LinkCell(P0,0,0);
       const_cast<node_index&>(NCELL) = CF;
     }
+    //
+    node_index const&NCell() const { return NCELL; }
     //@}
 #ifdef TESTING
     /// header for dot data dump
@@ -878,7 +791,7 @@ namespace {
     {
       out<<" Box        N No Nb"
 	 <<(Dim==2? "    NDL[]   " : "          NDL[]         ");
-      for(octant_type i=0; i!=Nsub; ++i) out<<" OCT["<<i<<']';
+      for(int i=0; i!=Nsub; ++i) out<<" OCT["<<i<<']';
       out<<" S NSP         Rad                 C\n";
     }
     /// Find first non-single parent descendant
@@ -896,26 +809,19 @@ namespace {
 	 <<' ' <<setfill(' ')<<setw(5)<<B->NUM
 	 <<' ' <<setw(2)<<int(B->NOC)
 	 <<' ' <<setw(2)<<int(B->NBX);
-      for(octant_type i=0; i!=Nsub; ++i)
+      for(int i=0; i!=Nsub; ++i)
 	out<<' '<<setw(2)<<int(B->NDL[i]);
-      for(octant_type i=0; i!=Nsub; ++i) {
+      for(int i=0; i!=Nsub; ++i) {
 	if(B->NDL[i]==0)
 	  out<<" nil   ";
-	else {
-#ifdef USE_BLOCK_ALLOC
-	  if(B->NDL[i] <= NMAX)
-	    out<<" D"<<setfill('0')<<setw(5)
-	       <<int(pDOT(B->OCT[i])-D0);
-	  else
-	    out<<" B"<<setfill('0')<<setw(5)
-	       <<BM.number_of_element(pBOX(B->OCT[i]));
-#else
-	  out<< (B->NDL[i]<=NMAX? " D" : " B")
-	     << <<setfill('0')<<setw(5) << B->OCT[i];
-#endif
-	}
+	else if(B->NDL[i] <= NMAX)
+	  out<<" D"<<setfill('0')<<setw(5)
+	     <<int(pDOT(B->OCT[i])-D0);
+	else
+	  out<<" B"<<setfill('0')<<setw(5)
+	     <<BM.number_of_element(pBOX(B->OCT[i]));
       }
-      if(B->IsSingleParent()) {
+      if(B->NOC==1 && B->NBX==1) {
 	++ns;
 	out<<" S";
       } else
@@ -929,7 +835,7 @@ namespace {
     void Dump(const Box*B, std::ostream&outd, std::ostream&outb, node_index&ns)
     {
       Dump(B,outb,ns);
-      for(octant_type i=0; i!=Nsub; ++i)
+      for(int i=0; i!=Nsub; ++i)
 	if     (B->NDL[i] >  NMAX) Dump(pBOX(B->OCT[i]),outd,outb,ns);
 	else if(B->NDL[i] != 0   ) Dump(pDOT(B->OCT[i]),outd);
     }
@@ -948,7 +854,7 @@ namespace {
   //
   template<int D, typename Real>
   typename BoxDotTree<D,Real>::depth_type
-  BoxDotTree<D,Real>::LinkCell(const Box*P, node_index C, octant_type o) const
+  BoxDotTree<D,Real>::LinkCell(const Box*P, node_index C, int o) const
   {
     // 1 if single-parent replace by non-single-parent descendant
     if(AVSPC) EnsureNonSingleParent(P);
@@ -959,32 +865,32 @@ namespace {
     TREE->XC[C] = P->CEN;
     TREE->NM[C] = P->NUM;
     // 3 loop octants: link leaf kids (from octants with < NMIN), count cells
-    node_index ncell=0;
-    for(octant_type i=0; i!=Nsub; ++i)
+    depth_type tmp = 0;
+    for(int i=0; i!=Nsub; ++i)
       if(P->NDL[i] >= NMIN)
-	++ncell;
+	++tmp;
       else if(P->NDL[i])
 	for(const Dot*Di=cpDOT(P->OCT[i]); Di; Di=Di->Next)
 	  LinkLeaf(LF++,Di,C);
     // 4 set number of leaf and cell kids, first daughter cell, if any
     TREE->NL[C] = LF - TREE->L0[C];
-    TREE->NC[C] = ncell;
-    TREE->CF[C] = ncell? CF : 0;
-    if(ncell==0) return 1;
+    TREE->NC[C] = tmp;
+    TREE->CF[C] = tmp? CF : 0;
+    if(tmp==0) return 1;
     // 5 link daughter cells
-    depth_type dp = 1;
     node_index Ci = CF;
-    CF += ncell;
-    for(octant_type i=0; i!=Nsub; ++i) {
+    CF += tmp;
+    tmp = 1;
+    for(int i=0; i!=Nsub; ++i) {
       if(P->NDL[i] > NMAX) {
 	TREE->PA[Ci] = C;
-	update_max(dp, LinkCell(cpBOX(P->OCT[i]), Ci++, i));
+	update_max(tmp, LinkCell(cpBOX(P->OCT[i]), Ci++, i));
       } else if(P->NDL[i] >= NMIN) {
 	TREE->PA[Ci] = C;
 	LinkOctantCell(P, Ci++, i);
       }
     }
-    return ++dp;
+    return ++tmp;
   }
   //
   template<int Dim, typename Real>
@@ -997,23 +903,11 @@ namespace {
       NMAX  ( nmax ),
       NMIN  ( nmin ),
       AVSPC ( avspc ),
-#ifdef USE_BLOCK_ALLOC
+      NMAX1 ( nmax + 1 ),
       BM    ( NBoxes<Dim>(Ndot,nmax) ),
-#else
-      NB    ( NBoxes<Dim>(Ndot,nmax) ),
-      B0    ( WDutils_NEW(Box,NB) ),
-      BF    ( 0 ),
-#endif
+      P0    ( BM.new_element() ),
       NCELL ( 1 )
   {
-    // TEST
-#ifdef USE_BLOCK_ALLOC
-    std::cerr<<" BoxDotTree: initially allocated "<<BM.N_allocated()
-	     <<" boxes\n";
-#else
-    std::cerr<<" BoxDotTree: allocated "<<NB<<" boxes\n";
-#endif
-    // TSET
     // 1 find min, max and average position
     Dot*Di=D0;
     point Xmin(D0->X), Xmax(D0->X), Xave(D0->X);
@@ -1035,13 +929,11 @@ namespace {
       WDutils_THROW("OctalTree<%d,%s>: unidentified invalid position(s)\n",
 		    Dim,nameof(Real));
     }
-    // 2 set (empty) root box, RA[]
     Xave   /= Real(NDOT);
-#ifdef USE_BLOCK_ALLOC
-    P0      = BM.new_element()->Reset();
-#else
-    P0      = B0; ++BF;
-#endif
+    // 2 set (empty) root box, RA[]
+    P0->NDl = 0;
+    P0->NBX = 0;
+    P0->NOC = 0;
     P0->CEN = Helper<Dim,Real>::Integer(Xave);
     P0->LEV = 0;
     P0->NUM = 0;
@@ -1052,15 +944,6 @@ namespace {
     ND = 0;
     for(Di=D0; Di!=DN; ++Di,++ND)
       AddDot(P0,Di);
-    // TEST
-#ifdef USE_BLOCK_ALLOC
-    std::cerr<<" BoxDotTree: "<<BM.N_used()<<" Boxes used, "
-	     <<BM.N_allocated()<<" allocated in "<<BM.N_blocks()<<" blocks.\n"
-#else
-    std::cerr<<" BoxDotTree: "<< BF <<" Boxes used\n"
-#endif
-	     <<" estimated # cells: "<<NCELL<<'\n';
-    // TSET
 #ifdef TESTING
     std::ofstream dumpD("dots.dat"), dumpB("boxs.dat");
     Dump(dumpD, dumpB);
@@ -1079,7 +962,7 @@ namespace WDutils {
   {
     unsigned need =
       NLEAF * (sizeof(point) + sizeof(particle_key) + sizeof(node_index)) +
-      NCELL * (sizeof(depth_type) + 2*sizeof(octant_type) +
+      NCELL * (sizeof(depth_type) + 2*sizeof(int) +
 	       sizeof(local_count) + 4*sizeof(node_index) + sizeof(point));
     if((need > NALLOC) || (3*need < 2*NALLOC)) {
       if(ALLOC) delete16(ALLOC);
@@ -1106,11 +989,29 @@ namespace WDutils {
 				const Initialiser*init, const OctalTree*tree)
     WDutils_THROWING
   {
+#undef GIVE_TIMING
+#ifdef GIVE_TIMING
+    clock_t cpu0, cpu1;
+    cpu0 = clock();
+#endif
     BoxDotTree<D,Real> BDT(building,n,init,NMAX,NMIN,AVSPC,tree);
+#ifdef GIVE_TIMING
+    cpu1 = clock();
+    std::cerr<<" OctalTree::build(): BoxDotTree::BoxDotTree took "
+	     <<double(cpu1 - cpu0)/double(CLOCKS_PER_SEC)<<" sec\n";
+#endif
     NLEAF = BDT.NDOT;
-    NCELL = BDT.NCELL;
+    NCELL = BDT.NCell();
     Allocate();
+#ifdef GIVE_TIMING
+    cpu0 = clock();
+#endif
     BDT.Link(this);
+#ifdef GIVE_TIMING
+    cpu1 = clock();
+    std::cerr<<" OctalTree::build(): BoxDotTree::Link()     took "
+	     <<double(cpu1 - cpu0)/double(CLOCKS_PER_SEC)<<" sec\n";
+#endif
     DEPTH = BDT.DEPTH;
     NCELL = BDT.NCELL;
     std::memcpy(RAD,BDT.RA,(MaximumDepth+1)*sizeof(Real));
