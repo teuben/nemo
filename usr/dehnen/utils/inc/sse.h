@@ -680,6 +680,58 @@ namespace WDutils {
       }
       //@}
     };
+    /// filler object of size __S
+    template<size_t __S> class Filler { char __F[__S]; };
+    /// extend a given class to have size a multibple of 16-byte
+    /// \note only default constructor
+    template<typename Base>
+    class Extend16 : public Base
+    {
+      static const size_t Bytes = sizeof(Base);
+      static const size_t Splus = Bytes & 15;
+      static const size_t Added = Splus? 16-Splus : 0;
+      Filler<Added> __Filler;
+    };
+    //
+#ifdef __SSE__
+    template<int N4> struct __SwapF{
+      WDutilsStaticAssert( N4>0 && N4&3==0 );
+      typedef __SwapF<N4-4> Before;
+      static void Sa(float*A, float*B)
+      {
+	Before::Sa(A,B);
+	__m128 tmp = _mm_load_ps(A+N4);
+	_mm_store_ps(A,_mm_load_ps(B+N4));
+	_mm_store_ps(B,tmp);
+      }
+    };
+    template<> struct __SwapF<0> {
+      static void Sa(float*, float*) {}
+    };
+    //
+    template<typename Object>
+    struct __SwapO {
+      static const int N  = sizeof(Object);
+      static const int N4 = N/4;
+      WDutilsStaticAssert( N&15 == 0 );
+      void Sa(Object*a, Object*b)
+      {
+	__SwapF<N4>::Sa(reinterpret_cast<float*>(a),
+			reinterpret_cast<float*>(b));
+      }
+    };
+    /// swaps 16-byte aligned objects with 16-byte multiple size
+    /// \param[in,out] x  pter to object, on return holds data of @a y
+    /// \param[in,out] y  pter to object, on return holds data of @a x
+    /// \note If the sizeof(Object) is not a multiple of 16, a compile-time
+    ///       error occurs. Conversely, if either x or y is not 16-byte aligned
+    ///       a run-time error will occur.
+    template<typename Object>
+    inline void SwapAligned(Object*x, Object*y)
+    { __SwapO<Object>::Sa(x,y); }
+#endif
+
+
 
   } // namespace SSE
 } // namespace WDutils

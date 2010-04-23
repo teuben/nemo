@@ -4,7 +4,7 @@
 /// \file   utils/inc/octtree.h
 ///
 /// \brief  methods for building and walking an octtree in 2D or 3D as well as
-///         mutual-interaction and neighbour-search algorithms using this tree
+///         interaction and neighbour-search algorithms using this tree
 ///
 /// \author Walter Dehnen
 ///
@@ -61,7 +61,6 @@
 #endif
 
 namespace {
-  template<int, typename> struct DotInitialiser;
   template<int, typename> struct BoxDotTree;
 }
 namespace WDutils {
@@ -84,7 +83,6 @@ namespace WDutils {
   /// \note Implementations for @a __X = float,double and @a __D = 2,3
   template<int __D, typename __X>
   class OctalTree {
-    friend struct DotInitialiser<__D,__X>;
     friend struct BoxDotTree<__D,__X>;
     friend struct TreeAccess<OctalTree>;
     /// ensure that the only valid instantinations are those in octtree.cc
@@ -114,7 +112,7 @@ namespace WDutils {
     /// OctalTree::rebuild() we keep the particle order (as much as possible),
     /// enabling significant speed-up of tree re-building.
     class Initialiser {
-      friend struct DotInitialiser<__D,__X>;
+      friend struct BoxDotTree<__D,__X>;
     protected:
       // virtual dtor: only needed with older compiler versions
       virtual ~Initialiser() {}
@@ -164,14 +162,14 @@ namespace WDutils {
     const bool        AVSPC;          ///< avoid single parent cells?
     depth_type        DEPTH;          ///< tree depth
     //@}
-    /// \name leaf data (access via TreeAccess<OctalTree>)
+    /// \name leaf data (access via struct TreeAccess )
     //@{
     node_index    NLEAF;              ///< total number of leafs
     point        *XL;                 ///< leaf positions
     particle_key *PL;                 ///< index of associated particle
     node_index   *PC;                 ///< index of parent cell
     //@}
-    /// \name cell data (access via TreeAccess<OctalTree>)
+    /// \name cell data (access via struct TreeAccess )
     //@{
     node_index    NCELL;              ///< total number of cells
     depth_type   *LE;                 ///< cells' tree level
@@ -210,7 +208,10 @@ namespace WDutils {
     /// \param[in] init   Initialiser for particle keys and positions
     /// \param[in] nmax   maximum number of particles in unsplit octants
     /// \param[in] nmin   minimum number of particles in cell
-    /// \note For @a nmin=2 (and @a nmax>1) the cell-leaf tree reflects the
+    /// \note We require @a nmin,nmax<=250 but map @a nmin=0 to @a
+    ///       nmin=min(2,nmax).
+    ///       \n
+    ///       For @a nmin=2 (and @a nmax>1) the cell-leaf tree reflects the
     ///       depth of the original box-dot tree. However, for @a nmin > 2,
     ///       while the cell-leaf tree is not as deep, the tree order of the
     ///       deeper box-dot tree is preserved in the tree order of the leafs.
@@ -265,6 +266,7 @@ namespace WDutils {
     ///
     /// \param[in] init    Initialiser required to re-initialise particle data
     /// \param[in] Nnew    new number of particles (if @a Nnew=0 we assume the
+    ///                    number has not changed)
     /// \param[in] nmax    maximum number of particles in unsplit octants
     /// \param[in] nmin    minimum number of particles in cell
     /// \note If @a nmax=0 we take the old values for both @a nmin and @a nmax.
@@ -355,7 +357,7 @@ namespace WDutils {
     ///
     /// This is equivalent to destruction followed by construction as pruned
     /// version of another octtree: the tree will contain all leafs of the
-    /// parent tree for which Initialiser::Pick(l) returns true.
+    /// parent tree for which Initialiser::Pick() returns true.
     ///
     /// \note If all parent-tree leafs are picked, a warning is issued.
     ///       Conversely, if none is picked, an error is thrown.
@@ -687,6 +689,7 @@ namespace WDutils {
     /// \name macros for tree walking from within a TreeAccess
     //@{
     /// loop cells down: root first
+    /// \relates WDutils::TreeAccess
     /// \note useful for a down-ward pass
 #ifndef LoopCellsDown
 # define LoopCellsDown(NAME)			\
@@ -694,6 +697,7 @@ namespace WDutils {
 	NAME != this->EndCells(); ++NAME)
 #endif
     /// loop cells up: root last
+    /// \relates WDutils::TreeAccess
     /// \note useful for an up-ward pass
 #ifndef LoopCellsUp
 # define LoopCellsUp(NAME)			\
@@ -701,54 +705,63 @@ namespace WDutils {
 	NAME != this->REndCells(); --NAME)
 #endif
     /// loop leafs
+    /// \relates WDutils::TreeAccess
 #ifndef LoopLeafs
 # define LoopLeafs(NAME)			\
     for(Leaf NAME = this->BeginLeafs();		\
 	NAME != this->EndLeafs(); ++NAME)
 #endif
     /// loop cell kids of a given cell
+    /// \relates WDutils::TreeAccess
 #ifndef LoopCellKids
 # define LoopCellKids(CELL,NAME)		\
     for(Cell NAME = this->BeginCells(CELL);	\
     NAME != this->EndCells(CELL); ++NAME)
 #endif
     /// loop cell kids of a given cell in reverse order
+    /// \relates WDutils::TreeAccess
 #ifndef LoopCellKidsReverse
 # define LoopCellKidsReverse(CELL,NAME)		\
     for(Cell NAME = this->RBeginCells(CELL);	\
     NAME != this->REndCells(CELL); --NAME)
 #endif
     /// loop cell kids of a given cell, starting somewhere
+    /// \relates WDutils::TreeAccess
 #ifndef LoopCellSecd
 # define LoopCellSecd(CELL,START,NAME)		\
     for(Cell NAME = START;			\
 	NAME != this->EndCells(CELL); ++NAME)
 #endif
     /// loop leaf kids of a given cell
+    /// \relates WDutils::TreeAccess
 #ifndef LoopLeafKids
 # define LoopLeafKids(CELL,NAME)			\
     for(Leaf NAME = this->BeginLeafs(CELL);		\
 	NAME != this->EndLeafKids(CELL); ++NAME)
 #endif
     /// loop leaf kids of a given cell, starting somewhere
+    /// \relates WDutils::TreeAccess
 #ifndef LoopLeafSecd
 # define LoopLeafSecd(CELL,START,NAME)			\
     for(Leaf NAME = START;				\
 	NAME != this->EndLeafKids(CELL); ++NAME)
 #endif
     /// loop leaf descendants of a given cell
+    /// \relates WDutils::TreeAccess
 #ifndef LoopAllLeafs
 # define LoopAllLeafs(CELL,NAME)			\
     for(Leaf NAME = this->BeginLeafs(CELL);		\
 	NAME != this->EndLeafDesc(CELL); ++NAME)
 #endif
     /// loop leaf descendants of a given cell, starting somewhere
+    /// \relates WDutils::TreeAccess
 #ifndef LoopSecLeafs
 # define LoopSecLeafs(CELL,START,NAME)			\
     for(Leaf NAME = START;				\
 	NAME != this->EndLeafDesc(CELL); ++NAME)
 #endif
     /// loop all except the last leaf descendants of a given cell
+    /// \relates WDutils::TreeAccess
 #ifndef LoopLstLeafs
 # define LoopLstLeafs(CELL,NAME)			\
     for(Leaf NAME = this->BeginLeafs(CELL);		\
@@ -1290,7 +1303,6 @@ namespace WDutils {
     ///       about where to search the tree than the position @a x.
     node_index Find(point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
     { return Find(x,q,nb.array(),nb.size()); }
-//   protected:
   private:
     /// process a range of leafs
     void ProcessLeafs(Leaf b, Leaf e) const;
@@ -1304,10 +1316,6 @@ namespace WDutils {
     PosSSE::K;
     PosSSE::L;
     PosSSE::nL;
-//   private:
-//     const static unsigned K = SSE::Traits<Real>::K;
-//     const static unsigned L = K-1;
-//     const static unsigned nL= ~L;
     struct chunk { unsigned I0, IN; };
     struct qandi { Real Q; unsigned I; };
     //

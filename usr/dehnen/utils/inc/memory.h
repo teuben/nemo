@@ -246,7 +246,170 @@ namespace WDutils {
   ///
   /// \param P pointer to object to be de-allocated
 #define WDutils_DEL_O(P) WDutils::DelObject(P,__FILE__,__LINE__)
-  // ///////////////////////////////////////////////////////////////////////////
+}
+//
+#ifdef __GNUC__
+#include <mm_malloc.h>
+#endif
+//
+namespace WDutils {
+  //////////////////////////////////////////////////////////////////////////////
+  /// \defgroup  Mem16  memory alignment to 16 bytes
+
+  /// Macro enforcing memory alignment to 16 bytes
+  /// \ingroup Mem16
+  ///
+  /// Forces the corresponding variable/type to be 16-byte aligned; Works with
+  /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
+  ///    struct WDutils__align16 name { ... };              \endcode
+#if defined (__INTEL_COMPILER)
+#  define WDutils__align16 __declspec(align(16))
+#elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
+#  define WDutils__align16 __attribute__ ((aligned(16)))
+#else
+#  define WDutils__align16
+#endif
+  //----------------------------------------------------------------------------
+  /// is a given memory address aligned?
+  /// \ingroup Mem16
+  /// \param p  memory address to be tested
+  /// \param al alignemt to a bytes will be tested
+  inline bool is_aligned(const void*p, int al)
+  {
+    return size_t(p) % al == 0;
+  }
+  //----------------------------------------------------------------------------
+  /// is a given memory address aligned to a 16 bytes memory location?
+  /// \param p  memory address to be tested
+  inline bool is_aligned16(const void*p)
+  {
+    return size_t(p) % 16 == 0;
+  }
+  //----------------------------------------------------------------------------
+  /// Allocate memory at a address aligned to a 16 byte memory location
+  /// \ingroup Mem16
+  ///
+  /// Will allocate slightly more memory than required to ensure we can find
+  /// the required amount at a 16b memory location. To de-allocate, you \b must
+  /// use WDutils::free16(), otherwise an error will occur!
+  ///
+  /// \return   a newly allocated memory address at a 16 byte memory location
+  /// \param n  number of bytes to allocate
+  /// \version  debugged 02-09-2004 WD
+  inline void* malloc16(size_t n) WDutils_THROWING
+  {
+#ifdef __GNUC__
+    void*t;
+    try {
+      t = _mm_malloc(n,16);
+    } catch(...) {
+      t = 0;
+#ifdef WDutils_EXCEPTIONS
+      throw Thrower
+#else
+      Error
+#endif
+	()(sizeof(size_t)==8?
+	   "allocation of %lu bytes aligned to 16 failed\n":
+	   "allocation of %du bytes aligned to 16 failed\n",n);
+    }
+    if(n && t==0)
+#ifdef WDutils_EXCEPTIONS
+      throw Thrower
+#else
+      Error
+#endif
+	()(sizeof(size_t)==8?
+	   "could not allocate %lu bytes aligned to 16\n":
+	   "could not allocate %du bytes aligned to 16\n",n);
+    if(debug(WDutilsAllocDebugLevel))
+      DebugInformation()(sizeof(size_t)==8?
+			 "allocated %lu bytes aligned to 16 @ %p\n":
+			 "allocated %du bytes aligned to 16 @ %p\n",n,t);
+    return t;
+#else
+    // linear memory model:                                                     
+    // ^    = 16byte alignment points                                           
+    // S    = sizeof(void*) (assumed 4 in this sketch)                          
+    // PPPP = memory where p is stored (needed in deletion)                     
+    // def0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01    
+    //    ^               ^               ^               ^               ^     
+    //        |-S-|       |  ->  at least n bytes                               
+    //        |   |       |                                                     
+    //        p   q   ->  q                                                     
+    //    |--off--|-16-off|                                                     
+    //                |-S-|                                                     
+    //                PPPP|                                                     
+    //                                                                          
+    // the original allocation gave p, we return the shifted q and remember     
+    // the original allocation address at PPPP.                                 
+    char *p = WDutils_NEW(char,n+16+sizeof(void*)); // alloc: (n+16)b + pter    
+    char *q = p + sizeof(void*);                    // go sizeof pointer up     
+    size_t off = size_t(q) % 16;                    // offset from 16b alignment
+    if(off) q += 16-off;                            // IF offset, shift         
+    *((void**)(q-sizeof(void*))) = p;               // remember allocation point
+    return static_cast<void*>(q);                   // return aligned address   
+#endif
+  }
+  ///
+  /// de-allocate memory previously allocated with WDutils::malloc16()
+  /// \ingroup Mem16
+  ///
+  /// This routine \b must be used to properly de-allocate memory that has been
+  /// previously allocated by WDutils::malloc16(); other de-allocation will
+  /// inevitably result in a run-time \b error!
+  ///
+  /// \param q  pointer previously allocated by WDutils::malloc16()
+  inline void free16(void*q) WDutils_THROWING
+  {
+#ifdef __GNUC__
+    if(0==q) {
+      Warning()("free16: trying to delete zero pointer");
+      return;
+    }
+    try {
+      _mm_free(q);
+    } catch(...) {
+#ifdef WDutils_EXCEPTIONS
+      throw Thrower
+#else
+      Error
+#endif
+	()("free16: de-allocating %p failed\n", q);
+    }
+    if(debug(WDutilsAllocDebugLevel))
+      DebugInformation()("free16: de-allocated array @ %p\n",q);
+#else
+    WDutils_DEL_A( (char*)( *( (void**) ( ( (char*)q )-sizeof(void*) ) ) ) );
+#endif
+  }
+  ///
+  /// allocate memory at a address alignged to at a 16 byte memory location
+  /// \ingroup Mem16
+  ///
+  /// Will allocate slightly more memory than required to ensure we can find
+  /// the required amount at a 16b memory location. To de-allocate, you \b must
+  /// use WDutils::delete16<>(), otherwise an error will occur!
+  ///
+  /// \return   a newly allocated memory address at a 16 byte memory location
+  /// \param n  number of objects to allocate
+  template<typename T> inline T* new16(size_t n) WDutils_THROWING
+  {
+    return static_cast<T*>(malloc16(n * sizeof(T)));
+  }
+  ///
+  /// de-allocate memory previously allocated with WDutils::new16().
+  /// \ingroup Mem16
+  ///
+  /// This routine \b must be used to properly de-allocate memory that has been
+  /// previously allocated by WDutils::new16(); other de-allocation will
+  /// inevitably result in an error.
+  ///
+  /// \param q  pointer previously allocated by WDutils::new16()
+  template<typename T> inline void delete16(T* q)WDutils_THROWING 
+  {
+    free16(static_cast<void*>(q));
+  }
   //
   //  WDutils::block_alloc<T>
   //
@@ -271,11 +434,8 @@ namespace WDutils {
   template<typename T>
   class block_alloc {
   public:
-    ////////////////////////////////////////////////////////////////////////////
-    //
     /// \name some public typedefs
     //@{
-    ////////////////////////////////////////////////////////////////////////////
     typedef T         value_type;                ///< type of elements          
     typedef size_t    size_type;                 ///< type of number of elements
     typedef ptrdiff_t difference_type;           ///< type of pointer difference
@@ -284,14 +444,8 @@ namespace WDutils {
     typedef T&        reference;                 ///< type of reference to elem 
     typedef const T&  const_reference;           ///< type of const reference   
     //@}
-    // /////////////////////////////////////////////////////////////////////////
-    //
-    //  sub-type WDutils::block_alloc::block
-    //
-    /// allocates and manages a contiguous chunk of elements                    
-    ///
-    // /////////////////////////////////////////////////////////////////////////
   private:
+    /// allocates and manages a contiguous chunk of elements                    
     class block {
     private:
       /// \name data of class WDutils::block_alloc::block
@@ -302,75 +456,58 @@ namespace WDutils {
       value_type *ENDTOT;  ///< end of all elements
       //@}
       block();
-      //------------------------------------------------------------------------
     public:
       /// constructor
       /// \param n number of elements to allocate
       explicit
       block(size_type const&n) :
 	NEXT    ( 0 ),
-	FIRST   ( WDutils_NEW(value_type,n) ),
+	FIRST   ( new16<value_type>(n) ),
 	END     ( FIRST ),
 	ENDTOT  ( FIRST + n ) {}
       /// destructor: de-allocate
-      ~block() {
-	WDutils_DEL_A(FIRST);
-      }
+      ~block()
+      { free16(FIRST); }
       /// link block to next block
-      void link(block*__n) {
-	NEXT = __n;
-      }
+      void link(block*__n)
+      { NEXT = __n; }
       /// give out: another element
-      pointer new_element() {
-	return END++;
-      }
+      pointer new_element()
+      { return END++; }
       /// give out: N new elements
-      pointer new_elements(size_type n) {
-	register pointer OLD_END=END;
+      pointer new_elements(size_type n)
+      {
+	pointer OLD_END=END;
 	END += n;
 	return OLD_END;
       }
       /// can we give out up to \a n elements?
-      bool has_free(size_type n) const {
-	return END + n <= ENDTOT;
-      }
+      bool has_free(size_type n) const
+      { return END + n <= ENDTOT; }
       /// is block full (no free elements)?
-      bool is_full() const {
-	return END>=ENDTOT;
-      }
+      bool is_full() const
+      { return END>=ENDTOT; }
       /// return next block in linked list of blocks
-      block  *next () const {
-	return NEXT;
-      }
+      block  *next () const
+      { return NEXT; }
       /// return first element allocated
-      pointer front() const {
-	return FIRST;
-      }
+      pointer front() const
+      { return FIRST; }
       /// return last element used
-      pointer back () const {
-	return END-1;
-      }
+      pointer back () const
+      { return END-1; }
       /// return end of elements used
-      pointer end  () const {
-	return END;
-      }
+      pointer end  () const
+      { return END; }
       /// return number of elements used
-      difference_type N_used () const {
-	return END-FIRST;
-      }
+      difference_type N_used () const
+      { return END-FIRST; }
       /// return number of elemnets allocated
-      difference_type N_alloc() const {
-	return ENDTOT-FIRST;
-      }
+      difference_type N_alloc() const
+      { return ENDTOT-FIRST; }
     };
   public:
-    // /////////////////////////////////////////////////////////////////////////
-    //
-    //  sub-type WDutils::block_alloc::iterator                                 
-    //
     /// for forward sequential iteration through all elements used              
-    ///
-    // /////////////////////////////////////////////////////////////////////////
     class iterator {
     private:
       /// \name data of WDutils::block_alloc::iterator
@@ -444,11 +581,8 @@ namespace WDutils {
       //@}
     };
   private:
-    // /////////////////////////////////////////////////////////////////////////
-    //
     /// \name member data of class WDutils::block_alloc
     //@{
-    // /////////////////////////////////////////////////////////////////////////
     block       *FIRST;  ///< first block in linked list
     block       *LAST;   ///< last block in linked list
     size_type    NTOT;   ///< # elements allocated
@@ -456,11 +590,8 @@ namespace WDutils {
     size_type    NBLCK;  ///< # blocks
     //@}
   public:
-    // /////////////////////////////////////////////////////////////////////////
-    //
     /// \name member functions of class WDutils::block_alloc
     //@{
-    // /////////////////////////////////////////////////////////////////////////
     /// constructor: allocate first block
     /// \param[in] Ns number of elements in 1st block
     explicit
@@ -608,7 +739,6 @@ namespace WDutils {
       A = N;
     }
   }
-  // ///////////////////////////////////////////////////////////////////////////
   //
   //  class WDutils::pool
   //
@@ -1296,176 +1426,6 @@ namespace WDutils {
       return message("Stack<%s>",traits<T>::name());
     }
   };
-} // namespace WDutils {
-#ifdef __GNUC__
-#include <mm_malloc.h>
-#endif
-namespace WDutils {
-  //////////////////////////////////////////////////////////////////////////////
-  /// \defgroup  Mem16  memory alignment to 16 bytes
-  /// \name memory alignment to 16 bytes
-  //@{
-
-  //----------------------------------------------------------------------------
-  /// Macro enforcing memory alignment to 16 bytes
-  /// \ingroup Mem16
-  ///
-  /// Forces the corresponding variable/type to be 16-byte aligned; Works with
-  /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
-  ///    struct WDutils__align16 name { ... };              \endcode
-#if defined (__INTEL_COMPILER)
-#  define WDutils__align16 __declspec(align(16))
-#elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
-#  define WDutils__align16 __attribute__ ((aligned(16)))
-#else
-#  define WDutils__align16
-#endif
-  //----------------------------------------------------------------------------
-  /// is a given memory address aligned?
-  /// \ingroup Mem16
-  /// \param p  memory address to be tested
-  /// \param al alignemt to a bytes will be tested
-  inline bool is_aligned(const void*p, int al)
-  {
-    return size_t(p) % al == 0;
-  }
-  //----------------------------------------------------------------------------
-  /// is a given memory address aligned to a 16 bytes memory location?
-  /// \param p  memory address to be tested
-  inline bool is_aligned16(const void*p)
-  {
-    return size_t(p) % 16 == 0;
-  }
-  //----------------------------------------------------------------------------
-  /// Allocate memory at a address aligned to a 16 byte memory location
-  /// \ingroup Mem16
-  ///
-  /// Will allocate slightly more memory than required to ensure we can find
-  /// the required amount at a 16b memory location. To de-allocate, you \b must
-  /// use WDutils::free16(), otherwise an error will occur!
-  ///
-  /// \return   a newly allocated memory address at a 16 byte memory location
-  /// \param n  number of bytes to allocate
-  /// \version  debugged 02-09-2004 WD
-  inline void* malloc16(size_t n) WDutils_THROWING
-  {
-#ifdef __GNUC__
-    void*t;
-    try {
-      t = _mm_malloc(n,16);
-    } catch(...) {
-      t = 0;
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	()(sizeof(size_t)==8?
-	   "allocation of %lu bytes aligned to 16 failed\n":
-	   "allocation of %du bytes aligned to 16 failed\n",n);
-    }
-    if(n && t==0)
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	()(sizeof(size_t)==8?
-	   "could not allocate %lu bytes aligned to 16\n":
-	   "could not allocate %du bytes aligned to 16\n",n);
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation()(sizeof(size_t)==8?
-			 "allocated %lu bytes aligned to 16 @ %p\n":
-			 "allocated %du bytes aligned to 16 @ %p\n",n,t);
-    return t;
-#else
-    // linear memory model:                                                     
-    // ^    = 16byte alignment points                                           
-    // S    = sizeof(void*) (assumed 4 in this sketch)                          
-    // PPPP = memory where p is stored (needed in deletion)                     
-    // def0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef01    
-    //    ^               ^               ^               ^               ^     
-    //        |-S-|       |  ->  at least n bytes                               
-    //        |   |       |                                                     
-    //        p   q   ->  q                                                     
-    //    |--off--|-16-off|                                                     
-    //                |-S-|                                                     
-    //                PPPP|                                                     
-    //                                                                          
-    // the original allocation gave p, we return the shifted q and remember     
-    // the original allocation address at PPPP.                                 
-    char *p = WDutils_NEW(char,n+16+sizeof(void*)); // alloc: (n+16)b + pter    
-    char *q = p + sizeof(void*);                    // go sizeof pointer up     
-    size_t off = size_t(q) % 16;                    // offset from 16b alignment
-    if(off) q += 16-off;                            // IF offset, shift         
-    *((void**)(q-sizeof(void*))) = p;               // remember allocation point
-    return static_cast<void*>(q);                   // return aligned address   
-#endif
-  }
-  //----------------------------------------------------------------------------
-  ///
-  /// de-allocate memory previously allocated with WDutils::malloc16()
-  /// \ingroup Mem16
-  ///
-  /// This routine \b must be used to properly de-allocate memory that has been
-  /// previously allocated by WDutils::malloc16(); other de-allocation will
-  /// inevitably result in a run-time \b error!
-  ///
-  /// \param q  pointer previously allocated by WDutils::malloc16()
-  inline void free16(void*q) WDutils_THROWING
-  {
-#ifdef __GNUC__
-    if(0==q) {
-      Warning()("free16: trying to delete zero pointer");
-      return;
-    }
-    try {
-      _mm_free(q);
-    } catch(...) {
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	()("free16: de-allocating %p failed\n", q);
-    }
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation()("free16: de-allocated array @ %p\n",q);
-#else
-    WDutils_DEL_A( (char*)( *( (void**) ( ( (char*)q )-sizeof(void*) ) ) ) );
-#endif
-  }
-  //----------------------------------------------------------------------------
-  ///
-  /// allocate memory at a address alignged to at a 16 byte memory location
-  /// \ingroup Mem16
-  ///
-  /// Will allocate slightly more memory than required to ensure we can find
-  /// the required amount at a 16b memory location. To de-allocate, you \b must
-  /// use WDutils::delete16<>(), otherwise an error will occur!
-  ///
-  /// \return   a newly allocated memory address at a 16 byte memory location
-  /// \param n  number of objects to allocate
-  template<typename T> inline T* new16(size_t n) WDutils_THROWING
-  {
-    return static_cast<T*>(malloc16(n * sizeof(T)));
-  }
-  //----------------------------------------------------------------------------
-  ///
-  /// de-allocate memory previously allocated with WDutils::new16().
-  /// \ingroup Mem16
-  ///
-  /// This routine \b must be used to properly de-allocate memory that has been
-  /// previously allocated by WDutils::new16(); other de-allocation will
-  /// inevitably result in an error.
-  ///
-  /// \param q  pointer previously allocated by WDutils::new16()
-  template<typename T> inline void delete16(T* q)WDutils_THROWING 
-  {
-    free16(static_cast<void*>(q));
-  }
-  //@}
-  //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////
 #endif // WDutils_included_memory_h
