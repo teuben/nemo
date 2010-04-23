@@ -125,7 +125,7 @@ char * VirtualParticlesSelect::parseString(const char * select_string, const int
   char * status;
   PRINT_D std::cerr << "In parseString...["<< select_string << "]\n";
 
-  char * c = strchr(select_string,',');
+  char * c = strchr((char *) select_string,',');
   int sup;
   if ( c) {
     status = c+1;

@@ -11,6 +11,7 @@
 // ============================================================================
 #include <iostream>
 #include <errno.h>
+#include <cstdio>
 #include <netinet/in.h>
 #include "SocketClient.h"
 

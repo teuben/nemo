@@ -15,6 +15,7 @@
 #include "Socket.h"
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 #define LOCAL_DEBUG 0
 #include "print_debug.h"
 

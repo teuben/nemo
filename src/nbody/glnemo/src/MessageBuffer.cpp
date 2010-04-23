@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <cstdlib>
+#include <cstdio>
 #include "MessageBuffer.h"
 
 using namespace std;
