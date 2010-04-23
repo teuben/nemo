@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -27,25 +27,18 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "preview.2010-April-21"
+#define RELEASE_VERSION "preview.2010-April-23"
 
 // ============================================================================
 // NEMO parameters                                                             
   const char * defv[] = {  
-    "in=\n             Nemo input snapshot                                             ",
-    "select=\n      Select particles using range operator separated               \n"
-    "                   by a comma. E.g 0:999,1000:1999 would select two sets        \n"
-    "                   of 1000 particles and give them a different color              ",
+    "in=\n             Input snapshot (Nemo,Gadget 2 & 1, Ramses, phiGrape, ftm, list of files)",
+    "select=\n         Select particles using:                                         \n"
+    "                   1) component name ex: gas,halo,disk,stars,bulge,bndry           \n"
+    "                   2) range operator ex: 0:999,1000:1999 would select two sets     \n"
+    "                   of 1000 particles                                              ",
     "server=\n         Running simulation server hostname                              ",
-    "range_visib=t\n   toggle visibility  for the particles selected via \'select=\' \n"
-    "                   options. Can be usefull if you only want to display particles\n"
-    "                   selected via \'select_list\' options(see below). In that case\n"
-    "                   you should set \'f\'                                           ",
-    "select_list=\n    Select particles from list of indexes            ",
     "keep_all=f\n      keep all the particles despite the selection     ",
-    "comp=\n           select particles from component name, separated\n"
-    "                   by a comma. E.g \"halo,disk,gas\" would select\n"
-    "                   Halo, Disk and Gas components.\n                         ",
     "times=all\n       Select time                                      ",
     "xmin=0.0\n        xmin box (for ramses input)                      ",
     "xmax=1.0\n        xmax box (for ramses input)                      ",
@@ -80,18 +73,14 @@ using namespace std;
     "auto_ts=t\n       automatic texture size                           ",
     "texture=t\n       show particles as textures                       ",
     "texture_s=1.0\n   texture size of gaz particle                     ",
-    "texture_ac=125\n  texture alpha color of gaz particle              ",
     "cmapindex=0\n     Color map index                                  ",
     "psize=1.0\n       Set particles size                               ",
-    "port=4444\n       Server's communication port                      ",
+    "port=4000\n       Server's communication port                      ",
     "wsize=931\n       Windows's width size                             ",
     "hsize=750\n       Windows's height size                            ",
     "screenshot=\n     Screenshot name                                  ",
-    "anim_file=\n      Animation filename                               ",
-    "anim_play=t\n     play animation ?                                 ",
-    "anim_bench=t\n    play animation in benchmark mode ?               ",
     "smooth_gui=t\n    if true it allows a smoother interactivity with  ",
-    "                   the GUI, but it **doubles** the memory usage. \n",
+    "                   the GUI, but it **double** the memory usage. \n",
     "VERSION="RELEASE_VERSION"\n    "__DATE__"  - JCL  compiled at <"__TIME__">      ",
     NULL
   };
@@ -102,6 +91,7 @@ using namespace std;
   Q_IMPORT_PLUGIN(phigrapeplugin); 
   Q_IMPORT_PLUGIN(ramsesplugin); 
   Q_IMPORT_PLUGIN(listplugin);
+  Q_IMPORT_PLUGIN(networkplugin);
 
 // ============================================================================
 //  The main program is here                                                   

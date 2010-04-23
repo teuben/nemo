@@ -15,11 +15,10 @@ CONFIG += $$GLOBAL warn_on \
           
 TEMPLATE = lib
 
+INCLUDEPATH += ../../src
+
 HEADERS += gadgetio.h
 
 SOURCES += gadgetio.cc
 
-INCLUDEPATH += \
-../../src \
-../../utils
-
+INCLUDEPATH += ../../src

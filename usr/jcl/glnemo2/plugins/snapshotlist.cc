@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -39,8 +39,9 @@ SnapshotList::~SnapshotList()
     delete part_data;
 }
 // ============================================================================
-SnapshotInterface * SnapshotList::newObject(const std::string _filename)
+SnapshotInterface * SnapshotList::newObject(const std::string _filename, const int x)
 {
+  if (x) {;} // get rid of compiler warning
   filename = _filename;
   obj      = new SnapshotList();
   obj->setFileName(_filename);

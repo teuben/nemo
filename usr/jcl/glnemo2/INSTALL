@@ -6,8 +6,8 @@
 0) Requirements:
 ------------------  
  Glnemo2 compiles and runs fine on Linux, Windows and MacOSX platform.
-  In order to compile it, you need Trolltech QT development  library (qt > 4.3).
-See http://www.qtsoftware.com/downloads to download QT.  You also need a decent 
+  In order to compile it, you need Trolltech QT development  library (qt > 4.6).
+See http://qt.nokia.com/downloads to download QT.  You also need a decent 
 video card with a fast opengl driver. Glnemo2 has been successfully tested on Nvidia and
 ATI GPU cards. If the installed OpenGL driver is not fully compatible with the requirement, it
 can also run in software mode.
@@ -25,20 +25,28 @@ qt4 are still installed there). Change to 'glnemo2' directory and enter the comm
           then
        make
 
+
     b) Mac OS X
        - - - - -
        qmake -spec macx-g++
           then
        make
 
+
  if the compilation fails, please send me a full report by e-mail : 
   jean-charles.lambert@oamp.fr 
    
 it should take a while to compile, at the end you should have a 'glnemo2' binary located in
-"PATH/glnemo2/bin/ARCH" directory. PATH is where is located glnemo2 directory. ARCH depends on
+"PATH/glnemo2/bin/ARCH/debug" directory. PATH is where is located glnemo2 directory. ARCH depends on
 you architecture, and could be "unix", "win32" or "macx".
 
 2) Installation :
 -------------------
-   You'll find glnemo2.debug binary file in the "bin" directory.
-   You can copy this somewhere else in your $PATH, e.g. in $NEMOBIN/glnemo2
+   just enter the command :
+
+   make install
+
+3) GyrfalcON runtime manipulator
+--------------------------------
+
+see $NEMO/usr/jcl/glnemo2/gyrfalcon/README

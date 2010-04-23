@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2009                                       
+// Copyright Jean-Charles LAMBERT - 2007-2010                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -78,6 +78,9 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
   int cpt_dm=0;
   int cpt_star=0;
   bool count_only=false;
+
+  if (nsel) {;} // remove compiler warning
+  
   if (index==NULL) {
     ndm_box=0;
     nstar_box=0;

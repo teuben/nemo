@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -25,6 +25,7 @@
 #include "particlesselectrange.h"
 #include "snapshotinterface.h"
 #include "globjectparticles.h"
+#include "snapshotnetwork.h"
 
 #include "ftmio.h"
 #include "nemo.h"
@@ -104,7 +105,7 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_options,SIGNAL(startStopPlay()),camera,SLOT(startStopPlay()));
   // colormap
   connect(colormap,SIGNAL(newColorMap()),gl_window,SLOT(changeColorMap()));
-  connect(colormap,SIGNAL(newColorMap()),gl_window,SLOT(reverseColorMap()));
+  //connect(colormap,SIGNAL(newColorMap()),gl_window,SLOT(reverseColorMap()));
   connect(colormap,SIGNAL(newColorMap()),form_o_c,SLOT(changeColorMap()));
   connect(form_o_c,SIGNAL(nextColorMap()),colormap,SLOT(next()));
   connect(form_o_c,SIGNAL(prevColorMap()),colormap,SLOT(prev()));
@@ -146,12 +147,27 @@ void MainWindow::start(std::string shot)
         if (shot == "") interactiveSelect("",true);
       }
       else 
-  	loadNewData(select,store_options->select_time,keep_all,store_options->vel_req, false,true);
+  	loadNewData(select,store_options->select_time,keep_all, false,true);
       if (!store_options->rho_exist) {
         store_options->render_mode = 0;
       }
       
       gl_window->updateGL();
+    }
+  }
+  else if (hasvalue((char*)"server")) {
+    std::string ip=getparam((char*)"server");
+    int port=getiparam((char*)"port");
+    bool vel=getbparam((char *)"vel");
+    std::string select=getparam((char *)"select");
+    if (select.length() == 0) {
+        actionMenuFileConnect2(ip, port, vel, false, true);
+    }
+    else {
+        if(actionMenuFileConnect2(ip, port, vel, false, false)) {
+            crv = current_data->getSnapshotRange();
+            selectPart(select, true);
+        }
     }
   }
   if (shot != "" && play) {
@@ -168,6 +184,7 @@ void MainWindow::start(std::string shot)
   }
   
   gl_window->setFocus();
+  //actionMenuFileConnect();
 }
 // -----------------------------------------------------------------------------
 // MainMainWindow destructor                                                    
@@ -188,6 +205,7 @@ MainWindow::~MainWindow()
   delete current_data;
    std::cerr << "<<  MainWindow::~MainWindow()\n";
   if (user_select) delete user_select;
+
 }
 // -----------------------------------------------------------------------------
 // create menus                                                                 
@@ -252,12 +270,14 @@ void MainWindow::createForms()
   form_spart  = new FormSelectPart(this);
   form_o_c    = new FormObjectControl(this);
   form_options= new FormOptions(store_options,this);
+  form_connect = new FormConnect(this);
   // sig/slot
   connect(form_sshot,SIGNAL(screenshot(const int, const int)),
 	  this,SLOT(takeScreenshot(const int, const int)));
   connect(form_spart,SIGNAL(selectPart(const std::string,const bool)),
 	  this,SLOT(selectPart(const std::string, const bool)));
   connect(form_options,SIGNAL(start_bench(const bool)),this,SLOT(startBench(const bool)));
+  connect(form_connect, SIGNAL(newConnect(std::string, int, bool, bool, bool)), this, SLOT(actionMenuFileConnect2(std::string, int, bool, bool, bool)));
   // some init
   form_about->setVersion(QString(version.c_str()));
   form_o_c->init(mutex_data);
@@ -314,7 +334,7 @@ void MainWindow::createActions()
   connect_file_action = new QAction(QIcon(":/images/connect.png"),tr("&Connect"),this);
   //connect_file_action->setShortcut(tr("Ctrl+O"));
   connect_file_action->setStatusTip(tr("Connect to a simulation server"));
-  connect(connect_file_action, SIGNAL(triggered()), this, SLOT(actionEmpty()));
+  connect(connect_file_action, SIGNAL(triggered()), this, SLOT(actionMenuFileConnect()));
   // print
   print_file_action = new QAction(QIcon(":/images/fileprint.png"),tr("&Print"),this);
   print_file_action->setShortcut(tr("Ctrl+P"));
@@ -540,16 +560,17 @@ void MainWindow::selectPart(const std::string _select, const bool first_snapshot
   } else {
     actionReset();             // reset view if menu file open
   }
+  current_data->setSelectPart(select);
   std::cerr << "MainWindow::selectPart store_options->select_time = " << store_options->select_time << "\n";
   loadNewData(select,store_options->select_time,  // load data
-	      keep_all,store_options->vel_req,true,first_snapshot);
+	      keep_all,true,first_snapshot);
 }
 // -----------------------------------------------------------------------------
 // loadNewData                                                                  
 // -----------------------------------------------------------------------------
 void MainWindow::loadNewData(const std::string select,
                              const std::string s_time,
-                             const bool keep_all, const bool load_vel, const bool interact,
+                             const bool keep_all, const bool interact,
                              const bool first)
 {
   ParticlesObjectVector povold;
@@ -685,11 +706,6 @@ void MainWindow::parseNemoParameters()
   server                  = getparam((char *) "server");
   select                  = getparam((char *) "select");
   store_options->select_part = select;
-  ::string select_list;
-  if ( hasvalue((char *) "select_list") )
-    select_list           = getparam((char *) "select_list");
-  else
-    select_list = NULL;
   store_options->select_time = getparam((char *) "times");
   keep_all                = getbparam((char *) "keep_all");
   store_options->vel_req  = getbparam((char *) "vel");
@@ -738,19 +754,10 @@ void MainWindow::parseNemoParameters()
   // textures
   store_options->auto_texture_size  =getbparam((char *) "auto_ts");
   store_options->texture_size       =getdparam((char *) "texture_s");
-  store_options->texture_alpha_color=getiparam((char *) "texture_ac");
+  //store_options->texture_alpha_color=getiparam((char *) "texture_ac");
   
   store_options->duplicate_mem = getbparam((char *) "smooth_gui");
-  // Animation variables
-  bool anim_bench=true;
-  bool anim_play= true;
-  QString anim_file="";
-  if ( hasvalue((char *) "anim_file")) {
-    
-    anim_bench = getbparam((char *) "anim_bench");
-    anim_play  = getbparam((char *) "anim_play");
-    anim_file  = getparam((char *) "anim_file");
-  }
+  // ortho
   float range_ortho;
   if (store_options->orthographic) {
     range_ortho=getdparam((char *) "ortho_range");
@@ -788,7 +795,8 @@ void MainWindow::killPlayingEvent()
   }
 }
 // -----------------------------------------------------------------------------
-// actionMenuFileOpen()                                                         
+// actionMenuFileOpen()
+//------------------------------------------------------------------------------
 void MainWindow::actionMenuFileOpen()
 {
   static QString menudir("");
@@ -809,6 +817,43 @@ void MainWindow::actionMenuFileOpen()
       interactiveSelect();
       mutex_loading.unlock();   // release area                  
     }
+  }
+}
+// -----------------------------------------------------------------------------
+// actionMenuFileConnect()
+//------------------------------------------------------------------------------
+void MainWindow::actionMenuFileConnect()
+{
+  killPlayingEvent();       // wait the end of loading thread
+  form_connect->show(); // show connect form
+}
+// -----------------------------------------------------------------------------
+// actionMenuFileConnect2()
+//------------------------------------------------------------------------------
+bool MainWindow::actionMenuFileConnect2(std::string adresseIP, int Port, bool velocities, bool densities, bool interactivSelect)
+{
+  if (densities) {;} // remove compiler warning
+  SnapshotNetwork * net = new SnapshotNetwork();
+  std::string adresseip = adresseIP;
+  int port = Port;
+  SnapshotInterface * new_data;
+  new_data = net->newObject(adresseip,port);
+  if (new_data->isValidData()) {
+    mutex_loading.lock();     // protect area
+    delete current_data;      // free memory
+    current_data = new_data;  // link new_data
+    //     loadNewData("all","all",  // load data
+    //           keep_all,store_options->vel_req,true); //
+    store_options->vel_req = velocities;
+    current_data->initLoading(store_options);
+    reload=false;
+    bestzoom = true;
+    if (interactivSelect) interactiveSelect(select,true);
+    mutex_loading.unlock();   // release area
+    return true;
+  }
+  else {
+    return false;
   }
 }
 // -----------------------------------------------------------------------------

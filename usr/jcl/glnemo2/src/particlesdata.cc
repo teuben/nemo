@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -367,8 +367,8 @@ void ParticlesData::computeMaxSize()
       coo_min[1] = std::min(coo_min[1],pos[i*3+1]); 
       coo_min[2] = std::min(coo_min[2],pos[i*3+2]);
     }
-    float max=std::max(std::max(coo_max[0],coo_max[1]),coo_max[2]);
-    float min=std::min(std::min(coo_min[0],coo_min[1]),coo_min[2]);
+    //float max=std::max(std::max(coo_max[0],coo_max[1]),coo_max[2]);
+    //float min=std::min(std::min(coo_min[0],coo_min[1]),coo_min[2]);
     max_size=sqrt(pow(coo_max[0]-coo_min[0],2)+pow(coo_max[1]-coo_min[1],2)+pow(coo_max[2]-coo_min[2],2));
     //max_size = max-min;
     if (1) {

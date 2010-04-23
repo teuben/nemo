@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -46,8 +46,9 @@ SnapshotPhiGrape::~SnapshotPhiGrape()
 // ============================================================================
 // newObject                                                                   
 // instantiate a new object and return a pointer on it                         
-SnapshotInterface * SnapshotPhiGrape::newObject(const std::string _filename)
+SnapshotInterface * SnapshotPhiGrape::newObject(const std::string _filename, const int x)
 {
+  if (x) {;} // get rid of compiler warning
   filename = _filename;
   obj      = new SnapshotPhiGrape();
   obj->setFileName(_filename);

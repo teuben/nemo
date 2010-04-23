@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -52,8 +52,9 @@ SnapshotNemo::~SnapshotNemo()
 // ============================================================================
 // newObject                                                                   
 // instantiate a new object and return a pointer on it                         
-SnapshotInterface * SnapshotNemo::newObject(const std::string _filename)
+SnapshotInterface * SnapshotNemo::newObject(const std::string _filename, const int x)
 {
+  if (x) {;} // get rid of compiler warning
   filename = _filename;
   obj      = new SnapshotNemo();
   obj->setFileName(_filename);

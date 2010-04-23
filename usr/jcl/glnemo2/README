@@ -1,7 +1,7 @@
                              
                              --  Glnemo2 --
                                  
-                   Copyright © Jean-Charles LAMBERT 2007-2009
+                   Copyright © Jean-Charles LAMBERT 2007-2010
                               Version preview
                               
                        Jean-Charles.Lambert@oamp.fr
@@ -30,9 +30,10 @@ Currently, glnemo2 reads:
 - NEMO files (http://carma.astro.umd.edu/nemo)
 - Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/)
 - RAMSES files (http://irfu.cea.fr/Projets/Site_ramses/RAMSES.html)
-- FTM files (Clayton Heller's sph/nbody code), 
+- FTM files (Clayton Heller's sph/nbody code)
 - phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE)
-- list of files stored in a file. 
+- list of files stored in a file
+- realtime gyrfalcON simulation via a network plugin (see $NEMO/usr/jcl/glnemo2/gyrfalcon/README)
 
  Noticed that a "lite" version of the NEMO's engine I/O  is included inside the glnemo2 
 package so you don't longer need to download the whole NEMO package to compile it.

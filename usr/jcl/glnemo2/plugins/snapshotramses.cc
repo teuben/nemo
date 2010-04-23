@@ -15,6 +15,8 @@
 
 namespace glnemo {
 
+// ============================================================================
+// constructor
 SnapshotRamses::SnapshotRamses():SnapshotInterface()
 {
   valid=false;
@@ -44,8 +46,9 @@ SnapshotRamses::~SnapshotRamses()
 // ============================================================================
 // newObject                                                                   
 // instantiate a new object and return a pointer on it                         
-SnapshotInterface * SnapshotRamses::newObject(const std::string _filename)
+SnapshotInterface * SnapshotRamses::newObject(const std::string _filename, const int x)
 {
+  if (x) {;} // get rid of compiler warning
   filename = _filename;
   obj      = new SnapshotRamses();
   obj->setFileName(_filename);

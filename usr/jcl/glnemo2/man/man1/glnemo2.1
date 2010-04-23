@@ -1,0 +1,255 @@
+.TH GLNEMO2 1NEMO "April 2010"
+.SH NAME
+glnemo2 \- An interactive 3D OpenGL visualization program for Nemo snapshots
+.SH SYNOPSIS
+\fBglnemo2\fP [parameter=value]
+.SH DESCRIPTION
+\fBglnemo2\fP is  an interactive visualization 3D program  , using OpenGL and trolltech 
+QT 4.X API. It displays in 3D, particles positions of the different components of an 
+nbody snapshot. 
+
+ You can zoom in/out, rotate, scale, translate, select different particles 
+and plot them in different blending colors, color particles according to their density,
+play with the density threshold, trace orbits, play different time steps, take automatic
+screenshots to make movies, select particles using the mouse, fly over your simulation 
+using camera path. All this features are accessible from a very intuitive graphic user interface.
+
+.SS Currently, glnemo2 reads:
+.nf
+- NEMO files (http://carma.astro.umd.edu/nemo)
+- Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/)
+- RAMSES files (http://irfu.cea.fr/Projets/Site_ramses/RAMSES.html)
+- FTM files (Clayton Heller's sph/nbody code)
+- phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE)
+- list of files stored in a file
+- realtime gyrfalcON simulation via a network plugin (see $NEMO/usr/jcl/glnemo2/gyrfalcon/README)
+.fi
+
+.SH Features:
+ Glnemo2 uses a plugin mechanism to load data, so it's easy to add a new file reader.
+It uses the latest OpenGL technology like, shaders (glsl), vertex buffer object, 
+frame buffer object, and takes in account the power of your graphic card to accelerate the
+rendering. Millions of particles can be rendered, in real time, with a fast GPU. With this
+technology, glnemo2 can be 1000% times faster than glnemo1 !
+
+ Glnemo2 runs fine on Linux, Windows(using minGW compiler), and
+ MaxOSX, thanks to the QT4 API.
+
+.SH Examples
+ From the command line you can select particles to load by specifying a range of particles, or
+by the name of the component (if the file format store its data by component name).
+
+ For example :
+
+1) glnemo2 in=mysnaphot  select=0:199999,300000:999999
+
+  it loads snapshot "mysnapshot" and creates 2 objects (range0: 0 to 199999 particles indexes) and (range1 : 300000 to 999999 particles indexes)
+
+2) glnemo2 in=snap_01  select=gas,stars
+
+ it loads snapshot "snap_01" and creates 2 objects (range0: gas particles) and (range1 : stars particles). Gas and stars particles are automatically detected from the input file.
+
+
+If you start glnemo2 without feeding "select" parameter, it will open a dialog box where you
+will be able to select particles.
+
+ Once started, glnemo2 displays particles, and different actions with the mouse or the keyboard
+perform different actions.
+.SH OPERATION
+All the parameters given to the command line can be interactively
+modified in real time using the graphic user interface composed of menus, icons and
+dialog boxes. Most of the operations can also be activated by
+hitting a key in the display window itself:
+.nf
+- - - - - - - - - - - - - 
+LMB = Left Mouse Button
+RMB = Right Mouse Button
+MM  = Mouve Mouse
+A   = Alt key
+C   = Control key
+S   = Shift key
+- - - - - - - - - - - - - 
+
+LMB + MM       rotate around X/Y axis
+RMB + MM       rotate around Z axis
+Wheel mouse    zoom in or out
++              zoom in
+-              zoom out
+S + LMB + MM   draw a rectangle box to zoom in
+C + LMB + MM   translate along XY axis
+C + RMB + MM   translate along Z  axis
+c              center to center of mass
+C + r          reset translation/rotation
+C + a          fit all particles inside the window
+f              toggle fullscreen
+g              toggle the grid
+r              launch particles ranges/color dialog box
+o              launch option dialog box
+s              take a screenshot
+p              play all snapshots
+y
+C + x          toogle automatic rotation arounc x axis
+C + y          toogle automatic rotation arounc y axis
+C + z          toogle automatic rotation arounc z axis
+
+
+.fi
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input snapshot (Nemo,Gadget 2 & 1, Ramses, phiGrape, ftm, list of files)
+.TP 20
+\fBserver=\fP
+Running simulation server hostname (right now works with gyrfalcON) []   
+.TP 20
+\fBselect=\fP
+Select particles. This option can be used to color the particles. Sets of particles
+must be selected using the : range operator, separated by a comma. 
+E.g. select=0:9,10:19 would select two sets of 10 particles and give them a
+different color or by component (gas,halo,stars,bulge,disk,bndry)
+[all] 
+.TP 20
+\fBtimes=\fP
+Select time [all]     
+.TP 20
+\fBxmin=\fP
+xmin coordinate box for Ramses input [0]
+.TP 20
+\fBxmax=\fP
+xmax coordinate box for Ramses input [1]
+.TP 20
+\fBymin=\fP
+ymin coordinate box for Ramses input [0]
+.TP 20
+\fBymax=\fP
+ymax coordinate box for Ramses input [1]
+.TP 20
+\fBzmin=\fP
+zmin coordinate box for Ramses input [0]
+.TP 20
+\fBzmax=\fP
+zmax coordinate box for Ramses input [1]
+.TP 20
+\fBlmax=\fP
+level max for Ramses amr input. (if 0, max internal level will be used)
+[0]
+.TP 20
+\fBscale=\fP
+scaling factor applied on ramses particles coordinates [1000]
+.TP 20
+\fBvel=\fP
+load velocity coordinates [t]
+.TP 20
+\fBdisp_vel=\fP
+display velocity vectors [f]
+.TP 20
+\fBblending=\fP
+Activate blending colors [t]    
+.TP 20
+\fBdbuffer=\fP
+Activate OpenGL depth buffer [f]
+.TP 20
+\fBperspective=\fP
+Perspective projection is activated by default. Select 'f' to toggle to
+orthographic projection.[t]
+.TP 20
+\fBbestzoom=\fP
+performs an automatic zoom to fit all particles on the
+display.[t]
+.TP 20
+\fBplay=\fP          
+automatically load and display next snapshot [f]
+.TP 20
+\fBglsl=\fP          
+try to initiayze GLSL (shaders) engine [t]
+.TP 20
+\fBortho_range=\fP
+[xy] range size in case of orthographic projection.[6.0]
+.TP 20
+\fBzoom=\fP
+Zoom value.[-14.0]
+.TP 20
+\fBxrot=\fP
+Rotation angle on X axis.[0.0]
+.TP 20
+\fByrot=\fP
+Rotation angle on Y axis.[0.0]
+.TP 20
+\fBzrot=\fP
+Rotation angle on Z axis.[0.0]
+.TP 20
+\fBxtrans=\fP
+translation on X.[0.0]
+.TP 20
+\fBytrans=\fP
+translation on Y.[0.0]
+.TP 20
+\fBztrans=\fP
+translation on Z.[0.0]
+.TP 20
+\fBgrid=\fP
+Show grid [f]
+.TP 20
+\fBosd=\fP
+show On Screen Display [t]
+.TP 20
+\fBcom=\fP
+center according the Center Of Mass [t]
+.TP 20
+\fBpoint=\fP
+display particles as points [f]
+.TP 20
+\fBtexture=\fP
+display particles as textures [t]
+.TP 20
+\fBmindens=\fP
+set minimal density value
+.TP 20
+\fBmaxdens=\fP
+set maximal density value
+.TP 20
+\fBtexture_s=\fP
+texture size for gas like particles
+.TP 20
+\fBcmapindex=\fP
+color map index (used to color particles by density)
+.TP 20
+\fBpsize=\fP
+Set particles point size [1.0]    
+.TP 20
+\fBport=\fP
+Running simulation server's communication port [4000]    
+.TP 20
+\fBwsize=\fP
+Windows's width size [925]    
+.TP 20
+\fBhsize=\fP
+Windows's height size [685]    
+.TP 20
+\fBscreenshot=\fP
+Screenshot name []
+.TP 20
+\fBsmooth_gui=\fP
+if true it allows a smoother interactivity with   [t]
+.SH SEE ALSO
+glnemo(1NEMO)
+.PP
+http://qt.nokia.com/downloads     Qt library web site
+.SH LICENCE
+CeCILL (see http://www.cecill.info)
+.SH FILES
+$NEMO/usr/jcl/glnemo2: directory with source code
+.br
+$NEMO/usr/jcl/glnemo2/gyrfalcon: runtime gyrfalcon manipulator (See README)
+.TP
+\fBhttp://www.oamp.fr/lam/equipes/dynamique/jcl/glnemo\fP Home page
+.SH AUTHOR
+Jean-Charles Lambert
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +5.0i
+23-Apr-10  ramses reader + gyrfalcON manipulator	JCL
+.fi

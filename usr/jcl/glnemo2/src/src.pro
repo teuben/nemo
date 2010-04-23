@@ -9,7 +9,8 @@ FORMS += formobjectcontrol.ui \
     formabout.ui \
     formscreenshot.ui \
     formselectpart.ui \
-    formoptions.ui
+    formoptions.ui \
+    formconnect.ui
 HEADERS += mainwindow.h \
     glwindow.h \
     globject.h \
@@ -42,7 +43,8 @@ HEADERS += mainwindow.h \
     colormap.h \
     densitycolorbar.h \
     camera.h \
-    catmull_rom_spline.h
+    catmull_rom_spline.h \
+    formconnect.h
 SOURCES += glnemo.cc \
     mainwindow.cc \
     glwindow.cc \
@@ -77,36 +79,34 @@ SOURCES += glnemo.cc \
     densitycolorbar.cc \
     camera.cc \
     catmull_rom_spline.cc \
-    snapshotinterface.cc
+    snapshotinterface.cc \
+    formconnect.cc
 RESOURCES = glnemo.qrc
 CONFIG += $$GLOBAL \
     warn_on \
     opengl \
     thread
 CONFIG(debug, debug|release) { 
-    TARGET = ../bin/$$ARCH/glnemo2.debug
+    TARGET = ../bin/$$ARCH/$$COMPILEMODE/glnemo2
     win32 { 
-        DESTDIR = ../bin/$$ARCH
-        TARGET = glnemo2_debug
+        DESTDIR = ../bin/$$COMPILEMODE/$$ARCH
+        TARGET = glnemo2
     }
     unix:
 }
 
-# TARGET = ../bin/$$ARCH/glnemo2
-# INSTALLS += target
-# NEMOBIN = $(NEMOBIN)
-# target.path += $$NEMOBIN
 else { 
-    TARGET = ../bin/$$ARCH/glnemo2.release
+    TARGET = ../bin/$$ARCH/$$COMPILEMODE/glnemo2
     win32 { 
-        DESTDIR = ../bin/$$ARCH
+        DESTDIR = ../bin/$$COMPILEMODE/$$ARCH
         TARGET = glnemo2
     }
 }
 TEMPLATE = app
 QT += opengl
-MOC_DIR = .moc/$$ARCH
-UI_DIR = ._ui/$$ARCH
+QT += network
+MOC_DIR = .moc/$${ARCH}/$$COMPILEMODE
+UI_DIR = ._ui/$${ARCH}/$$COMPILEMODE
 OBJECTS_DIR = .obj/$$ARCH/$$COMPILEMODE
 RCC_DIR = .res/$$ARCH/$$COMPILEMODE
 QMAKE_LIBDIR = \
@@ -116,8 +116,15 @@ QMAKE_LIBDIR = \
     ../plugins/ftm/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/ramses/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/gadget/lib/$$ARCH/$$COMPILEMODE \
-    ../plugins/zlib/lib/$${ARCH}/$$COMPILEMODE
+    ../plugins/zlib/lib/$${ARCH}/$$COMPILEMODE \
+    ../plugins/network/lib/$${ARCH}/$$COMPILEMODE
 
+# INSTALLS
+target.path = $$(NEMO)/bin
+INSTALLS += target
+man.path = $$(NEMO)/man/man1
+man.files = ../man/man1/glnemo2.1
+INSTALLS += man
 # !!!!!!
 # DESTDIR = .
 # !!!!!!
@@ -128,6 +135,7 @@ INCLUDEPATH += ../plugins \
     ../plugins/nemolight \
     ../plugins/gadget \
     ../plugins/zlib \
+    ../plugins/network \
     ../src \
     $$NEMOLIB \
     $$NEMOINC \
@@ -137,6 +145,7 @@ LIBS += -lsnapshot \
     -lnemo \
     -lgadget \
     -lramses \
+    -lnetwork \
     -lzlib \
     -lutils
 TARGETDEPS += ../plugins/nemolight/lib/$${ARCH}/$$COMPILEMODE/libnemo.a \
@@ -144,6 +153,7 @@ TARGETDEPS += ../plugins/nemolight/lib/$${ARCH}/$$COMPILEMODE/libnemo.a \
     ../plugins/ftm/lib/$${ARCH}/$$COMPILEMODE/libftm.a \
     ../plugins/gadget/lib/$${ARCH}/$$COMPILEMODE/libgadget.a \
     ../plugins/ramses/lib/$${ARCH}/$$COMPILEMODE/libramses.a \
+    ../plugins/network/lib/$${ARCH}/$$COMPILEMODE/libnetwork.a \
     ../plugins/zlib/lib/$${ARCH}/$$COMPILEMODE/libzlib.a \
     ../utils/lib/$${ARCH}/$$COMPILEMODE/libutils.a
 DISTFILES += ../ChangeLog

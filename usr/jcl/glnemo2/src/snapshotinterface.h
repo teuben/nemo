@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -64,7 +64,7 @@ class SnapshotInterface
     // ---------------------------------------------------
     // Pure Virtual functions, *** MUST be implemented ***
     // ---------------------------------------------------
-    virtual SnapshotInterface * newObject(const std::string _filename) = 0 ;
+    virtual SnapshotInterface * newObject(const std::string _filename, const int x=0) = 0 ;
     virtual bool isValidData() = 0;
     virtual ComponentRangeVector * getSnapshotRange() = 0;
     virtual int initLoading(GlobalOptions * so) = 0;
@@ -75,12 +75,16 @@ class SnapshotInterface
     virtual int close() = 0;
     virtual QString endOfDataMessage() = 0;
     // simple Virtual functions
-    virtual bool isEndOfData() const { return end_of_data;};
+	virtual bool isEndOfData() const { return end_of_data;}
+	virtual void setPort(const int x=4000) { port=x;}
+	virtual void setSelectPart(const std::string _sel) { select_part = _sel;}
+	virtual std::string getSelectPart() { return select_part; }
     // normal functions        
-    void setFileName(std::string _f) { filename = _f;};
-    std::string getFileName() const { return filename;};
-    std::string getInterfaceType() { return interface_type;};
-    bool isFileExist() { return QFile::exists(QString(filename.c_str()));};
+	void setFileName(std::string _f) { filename = _f;}
+	std::string getFileName() const { return filename;}
+	std::string getInterfaceType() { return interface_type;}
+	bool isFileExist() { return QFile::exists(QString(filename.c_str()));}
+
     ParticlesData * part_data;
     int nbody_first;
     float time_first;
@@ -91,6 +95,7 @@ class SnapshotInterface
     std::string interface_type;
     mutable bool end_of_data;
     std::string select_part, select_time;
+    int port;
     bool keep_all, load_vel;
     ComponentRangeVector crv;
     float * pos, *vel;

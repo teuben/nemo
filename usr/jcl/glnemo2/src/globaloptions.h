@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -26,6 +26,9 @@ public:
     GlobalOptions();
     ~GlobalOptions();
     const GlobalOptions& operator=(const GlobalOptions& m);
+	// Network stuff
+	std::string  network_host;
+	int  network_port;
     // from play option TAB
     bool auto_play_screenshot;
     bool auto_gl_screenshot;
@@ -74,7 +77,6 @@ public:
     // from experimental TAB
     bool show_poly;
     float texture_size;
-    int texture_alpha_color;
     bool octree_enable;
     bool octree_display;
     int octree_level;

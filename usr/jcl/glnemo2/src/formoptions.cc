@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -36,6 +36,7 @@ FormOptions::FormOptions(GlobalOptions * _go, QWidget *parent):QDialog(parent)
   form.frame_name_text->setText(QString(go->base_frame_name));
   // activate the first TAB by default
   form.options_dialog->setCurrentIndex(0);
+  form.com->setChecked(go->auto_com);
 }
 
 // ============================================================================

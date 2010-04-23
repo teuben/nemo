@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -142,7 +142,7 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
       const ParticlesObject * po = (*gpv)[i].getPartObj();        // object
       float DMIN = po->getMinPhys();
       float DMAX = po->getMaxPhys();
-      //std::cerr << "obj="<<i<<" DMIN="<<DMIN<<" DMAX="<<DMAX<<"\n";
+
       if (po->isVisible()) {                                   // is visible  
         part_data = (*gpv)[i].getPartData();// get its Data
         // get physical value data array
@@ -170,6 +170,7 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
                 indensity=false;
             }
           }
+          //std::cerr << winx << " " << x0 << " " << x1 << " " << winy << " " << y0 << " " << y1 << " " <<frustum.isPointInside(x,y,z) << "\n"; 
           // is particle visible ?
           if (indensity && winx >= x0 && winx <= x1 && winy >= y0 && winy <= y1 && // in selected area
               frustum.isPointInside(x,y,z)) {                         // in the frustum  

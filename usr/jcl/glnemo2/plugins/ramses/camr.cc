@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2010                                       
+// Copyright Jean-Charles LAMBERT - 2007-2010                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -105,7 +105,9 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
   int ngridbound [nlevelmax][     nboundary];
   double xc[3][8];
   int ngrida;
-
+  
+  if (load_vel || nsel || vel) {;} // remove compiler warning
+  
   nbody = 0;
   int cpt=0;
   bool count_only=false;

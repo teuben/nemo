@@ -15,25 +15,29 @@ CONFIG += $$GLOBAL \
     opengl \
     staticlib
 QT += opengl
+QT += network
 TEMPLATE = lib
 HEADERS += snapshotnemo.h \
     snapshotftm.h \
     snapshotlist.h \
     snapshotgadget.h \
     snapshotramses.h \
-    snapshotphigrape.h
+    snapshotphigrape.h \
+    snapshotnetwork.h
 SOURCES += snapshotnemo.cc \
     snapshotftm.cc \
     snapshotlist.cc \
     snapshotgadget.cc \
     snapshotramses.cc \
-    snapshotphigrape.cc
+    snapshotphigrape.cc \
+    snapshotnetwork.cc
 
 # CONFIG -= release
 DESTDIR = lib/$${ARCH}/$$COMPILEMODE
 INCLUDEPATH += ftm \
     gadget \
     ramses \
+    network \
     ../src \
     ../utils \
     ../plugins \
@@ -44,4 +48,7 @@ DEPENDPATH += \
     ../src \
     ftm \
     gadget \
-    ramses
+    ramses \
+    network
+
+#

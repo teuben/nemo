@@ -1,10 +1,14 @@
 current version
 
 
-preview.2010-April-21
----------------------
+preview.2010-April-23 (aka Leiden Release)
+-----------------------------------------
   can select times with list of snapshots
   add experimental Ramses reader (gas,halo,stars)
+  add gyrfalcON's runtime manipulator (see $NEMO/usr/jcl/glnemo2/gyrfalcon/README)
+  add clean installer (make install => glnemo2 install in $NEMOBIN)
+  add glnemo2 manual (man glnemo2)
+  many bugs fixed
 	
 preview.2010-Feb-15
 -------------------

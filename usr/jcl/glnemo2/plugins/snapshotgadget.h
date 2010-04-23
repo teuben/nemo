@@ -30,7 +30,7 @@ public:
     SnapshotGadget();
 
     ~SnapshotGadget();
-    SnapshotInterface * newObject(const std::string _filename);
+	SnapshotInterface * newObject(const std::string _filename, const int x=0);
     bool isValidData();
     ComponentRangeVector * getSnapshotRange();
     int initLoading(GlobalOptions * so);

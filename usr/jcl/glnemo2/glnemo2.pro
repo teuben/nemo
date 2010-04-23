@@ -5,6 +5,7 @@ SUBDIRS += \
            plugins/nemolight \
 	   plugins/ftm \
            plugins/zlib \
+           plugins/network \
 	   plugins \
 	   src
 TEMPLATE = subdirs 

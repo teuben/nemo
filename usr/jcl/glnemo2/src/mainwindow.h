@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -31,6 +31,7 @@
 #include "formscreenshot.h"
 #include "formselectpart.h"
 #include "formoptions.h"
+#include "formconnect.h"
 #include "componentrange.h"
 #include "userselection.h"
 #include "colormap.h"
@@ -67,6 +68,8 @@ class MainWindow : public QMainWindow {
     void actionFormObjectControl();
     void actionFormOptions();
     void actionMenuFileOpen();
+	void actionMenuFileConnect();
+    bool actionMenuFileConnect2(std::string ip, int port, bool velocities, bool dencities, bool interactivSelect);
     void actionReset();
     void actionReload();
     void actionPrint();
@@ -112,7 +115,7 @@ class MainWindow : public QMainWindow {
     // -------------------------------
     void interactiveSelect(std::string s="", const bool first_snaphot=false);
     void loadNewData(const std::string, const std::string ,
-                            const bool , const bool, const bool, const bool first=false);
+                            const bool , const bool, const bool first=false);
     void killPlayingEvent();
     // OSD
     void updateOsd();
@@ -167,6 +170,7 @@ class MainWindow : public QMainWindow {
     FormScreenshot    * form_sshot;
     FormSelectPart    * form_spart;
     FormOptions       * form_options;
+    FormConnect       * form_connect;
     // DockWidgets
     QDockWidget *dock_o_c, * dock_options;
     //------------------------------

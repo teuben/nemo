@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -31,7 +31,7 @@ class SnapshotNemo : public QObject,
 public:
     SnapshotNemo();
     ~SnapshotNemo();
-    SnapshotInterface * newObject(const std::string _filename);
+	SnapshotInterface * newObject(const std::string _filename, const int x=0);
     ComponentRangeVector * getSnapshotRange();
     int initLoading(GlobalOptions * so);
     bool isValidData();

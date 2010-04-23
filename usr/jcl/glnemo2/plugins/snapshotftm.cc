@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -39,8 +39,9 @@ SnapshotFtm::~SnapshotFtm()
 // ============================================================================
 // newObject                                                                   
 // instantiate a new object and return a pointer on it                         
-SnapshotInterface * SnapshotFtm::newObject(const std::string _filename)
+SnapshotInterface * SnapshotFtm::newObject(const std::string _filename, int x)
 {
+  if (x) {;} // get rid of compiler warning
   filename = _filename;
   obj      = new SnapshotFtm();
   obj->setFileName(_filename);
@@ -100,7 +101,6 @@ int SnapshotFtm::nextFrame(const int * index_tab, const int nsel)
 {
   int status=0;
   if (valid) {
-    
   if (ftm_io->read(part_data,index_tab,nsel,load_vel)) {
     status=1;
     part_data->computeVelNorm();

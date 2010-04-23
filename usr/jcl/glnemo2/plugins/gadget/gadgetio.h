@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -136,7 +136,6 @@ private:
   bool swap;
   glnemo::ComponentRangeVector  crv;
   void storeComponents();
-  int npartOffset[6];
   //fortran offset record length
   int frecord_offset;
   //control
@@ -155,7 +154,7 @@ private:
   // if yes we'll have to do unit conversion for temperature and rho
   bool use_gas;
   int  s_gas, e_gas; // start  end gas indexes
-  void unitConversion(const bool);
+  void unitConversion();
   
   // swap bytes
   inline void swapBytes(void * x,const int size) {

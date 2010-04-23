@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2009                                  
+// Copyright Jean-Charles LAMBERT - 2007-2010                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -24,6 +24,9 @@ namespace glnemo {
 // constructor                                                                 
 GlobalOptions::GlobalOptions()
 {
+  // Network stuff
+  network_host = "127.0.0.1";
+  network_port = 4000;
   // from PLAY options TAB
   auto_play_screenshot = false;
   auto_gl_screenshot   = false;
@@ -78,7 +81,6 @@ GlobalOptions::GlobalOptions()
   // from experimental TAB
   show_poly=false;
   texture_size=1.;
-  texture_alpha_color=255;
   octree_enable=false;
   octree_display=false;
   octree_level=10;
@@ -217,7 +219,6 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   // from experimental TAB
   show_poly=m.show_poly;
   texture_size=m.texture_size;
-  texture_alpha_color=m.texture_alpha_color;
   octree_enable=m.octree_enable;
   octree_display=m.octree_display;
   octree_level=m.octree_level;
@@ -243,6 +244,9 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   zsort = m.zsort;
   enable_gui = m.enable_gui;
   auto_texture_size = m.auto_texture_size;
+  // network stuff
+  network_host = m.network_host;
+  network_port = m.network_port;
   // ramses
   xmin = m.xmin;
   xmax = m.xmax;

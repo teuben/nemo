@@ -36,8 +36,9 @@ SnapshotGadget::~SnapshotGadget()
 // ============================================================================
 // newObject                                                                   
 // instantiate a new object and return a pointer on it                         
-SnapshotInterface * SnapshotGadget::newObject(const std::string _filename)
+SnapshotInterface * SnapshotGadget::newObject(const std::string _filename, const int x)
 {
+  if (x) {;} // get rid of compiler warning
   filename = _filename;
   obj      = new SnapshotGadget();
   obj->setFileName(_filename);
