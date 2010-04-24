@@ -814,7 +814,8 @@ void MainWindow::actionMenuFileOpen()
 //           keep_all,store_options->vel_req,true); //
       reload=false;
       bestzoom = true;
-      interactiveSelect();
+      current_data->initLoading(store_options);
+      interactiveSelect("",true);
       mutex_loading.unlock();   // release area                  
     }
   }
