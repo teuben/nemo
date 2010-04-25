@@ -25,7 +25,8 @@ if (-e $dir) then
   endif
   make
   # hopefully only 1 subdir in bin
-  cp bin/*/glnemo2.debug $NEMOBIN/glnemo2
+  # pre leiden release:   cp bin/*/glnemo2.debug $NEMOBIN/glnemo2
+  make install
 else
   echo mknemo.d: $dir does not exist
 endif
