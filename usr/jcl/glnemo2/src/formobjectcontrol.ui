@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>305</width>
-    <height>834</height>
+    <width>323</width>
+    <height>913</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,11 +29,11 @@
    <iconset>
     <normaloff>../../../../../../../../../../../../../../home/jcl/.designer/backup</normaloff>../../../../../../../../../../../../../../home/jcl/.designer/backup</iconset>
   </property>
-  <layout class="QGridLayout" name="gridLayout_6">
+  <layout class="QGridLayout" name="gridLayout_10">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+      <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -41,8 +41,8 @@
      <property name="title">
       <string>Objects</string>
      </property>
-     <layout class="QGridLayout">
-      <item row="0" column="0" colspan="3">
+     <layout class="QGridLayout" name="gridLayout_9">
+      <item row="0" column="0" colspan="2">
        <widget class="QTabWidget" name="tabWidget">
         <property name="enabled">
          <bool>true</bool>
@@ -276,7 +276,7 @@ p, li { white-space: pre-wrap; }
          <attribute name="title">
           <string>File</string>
          </attribute>
-         <layout class="QGridLayout">
+         <layout class="QGridLayout" name="gridLayout_11">
           <item row="0" column="0">
            <widget class="QTableWidget" name="file_table">
             <property name="rowCount">
@@ -499,7 +499,7 @@ p, li { white-space: pre-wrap; }
    <item row="1" column="0">
     <widget class="QTabWidget" name="objects_properties">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -508,63 +508,65 @@ p, li { white-space: pre-wrap; }
       <string/>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="tab_particles">
       <attribute name="title">
        <string>Particles</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout">
+      <layout class="QGridLayout" name="gridLayout_8">
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_5">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Textures FX</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0" colspan="3">
-           <layout class="QHBoxLayout" name="horizontalLayout">
-            <item>
-             <widget class="QCheckBox" name="gaz_check">
-              <property name="toolTip">
-               <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0" colspan="2">
+           <widget class="QCheckBox" name="gaz_check">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Enable texture effect on particles&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>display</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="gaz_glsl_check">
-              <property name="toolTip">
-               <string comment="if checked,">When enabled and if your video card have GLSL support, shaders engine will be used.</string>
-              </property>
-              <property name="text">
-               <string>Shaders</string>
-              </property>
-              <property name="checked">
-               <bool>false</bool>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QCheckBox" name="gaz_rot_check">
-              <property name="toolTip">
-               <string comment="If enable, textures will be rotated">&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+            </property>
+            <property name="text">
+             <string>display</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QCheckBox" name="gaz_glsl_check">
+            <property name="toolTip">
+             <string comment="if checked,">When enabled and if your video card have GLSL support, shaders engine will be used.</string>
+            </property>
+            <property name="text">
+             <string>Shaders</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QCheckBox" name="gaz_rot_check">
+            <property name="toolTip">
+             <string comment="If enable, textures will be rotated">&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Sans Serif'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;When enable, textures are rotating to increase the randomization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-              </property>
-              <property name="text">
-               <string>Rotate</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+            </property>
+            <property name="text">
+             <string>Rotate</string>
+            </property>
+           </widget>
           </item>
-          <item row="1" column="0" colspan="2">
+          <item row="1" column="0" colspan="3">
            <widget class="QComboBox" name="texture_box">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -580,7 +582,7 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="1" column="2">
+          <item row="1" column="3">
            <widget class="QDoubleSpinBox" name="texture_spin">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -621,8 +623,14 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="2" column="1" colspan="2">
+          <item row="2" column="1" colspan="3">
            <widget class="QSlider" name="gaz_slide_size">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
             </property>
@@ -644,8 +652,14 @@ p, li { white-space: pre-wrap; }
             </property>
            </widget>
           </item>
-          <item row="3" column="1" colspan="2">
+          <item row="3" column="1" colspan="3">
            <widget class="QSlider" name="gaz_slide_alpha">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="cursor">
              <cursorShape>PointingHandCursor</cursorShape>
             </property>
@@ -662,10 +676,16 @@ p, li { white-space: pre-wrap; }
        </item>
        <item row="1" column="0">
         <widget class="QGroupBox" name="groupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Particles</string>
          </property>
-         <layout class="QGridLayout">
+         <layout class="QGridLayout" name="gridLayout_3">
           <item row="0" column="0" colspan="2">
            <widget class="QCheckBox" name="part_check">
             <property name="text">
@@ -727,10 +747,25 @@ p, li { white-space: pre-wrap; }
        </item>
        <item row="2" column="0">
         <widget class="QGroupBox" name="groupBox_2">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>2</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Velocity vectors</string>
          </property>
-         <layout class="QGridLayout">
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+         <property name="checkable">
+          <bool>false</bool>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_6">
           <item row="0" column="0" colspan="2">
            <widget class="QCheckBox" name="vel_check">
             <property name="text">
@@ -883,6 +918,12 @@ Physical value can be:
        </item>
        <item row="3" column="0">
         <widget class="QGroupBox" name="phys_threshold">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Threshold</string>
          </property>
@@ -1008,6 +1049,12 @@ Physical value can be:
        </item>
        <item row="4" column="0">
         <widget class="QGroupBox" name="groupBox_6">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Physical value to display</string>
          </property>
@@ -1044,6 +1091,12 @@ Physical value can be:
        </item>
        <item row="2" column="0">
         <widget class="QGroupBox" name="groupBox_7">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="title">
           <string>Colormap</string>
          </property>
@@ -1297,11 +1350,6 @@ Physical value can be:
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_transfert">
-      <attribute name="title">
-       <string>Transfert</string>
-      </attribute>
-     </widget>
     </widget>
    </item>
   </layout>
@@ -1310,22 +1358,6 @@ Physical value can be:
   <include location="glnemo.qrc"/>
  </resources>
  <connections>
-  <connection>
-   <sender>dens_slide_min</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>dens_spin_min</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>115</x>
-     <y>561</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>192</x>
-     <y>572</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>dens_slide_max</sender>
    <signal>valueChanged(int)</signal>
@@ -1339,6 +1371,22 @@ Physical value can be:
     <hint type="destinationlabel">
      <x>191</x>
      <y>604</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dens_slide_min</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>dens_spin_min</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>115</x>
+     <y>561</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>192</x>
+     <y>572</y>
     </hint>
    </hints>
   </connection>

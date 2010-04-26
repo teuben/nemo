@@ -224,7 +224,7 @@ void FormObjectControl::update(ParticlesData   * _p_data,
   if (go  && ! go->duplicate_mem) mutex_data->unlock();
   
   on_range_table_cellClicked(last_row,1);
-  //on_physical_selected();
+  //physicalSelected();
 }
 // ============================================================================
 // updateTable()                                                               
@@ -1016,7 +1016,7 @@ void FormObjectControl::on_dens_phys_radio_clicked()
   current_data->setIpvs(PhysicalData::rho);
   emit updateIpvs(PhysicalData::rho);
   mutex_data->unlock();
-  on_physical_selected();
+  physicalSelected();
 }
 // ============================================================================
 // on_temp_phys_radio_pressed()                                                
@@ -1026,7 +1026,7 @@ void FormObjectControl::on_temp_phys_radio_clicked()
   current_data->setIpvs(PhysicalData::temperature);
   emit updateIpvs(PhysicalData::temperature);
   mutex_data->unlock();
-  on_physical_selected();
+  physicalSelected();
 }
 // ============================================================================
 // on_pressure_phys_radio_pressed()                                            
@@ -1036,11 +1036,11 @@ void FormObjectControl::on_pressure_phys_radio_clicked()
   current_data->setIpvs(PhysicalData::pressure);
   emit updateIpvs(PhysicalData::pressure);
   mutex_data->unlock();
-  on_physical_selected();
+  physicalSelected();
 }
 // ============================================================================
-// on_physical_selected()                                                      
-void FormObjectControl::on_physical_selected()
+// physicalSelected()                                                      
+void FormObjectControl::physicalSelected()
 {
   if (go  && ! go->duplicate_mem) mutex_data->lock();
   int i_obj = object_index[current_object];

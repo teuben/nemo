@@ -183,7 +183,7 @@ namespace glnemo {
     void on_dens_phys_radio_clicked();  
     void on_temp_phys_radio_clicked();  
     void on_pressure_phys_radio_clicked();  
-    void on_physical_selected();
+    
     // colormap group
     void on_next_cmap_clicked() {
        emit nextColorMap();
@@ -212,6 +212,7 @@ namespace glnemo {
     }
     
     private:
+    void physicalSelected();
     void leaveEvent ( QEvent * event ) {
       if (event) {;} // remove compiler warning
       emit leaveEvent();

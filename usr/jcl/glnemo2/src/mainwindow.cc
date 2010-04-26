@@ -43,9 +43,9 @@ MainWindow::MainWindow(std::string _ver)
                                               // has been locked                               
    
   // set Windows color
-  QPalette mp;
-  mp.setColor(QPalette::Window,QColor(224,212,247));
-  setPalette(mp);
+//  QPalette mp;
+//  mp.setColor(QPalette::Window,QColor(224,212,247));
+//  setPalette(mp);
   
   // Plugins
   plugins = new PluginsManage();
@@ -349,7 +349,7 @@ void MainWindow::createActions()
   
   // ------- Help menu actions ---------
   // about glnemo
-  about_action = new QAction(QIcon(":/images/glnemo2.png"),tr("About glnemo"),this);
+  about_action = new QAction(QIcon(":/images/glnemo2.png"),tr("About glnemo2"),this);
   about_action->setStatusTip(tr("About glnemo2"));
   connect(about_action, SIGNAL(triggered()), form_about, SLOT(show()));
   // about Qt
