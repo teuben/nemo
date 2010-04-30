@@ -36,6 +36,7 @@
 // v 2.0    09/02/2010  WD fixed bug in subtraction of sink potential
 // v 2.1    19/03/2010  WD epssink
 // v 2.2    14/04/2010  WD replaced energy by potential in weighting
+// v 2.3    30/04/2010  WD added weighted potential of centre to output
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/default.h>
@@ -70,16 +71,17 @@ namespace Manipulate {
   /// This manipulator finds the most bound body from those in_subset()
   /// (default: all) and finds its \f$K\f$ nearest neighbours (including
   /// itself). From the \f$K/8\f$ (at least 4) most bound of these, it
-  /// computes the centre weighted by \f$ (E_{\mathrm{max}}-E)^\alpha\f$.
-  /// \note Initially, we ignore the contribution of the velocity to the
-  ///       binding energy, since it is not clear which velocity reference
-  ///       frame would be appropriate (we must be Galileian invariant).
-  ///       Only in the second step (if K>1), we use the mean velocity of
-  ///       the K particles as velocity reference.
+  /// computes the centre weighted by \f$ (\Phi_{\mathrm{max}}-\Phi)^\alpha\f$.
   ///
-  /// If sink particles are present and are not in_subset() and have
-  /// individual softening lengths, we subtract their contribution to the
-  /// potential off before the above process.
+  /// \note We ignore the contribution of the velocity to the binding energy,
+  ///       since it is not clear which velocity reference frame would be
+  ///       appropriate (we must be Galileian invariant).
+  ///
+  /// \note If individual softening length are provided with the snapshot, we
+  ///       use them to correct for the sink potential. If they are not
+  ///       provided, we use the value provided with pars[3]. If none is
+  ///       provided, we use the value given by pointer 'epssink', if present,
+  ///       otherwise a fatal error is thrown.
   ///
   /// The centre position and velocity are put in 'xcen' and 'vcen' to be used
   /// by subsequent manipulators, such as sphereprof.
@@ -90,12 +92,6 @@ namespace Manipulate {
   /// pars[2]: (0,1,2,3): kernel for subtracting off satellite\n
   /// pars[3]: softening length for sink particles
   /// file: write centre position to file.
-  ///
-  /// \note If individual softening length are provided with the snapshot, we
-  ///       use them to correct for the sink potential. If they are not
-  ///       provided, we use the value provided with pars[3]. If none is
-  ///       provided, we use the value given by pointer 'epssink', if present,
-  ///       otherwise a fatal error is thrown.
   ///
   /// Usage of pointers: sets 'xcen' and 'vcen', may use 'epssink'
   /// Usage of flags:    uses in_subset()\n
@@ -113,12 +109,13 @@ namespace Manipulate {
     mutable bool    FIRST;
     mutable Array<real>          Pot;  // potential for subset
     mutable Array<bodies::index> Nb;   // K nearest neighbours
-    mutable Array<double>        En;   // potential of K nearest neighbours
+    mutable Array<double>        Pn;   // potential of K nearest neighbours
     mutable Array<int>           In;
     //--------------------------------------------------------------------------
     static std::ostream&print_line(std::ostream&to) {
       return to << 
 	"#-------------"
+	"----------------"
 	"----------------"
 	"----------------"
 	"----------------"
@@ -134,7 +131,8 @@ namespace Manipulate {
 	"              z "
 	"            v_x "
 	"            v_y "
-	"            v_z\n";
+	"            v_z "
+	"            Phi\n";
     }
     static kern_type kernel(int par) {
       switch(par) {
@@ -174,7 +172,7 @@ namespace Manipulate {
       VCEN ( vect(zero) ),
       FIRST( true ),
       Nb   ( K ),
-      En   ( K ),
+      Pn   ( K ),
       In   ( K )
     {
       if(debug(2) || npar > 3)
@@ -241,30 +239,34 @@ namespace Manipulate {
 	Bmin = b;
       }
     }
+    double P=0;
     if(K>1) {
       // 2   find K nearest neighbours of most bound body
       unsigned n = S->findNeighbours(Bmin,K,Nb);
-      // 3   get (P_max-E)^A weigted centre of K/4 most bound of those
-      // 3.1 sort neighbours according to their energy w.r.t. mean velocity
+      // 3   get (P_max-P)^A weigted centre of K/4 most bound of those
+      // 3.1 sort neighbours according to their potential (excluding satellite)
       for(unsigned i=0; i!=n; ++i)
-	En[i] = Pot[S->bodyindex(Nb[i])];
-      HeapIndex(En.array(),n,In.array());
-      double Emax = En[In[n-1]];
+	Pn[i] = Pot[S->bodyindex(Nb[i])];
+      HeapIndex(Pn.array(),n,In.array());
+      double Pmax = Pn[In[n-1]];
       // 3.2 loop K/4 most bound and find weighted centre
       double W(0.);
       vect_d V(0.);
       vect_d X(0.);
       for(unsigned i=0; i!=min(n,max(4u,K/4)); ++i) {
-	double w = pow(Emax-En[In[i]],A);
+	double w = pow(Pmax-Pn[In[i]],A);
 	W += w;
+	P += w * Pn[In[i]];
 	X += w * S->pos(Nb[In[i]]);
 	V += w * S->vel(Nb[In[i]]);
       }
+      P   /= W;
       X   /= W;
       V   /= W;
       XCEN = X;
       VCEN = V;
     } else {
+      P    = Pmin;
       XCEN = pos(Bmin);
       VCEN = vel(Bmin);
     }
@@ -273,7 +275,8 @@ namespace Manipulate {
       OUT << ' '
 	  << print(S->time(),12,8) << ' '
 	  << print(XCEN,15,8) << ' '
-	  << print(VCEN,15,8) << std::endl;
+	  << print(VCEN,15,8) << ' '
+	  << print(P  , 15,8) << std::endl;
     // 5   put centre under 'xcen' and 'vcen'
     S->set_pointer(&XCEN,"xcen");
     S->set_pointer(&VCEN,"vcen");
