@@ -33,6 +33,8 @@ setenv PGPLOT_DIR  @PGPLOT_DIR@
 # see also "man 5 yapp" for more info
 #setenv PGPLOT_BACKGROUND  0     # 0=black in /xs
 #setenv PGPLOT_FOREGROUND  1     # 1=white in /xs
+#setenv PGPLOT_BACKGROUND  white  # reverse option for /gif
+#setenv PGPLOT_FOREGROUND  black  # reverse option for /gif
 #setenv PGPLOT_GIF_WIDTH   512
 #setenv PGPLOT_GIF_HEIGHT  512
 #setenv PGPLOT_PS_WIDTH     7800
@@ -61,6 +63,9 @@ if (1) then
   if ("$PGPLOT_DIR" != "$NEMOLIB") then
     setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:$PGPLOT_DIR
   endif
+
+  # Hack for Mac
+  setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
 endif
 
 if (-e $NEMO/usr/zeno/ZENORC) then
