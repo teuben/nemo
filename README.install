@@ -1,8 +1,8 @@
 Installation overview:
 ----------------------
 
-This document gives some background information in case the 
-more automated scripts to install NEMO have failed you.
+This document gives some background information in case the  more
+automated scripts to install NEMO have failed you.
 
 Installation of NEMO V3.x roughly follows that of most open source
 packages, except that NEMO does not install its products in an
@@ -13,7 +13,7 @@ the basic scheme is more one of (except commands are different and
 detailed below!!!):
 
 	configure
-	source NEMORC
+	source NEMORC		**bad**
 	make
 
 This installation has recently been slightly modified in VERSION
