@@ -1,12 +1,14 @@
 #
 # Source this file in a csh to install and build NEMO from scratch 
 # (referred to as the "old manybody method"). This is not to load
-# NEMO in your shell, use the nemo_start script for that!
+# NEMO in your shell, use the nemo_start.csh script for that that
+# is produced by this script.
 #
 # wget ftp://ftp.astro.umd.edu/progs/nemo/nemo_cvs.tar.gz
 #
-# This script also supports building with the PGPLOT and CFITSIO packages that
-# have to be in NEMO/local to be triggered. Here is an example how to do this:
+# This script also supports building with the PGPLOT, CFITSIO and HDF4 packages 
+# that have to be in NEMO/local to be triggered. 
+# Here is an example how to do this:
 #
 #	cvs -Q co nemo
 #	cd nemo
@@ -14,6 +16,7 @@
 #       cd local; cvs -Q co pgplot; cd ..
 #       cd local; wget -q ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3006.tar.gz
 #       tar zxf cfitsio3006.tar.gz
+#       
 #       cd ..
 #
 # after this the install can be done as follows (your shell must be (t)csh !!)
@@ -57,7 +60,7 @@ rm -f install.log >& /dev/null
 touch install.log
 
 #   number of executables expected on a full successfull install
-set nexec=132
+set nexec=152
 
 #   other options
 set png=0
