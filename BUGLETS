@@ -47,6 +47,10 @@
 	http://www.suse.de/~aj/linux_lfs.html
   for an outline of the problems
 
+- large objects (> 2GB or > 4GB), specifically snapshots, can be limited
+  in size of they use private calls to allocate() without making sure the
+  argument has been casted to (size_t)
+
 - runbody1/2 : input files can have velocities changed by 2t/w ??
 	also needs nbody= when really not needed?
 
