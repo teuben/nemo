@@ -11,7 +11,7 @@ need:
 clean:
 	@echo Cleaning $(DIR)
 	@rm -f snapenter.in snapenter.out snapenter.cmp mkplummer.out mkexpdisk.out
-	@rm -f mkhomsph.out mkommod.out
+	@rm -f mkhomsph.out mkommod.out mkspiral.out
 
 NBODY = 10
 
