@@ -55,6 +55,7 @@ will be able to select particles.
 
  Once started, glnemo2 displays particles, and different actions with the mouse or the keyboard
 perform different actions.
+
 .SH OPERATION
 All the parameters given to the command line can be interactively
 modified in real time using the graphic user interface composed of menus, icons and
@@ -88,9 +89,9 @@ o              launch option dialog box
 s              take a screenshot
 p              play all snapshots
 y
-C + x          toogle automatic rotation arounc x axis
-C + y          toogle automatic rotation arounc y axis
-C + z          toogle automatic rotation arounc z axis
+C + x          toogle automatic rotation around x axis
+C + y          toogle automatic rotation around y axis
+C + z          toogle automatic rotation around z axis
 
 
 .fi
@@ -234,6 +235,10 @@ Screenshot name []
 .TP 20
 \fBsmooth_gui=\fP
 if true it allows a smoother interactivity with   [t]
+
+.SH WARNING
+Glnemo2 uses hardware accelerated feature of the video card and especially GLSL capabilities. Not all the video cards have this requirement under Linux. The very well supported card are Nvidia card with proprietary driver. If glnemo2 crashs at starting, try to launch the program again by adding to the command line "glsl=f". It will deactivate the hardware accelerated engine, therefore the rendering will be slow but the program might work at least.
+
 .SH SEE ALSO
 glnemo(1NEMO)
 .PP
