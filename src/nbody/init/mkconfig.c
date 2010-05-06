@@ -26,9 +26,10 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "shape=shell\n	shape of configuration {shell,ball,cusp,line,ring}",
     "radius=1.0\n	radius of shell, ball or ring",
     "seed=123\n		seed for random numbers",
+    "mass=1\n           total mass of system",
     "zerocm=false\n	if true, zero center of mass",
     "headline=\n	verbiage for output",
-    "VERSION=0.4b\n	13-sep-09 PJT",
+    "VERSION=1.0\n	5-may-10 PJT",
     NULL,
 };
 
@@ -40,6 +41,7 @@ string cvsid="$Id$";
 local int nobj;
 local real *mass;
 local mdarray3 phase;
+local double total_mass;                
 local double radius;	                /* must be double !! */
 
 extern double xrandom(double, double);
@@ -50,6 +52,7 @@ void nemo_main()
 {
     string shape = getparam("shape");
 
+    total_mass = getdparam("mass");
     radius = getdparam("radius");
     nobj = getiparam("nbody");
 
@@ -69,7 +72,7 @@ void nemo_main()
 	makering();
     else
 	error("%s: shape %s unknown\n", getargv0(), shape);
-    if (getbparam("zerocm"))
+    if (total_mass > 0 && getbparam("zerocm"))
 	zerocms(phase[0][0], 2 * NDIM, mass, nobj, nobj);
     writesnap();
 }
@@ -79,7 +82,7 @@ makeshell()
     int i;
 
     for (i = 0; i < nobj; i++) {
-	mass[i] = 1.0 / nobj;
+	mass[i] = total_mass / nobj;
 	pickshell(phase[i][0], NDIM, (double)radius);
 	CLRV(phase[i][1]);
     }
@@ -90,7 +93,7 @@ makeball()
     int i;
 
     for (i = 0; i < nobj; i++) {
-	mass[i] = 1.0 / nobj;
+	mass[i] = total_mass / nobj;
 	pickball(phase[i][0], NDIM, radius);
 	CLRV(phase[i][1]);
     }
@@ -101,7 +104,7 @@ makecusp()
     int i;
 
     for (i = 0; i < nobj; i++) {
-	mass[i] = 1.0 / nobj;
+	mass[i] = total_mass / nobj;
 	pickshell(phase[i][0], NDIM, xrandom(0.0, radius));
 	CLRV(phase[i][1]);
     }
@@ -112,7 +115,7 @@ makeline()
     int i;
 
     for (i = 0; i < nobj; i++) {
-	mass[i] = 1.0 / nobj;
+	mass[i] = total_mass / nobj;
 	CLRV(phase[i][0]);
 	phase[i][0][0] = radius * i / (nobj - 1.0);
 	CLRV(phase[i][1]);
@@ -125,7 +128,7 @@ makering()
     real theta;
 
     for (i = 0; i < nobj; i++) {
-	mass[i] = 1.0 / nobj;
+	mass[i] = total_mass / nobj;
 	theta = TWO_PI * ((real) i) / nobj;
 	CLRV(phase[i][0]);
 	phase[i][0][0] = radius * sin(theta);

@@ -1,4 +1,4 @@
-.TH MKCONFIG 1NEMO "2 June 1988"
+.TH MKCONFIG 1NEMO "6 May 2010"
 .SH NAME
 mkconfig \- make a static configuration of particles.
 .SH SYNOPSIS
@@ -25,6 +25,9 @@ Number of particles in configuration.  Default: \fB512\fP.
 \fBseed=\fP\fIrandom_seed\fP
 Seed used to initialize random number generator. Default: \fB123\fP.
 .TP
+\fBmass=\fP\fItotal_mass\fP
+Total mass of the system . Default: \fB1\fP.
+.TP
 \fBzerocm=\fP\fIzero_cm_flag\fP
 If set, translate origin to center of mass of configuration.
 Default: \fBfalse\fP.
@@ -39,5 +42,6 @@ Joshua E. Barnes
 .nf
 .ta +1i +4i
 2-jun-88	document created?	JEB
-8-jul-90	V1.1 nobj->nbody, new snapshot macro's  	PJT
+8-jul-90	V0.x nobj->nbody, new snapshot macro's  	PJT
+6-may-2010	V1.0 added mass=	PJT
 .fi
