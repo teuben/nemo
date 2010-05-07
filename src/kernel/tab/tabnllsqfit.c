@@ -20,11 +20,13 @@
  *      25-aug-05  1.10 poly2 for Rahul
  *      21-nov-05  2.0  gauss2d, fix error in gauss1d
  *      24-apr-08  2.1  psf (phase structure function)
+ *       7-may-10  2.2  grow
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
  *  poly       p0+p1*x+p2*x^2+p3*x^3+.....    up to 'order'   (paraboloid has order=2)
  *  exp        p0+p1*exp(-(x-p2)/p3)  
+ *  grow       p1*(1-exp(x/p3))               lyaponov?
  *  arm        p0+p1*cos(x)+p2*sin(x)         special version for rahul 
  *  arm3       p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
  *  loren      (p1/PI) / ( (x-p0)^2 + p1^2 )
@@ -63,7 +65,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=2.1\n      24-apr-08 PJT",
+    "VERSION=2.2\n      7-may-10 PJT",
     NULL
 };
 
@@ -211,6 +213,46 @@ static void derv_exp(real *x, real *p, real *e, int np)
   e[2] = p[1]*e[1] / b;
   e[3] = e[2] * arg;
 }
+
+static real func_grow(real *x, real *p, int np)
+{
+  real arg;
+  arg = x[0]/p[1];
+  return p[0] * (exp(arg)-1);
+}
+
+static void derv_grow(real *x, real *p, real *e, int np)
+{
+  real arg,arg1;
+  arg = x[0]/p[1];
+  arg1 = exp(arg);
+  e[0] = arg1-1.0;
+  e[1] = -p[0]*arg1*x[0]/(p[1]*p[1]);
+}
+
+#ifdef TESTMP
+
+int mp_func_line(int npt, int npar, double *par, double *dev, double **der, void *pri)
+{ /* 1D line, npar=2  should be */
+  int i;
+  double f, *x, *y;
+
+  x = pri->x;
+  y = pri->y;
+
+  for (i=0; i<npt; i++) {
+    f = p[0] + p[1]*x[i];     /* Linear fit function */
+    dy[i] = y[i] - f;
+  }
+
+
+  if (derivs) {
+    int j;
+    
+  }
+}
+
+#endif
 
 static real func_line(real *x, real *p, int np)
 {
@@ -403,6 +445,8 @@ nemo_main()
     	do_gauss2d();
     } else if (scanopt(method,"exp")) {
     	do_exp();
+    } else if (scanopt(method,"grow")) {
+    	do_grow();
     } else if (scanopt(method,"arm")) {
     	do_arm();
     } else if (scanopt(method,"loren")) {
@@ -1086,6 +1130,61 @@ do_exp()
   
   fitfunc = func_exp;
   fitderv = derv_exp;
+
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf(fmt,fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+
+    npt1 = remove_data(x,1,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
+  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+
+}
+
+
+/*
+ * GROW:       y = a * (exp(x/b) - 1)
+ *
+ */
+ 
+do_grow()
+{
+  real *x1, *x2, *x, *y, *dy, *d;
+  int i,j, nrt, npt1, iter, mpar[2];
+  real fpar[2], epar[2];
+  int lpar = 2;
+
+  warning("fit=grow does not seem to work when all parameters free");
+
+  if (nxcol < 1) error("nxcol=%d",nxcol);
+  if (nycol<1) error("Need 1 value for ycol=");
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.01;
+  sprintf(fmt,"Fitting a*(exp(x/b)-1):  \na= %s %s \nb= %s %s \n",
+	  format,format,format,format);
+  x = xcol[0].dat;
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+  
+  fitfunc = func_grow;
+  fitderv = derv_grow;
 
   for (iter=0; iter<=msigma; iter++) {
     nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
