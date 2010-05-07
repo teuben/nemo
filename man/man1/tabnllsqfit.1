@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "21 November 2005"
+.TH TABNLLSQFIT 1NEMO "7 May 2010"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -152,6 +152,7 @@ polynomial  	y=p0+p1*x+p2*x^2+p3*x^3...       (example order=3)
 gauss1d       	y=p0+p1*exp(-(x-p2)^2/(2*p3^2))
 gauss2d       	y=p0+p1*exp(-[(x-p2)^2+(x-p3)^2]/(2*p4^2))
 exp		y=p0+p1*exp(-(x-p2)/p3)
+grow            y=p0*(exp(x/p1)-1)
 arm		y=p0+p1*cos(x)+p2*sin(x)
 arm3		y=p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
 loren		y=p1/PI( (x-p0)^2 + p1^2 )
@@ -324,5 +325,6 @@ Peter Teuben
 15-mar-04	V1.8b added fit=loren and corrected lab= setting for functions	PJT/RS
 21-nov-05	V2.0 added fit=gauss1d,gauss2d		PJT
 24-apr-08	V2.1 added psf	PJT
+7-may-10	V2.2 added grow		PJT
 .fi
 
