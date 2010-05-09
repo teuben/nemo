@@ -12,20 +12,21 @@
 #include <image.h>
 
 string defv[] = {
-	"in=???\n               Input filename",
-	"out=???\n              Output filename",
-	"gauss=0.1\n            FWHM gaussian beamwidth for the core image",		
-	"fraction=0.1\n         Spike fraction (rest in gaussian beam)",
-	"cutoff=0\n             Cutoff pixel value below which no diffraction spikes",
-	"spike=0.5\n            Spike sinc width",
-	"dir=xy\n               Smoothing direction(s)",
-	"noise=0\n              Add poisson noise",
-	"bad=\n			Optional ignoring this bad value",
-	"VERSION=0.1\n          9-may-10 PJT",
-	NULL,
+  "in=???\n               Input filename",
+  "out=???\n              Output filename",
+  "gauss=0.05\n           FWHM gaussian beamwidth for the core image",		
+  "fraction=0.1\n         Spike fraction (rest in gaussian beam)",
+  "cutoff=0\n             Cutoff pixel value below which no diffraction spikes",
+  "spike=0.1\n            Spike sinc width",
+  "dir=xy\n               Smoothing direction(s)",
+  "noise=0\n              Add fake 'poisson' noise (care)",
+  "bad=\n			Optional ignoring this bad value",
+  "VERSION=0.2\n          9-may-10 PJT",
+  NULL,
 };
 
 string usage = "add diffraction spikes to an image";
+string cvsid="$Id$";
 
 #ifndef HUGE
 # define HUGE 1.0e20
@@ -67,33 +68,33 @@ real sinc2();
 
 void nemo_main ()
 {
-    setparams();			/* set par's in globals */
+  setparams();			/* set par's in globals */
 
-    instr = stropen (infile, "r");
-    read_image (instr,&iptr);
+  instr = stropen (infile, "r");
+  read_image (instr,&iptr);
 				/* set some global paramters */
-    nx = Nx(iptr);	
-    ny = Ny(iptr);
-    nz = Nz(iptr);
-    xmin = Xmin(iptr);
-    ymin = Ymin(iptr);
-    zmin = Zmin(iptr);
-    dx = Dx(iptr);
-    dy = Dy(iptr);
-    dz = Dz(iptr);
-    create_cube(&iptr1, nx, ny, nz);
+  nx = Nx(iptr);	
+  ny = Ny(iptr);
+  nz = Nz(iptr);
+  xmin = Xmin(iptr);
+  ymin = Ymin(iptr);
+  zmin = Zmin(iptr);
+  dx = Dx(iptr);
+  dy = Dy(iptr);
+  dz = Dz(iptr);
+  create_cube(&iptr1, nx, ny, nz);
+  
+  report_minmax("old");
 
-    report_minmax("old");
+  if(hasvalue("gauss"))
+    make_gauss_beam(getparam("dir"));
 
-    if(hasvalue("gauss"))
-        make_gauss_beam(getparam("dir"));
-
-    outstr = stropen (outfile,"w");
-    smooth_it();
-    write_image (outstr,iptr);
-
-    strclose(instr);
-    strclose(outstr);
+  outstr = stropen (outfile,"w");
+  smooth_it();
+  write_image (outstr,iptr);
+  
+  strclose(instr);
+  strclose(outstr);
 }
 
 void setparams()
