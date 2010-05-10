@@ -1,4 +1,4 @@
-.TH CCDSMOOTH 1NEMO "12 March 1998"
+.TH CCDSMOOTH 1NEMO "10 May 2010"
 .SH NAME
 ccdsmooth \- smoothing of an image map (2D or 3D)
 .SH SYNOPSIS
@@ -9,6 +9,9 @@ ccdsmooth \- smoothing of an image map (2D or 3D)
 (no FFT). The smoothing beam must be circular/spherical, or smoothing
 must be done independantly per coordinate by calling \fIccdsmooth\fP
 multiple times using the \fBdir=\fP keyword (see below).
+.PP
+For more artistic versions of a smoothing operation, such as added
+noise and diffraction spikes for bright stars, see \fIccddiffract(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -54,7 +57,7 @@ Input pixel value which to skip in smoothing.
 Value at which to cutoff the gaussian beam. 
 [Default: \fB0.01\fP]
 .SH "SEE ALSO"
-ccdfill(1NEMO), snapccd(1NEMO), snapsmooth(1NEMO), snapgrid(1NEMO), image(5NEMO)
+ccdfill(1NEMO), ccddiffract(1NEMO), snapccd(1NEMO), snapsmooth(1NEMO), snapgrid(1NEMO), image(5NEMO)
 .SH TIMING
 .nf
 .ta +1.0i
