@@ -1,0 +1,61 @@
+.TH CCDDIFFRACT 1NEMO "9 May 2010"
+.SH NAME
+ccddiffract \- smoothing/diffracting an image
+.SH SYNOPSIS
+.PP
+\fBccddiffract in=\fPimage \fBout=\fPimage [parameter=value]
+.SH DESCRIPTION
+\fIccddiffract\fP will smooth and/or add diffraction patterns
+an image to make it look "pretty".
+It can also add some quasi poissonian noise.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIImage(5)\fP format [no default]
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIImage(5)\fP format [no default]
+.TP
+\fBgauss=\fIvalue\fP
+Beam size (FWHM, note FWHM = 2*sqrt(2*ln(2)) = 2.355 * sigma) of a 
+gaussian smoothing kernel. 
+ignored [default: 0.05].
+.TP
+\fBfraction=\fP
+Fraction of signal that is diffracted. The remainder is smoothed
+using a gaussian beam.
+[default: 0.1].
+.TP
+\fBcutoff=\fP
+Signal below which no diffraction spikes are added.
+.TP
+\fBspike=\fP
+The width of the spike. For the spike, a \fIsqr(sinc(x))\fP is 
+used, where the width is the distance to the first null.
+[default: \fB0.1\fP].
+.TP
+\fBnoise=\fP
+Amount of noise.
+[default: \fB0\fP].
+.TP
+\fBbad=\fIbad_value\fP
+Input pixel value which to skip in smoothing.
+[Default: not used]
+.SH CAVEATS
+Should look at the code in STARLAB/src/star/rdc/make_ccd.C
+.SH "SEE ALSO"
+ccdsmooth(1NEMO), ccdfill(1NEMO), snapccd(1NEMO), snapgrid(1NEMO), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/image/trans     	ccddiffract.c 
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+9-may-01	V0.1: Created from CCDSMOOTH	PJT
+.fi
