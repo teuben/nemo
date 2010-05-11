@@ -186,7 +186,7 @@ goto end
 #
 bad_has_nemo:
   echo "NEMO=$NEMO already exists, AAA_SOURCE_ME should be run from a clean place"
-  echo "use the alias 'omen' to remove the NEMO environment'
+  echo "use the alias 'omen' to remove the NEMO environment"
   goto end
 
 
