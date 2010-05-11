@@ -22,6 +22,9 @@ int main(int argc, char ** argv)
   f_setsig();
   f_init();
 #endif
+#if GFORT
+  _gfortran_set_args (argc, argv);
+#endif
   MAIN__();
   return 0; /* For compilers that complain of missing return values; */
 }
