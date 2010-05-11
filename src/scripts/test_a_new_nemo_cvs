@@ -10,12 +10,13 @@
 #                5-mar-2006   also create nemo_start.sh
 #               20-aug-2006   falcON install 
 #               21-jan-2008   optional nemo= where the root is located
+#               11-may-2010   gfortran now the default (but 4.1 or below no pgplot/GIF)
 
 set nemo=nemo           # root directory name
 
 set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
-set gfortran=0          # pick gfortran compiler
+set gfortran=1          # pick gfortran compiler
 set gcc=0		# pick gcc version (version number via astromake)
 set glnemo=1            # compile glnemo
 set anonymous=1		# anonymous CVS ?
