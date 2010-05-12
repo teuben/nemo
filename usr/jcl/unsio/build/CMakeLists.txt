@@ -15,13 +15,22 @@ cmake_minimum_required(VERSION 2.6)
 # project name
 project (UNSIO)
 SET(CMAKE_VERBOSE_MAKEFILE OFF)
-set(NEMOLIB $ENV{NEMOLIB})
-set(LOCAL $ENV{LOCAL})
+# extra path for NEMO
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_BINARY_DIR})
 
-IF    ("${LOCAL}" STREQUAL "")
-  set (LOCAL $ENV{HOME}/local)
-  MESSAGE( WARNING " => Environnment variable LOCAL not populated, the project will be install here :" ${LOCAL})
-ENDIF ("${LOCAL}" STREQUAL "")
+FIND_PACKAGE(NEMO)
+
+IF (NOT NEMO_INSTALLED) 
+
+  MESSAGE(FATAL_ERROR "NEMO environment not loaded !!!")
+
+ELSE (NOT NEMO_INSTALLED) 
+
+  set(NEMOLIB $ENV{NEMOLIB})
+  set(NEMOINC $ENV{NEMOINC})
+
+ENDIF (NOT NEMO_INSTALLED) 
+
 
 #detect libg2c directory
 execute_process(COMMAND g77 -print-file-name=libg2c.a 
@@ -111,17 +120,19 @@ ENDFOREACH(exe_f ${exe_sources})
 # ----------------------------------------------------------
 # install target                                            
 
-set (CMAKE_INSTALL_PREFIX ${LOCAL})
+IF (NEMO_INSTALLED) 
+  set (CMAKE_INSTALL_PREFIX $ENV{NEMO})
 
-# lib
-INSTALL(FILES  ${UNSIO_BINARY_DIR}/../lib/libunsio.so DESTINATION lib)
-# includes
-INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/uns.h DESTINATION include/uns)
-INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/unsdebug.h DESTINATION include/uns)
-INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/snapshotinterface.h DESTINATION include/uns)
-INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/componentrange.h DESTINATION include/uns)
-INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/ctools.h DESTINATION include/uns)
-INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/userselection.h DESTINATION include/uns)
+  # lib
+  INSTALL(FILES  ${UNSIO_BINARY_DIR}/../lib/libunsio.so DESTINATION lib)
+  # includes
+  INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/uns.h DESTINATION inc/uns)
+  INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/unsdebug.h DESTINATION inc/uns)
+  INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/snapshotinterface.h DESTINATION inc/uns)
+  INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/componentrange.h DESTINATION inc/uns)
+  INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/ctools.h DESTINATION inc/uns)
+  INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/userselection.h DESTINATION inc/uns)
+ENDIF (NEMO_INSTALLED) 
 # man
 #INSTALL(FILES  ${UNSIO_BINARY_DIR}/../doc/man/man3/uns.3 DESTINATION man/man3)
 
