@@ -1,0 +1,22 @@
+#! /bin/csh -f
+#
+# a quick hack   - May 2010
+#
+# g77:        -lfrtbegin -lg2c
+# gfortran:   -lgfortran
+
+set dir=$NEMO/usr/jcl/unsio
+
+# for linux
+set args=""
+
+
+if (-e $dir) then
+  cd $dir/build
+  cmake .
+  make
+  make install 
+else
+  echo mknemo.d: $dir does not exist
+endif
+
