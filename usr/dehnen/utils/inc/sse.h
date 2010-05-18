@@ -683,7 +683,7 @@ namespace WDutils {
     /// filler object of size __S
     template<size_t __S> class Filler { char __F[__S]; };
     /// extend a given class to have size a multibple of 16-byte
-    /// \note only default constructor
+    /// \note only default constructor possible for @a Base
     template<typename Base>
     class Extend16 : public Base
     {
@@ -694,45 +694,33 @@ namespace WDutils {
     };
     //
 #ifdef __SSE__
-    template<int N4> struct __SwapF{
-      WDutilsStaticAssert( N4>0 && N4&3==0 );
-      typedef __SwapF<N4-4> Before;
-      static void Sa(float*A, float*B)
-      {
-	Before::Sa(A,B);
-	__m128 tmp = _mm_load_ps(A+N4);
-	_mm_store_ps(A,_mm_load_ps(B+N4));
-	_mm_store_ps(B,tmp);
-      }
-    };
-    template<> struct __SwapF<0> {
-      static void Sa(float*, float*) {}
-    };
-    //
-    template<typename Object>
-    struct __SwapO {
-      static const int N  = sizeof(Object);
-      static const int N4 = N/4;
-      WDutilsStaticAssert( N&15 == 0 );
-      void Sa(Object*a, Object*b)
-      {
-	__SwapF<N4>::Sa(reinterpret_cast<float*>(a),
-			reinterpret_cast<float*>(b));
-      }
-    };
-    /// swaps 16-byte aligned objects with 16-byte multiple size
+    /// working horse actually implemented in sse.cc
+    /// \note Not intended for consumption, use routine below instead.
+    void __swap16(float*a, float*b, size_t n);
+    /// swap a multiple of 16 bytes at 16-byte aligned memory.
+    /// \param[in] a   16-byte aligned memory address
+    /// \param[in] b   16-byte aligned memory address
+    /// \param[in] n   multiple of 16: # bytes to swap at @a a and @a b
+    /// \note For reasons of efficiency, the above conditions are not tested.
+    ///       If either address is not 16-byte aligned, a run-time error
+    ///       (segmentation fault) will result. If @a n is not a multiple of
+    ///       16, the last @a n%16 bytes will not be swapped.
+    inline void Swap16(void*a, void*b, size_t n)
+    { __swap16(static_cast<float*>(a),static_cast<float*>(b),n>>2); }
+    /// swaps 16-byte aligned objects with size a multiple of 16-bytes
     /// \param[in,out] x  pter to object, on return holds data of @a y
     /// \param[in,out] y  pter to object, on return holds data of @a x
     /// \note If the sizeof(Object) is not a multiple of 16, a compile-time
-    ///       error occurs. Conversely, if either x or y is not 16-byte aligned
-    ///       a run-time error will occur.
+    ///       error occurs. However, if either @a x or @a y is not 16-byte
+    ///       aligned a run-time error (segmentation fault) will result.
     template<typename Object>
-    inline void SwapAligned(Object*x, Object*y)
-    { __SwapO<Object>::Sa(x,y); }
+    inline void SwapAligned(Object*a, Object*b)
+    {
+      WDutilsStaticAssert( sizeof(Object)%16 == 0 );
+      __swap16(reinterpret_cast<float*>(a), reinterpret_cast<float*>(b),
+	       sizeof(Object)>>2);
+    }
 #endif
-
-
-
   } // namespace SSE
 } // namespace WDutils
 //

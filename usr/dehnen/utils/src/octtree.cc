@@ -1020,8 +1020,8 @@ namespace {
 }
 //
 namespace WDutils {
-  template<int D, typename Real>
-  void OctalTree<D,Real>::Allocate()
+  template<int D, typename Real> 
+  void OctalTree<D,Real>::allocate()
   {
     unsigned need =
       NLEAF * (sizeof(point) + sizeof(particle_key) + sizeof(node_index)) +
@@ -1065,7 +1065,7 @@ namespace WDutils {
 #endif
     NLEAF = BDT.NDOT;
     NCELL = BDT.NCell();
-    Allocate();
+    allocate();
 #ifdef GIVE_TIMING
     cpu0 = clock();
 #endif

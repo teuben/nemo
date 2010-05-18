@@ -5,8 +5,7 @@
 #
 ################################################################################
 
-default			: library doxu
-install			: library cleanobj doxu
+.PHONY		: test
 
 # ----------------
 # Compiler related
@@ -15,36 +14,53 @@ install			: library cleanobj doxu
 # GNU compiler
 ifeq ($(COMPILER),gcc)
 -include make.gcc
+makefiles		:= makeall make.gcc
 endif
 
 # Portland group compiler
 ifeq ($(COMPILER),pgi)
 -include make.pgi
+makefiles		:= makeall make.pgi
 endif
 
 # Pathscale compiler
 ifeq ($(COMPILER),pth)
 -include make.pth
+makefiles		:= makeall make.pth
 endif
 
 # Sun compiler
 ifeq ($(COMPILER),sun)
 -include make.sun
+makefiles		:= makeall make.sun
 endif
 
 # Intel compiler
 ifeq ($(COMPILER),icc)
 -include make.icc
+makefiles		:= makeall make.icc
 endif
 
 
 # ---------
 # MPI stuff
 # ---------
+
 MPIDIR			:= $(shell ls | grep mpich)
+ifeq ($(MPIDIR),mpich)
+WDutilsMPI	:= -DWDutilsMPI
 MPICC			:= $(MPIDIR)/bin/mpicc
 MPIINC			:= $(MPIDIR)/include/
 IMPI			:= -I$(MPIINC)
+endif
+
+# ----
+# test
+# ----
+
+ifeq ($(USER),wd11)
+WDutilsTEST	:= -DWDutilsTEST
+endif
 
 # -----------
 # directories
@@ -62,8 +78,14 @@ $(LIBT)			:
 # compile and link commands
 # -------------------------
 
+CXXFLAGS		:= $(CXXFLAGS) $(WDutilsTEST) $(WDutilsMPI)
+LUTIL			:= -L$(LIB) -lWDutils -Wl,-rpath,$(PWD)/$(LIB)
+LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI -Wl,-rpath,$(PWD)/$(LIB)
 MAKE_OBJ		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
-
+MAKE_EXE		= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS) $(LUTIL) -lm
+ifdef WDutilsMPI
+MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(LUTIL_MPI) -lm
+endif
 # -----------------------
 # header dependency lists
 # -----------------------
@@ -83,8 +105,10 @@ spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
 WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 				$(inline_h)
-parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
 octtree_h		:= $(INC)octtree.h $(memory_h) $(traits_h) $(tupel_h)
+parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
+peano_h			:= $(INC)peano.h $(traits_h)
+domain_h		:= $(INC)domain.h $(parallel_h) $(octtree_h)
 
 # -----------------------
 # source dependency lists
@@ -100,26 +124,27 @@ random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 parallel_cc		:= $(SRC)parallel.cc $(parallel_h) $(meta_h) $(io_h)
 octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(memory_h)
+domain_cc		:= $(SRC)domain.cc $(domain_h) $(peano_h)
 
 # ---------------
 # library modules
 # ---------------
 
-$(LIB)exception.o:	$(exception_cc) $(LIBT) makefile
+$(LIB)exception.o:	$(exception_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)sse.o:		$(sse_cc) $(LIBT) makefile
+$(LIB)sse.o:		$(sse_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)io.o:		$(io_cc) $(LIBT) makefile
+$(LIB)io.o:		$(io_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)meta.o:		$(meta_cc) $(LIBT) makefile
+$(LIB)meta.o:		$(meta_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)numerics.o:	$(numerics_cc) $(LIBT) makefile
+$(LIB)numerics.o:	$(numerics_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)random.o:		$(random_cc) $(LIBT) makefile
+$(LIB)random.o:		$(random_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) makefile
+$(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)octtree.o:	$(octtree_cc) $(LIBT) makefile
+$(LIB)octtree.o:	$(octtree_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
@@ -141,15 +166,21 @@ $(LIB)libWDutils.so:	$(WDutils_objs)
 
 library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
 
-ifeq ($(MPIDIR),mpich)
+ifdef WDutilsMPI
 # -------------------
 # MPI library modules
 # -------------------
 
 $(LIB)parallel.o:	$(parallel_cc) $(makefiles)
 			$(MAKE_OBJ) $(IMPI)
+ifdef WDutilsTEST
+$(LIB)domain.o:		$(domain_cc) $(makefiles)
+			$(MAKE_OBJ)
 
+WDutilsP_objs	:=	$(WDutils_objs) $(LIB)parallel.o $(LIB)domain.o
+else
 WDutilsP_objs	:=	$(WDutils_objs) $(LIB)parallel.o
+endif
 
 # -----------
 # MPI library
@@ -169,6 +200,39 @@ library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
 
 endif
 
+# -------------
+# test routines
+# -------------
+
+ifdef WDutilsTEST
+
+.PHONY			:	test TestDomain$(EXT) TestTree$(EXT)
+
+test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
+				$(Pi_h) $(io_h) $(heap_h) library
+				$(MAKE_EXE)
+TestTree$(EXT)		:	test/TestTree$(EXT)
+
+ifdef WDutilsMPI
+
+test/TestDomain$(EXT).o	:	test/TestDomain.cc $(domain_h) $(Pi_h)
+				$(MAKE_OBJ)
+test/TestDomain$(EXT)	:	test/TestDomain$(EXT).o library
+				$(MAKE_EXE_MPI)
+
+TestDomain$(EXT)	:	test/TestDomain$(EXT)
+
+test			:	library \
+				TestDomain$(EXT) \
+				TestTree$(EXT)
+
+else
+
+test			:	library \
+				TestTree$(EXT)
+
+endif
+endif
 # ---------------------
 # doxygen documentation
 # ---------------------

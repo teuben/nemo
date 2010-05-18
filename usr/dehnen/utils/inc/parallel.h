@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2008,2009
+/// \date   2008-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2008,2009 Walter Dehnen
+// Copyright (C) 2008-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,6 +29,10 @@
 #ifndef WDutils_included_parallel_h
 #define WDutils_included_parallel_h
 
+#ifndef WDutilsMPI
+#error  WDutilsMPI not defined
+#endif
+
 #ifndef WDutils_included_memory_h
 #  include <memory.h>
 #endif
@@ -43,7 +47,7 @@ namespace WDutils {
   /// 1. Both C and C++ binding are very basic, which has the benefit of
   ///    great flexibility but little convenience.\n
   /// 2. The "official" C++ binding is only a straight "translation" into C++
-  ///    without any try to make it a proper C++ (STL-style) code.\n
+  ///    without any attempt to make it a proper C++ (STL-style) code.\n
   /// 3. Our implementation here is driven by our needs in falcON and provides
   ///    basic two-point and collective communications of all built-in data
   ///    types, plus contiguous types built from these, either as array or
@@ -146,8 +150,7 @@ namespace MPI {
     operator bool() const { return R != 0; }
   };
   /// return value for undefined index values etc.
-  extern int    Undefined;
-  //----------------------------------------------------------------------------
+  extern int Undefined;
   /// \name some global functions which do not need a communicator
   //@{
   /// is MPI initialised?
@@ -155,7 +158,7 @@ namespace MPI {
   inline bool Initialized();
   /// \brief Initialise MPI and more.
   /// \details
-  /// Here, the following things are done (in this order).
+  /// Here, the following things are done (in this order).\n
   /// - MPI_Init() is called spawning the MPI processes and distributing the
   ///   command-line arguments.\n
   /// - the initial wall-clock time is remembered.\n
@@ -185,7 +188,6 @@ namespace MPI {
   /// tick size in seconds of wall-clock in Wtime()
   double WallClockTick();
   //@}
-  //----------------------------------------------------------------------------
   /// \brief operators for collective reductions
   enum Operator {
     Max,    ///< maximum
@@ -215,9 +217,6 @@ namespace MPI {
     default:     return "Unknown";     // to make compiler happy
     }
   }
-  //----------------------------------------------------------------------------
-#define NonTemplateCommunications
-#undef  NonTemplateCommunications
   /// \brief implements some functionality of MPI communicators as C++ class.
   ///
   /// \details
@@ -478,7 +477,7 @@ namespace MPI {
     /// \param[out] recv  data to be received
     /// \note If needed, we reset @a recv to match size requirements
     template<typename T>
-      void AllGather(const T&send, Array<T>&recv) const WDutils_THROWING
+    void AllGather(const T&send, Array<T>&recv) const WDutils_THROWING
     {
       DEBUGINFO("MPI::Communicator::AllGather(): 1 %s\n", nameof(T));
       if(recv.size() != SIZE) {
@@ -495,7 +494,7 @@ namespace MPI {
     /// \note @a send.size() must be the same on all processes (not checked)
     /// \note If needed, we reset @a recv to match size requirements
     template<typename T>
-      void AllGather(const Array<T>&send, Array<T,2>&recv)
+    void AllGather(const Array<T>&send, Array<T,2>&recv)
       const WDutils_THROWING
     {
       DEBUGINFO("MPI::Communicator::AllGather(): Array<%s>(%d)\n",
@@ -512,7 +511,7 @@ namespace MPI {
 	  unsigned n[2] = {SIZE,send.size()};
 	  recv.reset(n);
 	}
-	Allgather(send.array(),send.size(),recv.array(),Type<T>(),
+	AllGather(send.array(),send.size(),recv.array(),Type<T>(),
 		  "AllGather()");
       }
     }
@@ -690,6 +689,17 @@ namespace MPI {
     {
       DEBUGINFO("MPI::Communicator::AllReduce<%s> 1 %s\n", OpName(O),nameof(T));
       AllReduce(O,&send,&recv,1,Type<T>(),"AllReduce<%s>");
+    }
+    /// reduce a single datum at all processes
+    /// \param[in]  send   datum to be reduced
+    /// \return     reduced datum
+    template<Operator O, typename T>
+    T AllReduce(T const&send) const WDutils_THROWING
+    {
+      DEBUGINFO("MPI::Communicator::AllReduce<%s> 1 %s\n", OpName(O),nameof(T));
+      T tmp;
+      AllReduce(O,&send,&tmp,1,Type<T>(),"AllReduce<%s>");
+      return tmp;
     }
     /// reduce data at all processes, using Array<> arguments
     /// \param[in]  send   data to be reduced
@@ -888,33 +898,34 @@ namespace MPI {
     //@}
     /// shift rank right
     /// \param[in,out] r  will be increased by one, modulo SIZE
-    void to_right(unsigned&r) const {
-      if(++r == SIZE) r=0u;
-    }
+    void to_right(unsigned&r) const
+    { if(++r == SIZE) r=0u; }
     /// shift rank left
     /// \param[in,out] r  will be decreased by one, modulo SIZE
-    void to_left(unsigned&r) const {
-      if(r == 0u) r = SIZE;
-      --r;
-    }
+    void to_left(unsigned&r) const
+    { --(r? r:r=SIZE); }
     /// right of given rank
     /// \param[in] r  given rank
     /// \return    r+1 mod SIZE
-    unsigned right(unsigned r) const {
+    unsigned right(unsigned r) const
+    {
       to_right(r);
       return r;
     }
     /// left of given rank
     /// \param[in] r  given rank
     /// \return    r-1 mod SIZE
-    unsigned left(unsigned r) const {
+    unsigned left(unsigned r) const
+    {
       to_left(r);
       return r;
     }
     /// right of us
-    unsigned right() const { return right(RANK); }
+    unsigned right() const
+    { return right(RANK); }
     /// left of us
-    unsigned left() const { return left(RANK); }
+    unsigned left() const
+    { return left(RANK); }
 #undef DEBUGINFO
   };// class Communicator
   /// Communicator World
