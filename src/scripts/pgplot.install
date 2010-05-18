@@ -26,6 +26,7 @@
 # 26-sep-06     use fix64bit.csh if on 64 bit (or use int8=1)
 # 25-oct-07     note that gcc 4.2.2 compiles GI/PP/
 # 16-aug-09     added support for Cygwin (JM)
+# 18-may-10     gfortran default, and option to use old gfortran41/40
 
 # Other places to get pgplot from
 # cvs -d :pserver:anonymous@cvs.starlink.ac.uk:/cvs co thirdparty/caltech/pgplot
@@ -34,6 +35,10 @@
 # E3D:  http://www.aip.de/Euro3D/E3D/PGPLOT_install_E3D.sh
 #
 # CARMA: 
+# cvs -d :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot co pgplot
+# wich has two versions:
+#    - this script
+#    - the autoconf'd configure script
 
 
 # Example standalone WIP install outside of MIRIAD or NEMO
@@ -63,7 +68,7 @@ if ($?NEMOLIB) then
   set lib=$NEMOLIB
 endif
 set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
-set drivers_gfortran=CGDRIV,NUDRIV,PGDRIV,PSDRIV,XWDRIV
+set drivers_gfortran41=CGDRIV,NUDRIV,PGDRIV,PSDRIV,XWDRIV
 set drivers_g95=CGDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,XWDRIV
 if ($?NEMOHOST) then
   set host=$NEMOHOST
@@ -71,6 +76,7 @@ endif
 set debug=0
 set png=0
 set int8=0
+set gfortran41=0
 
 #  dir:  where the source code will be extracted
 #  lib:  where the library (PGPLOT_DIR) will be placed
@@ -104,7 +110,7 @@ endif
 #  handle new 4th and up arguments to makemake, quite an ugly hack....
 set new4=()
 if ($?F77) then
-  set base=(ifc ifort g77 g95 gfortran)
+  set base=(gfortran g77 ifc ifort g95)
   foreach b  ($base)
     echo $F77 | grep -q $b
     if ($status == 0) then
@@ -159,8 +165,10 @@ cp drivers.list old.list
 
 if ($?F77) then
   if ($F77  == gfortran) then
-    echo NOTE: SPECIAL lightweight pgplot for stricter gfortran
-    set drivers=$drivers_gfortran
+    if ($gfortran41) then
+      echo NOTE: SPECIAL lightweight pgplot for stricter older gfortran41
+      set drivers=$drivers_gfortran41
+    endif
   endif
   if ($F77  == g95) then
     echo NOTE: SPECIAL lightweight pgplot for stricter g95
@@ -185,7 +193,12 @@ if (-e pgxwin_server) mv pgxwin_server pgxwin_server.old
 
 switch ($host)
   case *darwin*:
-    $dir/pgplot/makemake   $dir/pgplot darwin g77_gcc
+    if ($?CC && $?F77) then
+      echo ${F77}_${CC}
+      $dir/pgplot/makemake  $dir/pgplot sol2 ${F77}_${CC} $new4
+    else
+      $dir/pgplot/makemake   $dir/pgplot darwin gfortran_gcc
+    endif
     breaksw
   case SunOS:
   case solaris*:
@@ -209,7 +222,7 @@ switch ($host)
     if ($?CC && $?F77) then
         $dir/pgplot/makemake  $dir/pgplot linux ${F77}_${CC} $new4
     else
-        $dir/pgplot/makemake  $dir/pgplot linux g77_gcc $new4
+        $dir/pgplot/makemake  $dir/pgplot linux gfortran_gcc $new4
     endif
     if (! -e /usr/X11) then
         echo You may need to patch your Linux distribution:
@@ -272,11 +285,12 @@ usage:
   echo "  drivers=$drivers"
   echo "  dir=`pwd`            directory within which pgplot/ resides"
   echo "  lib=`pwd`/lib        directory where PGPLOT_DIR will be"
-  echo "  host=`uname -s`      host type (examples are in pgplot/sys_*)"
+  echo "  host=`uname -s`      host type (valid ones are in pgplot/sys_*)"
   echo "  debug=0              clean demo example from lib"
-  echo "  cc=gcc               changed a (supported) C compiler for this system"
-  echo "  f77=g77              changed a (supported) Fortran compiler for this system"
-  echo "  int8=1               use INTEGER*8 in some drivers (e.g. gif)"
+  echo "  cc=gcc               change a (supported) C compiler for this system"
+  echo "  f77=gfortran         change a (supported) Fortran compiler for this system"
+  echo "  int8=0               use INTEGER*8 in some drivers (e.g. gif)"
+  echo "  gfortran41=0         use more strict old gfortran"
   echo ""
   echo "   drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV"
   echo "   will work again for gfortran V4.2.2"
