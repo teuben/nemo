@@ -65,9 +65,9 @@ namespace {
 }
 namespace WDutils {
   template<typename> struct TreeAccess;
-  //
+  ///
   /// A spatial tree of square (2D) or cubic (3D) cells
-  //
+  ///
   /// Cells with more than @a nmax (argument to constructor and member
   /// rebuild) are split and octants (or quarters for Dim=2) with more than
   /// @a nmin particles are assigned a new cell. After tree construction, the
@@ -183,12 +183,9 @@ namespace WDutils {
     node_index   *PA;                 ///< parent cell
     Real          RAD[MaximumDepth+1];///< table: radius[level]
     //@}
-    /// \name workhorses, implemented in octree.cc
-    //@{
-    void Allocate();
+    void allocate();
     void build(char, node_index, const Initialiser*, const OctalTree*)
       WDutils_THROWING;
-    //@}
   public:
     /// \name tree building
     //@{
@@ -236,8 +233,8 @@ namespace WDutils {
     { 
       if(N == 0)
 	WDutils_THROWN  ("OctalTree<%d,%s>: N=0\n",Dim,nameof(Real));
-      if(0==init)
-	WDutils_THROW   ("OctalTree<%d,%s>: init=0\n",Dim,nameof(Real));
+      if(init == 0)
+	WDutils_THROWN  ("OctalTree<%d,%s>: init=0\n",Dim,nameof(Real));
       if(nmax == 0)
 	WDutils_WarningN("OctalTree<%d,%s>: "
 			 "nmax=%d; will use nmax=%d instead\n",
@@ -469,18 +466,20 @@ namespace WDutils {
     TreeAccess(const OctTree*t) : TREE(t) {}
     /// copy ctor
     TreeAccess(const TreeAccess&t) : TREE(t.TREE) {}
-    /// virtual dtor (to make gcc version 4.1.0 happy)
+    // virtual dtor required by some old compilers
     virtual ~TreeAccess() {}
     /// iterator used for leafs.
     /// A simple wrapper around an index, which, being a separate type, avoids
     /// confusion with other indices or variables of type node_index.
-    //  note A conversion to node_index is not a good idea, as it allows an
+    //
+    //  NOTE A conversion to node_index is not a good idea, as it allows an
     //       implicit conversion to bool, which almost certainly results in
     //       behaviour that is not intended, i.e. instead of IsInvalid()
     struct Leaf {
       node_index I;
       /// default ctor
-      Leaf() {}
+      Leaf()
+      {}
       /// ctor from index
       explicit Leaf(node_index i)
 	: I(i) {}
@@ -515,7 +514,8 @@ namespace WDutils {
     /// iterator used for cells.
     /// A simple wrapper around an index, which, being a separate type, avoids
     /// confusion with other indices or variables of type node_index.
-    //  note A conversion to node_index is not a good idea, as it allows an
+    //
+    //  NOTE A conversion to node_index is not a good idea, as it allows an
     //       implicit conversion to bool, which almost certainly results in
     //       behaviour that is not intended, i.e. instead of IsInvalid()
     struct Cell {
@@ -768,7 +768,7 @@ namespace WDutils {
 	NAME != this->LastLeafDesc(CELL); ++NAME)
 #endif
     //@}
-    /// \name dumping leaf and cell data (for debugging purposes)
+    /// \name dumping leaf and cell data (e.g. for debugging purposes)
     //@{
   protected:
     /// header for leaf dump
@@ -871,6 +871,8 @@ namespace WDutils {
     /// ctor: allocate memory for stack
     TreeWalkAlgorithm(const OctTree*t)
       : Base(t), S(OctTree::Nsub*Base::Depth()) {}
+    //  vritual dtor (required by some old compilers)
+    virtual ~TreeWalkAlgorithm() {}
     /// perform a tree walk.
     void walk()
     {
@@ -1002,9 +1004,9 @@ namespace WDutils {
     }
   public:
     /// ctor: allocate memory for stacks
-    /// \param[in] i  pter to interactor
+    /// \param[in] t  (pter to) tree
     MutualInteractionAlgorithm(const OctTree*t)
-      : Base (t),
+      : Base ( t ),
 	CL   ( OctTree::Nsub*Base::Depth()),
 	CC   ( 2*(OctTree::Nsub-1)*(Base::Depth()+1)+1 )
     {}
@@ -1092,7 +1094,7 @@ namespace WDutils {
     /// functor for processing a Neighbour
     /// \note used as interface with Process() below
     struct Processor {
-      /// virtual dtor: make old versions of gcc happy
+      // virtual dtor: make old versions of gcc happy
       virtual ~Processor() {}
       /// process a neighbour
       /// \param[in] l  neighbour leaf
@@ -1113,7 +1115,7 @@ namespace WDutils {
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance^2 @a q are @b not put on the list.
+    /// \note leafs at distance^2 = @a q are @b not put on the list.
     /// \param[out] nb   list of neighbours (unsorted)
     /// \param[in]  m    maximum size of list @a nb
     /// \return          number of neighbours found, may exceed @a m
@@ -1124,7 +1126,7 @@ namespace WDutils {
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance^2 @a q are @b not put on the list.
+    /// \note leafs at distance^2 = @a q are @b not put on the list.
     /// \param[out] nb   list of neighbours (unsorted)
     /// \return          number of neighbours found, may exceed @a nb.size()
     /// \note If the actual number of neighbours exceeds @a nb.size(), only
@@ -1134,7 +1136,7 @@ namespace WDutils {
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance^2 @a q are @b not put on the list.
+    /// \note leafs at distance^2 = @a q are @b not put on the list.
     /// \param[out] nb   list of neighbours (unsorted)
     /// \param[in]  m    maximum size of list @a nb
     /// \return          number of neighbours found, may exceed @a m
@@ -1147,7 +1149,7 @@ namespace WDutils {
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance^2 @a q are @b not put on the list.
+    /// \note leafs at distance^2 = @a q are @b not put on the list.
     /// \param[out] nb   list of neighbours (unsorted)
     /// \return          number of neighbours found, may exceed @a nb.size()
     /// \note If the actual number of neighbours exceeds @a nb.size(), only
@@ -1161,25 +1163,25 @@ namespace WDutils {
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will also be processed.
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance^2 @a q are @b not processed
+    /// \note leafs at distance^2 = @a q are @b not processed
     /// \param[in]  p    functor for processing neighbours found
     void Process(Leaf l, Real q, const Processor*p) WDutils_THROWING;
     /// find all leafs within certain distance from @a x and process them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
-    /// \note leafs at distance^2 @a q are @b not processed
+    /// \note leafs at distance^2 = @a q are @b not processed
     /// \param[in]  p    functor for processing neighbours found
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
     void Process(point const&x, Real q, const Processor*p) WDutils_THROWING;
   protected:
-    const Processor *PROC;        ///< function to call
+    const Processor *PROC;        ///< functor to call
     Base::Q;
     Base::C;
     Base::X;
     /// process a range of leafs
-    void ProcessLeafs(Leaf b, Leaf e) const;
+    void ProcessLeafs(Leaf, Leaf) const;
   };// class NeighbourFinder
 
 #ifdef __SSE__

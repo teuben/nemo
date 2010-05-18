@@ -58,7 +58,7 @@ endif
 # test
 # ----
 
-ifeq ($(USER),wd11)
+ifeq ($(PWD),/local/wd11/nemo_cvs/usr/dehnen/utils)
 WDutilsTEST	:= -DWDutilsTEST
 endif
 

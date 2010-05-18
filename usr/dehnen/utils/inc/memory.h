@@ -1400,7 +1400,11 @@ namespace WDutils {
     X *const SN; ///< end of stack
   public:
     /// ctor: allocate memory, empty stack
+    explicit
     Stack(unsigned n) : S(n? WDutils_NEW(X,n) : 0), P(S), SN(S+n) {}
+    /// ctor: allocate memory, put one element on stack
+    Stack(unsigned n, const X&a) : S(WDutils_NEW(X,n? n:1)), P(S), SN(S+n)
+    { push(a); }
     /// dtor: de-allocate memory
     ~Stack() { if(S) WDutils_DEL_A(S); S=0; }
     /// is stack empty?
