@@ -26,7 +26,7 @@
 # 26-sep-06     use fix64bit.csh if on 64 bit (or use int8=1)
 # 25-oct-07     note that gcc 4.2.2 compiles GI/PP/
 # 16-aug-09     added support for Cygwin (JM)
-# 18-may-10     gfortran default, and option to use old gfortran41/40
+# 19-may-10     gfortran default, and option to use gif because of old gfortran41/40
 
 # Other places to get pgplot from
 # cvs -d :pserver:anonymous@cvs.starlink.ac.uk:/cvs co thirdparty/caltech/pgplot
@@ -67,16 +67,17 @@ endif
 if ($?NEMOLIB) then
   set lib=$NEMOLIB
 endif
-set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
-set drivers_gfortran41=CGDRIV,NUDRIV,PGDRIV,PSDRIV,XWDRIV
-set drivers_g95=CGDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,XWDRIV
+set drivers=CGDRIV,NUDRIV,PGDRIV,PSDRIV,XWDRIV
+#set drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV
+#set drivers_gfortran41=CGDRIV,NUDRIV,PGDRIV,PSDRIV,XWDRIV
+#set drivers_g95=CGDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,XWDRIV
 if ($?NEMOHOST) then
   set host=$NEMOHOST
 endif
 set debug=0
 set png=0
 set int8=0
-set gfortran41=0
+set gif=1
 
 #  dir:  where the source code will be extracted
 #  lib:  where the library (PGPLOT_DIR) will be placed
@@ -176,7 +177,7 @@ if ($?F77) then
   endif
 endif
 if ($png) set drivers=$drivers,PNDRIV
-
+if ($gif) set drivers=$drivers,GIDRIV,PPDRIV,WDDRIV
 
 echo Building drivers for $drivers
 
@@ -290,7 +291,8 @@ usage:
   echo "  cc=gcc               change a (supported) C compiler for this system"
   echo "  f77=gfortran         change a (supported) Fortran compiler for this system"
   echo "  int8=0               use INTEGER*8 in some drivers (e.g. gif)"
-  echo "  gfortran41=0         use more strict old gfortran"
+  echo "  png=0                use PNG driver"
+  echo "  gif=1                use GIF/PP/WD if new (4.2 and up) gfortran"
   echo ""
   echo "   drivers=CGDRIV,GIDRIV,NUDRIV,PGDRIV,PPDRIV,PSDRIV,WDDRIV,XWDRIV"
   echo "   will work again for gfortran V4.2.2"
