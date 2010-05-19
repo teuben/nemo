@@ -161,21 +161,6 @@ cd $lib
 cp drivers.list new.list
 cp drivers.list old.list
 
-
-
-
-if ($?F77) then
-  if ($F77  == gfortran) then
-    if ($gfortran41) then
-      echo NOTE: SPECIAL lightweight pgplot for stricter older gfortran41
-      set drivers=$drivers_gfortran41
-    endif
-  endif
-  if ($F77  == g95) then
-    echo NOTE: SPECIAL lightweight pgplot for stricter g95
-    set drivers=$drivers_g95
-  endif
-endif
 if ($png) set drivers=$drivers,PNDRIV
 if ($gif) set drivers=$drivers,GIDRIV,PPDRIV,WDDRIV
 
