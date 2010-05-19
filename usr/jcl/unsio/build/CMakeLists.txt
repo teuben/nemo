@@ -10,6 +10,8 @@
 # ============================================================================
 # CMakeListst.txt file for UNS library                                        
 # ============================================================================
+# defaults to gfortran, for g77 you need to replace gfortran library reference
+# to "frtbegin g2c"
 cmake_minimum_required(VERSION 2.6)
 #INCLUDE(CPack) 
 # project name
@@ -33,7 +35,7 @@ ENDIF (NOT NEMO_INSTALLED)
 
 
 #detect libg2c directory
-execute_process(COMMAND g77 -print-file-name=libg2c.a 
+execute_process(COMMAND gfortran -print-file-name=libgfortran.a 
 	OUTPUT_VARIABLE G2CFPATH OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND dirname ${G2CFPATH} 
 	OUTPUT_VARIABLE G2C_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -96,7 +98,7 @@ FOREACH(exe_cpp ${execpp_sources})
   add_executable (${exe} ${exe_cpp})
 
   # Link the executable to the Hello library.
-  target_link_libraries (${exe} unsio nemo sqlite3  X11 pgplot g2c stdc++)
+  target_link_libraries (${exe} unsio nemo sqlite3  X11 pgplot gfortran stdc++)
 
 ENDFOREACH(exe_cpp ${execpp_sources})
 
