@@ -10,7 +10,7 @@
 #                5-mar-2006   also create nemo_start.sh
 #               20-aug-2006   falcON install 
 #               21-jan-2008   optional nemo= where the root is located
-#               11-may-2010   gfortran now the default (but 4.1 or below no pgplot/GIF)
+#               19-may-2010   gfortran now the default (but 4.1 or below no pgplot/GIF)
 
 set nemo=nemo           # root directory name
 
@@ -25,6 +25,7 @@ set vogl=1		# compile vogl
 set gsl=0               # add gsl
 set hdf=1               # use HDF if present
 set png=0               # add png for pgplot
+set gif=1               # add gi/pp/wd drivers (they use %ref/%val) for pgplot - not for gfortran <= 41
 set single=0            # singe or double (default) precision
 set all=1		# make all binaries , or just testsuite?
 set clean=1		# remove old nemo directory before installing (rm -r nemo)
@@ -161,7 +162,7 @@ if ($#yapp > 0) setenv YAPP $yapp
 
 if ($pgplot) then
   echo "Compiling internal pgplot (logfile: install.pgplot.log)"
-  $make pgplot PNG=$png >& install.pgplot.log
+  $make pgplot PNG=$png GIF=$gif >& install.pgplot.log
 endif
 
 rehash
