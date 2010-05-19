@@ -92,6 +92,7 @@ FormObjectControl::FormObjectControl(QWidget *parent):QDialog(parent)
   //form.dens_histo_view->setParent(form.tab_density);
   dens_histo = new DensityHisto(form.dens_histo_view);
   form.dens_histo_view->setScene(dens_histo);
+  form.dens_histo_view->repaint();
   //DEACTIVARED form.dens_glob_box->setDisabled(true);
   dens_color_bar = new DensityColorBar(go,form.dens_bar_view);
   form.dens_bar_view->setScene(dens_color_bar);
@@ -918,6 +919,10 @@ void FormObjectControl::on_orbit_max_spin_valueChanged(int value)
     assert(i_obj < (int)pov->size());
     ParticlesObject * pobj = &(*pov)[i_obj];
     //go->vel_vector_size = form.vel_slide_size->value();
+    if (value > (int) pobj->npart) { // it's forbidden to exceed max orbits
+      value=pobj->npart;
+      form.orbit_max_spin->setValue(value);
+    }
     pobj->setOrbitsMax(value);
     if (EMIT) emit objectSettingsChanged();
   }

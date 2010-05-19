@@ -52,6 +52,7 @@ class ParticlesObject{
     static void copyVVkeepProperties(ParticlesObjectVector&,ParticlesObjectVector&, const int nbody);
     static void backupVVProperties(ParticlesObjectVector& src,ParticlesObjectVector& dest, const int nsel);
     static void clearOrbitsVectorPOV(ParticlesObjectVector&);   
+    static void initOrbitsVectorPOV(ParticlesObjectVector&);   
     void buildIndexList(const int, const int, const int, const int _step=1);
     void buildIndexList();
     int resizeRange(const int, const int, int&);

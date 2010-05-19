@@ -239,6 +239,16 @@ void ParticlesObject::clearOrbitsVectorPOV(ParticlesObjectVector& pov)
   }
 }
 // ============================================================================
+// initOrbitsVectorPOV                                                        
+void ParticlesObject::initOrbitsVectorPOV(ParticlesObjectVector& pov)
+{
+  for (ParticlesObjectVector::iterator pvit=pov.begin(); pvit!=pov.end(); pvit++) {
+    //std::cerr << "Object size (before) =" << (*pvit).ov.size() << "\n";
+    //std::cerr << "pvit->npart = " << pvit->npart << " orbit max ="<<pvit->getOrbitsMax()<<"\n";
+    pvit->setOrbitsMax(std::min(pvit->npart,pvit->getOrbitsMax()));
+  }
+}
+// ============================================================================
 // destructor                                                                  
 ParticlesObject::~ParticlesObject()
 {

@@ -121,6 +121,7 @@ public:
     // select
     std::string select_time;
     std::string select_part;
+    bool auto_render;
 };
 
 }

@@ -175,7 +175,6 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
     sortByDensity();
 #endif
   }
-  std::cerr << "DENS min="<< PHYS_MIN<<" DENS max="<< PHYS_MAX << "\n";
 }
 // ============================================================================
 // updateVbo                                                                   
@@ -428,8 +427,6 @@ void GLObjectParticles::buildVboColorGasGasSorted()
     tbench.restart();
     nvert_pos=0;
     GLfloat * colors = new GLfloat[((po->npart/po->step)+1)*4]; // create colors array
-    std::cerr << "buildVboColor mindens="<<PHYS_MIN<<"\n";
-    std::cerr << "buildVboColor maxdens="<<PHYS_MAX<<"\n";
 
     // compute some constants
     float LOGDMIN = log(PHYS_MIN);
@@ -440,9 +437,18 @@ void GLObjectParticles::buildVboColorGasGasSorted()
     LOGMPMINRHO = LOGMPMAXRHO =0;
 
     if (phys_select && phys_select->isValid()) { // density or temperature
+      if (phys_select->getType() == 1) 
+        std::cerr << "** Density selected **\n";
+      if (phys_select->getType() == 2) 
+        std::cerr << "** Temperature selected **\n";
+      if (phys_select->getType() == 3) 
+        std::cerr << "** Pressure selected **\n";
+      
         LOGMPMINRHO = log(phys_select->getMin());
         LOGMPMAXRHO = log(phys_select->getMax());
     }
+    std::cerr << "buildVboColor minphys="<<PHYS_MIN<<"\n";
+    std::cerr << "buildVboColor maxphys="<<PHYS_MAX<<"\n";
 
     float LOGRNEIBMIN,LOGRNEIBMAX,INVDIFFRNEIB;
     if (part_data->rneib) { // neighbours exists

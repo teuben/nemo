@@ -116,6 +116,7 @@ GlobalOptions::GlobalOptions()
   // select
   select_time = "";
   select_part = "";
+  auto_render=true;
 }
 // ============================================================================
 // destructor                                                                  
@@ -258,7 +259,8 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   scale= m.scale;
   // select
   select_time = m.select_time;
-  select_part = m.select_part;
+  select_part = m.select_part;  
+  auto_render = m.auto_render;
   return *this;
 }
 // ============================================================================

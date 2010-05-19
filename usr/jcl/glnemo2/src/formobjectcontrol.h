@@ -203,8 +203,9 @@ namespace glnemo {
     //
     void on_objects_properties_currentChanged(int index) {
       if (index==1) { // tab density
-        std::cerr << "index tab="<<index<<" dens_histo_view width="<<form.dens_histo_view->width()<<"\n";
-        form.dens_histo_view->resize(form.dens_histo_view->width(),form.dens_histo_view->height());
+        //std::cerr << "index tab="<<index<<" dens_histo_view width="<<form.dens_histo_view->width()<<"\n";
+        //form.dens_histo_view->resize(form.dens_histo_view->width(),form.dens_histo_view->height());
+        form.dens_histo_view->repaint();
         dens_histo->drawDensity(form.dens_slide_min->value(),form.dens_slide_max->value());
         form.dens_bar_view->resize(form.dens_bar_view->width(),form.dens_bar_view->height());
         dens_color_bar->draw(form.dens_slide_min->value(),form.dens_slide_max->value());
@@ -217,12 +218,8 @@ namespace glnemo {
       if (event) {;} // remove compiler warning
       emit leaveEvent();
     }
-    void resizeEvent ( QResizeEvent * event ) {
-      //std::cerr << "form ob control resize event width="<<width()<<"\n";
-      //std::cerr << "form ob control dens_histo_view width="<<form.dens_histo_view->width()<<"\n";
-      dens_histo->setFocus();
+    void resizeEvent ( QResizeEvent * event ) {    
       form.dens_histo_view->repaint();
-
       dens_histo->resizeEvent(event);
       dens_histo->drawDensity(form.dens_slide_min->value(),form.dens_slide_max->value());
       dens_color_bar->resizeEvent(event);

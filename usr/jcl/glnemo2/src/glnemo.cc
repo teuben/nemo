@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "preview.2010-April-26"
+#define RELEASE_VERSION "preview.2010-May-19"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -54,6 +54,7 @@ using namespace std;
     "dbuffer=f\n       Activate OpenGL depth buffer                     ",
     "perspective=t\n   false means orthographic                         ",
     "bestzoom=t\n      automatic zoom                                   ",
+    "auto_render=t\n   automatic rendering mode                         ",
     "play=f\n          automatically load and display next snapshot     ",
     "glsl=t\n          try to initialyze GLSL engine                    ",
     "ortho_range=6.0\n xy range if orthographic projection              ",
@@ -68,8 +69,10 @@ using namespace std;
     "osd=t\n           Show On Screen Display                           ",
     "com=t\n           centering according Center Of Mass               ", 
     "point=f\n         show particles as points                         ",
-    "mindens=\n        set minimal density                              ",
-    "maxdens=\n        set maximal density                              ",
+    "selphys=1\n        select physical quantity to display\n           "
+    "             (1:density, 2:temperature, 3:pressure)                ",
+    "minphys=\n        set minimal physical value                       ",
+    "maxphys=\n        set maximal physical value                       ",
     "auto_ts=t\n       automatic texture size                           ",
     "texture=t\n       show particles as textures                       ",
     "texture_s=1.0\n   texture size of gaz particle                     ",

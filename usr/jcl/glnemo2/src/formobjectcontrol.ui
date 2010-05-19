@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>323</width>
-    <height>913</height>
+    <width>341</width>
+    <height>940</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -508,7 +508,7 @@ p, li { white-space: pre-wrap; }
       <string/>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_particles">
       <attribute name="title">

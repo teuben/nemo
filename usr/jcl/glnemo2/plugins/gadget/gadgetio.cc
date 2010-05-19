@@ -741,7 +741,7 @@ void GadgetIO::unitConversion()
     /* get temperature in Kelvin */
 
     tempp[i] = MeanWeight/BOLTZMANN * (gamma-1) * u;
-    if (rhop) {
+    if (0 && rhop) {
       rhop[i] *= UnitDensity_in_cgs/RhoUniverse_omegabar;
     }
 	  

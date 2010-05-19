@@ -1,8 +1,19 @@
-current version
-
-
-preview.2010-April-24 (aka Leiden Release)
+preview.2010-May-19 (aka Leiden Release)
 -----------------------------------------
+ - remove mindens maxdens from command line parameters
+ - add minphys and maxphys to set minimum and maximum physical value
+ - add selphys to select the physical quantity to display
+ - auto_render command line parameter added
+   if true, guess the best rendering mode, otherwise use accumulation buffer
+ - glnemo2 no more crash when it displays a number of orbits
+   lesser than 20
+ - fix a bug about the rendering mode changing from time to time
+ - set correctly min/man physical quantity with respecting slide
+ - draw correctly histo view
+	
+	
+preview.2010-April-24 
+---------------------
   can select times with list of snapshots
   add experimental Ramses reader (gas,halo,stars)
   add gyrfalcON's runtime manipulator (see $NEMO/usr/jcl/glnemo2/gyrfalcon/README)

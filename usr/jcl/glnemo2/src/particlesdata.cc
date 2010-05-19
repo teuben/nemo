@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <iostream>
 #include <math.h>
+#include <iomanip>
 #include "globaloptions.h"
 #define MAX(A,B) ((A)>(B)?(A):(B))
 #define PRINT_D if (1)
@@ -456,21 +457,26 @@ int PhysicalData::computeMinMax()
     } 
     else {
       switch (type) {
-          case PhysicalData::neib : 
+          case PhysicalData::neib :
+            std::cerr << "Hsml        range :";
             break;
           case PhysicalData::rho : 
             GlobalOptions::rho_exist         = true;
+            std::cerr << "Density     range :";
             break;
           case PhysicalData::temperature : 
             GlobalOptions::temperature_exist = true;
+            std::cerr << "Temperature range :";
             break;            
           case PhysicalData::pressure :
             GlobalOptions::pressure_exist    = true;
+            std::cerr << "Pressure    range :";
             break;                        
           }
       valid = true;
     }
-    std::cerr << "min data="<<min<<" max data="<<max<<"\n";
+    std::cerr <<" min = "<< std::scientific << std::setw(10) << min
+              <<" max = "<< std::setw(10)<<max<<"\n";
     // compute density histogram                                      
     // in a array of 100 bins, going from log(min data) to log(max data)
     // we compute the index in that range for the particles's density,

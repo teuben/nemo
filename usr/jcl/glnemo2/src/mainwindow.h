@@ -220,8 +220,8 @@ class MainWindow : public QMainWindow {
     Colormap * colormap;
     // Camera
     Camera * camera;
-    // ramses boundaries
-
+    // Selected Physical quantitie from the command line
+    int selphys;
     signals:
     void endOfSnapshot();
 };

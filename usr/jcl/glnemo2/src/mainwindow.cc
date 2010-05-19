@@ -31,6 +31,7 @@
 #include "nemo.h"
 namespace glnemo {
 #define ICONSIZE 25
+  
 // -----------------------------------------------------------------------------
 // MainWindow constructor                                                       
 // -----------------------------------------------------------------------------
@@ -142,6 +143,8 @@ void MainWindow::start(std::string shot)
     bool exist=hasvalue((char*)"select");
     current_data = plugins->getObject(snapshot);
     if (current_data) {
+
+      current_data->part_data->setIpvs(selphys);
       if (! exist ) {
         current_data->initLoading(store_options); 
         if (shot == "") interactiveSelect("",true);
@@ -602,6 +605,7 @@ void MainWindow::loadNewData(const std::string select,
         povold.clear();
         ParticlesObject::backupVVProperties(pov2,povold,pov.size());
       }
+      ParticlesObject::initOrbitsVectorPOV(pov);
       pov2 = pov;   // copy new pov object to pov2
       ParticlesObject::clearOrbitsVectorPOV(pov2); // clear orbits vectors if present
       if (reload) { // copy back povold properties to pov2
@@ -626,6 +630,9 @@ void MainWindow::loadNewData(const std::string select,
       }
       if (interact && !reload && !store_options->rho_exist) {
         store_options->render_mode = 0; // alpha blending accumulation mode
+      }
+      if (! store_options->auto_render) {
+        store_options->render_mode=0;
       }
       if (store_options->auto_com) {
         actionCenterToCom(false);
@@ -691,6 +698,13 @@ void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
     pov[i].setGaz(store_options->show_poly);
     pov[i].setGazSize(store_options->texture_size);
     pov[i].setGazSizeMax(store_options->texture_size);
+    if (store_options->phys_min_glob!=-1) {
+      pov[i].setMinPhys(store_options->phys_min_glob);
+    }
+    if (store_options->phys_max_glob!=-1) {
+      pov[i].setMaxPhys(store_options->phys_max_glob);
+    }
+    
   }
 }
 // -----------------------------------------------------------------------------
@@ -739,13 +753,19 @@ void MainWindow::parseNemoParameters()
   store_options->zmax     = getdparam((char *) "zmax");
   store_options->lmax     = getiparam((char *) "lmax");
   store_options->scale    = getdparam((char *) "scale");
-  // density
-  if ( hasvalue((char *) "mindens") ) {
-      store_options->phys_min_glob=getdparam((char *) "mindens");
+  // auto rendering mode
+  store_options->auto_render = getbparam((char *) "auto_render");
+  
+  // select physical quantity to display
+  selphys = getiparam((char* )"selphys");  
+  // min/max physical value
+  if ( hasvalue((char *) "minphys") ) {
+      store_options->phys_min_glob=getdparam((char *) "minphys");
       store_options->phys_local=false;
   } 
-  if ( hasvalue((char *) "maxdens") ) {
-      store_options->phys_max_glob=getdparam((char *) "maxdens");
+  if ( hasvalue((char *) "maxphys") ) {
+      store_options->phys_max_glob=getdparam((char *) "maxphys");
+      store_options->phys_local=false;
   }
   // color map
   store_options->colormap += getiparam((char *) "cmapindex");
@@ -935,6 +955,7 @@ void MainWindow::actionBestZoom()
 void MainWindow::actionRenderMode()
 {
   store_options->render_mode = (store_options->render_mode+1)%3;
+  store_options->auto_render=true;
   gl_window->updateGL();
 }
 // -----------------------------------------------------------------------------
@@ -1250,6 +1271,7 @@ void MainWindow::uploadNewFrame()
           current_data->getInterfaceType() == "List of Nemo") { 
       //mutex_data->lock();
       //pov2=pov;
+      ParticlesObject::initOrbitsVectorPOV(pov);
       ParticlesObject::copyVVkeepProperties(pov,pov2,user_select->getNSel()); 
       form_o_c->update( current_data->part_data, &pov2,store_options,false); // update Form
       //mutex_data->unlock();
@@ -1257,12 +1279,14 @@ void MainWindow::uploadNewFrame()
       //pov2=pov; // modif orbits
     }
     updateOsd();
+#if 0
     if (store_options->rho_exist) {
       store_options->render_mode = 2; // density mode
     }
     if (!store_options->rho_exist) {
       store_options->render_mode = 0; // alpha blending accumulation mode
     }
+#endif
     if (store_options->auto_com) {
        actionCenterToCom(false);
     } 
