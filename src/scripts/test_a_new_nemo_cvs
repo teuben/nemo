@@ -73,6 +73,10 @@ if ($gcc != 0) then
    astroload -v $gcc gcc
 endif
 
+if ($?CC  == 0)  setenv CC  gcc
+if ($?CXX == 0)  setenv CXX g++
+if ($?F77 == 0)  setenv F77 g77
+
 #		pick intel compiler (ifort means >= 8.0)
 if ($intel) then
   # source /astromake/astromake_start
