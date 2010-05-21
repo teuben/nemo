@@ -998,12 +998,13 @@ void CSnapshotGadgetIn::storeComponents()
     mass[i]   = NULL;
     pos [i]   = NULL;
     vel [i]   = NULL;
-    
+    id  [i]   = NULL;
     ptrIsAlloc[i]["mass" ]=false; 
     ptrIsAlloc[i]["pos"  ]=false; 
     ptrIsAlloc[i]["vel"  ]=false; 
+    ptrIsAlloc[i]["id"   ]=false; 
   }
-  id     = NULL;
+  //id     = NULL;
   age    = NULL;
   metal  = NULL;
   intenerg=NULL;
@@ -1012,7 +1013,7 @@ void CSnapshotGadgetIn::storeComponents()
   hsml   = NULL;
   ntot_withmasses=0;
 
-  ptrIsAlloc[0]["id"   ]=false;     
+  //ptrIsAlloc[0]["id"   ]=false;     
   ptrIsAlloc[0]["age"  ]=false; 
   ptrIsAlloc[0]["temp" ]=false;
   ptrIsAlloc[0]["rho"  ]=false; 
@@ -1030,8 +1031,9 @@ CSnapshotGadgetOut::~CSnapshotGadgetOut()
     if (mass[i]&& ptrIsAlloc[i]["mass" ]) delete [] mass[i];
     if (pos [i]&& ptrIsAlloc[i]["pos"  ]) delete [] pos[i];
     if (vel [i]&& ptrIsAlloc[i]["vel"  ]) delete [] vel[i];    
+    if (id  [i]&& ptrIsAlloc[i]["id"   ]) delete [] id[i];    
   }
-  if (id       && ptrIsAlloc[0]["id"   ]) delete [] id;
+  //if (id       && ptrIsAlloc[0]["id"   ]) delete [] id;
   if (rho      && ptrIsAlloc[0]["rho"  ]) delete [] rho;
   if (hsml     && ptrIsAlloc[0]["hsml" ]) delete [] hsml;
   if (metal    && ptrIsAlloc[0]["metal"]) delete [] metal;
@@ -1078,6 +1080,7 @@ int CSnapshotGadgetOut::setData(std::string name, const int n ,int * data,const 
   int status=0;
 
   switch(CunsOut::s_mapStringValues[name]) {
+#if 0    
   case uns::Id :
     assert(n==npartTotal);
     if (_addr) { // map address
@@ -1091,6 +1094,7 @@ int CSnapshotGadgetOut::setData(std::string name, const int n ,int * data,const 
     }
     bits |= ID_BIT;
     break;
+#endif
   default: ok=false;
   }
   
@@ -1176,7 +1180,28 @@ int CSnapshotGadgetOut::setData(std::string name,std::string array,  const int n
 {
   bool ok=true;
   int status=0;
+  
+  switch(CunsOut::s_mapStringValues[name]) {
+  case uns::Gas   :
+  case uns::Halo  :
+  case uns::Disk  :
+  case uns::Bulge :
+  case uns::Stars :
+  case uns::Bndry :
+    status = setId(name, n, data, _addr);
+    break;
+  default: ok=false;
+  }
 
+  if (verbose) {
+    if (ok) { 
+      std::cerr << "CSnapshotGadgetOut::setData name["<<name<<"]=" << CunsOut::s_mapStringValues[name] << "\n";
+    } else {
+      std::cerr << "** WARNING ** CSnapshotGadgetOut::setData Value ["<<name<<"] does not exist.....\n";
+    }
+  }
+  return status;
+#if 0
   switch(CunsOut::s_mapStringValues[array]) {
   case uns::Id  :
     status = setData(array, n, data, _addr);
@@ -1192,6 +1217,8 @@ int CSnapshotGadgetOut::setData(std::string name,std::string array,  const int n
     }
   }
   return status;
+#endif
+  
 }
 
 // ----------------------------------------------------------------------------
@@ -1239,6 +1266,35 @@ int CSnapshotGadgetOut::setHeader(t_io_header_1 * _header)
 int CSnapshotGadgetOut::setNbody(const int _nbody)
 {
   npartTotal = _nbody;
+  return 1;
+}
+// ============================================================================
+// setId:                                                            
+int CSnapshotGadgetOut::setId(std::string name, const int _n, int * _id, const bool addr)
+{
+  int index=-1;
+  switch(CunsOut::s_mapStringValues[name]) {
+  case uns::Gas    : index=0; break;
+  case uns::Halo   : index=1; break;
+  case uns::Disk   : index=2; break;
+  case uns::Bulge  : index=3; break;
+  case uns::Stars  : index=4; break;
+  case uns::Bndry  : index=5; break;
+  default:
+    break;
+  }
+  assert(index!=-1);
+  if (addr) { // map address
+    id[index] = _id;
+  }
+  else {
+    ptrIsAlloc[index]["id"]=true;
+    if (id[index])  delete [] id[index];
+    id[index] = new int[_n];
+    memcpy(id[index],_id,sizeof(int)*_n);
+  }
+  header.npart[index] = _n;
+  bits |= ID_BIT;
   return 1;
 }
 // ============================================================================
@@ -1418,8 +1474,9 @@ int CSnapshotGadgetOut::save()
     }
     if (verbose) std::cerr << "CSnapshotGadgetOut::save npartTotal = " << npartTotal << "\n";
     setupHeader();
-#if 1
+#if 0
     if (!(bits & ID_BIT)) {
+      std::cerr << "No Id Bit, I am going to create them for you....\n";
       if (! id) {
         ptrIsAlloc[0]["id"]=true;
         id = new int[npartTotal];
@@ -1567,13 +1624,26 @@ int CSnapshotGadgetOut::write()
     if (header.npart[k]) // vel exist for the component
       writeData((char *) vel[k], sizeof(float)*3, header.npart[k]);
   writeFRecord(sizeof(float)*3*npartTotal);
-#if 1 
+
   // ID
   writeBlockName("ID  ");
   writeFRecord(sizeof(int)*npartTotal);
-  writeData((char *) id, sizeof(int), npartTotal);
+  
+  if (!(bits & ID_BIT)) {
+    std::cerr << "No Ids Bit set, I am going to create them for you....\n";
+    int * iid;
+    iid = new int[npartTotal];
+
+    for (int i=0; i<npartTotal; i++) iid[i]=i;
+    writeData((char *) iid, sizeof(int), npartTotal);
+    delete [] iid;
+  } else { // There are IDs
+    for(int k=0;k<6;k++)
+      if (header.npart[k]) // id exist for the component
+        writeData((char *) id[k], sizeof(int), header.npart[k]);
+  }
   writeFRecord(sizeof(int)*npartTotal);
-#endif
+
   // MASS
   if (ntot_withmasses >0 ) {
     writeBlockName("MASS");

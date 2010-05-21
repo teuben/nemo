@@ -248,7 +248,7 @@ typedef struct particle_data_lite
   private:
     //data
     float * mass[6], * pos[6], * vel[6], * rho, * hsml, * age, * metal, * intenerg, * temp;
-    int * id;
+    int * id[6];
     int ntot_withmasses;
     std::ofstream out;
     // Map to associate the strings with the bool values

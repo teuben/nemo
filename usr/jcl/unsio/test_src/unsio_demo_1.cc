@@ -50,19 +50,23 @@ const char * usage="test unsio library";
 void processComponent(std::string comp, uns::CunsIn * uns,uns::CunsOut * unsout)
 {
   float * pos, * vel, * mass;
-  int n1,n2,n3;
-  bool ok1,ok2,ok3;
-  
+  int * id;
+  int n1,n2,n3,n4;
+  bool ok1,ok2,ok3,ok4;
+
+
   ok1 = uns->snapshot->getData(comp,"pos" ,&n1,&pos );
   ok2 = uns->snapshot->getData(comp,"vel" ,&n2,&vel );
   ok3 = uns->snapshot->getData(comp,"mass",&n3,&mass);
-  if (ok1 && ok2 && ok3) {
+  ok4 = uns->snapshot->getData(comp,"id"  ,&n4,&id  );
+  if (ok1 && ok2 && ok3 && ok4) {
     assert(n1==n2);
     assert(n1==n3);
     std::cerr << "--> "<< std::left << std::setfill('.')<<
         std::setw(8) << comp << ":" << std::setfill(' ')<<
         std::right   << std::setw(10) << n1 <<"\n";
     unsout->snapshot->setData(comp,n1,mass,pos,vel,false);
+    unsout->snapshot->setData(comp,"id",n4,id,false);
   }  
 }
 //------------------------------------------------------------------------------
@@ -110,6 +114,7 @@ int main(int argc, char ** argv )
       uns::CunsOut * unsout = new uns::CunsOut(out_name,type,verbose);      
       // save time
       unsout->snapshot->setData("time",time);
+
       // processing
       processComponent("halo" ,unsin,unsout);
       processComponent("disk" ,unsin,unsout);
