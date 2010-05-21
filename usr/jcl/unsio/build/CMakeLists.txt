@@ -109,7 +109,7 @@ FOREACH(exe_f ${exe_sources})
 
   # Link the executable to the Hello library.
   #target_link_libraries (${exe} unsio nemomaing77 nemo g2c sqlite3 stdc++)
-  target_link_libraries (${exe} unsio nemomaing77 nemo sqlite3 stdc++)
+  target_link_libraries (${exe} unsio nemomaing77 nemo  ${FC_LIB} sqlite3 stdc++)
 
   SET_TARGET_PROPERTIES(${exe} PROPERTIES LINKER_LANGUAGE Fortran)
   # add "-lstdc++"
