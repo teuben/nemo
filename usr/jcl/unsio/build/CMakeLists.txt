@@ -10,8 +10,6 @@
 # ============================================================================
 # CMakeListst.txt file for UNS library                                        
 # ============================================================================
-# defaults to gfortran, for g77 you need to replace gfortran library reference
-# to "frtbegin g2c"
 cmake_minimum_required(VERSION 2.6)
 #INCLUDE(CPack) 
 # project name
@@ -34,14 +32,13 @@ ELSE (NOT NEMO_INSTALLED)
 ENDIF (NOT NEMO_INSTALLED) 
 
 
-#detect libg2c directory
-execute_process(COMMAND gfortran -print-file-name=libgfortran.a 
-	OUTPUT_VARIABLE G2CFPATH OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND dirname ${G2CFPATH} 
-	OUTPUT_VARIABLE G2C_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-MESSAGE( STATUS "G2C dir : " ${G2C_DIR})
+
+
 MESSAGE( STATUS "NEMOLIB : " ${NEMOLIB} )
 
+#execute_process(COMMAND  "grep 'FC  =' ${NEMOLIB}/makedefs | cut -d= -f2"
+#	OUTPUT_VARIABLE FF OUTPUT_STRIP_TRAILING_WHITESPACE)
+#MESSAGE( STATUS "FORTRAN: " ${FF} )
 # contains the full path to the top level directory of your build tree 
 MESSAGE( STATUS "PROJECT_BINARY_DIR: " ${PROJECT_BINARY_DIR} )
 
@@ -77,7 +74,7 @@ MESSAGE( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 include_directories (${UNSIO_SOURCE_DIR}/../src $ENV{NEMOINC} ${NEMOLIB})
 
 # Make sure the linker can find the Hello library once it is built.
-link_directories (${UNSIO_BINARY_DIR}/lib ${NEMOLIB} ${G2C_DIR})
+link_directories (${UNSIO_BINARY_DIR}/lib ${NEMOLIB} ${FC_LIB_PATH})
 
 # Find all LIB's sources files
 FILE(GLOB exe_sources ../test_src/*.F)
@@ -98,7 +95,7 @@ FOREACH(exe_cpp ${execpp_sources})
   add_executable (${exe} ${exe_cpp})
 
   # Link the executable to the Hello library.
-  target_link_libraries (${exe} unsio nemo sqlite3  X11 pgplot gfortran stdc++)
+  target_link_libraries (${exe} unsio nemo sqlite3  X11 pgplot ${FC_LIB} stdc++)
 
 ENDFOREACH(exe_cpp ${execpp_sources})
 
