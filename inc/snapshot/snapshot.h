@@ -15,7 +15,8 @@
 /*
  * Item tags for SnapShot components. 
  * !! see also some ZENO compatibility components below !!
- * Handling of SPH particles is still done rather poorly
+ * Handling of SPH particles is still done rather poorly 
+ * the current NEMO convention is to store the SPH particles first
  */
 
 #define SnapShotTag		"SnapShot"
