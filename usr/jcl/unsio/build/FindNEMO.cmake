@@ -16,7 +16,7 @@ IF(GLOB_TEMP_VAR)
      MESSAGE("GFortran compiler Detected......")
      #SET (FC_COMPILER gfortran)
      SET (FC_LIB_PATH "")
-     SET (FC_LIB "")
+     SET (FC_LIB gfortran)
 
   ELSE("FC  = gfortran" STREQUAL "${GFORTRAN_IS_SET}")
      # g77 stuffs     
