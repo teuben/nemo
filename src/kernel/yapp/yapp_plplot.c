@@ -10,6 +10,7 @@
  *     12-mar-97  non COLOR version didn't link properly
  *  
  *     25-oct-03  various fixed for the new CVS 5.x series of plplot
+ *     11-oct-07  compile option to use the double instead of float
  *
  *  ToDo: colors
  *        fix the --without-double requirement
@@ -21,6 +22,14 @@
 #include <stdinc.h>
 #include <yapp.h>
 
+/*   we don't want to use NEMO's real, since we may want to mix & match */
+#if 1
+ typedef double pl_real;
+local char *pl_nemoreal = "nemo: pl_real = double";
+#else
+ typedef float  pl_real;
+local char *pl_nemoreal = "nemo: pl_real = float";
+#endif
 
 /* we use the c_ versions since NEMO uses the same namespace ... */
 /* this means we cannot include the plplot.h header as is ...... */
@@ -32,19 +41,19 @@ extern void c_plinit(void);
 extern void c_plsdev(string);
 extern void c_plsfnam(string);
 extern void c_pladv(int);
-extern void c_plvpor(float, float, float, float);
-extern void c_plwind(float, float, float, float);
-extern void c_pljoin(float, float, float, float);
-extern void c_plsym(int, float *, float *, int);	/* hershey */
-extern void c_plpoin(int, float *, float *, int);	/* ascii */
-extern void c_plptex(float, float, float, float, float, char *);
-extern void c_plschr(float, float);
+extern void c_plvpor(pl_real, pl_real, pl_real, pl_real);
+extern void c_plwind(pl_real, pl_real, pl_real, pl_real);
+extern void c_pljoin(pl_real, pl_real, pl_real, pl_real);
+extern void c_plsym(int, pl_real *, pl_real *, int);	/* hershey */
+extern void c_plpoin(int, pl_real *, pl_real *, int);	/* ascii */
+extern void c_plptex(pl_real, pl_real, pl_real, pl_real, pl_real, char *);
+extern void c_plschr(pl_real, pl_real);
 extern void c_plend(void);
 extern void c_plfontld(int);
 extern void c_pllsty(int);
 extern void c_plwid(int);
 extern void c_plcol0(int);
-extern void c_plcol1(float);
+extern void c_plcol1(pl_real);
 extern void c_plsori(int);
 
 extern void c_plgver(char *);
@@ -57,14 +66,14 @@ extern string *burststring(string, string);
 #define COLOR  1
 
 local real dxymax;    /* size of user window */
-local float xcur=0.0, ycur=0.0;
+local pl_real xcur=0.0, ycur=0.0;
 
 #ifdef COLOR
 #define MAXCOLOR 256
 local int ncolors=0;
-local float red[MAXCOLOR];		/* RGB color tables		    */
-local float blue[MAXCOLOR];
-local float green[MAXCOLOR];
+local pl_real red[MAXCOLOR];		/* RGB color tables		    */
+local pl_real blue[MAXCOLOR];
+local pl_real green[MAXCOLOR];
 local cms_rgbsetup();
 #else
 #define MAXCOLOR 0
@@ -76,11 +85,13 @@ local cms_rgbsetup();
 
 plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
-    float width, height, x1,x2,y1,y2, zero, one;
+    pl_real width, height, x1,x2,y1,y2, zero, one;
     int   dummy, nx, ny, npldev;
     int   nxp, nyp, xoff, yoff, xlen, ylen;
     string *pldev;
     char ver[80];
+
+    dprintf(1,"plinit (PLPLOT): %s\n",pl_nemoreal);
     
     if (yapp_string == NULL || *yapp_string == 0)
 	if (pltdev != NULL && *pltdev != 0)
@@ -102,7 +113,7 @@ plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     c_plinit();
     c_pladv(0);
     c_plvpor(0.0, 1.0, 0.0, 1.0);
-    c_plwind((float)xmin, (float)xmax, (float)ymin, (float)ymax);
+    c_plwind((pl_real)xmin, (pl_real)xmax, (pl_real)ymin, (pl_real)ymax);
     c_plfontld(1);
     c_plcol0(15);    /* white color will be the default */
 
@@ -169,7 +180,7 @@ plltype(int lwid, int lpat)
 
 plline(real x, real y)
 {
-    float xp,yp;
+    pl_real xp,yp;
 
     xp=x; yp=y;
     c_pljoin(xcur,ycur,xp,yp);
@@ -180,7 +191,7 @@ plline(real x, real y)
 
 plmove(real x, real y)
 {
-   float xp,yp;
+   pl_real xp,yp;
 
    xcur=x; ycur=y;          /* RECALC !! */
 }
@@ -188,7 +199,7 @@ plmove(real x, real y)
 plpoint(real x, real y)
 {
     int n=0,istyle=0;           /* just a dot */
-    float xp,yp;
+    pl_real xp,yp;
     
     xp=x; yp=y;
     c_plpoin(1,&xp,&yp,1);
@@ -250,7 +261,7 @@ plbox(real x, real y, real s)
  * Imports: jus: 
  */
 
-static float fjust = 0.0;   /* pgplot default: left justified */
+static pl_real fjust = 0.0;   /* pgplot default: left justified */
 
 pljust(int jus)          /* -1, 0, 1 for left, mid, right just */
 {
@@ -263,14 +274,14 @@ pljust(int jus)          /* -1, 0, 1 for left, mid, right just */
 
 pltext(string msg, real x, real y, real hgt, real ang)
 {
-    float dx, dy, xp, yp;
+    pl_real dx, dy, xp, yp;
 
     xp=x; yp=y;
     ang *= PI/180.0;
     dx = cos(ang);
     dy = sin(ang);
     dprintf(1,"just %f: %s\n",fjust,msg);
-    c_plschr((float)10.0*hgt,1.0);
+    c_plschr((pl_real)10.0*hgt,1.0);
     c_plptex(xp,yp,dx,dy,fjust,msg);
 }
 
@@ -496,7 +507,7 @@ void pllut(string fname, bool compress)
     stream cstr;
     int ncolors, nskip=0;
     real red[MAXCOLOR], green[MAXCOLOR], blue[MAXCOLOR];
-    float r, g, b, r_old, g_old, b_old;
+    pl_real r, g, b, r_old, g_old, b_old;
     char line[256];
 
     if (fname==NULL || *fname == 0) return;
