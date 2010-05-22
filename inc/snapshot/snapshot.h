@@ -13,7 +13,9 @@
 #define _snapshot_h
 
 /*
- * Item tags for SnapShot components. (see also some ZENO compatibility components below)
+ * Item tags for SnapShot components. 
+ * !! see also some ZENO compatibility components below !!
+ * Handling of SPH particles is still done rather poorly
  */
 
 #define SnapShotTag		"SnapShot"
@@ -60,7 +62,11 @@
 #define PhaseTag       	PhaseSpaceTag
 
 
-/* New ZENO tags that NEMO had not defined before */
+/* 
+ *  New ZENO tags that NEMO had not defined before 
+ *  Note the NGas  vs. Ngas
+ *           NBody vs. Nobj
+ */
 
 #define NBodyTag 	"NBody"
 #define NGasTag 	"NGas"
