@@ -15,9 +15,11 @@ IF(GLOB_TEMP_VAR)
      # gfortran stuffs
      MESSAGE("GFortran compiler Detected......")
      #SET (FC_COMPILER gfortran)
-     SET (FC_LIB_PATH "")
+     execute_process(COMMAND gfortran -print-file-name=libgfortran.a 
+	OUTPUT_VARIABLE G2CFPATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+     execute_process(COMMAND dirname ${G2CFPATH} 
+	OUTPUT_VARIABLE FC_LIB_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
      SET (FC_LIB gfortran)
-
   ELSE("FC  = gfortran" STREQUAL "${GFORTRAN_IS_SET}")
      # g77 stuffs     
      MESSAGE("Assuming G77 compiler")
@@ -27,9 +29,10 @@ IF(GLOB_TEMP_VAR)
      execute_process(COMMAND dirname ${G2CFPATH} 
 	OUTPUT_VARIABLE FC_LIB_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
      SET (FC_LIB g2c)
-     MESSAGE( STATUS "FC LIB PATH : " ${FC_LIB_PATH})
-
   ENDIF  ("FC  = gfortran" STREQUAL "${GFORTRAN_IS_SET}")
+
+  MESSAGE( STATUS "FC LIB PATH : " ${FC_LIB_PATH})
+
 ENDIF(GLOB_TEMP_VAR)
 
 if (NOT NEMO_INSTALLED)
