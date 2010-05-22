@@ -9,6 +9,7 @@
  *	 7-mar-92   V2.5b   happy gcc2.0				   pjt
  *	22-feb-94       c   ansi headers
  *	 2-sep-94   V2.6    allow new format
+ *      22-may-10   V2.7    remove locally (re)defined Ngas etc., use snapshot.h
  */
 
 #include <stdinc.h>
@@ -32,7 +33,7 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS                 */
 #if defined(SPH)
     "mode=1\n		1: header has 4 items      2: header has 5 items",
 #endif
-    "VERSION=2.6\n      2-sep-94 PJT",
+    "VERSION=2.7\n      22-may-2010 PJT",
     NULL,
 };
 
@@ -51,23 +52,12 @@ int linecnt=0;
 bool in_header();
 void conv_real(), conv_vect(), conv_phase(), 
      in_real(), in_vect(), hexcheck();
-/*
- * Additional tags for SPH - not yet part of standard snapshot.h ....
- */
 
-#define PositionTag      "Position"
-#define VelocityTag      "Velocity"
 
-#define NgasTag          "Ngas"
-
-#define DensityTag       "Density"
-#define TemperatureTag   "Temperature"
-#define SmoothLengthTag  "SmoothLength"
 
 void
 nemo_main()
 {
-    bool in_header(), scanopt();
     int nbody, ngas;
     real tsnap;
 
@@ -99,11 +89,11 @@ nemo_main()
 	    conv_real(MassTag, nbody);
 	if (scanopt(options, "pos")) {		/*   convert position data  */
 	    assert(! scanopt(options, "phase"));
-	    conv_vect(PositionTag, nbody);
+	    conv_vect(PosTag, nbody);
 	}
 	if (scanopt(options, "vel")) {		/*   convert velocity data  */
 	    assert(! scanopt(options, "phase"));
-	    conv_vect(VelocityTag, nbody);
+	    conv_vect(VelTag, nbody);
 	}
         if (scanopt(options, "phase"))		/*   convert phase-space    */
 	    conv_phase(PhaseSpaceTag, nbody);
