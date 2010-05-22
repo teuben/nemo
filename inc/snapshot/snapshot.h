@@ -6,6 +6,7 @@
  *      jan-2002        added ZENO compatible ones
  *      nov-2003        removed Yanc tags (YANC is also called gyrfalcON now)
  *      feb-2004        added some new SPH stuff (GasDensity, NPartners, NSPHPartners)
+ *      may-2010        added in a few tag from atos.c for handling its' SPH 
  */
 
 #ifndef _snapshot_h
@@ -19,6 +20,7 @@
 
 #define   ParametersTag		"Parameters"
 #define     NobjTag             "Nobj"
+#define     NgasTag             "Ngas"        /* atos.c */
 #define     TimeTag             "Time"
 
 #define   ParticlesTag		"Particles"
@@ -33,6 +35,8 @@
 #define     KeyTag              "Key"
 #define     DensityTag          "Density"
 #define     GasDensTag          "GasDensity"
+#define     TemperatureTag      "Temperature"   /* atos.c */
+#define     SmoothLengthTag     "SmoothLength"  /* atos.c */
 #define     EpsTag              "Eps"
 #define     StoryTag		"Story"
 
