@@ -31,9 +31,6 @@ ELSE (NOT NEMO_INSTALLED)
 
 ENDIF (NOT NEMO_INSTALLED) 
 
-
-
-
 MESSAGE( STATUS "NEMOLIB : " ${NEMOLIB} )
 
 #execute_process(COMMAND  "grep 'FC  =' ${NEMOLIB}/makedefs | cut -d= -f2"
@@ -95,7 +92,7 @@ FOREACH(exe_cpp ${execpp_sources})
   add_executable (${exe} ${exe_cpp})
 
   # Link the executable to the Hello library.
-  target_link_libraries (${exe} unsio nemo sqlite3  X11 pgplot ${FC_LIB} stdc++)
+  target_link_libraries (${exe} unsio nemo sqlite3  X11 ${FC_LIB} stdc++)
 
 ENDFOREACH(exe_cpp ${execpp_sources})
 
