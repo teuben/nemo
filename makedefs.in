@@ -89,6 +89,9 @@ F77_CMAIN_FFLAGS = @F77_CMAIN_FFLAGS@
 # sometimes (for native cc/f77 compiler on solaris) you need to append $(FLIBS) here
 # since FLIBS isn't computed properly
 # Note for some PGPLOT devices (e.g. PNDRIV) you will need to add -lpng)
+# for PLPLOT a choice between -lplplotd and -lplplotf needs to be consistent with
+#  the definition triggered for pl_real in yapp_plplot.c !! this is not automated yet
+#  via configure.
 YAPPLIB = $(NEMOLIB)/yapp_@YAPP_NAME@.o @YAPP_LIBS@
 
 # Solaris 2.6+: -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath  
