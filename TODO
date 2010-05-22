@@ -192,6 +192,9 @@ code & line coverage: (gcov, lcov)
 - fix for pgplot  when libpng is needed, or tcl/tk for that matter....
 	**done; pgn=0 or 1 is now a keyword, --enable-png is allowed and used**
 
+- unsio (and possibly a few more modules) won't link if e.g. pgplot was enabled
+  with png. are some interfaces not cleanly separated?  maybe via yapp_pgplot ?
+
 - if the code has to be C++ friendly, i.e. the nemo_main() be compiled
   by c++, but the rest with CC,  all extern's must be wrapped in
 
