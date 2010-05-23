@@ -61,9 +61,6 @@ directcode: code.o code_io.o grav.o util.o
 	$(CC) $(CFLAGS) -o directcode \
 	   code.o code_io.o grav.o util.o $(LIBN) -lm
 
-hackforce: hackforce.c defs.h load_mp.o grav_mp.o
-	$(CC) $(CFLAGS) -o hackforce hackforce.c load_mp.o grav_mp.o $(LIBN) -lm
-
 code.o: code.c defs.h code.h
 
 code_io.o: code_io.c defs.h
