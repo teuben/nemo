@@ -48,13 +48,6 @@ static int c_nmax = NMAX;
 #include <nemo.h>
 #include "proto.h"
 
-
-  /*    extern int outbods_(), inbods_(), inpars_(), outene_();  */
-  /*    local  int nbody0_() */
-
-extern double cputime();
-
-
 /* *********************************************************************** */
 void nbody0(void)
 {
@@ -81,7 +74,7 @@ void nbody0(void)
     inpars(&c_nmax, &n, &eta, &deltat, &tcrit, &eps2, &reset, &use3dot);
     inbods(&n, body, x0, x0dot);
 
-/*           obtain total forces and first derivative for each body */
+    /* obtain total forces and first derivative for each body */
     for (i = 0; i < n; ++i) {
 	for (k = 0; k < NDIM; ++k) {
 	    f[k+i*3] = 0.0;
@@ -108,7 +101,7 @@ void nbody0(void)
 	    }
 	}
     } /* for(i) */
-/*              form second and third derivative */
+    /*  form second and third derivative */
     for (i = 0; i < n; ++i) {
 	for (j = 0; j < n; ++j) {
 	    if (i == j) continue;
@@ -147,8 +140,8 @@ void nbody0(void)
 	}
     } /* for (i) */
 
-/*             initialize integration steps and convert to force diffences          */
-/*             STEP = sqrt(ETA * (F*F2DOT + FDOT*FDOT)/(F2DOT*F2DOT + FDOT*F3DOT))  */
+    /* initialize integration steps and convert to force diffences          */
+    /* STEP = sqrt(ETA * (F*F2DOT + FDOT*FDOT)/(F2DOT*F2DOT + FDOT*F3DOT))  */
     for (i = 0; i < n; ++i) {
 	d__1 = X(f,i);
 	d__2 = Y(f,i);
@@ -293,14 +286,14 @@ L200:
     }
 #endif
     
-/*              predict all coordinates to first order in force derivative */
+    /*  predict all coordinates to first order in force derivative */
     for (j = 0; j < n; ++j) {
 	s = time - t0[j];
 	X(x,j) = ((X(fdot,j) * s + X(f,j)) * s + X(x0dot,j)) * s + X(x0,j);
 	Y(x,j) = ((Y(fdot,j) * s + Y(f,j)) * s + Y(x0dot,j)) * s + Y(x0,j);
 	Z(x,j) = ((Z(fdot,j) * s + Z(f,j)) * s + Z(x0dot,j)) * s + Z(x0,j);
     }
-/*              include 2nd and 3rd order and obtain the velocity */
+    /*  include 2nd and 3rd order and obtain the velocity */
     dt = time - t0[i];
     for (k = 0; k < NDIM; ++k) {
 	f2dot[k] = d3[k+i*3] * (t0[i] - t1[i] + (t0[i]
@@ -313,7 +306,7 @@ L200:
 		dt + f[k+i*3] * 2.0) * dt + x0dot[k+i*3];
 	f1[k] = 0.0;
     }
-/*              obtain current force on i-th body */
+    /*  obtain current force on i-th body */
     for (j = 0; j < n; ++j) {
 	if (j == i) continue;
 	d__1 = a[0] = X(x,j) - X(x,i);
@@ -326,7 +319,7 @@ L200:
 	f1[2] += a[2] * a[4];
     }
 
-/*              set time intervals for new difference and update the times */
+    /*  set time intervals for new difference and update the times */
     dt1 = time - t1[i];
     dt2 = time - t2[i];
     dt3 = time - t3[i];
@@ -337,7 +330,7 @@ L200:
     t2[i] = t1[i];
     t1[i] = t0[i];
     t0[i] = time;
-/*              form new differences and include 4th order semi-iterative  */
+    /*  form new differences and include 4th order semi-iterative  */
     for (k = 0; k < NDIM; ++k) {
 	a[k    ] = (f1[k   ] -  f[k+i*3 ] * 2.0) / dt;
 	a[k + 3] = (a[k    ] - d1[k+i*3]) / dt1;
@@ -358,7 +351,7 @@ L200:
 		0.25) * dt + f2dot[k] / 3.0) * dt + f1dot[k] * 0.5) * 
 		SQR(d__1) + x0dot[k+i*3];
     }
-/*           scale F and FDOT by factorials and set new integration step  */
+    /*  scale F and FDOT by factorials and set new integration step  */
     for (k = 0; k < NDIM; ++k) {
 	f[k+i*3] = f1[k] * 0.5;
 	fdot[k+i*3] = ((d3[k+i*3] * dt1 + d2[k+i*3]) *
