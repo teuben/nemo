@@ -6,6 +6,7 @@ History:
   - 01-Jul-1998:    fixed bug reported by Sverre
   - 25-sep-1998:    fixed quitting bug, added sun-earth-jupiter example (sej.in)
   -  1-mar-2006:    documented the color aggressive window managers
+  -  5-jul-2009:    document VNC trick
 
 Incompatible things with Sverre's January 1998 version:
 
@@ -68,3 +69,18 @@ Some other things to note:
 
 	  twm does not use as many colors, and now xtriple will work.
 
+
+    The following VNC trick should also work to get an 8 bit display:
+
+
+     % vncserver :1 -depth 8 -cc 3 -geometry 1024x768
+     % vncpasswd
+     % vncviewer :1
+
+    and in this new 8 bit viewer you can run your application
+
+     % xtriple < 
+
+     and at the end, kill the server again
+
+      % vncserver -kill :1
