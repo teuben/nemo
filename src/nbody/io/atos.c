@@ -39,6 +39,8 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS                 */
 
 string usage = "convert ASCII N-body file to binary format";
 
+string cvsid="$Id$";
+
 stream instr, outstr;
 
 string options;
@@ -49,14 +51,17 @@ bool hexpack;
 int coordsys = CSCode(Cartesian, NDIM, 2);
 int linecnt=0;
 
-bool in_header();
-void conv_real(), conv_vect(), conv_phase(), 
-     in_real(), in_vect(), hexcheck();
-
+bool in_header(int *nbptr, int *ngptr, real *tsptr);
+void conv_real(string tag, int ndata);
+void conv_vect(string tag, int ndata);
+void conv_phase(string tag, int ndata);
+void hexcheck(void);
+void in_real(real *rptr);
+void in_vect(vector vptr);
 
 
 void
-nemo_main()
+nemo_main(void)
 {
     int nbody, ngas;
     real tsnap;
@@ -118,9 +123,7 @@ nemo_main()
 #if !defined(SPH)
 
 bool 
-in_header(nbptr, ngptr, tsptr)
-int *nbptr, *ngptr;
-real *tsptr;
+in_header(int *nbptr, int *ngptr, real *tsptr)
 {
     int ndim;
     double dval;
@@ -137,9 +140,7 @@ real *tsptr;
 
 #else
 
-bool in_header(nbptr, ngptr, tsptr)
-int *nbptr, *ngptr;
-real *tsptr;
+bool in_header(int *nbptr, int *ngptr, real *tsptr)
 {
     int ndim, ndummy;
     double dval;
@@ -165,9 +166,7 @@ real *tsptr;
 #endif
 
 void
-conv_real(tag, ndata)
-string tag;
-int ndata;
+conv_real(string tag, int ndata)
 {
     real *rbuf, *rp;
     int i;
@@ -183,9 +182,7 @@ int ndata;
 }
 
 void
-conv_vect(tag, ndata)
-string tag;
-int ndata;
+conv_vect(string tag, int ndata)
 {
     real *vbuf, *vp;
     int i;
@@ -201,9 +198,7 @@ int ndata;
 }
 
 void
-conv_phase(tag, ndata)
-string tag;
-int ndata;
+conv_phase(string tag, int ndata)
 {
     real *pbuf, *pp;
     int i;
@@ -228,7 +223,7 @@ local int hexmax;		/* max value of packed hex coordinates      */
 local double scale;		/* scale factor for packed hex coords.      */
 
 void 
-hexcheck()
+hexcheck(void)
 {
     if (hexpack) {		        	/* packed hex data to read? */
         linecnt++;
@@ -241,8 +236,7 @@ hexcheck()
 }
 
 void
-in_real(rptr)
-real *rptr;
+in_real(real *rptr)
 {
     char line[128];
     double dval;
@@ -265,8 +259,7 @@ real *rptr;
 }
 
 void
-in_vect(vptr)
-vector vptr;
+in_vect(vector vptr)
 {
     char line[128];
     double dx, dy, dz;
