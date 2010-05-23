@@ -2,4 +2,4 @@
 #if defined(GETPARAM_VERSION_ID)
 static char *version_h = "$Id$";
 #endif
-#define NEMO_VERSION "3.3.0"
+#define NEMO_VERSION "3.3.1"
