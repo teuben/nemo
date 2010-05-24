@@ -313,7 +313,7 @@ dnl TODO: allow to choose a compiler, e.g. --with-fortran=f90   (setenv F77)
 
 if test "$enable_fortran" = "yes"; then
   AC_MSG_CHECKING(whether we have a FORTRAN 77 compiler)
-  AC_CHECK_PROGS(F77, f77 g77 gfortran g95 ifort ifc xlf xlf77 fl32 fort77 fc cf77 frt f90 xlf90)
+  AC_CHECK_PROGS(F77, gfortran g77 g95 ifort ifc xlf xlf77 fl32 fort77 fc cf77 frt f90 xlf90)
   AC_PROG_F77
   if test -n "$F77"; then
     if test -n "$GCC"; then
