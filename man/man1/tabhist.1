@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "29 January 2004"
+.TH TABHIST 1NEMO "1 June 2010"
 .SH NAME
 tabhist \- histogram plotter and gaussian fit for tabular data
 .SH SYNOPSIS
@@ -44,7 +44,10 @@ Maximum value along X-axis to include
 [default: autoscaling on maximum of datapoints].
 .TP
 \fBbins=\fIn_bins\fP
-Number of (equal size) bins the data is split up in [default: \fB16\fP].
+If one number is given, it is the number of (equal size) bins between 
+min and max.  If more than one number is given, they are the bin edges
+(thus one more than the number of bins need to be supplied).
+[default: \fB16\fP].
 .TP
 \fBmaxcount=\fIcount\fP
 Maximum count value per bin plotted along the Y-axis
@@ -143,5 +146,6 @@ xx-mar-88	V1.0: created          	PJT
 7-jun-01	3.2: added nsigma, corrected man page options	PJT
 7-may-03	4.0: multiple columns allowed	PJT
 28-jan-05	5.0: separate xmin/xmax=, added sort=, fix median if nsigma 	PJT
+1-jun-10	6.0: bins= now allowed to have manual edges	PJT
 .fi
 
