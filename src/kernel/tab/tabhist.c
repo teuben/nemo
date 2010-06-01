@@ -40,13 +40,14 @@
  *                        fixed median & histogram if nsigma outliers 
  *      11-mar-05   5.1   added xcoord= keyword                 pjt
  *       7-apr-05   5.2   under and overflow reporting fixed    pjt
+ *       1-jun-10   6.0   allow bins= to be edges of bins       pjt 
  *                        
  * 
  * TODO:
  *     option to do dual-pass to subtract the mean before computing
  *     the higher order moments - needed for accuracy
- *   allow bins= to give the actual bin edges, e.g.
- *     bins=1:100:0.5
+ *
+ *   allow bins= with actual bin edges to also use xmin and xmax for plot
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -66,7 +67,7 @@ string defv[] = {
     "xcol=1\n			  Column(s) to use",
     "xmin=\n			  Set minimum, if no autoscale needed",
     "xmax=\n			  Set maximum, if no autoscale needed",
-    "bins=16\n			  Number of bins",
+    "bins=16\n			  Number of bins (or optionally edges of bins)",
     "maxcount=0\n		  Maximum along count-axis",
     "nmax=100000\n		  maximum number of data to be read if pipe",
     "ylog=f\n			  log scaling in Y?",
@@ -83,7 +84,7 @@ string defv[] = {
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
-    "VERSION=5.4\n		  11-feb-07 PJT",
+    "VERSION=6.0\n		  1-jun-10 PJT",
     NULL
 };
 
@@ -125,10 +126,12 @@ local bool   Qtab;                      /* table output ? */
 local bool   Qcumul;                    /* cumulative histogram ? */
 local bool   Qmedian;			/* compute median also ? */
 local bool   Qdual;                     /* dual pass ? */
+local bool   Qbin;                      /* manual bins ? */
 local int    maxcount;
 local int    Nunder, Nover;             /* number of data under or over min/max */
 local real   dual_mean;                 /* mean value, if dual pass used */
 local real   scale;                     /* scale factor */
+local real   bins[MAXHIST+1];           /* edges of histogram bins */
 
 local string headline;			/* text string above plot */
 local string xlab, ylab, xlab2;		/* text string along axes */
@@ -140,10 +143,10 @@ local int nxcoord;
 
 local iproc  mysort, getsort();
 
-local real xtrans(real), ytrans(real);
-local void setparams(void), read_data(void), histogram(void);
+local real  xtrans(real), ytrans(real);
+local void  setparams(void), read_data(void), histogram(void);
 local iproc getsort(string name);
-
+local int   ring_index(int n, real *r, real rad);
 
 
 /****************************** START OF PROGRAM **********************/
@@ -165,15 +168,27 @@ local void setparams()
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
     if (ncol < 0) error("parsing error col=%s",getparam("col"));
-    
-    nsteps=getiparam("bins");
-    if (nsteps > MAXHIST) 
+
+    nsteps = nemoinpd(getparam("bins"),bins,MAXHIST+1) - 1;
+    if (nsteps == 0) {
+      Qbin = FALSE;
+      Qmin = hasvalue("xmin");
+      Qmax = hasvalue("xmax");
+      nsteps=getiparam("bins");
+      if (nsteps > MAXHIST) 
         error("bins=%d too large; MAXHIST=%d",nsteps,MAXHIST);
-    Qmin = hasvalue("xmin");
-    Qmax = hasvalue("xmax");
-    if (Qmin) xrange[0] = getdparam("xmin");
-    if (Qmax) xrange[1] = getdparam("xmax");
-    if (Qmin && Qmax && xrange[0] >= xrange[1]) error("Need xmin < xmax");
+      if (Qmin) xrange[0] = getdparam("xmin");
+      if (Qmax) xrange[1] = getdparam("xmax");
+      if (Qmin && Qmax && xrange[0] >= xrange[1]) error("Need xmin < xmax");
+    } else if (nsteps > 0) {
+      Qbin = TRUE;
+      Qmin = TRUE;
+      Qmax = TRUE;
+      xrange[0] = hasvalue("xmin") ?  getdparam("xmin") : bins[0];
+      xrange[1] = hasvalue("xmax") ?  getdparam("xmax") : bins[nsteps];
+      warning("new mode: manual bins=%s",getparam("bins"));
+    } else
+      error("no proper usage for bins=%s",getparam("bins"));
     Qauto = (!Qmin || !Qmax) ;
 
     maxcount=getiparam("maxcount");
@@ -274,300 +289,304 @@ local void read_data()
 
 local void histogram(void)
 {
-        int i,j,k, l, kmin, kmax, lcount = 0;
-	real count[MAXHIST], under, over;
-	real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
-	real mean, sigma, skew, kurt, lmin, lmax, median;
-	Moment m;
+  int i,j,k, l, kmin, kmax, lcount = 0;
+  real count[MAXHIST], under, over;
+  real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
+  real mean, sigma, skew, kurt, lmin, lmax, median;
+  Moment m;
+  
+  dprintf (0,"read %d values\n",npt);
+  dprintf (0,"min and max value in column(s)  %s: [%g : %g]\n",getparam("xcol"),xmin,xmax);
+  if (!Qauto) {
+    xmin = xrange[0];
+    xmax = xrange[1];
+    dprintf (0,"min and max value reset to : [%g : %g]\n",xmin,xmax);
+    lmin = xmax;
+    lmax = xmin;
+    for (i=0; i<npt; i++) {
+      if (x[i]>xmin && x[i]<=xmax) {
+	lmin = MIN(lmin, x[i]);
+	lmax = MAX(lmax, x[i]);
+      }
+    }
+    dprintf (0,"min and max value in range : [%g : %g]\n",lmin,lmax);
+  } 
+  
+  for (k=0; k<nsteps; k++)
+    count[k] = 0;		/* init histogram */
+  under = over = 0;
+  
+  ini_moment(&m,4,0);
+  for (i=0; i<npt; i++) {
+    if (Qbin) {
+      k=ring_index(nsteps,bins,x[i]);
+    } else {
+      if (xmax != xmin)
+	k = (int) floor((x[i]-xmin)/(xmax-xmin)*nsteps);
+      else
+	k = 0;
+      dprintf(1,"%d k=%d %g\n",i,k,x[i]);
+    }
+    if (k==nsteps && x[i]==xmax) k--;     /* include upper edge */
+    if (k<0)       { under++; continue; }
+    if (k>=nsteps) { over++;  continue; }
+    count[k] = count[k] + 1;
+    dprintf (4,"%d : %f %d\n",i,x[i],k);
+    accum_moment(&m,x[i],1.0);
+  }
+  if (under > 0) error("bug: under = %d",under);
+  if (over  > 0) error("bug: over = %d",over);
+  under = Nunder;
+  over  = Nover;
 
-	dprintf (0,"read %d values\n",npt);
-	dprintf (0,"min and max value in column(s)  %s: [%g : %g]\n",getparam("xcol"),xmin,xmax);
-	if (!Qauto) {
-	    xmin = xrange[0];
-	    xmax = xrange[1];
-	    dprintf (0,"min and max value reset to : [%g : %g]\n",xmin,xmax);
-	    lmin = xmax;
-	    lmax = xmin;
-	    for (i=0; i<npt; i++) {
-	    	if (x[i]>xmin && x[i]<=xmax) {
-	    	    lmin = MIN(lmin, x[i]);
-   	    	    lmax = MAX(lmax, x[i]);
-	    	}
-	    }
-	    dprintf (0,"min and max value in range : [%g : %g]\n",lmin,lmax);
-	} 
-
-	for (k=0; k<nsteps; k++)
-		count[k] = 0;		/* init histogram */
-	under = over = 0;
-
-	ini_moment(&m,4,0);
-	for (i=0; i<npt; i++) {
-		if (xmax != xmin)
-		    k = (int) floor((x[i]-xmin)/(xmax-xmin)*nsteps);
-		else
-		    k = 0;
-		dprintf(1,"%d k=%d %g\n",i,k,x[i]);
-		if (k==nsteps && x[i]==xmax) k--;     /* include upper edge */
-		if (k<0)       { under++; continue; }
-		if (k>=nsteps) { over++;  continue; }
-		count[k] = count[k] + 1;
-		dprintf (4,"%d : %f %d\n",i,x[i],k);
-		accum_moment(&m,x[i],1.0);
+  mean = mean_moment(&m);
+  sigma = sigma_moment(&m);
+  skew = skewness_moment(&m);
+  kurt = kurtosis_moment(&m);
+  
+  if (nsigma > 0) {    /* remove outliers iteratively, starting from the largest */
+    iq = (int *) allocate(npt*sizeof(int));
+    for (i=0; i<npt; i++) {
+#if 1
+      iq[i] = x[i] < xmin  || x[i] > xmax;
+#else
+      iq[i] = 0;
+#endif
+    }
+    lcount = 0;
+    do {               /* loop to remove outliers one by one */
+      qmax = -1.0;
+      for (i=0, l=-1; i<npt; i++) {     /* find largest deviation from current mean */
+	if (iq[i]) continue;            /* but skip previously flagged points */
+	q = (x[i]-mean)/sigma;
+	q = ABS(q);
+	if (q > qmax) {
+	  qmax = q;
+	  l = i;
 	}
-	if (under > 0) error("bug: under = %d",under);
-	if (over  > 0) error("bug: over = %d",over);
-	under = Nunder;
-	over  = Nover;
-
+      }
+      if (qmax > nsigma) {
+	lcount++;
+	iq[l] = 1;
+	decr_moment(&m,x[l],1.0);
 	mean = mean_moment(&m);
 	sigma = sigma_moment(&m);
 	skew = skewness_moment(&m);
 	kurt = kurtosis_moment(&m);
-
-	if (nsigma > 0) {    /* remove outliers iteratively, starting from the largest */
-	  iq = (int *) allocate(npt*sizeof(int));
-	  for (i=0; i<npt; i++) {
-#if 1
-	    iq[i] = x[i] < xmin  || x[i] > xmax;
-#else
-	    iq[i] = 0;
-#endif
-	  }
-	  lcount = 0;
-	  do {               /* loop to remove outliers one by one */
-	    qmax = -1.0;
-	    for (i=0, l=-1; i<npt; i++) {     /* find largest deviation from current mean */
-	      if (iq[i]) continue;            /* but skip previously flagged points */
-	      q = (x[i]-mean)/sigma;
-	      q = ABS(q);
-	      if (q > qmax) {
-		qmax = q;
-		l = i;
-	      }
-	    }
-	    if (qmax > nsigma) {
-	      lcount++;
-	      iq[l] = 1;
-	      decr_moment(&m,x[l],1.0);
-	      mean = mean_moment(&m);
-	      sigma = sigma_moment(&m);
-	      skew = skewness_moment(&m);
-	      kurt = kurtosis_moment(&m);
-	      dprintf(1,"%d/%d: removing point %d, m/s=%g %g qmax=%g\n",
-		      lcount,npt,l,mean,sigma,qmax);
-	      if (sigma <= 0) {
-		/* RELATED TO presetting MINMAX */
-		warning("BUG");
-		accum_moment(&m,x[l],1.0);
-		mean = mean_moment(&m);
-		sigma = sigma_moment(&m);
-		skew = skewness_moment(&m);
-		kurt = kurtosis_moment(&m);
-		dprintf(1,"%d/%d: LAST removing point %d, m/s=%g %g qmax=%g\n",
-		      lcount,npt,l,mean,sigma,qmax);
-		break;
-		
-	      }
-
-	    } else
-	      dprintf(1,"%d/%d: keeping point %d, m/s=%g %g qmax=%g\n",
-		      lcount,npt,l,mean,sigma,qmax);
-
-	    /* if (lcount > npt/2) break; */
-	  } while (qmax > nsigma);
-	  dprintf(0,"Removed %d/%d points for nsigma=%g\n",lcount,npt,nsigma);
-
-	  /* @algorithm      left shift array values from mask array */
-	  /* now shift all points into the array, decreasing npt */
-	  /* otherwise the median is not correctly computed */
-	  for (i=0, k=0; i<npt; i++) {
-	    dprintf(1,"iq->%d\n",iq[i]);
-	    if (iq[i]) k++;
-	    if (k==0) continue;  /* ?? */
-	    if (i-k < 0) continue;
-	    dprintf(1,"SHIFT: %d <= %d\n",i-k,i);
-	    x[i-k] = x[i];
-	  }
-	  npt -= lcount;   /* correct for outliers */
-	  free(iq);
-	} /* nsigma > 0 */
-
-	if (npt != n_moment(&m))
-	  error("Counting error, probably in removing outliers...");
-	dprintf (0,"Number of points     : %d\n",npt);
-	if (npt>1)
-	  dprintf (0,"Mean and dispersion  : %g %g %g\n",mean,sigma,sigma/sqrt(npt-1.0));
-	else
-	  dprintf (0,"Mean and dispersion  : %g %g 0.0\n",mean,sigma);
-	dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
-	if (Qmedian) {
-
-	  if (npt % 2) 
-            median = x[(npt-1)/2];
-	  else
-            median = 0.5 * (x[npt/2] + x[npt/2-1]);
-	  dprintf (0,"Median               : %g\n",median);
+	dprintf(1,"%d/%d: removing point %d, m/s=%g %g qmax=%g\n",
+		lcount,npt,l,mean,sigma,qmax);
+	if (sigma <= 0) {
+	  /* RELATED TO presetting MINMAX */
+	  warning("BUG");
+	  accum_moment(&m,x[l],1.0);
+	  mean = mean_moment(&m);
+	  sigma = sigma_moment(&m);
+	  skew = skewness_moment(&m);
+	  kurt = kurtosis_moment(&m);
+	  dprintf(1,"%d/%d: LAST removing point %d, m/s=%g %g qmax=%g\n",
+		  lcount,npt,l,mean,sigma,qmax);
+	  break;
+	  
 	}
-	dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
-
-	if (lcount > 0) {
-	  warning("Recompute histogram because of outlier removals");
-	  /* recompute histogram if we've lost some outliers */
-	  for (k=0; k<nsteps; k++)
-	    count[k] = 0;		/* init histogram */
-	  under = over = 0;
-	  for (i=0; i<npt; i++) {
-	    if (xmax != xmin)
-	      k = (int) floor((x[i]-xmin)/(xmax-xmin)*nsteps);
-	    else
-	      k = 0;
-	    if (k==nsteps && x[i]==xmax) k--;     /* include upper edge */
-	    if (k<0)       { under++; continue; }
-	    if (k>=nsteps) { over++;  continue; }
-	    count[k] = count[k] + 1;
-	    dprintf (4,"%d : %f %d\n",i,x[i],k);
-	  }
-	  if (under > 0 || over > 0) error("under=%d over=%d in recomputed histo",under,over);
-	}
-
-	dprintf (3,"Histogram values : \n");
-        dx=(xmax-xmin)/nsteps;
-	kmax=0;
-	sum=0.0;
-	for (k=0; k<nsteps; k++) {
-	        sum = sum + dx*count[k];
-		if (ylog) {
-		    if (count[k]>0.0)
-                        count[k] = log10(count[k]);
-                    else
-                        count[k] = -1.0;
-		}
-		if (count[k]>kmax)
-			kmax=count[k];
-		dprintf (3,"%f ",count[k]);
-                if (Qcumul) {
-                    if (k==0)
-                        count[k] += under;
-                    else
-                        count[k] += count[k-1];
-                }
-	}
-	dprintf (3,"\n");
-        sigma2 = 2.0 * sigma * sigma;	/* gaussian */
-        sum /= sigma * sqrt(2*PI);	/* scaling factor for equal area gauss */
-
-	if (ylog && over>0)  over =  log10(over);
-	if (ylog && under>0) under = log10(under);
-
-	kmax *= 1.1;		/* add 10% */
-        if (Qcumul) kmax = npt;
-	if (maxcount>0)		/* force scaling by user ? */
-		kmax=maxcount;	
-
-	if (Qtab) {
-            maxcount = 0;
-            for (k=0; k<nsteps; k++)
-                maxcount = MAX(maxcount,count[k]);
-            if (maxcount>0)
-                r = 29.0/maxcount;
-            else
-                r = 1.0;
-            printf("  Bin    Value          Number\n");
-            printf("       Underflow   %d\n",Nunder);
-            for (k=0; k<nsteps; k++) {
-                j = (int) (r*count[k]) + 1;
-                if (ylog) printf("%3d %13.6g %13.6g ", 
-				k+1, xmin+(k+0.5)*dx, count[k]);
-		else printf("%3d %13.6g %8d ", 
-				k+1, xmin+(k+0.5)*dx, (int)count[k]);
-                while (j-- > 0) printf("*");
-                printf("\n");
-            }
-            printf("       Overflow    %d\n",Nover);
-	    stop(0);
-	}
-
+	
+      } else
+	dprintf(1,"%d/%d: keeping point %d, m/s=%g %g qmax=%g\n",
+		lcount,npt,l,mean,sigma,qmax);
+      
+      /* if (lcount > npt/2) break; */
+    } while (qmax > nsigma);
+    dprintf(0,"Removed %d/%d points for nsigma=%g\n",lcount,npt,nsigma);
+    
+    /* @algorithm      left shift array values from mask array */
+    /* now shift all points into the array, decreasing npt */
+    /* otherwise the median is not correctly computed */
+    for (i=0, k=0; i<npt; i++) {
+      dprintf(1,"iq->%d\n",iq[i]);
+      if (iq[i]) k++;
+      if (k==0) continue;  /* ?? */
+      if (i-k < 0) continue;
+      dprintf(1,"SHIFT: %d <= %d\n",i-k,i);
+      x[i-k] = x[i];
+    }
+    npt -= lcount;   /* correct for outliers */
+    free(iq);
+  } /* nsigma > 0 */
+  
+  if (npt != n_moment(&m))
+    error("Counting error, probably in removing outliers...");
+  dprintf (0,"Number of points     : %d\n",npt);
+  if (npt>1)
+    dprintf (0,"Mean and dispersion  : %g %g %g\n",mean,sigma,sigma/sqrt(npt-1.0));
+  else
+    dprintf (0,"Mean and dispersion  : %g %g 0.0\n",mean,sigma);
+  dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
+  if (Qmedian) {
+    
+    if (npt % 2) 
+      median = x[(npt-1)/2];
+    else
+      median = 0.5 * (x[npt/2] + x[npt/2-1]);
+    dprintf (0,"Median               : %g\n",median);
+  }
+  dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
+  
+  if (lcount > 0) {
+    warning("Recompute histogram because of outlier removals");
+    /* recompute histogram if we've lost some outliers */
+    for (k=0; k<nsteps; k++)
+      count[k] = 0;		/* init histogram */
+    under = over = 0;
+    for (i=0; i<npt; i++) {
+      if (xmax != xmin)
+	k = (int) floor((x[i]-xmin)/(xmax-xmin)*nsteps);
+      else
+	k = 0;
+      if (k==nsteps && x[i]==xmax) k--;     /* include upper edge */
+      if (k<0)       { under++; continue; }
+      if (k>=nsteps) { over++;  continue; }
+      count[k] = count[k] + 1;
+      dprintf (4,"%d : %f %d\n",i,x[i],k);
+    }
+    if (under > 0 || over > 0) error("under=%d over=%d in recomputed histo",under,over);
+  }
+  
+  dprintf (3,"Histogram values : \n");
+  dx=(xmax-xmin)/nsteps;
+  kmax=0;
+  sum=0.0;
+  for (k=0; k<nsteps; k++) {
+    sum = sum + dx*count[k];
+    if (ylog) {
+      if (count[k]>0.0)
+	count[k] = log10(count[k]);
+      else
+	count[k] = -1.0;
+    }
+    if (count[k]>kmax)
+      kmax=count[k];
+    dprintf (3,"%f ",count[k]);
+    if (Qcumul) {
+      if (k==0)
+	count[k] += under;
+      else
+	count[k] += count[k-1];
+    }
+  }
+  dprintf (3,"\n");
+  sigma2 = 2.0 * sigma * sigma;	/* gaussian */
+  sum /= sigma * sqrt(2*PI);	/* scaling factor for equal area gauss */
+  
+  if (ylog && over>0)  over =  log10(over);
+  if (ylog && under>0) under = log10(under);
+  
+  kmax *= 1.1;		/* add 10% */
+  if (Qcumul) kmax = npt;
+  if (maxcount>0)		/* force scaling by user ? */
+    kmax=maxcount;	
+  
+  if (Qtab) {
+    maxcount = 0;
+    for (k=0; k<nsteps; k++)
+      maxcount = MAX(maxcount,count[k]);
+    if (maxcount>0)
+      r = 29.0/maxcount;
+    else
+      r = 1.0;
+    printf("  Bin    Value          Number\n");
+    printf("       Underflow   %d\n",Nunder);
+    for (k=0; k<nsteps; k++) {
+      j = (int) (r*count[k]) + 1;
+      if (ylog) printf("%3d %13.6g %13.6g ", 
+		       k+1, xmin+(k+0.5)*dx, count[k]);
+      else printf("%3d %13.6g %8d ", 
+		  k+1, xmin+(k+0.5)*dx, (int)count[k]);
+      while (j-- > 0) printf("*");
+      printf("\n");
+    }
+    printf("       Overflow    %d\n",Nover);
+    stop(0);
+  }
+  
 #ifdef YAPP
-	/*	PLOTTING */	
-	plinit("***",0.0,20.0,0.0,20.0);
+  /*	PLOTTING */	
+  plinit("***",0.0,20.0,0.0,20.0);
 
-	xplot[0] = xmin;
-	xplot[1] = xmax;
-	yplot[0] = 0.0;
-	yplot[1] = (real) kmax;
-	xaxis (2.0, 2.0, 16.0, xplot, -7, xtrans, xlab);
-	xaxis (2.0, 18.0,16.0, xplot, -7, xtrans, NULL);
-	yaxis (2.0, 2.0, 16.0, yplot, -7, ytrans, ylab);
-	yaxis (18.0, 2.0, 16.0, yplot, -7, ytrans, NULL);
-
-        pljust(-1);     /* set to left just */
-        pltext(input,2.0,18.2,0.32,0.0);             /* filename */
-        pljust(1);
-        pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
-        pljust(-1);     /* return to left just */
-
-	xdat=xmin;
-	dx=(xmax-xmin)/nsteps;
-	plmove(xtrans(xmin),ytrans(0.0));
-	for (k=0; k<nsteps; k++) {	/* nsteps= */
-		xplt = xtrans(xdat);
-		yplt = ytrans((real)count[k]);
-		plline (xplt,yplt);
-		xdat += dx;
-		xplt = xtrans(xdat);
-		plline (xplt,yplt);	
-	}
-	plline(xplt,ytrans(0.0));
-
-	for (i=0; i<nxcoord; i++) {
-	  plmove(xtrans(xcoord[i]),ytrans(yplot[0]));
-	  plline(xtrans(xcoord[i]),ytrans(yplot[1]));
-	}
-
-	if (Qgauss) {                   /* plot model and residuals */
-            if (ylog)
-		plmove(xtrans(xmin),ytrans(-1.0));
-            else
-		plmove(xtrans(xmin),ytrans(0.0));
-	    for (k=0; k<100; k++) {
-	        xdat = xmin + (k+0.5)*(xmax-xmin)/100.0;
-	        ydat = sum * exp( -sqr(xdat-mean)/sigma2);
-	        if (ylog) ydat = log10(ydat);
-	        plline(xtrans(xdat), ytrans(ydat));
-	    }
-        }
-
-        if (Qresid) {
-
-	    plltype(0,2);   /* dotted residuals */
-	    xdat = xmin+0.5*dx;
-            dprintf(1,"# residuals from gauss\n");
-	    for (k=0; k<nsteps; k++, xdat +=dx) {
-	        ydat = sum * exp( -sqr(xdat-mean)/sigma2);
-	        dprintf(1,"%g %g %g\n",xdat,count[k],ydat);
-	        if (ylog) ydat = log10(ydat);
-                ydat = count[k] - ydat;
-                if (k==0)
-                    plmove(xtrans(xdat),ytrans(ydat));
-                else
-                    plline(xtrans(xdat),ytrans(ydat));
-	    }
-	    plltype(0,1);   /* back to normal line type */
-
-	}
-	plstop();
+  xplot[0] = xmin;
+  xplot[1] = xmax;
+  yplot[0] = 0.0;
+  yplot[1] = (real) kmax;
+  xaxis (2.0, 2.0, 16.0, xplot, -7, xtrans, xlab);
+  xaxis (2.0, 18.0,16.0, xplot, -7, xtrans, NULL);
+  yaxis (2.0, 2.0, 16.0, yplot, -7, ytrans, ylab);
+  yaxis (18.0, 2.0, 16.0, yplot, -7, ytrans, NULL);
+  
+  pljust(-1);     /* set to left just */
+  pltext(input,2.0,18.2,0.32,0.0);             /* filename */
+  pljust(1);
+  pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
+  pljust(-1);     /* return to left just */
+  
+  xdat=xmin;
+  dx=(xmax-xmin)/nsteps;
+  plmove(xtrans(xmin),ytrans(0.0));
+  for (k=0; k<nsteps; k++) {	/* nsteps= */
+    xplt = xtrans(xdat);
+    yplt = ytrans((real)count[k]);
+    plline (xplt,yplt);
+    xdat += dx;
+    xplt = xtrans(xdat);
+    plline (xplt,yplt);	
+  }
+  plline(xplt,ytrans(0.0));
+  
+  for (i=0; i<nxcoord; i++) {
+    plmove(xtrans(xcoord[i]),ytrans(yplot[0]));
+    plline(xtrans(xcoord[i]),ytrans(yplot[1]));
+  }
+  
+  if (Qgauss) {                   /* plot model and residuals */
+    if (ylog)
+      plmove(xtrans(xmin),ytrans(-1.0));
+    else
+      plmove(xtrans(xmin),ytrans(0.0));
+    for (k=0; k<100; k++) {
+      xdat = xmin + (k+0.5)*(xmax-xmin)/100.0;
+      ydat = sum * exp( -sqr(xdat-mean)/sigma2);
+      if (ylog) ydat = log10(ydat);
+      plline(xtrans(xdat), ytrans(ydat));
+    }
+  }
+  
+  if (Qresid) {
+    
+    plltype(0,2);   /* dotted residuals */
+    xdat = xmin+0.5*dx;
+    dprintf(1,"# residuals from gauss\n");
+    for (k=0; k<nsteps; k++, xdat +=dx) {
+      ydat = sum * exp( -sqr(xdat-mean)/sigma2);
+      dprintf(1,"%g %g %g\n",xdat,count[k],ydat);
+      if (ylog) ydat = log10(ydat);
+      ydat = count[k] - ydat;
+      if (k==0)
+	plmove(xtrans(xdat),ytrans(ydat));
+      else
+	plline(xtrans(xdat),ytrans(ydat));
+    }
+    plltype(0,1);   /* back to normal line type */
+    
+  }
+  plstop();
 #endif
 }
 
 local real xtrans(real x)
 {
-	return (2.0 + 16.0*(x-xplot[0])/(xplot[1]-xplot[0]));
+  return (2.0 + 16.0*(x-xplot[0])/(xplot[1]-xplot[0]));
 }
 
 local real ytrans(real y)
 {
-	return (2.0 + 16.0*(y-yplot[0])/(yplot[1]-yplot[0]));
+  return (2.0 + 16.0*(y-yplot[0])/(yplot[1]-yplot[0]));
 }
 
 /*
@@ -577,8 +596,8 @@ local real ytrans(real y)
  */
  
 typedef struct sortmode {
-    string name;
-    iproc   fie;
+  string name;
+  iproc   fie;
 } sortmode;
  
 #define SortName(x)  x->name
@@ -628,3 +647,25 @@ local iproc getsort(string name)
     error("%s: no valid sortname",name);
     return NULL;     /* better not get here ... */
 }
+
+
+/* index into an array --- stolen from velfit.c */
+
+local
+int ring_index(int n, real *r, real rad)
+{
+  int i;
+  
+  if (r[0] < r[1]) {
+    if (rad < r[0]) return -1;
+    if (rad > r[n-1]) return -2;
+    for (i=0;i<n;i++)
+      if (rad >= r[i] && rad < r[i+1]) return i;
+    error("ring_index: should never gotten here %g in [%g : %g]",
+	  rad,r[0],r[n-1]);
+  } else {
+    error("reverse indexing not yet implemented");
+  }
+
+}
+
