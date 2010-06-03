@@ -91,6 +91,7 @@ void nemo_main()
 	n = nobj;
       makering(n,i,radius[i]);
       writesnap(n);
+      nemo_dprintf(1,"Ring %d %d:%d\n",i,ntot-n,ntot-1);
     }
     strclose(outstr);
     nemo_dprintf(1,"Total number of particles written: %d\n",ntot);
