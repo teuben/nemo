@@ -5,6 +5,7 @@
  *    4-dec-2002        0.2 Added mass=, eps= (mode= not implemetned)
  *    5-dec-2002        0.3 add central=, grow=
  *   19-feb-2006        0.4 dynamic memory using mdarray
+ *    3-jun-2010        0.5 add ring number as Key
  *
  */
 
@@ -26,7 +27,7 @@ string defv[] = {
     "central=f\n        add the central mass also as 1st point?",
     "grow=t\n           grow number of points per ring to keep a constant density",
     "headline=\n	verbiage for output",
-    "VERSION=0.4\n	19-feb-06 PJT",
+    "VERSION=0.5\n	3-jun-10 PJT",
     NULL,
 };
 
@@ -41,6 +42,7 @@ string cvsid="$Id$";
 local int nobj, nobj_max, ntot = 0;
 local real *mass;
 local mdarray3 phase;
+local int *key;
 local double radius[MAXRAD];
 
 local real eps2;
@@ -51,6 +53,7 @@ local string headline;
 
 local bool Qgrow;
 
+void makering(int n, int k, real radius);
 
 
 void nemo_main()
@@ -69,6 +72,7 @@ void nemo_main()
 
     mass = (real *) allocate(sizeof(real)*nobj_max);
     phase = allocate_mdarray3(nobj_max,2,NDIM);
+    key = (int *) allocate(sizeof(int)*nobj_max);
     headline = getparam("headline");
     sqrtm = getdparam("mass");
     if (getbparam("central")) {
@@ -85,14 +89,14 @@ void nemo_main()
 	n = (int)(nobj*(radius[i]/radius[0]));
       else
 	n = nobj;
-      makering(n,radius[i]);
+      makering(n,i,radius[i]);
       writesnap(n);
     }
     strclose(outstr);
     nemo_dprintf(1,"Total number of particles written: %d\n",ntot);
 }
 
-makering(int n, real radius)
+void makering(int n, int k, real radius)
 {
   int i;
   real theta, velo = sqrtm*radius*pow(radius*radius+eps2,-0.75);
@@ -106,6 +110,7 @@ makering(int n, real radius)
     CLRV(phase[i][1]);
     phase[i][1][0] = -velo * sin(theta);
     phase[i][1][1] =  velo * cos(theta);
+    key[i] = k;
   }
 }
 
@@ -139,6 +144,7 @@ writesnap(int n)
       put_data(outstr, CoordSystemTag, IntType, &cs, 0);
       put_data(outstr, MassTag, RealType, mass, n, 0);
       put_data(outstr, PhaseSpaceTag, RealType, phase[0][0], n, 2, NDIM, 0);
+      put_data(outstr, KeyTag, IntType, key, n, 0);
      put_tes(outstr, ParticlesTag);
     put_tes(outstr, SnapShotTag);
     ntot += n;
