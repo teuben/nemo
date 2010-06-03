@@ -30,6 +30,7 @@ stream instr, outstr;
 int nbodytot=0, nbody;
 real *masstot=NULL, *mass;
 real *phasetot=NULL, *phase;
+int  *keytot=NULL, *key;
 bool Qmass;
 real tsnap;
 
@@ -73,17 +74,23 @@ readdata()
             for (i=0; i<nbody; i++)
                 masstot[i] = 0.0;
             phasetot = (real *) allocate(sizeof(real) * 2*NDIM * nbodytot);
+	    if (get_tag_ok(instr,KeyTag))
+	      keytot = (int *) allocate(sizeof(int) * nbodytot); 
         } else {
             nbodytot += nbody;
             masstot = (real *) reallocate(masstot, sizeof(real) * nbodytot); 
             phasetot = (real *) reallocate(phasetot,
                                     sizeof(real) * 2*NDIM * nbodytot);
+	    if (keytot)
+	      keytot = (int *) reallocate(keytot, sizeof(int) * nbodytot); 
         }
 
 
 
         mass = masstot + offset;
         phase = phasetot + 2 * NDIM * offset;
+	if (keytot)
+	  key = keytot + offset;
 
         if (get_tag_ok(instr, MassTag)) {
             get_data_coerced(instr, MassTag, RealType, mass, nbody, 0);
@@ -93,6 +100,8 @@ readdata()
         }
         get_data_coerced(instr, PhaseSpaceTag, RealType, phase,
 		     nbody, 2, NDIM, 0);
+	if (keytot)
+	  get_data(instr, KeyTag, IntType, key, nbody, 0);
         get_tes(instr, ParticlesTag);
         get_tes(instr, SnapShotTag);
 	offset = nbodytot;
@@ -116,6 +125,8 @@ writedata()
 	if (Qmass)
           put_data(outstr, MassTag, RealType, masstot, nbodytot,0);
         put_data(outstr, PhaseSpaceTag, RealType, phasetot, nbodytot,2,NDIM,0);
+	if (keytot)
+	  put_data(outstr, KeyTag, IntType, keytot, nbodytot,0);
       put_tes(outstr, ParticlesTag);
     put_tes(outstr, SnapShotTag);
 }
