@@ -8,6 +8,9 @@ ccddiffract \- smoothing/diffracting an image
 \fIccddiffract\fP will smooth and/or add diffraction patterns
 an image to make it look "pretty".
 It can also add some quasi poissonian noise.
+.PP
+In the current version a fraction of light is kept in the main gaussian beam,
+whereas another fraction is dispersed in the diffraction spikes.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -33,7 +36,8 @@ Signal below which no diffraction spikes are added.
 .TP
 \fBspike=\fP
 The width of the spike. For the spike, a \fIsqr(sinc(x))\fP is 
-used, where the width is the distance to the first null.
+used, where the width is the distance to the first null. No signal beyond
+the first null is added.
 [default: \fB0.1\fP].
 .TP
 \fBnoise=\fP
