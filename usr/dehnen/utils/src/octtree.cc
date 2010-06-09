@@ -1144,6 +1144,131 @@ namespace WDutils {
 // Wdutils::TreeAccess<OctTree>
 //
 namespace WDutils {
+#ifdef __SSE__
+#define  PF(__X) static_cast<float*>(__X)
+#define cPF(__X) static_cast<const float*>(__X)
+  template<> 
+  TreeAccess<OctalTree<2,float> >::Cell
+  TreeAccess<OctalTree<2,float> >::SmallestContainingCell(point const&x) const
+  {
+    Cell c = Root();
+    __m128 X = _mm_loadu_ps(cPF(x));
+    __m128 C = _mm_load_ps(cPF(box(c).X));
+    __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(2,2,2,2));
+    if(3 != (3&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),
+					  _mm_cmpgt_ps(_mm_add_ps(C,H),X)))))
+      return InvalidCell();
+    for(;;) {
+      if(Ncells(c)==0) return c;
+      uint8 o = 3&_mm_movemask_ps(_mm_cmplt_ps(C,X));
+      Cell cc = BeginCells(c), ce=EndCells(c);
+      while(cc!=ce && o!=octant(cc)) ++cc;
+      if(cc==ce) return c;
+      c = cc;
+      C = _mm_load_ps(cPF(box(c).X));
+    }
+  }
+  template<> 
+  TreeAccess<OctalTree<3,float> >::Cell
+  TreeAccess<OctalTree<3,float> >::SmallestContainingCell(point const&x) const
+  {
+    Cell c = Root();
+    __m128 X = _mm_loadu_ps(cPF(x));
+    __m128 C = _mm_load_ps(cPF(box(c).X));
+    __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(3,3,3,3));
+    if(7 != (7&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),
+					  _mm_cmpgt_ps(_mm_add_ps(C,H),X)))))
+      return InvalidCell();
+    for(;;) {
+      if(Ncells(c)==0) return c;
+      uint8 o = 7&_mm_movemask_ps(_mm_cmplt_ps(C,X));
+      Cell cc = BeginCells(c), ce=EndCells(c);
+      while(cc!=ce && o!=octant(cc)) ++cc;
+      if(cc==ce) return c;
+      c = cc;
+      C = _mm_load_ps(cPF(box(c).X));
+    }
+  }
+#undef  PF
+#undef cPF
+#ifdef __SSE2__
+#define  PD(__X) static_cast<double*>(__X)
+#define cPD(__X) static_cast<const double*>(__X)
+#define  PD2(__X) static_cast<double*>(__X)+2
+#define cPD2(__X) static_cast<const double*>(__X)+2
+  template<> 
+  TreeAccess<OctalTree<2,double> >::Cell
+  TreeAccess<OctalTree<2,double> >::SmallestContainingCell(point const&x) const
+  {
+    Cell c = Root();
+    __m128d X = _mm_loadu_pd(cPD(x));
+    __m128d C = _mm_load_pd(cPD(box(c).X));
+    __m128d H = _mm_set1_pd(box(c).H);
+    if(3 != _mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C,H),X),
+				       _mm_cmpgt_pd(_mm_add_pd(C,H),X))))
+      return InvalidCell();
+    for(;;) {
+      if(Ncells(c)==0) return c;
+      uint8 o = _mm_movemask_pd(_mm_cmplt_pd(C,X));
+      Cell cc = BeginCells(c), ce=EndCells(c);
+      while(cc!=ce && o!=octant(cc)) ++cc;
+      if(cc==ce) return c;
+      c = cc;
+      C = _mm_load_pd(cPD(box(c).X));
+    }
+  }
+  template<> 
+  TreeAccess<OctalTree<3,double> >::Cell
+  TreeAccess<OctalTree<3,double> >::SmallestContainingCell(point const&x) const
+  {
+    Cell c = Root();
+    __m128d X0 = _mm_loadu_pd(cPD(x));
+    __m128d C0 = _mm_load_pd(cPD(box(c).X));
+    __m128d H  = _mm_set1_pd(box(c).H);
+    if(3 != _mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C0,H),X0),
+				       _mm_cmpgt_pd(_mm_add_pd(C0,H),X0))))
+      return InvalidCell();
+    __m128d C1 = _mm_load_pd(cPD2(box(c).X));
+    __m128d X1 = _mm_loadu_pd(cPD2(x));
+    if(! (1&_mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C1,H),X1),
+				       _mm_cmpgt_pd(_mm_add_pd(C1,H),X1)))))
+      return InvalidCell();
+    for(;;) {
+      if(Ncells(c)==0) return c;
+      uint8 o = _mm_movemask_pd(_mm_cmplt_pd(C0,X0)) |
+	(    (1&_mm_movemask_pd(_mm_cmplt_pd(C1,X1)))<<2) ;
+      Cell cc = BeginCells(c), ce=EndCells(c);
+      while(cc!=ce && o!=octant(cc)) ++cc;
+      if(cc==ce) return c;
+      c  = cc;
+      C0 = _mm_load_pd(cPD (box(c).X));
+      C1 = _mm_load_pd(cPD2(box(c).X));
+    }
+  }
+#undef  PD
+#undef cPD
+#undef  PD2
+#undef cPD2
+#else  // no __SSE2__ but __SSE__
+  template<int D>
+  typename TreeAccess<OctalTree<Dim,double> >::Cell
+  TreeAccess<OctalTree<Dim,double> >::SmallestContainingCell(point const&x)
+    const
+  {
+    Cell c=Root();
+    if(!::contains(centre(c),radius(c),x) )
+      return InvalidCell();
+    for(;;) {
+      if(Ncells(c)==0) return c;
+      uint8 o=::octant(centre(c),x);
+      Cell cc=BeginCells(c), ce=EndCells(c);
+      while(cc!=ce && o!=octant(cc)) ++cc;
+      if(cc==ce) return c;
+      c=cc;
+    }
+  }  
+#endif // __SSE2__
+#else  // no __SSE__
   template<typename OctTree>
   typename TreeAccess<OctTree>::Cell
   TreeAccess<OctTree>::SmallestContainingCell(point const&x) const
@@ -1160,6 +1285,7 @@ namespace WDutils {
       c=cc;
     }
   }
+#endif // __SSE__
 }
 //
 // Wdutils::NeighbourLoop<OctTree>
