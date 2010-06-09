@@ -51,7 +51,7 @@ namespace WDutils {
       static const int size_u = sizeof(integer_u);
     };
 
-    template<int I> struct __ITRAITS {};
+    template<int> struct __ITRAITS;
     template<> struct __ITRAITS<0> : 
       public __ISIZE<char, unsigned char> {};
     template<> struct __ITRAITS<1> :
@@ -78,6 +78,10 @@ namespace WDutils {
     __ITRAITS<3>::size_u == WORDS ? 3 :
     __ITRAITS<4>::size_u == WORDS ? 4 : 5;
       typedef typename __ITRAITS<UTYPE>::integer_u integer_u;
+
+      WDutilsStaticAssert(sizeof(integer_s) == WORDS &&
+			  sizeof(integer_u) == WORDS   );
+
     };
   } // namespace meta {
 

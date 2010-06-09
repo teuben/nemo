@@ -7,11 +7,11 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2009
+/// \date   2009,2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2009 Walter Dehnen
+// Copyright (C) 2009,2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -35,12 +35,23 @@
 #  ifndef WDutils_included_xmmintrin_h
 #    define WDutils_included_xmmintrin_h
 #    include <xmmintrin.h>
+#    define _mm_abs_ps(__x) _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x7fffffff))
+#    define _mm_neg_ps(__x) _mm_xor_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
+#    define _mm_nabs_ps(__x) _mm_or_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
+#    define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
 #  endif
 
 # ifdef __SSE2__
 #  ifndef WDutils_included_emmintrin_h
 #    define WDutils_included_emmintrin_h
 #    include <emmintrin.h>
+#    define _mm_abs_pd(__x) \
+            _mm_and_pd(__x,(__m128d)_mm_set1_epi64x(0x7fffffffffffffffll))
+#    define _mm_neg_pd(__x) \
+            _mm_xor_pd(__x,(__m128d)_mm_set1_epi64x(0x8000000000000000ll))
+#    define _mm_nabs_pd(__x) \
+            _mm_or_pd(__x,(__m128d)_mm_set1_epi64x(0x8000000000000000ll))
+#    define _mm_diff_pd(__x,__y) _mm_abs_pd(_mm_sub_pd(__x,__y))
 #  endif
 # endif
 #endif
@@ -429,7 +440,7 @@ namespace WDutils {
       /// alignment number: K floats align to 128 bytes
       const static int K=4;
       /// 16-byte alligned array
-      typedef __attribute__ ((aligned(16))) float vector[K];
+      typedef WDutils__align16 float vector[K];
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }
@@ -458,7 +469,7 @@ namespace WDutils {
       /// alignment number: K floats align to 128 bytes
       const static int K=4;
       /// 16-byte alligned array
-      typedef __attribute__ ((aligned(16))) int vector[K];
+      typedef WDutils__align16 int vector[K];
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }
@@ -487,7 +498,7 @@ namespace WDutils {
       /// alignment number: K doubles align to 128 bytes
       const static int K=2;
       /// 16-byte alligned array
-      typedef __attribute__ ((aligned(16))) double vector[K];
+      typedef WDutils__align16 double vector[K];
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }

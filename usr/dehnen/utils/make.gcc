@@ -1,13 +1,22 @@
+# -*- makefile -*-
 #
 # sets library sub-directory and flags for gcc compiler
 # to be included by makefile 
 #
 
-CXX		:= $(CPATH)c++
-CC		:= $(CPATH)gcc
+ifndef GCC
+GCC		:= gcc
+GPP		:= g++
+endif
+
+CXX		:= $(CPATH)$(GPP)
+CC		:= $(CPATH)$(GCC)
 FC		:= $(CPATH)gfortran
 
 PLATFORM 	:= $(shell uname -m)
+ifneq ($(VENDOR),apple)
+RDYNAMIC	:= -rdynamic
+endif
 
 # warning flags
 ifdef LIMITED_WARNINGS
@@ -19,7 +28,7 @@ endif
 # general optimisation and warning flags
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
 		-ggdb3 $(WARNING) -O2 -fPIC -ffast-math \
-		-funroll-loops -fforce-addr -rdynamic
+		-funroll-loops -fforce-addr $(RDYNAMIC)
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)

@@ -7,6 +7,15 @@
 
 .PHONY		: test
 
+
+ifeq ($(USER),wd11)
+WDutilsTEST	:= -DWDutilsTEST
+endif
+
+ifeq ($(USER),walter)
+WDutilsTEST	:= -DWDutilsTEST
+endif
+
 # ----------------
 # Compiler related
 # ----------------
@@ -48,7 +57,7 @@ endif
 
 MPIDIR			:= $(shell ls | grep mpich)
 ifeq ($(MPIDIR),mpich)
-WDutilsMPI	:= -DWDutilsMPI
+WDutilsMPI		:= -DWDutilsMPI
 MPICC			:= $(MPIDIR)/bin/mpicc
 MPIINC			:= $(MPIDIR)/include/
 IMPI			:= -I$(MPIINC)
@@ -57,10 +66,6 @@ endif
 # ----
 # test
 # ----
-
-ifeq ($(PWD),/local/wd11/nemo_cvs/usr/dehnen/utils)
-WDutilsTEST	:= -DWDutilsTEST
-endif
 
 # -----------
 # directories
@@ -71,7 +76,7 @@ SRC             	:= src/
 LIB			:= lib$(EXT)/
 LIBT			:= $(LIB).dummy
 $(LIBT)			:
-			mkdir --parents --mode=755 $(LIB)
+			mkdir -p -m 755 $(LIB)
 			touch $(LIBT)
 
 # -------------------------
@@ -109,6 +114,7 @@ octtree_h		:= $(INC)octtree.h $(memory_h) $(traits_h) $(tupel_h)
 parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
 peano_h			:= $(INC)peano.h $(traits_h)
 domain_h		:= $(INC)domain.h $(parallel_h) $(octtree_h)
+geometry_h		:= $(INC)geometry.h $(tupel_h) $(sse_h)
 
 # -----------------------
 # source dependency lists
@@ -206,11 +212,16 @@ endif
 
 ifdef WDutilsTEST
 
-.PHONY			:	test TestDomain$(EXT) TestTree$(EXT)
+.PHONY			:	test TestDomain$(EXT) TestGeometry$(EXT) \
+				TestTree$(EXT)
 
 test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
 				$(Pi_h) $(io_h) $(heap_h) library
 				$(MAKE_EXE)
+test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h) library
+				$(MAKE_EXE)
+
+TestGeometry$(EXT)	:	test/TestGeometry$(EXT)
 TestTree$(EXT)		:	test/TestTree$(EXT)
 
 ifdef WDutilsMPI
@@ -224,11 +235,13 @@ TestDomain$(EXT)	:	test/TestDomain$(EXT)
 
 test			:	library \
 				TestDomain$(EXT) \
+				TestGeometry$(EXT) \
 				TestTree$(EXT)
 
 else
 
 test			:	library \
+				TestGeometry$(EXT) \
 				TestTree$(EXT)
 
 endif

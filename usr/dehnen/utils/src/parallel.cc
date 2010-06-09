@@ -186,7 +186,7 @@ namespace MPI {
   // static data with external linkage
   Communicator Communicator::world;
   Communicator const& World = Communicator::world;
-  int Communicator::DEBUG_LEVEL = 1;
+  int Communicator::DEBUG_LEVEL = 4;
   int Undefined = MPI_UNDEFINED;
   // ///////////////////////////////////////////////////////////////////////////
   // MPI::ContiguousType()

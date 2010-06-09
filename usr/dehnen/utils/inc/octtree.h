@@ -53,11 +53,8 @@
 #ifndef WDutils_included_memory_h
 #  include <memory.h>
 #endif
-#ifndef WDutils_included_tupel_h
-#  include <tupel.h>
-#endif
-#ifndef WDutils_included_sse_h
-#  include <sse.h>
+#ifndef WDutils_included_geometry_h
+#  include <geometry.h>
 #endif
 
 namespace {
@@ -95,13 +92,16 @@ namespace WDutils {
   public:
     /// \name public constants and types
     //@{
-    typedef __X             Real;            ///< floating point type: position
-    typedef tupel<__D,Real> point;           ///< type: positions
+    typedef __X             real;            ///< floating point type: position
+    typedef tupel<__D,real> point;           ///< type: positions
     typedef uint32          particle_key;    ///< type: indexing particles
     typedef uint32          node_index;      ///< type: indexing leafs & cells
     typedef uint8           depth_type;      ///< type: tree depth & level
     typedef uint8           octant_type;     ///< type: octant and # cell kids
     typedef uint16          local_count;     ///< type: # leaf kids
+    typedef Geometry::cube<__D,real> cube;   ///< type: cubic box
+    typedef SSE::Extend16<point> point16;
+    typedef SSE::Extend16<cube>  cube16;
     const static depth_type Dim = __D;       ///< number of dimensions
     const static depth_type Nsub= 1<<Dim;    ///< number of octants per cell
     const static depth_type MaximumDepth=99; ///< maximum tree depth
@@ -165,7 +165,7 @@ namespace WDutils {
     /// \name leaf data (access via struct TreeAccess )
     //@{
     node_index    NLEAF;              ///< total number of leafs
-    point        *XL;                 ///< leaf positions
+    point16      *XL;                 ///< leaf positions
     particle_key *PL;                 ///< index of associated particle
     node_index   *PC;                 ///< index of parent cell
     //@}
@@ -174,14 +174,13 @@ namespace WDutils {
     node_index    NCELL;              ///< total number of cells
     depth_type   *LE;                 ///< cells' tree level
     octant_type  *OC;                 ///< cells' octant in parent cell
-    point        *XC;                 ///< cells' centre (of cube)
+    cube16       *XC;                 ///< cells' centre (of cube)
     node_index   *L0;                 ///< cells' first leaf
     local_count  *NL;                 ///< number of cells' leaf kids
     node_index   *NM;                 ///< number of cells' leaf descendants
     node_index   *CF;                 ///< first daughter cell
     octant_type  *NC;                 ///< number of cells' daughter cells
     node_index   *PA;                 ///< parent cell
-    Real          RAD[MaximumDepth+1];///< table: radius[level]
     //@}
     void allocate();
     void build(char, node_index, const Initialiser*, const OctalTree*)
@@ -232,25 +231,25 @@ namespace WDutils {
       AVSPC ( avspc )
     { 
       if(N == 0)
-	WDutils_THROWN  ("OctalTree<%d,%s>: N=0\n",Dim,nameof(Real));
+	WDutils_THROWN  ("OctalTree<%d,%s>: N=0\n",Dim,nameof(real));
       if(init == 0)
-	WDutils_THROWN  ("OctalTree<%d,%s>: init=0\n",Dim,nameof(Real));
+	WDutils_THROWN  ("OctalTree<%d,%s>: init=0\n",Dim,nameof(real));
       if(nmax == 0)
 	WDutils_WarningN("OctalTree<%d,%s>: "
 			 "nmax=%d; will use nmax=%d instead\n",
-			 Dim,nameof(Real), nmax,int(NMAX));
+			 Dim,nameof(real), nmax,int(NMAX));
       if(nmax > 250)
 	WDutils_WarningN("OctalTree<%d,%s>: "
 			 "nmax=%d exceeds 250; will use nmax=%d instead\n",
-			 Dim,nameof(Real),nmax, int(NMAX));
+			 Dim,nameof(real),nmax, int(NMAX));
       if(nmin > 250)
 	WDutils_WarningN("OctalTree<%d,%s>: "
 			 "nmin=%d exceeds 250; will use nmin=%d instead\n",
-			 Dim,nameof(Real),nmin, int(NMIN));
+			 Dim,nameof(real),nmin, int(NMIN));
       if(nmin > nmax)
 	WDutils_WarningN("OctalTree<%d,%s>: "
 			 "nmin=%d exceeds nmax=%d; will use nmin=%d\n",
-			 Dim,nameof(Real), nmin, nmax, int(NMIN));
+			 Dim,nameof(real), nmin, nmax, int(NMIN));
       build('n', N, init, 0);
     }
     /// re-build the tree after particles have changed (position or number).
@@ -282,22 +281,22 @@ namespace WDutils {
 		 unsigned nmax=0, unsigned nmin=0) WDutils_THROWING
     {
       if(0==init)
-	WDutils_THROW("OctalTree<%d,%s>::rebuild(): init=0\n",Dim,nameof(Real));
+	WDutils_THROW("OctalTree<%d,%s>::rebuild(): init=0\n",Dim,nameof(real));
       if(nmax!=0) {
 	const_cast<depth_type&>(NMAX) = min(250u,nmax);
 	const_cast<depth_type&>(NMIN) = min(depth_type(nmin? nmin:2u), NMAX);
 	if(nmax > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
 			   "nmax=%d exceeds 250; will use nmax=%d instead\n",
-			   Dim,nameof(Real), nmax,int(NMAX));
+			   Dim,nameof(real), nmax,int(NMAX));
 	if(nmin > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
 			   "nmin=%d exceeds 250; will use nmin=%d instead\n",
-			   Dim,nameof(Real), nmin,int(NMIN));
+			   Dim,nameof(real), nmin,int(NMIN));
 	if(nmin > nmax)
 	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
 			   "nmin=%d exceeds nmax=%d; will use nmin=%d\n",
-			   Dim,nameof(Real), nmin,nmax,int(NMIN));
+			   Dim,nameof(real), nmin,nmax,int(NMIN));
       }
       build('r', Nnew?Nnew:NLEAF, init, this);
     }
@@ -335,19 +334,19 @@ namespace WDutils {
       AVSPC ( avspc )
     {
       if(0==init)
-	WDutils_THROW   ("OctalTree<%d,%s>: init=0\n",Dim,nameof(Real));
+	WDutils_THROW   ("OctalTree<%d,%s>: init=0\n",Dim,nameof(real));
       if(nmax > 250)
 	WDutils_WarningN("OctalTree<%d,%s>: "
 			 "nmax=%d exceeds 250; will use nmax=%d instead\n",
-			 Dim,nameof(Real),nmax, int(NMAX));
+			 Dim,nameof(real),nmax, int(NMAX));
       if(nmin > 250)
 	WDutils_WarningN("OctalTree<%d,%s>: "
 			 "nmin=%d exceeds 250; will use nmin=%d instead\n",
-			 Dim,nameof(Real),nmin, int(NMIN));
+			 Dim,nameof(real),nmin, int(NMIN));
       if(nmin > nmax)
 	WDutils_WarningN("OctalTree<%d,%s>: "
 			 "nmin=%d exceeds nmax=%d; will use nmin=%d\n",
-			 Dim,nameof(Real), nmin, nmax, int(NMIN));
+			 Dim,nameof(real), nmin, nmax, int(NMIN));
       build('p', nsub, init, parent);
     }
     /// establish as pruned version of an existing octtree
@@ -378,7 +377,7 @@ namespace WDutils {
       WDutils_THROWING
     {
       if(0==init)
-	WDutils_THROW("OctalTree<%d,%s>::reprune(): init=0\n",Dim,nameof(Real));
+	WDutils_THROW("OctalTree<%d,%s>::reprune(): init=0\n",Dim,nameof(real));
       if(nmax==0) {
 	const_cast<depth_type&>(NMAX) = parent->Nmax();
 	const_cast<depth_type&>(NMIN) = parent->Nmin();
@@ -388,15 +387,15 @@ namespace WDutils {
 	if(nmax > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
 			   "nmax=%d exceeds 250; will use nmax=%d instead\n",
-			   Dim,nameof(Real), nmax, int(NMAX));
+			   Dim,nameof(real), nmax, int(NMAX));
 	if(nmin > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
 			   "nmin=%d exceeds 250; will use nmin=%d instead\n",
-			   Dim,nameof(Real), nmin, int(NMIN));
+			   Dim,nameof(real), nmin, int(NMIN));
 	if(nmin > nmax)
 	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
 			   "nmin=%d exceeds nmax=%d; will use nmin=%d\n",
-			   Dim,nameof(Real), nmin, nmax, int(NMIN));
+			   Dim,nameof(real), nmin, nmax, int(NMIN));
       }
       build('p', nsub, init, parent);
     }
@@ -415,8 +414,8 @@ namespace WDutils {
     depth_type const&Depth() const
     { return DEPTH; }
     /// root radius
-    Real const&RootRadius() const
-    { return RAD[0]; }
+    real const&RootRadius() const
+    { return XC->H; }
     /// N_max
     depth_type const&Nmax() const
     { return NMAX; }
@@ -443,9 +442,11 @@ namespace WDutils {
   template<typename OctTree>
   struct TreeAccess {
     /// floating-point type
-    typedef typename OctTree::Real Real;
+    typedef typename OctTree::real real;
     /// type for positions
     typedef typename OctTree::point point;
+    /// type for cubic boxes
+    typedef typename OctTree::cube cube;
     /// type for particle index
     typedef typename OctTree::particle_key particle_key;
     /// type for indexing leafs and cells
@@ -501,7 +502,7 @@ namespace WDutils {
     };
     /// \name leaf data access
     //@{
-    /// leaf position
+    /// leaf position, 16-byte aligned
     point const&position(Leaf l) const
     { return TREE->XL[l.I]; }
     /// index of associated particle
@@ -559,12 +560,15 @@ namespace WDutils {
     /// octant of cell in parent
     octant_type const&octant(Cell c) const
     { return TREE->OC[c.I]; }
+    /// cell's cubic box, 16-byte aligned
+    cube const&box(Cell c) const
+    { return TREE->XC[c.I]; }
     /// cell's geometric centre (of cubic box)
     point const&centre(Cell c) const
-    { return TREE->XC[c.I]; }
+    { return box(c).X; }
     /// radius (half-side-length of box) of cell
-    Real const&radius(Cell c) const
-    { return TREE->RAD[level(c)]; }
+    real const&radius(Cell c) const
+    { return box(c).H; }
     /// number of leaf kids
     local_count const&Nleafkids(Cell c) const
     { return TREE->NL[c.I]; }
@@ -587,7 +591,7 @@ namespace WDutils {
     /// \name tree walking and related
     //@{
     /// root radius
-    Real const&RootRadius() const
+    real const&RootRadius() const
     { return TREE->RootRadius(); }
     /// N_max
     depth_type const&Nmax() const
@@ -1029,7 +1033,7 @@ namespace WDutils {
     typedef TreeAccess<OctTree> Base;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
-    typedef typename Base::Real Real;             ///< type: scalars
+    typedef typename Base::real real;             ///< type: scalars
     typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
     Base::Dim;
@@ -1045,7 +1049,7 @@ namespace WDutils {
       : Base(tree), NDIR(ndir) {}
     //
     const node_index NDIR;       ///< direct-loop control
-    Real             Q;          ///< radius^2 of search sphere
+    real             Q;          ///< radius^2 of search sphere
     Cell             C;          ///< cell containing X, already searched
     point            X;          ///< centre of search sphere
     /// is search sphere outside of a cell (and vice versa)?
@@ -1073,7 +1077,7 @@ namespace WDutils {
   ///       whether to compare on distance or leaf (both is conceivable).
   template<typename OctTree>
   struct Neighbour {
-    typename TreeAccess<OctTree>::Real Q;  ///< distance^2 to search position
+    typename TreeAccess<OctTree>::real Q;  ///< distance^2 to search position
     typename TreeAccess<OctTree>::Leaf L;  ///< neighbour leaf
   };
   ///
@@ -1087,7 +1091,7 @@ namespace WDutils {
     typedef TreeAccess<OctTree> Access;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
-    typedef typename Base::Real Real;             ///< type: scalars
+    typedef typename Base::real real;             ///< type: scalars
     typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
     Base::Dim;
@@ -1099,7 +1103,7 @@ namespace WDutils {
       /// process a neighbour
       /// \param[in] l  neighbour leaf
       /// \param[in] q  squared distance of @a l from search position
-      virtual void process(Leaf l, Real q) const = 0;
+      virtual void process(Leaf l, real q) const = 0;
     };
     /// ctor
     /// \param[in] tree  OctTree to use for searches
@@ -1121,7 +1125,7 @@ namespace WDutils {
     /// \return          number of neighbours found, may exceed @a m
     /// \note If the actual number of neighbours exceeds @a m, only the first
     ///       @a m neighbours found will be copied into @a nb.
-    node_index Find(Leaf l, Real q, Neighbour<OctTree>*nb, node_index m);
+    node_index Find(Leaf l, real q, Neighbour<OctTree>*nb, node_index m);
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
@@ -1131,7 +1135,7 @@ namespace WDutils {
     /// \return          number of neighbours found, may exceed @a nb.size()
     /// \note If the actual number of neighbours exceeds @a nb.size(), only
     ///       the first @a nb.size() neighbours found will be copied into @a nb.
-    node_index Find(Leaf l, Real q, Array<Neighbour<OctTree> >&nb)
+    node_index Find(Leaf l, real q, Array<Neighbour<OctTree> >&nb)
     { return Find(l,q,nb.array(),nb.size()); }
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
@@ -1145,7 +1149,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(point const&x, Real q, Neighbour<OctTree>*nb, node_index m);
+    node_index Find(point const&x, real q, Neighbour<OctTree>*nb, node_index m);
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
@@ -1157,7 +1161,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
+    node_index Find(point const&x, real q,  Array<Neighbour<OctTree> >&nb)
     { return Find(x,q,nb.array(),nb.size()); }
     /// find all leafs within certain distance from leaf @a l and process them.
     /// \param[in]  l    leaf to find neighbours of
@@ -1165,7 +1169,7 @@ namespace WDutils {
     /// \param[in]  q    square of radius of search sphere
     /// \note leafs at distance^2 = @a q are @b not processed
     /// \param[in]  p    functor for processing neighbours found
-    void Process(Leaf l, Real q, const Processor*p) WDutils_THROWING;
+    void Process(Leaf l, real q, const Processor*p) WDutils_THROWING;
     /// find all leafs within certain distance from @a x and process them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
@@ -1174,7 +1178,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    void Process(point const&x, Real q, const Processor*p) WDutils_THROWING;
+    void Process(point const&x, real q, const Processor*p) WDutils_THROWING;
   protected:
     const Processor *PROC;        ///< functor to call
     Base::Q;
@@ -1193,21 +1197,21 @@ namespace WDutils {
   {
     typedef TreeAccess<OctTree> Access;
     typedef typename Access::Leaf Leaf;
-    typedef typename Access::Real Real;
+    typedef typename Access::real real;
     /// update positions
     /// \note Must be called after every rebuild() of the tree.
     void Update(Access const*);
   protected:
-    const static unsigned K = SSE::Traits<Real>::K;
+    const static unsigned K = SSE::Traits<real>::K;
     const static unsigned L = K-1;
     const static unsigned nL= ~L;
     unsigned const N16;                  ///< aligned number of leafs
     bool    *const PP;                   ///< indicator: incomplete block added
-    Real    *const XX;                   ///< leaf x positions in aligned memory
-    Real    *const YY;                   ///< leaf y positions in aligned memory
-    Real    *const ZZ;                   ///< leaf z positions in aligned memory
+    real    *const XX;                   ///< leaf x positions in aligned memory
+    real    *const YY;                   ///< leaf y positions in aligned memory
+    real    *const ZZ;                   ///< leaf z positions in aligned memory
     /// ensure that the only valid instantinations are those in octtree.cc
-    WDutilsStaticAssert( SSE::Traits<Real>::sse );
+    WDutilsStaticAssert( SSE::Traits<real>::sse );
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     PositionsSSE(Access const*tree);
@@ -1240,7 +1244,7 @@ namespace WDutils {
     typedef NeighbourLoop<OctTree> NLoop;
     typedef typename Access::Leaf Leaf;             ///< type: tree leaf
     typedef typename Access::Cell Cell;             ///< type: tree cell
-    typedef typename Access::Real Real;             ///< type: scalars
+    typedef typename Access::real real;             ///< type: scalars
     typedef typename Access::point point;           ///< type: position vectors
     typedef typename Access::node_index node_index; ///< type: index & counters
     NLoop::Dim;
@@ -1267,7 +1271,7 @@ namespace WDutils {
     /// \return          number of neighbours found, may exceed @a m
     /// \note If the actual number of neighbours exceeds @a m, only the first
     ///       @a m neighbours found will be copied into @a nb.
-    node_index Find(Leaf l, Real q, Neighbour<OctTree>*nb, node_index m);
+    node_index Find(Leaf l, real q, Neighbour<OctTree>*nb, node_index m);
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
@@ -1280,7 +1284,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(point const&x, Real q, Neighbour<OctTree>*nb, node_index m);
+    node_index Find(point const&x, real q, Neighbour<OctTree>*nb, node_index m);
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
@@ -1290,7 +1294,7 @@ namespace WDutils {
     /// \return          number of neighbours found, may exceed @a nb.size()
     /// \note If the actual number of neighbours exceeds @a nb.size(), only
     ///       the first @a nb.size() neighbours found will be copied into @a nb.
-    node_index Find(Leaf l, Real q, Array<Neighbour<OctTree> >&nb)
+    node_index Find(Leaf l, real q, Array<Neighbour<OctTree> >&nb)
     { return Find(l,q,nb.array(),nb.size()); }
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
@@ -1303,7 +1307,7 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(point const&x, Real q,  Array<Neighbour<OctTree> >&nb)
+    node_index Find(point const&x, real q,  Array<Neighbour<OctTree> >&nb)
     { return Find(x,q,nb.array(),nb.size()); }
   private:
     /// process a range of leafs
@@ -1319,7 +1323,7 @@ namespace WDutils {
     PosSSE::L;
     PosSSE::nL;
     struct chunk { unsigned I0, IN; };
-    struct qandi { Real Q; unsigned I; };
+    struct qandi { real Q; unsigned I; };
     //
     chunk  *const C0;                   ///< chunks of blocks to process
     mutable chunk*CL;                   ///< last active chunk
@@ -1343,7 +1347,7 @@ namespace WDutils {
     typedef TreeAccess<OctTree> Base;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
-    typedef typename Base::Real Real;             ///< type: scalars
+    typedef typename Base::real real;             ///< type: scalars
     typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
     /// ctor
@@ -1422,7 +1426,7 @@ namespace WDutils {
     /// is search sphere inside of a cell?
     inline bool Inside (Cell) const;
     /// distance^2 of cell to search sphere
-    inline Real OutsideDistSq(Cell) const;
+    inline real OutsideDistSq(Cell) const;
     /// actual direct summation control parameter
     inline node_index Ndir() const;
     /// update the list w.r.t. a leaf

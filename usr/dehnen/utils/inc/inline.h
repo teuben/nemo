@@ -51,8 +51,13 @@ namespace WDutils {
   // the pgCC compiler is faulty: std::abs(float) returns double
   template<typename T> T abs(T x) { return x<T(0)? -x:x; }
 #endif
+#ifdef __GNUC__
+  using std::isnan;
+  using std::isinf;
+#else
   using ::isnan;   // with some compilers (pgCC, CC) these are not in std
   using ::isinf;
+#endif
   //----------------------------------------------------------------------------
   template<typename scalar_type> inline
   int sign    (const scalar_type&x)

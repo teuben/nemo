@@ -64,7 +64,7 @@
 #endif
 
 //
-// Wdutils::OctalTree<Dim,Real>
+// Wdutils::OctalTree<Dim,real>
 //
 namespace {
   using std::setw;
@@ -73,19 +73,19 @@ namespace {
   /// \name some geometrical methods, only for D=2,3
   //@{
   /// is pos in the interval [cen-rad, cen+rad) ?
-  template<typename Real> inline
-  bool ininterval(Real cen, Real rad, Real pos)
+  template<typename real> inline
+  bool ininterval(real cen, real rad, real pos)
   // necessary to trick emacs, which otherwise confused "<" for a bracket
 #define LessThan <
   { return pos LessThan cen?  cen <= pos+rad : pos < cen+rad; }
 #undef  LessThan
   /// contains geometrical methods in Dim dimensions, only D=2,3
-  template<int Dim, typename Real> struct Helper;
+  template<int Dim, typename real> struct Helper;
   //
   template<> struct Helper<2,float>
   {
-    typedef float         Real;
-    typedef tupel<2,Real> point;
+    typedef float         real;
+    typedef tupel<2,real> point;
     static int octant(point const&cen, point const&pos)
     {
 #ifdef __SSE__
@@ -110,57 +110,57 @@ namespace {
       return oct;
 #endif
     }
-    static bool contains(point const&cen, Real rad, point const&pos)
+    static bool contains(point const&cen, real rad, point const&pos)
     {
       return ininterval(cen[0],rad,pos[0])
 	&&   ininterval(cen[1],rad,pos[1]);
     }
-    static Real outside_dist_sq(point const&cen, Real rad, point const&pos)
+    static real outside_dist_sq(point const&cen, real rad, point const&pos)
     {
-      Real q(0),D;
+      real q(0),D;
       D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
       D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
       return q;
     }
-    static bool outside(point const&cen, Real rad, point const&pos, Real Q)
+    static bool outside(point const&cen, real rad, point const&pos, real Q)
     {
-      Real q(0),D;
+      real q(0),D;
       D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
       D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
       return false;
     }
-    static bool inside(point const&cen, Real rad, point const&pos, Real Q)
+    static bool inside(point const&cen, real rad, point const&pos, real Q)
     {
-      Real D;
+      real D;
       D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
       D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
       return true;
     }
-    static tupel<2,Real> Integer(point const&x)
+    static tupel<2,real> Integer(point const&x)
     {
-      tupel<2,Real> c;
-      c[0]=int(x[0]+Real(0.5));
-      c[1]=int(x[1]+Real(0.5));
+      tupel<2,real> c;
+      c[0]=int(x[0]+real(0.5));
+      c[1]=int(x[1]+real(0.5));
       return c;
     }
-    static void ShrinkToOctant(point&cen, int i, Real rad)
+    static void ShrinkToOctant(point&cen, int i, real rad)
     {
       if(i&1) cen[0] += rad;  else  cen[0] -= rad;
       if(i&2) cen[1] += rad;  else  cen[1] -= rad;
     }
-    static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
+    static real RootRadius(point const&X, point const&Xmin, point const&Xmax)
     {
-      Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-      Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
+      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
       if(R1>D) D=R1;
-      return pow(Real(2), int(1+std::log(D)/M_LN2));
+      return pow(real(2), int(1+std::log(D)/M_LN2));
     }
   };
   //
   template<> struct Helper<2,double>
   {
-    typedef double        Real;
-    typedef tupel<2,Real> point;
+    typedef double        real;
+    typedef tupel<2,real> point;
     static int octant(point const&cen, point const&pos)
     {
       int oct(0);
@@ -175,57 +175,57 @@ namespace {
       if(pos[1] > cen[1]) oct |= 2;
       return oct;
     }
-    static bool contains(point const&cen, Real rad, point const&pos)
+    static bool contains(point const&cen, real rad, point const&pos)
     {
       return ininterval(cen[0],rad,pos[0])
 	&&   ininterval(cen[1],rad,pos[1]);
     }
-    static Real outside_dist_sq(point const&cen, Real rad, point const&pos)
+    static real outside_dist_sq(point const&cen, real rad, point const&pos)
     {
-      Real q(0),D;
+      real q(0),D;
       D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
       D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
       return q;
     }
-    static bool outside(point const&cen, Real rad, point const&pos, Real Q)
+    static bool outside(point const&cen, real rad, point const&pos, real Q)
     {
-      Real q(0),D;
+      real q(0),D;
       D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
       D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
       return false;
     }
-    static bool inside(point const&cen, Real rad, point const&pos, Real Q)
+    static bool inside(point const&cen, real rad, point const&pos, real Q)
     {
-      Real D;
+      real D;
       D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
       D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
       return true;
     }
-    static tupel<2,Real> Integer(point const&x)
+    static tupel<2,real> Integer(point const&x)
     {
-      tupel<2,Real> c;
-      c[0]=int(x[0]+Real(0.5));
-      c[1]=int(x[1]+Real(0.5));
+      tupel<2,real> c;
+      c[0]=int(x[0]+real(0.5));
+      c[1]=int(x[1]+real(0.5));
       return c;
     }
-    static void ShrinkToOctant(point&cen, int i, Real rad)
+    static void ShrinkToOctant(point&cen, int i, real rad)
     {
       if(i&1) cen[0] += rad;  else  cen[0] -= rad;
       if(i&2) cen[1] += rad;  else  cen[1] -= rad;
     }
-    static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
+    static real RootRadius(point const&X, point const&Xmin, point const&Xmax)
     {
-      Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-      Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
+      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
       if(R1>D) D=R1;
-      return pow(Real(2), int(1+std::log(D)/M_LN2));
+      return pow(real(2), int(1+std::log(D)/M_LN2));
     }
   };
   //
   template<> struct Helper<3,float>
   {
-    typedef float         Real;
-    typedef tupel<3,Real> point;
+    typedef float         real;
+    typedef tupel<3,real> point;
     static int octant(point const&cen, point const&pos)
     {
 #ifdef __SSE__
@@ -252,7 +252,7 @@ namespace {
       return oct;
 #endif
     }
-    static bool contains(point const&cen, Real rad, point const&pos)
+    static bool contains(point const&cen, real rad, point const&pos)
     {
 #ifdef __SSE__
       __m128 CC = _mm_loadu_ps(cen);
@@ -267,7 +267,7 @@ namespace {
 	&&   ininterval(cen[2],rad,pos[2]);
 #endif
     }
-    static Real outside_dist_sq(point const&cen, Real rad, point const&pos)
+    static real outside_dist_sq(point const&cen, real rad, point const&pos)
     {
 #ifdef __SSE__
       SSE::Traits<float>::vector Q;
@@ -279,60 +279,60 @@ namespace {
       _mm_store_ps(Q,_mm_and_ps(_mm_cmplt_ps(R,D),_mm_mul_ps(DR,DR)));
       return Q[0]+Q[1]+Q[2];
 #else
-      Real q(0),D;
+      real q(0),D;
       D=abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
       D=abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
       D=abs(cen[2]-pos[2]); if(D>rad) q+=square(D-rad);
       return q;
 #endif
     }
-    static bool outside(point const&cen, Real rad, point const&pos, Real Q)
+    static bool outside(point const&cen, real rad, point const&pos, real Q)
     {
 #ifdef __SSE__
       return  outside_dist_sq(cen,rad,pos) > Q;
 #else
-      Real q(0),D;
+      real q(0),D;
       D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
       D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
       D=abs(cen[2]-pos[2]); if(D>rad && Q<(q+=square(D-rad))) return true;
       return false;
 #endif
     }
-    static bool inside(point const&cen, Real rad, point const&pos, Real Q)
+    static bool inside(point const&cen, real rad, point const&pos, real Q)
     {
-      Real D;
+      real D;
       D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
       D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
       D=abs(cen[2]-pos[2]); if(D>rad || Q>square(D-rad)) return false;
       return true;
     }
-    static tupel<3,Real> Integer(point const&x)
+    static tupel<3,real> Integer(point const&x)
     {
-      tupel<3,Real> c;
-      c[0]=int(x[0]+Real(0.5));
-      c[1]=int(x[1]+Real(0.5));
-      c[2]=int(x[2]+Real(0.5));
+      tupel<3,real> c;
+      c[0]=int(x[0]+real(0.5));
+      c[1]=int(x[1]+real(0.5));
+      c[2]=int(x[2]+real(0.5));
       return c;
     }
-    static void ShrinkToOctant(point&cen, int i, Real rad)
+    static void ShrinkToOctant(point&cen, int i, real rad)
     {
       if(i&1) cen[0] += rad;  else  cen[0] -= rad;
       if(i&2) cen[1] += rad;  else  cen[1] -= rad;
       if(i&4) cen[2] += rad;  else  cen[2] -= rad;
     }
-    static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
+    static real RootRadius(point const&X, point const&Xmin, point const&Xmax)
     {
-      Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-      Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
+      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
       R1 = max(Xmax[2]-X[2], X[2]-Xmin[2]); if(R1>D) D=R1;
-      return pow(Real(2), int(1+std::log(D)/M_LN2));
+      return pow(real(2), int(1+std::log(D)/M_LN2));
     }
   };
   //
   template<> struct Helper<3,double>
   {
-    typedef double        Real;
-    typedef tupel<3,Real> point;
+    typedef double        real;
+    typedef tupel<3,real> point;
     static int octant(point const&cen, point const&pos)
     {
       int oct(0);
@@ -349,68 +349,68 @@ namespace {
       if(pos[2] > cen[2]) oct |= 4;
       return oct;
     }
-    static bool contains(point const&cen, Real rad, point const&pos)
+    static bool contains(point const&cen, real rad, point const&pos)
     {
       return ininterval(cen[0],rad,pos[0])
 	&&   ininterval(cen[1],rad,pos[1])
 	&&   ininterval(cen[2],rad,pos[2]);
     }
-    static Real outside_dist_sq(point const&cen, Real rad, point const&pos)
+    static real outside_dist_sq(point const&cen, real rad, point const&pos)
     {
-      Real q(0),D;
+      real q(0),D;
       D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
       D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
       D = abs(cen[2]-pos[2]); if(D>rad) q+=square(D-rad);
       return q;
     }
-    static bool outside(point const&cen, Real rad, point const&pos, Real Q)
+    static bool outside(point const&cen, real rad, point const&pos, real Q)
     {
-      Real q(0),D;
+      real q(0),D;
       D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
       D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
       D=abs(cen[2]-pos[2]); if(D>rad && Q<(q+=square(D-rad))) return true;
       return false;
     }
-    static bool inside(point const&cen, Real rad, point const&pos, Real Q)
+    static bool inside(point const&cen, real rad, point const&pos, real Q)
     {
-      Real D;
+      real D;
       D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
       D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
       D=abs(cen[2]-pos[2]); if(D>rad || Q>square(D-rad)) return false;
       return true;
     }
-    static tupel<3,Real> Integer(point const&x)
+    static tupel<3,real> Integer(point const&x)
     {
-      tupel<3,Real> c;
-      c[0]=int(x[0]+Real(0.5));
-      c[1]=int(x[1]+Real(0.5));
-      c[2]=int(x[2]+Real(0.5));
+      tupel<3,real> c;
+      c[0]=int(x[0]+real(0.5));
+      c[1]=int(x[1]+real(0.5));
+      c[2]=int(x[2]+real(0.5));
       return c;
     }
-    static void ShrinkToOctant(point&cen, int i, Real rad)
+    static void ShrinkToOctant(point&cen, int i, real rad)
     {
       if(i&1) cen[0] += rad;  else  cen[0] -= rad;
       if(i&2) cen[1] += rad;  else  cen[1] -= rad;
       if(i&4) cen[2] += rad;  else  cen[2] -= rad;
     }
-    static Real RootRadius(point const&X, point const&Xmin, point const&Xmax)
+    static real RootRadius(point const&X, point const&Xmin, point const&Xmax)
     {
-      Real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-      Real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
+      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
       R1 = max(Xmax[2]-X[2], X[2]-Xmin[2]); if(R1>D) D=R1;
-      return pow(Real(2), int(1+std::log(D)/M_LN2));
+      return pow(real(2), int(1+std::log(D)/M_LN2));
     }
   };
   /// octant of pos with respect to cen.
   /// \note if pos[i]>=cen[i], the ith bit of octant is set to 1, otherwise 0
-  template<int D, typename Real> inline
-  int octant(tupel<D,Real> const&cen, tupel<D,Real> const&pos)
-  { return Helper<D,Real>::octant(cen,pos); }
+  template<int D, typename real> inline
+  int octant(tupel<D,real> const&cen, tupel<D,real> const&pos)
+  { return Helper<D,real>::octant(cen,pos); }
   /// octant of pos with respect to cen.
   /// \note if pos[i]>=cen[i], the ith bit of octant is set to 1, otherwise 0
-  template<int D, typename Real> inline
-  int octant16(tupel<D,Real> const&cen, tupel<D,Real> const&pos)
-  { return Helper<D,Real>::octant16(cen,pos); }
+  template<int D, typename real> inline
+  int octant16(tupel<D,real> const&cen, tupel<D,real> const&pos)
+  { return Helper<D,real>::octant16(cen,pos); }
   /// does a cubic box contain a given position
   /// \param[in] cen  geometric centre of cube
   /// \param[in] rad  radius = half side length of cube
@@ -418,19 +418,19 @@ namespace {
   /// \return         is pos[i] in [cen[i]-rad, cen[i]+rad) for i=0...D-1 ?
   /// \note This definition of containment matches the way positions are
   ///       sorted into the OctalTree.
-  template<int D, typename Real> inline
-  bool contains(tupel<D,Real> const&cen, Real rad, tupel<D,Real> const&pos)
-  { return Helper<D,Real>::contains(cen,rad,pos); }
+  template<int D, typename real> inline
+  bool contains(tupel<D,real> const&cen, real rad, tupel<D,real> const&pos)
+  { return Helper<D,real>::contains(cen,rad,pos); }
   /// distance^2 from given position to the nearest point on a cube
   /// \param[in] cen  geometric centre of cube
   /// \param[in] rad  radius = half side length of cube
   /// \param[in] pos  position to compute distance^2 for
   /// \return    squared distance of @a pos to cube
   /// \note If pos is inside the cube, zero is returned
-  template<int D, typename Real> inline
-  Real outside_dist_sq(tupel<D,Real> const&cen, Real rad,
-		       tupel<D,Real> const&pos)
-  { return Helper<D,Real>::outside_dist_sq(cen,rad,pos); }
+  template<int D, typename real> inline
+  real outside_dist_sq(tupel<D,real> const&cen, real rad,
+		       tupel<D,real> const&pos)
+  { return Helper<D,real>::outside_dist_sq(cen,rad,pos); }
   /// is a sphere outside of a cubic box?
   /// \param[in] cen  geometric centre of cube
   /// \param[in] rad  radius = half side length of cube
@@ -439,24 +439,68 @@ namespace {
   /// \return is sphere outside cube?
   /// \note Equivalent to, but on average faster than, 
   ///       \code q < outside_dist_sq(cen,rad,pos) \endcode
-  template<int D, typename Real> inline
-  bool outside(tupel<D,Real> const&cen, Real rad,
-	       tupel<D,Real> const&pos, Real q)
-  { return Helper<D,Real>::outside(cen,rad,pos,q); }
+  template<int D, typename real> inline
+  bool outside(tupel<D,real> const&cen, real rad,
+	       tupel<D,real> const&pos, real q)
+  { return Helper<D,real>::outside(cen,rad,pos,q); }
   /// is a sphere inside of a cubic box?
   /// \param[in] cen  geometric centre of cube
   /// \param[in] rad  radius = half side length of cube
   /// \param[in] pos  centre of sphere
   /// \param[in] q    radius^2 of sphere
-  template<int D, typename Real> inline
-  bool inside(tupel<D,Real> const&cen, Real rad,
-	      tupel<D,Real> const&pos, Real q)
-  { return Helper<D,Real>::inside(cen,rad,pos,q); }
+  template<int D, typename real> inline
+  bool inside(tupel<D,real> const&cen, real rad,
+	      tupel<D,real> const&pos, real q)
+  { return Helper<D,real>::inside(cen,rad,pos,q); }
   /// move @a cen by @a rad in direction of octant @a i
   /// \note used for setting centre of daughter box from that of parent box
-  template<int D, typename Real> inline
-  void ShrinkToOctant(tupel<D,Real>&cen, int i, Real rad)
-  { return Helper<D,Real>::ShrinkToOctant(cen,i,rad); }
+  template<int D, typename real> inline
+  void ShrinkToOctant(tupel<D,real>&cen, int i, real rad)
+  { return Helper<D,real>::ShrinkToOctant(cen,i,rad); }
+
+  ///
+  template<int D> struct TreeHelper;
+  template<> struct TreeHelper<2> {
+    template<typename real>
+    static tupel<2,real> Integer(tupel<2,real> const&x)
+    {
+      tupel<2,real> c;
+      c[0]=int(x[0]+real(0.5));
+      c[1]=int(x[1]+real(0.5));
+      return c;
+    }
+    template<typename real>
+    static real RootRadius(tupel<2,real> const&X,
+			   tupel<2,real>const&Xmin,
+			   tupel<2,real> const&Xmax)
+    {
+      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
+      if(R1>D) D=R1;
+      return pow(real(2), int(1+std::log(D)/M_LN2));
+    }
+  };
+  template<> struct TreeHelper<3> {
+    template<typename real>
+    static tupel<3,real> Integer(tupel<3,real> const&x)
+    {
+      tupel<3,real> c;
+      c[0]=int(x[0]+real(0.5));
+      c[1]=int(x[1]+real(0.5));
+      c[2]=int(x[2]+real(0.5));
+      return c;
+    }
+    template<typename real>
+    static real RootRadius(tupel<3,real> const&X,
+			   tupel<3,real>const&Xmin,
+			   tupel<3,real> const&Xmax)
+    {
+      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
+      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
+      R1 = max(Xmax[2]-X[2], X[2]-Xmin[2]); if(R1>D) D=R1;
+      return pow(real(2), int(1+std::log(D)/M_LN2));
+    }
+  };
   /// type to estimate the number of tree boxes needed.
   class EstimateNalloc
   {
@@ -488,18 +532,20 @@ namespace {
   ///
   /// An OctalTree is build by first making a BoxDotTree, then mapping it to
   /// an OctalTree via BoxDotTree::Link()
-  template<int Dim, typename Real>
+  template<int Dim, typename real>
   struct BoxDotTree
   {
     const static int Nsub = 1<<Dim; ///< number of octants per cell
     //
-    typedef OctalTree<Dim,Real>            OctTree;
+    typedef OctalTree<Dim,real>            OctTree;
+    typedef Geometry::Algorithms<1>        GeoAlg;
     typedef typename OctTree::Initialiser  Initialiser;
     typedef typename OctTree::node_index   node_index;
     typedef typename OctTree::depth_type   depth_type;
     typedef typename OctTree::local_count  local_count;
     typedef typename OctTree::particle_key particle_key;
     typedef typename OctTree::point        point;
+    typedef typename OctTree::cube         cube;
     //
     const static depth_type MAXD = OctTree::MaximumDepth;
     /// represents a particle in the BoxDotTree
@@ -512,7 +558,7 @@ namespace {
     /// represents a cubic cell in the BoxDotTree
     struct __Box {
       typedef typename meta::__IWORDS<Nsub>::integer_u ndl_type;
-      point             CEN;           ///< centre position
+      cube              CUB;           ///< box cubus
       void             *OCT[Nsub];     ///< octants
       // if 0 == NDL[i]          the octant is empty
       // if 0 <  NDL[i] <= NMAX  the octant holds a list of NDL[] leafs
@@ -543,7 +589,6 @@ namespace {
     const node_index    NMAX1;         ///< NMAX + 1
     depth_type          DEPTH;         ///< depth of linked tree
     block_alloc<Box>    BM;            ///< allocator for boxes
-    Real                RA[MAXD+1];    ///< array with radius(level)  
     Box                *P0;            ///< root box
     /// after building: # cells required; after linking: # cells actually used
     node_index          NCELL;
@@ -580,8 +625,8 @@ namespace {
 	WDutils_THROW("exceeding maximum tree depth of %d\n         "
 		      "(perhaps more than Nmax=%du positions are identical "
 		      "within floating-point precision)\n", MAXD, NMAX);
-      P->CEN = B->CEN;
-      ShrinkToOctant(P->CEN,i,RA[P->LEV]);
+      GeoAlg::copy(B->CUB,P->CUB);
+      GeoAlg::shrink(P->CUB,i);
       return P;
     }
     /// adds dot @a Di to octant @a b of box @a P
@@ -614,7 +659,7 @@ namespace {
       for(;;) {
 	// loop boxes down the tree
 	P->NUM++;
-	int b = octant16(P->CEN,Di->X);
+	int b = GeoAlg::octant(P->CUB,Di->X);
 	if(P->NDL[b] > NMAX)
 	  // octant is a box
 	  P = pBOX(P->OCT[b]);
@@ -629,7 +674,7 @@ namespace {
 	    P->NUM    = NMAX1;                 //   set P->NUM
 	    for(Dot*Dn; Di; Di=Dn) {           //   sort dots into octants
 	      Dn= pDOT(Di->Next);
-	      b = octant16(P->CEN,Di->X);
+	      b = GeoAlg::octant(P->CUB,Di->X);
 	      AddDotToOctant(P,Di,b);
 	    }
 	  }
@@ -659,7 +704,7 @@ namespace {
     /// \param[in] P  parent cell index for leaf
     void LinkLeaf(node_index L, const Dot*D, node_index P) const
     {
-      TREE->XL[L] = D->X;
+      static_cast<point&>(TREE->XL[L]) = D->X;
       TREE->PL[L] = D->I;
       TREE->PC[L] = P;
     }
@@ -672,8 +717,8 @@ namespace {
       TREE->L0[C] = LF;
       TREE->OC[C] = i;
       TREE->LE[C] = P->LEV + 1;
-      TREE->XC[C] = P->CEN;
-      ShrinkToOctant(TREE->XC[C], i, RA[TREE->LE[C]]);
+      GeoAlg::copy(P->CUB,static_cast<cube&>(TREE->XC[C]));
+      GeoAlg::shrink(TREE->XC[C],i);
       TREE->NM[C] = P->NDL[i];
       TREE->NL[C] = P->NDL[i];
       TREE->NC[C] = 0;
@@ -762,8 +807,8 @@ namespace {
 	out<<" M";
       out<<" B"<<setfill('0')<<setw(5)
 	 <<BM.number_of_element(NonSingleParent(const_cast<Box*>(B)));
-      out<<' '<<setfill(' ')<<setw(8)<<RA[B->LEV]
-	 <<' '<<setw(8)<<B->CEN<<'\n';
+      out<<' '<<setfill(' ')<<setw(8)<<B->CUB.H
+	 <<' '<<setw(8)<<B->CUB.X<<'\n';
     }
     /// dump tree, recursive
     void Dump(const Box*B, std::ostream&outd, std::ostream&outb, node_index&ns)
@@ -844,8 +889,8 @@ namespace WDutils {
 //
 namespace {
   //
-  template<int Dim, typename Real>
-  BoxDotTree<Dim,Real>::BoxDotTree(char build, node_index Ndot,
+  template<int Dim, typename real>
+  BoxDotTree<Dim,real>::BoxDotTree(char build, node_index Ndot,
 				   const Initialiser*Init,
 				   depth_type nmax, depth_type nmin,
 				   bool avspc, const OctTree*Tree)
@@ -893,7 +938,7 @@ namespace {
 	  if(Init->Pick(Tree->PL[i])) ++NDOT;
 	if(0==NDOT)
 	  WDutils_THROW("OctalTree<%d,%s>::build(): empty tree\n",
-			Dim,nameof(Real));
+			Dim,nameof(real));
 	// 1.3A.2  allocate dots
 	const_cast<Dot*&>(D0) = WDutils_NEW(Dot,NDOT);
 	const_cast<Dot*&>(DN) = D0+NDOT;
@@ -902,7 +947,7 @@ namespace {
 	for(node_index i=0; i!=Tree->Nleafs(); ++i)
 	  if(Init->Pick(Tree->PL[i])) {
 	    Di->I = Tree->PL[i];
-	    Di->X = Tree->XL[i];
+	    Di->X = static_cast<point const&>(Tree->XL[i]);
 	    ++Di;
 	  }
       } else {
@@ -913,16 +958,16 @@ namespace {
 	    if(Di==DN)
 	      WDutils_THROW("OctalTree<%d,%s>::build(): "
 			    "more leafs in pruned tree than expected (%d)\n",
-			    Dim,nameof(Real),NDOT);
+			    Dim,nameof(real),NDOT);
 	    Di->I = Tree->PL[i];
-	    Di->X = Tree->XL[i];
+	    Di->X = static_cast<point const&>(Tree->XL[i]);
 	    ++Di;
 	  }
 	if(Di < DN) NDOT = Di-D0;
       }
     } break;
     default: WDutils_THROW("OctalTree<%d,%s>::build(): unknown build '%c'\n",
-			   Dim,nameof(Real),build);
+			   Dim,nameof(real),build);
     }
     // 2  find min, max and average position
     Dot*Di=D0;
@@ -936,26 +981,24 @@ namespace {
 	if(isnan(Di->X) || isinf(Di->X))
 	  Dim==2?
 	    WDutils_THROW("OctalTree<%d,%s>: particle %d: "
-			  "invalid X=%g,%g\n",Dim,nameof(Real),
+			  "invalid X=%g,%g\n",Dim,nameof(real),
 			  Di->I, Di->X[0],Di->X[1])
 	    :
 	    WDutils_THROW("OctalTree<%d,%s>: particle %d: "
-			  "invalid X=%g,%g,%g\n",Dim,nameof(Real),
+			  "invalid X=%g,%g,%g\n",Dim,nameof(real),
 			  Di->I, Di->X[0],Di->X[1],Di->X[2]);
       WDutils_THROW("OctalTree<%d,%s>: unidentified invalid position(s)\n",
-		    Dim,nameof(Real));
+		    Dim,nameof(real));
     }
-    Xave   /= Real(NDOT);
+    Xave   /= real(NDOT);
     // 3  set (empty) root box, RA[]
-    P0->NDl = 0;
-    P0->NBX = 0;
-    P0->NOC = 0;
-    P0->CEN = Helper<Dim,Real>::Integer(Xave);
-    P0->LEV = 0;
-    P0->NUM = 0;
-    RA[0]   = Helper<Dim,Real>::RootRadius(P0->CEN,Xmin,Xmax);
-    for(unsigned l=0; l!=MAXD; ++l)
-      RA[l+1] = Real(0.5)*RA[l];
+    P0->NDl   = 0;
+    P0->NBX   = 0;
+    P0->NOC   = 0;
+    P0->CUB.X = TreeHelper<Dim>::Integer(Xave);
+    P0->CUB.H = TreeHelper<Dim>::RootRadius(P0->CUB.X,Xmin,Xmax);
+    P0->LEV   = 0;
+    P0->NUM   = 0;
     // 4  add dots
     ND = 0;
     for(Di=D0; Di!=DN; ++Di,++ND)
@@ -966,15 +1009,15 @@ namespace {
 #endif
   }
   //
-  template<int D, typename Real>
-  inline BoxDotTree<D,Real>::~BoxDotTree()
+  template<int D, typename real>
+  inline BoxDotTree<D,real>::~BoxDotTree()
   { 
     if(D0) delete16(D0);
   }
   //
-  template<int D, typename Real>
-  typename BoxDotTree<D,Real>::depth_type
-  BoxDotTree<D,Real>::LinkCell(const Box*P, node_index C, int o) const
+  template<int D, typename real>
+  typename BoxDotTree<D,real>::depth_type
+  BoxDotTree<D,real>::LinkCell(const Box*P, node_index C, int o) const
   {
     // 1 if single-parent replace by non-single-parent descendant
     if(AVSPC) EnsureNonSingleParent(P);
@@ -982,7 +1025,7 @@ namespace {
     TREE->L0[C] = LF;
     TREE->OC[C] = o;
     TREE->LE[C] = P->LEV;
-    TREE->XC[C] = P->CEN;
+    GeoAlg::copy(P->CUB,static_cast<cube&>(TREE->XC[C]));
     TREE->NM[C] = P->NUM;
     // 3 loop octants: link leaf kids (from octants with < NMIN), count cells
     depth_type tmp = 0;
@@ -1017,38 +1060,55 @@ namespace {
 #undef  cpDOT
 #undef   pBOX
 #undef  cpBOX
+  /// the next multiple of 16 to n*sizeof(T)
+  template<typename T>
+  inline size_t Next16(size_t n)
+  {
+    return WDutils::next_aligned16(n*sizeof(T));
+  }
 }
 //
 namespace WDutils {
-  template<int D, typename Real> 
-  void OctalTree<D,Real>::allocate()
+  template<int D, typename real> 
+  void OctalTree<D,real>::allocate()
   {
+    // all arrays are to be 16-byte aligned
     unsigned need =
-      NLEAF * (sizeof(point) + sizeof(particle_key) + sizeof(node_index)) +
-      NCELL * (sizeof(depth_type) + 2*sizeof(int) +
-	       sizeof(local_count) + 4*sizeof(node_index) + sizeof(point));
+      Next16<point16>       (NLEAF) +  // XL
+      Next16<particle_key>  (NLEAF) +  // PL
+      Next16<node_index>    (NLEAF) +  // PC
+      Next16<depth_type>    (NCELL) +  // LE
+      2*Next16<octant_type> (NCELL) +  // OC,NC
+      Next16<cube16>        (NCELL) +  // XC
+      Next16<local_count>   (NCELL) +  // NL
+      4*Next16<node_index>  (NCELL);   // L0,NM,CF,PA
     if((need > NALLOC) || (3*need < 2*NALLOC)) {
       if(ALLOC) delete16(ALLOC);
       ALLOC  = new16<char>(need);
       NALLOC = need;
     }
     char* A = ALLOC;
-    XL = reinterpret_cast<point*>       (A); A += NLEAF * sizeof(point);
-    PL = reinterpret_cast<particle_key*>(A); A += NLEAF * sizeof(particle_key);
-    PC = reinterpret_cast<node_index*>  (A); A += NLEAF * sizeof(node_index);
-    LE = reinterpret_cast<depth_type*>  (A); A += NCELL * sizeof(depth_type);
-    OC = reinterpret_cast<octant_type*> (A); A += NCELL * sizeof(octant_type);
-    XC = reinterpret_cast<point*>       (A); A += NCELL * sizeof(point);
-    L0 = reinterpret_cast<node_index*>  (A); A += NCELL * sizeof(node_index);
-    NL = reinterpret_cast<local_count*> (A); A += NCELL * sizeof(local_count);
-    NM = reinterpret_cast<node_index*>  (A); A += NCELL * sizeof(node_index);
-    CF = reinterpret_cast<node_index*>  (A); A += NCELL * sizeof(node_index);
-    NC = reinterpret_cast<octant_type*> (A); A += NCELL * sizeof(octant_type);
-    PA = reinterpret_cast<node_index*>  (A); A += NCELL * sizeof(node_index);
+
+#define SET_POINTER(Name,Number,Type)				\
+    Name=reinterpret_cast<Type*>(A);  A+=Next16<Type>(Number);
+    
+    SET_POINTER(XL,NLEAF,point16);
+    SET_POINTER(PL,NLEAF,particle_key);
+    SET_POINTER(PC,NLEAF,node_index);
+    SET_POINTER(LE,NCELL,depth_type);
+    SET_POINTER(OC,NCELL,octant_type);
+    SET_POINTER(XC,NCELL,cube16);
+    SET_POINTER(L0,NCELL,node_index);
+    SET_POINTER(NL,NCELL,local_count);
+    SET_POINTER(NM,NCELL,node_index);
+    SET_POINTER(CF,NCELL,node_index);
+    SET_POINTER(NC,NCELL,octant_type);
+    SET_POINTER(PA,NCELL,node_index);
+#undef SET_POINTER
   }
   //
-  template<int D, typename Real>
-  void OctalTree<D,Real>::build(char building, node_index n,
+  template<int D, typename real>
+  void OctalTree<D,real>::build(char building, node_index n,
 				const Initialiser*init, const OctalTree*tree)
     WDutils_THROWING
   {
@@ -1057,7 +1117,7 @@ namespace WDutils {
     clock_t cpu0, cpu1;
     cpu0 = clock();
 #endif
-    BoxDotTree<D,Real> BDT(building,n,init,NMAX,NMIN,AVSPC,tree);
+    BoxDotTree<D,real> BDT(building,n,init,NMAX,NMIN,AVSPC,tree);
 #ifdef GIVE_TIMING
     cpu1 = clock();
     std::cerr<<" OctalTree::build(): BoxDotTree::BoxDotTree took "
@@ -1077,7 +1137,7 @@ namespace WDutils {
 #endif
     DEPTH = BDT.DEPTH;
     NCELL = BDT.NCELL;
-    std::memcpy(RAD,BDT.RA,(MaximumDepth+1)*sizeof(Real));
+//     std::memcpy(RAD,BDT.RA,(MaximumDepth+1)*sizeof(real));
   }
 }
 //
@@ -1146,7 +1206,7 @@ namespace {
   template<typename OctTree>
   struct Lister : public NeighbourFinder<OctTree>::Processor {
     typedef typename NeighbourFinder<OctTree>::Leaf Leaf;
-    typedef typename NeighbourFinder<OctTree>::Real Real;
+    typedef typename NeighbourFinder<OctTree>::real real;
     typedef typename NeighbourFinder<OctTree>::node_index node_index;
     //
     Neighbour<OctTree> *LIST;    ///< neighbour list
@@ -1156,7 +1216,7 @@ namespace {
     Lister(Neighbour<OctTree>*list, node_index size)
       : LIST(list), K(size), I(0) {}
     /// process: add neighbour to list
-    void process(Leaf l, Real q) const
+    void process(Leaf l, real q) const
     {
       if(I<K) {
 	LIST[I].Q = q;
@@ -1172,14 +1232,14 @@ namespace WDutils {
   void NeighbourFinder<OctTree>::ProcessLeafs(Leaf b, Leaf e) const
   {
     for(Leaf l=b; l!=e; ++l) {
-      Real q = dist_sq(X,position(l));
+      real q = dist_sq(X,position(l));
       if(q<Q) PROC->process(l,q);
     }
   }
   //
   template<typename OctTree>
   typename NeighbourFinder<OctTree>::node_index
-  NeighbourFinder<OctTree>::Find(Leaf l, Real q, Neighbour<OctTree>*nb,
+  NeighbourFinder<OctTree>::Find(Leaf l, real q, Neighbour<OctTree>*nb,
 				 node_index m)
   {
     Lister<OctTree> LL(nb,m);
@@ -1193,7 +1253,7 @@ namespace WDutils {
   //
   template<typename OctTree>
   typename NeighbourFinder<OctTree>::node_index
-  NeighbourFinder<OctTree>::Find(point const&x, Real q, Neighbour<OctTree>*nb,
+  NeighbourFinder<OctTree>::Find(point const&x, real q, Neighbour<OctTree>*nb,
 				 node_index m)
   {
     Lister<OctTree> LL(nb,m);
@@ -1206,7 +1266,7 @@ namespace WDutils {
   }
   //
   template<typename OctTree>
-  void NeighbourFinder<OctTree>::Process(Leaf l, Real q, const Processor*p)
+  void NeighbourFinder<OctTree>::Process(Leaf l, real q, const Processor*p)
     WDutils_THROWING
   {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
@@ -1218,7 +1278,7 @@ namespace WDutils {
   }
   //
   template<typename OctTree>
-  void NeighbourFinder<OctTree>::Process(point const&x, Real q,
+  void NeighbourFinder<OctTree>::Process(point const&x, real q,
 					 const Processor*p) WDutils_THROWING
   {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
@@ -1238,7 +1298,7 @@ namespace WDutils {
   void PositionsSSE<OctTree>::Allocate(typename Access::node_index nl)
   {
     const_cast<unsigned&>(N16) = (nl+L) & nL;
-    size_t nx  = N16 * sizeof(Real);
+    size_t nx  = N16 * sizeof(real);
     size_t na  = N16 + OctTree::Dim * nx;
     if(na > NALLOC || 2*na < 3*NALLOC) {
       if(ALLOC) free16(ALLOC);
@@ -1246,10 +1306,10 @@ namespace WDutils {
       const_cast<char* &>(ALLOC)  = NALLOC? new16<char>(na) : 0;
     }
     char* A = ALLOC;
-    const_cast<Real*&>(XX)=reinterpret_cast<Real*>(A);  A+=nx;
-    const_cast<Real*&>(YY)=reinterpret_cast<Real*>(A);  A+=nx;
+    const_cast<real*&>(XX)=reinterpret_cast<real*>(A);  A+=nx;
+    const_cast<real*&>(YY)=reinterpret_cast<real*>(A);  A+=nx;
     if(OctTree::Dim == 3) {
-      const_cast<Real*&>(ZZ)=reinterpret_cast<Real*>(A);  A+=nx;
+      const_cast<real*&>(ZZ)=reinterpret_cast<real*>(A);  A+=nx;
     }
     const_cast<bool*&>(PP)=reinterpret_cast<bool*>(A);
   }
@@ -1338,7 +1398,7 @@ namespace WDutils {
     __m128 HQ = _mm_set1_ps(Q);
     __m128 X0 = _mm_set1_ps(X[0]);
     __m128 Y0 = _mm_set1_ps(X[1]);
-    SSE::Traits<Real>::vector QQ;
+    SSE::Traits<real>::vector QQ;
     unsigned n=0;
     ++CL;
     for(chunk*Ch=C0; Ch!=CL; ++Ch) {
@@ -1370,7 +1430,7 @@ namespace WDutils {
     __m128 X0 = _mm_set1_ps(X[0]);
     __m128 Y0 = _mm_set1_ps(X[1]);
     __m128 Z0 = _mm_set1_ps(X[2]);
-    SSE::Traits<Real>::vector QQ;
+    SSE::Traits<real>::vector QQ;
     unsigned n=0;
     ++CL;
     for(chunk*Ch=C0; Ch!=CL; ++Ch) {
@@ -1404,7 +1464,7 @@ namespace WDutils {
     __m128d HQ = _mm_set1_pd(Q);
     __m128d X0 = _mm_set1_pd(X[0]);
     __m128d Y0 = _mm_set1_pd(X[1]);
-    SSE::Traits<Real>::vector QQ;
+    SSE::Traits<real>::vector QQ;
     unsigned n=0;
     ++CL;
     for(chunk*Ch=C0; Ch!=CL; ++Ch) {
@@ -1434,7 +1494,7 @@ namespace WDutils {
     __m128d X0 = _mm_set1_pd(X[0]);
     __m128d Y0 = _mm_set1_pd(X[1]);
     __m128d Z0 = _mm_set1_pd(X[2]);
-    SSE::Traits<Real>::vector QQ;
+    SSE::Traits<real>::vector QQ;
     unsigned n=0;
     ++CL;
     for(chunk*Ch=C0; Ch!=CL; ++Ch) {
@@ -1505,7 +1565,7 @@ namespace WDutils {
   template<typename OctTree>
   typename FastNeighbourFinder<OctTree>::node_index
   FastNeighbourFinder<OctTree>::
-  Find(Leaf l, Real q, Neighbour<OctTree>*nb, node_index m)
+  Find(Leaf l, real q, Neighbour<OctTree>*nb, node_index m)
   {
     Q    = q;
     X    = position(l);
@@ -1522,7 +1582,7 @@ namespace WDutils {
   template<typename OctTree>
   typename FastNeighbourFinder<OctTree>::node_index
   FastNeighbourFinder<OctTree>::
-  Find(point const&x, Real q, Neighbour<OctTree>*nb, node_index m)
+  Find(point const&x, real q, Neighbour<OctTree>*nb, node_index m)
   {
     Q    = q;
     X    = x;
@@ -1544,25 +1604,25 @@ namespace {
   /// type used for sorting daughter cells in NearestNeighbourFinder::AddCell
   template<typename OctTree>
   struct CellQ {
-    typename TreeAccess<OctTree>::Real Q;
+    typename TreeAccess<OctTree>::real Q;
     typename TreeAccess<OctTree>::Cell C;
-    void set(typename TreeAccess<OctTree>::Real q,
+    void set(typename TreeAccess<OctTree>::real q,
 	     typename TreeAccess<OctTree>::Cell c)
     { Q=q; C=c; }
 //     bool operator<(CellQ const&x) const
 //     { return Q < x.Q; }
     bool operator>(CellQ const&x) const 
     { return Q > x.Q; }
-//     bool operator<(typename TreeAccess<OctTree>::Real q) const
+//     bool operator<(typename TreeAccess<OctTree>::real q) const
 //     { return Q < q; }
-//     bool operator>(typename TreeAccess<OctTree>::Real q) const
+//     bool operator>(typename TreeAccess<OctTree>::real q) const
 //     { return Q > q; }
   };
 }
 //
 namespace WDutils {
   template<typename OctTree> inline
-  typename NearestNeighbourFinder<OctTree>::Real
+  typename NearestNeighbourFinder<OctTree>::real
   NearestNeighbourFinder<OctTree>::OutsideDistSq(Cell c) const
   { return outside_dist_sq(centre(c),radius(c),X); }
   //
@@ -1584,7 +1644,7 @@ namespace WDutils {
   {
     // testing after adding the contributions to q from each dimension does
     // make the code run more slowly
-    Real q = dist_sq(X,position(l));
+    real q = dist_sq(X,position(l));
     if(LIST->Q > q) {
       LIST->Q = q;
       LIST->L = l;
@@ -1635,13 +1695,13 @@ namespace WDutils {
   {
 //     // TEST
 //     {
-//       Real  r;
+//       real  r;
 //       point c,x;
 //       for(;;) {
 // 	std::cerr<<" c="; std::cin>>c;
 // 	std::cerr<<" r="; std::cin>>r;
 // 	std::cerr<<" x="; std::cin>>x;
-// 	Real q(0),D;
+// 	real q(0),D;
 // 	D = abs(c[0]-x[0]); if(D>r) q+=square(D-r);
 // 	D = abs(c[1]-x[1]); if(D>r) q+=square(D-r);
 // 	D = abs(c[2]-x[2]); if(D>r) q+=square(D-r);
@@ -1652,7 +1712,7 @@ namespace WDutils {
 //     // TSET
     NIAC = 0;
     M    = K;
-    Real Q = 12*square(Base::RootRadius());
+    real Q = 12*square(Base::RootRadius());
     for(node_index k=0; k!=K; ++k)
       LIST[k].Q = Q;
     for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))

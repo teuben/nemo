@@ -85,15 +85,12 @@ namespace WDutils {
 #else
       Error
 #endif
-	(f,l)(sizeof(size_t)==8? 
-	      "could not allocate %lu %s = %lu bytes\n" :
-	      "could not allocate %du %s = %du bytes\n",
-	      n,nameof(T),n*sizeof(T));
+	(f,l)("could not allocate %u %s = %u bytes\n",
+	      uint32(n),nameof(T),uint32(n*sizeof(T)));
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)(sizeof(size_t)==8?
-				"allocated %lu %s = %lu bytes @ %p\n" :
-				"allocated %du %s = %du bytes @ %p\n",
-				n,nameof(T),n*sizeof(T),static_cast<void*>(t));
+      DebugInformation(f,l,lib)("allocated %u %s = %u bytes @ %p\n",
+				uint32(n),nameof(T),uint32(n*sizeof(T)),
+				static_cast<void*>(t));
     return t;
   }
   // ///////////////////////////////////////////////////////////////////////////
@@ -269,7 +266,7 @@ namespace WDutils {
 #else
 #  define WDutils__align16
 #endif
-  //----------------------------------------------------------------------------
+  ///
   /// is a given memory address aligned?
   /// \ingroup Mem16
   /// \param p  memory address to be tested
@@ -278,14 +275,32 @@ namespace WDutils {
   {
     return size_t(p) % al == 0;
   }
-  //----------------------------------------------------------------------------
+  ///
   /// is a given memory address aligned to a 16 bytes memory location?
   /// \param p  memory address to be tested
   inline bool is_aligned16(const void*p)
   {
     return size_t(p) % 16 == 0;
   }
-  //----------------------------------------------------------------------------
+  ///
+  /// given a number, find the next multiple of 16
+  /// \param[in] n  some number
+  /// \return smallest multiple of 16 not smaller than @a n
+  inline size_t next_aligned16(size_t n)
+  {
+    const size_t L=15, nL=~L;
+    return (n+L)&nL;
+  }
+  ///
+  /// given an address @a p, find the next 16-byte aligned address
+  /// \param[in] p  some address (pointer)
+  /// \return smallest 16-byte aligned address not smaller than @a p
+  template<typename T>
+  inline T* next_aligned16(T*p)
+  {
+    return reinterpret_cast<T*>(next_aligned16(reinterpret_cast<size_t>(p)));
+  }
+  ///
   /// Allocate memory at a address aligned to a 16 byte memory location
   /// \ingroup Mem16
   ///
@@ -309,9 +324,7 @@ namespace WDutils {
 #else
       Error
 #endif
-	()(sizeof(size_t)==8?
-	   "allocation of %lu bytes aligned to 16 failed\n":
-	   "allocation of %du bytes aligned to 16 failed\n",n);
+	()("allocation of %u bytes aligned to 16 failed\n",uint32(n));
     }
     if(n && t==0)
 #ifdef WDutils_EXCEPTIONS
@@ -319,13 +332,9 @@ namespace WDutils {
 #else
       Error
 #endif
-	()(sizeof(size_t)==8?
-	   "could not allocate %lu bytes aligned to 16\n":
-	   "could not allocate %du bytes aligned to 16\n",n);
+	()("could not allocate %u bytes aligned to 16\n",uint32(n));
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation()(sizeof(size_t)==8?
-			 "allocated %lu bytes aligned to 16 @ %p\n":
-			 "allocated %du bytes aligned to 16 @ %p\n",n,t);
+      DebugInformation()("allocated %u bytes aligned to 16 @ %p\n",uint32(n),t);
     return t;
 #else
     // linear memory model:                                                     
@@ -1336,7 +1345,7 @@ namespace WDutils {
   {
     typedef Array<uint64> Base;
     static const uint64 null = 0;
-    static const uint64 full = 0xffffffffffffffff;
+    static const uint64 full = ~null;
     static unsigned rsize(unsigned n)
     { return (n>>6) + (n&full)? 1 : 0; }
   public:
