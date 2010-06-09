@@ -1345,11 +1345,14 @@ namespace WDutils {
   struct NearestNeighbourFinder : public TreeAccess<OctTree>
   {
     typedef TreeAccess<OctTree> Base;
+    Base::Dim;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
     typedef typename Base::real real;             ///< type: scalars
     typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
+    typedef Geometry::sphere<Dim,real> Sphere;    ///< type: search sphere
+    typedef Geometry::Algorithms<1> GeoAlgos;     ///< geometric algorithms
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] k     number K of nearest neighbours to find
@@ -1385,7 +1388,7 @@ namespace WDutils {
 	WDutils_THROW("NearestNeighbourFinder: K=%d >= Nl=%d\n",
 		      K,Base::Nleafs());
       LIST = nb;
-      X    = position(l);
+      S.X  = position(l);
       C    = Parent(l);
       FillList();
       return NIAC;
@@ -1407,8 +1410,8 @@ namespace WDutils {
 	WDutils_THROW("NearestNeighbourFinder: K=%d > Nl=%d\n",
 		      K,Base::Nleafs());
       LIST = nb;
-      X    = x;
-      C    = SmallestContainingCell(X);
+      S.X  = x;
+      C    = SmallestContainingCell(S.X);
       FillList();
       return NIAC;
     }
@@ -1418,7 +1421,8 @@ namespace WDutils {
     const node_index    NDIR;     ///< direct-loop control
     Neighbour<OctTree> *LIST;     ///< neighbour list
     Cell                C;        ///< cell containing X, to be searched
-    point               X;        ///< centre of search sphere
+    WDutils__align16
+    mutable Sphere      S;        ///< search sphere
     mutable node_index  NIAC;     ///< interaction counter
     mutable int         M;        ///< K - # interactions for current search
     /// is search sphere outside of a cell (and vice versa)?

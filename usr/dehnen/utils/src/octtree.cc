@@ -1735,46 +1735,30 @@ namespace {
     void set(typename TreeAccess<OctTree>::real q,
 	     typename TreeAccess<OctTree>::Cell c)
     { Q=q; C=c; }
-//     bool operator<(CellQ const&x) const
-//     { return Q < x.Q; }
     bool operator>(CellQ const&x) const 
     { return Q > x.Q; }
-//     bool operator<(typename TreeAccess<OctTree>::real q) const
-//     { return Q < q; }
-//     bool operator>(typename TreeAccess<OctTree>::real q) const
-//     { return Q > q; }
   };
 }
 //
 namespace WDutils {
   template<typename OctTree> inline
-  typename NearestNeighbourFinder<OctTree>::real
-  NearestNeighbourFinder<OctTree>::OutsideDistSq(Cell c) const
-  { return outside_dist_sq(centre(c),radius(c),X); }
-  //
-  template<typename OctTree> inline
-  bool NearestNeighbourFinder<OctTree>::Outside(Cell c) const
-  { return outside(centre(c),radius(c),X,LIST->Q); }
-  //
-  template<typename OctTree> inline
-  bool NearestNeighbourFinder<OctTree>::Inside(Cell c) const
-  { return inside(centre(c),radius(c),X,LIST->Q); }
-  //
-  template<typename OctTree> inline
   typename NearestNeighbourFinder<OctTree>::node_index
   NearestNeighbourFinder<OctTree>::Ndir() const
-  { return M<=0? NDIR : max(static_cast<node_index>(M),NDIR); }
+  {
+    return M<=0? NDIR : max(static_cast<node_index>(M),NDIR);
+  }
   //
   template<typename OctTree> inline
   void NearestNeighbourFinder<OctTree>::AddLeaf(Leaf l) const
   {
     // testing after adding the contributions to q from each dimension does
     // make the code run more slowly
-    real q = dist_sq(X,position(l));
-    if(LIST->Q > q) {
+    real q = dist_sq(S.X,position(l));
+    if(S.Q > q) {
       LIST->Q = q;
       LIST->L = l;
       MaxHeap::after_top_replace(LIST,K);
+      S.Q = LIST->Q;
       --M;
       ++NIAC;
     }
@@ -1783,31 +1767,31 @@ namespace WDutils {
   template<typename OctTree>
   void NearestNeighbourFinder<OctTree>::AddCell(Cell Ci, node_index cC) const
   {
-    if(cC==0 && Number(Ci) <= Ndir()) {
+    if(cC==0 && Number(Ci) <= Ndir())
       // direct loop
       LoopAllLeafs(Ci,l) AddLeaf(l);
-    } else {
+    else {
       // process leaf kids
-      if(Nleafkids(Ci)) {
+      if(Nleafkids(Ci))
 	LoopLeafKids(Ci,l) AddLeaf(l);
-      }
       // process cell kids
       if(Ncells(Ci)>cC+1) {
 	// more than one sub-cell: process in order of increasing distance
 	CellQ<OctTree> Z[Base::Nsub];
 	int J(0);
 	LoopCellKids(Ci,c)
-	  if(c!=C) Z[J++].set(OutsideDistSq(c),c);
+	  if(c!=C) Z[J++].set(GeoAlgos::dist_sq(box(c),S.X),c);
 	MinHeap::build(Z,J);
-	while(J && LIST->Q > Z->Q) {
+	while(J && S.Q > Z->Q) {
 	  AddCell(Z->C);
 	  Z[0] = Z[J-1];
 	  MinHeap::after_top_replace(Z,--J);
 	}
       } else if(Ncells(Ci)>cC) {
 	// only 1 sub-cell to process
-	if(cC) { LoopCellKids(Ci,c) if(c!=C && !Outside(c)) AddCell(c);}
-	else   { LoopCellKids(Ci,c) if(!Outside(c)) AddCell(c); }
+	LoopCellKids(Ci,c)
+	  if((!cC || c!=C) && !GeoAlgos::outside(box(c),S))
+	    AddCell(c);
       }
     }
   }
@@ -1819,29 +1803,14 @@ namespace WDutils {
   template<typename OctTree>
   void NearestNeighbourFinder<OctTree>::FillList()
   {
-//     // TEST
-//     {
-//       real  r;
-//       point c,x;
-//       for(;;) {
-// 	std::cerr<<" c="; std::cin>>c;
-// 	std::cerr<<" r="; std::cin>>r;
-// 	std::cerr<<" x="; std::cin>>x;
-// 	real q(0),D;
-// 	D = abs(c[0]-x[0]); if(D>r) q+=square(D-r);
-// 	D = abs(c[1]-x[1]); if(D>r) q+=square(D-r);
-// 	D = abs(c[2]-x[2]); if(D>r) q+=square(D-r);
-// 	std::cerr<<" outside_dist_sq(c,r,x) = "<<q<<'\n';
-// 	std::cerr<<" SSE version:             "<<outside_dist_sq(c,r,x)<<'\n';
-//       }
-//     }
-//     // TSET
     NIAC = 0;
     M    = K;
-    real Q = 12*square(Base::RootRadius());
-    for(node_index k=0; k!=K; ++k)
-      LIST[k].Q = Q;
-    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
+    S.Q  = 12*square(Base::RootRadius());
+    for(node_index k=0; k!=K; ++k) {
+      LIST[k].L = Base::InvalidLeaf();
+      LIST[k].Q = S.Q;
+    }
+    for(Cell P=C; IsValid(P) && !GeoAlgos::inside(box(C),S); C=P,P=Parent(C))
       AddCell(P, C!=P);
     MaxHeap::sort(LIST,K);
   }
