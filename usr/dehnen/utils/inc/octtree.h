@@ -411,6 +411,9 @@ namespace WDutils {
       NCELL = 0;
       DEPTH = 0;
     }
+    /// was @a avspc set during tree building?
+    bool const&AvoidedSingleParentCells() const
+    { return AVSPC; }
     /// tree depth
     depth_type const&Depth() const
     { return DEPTH; }
@@ -594,6 +597,9 @@ namespace WDutils {
     /// root radius
     real const&RootRadius() const
     { return TREE->RootRadius(); }
+    /// was @a avspc set during tree building?
+    bool const&AvoidedSingleParentCells() const
+    { return TREE->AvoidedSingleParentCells(); }
     /// N_max
     depth_type const&Nmax() const
     { return TREE->Nmax(); }

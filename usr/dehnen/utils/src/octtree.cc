@@ -23,6 +23,7 @@
 /// \version 15-apr-2010 WD  tree pruning, OctTree::build()
 /// \version 22-apr-2010 WD  parameter nmin, changes in tree building
 /// \version 24-apr-2010 WD  changes in tree building code.
+/// \version 09-jun-2010 WD  16-byte alignement, using geometry.h
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -70,395 +71,6 @@ namespace {
   using std::setw;
   using std::setfill;
   using namespace WDutils;
-#if(0)
-  /// \name some geometrical methods, only for D=2,3
-  //@{
-  /// is pos in the interval [cen-rad, cen+rad) ?
-  template<typename real> inline
-  bool ininterval(real cen, real rad, real pos)
-  // necessary to trick emacs, which otherwise confused "<" for a bracket
-#define LessThan <
-  { return pos LessThan cen?  cen <= pos+rad : pos < cen+rad; }
-#undef  LessThan
-  /// contains geometrical methods in Dim dimensions, only D=2,3
-  template<int Dim, typename real> struct Helper;
-  //
-  template<> struct Helper<2,float>
-  {
-    typedef float         real;
-    typedef tupel<2,real> point;
-    static int octant(point const&cen, point const&pos)
-    {
-#ifdef __SSE__
-      return 3&_mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
-					    _mm_loadu_ps(pos)));
-#else
-      int oct(0);
-      if(pos[0] > cen[0]) oct |= 1;
-      if(pos[1] > cen[1]) oct |= 2;
-      return oct;
-#endif
-    }
-    static int octant16(point const&cen, point const&pos)
-    {
-#ifdef __SSE__
-      return 3&_mm_movemask_ps(_mm_cmplt_ps(_mm_load_ps(cen),
-					    _mm_load_ps(pos)));
-#else
-      int oct(0);
-      if(pos[0] > cen[0]) oct |= 1;
-      if(pos[1] > cen[1]) oct |= 2;
-      return oct;
-#endif
-    }
-    static bool contains(point const&cen, real rad, point const&pos)
-    {
-      return ininterval(cen[0],rad,pos[0])
-	&&   ininterval(cen[1],rad,pos[1]);
-    }
-    static real outside_dist_sq(point const&cen, real rad, point const&pos)
-    {
-      real q(0),D;
-      D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
-      D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
-      return q;
-    }
-    static bool outside(point const&cen, real rad, point const&pos, real Q)
-    {
-      real q(0),D;
-      D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      return false;
-    }
-    static bool inside(point const&cen, real rad, point const&pos, real Q)
-    {
-      real D;
-      D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
-      D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
-      return true;
-    }
-    static tupel<2,real> Integer(point const&x)
-    {
-      tupel<2,real> c;
-      c[0]=int(x[0]+real(0.5));
-      c[1]=int(x[1]+real(0.5));
-      return c;
-    }
-    static void ShrinkToOctant(point&cen, int i, real rad)
-    {
-      if(i&1) cen[0] += rad;  else  cen[0] -= rad;
-      if(i&2) cen[1] += rad;  else  cen[1] -= rad;
-    }
-    static real RootRadius(point const&X, point const&Xmin, point const&Xmax)
-    {
-      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
-      if(R1>D) D=R1;
-      return pow(real(2), int(1+std::log(D)/M_LN2));
-    }
-  };
-  //
-  template<> struct Helper<2,double>
-  {
-    typedef double        real;
-    typedef tupel<2,real> point;
-    static int octant(point const&cen, point const&pos)
-    {
-      int oct(0);
-      if(pos[0] > cen[0]) oct |= 1;
-      if(pos[1] > cen[1]) oct |= 2;
-      return oct;
-    }
-    static int octant16(point const&cen, point const&pos)
-    {
-      int oct(0);
-      if(pos[0] > cen[0]) oct |= 1;
-      if(pos[1] > cen[1]) oct |= 2;
-      return oct;
-    }
-    static bool contains(point const&cen, real rad, point const&pos)
-    {
-      return ininterval(cen[0],rad,pos[0])
-	&&   ininterval(cen[1],rad,pos[1]);
-    }
-    static real outside_dist_sq(point const&cen, real rad, point const&pos)
-    {
-      real q(0),D;
-      D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
-      D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
-      return q;
-    }
-    static bool outside(point const&cen, real rad, point const&pos, real Q)
-    {
-      real q(0),D;
-      D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      return false;
-    }
-    static bool inside(point const&cen, real rad, point const&pos, real Q)
-    {
-      real D;
-      D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
-      D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
-      return true;
-    }
-    static tupel<2,real> Integer(point const&x)
-    {
-      tupel<2,real> c;
-      c[0]=int(x[0]+real(0.5));
-      c[1]=int(x[1]+real(0.5));
-      return c;
-    }
-    static void ShrinkToOctant(point&cen, int i, real rad)
-    {
-      if(i&1) cen[0] += rad;  else  cen[0] -= rad;
-      if(i&2) cen[1] += rad;  else  cen[1] -= rad;
-    }
-    static real RootRadius(point const&X, point const&Xmin, point const&Xmax)
-    {
-      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
-      if(R1>D) D=R1;
-      return pow(real(2), int(1+std::log(D)/M_LN2));
-    }
-  };
-  //
-  template<> struct Helper<3,float>
-  {
-    typedef float         real;
-    typedef tupel<3,real> point;
-    static int octant(point const&cen, point const&pos)
-    {
-#ifdef __SSE__
-      return 7 & _mm_movemask_ps(_mm_cmplt_ps(_mm_loadu_ps(cen),
-					      _mm_loadu_ps(pos)));
-#else
-      int oct(0);
-      if(pos[0] > cen[0]) oct |= 1;
-      if(pos[1] > cen[1]) oct |= 2;
-      if(pos[2] > cen[2]) oct |= 4;
-      return oct;
-#endif
-    }
-    static int octant16(point const&cen, point const&pos)
-    {
-#ifdef __SSE__
-      return 7 & _mm_movemask_ps(_mm_cmplt_ps(_mm_load_ps(cen),
-					      _mm_load_ps(pos)));
-#else
-      int oct(0);
-      if(pos[0] > cen[0]) oct |= 1;
-      if(pos[1] > cen[1]) oct |= 2;
-      if(pos[2] > cen[2]) oct |= 4;
-      return oct;
-#endif
-    }
-    static bool contains(point const&cen, real rad, point const&pos)
-    {
-#ifdef __SSE__
-      __m128 CC = _mm_loadu_ps(cen);
-      __m128 RR = _mm_set1_ps (rad);
-      __m128 XX = _mm_loadu_ps(pos);
-      return 7 == (7 & 
-      _mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(CC,_mm_add_ps(XX,RR)),
-				 _mm_cmplt_ps(XX,_mm_add_ps(CC,RR)))));
-#else
-      return ininterval(cen[0],rad,pos[0])
-	&&   ininterval(cen[1],rad,pos[1])
-	&&   ininterval(cen[2],rad,pos[2]);
-#endif
-    }
-    static real outside_dist_sq(point const&cen, real rad, point const&pos)
-    {
-#ifdef __SSE__
-      SSE::Traits<float>::vector Q;
-      __m128 R = _mm_set1_ps (rad);
-      __m128 C = _mm_loadu_ps(cen);
-      __m128 X = _mm_loadu_ps(pos);
-      __m128 D = _mm_sub_ps(_mm_max_ps(C,X),_mm_min_ps(C,X));
-      __m128 DR= _mm_sub_ps(D,R);
-      _mm_store_ps(Q,_mm_and_ps(_mm_cmplt_ps(R,D),_mm_mul_ps(DR,DR)));
-      return Q[0]+Q[1]+Q[2];
-#else
-      real q(0),D;
-      D=abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
-      D=abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
-      D=abs(cen[2]-pos[2]); if(D>rad) q+=square(D-rad);
-      return q;
-#endif
-    }
-    static bool outside(point const&cen, real rad, point const&pos, real Q)
-    {
-#ifdef __SSE__
-      return  outside_dist_sq(cen,rad,pos) > Q;
-#else
-      real q(0),D;
-      D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      D=abs(cen[2]-pos[2]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      return false;
-#endif
-    }
-    static bool inside(point const&cen, real rad, point const&pos, real Q)
-    {
-      real D;
-      D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
-      D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
-      D=abs(cen[2]-pos[2]); if(D>rad || Q>square(D-rad)) return false;
-      return true;
-    }
-    static tupel<3,real> Integer(point const&x)
-    {
-      tupel<3,real> c;
-      c[0]=int(x[0]+real(0.5));
-      c[1]=int(x[1]+real(0.5));
-      c[2]=int(x[2]+real(0.5));
-      return c;
-    }
-    static void ShrinkToOctant(point&cen, int i, real rad)
-    {
-      if(i&1) cen[0] += rad;  else  cen[0] -= rad;
-      if(i&2) cen[1] += rad;  else  cen[1] -= rad;
-      if(i&4) cen[2] += rad;  else  cen[2] -= rad;
-    }
-    static real RootRadius(point const&X, point const&Xmin, point const&Xmax)
-    {
-      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
-      R1 = max(Xmax[2]-X[2], X[2]-Xmin[2]); if(R1>D) D=R1;
-      return pow(real(2), int(1+std::log(D)/M_LN2));
-    }
-  };
-  //
-  template<> struct Helper<3,double>
-  {
-    typedef double        real;
-    typedef tupel<3,real> point;
-    static int octant(point const&cen, point const&pos)
-    {
-      int oct(0);
-      if(pos[0] > cen[0]) oct |= 1;
-      if(pos[1] > cen[1]) oct |= 2;
-      if(pos[2] > cen[2]) oct |= 4;
-      return oct;
-    }
-    static int octant16(point const&cen, point const&pos)
-    {
-      int oct(0);
-      if(pos[0] > cen[0]) oct |= 1;
-      if(pos[1] > cen[1]) oct |= 2;
-      if(pos[2] > cen[2]) oct |= 4;
-      return oct;
-    }
-    static bool contains(point const&cen, real rad, point const&pos)
-    {
-      return ininterval(cen[0],rad,pos[0])
-	&&   ininterval(cen[1],rad,pos[1])
-	&&   ininterval(cen[2],rad,pos[2]);
-    }
-    static real outside_dist_sq(point const&cen, real rad, point const&pos)
-    {
-      real q(0),D;
-      D = abs(cen[0]-pos[0]); if(D>rad) q+=square(D-rad);
-      D = abs(cen[1]-pos[1]); if(D>rad) q+=square(D-rad);
-      D = abs(cen[2]-pos[2]); if(D>rad) q+=square(D-rad);
-      return q;
-    }
-    static bool outside(point const&cen, real rad, point const&pos, real Q)
-    {
-      real q(0),D;
-      D=abs(cen[0]-pos[0]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      D=abs(cen[1]-pos[1]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      D=abs(cen[2]-pos[2]); if(D>rad && Q<(q+=square(D-rad))) return true;
-      return false;
-    }
-    static bool inside(point const&cen, real rad, point const&pos, real Q)
-    {
-      real D;
-      D=abs(cen[0]-pos[0]); if(D>rad || Q>square(D-rad)) return false;
-      D=abs(cen[1]-pos[1]); if(D>rad || Q>square(D-rad)) return false;
-      D=abs(cen[2]-pos[2]); if(D>rad || Q>square(D-rad)) return false;
-      return true;
-    }
-    static tupel<3,real> Integer(point const&x)
-    {
-      tupel<3,real> c;
-      c[0]=int(x[0]+real(0.5));
-      c[1]=int(x[1]+real(0.5));
-      c[2]=int(x[2]+real(0.5));
-      return c;
-    }
-    static void ShrinkToOctant(point&cen, int i, real rad)
-    {
-      if(i&1) cen[0] += rad;  else  cen[0] -= rad;
-      if(i&2) cen[1] += rad;  else  cen[1] -= rad;
-      if(i&4) cen[2] += rad;  else  cen[2] -= rad;
-    }
-    static real RootRadius(point const&X, point const&Xmin, point const&Xmax)
-    {
-      real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
-      real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
-      R1 = max(Xmax[2]-X[2], X[2]-Xmin[2]); if(R1>D) D=R1;
-      return pow(real(2), int(1+std::log(D)/M_LN2));
-    }
-  };
-  /// octant of pos with respect to cen.
-  /// \note if pos[i]>=cen[i], the ith bit of octant is set to 1, otherwise 0
-  template<int D, typename real> inline
-  int octant(tupel<D,real> const&cen, tupel<D,real> const&pos)
-  { return Helper<D,real>::octant(cen,pos); }
-  /// octant of pos with respect to cen.
-  /// \note if pos[i]>=cen[i], the ith bit of octant is set to 1, otherwise 0
-  template<int D, typename real> inline
-  int octant16(tupel<D,real> const&cen, tupel<D,real> const&pos)
-  { return Helper<D,real>::octant16(cen,pos); }
-  /// does a cubic box contain a given position
-  /// \param[in] cen  geometric centre of cube
-  /// \param[in] rad  radius = half side length of cube
-  /// \param[in] pos  position to test for containment
-  /// \return         is pos[i] in [cen[i]-rad, cen[i]+rad) for i=0...D-1 ?
-  /// \note This definition of containment matches the way positions are
-  ///       sorted into the OctalTree.
-  template<int D, typename real> inline
-  bool contains(tupel<D,real> const&cen, real rad, tupel<D,real> const&pos)
-  { return Helper<D,real>::contains(cen,rad,pos); }
-  /// distance^2 from given position to the nearest point on a cube
-  /// \param[in] cen  geometric centre of cube
-  /// \param[in] rad  radius = half side length of cube
-  /// \param[in] pos  position to compute distance^2 for
-  /// \return    squared distance of @a pos to cube
-  /// \note If pos is inside the cube, zero is returned
-  template<int D, typename real> inline
-  real outside_dist_sq(tupel<D,real> const&cen, real rad,
-		       tupel<D,real> const&pos)
-  { return Helper<D,real>::outside_dist_sq(cen,rad,pos); }
-  /// is a sphere outside of a cubic box?
-  /// \param[in] cen  geometric centre of cube
-  /// \param[in] rad  radius = half side length of cube
-  /// \param[in] pos  centre of sphere
-  /// \param[in] q    radius^2 of sphere
-  /// \return is sphere outside cube?
-  /// \note Equivalent to, but on average faster than, 
-  ///       \code q < outside_dist_sq(cen,rad,pos) \endcode
-  template<int D, typename real> inline
-  bool outside(tupel<D,real> const&cen, real rad,
-	       tupel<D,real> const&pos, real q)
-  { return Helper<D,real>::outside(cen,rad,pos,q); }
-  /// is a sphere inside of a cubic box?
-  /// \param[in] cen  geometric centre of cube
-  /// \param[in] rad  radius = half side length of cube
-  /// \param[in] pos  centre of sphere
-  /// \param[in] q    radius^2 of sphere
-  template<int D, typename real> inline
-  bool inside(tupel<D,real> const&cen, real rad,
-	      tupel<D,real> const&pos, real q)
-  { return Helper<D,real>::inside(cen,rad,pos,q); }
-  /// move @a cen by @a rad in direction of octant @a i
-  /// \note used for setting centre of daughter box from that of parent box
-  template<int D, typename real> inline
-  void ShrinkToOctant(tupel<D,real>&cen, int i, real rad)
-  { return Helper<D,real>::ShrinkToOctant(cen,i,rad); }
-#endif
   ///
   template<int D> struct TreeHelper;
   template<> struct TreeHelper<2> {
@@ -1152,21 +764,37 @@ namespace WDutils {
   TreeAccess<OctalTree<2,float> >::Cell
   TreeAccess<OctalTree<2,float> >::SmallestContainingCell(point const&x) const
   {
+    // start with root cell
     Cell c = Root();
     __m128 X = _mm_loadu_ps(cPF(x));
     __m128 C = _mm_load_ps(cPF(box(c).X));
     __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(2,2,2,2));
+    // if x not in root cell, return invalid cell
     if(3 != (3&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),
 					  _mm_cmpgt_ps(_mm_add_ps(C,H),X)))))
       return InvalidCell();
+    // descend down the tree
     for(;;) {
-      if(Ncells(c)==0) return c;
+      // if cell has no sub-cells: we are done
+      if(Ncells(c)==0)
+	return c;
+      // find sub-cell in same octant as x
       uint8 o = 3&_mm_movemask_ps(_mm_cmplt_ps(C,X));
       Cell cc = BeginCells(c), ce=EndCells(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
-      if(cc==ce) return c;
+      // non found: return c
+      if(cc == ce)
+	return c;
+      C = _mm_load_ps(cPF(box(cc).X));
+      // ensure sub-cell does contain x (otherwise return c)
+      // [this may not be so if the sub-cell does not cover the full of the
+      // octant, which can occur when avoiding single-parent cells]
+      if(AvoidedSingleParentCells() && level(cc) > level(c)+1 &&
+	 3 != (3&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),
+					    _mm_cmpgt_ps(_mm_add_ps(C,H),X)))))
+	return c;
+      // continue with sub-cell
       c = cc;
-      C = _mm_load_ps(cPF(box(c).X));
     }
   }
   template<> 
@@ -1185,9 +813,14 @@ namespace WDutils {
       uint8 o = 7&_mm_movemask_ps(_mm_cmplt_ps(C,X));
       Cell cc = BeginCells(c), ce=EndCells(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
-      if(cc==ce) return c;
+      if(cc==ce)
+	return c;
+      C = _mm_load_ps(cPF(box(cc).X));
+      if(AvoidedSingleParentCells() && level(cc) > level(c)+1 &&
+	 7 != (7&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),
+					    _mm_cmpgt_ps(_mm_add_ps(C,H),X)))))
+	return c;
       c = cc;
-      C = _mm_load_ps(cPF(box(c).X));
     }
   }
 #undef  PF
@@ -1214,8 +847,12 @@ namespace WDutils {
       Cell cc = BeginCells(c), ce=EndCells(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce) return c;
+      C = _mm_load_pd(cPD(box(cc).X));
+      if(AvoidedSingleParentCells() && level(cc) > level(c)+1 &&
+	 3 != _mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C,H),X),
+					 _mm_cmpgt_pd(_mm_add_pd(C,H),X))))
+	return c;
       c = cc;
-      C = _mm_load_pd(cPD(box(c).X));
     }
   }
   template<> 
@@ -1241,9 +878,18 @@ namespace WDutils {
       Cell cc = BeginCells(c), ce=EndCells(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce) return c;
+      C0 = _mm_load_pd(cPD (box(cc).X));
+      C1 = _mm_load_pd(cPD2(box(cc).X));
+      if(AvoidedSingleParentCells() && level(cc) > level(c)+1 &&
+	 ( 3 != _mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C0,H),X0),
+					   _mm_cmpgt_pd(_mm_add_pd(C0,H),X0)))
+	   ||
+	   ! (1&_mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C1,H),X1),
+					   _mm_cmpgt_pd(_mm_add_pd(C1,H),X1))))
+	   )
+	 )
+	return c;
       c  = cc;
-      C0 = _mm_load_pd(cPD (box(c).X));
-      C1 = _mm_load_pd(cPD2(box(c).X));
     }
   }
 #undef  PD
@@ -1257,14 +903,19 @@ namespace WDutils {
     const
   {
     Cell c=Root();
-    if(!::contains(centre(c),radius(c),x) )
+    if(! Geometry::Algorithms<0>::contains(box(c),x))
       return InvalidCell();
     for(;;) {
-      if(Ncells(c)==0) return c;
+      if(Ncells(c)==0)
+	return c;
       uint8 o=::octant(centre(c),x);
       Cell cc=BeginCells(c), ce=EndCells(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
-      if(cc==ce) return c;
+      if(cc==ce || 
+	 AvoidedSingleParentCells() &&
+	 level(cc) > level(c)+1     &&
+	 ! Geometry::Algorithms<0>::contains(box(cc),x))
+	return c;
       c=cc;
     }
   }  
@@ -1275,14 +926,19 @@ namespace WDutils {
   TreeAccess<OctTree>::SmallestContainingCell(point const&x) const
   {
     Cell c=Root();
-    if(!::contains(centre(c),radius(c),x) )
+    if(! Geometry::Algorithms<0>::contains(box(c),x))
       return InvalidCell();
     for(;;) {
-      if(Ncells(c)==0) return c;
+      if(Ncells(c)==0)
+	return c;
       uint8 o=::octant(centre(c),x);
       Cell cc=BeginCells(c), ce=EndCells(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
-      if(cc==ce) return c;
+      if(cc==ce || 
+	 AvoidedSingleParentCells() &&
+	 level(cc) > level(c)+1     &&
+	 ! Geometry::Algorithms<0>::contains(box(cc),x))
+	return c;
       c=cc;
     }
   }
