@@ -186,6 +186,10 @@ namespace WDutils {
       void reset(tupel<Dim,real> const&x) { S.X=x; }
       /// reset just the radius^2
       void reset(real q) { S.Q = q; }
+      /// radius^2 of search sphere
+      real const&RadSq() const { return S.Q; }
+      /// \name geometric relations with cubic box
+      //@{
       /// distance^2 from cube to centre of sphere (zero if inside cube)
       /// \param[in]  c  cubic box
       /// \note If @a c is 16-byte aligned, use @a aligned == true, otherwise
@@ -213,6 +217,28 @@ namespace WDutils {
       template<bool aligned>
       bool inside(cube<Dim,real> const&c) const
       { return Algorithms<aligned>::inside(c,S); }
+      //@}
+      /// \name geometric relations with position
+      //@{
+      /// distance^2 from centre of sphere to some point
+      /// \param[in]  x  position
+      /// \note If @a x is 16-byte aligned, use @a aligned == true, otherwise
+      ///       @a aligned == false. In case SSE instructions are supported for
+      ///       @a real, we specialise this routine in geometry_inl.h such that
+      ///       alignement gives slightly faster execution.
+      template<bool aligned>
+      real dist_sq(tupel<Dim,real> const&x) const
+      { return WDutils::dist_sq(x,S.X); }
+      /// is a position contained within the search sphere?
+      /// \param[in]  x  position
+      /// \note If @a x is 16-byte aligned, use @a aligned == true, otherwise
+      ///       @a aligned == false. In case SSE instructions are supported for
+      ///       @a real, we specialise this routine in geometry_inl.h such that
+      ///       alignement gives slightly faster execution.
+      template<bool aligned>
+      bool contains(tupel<Dim,real> const&x) const
+      { return dist_sq(x) < S.Q; }
+      //@}
     private:
       WDutilsStaticAssert( ( __D == 2 || __D == 3 )               &&
 			   meta::TypeInfo<__X>::is_floating_point    );

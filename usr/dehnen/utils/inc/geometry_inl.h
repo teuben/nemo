@@ -51,6 +51,7 @@ namespace WDutils {
       template<typename real, bool aligned>
       class AlgorithmsHelper<real,aligned,0>
       {
+	friend class AlgorithmsHelper<real,aligned,1>;
 	friend struct Algorithms<aligned,0>;
 #ifndef __SSE2__
 	friend struct Algorithms<aligned,1>;
@@ -113,11 +114,11 @@ namespace WDutils {
 	// dist_sq(point,point)
 	static real dist_sq(vec2 const&x, vec2 const&y)
 	{
-	  return square(x[0]-y[0]) + square(x[1]-y[1]);
+	  return WDutils::dist_sq(x,y);
 	}
 	static real dist_sq(vec3 const&x, vec3 const&y)
 	{
-	  return square(x[0]-y[0]) + square(x[1]-y[1])+ square(x[2]-y[2]);
+	  return WDutils::dist_sq(x,y);
 	}
 	// dist_sq(cube,point)
 	static real dist_sq(cub2 const&c, vec2 const&x)
@@ -251,6 +252,8 @@ namespace WDutils {
 					     _mm_cmpgt_ps(_mm_add_ps(C,H),X))));
 	}
 	// dist_sq(point,point)
+	// for unaligned access, non-SSE code is faster
+#if(0)
 	static float dist_sq(vec2 const&x, vec2 const&y)
 	{
 	  WDutils__align16 float q[4];
@@ -265,14 +268,20 @@ namespace WDutils {
 	  _mm_store_ps(q,_mm_mul_ps(D,D));
 	  return q[0]+q[1]+q[2];
 	}
+#else
+	static float dist_sq(vec2 const&x, vec2 const&y)
+	{ return WDutils::dist_sq(x,y); }
+	static float dist_sq(vec3 const&x, vec3 const&y)
+	{ return WDutils::dist_sq(x,y); }
+#endif
 	// dist_sq(cube,point)
 	static float dist_sq(cub2 const&c, vec2 const&x)
 	{
-	  WDutils__align16 float q[4];
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 X = _mm_loadu_ps(cPF(x));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(2,2,2,2));
 	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  WDutils__align16 float q[4];
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
 	  return q[0]+q[1];
@@ -543,6 +552,8 @@ namespace WDutils {
 					      _mm_cmpgt_pd(_mm_add_pd(C,H),X)));
 	}
 	// dist_sq(point,point)
+	// for unaligned access, non-SSE code is faster
+#if(0)
 	static double dist_sq(vec2 const&x, vec2 const&y)
 	{
 	  WDutils__align16 double q[2];
@@ -559,6 +570,12 @@ namespace WDutils {
 	  _mm_store_pd(p,_mm_mul_pd(D,D));
 	  return q[0]+q[1]+p[0];
 	}
+#else
+	static double dist_sq(vec2 const&x, vec2 const&y)
+	{ return WDutils::dist_sq(x,y); }
+	static double dist_sq(vec3 const&x, vec3 const&y)
+	{ return WDutils::dist_sq(x,y); }
+#endif
 	// dist_sq(cube,point)
 	static double dist_sq(cub2 const&c, vec2 const&x)
 	{
@@ -888,6 +905,13 @@ namespace WDutils {
       template<int, typename, bool> class SearchSphereHelper;
       template<> class SearchSphereHelper<2,float,0> {
 	friend struct SearchSphere<2,float>;
+	static float dist_sq(__m128 const&X, tupel<2,float> const&x)
+	{
+	  __m128 D = _mm_sub_ps(X,_mm_loadu_ps(cPF(x)));
+	  WDutils__align16 float q[4];
+	  _mm_store_ps(q,_mm_mul_ps(D,D));
+	  return q[0]+q[1];
+	}
 	static float dist_sq(__m128 const&X, cube<2,float> const&c)
 	{
 	  __m128 C,H;
@@ -914,6 +938,13 @@ namespace WDutils {
       };// class WDutils::Geometry::Meta::SearchSphereHelper<2,float,0>
       template<> class SearchSphereHelper<2,float,1> {
 	friend struct SearchSphere<2,float>;
+	static float dist_sq(__m128 const&X, tupel<2,float> const&x)
+	{
+	  __m128 D = _mm_sub_ps(X,_mm_load_ps(cPF(x)));
+	  WDutils__align16 float q[4];
+	  _mm_store_ps(q,_mm_mul_ps(D,D));
+	  return q[0]+q[1];
+	}
 	static float dist_sq(__m128 const&X, cube<2,float> const&c)
 	{
 	  __m128 C,H;
@@ -940,6 +971,13 @@ namespace WDutils {
       };// class WDutils::Geometry::Meta::SearchSphereHelper<2,float,1>
       template<> class SearchSphereHelper<3,float,0> {
 	friend struct SearchSphere<3,float>;
+	static float dist_sq(__m128 const&X, tupel<3,float> const&x)
+	{
+	  __m128 D = _mm_sub_ps(X,_mm_loadu_ps(cPF(x)));
+	  WDutils__align16 float q[4];
+	  _mm_store_ps(q,_mm_mul_ps(D,D));
+	  return q[0]+q[1]+q[2];
+	}
 	static float dist_sq(__m128 const&X, cube<3,float> const&c)
 	{
 	  __m128 C,H;
@@ -966,6 +1004,13 @@ namespace WDutils {
       };// class WDutils::Geometry::Meta::SearchSphereHelper<3,float,0>
       template<> class SearchSphereHelper<3,float,1> {
 	friend struct SearchSphere<3,float>;
+	static float dist_sq(__m128 const&X, tupel<3,float> const&x)
+	{
+	  __m128 D = _mm_sub_ps(X,_mm_load_ps(cPF(x)));
+	  WDutils__align16 float q[4];
+	  _mm_store_ps(q,_mm_mul_ps(D,D));
+	  return q[0]+q[1]+q[2];
+	}
 	static float dist_sq(__m128 const&X, cube<3,float> const&c)
 	{
 	  __m128 C,H;
@@ -1009,7 +1054,8 @@ namespace WDutils {
       { Q=_mm_set1_ps(sQ=q); }
       void reset(tupel<Dim,real> const&x)
       { X=_mm_loadu_ps(cPF(x)); }
-      //
+      real const&RadSq() const
+      { return sQ; }
       template<bool al>
       real dist_sq(cube<Dim,real> const&c) const
       { return Meta::SearchSphereHelper<Dim,real,al>::dist_sq(X,c); }
@@ -1019,8 +1065,13 @@ namespace WDutils {
       template<bool al>
       real inside(cube<Dim,real> const&c) const
       { return Meta::SearchSphereHelper<Dim,real,al>::inside(X,Q,c); }
+      template<bool al>
+      real dist_sq(tupel<Dim,real> const&x) const
+      { return Meta::SearchSphereHelper<Dim,real,al>::dist_sq(X,x); }
+      template<bool al>
+      bool contains(tupel<Dim,real> const&x) const
+      { return dist_sq<al>(x) < sQ; }
     private:
-      //
       __m128 X,Q;
       float  sQ;
     };
@@ -1043,7 +1094,8 @@ namespace WDutils {
       { Q=_mm_set1_ps(sQ=q); }
       void reset(tupel<Dim,real> const&x)
       { X=_mm_loadu_ps(cPF(x)); }
-      //
+      real const&RadSq() const
+      { return sQ; }
       template<bool al>
       real dist_sq(cube<Dim,real> const&c) const
       { return Meta::SearchSphereHelper<Dim,real,al>::dist_sq(X,c); }
@@ -1053,8 +1105,13 @@ namespace WDutils {
       template<bool al>
       real inside(cube<Dim,real> const&c) const
       { return Meta::SearchSphereHelper<Dim,real,al>::inside(X,Q,c); }
+      template<bool al>
+      real dist_sq(tupel<Dim,real> const&x) const
+      { return Meta::SearchSphereHelper<Dim,real,al>::dist_sq(X,x); }
+      template<bool al>
+      bool contains(tupel<Dim,real> const&x) const
+      { return dist_sq<al>(x) < sQ; }
     private:
-      //
       __m128 X,Q;
       float  sQ;
     };
@@ -1067,6 +1124,13 @@ namespace WDutils {
     namespace Meta {
       template<> class SearchSphereHelper<2,double,0> {
 	friend struct SearchSphere<2,double>;
+	static double dist_sq(__m128d const&X, tupel<2,double> const&x)
+	{
+	  WDutils__align16 double q[2];
+	  __m128d D = _mm_sub_pd(X,_mm_loadu_pd(cPD(x)));
+	  _mm_store_pd(q,_mm_mul_pd(D,D));
+	  return q[0]+q[1];
+	}
 	static double dist_sq(__m128d const&X, cube<2,double> const&c)
 	{
 	  __m128d C,H;
@@ -1093,6 +1157,13 @@ namespace WDutils {
       };// class WDutils::Geometry::Meta::SearchSphereHelper<2,double,0>
       template<> class SearchSphereHelper<2,double,1> {
 	friend struct SearchSphere<2,double>;
+	static double dist_sq(__m128d const&X, tupel<2,double> const&x)
+	{
+	  __m128d D = _mm_sub_pd(X,_mm_load_pd(cPD(x)));
+	  WDutils__align16 double q[2];
+	  _mm_store_pd(q,_mm_mul_pd(D,D));
+	  return q[0]+q[1];
+	}
 	static double dist_sq(__m128d const&X, cube<2,double> const&c)
 	{
 	  __m128d C,H;
@@ -1119,6 +1190,17 @@ namespace WDutils {
       };// class WDutils::Geometry::Meta::SearchSphereHelper<2,double,1>
       template<> class SearchSphereHelper<3,double,0> {
 	friend struct SearchSphere<3,double>;
+	static double dist_sq(__m128d const&X0, __m128d const&X1,
+			     tupel<3,double> const&x)
+	{
+	  __m128d D = _mm_sub_pd(X0,_mm_loadu_pd(cPD(x)));
+	  WDutils__align16 double q[2];
+	  _mm_store_pd(q,_mm_mul_pd(D,D));
+	  register double d = q[0]+q[1];
+	  D = _mm_sub_pd(X1,_mm_loadu_pd(cPD2(x)));
+	  _mm_store_pd(q,_mm_mul_pd(D,D));
+	  return d+=q[0];
+	}
 	static double dist_sq(__m128d const&X0, __m128d const&X1,
 			      cube<3,double> const&c)
 	{
@@ -1176,6 +1258,17 @@ namespace WDutils {
       };// class WDutils::Geometry::Meta::SearchSphereHelper<3,double,0>
       template<> class SearchSphereHelper<3,double,1> {
 	friend struct SearchSphere<3,double>;
+	static double dist_sq(__m128d const&X0, __m128d const&X1,
+			     tupel<3,double> const&x)
+	{
+	  __m128d D = _mm_sub_pd(X0,_mm_load_pd(cPD(x)));
+	  WDutils__align16 double q[2];
+	  _mm_store_pd(q,_mm_mul_pd(D,D));
+	  register double d = q[0]+q[1];
+	  D = _mm_sub_pd(X1,_mm_load_pd(cPD2(x)));
+	  _mm_store_pd(q,_mm_mul_pd(D,D));
+	  return d+=q[0];
+	}
 	static double dist_sq(__m128d const&X0, __m128d const&X1,
 			      cube<3,double> const&c)
 	{
@@ -1250,6 +1343,8 @@ namespace WDutils {
       { Q=_mm_set1_pd(sQ=q); }
       void reset(tupel<Dim,real> const&x)
       { X=_mm_loadu_pd(cPD(x)); }
+      real const&RadSq() const
+      { return sQ; }
       template<bool al>
       real dist_sq(cube<Dim,real> const&c) const
       { return Meta::SearchSphereHelper<Dim,real,al>::dist_sq(X,c); }
@@ -1259,6 +1354,12 @@ namespace WDutils {
       template<bool al>
       real inside(cube<Dim,real> const&c) const
       { return Meta::SearchSphereHelper<Dim,real,al>::inside(X,Q,c); }
+      template<bool al>
+      real dist_sq(tupel<Dim,real> const&x) const
+      { return Meta::SearchSphereHelper<Dim,real,al>::dist_sq(X,x); }
+      template<bool al>
+      bool contains(tupel<Dim,real> const&x) const
+      { return dist_sq<al>(x) < sQ; }
     private:
       //
       __m128d X,Q;
@@ -1286,6 +1387,8 @@ namespace WDutils {
       void reset(tupel<Dim,real> const&x)
       { X0=_mm_loadu_pd(cPD(x));
 	X1=_mm_loadu_pd(cPD2(x)); }
+      real const&RadSq() const
+      { return sQ; }
       template<bool al>
       real dist_sq(cube<Dim,real> const&c) const
       { return Meta::SearchSphereHelper<Dim,real,al>::dist_sq(X0,X1,c); }
@@ -1295,6 +1398,12 @@ namespace WDutils {
       template<bool al>
       real inside(cube<Dim,real> const&c) const
       { return Meta::SearchSphereHelper<Dim,real,al>::inside(X0,X1,Q,c); }
+      template<bool al>
+      real dist_sq(tupel<Dim,real> const&x) const
+      { return Meta::SearchSphereHelper<Dim,real,al>::dist_sq(X0,X1,x); }
+      template<bool al>
+      bool contains(tupel<Dim,real> const&x) const
+      { return dist_sq<al>(x) < sQ; }
     private:
       //
       __m128d X0,X1,Q;

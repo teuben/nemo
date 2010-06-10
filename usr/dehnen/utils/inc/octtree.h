@@ -157,7 +157,7 @@ namespace WDutils {
     //@{
   private:
     char*             ALLOC;          ///< actually allocated memory
-    unsigned          NALLOC;         ///< # bytes allocated at ALLOC
+    size_t            NALLOC;         ///< # bytes allocated at ALLOC
     const depth_type  NMAX;           ///< N_max
     const depth_type  NMIN;           ///< N_min
     const bool        AVSPC;          ///< avoid single parent cells?
@@ -854,9 +854,10 @@ namespace WDutils {
   };// struct TreeAccess<>
 
   ///
-  /// The standard tree-walking algorithm
+  /// The standard tree-walking algorithm.
   ///
-  /// \note fully inline
+  /// To use it, create a class derived from this and provide the abstract
+  /// functions.
   template<typename OctTree>
   struct TreeWalkAlgorithm : public TreeAccess<OctTree> {
     typedef TreeAccess<OctTree> Base;
@@ -871,7 +872,7 @@ namespace WDutils {
     /// \param[in] C  cell to interact with
     /// \return  whether interaction was possible, otherwise cell will be split
     virtual bool interact(Cell C) = 0;
-    /// perform all leaf interactions for a set of leafs
+    /// perform all leaf interactions with a set of leafs
     /// \param[in] Li  first leaf to interact with
     /// \param[in] Ln  beyond last leaf to interact with
     /// \note Not abstract, but virtual; default: calls single leaf interact
@@ -882,7 +883,7 @@ namespace WDutils {
     /// ctor: allocate memory for stack
     TreeWalkAlgorithm(const OctTree*t)
       : Base(t), S(OctTree::Nsub*Base::Depth()) {}
-    //  vritual dtor (required by some old compilers)
+    //  virtual dtor (required by some old compilers)
     virtual ~TreeWalkAlgorithm() {}
     /// perform a tree walk.
     void walk()
@@ -944,18 +945,37 @@ namespace WDutils {
     virtual void interact_many(Leaf ll, Leaf lr, Leaf ln)
     { for(; lr<ln; ++lr) interact(ll,lr); }
     //@}
+    /// ctor: allocate memory for stacks
+    /// \param[in] t  (pter to) tree
+    MutualInteractionAlgorithm(const OctTree*t)
+      : Base ( t ),
+	CL   ( OctTree::Nsub*Base::Depth()),
+	CC   ( 2*(OctTree::Nsub-1)*(Base::Depth()+1)+1 )
+    {}
+    //  virtual dtor (required by some old compilers)
+    virtual ~MutualInteractionAlgorithm() {}
+    /// perform a mutual tree walk.
+    void walk()
+    {
+      CC.reset();
+      CL.reset();
+      perform(Cell(0));
+      clear_CC_stack();
+    }
   private:
     //
     typedef std::pair<Cell,Leaf> pCL;   ///< represents a cell-leaf interaction
     typedef std::pair<Cell,Cell> pCC;   ///< represents a cell-cell interaction
     //
-    Stack<pCL>       CL;                ///< stack of cell-leaf interactions
-    Stack<pCC>       CC;                ///< stack of cell-cell interactions
-    //
+    Stack<pCL> CL;                      ///< stack of cell-leaf interactions
+    Stack<pCC> CC;                      ///< stack of cell-cell interactions
+    /// perform a cell-leaf interaction: try to interact, then stack it
     void perform(Cell A, Leaf B)
     { if(!interact(A,B)) CL.push(pCL(A,B)); }
+    /// perform a cell-cell interaction: try to interact, then stack it
     void perform(Cell A, Cell B)
     { if(!interact(A,B)) CC.push(pCC(A,B)); }
+    /// perform a cell self-interaction: try to interact, then stack it
     void perform(Cell A)
     { if(!interact(A)) CC.push(pCC(A,Cell(0u))); }
     /// clear the stack of cell-leaf interactions
@@ -993,7 +1013,7 @@ namespace WDutils {
       if(Ncells(A)) {
 	LoopCellKids(A,Ci)
 	  perform(Ci);
-      // mutual interaction between sub-cells and sub-leafs
+      // mutual interactions between sub-cells and sub-leafs
 	LoopCellKids(A,Ci) {
 	  LoopCellSecd(A,next(Ci),Cj)
 	    perform(Ci,Cj);
@@ -1013,28 +1033,12 @@ namespace WDutils {
 	clear_CL_stack();
       }
     }
-  public:
-    /// ctor: allocate memory for stacks
-    /// \param[in] t  (pter to) tree
-    MutualInteractionAlgorithm(const OctTree*t)
-      : Base ( t ),
-	CL   ( OctTree::Nsub*Base::Depth()),
-	CC   ( 2*(OctTree::Nsub-1)*(Base::Depth()+1)+1 )
-    {}
-    /// perform a mutual tree walk.
-    void walk()
-    {
-      CC.reset();
-      CL.reset();
-      perform(Cell(0));
-      clear_CC_stack();
-    }
   };
   ///
   /// base class for NeighbourFinder and FastNeighbourFinder
   ///
   template<typename OctTree>
-  struct NeighbourLoop : public TreeAccess<OctTree>
+  struct NeighbourSearch : public TreeAccess<OctTree>
   {
   protected:
     typedef TreeAccess<OctTree> Base;
@@ -1049,28 +1053,27 @@ namespace WDutils {
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    NeighbourLoop(OctTree const*tree, node_index ndir)
+    NeighbourSearch(OctTree const*tree, node_index ndir)
       : Base(tree), NDIR(ndir) {}
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    NeighbourLoop(Base const&tree, node_index ndir)
+    NeighbourSearch(Base const&tree, node_index ndir)
       : Base(tree), NDIR(ndir) {}
     //
-    WDutils__align16
-    mutable Sphere   S;          ///< search sphere
-    const node_index NDIR;       ///< direct-loop control
-    Cell             C;          ///< cell containing S.X, already searched
+    Geometry::SearchSphere<Dim,real> SS;          ///< search sphere
+    const node_index                 NDIR;        ///< direct-loop control
+    Cell                             C;           ///< cell already searched
     /// is search sphere outside of a cell (and vice versa)?
     bool Outside(Cell c) const
-    { return GeoAlgos::outside(box(c),S); }
+    { return SS.template outside<1>(box(c)); }
     /// is search sphere inside of a cell?
     bool Inside (Cell c) const
-    { return GeoAlgos::inside(box(c),S); }
+    { return SS.template inside<1>(box(c)); }
     /// process a range of leafs
-    virtual void ProcessLeafs(Leaf b, Leaf e) const = 0;
+    virtual void ProcessLeafs(Leaf, Leaf) const = 0;
     /// does the actual work
-    /// \note the data @a C and @a S must have been set by derived
+    /// \note the data @a C and @a SS must have been set by derived BEFORE
     inline void Process();
   private:
     /// process a cell: process all leafs within cell and search sphere
@@ -1078,7 +1081,7 @@ namespace WDutils {
     /// \param[in] Ci   Cell to search
     /// \param[in] cC   does @a Ci contain @a C ?
     void ProcessCell(Cell Ci, node_index cC=0) const;
-  };// class NeighbourLoop
+  };// class NeighbourSearch
 
   ///
   /// type representing a tree leaf and its squared distance.
@@ -1096,16 +1099,16 @@ namespace WDutils {
   ///
   /// \note Implementations for OctalTree<D,R> with D=2,3 and R=float,double
   template<typename OctTree>
-  struct NeighbourFinder : public NeighbourLoop<OctTree>
+  struct NeighbourFinder : public NeighbourSearch<OctTree>
   {
-    typedef NeighbourLoop<OctTree> Base;
+    typedef NeighbourSearch<OctTree> NSearch;
     typedef TreeAccess<OctTree> Access;
-    typedef typename Base::Leaf Leaf;             ///< type: tree leaf
-    typedef typename Base::Cell Cell;             ///< type: tree cell
-    typedef typename Base::real real;             ///< type: scalars
-    typedef typename Base::point point;           ///< type: position vectors
-    typedef typename Base::node_index node_index; ///< type: index & counters
-    Base::Dim;
+    typedef typename NSearch::Leaf Leaf;             ///< type: tree leaf
+    typedef typename NSearch::Cell Cell;             ///< type: tree cell
+    typedef typename NSearch::real real;             ///< type: scalars
+    typedef typename NSearch::point point;           ///< type: position vectors
+    typedef typename NSearch::node_index node_index; ///< type: index & counters
+    NSearch::Dim;
     /// functor for processing a Neighbour
     /// \note used as interface with Process() below
     struct Processor {
@@ -1120,12 +1123,12 @@ namespace WDutils {
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     NeighbourFinder(OctTree const*tree, node_index ndir)
-      : Base(tree,ndir) {}
+      : NSearch(tree,ndir) {}
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     NeighbourFinder(Access const&tree, node_index ndir)
-      : Base(tree,ndir) {}
+      : NSearch(tree,ndir) {}
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
@@ -1192,47 +1195,94 @@ namespace WDutils {
     void Process(point const&x, real q, const Processor*p) WDutils_THROWING;
   protected:
     const Processor *PROC;        ///< functor to call
-    Base::C;
-    Base::S;
+    NSearch::C;
+    NSearch::SS;
     /// process a range of leafs
     void ProcessLeafs(Leaf, Leaf) const;
   };// class NeighbourFinder
 
 #ifdef __SSE__
   ///
-  /// SSE capable leaf positions added
+  /// support for SSE-supported neighbour search.
   ///
+  /// support comes in form of 16-byte aligned arrays with leafs' X,Y,Z 
+  /// and methods to find a list of chunks containing all candidate leafs.
+  /// \n
+  /// see FastNeighbourSearch for an example on how to use this class.
   template<typename OctTree>
-  struct PositionsSSE
+  struct NeighbourSearchSSE : private NeighbourSearch<OctTree>
   {
-    typedef TreeAccess<OctTree> Access;
-    typedef typename Access::Leaf Leaf;
-    typedef typename Access::real real;
+    typedef NeighbourSearch<OctTree> Base;
+    Base::Dim;
+    typedef typename Base::Leaf Leaf;             ///< type: tree leaf
+    typedef typename Base::Cell Cell;             ///< type: tree cell
+    typedef typename Base::real real;             ///< type: scalars
+    typedef typename Base::point point;           ///< type: position vectors
+    typedef typename Base::node_index node_index; ///< type: index & counters
     /// update positions
     /// \note Must be called after every rebuild() of the tree.
-    void Update(Access const*);
+    void UpdatePositions();
   protected:
-    const static unsigned K = SSE::Traits<real>::K;
-    const static unsigned L = K-1;
-    const static unsigned nL= ~L;
-    unsigned const N16;                  ///< aligned number of leafs
-    bool    *const PP;                   ///< indicator: incomplete block added
-    real    *const XX;                   ///< leaf x positions in aligned memory
-    real    *const YY;                   ///< leaf y positions in aligned memory
-    real    *const ZZ;                   ///< leaf z positions in aligned memory
-    /// ensure that the only valid instantinations are those in octtree.cc
-    WDutilsStaticAssert( SSE::Traits<real>::sse );
+    /// number of reals in 16 bytes
+    const static node_index K = SSE::Traits<real>::K;
+    const static node_index L = K-1;
+    const static node_index nL= ~L;
+    /// chunk in a list of neighbour candiates
+    struct Chunk {
+      node_index I0;       ///< first leaf index, @a K aligned
+      node_index IN;       ///< end   leaf index, @a K aligned
+    };
+    node_index const N16;  ///< aligned number of leafs
+    real      *const XX;   ///< leaf x positions in aligned memory
+    real      *const YY;   ///< leaf y positions in aligned memory
+    real      *const ZZ;   ///< leaf z positions in aligned memory
+    WDutils__align16
+    point            X;    ///< centre of search sphere
+    /// radius^2 of search sphere
+    real const&RadSq() const { return SS.RadSq(); }
     /// ctor
     /// \param[in] tree  OctTree to use for searches
-    PositionsSSE(Access const*tree);
+    /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
+    NeighbourSearchSSE(TreeAccess<OctTree> const&tree, node_index ndir); 
+    /// ctor
+    /// \param[in] tree  OctTree to use for searches
+    /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
+    NeighbourSearchSSE(OctTree const*tree, node_index ndir); 
     /// dtor
-    ~PositionsSSE();
+    ~NeighbourSearchSSE();
+    /// generate a list of neighbour candidates
+    /// \param[in]  l    leaf to find neighbours of
+    /// \note Leaf @a l itself will be entered into the list.
+    /// \param[in]  q    square of radius of search sphere
+    /// \note leafs at distance^2 @a q are @b not put on the list.
+    void MakeList(Leaf l, real q);
+    /// generate a list of neighbour candidates
+    /// \param[in]  x    position to find neighbours of
+    /// \param[in]  q    square of radius of search sphere
+    /// \note leafs at distance^2 @a q are @b not put on the list.
+    void MakeList(point const&x, real q);
+    /// after @a MakeList(): first Chunk in list
+    const Chunk*BeginChunks() const { return C1; }
+    /// after @a MakeList(): end Chunk in list
+    const Chunk*EndChunks() const { return CL; }
   private:
-    char*const   ALLOC;
-    const size_t NALLOC;
+    Base::NDIR;
+    Base::C;
+    Base::SS;
+    bool*const    PP;              ///< indicator: incomplete block added
+    Chunk*const   C0;              ///< chunks of blocks to process
+    char*const    ALLOC;           ///< memory allocated
+    const size_t  NALLOC;          ///< # bytes allocated
+    mutable Chunk*C1,*CL;          ///< first and last/end active chunk
     /// re-allocate
     /// \param[in] nl number of leafs
-    void Allocate(typename Access::node_index nl);
+    void Allocate(node_index nl);
+    /// add blocks to neighbour list
+    inline void AddBlocks(unsigned, unsigned) const;
+    /// process a range of leafs
+    void ProcessLeafs(Leaf, Leaf) const;
+    /// ensure that the only valid instantinations are those in octtree.cc
+    WDutilsStaticAssert( SSE::Traits<real>::sse );
   };
   ///
   /// Similar functionality to NeighbourFinder, but slightly faster due to SSE
@@ -1244,33 +1294,29 @@ namespace WDutils {
   ///       some number of particles or positions need to be found.
   /// \note Implementations for OctalTree<D,R> with D=2,3 and R=float,double
   template<typename OctTree>
-  struct FastNeighbourFinder : 
-    private NeighbourLoop<OctTree>,
-    private PositionsSSE <OctTree>
+  struct FastNeighbourFinder : protected NeighbourSearchSSE<OctTree>
   {
     //
-    typedef TreeAccess   <OctTree> Access;
-    typedef PositionsSSE <OctTree> PosSSE;
-    typedef NeighbourLoop<OctTree> NLoop;
-    typedef typename Access::Leaf Leaf;             ///< type: tree leaf
-    typedef typename Access::Cell Cell;             ///< type: tree cell
-    typedef typename Access::real real;             ///< type: scalars
-    typedef typename Access::point point;           ///< type: position vectors
-    typedef typename Access::node_index node_index; ///< type: index & counters
-    NLoop::Dim;
+    typedef NeighbourSearchSSE<OctTree> Base;
+    Base::Dim;
+    typedef typename Base::Leaf Leaf;             ///< type: tree leaf
+    typedef typename Base::Cell Cell;             ///< type: tree cell
+    typedef typename Base::real real;             ///< type: scalars
+    typedef typename Base::point point;           ///< type: position vectors
+    typedef typename Base::node_index node_index; ///< type: index & counters
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    FastNeighbourFinder(OctTree const*tree, node_index ndir);
+    FastNeighbourFinder(OctTree const*tree, node_index ndir)
+      : Base(tree,ndir) {}
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    FastNeighbourFinder(Access const&tree, node_index ndir);
+    FastNeighbourFinder(TreeAccess<OctTree> const&tree, node_index ndir)
+      : Base(tree,ndir) {}
     /// update positions (after re-allocating if necessary)
     /// \note Must be called after every rebuild() of the tree.
-    void UpdatePositions();
-    /// dtor
-    ~FastNeighbourFinder();
+    Base::UpdatePositions;
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
@@ -1281,7 +1327,12 @@ namespace WDutils {
     /// \return          number of neighbours found, may exceed @a m
     /// \note If the actual number of neighbours exceeds @a m, only the first
     ///       @a m neighbours found will be copied into @a nb.
-    node_index Find(Leaf l, real q, Neighbour<OctTree>*nb, node_index m);
+    node_index Find(Leaf l, real q, Neighbour<OctTree>*nb, node_index m)
+    {
+      Base::MakeList(l,q);
+      return ProcessBlocks(Base::BeginChunks(),Base::EndChunks(),
+			   reinterpret_cast<QandI*>(nb),m);
+    }
     /// find all leafs within certain distance from @a x and store them.
     /// \param[in]  x    position to find neighbours of
     /// \param[in]  q    square of radius of search sphere
@@ -1294,7 +1345,12 @@ namespace WDutils {
     /// \note If @a x is the position of a leaf @a l in the tree, the above
     ///       routine is preferrable, as a leaf provides better information
     ///       about where to search the tree than the position @a x.
-    node_index Find(point const&x, real q, Neighbour<OctTree>*nb, node_index m);
+    node_index Find(point const&x, real q, Neighbour<OctTree>*nb, node_index m)
+    {
+      Base::MakeList(x,q);
+      return ProcessBlocks(Base::BeginChunks(),Base::EndChunks(),
+			   reinterpret_cast<QandI*>(nb),m);
+    }
     /// find all leafs within a certain distance from leaf @a l and store them.
     /// \param[in]  l    leaf to find neighbours of
     /// \note Leaf @a l itself will be entered into the list.
@@ -1320,25 +1376,15 @@ namespace WDutils {
     node_index Find(point const&x, real q,  Array<Neighbour<OctTree> >&nb)
     { return Find(x,q,nb.array(),nb.size()); }
   private:
-    /// process a range of leafs
-    void ProcessLeafs(Leaf b, Leaf e) const;
-    NLoop::NDIR;
-    NLoop::C;
-    NLoop::S;
-    PosSSE::PP;
-    PosSSE::XX;
-    PosSSE::YY;
-    PosSSE::ZZ;
-    PosSSE::K;
-    PosSSE::L;
-    PosSSE::nL;
-    struct chunk { unsigned I0, IN; };
-    struct qandi { real Q; unsigned I; };
-    //
-    chunk  *const C0;                   ///< chunks of blocks to process
-    mutable chunk*CL;                   ///< last active chunk
-    inline void AddBlocks(unsigned, unsigned) const;
-    unsigned ProcessBlocks(qandi*,unsigned) const;
+    typedef typename Base::Chunk Chunk;
+    Base::XX;
+    Base::YY;
+    Base::ZZ;
+    Base::X;
+    Base::RadSq;
+    Base::K;
+    struct QandI { real Q; unsigned I; };
+    node_index ProcessBlocks(const Chunk*,const Chunk*,QandI*,node_index) const;
   };
 #endif // __SSE__
 
