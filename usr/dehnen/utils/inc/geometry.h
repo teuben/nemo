@@ -72,12 +72,12 @@ namespace WDutils {
     ///       usually faster in particular if data are 16-byte aligned. It is
     ///       recommended to use the default setting for @a use_sse (if @a
     ///       use_sse is set, but SSE is unavailable, the non-SSE instructions
-    ///       are used automatically). The explicit non-SSE verions are used
+    ///       are used automatically). The explicit non-SSE versions are used
     ///       mainly for validation of the SSE versions.
     ///
     /// \note Unless otherwise stated, the algorithms (static methods below)
     ///       are implemented only for 2D and 3D and for single (float) and
-    ///       double precision. Using other arguments causes a compile-time
+    ///       double precision. Using other parameters causes a compile-time
     ///       error.
     ///
     template<bool aligned_to_16_bytes, bool use_sse = true>
@@ -86,26 +86,22 @@ namespace WDutils {
       /// copy a cube
       /// \param[in]  in  cube to copy
       /// \param[out] out cube copied
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       void copy(cube<Dim,real> const&in, cube<Dim,real> &out);
       /// copy a sphere
       /// \param[in]  in  sphere to copy
       /// \param[out] out sphere copied
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       void copy(sphere<Dim,real> const&in, sphere<Dim,real> &out);
       /// move centre position to octant
       /// \param[in,out] c cube
       /// \param[in]     i octant
       /// \param[in]     r amount to move by (= radius of shrunk cube)
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       void move_to_octant(tupel<Dim,real>&c, int i, real r);
       /// shrink cube to its octant
       /// \param[in,out] c cube
       /// \param[in]     i octant
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       void shrink(cube<Dim,real>&c, int i)
       { c.H *= real(0.5); move_to_octant(c.X,i,c.H); }
@@ -113,14 +109,12 @@ namespace WDutils {
       /// \param[in] c  centre
       /// \param[in] x  point
       /// \return integer: ith bit equals x[i]>c[i]; bits @a D and beyond are 0.
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       int octant(tupel<Dim,real> const&c, tupel<Dim,real> const&x);
       /// octant of a point w.r.t. a cube's centre
       /// \param[in] c  cube
       /// \param[in] x  point
       /// \return integer: ith bit equals x[i]>c[i]; bits @a D and beyond are 0.
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       int octant(cube<Dim,real> const&c, tupel<Dim,real> const&x)
       { return octant(c.X,x); }
@@ -128,21 +122,18 @@ namespace WDutils {
       /// \param[in] c    cube
       /// \param[in] x    position
       /// \return is @a x[i] in [c.X[i]-c.R[i], c.X[i]+c.R[i]) for i=0..D-1?
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       bool contains(cube<Dim,real> const&c, tupel<Dim,real> const&x);
       /// distance^2 between two points
       /// \param[in] x    point
       /// \param[in] y    point
       /// \return |x-y|^2
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       real dist_sq(tupel<Dim,real> const&x, tupel<Dim,real> const&y);
       /// distance^2 from given point to the nearest point on a cube
       /// \param[in] c    cube
       /// \param[in] x    point
       /// \return squared distance of @a x to @a c; zero if @a x is inside @a c.
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       real dist_sq(cube<Dim,real> const&c, tupel<Dim,real> const&x);
       /// is a sphere completely outside of a cube?
@@ -151,17 +142,82 @@ namespace WDutils {
       /// \return is sphere outside cube?
       /// \note Equivalent to, but on average faster than, 
       ///       \code s.Q < outside_dist_sq(c,s.X) \endcode
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       bool outside(cube<Dim,real> const&c, sphere<Dim,real> const&s);
       /// is a sphere completely inside of a cube?
       /// \param[in] c    cube
       /// \param[in] s    sphere
       /// \return is sphere completely inside cube?
-      /// \note Only specialisations: @a Dim = 2 or 3, @a real = float or double
       template<int Dim, typename real> static inline
       bool inside(cube<Dim,real> const&c, sphere<Dim,real> const&s);
     };// struct WDutils::Geometry::Algorithms<aligned,sse>
+
+    ///
+    /// a search sphere
+    ///
+    /// \note If SSE instructions for @a __X are available, we implement in
+    ///       geometry_inl.h specialisation which exploit them and, to this
+    ///       end, have a different data representation. Therefore, nothing
+    ///       must be assumed about the private member layout.
+    ///
+    /// \note Only @a __D = 2 or 3 and @a __X = float or double are possible.
+    template<int __D, typename __X> struct SearchSphere
+    {
+      static const int Dim = __D;  ///< number of spatial dimensions
+      typedef __X      real;       ///< floating point type
+      /// default ctor
+      SearchSphere() {}
+      /// ctor from centre and radius^2
+      /// \param[in] x  centre of sphere
+      /// \param[in] q  radius^2 of sphere
+      SearchSphere(tupel<Dim,real> const&x, real q) { reset(x,q); }
+      /// ctor from sphere
+      /// \param[in] s  sphere, need not be aligned
+      SearchSphere(sphere<Dim,real> const&s) { reset(s); }
+      /// reset centre and radius^2
+      /// \param[in] x  centre of sphere
+      /// \param[in] q  radius^2 of sphere
+      void reset(tupel<Dim,real> const&x, real q) { S.X=x; S.Q=q; }
+      /// reset centre and radius^2
+      /// \param[in] x  centre of sphere
+      /// \param[in] q  radius^2 of sphere
+      void reset(sphere<Dim,real> const&s) { S.X=s.X; S.Q=s.Q; }
+      /// reset just the centre
+      void reset(tupel<Dim,real> const&x) { S.X=x; }
+      /// reset just the radius^2
+      void reset(real q) { S.Q = q; }
+      /// distance^2 from cube to centre of sphere (zero if inside cube)
+      /// \param[in]  c  cubic box
+      /// \note If @a c is 16-byte aligned, use @a aligned == true, otherwise
+      ///       @a aligned == false. In case SSE instructions are supported for
+      ///       @a real, we specialise this routine in geometry_inl.h such that
+      ///       alignement gives slightly faster execution.
+      template<bool aligned>
+      real dist_sq(cube<Dim,real> const&c) const
+      { return Algorithms<aligned>::dist_sq(c,S.X); }
+      /// is search sphere outside of a cubic box?
+      /// \param[in]  c  cubic box
+      /// \note If @a c is 16-byte aligned, use @a aligned == true, otherwise
+      ///       @a aligned == false. In case SSE instructions are supported for
+      ///       @a real, we specialise this routine in geometry_inl.h such that
+      ///       alignement gives slightly faster execution.
+      template<bool aligned>
+      bool outside(cube<Dim,real> const&c) const
+      { return Algorithms<aligned>::outside(c,S); }
+      /// is search sphere inside of a cubic box?
+      /// \param[in]  c  cubic box
+      /// \note If @a c is 16-byte aligned, use @a aligned == true, otherwise
+      ///       @a aligned == false. In case SSE instructions are supported for
+      ///       @a real, we specialise this routine in geometry_inl.h such that
+      ///       alignement gives slightly faster execution.
+      template<bool aligned>
+      bool inside(cube<Dim,real> const&c) const
+      { return Algorithms<aligned>::inside(c,S); }
+    private:
+      WDutilsStaticAssert( ( __D == 2 || __D == 3 )               &&
+			   meta::TypeInfo<__X>::is_floating_point    );
+      WDutils__align16 sphere<Dim,real> S;   ///< search sphere data
+    };// struct SearchSphere
   } // namespace WDutils::Geometry
 } // namespace WDutils
 // inline implementations

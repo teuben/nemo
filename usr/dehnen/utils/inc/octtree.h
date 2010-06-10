@@ -19,6 +19,7 @@
 /// \version Mar-2010 WD  class FastNeighbourFinder
 /// \version Apr-2010 WD  class TreeWalkAlgorithm, tree pruning
 /// \version Apr-2010 WD  faster and memory-leaner tree-building algorithm
+/// \version Jun-2010 WD  16-byte alignement, using geometry.h
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -1031,12 +1032,14 @@ namespace WDutils {
   {
   protected:
     typedef TreeAccess<OctTree> Base;
+    Base::Dim;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
     typedef typename Base::real real;             ///< type: scalars
     typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
-    Base::Dim;
+    typedef Geometry::sphere<Dim,real> Sphere;    ///< type: search sphere
+    typedef Geometry::Algorithms<1> GeoAlgos;     ///< geometric algorithms
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
@@ -1048,18 +1051,20 @@ namespace WDutils {
     NeighbourLoop(Base const&tree, node_index ndir)
       : Base(tree), NDIR(ndir) {}
     //
+    WDutils__align16
+    mutable Sphere   S;          ///< search sphere
     const node_index NDIR;       ///< direct-loop control
-    real             Q;          ///< radius^2 of search sphere
-    Cell             C;          ///< cell containing X, already searched
-    point            X;          ///< centre of search sphere
+    Cell             C;          ///< cell containing S.X, already searched
     /// is search sphere outside of a cell (and vice versa)?
-    inline bool Outside(Cell) const;
+    bool Outside(Cell c) const
+    { return GeoAlgos::outside(box(c),S); }
     /// is search sphere inside of a cell?
-    inline bool Inside (Cell) const;
+    bool Inside (Cell c) const
+    { return GeoAlgos::inside(box(c),S); }
     /// process a range of leafs
     virtual void ProcessLeafs(Leaf b, Leaf e) const = 0;
     /// does the actual work
-    /// \note the data @a C, @a X, and @a Q must have been set by derived
+    /// \note the data @a C and @a S must have been set by derived
     inline void Process();
   private:
     /// process a cell: process all leafs within cell and search sphere
@@ -1181,9 +1186,8 @@ namespace WDutils {
     void Process(point const&x, real q, const Processor*p) WDutils_THROWING;
   protected:
     const Processor *PROC;        ///< functor to call
-    Base::Q;
     Base::C;
-    Base::X;
+    Base::S;
     /// process a range of leafs
     void ProcessLeafs(Leaf, Leaf) const;
   };// class NeighbourFinder
@@ -1312,9 +1316,9 @@ namespace WDutils {
   private:
     /// process a range of leafs
     void ProcessLeafs(Leaf b, Leaf e) const;
-    NLoop::Q;
+    NLoop::NDIR;
     NLoop::C;
-    NLoop::X;
+    NLoop::S;
     PosSSE::PP;
     PosSSE::XX;
     PosSSE::YY;

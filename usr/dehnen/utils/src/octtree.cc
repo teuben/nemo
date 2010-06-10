@@ -70,6 +70,7 @@ namespace {
   using std::setw;
   using std::setfill;
   using namespace WDutils;
+#if(0)
   /// \name some geometrical methods, only for D=2,3
   //@{
   /// is pos in the interval [cen-rad, cen+rad) ?
@@ -457,7 +458,7 @@ namespace {
   template<int D, typename real> inline
   void ShrinkToOctant(tupel<D,real>&cen, int i, real rad)
   { return Helper<D,real>::ShrinkToOctant(cen,i,rad); }
-
+#endif
   ///
   template<int D> struct TreeHelper;
   template<> struct TreeHelper<2> {
@@ -1291,14 +1292,6 @@ namespace WDutils {
 // Wdutils::NeighbourLoop<OctTree>
 //
 namespace WDutils {
-  template<typename OctTree> inline
-  bool NeighbourLoop<OctTree>::Outside(Cell c) const
-  { return ::outside(centre(c),radius(c),X,Q); }
-  //
-  template<typename OctTree> inline
-  bool NeighbourLoop<OctTree>::Inside(Cell c) const
-  { return ::inside(centre(c),radius(c),X,Q); }
-  //
   template<typename OctTree>
   void NeighbourLoop<OctTree>::ProcessCell(Cell Ci, node_index cC) const
   {
@@ -1358,8 +1351,8 @@ namespace WDutils {
   void NeighbourFinder<OctTree>::ProcessLeafs(Leaf b, Leaf e) const
   {
     for(Leaf l=b; l!=e; ++l) {
-      real q = dist_sq(X,position(l));
-      if(q<Q) PROC->process(l,q);
+      real q = dist_sq(S.X,position(l));
+      if(q<S.Q) PROC->process(l,q);
     }
   }
   //
@@ -1370,8 +1363,8 @@ namespace WDutils {
   {
     Lister<OctTree> LL(nb,m);
     PROC =&LL;
-    Q    = q;
-    X    = position(l);
+    S.Q  = q;
+    S.X  = position(l);
     C    = Parent(l);
     Base::Process();
     return LL.I;
@@ -1384,9 +1377,9 @@ namespace WDutils {
   {
     Lister<OctTree> LL(nb,m);
     PROC =&LL;
-    Q    = q;
-    X    = x;
-    C    = SmallestContainingCell(X);
+    S.Q  = q;
+    S.X  = x;
+    C    = SmallestContainingCell(S.X);
     Base::Process();
     return LL.I;
   }
@@ -1397,8 +1390,8 @@ namespace WDutils {
   {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
     PROC = p;
-    Q    = q;
-    X    = position(l);
+    S.Q  = q;
+    S.X  = position(l);
     C    = Parent(l);
     Base::Process();
   }
@@ -1409,9 +1402,9 @@ namespace WDutils {
   {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
     PROC = p;
-    Q    = q;
-    X    = x;
-    C    = SmallestContainingCell(X);
+    S.Q  = q;
+    S.X  = x;
+    C    = SmallestContainingCell(S.X);
     Base::Process();
   }
 }
@@ -1521,9 +1514,9 @@ namespace WDutils {
   unsigned FastNeighbourFinder<OctalTree<2,float> >::
   ProcessBlocks(qandi*List, unsigned Nl) const
   {
-    __m128 HQ = _mm_set1_ps(Q);
-    __m128 X0 = _mm_set1_ps(X[0]);
-    __m128 Y0 = _mm_set1_ps(X[1]);
+    __m128 HQ = _mm_set1_ps(S.Q);
+    __m128 X0 = _mm_set1_ps(S.X[0]);
+    __m128 Y0 = _mm_set1_ps(S.X[1]);
     SSE::Traits<real>::vector QQ;
     unsigned n=0;
     ++CL;
@@ -1552,10 +1545,10 @@ namespace WDutils {
   unsigned FastNeighbourFinder<OctalTree<3,float> >::
   ProcessBlocks(qandi*List, unsigned Nl) const
   {
-    __m128 HQ = _mm_set1_ps(Q);
-    __m128 X0 = _mm_set1_ps(X[0]);
-    __m128 Y0 = _mm_set1_ps(X[1]);
-    __m128 Z0 = _mm_set1_ps(X[2]);
+    __m128 HQ = _mm_set1_ps(S.Q);
+    __m128 X0 = _mm_set1_ps(S.X[0]);
+    __m128 Y0 = _mm_set1_ps(S.X[1]);
+    __m128 Z0 = _mm_set1_ps(S.X[2]);
     SSE::Traits<real>::vector QQ;
     unsigned n=0;
     ++CL;
@@ -1587,9 +1580,9 @@ namespace WDutils {
   unsigned FastNeighbourFinder<OctalTree<2,double> >::
   ProcessBlocks(qandi*List, unsigned Nl) const
   {
-    __m128d HQ = _mm_set1_pd(Q);
-    __m128d X0 = _mm_set1_pd(X[0]);
-    __m128d Y0 = _mm_set1_pd(X[1]);
+    __m128d HQ = _mm_set1_pd(S.Q);
+    __m128d X0 = _mm_set1_pd(S.X[0]);
+    __m128d Y0 = _mm_set1_pd(S.X[1]);
     SSE::Traits<real>::vector QQ;
     unsigned n=0;
     ++CL;
@@ -1616,10 +1609,10 @@ namespace WDutils {
   unsigned FastNeighbourFinder<OctalTree<3,double> >::
   ProcessBlocks(qandi*List, unsigned Nl) const
   {
-    __m128d HQ = _mm_set1_pd(Q);
-    __m128d X0 = _mm_set1_pd(X[0]);
-    __m128d Y0 = _mm_set1_pd(X[1]);
-    __m128d Z0 = _mm_set1_pd(X[2]);
+    __m128d HQ = _mm_set1_pd(S.Q);
+    __m128d X0 = _mm_set1_pd(S.X[0]);
+    __m128d Y0 = _mm_set1_pd(S.X[1]);
+    __m128d Z0 = _mm_set1_pd(S.X[2]);
     SSE::Traits<real>::vector QQ;
     unsigned n=0;
     ++CL;
@@ -1693,10 +1686,10 @@ namespace WDutils {
   FastNeighbourFinder<OctTree>::
   Find(Leaf l, real q, Neighbour<OctTree>*nb, node_index m)
   {
-    Q    = q;
-    X    = position(l);
+    S.Q  = q;
+    S.X  = position(l);
     C    = Parent(l);
-    while(C != NLoop::Root() && IsValid(C) && Number(Parent(C)) < NLoop::NDIR )
+    while(C != NLoop::Root() && IsValid(C) && Number(Parent(C)) < NDIR )
       C = Parent(C);
     CL     = C0;
     CL->I0 = 0;
@@ -1710,10 +1703,10 @@ namespace WDutils {
   FastNeighbourFinder<OctTree>::
   Find(point const&x, real q, Neighbour<OctTree>*nb, node_index m)
   {
-    Q    = q;
-    X    = x;
-    C    = SmallestContainingCell(NLoop::X);
-    while(C != NLoop::Root() && IsValid(C) && Number(Parent(C)) < NLoop::NDIR )
+    S.Q  = q;
+    S.X  = x;
+    C    = SmallestContainingCell(S.X);
+    while(C != NLoop::Root() && IsValid(C) && Number(Parent(C)) < NDIR )
       C = Parent(C);
     CL     = C0;
     CL->I0 = 0;
