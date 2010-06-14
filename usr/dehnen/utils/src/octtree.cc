@@ -948,6 +948,249 @@ namespace WDutils {
 // Wdutils::NeighbourSearch<OctTree>
 //
 namespace WDutils {
+  //
+  template<typename OctTree>
+  void NeighbourSearch<OctTree>::Update()
+  {
+    // make sure we have enough cuboids allocated
+    size_t nc = this->Ncells();
+    if(nc > NC || 2*nc < 3*NC) {
+      if(CB) delete16(CB);
+      NC = nc;
+      CB = new16<cuboid>(NC);
+    }
+    // pass (Xmin,Xmax) up the tree
+    LoopCellsUp(c) {
+      point Xmin,Xmax;
+      if(Nleafkids(c)) {
+	Leaf ll = BeginLeafs(c);
+	Xmin = position(ll);
+	Xmax = Xmin;
+	for(++ll; ll!=EndLeafKids(c); ++ll)
+	  position(ll).up_min_max(Xmin,Xmax);
+	for(Cell cc=BeginCells(c); cc!=EndCells(c); ++cc) {
+	  rect(cc).X.up_min(Xmin);
+	  rect(cc).Y.up_max(Xmax);
+	}
+      } else {
+	Cell cc = BeginCells(c);
+	Xmin = rect(cc).X;
+	Xmax = rect(cc).Y;
+	for(++cc; cc!=EndCells(c); ++cc) {
+	  rect(cc).X.up_min(Xmin);
+	  rect(cc).Y.up_max(Xmax);
+	}
+      }
+      CB[c.I].X = Xmin;
+      CB[c.I].Y = Xmax;
+    }
+    // convert (Xmin,Xmax) to (centre,size)
+    LoopCellsDown(c)
+      Geometry::Algorithms<1>::convert2cuboid(CB[c.I]);
+  }
+#ifdef __SSE__
+#define  PF(__X) static_cast<float*>(__X)
+#define cPF(__X) static_cast<const float*>(__X)
+  template<>
+  void NeighbourSearch<OctalTree<2,float> >::Update()
+  {
+    // make sure we have enough cuboids allocated
+    size_t nc = this->Ncells();
+    if(nc > NC || (3*nc < 2*NC) ) {
+      if(CB) delete16(CB);
+      NC = nc;
+      CB = new16<cuboid>(NC);
+    }
+    // pass (Xmin,Xmax) up the tree
+    LoopCellsUp(c) {
+      __m128 X,Xmin,Xmax;
+      if(Nleafkids(c)) {
+	Leaf ll = BeginLeafs(c);
+	Xmin = _mm_load_ps(cPF(position(ll)));
+	Xmin = _mm_movelh_ps(Xmin,Xmin);
+	Xmax = Xmin;
+	for(++ll; ll!=EndLeafKids(c); ++ll) {
+	  X    = _mm_load_ps(cPF(position(ll)));
+	  X    = _mm_movelh_ps(X,X);
+	  Xmin = _mm_min_ps(Xmin,X);
+	  Xmax = _mm_max_ps(Xmax,X);
+	}
+	for(Cell cc=BeginCells(c); cc!=EndCells(c); ++cc) {
+	  X    = _mm_load_ps(cPF(rect(cc).X));
+	  Xmin = _mm_min_ps(Xmin,X);
+	  Xmax = _mm_max_ps(Xmax,X);
+	}
+      } else {
+	Cell cc = BeginCells(c);
+	Xmin = _mm_load_ps(cPF(rect(cc).X));
+	Xmax = Xmin;
+	for(++cc; cc!=EndCells(c); ++cc) {
+	  X    = _mm_load_ps(cPF(rect(cc).X));
+	  Xmin = _mm_min_ps(Xmin,X);
+	  Xmax = _mm_max_ps(Xmax,X);
+	}
+      }
+      X = _mm_shuffle_ps(Xmin,Xmax,_MM_SHUFFLE(3,2,1,0));
+      _mm_store_ps(PF(CB[c.I].X),X);
+    }
+    // convert (Xmin,Xmax) to (centre,size)
+    LoopCellsDown(c)
+      Geometry::Algorithms<1>::convert2cuboid(CB[c.I]);
+  }
+  //
+  template<>
+  void NeighbourSearch<OctalTree<3,float> >::Update()
+  {
+    // make sure we have enough cuboids allocated
+    size_t nc = this->Ncells();
+    if(nc > NC || (3*nc < 2*NC) ) {
+      if(CB) delete16(CB);
+      NC = nc;
+      CB = new16<cuboid>(NC);
+    }
+    // pass (Xmin,Xmax) up the tree
+    LoopCellsUp(c) {
+      __m128 X,Xmin,Xmax;
+      if(Nleafkids(c)) {
+	Leaf ll = BeginLeafs(c);
+	Xmin = _mm_load_ps(cPF(position(ll)));
+	Xmax = Xmin;
+	for(++ll; ll!=EndLeafKids(c); ++ll) {
+	  X    = _mm_load_ps(cPF(position(ll)));
+	  Xmin = _mm_min_ps(Xmin,X);
+	  Xmax = _mm_max_ps(Xmax,X);
+	}
+	for(Cell cc=BeginCells(c); cc!=EndCells(c); ++cc) {
+	  Xmin = _mm_min_ps(Xmin,_mm_load_ps(cPF(rect(cc).X)));
+	  Xmax = _mm_max_ps(Xmax,_mm_load_ps(cPF(rect(cc).Y)));
+	}
+      } else {
+	Cell cc = BeginCells(c);
+	Xmin = _mm_load_ps(cPF(rect(cc).X));
+	Xmax = _mm_load_ps(cPF(rect(cc).Y));
+	for(++cc; cc!=EndCells(c); ++cc) {
+	  Xmin = _mm_min_ps(Xmin,_mm_load_ps(cPF(rect(cc).X)));
+	  Xmax = _mm_max_ps(Xmax,_mm_load_ps(cPF(rect(cc).Y)));
+	}
+      }
+      _mm_store_ps(PF(CB[c.I].X),Xmin);
+      _mm_store_ps(PF(CB[c.I].Y),Xmax);
+    }
+    // convert (Xmin,Xmax) to (centre,size)
+    LoopCellsDown(c)
+      Geometry::Algorithms<1>::convert2cuboid(CB[c.I]);
+  }
+#undef PF
+#undef cPF
+  //
+#ifdef __SSE2__
+#define  PD(__X) static_cast<double*>(__X)
+#define cPD(__X) static_cast<const double*>(__X)
+  template<> void NeighbourSearch<OctalTree<2,double> >::Update()
+  {
+    // make sure we have enough cuboids allocated
+    size_t nc = this->Ncells();
+    if(nc > NC || 2*nc < 3*NC) {
+      if(CB) delete16(CB);
+      NC = nc;
+      CB = new16<cuboid>(NC);
+    }
+    // pass (Xmin,Xmax) up the tree
+    LoopCellsUp(c) {
+      __m128d X,Xmin,Xmax;
+      if(Nleafkids(c)) {
+	Leaf ll = BeginLeafs(c);
+	Xmin = _mm_load_pd(cPD(position(ll)));
+	Xmax = Xmin;
+	for(++ll; ll!=EndLeafKids(c); ++ll) {
+	  X    = _mm_load_pd(cPD(position(ll)));
+	  Xmin = _mm_min_pd(Xmin,X);
+	  Xmax = _mm_max_pd(Xmax,X);
+	}
+	for(Cell cc=BeginCells(c); cc!=EndCells(c); ++cc) {
+	  Xmin = _mm_min_pd(Xmin,_mm_load_pd(cPD(rect(cc).X)));
+	  Xmax = _mm_max_pd(Xmax,_mm_load_pd(cPD(rect(cc).Y)));
+	}
+      } else {
+	Cell cc=BeginCells(c);
+	Xmin = _mm_load_pd(cPD(rect(cc).X));
+	Xmax = _mm_load_pd(cPD(rect(cc).Y));
+	for(++cc; cc!=EndCells(c); ++cc) {
+	  Xmin = _mm_min_pd(Xmin,_mm_load_pd(cPD(rect(cc).X)));
+	  Xmax = _mm_max_pd(Xmax,_mm_load_pd(cPD(rect(cc).Y)));
+	}
+      }
+      _mm_store_pd(PD(CB[c.I].X),Xmin);
+      _mm_store_pd(PD(CB[c.I].Y),Xmax);
+    }
+    // convert (Xmin,Xmax) to (centre,size)
+    LoopCellsDown(c)
+      Geometry::Algorithms<1>::convert2cuboid(CB[c.I]);
+  }
+  //
+#define  PD2(__X) static_cast<double*>(__X)+2
+#define cPD2(__X) static_cast<const double*>(__X)+2
+  template<> void NeighbourSearch<OctalTree<3,double> >::Update()
+  {
+    // make sure we have enough cuboids allocated
+    size_t nc = this->Ncells();
+    if(nc > NC || 2*nc < 3*NC) {
+      if(CB) delete16(CB);
+      NC = nc;
+      CB = new16<cuboid>(NC);
+    }
+    // pass (Xmin,Xmax) up the tree
+    LoopCellsUp(c) {
+      __m128d X,Xmin0,Xmin1,Xmax0,Xmax1;
+      if(Nleafkids(c)) {
+	Leaf ll = BeginLeafs(c);
+	Xmin0 = _mm_load_pd(cPD (position(ll)));
+	Xmin1 = _mm_load_pd(cPD2(position(ll)));
+	Xmax0 = Xmin0;
+	Xmax1 = Xmin1;
+	for(++ll; ll!=EndLeafKids(c); ++ll) {
+	  X     = _mm_load_pd(cPD (position(ll)));
+	  Xmin0 = _mm_min_pd(Xmin0,X);
+	  Xmax0 = _mm_max_pd(Xmax0,X);
+	  X     = _mm_load_pd(cPD2(position(ll)));
+	  Xmin1 = _mm_min_pd(Xmin1,X);
+	  Xmax1 = _mm_max_pd(Xmax1,X);
+	}
+	for(Cell cc=BeginCells(c); cc!=EndCells(c); ++cc) {
+	  Xmin0 = _mm_min_pd(Xmin0,_mm_load_pd(cPD (rect(cc).X)));
+	  Xmin1 = _mm_min_pd(Xmin1,_mm_load_pd(cPD2(rect(cc).X)));
+	  Xmax0 = _mm_max_pd(Xmax0,_mm_load_pd(cPD (rect(cc).Y)));
+	  Xmax1 = _mm_max_pd(Xmax1,_mm_load_pd(cPD2(rect(cc).Y)));
+	}
+      } else {
+	Cell cc = BeginCells(c);
+	Xmin0 = _mm_load_pd(cPD (rect(cc).X));
+	Xmin1 = _mm_load_pd(cPD2(rect(cc).X));
+	Xmax0 = _mm_load_pd(cPD (rect(cc).Y));
+	Xmax1 = _mm_load_pd(cPD2(rect(cc).Y));
+	for(++cc; cc!=EndCells(c); ++cc) {
+	  Xmin0 = _mm_min_pd(Xmin0,_mm_load_pd(cPD (rect(cc).X)));
+	  Xmin1 = _mm_min_pd(Xmin1,_mm_load_pd(cPD2(rect(cc).X)));
+	  Xmax0 = _mm_max_pd(Xmax0,_mm_load_pd(cPD (rect(cc).Y)));
+	  Xmax1 = _mm_max_pd(Xmax1,_mm_load_pd(cPD2(rect(cc).Y)));
+	}
+      }
+      _mm_store_pd(PD (CB[c.I].X),Xmin0);
+      _mm_store_pd(PD2(CB[c.I].X),Xmin1);
+      _mm_store_pd(PD (CB[c.I].Y),Xmax0);
+      _mm_store_pd(PD2(CB[c.I].Y),Xmax1);
+    }
+    // convert (Xmin,Xmax) to (centre,size)
+    LoopCellsDown(c)
+      Geometry::Algorithms<1>::convert2cuboid(CB[c.I]);
+  }
+#undef PD
+#undef PD2
+#undef cPD
+#undef cPD2
+#endif // __SSE2__
+#endif // __SSE__
+  //
   template<typename OctTree>
   void NeighbourSearch<OctTree>::ProcessCell(Cell Ci, node_index cC) const
   {
@@ -962,6 +1205,7 @@ namespace WDutils {
       }
     }
   }
+  //
   template<typename OctTree> inline
   void NeighbourSearch<OctTree>::Process()
   {
@@ -1006,7 +1250,7 @@ namespace WDutils {
   void NeighbourFinder<OctTree>::ProcessLeafs(Leaf b, Leaf e) const
   {
     for(Leaf l=b; l!=e; ++l) {
-      real q = SS.template dist_sq<1>(position(l));
+      real q = DistSq(l);
       if(q<SS.RadSq()) PROC->process(l,q);
     }
   }
@@ -1019,7 +1263,7 @@ namespace WDutils {
     Lister<OctTree> LL(nb,m);
     PROC =&LL;
     C    = Parent(l);
-    SS.reset(position(l),q);
+    SS.reset(position(l),q,0);
     NSearch::Process();
     return LL.I;
   }
@@ -1032,7 +1276,8 @@ namespace WDutils {
     Lister<OctTree> LL(nb,m);
     PROC =&LL;
     C    = SmallestContainingCell(x);
-    SS.reset(x,q);
+    WDutils__align16 point x16=x;
+    SS.reset(x16,q,0);
     NSearch::Process();
     return LL.I;
   }
@@ -1044,7 +1289,7 @@ namespace WDutils {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
     PROC = p;
     C    = Parent(l);
-    SS.reset(position(l),q);
+    SS.reset(position(l),q,0);
     NSearch::Process();
   }
   //
@@ -1055,7 +1300,8 @@ namespace WDutils {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
     PROC = p;
     C    = SmallestContainingCell(x);
-    SS.reset(x,q);
+    WDutils__align16 point x16=x;
+    SS.reset(x16,q,0);
     NSearch::Process();
   }
 }
@@ -1187,7 +1433,8 @@ namespace WDutils {
   void NeighbourSearchSSE<OctTree>::MakeList(Leaf l, real q)
   {
     C = Parent(l);
-    SS.reset(X=position(l),q);
+    X = position(l);
+    SS.reset(X,q,0);
     while(C != Base::Root() && IsValid(C) && Number(Parent(C)) < NDIR )
       C = Parent(C);
     CL = C0;
@@ -1204,8 +1451,9 @@ namespace WDutils {
   template<typename OctTree>
   void NeighbourSearchSSE<OctTree>::MakeList(point const&x, real q)
   {
-    C = SmallestContainingCell(x);
-    SS.reset(X=x,q);
+    X = x;
+    C = SmallestContainingCell(X);
+    SS.reset(X,q,0);
     while(C != Base::Root() && IsValid(C) && Number(Parent(C)) < NDIR )
       C = Parent(C);
     CL = C0;

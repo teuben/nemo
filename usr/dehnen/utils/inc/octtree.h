@@ -1035,7 +1035,12 @@ namespace WDutils {
     }
   };
   ///
-  /// base class for NeighbourFinder and FastNeighbourFinder
+  /// base class for neighbour searches
+  ///
+  /// supports neighbour searching by providing \n
+  /// 1  a search sphere\;\n
+  /// 2  tight cuboids for each cell containing all leafs in each cell;\n
+  /// 3  fast method for geometrical relactions between search sphere and cuboid
   ///
   template<typename OctTree>
   struct NeighbourSearch : public TreeAccess<OctTree>
@@ -1048,34 +1053,74 @@ namespace WDutils {
     typedef typename Base::real real;             ///< type: scalars
     typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
-    typedef Geometry::sphere<Dim,real> Sphere;    ///< type: search sphere
-    typedef Geometry::Algorithms<1> GeoAlgos;     ///< geometric algorithms
+    typedef Geometry::cuboid<Dim,real> cuboid;    ///< type: cell's rectangle
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     NeighbourSearch(OctTree const*tree, node_index ndir)
-      : Base(tree), NDIR(ndir) {}
+      : Base(tree), NDIR(ndir), NC(0), CB(0) { Update(); }
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     NeighbourSearch(Base const&tree, node_index ndir)
-      : Base(tree), NDIR(ndir) {}
+      : Base(tree), NDIR(ndir), NC(0), CB(0) { Update(); }
+    /// updates the cell's rectangles.
+    /// \note must be called after any tree re-build
+    void Update();
+    /// the rectangle enclosing all leafs in cell @a c
+    /// \param[in] c  cell
+    cuboid const&rect(Cell c) const
+    { return CB[c.I]; }
     //
     Geometry::SearchSphere<Dim,real> SS;          ///< search sphere
     const node_index                 NDIR;        ///< direct-loop control
     Cell                             C;           ///< cell already searched
-    /// is search sphere outside of a cell (and vice versa)?
+    /// distance^2 from centre of search sphere to leaf
+    /// \param[in] l  leaf
+    real DistSq(Leaf l) const
+    { return SS.dist_sq(position(l),0); }
+    /// distance^2 from centre of search sphere to a cell's rectangle
+    /// \param[in] c  cell
+    /// \return distance^2 from the centre of search sphere to the nearest
+    ///         point in the cell's rectangle, zero if within.
+    real DistSq(Cell c) const
+    { return SS.dist_sq(rect(c),0); }
+    /// is search sphere outside of a cell's rectangle (and vice versa)?
+    /// \param[in] c  cell
+    /// \return 
+    /// \note Equivalent to \code DistSq(c) > SS.RadSq() \endcode
+    ///       If true, the no leaf in cell @a c lies within the search sphere.
     bool Outside(Cell c) const
-    { return SS.template outside<1>(box(c)); }
+    { return SS.outside(rect(c),0); }
     /// is search sphere inside of a cell?
+    /// \param[in] c  cell
+    /// \return is the sphere entirely within the cube of cell @a c?
+    /// \note If true, no further cells need to be searched up the tree
     bool Inside (Cell c) const
-    { return SS.template inside<1>(box(c)); }
+    { return SS.inside(box(c),0); }
     /// process a range of leafs
+    /// \note this must be provided by the derived class
     virtual void ProcessLeafs(Leaf, Leaf) const = 0;
     /// does the actual work
     /// \note the data @a C and @a SS must have been set by derived BEFORE
     inline void Process();
+    /// header for cell dump
+    virtual std::ostream&Head(Cell c, std::ostream&out) const
+    {
+      return Base::Head(c,out)
+	<< "                 C          "
+	<< "                 H          ";
+    }
+    /// dump cell data
+    virtual std::ostream&Data(Cell c, std::ostream&out) const
+    {
+      return Base::Data(c,out)
+	<< ' ' << std::setw(8) << rect(c).X
+	<< ' ' << std::setw(8) << rect(c).Y;
+    }
   private:
+    size_t   NC;     ///< # cells for which cuboids have been allocated
+    cuboid  *CB;     ///< array with cell's rectangles
     /// process a cell: process all leafs within cell and search sphere
     /// \note recursive
     /// \param[in] Ci   Cell to search
@@ -1205,8 +1250,8 @@ namespace WDutils {
   ///
   /// support for SSE-supported neighbour search.
   ///
-  /// support comes in form of 16-byte aligned arrays with leafs' X,Y,Z 
-  /// and methods to find a list of chunks containing all candidate leafs.
+  /// support comes in form of 16-byte aligned arrays with leafs' x,y,z 
+  /// and methods to find a list of chunks containing all neighbour candidates
   /// \n
   /// see FastNeighbourSearch for an example on how to use this class.
   template<typename OctTree>
@@ -1269,9 +1314,9 @@ namespace WDutils {
     Base::NDIR;
     Base::C;
     Base::SS;
-    bool*const    PP;              ///< indicator: incomplete block added
+    bool *const   PP;              ///< indicator: incomplete block added
     Chunk*const   C0;              ///< chunks of blocks to process
-    char*const    ALLOC;           ///< memory allocated
+    char *const   ALLOC;           ///< memory allocated
     const size_t  NALLOC;          ///< # bytes allocated
     mutable Chunk*C1,*CL;          ///< first and last/end active chunk
     /// re-allocate
@@ -1407,7 +1452,7 @@ namespace WDutils {
     typedef typename Base::real real;             ///< type: scalars
     typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
-    typedef Geometry::sphere<Dim,real> Sphere;    ///< type: search sphere
+    typedef Geometry::sphere<Dim,real> sphere;    ///< type: search sphere
     typedef Geometry::Algorithms<1> GeoAlgos;     ///< geometric algorithms
     /// ctor
     /// \param[in] tree  OctTree to use for searches
@@ -1478,7 +1523,7 @@ namespace WDutils {
     Neighbour<OctTree> *LIST;     ///< neighbour list
     Cell                C;        ///< cell containing X, to be searched
     WDutils__align16
-    mutable Sphere      S;        ///< search sphere
+    mutable sphere      S;        ///< search sphere
     mutable node_index  NIAC;     ///< interaction counter
     mutable int         M;        ///< K - # interactions for current search
     /// is search sphere outside of a cell (and vice versa)?
