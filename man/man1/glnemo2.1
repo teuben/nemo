@@ -203,14 +203,22 @@ center according the Center Of Mass [t]
 \fBpoint=\fP
 display particles as points [f]
 .TP 20
+\fBauto_render=\fP
+glnemo2 guess automatically the rendering mode, otherwise accumulation
+buffer will be selected[t]
+.TP 20
 \fBtexture=\fP
 display particles as textures [t]
 .TP 20
-\fBmindens=\fP
-set minimal density value
+\fBselphys=\fP
+select physical quantity to display
+(1:density, 2:temperature, 3:pressure) [1]
 .TP 20
-\fBmaxdens=\fP
-set maximal density value
+\fBminphys=\fP
+set minimal physical value
+.TP 20
+\fBmaxphys=\fP
+set maximal physical value
 .TP 20
 \fBtexture_s=\fP
 texture size for gas like particles
@@ -257,4 +265,5 @@ Jean-Charles Lambert
 .nf
 .ta +1.0i +5.0i
 23-Apr-10  ramses reader + gyrfalcON manipulator	JCL
+19-May-10  - Leiden release - see ChangeLog		JCL
 .fi
