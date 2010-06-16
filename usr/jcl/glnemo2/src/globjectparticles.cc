@@ -275,7 +275,7 @@ void GLObjectParticles::buildVelDisplayList()
     glBegin(GL_LINES);
     
     // draw all the selected points
-    const float vfactor = po->getVelSize() / part_data->getMaxVelNorm();
+    const float vfactor = po->getVelSize();// / part_data->getMaxVelNorm(); // requested by Peter Teuben
     for (int i=0; i < po->npart; i+=po->step) {
       int index=po->index_tab[i];
       float

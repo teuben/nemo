@@ -484,6 +484,17 @@ int PhysicalData::computeMinMax()
     for (int i=0; i<100; i++) {
       data_histo[i] = 0;
     }
+    if (min <=0) {
+      std::cerr << "Min is negative, rescaling data...\n";
+      float offset=min*-1.;
+      for (int i=0; i<(nbody); i++) {
+        if (data[i] != -1 ) {
+          data[i] += offset;
+        }
+      }
+      min=1E-12;
+      max=max+offset;
+    }
     if (valid) {
       for (int i=0; i<(nbody); i++) {
         if (data[i] != -1 && data[i] != 0) {
