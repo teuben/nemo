@@ -184,12 +184,12 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
       }
     }
     reset();
+    emit updatePareticlesSelected(in_area); // update Form Option
     if (in_area) { // particles exist
         // normalizing COM
 	com[0] /= (float) in_area;
 	com[1] /= (float) in_area;
-	com[2] /= (float) in_area;
-        emit updatePareticlesSelected(in_area);
+	com[2] /= (float) in_area;        
 	
         //std::cerr << "in_area = " << in_area << "  list ="<<list.size()<<"\n";
 	//std::cerr << "center of mass:" << com[0] << " " << com[1] << " " << com[2] <<"\n";

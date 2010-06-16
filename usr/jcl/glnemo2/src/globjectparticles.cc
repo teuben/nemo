@@ -186,7 +186,7 @@ void GLObjectParticles::updateVbo()
     buildVboPos();
   }
   
-  if (GLWindow::GLSL_support && po->isGazEnable()) {
+  if (GLWindow::GLSL_support) { // && po->isGazEnable()) {
 
     if (go->render_mode == 1 || go->render_mode == 2) {
       if (go->phys_local) {

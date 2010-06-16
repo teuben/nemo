@@ -1,3 +1,14 @@
+current
+--------
+ - bug fixed: bestzoom deactivated for the first playing frame 
+ - bug fixed: if only particles are selected, a modification of the
+	     density threshold modify now the color of the particles
+ - bug fixed: display the correct number of particles selected from
+	     the mouse in the Form Option box
+ - bug fixed: display velocities vectors when selected from the cli
+	
+	
+	
 preview.2010-May-19 (aka Leiden Release)
 -----------------------------------------
  - remove mindens maxdens from command line parameters

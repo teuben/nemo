@@ -698,6 +698,7 @@ void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
     pov[i].setGaz(store_options->show_poly);
     pov[i].setGazSize(store_options->texture_size);
     pov[i].setGazSizeMax(store_options->texture_size);
+    pov[i].setVel(store_options->show_vel);
     if (store_options->phys_min_glob!=-1) {
       pov[i].setMinPhys(store_options->phys_min_glob);
     }
@@ -1293,7 +1294,7 @@ void MainWindow::uploadNewFrame()
     gl_window->update( current_data->part_data, &pov2,store_options);
     if (first && bestzoom) {
       first=false;
-      gl_window->bestZoomFit();
+      //gl_window->bestZoomFit();
     }
     if (store_options->auto_play_screenshot && !store_options->auto_gl_screenshot) {
       startAutoScreenshot();
