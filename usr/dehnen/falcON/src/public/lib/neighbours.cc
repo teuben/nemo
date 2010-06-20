@@ -417,3 +417,24 @@ void falcON::ProcessNearestNeighbours(const OctTree*T, int K,
   Ni = NNS.N_iact();
 }
 // /////////////////////////////////////////////////////////////////////////////
+void falcON::ProcessNearestNeighbours(const OctTree*T, int K,
+				      void(*f)(const Neighbour*, int),
+				      bodies::index i)
+  falcON_THROWING
+{
+  const leaf*Li=0;
+  const cell*Ci=0;
+  LoopCellsUp(OctTree::CellIter<OctTree::Cell>,T,C)
+    LoopLeafKids(T,C,L)
+    if(i == mybody(L)) {
+      Li = L;
+      Ci = C;
+      break;
+    }
+  if(!Li) falcON_THROW("cannot find body in tree\n");
+  NearestNeighbourSearch NNS(T,K/4,0);
+  Array<Neighbour> E(K);
+  NNS.make_list(Li,Ci,E.array(),K);
+  f(E.array(),K);
+}
+// /////////////////////////////////////////////////////////////////////////////

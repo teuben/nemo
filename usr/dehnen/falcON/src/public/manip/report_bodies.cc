@@ -36,11 +36,36 @@
 // v 0.3    20/07/2010  WD added density (rho) to output
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
+#include <forces.h>
+#include <public/neighbours.h>
 #include <fstream>                                 // C++ file I/O              
 #include <cstring>                                 // C strings
 #include <limits>
 
 namespace falcON { namespace Manipulate {
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // auxiliary data and function
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  real FAC; ///< normalisation factor for kernel
+  int  NF;  ///< order of Ferrers kernel
+  real RHO; ///< density of body
+  void prepare(int n=1) {
+    NF  = n;
+    FAC = 0.75/Pi;
+    for(n=1; n<=NF; ++n)
+      FAC *= double(n+n+3)/double(n+n);
+  }
+  void SetDensity(const Neighbour    *N,
+		  int                 K)
+  {
+    real iHq = one/N[K-1].Q;
+    RHO = zero;
+    for(int k=0; k!=K-1; ++k) if(N[k].Q)
+      RHO += scalar(N[k].L) * std::pow(one-iHq*N[k].Q,NF);
+    RHO *= FAC * std::pow(sqrt(iHq),3);
+  }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class report_bodies                                                        
@@ -98,7 +123,7 @@ namespace falcON { namespace Manipulate {
       print_scal(out);
     }
     //--------------------------------------------------------------------------
-    void print_line(std::ostream&out, const body&b, bool rho) const
+    void print_line(std::ostream&out, const body&b) const
     {
       print_scal( out << '#' );
       if(has_mass(b)) print_scal(out << '-');
@@ -107,14 +132,14 @@ namespace falcON { namespace Manipulate {
       if(has_acc (b)) print_vect(out << "------");
       if(has_pot (b) ||
 	 has_pex (b)) print_scal(out << "--");
-      if(rho)         print_scal(out << '-');
+      if(DENS)        print_scal(out << '-');
       if(has_srho(b)) print_scal(out << '-');
       if(has_uin (b)) print_scal(out << '-');
       if(has_csnd(b)) print_scal(out << '-');
       out<<std::endl;
     }
     //--------------------------------------------------------------------------
-    void print_head(std::ostream&out, const body&b, bool rho) const
+    void print_head(std::ostream&out, const body&b) const
     {
       out << '#'                 << std::setw(PREC+5) << "time";
       if(has_mass(b)) out << ' ' << std::setw(PREC+5) << "mass";
@@ -129,14 +154,14 @@ namespace falcON { namespace Manipulate {
 			  << ' ' << std::setw(PREC+6) << "a_z";
       if(has_pot (b) ||
 	 has_pex (b)) out << ' ' << std::setw(PREC+6) << "Phi";
-      if(rho)         out << ' ' << std::setw(PREC+5) << "rho";
+      if(DENS)        out << ' ' << std::setw(PREC+5) << "rho";
       if(has_srho(b)) out << ' ' << std::setw(PREC+5) << "gas_density";
       if(has_uin (b)) out << ' ' << std::setw(PREC+5) << "U_internal";
       if(has_csnd(b)) out << ' ' << std::setw(PREC+5) << "sound speed";
       out << std::endl;
     }
     //--------------------------------------------------------------------------
-    void print_data(std::ostream&out, const body&b, double time, real rho) const
+    void print_data(std::ostream&out, const body&b, double time) const
     {
       out    << ' ' << print(time,PREC+5,PREC);
       if(has_mass(b))
@@ -154,8 +179,8 @@ namespace falcON { namespace Manipulate {
 	  out<< ' ' << print(pot(b),PREC+6,PREC);
 	else if(has_pex(b))
 	  out<< ' ' << print(pex(b),PREC+6,PREC);
-      if(rho)
-	out << ' ' << print(rho,PREC+5,PREC);
+      if(RHO)
+	out << ' ' << print(RHO,PREC+5,PREC);
       if(has_srho(b))
 	out << ' ' << print(srho(b),PREC+5,PREC);
       if(has_uin (b))
@@ -188,6 +213,7 @@ namespace falcON { namespace Manipulate {
 	  " writes basic data for file(s) for bodies in_subset()"
 	  " (default: all)\n";
       strcpy(FNAME,file);
+      prepare();
     }
     //--------------------------------------------------------------------------
     ~report_bodies();
@@ -218,12 +244,12 @@ namespace falcON { namespace Manipulate {
 			"file name \"%s\" not format string\n",
 			name(),NSET,FNAME);
 	open_to_append_error(OUT[f],file);
- 	print_line(OUT[f],b,DENS && S->have_rho());
+ 	print_line(OUT[f],b);
 	OUT[f]   << "#\n# output from Manipulator \"" << name() << "\"\n#\n";
 	RunInfo::header(OUT[f]);
 	OUT[f]   << "# data for body " << KEY[f] << "\n#\n";
-	print_head(OUT[f],b,DENS && S->have_rho());
-	print_line(OUT[f],b,DENS && S->have_rho());
+	print_head(OUT[f],b);
+	print_line(OUT[f],b);
 	f++;
       }
     }
@@ -239,20 +265,16 @@ namespace falcON { namespace Manipulate {
 	falcON_ErrorN("Manipulator \"%s\": "
 		      "%dth body changed key to %d\n",
 		      name(),KEY[f],bodykey(b));
-      // find nearest neighbour not in subset and take its density
-      real rho=zero;
-      if(DENS && S->have_rho()) {
-	real qmin = std::numeric_limits<real>::max();
-	vect x    = pos(b);
-	LoopAllBodies(S,c) if(!in_subset(c)) {
-	  real q = dist_sq(x,pos(c));
-	  if(q < qmin) {
-	    rho  = falcON::rho(c);
-	    qmin = q;
-	  }
+      // find 32 nearest neighbours and compute density from them
+      RHO = zero;
+      if(DENS) {
+	const forces*F = S->pointer<forces>("forces");
+	if(F && F->tree()) {
+	  ProcessNearestNeighbours(F->tree(),32,&SetDensity,
+				   static_cast<bodies::index>(b));
 	}
       }
-      print_data(OUT[f],b,S->time(),rho);
+      print_data(OUT[f],b,S->time());
       f++;
     }
     return false;

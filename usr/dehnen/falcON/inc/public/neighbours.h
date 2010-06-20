@@ -68,6 +68,24 @@ namespace falcON {
 					 const Neighbour*, int),
 				unsigned&Ni, bool all=0) falcON_THROWING;
   //----------------------------------------------------------------------------
+  /// Find neighbour list for given body and process it.
+  ///
+  /// For a given in the tree, we find the K
+  /// nearest neighbours and then call a user supplied function to process it
+  /// (eg. to compute a density estimate). Upon calling the function f, the
+  /// neighbour list is sorted in ascending order of distance.\n
+  /// Used in density estimation.
+  /// \note The user function's 4th argument is the size K of the list.
+  /// \note The user function can assume scalar(Leaf) to hold the mass.
+  /// \note The tree must not be have been re-used, but grown.
+  /// \param T tree to use
+  /// \param K number of neighbours to find
+  /// \param f function for processing neighbour list
+  /// \param[in] i  index body to find neighbours for
+  void ProcessNearestNeighbours(const OctTree*T, int K,
+				void(*f)(const Neighbour*, int),
+				bodies::index i) falcON_THROWING;
+  //----------------------------------------------------------------------------
   /// given a body, find smallest surrounding cell
   /// \return (pter to) smallest cell containing body
   /// \param[in]  T tree to search

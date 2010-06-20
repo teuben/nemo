@@ -898,6 +898,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   s->add_pointer(&__EPS,"eps");
   s->add_pointer(&__EPSSINK,"epssink");
   s->add_pointer(&__KERN,"kernel");
+  s->add_pointer(&FALCON,"forces");
   DebugInfo(4,"ForceALCON constructed\n");
 }
 //------------------------------------------------------------------------------

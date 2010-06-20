@@ -394,7 +394,7 @@ namespace falcON {
       sizeof(real),           ///< dlogh/dt
       sizeof(real),           ///< f_i
       sizeof(real),           ///< sound speed
-      sizeof(real),           ///< sound speed
+      sizeof(real),           ///< molecular weight
       //            SINK properties: 1
       sizeof(vect)            ///< spin
     };
