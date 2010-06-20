@@ -928,26 +928,13 @@ namespace falcON {
     mutable unsigned    REUSED;            ///< how often has tree been re-used
     mutable double      CPU_TREE, CPU_GRAV, CPU_AEX; ///< CPU timings
     const real          __EPS,__EPSSINK;
+    const kern_type     __KERN;
     //@}
     /// build tree and compute forces
     /// \param[in] all   for all bodies (or active only)?
     /// \param[in] build build the tree in any case?
     void set_tree_and_forces(bool all, bool build) const;
   public:
-#if(0)
-    /// reset softening parameters
-    /// \param[in] kern    softening kernel
-    /// \param[in] eps     softening length
-    /// \param[in] epssink softening length for sink particles
-    void reset_softening(kern_type kern, real eps, real epssink=zero
-#ifdef falcON_ADAP
-			,real     ,                // I: Nsoft                  
-			 unsigned ,                // I: Nref                   
-			 real     ,                // I: eps_min                
-			 real                      // I: eps_fac                
-#endif
-			 );
-#endif
     /// construction
     /// \param[in] s  snapshot: time & bodies
     /// \param[in] e  global softening length

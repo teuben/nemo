@@ -834,35 +834,6 @@ void ForceDiagGrav::dia_stats_body(output&o) const
 // class falcON::ForceALCON                                                   //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-#if(0)
-void ForceALCON::reset_softening(
-				  kern_type ker,
-				  real      e,
-				  real      es
-#ifdef falcON_ADAP
-				 ,real      ns,
-				  unsigned  nr,
-				  real      em,
-				  real      ef
-#endif
-				  )
-{
-#ifdef falcON_ADAP
-  NSOFT = ns;
-  NREF  = nr;
-  EMIN  = abs(em);
-  EFAC  = abs(ef);
-  if(SOFTENING == individual_adaptive && EFAC  == zero)
-    falcON_THROW("ForceALCON: using individual adaptive softening, "
-		 " but eps_fac=0\n");
-  if(SOFTENING == individual_adaptive && NSOFT == zero)
-    falcON_THROW("ForceALCON: using individual adaptive softening, "
-		 "but Nsoft=0\n");
-#endif
-  FALCON.reset_softening(abs(e),abs(es),ker);
-}
-#endif
-////////////////////////////////////////////////////////////////////////////////
 ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 		       real               e,       // I: global softening length
 		       real               th,      // I: tolerance parameter    
@@ -903,7 +874,8 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   CPU_GRAV      ( 0. ),
   CPU_AEX       ( 0. ),
   __EPS         ( e ),
-  __EPSSINK     ( es? es:e )
+  __EPSSINK     ( es? es:e ),
+  __KERN        ( ke )
 {
 #ifdef falcON_MPI
   if(SELF_GRAV && MPI::Initialized())
@@ -925,6 +897,7 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
 #endif
   s->add_pointer(&__EPS,"eps");
   s->add_pointer(&__EPSSINK,"epssink");
+  s->add_pointer(&__KERN,"kernel");
   DebugInfo(4,"ForceALCON constructed\n");
 }
 //------------------------------------------------------------------------------
