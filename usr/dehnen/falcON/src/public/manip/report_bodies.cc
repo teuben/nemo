@@ -33,10 +33,12 @@
 // v 0.0    06/09/2006  WD created
 // v 0.1    11/09/2008  WD erased direct use of nemo functions
 // v 0.2    29/10/2008  WD append to existing output files, output format
+// v 0.3    20/07/2010  WD added density (rho) to output
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <fstream>                                 // C++ file I/O              
-#include <cstring>                                 // C strings                 
+#include <cstring>                                 // C strings
+#include <limits>
 
 namespace falcON { namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
@@ -57,7 +59,8 @@ namespace falcON { namespace Manipulate {
   ///                                                                           
   /// Meaning of the parameters:\n                                              
   /// file:   file name, format string if more than one body in_subset().       
-  /// par[0]: # digits to print out real numbers (default: 8)                   
+  /// par[0]: # digits to print out real numbers (default: 8)
+  /// par[1]: estimate density from nearest particle not in subset?
   ///                                                                           
   /// Usage of pointers: none\n                                                 
   /// Usage of flags:    uses in_subset()\n                                     
@@ -67,6 +70,7 @@ namespace falcON { namespace Manipulate {
   private:
     char                    FNAME[256];   ///< file name / format string.
     const int               PREC;         ///< precision for output of scalars
+    const bool              DENS;         ///< estimate density from neighbour
     mutable int             NSET;         ///< # files open
     mutable std::ofstream  *OUT;          ///< array: files to write to
     mutable unsigned       *KEY;          ///< array: keys of bodies in subset.
@@ -94,7 +98,7 @@ namespace falcON { namespace Manipulate {
       print_scal(out);
     }
     //--------------------------------------------------------------------------
-    void print_line(std::ostream&out, const body&b) const
+    void print_line(std::ostream&out, const body&b, bool rho) const
     {
       print_scal( out << '#' );
       if(has_mass(b)) print_scal(out << '-');
@@ -103,13 +107,14 @@ namespace falcON { namespace Manipulate {
       if(has_acc (b)) print_vect(out << "------");
       if(has_pot (b) ||
 	 has_pex (b)) print_scal(out << "--");
+      if(rho)         print_scal(out << '-');
       if(has_srho(b)) print_scal(out << '-');
       if(has_uin (b)) print_scal(out << '-');
       if(has_csnd(b)) print_scal(out << '-');
       out<<std::endl;
     }
     //--------------------------------------------------------------------------
-    void print_head(std::ostream&out, const body&b) const
+    void print_head(std::ostream&out, const body&b, bool rho) const
     {
       out << '#'                 << std::setw(PREC+5) << "time";
       if(has_mass(b)) out << ' ' << std::setw(PREC+5) << "mass";
@@ -124,13 +129,14 @@ namespace falcON { namespace Manipulate {
 			  << ' ' << std::setw(PREC+6) << "a_z";
       if(has_pot (b) ||
 	 has_pex (b)) out << ' ' << std::setw(PREC+6) << "Phi";
+      if(rho)         out << ' ' << std::setw(PREC+5) << "rho";
       if(has_srho(b)) out << ' ' << std::setw(PREC+5) << "gas_density";
       if(has_uin (b)) out << ' ' << std::setw(PREC+5) << "U_internal";
       if(has_csnd(b)) out << ' ' << std::setw(PREC+5) << "sound speed";
       out << std::endl;
     }
     //--------------------------------------------------------------------------
-    void print_data(std::ostream&out, const body&b, double time) const
+    void print_data(std::ostream&out, const body&b, double time, real rho) const
     {
       out    << ' ' << print(time,PREC+5,PREC);
       if(has_mass(b))
@@ -148,6 +154,8 @@ namespace falcON { namespace Manipulate {
 	  out<< ' ' << print(pot(b),PREC+6,PREC);
 	else if(has_pex(b))
 	  out<< ' ' << print(pex(b),PREC+6,PREC);
+      if(rho)
+	out << ' ' << print(rho,PREC+5,PREC);
       if(has_srho(b))
 	out << ' ' << print(srho(b),PREC+5,PREC);
       if(has_uin (b))
@@ -170,7 +178,9 @@ namespace falcON { namespace Manipulate {
     bool manipulate(const snapshot*) const;
     //--------------------------------------------------------------------------
     report_bodies(const double*pars, int npar, const char*file) falcON_THROWING
-    : PREC ( npar>0? int(pars[0]) : 8 ), NSET (0), OUT(0), KEY(0)
+    : PREC ( npar>0? int(pars[0]) : 8 ),
+      DENS ( npar>1? int(pars[1]) : 0 ),
+      NSET (0), OUT(0), KEY(0)
     {
       if((npar==0 && debug(1)) || debug(2))
 	std::cerr<<
@@ -208,12 +218,12 @@ namespace falcON { namespace Manipulate {
 			"file name \"%s\" not format string\n",
 			name(),NSET,FNAME);
 	open_to_append_error(OUT[f],file);
- 	print_line(OUT[f],b);
+ 	print_line(OUT[f],b,DENS && S->have_rho());
 	OUT[f]   << "#\n# output from Manipulator \"" << name() << "\"\n#\n";
 	RunInfo::header(OUT[f]);
 	OUT[f]   << "# data for body " << KEY[f] << "\n#\n";
-	print_head(OUT[f],b);
-	print_line(OUT[f],b);
+	print_head(OUT[f],b,DENS && S->have_rho());
+	print_line(OUT[f],b,DENS && S->have_rho());
 	f++;
       }
     }
@@ -229,7 +239,20 @@ namespace falcON { namespace Manipulate {
 	falcON_ErrorN("Manipulator \"%s\": "
 		      "%dth body changed key to %d\n",
 		      name(),KEY[f],bodykey(b));
-      print_data(OUT[f],b,S->time());
+      // find nearest neighbour not in subset and take its density
+      real rho=zero;
+      if(DENS && S->have_rho()) {
+	real qmin = std::numeric_limits<real>::max();
+	vect x    = pos(b);
+	LoopAllBodies(S,c) if(!in_subset(c)) {
+	  real q = dist_sq(x,pos(c));
+	  if(q < qmin) {
+	    rho  = falcON::rho(c);
+	    qmin = q;
+	  }
+	}
+      }
+      print_data(OUT[f],b,S->time(),rho);
       f++;
     }
     return false;
