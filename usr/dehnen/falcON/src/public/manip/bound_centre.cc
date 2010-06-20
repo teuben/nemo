@@ -90,7 +90,7 @@ namespace Manipulate {
   /// pars[0]: number \f$K\f$ of particles to consider (default: 256)\n
   /// pars[1]: power \f$\alpha\f$ in energy weighting (default: 3)\n
   /// pars[2]: (0,1,2,3): kernel for subtracting off satellite\n
-  /// pars[3]: softening length for sink particles
+  /// pars[3]: softening length for sink particles\n
   /// file: write centre position to file.
   ///
   /// Usage of pointers: sets 'xcen' and 'vcen', may use 'epssink'
@@ -103,7 +103,7 @@ namespace Manipulate {
     double          A;
     const kern_type KERN;
     const real      EQ;
-    const bool      HaveE;
+    const bool      HaveE,GivenK;
     mutable output  OUT;
     mutable vect    XCEN,VCEN;
     mutable bool    FIRST;
@@ -162,18 +162,19 @@ namespace Manipulate {
     bound_centre(const double*pars,
 		 int          npar,
 		 const char  *file) falcON_THROWING
-    : K    ( npar>0? max(1,int(pars[0])) : K_default ),
-      A    ( npar>1? pars[1]  : A_default ),
-      KERN ( npar>2? kernel(int(pars[2])) : Default::kernel ),
-      EQ   ( npar>3? square(pars[3]) : zero ),
-      HaveE( npar>3 ),
-      OUT  ( file, true ),
-      XCEN ( vect(zero) ),
-      VCEN ( vect(zero) ),
-      FIRST( true ),
-      Nb   ( K ),
-      Pn   ( K ),
-      In   ( K )
+    : K     ( npar>0? max(1,int(pars[0])) : K_default ),
+      A     ( npar>1? pars[1]  : A_default ),
+      KERN  ( npar>2? kernel(int(pars[2])) : Default::kernel ),
+      EQ    ( npar>3? square(pars[3]) : zero ),
+      HaveE ( npar>3 ),
+      GivenK( npar>2 ),
+      OUT   ( file, true ),
+      XCEN  ( vect(zero) ),
+      VCEN  ( vect(zero) ),
+      FIRST ( true ),
+      Nb    ( K ),
+      Pn    ( K ),
+      In    ( K )
     {
       if(debug(2) || npar > 3)
 	std::cerr <<
@@ -224,6 +225,10 @@ namespace Manipulate {
 		     "softening lenght required for correcting "
 		     "contribution of sink particles to potential\n");
       const_cast<real&>(EQ) = square(*es);
+    }
+    if(!GivenK) {
+      const kern_type*kt=S->pointer<kern_type>("kernel");
+      if(kt) const_cast<kern_type&>(KERN) = *kt;
     }
     LoopSubsetBodies(S,b) {
       real phi=zero;
