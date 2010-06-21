@@ -395,7 +395,6 @@ namespace {
   using namespace WDutils;
   //////////////////////////////////////////////////////////////////////////////
   /// auxiliary for FindPercentile
-  /// \note wtype should be either scalar or void
   template<typename scalar>
   class Ranker {
     friend class FindPercentile<scalar>;
@@ -411,7 +410,7 @@ namespace {
       unsigned R;       ///< rank of first point
       scalar   W;       ///< cumulative weight at first point
       range   *S;       ///< pter to left sub-range
-      range() : S(0) {}
+      range() {}
       range(int n) : N(n), R(0), W(0), S(0) {}
     };
     scalar             SumW;        ///< total weight
@@ -500,7 +499,16 @@ namespace {
       }
       return A;
     }
-  };
+  };// class FindPercentile<>
+} // namespace {
+namespace WDutils {
+  WDutils_TRAITS(Ranker<float>::point,"Ranker<float>::point");
+  WDutils_TRAITS(Ranker<float>::range,"Ranker<float>::range");
+  WDutils_TRAITS(Ranker<double>::point,"Ranker<double>::point");
+  WDutils_TRAITS(Ranker<double>::range,"Ranker<double>::range");
+}
+//
+namespace {
   // Ranker::Ranker
   template<typename T>
   Ranker<T>::Ranker(const T*a, unsigned n, const T*w, unsigned k)
@@ -570,6 +578,7 @@ namespace {
       A->S[0].R   = A->R;    A->S[1].R = A->R+L;
       A->S[0].N   = L;       A->S[1].N = A->N-L;
       A->S[0].W   = A->W;    A->S[1].W = A->W+W;
+      A->S[0].S   = 0;       A->S[1].S = 0;
     } else 
       WDutils_THROW("FindPercentile: cannot split range with N=%d<2\n",A->N);
   }

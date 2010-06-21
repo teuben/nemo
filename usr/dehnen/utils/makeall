@@ -110,7 +110,9 @@ spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
 WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 				$(inline_h)
-octtree_h		:= $(INC)octtree.h $(memory_h) $(traits_h) $(tupel_h)
+geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
+				$(INC)geometry_inl.h
+octtree_h		:= $(INC)octtree.h $(memory_h) $(geometry_h)
 parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
 peano_h			:= $(INC)peano.h $(traits_h)
 domain_h		:= $(INC)domain.h $(parallel_h) $(octtree_h)

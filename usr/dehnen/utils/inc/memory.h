@@ -439,6 +439,12 @@ namespace WDutils {
   /// sofar. This function must be provided by the user, otherwise the same
   /// number as in the last block is used.
   ///
+  /// \warning Since using 16-byte aligned memory for the elements, the
+  ///          default constructor is not called for each of them, rather
+  ///          uninitialised memory is returned. The user should therefore
+  ///          initialise elements given out, rather than trust the default
+  ///          constructor to have been called.
+  ///
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T>
   class block_alloc {
@@ -448,10 +454,10 @@ namespace WDutils {
     typedef T         value_type;                ///< type of elements          
     typedef size_t    size_type;                 ///< type of number of elements
     typedef ptrdiff_t difference_type;           ///< type of pointer difference
-    typedef T*        pointer;                   ///< type of pointer to element
-    typedef const T*  const_pointer;             ///< type of const pointer     
-    typedef T&        reference;                 ///< type of reference to elem 
-    typedef const T&  const_reference;           ///< type of const reference   
+    typedef T        *pointer;                   ///< type of pointer to element
+    typedef const T  *const_pointer;             ///< type of const pointer     
+    typedef T        &reference;                 ///< type of reference to elem 
+    typedef const T  &const_reference;           ///< type of const reference   
     //@}
   private:
     /// allocates and manages a contiguous chunk of elements                    

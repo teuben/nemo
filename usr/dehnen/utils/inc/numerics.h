@@ -369,7 +369,7 @@ namespace WDutils {
     /// \return    handle to element of given rank
     handle FindRank(unsigned r) const WDutils_THROWING;
     /// find element of given cumulative weight
-    /// \param[in] w  cumulative weight in [0, TotalWeight()]
+    /// \param[in] w  cumulative weight in [0, TotalWeight()[
     /// \return    handle to element at which cumulative weight equals w
     /// \note If no weights were given, this is equivalent to FindRank(r=w).
     handle FindCumulativeWeight(scalar w) const WDutils_THROWING;
@@ -385,7 +385,7 @@ namespace WDutils {
       unsigned r = Rank(h) + 1;
       return r == TotalNumber()? 0 : FindRank(r);
     }
-    /// given a handle, find the next element up
+    /// given a handle, find the next element down
     /// \param[in] h element handle
     /// \return    handle to previous element in ascending position
     /// \note If h refers to the first element, NULL is returned
@@ -405,7 +405,7 @@ namespace WDutils {
     /// \param[in] h element handle as returned from FindRank() or FindWeight()
     /// \return rank of element referred to by handle
     unsigned Rank(handle h, bool=true) const WDutils_THROWING; 
-    /// position givne handle
+    /// position given handle
     /// \param[in] h element handle as returned from FindRank() or FindWeight()
     /// \return position of element referred to by handle
     scalar Position(handle h, bool=true) const WDutils_THROWING;

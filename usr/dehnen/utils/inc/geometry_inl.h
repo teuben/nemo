@@ -1458,6 +1458,7 @@ namespace WDutils {
     template<bool __A, bool __S> template<int __D, typename __X> inline
     void Algorithms<__A,__S>::convert2cuboid(PointPair<__D,__X> &p)
     { return Meta::AlgorithmsHelper<__X,__A,__S>::convert2cuboid(p); }
+#if(0)
     //    
     // class SearchSphere: specialisations
     //
@@ -2292,6 +2293,7 @@ namespace WDutils {
 #endif // __SSE2__
 #undef _GT_
 #endif // __SSE__
+#endif // (0)
   } // nameapce WDutils::Geometry
 } // namespace WDutils
 //

@@ -12,7 +12,7 @@
 /// \version 07-06-2010 WD  tested: octant,contains,dist_sq,outside,inside
 /// \version 08-06-2010 WD  new template layout, struct Algorithms<al,sse>
 /// \version 10-06-2010 WD  struct SearchSphere<Dim,real>
-/// \version 11-06-2010 WD  cuboid<> supported in Algorithms<>, SearchSpher<>
+/// \version 11-06-2010 WD  cuboid<> supported in Algorithms<>, SearchSphere<>
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -260,7 +260,7 @@ namespace WDutils {
       /// ctor from sphere
       /// \param[in] s  sphere, need not be aligned
       SearchSphere(sphere<Dim,real> const&s, int)
-      { reset(s); }
+      { reset(s,0); }
       /// ctor from sphere, assuming 16-byte alignment
       /// \param[in] s  sphere, 16-byte aligned
       SearchSphere(sphere<Dim,real> const&s)
@@ -302,11 +302,11 @@ namespace WDutils {
       /// distance^2 from centre of sphere to some point
       /// \param[in]  x  position
       real dist_sq(tupel<Dim,real> const&x, int) const
-      { return WDutils::dist_sq(x,S.X); }
+      { return Algorithms<0>::dist_sq(S.X,x); }
       /// distance^2 from centre of sphere to some point
       /// \param[in]  x  position, 16-byte aligned
       real dist_sq(tupel<Dim,real> const&x) const
-      { return WDutils::dist_sq(x,S.X); }
+      { return Algorithms<1>::dist_sq(S.X,x); }
       /// is a position contained within the search sphere?
       /// \param[in]  x  position
       bool contains(tupel<Dim,real> const&x, int) const

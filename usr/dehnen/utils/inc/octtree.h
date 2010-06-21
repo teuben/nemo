@@ -1064,6 +1064,9 @@ namespace WDutils {
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     NeighbourSearch(Base const&tree, node_index ndir)
       : Base(tree), NDIR(ndir), NC(0), CB(0) { Update(); }
+  public:
+    /// dtor
+    ~NeighbourSearch();
     /// updates the cell's rectangles.
     /// \note must be called after any tree re-build
     void Update();
@@ -1071,6 +1074,7 @@ namespace WDutils {
     /// \param[in] c  cell
     cuboid const&rect(Cell c) const
     { return CB[c.I]; }
+  protected:
     //
     Geometry::SearchSphere<Dim,real> SS;          ///< search sphere
     const node_index                 NDIR;        ///< direct-loop control
@@ -1078,29 +1082,29 @@ namespace WDutils {
     /// distance^2 from centre of search sphere to leaf
     /// \param[in] l  leaf
     real DistSq(Leaf l) const
-    { return SS.dist_sq(position(l),0); }
+    { return SS.dist_sq(position(l)); }
     /// distance^2 from centre of search sphere to a cell's rectangle
     /// \param[in] c  cell
     /// \return distance^2 from the centre of search sphere to the nearest
     ///         point in the cell's rectangle, zero if within.
     real DistSq(Cell c) const
-    { return SS.dist_sq(rect(c),0); }
+    { return SS.dist_sq(rect(c)); }
     /// is search sphere outside of a cell's rectangle (and vice versa)?
     /// \param[in] c  cell
     /// \return 
     /// \note Equivalent to \code DistSq(c) > SS.RadSq() \endcode
     ///       If true, the no leaf in cell @a c lies within the search sphere.
     bool Outside(Cell c) const
-    { return SS.outside(rect(c),0); }
+    { return SS.outside(rect(c)); }
     /// is search sphere inside of a cell?
     /// \param[in] c  cell
     /// \return is the sphere entirely within the cube of cell @a c?
     /// \note If true, no further cells need to be searched up the tree
     bool Inside (Cell c) const
-    { return SS.inside(box(c),0); }
+    { return SS.inside(box(c)); }
     /// process a range of leafs
     /// \note this must be provided by the derived class
-    virtual void ProcessLeafs(Leaf, Leaf) const = 0;
+    virtual void ProcessLeafs(Leaf, Leaf) const {}
     /// does the actual work
     /// \note the data @a C and @a SS must have been set by derived BEFORE
     inline void Process();
@@ -1443,30 +1447,31 @@ namespace WDutils {
   ///
   /// \note Implementations for OctalTree<D,R> with D=2,3 and R=float,double
   template<typename OctTree>
-  struct NearestNeighbourFinder : public TreeAccess<OctTree>
+  struct NearestNeighbourFinder : public NeighbourSearch<OctTree>
   {
-    typedef TreeAccess<OctTree> Base;
+    typedef TreeAccess<OctTree> Access;
+    typedef NeighbourSearch<OctTree> Base;
     Base::Dim;
     typedef typename Base::Leaf Leaf;             ///< type: tree leaf
     typedef typename Base::Cell Cell;             ///< type: tree cell
     typedef typename Base::real real;             ///< type: scalars
     typedef typename Base::point point;           ///< type: position vectors
     typedef typename Base::node_index node_index; ///< type: index & counters
-    typedef Geometry::sphere<Dim,real> sphere;    ///< type: search sphere
-    typedef Geometry::Algorithms<1> GeoAlgos;     ///< geometric algorithms
+    typedef Geometry::cuboid<Dim,real> cuboid;    ///< type: cell's rectangle
+    Base::Update;
     /// ctor
     /// \param[in] tree  OctTree to use for searches
     /// \param[in] k     number K of nearest neighbours to find
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
     /// \note if @a ndir == 0, we will use 2*@a k as default.
     NearestNeighbourFinder(OctTree const*tree, node_index k, node_index ndir=0)
-      : Base(tree), K(k), NDIR(ndir? ndir : K+K) {}
+      : Base(tree,ndir? ndir : K+K), K(k) {}
     /// ctor
     /// \param[in] walk  tree walker
     /// \param[in] k     number K of nearest neighbours to find
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
-    NearestNeighbourFinder(Base const&walk, node_index k, node_index ndir=0)
-      : Base(walk), K(k), NDIR(ndir? ndir : K+K) {}
+    NearestNeighbourFinder(Access const&walk, node_index k, node_index ndir=0)
+      : Base(walk,ndir? ndir : K+K), K(k) {}
     /// reset search settings
     /// \param[in] k     number K of nearest neighbours to find
     /// \param[in] ndir  use direct loop for cells with less than @a ndir leafs
@@ -1489,8 +1494,8 @@ namespace WDutils {
 	WDutils_THROW("NearestNeighbourFinder: K=%d >= Nl=%d\n",
 		      K,Base::Nleafs());
       LIST = nb;
-      S.X  = position(l);
       C    = Parent(l);
+      SS.reset(position(l),real(0));
       FillList();
       return NIAC;
     }
@@ -1511,27 +1516,20 @@ namespace WDutils {
 	WDutils_THROW("NearestNeighbourFinder: K=%d > Nl=%d\n",
 		      K,Base::Nleafs());
       LIST = nb;
-      S.X  = x;
-      C    = SmallestContainingCell(S.X);
+      C    = SmallestContainingCell(x);
+      SS.reset(x,real(0),0);
       FillList();
       return NIAC;
     }
     //
   private:
-    const node_index    K;        ///< size of list
-    const node_index    NDIR;     ///< direct-loop control
+    Base::NDIR;
+    Base::SS;
+    Base::C;
     Neighbour<OctTree> *LIST;     ///< neighbour list
-    Cell                C;        ///< cell containing X, to be searched
-    WDutils__align16
-    mutable sphere      S;        ///< search sphere
+    const   node_index  K;        ///< size of list
     mutable node_index  NIAC;     ///< interaction counter
     mutable int         M;        ///< K - # interactions for current search
-    /// is search sphere outside of a cell (and vice versa)?
-    inline bool Outside(Cell) const;
-    /// is search sphere inside of a cell?
-    inline bool Inside (Cell) const;
-    /// distance^2 of cell to search sphere
-    inline real OutsideDistSq(Cell) const;
     /// actual direct summation control parameter
     inline node_index Ndir() const;
     /// update the list w.r.t. a leaf

@@ -169,6 +169,8 @@ namespace {
     };
     typedef SSE::Extend16<__Dot> Dot;
     /// represents a cubic cell in the BoxDotTree
+    /// \note We cannot rely on a default constructor being called when
+    ///       allocating boxes for the tree (see documentation for block_alloc).
     struct __Box {
       typedef typename meta::__IWORDS<Nsub>::integer_u ndl_type;
       cube              CUB;           ///< box cubus
@@ -950,6 +952,14 @@ namespace WDutils {
 namespace WDutils {
   //
   template<typename OctTree>
+  NeighbourSearch<OctTree>::~NeighbourSearch()
+  {
+    if(CB) delete16(CB);
+    CB = 0;
+    NC = 0;
+  }
+  //
+  template<typename OctTree>
   void NeighbourSearch<OctTree>::Update()
   {
     // make sure we have enough cuboids allocated
@@ -1263,7 +1273,7 @@ namespace WDutils {
     Lister<OctTree> LL(nb,m);
     PROC =&LL;
     C    = Parent(l);
-    SS.reset(position(l),q,0);
+    SS.reset(position(l),q);
     NSearch::Process();
     return LL.I;
   }
@@ -1276,8 +1286,7 @@ namespace WDutils {
     Lister<OctTree> LL(nb,m);
     PROC =&LL;
     C    = SmallestContainingCell(x);
-    WDutils__align16 point x16=x;
-    SS.reset(x16,q,0);
+    SS.reset(x,q,0);
     NSearch::Process();
     return LL.I;
   }
@@ -1289,7 +1298,7 @@ namespace WDutils {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
     PROC = p;
     C    = Parent(l);
-    SS.reset(position(l),q,0);
+    SS.reset(position(l),q);
     NSearch::Process();
   }
   //
@@ -1300,8 +1309,7 @@ namespace WDutils {
     if(0==p) WDutils_THROW("NeighbourFinder::Process(): p=0\n");
     PROC = p;
     C    = SmallestContainingCell(x);
-    WDutils__align16 point x16=x;
-    SS.reset(x16,q,0);
+    SS.reset(x,q,0);
     NSearch::Process();
   }
 }
@@ -1434,7 +1442,7 @@ namespace WDutils {
   {
     C = Parent(l);
     X = position(l);
-    SS.reset(X,q,0);
+    SS.reset(X,q);
     while(C != Base::Root() && IsValid(C) && Number(Parent(C)) < NDIR )
       C = Parent(C);
     CL = C0;
@@ -1453,7 +1461,7 @@ namespace WDutils {
   {
     X = x;
     C = SmallestContainingCell(X);
-    SS.reset(X,q,0);
+    SS.reset(X,q);
     while(C != Base::Root() && IsValid(C) && Number(Parent(C)) < NDIR )
       C = Parent(C);
     CL = C0;
@@ -1623,12 +1631,12 @@ namespace WDutils {
   {
     // testing after adding the contributions to q from each dimension does
     // make the code run more slowly
-    real q = dist_sq(S.X,position(l));
-    if(S.Q > q) {
+    real q = DistSq(l);
+    if(SS.RadSq() > q) {
       LIST->Q = q;
       LIST->L = l;
       MaxHeap::after_top_replace(LIST,K);
-      S.Q = LIST->Q;
+      const_cast<Geometry::SearchSphere<Dim,real>&>(SS).reset(LIST->Q);
       --M;
       ++NIAC;
     }
@@ -1650,9 +1658,9 @@ namespace WDutils {
 	CellQ<OctTree> Z[Base::Nsub];
 	int J(0);
 	LoopCellKids(Ci,c)
-	  if(c!=C) Z[J++].set(GeoAlgos::dist_sq(box(c),S.X),c);
+	  if(c!=C) Z[J++].set(DistSq(c),c);
 	MinHeap::build(Z,J);
-	while(J && S.Q > Z->Q) {
+	while(J && SS.RadSq() > Z->Q) {
 	  AddCell(Z->C);
 	  Z[0] = Z[J-1];
 	  MinHeap::after_top_replace(Z,--J);
@@ -1660,7 +1668,7 @@ namespace WDutils {
       } else if(Ncells(Ci)>cC) {
 	// only 1 sub-cell to process
 	LoopCellKids(Ci,c)
-	  if((!cC || c!=C) && !GeoAlgos::outside(box(c),S))
+	  if((!cC || c!=C) && !Outside(c))
 	    AddCell(c);
       }
     }
@@ -1675,12 +1683,11 @@ namespace WDutils {
   {
     NIAC = 0;
     M    = K;
-    S.Q  = 12*square(Base::RootRadius());
-    for(node_index k=0; k!=K; ++k) {
-      LIST[k].L = Base::InvalidLeaf();
-      LIST[k].Q = S.Q;
-    }
-    for(Cell P=C; IsValid(P) && !GeoAlgos::inside(box(C),S); C=P,P=Parent(C))
+    real Q = 12*square(Base::RootRadius());
+    SS.reset(Q);
+    for(node_index k=0; k!=K; ++k)
+      LIST[k].Q = Q;
+    for(Cell P=C; IsValid(P) && !Inside(C); C=P,P=Parent(C))
       AddCell(P, C!=P);
     MaxHeap::sort(LIST,K);
   }
