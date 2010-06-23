@@ -78,6 +78,9 @@ LIBT			:= $(LIB).dummy
 $(LIBT)			:
 			mkdir -p -m 755 $(LIB)
 			touch $(LIBT)
+ifdef WDutilsTEST
+DEV			:= devel/
+endif
 
 # -------------------------
 # compile and link commands
@@ -114,9 +117,18 @@ geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 				$(INC)geometry_inl.h
 octtree_h		:= $(INC)octtree.h $(memory_h) $(geometry_h)
 parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
+
+ifdef WDutilsTEST
+$(INC)neighbour.h	: $(DEV)neighbour.h
+			(cd $(INC); ln -s ../$(DEV)neighbour.h neighbour.h)
+$(INC)peano.h		: $(DEV)peano.h
+			(cd $(INC); ln -s ../$(DEV)peano.h peano.h)
+$(INC)domain.h		: $(DEV)domain.h
+			(cd $(INC); ln -s ../$(DEV)domain.h domain.h)
+neighbour_h		:= $(INC)neighbour.h $(octtree_h)
 peano_h			:= $(INC)peano.h $(traits_h)
 domain_h		:= $(INC)domain.h $(parallel_h) $(octtree_h)
-geometry_h		:= $(INC)geometry.h $(tupel_h) $(sse_h)
+endif
 
 # -----------------------
 # source dependency lists
@@ -132,7 +144,11 @@ random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 parallel_cc		:= $(SRC)parallel.cc $(parallel_h) $(meta_h) $(io_h)
 octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(memory_h)
-domain_cc		:= $(SRC)domain.cc $(domain_h) $(peano_h)
+
+ifdef WDutilsTEST
+neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
+domain_cc		:= $(DEV)domain.cc $(domain_h) $(peano_h)
+endif
 
 # ---------------
 # library modules
@@ -154,10 +170,18 @@ $(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)octtree.o:	$(octtree_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
+ifdef WDutilsTEST
+$(LIB)neighbour.o:	$(neighbour_cc) $(LIBT) $(makefiles)
+			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
+			$(LIB)WDMath.o $(LIB)neighbour.o
+else
+WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
+			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
 			$(LIB)WDMath.o
+endif
 
 # -------
 # library
