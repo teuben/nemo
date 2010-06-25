@@ -176,7 +176,7 @@ namespace Manipulate {
       Pn    ( K ),
       In    ( K )
     {
-      if(debug(2) || npar > 3)
+      if(debug(2) || npar > 4)
 	std::cerr <<
 	  " Manipulator \"bound_centre\":\n"
 	  " find centre of most bound region and put it in 'xcen' and 'vcen'\n"
@@ -222,7 +222,7 @@ namespace Manipulate {
       const real*es=S->pointer<real>("epssink");
       if(!es)
 	falcON_THROW("Manipulator bound_centre: cannot determine "
-		     "softening lenght required for correcting "
+		     "softening length required for correcting "
 		     "contribution of sink particles to potential\n");
       const_cast<real&>(EQ) = square(*es);
     }

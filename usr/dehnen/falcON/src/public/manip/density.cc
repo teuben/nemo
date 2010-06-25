@@ -38,6 +38,7 @@
 // v 0.4.3  25/09/2008  WD debugged (debug output only)
 // v 0.5    05/11/2008  WD register time of manipulation under trho
 // v 0.5.1  13/04/2010  WD removed use of initial_time()
+// v 0.6    25/06/2010  WD manipulation if time=integer*step (or step==0)
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/neighbours.h>
@@ -100,8 +101,6 @@ namespace Manipulate {
     int             N;        ///< # order of Ferrers kernel
     double          STEP;     ///< delta time between manipulations
     mutable double  TRHO;     ///< time of actual density.
-    mutable double  TMAN;     ///< time for next manipulation
-    mutable bool    FRST;     ///< first call to manipulate() ?
     //--------------------------------------------------------------------------
   public:
     const char* name    () const { return "density"; }
@@ -121,7 +120,7 @@ namespace Manipulate {
     : K    ( npar>0?     int(pars[0])    : 16 ),
       N    ( npar>1?     int(pars[1])    : 1  ),
       STEP ( npar>2?         pars[2]     : 0. ),
-      FRST ( true )
+      TRHO ( 0.0 )
     {
       if((npar==0 && debug(1)) || debug(2))
 	std::cerr<<
@@ -148,14 +147,8 @@ namespace Manipulate {
   {
     // 0. preliminaries
     S->set_pointer(&TRHO,"trho");
-    // 0.1 first call ever:
-    if(FRST) {
-      TMAN = S->time();
-      FRST = false;
-    // 0.2 is it time for a manipulation?
-    } else if(S->time() < TMAN)
+    if(STEP && S->time() != STEP*int(S->time()/STEP))
       return false;
-    // 0.3 set TRHO
     TRHO = S->time();
     // 1. establish tree
     clock_t CPU0 = clock();
@@ -188,8 +181,7 @@ namespace Manipulate {
 		" %d neighbour updates\n",
 		(CPU1 - CPU0)/real(CLOCKS_PER_SEC),NIAC);
     }
-    // 3. set new TMAN
-    TMAN += STEP;
+    //
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////

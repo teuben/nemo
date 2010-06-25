@@ -794,13 +794,13 @@ namespace {
   //----------------------------------------------------------------------------
   template<> struct __block<p0,1> : public __setE<p0> {
     enum { ND=2 };
-    sv b(real&X, real*D, real, real, real) {
+    sv b(real&X, real D[ND], real, real, real) {
       D[0] *= sqrt(X);
       D[1]  = X * D[0];
     } };
   template<int K> struct __block<p0,K> : public __setE<p0> {
     enum { ND=K+1, F=K+K-1 };
-    sv b(real&X, real*D, real EQ, real HQ, real QQ) {
+    sv b(real&X, real D[ND], real EQ, real HQ, real QQ) {
       __block<p0,K-1>::b(X,D,EQ,HQ,QQ);
       D[K] = int(F) * X * D[K-1];
     } };
@@ -814,7 +814,7 @@ namespace {
   //----------------------------------------------------------------------------
   template<> struct __block<p1,1> : public __setE<p1> {
     enum { ND=3 };
-    sv b(real&X, real*D, real, real HQ, real) {
+    sv b(real&X, real D[ND], real, real HQ, real) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
       D[2]  = 3 * X * D[1];
@@ -823,7 +823,7 @@ namespace {
     } };
   template<int K> struct __block<p1,K> : public __setE<p1> {
     enum { ND=K+2, F=K+K+1 };
-    sv b(real&X, real*D, real EQ, real HQ, real QQ) {
+    sv b(real&X, real D[ND], real EQ, real HQ, real QQ) {
       __block<p1,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+1] = int(F) * X * D[K];
       D[K]  += HQ  * D[K+1];
@@ -838,7 +838,7 @@ namespace {
   //----------------------------------------------------------------------------
   template<> struct __block<p2,1> : public __setE<p2> {
     enum { ND=4 };
-    sv b(real&X, real*D, real, real HQ, real) {
+    sv b(real&X, real D[ND], real, real HQ, real) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
       D[2]  = 3 * X * D[1];
@@ -848,7 +848,7 @@ namespace {
     } };
   template<int K> struct __block<p2,K> : public __setE<p2> {
     enum { ND=K+3, F=K+K+3 };
-    sv b(real&X, real*D, real EQ, real HQ, real QQ) {
+    sv b(real&X, real D[ND], real EQ, real HQ, real QQ) {
       __block<p2,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+2] = int(F) * X * D[K+1];
       D[K]  += HQ*(D[K+1]+HQ*D[K+2]);
@@ -864,7 +864,7 @@ namespace {
   //----------------------------------------------------------------------------
   template<> struct __block<p3,1> : public __setE<p3> {
     enum { ND=5 };
-    sv b(real&X, real*D, real, real HQ, real QQ) {
+    sv b(real&X, real D[ND], real, real HQ, real QQ) {
       D[0] *= sqrt(X);
       D[1]  =     X * D[0];
       D[2]  = 3 * X * D[1];
@@ -875,7 +875,7 @@ namespace {
     } };
   template<int K> struct __block<p3,K> : public __setE<p3> {
     enum { ND=K+4, F=K+K+5 };
-    sv b(real&X, real*D, real EQ, real HQ, real QQ) {
+    sv b(real&X, real D[ND], real EQ, real HQ, real QQ) {
       __block<p3,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+3] = int(F) * X * D[K+2];
       D[K]  += HQ*(D[K+1]+QQ*(D[K+2]+HQ*D[K+3]));

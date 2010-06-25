@@ -9,9 +9,10 @@ GCC		:= gcc
 GPP		:= g++
 endif
 
-CXX		:= $(CPATH)$(GPP)
-CC		:= $(CPATH)$(GCC)
-FC		:= $(CPATH)gfortran
+EXT             :=
+CXX             := CPATH=$(CPATH) $(GPP)
+CC              := CPATH=$(CPATH) $(GCC)
+FC              := CPATH=$(CPATH) gfortran
 
 PLATFORM 	:= $(shell uname -m)
 ifneq ($(VENDOR),apple)
