@@ -142,10 +142,11 @@
 // v 3.3.2  04/11/2008  WD individual eps_i always enabled
 // v 3.4    19/03/2010  WD sink particle gravity extra tree, epssink, no fsink
 // v 3.4.1  25/03/2010  WD debugged sink particle gravity, fsink back
-// v 3.4.2  13/04/2010  WD  removed use of initial_time()
+// v 3.4.2  13/04/2010  WD removed use of initial_time()
+// v 3.4.3  02/07/2010  WD write env variable FalcONLastOutputTime
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "3.4.2"
-#define falcON_VERSION_D "13-apr-2010 Walter Dehnen                          "
+#define falcON_VERSION   "3.4.3"
+#define falcON_VERSION_D "02-jul-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON

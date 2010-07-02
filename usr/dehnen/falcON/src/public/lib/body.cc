@@ -26,13 +26,13 @@
 // Mass Ave, Cambridge, MA 02139, USA.
 //
 ////////////////////////////////////////////////////////////////////////////////
-#include <body.h>                                  // falcON::bodies etc        
-#include <iostream>                                // C++ basic I/O             
-#include <fstream>                                 // C++ file I/O              
-#include <sstream>                                 // C++ string I/O            
-#include <iomanip>                                 // C++ I/O formating         
-#include <cstring>                                 // C++ strings               
-#include <public/nemo++.h>                         // utilities for NEMO I/O    
+#include <body.h>                                  // falcON::bodies etc
+#include <iostream>                                // C++ basic I/O 
+#include <fstream>                                 // C++ file I/O
+#include <sstream>                                 // C++ string I/O
+#include <iomanip>                                 // C++ I/O formating
+#include <cstring>                                 // C++ strings 
+#include <public/nemo++.h>                         // utilities for NEMO I/O
 #include <public/bodyfunc.h>
 #include <utils/numerics.h>
 #include <utils/heap.h>
@@ -45,9 +45,9 @@ using namespace falcON;
 typedef long unsigned lu; // will convert size_t to this type in printf
 
 falcON_TRAITS(falcON::bodies::block,"bodies::block");
-//                                                                              
-// struct falcON::bodies::block                                                 
-//                                                                              
+//
+// struct falcON::bodies::block
+//
 void bodies::block::clone(block*that)
 {
   if(that == this) return;
@@ -158,13 +158,13 @@ bodies::block::~block() falcON_THROWING
     del_field(f);
 }
 //
-bodies::block::block(unsigned no,                  // I: our No                 
-		     unsigned na,                  // I: data to allocate       
-		     unsigned nb,                  // I: # bodies <= na_b       
-		     unsigned fst,                 // I: first body index       
-		     bodytype typ,                 // I: hold sph bodies?       
-		     fieldset bits,                // I: data to allocate       
-		     bodies  *bods)                // I: pointer to my bodies   
+bodies::block::block(unsigned no,                  // I: our No
+		     unsigned na,                  // I: data to allocate
+		     unsigned nb,                  // I: # bodies <= na_b
+		     unsigned fst,                 // I: first body index
+		     bodytype typ,                 // I: hold sph bodies?
+		     fieldset bits,                // I: data to allocate
+		     bodies  *bods)                // I: pointer to my bodies
   falcON_THROWING
 : TYPE       ( typ ),
   NALL       ( na ), 
@@ -247,13 +247,13 @@ inline void bodies::block::skip(unsigned&from,
     for(; from<NBOD && !(flag(from).are_set(copyflag)); ++from ) {}
 }
 //
-// copy up to NALL bodies                                                 
-// - we copy only bodies of the same type as hold here                    
-// - we only copy bodies whose flag matches last argument                 
-// - if the block copied is finished, we take its NEXT, starting at i=0   
-// - on return the block pointer is either NULL or together with i they   
-//   give the first body which was not copied because NALL was exceeded   
-// - NBOD is set to the bodies copied                                     
+// copy up to NALL bodies
+// - we copy only bodies of the same type as hold here
+// - we only copy bodies whose flag matches last argument
+// - if the block copied is finished, we take its NEXT, starting at i=0
+// - on return the block pointer is either NULL or together with i they
+//   give the first body which was not copied because NALL was exceeded
+// - NBOD is set to the bodies copied
 fieldset bodies::block::copy(const block*&From,
 			     unsigned    &from,
 			     fieldset     copydata,
@@ -271,11 +271,11 @@ fieldset bodies::block::copy(const block*&From,
 		 "copyflag!=0 but flags not supported");
   // skip bodies not to be copied                                               
   From->skip(from,copyflag);
-  while(free &&                              // WHILE  we have still space      
+  while(free &&                              // WHILE  we have still space
 	From &&                              //   AND  the copied block is valid
-	From->TYPE == TYPE &&                //   AND  its type is ours         
-	from < From->NBOD ) {                //   AND  the index is valid too   
-    // determine number of bodies to be copied to position from                 
+	From->TYPE == TYPE &&                //   AND  its type is ours
+	from < From->NBOD ) {                //   AND  the index is valid too
+    // determine number of bodies to be copied to position from
     if(copyflag) {
       _copy = 0u;
       for(unsigned to=from;
@@ -283,7 +283,7 @@ fieldset bodies::block::copy(const block*&From,
 	  ++_copy, ++to) {}
     } else
       _copy = min(free, From->NBOD - from);
-    // if any body to be copied, copy data, adjust free, NBOD, from, copied     
+    // if any body to be copied, copy data, adjust free, NBOD, from, copied
     if(_copy) {
       fieldset c = copy_bodies(From, from, NBOD, _copy, copydata);
       free -= _copy;
@@ -291,9 +291,9 @@ fieldset bodies::block::copy(const block*&From,
       from += _copy;
       copied = copied? c : copied & c;
     }
-    // skip bodies not to be copied                                             
+    // skip bodies not to be copied
     From->skip(from,copyflag);
-    // end of input block? then take next block                                 
+    // end of input block? then take next block
     if(from == From->NBOD) {
       From = From->NEXT;
       if(From == this) 
@@ -438,9 +438,9 @@ void bodies::block::write_Fortran(FortranORec&O, fieldbit f, unsigned from,
 #endif
 //
 #ifdef falcON_NEMO
-//                                                                              
-// class falcON::bodies::iterator                                               
-//                                                                              
+//
+// class falcON::bodies::iterator
+//
 bodies::iterator& bodies::iterator::read_data(data_in&D, unsigned R)
   falcON_THROWING
 {
@@ -538,9 +538,9 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
   return *this;
 }
 #endif
-//                                                                              
-// class falcON::bodies                                                         
-//                                                                              
+//
+// class falcON::bodies
+//
 
 // link a new block in
 void bodies::add_block(block*B)
@@ -1669,32 +1669,44 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 			  unsigned       n) const  //[I: #, default: all]       
   falcON_THROWING
 {
-  unsigned i = falcON::bodyindex(b);
-  if(this != b.my_bodies())
-    falcON_THROW("snapshot::write_nemo() start body is not ours\n");
-  if(n == 0) n = N_bodies()-i;
-  else if(i + n > N_bodies()) {
-    falcON_Warning("snapshot::write_nemo() cannot write %u bodies, "
-		   "will only write %u\n",n,N_bodies()-i);
-    n = N_bodies()-i;
-  }
-  unsigned nb[bodytype::NUM]={0}, nt=n, nc(0u);
-  for(bodytype t; t; ++t)
-    if(i < (nc+=N_bodies(t))) {
-      nb[t] = min(nc-i, nt);
-      i  += nb[t];
-      nt -= nb[t];
+  { // block to ensure that snap_out s is closed before setting env. variable
+    unsigned i = falcON::bodyindex(b);
+    if(this != b.my_bodies())
+      falcON_THROW("snapshot::write_nemo() start body is not ours\n");
+    if(n == 0) n = N_bodies()-i;
+    else if(i + n > N_bodies()) {
+      falcON_Warning("snapshot::write_nemo() cannot write %u bodies, "
+		     "will only write %u\n",n,N_bodies()-i);
+      n = N_bodies()-i;
     }
-  snap_out s(o,nb,TIME);
-  write_snapshot(s,w,b,n);
+    unsigned nb[bodytype::NUM]={0}, nt=n, nc(0u);
+    for(bodytype t; t; ++t)
+      if(i < (nc+=N_bodies(t))) {
+	nb[t] = min(nc-i, nt);
+	i  += nb[t];
+	nt -= nb[t];
+      }
+    snap_out s(o,nb,TIME);
+    write_snapshot(s,w,b,n);
+  }
+  // set environment variable FalcONLastOutputTime
+  char timestr[32];
+  SNprintf(timestr,32,"%15.8f",TIME);
+  setenv("FalcONLastOutputTime",timestr,1);
 }
 //
 void snapshot::write_nemo(nemo_out const&o,        // I: nemo output            
 			  fieldset       w) const  // I: what to write          
   falcON_THROWING
 {
-  snap_out s(o,N_bodies_per_type(),TIME);
-  write_snapshot(s,w,begin_all_bodies(),N_bodies());
+  { // block to ensure that snap_out s is closed before setting env. variable
+    snap_out s(o,N_bodies_per_type(),TIME);
+    write_snapshot(s,w,begin_all_bodies(),N_bodies());
+  }
+  // set environment variable FalcONLastOutputTime
+  char timestr[32];
+  SNprintf(timestr,32,"%15.8f",TIME);
+  setenv("FalcONLastOutputTime",timestr,1);
 }
 #endif // falcON_NEMO
 //
