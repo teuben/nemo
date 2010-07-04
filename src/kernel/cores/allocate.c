@@ -93,7 +93,8 @@ string defv[] = {
   "repeat=1\n      How often to repeat the whole test",
   "big1=100\n      Allocate the product of these two",
   "big2=100\n      Allocate the product of these two",
-  "VERSION=1.2\n   31-may-2007 PJT",
+  "doubling=f\n    Doubling the big1*big2 allocation until failure",
+  "VERSION=2.0\n   4-jul-2010 PJT",
   NULL,
 };
 
@@ -109,7 +110,9 @@ void nemo_main(void) {
   int big2 = getiparam("big2");
   int big = big1*big2;
   size_t big64 = (size_t)big1*(size_t)big2;    /* this is crucial to cast */
+  size_t i64;
   int i;
+  bool Qdouble = getbparam("doubling");
   char *data;
 
   nemo_dprintf(0,"  Alloc:  %d * %d bytes\n",nalloc,size0);
@@ -121,6 +124,14 @@ void nemo_main(void) {
   data = allocate(big64);
   free(data);
   dprintf(0,"Passed big64 allocating %ld\n",big64);
+  while (Qdouble) {
+    big64 *= 2;
+    data = allocate(big64);
+    for (i64=0; i64<big64; i64++)
+      data[i64] = 0;
+    free(data);
+    dprintf(0,"Passed big64 allocating %ld\n",big64);
+  }
 
 
   while (repeat-- > 0) {              /* repeat loop */
