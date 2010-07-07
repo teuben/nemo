@@ -152,9 +152,6 @@ namespace WDutils {
     /// is command line is known?
     static bool cmd_known()
     { return Info.__cmd_known; }
-    /// is this process part of an MPI run?
-    static bool is_mpi_proc()
-    { return Info.__is_mpi_proc; }
     /// string with full time of run
     static const char*time()
     { return Info.__time; }
@@ -176,6 +173,9 @@ namespace WDutils {
     /// return debugging level
     static int debug_level()
     { return Info.__debug; }
+    /// is this process part of an MPI run?
+    static bool is_mpi_proc()
+    { return Info.__is_mpi_proc; }
     /// return our rank within MPI, if we are part of a MPI run
     static int mpi_proc()
     { return Info.__mpi_proc; }

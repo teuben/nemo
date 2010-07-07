@@ -34,6 +34,7 @@
 #include <ctime>
 #include <iostream>
 #include <fstream>
+#include <omp.h>
 #ifdef unix
   extern "C" {
 #   include <unistd.h>
@@ -129,33 +130,6 @@ namespace {
   using std::vsnprintf;
 #endif
 
-#define PRINTERR_STEP   // old style: print message in bits
-#undef  PRINTERR_STEP   // new style: print message in one
-                        // to avoid problems if more than one of several MPI 
-                        // processes isses a message at the same time
-
-#ifdef PRINTERR_STEP
-  inline void printerr(const char*header,
-		       const char*fmt,
-		       va_list   &ap,
-		       const char*file = 0,
-		       int        line = 0,
-		       bool       name = true)
-  {
-    fprintf(stderr,header);
-    if(name && RunInfo::name_known())
-      fprintf(stderr," [%s]",RunInfo::name());
-    if(RunInfo::is_mpi_proc())
-      fprintf(stderr," @%d",RunInfo::mpi_proc());
-    if(file)
-      fprintf(stderr," [%s:%d]",file,line);
-    fprintf(stderr,": ");
-    vfprintf(stderr,fmt,ap);
-    if (fmt[strlen(fmt)-1] != '\n')
-      fprintf(stderr,"\n");
-    fflush(stderr);
-  }
-#else
   inline void printerr(const char*lib,
 		       const char*issue,
 		       const char*fmt,
@@ -176,6 +150,9 @@ namespace {
     if(RunInfo::is_mpi_proc()) {
       w=snprintf(t,s," @%d",RunInfo::mpi_proc());
       t+=w; s-=w;
+    } else if(omp_in_parallel()) {
+      w=snprintf(t,s," @%d",omp_get_thread_num());
+      t+=w; s-=w;
     }
     if(file) {
       w=snprintf(t,s," [%s:%d]",file,line);
@@ -189,72 +166,39 @@ namespace {
     vfprintf(stderr,ffmt,ap);
     fflush(stderr);
   }
-#endif
 }
 //
 void WDutils::Error::operator()(const char* fmt, ...) const
 {
-#ifdef PRINTERR_STEP
-  char header[35];
-  SNprintf(header,35,"### %s Error",lib);
-  va_list  ap;
-  va_start(ap,fmt);
-  printerr(header, fmt, ap, file, line);
-#else
   va_list  ap;
   va_start(ap,fmt);
   printerr(lib, "Error", fmt, ap, file, line);
-#endif
   va_end(ap);
   std::exit(1);
 }
 //
 void WDutils::Warning::operator()(const char* fmt, ...) const
 {
-#ifdef PRINTERR_STEP
-  char header[37];
-  SNprintf(header,37,"### %s Warning",lib);
-  va_list  ap;
-  va_start(ap,fmt);
-  printerr(header, fmt, ap, file, line);
-#else
   va_list  ap;
   va_start(ap,fmt);
   printerr(lib, "Warning", fmt, ap, file, line);
-#endif
   va_end(ap);
 }
 //
 void WDutils::DebugInformation::operator()(const char* fmt, ...) const
 {
-#ifdef PRINTERR_STEP
-  char header[40];
-  SNprintf(header,40,"### %s Debug Info",lib);
-  va_list  ap;
-  va_start(ap,fmt);
-  printerr(header, fmt, ap, file, line, false);
-#else
   va_list  ap;
   va_start(ap,fmt);
   printerr(lib, "Debug Info", fmt, ap, file, line, false);
-#endif
   va_end(ap);
 }
 //
 void WDutils::DebugInformation::operator()(int deb, const char* fmt, ...) const
 {
   if(RunInfo::debug(deb)) {
-#ifdef PRINTERR_STEP
-    char header[40];
-    SNprintf(header,40,"### %s Debug Info: ",lib);
-    va_list  ap;
-    va_start(ap,fmt);
-    printerr(header, fmt, ap, file, line, false);
-#else
     va_list  ap;
     va_start(ap,fmt);
     printerr(lib, "Debug Info", fmt, ap, file, line, false);
-#endif
     va_end(ap);
   }
 }
