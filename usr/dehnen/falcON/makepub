@@ -275,6 +275,8 @@ $(ACC)PotExp.so:                $(SACC)PotExp.cc $(ACCT) $(PotExp_cc) $(makefile
 				$(MAKE_ACC) -I$(SRC) $(NBDYFLAGS)
 $(ACC)Shrink.so:		$(SACC)Shrink.cc $(ACCT) $(timer_h) $(makefiles)
 				$(MAKE_ACC)
+$(ACC)SoftKernel.so:		$(SACC)SoftKernel.cc $(ACCT) $(makefiles)
+				$(MAKE_ACC) $(NBDYFLAGS)
 
 acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
@@ -288,7 +290,8 @@ acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Plummer.so \
 				$(ACC)Point.so \
 				$(ACC)PotExp.so \
-				$(ACC)Shrink.so
+				$(ACC)Shrink.so \
+				$(ACC)SoftKernel.so
 endif
 
 # -----

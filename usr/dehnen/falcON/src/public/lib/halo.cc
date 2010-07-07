@@ -375,7 +375,7 @@ HaloPotential::HaloPotential(HaloDensity const&model,
       ps[i] =-pot_e[i];                         // get Psi_e(r)
       mt[i] =-square(r[i])*acc_e[i][0];         // get M_e(<r)
       if(i && ps[i]>ps[i-1])
-	falcON_THROW("HaloPotential: external Ps(%g)=%g > Ps(%g)=%g",
+	falcON_THROW("HaloPotential: external Ps(%g)=%20.16g > Ps(%g)=%20.16g",
 	      r[i],ps[i],r[i-1],ps[i-1]);
     }
     //    find density generating external monopole
