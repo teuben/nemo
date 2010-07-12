@@ -18,12 +18,16 @@ SRC             := src/
 # development flag
 # ----------------
 
+ifndef Standard
+
 ifeq ($(USER),wd11)
 WDutilsDevel	:= -DWDutilsDevel
 endif
 
 ifeq ($(USER),walter)
 WDutilsDevel	:= -DWDutilsDevel
+endif
+
 endif
 
 # ---------

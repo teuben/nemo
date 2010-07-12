@@ -7,14 +7,6 @@
 
 .PHONY		: test
 
-ifeq ($(USER),wd11)
-WDutilsDevel	:= -DWDutilsDevel
-endif
-
-ifeq ($(USER),walter)
-WDutilsDevel	:= -DWDutilsDevel
-endif
-
 # ----------------
 # Compiler related
 # ----------------
@@ -113,8 +105,6 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 				$(INC)geometry_inl.h
 octtree_h		:= $(INC)octtree.h $(memory_h) $(geometry_h)
-parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h)
-parallelMPI_h		:= $(INC)parallelMPI.h $(parallel_h)
 
 ifdef WDutilsDevel
 $(INC)neighbour.h	: $(DEV)neighbour.h
@@ -150,9 +140,6 @@ numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
-parallel_cc		:= $(SRC)parallel.cc $(parallel_h) $(meta_h) $(io_h)
-parallelMPI_cc		:= $(SRC)parallelMPI.cc $(parallelMPI_h) $(meta_h) \
-				$(io_h)
 octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(memory_h)
 
 ifdef WDutilsDevel
@@ -184,11 +171,11 @@ $(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)octtree.o:	$(octtree_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ)
 
 ifdef WDutilsDevel
 $(LIB)neighbour.o:	$(neighbour_cc) $(LIBT) $(makefiles)
+			$(MAKE_OBJ)
+$(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
@@ -197,7 +184,7 @@ WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 else
 WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
-			$(LIB)WDMath.o $(LIB)parallel.o
+			$(LIB)WDMath.o
 endif
 
 # -------
