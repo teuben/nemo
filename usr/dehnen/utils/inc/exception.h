@@ -44,25 +44,6 @@
 /// public under the GNU public licence                                         
 ///                                                                             
 namespace WDutils {
-  //
-  //  macro for compile-time assertion, stolen from the boost library
-  //
-  template<bool> struct STATIC_ASSERTION_FAILURE;
-  template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
-  /// \brief macro for compile-time assertion
-  ///
-  /// \code
-  ///   WDutilsStaticAssert(constant expression);
-  /// \endcode
-  /// will cause a compiler error if the expression evaluates to false. This
-  /// relies on sizeof() an incomplete type causing an error, though
-  /// "STATIC_ASSERTION_FAILURE" along with the line of the actual
-  /// instantination causing the error will also appear in the
-  /// compiler-generated error message.
-#define WDutilsStaticAssert(TEST)				\
-  enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
-    static_cast<bool>((TEST))>)					\
-  }
   namespace meta {
     /// static type comparison.
     /// useful together with static assertion, for instance
@@ -267,13 +248,16 @@ namespace WDutils {
     Thrower() : file(0), line(0) {}
     /// constructor: get file name, and line number
     Thrower(const char*__file, int __line) : file(__file), line(__line) {}
-    /// generate an exception
+    /// generate an exception; for usage in WDutils_THROW
     /// \param[in] fmt  gives the format in C printf() style
     exception operator()(const char*fmt, ...) const
 #ifdef __GNUC__
       __attribute__ ((format (printf, 2, 3)))
 #endif
       ;
+    /// generate an exception; for usage in WDutilsAssert
+    /// \param[in] expr  boolean expression: throw exception if false
+    exception operator()(bool expr) const;
   };
   //@}
   //
@@ -363,6 +347,25 @@ namespace WDutils {
 #define WDutils_WarningN     WDutils::Warning()
   //@}
   //
+  //  macro for compile-time assertion, stolen from the boost library
+  //
+  template<bool> struct STATIC_ASSERTION_FAILURE;
+  template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+  /// \brief macro for compile-time assertion
+  ///
+  /// \code
+  ///   WDutilsStaticAssert(constant expression);
+  /// \endcode
+  /// will cause a compiler error if the expression evaluates to false. This
+  /// relies on sizeof() an incomplete type causing an error, though
+  /// "STATIC_ASSERTION_FAILURE" along with the line of the actual
+  /// instantination causing the error will also appear in the
+  /// compiler-generated error message.
+#define WDutilsStaticAssert(TEST)				\
+  enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
+    static_cast<bool>((TEST))>)					\
+  }
+  //
   /// \name macros and code controling the usage of throw exception vs error    
   //@{                                                                          
 #if 0
@@ -393,6 +396,44 @@ namespace WDutils {
 #endif
   /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
 #define WDutils_THROW  WDutils_THROWER(__FILE__,__LINE__)
+  /// use instead of assert()
+  //@}
+  /// \name assertion which throw an excpetion rather than abort
+  //@{
+  /// throws exception with "assertion failed" message
+#ifdef __GNUC__
+  inline void AssertFail(const char*, const char*, unsigned, const char*)
+    WDutils_THROWING __attribute__ ((__noreturn__));
+#endif
+  inline void AssertFail(const char*assertion, const char*file, unsigned line,
+			 const char*function) WDutils_THROWING
+  {
+    if(function)
+      WDutils_THROWER(file,line)
+	("%s: Assertion `%s' failed",function,assertion);
+    else
+      WDutils_THROWER(file,line)
+	("Assertion `%s' failed",assertion);
+  }
+  /// use instead of assert()
+#define WDutilsAssert(expr)						\
+  ((expr)								\
+  ? static_cast<void>(0)						\
+  : AssertFail(__STRING(expr), __FILE__, __LINE__, __ASSERT_FUNCTION))
+/* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
+   which contains the name of the function currently being defined.
+   This is broken in G++ before version 2.6.
+   C9x has a similar variable called __func__, but prefer the GCC one since
+   it demangles C++ function names.  */
+#ifdef __GNUC__
+# if __GNUC_PREREQ (2, 6)
+#   define __ASSERT_FUNCTION	__PRETTY_FUNCTION__
+# elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#   define __ASSERT_FUNCTION	__func__
+# endif
+#else
+# define __ASSERT_FUNCTION	0
+#endif
   //@}
   //
   /// a safer snprintf.                                                         

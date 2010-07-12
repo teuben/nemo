@@ -14,24 +14,16 @@ SHELL		:= csh
 INC             := inc/
 SRC             := src/
 
-# --------------------------
-# gcc compiler and testsuite
-# --------------------------
-GCC		:= gcc
-GPP		:= g++
+# ----------------
+# development flag
+# ----------------
 
-ifeq ($(VENDOR),apple)
-ifeq ($(USER),walter)
-WDutilsTEST	:= -DWDutilsTEST
-# on my MAC, I'v installed gcc 4.4.1 under /sw.
-# it's called gcc-4 and g++-4
-GCC		:= gcc-4
-GPP		:= g++-4
-endif
-else
 ifeq ($(USER),wd11)
-WDutilsTEST	:= -DWDutilsTEST
+WDutilsDevel	:= -DWDutilsDevel
 endif
+
+ifeq ($(USER),walter)
+WDutilsDevel	:= -DWDutilsDevel
 endif
 
 # ---------
@@ -40,12 +32,16 @@ endif
 
 .PHONY		: libgcc libpgi libpath libsun libicc test
 
+ifdef WDutilsDevel
+default		: libgcc testsuite
+else
 default		: libgcc
+endif
 
 # these variables have value "1" or ("       1" on a MAC) if the
 # corresponding compiler is present
 # NOTE: we need csh (default for make is sh, which wouldn't work)
-__GCC		:= $(shell which $(GCC) |& wc -w)
+__GCC		:= $(shell which gcc    |& wc -w)
 __PGI		:= $(shell which pgcc   |& wc -w)
 __PTH		:= $(shell which pathcc |& wc -w)
 __SUN		:= $(shell which cc     |& wc -w)
@@ -58,10 +54,10 @@ VALID		:= $(shell which make   |& wc -w)
 #    used for developing and verifying the code (version 4.3 or higher)
 ifeq ($(__GCC),$(VALID))
 libgcc		:
-		make -f makeall COMPILER=gcc GCC=$(GCC) GPP=$(GPP) library
-ifdef WDutilsTEST
-test		:
-		make -f makeall COMPILER=gcc GCC=$(GCC) GPP=$(GPP) test
+		make -f makeall COMPILER=gcc library
+ifdef WDutilsDevel
+testsuite	:
+		make -f makeall COMPILER=gcc testsuite
 endif
 endif
 

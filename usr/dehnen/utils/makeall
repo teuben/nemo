@@ -7,13 +7,12 @@
 
 .PHONY		: test
 
-
 ifeq ($(USER),wd11)
-WDutilsTEST	:= -DWDutilsTEST
+WDutilsDevel	:= -DWDutilsDevel
 endif
 
 ifeq ($(USER),walter)
-WDutilsTEST	:= -DWDutilsTEST
+WDutilsDevel	:= -DWDutilsDevel
 endif
 
 # ----------------
@@ -50,11 +49,11 @@ ifeq ($(COMPILER),icc)
 makefiles		:= makeall make.icc
 endif
 
-
 # ---------
 # MPI stuff
 # ---------
 
+ifdef WDutilsDevel
 MPIDIR			:= $(shell ls | grep mpich)
 ifeq ($(MPIDIR),mpich)
 WDutilsMPI		:= -DWDutilsMPI
@@ -62,10 +61,7 @@ MPICC			:= $(MPIDIR)/bin/mpicc
 MPIINC			:= $(MPIDIR)/include/
 IMPI			:= -I$(MPIINC)
 endif
-
-# ----
-# test
-# ----
+endif
 
 # -----------
 # directories
@@ -78,7 +74,7 @@ LIBT			:= $(LIB).dummy
 $(LIBT)			:
 			mkdir -p -m 755 $(LIB)
 			touch $(LIBT)
-ifdef WDutilsTEST
+ifdef WDutilsDevel
 DEV			:= devel/
 endif
 
@@ -86,13 +82,14 @@ endif
 # compile and link commands
 # -------------------------
 
-CXXFLAGS		:= $(CXXFLAGS) $(WDutilsTEST) $(WDutilsMPI)
+CXXFLAGS		:= $(CXXFLAGS) $(WDutilsDevel)
 LUTIL			:= -L$(LIB) -lWDutils -Wl,-rpath,$(PWD)/$(LIB)
-LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI -Wl,-rpath,$(PWD)/$(LIB)
 MAKE_OBJ		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
 MAKE_EXE		= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS) $(LUTIL) -lm
 ifdef WDutilsMPI
-MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(LUTIL_MPI) -lm
+LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI -Wl,-rpath,$(PWD)/$(LIB)
+MAKE_OBJ_MPI		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI)
+MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI) $(LUTIL_MPI) -lm
 endif
 # -----------------------
 # header dependency lists
@@ -116,18 +113,29 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 				$(INC)geometry_inl.h
 octtree_h		:= $(INC)octtree.h $(memory_h) $(geometry_h)
-parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h) $(tupel_h)
+parallel_h		:= $(INC)parallel.h $(traits_h) $(memory_h)
+parallelMPI_h		:= $(INC)parallelMPI.h $(parallel_h)
 
-ifdef WDutilsTEST
+ifdef WDutilsDevel
 $(INC)neighbour.h	: $(DEV)neighbour.h
 			(cd $(INC); ln -s ../$(DEV)neighbour.h neighbour.h)
+neighbour_h		:= $(INC)neighbour.h $(octtree_h)
 $(INC)peano.h		: $(DEV)peano.h
 			(cd $(INC); ln -s ../$(DEV)peano.h peano.h)
-$(INC)domain.h		: $(DEV)domain.h
-			(cd $(INC); ln -s ../$(DEV)domain.h domain.h)
-neighbour_h		:= $(INC)neighbour.h $(octtree_h)
 peano_h			:= $(INC)peano.h $(traits_h)
-domain_h		:= $(INC)domain.h $(parallel_h) $(octtree_h)
+$(INC)parallel.h	: $(DEV)parallel.h
+			(cd $(INC); ln -s ../$(DEV)parallel.h parallel.h)
+ifdef WDutilsMPI
+parallel_h		:= $(INC)parallel.h $(memory_h) $(INC)parallelMPI.h
+$(INC)parallelMPI.h	: $(DEV)parallelMPI.h
+			(cd $(INC); ln -s ../$(DEV)parallelMPI.h parallelMPI.h)
+parallelMPI_h		:= $(INC)parallelMPI.h $(parallel_h)
+$(INC)domainMPI.h	: $(DEV)domainMPI.h
+			(cd $(INC); ln -s ../$(DEV)domainMPI.h domainMPI.h)
+domainMPI_h		:= $(INC)domainMPI.h $(parallel_h) $(octtree_h)
+else
+parallel_h		:= $(INC)parallel.h $(memory_h)
+endif
 endif
 
 # -----------------------
@@ -143,11 +151,17 @@ random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
 parallel_cc		:= $(SRC)parallel.cc $(parallel_h) $(meta_h) $(io_h)
+parallelMPI_cc		:= $(SRC)parallelMPI.cc $(parallelMPI_h) $(meta_h) \
+				$(io_h)
 octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(memory_h)
 
-ifdef WDutilsTEST
+ifdef WDutilsDevel
 neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
-domain_cc		:= $(DEV)domain.cc $(domain_h) $(peano_h)
+parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
+ifdef WDutilsMPI
+domainMPI_cc		:= $(DEV)domainMPI.cc $(domainMPI_h) $(peano_h)
+parallelMPI_cc		:= $(DEV)parallelMPI.cc $(parallelMPI_h)
+endif
 endif
 
 # ---------------
@@ -170,17 +184,20 @@ $(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)octtree.o:	$(octtree_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-ifdef WDutilsTEST
+$(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
+			$(MAKE_OBJ)
+
+ifdef WDutilsDevel
 $(LIB)neighbour.o:	$(neighbour_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 
 WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
-			$(LIB)WDMath.o $(LIB)neighbour.o
+			$(LIB)WDMath.o $(LIB)parallel.o $(LIB)neighbour.o
 else
 WDutils_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
-			$(LIB)WDMath.o
+			$(LIB)WDMath.o $(LIB)parallel.o
 endif
 
 # -------
@@ -190,28 +207,26 @@ endif
 AR			:= ar rc
 RL			:= ranlib
 
-$(LIB)libWDutils.a:	$(WDutils_objs)
+$(LIB)libWDutils.a:	$(WDutils_objs) $(LIB)parallel.o
 			$(AR) $@ $?
 			$(RL) $@
-$(LIB)libWDutils.so:	$(WDutils_objs)
+$(LIB)libWDutils.so:	$(WDutils_objs) $(LIB)parallel.o
 			$(CXX) $^ $(LDFLAGS) -o $@
-
-library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
 
 ifdef WDutilsMPI
 # -------------------
 # MPI library modules
 # -------------------
 
-$(LIB)parallel.o:	$(parallel_cc) $(makefiles)
-			$(MAKE_OBJ) $(IMPI)
-ifdef WDutilsTEST
-$(LIB)domain.o:		$(domain_cc) $(makefiles)
-			$(MAKE_OBJ)
+$(LIB)parallelMPI.o:	$(parallelMPI_cc) $(makefiles)
+			$(MAKE_OBJ_MPI) $(IMPI)
+ifdef WDutilsDevel
+$(LIB)domainMPI.o:	$(domainMPI_cc) $(makefiles)
+			$(MAKE_OBJ_MPI)
 
-WDutilsP_objs	:=	$(WDutils_objs) $(LIB)parallel.o $(LIB)domain.o
+WDutilsP_objs	:=	$(WDutils_objs) $(LIB)parallelMPI.o $(LIB)domainMPI.o
 else
-WDutilsP_objs	:=	$(WDutils_objs) $(LIB)parallel.o
+WDutilsP_objs	:=	$(WDutils_objs) $(LIB)parallelMPI.o
 endif
 
 # -----------
@@ -236,39 +251,35 @@ endif
 # test routines
 # -------------
 
-ifdef WDutilsTEST
-
-.PHONY			:	test TestDomain$(EXT) TestGeometry$(EXT) \
-				TestTree$(EXT)
+ifdef WDutilsDevel
 
 test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
 				$(Pi_h) $(io_h) $(heap_h) library
 				$(MAKE_EXE)
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h) library
 				$(MAKE_EXE)
-
-TestGeometry$(EXT)	:	test/TestGeometry$(EXT)
-TestTree$(EXT)		:	test/TestTree$(EXT)
+test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) library
+				$(MAKE_EXE)
 
 ifdef WDutilsMPI
 
-test/TestDomain$(EXT).o	:	test/TestDomain.cc $(domain_h) $(Pi_h)
-				$(MAKE_OBJ)
+test/TestDomain$(EXT).o	:	test/TestDomain.cc $(domainMPI_h) $(Pi_h)
+				$(MAKE_OBJ_MPI)
 test/TestDomain$(EXT)	:	test/TestDomain$(EXT).o library
 				$(MAKE_EXE_MPI)
 
-TestDomain$(EXT)	:	test/TestDomain$(EXT)
-
-test			:	library \
-				TestDomain$(EXT) \
-				TestGeometry$(EXT) \
-				TestTree$(EXT)
+testsuite		:	library \
+				test/TestDomain$(EXT) \
+				test/TestGeometry$(EXT) \
+				test/TestTree$(EXT) \
+				test/TestOMP$(EXT)
 
 else
 
-test			:	library \
-				TestGeometry$(EXT) \
-				TestTree$(EXT)
+testsuite		:	library \
+				test/TestGeometry$(EXT) \
+				test/TestTree$(EXT) \
+				test/TestOMP$(EXT)
 
 endif
 endif
@@ -276,13 +287,24 @@ endif
 # doxygen documentation
 # ---------------------
 
+ifdef WDutilsDevel
 dox/html/index.htlm:	$(INC)Pi.h $(INC)heap.h $(INC)meta.h $(INC)inline.h \
 			$(INC)exception.h $(INC)sse.h $(INC)traits.h \
 			$(INC)io.h $(INC)tupel.h $(INC)memory.h \
 			$(INC)numerics.h $(INC)spline.h $(INC)random.h \
-			$(INC)WDMath.h $(INC)parallel.h $(INC)octtree.h
+			$(INC)WDMath.h $(INC)octtree.h \
+			$(INC)neighbour.h $(INC)parallel.h \
+			$(INC)parallelMPI.h $(INC)domainMPI.h \
+			$(INC)peano.h 
+			doxygen devel/utils.dox
+else
+dox/html/index.htlm:	$(INC)Pi.h $(INC)heap.h $(INC)meta.h $(INC)inline.h \
+			$(INC)exception.h $(INC)sse.h $(INC)traits.h \
+			$(INC)io.h $(INC)tupel.h $(INC)memory.h \
+			$(INC)numerics.h $(INC)spline.h $(INC)random.h \
+			$(INC)WDMath.h $(INC)octtree.h
 			doxygen utils.dox
-
+endif
 doxu		:	dox/html/index.htlm
 
 #END

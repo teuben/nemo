@@ -26,9 +26,13 @@ else
 WARNING		:= -Wall -Wextra -Winit-self -Wshadow
 endif
 
+ifdef WDutilsDevel
+DevelFlags	:= -fopenmp
+endif
+
 # general optimisation and warning flags
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
-		-ggdb3 $(WARNING) -O2 -fPIC -ffast-math -fopenmp\
+		-ggdb3 $(WARNING) -O2 -fPIC -ffast-math $(DevelFlags)\
 		-funroll-loops -fforce-addr $(RDYNAMIC)
 
 # these are actually to be set
