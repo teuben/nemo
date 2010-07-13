@@ -58,10 +58,10 @@ VALID		:= $(shell which make   |& wc -w)
 #    used for developing and verifying the code (version 4.3 or higher)
 ifeq ($(__GCC),$(VALID))
 libgcc		:
-		make -f makeall COMPILER=gcc library
+		make -f makeall COMPILER=gcc WDutilsDevel=$(WDutilsDevel) library
 ifdef WDutilsDevel
 testsuite	:
-		make -f makeall COMPILER=gcc testsuite
+		make -f makeall COMPILER=gcc WDutilsDevel=$(WDutilsDevel) testsuite
 endif
 endif
 
@@ -69,28 +69,28 @@ endif
 #    somewhat tested, seems to work under version 7.2.1
 ifeq ($(__PGI),$(VALID))
 libpgi		:
-		make -f makeall COMPILER=pgi library
+		make -f makeall COMPILER=pgi WDutilsDevel=$(WDutilsDevel) library
 endif
 
 # Pathscale compiler
 #    NOT TESTED
 ifeq ($(__PTH),$(VALID))
 libpath		:
-		make -f makeall COMPILER=pth library
+		make -f makeall COMPILER=pth WDutilsDevel=$(WDutilsDevel) library
 endif
 
 # Sun compiler
 #    NOT TESTED
 ifeq ($(__SUN),$(VALID))
 libsun		:
-		make -f makeall COMPILER=sun library
+		make -f makeall COMPILER=sun WDutilsDevel=$(WDutilsDevel) library
 endif
 
 # Intel compiler
 #    NOT TESTED
 ifeq ($(__ICC),$(VALID))
 libicc		:
-		make -f makeall COMPILER=icc library
+		make -f makeall COMPILER=icc WDutilsDevel=$(WDutilsDevel) library
 endif
 
 # ---------------------
@@ -98,7 +98,7 @@ endif
 # ---------------------
 
 doxu		:
-		make -f makeall COMPILER=gcc doxu
+		make -f makeall COMPILER=gcc WDutilsDevel=$(WDutilsDevel) doxu
 
 # --------
 # cleaning
