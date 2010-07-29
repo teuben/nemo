@@ -50,6 +50,8 @@ namespace uns {
   mass   = NULL;
   pos    = NULL;
   vel    = NULL;
+  acc    = NULL;
+  pot    = NULL;
   id     = NULL;
   age    = NULL;
   metal  = NULL;
@@ -84,6 +86,8 @@ CSnapshotGadgetIn::~CSnapshotGadgetIn()
     if (mass)     delete [] mass;
     if (pos)      delete [] pos;
     if (vel)      delete [] vel;
+    if (acc)      delete [] acc;
+    if (pot)      delete [] pot;
     if (id)       delete [] id;
     if (age)      delete [] age;
     if (metal)    delete [] metal;
@@ -192,7 +196,9 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
   if (! is_read ) {
     if (! pos)  pos  = new float[3*nsel];
     if (! vel)  vel  = new float[3*nsel];
+    if (! acc)  acc  = new float[3*nsel];
     if (! mass) mass = new float[nsel];
+    if (! pot)  pot  = new float[nsel];
     if (! id)   id   = new int[nsel];
     if (! age && header.npartTotal[4]>0) age = new float[header.npartTotal[4]];
     if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0) 
@@ -359,6 +365,52 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
 	    assert(in.good() && len1==len2 && len1==bytes_counter);
 	  }
           if (version==1) stop=true; // we stop reading for gadget1
+        }
+        // --> POT block
+        if (block_name=="POT") { 
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+
+          for(int k=0;k<6;k++)
+            for(int n=0;n<header.npart[k];n++){
+              int idx=index2[npartOffset[k]+n];
+              assert(idx<nsel);
+              if (idx != -1) {
+                  readData((char *) &pot[idx], sizeof(float), 1);                  
+              } else {
+                float tmp;
+                readData((char *) &tmp, sizeof(float), 1);
+              }
+            }
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);
+        }
+        // --> Acceleration block
+        if (block_name=="ACCE") { 
+          ok=true;
+          if (1) {
+            bytes_counter=0;
+            len1 = readFRecord();
+            
+            for(int k=0;k<6;k++)
+              for(int n=0;n<header.npart[k];n++){
+              int idx=index2[npartOffset[k]+n];                
+              assert(idx<nsel);
+              if (idx != -1) {
+                readData((char *) &acc[3*idx], sizeof(float), 3);                  
+              } else {
+                //skipData(sizeof(float)*3);
+                float tmp3[3];
+                readData((char *) tmp3, sizeof(float), 3);
+              }
+            }
+            len2 = readFRecord();
+            assert(in.good() && len1==len2 && len1==bytes_counter);
+          } 
+          else {
+            skipBlock();
+          }          
         }
         // --> U block (Internal energy)
         if (block_name=="U") { 
@@ -712,6 +764,22 @@ bool CSnapshotGadgetIn::getData(const std::string comp, std::string name, int *n
   case uns::Vel  :
     if (status && getVel()) {
       *data = &getVel()[first*3];
+      *n    = nbody;//getNSel();
+    } else {
+      ok=false;
+    }
+    break;
+  case uns::Acc  :
+    if (status && getAcc()) {
+      *data = &getAcc()[first*3];
+      *n    = nbody;//getNSel();
+    } else {
+      ok=false;
+    }
+    break;
+  case uns::Pot  :
+    if (status && getPot()) {
+      *data = &getPot()[first];
       *n    = nbody;//getNSel();
     } else {
       ok=false;

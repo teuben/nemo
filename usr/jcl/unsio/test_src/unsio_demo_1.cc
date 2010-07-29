@@ -58,16 +58,25 @@ void processComponent(std::string comp, uns::CunsIn * uns,uns::CunsOut * unsout)
   ok1 = uns->snapshot->getData(comp,"pos" ,&n1,&pos );
   ok2 = uns->snapshot->getData(comp,"vel" ,&n2,&vel );
   ok3 = uns->snapshot->getData(comp,"mass",&n3,&mass);
-  ok4 = uns->snapshot->getData(comp,"id"  ,&n4,&id  );
-  if (ok1 && ok2 && ok3 && ok4) {
+  
+  if (ok1 && ok2 && ok3) {
     assert(n1==n2);
     assert(n1==n3);
     std::cerr << "--> "<< std::left << std::setfill('.')<<
         std::setw(8) << comp << ":" << std::setfill(' ')<<
         std::right   << std::setw(10) << n1 <<"\n";
     unsout->snapshot->setData(comp,n1,mass,pos,vel,false);
-    unsout->snapshot->setData(comp,"id",n4,id,false);
-  }  
+    
+  }
+  ok4 = uns->snapshot->getData(comp,"id"  ,&n4,&id  );
+  if (ok4) unsout->snapshot->setData(comp,"id",n4,id,false);
+  float * rho;
+  ok4 = uns->snapshot->getData(comp,"rho"  ,&n4,&rho  );
+  if (ok4) unsout->snapshot->setData(comp,"rho",n4,rho,false);
+  float * hsml;
+  ok4 = uns->snapshot->getData(comp,"hsml"  ,&n4,&hsml  );
+  if (ok4) unsout->snapshot->setData(comp,"hsml",n4,hsml,false);
+  
 }
 //------------------------------------------------------------------------------
 // main

@@ -47,20 +47,25 @@ namespace uns {
 private:
     int full_nbody;
     int * nemobits , * ionbody;
-    float * iotime, *iopos, *iovel, *iomass;
+    float * iotime, *iopos, *iovel, *iomass, *iorho, *ioaux, *ioacc, *iopot;
+    float * pos, *vel, *mass, * rho, *acc, *aux, *pot;
     bool first_stream;
     int status_ionemo;
     int last_nbody;
     void checkBits(std::string,const int);
     bool isValidNemo();
     float *  getPos()  { //checkBits("pos",PosBit); 
-                         return pos ;};
+                         return pos ;}
     float *  getVel()  { //checkBits("vel",VelBit); 
-                         return vel ;};
+                         return vel ;}
     float *  getMass() { //checkBits("mass",MassBit); 
-                         return mass;};
-    float    getTime() { return *iotime; };
-    int      getNbody(){ return *ionbody;};    
+                         return mass;}
+    float *  getRho()  { return rho ;}
+    float *  getAux()  { return aux ;}
+    float *  getAcc()  { return acc ;}
+    float *  getPot()  { return pot ;}
+    float    getTime() { return *iotime; }
+    int      getNbody(){ return *ionbody;}
 };
   
   class CSnapshotNemoOut : public CSnapshotInterfaceOut {

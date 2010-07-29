@@ -65,6 +65,9 @@ namespace uns {
       if (!valid) {              // nemo 
         trySnapList();           // try snapshotlist   
       }
+      if (!valid) {
+        trySimDB();              // try DataBase       
+      }
     }
     else {                       // file does not exist
       tryGadget();               // try gadget parallel output

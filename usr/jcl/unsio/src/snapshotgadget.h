@@ -140,7 +140,7 @@ typedef struct particle_data_lite
   int multiplefiles;
   bool lonely_file;
   //data
-  float * mass, * pos, * vel, * rho, * hsml, * age, * metal, * intenerg, * temp;
+  float * mass, * pos, * vel, * acc, *pot, * rho, * hsml, * age, * metal, * intenerg, * temp;
   int * id;
   int bits; // to store the bits components
   float tframe;
@@ -156,6 +156,8 @@ typedef struct particle_data_lite
   float   getTime()   { return tframe;}
   float * getPos()    { return pos; }
   float * getVel()    { return vel; }
+  float * getAcc()    { return acc; }
+  float * getPot()    { return pot; }
   float * getAge(int & n)   { n=header.npartTotal[4]; return age;}
   float * getMetal(int & n) { n=header.npartTotal[0]+header.npartTotal[4]; return metal;}
   float * getMetalGas(int & n) { n=header.npartTotal[0]; return metal;}

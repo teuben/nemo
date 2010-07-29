@@ -47,6 +47,18 @@ CSnapshotNemoIn::CSnapshotNemoIn(const std::string _name,
   iopos   =NULL;
   iovel   =NULL;
   iomass  =NULL;
+  ioacc   =NULL;
+  iopot   =NULL;
+  ioaux   =NULL;
+  iorho   =NULL;
+  
+  mass   = NULL;
+  pos    = NULL;
+  vel    = NULL;
+  acc    = NULL;
+  pot    = NULL;
+  rho    = NULL;
+  aux    = NULL;
   last_nbody=0;
   initparam(const_cast<char**>(argv),const_cast<char**>(defv));
   valid=isValidNemo();
@@ -62,11 +74,18 @@ CSnapshotNemoIn::~CSnapshotNemoIn()
   if (iopos  ) free ((float *) iopos  );
   if (iovel  ) free ((float *) iovel  );
   if (iomass ) free ((float *) iomass );
-
+  if (iorho  ) free ((float *) iorho  );
+  if (ioaux  ) free ((float *) ioaux  );
+  if (ioacc  ) free ((float *) ioacc  );
+  if (iopot  ) free ((float *) iopot  );
+  
   if (pos    ) delete [] pos;
   if (vel    ) delete [] vel;
   if (mass   ) delete [] mass;
-
+  if (rho    ) delete [] rho;
+  if (aux    ) delete [] aux;
+  if (acc    ) delete [] acc;
+  if (pot    ) delete [] pot;
   if (valid) close();
 }
 // ============================================================================
@@ -131,8 +150,8 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
 {
   int status;  // io_nemo status
   std::string force_select = "all"; 
-  status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,t,st,b",
-                   force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,
+  status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,t,st,b",
+                   force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,
 		   &iotime, select_time.c_str(),&nemobits);
   if (status == -1) {  // Bad nemobits
     PRINT("io_nemo status="<<status<<"\n";);
@@ -159,6 +178,18 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
 	if (mass) delete [] mass;
 	if ( *nemobits & MassBit)  mass = new float[*ionbody];
 	else mass=NULL;
+	if (rho) delete [] rho;
+	if ( *nemobits & DensBit)  rho = new float[*ionbody];
+	else rho=NULL;
+	if (acc) delete [] acc;
+	if ( *nemobits & AccelerationBit)  acc = new float[*ionbody*3];
+	else acc=NULL;
+	if (aux) delete [] aux;
+	if ( *nemobits & AuxBit)  aux = new float[*ionbody];
+	else aux=NULL;
+	if (pot) delete [] pot;
+	if ( *nemobits & PotentialBit)  pot = new float[*ionbody];
+	else pot=NULL;
       }
       last_nbody = *ionbody; // save nbody
       int cpt=0;
@@ -169,8 +200,12 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
 	  for (int j=0; j<3; j++) {
 	    if ( *nemobits & PosBit) pos[cpt*3+j] = iopos[idx*3+j];
 	    if ( *nemobits & VelBit) vel[cpt*3+j] = iovel[idx*3+j];
+            if ( *nemobits & AccelerationBit) acc[cpt*3+j] = ioacc[idx*3+j];
 	  }
 	  if ( *nemobits & MassBit) mass[cpt] = iomass[cpt];
+          if ( *nemobits & DensBit) rho[cpt]  = iorho[cpt];
+          if ( *nemobits & AuxBit ) aux[cpt]  = ioaux[cpt];
+          if ( *nemobits & PotentialBit ) pot[cpt]  = iopot[cpt];
 	  cpt++;
 	}
       }
@@ -225,9 +260,24 @@ bool CSnapshotNemoIn::getData(const std::string name,int *n,float **data)
     *data = getMass();
     *n    = getNSel();
     break;
+  case uns::Acc :
+    *data = getAcc();
+    *n    = getNSel();
+    break;        
   case uns::Rho :
-    //data = getRho(n);
+    *data = getRho();
+    *n    = getNSel();
     break;
+  case uns::Pot :
+    *data = getPot();
+    *n    = getNSel();
+    break;    
+  case uns::Aux :
+  case uns::Hsml :
+    *data = getAux();
+    *n    = getNSel();
+    break;
+    
   default: ok=false;
   }
 
@@ -259,7 +309,7 @@ bool CSnapshotNemoIn::getData(const std::string comp,const std::string name,int 
   switch(CunsOut::s_mapStringValues[name]) {
   case uns::Pos   :
     if (status && getPos()) {
-      *data = &getPos()[first];
+      *data = &getPos()[first*3];
       *n    = nbody;//getNSel();
     } else {
       ok=false;
@@ -273,17 +323,48 @@ bool CSnapshotNemoIn::getData(const std::string comp,const std::string name,int 
       ok=false;
     }
     break;
+  case uns::Acc  :
+    if (status && getAcc()) {
+      *data = &getAcc()[first*3];
+      *n    = nbody;//getNSel();
+    } else {
+      ok=false;
+    }
+    break;    
+  case uns::Pot  :
+    if (status && getPot()) {
+      *data = &getPot()[first];
+      *n    = nbody;//getNSel();
+    } else {
+      ok=false;
+    }
+    break;    
   case uns::Mass  :
     if (status && getMass()) {
-      *data = &getMass()[first*3];
+      *data = &getMass()[first];
       *n    = nbody;//getNSel();
     } else {
       ok=false;
     }
     break;
   case uns::Rho :
-    //data = getRho(n);
+    if (status && getRho()) {
+      *data = &getRho()[first];
+      *n    = nbody;//getNSel();
+    } else {
+      ok=false;
+    }
     break;
+  case uns::Aux :
+  case uns::Hsml :
+    if (status && getAux()) {
+      *data = &getAux()[first];
+      *n    = nbody;//getNSel();
+    } else {
+      ok=false;
+    }
+    break;
+    
   default: ok=false;
   }
 
