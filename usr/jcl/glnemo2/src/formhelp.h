@@ -3,46 +3,38 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           PÙle de l'Etoile, site de Ch‚teau-Gombert                         
-//           38, rue FrÈdÈric Joliot-Curie                                     
+//           P√¥le de l'Etoile, site de Ch√¢teau-Gombert                         
+//           38, rue Fr√©d√©ric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
 /**
-	@author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
+	@author Jean-Charles Lambert <jean-charles.lambert@oamp.fr>
 */
-#ifndef GLNEMOGLGRIDOBJECT_H
-#define GLNEMOGLGRIDOBJECT_H
-#include <QGLWidget>
+#ifndef FORMHELP_H
+#define FORMHELP_H
 
-#include "globject.h"
-#include "glgridobject.h"
+#include <QDialog>
+
+namespace Ui {
+    class FormHelp;
+}
 
 namespace glnemo {
 
+class FormHelp : public QDialog
+{
+    Q_OBJECT
 
-class GLGridObject: public GLObject {
 public:
+    explicit FormHelp(QWidget *parent = 0);
+    ~FormHelp();
 
-  GLGridObject(int axe_parm=0,const QColor &c=Qt::yellow, bool activated=TRUE);
-  
-  ~GLGridObject();
-
-  // method
-  void setNbSquare(int _nsquare) { nsquare = _nsquare;};
-  void setSquareSize(float _square_size) { square_size = _square_size;};
-  void rebuild() { buildDisplayList(); };
-  static int nsquare;        // #square       
-  static float square_size;  // size of square
-  
- private:
-  int axe;
-  // method
-  void  buildDisplayList( );
+private:
+    Ui::FormHelp *ui;
 };
 
 }
-
-#endif
+#endif // FORMHELP_H

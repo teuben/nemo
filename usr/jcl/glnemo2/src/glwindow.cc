@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "glwindow.h"
 #include "glgridobject.h"
+#include "glcubeobject.h"
 #include "globaloptions.h"
 #include "particlesdata.h"
 #include "particlesobject.h"
@@ -129,6 +130,7 @@ GLWindow::~GLWindow()
   delete gridy;
   delete gridz;
   delete gl_select;
+  delete cube;
   delete tree;
   if (GLWindow::GLSL_support) {
     glDeleteRenderbuffersEXT(1, &renderbuffer);
@@ -255,6 +257,37 @@ void GLWindow::reverseColorMap()
   updateGL();
 }
 // ============================================================================
+// rebuildGrid                                                             
+void GLWindow::rebuildGrid(bool ugl)
+{
+  GLGridObject::nsquare = store_options->nb_meshs;
+  GLGridObject::square_size = store_options->mesh_length;
+  gridx->rebuild();
+  gridy->rebuild();
+  gridz->rebuild();
+  cube->setSquareSize(store_options->nb_meshs*store_options->mesh_length);
+  if (ugl) updateGL();
+}
+// ============================================================================
+// updatedGrid                                                             
+void GLWindow::updateGrid(bool ugl)
+{
+  gridx->setActivate(store_options->xy_grid);
+  gridx->setColor(store_options->col_x_grid);
+  
+  gridy->setActivate(store_options->yz_grid);
+  gridy->setColor(store_options->col_y_grid);
+  
+  gridz->setActivate(store_options->xz_grid);
+  gridz->setColor(store_options->col_z_grid);
+  
+  cube->setActivate(store_options->show_cube);
+  cube->setColor(store_options->col_cube);
+  
+  if (ugl) updateGL();
+}
+
+// ============================================================================
 // init Light                                                                  
 void GLWindow::initLight()
 {
@@ -323,7 +356,7 @@ void GLWindow::paintGL()
     gridx->display();
     gridy->display();
     gridz->display();
-    //!cube->display();
+    cube->display();
     glDisable(GL_BLEND);
   }
   // camera display path and control points
@@ -506,10 +539,14 @@ void GLWindow::initializeGL()
   //initShader();
   
   // grid
-  gridx = new GLGridObject(0,QColor(136,141,102),store_options->xy_grid);
-  gridy = new GLGridObject(1,QColor(136,141,102),store_options->yz_grid);
-  gridz = new GLGridObject(2,QColor(136,141,102),store_options->xz_grid);
+  GLGridObject::nsquare = store_options->nb_meshs;
+  GLGridObject::square_size = store_options->mesh_length;
+  gridx = new GLGridObject(0,store_options->col_x_grid,store_options->xy_grid);
+  gridy = new GLGridObject(1,store_options->col_y_grid,store_options->yz_grid);
+  gridz = new GLGridObject(2,store_options->col_z_grid,store_options->xz_grid);
 
+  // cube
+  cube  = new GLCubeObject(store_options->mesh_length*store_options->nb_meshs,store_options->col_cube,store_options->show_cube);
   // load texture
   GLTexture::loadTextureVector(gtv);
   

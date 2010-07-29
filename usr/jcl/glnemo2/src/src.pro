@@ -9,7 +9,8 @@ FORMS += formobjectcontrol.ui \
     formscreenshot.ui \
     formselectpart.ui \
     formoptions.ui \
-    formconnect.ui
+    formconnect.ui \
+    formhelp.ui
 HEADERS += mainwindow.h \
     glwindow.h \
     globject.h \
@@ -43,7 +44,9 @@ HEADERS += mainwindow.h \
     densitycolorbar.h \
     camera.h \
     catmull_rom_spline.h \
-    formconnect.h
+    formconnect.h \
+    glcubeobject.h \
+    formhelp.h
 SOURCES += glnemo.cc \
     mainwindow.cc \
     glwindow.cc \
@@ -79,7 +82,9 @@ SOURCES += glnemo.cc \
     camera.cc \
     catmull_rom_spline.cc \
     snapshotinterface.cc \
-    formconnect.cc
+    formconnect.cc \
+    glcubeobject.cc \
+    formhelp.cc
 RESOURCES = glnemo.qrc
 CONFIG += $$GLOBAL \
     warn_on \

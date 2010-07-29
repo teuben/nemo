@@ -28,6 +28,7 @@
 #include "loadingthread.h"
 #include "formobjectcontrol.h"
 #include "formabout.h"
+#include "formhelp.h"
 #include "formscreenshot.h"
 #include "formselectpart.h"
 #include "formoptions.h"
@@ -130,6 +131,7 @@ class MainWindow : public QMainWindow {
     QAction * print_file_action;
     QAction * quit_file_action;
     // Help menu actions
+    QAction * doc_action;
     QAction * about_action;
     QAction * about_qt;
     // Toolbar actions
@@ -167,6 +169,7 @@ class MainWindow : public QMainWindow {
     // Forms
     FormObjectControl * form_o_c;
     FormAbout         * form_about;
+    FormHelp          * form_help;
     FormScreenshot    * form_sshot;
     FormSelectPart    * form_spart;
     FormOptions       * form_options;

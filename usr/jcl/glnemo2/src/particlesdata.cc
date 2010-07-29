@@ -448,8 +448,8 @@ int PhysicalData::computeMinMax()
     // compute Min/Max
     for (int i=0; i<(nbody); i++) {
       if (data[i] != -1 ) {
-	max=std::max(max,data[i]);
-	min=std::min(min,data[i]);
+	max=std::max(max,(double) data[i]);
+	min=std::min(min,(double) data[i]);
       }
     }
     if ((max == -1E9 && min == 1E9 )|| (max == min)) {
@@ -486,7 +486,12 @@ int PhysicalData::computeMinMax()
     }
     if (min <=0) {
       std::cerr << "Min is negative, rescaling data...\n";
-      float offset=min*-1.;
+      double offset;
+      if (min==0) {
+        min=1E-9;
+        offset=1E-9;
+      }
+      else offset=min*-1.;
       for (int i=0; i<(nbody); i++) {
         if (data[i] != -1 ) {
           data[i] += offset;

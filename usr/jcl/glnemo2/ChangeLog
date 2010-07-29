@@ -1,5 +1,9 @@
-current
---------
+1.0 (July, 28th 2010)
+---------------------
+ - release number has changed, this is the 1.0 release !!!	
+ - add a new tab in Options dialog box to manage grid and cube display	
+ - if "screenshot" parameter used from the command line, image will be
+   saved in the correct file format according to the extension name
  - bug fixed: bestzoom deactivated for the first playing frame 
  - bug fixed: if only particles are selected, a modification of the
 	     density threshold modify now the color of the particles

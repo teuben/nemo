@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "preview.2010-Jun-16"
+#define RELEASE_VERSION "1.0"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -66,6 +66,12 @@ using namespace std;
     "ytrans=0.0\n      translation on Y                                 ",
     "ztrans=0.0\n      translation on Z                                 ",
     "grid=t\n          Show grid                                        ",
+    "nb_meshs=28\n     #meshs for the grid                              ",
+    "mesh_size=1.0\n   grid's size of one mesh                          ",
+    "xyg=t\n           display a grid in XY plan                        ",
+    "yzg=f\n           display a grid in YZ plan                        ",
+    "xzg=f\n           display a grid in XZ plan                        ",
+    "cube=f\n          display a cube                                   ",
     "osd=t\n           Show On Screen Display                           ",
     "com=t\n           centering according Center Of Mass               ", 
     "point=f\n         show particles as points                         ",
@@ -82,6 +88,7 @@ using namespace std;
     "wsize=931\n       Windows's width size                             ",
     "hsize=750\n       Windows's height size                            ",
     "screenshot=\n     Screenshot name                                  ",
+    "shot_ext=jpg\n    Screenshot's extension jpg|png                    ",
     "smooth_gui=t\n    if true it allows a smoother interactivity with  ",
     "                   the GUI, but it **double** the memory usage. \n",
     "VERSION="RELEASE_VERSION"\n    "__DATE__"  - JCL  compiled at <"__TIME__">      ",

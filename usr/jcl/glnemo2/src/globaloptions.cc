@@ -64,9 +64,9 @@ GlobalOptions::GlobalOptions()
   xy_grid=true;
   yz_grid=xz_grid= show_cube =false;
   col_x_grid = QColor(136,141,102);
-  col_y_grid = QColor(136,141,102);
-  col_z_grid = QColor(136,141,102);
-  col_cube   = QColor(136,141,102);
+  col_y_grid = QColor(237,255,152);
+  col_z_grid = QColor(163,192,88);
+  col_cube   = QColor(0,255,0);
   // from camera tab
   cam_mode = false;
   cam_display_ctrl = false;

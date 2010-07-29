@@ -20,6 +20,7 @@
 #include <QMutex>
 #include "particlesobject.h"
 #include "globjectparticles.h"
+#include "glcubeobject.h"
 #include "glselection.h"
 #include "globjectosd.h"
 #include "gltexture.h"
@@ -73,6 +74,8 @@ public slots:
    void  updateColorVbo(const int);
    void  changeColorMap();
    void  reverseColorMap();
+   void  rebuildGrid(bool ugl=true);
+   void  updateGrid(bool ugl=true);
    void  updateGL();
    void  osdZoom(bool ugl=true);
    void setOsd(const GLObjectOsd::OsdKeys k,const QString text, bool b=true);
@@ -112,6 +115,7 @@ private:
   GlobalOptions * store_options;
   // grid variables
   GLGridObject * gridx, * gridy, * gridz;
+  GLCubeObject * cube;
   // Vectors
   GLObjectParticlesVector gpv;
   ParticlesObjectVector * pov;

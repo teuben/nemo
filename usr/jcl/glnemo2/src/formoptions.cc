@@ -37,12 +37,42 @@ FormOptions::FormOptions(GlobalOptions * _go, QWidget *parent):QDialog(parent)
   // activate the first TAB by default
   form.options_dialog->setCurrentIndex(0);
   form.com->setChecked(go->auto_com);
+  
+  QPalette pal;
+  // Color cube button
+  pal.setColor(QPalette::Button,go->col_cube);
+  form.cube_color->setPalette(pal);
+  // Color XY button
+  pal.setColor(QPalette::Button,go->col_x_grid);
+  form.xy_grid_color->setPalette(pal);
+  // Color YZ button
+  pal.setColor(QPalette::Button,go->col_y_grid);
+  form.yz_grid_color->setPalette(pal);
+  // Color XZ button
+  pal.setColor(QPalette::Button,go->col_z_grid);
+  form.xz_grid_color->setPalette(pal);
+  
+  update();
 }
 
 // ============================================================================
 // Destructor                                                                  
 FormOptions::~FormOptions()
 {
+}
+// ============================================================================
+// update                                                                 
+void FormOptions::update()
+{
+  // Grid tabs
+  form.show_grid_checkb->setChecked(go->show_grid);
+  form.xy_checkb->setChecked(go->xy_grid);
+  form.xz_checkb->setChecked(go->xz_grid);
+  form.yz_checkb->setChecked(go->yz_grid);
+  
+  form.mesh_length_spin->setValue(go->mesh_length);
+  form.mesh_nb_spin->setValue(go->nb_meshs);
+  form.cube_checkb->setChecked(go->show_cube);
 }
 
 // ============================================================================
@@ -140,4 +170,7 @@ void FormOptions::on_screen_size_activated(int index)
   go->frame_width  = windows_size[index][0];
   go->frame_height = windows_size[index][1];
 }
+// ============================================================================
+// TAB GRIDS and CUBE OPTIONS                                                            
+// ============================================================================
 }

@@ -29,15 +29,15 @@ class PhysicalData {
     nbody = n;
   }
   int computeMinMax();
-  float getMin() const { return min;}
-  float getMax() const { return max;}
+  double getMin() const { return min;}
+  double getMax() const { return max;}
   bool isValid() const { return valid;}
   int getType()  const { return type;}
   float * data;
   int data_histo[100];
   private:
   int nbody;
-  float min,max;
+  double min,max;
   bool valid;
   ALLOC cmodel;
   PHYS type;

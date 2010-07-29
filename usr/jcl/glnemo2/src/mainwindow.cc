@@ -118,7 +118,9 @@ MainWindow::MainWindow(std::string _ver)
   // leaveEvent to pass focus to gl_window
   connect(form_o_c,SIGNAL(leaveEvent()),gl_window,SLOT(setFocus()));
   connect(form_options,SIGNAL(leaveEvent()),gl_window,SLOT(setFocus()));
-  
+  // options grid tab
+  connect(form_options,SIGNAL(update_grid()),gl_window,SLOT(updateGrid()));
+  connect(form_options,SIGNAL(rebuild_grid()),gl_window,SLOT(rebuildGrid()));
   // --------- init some stuffs
   initVariables();
   startTimers();
@@ -137,6 +139,9 @@ void MainWindow::start(std::string shot)
 {
   const int wsize=getiparam((char *)"wsize");
   const int hsize=getiparam((char* )"hsize");
+  if ( hasvalue((char *) "shot_ext") ) {
+    store_options->base_frame_ext=getparam((char* )"shot_ext");
+  }
   // try to load a snapshot
   user_select = new UserSelection();
   if (hasvalue((char*)"in")) {
@@ -179,8 +184,18 @@ void MainWindow::start(std::string shot)
       store_options->frame_width=wsize;
       store_options->frame_height=hsize;
       store_options->base_frame_name=QString(shot.c_str());
-  }
-  if (shot != "") takeScreenshot(wsize,hsize,shot);
+      startAutoScreenshot();
+    } else {
+      if (shot != "") {
+        // get suffix
+        QString suffix = ((QString(shot.c_str())).section('.', -1)).toUpper(); // 
+        if (suffix != "PNG" && suffix != "JPG" && suffix != "JPEG") {
+          // add selected extension as suffix
+          shot = shot + "." + store_options->base_frame_ext.toStdString();
+        }
+        takeScreenshot(wsize,hsize,shot);
+      }
+    }
   
   if (play) {
       actionPlay(); // start playing time step
@@ -224,6 +239,8 @@ void MainWindow::createMenus()
   file_menu->addAction(quit_file_action);
   // help menu
   help_menu = menuBar()->addMenu(tr("&Help"));
+  help_menu->addAction(doc_action);
+  help_menu->addSeparator();
   help_menu->addAction(about_action);
   help_menu->addAction(about_qt);
 }
@@ -239,7 +256,7 @@ void MainWindow::createToolBars()
   icons_tool_bar->addAction(toggle_grid_action);
   icons_tool_bar->addAction(particles_form_action);
   icons_tool_bar->addAction(options_form_action);
-  icons_tool_bar->addAction(toggle_trans_action);
+  //icons_tool_bar->addAction(toggle_trans_action);
   icons_tool_bar->addAction(toggle_play_action);
   icons_tool_bar->addAction(reload_action);
   icons_tool_bar->addAction(screenshot_action);
@@ -269,6 +286,7 @@ void MainWindow::createStatusBar()
 void MainWindow::createForms()
 {
   form_about  = new FormAbout(this);
+  form_help   = new FormHelp(this);
   form_sshot  = new FormScreenshot(this);
   form_spart  = new FormSelectPart(this);
   form_o_c    = new FormObjectControl(this);
@@ -351,6 +369,10 @@ void MainWindow::createActions()
   connect(quit_file_action, SIGNAL(triggered()), this, SLOT(actionQuit()));
   
   // ------- Help menu actions ---------
+  // Documentation
+  doc_action = new QAction(QIcon(""),tr("Documentation"),this);
+  doc_action->setStatusTip(tr("Documentation"));
+  connect(doc_action, SIGNAL(triggered()), form_help, SLOT(show()));
   // about glnemo
   about_action = new QAction(QIcon(":/images/glnemo2.png"),tr("About glnemo2"),this);
   about_action->setStatusTip(tr("About glnemo2"));
@@ -729,6 +751,12 @@ void MainWindow::parseNemoParameters()
   store_options->blending = getbparam((char *) "blending");
   store_options->dbuffer  = getbparam((char *) "dbuffer");
   store_options->show_grid= getbparam((char *) "grid");
+  store_options->mesh_length=getdparam((char *) "mesh_size");
+  store_options->nb_meshs = getiparam((char *) "nb_meshs");
+  store_options->xy_grid  = getbparam((char *) "xyg");
+  store_options->xz_grid  = getbparam((char *) "xzg");
+  store_options->yz_grid  = getbparam((char *) "yzg");
+  store_options->show_cube= getbparam((char *) "cube");
   store_options->show_osd = getbparam((char *) "osd");
   store_options->perspective=getbparam((char *) "perspective");
   store_options->orthographic = !store_options->perspective;
@@ -1008,7 +1036,7 @@ void MainWindow::actionReset()
 void MainWindow::actionGrid()
 {
   store_options->show_grid = !store_options->show_grid;
-  std::cerr << "grid " << store_options->show_grid << "\n";
+  form_options->update();
   gl_window->updateGL();
 }
 // -----------------------------------------------------------------------------
@@ -1137,8 +1165,10 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
             if (store_options->base_frame_ext=="jpg") {
                 quality=95;
             }
+            std::cerr << "takescreenshot name ="<<name<<"\n";
             std::cerr << "base_frame_ext="<<store_options->base_frame_ext.toStdString()<<"\n";
-            img.save(QString(name.c_str()),(store_options->base_frame_ext.toStdString()).c_str(),quality);
+            //img.save(QString(name.c_str()),(store_options->base_frame_ext.toStdString()).c_str(),quality);
+            img.save(QString(name.c_str()),0,quality);
         }
     }
 }

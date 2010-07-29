@@ -17,6 +17,7 @@
 #define GLNEMOFORMOPTIONS_H
 #include <QTime>
 #include <QTimer>
+#include <QColorDialog>
 #include <iostream>
 #include "ui_formoptions.h"
 #include "globaloptions.h"
@@ -28,6 +29,7 @@ class FormOptions: public QDialog {
     FormOptions(GlobalOptions * ,QWidget *parent = 0);
     ~FormOptions();
   public slots:
+    void update();
     void updateFrame(const int, const int);
     void updateParticlesSelect(const int);
   private:
@@ -82,13 +84,80 @@ class FormOptions: public QDialog {
     void on_frame_png_clicked() { go->base_frame_ext = "png";}
     void on_frame_jpg_clicked() { go->base_frame_ext = "jpg";}
     
-    
+    //
+    // grids tab
+    void on_show_grid_checkb_clicked(bool b) {
+      go->show_grid = b;
+      emit update_grid();
+    }
+    void on_xy_checkb_clicked(bool b) {
+      go->xy_grid = b;
+      emit update_grid();
+    }
+    void on_yz_checkb_clicked(bool b) {
+      go->yz_grid = b;
+      emit update_grid();
+    }
+    void on_xz_checkb_clicked(bool b) {
+      go->xz_grid = b;
+      emit update_grid();
+    }
+    void on_mesh_length_spin_valueChanged(double d) {
+      go->mesh_length = d;
+      emit rebuild_grid();
+    }
+    void on_mesh_nb_spin_valueChanged(int d) {
+      go->nb_meshs = d;
+      emit rebuild_grid();
+    }
+    void on_cube_checkb_clicked(bool b) {
+      go->show_cube = b;
+      emit update_grid();
+    }
+    // change xy grid color button
+    void on_xy_grid_color_clicked() {
+      QPalette pal = form.xy_grid_color->palette();
+      QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
+      pal.setColor(QPalette::Button,color);
+      form.xy_grid_color->setPalette(pal);
+      go->col_x_grid = color;
+      emit update_grid();
+    }
+    // change yz grid color button
+    void on_yz_grid_color_clicked() {
+      QPalette pal = form.yz_grid_color->palette();
+      QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
+      pal.setColor(QPalette::Button,color);
+      form.yz_grid_color->setPalette(pal);
+      go->col_y_grid = color;
+      emit update_grid();
+    }
+    // change xz grid color button
+    void on_xz_grid_color_clicked() {
+      QPalette pal = form.xz_grid_color->palette();
+      QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
+      pal.setColor(QPalette::Button,color);
+      form.xz_grid_color->setPalette(pal);
+      go->col_z_grid = color;
+      emit update_grid();
+    }
+    // change cube color button
+    void on_cube_color_clicked() {
+      QPalette pal = form.cube_color->palette();
+      QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
+      pal.setColor(QPalette::Button,color);
+      form.cube_color->setPalette(pal);
+      go->col_cube = color;
+      emit update_grid();
+    }
   signals:
     void start_bench(const bool);
     void select_and_zoom(const bool);
     void save_selected();
     void create_obj_selected();
     void leaveEvent();
+    void update_grid();
+    void rebuild_grid();
     //           
     // camera tab
     void setCamDisplay(const bool, const bool);
