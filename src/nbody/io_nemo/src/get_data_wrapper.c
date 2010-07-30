@@ -52,7 +52,7 @@ int get_data_time(stream instr, char * DataType, int size_type,
   if (get_tag_ok(instr, TimeTag))
     { 
       if (*timeptr == NULL)
-	*timeptr = (void *) allocate(size_type);
+	*timeptr = (void *) allocate((size_t) size_type);
       get_data_coerced(instr, TimeTag, DataType, *timeptr,0);
       status = 1; 
     }
@@ -71,7 +71,7 @@ int get_data_nbody(stream instr, char * DataType, int size_type, void ** nbodypt
   if (get_tag_ok(instr, NobjTag))
     { 
       if (*nbodyptr == NULL)
-	*nbodyptr = (void *) allocate(size_type);
+	*nbodyptr = (void *) allocate((size_t) size_type);
       get_data_coerced(instr, NobjTag, DataType, *nbodyptr,0);
       status = 1; 
     }
@@ -96,7 +96,7 @@ int get_data_mass(stream instr, char * DataType, int nbody, int size_type,
 	*massptr = NULL;
       }
       if (*massptr == NULL)
-	*massptr = (void *) allocate(size_type * nbody);
+	*massptr = (void *) allocate((size_t) size_type * nbody);
       get_data_coerced(instr, MassTag, DataType, *massptr,
 		       nbody, 0);
       status = 1; 
@@ -122,7 +122,7 @@ int get_data_pos(stream instr, char * DataType, int nbody, int size_type,
 	*posptr = NULL;
       }
       if (*posptr == NULL) {
-	*posptr = (void *) allocate(size_type * nbody *ndim);
+	*posptr = (void *) allocate((size_t) size_type * nbody *ndim);
       }
       get_data_coerced(instr, PosTag, DataType, *posptr,
 		       nbody,ndim,0);
@@ -148,7 +148,7 @@ int get_data_vel(stream instr, char * DataType, int nbody, int size_type,
 	*velptr = NULL;
       }
       if (*velptr == NULL)
-	*velptr = (void *) allocate(size_type * nbody*ndim);
+	*velptr = (void *) allocate((size_t) size_type * nbody*ndim);
       get_data_coerced(instr, VelTag, DataType, *velptr,
 		       nbody,ndim, 0);
       status = 1; 
@@ -173,7 +173,7 @@ int get_data_phase(stream instr, char * DataType, int nbody,
 	*phaseptr = NULL;
       }
       if (*phaseptr == NULL)
-	*phaseptr = (void *) allocate(size_type*nbody*2*ndim);
+	*phaseptr = (void *) allocate((size_t) size_type*nbody*2*ndim);
 
       get_data_coerced(instr, PhaseSpaceTag, DataType, *phaseptr,
 		       nbody,2,ndim,0);
@@ -202,7 +202,7 @@ int get_data_pot(stream instr, char * DataType, int nbody, int size_type,
 	*potptr = NULL;
       }
       if (*potptr == NULL)
-	*potptr = (void *) allocate(size_type * nbody);
+	*potptr = (void *) allocate((size_t) size_type * nbody);
       get_data_coerced(instr, PotentialTag, DataType, *potptr,
 		       nbody, 0);
       status = 1; 
@@ -227,7 +227,7 @@ int get_data_acc(stream instr, char * DataType, int nbody, int size_type,
 	*accptr = NULL;
       }
       if (*accptr == NULL)
-	*accptr = (void *) allocate(size_type * nbody*ndim);
+	*accptr = (void *) allocate((size_t) size_type * nbody*ndim);
       get_data_coerced(instr, AccelerationTag, DataType, *accptr,
 		       nbody,ndim, 0);
       status = 1; 
@@ -252,7 +252,7 @@ int get_data_keys(stream instr, char * DataType, int nbody, int size_type,
 	*keysptr = NULL;
       }
       if (*keysptr == NULL)
-	*keysptr = (void *) allocate(size_type * nbody);
+	*keysptr = (void *) allocate((size_t) size_type * nbody);
       get_data_coerced(instr, KeyTag, DataType, *keysptr,
 		       nbody, 0);
       status = 1; 
@@ -277,7 +277,7 @@ int get_data_eps(stream instr, char * DataType, int nbody, int size_type,
 	*epsptr = NULL;
       }
       if (*epsptr == NULL)
-	*epsptr = (void *) allocate(size_type * nbody);
+	*epsptr = (void *) allocate((size_t) size_type * nbody);
       get_data_coerced(instr, EpsTag, DataType, *epsptr,
 		       nbody, 0);
       status = 1; 
@@ -302,7 +302,7 @@ int get_data_aux(stream instr, char * DataType, int nbody, int size_type,
 	*auxptr = NULL;
       }
       if (*auxptr == NULL)
-	*auxptr = (void *) allocate(size_type * nbody);
+	*auxptr = (void *) allocate((size_t) size_type * nbody);
       get_data_coerced(instr, AuxTag, DataType, *auxptr,
 		       nbody, 0);
       status = 1; 
@@ -327,7 +327,7 @@ int get_data_dens(stream instr, char * DataType, int nbody, int size_type,
 	*densptr = NULL;
       }
       if (*densptr == NULL)
-	*densptr = (void *) allocate(size_type * nbody);
+	*densptr = (void *) allocate((size_t) size_type * nbody);
       get_data_coerced(instr, DensityTag, DataType, *densptr,
 		       nbody, 0);
       status = 1; 

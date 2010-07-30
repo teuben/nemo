@@ -18,7 +18,7 @@ Ldummyf = $(NEMOLIB)/libio_nemo_f.a
 LIBNEMO = -lnemo
 #--------------------------------------------------------
 # compilers options
-#FC     = gfortran
+FC     = gfortran
 
 ifeq ($(FC),gfortran)
 FFLAGS = -O -fno-second-underscore
