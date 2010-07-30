@@ -794,45 +794,45 @@ bool CSnapshotGadgetIn::getData(const std::string comp, std::string name, int *n
     }
     break;
   case uns::Rho :
-    if (comp=="gas") {
+    if (status && comp=="gas") {
       *data = getRho(*n);
     } else {
       ok=false;
     }
     break;
   case uns::U :
-    if (comp=="gas") {
+    if (status && comp=="gas") {
       *data = getU(*n);
     } else {
       ok=false;
     } 
     break;
   case uns::Hsml :
-    if (comp=="gas") {
+    if (status && comp=="gas") {
       *data = getHsml(*n);
     } else {
       ok=false;
     }  
     break;
   case uns::Temp :
-    if (comp=="gas") {
+    if (status && comp=="gas") {
       *data = getTemp(*n);
     } else {
       ok=false;
     } 
     break;
   case uns::Age :
-    if (comp=="stars") {
+    if (status && comp=="stars") {
       *data = getAge(*n);
     } else {
       ok=false;
     } 
     break;
   case uns::Metal :
-    if (comp=="gas") {
+    if (status && comp=="gas") {
       *data = getMetalGas(*n);
     } else
-      if (comp=="stars") {
+      if (status && comp=="stars") {
       *data = getMetalStars(*n);
     } else {
       ok=false;

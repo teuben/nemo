@@ -38,6 +38,7 @@ namespace uns {
 			int * nbody, int * first, int * last);
     int uns_get_eps_  ( const int * id, const char * comp, float * eps);
     int uns_sim_type_ ( const int * id);
+    void uns_sim_dir_ ( const int * id, char * simdir, int len);
     int uns_get_u_    ( const int * id , float * u  , int * size);
     int uns_get_temp_ ( const int * id , float * temp  , int * size);
     int uns_get_rho_  ( const int * id , float * rho  , int * size);
@@ -500,6 +501,20 @@ int uns_sim_type_(const int * id)
 {
   int index=getUnsvIndex(*id);
   return(((CunsIn *)unsv[index].obj)->snapshot->getInterfaceIndex());
+}
+// ----------------------------------------------------------------------------
+// uns_sim_dir:                                                               
+// return simulation dirname of the requested simulation    
+// and belonging to the simulation with the identifier ident                   
+void uns_sim_dir_(const int * id, char * simdir, int lenstring)
+{
+  int index=getUnsvIndex(*id);
+  std::string dir= ((CunsIn *)unsv[index].obj)->snapshot->getSimDir();
+  assert(dir.length() <= (unsigned int) lenstring);
+  strcpy(simdir,dir.c_str());
+  for (int i=strlen(simdir); i<lenstring; i++) {
+    simdir[i] = ' ';
+  }
 }
 // ----------------------------------------------------------------------------
 // getCrv:                                                                     

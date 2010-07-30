@@ -58,6 +58,7 @@ namespace uns {
                        const std::string _time, const bool verb=false) {
 
       filename = _name;
+      simdir = "";
       select_part = _comp;
       select_time = _time;
       obj=NULL; pos=NULL; vel=NULL;
@@ -92,15 +93,16 @@ namespace uns {
     virtual bool getData(const std::string, const std::string ,int *,int   **)=0;
     
     // Virtual function with a default behaviour
-    virtual bool isEndOfData() const { return end_of_data;};
-    virtual std::string getFileName() { return filename;};
+    virtual bool isEndOfData() const { return end_of_data;}
+    virtual std::string getFileName() { return filename;}
+    virtual std::string getSimDir() { return simdir;}
     virtual int  getNSel() { return nsel;}
     virtual void setNsel(const int _nsel) { nsel = _nsel;}
-    virtual bool isNewFrame() { return true;};
+    virtual bool isNewFrame() { return true;}
     virtual int nextFrame(std::string bits="mxvpaekXRMAHIU");
     virtual ComponentRangeVector * getCrvFromSelection() { return user_select.getCrvFromSelection();}
     virtual bool shift(std::string,const float x, const float y, const float z);
-    virtual float   getEps(const std::string) { return -1.;};
+    virtual float   getEps(const std::string) { return -1.;}
     virtual int     getCod(const std::string select, const float time, 
 			   float * tcod, const std::string base="ANALYSIS/cod",
 			   const std::string ext="cod") { 
@@ -113,15 +115,15 @@ namespace uns {
     };
     
     // normal functions        
-    bool isValidData() { return valid; };
-    void setFileName(std::string _f) { filename = _f;};
+    bool isValidData() { return valid; }
+    void setFileName(std::string _f) { filename = _f;}
     bool getRangeSelect(const char *, int *, int *, int * , bool fortran=false);
     //std::string getFileName() const { return filename;};
-    std::string getInterfaceType() { return interface_type;};
-    int getInterfaceIndex() { return interface_index; };
-    bool isFileExist() { return true; };
-    std::string getSelectPart() { return select_part; };
-    std::string getSelectTime() { return select_time; };    
+    std::string getInterfaceType() { return interface_type;}
+    int getInterfaceIndex() { return interface_index; }
+    bool isFileExist() { return true; }
+    std::string getSelectPart() { return select_part; }
+    std::string getSelectTime() { return select_time; }
     int nbody_first;
     float time_first, time;
     ComponentRangeVector crv_first;
@@ -132,6 +134,7 @@ namespace uns {
     
     CSnapshotInterfaceIn * obj;
     std::string filename;
+    std::string simdir;
     std::string interface_type;
     int interface_index;
     mutable bool end_of_data;

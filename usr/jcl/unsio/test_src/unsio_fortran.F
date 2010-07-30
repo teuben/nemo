@@ -1,11 +1,12 @@
-      program testlib
+      program unsio_fortran
       implicit none
 
       integer lnblnk, narg, uns_init, uns_load, valid, ident,
-     $     nbody,  uns_sim_type, cpt, uns_get_value_i, status
+     $     nbody,  uns_sim_type, cpt, uns_get_value_i,
+     $     status
       !external iargc,getarg
       character ain * 80, aout * 80, atyp * 80, acomp * 80, atim * 80
-      character out * 80, ii * 6
+      character out * 80, ii * 6, simdir * 100
 
       !narg = iargc()
       narg = command_argument_count()
@@ -54,6 +55,8 @@
       if (ident.gt.0) then
          valid = 1
          cpt = 0
+         call uns_sim_dir(ident,simdir)
+         write (0,*) "Simulation DIR = [",simdir(1:lnblnk(simdir)),"]"
          do while (valid .gt. 0) ! loop on all the time step
             valid = uns_load(ident) ! load data belonging to ident snapshot
             write(0,*) "uns_load return=>",valid

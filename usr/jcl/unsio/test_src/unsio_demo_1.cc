@@ -103,6 +103,7 @@ int main(int argc, char ** argv )
     while(unsin->snapshot->nextFrame()) { // there is a new frame
       std::string itype = unsin->snapshot->getInterfaceType();
       std::cerr << "Input file is of type :"<<itype<<"\n";
+      std::cerr << "Sim dir :"<<unsin->snapshot->getSimDir()<<"\n";
       bool ok;
       int cnbody,cfirst,clast,nbody;      
       float time;

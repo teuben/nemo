@@ -55,6 +55,7 @@ namespace uns {
     virtual int     getCod(const std::string select, const float time, 
 			   float * tcod, const std::string base="ANALYSIS/cod",
 			   const std::string ext="cod");
+    virtual std::string getSimDir() { return dirname; }
   private:
     // from ascii database
     bool getLine();
