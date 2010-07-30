@@ -31,14 +31,8 @@ ELSE (NOT NEMO_INSTALLED)
 
 ENDIF (NOT NEMO_INSTALLED) 
 
-
-
-
 MESSAGE( STATUS "NEMOLIB : " ${NEMOLIB} )
 
-#execute_process(COMMAND  "grep 'FC  =' ${NEMOLIB}/makedefs | cut -d= -f2"
-#	OUTPUT_VARIABLE FF OUTPUT_STRIP_TRAILING_WHITESPACE)
-#MESSAGE( STATUS "FORTRAN: " ${FF} )
 # contains the full path to the top level directory of your build tree 
 MESSAGE( STATUS "PROJECT_BINARY_DIR: " ${PROJECT_BINARY_DIR} )
 
@@ -63,7 +57,8 @@ add_library (unsio SHARED ${LIBSOURCES})
 # ------------------
 # Enable Fortran support
 ENABLE_LANGUAGE(Fortran)
-SET(CMAKE_Fortran_COMPILER ${FORT_COMP})
+#SET(CMAKE_Fortran_COMPILER ${FORT_COMP})
+SET(CMAKE_Fortran_COMPILER gfortran)
 
 
 # Executbale output path
