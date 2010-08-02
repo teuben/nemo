@@ -118,14 +118,7 @@ $(INC)domain.h		: $(DEV)domain.h
 domain_h		:= $(INC)domain.h $(parallel_h) $(octtree_h)
 $(INC)parallel.h	: $(DEV)parallel.h
 			(cd $(INC); ln -s ../$(DEV)parallel.h parallel.h)
-ifndef WDutilsMPI
 parallel_h		:= $(INC)parallel.h $(memory_h)
-else
-parallel_h		:= $(INC)parallel.h $(memory_h) $(INC)parallelMPI.h
-$(INC)parallelMPI.h	: $(DEV)parallelMPI.h
-			(cd $(INC); ln -s ../$(DEV)parallelMPI.h parallelMPI.h)
-parallelMPI_h		:= $(INC)parallelMPI.h $(parallel_h)
-endif
 endif
 
 # -----------------------
@@ -146,9 +139,6 @@ domain_cc		:= $(DEV)domain.cc $(domain_h) $(peano_h)
 ifdef WDutilsDevel
 neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
 parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
-ifdef WDutilsMPI
-parallelMPI_cc		:= $(DEV)parallelMPI.cc $(parallelMPI_h)
-endif
 endif
 
 # ---------------
@@ -178,13 +168,11 @@ $(LIB)neighbour.o:	$(neighbour_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)domain.o:		$(domain_cc) $(makefiles)
-			$(MAKE_OBJ)
 
 WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
-			$(LIB)WDMath.o $(LIB)parallel.o $(LIB)neighbour.o
-WDutils_objs	:=	$(WDutilsS_objs) $(LIB)domain.o
+			$(LIB)WDMath.o $(LIB)neighbour.o
+WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o
 
 else
 
@@ -201,10 +189,10 @@ endif
 AR			:= ar rc
 RL			:= ranlib
 
-$(LIB)libWDutils.a:	$(WDutils_objs) $(LIB)parallel.o
+$(LIB)libWDutils.a:	$(WDutils_objs)
 			$(AR) $@ $?
 			$(RL) $@
-$(LIB)libWDutils.so:	$(WDutils_objs) $(LIB)parallel.o
+$(LIB)libWDutils.so:	$(WDutils_objs)
 			$(CXX) $^ $(LDFLAGS) -o $@
 
 ifdef WDutilsMPI
@@ -212,7 +200,7 @@ ifdef WDutilsMPI
 # MPI library modules
 # -------------------
 
-$(LIB)parallelMPI.o:	$(parallelMPI_cc) $(makefiles)
+$(LIB)parallelMPI.o:	$(parallel_cc) $(makefiles)
 			$(MAKE_OBJ_MPI) $(IMPI)
 $(LIB)domainMPI.o:	$(domain_cc) $(makefiles)
 			$(MAKE_OBJ_MPI)
