@@ -22,6 +22,7 @@
 /// \version 22-apr-2010 WD  parameter nmin, changes in tree building
 /// \version 24-apr-2010 WD  changes in tree building code.
 /// \version 09-jun-2010 WD  16-byte alignement, using geometry.h
+/// \version 15-jul-2010 WD  maximum tree depth = numeric_limits<real>::digits
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -71,7 +72,7 @@ namespace {
   template<int D> struct TreeHelper;
   template<> struct TreeHelper<2> {
     template<typename real>
-    static tupel<2,real> Integer(tupel<2,real> const&x)
+    static tupel<2,real> RootCentre(tupel<2,real> const&x)
     {
       tupel<2,real> c;
       c[0]=int(x[0]+real(0.5));
@@ -80,7 +81,7 @@ namespace {
     }
     template<typename real>
     static real RootRadius(tupel<2,real> const&X,
-			   tupel<2,real>const&Xmin,
+			   tupel<2,real> const&Xmin,
 			   tupel<2,real> const&Xmax)
     {
       real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
@@ -91,7 +92,7 @@ namespace {
   };
   template<> struct TreeHelper<3> {
     template<typename real>
-    static tupel<3,real> Integer(tupel<3,real> const&x)
+    static tupel<3,real> RootCentre(tupel<3,real> const&x)
     {
       tupel<3,real> c;
       c[0]=int(x[0]+real(0.5));
@@ -156,7 +157,7 @@ namespace {
     typedef typename OctTree::point        point;
     typedef typename OctTree::cube         cube;
     //
-    const static depth_type MAXD = OctTree::MaximumDepth;
+    const static depth_type MaximumDepth = OctTree::MaximumDepth;
     /// represents a particle in the BoxDotTree
     struct __Dot {
       point             X;             ///< position
@@ -182,7 +183,6 @@ namespace {
       uint8             NBX;           ///< number of daughter boxes  <= Nsub
       uint8             NOC;           ///< number of octant occupied <= NBX
       uint8             LEV;           ///< tree level of box
-      uint8             PEA;           ///< Peano key, not currently used
     };
     typedef SSE::Extend16<__Box> Box;
     //
@@ -232,10 +232,10 @@ namespace {
       P->NBX = 0;
       P->NOC = 0;
       P->LEV = B->LEV + 1;
-      if(P->LEV >= MAXD)
+      if(P->LEV >= MaximumDepth)
 	WDutils_THROW("exceeding maximum tree depth of %d\n         "
 		      "(perhaps more than Nmax=%du positions are identical "
-		      "within floating-point precision)\n", MAXD, NMAX);
+		      "within floating-point precision)\n", MaximumDepth, NMAX);
       GeoAlg::copy(B->CUB,P->CUB);
       GeoAlg::shrink(P->CUB,i);
       return P;
@@ -606,7 +606,7 @@ namespace {
     P0->NDl   = 0;
     P0->NBX   = 0;
     P0->NOC   = 0;
-    P0->CUB.X = TreeHelper<Dim>::Integer(Xave);
+    P0->CUB.X = TreeHelper<Dim>::RootCentre(Xave);
     P0->CUB.H = TreeHelper<Dim>::RootRadius(P0->CUB.X,Xmin,Xmax);
     P0->LEV   = 0;
     P0->NUM   = 0;
@@ -680,8 +680,8 @@ namespace {
 }
 //
 namespace WDutils {
-  template<int D, typename real> 
-  void OctalTree<D,real>::allocate()
+  template<int __D, typename __X> 
+  void OctalTree<__D,__X>::allocate()
   {
     // all arrays are to be 16-byte aligned
     size_t need =
@@ -718,9 +718,9 @@ namespace WDutils {
 #undef SET_POINTER
   }
   //
-  template<int D, typename real>
-  void OctalTree<D,real>::build(char building, node_index n,
-				const Initialiser*init, const OctalTree*tree)
+  template<int __D, typename __X>
+  void OctalTree<__D,__X>::build(char building, node_index n,
+				 const Initialiser*init, const OctalTree*tree)
     WDutils_THROWING
   {
 #undef GIVE_TIMING
@@ -728,7 +728,7 @@ namespace WDutils {
     clock_t cpu0, cpu1;
     cpu0 = clock();
 #endif
-    BoxDotTree<D,real> BDT(building,n,init,NMAX,NMIN,AVSPC,tree);
+    BoxDotTree<Dim,real> BDT(building,n,init,NMAX,NMIN,AVSPC,tree);
 #ifdef GIVE_TIMING
     cpu1 = clock();
     std::cerr<<" OctalTree::build(): BoxDotTree::BoxDotTree took "
@@ -748,7 +748,21 @@ namespace WDutils {
 #endif
     DEPTH = BDT.DEPTH;
     NCELL = BDT.NCELL;
-//     std::memcpy(RAD,BDT.RA,(MaximumDepth+1)*sizeof(real));
+  }
+  //
+  template<int __D, typename __X>
+  typename OctalTree<__D,__X>::point
+  OctalTree<__D,__X>::RootCentre(point const&xave)
+  {
+    return TreeHelper<Dim>::RootCentre(xave);
+  }
+  //
+  template<int __D, typename __X>
+  typename OctalTree<__D,__X>::real
+  OctalTree<__D,__X>::RootRadius(point const&xcen, point const&xmin,
+				 point const&xmax)
+  {
+    return TreeHelper<Dim>::RootRadius(xcen,xmin,xmax);
   }
 }
 //

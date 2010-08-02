@@ -26,18 +26,15 @@ else
 WARNING		:= -Wall -Wextra -Winit-self -Wshadow
 endif
 
-ifdef WDutilsDevel
-DevelFlags	:= -fopenmp
-endif
-
 # general optimisation and warning flags
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
-		-ggdb3 $(WARNING) -O2 -fPIC -ffast-math $(DevelFlags)\
+		-ggdb3 $(WARNING) -O2 -fPIC -ffast-math \
 		-funroll-loops -fforce-addr $(RDYNAMIC)
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
 CXXFLAGS	:= $(OPTFLAGS)
+OMPFLGAS	:= -fopenmp
 LDFLAGS		:= -shared
 
 # end

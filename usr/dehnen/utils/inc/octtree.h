@@ -105,7 +105,9 @@ namespace WDutils {
     typedef SSE::Extend16<cube>  cube16;
     const static depth_type Dim = __D;       ///< number of dimensions
     const static depth_type Nsub= 1<<Dim;    ///< number of octants per cell
-    const static depth_type MaximumDepth=99; ///< maximum tree depth
+    /// the maximum allowed tree depth
+    /// \note Set to the number of digits in our floating point type.
+    const static depth_type MaximumDepth=std::numeric_limits<real>::digits;
     /// Interface for initialising particles at tree building
     ///
     /// The interface here is intended to allow for a general particle data
@@ -175,7 +177,7 @@ namespace WDutils {
     node_index    NCELL;              ///< total number of cells
     depth_type   *LE;                 ///< cells' tree level
     octant_type  *OC;                 ///< cells' octant in parent cell
-    cube16       *XC;                 ///< cells' centre (of cube)
+    cube16       *XC;                 ///< cells' centre and radius (of cube)
     node_index   *L0;                 ///< cells' first leaf
     local_count  *NL;                 ///< number of cells' leaf kids
     node_index   *NM;                 ///< number of cells' leaf descendants
@@ -432,6 +434,17 @@ namespace WDutils {
     /// total number of cells
     node_index const&Ncells() const
     { return NCELL; }
+    /// centre suitable for root
+    /// \return position suitable for root centre
+    /// \param[in] xave  some average or mean position within the root box
+    static point RootCentre(point const&xave);
+    /// radius suitable for root
+    /// \return radius suitable for root
+    /// \param[in] xcen  root centre
+    /// \param[in] xmin  most extreme position with smallest coordinates
+    /// \param[in] xmax  most extreme position with largest coordinates
+    static real RootRadius(point const&xcen, point const&xmin,
+			   point const&xmax);
   };// class OctalTree<>
 
   ///
