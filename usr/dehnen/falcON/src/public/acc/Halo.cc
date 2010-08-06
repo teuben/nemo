@@ -32,18 +32,55 @@ namespace {
     private ModifiedDoublePowerLawHalo,
     private HaloPotential
   {
+    typedef DoublePowerLawHalo DPLH;
+    static double inner(const char*model, const double*par)
+    {
+      DPLH::Model M = DPLH::model(model);
+      double def = DPLH::inner_default(M);
+      if(def == DPLH::null_value())
+	return par?  *par : 7./9.;
+      else if(par && *par != def)
+	falcON_WarningN("external potential \"Halo\": "
+			"par[3]=g_i=%g ignored, using g_i=%g for model '%s'",
+			*par, def, model);
+      return def;
+    }
+    static double outer(const char*model, const double*par)
+    {
+      DPLH::Model M = DPLH::model(model);
+      double def = DPLH::outer_default(M);
+      if(def == DPLH::null_value())
+	return par?  *par : 31./9.;
+      else if(par && *par != def)
+	falcON_WarningN("external potential \"Halo\": "
+			"par[4]=g_o=%g ignored, using g_o=%g for model '%s'",
+			*par, def, model);
+      return def;
+    }
+    static double trans(const char*model, const double*par)
+    {
+      DPLH::Model M = DPLH::model(model);
+      double def = DPLH::trans_default(M);
+      if(def == DPLH::null_value())
+	return par?  *par : 4./9.;
+      else if(par && *par != def)
+	falcON_WarningN("external potential \"Halo\": "
+			"par[5]=eta=%g ignored, using eta=%g for model '%s'",
+			*par, def, model);
+      return def;
+    }
   public:
-    //--------------------------------------------------------------------------
+    //
     static const char* name() { return "Halo"; }
-    //--------------------------------------------------------------------------
+    //
     Halo(const double*pars, int npar, const char*file) :
       ModifiedDoublePowerLawHalo(npar>1? pars[1] : 1.,
 				 npar>7? pars[7] : 0.,
 				 npar>6? pars[6] : 0.,
 				 npar>2? pars[2] : 1.,
-				 npar>3? pars[3] : 0.77777777777777777778,
-				 npar>4? pars[4] : 3.44444444444444444444,
-				 npar>5? pars[5] : 0.44444444444444444444),
+				 inner(file, npar>3? pars+3:0),
+				 outer(file, npar>4? pars+4:0),
+				 trans(file, npar>5? pars+5:0)),
       HaloPotential(*this,0)
     {
       if((npar<8 && nemo_debug(1)) || nemo_debug(2) ) {
@@ -57,28 +94,35 @@ namespace {
 	  "   eta     transition steepness      [4/9]\n"
 	  "   r_t     truncation radius (0->oo) [0]\n"
 	  "   r_c     core radius               [0]\n"
-	  " The halo density is given by\n\n"
-	  "                 C sech(r/r_t)\n"
-	  "   rho(r) = -------------------------\n"
-	  "             gi   eta     [go-gi]/eta\n"
-	  "            x   (x    + 1)\n"
-	  " with\n"
-	  "             2    2\n"
-	  "   x = sqrt(r +r_c )/r_s.\n\n";
+	  " The halo density proportional to\n"
+	  "\n"
+	  "      Model(x) * sech(r/r_t)\n"
+	  "\n"
+	  " with x=sqrt(r^2+r_c^2)/r_s,\n"
+	  " and\n"
+	  "                  -gi   eta    [gi-go]/eta\n"
+	  "      Model(x) = x    (x    + 1).\n"
+	  "\n"
+	  " If file is given, it's interpreted as follows:\n"
+	  "   Plummer:   gi=0, go=5, eta=2\n"
+	  "   Jaffe:     gi=2, go=4, eta=1\n"
+	  "   Hernquist: gi=1, go=4, eta=1\n"
+	  "   Dehnen:          go=4, eta=1\n"
+	  "   NFW:       gi=1, go=4, eta=1\n"
+	  "   Moore:     gi=3/2, go=3, eta=3/2\n"
+	  "   DM:        gi=7/9, go=31/9, eta=4/9\n"
+	  " and differing values are ignored.\n";
       }
-      if(file && file[0])
-	falcON_WarningN("external potential \"Halo\": "
-			"file \"%s\" ignored\n",file);
       if(nemo_debug(2)) {
 	DebugInfo("external potential \"Halo\" initialized with:\n");
 	std::cerr<<
 	  "   r_s = "<<scale_radius()<<"\n"
-	  "   m_t = "<<total_mass()<<"\n"
-	  "   g_i = "<<(npar>3? pars[3] : 0.77777777777777777778)<<"\n"
-	  "   g_o = "<<(npar>4? pars[4] : 3.44444444444444444444)<<"\n"
-	  "   eta = "<<transition()<<"\n"
+	  "   m_t = "<<total_mass()  <<"\n"
+	  "   g_i = "<<inner_gamma() <<"\n"
+	  "   g_o = "<<outer_gamma() <<"\n"
+	  "   eta = "<<transition()  <<"\n"
 	  "   r_t = "<<trunc_radius()<<"\n"
-	  "   r_c = "<<core_radius()<<"\n";
+	  "   r_c = "<<core_radius() <<'\n';
       }
       if(npar>8)
 	falcON_Warning("external potential \"Halo\": "

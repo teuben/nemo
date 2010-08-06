@@ -187,16 +187,113 @@ double HaloModifier::operator()(HaloDensity const&Model,
 //
 // class falcON::DoublePowerLawHalo
 //
-DoublePowerLawHalo::DoublePowerLawHalo(double inner, double outer, double trans)
-  : go(outer), gi(inner), et(trans), gg(go-gi), al(gg/et)
+DoublePowerLawHalo::Model DoublePowerLawHalo::model(const char*mod, bool warn)
+{
+  if(mod==0) return Default;
+  if(0==strcasecmp(mod,"Plummer"))   return Plummer;
+  if(0==strcasecmp(mod,"Jaffe"))     return Jaffe;
+  if(0==strcasecmp(mod,"Hernquist")) return Hernquist;
+  if(0==strcasecmp(mod,"Dehnen"))    return Dehnen;
+  if(0==strcasecmp(mod,"Zhao"))      return Default;
+  if(0==strcasecmp(mod,"NFW"))       return NFW;
+  if(0==strcasecmp(mod,"Moore"))     return Moore;
+  if(0==strcasecmp(mod,"DM"))        return DM;
+  if(warn) falcON_WarningN("DoublePowerLawHalo: "
+			   "unknown model '%s'; assume default\n",mod);
+  return Default;
+}
+//
+const char* DoublePowerLawHalo::name(DoublePowerLawHalo::Model model)
+{
+  switch(model){
+  case Default:   return "Zhao";
+  case Plummer:   return "Plummer";
+  case Jaffe:     return "Jaffe";
+  case Hernquist: return "Hernquist";
+  case Dehnen:    return "Dehnen";
+  case NFW:       return "NFW";
+  case Moore:     return "Moore";
+  case DM:        return "DM";
+  default:        return "unknown model";
+  }
+}
+//
+namespace {
+  using namespace falcON;
+  const double req = DoublePowerLawHalo::null_value();
+  //
+  const double Value[8][3] = {
+    { req, req, req },         // Default:       gi=???  go=???   et=???
+    { 0.0, 5.0, 2.0 },         // Plummer:       gi=0    go=5     et=2
+    { 2.0, 4.0, 1.0 },         // Jaffe:         gi=2    go=4     et=1
+    { 1.0, 4.0, 1.0 },         // Hernquist:     gi=1    go=4     et=1
+    { req, 4.0, 1.0 },         // Dehnen:        gi=???  go=4     et=1
+    { 1.0, 3.0, 1.0 },         // NFW:           gi=1    go=3     et=1
+    { 1.5, 3.0, 1.5 },         // Moore:         gi=3/2  go=3     et=3/2
+    { 0.777777777777777778,    // DM:            gi=7/9  go=31/9  et=4/9
+      3.444444444444444444,
+      0.444444444444444444 } };
+  const char* Name[3] = {"inner", "outer", "eta"};
+  //
+  inline double value(DoublePowerLawHalo::Model m, double x, int v)
+    falcON_THROWING
+  {
+    if(Value[m][v] == req) {
+      if(x == req)
+	falcON_THROWN("parameter '%s' required for model '%s'\n",
+		      Name[v],DoublePowerLawHalo::name(m));
+      return x;
+    } else {
+      if(x != req && x != Value[m][v])
+	falcON_WarningN("%s=%g ignored, using %s=%g for model '%s'\n",
+			Name[v],x,Name[v],Value[m][v],
+			DoublePowerLawHalo::name(m));
+      return Value[m][v];
+    }
+  }
+}
+//
+double DoublePowerLawHalo::inner_value(Model m, double x) falcON_THROWING
+{ return ::value(m,x,0); }
+double DoublePowerLawHalo::outer_value(Model m, double x) falcON_THROWING
+{ return ::value(m,x,1); }
+double DoublePowerLawHalo::trans_value(Model m, double x) falcON_THROWING
+{ return ::value(m,x,2); }
+//
+double DoublePowerLawHalo::inner_default(Model m)
+{ return ::Value[m][0]; }
+double DoublePowerLawHalo::outer_default(Model m)
+{ return ::Value[m][1]; }
+double DoublePowerLawHalo::trans_default(Model m)
+{ return ::Value[m][2]; }
+//
+DoublePowerLawHalo::DoublePowerLawHalo(Model mod,
+				       double inner, double outer, double trans)
+  falcON_THROWING :
+  go(outer_value(mod,outer)),
+  gi(inner_value(mod,inner)),
+  et(trans_value(mod,trans)),
+  gg(go-gi), al(gg/et)
 {
   if(gi < 0.)
-      falcON_THROW("DoublePowerHalo: inner power-law slope = %g < 0",gi);
+    falcON_THROW("DoublePowerHalo: inner power-law slope = %g < 0",gi);
   if(gi > go)
     falcON_THROW("DoublePowerHalo: inner power-law slope = %g > outer = %g",
 		 gi,go);
   if(et <= 0.)
-      falcON_THROW("DoublePowerHalo: transition steepness = %g <= 0",et);
+    falcON_THROW("DoublePowerHalo: transition steepness = %g <= 0",et);
+}
+//
+DoublePowerLawHalo::DoublePowerLawHalo(double inner, double outer, double trans)
+  : go(outer), gi(inner), et(trans), gg(go-gi), al(gg/et)
+{
+  if(gi < 0.)
+    falcON_THROW("DoublePowerHalo: inner power-law slope = %g < 0",gi);
+  if(gi > go)
+    falcON_THROW("DoublePowerHalo: inner power-law slope = %g > outer = %g",
+		 gi,go);
+  if(et <= 0.)
+    falcON_THROW("DoublePowerHalo: transition steepness = %g <= 0",et);
 }
 //
 double DoublePowerLawHalo::operator()(double x) const {

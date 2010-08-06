@@ -8,12 +8,12 @@
 ///
 /// \author Paul McMillan
 /// \author Walter Dehnen
-/// \date   2000-2009
+/// \date   2000-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Copyright (C) 2005      Walter Dehnen, Paul McMillan
-// Copyright (C) 2005-2009 Walter Dehnen
+// Copyright (C) 2005-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -57,9 +57,10 @@
 // v 2.4.9  03/07/2009  WD  keyword r_max
 // v 2.5    08/07/2009  WD  automatically careful if DF non-monotonic
 // v 2.5.1  15/03/2010  WD  inserted explanation of max_r
+// v 2.6    04/08/2010  WD  keyword model
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.5.1"
-#define falcON_VERSION_D "15-mar-2010 Walter Dehnen                          "
+#define falcON_VERSION   "2.6"
+#define falcON_VERSION_D "04-aug-2010 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -74,12 +75,21 @@
 const char*defv[] = {
   "out=???\n          output file                                        ",
   "nbody=???\n        number of bodies                                   ",
-  "inner=7/9\n        inner density exponent                             ",
-  "outer=31/9\n       outer density exponent                             ",
+  "model=Zhao\n       (untruncated) density model; recognised values:\n"
+  "                    Plummer:   1/Model= (1+x^2)^(5/2)\n"
+  "                    Jaffe:     1/Model= x^2 (1+x)^2\n"
+  "                    Hernquist: 1/Model= x (1+x)^3\n"
+  "                    Dehnen:    1/Model= x^inner (1+x)^(4-inner)\n"
+  "                    Zhao:      1/Model= x^inner (1+x^eta)^((outer-inner)/eta)\n"
+  "                    NFW:       1/Model= x (1+x)^3\n"
+  "                    Moore:     1/Model= x^(3/2) (1+x^(3/2))\n"
+  "                    DM:        1/Model= x^(7/9) (1+x^(4/9))^6         ",
+  "inner=\n           inner density exponent                             ",
+  "outer=\n           outer density exponent                             ",
+  "eta=\n             transition strength between inner and outer        ",
   "r_s=1\n            scale radius                                       ",
   "r_2=\n             use r_s = r_2*((2-inner)/(outer-2))^(-1/eta)       ",
   "M=1\n              total mass of halo                                 ",
-  "eta=4/9\n          transition parameter between inner/outer power law ",
   "r_c=0\n            core radius                                        ",
   "r_t=0\n            truncation radius (0 maps to infinity)             ",
   "b=0\n              anisotropy parameter; -1.5 <= b <= min(1,g/2)      ",
@@ -116,57 +126,39 @@ const char*defv[] = {
 //------------------------------------------------------------------------------
 const char*usage =
   "mkhalo -- initial conditions from an equilibrium distribution function\n"
-  "          with spherical density\n"
-  "\n"
-  "                           C trunc(r/|r_t|)\n"
-  "          rho(r) = ----------------------------------\n"
-  "                    inner   eta     [outer-inner]/eta\n"
-  "                   x      (x    + 1)\n"
+  "          with spherical density proportional to\n"
+  "             Model(x) * Trunc(r/|r_t|),  x=sqrt(r^2+r_c^2)/r_s\n"
   "          with\n"
-  "                                     2\n"
-  "          trunc(z) = sech(z) = --------------   if r_t > 0\n"
-  "                               exp(z)+exp(-z)\n\n"
-  "                             2\n"
-  "                   = -----------------          if r_t < 0\n"
-  "                     sech(z)+1/sech(z)\n"
-  "          and\n"
-  "                    2    2\n"
-  "          x = sqrt(r +r_c )/r_s.\n"
-  "\n"
+  "                         -inner   eta    (inner-outer)/eta\n"
+  "             Model(x) = x       (x    + 1),\n"
+  "             Trunc(z) = 1                      if r_t = 0,\n"
+  "                      = sech(z)                if r_t > 0,\n"
+  "                      = 2/(sech(z)+1/sech(z)   if r_t < 0.\n"
   "          The distribution function is of the form (Cuddeford 1991)\n"
-  "\n"
-  "                   -2b\n"
-  "          f(E,L) = L   g(Q)\n"
-  "\n"
-  "          with (Ossipkov 1979, Merritt 1985)\n"
-  "\n"
-  "                    2       2\n"
-  "          Q = -E - L / 2 r_a.\n"
-  "\n"
+  "             f(E,L) = g(Q)/L^2b\n"
+  "          with  Q=-E - L^2 / 2 r^2_a  (Ossipkov 1979, Merritt 1985).\n"
   "          These models have velocity anisotropy\n"
-  "\n"
-  "                        sigma_theta  2   r^2 + b r_a^2\n"
-  "          beta == 1 - ( ----------- )  = --------------.\n"
-  "                          sigma_r         r^2 + r_a^2\n"
-  "\n"
-  "          If an external potential is given, the initial conditions\n"
-  "          will be in equilibrium with the total potential (the sum of\n"
-  "          the external and the halo's own potential)."
+  "             beta(r) = (r^2 + b r_a^2)/r^2 + r_a^2).\n"
+  "          If an external potential is given, the initial conditions will\n"
+  "          be in equilibrium with the total potential."
 #ifdef falcON_PROPER
-  "\n          Individual masses are supported with :"
-  "\n\n                   m_min + (r/rs)^eta m_max"
-  "\n          m propto ------------------------"
-  "\n                       1  + (r/rs)^eta\n"
-  "\n          with rs and eta independent of those for the density.\n"
+  "\n"
+  "          Individual masses are supported with :\n"
+  "                                     eta                   eta\n"
+  "             m propto (m_min + [r/rs]    m_max)/(1 + [r/rs]    )\n"
+  "          with rs and eta independent of those for the density."
 #endif
   ;
 //------------------------------------------------------------------------------
+namespace {
+  inline double getshapeparam(const char*keyword)
+  { return falcON::hasvalue(keyword)? falcON::getdparam(keyword) : -1.; }
+}
+//------------------------------------------------------------------------------
 void falcON::main() falcON_THROWING
 {
-  const double mf = 2.2228847e5;                   // M_sun in WD_units
-  //----------------------------------------------------------------------------
+  const double mf = 2.2228847e5;                      // M_sun in WD_units
   // 1. set some parameters
-  //----------------------------------------------------------------------------
   const bool WD   (getbparam("WD_units"));
   const Random Ran(getiparam("seed"),6);
   const fieldset data((
@@ -189,19 +181,18 @@ void falcON::main() falcON_THROWING
   else if(hasvalue("accfile"))
     falcON_Warning("'accfile' given but no 'accname': "
 		   "will have no external potential\n");
-  //----------------------------------------------------------------------------
   // 2. create initial conditions from a halo model using mass adaption
-  //----------------------------------------------------------------------------
-  double rs(getdparam("r_s"));
-  double rc(getdparam("r_c"));
-  double rt(getdparam("r_t"));
-  double ra(getdparam("r_a"));
-  double be(getdparam("b"));
-  double Mt(getdparam("M"));
-  double gi(getdparam("inner"));
-  double go(getdparam("outer"));
-  double et(getdparam("eta"));
-  if(WD) Mt /= mf;
+  DoublePowerLawHalo::Model model=DoublePowerLawHalo::model(getparam("model"));
+  double gi = DoublePowerLawHalo::inner_value(model,getshapeparam("inner"));
+  double go = DoublePowerLawHalo::outer_value(model,getshapeparam("outer"));
+  double et = DoublePowerLawHalo::trans_value(model,getshapeparam("eta"));
+  double rs = getdparam("r_s");
+  double rc = getdparam("r_c");
+  double rt = getdparam("r_t");
+  double ra = getdparam("r_a");
+  double be = getdparam("b");
+  double Mt = getdparam("M");
+  if(WD) Mt/= mf;
   if(hasvalue("r_2")) {
     if(rs!=1.)
       falcON_Warning("'r_2' given: will ignore non-default 'r_s' value\n");
@@ -219,9 +210,7 @@ void falcON::main() falcON_THROWING
 			 getbparam  ("MA_peri"),
 #endif
 			 getdparam_z("max_r"));
-  //----------------------------------------------------------------------------
   // 3. sample snapshot and write to output
-  //----------------------------------------------------------------------------
   unsigned N = getuparam("nbody");
   if(N) {
     unsigned nbod[bodytype::NUM]={0}; nbod[bodytype::std] = N;
@@ -250,9 +239,7 @@ void falcON::main() falcON_THROWING
     nemo_out out(getparam("out"));
     shot.write_nemo(out,data);
   }
-  //----------------------------------------------------------------------------
   // 4. optional output of table
-  //----------------------------------------------------------------------------
   if(hasvalue("tabfile")) {
     HaloModel const&HM (HaloSample.Model());
     output   Tab(getparam("tabfile"));

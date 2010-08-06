@@ -340,11 +340,45 @@ namespace falcON {
     const double go,gi,et;
     const double gg,al;
   public:
-    /// constructor
-    /// \param inner inner power law slope gamma_i of density
-    /// \param outer outer power law slope gamma_o of density
-    /// \param trans transition steepness eta
+    /// specifying the model
+    enum Model {
+      Default   = 0,  ///< Zhao (1996)               : gi=???  go=???   et=???
+      Plummer   = 1,  ///< Plummer (1911)            : gi=0    go=5     et=2
+      Jaffe     = 2,  ///< Jaffe (1983)              : gi=2    go=4     et=1
+      Hernquist = 3,  ///< Hernquist (1990)          : gi=1    go=4     et=1
+      Dehnen    = 4,  ///< Dehnen (1993)             : gi=???  go=4     et=1
+      NFW       = 5,  ///< NFW (1996)                : gi=1    go=3     et=1
+      Moore     = 6,  ///< Moore (1999)              : gi=3/2  go=3     et=3/2
+      DM        = 7   ///< Dehnen & McLaughlin (2005): gi=7/9  go=31/9  et=4/9
+    };
+    /// find model from string
+    /// \param[in] model "Plummer", "Jaffe", "Hernquist", "Dehnen", "Zhao", 
+    ///                  "NFW", "Moore", or "DM"
+    /// \param[in] warn  if true, a non-matching @a model triggers a warning
+    static Model model(const char*model, bool warn=true);
+    /// get name string from Model
+    /// \param[in] model model to get name for
+    static const char*name(Model model);
+    static double null_value() { return -1.; }
+    static double inner_value(Model, double val=-1.) falcON_THROWING;
+    static double outer_value(Model, double val=-1.) falcON_THROWING;
+    static double trans_value(Model, double val=-1.) falcON_THROWING;
+    static double inner_default(Model);
+    static double outer_default(Model);
+    static double trans_default(Model);
+    /// constructor from parameters
+    /// \param[in] inner inner power law slope gamma_i of density
+    /// \param[in] outer outer power law slope gamma_o of density
+    /// \param[in] trans transition steepness eta
     DoublePowerLawHalo(double inner, double outer, double trans);
+    /// constructor from model and parameters as required
+    /// \param[in] model model
+    /// \param[in] inner optional: inner power law slope gamma_i of density
+    /// \param[in] outer optional: iouter power law slope gamma_o of density
+    /// \param[in] trans optional: itransition steepness eta
+    DoublePowerLawHalo(Model  model,
+		       double inner=-1., double outer=-1., double trans=-1.)
+    falcON_THROWING;
     /// negative logarithmic density slope at r->0
     double inner_gamma() const { return gi; }
     /// scale radius: one
@@ -377,7 +411,7 @@ namespace falcON {
     const HaloModifier       Modif;
     const double             rsc,irs,mt,rh0,fc1,fc2;
   public:
-    /// constructor
+    /// constructor from parameters
     /// It is required that the total mass is finite; otherwise, we error out.
     /// The total mass is finite if outer > 3 or trunc > 0.
     /// \param scale scale radius
@@ -392,6 +426,39 @@ namespace falcON {
 			       double inner, double outer, double trans)
       falcON_THROWING :
       Model(inner,outer,trans),
+      Modif(core/scale,trunc/scale),
+      rsc  (scale),
+      irs  (1/scale),
+      mt   (mtot),
+      rh0  (cube(irs)*mtot/Model.Mtot(Modif)),
+      fc1  (rh0*irs),
+      fc2  (fc1*irs) 
+    {
+      if(isinf(rsc)) falcON_THROW("ModifiedDoublePowerLawHalo: r_s=inf\n");
+      if(rsc   ==0.) falcON_THROW("ModifiedDoublePowerLawHalo: r_s==0\n");
+      if(rsc   < 0.) falcON_THROW("ModifiedDoublePowerLawHalo: r_s=%g<0\n",rsc);
+      if(isinf(mt) ) falcON_THROW("ModifiedDoublePowerLawHalo: M=inf\n");
+      if(mt    ==0.) falcON_THROW("ModifiedDoublePowerLawHalo: M==0\n");
+      if(mt     <0.) falcON_THROW("ModifiedDoublePowerLawHalo: M=%g<0\n",mt);
+      DebugInfo(2,"ModifiedDoublePowerLawHalo: rh0=%f\n",rh0);
+    }
+    /// constructor from model and parameters
+    /// It is required that the total mass is finite; otherwise, we error out.
+    /// The total mass is finite if outer > 3 or trunc > 0.
+    /// \param scale scale radius
+    /// \param core  core radius
+    /// \param trunc truncation radius (zero -> infinity, ie. no truncation)
+    /// \param mtot  total mass
+    /// \param inner inner power law slope of density
+    /// \param outer outer power law slope of density
+    /// \param trans transition steepness
+    ModifiedDoublePowerLawHalo(double scale, double core, double trunc,
+			       double mtot,
+			       DoublePowerLawHalo::Model model,
+			       double inner=-1., double outer=-1.,
+			       double trans=-1.)
+      falcON_THROWING :
+      Model(model,inner,outer,trans),
       Modif(core/scale,trunc/scale),
       rsc  (scale),
       irs  (1/scale),
