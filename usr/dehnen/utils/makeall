@@ -75,6 +75,7 @@ endif
 # -------------------------
 
 CXXFLAGS		:= $(CXXFLAGS) $(WDutilsDevel)
+OMPFLAGS		:= $(OMPFLAGS) -DWDutilsOMP
 LUTIL			:= -L$(LIB) -lWDutils -Wl,-rpath,$(PWD)/$(LIB)
 MAKE_OBJ		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
 MAKE_EXE		= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS) $(LUTIL) -lm
@@ -170,21 +171,19 @@ ifdef WDutilsDevel
 
 $(LIB)neighbour.o:	$(neighbour_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ)
 
-WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
+WDutilsS_objs	:=	$(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
 			$(LIB)WDMath.o $(LIB)neighbour.o
-WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o
 
 else
 
-WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
+WDutilsS_objs	:=	$(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
 			$(LIB)WDMath.o
-WDutils_objs	:=	$(WDutilsS_objs)
 endif
+
+WDutils_objs	:=	$(LIB)exception.o $(WDutilsS_objs)
 
 # -------
 # library
@@ -209,7 +208,8 @@ $(LIB)parallelMPI.o:	$(parallel_cc) $(makefiles)
 $(LIB)domainMPI.o:	$(domain_cc) $(makefiles)
 			$(MAKE_OBJ_MPI)
 
-WDutilsP_objs	:=	$(WDutilsS_objs) $(LIB)domainMPI.o $(LIB)parallelMPI.o
+WDutilsP_objs	:=	$(LIB)exception.o $(WDutilsS_objs) \
+			$(LIB)domainMPI.o $(LIB)parallelMPI.o
 
 $(LIB)libWDutilsMPI.a:	$(WDutilsP_objs)
 			$(AR) $@ $?
@@ -217,13 +217,38 @@ $(LIB)libWDutilsMPI.a:	$(WDutilsP_objs)
 $(LIB)libWDutilsMPI.so:	$(WDutilsP_objs)
 			$(CXX) $^ $(LDFLAGS) -o $@
 
-library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so \
-			$(LIB)libWDutilsMPI.a $(LIB)libWDutilsMPI.so
-else
-
-library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so
+libraryMPI	:=	$(LIB)libWDutilsMPI.a $(LIB)libWDutilsMPI.so
 
 endif
+
+ifdef WDutilsDevel
+# -----------------------
+# OMP modules and library
+# -----------------------
+
+$(LIB)parallelOMP.o:	$(parallel_cc) $(makefiles)
+			$(MAKE_OBJ_OMP)
+$(LIB)exceptionOMP.o:	$(exception_cc) $(makefiles)
+			$(MAKE_OBJ_OMP)
+
+WDutilsO_objs	:=	$(LIB)exceptionOMP.o $(WDutilsS_objs) \
+			$(LIB)parallelOMP.o
+
+$(LIB)libWDutilsOMP.a:	$(WDutilsO_objs)
+			$(AR) $@ $?
+			$(RL) $@
+$(LIB)libWDutilsOMP.so:	$(WDutilsO_objs)
+			$(CXX) $^ $(LDFLAGS) -o $@
+
+libraryOMP	:=	$(LIB)libWDutilsOMP.a $(LIB)libWDutilsOMP.so
+
+endif
+
+#
+
+library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so \
+			$(libraryMPI) $(libraryOMP)
+
 
 # -------------
 # test routines
