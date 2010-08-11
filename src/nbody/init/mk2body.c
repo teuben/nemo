@@ -2,6 +2,7 @@
  * MK2BODY: make a 2 body system
  *
  *	29-jul-09	PJT     why did this take so long....
+ *       7-jun-10       PJT     added mass=, e.g. see mktt72
  */
 
 #include <stdinc.h>
@@ -22,9 +23,10 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "vx=0\n             VX velocity of 2nd particle",
     "vy=1\n             VY velocity of 2nd particle",
     "vz=0\n             VY velocity of 2nd particle",
+    "mass=1\n           Mass of central particle",
     "zerocm=true\n	if true, zero the center of mass",
     "headline=\n	verbiage for output",
-    "VERSION=1.0\n	29-jul-09 PJT",
+    "VERSION=2.0\n	7-jun-10 PJT",
     NULL,
 };
 
@@ -33,6 +35,7 @@ string usage = "make a 2 body system";
 string cvsid="$Id$";
 
 
+local real mass;
 local int nobj;
 local real *m;
 local mdarray3 phase;
@@ -52,7 +55,7 @@ void nemo_main()
   m = (real *) allocate(nobj * sizeof(real));
   phase = allocate_mdarray3(nobj,2,NDIM);
 
-  m[0] = 1.0;             /* central particle, mass=1 at center */
+  m[0] = getdparam("mass");    /* central particle */
   for (j=0; j<2; j++)
     for (i=0; i<NDIM; i++)
       phase[0][j][i] = 0.0;
