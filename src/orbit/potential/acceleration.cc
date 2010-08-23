@@ -29,15 +29,17 @@
 //
 //------------------------------------------------------------------------------
 //
-// version 0.0  17/06/2004  WD   It works!
-// version 1.0  22/06/2004  WD   allow for up to 10 fallbacks, no last_...
-// version 2.0  24/08/2004  WD   have iniacceleration() give the acc_pter
-// version 2.1  26/08/2004  WD   check for 2nd use of same potential
-//                               16 fallbacks
-// version 3.0  26/08/2004  WD   allow for multiple accnames
-// version 3.1  26/08/2004  WD   avoid array allocation in fallback
-// version 3.2  26/08/2004  WD   check for 2nd use of same acceleration
-// version 3.3  17/02/2010  WD   allow for nemo string bug
+// version 0.0  17/06/2004  WD  It works!
+// version 1.0  22/06/2004  WD  allow for up to 10 fallbacks, no last_...
+// version 2.0  24/08/2004  WD  have iniacceleration() give the acc_pter
+// version 2.1  26/08/2004  WD  check for 2nd use of same potential
+//                              16 fallbacks
+// version 3.0  26/08/2004  WD  allow for multiple accnames
+// version 3.1  26/08/2004  WD  avoid array allocation in fallback
+// version 3.2  26/08/2004  WD  check for 2nd use of same acceleration
+// version 3.3  17/02/2010  WD  allow for nemo string bug
+// version 3.4  23/08/2010  WD  empty accnames: return 0 (rather than trigger
+//                              Segmentation fault)
 //
 //------------------------------------------------------------------------------
 
@@ -653,7 +655,7 @@ namespace {
     return false;
   }
 
-  inline c_string *splitstring(c_string list, c_string seps)
+  c_string *splitstring(c_string list, c_string seps)
   {
     char    *words = new char[strlen(list)+1];
     c_string*wlist = new c_string[128];
@@ -699,10 +701,14 @@ acc_pter get_acceleration(const char*accnames,
   // 0. split accnames and count number of sub acceleration fields
   nemo_dprintf(2,"get_acceleration(\"%s\",\"%s\",\"%s\")\n",
 	       accnames,accparss,accfiles);
-  c_string*accname = splitstring(accnames,NameSeps);
+  
   int nacc=0;
-  while(accname[nacc]) nacc++;
-  if(nacc == 0) error(const_cast<char*>("get_acceleration: empty accname"));
+  c_string*accname;
+  if(accnames) {
+    accname = splitstring(accnames,NameSeps);
+    while(accname[nacc]) nacc++;
+  }
+  if(nacc == 0) return 0;
   // 1. just one accname, then return single acceleration()
   if(nacc == 1) {
     freestrings(accname);
