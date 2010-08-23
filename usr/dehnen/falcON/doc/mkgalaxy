@@ -155,8 +155,8 @@ if(! $?giveF) then
     set giveF=f
 endif
 
-set fac=`nemoinp "$Rdmax/$Rd"`
-set reduce=`nemoinp "(1+$fac)*exp(-$fac)"`
+set Rfac=`nemoinp "$Rdmax/$Rd"`
+set reduce=`nemoinp "(1+$Rfac)*exp(-$Rfac)"`
 set sdens=`nemoinp "$Md/(2*3.141592*$Rd*$Rd*(1-$reduce))"`
                                                # Central surface dens. of disc
 set Nlev=`nemoinp "$kmin-$kmax+1"`             # Number of different timestep lengths
