@@ -2,6 +2,8 @@
 #
 #	dec-90	moved small things from $NEMO/src/nemo/util into here
 
+include $(NEMOLIB)/makedefs
+
 #
 CFLAGS = -O
 LDFLAGS = -O
