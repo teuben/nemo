@@ -1,4 +1,7 @@
 
+# optionally include NEMO's compilers
+-include $(NEMOLIB)/makedefs
+
 EXPORT = tkrun.c tkrun.1 tkrun.lsm Makefile \
 	testscript testscript0.tk redo \
 	sample1 \
