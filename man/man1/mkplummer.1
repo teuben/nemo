@@ -1,4 +1,4 @@
-.TH MKPLUMMER 1NEMO "11 April 2005"
+.TH MKPLUMMER 1NEMO "15 September 2010"
 .SH NAME
 mkplummer \- generates a snapshot according to a truncated Plummer model
 .SH SYNOPSIS
@@ -37,8 +37,8 @@ see  rfrac immediately below (Default: \fIrfrac\fP=22.8042468).
 .TP
 \fBrfrac=\fP\fIreal\fP
 radius fraction of the (infinitely extended) Plummer model. If
-\fImfrac = rfrac\fP = 1.0 then particles will be sprinkled in all over
-space. If \fImfrac\fP < 1.0 or \fIrfrac\fP < 1.0 then each particle is
+\fImfrac = 1.0\fP then particles will be sprinkled in all over
+space. If \fImfrac\fP < 1.0 or \fIrfrac\fP > 0.0 then each particle is
 constrained to lie within both the radial and (cumulative) mass bound.
 For example, if \fIrfrac\fP( \fImfrac\fP ) > \fIrfrac\fP then
 \fIrfrac\fP is the limiting factor, but if \fIrfrac\fP( \fImfrac\fP )
@@ -137,3 +137,4 @@ xx-Mar-89	V2.0: full new snapshot version	+ doc PJT
 6-jun-96	V2.5d: report total mass before scaling  	PJT
 21-mar-04	V2.7: added mlow=	PJT+NCM
 11-apr-05	V2.8: added nmodel=	PJT
+15-sep-10	V2.9: clarified rfrac and allow rfrac<0		PJT
