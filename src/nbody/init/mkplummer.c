@@ -60,7 +60,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
-    "VERSION=2.8b\n           30-may-07 PJT",
+    "VERSION=2.9\n            15-sep-2010 PJT",
     NULL,
 };
 
@@ -233,11 +233,16 @@ rproc mf;
     sqrt_scalefactor = sqrt( scalefactor );
 /*
  *  we can now convert  rfrac  into an equivalent mfrac:
+ *  but by allowing rfrac <= 0.0 we can cheat and use mfrac=1 (for example)
  */
-    rfrac *= scalefactor;          /* from VIRIAL to STRUCTURAL units */
-    mrfrac = rfrac*rfrac*rfrac / pow(1.0 + rfrac*rfrac, 1.5);
-    if (mrfrac < mfrac)
+    if (rfrac > 0) {
+      rfrac *= scalefactor;          /* from VIRIAL to STRUCTURAL units */
+      mrfrac = rfrac*rfrac*rfrac / pow(1.0 + rfrac*rfrac, 1.5);
+      if (mrfrac < mfrac)
 	mfrac = mrfrac;            /* mfrac = min(mfrac, m(rfrac)) */
+    } else
+      warning("New feature: mfrac=%g\n",mfrac);
+      
 /*
  *  now we construct the individual particles:
  */
