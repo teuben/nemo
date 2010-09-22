@@ -85,9 +85,6 @@ namespace WDutils {
     };
   } // namespace meta {
 
-  /// printf style format for arguments of type size_t
-  static const char size_t_format[4] = sizeof(size_t)==4? "%du" : "%lu";
-
   typedef meta::__IWORDS<1>::integer_s int8;   ///<   signed integer of  8 bytes
   typedef meta::__IWORDS<2>::integer_s int16;  ///<   signed integer of 16 bytes
   typedef meta::__IWORDS<4>::integer_s int32;  ///<   signed integer of 32 bytes

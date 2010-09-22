@@ -91,6 +91,10 @@ endif
 ifeq ($(__ICC),$(VALID))
 libicc		:
 		make -f makeall COMPILER=icc WDutilsDevel=$(WDutilsDevel) library
+ifdef WDutilsDevel
+testsuiteicc	:
+		make -f makeall COMPILER=icc WDutilsDevel=$(WDutilsDevel) testsuite
+endif
 endif
 
 # ---------------------

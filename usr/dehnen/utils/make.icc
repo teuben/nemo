@@ -14,11 +14,14 @@ CC		:= icc
 FC		:= ifc
 
 # general optimasation and warning flags
-OPTFLAGS	:= -O2 -unroll -tpp7 -wd177,1572 -i_dynamic -prefetch
+WARNFLAGS	:= -Wall
+TEST		:= -Wcheck -Wformat -Wreorder -Wno-return-type -Wshadow -Wuninitialized -Wstrict-prototypes -Wunused-function
+
+OPTFLAGS	:= -O2 -fpic -falign-functions
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
-CXXFLAGS	:= $(OPTFLAGS)
+CXXFLAGS	:= $(OPTFLAGS) $(WARNFLAGS)
 
 # end
 
