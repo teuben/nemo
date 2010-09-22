@@ -1,3 +1,4 @@
+# -*- makefile -*-
 #
 # sets library sub-directory and flags for intel compiler
 # to be included by makefile 

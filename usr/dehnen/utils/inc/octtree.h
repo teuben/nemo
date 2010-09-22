@@ -96,7 +96,7 @@ namespace WDutils {
     typedef __X             real;            ///< floating point type: position
     typedef tupel<__D,real> point;           ///< type: positions
     typedef uint32          particle_key;    ///< type: indexing particles
-    typedef uint32          node_index;      ///< type: indexing leafs & cells
+    typedef uint32          count_type;      ///< type: indexing leafs & cells
     typedef uint8           depth_type;      ///< type: tree depth & level
     typedef uint8           octant_type;     ///< type: octant and # cell kids
     typedef uint16          local_count;     ///< type: # leaf kids
@@ -167,26 +167,26 @@ namespace WDutils {
     //@}
     /// \name leaf data (access via struct TreeAccess )
     //@{
-    node_index    NLEAF;              ///< total number of leafs
+    count_type    NLEAF;              ///< total number of leafs
     point16      *XL;                 ///< leaf positions
     particle_key *PL;                 ///< index of associated particle
-    node_index   *PC;                 ///< index of parent cell
+    count_type   *PC;                 ///< index of parent cell
     //@}
     /// \name cell data (access via struct TreeAccess )
     //@{
-    node_index    NCELL;              ///< total number of cells
+    count_type    NCELL;              ///< total number of cells
     depth_type   *LE;                 ///< cells' tree level
     octant_type  *OC;                 ///< cells' octant in parent cell
     cube16       *XC;                 ///< cells' centre and radius (of cube)
-    node_index   *L0;                 ///< cells' first leaf
+    count_type   *L0;                 ///< cells' first leaf
     local_count  *NL;                 ///< number of cells' leaf kids
-    node_index   *NM;                 ///< number of cells' leaf descendants
-    node_index   *CF;                 ///< first daughter cell
+    count_type   *NM;                 ///< number of cells' leaf descendants
+    count_type   *CF;                 ///< first daughter cell
     octant_type  *NC;                 ///< number of cells' daughter cells
-    node_index   *PA;                 ///< parent cell
+    count_type   *PA;                 ///< parent cell
     //@}
     void allocate();
-    void build(char, node_index, const Initialiser*, const OctalTree*)
+    void build(char, count_type, const Initialiser*, const OctalTree*)
       WDutils_THROWING;
   public:
     /// \name tree building
@@ -225,7 +225,7 @@ namespace WDutils {
     ///       in favour of their only daughter cell. In this case, the parent
     ///       and daughter cell may be more than one tree level apart and the
     ///       tree depth less than the maximum tree level of any cell.
-    OctalTree(node_index N, const Initialiser*init, unsigned nmax,
+    OctalTree(count_type N, const Initialiser*init, unsigned nmax,
 	      unsigned nmin=0, bool avspc=true) WDutils_THROWING
     : ALLOC ( 0 ),
       NALLOC( 0 ),
@@ -280,7 +280,7 @@ namespace WDutils {
     ///       of Initialiser::ReInitialiseValid(). Finally,
     ///       Initialiser::ReInitialiseInvalid() is called to initialise any
     ///       additional particles.
-    void rebuild(const Initialiser*init, node_index Nnew=0,
+    void rebuild(const Initialiser*init, count_type Nnew=0,
 		 unsigned nmax=0, unsigned nmin=0) WDutils_THROWING
     {
       if(0==init)
@@ -328,7 +328,7 @@ namespace WDutils {
     ///
     /// \param[in] avspc   avoid single-parent cells
     OctalTree(const OctalTree*parent, const Initialiser*init,
-	      node_index nsub=0, unsigned nmax=0, unsigned nmin=0,
+	      count_type nsub=0, unsigned nmax=0, unsigned nmin=0,
 	      bool avspc=true) WDutils_THROWING
     : ALLOC ( 0 ),
       NALLOC( 0 ),
@@ -376,7 +376,7 @@ namespace WDutils {
     ///       the parent tree. Otherwise, we require @a nmin,nmax<=250 but map
     ///       @a nmin=0 to @a nmin=min(2,nmax).
     void reprune(const OctalTree*parent, const Initialiser*init,
-		 node_index nsub=0, unsigned nmax=0, unsigned nmin=0)
+		 count_type nsub=0, unsigned nmax=0, unsigned nmin=0)
       WDutils_THROWING
     {
       if(0==init)
@@ -429,10 +429,10 @@ namespace WDutils {
     depth_type const&Nmin() const
     { return NMIN; }
     /// total number of leafs
-    node_index const&Nleafs() const
+    count_type const&NLeaf() const
     { return NLEAF; }
     /// total number of cells
-    node_index const&Ncells() const
+    count_type const&NCell() const
     { return NCELL; }
     /// centre suitable for root
     /// \return position suitable for root centre
@@ -447,6 +447,7 @@ namespace WDutils {
 			   point const&xmax);
   };// class OctalTree<>
 
+  template<typename Tree> struct TreeAccess; // forward declaration
   ///
   /// support for using an OctalTree.
   ///
@@ -456,50 +457,53 @@ namespace WDutils {
   /// Essential as base class for tree-walking algorithms.
   ///
   /// \relates WDutils::OctalTree
-  template<typename OctTree>
-  struct TreeAccess {
+  template<int __D, typename __X>
+  struct TreeAccess< OctalTree<__D,__X> >
+  {
+    /// tree
+    typedef OctalTree<__D,__X> Tree;
     /// floating-point type
-    typedef typename OctTree::real real;
+    typedef typename Tree::real real;
     /// type for positions
-    typedef typename OctTree::point point;
+    typedef typename Tree::point point;
     /// type for cubic boxes
-    typedef typename OctTree::cube cube;
+    typedef typename Tree::cube cube;
     /// type for particle index
-    typedef typename OctTree::particle_key particle_key;
+    typedef typename Tree::particle_key particle_key;
     /// type for indexing leafs and cells
-    typedef typename OctTree::node_index node_index;
+    typedef typename Tree::count_type count_type;
     /// type for tree depth & level
-    typedef typename OctTree::depth_type depth_type;
+    typedef typename Tree::depth_type depth_type;
     /// type for cell octants
-    typedef typename OctTree::octant_type octant_type;
+    typedef typename Tree::octant_type octant_type;
     /// type for number of leaf kids and Nmax
-    typedef typename OctTree::local_count local_count;
+    typedef typename Tree::local_count local_count;
     /// number of dimensions
-    const static depth_type Dim  = OctTree::Dim;
+    const static depth_type Dim  = Tree::Dim;
     /// number of octants per cell
-    const static depth_type Nsub = OctTree::Nsub;
+    const static depth_type Nsub = Tree::Nsub;
     /// pointer to tree
-    const OctTree*const TREE;
+    const Tree*const TREE;
     /// ctor
-    TreeAccess(const OctTree*t) : TREE(t) {}
+    TreeAccess(const Tree*t) : TREE(t) {}
     /// copy ctor
     TreeAccess(const TreeAccess&t) : TREE(t.TREE) {}
     // virtual dtor required by some old compilers
     virtual ~TreeAccess() {}
     /// iterator used for leafs.
     /// A simple wrapper around an index, which, being a separate type, avoids
-    /// confusion with other indices or variables of type node_index.
+    /// confusion with other indices or variables of type count_type.
     //
-    //  NOTE A conversion to node_index is not a good idea, as it allows an
+    //  NOTE A conversion to count_type is not a good idea, as it allows an
     //       implicit conversion to bool, which almost certainly results in
     //       behaviour that is not intended, i.e. instead of IsInvalid()
     struct Leaf {
-      node_index I;
+      count_type I;
       /// default ctor
       Leaf()
       {}
       /// ctor from index
-      explicit Leaf(node_index i)
+      explicit Leaf(count_type i)
 	: I(i) {}
       /// prefix increment
       Leaf& operator++()
@@ -525,24 +529,21 @@ namespace WDutils {
     /// index of associated particle
     particle_key const&particle(Leaf l) const
     { return TREE->PL[l.I]; }
-    /// index of parent cell
-    node_index const&parentcellindex(Leaf l) const
-    { return TREE->PC[l.I]; }
     //@}
     /// iterator used for cells.
     /// A simple wrapper around an index, which, being a separate type, avoids
-    /// confusion with other indices or variables of type node_index.
+    /// confusion with other indices or variables of type count_type.
     //
-    //  NOTE A conversion to node_index is not a good idea, as it allows an
+    //  NOTE A conversion to count_type is not a good idea, as it allows an
     //       implicit conversion to bool, which almost certainly results in
     //       behaviour that is not intended, i.e. instead of IsInvalid()
     struct Cell {
-      node_index I;
+      count_type I;
       /// default ctor
       Cell()
       {}
       /// ctor from index
-      explicit Cell(node_index i)
+      explicit Cell(count_type i)
 	: I(i) {}
       /// prefix increment
       Cell& operator++()
@@ -587,23 +588,20 @@ namespace WDutils {
     real const&radius(Cell c) const
     { return box(c).H; }
     /// number of leaf kids
-    local_count const&Nleafkids(Cell c) const
+    local_count const&NLeafKids(Cell c) const
     { return TREE->NL[c.I]; }
     /// total number of leafs
-    node_index const&Number(Cell c) const
+    count_type const&Number(Cell c) const
     { return TREE->NM[c.I]; }
     /// number of daughter cells
-    octant_type const&Ncells(Cell c) const
+    octant_type const&NCell(Cell c) const
     { return TREE->NC[c.I]; }
     /// index of cell's first leaf
-    node_index const&firstleafindex(Cell c) const
+    count_type const&firstleafindex(Cell c) const
     { return TREE->L0[c.I]; }
     /// index of cell's first daughter cell, if any
-    node_index const&firstcellindex(Cell c) const
+    count_type const&firstcellindex(Cell c) const
     { return TREE->CF[c.I]; }
-    /// index of parent cell, if any
-    node_index const&parentcellindex(Cell c) const
-    { return TREE->PA[c.I]; }
     //@}
     /// \name tree walking and related
     //@{
@@ -623,16 +621,16 @@ namespace WDutils {
     depth_type const&Depth() const
     { return TREE->Depth(); }
     /// # leafs
-    node_index const&Nleafs() const
-    { return TREE->Nleafs(); }
+    count_type const&NLeaf() const
+    { return TREE->NLeaf(); }
     /// next leaf
     static Leaf next(Leaf l)
     { return Leaf(l.I+1); }
     /// first leaf
-    static Leaf BeginLeafs()
+    static Leaf BeginLeaf()
     { return Leaf(0u); }
     /// end of leafs (beyond last leaf)
-    Leaf EndLeafs() const
+    Leaf EndLeaf() const
     { return Leaf(TREE->NLEAF); }
     /// an invalid leaf
     Leaf InvalidLeaf() const
@@ -641,8 +639,8 @@ namespace WDutils {
     bool IsValid(Leaf l) const
     { return l.I < TREE->NLEAF; }
     /// # cells
-    node_index const&Ncells() const
-    { return TREE->Ncells(); }
+    count_type const&NCell() const
+    { return TREE->NCell(); }
     /// next cell
     static Cell next(Cell c)
     { return Cell(c.I+1); }
@@ -650,16 +648,16 @@ namespace WDutils {
     static Cell Root()
     { return Cell(0u); }
     /// first cell
-    static Cell BeginCells()
+    static Cell BeginCell()
     { return Cell(0u); }
     /// end of cells (beyond last cell)
-    Cell EndCells() const
+    Cell EndCell() const
     { return Cell(TREE->NCELL); }
     /// first cell in reversed order: last cell
-    Cell RBeginCells() const
+    Cell RBeginCell() const
     { return Cell(TREE->NCELL-1); }
     /// end cell in reversed order: invalid Cell
-    static Cell REndCells()
+    static Cell REndCell()
     { return --(Cell(0)); }
     /// an invalid cell
     Cell InvalidCell() const
@@ -668,37 +666,40 @@ namespace WDutils {
     bool IsValid(Cell c) const
     { return c.I < TREE->NCELL; }
     /// first of cell @a c's leafs
-    Leaf BeginLeafs(Cell c) const
+    Leaf BeginLeaf(Cell c) const
     { return Leaf(firstleafindex(c)); }
     /// end of cell @a c's leaf children 
     Leaf EndLeafKids(Cell c) const
-    { return Leaf(firstleafindex(c)+Nleafkids(c)); }
+    { return Leaf(firstleafindex(c)+NLeafKids(c)); }
     /// end of all of cell @a c's leafs
     Leaf EndLeafDesc(Cell c) const
     { return Leaf(firstleafindex(c)+Number(c)); }
+    /// last of all of cell @a c's leafs
+    Leaf LastLeafDesc(Cell c) const
+    { return Leaf(firstleafindex(c)+Number(c)-1); }
     /// first of cell @a c's daughter cells
     /// \note if @a c has no daughter cells, this returns @a c itself
-    Cell BeginCells(Cell c) const
+    Cell BeginCell(Cell c) const
     { return Cell(firstcellindex(c)); }
     /// end of cell @a c's daughter cells
     /// \note if @a c has no daughter cells, this returns @a c itself
-    Cell EndCells(Cell c) const
-    { return Cell(firstcellindex(c)+Ncells(c)); }
+    Cell EndCell(Cell c) const
+    { return Cell(firstcellindex(c)+NCell(c)); }
     /// last of cell @a c's daughter cells
-    Cell RBeginCells(Cell c) const
-    { return --(EndCells(c)); }
+    Cell RBeginCell(Cell c) const
+    { return --(EndCell(c)); }
     /// before first of cell @a c's daughter cells
-    Cell REndCells(Cell c) const
-    { return --(BeginCells(c)); }
+    Cell REndCell(Cell c) const
+    { return --(BeginCell(c)); }
     /// cell @a c's parent cell
     Cell Parent(Cell c) const
-    { return Cell(c.I? parentcellindex(c):TREE->NCELL); }
+    { return Cell(c.I? TREE->PA[c.I] : TREE->NCELL); }
     /// leaf @a l's parent cell
     Cell Parent(Leaf l) const
-    { return Cell(parentcellindex(l)); }
+    { return Cell(TREE->PC[l.I]); }
     /// does cell @a c contain leaf @a l ?
     bool Contains(Cell c, Leaf l) const
-    { return BeginLeafs(c) <= l && l < EndLeafDesc(c); }
+    { return BeginLeaf(c) <= l && l < EndLeafDesc(c); }
     /// is either cell ancestor of the other?
     bool IsAncestor(Cell a, Cell b) const
     { return maxnorm(centre(a)-centre(b)) < max(radius(a),radius(b)); }
@@ -710,57 +711,57 @@ namespace WDutils {
     ///       than, Parent(Leaf).
     Cell SmallestContainingCell(point const&x) const;
     //@}
-    /// \name macros for tree walking from within a TreeAccess
+    /// \name macros for tree walking from within a TreeAccess<OctalTree>
     //@{
     /// loop cells down: root first
     /// \relates WDutils::TreeAccess
     /// \note useful for a down-ward pass
 #ifndef LoopCellsDown
 # define LoopCellsDown(NAME)			\
-    for(Cell NAME = this->BeginCells();		\
-	NAME != this->EndCells(); ++NAME)
+    for(Cell NAME = this->BeginCell();		\
+	NAME != this->EndCell(); ++NAME)
 #endif
     /// loop cells up: root last
     /// \relates WDutils::TreeAccess
     /// \note useful for an up-ward pass
 #ifndef LoopCellsUp
 # define LoopCellsUp(NAME)			\
-    for(Cell NAME = this->RBeginCells();	\
-	NAME != this->REndCells(); --NAME)
+    for(Cell NAME = this->RBeginCell();	\
+	NAME != this->REndCell(); --NAME)
 #endif
     /// loop leafs
     /// \relates WDutils::TreeAccess
 #ifndef LoopLeafs
 # define LoopLeafs(NAME)			\
-    for(Leaf NAME = this->BeginLeafs();		\
-	NAME != this->EndLeafs(); ++NAME)
+    for(Leaf NAME = this->BeginLeaf();		\
+	NAME != this->EndLeaf(); ++NAME)
 #endif
     /// loop cell kids of a given cell
     /// \relates WDutils::TreeAccess
 #ifndef LoopCellKids
 # define LoopCellKids(CELL,NAME)		\
-    for(Cell NAME = this->BeginCells(CELL);	\
-    NAME != this->EndCells(CELL); ++NAME)
+    for(Cell NAME = this->BeginCell(CELL);	\
+	NAME != this->EndCell(CELL); ++NAME)
 #endif
     /// loop cell kids of a given cell in reverse order
     /// \relates WDutils::TreeAccess
 #ifndef LoopCellKidsReverse
 # define LoopCellKidsReverse(CELL,NAME)		\
-    for(Cell NAME = this->RBeginCells(CELL);	\
-    NAME != this->REndCells(CELL); --NAME)
+    for(Cell NAME = this->RBeginCell(CELL);	\
+	NAME != this->REndCell(CELL); --NAME)
 #endif
     /// loop cell kids of a given cell, starting somewhere
     /// \relates WDutils::TreeAccess
 #ifndef LoopCellSecd
 # define LoopCellSecd(CELL,START,NAME)		\
     for(Cell NAME = START;			\
-	NAME != this->EndCells(CELL); ++NAME)
+	NAME != this->EndCell(CELL); ++NAME)
 #endif
     /// loop leaf kids of a given cell
     /// \relates WDutils::TreeAccess
 #ifndef LoopLeafKids
 # define LoopLeafKids(CELL,NAME)			\
-    for(Leaf NAME = this->BeginLeafs(CELL);		\
+    for(Leaf NAME = this->BeginLeaf(CELL);		\
 	NAME != this->EndLeafKids(CELL); ++NAME)
 #endif
     /// loop leaf kids of a given cell, starting somewhere
@@ -774,7 +775,7 @@ namespace WDutils {
     /// \relates WDutils::TreeAccess
 #ifndef LoopAllLeafs
 # define LoopAllLeafs(CELL,NAME)			\
-    for(Leaf NAME = this->BeginLeafs(CELL);		\
+    for(Leaf NAME = this->BeginLeaf(CELL);		\
 	NAME != this->EndLeafDesc(CELL); ++NAME)
 #endif
     /// loop leaf descendants of a given cell, starting somewhere
@@ -788,7 +789,7 @@ namespace WDutils {
     /// \relates WDutils::TreeAccess
 #ifndef LoopLstLeafs
 # define LoopLstLeafs(CELL,NAME)			\
-    for(Leaf NAME = this->BeginLeafs(CELL);		\
+    for(Leaf NAME = this->BeginLeaf(CELL);		\
 	NAME != this->LastLeafDesc(CELL); ++NAME)
 #endif
     //@}
@@ -806,11 +807,10 @@ namespace WDutils {
     /// \note virtual: may be overridden/extended in derived class
     virtual std::ostream&Data(Leaf l, std::ostream&out) const
     {
-      return out << 'L' << std::setfill('0') << std::setw(6) << l.I
-		 << ' ' << std::setfill(' ') << std::setw(6) << particle(l)
-		 << ' ' << std::setw(10) << position(l)
-		 << " C" << std::setfill('0') << std::setw(6)
-		 << parentcellindex(l) ;
+      return out << 'L'  << std::setfill('0') << std::setw(6) << l.I
+		 << ' '  << std::setfill(' ') << std::setw(6) << particle(l)
+		 << ' '                       << std::setw(10)<< position(l)
+		 << " C" << std::setfill('0') << std::setw(6) << TREE->PC[l.I];
     }
     /// header for cell dump
     /// \note virtual: may be overridden/extended in derived class
@@ -826,22 +826,21 @@ namespace WDutils {
       out  << 'C' << std::setfill('0') << std::setw(6) << c.I <<' '
 	   << std::setw(2) << std::setfill(' ') << int(level(c)) <<' ';
       if(c.I > 0u)
-	out<< 'C' << std::setfill('0') << std::setw(6)
-	   << parentcellindex(c) <<' ';
+	out<< 'C' << std::setfill('0') << std::setw(6) << TREE->PA[c.I] <<' ';
       else
 	out<< "nil     ";
       out  << int(octant(c)) << ' ';
-      if(Ncells(c))
+      if(NCell(c))
 	out<< 'C' << std::setfill('0') << std::setw(6)
 	   << firstcellindex(c) << ' '
-	   << std::setfill(' ') << std::setw(1) << int(Ncells(c)) << ' ';
+	   << std::setfill(' ') << std::setw(1) << int(NCell(c)) << ' ';
       else
 	out<< "nil     0 ";
       return 
 	out<< 'L' << std::setfill('0') << std::setw(6)
 	   << firstleafindex(c) << ' ' 
 	   << std::setfill(' ')
-	   << std::setw(2) << Nleafkids(c) << ' '
+	   << std::setw(2) << NLeafKids(c) << ' '
 	   << std::setw(6) << Number   (c) << ' '
 	   << std::setw(8) << radius   (c) << ' '
 	   << std::setw(8) << centre   (c);
@@ -871,9 +870,10 @@ namespace WDutils {
   ///
   /// To use it, create a class derived from this and provide the abstract
   /// functions.
-  template<typename OctTree>
-  struct TreeWalkAlgorithm : public TreeAccess<OctTree> {
-    typedef TreeAccess<OctTree> Base;
+  template<int __D, typename __X>
+  struct TreeWalkAlgorithm : public TreeAccess<OctalTree<__D,__X> > {
+    typedef TreeAccess<OctalTree<__D,__X> > Base;
+    typedef typename Base::Tree Tree;
     typedef typename Base::Leaf Leaf;
     typedef typename Base::Cell Cell;
     /// \name interaction interface 
@@ -894,8 +894,8 @@ namespace WDutils {
     { for(; Li<Ln; ++Li) interact(Li); }
     //@}
     /// ctor: allocate memory for stack
-    TreeWalkAlgorithm(const OctTree*t)
-      : Base(t), S(OctTree::Nsub*Base::Depth()) {}
+    TreeWalkAlgorithm(const Tree*t)
+      : Base(t), S(Tree::Nsub*Base::Depth()) {}
     //  virtual dtor (required by some old compilers)
     virtual ~TreeWalkAlgorithm() {}
     /// perform a tree walk.
@@ -905,9 +905,9 @@ namespace WDutils {
 	S.push(Cell(0));
       while(!S.is_empty()) {
 	Cell C = S.pop();
-	if(Nleafkids(C))
-	  interact_many(BeginLeafs(C),EndLeafKids(C));
-	if(Ncells(C))
+	if(NLeafKids(C))
+	  interact_many(BeginLeaf(C),EndLeafKids(C));
+	if(NCell(C))
 	  LoopCellKidsReverse(C,Ci)
 	    if(!interact(C))
 	      S.push(C);
@@ -927,10 +927,11 @@ namespace WDutils {
   /// splitted without further ado. This is usually faster than "late testing".
   ///
   /// \note fully inline
-  template<typename OctTree>
-  class MutualInteractionAlgorithm : public TreeAccess<OctTree> {
+  template<int __D, typename __X>
+  struct MutualInteractionAlgorithm : public TreeAccess<OctalTree<__D,__X> > {
   public:
-    typedef TreeAccess<OctTree> Base;
+    typedef TreeAccess<OctalTree<__D,__X> > Base;
+    typedef typename Base::Tree Tree;
     typedef typename Base::Leaf Leaf;
     typedef typename Base::Cell Cell;
     /// \name interaction interface 
@@ -960,10 +961,10 @@ namespace WDutils {
     //@}
     /// ctor: allocate memory for stacks
     /// \param[in] t  (pter to) tree
-    MutualInteractionAlgorithm(const OctTree*t)
+    MutualInteractionAlgorithm(const Tree*t)
       : Base ( t ),
-	CL   ( OctTree::Nsub*Base::Depth()),
-	CC   ( 2*(OctTree::Nsub-1)*(Base::Depth()+1)+1 )
+	CL   ( Tree::Nsub*Base::Depth()),
+	CC   ( 2*(Tree::Nsub-1)*(Base::Depth()+1)+1 )
     {}
     //  virtual dtor (required by some old compilers)
     virtual ~MutualInteractionAlgorithm() {}
@@ -996,9 +997,9 @@ namespace WDutils {
     {
       while(!CL.is_empty()) {
 	pCL p = CL.pop();
-	if(Nleafkids(p.first))
-	  interact_many(p.second,BeginLeafs(p.first),EndLeafKids(p.first));
-	if(Ncells(p.first))
+	if(NLeafKids(p.first))
+	  interact_many(p.second,BeginLeaf(p.first),EndLeafKids(p.first));
+	if(NCell(p.first))
 	  LoopCellKids(p.first,Ci)
 	    perform(Ci,p.second);
       }
@@ -1008,10 +1009,10 @@ namespace WDutils {
     /// \param[in] B cell to be kept
     void split(Cell A, Cell B)
     {
-      if(Nleafkids(A))
+      if(NLeafKids(A))
 	LoopLeafKids(A,Li)
 	  perform(B,Li);
-      if(Ncells(A))
+      if(NCell(A))
 	LoopCellKids(A,Ci)
 	  perform(Ci,B);
     }
@@ -1020,10 +1021,10 @@ namespace WDutils {
     void split(Cell A)
     {
       // leaf-leaf sub-interactions
-      if(Nleafkids(A) > 1u)
-	interact_many(BeginLeafs(A),EndLeafKids(A));
+      if(NLeafKids(A) > 1u)
+	interact_many(BeginLeaf(A),EndLeafKids(A));
       // self-interactions between sub-cells
-      if(Ncells(A)) {
+      if(NCell(A)) {
 	LoopCellKids(A,Ci)
 	  perform(Ci);
       // mutual interactions between sub-cells and sub-leafs

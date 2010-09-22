@@ -150,7 +150,7 @@ namespace {
     typedef OctalTree<Dim,real>            OctTree;
     typedef Geometry::Algorithms<1>        GeoAlg;
     typedef typename OctTree::Initialiser  Initialiser;
-    typedef typename OctTree::node_index   node_index;
+    typedef typename OctTree::count_type   count_type;
     typedef typename OctTree::depth_type   depth_type;
     typedef typename OctTree::local_count  local_count;
     typedef typename OctTree::particle_key particle_key;
@@ -179,7 +179,7 @@ namespace {
 	ndl_type        NDl;
 	uint8           NDL[Nsub];     ///< # dots/octant
       };
-      node_index        NUM;           ///< total # dots in box
+      count_type        NUM;           ///< total # dots in box
       uint8             NBX;           ///< number of daughter boxes  <= Nsub
       uint8             NOC;           ///< number of octant occupied <= NBX
       uint8             LEV;           ///< tree level of box
@@ -192,20 +192,20 @@ namespace {
 #define cpBOX(d) static_cast<const Box*>((d))
     /// \name data
     //@{
-    node_index          NDOT;          ///< number of dots to load
+    count_type          NDOT;          ///< number of dots to load
     Dot          *const D0;            ///< begin of dots
     const uint8         NMAX;          ///< maximum # particles/octant
     const uint8         NMIN;          ///< minimum # particles/cell
     const bool          AVSPC;         ///< avoid single-parent cells
-    const node_index    NMAX1;         ///< NMAX + 1
+    const count_type    NMAX1;         ///< NMAX + 1
     depth_type          DEPTH;         ///< depth of linked tree
     block_alloc<Box>    BM;            ///< allocator for boxes
     Box                *P0;            ///< root box
     /// after building: # cells required; after linking: # cells actually used
-    node_index          NCELL;
-    mutable node_index  CF;            ///< free cells during linking
-    mutable node_index  LF;            ///< free leafs during linking
-    mutable size_t      ND;            ///< # dots added sofar
+    count_type          NCELL;
+    mutable count_type  CF;            ///< free cells during linking
+    mutable count_type  LF;            ///< free leafs during linking
+    size_t              ND;            ///< # dots added sofar
     const OctTree      *TREE;          ///< tree to be linked
     //@}
     /// replace (pter to) box by (pter to) its non-single-parent descendant
@@ -301,7 +301,7 @@ namespace {
     /// \param[in] nmax  max # dots / octant in building
     /// \param[in] nmin  min leaf / cell in linking
     /// \param[in] tree  old OctalTree, needed if build='r' or 'p'
-    BoxDotTree(char build, node_index Ndot, const Initialiser*Init,
+    BoxDotTree(char build, count_type Ndot, const Initialiser*Init,
 	       depth_type nmax, depth_type nmin, bool avspc,
 	       const OctTree*tree=0) WDutils_THROWING WD_HOT;
     /// dtor
@@ -313,7 +313,7 @@ namespace {
     /// \param[in] L  leaf index in tree
     /// \param[in] D  dot to link leaf to
     /// \param[in] P  parent cell index for leaf
-    void LinkLeaf(node_index L, const Dot*D, node_index P) const
+    void LinkLeaf(count_type L, const Dot*D, count_type P) const
     {
       static_cast<point&>(TREE->XL[L]) = D->X;
       TREE->PL[L] = D->I;
@@ -323,7 +323,7 @@ namespace {
     /// \param[in] P  parent box
     /// \param[in] C  index of current cell to be linked
     /// \param[in] o  octant of cell in @a P
-    void LinkOctantCell(const Box*P, node_index C, int i) const
+    void LinkOctantCell(const Box*P, count_type C, int i) const
     {
       TREE->L0[C] = LF;
       TREE->OC[C] = i;
@@ -344,7 +344,7 @@ namespace {
     /// \return       tree depth of cell C
     /// \note recursive.
     /// \node uses data CF and LF
-    depth_type LinkCell(const Box*P, node_index C, int o) const WD_HOT;
+    depth_type LinkCell(const Box*P, count_type C, int o) const WD_HOT;
     /// frontend for tree linking
     /// \param[in] tree  tree to be linked
     /// \param[in] nmin  only make cells from boxes with at least @a nmin dots
@@ -355,10 +355,10 @@ namespace {
       LF = 0;
       TREE->PA[0] = 0;
       const_cast<depth_type&>(DEPTH) = LinkCell(P0,0,0);
-      const_cast<node_index&>(NCELL) = CF;
+      const_cast<count_type&>(NCELL) = CF;
     }
     //
-    node_index const&NCell() const { return NCELL; }
+    count_type const&NCell() const { return NCELL; }
     //@}
 #ifdef TESTING
     /// header for dot data dump
@@ -375,6 +375,8 @@ namespace {
       else
 	out<<" nil   ";
       out<<' '<<setfill(' ')<<setw(5)<<D->I<<' '<<setw(10)<<D->X<<'\n';
+      if(D->Next)
+	Dump(pDOT(D->Next),out);
     }
     /// header for box data dump
     void DumpHeadBox(std::ostream&out)
@@ -393,7 +395,7 @@ namespace {
     }
     /// dump box data
     /// \param[out] ns  counter for single-parent boxes
-    void Dump(const Box*B, std::ostream&out, node_index&ns)
+    void Dump(const Box*B, std::ostream&out, count_type&ns)
     {
       out<<" B"<<setfill('0')<<setw(5)<<BM.number_of_element(B)
 	 <<' ' <<setfill(' ')<<setw(5)<<B->NUM
@@ -422,7 +424,7 @@ namespace {
 	 <<' '<<setw(8)<<B->CUB.X<<'\n';
     }
     /// dump tree, recursive
-    void Dump(const Box*B, std::ostream&outd, std::ostream&outb, node_index&ns)
+    void Dump(const Box*B, std::ostream&outd, std::ostream&outb, count_type&ns)
     {
       Dump(B,outb,ns);
       for(int i=0; i!=Nsub; ++i)
@@ -433,7 +435,7 @@ namespace {
     /// \param[in] outd ostream for dumping Dot data
     /// \param[in] outb ostream for dumping Box data
     void Dump(std::ostream&outd, std::ostream&outb) {
-      node_index ns=0;
+      count_type ns=0;
       DumpHeadDot(outd);
       DumpHeadBox(outb);
       Dump(P0,outd,outb,ns);
@@ -501,7 +503,7 @@ namespace WDutils {
 namespace {
   //
   template<int Dim, typename real>
-  BoxDotTree<Dim,real>::BoxDotTree(char build, node_index Ndot,
+  BoxDotTree<Dim,real>::BoxDotTree(char build, count_type Ndot,
 				   const Initialiser*Init,
 				   depth_type nmax, depth_type nmin,
 				   bool avspc, const OctTree*Tree)
@@ -526,10 +528,10 @@ namespace {
       break;
     case 'r': {
       // 1.2    re-building using the old tree order
-      Dot*Di=D0, *List=0, *DN1=D0+min(NDOT,Tree->Nleafs());
+      Dot*Di=D0, *List=0, *DN1=D0+min(NDOT,Tree->NLeaf());
       // 1.2.1  try to re-initialise dot positions from particle key in old tree
       //        put uninitialised dots in linked list
-      for(node_index i=0; Di!=DN1; ++Di,++i) {
+      for(count_type i=0; Di!=DN1; ++Di,++i) {
 	Di->I = Tree->PL[i];
 	if(! Init->ReInitialiseValid(Di->I,Di->X) ) { Di->Next=List; List=Di; }
       }
@@ -545,7 +547,7 @@ namespace {
       if(0==NDOT) {
 	// 1.3A  unknown number of particles in pruned tree
 	// 1.3A.1  count number of particles in pruned tree
-	for(node_index i=0; i!=Tree->Nleafs(); ++i)
+	for(count_type i=0; i!=Tree->NLeaf(); ++i)
 	  if(Init->Pick(Tree->PL[i])) ++NDOT;
 	if(0==NDOT)
 	  WDutils_THROW("OctalTree<%d,%s>::build(): empty tree\n",
@@ -555,7 +557,7 @@ namespace {
 	const_cast<Dot*&>(DN) = D0+NDOT;
 	// 1.3A.3  initialise dots
 	Dot*Di=D0;
-	for(node_index i=0; i!=Tree->Nleafs(); ++i)
+	for(count_type i=0; i!=Tree->NLeaf(); ++i)
 	  if(Init->Pick(Tree->PL[i])) {
 	    Di->I = Tree->PL[i];
 	    Di->X = static_cast<point const&>(Tree->XL[i]);
@@ -564,7 +566,7 @@ namespace {
       } else {
 	// 1.3B  assume no more than Ndot leafs of parent tree are picked
 	Dot*Di=D0;
-	for(node_index i=0; i!=Tree->Nleafs(); ++i)
+	for(count_type i=0; i!=Tree->NLeaf(); ++i)
 	  if(Init->Pick(Tree->PL[i])) {
 	    if(Di==DN)
 	      WDutils_THROW("OctalTree<%d,%s>::build(): "
@@ -602,7 +604,7 @@ namespace {
 		    Dim,nameof(real));
     }
     Xave   /= real(NDOT);
-    // 3  set (empty) root box, RA[]
+    // 3  set (empty) root box
     P0->NDl   = 0;
     P0->NBX   = 0;
     P0->NOC   = 0;
@@ -628,7 +630,7 @@ namespace {
   //
   template<int D, typename real>
   typename BoxDotTree<D,real>::depth_type
-  BoxDotTree<D,real>::LinkCell(const Box*P, node_index C, int o) const
+  BoxDotTree<D,real>::LinkCell(const Box*P, count_type C, int o) const
   {
     // 1 if single-parent replace by non-single-parent descendant
     if(AVSPC) EnsureNonSingleParent(P);
@@ -652,7 +654,7 @@ namespace {
     TREE->CF[C] = tmp? CF : C;
     if(tmp==0) return 1;
     // 5 link daughter cells
-    node_index Ci = CF;
+    count_type Ci = CF;
     CF += tmp;
     tmp = 1;
     for(int i=0; i!=Nsub; ++i) {
@@ -687,12 +689,12 @@ namespace WDutils {
     size_t need =
       Next16<point16>       (NLEAF) +  // XL
       Next16<particle_key>  (NLEAF) +  // PL
-      Next16<node_index>    (NLEAF) +  // PC
+      Next16<count_type>    (NLEAF) +  // PC
       Next16<depth_type>    (NCELL) +  // LE
       2*Next16<octant_type> (NCELL) +  // OC,NC
       Next16<cube16>        (NCELL) +  // XC
       Next16<local_count>   (NCELL) +  // NL
-      4*Next16<node_index>  (NCELL);   // L0,NM,CF,PA
+      4*Next16<count_type>  (NCELL);   // L0,NM,CF,PA
     if((need > NALLOC) || (3*need < 2*NALLOC)) {
       if(ALLOC) delete16(ALLOC);
       ALLOC  = new16<char>(need);
@@ -705,21 +707,21 @@ namespace WDutils {
     
     SET_POINTER(XL,NLEAF,point16);
     SET_POINTER(PL,NLEAF,particle_key);
-    SET_POINTER(PC,NLEAF,node_index);
+    SET_POINTER(PC,NLEAF,count_type);
     SET_POINTER(LE,NCELL,depth_type);
     SET_POINTER(OC,NCELL,octant_type);
     SET_POINTER(XC,NCELL,cube16);
-    SET_POINTER(L0,NCELL,node_index);
+    SET_POINTER(L0,NCELL,count_type);
     SET_POINTER(NL,NCELL,local_count);
-    SET_POINTER(NM,NCELL,node_index);
-    SET_POINTER(CF,NCELL,node_index);
+    SET_POINTER(NM,NCELL,count_type);
+    SET_POINTER(CF,NCELL,count_type);
     SET_POINTER(NC,NCELL,octant_type);
-    SET_POINTER(PA,NCELL,node_index);
+    SET_POINTER(PA,NCELL,count_type);
 #undef SET_POINTER
   }
   //
   template<int __D, typename __X>
-  void OctalTree<__D,__X>::build(char building, node_index n,
+  void OctalTree<__D,__X>::build(char building, count_type n,
 				 const Initialiser*init, const OctalTree*tree)
     WDutils_THROWING
   {
@@ -766,9 +768,32 @@ namespace WDutils {
   }
 }
 //
-// Wdutils::TreeAccess<OctTree>
+// Wdutils::TreeAccess<OctalTree>
 //
 namespace WDutils {
+  // generic case
+  template<int __D, typename __X>
+  typename TreeAccess<OctalTree<__D,__X> >::Cell
+  TreeAccess<OctalTree<__D,__X> >::SmallestContainingCell(point const&x) const
+  {
+    Cell c=Root();
+    if(! Geometry::Algorithms<0>::contains(box(c),x))
+      return InvalidCell();
+    for(;;) {
+      if(NCell(c)==0)
+	return c;
+      uint8 o=Geometry::Algorithms<0>::octant(box(c),x);
+      Cell cc=BeginCell(c), ce=EndCell(c);
+      while(cc!=ce && o!=octant(cc)) ++cc;
+      if(cc==ce || 
+	 AvoidedSingleParentCells() &&
+	 level(cc) > level(c)+1     &&
+	 ! Geometry::Algorithms<0>::contains(box(cc),x))
+	return c;
+      c=cc;
+    }
+  }
+  // specialisations for SSE supported types
 #ifdef __SSE__
 #define  PF(__X) static_cast<float*>(__X)
 #define cPF(__X) static_cast<const float*>(__X)
@@ -788,11 +813,11 @@ namespace WDutils {
     // descend down the tree
     for(;;) {
       // if cell has no sub-cells: we are done
-      if(Ncells(c)==0)
+      if(NCell(c)==0)
 	return c;
       // find sub-cell in same octant as x
       uint8 o = 3&_mm_movemask_ps(_mm_cmplt_ps(C,X));
-      Cell cc = BeginCells(c), ce=EndCells(c);
+      Cell cc = BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       // non found: return c
       if(cc == ce)
@@ -821,9 +846,9 @@ namespace WDutils {
 					  _mm_cmpgt_ps(_mm_add_ps(C,H),X)))))
       return InvalidCell();
     for(;;) {
-      if(Ncells(c)==0) return c;
+      if(NCell(c)==0) return c;
       uint8 o = 7&_mm_movemask_ps(_mm_cmplt_ps(C,X));
-      Cell cc = BeginCells(c), ce=EndCells(c);
+      Cell cc = BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce)
 	return c;
@@ -837,6 +862,7 @@ namespace WDutils {
   }
 #undef  PF
 #undef cPF
+#endif // __SSE__
 #ifdef __SSE2__
 #define  PD(__X) static_cast<double*>(__X)
 #define cPD(__X) static_cast<const double*>(__X)
@@ -854,9 +880,9 @@ namespace WDutils {
 				       _mm_cmpgt_pd(_mm_add_pd(C,H),X))))
       return InvalidCell();
     for(;;) {
-      if(Ncells(c)==0) return c;
+      if(NCell(c)==0) return c;
       uint8 o = _mm_movemask_pd(_mm_cmplt_pd(C,X));
-      Cell cc = BeginCells(c), ce=EndCells(c);
+      Cell cc = BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce) return c;
       C = _mm_load_pd(cPD(box(cc).X));
@@ -884,10 +910,10 @@ namespace WDutils {
 				       _mm_cmpgt_pd(_mm_add_pd(C1,H),X1)))))
       return InvalidCell();
     for(;;) {
-      if(Ncells(c)==0) return c;
+      if(NCell(c)==0) return c;
       uint8 o = _mm_movemask_pd(_mm_cmplt_pd(C0,X0)) |
 	(    (1&_mm_movemask_pd(_mm_cmplt_pd(C1,X1)))<<2) ;
-      Cell cc = BeginCells(c), ce=EndCells(c);
+      Cell cc = BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce) return c;
       C0 = _mm_load_pd(cPD (box(cc).X));
@@ -908,53 +934,7 @@ namespace WDutils {
 #undef cPD
 #undef  PD2
 #undef cPD2
-#else  // no __SSE2__ but __SSE__
-  template<int D>
-  typename TreeAccess<OctalTree<Dim,double> >::Cell
-  TreeAccess<OctalTree<Dim,double> >::SmallestContainingCell(point const&x)
-    const
-  {
-    Cell c=Root();
-    if(! Geometry::Algorithms<0>::contains(box(c),x))
-      return InvalidCell();
-    for(;;) {
-      if(Ncells(c)==0)
-	return c;
-      uint8 o=::octant(centre(c),x);
-      Cell cc=BeginCells(c), ce=EndCells(c);
-      while(cc!=ce && o!=octant(cc)) ++cc;
-      if(cc==ce || 
-	 AvoidedSingleParentCells() &&
-	 level(cc) > level(c)+1     &&
-	 ! Geometry::Algorithms<0>::contains(box(cc),x))
-	return c;
-      c=cc;
-    }
-  }  
 #endif // __SSE2__
-#else  // no __SSE__
-  template<typename OctTree>
-  typename TreeAccess<OctTree>::Cell
-  TreeAccess<OctTree>::SmallestContainingCell(point const&x) const
-  {
-    Cell c=Root();
-    if(! Geometry::Algorithms<0>::contains(box(c),x))
-      return InvalidCell();
-    for(;;) {
-      if(Ncells(c)==0)
-	return c;
-      uint8 o=::octant(centre(c),x);
-      Cell cc=BeginCells(c), ce=EndCells(c);
-      while(cc!=ce && o!=octant(cc)) ++cc;
-      if(cc==ce || 
-	 AvoidedSingleParentCells() &&
-	 level(cc) > level(c)+1     &&
-	 ! Geometry::Algorithms<0>::contains(box(cc),x))
-	return c;
-      c=cc;
-    }
-  }
-#endif // __SSE__
 }
 //
 // instantinations

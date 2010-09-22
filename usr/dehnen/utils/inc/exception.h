@@ -373,14 +373,13 @@ namespace WDutils {
   /// use instead of <tt> throw(WDutils::exception) </tt> after function
   /// declaration
 #  define WDutils_THROWING
-  /// instead of throwing an exception: error with [file:line]
-  /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
-  /// WDutils::exception(fmt, data)"
-#  define WDutils_THROW	        WDutils_Error
   /// instead of throwing an exception: error 
   /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
   /// WDutils::exception(fmt, data)"
 #  define WDutils_THROWN	WDutils_ErrorN
+  /// instead of throwing an exception: error with [file:line]
+  /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
+  /// WDutils::exception(fmt, data)"
 #  define WDutils_THROWER       WDutils::Error
   //----------------------------------------------------------------------------
   /// use "WDutils_RETHROW(E)" to re-throw a caught exception "E"
@@ -398,28 +397,48 @@ namespace WDutils {
 #define WDutils_THROW  WDutils_THROWER(__FILE__,__LINE__)
   /// use instead of assert()
   //@}
-  /// \name assertion which throw an excpetion rather than abort
+  /// \name assertion which throws an excpetion rather than abort
   //@{
   /// throws exception with "assertion failed" message
 #ifdef __GNUC__
-  inline void AssertFail(const char*, const char*, unsigned, const char*)
+  inline
+  void AssertFail(const char*, const char*, unsigned, const char*)
     WDutils_THROWING __attribute__ ((__noreturn__));
 #endif
-  inline void AssertFail(const char*assertion, const char*file, unsigned line,
-			 const char*function) WDutils_THROWING
+  inline
+  void AssertFail(const char*assertion, const char*file, unsigned line,
+		  const char*function) WDutils_THROWING
   {
-    if(function)
-      WDutils_THROWER(file,line)
-	("%s: Assertion `%s' failed",function,assertion);
-    else
-      WDutils_THROWER(file,line)
-	("Assertion `%s' failed",assertion);
+    if(function) WDutils_THROWER(file,line)
+		   ("%s: Assertion \"%s\" failed",function,assertion);
+    else         WDutils_THROWER(file,line)
+		   ("Assertion \"%s\" failed",assertion);
   }
-  /// use instead of assert()
+  //
+#ifdef __GNUC__
+  inline
+  void AssertFailE(const char*, const char*, unsigned, const char*)
+    __attribute__ ((__noreturn__));
+#endif
+  inline
+  void AssertFailE(const char*assertion, const char*file, unsigned line,
+		   const char*function)
+  {
+    if(function) WDutils::Error(file,line)
+		   ("%s: Assertion \"%s\" failed",function,assertion);
+    else         WDutils::Error(file,line)
+		   ("Assertion \"%s\" failed",assertion);
+  }
+  /// use instead of assert(): throws an exception
 #define WDutilsAssert(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : AssertFail(__STRING(expr), __FILE__, __LINE__, __ASSERT_FUNCTION))
+  : AssertFail(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
+  /// almost identical to assert()
+#define WDutilsAssertE(expr)						\
+  ((expr)								\
+  ? static_cast<void>(0)						\
+  : AssertFailE(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
 /* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
    which contains the name of the function currently being defined.
    This is broken in G++ before version 2.6.

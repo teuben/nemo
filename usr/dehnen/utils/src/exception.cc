@@ -34,7 +34,7 @@
 #include <ctime>
 #include <iostream>
 #include <fstream>
-#ifdef WDutilsOMP
+#ifdef _OPENMP
 # include <omp.h>
 #endif
 #ifdef unix
@@ -152,7 +152,7 @@ namespace {
     if(RunInfo::is_mpi_proc()) {
       w=snprintf(t,s," @%d",RunInfo::mpi_proc());
       t+=w; s-=w;
-#ifdef WDutilsOMP
+#ifdef _OPENMP
     } else if(omp_in_parallel()) {
       w=snprintf(t,s," @%d",omp_get_thread_num());
       t+=w; s-=w;

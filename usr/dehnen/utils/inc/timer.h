@@ -3,7 +3,7 @@
 ///
 /// \file    utils/inc/timer.h
 ///
-/// \author  Song Ho Ahn (song.ahn@gmail.com), Walter Dehnen
+/// \author  Song Ho Ahn (song.ahn@gmail.com), Walter Dehnen (wd11@le.ac.uk)
 ///                                                                             
 /// \date    2003-2010
 /// \version 13-jan-2003 created SHA
@@ -34,9 +34,9 @@
 
 extern "C" {
 #ifdef WIN32   // Windows system specific
-#include <windows.h>
+#  include <windows.h>
 #else          // Unix based system specific
-#include <sys/time.h>
+#  include <sys/time.h>
 #endif
 }
 
@@ -52,17 +52,17 @@ namespace WDutils {
   private:
 #ifdef WIN32
     LARGE_INTEGER frequency;               ///< ticks per second
-    LARGE_INTEGER startCount;              ///<
-    LARGE_INTEGER endCount;                ///<
+    LARGE_INTEGER startCount;              ///< value of counter at start
+    LARGE_INTEGER endCount;                ///< value of counter at end
 #else
-    timeval startCount;                    ///< 
-    timeval endCount;                      ///< 
+    timeval startCount;                    ///< value of counter at start
+    timeval endCount;                      ///< value of counter at end
 #endif
     bool    stopped;                       ///< stop flag 
   public:
     /// ctor
     Timer()
-      : stopped(false)  {}
+      : stopped(true)  {}
     /// start timer.
     /// startCount will be set here
     void start()

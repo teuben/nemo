@@ -558,20 +558,20 @@ namespace WDutils {
 	return *this;
       }
       /// postfix ++: return temporary equal original, but increment this
-      iterator  operator++(int)
+      iterator operator++(int)
       {
 	iterator tmp(*this);
 	this->operator++();
 	return tmp;
       }
       /// equality: refer to the same element?
-      bool operator==(const iterator&I)
-      { return B == I.B  &&  E == I.E; }
+      bool operator==(const iterator&I) const
+      { return E == I.E; }
       /// inequality: not equal
-      bool operator!=(const iterator&I)
+      bool operator!=(const iterator&I) const
       { return ! operator==(I); }
       /// conversion to bool: is iterator valid?
-      operator bool()
+      operator bool() const
       { return B!=0; }
       /// \name conversions to pointer to elment or reference to element
       //@{
@@ -679,22 +679,37 @@ namespace WDutils {
       NUSED+=Ne;
       return LAST->new_elements(Ne);
     }
+    /// an invalid number for an element
+    static const unsigned invalid = ~0;
     /// the running number of a given element
     ///
-    /// if \a E does appear not to point to an element given out by this, we
-    /// return a negative number
-    /// \return the running number of element pointed to by \a E
+    /// If @a E does not to point to an element, we return @a invalid
+    ///
+    /// \return the running number of element pointed to by @a E
     /// \param[in]  E  pointer to element
-    int number_of_element(const_pointer E) const
+    unsigned number_of_element(const_pointer E) const
     {
-      if(E==0) return -99;
-      int num=0;
+      if(E==0) return invalid;
+      unsigned num=0;
       for(block*B=FIRST; B; B=B->next())
 	if(E >= B->front() && E < B->end())
-	  return num + int(E-B->front());
+	  return num + unsigned(E-B->front());
 	else
 	  num += B->N_used();
-      return -99;
+      return invalid;
+    }
+    /// element of a given running number
+    ///
+    /// \param[in]  n  running number, must be in [0, N_used[
+    /// \return     pointer to element # @a n, NULL is @a n outside range
+    pointer element(unsigned n) const
+    {
+      for(block*B=FIRST; B; B=B->next()) {
+	unsigned nb = B->N_used();
+	if(n<nb) return B->front() + n;
+	n -= nb;
+      }
+      return 0;
     }
     /// was a given element given out by this?
     /// \return true if a given pointer to element was given out by this

@@ -263,6 +263,7 @@ namespace WDutils {
       { reset(s,0); }
       /// ctor from sphere, assuming 16-byte alignment
       /// \param[in] s  sphere, 16-byte aligned
+      explicit
       SearchSphere(sphere<Dim,real> const&s)
       { reset(s); }
       /// ctor from centre position and radius^2
