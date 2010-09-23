@@ -31,6 +31,10 @@
 #include <numerics.h>
 #include <exception.h>
 
+#ifdef __INTEL_COMPILER
+#pragma warning (disable:1418) /* intel: "this warning can safely be ignored" */
+#endif
+
 using namespace WDutils;
 ////////////////////////////////////////////////////////////////////////////////
 //

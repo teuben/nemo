@@ -41,6 +41,11 @@ ifeq ($(COMPILER),icc)
 makefiles		:= makeall make.icc
 endif
 
+# math lib
+ifndef MATHLIB
+MATHLIB			:= -lm
+endif
+
 # ---------
 # MPI stuff
 # ---------
@@ -77,26 +82,27 @@ endif
 CXXFLAGS		:= $(CXXFLAGS) $(WDutilsDevel)
 LUTIL			:= -L$(LIB) -lWDutils -Wl,-rpath,$(PWD)/$(LIB)
 MAKE_OBJ		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
-MAKE_EXE		= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS) $(LUTIL) -lm
+MAKE_EXE		= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS) $(LUTIL) $(MATHLIB)
 ifdef WDutilsMPI
 LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI -Wl,-rpath,$(PWD)/$(LIB)
 MAKE_OBJ_MPI		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI)
-MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI) $(LUTIL_MPI) -lm
+MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI) $(LUTIL_MPI) $(MATHLIB)
 endif
 # -----------------------
 # header dependency lists
 # -----------------------
 
 Pi_h			:= $(INC)Pi.h
-heap_h			:= $(INC)heap.h
-meta_h			:= $(INC)meta.h
+timer_h			:= $(INC)timer.h
 inline_h		:= $(INC)inline.h
 exception_h		:= $(INC)exception.h
-sse_h			:= $(INC)sse.h $(exception_h)
+meta_h			:= $(INC)meta.h $(exception_h)
 traits_h		:= $(INC)traits.h $(exception_h)
-io_h			:= $(INC)io.h $(exception_h)
-tupel_h			:= $(INC)tupel.h $(INC)tupel.cc $(traits_h)
-memory_h		:= $(INC)memory.h $(exception_h) $(traits_h) $(inline_h)
+io_h			:= $(INC)io.h $(exception_h) $(traits_h)
+tupel_h			:= $(INC)tupel.h $(INC)tupel.cc
+memory_h		:= $(INC)memory.h $(traits_h) $(inline_h)
+sse_h			:= $(INC)sse.h $(exception_h) $(meta_h) $(memory_h)
+heap_h			:= $(INC)heap.h $(memory_h)
 numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(tupel_h)
 spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
@@ -104,7 +110,7 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 				$(inline_h)
 geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 				$(INC)geometry_inl.h
-octtree_h		:= $(INC)octtree.h $(memory_h) $(geometry_h)
+octtree_h		:= $(INC)octtree.h $(geometry_h) $(memory_h)
 
 ifdef WDutilsDevel
 $(INC)neighbour.h	: $(DEV)neighbour.h
@@ -243,14 +249,15 @@ library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so $(libraryMPI)
 ifdef WDutilsDevel
 
 test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
-				$(Pi_h) $(io_h) $(heap_h) library
+				$(WDMath_h) $(neighbour_h) $(Pi_h) $(io_h) \
+				$(heap_h) $(timer_h) library
 				$(MAKE_EXE)
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h) library
 				$(MAKE_EXE)
-test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) library
+test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) $(WDMath_h) \
+				library
 				$(MAKE_EXE)
-test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(parallel_h) \
-				$(Pi_h) library
+test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(Pi_h) library
 				$(MAKE_EXE)
 
 serial_tests		:=	test/TestTreeP$(EXT) \

@@ -79,14 +79,6 @@
 # include <inline.h>
 #endif
 
-#ifdef __GNUC__
-extern "C" {
-  // from math.h
-  double hypot(double,double);
-  float  hypotf(float,float);
-}
-#endif
-
 namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -101,17 +93,6 @@ namespace WDutils {
   const double LogofTenInv = 0.434294481903251827651128918917; ///< 1/ln(10)
   //@}
   // ///////////////////////////////////////////////////////////////////////////
-  /// volume of unit sphere in n dimensions                                     
-  double SphVol(int);
-  // ///////////////////////////////////////////////////////////////////////////
-  /// integral of power (inline)                                                
-  inline double Ipow(double x, double p)
-  {
-    register double p1=p+1;
-    if(p1) return std::pow(x,p1)/p1;
-    else   return std::log(x);
-  }
-  // ///////////////////////////////////////////////////////////////////////////
   /// hypotenus of x,y                                                          
 #ifdef __GNUC__
   inline double hypot(double x, double y) { return ::hypot (x,y); }
@@ -123,6 +104,125 @@ namespace WDutils {
     return ax>ay? ax*sqrt(1+square(ay/ax)) : ay*sqrt(1+square(ax/ay));
   }
 #endif
+  // ///////////////////////////////////////////////////////////////////////////
+  namespace meta {
+    // all exact built-in types
+    template<typename, bool> struct __TypeCompareE;
+    template<typename __T> struct __TypeCompareE<__T,true>
+    {
+      static bool iszero(__T x) { return x==__T(0); }
+      static bool equal(__T x, __T y) { return x==y; }
+      static bool insignificant(__T e, __T) { return iszero(e); }
+    };
+    // all floating-point types
+    template<typename __T> struct __TypeCompareE<__T,false>
+    {
+      // static assert to avoid non-exact non-float-point types
+      WDutilsStaticAssert(TypeInfo<__T>::is_floating_point);
+      static bool iszero(__T x)
+      { return std::abs(x) < TypeInfo<__T>::min(); }
+      static bool equal(__T x, __T y)
+      { return (x<y? y-x:y-x) < TypeInfo<__T>::min(); }
+      static bool insignificant(__T e, __T x)
+      { return std::abs(e) < std::abs(x) * TypeInfo<__T>::epsilon(); }
+    };
+    // all built-in types
+    template<typename __T> struct __TypeCompare :
+      public __TypeCompareE<__T, TypeInfo<__T>::is_exact> {};
+    // specialisation: pointer
+    template<typename __T> struct __TypeCompare<__T*> :
+      public __TypeCompareE<__T*, true> {};
+    // specialisation: const pointer
+    template<typename __T> struct __TypeCompare<const __T*> :
+      public __TypeCompareE<const __T*, true> {};
+#ifdef WDutils_COMPLEX
+    // specialisation: complex
+    template<typename __T> struct __TypeCompare<std::complex<__T> >
+    {
+      typedef __TypeCompareE<__T, TypeInfo<__T>::is_exact> __Comp;
+      static bool iszero(std::complex<__T> x)
+      { 
+	return
+	  __Comp::iszero(std::real(x)) &&
+	  __Comp::iszero(std::imag(x)) ;
+      }
+      static bool equal(std::complex<__T> x,
+			std::complex<__T> y)
+      {
+	return
+	  __Comp::equal(std::real(x),std::real(y)) &&
+	  __Comp::equal(std::imag(x),std::imag(y)) ;
+      }
+      static bool insignificant(std::complex<__T> e,
+				std::complex<__T> x)
+      {
+	return
+	  __Comp::insignificant(std::real(e),std::real(x)) &&
+	  __Comp::insignificant(std::imag(e),std::imag(x)) ;
+      }
+    };
+#endif    
+  } // namespace WDutils::meta
+  // ///////////////////////////////////////////////////////////////////////////
+  /// is a number zero?
+  /// \note For floating-point numbers, the naive comparison "X==0" is
+  ///       not reliable and some compilers, such as icc, warn about such
+  ///       code. Here, we deem a floating-point number to be zero if its
+  ///       absolute value is smaller than the smallest finite value
+  ///       representable in that floating-point format.
+  /// \note This is a template which works fine for all built-in types
+  ///       and pointers. However, if you want or need to use this function
+  ///       for a user-defined type, you best provide an overloaded version.
+  template<typename __T>
+  inline bool iszero(__T x)
+  { 
+    return meta::__TypeCompare<__T>::iszero(x);
+  }
+  /// are two numbers equal?
+  /// \note For floating-point numbers, the naive comparison "X==Y" is
+  ///       not reliable at all. It depends very much on the actual
+  ///       representation. For example internally often 80-bit arithmetic
+  ///       is used, when two numbers may still be different even if they
+  ///       are identical when converted back to 64 or 32 bits (double or
+  ///       float, respectively). Here, we deem two floating-point numbers
+  ///       to be identical if their difference iszero().
+  /// \note This is a template which works fine for all built-in types
+  ///       and pointers. However, if you want or need to use this function
+  ///       for a user-defined type, you best provide an overloaded version.
+  template<typename __T>
+  inline bool equal(__T x, __T y)
+  { 
+    return meta::__TypeCompare<__T>::equal(x,y);
+  }
+  /// is a number insignificant compared to another
+
+  /// \note Numerical code sometimes contains statements like \code
+  ///       if(e+x==x) \endcode. This is meant as "if e is so small compared
+  ///       to x that adding it to x would not change the finite
+  ///       representation of x". However, for floating-point types this
+  ///       code is (1) unreliable as floating-point equality and
+  ///       inequalities generally are, and (2) may be optimised by the
+  ///       compiler to \code if(e!=0) \endcode, which is clearly not the
+  ///       same. Here we compare e to x times epsilon.
+  /// \note This is a template which works fine for all built-in types
+  ///       and pointers. However, if you want or need to use this function
+  ///       for a user-defined type, you best provide an overloaded version.
+  template<typename __T>
+  inline bool insignificant(__T e, __T x)
+  { 
+    return meta::__TypeCompare<__T>::insignificant(e,x);
+  }
+  // ///////////////////////////////////////////////////////////////////////////
+  /// volume of unit sphere in n dimensions                                     
+  double SphVol(int);
+  // ///////////////////////////////////////////////////////////////////////////
+  /// integral of power (inline)                                                
+  inline double Ipow(double x, double p)
+  {
+    register double p1=p+1;
+    if(!iszero(p1)) return std::pow(x,p1)/p1;
+    else            return std::log(x);
+  }
   // ///////////////////////////////////////////////////////////////////////////
   /// fast inverse square root.
   ///

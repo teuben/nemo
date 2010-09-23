@@ -39,6 +39,12 @@
 #  define WDutils_included_limits
 #endif
 
+#ifdef __INTEL_COMPILER
+#pragma warning (disable:383) /* value copied to temporary, reference to temporary used */
+#pragma warning (disable:424) /* extra ";" ignored */
+#pragma warning (disable:981) /* operands are evaluated in unspecified order */
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
 // Burlisch-Stoer integration of 1D real integrals                              
 //------------------------------------------------------------------------------
@@ -65,16 +71,12 @@ double WDutils::qbulir(double(*func)(double),
 		       int     mx)
 {
   // get actual computing precision and adjust accuracy
-  static double eta=0.;
-  if(eta == 0.) {
-    eta = 1.e-7;
-    while(eta+1. != 1.) eta *=0.5;
-    eta  *=2.;                       // eta = actual computing accuracy
-  }
+  const double eta = std::numeric_limits<double>::epsilon();
+
   if(eps<eta) eps=eta;
   // get integration interval and return zero if it vanishes
   double ba=b-a;
-  if(ba==0.) return 0.;
+  if(ba<eta) return 0.;
   // initialise some variables
   bool   bo,bu=0,odd=1;
   int    i,m,n=2,nn=3,mr;
@@ -128,7 +130,7 @@ double WDutils::qbulir(double(*func)(double),
       double d1  = d[i]*ddt;
       double den = d1-nt;
 //    double e   = nt-ddt;
-      if(den) {
+      if(abs(den)>eta) {
 	double e = (nt-ddt)/den;
 //	e /= den;
 	v  = nt*e;
@@ -214,7 +216,8 @@ namespace WDutils {
 	X sc = zero;
 	for(int k=0; k!=i; ++k)
 	  sc += abs(a[i][k]);
-	if(sc == zero)
+	if(iszero(sc))
+// 	if(sc == zero)
 	  e[i] = a[i][i-1];
 	else {
 	  X in = one/sc;
@@ -257,7 +260,8 @@ namespace WDutils {
     e[0] = zero;
     if(EIGENVECTORS)
       for(int i=0; i!=n; ++i) {
-	if(d[i]) {
+	if(!iszero(d[i])) {
+// 	if(d[i]) {
 	  for(int j=0; j!=i; ++j) {
 	    X g = zero;
 	    for(int k=0; k!=i; ++k)
@@ -292,7 +296,8 @@ namespace WDutils {
       do {
 	for(m=l; m!=n-1; ++m) {
 	  X dd = abs(d[m])+abs(d[m+1]);
-	  if(abs(e[m])+dd == dd) break;
+	  if(insignificant(e[m],dd)) break;
+//	  if(abs(e[m])+dd == dd) break;
 	}
 	if(m != l) {
 	  if(iter++ == 30) WDutils_Error("in EigenSystemTridiagonal(): "
@@ -309,7 +314,8 @@ namespace WDutils {
 	    X b = c*e[i];
 	    r = hypot(f,g);
 	    e[i+1] = r;
-	    if(r==zero) {
+	    if(iszero(r)) {
+// 	    if(r==zero) {
 	      d[i+1] -= p;
 	      e[m] = zero;
 	      break;
@@ -327,7 +333,8 @@ namespace WDutils {
 	      z[k][i]   = c*z[k][i]-s*f;
 	    }
 	  }
-	  if(r==zero && i>=0) continue;
+	  if(iszero(r) && i>=0) continue;
+// 	  if(r==zero && i>=0) continue;
 	}
       } while(m!=l);
     }
@@ -347,7 +354,8 @@ namespace WDutils {
       do {
 	for(m=l; m!=n-1; ++m) {
 	  X dd = abs(d[m])+abs(d[m+1]);
-	  if(abs(e[m])+dd == dd) break;
+	  if(insignificant(e[m],dd)) break;
+// 	  if(abs(e[m])+dd == dd) break;
 	}
 	if(m != l) {
 	  if(iter++ == 30) WDutils_Error("in EigenValuesTridiagonal(): "
@@ -364,7 +372,8 @@ namespace WDutils {
 	    X b = c*e[i];
 	    r = hypot(f,g);
 	    e[i+1] = r;
-	    if(r==zero) {
+	    if(iszero(r)) {
+// 	    if(r==zero) {
 	      d[i+1] -= p;
 	      e[m] = zero;
 	      break;
@@ -377,7 +386,8 @@ namespace WDutils {
 	    d[i+1] = g+p;
 	    g = c*r-b;
 	  }
-	  if(r==zero && i>=0) continue;
+	  if(iszero(r) && i>=0) continue;
+// 	  if(r==zero && i>=0) continue;
 	}
       } while(m!=l);
     }

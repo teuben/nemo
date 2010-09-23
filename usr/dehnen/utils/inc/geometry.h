@@ -66,7 +66,7 @@ namespace WDutils {
     ///
     template<int __D, typename __X>
     struct PointPair {
-      const static int Dim=__D;
+      static const int Dim=__D;
       typedef __X real;
       typedef tupel<Dim,real> point;
       SSE::Extend16<point> X,Y;
@@ -74,7 +74,7 @@ namespace WDutils {
     /// special case Dim=2, real=float: just pack all in 128 bits
     template<>
     struct PointPair<2,float> {
-      const static int Dim=2;
+      static const int Dim=2;
       typedef float real;
       typedef tupel<2,float> point;
       point X,Y;

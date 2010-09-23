@@ -47,7 +47,8 @@
 #  define WDutils_included_cmath
 #endif
 ////////////////////////////////////////////////////////////////////////////////
-namespace WDutils { namespace meta {
+namespace WDutils {
+namespace meta {
   //////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_inline_h
   using std::min;
@@ -58,8 +59,13 @@ namespace WDutils { namespace meta {
   // the pgCC compiler is faulty: std::abs(float) returns double
   template<typename T> T abs(T x) { return x<T(0)? -x:x; }
 #endif
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+  using std::isnan;
+  using std::isinf;
+#else
   using ::isnan;   // with some compilers (pgCC, CC) these are not in std
-  using ::isinf;
+  using ::isinf;   // with icc, the std:: version causes compiler error
+#endif
 #endif
   //----------------------------------------------------------------------------
   template<int N> struct times__ {

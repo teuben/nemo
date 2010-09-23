@@ -43,6 +43,9 @@
 #ifndef WDutils_included_octtree_h
 #define WDutils_included_octtree_h
 
+#ifndef WDutils_included_geometry_h
+#  include <geometry.h>
+#endif
 #ifndef WDutils_included_iostream
 #  include <iostream>
 #  define WDutils_included_iostream
@@ -53,9 +56,6 @@
 #endif
 #ifndef WDutils_included_memory_h
 #  include <memory.h>
-#endif
-#ifndef WDutils_included_geometry_h
-#  include <geometry.h>
 #endif
 
 namespace {
@@ -93,21 +93,24 @@ namespace WDutils {
   public:
     /// \name public constants and types
     //@{
-    typedef __X             real;            ///< floating point type: position
-    typedef tupel<__D,real> point;           ///< type: positions
-    typedef uint32          particle_key;    ///< type: indexing particles
-    typedef uint32          count_type;      ///< type: indexing leafs & cells
-    typedef uint8           depth_type;      ///< type: tree depth & level
-    typedef uint8           octant_type;     ///< type: octant and # cell kids
-    typedef uint16          local_count;     ///< type: # leaf kids
-    typedef Geometry::cube<__D,real> cube;   ///< type: cubic box
+    typedef __X             real;             ///< floating point type: position
+    typedef tupel<__D,real> point;            ///< type: positions
+    typedef uint32          particle_key;     ///< type: indexing particles
+    typedef uint32          count_type;       ///< type: indexing leafs & cells
+    typedef uint8           depth_type;       ///< type: tree depth & level
+    typedef uint8           octant_type;      ///< type: octant and # cell kids
+    typedef uint16          local_count;      ///< type: # leaf kids
+    typedef Geometry::cube<__D,real> cube;    ///< type: cubic box
     typedef SSE::Extend16<point> point16;
     typedef SSE::Extend16<cube>  cube16;
-    const static depth_type Dim = __D;       ///< number of dimensions
-    const static depth_type Nsub= 1<<Dim;    ///< number of octants per cell
+    static const depth_type Dim     = __D;    ///< number of dimensions
+    static const depth_type Nsub    = 1<<Dim; ///< number of octants per cell
+    static const depth_type MAXNMAX = 250;
+    static const depth_type MINNMAX = 1;
+    static const depth_type DEFNMIN = 2;
     /// the maximum allowed tree depth
     /// \note Set to the number of digits in our floating point type.
-    const static depth_type MaximumDepth=std::numeric_limits<real>::digits;
+    static const depth_type MaximumDepth=std::numeric_limits<real>::digits;
     /// Interface for initialising particles at tree building
     ///
     /// The interface here is intended to allow for a general particle data
@@ -225,12 +228,12 @@ namespace WDutils {
     ///       in favour of their only daughter cell. In this case, the parent
     ///       and daughter cell may be more than one tree level apart and the
     ///       tree depth less than the maximum tree level of any cell.
-    OctalTree(count_type N, const Initialiser*init, unsigned nmax,
-	      unsigned nmin=0, bool avspc=true) WDutils_THROWING
+    OctalTree(count_type N, const Initialiser*init, depth_type nmax,
+	      depth_type nmin=0, bool avspc=true) WDutils_THROWING
     : ALLOC ( 0 ),
       NALLOC( 0 ),
-      NMAX  ( min(250u, max(1u, nmax)) ), 
-      NMIN  ( min(depth_type(nmin? nmin:2u), NMAX) ),
+      NMAX  ( nmax<MINNMAX? MINNMAX : (nmax>MAXNMAX? MAXNMAX:nmax) ),
+      NMIN  ( nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<DEFNMIN?NMAX:DEFNMIN) ),
       AVSPC ( avspc )
     { 
       if(N == 0)
@@ -281,13 +284,15 @@ namespace WDutils {
     ///       Initialiser::ReInitialiseInvalid() is called to initialise any
     ///       additional particles.
     void rebuild(const Initialiser*init, count_type Nnew=0,
-		 unsigned nmax=0, unsigned nmin=0) WDutils_THROWING
+		 depth_type nmax=0, depth_type nmin=0) WDutils_THROWING
     {
       if(0==init)
 	WDutils_THROW("OctalTree<%d,%s>::rebuild(): init=0\n",Dim,nameof(real));
       if(nmax!=0) {
-	const_cast<depth_type&>(NMAX) = min(250u,nmax);
-	const_cast<depth_type&>(NMIN) = min(depth_type(nmin? nmin:2u), NMAX);
+	const_cast<depth_type&>(NMAX) = nmax>MAXNMAX? MAXNMAX:nmax;
+	const_cast<depth_type&>(NMIN) = (nmin ?
+					 (nmin<NMAX? nmin:NMAX) :
+					 (NMAX<DEFNMIN?NMAX:DEFNMIN) );
 	if(nmax > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
 			   "nmax=%d exceeds 250; will use nmax=%d instead\n",
@@ -328,12 +333,13 @@ namespace WDutils {
     ///
     /// \param[in] avspc   avoid single-parent cells
     OctalTree(const OctalTree*parent, const Initialiser*init,
-	      count_type nsub=0, unsigned nmax=0, unsigned nmin=0,
+	      count_type nsub=0, depth_type nmax=0, depth_type nmin=0,
 	      bool avspc=true) WDutils_THROWING
     : ALLOC ( 0 ),
       NALLOC( 0 ),
-      NMAX  ( nmax==0? parent->Nmax() : min(250u,nmax) ),
-      NMIN  ( nmax==0? parent->Nmin() : min(depth_type(nmin? nmin:2u), NMAX) ),
+      NMAX  ( nmax==0? parent->Nmax() : (nmax>MAXNMAX? MAXNMAX:nmax) ),
+      NMIN  ( nmax==0? parent->Nmin() : 
+	      nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<DEFNMIN?NMAX:DEFNMIN) ),
       AVSPC ( avspc )
     {
       if(0==init)
@@ -376,7 +382,7 @@ namespace WDutils {
     ///       the parent tree. Otherwise, we require @a nmin,nmax<=250 but map
     ///       @a nmin=0 to @a nmin=min(2,nmax).
     void reprune(const OctalTree*parent, const Initialiser*init,
-		 count_type nsub=0, unsigned nmax=0, unsigned nmin=0)
+		 count_type nsub=0, depth_type nmax=0, depth_type nmin=0)
       WDutils_THROWING
     {
       if(0==init)
@@ -385,8 +391,10 @@ namespace WDutils {
 	const_cast<depth_type&>(NMAX) = parent->Nmax();
 	const_cast<depth_type&>(NMIN) = parent->Nmin();
       } else {
-	const_cast<depth_type&>(NMAX) = min(250u,nmax);
-	const_cast<depth_type&>(NMIN) = min(depth_type(nmin? nmin:2u), NMAX);
+	const_cast<depth_type&>(NMAX) = nmax>MAXNMAX? MAXNMAX:nmax;
+	const_cast<depth_type&>(NMIN) = (nmin ?
+					 (nmin<NMAX? nmin:NMAX) :
+					 (NMAX<DEFNMIN?NMAX:DEFNMIN) );
 	if(nmax > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
 			   "nmax=%d exceeds 250; will use nmax=%d instead\n",
@@ -479,9 +487,9 @@ namespace WDutils {
     /// type for number of leaf kids and Nmax
     typedef typename Tree::local_count local_count;
     /// number of dimensions
-    const static depth_type Dim  = Tree::Dim;
+    static const depth_type Dim  = Tree::Dim;
     /// number of octants per cell
-    const static depth_type Nsub = Tree::Nsub;
+    static const depth_type Nsub = Tree::Nsub;
     /// pointer to tree
     const Tree*const TREE;
     /// ctor

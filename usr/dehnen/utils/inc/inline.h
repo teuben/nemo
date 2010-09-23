@@ -51,7 +51,7 @@ namespace WDutils {
   // the pgCC compiler is faulty: std::abs(float) returns double
   template<typename T> T abs(T x) { return x<T(0)? -x:x; }
 #endif
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
   using std::isnan;
   using std::isinf;
 #else

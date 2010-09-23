@@ -34,7 +34,23 @@
 #ifdef __SSE__
 #  ifndef WDutils_included_xmmintrin_h
 #    define WDutils_included_xmmintrin_h
+
+#    if defined(__INTEL_COMPILER) && \
+        defined(__GNUC__) && \
+        defined(_MM_MALLOC_H_INCLUDED)
+#      warning
+#      warning The intel compiler has seen GNU's _mm_malloc.h which declares \
+_mm_malloc() and _mm_free() to have different linking than those declared in \
+INTEL's xmmintrin.h header file, which we are going to include now. This may \
+cause a compiler error, which can be prevented by ensuring that this file (sse.h) \
+is seen by the compiler before GNU's _mm_malloc.h (which in turn seems to be \
+included from GNU's iostream, for instance).
+#      warning
+#    endif
+
+extern "C" {
 #    include <xmmintrin.h>
+}
 #    define _mm_abs_ps(__x) _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x7fffffff))
 #    define _mm_neg_ps(__x) _mm_xor_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
 #    define _mm_nabs_ps(__x) _mm_or_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
@@ -44,13 +60,16 @@
 # ifdef __SSE2__
 #  ifndef WDutils_included_emmintrin_h
 #    define WDutils_included_emmintrin_h
+extern "C" {
 #    include <emmintrin.h>
-#    define _mm_abs_pd(__x) \
-            _mm_and_pd(__x,(__m128d)_mm_set1_epi64x(0x7fffffffffffffffll))
-#    define _mm_neg_pd(__x) \
-            _mm_xor_pd(__x,(__m128d)_mm_set1_epi64x(0x8000000000000000ll))
-#    define _mm_nabs_pd(__x) \
-            _mm_or_pd(__x,(__m128d)_mm_set1_epi64x(0x8000000000000000ll))
+}
+#    define _mm_abs_pd(__x)						\
+    _mm_and_pd(__x,(__m128d)_mm_set_epi32(0x7fffffff,0xffffffff,	\
+					  0x7fffffff,0xffffffff))
+#    define _mm_neg_pd(__x)						\
+    _mm_xor_pd(__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
+#    define _mm_nabs_pd(__x)					\
+    _mm_or_pd (__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
 #    define _mm_diff_pd(__x,__y) _mm_abs_pd(_mm_sub_pd(__x,__y))
 #  endif
 # endif

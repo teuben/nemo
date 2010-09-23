@@ -17,11 +17,13 @@ FC		:= ifc
 WARNFLAGS	:= -Wall
 TEST		:= -Wcheck -Wformat -Wreorder -Wno-return-type -Wshadow -Wuninitialized -Wstrict-prototypes -Wunused-function
 
-OPTFLAGS	:= -O2 -fpic -falign-functions
+OPTFLAGS	:= -O2 -msse4.1 -fpic -falign-functions -openmp -ip
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
 CXXFLAGS	:= $(OPTFLAGS) $(WARNFLAGS)
+LDFLAGS		:= -shared
+MATHLIB		:= -limf -lm
 
 # end
 

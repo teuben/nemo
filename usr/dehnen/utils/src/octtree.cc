@@ -61,6 +61,11 @@
 # endif
 #endif
 
+#ifdef __INTEL_COMPILER
+#pragma warning (disable:383) /* value copied to temporary, reference to temporary used */
+#pragma warning (disable:981) /* operands are evaluated in unspecified order */
+#pragma warning (disable:2259) /* non-pointer conversion from "A" to "B" may lose significant bits */
+#endif
 //
 // Wdutils::OctalTree<Dim,real>
 //
@@ -145,7 +150,7 @@ namespace {
   template<int Dim, typename real>
   struct BoxDotTree
   {
-    const static int Nsub = 1<<Dim; ///< number of octants per cell
+    static const int Nsub = 1<<Dim; ///< number of octants per cell
     //
     typedef OctalTree<Dim,real>            OctTree;
     typedef Geometry::Algorithms<1>        GeoAlg;
@@ -157,7 +162,7 @@ namespace {
     typedef typename OctTree::point        point;
     typedef typename OctTree::cube         cube;
     //
-    const static depth_type MaximumDepth = OctTree::MaximumDepth;
+    static const depth_type MaximumDepth = OctTree::MaximumDepth;
     /// represents a particle in the BoxDotTree
     struct __Dot {
       point             X;             ///< position

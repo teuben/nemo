@@ -405,6 +405,7 @@ namespace WDutils {
     char             FNAME[FNAME_MAX_SIZE];
     const char      *FILE;
     iofile() : FILE(0) {}
+    virtual~iofile() {}
     void setfile(const char*fname) {
       if(fname && fname[0]) {
 	strncpy(FNAME,fname,FNAME_MAX_SIZE);
@@ -927,7 +928,7 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   namespace {
     inline void swap_char(char&A, char&B) { char T(A); A=B; B=T; }
-    template<int B> struct __bswap {};
+    template<int B> struct __bswap;
     template<> struct __bswap<1> {
       static void swap(void*, unsigned) {}
     };
@@ -1003,7 +1004,7 @@ namespace WDutils {
   inline
   void swap_bytes(void*vdat, unsigned len, unsigned cnt) WDutils_THROWING {
     switch(len) {
-    case  1: return;
+    case  1: return __bswap< 1>::swap(vdat,cnt);  // does nothing
     case  2: return __bswap< 2>::swap(vdat,cnt);
     case  4: return __bswap< 4>::swap(vdat,cnt);
     case  8: return __bswap< 8>::swap(vdat,cnt);

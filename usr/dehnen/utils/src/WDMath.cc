@@ -32,6 +32,11 @@
 #include <inline.h>
 #include <iostream>
 
+#ifdef __INTEL_COMPILER
+#pragma warning (disable:383) /* value copied to temporary, reference to temporary used */
+#pragma warning (disable:981) /* operands are evaluated in unspecified order */
+#endif
+
 using std::exp;
 using std::log;
 using std::cos;
@@ -229,7 +234,7 @@ complex<double> WDutils::LogGamma(complex<double> const&z)
   const double c[6]={ 76.18009172947146, -86.50532032941677,
 		      24.01409824083091, -1.231739572450155,
 		      1.208650973866179e-3, -5.395239384953e-6 };
-  if( std::imag(z)==0. && std::real(z) <= 0. && is_integral(-std::real(z)) ) 
+  if(iszero(std::imag(z)) && std::real(z) <= 0. && is_integral(-std::real(z))) 
     MathError("z=-n","LogGamma(z)");
   register bool turn = std::real(z)<1;
   complex<double> 
@@ -277,8 +282,8 @@ double WDutils::Loggamma(double a, double x)
 //------------------------------------------------------------------------------
 double WDutils::LogGamma(double a, double x)
 {
-  if(x==0) return lnGam(a,"LogGamma(a,x)");
-  if(x <0) MathError("x < 0","LogGamma(a,x)");
+  if(iszero(x)) return lnGam(a,"LogGamma(a,x)");
+  if(x < 0 ) MathError("x < 0","LogGamma(a,x)");
   if(x < a+1 && a > 0)
     return log(exp(lnGam_pos(a)) - exp(lngam_ser(a,x,"LogGamma(a,x)")));
   else
@@ -340,8 +345,8 @@ double WDutils::Beta(double a, double b, double x)
   if(b <= 0) MathError("b <=0","Beta(a,b,x)");
   if(x <  0) MathError("x < 0","Beta(a,b,x)");
   if(x >  1) MathError("x > 1","Beta(a,b,x)");
-  if(x == 0) return 0.;
-  if(x == 1) return exp(lnGam_pos(a)+lnGam_pos(b)-lnGam_pos(a+b));
+  if(iszero(x) ) return 0.;
+  if(equal(x,1.)) return exp(lnGam_pos(a)+lnGam_pos(b)-lnGam_pos(a+b));
   if(x < (a+1)/(a+b+2))
     return
       exp(a*log(x)+b*log(1-x))*betacf(a,b,x)/a;
@@ -359,8 +364,8 @@ WDutils::BetaFunc::BetaFunc(double __a, double __b)
 double WDutils::BetaFunc::operator() (double x) const {
   if(x <  0) MathError("x < 0","BetaFunc(x)");
   if(x >  1) MathError("x > 1","BetaFunc(x)");
-  if(x == 0) return 0;
-  if(x == 1) return B;
+  if(iszero(x) ) return 0;
+  if(equal(x,1.)) return B;
   return x < x0 ?
         exp(a*log(x)+b*log(1-x))*betacf(a,b,  x)/a : 
     B - exp(a*log(x)+b*log(1-x))*betacf(b,a,1-x)/b ;
@@ -370,9 +375,9 @@ double WDutils::BetaFunc::operator() (double x) const {
 ////////////////////////////////////////////////////////////////////////////////
 double WDutils::En(int n, double x)
 {
-  if(n<0 || x<0. || (x==0. && n<=1)) MathError("bad argumends","En()");
+  if(n<0 || x<0. || (iszero(x) && n<=1)) MathError("bad argumends","En()");
   if(n==0)  return exp(-x)/x;
-  if(x==0.) return 1./double(n-1);
+  if(iszero(x)) return 1./double(n-1);
   register double ans;
   if(x>1.) {
     register int    i,nm1=n-1;
@@ -500,7 +505,7 @@ double WDutils::Jn(unsigned n, double x)
   register double ax,bj,bjm,bjp,sum,tox,ans;
 
   ax=abs(x);
-  if(ax==0.0) return 0.0;
+  if(iszero(ax)) return 0.;
   if(ax>double(n)) {
     tox = 2./ax;
     bjm = J0(ax);
@@ -638,7 +643,7 @@ double WDutils::In(unsigned n, double x)
   const double acc=60., bigno=1.e10, bigni=1.e-10;
   if(n==0)  return I0(x);
   if(n==1)  return I1(x);
-  if(x==0.) return 0.;
+  if(iszero(x)) return 0.;
   register double bi,bim,bip,tox,ans;
   tox=2.0/fabs(x);
   bip=ans=0.0;
