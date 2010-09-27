@@ -10,6 +10,7 @@
 /*                  12-apr-95 no more ARGS                     */
 /*                  20-jun-01 gcc3 - removed old BORLAND code  */
 /*                  17-mar-06 added fullname                   */
+/*                  27-Sep-10 MINGW32/WINDOWS support (JCL)    */
 /***************************************************************/
 
 #include <stdinc.h>
@@ -17,7 +18,9 @@
 #include <filefn.h>
 
 #include <ctype.h>
+#ifndef __MINGW32__
 #include <pwd.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -293,7 +296,7 @@ string _mappath(strfn fn, string path, string filename, string arg)
 
 local string expandtilde(string name)
 {
-#if defined(__BORLANDC__) 
+#if defined(__BORLANDC__ ) || defined(__MINGW32__) 
     if (*name != '~') return (name);
     warning("Cannot parse a tilde (~) in a filename, returning %s",name);
     return(name);

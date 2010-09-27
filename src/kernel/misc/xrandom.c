@@ -25,6 +25,7 @@
  *  13-may-05   
  *  23-oct-07   added random0() and srandom0(), from Koda, based on ran1 from NumRec     PJT
  *  19-jun-08   enable init_xrandom(0) (previously caused Segmentation fault)  WD
+ *  27-Sep-10   MINGW32/WINDOWS support  JCL
  */
 
 #include <stdinc.h>
@@ -34,8 +35,9 @@
 #include <unistd.h>
 #include <time.h>
 #include <sys/types.h>
+#ifndef __MINGW32__
 #include <sys/times.h>
-
+#endif
 
 extern string *burststring(string,string);
 
@@ -119,11 +121,16 @@ int init_xrandom(string init)
 int set_xrandom(int dum)
 {
     int retval;
+#ifndef __MINGW32__
     struct tms buffer;
-
+#endif
     if (dum <= 0) {
 	if (dum == -1)
+#ifndef __MINGW32__
             retval = idum = (int) times(&buffer);   /* clock cycles */
+#else
+	    ;
+#endif
         else if (dum == -2)
             retval = idum = (int) getpid();         /* process id */
         else            /* normally if dum==0 */

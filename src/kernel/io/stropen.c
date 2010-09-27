@@ -40,6 +40,7 @@
  *       2-aug-03    scratchfile (r+w) access was broken                pjt
  *       2-dec-03    increase MAXFD to 64
  *       9-dec-05    allow input files to be URLs                       pjt
+ *      27-Sep-10   MINGW32/WINDOWS i/o support                         jcl
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -53,6 +54,10 @@
 #include <limits.h>
 #define MAXPATHLEN      PATH_MAX
 
+#ifndef __MINGW32__
+extern int unlink (string);		/* POSIX ??? unistd.h */
+#endif
+extern int dup (int);			/* POSIX ??? unistd.h */
 
 /* normally already defined via maxsizes.h */
 #if !defined(NEMO_MAXFD)
@@ -90,8 +95,18 @@ stream stropen(const_string name, string mode)
     char tempname[MAXPATHLEN];   /* buffer for temp name in case of scratch file */
     stream res;
     struct stat buf;
+#if __MINGW32__
+    // under windows binary read mode is defined "rb"  
+    // DAMN IT (8 hours to figure out this)!!!!!!!!!!!
+    string readwin32="rb";
+#endif
 
     inflag = streq(mode, "r");
+#if __MINGW32__
+    if (streq(mode, "r")) {
+	mode = readwin32;
+    }
+#endif
     if (name[0] == '-') {		/* see if '-' or '-num' special file */
         if (streq(mode,"s")) 
             error("stropen: no scratch mode allowed in %s",name);
@@ -122,15 +137,25 @@ stream stropen(const_string name, string mode)
 #if 0
                 mktemp(tempname);    /* should not use it, insecure */
 #else
+#ifndef __MINGW32__
 		fds = mkstemp(tempname);
+#endif
 #endif
             } 
 	    if (fds < 0) {
 	      if (stat(tempname,&buf)==0)
                 error("stropen: scratch file \"%s\" already exists", tempname);
+#if __MINGW32__
+	      res = fopen(tempname,"wb+");
+#else
 	      res = fopen(tempname,"w+");
+#endif
 	    } else
+#if __MINGW32__
+	      res = fdopen(fds,"wb+");
+#else
 	      res = fdopen(fds,"w+");
+#endif
             if (res==NULL) 
                 error("stropen: cannot open scratch file \"%s\"",tempname);
         } else {                    /* "r" or "w" mode */
@@ -139,7 +164,11 @@ stream stropen(const_string name, string mode)
 		stat(tempname, &buf) == 0)
                 error("stropen: file \"%s\" already exists\n", tempname);
             if (streq(name,".")) {
+#if __MINGW32__
+            	res = fopen("/dev/null", "wb!");
+#else
             	res = fopen("/dev/null", "w!");
+#endif
 		canSeek = FALSE;
             } else {
 	      if (inflag && strstr(name,"://")) {
@@ -148,7 +177,11 @@ stream stropen(const_string name, string mode)
 		res = popen(tempname,"r");
 		canSeek = FALSE;
 	      } else
+#if __MINGW32__
+            	res = fopen(tempname, streq(mode, "w!") ? "wb" : mode);
+#else
             	res = fopen(tempname, streq(mode, "w!") ? "w" : mode);
+#endif
 	    }
             if (res == NULL)
                 error("stropen: cannot open file \"%s\" for %s\n",

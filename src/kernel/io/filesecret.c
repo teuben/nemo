@@ -38,6 +38,7 @@
  * V 3.2   2-jun-05   pjt    blocked (sequential) I/O
  * V 3.3  25-may-07   pjt    handle > 2GB objects in memory (Pierre Fortin <pierre.fortin@oamp.fr>)
  * V 3.4  12-dec-09   pjt    support the new halfp type for I/O (see also csf)
+ *        27-Sep-10   jcl    MINGW32/WINDOWS support
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -61,7 +62,10 @@ extern int convert_h2f(int, halfp  *, float  *);
 extern int convert_h2d(int, halfp  *, double *);
 extern int convert_f2h(int, float  *, halfp  *);
 extern int convert_d2h(int, double *, halfp  *);
-
+#ifdef __MINGW32__
+#define fseeko fseek
+#define ftello ftell
+#endif
 
 /*
  * COPY_ITEM: recursively copy item from input to output.

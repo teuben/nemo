@@ -131,7 +131,8 @@
  * 23-oct-07    3.6   fix bug when ZENO style defv[] is used, more ZENO compat
  * 22-aug-08       a  add help=m to show memory usage at end
  * 26-sep-08 WD    b  add MPI proc info to some stderr output
- 
+ * 27-Sep-10 JCL   c   MINGW32/WINDOWS support
+
   TODO:
       - what if there is no VERSION=
       - process system keywords in readkeys()
@@ -211,8 +212,12 @@
 #include <strlib.h>
 #include <history.h>
 
+#ifndef __MINGW32__
 #include <sys/types.h>
 #include <sys/times.h>
+#else
+# include <sys/time.h>
+#endif
 #include <sys/stat.h>
 #include <sys/file.h>
 #include <fcntl.h>
@@ -248,7 +253,9 @@
 #endif
 
 #if defined(INTERACT)
+#ifndef __MINGW32__
 # include <sys/ioctl.h>           /* this is a BSD thing - won't work on SYSV */
+#endif
                                   /* fcntl.h doesn't have the right stuff */
 # if defined(SOLARIS)
 #  include <sys/termio.h>	/* for Solaris - can it hurt on SUN OS 4.x ?  */
@@ -343,7 +350,11 @@ string argv_string = NULL;  /* cumulative ? */
 string error_string = NULL;
 
 local clock_t clock1, clock2;
-local struct tms tms1, tms2;
+#ifndef __MINGW32__
+ local struct tms tms1, tms2;
+#else
+ local struct tm tms1, tms2;
+#endif
 
 #if defined(TCL7)
   Tcl_Interp *tcl_interp;
@@ -703,8 +714,9 @@ void initparam(string argv[], string defv[])
     }
 #endif
     initparam_out();
+#ifndef __MINGW32__
     clock1 = times(&tms1);
-
+#endif
 } /* initparam */
 
 local void initparam_out()
@@ -730,10 +742,10 @@ local void initparam_out()
 void finiparam()
 {
     int i, n=0;
-
+#ifndef __MINGW32__
     if (report_cpu) report('c');
     if (report_mem) report('m');
-
+#endif
     for (i=1; i<nkeys; i++)
         n += keys[i].upd ? 1 : 0;
 
