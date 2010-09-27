@@ -299,7 +299,7 @@ namespace WDutils {
     return 2.*ex/(1+ex*ex);
   }
   template<typename T> struct __sincos {
-    static void sc(T x, T&, T&) {
+    static void sc(T, T&, T&) {
       WDutils_THROW("sincos() of \"%s\" called\n",traits<T>::name());
     }
   };

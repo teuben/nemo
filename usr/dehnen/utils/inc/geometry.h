@@ -253,8 +253,9 @@ namespace WDutils {
     /// \note Only @a __D = 2 or 3 and @a __X = float or double are possible.
     template<int __D, typename __X> struct SearchSphere
     {
-      static const int Dim = __D;  ///< number of spatial dimensions
-      typedef __X      real;       ///< floating point type
+      static const int        Dim = __D;  ///< number of spatial dimensions
+      typedef __X             real;       ///< floating point type
+      typedef tupel<Dim,real> point;      ///< position type
       /// default ctor
       SearchSphere() {}
       /// ctor from sphere
@@ -296,6 +297,8 @@ namespace WDutils {
       { S.X=s.X; S.Q=s.Q; }
       /// reset just the radius^2
       void reset(real q) { S.Q = q; }
+      /// centre of search sphere
+      point const&Centre() const { return S.X; }
       /// radius^2 of search sphere
       real const&RadSq() const { return S.Q; }
       /// \name geometric relations with position

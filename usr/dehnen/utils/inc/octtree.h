@@ -107,7 +107,6 @@ namespace WDutils {
     static const depth_type Nsub    = 1<<Dim; ///< number of octants per cell
     static const depth_type MAXNMAX = 250;
     static const depth_type MINNMAX = 1;
-    static const depth_type DEFNMIN = 2;
     /// the maximum allowed tree depth
     /// \note Set to the number of digits in our floating point type.
     static const depth_type MaximumDepth=std::numeric_limits<real>::digits;
@@ -233,7 +232,7 @@ namespace WDutils {
     : ALLOC ( 0 ),
       NALLOC( 0 ),
       NMAX  ( nmax<MINNMAX? MINNMAX : (nmax>MAXNMAX? MAXNMAX:nmax) ),
-      NMIN  ( nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<DEFNMIN?NMAX:DEFNMIN) ),
+      NMIN  ( nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<2?NMAX:2) ),
       AVSPC ( avspc )
     { 
       if(N == 0)
@@ -290,9 +289,8 @@ namespace WDutils {
 	WDutils_THROW("OctalTree<%d,%s>::rebuild(): init=0\n",Dim,nameof(real));
       if(nmax!=0) {
 	const_cast<depth_type&>(NMAX) = nmax>MAXNMAX? MAXNMAX:nmax;
-	const_cast<depth_type&>(NMIN) = (nmin ?
-					 (nmin<NMAX? nmin:NMAX) :
-					 (NMAX<DEFNMIN?NMAX:DEFNMIN) );
+	const_cast<depth_type&>(NMIN) =
+	  nmin ? (nmin<NMAX? nmin:NMAX) : (NMAX<2?NMAX:2);
 	if(nmax > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
 			   "nmax=%d exceeds 250; will use nmax=%d instead\n",
@@ -339,7 +337,7 @@ namespace WDutils {
       NALLOC( 0 ),
       NMAX  ( nmax==0? parent->Nmax() : (nmax>MAXNMAX? MAXNMAX:nmax) ),
       NMIN  ( nmax==0? parent->Nmin() : 
-	      nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<DEFNMIN?NMAX:DEFNMIN) ),
+	      nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<2?NMAX:2) ),
       AVSPC ( avspc )
     {
       if(0==init)
@@ -392,9 +390,8 @@ namespace WDutils {
 	const_cast<depth_type&>(NMIN) = parent->Nmin();
       } else {
 	const_cast<depth_type&>(NMAX) = nmax>MAXNMAX? MAXNMAX:nmax;
-	const_cast<depth_type&>(NMIN) = (nmin ?
-					 (nmin<NMAX? nmin:NMAX) :
-					 (NMAX<DEFNMIN?NMAX:DEFNMIN) );
+	const_cast<depth_type&>(NMIN) = 
+	  nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<2?NMAX:2);
 	if(nmax > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
 			   "nmax=%d exceeds 250; will use nmax=%d instead\n",

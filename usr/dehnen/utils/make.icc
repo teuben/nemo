@@ -13,17 +13,18 @@ CXX		:= icpc
 CC		:= icc
 FC		:= ifc
 
-# general optimasation and warning flags
-WARNFLAGS	:= -Wall
-TEST		:= -Wcheck -Wformat -Wreorder -Wno-return-type -Wshadow -Wuninitialized -Wstrict-prototypes -Wunused-function
-
-OPTFLAGS	:= -O2 -msse4.1 -fpic -falign-functions -openmp -ip
+# general optimisation and warning flags
+WARNFLAGS	:= -Wall -early-template-check
+# note -fast or -ipo gave wrong results with TestTree
+OPTFLAGS	:= -O2 -ip -xHost -fpic -falign-functions -openmp -g
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
 CXXFLAGS	:= $(OPTFLAGS) $(WARNFLAGS)
 LDFLAGS		:= -shared
 MATHLIB		:= -limf -lm
+# xiar is needed if using ipo
+#ARCHIVE		:= xiar rc
 
 # end
 

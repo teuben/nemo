@@ -42,6 +42,11 @@
 #   include <unistd.h>
   }
 #endif
+
+#ifdef __INTEL_COMPILER
+#pragma warning (disable:981) /* operands are evaluated in unspecified order */
+#endif
+
 //                                                                              
 // class RunInfo                                                                
 //                                                                              

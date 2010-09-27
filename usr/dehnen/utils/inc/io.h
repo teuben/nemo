@@ -7,11 +7,11 @@
 ///         as well as WDutils::FortranIRec and WDutils::FortranORec
 ///
 /// \author Walter Dehnen
-/// \date   2000-2009
+/// \date   2000-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2009 Walter Dehnen
+// Copyright (C) 2000-2010 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -405,7 +405,16 @@ namespace WDutils {
     char             FNAME[FNAME_MAX_SIZE];
     const char      *FILE;
     iofile() : FILE(0) {}
-    virtual~iofile() {}
+    //
+    // some compilers (icpc 11.1 for instance) complain about no virtual
+    // destructor. However, when providing one, we get the most bizarre of
+    // run-time errors with gcc: a segmentation fault in using output with
+    // std::cout. (essentially, output::OUT refers to a different std::cout
+    // object than the executable for some reason currently beyond my
+    // comprehension). It affects, amongst others things gyrfalcON.
+    //
+    //     virtual~iofile() {}
+    //
     void setfile(const char*fname) {
       if(fname && fname[0]) {
 	strncpy(FNAME,fname,FNAME_MAX_SIZE);
