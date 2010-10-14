@@ -31,7 +31,7 @@ string defv[] = {
     "dr=\n          Differential step for (Poisson) density map",
     "omega=\n       Use this instead of any returned pattern speed",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=1.5\n  22-oct-02 PJT",
+    "VERSION=1.5a\n 7-jun-09 PJT",
     NULL,
 };
 
@@ -39,7 +39,7 @@ string usage = "Create potential or density image from a NEMO potential";
 
 /*                     this code uses double[3*MAXPT] */
 #ifndef MAXPT
-# define MAXPT 4096
+# define MAXPT 10000
 #endif
 
 local potproc_double mypot;    /* pointer to potential calculator function */
@@ -100,7 +100,7 @@ void nemo_main(void)
       idx = 0;
       if (dr < 0) error("Need to supply a small positive value for dr=");
     } else
-      error("bad mode=%s",mode);
+      error("bad mode=%s; allowed are: ax,ay,az,ar,at,den",mode);
     mypot = get_potential(getparam("potname"), 
 			  getparam("potpars"), 
 			  getparam("potfile"));
