@@ -23,6 +23,7 @@
  *      14-sep-01	    d using potproc_ types		pjt
  *      11-feb-02       V4.0 start of the new "+/-" notation    pjt
  *      27-aug-04           a   messing with signs
+ *      14-oct-10       V4.1a   finished off the +/- sign       pjt
  *
  * TODO:   allow 'circular' orbit, i.e. the one that locally balances centrifugally
  */
@@ -47,11 +48,12 @@ string defv[] = {
     "potpars=\n		  .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=4.0a\n       27-aug-04 PJT",
+    "VERSION=4.1a\n       14-oct-10 PJT",
     NULL,
 };
 
 string usage = "Make an orbit with from given initial conditions";
+string cvsid="$Id$";
 
 string	infile,outfile;			/* file names */
 stream  instr,outstr;			/* file streams */
@@ -69,37 +71,37 @@ void setparams();
 
 void nemo_main ()
 {
-	setparams();	/* get cmdline stuff and compute x,y,u,v,etot,lz */
+  setparams();	/* get cmdline stuff and compute x,y,u,v,etot,lz */
 
-	optr = NULL;				/* make an orbit */
-	allocate_orbit (&optr, 3, 1);
-	Masso(optr)  = 1.0;                     /* and set Mass */
-	Torb(optr,0) = tnow;
-	Xorb(optr,0) = x;			/* .. positions */
-	Yorb(optr,0) = y;
-	Zorb(optr,0) = z;
-	Uorb(optr,0) = u;			/* .. velocities */
-	Vorb(optr,0) = v;
-	Worb(optr,0) = w;
-	I1(optr) = etot;			/*  energy (zero if not used) */
-	I2(optr) = lz;                          /* angular momentum */
+  optr = NULL;				/* make an orbit */
+  allocate_orbit (&optr, 3, 1);
+  Masso(optr)  = 1.0;                     /* and set Mass */
+  Torb(optr,0) = tnow;
+  Xorb(optr,0) = x;			/* .. positions */
+  Yorb(optr,0) = y;
+  Zorb(optr,0) = z;
+  Uorb(optr,0) = u;			/* .. velocities */
+  Vorb(optr,0) = v;
+  Worb(optr,0) = w;
+  I1(optr) = etot;			/*  energy (zero if not used) */
+  I2(optr) = lz;                          /* angular momentum */
+  
+  dprintf(0,"pos: %f %f %f  \nvel: %f %f %f  \netot: %f\nlz=%f\n",
+	  x,y,z,u,v,w,etot,lz);
 
-	dprintf(0,"pos: %f %f %f  \nvel: %f %f %f  \netot: %f\nlz=%f\n",
-		  x,y,z,u,v,w,etot,lz);
-
-	outstr = stropen (outfile,"w");		/* write to file */
-	put_history(outstr);
-        PotName(optr) = p.name;
-        PotPars(optr) = p.pars;
-        PotFile(optr) = p.file;
-	write_orbit(outstr,optr);
-	strclose(outstr);
+  outstr = stropen (outfile,"w");		/* write to file */
+  put_history(outstr);
+  PotName(optr) = p.name;
+  PotPars(optr) = p.pars;
+  PotFile(optr) = p.file;
+  write_orbit(outstr,optr);
+  strclose(outstr);
 }
 
 void setparams()
 {
     potproc_double pot;
-    double pos[3],acc[3],epot;
+    double pos[3],acc[3],epot,vel2,per;
     int ndim=3;
     int signcount;
     int lzsign;
@@ -118,7 +120,7 @@ void setparams()
       Dpos = 1;
       signcount++;
     }
-    if (streq(getparam("y"),"+") || streq(getparam("z"),"-")) {
+    if (streq(getparam("z"),"+") || streq(getparam("z"),"-")) {
       Dpos = 2;
       signcount++;
     }
@@ -134,11 +136,12 @@ void setparams()
       Dvel = 1;
       signcount++;
     }
-    if (streq(getparam("vy"),"+") || streq(getparam("vz"),"-")) {
+    if (streq(getparam("vz"),"+") || streq(getparam("vz"),"-")) {
       Dvel = 2;
       signcount++;
     }
     if (signcount > 1) error("Can only set one of vx,vy,vz to + or -");
+    tnow = getdparam("time");
     
 
     outfile = getparam("out");
@@ -197,9 +200,10 @@ void setparams()
 	   x = getdparam("x");			
 	   y = getdparam("y");
 	   z = getdparam("z");
-	   u = getdparam("vx");
-	   v = getdparam("vy");
-	   w = getdparam("vz");
+	   dprintf(0,"Dvel=%d\n",Dvel);
+	   u = Dvel==0 ? 0 : getdparam("vx");
+	   v = Dvel==1 ? 0 : getdparam("vy");
+	   w = Dvel==2 ? 0 : getdparam("vz");
 	   
            if(hasvalue("potname")) {
     	       pot = get_potential_double(p.name, p.pars, p.file);
@@ -213,7 +217,17 @@ void setparams()
 	          pos[1] = y;
 	          pos[2] = z;
 	          (*pot)(&ndim,pos,acc,&epot,&tnow);
-                  etot = epot + 0.5*(u*u+v*v+w*w) - 0.5*omega*omega*(x*x+y*y);
+		  if (Dvel==0) {
+		    error("Dvel=0 not implemented");
+		  } else if (Dvel==1) {
+		    vel2 = -acc[0]*x;
+		    v = sqrt(vel2);
+		    per = TWO_PI*x/v;
+		    dprintf(0,"vel2=%g  p=%g\n",vel2,per);
+		  } else if (Dvel==2) {
+		    error("Dvel=2 not implemented");
+		  } 
+		  etot = epot + 0.5*(u*u+v*v+w*w) - 0.5*omega*omega*(x*x+y*y);
                }
            } else {
                warning("Potential potname=%s not used; set etot=0.0",p.name);
@@ -221,6 +235,5 @@ void setparams()
            }
            lz = x*v-y*u;
     } 
-    tnow = getdparam("time");
     if (hasvalue("headline")) set_headline(getparam("headline"));
 }
