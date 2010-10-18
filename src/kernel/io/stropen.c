@@ -40,7 +40,8 @@
  *       2-aug-03    scratchfile (r+w) access was broken                pjt
  *       2-dec-03    increase MAXFD to 64
  *       9-dec-05    allow input files to be URLs                       pjt
- *      27-Sep-10   MINGW32/WINDOWS i/o support                         jcl
+ *      27-Sep-10    MINGW32/WINDOWS i/o support                        jcl
+ *      18-oct-10    assume unlink/dup in unistd.h                      pjt
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -54,10 +55,10 @@
 #include <limits.h>
 #define MAXPATHLEN      PATH_MAX
 
-#ifndef __MINGW32__
+#if 0
 extern int unlink (string);		/* POSIX ??? unistd.h */
-#endif
 extern int dup (int);			/* POSIX ??? unistd.h */
+#endif
 
 /* normally already defined via maxsizes.h */
 #if !defined(NEMO_MAXFD)
