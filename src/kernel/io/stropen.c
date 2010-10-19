@@ -42,6 +42,7 @@
  *       9-dec-05    allow input files to be URLs                       pjt
  *      27-Sep-10    MINGW32/WINDOWS i/o support                        jcl
  *      18-oct-10    assume unlink/dup in unistd.h                      pjt
+ *      19-oct-10    unlimited number of open files                     wd
  */
 #include <stdinc.h>
 #include <getparam.h>
@@ -60,17 +61,26 @@ extern int unlink (string);		/* POSIX ??? unistd.h */
 extern int dup (int);			/* POSIX ??? unistd.h */
 #endif
 
-/* normally already defined via maxsizes.h */
-#if !defined(NEMO_MAXFD)
-#define NEMO_MAXFD  64
-#endif
-
-local struct {	          /*  our internal filetable for stropen/strdelete */
-    char *name;
+/*  19-Oct-2010 WD
+ *
+ *  Rationale for new layout of file attribute list
+ *
+ *  The old method of remembering the file attributes in a fixed-sized (64)
+ *  table with index taken to the (unique) file descriptor causes fatal error
+ *  if the number of files opened for this process -- not necessarily through
+ *  calls so stropen() -- exceeds the fixed table size. The new layout
+ *  allocates a new entry for each file opened by stropen and thus allows for
+ *  an unlimited number of files.
+ */
+local struct flist_element {
+    char  *name;
     stream str;
-    bool scratch;
-    bool seek;		/* flag to denote if you can seek; it also denotes deletability */
-} ftable[NEMO_MAXFD];
+    bool   scratch;
+    bool   seek;        /* flag to denote seekability and deletability */
+    struct flist_element *next;
+} *flist = 0;           /* our internal file list for stropen/strdelete */
+
+typedef struct flist_element fentry;
 
 /* possible URL command getters are:  @todo should make this a 'set' function
  *     curl -s <URL>
@@ -93,6 +103,7 @@ stream stropen(const_string name, string mode)
 {
     bool inflag,canSeek = TRUE;
     int fds;
+    fentry*fe;
     char tempname[MAXPATHLEN];   /* buffer for temp name in case of scratch file */
     stream res;
     struct stat buf;
@@ -122,13 +133,13 @@ stream stropen(const_string name, string mode)
 	if (res == NULL)
 	    error("stropen: cannot open f.d. %d for %s\n",
 		  fds, inflag ? "input" : "output");
-        fds=fileno(res);
-        if (fds>=NEMO_MAXFD) 
-            error("stropen: file descriptor too large for ftable. fds=%d",fds);
-        ftable[fds].name = scopy(name);
-        ftable[fds].str = res;
-        ftable[fds].scratch = FALSE;
-        ftable[fds].seek = FALSE;
+	fe = (fentry*) allocate(sizeof(fentry));
+	fe->next = flist;
+	flist = fe;                /* hook into the list */
+	fe->name = scopy(name);
+	fe->str = res;
+	fe->scratch = FALSE;
+	fe->seek = FALSE;
     } else {                                    /* regular file */
         strncpy(tempname,name,MAXPATHLEN);
         if (streq(mode,"s")) {          /* scratch mode */
@@ -188,13 +199,13 @@ stream stropen(const_string name, string mode)
                 error("stropen: cannot open file \"%s\" for %s\n",
                      tempname, inflag ? "input" : "output");
         }
-        fds=fileno(res);
-        if (fds>=NEMO_MAXFD) 
-            error("stropen: file descriptor too large for ftable. fds=%d",fds);
-        ftable[fds].name = scopy(tempname);
-        ftable[fds].str = res;
-        ftable[fds].scratch = streq(mode,"s");
-        ftable[fds].seek = canSeek;
+	fe = (fentry*) allocate(sizeof(fentry));
+	fe->next = flist;
+	flist = fe;                /* hook into the list */
+	fe->name = scopy(tempname);
+	fe->str = res;
+	fe->scratch = streq(mode,"s");
+	fe->seek = canSeek;
     }
     return res;
 }
@@ -213,22 +224,24 @@ stream stropen(const_string name, string mode)
  */
 int strdelete( stream str, bool scratch)
 {
-    int i,  retval=1;
-
-    for (i=0; i<NEMO_MAXFD; i++) {    /* check all entries */
-        if (str == ftable[i].str) {         /* if match found */
-            if (ftable[i].name == NULL) 
+    fentry*fe,**pfe;
+    int retval=1;
+    for(pfe=&flist,fe=flist;  fe;
+	pfe=&(fe->next),
+	    fe=fe->next) {                /* loop list of all entries */
+	if (str == fe->str ) {            /* if match found */
+            if (fe->name == NULL) 
                 error("strdelete: no file name");
-            if (scratch || ftable[i].scratch) {
-                dprintf(1,"Deleting scratch file %s\n",ftable[i].name);
-                if (unlink(ftable[i].name) != 0) {
+            if (scratch || fe->scratch) {
+                dprintf(1,"Deleting scratch file %s\n",fe->name);
+                if (unlink(fe->name) != 0) {
                     retval = 0;
-                    warning("strdelete: could not delete %s\n",ftable[i].name);
+                    warning("strdelete: could not delete %s\n",fe->name);
                 }
-            } 
-            free(ftable[i].name);        /* free all associated extra space */
-            ftable[i].name = NULL;
-            ftable[i].str = NULL;
+            }
+	    free(fe->name);               /* free space for name */
+	    *pfe = fe->next;              /* link previous to next */
+	    free(fe);                     /* free this entry */
             return retval;
         }
     }
@@ -244,10 +257,10 @@ int strdelete( stream str, bool scratch)
 
 string strname(stream str)
 {
-    int i;
+    fentry*fe;
 
-    for (i=0; i<NEMO_MAXFD; i++)     /* check all entries */
-        if (str == ftable[i].str) return(ftable[i].name);
+    for(fe=flist; fe; fe=fe->next)   /* check all entries */
+	if (str == fe->str) return(fe->name);
     return(NULL);
 }
 
@@ -258,10 +271,10 @@ string strname(stream str)
 
 bool strseek(stream str)
 {
-    int i;
+    fentry*fe;
 
-    for (i=0; i<NEMO_MAXFD; i++)     /* check all entries */
-        if (str == ftable[i].str) return ftable[i].seek;
+    for(fe=flist; fe; fe=fe->next)   /* check all entries */
+	if (str == fe->str) return fe->seek;
     error("Bad search in strseek");
     return FALSE;	/* Never Reached */
 }
@@ -276,19 +289,18 @@ string defv[] = {
     "mode=w\n		r(read),w(write),w!(write-on),a(append),s(scratch)",
     "text=boo hoo foo\n Text to write to file if w/a-option",
     "delete=f\n         Try and strdelete it?",
+    "name2=\n	        Second example filename to process",
+    "mode2=w\n		r(read),w(write),w!(write-on),a(append),s(scratch)",
+    "text2=boo haa foo\nText to write to file if w/a-option",
+    "delete2=f\n        Try and strdelete it?",
     "VERSION=1.3\n      2-aug-03 PJT",
     NULL,
 };
 
-nemo_main()
+void testing(string name, string mode, string text, bool del)
 {
-    string name, mode, text;
-    stream str;
     char buf[128];
-
-    name = getparam("name");
-    mode = getparam("mode");
-    text = getparam("text");
+    stream str;
 
     str = stropen(name, mode);
     dprintf(0,"%s has strname -> %s\n", name, strname(str));
@@ -300,8 +312,8 @@ nemo_main()
 	    printf("%s", buf);
     }
 
-
-    if (streq(mode, "w") || streq(mode,"s") || streq(mode,"a")) {
+    if (streq(mode,"w") || streq(mode,"w!") ||
+	streq(mode,"s") || streq(mode,"a")) {
         printf("WRITING\n");
         sprintf(buf, "%s\n", text);
 	fputs(buf, str);
@@ -314,10 +326,25 @@ nemo_main()
 	    printf("%s", buf);
     }
 
-    if (getbparam("delete"))
+    if (del)
         strdelete(str,TRUE);
     else
         strclose(str);
+}
+    
+
+nemo_main()
+{
+    testing(getparam("name"),
+	    getparam("mode"),
+	    getparam("text"),
+	    getbparam("delete"));
+
+    if(hasvalue("name2"))
+	testing(getparam("name2"),
+		getparam("mode2"),
+		getparam("text2"),
+		getbparam("delete2"));
 }
 
 #endif
