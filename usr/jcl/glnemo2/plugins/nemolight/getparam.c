@@ -798,6 +798,7 @@ local void report(char what)
   float ticks;
 
   if (what == 'c') {
+#ifndef __MINGW32__
     clock2 = times(&tms2);
     ticks = (float) sysconf(_SC_CLK_TCK);
     dprintf(0,"CPU_USAGE %s : %.2f    %.2f %.2f  %.2f %.2f  %ld\n",
@@ -808,6 +809,7 @@ local void report(char what)
 	    (tms2.tms_cutime-tms1.tms_cutime)/ticks,
 	    (tms2.tms_cstime-tms1.tms_cstime)/ticks,
 	    clock1);
+#endif
     return;
   }
 

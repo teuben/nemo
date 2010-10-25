@@ -159,6 +159,9 @@ LIBS += \
     -lnetwork \
     -lzlib \
     -lutils
+win32 {
+    LIBS += -lopengl32
+}
 POST_TARGETDEPS += \
     ../3rdparty/pfntlib/lib/$$ARCH/$$COMPILEMODE/libpfntlib.a \
     ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE/libnemo.a \
