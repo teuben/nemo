@@ -50,14 +50,16 @@
  *                 a data value is BLANK or not. See FBLANK.DC2.
  *
  * Updates:        24/oct/88 KGB Document created.
+ *                 10/sep/08 PJT g++ friendly
  *
  */
 
 #include <stdio.h>
 #include "gipsyc.h"
 
-void setfblank_( integer *value )
+void setfblank_( void *value )
 {
-   *value = BLANKVAL;
+   integer *ivalue = (integer *) value;
+   *ivalue = BLANKVAL;
 }
 

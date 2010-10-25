@@ -7,9 +7,12 @@
 ------------------  
  Glnemo2 compiles and runs fine on Linux, Windows and MacOSX platform.
   In order to compile it, you need Trolltech QT development  library (qt > 4.6).
-See http://qt.nokia.com/downloads to download QT.  You also need a decent 
-video card with a fast opengl driver. Glnemo2 has been successfully tested on Nvidia and
-ATI GPU cards. If the installed OpenGL driver is not fully compatible with the requirement, it
+Go to http://qt.nokia.com/downloads to download QT, click on "LGPL" tab,
+than get and install "Qt SDK: Complete Development Environment" for your specific
+platform.  
+ You also need a decent video card with a fast opengl driver. Glnemo2
+has been successfully tested on Nvidia and  ATI GPU cards. If the
+installed OpenGL driver is not fully compatible with the requirement, it
 can also run in software mode.
 
 

@@ -73,6 +73,18 @@ void FormOptions::update()
   form.mesh_length_spin->setValue(go->mesh_length);
   form.mesh_nb_spin->setValue(go->nb_meshs);
   form.cube_checkb->setChecked(go->show_cube);
+  
+  // OSD tabs
+  form.show_osd_checkb->setChecked(go->show_osd);
+  form.osd_datatype->setChecked(go->osd_data_type);
+  form.osd_title->setChecked(go->osd_title);
+  form.osd_time->setChecked(go->osd_time);
+  form.osd_nbody->setChecked(go->osd_nbody);
+  form.osd_trans->setChecked(go->osd_trans);
+  form.osd_zoom->setChecked(go->osd_zoom);
+  form.osd_rot->setChecked(go->osd_rot);
+  form.spin_font_size->setValue(go->osd_font_size);
+  form.title_name->setText(go->osd_title_name);
 }
 
 // ============================================================================

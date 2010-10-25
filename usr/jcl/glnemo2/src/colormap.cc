@@ -44,7 +44,7 @@ int Colormap::load()
   else  if (cmap < 101) cmap=125;
 
   std::ostringstream fortmap;
-  fortmap << ":/colormaps/fort." << cmap;
+  fortmap << GlobalOptions::RESPATH.toStdString()+"/colormaps/fort." << cmap;
   //QFile file(":/colormaps/fort.108");  //fort.106" 108 117
   QFile file((fortmap.str()).c_str());  //fort.106" 108 117
   if (!file.open(QIODevice::ReadOnly | QIODevice::Text))

@@ -23,6 +23,9 @@
  *   8-sep-01   (V2.0) added GSL 
  *  24-nov-03   V2.0b  some prototypes for -Wall added            PJT
  *  13-may-05   
+ *  23-oct-07   added random0() and srandom0(), from Koda, based on ran1 from NumRec     PJT
+ *  19-jun-08   enable init_xrandom(0) (previously caused Segmentation fault)  WD
+ *  27-Sep-10   MINGW32/WINDOWS support  JCL
  */
 
 #include <stdinc.h>
@@ -52,6 +55,11 @@ extern string *burststring(string,string);
 #if defined(NUMREC)
 # define portable_ran  ran3
 real portable_ran(int *);     /* ieck, this is a long */
+#endif
+
+#if defined(RANDOM0)
+extern void srandom0(long seed0);
+extern double random0(void);
 #endif
 
 local int idum;            /* local variable to store used seed */
@@ -105,7 +113,7 @@ int init_xrandom(string init)
 
     return (int) gsl_rng_default_seed;
 #else
-    return set_xrandom(natoi(init));
+    return set_xrandom(init? natoi(init) : 0);     /*  18/06/2008: allow for init=0 WD */
 #endif
 }
 
@@ -139,6 +147,9 @@ int set_xrandom(int dum)
 #elif defined(RAND48)
     dprintf(2,"set_xrandom(UNIX srand48) seed=%d\n",retval);
     srand48(retval);
+#elif defined(RANDOM0)
+    dprintf(2,"set_xrandom(random0) seed=%d\n",retval);
+    srandom0(retval);
 #else    
     dprintf(2,"set_xrandom(UNIX srandom) seed=%d\n",retval);
     srandom(retval);
@@ -160,6 +171,8 @@ double xrandom(double xl, double xh)
         retval = ((double) portable_ran(&idum));
 #elif defined(RAND48)
         retval = drand48();
+#elif defined(RANDOM0)
+        retval = random0();
 #else    
         retval = (double) random() / 2147483647.0;
 #endif
@@ -231,7 +244,7 @@ string defv[] = {
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.0b\n 24-nov-03 PJT",
+    "VERSION=2.1\n  23-oct-07 PJT",
     NULL,
 };
 

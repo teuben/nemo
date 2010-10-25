@@ -17,6 +17,7 @@ namespace glnemo {
   float GlobalOptions::MAX_PARTICLES_SIZE   = 15.0;
   float GlobalOptions::MAX_TEXTURE_SIZE     = 1.0;
   float GlobalOptions::MAX_VEL_VECTOR_SIZE  = 2.0;
+  QString GlobalOptions::RESPATH            = ":/res";
   bool  GlobalOptions::rho_exist         = false;
   bool  GlobalOptions::temperature_exist = false;
   bool  GlobalOptions::pressure_exist    = false;
@@ -72,12 +73,15 @@ GlobalOptions::GlobalOptions()
   cam_display_ctrl = false;
   cam_display_spline = false;
   cam_play = false;
-  // from HUD TAB
+  // from OSD TAB
   show_osd=true;
   osd_title=osd_time=osd_zoom=osd_rot=true;
   osd_trans=osd_data_type=osd_nbody=osd_projection=true;
   background_color=QColor(Qt::black);
   osd_color=QColor(Qt::yellow);
+  osd_font_name = RESPATH+"/fonts/AvantGarde-Demi.txf";
+  osd_title_name= "";
+  osd_font_size = 13.;
   // from experimental TAB
   show_poly=false;
   texture_size=1.;
@@ -161,6 +165,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   MAX_PARTICLES_SIZE   = m.MAX_PARTICLES_SIZE;
   MAX_TEXTURE_SIZE     = m.MAX_TEXTURE_SIZE;
   MAX_VEL_VECTOR_SIZE  = m.MAX_VEL_VECTOR_SIZE;
+  RESPATH              = m.RESPATH;
   // from options PLAY TAB
   auto_play_screenshot = m.auto_play_screenshot;
   auto_gl_screenshot   = m.auto_gl_screenshot;
@@ -200,7 +205,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   col_y_grid = m.col_y_grid;
   col_z_grid = m.col_z_grid;
   col_cube   = m.col_cube;
-  // from HUD TAB
+  // from OSD TAB
   show_osd=m.show_osd;
   osd_title=m.osd_title;
   osd_time=m.osd_time;
@@ -212,6 +217,9 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   osd_projection=m.osd_projection;
   background_color=m.background_color;
   osd_color=m.osd_color;
+  osd_font_name = m.osd_font_name;
+  osd_title_name= m.osd_title_name;
+  osd_font_size = m.osd_font_size;
   // from camera tab
   cam_display_ctrl   = m.cam_display_ctrl;
   cam_mode           = m.cam_mode;

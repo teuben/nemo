@@ -80,7 +80,8 @@ void GLSelection::display(const int width, const int height)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    glBlendFunc( GL_SRC_ALPHA, GL_ONE ); // original
+    //glBlendFunc( GL_SRC_ALPHA, GL_ONE ); // original
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);// No Alpha bending accumulation
     glEnable(GL_BLEND);
     // draw blended box
     glColor4f( 1.0f, 1.0f, 1.f,0.4f );

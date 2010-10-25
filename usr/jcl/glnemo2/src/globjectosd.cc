@@ -11,7 +11,6 @@
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
 #include "globjectosd.h"
-
 namespace glnemo {
 // init static data
 char * GLObjectOsd::OsdText[n_OsdKeys] = {
@@ -32,7 +31,7 @@ char * GLObjectOsd::OsdText[n_OsdKeys] = {
 // ============================================================================
 // constructor                                                                 
 GLObjectOsd::GLObjectOsd(const int w, const int h,
-			 const QFont &f,const QColor &c,
+			 const fntRenderer &f,const QColor &c,
 			 bool activated):GLObject()
 {
   mycolor = c;
@@ -46,6 +45,7 @@ GLObjectOsd::GLObjectOsd(const int w, const int h,
   for (int i=0; i<n_OsdKeys; i++) {
     Osd_text[i].setFont(font);
     Osd_text[i].setColor(c);
+    Osd_text[i].setActivate(true);
   }
   setTextColor(GLObjectOsd::Loading,Qt::red);
   // initialization
@@ -114,6 +114,15 @@ void GLObjectOsd::setTextColor(const OsdKeys k, const QColor c)
   Osd_text[k].setColor(c);
 }
 // ============================================================================
+// GLObjectOsd::setColor()
+// set text color to the selected HubObject                                    
+void GLObjectOsd::setColor(const QColor c)
+{
+  for (int i=0; i<n_OsdKeys; i++) {
+    Osd_text[i].setColor(c);
+  }
+}
+// ============================================================================
 // GLObjectOsd::keysToggle()
 // Toggle  the selected HubObject                                              
 void GLObjectOsd::keysToggle(const OsdKeys k)
@@ -130,14 +139,24 @@ void GLObjectOsd::keysActivate(const OsdKeys k, const bool status)
 // ============================================================================
 // GLObjectOsd::setFont()
 // set global font                                                             
-void GLObjectOsd::setFont(QFont f)
+void GLObjectOsd::setFont(fntRenderer f)
 {
   font =f;
+  // first we update the fonts
+  for (int i=0; i<n_OsdKeys; i++) {
+    Osd_text[i].setFont(f);
+  }
+  // 2nd we update text positions
+  // first step must be complete otherwise
+  // it crashs the application
+  for (int i=0; i<n_OsdKeys; i++) {
+    updateDisplay((const OsdKeys) i);
+  }
 }
 // ============================================================================
 // GLObjectOsd::setFont()
 // set font to the selected HubObject                                          
-void GLObjectOsd::setFont(const OsdKeys k,QFont f)
+void GLObjectOsd::setFont(const OsdKeys k,fntRenderer f)
 {
   Osd_text[k].setFont(f);
 }
@@ -160,7 +179,6 @@ void GLObjectOsd::updateDisplay()
 void GLObjectOsd::updateDisplay(const OsdKeys k)
 {
   int x=0,y=0,x_text=0, max;
-  QFontMetrics fm(font);
   
   switch (k) {
     case DataType:
@@ -227,14 +245,38 @@ void GLObjectOsd::updateDisplay(const OsdKeys k)
 // ============================================================================
 // GLObjectOsd::display()
 // render Osd text object
-void GLObjectOsd::display(GLWindow * gg)
+void GLObjectOsd::display()
 {
   if (is_activated) {
+    // save OpenGL state
+    glDisable( GL_DEPTH_TEST );
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    //glOrtho(0.,width,0.,height,-1,1);
+    gluOrtho2D(0.,width,0.,height);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    //glBlendFunc( GL_SRC_ALPHA, GL_ONE ); // original
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  // No Alpha bending accumulation
+    glEnable(GL_BLEND);
+    
+    font.begin();
+    
     for (int i=0; i<n_OsdKeys; i++) {
       if (Osd_text[i].getActivate()) {
-	Osd_text[(const OsdKeys) i].display(gg);
+	Osd_text[(const OsdKeys) i].display(width,height);
       }
     }
+    
+    font.end();
+    // Restore OpenGL state
+    glMatrixMode( GL_PROJECTION );
+    glPopMatrix();
+    glMatrixMode( GL_MODELVIEW );
+    glPopMatrix();
+    glEnable( GL_DEPTH_TEST );
   }
 }
 // ============================================================================

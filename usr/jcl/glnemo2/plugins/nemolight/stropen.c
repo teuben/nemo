@@ -40,11 +40,13 @@
  *       2-aug-03    scratchfile (r+w) access was broken                pjt
  *       2-dec-03    increase MAXFD to 64
  *       9-dec-05    allow input files to be URLs                       pjt
+ *      27-Sep-10   MINGW32/WINDOWS i/o support                         jcl
  */
 #include <stdinc.h>
 #include <getparam.h>
 #include <strlib.h>
 
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -53,7 +55,7 @@
 #define MAXPATHLEN      PATH_MAX
 
 #ifndef __MINGW32__
-extern int unlink (string);		/* POSIX ??? unistd.h */
+//extern int unlink (string);		/* POSIX ??? unistd.h */
 #endif
 extern int dup (int);			/* POSIX ??? unistd.h */
 

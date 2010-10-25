@@ -21,6 +21,7 @@
 #include <qgl.h>
 #include "globject.h"
 #include <iostream>
+#include "fnt.h"
 namespace glnemo { 
 class GLWindow;
 
@@ -29,24 +30,24 @@ using namespace std;
 class GLTextObject : public GLObject {
 
   public:
-  GLTextObject(const QString text,const QFont &f,const QColor &c=Qt::green, bool activated=TRUE);
-  GLTextObject(const QFont &f,const QColor &c=Qt::green, 
+  GLTextObject(const QString text,const fntRenderer &f,const QColor &c=Qt::green, bool activated=TRUE);
+  GLTextObject(const fntRenderer &f,const QColor &c=Qt::green, 
                bool activated=TRUE);
   GLTextObject( bool activated=TRUE);
     
   ~GLTextObject();
   
   void setText(const QString &p_label,const QString &p_text);
-  void setFont(QFont &f);
+  void setFont(fntRenderer &f);
   int getLabelWidth();
   int getTextWidth();
   int getHeight();
   void setPos(const int,const  int, const int);
-  void display(GLWindow * gg);
+  void display(const int width, const int height);
   private:
   // data
   QString label,text;
-  QFont font;
+  fntRenderer font;
   int x,y;      // xy label text position
   int x_text;   // x offset text position
 };

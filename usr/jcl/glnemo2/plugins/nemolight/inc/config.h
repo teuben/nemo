@@ -169,7 +169,7 @@
 /* #undef HAVE_LIBYAPP_X */
 
 /* Define if you have the z library (-lz).  */
-#define HAVE_LIBZ 1
+/* #undef HAVE_LIBZ */
 
 /* Define this if your machine is big endian (like Sparcs) */
 /* #undef WORDS_BIGENDIAN */
@@ -184,7 +184,7 @@
 #define SIZEOF_INT 4
 
 /* The size of a `long', as computed by sizeof. */
-#define SIZEOF_LONG 4
+#define SIZEOF_LONG 8
 
 /* The size of a `long long', as computed by sizeof. */
 #define SIZEOF_LONG_LONG 8
@@ -192,7 +192,7 @@
 
 
 /* Fortran unformatted I/O header size (should be 4 or 8) */
-#define UNFIO_HDR_SIZE 4
+#define UNFIO_HDR_SIZE 8
 
 
 /* define to specify how to mangle identifiers for the Fortran linker: */

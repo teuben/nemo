@@ -12,17 +12,17 @@
 // ============================================================================
 #include <GL/glew.h>
 #include "gltexture.h"
-
+#include "globaloptions.h"
 #include <QImage>
 #include <math.h>
 #include <iostream>
 namespace glnemo {
 QString GLTexture::TEXTURE[][2] = {
-  {"gaussian"                      , "gaussian"      },
-  {":/images/textures/text1.png"   , "particles"     },
-  {":/images/textures/smoke10.png" , "gas"           },
-  {":/images/textures/text2.png"   , "you are here"  },
-  {":/images/textures/identite.jpg", "jcl's identity"},
+  {"gaussian"              , "gaussian"      },
+  {"/textures/text1.png"   , "particles"     },
+  {"/textures/smoke10.png" , "gas"           },
+  {"/textures/text2.png"   , "you are here"  },
+  {"/textures/identite.jpg", "jcl's identity"},
   {NULL                            , NULL            }
 };
 // ============================================================================
@@ -58,7 +58,7 @@ bool GLTexture::load(QString _texture_name, QString _path,bool embeded)
       glDeleteTextures(1,&texture);
     }
     texture_name = _texture_name;
-    if ( _texture_name == "gaussian") {
+    if ( _texture_name == GlobalOptions::RESPATH+"gaussian") {
       createGaussian(1024);
       u_max = v_max = 1.;
       status = true;
@@ -184,7 +184,7 @@ int GLTexture::loadTextureVector(GLTextureVector & gtv)
   // loop and load all embeded texture
   while (GLTexture::TEXTURE[i][0]!=NULL) {
     GLTexture * p = new GLTexture();
-    p->load(QString(TEXTURE[i][0]),NULL);
+    p->load(QString(GlobalOptions::RESPATH+TEXTURE[i][0]),NULL);
     gtv.push_back(*p);
     delete p;
     i++;

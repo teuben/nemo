@@ -58,7 +58,7 @@ MainWindow::MainWindow(std::string _ver)
   camera = new  Camera();  
   // ------- openGL object ---------
   gl_window = new glnemo::GLWindow(this,store_options,mutex_data, camera);
-  camera->init(":/camera/path_01");
+  camera->init(GlobalOptions::RESPATH.toStdString()+"/camera/path_01");
   // colormap object
   colormap  = new Colormap(store_options);
   
@@ -71,8 +71,8 @@ MainWindow::MainWindow(std::string _ver)
   createStatusBar();
 
   setWindowTitle(tr("glnemo2"));
-  setWindowIcon(QIcon(":/images/glnemo2.png"));
-  //readColormaps();
+  setWindowIcon(QIcon(GlobalOptions::RESPATH+"/images/glnemo2.png"));
+
   // create SIGNAL/SLOTS connexions
   connect(gl_window, SIGNAL(sigKeyMouse(const bool, const bool)),
           this,    SLOT(pressedKeyMouse(const bool, const bool)));
@@ -121,6 +121,10 @@ MainWindow::MainWindow(std::string _ver)
   // options grid tab
   connect(form_options,SIGNAL(update_grid()),gl_window,SLOT(updateGrid()));
   connect(form_options,SIGNAL(rebuild_grid()),gl_window,SLOT(rebuildGrid()));
+  // options osd tab
+  connect(form_options,SIGNAL(update_osd(bool)),this,SLOT(updateOsd(bool)));
+  connect(form_options,SIGNAL(update_osd_font()),gl_window,SLOT(changeOsdFont()));
+  connect(form_options,SIGNAL(update_gl()),gl_window,SLOT(updateGL()));
   // --------- init some stuffs
   initVariables();
   startTimers();
@@ -346,24 +350,24 @@ void MainWindow::createActions()
 {
   // ------ File menu actions --------
   // open
-  open_file_action = new QAction(QIcon(":/images/folder_open.png"),tr("Open &File"),this);
+  open_file_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/folder_open.png"),tr("Open &File"),this);
   open_file_action->setShortcut(tr("Ctrl+O"));
   open_file_action->setStatusTip(tr("Open File from disk"));
   connect(open_file_action, SIGNAL(triggered()), this, SLOT(actionMenuFileOpen()));
 
   // connexion
-  connect_file_action = new QAction(QIcon(":/images/connect.png"),tr("&Connect"),this);
+  connect_file_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/connect.png"),tr("&Connect"),this);
   //connect_file_action->setShortcut(tr("Ctrl+O"));
   connect_file_action->setStatusTip(tr("Connect to a simulation server"));
   connect(connect_file_action, SIGNAL(triggered()), this, SLOT(actionMenuFileConnect()));
   // print
-  print_file_action = new QAction(QIcon(":/images/fileprint.png"),tr("&Print"),this);
+  print_file_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/fileprint.png"),tr("&Print"),this);
   print_file_action->setShortcut(tr("Ctrl+P"));
   print_file_action->setStatusTip(tr("Print OpenGL buffer"));
   connect(print_file_action, SIGNAL(triggered()), this, SLOT(actionEmpty()));
 
   // quit
-  quit_file_action = new QAction(QIcon(":/images/exit.png"),tr("&Quit"),this);
+  quit_file_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/exit.png"),tr("&Quit"),this);
   quit_file_action->setShortcut(tr("Ctrl+Q"));
   quit_file_action->setStatusTip(tr("Quit"));
   connect(quit_file_action, SIGNAL(triggered()), this, SLOT(actionQuit()));
@@ -374,7 +378,7 @@ void MainWindow::createActions()
   doc_action->setStatusTip(tr("Documentation"));
   connect(doc_action, SIGNAL(triggered()), form_help, SLOT(show()));
   // about glnemo
-  about_action = new QAction(QIcon(":/images/glnemo2.png"),tr("About glnemo2"),this);
+  about_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/glnemo2.png"),tr("About glnemo2"),this);
   about_action->setStatusTip(tr("About glnemo2"));
   connect(about_action, SIGNAL(triggered()), form_about, SLOT(show()));
   // about Qt
@@ -385,47 +389,47 @@ void MainWindow::createActions()
   // ------- options toolbar actions -------
   //
   // Full Screen
-  fullscreen_action = new QAction(QIcon(":/images/window_fullscreen.png"),
+  fullscreen_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/window_fullscreen.png"),
                                   tr("Toggle Full Screen"),this);
   fullscreen_action->setShortcut(tr("F"));
   fullscreen_action->setStatusTip(tr("Toogle Full Screen"));
   connect( fullscreen_action, SIGNAL(activated()), this, SLOT(actionFullScreen()) );
 
   // Reset 
-  reset_action = new QAction(QIcon(":/images/home-mdk.png"),tr("Reset to initial positions"),this);
+  reset_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Reset to initial positions"),this);
   reset_action->setShortcut(tr("Ctrl+R"));
   reset_action->setStatusTip(tr("Reset to initial positions"));
   connect( reset_action, SIGNAL( activated() ), this, SLOT( actionReset() ) );
 
   // Center to COM 
-  com_action = new QAction(QIcon(":/images/home-mdk.png"),tr("Center to COM"),this);
+  com_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Center to COM"),this);
   com_action->setShortcut(tr("C"));
   com_action->setStatusTip(tr("Center to COM"));
   connect( com_action, SIGNAL( activated() ), this, SLOT( actionCenterToCom() ) );
   addAction(com_action);
   
   // render mode 
-  render_mode_action = new QAction(QIcon(":/images/home-mdk.png"),tr("Rendering mode"),this);
+  render_mode_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Rendering mode"),this);
   render_mode_action->setShortcut(tr("M"));
   render_mode_action->setStatusTip(tr("Rendering mode"));
   connect( render_mode_action, SIGNAL( activated() ), this, SLOT( actionRenderMode() ) );
   addAction(render_mode_action);
 
   // Fit all particles
-  fit_particles_action = new QAction(QIcon(":/images/zoom-best-fit.png"),tr("Fit all particles on screen"),
+  fit_particles_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/zoom-best-fit.png"),tr("Fit all particles on screen"),
                                      this);
   fit_particles_action->setShortcut(tr("Ctrl+A"));
   fit_particles_action->setStatusTip(tr("Fit all particles on screen"));
   connect( fit_particles_action, SIGNAL( activated() ), this, SLOT(actionBestZoom()) );
 
   // Grid 
-  toggle_grid_action = new QAction(QIcon(":/images/grid.png"),tr("Toggle Grid"),this);
+  toggle_grid_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/grid.png"),tr("Toggle Grid"),this);
   toggle_grid_action->setShortcut(tr("G"));
   toggle_grid_action->setStatusTip(tr("Toggle Grid"));
   connect(toggle_grid_action, SIGNAL( activated() ),  this, SLOT(actionGrid()) );
 
   // Particles range & color
-  particles_form_action = new QAction(QIcon(":/images/colors.png"),
+  particles_form_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/colors.png"),
                                       tr("set Particles range and color"),this);
   particles_form_action->setShortcut(tr("R"));
   particles_form_action->setStatusTip(tr("set Particles range and color"));
@@ -433,32 +437,32 @@ void MainWindow::createActions()
            this, SLOT(actionFormObjectControl() ) );
 
   // options
-  options_form_action = new QAction(QIcon(":/images/options.png"),tr("Options dialog box"),this);
+  options_form_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/options.png"),tr("Options dialog box"),this);
   options_form_action->setShortcut(tr("O"));
   options_form_action->setStatusTip(tr("Options dialog box"));
   connect(options_form_action, SIGNAL( activated() ), this, SLOT( actionFormOptions() ) );
 
   // Translation
-  toggle_trans_action = new QAction(QIcon(":/images/move.png"),tr("Toggle translation"),this);
+  toggle_trans_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/move.png"),tr("Toggle translation"),this);
   toggle_trans_action->setShortcut(tr("T"));
   toggle_trans_action->setStatusTip(tr("Toggle translation"));
   connect(toggle_trans_action, SIGNAL( activated() ), this, SLOT(actionEmpty()) );
 
   // play simulation
-  toggle_play_action = new QAction(QIcon(":/images/player_play.png"),tr("Play next snapshot"),this);
+  toggle_play_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/player_play.png"),tr("Play next snapshot"),this);
   toggle_play_action->setShortcut(tr("p"));
   toggle_play_action->setStatusTip(tr("Play next snapshot"));
   //connect(toggle_play_action, SIGNAL( activated() ), this, SLOT(actionPlay()) );
   connect(toggle_play_action, SIGNAL( activated() ), form_options, SLOT(on_play_pressed()));
   
   // reload
-  reload_action = new QAction(QIcon(":/images/reload.png"),tr("Reload snaphot"),this);
+  reload_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/reload.png"),tr("Reload snaphot"),this);
   reload_action->setShortcut(tr("l"));
   reload_action->setStatusTip(tr("Reload snapshot"));
   connect(reload_action, SIGNAL( activated() ), this, SLOT(actionReload()) );
   
   // screenshot
-  screenshot_action = new QAction(QIcon(":/images/camera.png"),tr("Take a screenshot"),this);
+  screenshot_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/camera.png"),tr("Take a screenshot"),this);
   screenshot_action->setShortcut(tr("S"));
   screenshot_action->setStatusTip(tr("Take a screenshot"));
   connect(screenshot_action, SIGNAL( activated() ), this, SLOT(actionScreenshot()) );
@@ -484,13 +488,13 @@ void MainWindow::createActions()
   addAction(toggle_osd_action);
   
   // print
-  print_file_action = new QAction(QIcon(":/images/fileprint.png"),tr("Print OpenGL window"),this);
+  print_file_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/fileprint.png"),tr("Print OpenGL window"),this);
   print_file_action->setShortcut(tr(""));
   print_file_action->setStatusTip(tr("Print OpenGL window"));
   connect(print_file_action, SIGNAL( activated() ), this, SLOT(actionPrint()) );
   
   // movie
-  movie_form_action = new QAction(QIcon(":/images/video_section.png"),tr("Make a movie"),this);
+  movie_form_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/video_section.png"),tr("Make a movie"),this);
   movie_form_action->setShortcut(tr(""));
   movie_form_action->setStatusTip(tr("Make a movie"));
   connect(movie_form_action, SIGNAL( activated() ), this, SLOT(actionEmpty()) );
@@ -738,7 +742,7 @@ void MainWindow::parseNemoParameters()
   // instantiate store_options object
   store_options = new GlobalOptions();
 
-  //                         Initialyze NEMO engine
+  // Initialyze NEMO parameters
   snapshot                = getparam((char *) "in");
   server                  = getparam((char *) "server");
   select                  = getparam((char *) "select");
@@ -747,7 +751,6 @@ void MainWindow::parseNemoParameters()
   keep_all                = getbparam((char *) "keep_all");
   store_options->vel_req  = getbparam((char *) "vel");
   store_options->show_vel = getbparam((char *) "disp_vel");
-  //bool range_visib        = getbparam((char *) "range_visib");
   store_options->blending = getbparam((char *) "blending");
   store_options->dbuffer  = getbparam((char *) "dbuffer");
   store_options->show_grid= getbparam((char *) "grid");
@@ -757,7 +760,19 @@ void MainWindow::parseNemoParameters()
   store_options->xz_grid  = getbparam((char *) "xzg");
   store_options->yz_grid  = getbparam((char *) "yzg");
   store_options->show_cube= getbparam((char *) "cube");
+  // On screen Display
   store_options->show_osd = getbparam((char *) "osd");
+  store_options->osd_time = getbparam((char *) "osdtime");
+  store_options->osd_nbody= getbparam((char *) "osdnbody");
+  store_options->osd_zoom = getbparam((char *) "osdzoom");
+  store_options->osd_rot  = getbparam((char *) "osdrot");
+  store_options->osd_trans= getbparam((char *) "osdtrans");
+  store_options->osd_title= getbparam((char *) "osdtitle");
+  store_options->osd_data_type = getbparam((char *) "osddata");
+  if (hasvalue((char *) "osd_set_title") ) {
+    store_options->osd_title_name = getparam((char *) "osd_set_title");
+  }
+  store_options->osd_font_size = getdparam((char *) "osdfontsize");
   store_options->perspective=getbparam((char *) "perspective");
   store_options->orthographic = !store_options->perspective;
   play                   = getbparam((char *) "play");
@@ -962,12 +977,12 @@ void MainWindow::actionFullScreen()
   static bool full_screen=true;
 
   if (full_screen)  {
-    fullscreen_action->setIcon(QIcon(":/images/window_nofullscreen.png"));
+    fullscreen_action->setIcon(QIcon(GlobalOptions::RESPATH+"/images/window_nofullscreen.png"));
     showFullScreen();
   }
   else {
-    setWindowIcon(QIcon(":/images/glnemo2.png"));
-    fullscreen_action->setIcon(QIcon(":/images/window_fullscreen.png"));
+    setWindowIcon(QIcon(GlobalOptions::RESPATH+"/images/glnemo2.png"));
+    fullscreen_action->setIcon(QIcon(GlobalOptions::RESPATH+"/images/window_fullscreen.png"));
     showNormal();
   }
   full_screen=!full_screen;
@@ -1074,6 +1089,7 @@ void MainWindow::actionGLAutoScreenshot()
 void MainWindow::actionToggleOsd()
 {
   store_options->show_osd = !store_options->show_osd;
+  form_options->update();
   gl_window->updateGL();
 }
 // -----------------------------------------------------------------------------
@@ -1121,10 +1137,10 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
         else {           // screen resolution
             size  = sizegl;
         }
-        //gl_window->resizeOsd(size.width(),size.height());
+        gl_window->resizeOsd(size.width(),size.height());
 
         QRect geom = gl_window->geometry(); // save the current geometry of the GL's window
-
+        std::cerr << "MainWindow::takeScreenshot call resizen";
         gl_window->resize(size.width(),size.height());
         // !!! activate the following line if you want to see OSD
 #if 0
@@ -1354,18 +1370,38 @@ void MainWindow::pressedKeyMouse(const bool k, const bool m)
 }
 // -----------------------------------------------------------------------------
 // updateOsd()                                                                  
-void MainWindow::updateOsd()
+void MainWindow::updateOsd(bool ugl)
 {
-  gl_window->setOsd(GLObjectOsd::Nbody,*current_data->part_data->nbody,false);
-  gl_window->setOsd(GLObjectOsd::Time,*current_data->part_data->timu,false);
-  gl_window->setOsd(GLObjectOsd::Title,QString((current_data->getFileName()).c_str()),false);
-  gl_window->setOsd(GLObjectOsd::Getdata,
-		    QString((current_data->getInterfaceType()).c_str()),false);
-  gl_window->setOsd(GLObjectOsd::Zoom,(const float) store_options->zoom);
-  gl_window->setOsd(GLObjectOsd::Rot,(const float) store_options->xrot,
-                    (const float) store_options->yrot,(const float) store_options->zrot);
-  gl_window->setOsd(GLObjectOsd::Trans,(const float) store_options->xtrans,
-                    (const float) store_options->ytrans,(const float) store_options->ztrans);
+  if (current_data) {
+    GlobalOptions * g = store_options;
+    gl_window->setOsd(GLObjectOsd::Nbody,
+                      *current_data->part_data->nbody,g->osd_nbody,false);
+    gl_window->setOsd(GLObjectOsd::Time,
+                      *current_data->part_data->timu,g->osd_time,false);
+    
+    std::string title = g->osd_title_name.toStdString();
+    if (title=="") {
+      title = current_data->getFileName();
+    }
+    gl_window->setOsd(GLObjectOsd::Title,
+                      QString(title.c_str()),
+                      g->osd_title,false);
+    gl_window->setOsd(GLObjectOsd::Getdata,
+                      QString((current_data->getInterfaceType()).c_str()),
+                      g->osd_data_type,false);
+    gl_window->setOsd(GLObjectOsd::Zoom,(const float) store_options->zoom,
+                      g->osd_zoom,false);
+    gl_window->setOsd(GLObjectOsd::Rot,(const float) store_options->xrot,
+                      (const float) store_options->yrot,
+                      (const float) store_options->zrot, g->osd_rot,false);
+    gl_window->setOsd(GLObjectOsd::Trans,(const float) store_options->xtrans,
+                      (const float) store_options->ytrans,
+                      (const float) store_options->ztrans,g->osd_trans,false);
+  }
+  if (ugl) {
+    gl_window->updateGL();
+  }
+  
 }
 // -----------------------------------------------------------------------------
 // startBench()                                                                 

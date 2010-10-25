@@ -75,7 +75,7 @@ FormObjectControl::FormObjectControl(QWidget *parent):QDialog(parent)
   // loop and load all embeded textures                       
   int i=0;
   while (GLTexture::TEXTURE[i][0]!=NULL) {
-    form.texture_box->addItem(QIcon(GLTexture::TEXTURE[i][0]),GLTexture::TEXTURE[i][1]);
+    form.texture_box->addItem(QIcon(GlobalOptions::RESPATH+GLTexture::TEXTURE[i][0]),GLTexture::TEXTURE[i][1]);
     std::cerr << "texture i="<<i<<" = " << GLTexture::TEXTURE[i][1].toStdString() << "\n";
     i++;
   }

@@ -10,6 +10,7 @@
 /*                  12-apr-95 no more ARGS                     */
 /*                  20-jun-01 gcc3 - removed old BORLAND code  */
 /*                  17-mar-06 added fullname                   */
+/*                  27-Sep-10 MINGW32/WINDOWS support (JCL)    */
 /***************************************************************/
 
 #include <stdinc.h>

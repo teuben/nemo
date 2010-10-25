@@ -83,7 +83,68 @@ class FormOptions: public QDialog {
     void on_screen_size_activated(int index);
     void on_frame_png_clicked() { go->base_frame_ext = "png";}
     void on_frame_jpg_clicked() { go->base_frame_ext = "jpg";}
-    
+    // OSD tab
+    //
+    void on_show_osd_checkb_clicked(bool b) {
+      go->show_osd = b;
+      emit update_osd(true);
+    }
+    void on_osd_time_clicked(bool b) {
+      go->osd_time = b;
+      emit update_osd(true);
+    }
+    void on_osd_nbody_clicked(bool b) {
+      go->osd_nbody = b;
+      emit update_osd(true);
+    }
+    void on_osd_title_clicked(bool b) {
+      go->osd_title = b;
+      emit update_osd(true);
+    }
+    void on_osd_datatype_clicked(bool b) {
+      go->osd_data_type = b;
+      emit update_osd(true);
+    }
+    void on_osd_zoom_clicked(bool b) {
+      go->osd_zoom = b;
+      emit update_osd(true);
+    }
+    void on_osd_trans_clicked(bool b) {
+      go->osd_trans = b;
+      emit update_osd(true);
+    }
+    void on_osd_rot_clicked(bool b) {
+      go->osd_rot = b;
+      emit update_osd(true);
+    }
+    void on_spin_font_size_valueChanged(double value) {
+      go->osd_font_size = (float ) value;
+      emit update_osd_font();
+    }
+    // change font color button
+    void on_font_color_clicked() {
+      QPalette pal = form.font_color->palette();
+      QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
+      pal.setColor(QPalette::Button,color);
+      form.font_color->setPalette(pal);
+      go->osd_color = color;
+      emit update_osd_font();
+    }
+    // change font color button
+    void on_background_color_clicked() {
+      QPalette pal = form.font_color->palette();
+      QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
+      pal.setColor(QPalette::Button,color);
+      form.background_color->setPalette(pal);
+      go->background_color = color;
+      emit update_gl();
+    }
+    // change title
+    void on_title_name_returnPressed() {
+      go->osd_title_name = form.title_name->text();
+      emit update_osd(true);
+    }
+
     //
     // grids tab
     void on_show_grid_checkb_clicked(bool b) {
@@ -158,6 +219,9 @@ class FormOptions: public QDialog {
     void leaveEvent();
     void update_grid();
     void rebuild_grid();
+    void update_osd(bool b);
+    void update_osd_font();
+    void update_gl();
     //           
     // camera tab
     void setCamDisplay(const bool, const bool);

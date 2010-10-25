@@ -6,19 +6,24 @@
  *      jan-2002        added ZENO compatible ones
  *      nov-2003        removed Yanc tags (YANC is also called gyrfalcON now)
  *      feb-2004        added some new SPH stuff (GasDensity, NPartners, NSPHPartners)
+ *      may-2010        added in a few tag from atos.c for handling its' SPH 
  */
 
 #ifndef _snapshot_h
 #define _snapshot_h
 
 /*
- * Item tags for SnapShot components. (see also some ZENO compatibility components below)
+ * Item tags for SnapShot components. 
+ * !! see also some ZENO compatibility components below !!
+ * Handling of SPH particles is still done rather poorly 
+ * the current NEMO convention is to store the SPH particles first
  */
 
 #define SnapShotTag		"SnapShot"
 
 #define   ParametersTag		"Parameters"
 #define     NobjTag             "Nobj"
+#define     NgasTag             "Ngas"        /* atos.c */
 #define     TimeTag             "Time"
 
 #define   ParticlesTag		"Particles"
@@ -33,6 +38,8 @@
 #define     KeyTag              "Key"
 #define     DensityTag          "Density"
 #define     GasDensTag          "GasDensity"
+#define     TemperatureTag      "Temperature"   /* atos.c */
+#define     SmoothLengthTag     "SmoothLength"  /* atos.c */
 #define     EpsTag              "Eps"
 #define     StoryTag		"Story"
 
@@ -56,7 +63,11 @@
 #define PhaseTag       	PhaseSpaceTag
 
 
-/* New ZENO tags that NEMO had not defined before */
+/* 
+ *  New ZENO tags that NEMO had not defined before 
+ *  Note the NGas  vs. Ngas
+ *           NBody vs. Nobj
+ */
 
 #define NBodyTag 	"NBody"
 #define NGasTag 	"NGas"

@@ -37,6 +37,14 @@
  * 22-jun-04    added some more useful astr constants
  * 25-jan-05    added powd/powi
  *  1-aug-05    nemo_string, nemo_stream for starlab interfaces
+ * 29-nov-06    within() now using double's
+ * 23-oct-07    added some more PI's and LN's from ZENO/Koda's mathfns.h
+ * 06-jun-08    nemo_exit                                           WD
+ * 12-jun-08    nemo_dprintf  is macro, reports [file:line]         WD
+ * 12-jun-08    allocate, reallocate are macros (not under C++)     WD
+ * 16-sep-08    removes nemo_exit (better use stdlib's atexit)      WD
+ * 18-sep-08    replaced sqr, qbe, dex inline in mathfns.h          WD
+ * 11-dec-09    tinkering with halfp                                PJT
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -185,16 +193,19 @@ typedef struct _mstr {     /* see mstropen(3) */
 /*
  * REAL, REALPTR: default type is double; if single precision calculation is
  * supported and desired, compile with -DSINGLEPREC. 
- *      DOUBLEPREC:     everything (variables & functions) is double.
- *      MIXEDPREC:      user values are float, -lm functions are double.
+ *      DOUBLEPREC:     everything (variables & functions) is double. *      MIXEDPREC:      user values are float, -lm functions are double.
  *      SINGLEPREC:     everything (variables & functions) is float.
  * Note: The whole package must be compiled in one floating point
  *       type, although some routines are compiled in both single
  *       and double. Using this conmpile directive we can keep one
  *       version of the source code.
+ * Warning:
  * The "D" language defines a "real" as a floating point with the largest
  * number of bits the hardware supports (e.g. 80 bit on intel). Don't confuse
  * that with the real here, which is either float *or* double.
+ * Also:
+ * For convenient storage we also define a 'halfp' type, which has half the 
+ * number of bits of a float.
  */
 
 /*   first off, by default, NEMO will be in DOUBLEPREC mode */
@@ -224,6 +235,9 @@ typedef float *realptr, real;
 typedef float real, *realptr;
 #define Precision "SINGLEPREC"
 #endif
+
+/* halfp needs to be 2 bytes */
+typedef short halfp, *halfpptr;
 
 /* NOTE: to be deprecated
  * The following conveniences cannot be used in full ANSI C or C++:
@@ -283,6 +297,13 @@ typedef real (*float_proc)(float);
 #define   FOUR_PI   12.56637061435917295385
 #define   HALF_PI    1.57079632679489661923
 #define   FRTHRD_PI  4.18879020478639098462
+#define   INV_PI     0.31830988618379067154
+#define   TENSVN_IPI 0.45472840883398667363
+#define   ONETRD     0.33333333333333333333
+#define   TWOTRD     0.66666666666666666667
+#define   FORTRD     1.33333333333333333333
+#define   ONESVN     0.14285714285714285714
+#define   ONESIX     0.16666666666666666667
 
 /*
  * angular conversion factors (multiplicative)
@@ -421,16 +442,65 @@ extern bool LittleEndian(void);
 /* io/filesecret.c */
 extern void   strclose(stream);
 
+/*
+ * tell nemo that this process is part of an MPI run: give its rank (dprintf.c)
+ */
+void set_mpi_rank(int rank);
 
-/* error.c dprintf.c */
+/* error and warning */
 /* C99 stdargs example of macro usage:   #define HELLO(a,...)  error(a,__VA_ARGS__)   */
 /* GNU stdargs (deprecated now)          #define HELLO(a,args...)  error(a,##args)    */
+
+/* prints error message (printf-style) to stderr and exits (via nemo_exit) */
 void error(string, ...);
-void errorn(string, ...);
+/* void errorn(string, ...);   not implemented, commented out WD 10-09-2008 */
+/* prints warning message (printf-style) to stderr */
 void warning(string, ...);
 int progress(double dtime, string, ...);
-int nemo_dprintf(int, const_string, ...);    /* NEMO has same name as libc */
-bool nemo_debug(int);
+
+/* dprintf.c */
+/* is a given depth below the current debugging level ? */
+bool nemo_debug(int depth);
+
+/*
+ * WD 12th June 2008
+   improved debugging info: report [file:line]
+   
+   nemo_dprintf() reports the source file name and line number of its call if 
+   debug_level >= DEBUG_LEVEL_FOR_REPORTING_FILE (see dprintf.c).
+
+   We implement this by a C-macro "nemo_dprintf" which expands to calling a 
+   function which (i) takes file name and line number and (ii) returns a
+   pointer to a function with nemo_dprintf style syntax.
+
+   NOTE Since nemo_dprintf is a macro, one must not declare it as an external 
+        function anywhere else (and rely on the library to resolve it).
+
+   NOTE It seems that our way to implement this functionality is the only way.
+        The possible simpler alternative of using a C macro with variable number
+	of arguments fails if there are no additional arguments after the format
+	string.
+*/
+
+/* pointer to function of same syntax as nemo_dprintf() */
+typedef int (*dprintf_pter)(int, const_string, ...);
+
+/* return pointer to function with nemo_dprintf() syntax */
+dprintf_pter get_dprintf(const_string, int);
+
+/* implement nemo_dprintf() as macro */
+#define nemo_dprintf  get_dprintf(__FILE__,__LINE__)
+
+/* 
+   identical to old-style nemo_dprintf:
+ */
+#define nemo_dprintfN get_dprintf(0,0)
+
+#if(0) /* commented out WD 12th June 2008 */
+  int nemo_dprintf(int, const_string, ...);    /* NEMO has same name as libc */
+#endif
+
+/* END of changes WD 12th June 2008 */
 
 #ifndef HAVE_DPRINTF
 #define dprintf		nemo_dprintf
@@ -442,10 +512,51 @@ bool nemo_debug(int);
 #define eprintf warning
 
 /* core/allocate.c */
-extern void *allocate(int);
-extern void *reallocate(void *, int);
+
+/*
+ * WD 12th June 2008
+   allocate() and reallocate to report [file:line] with nemo_dprintf
+
+   Rationale: At debug_level >= 8, allocate() reports number of bytes
+              allocated as well as the memory address. Here, we add to that
+	      the source code file and line number.
+
+   NOTE  This is implemented by C macros which call extended versions
+         of allocate and reallocate().
+
+   NOTE  This implies that every source code using allocate() or 
+         reallocate() MUST #include this file.
+
+   NOTE  With C++ this will not work, as the C++ std header file <new>
+         has a member function allocate() (so that our macror definition
+	 causes a compilation error). Therefore, under C++, we simply
+	 define allocate and reallocate as inline functions, which however
+	 never report source file and line number.
+*/
+
+/* extended functions taking file and line information */
+  extern void *allocate_FL(size_t,const_string,int); 
+  extern void *reallocate_FL(void *, size_t,const_string,int);
+
+#if !defined(__cplusplus)
+  /* in C: implement allocate() and reallocate() as macros */
+# define allocate(SIZE) allocate_FL(SIZE,__FILE__,__LINE__)
+# define reallocate(PTER,SIZE) reallocate_FL(PTER,SIZE,__FILE__,__LINE__)
+#else
+  /* in C++ make allocate() and reallocate() inlined functions
+     NOTE: these will not report [file:line] */
+  inline void *allocate(size_t n) { return allocate_FL(n,0,0); }
+  inline void *reallocate(void*p,size_t n) { return reallocate_FL(p,n,0,0); }
+#endif
+
+#if(0) /* commented out old code 12/06/2008 WD */
+  extern void *allocate(size_t);
+  extern void *reallocate(void *, size_t);
+#endif
+/* END of changes WD 12th June 2008 */
+
 /* this is to shut up e.g. gcc when allocate(n*sizeof(T)) is used */
-#define  sizeof  (int)sizeof
+#define  sizeof  (size_t)sizeof
 
 /* core/common.c */
 void set_common(int id, int byte_size);
@@ -459,10 +570,13 @@ extern bool scanopt(string, string);
 /* core/cputime.c */
 extern double cputime(void);
 
-  /* misc/sqr.c */
+/*
+ * replaced by inline functions in mathfns.h
+ // misc/sqr.c
 extern double sqr(double);
 extern double qbe(double);
 extern double dex(double);
+*/
 
   /* misc/pow.c */
 extern double powi(double,int);

@@ -100,6 +100,8 @@ class MainWindow : public QMainWindow {
          current_data->part_data->setIpvs(ipvs);
        }
     }
+    // OSD
+    void updateOsd(bool ugl=false);
   private:
 
     // ------------------------------
@@ -118,8 +120,7 @@ class MainWindow : public QMainWindow {
     void loadNewData(const std::string, const std::string ,
                             const bool , const bool, const bool first=false);
     void killPlayingEvent();
-    // OSD
-    void updateOsd();
+    
     // Menus
     QMenu *file_menu;
     QMenu *help_menu;

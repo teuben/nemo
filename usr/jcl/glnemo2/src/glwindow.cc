@@ -23,26 +23,28 @@
 #include "particlesdata.h"
 #include "particlesobject.h"
 #include "tools3d.h"
+#include "fnt.h"
 
 namespace glnemo {
 #define DOF 4000000
   const char  GLWindow::vertexShader[] = {
         "// with ATI hardware, uniform variable MUST be used by output          \n"
-        "// variables. That's why win_height is used by gl_FrontColor           \n"
-        "// uniform int win_height;                                                \n"
-        "uniform float alpha;                                                   \n"
-        "attribute float a_sprite_size;                                         \n"
+        "// variables. That's why factor_size is used by gl_FrontColor          \n"
+        "uniform float alpha;           // alpha color factor                   \n"
+        "uniform float factor_size;     // texture size factor                  \n"
+        "attribute float a_sprite_size; // a different value for each particles \n"
         "void main()                                                            \n"
         "{                                                                      \n"
         "    vec4 vert = gl_Vertex;                                             \n"
-        "    //float pointSize =  float(win_height)*a_sprite_size*gl_Point.size;  \n"
-        "    float pointSize =  a_sprite_size*gl_Point.size;  \n"
+        "    float pointSize =  a_sprite_size*factor_size;                      \n"
         "    vec3 pos_eye = vec3 (gl_ModelViewMatrix * vert);                   \n"
         "    gl_PointSize = max(0.00001, pointSize / (1.0 - pos_eye.z));        \n"
         "    gl_TexCoord[0] = gl_MultiTexCoord0;                                \n"
         "    gl_Position = ftransform();                                        \n"
-        "    //gl_FrontColor =  vec4(gl_Color.r+float(win_height)-float(win_height),gl_Color.g,gl_Color.b,gl_Color.a*alpha); \n"
-        "    gl_FrontColor =  vec4(gl_Color.r,gl_Color.g,gl_Color.b,gl_Color.a*alpha); \n"
+        "    gl_FrontColor =  vec4(gl_Color.r + float(factor_size)*0. ,         \n" 
+        "                          gl_Color.g                         ,         \n"
+        "                          gl_Color.b                         ,         \n"
+        "                          gl_Color.a * alpha);                         \n"
         "}                                                                      \n"
   };
 
@@ -52,7 +54,7 @@ namespace glnemo {
         "void main()                                                            \n"
         "{                                                                      \n"
         "    vec4 color = gl_Color * texture2D(splatTexture, gl_TexCoord[0].st);\n"
-        "    gl_FragColor = color ;                                              \n"
+        "    gl_FragColor = color ;                                             \n"
         "}                                                                      \n"
   };
   unsigned int GLWindow::m_program = 0;
@@ -94,20 +96,43 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   // leave events : reset event when we leave opengl windows
   connect(this,SIGNAL(leaveEvent()),this,SLOT(resetEvents()));
   
-  // OSD
-  //QFont f=QFont("Courier", 12, QFont::Light);
-  QFont f;
-  //f.setFamily("fixed");
-  f.setRawMode(true);
-  f.setPixelSize(10);
-  f.setFixedPitch (true)  ;
-  //f.setStyleHint(QFont::AnyStyle, QFont::PreferBitmap);
-  f.setStyleHint(QFont::SansSerif, QFont::PreferAntialias);
-  osd = new GLObjectOsd(wwidth,wheight,f,Qt::yellow);
   initializeGL();
   checkGLErrors("initializeGL");
   initShader();
   checkGLErrors("initShader");
+  ////////
+  
+  // grid
+  GLGridObject::nsquare = store_options->nb_meshs;
+  GLGridObject::square_size = store_options->mesh_length;
+  gridx = new GLGridObject(0,store_options->col_x_grid,store_options->xy_grid);
+  gridy = new GLGridObject(1,store_options->col_y_grid,store_options->yz_grid);
+  gridz = new GLGridObject(2,store_options->col_z_grid,store_options->xz_grid);
+
+  // cube
+  cube  = new GLCubeObject(store_options->mesh_length*store_options->nb_meshs,store_options->col_cube,store_options->show_cube);
+  // load texture
+  GLTexture::loadTextureVector(gtv);
+  
+  // build display list in case of screenshot
+  if (store_options->show_part && pov ) {
+    //std::cerr << "GLWindow::initializeGL() => build display list\n";
+    for (int i=0; i<(int)pov->size(); i++) {
+      // !!!! DEACTIVATE gpv[i].buildDisplayList();;
+      gpv[i].buildVelDisplayList();;
+      gpv[i].setTexture();
+      //gpv[i].buildVboPos();
+    }
+  }
+  
+  // Osd
+  fntRenderer text;
+  font = new fntTexFont(store_options->osd_font_name.toStdString().c_str());
+  text.setFont(font);
+  text.setPointSize(store_options->osd_font_size );
+  osd = new GLObjectOsd(wwidth,wheight,text,Qt::yellow);
+  
+  ////////
   // FBO
   // Set the width and height appropriately for you image
   fbo = false;
@@ -136,6 +161,7 @@ GLWindow::~GLWindow()
     glDeleteRenderbuffersEXT(1, &renderbuffer);
     glDeleteRenderbuffersEXT(1, &framebuffer);
   }
+  std::cerr << "Destructor GLWindow::~GLWindow()\n";
 }
 #define COPY 0
 // ============================================================================
@@ -296,8 +322,11 @@ void GLWindow::initLight()
 // ============================================================================
 // move, translate and re-draw the whole scene according to the objects and
 // features selected
+long int CPT=0;
 void GLWindow::paintGL()
 {
+  CPT++;
+  //std::cerr << "GLWindow::paintGL() --> "<<CPT<<"\n";
   if (store_options->auto_gl_screenshot) {
     store_options->auto_gl_screenshot = false;
     emit sigScreenshot();
@@ -306,6 +335,7 @@ void GLWindow::paintGL()
   if ( !store_options->duplicate_mem)
     mutex_data->lock();
   if (fbo && GLWindow::GLSL_support) {
+    std::cerr << "FBO GLWindow::paintGL() --> "<<CPT<<"\n";
     //glGenFramebuffersEXT(1, &framebuffer);
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, framebuffer);
     //glGenRenderbuffersEXT(1, &renderbuffer);
@@ -315,7 +345,7 @@ void GLWindow::paintGL()
                   GL_RENDERBUFFER_EXT, renderbuffer);
     GLuint status = glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT);
     if (status != GL_FRAMEBUFFER_COMPLETE_EXT) {
-    } 
+    }
   } 
   //setFocus();
   
@@ -402,10 +432,9 @@ void GLWindow::paintGL()
   if (store_options->octree_display || 1) {
     tree->display();
   }
-  
-  
+    
   // On Screen Display
-  if (store_options->show_osd) osd->display(this);
+  if (store_options->show_osd) osd->display();
   
   // display selected area
   gl_select->display(QGLWidget::width(),QGLWidget::height());
@@ -518,7 +547,7 @@ void GLWindow::checkGLErrors(std::string s)
 // initialyse the openGl engine
 void GLWindow::initializeGL()
 {
-  std::cerr << ">>>>>>>>> initializeGL()\n";
+  std::cerr << "\n>>>>>>>>> initializeGL()\n\n";
 #if 1
   qglClearColor( Qt::black );		// Let OpenGL clear to black
   glEnable(GL_DEPTH_TEST);
@@ -533,33 +562,9 @@ void GLWindow::initializeGL()
   //PRINT_D std::cerr << "-- Initialize GL --\n";
 
 #endif
-  //width = height = 0;
 
   makeCurrent();   // activate OpenGL context, can build display list by now
-  //initShader();
   
-  // grid
-  GLGridObject::nsquare = store_options->nb_meshs;
-  GLGridObject::square_size = store_options->mesh_length;
-  gridx = new GLGridObject(0,store_options->col_x_grid,store_options->xy_grid);
-  gridy = new GLGridObject(1,store_options->col_y_grid,store_options->yz_grid);
-  gridz = new GLGridObject(2,store_options->col_z_grid,store_options->xz_grid);
-
-  // cube
-  cube  = new GLCubeObject(store_options->mesh_length*store_options->nb_meshs,store_options->col_cube,store_options->show_cube);
-  // load texture
-  GLTexture::loadTextureVector(gtv);
-  
-  // build display list in case of screenshot
-  if (store_options->show_part && pov ) {
-    //std::cerr << "GLWindow::initializeGL() => build display list\n";
-    for (int i=0; i<(int)pov->size(); i++) {
-      // !!!! DEACTIVATE gpv[i].buildDisplayList();;
-      gpv[i].buildVelDisplayList();;
-      gpv[i].setTexture();
-      //gpv[i].buildVboPos();
-    }
-  }
 }
 // ============================================================================
 // resize the opengl viewport according to the new window size
@@ -567,7 +572,6 @@ void GLWindow::resizeGL(int w, int h)
 {
   wwidth = w;
   wheight= h;
-
   glViewport( 0, 0, (GLint)w, (GLint)h );
   //float ratio =  ((double )w) / ((double )h);
   glMatrixMode( GL_PROJECTION );
@@ -577,33 +581,6 @@ void GLWindow::resizeGL(int w, int h)
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
   osd->setWH(w,h);
-  
-  //formatInstructions(w,h);
-}
-// ============================================================================
-//
-void GLWindow::formatInstructions(int width, int height)
-{
-  QString text = tr("- Glnemo 2 Demonstration -");
-  QFontMetrics metrics = QFontMetrics(font());
-  int border = qMax(4, metrics.leading());
-
-  QRect rect = metrics.boundingRect(0, 0, width - 2*border, int(height*0.125),
-      Qt::AlignCenter | Qt::TextWordWrap, text);
-  
-  image = QImage(width, rect.height() + 2*border, QImage::Format_ARGB32_Premultiplied);
-  image.fill(qRgba(0, 0, 0, 127));
-
-  QPainter painter;
-  painter.begin(&image);
-  painter.setRenderHint(QPainter::TextAntialiasing);
-  //painter.setRenderHint(QPainter::HighQualityAntialiasing);
-  painter.setPen(Qt::green);
-  painter.drawText((width - rect.width())/2, border,
-                    rect.width(), rect.height(),
-                    Qt::AlignCenter | Qt::TextWordWrap, text);
-  painter.end();
-  gldata = QGLWidget::convertToGLFormat(image);
 }
 // ============================================================================
 // set up the projection according to the width and height of the windows
@@ -951,16 +928,18 @@ void GLWindow::osdZoom(bool ugl)
 // ============================================================================
 // GLWindow::setOsd()                                                             
 // Set Text value to the specified HudObject                                   
-void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const QString text, bool ugl)
+void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const QString text, bool show, bool ugl)
 {
+  osd->keysActivate(k,show);
   osd->setText(k,text);
   if (ugl) updateGL();
 }
 // ============================================================================
 // GLWindow::setOsd()                                                             
 // Set Float value to the specified HudObject                                  
-void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const float value, bool ugl)
+void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const float value, bool show, bool ugl)
 {
+  osd->keysActivate(k,show);
   osd->setText(k,(const float) value);
   if (ugl) updateGL();
 }
@@ -968,18 +947,34 @@ void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const float value, bool ugl)
 // GLWindow::setOsd()                                                             
 // Set Float value to the specified HudObject                                  
 void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const float value1, 
-                      const float value2, const float value3, bool ugl)
+                      const float value2, const float value3, bool show,bool ugl)
 {
-  osd->setText(k,(const float) value1,(const float) value2,(const float) value3);
+  osd->keysActivate(k,show);
+  osd->setText(k,(const float) value1,(const float) value2,(const float) value3);  
   if (ugl) updateGL();
 }
 // ============================================================================
 // GLWindow::setOsd()                                                             
 // Set Int value to the specified HudObject                                    
-void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const int value, bool ugl)
+void GLWindow::setOsd(const GLObjectOsd::OsdKeys k, const int value, bool show, bool ugl)
 {
+  osd->keysActivate(k,show);
   osd->setText(k,(const int) value);
   if (ugl) updateGL();
+}
+// ============================================================================
+// GLWindow::changeOsdFont()                                                             
+// Change OSD font
+void GLWindow::changeOsdFont()
+{
+  fntRenderer text;
+  if (font) delete font;
+  font = new fntTexFont(store_options->osd_font_name.toStdString().c_str());
+  text.setFont(font);
+  text.setPointSize(store_options->osd_font_size );
+  osd->setFont(text);
+  osd->setColor(store_options->osd_color);
+  updateGL();
 }
 // ============================================================================
 // set texture on the object

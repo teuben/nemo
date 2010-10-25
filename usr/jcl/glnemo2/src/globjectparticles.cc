@@ -827,13 +827,14 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
         sortByDensity(); // we have to resort by density
       }
   }
+  
   // setup point sprites
   glEnable(GL_POINT_SPRITE_ARB);
   glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
   //float quadratic[] =  { 0.0f, 0.0f, 0.01f };
   //glPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, quadratic );
-  glPointSize(po->getGazSize()*win_height);
+  //glPointSize(1.0);//po->getGazSize()*win_height);
   GLObject::setColor(po->getColor()); // set the color 
   glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),po->getGazAlpha());
   //glNormal3f(2.0,1.,1.);
@@ -898,7 +899,13 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
   if (go->render_mode == 0 ) { // global size and color
     glUniform1f(alpha_loc, 1.); // send alpha channel
   }
-
+  // Send texture size factor
+  int factor_size_loc  = glGetUniformLocation(GLWindow::m_program, "factor_size");
+  if (factor_size_loc == -1) {
+    std::cerr << "Error occured when sending \"factor_size\" to Vertex shader..\n";
+    exit(1);
+  }
+  glUniform1f(factor_size_loc, po->getGazSize()*win_height); // send texture size
   // Send data to Pixel Shader
   int tex_loc = glGetUniformLocation(GLWindow::m_program, "splatTexture");
   if (tex_loc == -1) {
@@ -935,9 +942,9 @@ void GLObjectParticles::displayVboSprites(int win_height,const bool front)
     glColorPointer(4, GL_FLOAT, 0, (void *) (3*nvert_pos*sizeof(float)));
     // Send vertex object neighbours size
 #if 1
-    glEnableVertexAttribArray(a_sprite_size);
+    glEnableVertexAttribArrayARB(a_sprite_size);
     glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_size);
-    glVertexAttribPointer(a_sprite_size,1,GL_FLOAT, 0, 0, 0);
+    glVertexAttribPointerARB(a_sprite_size,1,GL_FLOAT, 0, 0, 0);
 #endif
 #if 0
     glEnableClientState(GL_NORMAL_ARRAY);                

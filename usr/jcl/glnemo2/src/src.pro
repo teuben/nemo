@@ -115,6 +115,7 @@ OBJECTS_DIR = .obj/$$ARCH/$$COMPILEMODE
 RCC_DIR     = .res/$$ARCH/$$COMPILEMODE
 QMAKE_LIBDIR = \
     ../utils/lib/$$ARCH/$$COMPILEMODE \
+    ../3rdparty/pfntlib/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/lib/$$ARCH/$$COMPILEMODE \
     $$NEMOLIB \
     ../plugins/ftm/lib/$$ARCH/$$COMPILEMODE \
@@ -136,7 +137,9 @@ MYNEMO = $$(NEMO)
    }
    INSTALLS      += target
 }
-INCLUDEPATH += ../plugins \
+INCLUDEPATH += \
+    ../3rdparty/pfntlib/ \
+    ../plugins \
     ../plugins/ftm \
     ../plugins/nemolight \
     ../plugins/gadget \
@@ -146,7 +149,9 @@ INCLUDEPATH += ../plugins \
     $$NEMOLIB \
     $$NEMOINC \
     glew
-LIBS += -lsnapshot \
+LIBS += \
+    -lpfntlib \
+    -lsnapshot \
     -lftm \
     -lnemo \
     -lgadget \
@@ -154,7 +159,9 @@ LIBS += -lsnapshot \
     -lnetwork \
     -lzlib \
     -lutils
-TARGETDEPS += ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE/libnemo.a \
+POST_TARGETDEPS += \
+    ../3rdparty/pfntlib/lib/$$ARCH/$$COMPILEMODE/libpfntlib.a \
+    ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE/libnemo.a \
     ../plugins/lib/$$ARCH/$$COMPILEMODE/libsnapshot.a \
     ../plugins/ftm/lib/$$ARCH/$$COMPILEMODE/libftm.a \
     ../plugins/gadget/lib/$$ARCH/$$COMPILEMODE/libgadget.a \

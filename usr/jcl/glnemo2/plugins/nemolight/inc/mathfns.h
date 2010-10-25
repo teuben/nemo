@@ -7,6 +7,7 @@
 /*                                                                          */
 /* 22-jun-01:    adapted for NEMO - included by stdinc.h                    */
 /*               note, NEMO does not use MIXEDPREC yet                      */
+/* 18-Sep-08: WD made sqr,qbe,dex inline                                    */
 /****************************************************************************/
 
 #ifndef _mathfns_h
@@ -47,7 +48,7 @@ extern "C" {
 
 #if defined(SINGLEPREC)
 
-#if defined(LINUX) || defined(linux)
+#if defined(LINUX) || defined(linux) || defined (__CYGWIN__)
 
 #define rsqrt    sqrtf
 #define rsin     sinf
@@ -114,11 +115,20 @@ extern "C" {
 #define rcbrt    fcbrt
 #endif
 
-real rsqr(real);
-real rqbe(real);
-real rlog2(real);
+inline static double sqr(double x) { return x*x; }
+inline static double qbe(double x) { return x*x*x; }
+/* inline static double dex(double x) { return pow(10.0,x); } */
+inline static double dex(double x) { return exp(M_LN10*x); }
+inline static float fsqr(float x) { return x*x; }
+inline static float fqbe(float x) { return x*x*x; }
+inline static float fdex(float x) { return rexp(M_LN10*x); }
+
+/* real rsqr(real); */
+/* real rqbe(real); */
+/* real rdex(real); */
+
+/* real rlog2(real);*/
 real rexp2(real);
-real rdex(real);
 
 #if defined(SINGLEPREC)
 float rcbrt(float);

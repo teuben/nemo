@@ -19,12 +19,11 @@
 #include "gltextobject.h"
 
 namespace glnemo {
-class GLWindow;
 class GLTextObject;
 class GLObjectOsd : public GLObject {
   Q_OBJECT
   public:
-    GLObjectOsd(const int w, const int h,const QFont &f,
+    GLObjectOsd(const int w, const int h,const fntRenderer &f,
 		const QColor &c=Qt::green, bool activated=TRUE);
    ~GLObjectOsd();
 
@@ -45,23 +44,24 @@ class GLObjectOsd : public GLObject {
 
   public slots:
     void setWH(int width, int height);
-    void setFont(const QFont);
-    void setFont(const OsdKeys k, const QFont);
+    void setFont(const fntRenderer);
+    void setFont(const OsdKeys k, const fntRenderer);
     void setText(const OsdKeys k, const QString text);
     void setText(const OsdKeys k, const int);
     void setText(const OsdKeys k, const float);
     void setText(const OsdKeys k, const float, const float, const float);
     void setTextColor(const OsdKeys k,const QColor );
+    void setColor(const QColor );
     void keysToggle(const OsdKeys k);
     void keysActivate(const OsdKeys k, const bool status);
     void updateDisplay();
     void updateDisplay(const OsdKeys k);
-    void display(GLWindow *);
+    void display();
     void updateColor(const QColor);
     
   private:
     static char * OsdText[n_OsdKeys];
-    QFont font;
+    fntRenderer font;
 };
 
 }

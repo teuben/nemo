@@ -7,6 +7,7 @@
  * 27-apr-92    added SMULVV				PJT
  * 16-feb-97    sqrt() from math.h			pjt
  * 23-jun-01    ZENOisms
+ * 23-oct-07    added ZENOism for Koda's etude code     pjt
  *
  */
 
@@ -431,8 +432,12 @@ extern   double _tracem_f(real *, int);
     (v)[2] += (u)[2] * (s) + (w)[2] * (r);                              \
 }
 
-
-
+#define ADDVMULVS(v,u,w,s)      /* MUL Vect by Scalar, ADD to Vects */ \
+{                                                                      \
+    (v)[0] = (u)[0] + (w)[0] * (s);                                    \
+    (v)[1] = (u)[1] + (w)[1] * (s);                                    \
+    (v)[2] = (u)[2] + (w)[2] * (s);                                    \
+}
 
 
 #endif

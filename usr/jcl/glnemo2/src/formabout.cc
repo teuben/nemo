@@ -13,6 +13,7 @@
 #include "formabout.h"
 #include <QPainter>
 #include <iostream>
+#include "globaloptions.h"
 
 namespace glnemo {
 
@@ -37,7 +38,7 @@ FormAbout::FormAbout(QWidget *parent):QDialog(parent)
        "</center>"));
   form.text_info->setHtml(info);
   QRect geo = form.view_picture->geometry();       // initial geometry defined with designer
-  QPixmap pix =  QPixmap(":/images/glnemo2.png");  // picture to display
+  QPixmap pix =  QPixmap(GlobalOptions::RESPATH+"/images/glnemo2.png");  // picture to display
   scene.setSceneRect(pix.rect());                  // size of the scene
   scene.setItemIndexMethod(QGraphicsScene::NoIndex);  
   scene.addPixmap(pix);                            // add picture

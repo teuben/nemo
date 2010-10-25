@@ -1,8 +1,8 @@
 /* 
- * GETPARAM.C: command-line processing functions for NEMO
+ * GETPARAM.C: command-line processing functions for NEMO and ZENO
  *             this also encompassed most of NEMO's user interface
  *
- *             This package has a long and winded history...
+ *             This package has a long and winded history... 
  *
  * Nov. 1986  Joshua Edward Barnes, Princeton NJ. - original version
  * Oct. 1987  Peter Teuben: added the 'host=' system keyword 
@@ -126,6 +126,12 @@
  * 18-oct-04       k  support for the CVS ID (cvsid)
  * 28-dec-04       l  help/report CVS ID properly (help=I)
  * 30-jun-05       o  parse integers with 0x as hex numbers
+ * 14-dec-06    3.5   changed some printf()'s to fprintf(stderr,....)'s
+ * 13-sep-07 WD    a  print name of name whose key is not found
+ * 23-oct-07    3.6   fix bug when ZENO style defv[] is used, more ZENO compat
+ * 22-aug-08       a  add help=m to show memory usage at end
+ * 26-sep-08 WD    b  add MPI proc info to some stderr output
+ * 27-Sep-10 JCL   c   MINGW32/WINDOWS support
 
   TODO:
       - what if there is no VERSION=
@@ -169,7 +175,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.4o 30-jun-05 PJT"
+#define GETPARAM_VERSION_ID  "3.6a 22-aug-08 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -207,8 +213,8 @@
 #include <history.h>
 
 #ifndef __MINGW32__
-# include <sys/types.h>
-# include <sys/times.h>
+#include <sys/types.h>
+#include <sys/times.h>
 #else
 # include <sys/time.h>
 #endif
@@ -320,6 +326,8 @@ typedef struct keyword_out {  /* a simple keyword, only meant for outkeys=   */
 /*      some defined here, others defined elsewhere        */
 
 extern int debug_level; /* see dprintf.c   from DEBUG env.var. */
+extern bool mpi_proc;   /* dprintf.c */
+extern int  mpi_rank;   /* dprintf.c */
 extern int error_level; /* see error.c     from ERROR env.var. */
 extern string usage;    /* see program.c or usage.c */
 extern string cvsid;    /* see program.c or cvsid.c */
@@ -327,7 +335,7 @@ extern string defv[];   /* see program.c or defv.c */
 extern string outdefv[];/* see program.c or outdefv.c */
 extern char **environ;  /* environment variables */
 
-extern int history;     /* 0=no history written; see history.c */
+extern int nemo_history;     /* 0=no history written; see history.c */
 
 int yapp_dev = 0;       /* interface hidden keyword yapp to plotting pkg */
 int help_level = 0;     /* hidden keyword help for interactive prompting */
@@ -335,6 +343,7 @@ int bell_level = 0;     /* noisy terminal when prompted */
 int review_flag = 0;    /* review keywords and optional help=8 chaining ? */
 int tcl_flag = 0;       /* go into TCL when all parameters set before go */
 int report_cpu = 0;     /* report time and cpu usage; activated with help=T */
+int report_mem = 0;     /* report memory usage (machine specific) */
 string yapp_string = NULL;  /* once only ? */
 string help_string = NULL;  /* cumulative ? */
 string argv_string = NULL;  /* cumulative ? */
@@ -391,6 +400,7 @@ local void set_yapp(string);
 local void set_outkeys(string);
 local void local_error(string);
 local void local_exit(int);
+local void report(char);
 
 /* external NEMO functions */
 
@@ -438,18 +448,33 @@ void initparam(string argv[], string defv[])
     keys[0].help = scopy("Program name");
     keys[0].count = 0;
     keys[0].upd = 0;
-    nzeno = 0;
-    for (i = 1, j=0; i < nkeys; i++, j++) {		/* loop key defs */
+    nzeno =  (*defv[0] == ';');
+
+    /* TODO:  if in zeno mode, it needs to skip EACH ; string, since it's a comment/help */
+
+    for (i = 1, j=0; i < nkeys; i++, j++) {		/* loop over key defs */
         if (defv[j] == NULL) break;
-        while(*defv[j] == ';') {			/* handle ZENO */
-	    dprintf(0,"ZENO: %s\n",defv[j]);
-            nzeno++;
-            j++;
-        }
+	if (nzeno) {
+	  if (j==0) {
+	    usage = defv[0];
+	    dprintf(1,"ZENO Usage: %s\n",usage);
+	  } else
+	    dprintf(1,"ZENO: %s\n",defv[j]);
+	  j++;
+	  if (defv[j] == NULL) {
+	    nkeys = i;
+	    dprintf(2,"ZENO: nkeys=%d %s\n",nkeys,keys[i].keyval);
+	    break;
+	  }
+	}
+
         keys[i].keyval = defv[j];
         keys[i].key = scopy(parname(defv[j]));
         keys[i].val = scopy(parvalue(defv[j]));
-        keys[i].help = scopy(parhelp(defv[j]));
+	if (nzeno)
+	  keys[i].help = scopy(defv[j+1] + 1);
+	else
+	  keys[i].help = scopy(parhelp(defv[j]));
         keys[i].count = 0;
         keys[i].upd = 1;
 	if (keys[i].key[strlen(keys[i].key)-1] == '#')
@@ -618,7 +643,6 @@ void initparam(string argv[], string defv[])
     error("(initparam) INTERACTIVE input not allowed; check help=?");
 #endif /* INTERACT */     
     }
-
 
 #if defined(INTERACT)
     if (help_level&HELP_DEFIO || help_level&HELP_EDIT) {     /* write keyfile */
@@ -645,11 +669,12 @@ void initparam(string argv[], string defv[])
 #endif /* INTERACT */
 
     if (help_string) {
-        if (  strpbrk(help_string,"oiapdqntkvhc?")!=NULL ||
-              ( strpbrk(help_string,"oiapdqntkvhc?")==NULL && 
+      /* also patch printhelp if you add characters to this strpbrk check */
+      if (      strpbrk(help_string,"oiapdqntkvhmc?")!=NULL ||
+              ( strpbrk(help_string,"oiapdqntkvhmc?")==NULL && 
                 strpbrk(help_string,"0123456789")==NULL
-              )  )
-            printhelp(help_string);     /* give some help and possibly */
+		) )
+	printhelp(help_string);     /* give some help and possibly */
     }
 
     useflag = FALSE;
@@ -657,7 +682,7 @@ void initparam(string argv[], string defv[])
           useflag = useflag || streq(keys[i].val,"???");
 
     if (useflag) {
-        printusage(defv);                  /* give minimum 'usage' and exit */
+        printusage(defv);         /* give minimum 'usage' to stderr and exit */
         local_exit(0);
         /*NOTREACHED*/
     }
@@ -717,20 +742,9 @@ local void initparam_out()
 void finiparam()
 {
     int i, n=0;
-    float ticks;
 #ifndef __MINGW32__
-    if (report_cpu) {
-      clock2 = times(&tms2);
-      ticks = (float) sysconf(_SC_CLK_TCK);
-      dprintf(0,"CPU_USAGE %s : %.2f    %.2f %.2f  %.2f %.2f  %ld\n",
-	      progname, 
-	      (clock2-clock1)/ticks,
-	      (tms2.tms_utime-tms1.tms_utime)/ticks,
-	      (tms2.tms_stime-tms1.tms_stime)/ticks,
-	      (tms2.tms_cutime-tms1.tms_cutime)/ticks,
-	      (tms2.tms_cstime-tms1.tms_cstime)/ticks,
-	      clock1);
-    }
+    if (report_cpu) report('c');
+    if (report_mem) report('m');
 #endif
     for (i=1; i<nkeys; i++)
         n += keys[i].upd ? 1 : 0;
@@ -776,6 +790,39 @@ void finiparam()
     }
     free(keys);
     if (version_i) free(version_i);
+}
+
+
+local void report(char what)
+{
+  float ticks;
+
+  if (what == 'c') {
+    clock2 = times(&tms2);
+    ticks = (float) sysconf(_SC_CLK_TCK);
+    dprintf(0,"CPU_USAGE %s : %.2f    %.2f %.2f  %.2f %.2f  %ld\n",
+	    progname, 
+	    (clock2-clock1)/ticks,
+	    (tms2.tms_utime-tms1.tms_utime)/ticks,
+	    (tms2.tms_stime-tms1.tms_stime)/ticks,
+	    (tms2.tms_cutime-tms1.tms_cutime)/ticks,
+	    (tms2.tms_cstime-tms1.tms_cstime)/ticks,
+	    clock1);
+    return;
+  }
+
+  if (what == 'm') {
+#if defined(linux)
+    /* http://www.gnu.org/software/libc/manual/html_node/Statistics-of-Malloc.html */
+    struct mallinfo mi = mallinfo();
+    dprintf(0,"mallinfo: hblks(d):%d %d uord=%d ford=%d keepcost=%d arena=%d ord=%d\n",
+	    mi.hblks,mi.hblkhd,mi.uordblks,mi.fordblks,mi.keepcost,mi.arena,mi.ordblks);
+#else
+    dprintf(0,"report_mem not implemented for non-linux\n");
+#endif      
+    return;
+  }
+  return;
 }
 
 /*
@@ -848,7 +895,7 @@ local void scan_environment()
         if (streq("BELL", parname(environ[i])))
             bell_level = atoi(parvalue(environ[i]));
         else if (streq("HISTORY", parname(environ[i])))
-            history = atoi(parvalue(environ[i]));
+            nemo_history = atoi(parvalue(environ[i]));
         else if (streq("DEBUG", parname(environ[i])))
             set_debug(parvalue(environ[i]));
         else if (streq("YAPP", parname(environ[i])))
@@ -864,7 +911,7 @@ local void scan_environment()
     }
     dprintf(5, 
     "scan_environment: debug=%d yapp=%d help=%d history=%d review=%d error=%d\n",
-     debug_level, yapp_dev, help_level, history, review_flag, error_level);
+     debug_level, yapp_dev, help_level, nemo_history, review_flag, error_level);
     dprintf(5,"date_id = %s\n",date_id());
 #if defined(INTERACT)
     if ((ev=getenv("NEMODEF")) != NULL) {
@@ -881,7 +928,7 @@ local void save_history(string *argv)
     int i, histlen;
     string hist;
 
-    if (!history) return;
+    if (!nemo_history) return;
 
     if (help_level) {         /* if external help, argv[] is not appropriate */
         histlen = 0;
@@ -940,6 +987,7 @@ local void printhelp(string help)
         printf("  i       >> show some internal variables\n");
 	printf("  o       >> show the output key names\n");
 	printf("  c       >> show cpu usage at the end of the run\n");
+	printf("  m       >> show memory usage at the end of the run\n");
 	printf("  I       >> cvs id\n");
         printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
@@ -992,7 +1040,7 @@ local void printhelp(string help)
 
     numl = ((strchr(help,'n')) ? 1 : 0);    /* add newlines between key=val ? */
 
-    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzuc")==NULL) { /* arguments */
+    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzucm")==NULL) { /* arguments */
         printf("%s", progname);
         for (i=1; i<nkeys; i++) {
             newline(numl);
@@ -1105,6 +1153,9 @@ local void printhelp(string help)
     if (strchr(help,'c')) {
         report_cpu = 1;
     }
+    if (strchr(help,'m')) {
+        report_mem = 1;
+    }
 }
 
 local void newline(int n)        /* print 'n' newlines */
@@ -1207,16 +1258,18 @@ local void printusage(string *defv)
     int i;
     bool otherargs;
 
-    printf("Insufficient parameters, try 'help=', 'help=?' or 'help=h',\n");
-    printf("Usage: %s", progname);
+    if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
+    fprintf(stderr,"Insufficient parameters, try 'help=', 'help=?' or 'help=h',\n");
+    if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
+    fprintf(stderr,"Usage: %s", progname);
     otherargs = FALSE;
     for (i=1; i<nkeys; i++)
         if (streq(keys[i].val,"???"))
-            printf(" %s=???", keys[i].key);
+	  fprintf(stderr," %s=???", keys[i].key);
         else
-            otherargs = TRUE;
-    printf(otherargs ? " ...\n" : "\n");
-    if (usage) printf("%s\n",usage);
+	  otherargs = TRUE;
+    fprintf(stderr,otherargs ? " ...\n" : "\n");
+    if (usage) fprintf(stderr,"%s\n",usage);
 }
 
 /*
@@ -1389,6 +1442,16 @@ bool updparam(string name)
     if (kw == NULL) error("(updparam) \"%s\" unknown keyword",name);
     return kw->upd == 1;
 }
+
+/*
+ *  GETPARAMSTAT
+ */
+
+int getparamstat(string name) {
+  error("getparamstat is a ZENO feature, not implemented in NEMO yet");
+}
+
+
 
 /*
  * GETPARAM: look up parameter value by name
@@ -2010,7 +2073,7 @@ local int findkey(string name)
                 name, keys[last].key);
         return last;
     } else if (count > 1) {
-        dprintf(0,"### Minimum match failed, found: ");
+        dprintf(0,"Minimum match failed for \"%s\", found: ",name);
         for (j=0; j<nkeys; j++)
             if (strncmp(keys[j].key,name,(unsigned)l)==0)
                 dprintf(0,"%s ",keys[j].key);
@@ -2104,7 +2167,7 @@ local keyword *findakey(string name)
 	    name, keys[last].key);
     return &keys[last];
   } else if (count > 1) {
-    dprintf(0,"### Minimum match failed, found: ");
+    dprintf(0,"Minimum match failed for \"%s\", found: ",name);
     for (j=0; j<nkeys; j++)
       if (strncmp(keys[j].key,name,(unsigned)l)==0)
 	dprintf(0,"%s ",keys[j].key);

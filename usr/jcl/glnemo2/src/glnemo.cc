@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.0"
+#define RELEASE_VERSION "1.1"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -73,6 +73,15 @@ using namespace std;
     "xzg=f\n           display a grid in XZ plan                        ",
     "cube=f\n          display a cube                                   ",
     "osd=t\n           Show On Screen Display                           ",
+    "osdtime=t\n       Show time on OSD                                 ",
+    "osdnbody=t\n      Show nbody on OSD                                ",
+    "osdzoom=t\n       Show zoom on OSD                                 ",
+    "osdrot=t\n        Show rotattion on OSD                            ",
+    "osdtrans=t\n      Show transformation on OSD                       ",
+    "osdtitle=t\n      Show title on OSD                                ",
+    "osddata=t\n       Show data type on OSD                            ",
+    "osd_set_title=\n  Set an explicit title on OSD                     ",
+    "osdfontsize=13.0\n Size of OSD's font                              ",
     "com=t\n           centering according Center Of Mass               ", 
     "point=f\n         show particles as points                         ",
     "selphys=1\n        select physical quantity to display\n           "

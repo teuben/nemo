@@ -1,5 +1,6 @@
 SUBDIRS += \
            utils \
+           3rdparty/pfntlib \
            plugins/ramses    \
            plugins/gadget    \
            plugins/nemolight \

@@ -26,8 +26,9 @@
 #include "gltexture.h"
 #include "gloctree.h"
 #include "camera.h"
-namespace glnemo {
+class fntTexFont;
 
+namespace glnemo {
 class GLGridObject;
 class GlobalOptions;
 
@@ -78,11 +79,13 @@ public slots:
    void  updateGrid(bool ugl=true);
    void  updateGL();
    void  osdZoom(bool ugl=true);
-   void setOsd(const GLObjectOsd::OsdKeys k,const QString text, bool b=true);
-   void setOsd(const GLObjectOsd::OsdKeys k,const int value, bool b=true);
-   void setOsd(const GLObjectOsd::OsdKeys k,const float value, bool b=true);
+   void setOsd(const GLObjectOsd::OsdKeys k,const QString text, bool show,bool b=true);
+   void setOsd(const GLObjectOsd::OsdKeys k,const int value, bool show, bool b=true);
+   void setOsd(const GLObjectOsd::OsdKeys k,const float value, bool show, bool b=true);
    void setOsd(const GLObjectOsd::OsdKeys k, const float value1, 
-                      const float value2, const float value3, bool b=true);
+                      const float value2, const float value3,  bool show,bool b=true);
+   void changeOsdFont();     
+
    void resetFrame() { nframe=0; }
    int getFrame() { return nframe;}
 
@@ -172,7 +175,10 @@ private:
   // OSD
   GLObjectOsd * osd;
   QImage image,gldata;
-  void formatInstructions(int width, int height);
+  // Font
+  fntTexFont * font;
+  // Font
+  //fntRenderer * text;
   // Texture vector
   GLTextureVector gtv;
   // Thread

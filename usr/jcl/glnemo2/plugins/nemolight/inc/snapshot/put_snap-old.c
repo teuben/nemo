@@ -10,6 +10,7 @@
  *       8-oct-01  add some dens/eps if present PJT (for yanc)
  *      29-sep-05  fix for gcc4 supplying default prototypes
  *                 ** only potcode needed this,but we clearly need better solution for this **
+ *      30-may-07  allocate() needs size_t argument casting for > 44.7M particles
  */
 
 /*
@@ -117,7 +118,7 @@ int *ofptr;			/* pointer to output bit flags */
 
     if (*ofptr & MassBit) {
 #ifdef Mass
-	mbuf = (real *) allocate(*nbptr * sizeof(real));
+        mbuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	for (bp = *btptr, mp = mbuf; bp < *btptr + *nbptr; bp++)
 	    *mp++ = Mass(bp);;
 	put_data(outstr, MassTag, RealType, mbuf, *nbptr, 0);
@@ -150,7 +151,7 @@ int *ofptr;			/* pointer to output bit flags */
 
     if (*ofptr & PhaseSpaceBit) {
 #ifdef Phase
-	rvbuf = (real *) allocate(*nbptr * 2 * NDIM * sizeof(real));
+        rvbuf = (real *) allocate((size_t)(*nbptr) * 2 * NDIM * sizeof(real));
 	for (bp = *btptr, rvp = rvbuf; bp < *btptr + *nbptr; bp++) {
 	    SETV(rvp, Phase(bp)[0]);
 	    rvp += NDIM;
@@ -187,7 +188,7 @@ int *ofptr;			/* pointer to output bit flags */
 
     if (*ofptr & PotentialBit) {
 #ifdef Phi
-	pbuf = (real *) allocate(*nbptr * sizeof(real));
+        pbuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	for (bp = *btptr, pp = pbuf; bp < *btptr + *nbptr; bp++)
 	    *pp++ = Phi(bp);
 	put_data(outstr, PotentialTag, RealType, pbuf, *nbptr, 0);
@@ -220,7 +221,7 @@ int *ofptr;			/* pointer to output bit flags */
 
     if (*ofptr & AccelerationBit) {
 #ifdef Acc
-	abuf = (real *) allocate(*nbptr * NDIM * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * NDIM * sizeof(real));
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++) {
 	    SETV(ap, Acc(bp));
 	    ap += NDIM;
@@ -255,7 +256,7 @@ int *ofptr;			/* pointer to output bit flags */
     
     if (*ofptr & AuxBit) {
 #ifdef Aux
-	abuf = (real *) allocate(*nbptr * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
 	    *ap++ = Aux(bp);;
 	put_data(outstr, AuxTag, RealType, abuf, *nbptr, 0);
@@ -288,7 +289,7 @@ int *ofptr;			/* pointer to output bit flags */
 
     if (*ofptr & KeyBit) {
 #ifdef Key
-	kbuf = (int *) allocate(*nbptr * sizeof(int));
+        kbuf = (int *) allocate((size_t)(*nbptr) * sizeof(int));
 	for (bp = *btptr, kp = kbuf; bp < *btptr + *nbptr; bp++)
 	    *kp++ = Key(bp);;
 	put_data(outstr, KeyTag, IntType, kbuf, *nbptr, 0);
@@ -322,7 +323,7 @@ int *ofptr;			/* pointer to output bit flags */
     
     if (*ofptr & DensBit) {
 #ifdef Dens
-	abuf = (real *) allocate(*nbptr * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
 	    *ap++ = Dens(bp);;
 	put_data(outstr, DensityTag, RealType, abuf, *nbptr, 0);
@@ -356,7 +357,7 @@ int *ofptr;			/* pointer to output bit flags */
     
     if (*ofptr & EpsBit) {
 #ifdef Eps
-	abuf = (real *) allocate(*nbptr * sizeof(real));
+        abuf = (real *) allocate((size_t)(*nbptr) * sizeof(real));
 	for (bp = *btptr, ap = abuf; bp < *btptr + *nbptr; bp++)
 	    *ap++ = Eps(bp);;
 	put_data(outstr, EpsTag, RealType, abuf, *nbptr, 0);

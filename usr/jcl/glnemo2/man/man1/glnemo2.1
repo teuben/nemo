@@ -1,4 +1,4 @@
-.TH GLNEMO2 1NEMO "July 2010"
+.TH GLNEMO2 1NEMO "October 2010"
 .SH NAME
 glnemo2 \- An interactive 3D OpenGL visualization program for Nemo snapshots
 .SH SYNOPSIS
@@ -213,7 +213,35 @@ display a grid in XZ plan [f]
 display a cube centered on 0,0,0 [f]
 .TP 20
 \fBosd=\fP
-show On Screen Display [t]
+show On Screen Display (OSD) [t]
+.TP 20
+\fBosdtime=\fP
+show time on OSD [t]
+.TP 20
+\fBosdnbody=\fP
+show nbody on OSD [t]
+.TP 20
+\fBosdzoom=\fP
+show zoom on OSD [t]
+.TP 20
+\fBosdrot=\fP
+show rotation values on OSD [t]
+.TP 20
+\fBosdtrans=\fP
+show translation values on OSD [t]
+.TP 20
+\fBosddata=\fP
+show data type on OSD [t]
+.TP 20
+\fBosdtitle=\fP
+show title on OSD [t]
+.TP 20
+\fBosd_set_title=\fP
+set an explicit title on OSD. If this variable remains blank, then
+simulation's file name will be used as title
+.TP 20
+\fBosdfontsize=\fP
+set OSD's font in pixels [13.]
 .TP 20
 \fBcom=\fP
 center according the Center Of Mass [t]
@@ -282,7 +310,8 @@ Jean-Charles Lambert
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +5.0i
-23-Apr-10  ramses reader + gyrfalcON manipulator	JCL
-19-May-10  - Leiden release - see ChangeLog		JCL
-28-Jul-10  Version 1.0 !!!                              JCL
+23-Apr-10	ramses reader + gyrfalcON manipulator	JCL
+19-May-10	- Leiden release - see ChangeLog	JCL
+28-Jul-10	Version 1.0 !!!				JCL
+25-Oct-10	Version 1.1 - see ChangeLog		JCL
 .fi

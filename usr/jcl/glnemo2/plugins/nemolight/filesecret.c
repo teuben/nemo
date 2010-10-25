@@ -14,7 +14,7 @@
  *      saferead -> fread()         fwrite()
  *
  * V 1.0: Joshua Barnes 4/87	basic I/O operators implemented,
- * V 1.X: Lyman Hurd 8/87	added f-d coercion, deferred input,
+ * V 1.X: Lyman Hurd 8/87	adde f-d coercion, deferred input,
  * V 2.0: Joshua Barnes 4/88	new types, operators, external format.
  * V 2.1: Peter Teuben:	4/90	bug in stacklength in filesecret.h removed
  * V 2.2: Peter Teuben: 9/90    random access I/O - swap
@@ -36,6 +36,9 @@
  *        18-jun-03   pjt    <docs>
  * V 3.1  15-mar-05   pjt    C++ compilable
  * V 3.2   2-jun-05   pjt    blocked (sequential) I/O
+ * V 3.3  25-may-07   pjt    handle > 2GB objects in memory (Pierre Fortin <pierre.fortin@oamp.fr>)
+ * V 3.4  12-dec-09   pjt    support the new halfp type for I/O (see also csf)
+ *        27-Sep-10   jcl    MINGW32/WINDOWS support
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -53,8 +56,12 @@
 #include "filesecret.h"
 #include <stdarg.h>
 
-extern int convert_d2f (int, double *, float *);
-extern int convert_f2d (int, float *, double *);
+extern int convert_d2f(int, double *, float  *);
+extern int convert_f2d(int, float  *, double *);
+extern int convert_h2f(int, halfp  *, float  *);
+extern int convert_h2d(int, halfp  *, double *);
+extern int convert_f2h(int, float  *, halfp  *);
+extern int convert_d2h(int, double *, halfp  *);
 #ifdef __MINGW32__
 #define fseeko fseek
 #define ftello ftell
@@ -68,7 +75,8 @@ extern int convert_f2d (int, float *, double *);
 void copy_item(stream ostr, stream istr, string tag)
 {
     string type, *tags, *tp;
-    int *dims, dlen;
+    int *dims;
+    size_t dlen;
     byte *buf;
 
     if (! get_tag_ok(istr, tag))		/* prevent obvious errors   */
@@ -110,7 +118,8 @@ void copy_item(stream ostr, stream istr, string tag)
 void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 {
     string type, *tags, *tp;
-    int *dims, dlen, cvtlen;
+    int *dims, cvtlen;
+    size_t dlen;
     char *cp;
     byte *bufin, *bufout=NULL;
     itemptr ipt;
@@ -138,6 +147,12 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
                 convert_d2f(eltcnt(ipt,0),(double*)bufin,(float*)bufin);
 	        put_data_sub(ostr, tag, FloatType, bufin,  dims, FALSE); 
                 freeitem(ipt,FALSE);
+	    } else if (streq(cp,"d2h")) {
+                dprintf(1,"Converting %s in %s\n",cp,tag);
+                ipt = makeitem(HalfpType,tag,NULL,dims);    /* silly */
+                convert_d2h(eltcnt(ipt,0),(double*)bufin,(halfp*)bufin);
+	        put_data_sub(ostr, tag, HalfpType, bufin,  dims, FALSE); 
+                freeitem(ipt,FALSE);
             } else {
             	warning("Cannot convert %s yet in %s",cp,tag);
 	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
@@ -152,10 +167,42 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
                 convert_f2d(eltcnt(ipt,0),(float*)bufin,(double*)bufout);
 	        put_data_sub(ostr, tag, DoubleType, bufout,  dims, FALSE); 
                 freeitem(ipt,0);
+	    } else if (streq(cp,"f2h")) {
+                dprintf(1,"Converting %s in %s\n",cp,tag);
+                ipt = makeitem(HalfpType,tag,NULL,dims);    /* silly */
+                bufout = (byte *) allocate(datlen(ipt,0));
+                if (bufout == NULL)
+               	    error("copy_item_cvt: item %s: (f2h) not enuf memory", tag);
+                convert_f2h(eltcnt(ipt,0),(float*)bufin,(halfp*)bufout);
+	        put_data_sub(ostr, tag, HalfpType, bufout,  dims, FALSE); 
+                freeitem(ipt,0);
             } else {
             	warning("Cannot convert %s yet in %s",cp,tag);
 	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
 
+	    }
+	} else if (streq(type,HalfpType)) {
+            if (streq(cp,"h2d")) {		/* convert halfp to double */
+                dprintf(1,"Converting %s in %s\n",cp,tag);
+                ipt = makeitem(DoubleType,tag,NULL,dims);    /* silly */
+                bufout = (byte *) allocate(datlen(ipt,0));
+                if (bufout == NULL)
+               	    error("copy_item_cvt: item %s: (h2d) not enuf memory", tag);
+                convert_h2d(eltcnt(ipt,0),(halfp*)bufin,(double*)bufout);
+	        put_data_sub(ostr, tag, DoubleType, bufout,  dims, FALSE); 
+                freeitem(ipt,0);
+	    } else if (streq(cp,"h2f")) {
+                dprintf(1,"Converting %s in %s\n",cp,tag);
+                ipt = makeitem(FloatType,tag,NULL,dims);    /* silly */
+                bufout = (byte *) allocate(datlen(ipt,0));
+                if (bufout == NULL)
+               	    error("copy_item_cvt: item %s: (h2f) not enuf memory", tag);
+                convert_h2f(eltcnt(ipt,0),(halfp*)bufin,(float*)bufout);
+	        put_data_sub(ostr, tag, FloatType, bufout,  dims, FALSE); 
+                freeitem(ipt,0);
+            } else {
+            	warning("Cannot convert %s yet in %s",cp,tag);
+	        put_data_sub(ostr, tag, type, bufin,  dims, FALSE); 
 	    }
 	} else if (streq(type,IntType)) {
             warning("Cannot convert %s yet in %s",cp,tag);
@@ -227,7 +274,7 @@ void put_tes(stream str, string tag)
     ss_pop(sspt);				/* flush stacked item       */
     put_data(str, NULL, TesType, NULL, 0);	/* output external token    */
     if (sspt->ss_stp == -1) {                   /* if at top level          */
-      dprintf(1,"\nput_tes(%s) flushing\n",tag);
+      dprintf(1,"put_tes(%s) flushing\n",tag);  /* removed '\n' 27/06/08 WD */
       fflush(str);                              /* flush buffer for Walter  */ 
     }
 }
@@ -661,7 +708,8 @@ string get_string(
 ) {
     strstkptr sspt;
     itemptr ipt;
-    int *dp, dlen;
+    int *dp;
+    size_t dlen;
     char *dat;
 
     sspt = findstream(str);			/* access assoc. info	    */
@@ -773,10 +821,10 @@ int *get_dims(
 	return ((int *) copxstr(ItemDim(ipt), sizeof(int)));
 						/*   return copy of dims    */
     else
-	return (NULL);
+	return NULL;
 }
 
-int get_dlen(
+size_t get_dlen(
     stream str,			/* input stream obtained from stropen */
     string tag			/* tag of item being looked for */
 ) {
@@ -789,7 +837,7 @@ int get_dlen(
 	error("get_dlen: at EOF");
     if (sspt->ss_stp == -1)			/* was input at top level?  */
 	sspt->ss_stk[0] = ipt;			/*   put back for next time */
-    return (datlen(ipt, 0));			/* return count of bytes    */
+    return datlen(ipt, 0);			/* return count of bytes    */
 }
 
 /*
@@ -807,13 +855,13 @@ bool skip_item(
     if (sspt->ss_stp == -1) {			/* input from top level?    */
 	ipt = nextitem(sspt);			/*   get item read next     */
 	if (ipt == NULL)			/*   nothing left in input? */
-	    return (FALSE);			/*     then nothing to skip */
+	    return FALSE;			/*     then nothing to skip */
 	freeitem(ipt, TRUE);			/*   reclaim storage space  */
 	sspt->ss_stk[0] = NULL;			/*   and flush that item    */
-	return (TRUE);				/*   handled an item        */
+	return TRUE;				/*   handled an item        */
     } else {
 	printf("skip_item: within set");
-	return (TRUE);				/*    a lie                 */
+	return TRUE;				/*    a lie                 */
     }
 }
 
@@ -897,7 +945,7 @@ local bool puthdr(stream str, itemptr ipt)
 
 local bool putdat(stream str, itemptr ipt)
 {
-    int len;
+    size_t len;
 
     if (ItemDat(ipt) == NULL)			/* no data to write?        */
 	error("putdat: item %s has no data", ItemTag(ipt));
@@ -976,7 +1024,7 @@ local itemptr readitem(stream str, itemptr first)
 	return (ip);				/*   just return it	    */
     bufp = &ibuf[0];				/* prepare item buffer	    */
     for ( ; ; ) {				/* loop reading items in    */
-	if (bufp >= &ibuf[MaxSetLen])		/*   no room for n ext?	    */
+	if (bufp >= &ibuf[MaxSetLen])		/*   no room for next?	    */
 	    error("readitem: set %s: buffer overflow", ItemTag(ip));
 	np = getitem(str);		        /*   look at next item	    */
 	if (np == NULL)				/*   at end of file?	    */
@@ -1003,9 +1051,8 @@ local itemptr getitem(stream str)
     itemptr ipt;
 
     ipt = gethdr(str);				/* try reading header in    */
-    if (ipt == NULL)	{			/* did gethdr detect EOF?   */
+    if (ipt == NULL)				/* did gethdr detect EOF?   */
         return (NULL);				/*   return NULL on EOF     */
-    }
     if (! streq(ItemTyp(ipt), SetType) &&	/* if item does not start   */
 	  ! streq(ItemTyp(ipt), TesType))	/* or terminate a set       */
 	getdat(ipt, str);			/*   try reading data in    */
@@ -1023,9 +1070,8 @@ local itemptr gethdr(stream str)
     int *dim, *ip;  /* ISSWAP */
     permanent bool firsttime = TRUE;
 
-    if (fread(&num, sizeof(short), 1, str) != 1) { /* read magic number*/
+    if (fread(&num, sizeof(short), 1, str) != 1)/* read magic number*/
 	return NULL;				/*   return NULL on EOF     */
-    }
     if (num == SingMagic || num == PlurMagic) {	/* new-style magic number?  */
 	typ = (string) getxstr(str, sizeof(char));
 						/*   read type string       */
@@ -1038,7 +1084,7 @@ local itemptr gethdr(stream str)
         bswap((char *)&num,sizeof(short int),1);        /* swap the bytes */
         if (num == SingMagic || num == PlurMagic) {    /* test the swapped */
             if (firsttime)
-               fprintf(stderr ,"[filestruct: reading swapped]");
+                fprintf(stderr,"[filestruct: reading swapped]");
 	    typ = (string) getxstr(str, sizeof(char));
 						/*   read type string       */
 	    if (typ == NULL)			/*   check for EOF          */
@@ -1118,7 +1164,7 @@ bool qsf(stream str)
 
 local void getdat(itemptr ipt, stream str)
 {
-    int dlen, elen;
+    size_t dlen, elen;
 
     elen = eltcnt(ipt, 0);
     dlen = elen * ItemLen(ipt);                 /* count bytes of data	    */
@@ -1255,10 +1301,8 @@ local void saferead(
     int cnt,
     stream str)
 {
-
-    if (  fread( dat, siz, cnt, str) != cnt) {
+    if (fread(dat, siz, cnt, str) != cnt)
 	error("saferead: error calling fread %d*%d bytes", siz, cnt);
-     }	
 #if defined(CHKSWAP)
     if (swap) bswap(dat,siz,cnt);
 #endif
@@ -1269,7 +1313,6 @@ local void safeseek(
     off_t offset,
     int key)	      /* 0: start of file, 1: current point, 2: end */
 {
-
     if (fseeko(str, offset, key) == -1)
 	error("safeseek: error calling fseeko %d bytes from %d",
 	      offset, key);
@@ -1374,6 +1417,7 @@ local typlen tl_tab[] = {
     { ShortType,  sizeof(short),  },
     { IntType,	  sizeof(int),    },
     { LongType,	  sizeof(long),   },
+    { HalfpType,  sizeof(short),  },
     { FloatType,  sizeof(float),  },
     { DoubleType, sizeof(double), },
     { SetType,    0,              },
@@ -1403,13 +1447,15 @@ local string findtype(string *a, string type)
     for (i=0; a[i]; i++) {
         cp = a[i];
         if (streq(type,DoubleType) && *cp=='d')
-            return(cp);
+            return cp;
         else if (streq(type,FloatType) && *cp=='f')
-            return(cp);
+            return cp;
+        else if (streq(type,HalfpType) && *cp=='h')
+            return cp;
         else if (streq(type,IntType) && *cp=='i')
-            return(cp);
+            return cp;
         else if (streq(type,IntType) && *cp=='s')
-            return(cp);
+            return cp;
     }
     return NULL;
 }

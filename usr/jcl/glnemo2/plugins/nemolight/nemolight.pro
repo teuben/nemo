@@ -73,6 +73,7 @@ SOURCES += allocate.c \
            check_file.c \
            command.c \
            convert.c \
+	   ieeehalfprecision.c \
            cvsid.c \
            date_id.c \
            defv.c \

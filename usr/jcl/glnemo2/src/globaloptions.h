@@ -19,8 +19,7 @@
 #include <QColor>
 #include <vector>
 namespace glnemo {
-
-
+ 
 class GlobalOptions{
 public:
     GlobalOptions();
@@ -68,12 +67,14 @@ public:
     float mesh_length;
     int nb_meshs;
     bool xy_grid, yz_grid, xz_grid, show_cube;
-    QColor col_x_grid, col_y_grid, col_z_grid, col_cube;
-    // from HUD TAB
+    QColor col_x_grid, col_y_grid, col_z_grid, col_cube;    
+    // from OSD TAB
     bool show_osd;
     bool osd_title, osd_time, osd_zoom, osd_rot,
     osd_trans, osd_data_type, osd_nbody, osd_projection;
     QColor background_color, osd_color;
+    QString osd_font_name, osd_title_name;
+    float osd_font_size;
     // from experimental TAB
     bool show_poly;
     float texture_size;
@@ -86,6 +87,7 @@ public:
     static float MAX_PARTICLES_SIZE;
     static float MAX_TEXTURE_SIZE;
     static float MAX_VEL_VECTOR_SIZE;
+    static QString RESPATH;
     // velocity
     bool vel_req;
     // method
