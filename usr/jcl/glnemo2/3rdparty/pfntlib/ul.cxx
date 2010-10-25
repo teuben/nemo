@@ -82,7 +82,7 @@ ulDir* ulOpenDir ( const char* dirname )
     
     dir->first = true;
     dir->done = false;
-    dir->hFind = FindFirstFile(search, &dir->data);
+    dir->hFind = FindFirstFile((WCHAR *) search, &dir->data);
     if (dir->hFind == INVALID_HANDLE_VALUE)
     {
       delete dir;
@@ -114,7 +114,7 @@ ulDirEnt* ulReadDir ( ulDir* dir )
   if ( dir->done )
     return NULL ;
 
-  strcpy( dir->curr.d_name, dir->data.cFileName ) ;
+  strcpy( dir->curr.d_name, (char *) dir->data.cFileName ) ;
 #else
   struct dirent* direntp = readdir( dir->dirp );
   if ( !direntp )

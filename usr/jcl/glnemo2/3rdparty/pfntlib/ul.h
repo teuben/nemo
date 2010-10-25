@@ -551,7 +551,7 @@ public:
     char dllname[1024];
     strcpy ( dllname, libname ) ;
     strcat ( dllname, ".dll"  ) ;
-    handle = (HMODULE) LoadLibrary ( dllname ) ;
+    handle = (HMODULE) LoadLibrary ( (WCHAR *) dllname ) ;
   }
 
   void *getFuncAddress ( const char *funcname )

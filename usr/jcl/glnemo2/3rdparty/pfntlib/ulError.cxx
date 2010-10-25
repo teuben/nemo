@@ -55,7 +55,7 @@ void ulSetError ( enum ulSeverity severity, const char *fmt, ... )
 #ifdef WIN32
       // A Windows user that does not start the program from the command line
       // will not see output to stderr
-      ::MessageBox(0, _ulErrorBuffer, "fatal error!:", 0);
+      ::MessageBox(0, (WCHAR *) _ulErrorBuffer, (WCHAR *) "fatal error!:", 0);
 #endif
       exit (1) ;
     }
