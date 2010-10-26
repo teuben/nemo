@@ -1,4 +1,4 @@
-.TH GLNEMO2 1NEMO "April 2010"
+.TH GLNEMO2 1NEMO "October 2010"
 .SH NAME
 glnemo2 \- An interactive 3D OpenGL visualization program for Nemo snapshots
 .SH SYNOPSIS
@@ -16,11 +16,11 @@ using camera path. All this features are accessible from a very intuitive graphi
 
 .SS Currently, glnemo2 reads:
 .nf
-- NEMO files (http://carma.astro.umd.edu/nemo)
-- Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/)
-- RAMSES files (http://irfu.cea.fr/Projets/Site_ramses/RAMSES.html)
+- NEMO files ( http://carma.astro.umd.edu/nemo )
+- Gadget 1 and 2 -little and big endian- files ( http://www.mpa-garching.mpg.de/gadget/ )
+- RAMSES files ( http://irfu.cea.fr/Projets/Site_ramses/RAMSES.html )
 - FTM files (Clayton Heller's sph/nbody code)
-- phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE)
+- phiGRAPE file ( http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE )
 - list of files stored in a file
 - realtime gyrfalcON simulation via a network plugin (see $NEMO/usr/jcl/glnemo2/gyrfalcon/README)
 .fi
@@ -192,10 +192,56 @@ translation on Y.[0.0]
 translation on Z.[0.0]
 .TP 20
 \fBgrid=\fP
-Show grid [f]
+Show grids and cube if they are activated [t]
+.TP 20
+\fBnb_meshs=\fP
+#meshs for the grid [28]
+.TP 20
+\fBmesh_size=\fP
+grid's size of one mesh [1.0]
+.TP 20
+\fBxyg=\fP
+display a grid in XY plan [t]
+.TP 20
+\fByzg=\fP
+display a grid in YZ plan [f]
+.TP 20
+\fBxzg=\fP
+display a grid in XZ plan [f]
+.TP 20
+\fBcube=\fP
+display a cube centered on 0,0,0 [f]
 .TP 20
 \fBosd=\fP
-show On Screen Display [t]
+show On Screen Display (OSD) [t]
+.TP 20
+\fBosdtime=\fP
+show time on OSD [t]
+.TP 20
+\fBosdnbody=\fP
+show nbody on OSD [t]
+.TP 20
+\fBosdzoom=\fP
+show zoom on OSD [t]
+.TP 20
+\fBosdrot=\fP
+show rotation values on OSD [t]
+.TP 20
+\fBosdtrans=\fP
+show translation values on OSD [t]
+.TP 20
+\fBosddata=\fP
+show data type on OSD [t]
+.TP 20
+\fBosdtitle=\fP
+show title on OSD [t]
+.TP 20
+\fBosd_set_title=\fP
+set an explicit title on OSD. If this variable remains blank, then
+simulation's file name will be used as title
+.TP 20
+\fBosdfontsize=\fP
+set OSD's font in pixels [13.]
 .TP 20
 \fBcom=\fP
 center according the Center Of Mass [t]
@@ -252,7 +298,7 @@ glnemo(1NEMO)
 .PP
 http://qt.nokia.com/downloads     Qt library web site
 .SH LICENCE
-CeCILL (see http://www.cecill.info)
+CeCILL ( see http://www.cecill.info )
 .SH FILES
 $NEMO/usr/jcl/glnemo2: directory with source code
 .br
@@ -264,6 +310,8 @@ Jean-Charles Lambert
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +5.0i
-23-Apr-10  ramses reader + gyrfalcON manipulator	JCL
-19-May-10  - Leiden release - see ChangeLog		JCL
+23-Apr-10	ramses reader + gyrfalcON manipulator	JCL
+19-May-10	- Leiden release - see ChangeLog	JCL
+28-Jul-10	Version 1.0 !!!				JCL
+26-Oct-10	Version 1.1 - see ChangeLog		JCL
 .fi
