@@ -81,12 +81,15 @@ endif
 
 CXXFLAGS		:= $(CXXFLAGS) $(WDutilsDevel)
 LUTIL			:= -L$(LIB) -lWDutils -Wl,-rpath,$(PWD)/$(LIB)
-MAKE_OBJ		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
-MAKE_EXE		= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS) $(LUTIL) $(MATHLIB)
+LIBRARIES		:= $(LUTIL) $(MATHLIB)
+MAKE			= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS)
+MAKE_OBJ		= $(MAKE) -c
+MAKE_EXE		= $(MAKE) $(LIBRARIES)
 ifdef WDutilsMPI
 LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI -Wl,-rpath,$(PWD)/$(LIB)
+LIBRARIES_MPI		:= $(LUTIL_MPI) $(MATHLIB)
 MAKE_OBJ_MPI		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI)
-MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI) $(LUTIL_MPI) $(MATHLIB)
+MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI) $(LIBRARIES_MPI)
 endif
 # -----------------------
 # header dependency lists
@@ -133,6 +136,11 @@ $(INC)partree.h		: $(DEV)partree.h
 			(cd $(INC); ln -s ../$(DEV)partree.h partree.h)
 partree_h		:= $(INC)partree.h $(memory_h) $(geometry_h) \
 			$(parallel_h)
+
+$(INC)partreeOLD.h	: $(DEV)partreeOLD.h
+			(cd $(INC); ln -s ../$(DEV)partreeOLD.h partreeOLD.h)
+partreeOLD_h		:= $(INC)partreeOLD.h $(memory_h) $(geometry_h) \
+			$(parallel_h)
 endif
 
 # -----------------------
@@ -147,13 +155,15 @@ numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
-octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(memory_h)
+octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(timer_h)
 domain_cc		:= $(DEV)domain.cc $(domain_h) $(io_h)
 
 ifdef WDutilsDevel
 neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
 parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
-partree_cc		:= $(DEV)partree.cc $(partree_h) $(peano_h) $(io_h)
+partreeOLD_cc		:= $(DEV)partreeOLD.cc $(partreeOLD_h) $(peano_h) \
+				$(timer_h)
+partree_cc		:= $(DEV)partree.cc $(partree_h) $(peano_h) $(timer_h)
 endif
 
 # ---------------
@@ -182,6 +192,8 @@ ifdef WDutilsDevel
 $(LIB)neighbour.o:	$(neighbour_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
+			$(MAKE_OBJ)
+$(LIB)partreeOLD.o:	$(partreeOLD_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)partree.o:	$(partree_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
@@ -215,6 +227,8 @@ $(LIB)libWDutils.a:	$(WDutils_objs)
 $(LIB)libWDutils.so:	$(WDutils_objs)
 			$(CXX) $^ $(LDFLAGS) -o $@
 
+libraryOMP	:=	$(LIB)libWDutils.a $(LIB)libWDutils.so
+
 ifdef WDutilsMPI
 # -----------------------
 # MPI modules and library
@@ -240,7 +254,7 @@ endif
 
 #
 
-library		:	$(LIB)libWDutils.a $(LIB)libWDutils.so $(libraryMPI)
+library		:	$(libraryOMP) $(libraryMPI)
 
 # -------------
 # test routines
@@ -250,17 +264,21 @@ ifdef WDutilsDevel
 
 test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
 				$(WDMath_h) $(neighbour_h) $(Pi_h) $(io_h) \
-				$(heap_h) $(timer_h) library
+				$(heap_h) $(timer_h)
 				$(MAKE_EXE)
-test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h) library
+test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
 				$(MAKE_EXE)
-test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) $(WDMath_h) \
-				library
+test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) $(WDMath_h)
 				$(MAKE_EXE)
-test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(Pi_h) library
+test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(numerics_h) \
+				$(Pi_h) $(io_h) $(timer_h)
 				$(MAKE_EXE)
 
-serial_tests		:=	test/TestTreeP$(EXT) \
+#test/TestTreeN$(EXT)	:	test/TestTreeP.cc $(LIB)newtree.o $(numerics_h) \
+#				$(Pi_h) $(io_h) $(timer_h)
+#				$(MAKE) -DNEWTREE $(LIB)newtree.o $(LIBRARIES)
+
+omp_tests		:=	test/TestTreeP$(EXT) \
 				test/TestTree$(EXT) \
 				test/TestGeometry$(EXT) \
 				test/TestOMP$(EXT)
@@ -269,15 +287,15 @@ ifdef WDutilsMPI
 
 test/TestDomainMPI$(EXT).o:	test/TestDomainMPI.cc $(domain_h) $(Pi_h)
 				$(MAKE_OBJ_MPI)
-test/TestDomainMPI$(EXT):	test/TestDomainMPI$(EXT).o library
+test/TestDomainMPI$(EXT):	test/TestDomainMPI$(EXT).o $(libraryMPI)
 				$(MAKE_EXE_MPI)
 
-testsuite		:	library $(serial_tests) \
+testsuite		:	library $(omp_tests) \
 				test/TestDomainMPI$(EXT)
 
 else
 
-testsuite		:	library $(serial_tests)
+testsuite		:	library $(omp_tests)
 
 endif
 endif

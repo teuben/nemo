@@ -37,11 +37,15 @@
 #ifdef _OPENMP
 # include <omp.h>
 #endif
+extern "C" {
 #ifdef unix
-  extern "C" {
-#   include <unistd.h>
-  }
+#  include <unistd.h>
+#  include <sys/time.h>
 #endif
+#ifdef WIN32
+#  include <windows.h>
+#endif
+}
 
 #ifdef __INTEL_COMPILER
 #pragma warning (disable:981) /* operands are evaluated in unspecified order */
@@ -59,49 +63,77 @@ WDutils::RunInfo::RunInfo()
     __debug(0)
 {
   try {
-  // set time
-    time_t now = ::time(0);
-    SNprintf(__time,100,ctime(&now));
-    __time[24] = 0;
+    // set wall-clock time
+    {
+#if defined(unix)
+      timeval now;
+      gettimeofday(&now, NULL);
+      __sec = now.tv_sec;
+      __usec = now.tv_usec;
+#elif defined(WIN32)
+      LARGE_INTEGER tmp;
+      QueryPerformanceCounter(&tmp);
+      QueryPerformanceFrequency(&tmp);
+      __timecount = tmp.QuadPart;
+      __timetick = 1.0/double(tmp.QuadPart);
+#endif
+    }
+    // set run time
+    {
+      time_t now = ::time(0);
+      SNprintf(__time,100,ctime(&now));
+      __time[24] = 0;
+    }
 #ifdef unix
     // set host name
-    gethostname(__host,100);
-    __host_known = 1;
+    {
+      gethostname(__host,100);
+      __host_known = 1;
+    }
     // set user name
-    const char*user__ = getenv("USER");
-    if(user__) {
-      SNprintf(__user,100,user__);
-      __user_known = 1;
-    } else
-      SNprintf(__user,100,"unknown.user");
+    {
+      const char*user__ = getenv("USER");
+      if(user__) {
+	SNprintf(__user,100,user__);
+	__user_known = 1;
+      } else
+	SNprintf(__user,100,"unknown.user");
+    }
     // set pid
-    SNprintf(__pid,20,"%d",getpid());
-    __pid_known  = 1;
+    {
+      __pid_num = getpid();
+      SNprintf(__pid,20,"%d",__pid_num);
+      __pid_known  = 1;
+    }
     // set command and name of executable
-    char file[64];
-    if(__pid_known) {
-      SNprintf(file,64,"/proc/%s/cmdline",__pid);
-      std::ifstream in(file);
-      if(in) {
-	int i,e=0;
-	for(i=0; i!=1024; ++i) __cmd[i]=0;
-	in.getline(__cmd,1023);
-	for(i=1023; i!=0; --i)
-	  if(__cmd[i]==0 || isspace(__cmd[i])) __cmd[i] = ' ';
-	  else if(e==0) e=i;
-	__cmd[e+1] = 0;
-	for(i=0; !isspace(__cmd[i]); ++i)
-	  __name[i] = __cmd[i];
-	__name[i] = 0;
-	__name[i] = 0;
-	__cmd_known  = 1;
-	__name_known = 1;
+    {
+      char file[64];
+      if(__pid_known) {
+	SNprintf(file,64,"/proc/%s/cmdline",__pid);
+	std::ifstream in(file);
+	if(in) {
+	  int i,e=0;
+	  for(i=0; i!=1024; ++i) __cmd[i]=0;
+	  in.getline(__cmd,1023);
+	  for(i=1023; i!=0; --i)
+	    if(__cmd[i]==0 || isspace(__cmd[i])) __cmd[i] = ' ';
+	    else if(e==0) e=i;
+	  __cmd[e+1] = 0;
+	  for(i=0; !isspace(__cmd[i]); ++i)
+	    __name[i] = __cmd[i];
+	  __name[i] = 0;
+	  __name[i] = 0;
+	  __cmd_known  = 1;
+	  __name_known = 1;
+	}
       }
     }
 #else // unix
-    SNprintf(__host,100,"unknown.host");
-    SNprintf(__user,100,"unknown.user");
-    SNprintf(__name,100,"unknown.name");
+    {
+      SNprintf(__host,100,"unknown.host");
+      SNprintf(__user,100,"unknown.user");
+      SNprintf(__name,100,"unknown.name");
+    }
 #endif
   } catch(exception E) {
     WDutils_RETHROW(E);
@@ -121,6 +153,34 @@ void WDutils::RunInfo::header(std::ostream&out)
     out<<"#\n";
   }
 }
+//
+#if   defined(unix)
+double WDutils::RunInfo::WallClock()
+{
+  timeval now;
+  gettimeofday(&now, NULL);
+  return (now.tv_sec - Info.__sec) + (now.tv_usec - Info.__usec) * 1.e-6;
+}
+void WDutils::RunInfo::WallClock(unsigned&sec, unsigned&usec)
+{
+  timeval now;
+  gettimeofday(&now, NULL);
+  if(now.tv_usec > Info.__usec) {
+    sec  = now.tv_sec  - Info.__sec;
+    usec = now.tv_usec - Info.__usec;
+  } else {
+    sec  = now.tv_sec  - Info.__sec - 1;
+    usec = (1000000 + now.tv_usec) - Info.__usec;
+  }
+}
+#elif defined(WIN32)
+double WDutils::RunInfo::WallClock()
+{
+  LARGE_INTEGER now;
+  QueryPerformanceCounter(&now);
+  return (now.QuadPart - Info.__timecount) * Info.__timetick;
+}
+#endif
 //
 WDutils::RunInfo WDutils::RunInfo::Info;
 
@@ -155,11 +215,11 @@ namespace {
       t+=w; s-=w;
     }
     if(RunInfo::is_mpi_proc()) {
-      w=snprintf(t,s," @%d",RunInfo::mpi_proc());
+      w=snprintf(t,s," @%2d",RunInfo::mpi_proc());
       t+=w; s-=w;
 #ifdef _OPENMP
     } else if(omp_in_parallel()) {
-      w=snprintf(t,s," @%d",omp_get_thread_num());
+      w=snprintf(t,s," @%2d",omp_get_thread_num());
       t+=w; s-=w;
 #endif
     }

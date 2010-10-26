@@ -102,9 +102,16 @@ namespace WDutils {
     char __pid     [20];
     char __name   [100];
     char __cmd   [1024];
+    int  __pid_num;
     int  __debug;
     int  __mpi_proc;
     int  __mpi_size;
+#if defined(unix)
+    long long __sec, __usec;
+#elif defined(WIN32)
+    long long __timecount;
+    double __timetick;
+#endif
     RunInfo();
     static RunInfo Info;
   public:
@@ -142,9 +149,12 @@ namespace WDutils {
     /// string with user name
     static const char*user()
     { return Info.__user; }
-    /// string with user pid
+    /// string with process id
     static const char*pid()
     { return Info.__pid; }
+    /// numerical valud of user process id
+    static int const&pid_num()
+    { return Info.__pid_num; }
     /// string with name of the running program
     static const char*name()
     { return Info.__name; }
@@ -168,6 +178,17 @@ namespace WDutils {
     { return Info.__debug >= depth; }
     /// print a log-file header
     static void header(std::ostream&out);
+#if defined(unix) || defined(WIN32)
+    /// time in seconds since start of the program (or more accurately since
+    /// construction of the RunInfo object)
+    /// \return time in seconds
+    static double WallClock();
+#endif
+#if defined(unix)
+    /// \param[out] sec   full seconds since start of the program
+    /// \param[out] usec  micro seconds since start of the program
+    static void WallClock(unsigned&sec, unsigned&usec);
+#endif
   };
   /// is debugging level exceeded by debugging depth (argument)?
   /// \relates DebugInformation

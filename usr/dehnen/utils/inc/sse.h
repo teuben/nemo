@@ -39,12 +39,7 @@
         defined(__GNUC__) && \
         defined(_MM_MALLOC_H_INCLUDED)
 #      warning
-#      warning The intel compiler has seen GNU's _mm_malloc.h which declares \
-_mm_malloc() and _mm_free() to have different linking than those declared in \
-INTEL's xmmintrin.h header file, which we are going to include now. This may \
-cause a compiler error, which can be prevented by ensuring that this file (sse.h) \
-is seen by the compiler before GNU's _mm_malloc.h (which in turn seems to be \
-included from GNU's iostream, for instance).
+#      warning The intel compiler has seen GNU's _mm_malloc.h which declares _mm_malloc() and _mm_free() to have different linking than those declared in INTEL's xmmintrin.h header file, which we are going to include now. This may cause a compiler error, which can be prevented by ensuring that _mm_malloc.h is not explicitly included when using the intel compiler.
 #      warning
 #    endif
 
@@ -452,14 +447,12 @@ namespace WDutils {
     {
       /// is SSE enabled for this type?
 #ifdef __SSE__
-      const static bool sse = true;
+      static const bool sse = true;
 #else
-      const static bool sse = false;
+      static const bool sse = false;
 #endif
       /// alignment number: K floats align to 128 bytes
-      const static int K=4;
-      /// 16-byte alligned array
-      typedef WDutils__align16 float vector[K];
+      static const int K=4;
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }
@@ -481,14 +474,12 @@ namespace WDutils {
     {
       /// is SSE enabled for this type?
 #ifdef __SSE2__
-      const static bool sse = true;
+      static const bool sse = true;
 #else
-      const static bool sse = false;
+      static const bool sse = false;
 #endif
       /// alignment number: K floats align to 128 bytes
-      const static int K=4;
-      /// 16-byte alligned array
-      typedef WDutils__align16 int vector[K];
+      static const int K=4;
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }
@@ -510,14 +501,12 @@ namespace WDutils {
     {
       /// is SSE enabled for this type?
 #ifdef __SSE2__
-      const static bool sse = true;
+      static const bool sse = true;
 #else
-      const static bool sse = false;
+      static const bool sse = false;
 #endif
       /// alignment number: K doubles align to 128 bytes
-      const static int K=2;
-      /// 16-byte alligned array
-      typedef WDutils__align16 double vector[K];
+      static const int K=2;
       /// smallest multiple of K not less than n
       template<typename __I>
       static __I Top(__I n) { return top<K,__I>(n); }

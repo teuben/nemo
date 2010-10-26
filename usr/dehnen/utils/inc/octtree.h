@@ -43,9 +43,6 @@
 #ifndef WDutils_included_octtree_h
 #define WDutils_included_octtree_h
 
-#ifndef WDutils_included_geometry_h
-#  include <geometry.h>
-#endif
 #ifndef WDutils_included_iostream
 #  include <iostream>
 #  define WDutils_included_iostream
@@ -56,6 +53,9 @@
 #endif
 #ifndef WDutils_included_memory_h
 #  include <memory.h>
+#endif
+#ifndef WDutils_included_geometry_h
+#  include <geometry.h>
 #endif
 
 namespace {
@@ -106,7 +106,6 @@ namespace WDutils {
     static const depth_type Dim     = __D;    ///< number of dimensions
     static const depth_type Nsub    = 1<<Dim; ///< number of octants per cell
     static const depth_type MAXNMAX = 250;
-    static const depth_type MINNMAX = 1;
     /// the maximum allowed tree depth
     /// \note Set to the number of digits in our floating point type.
     static const depth_type MaximumDepth=std::numeric_limits<real>::digits;
@@ -191,6 +190,9 @@ namespace WDutils {
     void build(char, count_type, const Initialiser*, const OctalTree*)
       WDutils_THROWING;
   public:
+#ifdef __INTEL_COMPILER
+#pragma warning (disable:2259) /* non-pointer conversion from A to B may lose significant bits */
+#endif
     /// \name tree building
     //@{
     /// build tree from scratch.
@@ -231,7 +233,7 @@ namespace WDutils {
 	      depth_type nmin=0, bool avspc=true) WDutils_THROWING
     : ALLOC ( 0 ),
       NALLOC( 0 ),
-      NMAX  ( nmax<MINNMAX? MINNMAX : (nmax>MAXNMAX? MAXNMAX:nmax) ),
+      NMAX  ( nmax<1? 1 : (nmax>MAXNMAX? MAXNMAX:nmax) ),
       NMIN  ( nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<2?NMAX:2) ),
       AVSPC ( avspc )
     { 
@@ -289,7 +291,7 @@ namespace WDutils {
 	WDutils_THROW("OctalTree<%d,%s>::rebuild(): init=0\n",Dim,nameof(real));
       if(nmax!=0) {
 	const_cast<depth_type&>(NMAX) = nmax>MAXNMAX? MAXNMAX:nmax;
-	const_cast<depth_type&>(NMIN) =
+	const_cast<depth_type&>(NMIN) = 
 	  nmin ? (nmin<NMAX? nmin:NMAX) : (NMAX<2?NMAX:2);
 	if(nmax > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::rebuild(): "
@@ -356,6 +358,9 @@ namespace WDutils {
 			 Dim,nameof(real), nmin, nmax, int(NMIN));
       build('p', nsub, init, parent);
     }
+#ifdef __INTEL_COMPILER
+#pragma warning (restore:2259) /* non-pointer conversion from A to B may lose significant bits */
+#endif
     /// establish as pruned version of an existing octtree
     ///
     /// This is equivalent to destruction followed by construction as pruned
@@ -391,7 +396,7 @@ namespace WDutils {
       } else {
 	const_cast<depth_type&>(NMAX) = nmax>MAXNMAX? MAXNMAX:nmax;
 	const_cast<depth_type&>(NMIN) = 
-	  nmin? (nmin<NMAX? nmin:NMAX) : (NMAX<2?NMAX:2);
+	  nmin ? (nmin<NMAX? nmin:NMAX) : (NMAX<2?NMAX:2);
 	if(nmax > 250)
 	  WDutils_WarningN("OctalTree<%d,%s>::reprune(): "
 			   "nmax=%d exceeds 250; will use nmax=%d instead\n",
@@ -526,6 +531,15 @@ namespace WDutils {
       bool operator !=(Leaf l) const
       { return I!=l.I; }
     };
+    /// type for compact indexing of leafs
+    /// \note Useful for templates over tree type (OctalTree or ParallelTree)
+    typedef Leaf LeafIndentifier;
+    //
+    static LeafIndentifier indentifier(Leaf l)
+    { return l; }
+    //
+    static Leaf leaf(LeafIndentifier l)
+    { return l; }
     /// \name leaf data access
     //@{
     /// leaf position, 16-byte aligned

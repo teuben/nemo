@@ -44,6 +44,8 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <octtree.h>
+#include <timer.h>
+#include <sstream>
 
 #define TESTING
 #undef  TESTING
@@ -185,8 +187,7 @@ namespace {
 	uint8           NDL[Nsub];     ///< # dots/octant
       };
       count_type        NUM;           ///< total # dots in box
-      uint8             NBX;           ///< number of daughter boxes  <= Nsub
-      uint8             NOC;           ///< number of octant occupied <= NBX
+      uint8             NOC;           ///< number of octant occupied
       uint8             LEV;           ///< tree level of box
     };
     typedef SSE::Extend16<__Box> Box;
@@ -212,15 +213,16 @@ namespace {
     mutable count_type  LF;            ///< free leafs during linking
     size_t              ND;            ///< # dots added sofar
     const OctTree      *TREE;          ///< tree to be linked
+    mutable Timer       TIM;           ///< timer for reporting
     //@}
     /// replace (pter to) box by (pter to) its non-single-parent descendant
     /// \param[in,out] P  (pter to) given box
     void EnsureNonSingleParent(const Box*&P) const
     {
-      while(P->NOC==1 && P->NBX==1)
+      while(P->NOC==1)
 	for(int i=0; i!=Nsub; ++i)
 	  if(P->NDL[i]) {
-	    P = pBOX(P->OCT[i]);
+	    P = cpBOX(P->OCT[i]);
 	    break;
 	  }
     }
@@ -230,17 +232,12 @@ namespace {
     /// \return new box
     /// \param[in] B  parent box
     /// \param[in] i  parent box's octant
-    Box*MakeSubBox(const Box*B, int i) WDutils_THROWING
+    Box*MakeSubBox(const Box*B, int i)
     {
       Box *P = BM.new_element(EstimateNalloc(NDOT,ND));
       P->NDl = 0;
-      P->NBX = 0;
       P->NOC = 0;
       P->LEV = B->LEV + 1;
-      if(P->LEV >= MaximumDepth)
-	WDutils_THROW("exceeding maximum tree depth of %d\n         "
-		      "(perhaps more than Nmax=%du positions are identical "
-		      "within floating-point precision)\n", MaximumDepth, NMAX);
       GeoAlg::copy(B->CUB,P->CUB);
       GeoAlg::shrink(P->CUB,i);
       return P;
@@ -283,10 +280,19 @@ namespace {
 	  // octant either empty or has a list of dots
 	  AddDotToOctant(P,Di,b);              // add dot to octant in box
 	  while(P->NDL[b] > NMAX) {            // WHILE dot list too long
-	    P->NBX++;                          //   increment box counter
 	    Di        = pDOT(P->OCT[b]);       //   get first dot from octant
 	    P->OCT[b] = MakeSubBox(P,b);       //   new empty box in octant
 	    P         = pBOX(P->OCT[b]);       //   P = daughter box
+	    if(P->LEV>= MaximumDepth) {
+	      std::ostringstream out;
+	      for(;Di; Di=pDOT(Di->Next))
+		out<<"         particle #"<<std::setw(6)<<Di->I
+		   <<" @ "<<std::setw(10)<<Di->X<<'\n';
+	      WDutils_THROW
+		("exceeding maximum tree depth of %d\n         "
+		 "perhaps more than Nmax=%d positions are identical:\n%s",
+		 MaximumDepth,NMAX,out.str().c_str());
+	    }
 	    P->NUM    = NMAX1;                 //   set P->NUM
 	    for(Dot*Dn; Di; Di=Dn) {           //   sort dots into octants
 	      Dn= pDOT(Di->Next);
@@ -361,6 +367,9 @@ namespace {
       TREE->PA[0] = 0;
       const_cast<depth_type&>(DEPTH) = LinkCell(P0,0,0);
       const_cast<count_type&>(NCELL) = CF;
+      if(debug(1))
+	DebugInfo(" OctalTree::build(): tree linked in         %g sec\n",
+		  TIM.stop());
     }
     //
     count_type const&NCell() const { return NCELL; }
@@ -386,7 +395,7 @@ namespace {
     /// header for box data dump
     void DumpHeadBox(std::ostream&out)
     {
-      out<<" Box        N No Nb"
+      out<<" Box        N No"
 	 <<(Dim==2? "    NDL[]   " : "          NDL[]         ");
       for(int i=0; i!=Nsub; ++i) out<<" OCT["<<i<<']';
       out<<" S NSP         Rad                 C\n";
@@ -405,7 +414,7 @@ namespace {
       out<<" B"<<setfill('0')<<setw(5)<<BM.number_of_element(B)
 	 <<' ' <<setfill(' ')<<setw(5)<<B->NUM
 	 <<' ' <<setw(2)<<int(B->NOC)
-	 <<' ' <<setw(2)<<int(B->NBX);
+	;
       for(int i=0; i!=Nsub; ++i)
 	out<<' '<<setw(2)<<int(B->NDL[i]);
       for(int i=0; i!=Nsub; ++i) {
@@ -418,7 +427,7 @@ namespace {
 	  out<<" B"<<setfill('0')<<setw(5)
 	     <<BM.number_of_element(pBOX(B->OCT[i]));
       }
-      if(B->NOC==1 && B->NBX==1) {
+      if(B->NOC==1) {
 	++ns;
 	out<<" S";
       } else
@@ -587,6 +596,9 @@ namespace {
     default: WDutils_THROW("OctalTree<%d,%s>::build(): unknown build '%c'\n",
 			   Dim,nameof(real),build);
     }
+    if(debug(1))
+      DebugInfo(" OctalTree::build(): initialised dots in    %g sec\n",
+		TIM.stop());
     // 2  find min, max and average position
     Dot*Di=D0;
     point Xmin(D0->X), Xmax(D0->X), Xave(D0->X);
@@ -611,7 +623,6 @@ namespace {
     Xave   /= real(NDOT);
     // 3  set (empty) root box
     P0->NDl   = 0;
-    P0->NBX   = 0;
     P0->NOC   = 0;
     P0->CUB.X = TreeHelper<Dim>::RootCentre(Xave);
     P0->CUB.H = TreeHelper<Dim>::RootRadius(P0->CUB.X,Xmin,Xmax);
@@ -625,6 +636,9 @@ namespace {
     std::ofstream dumpD("dots.dat"), dumpB("boxs.dat");
     Dump(dumpD, dumpB);
 #endif
+    if(debug(1))
+      DebugInfo(" OctalTree::build(): box-dot tree grown in  %g sec\n",
+		TIM.stop());
   }
   //
   template<int D, typename real>
@@ -646,7 +660,7 @@ namespace {
     GeoAlg::copy(P->CUB,static_cast<cube&>(TREE->XC[C]));
     TREE->NM[C] = P->NUM;
     // 3 loop octants: link leaf kids (from octants with < NMIN), count cells
-    depth_type tmp = 0;
+    depth_type tmp = 0; // cell counter
     for(int i=0; i!=Nsub; ++i)
       if(P->NDL[i] >= NMIN)
 	++tmp;
@@ -730,29 +744,11 @@ namespace WDutils {
 				 const Initialiser*init, const OctalTree*tree)
     WDutils_THROWING
   {
-#undef GIVE_TIMING
-#ifdef GIVE_TIMING
-    clock_t cpu0, cpu1;
-    cpu0 = clock();
-#endif
     BoxDotTree<Dim,real> BDT(building,n,init,NMAX,NMIN,AVSPC,tree);
-#ifdef GIVE_TIMING
-    cpu1 = clock();
-    std::cerr<<" OctalTree::build(): BoxDotTree::BoxDotTree took "
-	     <<double(cpu1 - cpu0)/double(CLOCKS_PER_SEC)<<" sec\n";
-#endif
     NLEAF = BDT.NDOT;
     NCELL = BDT.NCell();
     allocate();
-#ifdef GIVE_TIMING
-    cpu0 = clock();
-#endif
     BDT.Link(this);
-#ifdef GIVE_TIMING
-    cpu1 = clock();
-    std::cerr<<" OctalTree::build(): BoxDotTree::Link()     took "
-	     <<double(cpu1 - cpu0)/double(CLOCKS_PER_SEC)<<" sec\n";
-#endif
     DEPTH = BDT.DEPTH;
     NCELL = BDT.NCELL;
   }

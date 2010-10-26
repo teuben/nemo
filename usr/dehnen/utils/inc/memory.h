@@ -245,7 +245,7 @@ namespace WDutils {
 #define WDutils_DEL_O(P) WDutils::DelObject(P,__FILE__,__LINE__)
 }
 //
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 #include <mm_malloc.h>
 #endif
 //
@@ -963,11 +963,11 @@ namespace WDutils {
     /// rank: number of dimensions
     static const unsigned rank = D;
     /// return size in dimension @a d
-    unsigned size(unsigned d) const
+    unsigned size(unsigned d=0) const
     { return N[d]; }
-    /// return size in 1st dimension
-    unsigned size() const
-    { return N[0]; }
+    /// return product of size in all dimensions
+    unsigned prod_sizes() const
+    { return N[0]*K[0]; }
     /// type resulting from a const [] operation
     typedef ConstSubArray<T,D-1> ConstSub;
     /// acts like the operator[] on a const pointer
@@ -992,6 +992,9 @@ namespace WDutils {
     /// return size in dimension @a d, default: in lowest dimension
     unsigned size(unsigned d=0) const
     { return N[d]; }
+    /// return product of size in all dimensions
+    unsigned prod_sizes() const
+    { return N[0]*K[0]; }
     /// type resulting from a const [] operation
     typedef const T* ConstSub;
     /// acts like the operator[] on a const pointer
@@ -1019,6 +1022,9 @@ namespace WDutils {
     /// \note We assume 0 <= @a d < @a rank. For efficiency, this is not tested.
     unsigned size(unsigned d=0) const
     { return N[d]; }
+    /// return product of size in all dimensions
+    unsigned prod_sizes() const
+    { return N[0]*K[0]; }
     /// type resulting from a non-const [] operation
     typedef SubArray<T,D-1> Sub;
     /// type resulting from a const [] operation
@@ -1052,6 +1058,9 @@ namespace WDutils {
     /// \note We assume 0 <= @a d < @a rank. For efficiency, this is not tested.
     unsigned size(unsigned d=0) const
     { return N[d]; }
+    /// return product of size in all dimensions
+    unsigned prod_sizes() const
+    { return N[0]*K[0]; }
     /// type resulting from a non-const [] operation
     typedef T* Sub;
     /// type resulting from a const [] operation
@@ -1264,6 +1273,9 @@ namespace WDutils {
     { return N; }
     /// return size of array
     unsigned const&size(unsigned) const
+    { return N; }
+    /// return product of size in all dimensions
+    unsigned prod_sizes() const
     { return N; }
     /// set all values to given constant
     /// \param[in] x initialize each element with this value

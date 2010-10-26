@@ -26,15 +26,19 @@ else
 WARNING		:= -Wall -Wextra -Winit-self -Wshadow
 endif
 
+# it seem that coverage (to be combined with gcov) does not work for openmp)
+#ifdef WDutilsDevel
+#PROFLAGS	:= --coverage -fprofile-use -Wcoverage-mismatch
+#endif
 # general optimisation and warning flags
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
 		-ggdb3 $(WARNING) -O2 -fPIC -fopenmp -ffast-math \
-		-funroll-loops -fforce-addr $(RDYNAMIC)
+		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
 CXXFLAGS	:= $(OPTFLAGS)
-LDFLAGS		:= -shared
+LDFLAGS		:= -shared $(PROFLAGS)
 
 # end
 

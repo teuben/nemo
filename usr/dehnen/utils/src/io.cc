@@ -76,30 +76,32 @@ size_t WDutils::FileSize(const char*sFileName)
 ////////////////////////////////////////////////////////////////////////////////
 void output::__open(bool append)
 {
+  DebugInfo(8,"output::__open(%d): FILE=%s\n",append,FILE);
   APPENDING = false;
   if     (0 == FILE    ||
 	  0 == FILE[0] ||
 	  0 == std::strcmp(FILE,".") ) {
     OUT = 0;
-    DebugInfo(2,"output: open sink\n");
+    DebugInfo(5,"output: open sink\n");
   } else if(0 == std::strcmp(FILE,"-") ) {
     open_std();
     OUT = &std::cout;
-    DebugInfo(2,"output: open stdout\n");
+    DebugInfo(5,"output: open stdout\n");
   } else {
+    DebugInfo(10,"output::__open(%d): FILE=%s\n",append,FILE);
     std::ofstream *FOUT = new std::ofstream();
     if(append) {
       FOUT->open(FILE,std::ios::out | std::ios::app);
       if(FOUT->is_open()) {
 	APPENDING = true;
-	DebugInfo(2,"output: append to file \"%s\"\n",FILE);
+	DebugInfo(4,"output: append to file \"%s\"\n",FILE);
       }
     }
     if(!FOUT->is_open() )
       FOUT->open(FILE,std::ios::out);
     if( FOUT->is_open() ) {
       OUT = FOUT;
-      DebugInfo(2,"output: open file \"%s\"\n",FILE);
+      DebugInfo(5,"output: open file \"%s\"\n",FILE);
     } else {
       DebugInfo(2,"output: could not open file \"%s\"\n",FILE);
       OUT = 0;
@@ -118,7 +120,7 @@ void output::close() {
     FREC->close();
   }
   if(OUT) {
-    DebugInfo(2,"output: closing\n");
+    DebugInfo(6,"output: closing\n");
     if(OUT == &std::cout) close_std();
     else WDutils_DEL_O(OUT);
   }

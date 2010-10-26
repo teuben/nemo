@@ -6,9 +6,10 @@
 /// \author  Song Ho Ahn (song.ahn@gmail.com), Walter Dehnen (wd11@le.ac.uk)
 ///                                                                             
 /// \date    2003-2010
-/// \version 13-jan-2003 created SHA
-/// \version 13-jan-2006 updated SHA
-/// \version 05-jun-2010 adapted WD
+/// \version 13-jan-2003  SHA  created
+/// \version 13-jan-2006  SHA  updated
+/// \version 05-jun-2010  WD   adapted
+/// \version 06-oct-2010  WD   improved
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -41,64 +42,94 @@ extern "C" {
 }
 
 #ifndef WDutils_included_cstdlib
-#define WDutils_included_cstdlib
+#  define WDutils_included_cstdlib
 #  include <cstdlib>
 #endif
 
+
+#define TIMER_SUPPORT_FOR_DEPRACATED
+
 namespace WDutils {
   /// High Resolution timer.
-  /// this timer measures elapsed time with 1 micro-second accuracy
+  /// this timer measures elapsed wall-clock time with micro-second accuracy
   class Timer {
   private:
 #ifdef WIN32
     LARGE_INTEGER frequency;               ///< ticks per second
-    LARGE_INTEGER startCount;              ///< value of counter at start
-    LARGE_INTEGER endCount;                ///< value of counter at end
+    LARGE_INTEGER oldCount;                ///< counter at last call to take()
 #else
-    timeval startCount;                    ///< value of counter at start
-    timeval endCount;                      ///< value of counter at end
+    timeval oldCount;                      ///< counter at last call to take()
 #endif
-    bool    stopped;                       ///< stop flag 
+#ifdef TIMER_SUPPORT_FOR_DEPRACATED
+    double taken;                          ///< time taken in seconds
+#endif
+    /// read clock, compute elapsed time in @a t, return clock reading
+#ifdef WIN32
+    LARGE_INTEGER getTime(double&t) const
+    {
+      LARGE_INTEGER newCount;
+      QueryPerformanceCounter(&newCount);
+      t = double(newCount.QuadPart - oldCount.QuadPart)
+	/ double(frequency.QuadPart);
+      return newCount;
+    }
+#else
+    timeval getTime(double&t) const
+    {
+      timeval newCount;
+      gettimeofday(&newCount, NULL);
+      t = double(newCount.tv_sec -oldCount.tv_sec )
+	+ double(newCount.tv_usec-oldCount.tv_usec) * 1.e-6;
+      return newCount;
+    }
+#endif
   public:
-    /// ctor
-    Timer()
-      : stopped(true)  {}
-    /// start timer.
-    /// startCount will be set here
+    /// start timer: take clock reading and reset counter
     void start()
-    {
-      stopped = false; // reset stop flag
+    { 
 #ifdef WIN32
-      QueryPerformanceCounter(&startCount);
+      QueryPerformanceCounter(&oldCount);
 #else
-      gettimeofday(&startCount, NULL);
+      gettimeofday(&oldCount, NULL);
 #endif
     }
-    /// stop the timer.
-    /// endCount will be set at this point.
-    void stop()
-    {
-      stopped = true;  // set timer stopped flag
-#ifdef WIN32
-      QueryPerformanceCounter(&endCount);
-#else
-      gettimeofday(&endCount, NULL);
+    /// ctor: start timer
+    Timer()
+#ifdef TIMER_SUPPORT_FOR_DEPRACATED
+      : taken(0.0)
 #endif
-    }
-    /// compute elapsed time with micro-second resolution.
-    double getElapsedTime()
     {
-      if(!stopped) stop();
 #ifdef WIN32
-      return 
-	double(endCount.QuadPart - startCount.QuadPart) /
-	double(frequency.QuadPart);
-#else
-      return
-	double(endCount.tv_sec-startCount.tv_sec) +
-	double(endCount.tv_usec-startCount.tv_usec) * 1.e-6;
+      QueryPerformanceFrequency(&frequency);
 #endif
+      start();
     }
+    /// stop timer and return elapsed time: take wallclock-time, compute
+    /// elapsed time, and reset start counter.
+    /// \return wallclock-time (in sec) since last call to start() or stop()
+    double stop()
+    {
+#ifndef TIMER_SUPPORT_FOR_DEPRACATED
+      double  taken;
+#endif
+      oldCount = getTime(taken);
+      return taken;
+    }
+    /// take time since last call to start() or stop()
+    /// \note Does not reset the start counter.
+    /// \return wallclock-time (in sec) since last call to start() or stop()
+    double take() const
+    {
+      double  t;
+      getTime(t);
+      return t;
+    }
+#ifdef TIMER_SUPPORT_FOR_DEPRACATED
+    /// elapsed time in seconds with micro-second resolution.
+    /// \note deprecated and provided for backwards compatibility only
+    double getElapsedTime() const
+    { return taken; }
+#endif
   };// class Timer
 } // namespace WDutils
 // /////////////////////////////////////////////////////////////////////////////

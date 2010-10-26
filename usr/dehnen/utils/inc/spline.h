@@ -83,9 +83,13 @@ namespace WDutils {
       }
       for(int i=1; i!=n1; ++i) {
 	scalar_type dx1 = x[i+1]-x[i];
-	if((ascending && dx1<=zero) || (!ascending && dx1>=zero) )
+	if((ascending && dx1<=zero) || (!ascending && dx1>=zero) ) {
+	  WDutils_DEL_A(u);
+	  WDutils_DEL_A(v);
 	  WDutils_THROW("cubic spline: bad x input:"
 			"x[%d]=%16.12e x[%d]=%16.12e\n", i,x[i],i+1,x[i+1]);
+
+	}
 	scalar_type dx2 = x[i+1]-x[i-1];
 	table_type  dy1 = y[i+1]-y[i];
 	scalar_type sig = dx/dx2;
@@ -212,8 +216,11 @@ namespace WDutils {
 	   const table_type *_y,
 	   const table_type *yp1=0,
 	   const table_type *ypn=0) WDutils_THROWING
-      : n(_n), x(_x), y(_y), y2(WDutils_NEW(table_type,n)), lo(0)
+      : n(_n), x(_x), y(_y), y2(0), lo(0)
     {
+      DebugInfo(6,"constructing spline of %d %s vs %s\n",n,
+		nameof(scalar_type),nameof(table_type));
+      const_cast<table_type*&>(y2) = WDutils_NEW(table_type,n);
       construct(n,x,y,y2,yp1,ypn);
     }
     /// constructor from Array<>s
@@ -228,15 +235,22 @@ namespace WDutils {
 	   Array<table_type ,1> const&_y,
 	   const table_type *yp1=0,
 	   const table_type *ypn=0) WDutils_THROWING
-      : n(_x.size()), x(_x.array()), y(_y.array()),
-	y2(WDutils_NEW(table_type,n)), lo(0)
+      : n(_x.size()), x(_x.array()), y(_y.array()), y2(0), lo(0)
     {
+      DebugInfo(6,"constructing spline of %d %s vs %s\n",n,
+		nameof(scalar_type),nameof(table_type));
       if(_x.size() != _y.size())
 	WDutils_THROW("size mismatch in spline construction\n");
+      const_cast<table_type*&>(y2) = WDutils_NEW(table_type,n);
       construct(n,x,y,y2,yp1,ypn);
     }
     /// destructor
-    ~spline() { WDutils_DEL_A(y2); }
+    ~spline()
+    {
+      WDutils_DEL_A(y2); 
+      DebugInfo(6,"destructed spline of %d %s vs %s\n",n,
+		nameof(scalar_type),nameof(table_type));
+    }
     /// spline evaluation
     /// \return y(xi)
     /// \param[in]  xi  point at which to compute spline

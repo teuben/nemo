@@ -416,11 +416,14 @@ namespace WDutils {
     //     virtual~iofile() {}
     //
     void setfile(const char*fname) {
+      DebugInfo(12,"iofile::setfile(%s): FILE=%p\n",fname,(void*)(FILE));
       if(fname && fname[0]) {
 	strncpy(FNAME,fname,FNAME_MAX_SIZE);
 	FILE = FNAME;
       } else
 	FILE = 0;
+      DebugInfo(12,"iofile::setfile(%s): FILE=%p = %s\n",fname,
+		(void*)(FILE),FILE);
     }
   public:
     /// give file name, if any
@@ -497,6 +500,7 @@ namespace WDutils {
     /// which case, we append to that existing file.
     explicit
     output(const char*fname, bool append=0) : APPENDING(false), FREC(0) {
+      DebugInfo(4,"output(%s,%d)\n",fname,append);
       setfile(fname);
       __open(append);
     }
