@@ -38,20 +38,47 @@ FormOptions::FormOptions(GlobalOptions * _go, QWidget *parent):QDialog(parent)
   form.options_dialog->setCurrentIndex(0);
   form.com->setChecked(go->auto_com);
   
-  QPalette pal;
+
+  QString css;
+  // ---------- Grid tab
   // Color cube button
-  pal.setColor(QPalette::Button,go->col_cube);
-  form.cube_color->setPalette(pal);
+  css=QString("background:rgb(%1,%2,%3)").
+        arg(go->col_cube.red()).
+        arg(go->col_cube.green()).
+        arg(go->col_cube.blue());  
+  form.cube_color->setStyleSheet(css);
   // Color XY button
-  pal.setColor(QPalette::Button,go->col_x_grid);
-  form.xy_grid_color->setPalette(pal);
+  css=QString("background:rgb(%1,%2,%3)").
+        arg(go->col_x_grid.red()).
+        arg(go->col_x_grid.green()).
+        arg(go->col_x_grid.blue());  
+  form.xy_grid_color->setStyleSheet(css);
   // Color YZ button
-  pal.setColor(QPalette::Button,go->col_y_grid);
-  form.yz_grid_color->setPalette(pal);
+  css=QString("background:rgb(%1,%2,%3)").
+        arg(go->col_y_grid.red()).
+        arg(go->col_y_grid.green()).
+        arg(go->col_y_grid.blue());  
+  form.yz_grid_color->setStyleSheet(css);
   // Color XZ button
-  pal.setColor(QPalette::Button,go->col_z_grid);
-  form.xz_grid_color->setPalette(pal);
+  css=QString("background:rgb(%1,%2,%3)").
+        arg(go->col_z_grid.red()).
+        arg(go->col_z_grid.green()).
+        arg(go->col_z_grid.blue());  
+  form.xz_grid_color->setStyleSheet(css);
   
+  // ------------- OSD tab
+  // font color
+  css=QString("background:rgb(%1,%2,%3)").
+        arg(go->osd_color.red()).
+        arg(go->osd_color.green()).
+        arg(go->osd_color.blue());  
+  form.font_color->setStyleSheet(css);
+  // background color
+  css=QString("background:rgb(%1,%2,%3)").
+        arg(go->background_color.red()).
+        arg(go->background_color.green()).
+        arg(go->background_color.blue());  
+  form.background_color->setStyleSheet(css);
   update();
 }
 

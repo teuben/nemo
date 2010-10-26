@@ -1,4 +1,4 @@
-1.1 (October, 25th 2010)
+1.1 (October, 26th 2010)
 ------------------------
  - Change text rendering engine, it's based on PLIB now, and allows to properly
    display OSD during off-screen rendering
@@ -6,6 +6,7 @@
  - Fix an issue on shader program with NVIDIA 260.19.12 driver. ( glPointsize
    is no more used, it has been replaced by a uniform texture factor variable)
  - add a new tab in Options dialog box to control On Screen Display
+ - use widget->setStyleSheet to set color and to be platform independant
 
 1.0 (July, 28th 2010)
 ---------------------
