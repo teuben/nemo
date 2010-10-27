@@ -99,7 +99,7 @@ int GadgetIO::close()
   return 1;
 }
 // ============================================================================
-int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float * temp,const int *index, const int nsel,   const bool load_vel)
+int GadgetIO::read(float * pos, float * vel, float * rho, float * rneib, float * temp,const int *index, const int nsel,   const bool load_vel)
 {
   bool is_temp=true;
   if (! is_read ) {
@@ -113,6 +113,31 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
     assert(nsel<=npartTotal);
     //t_particle_data_lite * P= new t_particle_data_lite[npartTotal];
     if (! intenerg && header.npartTotal[0]>0) intenerg = new float[header.npartTotal[0]];
+    
+    int npartOffset[6];
+    // compute offset in case of multiple gadget file
+    npartOffset[0] = 0;
+    for (int i=1;i<=5;i++) {
+      npartOffset[i] = npartOffset[i-1]+header.npartTotal[i-1];
+      std::cerr 
+          << "npartOffset["<<i<<"]="<<npartOffset[i]<<" npartOffset["<<i-1<<"]="
+          <<npartOffset[i-1]<<" header.npartTotal["<<i-1<<"]="<<header.npartTotal[i-1]<<"\n";
+    }
+    // allocate array to store indexes 
+    int * index2  = new int[npartTotal];
+    for (int i=0; i<npartTotal; i++)
+        index2[i] = -1; // index2 init
+
+    for (int i=0, cpt=0; i<npartTotal; i++) {
+      int idx=index[i];
+      assert(idx<npartTotal);
+      //std::cerr << i<< " " << index[i].i << " "<< index[i].idx << " " << nsel << " " <<npartTotal << "\n";
+      if (idx != -1 ) {
+          index2[idx] = cpt++;
+      }
+    }    
+    int z_offset  =0; // metalicity offset
+    int age_offset=0; // age offset
     
     int pc_new=0; // particles index
     // loop on all the files
@@ -144,12 +169,11 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
           bytes_counter=0;
           len1 = readFRecord();
           pc_new=pc;
-          int ic=0;
           for(int k=0;k<6;k++) {
             for(int n=0;n<header.npart[k];n++) {
-              int idx=index[pc_new++];
+              int idx=index2[npartOffset[k]+n];
               if (idx != -1) {
-                ioData((char *) &pos[3*ic++], sizeof(float), 3,READ);
+                ioData((char *) &pos[3*idx], sizeof(float), 3,READ);
               } else {
                 //skipData(sizeof(float)*3);
                 float tmp3[3];
@@ -167,13 +191,12 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
           if (load_vel || version==1) {
             bytes_counter=0;
             len1 = readFRecord();
-            pc_new=pc;
-            int ic=0;
+            pc_new=pc;          
             for(int k=0;k<6;k++)
               for(int n=0;n<header.npart[k];n++){
-                int idx=index[pc_new++];
+                int idx=index2[npartOffset[k]+n];   
                 if (idx != -1 && load_vel) {
-                    ioData((char *) &vel[3*ic++], sizeof(float), 3,READ);                  
+                    ioData((char *) &vel[3*idx], sizeof(float), 3,READ);                  
                 } else {
                   //skipData(sizeof(float)*3);
                   float tmp3[3];
@@ -208,7 +231,17 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
-          ioData((char *) &intenerg[pc], sizeof(float), header.npart[0],READ);
+	  // getting NE for gas only
+          pc_new=pc;
+          for(int n=0;n<header.npart[0];n++){
+            int idx=index2[npartOffset[0]+n];
+            if (idx != -1) {              
+              ioData((char *) &intenerg[idx], sizeof(float), 1,READ);              
+            } else {              
+              float tmp;
+              ioData((char *) &tmp, sizeof(float), 1,READ);              
+            }            
+          }
           len2 = readFRecord();
           assert(in.good() && len1==len2 && len1==bytes_counter);
         }
@@ -222,24 +255,19 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
 	  // getting NE for gas only
           pc_new=pc;
           int ic=0;
-          for(int k=0;k<6;k++)
-            for(int n=0;n<header.npart[k];n++){
-            int idx=index[pc_new++];
-            if (idx != -1) {
-              if (k == 0 ) { // gaz component only
-                use_gas=true;
-                s_gas = std::min(s_gas,ic);
-                e_gas = std::max(e_gas,ic+1);
-                ioData((char *) &temp[ic++], sizeof(float), 1,READ);
-              }
-            } else {
-              if (k == 0) {
-                float tmp;
-                ioData((char *) &tmp, sizeof(float), 1,READ);
-              }
-            }
+          for(int n=0;n<header.npart[0];n++){
+            int idx=index2[npartOffset[0]+n];
+            if (idx != -1) {              
+              use_gas=true;
+              s_gas = std::min(s_gas,ic);
+              e_gas = std::max(e_gas,ic+1);
+              ic++;
+              ioData((char *) &temp[idx], sizeof(float), 1,READ);              
+            } else {              
+              float tmp;
+              ioData((char *) &tmp, sizeof(float), 1,READ);              
+            }            
           }
-          //ioData((char *) &temp[pc], sizeof(float),header.npart[0],READ);
           len2 = readFRecord();
           assert(in.good() && len1==len2 && len1==bytes_counter);
         }
@@ -249,28 +277,22 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
-	  // getting RHO for gas only
+          // getting RHO for gas only
           pc_new=pc;
           int ic=0;
-          for(int k=0;k<6;k++)
-            for(int n=0;n<header.npart[k];n++){
-            int idx=index[pc_new++];
-            if (idx != -1) {
-              if (k == 0 ) { // gaz component only
-                use_gas=true;
-                s_gas = std::min(s_gas,ic);
-                e_gas = std::max(e_gas,ic+1);
-                ioData((char *) &rho[ic++], sizeof(float), 1,READ);
-              }
-            } else {
-              if (k == 0) {
-                float tmp;
-                ioData((char *) &tmp, sizeof(float), 1,READ);
-              }
-            }
-          }
-
-          //ioData((char *) &rho[pc], sizeof(float),header.npart[0],READ);
+          for(int n=0;n<header.npart[0];n++){
+            int idx=index2[npartOffset[0]+n];
+            if (idx != -1) {              
+              use_gas=true;
+              s_gas = std::min(s_gas,ic);
+              e_gas = std::max(e_gas,ic+1);
+              ic++;
+              ioData((char *) &rho[idx], sizeof(float), 1,READ);              
+            } else {              
+              float tmp;
+              ioData((char *) &tmp, sizeof(float), 1,READ);              
+            }            
+          } 
           len2 = readFRecord();
           assert(in.good() && len1==len2 && len1==bytes_counter);
         }
@@ -283,22 +305,19 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
 	  // getting HSML for gas only
           pc_new=pc;
           int ic=0;
-          for(int k=0;k<6;k++)
-            for(int n=0;n<header.npart[k];n++){
-              int idx=index[pc_new++];
-              if (idx != -1) {
-                assert(ic<nsel);
-                if (k == 0 ) { // gaz component only
-                  ioData((char *) &rneib[ic++], sizeof(float), 1,READ);
-                }
-              } else {
-                if (k == 0) {
-                  float tmp;
-                  ioData((char *) &tmp, sizeof(float), 1,READ);
-                }
-              }
-          }
-          //ioData((char *) &rho[pc], sizeof(float),header.npart[0],READ);
+          for(int n=0;n<header.npart[0];n++){
+            int idx=index2[npartOffset[0]+n];
+            if (idx != -1) {              
+              use_gas=true;
+              s_gas = std::min(s_gas,ic);
+              e_gas = std::max(e_gas,ic+1);
+              ic++;
+              ioData((char *) &rneib[idx], sizeof(float), 1,READ);              
+            } else {              
+              float tmp;
+              ioData((char *) &tmp, sizeof(float), 1,READ);              
+            }            
+          } 
           len2 = readFRecord();
           assert(in.good() && len1==len2 && len1==bytes_counter);
         }
@@ -317,6 +336,14 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
           skipBlock();
         }
       }
+   
+      // correct the offset of the particles which have been read
+      for (int i=0;i<6;i++) {
+        npartOffset[i] = npartOffset[i]+header.npart[i];
+      }
+      // correction for metalicity and age
+      z_offset   += (header.npart[0]+header.npart[4]);
+      age_offset += header.npart[4];
     } // end of loop on numfiles
 
     std::cerr << "Use gas = " << use_gas << " start=" << s_gas << " end=" << e_gas << "\n";
@@ -330,8 +357,9 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
     
     // convert to temperature units only if user has selected gas particles
     if (use_gas && is_temp && header.npartTotal[0] > 0) {
-      rhop  = rho;
-      tempp = temp;
+      rhop      = rho;
+      tempp     = temp;
+      intenergp = intenerg;
       unitConversion();
     }
     if (! is_temp) {
@@ -339,182 +367,9 @@ int GadgetIO::read2(float * pos, float * vel, float * rho, float * rneib, float 
       temp=NULL;
     }
     // garbage collecting
+    delete [] index2;
   }
   return 1;
-}
-// ============================================================================
-int GadgetIO::read(float * pos, float * vel, float * rho, float * rneib, const int *index, const int nsel,
-                   const bool load_vel)
-{
-  if (! is_read ) {
-    is_read=true;
-    // allocate memory
-    assert(nsel<=npartTotal);
-    //t_particle_data_lite * P= new t_particle_data_lite[npartTotal];
-    float * P = new float[npartTotal*3];
-  
-    int pc_new; // particles index
-    // loop on all the files
-    for (int i=0, pc=0; i<header.num_files || (i==0 && header.num_files==0);i++,pc=pc_new) {
-      std::string infile;
-      if (header.num_files > 0 ) { // more than one file
-        std::ostringstream stm;
-        stm << "." << i;               // add ".XX" extension
-        infile = filename + stm.str(); // new filename
-        if (i>0) {
-          close();                 // close previous file
-          int fail=open(infile);   // open new file,read header
-          assert(!fail);           // fail is true abort
-        }
-      }
-      else infile=filename;        // lonely file
-      int len1,len2;
-      
-      // Postions block
-      readBlockName();
-      bytes_counter=0;
-      len1 = readFRecord();
-      pc_new=pc;
-      for(int k=0;k<6;k++)
-        for(int n=0;n<header.npart[k];n++) {
-          ioData((char *) &P[3*pc_new++], sizeof(float), 3,READ);
-        }
-      len2 = readFRecord();
-      assert(in.good() && len1==len2 && len1==bytes_counter);
-      //copy3DtoArray(P,pos,index,npartTotal);
-      copy3DtoArray(P,pos,index,npartTotal);
-      
-      // Velocities block
-      readBlockName();
-      if (load_vel) {
-        bytes_counter=0;
-        len1 = readFRecord();
-        pc_new=pc;
-        for(int k=0;k<6;k++)
-          for(int n=0;n<header.npart[k];n++)
-            ioData((char *) &P[3*pc_new++], sizeof(float), 3,READ);
-        len2 = readFRecord();
-        assert(in.good() && len1==len2 && len1==bytes_counter);
-        copy3DtoArray(P,vel,index,npartTotal);
-      }
-      else skipBlock();
-      
-      // IDs block
-      readBlockName();
-      bytes_counter=0;
-      len1 = readFRecord();
-      pc_new=pc;
-      for(int k=0;k<6;k++)
-        for(int n=0;n<header.npart[k];n++)
-          ioData((char *) &P[pc_new++], sizeof(int), 1,READ);
-      len2 = readFRecord();
-      assert(in.good() && len1==len2 && len1==bytes_counter);
-  
-      // MASS block
-      
-      bytes_counter=0;
-      if (ntot_withmasses>0) {
-        readBlockName();
-        skipBlock();
-      }
-
-      // U block
-      if (header.npart[0] > 0) { // proceed only if there are gas particles
-	readBlockName();
-        skipBlock();
-      }
-      
-      // Rho block
-      if (header.npart[0] > 0 && version==2) { // proceed only if there are gas particles
-	if (version == 2) {
-	  while (block_name != "RHO") {         // find RHO blockname
-	    readBlockName();
-	    if (block_name != "RHO") {
-              skipBlock();
-	    }
-	  }
-	}
-	if (block_name == "RHO") { //||version==1) {
-	  bytes_counter=0;
-	  len1 = readFRecord();
-	  pc_new=pc;
-	  for(int k=0;k<6;k++)
-	    for(int n=0;n<header.npart[k];n++) {
-	      if (k==0) { // read only gas particles
-	       ioData((char *) &P[pc_new++], sizeof(float), 1,READ);
-	      } else {
-		P[pc_new++] = -1;
-	      }
-	    }
-	  len2 = readFRecord();
-	  assert(in.good() && len1==len2 && len1==bytes_counter);
-          copy1DtoArray(P,rho,index,npartTotal);
-	}
-      }
-      if (version == 1 && header.flag_sfr) {
-          skipBlock();
-          skipBlock();       
-      }
-      // HMSL block
-      if (header.npart[0] > 0 && version==2) { // proceed only if there are gas particles
-	if (version == 2) {
-	  while (block_name != "HSML") {         // find RHO blockname
-	    readBlockName();
-	    if (block_name != "HSML") {
-              skipBlock();
-	    }
-	  }
-	}
-	if (block_name == "HSML"||(version==1 && header.flag_cooling)) {
-	  bytes_counter=0;
-	  len1 = readFRecord();
-	  pc_new=pc;
-	  for(int k=0;k<6;k++)
-	    for(int n=0;n<header.npart[k];n++) {
-	      if (k==0 ) { // read only gas particles
-	        ioData((char *) &P[pc_new++], sizeof(float), 1,READ);
-	      }
-              else {
-	        P[pc_new++] = -1;
-	      }
-	    }
-	    len2 = readFRecord();
-	    assert(in.good() && len1==len2 && len1==bytes_counter);
-            copy1DtoArray(P,rneib,index,npartTotal);
-	} else {
-	    if ((version==1 && !header.flag_cooling)) {
-              pc_new=pc;
-	      for(int k=0;k<6;k++)
-		for(int n=0;n<header.npart[k];n++) {
-		  if (k==0 ) { // read only gas particles
-		      P[pc_new++] = 1;
-		  }
-                  else {
-		      P[pc_new++] = -1;
-		  }
-	        }
-              copy1DtoArray(P,rneib,index,npartTotal);
-            }
-	  }
-      }
-    } // end of loop on numfiles
-  
-    // sort particles according to their indexes
-    //qsort(P,npartTotal,sizeof(t_particle_data_lite),gadget::compare);
-    
-    // garbage collecting
-    delete [] P;
-  }
-  return 1;
-}
-// ============================================================================
-// compare 2 elements                                                          
-int compare( const void * a, const void * b )
-{
-  t_particle_data_lite 
-    * pa = ( t_particle_data_lite * ) a, 
-    * pb = ( t_particle_data_lite * ) b;
-  return (pa->Id - pb->Id);
 }
 
 // ============================================================================
@@ -734,8 +589,8 @@ void GadgetIO::unitConversion()
 
     /* convert internal energy to cgs units */
 
-    u  = intenerg[i-s_gas] * UnitEnergy_in_cgs/ UnitMass_in_g;
-
+    //u  = intenerg[i-s_gas] * UnitEnergy_in_cgs/ UnitMass_in_g;
+    u  = intenergp[i] * UnitEnergy_in_cgs/ UnitMass_in_g;
     gamma= 5.0/3;
 
     /* get temperature in Kelvin */

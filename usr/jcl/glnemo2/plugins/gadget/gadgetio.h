@@ -109,18 +109,15 @@ public:
     int open(const std::string);
     int close();
     int read();
-    int read(float * pos, float * vel, float * rho, float * rneib, const int *index, const int nsel,
-             const bool); 
-    int read2(float * pos, float * vel, float * rho, float * rneib, float * temp,const int *index, const int nsel,
-             const bool); 
-
-    float * getMass()   const { return mass; };
-    float * getPos()    const { return pos; };
-    float * getVel()    const { return vel; };
+    int read(float * pos, float * vel, float * rho, float * rneib, float * temp,const int *index, const int nsel,
+             const bool);  
+    float * getMass()   const { return mass; }
+    float * getPos()    const { return pos; }
+    float * getVel()    const { return vel; }
     float   getTime()   const { return float(tframe);}
-    int     getNtotal() const { return npartTotal;};
-    int getVersion() const { return version;};
-    const glnemo::ComponentRangeVector getCRV() const { return crv;};
+    int     getNtotal() const { return npartTotal;}
+    int getVersion() const { return version;}
+    const glnemo::ComponentRangeVector getCRV() const { return crv;}
 private:
   std::string filename,file0;
   std::ifstream in;
@@ -128,7 +125,7 @@ private:
   int multiplefiles;
   bool lonely_file;
   //data
-  float * mass, * pos, * vel, * intenerg, * tempp, * rhop;
+  float * mass, * pos, * vel, * intenerg,  * intenergp,* tempp, * rhop;
   float tframe;
   t_io_header_1 header;
   int npartTotal, npart, ntot_withmasses;

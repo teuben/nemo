@@ -122,7 +122,7 @@ int SnapshotGadget::nextFrame(const int * index_tab, const int nsel)
     }
     *part_data->nbody = nsel;
 #if 1
-    if (gadget_io->read2(part_data->pos,part_data->vel,part_data->rho->data, part_data->rneib->data,part_data->temp->data,
+    if (gadget_io->read(part_data->pos,part_data->vel,part_data->rho->data, part_data->rneib->data,part_data->temp->data,
 	index_tab,nsel,load_vel)) {
 #else
     if (gadget_io->read(part_data->pos,part_data->vel,part_data->rho, part_data->rneib,
