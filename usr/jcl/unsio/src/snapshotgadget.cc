@@ -673,11 +673,12 @@ bool CSnapshotGadgetIn::readBlockName()
 {
   bool status=true;
   if (version == 2 ) { // gadget2 file format
-    int dummy,dummy1;
-    char name[9];
-    readData((char *) &dummy , sizeof(int),  1); // read
-    readData((char *) name   , sizeof(char), 8); // read
-    readData((char *) &dummy1, sizeof(int),  1); // read
+    int dummy,nextblock;
+    char name[5];
+    readData((char *) &dummy    , sizeof(int) , 1); // read
+    readData((char *) name      , sizeof(char), 4); // read label
+    readData((char *) &nextblock, sizeof(int) , 1); // read nextblock
+    readData((char *) &dummy    , sizeof(int) , 1); // read
     int i=0; while (isupper(name[i])&& i<4) i++;
     name[i]='\0';
     block_name=name;
@@ -1644,7 +1645,7 @@ int CSnapshotGadgetOut::writeHeader()
 //    std::cerr << "header.mass ["<<i<<"]="<<header.mass [i]<<"\n";
 //  }
     // Header block
-  writeBlockName("HEAD");
+  writeBlockName("HEAD",sizeof(t_io_header_1));
   bytes_counter=0;
   writeFRecord(sizeof(t_io_header_1));
   writeData((char *)  header.npart         , sizeof(int   ),  6);
@@ -1673,29 +1674,32 @@ int CSnapshotGadgetOut::writeHeader()
 // write gadget data
 int CSnapshotGadgetOut::write()
 {
+  int blk;
   // POS
-  writeBlockName("POS ");
-  writeFRecord(sizeof(float)*3*npartTotal);
+  blk=sizeof(float)*3*npartTotal;
+  writeBlockName("POS ",blk);
+  writeFRecord(blk);
   for(int k=0;k<6;k++) {
     if (header.npart[k]) { // pos exist for the component
       assert(pos[k]!=NULL);
       writeData((char *) pos[k], sizeof(float)*3, header.npart[k]);
     }
   }
-
-  writeFRecord(sizeof(float)*3*npartTotal);
+  writeFRecord(blk);
 
   // VEL
-  writeBlockName("VEL ");
-  writeFRecord(sizeof(float)*3*npartTotal);
+  blk=sizeof(float)*3*npartTotal;
+  writeBlockName("VEL ",blk);
+  writeFRecord(blk);
   for(int k=0;k<6;k++)
     if (header.npart[k]) // vel exist for the component
       writeData((char *) vel[k], sizeof(float)*3, header.npart[k]);
-  writeFRecord(sizeof(float)*3*npartTotal);
+  writeFRecord(blk);
 
   // ID
-  writeBlockName("ID  ");
-  writeFRecord(sizeof(int)*npartTotal);
+  blk=sizeof(int)*npartTotal;
+  writeBlockName("ID  ",blk);
+  writeFRecord(blk);
   
   if (!(bits & ID_BIT)) {
     std::cerr << "No Ids Bit set, I am going to create them for you....\n";
@@ -1710,44 +1714,48 @@ int CSnapshotGadgetOut::write()
       if (header.npart[k]) // id exist for the component
         writeData((char *) id[k], sizeof(int), header.npart[k]);
   }
-  writeFRecord(sizeof(int)*npartTotal);
+  writeFRecord(blk);
 
   // MASS
   if (ntot_withmasses >0 ) {
-    writeBlockName("MASS");
+    blk=sizeof(float)*ntot_withmasses;
+    writeBlockName("MASS",blk);
     if (verbose) std::cerr << "CSnapshotGadgetOut::write => ntotwithmass="<<ntot_withmasses<<"\n";
-    writeFRecord(sizeof(float)*ntot_withmasses);
+    writeFRecord(blk);
     for(int k=0;k<6;k++)
       if (header.npart[k] && header.mass[k]==0) // mass exist for the component
         writeData((char *) mass[k], sizeof(float), header.npart[k]);
-    writeFRecord(sizeof(float)*ntot_withmasses);
+    writeFRecord(blk);
   }
 
   // RHO
   if (bits & RHO_BIT) {
     assert(header.npart[0]>0);
-    writeBlockName("RHO ");
-    writeFRecord(sizeof(float)*header.npart[0]);
+    blk=sizeof(float)*header.npart[0];
+    writeBlockName("RHO ",blk);
+    writeFRecord(blk);
     writeData((char *) rho, sizeof(float), header.npart[0]);
-    writeFRecord(sizeof(float)*header.npart[0]);
+    writeFRecord(blk);
   }
 
   // HSML
   if (bits & HSML_BIT) {
     assert(header.npart[0]>0);
-    writeBlockName("HSML");
-    writeFRecord(sizeof(float)*header.npart[0]);
+    blk=sizeof(float)*header.npart[0];
+    writeBlockName("HSML",blk);
+    writeFRecord(blk);
     writeData((char *) hsml, sizeof(float), header.npart[0]);
-    writeFRecord(sizeof(float)*header.npart[0]);
+    writeFRecord(blk);
   }
   
   // U
   if (bits & U_BIT) {
     assert(header.npart[0]>0);
-    writeBlockName("U   ");
-    writeFRecord(sizeof(float)*header.npart[0]);
+    blk=sizeof(float)*header.npart[0];
+    writeBlockName("U   ",blk);
+    writeFRecord(blk);
     writeData((char *) intenerg, sizeof(float), header.npart[0]);
-    writeFRecord(sizeof(float)*header.npart[0]);
+    writeFRecord(blk);
   }
 #if 0
   offset=0;
@@ -1760,17 +1768,16 @@ int CSnapshotGadgetOut::write()
 }
 // ============================================================================
 // writeBlockName : write Gadget2 file format block                              
-bool CSnapshotGadgetOut::writeBlockName(std::string block_name)
+bool CSnapshotGadgetOut::writeBlockName(std::string block_name, int nextblock)
 {
   bool status=true;
   if (version == 2 ) { // gadget2 file format
     int dummy=8;
-    char block[8];
-    bzero(block,8);
-    strcpy(block,block_name.c_str());
+    nextblock += (2*sizeof(int));
+    
     writeData((char *) &dummy , sizeof(int),  1); // write
-    //writeData((char *) block_name.c_str()   , sizeof(char), 8); // write
-    writeData((char *) block   , sizeof(char), 8); // write
+    writeData((char *) block_name.c_str()   , sizeof(char), 4); // write label
+    writeData((char *) &nextblock           , sizeof(int),  1); // write nextblock
     writeData((char *) &dummy , sizeof(int),  1); // write
     status = out.good();
     if (status && block_name!= "HEAD" && verbose) 

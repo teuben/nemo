@@ -265,7 +265,7 @@ typedef struct particle_data_lite
     void setupHeader(bool check=false);
     int writeHeader();
     int write();
-    bool writeBlockName(std::string);
+    bool writeBlockName(std::string, int);
     inline void writeFRecord(const int len) {
       out.write((char *) &len,sizeof(int));
       assert(out.good());
