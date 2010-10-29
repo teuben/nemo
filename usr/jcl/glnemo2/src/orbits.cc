@@ -46,7 +46,7 @@ Orbits::Orbits()
 }
 // ============================================================================
 // Copy Constructor                                                            
-const Orbits::Orbits & Orbits::operator=(const Orbits & m)
+const Orbits & Orbits::operator=(const Orbits & m)
 {
   time  = m.time;
 

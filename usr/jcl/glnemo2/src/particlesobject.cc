@@ -98,8 +98,7 @@ ParticlesObject::ParticlesObject(const ParticlesObject&m)
 }
 // ============================================================================
 // copy constructor                                                            
-const ParticlesObject::ParticlesObject&
-    ParticlesObject::operator=(const ParticlesObject&m)
+const ParticlesObject& ParticlesObject::operator=(const ParticlesObject&m)
 {
   obj_from     = m.obj_from;
   obj_name     = m.obj_name;
