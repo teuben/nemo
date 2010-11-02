@@ -416,16 +416,20 @@ namespace WDutils {
 #endif
   /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
 #define WDutils_THROW  WDutils_THROWER(__FILE__,__LINE__)
-  /// use instead of assert()
   //@}
   /// \name assertion which throws an excpetion rather than abort
   //@{
+  // is NDEBUG is defined, do nothing
+#ifdef  NDEBUG
+# define WDutilsAssert(expr)   (static_cast<void>(0))
+# define WDutilsAssertE(expr)  (static_cast<void>(0))
+#else
   /// throws exception with "assertion failed" message
-#ifdef __GNUC__
+# ifdef __GNUC__
   inline
   void AssertFail(const char*, const char*, unsigned, const char*)
     WDutils_THROWING __attribute__ ((__noreturn__));
-#endif
+# endif
   inline
   void AssertFail(const char*assertion, const char*file, unsigned line,
 		  const char*function) WDutils_THROWING
@@ -436,11 +440,11 @@ namespace WDutils {
 		   ("Assertion \"%s\" failed",assertion);
   }
   //
-#ifdef __GNUC__
+# ifdef __GNUC__
   inline
   void AssertFailE(const char*, const char*, unsigned, const char*)
     __attribute__ ((__noreturn__));
-#endif
+# endif
   inline
   void AssertFailE(const char*assertion, const char*file, unsigned line,
 		   const char*function)
@@ -451,12 +455,12 @@ namespace WDutils {
 		   ("Assertion \"%s\" failed",assertion);
   }
   /// use instead of assert(): throws an exception
-#define WDutilsAssert(expr)						\
+# define WDutilsAssert(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
   : AssertFail(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
   /// almost identical to assert()
-#define WDutilsAssertE(expr)						\
+# define WDutilsAssertE(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
   : AssertFailE(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
@@ -465,15 +469,16 @@ namespace WDutils {
    This is broken in G++ before version 2.6.
    C9x has a similar variable called __func__, but prefer the GCC one since
    it demangles C++ function names.  */
-#ifdef __GNUC__
-# if __GNUC_PREREQ (2, 6)
+# ifdef __GNUC__
+#  if __GNUC_PREREQ (2, 6)
 #   define __ASSERT_FUNCTION	__PRETTY_FUNCTION__
-# elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#  elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
 #   define __ASSERT_FUNCTION	__func__
+#  endif
+# else
+#  define __ASSERT_FUNCTION	0
 # endif
-#else
-# define __ASSERT_FUNCTION	0
-#endif
+#endif // NDEBUG
   //@}
   //
   /// a safer snprintf.                                                         

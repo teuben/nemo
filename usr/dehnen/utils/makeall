@@ -54,7 +54,7 @@ ifdef WDutilsDevel
 MPIDIR			:= $(shell ls | grep mpich)
 ifeq ($(MPIDIR),mpich)
 WDutilsMPI		:= -DWDutilsMPI
-MPICC			:= $(MPIDIR)/bin/mpicc
+MPICC			:= $(MPIDIR)/bin/mpiCC
 MPIINC			:= $(MPIDIR)/include/
 IMPI			:= -I$(MPIINC)
 endif
