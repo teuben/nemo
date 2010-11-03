@@ -2,6 +2,7 @@
 #
 
 set log=/tmp/tellme.log
+set xcode=/Developer/Applications/Xcode.app/Contents/version.plist
 
 if ($?NEMO == 0) exit 0
 
@@ -29,6 +30,13 @@ endif
 echo === BEGIN PRINTENV >> $log
 printenv      >> $log
 echo === END PRINTENV >> $log
+
+if (-e $xcode) then
+  echo === BEGIN MAC ===
+  sw_vers >> $log
+  cat $xcode >> $log  
+  echo === END MAC ===
+endif
 
 
 
