@@ -548,7 +548,7 @@ void GLWindow::checkGLErrors(std::string s)
 void GLWindow::initializeGL()
 {
   std::cerr << "\n>>>>>>>>> initializeGL()\n\n";
-#if 1
+#if 0
   qglClearColor( Qt::black );		// Let OpenGL clear to black
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_LINE_SMOOTH);
