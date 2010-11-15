@@ -68,24 +68,20 @@ namespace WDutils {
     WDutils_THROWING
   {
     T*t;
+    bool failed=0;
     try {
       t = new T[n];
     } catch(std::bad_alloc E) {
       t = 0;
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	(f,l)("caught std::bad_alloc\n");
+      failed = 1;
     }
-    if(n && t==0)
+    if(failed || (n && t==0))
 #ifdef WDutils_EXCEPTIONS
       throw Thrower
 #else
       Error
 #endif
-	(f,l)("could not allocate %u %s = %u bytes\n",
+	(f,l)("allocation of %u '%s' (%u bytes) failed\n",
 	      uint32(n),nameof(T),uint32(n*sizeof(T)));
     if(debug(WDutilsAllocDebugLevel))
       DebugInformation(f,l,lib)("allocated %u %s = %u bytes @ %p\n",
@@ -137,7 +133,7 @@ namespace WDutils {
 #else
       Error
 #endif
-	(f,l)("de-allocating array of '%s' @ %p' failed\n", nameof(T),a);
+	(f,l)("de-allocating array of '%s' @ %p failed\n", nameof(T),a);
     }
     if(debug(WDutilsAllocDebugLevel))
       DebugInformation(f,l,lib)("de-allocated array of %s @ %p\n",
@@ -146,25 +142,7 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   void DelArray(const T* a, const char*f, int l, const char*lib = "WDutils")
-    WDutils_THROWING {
-    if(0==a) {
-      Warning(f,l)("trying to delete zero pointer to array of '%s'", nameof(T));
-      return;
-    }
-    try {
-      delete[] a;
-    } catch(...) {
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	(f,l)("de-allocating array of '%s' @ %p' failed\n", nameof(T),a);
-    }
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)("de-allocated array of %s @ %p\n",
-				nameof(T), static_cast<const void*>(a));
-  }
+    WDutils_THROWING { DelArray(const_cast<T*>(a),f,l,lib); }
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// C MACRO to be used for array de-allocation
@@ -288,8 +266,9 @@ namespace WDutils {
   /// \return smallest multiple of 16 not smaller than @a n
   inline size_t next_aligned16(size_t n)
   {
-    const size_t L=15, nL=~L;
-    return (n+L)&nL;
+//     const size_t L=15, nL=~L;
+//     return (n+L)&nL;
+    return (n+15)&(~15);
   }
   ///
   /// given an address @a p, find the next 16-byte aligned address
@@ -304,39 +283,39 @@ namespace WDutils {
   /// Allocate memory at a address aligned to a 16 byte memory location
   /// \ingroup Mem16
   ///
-  /// Will allocate slightly more memory than required to ensure we can find
-  /// the required amount at a 16b memory location. To de-allocate, you \b must
-  /// use WDutils::free16(), otherwise an error will occur!
-  ///
   /// \return   a newly allocated memory address at a 16 byte memory location
-  /// \param n  number of bytes to allocate
+  /// \param k  number of objects to allocate
   /// \version  debugged 02-09-2004 WD
-  inline void* malloc16(size_t n) WDutils_THROWING
+  /// \note Unlike NewArray<>, we do not call the default ctor for each
+  ///       allocated object!
+  template<typename T> inline
+  T* NewArray16(size_t k, const char*f, int l, const char*lib = "WDutils")
+    WDutils_THROWING
   {
-#ifdef __GNUC__
+    size_t n = k*sizeof(T);
+#if defined(__GNUC__) || defined (__INTEL_COMPILER)
     void*t;
+    bool failed=0;
     try {
       t = _mm_malloc(n,16);
     } catch(...) {
       t = 0;
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	()("allocation of %u bytes aligned to 16 failed\n",uint32(n));
+      failed = 1;
     }
-    if(n && t==0)
+    if(failed || (n && t==0))
 #ifdef WDutils_EXCEPTIONS
-      throw Thrower
+    throw Thrower
 #else
-      Error
+    Error
 #endif
-	()("could not allocate %u bytes aligned to 16\n",uint32(n));
+      (f,l)("allocation of %u '%s' (%u bytes) aligned to 16 failed\n",
+	    uint32(k),nameof(T),uint32(n));
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation()("allocated %u bytes aligned to 16 @ %p\n",uint32(n),t);
-    return t;
-#else
+      DebugInformation(f,l,lib)("allocated %u %s = %u bytes "
+				"aligned to 16 @ %p\n",
+				uint32(k),nameof(T),uint32(n),t);
+    return static_cast<T*>(t);
+#else // __GNUC__ or __INTEL_COMPILER
     // linear memory model:                                                     
     // ^    = 16byte alignment points                                           
     // S    = sizeof(void*) (assumed 4 in this sketch)                          
@@ -351,15 +330,30 @@ namespace WDutils {
     //                PPPP|                                                     
     //                                                                          
     // the original allocation gave p, we return the shifted q and remember     
-    // the original allocation address at PPPP.                                 
-    char *p = WDutils_NEW(char,n+16+sizeof(void*)); // alloc: (n+16)b + pter    
-    char *q = p + sizeof(void*);                    // go sizeof pointer up     
+    // the original allocation address at PPPP.
+    char*p = NewArray<char>(n+16+sizeof(void*),f,l,lib);// alloc: (n+16)b + pter
+    char*q = p + sizeof(void*);                     // go sizeof pointer up     
     size_t off = size_t(q) % 16;                    // offset from 16b alignment
     if(off) q += 16-off;                            // IF offset, shift         
     *((void**)(q-sizeof(void*))) = p;               // remember allocation point
-    return static_cast<void*>(q);                   // return aligned address   
+    return static_cast<T*>(q);                      // return aligned address   
 #endif
   }
+  //
+  /// C MACRO to be used for array allocation aligned to 16 bytes
+  /// \ingroup Mem16
+  ///
+  /// Calling WDutils::NewArray16<TYPE>(), which in case of an error generates
+  /// an error message detailing the source file and line of the call. In case
+  /// the debugging level exceeds 10, we always print debugging information
+  /// about memory allocation.
+  ///
+  /// \param  TYPE name of the element type
+  /// \param  SIZE number of elements
+  /// \note   Unlike WDutils_NEW(TYPE,SIZE), we do not call the default ctor for
+  ///         the objects allocated!
+#define WDutils_NEW16(TYPE,SIZE)			\
+  WDutils::NewArray16<TYPE>(SIZE,__FILE__,__LINE__)
   ///
   /// de-allocate memory previously allocated with WDutils::malloc16()
   /// \ingroup Mem16
@@ -369,56 +363,118 @@ namespace WDutils {
   /// inevitably result in a run-time \b error!
   ///
   /// \param q  pointer previously allocated by WDutils::malloc16()
-  inline void free16(void*q) WDutils_THROWING
+  template<typename T> inline
+  void DelArray16(T* a, const char*f, int l, const char*lib = "WDutils")
+    WDutils_THROWING
   {
-#ifdef __GNUC__
-    if(0==q) {
-      Warning()("free16: trying to delete zero pointer");
+#if defined(__GNUC__) || defined (__INTEL_COMPILER)
+    if(0==a) {
+      Warning(f,l)("trying to delete zero pointer to array of '%s'",nameof(T));
       return;
     }
+    if(size_t(a)&15) {
+#ifdef WDutils_EXCEPTIONS
+      throw Thrower
+#else
+      Error
+#endif
+	(f,l)("de-allocating 16-byte aligned array of '%s' @ %p: "
+	      "not 16-byte aligned",nameof(T),a);
+    }
     try {
-      _mm_free(q);
+      _mm_free(a);
     } catch(...) {
 #ifdef WDutils_EXCEPTIONS
       throw Thrower
 #else
       Error
 #endif
-	()("free16: de-allocating %p failed\n", q);
+	(f,l)("de-allocating 16-byte aligned array of '%s' @ %p failed\n",
+	      nameof(T),a);
     }
     if(debug(WDutilsAllocDebugLevel))
-      DebugInformation()("free16: de-allocated array @ %p\n",q);
+      DebugInformation(f,l,lib)("de-allocated 16-byte aligned array "
+				"of '%s' @ %p\n", nameof(T),a);
 #else
-    WDutils_DEL_A( (char*)( *( (void**) ( ( (char*)q )-sizeof(void*) ) ) ) );
+    DelArray((char*)(*((void**)(((char*)q)-sizeof(void*)))),f,l,lib);
 #endif
   }
-  ///
-  /// allocate memory at a address alignged to at a 16 byte memory location
+  //
+  template<typename T> inline
+  void DelArray16(const T* a, const char*f, int l, const char*lib = "WDutils")
+    WDutils_THROWING { DelArray16(const_cast<T*>(a),f,l,lib); }
+  // ///////////////////////////////////////////////////////////////////////////
+  //
+  /// C MACRO to be used for array de-allocation of 16-byte aligned stuff
   /// \ingroup Mem16
   ///
-  /// Will allocate slightly more memory than required to ensure we can find
-  /// the required amount at a 16b memory location. To de-allocate, you \b must
-  /// use WDutils::delete16<>(), otherwise an error will occur!
+  /// Calling WDutilsN::DelArray16<TYPE>(), which in case of an error generates
+  /// an error message detailing the source file and line of the call. In case
+  /// the debugging level exceeds 10, we always print debugging information
+  /// about memory de-allocation.
   ///
-  /// \return   a newly allocated memory address at a 16 byte memory location
-  /// \param n  number of objects to allocate
+  /// \param P  pointer to be de-allocated
+#define WDutils_DEL16(P) WDutils::DelArray16(P,__FILE__,__LINE__)
+  // ///////////////////////////////////////////////////////////////////////////
+  //
+  /// a simple one-dimensional array of data aligned to 16 bytes
+  /// \note  sizeof(T) must be either a multiple or a dividor of 16.
+  /// \ingroup Mem16
+  template<typename T>
+  class Array16 {
+    /// ensure sizeof(T) is either multiple or dividor of 16
+    WDutilsStaticAssert( 0 == (sizeof(T) % 16)  ||  0 == (16 % sizeof(T)) );
+    /// # objects to allocate for n
+    static unsigned Nalloc(unsigned n)
+    { return sizeof(T)>=16? n : ((n*sizeof(T)+15)&(~15))/sizeof(T); }
+    const unsigned N; ///< # allocated data
+    T* const       A; ///< allocates array
+  public:
+    /// default ctor
+    Array16()
+      : N(0), A(0) {}
+    /// ctor from size
+    explicit Array16(unsigned n)
+      : N(Nalloc(n)), A(WDutils_NEW16(T,N)) {}
+    /// dtor
+    ~Array16()
+    {
+      if(A) WDutils_DEL16(A);
+      const_cast<unsigned&>(N) = 0;
+      const_cast<T*      &>(A) = 0;
+    }
+    /// reset(): only re-allocate if n>N or n<2N/3
+    void reset(unsigned n)
+    {
+      n = Nalloc(n);
+      if(n>N || (3*n<2*N && sizeof(T)*n>16) ) {
+	if(A) WDutils_DEL16(A);
+	const_cast<unsigned&>(N) = n;
+	const_cast<T*      &>(A) = WDutils_NEW16(T,N);
+      }
+    }
+    /// # allocated elements
+    unsigned nalloc() const { return N; }
+    /// const data access
+    template<typename integer>
+    T const&operator[](integer i) const { return A[i]; }
+    /// non-const data access
+    template<typename integer>
+    T&operator[](integer i) { return A[i]; }
+    /// const array
+    const T*array() const { return A; }
+    /// non-const array
+    T*array() { return A; }
+  };
+  // deprecated, use WDutils_NEW16 instead
   template<typename T> inline T* new16(size_t n) WDutils_THROWING
-  {
-    return static_cast<T*>(malloc16(n * sizeof(T)));
-  }
-  ///
-  /// de-allocate memory previously allocated with WDutils::new16().
-  /// \ingroup Mem16
-  ///
-  /// This routine \b must be used to properly de-allocate memory that has been
-  /// previously allocated by WDutils::new16(); other de-allocation will
-  /// inevitably result in an error.
-  ///
-  /// \param q  pointer previously allocated by WDutils::new16()
+  { return NewArray16<T>(n,0,0); }
+  // deprecated, use WDutils_DEL16 instead
+  inline void free16(void*q) WDutils_THROWING
+  { DelArray16(q,0,0); }
+  // deprecated, use WDutils_DEL16 instead
   template<typename T> inline void delete16(T* q)WDutils_THROWING 
-  {
-    free16(static_cast<void*>(q));
-  }
+  { free16(static_cast<void*>(q)); }
   //
   //  WDutils::block_alloc<T>
   //
@@ -477,12 +533,12 @@ namespace WDutils {
       explicit
       block(size_type const&n) :
 	NEXT    ( 0 ),
-	FIRST   ( new16<value_type>(n) ),
+	FIRST   ( WDutils_NEW16(value_type,n) ),
 	END     ( FIRST ),
 	ENDTOT  ( FIRST + n ) {}
       /// destructor: de-allocate
       ~block()
-      { free16(FIRST); }
+      { WDutils_DEL16(FIRST); }
       /// link block to next block
       void link(block*__n)
       { NEXT = __n; }

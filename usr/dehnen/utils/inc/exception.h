@@ -82,120 +82,6 @@ namespace WDutils {
     };
   }
   //
-  //  WDutils::RunInfo
-  //
-  /// provides information about the running process
-  ///
-  /// only one object exists, the static RunInfo::Info
-  ///
-  class RunInfo {
-  private:
-    bool __host_known;
-    bool __user_known;
-    bool __pid_known;
-    bool __name_known;
-    bool __cmd_known;
-    bool __is_mpi_proc;
-    char __time   [100];
-    char __host   [100];
-    char __user   [100];
-    char __pid     [20];
-    char __name   [100];
-    char __cmd   [1024];
-    int  __pid_num;
-    int  __debug;
-    int  __mpi_proc;
-    int  __mpi_size;
-#if defined(unix)
-    long long __sec, __usec;
-#elif defined(WIN32)
-    long long __timecount;
-    double __timetick;
-#endif
-    RunInfo();
-    static RunInfo Info;
-  public:
-    /// reset the debugging level
-    static void set_debug_level(int d)
-    { Info.__debug = d; }
-    /// provide info about MPI
-    static void set_mpi_proc(int p, int s)
-    {
-      Info.__is_mpi_proc = 1;
-      Info.__mpi_proc=p;
-      Info.__mpi_size=s;
-    }
-    /// is host name known?
-    static bool host_known()
-    { return Info.__host_known; }
-    /// is user name known?
-    static bool user_known()
-    { return Info.__user_known; }
-    /// is user pid known?
-    static bool pid_known()
-    { return Info.__pid_known; }
-    /// is name of the running program known?
-    static bool name_known()
-    { return Info.__name_known; }
-    /// is command line is known?
-    static bool cmd_known()
-    { return Info.__cmd_known; }
-    /// string with full time of run
-    static const char*time()
-    { return Info.__time; }
-    /// string with host nam
-    static const char*host()
-    { return Info.__host; }
-    /// string with user name
-    static const char*user()
-    { return Info.__user; }
-    /// string with process id
-    static const char*pid()
-    { return Info.__pid; }
-    /// numerical valud of user process id
-    static int const&pid_num()
-    { return Info.__pid_num; }
-    /// string with name of the running program
-    static const char*name()
-    { return Info.__name; }
-    /// string with command line
-    static const char*cmd()
-    { return Info.__cmd; }
-    /// return debugging level
-    static int debug_level()
-    { return Info.__debug; }
-    /// is this process part of an MPI run?
-    static bool is_mpi_proc()
-    { return Info.__is_mpi_proc; }
-    /// return our rank within MPI, if we are part of a MPI run
-    static int mpi_proc()
-    { return Info.__mpi_proc; }
-    /// return our size of MPI::World, if we are part of a MPI run
-    static int mpi_size()
-    { return Info.__mpi_size; }
-    /// return true if debug level >= given debug depth
-    static bool debug(int depth)
-    { return Info.__debug >= depth; }
-    /// print a log-file header
-    static void header(std::ostream&out);
-#if defined(unix) || defined(WIN32)
-    /// time in seconds since start of the program (or more accurately since
-    /// construction of the RunInfo object)
-    /// \return time in seconds
-    static double WallClock();
-#endif
-#if defined(unix)
-    /// \param[out] sec   full seconds since start of the program
-    /// \param[out] usec  micro seconds since start of the program
-    static void WallClock(unsigned&sec, unsigned&usec);
-#endif
-  };
-  /// is debugging level exceeded by debugging depth (argument)?
-  /// \relates DebugInformation
-  /// \param d debugging depth
-  inline bool debug(int d)
-  { return RunInfo::debug(d); }
-  //
   /// \name print debugging information to stderr, reporting [file:line]        
   //@{                                                                          
   /// to be used for reporting debug info
@@ -367,26 +253,6 @@ namespace WDutils {
   /// \endcode
 #define WDutils_WarningN     WDutils::Warning()
   //@}
-  //
-  //  macro for compile-time assertion, stolen from the boost library
-  //
-  template<bool> struct STATIC_ASSERTION_FAILURE;
-  template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
-  /// \brief macro for compile-time assertion
-  ///
-  /// \code
-  ///   WDutilsStaticAssert(constant expression);
-  /// \endcode
-  /// will cause a compiler error if the expression evaluates to false. This
-  /// relies on sizeof() an incomplete type causing an error, though
-  /// "STATIC_ASSERTION_FAILURE" along with the line of the actual
-  /// instantination causing the error will also appear in the
-  /// compiler-generated error message.
-#define WDutilsStaticAssert(TEST)				\
-  enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
-    static_cast<bool>((TEST))>)					\
-  }
-  //
   /// \name macros and code controling the usage of throw exception vs error    
   //@{                                                                          
 #if 0
@@ -417,6 +283,152 @@ namespace WDutils {
   /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
 #define WDutils_THROW  WDutils_THROWER(__FILE__,__LINE__)
   //@}
+  /// provides information about the running process
+  /// \note only one object exists, the static RunInfo::Info
+  class RunInfo {
+  private:
+    bool __host_known;
+    bool __user_known;
+    bool __pid_known;
+    bool __name_known;
+    bool __cmd_known;
+    bool __is_mpi_proc;
+    char __time   [100];
+    char __host   [100];
+    char __user   [100];
+    char __pid     [20];
+    char __name   [100];
+    char __cmd   [1024];
+    int  __pid_num;
+    int  __debug;
+    int  __mpi_proc;
+    int  __mpi_size;
+    int  __omp_size;
+    int  __omp_proc;
+#if defined(unix) || defined(__DARWIN_UNIX03)
+    long long __sec, __usec;
+#elif defined(WIN32)
+    long long __timecount;
+    double __timetick;
+#endif
+    RunInfo();
+    static RunInfo Info;
+  public:
+    /// reset the debugging level
+    static void set_debug_level(int d)
+    { Info.__debug = d; }
+    /// provide info about MPI
+    static void set_mpi_proc(int p, int s)
+    {
+      Info.__is_mpi_proc = 1;
+      Info.__mpi_proc=p;
+      Info.__mpi_size=s;
+    }
+    /// maximum # processors available for openMP
+    static int max_omp_proc()
+    { return Info.__omp_proc; }
+    /// # openMP threads to be used, may exceed @a max_omp_proc()
+    /// \note defaults to 0, implying openMP is not supposed to be used
+    static int omp_threads()
+    { return Info.__omp_size; }
+    /// set # openMP threads
+    /// \note If @a arg[0] == 't', we set # threads to # processors.\n
+    ///       If @a arg[0] == 'f', we set # threads to 0 (no openMP).\n
+    ///       Otherwise, we try to convert @a arg to an integer number and
+    ///       take that. This may exceed the # processors.
+    static void set_omp(const char*arg) WDutils_THROWING;
+    /// shall openMP parallelism be used?
+    static bool use_omp()
+    { return Info.__omp_size; }
+    /// is host name known?
+    static bool host_known()
+    { return Info.__host_known; }
+    /// is user name known?
+    static bool user_known()
+    { return Info.__user_known; }
+    /// is user pid known?
+    static bool pid_known()
+    { return Info.__pid_known; }
+    /// is name of the running program known?
+    static bool name_known()
+    { return Info.__name_known; }
+    /// is command line is known?
+    static bool cmd_known()
+    { return Info.__cmd_known; }
+    /// string with full time of run
+    static const char*time()
+    { return Info.__time; }
+    /// string with host nam
+    static const char*host()
+    { return Info.__host; }
+    /// string with user name
+    static const char*user()
+    { return Info.__user; }
+    /// string with process id
+    static const char*pid()
+    { return Info.__pid; }
+    /// numerical valud of user process id
+    static int const&pid_num()
+    { return Info.__pid_num; }
+    /// string with name of the running program
+    static const char*name()
+    { return Info.__name; }
+    /// string with command line
+    static const char*cmd()
+    { return Info.__cmd; }
+    /// return debugging level
+    static int debug_level()
+    { return Info.__debug; }
+    /// is this process part of an MPI run?
+    static bool is_mpi_proc()
+    { return Info.__is_mpi_proc; }
+    /// return our rank within MPI, if we are part of a MPI run
+    static int mpi_proc()
+    { return Info.__mpi_proc; }
+    /// return our size of MPI::World, if we are part of a MPI run
+    static int mpi_size()
+    { return Info.__mpi_size; }
+    /// return true if debug level >= given debug depth
+    static bool debug(int depth)
+    { return Info.__debug >= depth; }
+    /// print a log-file header
+    static void header(std::ostream&out);
+#if defined(unix) || defined(__DARWIN_UNIX03) || defined(WIN32)
+    /// time in seconds since start of the program (or more accurately since
+    /// construction of the RunInfo object)
+    /// \return time in seconds
+    static double WallClock();
+#endif
+#if defined(unix) || defined(__DARWIN_UNIX03)
+    /// \param[out] sec   full seconds since start of the program
+    /// \param[out] usec  micro seconds since start of the program
+    static void WallClock(unsigned&sec, unsigned&usec);
+#endif
+  };
+  /// is debugging level exceeded by debugging depth (argument)?
+  /// \relates DebugInformation
+  /// \param d debugging depth
+  inline bool debug(int d)
+  { return RunInfo::debug(d); }
+  //
+  //  macro for compile-time assertion, stolen from the boost library
+  //
+  template<bool> struct STATIC_ASSERTION_FAILURE;
+  template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
+  /// \brief macro for compile-time assertion
+  ///
+  /// \code
+  ///   WDutilsStaticAssert(constant expression);
+  /// \endcode
+  /// will cause a compiler error if the expression evaluates to false. This
+  /// relies on sizeof() an incomplete type causing an error, though
+  /// "STATIC_ASSERTION_FAILURE" along with the line of the actual
+  /// instantination causing the error will also appear in the
+  /// compiler-generated error message.
+#define WDutilsStaticAssert(TEST)				\
+  enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
+    static_cast<bool>((TEST))>)					\
+  }
   /// \name assertion which throws an excpetion rather than abort
   //@{
   // is NDEBUG is defined, do nothing
@@ -470,7 +482,8 @@ namespace WDutils {
    C9x has a similar variable called __func__, but prefer the GCC one since
    it demangles C++ function names.  */
 # ifdef __GNUC__
-#  if __GNUC_PREREQ (2, 6)
+#  if (__GNUC__ > 3) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 6))
+//#  if __GNUC_PREREQ (2, 6)
 #   define __ASSERT_FUNCTION	__PRETTY_FUNCTION__
 #  elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
 #   define __ASSERT_FUNCTION	__func__

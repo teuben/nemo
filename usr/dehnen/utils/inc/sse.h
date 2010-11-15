@@ -532,9 +532,9 @@ namespace WDutils {
     __I Bottom(__I i) {
       return Traits<__F>::Bottom(i);
     }
-
     ////////////////////////////////////////////////////////////////////////////
     /// An array of float or double supporting operations via SSE instructions
+    /// \note not to be confused with WDutils::Array16 in memory.h
     template<typename _F>
     class Array16 {
       WDutilsStaticAssert( meta::TypeInfo<_F>::is_floating_point );
@@ -567,7 +567,10 @@ namespace WDutils {
 	: _S(0), _N(0), _A(0) {}
       /// ctor from given size
       explicit Array16(size_t n)
-	: _S(Top<_F>(n)), _N(n), _A(new16<_F>(_S)) {}
+	: _S(Top<_F>(n)), _N(n), _A(WDutils_NEW16(_F,_S)) {}
+      /// dtor
+      ~Array16()
+      { if(_A) WDutils_DEL16(_A); const_cast<_F*&>(_A)=0; }
       /// reset size
       /// \param[in] n new number of elements
       Array16&reset(size_t n);

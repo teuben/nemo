@@ -523,7 +523,7 @@ namespace {
 				   bool avspc, const OctTree*Tree)
     WDutils_THROWING : 
     NDOT  ( Ndot ),
-    D0    ( NDOT? new16<Dot>(NDOT) : 0 ),
+    D0    ( NDOT? WDutils_NEW16(Dot,NDOT) : 0 ),
     NMAX  ( nmax ),
     NMIN  ( nmin ),
     AVSPC ( avspc ),
@@ -644,7 +644,7 @@ namespace {
   template<int D, typename real>
   inline BoxDotTree<D,real>::~BoxDotTree()
   { 
-    if(D0) delete16(D0);
+    if(D0) WDutils_DEL16(D0);
   }
   //
   template<int D, typename real>
@@ -715,8 +715,8 @@ namespace WDutils {
       Next16<local_count>   (NCELL) +  // NL
       4*Next16<count_type>  (NCELL);   // L0,NM,CF,PA
     if((need > NALLOC) || (3*need < 2*NALLOC)) {
-      if(ALLOC) delete16(ALLOC);
-      ALLOC  = new16<char>(need);
+      if(ALLOC) WDutils_DEL16(ALLOC);
+      ALLOC  = WDutils_NEW16(char,need);
       NALLOC = need;
     }
     char* A = ALLOC;

@@ -661,9 +661,9 @@ namespace WDutils {
       if(n==_N) return*this;
       size_t s = Top<_F>(n);
       if(s != _S) {
-	if(_A) delete16(_A);
+	if(_A) WDutils_DEL16(_A);
 	const_cast<size_t&>(_S) = s;
-	const_cast<_F*&>(_A) = new16<_F>(_S);
+	const_cast<_F*&>(_A) = WDutils_NEW16(_F,_S);
       }
       const_cast<size_t&>(_N) = n;
       return*this;
@@ -673,9 +673,9 @@ namespace WDutils {
     Array16<_F>&Array16<_F>::assign(Array16 const&a)
     {
       if(a._S != _S) {
-	if(_A) delete16(_A);
+	if(_A) WDutils_DEL16(_A);
 	const_cast<size_t&>(_S) = a._S;
-	const_cast<_F*&>(_A) = new16<_F>(_S);
+	const_cast<_F*&>(_A) = WDutils_NEW16(_F,_S);
       }
       const_cast<size_t&>(_N) = a._N;
       std::memcpy(_A,a._A,_N*sizeof(_F));

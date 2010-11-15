@@ -416,7 +416,7 @@ namespace WDutils {
     /// dtor
     ~OctalTree()
     {
-      if(ALLOC) delete16(ALLOC);
+      if(ALLOC) WDutils_DEL16(ALLOC);
       ALLOC = 0;
       NALLOC= 0;
       NLEAF = 0;
@@ -915,7 +915,7 @@ namespace WDutils {
     /// ctor: allocate memory for stack
     TreeWalkAlgorithm(const Tree*t)
       : Base(t), S(Tree::Nsub*Base::Depth()) {}
-    //  virtual dtor (required by some old compilers)
+    /// virtual dtor
     virtual ~TreeWalkAlgorithm() {}
     /// perform a tree walk.
     void walk()

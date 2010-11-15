@@ -28,6 +28,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <exception.h>
 #include <cstdlib>
+#include <cerrno>
 #include <cstdio>
 #include <cstdarg>
 #include <cstring>
@@ -35,10 +36,10 @@
 #include <iostream>
 #include <fstream>
 #ifdef _OPENMP
-# include <omp.h>
+#  include <omp.h>
 #endif
 extern "C" {
-#ifdef unix
+#if defined(unix) || defined(__DARWIN_UNIX03)
 #  include <unistd.h>
 #  include <sys/time.h>
 #endif
@@ -65,7 +66,7 @@ WDutils::RunInfo::RunInfo()
   try {
     // set wall-clock time
     {
-#if defined(unix)
+#if defined(unix) || defined(__DARWIN_UNIX03)
       timeval now;
       gettimeofday(&now, NULL);
       __sec = now.tv_sec;
@@ -84,7 +85,7 @@ WDutils::RunInfo::RunInfo()
       SNprintf(__time,100,ctime(&now));
       __time[24] = 0;
     }
-#ifdef unix
+#if defined(unix) || defined(__DARWIN_UNIX03)
     // set host name
     {
       gethostname(__host,100);
@@ -135,9 +136,40 @@ WDutils::RunInfo::RunInfo()
       SNprintf(__name,100,"unknown.name");
     }
 #endif
+    // set # proc available for openMP
+    {
+#ifdef _OPENMP
+      if(omp_in_parallel())
+	WDutils_Error("RunInfo::RunInfo() called inside OMP parallel region\n");
+      __omp_proc = omp_get_num_procs();
+#else
+      __omp_proc = 0;
+#endif
+      __omp_size = 0;
+    }
   } catch(exception E) {
     WDutils_RETHROW(E);
   }
+}
+//
+void WDutils::RunInfo::set_omp(const char*arg) WDutils_THROWING
+{
+#ifdef _OPENMP
+  if(arg[0] == 't')
+    Info.__omp_size = Info.__omp_proc;
+  else if(arg[0] == 'f')
+    Info.__omp_size = 0;
+  else {
+    Info.__omp_size = strtol(arg,0,10);
+    if(errno == EINVAL || errno == ERANGE)
+      WDutils_THROW("RunInfo::set_omp('%s')\n",arg);
+    if(Info.__omp_size < 0) {
+      Info.__omp_size = 0;
+      WDutils_WarningN("RunInfo::set_omp('%s') assume '0'\n",arg);
+    }
+  }
+  omp_set_num_threads(Info.__omp_size);
+#endif
 }
 //
 void WDutils::RunInfo::header(std::ostream&out)
@@ -154,7 +186,7 @@ void WDutils::RunInfo::header(std::ostream&out)
   }
 }
 //
-#if   defined(unix)
+#if defined(unix) || defined(__DARWIN_UNIX03)
 double WDutils::RunInfo::WallClock()
 {
   timeval now;

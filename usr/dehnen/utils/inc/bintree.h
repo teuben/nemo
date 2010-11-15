@@ -429,7 +429,7 @@ namespace WDutils {
       NALL  ( Nbox_alloc() ),
       NFIN  ( 0 ),
       DPTH  ( 0 ),
-      DOTS  ( new16<Dot>(NDOT) ),
+      DOTS  ( WDutils_NEW16(DOT,NDOT) ),
       ROOT  ( WDutils_NEW(Box,NALL) ),
       BOXN  ( ROOT+1 )
     {
@@ -576,7 +576,7 @@ namespace WDutils {
   template<int Dim, typename _X>
   BinaryTree<Dim,_X>::~BinaryTree()
   {
-    if(DOTS) { delete16<Dot>(DOTS); DOTS=0; }
+    if(DOTS) { WDutils_DEL16(DOTS); DOTS=0; }
     if(ROOT) { WDutils_DEL_A(ROOT); ROOT=0; }
   }
   // ///////////////////////////////////////////////////////////////////////////

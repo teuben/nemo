@@ -41,6 +41,10 @@
 #  include <limits>
 #  define WDutils_included_limits
 #endif
+#ifndef WDutils_included_algorithm
+#  include <algorithm>
+#  define WDutils_included_algorithm
+#endif
 //------------------------------------------------------------------------------
 namespace WDutils {
   using std::min;
