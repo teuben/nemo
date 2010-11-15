@@ -74,7 +74,8 @@ include_directories (../lib/utils ../lib/projects ${DEHNEN}/falcON/inc ${DEHNEN}
 
 
 # Make sure the linker can find the Hello library once it is built.
-link_directories (${NEMOLIB} ${DEHNEN}/falcON/lib ${DEHNEN}/utils/lib $ENV{PGPLOT_DIR}  ${G2C_DIR} ${PROJECT_BINARY_DIR}/../lib /usr/lib64)
+link_directories (${NEMOLIB} ${DEHNEN}/falcON/lib ${DEHNEN}/utils/lib $ENV{PGPLOT_DIR}  ${G2C_DIR} ${PROJECT_BINARY_DIR}/../lib /usr/lib64 ${FC_GFORT_PATH} ${FC_G77_PATH}
+)
 
 
 # ----------------------------------------------------------
@@ -93,7 +94,7 @@ FOREACH(exe_cpp ${execpp_sources})
 
   # Link the executable to the Hello library.
 #  target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot X11 g2c unsio nemo sqlite3 ${Boost_LIBRARIES} boost_thread-mt.a boost_system-mt.a)
- target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot X11 g2c unsio WDutils falcON nemo sqlite3  boost_thread-mt boost_system-mt dl)
+ target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot  ${FC_GFORT_LIB} ${FC_G77_LIB} X11 g2c unsio WDutils falcON nemo sqlite3  boost_thread-mt boost_system-mt dl)
 
 
 ENDFOREACH(exe_cpp ${execpp_sources})
