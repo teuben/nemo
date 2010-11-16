@@ -145,7 +145,7 @@ WDutils::RunInfo::RunInfo()
 #else
       __omp_proc = 0;
 #endif
-      __omp_size = 0;
+      __omp_size = 1;
     }
   } catch(exception E) {
     WDutils_RETHROW(E);
@@ -158,14 +158,14 @@ void WDutils::RunInfo::set_omp(const char*arg) WDutils_THROWING
   if(arg[0] == 't')
     Info.__omp_size = Info.__omp_proc;
   else if(arg[0] == 'f')
-    Info.__omp_size = 0;
+    Info.__omp_size = 1;
   else {
     Info.__omp_size = strtol(arg,0,10);
     if(errno == EINVAL || errno == ERANGE)
       WDutils_THROW("RunInfo::set_omp('%s')\n",arg);
-    if(Info.__omp_size < 0) {
-      Info.__omp_size = 0;
-      WDutils_WarningN("RunInfo::set_omp('%s') assume '0'\n",arg);
+    if(Info.__omp_size < 1) {
+      Info.__omp_size = 1;
+      WDutils_WarningN("RunInfo::set_omp('%s') assume '1'\n",arg);
     }
   }
   omp_set_num_threads(Info.__omp_size);

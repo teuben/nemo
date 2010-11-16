@@ -333,13 +333,13 @@ namespace WDutils {
     { return Info.__omp_size; }
     /// set # openMP threads
     /// \note If @a arg[0] == 't', we set # threads to # processors.\n
-    ///       If @a arg[0] == 'f', we set # threads to 0 (no openMP).\n
+    ///       If @a arg[0] == 'f', we set # threads to 1 (no openMP).\n
     ///       Otherwise, we try to convert @a arg to an integer number and
     ///       take that. This may exceed the # processors.
     static void set_omp(const char*arg) WDutils_THROWING;
     /// shall openMP parallelism be used?
     static bool use_omp()
-    { return Info.__omp_size; }
+    { return Info.__omp_size > 1; }
     /// is host name known?
     static bool host_known()
     { return Info.__host_known; }

@@ -261,24 +261,14 @@ namespace WDutils {
     return size_t(p) % 16 == 0;
   }
   ///
-  /// given a number, find the next multiple of 16
-  /// \param[in] n  some number
-  /// \return smallest multiple of 16 not smaller than @a n
+  /// find the smallest multiple of 16 not smaller than @a n
   inline size_t next_aligned16(size_t n)
-  {
-//     const size_t L=15, nL=~L;
-//     return (n+L)&nL;
-    return (n+15)&(~15);
-  }
+  { return (n+15)&(~15); }
   ///
-  /// given an address @a p, find the next 16-byte aligned address
-  /// \param[in] p  some address (pointer)
-  /// \return smallest 16-byte aligned address not smaller than @a p
+  /// find the smallest 16-byte aligned address not smaller than @a p
   template<typename T>
   inline T* next_aligned16(T*p)
-  {
-    return reinterpret_cast<T*>(next_aligned16(reinterpret_cast<size_t>(p)));
-  }
+  { return reinterpret_cast<T*>(next_aligned16(reinterpret_cast<size_t>(p))); }
   ///
   /// Allocate memory at a address aligned to a 16 byte memory location
   /// \ingroup Mem16
@@ -355,14 +345,14 @@ namespace WDutils {
 #define WDutils_NEW16(TYPE,SIZE)			\
   WDutils::NewArray16<TYPE>(SIZE,__FILE__,__LINE__)
   ///
-  /// de-allocate memory previously allocated with WDutils::malloc16()
+  /// de-allocate memory previously allocated with WDutils::NewArray16()
   /// \ingroup Mem16
   ///
   /// This routine \b must be used to properly de-allocate memory that has been
-  /// previously allocated by WDutils::malloc16(); other de-allocation will
+  /// previously allocated by WDutils::NewArray16(); other de-allocation will
   /// inevitably result in a run-time \b error!
   ///
-  /// \param q  pointer previously allocated by WDutils::malloc16()
+  /// \param q  pointer previously allocated by WDutils::NewArray16()
   template<typename T> inline
   void DelArray16(T* a, const char*f, int l, const char*lib = "WDutils")
     WDutils_THROWING
@@ -466,6 +456,9 @@ namespace WDutils {
     /// non-const array
     T*array() { return A; }
   };
+  // deprecated, use WDutils_NEW16 instead
+  inline void* malloc16(size_t n) WDutils_THROWING
+  { return NewArray16<char>(n,0,0); }
   // deprecated, use WDutils_NEW16 instead
   template<typename T> inline T* new16(size_t n) WDutils_THROWING
   { return NewArray16<T>(n,0,0); }
