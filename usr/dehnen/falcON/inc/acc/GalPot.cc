@@ -1333,6 +1333,15 @@ void Multipole::reset(double      ri,
 		      PotResidual*PR,
 		      int         lr)
 {
+  if(!LR && lr) {
+    lLc = new double[K[0]];
+    d2R = new double[K[0]];
+    d2L = new double[K[0]];
+  } else if(LR && !lr) {
+    delete[] lLc;
+    delete[] d2R;
+    delete[] d2L;
+  }
   LR = lr;
   setup(ri,ra,g,b,PR);
 }
