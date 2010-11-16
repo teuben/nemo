@@ -3,7 +3,7 @@
 //                                                                             |
 // GalPot.cc                                                                   |
 //                                                                             |
-// Copyright (C) 1996-2007 Walter Dehnen                                       |
+// Copyright (C) 1996-2007,2010 Walter Dehnen                                  |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -35,7 +35,7 @@
 // Version 0.7    23. September 2004  fixed "find(): x out of range" error     |
 // Version 0.8    24. June      2005  explicit construction of tupel           |
 // Version 0.9    06. November  2007  consistent with GalPot package           |
-//                                                                             |
+// Version 0.10   16. November  2010  fixed memory leak (thanks to PJM)        |
 //-----------------------------------------------------------------------------+
 #define  GalPot_cc
 #ifndef GalPot_h
@@ -1517,9 +1517,6 @@ void Multipole::setup(double      ri,
   if(LR) {
     tg3 = 2./(3.-gamma);
     g3h = 0.5*(3.-gamma);
-    lLc = new double[K[0]];
-    d2R = new double[K[0]];
-    d2L = new double[K[0]];
     LegendrePeven(P2l,0.);
     for(k=0; k<K[0]; k++)
       lLc[k] = 0.5 * ( 2*logr[k] + log(dPhl[k]*P2l) );
