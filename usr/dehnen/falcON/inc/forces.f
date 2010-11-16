@@ -123,9 +123,8 @@ C                                                                              |
 C                                                                              |
 C  The syntax is a follows:                                                    |
 C                                                                              |
-C     INTEGER    N                                                             |
-C     PARAMETER (N=10000)          number of bodies                            |
-C     PARAMETER (NS=2000)          the first NS bodies are SPH particles       |
+C     INTEGER    N                 number of bodies                            |
+C     INTEGER    NS                the first NS bodies are SPH particle        |
 C     INTEGER    FL(N)             array with flags, see below                 |
 C     INPUT_TYPE M(N)              array with masses                           |
 C     INPUT_TYPE X(3,N)            arrays with position components             |
@@ -170,10 +169,9 @@ C         if(EPS< 0):  use individual softening lengths provided in array      |
 C  TH:    if(TH>0):    theta = theta(M) with theta_min = TH (Dehnen 2002)      |
 C         if(TH<0):    theta = |TH| = const                                    |
 C         RECOMMENDED: TH    = 0.55                                            |
-C  K:     0,1,2,3:     Ferrers sphere of this index (Dehnen 2001)              |
-C         10,11,12,13  compensating kernel (Dehnen 2001) of index (KERN-10)    |
-C         20,21,22,23  Plummer (20) and related (Dehnen & Teuben, 2002)        |
-C         RECOMMENDED: K = 21 or 22                                            |
+C  K:     0            Plummer softening                                       |
+C         1,2,3        P1,P2,P3 kernel                                         |
+C         RECOMMENDED: K = 1                                                   |
 C                                                                              |
 C  If FALCON_INIT() is called more than once, only the last initialisation     |
 C  applies, the older ones will be deleted. That is, you can have only one     |

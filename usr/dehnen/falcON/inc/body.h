@@ -62,8 +62,10 @@ namespace falcON {
   }
   //
   class ebodies;                                   // declared in forcesC.cc
+#ifdef falcON_NEMO
   class BodyFilter;                                // declared in bodyfunc.h
   template<typename T> class BodyFunc;             // declared in bodyfunc.h
+#endif
   class ParallelSnapshot;                          // parallel/snapshot.h
   class forces;                                    // forces.h
   //
@@ -1052,11 +1054,13 @@ namespace falcON {
     ///
     /// \param[in] b body data field to swap bytes for
     void swap_bytes(fieldbit b) falcON_THROWING;
+#ifdef falcON_NEMO
     //
     void apply_filter(BodyFilter const&, bool, bool) falcON_THROWING;
     //
     void apply_sort(BodyFunc<real> const&, double, fieldset, bool, bool)
       falcON_THROWING;
+#endif
   public:
     // \name methods using another set of bodies
 #if(0)
@@ -1320,6 +1324,7 @@ namespace falcON {
     /// \param[in]  func function for property to be sorted
     void sorted(Array<index>&T, real(*func)(iterator const&))
       const falcON_THROWING;
+#ifdef falcON_NEMO
     /// \brief Create an index table sorted in \a func(body) for all bodies 
     /// flagged not to be ignored (in_subset()).
     ///
@@ -1328,6 +1333,7 @@ namespace falcON {
     /// \param[in]  func function for property to be sorted
     void sorted(Array<index>&T, double time, BodyFunc<real>const&func)
       const falcON_THROWING;
+#endif
     /// \brief Create an index table sorted in \a func(body) for all bodies
     /// flagged not to be ignored (in_subset()) and also generate a sorted table
     /// of quantities
@@ -1757,6 +1763,7 @@ namespace falcON {
 	      fieldset       Bd=fieldset::all,
 	      flags          F =flags::empty) falcON_THROWING;
 #endif
+#ifdef falcON_NEMO
     /// apply filter: remove body's not matching a filter function
     /// \param[in] F     filter function
     /// \note @a F is non-constant, since we will call BodyFilter::set_time().
@@ -1783,11 +1790,13 @@ namespace falcON {
 		    bool zm=false, bool warn=true)
       falcON_THROWING
     { bodies::apply_sort(F,TIME,keep,zm,warn); }
+#endif
     //--------------------------------------------------------------------------
     /// destruction
     ~snapshot();
     //==========================================================================
     bodies::sorted;
+#ifdef falcON_NEMO
     /// \brief Create an index table sorted in \a func(body) for all bodies 
     /// flagged not to be ignored (in_subset()).
     ///
@@ -1796,7 +1805,6 @@ namespace falcON {
     /// \param[in]  func function for property to be sorted
     void sorted(Array<index>&T, BodyFunc<real>const&func) const falcON_THROWING
     { bodies::sorted(T,TIME,func); }
-#ifdef falcON_NEMO
     //==========================================================================
     // \name NEMO data I/O
     //==========================================================================

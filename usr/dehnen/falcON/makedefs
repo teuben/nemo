@@ -140,11 +140,16 @@ falcON		:= $(links) $(LIB)lib$(LIBNAME).a $(LIB)lib$(LIBNAME).so
 # compile and link commands
 # -------------------------
 
+ifndef $(MATHLIB)
+MATHLIB		:= -lm
+endif
+
+
 MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS)
 MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS) $(NBDYFLAGS) -shared
 MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS) -shared
 MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS)
 MAKE_EXE_C	= $(CC) -o $@ $< -I$(INC) $(IUTIL) $(CFLAGS)
 MAKE_EXE_F	= $(FC) -o $@ $< -I$(INC) $(IUTIL) $(OPTFLAGS)
-NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) -lm
+NEMO_EXE_FLGS	= $(NBDYFLAGS) $(LFALCON) $(MATHLIB)
 

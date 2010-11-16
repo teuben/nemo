@@ -908,6 +908,7 @@ void bodies::remove() {
 	    NDEL[0],NDEL[1],NDEL[2]);
 }
 //
+#ifdef falcON_NEMO
 void bodies::apply_filter(BodyFilter const&F, bool zm, bool warn)
   falcON_THROWING
 {
@@ -942,6 +943,7 @@ void bodies::apply_filter(BodyFilter const&F, bool zm, bool warn)
   // delete any fields added
   del_fields(BITS-ORIG);
 }
+#endif
 //
 void bodies::merge(bodies&Other) falcON_THROWING
 {
@@ -979,6 +981,7 @@ namespace {
   };
 }
 //
+#ifdef falcON_NEMO
 void bodies::apply_sort(BodyFunc<real> const&F, double time, fieldset copy,
 			bool zm, bool warn) falcON_THROWING
 {
@@ -1028,6 +1031,7 @@ void bodies::apply_sort(BodyFunc<real> const&F, double time, fieldset copy,
   del_data();
   merge(Other);
 }
+#endif
 //
 bodies::block* bodies::ensure_contiguous(unsigned N, bodytype t, unsigned Na)
 {
@@ -1335,6 +1339,7 @@ void bodies::sorted(Array<index>&table,
   falcON_DEL_A(R);
 }
 //
+#ifdef falcON_NEMO
 void bodies::sorted(Array<index>&table, double time,
 		    BodyFunc<real> const&func) const falcON_THROWING
 {
@@ -1365,6 +1370,7 @@ void bodies::sorted(Array<index>&table, double time,
   falcON_DEL_A(I);
   falcON_DEL_A(R);
 }
+#endif
 //
 void bodies::sorted(Array<index>&table, 
 		    Array<real> &quant, 
@@ -1626,11 +1632,13 @@ snapshot::~snapshot()
   if(PBNK) { falcON_DEL_O(static_cast<PointerBank*>(PBNK)); PBNK = 0; }
 }
 //
+#ifdef falcON_NEMO
 void snapshot::apply_filter(BodyFilter&F, bool zm, bool warn) falcON_THROWING
 {
   F.set_time(TIME);
   bodies::apply_filter(F,zm,warn);
 }
+#endif
 //
 #ifdef falcON_NEMO
 bool snapshot::read_nemo(nemo_in const&i, fieldset&r, fieldset g,

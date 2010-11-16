@@ -35,9 +35,11 @@
 // v 0.4    11/09/2008  WD erased direct use of nemo functions
 // v 0.5    05/11/2008  WD using 'trho' instead of 2nd parameter
 // v 0.5.1  13/04/2010  WD set initial file index to non-existing file
+// v 0.6    22/10/2010  WD parameter to control window in log(r)
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <utils/numerics.h>
+#include <utils/WDMath.h>
 #include <ctime>
 #include <cstring>
 
@@ -105,6 +107,7 @@ namespace falcON { namespace Manipulate {
   }
   //////////////////////////////////////////////////////////////////////////////
   const int    W_default = 1000;
+  const double L_default = 0.1;
   // ///////////////////////////////////////////////////////////////////////////
   //
   // class densprof
@@ -120,6 +123,7 @@ namespace falcON { namespace Manipulate {
   ///
   /// Meaning of the parameters:\n
   /// par[0]: # bodies per density shell (window size, default: 1000)\n
+  /// par[1]: minimum bin size in log_10(r) (default: 0.1)\n
   /// file  : format string for output table files\n
   ///
   /// Usage of pointers: 'trho'\n
@@ -129,6 +133,8 @@ namespace falcON { namespace Manipulate {
   class densprof : public manipulator {
   private:
     const unsigned   W;         ///< window size
+    const double     L;         ///< minimum bin size in dex(radius)
+    const double     RFAC;      ///< 10^L
     mutable int      I;         ///< index of manipulation
     mutable output   OUT;       ///< file for output table
     char*  const     FILE;      ///< format for file name
@@ -160,25 +166,30 @@ namespace falcON { namespace Manipulate {
 		     int          npar,
 		     const char  *file) falcON_THROWING
   : W    ( npar>0?     int(pars[0])    : W_default ),
+    L    ( npar>1?         pars[1]     : L_default ),
+    RFAC ( Tento(L) ),
     I    ( 0 ),
     FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
     PS   ( 3 ),
     FRST ( true )  
   {
-    if(debug(2) || file==0 || file[0]==0 || npar>1 || (debug(1) && npar<1))
+    if(debug(2) || file==0 || file[0]==0 || npar>2 || (debug(1) && npar<2))
       std::cerr<<
 	" Manipulator \""<<name()<<"\":\n"
 	" uses estimated density to compute centre and radial profiles\n"
 	" par[0]: # bodies per density shell (window size, def: "
 	       <<W_default<<")\n"
+	" par[1]: minimum bin size in log(r) (def: "<<L_default<<")\n"
 	" file  : format string for output table files\n";
     if(FILE) strcpy(FILE,file);
     if(file==0 || file[0]==0)
       falcON_THROW("Manipulator \"densprof\": no file given");
     if(W<=2) falcON_THROW("Manipulator \"%s\": W = %d <2\n",name(),W);
-    if(npar > 1)
+    if(L<0.)
+      falcON_THROW("Manipulator \"%s\": L = %f < 0\n",name(),L);
+    if(npar > 2)
       falcON_WarningN("Manipulator \"%s\": "
-		      "skipping parameters beyond 1\n",name());
+		      "skipping parameters beyond 2\n",name());
   }
   //////////////////////////////////////////////////////////////////////////////
   inline void densprof::print_line() const
@@ -245,90 +256,132 @@ namespace falcON { namespace Manipulate {
 	<<"      b/a "
 	<<"       major axis        minor axis     rotation axis\n";
     print_line();
-    Array<real> Rq(W+W);
-    Array<int>  Ir(W+W);
+    // auxiliary arrays for median radius
+    Array<double> Rq(SHOT->N_bodies());
+    Array<double> Mi(SHOT->N_bodies());
+    // variables for cumulated properties
+    unsigned    Cum0=0;                 // begin of accumulated bodies
+    unsigned    CumN=0;                 // # bodies accumulated
+    double      CumRm=0;                // median radius of last emitted window
+    double      CumM=0;                 // sum m
+    vect_d      CumMX0(0.), CumMV0(0.); // sum m*x, sum m*v
+    double      CumMRho=0;              // sum m*rho
     // 4  loop windows of W and compute properties
     for(unsigned ib=0,kb=W+W>Nb? Nb:W; ib!=Nb;
 	ib=kb,kb=kb+W+W > Nb? Nb : kb+W) {
       const unsigned N = kb-ib;
-      // 4.1  measure total mass, mean density, and centre
-      double M(0.);
-      vect_d X0(0.), V0(0.);
-      double Rho(0.);
-      for(unsigned i=ib; i!=kb; ++i) {
-	const real mi = SHOT->mass(T[i]);
-	M  += mi;
-	X0 += mi * SHOT->pos(T[i]);
-	V0 += mi * SHOT->vel(T[i]);
-	Rho+= mi * SHOT->rho(T[i]);
-      }
-      double iM = 1./M;
-      X0  *= iM;
-      V0  *= iM;
-      Rho *= iM;
-      // 4.2  measure moment of inertia, rotation and median radius
-      vect_d Mvp(0.);
-      double Mxx[3][3] = {{0.,0.,0.},{0.,0.,0.},{0.,0.,0.}};
-      for(unsigned i=ib,j=0; i!=kb; ++i,++j) {
-	double mi = SHOT->mass(T[i]);
-	vect_d ri = SHOT->pos(T[i]) - X0;
-	vect_d vi = SHOT->vel(T[i]) - V0;
-	vect_d er = normalized(ri);
-	Mvp      += mi * (er^vi);
-	Rq[j]     = norm(ri);
-	add_outer_product(Mxx,ri,mi);
-      }
-      symmetrize(Mxx);
-      double IV[3][3], ID[3];
-      int    IR;
-      EigenSymJacobiSorted<3,double>(Mxx,IV,ID,IR);
-      double vp = abs(Mvp)*iM;
-      HeapIndex(Rq.array(),N,Ir.array());
-      double Mh = 0.5*M, Mc(0.), mR(0.);
-      for(unsigned j=0; j!=N; ++j) {
-	double mi = SHOT->mass(T[ib+Ir[j]]);
-	Mc += mi;
-	if(Mc >= Mh) {
-	  mR = sqrt((Rq[Ir[j-1]]*(Mc-Mh) + Rq[Ir[j]]*(Mh-Mc+mi))/mi);
-	  break;
+      // 4.1  measure in window: total mass, mean density, and centre
+      double Mw=0, MRho=0, Rm=0;
+      vect_d MX0(0.), MV0(0.);
+      {
+	for(unsigned i=ib; i!=kb; ++i) {
+	  const real mi = SHOT->mass(T[i]);
+	  Mw  += mi;
+	  MX0 += mi * SHOT->pos(T[i]);
+	  MV0 += mi * SHOT->vel(T[i]);
+	  MRho+= mi * SHOT->rho(T[i]);
 	}
+	vect_d X0 = MX0/Mw;
+	// 4.2  measure in window: median radius
+	for(unsigned i=ib,j=0; i!=kb; ++i,++j) {
+	  Rq[j] = dist_sq(SHOT->pos(T[i]),X0);
+	  Mi[j] = SHOT->mass(T[i]);
+	}
+	FindPercentile<double> FP(Rq.array(),N,Mi.array(),1);
+	double Mh = 0.5*FP.TotalWeight();
+	FindPercentile<double>::handle Lo = FP.FindCumulativeWeight(Mh);
+	FindPercentile<double>::handle Hi = FP.Next(Lo);
+	double Mlo= FP.CumulativeWeight(Lo);
+	double Mhi= FP.CumulativeWeight(Hi);
+	Rm = sqrt( (FP.Position(Lo)*(Mhi-Mh) +
+		    FP.Position(Hi)*(Mh-Mlo) ) / (Mhi-Mlo) );
       }
-      // 4.3  measure mean velocities and dispersion
-      vect_d erot = norm(Mvp)>0.? normalized(Mvp) : vect_d(0.,0.,1.);
-      double Mvr(0.), Mvrq(0.), Mvpq(0.), Mvtq(0.);
-      for(unsigned i=ib; i!=kb; ++i) {
-	double mi = SHOT->mass(T[i]);
-	vect_d ri = SHOT->pos(T[i]) - X0;
-	vect_d vi = SHOT->vel(T[i]) - V0;
-	vect_d er = normalized(ri);
-	vect_d ep = normalized(er^erot);
-	vect_d et = normalized(er^ep);
-	double ui = er*vi;
-	Mvr      += mi * ui;
-	Mvrq     += mi * ui*ui;
-	Mvpq     += mi * square(vi*ep);
-	Mvtq     += mi * square(vi*et);
-      }
-      double vr = Mvr*iM;
-      double sr = sqrt(M*Mvrq-Mvr*Mvr)*iM;
-      double st = sqrt(Mvtq*iM);
-      double sp = sqrt(M*Mvpq-Mvp*Mvp)*iM;
-      // 4.4  finally print out the data
-      OUT << print(X0 ,9,3)               <<' '  // centre position
-	  << print(V0 ,9,3)               <<' '  // centre velocity
-	  << print(mR ,9,3)               <<' '  // median radius
-	  << print(Rho,9,3)               <<' '  // density
-	  << print(vr ,9,3)               <<' '  // <v_r>
-	  << print(vp ,9,3)               <<' '  // <v_rot>
-	  << print(sr ,9,3)               <<' '  // sigma_r
-	  << print(st ,9,3)               <<' '  // sigma_mer
-	  << print(sp ,9,3)               <<' '  // sigma_rot
-	  << print(sqrt(ID[2]/ID[0]),9,3) <<' '  // axis ratio c/a
-	  << print(sqrt(ID[1]/ID[0]),9,3) <<' '; // axis ratio b/a
-      Transpose<3>(IV);
-      PS.print_dir(OUT,IV[0]) << ' ';
-      PS.print_dir(OUT,IV[2]) << ' ';
-      PS.print_dir(OUT,erot ) << std::endl;
+      // 4.3  if beyond allowed range from CumRm: emit accumulated
+      if(CumN && (Cum0==0 || CumRm*RFAC<Rm || kb==Nb)) {
+	// 4.3.1 get for all accumulated: mean position, velocity, and density
+	double   M   = CumM;
+	double  iM   = 1./M;
+	vect_d   X0  = iM*CumMX0;
+	vect_d   V0  = iM*CumMV0;
+	double   Rho = iM*CumMRho;
+	unsigned CumK= Cum0 + CumN;
+	// 4.3.2 measure for all accumulated: moment of inertia, rotation
+	CumRm  = Rm; // remember Rm of last emitted window
+	vect_d Mvp(0.);
+	double Mxx[3][3] = {{0.,0.,0.},{0.,0.,0.},{0.,0.,0.}};
+	for(unsigned i=Cum0,j=0; i!=CumK; ++i,++j) {
+	  double mi = SHOT->mass(T[i]);
+	  vect_d ri = SHOT->pos(T[i]) - X0;
+	  vect_d vi = SHOT->vel(T[i]) - V0;
+	  vect_d er = normalized(ri);
+	  Mvp      += mi * (er^vi);
+	  Rq[j]     = norm(ri);
+	  Mi[j]     = mi;
+	  add_outer_product(Mxx,ri,mi);
+	}
+	symmetrize(Mxx);
+	double IV[3][3], ID[3];
+	int    IR;
+	EigenSymJacobiSorted<3,double>(Mxx,IV,ID,IR);
+	double vp = abs(Mvp)*iM;
+	FindPercentile<double> FP(Rq.array(),CumN,Mi.array(),1);
+	double Mh = 0.5*FP.TotalWeight();
+	FindPercentile<double>::handle Lo = FP.FindCumulativeWeight(Mh);
+	FindPercentile<double>::handle Hi = FP.Next(Lo);
+	double Mlo= FP.CumulativeWeight(Lo);
+	double Mhi= FP.CumulativeWeight(Hi);
+	Rm = sqrt( (FP.Position(Lo)*(Mhi-Mh) +
+		    FP.Position(Hi)*(Mh-Mlo) ) / (Mhi-Mlo) );
+	// 4.3.3 measure for all accumulated: mean velocities and dispersion
+	vect_d erot = norm(Mvp)>0.? normalized(Mvp) : vect_d(0.,0.,1.);
+	double Mvr(0.), Mvrq(0.), Mvpq(0.), Mvtq(0.);
+	for(unsigned i=Cum0; i!=CumK; ++i) {
+	  double mi = SHOT->mass(T[i]);
+	  vect_d ri = SHOT->pos(T[i]) - X0;
+	  vect_d vi = SHOT->vel(T[i]) - V0;
+	  vect_d er = normalized(ri);
+	  vect_d ep = normalized(er^erot);
+	  vect_d et = normalized(er^ep);
+	  double ui = er*vi;
+	  Mvr      += mi * ui;
+	  Mvrq     += mi * ui*ui;
+	  Mvpq     += mi * square(vi*ep);
+	  Mvtq     += mi * square(vi*et);
+	}
+	double vr = Mvr*iM;
+	double sr = sqrt(M*Mvrq-Mvr*Mvr)*iM;
+	double st = sqrt(Mvtq*iM);
+	double sp = sqrt(M*Mvpq-Mvp*Mvp)*iM;
+	// 4.3.4 print out the accumulated data
+	OUT << print(X0 ,9,3)               <<' '  // centre position
+	    << print(V0 ,9,3)               <<' '  // centre velocity
+	    << print(Rm ,9,3)               <<' '  // median radius
+	    << print(Rho,9,3)               <<' '  // density
+	    << print(vr ,9,3)               <<' '  // <v_r>
+	    << print(vp ,9,3)               <<' '  // <v_rot>
+	    << print(sr ,9,3)               <<' '  // sigma_r
+	    << print(st ,9,3)               <<' '  // sigma_mer
+	    << print(sp ,9,3)               <<' '  // sigma_rot
+	    << print(sqrt(ID[2]/ID[0]),9,3) <<' '  // axis ratio c/a
+	    << print(sqrt(ID[1]/ID[0]),9,3) <<' '; // axis ratio b/a
+	Transpose<3>(IV);
+	PS.print_dir(OUT,IV[0]) << ' ';
+	PS.print_dir(OUT,IV[2]) << ' ';
+	PS.print_dir(OUT,erot ) << std::endl;
+	// 4.3.5 finally reset accumulation
+	Cum0   = kb;
+	CumN   = 0;
+	CumM   = 0;
+	CumMX0 = 0;
+	CumMV0 = 0;
+	CumMRho= 0;
+      } 
+      // 4.4  accumulate more
+      CumN    += N;
+      CumM    += Mw;
+      CumMX0  += MX0;
+      CumMV0  += MV0;
+      CumMRho += MRho;
     }
     return false;
   }

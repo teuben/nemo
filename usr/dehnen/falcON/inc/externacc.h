@@ -74,15 +74,15 @@ namespace falcON {
     /// shall be assigned or added. If bit 0 is set, the potential is added,
     /// otherwise assigned; if bit 1 is set, the acceleration is added,
     /// otherwise assigned. So, 0 means both are assigned.
-    /// \param t (input) simulation time
-    /// \param n (input) # bodies=size of tables
-    /// \param m (input) table with masses
-    /// \param x (input) table with positions
-    /// \param v (input) table with velocities
-    /// \param f (input) table with flags
-    /// \param m (output) table with potentials
-    /// \param m (output) table with accelerations
-    /// \param add (input) see detailed description
+    /// \param[in]  t    simulation time
+    /// \param[in]  n    # bodies=size of tables
+    /// \param[in]  m    table with masses
+    /// \param[in]  x    table with positions
+    /// \param[in]  v    table with velocities
+    /// \param[in]  f    table with flags
+    /// \param[out] p    table with potentials
+    /// \param[out] a    table with accelerations
+    /// \param[in]  add  see detailed description
     virtual
     void set(double      t,
 	     int         n,
@@ -100,15 +100,15 @@ namespace falcON {
     /// shall be assigned or added. If bit 0 is set, the potential is added,
     /// otherwise assigned; if bit 1 is set, the acceleration is added,
     /// otherwise assigned. So, 0 means both are assigned.
-    /// \param t (input) simulation time
-    /// \param n (input) # bodies=size of tables
-    /// \param m (input) table with masses
-    /// \param x (input) table with positions
-    /// \param v (input) table with velocities
-    /// \param f (input) table with flags
-    /// \param m (output) table with potentials
-    /// \param m (output) table with accelerations
-    /// \param add (input) see detailed description
+    /// \param[in]  t    simulation time
+    /// \param[in]  n    # bodies=size of tables
+    /// \param[in]  m    table with masses
+    /// \param[in]  x    table with positions
+    /// \param[in]  v    table with velocities
+    /// \param[in]  f    table with flags
+    /// \param[out] p    table with potentials
+    /// \param[out] a    table with accelerations
+    /// \param[in]  add  see detailed description
     virtual
     void set(double       t,
 	     int          n,
@@ -131,9 +131,9 @@ namespace falcON {
     /// otherwise assigned; if bit 1 is set, the acceleration is added,
     /// otherwise assigned. So, 0 means both are assigned, while the default is
     /// to add acceleration but assign potential to field pex (see fieldset).
-    /// \param snap (input) snapshot = time + bodies
-    /// \param all  (input) set gravity for all bodies or only active bodies?
-    /// \param add  (optional input) see detailed description
+    /// \param[in] snap  snapshot = time + bodies
+    /// \param[in] all   set gravity for all bodies or only active bodies?
+    /// \param[in] add   (optional) see detailed description
     void set(const snapshot*snap,
 	     bool           all,
 	     int            add = 2) const
@@ -151,10 +151,10 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// computing external gravity at a single position
     ///
-    /// \param t (input) simulation time
-    /// \param x (input) position
-    /// \param p (output) potential
-    /// \param a (output) acceleration
+    /// \param[in]  t   simulation time
+    /// \param[in]  x   position
+    /// \param[out] p   potential
+    /// \param[out] a   acceleration
     /// \warning  This routine makes sense only for static potentials.
     void single_force(double       t,
 		      vectf  const&x,
@@ -173,10 +173,10 @@ namespace falcON {
     //--------------------------------------------------------------------------
     /// computing external gravity at a single position
     ///
-    /// \param t (input) simulation time
-    /// \param x (input) position
-    /// \param p (output) potential
-    /// \param a (output) acceleration
+    /// \param[in]  t   simulation time
+    /// \param[in]  x   position
+    /// \param[out] p   potential
+    /// \param[out] a   acceleration
     /// \warning  This routine makes sense only for static potentials.
     void single_force(double       t,
 		      vectd  const&x,
@@ -197,9 +197,9 @@ namespace falcON {
     /// in place of class extpot
     ///
     /// \return potential
-    /// \param a (output) acceleration
-    /// \param x (input) position
-    /// \param t (input) simulation time
+    /// \param[out] a  acceleration
+    /// \param[in]  x  position
+    /// \param[in]  t  simulation time
     float pot_f      (vectf      &a,
 		      vectf const&x,
 		      double     t) const {
@@ -212,9 +212,9 @@ namespace falcON {
     /// in place of class extpot
     ///
     /// \return potential
-    /// \param a (output) acceleration
-    /// \param x (input) position
-    /// \param t (input) simulation time
+    /// \param[out] a  acceleration
+    /// \param[in]  x  position
+    /// \param[in]  t  simulation time
     double pot_f     (vectd      &a,
 		      vectd const&x,
 		      double     t) const {
@@ -227,6 +227,124 @@ namespace falcON {
     virtual~acceleration() {}
     //--------------------------------------------------------------------------
   };
+  // ///////////////////////////////////////////////////////////////////////////
+  //
+  // class falcON::spherical_acceleration
+  //
+  /// acceleration due to a simple static spherical potential
+  //
+  // ///////////////////////////////////////////////////////////////////////////
+  class spherical_acceleration : public acceleration
+  {
+  protected:
+    /// pure virtual: potential and acceleration at given position
+    /// \param[in]  radius_squared       x^2
+    /// \param[out] minus_dpotdr_over_r  -1/x * dPhi/dx
+    /// \return     Phi(x)
+    virtual double PotAcc(double radius_squared,
+			  double&minus_dpotdr_over_r) const = 0;
+  public:
+    /// implementing pure virtual member of acceleration
+    bool need_masses() const
+    { return false; }
+    /// implementing pure virtual member of acceleration
+    bool need_velocities() const
+    { return false; }
+    /// The parameter @a add indicates whether the accelerations and potential 
+    /// shall be assigned or added. If bit 0 is set, the potential is added,
+    /// otherwise assigned; if bit 1 is set, the acceleration is added,
+    /// otherwise assigned. So, 0 means both are assigned.
+    /// \param[in]  t    simulation time
+    /// \param[in]  n    # bodies=size of tables
+    /// \param[in]  m    table with masses
+    /// \param[in]  x    table with positions
+    /// \param[in]  v    table with velocities
+    /// \param[in]  f    table with flags
+    /// \param[out] p    table with potentials
+    /// \param[out] a    table with accelerations
+    /// \param[in]  add  see detailed description
+    void set(double, int n, const float*, const vectf*x, const vectf*,
+	     const flags*f, float*p, vectf*a, int add)  const
+    {
+      if(add&1) {
+	if(add&2) {
+	  for(int i=0; i!=n; ++i) if(f==0 || is_active(f[i])) {
+	      double F;
+	      p[i]+= PotAcc(double(norm(x[i])),F);
+	      a[i]+= float(F)*x[i];
+	    }
+	} else {
+	  for(int i=0; i!=n; ++i) if(f==0 || is_active(f[i])) {
+	      double F;
+	      p[i]+= PotAcc(double(norm(x[i])),F);
+	      a[i] = float(F)*x[i];
+	    }
+	}
+      } else {
+	if(add&2) {
+	  for(int i=0; i!=n; ++i) if(f==0 || is_active(f[i])) {
+	      double F;
+	      p[i] = PotAcc(double(norm(x[i])),F);
+	      a[i]+= float(F)*x[i];
+	    }
+	} else {
+	  for(int i=0; i!=n; ++i) if(f==0 || is_active(f[i])) {
+	      double F;
+	      p[i] = PotAcc(double(norm(x[i])),F);
+	      a[i] = float(F)*x[i];
+	    }
+	}
+      }
+    }
+    /// The parameter @a add indicates whether the accelerations and potential 
+    /// shall be assigned or added. If bit 0 is set, the potential is added,
+    /// otherwise assigned; if bit 1 is set, the acceleration is added,
+    /// otherwise assigned. So, 0 means both are assigned.
+    /// \param[in]  t    simulation time
+    /// \param[in]  n    # bodies=size of tables
+    /// \param[in]  m    table with masses
+    /// \param[in]  x    table with positions
+    /// \param[in]  v    table with velocities
+    /// \param[in]  f    table with flags
+    /// \param[out] p    table with potentials
+    /// \param[out] a    table with accelerations
+    /// \param[in]  add  see detailed description
+    void set(double, int n, const double*, const vectd*x, const vectd*,
+	     const flags*f, double*p, vectd*a, int add) const
+    {
+      if(add&1) {
+	if(add&2) {
+	  for(int i=0; i!=n; ++i) if(f==0 || is_active(f[i])) {
+	      double F;
+	      p[i]+= PotAcc(norm(x[i]),F);
+	      a[i]+= F*x[i];
+	    }
+	} else {
+	  for(int i=0; i!=n; ++i) if(f==0 || is_active(f[i])) {
+	      double F;
+	      p[i]+= PotAcc(norm(x[i]),F);
+	      a[i] = F*x[i];
+	    }
+	}
+      } else {
+	if(add&2) {
+	  for(int i=0; i!=n; ++i) if(f==0 || is_active(f[i])) {
+	      double F;
+	      p[i] = PotAcc(norm(x[i]),F);
+	      a[i]+= F*x[i];
+	    }
+	} else {
+	  for(int i=0; i!=n; ++i) if(f==0 || is_active(f[i])) {
+	      double F;
+	      p[i] = PotAcc(norm(x[i]),F);
+	      a[i] = F*x[i];
+	    }
+	}
+      }
+    }
+    /// noon dtor
+    virtual~spherical_acceleration() {}
+  };// class spherical_acceleration
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
   // class falcON::sum_acceleration                                             
@@ -338,15 +456,15 @@ namespace falcON {
     /// shall be assigned or added. If bit 0 is set, the potential is added,
     /// otherwise assigned; if bit 1 is set, the acceleration is added,
     /// otherwise assigned. So, 0 means both are assigned.
-    /// \param t (input) simulation time
-    /// \param n (input) # bodies=size of tables
-    /// \param m (input) table with masses
-    /// \param x (input) table with positions
-    /// \param v (input) table with velocities
-    /// \param f (input) table with flags
-    /// \param m (output) table with potentials
-    /// \param m (output) table with accelerations
-    /// \param i (input) see detailed description
+    /// \param[in]  t   simulation time
+    /// \param[in]  n   # bodies=size of tables
+    /// \param[in]  m   table with masses
+    /// \param[in]  x   table with positions
+    /// \param[in]  v   table with velocities
+    /// \param[in]  f   table with flags
+    /// \param[out] p   table with potentials
+    /// \param[out] a   table with accelerations
+    /// \param[in]  i   see detailed description
     void set(double      t,
 	     int         N,
 	     const float*m,
@@ -373,15 +491,15 @@ namespace falcON {
     /// shall be assigned or added. If bit 0 is set, the potential is added,
     /// otherwise assigned; if bit 1 is set, the acceleration is added,
     /// otherwise assigned. So, 0 means both are assigned.
-    /// \param t (input) simulation time
-    /// \param n (input) # bodies=size of tables
-    /// \param m (input) table with masses
-    /// \param x (input) table with positions
-    /// \param v (input) table with velocities
-    /// \param f (input) table with flags
-    /// \param m (output) table with potentials
-    /// \param m (output) table with accelerations
-    /// \param i (input) see detailed description
+    /// \param[in]  t   simulation time
+    /// \param[in]  n   # bodies=size of tables
+    /// \param[in]  m   table with masses
+    /// \param[in]  x   table with positions
+    /// \param[in]  v   table with velocities
+    /// \param[in]  f   table with flags
+    /// \param[out] p   table with potentials
+    /// \param[out] a   table with accelerations
+    /// \param[in]  i   see detailed description
     void set(double       t,
 	     int          N,
 	     const double*m,

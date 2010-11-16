@@ -41,13 +41,15 @@ random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
 # header dependency lists
 # -----------------------
 
-utils_h			:= $(traits_h) $(Pi_h) $(inline_h) $(io_h) $(tupel_h) $(exception_h) $(memory_h)
+utils_h			:= $(traits_h) $(Pi_h) $(inline_h) $(io_h) $(tupel_h) \
+				$(exception_h) $(memory_h)
 types_h			:= $(IPUB)types.h $(utils_h) $(tensor_h)
 basic_h			:= $(IPUB)basic.h $(types_h)
 simd_h			:= $(IPUB)simd.h $(basic_h)
 PotExp_h		:= $(IPUB)PotExp.h $(basic_h) $(mpi_falcON_h)
 tensor_h		:= $(IPUB)tensor.h $(utils_h) $(IPUB)tensor.cc
-tensor_set_h		:= $(IPUB)tensor_set.h $(tensor_h) $(simd_h) $(IPUB)tensor_set.cc
+tensor_set_h		:= $(IPUB)tensor_set.h $(tensor_h) $(simd_h) \
+				$(IPUB)tensor_set.cc
 default_h		:= $(IPUB)default.h $(basic_h)
 interact_h		:= $(IPUB)interact.h $(basic_h)
 fields_h		:= $(IPUB)fields.h $(basic_h)
@@ -62,12 +64,15 @@ tree_h			:= $(IPUB)tree.h $(default_h) $(body_h) $(peano_h)
 partner_h		:= $(IPUB)partner.h $(tree_h)
 gravity_h		:= $(IPUB)gravity.h $(tree_h) $(tensor_set_h)
 kernel_h		:= $(IPUB)kernel.h $(gravity_h) $(simd_h)
-forces_h		:= $(INC)forces.h $(types_h) $(default_h) $(body_h) $(IPUB)forces.cc $(gravity_h) $(partner_h) $(sph_h)
+forces_h		:= $(INC)forces.h $(types_h) $(default_h) $(body_h) \
+				$(IPUB)forces.cc $(gravity_h) $(partner_h) \
+				$(sph_h)
 forces_C_h		:= $(INC)forces_C.h
 forces_f		:= $(INC)forces.f
 nemopp_h		:= $(IPUB)nemo++.h $(fields_h)
 main_h			:= $(INC)main.h $(nemopp_h) $(body_h) $(mpi_falcON_h)
-nbody_h			:= $(IPUB)nbody.h $(body_h) $(nemopp_h) $(forces_h) $(externacc_h)
+nbody_h			:= $(IPUB)nbody.h $(body_h) $(nemopp_h) $(forces_h) \
+				$(externacc_h)
 manip_h			:= $(IPUB)manip.h $(body_h)
 defman_h		:= $(IPUB)defman.h $(manip_h)
 profile_h		:= $(IPUB)profile.h $(body_h)
@@ -79,7 +84,12 @@ king_h			:= $(IPUB)king.h $(basic_h)
 bodyfunc_h		:= $(IPUB)bodyfunc.h $(body_h) 
 bodyduncdefs_h		:= $(IPUB)bodyfuncdefs.h $(body_h) 
 neighbours_h		:= $(IPUB)neighbours.h $(tree_h)
+ifdef DPROPER
+halo_h			:= $(IPUB)halo.h $(externacc_h) $(sample_h) \
+				$(IPRO)achalo.h
+else
 halo_h			:= $(IPUB)halo.h $(externacc_h) $(sample_h)
+endif
 WD99disc_h		:= $(IPUB)WD99disc.h $(random_h) $(externacc_h)
 
 timer_h			:= $(IACC)timer.h
@@ -87,31 +97,50 @@ center_h		:= $(IACC)center.h
 ifdef NEMO
 defacc_h		:= $(NEMOINC)defacc.h
 endif
-GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h $(IACC)GalPot_pre.h $(tupel_h)
+GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h \
+				$(IACC)GalPot_pre.h $(tupel_h)
 
 # -----------------------
 # source dependency lists
 # -----------------------
 
 basic_cc		:= $(SLIB)basic.cc $(basic_h)
-body_cc			:= $(SLIB)body.cc $(body_h) $(nemopp_h) $(numerics) $(heap_h)
+body_cc			:= $(SLIB)body.cc $(body_h) $(nemopp_h) $(numerics) \
+				$(heap_h)
 kernel_cc		:= $(SLIB)kernel.cc $(kernel_h) $(kernel_SSE_h)
 partner_cc		:= $(SLIB)partner.cc $(partner_h) $(interact_h)
-gravity_cc		:= $(SLIB)gravity.cc $(gravity_h) $(kernel_h) $(interact_h) $(numerics_h) $(gravity_pro)
+gravity_cc		:= $(SLIB)gravity.cc $(gravity_h) $(kernel_h) \
+				$(interact_h) $(numerics_h) $(gravity_pro)
 tree_cc			:= $(SLIB)tree.cc $(tree_h) $(body_h) $(memory_h)
 nbody_cc		:= $(SLIB)nbody.cc $(nbody_h)
 manip_cc		:= $(SLIB)manip.cc $(manip_h)
-nemopp_cc		:= $(SLIB)nemo++.cc $(nemopp_h) $(basic_h) $(NEMOINC)/stdinc.h $(NEMOINC)/loadobj.h $(NEMOINC)/getparam.h $(NEMOINC)/history.h $(NEMOINC)/filestruct.h $(NEMOINC)/snapshot/snapshot.h
+nemopp_cc		:= $(SLIB)nemo++.cc $(nemopp_h) $(basic_h) \
+				$(NEMOINC)/stdinc.h $(NEMOINC)/loadobj.h \
+				$(NEMOINC)/getparam.h $(NEMOINC)/history.h \
+				$(NEMOINC)/filestruct.h \
+				$(NEMOINC)/snapshot/snapshot.h
 forcesC_cc		:= $(SLIB)forcesC.cc $(forces_C_h) $(forces_h)
 tools_cc		:= $(SLIB)tools.cc $(tools_h) $(Pi_h) $(memory_h)
 profile_cc		:= $(SLIB)profile.cc $(profile_h) $(Pi_h) $(numerics_h)
+ifdef DPROPER
+sample_cc		:= $(SLIB)sample.cc $(sample_h) $(basic_h) \
+				$(numerics_h) $(IPRO)sample.cc
+else
 sample_cc		:= $(SLIB)sample.cc $(sample_h) $(basic_h) $(numerics_h)
+endif
 gamma_cc		:= $(SLIB)gamma.cc $(gamma_h) $(numerics_h)
 king_cc			:= $(SLIB)king.cc $(king_h) $(numerics_h)
 bodyfunc_cc		:= $(SLIB)bodyfunc.cc $(bodyfunc_h) $(bodyfuncdefs_h) 
 neighbours_cc		:= $(SLIB)neighbours.cc $(neighbours_h)
-halo_cc			:= $(SLIB)halo.cc $(halo_h) $(basic_h) $(spline_h) $(WDMath_h)
-WD99disc_cc		:= $(SLIB)WD99disc.cc $(WD99disc_h) $(numerics_h) $(WDMath_h) $(spline_h)
+ifdef DPROPER
+halo_cc			:= $(SLIB)halo.cc $(halo_h) $(basic_h) $(spline_h) \
+				$(WDMath_h) $(IPRO)achalo.cc
+else
+halo_cc			:= $(SLIB)halo.cc $(halo_h) $(basic_h) $(spline_h) \
+				$(WDMath_h)
+endif
+WD99disc_cc		:= $(SLIB)WD99disc.cc $(WD99disc_h) $(numerics_h) \
+				$(WDMath_h) $(spline_h)
 PotExp_cc		:= $(SLIB)PotExp.cc $(PotExp_h) $(simd_h)
 
 # ---------------
@@ -302,7 +331,9 @@ $(BIN)TestGrav:		$(SEXE)TestGrav.cc $(BINT) $(main_h) $(body_h) $(forces_h) $(Pi
 			$(MAKE_EXE) $(NBDYFLAGS) $(LFALCON) -lm
 $(BIN)TestGravC:	$(SEXE)TestGravC.c $(BINT) $(forces_C_h) $(makefiles)
 			$(MAKE_EXE_C) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
-$(BIN)TestGravF:	$(SEXE)TestGravF.F $(BINT) $(makefiles)
+#$(BIN)TestGravF:	$(SEXE)TestGravF.F $(BINT) $(makefiles)
+#			$(MAKE_EXE_F) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
+$(BIN)TestGravF:	$(SEXE)TestGrav.F90 $(BINT) $(makefiles)
 			$(MAKE_EXE_F) $(NBDYFLAGS) $(LFALCON) -lstdc++ -lm
 $(BIN)TestPair:		$(SEXE)TestPair.cc $(BINT) $(main_h) $(body_h) $(forces_h) $(makefiles)
 			$(MAKE_EXE) $(NBDYFLAGS) $(LFALCON) -lm

@@ -80,7 +80,7 @@ tonemo			: acc doxu man
 else
 # public version: copy executables, manipulators, and accelerations
 tonemo			: exe manip acc doxu man
-				cp $(LIB)/*.so $(NEMOLIB)
+				cp $(LIB)/*.a $(NEMOLIB)
 			      - cp $(BIN)/* $(NEMOBIN)
 			      - cp $(MAN)/* $(NEMOOBJ)/manip/
 			      - cp $(ACC)/* $(NEMOOBJ)/acc/
