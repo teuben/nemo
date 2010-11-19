@@ -570,6 +570,14 @@ extern bool scanopt(string, string);
 /* core/cputime.c */
 extern double cputime(void);
 
+/* core/burststring.c */
+string *burststring(string lst, string sep);
+string *burst0string(string lst, string sep);
+string *burst2string(string lst, string sep);
+void freestrings(string *strptr);
+int splitstring(int maxout, string out[], string lst, string sep);
+
+
 /*
  * replaced by inline functions in mathfns.h
  // misc/sqr.c
