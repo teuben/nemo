@@ -38,13 +38,6 @@ MESSAGE( STATUS "PROJECT_BINARY_DIR: " ${PROJECT_BINARY_DIR} )
 # i.e. to the nearest directory where CMakeLists.txt contains the PROJECT() command 
 MESSAGE( STATUS "PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR} )
 
-# find lib g2c
-execute_process(COMMAND g77 -print-file-name=libg2c.a 
-	OUTPUT_VARIABLE G2CFPATH OUTPUT_STRIP_TRAILING_WHITESPACE)
-execute_process(COMMAND dirname ${G2CFPATH} 
-	OUTPUT_VARIABLE G2C_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-MESSAGE( STATUS "G2C dir : " ${G2C_DIR})
 
 # Find all the sources for the utils LIB
 FILE(GLOB LIBUTILS ../lib/utils/*.cc)
@@ -94,7 +87,7 @@ FOREACH(exe_cpp ${execpp_sources})
 
   # Link the executable to the Hello library.
 #  target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot X11 g2c unsio nemo sqlite3 ${Boost_LIBRARIES} boost_thread-mt.a boost_system-mt.a)
- target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot  ${FC_GFORT_LIB} ${FC_G77_LIB} X11 g2c unsio WDutils falcON nemo sqlite3  boost_thread-mt boost_system-mt dl)
+ target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot  ${FC_GFORT_LIB} ${FC_G77_LIB} X11 unsio WDutils falcON nemo sqlite3  boost_thread-mt boost_system-mt dl)
 
 
 ENDFOREACH(exe_cpp ${execpp_sources})
