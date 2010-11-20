@@ -180,7 +180,7 @@ namespace WDutils {
   using std::sqrt;
   using std::exp;
   using std::log;
-#ifdef linux
+#if defined(linux) || defined(__DARWIN_UNIX03)
   using ::cbrt;
 #else
   inline float cbrt(float x)          { 
