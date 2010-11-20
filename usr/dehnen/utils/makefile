@@ -45,13 +45,13 @@ endif
 # these variables have value "1" or ("       1" on a MAC) if the
 # corresponding compiler is present
 # NOTE: we need csh (default for make is sh, which wouldn't work)
-__GCC		:= $(shell which gcc    |& wc -w)
-__PGI		:= $(shell which pgcc   |& wc -w)
-__PTH		:= $(shell which pathcc |& wc -w)
-__SUN		:= $(shell which cc     |& wc -w)
-__ICC		:= $(shell which icc    |& wc -w)
+__GCC		:= $(shell which gcc    |& wc -l)
+__PGI		:= $(shell which pgcc   |& wc -l)
+__PTH		:= $(shell which pathcc |& wc -l)
+__SUN		:= $(shell which cc     |& wc -l)
+__ICC		:= $(shell which icc    |& wc -l)
 # this is the expected value for available compilers
-VALID		:= $(shell which make   |& wc -w)
+VALID		:= $(shell which make   |& wc -l)
 
 
 # GNU compiler (default)
