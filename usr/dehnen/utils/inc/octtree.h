@@ -533,12 +533,12 @@ namespace WDutils {
     };
     /// type for compact indexing of leafs
     /// \note Useful for templates over tree type (OctalTree or ParallelTree)
-    typedef Leaf LeafIndentifier;
+    typedef Leaf LeafIdentifier;
     //
-    static LeafIndentifier indentifier(Leaf l)
+    static LeafIdentifier identifier(Leaf l)
     { return l; }
     //
-    static Leaf leaf(LeafIndentifier l)
+    static Leaf leaf(LeafIdentifier l)
     { return l; }
     /// \name leaf data access
     //@{

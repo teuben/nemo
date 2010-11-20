@@ -470,12 +470,12 @@ namespace WDutils {
 # define WDutilsAssert(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : AssertFail(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
+  : WDutils::AssertFail(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
   /// almost identical to assert()
 # define WDutilsAssertE(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : AssertFailE(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
+  : WDutils::AssertFailE(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
 /* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
    which contains the name of the function currently being defined.
    This is broken in G++ before version 2.6.
