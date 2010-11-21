@@ -48,7 +48,7 @@ extern "C" {
 
 #if defined(SINGLEPREC)
 
-#if defined(LINUX) || defined(linux) || defined (__CYGWIN__)
+#if defined(LINUX) || defined(linux) || defined (__CYGWIN__) || defined(darwin)
 
 #define rsqrt    sqrtf
 #define rsin     sinf
