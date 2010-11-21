@@ -37,20 +37,20 @@ MANT		:= $(MAN).dummy
 BFCT		:= $(LIB)bodyfunc/.dummy
 
 $(BINT)		:
-		mkdir --parents --mode=$(MODE) $(BIN)
+		mkdir -p -m $(MODE) $(BIN)
 		touch $(BINT)
 $(LIBT)		:
-		mkdir --parents --mode=$(MODE) $(LIB)
+		mkdir -p -m $(MODE) $(LIB)
 		touch $(LIBT)
 $(BFCT)		: $(LIBT)
-		mkdir --parents --mode=$(PUBLICMODE) $(LIB)bodyfunc
-		mkdir --parents --mode=$(PUBLICMODE) $(LIB)bodiesfunc
+		mkdir -p -m $(PUBLICMODE) $(LIB)bodyfunc
+		mkdir -p -m $(PUBLICMODE) $(LIB)bodiesfunc
 		touch $(BFCT)
 $(MANT)		:
-		mkdir --parents --mode=$(MODE) $(MAN)
+		mkdir -p -m $(MODE) $(MAN)
 		touch $(MANT)
 $(ACCT)		:
-		mkdir --parents --mode=$(MODE) $(ACC)
+		mkdir -p -m $(MODE) $(ACC)
 		touch $(ACCT)
 
 # ------------
@@ -144,10 +144,9 @@ ifndef $(MATHLIB)
 MATHLIB		:= -lm
 endif
 
-
 MAKE_OBJ	= $(CXX) -c -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS)
-MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS) $(NBDYFLAGS) -shared
-MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS) -shared
+MAKE_MANIP	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS) $(NBDYFLAGS) -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO) -shared
+MAKE_ACC	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(INEMO) $(CXXFLAGS) -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO) -shared
 MAKE_EXE	= $(CXX) -o $@ $< -I$(INC) $(IUTIL) $(CXXFLAGS)
 MAKE_EXE_C	= $(CC) -o $@ $< -I$(INC) $(IUTIL) $(CFLAGS)
 MAKE_EXE_F	= $(FC) -o $@ $< -I$(INC) $(IUTIL) $(OPTFLAGS)

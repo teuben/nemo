@@ -80,7 +80,8 @@ tonemo			: acc doxu man
 else
 # public version: copy executables, manipulators, and accelerations
 tonemo			: exe manip acc doxu man
-				cp $(LIB)/*.a $(NEMOLIB)
+				cp $(LIB)/*.so $(NEMOLIB)
+			      - cp ../utils/lib/*.so $(NEMOLIB)
 			      - cp $(BIN)/* $(NEMOBIN)
 			      - cp $(MAN)/* $(NEMOOBJ)/manip/
 			      - cp $(ACC)/* $(NEMOOBJ)/acc/
@@ -149,7 +150,7 @@ $(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 			$(AR) $@ $?
 			$(RL) $@
 $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
-			$(CXX) $^ -shared -o $@
+			$(CXX) $^ -Lutils/lib -lWDutils $(LNEMO) -shared -o $@
 
 library		: 	links $(LIBT) $(falcON) $(BFCT)
 
