@@ -131,7 +131,8 @@
  * 23-oct-07    3.6   fix bug when ZENO style defv[] is used, more ZENO compat
  * 22-aug-08       a  add help=m to show memory usage at end
  * 26-sep-08 WD    b  add MPI proc info to some stderr output
- * 27-Sep-10 JCL   c   MINGW32/WINDOWS support
+ * 27-Sep-10 JCL   c  MINGW32/WINDOWS support
+ * 20-Nov-10 WD    d  import environ on darwin (so allow dynamic lib)
 
   TODO:
       - what if there is no VERSION=
@@ -241,11 +242,15 @@
 #endif
 
 #if defined(sun)
-#   include <floatingpoint.h>               /* special IEEE handler for Sun's */
+# include <floatingpoint.h>      /* special IEEE handler for Sun's */
+#endif
+
+#if defined(darwin)
+# include <crt_externs.h>        /* get environ for .so files */
 #endif
 
 #if defined(MIRIAD)
-#define KEYVAL 1			/* this would enforce usage of key= */
+#define KEYVAL 1		 /* this would enforce usage of key= */
 #endif
 
 #if defined(INTERRUPT)
@@ -253,14 +258,13 @@
 #endif
 
 #if defined(INTERACT)
-#ifndef __MINGW32__
-# include <sys/ioctl.h>           /* this is a BSD thing - won't work on SYSV */
-#endif
-                                  /* fcntl.h doesn't have the right stuff */
-# if defined(SOLARIS)
-#  include <sys/termio.h>	/* for Solaris - can it hurt on SUN OS 4.x ?  */
+# ifndef __MINGW32__
+#  include <sys/ioctl.h>         /* this is a BSD thing - won't work on SYSV */
 # endif
-
+                                 /* fcntl.h doesn't have the right stuff */
+# if defined(SOLARIS)
+#  include <sys/termio.h>  	 /* for Solaris - can it hurt on SUN OS 4.x ?  */
+# endif
 #endif /* INTERACT */
 
 #ifndef MAXBUF
@@ -333,9 +337,12 @@ extern string usage;    /* see program.c or usage.c */
 extern string cvsid;    /* see program.c or cvsid.c */
 extern string defv[];   /* see program.c or defv.c */
 extern string outdefv[];/* see program.c or outdefv.c */
+#ifdef darwin
+local char **environ = NULL; /* environment vars need to be retrieved */
+#else
 extern char **environ;  /* environment variables */
-
-extern int nemo_history;     /* 0=no history written; see history.c */
+#endif
+extern int nemo_history;/* 0=no history written; see history.c */
 
 int yapp_dev = 0;       /* interface hidden keyword yapp to plotting pkg */
 int help_level = 0;     /* hidden keyword help for interactive prompting */
@@ -889,7 +896,9 @@ local void scan_environment()
 {
     int i;
     char *ev;
-
+#ifdef darwin
+    if(environ == NULL) environ = * _NSGetEnviron();
+#endif
     for (i = 0; environ[i] != NULL; i++) {
     	/* printf("%d: \"%s\"\n",i+1,environ[i]); */
         if (streq("BELL", parname(environ[i])))
@@ -2803,7 +2812,9 @@ load_environ()
 {
     char *cp, *cp1, line[512];
     int i, k, kbad, len;
-    
+#ifdef darwin
+    if(environ==NULL) environ = * _NSGetEnviron();
+#endif
     k = kbad = 0;
     for (i=0, cp=environ[0]; cp != NULL; cp=environ[++i]) {
     	len = strlen(cp);
