@@ -71,6 +71,9 @@ char * hist_file;         /* history file name  */
 /* variables to store max #bodies per file */
 int   maxbodies[MAXIO];
 
+/* some other thing to be shared */
+int   CURRENT_IO;
+
 /* ------------------------------------------------------------------
 |  reajust_ptr :                                                     
 |  match for each pointers passing to "io_nemo" the pointers         

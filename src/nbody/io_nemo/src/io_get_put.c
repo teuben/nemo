@@ -44,7 +44,7 @@
 
 #define TIMEFUZZ 0.0000001
 extern int maxbodies[];
-int CURRENT_IO;
+extern int CURRENT_IO;
 /* -----------------------------------------------------------------
 |  put_data_select :                                                
 |  Save the snapshot in NEMO format.                                
