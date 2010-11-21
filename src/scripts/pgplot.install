@@ -181,7 +181,7 @@ switch ($host)
   case *darwin*:
     if ($?CC && $?F77) then
       echo ${F77}_${CC}
-      $dir/pgplot/makemake  $dir/pgplot sol2 ${F77}_${CC} $new4
+      $dir/pgplot/makemake  $dir/pgplot darwin ${F77}_${CC} $new4
     else
       $dir/pgplot/makemake   $dir/pgplot darwin gfortran_gcc
     endif
