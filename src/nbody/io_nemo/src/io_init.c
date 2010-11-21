@@ -56,7 +56,7 @@ void init_io_one(int  * maxbodies,
 		 char **history_prog,
 		 int    MAXIO)
 { 
-  string defv[] = { "none=none","VERSION=1.51",NULL };
+  string defv[] = { "none=none","VERSION=1.52",NULL };
   string argv[] = { "IO_NEMO",NULL };
   int i;
   string * histo;
@@ -75,6 +75,9 @@ void init_io_one(int  * maxbodies,
     }
   }
   for (i=0; i< MAXIO; i++) {
+    maxbodies[i]   = 0;
+    read_one[i]    = FALSE;
+    save_one[i]    = FALSE;
     set_history[i] = FALSE;
   }
     /* get command line history */
