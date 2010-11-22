@@ -19,7 +19,7 @@ set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
 set gfortran=1          # pick gfortran compiler (otherwise g77 is the default)
 set gcc=0		# pick gcc version (version number via astromake)
-set anonymous=1		# anonymous CVS ?
+set anonymous=0		# anonymous CVS ?
 set cvsroot=0		# override the official CVSROOT
 set vogl=1		# compile vogl
 set glnemo=1            # compile glnemo2
@@ -60,15 +60,12 @@ if ($?NEMO) then
   exit 1
 endif
 
-if ($anonymous) then
+if ($anonymous || $?CVSROOT == 0) then
  setenv CVSROOT :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
+ echo WARNING: CVSROOT=$cvsroot used
 endif
 
-#if ($?CVSROOT == 0) then
-#
-#endif
-
-#		pick another GNU compiler (this is rather astromake specific of course)
+#	pick another GNU compiler (this is rather astromake specific of course)
 if ($gcc != 0) then
    source /astromake/astromake_start
    astroload -v $gcc gcc
@@ -78,7 +75,7 @@ if ($?CC  == 0)  setenv CC  gcc
 if ($?CXX == 0)  setenv CXX g++
 if ($?F77 == 0)  setenv F77 g77
 
-#		pick intel compiler (ifort means >= 8.0)
+#	pick intel compiler (ifort means >= 8.0)
 if ($intel) then
   # source /astromake/astromake_start
   # astroload intel
