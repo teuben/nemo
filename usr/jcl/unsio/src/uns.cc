@@ -57,22 +57,26 @@ namespace uns {
     PRINT("sel_comp["<< sel_comp <<"]\n");
     PRINT("sel_time["<< sel_time <<"]\n");
     CunsOut::initializeStringMap(verbose);
-    if (tools::Ctools::isFileExist(simname)) {  // file exist 
-      tryGadget();               // try gadget 
-      if (!valid) {              // gadget failed
-        tryNemo();               // try nemo   
+    if (simname == "-") { // we assume here that "-"
+      tryNemo();          // is standard input and a NEMO stream...      
+    } else {
+      if (tools::Ctools::isFileExist(simname)) {  // file exist 
+        tryGadget();               // try gadget 
+        if (!valid) {              // gadget failed
+          tryNemo();               // try nemo   
+        }
+        if (!valid) {              // nemo 
+          trySnapList();           // try snapshotlist   
+        }
+        if (!valid) {
+          trySimDB();              // try DataBase       
+        }
       }
-      if (!valid) {              // nemo 
-        trySnapList();           // try snapshotlist   
-      }
-      if (!valid) {
-        trySimDB();              // try DataBase       
-      }
-    }
-    else {                       // file does not exist
-      tryGadget();               // try gadget parallel output
-      if (!valid) {
-        trySimDB();              // try DataBase       
+      else {                       // file does not exist
+        tryGadget();               // try gadget parallel output
+        if (!valid) {
+          trySimDB();              // try DataBase       
+        }
       }
     }
     if (valid && verb) {

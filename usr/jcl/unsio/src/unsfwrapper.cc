@@ -24,6 +24,7 @@ namespace uns {
     // load protocol
     int uns_init_(const char *,const char *, const char * );
     int uns_load_(const int *);
+    int uns_close_(const int *);
     // load data
     int uns_get_nbody_( const int * id, int   * nbody            );
     int uns_get_time_ ( const int * id, float * timu             );
@@ -122,6 +123,25 @@ int uns_load_(const int * ident)
   if (index >= 0) {
     uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
     index = snap->nextFrame();
+  }
+
+  return index;
+}
+// ----------------------------------------------------------------------------
+// uns_close                                                                    
+// close the UNS file with the identifier ident 
+int uns_close_(const int * ident)
+{
+  PRINT("uns_close ident requested : "<< *ident << "\n";)
+  // look for "ident" exist in the already opened snapshots
+  // return the index in the vector of -1 if false         
+  int index=uns::CunsIdentifier::getUnsvIndex(*ident,&unsv);
+  PRINT("index in UNSV ="<< index << "\n";)
+
+  if (index >= 0) {
+    uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
+    snap->close();
+    delete ((CunsIn *)unsv[index].obj);
   }
 
   return index;

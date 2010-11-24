@@ -94,29 +94,41 @@ CSnapshotNemoIn::~CSnapshotNemoIn()
 bool CSnapshotNemoIn::isValidNemo()
 {
   bool status;
-  float * ntimu; int * nnemobits;
+  float * ntimu;
   valid=true;
   
-  stream str=stropen(filename.c_str(),(char *) "r"); // open NEMO file for reading
-  if ( ! str )  status = false; // failed to open
-  if (qsf(str)) status = true;  // it's a structured binary file (NEMO)
-  else          status = false; // it's not                            
-  strclose(str);
-  if (status)  {                // it's a NEMO snapshot
-    int * ptr=NULL;      // get the full nbody
-    ntimu=NULL;nnemobits = NULL; 
-    if (io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&ntimu,&nnemobits) > 0) {
-      io_nemo(filename.c_str(),"close");
-    } else {
-    }
-    assert(ptr);
-    full_nbody=*ptr;
-    free((int *) ptr);
+  if (filename == "-") { // we assume here that "-"
+    status=true;         // is standard input and a NEMO stream...
+    first_stream=true;
+    //select_time="all";
+    std::string force_select = "all"; 
+    status_ionemo=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,t,st,b",
+            force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,
+            &iotime, select_time.c_str(),&nemobits);
+
+    full_nbody = *ionbody;        
   }
-  
+  else { // Normal file
+    stream str=stropen(filename.c_str(),(char *) "r"); // open NEMO file for reading
+    if ( ! str )  status = false; // failed to open
+    if (qsf(str)) status = true;  // it's a structured binary file (NEMO)
+    else          status = false; // it's not                            
+    strclose(str);
+    if (status)  {                // it's a NEMO snapshot
+      int * ptr=NULL;      // get the full nbody
+      ntimu=NULL;
+      if (io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&ntimu,&nemobits) > 0) {
+        io_nemo(filename.c_str(),"close");
+      } else {
+      }
+      assert(ptr);
+      full_nbody=*ptr;
+      free((int *) ptr);
+    }
+  }
   valid=status;
   if (valid) {
-    if ( ! ( *nnemobits & TimeBit)) { // no TimeBit
+    if ( ! ( *nemobits & TimeBit)) { // no TimeBit
       time_first = 0.0;
     }
     else time_first = *ntimu;
@@ -150,9 +162,14 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
 {
   int status;  // io_nemo status
   std::string force_select = "all"; 
-  status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,t,st,b",
+  if (! first_stream) { // normal file or second reading (stream)
+    status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,t,st,b",
                    force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,
 		   &iotime, select_time.c_str(),&nemobits);
+  } else { // "-" first stream, no need to read
+    first_stream=false;
+    status=status_ionemo; // status read the first time cf : isValid()
+  }
   if (status == -1) {  // Bad nemobits
     PRINT("io_nemo status="<<status<<"\n";);
   } else {
@@ -280,7 +297,9 @@ bool CSnapshotNemoIn::getData(const std::string name,int *n,float **data)
     
   default: ok=false;
   }
-
+  if (*data == NULL) {
+    ok=false;
+  }
   if (verbose) {
     if (ok) {
       std::cerr << "CSnapshotNemoIn::getData name["<<name<<"]=" << CunsOut::s_mapStringValues[name] << "\n";
