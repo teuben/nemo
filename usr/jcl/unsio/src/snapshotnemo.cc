@@ -117,7 +117,7 @@ bool CSnapshotNemoIn::isValidNemo()
     if (status)  {                // it's a NEMO snapshot
       int * ptr=NULL;      // get the full nbody
       ntimu=NULL;
-      if (io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&ntimu,&nemobits) > 0) {
+      if (io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&iotime,&nemobits) > 0) {
         io_nemo(filename.c_str(),"close");
       } else {
       }
@@ -131,7 +131,7 @@ bool CSnapshotNemoIn::isValidNemo()
     if ( ! ( *nemobits & TimeBit)) { // no TimeBit
       time_first = 0.0;
     }
-    else time_first = *ntimu;
+    else time_first = *iotime;
   }
   return status;
 }
