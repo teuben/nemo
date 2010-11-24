@@ -48,7 +48,7 @@ const char * usage="Convert an UNS file to Nemo file format";
 // read pos,vel,mass of the components
 // if component exist AND it has been selected, then respecting comp's data are
 // prepared to be saved
-void processComponent(std::string comp, uns::CunsIn * uns,uns::CunsOut * unsout)
+void processComponent(std::string select,std::string comp, uns::CunsIn * uns,uns::CunsOut * unsout)
 {
   float * pos, * vel, * mass;
   int n1,n2,n3;
@@ -65,6 +65,18 @@ void processComponent(std::string comp, uns::CunsIn * uns,uns::CunsOut * unsout)
         std::right   << std::setw(10) << n1 <<"\n";
     unsout->snapshot->setData(comp,n1,mass,pos,vel,false);
   }  
+ 
+  float * rho, * hsml;
+  bool ok4;
+  int nn;
+  ok4 = uns->snapshot->getData("rho" ,&nn,&rho );
+  if (ok4 && n1 == nn) {
+    unsout->snapshot->setData("rho",n1,rho,false);
+  }  
+  ok4 = uns->snapshot->getData("hsml" ,&nn,&hsml );
+  if (ok4 && n1 == nn) 
+    unsout->snapshot->setData("hsml",n1,hsml,false);
+  
 }
 //------------------------------------------------------------------------------
 // main
@@ -143,7 +155,7 @@ int main(int argc, char ** argv )
         // save time
         unsout->snapshot->setData("time",time);
         // processing
-        processComponent("all"  ,unsin,unsout); // only all particles selected
+        processComponent(select_c,"all"  ,unsin,unsout); // only all particles selected
         // save snapshot
         unsout->snapshot->save();
         delete unsout; // remove object      
