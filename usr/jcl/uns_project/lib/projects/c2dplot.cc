@@ -79,6 +79,9 @@ template <class T> void C2dplot<T>::compute(std::string _dev, const int _no_fram
   
   if (sview) { // one single view
     outdev = buildFrameName("",no_frame);
+    if (outdev=="?" && filename=="-") {
+      outdev="/xwin";
+    }
     cpgopen(outdev.c_str());
     cpgsubp(nbxview,1);
   }  
@@ -112,6 +115,9 @@ template <class T> void C2dplot<T>::drawImage(const bool disp,const int xaxis, c
       // build extension name
       std::string ext="_"+label[xaxis]+label[yaxis]; // example "_XY"
       outdev = buildFrameName(ext,no_frame);
+      if (outdev=="?" && filename=="-") {
+        outdev="/xwin";
+      }
       cpgopen(outdev.c_str());
       cpgsubp(1,1);
     }
