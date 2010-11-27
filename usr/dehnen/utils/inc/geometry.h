@@ -299,6 +299,8 @@ namespace WDutils {
       void reset(real q) { S.Q = q; }
       /// centre of search sphere
       point const&Centre() const { return S.X; }
+      /// ith co-ordinate of centre of search sphere
+      real const&Centre(int i) const { return S.X[i]; }
       /// radius^2 of search sphere
       real const&RadSq() const { return S.Q; }
       /// \name geometric relations with position

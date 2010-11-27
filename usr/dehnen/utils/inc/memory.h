@@ -676,6 +676,7 @@ namespace WDutils {
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
+	++NBLCK;
       }
       ++NUSED;
       return LAST->new_element();
@@ -844,7 +845,7 @@ namespace WDutils {
     struct link {
       link *NEXT;   ///< pter to next link
     };
-#define LINK(NAME) static_cast<link*>(static_cast<void*>(NAME))
+#define LINK(NAME) reinterpret_cast<link*>(NAME)
     /// a chunk of elements
     struct chunk {
       char   *DATA; ///< pter to allocated memory
@@ -853,7 +854,7 @@ namespace WDutils {
       /// \param[in] N  number of element in chunk
       /// \param[in] Kp sizeof(elements)
       chunk(size_type N, size_type Kp)
-	: DATA ( WDutils_NEW(char,N*Kp) ),
+	: DATA ( WDutils_NEW16(char,N*Kp) ),
 	  NEXT ( 0 ) {
 	const    char *END=DATA+N*Kp;
 	register char *l,*n;
@@ -863,7 +864,7 @@ namespace WDutils {
       }
       /// destructor: de-allocate memory
       ~chunk() {
-	WDutils_DEL_A(DATA);
+	WDutils_DEL16(DATA);
       }
     };// struct pool::chunk
     //@}

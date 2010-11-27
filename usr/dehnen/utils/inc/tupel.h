@@ -5,7 +5,7 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    1996-2008
+/// \date    1996-2010
 /// 
 /// \brief   contains the definition of template class WDutild::tupel and
 ///	     all its members and friends
@@ -23,10 +23,11 @@
 /// \version may-2008: output manipulator "print()" supported
 /// \version oct-2008: added static assertion to N-specific constructors
 /// \version sep-2009: formatted output preserves width and precision
+/// \version nov-2010: namespace WDutils::Tuple, allows easy export
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 1996-2008  Walter Dehnen
+// Copyright (C) 1996-2010  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -70,6 +71,10 @@ namespace WDutils {
   }
 #endif
 
+  /// namespace for class tupel<int,typename>
+  /// \note To allow \code using namespace WDutils::Tuple; \endcode
+  namespace Tuple {
+    
   // ///////////////////////////////////////////////////////////////////////////
   //
   // class WDutils::tupel
@@ -663,6 +668,8 @@ namespace WDutils {
     return x.up_min(y);
   }
   //@}
+  } // namespace WDutils::Tuple
+  using namespace Tuple;
   // ///////////////////////////////////////////////////////////////////////////
 #ifdef WDutils_included_traits_h
   template<int N, typename T> struct traits< tupel<N,T> > {

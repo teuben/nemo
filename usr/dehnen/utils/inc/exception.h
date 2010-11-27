@@ -81,6 +81,8 @@ namespace WDutils {
       static const bool is_floating_point = true;
     };
   }
+  using meta::TypeInfo;
+  using meta::TypeCompare;
   //
   /// \name print debugging information to stderr, reporting [file:line]        
   //@{                                                                          
