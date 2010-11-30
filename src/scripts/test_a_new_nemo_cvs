@@ -23,6 +23,7 @@ set anonymous=0		# anonymous CVS ?
 set cvsroot=0		# override the official CVSROOT
 set vogl=1		# compile vogl
 set glnemo=1            # compile glnemo2
+set unsio=0             # compile unsio and uns_project
 set gsl=0               # add GSL library
 set hdf=1               # use HDF library, if present
 set png=0               # add png for pgplot (can easily break other programs in NEMO)
@@ -185,6 +186,14 @@ if ($glnemo) then
   echo "Compiling glnemo2 (logfile: install.glnemo2.log)"
   mknemo glnemo2 >& install.glnemo2.log
   if ($status) echo "### Error: glnemo2 build problem".
+endif
+
+if ($unsio) then
+  echo "Compiling unsio and uns_project (logfile: install.unsio.log)"
+  mknemo unsio >& install.unsio.log
+  if ($status) echo "### Error: unsio build problem".  
+  mknemo uns_project >>& install.unsio.log
+  if ($status) echo "### Error: uns_project build problem".  
 endif
 
 
