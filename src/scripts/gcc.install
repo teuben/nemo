@@ -1,7 +1,7 @@
 #! /bin/csh -f
 #
 #  Install GCC for NEMO ; from a source tree compilating and installation
-#  would take about XXX mins on a 2.8 GHz P4.
+#  with optional GMP and MPFR libraries if not present
 #
 #  For 'astromake', a more typical call would be:
 #  
@@ -11,14 +11,32 @@
 #  For latest versions, see http://gcc.gnu.org/
 #
 #  new (4.4.0) versions require GMP 4.1+ and MPFR 2.3.2+. to build...????
+#  e.g.
+#  gcc.install \
+#        src=gcc-$version  prefix=$ASTROMAKE/opt/gcc/$version version=$version \
+#        gmp=4.3.2 mpfr=2.3.2
+#  See ftp://gcc.gnu.org/pub/gcc/infrastructure/
+#  and/or
+#  http://ftp.gnu.org/gnu/gmp/ 
+#  http://ftp.gnu.org/gnu/mpfr/
+#  http://www.multiprecision.org/
+#   gcc    gmp       mpfr     mpc
+#  4.4.5   4.?      2.3?      n/a
+#  4.5.1   4.2+     2.3.1+   0.8.0+
+
+# TODO:     the 4.4 and 4.5 series with the gmp/mpfr needs don't compile yet :-(
+
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
 #			 	.. command line keywords .. fc=f77 or f95 or fortran
 set src=$NEMO/local/gcc
 set prefix=$NEMO/opt
-set version=3.3.5
-set fc=f77
+set version=4.2.3
+set fc=fortran
+set gmp=0
+set mpfr=0
+set mpc=0
 
 #				.. parse command line ..
 foreach arg ($*)
@@ -56,7 +74,7 @@ endif
 
 
 cd $src
-mkdir build
+mkdir -p build
 cd build
 
 echo Building in `pwd`, 
@@ -73,7 +91,48 @@ if ($version:r:r == 4) then
   endif
 endif
 
-../configure --prefix=$prefix --enable-threads --enable-languages=c,c++,$fc >& build1.log
+set opts=()
+
+if (-d gmp-$gmp) then
+  echo pre-installing GMP $gmp
+  pushd gmp-$gmp
+  ./configure --prefix=$prefix >& ../build0a.log
+  echo status $status on          ../build0a.log
+  make                         >& ../build0b.log
+  echo status $status on          ../build0b.log
+  make install                 >& ../build0c.log
+  echo status $status on          ../build0c.log
+  popd
+  set opts=($opts --with-gmp=$prefix)
+endif
+if (-d mpfr-$mpfr) then
+  echo pre-installing MPFR $mpfr
+  pushd mpfr-$mpfr
+  ./configure --prefix=$prefix >& ../build0d.log
+  echo status $status on          ../build0d.log
+  make                         >& ../build0e.log
+  echo status $status on          ../build0e.log
+  make install                 >& ../build0f.log
+  echo status $status on          ../build0f.log
+  popd
+  set opts=($opts --with-mpfr=$prefix)
+endif
+
+if (-d mpc-$mpc) then
+  echo pre-installing MPC $mpc
+  pushd mpc-$mpc
+  ./configure --prefix=$prefix $opts >& ../build0g.log
+  echo status $status on                ../build0g.log
+  make                               >& ../build0h.log
+  echo status $status on                ../build0h.log
+  make install                       >& ../build0i.log
+  echo status $status on                ../build0i.log
+  popd
+endif
+
+
+../configure --prefix=$prefix --enable-threads $opts \
+    --enable-languages=c,c++,$fc >& build1.log
 echo status $status on build1.log
 
 make bootstrap   >& build2.log
