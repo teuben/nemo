@@ -130,6 +130,7 @@ if (-d mpc-$mpc) then
   popd
 endif
 
+setenv LD_LIBRARY_PATH $prefix/lib
 
 ../configure --prefix=$prefix --enable-threads $opts \
     --enable-languages=c,c++,$fc >& build1.log
