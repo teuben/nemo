@@ -1,4 +1,18 @@
-.TH IPICK 1 "1 August 1992"
+.\ " $Id$
+.\ "
+.TH IPICK 1 "28 February 1993"
+.\ "
+.\ " $Log$
+.\ " Revision 1.2  2010/12/04 04:59:45  pteuben
+.\ " long forgotten update
+.\ "
+.\ " Revision 1.1.1.1  2004-09-22 02:33:14  pteuben
+.\ " import from 1993 comp.sources.misc
+.\ "
+.\ " Revision 1.1  1993/02/27  21:53:58  markd
+.\ " Initial revision
+.\ "
+.\" Had to fix examples using -i to use -v (new invert option)
 .\" I have no *roff manual so this manpage may well be faulty.
 .\" Having said that, the good bits of this manpage come care of
 .\" DaviD W. Sanderson <dws@ssec.wisc.edu>
@@ -9,7 +23,7 @@ ipick \- A screen-based filter to
 lines
 .SH SYNTAX
 .B ipick
-.RB [ \-abdhrsv ]
+.RB [ \-abdhrRvV ]
 .RB [ \-m
 .IR minimum ]
 .RB [ \-M
@@ -118,18 +132,20 @@ Note that raw mode has other side-effects; see
 .IR stty (1)
 for more details.
 .TP
-.B \-s
-Catch keyboard signals.
-Normally
+.B \-R
+Do not set terminal input to raw mode.
+The main effects of this option
+is that the
+.IR stty (1)
+control character sequences remain active and are thus capable of
+generating
+keyboard signals such as SIGINT and SIGQUIT.
+Note that
 .I ipick
-terminates on receiving a keyboard signal (SIGINT or SIGTERM).
-With this option
-.I ipick
-catches SIGINT and aborts the current command.
-This is only useful for long-running
-commands and even then the problem is that all processes in the
-same process group get the signal and typically terminate.
-Hence, this option is marginally useful at best.
+has an abort command that can be bound to your normal ``intr'' or
+``quit'' characters; see
+.IR stty (1)
+for more details on raw mode.
 .TP
 .BI \-t " fixed-title-text"
 Text to use as a title on the screen.
@@ -176,8 +192,17 @@ then
 separates the title from the data with a line of hyphens.
 .TP
 .B \-v
+Invert the selections.
+With this option,
+.I ipick
+writes the lines the user
+.I did not
+select to stdout.
+.TP
+.B \-V
 Print a message containing the version,
-compilation options and the obligatory copyright message.
+compilation options, location of the system-wide
+customization file and the obligatory copyright message.
 .TP
 .BI \-X " xterm-name-substring"
 .I ipick
@@ -230,13 +255,24 @@ and
 keybindings concurrently!
 Additionally,
 .I ipick
-binds all of the commonly used commands to function keys as defined 
+binds all of the commonly used commands to function keys as defined
 in the TERMINFO (or the corresponding termcap) definition file.
 This means that users can avoid learning the idiosyncratic nature of
 .I vi
 and
 .I emacs
 keystrokes.
+.PP
+Finally,
+.I ipick
+can be customized
+with both a system wide startup file and
+and a user startup file.
+See
+.BR CUSTOMIZATION ,
+for a detailed discussion of these files.
+For the purposes of this section it is assumed that
+no customization is in effect.
 .PP
 The list of keyboard commands uses the following symbols:
 .nr n \w'^V, <Space>, K_npage, K_index\0\0'+1n-1/1n
@@ -408,6 +444,9 @@ Go to line
 q, Q, ^X^C, ZZ, K_exit
 Quit
 .TP
+^C
+Abort
+.TP
 ^L, K_refresh
 Refresh
 .TP
@@ -421,6 +460,345 @@ Shell command
 Pipe command.
 Pipe the current line into the command
 .PD
+.SH CUSTOMIZATION
+.PP
+When
+.I ipick
+is invoked, it reads initialization commands from the
+site customization
+file (normally /usr/local/lib/ipickrc but see the
+.B \-V
+option)
+and
+then the user's customization file .ipickrc in the
+user's home directory.
+Both files are optional.
+The file can contain blank lines and comments where comments are
+denoted by the first occurence of the ``#'' character.
+.PP
+A command must be completely contained on a single
+line as there is no continuation character.
+Each token can be separated by one or more
+white-space characters.
+A token can be quoted if it requires embedded spaces with either a
+single or double quote.
+.PP
+.PD
+.I Substitution sequences
+.PP
+The following special substitution sequences are recognized:
+.ft I
+.nr n \w'^char\0\0\0'+1n/1n
+.ft
+.TP \nn
+.B \eb
+A backspace character
+.TP
+.B \ef
+A form-feed
+.TP
+.B \ee
+An escape
+.TP
+.B \en
+The newline character
+.TP
+.B \er
+A carriage-return
+.TP
+.B \es
+A space
+.TP
+.B \et
+A TAB
+.TP
+.B \e\e
+The back-slash character
+.TP
+.B \eNNN
+The character represented by the  octal value of
+.I NNN
+.TP
+.B ^char
+A control character.
+.I char
+can be ``A-Z'' or ``@''.
+.PP
+.I Customization commands
+.\" .nr n \w'bind-terminfo'+1n/1n
+.\" .TP \nn
+.PP
+.B bind-key
+.I function
+.I keysequence
+.RI [ helptext ]
+.TP
+\&
+Bind a set of keystrokes to a specific function.
+.PP
+.B bind-terminfo
+.I function
+.I terminfo-capability
+.RI [ helptext ]
+.TP
+\&
+Bind a terminfo capability to a specific
+function.
+If the terminfo functionality has not been built into
+.I ipick
+then this effectively becomes a no-op.
+.PP
+.B bind-termcap
+.I function
+.I termcap-capability
+.RI [ helptext ]
+.TP
+\&
+Bind a termcap capability to a specific
+function.
+If the termcap functionality has not been
+built into
+.I ipick
+then this effectively becomes a no-op.
+.PP
+.B include
+.I includefile
+.PP
+Where:
+.PP
+.ft I
+.nr n \w'terminfo-capability\0\0\0'+1n/1n
+.ft
+.TP \nn
+.I function
+is a valid
+.I ipick
+function; see
+.BR FUNCTIONS ,
+for a complete list.
+.TP
+.I keysequence
+is any sequence of keystrokes.
+The
+.I substitution
+character will typically be useful for this parameter.
+.TP
+.I helptext
+is an optional text string that will be displayed as part of the online
+help screen.
+If not present then the keysequence or capability name will be used.
+.TP
+.I terminfo-capability
+A valid terminfo keystroke capability name; see
+.IR terminfo (5)
+for more details.
+.TP
+.I termcap-capability
+A valid termcap keystroke capability name; see
+.IR termcap (5)
+for more details.
+.TP
+.I includefile
+a path of the file to include.
+.TP
+\&
+If
+.I includefile
+has a leading tilde ``~'' then
+.I ipick
+performs the usual tilde expansion.
+That is the string between
+the tilde and the first ``/'' character
+is treated as a login name whose home directory is substituted.
+An empty login name implies $HOME.
+.TP
+\&
+If
+.I includefile
+contains any shell characters then
+.I ipick
+assumes that it's a pipeline command
+and uses
+.IR popen (3S)
+rather than
+.IR fopen (3V)
+to open the command.
+.TP
+\&
+If
+.I includefile
+is treated as a pipeline command and there is no trailing pipe character ``|''
+then
+.I ipick
+preceeds the pipeline string with
+the
+.IR cat (1)
+command.
+.PD
+.PP
+The follow sample
+.I .ipickrc
+file demostrates most of the functionality
+discuss in this section.
+.PP
+.nf
+#
+# This file has some comments in it
+#
+
+include "~fred/.ipickrc"         # Fred has a cool startup file
+include '/usr/local/lib/ipick_${EDITOR:-EMACS}'
+
+include "grep terminfo /usr/local/lib/ipick_wyse |"
+
+include "$HOME/env/test_bindings"
+
+bind-key QUIT "\ee\es\e023" "NT250 Exit key"
+
+# Bind the begining of line terminal definition
+
+bind-terminfo beginning-of-line kbeg
+bind-termcap beginning-of-line @1
+.fi
+.SH FUNCTIONS
+The follow is a list of available functions.
+.PP
+.ft I
+.nr n \w'scroll-right-screen\0\0\0'+1n/1n
+.ft
+.TP \nn
+.I select-range
+Enter a range of line numbers to pick
+.TP
+.I select-all
+Mark all lines as picked
+.TP
+.I clear-range
+Enter a range of line numbers which are
+to have their pick state cleared
+.TP
+.I clear-all
+Mark all lines as not picked
+.TP
+.I toggle-current
+Toggle the picked state of the current
+line and move the cursor to the next line
+.TP
+.I toggle-range
+Enter a range of line numbers which are
+to have their pick state toggled
+.TP
+.I toggle-unread
+Toggle the picked state of all unread lines
+.TP
+.I top-of-screen
+Move the cursor to the top of the screen
+.TP
+.I bottom-of-screen
+Move the cursor to the bottom of the screen
+.TP
+.I previous-line
+Move the cursor up one line
+.TP
+.I next-line
+Move the cursor down one line
+.TP
+.I quit
+Exit and write the pick lines to stdout
+.TP
+.I abort
+Exit without writing anything to stdout
+.TP
+.I help
+Display the online help screen
+.TP
+.I refresh
+Clear and re-display the current screen
+.TP
+.I scroll-left-char
+Move the cursor left one position
+.TP
+.I scroll-right-char
+Move the cursor right one position
+.TP
+.I beginning-of-line
+Move the cursor to the first character position
+.TP
+.I end-of-line
+Move the cursor to the last character position of the current line
+.TP
+.I scroll-tab
+Move the cursor forward one tabstop
+.TP
+.I scroll-backtab
+Move the cursor back one tabstop
+.TP
+.I scroll-left-screen
+Move the cursor left by one half the width of the screen
+.TP
+.I scroll-right-screen
+Move the cursor right by one half the width of the screen
+.TP
+.I scroll-up-half
+Move the cursor up by one half of the height of the screen
+.TP
+.I scroll-down-half
+Move the cursor down by one half of the height of the screen
+.TP
+.I scroll-up-full
+Move the cursor up a full screen
+.TP
+.I scroll-down-full
+Move the cursor down a full screen
+.TP
+.I beginning-of-file
+Move the cursor to the first line
+.TP
+.I end-of-file
+Move the cursor to the end of all
+the input lines.
+If data is from an upstream process, ipick will read until
+this process writes end of file
+.TP
+.I search-forward
+Enter the search forward string
+.TP
+.I search-backward
+Enter the reverse search string
+.TP
+.I re-search-forward
+Continue the search forwards
+.TP
+.I re-search-backward
+Continue the search backwards
+.TP
+.I next-selected
+Move the cursor to the next line selected
+.TP
+.I previous-selected
+Move the cursor to the previous line selected
+.TP
+.I goto-line
+Enter a line number to position to
+.TP
+.I shell
+Enter a shell command
+.TP
+.I pipe
+Enter a  command which will have the
+current line written to it's stdin
+.TP
+.I redo-command
+Redo the last command
+.TP
+.I xterm-mouse
+Define the xterm escape prefix.
+Only to be used if you really know what you're
+doing (Which I don't when it comes to
+.IR nroff (1))
+.TP
+.I invalid-command
+Treat as an invalid command and generate an error message
 .SH "XTERM MOUSE TRACKING"
 .PP
 .I ipick
@@ -524,8 +902,8 @@ rather than reading all input lines on starting.
 This is especially useful if the upstream process generates output lines
 slowly as
 .I ipick
-is able to display lines as soon as they become available - within the
-constraints of any buffering.
+is able to display lines as soon as they become available \(em within
+the constraints of any buffering.
 It is also useful if the upstream process has the potential to generate
 an enormous number of lines of output prior to completion.
 .PP
@@ -552,10 +930,6 @@ definitions \(em later definitions override earlier definitions.
 .PP
 The search function does not handle regular expressions.
 .PP
-There is no
-.I .ipickrc
-file to add or override the default keybindings \(em yet!
-.PP
 Because of the way in which
 .I ipick
 reads the standard input, using
@@ -577,17 +951,16 @@ arbitrarily expands tab characters to 8-column tabstops.
 The online help does not display properly if the screen is less than 80
 columns wide.
 .PP
-Arguably
-.I ipick
-could use
-.IR select ()
-and look ahead for keyboard signal characters rather
-than rely on cbreak mode as this method would protect other
-processes in the same process group.
-However, this is less portable and messy.
-.PP
 Directions implied by movement and scrolling commands apply to
 the cursor, not the data.
+.PP
+.I ipick
+does not know when include files opened with
+.IR popen (1)
+fail.
+This can sometimes cause
+.I ipick
+to wait for ever depending on the state of the child process.
 .SH MOTIVATION
 .PP
 It is the very essence of Unix to make useful
@@ -628,7 +1001,7 @@ combination of
 .IR awk (1),
 .IR perl (1),
 or
-.I sed (1)
+.IR sed (1)
 \(em usually
 after
 you've had a look at the
@@ -715,6 +1088,7 @@ vi `ls \-1 *.c | ipick \-m1`
 cd `ls \-l | grep '^d' | ipick \-m1 \-M1 \-a | cut \-c46\-`
 .fi
 .PP
+.ne 6
 .I "Pick files to extract from a tar file in the default tape drive."
 .nf
 .IP
@@ -730,9 +1104,22 @@ solution to an interactive tar is:
 .nf
 .IP
 .ta \w'\0\0\0\0\0\0\0\0'u
-tar tvf ${1:-/dev/rmt8} | sed -e 's./$..' | ipick | \e
+tar tvf ${1:\-/dev/rmt8} | sed \-e 's./$..' | ipick |
 .br
-	cut -c42- | xargs -i -t tar xvf ${1:-/dev/rmt8} {}
+	cut \-c42\- | xargs \-v \-t tar xvf ${1:\-/dev/rmt8} {}
+.fi
+.DT
+.PP
+.I "Clean up a directory containing many junk files."
+.PP
+The following pipeline does this by letting you select
+the files you want to keep, and deleting the rest.
+.nf
+.IP
+.ta \w'\0\0\0\0\0\0\0\0'u
+rm `ls \-l | grep '^\-' | ipick \-v \-t "Which files to keep ?" |
+.br
+	cut \-c46\-`
 .fi
 .DT
 .PP
@@ -789,17 +1176,19 @@ TERM=`ipickf TERM`
 .SH VERSION
 .PP
 .I ipick
-version 1.0 Gamma1, dated 1 August, 1992.
+version 1.1, dated 28 February, 1993.
 .SH AUTHOR
 .PP
-Copyright (c) 1992, Mark Delany <markd@werple.pub.uu.oz.au>
+Copyright (c) 1993, Mark Delany <markd@werple.apana.org.au>
 All rights reserved.
 .PP
 Substantial man page improvements by DaviD W. Sanderson <dws@ssec.wisc.edu>
 .PP
 .I ipick
-may only be copied and used under the terms and conditions
-of the COPYRIGHT notice found in the source kit.
+may only be copied under the terms of either the Artistic License
+or
+the GNU General Public Licence,
+which may be found in the ipick source kit.
 .SH "SEE ALSO"
 .IR stty (1),
 .IR xargs (1V),
