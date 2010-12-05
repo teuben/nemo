@@ -11,12 +11,13 @@
 #   dec-2005            -u also looks a NEMO/local/pgplot etc.
 #   mar-2006            give help, even if locked
 #   aug-2006            some sanity checks if cvs is present if -u is used; fixed dir search -a
+#   nov-2010            report special things it can do 
 #
 
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 3.4b 6-aug-2006"
+set version="MKNEMO Version 3.5 4-dec-2010"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -56,6 +57,7 @@ set src=$NEMO/src
 set usr=$NEMO/usr
 set n=0
 set d=0
+set D=0
 set code=""
 set post_tidy=""
 set pre_tidy=""
@@ -83,6 +85,11 @@ loop:
     shift argv
     if ($#argv == 0) goto noargs
     set d=1
+    breaksw
+  case -D:
+    shift argv
+    set D=1
+    set go=1
     breaksw
   case -l:
     shift argv
@@ -148,6 +155,12 @@ loop:
 process:
 
 if ($go == 0 && $#argv == 0) goto noargs
+
+if ($D) then
+  ls $NEMO/src/scripts/mknemo.d  | egrep -v '(README|CVS)'
+  rm -f $lockfile >& /dev/null
+  exit 0
+endif
 
 if ($u) then
   # 
@@ -334,7 +347,8 @@ usage:
   echo "  -T        cleanup before making the binaries"
   echo "  -u        run 'cvs update -d' to NEMO before making"
   echo "  -l        recompile the library by running 'make libs'"
-  echo "  -g        use gmake, instead of make"
+  echo "  -g        explicitly use gmake, instead of make"
   echo "  -a        use all directories, usr and src, to find code to update"
   echo "  -v        more verbose, it will report version and cvsid of program"
+  echo "  -D        show special projects from the mknemo.d directory"
   exit 1
