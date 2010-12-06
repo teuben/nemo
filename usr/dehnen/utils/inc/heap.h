@@ -160,31 +160,40 @@ namespace WDutils {
   template<class Walk, template<typename T> class Comparator>
   class HeapAlgorithms {
   public:
+    /// downwards pass
+    /// \param[in,out] a        array[0..@a n -1] to be heapified
+    /// \param[in]     p        index of element to be walked down the tree
+    /// \param[in]     n        size of array
+    template<typename T>
+    static void down(T*a, int p, int n)
+    { Walk::down(a,p,n,Comparator<T>()); }
+    /// upwards pass
+    /// \param[in,out] a        array[0..@a n -1] to be heapified
+    /// \param[in]     c        index of element to be walked up the tree
+    template<typename T>
+    static void up(T*a, int c)
+    { Walk::up(a,c,Comparator<T>()); }
     /// put randomly ordered array into heap order
     /// \param[in,out] a  array[0..@a n -1]; input: random; output: heap order
     /// \param[in]     n  size of array
     template<typename T> 
-    static void build(T*a, int n) {
-      for(int i=n>>1; i; --i)
-	Walk::down(a,i-1,n,Comparator<T>());
-    }
+    static void build(T*a, int n)
+    { for(int i=n>>1; i; --i) down(a,i-1,n); }
     /// put array back into heap order after the top element has been replaced.
     /// This is equivalent to, but faster than, pop() followed by push().
     /// \param[in,out] a  array[0..@a n -1] in heap order, except for element 0 
     /// \param[in]     n  size of array
     template<typename T>
-    static void after_top_replace(T*a, int n) {
-      Walk::down(a,0,n,Comparator<T>());
-    }
+    static void after_top_replace(T*a, int n)
+    { down(a,0,n); }
     /// put array back into heap order after the last element has been replaced
     /// \note used in push()
     /// \param[in,out] a  array[0..@a n -1] in heap order, except for element @a
     ///                   n -1
     /// \param[in]     n  size of array
     template<typename T>
-    static void after_last_replace(T*a, int n) {
-      Walk::up(a,n-1,Comparator<T>());
-    }
+    static void after_last_replace(T*a, int n)
+    { up(a,n-1); }
     /// put array back into heap order after the @a i th element (only) has
     /// been replaced
     /// \param[in,out] a  array[0..@a n -1] in heap order, except for element @a
@@ -192,7 +201,8 @@ namespace WDutils {
     /// \param[in]     i  element that has been replaced, must be in [0,@a n -1]
     /// \param[in]     n  size of array
     template<typename T>
-    static void after_replace(T*a, int i, int n) {
+    static void after_replace(T*a, int i, int n)
+    {
       int p=Walk::parent(i);
       Comparator<T> compare;
       if(compare(a[p],a[i]))
@@ -210,7 +220,8 @@ namespace WDutils {
     /// \param[in,out] a  array[0..@a n -1] in heap order
     /// \param[in,out] n  size of array, increased by one on output
     template<typename T>
-    static void push(T const&x, T*a, int&n) {
+    static void push(T const&x, T*a, int&n)
+    {
       a[n++] = x;
       after_last_replace(a,n);
     }
@@ -220,7 +231,8 @@ namespace WDutils {
     /// \param[in,out] a  array[0..@a n -1] in heap order
     /// \param[in,out] n  size of array, reduced by one on output
     template<typename T>
-    static void pop(T&x, T*a, int&n) {
+    static void pop(T&x, T*a, int&n)
+    {
       x = a[0];
       a[0] = a[n-1];
       after_top_replace(a,--n);
@@ -231,10 +243,11 @@ namespace WDutils {
     /// \param[in,out] a  array[0..@a n -1]; input heap; output ordered
     /// \param[in]     n  size of array, assuming @a n > 0
     template<typename T>
-    static void sort(T*a, int n) {
-      for(int i=n-1; i; --i) {
-	std::swap(a[i],a[0]);
-	Walk::down(a,0,--n,Comparator<T>());
+    static void sort(T*a, int n)
+    {
+      for(--n; n; --n) {
+	std::swap(a[n],a[0]);
+	down(a,0,n);
       }
     }
     /// find the index of the smallest element in a heap which is larger than x
@@ -244,7 +257,8 @@ namespace WDutils {
     /// \param[in] n  size of array
     /// \return index of element closest to x, but upwards in Comparator order
     template<typename T>
-    static int next_up(T const&x, const T*a, int n) {
+    static int next_up(T const&x, const T*a, int n)
+    {
       if(!compare(x,a[0])) return -1;     // x larger than top: illegal
       for(int i,j,p=0;;) {
 	i=j=Walk::child(p);
@@ -258,20 +272,20 @@ namespace WDutils {
     }
     //--------------------------------------------------------------------------
     template<typename T> 
-    static void build(Array<T>&a) {
-      build(a.array(),a.size()); }
+    static void build(Array<T>&a)
+    { build(a.array(),a.size()); }
     template<typename T> 
-    static void after_top_replace(Array<T>&a) {
-      after_top_replace(a.array(),a.size()); }
+    static void after_top_replace(Array<T>&a)
+    { after_top_replace(a.array(),a.size()); }
     template<typename T> 
-    static void after_last_replace(Array<T>&a) {
-      after_last_replace(a.array(),a.size()); }
+    static void after_last_replace(Array<T>&a)
+    { after_last_replace(a.array(),a.size()); }
     template<typename T> 
-    static void after_replace(Array<T>&a, int i) {
-      after_replace(a.array(),i,a.size()); }
+    static void after_replace(Array<T>&a, int i)
+    { after_replace(a.array(),i,a.size()); }
     template<typename T> 
-    static void sort(Array<T>&a) {
-      sort(a.array(),a.size()); }
+    static void sort(Array<T>&a)
+    { sort(a.array(),a.size()); }
   };// class HeapAlgorithms<Walk,Comparator>
   //
   /// support for max heaps, using std::swap()
@@ -287,7 +301,8 @@ namespace WDutils {
   //@{
   /// ascending heapsort in place, avoiding std::swap()
   template<typename T>
-  void HeapSortAsc(T*a, int n) {
+  void HeapSortAsc(T*a, int n)
+  {
     if(n>0) {
       MaxHeap::build(a,n);
       MaxHeap::sort(a,n);
@@ -295,7 +310,8 @@ namespace WDutils {
   }
   /// descending heapsort in place, avoiding std::swap()
   template<typename T>
-  void HeapSortDesc(T*a, int n) {
+  void HeapSortDesc(T*a, int n)
+  {
     if(n>0) {
       MinHeap::build(a,n);
       MinHeap::sort(a,n);
@@ -303,7 +319,8 @@ namespace WDutils {
   }
   /// ascending heapsort in place, using std::swap()
   template<typename T>
-  void HeapSortAscSwap(T*a, int n) {
+  void HeapSortAscSwap(T*a, int n)
+  {
     if(n>0) {
       MaxHeapSwap::build(a,n);
       MaxHeapSwap::sort(a,n);
@@ -311,7 +328,8 @@ namespace WDutils {
   }
   /// descending heapsort in place, using std::swap()
   template<typename T>
-  void HeapSortDescSwap(T*a, int n) {
+  void HeapSortDescSwap(T*a, int n)
+  {
     if(n>0) {
       MinHeapSwap::build(a,n);
       MinHeapSwap::sort(a,n);
