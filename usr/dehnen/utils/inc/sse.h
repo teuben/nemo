@@ -46,10 +46,6 @@
 extern "C" {
 #    include <xmmintrin.h>
 }
-#    define _mm_abs_ps(__x) _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x7fffffff))
-#    define _mm_neg_ps(__x) _mm_xor_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
-#    define _mm_nabs_ps(__x) _mm_or_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
-#    define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
 #  endif
 
 # ifdef __SSE2__
@@ -58,17 +54,45 @@ extern "C" {
 extern "C" {
 #    include <emmintrin.h>
 }
-#    define _mm_abs_pd(__x)						\
+#  endif
+// macros for |x|, -x, -|x|. and |x-y|
+#  define _mm_abs_pd(__x)						\
     _mm_and_pd(__x,(__m128d)_mm_set_epi32(0x7fffffff,0xffffffff,	\
 					  0x7fffffff,0xffffffff))
-#    define _mm_neg_pd(__x)						\
+#  define _mm_neg_pd(__x)						\
     _mm_xor_pd(__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
-#    define _mm_nabs_pd(__x)					\
+#  define _mm_nabs_pd(__x)					\
     _mm_or_pd (__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
-#    define _mm_diff_pd(__x,__y) _mm_abs_pd(_mm_sub_pd(__x,__y))
-#  endif
-# endif
+#  define _mm_diff_pd(__x,__y) _mm_abs_pd(_mm_sub_pd(__x,__y))
+
+#  define _mm_abs_ps(__x) _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x7fffffff))
+#  define _mm_neg_ps(__x) _mm_xor_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
+#  define _mm_nabs_ps(__x) _mm_or_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
+#  define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
+# else // __SSE2__
+
+// in case we have no __SSE2__, we cannot use _mm_set1_epi32
+namespace WDutils {
+  namespace meta {
+    union FandI {
+      float __F;
+      int   __I;
+      FandI(int i) : __I(i) {}
+    };
+    const FandI __abs_mask(0x7fffffff);
+    const FandI __neg_mask(0x80000000);
+  }
+}
+# define _mm_abs_ps(__x)						\
+  _mm_and_ps(__x,(__m128)_mm_set1_ps(WDutils::meta::__abs_mask.__F))
+# define _mm_neg_ps(__x)						\
+  _mm_xor_ps(__x,(__m128)_mm_set1_ps(WDutils::meta::__neg_mask.__F))
+# define _mm_nabs_ps(__x)						\
+  _mm_or_ps(__x,(__m128)_mm_set1_ps(WDutils::meta::__neg_mask.__F))
+# define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
 #endif
+
+//
 
 #ifndef WDutils_included_meta_h
 #  include <meta.h>
