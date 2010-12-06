@@ -56,7 +56,7 @@ extern "C" {
 }
 #  endif // WDutils_included_emmintrin_h
 //
-// macros for packed double of |x|, -x, -|x|, and |x-y|
+// macros for |x|, -x, -|x|, and |x-y| of packed double
 //
 #  define _mm_abs_pd(__x)						\
     _mm_and_pd(__x,(__m128d)_mm_set_epi32(0x7fffffff,0xffffffff,	\
@@ -68,7 +68,7 @@ extern "C" {
 #  define _mm_diff_pd(__x,__y) _mm_abs_pd(_mm_sub_pd(__x,__y))
 
 //
-// macros for packed single of |x|, -x, -|x|, and |x-y|
+// macros for |x|, -x, -|x|, and |x-y| of packed single 
 //
 #  define _mm_abs_ps(__x) _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x7fffffff))
 #  define _mm_neg_ps(__x) _mm_xor_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
