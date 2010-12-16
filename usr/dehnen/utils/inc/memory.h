@@ -443,6 +443,24 @@ namespace WDutils {
 	const_cast<T*      &>(A) = WDutils_NEW16(T,N);
       }
     }
+    /// grow: increase size by n, but keep old data
+    /// \param[in] n  grow by this much, default: double size
+    void grow(unsigned n=0)
+    {
+      n = n? N+n : N+N;
+      if(n) {
+	if(N) {
+	  T* newA = WDutils_NEW16(T,n);
+	  memcpy(newA,A,sizeof(T)*N);
+	  WDutils_DEL16(A);
+	  const_cast<unsigned&>(N) = n;
+	  const_cast<T*      &>(A) = newA;
+	} else {
+	  const_cast<unsigned&>(N) = n;
+	  const_cast<T*      &>(A) = WDutils_NEW16(T,N);
+	}
+      }
+    }
     /// # allocated elements
     unsigned nalloc() const { return N; }
     /// const data access
