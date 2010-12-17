@@ -115,6 +115,44 @@ namespace WDutils {
 
 namespace WDutils {
 
+#ifdef __SSE__
+  /// horizontal sum: A0+A1+A2+A3.
+  /// compute in each SPFP value the sum of the four SPFP values from argument:
+  /// result: [A0+A1+A2+A3, A0+A1+A2+A3, A0+A1+A2+A3, A0+A1+A2+A3]
+  inline __m128 _mm_sum_ps(__m128 __A)
+  {
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+    __v4sf __a = (__v4sf)__A, __t,__s;
+    __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
+    __s  = __builtin_ia32_addps(__a,__t);
+    __t  = __builtin_ia32_shufps(__s,__s,_MM_SHUFFLE (1,0,3,2));
+    return (__m128) __builtin_ia32_addps(__s,__t);
+#else
+    __m128 __S;
+    __S =  _mm_add_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
+    return _mm_add_ps(__S,_mm_shuffle_ps(__S,__S,_MM_SHUFFLE (1,0,3,2)));
+#endif
+  }
+
+  /// horizontal sum: A0+A1+A2+A3.
+  /// extract the sum of the four SPFP values from argument
+  inline float _mm_getsum_ps(__m128 __A)
+  {
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+  __v4sf __a = (__v4sf)__A, __t,__s;
+  __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
+  __s  = __builtin_ia32_addps(__a,__t);
+  __t  = __builtin_ia32_movhlps(__s,__s);
+  __s  = __builtin_ia32_addps(__s,__t);
+  return __builtin_ia32_vec_ext_v4sf(__s,0);
+#else
+    __m128 __S;
+    __S =  _mm_add_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
+    return _mm_cvtss_f32(_mm_add_ps(__S,_mm_movehl_ps(__S,__S)));
+#endif
+  }
+#endif
+
   /// support for coding with SSE intrinsics, code using SSE intrinsics.
   namespace SSE {
 

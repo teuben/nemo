@@ -382,6 +382,22 @@ namespace WDutils {
       WDutils__align16 sphere<Dim,real> S;   ///< search sphere data
     };// struct SearchSphere
   } // namespace WDutils::Geometry
+#define Geometry_TRAITS(TYPE,NAME)					\
+  template<> struct traits<TYPE<2,float> >				\
+  { static const char  *name () { return NAME "<2,float>"; } };		\
+  template<> struct traits<TYPE<3,float> >				\
+  { static const char  *name () { return NAME "<2,float>"; } };		\
+  template<> struct traits<TYPE<2,double> >				\
+  { static const char  *name () { return NAME "<2,double>"; } };	\
+  template<> struct traits<TYPE<3,double> >				\
+  { static const char  *name () { return NAME "<2,double>"; } };
+
+  Geometry_TRAITS(Geometry::cube,"Geometry::cube")
+  Geometry_TRAITS(Geometry::sphere,"Geometry::sphere")
+  Geometry_TRAITS(Geometry::PointPair,"Geometry::PointPair")
+  Geometry_TRAITS(Geometry::cuboid,"Geometry::cuboid")
+  Geometry_TRAITS(Geometry::SearchSphere,"Geometry::SearchSphere")
+#undef Geometry_TRAITS
 } // namespace WDutils
 // inline implementations
 #ifndef WDutils_included_geometry_inl_h

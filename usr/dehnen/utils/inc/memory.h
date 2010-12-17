@@ -425,7 +425,7 @@ namespace WDutils {
       : N(0), A(0) {}
     /// ctor from size
     explicit Array16(unsigned n)
-      : N(Nalloc(n)), A(WDutils_NEW16(T,N)) {}
+      : N(Nalloc(n)), A(N?WDutils_NEW16(T,N):0) {}
     /// dtor
     ~Array16()
     {

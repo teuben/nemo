@@ -381,6 +381,12 @@ namespace WDutils {
   inline smanip_fp_vec_width<X> print(const X*x, int n, int w, int p) {
     return smanip_fp_vec_width<X>(x,n,w,p);
   }
+#ifdef WDutils_included_tupel_h
+  template<int N, typename X>
+  inline smanip_fp_vec_width<X> print(tupel<N,X> const&x, int w, int p) {
+    return smanip_fp_vec_width<X>(static_cast<const X*>(x),N,w,p);
+  }
+#endif
   // ///////////////////////////////////////////////////////////////////////////
   //
   // WDutils::FileSize()
