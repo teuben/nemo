@@ -116,6 +116,10 @@ geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 octtree_h		:= $(INC)octtree.h $(geometry_h) $(memory_h)
 
 ifdef WDutilsDevel
+$(INC)matr33.h		: $(DEV)matr33.h
+			(cd $(INC); ln -s ../$(DEV)matr33.h matr33.h)
+matr33_h		:= $(INC)matr33.h $(exception_h) $(tupel_h)
+
 $(INC)neighbour.h	: $(DEV)neighbour.h
 			(cd $(INC); ln -s ../$(DEV)neighbour.h neighbour.h)
 neighbour_h		:= $(INC)neighbour.h $(octtree_h)
@@ -268,6 +272,8 @@ test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
 				$(MAKE_EXE)
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
 				$(MAKE_EXE)
+test/TestMatrix$(EXT)	:	test/TestMatrix.cc $(matr33_h)
+				$(MAKE_EXE)
 test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) $(WDMath_h)
 				$(MAKE_EXE)
 test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(numerics_h) \
@@ -281,6 +287,7 @@ test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(numerics_h) \
 omp_tests		:=	test/TestTreeP$(EXT) \
 				test/TestTree$(EXT) \
 				test/TestGeometry$(EXT) \
+				test/TestMatrix$(EXT) \
 				test/TestOMP$(EXT)
 
 ifdef WDutilsMPI
