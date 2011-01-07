@@ -48,7 +48,7 @@ LIBMESA	    = -lGL $(LIBX)
 OBJFILES = yapp.o
 YAPPOBJS = yapp_ps.o yapp_null.o yapp_pgplot.o yapp_plplot.o \
 	yapp_cpgplot.o yapp_meta.o
-BINFILES = catps catpgps 
+BINFILES = catps catpgps yapp
 # wow: the following are TRUE original NEMO V1 programs !!!    can't be in BINFILES yet
 # pltext_ps plarrow_ps
 
@@ -227,5 +227,9 @@ plarrow: plarrow.c
 
 plarrow_ps: plarrow.c
 	$(CC) -o plarrow_ps plarrow.c $(NEMOLIB)/yapp_ps_new.o $(NEMO_LIBS) -lm
+
+
+yapp: yappmain.c
+	$(CC) $(CFLAGS) -o yapp yappmain.c $(NEMO_LIBS) $(YAPPLIB) -lm
 
 # the end
