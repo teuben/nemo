@@ -28,10 +28,10 @@ unix {
 }
 QMAKE_LFLAGS = -shared
 macx {
-  QMAKE_LIBDIR =  $$NEMOLIB
-  QMAKE_LFLAGS += -Wl,-rpath,$(NEMO)/usr/dehnen/utils
-  QMAKE_LFLAGS += -Wl,-rpath,$(NEMOLIB)
-  LIBS += -lnemo -lWDutils -lfalcon
+  QMAKE_LIBDIR =  $(NEMO)/lib $(NEMO)/usr/dehnen/utils
+  #QMAKE_LFLAGS += -Wl,-rpath,$(NEMO)/usr/dehnen/utils
+  #QMAKE_LFLAGS += -Wl,-rpath,$(NEMO)/lib
+  LIBS +=  -lWDutils -lfalcon
 }
 
 CONFIG += console
@@ -39,7 +39,7 @@ QT += network
 # INSTALLS
 target.path  = $$(NEMO)/obj/manip
 unix:target.extra = cp ../lib/$${ARCH}/$$COMPILEMODE/libglnemo2.so $$(NEMO)/obj/manip/glnemo2.so
-macx:target.extra = cp ../lib/$${ARCH}/$$COMPILEMODE/libglnemo2.so $$(NEMO)/obj/manip/glnemo2.so
+macx:target.extra = cp ../lib/$${ARCH}/$$COMPILEMODE/libglnemo2.1.0.0.dylib $$(NEMO)/obj/manip/glnemo2.so
 INSTALLS += target
 
 SOURCES += glnemo2.cc \
