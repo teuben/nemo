@@ -28,10 +28,9 @@ unix {
 }
 QMAKE_LFLAGS = -shared
 macx {
-  QMAKE_LIBDIR = \
-    $$NEMOLIB 
-  QMAKE_LFLAGS += -Wl,-rpath,$$NEMO/usr/dehnen/utils
-  LIBS += nemo WDutils falcon
+  QMAKE_LIBDIR =  $$NEMOLIB
+  QMAKE_LFLAGS += -Wl,-rpath,$$GYRFALCON/usr/dehnen/utils
+  LIBS += -lnemo -lWDutils -lfalcon
 }
 
 CONFIG += console
