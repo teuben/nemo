@@ -31,10 +31,21 @@ be changed by modifying 'GYRFALCON' variable in the Makefile.
  You need also QT4 API (QT > 4.6 is recommend to prevent some memory leaks)
 
  - to compile enter:
-qmake
-make
+====================
+
+a) Linux
+   ------
+   qmake
+   make
+
+b) Mac OS X
+   --------
+   qmake -spec macx-g++
+   then
+   make
 
 - then install the manipulator
+===============================
 
 make install        (Don't forget this step !!!!!)
 
