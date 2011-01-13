@@ -29,7 +29,8 @@ unix {
 QMAKE_LFLAGS = -shared
 macx {
   QMAKE_LIBDIR =  $$NEMOLIB
-  QMAKE_LFLAGS += -Wl,-rpath,$$GYRFALCON/usr/dehnen/utils
+  QMAKE_LFLAGS += -Wl,-rpath,$(NEMO)/usr/dehnen/utils
+  QMAKE_LFLAGS += -Wl,-rpath,$(NEMOLIB)
   LIBS += -lnemo -lWDutils -lfalcon
 }
 
