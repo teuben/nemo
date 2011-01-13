@@ -17,12 +17,23 @@ INCLUDEPATH += ./ \
     $(NEMOINC) \
     $(NEMOLIB)
 QMAKE_CFLAGS += -DfalcON_INDI \
-    -DfalcON_NEMO -DfalcON_SINGLE \
-    -rdynamic
+    -DfalcON_NEMO -DfalcON_SINGLE
+
 QMAKE_CXXFLAGS += -DfalcON_INDI \
-    -DfalcON_NEMO -DfalcON_SINGLE \
-    -rdynamic
+    -DfalcON_NEMO -DfalcON_SINGLE
+
+unix {
+   QMAKE_CFLAGS   += -rdynamic
+   QMAKE_CXXFLAGS += -rdynamic
+}
 QMAKE_LFLAGS = -shared
+macx {
+  QMAKE_LIBDIR = \
+    $$NEMOLIB 
+  QMAKE_LFLAGS += -Wl,-rpath,$$NEMO/usr/dehnen/utils
+  LIBS += nemo WDutils falcon
+}
+
 CONFIG += console
 QT += network
 # INSTALLS
