@@ -1,5 +1,5 @@
 # ============================================================================
-# Copyright Jean-Charles LAMBERT - 2009                                       
+# Copyright Jean-Charles LAMBERT - 2009-2011                                       
 # e-mail:   Jean-Charles.Lambert@oamp.fr
 # address:  Dynamique des galaxies                                            
 #           Laboratoire d'Astrophysique de Marseille                          
@@ -18,17 +18,19 @@ SET(CMAKE_VERBOSE_MAKEFILE OFF)
 # extra path for NEMO
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_BINARY_DIR})
 
+SET(OSX FALSE)
+if    (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+   SET(OSX TRUE)
+endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
 FIND_PACKAGE(NEMO)
 FIND_PACKAGE(SQLITE3)
+
 IF (NOT NEMO_INSTALLED) 
-
   MESSAGE(FATAL_ERROR "NEMO environment not loaded !!!")
-
 ELSE (NOT NEMO_INSTALLED) 
-
   set(NEMOLIB $ENV{NEMOLIB})
   set(NEMOINC $ENV{NEMOINC})
-
 ENDIF (NOT NEMO_INSTALLED) 
 
 MESSAGE( STATUS "NEMOLIB : " ${NEMOLIB} )
@@ -51,6 +53,9 @@ add_definitions(-Wall -g -Wswitch -Wcast-align -Wreturn-type -Wno-unused-functio
 
 # create library "uns"
 add_library (unsio SHARED ${LIBSOURCES} )
+if(OSX) 
+  set_target_properties(unsio PROPERTIES LINK_FLAGS "-L${NEMOLIB} -lnemo -lsqlite3")
+endif(OSX)
 #
 # ------------------
 # TEST PROGRAM      
@@ -69,7 +74,7 @@ MESSAGE( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 include_directories (${UNSIO_SOURCE_DIR}/../src $ENV{NEMOINC} ${NEMOLIB} ${SQLITE3_H_PATH})
 
 # Make sure the linker can find the Hello library once it is built.
-link_directories (${UNSIO_BINARY_DIR}/lib ${SQLITE3_LIB_PATH} ${NEMOLIB} ${FC_GFORT_PATH} ${FC_G77_PATH})
+link_directories (${UNSIO_BINARY_DIR}/lib /usr/X11/lib ${SQLITE3_LIB_PATH} ${NEMOLIB} ${FC_GFORT_PATH} ${FC_G77_PATH})
 
 # Find all LIB's sources files
 FILE(GLOB exe_sources ../test_src/*.F)
@@ -116,9 +121,13 @@ ENDFOREACH(exe_f ${exe_sources})
 
 IF (NEMO_INSTALLED) 
   set (CMAKE_INSTALL_PREFIX $ENV{NEMO})
-
   # lib
-  INSTALL(FILES  ${UNSIO_BINARY_DIR}/../lib/libunsio.so DESTINATION lib)
+  IF   (OSX) # Mac OSX
+     INSTALL(FILES  ${UNSIO_BINARY_DIR}/../lib/libunsio.dylib DESTINATION lib)	
+  ELSE (OSX) # Linux
+     INSTALL(FILES  ${UNSIO_BINARY_DIR}/../lib/libunsio.so DESTINATION lib)	
+  ENDIF(OSX)
+  
   # includes
   INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/uns.h DESTINATION inc/uns)
   INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/unsdebug.h DESTINATION inc/uns)
