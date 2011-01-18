@@ -46,7 +46,8 @@ namespace uns {
    
 private:
     int full_nbody;
-    int * nemobits , * ionbody;
+    int * nemobits , * ionbody, *iokeys;
+    int * keys;
     float * iotime, *iopos, *iovel, *iomass, *iorho, *ioaux, *ioacc, *iopot;
     float * pos, *vel, *mass, * rho, *acc, *aux, *pot;
     bool first_stream;
@@ -64,6 +65,7 @@ private:
     float *  getAux()  { return aux ;}
     float *  getAcc()  { return acc ;}
     float *  getPot()  { return pot ;}
+    int   *  getKeys() { return keys;}
     float    getTime() { return *iotime; }
     int      getNbody(){ return *ionbody;}
 };

@@ -19,7 +19,7 @@ SET(CMAKE_VERBOSE_MAKEFILE OFF)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_BINARY_DIR})
 
 FIND_PACKAGE(NEMO)
-
+FIND_PACKAGE(SQLITE3)
 IF (NOT NEMO_INSTALLED) 
 
   MESSAGE(FATAL_ERROR "NEMO environment not loaded !!!")
@@ -47,10 +47,10 @@ FILE(GLOB LIBSOURCES ../src/*.cc)
 SET(LIBRARY_OUTPUT_PATH ../lib)
 
 # compilation options
-add_definitions(-Wall -g -Wswitch -Wcast-align -Wreturn-type -Wno-unused-function  -fno-strict-aliasing -ggdb)
+add_definitions(-Wall -g -Wswitch -Wcast-align -Wreturn-type -Wno-unused-function  -fno-strict-aliasing -ggdb ${DNOSQLITE3})
 
 # create library "uns"
-add_library (unsio SHARED ${LIBSOURCES})
+add_library (unsio SHARED ${LIBSOURCES} )
 #
 # ------------------
 # TEST PROGRAM      
@@ -66,10 +66,10 @@ set(EXECUTABLE_OUTPUT_PATH ../bin)
 MESSAGE( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
 
 # Make sure the compiler can find include files from our Hello library.
-include_directories (${UNSIO_SOURCE_DIR}/../src $ENV{NEMOINC} ${NEMOLIB})
+include_directories (${UNSIO_SOURCE_DIR}/../src $ENV{NEMOINC} ${NEMOLIB} ${SQLITE3_H_PATH})
 
 # Make sure the linker can find the Hello library once it is built.
-link_directories (${UNSIO_BINARY_DIR}/lib ${NEMOLIB} ${FC_GFORT_PATH} ${FC_G77_PATH})
+link_directories (${UNSIO_BINARY_DIR}/lib ${SQLITE3_LIB_PATH} ${NEMOLIB} ${FC_GFORT_PATH} ${FC_G77_PATH})
 
 # Find all LIB's sources files
 FILE(GLOB exe_sources ../test_src/*.F)
@@ -90,7 +90,7 @@ FOREACH(exe_cpp ${execpp_sources})
   add_executable (${exe} ${exe_cpp})
 
   # Link the executable to the Hello library.
-  target_link_libraries (${exe} unsio nemo sqlite3  X11 pgplot ${FC_GFORT_LIB} ${FC_G77_LIB} stdc++)
+  target_link_libraries (${exe} unsio nemo ${SQLITE3_LIB} X11 pgplot ${FC_GFORT_LIB} ${FC_G77_LIB} stdc++)
 
 ENDFOREACH(exe_cpp ${execpp_sources})
 

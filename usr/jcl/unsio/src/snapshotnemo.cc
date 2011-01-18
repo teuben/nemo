@@ -51,6 +51,7 @@ CSnapshotNemoIn::CSnapshotNemoIn(const std::string _name,
   iopot   =NULL;
   ioaux   =NULL;
   iorho   =NULL;
+  iokeys  =NULL;
   
   mass   = NULL;
   pos    = NULL;
@@ -59,6 +60,7 @@ CSnapshotNemoIn::CSnapshotNemoIn(const std::string _name,
   pot    = NULL;
   rho    = NULL;
   aux    = NULL;
+  keys   = NULL;
   last_nbody=0;
   initparam(const_cast<char**>(argv),const_cast<char**>(defv));
   valid=isValidNemo();
@@ -78,6 +80,7 @@ CSnapshotNemoIn::~CSnapshotNemoIn()
   if (ioaux  ) free ((float *) ioaux  );
   if (ioacc  ) free ((float *) ioacc  );
   if (iopot  ) free ((float *) iopot  );
+  if (iokeys ) free ((int   *) iokeys );
   
   if (pos    ) delete [] pos;
   if (vel    ) delete [] vel;
@@ -86,6 +89,8 @@ CSnapshotNemoIn::~CSnapshotNemoIn()
   if (aux    ) delete [] aux;
   if (acc    ) delete [] acc;
   if (pot    ) delete [] pot;
+  if (keys   ) delete [] keys;
+  
   if (valid) close();
 }
 // ============================================================================
@@ -102,8 +107,8 @@ bool CSnapshotNemoIn::isValidNemo()
     first_stream=true;
     //select_time="all";
     std::string force_select = "all"; 
-    status_ionemo=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,t,st,b",
-            force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,
+    status_ionemo=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,key,t,st,b",
+            force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,&iokeys,
             &iotime, select_time.c_str(),&nemobits);
 
     full_nbody = *ionbody;        
@@ -163,8 +168,8 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
   int status;  // io_nemo status
   std::string force_select = "all"; 
   if (! first_stream) { // normal file or second reading (stream)
-    status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,t,st,b",
-                   force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,
+    status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,key,t,st,b",
+                   force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,&iokeys,
 		   &iotime, select_time.c_str(),&nemobits);
   } else { // "-" first stream, no need to read
     first_stream=false;
@@ -207,6 +212,9 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
 	if (pot) delete [] pot;
 	if ( *nemobits & PotentialBit)  pot = new float[*ionbody];
 	else pot=NULL;
+	if (keys) delete [] keys;
+	if ( *nemobits & KeyBit)  keys = new int[*ionbody];
+        else keys=NULL;
       }
       last_nbody = *ionbody; // save nbody
       int cpt=0;
@@ -223,6 +231,7 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
           if ( *nemobits & DensBit) rho[cpt]  = iorho[cpt];
           if ( *nemobits & AuxBit ) aux[cpt]  = ioaux[cpt];
           if ( *nemobits & PotentialBit ) pot[cpt]  = iopot[cpt];
+          if ( *nemobits & KeyBit ) keys[cpt]  = iokeys[cpt];
 	  cpt++;
 	}
       }
@@ -428,7 +437,15 @@ bool CSnapshotNemoIn::getData(const std::string name,int *n,int **data)
   *n = 0;
     
   switch(CunsOut::s_mapStringValues[name]) {
-    default: ok=false;
+  case uns::Keys :
+  case uns::Id   :
+    *data = getKeys();
+    *n    = getNSel();
+    break;
+  default: ok=false;
+  }
+  if (*data == NULL) {
+    ok=false;
   }
   if (verbose) {
     if (ok) {
@@ -450,10 +467,24 @@ bool CSnapshotNemoIn::getData(const std::string comp,const std::string name,int 
   
   int nbody,first,last;
   bool status=getRangeSelect(comp.c_str(),&nbody,&first,&last,false); // find components ranges
-  if (status) {;} // remove compiler warning
-  switch(CunsOut::s_mapStringValues[name]) {
-    default: ok=false;
+  if (!status && comp=="all") { // retreive all particles selected by the user
+    status=1;
+    first=0;
+    nbody=getNSel();
   }
+  switch(CunsOut::s_mapStringValues[name]) {
+  case uns::Id   :
+    if (status && getKeys()) {
+      *data = &getKeys()[first];
+      *n    = nbody;//getNSel();
+    } else {
+      ok=false;
+    }
+    break;
+    
+    default: ok=false;
+    }
+
   if (verbose) {
     if (ok) {      
       std::cerr << "CSnapshotNemoIn::getData name["<<name<<"]=" << CunsOut::s_mapStringValues[name] << "\n";
@@ -588,6 +619,7 @@ int CSnapshotNemoOut::setData(std::string name, const int n ,int * data,const bo
 
   switch(CunsOut::s_mapStringValues[name]) {
   case uns::Keys :
+  case uns::Id:
     //status = setKeys(n, data, _addr);
     status = setArray(n,1,data,&keys,name.c_str(),KeyBit,_addr);
     break;
@@ -750,7 +782,7 @@ int CSnapshotNemoOut::setArray(const int _n, const int dim, int * src, int ** de
     ptrIsAlloc[name]=true;
     if (*dest)  delete [] (*dest);
     *dest = new int[_n*dim];
-    memcpy(*dest,src,sizeof(float)*_n*dim);
+    memcpy(*dest,src,sizeof(int)*_n*dim);
   }
   bits |= tbits;
   return 1;

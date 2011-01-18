@@ -19,8 +19,9 @@
 #include <string>
 #include <fstream>
 #include "snapshotinterface.h"
+#ifndef NOSQLITE3
 #include "sqlite_tools.h"
-
+#endif
 
 namespace uns {
   class CunsIn;

@@ -111,11 +111,15 @@ namespace uns {
   // trySim                                                                      
   void CunsIn::trySimDB()
   {
+#ifndef NOSQLITE3  
     snapshot = new CSnapshotSimIn(simname, sel_comp, sel_time, verbose);
     valid = snapshot->isValidData();
     if (valid && verbose) {
       std::cerr << "CunsIn::trySimDB() It's a simulation...\n";
     }
+#else
+    valid = false;
+#endif
   }
   // ----------------------------------------------------------------------------
   // trySnapList                                                                      

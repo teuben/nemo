@@ -15,7 +15,7 @@
 
 #ifndef SQLITE_TOOLS_H
 #define SQLITE_TOOLS_H
-
+#ifndef NOSQLITE3
 #include <sqlite3.h>
 #include <iostream>
 #include <cstdlib>
@@ -49,4 +49,5 @@ namespace jclt {
   };
 
 }
+#endif
 #endif

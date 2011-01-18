@@ -31,12 +31,14 @@
 */
 
 #include "sqlite_tools.h"
-
+#include <iostream>
+#include <cstdlib>
 int main(int argc, char **argv){
   if( argc!=3 ){
    std::cerr << "Usage: " << argv[0] << " DATABASE SQL-STATEMENT" << std::endl;
    exit(1);
   }
+#ifndef NOSQLITE3
   jclt::CSQLite3 sql(argv[1]);
   sql.exe(argv[2]);
 
@@ -58,6 +60,7 @@ int main(int argc, char **argv){
     }
 
   return 0;
+#endif
 }
 
 

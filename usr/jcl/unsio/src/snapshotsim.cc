@@ -12,7 +12,7 @@
 /* 
 	@author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
  */
-
+#ifndef NOSQLITE3  // do not compite if no sqlite3 lib
 #include "snapshotsim.h"
 #include "snapshotgadget.h"
 #include "snapshotnemo.h"
@@ -597,3 +597,4 @@ int CSnapshotSimIn::getCod(const std::string select,
   return status;
 }
 }
+#endif // NOSQLITE3

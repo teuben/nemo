@@ -15,7 +15,7 @@
 
 #ifndef SNAPSHOTSIM_H
 #define SNAPSHOTSIM_H
-
+#ifndef NOSQLITE3
 #include <string>
 #include <fstream>
 #include "snapshotinterface.h"
@@ -30,12 +30,12 @@ namespace uns {
 		 const bool verb=false);
     ~CSnapshotSimIn();
     int nextFrame(const uns::t_indexes_tab * index_tab, const int nsel);
-    int close() { return 1;};
+    int close() { return 1;}
     ComponentRangeVector * getSnapshotRange();
-    bool getData(const std::string name,int *n,float **f) { return snapshot->getData(name,n,f); };
-    bool getData(const std::string name,       float * f) { return snapshot->getData(name,  f); };
-    bool getData(const std::string name,int *n,int   **i) { return snapshot->getData(name,n,i); };
-    bool getData(const std::string name,       int   * i) { return snapshot->getData(name,  i); };
+    bool getData(const std::string name,int *n,float **f) { return snapshot->getData(name,n,f); }
+    bool getData(const std::string name,       float * f) { return snapshot->getData(name,  f); }
+    bool getData(const std::string name,int *n,int   **i) { return snapshot->getData(name,n,i); }
+    bool getData(const std::string name,       int   * i) { return snapshot->getData(name,  i); }
     bool getData(const std::string comp, const std::string name,int *n,float **f) {
       return snapshot->getData(comp,name,n,f);
     }
@@ -88,5 +88,5 @@ namespace uns {
   };
   
 } // namespace
-
+#endif
 #endif
