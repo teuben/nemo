@@ -21,8 +21,9 @@ CSQLite3::CSQLite3 (std::string tablename): zErrMsg(0), rc(0),db_open(false)
   if( rc ){
     std::cerr << "Can't open database: " << sqlite3_errmsg(db) << "\n";
     sqlite3_close(db);
+  } else {
+    db_open=true;
   }
-  db_open=true;
 }
 // ----------------------------------------------------------------------------
 //
