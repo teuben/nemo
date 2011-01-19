@@ -1,0 +1,59 @@
+.TH UNS_STACK 1NEMO "April 2, 2010"
+.SH NAME
+uns_stack \- superimpose two UNS N-body snapshots
+.SH SYNOPSIS
+\fBuns_stack in1=\fPin_file1 \fBin2=\fPin_file2 \fBout=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIuns_stack\fP reads in two UNS N-body systems and outputs one containing
+particles from both.  It may be used to set up collisions by
+specifying offsets in position and velocity space.
+.PP
+If more than two snapshots need to be stacked, multiple runs of \fIuns_stack\fP.
+would be needed
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin1=\fP\fIin_file1\fP
+.TP
+\fBin2=\fP\fIin_file2\fP
+Input data will be read from these files, which must be in
+\fIUNS\fP format (currently Nemo and Gadget2 are supported).  Only the
+first frames are used. Both input snapshot must have the same file format.
+
+Default: \fIrequired\fP.
+.TP
+\fBout=\fP\fIout_file\fP
+Output data will be written to \fIout_file\fP. The out file format
+will be the same as input file format.
+.TP
+\fBdeltar=\fP\fIrel_position\fP
+Relative position of first snapshot w.r.t. second.
+Default: \fB0.0,0.0,0.0\fP.
+.TP
+\fBdeltav=\fP\fIrel_velocity\fP
+Relative velocity of first snapshot w.r.t. second.
+Default: \fB0.0,0.0,0.0\fP.
+.TP
+\fBshift=1|2\fP
+Shift system1 or system2?  If the final system is shifted with center
+of mass moved to the center, this option is not relevant anymore.
+Default: \fB1\fP.
+.TP
+\fBzerocm=\fP\fIzero_cm_flag\fP
+If true, translate to center of mass before output.
+Default: \fBfalse\fP. 
+.TP
+\fBverbose=\fP\fIflag\fP
+If true, give some verbose output.
+Default: \fBTrue\fP.
+.TP
+.SH SEE ALSO
+snapstack(1NEMO), snapadd(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Jean-Charles LAMBERT
+.SH HISTORY
+.nf
+.ta +1i +4i
+02-Apr-10	V1.0 created	JCL
+.fi
+
