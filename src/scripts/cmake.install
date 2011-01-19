@@ -18,7 +18,7 @@ echo These two better be the same , or the script may fail
 
 cd $NEMO/local
 wget $cmake1
-tar zxf $cmaketargz
+tar zxf $cmake1:t
 cd cmake-$version
 ./configure --prefix=$NEMO
 make
