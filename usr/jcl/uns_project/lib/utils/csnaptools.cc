@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2009                                       
+// Copyright Jean-Charles LAMBERT - 2009-2010                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -12,10 +12,65 @@
 #include <iostream>
 #include <cmath>
 #include <sstream>
+#include <assert.h>
 #include "csnaptools.h"
 
 using namespace jclut;
 
+//
+// moveToCod
+// move particles positions and velocities to center of density
+//template <class T> void CSnaptools<T>::moveToCod(const int nbody,T * pos, T * mass)
+template <class T> void CSnaptools::moveToCod(const int nbody,T * pos,T * vel, T * mass, T * rho, double cod[6], bool move)
+{
+  double codp[3] = {0., 0., 0.};
+  double codv[3] = {0., 0., 0.};
+  double w_i, w_sum=0.0;
+  // loop on all the bodies
+  for (int i=0; i<nbody;i++) {
+    w_i    = rho[i] * mass[i]; // weight = rho * mass
+    w_sum += w_i;              // sum
+    if (pos) {
+      codp[0] +=(pos[i*3  ]*w_i);
+      codp[1] +=(pos[i*3+1]*w_i);
+      codp[2] +=(pos[i*3+2]*w_i);
+    }
+    if (vel) {
+      codv[0] +=(vel[i*3  ]*w_i);
+      codv[1] +=(vel[i*3+1]*w_i);
+      codv[2] +=(vel[i*3+2]*w_i);
+    }    
+  }
+  assert(w_sum>0.0); // total weight must be positif
+  if (pos) {
+    codp[0] /= w_sum;
+    codp[1] /= w_sum;
+    codp[2] /= w_sum;
+  }
+  cod[0] = codp[0]; cod[1] = codp[1]; cod[2] = codp[2];
+  if (vel) {
+    codv[0] /= w_sum;
+    codv[1] /= w_sum;
+    codv[2] /= w_sum;
+    
+  }
+  cod[3] = codv[0]; cod[4] = codv[1]; cod[5] = codv[2];
+  std::cerr << "COD = " << cod[0]<<" "<< cod[1]<<" "<< cod[2]<<" "
+      << cod[3]<<" "<< cod[4]<<" "<< cod[5]<<"\n";
+  if (move) {
+    // move to cod requested
+    for (int i=0; i<nbody;i++) {
+      for (int j=0;j<3;j++) {
+        if (pos)
+          pos[i*3+j] -= codp[j]; // pos
+        if (vel)
+          vel[i*3+j] -= codv[j]; // vel
+      }
+    }
+  }
+}
+template void CSnaptools::moveToCod(const int nbody,float * pos,float * vel, float * mass, float * rho, double cod[6], bool move);
+template void CSnaptools::moveToCod(const int nbody,double * pos,double * vel, double * mass, double * rho, double cod[6], bool move);
 //
 // moveToCom
 // move particles positions to center of mass
@@ -50,7 +105,6 @@ template <class T> void CSnaptools::moveToCom(const int nbody,T * pos, T * mass)
 }
 template void CSnaptools::moveToCom<float>(const int nbody,float * pos, float * mass);
 template void CSnaptools::moveToCom<double>(const int nbody,double * pos, double * mass);
-#if 1
 //
 // basename
 std::string  CSnaptools::basename(const std::string str)
@@ -107,5 +161,4 @@ template <class T>  std::vector<T> CSnaptools::stringToVector(const std::string 
 }
 template std::vector<float> CSnaptools::stringToVector<float>(const std::string s, const int min, float val, std::string sep);
 template std::vector<int  > CSnaptools::stringToVector<int  >(const std::string s, const int min, int   val, std::string sep);
-#endif
 //

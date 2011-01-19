@@ -229,3 +229,93 @@ bool cfalcon::addGravity2(const int nbody,
   }
   return status;
 }
+// -------------------------------------------------------------------------
+//                        CDensity class implementation
+// -------------------------------------------------------------------------
+
+// -------------------------------------------------------------------------
+// Initialyse static variable
+int  CDensity::N = 1;
+real CDensity::F = 1.;
+
+// -------------------------------------------------------------------------
+// constructor
+CDensity::CDensity(const int _nbody, float * pos, float * mass)
+{
+  SHOT = NULL;
+  rho  = NULL;
+  hsml = NULL;
+  nbody = 0;
+  setData(_nbody,pos,mass);
+}
+// -------------------------------------------------------------------------
+// destructor
+CDensity::~CDensity()
+{
+  if (SHOT) delete SHOT;
+  if (rho ) delete [] rho;
+  if (hsml) delete [] hsml;
+}
+// -------------------------------------------------------------------------
+void CDensity::setData(const int _nbody, float * pos, float * mass)
+{
+  nbody=_nbody;
+  
+  unsigned Nbod[bodytype::NUM]={0};
+  Nbod[falcON::bodytype::std]=nbody;
+  const fieldset SRCE(fieldset::m | fieldset::x);
+  const fieldset GIVE(fieldset::x | fieldset::y | fieldset::r);// |  fieldset::R);  
+  const fieldset WANT((GIVE & ~fieldset(fieldset::r) & ~fieldset(fieldset::y) ) | SRCE |
+		      fieldset(fieldset::empty));
+
+  if (! SHOT) delete SHOT;
+  SHOT = new falcON::snapshot(0.,Nbod,SRCE|fieldset::r);
+  
+  int cpt=0;
+  LoopAllBodies(SHOT,B) {
+    B.pos()[0] =  pos[cpt*3+0];
+    B.pos()[1] =  pos[cpt*3+1];
+    B.pos()[2] =  pos[cpt*3+2];    
+    B.mass()   =  mass[cpt];
+    B.rho()    =  0.0;   
+    cpt++;
+  }
+  assert(cpt==nbody);
+}
+// -------------------------------------------------------------------------
+// CDensity::computeDensity
+void CDensity::compute(const int method, const int K,const int N, const int ncrit)
+{
+  prepare(N);
+ 
+  flags   FLAG = flags::empty;
+  SHOT->add_field(fieldbit::f);
+  OctTree TREE(SHOT, ncrit, 0, Default::MaxDepth, FLAG);
+
+  // estimate density
+  SHOT->add_field(fieldbit::r);
+  SHOT->add_field(fieldbit::y);
+  unsigned NIAC;
+  switch(method) {
+  case 0:
+    std::cerr << "Density engine : Ferrer's method\n";
+    ProcessNearestNeighbours(&TREE,K,&SetDensity,NIAC,true);break;
+  case 1:
+    std::cerr << "Density engine : Hackdens's method\n";
+    ProcessNearestNeighbours(&TREE,K,&SetDensity2,NIAC,true);break;
+  }
+  if (rho) delete [] rho;
+  rho = new real[nbody];
+  if (hsml) delete [] hsml;
+  hsml = new real[nbody];
+  int i=0;
+  LoopAllBodies(SHOT,B) {
+    rho[i]  = B.rho();
+    hsml[i] = B.aux();
+    i++;
+  }
+  // garbage collecting
+  delete SHOT;
+  SHOT=NULL;
+}
+

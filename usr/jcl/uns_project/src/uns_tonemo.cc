@@ -17,12 +17,7 @@
 #include <cstdio>
 #include <iomanip>
 #include "uns.h"
-
-#define _vectmath_h // put this statement to avoid conflict with C++ vector class
-extern "C" {
-#include <nemo.h>                                     // NEMO basics
-  int io_nemo(const char *, const char *,...);
-}
+#include <nemo.h>       
 
 using namespace std; // prevent writing statment like 'std::cerr'
 
@@ -67,16 +62,22 @@ void processComponent(std::string select,std::string comp, uns::CunsIn * uns,uns
   }  
  
   float * rho, * hsml;
-  bool ok4;
+  bool ok;
   int nn;
-  ok4 = uns->snapshot->getData("rho" ,&nn,&rho );
-  if (ok4 && n1 == nn) {
+  // Try to get Rho
+  ok = uns->snapshot->getData("rho" ,&nn,&rho );
+  if (ok && n1 == nn) {
     unsout->snapshot->setData("rho",n1,rho,false);
   }  
-  ok4 = uns->snapshot->getData("hsml" ,&nn,&hsml );
-  if (ok4 && n1 == nn) 
-    unsout->snapshot->setData("hsml",n1,hsml,false);
-  
+  // Try to get Hsml
+  ok = uns->snapshot->getData("hsml" ,&nn,&hsml );
+  if (ok && n1 == nn) 
+    unsout->snapshot->setData("hsml",n1,hsml,false);  
+  // Try to get Ids
+  int * id;
+  ok = uns->snapshot->getData("id" ,&nn,&id );
+  if (ok && n1 == nn) 
+    unsout->snapshot->setData("id",n1,id,false);  
 }
 //------------------------------------------------------------------------------
 // main
@@ -97,7 +98,8 @@ int main(int argc, char ** argv )
     
   bool one_file=false;
   bool stop=false;
-
+  bool special_nemo=false;
+  if (outname=="-" || outname==".") special_nemo=true;
   // in case of an input simulation from the database
   // and with just one time requested,
   // we create a range of time to speedup the searching
@@ -114,6 +116,8 @@ int main(int argc, char ** argv )
     std::cerr << "Modified selected time =["<<select_t<<"]\n";
   }
 
+  uns::CunsOut * unsout=NULL; // out object
+  bool first_out=true;
   // -----------------------------------------------
   // instantiate a new UNS input object (for reading)
   uns::CunsIn * unsin = new uns::CunsIn(simname,select_c,select_t,verbose);
@@ -138,27 +142,38 @@ int main(int argc, char ** argv )
         // example : myoutput.0 myoutput.1 ...... etc
         stringstream number;
         number << cpt++;
-        std::string out_name;
-        if (one_file || (cpt==1 && !first)) {
-          out_name=std::string(outname);
-          if (one_file) stop = true; // do not continue
+        std::string out_name=std::string(outname);;
+        if (! special_nemo) { // ! standard output && ! "."
+          if (one_file || (cpt==1 && !first)) {
+            out_name=std::string(outname);
+            if (one_file) stop = true; // do not continue
+          } else {
+            stringstream ss;
+            ss << std::string(outname) << "." << setw(5) << setfill('0') << number.str();
+            //out_name=std::string(outname)+"."+number.str();
+            out_name=ss.str();
+          }
+          // create a new UNS out object
+          unsout = new uns::CunsOut(out_name,"nemo",verbose);      
         } else {
-          stringstream ss;
-          ss << std::string(outname) << "." << setw(5) << setfill('0') << number.str();
-          //out_name=std::string(outname)+"."+number.str();
-          out_name=ss.str();
+          if (first_out) {
+            first_out = false;
+            // instantiate only once unsout, because outname="-"
+            unsout = new uns::CunsOut(out_name,"nemo",verbose);
+          }
         }
         std::cerr << "output filename=["<<out_name<<"]\n";
-        // -----------------------------------------------
-        // Instantiate a UNS output snapshot in "nemo" format (for writing)
-        uns::CunsOut * unsout = new uns::CunsOut(out_name,"nemo",verbose);      
+        
         // save time
         unsout->snapshot->setData("time",time);
         // processing
         processComponent(select_c,"all"  ,unsin,unsout); // only all particles selected
         // save snapshot
         unsout->snapshot->save();
-        delete unsout; // remove object      
+        
+        if (!special_nemo) {
+          delete unsout; // remove object      
+        }
       }
     }
   } else {

@@ -14,8 +14,11 @@
 */
 #ifndef CFALCON_H
 #define CFALCON_H
-
+#include <forces.h>                                // falcON      
+#include <body.h>                                  // the bodies    
+#include <public/neighbours.h>                     // finding neighbours       
 namespace jclut {
+  
 class cfalcon
 {
 public:
@@ -40,8 +43,62 @@ public:
                              const float theta=0.6,
                              const int kernel_type=1,
                              const int ncrit=6);
-
+    
+};
+using namespace falcON;
+using falcON::real;
+// -------------------------------------------------------------
+// Class CDensity
+// estimate density using falcON engine
+class CDensity {
+  
+public:
+  CDensity(const int nbody, float * pos, float * mass);
+  ~CDensity();
+  void setData(const int nbody, float * pos, float * mass);
+  void compute(const int method, const int K,const int N, const int ncrit);
+  static real F; ///< normalisation factor for kernel
+  static int  N; ///< order of Ferrers kernel
+  real * getRho()  { return rho; }
+  real * getHsml() { return hsml; }
 private:
+  real * rho, * hsml;
+  int nbody;
+  //real RHO,AUX;
+  snapshot *  SHOT ;
+  void prepare(int n) {
+    N = n;
+    F = 0.75/Pi;
+    for(n=1; n<=N; ++n)
+      F *= double(n+n+3)/double(n+n);
+  } 
+  static void SetDensity(const bodies*B, const OctTree::Leaf*L,
+		  const Neighbour*NB, int K)
+  {
+    real iHq = one/NB[K-1].Q;
+    real rho = zero;
+    for(int k=0; k!=K-1; ++k) {
+      //std::cerr << "rneib["<<k<<"]="<<NB[k].Q<<"\n";
+      rho += scalar(NB[k].L) * std::pow(one-iHq*NB[k].Q,N);
+    }
+    rho *= F * std::pow(sqrt(iHq),3);
+    B->rho(mybody(L)) = rho;
+    B->aux(mybody(L)) = sqrt(NB[K-1].Q);
+    //std::cerr << "neib="<<B->aux(mybody(L))<<"\n";
+
+  }
+#define   FRTHRD_PI  4.18879020478639098462
+  static void SetDensity2(const bodies*B, const OctTree::Leaf*L,
+		  const Neighbour*NB, int K)
+  {
+    float rn=NB[K-1].Q;
+    float sqrn = sqrt(rn);
+    real rho=(K-1)/(rn*sqrn*FRTHRD_PI);
+    B->rho(mybody(L)) = rho;
+    B->aux(mybody(L)) = sqrn;
+    //std::cerr << "neib="<<B->aux(mybody(L))<<"\n";
+    //fprintf(stdout,"r=%f nb=%d den=%f\n", sqrt(rn),K,rho);
+  }
 };
 }
 #endif // CFALCON_H

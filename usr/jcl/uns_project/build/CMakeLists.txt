@@ -22,8 +22,14 @@ MESSAGE( STATUS "CMAKE_MODULE_PATH=" ${CMAKE_MODULE_PATH} )
 # require NEMO
 FIND_PACKAGE(NEMO REQUIRED)
 # require boost
-find_package( Boost 1.36.0 REQUIRED)
-
+find_package( Boost 1.36.0)
+set(LIBBOOST boost_thread-mt.a boost_system-mt.a)
+set(DNOBOOST "")
+if(NOT Boost_FOUND)
+   MESSAGE (STATUS " Boost not found, uns_2dplot will run slowly.....")
+   set(DNOBOOST "-DNOBOOST")
+   set(LIBBOOST "")
+endif(NOT Boost_FOUND)
 # Some necessary variable
 set(DEHNEN  $ENV{NEMO}/usr/dehnen)
 set(NEMOLIB $ENV{NEMOLIB})
@@ -54,8 +60,7 @@ SET(LIBRARY_OUTPUT_PATH ../lib)
 
 
 # compilation options
-add_definitions( -DfalcON_NEMO -DfalcON_SINGLE -g -ggdb -funroll-loops -Wall)
-#add_definitions(-O2 -ggdb -DfalcON_NEMO -D_FILE_OFFSET_BITS=64 -mpreferred-stack-boundary=4 -funroll-loops -fforce-addr -rdynamic  -DfalcON_SINGLE)
+add_definitions( -O2 -DfalcON_NEMO -DfalcON_SINGLE  -funroll-loops -Wall ${DNOBOOST})
 
 
 # Executbale output path
@@ -87,7 +92,7 @@ FOREACH(exe_cpp ${execpp_sources})
 
   # Link the executable to the Hello library.
 #  target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot X11 g2c unsio nemo sqlite3 ${Boost_LIBRARIES} boost_thread-mt.a boost_system-mt.a)
- target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot  ${FC_GFORT_LIB} ${FC_G77_LIB} X11 unsio WDutils falcON nemo sqlite3  boost_thread-mt boost_system-mt dl)
+ target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot ${FC_GFORT_LIB} ${FC_G77_LIB}  X11 unsio WDutils falcON nemo sqlite3 -lgomp ${LIBBOOST} dl)
 
 
 ENDFOREACH(exe_cpp ${execpp_sources})

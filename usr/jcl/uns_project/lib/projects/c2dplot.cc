@@ -10,8 +10,10 @@
 // ============================================================================
 #include <cpgplot.h>
 #include <iostream>
-#include <boost/timer.hpp>
+//#include <boost/timer.hpp>
 #include <ctime>
+#include <cmath>
+#include <cassert>
 #include <sstream>
 #include <iomanip>
 #include <cstring>
@@ -148,6 +150,7 @@ template <class T> void C2dplot<T>::computeImage(const int xaxis, const int yaxi
   float contrast=1.0;
 
   float RL[9] = {-0.5, 0.0, 0.17, 0.33, 0.50, 0.67, 0.83, 1.0, 1.7};
+  //float RL[9] = {0.0,  0.1, 0.17, 0.33, 0.50, 0.67, 0.83, 1.0, 1.7};
   float RR[9] = { 0.0, 0.0,  0.0,  0.0,  0.6,  1.0,  1.0, 1.0, 1.0};
   float RG[9] = { 0.0, 0.0,  0.0,  1.0,  1.0,  1.0,  0.6, 0.0, 1.0};
   float RB[9] = { 0.0, 0.3,  0.8,  1.0,  0.3,  0.0,  0.0, 0.0, 1.0};
@@ -263,18 +266,24 @@ template <class T> void C2dplot<T>::startWorkers(const int nbody, T * data, cons
     if (x==nthreads-1) { // last threads
       npart=indexes.size()-offset;
     }
+#ifndef NOBOOST
     //std::cerr << "startWorkers: "<<x<<" npart="<<npart<<"\n";
     boost::shared_ptr<boost::thread>  vv(new boost::thread(boost::bind(&C2dplot::worker, this, x,offset,npart,data,xaxis,yaxis)));
     v_threads.push_back(vv) ;
-
+#else
+    // this part is not parallel
+    worker(x,offset,npart,data,xaxis,yaxis);
+#endif
     offset+=npart;
   }
+#ifndef NOBOOST
   // wait the end of each threads
   for (std::vector<boost::shared_ptr<boost::thread> >::iterator 
 	 it=v_threads.begin();
        it != v_threads.end(); it++) {
     (*it)->join();
   }
+#endif
   // accumulate all frames computed in parallel on the first frame
   for (int x=1; x<nthreads; x++) {
     for (int i=0;i<dimy; i++)

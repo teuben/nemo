@@ -19,8 +19,10 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#ifndef NOBOOST
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
+#endif
 #include "cgaussian.h"
 
 #define NTHREAD_MAX 256
@@ -59,8 +61,10 @@ namespace uns_proj {
     // Parallel tasks
     void startWorkers(const int nbody, T * data, const int xaxis, const int yaxis,float& zmin,float& zmax);
     void worker(const int ithread, const int offset, const int nbody, T * data, const int xaxis, const int yaxis);
+#ifndef NOBOOST
     std::vector<boost::shared_ptr<boost::thread> > v_threads; 
     boost::mutex io_mutex;
+#endif
     float xmin,xmax,ymin,ymax;
     
     std::string dev, title, sel_comp, filename;

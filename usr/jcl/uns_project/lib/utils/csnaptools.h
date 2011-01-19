@@ -23,6 +23,7 @@ namespace jclut {
     public:
       CSnaptools() {;};
       
+      template <class T> static void moveToCod(const int nbody,T * pos, T * Vel, T * mass, T * rho, double cod[6], bool move);
       template <class T> static void moveToCom(const int nbody,T * pos, T * mass);
       static std::string basename(const std::string);
       static std::string dirname(const std::string);
