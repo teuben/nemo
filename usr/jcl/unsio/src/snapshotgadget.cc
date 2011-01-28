@@ -1727,7 +1727,15 @@ int CSnapshotGadgetOut::write()
         writeData((char *) mass[k], sizeof(float), header.npart[k]);
     writeFRecord(blk);
   }
-
+  // U
+  if (bits & U_BIT) {
+    assert(header.npart[0]>0);
+    blk=sizeof(float)*header.npart[0];
+    writeBlockName("U   ",blk);
+    writeFRecord(blk);
+    writeData((char *) intenerg, sizeof(float), header.npart[0]);
+    writeFRecord(blk);
+  }
   // RHO
   if (bits & RHO_BIT) {
     assert(header.npart[0]>0);
@@ -1747,16 +1755,7 @@ int CSnapshotGadgetOut::write()
     writeData((char *) hsml, sizeof(float), header.npart[0]);
     writeFRecord(blk);
   }
-  
-  // U
-  if (bits & U_BIT) {
-    assert(header.npart[0]>0);
-    blk=sizeof(float)*header.npart[0];
-    writeBlockName("U   ",blk);
-    writeFRecord(blk);
-    writeData((char *) intenerg, sizeof(float), header.npart[0]);
-    writeFRecord(blk);
-  }
+    
 #if 0
   offset=0;
   for(int k=0;k<6;k++)
