@@ -30,7 +30,7 @@ const char * defv[] = {
   "deltar=0.0,0.0,0.0\n	      position of in1 w.r.t. in2",
   "deltav=0.0,0.0,0.0\n	      velocity of in1 w.r.t. in2",
   "shift=1\n                  Shift over 1st or 2nd one?",
-  "zercom=f\n                 Centering On Mass after stacking?",
+  "zerocm=f\n                 Centering On Mass after stacking?",
   "verbose=f\n                verbose on/off",
   "VERSION=1.O\n              compiled on <"__DATE__"> JCL  ",
   NULL,
@@ -44,12 +44,13 @@ using namespace jclut;
 bool addArray(std::string comp, std::string name, int dim, CunsIn * uns1,CunsIn * uns2, CunsOut * unsout, bool verbose)
 {
   bool status=false;
-  float * d=NULL, * d1, * d2;
-  int n,n1,n2;
+  float * d=NULL, * d1=NULL, * d2=NULL;
+  int n,n1=0,n2=0;
   bool ok1 = uns1->snapshot->getData(comp,name ,&n1,&d1);
   bool ok2 = uns2->snapshot->getData(comp,name ,&n2,&d2);
   n=0;
-  if (ok1 && ok2) {
+  if (ok1 || ok2) {
+    std::cerr << "n1="<<n1<<" n2="<<n2;
     n = n1+n2;
     assert(n>0);
     d = new float[n*dim];

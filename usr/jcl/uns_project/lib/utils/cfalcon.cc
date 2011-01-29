@@ -61,6 +61,16 @@ extern "C" {
                         *G,*theta,*kernel_type,*ncrit);
     return 1;
   }
+  int falcon_density_(const int * nbody, float * pos, float * mass,
+                      const int * K,const int * N, const int * ncrit,
+                      float * rho, float * hsml) {
+    CDensity * density = new CDensity(*nbody,pos,mass);     
+    density->compute(0,*K,*N,*ncrit); // estimate density
+    memcpy(rho ,density->getRho() ,*nbody*sizeof(float));
+    memcpy(hsml,density->getHsml(),*nbody*sizeof(float));
+    delete density; // free memory
+    return 1;
+  }
 }
 bool cfalcon::addGravity(const int nbody,
                          const float * pos, const float * mass, 

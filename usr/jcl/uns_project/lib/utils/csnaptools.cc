@@ -136,7 +136,24 @@ std::string CSnaptools::parseString(std::string & next_string, const std::string
   return return_string;
   
 }
-
+//
+// isStringANumber
+// return true if string is a number of type T. Set data to this number
+template <class T> bool CSnaptools::isStringANumber(const std::string mystring, T &data)
+{
+  bool status=true;
+  std::stringstream stream;
+  stream << mystring;
+  stream >> data;
+  if (! stream.eof()) {
+    //std::cerr << "conversion failed\n";
+    status=false;
+  }
+  return status;
+}
+template bool CSnaptools::isStringANumber<double>(const std::string mystring, double &data);
+template bool CSnaptools::isStringANumber<float> (const std::string mystring, float  &data);
+template bool CSnaptools::isStringANumber<int>   (const std::string mystring, int    &data);
 //
 // stringToVector
 template <class T>  std::vector<T> CSnaptools::stringToVector(const std::string s, const int min, T val, std::string sep)
@@ -161,4 +178,5 @@ template <class T>  std::vector<T> CSnaptools::stringToVector(const std::string 
 }
 template std::vector<float> CSnaptools::stringToVector<float>(const std::string s, const int min, float val, std::string sep);
 template std::vector<int  > CSnaptools::stringToVector<int  >(const std::string s, const int min, int   val, std::string sep);
+template std::vector<std::string> CSnaptools::stringToVector<std::string  >(const std::string s, const int min, std::string  val, std::string sep);
 //

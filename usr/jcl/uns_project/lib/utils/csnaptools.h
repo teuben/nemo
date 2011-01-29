@@ -29,6 +29,7 @@ namespace jclut {
       static std::string dirname(const std::string);
       static std::string parseString(std::string & next_string, const std::string sep=",");
       template <class T> static std::vector<T> stringToVector(const std::string s, const int min, T val, std::string sep=",");
+      template <class T> static bool isStringANumber(const std::string mystring, T &data);
     };
 }
 #endif
