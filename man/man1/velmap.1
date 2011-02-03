@@ -1,0 +1,62 @@
+.TH VELMAP 1NEMO "3 February 2011"
+.SH NAME
+velmap \- various galactic velocity field mapping routines
+.SH SYNOPSIS
+\fBvelmap\fP [parameter=value]
+.SH DESCRIPTION
+VELMAP has various mapping routines on a
+galactic velocity field.
+isovelocity image, weighted by the intensity image and a
+geometric factor specified by model input paramaters.
+.PP
+Optionally an output map can be generated with amusing quantities.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input velocity field, in \fIimage(5NEMO)\fP format. No default.
+.TP
+\fBradii=\fP
+radii of the ring boundaries. For N rings, N+1 values need to be give.
+They need to be sorted by increasing radius. 
+.TP
+\fBpa=\fP
+position angle of disk, in degrees. [0]
+.TP
+\fBinc=\fP
+inclination angle of disk, in degrees [45]   
+.TP
+\fBcenter=\fP
+rotation center (mapcenter if left blank, 0,0=lower left)
+.TP
+\fBvsys=\fP
+systemic velocity [0]     
+.TP
+\fBden=\fP
+input density image, used to weigh the velocities. If missing,
+weights are uniform (but see \fBcoswt=\fP below). Default: none.
+.TP
+\fBfrang=\fP
+free angle around minor axis (2*frang is the total angle around
+the minor axis used).
+[Default: 0]
+.TP
+\fBblank=\fP
+Value of the blank pixel to be ignored. Default: 0.0
+.TP
+\fBcoswt=\fP
+power of cos(theta) weighting [1]   
+.TP
+\fBout=\fP
+Optional output file. 
+.SH SEE ALSO
+rotcur(1NEMO), velfit(1NEMO), runvelfitss07(1NEMO), rotcurshape(1NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben (C version)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+3-feb-2011	new task	PJT
+.fi
