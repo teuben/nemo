@@ -1,4 +1,4 @@
-.TH VELFIT 1NEMO "22 October 2005"
+.TH VELFIT 1NEMO "4 February 2011"
 .SH NAME
 velfit \- fit rotation curve to coplanar disk (WWB73 method)
 .SH SYNOPSIS
@@ -6,14 +6,15 @@ velfit \- fit rotation curve to coplanar disk (WWB73 method)
 .SH DESCRIPTION
 VELFIT fits a theoretical velocity pattern to an
 isovelocity image, weighted by the intensity image and a
-geometric factor specified by model input paramaters.
+geometric factor specified by model input parameters.
 The default option is to fit a rotation curve to an isovelocity
 image of a rotating disk. The rotation curve and rms for the
 fit are printed out and can be used to find the best fit to the
 other parameters. For more details see 
 Warner, Wright and Baldwin (1973MNRAS.163..163W).
 .PP
-Optionally an output map can be generated with amusing quantities.
+Optionally an output map can be generated with amusing quantities, 
+as well an output table that containst, amongst, the rotation curve.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -56,12 +57,20 @@ power of cos(theta) weighting [1]
 use the classic WWB73 method. Currently there is no other 
 method. [t]  
 .TP
+\fBmode=\fP
+Output mode for the output data file. Valid are:
+vtan, vmod, vres (=vobs-vmod), vtan/r, ome (=vtan/r)
+.TP
 \fBout=\fP
-Optional output file. If selected, it will contain the 
+Optional output image. If selected, it will contain the 
 nominal rotation speed as derived from the local radial
 velocity in the disk, appropriately corrected for the
 geometric factors.
 Default: none.
+\fBtab=\fP
+Optional output table file. This will contain the 
+radius, rotation speed, dispersion in the ring and some
+other values.
 .SH SEE ALSO
 rotcur(1NEMO), runvelfitss07(1NEMO), rotcurshape(1NEMO)
 .SH FILES
@@ -73,4 +82,5 @@ Mel Wright (Fortran version), Peter Teuben (C version)
 30-sep-92	new task in miriad	MCHW
 5-oct-2003	V1.0 : C version in NEMO	PJT
 22-oct-2005	V1.1 : added out=	PJT
+4-feb-2011	V1.2 : added tab= and mode=	PJT
 .fi
