@@ -4,18 +4,24 @@ velmap \- various galactic velocity field mapping routines
 .SH SYNOPSIS
 \fBvelmap\fP [parameter=value]
 .SH DESCRIPTION
-VELMAP has various mapping routines on a
-galactic velocity field.
-isovelocity image, weighted by the intensity image and a
-geometric factor specified by model input paramaters.
+VELMAP has various mapping routines that can be done on
+galactic velocity field.  The velocity field can be from
+observations, or a model.
 .PP
-Optionally an output map can be generated with amusing quantities.
+In practice this also means that on a set of projected
+rings, defined by their radii, a center, position angle and inclination,
+various computations can be done and tabulated. 
+.PP
+An output map can be generated with amusing quantities. 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
 input velocity field, in \fIimage(5NEMO)\fP format. No default.
+.TP
+\fBout=\fP
+Output file.  Currently the angular velocity is written here.
 .TP
 \fBradii=\fP
 radii of the ring boundaries. For N rings, N+1 values need to be give.
@@ -44,12 +50,6 @@ the minor axis used).
 .TP
 \fBblank=\fP
 Value of the blank pixel to be ignored. Default: 0.0
-.TP
-\fBcoswt=\fP
-power of cos(theta) weighting [1]   
-.TP
-\fBout=\fP
-Optional output file. 
 .SH SEE ALSO
 rotcur(1NEMO), velfit(1NEMO), runvelfitss07(1NEMO), rotcurshape(1NEMO)
 .SH FILES
