@@ -65,17 +65,23 @@ real vrot[MAXRING];
 real pa, inc, vsys, xpos, ypos;
 real undf;
 
-string outmodes[] = {"vtan","vmod","vres","vtan/r", "ome", NULL};
+    /* outmodes: the order of these is important, see mode= */
+    /*    mode:    0    1    2    3      4   5      */
+string outmodes = "vtan,vmod,vres,vtan/r,ome,vrad";
 
-
-int string_index(string *sa, string s)
+int string_index(string options, string s)
 {
   int i=0;
+  string *sa = burststring(options,",");
+
   while (sa[i]) {
-    if (streq(sa[i],s)) return i;
+    if (streq(sa[i],s))  {
+      freestrings(sa);
+      return i;
+    }
     i++;
   }
-	   
+  freestrings(sa);	   
   return -1;
 }
 
@@ -93,7 +99,8 @@ int ring_index(int n, real *r, real rad)
 nemo_main()
 {
   stream denstr, velstr, outstr, tabstr;
-  real center[2], cospa, sinpa, cosi, sini, cost, costmin, x, y, xt, yt, r, den;
+  real center[2], cospa, sinpa, cosi, sini, sint, cost, costmin, 
+       x, y, xt, yt, r, den;
   real vr, wt, frang, dx, dy, xmin, ymin, rmin, rmax, fsum, ave, tmp, rms;
   real sincosi, cos2i, tga, dmin, dmax, dval, vmod;
   int i, j, k, nx, ny, ir, nring, nundf, nout, nang, nsum, coswt;
@@ -115,7 +122,7 @@ nemo_main()
   if (hasvalue("out")) {
     outmode = getparam("mode");
     mode = string_index(outmodes, outmode);
-    if (mode < 0) error("Illegal mode=%s",outmode);    
+    if (mode < 0) error("Illegal mode=%s [%d], valid:",outmode,mode,outmodes);
     warning("New out= mode mode=%s [%d]",outmode,mode);
     Qout = TRUE;
     outstr = stropen(getparam("out"),"w");
@@ -193,7 +200,7 @@ nemo_main()
 	  MapValue(outptr,i,j) = dval;
 	else if (mode==3 || mode==4) {    /* mode=vtan/r or mode=ome */
 	  MapValue(outptr,i,j) = dval/sqrt(sqr(xt/cosi)+sqr(yt));
-	}
+	} 
       }
       xt /= cosi;
       r  = sqrt(xt*xt+yt*yt);
@@ -251,6 +258,7 @@ nemo_main()
       ir = ring_index(nrad,rad,r);
       if (ir < 0) continue;
       cost = yt/r;
+      sint = xt/r;
       if (ABS(cost) < costmin) {
 	if (Qout) MapValue(outptr,i,j) = undf;
 	continue;
@@ -263,10 +271,12 @@ nemo_main()
 	vmod = vsys + vrot[ir]*cost*sini;     /* model */
 	vr = MapValue(velptr,i,j)-vmod;       /* residual:   vobs-vmod */
 	if (Qout) {
-	  if (mode==1)
+	  if (mode==1)                        /* mode=vmod */
 	    MapValue(outptr,i,j) = vmod;
-	  else if (mode==2)
+	  else if (mode==2)                   /* mode=vres */
 	    MapValue(outptr,i,j) = vr;
+	  else if (mode==5)                   /* mode=vrad */
+	    MapValue(outptr,i,j) = vr/(sint*sini);
 	}
 	wsum[ir] += wt;
 	vsum[ir] += wt*vr;
