@@ -13,7 +13,6 @@
 
 string defv[] = {
   "in=???\n       input velocity field",
-  "out=???\n      output map",
   "radii=\n       radii of the ring boundaries (Nring+1)",
   "pa=0\n         position angle of disk",
   "inc=45\n       inclination angle of disk",
@@ -22,9 +21,10 @@ string defv[] = {
   "den=\n         input density image, unity if left blank",
   "frang=0\n      free angle around minor axis (2*frang is the total)",
   "blank=0.0\n    Value of the blank pixel to be ignored",
-  "mode=v\n       output mode (v, v/r, ..)",
+  "mode=v/r\n     Output mode (v, v/r, d*v/r, ...)",
+  "out=\n         Optional output map",
   "tab=\n         Optional output table",
-  "VERSION=0.3\n  4-feb-2011 PJT",
+  "VERSION=0.3\n  8-feb-2011 PJT",
   NULL,
 };
 
@@ -52,7 +52,24 @@ real vrot[MAXRING];
 real pa, inc, vsys, xpos, ypos;
 real undf;
 
-string outmodes[] = { "vtan", "vres", "ome", "vtan/r", NULL};
+               /*  0 1   2    */
+string outmodes = "v,v/r,d*v/r";
+
+int string_index(string options, string s)
+{
+  int i=0;
+  string *sa = burststring(options,",");
+
+  while (sa[i]) {
+    if (streq(sa[i],s))  {
+      freestrings(sa);
+      return i;
+    }
+    i++;
+  }
+  freestrings(sa);	   
+  return -1;
+}
 
 int ring_index(int n, real *r, real rad)
 {
@@ -68,11 +85,12 @@ int ring_index(int n, real *r, real rad)
 nemo_main()
 {
   stream denstr, velstr, outstr, tabstr;
-  string outmode;
   real center[2], cospa, sinpa, cosi, sini, cost, costmin, x, y, xt, yt, r, den;
   real vr, wt, frang, dx, dy, xmin, ymin, rmin, rmax, fsum, ave, tmp, rms;
   real sincosi, cos2i, tga, dmin, dmax, dval, dr, area;
   int i, j, k, nx, ny, ir, nring, nundf, nout, nang, nsum;
+  string outmode;
+  int mode = -1;
 
   velstr = stropen(getparam("in"),"r");
 
@@ -80,18 +98,23 @@ nemo_main()
   nx = Nx(velptr);
   ny = Ny(velptr);
 
-  if (hasvalue("den")) {
-    Qden = TRUE;
-    denstr = stropen(getparam("den"),"r");
-    read_image(denstr,&denptr);
-  } 
-
   if (hasvalue("out")) {
-    warning("New out= option not well tested yet");
+    outmode = getparam("mode");
+    mode = string_index(outmodes, outmode);
+    if (mode < 0) error("Illegal mode=%s [%d], valid:",outmode,mode,outmodes);
+    warning("New out= mode mode=%s [%d]",outmode,mode);
     Qout = TRUE;
     outstr = stropen(getparam("out"),"w");
     copy_image(velptr,&outptr);
   } 
+
+  if (hasvalue("den")) {
+    Qden = TRUE;
+    denstr = stropen(getparam("den"),"r");
+    read_image(denstr,&denptr);
+  } else if (mode==2)
+    error("Need den=");
+
 
   if (hasvalue("tab")) {
     Qtab = TRUE;
@@ -115,9 +138,6 @@ nemo_main()
   vsys  = getdparam("vsys");
   undf  = getdparam("blank");
   frang = getdparam("frang");
-
-  outmode = getparam("mode");
-
 
   cospa   = cos(pa*PI/180.0);
   sinpa   = sin(pa*PI/180.0);
@@ -169,8 +189,11 @@ nemo_main()
       }
       cost = yt/r;
       dval = MapValue(velptr,i,j);
-
-      vr = dval;
+      
+      if (mode==1)
+	dval /= r;
+      else if (mode==2)
+	dval *= MapValue(denptr,i,j) / r;
 
       if (outptr) {
 	if  (ABS(cost) > costmin) {
@@ -190,8 +213,8 @@ nemo_main()
       if (ABS(cost) > costmin) {
 	pixe[ir] += 1.0;
 	wsum[ir] += wt;
-	vsum[ir] += wt*vr;
-	vsqu[ir] += wt*vr*vr;
+	vsum[ir] += wt*dval;
+	vsqu[ir] += wt*dval*dval;
       } else
 	nang++;
     } /* i */
