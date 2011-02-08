@@ -104,6 +104,7 @@ traits_h		:= $(INC)traits.h $(exception_h)
 io_h			:= $(INC)io.h $(exception_h) $(traits_h)
 tupel_h			:= $(INC)tupel.h $(INC)tupel.cc
 memory_h		:= $(INC)memory.h $(traits_h) $(inline_h)
+radix_h			:= $(INC)radix.h $(traits_h) $(memory_h)
 sse_h			:= $(INC)sse.h $(exception_h) $(meta_h) $(memory_h)
 heap_h			:= $(INC)heap.h $(memory_h)
 numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(tupel_h)
@@ -272,6 +273,8 @@ test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
 				$(MAKE_EXE)
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
 				$(MAKE_EXE)
+test/TestRadix$(EXT)	:	test/TestRadix.cc $(radix_h) $(random_h) library
+				$(MAKE_EXE)
 test/TestMatrix$(EXT)	:	test/TestMatrix.cc $(matr33_h)
 				$(MAKE_EXE)
 test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) $(WDMath_h)
@@ -287,6 +290,7 @@ test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(numerics_h) \
 omp_tests		:=	test/TestTreeP$(EXT) \
 				test/TestTree$(EXT) \
 				test/TestGeometry$(EXT) \
+				test/TestRadix$(EXT) \
 				test/TestMatrix$(EXT) \
 				test/TestOMP$(EXT)
 
@@ -311,21 +315,17 @@ endif
 # ---------------------
 
 ifdef WDutilsDevel
-dox/html/index.htlm:	$(INC)Pi.h $(INC)heap.h $(INC)meta.h $(INC)inline.h \
-			$(INC)exception.h $(INC)sse.h $(INC)traits.h \
-			$(INC)io.h $(INC)tupel.h $(INC)memory.h \
-			$(INC)numerics.h $(INC)spline.h $(INC)random.h \
-			$(INC)WDMath.h $(INC)octtree.h \
-			$(INC)neighbour.h $(INC)parallel.h \
-			$(INC)parallelMPI.h $(INC)domain.h \
-			$(INC)peano.h $(INC)partree.h
+dox/html/index.htlm:	$(Pi_h) $(heap_h) $(meta_h) $(inline_h) $(exception_h) \
+			$(sse_h) $(traits_h) $(io_h) $(tupel_h) $(memory_h) \
+			$(numerics_h) $(spline_h) $(radix_h) $(random_h) \
+			$(WDMath_h) $(octtree_h) $(neighbour_h) $(parallel_h) \
+			$(parallelMPI_h) $(domain_h) $(peano_h) $(partree_h)
 			doxygen devel/utils.dox
 else
-dox/html/index.htlm:	$(INC)Pi.h $(INC)heap.h $(INC)meta.h $(INC)inline.h \
-			$(INC)exception.h $(INC)sse.h $(INC)traits.h \
-			$(INC)io.h $(INC)tupel.h $(INC)memory.h \
-			$(INC)numerics.h $(INC)spline.h $(INC)random.h \
-			$(INC)WDMath.h $(INC)octtree.h
+dox/html/index.htlm:	$(Pi_h) $(heap_h) $(meta_h) $(inline_h) $(exception_h) \
+			$(sse_h) $(traits_h) $(io_h) $(tupel_h) $(memory_h) \
+			$(numerics_h) $(spline_h) $(radix_h) $(random_h) \
+			$(WDMath_h) $(octtree_h)
 			doxygen utils.dox
 endif
 doxu		:	dox/html/index.htlm

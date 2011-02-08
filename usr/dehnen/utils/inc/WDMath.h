@@ -122,7 +122,8 @@ namespace WDutils {
       static bool iszero(__T x)
       { return std::abs(x) < TypeInfo<__T>::min(); }
       static bool equal(__T x, __T y)
-      { return (x<y? y-x:y-x) < TypeInfo<__T>::min(); }
+      { return std::abs(x-y) <=
+	  std::max(std::abs(x),std::abs(y)) * TypeInfo<__T>::epsilon(); }
       static bool insignificant(__T e, __T x)
       { return std::abs(e) < std::abs(x) * TypeInfo<__T>::epsilon(); }
     };

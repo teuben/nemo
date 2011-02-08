@@ -56,24 +56,32 @@ extern "C" {
 }
 #  endif // WDutils_included_emmintrin_h
 //
-// macros for |x|, -x, -|x|, and |x-y| of packed double
+// macros for |x|, -x, -|x|, |x-y|, and sign(x)*|y| of packed double
 //
 #  define _mm_abs_pd(__x)						\
     _mm_and_pd(__x,(__m128d)_mm_set_epi32(0x7fffffff,0xffffffff,	\
 					  0x7fffffff,0xffffffff))
 #  define _mm_neg_pd(__x)						\
     _mm_xor_pd(__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
-#  define _mm_nabs_pd(__x)					\
+#  define _mm_nabs_pd(__x)						\
     _mm_or_pd (__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
 #  define _mm_diff_pd(__x,__y) _mm_abs_pd(_mm_sub_pd(__x,__y))
+#  define _mm_signmask_pd(__x)						\
+  _mm_and_pd (__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
+#  define _mm_signmove_pd(__x,__y)					\
+  _mm_or_pd(_mm_signmask_pd(__x),_mm_abs_pd(__y))
 
 //
-// macros for |x|, -x, -|x|, and |x-y| of packed single 
+// macros for |x|, -x, -|x|, |x-y|, and sign(x)*|y| of packed single 
 //
 #  define _mm_abs_ps(__x) _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x7fffffff))
 #  define _mm_neg_ps(__x) _mm_xor_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
 #  define _mm_nabs_ps(__x) _mm_or_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
 #  define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
+#  define _mm_signmask_ps(__x)				\
+  _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
+#  define _mm_signmove_ps(__x,__y)			\
+  _mm_or_ps(_mm_signmask_ps(__x),_mm_abs_ps(__y))
 # else // __SSE2__
 // in case we have no __SSE2__, we cannot use _mm_set1_epi32
 namespace WDutils {
@@ -83,17 +91,21 @@ namespace WDutils {
       int   __I;
       FandI(int i) : __I(i) {}
     };
-    const FandI __abs_mask(0x7fffffff);
-    const FandI __neg_mask(0x80000000);
+    const FandI __val_mask(0x7fffffff);
+    const FandI __sgn_mask(0x80000000);
   }
 }
-#  define _mm_abs_ps(__x)						\
-  _mm_and_ps(__x,(__m128)_mm_set1_ps(WDutils::meta::__abs_mask.__F))
-#  define _mm_neg_ps(__x)						\
-  _mm_xor_ps(__x,(__m128)_mm_set1_ps(WDutils::meta::__neg_mask.__F))
-#  define _mm_nabs_ps(__x)						\
-  _mm_or_ps(__x,(__m128)_mm_set1_ps(WDutils::meta::__neg_mask.__F))
+#  define _mm_abs_ps(__x)					\
+  _mm_and_ps(__x,_mm_set1_ps(WDutils::meta::__val_mask.__F))
+#  define _mm_neg_ps(__x)					\
+  _mm_xor_ps(__x,_mm_set1_ps(WDutils::meta::__sgn_mask.__F))
+#  define _mm_nabs_ps(__x)					\
+  _mm_or_ps(__x,_mm_set1_ps(WDutils::meta::__sgn_mask.__F))
 #  define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
+#  define _mm_signmask_ps(__x)					\
+  _mm_and_ps(__x,_mm_set1_ps(WDutils::meta::__neg_mask.__F))
+#  define _mm_signmove_ps(__x,__y)				\
+  _mm_or_ps(_mm_signmask_ps(__x),_mm_abs_ps(__y))
 # endif // __SSE2__
 #endif // __SSE__
 
@@ -151,6 +163,59 @@ namespace WDutils {
     return _mm_cvtss_f32(_mm_add_ps(__S,_mm_movehl_ps(__S,__S)));
 #endif
   }
+  /// horizontal maximum: max(A0,A1,A2,A3)
+  /// extract the max of the four SPFP values from argument
+  inline float _mm_getmax_ps(__m128 __A)
+  {
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+  __v4sf __a = (__v4sf)__A, __t,__s;
+  __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
+  __s  = __builtin_ia32_maxps(__a,__t);
+  __t  = __builtin_ia32_movhlps(__s,__s);
+  __s  = __builtin_ia32_maxps(__s,__t);
+  return __builtin_ia32_vec_ext_v4sf(__s,0);
+#else
+    __m128 __S;
+    __S =  _mm_max_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
+    return _mm_cvtss_f32(_mm_max_ps(__S,_mm_movehl_ps(__S,__S)));
+#endif
+  }
+
+  /// horizontal minimum: min(A0,A1,A2,A3)
+  /// extract the min of the four SPFP values from argument
+  inline float _mm_getmin_ps(__m128 __A)
+  {
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+  __v4sf __a = (__v4sf)__A, __t,__s;
+  __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
+  __s  = __builtin_ia32_minps(__a,__t);
+  __t  = __builtin_ia32_movhlps(__s,__s);
+  __s  = __builtin_ia32_minps(__s,__t);
+  return __builtin_ia32_vec_ext_v4sf(__s,0);
+#else
+    __m128 __S;
+    __S =  _mm_min_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
+    return _mm_cvtss_f32(_mm_min_ps(__S,_mm_movehl_ps(__S,__S)));
+#endif
+  }
+
+#ifdef __SSE2__
+  /// horizontal minimum: min(A0,A1,A2,A3)
+  /// extract the min of the four packed 32-bit integer values from argument
+  inline int32 _mm_getmin_epi32(__m128i __A)
+  {
+    union WDutils__align16 {
+      int   i[4];
+      float x[4];
+    } tmp;
+    _mm_store_ps(tmp.x,(__m128)__A);
+    int m=tmp.i[0];
+    if(tmp.i[1]<m) m=tmp.i[1];
+    if(tmp.i[2]<m) m=tmp.i[2];
+    if(tmp.i[3]<m) m=tmp.i[3];
+    return m;
+  }
+#endif
 #endif
 
   /// support for coding with SSE intrinsics, code using SSE intrinsics.
