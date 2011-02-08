@@ -20,8 +20,6 @@ is also given:
 \fBin=\fP
 input velocity field, in \fIimage(5NEMO)\fP format. No default.
 .TP
-\fBout=\fP
-Output file.  Currently the angular velocity is written here. See also 
 \fBmode=\fP below.
 .TP
 \fBradii=\fP
@@ -41,8 +39,9 @@ rotation center (mapcenter if left blank, 0,0=lower left)
 systemic velocity [0]     
 .TP
 \fBden=\fP
-input density image, used to weigh the velocities. If missing,
-weights are uniform. Default: none.
+input density image, only needed if surface brightness given in 
+\fBmode=\fP.
+Default: none.
 .TP
 \fBfrang=\fP
 free angle around minor axis (2*frang is the total angle around
@@ -56,6 +55,10 @@ Value of the blank pixel to be ignored. Default: 0.0
 Output mode for the output data file. Valid are:
 \fBv\fP, 
 \fBv/r\fP (angular velocity),
+\fBv*d/r\fP (angular velocity times surface brightness)
+.TP
+\fBout=\fP
+Optional output file.  See \fBmode=\fP which quantity. Default: none
 .TP
 \fBtab=\fP
 Optional output table file. This will contain the 
