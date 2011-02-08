@@ -1,30 +1,38 @@
-.TH VELFIT 1NEMO "4 February 2011"
+.TH VELFIT 1NEMO "7 February 2011"
 .SH NAME
 velfit \- fit rotation curve to coplanar disk (WWB73 method)
 .SH SYNOPSIS
 \fBvelfit\fP [parameter=value]
 .SH DESCRIPTION
-VELFIT fits a theoretical velocity pattern to an
-isovelocity image, weighted by the intensity image and a
+VELFIT fits a theoretical velocity pattern (\fBvmod\fP) to an
+observed isovelocity image (\fBvobs\fP), optionally
+weighted by the intensity image and a
 geometric factor specified by model input parameters.
-The default option is to fit a rotation curve to an isovelocity
+The default option is to fit a rotation curve
+to an isovelocity
 image of a rotating disk. The rotation curve and rms for the
-fit are printed out and can be used to find the best fit to the
+fit are tabulated and can be used to find the best fit to the
 other parameters. For more details see 
-Warner, Wright and Baldwin (1973MNRAS.163..163W).
+Warner, Wright and Baldwin (1973MNRAS.163..163W).  This may not be 
+the best method to fit a rotation curve (see also \fIrotcur(1NEMO)\fP),
+but it is very simple and elegant to program.
 .PP
 Optionally an output map can be generated with amusing quantities, 
-as well an output table that containst, amongst, the rotation curve.
+as well an output table that contains, amongst, the rotation curve.
+For additional map manipulations, see also \fIvelmap(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-input velocity field, in \fIimage(5NEMO)\fP format. No default.
+input observed velocity field, in \fIimage(5NEMO)\fP format. We refer to
+this as \fBvobs\fP. No default.
 .TP
 \fBradii=\fP
-radii of the ring boundaries. For N rings, N+1 values need to be give.
-They need to be sorted by increasing radius. 
+radii of the ring boundaries. For N rings, N+1 values need to be given.
+They need to be sorted by increasing radius.   See \fInemoinp(1NEMO)\fP
+for syntax, though \fIrmin:rmax:rstep\fP is a common shortcut.
+No default.
 .TP
 \fBpa=\fP
 position angle of disk, in degrees. [0]
@@ -44,7 +52,7 @@ weights are uniform (but see \fBcoswt=\fP below). Default: none.
 .TP
 \fBfrang=\fP
 free angle around minor axis (2*frang is the total angle around
-the minor axis used).
+the minor axis used), where data are ignored.
 [Default: 0]
 .TP
 \fBblank=\fP
@@ -54,12 +62,18 @@ Value of the blank pixel to be ignored. Default: 0.0
 power of cos(theta) weighting [1]   
 .TP
 \fBwwb73=\fP
-use the classic WWB73 method. Currently there is no other 
-method. [t]  
+use the classic WWB73 method? Currently there is no other 
+method.  See \fIrotcur(1NEMO)\fP and \fIrotcurshape(1NEMO)\fP for
+alternate discussions. [t]  
 .TP
 \fBmode=\fP
-Output mode for the output data file. Valid are:
-vtan, vmod, vres (=vobs-vmod), vtan/r, ome (=vtan/r)
+Output mode for the output image data file. Valid are:
+\fBvtan\fP (=(vobs-vsys)/(cost*sini)),
+\fBvmod\fP, 
+\fBvres\fP (=vobs-vmod), 
+\fBvtan/r\fP, 
+\fBome\fP (=vtan/r), or
+\fBvrad\fP (=vres/(sint*cosi))
 .TP
 \fBout=\fP
 Optional output image. If selected, it will contain the 
@@ -67,19 +81,32 @@ nominal rotation speed as derived from the local radial
 velocity in the disk, appropriately corrected for the
 geometric factors.
 Default: none.
+.TP
 \fBtab=\fP
 Optional output table file. This will contain the 
 radius, rotation speed, dispersion in the ring and some
-other values.
+other values. 
+Default: none
 .SH SEE ALSO
-rotcur(1NEMO), runvelfitss07(1NEMO), rotcurshape(1NEMO)
+rotcur(1NEMO), runvelfitss07(1NEMO), rotcurshape(1NEMO), velmap(1NEMO)
 .SH FILES
+src/image/rotcur :  velfit.c
+.SH EXAMPLES
+The following example fits a velocity field for NGC 6503, produces a table and 
+plots the rotation curve with error bars
+.nf
+% fitsccd N6503.xmom1.fits - | ccdmath - n6503.vel %1/1000.0
+% velfit n6503.vel 0:1:0.002 -60 70 466,546 30 frang=5 tab=n6503.vtab
+% tabplot n6503.vtab dycol=3 xmin=0 xmax=0.2
+.fi
+The N6503 example was taken from the 1996 VLA data, published  in 2009
+by Greisen et al. (2009AJ....137.4718G) and generally available.
 .SH AUTHOR
 Mel Wright (Fortran version), Peter Teuben (C version)
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-30-sep-92	new task in miriad	MCHW
+30-sep-92	new task in MIRIAD	MCHW
 5-oct-2003	V1.0 : C version in NEMO	PJT
 22-oct-2005	V1.1 : added out=	PJT
 4-feb-2011	V1.2 : added tab= and mode=	PJT

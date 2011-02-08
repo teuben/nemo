@@ -1,4 +1,4 @@
-.TH VELMAP 1NEMO "3 February 2011"
+.TH VELMAP 1NEMO "4 February 2011"
 .SH NAME
 velmap \- various galactic velocity field mapping routines
 .SH SYNOPSIS
@@ -21,7 +21,8 @@ is also given:
 input velocity field, in \fIimage(5NEMO)\fP format. No default.
 .TP
 \fBout=\fP
-Output file.  Currently the angular velocity is written here.
+Output file.  Currently the angular velocity is written here. See also 
+\fBmode=\fP below.
 .TP
 \fBradii=\fP
 radii of the ring boundaries. For N rings, N+1 values need to be give.
@@ -41,7 +42,7 @@ systemic velocity [0]
 .TP
 \fBden=\fP
 input density image, used to weigh the velocities. If missing,
-weights are uniform (but see \fBcoswt=\fP below). Default: none.
+weights are uniform. Default: none.
 .TP
 \fBfrang=\fP
 free angle around minor axis (2*frang is the total angle around
@@ -50,13 +51,24 @@ the minor axis used).
 .TP
 \fBblank=\fP
 Value of the blank pixel to be ignored. Default: 0.0
+.TP
+\fBmode=\fP
+Output mode for the output data file. Valid are:
+\fBv\fP, 
+\fBv/r\fP (angular velocity),
+.TP
+\fBtab=\fP
+Optional output table file. This will contain the 
+radius, rotation speed, dispersion in the ring and some
+other values.
 .SH SEE ALSO
 rotcur(1NEMO), velfit(1NEMO), runvelfitss07(1NEMO), rotcurshape(1NEMO)
 .SH FILES
+src/image/rotcur : velmap.c
 .SH AUTHOR
-Peter Teuben (C version)
+Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-3-feb-2011	new task	PJT
+3-feb-2011	created for Nurur	PJT
 .fi
