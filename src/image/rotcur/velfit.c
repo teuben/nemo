@@ -35,10 +35,10 @@ string defv[] = {
   "blank=0.0\n    Value of the blank pixel to be ignored",
   "coswt=1\n      power of cos(theta) weighting",
   "wwb73=t\n      use the classic WWB73 method (fixed)",
-  "mode=vtan\n    Output mode (vtan, vres, ome)",
+  "mode=vtan\n    Output mode {vtan,vmod,vres,vtan/r,ome,vrad}",
   "out=\n         Optional output map of converted rotation speeds",
   "tab=\n         Optional output table of radii, velocities etc.",
-  "VERSION=1.2\n  4-feb-2011 PJT",
+  "VERSION=1.2\n  8-feb-2011 PJT",
   NULL,
 };
 
