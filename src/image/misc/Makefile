@@ -13,7 +13,7 @@ INCFILES =
 SRCFILES = contour.c
 OBJFILES=  contour.o
 LOBJFILES= $L(contour.o)
-BINFILES = ccdgoat ccdplot ccdstat ccdsub ccdmom 
+BINFILES = ccdgoat ccdplot ccdstat ccdsub ccdmom ccdhist
 # ccdplot_ps
 TESTFILES= 
 
@@ -92,6 +92,10 @@ tests: $(TESTFILES)
 
 ccdplot:  ccdplot.c
 	$(CC) $(CFLAGS) -o ccdplot ccdplot.c \
+		$(NEMO_LIBS) $(YAPPLIB) $(EL)
+
+ccdhist:  ccdhist.c
+	$(CC) $(CFLAGS) -DYAPP -o ccdhist ccdhist.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL)
 
 # special greyscale
