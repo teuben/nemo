@@ -1,5 +1,6 @@
 /*
  * TABHIST: histogram plotter program for ascii data in tabular format
+ *      See also CCDHIST, which has inherited much of this code
  *          
  *
  *	17-Mar-88  V1.0 :  created by P.J.Teuben
@@ -41,6 +42,7 @@
  *      11-mar-05   5.1   added xcoord= keyword                 pjt
  *       7-apr-05   5.2   under and overflow reporting fixed    pjt
  *       1-jun-10   6.0   allow bins= to be edges of bins       pjt 
+ *      (8-feb-11   !!!   code cloned into ccdhist              pjt)
  *                        
  * 
  * TODO:
