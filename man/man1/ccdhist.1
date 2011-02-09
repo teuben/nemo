@@ -1,13 +1,13 @@
-.TH TABHIST 1NEMO "1 June 2010"
+.TH CCDHIST 1NEMO "8 February 2011"
 .SH NAME
-tabhist \- histogram plotter and gaussian fit for tabular data
+ccdhist \- histogram plotter and gaussian fit for image data
 .SH SYNOPSIS
 .PP
-\fBtabhist in=\fPinfile [parameter=value]
+\fBccdhist in=\fPinfile [parameter=value]
 .SH DESCRIPTION
-\fItabhist\fP plots a histogram and computes the first 
-4 moments of points obtained from an (set of) column(s) from an ascii 
-\fItable(5NEMO)\fP.
+\fIccdhist\fP plots a histogram and computes the first 
+4 moments of points obtained from the data values of an
+\fIimage(5NEMO)\fP cube.
 It calculates the mean, dispersion,
 skewness and kurtosis. It then plots the data in the form of a histogram,
 optionally with a 'best' gaussian fit and residuals. It can also plot
@@ -16,24 +16,17 @@ a cumulative histogram of the data.
 The median is also optionally computed, for which an 
 alternate sorting routine can be selected (if available). 
 .PP
-If multiple columns are used, they are appended to each other and
-treated like a single long column.
-If you need simple statistics for multiple columns, use \fBtabstat\fP 
-instead. 
-.PP
 Using the \fBnsigma\fP keyword, outliers can be removed
 and statistics re-computed.
+.PP
+This program was derived from \fItabhist(1NEMO)\fP, which works on ASCII tables,
+and derived much of it's user interface from that program.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
 \fBin=\fIinfile\fP
 input file, in tabular format [no default].
-.TP
-\fBxcol=\fIcolumn\fP
-column(s) from which the (X) values are taken. 
-Multiple columns can be given in the usual \fInemoinp(3NEMO)\fP notation
-for integers. [default \fB1\fP].
 .TP
 \fBxmin=\fIx_min\fP
 Minimum value along X-axis to include 
@@ -52,11 +45,6 @@ min and max.  If more than one number is given, they are the bin edges
 \fBmaxcount=\fIcount\fP
 Maximum count value per bin plotted along the Y-axis
 [default: autoscaling].
-.TP
-\fBnmax=\fImax_lines\fP
-Maximum number of lines allowed to read from datafile, if the data
-comes from a pipe as supposed from file.  
-[Default: \fB10000\fP].
 .TP
 \fBylog=t|f\fP
 Take log of Y-axis? This option is really redundant, since
@@ -118,36 +106,17 @@ right side. Another way of saying is that a cell includes the left side,
 but is open ended on the right side, i.e. [---). Note this behavior is
 exactly opposite that of SM's behavior, which was used to compare results.
 .SH "SEE ALSO"
-tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO)
-.PP
-http://vostat.org
-.PP
-http://www.star.bris.ac.uk/~mbt/stilts/
-.PP
-http://arxiv.org/ps/0807.4820 (\fIchoosing the binning for a histogram\fP)
+tabhist(1NEMO), ccdstat(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
 .nf
 .ta +3.0i
-~/src/kernel/tab	sources
+~/src/image/misc	sources
 .fi
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
-xx-mar-88	V1.0: created          	PJT
-15-Apr-88	V1.1: higher order moments, Y scale  	PJT
-1-jun-88	V2.0: new name, code same	PJT
-28-oct-88	V2.0a: updated doc + labels plotting done	PJT
-13-nov-93	V2.7: added gaussian model + residuals	PJT
-11-jul-96	V2.8: log scale is now 10-based, not e	PJT
-12-apr-97	V3.0: added cumulative option	PJT
-24-apr-98	V3.0a: fix median calculation for restricted range	PJT
-22-dec-99	V3.1a: optional median, fix N=1 reporting bug	PJT
-24-jan-00	documentation updated with program	PJT
-7-jun-01	3.2: added nsigma, corrected man page options	PJT
-7-may-03	4.0: multiple columns allowed	PJT
-28-jan-05	5.0: separate xmin/xmax=, added sort=, fix median if nsigma 	PJT
-1-jun-10	6.0: bins= now allowed to have manual edges	PJT
+8-feb-2011	V1.0: cloned off tabhist	PJT
 .fi
 
