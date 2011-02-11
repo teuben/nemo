@@ -16,6 +16,7 @@
  *    5-oct-2003  Created, embedding in rotcur was too painful    PJT
  *   22-oct-2005  Optional output map with rotation velocities  SNV/PJT
  *    3-feb-2011  more options to output map, added tab=           PJT
+ *   10-feb-2011  cleanup and order of keywords aligned with rotcur PJT
  *
  *
  */
@@ -28,8 +29,8 @@ string defv[] = {
   "radii=\n       radii of the ring boundaries (Nring+1)",
   "pa=0\n         position angle of disk",
   "inc=45\n       inclination angle of disk",
-  "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
   "vsys=0\n       systemic velocity",
+  "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
   "den=\n         input density image, unity if left blank",
   "frang=0\n      free angle around minor axis (2*frang is the total)",
   "blank=0.0\n    Value of the blank pixel to be ignored",
@@ -38,7 +39,7 @@ string defv[] = {
   "mode=vtan\n    Output mode {vtan,vmod,vres,vtan/r,ome,vrad}",
   "out=\n         Optional output map of converted rotation speeds",
   "tab=\n         Optional output table of radii, velocities etc.",
-  "VERSION=1.2\n  8-feb-2011 PJT",
+  "VERSION=1.3\n  10-feb-2011 PJT",
   NULL,
 };
 
