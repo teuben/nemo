@@ -1,4 +1,4 @@
-.TH VELFIT 1NEMO "7 February 2011"
+.TH VELFIT 1NEMO "10 February 2011"
 .SH NAME
 velfit \- fit rotation curve to coplanar disk (WWB73 method)
 .SH SYNOPSIS
@@ -6,7 +6,7 @@ velfit \- fit rotation curve to coplanar disk (WWB73 method)
 .SH DESCRIPTION
 VELFIT fits a theoretical velocity pattern (\fBvmod\fP) to an
 observed isovelocity image (\fBvobs\fP), optionally
-weighted by the intensity image and a
+weighted by an intensity image and a
 geometric factor specified by model input parameters.
 The default option is to fit a rotation curve
 to an isovelocity
@@ -40,11 +40,12 @@ position angle of disk, in degrees. [0]
 \fBinc=\fP
 inclination angle of disk, in degrees [45]   
 .TP
-\fBcenter=\fP
-rotation center (mapcenter if left blank, 0,0=lower left)
-.TP
 \fBvsys=\fP
-systemic velocity [0]     
+systemic velocity b[0]     
+.TP
+\fBcenter=\fP
+rotation center. Default is the mapcenter ((Nx-1)/2,Ny-1)/2)
+where 0,0=center of lower left pixel.
 .TP
 \fBden=\fP
 input density image, used to weigh the velocities. If missing,
@@ -96,7 +97,7 @@ The following example fits a velocity field for NGC 6503, produces a table and
 plots the rotation curve with error bars
 .nf
 % fitsccd N6503.xmom1.fits - | ccdmath - n6503.vel %1/1000.0
-% velfit n6503.vel 0:1:0.002 -60 70 466,546 30 frang=5 tab=n6503.vtab
+% velfit n6503.vel 0:1:0.002 -57 71.5 467,543 20 frang=0 tab=n6503.vtab
 % tabplot n6503.vtab dycol=3 xmin=0 xmax=0.2
 .fi
 The N6503 example was taken from the 1996 VLA data, published  in 2009

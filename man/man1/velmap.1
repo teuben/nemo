@@ -18,9 +18,7 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-input velocity field, in \fIimage(5NEMO)\fP format. No default.
-.TP
-\fBmode=\fP below.
+input velocity field, in \fIimage(5NEMO)\fP format. 
 .TP
 \fBradii=\fP
 radii of the ring boundaries. For N rings, N+1 values need to be give.
@@ -33,13 +31,15 @@ position angle of disk, in degrees. [0]
 inclination angle of disk, in degrees [45]   
 .TP
 \fBcenter=\fP
-rotation center (mapcenter if left blank, 0,0=lower left)
+rotation center. Default is the mapcenter ((Nx-1)/2,Ny-1)/2)
+where 0,0=center of lower left pixel.
 .TP
 \fBvsys=\fP
 systemic velocity [0]     
 .TP
 \fBden=\fP
-input density image, only needed if surface brightness given in 
+input density image, only needed if surface brightness (d) given in 
+an output mode. Default: not used.
 \fBmode=\fP.
 Default: none.
 .TP
@@ -72,6 +72,6 @@ src/image/rotcur : velmap.c
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +4.0i
+.ta +2.0i +4.0i
 3-feb-2011	created for Nurur	PJT
 .fi
