@@ -4,7 +4,8 @@
  *	VELMAP performs various mapping functions on a projected
  *      galactic velocity field.
  *      
- *    3feb11  pjt   New task, cloned off velfit, for Nurur
+ *     3-feb-2011   New task, cloned off velfit, for Nurur          PJT
+ *    10-feb-2011   Cleaned up, aligned with velfit                 PJT
  *
  */
 
@@ -16,15 +17,15 @@ string defv[] = {
   "radii=\n       radii of the ring boundaries (Nring+1)",
   "pa=0\n         position angle of disk",
   "inc=45\n       inclination angle of disk",
-  "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
   "vsys=0\n       systemic velocity",
+  "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
   "den=\n         input density image, unity if left blank",
   "frang=0\n      free angle around minor axis (2*frang is the total)",
   "blank=0.0\n    Value of the blank pixel to be ignored",
-  "mode=v/r\n     Output mode (v, v/r, d*v/r, ...)",
+  "mode=v\n       Output mode (v, v/r, d*v/r, ...)",
   "out=\n         Optional output map",
   "tab=\n         Optional output table",
-  "VERSION=0.3\n  8-feb-2011 PJT",
+  "VERSION=0.4\n  10-feb-2011 PJT",
   NULL,
 };
 
@@ -46,7 +47,8 @@ imageptr denptr = NULL, velptr = NULL, outptr = NULL;
 real rad[MAXRING];
 int nrad;
 
-real pixe[MAXRING], vsum[MAXRING], vsqu[MAXRING], wsum[MAXRING];
+int  pixe[MAXRING];
+real vsum[MAXRING], vsqu[MAXRING], wsum[MAXRING];
 real vrot[MAXRING];
 
 real pa, inc, vsys, xpos, ypos;
@@ -86,8 +88,8 @@ nemo_main()
 {
   stream denstr, velstr, outstr, tabstr;
   real center[2], cospa, sinpa, cosi, sini, cost, costmin, x, y, xt, yt, r, den;
-  real vr, wt, frang, dx, dy, xmin, ymin, rmin, rmax, fsum, ave, tmp, rms;
-  real sincosi, cos2i, tga, dmin, dmax, dval, dr, area;
+  real vr, wt, frang, dx, dy, xmin, ymin, rmin, rmax, ave, tmp, rms;
+  real sincosi, cos2i, tga, dmin, dmax, dval, dr, area, fsum1, fsum2;
   int i, j, k, nx, ny, ir, nring, nundf, nout, nang, nsum;
   string outmode;
   int mode = -1;
@@ -148,7 +150,7 @@ nemo_main()
   cos2i   = cosi*cosi;
     
   for (i=0; i<nring; i++)
-    pixe[i] = vsum[i] = vsqu[i] = wsum[i] = 0.0;
+    pixe[i] = vsum[i] = vsqu[i] = wsum[i] = 0;
   nundf = nout = nang = 0;
 
   ymin = Ymin(velptr);
@@ -207,14 +209,11 @@ nemo_main()
 
       /* now some ring accumulation, remnant of the velfit fitting */
 
-      den = Qden ? MapValue(denptr,i,j) : 1.0;
-      wt = den;
-      wt = ABS(wt);
       if (ABS(cost) > costmin) {
-	pixe[ir] += 1.0;
-	wsum[ir] += wt;
-	vsum[ir] += wt*dval;
-	vsqu[ir] += wt*dval*dval;
+	pixe[ir] += 1;
+	wsum[ir] += 1.0;
+	vsum[ir] += dval;
+	vsqu[ir] += dval*dval;
       } else
 	nang++;
     } /* i */
@@ -230,25 +229,28 @@ nemo_main()
 
   /* report on the rings */
 
-  fsum = 0.0;
-  nsum = 0;
-  for (i=0; i<nring; i++) {
-    if (wsum[i] == 0.0) continue;
-    nsum++;
-    r = 0.5*(rad[i] + rad[i+1]);
-    dr = rad[i+1] - rad[i];
-    area = PI*(sqr(rad[i+1]) - sqr(rad[i]));
-    tmp = wsum[i]/pixe[i];
-    ave = vsum[i]/wsum[i];
-    rms = vsqu[i]/wsum[i]-ave*ave;
-    if (rms <  0) rms=0.0;
-    rms = sqrt(rms);
-    fsum += rms*rms;
-
-    if (Qtab) fprintf(tabstr,"%g %g %g %g %g %g ;; %g %g\n",
-	   r,ave,rms,pixe[i],tmp,sqrt(fsum/nsum),    vsum[i],wsum[i]);
+  if (Qtab) {
+    fprintf(tabstr,"# r I rms I_sum1 I_sum2 i_ring Npoints\n");
+    fsum1 = 0.0;  /* this will count rings with average values */
+    fsum2 = 0.0;  /* this will count up flux whenever it fell in a ring */
+    nsum = 0;
+    for (i=0; i<nring; i++) {
+      if (wsum[i] == 0.0) continue;
+      nsum++;
+      r = 0.5*(rad[i] + rad[i+1]);
+      dr = rad[i+1] - rad[i];
+      area = PI*(sqr(rad[i+1]) - sqr(rad[i]));
+      ave = vsum[i]/wsum[i];
+      rms = vsqu[i]/wsum[i]-ave*ave;
+      if (rms <  0) rms=0.0;
+      rms = sqrt(rms);
+      fsum1 += ave*area;
+      fsum2 += vsum[i];
+      
+      fprintf(tabstr,"%g %g %g  %g %g  %d %d\n",
+	      r,ave,rms,fsum1,fsum2,i+1,pixe[i]);
+    }
   }
-
   dprintf(0,"Nundf=%d/%d Nout=%d Nang=%d (sum=%d)\n",
 	  nundf,nx*ny,nout,nang,nout+nundf+nang);
   dprintf(0,"Rmin/max = %g %g\n",rmin,rmax);
