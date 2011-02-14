@@ -210,7 +210,7 @@ namespace WDutils {
   /// \param[in]      Y auxiliary array of @a N elements
   /// \note radix sort provides stable sorting and costs O(N) time
   template<typename __T>
-  void RadixSort(unsigned N, __T*X, __T*Y)
+  inline void RadixSort(unsigned N, __T*X, __T*Y)
   { RadixSortBits<sizeof(__T),RadixSortTraits<__T> >::sort(N,X,Y); }
 
   /// radix sort of the lower K bits of any type with a RadixSortTraits<>
@@ -219,7 +219,7 @@ namespace WDutils {
   /// \param[in]      Y auxiliary array of @a N elements
   /// \note radix sort provides stable sorting and costs O(N) time
   template<int K, typename __T>
-  void RadixSortLow(unsigned N, __T*X, __T*Y)
+  inline void RadixSortLow(unsigned N, __T*X, __T*Y)
   { RadixSortBits<K,RadixSortTraits<__T> >::sort(N,X,Y); }
   
   /// radix sort of single-precision floating point numbers

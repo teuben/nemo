@@ -411,6 +411,7 @@ namespace WDutils {
     char             FNAME[FNAME_MAX_SIZE];
     const char      *FILE;
     iofile() : FILE(0) {}
+    virtual ~iofile() {}
     //
     // some compilers (icpc 11.1 for instance) complain about no virtual
     // destructor. However, when providing one, we get the most bizarre of

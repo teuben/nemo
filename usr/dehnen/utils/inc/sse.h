@@ -215,6 +215,17 @@ namespace WDutils {
     if(tmp.i[3]<m) m=tmp.i[3];
     return m;
   }
+
+  /// horizontal sum: A0+A1+A2+A3
+  /// extract the sum of the four packed 32-bit integer values from argument
+  inline int32 _mm_getsum_epi32(__m128i __A)
+  {
+    __m128i __S;
+    __S =  _mm_add_epi32(__A,_mm_shuffle_epi32(__A,_MM_SHUFFLE (2,3,0,1)));
+    union { int32 i; float x; } tmp;
+    tmp.x = _mm_cvtss_f32((__m128)_mm_add_epi32(__S,(__m128i)_mm_movehl_ps((__m128)__S,(__m128)__S)));
+    return tmp.i;
+  }
 #endif
 #endif
 

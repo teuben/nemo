@@ -32,8 +32,8 @@ endif
 #endif
 # general optimisation and warning flags
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
-		-ggdb3 $(WARNING) -O2 -fPIC -fopenmp -ffast-math \
-		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
+		-ggdb3 $(WARNING) -O2 -fPIC -fopenmp -funroll-loops \
+		-fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
