@@ -411,17 +411,15 @@ namespace WDutils {
     char             FNAME[FNAME_MAX_SIZE];
     const char      *FILE;
     iofile() : FILE(0) {}
-    virtual ~iofile() {}
-    //
+#if !defined(__GNUC__) || defined(__INTEL_COMPILER)
     // some compilers (icpc 11.1 for instance) complain about no virtual
     // destructor. However, when providing one, we get the most bizarre of
     // run-time errors with gcc: a segmentation fault in using output with
-    // std::cout. (essentially, output::OUT refers to a different std::cout
+    // std::cout. Essentially, output::OUT refers to a different std::cout
     // object than the executable for some reason currently beyond my
-    // comprehension). It affects, amongst others things gyrfalcON.
-    //
-    //     virtual~iofile() {}
-    //
+    // comprehension. It affects, amongst others things gyrfalcON.
+    virtual ~iofile() {}
+#endif
     void setfile(const char*fname) {
       DebugInfo(12,"iofile::setfile(%s): FILE=%p\n",fname,(void*)(FILE));
       if(fname && fname[0]) {
