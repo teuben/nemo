@@ -16,9 +16,6 @@
 #include <axis.h>
 #include "s2plot.h"
 
-#ifdef HAVE_LIBPGPLOT
-#define COLOR
-#endif
 
 string defv[] = {
     "in=???\n                     input file name",
@@ -42,10 +39,6 @@ string defv[] = {
     "formal=false\n		  produce more publication-style plots",
     "nobox=false\n		  draw axis, ticks, labels",
 
-    "xbox=2.0:10.0\n		  extent of x-y frame in x direction",
-    "ybox=2.0:10.0\n		  extent of x-y frame in y direction",
-    "zbox=11.0:19.0\n		  extent of zy and xz frame in x resp. y direction",
-
     "nxticks=7\n		  number of ticks on x axis",
     "nyticks=7\n		  number of ticks on y axis",
     "nzticks=7\n		  number of ticks on y axis",
@@ -59,6 +52,7 @@ string defv[] = {
     "color_table=\n		  specify new color table to use",
     "crange=0:1\n                 range in colors to map",
 #endif
+    "s2box=BCDETMNOQ\n            box labeling style",
     "VERSION=0.2\n		  2-nov-05 PJT",
     NULL,
 };
@@ -79,12 +73,12 @@ local string xvar, yvar, zvar;
 local btrproc xfunc, yfunc, zfunc;
 local string xlabel, ylabel, zlabel;
 local string visib, psize, color;
+local string s2box_opt;
 local btiproc vfunc;
 local btrproc pfunc, cfunc;
 local bool fillcircle;
 local bool formal;
 local bool nobox;
-local real xbox[3], ybox[3], zbox[3];
 local real xrange[3], yrange[3], zrange[3], crange[3];
 local int nxticks, nyticks, nzticks;
 local real xticks[MAXTICKS], yticks[MAXTICKS], zticks[MAXTICKS];
@@ -101,17 +95,11 @@ local real *phiptr = NULL;
 local real *accptr = NULL;
 local real *auxptr = NULL;
 
-/* Layout:
- *   BOX3  N/A
- *   BOX1  BOX2
- *
- * Variables labeled 1,2,3 belong to box 1,2,3
- *                   x,y,z belong to the plotted x,y,z variable
- */
+local float *xpnt = NULL;
+local float *ypnt = NULL;
+local float *zpnt = NULL;
+local int npnt = 0;
 
-
-
-real xtrans1(real), ytrans1(real), xtrans2(real), ytrans2(real), xtrans3(real), ytrans3(real);
 
 local bool scansnap(void);
 
@@ -126,16 +114,19 @@ nemo_main()
     static char *argv[] = {"snaps2plot", NULL};
     float size = 1.0;
 
-    s2opend("/?", argc, argv);
-    s2swin(-size,size, -size,size, -size,size);
-    s2show(1);
-
-
     setparams();
+
+    s2opend("/?", argc, argv);
+    s2swin((float)xrange[0], (float)xrange[1], 
+	   (float)yrange[0], (float)yrange[1], 
+	   (float)zrange[0], (float)zrange[1]);
+    s2box(s2box_opt,0,0,s2box_opt,0,0,s2box_opt,0,0);
+    s2lab(xlabel,ylabel,zlabel,input);
+
+
     instr = stropen(input, "r");
     get_history(instr);
     compfuncs();
-    plinit("", 0.0, 20.0, 0.0, 20.0);
 #ifdef COLOR
     setcolors();
 #endif
@@ -148,11 +139,10 @@ nemo_main()
 	    plframe();
 	  } 
 	}
-	plotbox();
-	plltype(1, 0);
 	plotsnap();
+	s2show(1);
+	/* how to clear and advance to next snapshot */
     }
-    plstop();
 }
 
 setparams()
@@ -187,9 +177,6 @@ setparams()
     fillcircle = getbparam("fill_circle");
     formal = getbparam("formal");
     nobox = getbparam("nobox");
-    setrange(xbox, getparam("xbox"));
-    setrange(ybox, getparam("ybox"));
-    setrange(zbox, getparam("zbox"));
 
     if (hasvalue("xticks"))
       setticks(xticks, &nxticks, getparam("xticks"));
@@ -212,6 +199,8 @@ setparams()
       zticks[1] = zrange[1];
       nzticks = - getiparam("nzticks");
     } 
+
+    s2box_opt = getparam("s2box");
     
 #ifdef COLOR
     color = getparam("color");
@@ -380,56 +369,13 @@ bool scansnap(void)
 				 nbody, 0);
 	    }
 	    get_tes(instr, ParticlesTag);
+	    xpnt = (float *) allocate(sizeof(float)*nbody);
+	    ypnt = (float *) allocate(sizeof(float)*nbody);
+	    zpnt = (float *) allocate(sizeof(float)*nbody);
 	}
 	get_tes(instr, SnapShotTag);
     }
     return TRUE;
-}
-
-plotbox()
-{
-    char msg[128];
-
-    if (formal) {
-	formalaxis = TRUE;
-	xaxisvar.labdn = 0.44;
-	xaxisvar.szlab = 0.40;
-	yaxisvar.numdn = 0.24;
-	yaxisvar.labdn = 0.24;
-	yaxisvar.szlab = 0.40;
-    }
-    if (! nobox) {
-        xaxis(xbox[0], ybox[0], xbox[2], xticks, nxticks, xtrans1, xlabel);
-	xaxis(xbox[0], ybox[1], xbox[2], xticks, nxticks, xtrans1, NULL);
-        yaxis(xbox[0], ybox[0], ybox[2], yticks, nyticks, ytrans1, ylabel);
-	yaxis(xbox[1], ybox[0], ybox[2], yticks, nyticks, ytrans1, NULL);
-
-        xaxis(zbox[0], ybox[0], zbox[2], zticks, nzticks, xtrans2, zlabel);
-	xaxis(zbox[0], ybox[1], zbox[2], zticks, nzticks, xtrans2, NULL);
-        yaxis(zbox[0], ybox[0], ybox[2], yticks, nyticks, ytrans2, "");
-	yaxis(zbox[1], ybox[0], ybox[2], yticks, nyticks, ytrans2, NULL);
-
-        xaxis(xbox[0], zbox[0], xbox[2], xticks, nxticks, xtrans3, "");
-	xaxis(xbox[0], zbox[1], xbox[2], xticks, nxticks, xtrans3, NULL);
-        yaxis(xbox[0], zbox[0], ybox[2], zticks, nzticks, ytrans3, zlabel);
-	yaxis(xbox[1], zbox[0], ybox[2], zticks, nzticks, ytrans3, NULL);
-
-	if (! formal) {
-	    sprintf(msg, "File: %s", input);
-	    pltext(msg, xbox[0], zbox[1] + 0.4, 0.32, 0.0);
-	    if (timeptr != NULL) {
-	      sprintf(msg, "Time: %8.3f", *timeptr);
-	      pltext(msg, xbox[0] + 10.0, zbox[1] + 0.4, 0.32, 0.0);
-	    }
-	}
-
-
-    } else {
-	if (! formal && timeptr != NULL) {
-	    sprintf(msg, "%.2f", *timeptr);
-	    pltext(msg, xbox[1] - 1.0, zbox[1] - 1.0, 0.24, 0.0);
-	}
-    }
 }
 
 setticks(real *tiks, int *ntik, string tikstr)
@@ -443,8 +389,6 @@ plotsnap()
     real t, *mp, *psp, *pp, *ap, *acp;
     int vismax, visnow, i, vis, icol;
     real psz, col, x, y, z;
-    real x1,x2,x3,y1,y2,y3;
-    bool v1,v2,v3;
     Body b;
 
     t = (timeptr != NULL ? *timeptr : 0.0);	/* get current time value   */
@@ -458,6 +402,7 @@ plotsnap()
 	pp  = phiptr;
 	ap  = auxptr;
 	acp = accptr;
+	npnt = 0;
 	for (i = 0; i < nbody; i++) {		/*   loop over all bodies   */
 	    Mass(&b) = (mp != NULL ? *mp++ : 0.0);
 						/*     set mass if supplied */
@@ -479,115 +424,21 @@ plotsnap()
 		y = (*yfunc)(&b, t, i);
 		z = (*zfunc)(&b, t, i);
 
-		x1 = xtrans1(x);
-		y1 = ytrans1(y);
-
-		x2 = xtrans2(z);
-		y2 = ytrans2(y);
-
-		x3 = xtrans3(x);
-		y3 = ytrans3(z);
-		
-		v1 = (xbox[0] < x1 && x1 < xbox[1] && ybox[0] < y1 && y1 < ybox[1]);
-		v2 = (zbox[0] < x2 && x2 < zbox[1] && ybox[0] < y2 && y2 < ybox[1]);
-		v3 = (xbox[0] < x3 && x3 < xbox[1] && zbox[0] < y3 && y3 < zbox[1]);
-
-		if (v1 || v2 || v3) {
-		    psz = (*pfunc)(&b, t, i);
+		psz = (*pfunc)(&b, t, i);
 #ifdef COLOR
-		    col = (*cfunc)(&b, t, i);
-                    col = (col - crange[0])/(crange[1] - crange[0]);
-		    icol = 1 + (plncolors() - 2) *
-			         MAX(0.0, MIN(1.0, col));
-		    plcolor(icol);
+		col = (*cfunc)(&b, t, i);
+		col = (col - crange[0])/(crange[1] - crange[0]);
+		icol = 1 + (plncolors() - 2) *
+		  MAX(0.0, MIN(1.0, col));
+		plcolor(icol);
 #endif
-		    if (v1) {
-		      if (psz == 0.0)
-			plpoint(x1, y1);
-		      else if (psz < 0.0) {
-			if (fillcircle)
-			    plcross(x1, y1, - psz);
-                        else
-                            plcross(x1, y1, psz);
-		      } else if (psz > 0.0) {
-			if (fillcircle)
-			    plcircle(x1, y1, -psz);
-			else
-			    plcircle(x1, y1, psz);
-		      }
-		    }
-		    if (v2) {
-		      if (psz == 0.0)
-			plpoint(x2, y2);
-		      else if (psz < 0.0) {
-			if (fillcircle)
-			    plcross(x2, y2, - psz);
-                        else
-                            plcross(x2, y2, psz);
-		      } else if (psz > 0.0) {
-			if (fillcircle)
-			    plcircle(x2, y2, -psz);
-			else
-			    plcircle(x2, y2, psz);
-		      }
-		    }
-		    if (v3) {
-		      if (psz == 0.0)
-			plpoint(x3, y3);
-		      else if (psz < 0.0) {
-			if (fillcircle)
-			    plcross(x3, y3, - psz);
-                        else
-                            plcross(x3, y3, psz);
-		      } else if (psz > 0.0) {
-			if (fillcircle)
-			    plcircle(x3, y3, -psz);
-			else
-			    plcircle(x3, y3, psz);
-		      }
-		    }
-
-		}
+		xpnt[npnt] = x;
+		ypnt[npnt] = y;
+		zpnt[npnt] = z;
+		npnt++;
 	    }
+	    s2pt(npnt, xpnt, ypnt, zpnt, visnow);
 	}
     } while (visnow < vismax);			/* until final layer done   */
-#ifdef COLOR
-    plcolor(32767);				/* reset to white */
-#endif
-}
-
-
-
-/* lower left box */
-real xtrans1( real x )
-{
-    return xbox[0] + xbox[2] * (x - xrange[0]) / xrange[2];
-}
-
-real ytrans1( real y )
-{
-    return ybox[0] + ybox[2] * (y - yrange[0]) / yrange[2];
-}
-
-/* lower right box */
-real xtrans2( real x )
-{
-    return zbox[0] + zbox[2] * (x - zrange[0]) / zrange[2];
-}
-
-real ytrans2( real y )
-{
-    return ybox[0] + ybox[2] * (y - yrange[0]) / yrange[2];
-}
-
-/* uppper left box */
-real xtrans3( real x )
-{
-    return xbox[0] + xbox[2] * (x - xrange[0]) / xrange[2];
-}
-
-real ytrans3( real y )
-{
-    return zbox[0] + zbox[2] * (y - zrange[0]) / zrange[2];
 }
 
