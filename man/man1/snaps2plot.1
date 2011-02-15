@@ -82,8 +82,18 @@ Range of colors that should be mapped. Below and above these ranges
 the \fIyapp(3NEMO)\fP plotting layer may determine the visibility
 of the points.
 The default range is \fB0:1\fP.
+.TP
+\fBs2box\*e\fP\fIcolor-range\fP
+S2PLOT style for the X, Y and Z axes. Default: BCDETMNOQ
 .SH SEE ALSO
 snapplot3(1NEMO), snapplot(1NEMO), bodytrans(1NEMO), snapshot(5NEMO).
+.PP
+http://astronomy.swin.edu.au/s2plot/
+.SH CAVEATS
+Version 0.1 was a quick hack on valentines evening.
+It only plots the selected snapshot, it cannot yet
+page to the next one. Colors not implemented. Layers (visib=) are
+using s2plot's symbols (1,2,...). No tickmark implementation either.
 .SH AUTHOR
 Peter Teuben
 .SH HISTORY
