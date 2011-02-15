@@ -1,0 +1,93 @@
+.TH SNAPS2PLOT 1NEMO "14 February 2011"
+.SH NAME
+snaps2plot \- display an N-body snapshot file in a s2plot display
+.SH SYNOPSIS
+.ds e =\h'-0.0m'
+\fBsnaps2plot in\*e\fPsnap-file [parameter\*evalue] .\|.\|.
+.SH DESCRIPTION
+\fIsnaps2plot\fP plots a sequence of frames from a
+N-body snapshot file on a \fIs2plot\fP display device,
+.PP
+This program is derived from \fIsnapplot3(1NEMO)\fP and therefore shares
+many of its keywords.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin\*e\fP\fIsnap-file\fP
+Input data is read from \fIsnap-file\fP, which must be in snapshot format.
+.TP
+\fBtimes\*e\fP\fItime-range\fP
+Only plot frames with time values within \fItime-range\fP,
+which is of the form, eg, "1.0:1.5,2.5,3.0".
+The default is "all".
+.TP
+\fBxvar\*e\fP\fIx-expression\fP
+The value of \fIx-expression\fP is plotted along the X axis.
+\fIx-expression\fP is a real-valued C language expression over the
+real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
+\fBphi\fP, \fBt\fP, and the integer value \fBi\fP.
+The default is \fBx\fP.
+.TP
+\fBxlabel\*e\fP\fIx-axis-label\fP
+Label for the X axis.
+The default is the expression given for \fBxvar\fP.
+.TP
+\fBxrange\*e\fP\fIx-axis-range\fP
+Range of values for the X axis, specified either as a single number
+(in which case the lower bound is zero) or a pair of numbers separated
+by a colon.
+The default range is \fB-2.0:2.0\fP.
+.TP
+\fByvar\*e\fP\fIy-expression\fP
+See above.
+The default is \fBy\fP.
+.TP
+\fBylabel\*e\fP\fIy-axis-label\fP
+.TP
+\fByrange\*e\fP\fIy-axis-range\fP
+.TP
+\fBzvar\*e\fP\fIz-expression\fP
+See above.
+The default is \fBz\fP.
+.TP
+\fBzlabel\*e\fP\fIz-axis-label\fP
+.TP
+\fBzrange\*e\fP\fIz-axis-range\fP
+.TP
+\fBvisib\*e\fP\fIexpression\fP
+Determines the visibility of particles.
+\fIexpression\fP is a integer expression in the above variables;
+only points with non-zero values are plotted. Particles are plotted
+in order of their visib, e.g. visib=1 are plotted before visib=2,
+thus this keyword can be used to re-arrange the plotting order
+on screen (useful if colors are used).
+The default is \fB1\fP.
+.TP
+\fBpsize\*e\fP\fIexpression\fP
+Determines the point type and size.
+\fIexpression\fP is a real expression in the above variables;
+zero means plot a point, positive (negative) means plot a circle (cross)
+with size controled by absolute value.
+The default is \fB0\fP.
+.TP
+\fBcolor\*e\fP\fIexpression\fP
+Determines the point color.
+\fIexpression\fP is a real expression in the above variables;
+values between 0 and 1 produce a sequence of saturated colors starting
+with red, running through the spectrum, and wrapping back to red.
+The default is \fB0\fP.
+.TP
+\fBcrange\*e\fP\fIcolor-range\fP
+Range of colors that should be mapped. Below and above these ranges
+the \fIyapp(3NEMO)\fP plotting layer may determine the visibility
+of the points.
+The default range is \fB0:1\fP.
+.SH SEE ALSO
+snapplot3(1NEMO), snapplot(1NEMO), bodytrans(1NEMO), snapshot(5NEMO).
+.SH AUTHOR
+Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+14-feb-2011	V0.1 - initial version written  	PJT
+.fi
