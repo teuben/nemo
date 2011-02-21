@@ -16,12 +16,13 @@
 #ifndef SNAPSHOTPHIBAR_H
 #define SNAPSHOTPHIBAR_H
 #include <QObject>
+#include <string>
 #include "snapshotinterface.h"
 #include "zlib.h"
 #include "globaloptions.h"
 
 namespace glnemo {
-
+  using namespace std;
 class SnapshotPhiGrape: public QObject,
                       public SnapshotInterface
 {
@@ -45,6 +46,29 @@ public:
     gzFile           file;               // file handle for compressed file
     bool detectHeader();
     int full_nbody, frame_number;
+
+  // Buffer stuffs
+  char * BUFF;
+  char line[300];
+  unsigned int size_buff;
+  std::string sbuff; // string to store the buffer
+
+  // ============================================================================
+  // getLine()
+  inline bool getLine()
+  {
+    bool status = false;
+    size_t found=sbuff.find('\n'); // look for \n
+    if (found!=string::npos) { // \n found
+      memcpy(line,sbuff.c_str(),found); // build new line
+      line[found]='\0';       // null character terminaison
+      sbuff.erase(0,found+1); // erase from beginning to \n
+      status=true;
+    }
+    return status;
+  }
+  bool readBuffer();
+  bool gzGetLine();
 };
 
 }

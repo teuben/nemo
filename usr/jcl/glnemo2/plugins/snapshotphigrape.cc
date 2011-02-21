@@ -28,6 +28,9 @@ SnapshotPhiGrape::SnapshotPhiGrape():SnapshotInterface()
   part_data = new ParticlesData();
   interface_type    ="PhiGRAPE";
   full_nbody = 0;
+  size_buff = 2048;
+  BUFF = new char[size_buff];
+  sbuff="";
 }
 
 // ============================================================================
@@ -42,6 +45,8 @@ SnapshotPhiGrape::~SnapshotPhiGrape()
   if (vel)   free ((float *) vel);
 
   if (valid) close();
+  delete [] BUFF;
+
 }
 // ============================================================================
 // newObject                                                                   
@@ -147,6 +152,48 @@ int SnapshotPhiGrape::initLoading(GlobalOptions * so)
   return 1;
 }
 // ============================================================================
+// readBuffer()
+bool SnapshotPhiGrape::readBuffer()
+{
+  bool status = false;
+  int bytes_read = gzread(file,&BUFF[0],size_buff-1); // read the buffer
+  if (bytes_read == -1) { // reading error
+    std::cerr << "SnapshotPhiGrape::readBuffer error on gzread\n";
+    throw 11;
+  }
+  if (bytes_read==0) {
+    std::cerr << "SnapshotPhiGrape::readBuffer END OF FILE\n";
+    throw 12;
+  }
+  if (bytes_read>0) {
+    BUFF[bytes_read]='\0';
+    sbuff = sbuff + string(BUFF); // merge old + new buffer
+    status=true;
+  }
+  return status;
+}
+// ============================================================================
+// gzGetString();
+bool SnapshotPhiGrape::gzGetLine()
+{
+  bool status=false;
+  if (sbuff.size()>0) {     // buffer is not empty      
+    status=getLine();   // get a line
+  }
+  if (!status) { // no line found or buffer is empty
+    if ((readBuffer()      // then  append a new buffer
+      && getLine())) { // and   get a new line
+      status= true;
+    }
+    else {
+      std::cerr << "SnapshotPhiGrape::gzGetLine can't find a new line \n";
+      throw 13;
+    }
+  }
+  return status;
+}
+#if 0
+// ============================================================================
 // nextFrame()                                                                 
 int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
 {
@@ -164,31 +211,30 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
     assert(nsel<=full_nbody);
     *part_data->nbody=nsel;
     int cpt=0;
-    char buff[KB];
-    std::stringstream ss;
     bool first=true;
     for (int i=0; i<full_nbody; i++) {
   
-      gzgets(file, buff, KB);   // read a line from the file
+      //gzgets(file, buff, KB);   // read a line from the file
+      gzGetLine();
       int idx=index_tab[i];
       if (idx!=-1) { // it's a valid particle
         int nn; 
         float v[3],dummy;
-        ss.str(buff);
-        // particle index + mass
-        ss >> nn >> dummy; 
-        // x y z
-        ss >> part_data->pos[cpt*3+0] >> part_data->pos[cpt*3+1] >> part_data->pos[cpt*3+2];
-        // vx vy vz
-        ss >> v[0] >> v[1] >> v[2];
+        float rho1,hsml;
+	int ret=0;
+        //                 n  m  x  y  z  vx vy vz rho hsml
+	ret = sscanf(line,"%d %f %f %f %f %f %f %f %f  %f",
+		     &nn,&dummy,
+		     &part_data->pos[cpt*3+0],
+		     &part_data->pos[cpt*3+1],
+		     &part_data->pos[cpt*3+2],
+		     v,v+1,v+2,
+		     &rho1,&hsml);
         if (load_vel) 
           for (int j=0; j<3; j++)
             part_data->vel[cpt*3+j] = *(v+j);
-        float rho1,hsml;
-        
-        ss >> rho1 >> hsml;    // try to read RHO and HSML
-        
-        if (first && !ss.eof()) { // first time and rho+hsml exist
+
+        if (first && ret>=10) { // first time and rho+hsml exist
           first = false;
           if (nsel > *part_data->nbody|| !part_data->rho) {
             if (part_data->rho) delete part_data->rho;
@@ -199,11 +245,10 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
             part_data->rneib = new PhysicalData(PhysicalData::neib,nsel);
           }
         }
-        if (!ss.eof()) {
+        if (ret>=10) {
           part_data->rho->data[cpt]   = rho1;
           part_data->rneib->data[cpt] = hsml;
         }
-        ss.clear(); // clear error state flag like eof()
         cpt++;
       }
       
@@ -213,6 +258,90 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
   end_of_data = true;
   return status;
 }
+#else
+// ============================================================================
+// nextFrame()                                                                 
+int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
+{
+  int status=0;
+  if (valid) {
+    status=1;
+    if (nsel > *part_data->nbody) {
+      if (part_data->pos) delete [] part_data->pos;
+      part_data->pos = new float[nsel*3];
+      if (load_vel) {
+        if (part_data->vel) delete [] part_data->vel;
+        part_data->vel = new float[nsel*3];
+      }
+    }
+    assert(nsel<=full_nbody);
+    *part_data->nbody=nsel;
+    int cpt=0;
+    bool first=true;
+    for (int i=0; i<full_nbody; i++) {
+  
+      gzGetLine();
+      int idx=index_tab[i];
+      if (idx!=-1) { // it's a valid particle
+        long nn;
+        float v[3],dummy;
+        float rho1,hsml;
+        char *endptr;
+        char * p = line;
+        nn     = strtol(p, &endptr, 10); // index
+        p   = endptr;
+        dummy  = strtof(p, &endptr); // mass
+        p   = endptr;
+        // pos
+        for (int i=0;i<3;i++) {
+            part_data->pos[cpt*3+i] = strtof(p, &endptr);
+            p = endptr;
+        }
+        // vel
+        for (int i=0;i<3;i++) {
+            *(v+i) = strtof(p, &endptr);
+            p = endptr;
+        }
+        if (load_vel)
+          for (int j=0; j<3; j++)
+            part_data->vel[cpt*3+j] = *(v+j);
+        // rho ALLOC
+        if (first && endptr!='\0') {
+            first = false;
+            if (nsel > *part_data->nbody|| !part_data->rho) {
+              if (part_data->rho) delete part_data->rho;
+              part_data->rho = new PhysicalData(PhysicalData::rho,nsel);
+            }
+            if (nsel > *part_data->nbody || !part_data->rneib) {
+              if (part_data->rneib) delete part_data->rneib;
+              part_data->rneib = new PhysicalData(PhysicalData::neib,nsel);
+            }
+        }
+        // rho
+        if (endptr!='\0') {
+            rho1  = strtof(p, &endptr);
+            p   = endptr;
+            part_data->rho->data[cpt]   = rho1;
+            // hsml
+            if (endptr!='\0') {
+                hsml  = strtof(p, &endptr);
+                p   = endptr;
+                part_data->rneib->data[cpt] = hsml;
+            }
+            else { // default if not exist
+                part_data->rneib->data[cpt] = 1.;
+            }
+        }
+        cpt++;
+      }
+      
+    }
+    if (part_data->rho) part_data->rho->computeMinMax();
+  }
+  end_of_data = true;
+  return status;
+}
+#endif
 // ============================================================================
 // close()                                                                     
 int SnapshotPhiGrape::close()
