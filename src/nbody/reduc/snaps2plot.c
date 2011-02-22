@@ -1,7 +1,10 @@
 /*
- * SNAPPLOT3D.C: plot particle positions from a snapshot output file;
-
- *      V0.1  14-feb-11  Created, cloned off snapplot3, using s2plot library
+ * SNAPS2PLOT.C: plot particle positions from a snapshot output file;
+ *
+ *      V0.1  14-feb-2011  Created, cloned off snapplot3, using s2plot library
+ *      V0.2  15-feb-2011  added coloring
+ *      V0.3  21-feb-2011  fixed bug that created slowness, implemented color
+ *
  */
 
 #include <stdinc.h>
@@ -36,8 +39,6 @@ string defv[] = {
     "visib=1\n			  determine visibility of points",
     "psize=0\n			  point type and size",
     "fill_circle=t\n		  fill points plotted as circles",
-    "formal=false\n		  produce more publication-style plots",
-    "nobox=false\n		  draw axis, ticks, labels",
 
     "nxticks=7\n		  number of ticks on x axis",
     "nyticks=7\n		  number of ticks on y axis",
@@ -53,7 +54,7 @@ string defv[] = {
     "crange=0:1\n                 range in colors to map",
 #endif
     "s2box=BCDETMNOQ\n            box labeling style",
-    "VERSION=0.2\n		  2-nov-05 PJT",
+    "VERSION=0.3\n		  22-feb-2011 PJT",
     NULL,
 };
 
@@ -77,8 +78,6 @@ local string s2box_opt;
 local btiproc vfunc;
 local btrproc pfunc, cfunc;
 local bool fillcircle;
-local bool formal;
-local bool nobox;
 local real xrange[3], yrange[3], zrange[3], crange[3];
 local int nxticks, nyticks, nzticks;
 local real xticks[MAXTICKS], yticks[MAXTICKS], zticks[MAXTICKS];
@@ -113,10 +112,16 @@ nemo_main()
     int argc = 1;
     static char *argv[] = {"snaps2plot", NULL};
     float size = 1.0;
+    extern string yapp_string;
 
     setparams();
 
+    /* also:  check env var S2PLOT_DEV */
+#if 0
     s2opend("/?", argc, argv);
+#else
+    s2opendo(yapp_string);
+#endif
     s2swin((float)xrange[0], (float)xrange[1], 
 	   (float)yrange[0], (float)yrange[1], 
 	   (float)zrange[0], (float)zrange[1]);
@@ -140,6 +145,7 @@ nemo_main()
 	  } 
 	}
 	plotsnap();
+	warning("Can only do first selected snapshot");
 	s2show(1);
 	/* how to clear and advance to next snapshot */
     }
@@ -175,8 +181,6 @@ setparams()
     visib = getparam("visib");
     psize = getparam("psize");
     fillcircle = getbparam("fill_circle");
-    formal = getbparam("formal");
-    nobox = getbparam("nobox");
 
     if (hasvalue("xticks"))
       setticks(xticks, &nxticks, getparam("xticks"));
@@ -390,6 +394,7 @@ plotsnap()
     int vismax, visnow, i, vis, icol;
     real psz, col, x, y, z;
     Body b;
+    bool Qall = FALSE;
 
     t = (timeptr != NULL ? *timeptr : 0.0);	/* get current time value   */
     CLRV(Acc(&b));				/* zero unsupported fields  */
@@ -425,20 +430,24 @@ plotsnap()
 		z = (*zfunc)(&b, t, i);
 
 		psz = (*pfunc)(&b, t, i);
+#define MAXCOLOR 16
 #ifdef COLOR
 		col = (*cfunc)(&b, t, i);
 		col = (col - crange[0])/(crange[1] - crange[0]);
-		icol = 1 + (plncolors() - 2) *
-		  MAX(0.0, MIN(1.0, col));
-		plcolor(icol);
+		icol = 1 + (MAXCOLOR - 2) * MAX(0.0, MIN(1.0, col));
+		s2sci(icol);
 #endif
 		xpnt[npnt] = x;
 		ypnt[npnt] = y;
 		zpnt[npnt] = z;
+		if (!Qall) {
+		  s2pt1(xpnt[npnt],ypnt[npnt],zpnt[npnt], visnow);
+		}
 		npnt++;
 	    }
-	    s2pt(npnt, xpnt, ypnt, zpnt, visnow);
-	}
+	} /* i<nbody */
+	if (Qall)
+	  s2pt(npnt, xpnt, ypnt, zpnt, visnow);
     } while (visnow < vismax);			/* until final layer done   */
 }
 

@@ -136,7 +136,7 @@ S2_CFLAGS = -I$(S2PATH)
 S2_LFLAGS = -L$(S2PATH)/$(S2ARCH)  -ls2plot -ls2freetype -ls2dispstub -ls2meshstub -ls2winglut -lglut -lGLU -lGL  -L/usr/X11R6/lib -L/usr/lib -lfreetype -lX11 -lm -Wl,-rpath,$(S2PATH)/$(S2ARCH)  -Wl,-export-dynamic
 
 snaps2plot:	snaps2plot.c
-	$(CC) $(CFLAGS)	$(S2_CFLAGS) \
+	$(CC) $(CFLAGS)	$(S2_CFLAGS) -DCOLOR \
 		-o snaps2plot snaps2plot.c \
 		$(S2_LFLAGS) \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
