@@ -1,0 +1,41 @@
+#! /bin/csh -f
+#
+#  Install S2PLOT within NEMO
+#
+#
+#  23-feb-2011  created for V2.6
+# 
+# summary of build STEPS:
+# - grab s2plot-base-2.6-2009-02-04.tar.bz2 
+# - check S2X11PATH is ok s2plot.csh
+# - setenv S2PATH and S2ARCH 
+# - source the s2plot.csh file
+# - run the build.csh script
+
+if ($?NEMO == 0) set NEMO=`pwd`
+
+#			 	.. command line keywords ..
+set s2path=$NEMO/local/s2plot-2.6
+set s2arch=linux-gnu-i386
+
+
+
+#				.. parse command line ..
+foreach arg ($*)
+   set check = `echo $argv[1] | awk -F= '{print NF}'`
+   if ("$check" == 1) break
+   echo Setting: $arg
+   set $arg
+end
+
+if (! -e $s2path) then
+  echo S2PATH source directory s2path=$s2path does not exist
+  exit 1
+endif
+
+setenv S2PATH $s2path
+setenv S2ARCH $s2arch
+
+cd $s2path
+source s2plot.csh
+./build.csh
