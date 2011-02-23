@@ -168,11 +168,13 @@ if ($#yapp > 0) setenv YAPP $yapp
 if ($pgplot) then
   echo "Compiling internal pgplot (logfile: install.pgplot.log)"
   $make pgplot PNG=$png GIF=$gif >& install.pgplot.log
+  if ($status) echo "### Error: pgplot build problem."
 endif
 
 if ($cmake) then
-  echo "Making cmake"
+  echo "Compiling internal cmake (logfile: install.cmake.log)"
   src/scripts/cmake.install >& install.cmake.log
+  if ($status) echo "### Error: cmake build problem."
 endif
 
 rehash
