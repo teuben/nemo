@@ -7,6 +7,7 @@
 # 
 # summary of build STEPS:
 # - grab s2plot-base-2.6-2009-02-04.tar.bz2 
+#   ( see http://groups.google.com/group/s2plot/files )
 # - check S2X11PATH is ok s2plot.csh
 # - setenv S2PATH and S2ARCH 
 # - source the s2plot.csh file
@@ -17,7 +18,6 @@ if ($?NEMO == 0) set NEMO=`pwd`
 #			 	.. command line keywords ..
 set s2path=$NEMO/local/s2plot-2.6
 set s2arch=linux-gnu-i386
-
 
 
 #				.. parse command line ..
