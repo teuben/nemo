@@ -99,7 +99,7 @@ int GadgetIO::close()
   return 1;
 }
 // ============================================================================
-int GadgetIO::read(float * pos, float * vel, float * rho, float * rneib, float * temp,const int *index, const int nsel,   const bool load_vel)
+int GadgetIO::read(std::vector <int> * id, float * pos, float * vel, float * rho, float * rneib, float * temp,const int *index, const int nsel,   const bool load_vel)
 {
   bool is_temp=true;
   if (! is_read ) {
@@ -215,7 +215,27 @@ int GadgetIO::read(float * pos, float * vel, float * rho, float * rneib, float *
   
         if (block_name=="ID") { // IDs block
           ok=true;
-          skipBlock();
+          bytes_counter=0;
+          len1 = readFRecord();
+          for(int k=0;k<6;k++)
+            for(int n=0;n<header.npart[k];n++){
+              int idx=index2[npartOffset[k]+n];
+              if (idx != -1) {
+                int tmp;
+                ioData((char *) &tmp   , sizeof(int), 1,READ);
+                //ioData((char *) &(id[idx]), sizeof(int), 1,READ); 
+                //std::cerr << "vector size ="<<id->size() <<"\n";
+                id->at(idx)=tmp;
+                //std::cerr << "id["<<idx<<"]="<<id->at(idx)<<"\n";
+              } else {
+                //skipData(sizeof(float)*3);
+                int tmp;
+                ioData((char *) &tmp   , sizeof(int), 1,READ);
+              }
+            }
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);
+          //skipBlock();
           if (version==1) next_block_name="MASS";
         }
 

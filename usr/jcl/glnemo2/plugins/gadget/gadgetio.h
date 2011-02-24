@@ -18,6 +18,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 #include <string.h>
 #include <assert.h>
 #include "componentrange.h"
@@ -109,7 +110,7 @@ public:
     int open(const std::string);
     int close();
     int read();
-    int read(float * pos, float * vel, float * rho, float * rneib, float * temp,const int *index, const int nsel,
+    int read(std::vector <int> * id, float * pos, float * vel, float * rho, float * rneib, float * temp,const int *index, const int nsel,
              const bool);  
     float * getMass()   const { return mass; }
     float * getPos()    const { return pos; }

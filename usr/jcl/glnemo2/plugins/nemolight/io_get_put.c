@@ -297,6 +297,7 @@ int get_data_select(char * infile,
     fprintf(stderr,"histo : <%s>\n",histo[i]);
   }
 #endif
+  reset_history();
   for (;;) {
 
     get_history(instr[no_io]);

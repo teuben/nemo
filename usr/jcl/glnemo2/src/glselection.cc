@@ -175,6 +175,10 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
           // is particle visible ?
           if (indensity && winx >= x0 && winx <= x1 && winy >= y0 && winy <= y1 && // in selected area
               frustum.isPointInside(x,y,z)) {                         // in the frustum  
+            if (part_data->id.size()>0) {
+              //jndex = part_data->id.at(jndex);
+              //jndex = part_data->id[jndex];
+            }
             list.push_back(jndex); // save particle index
             in_area++;             // one more particle
             com[0]+=x;             // x COM

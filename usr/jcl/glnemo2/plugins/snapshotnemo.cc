@@ -72,19 +72,19 @@ bool SnapshotNemo::isValidData()
   if (filename == "-") {        // we assume here that "-"
     status=true;                // is standard input and a NEMO stream...
     npos=NULL; nvel=NULL; ntimu=NULL; nrho=NULL; nrneib=NULL;
-    nnemobits = NULL; ;nnbody = NULL;
+    nnemobits = NULL; nnbody = NULL; nid = NULL;
     first_stream=true;
     select_part="all";
     select_time="all";
     load_vel=true;
     if (load_vel) { // velocities requested
-      status_ionemo=io_nemo(filename.c_str(),"info,float,read,sp,n,pos,vel,dens,aux,t,st,b",
-		     select_part.c_str(),&nnbody,&npos,&nvel,&nrho,&nrneib,
+      status_ionemo=io_nemo(filename.c_str(),"info,float,read,sp,n,pos,vel,dens,aux,k,t,st,b",
+		     select_part.c_str(),&nnbody,&npos,&nvel,&nrho,&nrneib,&nid,
 		     &ntimu, select_time.c_str(),&nnemobits);
     }
     else {          // velocities NOT requested
-      status_ionemo=io_nemo(filename.c_str(),"float,read,sp,n,pos,dens,aux,t,st,b",
-                     select_part.c_str(),&nnbody,&npos, &nrho,&nrneib,&ntimu,
+      status_ionemo=io_nemo(filename.c_str(),"float,read,sp,n,pos,dens,aux,k,t,st,b",
+                     select_part.c_str(),&nnbody,&npos, &nrho,&nrneib,&nid,&ntimu,
 		     select_time.c_str(),&nnemobits);
     }
     full_nbody = *nnbody;
@@ -174,16 +174,16 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
 #endif
   if ( ! first_stream) { // Normal NEMO file
     npos=NULL; nvel=NULL; ntimu=NULL; nrho=NULL; nrneib=NULL;
-    nnemobits = NULL; ;nnbody = NULL;
+    nnemobits = NULL; ;nnbody = NULL; nid=NULL;
     std::cerr << "selected time = "<< select_time << "\n";
     if (load_vel) { // velocities requested
-      status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,dens,aux,t,st,b",
-                   force_select.c_str(),&nnbody,&npos,&nvel,&nrho,&nrneib,
+      status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,dens,aux,k,t,st,b",
+                   force_select.c_str(),&nnbody,&npos,&nvel,&nrho,&nrneib,&nid,
 		   &ntimu, select_time.c_str(),&nnemobits);
     }
     else {          // velocities NOT requested
-      status=io_nemo(filename.c_str(),"float,read,sp,n,pos,dens,aux,t,st,b",
-                     force_select.c_str(),&nnbody,&npos, &nrho,&nrneib,&ntimu,
+      status=io_nemo(filename.c_str(),"float,read,sp,n,pos,dens,aux,k,t,st,b",
+                     force_select.c_str(),&nnbody,&npos, &nrho,&nrneib,&nid,&ntimu,
 		     select_time.c_str(),&nnemobits);
     }
   }
@@ -216,7 +216,7 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
 	}
       }
       assert(nsel<=*nnbody);
-      *part_data->nbody=nsel;
+      //*part_data->nbody=nsel; // !!!! 07 November 2010 !!!!!!
       int cpt=0;
       for (int i=0; i<*nnbody; i++) {
 	int idx=index_tab[i];
@@ -271,11 +271,30 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
         part_data->rneib->computeMinMax();
       }
 
+      // read Ids
+      if (*nnemobits & KeyBit) {        
+        if (nsel > *part_data->nbody) {
+          part_data->id.clear();
+          for (int i=0; i<nsel; i++) part_data->id.push_back(-1);
+        }
+        cpt=0;
+        for (int i=0; i<*nnbody; i++) {
+          int idx=index_tab[i];
+          if (idx!=-1) {
+            part_data->id.at(cpt) = nid[idx];
+            cpt++;
+          }
+        }
+        assert(cpt==nsel);
+        if (nid) free ((int*) nid);
+      }      
       // garbage collecting
-      if (nrneib)   free ((float *) nrneib);
-      if (ntimu)    free ((float *) ntimu);
-      if (nnbody)   free ((int *) nnbody);
-      if (nnemobits)free ((int *) nnemobits);
+      if (nrneib)   free ((float *) nrneib   );
+      if (ntimu)    free ((float *) ntimu    );
+      if (nnbody)   free ((int   *) nnbody   );
+      if (nnemobits)free ((int   *) nnemobits);
+      //
+      *part_data->nbody=nsel; // !!!! 07 November 2010 !!!!!!
       // compute velocity vector norm
       part_data->computeVelNorm();
     }

@@ -16,6 +16,7 @@
 #ifndef GLNEMOPARTICLESDATA_H
 #define GLNEMOPARTICLESDATA_H
 
+#include <vector>
 namespace glnemo {
 
 class PhysicalData {
@@ -57,6 +58,7 @@ public:
     * vel, * vel_norm,
     * timu, coo_max[3], coo_min[3];//* rneib, * rho, * temp, * pressure;
     int tree_size_max;
+    std::vector <int> id;
     PhysicalData * rneib, * rho, * temp, * pressure;
     static char * mallocate(char *, int, bool force=false);
     void computeVelNorm();

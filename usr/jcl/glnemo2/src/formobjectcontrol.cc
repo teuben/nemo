@@ -200,7 +200,7 @@ void FormObjectControl::update(ParticlesData   * _p_data,
       }
       else {                                                  // File
         tw = form.range_table;
-        updateTable(tw,i,RT_VISIB,RT_COLOR);
+        updateTable(tw,i,FT_VISIB,FT_COLOR);
         updateFileTable(i);
       }
     }

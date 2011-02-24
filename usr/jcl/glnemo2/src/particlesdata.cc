@@ -36,6 +36,7 @@ ParticlesData::ParticlesData(const ALLOC _model)
   timu     = NULL;
   nbody    = NULL;
   nemobits = NULL;
+  id.clear();
   cmodel   = _model;
   allocVar();
   coo_max[0] = coo_max[1] = coo_max[2] = 0.0;
@@ -57,6 +58,9 @@ const ParticlesData& ParticlesData::operator=(const ParticlesData& m)
       nbody = new int;
     }
     *nbody = *m.nbody;
+    // Ids
+    id = m.id;
+    
     // positions "pos"
     if (m.pos) {
       if (cmodel)
@@ -252,6 +256,7 @@ ParticlesData::~ParticlesData()
   timu     = NULL;
   nbody    = NULL;
   nemobits = NULL;
+  id.clear();
 }
 
 // ============================================================================

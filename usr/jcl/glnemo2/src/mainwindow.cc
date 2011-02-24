@@ -1434,15 +1434,16 @@ void MainWindow::updateBenchFrame()
 void MainWindow::saveIndexList()
 {
   std::vector <int> * list = gl_window->gl_select->getList();
-  if (list->size()) {
+  if (list->size() && current_data->part_data->id.size()>0) {
     QString fileName = QFileDialog::getSaveFileName(this,tr("Save list of indexes"));
     if (!fileName.isEmpty()) {
       QFile file(fileName);
       if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         out << "#glnemo_index_list\n";
-        for (std::vector<int>::iterator i=list->begin(); i<list->end(); i++) {
-           out << (*i) << "\n";
+        for (std::vector<int>::iterator i=list->begin(); i<list->end(); i++) {          
+           //out << (*i) << "\n";
+          out << current_data->part_data->id[*i] << "\n";
         }
         file.close();
       }

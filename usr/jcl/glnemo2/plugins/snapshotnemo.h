@@ -42,7 +42,7 @@ private:
     int full_nbody;
     bool valid;
     float * npos, *nvel, *nrho, *nrneib, *ntimu;
-    int * nnemobits , *nnbody;
+    int * nnemobits , *nnbody, *nid;
     bool first_stream;
     int status_ionemo;
 };

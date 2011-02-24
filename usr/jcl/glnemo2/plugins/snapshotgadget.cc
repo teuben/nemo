@@ -119,10 +119,15 @@ int SnapshotGadget::nextFrame(const int * index_tab, const int nsel)
       if (part_data->temp) delete part_data->temp;
       part_data->temp = new PhysicalData(PhysicalData::temperature,nsel);
       for (int i=0; i<nsel; i++) part_data->temp->data[i]=-1.;
+      //Ids
+      part_data->id.clear();
+      for (int i=0; i<nsel; i++) part_data->id.push_back(-1);
     }
     *part_data->nbody = nsel;
+    
+    std::cerr << "vector size ="<<part_data->id.size() <<"  nsel="<<nsel<<"\n";
 #if 1
-    if (gadget_io->read(part_data->pos,part_data->vel,part_data->rho->data, part_data->rneib->data,part_data->temp->data,
+    if (gadget_io->read(&part_data->id,part_data->pos,part_data->vel,part_data->rho->data, part_data->rneib->data,part_data->temp->data,
 	index_tab,nsel,load_vel)) {
 #else
     if (gadget_io->read(part_data->pos,part_data->vel,part_data->rho, part_data->rneib,

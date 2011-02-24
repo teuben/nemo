@@ -27,7 +27,7 @@ FormAbout::FormAbout(QWidget *parent):QDialog(parent)
   //"<b>Glnemo2:</b> an interactive 3D visualisation program for nbody simulation data"
   
   QString info(tr(
-       "<center>Copyright (c) <b>Jean-Charles LAMBERT</b> 2007-2010"
+       "<center>Copyright (c) <b>Jean-Charles LAMBERT</b> 2007-2011"
       "<br><a href=\"mailto:Jean-Charles.Lambert@oamp.fr\">Jean-Charles.Lambert@oamp.fr</a>"
        "<br><br>Dynamique des Galaxies"
        "<br>Laboratoire d'Astrophysique de Marseille"
@@ -45,7 +45,7 @@ FormAbout::FormAbout(QWidget *parent):QDialog(parent)
   form.view_picture->setGeometry(geo.x(),geo.y(),pix.width(),pix.height()); // rebuild geometry
   form.view_picture->updateGeometry(); // mandatory because FIXED size policy
   form.view_picture->setScene(&scene);
-
+  form.tabWidget->setCurrentIndex(0); // set position to first tab
 }
 
 

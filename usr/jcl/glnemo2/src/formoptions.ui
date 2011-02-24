@@ -25,7 +25,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="options_dialog">
      <property name="currentIndex">
-      <number>6</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_i_select">
       <attribute name="title">
@@ -1995,7 +1995,7 @@
              <string>Grid's size mesh</string>
             </property>
             <property name="decimals">
-             <number>3</number>
+             <number>4</number>
             </property>
             <property name="maximum">
              <double>9999.000000000000000</double>
@@ -5744,9 +5744,9 @@ p, li { white-space: pre-wrap; }
               <colorrole role="Button">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>104</red>
-                 <green>255</green>
-                 <blue>40</blue>
+                 <red>255</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -5817,17 +5817,17 @@ p, li { white-space: pre-wrap; }
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
                  <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
               <colorrole role="Window">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>104</red>
-                 <green>255</green>
-                 <blue>40</blue>
+                 <red>255</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -5881,9 +5881,9 @@ p, li { white-space: pre-wrap; }
               <colorrole role="Button">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>104</red>
-                 <green>255</green>
-                 <blue>40</blue>
+                 <red>255</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -5954,17 +5954,17 @@ p, li { white-space: pre-wrap; }
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
                  <red>255</red>
-                 <green>255</green>
-                 <blue>255</blue>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
               <colorrole role="Window">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>104</red>
-                 <green>255</green>
-                 <blue>40</blue>
+                 <red>255</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -6018,9 +6018,9 @@ p, li { white-space: pre-wrap; }
               <colorrole role="Button">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>104</red>
-                 <green>255</green>
-                 <blue>40</blue>
+                 <red>255</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
@@ -6090,18 +6090,18 @@ p, li { white-space: pre-wrap; }
               <colorrole role="Base">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>104</red>
-                 <green>255</green>
-                 <blue>40</blue>
+                 <red>255</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
               <colorrole role="Window">
                <brush brushstyle="SolidPattern">
                 <color alpha="255">
-                 <red>104</red>
-                 <green>255</green>
-                 <blue>40</blue>
+                 <red>255</red>
+                 <green>0</green>
+                 <blue>0</blue>
                 </color>
                </brush>
               </colorrole>
