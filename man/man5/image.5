@@ -100,10 +100,12 @@ pre-define macros (in \fBimage.h\fP):
 #define Namez(iptr)	((iptr)->namez)
 #define Unit(iptr)      ((iptr)->unit)
 #define Storage(iptr)   ((iptr)->storage)
+/* row major */
 #if defined(CDEF)
 #define MapValue(iptr,ix,iy)	(*( (iptr)->frame + iy + ix*Ny(iptr) ))
 #define CubeValue(iptr,ix,iy,iz)	(*( (iptr)->frame + iz + Nz(iptr)*(iy + Ny(iptr)*ix)))
 #endif
+/* column major */
 #if defined(FORDEF)
 #define MapValue(iptr,ix,iy)	 (*( (iptr)->frame + ix + Nx(iptr)*iy) )
 #define CubeValue(iptr,ix,iy,iz)	(*( (iptr)->frame + ix + Nx(iptr)*(iy+Ny(iptr)*iz)))
@@ -133,7 +135,7 @@ supported.
 Code could be modified to use dynamem(3NEMO). Allows more flexable
 use by addressing image[i][j] instead of slower macros MapValue(iptr,i,j)
 .SH "SEE ALSO"
-snapshot(5NEMO),image(3NEMO),tsf(1NEMO)
+snapshot(5NEMO), image(3NEMO), tsf(1NEMO), mdarray(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
