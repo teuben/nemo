@@ -11,7 +11,7 @@ if ($#argv == 0) then
 endif
 
 foreach d ($*)
-   if (-d $d/image) then
+   if (-f $d/image) then
      fits     in=$d      out=$d/fits op=xyout
      fitsccd  in=$d/fits out=$d/nemo
    else
