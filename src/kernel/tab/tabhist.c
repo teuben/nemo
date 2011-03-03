@@ -294,7 +294,7 @@ local void histogram(void)
   int i,j,k, l, kmin, kmax, lcount = 0;
   real count[MAXHIST], under, over;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
-  real mean, sigma, skew, kurt, lmin, lmax, median;
+  real mean, sigma, skew, kurt, h3, h4, lmin, lmax, median;
   Moment m;
   
   dprintf (0,"read %d values\n",npt);
@@ -345,7 +345,9 @@ local void histogram(void)
   sigma = sigma_moment(&m);
   skew = skewness_moment(&m);
   kurt = kurtosis_moment(&m);
-  
+  h3 = h3_moment(&m);
+  h4 = h4_moment(&m);
+
   if (nsigma > 0) {    /* remove outliers iteratively, starting from the largest */
     iq = (int *) allocate(npt*sizeof(int));
     for (i=0; i<npt; i++) {
@@ -375,6 +377,8 @@ local void histogram(void)
 	sigma = sigma_moment(&m);
 	skew = skewness_moment(&m);
 	kurt = kurtosis_moment(&m);
+	h3 = h3_moment(&m);
+	h4 = h4_moment(&m);
 	dprintf(1,"%d/%d: removing point %d, m/s=%g %g qmax=%g\n",
 		lcount,npt,l,mean,sigma,qmax);
 	if (sigma <= 0) {
@@ -385,6 +389,8 @@ local void histogram(void)
 	  sigma = sigma_moment(&m);
 	  skew = skewness_moment(&m);
 	  kurt = kurtosis_moment(&m);
+	  h3 = h3_moment(&m);
+	  h4 = h4_moment(&m);
 	  dprintf(1,"%d/%d: LAST removing point %d, m/s=%g %g qmax=%g\n",
 		  lcount,npt,l,mean,sigma,qmax);
 	  break;
@@ -422,6 +428,7 @@ local void histogram(void)
   else
     dprintf (0,"Mean and dispersion  : %g %g 0.0\n",mean,sigma);
   dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
+  dprintf (0,"h3 and h4            : %g %g\n", h3, h4);
   if (Qmedian) {
     
     if (npt % 2) 

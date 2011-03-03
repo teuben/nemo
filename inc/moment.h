@@ -29,6 +29,8 @@ real sigma_moment (Moment *);	/* computes weighted dispersion around mean (mom=-
 real rms_moment   (Moment *);	/* computes rms */
 real skewness_moment (Moment *);	/* computes special 3rd moment (mom=-3) */
 real kurtosis_moment (Moment *);	/* computes special 4th moment (mom=-4) */
+real h3_moment (Moment *);              /* see kinemetry */
+real h4_moment (Moment *);              /* see kinemetry */
 
 real min_moment (Moment *);
 real max_moment (Moment *);

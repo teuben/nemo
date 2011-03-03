@@ -1,4 +1,4 @@
-.TH MOMENT 3NEMO "2 February 2005"
+.TH MOMENT 3NEMO "2 March 2011"
 .SH NAME
 ini_moment, accum_moment, decr_moment, 
 reset_moment, show_moment, n_moment, sum_moment,
@@ -22,6 +22,8 @@ min_moment, max_moment \- various (moving) moment and minmax routines
 .B real sigma_moment(m)
 .B real skewness_moment(m)
 .B real kurtosis_moment(m)
+.B real h3_moment(m)
+.B real h4_moment(m)
 .PP
 .B real min_moment(m);
 .B real max_moment(m);
@@ -109,4 +111,5 @@ Peter Teuben
 8-nov-93	fixed init bug 	PJT
 13-jun-95	added decr_moment	PJT
 2-feb-05	added moving moments	PJT
+2-mar-11	added h3,h4	PJT
 .fi

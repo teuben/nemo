@@ -198,7 +198,6 @@ real rms_moment(Moment *m)
     return sqrt(tmp);
 }
 
-
 real skewness_moment(Moment *m)
 {
     real mean, sigma, tmp;
@@ -232,6 +231,24 @@ real kurtosis_moment(Moment *m)
            (sigma2*sigma2);
     return tmp;
 }
+
+/* for h3 and h4, see S2.4 in van der Marel & Franx (1993) */
+/* skew: zeta_1 = mu_3 / mu_2^(3/2)  = 0 for a gaussian    */
+/* kurt: zeta_2 = mu_4 / mu_2^2      = 3 for a gaussian    */
+/*       zeta_1 = 4 sqrt(3) h_3      approx */
+/*       zeta_2 = 3 + 8 sqrt(6) h_4  approx */
+
+real h3_moment(Moment *m)
+{
+  return skewness_moment(m) / (4*sqrt(3.0));
+}
+
+real h4_moment(Moment *m)
+{
+  return kurtosis_moment(m) / (8*sqrt(6.0));
+}
+
+
 
 real min_moment(Moment *m)
 {
