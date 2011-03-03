@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2009-2010                                       
+// Copyright Jean-Charles LAMBERT - 2009-2011                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -52,7 +52,7 @@ const char * defv[] = {
   "gp=5.\n                    gaussian parameter",
   "threads=2\n                #threads used",
   "verbose=f\n                verbose on/off",
-  "VERSION=1.O\n              compiled on <"__DATE__"> JCL  ",
+  "VERSION=2.O\n              compiled on <"__DATE__"> JCL  ",
   NULL,
 };
 const char * usage="2D Plot of a UNS file, y=f(x) and/or z=f(x) and/or y=f(z)";

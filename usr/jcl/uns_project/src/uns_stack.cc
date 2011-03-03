@@ -113,6 +113,8 @@ void process(CunsIn * uns1,CunsIn * uns2, char * out, char * dr, char * dv, bool
   
   if (uns1->snapshot->getInterfaceType() == "Nemo") {
     addComponent("all",uns1,uns2,unsout,verbose);
+    addArray("all","hsml" ,1,uns1,uns2,unsout,verbose);
+    addArray("all","rho"  ,1,uns1,uns2,unsout,verbose);
   }
   else {
     addComponent("gas"  ,uns1,uns2,unsout,verbose);

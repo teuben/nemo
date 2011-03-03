@@ -10,10 +10,7 @@
 // ============================================================================
 #include <cpgplot.h>
 #include <iostream>
-//#include <boost/timer.hpp>
 #include <ctime>
-#include <cmath>
-#include <cassert>
 #include <sstream>
 #include <iomanip>
 #include <cstring>
@@ -37,6 +34,10 @@ template <class T> C2dplot<T>::C2dplot(const int _nthreads, const int _pixel, co
   // create gaussian
   gaussian = new CGaussian<float>(pixel,g);
 
+#ifndef NO_CUDA
+  initCuda();
+  nthreads = GPU_N;
+#endif
   // allocate memory for threads
   for (int i=0; i<nthreads; i++) {
     tab[i] = new float[dimx*dimy];
@@ -163,8 +164,12 @@ template <class T> void C2dplot<T>::computeImage(const int xaxis, const int yaxi
   xmax=ymax=max(range[xaxis][1],range[yaxis][1]);
 
   CTimer timing;
+#ifndef NO_CUDA // use CUDA computation
+  startCuda(nbody,pos,xaxis,yaxis,zmin,zmax);
+#else
   // launch computation on threads
   startWorkers(nbody,pos,xaxis,yaxis,zmin,zmax);
+#endif
   std::cerr << "Work done cpu time : "<< timing.cpu() << "\n";
   std::cerr << "Work done elapsed  : "<< timing.elapsed() << "\n";
   
@@ -301,13 +306,11 @@ template <class T> void C2dplot<T>::startWorkers(const int nbody, T * data, cons
       if (zzmin != 0.0)  zmin=zzmin;
 
     }
-
   for (int i=0;i<dimy; i++)
     for (int j=0;j<dimx; j++) {
       if (tab[0][i*dimx+j]==0.0) tab[0][i*dimx+j]=zmin ;
 
-    }
-  
+    }  
   std::cerr << "FIRST zmax="<<zmax<<" zmin="<<zmin<<"\n";
 
   // compute LOG
@@ -318,8 +321,7 @@ template <class T> void C2dplot<T>::startWorkers(const int nbody, T * data, cons
       if (tab[0][i*dimx+j] != 0.0) {
 	tab[0][i*dimx+j] = log(tab[0][i*dimx+j]);///zmax; // normalize
       }
-    }
-    
+    }    
 }
 // ----------------------------------------------------------------------------
 // worker
@@ -334,6 +336,7 @@ template <class T> void C2dplot<T>::worker(const int ithread, const int offset, 
   //displayIndexes();
 
   // loop on all sub particles
+  // to fill array 
   for (int i=0; i<npart; i++) {
     int    ii = indexes[(offset+i)];
     float  xx = data[ii*3+xaxis];
@@ -343,8 +346,29 @@ template <class T> void C2dplot<T>::worker(const int ithread, const int offset, 
 
     assert(x<dimx);
     assert(y<dimy);
-    // apply gaussian on XY coordinates
-    gaussian->applyOnArrayXY(tab[ithread],dimx,dimy,x,y);
+    tab[ithread][x*dimx+y] += 1.0; // one more particles into the cell
+  }  
+  // loop to store cells from the array which have a weight
+  std::vector<float> cells;
+  for (int i=0;i<dimy; i++) {
+    for (int j=0;j<dimx; j++) {
+      if (tab[ithread][i*dimx+j] != 0.0) {
+        cells.push_back(i); // x coordinate
+        cells.push_back(j); // y coordinate
+        cells.push_back(tab[ithread][i*dimx+j]); // weight
+        // reset array
+        tab[ithread][i*dimx+j] = 0.0;        
+      }
+    }
+  }
+  // Add [gaussian X weight] to
+  // not empty cells
+  for (unsigned int i=0; i<cells.size()/3; i++) {
+    int    x = cells[i*3+0]; // x
+    int    y = cells[i*3+1]; // y
+    float  w = cells[i*3+2]; // weight
+    // add gaussian on XY coordinates
+    gaussian->applyOnArrayXY(tab[ithread],dimx,dimy,x,y,w);
   }
 }
 //

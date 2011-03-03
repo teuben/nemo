@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2009 - 2010                                       
+// Copyright Jean-Charles LAMBERT - 2009-2011                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -26,11 +26,14 @@ template <class T> CGaussian<T>::CGaussian(const int _pixel, const T _g)
       
   T pi=atan(1.0)*4.;
   T sqrtpi=sqrt(2*pi);
+  T ig=1./g;
+  T isqrtpi=1./sqrtpi;
   T halfp=(T )pixel/2.;
   for (int i=0; i<pixel; i++) {
     for (int j=0; j<pixel; j++) {
       T distance=sqrt((i-halfp)*(i-halfp)+(j-halfp)*(j-halfp));
-      T gauss=exp(-(distance)*(distance)/g/g/2.0)/sqrtpi/g;      
+      //T gauss=exp(-(distance)*(distance)/g/g/2.0)/sqrtpi/g;      
+      T gauss=exp(-(distance)*(distance)*ig*ig*0.5)*isqrtpi*ig;
       gaussian[i*pixel+j]=gauss;
     }
   }   
@@ -40,27 +43,29 @@ template CGaussian<double>::CGaussian(const int _pixel, const double _g);
 
 // ----------------------------------------------------------------------------
 // applyOnArrayXY
-template <class T> void CGaussian<T>::applyOnArrayXY(T * tab, const int dimx,const int dimy, const int x, const int y)
+template <class T> void CGaussian<T>::applyOnArrayXY(T * tab, const int dimx,const int dimy,
+                                                     const int x, const int y,
+                                                     const T weight)
 {
-  T halfp=(float )pixel/2.;
+  int halfp=pixel/2.;
   int nindex=0;
   for (int i=0; i<pixel; i++) {
     for (int j=0; j<pixel; j++) {
       if ((x-halfp+j)>=0 && (x-halfp+j)<dimx && (y-halfp+i)>=0 && (y-halfp+i)<dimy) {
-	int index=(int) ((y-halfp+i)*dimx+(x-halfp+j));
+	int index=(int) ((y-halfp+i)*dimx+(x-halfp+j));        
 	if ( index <0 or index > (dimx*dimx)) {
 	  std::cerr << "error index = " << index << "\n";
 	  nindex++;
 	} else {
-	  tab[index]+=gaussian[i*pixel+j];
+	  tab[index]+=(gaussian[i*pixel+j]*weight);
 	}
       }
     }
   }  
 }
 
-template void CGaussian<float >::applyOnArrayXY(float  * tab, const int dimx,const int dimy, const int x, const int y);
-template void CGaussian<double>::applyOnArrayXY(double * tab, const int dimx,const int dimy, const int x, const int y);
+template void CGaussian<float >::applyOnArrayXY(float  * tab, const int dimx,const int dimy, const int x, const int y, const float);
+template void CGaussian<double>::applyOnArrayXY(double * tab, const int dimx,const int dimy, const int x, const int y, const double);
 
 
 

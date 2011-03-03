@@ -71,7 +71,7 @@ SET(LIBRARY_OUTPUT_PATH ../lib)
 
 
 # compilation options
-add_definitions( -O3 -DfalcON_NEMO -DfalcON_SINGLE  -funroll-loops -Wall ${DNOBOOST})
+add_definitions( -DNO_CUDA -O3 -DfalcON_NEMO -DfalcON_SINGLE  -funroll-loops -Wall ${DNOBOOST})
 
 
 # Executbale output path

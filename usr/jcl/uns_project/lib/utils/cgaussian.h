@@ -23,7 +23,9 @@ namespace jclut {
     CGaussian(const int pixel , const T g );
     ~CGaussian() { delete [] gaussian;}
     T * data() { return gaussian;}
-    void applyOnArrayXY(T * tab, const int dimx,const int dimy, const int x, const int y);
+    void applyOnArrayXY(T * tab, const int dimx,
+                        const int dimy, const int x, const int y,
+                        const T weight=1.0);
   private:
     int pixel;
     T g;

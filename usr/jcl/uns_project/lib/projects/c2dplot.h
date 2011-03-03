@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2009-2010                                       
+// Copyright Jean-Charles LAMBERT - 2009-2011                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -26,8 +26,17 @@
 #include "cgaussian.h"
 
 #define NTHREAD_MAX 256
-namespace uns_proj {
 
+#ifndef NO_CUDA
+#define NB_BLOCK 2
+
+#endif
+namespace uns_proj {
+  typedef struct {
+     int devid;
+     int nblock, offset;
+   } t_cuda_grid;
+  
   template <class T> class C2dplot {
   public:
     C2dplot(const int,const int,const int, const int, const T);
@@ -72,6 +81,18 @@ namespace uns_proj {
     float time,range[3][2];
     T * pos;
     bool xy, xz, zy, sview;
+#ifndef NO_CUDA
+    // CUDA stuffs
+    int GPU_N;
+    t_cuda_grid * device_data;
+    float 
+        * cuda_pos;      // particles's positions
+    int 
+        c_nbody;         // #cuda bodies particles
+    void initCuda();
+    void startCuda(const int nbody, T * data, const int xaxis, const int yaxis,float& zmin,float& zmax);
+    void workerCudaThread(const int id, T * data, const int xaxis, const int yaxis);
+#endif
   };
 }
 #endif
