@@ -379,7 +379,7 @@ allocate_image()
     create_cube (&iptr,nx,ny,nz);
     if (iptr==NULL) error("No memory to allocate first image");
 
-    if (Qmean) {
+    if (Qmean || moment <= -1) {
     	if (moment)
     	    warning("%d: mean=t requires moment=0",moment);
         create_cube(&iptr0,nx,ny,nz);
@@ -750,7 +750,7 @@ free_snap()
 
 rescale_data(int ivar)
 {
-  real m_min, m_max, brightness, total, x, y, z, b, mean, sigma;
+  real m_min, m_max, brightness, total, x, y, z, b, mean, sigma, h_factor;
   int    i, j, k, ix, iy, iz, nneg, ndata;
 
     dprintf(1,"rescale(%d)\n",ivar);
@@ -765,9 +765,9 @@ rescale_data(int ivar)
     
     /* handle special cases when mean=t or moment=-1 or moment=-2 */
     if (iptr4) {                   /* moment = -4 : h4 */
-      warning("new moment=-4, but not final version");
       dprintf(1,"rescale(%d) iptr4\n",ivar);
       nneg=0;
+      h_factor = 1.0/(8*sqrt(6));
       for (ix=0; ix<nx; ix++)         /* loop over whole cube */
         for (iy=0; iy<ny; iy++)
 	  for (iz=0; iz<nz; iz++) {
@@ -785,7 +785,7 @@ rescale_data(int ivar)
 		 3*mean*mean*mean*mean) / (sigma*sigma);
 	      dprintf(1,"ixyz4: %d %d  %g %g %g  %g\n",ix,iy,b,mean,sigma,CV(iptr0));
 	    }
-            CV(iptr) = b;
+            CV(iptr) = b * h_factor;
 	  }
       if(nneg>0) warning("%d pixels with sig^2<0",nneg);
 #if 0
@@ -801,9 +801,9 @@ rescale_data(int ivar)
 
 #endif
     } else if (iptr3) {                    /* moment = -3 : h4 */
-      warning("new moment=-4, but not final version");
       dprintf(1,"rescale(%d) iptr3\n",ivar);
       nneg=0;
+      h_factor = 1.0/(4*sqrt(3));
       for (ix=0; ix<nx; ix++)         /* loop over whole cube */
         for (iy=0; iy<ny; iy++)
 	  for (iz=0; iz<nz; iz++) {
@@ -821,7 +821,7 @@ rescale_data(int ivar)
 		(sigma*sigma*sigma);
 	      dprintf(1,"ixyz4: %d %d  %g %g %g  %g\n",ix,iy,b,mean,sigma,CV(iptr0));
 	    }
-	    CV(iptr) = b;
+	    CV(iptr) = b * h_factor;
 	  }
       if(nneg>0) warning("%d pixels with sig^2<0",nneg);
 #if 0
