@@ -27,8 +27,12 @@
  *       7-may-04   5.0 sky projections using proj= and new Image(5NEMO) format
  *       7-feb-06   5.1 integrate= option to compact the 3rd axis on the fly (ccdmom-like)
  *       9-feb-06   5.2 make it work for stack=t
+ *       2-mar-11   5.3 implemented h3,h4 as moment -3 and -4
  *
  * Todo: - mean=t may not be correct for nz>1 
+ *       - hermite h3 and h4 for proper kinemetry
+ *         Gerhard(1993), v d Marel & Franx (1993)   
+           0807.pdf?
  */
 
 #include <stdinc.h>		/* nemo general */
@@ -68,7 +72,7 @@ string defv[] = {		/* keywords/default values/help */
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=5.2a\n			  9-feb-06 PJT",
+	"VERSION=5.3\n			  3-mar-2011 PJT",
 	NULL,
 };
 
@@ -90,7 +94,7 @@ local Body   *btab = NULL;
 local string times;
 
 		/* IMAGE INTERFACE */
-local imageptr  iptr=NULL, iptr0=NULL, iptr1=NULL, iptr2=NULL;
+local imageptr  iptr=NULL, iptr0=NULL, iptr1=NULL, iptr2=NULL, iptr3=NULL, iptr4=NULL;
 local int    nx,ny,nz;			     /* map-size */
 local real   xrange[3], yrange[3], zrange[3];      /* range of cube */
 local real   xbeam, ybeam, zbeam;                  /* >0 if convolution beams */
@@ -323,7 +327,7 @@ void setparams()
 
 
     moment=getiparam("moment");
-    if (moment<-2) error("Illegal moment=%d",moment);
+    if (moment<-4) error("Illegal moment=%d",moment);
     instr = stropen (getparam ("in"), "r");
     outstr = stropen (getparam("out"),"w");
 }
@@ -383,17 +387,30 @@ allocate_image()
             error("No memory to allocate normalization image - try mean=f");
     }
 
-    if (moment == -1 || moment == -2) {
+    if (moment <= -1) {
         create_cube(&iptr1,nx,ny,nz);
         if (iptr1==NULL) 
-            error("No memory to allocate second image - try moment>0");
+            error("No memory to allocate 2nd image - try moment>0");
     }
 
-    if (moment == -2) {
+    if (moment <= -2) {
         create_cube(&iptr2,nx,ny,nz);
         if (iptr2==NULL) 
-            error("No memory to allocate third image - try moment>0");
+            error("No memory to allocate 3rd image - try moment>0");
     }
+
+    if (moment <= -3) {
+        create_cube(&iptr3,nx,ny,nz);
+        if (iptr3==NULL) 
+            error("No memory to allocate 4th image - try moment>0");
+    }
+
+    if (moment <= -4) {
+        create_cube(&iptr4,nx,ny,nz);
+        if (iptr4==NULL) 
+            error("No memory to allocate 5th image - try moment>0");
+    }
+
     if (Qwcs) {
       Axis(iptr) = 1;
 
@@ -444,6 +461,8 @@ clear_image()
         if(iptr0) CV(iptr0) = 0.0;        
         if(iptr1) CV(iptr1) = 0.0;        
         if(iptr2) CV(iptr2) = 0.0;
+        if(iptr3) CV(iptr3) = 0.0;
+        if(iptr4) CV(iptr4) = 0.0;
     }
 }
 
@@ -584,15 +603,18 @@ bin_data(int ivar)
                 }
 
 
-                if (zsig > 0.0) {           /* with Gaussian convolve in Z */
+                if (zsig > 0.0) {           /* with Gaussian convolution in Z */
                     for (iz=0, z0=Zmin(iptr); iz<nz; iz++, z0 += Dz(iptr)) {
         	        fac = (z-z0)/zsig;
 	        	if (ABS(fac)>CUTOFF)    /* if too far from gaussian center */
 		            continue;           /* no contribution added */
         		fac = expfac*exp(-0.5*fac*fac);
                         CV(iptr) += brightness*fac;     /* moment */
+			if(iptr0) CV(iptr0) += fac;     /* do we need that even here? */
                         if(iptr1) CV(iptr1) += b*fac;   /* moment -1,-2 */
                         if(iptr2) CV(iptr2) += b*z*fac; /* moment -2 */
+                        if(iptr3) CV(iptr3) += b*z*z*fac; /* moment -3 */
+                        if(iptr4) CV(iptr4) += b*z*z*z*fac; /* moment -4 */
         	    }
         	} else {
                     iz = zbox(z);
@@ -600,6 +622,8 @@ bin_data(int ivar)
                     if(iptr0) CV(iptr0) += 1.0; /* for mean */
                     if(iptr1) CV(iptr1) += b;   /* moment -1,-2 */
                     if(iptr2) CV(iptr2) += b*z; /* moment -2 */
+                    if(iptr3) CV(iptr3) += b*z*z;   /* moment -3 */
+                    if(iptr4) CV(iptr4) += b*z*z*z; /* moment -4 */
                 }
 
             } /* for (iy1/ix1) */
@@ -633,6 +657,13 @@ void los_data(void)
     if (iptr2) {
       iptr2 = 0; warning("iptr2 not 0, conflicting args");
     }
+    if (iptr3) {
+      iptr3 = 0; warning("iptr3 not 0, conflicting args");
+    }
+    if (iptr4) {
+      iptr4 = 0; warning("iptr4 not 0, conflicting args");
+    }
+
     
     /* for (i=0; i<Nx(iptr)*Ny(iptr); i++)  */
     /* accumulate */
@@ -719,8 +750,8 @@ free_snap()
 
 rescale_data(int ivar)
 {
-    real m_min, m_max, brightness, total, x, y, z, b;
-    int    i, j, k, ix, iy, iz, nneg, ndata;
+  real m_min, m_max, brightness, total, x, y, z, b, mean, sigma;
+  int    i, j, k, ix, iy, iz, nneg, ndata;
 
     dprintf(1,"rescale(%d)\n",ivar);
     m_max = -HUGE;
@@ -733,19 +764,95 @@ rescale_data(int ivar)
     Time(iptr) = tnow;
     
     /* handle special cases when mean=t or moment=-1 or moment=-2 */
-    if (iptr2) {                    /* moment = -2 : dispersion output */
+    if (iptr4) {                   /* moment = -4 : h4 */
+      warning("new moment=-4, but not final version");
+      dprintf(1,"rescale(%d) iptr4\n",ivar);
+      nneg=0;
+      for (ix=0; ix<nx; ix++)         /* loop over whole cube */
+        for (iy=0; iy<ny; iy++)
+	  for (iz=0; iz<nz; iz++) {
+            if(CV(iptr) == 0.0) continue;
+	    mean = CV(iptr2)/CV(iptr1);
+	    sigma = CV(iptr3)/CV(iptr1) - mean*mean;
+	    if (sigma < 0.0) {
+	      nneg++;
+	      b = 0.0;
+	    } else if (CV(iptr0) == 1) {
+	      b = 0.0;
+	    } else {
+	      b = -3.0 + 
+		((CV(iptr)-4*CV(iptr4)*mean+6*CV(iptr3)*mean*mean)/CV(iptr1) -
+		 3*mean*mean*mean*mean) / (sigma*sigma);
+	      dprintf(1,"ixyz4: %d %d  %g %g %g  %g\n",ix,iy,b,mean,sigma,CV(iptr0));
+	    }
+            CV(iptr) = b;
+	  }
+      if(nneg>0) warning("%d pixels with sig^2<0",nneg);
+#if 0
+/* kurt: zeta_2 = mu_4 / mu_2^2      = 3 for a gaussian    */
+/*       zeta_2 = 3 + 8 sqrt(6) h_4  approx */
+    mean = sum1/sum0;
+    sigma = sum2/sum0 - mean*mean;
+
+    tmp = -3.0 +
+           ((sum4-4*sum3*mean+6*sum2*mean*mean)/sum0 - 3*mean*mean*mean*mean) /
+           (sigma*sigma);
+    return tmp;
+
+#endif
+    } else if (iptr3) {                    /* moment = -3 : h4 */
+      warning("new moment=-4, but not final version");
+      dprintf(1,"rescale(%d) iptr3\n",ivar);
+      nneg=0;
+      for (ix=0; ix<nx; ix++)         /* loop over whole cube */
+        for (iy=0; iy<ny; iy++)
+	  for (iz=0; iz<nz; iz++) {
+            if(CV(iptr) == 0.0) continue;
+	    mean = CV(iptr2)/CV(iptr1);
+	    sigma = CV(iptr3)/CV(iptr1) - mean*mean;
+            if(sigma<0.0) {
+	      nneg++;
+	      b = 0;
+	    } else if (CV(iptr0) == 1) {
+	      b = 0.0;
+            } else {
+	      sigma = sqrt(sigma);
+	      b = ((CV(iptr)-3*CV(iptr3)*mean)/CV(iptr1) + 2*mean*mean*mean) /
+		(sigma*sigma*sigma);
+	      dprintf(1,"ixyz4: %d %d  %g %g %g  %g\n",ix,iy,b,mean,sigma,CV(iptr0));
+	    }
+	    CV(iptr) = b;
+	  }
+      if(nneg>0) warning("%d pixels with sig^2<0",nneg);
+#if 0
+/* skew: zeta_1 = mu_3 / mu_2^(3/2)  = 0 for a gaussian    */
+/*       zeta_1 = 4 sqrt(3) h_3      approx */
+    mean = sum1/sum0;
+    sigma = sum2/sum0 - mean*mean;
+    if (sigma < 0.0) sigma = 0.0;
+    sigma = sqrt(sigma);    
+    tmp = ((sum3-3*sum2*mean)/sum0 + 2*mean*mean*mean) /
+            (sigma*sigma*sigma);
+    return tmp;
+
+#endif
+    } else if (iptr2) {                    /* moment = -2 : dispersion output */
         dprintf(1,"rescale(%d) iptr2\n",ivar);
         nneg=0;
         for (ix=0; ix<nx; ix++)         /* loop over whole cube */
         for (iy=0; iy<ny; iy++)
         for (iz=0; iz<nz; iz++) {
             if(CV(iptr) == 0.0) continue;
-            b = CV(iptr)/CV(iptr1)-sqr(CV(iptr2)/CV(iptr1));
-            if(b<0.0) {
-                nneg++;
-                b=0.0;
-            }
-            CV(iptr) = sqrt(b);
+	    mean = CV(iptr2)/CV(iptr1);
+            sigma = CV(iptr)/CV(iptr1)-mean*mean;
+            if(sigma < 0.0) {
+	      nneg++;
+	      b = 0.0;
+            } else {
+	      b = sqrt(sigma);
+	      dprintf(1,"ixyz4: %d %d  %g %g %g  %g\n",ix,iy,b,mean,sigma,CV(iptr));
+	    }
+            CV(iptr) = b;
         }
         if(nneg>0) warning("%d pixels with sig^2<0",nneg);
     } else if(iptr1) {
