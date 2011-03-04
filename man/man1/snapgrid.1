@@ -1,6 +1,6 @@
-.TH SNAPGRID 1NEMO "10 February 2006"
+.TH SNAPGRID 1NEMO "4 March 2010"
 .SH NAME
-snapgrid \- grid a snapshot into a 2D or 3D image (cube)
+snapgrid \- grid a snapshot into a 2D or 3D image (cube), with optional moments
 .SH SYNOPSIS
 .PP
 \fBsnapgrid in=\fPsnapshot \fBout=\fPimage [parameter=value]
@@ -8,11 +8,12 @@ snapgrid \- grid a snapshot into a 2D or 3D image (cube)
 \fIsnapgrid\fP grids three arbitrary \fIbodytrans(3NEMO)\fP expressions 
 (default: \fBx\fP, \fBy\fP and \fB-vz\fP) of a snapshot into a 2D or 3D
 \fIimage(5NEMO)\fP dataset, with optional astronomical projection for direct
-comparision with true astronomical images.
+comparision with astronomical images.
 .PP
 The X and Y coordinates of the datacube can only
 be regularly gridded in histogram fashion 
-(for spatial XY-smoothing see \fIccdsmooth(1NEMO)\fP),
+(for spatial XY-smoothing see \fIccdsmooth(1NEMO)\fP, for interpolating
+see also \fIsnapmap(1NEMO)\fP),
 however the Z coordinate has the property that it can take moments in this
 variable, pick a number of planes or planes with smoothing.
 .PP
@@ -112,7 +113,10 @@ Most commonly choosen are: \fB0\fP (total intensity), \fB1\fP
 (velocity zvar weighted intensity) and \fB2\fP (velocity square weighted intensity),
 where 'intensity' should really be read as surface density per 
 square unit length. Special values of \fB-1\fP and \fB-2\fP can be
-used to directly compute the mean and the dispersion from the mean.
+used to directly compute the \fevar\fP weighted
+mean and the dispersion from the mean.
+\fB-3\fP and \fB-4\fP are used to compute the gaussian-hermitian h3 and h4 moments
+(see e.g. van der Marel & Franx, 1993)
 [default: \fB0\fP].
 .TP
 \fBmean=t|f\fP
@@ -120,7 +124,9 @@ Should the \fIemission\fP in a cell be averaged?
 This also controls the units of the gridding. For \fBmean=f\fP (the default) a
 \fIsurface-density\fP is computed (emission per square length),
  whereas for \fBmean=t\fP the average per
-pixel (or voxel) is computed of the units of emission.
+pixel (or voxel) is computed of the units of emission. Another way of looking 
+at this, \fBmean=t\fP is for interpolating maps (see also \fIsnapmap(1NEMO)\fP),
+where as \fBmean=f\fP is for splatting information as if this was observed.
 [Default: \fBf\fP].
 .TP
 \fBstack=t|f\fP
@@ -195,11 +201,18 @@ but the weighted average computes the two maps seperately and uses
 \fIccdmath(1NEMO)\fP to divide them to get the desired result:
 .nf
     snapgrid ... out=map1 evar='m*aux' 
-    snapgrid ... out=map2 evar='aux' 
+    snapgrid ... out=map2 evar='aux' fluxcal:b6iQS78Ufluxcal:b6iQS78UVi/bo:cvsVi/bo:cvs
     ccdmath in=map1,map2 out=map3 fie="ifeq(%2,0,0,%1/%2)"
 .fi
 with an additional safeguard to set cells to 0 if no emission with
 found in them.
+.SH KINEMETRY
+Krajnovic et al. (2006) popularized kinemetry, a description of line of sight
+velocities in terms of the first four moments (v, sigma, h3 and h4). The following
+example shows how to create these maps with \fBsnapgrid\fP:
+.nf
+  % snapgrid ...
+.fi
 .SH UNITS
 Units are maintained in the same way as in snapshots, they don't have
 a specific name, but carry their normal meaning 'length', 'velocity'
@@ -254,4 +267,5 @@ src/nbody/image  	snapgrid.c
 18-jun-98	V4.4: added xlab/ylab/zlab and allow range[0]>range[1]	PJT
 8-may-04	V5.0: added proj= to optionallaly allow sky projections	PJT
 7-feb-06	V5.1: added integrate=t to deal with 3D density points	PJT
+2-mar-11	V5.3: moment -3,-4 implemented	PJT
 .fi
