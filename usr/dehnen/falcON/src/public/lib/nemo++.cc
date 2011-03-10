@@ -30,11 +30,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/nemo++.h>
 #include <utils/io.h>
+#include <public/basic.h>
 
 #ifdef falcON_NEMO
 
 extern "C" {
-#  include <public/basic.h>
 #  include <stdinc.h>
 #  include <loadobj.h>
 #  include <getparam.h>
@@ -115,7 +115,7 @@ template int falcON::nemoinp(const char*, unsigned*, int);
 template int falcON::nemoinp(const char*, float   *, int);
 template int falcON::nemoinp(const char*, double  *, int);
 
-int nemoinpx(const char*e, double*x, int n) {
+int falcON::nemoinpx(const char*e, double*x, int n) {
   return ::nemoinpx(const_cast<char*>(e),x,n);
 }
 
@@ -383,7 +383,7 @@ namespace {
 /// define some auxiliary functionality
 /// \note most of this can be scrapped once NEMO is fixed
 namespace Aux {
-  std::FILE* stropen(const char*file, const char*mode) {
+  inline std::FILE* stropen(const char*file, const char*mode) {
     return ::stropen(file,const_cast<char*>(mode));
   }
   inline void put_set(std::FILE* file, const char*set) {

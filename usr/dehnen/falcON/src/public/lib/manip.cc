@@ -3,7 +3,7 @@
 //
 /// \file /src/public/manip.cc
 //
-// Copyright (C) 2004-2009  Walter Dehnen
+// Copyright (C) 2004-2011  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -31,6 +31,7 @@
 // version 1.7  10/06/2008 WD  debug_info -> DebugInfo 
 // version 1.8  10/09/2008 WD  nemo++.h to avoid #including nemo headers
 // version 1.9  18/03/2009 WD  avoid warnings from -Wshadow
+// version 1.10 08/03/2011 WD  debugged.
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/manip.h>              // the header we are implementing
 #include <public/nemo++.h>             // the header we are implementing
@@ -395,8 +396,8 @@ falcON::Manipulator::Manipulator(const char*mannames,
     IS_MPI    = IS_MPI && MANIP[i]->is_mpi();
   }
   CLEANUP;
-  NAME = falcON_NEW(char,namesize+N);
-  DSCR = falcON_NEW(char,dscrsize+3*N);
+  NAME = falcON_NEW(char,2+namesize+N);
+  DSCR = falcON_NEW(char,2+dscrsize+3*N);
   strcpy(NAME,MANIP[0]->name());
   strcpy(DSCR,MANIP[0]->describe());
   for(int i=1; i!=N; ++i) {
