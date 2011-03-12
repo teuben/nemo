@@ -62,12 +62,11 @@ nemo_main()
 
     for (bp = btab; bp < btab+nbody; bp++) {    /* loop all bodies */
       y = Pos(bp)[1];
-      if (y<yrange[0]) continue;
-      if (y>yrange[ny-1]) continue;
+      iy = index_grid(&g, y);
+      if (iy < 0) continue;
       d = Qmass ? Mass(bp) : Dens(bp);
       x = Pos(bp)[0];
       v = Vel(bp)[1];
-      iy = index_grid(&g, y);
       sumd[iy]  += d;
       sumvd[iy] += v*d;
       sumxd[iy] += x*d;
