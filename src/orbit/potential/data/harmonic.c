@@ -50,7 +50,7 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
         
         *pot = 0.0;
         for (i=0; i<*ndim; i++) {
-                (*pot) += h[i] * SQR(pos[i]);
+                (*pot) += h[i] * square(pos[i]);
                 acc[i] = -h[i] * pos[i];
         }
         *pot *= 0.5;
