@@ -77,7 +77,7 @@ nemo_main()
   for (i=0; i<ny-1; i++) {
     if (sumd[i] > 0.0) {
       nout++;
-      printf("%g %g %g %g\n",(yrange[i-1]+yrange[i])/2.0,
+      printf("%g %g %g %g\n",value_grid(&g, (real)i+0.5), 
 	     sumxd[i]/sumd[i], sumvd[i]/sumd[i], sumd[i]);
     }
   }
