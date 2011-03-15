@@ -1,0 +1,74 @@
+.TH CCDPRINTI NEMO "15 March 2011"
+.SH NAME
+ccdprinti \- interpolate values from a map
+.SH SYNOPSIS
+.PP
+\fBccdprinti in=\fP\fIimage\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdprinti\fP prints out map values in an image. The grid is
+specified in x, y and z independantly, and is limited to
+either pixel (0...N) or physical coordinates within a map.
+See also \fIccdprint(1NEMO)\fP for a version limited to
+gridpoints.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIimage(5NEMO)\fP format [no default].
+.TP
+\fBx=\fIx1,x2,...\fP
+Grid coordinates in X to display. 
+[Default: \fB0\fP].
+.TP
+\fBy=\fIy1,y2,...\fP
+Grid coordinates in Y to display. See \fBx=\fP.
+[Default: \fB0\fP].
+.TP
+\fBz=\fIz1,z2,...\fP
+Grid coordinates in Z to display. See \fBx=\fP.
+[Default: \fB0\fP].
+.TP
+\fBscale=\fIscale_factor\fP
+scale factor with which the data is multiplied before being displayed
+[default: \fB1\fP].
+.TP
+\fBformat=\fIfmt-expr\fP
+Real-valued C-format expression (see also printf(3), 
+e.g. %10.6e, %5.2f) with which data and optional
+coordinate values are displayed
+[default: \fB%g\fP].
+.TP
+\fBnewline=t|f\fP
+Add a newline between each map value
+printed? If false, all rows are printed
+on one line, and a blank line separates different planes.
+[Default: \fBf\fP]
+.TP
+\fBlabel=\fP\fIx,y,z\fP
+Any combination of \fBx\fP, \fBy\fP and/or \fBz\fP can be given, which labels
+the output with their X, Y and/or Z physical values. 
+[Default: no labels].
+.TP
+\fBoffset=0|1\fP
+Should X,Y,Z be 0- or 1- based. NEMO images use 0-based images,
+but to appease fortran users, 1-based input can be given here
+if this parameter is set to 1. Default: 0
+.TP
+\fBpixel=t|f\fP
+Print out X,Y,Z labels in physical or pixel coordinates. By default
+physical. [Default: \fBf\fP]
+.SH "SEE ALSO"
+ccdprint(1NEMO), printf(3), image(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+~src/image/io	ccdprinti.c 
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+15-mar-2011	V1.0 created	PJT
+.fi
