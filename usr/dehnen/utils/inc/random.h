@@ -6,11 +6,11 @@
 /// \author  Walter Dehnen                                                      
 /// \author  Paul McMillan                                                      
 ///                                                                             
-/// \date    1994-2008                                                          
+/// \date    1994-2011                                                          
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 1994-2008  Walter Dehnen                                       
+// Copyright (C) 1994-2011  Walter Dehnen                                       
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -350,6 +350,40 @@ namespace WDutils {
     double operator() () const { return ranvar(); }
 //     void   operator() (double& x) const { x = ranvar(); }
   };
+  // ///////////////////////////////////////////////////////////////////////////
+  //
+  // class WDutils::PowerLawDist
+  // 
+  /// random distribution: \f$ p(r) \propto r^alpha \f$
+  //
+  // ///////////////////////////////////////////////////////////////////////////
+  class PowerLawDist: public RandomDeviate
+  {
+    const RandomNumberGenerator*R;
+    const double xmin,xmax;
+    const double p,p1,ip1;
+    const bool   islog;
+    const double ranfc,pnorm;
+    double ranvar() const;
+  public:
+    /// ctor
+    /// \param[in] rng   random number generator
+    /// \param[in] alpha power
+    /// \param[in] xmin  mininum value for x
+    /// \param[in] xmax  maximum valud for x
+    PowerLawDist(const RandomNumberGenerator*rng, double alpha,
+		 double xmin, double xmax);
+    /// dtor
+    virtual ~PowerLawDist() {}
+    /// give parent distribution
+    /// \return p(r)
+    /// \param[in] x potential random value
+    double value (double x) const
+    { return pnorm*std::pow(x,p); }
+    /// generate random number in [xmin,xmax]
+    double operator() () const
+    { return ranvar(); }
+  };// PowerLawDist
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
 //-----------------------------------------------------------------------------+

@@ -6,11 +6,11 @@
 /// \author  Walter Dehnen
 /// \author  Paul McMillan
 ///
-/// \date    1994-2005, 2008-2009
+/// \date    1994-2005, 2008-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 1994-2005, 2008,2009  Walter Dehnen
+// Copyright (C) 1994-2005, 2008,2009,2011  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -261,5 +261,30 @@ double ExpDisk::radius(double p) const
   return h*y/(1.-y);
 }
 
+//////////////////////////////////////////////////////////////////////////////
+//
+// class WDutils::PowerLawDist
+//
+////////////////////////////////////////////////////////////////////////////////
+PowerLawDist::PowerLawDist(const RandomNumberGenerator*rng, double alpha,
+			   double x1, double x2)
+  : R(rng), xmin(x1), xmax(x2),
+    p(alpha), p1(1+alpha), ip1(1/p1), islog(abs(p1)<1.e-14), 
+    ranfc(islog? std::log(xmax/xmin) : (std::pow(xmax/xmin,p1)-1)),
+    pnorm(islog? (1/ranfc) : (p1/(std::pow(xmax,p1)-std::pow(xmin,p1))))
+{
+  if(p1<=1.e14? xmin<=0 : xmin<0)
+    WDutils_THROW("PowerLawDist: xmin=%g is too small\n",xmin);
+  if(xmin>=xmax)
+    WDutils_THROW("PowerLawDist: xmin=%g > xmax=%g\n",xmin,xmax);
+}
+//
+double PowerLawDist::ranvar() const
+{
+  double ran = ranfc*(*R)();
+  if(islog) ran = std::exp(ran);
+  else      ran = std::pow(ran+1,ip1);
+  return xmin*ran;
+}
 ////////////////////////////////////////////////////////////////////////////////
 
