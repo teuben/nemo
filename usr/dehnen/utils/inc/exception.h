@@ -472,28 +472,28 @@ namespace WDutils {
 # define WDutilsAssert(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : WDutils::AssertFail(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
+  : WDutils::AssertFail(__STRING(expr),__FILE__,__LINE__,WDutilsThisFunction))
   /// almost identical to assert()
 # define WDutilsAssertE(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : WDutils::AssertFailE(__STRING(expr),__FILE__,__LINE__,__ASSERT_FUNCTION))
+  : WDutils::AssertFailE(__STRING(expr),__FILE__,__LINE__,WDutilsThisFunction))
+#endif // NDEBUG
 /* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
    which contains the name of the function currently being defined.
    This is broken in G++ before version 2.6.
    C9x has a similar variable called __func__, but prefer the GCC one since
    it demangles C++ function names.  */
-# ifdef __GNUC__
+#ifdef __GNUC__
 #  if (__GNUC__ > 3) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 6))
 //#  if __GNUC_PREREQ (2, 6)
-#   define __ASSERT_FUNCTION	__PRETTY_FUNCTION__
+#    define WDutilsThisFunction	__PRETTY_FUNCTION__
 #  elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#   define __ASSERT_FUNCTION	__func__
+#    define WDutilsThisFunction	__func__
 #  endif
-# else
-#  define __ASSERT_FUNCTION	0
-# endif
-#endif // NDEBUG
+#else
+#  define WDutilsThisFunction	0
+#endif
   //@}
   //
   /// a safer snprintf.                                                         

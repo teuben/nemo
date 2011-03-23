@@ -64,9 +64,8 @@
 #endif
 
 #ifdef __INTEL_COMPILER
-#pragma warning (disable:383) /* value copied to temporary, reference to temporary used */
-#pragma warning (disable:981) /* operands are evaluated in unspecified order */
-#pragma warning (disable:2259) /* non-pointer conversion from "A" to "B" may lose significant bits */
+#pragma warning (disable:383)  /* ... reference to temporary used */
+#pragma warning (disable:981)  /* operands are evaluated in unspecified order */
 #endif
 //
 // Wdutils::OctalTree<Dim,real>

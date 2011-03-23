@@ -40,7 +40,7 @@
 #endif
 
 #ifdef __INTEL_COMPILER
-#pragma warning (disable:383) /* value copied to temporary, reference to temporary used */
+#pragma warning (disable:383) /* reference to temporary used */
 #pragma warning (disable:424) /* extra ";" ignored */
 #pragma warning (disable:981) /* operands are evaluated in unspecified order */
 #endif

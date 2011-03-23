@@ -428,7 +428,9 @@ INPUT		=	utils/inc/tupel.h \
 			src/public/manip/lagrange.cc \
 			src/public/manip/add_plummer.cc \
 			src/public/manip/symmetrize_pairs.cc \
-			src/public/manip/randomize_azimuth.cc
+			src/public/manip/randomize_azimuth.cc \
+			src/public/manip/report_bodies.cc \
+			src/public/manip/reduce_mass.cc
 
 # If the value of the INPUT tag contains directories, you can use the 
 # FILE_PATTERNS tag to specify one or more wildcard pattern (like *.cpp 

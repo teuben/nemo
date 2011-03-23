@@ -33,7 +33,6 @@
 #include <iostream>
 
 #ifdef __INTEL_COMPILER
-#pragma warning (disable:383) /* value copied to temporary, reference to temporary used */
 #pragma warning (disable:981) /* operands are evaluated in unspecified order */
 #endif
 
@@ -238,10 +237,10 @@ complex<double> WDutils::LogGamma(complex<double> const&z)
     MathError("z=-n","LogGamma(z)");
   register bool turn = std::real(z)<1;
   complex<double> 
-    ser = 1.000000000190015,
-    y   = turn? 2.-z : z,
-    tmp = y+4.5;
-  tmp-= (y-0.5)*log(tmp);
+    ser = complex<double>(1.000000000190015),
+    y   = turn? complex<double>(2.0)-z : z,
+    tmp = y+complex<double>(4.5);
+  tmp-= (y-complex<double>(0.5))*log(tmp);
   for(register int j=0; j<6; j++) {
     ser+= c[j]/y;
     y  += 1.;

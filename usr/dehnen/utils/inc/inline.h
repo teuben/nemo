@@ -5,11 +5,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    1994-2009
+/// \date    1994-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 1994-2009  Walter Dehnen
+// Copyright (C) 1994-2011  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -45,61 +45,63 @@
 #  include <algorithm>
 #  define WDutils_included_algorithm
 #endif
-//------------------------------------------------------------------------------
+//
 namespace WDutils {
+  /// provide min(a,b) for built-in types
   using std::min;
+  /// provide max(a,b) for built-in types
   using std::max;
 #ifndef __PGI
+  /// provide abs(a) for built-in types
   using std::abs;
 #else
-  // the pgCC compiler is faulty: std::abs(float) returns double
+  /// the pgCC compiler is faulty: std::abs(float) returns double
   template<typename T> T abs(T x) { return x<T(0)? -x:x; }
 #endif
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+  /// provide isnan(a) for built-in types
   using std::isnan;
+  /// provide isinf(a) for built-in types
   using std::isinf;
 #else
+  /// provide isnan(a) for built-in types
   using ::isnan;   // with some compilers (pgCC, CC) these are not in std
+  /// provide isinf(a) for built-in types
   using ::isinf;
 #endif
-  //----------------------------------------------------------------------------
+  /// sign(a) for scalar tyupes
   template<typename scalar_type> inline
-  int sign    (const scalar_type&x)
+  int sign(scalar_type x)
   { return (x<0)? -1:((x>0)? 1:0 ); }
-  //----------------------------------------------------------------------------
+  /// x*sign(s)
   template<typename scalar_type> inline
-  scalar_type sign (const scalar_type&x, const scalar_type&s)
+  scalar_type sign (scalar_type x, scalar_type s)
   { return ( s>=0 )?  abs(x) : -abs(x); }
-  //----------------------------------------------------------------------------
+  /// min(a,b,c)
   template<typename scalar_type> inline
-  const scalar_type&min(const scalar_type&x,
-			const scalar_type&y,
-			const scalar_type&z)
+  scalar_type min(scalar_type x, scalar_type y, scalar_type z)
   { return min(x,min(y,z)); }
-  //----------------------------------------------------------------------------
+  /// max(a,b,c)
   template<typename scalar_type> inline
-  const scalar_type&max(const scalar_type&x,
-			const scalar_type&y,
-			const scalar_type&z)
+  scalar_type max(scalar_type x, scalar_type y, scalar_type z)
   { return max(x,max(y,z)); }
-  //----------------------------------------------------------------------------
+  /// division remainder: mod(x,y) = x-y*int(x/y)
   template<typename scalar_type> inline
-  scalar_type mod(const scalar_type&x,
-		  const scalar_type&y)
+  scalar_type mod(scalar_type x, scalar_type y)
   { return x-y*int(x/y); }
-  //----------------------------------------------------------------------------
+  /// 2*x
   template<typename scalar_type> inline
-  scalar_type twice(const scalar_type&x)
+  scalar_type twice(scalar_type x)
   { return x+x; }
-  //----------------------------------------------------------------------------
+  /// 3*x
   template<typename scalar_type> inline
-  scalar_type trice(const scalar_type&x)
+  scalar_type trice(scalar_type x)
   { return 3*x; }
-  //----------------------------------------------------------------------------
+  /// 4*x
   template<typename scalar_type> inline
-  scalar_type times4(const scalar_type&x)
+  scalar_type times4(scalar_type x)
   { return 4*x; }
-  //----------------------------------------------------------------------------
+  //
   template<int N> struct times__ {
     template<typename S> static S is(S const&x) { return N * x; } };
   template<> struct times__<2> {
@@ -112,10 +114,10 @@ namespace WDutils {
     template<typename S> static S is(S const&x) { return -x; } };
   template<> struct times__<-2> {
     template<typename S> static S is(S const&x) { return -x-x; } };
-
+  /// N*x: uses faster code for |N| < 3
   template<int N, typename scalar_type> inline
-  scalar_type times (const scalar_type&x) { return times__<N>::is(x); }
-  //----------------------------------------------------------------------------
+  scalar_type times (scalar_type x) { return times__<N>::is(x); }
+  //
   template<unsigned, bool ISODD> struct powU;
   template<unsigned N> struct powU<N,0> {
     static const unsigned K = N>>1;
@@ -141,22 +143,22 @@ namespace WDutils {
 
   template<int N> struct powerI {
     template<typename S> static S is(S x) { return powI<N,N<0>::is(x); } };
-
+  /// integer power of scalar (integer known at compiler time)
   template<int N, typename scalar_type>
-  scalar_type power (const scalar_type&x) { return powerI<N>::is(x); }
-  //----------------------------------------------------------------------------
+  scalar_type power (scalar_type x) { return powerI<N>::is(x); }
+  /// x*x
   template<typename scalar_type> inline
-  scalar_type square(const scalar_type&x)
+  scalar_type square(scalar_type x)
   { return x*x; }
-  //----------------------------------------------------------------------------
+  /// x^3
   template<typename scalar_type> inline
-  scalar_type cube (const scalar_type&x)
+  scalar_type cube (scalar_type x)
   { return x*x*x; }
-  //----------------------------------------------------------------------------
+  /// sqrt(max(x,0))
   template<typename scalar_type> inline
-  scalar_type sqrt0(scalar_type const&x)
+  scalar_type sqrt0(scalar_type x)
   { return x <= scalar_type(0)? scalar_type(0) : std::sqrt(x); }
-  //----------------------------------------------------------------------------
+  /// provide pow(x,z)
   using std::pow;
 #ifdef WDutils_non_standard_math
   // integer power of floating point number                                     
@@ -174,59 +176,57 @@ namespace WDutils {
     return pow(x, unsigned (n));
   }
 #else
+  /// single-precision power with unsigned integer exponent
   inline float  pow(float  x, unsigned i) { return std::pow(x, int(i)); }
+  /// double-precision power with unsigned integer exponent
   inline double pow(double x, unsigned i) { return std::pow(x, int(i)); }
 #endif
+  /// provide sqrt(x) for built-in floating-point types
   using std::sqrt;
+  /// provide exp(x) for built-in floating-point types
   using std::exp;
+  /// provide log(x) for built-in floating-point types
   using std::log;
 #if defined(linux) || defined(__DARWIN_UNIX03)
+  /// provide cube-root(x) for built-in floating-point types
   using ::cbrt;
 #else
-  inline float cbrt(float x)          { 
-    return float( std::pow( double(x), 0.333333333333333333333 ) );
-  }
-  inline double cbrt(double x)        { 
-    return std::pow( x, 0.333333333333333333333 );
-  }
+  /// single-precision provide cube-root(x)
+  inline float cbrt(float x)
+  { return float( std::pow( double(x), 0.333333333333333333333 ) ); 
+  /// double-precision provide cube-root(x)
+  inline double cbrt(double x)
+  { return std::pow( x, 0.333333333333333333333 ); }
 #endif
-  //----------------------------------------------------------------------------
+  /// update maximum: x = max(x,y)
   template<typename scalar_type> inline
-  void update_max(scalar_type&x, const scalar_type&y)
-  {
-    if(y>x) x=y;
-  }
-  //----------------------------------------------------------------------------
+  void update_max(scalar_type&x, scalar_type y)
+  { if(y>x) x=y; }
+  /// update minimum: x = min(x,y)
   template<typename scalar_type> inline
-  void update_min(scalar_type&x, const scalar_type&y)
-  { 
-    if(y<x) x=y;
-  }
-  //----------------------------------------------------------------------------
-  template<typename scalar_type> inline
-  void update_max(scalar_type&x, const scalar_type&y, const scalar_type&a)
-  {
-    if((y+a)>x) x=y+a;
-  }
-  //----------------------------------------------------------------------------
-  template<typename scalar_type> inline
-  void update_min(scalar_type&x, const scalar_type&y, const scalar_type&a)
-  { 
-    if((y-a)<x) x=y-a;
-  }
-  //----------------------------------------------------------------------------
+  void update_min(scalar_type&x, scalar_type y)
+  { if(y<x) x=y; }
+//   /// update maximum with add: x = max(x,y+a)
+//   template<typename scalar_type> inline
+//   void update_max(scalar_type&x, scalar_type y, scalar_type a)
+//   { update_max(x,y+a); }
+//   /// update minimum with sub: x = min(x,y-a)
+//   template<typename scalar_type> inline
+//   void update_min(scalar_type&x, scalar_type y, scalar_type a)
+//   { update_min(x,y-a); }
+  /// update minimum and maximum:  min=min(min,x), max=max(max,x)
   template<typename S, typename T> inline
-  void update_min_max(S&min, S&max, T const&x)
+  void update_min_max(S&min, S&max, T x)
   {
     if     (x < min) min = x;
     else if(x > max) max = x;
   }
-  //----------------------------------------------------------------------------
-  inline bool is_integral(const float&x)
+  /// is floating-point number integral?
+  inline bool is_integral(float x)
   { return floor(abs(x))==abs(x);  }
-  //----------------------------------------------------------------------------
-  inline bool is_integral(const double&x)
+  /// is floating-point number integral?
+  inline bool is_integral(double x)
   { return floor(abs(x))==abs(x);  }
 } // namespace WDutils {
-//------------------------------------------------------------------------------
+//
 #endif // WDutils_included_inline_h

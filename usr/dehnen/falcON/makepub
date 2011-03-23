@@ -238,6 +238,8 @@ $(MAN)projprof.so:		$(SMAN)projprof.cc $(MANT) $(defman_h) $(profile_h) $(makefi
 				$(MAKE_MANIP)
 $(MAN)randomize_azimuth.so:	$(SMAN)randomize_azimuth.cc $(MANT) $(defman_h) $(Pi_h) $(random_h) $(makefiles)
 				$(MAKE_MANIP)
+$(MAN)reduce_mass.so:		$(SMAN)reduce_mass.cc $(MANT) $(timer_h)  $(defman_h) $(makefiles)
+				$(MAKE_MANIP)
 $(MAN)report_bodies.so:		$(SMAN)report_bodies.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)set_centre.so:		$(SMAN)set_centre.cc $(MANT) $(defman_h) $(makefiles)
@@ -265,6 +267,7 @@ manip_pub		:=	$(MAN)addgravity.so \
 				$(MAN)lagrange.so \
 				$(MAN)projprof.so \
 				$(MAN)randomize_azimuth.so \
+				$(MAN)reduce_mass.so \
 				$(MAN)report_bodies.so \
 				$(MAN)set_centre.so \
 				$(MAN)set_filter.so \
@@ -509,7 +512,8 @@ dox/html/index.html:	utils/inc/tupel.h \
 			src/public/manip/lagrange.cc \
 			src/public/manip/add_plummer.cc \
 			src/public/manip/symmetrize_pairs.cc \
-			src/public/manip/randomize_azimuth.cc \
+			src/public/manip/report_bodies.cc \
+			src/public/manip/reduce_mass.cc \
 			dox/falcON.dox
 			doxygen dox/falcON.dox
 
