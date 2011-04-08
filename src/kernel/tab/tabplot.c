@@ -40,6 +40,7 @@
  *      20-dec-05  V3.0a : fix bug in xbin=min:max:step mode
  *                     b : fix bug in bins with no dispersive data, switch to moment.h
  *       9-oct-06      d : Implemented the dxcol= and dycol=
+ *       8-apr-11      e : fixed dycol reference bug
  */
 
 /* TODO:
@@ -101,7 +102,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=3.0e\n	 10-oct-06 PJT",
+    "VERSION=3.0f\n	 8-apr-11 PJT",
     NULL
 };
 
@@ -549,7 +550,7 @@ void plot_data()
     for (k=0, i=0, j=0; k<npcol; k++) {
       if (np && nxcol==1) rebin_data (npt,x[i],y[j], nbin, xbin, np, xp, yp,  xps, yps);
 
-      plot_points( npt, x[i], y[j], dx[i], dy[i], xps, yps,
+      plot_points( npt, x[i], y[j], dx[i], dy[j], xps, yps,
 		   yapp_point[2*k], yapp_point[2*k+1],
 		   yapp_line[2*k], yapp_line[2*k+1],
 		   ncolors > 0 ? yapp_color[k] : -1,
