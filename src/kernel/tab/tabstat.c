@@ -28,7 +28,9 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "median=t\n          Compute median too? (can be time consuming)",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
     "nmax=10000\n        maximum number of data to be read if pipe",
-    "VERSION=1.2a\n	 2-feb-05 PJT",
+    "xmin=\n             Set minimum ",
+    "xmax=\n             Set maximum ",
+    "VERSION=1.3\n	 8-apr-2011 PJT",
     NULL
 };
 
@@ -46,7 +48,6 @@ local int    imaxdev[MAXCOL];
 local int    npt;		              /* actual number of data points */
 local int   *ix;
 
-local real xmin[MAXCOL], xmax[MAXCOL];			/* min and max as computed */
 local bool   Qmedian;
 local bool   Qverbose;
 local int    nmax;				/* lines to allocate */
@@ -55,6 +56,8 @@ local char   outfmt[20];
 local int    iter;
 local real   fsigma;
 local int    method;
+local bool   Qmin, Qmax;
+local real   xmin, xmax;
 
 void setparams(), stat_data();
 
@@ -90,6 +93,10 @@ void setparams()
         sprintf(outfmt,"%%%ds",width);
     } else
         sprintf(outfmt,"%%s");
+    Qmin = hasvalue("xmin");
+    Qmax = hasvalue("xmax");
+    if (Qmin) xmin = getrparam("xmin");
+    if (Qmax) xmax = getrparam("xmax");
     dprintf(1,"format=%s\n",outfmt);
     fsigma = getrparam("nsigma");
     iter = getiparam("iter");
@@ -128,7 +135,9 @@ void stat_data()
     for (j=0; j<nxcol; j++) {           /* initialize moments for all data */
         ini_moment(&m[j],4,0);
         for (i=0; i<npt; i++) {
-            accum_moment(&m[j],x[j][i],1.0);
+	  if (Qmin && x[j][i]<xmin) continue;
+	  if (Qmax && x[j][i]>xmax) continue;
+	  accum_moment(&m[j],x[j][i],1.0);
         }
     }
 
