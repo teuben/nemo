@@ -23,6 +23,7 @@
 
 #include <nemo.h>
 #include <image.h>
+#include <spline.h>
 
 string defv[] = {
   "in=???\n       input velocity field",
@@ -36,10 +37,10 @@ string defv[] = {
   "blank=0.0\n    Value of the blank pixel to be ignored",
   "coswt=1\n      power of cos(theta) weighting",
   "wwb73=t\n      use the classic WWB73 method (fixed)",
-  "mode=vtan\n    Output mode {vtan,vmod,vres,vtan/r,ome,vrad}",
+  "mode=vtan\n    Output mode {vtan,vmod,vres,vtan/r,ome,vrad,dv/dr}",
   "out=\n         Optional output map of converted rotation speeds",
   "tab=\n         Optional output table of radii, velocities etc.",
-  "VERSION=1.3\n  10-feb-2011 PJT",
+  "VERSION=1.4\n  10-apr-2011 PJT",
   NULL,
 };
 
@@ -61,14 +62,14 @@ real rad[MAXRING];
 int nrad;
 
 real pixe[MAXRING], flux[MAXRING], vsum[MAXRING], vsqu[MAXRING], wsum[MAXRING];
-real vrot[MAXRING];
+real vrot[MAXRING], radius[MAXRING], coeff[3*MAXRING];
 
 real pa, inc, vsys, xpos, ypos;
 real undf;
 
     /* outmodes: the order of these is important, see mode= */
-    /*    mode:    0    1    2    3      4   5      */
-string outmodes = "vtan,vmod,vres,vtan/r,ome,vrad";
+    /*    mode:    0    1    2    3      4   5    6     */
+string outmodes = "vtan,vmod,vres,vtan/r,ome,vrad,dv/dr";
 
 int string_index(string options, string s)
 {
@@ -86,6 +87,13 @@ int string_index(string options, string s)
   return -1;
 }
 
+/*
+ *  -1:     internal
+ *   0:     first ring   (rad[0]..rad[1])
+ *   nring: last ring
+ *   -2:    outside
+ */
+
 int ring_index(int n, real *r, real rad)
 {
   int i;
@@ -101,7 +109,7 @@ nemo_main()
 {
   stream denstr, velstr, outstr, tabstr;
   real center[2], cospa, sinpa, cosi, sini, sint, cost, costmin, 
-       x, y, xt, yt, r, den;
+    x, y, xt, yt, r, den, vrot_s, dvdr_s;
   real vr, wt, frang, dx, dy, xmin, ymin, rmin, rmax, fsum, ave, tmp, rms;
   real sincosi, cos2i, tga, dmin, dmax, dval, vmod;
   int i, j, k, nx, ny, ir, nring, nundf, nout, nang, nsum, coswt;
@@ -243,6 +251,12 @@ nemo_main()
     wsum[i] = vsum[i] = vsqu[i] = 0.0;
   }
 
+  /* set up rotation curve for differentation and get a spline */
+  for (i=0; i<nring; i++) {
+    radius[i] = 0.5*(rad[i]+rad[i+1]);
+  }
+  spline(coeff, radius, vrot, nring);
+
 
   /* loop over the map again, computing the residuals */
 
@@ -269,6 +283,8 @@ nemo_main()
       for (k=0; k<coswt; k++)  wt *= cost;
       wt = ABS(wt);
       if (ABS(cost) > costmin) {
+	vrot_s = seval(r, radius, vrot, coeff, nring);  
+	dvdr_s = spldif(r, radius, vrot, coeff, nring);
 	vmod = vsys + vrot[ir]*cost*sini;     /* model */
 	vr = MapValue(velptr,i,j)-vmod;       /* residual:   vobs-vmod */
 	if (Qout) {
@@ -278,6 +294,8 @@ nemo_main()
 	    MapValue(outptr,i,j) = vr;
 	  else if (mode==5)                   /* mode=vrad */
 	    MapValue(outptr,i,j) = vr/(sint*sini);
+	  else if (mode==6)                   /* mode=dv/dr */
+	    MapValue(outptr,i,j) = dvdr_s;
 	}
 	wsum[ir] += wt;
 	vsum[ir] += wt*vr;
