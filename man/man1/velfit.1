@@ -1,4 +1,4 @@
-.TH VELFIT 1NEMO "10 February 2011"
+.TH VELFIT 1NEMO "10 April 2011"
 .SH NAME
 velfit \- fit rotation curve to coplanar disk (WWB73 method)
 .SH SYNOPSIS
@@ -73,8 +73,9 @@ Output mode for the output image data file. Valid are:
 \fBvmod\fP, 
 \fBvres\fP (=vobs-vmod), 
 \fBvtan/r\fP, 
-\fBome\fP (=vtan/r), or
-\fBvrad\fP (=vres/(sint*sini))
+\fBome\fP (=vtan/r), 
+\fBvrad\fP (=vres/(sint*sini)), or
+\fBdv/dr\fP (spline derivative of rotation curve)
 .TP
 \fBout=\fP
 Optional output image. If selected, it will contain the 
@@ -111,4 +112,5 @@ Mel Wright (Fortran version), Peter Teuben (C version)
 5-oct-2003	V1.0 : C version in NEMO	PJT
 22-oct-2005	V1.1 : added out=	PJT
 4-feb-2011	V1.2 : added tab= and mode=	PJT
+10-apr-2011	V1.4 : added mode=dv/dr 	PJT
 .fi
