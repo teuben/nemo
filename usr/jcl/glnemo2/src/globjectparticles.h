@@ -15,11 +15,12 @@
  */
 #ifndef GLNEMOGLOBJECTPARTICLES_H
 #define GLNEMOGLOBJECTPARTICLES_H
-
+#include "cshader.h"
 #include "globject.h"
 #include "gltexture.h"
 #include <QObject>
-#define ALPHA_LOOKUP_TABLE 1000000
+#include <iostream>
+
 //#include "particlesdata.h"
 namespace glnemo {
 
@@ -63,7 +64,7 @@ class GLObjectParticles : public GLObject {
     GLObjectParticles(const ParticlesData   *,
                       ParticlesObject *,
                       const GlobalOptions   *,
-		      GLTextureVector *);
+		      GLTextureVector *, CShader *);
     ~GLObjectParticles();
     void update(const ParticlesData   *,
            ParticlesObject *,
@@ -71,27 +72,30 @@ class GLObjectParticles : public GLObject {
     void updateVel();
     void updateVbo();
     void updateColorVbo();
-    const ParticlesData * getPartData() const { return part_data; };
-    const ParticlesObject * getPartObj() const { return (const_cast <ParticlesObject *>(po)); };
+    void updateBoundaryPhys();
+    const ParticlesData * getPartData() const { return part_data; }
+    const ParticlesObject * getPartObj() const { return (const_cast <ParticlesObject *>(po)); }
     void buildDisplayList();
     void buildVelDisplayList();
     void buildOrbitsDisplayList();
     void buildVboPos();
-    void buildVboColor();
-    void buildVboColorGasGasSorted();
-    void buildVboSize();
-    void buildVboSize2();
+    void buildVboHsml();
+    void buildVboPhysData();
     void display(const double * mModel, int);
     void setTexture(QString);
     void setTexture(const int);
     void setTexture();
     void toto();
     void checkVboAllocation(const int sizebuf);
-    static void initAlphaLookupTable(GlobalOptions *);
+    void updateColormap();
+    
   private:
-    // lookup table
-    static float alpha_lookup[ALPHA_LOOKUP_TABLE];
-    static float lognlookup;
+    // shader
+    CShader * shader;
+    
+    // manage min/max index for the physical quantity selected
+    int min_index, max_index;
+    int index_histo[100]; // store first part's index in the percentage
     // Data
     const ParticlesData * part_data;
     ParticlesObject * po;
@@ -100,21 +104,33 @@ class GLObjectParticles : public GLObject {
     GLTexture * texture;
     GLTextureVector * gtv;
     const PhysicalData * phys_select;
+    // local color map
+    std::vector <float> cmap; 
+ 
     // method
     void displaySprites(const double *mModel);
-    void displayVboSprites(int,const bool);
-    void displayVboPoints();
+    void displayVboShader(const int,const bool use_point=false);
     void sortByDepth();
     void sortByDensity();
+    void selectParticles();
+    void buildIndexHisto();    
+    void sendShaderColor(const int, const bool use_point);
+    bool checkHasPhysic();
     // vbo
-    GLuint vbo_pos, vbo_color , vbo_size, vbo_index, vbo_index2;
+    GLuint vbo_pos, vbo_color , vbo_size, vbo_index, vbo_index2, vbo_data;
     int nvert_pos;
     // Rho
-    GLObjectIndexTabVector rho,zdepth,phys_itv;
+    GLObjectIndexTabVector vindex_sel,phys_itv;
     GLuint * indexes_sorted, nind_sorted;
     //
+    bool hasPhysic; // Does object has physic value
     void initShader();
     static int compareZ(const void * a, const void * b);
+    void checkGlError(std::string s) {
+      int err = glGetError();
+      if (err)
+        std::cerr << "!!!! OpenGL error["<<s<<"] error = "<<err<<"\n";
+    }
 };
 
 }

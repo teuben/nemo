@@ -24,42 +24,13 @@
 #include "particlesobject.h"
 #include "tools3d.h"
 #include "fnt.h"
+//#include "cshader.h"
 
 namespace glnemo {
 #define DOF 4000000
-  const char  GLWindow::vertexShader[] = {
-        "// with ATI hardware, uniform variable MUST be used by output          \n"
-        "// variables. That's why factor_size is used by gl_FrontColor          \n"
-        "uniform float alpha;           // alpha color factor                   \n"
-        "uniform float factor_size;     // texture size factor                  \n"
-        "attribute float a_sprite_size; // a different value for each particles \n"
-        "void main()                                                            \n"
-        "{                                                                      \n"
-        "    vec4 vert = gl_Vertex;                                             \n"
-        "    float pointSize =  a_sprite_size*factor_size;                      \n"
-        "    vec3 pos_eye = vec3 (gl_ModelViewMatrix * vert);                   \n"
-        "    gl_PointSize = max(0.00001, pointSize / (1.0 - pos_eye.z));        \n"
-        "    gl_TexCoord[0] = gl_MultiTexCoord0;                                \n"
-        "    gl_Position = ftransform();                                        \n"
-        "    gl_FrontColor =  vec4(gl_Color.r + float(factor_size)*0. ,         \n" 
-        "                          gl_Color.g                         ,         \n"
-        "                          gl_Color.b                         ,         \n"
-        "                          gl_Color.a * alpha);                         \n"
-        "}                                                                      \n"
-  };
-
-  const char  GLWindow::pixelShader[] = {
-        "uniform sampler2D splatTexture;                                        \n"
-
-        "void main()                                                            \n"
-        "{                                                                      \n"
-        "    vec4 color = gl_Color * texture2D(splatTexture, gl_TexCoord[0].st);\n"
-        "    gl_FragColor = color ;                                             \n"
-        "}                                                                      \n"
-  };
-  unsigned int GLWindow::m_program = 0;
+  
   bool GLWindow::GLSL_support = false;
-GLuint framebuffer, renderbuffer;
+  GLuint framebuffer, renderbuffer;
 // ============================================================================
 // Constructor                                                                 
 // BEWARE when parent constructor QGLWidget(QGLFormat(QGL::SampleBuffers),_parent)
@@ -98,6 +69,7 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   
   initializeGL();
   checkGLErrors("initializeGL");
+  shader = NULL;
   initShader();
   checkGLErrors("initShader");
   ////////
@@ -160,6 +132,7 @@ GLWindow::~GLWindow()
   if (GLWindow::GLSL_support) {
     glDeleteRenderbuffersEXT(1, &renderbuffer);
     glDeleteRenderbuffersEXT(1, &framebuffer);
+    if (shader) delete shader;
   }
   std::cerr << "Destructor GLWindow::~GLWindow()\n";
 }
@@ -206,7 +179,8 @@ void GLWindow::update(ParticlesData   * _p_data,
 
   for (unsigned int i=0; i<pov->size() ;i++) {
     if (i>=gpv.size()) {
-      GLObjectParticles * gp = new GLObjectParticles(p_data,&((*pov)[i]),store_options,&gtv);
+      GLObjectParticles * gp = new GLObjectParticles(p_data,&((*pov)[i]),
+                                                     store_options,&gtv,shader);
       //GLObjectParticles * gp = new GLObjectParticles(&p_data,pov[i],store_options);
       gpv.push_back(*gp);
       delete gp;
@@ -232,6 +206,14 @@ void GLWindow::update(ParticlesObjectVector * _pov)
   }
   else pov    = _pov;
 
+}
+// ============================================================================
+// updateBondaryPhys
+void GLWindow::updateBoundaryPhys(const int i_obj)
+{
+  assert(i_obj < (int) gpv.size());
+  gpv[i_obj].updateBoundaryPhys();
+  updateGL();
 }
 // ============================================================================
 // updateVbo
@@ -268,7 +250,8 @@ void GLWindow::updateVel(const int index)
 void GLWindow::changeColorMap()
 {
   for (unsigned int i=0; i<pov->size() ;i++) {
-     gpv[i].buildVboColor();
+     //gpv[i].buildVboColor();
+    gpv[i].updateColormap();
    }
   updateGL();
 }
@@ -277,9 +260,9 @@ void GLWindow::changeColorMap()
 void GLWindow::reverseColorMap()
 {
   //store_options->reverse_cmap = !store_options->reverse_cmap;
-  for (unsigned int i=0; i<pov->size() ;i++) {
-    gpv[i].buildVboColor();
-  }
+//  for (unsigned int i=0; i<pov->size() ;i++) {
+//    gpv[i].buildVboColor();
+//  }
   updateGL();
 }
 // ============================================================================
@@ -470,62 +453,13 @@ void GLWindow::initShader()
       GLSL_support = false;
       //exit(1);
     }
+
     if (GLSL_support ) {
-      std::cerr << "Creating vertex shader\n";
-      m_vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER);
-      if (!m_vertexShader) {
-        qDebug() << "Unable to create VERTEX SHADER.....\n";
-        exit(1);
-      }
-      std::cerr << "Creating Pixel shader\n";
-      m_pixelShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
-      if (!m_pixelShader) {
-        qDebug() << "Unable to create PIXEL SHADER.....\n";
-        exit(1);
-      }
-      const char* v = vertexShader;
-      const char* p = pixelShader;
-      glShaderSourceARB(m_vertexShader, 1, &v, NULL);
-      glShaderSourceARB(m_pixelShader, 1, &p, NULL);
-      std::cerr << "Compiling vertex shader\n";
-      GLint compile_status;
-      glCompileShaderARB(m_vertexShader);
-      checkGLErrors("compile Vertex Shader");
-      glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &compile_status);
-      if(compile_status != GL_TRUE) {
-        qDebug() << "Unable to COMPILE VERTEX SHADER.....\n";
-        exit(1);
-      }
-      std::cerr << "Compiling pixel shader\n";
-      glCompileShaderARB(m_pixelShader);
-      checkGLErrors("compile Pixel Shader");
-      glGetShaderiv(m_pixelShader, GL_COMPILE_STATUS, &compile_status);
-      if(compile_status != GL_TRUE) {
-        qDebug() << "Unable to COMPILE PIXEL SHADER.....\n";
-        exit(1);
-      }
-      std::cerr << "Creating program\n";
-      m_program = glCreateProgramObjectARB();
-      std::cerr << "Attaching vertex shader\n";
-      glAttachObjectARB(m_program, m_vertexShader);
-      std::cerr << "Attaching pixel shader\n";
-      glAttachObjectARB(m_program, m_pixelShader);
-      
-      // bind attribute
-      //glBindAttribLocation(m_program, 100, "a_sprite_size");
-      std::cerr << "Linking  program\n";
-      glLinkProgramARB(m_program);
-      checkGLErrors("link Shader program");
-      int  link_status;
-      glGetProgramiv(m_program, GL_LINK_STATUS, &link_status);
-      if(link_status != GL_TRUE) {
-        qDebug() << "Unable to LINK Shader program.....\n";
-        exit(1);
-      }
-      glDeleteShader(m_vertexShader);
-      glDeleteShader(m_pixelShader);
-      std::cerr << "ending init shader\n";
+      shader = new CShader(GlobalOptions::RESPATH.toStdString()+"/shaders/particles.vert.cc",
+                                 GlobalOptions::RESPATH.toStdString()+"/shaders/particles.frag.cc");
+      shader->init();
     }
+
   }
   else { // Initialisation of GLSL not requested
     std::cerr << "GLSL desactivated from user request, slow rendering ...\n";
@@ -834,13 +768,16 @@ void GLWindow::rotateAroundAxis(const int axis)
   if (!is_key_pressed              && // no interactive user request
       !is_mouse_pressed) {
       switch (axis) {
-      case 0: store_options->xrot++;  // X
+      case 0: // X
+              store_options->xrot += store_options->ixrot;
               y_mouse = (int) store_options->xrot;
               break;
-      case 1: store_options->yrot++;  // Y
+      case 1: // Y
+              store_options->yrot += store_options->iyrot;
               x_mouse = (int) store_options->yrot;
               break;
-      case 2: store_options->zrot++;  // Z
+      case 2: // Z
+              store_options->zrot += store_options->izrot;
               z_mouse = (int) store_options->zrot;
               break;
       }

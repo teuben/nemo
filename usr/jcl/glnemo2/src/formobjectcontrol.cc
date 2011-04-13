@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2010                                  
+// Copyright Jean-Charles LAMBERT - 2007-2011                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -10,6 +10,7 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
+#include "glwindow.h"
 #include "formobjectcontrol.h"
 #include <iostream>
 #include <sstream>
@@ -17,7 +18,6 @@
 #include <QColorDialog>
 #include <QRegExp>
 #include <assert.h>
-#include "glwindow.h"
 #include "globaloptions.h"
 #include "gltexture.h"
 
@@ -100,6 +100,7 @@ FormObjectControl::FormObjectControl(QWidget *parent):QDialog(parent)
   form.objects_properties->setTabEnabled(1,false);
   form.objects_properties->setCurrentIndex(0); // set position to first tab
   
+  my_mutex2 = new QMutex(QMutex::Recursive);
 }
 
 // ============================================================================
@@ -515,7 +516,8 @@ void FormObjectControl::updateRange(const QString& text, const int row, const in
 }
 // ============================================================================
 // updateObjectSettings()                                                      
-// update all the properties of the object in the form (slides, buttons etc..) 
+// update all the Object's FORM properties(slides, buttons etc..) 
+// from object's settings 
 void FormObjectControl::updateObjectSettings( const int row)
 {
   //if (go  && ! go->duplicate_mem) mutex_data->lock();
@@ -567,10 +569,38 @@ void FormObjectControl::updateObjectSettings( const int row)
     if (phys_select && phys_select->isValid()) {
       dens_histo->drawDensity(phys_select->data_histo);
       float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
-      form.dens_slide_min->setValue((log(pobj->getMinPhys())-log(phys_select->getMin()))*1./diff_rho);
-      form.dens_slide_max->setValue((log(pobj->getMaxPhys())-log(phys_select->getMin()))*1./diff_rho);
+
+      if (go->phys_min_glob==-1 && go->phys_max_glob==-1) { // glob phys not defined
+        if (pobj->getMinPhys()==-1. &&  // default parameter -1 -1
+            pobj->getMaxPhys()==-1.) {  // it's a NEW object, so we set min/max phys
+          pobj->setMinPhys(phys_select->getMin()); 
+          pobj->setMaxPhys(phys_select->getMax());
+        }
+      } else { // global phys defined
+        if (pobj->getMinPhys()==-1. &&            // default parameter for the object
+            pobj->getMaxPhys()==-1.) {  // 
+          pobj->setMinPhys(go->phys_min_glob);
+          pobj->setMaxPhys(go->phys_max_glob);
+        }
+      }
+      //min
+      float minphys=pobj->getMinPhys();
+      float maxphys=pobj->getMaxPhys();
+      
+      int min=(log(minphys)-log(phys_select->getMin()))*1./diff_rho;
+      form.dens_slide_min->setValue(min);
+      //pobj->setMinPercenPhys(std::max(min-1,0));
+      //max      
+      int max=(log(maxphys)-log(phys_select->getMin()))*1./diff_rho;
+      form.dens_slide_max->setValue(max);
+      //pobj->setMaxPercenPhys(std::max(1,max-1));
+
       dens_histo->drawDensity(form.dens_slide_min->value(),form.dens_slide_max->value());
       dens_color_bar->draw(form.dens_slide_min->value(),form.dens_slide_max->value());
+      //pobj->setMinPhys(minphys);
+      //pobj->setMaxPhys(maxphys);
+      go->phys_min_glob = minphys;
+      go->phys_max_glob = maxphys;
     }
                                        
   }
@@ -955,6 +985,7 @@ void FormObjectControl::on_orbit_history_spin_valueChanged(int value)
 void FormObjectControl::on_dens_slide_min_valueChanged(int value)
 {
   if (go  && ! go->duplicate_mem) mutex_data->lock();
+  my_mutex2->lock();
   int i_obj = object_index[current_object];
   if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
     assert(i_obj < (int)pov->size());
@@ -964,7 +995,19 @@ void FormObjectControl::on_dens_slide_min_valueChanged(int value)
     }
     dens_histo->drawDensity(form.dens_slide_min->value(), form.dens_slide_max->value());
     dens_color_bar->draw(form.dens_slide_min->value(), form.dens_slide_max->value());
+    
+    //setNewPhys();
+    ParticlesObject * pobj = &(*pov)[i_obj];
+    if (value<0) value=0;
+    if (value>=99) value=98;
+    pobj->setMinPercenPhys(value);
+    if (EMIT) {
+      
+      setNewPhys();
+      emit changeBoundaryPhys(i_obj);      
+    }
   }
+  my_mutex2->unlock();
   //if (lock)
   if (go  && ! go->duplicate_mem) mutex_data->unlock();
 }
@@ -973,28 +1016,58 @@ void FormObjectControl::on_dens_slide_min_valueChanged(int value)
 void FormObjectControl::on_dens_slide_max_valueChanged(int value)
 {
   if (go  && ! go->duplicate_mem) mutex_data->lock();
+  my_mutex2->lock();
   int i_obj = object_index[current_object];
   if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
     assert(i_obj < (int)pov->size());
     //ParticlesObject * pobj = &(*pov)[i_obj];
     if (value <= form.dens_slide_min->value()) { // min < max !
-      form.dens_slide_min->setValue(value-1);
+      form.dens_slide_min->setValue(std::max(value-1,0));
     }
     dens_histo->drawDensity(form.dens_slide_min->value(), form.dens_slide_max->value());
     dens_color_bar->draw(form.dens_slide_min->value(), form.dens_slide_max->value());
+    
+    //setNewPhys();
+    ParticlesObject * pobj = &(*pov)[i_obj];
+    if (value<=0) value=1;
+    if (value>=100) value=99;    
+    pobj->setMaxPercenPhys(value);
+    if (EMIT) {
+    
+      setNewPhys();
+      emit changeBoundaryPhys(i_obj);      
+    }
   }
+  my_mutex2->unlock();
   //if (lock)
   if (go  && ! go->duplicate_mem) mutex_data->unlock();
 }
 // ============================================================================
-// on_dens_apply_button_clicked()                                              
-void FormObjectControl::on_dens_apply_button_clicked()
+// setNewPhys
+void FormObjectControl::setNewPhys()
 {
   if (go  && ! go->duplicate_mem) mutex_data->lock();
   int i_obj = object_index[current_object];
   if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
     assert(i_obj < (int)pov->size());
     ParticlesObject * pobj = &(*pov)[i_obj];
+    float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
+    pobj->setMinPhys(exp(log(phys_select->getMin())+form.dens_slide_min->value()*diff_rho));
+    pobj->setMaxPhys(exp(log(phys_select->getMin())+form.dens_slide_max->value()*diff_rho));
+    go->phys_min_glob = pobj->getMinPhys();
+    go->phys_max_glob = pobj->getMaxPhys();
+  }
+}
+// ============================================================================
+// on_dens_apply_button_clicked()                                              
+void FormObjectControl::on_phys_console_button_clicked()
+{
+  if (go  && ! go->duplicate_mem) mutex_data->lock();
+  int i_obj = object_index[current_object];
+  if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
+    assert(i_obj < (int)pov->size());
+    ParticlesObject * pobj = &(*pov)[i_obj];
+#if 0
     if (1) { //DEACTIVAREDform.dens_loc_button->isChecked()) {
       go->phys_local = true;
       float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
@@ -1010,6 +1083,9 @@ void FormObjectControl::on_dens_apply_button_clicked()
       emit densityProfileObjectChanged(i_obj);
       emit objectSettingsChanged();
     }
+#endif
+    std::cerr << "minphys="<<pobj->getMinPhys()<<"\n";
+    std::cerr << "maxphys="<<pobj->getMaxPhys()<<"\n";
   }
   if (go  && ! go->duplicate_mem) mutex_data->unlock();
 }
@@ -1068,7 +1144,12 @@ void FormObjectControl::physicalSelected()
       dens_color_bar->draw(form.dens_slide_min->value(),form.dens_slide_max->value());
       
       
-      on_dens_apply_button_clicked();
+      //on_dens_apply_button_clicked();
+      //on_phys_console_button_clicked();
+      if (EMIT) {
+        emit densityProfileObjectChanged(i_obj);
+        emit objectSettingsChanged();
+      }
     }    
   }
   if (go  && ! go->duplicate_mem) mutex_data->unlock();

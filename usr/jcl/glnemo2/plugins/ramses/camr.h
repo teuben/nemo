@@ -29,18 +29,20 @@ public:
     CAmr(const std::string,const bool _v=true);
     
     ~CAmr();
-    void setBoundary(float x[7]) {
+    void setBoundary(float x[8]) {
       xmin=x[0];
       xmax=x[1];
       ymin=x[2];
       ymax=x[3];
       zmin=x[4];
       zmax=x[5];
-      if (x[6]==0.) {
+      
+      if (x[7]==0.) {
         lmax= nlevelmax;
       } else {
-        lmax = (int) x[6];
-      }  
+        lmax = (int) x[7];
+      } 
+      lmin = std::min((int) x[6],lmax-1);                   
     }
     bool isValid();
     int loadData(float * pos=NULL, float * vel=NULL, float * rho=NULL,
@@ -57,7 +59,7 @@ public:
     std::string s_run_index,ordering;
   
     float xmin,xmax,ymin,ymax,zmin,zmax;
-    int lmax;
+    int lmin,lmax;
     CFortIO  amr, hydro;
     int readHeader();
     // amr header variables

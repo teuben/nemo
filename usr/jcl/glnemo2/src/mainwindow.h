@@ -75,8 +75,11 @@ class MainWindow : public QMainWindow {
     void actionReload();
     void actionPrint();
     void actionRotateX();
+    void actionRotateRX();
     void actionRotateY();
+    void actionRotateRY();
     void actionRotateZ();
+    void actionRotateRZ();
     void actionTranslateX();
     void actionTranslateY();
     void actionTranslateZ();
@@ -160,7 +163,8 @@ class MainWindow : public QMainWindow {
     QAction * reverse_cmap_action;
     QAction * dynamic_cmap_action;
     // auto rotate
-    QAction * rotatex_action, * rotatey_action,* rotatez_action;
+    QAction * rotatex_action, * rotatey_action,* rotatez_action,
+    * rotatexr_action, * rotateyr_action,* rotatezr_action;
     // auto translate
     QAction * transx_action, * transy_action, * transz_action;
     // Z sorting

@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/" >
+    <qresource prefix="/">
         <file>../res/fonts/Helvetica.txf</file>
         <file>../res/fonts/AvantGarde-Demi.txf</file>
         <file>../res/colormaps/LOCS.256</file>
@@ -65,5 +65,7 @@
         <file>../res/images/window_nofullscreen.png</file>
         <file>../res/images/zoom-best-fit.png</file>
         <file>../res/camera/path_01</file>
+        <file>../res/shaders/particles.vert.cc</file>
+        <file>../res/shaders/particles.frag.cc</file>
     </qresource>
 </RCC>

@@ -56,7 +56,8 @@ GlobalOptions::GlobalOptions()
   // from Scene Orientation TAB
   zoom=-1.0;
   zoomo=1.0;
-  xrot=yrot=xrot=0.0;
+  xrot=yrot=xrot=0.0;     // x y z rotation
+  ixrot=iyrot=ixrot=1.;   // x y z increment rotation
   xtrans=ytrans=ztrans=0.0;
   // from Grids TAB
   show_grid=true;
@@ -116,6 +117,7 @@ GlobalOptions::GlobalOptions()
   zmin=0.;
   zmax=1.;
   lmax=0;
+  lmin=0;
   scale=1000.0;
   // select
   select_time = "";
@@ -136,6 +138,9 @@ void GlobalOptions::copyTransform(const GlobalOptions &m)
   xrot    = m.xrot;
   yrot    = m.yrot;
   zrot    = m.zrot;
+  ixrot   = m.ixrot;
+  iyrot   = m.iyrot;
+  izrot   = m.izrot;
   // trans
   xtrans = m.xtrans;
   ytrans = m.ytrans;
@@ -153,6 +158,9 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   xrot    = m.xrot;
   yrot    = m.yrot;
   zrot    = m.zrot;
+  ixrot   = m.ixrot;
+  iyrot   = m.iyrot;
+  izrot   = m.izrot;
   // trans
   xtrans = m.xtrans;
   ytrans = m.ytrans;
@@ -264,6 +272,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   zmin = m.zmin;
   zmax = m.zmax;
   lmax = m.lmax;
+  lmin = m.lmin;
   scale= m.scale;
   // select
   select_time = m.select_time;

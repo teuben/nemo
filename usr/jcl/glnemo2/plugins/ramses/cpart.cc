@@ -190,7 +190,7 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
               (tmp[2][k]>=zmin && tmp[2][k]<=zmax)) {
             
             if (count_only) {
-              if (age[k]==0) { // it's DM
+              if (1 /*age[k]==0*/) { // it's DM
                 ndm_box++;
               } else {         // it's a star
                 nstar_box++;
@@ -200,7 +200,7 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
             else {
               int idx=666;//index[nbody];
               if (idx!=-1) { // it's a valide particle
-                if (take_halo && age[k]==0) { // DM selected and it's a  DM
+                if (take_halo/* && age[k]==0*/) { // DM selected and it's a  DM
                   int cpt = namr_box+cpt_dm;
                   assert(cpt<(nselect+namr_box));
                   for (int l=0;l<3;l++) {
@@ -211,7 +211,7 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
                   }
                   cpt_dm++;
                 } 
-                if (take_stars && age[k]!=0) { // STARS selected and it's a star
+                if (take_stars /*&& age[k]!=0*/) { // STARS selected and it's a star
                   int cpt = namr_box+(take_halo?ndm_box:0)+cpt_star;
                   assert(cpt<(nselect+namr_box));
                   for (int l=0;l<3;l++) {
@@ -230,7 +230,7 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
         }
       }
       // garbage
-      delete [] age;
+      //delete [] age;
     } 
     // garbage collecting
     for (int i=0; i<6; i++)

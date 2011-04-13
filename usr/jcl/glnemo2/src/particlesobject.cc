@@ -10,10 +10,11 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
+#include "glwindow.h"
 #include "particlesobject.h"
 #include <iostream>
 #include <assert.h>
-#include "glwindow.h"
+
 namespace glnemo {
 int ParticlesObject::nobj=0;
 long long int ParticlesObject::cpt=0;
@@ -76,6 +77,9 @@ ParticlesObject::ParticlesObject(const ParticlesObject&m)
   orbits_animate=m.orbits_animate;
   min_phys   = m.min_phys;
   max_phys   = m.max_phys;
+  min_percen_phys = m.min_percen_phys;
+  max_percen_phys = m.max_percen_phys;
+  
   OrbitsVector oo = m.ov;
   // loop on orbits_max
   for (OrbitsVector::iterator oit =oo.begin();oit!=oo.end() ; oit++) {
@@ -131,6 +135,8 @@ const ParticlesObject& ParticlesObject::operator=(const ParticlesObject&m)
   orbits_animate=m.orbits_animate;
   min_phys   = m.min_phys;
   max_phys   = m.max_phys;
+  min_percen_phys = m.min_percen_phys;
+  max_percen_phys = m.max_percen_phys;
 
   OrbitsVector oo = m.ov;
   // loop on orbits_max
@@ -183,6 +189,8 @@ void ParticlesObject::copyProperties(const ParticlesObject&m)
   orbits_animate=m.orbits_animate;
   min_phys   = m.min_phys;
   max_phys   = m.max_phys;
+  min_percen_phys = m.min_percen_phys;
+  max_percen_phys = m.max_percen_phys;
 
   //ol           = m.ol;
   //pos          = m.pos;
@@ -300,9 +308,10 @@ void ParticlesObject::init(const ObjFrom _of, const std::string _name)
   orbits_max   = 20;
   orbits_history=50;
   orbits_animate=false;
-  min_phys   = 0.;
-  max_phys   = 10000000000.;
-
+  min_phys   = -1.;//0.;
+  max_phys   = -1.;//10000000000.;
+  min_percen_phys=0;
+  max_percen_phys=99;
   setColor();
 
 }

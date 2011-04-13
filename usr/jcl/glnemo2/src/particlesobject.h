@@ -120,11 +120,16 @@ class ParticlesObject{
     int getOrbitsHistory()       { return orbits_history;}
     bool getOrbitsAnimate()      { return orbits_animate;}
     ObjFrom selectFrom()        { return obj_from;}
-    // density
+    // real Physical value
     void setMinPhys(const float _v) { min_phys = _v; }
     void setMaxPhys(const float _v) { max_phys = _v; }
     float getMinPhys()  const { return min_phys; }
     float getMaxPhys()  const { return max_phys; }
+    // Percentage Physical Value
+    void setMinPercenPhys(const int _v) { min_percen_phys = _v; }
+    void setMaxPercenPhys(const int _v) { max_percen_phys = _v; }
+    int getMinPercenPhys()  const { return min_percen_phys; }
+    int getMaxPercenPhys()  const { return max_percen_phys; }
   private:
 
     QColor color;    // object color                    
@@ -155,6 +160,9 @@ class ParticlesObject{
     // physicial value
     float min_phys;
     float max_phys;
+    int min_percen_phys;
+    int max_percen_phys;
+    
     void setColor();
     std::string obj_name;  // or file name
     ObjFrom obj_from;

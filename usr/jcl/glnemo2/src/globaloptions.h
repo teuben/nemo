@@ -61,6 +61,7 @@ public:
     // from Scene Orientation TAB
     float zoom,zoomo;
     float xrot,yrot,zrot;
+    float ixrot,iyrot,izrot;
     float xtrans,ytrans,ztrans;
     // from Grids TAB
     bool show_grid;
@@ -118,7 +119,7 @@ public:
     bool auto_texture_size;
     // ramses stuffs
     float xmin,xmax,ymin,ymax,zmin,zmax;
-    int lmax;
+    int lmax,lmin;
     float scale;
     // select
     std::string select_time;

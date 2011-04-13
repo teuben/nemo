@@ -180,7 +180,7 @@ int SnapshotRamses::initLoading(GlobalOptions * so)
   go = so;
   load_vel = so->vel_req;
   select_time = so->select_time;  
-  float x[7];
+  float x[8];
   // boundary box
   x[0] = so->xmin;
   x[1] = so->xmax;
@@ -188,7 +188,8 @@ int SnapshotRamses::initLoading(GlobalOptions * so)
   x[3] = so->ymax;
   x[4] = so->zmin;
   x[5] = so->zmax;
-  x[6] = so->lmax;
+  x[6] = so->lmin;
+  x[7] = so->lmax;
   amr->setBoundary(x);
   part->setBoundary(x);
   if (so->select_part=="" || (so->select_part.find("gas")!=std::string::npos)) 

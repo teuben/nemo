@@ -24,14 +24,14 @@ qt4 are still installed there). Change to 'glnemo2' directory and enter the comm
 
     a) Linux and Windows only
        - - - - - - - - - - - -
-       qmake
+       qmake -recursive
           then
        make
 
 
     b) Mac OS X
        - - - - -
-       qmake -spec macx-g++
+       qmake -spec macx-g++ -recursive
           then
        make
 

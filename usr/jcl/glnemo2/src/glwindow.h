@@ -15,6 +15,8 @@
 */
 #ifndef GLNEMOGLWINDOW_H
 #define GLNEMOGLWINDOW_H
+
+#include  "cshader.h"
 #include <QGLWidget>
 #include <QImage>
 #include <QMutex>
@@ -26,6 +28,8 @@
 #include "gltexture.h"
 #include "gloctree.h"
 #include "camera.h"
+
+
 class fntTexFont;
 
 namespace glnemo {
@@ -46,7 +50,6 @@ public:
       setTranslation(0,0,0);
       resetEvents(true);
     }
-    static GLuint m_program;    
     static bool GLSL_support;
     void setFBO(bool _b) { fbo = _b; }
     void setFBOSize(GLuint w, GLuint h) { texWidth=w; texHeight=h;}
@@ -71,7 +74,8 @@ public slots:
                 GlobalOptions         * );
    void  update(ParticlesObjectVector * );
    void  update();
-   void  updateVbo(const int);
+   void  updateVbo(const int);   
+   void  updateBoundaryPhys(const int);
    void  updateColorVbo(const int);
    void  changeColorMap();
    void  reverseColorMap();
@@ -188,6 +192,7 @@ private:
   // bench
   int nframe;
   // Shaders
+  CShader * shader;
   void initShader();
   unsigned int m_vertexShader, m_pixelShader;
 

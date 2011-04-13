@@ -131,6 +131,7 @@ namespace glnemo {
   void constantColorMap(const bool);
   void reverseColorMap(const bool);
   void customColormap();
+  void changeBoundaryPhys(const int);
   public slots:
     void changeColorMap() {
       form.dynamic_cmap->setChecked(go->dynamic_cmap);
@@ -176,9 +177,10 @@ namespace glnemo {
     // -- Physical quantities  Tab --
     void on_dens_slide_min_valueChanged(int);
     void on_dens_slide_max_valueChanged(int);
-    void on_dens_apply_button_clicked();
+    void on_phys_console_button_clicked();
     void on_dens_set_uselect_clicked();
     void setPhysicalTabName();
+    void setNewPhys();
     //
     void on_dens_phys_radio_clicked();  
     void on_temp_phys_radio_clicked();  
@@ -247,6 +249,7 @@ namespace glnemo {
     void updateObjectSettings(const int);
     bool first;
     QMutex * mutex_data,my_mutex;
+    QMutex * my_mutex2;
     bool lock;
     DensityHisto * dens_histo;
     DensityColorBar * dens_color_bar;

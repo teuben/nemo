@@ -16,7 +16,6 @@
 #ifndef GLNEMOGLSELECTION_H
 #define GLNEMOGLSELECTION_H
 #include <QObject>
-#include <QGLWidget>
 #include <QMouseEvent>
 #include <QTimer>
 #include <QMutex>
@@ -24,6 +23,7 @@
 #include <particlesdata.h>
 #include "globjectparticles.h"
 #include "vec3d.h"
+#include <QGLWidget>
 
 namespace glnemo {
 

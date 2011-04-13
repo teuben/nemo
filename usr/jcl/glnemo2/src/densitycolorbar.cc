@@ -80,13 +80,12 @@ void DensityColorBar::draw(const int min, const int max)
           if (go->reverse_cmap) {
              index = ncolors-1-index;
           }
-          
-          //path.moveTo(i,0);
-          //path.lineTo(i,parent->height());
-          R=pow((*go->R)[index],go->powercolor)*255;
-          G=pow((*go->G)[index],go->powercolor)*255;
-          B=pow((*go->B)[index],go->powercolor)*255;
-          addLine(i,0,i,parent->height(),QPen(QColor(R,G,B)));
+          if (index>=0 && index<ncolors) {
+            R=pow((*go->R)[index],go->powercolor)*255;
+            G=pow((*go->G)[index],go->powercolor)*255;
+            B=pow((*go->B)[index],go->powercolor)*255;
+            addLine(i,0,i,parent->height(),QPen(QColor(R,G,B)));
+          }
         }
         //addPath(path,QPen(QColor(R,G,B)));
    }

@@ -1,3 +1,16 @@
+# ============================================================================
+# Copyright Jean-Charles LAMBERT - 2007-2011                                  
+# e-mail:   Jean-Charles.Lambert@oamp.fr                                      
+# address:  Dynamique des galaxies                                            
+#           Laboratoire d'Astrophysique de Marseille                          
+#           Pôle de l'Etoile, site de Château-Gombert                         
+#           38, rue Frédéric Joliot-Curie                                     
+#           13388 Marseille cedex 13 France                                   
+#           CNRS U.M.R 6110                                                   
+# ============================================================================
+# See the complete license in LICENSE and/or "http://www.cecill.info".        
+# ============================================================================
+
 cmake_minimum_required(VERSION 2.6)
  
 # project name
@@ -7,6 +20,7 @@ project (glnemo2)
 FIND_PACKAGE(Qt4 REQUIRED)
 SET(QT_USE_QTOPENGL 1)
 SET(QT_USE_QTUITOOLS 1)
+SET(QT_USE_QTNETWORK 1)
 INCLUDE(${QT_USE_FILE})
 
 # find OpenGL package
@@ -25,10 +39,18 @@ FILE(GLOB lib_files
      ../plugins/*.cc
      ../plugins/ftm/*.cc 
      ../plugins/gadget/*.cc
+     ../plugins/network/*.cc
+     ../plugins/network/*.cpp
+     ../plugins/ramses/*.cc
+     ../plugins/zlib/*.c
+     ../utils/*.cc
+     ../3rdparty/pfntlib/*.cxx
     )
 
 # Find plugins qt headers
-FILE(GLOB hdrs1_files ../plugins/*.h ../plugins/ftm/*.h ..plugins/gadget/*.h )
+FILE(GLOB hdrs1_files ../plugins/*.h ../plugins/ftm/*.h ..plugins/gadget/*.h 
+     ../plugins/network/*.h ../plugins/ramses/*.h
+     )
 
 # Destination path for the lib
 SET(LIBRARY_OUTPUT_PATH ../LIB)
@@ -43,7 +65,7 @@ ADD_DEFINITIONS(-DQT_CORE_LIB)
 ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 # Make sure the compiler can find include files from our Hello library.
-include_directories (${PROJECT_SOURCE_DIR}/../plugins/nemolight/inc ${PROJECT_SOURCE_DIR}/../src ${PROJECT_SOURCE_DIR}/../plugins/ftm ${PROJECT_SOURCE_DIR}/../plugins/gadget ${PROJECT_SOURCE_DIR}/../src/glew)
+include_directories (${PROJECT_SOURCE_DIR}/../plugins ${PROJECT_SOURCE_DIR}/../plugins/nemolight/inc ${PROJECT_SOURCE_DIR}/../src ${PROJECT_SOURCE_DIR}/../plugins/ftm ${PROJECT_SOURCE_DIR}/../plugins/gadget ${PROJECT_SOURCE_DIR}/../src/glew ${PROJECT_SOURCE_DIR}/../plugins/network ${PROJECT_SOURCE_DIR}/../plugins/ramses ${PROJECT_SOURCE_DIR}/../plugins/zlib ${PROJECT_SOURCE_DIR}/../3rdparty/pfntlib ${PROJECT_SOURCE_DIR}/../utils)
 
 # run moc files
 QT4_WRAP_CPP(moc1_src ${hdrs1_files})
@@ -95,5 +117,6 @@ set(EXECUTABLE_OUTPUT_PATH ../bin)
 add_executable (glnemo2 ${src_files} ${rc_src} ${ui_headers} ${moc_src} ${glew})
 
 # Link the executable to the Hello library.
-target_link_libraries (glnemo2 uns ${QT_LIBRARIES} )
+target_link_libraries (glnemo2 uns ${OPENGL_LIBRARY}  ${QT_LIBRARIES} )
 
+#

@@ -35,7 +35,7 @@ class PhysicalData {
   bool isValid() const { return valid;}
   int getType()  const { return type;}
   float * data;
-  int data_histo[100];
+  int data_histo[100]; // store #particles per percentage
   private:
   int nbody;
   double min,max;

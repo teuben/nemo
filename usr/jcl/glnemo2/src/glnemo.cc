@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.11"
+#define RELEASE_VERSION "1.20"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -46,6 +46,7 @@ using namespace std;
     "ymax=1.0\n        ymax box (for ramses input)                      ",
     "zmin=0.0\n        zmin box (for ramses input)                      ",
     "zmax=1.0\n        zmax box (for ramses input)                      ",
+    "lmin=0.0\n        level min (for ramses amr input)                 ",
     "lmax=0.0\n        level max (for ramses amr input)                 ",
     "scale=1000.\n        ramses rescaling factor                          ",
     "vel=f\n           load velocity coordinates                        ",

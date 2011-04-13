@@ -456,32 +456,32 @@ int PhysicalData::computeMinMax()
 	max=std::max(max,(double) data[i]);
 	min=std::min(min,(double) data[i]);
       }
+    }       
+    std::cerr << "-------------------------------\n";
+    switch (type) {
+    case PhysicalData::neib :
+      std::cerr << "Hsml        range :\n";
+      break;
+    case PhysicalData::rho : 
+      GlobalOptions::rho_exist         = true;
+      std::cerr << "Density     range :\n";
+      break;
+    case PhysicalData::temperature : 
+      GlobalOptions::temperature_exist = true;
+      std::cerr << "Temperature range :\n";
+      break;            
+    case PhysicalData::pressure :
+      GlobalOptions::pressure_exist    = true;
+      std::cerr << "Pressure    range :\n";
+      break;                        
     }
+    valid = true;
+    
     if ((max == -1E9 && min == 1E9 )|| (max == min)) {
       valid = false;
     } 
-    else {
-      switch (type) {
-          case PhysicalData::neib :
-            std::cerr << "Hsml        range :";
-            break;
-          case PhysicalData::rho : 
-            GlobalOptions::rho_exist         = true;
-            std::cerr << "Density     range :";
-            break;
-          case PhysicalData::temperature : 
-            GlobalOptions::temperature_exist = true;
-            std::cerr << "Temperature range :";
-            break;            
-          case PhysicalData::pressure :
-            GlobalOptions::pressure_exist    = true;
-            std::cerr << "Pressure    range :";
-            break;                        
-          }
-      valid = true;
-    }
     std::cerr <<" min = "<< std::scientific << std::setw(10) << min
-              <<" max = "<< std::setw(10)<<max<<"\n";
+              <<"\n max = "<< std::setw(10)<<max<<"\n";
     // compute density histogram                                      
     // in a array of 100 bins, going from log(min data) to log(max data)
     // we compute the index in that range for the particles's density,
@@ -496,14 +496,27 @@ int PhysicalData::computeMinMax()
         min=1E-9;
         offset=1E-9;
       }
-      else offset=min*-1.;
+      else offset=min*-1.0001;
+      double mmin=0.0;
+      bool first=true;
       for (int i=0; i<(nbody); i++) {
         if (data[i] != -1 ) {
           data[i] += offset;
+          if (first) {
+            mmin = data[i];
+            if (data[i] != 0.0)
+              first=false;
+          } else {
+            if (data[i]!=0.0)
+              mmin = std::min(mmin,(double)data[i]);
+          }
         }
       }
       min=1E-12;
+      min=mmin;
       max=max+offset;
+      std::cerr <<" new min = "<< std::scientific << std::setw(10) << min
+                <<"\n new max = "<< std::setw(10)<<max<<"\n";
     }
     if (valid) {
       for (int i=0; i<(nbody); i++) {

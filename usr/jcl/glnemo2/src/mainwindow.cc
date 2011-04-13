@@ -12,15 +12,15 @@
 // ============================================================================
 #include <QtGui>
 
-#include <QGLWidget>
+//#include <QGLWidget>
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QLayout>
 #include <assert.h>
 #include <iomanip>
 #include <sstream>
-#include "mainwindow.h"
 #include "glwindow.h"
+#include "mainwindow.h"
 #include "pluginsmanage.h"
 #include "particlesselectrange.h"
 #include "snapshotinterface.h"
@@ -81,6 +81,8 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_o_c,SIGNAL(objectUpdate()),gl_window,SLOT(update()));
   connect(form_o_c,SIGNAL(textureObjectChanged(const int, const int)),
           gl_window,SLOT(setTextureObject(const int, const int)));
+  connect(form_o_c,SIGNAL(changeBoundaryPhys(const int)),
+          gl_window,SLOT(updateBoundaryPhys(const int)));
   connect(form_o_c,SIGNAL(gazAlphaObjectChanged(const int)),
           gl_window,SLOT(updateVbo(const int)));
   connect(form_o_c,SIGNAL(gazSizeObjectChanged(const int)),
@@ -133,8 +135,6 @@ MainWindow::MainWindow(std::string _ver)
   reload = false;
   //mainLayout->addWidget(qgl);
   setCentralWidget(gl_window);
-  // initialyse lookup tables
-  GLObjectParticles::initAlphaLookupTable(store_options);
 }
 // -----------------------------------------------------------------------------
 // Start                                                                        
@@ -530,16 +530,37 @@ void MainWindow::createActions()
   rotatex_action->setShortcut(tr("Ctrl+X"));
   connect( rotatex_action, SIGNAL( activated() ), this, SLOT( actionRotateX() ) );
   addAction(rotatex_action);
+  
+  // Auto rotate reverse around X 
+  rotatexr_action = new QAction(this);
+  rotatexr_action->setShortcut(tr("Ctrl+Shift+X"));
+  connect( rotatexr_action, SIGNAL( activated() ), this, SLOT( actionRotateRX() ) );
+  addAction(rotatexr_action);
+  
   // Auto rotate around Y 
   rotatey_action = new QAction(this);
   rotatey_action->setShortcut(tr("Ctrl+Y"));
   connect( rotatey_action, SIGNAL( activated() ), this, SLOT( actionRotateY() ) );
   addAction(rotatey_action);
+  
+  // Auto rotate reverse around Y 
+  rotateyr_action = new QAction(this);
+  rotateyr_action->setShortcut(tr("Ctrl++Shift+Y"));
+  connect( rotateyr_action, SIGNAL( activated() ), this, SLOT( actionRotateRY() ) );
+  addAction(rotateyr_action);
+  
   // Auto rotate around Z 
   rotatez_action = new QAction(this);
   rotatez_action->setShortcut(tr("Ctrl+Z"));
   connect( rotatez_action, SIGNAL( activated() ), this, SLOT( actionRotateZ() ) );
   addAction(rotatez_action);
+  
+  // Auto rotate reverse around Z 
+  rotatezr_action = new QAction(this);
+  rotatezr_action->setShortcut(tr("Ctrl+Shift+Z"));
+  connect( rotatezr_action, SIGNAL( activated() ), this, SLOT( actionRotateRZ() ) );
+  addAction(rotatezr_action);
+  
   // Auto translate along X
   transx_action = new QAction(this);
   transx_action->setShortcut(tr("Alt+X"));
@@ -795,6 +816,7 @@ void MainWindow::parseNemoParameters()
   store_options->ymax     = getdparam((char *) "ymax");
   store_options->zmin     = getdparam((char *) "zmin");
   store_options->zmax     = getdparam((char *) "zmax");
+  store_options->lmin     = getiparam((char *) "lmin");
   store_options->lmax     = getiparam((char *) "lmax");
   store_options->scale    = getdparam((char *) "scale");
   // auto rendering mode
@@ -1189,32 +1211,67 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
     }
 }
 // -----------------------------------------------------------------------------
-// actionRotateX()                                                              
+// actionRotateX() starts timer to rotate around x axis                                                       
 void MainWindow::actionRotateX()
 {
   static bool rot=false;
   rot = !rot; // toggle rotation
+  store_options->ixrot = 1;
   if (rot)  auto_rotx_timer->start(20);
   else      auto_rotx_timer->stop();
 }
 // -----------------------------------------------------------------------------
-// actionRotateY()                                                              
+// actionRotateRX() starts timer to rotate around x axis (reverse)                                   
+void MainWindow::actionRotateRX()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->ixrot = -1;
+  if (rot)  auto_rotx_timer->start(20);
+  else      auto_rotx_timer->stop();
+}
+// -----------------------------------------------------------------------------
+// actionRotateY() starts timer to rotate around y axis              
 void MainWindow::actionRotateY()
 {
   static bool rot=false;
   rot = !rot; // toggle rotation
+  store_options->iyrot = 1;
   if (rot)  auto_roty_timer->start(20);
   else      auto_roty_timer->stop();
 }
 // -----------------------------------------------------------------------------
-// actionRotateZ()                                                              
+// actionRotateRY() starts timer to rotate around y axis (reverse)                                   
+void MainWindow::actionRotateRY()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->iyrot = -1;
+  if (rot)  auto_roty_timer->start(20);
+  else      auto_roty_timer->stop();
+}
+
+// -----------------------------------------------------------------------------
+// actionRotateZ() starts timer to rotate around z axis                              
 void MainWindow::actionRotateZ()
 {
   static bool rot=false;
   rot = !rot; // toggle rotation
+  store_options->izrot = 1;
   if (rot)  auto_rotz_timer->start(20);
   else      auto_rotz_timer->stop();
 }
+// -----------------------------------------------------------------------------
+// actionRotateRZ() starts timer to rotate around z axis (reverse)                                   
+void MainWindow::actionRotateRZ()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->izrot = -1;
+  if (rot)  auto_rotz_timer->start(20);
+  else      auto_rotz_timer->stop();
+}
+
 // -----------------------------------------------------------------------------
 // actionTranlateX()                                                            
 void MainWindow::actionTranslateX()
@@ -1434,7 +1491,7 @@ void MainWindow::updateBenchFrame()
 void MainWindow::saveIndexList()
 {
   std::vector <int> * list = gl_window->gl_select->getList();
-  if (list->size() && current_data->part_data->id.size()>0) {
+  if (list->size()) {// && current_data->part_data->id.size()>0) {
     QString fileName = QFileDialog::getSaveFileName(this,tr("Save list of indexes"));
     if (!fileName.isEmpty()) {
       QFile file(fileName);
@@ -1443,7 +1500,11 @@ void MainWindow::saveIndexList()
         out << "#glnemo_index_list\n";
         for (std::vector<int>::iterator i=list->begin(); i<list->end(); i++) {          
            //out << (*i) << "\n";
-          out << current_data->part_data->id[*i] << "\n";
+          if (current_data->part_data->id.size()>0) { // save by ids
+            out << current_data->part_data->id[*i] << "\n";
+          } else {                                    // save by indexes
+            out << *i << "\n";
+          }
         }
         file.close();
       }

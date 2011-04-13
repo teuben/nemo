@@ -35,7 +35,7 @@ CAmr::CAmr(const std::string _indir, const bool _v)
   while ((found=s_run_index.find_last_of("/"))>0) { // remove trailing "/"
     s_run_index.erase(found,found);
   }
-  std::cerr << "Run index = " << s_run_index << "\n";
+  //std::cerr << "Run index = " << s_run_index << "\n";
   infile = indir + "/amr_" + s_run_index + ".out00001";
   
   //computeNbody();
@@ -127,12 +127,19 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
     amr.skipBlock();    
     
     if (nboundary>0) {
-      assert(0);
-          amr.skipBlock(2);
+      amr.skipBlock(2);
       
       amr.readDataBlock((char *) &ngridbound);
       // must convert the following line
       //ngridfile(ncpu+1:ncpu+nboundary,1:nlevelmax)=ngridbound
+      for (int i=0;i<nlevelmax;i++) {
+        // copy grid level
+        memcpy(&ngridfile [i][0],
+               &ngridlevel[i][0],sizeof(int)*ncpu);
+        // copy gridbound
+        memcpy(&ngridfile [i][ncpu],
+               &ngridbound[i][0],sizeof(int)*nboundary);
+      }
     }
     amr.skipBlock();    
     // ROM: comment the single following line for old stuff
@@ -229,7 +236,8 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
             double py=xg[1*ngrida+i]+xc[1][ind]-xbound[1]; // y
             double pz=xg[2*ngrida+i]+xc[2][ind]-xbound[2]; // z
             bool ok_cell =       (
-                !(son[ind*ngrida+i]>0 && ilevel<lmax) &&
+                !(son[ind*ngrida+i]>0 && ilevel<lmax) && // cells is NOT refined
+                (ilevel>=lmin)                        &&
                 ((px+dx2)>=xmin)                      &&
                 ((py+dx2)>=ymin)                      &&
                 ((pz+dx2)>=zmin)                      &&

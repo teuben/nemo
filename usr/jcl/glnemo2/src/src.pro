@@ -46,7 +46,8 @@ HEADERS += mainwindow.h \
     catmull_rom_spline.h \
     formconnect.h \
     glcubeobject.h \
-    formhelp.h
+    formhelp.h \
+    cshader.h
 SOURCES += glnemo.cc \
     mainwindow.cc \
     glwindow.cc \
@@ -84,7 +85,8 @@ SOURCES += glnemo.cc \
     snapshotinterface.cc \
     formconnect.cc \
     glcubeobject.cc \
-    formhelp.cc
+    formhelp.cc \
+    cshader.cc
 RESOURCES = glnemo.qrc
 CONFIG += $$GLOBAL \
     warn_on \

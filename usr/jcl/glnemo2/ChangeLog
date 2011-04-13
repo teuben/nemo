@@ -1,4 +1,14 @@
- 1.11 (February, 24th 2011)
+1.20 (in cvs)
+--------------
+ - new rendering pipeline based on a new shader
+ - better interactivity with density threshold
+ - faster rendering according to density threshold
+ - new: add hotkeys to autorotate around x,y,z axis counter clockwise
+ - new: add lmin value for ramses amr file
+ - fix bug on histogram display if phys value<0
+ - fix bug on ramses data loading
+
+1.11 (February, 24th 2011)
 ----------------------------
  - happy gcc 4.5.x
  - fix a segmentation fault on intel gpu
