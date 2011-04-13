@@ -66,9 +66,9 @@ void main()
   }
   gl_TexCoord[0] = gl_MultiTexCoord0;                                
   gl_Position = ftransform();                                        
-  gl_FrontColor =  vec4(gl_Color.r + float(factor_size)*0. + use_point*0.,          
-                        gl_Color.g                                       ,         
-                        gl_Color.b                                       ,         
+  gl_FrontColor =  vec4(gl_Color.r + float(factor_size)*0. + float(use_point)*0.,          
+                        gl_Color.g                                              ,         
+                        gl_Color.b                                              ,         
                         gl_Color.a * alpha);
 }
 
