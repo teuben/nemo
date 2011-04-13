@@ -92,6 +92,9 @@ y
 C + x          toogle automatic rotation around x axis
 C + y          toogle automatic rotation around y axis
 C + z          toogle automatic rotation around z axis
+SC + x         toogle automatic reverse rotation around x axis
+SC + y         toogle automatic reverse rotation around y axis
+SC + z         toogle automatic reverse rotation around z axis
 
 
 .fi
@@ -133,6 +136,10 @@ zmin coordinate box for Ramses input [0]
 .TP 20
 \fBzmax=\fP
 zmax coordinate box for Ramses input [1]
+.TP 20
+\fBlmin=\fP
+level min for Ramses amr input. (if 0, min internal level will be used)
+[0]
 .TP 20
 \fBlmax=\fP
 level max for Ramses amr input. (if 0, max internal level will be used)
@@ -310,6 +317,7 @@ Jean-Charles Lambert
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +5.0i
+16-Apr-11	Ver 1.20 - new rendering pipeline/see ChangeLog	JCL
 23-Apr-10	ramses reader + gyrfalcON manipulator	JCL
 19-May-10	- Leiden release - see ChangeLog	JCL
 28-Jul-10	Version 1.0 !!!				JCL

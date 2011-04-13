@@ -16,6 +16,13 @@ cmake_minimum_required(VERSION 2.6)
 # project name
 project (glnemo2)
 
+# check for nemo
+SET(NEMO_INSTALLED FALSE)
+FILE(GLOB GLOB_TEMP_VAR $ENV{NEMO})
+IF(GLOB_TEMP_VAR)
+  SET(NEMO_INSTALLED TRUE)
+ENDIF(GLOB_TEMP_VAR)
+
 # find QT4 files
 FIND_PACKAGE(Qt4 REQUIRED)
 SET(QT_USE_QTOPENGL 1)
@@ -119,4 +126,13 @@ add_executable (glnemo2 ${src_files} ${rc_src} ${ui_headers} ${moc_src} ${glew})
 # Link the executable to the Hello library.
 target_link_libraries (glnemo2 uns ${OPENGL_LIBRARY}  ${QT_LIBRARIES} )
 
+# INSTALLATION
+
+IF (NEMO_INSTALLED) 
+  set (CMAKE_INSTALL_PREFIX $ENV{NEMO})
+
+  INSTALL(PROGRAMS  ${EXECUTABLE_OUTPUT_PATH}/glnemo2     DESTINATION bin)
+  INSTALL(FILES  ${PROJECT_BINARY_DIR}/../man/man1/glnemo2.1 DESTINATION man/man1)
+
+ENDIF (NEMO_INSTALLED) 
 #
