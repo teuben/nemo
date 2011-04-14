@@ -13,8 +13,10 @@
 #include <sstream>
 #include <iomanip>
 #include "cpart.h"
+#include <QDir>
 
 namespace ramses {
+  using namespace std;
 // ----------------------------------------------------------------------------
 // READING constructor                                                                 
 CPart::CPart(const std::string _indir, const int _select,const bool _v)
@@ -28,15 +30,26 @@ CPart::CPart(const std::string _indir, const int _select,const bool _v)
   verbose=_v;
   select = _select;
   indir = _indir;
-  int found=indir.find_last_of("output_");
-  s_run_index= indir.substr(found+1,indir.length()-1);
-
-  while ((found=s_run_index.find_last_of("/"))>0) { // remove trailing "/"
-    s_run_index.erase(found,found);
-  }
-  std::cerr << "Run index = " << s_run_index << "\n";
-  infile = indir + "/part_" + s_run_index + ".out00001";
+  infile="";
   
+  // keep filename untill last /
+  int found=indir.find_last_of("/");
+  if (found != (int) string::npos && (int) indir.rfind("output_")<found) {
+    indir.erase(found,indir.length()-found);
+  }
+  std::cerr << "indir =" << indir <<"\n";
+  
+  found=(int) indir.rfind("output_"); 
+  if (found) {
+    s_run_index= indir.substr(found+7,indir.length()-1); // output_ = 7 characters
+    
+    while ((found=s_run_index.find_last_of("/"))>0) { // remove trailing "/"
+      s_run_index.erase(found,found);
+    }
+    std::cerr << "Run index = " << s_run_index << "\n";
+    infile = indir + "/part_" + s_run_index + ".out00001";
+    std::cerr << "infile =" << infile <<"\n";
+  }
 }
 
 // ----------------------------------------------------------------------------

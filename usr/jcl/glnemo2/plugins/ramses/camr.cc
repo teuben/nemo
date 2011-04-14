@@ -30,14 +30,25 @@ CAmr::CAmr(const std::string _indir, const bool _v)
   //pos = mass = vel = NULL;
   verbose=_v;
   indir = _indir;
-  int found=indir.find_last_of("output_");
-  s_run_index= indir.substr(found+1,indir.length()-1);
-  while ((found=s_run_index.find_last_of("/"))>0) { // remove trailing "/"
-    s_run_index.erase(found,found);
-  }
-  //std::cerr << "Run index = " << s_run_index << "\n";
-  infile = indir + "/amr_" + s_run_index + ".out00001";
+  infile="";
   
+  // keep filename untill last /
+  int found=indir.find_last_of("/");
+  if (found != (int) std::string::npos && (int) indir.rfind("output_")<found) {
+    indir.erase(found,indir.length()-found);
+  }
+  std::cerr << "indir =" << indir <<"\n";
+  
+  found=(int) indir.rfind("output_"); 
+  if (found) {
+    s_run_index= indir.substr(found+7,indir.length()-1); // output_ = 7 characters
+    
+    while ((found=s_run_index.find_last_of("/"))>0) { // remove trailing "/"
+      s_run_index.erase(found,found);
+    }
+    //std::cerr << "Run index = " << s_run_index << "\n";
+    infile = indir + "/amr_" + s_run_index + ".out00001";
+  }
   //computeNbody();
   //loadData();
 }
