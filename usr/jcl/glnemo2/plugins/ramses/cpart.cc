@@ -40,7 +40,7 @@ CPart::CPart(const std::string _indir, const int _select,const bool _v)
   std::cerr << "indir =" << indir <<"\n";
   
   found=(int) indir.rfind("output_"); 
-  if (found) {
+  if (found>0) {
     s_run_index= indir.substr(found+7,indir.length()-1); // output_ = 7 characters
     
     while ((found=s_run_index.find_last_of("/"))>0) { // remove trailing "/"

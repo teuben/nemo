@@ -48,6 +48,13 @@ bool UserSelection::setSelection(std::string _sel,
   select =_sel; // cop selection              
   crv    = _crv;   // link component range vector
   pov    = _pov;   // link Particle Object Vector
+  if (select=="all" && crv->size()>1) { // replace "all" by list of components
+    select=(*crv)[1].type;
+    for (unsigned int i=2;i<crv->size();i++) {
+      select += ","+(*crv)[i].type;
+    }
+    std::cerr << "New selected component=" << select << "\n";
+  }
   assert(crv);                   // must not be NULL
   assert((*crv)[0].type=="all"); // first entry must be "all"    
   nbody = (*crv)[0].n;           // #bodies max in the snapshot  

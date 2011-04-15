@@ -3,8 +3,10 @@
  - new rendering pipeline based on a new shader
  - better interactivity with density threshold
  - faster rendering according to density threshold
- - new: add hotkeys to autorotate around x,y,z axis counter clockwise
- - new: add lmin value for ramses amr file
+ - experimental temperature display sorted by density
+ - all components are selected when, from cli, select="all"
+ - add hotkeys to autorotate around x,y,z axis counter clockwise
+ - add lmin value for ramses amr file
  - fix bug on histogram display if phys value<0
  - fix bug on ramses data loading
 

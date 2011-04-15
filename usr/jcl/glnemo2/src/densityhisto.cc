@@ -70,12 +70,10 @@ void DensityHisto::drawGrid()
 void DensityHisto::drawDensity(const int _density_histo[100])
 {
   memcpy(density_histo,_density_histo,sizeof(int)*100);
-    // compute maxhisto
-  std::cerr << "width = " << width() << " height = " << height() << "\n";
+  // compute maxhisto
   for (int i=0; i<100; i++) {
     maxhisto=std::max(maxhisto,density_histo[i]);
   }
-
   // draw density curve
   drawDensity();
 }

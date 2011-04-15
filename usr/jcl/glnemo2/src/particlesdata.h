@@ -22,7 +22,7 @@ namespace glnemo {
 class PhysicalData {
   public:
   enum ALLOC {New,Malloc};
-  enum PHYS {neib,rho,temperature,pressure};
+  enum PHYS {neib,rho,temperature,pressure,temperaturesd};
   PhysicalData(const PHYS, const int _nbody=0, const ALLOC model=New);
   ~PhysicalData();
   const PhysicalData& operator=(const PhysicalData& m);
@@ -34,6 +34,11 @@ class PhysicalData {
   double getMax() const { return max;}
   bool isValid() const { return valid;}
   int getType()  const { return type;}
+  void setType(const PHYS i)  { // set the index of the physical value selected
+    if (i!=-1) {
+      type = i; 
+    }
+  }
   float * data;
   int data_histo[100]; // store #particles per percentage
   private:
@@ -71,7 +76,7 @@ public:
         ipvs = i; 
       }
     }
-    int getIpvs() {
+    int getIpvs() const {
       return ipvs;
     }
     PhysicalData * getPhysData(int=-1) const;

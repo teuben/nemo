@@ -184,6 +184,7 @@ namespace glnemo {
     //
     void on_dens_phys_radio_clicked();  
     void on_temp_phys_radio_clicked();  
+    void on_tempdens_phys_radio_clicked();  
     void on_pressure_phys_radio_clicked();  
     
     // colormap group

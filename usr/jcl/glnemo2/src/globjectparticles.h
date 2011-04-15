@@ -85,7 +85,6 @@ class GLObjectParticles : public GLObject {
     void setTexture(QString);
     void setTexture(const int);
     void setTexture();
-    void toto();
     void checkVboAllocation(const int sizebuf);
     void updateColormap();
     
@@ -104,6 +103,7 @@ class GLObjectParticles : public GLObject {
     GLTexture * texture;
     GLTextureVector * gtv;
     const PhysicalData * phys_select;
+    int phys_select_id;
     // local color map
     std::vector <float> cmap; 
  
@@ -120,7 +120,7 @@ class GLObjectParticles : public GLObject {
     GLuint vbo_pos, vbo_color , vbo_size, vbo_index, vbo_index2, vbo_data;
     int nvert_pos;
     // Rho
-    GLObjectIndexTabVector vindex_sel,phys_itv;
+    GLObjectIndexTabVector vindex_sel,phys_itv,rho_itv;
     GLuint * indexes_sorted, nind_sorted;
     //
     bool hasPhysic; // Does object has physic value

@@ -244,9 +244,11 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
   }
   // Draw points 
 #if GLDRAWARRAYS
-
-  //std::cerr << " min_index = " <<min_index << "  max_index = " << max_index << "\n";
-  //std::cerr <<"maxvert="<<maxvert<< " #part="<<max_index-min_index+1<< " nvert_pos ="<<nvert_pos<<"\n";
+#if 0
+  std::cerr << " hasPhysic ? =" << hasPhysic <<"\n";
+  std::cerr << " min_index = " <<min_index << "  max_index = " << max_index << "\n";
+  std::cerr <<"maxvert="<<maxvert<< " #part="<<max_index-min_index+1<< " nvert_pos ="<<nvert_pos<<"\n";
+#endif
   if (maxvert > 0 && maxvert<=nvert_pos) {
     //std::cerr << ">> rendering...\n";
     glDrawArrays(GL_POINTS, 0, maxvert);
@@ -322,6 +324,7 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
   min_index = 0;
   // get physical value data array
   phys_select = part_data->getPhysData();
+  phys_select_id = part_data->getIpvs();
   hasPhysic = checkHasPhysic(); // check the object has physic            
   // color
   mycolor   = po->getColor();
@@ -358,8 +361,11 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
 void GLObjectParticles::updateVbo()
 {
   // get physical value data array
-  if (phys_select != part_data->getPhysData()) { // new physical quantity
+
+  //if (phys_select != part_data->getPhysData()) { // new physical quantity
+  if (phys_select_id != part_data->getIpvs()) { // new physical quantity
     phys_select=part_data->getPhysData();
+    phys_select_id=part_data->getIpvs();
     hasPhysic = checkHasPhysic(); // check the object has physic      
     buildVboPos();
   }
@@ -432,6 +438,7 @@ void GLObjectParticles::buildVboPos()
   
   //rho.clear();      // clear rho density vector
   phys_itv.clear(); // clear ohysical value vector
+  rho_itv.clear();
   vindex_sel.clear();   // clear zdepth vector     
   for (int i=0; i < po->npart; i+=po->step) {
     int index=po->index_tab[i];
@@ -441,7 +448,17 @@ void GLObjectParticles::buildVboPos()
       myphys.value   = phys_select->data[index];
       myphys.i_point = i;
       phys_itv.push_back(myphys);
+      
+      if (po->rhoSorted() && 
+          phys_select->getType() != PhysicalData::rho && part_data->rho) {
+        GLObjectIndexTab myphys;
+        myphys.index   = index;
+        myphys.value   = part_data->rho->data[index];
+        myphys.i_point = i;
+        rho_itv.push_back(myphys);
+      }
     }
+    
     
 #if 1 // used if z depth test activated
     GLObjectIndexTab myz;
@@ -452,14 +469,27 @@ void GLObjectParticles::buildVboPos()
   }
   // sort by density
 #if GLDRAWARRAYS
-  sort(phys_itv.begin(),phys_itv.end(),GLObjectIndexTab::compareLow);
+  
+  if (po->rhoSorted() &&
+      phys_select && phys_select->getType() != PhysicalData::rho && part_data->rho) {
+    sort(rho_itv.begin(),rho_itv.end(),GLObjectIndexTab::compareLow);
+  } else {
+    sort(phys_itv.begin(),phys_itv.end(),GLObjectIndexTab::compareLow);
+  }
   //sort(rho.begin(),rho.end(),GLObjectIndexTab::compareHigh);
 #endif
   // select vertices
   for (int i=0; i < po->npart; i+=po->step) {
     int index;
-    if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
-    else                index = po->index_tab[i];
+    if (po->rhoSorted() &&
+        phys_select && phys_select->getType() != PhysicalData::rho && part_data->rho) {
+      index = rho_itv[i].index; // it's temperature/pressure, we sort by density
+    }
+    else { 
+      if (phys_select && phys_select->isValid()) 
+        index = phys_itv[i].index; // we sort by physical value
+      else                index = po->index_tab[i]; // no physic
+    }
     // fill vertices array sorted by density
     vertices.push_back(part_data->pos[index*3  ]);
     vertices.push_back(part_data->pos[index*3+1]);
@@ -499,9 +529,19 @@ void GLObjectParticles::buildVboHsml()
   // loop on all the object's particles
   for (int i=0; i < po->npart; i+=po->step) {
     int index;
+#if 0
     if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
     else                index = po->index_tab[i];
-        
+#endif
+    if (po->rhoSorted() &&
+        phys_select && phys_select->getType() != PhysicalData::rho && part_data->rho) {
+      index = rho_itv[i].index; // it's temperature/pressure, we sort by density
+    }
+    else { 
+      if (phys_select && phys_select->isValid()) 
+        index = phys_itv[i].index; // we sort by physical value
+      else                index = po->index_tab[i]; // no physic
+    }
     if (part_data->rneib) {
       if (part_data->rneib->data[index] != -1) {
         hsml_value.push_back(2.0*part_data->rneib->data[index]);
@@ -538,9 +578,19 @@ void GLObjectParticles::buildVboPhysData()
   // loop on all the object's particles
   for (int i=0; i < po->npart; i+=po->step) {
     int index;
+#if 0
     if (phys_select && phys_select->isValid()) index = phys_itv[i].index;
     else                index = po->index_tab[i];
-        
+#endif
+    if (po->rhoSorted() &&
+        phys_select && phys_select->getType() != PhysicalData::rho && part_data->rho) {
+      index = rho_itv[i].index; // it's temperature/pressure, we sort by density
+    }
+    else { 
+      if (phys_select && phys_select->isValid()) 
+        index = phys_itv[i].index; // we sort by physical value
+      else                index = po->index_tab[i]; // no physic
+    }
     if (phys_select && phys_select->isValid()) {
       phys_data.push_back(phys_select->data[index]);
     } else {
@@ -642,23 +692,8 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
       shader->sendUniformf("data_phys_min",log(phys_select->getMin()));
       shader->sendUniformf("data_phys_max",log(phys_select->getMax()));
     } else {
-#if 0
-      int imin=phys_itv[min_index].index;
-      int imax=phys_itv[max_index].index;
-      // send min and max phys of the object selected from UI
-      shader->sendUniformf("data_phys_min",log(phys_select->data[imin]));
-      shader->sendUniformf("data_phys_max",log(phys_select->data[imax]));
-#else
-#if 0
-      shader->sendUniformf("data_phys_min",log(go->phys_min_glob));
-      shader->sendUniformf("data_phys_max",log(go->phys_max_glob));
-      std::cerr << "phys_min_glob="<<go->phys_min_glob<<"\n";
-      std::cerr << "phys_max_glob="<<go->phys_max_glob<<"\n";
-#else
       shader->sendUniformf("data_phys_min",log(po->getMinPhys()));
       shader->sendUniformf("data_phys_max",log(po->getMaxPhys()));
-#endif
-#endif
     }
     
     //int imin=phys_itv[min_index].index;
@@ -827,18 +862,39 @@ void GLObjectParticles::buildIndexHisto()
     int cpt=0;
     // find first index of particle in the percentage
     for (int i=0; i < po->npart; i+=po->step) {
-      int index= phys_itv[i].index;
-      if (phys_select->data[index]!=0 && phys_select->data[index]!=-1) {
-        //std::cerr << "I="<<i<<" => "<<phys_select->data[index]<<"\n";
-        int percen=(log(phys_select->data[index])-log(phys_select->getMin()))*99./
-                   (log(phys_select->getMax())-log(phys_select->getMin()));
-        assert(percen<100 && percen>=0);
-        if (index_histo[percen]==-1) { // no value yet
-          index_histo[percen]=cpt; // store 
-          
+      int index;//phys_itv[i].index;
+#if 1
+      if (po->rhoSorted() &&
+          phys_select && phys_select->getType() != PhysicalData::rho && part_data->rho) {
+        index = rho_itv[i].index; // it's temperature/pressure, we sort by density        
+        if (part_data->rho->data[index]!=0 && part_data->rho->data[index]!=-1) {
+          //std::cerr << "I="<<i<<" => "<<phys_select->data[index]<<"\n";
+          int percen=(log(part_data->rho->data[index])-log(part_data->rho->getMin()))*99./
+                     (log(part_data->rho->getMax())-log(part_data->rho->getMin()));
+          assert(percen<100 && percen>=0);
+          if (index_histo[percen]==-1) { // no value yet
+            index_histo[percen]=cpt; // store 
+            
+          }
+          cpt++;
         }
-        cpt++;
       }
+      else {        
+        index = phys_itv[i].index; // we sort by physical value        
+        if (phys_select->data[index]!=0 && phys_select->data[index]!=-1) {
+          //std::cerr << "I="<<i<<" => "<<phys_select->data[index]<<"\n";
+          int percen=(log(phys_select->data[index])-log(phys_select->getMin()))*99./
+                     (log(phys_select->getMax())-log(phys_select->getMin()));
+          assert(percen<100 && percen>=0);
+          if (index_histo[percen]==-1) { // no value yet
+            index_histo[percen]=cpt; // store 
+            
+          }
+          cpt++;
+        }
+      }
+#endif
+      
     }
     // fill empty index_histo
     int last=0;

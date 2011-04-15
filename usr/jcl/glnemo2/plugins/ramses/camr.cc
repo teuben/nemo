@@ -40,7 +40,7 @@ CAmr::CAmr(const std::string _indir, const bool _v)
   std::cerr << "indir =" << indir <<"\n";
   
   found=(int) indir.rfind("output_"); 
-  if (found) {
+  if (found>0) {
     s_run_index= indir.substr(found+7,indir.length()-1); // output_ = 7 characters
     
     while ((found=s_run_index.find_last_of("/"))>0) { // remove trailing "/"
@@ -95,7 +95,7 @@ int CAmr::readHeader()
   assert(amr.good() && len1==len2);
 
   amr.readDataBlock((char *) &nlevelmax);
-
+  std::cerr << "AMR Nlevel max="<<nlevelmax<<"\n";
   amr.readDataBlock((char *) &ngridmax);
 
   amr.readDataBlock((char *) &nboundary);
@@ -264,7 +264,20 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
                   pos[3*cpt+2] = pz;
                   rneib[cpt]   = dx;
                   rho[cpt] = var[0*ngrida*twotondim+ind*ngrida+i];
-                  temp[cpt]= var[4*ngrida*twotondim+ind*ngrida+i]/rho[cpt];
+#if 1
+                  temp[cpt]= std::max(0.0,var[4*ngrida*twotondim+ind*ngrida+i]/rho[cpt]);
+                  //temp[cpt]= var[4*ngrida*twotondim+ind*ngrida+i]/rho[cpt];
+#else
+                  float p=var[4*ngrida*twotondim+ind*ngrida+i]; // pressure
+                  float alpha=0.28;                 // fraction of He in mass
+                  float mu=4./(8.-5.*alpha);
+                  float mh=1.67e-24;                // proton mass in g
+                  float kb=1.38e-16;                // Boltzmann constant in erg.K-1
+                  temp[cpt]= mu*mh/kb*p/rho[cpt]*1.e14;    // Temperature en K
+                  //temp[cpt] /= (11604.5/1000.);            // Temperature en Kev
+                  temp[cpt]=std::max((float)0.0,temp[cpt]);
+                  
+#endif
                   cpt++;
                 }
 #if 0

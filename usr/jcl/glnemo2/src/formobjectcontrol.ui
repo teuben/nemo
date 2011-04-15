@@ -41,7 +41,7 @@
      <property name="title">
       <string>Objects</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_9">
+     <layout class="QGridLayout" name="gridLayout_10">
       <item row="0" column="0" colspan="2">
        <widget class="QTabWidget" name="tabWidget">
         <property name="enabled">
@@ -850,7 +850,7 @@ p, li { white-space: pre-wrap; }
          <attribute name="title">
           <string>Density</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_10">
+         <layout class="QGridLayout" name="gridLayout_9">
           <item row="0" column="0">
            <widget class="QGraphicsView" name="dens_histo_view">
             <property name="sizePolicy">
@@ -1202,14 +1202,31 @@ Physical value can be:
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QRadioButton" name="temp_phys_radio">
-               <property name="text">
-                <string>temperature</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
+              <layout class="QHBoxLayout" name="horizontalLayout_4">
+               <item>
+                <widget class="QRadioButton" name="temp_phys_radio">
+                 <property name="text">
+                  <string>temperature</string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="tempdens_phys_radio">
+                 <property name="toolTip">
+                  <string>Temperature sorted by density</string>
+                 </property>
+                 <property name="text">
+                  <string>sort by dens</string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
              </item>
              <item row="2" column="0">
               <widget class="QRadioButton" name="pressure_phys_radio">

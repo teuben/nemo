@@ -130,6 +130,11 @@ class ParticlesObject{
     void setMaxPercenPhys(const int _v) { max_percen_phys = _v; }
     int getMinPercenPhys()  const { return min_percen_phys; }
     int getMaxPercenPhys()  const { return max_percen_phys; }
+    bool rhoSorted() const { return rho_sorted;}
+    void setRhoSorted(const  bool _v) {
+      rho_sorted=_v;
+    }
+
   private:
 
     QColor color;    // object color                    
@@ -162,7 +167,7 @@ class ParticlesObject{
     float max_phys;
     int min_percen_phys;
     int max_percen_phys;
-    
+    bool rho_sorted;
     void setColor();
     std::string obj_name;  // or file name
     ObjFrom obj_from;

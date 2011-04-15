@@ -204,6 +204,7 @@ void FormObjectControl::update(ParticlesData   * _p_data,
         updateTable(tw,i,FT_VISIB,FT_COLOR);
         updateFileTable(i);
       }
+      //updateObjectSettings(i); 
     }
     else {               // not belonging to object list
       if (reset_table) {
@@ -215,11 +216,13 @@ void FormObjectControl::update(ParticlesData   * _p_data,
 
     }
     //if (i) form.range_table->setCellWidget(i,1,NULL);
-
+    
   }
   first=false;
   ///!!!!updateObjectSettings(0);
+  ///MODIFICATION April,15 2011 
   updateObjectSettings(last_row); 
+  ///MODIFICATION April,15 2011 
   form.range_table->setCurrentCell(current_object,1);
   // set active row
   lock=true;
@@ -563,6 +566,7 @@ void FormObjectControl::updateObjectSettings( const int row)
       form.objects_properties->setTabEnabled(1,true);  // enable  physical tab
       form.dens_phys_radio->setEnabled    (current_data->rho!=NULL     ?true:false);
       form.temp_phys_radio->setEnabled    (current_data->temp!=NULL    ?true:false);
+      form.tempdens_phys_radio->setEnabled(current_data->temp!=NULL    ?true:false);
       form.pressure_phys_radio->setEnabled(current_data->pressure!=NULL?true:false);
       setPhysicalTabName();
     }
@@ -1105,7 +1109,28 @@ void FormObjectControl::on_temp_phys_radio_clicked()
 {
   mutex_data->lock();
   current_data->setIpvs(PhysicalData::temperature);
-  emit updateIpvs(PhysicalData::temperature);
+  int i_obj = object_index[current_object];
+  if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
+    ParticlesObject * pobj = &(*pov)[i_obj];
+    pobj->setRhoSorted(false);
+    emit updateIpvs(PhysicalData::temperature);
+  }
+  mutex_data->unlock();
+  physicalSelected();
+}
+// ============================================================================
+// on_tempdens_phys_radio_pressed()                                                
+void FormObjectControl::on_tempdens_phys_radio_clicked()
+{
+  mutex_data->lock();
+  
+  current_data->setIpvs(PhysicalData::temperaturesd);
+  int i_obj = object_index[current_object];
+  if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
+    ParticlesObject * pobj = &(*pov)[i_obj];
+    pobj->setRhoSorted(true);
+    emit updateIpvs(PhysicalData::temperaturesd);
+  }
   mutex_data->unlock();
   physicalSelected();
 }
@@ -1160,7 +1185,8 @@ void FormObjectControl::setPhysicalTabName()
 {
   phys_select = current_data->getPhysData();
   if (phys_select) {
-    int type=phys_select->getType(); // return the index of the selectd physical quantities
+    //int type=phys_select->getType(); // return the index of the selectd physical quantities
+    int type=current_data->getIpvs(); // return the index of the selectd physical quantities
     switch (type) {
           case PhysicalData::rho : 
             form.dens_phys_radio->setChecked(true);
@@ -1169,6 +1195,10 @@ void FormObjectControl::setPhysicalTabName()
           case PhysicalData::temperature :
             form.objects_properties->setTabText(1,"Temperature");
             form.temp_phys_radio->setChecked(true);
+            break;            
+           case PhysicalData::temperaturesd:
+            form.objects_properties->setTabText(1,"Temperature/Dens");
+            form.tempdens_phys_radio->setChecked(true);
             break;            
           case PhysicalData::pressure :
             form.objects_properties->setTabText(1,"Pressure");

@@ -349,6 +349,11 @@ PhysicalData * ParticlesData::getPhysData(int index) const
     //assert(pressure!=NULL);
     ptr = pressure;
     break;
+  case 4: // temperature sorted by density
+    //assert(temp!=NULL);
+    ptr = temp;
+    break;
+    
     default:
     assert(0);
   }
@@ -469,7 +474,11 @@ int PhysicalData::computeMinMax()
     case PhysicalData::temperature : 
       GlobalOptions::temperature_exist = true;
       std::cerr << "Temperature range :\n";
-      break;            
+      break;  
+    case PhysicalData::temperaturesd : 
+      GlobalOptions::temperature_exist = true;
+      std::cerr << "Temperature range :\n";
+      break;     
     case PhysicalData::pressure :
       GlobalOptions::pressure_exist    = true;
       std::cerr << "Pressure    range :\n";
@@ -496,11 +505,12 @@ int PhysicalData::computeMinMax()
         min=1E-9;
         offset=1E-9;
       }
-      else offset=min*-1.0001;
+      else offset=min*-1.0001;//(1+1.E-12);
       double mmin=0.0;
       bool first=true;
       for (int i=0; i<(nbody); i++) {
         if (data[i] != -1 ) {
+          float dd=data[i];
           data[i] += offset;
           if (first) {
             mmin = data[i];
@@ -509,6 +519,9 @@ int PhysicalData::computeMinMax()
           } else {
             if (data[i]!=0.0)
               mmin = std::min(mmin,(double)data[i]);
+            else {
+              std::cerr << "i="<<i<<" data="<<dd<<"\n";
+            }
           }
         }
       }
