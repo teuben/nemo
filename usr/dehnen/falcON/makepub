@@ -383,6 +383,8 @@ $(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(random_h
 			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
 $(BIN)mkplum:		$(SEXE)mkplum.cc $(BINT) $(main_h) $(sample_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
+$(BIN)mksingle:		$(SEXE)mksingle.cc $(BINT) $(main_h) $(makefiles)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mkWD99disc:	$(SEXE)mkWD99disc.cc $(main_h) $(WD99disc_h) $(LIB)WD99disc.o $(makefiles)
 			$(MAKE_EXE) $(LIB)WD99disc.o $(NEMO_EXE_FLGS)
 $(BIN)s2a:		$(SEXE)s2a.cc $(BINT) $(main_h) $(body_h) $(makefiles)
@@ -441,6 +443,7 @@ mkgalaxy	:	$(BIN)mkgalaxy
 mkhalo 		:	$(falcON) $(BIN)mkhalo
 mkking		:	$(falcON) $(BIN)mkking
 mkplum		:	$(falcON) $(BIN)mkplum
+mksingle	:	$(falcON) $(BIN)mksingle
 mkWD99disc	:	$(falcON) $(BIN)mkWD99disc
 s2a		:	$(falcON) $(BIN)s2a
 ifneq ($(DPRECISION),-DfalcON_DOUBLE)
@@ -460,13 +463,13 @@ symmetrize	:	$(falcON) $(BIN)symmetrize
 ifeq ($(COMPILER),icc)
 exe_pub		:=	TestGrav a2s addgravity density $(g2s) getgravity \
 			gyrfalcON manipulate mkbodiesfunc mkbodyfunc mkdehnen \
-			mkhalo mkking mkplum mkWD99disc s2a $(s2g) s2s scale_eps \
-			snapprop snapstac symmetrize mkgalaxy
+			mkhalo mkking mkplum mksingle mkWD99disc s2a $(s2g) \
+			s2s scale_eps snapprop snapstac symmetrize mkgalaxy
 else
 exe_pub		:=	TestGrav a2s addgravity addprop density $(g2s) getgravity \
 			gyrfalcON manipulate mkbodiesfunc mkbodyfunc mkdehnen \
-			mkhalo mkking mkplum mkWD99disc s2a $(s2g) s2s scale_eps \
-			snapprop snapstac snapsupp symmetrize mkgalaxy
+			mkhalo mkking mkplum mksingle mkWD99disc s2a $(s2g) s2s \
+			scale_eps snapprop snapstac snapsupp symmetrize mkgalaxy
 endif
 
 else
