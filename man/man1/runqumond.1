@@ -1,0 +1,69 @@
+.TH RUNQUMOND 1NEMO "28 April 2011"
+.SH NAME
+runqumond \- Frontend to the QuMond program
+.SH SYNOPSIS
+\fBrunqumond\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input snapshot [???]     
+.TP 20
+\fBoutdir=\fP
+Run directory [???]     
+.TP 20
+\fBout=\fP
+Output snapshot(s) if to convert back to NEMO?
+.TP 20
+\fBnumbs=\fP
+Number of integration steps [8]   
+.TP 20
+\fBaexpn=\fP
+Initial scale factor (z=1/aexpn-1) [0.00544081442]   
+.TP 20
+\fBadiv=\fP
+Normalisation of time steps [0.002]   
+.TP 20
+\fBom0=\fP
+Omega_0 (Omega_0=Omega_cdm+Omega_nu+Omega_baryon) [0.2623]     
+.TP 20
+\fBvsca=\fP
+length of box (Mpc/h) [512.0]   
+.TP 20
+\fBhubble=\fP
+Hubble param used in cosmics [73.20]  
+.TP 20
+\fBmond=\fP
+Desired nu-function (0:no MOND, 1:some weird fcn, 2:simple
+.TP 20
+\fBfreq=\fP
+frequency to output a binary file [8] 
+.TP 20
+\fBbrand=\fP
+Restarting option (0=new and ascii, 2=old and binary)
+.TP 20
+\fBau0=\fP
+a_0 is empirically ~ 1.2e-8m/s^2. Want to rescale
+.SH EXAMPLES
+Run the standard benchmark
+.nf
+    % time runqumond ../qumondics.dat run_bench
+.fi
+.SH FILES
+.nf
+.ta +1.5i
+qmics.dat	Input datafile QMcode needs (6 floats for p,v per line)
+gout1000.dat	Output file Name(s) (1000,1001,1002,....). Same format as input
+start.txt	Input Parameter file
+.fi
+.SH AUTHOR
+Garry Angus (QMcode) / Peter Teuben (C-frontend)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+mar-11		V0.1 created			PJT
+28-Apr-11	V0.2 updated to run QMcode	PJT
+.fi
