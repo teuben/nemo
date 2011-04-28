@@ -15,7 +15,9 @@
 // 
 //
 // with ATI hardware, uniform variable MUST be used by output          
-// variables. That's why factor_size is used by gl_FrontColor          
+// variables. That's why factor_size is used by gl_FrontColor    
+//
+// !!!!!Attribute variable CAN'T be modified (ex: gl_Color)!!!!!!
 //
 // ============================================================================
 // texture
@@ -38,24 +40,24 @@ uniform float data_phys_max; // maximum physical value
 attribute float a_sprite_size; // a different value for each particles 
 attribute float a_phys_data;   // physical data value for each particles
 
+// varying variable
+varying vec4 col;
+
 // functions declaration
 vec4 computeColor();
 
 // ============================================================================
 void main()                                                            
-{                                                                      
+{           
+  col=vec4(0.0,0.0,0.0,0.0);
   // compute color
-  if (data_phys_valid) {
-    vec4 col=computeColor();
-    gl_Color.r = col.x;
-    gl_Color.g = col.y;
-    gl_Color.b = col.z;
-    gl_Color.a = col.w;
+  if (data_phys_valid==1) {
+    col=computeColor();
   }
   
   // compute texture size
   vec4 vert = gl_Vertex;
-  if (use_point) { // use point = same size whatever the distance from observer
+  if (use_point==1) { // use point = same size whatever the distance from observer
     float pointSize =  a_sprite_size/a_sprite_size*factor_size;
     gl_PointSize = max(2., pointSize*1.);
   } 
@@ -66,17 +68,17 @@ void main()
   }
   gl_TexCoord[0] = gl_MultiTexCoord0;                                
   gl_Position = ftransform();                                        
-  gl_FrontColor =  vec4(gl_Color.r + float(factor_size)*0. + float(use_point)*0.,          
-                        gl_Color.g                                              ,         
-                        gl_Color.b                                              ,         
-                        gl_Color.a * alpha);
+  gl_FrontColor =  vec4( gl_Color.r+col.x +float(factor_size)*0. + float(use_point)*0.,          
+                         gl_Color.g+col.y                                             ,         
+                         gl_Color.b+col.z                                             ,         
+                        (gl_Color.a+col.w) * alpha);
 }
 
 // ============================================================================
 vec4 computeColor() {
   vec4 col;
   
-  if (data_phys_valid && a_phys_data>0.0) {
+  if (data_phys_valid==1 && a_phys_data>0.0) {
     float logpri=log(a_phys_data);
     float log_rho=0.0;
     
@@ -88,7 +90,7 @@ vec4 computeColor() {
       log_rho = (logpri  - data_phys_min) / ( data_phys_max - data_phys_min);
     }
     
-    if (!reverse_cmap) { // normal colormap
+    if (reverse_cmap==0) { // normal colormap
       cindex = log_rho*(ncmap-1);
     } else {             // reverse colormap
       cindex = ncmap-1-log_rho*(ncmap-1);
@@ -103,7 +105,7 @@ vec4 computeColor() {
     else
       col.w = 0.;
   } else {
-    col = (gl_Color.r,gl_Color.g,gl_Color.b,1.0);
+    col = vec4(gl_Color.r,gl_Color.g,gl_Color.b,1.0);
     //col = (1.0,1.0,1.0,1.0);
   }  
   return col;

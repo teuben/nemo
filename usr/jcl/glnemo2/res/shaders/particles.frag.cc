@@ -15,11 +15,20 @@
 // 
 // ============================================================================
 
+uniform int data_phys_valid;// Is data phys valid ? 
 uniform sampler2D splatTexture;                                        
+varying vec4 col;
 
 void main()                                                            
-{                                                                      
-    vec4 color = gl_Color * texture2D(splatTexture, gl_TexCoord[0].st);
-    gl_FragColor = color ;                                             
-}   
+{           
+  vec4 color;
+  
+  if (data_phys_valid==1) {
+    color = col * texture2D(splatTexture, gl_TexCoord[0].st);
+  }
+  else {
+    color = gl_Color * texture2D(splatTexture, gl_TexCoord[0].st);
+  }
+  gl_FragColor = color ;                                             
+}
 // ============================================================================
