@@ -162,10 +162,10 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
   glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
 
-  if (hasPhysic) { // send black color to the shader
-    GLObject::setColor(Qt::black); // set the color 
-  } else {
-    GLObject::setColor(po->getColor()); // set the color 
+  if (hasPhysic) {                 // if physic
+    GLObject::setColor(Qt::black); // send black color to the shader
+  } else {                              // else
+    GLObject::setColor(po->getColor()); // send user selected color 
   }
   if (use_point)
     glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),po->getPartAlpha());

@@ -91,16 +91,16 @@ vec4 computeColor() {
     }
     
     if (reverse_cmap==0) { // normal colormap
-      cindex = log_rho*(ncmap-1);
+      cindex = int(log_rho*float(ncmap-1));
     } else {             // reverse colormap
-      cindex = ncmap-1-log_rho*(ncmap-1);
+      cindex = ncmap-1-int(log_rho*float(ncmap-1));
     }
-    cindex=min(cindex,ncmap-1);
-    cindex=max(0,cindex);
+    cindex=int(min(float(cindex),float(ncmap-1)));
+    cindex=int(max(0.,float(cindex)));
     col.x = colormap[cindex].x;    // red
     col.y = colormap[cindex].y;    // green
     col.z = colormap[cindex].z;    // blue
-    if (log_rho>0)
+    if (log_rho>0.0)
       col.w = pow(log_rho,powalpha); // alpha
     else
       col.w = 0.;
