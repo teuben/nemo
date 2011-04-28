@@ -41,8 +41,9 @@ void nemo_main()
   string infile = getparam("in");
   string outfile = getparam("out");
   string outdir = getparam("outdir");
-  string exefile = "QuMond";
+  string exefile = "QMcode";
   string parfile = "start.txt";
+  string logfile = "QMcode.log";
   char dname[256], cmd[256];
 
   real  aexpn = getdparam("aexpn");
@@ -59,44 +60,30 @@ void nemo_main()
   printf("Initial z=%g\n",1/aexpn-1);
   printf("Initial timestep = %g\n",aexpn*adiv);
 
-
-  error("code not ready to run yet");
   
   make_rundir(outdir);
   sprintf(dname,"%s/%s",outdir,parfile);
 
   parstr = stropen(dname,"w");
 
-  fprintf(parstr,"nr, nth, nph, lmax \n");
-  fprintf(parstr,"%d,  %d,  %d,  %d \n",nr, nth, nph, lmax);
-
-  fprintf(parstr,"model,mond_ind,spl_ord, rmap\n");
-  fprintf(parstr,"%d, %d, %g, %g\n",model,mond_ind,spl_ord, rmap);
-
-  fprintf(parstr,"a0,  dt_iter,scale\n");
-  fprintf(parstr,"%g, %g, %g\n",a0,  dt_iter,scale);
-
-  fprintf(parstr,"iter_max, tol\n");
-  fprintf(parstr,"%d, %g\n",iter_max, tol);
-
-  fprintf(parstr,"new, id_new, nout,iene,mrate\n");
-  fprintf(parstr,"%d, %d, %d, %d, %d\n",new, id_new, nout,iene,mrate);
-  fprintf(parstr,"tmax, dt_min, cfl, lp_ord\n");
-  fprintf(parstr,"%g, %g, %g, %d\n",tmax, dt_min, cfl, lp_ord);
-  fprintf(parstr,"! --------------\n");
-  fprintf(parstr,"! this file was produced automatically by NEMO::runmond\n");
+  fprintf(parstr,"%d\n",getiparam("numbs"));
+  fprintf(parstr,"%s\n",getparam("aexpn"));
+  fprintf(parstr,"%s\n",getparam("adiv"));
+  fprintf(parstr,"%s\n",getparam("om0"));
+  fprintf(parstr,"%s\n",getparam("vsca"));
+  fprintf(parstr,"%s\n",getparam("hubble"));
+  fprintf(parstr,"%d\n",getiparam("mond"));
+  fprintf(parstr,"%d\n",getiparam("freq"));
+  fprintf(parstr,"%d\n",getiparam("brand"));
+  fprintf(parstr,"%s\n",getparam("au0"));
   strclose(parstr);
 
-  sprintf(cmd,"snapmody in=%s out=%s/%s",infile,outdir,"mout00.bin");
-  run_program(cmd);
-
   goto_rundir(outdir);
-  sprintf(cmd,"rmond");
+  sprintf(cmd,"%s < %s > %s ", exefile, parfile, logfile);
   run_program(cmd);
 
   if (hasvalue("out")) {
-    sprintf(cmd,"cat mout??.bin | modysnap - %s",outfile);
-    run_program(cmd);
+    warning("no postprocessing yet");
   }
 
 }
