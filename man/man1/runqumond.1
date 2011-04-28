@@ -47,10 +47,23 @@ Restarting option (0=new and ascii, 2=old and binary)
 .TP 20
 \fBau0=\fP
 a_0 is empirically ~ 1.2e-8m/s^2. Want to rescale
-.SH EXAMPLES
+.SH BENCHMARK
 Run the standard benchmark
 .nf
-    % time runqumond ../qumondics.dat run_bench
+    % time runqumond $NEMODAT/qmics.dat run_bench
+    % tail -1 run_bench/gout1001.dat
+	32.9911329659966270      32.9889230852932585      32.9910473750990079      -0.0162493558387977      -0.0155574632018622      -0.0166939677870501
+    % rm -rf run_bench
+.fi
+with the following 2011 examples (in seconds):
+.nf
+.ta +2i
+i7 CPU 870 @2.93GHz	36.4
+i7 CPU 880 @3.07GHz	34.6
+Core2 6600 @2.40GHz	54.1
+Xeon       @3.20GHz	62.6
+Xeon E5530 @2.40GHz	48.3
+
 .fi
 .SH FILES
 .nf
