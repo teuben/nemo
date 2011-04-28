@@ -2,6 +2,10 @@
 #GLOBAL           = console debug_and_release
 #COMPILEMODE          = release
 COMPILEMODE          = debug
+macx {
+  COMPILEMODE          = release
+}
+
 GLOBAL           = console $$COMPILEMODE
 win32 {
         COMPILEMODE  = release
