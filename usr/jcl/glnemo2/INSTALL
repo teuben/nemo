@@ -28,13 +28,21 @@ qt4 are still installed there). Change to 'glnemo2' directory and enter the comm
           then
        make
 
-
+       
     b) Mac OS X
        - - - - -
        qmake -spec macx-g++ -recursive
           then
        make
 
+    c) cmake experimental
+       - - - - - - - - -
+     for linux only, if you have cmake package installed, you can try
+    the following :
+    cd build
+    cmake .
+    make
+    make install
 
  if the compilation fails, please send me a full report by e-mail : 
   jean-charles.lambert@oamp.fr 

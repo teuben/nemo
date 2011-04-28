@@ -79,7 +79,7 @@ ParticlesObject::ParticlesObject(const ParticlesObject&m)
   max_phys   = m.max_phys;
   min_percen_phys = m.min_percen_phys;
   max_percen_phys = m.max_percen_phys;
-  
+  has_physic      = m.has_physic;
   OrbitsVector oo = m.ov;
   // loop on orbits_max
   for (OrbitsVector::iterator oit =oo.begin();oit!=oo.end() ; oit++) {
@@ -137,7 +137,7 @@ const ParticlesObject& ParticlesObject::operator=(const ParticlesObject&m)
   max_phys   = m.max_phys;
   min_percen_phys = m.min_percen_phys;
   max_percen_phys = m.max_percen_phys;
-
+  has_physic      = m.has_physic;
   OrbitsVector oo = m.ov;
   // loop on orbits_max
   for (OrbitsVector::iterator oit =oo.begin();oit!=oo.end() ; oit++) {
@@ -191,7 +191,7 @@ void ParticlesObject::copyProperties(const ParticlesObject&m)
   max_phys   = m.max_phys;
   min_percen_phys = m.min_percen_phys;
   max_percen_phys = m.max_percen_phys;
-
+  has_physic      = m.has_physic;
   //ol           = m.ol;
   //pos          = m.pos;
 }
@@ -312,6 +312,7 @@ void ParticlesObject::init(const ObjFrom _of, const std::string _name)
   max_phys   = -1.;//10000000000.;
   min_percen_phys=0;
   max_percen_phys=99;
+  has_physic = false;
   setColor();
 
 }

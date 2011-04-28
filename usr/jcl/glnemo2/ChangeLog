@@ -9,7 +9,8 @@
  - add lmin value for ramses amr file
  - fix bug on histogram display if phys value<0
  - fix bug on ramses data loading
-
+ - cmake compilation enabled
+	
 1.11 (February, 24th 2011)
 ----------------------------
  - happy gcc 4.5.x
@@ -31,19 +32,17 @@
 
 1.0 (July, 28th 2010)
 ---------------------
- - release number has changed, this is the 1.0 release !!!	
- - add a new tab in Options dialog box to manage grid and cube display	
+ - release number has changed, this is the 1.0 release !!!
+ - add a new tab in Options dialog box to manage grid and cube display
  - if "screenshot" parameter used from the command line, image will be
    saved in the correct file format according to the extension name
- - bug fixed: bestzoom deactivated for the first playing frame 
+ - bug fixed: bestzoom deactivated for the first playing frame
  - bug fixed: if only particles are selected, a modification of the
 	     density threshold modify now the color of the particles
  - bug fixed: display the correct number of particles selected from
 	     the mouse in the Form Option box
  - bug fixed: display velocities vectors when selected from the cli
-	
-	
-	
+
 preview.2010-May-19 (aka Leiden Release)
 -----------------------------------------
  - remove mindens maxdens from command line parameters
@@ -56,9 +55,8 @@ preview.2010-May-19 (aka Leiden Release)
  - fix a bug about the rendering mode changing from time to time
  - set correctly min/man physical quantity with respecting slide
  - draw correctly histo view
-	
-	
-preview.2010-April-24 
+
+preview.2010-April-24
 ---------------------
   can select times with list of snapshots
   add experimental Ramses reader (gas,halo,stars)
@@ -66,11 +64,11 @@ preview.2010-April-24
   add clean installer (make install => glnemo2 install in $NEMOBIN)
   add glnemo2 manual (man glnemo2)
   many bugs fixed
-	
+
 preview.2010-Feb-15
 -------------------
   fix a bug on gadget2 file with BNDRY data
-  
+
 preview.2010-Feb-03
 -------------------
   glnemo2 can render automatically all the time steps of a snapshot, if 

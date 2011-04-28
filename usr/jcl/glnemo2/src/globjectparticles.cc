@@ -325,7 +325,7 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
   // get physical value data array
   phys_select = part_data->getPhysData();
   phys_select_id = part_data->getIpvs();
-  hasPhysic = checkHasPhysic(); // check the object has physic            
+  hasPhysic = po->hasPhysic();//checkHasPhysic(); // check the object has physic            
   // color
   mycolor   = po->getColor();
   
@@ -366,7 +366,7 @@ void GLObjectParticles::updateVbo()
   if (phys_select_id != part_data->getIpvs()) { // new physical quantity
     phys_select=part_data->getPhysData();
     phys_select_id=part_data->getIpvs();
-    hasPhysic = checkHasPhysic(); // check the object has physic      
+    hasPhysic = po->hasPhysic();//checkHasPhysic(); // check the object has physic      
     buildVboPos();
   }
   buildVboPhysData();
@@ -796,19 +796,6 @@ void GLObjectParticles::buildOrbitsDisplayList()
   }
   
   glEndList();
-}
-// ============================================================================
-// checkHasPhysisc
-// check if the object has physical data
-bool GLObjectParticles::checkHasPhysic()
-{ 
-  for (int i=0; i < po->npart; i+=po->step) {
-    int index=po->index_tab[i];
-    if (phys_select && phys_select->isValid()) {
-     if (phys_select->data[index] != -1) return true;    
-    }    
-  }
-  return false;
 }
 // ============================================================================
 // selectParticles();

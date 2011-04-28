@@ -187,7 +187,9 @@ void FormObjectControl::update(ParticlesData   * _p_data,
   // get physical value data array
   phys_select = current_data->getPhysData();
   
-    
+  // parse all the objects to check if physic is present
+  checkPhysic();
+  
   int cpt=0;
   combobox->clear();
   for (int i=0; i < form.range_table->rowCount(); i++) {
@@ -558,9 +560,7 @@ void FormObjectControl::updateObjectSettings( const int row)
     form.orbit_history_spin->setValue(pobj->getOrbitsHistory());
     form.orbit_max_spin->setValue(pobj->getOrbitsMax());
     // -- Physical quantity TAB
-    if (!current_data->rho    && 
-        !current_data->temp   &&
-        !current_data->pressure) {
+    if (!pobj->hasPhysic() ) {
       form.objects_properties->setTabEnabled(1,false); // disable physical tab
     } else {
       form.objects_properties->setTabEnabled(1,true);  // enable  physical tab
@@ -573,20 +573,6 @@ void FormObjectControl::updateObjectSettings( const int row)
     if (phys_select && phys_select->isValid()) {
       dens_histo->drawDensity(phys_select->data_histo);
       float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
-
-      if (go->phys_min_glob==-1 && go->phys_max_glob==-1) { // glob phys not defined
-        if (pobj->getMinPhys()==-1. &&  // default parameter -1 -1
-            pobj->getMaxPhys()==-1.) {  // it's a NEW object, so we set min/max phys
-          pobj->setMinPhys(phys_select->getMin()); 
-          pobj->setMaxPhys(phys_select->getMax());
-        }
-      } else { // global phys defined
-        if (pobj->getMinPhys()==-1. &&            // default parameter for the object
-            pobj->getMaxPhys()==-1.) {  // 
-          pobj->setMinPhys(go->phys_min_glob);
-          pobj->setMaxPhys(go->phys_max_glob);
-        }
-      }
       //min
       float minphys=pobj->getMinPhys();
       float maxphys=pobj->getMaxPhys();
@@ -605,8 +591,7 @@ void FormObjectControl::updateObjectSettings( const int row)
       //pobj->setMaxPhys(maxphys);
       go->phys_min_glob = minphys;
       go->phys_max_glob = maxphys;
-    }
-                                       
+    } 
   }
   if ( i_obj == -1 ) { // no object selected
     // Particles Settings
@@ -636,9 +621,43 @@ void FormObjectControl::updateObjectSettings( const int row)
   my_mutex.unlock();
 }
 // ============================================================================
-// checkVisib()                                                                
-void FormObjectControl::checkVisib()
+// checkPhysic()                                                                
+void FormObjectControl::checkPhysic()
 {
+  if (pov && pov->size()>0) {
+    for (int i=0; i<(int)pov->size();i++) {
+      ParticlesObject * pobj = &(*pov)[i];
+      pobj->setPhysic(false);
+      // check if physic exist and set it
+      for (int i=0; i < pobj->npart; i+=pobj->step) {
+        int index=pobj->index_tab[i];
+        if (phys_select && phys_select->isValid()) {
+          if (phys_select->data[index] != -1) pobj->setPhysic(true);
+        }    
+      }     
+      // 
+      if (pobj->hasPhysic() && phys_select && phys_select->isValid()) {
+        if (go->phys_min_glob==-1 && go->phys_max_glob==-1) { // glob phys not defined
+          if (pobj->getMinPhys()==-1. &&  // default parameter -1 -1
+              pobj->getMaxPhys()==-1.) {  // it's a NEW object, so we set min/max phys
+            pobj->setMinPhys(phys_select->getMin()); 
+            pobj->setMaxPhys(phys_select->getMax());
+          }
+        } else { // global phys defined
+          if (pobj->getMinPhys()==-1. &&            // default parameter for the object
+              pobj->getMaxPhys()==-1.) {  // 
+            pobj->setMinPhys(go->phys_min_glob);
+            pobj->setMaxPhys(go->phys_max_glob);
+          }
+        }
+        //min
+        float minphys=pobj->getMinPhys();
+        float maxphys=pobj->getMaxPhys();                
+        go->phys_min_glob = minphys;
+        go->phys_max_glob = maxphys;
+      }
+    }
+  }
 }
 // ============================================================================
 // ON PARTICLES                                                                

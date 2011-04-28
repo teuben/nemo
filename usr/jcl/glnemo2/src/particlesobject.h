@@ -134,7 +134,8 @@ class ParticlesObject{
     void setRhoSorted(const  bool _v) {
       rho_sorted=_v;
     }
-
+    void setPhysic(const bool _v) { has_physic = _v;}
+    bool  hasPhysic() { return has_physic;}
   private:
 
     QColor color;    // object color                    
@@ -163,6 +164,7 @@ class ParticlesObject{
     int orbits_history;
     bool orbits_animate;
     // physicial value
+    bool has_physic;
     float min_phys;
     float max_phys;
     int min_percen_phys;

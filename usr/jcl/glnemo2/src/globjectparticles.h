@@ -115,7 +115,7 @@ class GLObjectParticles : public GLObject {
     void selectParticles();
     void buildIndexHisto();    
     void sendShaderColor(const int, const bool use_point);
-    bool checkHasPhysic();
+
     // vbo
     GLuint vbo_pos, vbo_color , vbo_size, vbo_index, vbo_index2, vbo_data;
     int nvert_pos;

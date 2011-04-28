@@ -60,7 +60,7 @@ FILE(GLOB hdrs1_files ../plugins/*.h ../plugins/ftm/*.h ..plugins/gadget/*.h
      )
 
 # Destination path for the lib
-SET(LIBRARY_OUTPUT_PATH ../LIB)
+SET(LIBRARY_OUTPUT_PATH LIB)
 
 # compilation options
 add_definitions(-Wall -O2 -ggdb)

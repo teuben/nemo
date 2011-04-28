@@ -141,7 +141,6 @@ namespace glnemo {
   private slots:
     void reject() {} // allow to de activate escape key to close the box
     // global slots
-    void checkVisib();
     void updateVisib(const bool _b,const int _r,const int _t);
     void updateRange(const QString&, const int, const int);
     void checkComboLine(const int, const int);
@@ -216,6 +215,7 @@ namespace glnemo {
     }
     
     private:
+    void checkPhysic();
     void physicalSelected();
     void leaveEvent ( QEvent * event ) {
       if (event) {;} // remove compiler warning
