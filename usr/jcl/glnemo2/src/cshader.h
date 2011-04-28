@@ -39,6 +39,7 @@ private:
   bool processVertex();
   bool processPixel();
   bool createProgram();
+  void printLog(GLuint obj,std::string);
   
   // This handle stores our vertex shader information
   GLhandleARB m_vertexShader;

@@ -111,6 +111,7 @@ bool CShader::createProgram()
   std::cerr << "Linking  program\n";
   glLinkProgramARB(m_program);
   GLWindow::checkGLErrors("link Shader program");
+  printLog(m_program,"Linking  program");
   int  link_status;
   glGetProgramiv(m_program, GL_LINK_STATUS, &link_status);
   if(link_status != GL_TRUE) {
@@ -141,6 +142,7 @@ bool CShader::processVertex()
     GLint compile_status;
     glCompileShaderARB(m_vertexShader);
     GLWindow::checkGLErrors("compile Vertex Shader");
+    printLog(m_vertexShader,"Compiling vertex shader");
     glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &compile_status);
     if(compile_status != GL_TRUE) {
       cerr << "Unable to COMPILE VERTEX SHADER.....\n";
@@ -169,6 +171,7 @@ bool CShader::processPixel()
     GLint compile_status;
     glCompileShaderARB(m_pixelShader);
     GLWindow::checkGLErrors("compile Pixel Shader");
+    printLog(m_pixelShader,"Compiling pixel shader");
     glGetShaderiv(m_pixelShader, GL_COMPILE_STATUS, &compile_status);
     if(compile_status != GL_TRUE) {
       cerr << "Unable to COMPILE PIXEL SHADER.....\n";
@@ -202,4 +205,28 @@ std::string CShader::load(std::string filename)
     infile.close();
   }
   return src;
+}
+// ============================================================================
+// printLog      
+void CShader::printLog(GLuint obj,std::string s)
+{
+  int infologLength = 0;
+  int maxLength;
+  
+  if(glIsShader(obj))
+    glGetShaderiv(obj,GL_INFO_LOG_LENGTH,&maxLength);
+  else
+    glGetProgramiv(obj,GL_INFO_LOG_LENGTH,&maxLength);
+  
+  char infoLog[maxLength];
+  
+  if (glIsShader(obj))
+    glGetShaderInfoLog(obj, maxLength, &infologLength, infoLog);
+  else
+    glGetProgramInfoLog(obj, maxLength, &infologLength, infoLog);
+  
+  if (infologLength > 0) {
+    std::cerr << "CShader::printLog [" << s<< "]:"<<infoLog<<"\n";
+  }
+  
 }
