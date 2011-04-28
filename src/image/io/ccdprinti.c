@@ -12,9 +12,9 @@
 
 string defv[] = {
   "in=???\n           Input filename",
-  "x=0\n              Pixels in X to print (0=1st pixel)",
-  "y=0\n              Pixels in Y to print",
-  "z=0\n              Pixels in Z to print",
+  "x=0\n              Pixels/Coords in X to print (0=1st pixel)",
+  "y=0\n              Pixels/Coords in Y to print",
+  "z=0\n              Pixels/Coords in Z to print",
   "scale=1.0\n        Scale factor for printout",
   "format=%g\n        Format specification for output",
   "newline=t\n        Force newline between each line?",
@@ -22,7 +22,7 @@ string defv[] = {
   "offset=0\n         Offset (0 or 1) to index coordinates X,Y,Z",
   "pixel=f\n          XYZ in Pixel? else Physical coordinates",
   "dim=2\n            2d or 3d interpolation? (use 0 for nearest)",
-  "VERSION=1.0\n      15-mar-2011 PJT",
+  "VERSION=1.1\n      28-apr-2011 PJT",
   NULL,
 };
 
@@ -102,6 +102,10 @@ nemo_main()
 	dx = xr[l] - (Xmin(iptr)-ix*Dx(iptr));
 	dy = yr[l] - (Ymin(iptr)-iy*Dy(iptr));
 	dz = zr[l] - (Zmin(iptr)-iz*Dz(iptr));
+      }
+      if (nz==1) {
+	iz = 0;
+	dz = 0;
       }
       if (near_edge(ix,iy,iz,nx,ny,nz,dim,0)) {
 	nout++;
