@@ -1,5 +1,9 @@
 /*
  *  RUNQUMOND:   run the QuMond program
+ *
+ *    assemble parameters
+ *    needs qmics.dat
+ *    create directory, run program
  */
 
 #include <nemo.h>
@@ -18,7 +22,7 @@ string defv[] = {
   "freq=8\n              frequency to output a binary file",
   "brand=0\n             Restarting option (0=new and ascii, 2=old and binary)",
   "au0=1.0\n             a_0 is empirically ~ 1.2e-8m/s^2. Want to rescale it by a factor s.t. g_0=factor*a_o",
-  "VERSION=0.1\n         17-feb-2011 PJT",
+  "VERSION=0.2\n         28-apr-2011 PJT",
   NULL,
 };
 
