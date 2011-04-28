@@ -2,6 +2,7 @@
  * CCDPRINT: interpolate values off gridpoints of an image
  *
  *	 15-mar-2011   V1.0 created        Peter Teuben
+ *       28-apr-2011   V1.1 fixed location bug      PJT
  */
 
 #include <stdinc.h>
@@ -99,14 +100,14 @@ nemo_main()
 	ix = (int)rint((xr[l] - Xmin(iptr))/Dx(iptr));
 	iy = (int)rint((yr[l] - Ymin(iptr))/Dy(iptr));
 	iz = (int)rint((zr[l] - Zmin(iptr))/Dz(iptr));
-	dx = xr[l] - (Xmin(iptr)-ix*Dx(iptr));
-	dy = yr[l] - (Ymin(iptr)-iy*Dy(iptr));
-	dz = zr[l] - (Zmin(iptr)-iz*Dz(iptr));
+	dx = xr[l] - (Xmin(iptr)+ix*Dx(iptr));
+	dy = yr[l] - (Ymin(iptr)+iy*Dy(iptr));
+	dz = zr[l] - (Zmin(iptr)+iz*Dz(iptr));
       }
-      if (nz==1) {
-	iz = 0;
-	dz = 0;
-      }
+      if (nx==1) ix = dx = 0;
+      if (ny==1) iy = dy = 0;
+      if (nz==1) iz = dz = 0;
+
       if (near_edge(ix,iy,iz,nx,ny,nz,dim,0)) {
 	nout++;
 	continue;
