@@ -12,7 +12,7 @@ string defv[] = {
   "in=???\n              Input snapshot",
   "outdir=???\n          Run directory",
   "out=\n                Output snapshot(s) if to convert back to NEMO?",
-  "numbs=16\n            Number of integration steps",
+  "numbs=8\n             Number of integration steps",
   "aexpn=0.00544081442\n Initial scale factor (z=1/aexpn-1)",
   "adiv=0.002\n          Normalisation of time steps",
   "om0=0.2623\n          Omega_0 (Omega_0=Omega_cdm+Omega_nu+Omega_baryon)",
@@ -22,7 +22,7 @@ string defv[] = {
   "freq=8\n              frequency to output a binary file",
   "brand=0\n             Restarting option (0=new and ascii, 2=old and binary)",
   "au0=1.0\n             a_0 is empirically ~ 1.2e-8m/s^2. Want to rescale it by a factor s.t. g_0=factor*a_o",
-  "VERSION=0.2\n         28-apr-2011 PJT",
+  "VERSION=0.3\n         28-apr-2011 PJT",
   NULL,
 };
 
@@ -41,11 +41,12 @@ void nemo_main()
   int new, id_new, nout,iene, mrate;
   real tmax, dt_min, cfl;
   int lp_ord;
-  stream parstr;
+  stream parstr, outstr;
   string infile = getparam("in");
   string outfile = getparam("out");
   string outdir = getparam("outdir");
   string exefile = "QMcode";
+  string datfile = "qmics.dat";
   string parfile = "start.txt";
   string logfile = "QMcode.log";
   char dname[256], cmd[256];
@@ -82,12 +83,19 @@ void nemo_main()
   fprintf(parstr,"%s\n",getparam("au0"));
   strclose(parstr);
 
+  sprintf(cmd,"cp %s %s/%s", infile, outdir, datfile);
+  run_program(cmd);
+
   goto_rundir(outdir);
   sprintf(cmd,"%s < %s > %s ", exefile, parfile, logfile);
   run_program(cmd);
 
   if (hasvalue("out")) {
-    warning("no postprocessing yet");
+    warning("no postprocessing yet - only history written");
+  } else {
+    outstr = stropen("history.bin","w");
+    put_history(outstr);
+    strclose(outstr);
   }
 
 }
