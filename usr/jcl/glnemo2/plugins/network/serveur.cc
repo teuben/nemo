@@ -155,7 +155,7 @@ namespace network {
     // Read the snapshot
     // ============================================================================
     int Serveur::readPart(glnemo::ParticlesData * part_data, const int *index, const int nsel, bool  load_vel, const std::string _selectPart) {
-
+      if (index) {;} // remove compiler warning
         initialiseReception();
 
         if ( *part_data->nbody < nsel) {
