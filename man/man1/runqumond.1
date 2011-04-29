@@ -1,61 +1,69 @@
-.TH RUNQUMOND 1NEMO "28 April 2011"
+.TH RUNQUMOND 1NEMO "29 April 2011"
 .SH NAME
 runqumond \- Frontend to the QuMond program
 .SH SYNOPSIS
 \fBrunqumond\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+QuMond is a cosmology code that allow one to play with MOND type gravity
+as well as classical Newtonian gravity. The program was developed by
+G. Angus (20xx, ..., in press??).
+.PP
+This program only assembles the parameter to write the input parameter
+file, copies your input file to the properly named qmics.dat file,
+stuffs all of that in a (new) run directory, and runs the program in
+that directory, for the ease of managing multiple runs of QuMond.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input snapshot [???]     
-.TP 20
+Input snapshot. No default, currently needs to be an ASCII file
+.TP
 \fBoutdir=\fP
-Run directory [???]     
-.TP 20
+Run directory. No default.
+.TP
 \fBout=\fP
-Output snapshot(s) if to convert back to NEMO?
-.TP 20
+Output snapshot(s) if to convert back to NEMO?  Not implemented.
+.TP
 \fBnumbs=\fP
 Number of integration steps [8]   
-.TP 20
+.TP
 \fBaexpn=\fP
 Initial scale factor (z=1/aexpn-1) [0.00544081442]   
-.TP 20
+.TP
 \fBadiv=\fP
 Normalisation of time steps [0.002]   
-.TP 20
+.TP
 \fBom0=\fP
 Omega_0 (Omega_0=Omega_cdm+Omega_nu+Omega_baryon) [0.2623]     
-.TP 20
+.TP
 \fBvsca=\fP
 length of box (Mpc/h) [512.0]   
-.TP 20
+.TP
 \fBhubble=\fP
 Hubble param used in cosmics [73.20]  
-.TP 20
+.TP
 \fBmond=\fP
-Desired nu-function (0:no MOND, 1:some weird fcn, 2:simple
-.TP 20
+Desired nu-function (0:no MOND, 1:some weird fcn, 2:simple nu function) [2]
+.TP
 \fBfreq=\fP
 frequency to output a binary file [8] 
-.TP 20
+.TP
 \fBbrand=\fP
 Restarting option (0=new and ascii, 2=old and binary)
-.TP 20
+.TP
 \fBau0=\fP
 a_0 is empirically ~ 1.2e-8m/s^2. Want to rescale
+it by a factor s.t. g_0=factor*a_o [1.0]
 .SH BENCHMARK
-Run the standard benchmark
+Run the standard benchmark with the default parameters:
 .nf
     % time runqumond $NEMODAT/qmics.dat run_bench
     % tail -1 run_bench/gout1001.dat
 	32.9911329659966270      32.9889230852932585      32.9910473750990079      -0.0162493558387977      -0.0155574632018622      -0.0166939677870501
     % rm -rf run_bench
 .fi
-with the following 2011 examples (in seconds):
+with the following 2011 examples (in CPU seconds):
 .nf
 .ta +2i
 i7 CPU 870 @2.93GHz	36.4
@@ -66,8 +74,12 @@ Xeon E5530 @2.40GHz	48.3
 
 .fi
 .SH FILES
+The actual code has some hard coded file names, hence the concept of running
+this in a seperate directory, to ease the pain of quickly running simulations 
+in parallel.
 .nf
 .ta +1.5i
+QMcode		Name of the executable
 qmics.dat	Input datafile QMcode needs (6 floats for p,v per line)
 gout1000.dat	Output file Name(s) (1000,1001,1002,....). Same format as input
 start.txt	Input Parameter file

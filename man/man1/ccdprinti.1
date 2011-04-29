@@ -1,4 +1,4 @@
-.TH CCDPRINTI NEMO "15 March 2011"
+.TH CCDPRINTI NEMO "28 April 2011"
 .SH NAME
 ccdprinti \- interpolate values from a map
 .SH SYNOPSIS
@@ -7,9 +7,13 @@ ccdprinti \- interpolate values from a map
 .SH DESCRIPTION
 \fBccdprinti\fP prints out map values in an image. The grid is
 specified in x, y and z independantly, and is limited to
-either pixel (0...N) or physical coordinates within a map.
-See also \fIccdprint(1NEMO)\fP for a version limited to
-gridpoints.
+either pixel (-0.5...N-0.5) or physical coordinates within a map.
+See also \fIccdprint(1NEMO)\fP for a version limited to just integer
+gridpoints. Recall that the grid runs from the outer cell edges
+.nf
+    Xmin - Dx/2 ...  Xmin + (Nx-1/2)*Dx
+.fi
+and pixel coordinates generally refer to the center of the cell.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -48,7 +52,7 @@ on one line, and a blank line separates different planes.
 \fBlabel=\fP\fIx,y,z\fP
 Any combination of \fBx\fP, \fBy\fP and/or \fBz\fP can be given, which labels
 the output with their X, Y and/or Z physical values. 
-[Default: no labels].
+[Default: x,y].
 .TP
 \fBoffset=0|1\fP
 Should X,Y,Z be 0- or 1- based. NEMO images use 0-based images,
@@ -58,6 +62,11 @@ if this parameter is set to 1. Default: 0
 \fBpixel=t|f\fP
 Print out X,Y,Z labels in physical or pixel coordinates. By default
 physical. [Default: \fBf\fP]
+.TP
+\fBdim=0|2\fP
+Interpolation scheme. 0=nearest. 2=linear interpolaton in the plane.
+3=linear interpolation in a cube. 
+Default: 0
 .SH "SEE ALSO"
 ccdprint(1NEMO), printf(3), image(5NEMO)
 .SH AUTHOR
@@ -71,4 +80,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 15-mar-2011	V1.0 created	PJT
+28-apr-2011	V1.1 redesigned, fixed location bug	PJT
 .fi
