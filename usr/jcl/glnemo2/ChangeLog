@@ -1,4 +1,4 @@
-1.20 (in cvs)
+1.20 (May, 3rd 2011)
 --------------
  - new rendering pipeline based on a new shader
  - better interactivity with density threshold
