@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <iostream>
 #include <math.h>
+#include <limits>
 #include <iomanip>
 #include "globaloptions.h"
 #define MAX(A,B) ((A)>(B)?(A):(B))
@@ -486,11 +487,19 @@ int PhysicalData::computeMinMax()
     }
     valid = true;
     
-    if ((max == -1E9 && min == 1E9 )|| (max == min)) {
+    if ((max == -1E9 && min == 1E9 )|| (max == min) ||
+        max >  std::numeric_limits<double>::max() ||
+        max <  std::numeric_limits<double>::min() ||
+        min >  std::numeric_limits<double>::max() ||
+        min <  std::numeric_limits<double>::min() 
+        ) {
       valid = false;
     } 
     std::cerr <<" min = "<< std::scientific << std::setw(10) << min
               <<"\n max = "<< std::setw(10)<<max<<"\n";
+    if (max >  std::numeric_limits<double>::max()) {
+      std::cerr << "max is inf....\n"; 
+    }
     // compute density histogram                                      
     // in a array of 100 bins, going from log(min data) to log(max data)
     // we compute the index in that range for the particles's density,

@@ -1,3 +1,7 @@
+1.21 (SVN)
+----------
+- fix a crash when physical values are out of limits
+
 1.20 (May, 3rd 2011)
 --------------
  - new rendering pipeline based on a new shader
