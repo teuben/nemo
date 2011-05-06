@@ -1,4 +1,4 @@
-.TH DATA 5NEMO "20 March 2007"
+.TH DATA 5NEMO "6 May 2011"
 .SH NAME
 bench \- NEMO benchmarks in NemoStones
 .SH DESCRIPTION
@@ -10,7 +10,7 @@ quadrupole corrections, for 10240 particles and 64 timesteps.
 O(N) version from Dehnen (2002?). Again 64 timesteps.
 \fBbench0\fP has been added to compare a tree code with a 
 direct N-body code, also 64 timesteps. 
-\fBbench3\fP benchmarks the creation of a large (>2GB) snapshot.
+\fBbench3\fP benchmarks the I/O and creation of a large (>2GB) snapshot.
 .SH DATA
 Here are the benchmarks
 .ta +1i
@@ -64,7 +64,8 @@ bench3
        P4/2.8 w/cygwin	276.56u 26.35s 6:34.75 76.7% (using mkplummer V2.8)
        x86_64/3.0       21.651u 8.897s 0:48.05 63.5%    0+0k 0+0io 0pf+0w
        x86_64/3.2       21.950u 9.997s 0:39.37 81.1%  (SATA)
-
+       i7/2.93          7.892u 3.170s 0:12.92 85.6% (HDD)
+       i7/2.93          7.662u 1.467s 0:09.13 99.8% (SHMEM)
 .fi
 .SH "SEE ALSO"
 gyrfalcON(1NEMO), data(5NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO),
@@ -83,4 +84,5 @@ Peter Teuben
 26-nov-03	finally added some data		PJT
 17-feb-04	added bench0 comparison  	PJT
 31-mar-05	added some cygwin numbers, fixed input	PJT
+6-may-11    added i7 and SHMEM/HDD comparison   PJT
 .fi
