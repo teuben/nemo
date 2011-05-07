@@ -42,8 +42,8 @@ string defv[] = {		/* keywords/default values/help */
 	"mode=mean\n                      Mode: mean, linear",
 	"stack=f\n			  Stack all selected snapshots?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"emax=10\n                        Max exp smoothing parameter",
-	"VERSION=1.2\n			  6-may-11 PJT",
+	"emax=10\n                        Maximum exp smoothing parameter",
+	"VERSION=1.3\n			  7-may-11 PJT",
 	NULL,
 };
 
@@ -55,6 +55,9 @@ string cvsid="$Id$";
 #define TIMEFUZZ  0.000001
 #define CUTOFF    4.0		/* cutoff of gaussian in terms of sigma */
 #define MAXVAR	  16		/* max evar's */
+
+#define SMODE_GAUSS  1
+#define SMODE_CONE   2
 
 local stream  instr, outstr;				/* file streams */
 
@@ -80,6 +83,7 @@ local int    nvar;			/* number of evar's present */
 local string svar;
 local rproc  sfunc;
 local real   emax; 
+local int    smode;                     /* 1=gauss 2=cone */
 
 local int    moment;	                /* moment to take in velocity */
 
@@ -262,6 +266,14 @@ void setparams()
 	svar = getparam("svar");
     }
     emax = getdparam("emax");
+    cp = getparam("sfunc");
+    if (*cp == 'g')
+      smode = SMODE_GAUSS;
+    else if (*cp == 'c') {
+      smode = SMODE_CONE;
+      emax = 0.5;
+    } else
+      error("Bad sfunc=%s",cp);
 
     if (nvar < 1) error("Need evar=");
     if (nvar > MAXVAR) error("Too many evar's (%d > MAXVAR = %d)",nvar,MAXVAR);
@@ -378,7 +390,7 @@ bin_data(int ivar)
 {
   real brightness, x, y, z, z0, t,sum;
   real expfac, fac, sfac, flux, emtau, depth;
-  real e, twosqs;
+  real e, twosqs, delta;
   int    i, j, k, ix, iy, iz, n, nneg, ioff;
   int    ix0, iy0, ix1, iy1, m, mmax;
   Body   *bp;
@@ -410,15 +422,15 @@ bin_data(int ivar)
     if (Qwcs) wcs(&x,&y);            /* convert to an astronomical WCS, if requested */
     flux = efunc[ivar](bp,tnow,i);
     if (Qsmooth) {
-      twosqs = sfunc(bp,tnow,i);
-      twosqs = 2.0 * sqr(twosqs);
+      delta = sfunc(bp,tnow,i);
+      twosqs = 2.0 * sqr(delta);
     }
     
     ix0 = xbox(x);                  /* direct gridding in X and Y */
     iy0 = ybox(y);
     
     
-    if (ix0<0 || iy0<0) {           /* outside area (>= nx,ny never occurs */
+    if (ix0<0 || iy0<0) {           /* outside area (>= nx,ny never occurs) */
       noutxy++;
       continue;
     }
@@ -450,6 +462,11 @@ bin_data(int ivar)
 	pf->last = pp;
       }      
     } else {
+      /*  loop around the point and see where it has to deposit
+       *  emission
+       * 'm' is counting the radius from the center, until all of the 
+       *  points do not contribute anymore, the loop continues
+       */
       for (m=0; m<mmax; m++) {        /* loop over smoothing area */
 	done = TRUE;
 	for (iy1=-m; iy1<=m; iy1++)
@@ -467,8 +484,12 @@ bin_data(int ivar)
 		e = 2 * emax;
 	    else 
 	      e = 0.0;
+	    
 	    if (e < emax) {
-	      sfac = exp(-e);
+	      if (smode == SMODE_GAUSS)
+		sfac = exp(-e);
+	      else if (smode == SMODE_CONE)
+		sfac = 1-sqrt(e);
 	      done = FALSE;
 	    } else
 	      sfac = 0.0;
@@ -567,7 +588,7 @@ rescale_data(int ivar)
 
 /*	compute integerized coordinates in X Y and Z, return < 0 if
  *	outside the range's - handle Z a little differently, as it
- *	allows edges at infinity
+ *	also allows edges at infinity
  */
 
 int xbox(real x)
