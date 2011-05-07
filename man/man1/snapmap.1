@@ -1,4 +1,4 @@
-.TH SNAPMAP 1NEMO "20 June 2009"
+.TH SNAPMAP 1NEMO "6 May 2011"
 .SH NAME
 snapmap \- map a snapshot into a 2D image
 .SH SYNOPSIS
@@ -67,6 +67,11 @@ Variable to denote gaussian weighting size in X and Y. Note this is the
 gaussian sigma, not the FWHM (FMHW = 2.355 * sigma). Only used
 if \fBmode=mean\fP. 
 .TP
+\fBsfunc=\fIsmoothing-function\fP
+The function/method to used when smoothing/interpolating.
+Options are \fBgaussian\fP and \fPcone\fP.
+[Default: \fBgaussian\fP].
+.TP
 \fBnx=\fIx-pixels\fP
 Number of pixels along the X axis of the image [default: \fB64\fP].
 .TP
@@ -94,10 +99,16 @@ If a valid projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT)
 but see also \fIwcs(1NEMO)\fP, the input coordinates are interpreted
 in angular degrees, and griddes with the appropriate sky projection.
 Default: no sky projection.
+.TP
+\fBemax=\fP
+Normally gaussian smoothing gets cut off when the argument to the exponent
+is larger than \fBemax\fP, to prevent roundoff error and/or contributions
+from too far away. This equals \fBsqrt(2*emax)\fP times the sigma
+listed in \fBsvar=\fP. 
+[Default: \fB10\fP]
 .SH BUGS
 Combinations of large snapshots and large images may run into memory
-problems since both the snapshot and the image(s) must fit into memory
-to obtain turbo speeds.
+problems since both the snapshot and the image(s) must fit into memory.
 .PP
 Sky projections do not guarantee flux conservation, interpolation is done
 in linear space.
@@ -126,4 +137,5 @@ src/nbody/image  	snapmap.c
 .nf
 .ta +1.0i +4.0i
 20-jun-09	V1.0: created	PJT
+6-may-11	V1.3: implemented emax= and sfunc=cone	PJT
 .fi
