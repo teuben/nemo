@@ -6,7 +6,7 @@
  *
  *   TODO:
  *     fix gaussian weighted (still has the old svar= code from snapgrid)
- *     implement linear, i.e. ccdintpol, code
+ *     implement linear, i.e. ccdintpol, code (see also miriad::varmaps)
  *     check multiple evar's
  *     check stacking
  *
@@ -34,6 +34,7 @@ string defv[] = {		/* keywords/default values/help */
 	"yvar=y\n			  y-variable to grid",
         "evar=-vz\n                       emission variable(s)",
         "svar=\n                          smoothing size variable",
+	"sfunc=gauss\n                    smoothing function",
 	"nx=64\n			  x size of image",
 	"ny=64\n			  y size of image",
 	"xlab=\n                          Optional X label [xvar]",
@@ -41,7 +42,8 @@ string defv[] = {		/* keywords/default values/help */
 	"mode=mean\n                      Mode: mean, linear",
 	"stack=f\n			  Stack all selected snapshots?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=1.0\n			  21-jun-09 PJT",
+	"emax=10\n                        Max exp smoothing parameter",
+	"VERSION=1.2\n			  6-may-11 PJT",
 	NULL,
 };
 
@@ -77,6 +79,7 @@ local rproc  efunc[MAXVAR];
 local int    nvar;			/* number of evar's present */
 local string svar;
 local rproc  sfunc;
+local real   emax; 
 
 local int    moment;	                /* moment to take in velocity */
 
@@ -258,6 +261,8 @@ void setparams()
       } else 
 	svar = getparam("svar");
     }
+    emax = getdparam("emax");
+
     if (nvar < 1) error("Need evar=");
     if (nvar > MAXVAR) error("Too many evar's (%d > MAXVAR = %d)",nvar,MAXVAR);
     if (Qstack && nvar>1) error("stack=t with multiple (%d) evar=",nvar);
@@ -373,7 +378,7 @@ bin_data(int ivar)
 {
   real brightness, x, y, z, z0, t,sum;
   real expfac, fac, sfac, flux, emtau, depth;
-  real e, emax, twosqs;
+  real e, twosqs;
   int    i, j, k, ix, iy, iz, n, nneg, ioff;
   int    ix0, iy0, ix1, iy1, m, mmax;
   Body   *bp;
@@ -397,7 +402,6 @@ bin_data(int ivar)
     mmax = MAX(Nx(iptr),Ny(iptr));
   else
     mmax = 1;
-  emax = 10.0;
 
 		/* big loop: walk through all particles and accumulate data */
   for (i=0, bp=btab; i<nobj; i++, bp++) {
