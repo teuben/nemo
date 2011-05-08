@@ -7,12 +7,12 @@ snapmap \- map a snapshot into a 2D image
 .SH DESCRIPTION
 \fIsnapmap\fP "grids" two arbitrary \fIbodytrans(3NEMO)\fP expressions 
 (default: \fBx\fP, and \fBy\fP) of a snapshot into a 2D map, using
-another \fIbodytrans(3NEMO)\fP expression (default: \fB-vz\fP) as the map
+another \fIbodytrans(3NEMO)\fP expression (default: \fBm\fP) as the map
 value. The result is an
 \fIimage(5NEMO)\fP, with optional astronomical projection for direct
-comparision with true astronomical images. There are a number of way
+comparision with true astronomical images. There are a number of ways
 implemented to "grid" the particles: mean value, with or without gaussian
-weighting, and forms of linear interpolation.
+or cone weighting, and forms of linear interpolation.
 .PP 
 Use \fIsnapgrid(1NEMO)\fP instead to grid datacubes (e.g. X-Y-Z), or
 if you need various styles of
@@ -57,10 +57,10 @@ The value of \fIy-expression\fP is gridded along the Y axis.
 [default: \fBy\fP].
 .TP
 \fBevar=\fIe1,e2,...\fP
-Variable(s) to denote the emissivity per particle.  The default matches that
-of \fIsnapgrid(1NEMO)\fP's \fBzvar=\fP. Multiple expressions, separated
-by commas, can be given, each of them generating an image.
-[default: \fB-vz\fP].
+Variable(s) to denote the emissivity per particle.  Multiple expressions, separated
+by commas, can be given, each of them generating a separate image in 
+a single multi-image output file.
+[default: \fBm\fP].
 .TP
 \fBsvar=\fIsmoothing\fP
 Variable to denote gaussian weighting size in X and Y. Note this is the
@@ -87,7 +87,7 @@ with recognized labels like RA---TAN, DEC--SIN, GLON etc.
 Same for the Y-axis.
 .TP
 \fBmode=\fP\fIgridding-mode\fP
-mean (can be optionally with gaussian weighting),  linear interpolation
+mean (can be optionally with gaussian/cone weighting),  linear interpolation
 [Default: \fBmean\fP].
 .TP
 \fBstack=t|f\fP
@@ -117,15 +117,24 @@ This program was written to create maps with more accurate interpolated
 velocity fields from models. However, in the default mode it used
 the same \fImean\fP pixel value as \fIsnapgrid(1NEMO)\fP:
 .nf
-   snapmap  snap101 ccd101 
+   snapmap  snap101 ccd101 evar=-vz
    snapgrid snap101 ccd102 evar=-vz mean=t
    ccdmath ccd101,ccd102 - %1-%2 | ccdstat -
       Min=0.000000  Max=0.000000
       ...
 .fi
 produces the same images \fIccd101\fP and \fIccd102\fP from the input snapshot \fIsnap101\fP
+.PP
+When using multiple \fBevar\fP's, the multiple images are not in a cube, but 
+separate images. If you want them in a single image cube, use 
+\fIsnapmerge(1NEMO)\fP. Here's a simple example using NEMO's pipes:
+.nf
+    mkspiral - |\\
+      snapmap - - m,x,y,vx,vy svar=0.05 |\\
+      ccdmerge - spiral.ccd
+.fi
 .SH "SEE ALSO"
-snapgrid(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), image(5NEMO)
+snapgrid(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), ccdmerge(1NEMO), image(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -138,4 +147,5 @@ src/nbody/image  	snapmap.c
 .ta +1.0i +4.0i
 20-jun-09	V1.0: created	PJT
 6-may-11	V1.3: implemented emax= and sfunc=cone	PJT
+8-may-11	V2.0: evar=m is now default	PJT
 .fi
