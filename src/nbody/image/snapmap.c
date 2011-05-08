@@ -3,6 +3,8 @@
  *
  *	20-jun-09  V1.0 -- derived from snapgrid - GalaxyMasses09 - PJT
  *                      quick and dirty: only mean and svar used
+ *       7-may-11  V1.3 added cone smoothing
+ *       8-may-11  V1.4 make evar=m the default
  *
  *   TODO:
  *     fix gaussian weighted (still has the old svar= code from snapgrid)
@@ -25,26 +27,26 @@
 #include <image.h>              /* images */
 
 string defv[] = {		/* keywords/default values/help */
-	"in=???\n			  input filename (a snapshot)",
-	"out=???\n			  output filename (an image)",
-	"times=all\n			  standard selection of times",
-	"xrange=-2:2\n			  x-range in gridding",
-	"yrange=-2:2\n	  	 	  y-range in gridding",
-	"xvar=x\n			  x-variable to grid",
-	"yvar=y\n			  y-variable to grid",
-        "evar=-vz\n                       emission variable(s)",
-        "svar=\n                          smoothing size variable",
-	"sfunc=gauss\n                    smoothing function",
-	"nx=64\n			  x size of image",
-	"ny=64\n			  y size of image",
-	"xlab=\n                          Optional X label [xvar]",
-	"ylab=\n                          Optional Y label [yvar]",
-	"mode=mean\n                      Mode: mean, linear",
-	"stack=f\n			  Stack all selected snapshots?",
-	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"emax=10\n                        Maximum exp smoothing parameter",
-	"VERSION=1.3\n			  7-may-11 PJT",
-	NULL,
+  "in=???\n		  input filename (a snapshot)",
+  "out=???\n		  output filename (an image)",
+  "times=all\n		  standard selection of times",
+  "xrange=-2:2\n	  x-range in gridding",
+  "yrange=-2:2\n	  y-range in gridding",
+  "xvar=x\n		  x-variable to grid",
+  "yvar=y\n		  y-variable to grid",
+  "evar=m\n               emission variable(s)",
+  "svar=\n                smoothing size variable",
+  "sfunc=gauss\n          smoothing function: gauss,cone",
+  "nx=64\n		  x size of image",
+  "ny=64\n		  y size of image",
+  "xlab=\n                Optional X label [xvar]",
+  "ylab=\n                Optional Y label [yvar]",
+  "mode=mean\n            Mode: mean,linear",
+  "stack=f\n		  Stack all selected snapshots?",
+  "proj=\n                Sky projection (SIN,TAN,ARC,NCP,GLS,MER,AIT)",
+  "emax=10\n              Maximum exp smoothing parameter",
+  "VERSION=2.0\n	  8-may-11 PJT",
+  NULL,
 };
 
 string usage="grid a snapshot into a 2D map";
@@ -53,7 +55,6 @@ string cvsid="$Id$";
 
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
 #define TIMEFUZZ  0.000001
-#define CUTOFF    4.0		/* cutoff of gaussian in terms of sigma */
 #define MAXVAR	  16		/* max evar's */
 
 #define SMODE_GAUSS  1
@@ -153,13 +154,13 @@ void wcs(real *x, real *y)
   double xpix, ypix;
   double xpos = *x,
          ypos = *y;
-  if (xypix(xpos, ypos, xref, yref, xrefpix, yrefpix, xinc, yinc, rot, proj, &xpix, &ypix)) {
+  if (xypix(xpos,ypos,xref,yref,xrefpix,yrefpix,xinc,yinc,rot,proj,&xpix,&ypix)) {
     dprintf(0,"xypix %s %15.10g %15.10g %15.10g %15.10g\n",proj,xpos,ypos,xpix,ypix);
     error("problem-1 with WCS conversion");
   }
   *x = xpix;
   *y = ypix;
-  /* dprintf(0,"xypix %s %15.10g %15.10g %15.10g %15.10g\n",proj,xpos,ypos,xpix,ypix); */
+  /* dprintf(2,"xypix %s %15.10g %15.10g %15.10g %15.10g\n",proj,xpos,ypos,xpix,ypix); */
 }
 
 
@@ -176,17 +177,17 @@ void to_dms(double dval, int *dd, int *mm, double *ss)
 
 void show_wcs(string id, real longitude, real latitude)
 {
-    int d1,m1,d2,m2;
-    double s1,s2;
-    double xpos = longitude, ypos = latitude;
-    double xpix, ypix;
+  int d1,m1,d2,m2;
+  double s1,s2;
+  double xpos = longitude, ypos = latitude;
+  double xpix, ypix;
+  
+  if (worldpos(xpos,ypos,xref,yref,xrefpix,yrefpix,xinc,yinc,rot,proj,&xpix,&ypix))
+    warning("problem-2 with WCS conversion");
 
-    if (worldpos(xpos, ypos, xref, yref, xrefpix, yrefpix, xinc, yinc, rot, proj, &xpix, &ypix))
-      warning("problem-2 with WCS conversion");
-
-    to_dms(xpix,&d1,&m1,&s1);
-    to_dms(ypix,&d2,&m2,&s2);
-    dprintf(0,"%03d:%02d:%06.3f %03d:%02d:%06.3f   %s\n",d1,m1,s1,d2,m2,s2,id);
+  to_dms(xpix,&d1,&m1,&s1);
+  to_dms(ypix,&d2,&m2,&s2);
+  dprintf(0,"%03d:%02d:%06.3f %03d:%02d:%06.3f   %s\n",d1,m1,s1,d2,m2,s2,id);
 }
 
 
@@ -194,26 +195,26 @@ void show_wcs(string id, real longitude, real latitude)
 
 void setparams()
 {
-    char  *cp;
+  char  *cp;
 
-    times = getparam("times");
-    cp = getparam("mode");
-    Qmean = (*cp == 'm');   /* mean mode */
-    Qmap  = (*cp == 'l');   /* linear mode */
-    Qstack = getbparam("stack");
+  times = getparam("times");
+  cp = getparam("mode");
+  Qmean = (*cp == 'm');   /* mean mode */
+  Qmap  = (*cp == 'l');   /* linear mode */
+  Qstack = getbparam("stack");
       
-    nx = getiparam("nx");
-    ny = getiparam("ny");
-    if (nx<1 || ny<1) error("Bad grid size (%d %d)",nx,ny);
+  nx = getiparam("nx");
+  ny = getiparam("ny");
+  if (nx<1 || ny<1) error("Bad grid size (%d %d)",nx,ny);
+  
+  setaxis(getparam("xrange"), xrange, nx, &xedge, &xbeam);
+  if (xbeam > 0.0) error("No convolve in X allowed yet");
+  
+  setaxis(getparam("yrange"), yrange, ny, &yedge, &ybeam);
+  if (ybeam > 0.0) error("No convolve in Y allowed yet");
 
-    setaxis(getparam("xrange"), xrange, nx, &xedge, &xbeam);
-    if (xbeam > 0.0) error("No convolve in X allowed yet");
-
-    setaxis(getparam("yrange"), yrange, ny, &yedge, &ybeam);
-    if (ybeam > 0.0) error("No convolve in Y allowed yet");
-
-    Qwcs = hasvalue("proj");
-    if (Qwcs) {  /* X and Y are now interpreted as a LONGITUDE / LATITUDE paid, in degrees */
+  Qwcs = hasvalue("proj");
+  if (Qwcs) {  /* X and Y are now interpreted as a LONGITUDE / LATITUDE paid, in degrees */
       proj = getparam("proj");
       if (*proj != '-')
 	error("proj=%s should be 4 uppercase letters starting with -, e.g. proj=-TAN",proj);
@@ -249,40 +250,40 @@ void setparams()
       show_wcs("upper left", xrange[0],yrange[1]);
 
 
-    }
+  }
 
-    dprintf (1,"size of IMAGE map = %d * %d\n",nx,ny);
-
-    xvar = getparam("xvar");
-    yvar = getparam("yvar");
-    evar = burststring(getparam("evar"),",");
-    nvar = xstrlen(evar,sizeof(string)) - 1;
-    Qsmooth = hasvalue("svar");
-    if (Qsmooth) {
+  dprintf (1,"size of IMAGE map = %d * %d\n",nx,ny);
+  
+  xvar = getparam("xvar");
+  yvar = getparam("yvar");
+  evar = burststring(getparam("evar"),",");
+  nvar = xstrlen(evar,sizeof(string)) - 1;
+  Qsmooth = hasvalue("svar");
+  if (Qsmooth) {
       if (Qmap) {
 	warning("Cannot smooth in mode=linear map mode, smooth disabled");
 	Qsmooth = FALSE;
       } else 
 	svar = getparam("svar");
-    }
-    emax = getdparam("emax");
-    cp = getparam("sfunc");
-    if (*cp == 'g')
-      smode = SMODE_GAUSS;
-    else if (*cp == 'c') {
-      smode = SMODE_CONE;
-      emax = 0.5;
-    } else
-      error("Bad sfunc=%s",cp);
-
-    if (nvar < 1) error("Need evar=");
-    if (nvar > MAXVAR) error("Too many evar's (%d > MAXVAR = %d)",nvar,MAXVAR);
-    if (Qstack && nvar>1) error("stack=t with multiple (%d) evar=",nvar);
-    xlab = hasvalue("xlab") ? getparam("xlab") : xvar;
-    ylab = hasvalue("ylab") ? getparam("ylab") : yvar;
-
-    instr = stropen (getparam ("in"), "r");
-    outstr = stropen (getparam("out"),"w");
+  }
+  emax = getdparam("emax");
+  cp = getparam("sfunc");
+  if (*cp == 'g')
+    smode = SMODE_GAUSS;
+  else if (*cp == 'c') {
+    smode = SMODE_CONE;
+    emax = 0.5;
+  } else
+    error("Bad sfunc=%s",cp);
+  
+  if (nvar < 1) error("Need evar=");
+  if (nvar > MAXVAR) error("Too many evar's (%d > MAXVAR = %d)",nvar,MAXVAR);
+  if (Qstack && nvar>1) error("stack=t with multiple (%d) evar=",nvar);
+  xlab = hasvalue("xlab") ? getparam("xlab") : xvar;
+  ylab = hasvalue("ylab") ? getparam("ylab") : yvar;
+  
+  instr = stropen (getparam ("in"), "r");
+  outstr = stropen (getparam("out"),"w");
 }
 
 
@@ -301,7 +302,7 @@ void compfuncs()
 int read_snap()
 {
   dprintf(0,"SnapRead\n");
-    for(;;) {		
+  for(;;) {		
         get_history(instr);
         get_snap(instr,&btab,&nobj,&tnow,&bits);
         if (bits==0) 
@@ -312,14 +313,14 @@ int read_snap()
 	  dprintf(0,"Time: %g\n",tnow);
           break;          /* take it, if time in timerange */
 	}
-    }
-    if (bits) {
+  }
+  if (bits) {
     	if (Qstack)
 	    dprintf(1,"Adding data for times=%g; bits=0x%x\n",tnow,bits);
 	else
 	    dprintf(1,"New data for times=%g; bits=0x%x\n",tnow,bits);
-    }
-    return bits;
+  }
+  return bits;
 }
 
 #define CV(i)  (MapValue(i,ix,iy))
@@ -462,15 +463,15 @@ bin_data(int ivar)
 	pf->last = pp;
       }      
     } else {
-      /*  loop around the point and see where it has to deposit
-       *  emission
-       * 'm' is counting the radius from the center, until all of the 
-       *  points do not contribute anymore, the loop continues
+      /*  loop around the point and see where it has to deposit emission
+       * 'm' is counting the ring from the center
+       *  m=0 center point, m=1 the 8 point ring around it, etc.etc.
+       *  it loops until all points in a ring have not contributed anymore
        */
-      for (m=0; m<mmax; m++) {        /* loop over smoothing area */
-	done = TRUE;
-	for (iy1=-m; iy1<=m; iy1++)
-	  for (ix1=-m; ix1<=m; ix1++) {       /* current smoothing edge */
+      for (m=0; m<mmax; m++) {        /* loop over smoothing area in m-rings */
+	done = TRUE;                          /* claim no more rings needed */
+	for (iy1=-m; iy1<=m; iy1++)           /* unless in this ring */
+	  for (ix1=-m; ix1<=m; ix1++) {       /* it is proven else */
 	    ix = ix0 + ix1;
 	    iy = iy0 + iy1;
 	    if (ix<0 || iy<0 || ix >= Nx(iptr) || iy >= Ny(iptr))
@@ -485,24 +486,24 @@ bin_data(int ivar)
 	    else 
 	      e = 0.0;
 	    
-	    if (e < emax) {
+	    if (e < emax) {                    /* here is one contributing */
 	      if (smode == SMODE_GAUSS)
 		sfac = exp(-e);
 	      else if (smode == SMODE_CONE)
 		sfac = 1-sqrt(e);
-	      done = FALSE;
+	      done = FALSE;                    /* set the loop to still continue */
 	    } else
 	      sfac = 0.0;
+
+	    if (sfac == 0.0) continue;
 	    
-	    brightness =   sfac * flux;	/* normalize */
-	    if (brightness == 0.0) continue;
-	    
+	    brightness =   sfac * flux;     /* normalize */
 	    CV(iptr) +=   brightness;       /* mean */
 	    if(iptr0) CV(iptr0) += sfac;    /* for svar smoothing */
 
 	  } /* for (iy1/ix1) */
-	if (done) break;
-      } /* m */
+	if (done) break;                    /* if there were no contributing pixels */
+      } /* m */                             /* in this m-ring, quit */
     }
   }  /*-- end particles loop --*/
 }
