@@ -201,7 +201,7 @@ but the weighted average computes the two maps seperately and uses
 \fIccdmath(1NEMO)\fP to divide them to get the desired result:
 .nf
     snapgrid ... out=map1 evar='m*aux' 
-    snapgrid ... out=map2 evar='aux' fluxcal:b6iQS78Ufluxcal:b6iQS78UVi/bo:cvsVi/bo:cvs
+    snapgrid ... out=map2 evar='aux' 
     ccdmath in=map1,map2 out=map3 fie="ifeq(%2,0,0,%1/%2)"
 .fi
 with an additional safeguard to set cells to 0 if no emission with
