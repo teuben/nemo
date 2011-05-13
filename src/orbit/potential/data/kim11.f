@@ -1,0 +1,679 @@
+C
+C   History:
+C
+C   Taken from Lia:
+C       Date: Thu, 21 Oct 1993 08:22:15 EDT
+C       From: lia@OBMARA.CNRS-MRS.FR
+C       Subject: RE: Bar Potentials
+C
+C   21-oct-93   Put into potential(5NEMO) format                PJT
+C		Special case for (0,0,0) -- doesn't work because of LOG()
+C    4-mar-94   Adding the K=2 bar, renaming to piner94.f       PJT
+C               (renamed FORBA to FORBA1 - added FORBA2)
+C               The potentials of the bars have been messed up a bit
+C               to correct for bars being along the Y axis in some
+C               simulations. Better was to have this handled in
+C               the caller routines (e.g. potential)
+c   20-jun-01   geez, SGI doesn't like ctrl-L in the file....       pjt
+c   13-may-11   add MBH for the Kim et al. 2011 paper               pjt
+c               Also note cmhog2::piner94.src had many other changes
+c               for grid potentials and deal with the balongy/signerr
+c               bugs
+C
+C   ToDO:
+C	code DACSH()
+C=======================================================================
+      SUBROUTINE inipotential(npar, par, name)
+C
+      IMPLICIT NONE
+      INTEGER npar
+      REAL*8 par(*)
+      CHARACTER name*(*)
+C-----------------------------------------------------------------------
+C INITIALIZE THE POTENTIAL AND FORCE CALCULATIONS (after Lia's INPOT)
+C
+      COMMON/ AREAD/FCMASS,AXIRAT,QUAD,CENDEN,RADLAG,INDEX
+      REAL*8 FCMASS, AXIRAT, QUAD, CENDEN, RADLAG
+      INTEGER INDEX
+C 
+      COMMON/AXISY/C1BUL,CONST, CORAD,VT2,VTDR2, RTI2, MBH, RBH
+      REAL*8 C1BUL, CONST, CORAD, VT2, VTDR2, RTI2, MBH, RBH
+C
+      COMMON /COM1/ OMEGS, A2, B2, C2, E, NEQ
+      INTEGER NEQ
+      REAL*8 OMEGS, A2, B2, C2, E
+C
+      COMMON /COM2/ H, EPS, IOUT, IORB, ISIGN, ICHOOSE
+      INTEGER IOUT, IORB, ISIGN, ICHOOSE
+      REAL*8 H, EPS
+C
+      COMMON/PROLA/ELIPM,A,B,C,AAIN,CCIN,AAI,CCO,ACONST
+      REAL*8 ELIPM, A, B, C, ACONST, CCO, CCIN, AAI, AAIN
+C
+      COMMON/PROLA2/COEFF,COEFP,EP,EP2,SHO,CHO,THO,PSIO,CSHO,CTHO
+      REAL*8 COEFF, COEFP, EP, EP2, SHO, CHO, THO, PSIO, CSHO, CTHO
+C
+      INTEGER NITER
+      REAL*8 FUN1, ASINH, Z, DACSH
+      REAL*8 RTMAX, VTMAX
+      REAL*8 AAXIS, BAXIS, BAXIS2, QUADM, BARMAS, BARDEN, BULMAS, BULDEN
+      REAL*8 CENMAS
+      REAL*8 RQ, FMAS, AMAS, DMAS, DDMAS, QQ, AT, AX, AY, AZ
+      REAL*8 PIGROC
+C
+      REAL*8 PI, FOURPI, GRAVC
+      PARAMETER ( PI = 3.141592654, FOURPI = 4. * PI, GRAVC = 4.29569)
+C
+      FUN1 (Z) = SQRT( Z * Z + 1.)
+      ASINH (Z) = LOG( Z + SQRT( 1.0 + Z * Z))
+c
+c set constants from the initpotential par-list
+c   1 = pattern speed (returned)
+c   2 = ignored in this routine  (should be 1 though)
+c   3 = index (0,1,2)
+c   4 = radlag
+c
+c      COMMON/ AREAD/FCMASS,AXIRAT,QUAD,CENDEN,RADLAG, INDEX
+c      REAL*8 FCMASS, AXIRAT, QUAD, CENDEN, RADLAG
+c      INTEGER INDEX
+
+c first, set defaults:  (note black hole has softening of 1pc)
+      index = 1
+      axirat = 2.5
+      radlag = 6.0
+      quad = 45000.0
+      cenden = 24000.0
+      mbh = 0.0
+      rbh = 0.001
+
+c override the first npar:
+c Note: input values for omega (par(1)) and amode (par(2)) 
+c       not used in this version)
+      IF (npar.GE.3) index = par(3)
+      IF (npar.GE.4) axirat = par(4)
+      IF (npar.GE.5) radlag = par(5)
+      IF (npar.GE.6) quad = par(6)
+      IF (npar.GE.7) cenden = par(7)
+      IF (npar.GE.8) mbh = par(8)
+      IF (npar.GE.9) rbh = par(9)
+C
+C
+C  GRAVC IN UNITS OF km/s, kpc and 1e6MSUN
+C  not 'KPC**3 GYR**-2 1.E6MSUN**-1' as was quoted in earlier versions
+C
+C  This is the normalization of the model (at 20 kpc Vmx = 164.204 km/s)
+C
+      RTMAX = 20.
+      RTI2 = 1. / (RTMAX * RTMAX)
+      VTMAX = 164.204
+      VT2 = VTMAX * VTMAX
+      VTDR2= VT2 * RTI2
+C
+      MBH = MBH * GRAVC
+C
+      FCMASS = 1.0
+      AAXIS = 5.0
+      CENMAS = 4.87333E4
+      CENMAS = CENMAS * FCMASS
+      BAXIS = AAXIS / AXIRAT
+      BAXIS2 = BAXIS ** 2
+      IF( INDEX .EQ. 0) QUADM = CENMAS * (AAXIS ** 2 - BAXIS2) / 5.0
+      IF( INDEX .EQ. 1) QUADM = CENMAS * (AAXIS ** 2 - BAXIS2) / 7.0
+      IF( INDEX .EQ. 2) QUADM = CENMAS * (AAXIS ** 2 - BAXIS2) / 9.0
+      QUAD = MIN(QUAD, QUADM)
+      BARMAS = CENMAS * QUAD / QUADM
+      IF(INDEX .EQ. 0) BARDEN = BARMAS * 0.2387324    / (AAXIS * BAXIS2)
+      IF(INDEX .EQ. 1) BARDEN = BARMAS * 0.5968310366 / (AAXIS * BAXIS2)
+      IF(INDEX .EQ. 2) BARDEN = BARMAS * 1.044454314  / (AAXIS * BAXIS2)
+      BULMAS = CENMAS - BARMAS
+      BULDEN = 3.0E-3 * BULMAS / FOURPI
+      CENDEN = MAX(CENDEN, BARDEN + BULDEN)
+      BULDEN = CENDEN - BARDEN
+      CORAD = 1.0
+      BULMAS = CENMAS - BARMAS
+      NITER = 0
+   10 RQ = 10.0 / CORAD
+      AMAS = FOURPI * BULDEN * CORAD * CORAD * CORAD *
+     1       (ASINH(RQ) - RQ / FUN1(RQ))
+      DMAS = BULMAS - AMAS
+      FMAS = DMAS / BULMAS
+      IF (ABS(FMAS) .LE. 1.0E-6) GO TO 11
+      IF (NITER .GE. 20) GO TO 13
+      NITER = NITER + 1
+      DDMAS = FOURPI * BULDEN * CORAD * CORAD * (3.0 * ASINH(RQ) -
+     1        RQ * (3.0 + 4.0 * RQ * RQ) / (FUN1(RQ) ** 3))
+      CORAD = MAX(0.01 * CORAD, CORAD + DMAS / DDMAS)
+      GO TO 10
+   11 CONTINUE
+      C1BUL = GRAVC * BULDEN * FOURPI * CORAD * CORAD
+      CONST=12.56637061*GRAVC*CORAD*CORAD*CORAD*BULDEN
+C
+C     BAR
+C
+      A=AAXIS
+      B=BAXIS
+      AAIN = A * A
+      AAI = 1. / AAIN
+      C = BAXIS
+      CCIN = C * C
+      CCO = 1. / CCIN
+      ELIPM = BARMAS
+      ACONST = ELIPM * 4.027209375 / (A * C * C)
+C
+      IF( INDEX .EQ. 0) THEN
+         PIGROC = PI * GRAVC * BARDEN
+         EP = DSQRT( AAXIS**2 - BAXIS2)
+         EP2 = EP * EP
+c oops, need to define DACSH here for INDEX=0 case
+cpjt         PSIO = DACSH( AAXIS / BAXIS)
+c
+c	STOP
+c
+         SHO = DSINH (PSIO) 
+         CHO = AAXIS / BAXIS
+         THO = SHO / CHO 
+         CSHO = SHO ** 2 / EP ** 2
+         CTHO = THO ** 2 / EP ** 2
+         COEFF = 2. * PIGROC / (THO * SHO * SHO)
+         COEFP = PIGROC *BAXIS2 / THO
+      END IF
+C
+C
+C     CALCULATE PATTERN SPEED
+C
+      RQ = RADLAG / CORAD
+      AMAS = FOURPI * BULDEN * CORAD * CORAD * CORAD *
+     1       (ASINH(RQ) - RQ / FUN1(RQ))
+      QQ = GRAVC * AMAS / RADLAG
+C  BAR NOW LIES ON THE Y AXIS. SO INVERT X AND Y TO HAVE THE SAME LAGRAN
+C  POINT AS IN THE HYDRO CODE
+      IF( INDEX .EQ. 0) CALL FORBA0( 0.D0, RADLAG, 0.D0,AY,AX,AZ)
+      IF( INDEX .EQ. 1) CALL FORBA1( 0.D0, RADLAG, 0.D0,AY,AX,AZ)
+      IF( INDEX .EQ. 2) CALL FORBA2( 0.D0, RADLAG, 0.D0,AY,AX,AZ)
+      QQ = QQ - AX * RADLAG
+      AT = RADLAG * VT2 *
+     1     (3. / (1. + 2. * RADLAG * RADLAG * RTI2)) ** 1.5
+      AT = AT * RTI2
+      QQ = (QQ + AT * RADLAG) / (RADLAG * RADLAG)
+      OMEGS = SQRT(QQ)
+      par(1) = omegs
+      RETURN
+ 13   CONTINUE
+c+debug
+c13    PRINT 613, CORAD,FMAS,NITER
+c613   FORMAT(' NO CONVERGENCE FOR CORE RADIUS; RADIUS=',1PE12.5,
+c     &       ' FRACTION MASS DIFFERENCE =',E12.5,' NITER =',I5)
+c      STOP
+c-debug
+      END
+C-----------------------------------------------------------------------      
+      SUBROUTINE potential(ndim, pos, acc, pot, time)
+      INTEGER ndim
+      REAL*8 pos(*), acc(*), pot, time
+   
+      acc(1) = 0.0
+      acc(2) = 0.0
+      acc(3) = 0.0
+      pot = 0.0
+c			note exchanged X and Y, since their bar
+c			is along the Y axis, ours along the X
+      CALL FISOB(pos(2), pos(1), pos(3), acc(2), acc(1), acc(3))
+      CALL PISOB(pos(2), pos(1), pos(3), pot)
+      END
+C-----------------------------------------------------------------------
+      SUBROUTINE FISOB( X, Y, Z, FX, FY, FZ)
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C     CALCUL DES FORCES DANS LE POTENTIEL (PISOB)
+C     ROUTINE APPELLEE PAR DISOB (DERIVEES POUR RK78)
+C
+      IMPLICIT NONE
+      REAL*8 X, Y, Z, FX, FY, FZ
+C
+      COMMON/ AREAD/FCMASS,AXIRAT,QUAD,CENDEN,RADLAG, INDEX
+      REAL*8 FCMASS, AXIRAT, QUAD, CENDEN, RADLAG
+      INTEGER INDEX
+C 
+      REAL*8 FAX, FAY, FAZ, FBX, FBY, FBZ
+      CALL FORAX( X, Y, Z, FAX, FAY, FAZ) 
+      IF( QUAD .GT. 1.E-9) THEN
+         IF( INDEX .EQ. 0) CALL FORBA0( X, Y, Z, FBX, FBY, FBZ) 
+         IF( INDEX .EQ. 1) CALL FORBA1( X, Y, Z, FBX, FBY, FBZ) 
+         IF( INDEX .EQ. 2) CALL FORBA2( X, Y, Z, FBX, FBY, FBZ) 
+         FX = FAX + FBX
+         FY = FAY + FBY
+         FZ = 0.
+      ELSE
+         FX = FAX
+         FY = FAY
+         FZ = 0.
+      END IF
+C 
+      RETURN
+      END
+C-----------------------------------------------------------------------
+      SUBROUTINE FORAX( X, Y, Z, FX, FY, FZ)
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C FORCES DUES A UN POTENTIEL AXISYMETRIQUE
+C
+      IMPLICIT NONE
+      REAL*8 X, Y, Z, FX, FY, FZ
+C
+      COMMON/AXISY/C1BUL,CONST,CORAD,VT2,VTDR2,RTI2,MBH,RBH
+      REAL*8 C1BUL, CONST, CORAD, VT2, VTDR2, RTI2,MBH,RBH
+C
+      REAL*8 FUN1, ASINH, ZZ
+      REAL*8 R2, R, RQ, QQ
+      FUN1 (ZZ) = SQRT( ZZ * ZZ + 1.)
+      ASINH (ZZ) = LOG( ZZ + FUN1 (ZZ))
+C
+      R2 = X * X + Y * Y
+      IF (R2.GT.0.0D0) THEN
+         R = SQRT (R2)
+         RQ = R / CORAD
+         QQ = CONST * (ASINH(RQ) - RQ / FUN1(RQ))/(R * R * R) +
+     1        VTDR2 * (3./ (1. + 2. * R * R * RTI2)) ** 1.5
+         IF (MBH.NE.0D0) THEN
+            QQ = QQ +
+     1           MBH / (R2 + RBH*RBH)**1.5
+         ENDIF
+         FX = - X * QQ
+         FY = - Y * QQ
+      ELSE
+         FX = 0.
+         FY = 0.
+      ENDIF
+      FZ = 0.
+      RETURN
+      END
+C-----------------------------------------------------------------------
+      SUBROUTINE FORBA1( XINPUT, YINPUT, Z, AXOUT, AYOUT, AZ)
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C FORCES FROM A FERRER'S BAR WITH INDEX = 1
+C     SUBROUTINE PROL6 (ELIPM,A,B,C,X,Y,Z,AX,AY,AZ,EPT)
+C      IMPLICIT real*8 (A-Z)
+      IMPLICIT NONE
+      REAL*8 XINPUT, YINPUT, Z, AXOUT, AYOUT, AZ
+C
+      COMMON/PROLA/ELIPM,A,B,C,AAIN,CCIN,AAI,CCO,ACONST
+      REAL*8 ELIPM, A, B, C, ACONST, CCO, CCIN, AAI, AAIN
+C
+      REAL*8 X, Y, AA, CC, XX, YY, RR, GI, SIDE, BK, CK
+      REAL*8 KAPPA, EM, EE, E, LNE, A3, A1, I, A33, A13, A11
+      REAL*8 X4, Y4, AX, AY
+C     CAREFUL : IN HYDRO PROGRAM THE BAR IS ALONG THE X AXIS
+C     IN THE ORBIT CALCULATIONS ALONG THE Y AXIS
+C
+      X = YINPUT
+      Y = XINPUT
+      AA = AAIN
+      CC = CCIN
+      XX = X*X
+      YY = Y*Y
+      RR = XX+YY
+      GI = 1.
+      SIDE = XX/AA + (YY)/CC - 1.
+      IF (SIDE .LE. 0.) GO TO 10
+         BK = RR-AA-CC
+         CK = AA*CC*SIDE
+         KAPPA = (BK+SQRT(BK*BK+4.*CK))/2.
+         AA = AA + KAPPA
+         CC = CC + KAPPA
+         GI = A*C*C/SQRT(AA)/CC
+   10 EM = CC/AA
+      EE = 1. - EM
+      E = SQRT(EE)
+      LNE = LOG((1.+E)/(1.-E))
+C
+C     CALCULATE INDEX SYMBOLS IN EASIEST WAY
+C
+      A3 = GI*(1.-EM*LNE/(E + E))/EE
+      A1 = 2.*(GI - A3)
+      I = AA*A1 + 2.*CC*A3
+ 
+      A33 = GI*(4.*EE/EM - 6. + 3.*EM*LNE/E)/(8.*AA*EE*EE)
+      A13 = 2.*(GI/CC - 2.*A33)
+      A11 = 2.*(GI/AA - A13)/3.
+ 
+      X4 = A11*XX + A13*(YY)
+      Y4 = A13*XX + A33*(YY)
+C     Z4 = Y4
+ 
+C     EPT = I - 2.*(A1*XX + A3*(YY)) +(XX*X4+YY*Y4)
+ 
+      AX = 4. * X * (X4 - A1)
+ 
+      AY = 4. * Y * (Y4 - A3)
+ 
+      ACONST = ELIPM*4.027209375/(A*C*C)
+C     EPT = -EPT * ACONST
+      AX = AX * ACONST
+      AY = AY * ACONST
+      AZ = 0.
+      AXOUT=AY
+      AYOUT=AX
+      RETURN
+      END
+C-------------------------------------------------------------------------------
+      SUBROUTINE FORBA0( X, Y, Z, FX, FY, FZ)
+C-------------------------------------------------------------------------------
+C-------------------------------------------------------------------------------
+      IMPLICIT NONE
+      REAL*8 X, Y, Z, FX, FY, FZ
+C
+      COMMON/PROLA2/COEFF,COEFP,EP,EP2,SHO,CHO,THO,PSIO,CSHO,CTHO
+      REAL*8 COEFF, COEFP, EP, EP2, SHO, CHO, THO, PSIO, CSHO, CTHO
+C
+      REAL*8 R2, Y2, XM, PSI, SH, CH, TH, AA, W10, W11, W20
+      R2 = X * X
+      Y2 = Y * Y
+      XM = SQRT( R2 * CSHO + Y2 * CTHO)
+      IF( XM .LE. 1.) THEN
+         PSI = PSIO
+         SH = SHO
+         CH = CHO
+         TH = THO
+      ELSE
+         AA = Y2 + R2 - EP2 
+         IF( R2 * EP2 .LE. 1.D-10 * AA) THEN
+            SH = EP / SQRT( Y2 - EP2)
+         ELSE
+            SH = SQRT(( SQRT( AA * AA + 4. * R2 * EP2) - AA) / (R2+R2))
+         END IF
+         PSI = LOG( SH + SQRT( SH ** 2 + 1.)) 
+         CH = DCOSH (PSI) 
+         TH = SH / CH
+      END IF
+      W10 = PSI + PSI 
+      W20 = .5 * W10 - CH * SH
+      W11 = TH + TH - W10 
+      FX = COEFF * X * W20
+      FY = COEFF * Y * W11
+      FZ = 0.
+      RETURN
+      END 
+C-----------------------------------------------------------------------
+      SUBROUTINE PISOB( X, Y, Z, PHI)
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C     POTENTIEL AXISYMETRIQUE + BARRE PROLATE
+      IMPLICIT NONE
+      REAL*8 X, Y, Z, PHI
+C
+      COMMON/ AREAD/FCMASS,AXIRAT,QUAD,CENDEN,RADLAG, INDEX
+      REAL*8 FCMASS, AXIRAT, QUAD, CENDEN, RADLAG
+      INTEGER INDEX
+C
+      REAL*8 PAX, PBA
+C
+      CALL POTAX( X, Y, Z, PAX) 
+      IF ( INDEX .EQ. 0) CALL POTBA0 ( X, Y, Z, PBA)
+      IF ( INDEX .EQ. 1) CALL POTBA1 ( X, Y, Z, PBA)
+      IF ( INDEX .EQ. 2) CALL POTBA2 ( X, Y, Z, PBA)
+      PHI = PAX + PBA 
+      RETURN
+      END
+C-----------------------------------------------------------------------
+      SUBROUTINE POTAX( X, Y, Z, POT)
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C POTENTIEL AXISYMETRIQUE DU BULBE ET DU DISQUE
+      IMPLICIT NONE
+      REAL*8 X, Y, Z, POT
+C
+      COMMON/AXISY/C1BUL,CONST,CORAD,VT2,VTDR2,RTI2,MBH, RBH
+      REAL*8 C1BUL, CONST, CORAD, VT2, VTDR2, RTI2,MBH, RBH
+C
+      REAL*8 R2, R, RREL, RREL2, POTBU, POTDI, POTBH
+      R2 = X * X + Y * Y
+      R = SQRT (R2)
+C     BULGE
+      RREL = R / CORAD
+      RREL2 = RREL * RREL
+      POTBU = - C1BUL * LOG( RREL + SQRT( RREL2 + 1.)) / RREL
+C     DISK
+      POTDI = - 1.5 * VT2 * SQRT( 1.5 / ( 0.5 + R2 * RTI2))
+C     BLACK HOLE
+      IF (MBH.EQ.0D0) THEN
+         POTBH = 0D0 
+      ELSE
+         POTBH = -MBH / SQRT(R2+RBH*RBH)
+      ENDIF
+C     TOTAL
+      POT = POTBU + POTDI + POTBH
+      RETURN
+      END
+C-----------------------------------------------------------------------
+      SUBROUTINE POTBA1( XINPUT, YINPUT, Z, EPT)
+C-----------------------------------------------------------------------
+C-----------------------------------------------------------------------
+C POTENTIAL OF A FERRERS BAR WITH INDEX 1
+C     SUBROUTINE PROL6 (ELIPM,A,B,C,X,Y,Z,AX,AY,AZ,EPT)
+C      IMPLICIT real*8 (A-Z)
+      IMPLICIT NONE
+      real*8 XINPUT, YINPUT, Z, EPT
+C
+      COMMON/PROLA/ELIPM,A,B,C,AAIN,CCIN,AAI,CCO,ACONST
+      REAL*8 ELIPM, A, B, C, ACONST, CCO, CCIN, AAI, AAIN
+C
+      REAL*8 X, Y, AA, CC, XX, YY, RR, GI, SIDE, BK, CK
+      REAL*8 KAPPA, EM, EE, E, LNE, A3, A1, I, A33, A13, A11
+      REAL*8 X4, Y4
+C
+C     CAREFUL : IN HYDRO PROGRAM THE BAR IS ALONG THE X AXIS
+C     IN THE ORBIT CALCULATIONS ALONG THE Y
+C
+      X = YINPUT
+      Y = XINPUT
+      AA = AAIN
+      CC = CCIN
+      XX = X*X
+      YY = Y*Y
+      RR = XX+YY
+      GI = 1.
+      SIDE = XX/AA + (YY)/CC - 1.
+      IF (SIDE .LE. 0.) GO TO 10
+         BK = RR-AA-CC
+         CK = AA*CC*SIDE
+         KAPPA = (BK+SQRT(BK*BK+4.*CK))/2.
+         AA = AA + KAPPA
+         CC = CC + KAPPA
+         GI = A*C*C/SQRT(AA)/CC
+   10 EM = CC/AA
+      EE = 1. - EM
+      E = SQRT(EE)
+      LNE = LOG((1.+E)/(1.-E))
+C
+C     CALCULATE INDEX SYMBOLS IN EASIEST WAY
+C
+      A3 = GI*(1.-EM*LNE/(E + E))/EE
+      A1 = 2.*(GI - A3)
+      I = AA*A1 + 2.*CC*A3
+ 
+      A33 = GI*(4.*EE/EM - 6. + 3.*EM*LNE/E)/(8.*AA*EE*EE)
+      A13 = 2.*(GI/CC - 2.*A33)
+      A11 = 2.*(GI/AA - A13)/3.
+ 
+      X4 = A11*XX + A13*(YY)
+      Y4 = A13*XX + A33*(YY)
+ 
+      EPT = I - 2.*(A1*XX + A3*(YY)) +(XX*X4+YY*Y4)
+ 
+C     ACONST = ELIPM*4.027209375/(A*C*C)
+      EPT = -EPT * ACONST
+      RETURN
+      END
+C-------------------------------------------------------------------------------
+      SUBROUTINE POTBA0( X, Y, Z, POT) 
+C-------------------------------------------------------------------------------
+C-------------------------------------------------------------------------------
+C     POTENTIEL D'UN SPHEROIDE HOMOGENE PROLAT 
+C     PARAMETRES
+C     A : PETIT AXE 
+C     C : GRAND AXE 
+C     EP : EXCENTRICITE   EP = SQRT(C * C - A * A)
+C     SHO = SINH(PSIO) .........
+      IMPLICIT NONE
+      REAL*8 X, Y, Z, POT
+C
+      COMMON/PROLA2/COEFF,COEFP,EP,EP2,SHO,CHO,THO,PSIO,CSHO,CTHO
+      REAL*8 COEFF, COEFP, EP, EP2, SHO, CHO, THO, PSIO, CSHO, CTHO
+C
+      REAL*8 R2, Y2, XM, PSI, SH, CH, TH, AA, W10, W11, W20
+      R2 = X * X
+      Y2 = Y * Y
+      XM = SQRT( R2 * CSHO + Y2 * CTHO)
+      IF( XM .LE. 1.) THEN
+         PSI = PSIO
+         SH = SHO
+         CH = CHO
+         TH = THO
+      ELSE
+         AA = Y2 + R2 - EP2 
+         IF( R2 * EP2 .LE. 1.D-30*AA) THEN
+            SH = EP / SQRT( Y2 - EP2)
+         ELSE
+            SH = SQRT(( SQRT( AA * AA + 4. * R2 * EP2) - AA) / (R2+R2))
+         END IF
+         PSI = LOG( SH + SQRT( SH ** 2 + 1.)) 
+         CH = DCOSH (PSI) 
+         TH = SH / CH
+      END IF
+      W10 = PSI + PSI 
+      W20 = .5 * W10 - CH * SH
+      W11 = TH + TH - W10 
+      POT= ((W20 * R2 + W11 * Y2) / EP2 + W10) * COEFP
+      POT = - POT
+      RETURN
+      END 
+c-----------------------------------------------------------------------
+      SUBROUTINE forba2 (xin,yin,z,axout,ayout,az)
+      IMPLICIT DOUBLE PRECISION (a-z)
+
+      COMMON/PROLA/ELIPM,A,B,C,pad1,pad2,pad3,pad4,pad5
+      REAL*8 ELIPM, A, B, C,pad1,pad2,pad3,pad4,pad5
+
+	x=yin
+	y=xin
+      aa=a*a
+      cc=c*c
+      xx=x*x
+      yy=y*y
+      zz=z*z
+      rr=xx+yy+zz
+      side=xx/aa+(yy+zz)/cc - 1.0
+      gi=1.0
+      IF (side.LE.0.0) GOTO 100
+           kappa=(rr-aa-cc+DSQRT((rr-aa-cc)**2+4*aa*cc*side))*0.5
+           aa=aa+kappa
+           cc=cc+kappa
+           gi=a*c*c/(DSQRT(aa)*cc)
+ 100  CONTINUE
+      em=cc/aa
+      ee=1.0-em
+      E=dsqrt(ee)
+      lne=DLOG((1.0+e)/(1.0-e))
+C                              calculate index symbols
+      a3=gi*(1.0-em*lne/e*0.5)/ee
+      a1=2.0*(gi-a3)
+      i=aa*a1+2.0*cc*a3
+
+      a33=gi*(4*ee/em-6+3*em*lne/e)/(8*aa*ee**2)
+      a13=2.0*(gi/cc-2.0*a33)
+      a11=2.0*(gi/aa-a13)/3.0
+
+      a333=gi*(30-20*ee/em+16*ee**2/em**2-15*em*lne/e)
+      a333=a333/(ee**3*aa**2*48)
+      a133=2.0*(gi/cc**2-3.0*a333)
+      a113=2.0*(gi/(aa*cc)-2.0*a133)/3.0
+      a111=2.0*(gi/aa**2-a113)*0.2
+
+      x6=a111*xx+3.0*a113*(yy+zz)
+      y6=3.0*a133*xx+a333*(yy+3.0*zz)
+      z6=3.0*a133*xx+a333*(3.0*yy+zz)
+
+      x4=a11*xx+a13*(yy+zz)
+      y4=a13*xx+a33*(yy+zz)
+      z4=y4
+
+      ax=-6.0*x*a1+12.0*x*x4-2.0*x*(2.0*xx*x6+6.0*a133*yy*zz)
+      ax=ax-2.0*x*(xx**2*a111+3.0*yy**2*a133+3.0*zz**2*a133)
+
+      ay=-6.0*y*a3+12.0*y*y4-2.0*y*(2.0*yy*y6+6.0*a133*xx*zz)
+      ay=ay-2.0*y*(3.0*xx**2*a113+yy**2*a333+3.0*zz**2*a333)
+
+      az=-6.0*z*a3+12.0*z*z4-2.0*z*(2.0*zz*z6+6.0*a133*xx*yy)
+      az=az-2.0*z*(3.0*xx**2*a113+3.0*yy**2*a333+zz**2*a333)
+
+      aconst=elipm*35/(32*0.23259*a*c*c)
+
+c flip them forces too !!!!
+
+      axout=ay*aconst
+      ayout=ax*aconst
+      az=az*aconst
+
+      END
+
+
+      SUBROUTINE potba2(xin,yin,z,ept)
+      IMPLICIT DOUBLE PRECISION (a-z)
+
+      COMMON/PROLA/ELIPM,A,B,C,pad1,pad2,pad3,pad4,pad5
+      REAL*8 ELIPM, A, B, C, pad1,pad2,pad3,pad4,pad5
+
+	x = yin
+	y = xin
+      aa=a*a
+      cc=c*c
+      xx=x*x
+      yy=y*y
+      zz=z*z
+      rr=xx+yy+zz
+      side=xx/aa+(yy+zz)/cc - 1.0
+      gi=1.0
+      IF (side.LE.0.0) GOTO 100
+           kappa=(rr-aa-cc+DSQRT((rr-aa-cc)**2+4*aa*cc*side))*0.5
+           aa=aa+kappa
+           cc=cc+kappa
+           gi=a*c*c/(DSQRT(aa)*cc)
+ 100  CONTINUE
+      em=cc/aa
+      ee=1.0-em
+      E=dsqrt(ee)
+      lne=DLOG((1.0+e)/(1.0-e))
+C                               calculate index symbols
+      a3=gi*(1.0-em*lne/e*0.5)/ee
+      a1=2.0*(gi-a3)
+      i=aa*a1+2.0*cc*a3
+
+      a33=gi*(4*ee/em-6+3*em*lne/e)/(8*aa*ee**2)
+      a13=2.0*(gi/cc-2.0*a33)
+      a11=2.0*(gi/aa-a13)/3.0
+
+      a333=gi*(30-20*ee/em+16*ee**2/em**2-15*em*lne/e)
+      a333=a333/(ee**3*aa**2*48)
+      a133=2.0*(gi/cc**2-3.0*a333)
+      a113=2.0*(gi/(aa*cc)-2.0*a133)/3.0
+      a111=2.0*(gi/aa**2-a113)*0.2
+
+      x6=a111*xx+3.0*a113*(yy+zz)
+      y6=3.0*a133*xx+a333*(yy+3.0*zz)
+      z6=3.0*a133*xx+a333*(3.0*yy+zz)
+
+      x4=a11*xx+a13*(yy+zz)
+      y4=a13*xx+a33*(yy+zz)
+      z4=y4
+
+      ept = i - 3.0*(a1*xx+a3*(yy+zz)) + 3.0*(xx*x4+yy*y4+zz*z4)
+     *         - (x6*xx**2+y6*yy**2+z6*zz**2+6.0*a133*xx*yy*zz)
+
+      aconst=elipm*35/(32*0.23259*a*c*c)
+      ept=-ept*aconst
+
+      END
+
+
+
