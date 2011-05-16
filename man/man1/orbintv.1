@@ -1,0 +1,111 @@
+.TH ORBINTV 1NEMO "10 February 2004"
+.SH NAME
+orbintv \- integrating single stellar orbit with variable timestep
+.SH SYNOPSIS
+.PP
+\fBorbintv in=\fPorbit \fBout=\fPorbit [parameter=value]
+.SH DESCRIPTION
+\fBorbintv\fP will integrate a stellar orbit using a higher order
+variable timestep. A number of constant timestepping algorithms are implemented
+in \fIorbint(1NEMO)\fP.
+.PP
+Non-rotating potentials are also supported, but only with the
+rotation axis defined along the Z-axis.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 20
+\fBin=\fIin-file\fP
+input file, in \fIorbit(5NEMO)\fP format [no default]
+.TP
+\fBout=\fIout-file\fP
+output file, will be in \fIorbit(5NEMO)\fP format [no default]
+.TP
+\fBdtout=\fP
+Output timestep.
+.TP
+\fBtstop=\fP
+Stop time [default: \fB10\fP].
+.TP
+\fBdt=\fItime-step\fP
+initial guess for the time step to be taken.
+[default: \fB0.01\fP].
+.TP
+\fBndiag=\fInumber\fP
+number of timesteps when diagnostics are checked and output
+to \fIstdout\fP.
+[default: \fB10\fP].
+.TP
+\fBnsave=\fInumber\fP
+number of timesteps when data must be save to output orbit-file.
+Note that the program must have run to completion before the
+actual saved data are saved to the specified output file.
+[default: \fB1\fP].
+.TP
+\fBpotname=\fIname\fP
+name of file of \fIpotential(5NEMO)\fP descriptor. If no name
+given, the potential name of the input orbit is used.
+[default: none].
+.TP
+\fBpotpars=\fIpar-list\fP
+List of parameters to the potential descriptor. The first
+parameter MUST be the pattern speed in the x-y plane.
+The remaining parameters are used by the
+\fI_inipotential()\fP routine in the potential descriptor.
+[default: none - use default from input orbit].
+.TP
+\fBpotfile=\fIname\fP
+name of an optional datafile to the potential descriptor.
+This might be an N-body snapshot or list of spline fit
+coefficients etc. [default: none - use default from input
+orbit].
+.TP
+\fBmode=\fIint_mode\fP
+Specify the integration mode. Any one of \fBdopri5\fP,
+\fBdop853\fP
+[Default: \fBdopri5\fP].
+.TP
+\fBeta=\fP
+Relative error allowed in energy conservation. Integration is
+terminated if the relative error (|dE/E|) is too large. By default
+not used.
+.TP
+\fBvariable=t|f\fP
+Use variable timesteps? If so, the error control parameter
+\fBeta=\fP needs to be specified. Also note that not all integration
+methods support variable timesteps.
+Default: \fBf\fP.
+.SH EXAMPLES
+The following example launches a particle from the Y axis (at y=1)
+in the X direction (speed 0.4) in a plummer potential. Although
+the 6D initial conditions are fully specified, so a potential
+(potname=) is not needed, it is tagged along with the orbit, such
+that the orbint integrator will use it. The integrated orbit is
+then passed on to a simple plotting program, which plots an X-Y 
+view of this 2D orbit.
+.nf
+mkorbit - x=0 y=1 z=0 vx=0.4 vy=0 vz=0 potname=plummer |\\
+     orbintv - - tstop=10 dt=0.05 |\\
+     orbplot -
+Using pattern speed = 0
+pos: 0.000000 1.000000 0.000000  
+vel: 0.400000 0.000000 0.000000  
+etot: -0.627107
+lz=-0.400000
+Pattern speed=0
+.fi
+
+.SH "SEE ALSO"
+mkorbit(1NEMO), orblist(1NEMO), orbint(1NEMO), potential(5NEMO), newton0(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +2.5i
+src/orbit/misc  	orbintv.c
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+15-may-11	V1.0: created	PJT
+.fi
