@@ -9,9 +9,9 @@ MAN1FILES =
 MAN3FILES = 
 MAN5FILES = 
 INCFILES = 
-SRCFILES = 
-OBJFILES=  
-LOBJFILES= 
+SRCFILES = dopri5.c dop853.c 
+OBJFILES=  dopri5.o dop853.o
+LOBJFILES= $L(dopri5.o) $L(dop853.o)
 BINFILES = orbfour orbint orbplot otos perorb stoo orbsos orbstat orblist
 TESTFILES=  orbdim orblist
 
@@ -42,7 +42,7 @@ $(L):	$(LOBJFILES)
 	rm -f $?
 
 # install:   .install_inc .install_lib 
-install:
+install: .install_lib
 
 .install_lib: $(OBJFILES) 
 	ar ruv $(L) $?
