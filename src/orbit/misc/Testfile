@@ -36,6 +36,12 @@ orbint:
 	$(EXEC) orbint orb1.in orb3.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=leapfrog
 	$(EXEC) orbint orb1.in orb4.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=rk4     
 
+orbintv:
+	@echo Running $@
+	$(EXEC) orbintv orb1.in orb1v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dopri5
+	$(EXEC) orbintv orb1.in orb2v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dop853  
+
+
 orblist:
 	@echo Running $@
 	$(EXEC) orblist   orb1.out
