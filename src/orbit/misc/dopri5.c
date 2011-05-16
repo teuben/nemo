@@ -76,7 +76,7 @@ static double max_d (double a, double b)
 } /* max_d */
 
 
-static double hinit (unsigned n, FcnEqDiff fcn, double x, double* y,
+static double hinit (unsigned n, FcnEqDiff5 fcn, double x, double* y,
 	      double posneg, double* f0, double* f1, double* yy1, int iord,
 	      double hmax, double* atoler, double* rtoler, int itoler)
 {
@@ -152,9 +152,9 @@ static double hinit (unsigned n, FcnEqDiff fcn, double x, double* y,
 
 
 /* core integrator */
-static int dopcor (unsigned n, FcnEqDiff fcn, double x, double* y, double xend,
+static int dopcor (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend,
 		   double hmax, double h, double* rtoler, double* atoler,
-		   int itoler, FILE* fileout, SolTrait solout, int iout,
+		   int itoler, FILE* fileout, SolTrait5 solout, int iout,
 		   long nmax, double uround, int meth, long nstiff, double safe,
 		   double beta, double fac1, double fac2, unsigned* icont)
 {
@@ -434,8 +434,8 @@ static int dopcor (unsigned n, FcnEqDiff fcn, double x, double* y, double xend,
 
 /* front-end */
 int dopri5
- (unsigned n, FcnEqDiff fcn, double x, double* y, double xend, double* rtoler,
-  double* atoler, int itoler, SolTrait solout, int iout, FILE* fileout, double uround,
+ (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend, double* rtoler,
+  double* atoler, int itoler, SolTrait5 solout, int iout, FILE* fileout, double uround,
   double safe, double fac1, double fac2, double beta, double hmax, double h,
   long nmax, int meth, long nstiff, unsigned nrdens, unsigned* icont, unsigned licont)
 {
