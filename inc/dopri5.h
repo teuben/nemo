@@ -212,10 +212,10 @@ extern double contd5
   double x         /* approximation at x */
  );
 
-extern long nfcnRead (void);   /* encapsulation of statistical data */
-extern long nstepRead (void);
-extern long naccptRead (void);
-extern long nrejctRead (void);
-extern double hRead (void);
-extern double xRead (void);
+extern long nfcnRead5 (void);   /* encapsulation of statistical data */
+extern long nstepRead5 (void);
+extern long naccptRead5 (void);
+extern long nrejctRead5 (void);
+extern double hRead5 (void);
+extern double xRead5 (void);
 
