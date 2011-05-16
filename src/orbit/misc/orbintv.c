@@ -11,23 +11,28 @@
 #include <vectmath.h>
 #include <orbit.h>
 
+#if 1
 #include <dopri5.h>
+#else
+#include <dop853.h>
+#endif
 
 string defv[] = {
-    "in=???\n		  input filename (an orbit) ",
-    "out=???\n		  output filename (an orbit) ",
-    "dt=0.01\n            (initial) timestep",
-    "tstop=10\n           Stop time",
-    "ndiag=0\n		  frequency of diagnostics output (0=none)",
-    "nsave=1\n		  frequency of storing ",
-    "potname=\n	  	  potential name (default from orbit)",
-    "potpars=\n	          parameters of potential ",
-    "potfile=\n		  extra data-file for potential ",
-    "mode=dopri5\n        integration method (dopri5 dop853)",
-    "eta=\n               if used, stop if abs(de/e) > eta",
-    "variable=f\n         Use variable timesteps (needs eta=)",
-    "VERSION=1.0\n        15-may-11 PJT",
-    NULL,
+  "in=???\n		input filename (an orbit) ",
+  "out=???\n		output filename (an orbit) ",
+  "dtout=0.1\n          Output step time",
+  "tstop=10\n           Stop time",
+  "dt=0.01\n            (initial) timestep",
+  "ndiag=0\n		frequency of diagnostics output (0=none)",
+  "nsave=1\n		frequency of storing ",
+  "potname=\n	  	potential name (default from orbit)",
+  "potpars=\n	        parameters of potential ",
+  "potfile=\n		extra data-file for potential ",
+  "mode=dopri5\n        integration method (dopri5 dop853)",
+  "eta=\n               if used, stop if abs(de/e) > eta",
+  "variable=f\n         Use variable timesteps (needs eta=)",
+  "VERSION=1.0\n        15-may-11 PJT",
+  NULL,
 };
 
 string usage = "integrate stellar orbits";
@@ -46,7 +51,7 @@ orbitptr o_in  = NULL;			/* pointer to input orbit */
 orbitptr o_out = NULL;			/* pointer to output orbit */
 
 int    nsteps, ndiag, nsave;		/* how often */
-real   dt, dt2;				/* stepping */
+real   dt, dtout;			/* stepping */
 real   tstop;                           /* stop time */
 real   omega, omega2, tomega;  		/* pattern speed */
 real   tdum=0.0;                        /* time used in potential() */
@@ -70,6 +75,7 @@ void integrate_dopri5(),
 void nemo_main ()
 {
     int imode;
+    warning("New program, coding is unfinished");
 
     setparams();
 							       /* open files */
@@ -121,8 +127,11 @@ void setparams()
 
     nsteps = 1000;
     dt = getdparam("dt");
-    dt2 = 0.5*dt;
+    dtout = getdparam("dtout");
     tstop = getdparam("tstop");
+    nsteps = (int)(tstop/dtout + 1.001);
+    dprintf(0,"nsteps = %d\n",nsteps);
+
     ndiag=getiparam("ndiag");
     nsave=getiparam("nsave");
     Qvar = getbparam("variable");
@@ -171,14 +180,31 @@ void rhs(unsigned n, double x, double *y, double *f)
 void solout(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
 {
   static double xout;
+  static int isave;
 
   if (nr==1) {
     printf("%g   %g %g %g\n", x, y[0], y[1], y[2]);
-    xout = x + 0.1;
+    xout = x + dtout;
+    isave = 0;
+    Torb(o_out,isave) = x;
+    Xorb(o_out,isave) = y[0];
+    Yorb(o_out,isave) = y[1];
+    Zorb(o_out,isave) = y[2];
+    Uorb(o_out,isave) = y[3];
+    Vorb(o_out,isave) = y[4];
+    Worb(o_out,isave) = y[5];
   } else  {
     while (x >= xout) {
       printf("%g   %g %g %g\n", x, y[0], y[1], y[2]);
-      xout += 0.1;
+      xout += dtout;
+      isave += 1;
+      Torb(o_out,isave) = xout;
+      Xorb(o_out,isave) = y[0];
+      Yorb(o_out,isave) = y[1];
+      Zorb(o_out,isave) = y[2];
+      Uorb(o_out,isave) = y[3];
+      Vorb(o_out,isave) = y[4];
+      Worb(o_out,isave) = y[5];
     }
   }
 }
@@ -207,82 +233,22 @@ void integrate_dopri5()
   itoler = 0;
   rtoler = 1.0e-7;
   atoler = rtoler;
+#if 1
   res = dopri5(6, rhs, 0.0, y, tstop, &rtoler, &atoler, itoler, solout, iout,
 	       stdout, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 6, NULL, 
 	       3);
+#else
+  res = dop853(6, rhs, 0.0, y, tstop, &rtoler, &atoler, itoler, solout, iout,
+	       stdout, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 6, NULL, 
+	       3);
+#endif
 
 }
 
 
 void integrate_dop853()
 {
-    int i, ndim, kdiag, ksave, isave;
-    double time,epot,e_last;
-    double pos[3],vel[3],acc[3], xvel;
-
-    dprintf (0,"Modified EULER integration\n");
-    /* take last step of input file and set first step for outfile */
-    time = Torb(o_out,0) = Torb(o_in,Nsteps(o_in)-1);
-    pos[0] = Xorb(o_out,0) = Xorb(o_in,Nsteps(o_in)-1);
-    pos[1] = Yorb(o_out,0) = Yorb(o_in,Nsteps(o_in)-1);
-    pos[2] = Zorb(o_out,0) = Zorb(o_in,Nsteps(o_in)-1);
-    vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
-    vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
-    vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
-
-    ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
-    kdiag=0;			/* counter for diagnostics output */
-    ksave=0;
-    isave=0;
-    i=0;				/* counter of timesteps */
-    for(;;) {
-        if (Qstop) break;
-
-	/* first update the positions */
-
-	pos[0] += dt*vel[0];
-	pos[1] += dt*vel[1];
-	pos[2] += dt*vel[2];
-
-	/* get forces at new positions */
-
-	(*pot)(&ndim,pos,acc,&epot,&time);
-
-	time += dt;                     /* advance particle */
-	if (omega != 0) {
-	  acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
-	  acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
-	}
-
-	vel[0] += dt*acc[0];
-	vel[1] += dt*acc[1];
-	vel[2] += dt*acc[2];
-	i++;
-
-        if (i==0) I1(o_out) = print_diag(time,pos,vel,epot);
-	if (ndiag && kdiag++ == ndiag) {	/* see if output needed */
-	    e_last = print_diag(time,pos,vel,epot);
-	    kdiag=0;
-	}
-
-	if (++ksave == nsave) {		/* see if need to store particle */
-	    ksave=0;
-	    isave++;
-	    dprintf(2,"writing isave=%d for i=%d\n",isave,i);
-            if (isave>=Nsteps(o_out)) error("Storage error modified EULER");
-	    Torb(o_out,isave) = time;
-	    Xorb(o_out,isave) = pos[0];
-	    Yorb(o_out,isave) = pos[1];
-	    Zorb(o_out,isave) = pos[2];
-	    Uorb(o_out,isave) = vel[0];
-	    Vorb(o_out,isave) = vel[1];
-	    Worb(o_out,isave) = vel[2];
-	}
-	if (i>=nsteps) break;           /* see if need to quit looping */
-
-    } /* for(;;) */
-    if (ndiag)
-    dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
+  /* very similar to dopri5 */
 }
 
 
