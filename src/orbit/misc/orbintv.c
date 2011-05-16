@@ -11,27 +11,23 @@
 #include <vectmath.h>
 #include <orbit.h>
 
-#if 1
 #include <dopri5.h>
-#else
 #include <dop853.h>
-#endif
 
 string defv[] = {
   "in=???\n		input filename (an orbit) ",
   "out=???\n		output filename (an orbit) ",
   "dtout=0.1\n          Output step time",
   "tstop=10\n           Stop time",
-  "dt=0.01\n            (initial) timestep",
-  "ndiag=0\n		frequency of diagnostics output (0=none)",
-  "nsave=1\n		frequency of storing ",
+  "dt=0.01\n            (initial) timestep (not used)",
+  "ndiag=0\n		** frequency of diagnostics output (0=none)",
+  "nsave=1\n		** frequency of storing ",
   "potname=\n	  	potential name (default from orbit)",
   "potpars=\n	        parameters of potential ",
   "potfile=\n		extra data-file for potential ",
   "mode=dopri5\n        integration method (dopri5 dop853)",
-  "eta=\n               if used, stop if abs(de/e) > eta",
-  "variable=f\n         Use variable timesteps (needs eta=)",
-  "VERSION=1.0\n        15-may-11 PJT",
+  "tol=-7\n             tolerance of integration",
+  "VERSION=1.1\n        16-may-11 PJT",
   NULL,
 };
 
@@ -55,9 +51,7 @@ real   dt, dtout;			/* stepping */
 real   tstop;                           /* stop time */
 real   omega, omega2, tomega;  		/* pattern speed */
 real   tdum=0.0;                        /* time used in potential() */
-real   eta = -1.0;                      /* stop criterion parameter */
-bool   Qstop = FALSE;                   /* global flag to stop intgr. */
-bool   Qvar;
+real   eta ;                            /* tolerance */
 
 
 
@@ -75,7 +69,6 @@ void integrate_dopri5(),
 void nemo_main ()
 {
     int imode;
-    warning("New program, coding is unfinished");
 
     setparams();
 							       /* open files */
@@ -90,7 +83,7 @@ void nemo_main ()
     if (hasvalue("potpars")) PotPars(o_in) = getparam("potpars");
     if (hasvalue("potfile")) PotFile(o_in) = getparam("potfile");
 
-    if (allocate_orbit (&o_out,Ndim(o_in),nsteps/nsave+1)==0)
+    if (allocate_orbit (&o_out,Ndim(o_in),nsteps)==0)
 		error ("Error allocating output orbit");
     pot=get_potential(PotName(o_in), PotPars(o_in), PotFile(o_in));
     if (pot==NULL) 
@@ -134,12 +127,9 @@ void setparams()
 
     ndiag=getiparam("ndiag");
     nsave=getiparam("nsave");
-    Qvar = getbparam("variable");
-    if (hasvalue("eta")) 
-      eta = getdparam("eta");
-    else if (Qvar)
-      error("Variable timesteps choosen, it needs a control parameter eta=");
-    
+    eta = getdparam("tol");
+    if (eta < 0) 
+      eta = pow(10.0,eta);
 }
 
 void prepare()
@@ -147,7 +137,7 @@ void prepare()
     Masso(o_out) = Masso(o_in);
 }
 
-/* helper functions for the integrator helpers */
+/* helper functions for the integrator */
 
 void rhs(unsigned n, double x, double *y, double *f)
 {
@@ -176,35 +166,29 @@ void rhs(unsigned n, double x, double *y, double *f)
   f[5] = acc[2];
 
 }
-
-void solout(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
+
+void solout5(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
 {
   static double xout;
   static int isave;
 
   if (nr==1) {
-    printf("%g   %g %g %g\n", x, y[0], y[1], y[2]);
     xout = x + dtout;
     isave = 0;
     Torb(o_out,isave) = x;
-    Xorb(o_out,isave) = y[0];
-    Yorb(o_out,isave) = y[1];
-    Zorb(o_out,isave) = y[2];
-    Uorb(o_out,isave) = y[3];
-    Vorb(o_out,isave) = y[4];
-    Worb(o_out,isave) = y[5];
+    Xorb(o_out,isave) = y[0]; Yorb(o_out,isave) = y[1]; Zorb(o_out,isave) = y[2];
+    Uorb(o_out,isave) = y[3]; Vorb(o_out,isave) = y[4]; Worb(o_out,isave) = y[5];
   } else  {
     while (x >= xout) {
-      printf("%g   %g %g %g\n",xout, contd5(0,xout), contd5(1,xout), contd5(2,xout));
       xout += dtout;
       isave += 1;
       Torb(o_out,isave) = xout;
-      Xorb(o_out,isave) = y[0];
-      Yorb(o_out,isave) = y[1];
-      Zorb(o_out,isave) = y[2];
-      Uorb(o_out,isave) = y[3];
-      Vorb(o_out,isave) = y[4];
-      Worb(o_out,isave) = y[5];
+      Xorb(o_out,isave) = contd5(0,xout);
+      Yorb(o_out,isave) = contd5(1,xout);
+      Zorb(o_out,isave) = contd5(2,xout);
+      Uorb(o_out,isave) = contd5(3,xout);
+      Vorb(o_out,isave) = contd5(4,xout);
+      Worb(o_out,isave) = contd5(5,xout);
     }
   }
 }
@@ -214,41 +198,80 @@ void integrate_dopri5()
 {
   int i, ndim, kdiag, ksave, isave, res, iout, itoler;
   double time,epot,e_last, rtoler, atoler;
-  double pos[3],vel[3],acc[3], xvel;
   double y[6];
   
-  dprintf (1,"EULER integration\n");
+  dprintf (1,"DOPRI5 integration\n");
   /* take last step of input file and set first step for outfile */
   time = Torb(o_out,0) = Torb(o_in,Nsteps(o_in)-1);
-  y[0] = pos[0] = Xorb(o_out,0) = Xorb(o_in,Nsteps(o_in)-1);
-  y[1] = pos[1] = Yorb(o_out,0) = Yorb(o_in,Nsteps(o_in)-1);
-  y[2] = pos[2] = Zorb(o_out,0) = Zorb(o_in,Nsteps(o_in)-1);
-  y[3] = vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
-  y[4] = vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
-  y[5] = vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
+  y[0] = Xorb(o_out,0) = Xorb(o_in,Nsteps(o_in)-1);
+  y[1] = Xorb(o_out,0) = Yorb(o_in,Nsteps(o_in)-1);
+  y[2] = Zorb(o_out,0) = Zorb(o_in,Nsteps(o_in)-1);
+  y[3] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
+  y[4] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
+  y[5] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
   
   ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
   
   iout = 2;     /* controlling solout */
   itoler = 0;
-  rtoler = 1.0e-7;
+  rtoler = eta;
   atoler = rtoler;
-#if 1
-  res = dopri5(6, rhs, 0.0, y, tstop, &rtoler, &atoler, itoler, solout, iout,
+  res = dopri5(6, rhs, 0.0, y, tstop, &rtoler, &atoler, itoler, solout5, iout,
 	       stdout, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 6, NULL, 
 	       3);
-#else
-  res = dop853(6, rhs, 0.0, y, tstop, &rtoler, &atoler, itoler, solout, iout,
-	       stdout, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 6, NULL, 
-	       3);
-#endif
-
 }
+
+void solout8(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
+{
+  static double xout;
+  static int isave;
 
+  if (nr==1) {
+    xout = x + dtout;
+    isave = 0;
+    Torb(o_out,isave) = x;
+    Xorb(o_out,isave) = y[0]; Yorb(o_out,isave) = y[1];  Zorb(o_out,isave) = y[2];
+    Uorb(o_out,isave) = y[3]; Vorb(o_out,isave) = y[4];  Worb(o_out,isave) = y[5];
+  } else  {
+    while (x >= xout) {
+      xout += dtout;
+      isave += 1;
+      Torb(o_out,isave) = xout;
+      Xorb(o_out,isave) = contd8(0,xout);
+      Yorb(o_out,isave) = contd8(1,xout);
+      Zorb(o_out,isave) = contd8(2,xout);
+      Uorb(o_out,isave) = contd8(3,xout);
+      Vorb(o_out,isave) = contd8(4,xout);
+      Worb(o_out,isave) = contd8(5,xout);
+    }
+  }
+}
 
 void integrate_dop853()
 {
-  /* very similar to dopri5 */
+  int i, ndim, kdiag, ksave, isave, res, iout, itoler;
+  double time,epot,e_last, rtoler, atoler;
+  double y[6];
+  
+  dprintf (1,"DOP853 integration\n");
+  /* take last step of input file and set first step for outfile */
+  time = Torb(o_out,0) = Torb(o_in,Nsteps(o_in)-1);
+  y[0] = Xorb(o_out,0) = Xorb(o_in,Nsteps(o_in)-1);
+  y[1] = Xorb(o_out,0) = Yorb(o_in,Nsteps(o_in)-1);
+  y[2] = Zorb(o_out,0) = Zorb(o_in,Nsteps(o_in)-1);
+  y[3] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
+  y[4] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
+  y[5] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
+  
+  ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
+  
+  iout = 2;     /* controlling solout */
+  itoler = 0;
+  rtoler = eta;
+  atoler = rtoler;
+  res = dop853(6, rhs, 0.0, y, tstop, &rtoler, &atoler, itoler, solout8, iout,
+	       stdout, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0, 6, NULL, 
+	       3);
 }
 
 
@@ -275,10 +298,5 @@ real print_diag(double time, double *pos, double *vel, double epot)
     }
     err = (epot+ekin-etot_0)/etot_00;
     if (ndiag) dprintf(0,"%f %f %f %20.13g %g\n",time,ekin,epot,ekin+epot,err);
-    if (eta > 0 && ABS(err) > eta) {
-        warning("STOPPING: Time=%g E=%g E_0=%g Eta=%g",
-                    time,epot+ekin,etot_0,eta);
-        Qstop = TRUE;
-    }
     return ekin+epot;
 }
