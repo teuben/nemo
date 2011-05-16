@@ -174,20 +174,20 @@ nfcnRead    Number of function calls.
 #include <stdio.h>
 #include <limits.h>
 
-typedef void (*FcnEqDiff)(unsigned n, double x, double *y, double *f);
-typedef void (*SolTrait)(long nr, double xold, double x, double* y, unsigned n, int* irtrn);
+typedef void (*FcnEqDiff8)(unsigned n, double x, double *y, double *f);
+typedef void (*SolTrait8)(long nr, double xold, double x, double* y, unsigned n, int* irtrn);
 
 
 extern int dop853
  (unsigned n,      /* dimension of the system <= UINT_MAX-1*/
-  FcnEqDiff fcn,   /* function computing the value of f(x,y) */
+  FcnEqDiff8 fcn,  /* function computing the value of f(x,y) */
   double x,        /* initial x-value */
   double* y,       /* initial values for y */
   double xend,     /* final x-value (xend-x may be positive or negative) */
   double* rtoler,  /* relative error tolerance */
   double* atoler,  /* absolute error tolerance */
   int itoler,      /* switch for rtoler and atoler */
-  SolTrait solout, /* function providing the numerical solution during integration */
+  SolTrait8 solout,/* function providing the numerical solution during integration */
   int iout,        /* switch for calling solout */
   FILE* fileout,   /* messages stream */
   double uround,   /* rounding unit */
