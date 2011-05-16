@@ -195,7 +195,7 @@ void solout(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
     Worb(o_out,isave) = y[5];
   } else  {
     while (x >= xout) {
-      printf("%g   %g %g %g\n", x, y[0], y[1], y[2]);
+      printf("%g   %g %g %g\n",xout, contd5(0,xout), contd5(1,xout), contd5(2,xout));
       xout += dtout;
       isave += 1;
       Torb(o_out,isave) = xout;
@@ -229,7 +229,7 @@ void integrate_dopri5()
   
   ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
   
-  iout = 1;     /* controlling solout */
+  iout = 2;     /* controlling solout */
   itoler = 0;
   rtoler = 1.0e-7;
   atoler = rtoler;
