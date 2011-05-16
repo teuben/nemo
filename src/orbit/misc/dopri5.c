@@ -13,42 +13,42 @@ static double    *yy1, *k1, *k2, *k3, *k4, *k5, *k6, *ysti;
 static double    *rcont1, *rcont2, *rcont3, *rcont4, *rcont5;
 
 
-long nfcnRead (void)
+long nfcnRead5 (void)
 {
   return nfcn;
 
 } /* nfcnRead */
 
 
-long nstepRead (void)
+long nstepRead5 (void)
 {
   return nstep;
 
 } /* stepRead */
 
 
-long naccptRead (void)
+long naccptRead5 (void)
 {
   return naccpt;
 
 } /* naccptRead */
 
 
-long nrejctRead (void)
+long nrejctRead5 (void)
 {
   return nrejct;
 
 } /* nrejct */
 
 
-double hRead (void)
+double hRead5 (void)
 {
   return hout;
 
 } /* hRead */
 
 
-double xRead (void)
+double xRead5 (void)
 {
   return xout;
 

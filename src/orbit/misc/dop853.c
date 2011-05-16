@@ -14,14 +14,14 @@ static double    *rcont1, *rcont2, *rcont3, *rcont4;
 static double    *rcont5, *rcont6, *rcont7, *rcont8;
 
 
-long nfcnRead (void)
+long nfcnRead8 (void)
 {
   return nfcn;
 
 } /* nfcnRead */
 
 
-long nstepRead (void)
+long nstepRead8 (void)
 {
   return nstep;
 
@@ -35,21 +35,21 @@ long naccptRead (void)
 } /* naccptRead */
 
 
-long nrejctRead (void)
+long nrejctRead8 (void)
 {
   return nrejct;
 
 } /* nrejct */
 
 
-double hRead (void)
+double hRead8 (void)
 {
   return hout;
 
 } /* hRead */
 
 
-double xRead (void)
+double xRead8 (void)
 {
   return xout;
 
