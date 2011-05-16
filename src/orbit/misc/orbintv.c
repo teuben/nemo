@@ -21,7 +21,6 @@ string defv[] = {
   "tstop=10\n           Stop time",
   "dt=0.01\n            (initial) timestep (not used)",
   "ndiag=0\n		** frequency of diagnostics output (0=none)",
-  "nsave=1\n		** frequency of storing ",
   "potname=\n	  	potential name (default from orbit)",
   "potpars=\n	        parameters of potential ",
   "potfile=\n		extra data-file for potential ",
@@ -46,7 +45,7 @@ stream  instr, outstr;			/* file streams */
 orbitptr o_in  = NULL;			/* pointer to input orbit */
 orbitptr o_out = NULL;			/* pointer to output orbit */
 
-int    nsteps, ndiag, nsave;		/* how often */
+int    nsteps, ndiag;          		/* how often */
 real   dt, dtout;			/* stepping */
 real   tstop;                           /* stop time */
 real   omega, omega2, tomega;  		/* pattern speed */
@@ -126,7 +125,6 @@ void setparams()
     dprintf(0,"nsteps = %d\n",nsteps);
 
     ndiag=getiparam("ndiag");
-    nsave=getiparam("nsave");
     eta = getdparam("tol");
     if (eta < 0) 
       eta = pow(10.0,eta);
@@ -139,10 +137,12 @@ void prepare()
 
 /* helper functions for the integrator */
 
+static double last_pot;
+
 void rhs(unsigned n, double x, double *y, double *f)
 {
 
-  double pos[3], vel[3], acc[3], epot, time;
+  double pos[3], vel[3], acc[3], time;
   int ndim = 3;
 
   if (n!=6) error("not 3D");
@@ -154,7 +154,7 @@ void rhs(unsigned n, double x, double *y, double *f)
   vel[1] = y[4];
   vel[2] = y[5];
   time = x;
-  (*pot)(&ndim,pos,acc,&epot,&time);
+  (*pot)(&ndim,pos,acc,&last_pot,&time);
   acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
   acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
 
@@ -171,6 +171,7 @@ void solout5(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
 {
   static double xout;
   static int isave;
+  double pv[6];
 
   if (nr==1) {
     xout = x + dtout;
@@ -178,17 +179,19 @@ void solout5(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
     Torb(o_out,isave) = x;
     Xorb(o_out,isave) = y[0]; Yorb(o_out,isave) = y[1]; Zorb(o_out,isave) = y[2];
     Uorb(o_out,isave) = y[3]; Vorb(o_out,isave) = y[4]; Worb(o_out,isave) = y[5];
+    (void) print_diag(x, y);
   } else  {
     while (x >= xout) {
-      xout += dtout;
       isave += 1;
       Torb(o_out,isave) = xout;
-      Xorb(o_out,isave) = contd5(0,xout);
-      Yorb(o_out,isave) = contd5(1,xout);
-      Zorb(o_out,isave) = contd5(2,xout);
-      Uorb(o_out,isave) = contd5(3,xout);
-      Vorb(o_out,isave) = contd5(4,xout);
-      Worb(o_out,isave) = contd5(5,xout);
+      pv[0] = Xorb(o_out,isave) = contd5(0,xout);
+      pv[1] = Yorb(o_out,isave) = contd5(1,xout);
+      pv[2] = Zorb(o_out,isave) = contd5(2,xout);
+      pv[3] = Uorb(o_out,isave) = contd5(3,xout);
+      pv[4] = Vorb(o_out,isave) = contd5(4,xout);
+      pv[5] = Worb(o_out,isave) = contd5(5,xout);
+      (void) print_diag(xout, pv);
+      xout += dtout;
     }
   }
 }
@@ -225,6 +228,7 @@ void solout8(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
 {
   static double xout;
   static int isave;
+  double pv[6];
 
   if (nr==1) {
     xout = x + dtout;
@@ -232,17 +236,19 @@ void solout8(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
     Torb(o_out,isave) = x;
     Xorb(o_out,isave) = y[0]; Yorb(o_out,isave) = y[1];  Zorb(o_out,isave) = y[2];
     Uorb(o_out,isave) = y[3]; Vorb(o_out,isave) = y[4];  Worb(o_out,isave) = y[5];
+    (void) print_diag(x, y);
   } else  {
     while (x >= xout) {
-      xout += dtout;
       isave += 1;
       Torb(o_out,isave) = xout;
-      Xorb(o_out,isave) = contd8(0,xout);
-      Yorb(o_out,isave) = contd8(1,xout);
-      Zorb(o_out,isave) = contd8(2,xout);
-      Uorb(o_out,isave) = contd8(3,xout);
-      Vorb(o_out,isave) = contd8(4,xout);
-      Worb(o_out,isave) = contd8(5,xout);
+      pv[0] = Xorb(o_out,isave) = contd8(0,xout);
+      pv[1] = Yorb(o_out,isave) = contd8(1,xout);
+      pv[2] = Zorb(o_out,isave) = contd8(2,xout);
+      pv[3] = Uorb(o_out,isave) = contd8(3,xout);
+      pv[4] = Vorb(o_out,isave) = contd8(4,xout);
+      pv[5] = Worb(o_out,isave) = contd8(5,xout);
+      (void) print_diag(xout, pv);
+      xout += dtout;
     }
   }
 }
@@ -280,12 +286,20 @@ void integrate_dop853()
  *		    returns the total energy in the rotating frame
  */
 
-real print_diag(double time, double *pos, double *vel, double epot)
+real print_diag(double time, double *posvel)
 {
     double ekin;
+    double epot;
     permanent bool first = TRUE;
     permanent double etot_0, etot_00;
+    permanent idiag = 0;
     double err;
+    double f[3];
+    double *pos = posvel;
+    double *vel = pos+3;
+
+    rhs(6,time,posvel,f);
+    epot = last_pot;
 	
     ekin=sqr(vel[0]) + sqr(vel[1])+ sqr(vel[2]);
     ekin *= 0.5;
@@ -297,6 +311,10 @@ real print_diag(double time, double *pos, double *vel, double epot)
         etot_00 = (etot_0 == 0.0 ? 1.0 : etot_0);
     }
     err = (epot+ekin-etot_0)/etot_00;
-    if (ndiag) dprintf(0,"%f %f %f %20.13g %g\n",time,ekin,epot,ekin+epot,err);
+    if (ndiag) {
+      if (idiag%ndiag == 0)
+	dprintf(0,"%f %f %f %20.13g %g\n",time,ekin,epot,ekin+epot,err);
+    }
+    idiag++;
     return ekin+epot;
 }
