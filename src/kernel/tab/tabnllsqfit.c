@@ -21,6 +21,7 @@
  *      21-nov-05  2.0  gauss2d, fix error in gauss1d
  *      24-apr-08  2.1  psf (phase structure function)
  *       7-may-10  2.2  grow
+ *      14-may-11  2.3  different options for bootstrap method
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -65,7 +66,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=2.2\n      7-may-10 PJT",
+    "VERSION=2.3\n      14-may-2011 PJT",
     NULL
 };
 
@@ -802,13 +803,33 @@ random_permute2(int n, int *idx)
   dprintf(1,"\n");
 }
 
-/* 
- * bootstrap:  take a number of new samples of the errors and distribute them 
- *             on the first fit. then refit and see what the distribution of
- *             the errors is.
+/*
+ * pick between 1..n, but with replacement, the official bootstrap way
+ *
  */
 
-void bootstrap(int nboot, 
+random_permute3(int n, int *idx)
+{
+  int i;
+  double xn = n;
+
+  for (i=0; i<n; i++) {
+    idx[i] = (int) xrandom(0.0,xn);  
+    if (idx[i]<0 || idx[i]>=n) error("random_permute3 range error");
+  }
+}
+
+
+#define bootstrap  bootstrap3
+
+/* 
+ * bootstrap1: take a number of new samples of the errors and distribute them 
+ *             on the first fit. then refit and see what the distribution of
+ *             the errors is.
+ *             AKA resampling residuals, this incoorporates knowning a model
+ */
+
+void bootstrap1(int nboot, 
 	       int npt, int ndim, real *x, real *y, real *dy, real *d, 
 	       int npar, real *fpar, real *epar, int *mpar)
 {
@@ -842,7 +863,68 @@ void bootstrap(int nboot,
       accum_moment(&m[i],fpar[i],1.0);
     }
   }
-  printf("bootstrap= ");
+  printf("bootstrap1= ");
+  for (i=0; i<npar; i++)
+    printf("%g %g ",mean_moment(&m[i]),sigma_moment(&m[i]));
+  printf("\n");
+
+  free(y1);
+  free(d1);
+  free(bpar);
+  free(perm);
+  free(m);
+}
+/* 
+ * bootstrap3: take a new permution of the (x,y) sample, with 
+ *             replacement and refit. 
+ *             do this nboot time and see what the
+ *             distribution of fitted values is
+ *             this is a non-parametric way
+ */
+
+void bootstrap3(int nboot, 
+	       int npt, int ndim, real *x, real *y, real *dy, real *d, 
+	       int npar, real *fpar, real *epar, int *mpar)
+{
+  real *x1, *y1, *dy1, *d1, *bpar;
+  int *perm, i, j, nrt;
+  Moment *m;
+
+  if (nboot < 1) return;
+
+  perm = (int *) allocate(npt*sizeof(int));
+  x1  = (real *) allocate(npt*sizeof(real));
+  y1  = (real *) allocate(npt*sizeof(real));
+  if (dy)
+    dy1 = (real *) allocate(npt*sizeof(real));
+  else
+    dy1 = NULL;
+  d1  = (real *) allocate(npt*sizeof(real));
+  bpar = (real *) allocate(npar*sizeof(real));
+  m  = (Moment *) allocate(npar*sizeof(Moment));
+
+  for (i=0; i<npar; i++) {
+    bpar[i] = fpar[i];
+    ini_moment(&m[i],2,0);
+  }
+  
+  for (j=0; j<nboot; j++) {
+    random_permute3(npt,perm);
+    printf("PERM: ");
+    for (i=0; i<npt; i++) {
+      printf("%d ",perm[i]);
+      x1[i] = x[perm[i]];
+      y1[i] = y[perm[i]];
+      if (dy) dy1[i] = dy[perm[i]];
+    }
+    printf("\n");
+    nrt = (*my_nllsqfit)(x1,ndim,y1,dy1,d1,npt,fpar,epar,mpar,npar,tol,itmax,lab, fitfunc,fitderv);
+    dprintf(1,"%g %g %g %g\n", fpar[0],fpar[1],epar[0],epar[1]);
+    for (i=0; i<npar; i++) {
+      accum_moment(&m[i],fpar[i],1.0);
+    }
+  }
+  printf("bootstrap3= ");
   for (i=0; i<npar; i++)
     printf("%g %g ",mean_moment(&m[i]),sigma_moment(&m[i]));
   printf("\n");
