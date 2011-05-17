@@ -9,6 +9,12 @@ orbintv \- integrating single stellar orbit with variable timestep
 variable timestep. A number of constant timestepping algorithms are implemented
 in \fIorbint(1NEMO)\fP.
 .PP
+Currently two choices for the integratore can be made:
+\fBmode=dopri5\fP uses an explicit Runge-Kutta method of
+order (4)5 due to Dormand & Prince with step size control and dense output.
+\fBmode=dop853\fP uses an explicit Runge-Kutta method of
+order 8(5,3) due to Dormand & Prince with step size control and dense output.
+.PP
 Non-rotating potentials are also supported, but only with the
 rotation axis defined along the Z-axis.
 .SH PARAMETERS
@@ -32,15 +38,9 @@ initial guess for the time step to be taken.
 [default: \fB0.01\fP].
 .TP
 \fBndiag=\fInumber\fP
-number of timesteps when diagnostics are checked and output
-to \fIstdout\fP.
-[default: \fB10\fP].
-.TP
-\fBnsave=\fInumber\fP
-number of timesteps when data must be save to output orbit-file.
-Note that the program must have run to completion before the
-actual saved data are saved to the specified output file.
-[default: \fB1\fP].
+number of output timesteps when diagnostics are checked and output
+to \fIstderr\fP. Use 0 when never.
+[default: \fB0\fP].
 .TP
 \fBpotname=\fIname\fP
 name of file of \fIpotential(5NEMO)\fP descriptor. If no name
@@ -65,16 +65,11 @@ Specify the integration mode. Any one of \fBdopri5\fP,
 \fBdop853\fP
 [Default: \fBdopri5\fP].
 .TP
-\fBeta=\fP
-Relative error allowed in energy conservation. Integration is
-terminated if the relative error (|dE/E|) is too large. By default
-not used.
-.TP
-\fBvariable=t|f\fP
-Use variable timesteps? If so, the error control parameter
-\fBeta=\fP needs to be specified. Also note that not all integration
-methods support variable timesteps.
-Default: \fBf\fP.
+\fBtol=\fP
+Tolerance used by the integrators to control time stepping.
+Negative numbers will cause this number to raised to the
+power 10.
+[Default: -7]
 .SH EXAMPLES
 The following example launches a particle from the Y axis (at y=1)
 in the X direction (speed 0.4) in a plummer potential. Although
@@ -94,11 +89,17 @@ etot: -0.627107
 lz=-0.400000
 Pattern speed=0
 .fi
-
+.SH CAVEAT
+For large values of the output timestep, energy conservation may not seem
+very good. This is a result of the dense output interpolator.
 .SH "SEE ALSO"
 mkorbit(1NEMO), orblist(1NEMO), orbint(1NEMO), potential(5NEMO), newton0(1NEMO)
+.PP
+
 .SH AUTHOR
-Peter Teuben
+Peter Teuben (NEMO adaptation)
+Hairer & G. Wanner (Fortran version of core integrators)
+J.Colinge (C versions of the core integrators)
 .SH FILES
 .nf
 .ta +2.5i
