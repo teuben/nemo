@@ -143,9 +143,9 @@ WDutils::RunInfo::RunInfo()
 	WDutils_Error("RunInfo::RunInfo() called inside OMP parallel region\n");
       __omp_proc = omp_get_num_procs();
 #else
-      __omp_proc = 0;
+      __omp_proc = 1;
 #endif
-      __omp_size = 1;
+      __omp_size = __omp_proc;
     }
   } catch(exception E) {
     WDutils_RETHROW(E);
@@ -155,11 +155,11 @@ WDutils::RunInfo::RunInfo()
 void WDutils::RunInfo::set_omp(const char*arg) WDutils_THROWING
 {
 #ifdef _OPENMP
-  if(arg[0] == 't')
+  if(arg==0 || arg[0]==0 || arg[0]=='t')
     Info.__omp_size = Info.__omp_proc;
   else if(arg[0] == 'f')
     Info.__omp_size = 1;
-  else {
+  else if(arg && arg[0]) {
     Info.__omp_size = strtol(arg,0,10);
     if(errno == EINVAL || errno == ERANGE)
       WDutils_THROW("RunInfo::set_omp('%s')\n",arg);
@@ -169,6 +169,8 @@ void WDutils::RunInfo::set_omp(const char*arg) WDutils_THROWING
     }
   }
   omp_set_num_threads(Info.__omp_size);
+#else
+  Info.__omp_size = 1;
 #endif
 }
 //

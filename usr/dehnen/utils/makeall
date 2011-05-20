@@ -156,6 +156,7 @@ meta_cc			:= $(SRC)meta.cc $(meta_h)
 exception_cc		:= $(SRC)exception.cc $(exception_h)
 sse_cc			:= $(SRC)sse.cc $(sse_h)
 io_cc			:= $(SRC)io.cc $(io_h)
+radix_cc		:= $(SRC)radix.cc $(radix_h)
 numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
@@ -164,6 +165,7 @@ octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(timer_h)
 domain_cc		:= $(DEV)domain.cc $(domain_h) $(io_h)
 
 ifdef WDutilsDevel
+radix_cc		+= $(parallel_h)
 neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
 parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
 partreeOLD_cc		:= $(DEV)partreeOLD.cc $(partreeOLD_h) $(peano_h) \
@@ -187,6 +189,8 @@ $(LIB)numerics.o:	$(numerics_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)random.o:		$(random_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
+$(LIB)radix.o:		$(radix_cc) $(LIBT) $(makefiles)
+			$(MAKE_OBJ)
 $(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)octtree.o:	$(octtree_cc) $(LIBT) $(makefiles)
@@ -205,7 +209,7 @@ $(LIB)partree.o:	$(partree_cc) $(LIBT) $(makefiles)
 
 WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
-			$(LIB)WDMath.o $(LIB)neighbour.o 
+			$(LIB)radix.o $(LIB)WDMath.o $(LIB)neighbour.o 
 
 WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o $(LIB)partree.o
 
@@ -213,7 +217,7 @@ else
 
 WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
-			$(LIB)WDMath.o
+			$(LIB)radix.o $(LIB)WDMath.o
 
 WDutils_objs	:=	$(WDutilsS_objs)
 
@@ -273,7 +277,7 @@ test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
 				$(MAKE_EXE)
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
 				$(MAKE_EXE)
-test/TestRadix$(EXT)	:	test/TestRadix.cc $(radix_h) $(random_h) library
+test/TestRadix$(EXT)	:	test/TestRadix.cc $(radix_h) $(random_h)
 				$(MAKE_EXE)
 test/TestMatrix$(EXT)	:	test/TestMatrix.cc $(matr33_h)
 				$(MAKE_EXE)

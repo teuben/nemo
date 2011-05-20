@@ -175,22 +175,28 @@ namespace WDutils {
   WDutilsRadixSortTraits(uint64);
 #undef WDutilsRadixSortTraits
   /// RadixSortTraits for floats
-  /// \note not used in RadixSort(float) below, but useful for implementing
-  ///       RadixSort of structs with a float member to be sorted on
+  /// \detail
+  /// for implementing RadixSort of structs with a float member to be sorted on
   /// \note the order-preserving map from float to uint32 is due to Michael
   ///       Herf (see http://www.stereopsis.com/radix.html)
   template<> struct RadixSortTraits<float>
   {
     typedef float  input_type;
     typedef uint32 integer_type;
-    static uint32 forward(uint32 f)
-    { return f ^ (-int32(f>>31) | 0x80000000); }
     static integer_type integer(input_type const&x)
-    { return forward(reinterpret_cast<uint32 const&>(x)); }
+    { return forward(reinterpret_cast<integer_type const&>(x)); }
+    static integer_type forward_map(integer_type f)
+    { return -int32(f>>31) | 0x80000000; }
+    static integer_type backward_map(integer_type f)
+    { return ((f>>31) - 1) | 0x80000000; }
+    static integer_type forward(integer_type f)
+    { return f ^ forward_map(f); }
+    static integer_type backward(integer_type f)
+    { return f ^ backward_map(f); }
   };
   /// RadixSortTraits for doubles
-  /// \note not used in RadixSort(double) below, but useful for implementing
-  ///       RadixSort of structs with a double member to be sorted on
+  /// \detail
+  /// for implementing RadixSort of structs with a double member to be sorted on
   /// \note the order-preserving map from double to uint64 is based on the
   ///       equivalent map between float and uint32 due to Michael Herf see
   ///       http://www.stereopsis.com/radix.html
@@ -198,119 +204,56 @@ namespace WDutils {
   {
     typedef double input_type;
     typedef uint64 integer_type;
-    static uint64 forward(uint64 f)
-    { return f ^ (-int64(f>>63) | 0x8000000000000000ll); }
-    static uint64 integer(double const& x)
-    { return forward(reinterpret_cast<uint64 const&>(x)); }
+    static integer_type integer(double const& x)
+    { return forward(reinterpret_cast<integer_type const&>(x)); }
+    static integer_type forward_map(integer_type f)
+    { return -int64(f>>63) | 0x8000000000000000ll; }
+    static integer_type backward_map(integer_type f)
+    { return ((f>>63) - 1) | 0x8000000000000000ll; }
+    static integer_type forward(integer_type f)
+    { return f ^ forward_map(f); }
+    static integer_type backward(integer_type f)
+    { return f ^ backward_map(f); }
   };
-
   /// radix sort of any type with a RadixSortTraits<>
-  /// \param[in]      N # elements
-  /// \param[in,out]  X array, sorted on return
-  /// \param[in]      Y auxiliary array of @a N elements
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
+  /// \param[in]      Y  auxiliary array of @a N elements
   /// \note radix sort provides stable sorting and costs O(N) time
   template<typename __T>
   inline void RadixSort(unsigned N, __T*X, __T*Y)
-  { RadixSortBits<sizeof(__T),RadixSortTraits<__T> >::sort(N,X,Y); }
+  { RadixSortBits<8*sizeof(__T),RadixSortTraits<__T> >::sort(N,X,Y); }
 
   /// radix sort of the lower K bits of any type with a RadixSortTraits<>
-  /// \param[in]      N # elements
-  /// \param[in,out]  X array, sorted on return
-  /// \param[in]      Y auxiliary array of @a N elements
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
+  /// \param[in]      Y  auxiliary array of @a N elements
   /// \note radix sort provides stable sorting and costs O(N) time
   template<int K, typename __T>
   inline void RadixSortLow(unsigned N, __T*X, __T*Y)
   { RadixSortBits<K,RadixSortTraits<__T> >::sort(N,X,Y); }
-  
   /// radix sort of single-precision floating point numbers
-  /// \param[in]      N # elements
-  /// \param[in,out]  X array, sorted on return
-  /// \param[in]      Y auxiliary array of @a N @c floats
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
+  /// \param[in]      Y  auxiliary array of @a N @c floats
   /// \note radix sort provides stable sorting and costs O(N) time
-  /// \note we map to 32-bit unsigned integers, sort them, and then map back
-  /// \note the order-preserving map from float to uint32 is due to Michael
+  /// \note we map to 32-bit unsigned integers, sort them, and then map back.
+  ///       the order-preserving map from float to uint32 is due to Michael
   ///       Herf (see http://www.stereopsis.com/radix.html)
-  /// \note declared inline here rather than non-inline in some file radix.cc,
-  ///       for otherwise the g++ compiler/linker produces code which cannot
-  ///       resolve the related symbol (with dynamic linking).
-  inline void RadixSort(unsigned N, float*X, float*Y)
-  {
-    static const uint32 n0=0x800,n2=0x400;
-    static const uint32 m0=0x7ff,m2=0x3ff;
-    uint32 B0[n0+n0+n2]={0},*B1=B0+n0,*B2=B1+n0;
-    uint32*iX=reinterpret_cast<uint32*>(X);
-    uint32*iY=reinterpret_cast<uint32*>(Y);
-    for(uint32 i=0; i!=N; ++i) {
-      register uint32 f=iX[i];
-      iY[i]=f^=-int32(f>>31)|0x80000000;
-      B0[f       &m0]++;
-      B1[(f>>=11)&m0]++;
-      B2[(f>>=11)&m2]++;
-    }
-    for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-    for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-    for(uint32 i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-    for(uint32 i=0; i!=N; ++i) iX[B0[iY[i]     &m0]++] = iY[i];
-    for(uint32 i=0; i!=N; ++i) iY[B1[iX[i]>>11 &m0]++] = iX[i];
-    for(uint32 i=0; i!=N; ++i) {
-      register uint32 f=iY[i];
-      iX[B2[f>>22 &m2]++]=f^(((f>>31)-1)|0x80000000); 
-    }
-  }
+  void RadixSort(unsigned N, float*X, float*Y);
   /// radix sort of double-precision floating point numbers
-  /// \param[in]      N # elements
-  /// \param[in,out]  X array, sorted on return
-  /// \param[in]      Y auxiliary array of @a N @c doubles
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
+  /// \param[in]      Y  auxiliary array of @a N @c doubles
   /// \note radix sort provides stable sorting and costs O(N) time
-  /// \note we map to 64-bit unsigned integers, sort them, and then map back
-  /// \note the order-preserving map from double to uint64 is based on the
+  /// \note we map to 64-bit unsigned integers, sort them, and then map back.
+  ///       the order-preserving map from double to uint64 is based on the
   ///       equivalent map between float and uint32 due to Michael Herf see
   ///       http://www.stereopsis.com/radix.html
-  /// \note declared inline here rather than non-inline in some file radix.cc,
-  ///       for otherwise the g++ compiler/linker produces code which cannot
-  ///       resolve the related symbol (with dynamic linking).
-  inline void RadixSort(unsigned N, double*X, double*Y)
-  {
-    static const uint32 n0=0x800,n2=0x400, n=n0+n0+n2;
-    static const uint64 m0=0x7ff,m2=0x3ff;
-    uint32 B0[n]={0},*B1=B0+n0,*B2=B1+n0;
-    uint64*iX=reinterpret_cast<uint64*>(X);
-    uint64*iY=reinterpret_cast<uint64*>(Y);
-    // sort the lower 32 bits
-    for(uint32 i=0; i!=N; ++i) {
-      register uint64 f=iX[i];
-      iX[i]=f^=-int64(f>>63) | 0x8000000000000000ll;
-      B0[f       &m0] ++;
-      B1[(f>>=11)&m0] ++;
-      B2[(f>>=11)&m2] ++;
-    }
-    for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-    for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-    for(uint32 i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-    for(uint32 i=0; i!=N; ++i) iY[B0[iX[i]     &m0]++] = iX[i];
-    for(uint32 i=0; i!=N; ++i) iX[B1[iY[i]>>11 &m0]++] = iY[i];
-    for(uint32 i=0; i!=N; ++i) iY[B2[iX[i]>>22 &m2]++] = iX[i];
-    // sort the upper 32 bits
-    for(uint32 i=0; i!=n; ++i) B0[i]=0;
-    for(uint32 i=0; i!=N; ++i) {
-      register uint64 f=iY[i];
-      B0[(f>>=32)&m0] ++;
-      B1[(f>>=11)&m0] ++;
-      B2[(f>>=11)&m2] ++;
-    }
-    for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-    for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-    for(uint32 i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-    for(uint32 i=0; i!=N; ++i) iX[B0[iY[i]>>32 &m0]++] = iY[i];
-    for(uint32 i=0; i!=N; ++i) iY[B1[iX[i]>>43 &m0]++] = iX[i];
-    for(uint32 i=0; i!=N; ++i) {
-      register uint64 f = iY[i];
-      iX[B2[f    >>54 &m2]++] =  f ^ (((f>>63) - 1) | 0x8000000000000000ll);
-    }
-  }
+  void RadixSort(unsigned N, double*X, double*Y);
   /// radix sort
-  /// \param[in]      N # elements
-  /// \param[in,out]  X array, sorted on return
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
   /// \note radix sort provides stable sorting and costs O(N) time
   /// \note allocates and de-allocates an auxiliary array
   template<typename __T>
@@ -320,9 +263,89 @@ namespace WDutils {
     RadixSort(N,X,Y);
     WDutils_DEL16(Y);
   }
+#ifdef WDutilsDevel
+  /// radix sort of single-precision floating point numbers in parallel
+  //
+  /// \warning the speed-up is usually not optimal, but still non-zero.
+  //           the reason is presumably, that we have to do count the data
+  //           3 times each in 3 separate loops, while in the serial version
+  //           we can to this in just one loop.
+  //
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
+  /// \param[in]      Y  auxiliary array of @a N @c floats
+  /// \param[in]      w  warn if called from within OMP parallel region?
+  /// \note radix sort provides stable sorting and costs O(N) time
+  /// \note we map to 32-bit unsigned integers, sort them, and then map back.
+  ///       the order-preserving map from float to uint32 is due to Michael
+  ///       Herf (see http://www.stereopsis.com/radix.html)
+  /// \note If called from within an OMP parallel region with >1 threads, we
+  ///       assume that the data refer to a shared array and sort them. If you
+  ///       instead want to sort private data, use RadixSort() instead.
+  void RadixSortP(unsigned N, float*X, float*Y, bool w=true);
+  /// radix sort of single-precision floating point numbers in parallel
+  //
+  /// \warning the speed-up is usually not optimal, but still non-zero.
+  //           the reason is presumably, that we have to do count the data
+  //           3 times each in 3 separate loops, while in the serial version
+  //           we can to this in just one loop.
+  //
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
+  /// \param[in]      w  warn if called from within OMP parallel region?
+  /// \note radix sort provides stable sorting and costs O(N) time
+  /// \note we map to 32-bit unsigned integers, sort them, and then map back.
+  ///       the order-preserving map from float to uint32 is due to Michael
+  ///       Herf (see http://www.stereopsis.com/radix.html)
+  /// \note allocates and de-allocates an auxiliary array
+  /// \note If called from within an OMP parallel region with >1 threads, we
+  ///       assume that the data refer to a shared array and sort them. If you
+  ///       instead want to sort private data, use RadixSort() instead.
+  void RadixSortP(unsigned N, float*X, bool w=true);
+  /// radix sort of double-precision floating point numbers in parallel
+  //
+  /// \warning this is not faster than serial sorting via RadixSort()
+  //           the reason is presumably, that we have to do count the data
+  //           6 times each in 6 separate loops, while in the serial version
+  //           we can to this in just 2 loops.
+  //
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
+  /// \param[in]      Y  auxiliary array of @a N @c doubles
+  /// \param[in]      w  warn if called from within OMP parallel region?
+  /// \note radix sort provides stable sorting and costs O(N) time
+  /// \note we map to 64-bit unsigned integers, sort them, and then map back.
+  ///       the order-preserving map from double to uint64 is based on the
+  ///       equivalent map between float and uint32 due to Michael Herf see
+  ///       http://www.stereopsis.com/radix.html
+  /// \note If called from within an OMP parallel region with >1 threads, we
+  ///       assume that the data refer to a shared array and sort them. If you
+  ///       instead want to sort private data, use RadixSort() instead.
+  void RadixSortP(unsigned N, double*X, double*Y, bool w=true);
+  /// radix sort of double-precision floating point numbers in parallel
+  //
+  /// \warning this is not faster than serial sorting via RadixSort()
+  //           the reason is presumably, that we have to do count the data
+  //           6 times each in 6 separate loops, while in the serial version
+  //           we can to this in just 2 loops.
+  //
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
+  /// \param[in]      w  warn if called from within OMP parallel region?
+  /// \note radix sort provides stable sorting and costs O(N) time.
+  /// \note we map to 64-bit unsigned integers, sort them, and then map back.
+  ///       the order-preserving map from double to uint64 is based on the
+  ///       equivalent map between float and uint32 due to Michael Herf see
+  ///       http://www.stereopsis.com/radix.html
+  /// \note allocates and de-allocates an auxiliary array
+  /// \note If called from within an OMP parallel region with >1 threads, we
+  ///       assume that the data refer to a shared array and sort them. If you
+  ///       instead want to sort private data, use RadixSort() instead.
+  void RadixSortP(unsigned N, double*X, bool w=true);
+#endif
   /// radix sort of the first K bits
-  /// \param[in]      N # elements
-  /// \param[in,out]  X array, sorted on return
+  /// \param[in]      N  # elements
+  /// \param[in,out]  X  array, sorted on return
   /// \note radix sort provides stable sorting and costs O(N) time
   /// \note allocates and de-allocates an auxiliary array
   template<int K, typename __T>

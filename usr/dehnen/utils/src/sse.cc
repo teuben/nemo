@@ -53,6 +53,15 @@
 
 namespace WDutils {
   namespace SSE {
+    // loading and storing 32-bit integers
+#define _mm_load_epi32(A) \
+    (__m128i)(_mm_load_ps(reinterpret_cast<float const*>(A)))
+#define _mm_loadu_epi32(A) \
+    (__m128i)(_mm_loadu_ps(reinterpret_cast<float const*>(A)))
+#define _mm_store_epi32(M,A) \
+    _mm_store_ps(reinterpret_cast<float*>(M),(__m128)(A))
+#define _mm_storeu_epi32(M,A) \
+    _mm_storeu_ps(reinterpret_cast<float*>(M),(__m128)(A))
 
 #ifdef __SSE2__
 # define __Loop2SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,__TYPE)	\
@@ -84,9 +93,9 @@ namespace WDutils {
     for(size_t i=0; i!=n; i+=2) { __WORKA; }
 #endif 
 #ifdef __SSE__
-#define __Loop4SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,__TYPE)	\
+# define __Loop4SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,__TYPE)	\
     size_t i=size_t(f)&16;						\
-    if(n<4 || i&4) {		      /* small or unaligned     */	\
+    if(n<4 || i&4) {		        /* small or unaligned     */	\
       if(i&4)								\
 	WDutils_Warning("SSE::%s(): "					\
 			"array of %ss @ %p not 4-byte aligned: "	\
@@ -114,47 +123,68 @@ namespace WDutils {
 #endif 
 
 #ifdef __SSE__
-#define __LoopFloat(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+# define __LoopFloat(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
     __Loop4SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,"float")
-#define __LoopFloat16(__INIT,__WORKS,__WORKA)				\
+# define __LoopFloat16(__INIT,__WORKS,__WORKA)				\
     __Loop4SSE16(__INIT,__WORKA)
 #else
-#define __LoopFloat(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+# define __LoopFloat(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
     for(size_t i=0; i!=n; ++i) { __WORKS; }
-#define __LoopFloat16(__INIT,__WORKS,__WORKA)				\
+# define __LoopFloat16(__INIT,__WORKS,__WORKA)				\
     for(size_t i=0; i!=n; ++i) { __WORKS; }
 #endif
 
 #ifdef __SSE2__
-#define __LoopDouble(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+# define __LoopDouble(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
     __Loop2SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,"double")
-#define __LoopDouble16(__INIT,__WORKS,__WORKA)				\
+# define __LoopDouble16(__INIT,__WORKS,__WORKA)				\
     __Loop2SSE16(__INIT,__WORKA)
-#define __LoopInt(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+# define __LoopInt(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
     __Loop4SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,"int")
-#define __LoopInt16(__INIT,__WORKS,__WORKA)				\
+# define __LoopInt16(__INIT,__WORKS,__WORKA)				\
     __Loop4SSE16(__INIT,__WORKA)
 #else
-#define __LoopDouble(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+# define __LoopDouble(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
     for(size_t i=0; i!=n; ++i) { __WORKS; }
-#define __LoopDouble16(__INIT,__WORKS,__WORKA)				\
+# define __LoopDouble16(__INIT,__WORKS,__WORKA)				\
     for(size_t i=0; i!=n; ++i) { __WORKS; }
-#define __LoopInt(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+# define __LoopInt(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
     for(size_t i=0; i!=n; ++i) { __WORKS; }
-#define __LoopInt16(__INIT,__WORKS,__WORKA)				\
+# define __LoopInt16(__INIT,__WORKS,__WORKA)				\
     for(size_t i=0; i!=n; ++i) { __WORKS; }
 #endif
 
-    // SSE::U16<>::Ass, SSE::A16<>::Ass
-#define __Works f[i] = v;
+#ifdef __SSE4_1__
+# define __LoopXInt(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+    __Loop4SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,"int")
+# define __LoopXInt16(__INIT,__WORKS,__WORKA)				\
+    __Loop4SSE16(__INIT,__WORKA)
+#else
+# define __LoopXInt(__NAME,__INIT,__WORKS,__WORKU,__WORKA)		\
+    for(size_t i=0; i!=n; ++i) { __WORKS; }
+# define __LoopXInt16(__INIT,__WORKS,__WORKA)				\
+    for(size_t i=0; i!=n; ++i) { __WORKS; }
+#endif
+    // for(i=0; i!=n; ++i) f[i]=v
+#define __Works f[i]=v;
+
+#define __Init  __m128i V = _mm_set1_epi32(v);
+#define __Worku _mm_storeu_epi32(f+i,V);
+#define __Worka _mm_store_epi32(f+i,V);
+    void UnAligned::Ass(int*f, size_t n, int v)
+    { __LoopInt("Ass",__Init,__Works,__Worku,__Worka); }
+    void   Aligned::Ass(int*f, size_t n, int v)
+    { __LoopInt16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worku
+#undef  __Worka
+
 #define __Init  __m128 V = _mm_set1_ps(v);
 #define __Worku _mm_storeu_ps(f+i,V);
 #define __Worka _mm_store_ps(f+i,V);
-    template<>
-    void U16<float>::Ass(float*f, size_t n, float v)
+    void UnAligned::Ass(float*f, size_t n, float v)
     { __LoopFloat("Ass",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<float>::Ass(float*f, size_t n, float v)
+    void   Aligned::Ass(float*f, size_t n, float v)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -163,55 +193,60 @@ namespace WDutils {
 #define __Init  __m128d V = _mm_set1_pd(v);
 #define __Worku _mm_storeu_pd(f+i,V);
 #define __Worka _mm_store_pd(f+i,V);
-    template<>
-    void U16<double>::Ass(double*f, size_t n, double v)
+    void UnAligned::Ass(double*f, size_t n, double v)
     { __LoopDouble("Ass",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<double>::Ass(double*f, size_t n, double v)
+    void   Aligned::Ass(double*f, size_t n, double v)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
 
-#define __Init  __m128i V = _mm_set1_epi32(v);
-#define __Worku _mm_storeu_si128((__m128i*)(f+i),V);
-#define __Worka _mm_store_si128((__m128i*)(f+i),V);
-    void U16<int>::Ass(int*f, size_t n, int v)
+#undef  __Works
+    // for(i=0; i!=n; ++i) a[i]=w*b[i]
+#define __Works a[i]=w*b[i];
+
+#define __Init  __m128i W = _mm_set1_epi32(w);
+#define __Worka _mm_store_epi32(a+i,_mm_mul_epi32(W,_mm_load_epi32(b+i)));
+    void Aligned::Ass(int*a, size_t n, int w, const int*b)
+    { __LoopXInt16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worka
+
+#define __Init  __m128 W = _mm_set1_ps(w);
+#define __Worka _mm_store_ps(a+i,_mm_mul_ps(W,_mm_load_ps(b+i)));
+    void Aligned::Ass(float*a, size_t n, float w, const float*b)
+    { __LoopFloat16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worka
+
+#define __Init  __m128d W = _mm_set1_pd(w);
+#define __Worka _mm_store_pd(a+i,_mm_mul_pd(W,_mm_load_pd(b+i)));
+    void Aligned::Ass(double*a, size_t n, double w, const double*b)
+    { __LoopDouble16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worka
+
+#undef  __Works
+    // for(i=0; i!=n; ++i) f[i]=-f[i];
+#define __Works f[i]=-f[i];
+
+#define __Init  __m128i V = _mm_set1_epi32(0);
+#define __Worku _mm_storeu_epi32(f+i,_mm_sub_epi32(V,_mm_loadu_epi32(f+i)));
+#define __Worka _mm_store_epi32(f+i,_mm_sub_epi32(V,_mm_load_epi32(f+i)));
+    void UnAligned::Neg(int*f, size_t n)
     { __LoopInt("Ass",__Init,__Works,__Worku,__Worka); }
-    void A16<int>::Ass(int*f, size_t n, int v)
+    void   Aligned::Neg(int*f, size_t n)
     { __LoopInt16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
-#undef  __Works
 
-#define __Init  __m128 W = _mm_set1_ps(w);
-#define __Works a[i] = w*b[i];
-#define __Worka _mm_store_ps(a+i,_mm_mul_ps(W,_mm_load_ps(b+i)));
-    template<>
-    void A16<float>::Ass(float*a, size_t n, float w, const float*b)
-    { __LoopFloat16(__Init,__Works,__Worka); }
-#undef  __Init
-#undef  __Worka
-#define __Init  __m128d W = _mm_set1_pd(w);
-#define __Worka _mm_store_pd(a+i,_mm_mul_pd(W,_mm_load_pd(b+i)));
-    template<>
-    void A16<double>::Ass(double*a, size_t n, double w, const double*b)
-    { __LoopDouble16(__Init,__Works,__Worka); }
-#undef  __Init
-#undef  __Works
-#undef  __Worka
-
-// SSE::U16<>::Neg, SSE::A16<>::Neg
-#define __Works f[i] =-f[i];
 #define __Init  __m128 V = _mm_set1_ps(0.f);
 #define __Worku _mm_storeu_ps(f+i,_mm_sub_ps(V,_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_sub_ps(V,_mm_load_ps(f+i)));
-    template<>
-    void U16<float>::Neg(float*f, size_t n)
+    void UnAligned::Neg(float*f, size_t n)
     { __LoopFloat("Ass",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<float>::Neg(float*f, size_t n)
+    void   Aligned::Neg(float*f, size_t n)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -220,229 +255,124 @@ namespace WDutils {
 #define __Init  __m128d V = _mm_set1_pd(0.f);
 #define __Worku _mm_storeu_pd(f+i,_mm_sub_pd(V,_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_sub_pd(V,_mm_load_pd(f+i)));
-    template<>
-    void U16<double>::Neg(double*f, size_t n)
+    void UnAligned::Neg(double*f, size_t n)
     { __LoopDouble("Ass",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<double>::Neg(double*f, size_t n)
+    void   Aligned::Neg(double*f, size_t n)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
-#undef  __Works
 
-    // SSE::Add, SSE::A16<>::Add
-#define __Works f[i] += v;
+#undef  __Works
+    // for(i=0; i!=n; ++i) f[i]+=v
+#define __Works f[i]+=v;
+
+#define __Init  __m128i V = _mm_set1_epi32(v);
+#define __Worku _mm_storeu_epi32(f+i,_mm_add_epi32(V,_mm_loadu_epi32(f+i)));
+#define __Worka _mm_store_epi32 (f+i,_mm_add_epi32(V,_mm_load_epi32 (f+i)));
+    void UnAligned::Add(int*f, size_t n, int v)
+    { __LoopInt("Add",__Init,__Works,__Worku,__Worka); }
+    void   Aligned::Add(int*f, size_t n, int v)
+    { __LoopInt16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worku
+#undef  __Worka
+
 #define __Init  __m128 V = _mm_set1_ps(v);
-#define __Worku _mm_storeu_ps(f+i,_mm_add_ps(_mm_loadu_ps(f+i),V));
-#define __Worka _mm_store_ps(f+i,_mm_add_ps(_mm_load_ps(f+i),V));
-    template<>
-    void U16<float>::Add(float*f, size_t n, float v)
+#define __Worku _mm_storeu_ps(f+i,_mm_add_ps(V,_mm_loadu_ps(f+i)));
+#define __Worka _mm_store_ps(f+i,_mm_add_ps(V,_mm_load_ps(f+i)));
+    void UnAligned::Add(float*f, size_t n, float v)
     { __LoopFloat("Add",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<float>::Add(float*f, size_t n, float v)
+    void   Aligned::Add(float*f, size_t n, float v)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
 
 #define __Init  __m128d V = _mm_set1_pd(v);
-#define __Worku _mm_storeu_pd(f+i,_mm_add_pd(_mm_loadu_pd(f+i),V));
-#define __Worka _mm_store_pd(f+i,_mm_add_pd(_mm_load_pd(f+i),V));
-    template<>
-    void U16<double>::Add(double*f, size_t n, double v)
+#define __Worku _mm_storeu_pd(f+i,_mm_add_pd(V,_mm_loadu_pd(f+i)));
+#define __Worka _mm_store_pd(f+i,_mm_add_pd(V,_mm_load_pd(f+i)));
+    void UnAligned::Add(double*f, size_t n, double v)
     { __LoopDouble("Add",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<double>::Add(double*f, size_t n, double v)
+    void   Aligned::Add(double*f, size_t n, double v)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
 
-#define __Init  __m128i V = _mm_set1_epi32(v);
-#define __Worku _mm_storeu_si128((__m128i*)(f+i),			\
-		_mm_add_epi32(_mm_loadu_si128((__m128i*)(f+i)),V));
-#define __Worka _mm_store_si128 ((__m128i*)(f+i),			\
-		_mm_add_epi32(_mm_load_si128 ((__m128i*)(f+i)),V));
-    void U16<int>::Add(int*f, size_t n, int v)
-    { __LoopInt("Add",__Init,__Works,__Worku,__Worka); }
-    void A16<int>::Add(int*f, size_t n, int v)
-    { __LoopInt16(__Init,__Works,__Worka); }
-#undef  __Init
-#undef  __Worku
-#undef  __Worka
 #undef  __Works
-
-#define __Init
+    // for(i=0; i!=n; ++i) f[i]+=b[i]
 #define __Works a[i] += b[i];
-#define __Worka _mm_store_ps(a+i,_mm_add_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
-    template<>
-    void A16<float>::Add(float*a, size_t n, const float*b)
+#define __Init
+
+#define __Worka _mm_store_epi32(a+i,_mm_add_epi32(_mm_load_epi32(a+i),	\
+						  _mm_load_epi32(b+i)));
+    void   Aligned::Add(int*a, size_t n, const int*b)
+    { __LoopInt16(__Init,__Works,__Worka); }
+#undef  __Worka
+
+#define __Worka _mm_store_ps(a+i,_mm_add_ps(_mm_load_ps(a+i),	\
+					    _mm_load_ps(b+i)));
+    void   Aligned::Add(float*a, size_t n, const float*b)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
-#define __Worka _mm_store_pd(a+i,_mm_add_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
-    template<>
-    void A16<double>::Add(double*a, size_t n, const double*b)
-    { __LoopDouble16(__Init,__Works,__Worka); }
 
+#define __Worka _mm_store_pd(a+i,_mm_add_pd(_mm_load_pd(a+i),	\
+					    _mm_load_pd(b+i)));
+    void   Aligned::Add(double*a, size_t n, const double*b)
+    { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Worka
-#define __Worka _mm_store_si128((__m128i*)(a+i),			\
-		_mm_add_epi32(_mm_load_si128((__m128i*)(a+i)),	        \
-                              _mm_load_si128((__m128i*)(b+i))));
-    void A16<int>::Add(int*a, size_t n, const int*b)
-    { __LoopInt16(__Init,__Works,__Worka); }
-#undef  __Works
-#undef  __Worka
+
 #undef  __Init
+#undef  __Works
+    // for(i=0; i!=n; ++i) f[i]+=w*b[i]
+#define __Works a[i]+=w*b[i];
+
+#define __Init  __m128i W = _mm_set1_epi32(w);
+#define __Worka _mm_store_epi32(a+i,_mm_add_epi32(_mm_load_epi32(a+i),	\
+		_mm_mul_epi32(W,_mm_load_epi32(b+i))));
+    void   Aligned::Add(int*a, size_t n, int w, const int*b)
+    { __LoopXInt16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worka
 
 #define __Init  __m128 W = _mm_set1_ps(w);
-#define __Works a[i] += w*b[i];
 #define __Worka _mm_store_ps(a+i,_mm_add_ps(_mm_load_ps(a+i),		 \
 					    _mm_mul_ps(W,_mm_load_ps(b+i))));
-    template<>
-    void A16<float>::Add(float*a, size_t n, float w, const float*b)
+    void   Aligned::Add(float*a, size_t n, float w, const float*b)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
+
 #define __Init  __m128d W = _mm_set1_pd(w);
 #define __Worka _mm_store_pd(a+i,_mm_add_pd(_mm_load_pd(a+i),		 \
 					    _mm_mul_pd(W,_mm_load_pd(b+i))));
-    template<>
-    void A16<double>::Add(double*a, size_t n, double w, const double*b)
+    void   Aligned::Add(double*a, size_t n, double w, const double*b)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
-#undef  __Works
 #undef  __Worka
 
-    // SSE::Sum, SSE::A16<>::Sum
-#ifdef __SSE__
-# define __FloatTmp							\
-    __m128 Tm = _mm_setzero_ps(); float tm(0.f);
-# define __FloatRet							\
-    __attribute__ ((aligned(16))) float tmp[4];				\
-    _mm_store_ps(tmp,Tm);						\
-    return tmp[0]+tmp[1]+tmp[2]+tmp[3]+tm;
-# define __FloatTmp16							\
-    __m128 Tm = _mm_setzero_ps();
-# define __FloatRet16							\
-    __attribute__ ((aligned(16))) float tmp[4];				\
-    _mm_store_ps(tmp,Tm);						\
-    return tmp[0]+tmp[1]+tmp[2]+tmp[3]
-#ifdef __SSE2__
-# define __DoubleTmp							\
-    __m128d Tm = _mm_setzero_pd(); double tm(0.0);
-# define __DoubleRet							\
-    __attribute__ ((aligned(16))) double tmp[2];			\
-    _mm_store_pd(tmp,Tm);						\
-    return tmp[0]+tmp[1]+tm;
-# define __DoubleTmp16							\
-    __m128d Tm = _mm_setzero_pd();
-# define __DoubleRet16							\
-    __attribute__ ((aligned(16))) double tmp[2];			\
-    _mm_store_pd(tmp,Tm);						\
-    return tmp[0]+tmp[1];
-#else // __SSE2__
-# define __DoubleTmp							\
-    double tm(0.0);
-# define __DoubleRet							\
-    return tm;
-# define __DoubleTmp16 __DoubleTmp
-# define __DoubleRet16 __DoubleRet
-#endif// __SSE2__
-#else // __SSE__
-# define __FloatTmp							\
-    float tm(0.f);	
-# define __FloatRet							\
-    return tm;
-# define __FloatTmp16 __FloatTmp
-# define __FloatRet16 __FloatRet
-#endif// __SSE__
-#define __Init
-#define __Works tm += f[i];
-#define __Worka Tm = _mm_add_ps(Tm,_mm_load_ps(f+i));
-#define __Worku Tm = _mm_add_ps(Tm,_mm_loadu_ps(f+i));
-    template<>
-    float U16<float>::Sum(const float*f, size_t n)
-    {
-      __FloatTmp;
-      __LoopFloat("Sum",__Init,__Works,__Worku,__Worka);
-      __FloatRet;
-    }
-    template<>
-    float A16<float>::Sum(const float*f, size_t n)
-    {
-      __FloatTmp16;
-      __LoopFloat16(__Init,__Works,__Worka);
-      __FloatRet16;
-    }
-#undef  __Worku
-#undef  __Worka
-#define __Worka Tm = _mm_add_pd(Tm,_mm_load_pd(f+i));
-#define __Worku Tm = _mm_add_pd(Tm,_mm_loadu_pd(f+i));
-    template<>
-    double U16<double>::Sum(const double*f, size_t n)
-    {
-      __DoubleTmp;
-      __LoopDouble("Sum",__Init,__Works,__Worku,__Worka);
-      __DoubleRet;
-    }
-    template<>
-    double A16<double>::Sum(const double*f, size_t n)
-    {
-      __DoubleTmp16;
-      __LoopDouble16(__Init,__Works,__Worka);
-      __DoubleRet16;
-    }
+#undef  __Works
+    // for(i=0; i!=n; ++i) f[i]-=v;
+#define __Works f[i]-=v;
+
+#define __Init  __m128i V = _mm_set1_epi32(v);
+#define __Worku _mm_storeu_epi32(f+i,_mm_sub_epi32(_mm_loadu_epi32(f+i),V));
+#define __Worka _mm_store_epi32(f+i,_mm_sub_epi32(_mm_load_epi32(f+i),V));
+    void UnAligned::Sub(int*f, size_t n, int v)
+    { __LoopInt("Sub",__Init,__Works,__Worku,__Worka); }
+    void   Aligned::Sub(int*f, size_t n, int v)
+    { __LoopInt16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
-#undef  __Works
 #undef  __Worka
 
-    // SSE::A16<>::Dot
-#define __Init
-#define __Works tm += a[i]*b[i];
-#define __Worka Tm = _mm_add_ps(Tm,_mm_mul_ps(_mm_load_ps(a+i),		\
-					      _mm_load_ps(b+i)));
-    template<>
-    float A16<float>::Dot(const float*a, size_t n, const float*b)
-    {
-      __FloatTmp16;
-      __LoopFloat16(__Init,__Works,__Worka);
-      __FloatRet16;
-    }
-#undef  __Worka
-#define __Worka Tm = _mm_add_pd(Tm,_mm_mul_pd(_mm_load_pd(a+i),		\
-					      _mm_load_pd(b+i)));
-    template<>
-    double A16<double>::Dot(const double*a, size_t n, const double*b)
-    {
-      __DoubleTmp16;
-      __LoopDouble16(__Init,__Works,__Worka);
-      __DoubleRet16;
-    }
-#undef  __Init
-#undef  __Works
-#undef  __Worka
-#undef  __FloatTmp
-#undef  __FloatRet
-#undef  __FloatTmp16
-#undef  __FloatRet16
-#undef  __DoubleTmp
-#undef  __DoubleRet
-#undef  __DoubleTmp16
-#undef  __DoubleRet16
-
-
-    // SSE::U16<>::Sub, SSE::A16<>::Sub
-#define __Works f[i] -= v;
 #define __Init  __m128 V = _mm_set1_ps(v);
 #define __Worku _mm_storeu_ps(f+i,_mm_sub_ps(_mm_loadu_ps(f+i),V));
 #define __Worka _mm_store_ps(f+i,_mm_sub_ps(_mm_load_ps(f+i),V));
-    template<>
-    void U16<float>::Sub(float*f, size_t n, float v)
+    void UnAligned::Sub(float*f, size_t n, float v)
     { __LoopFloat("Sub",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<float>::Sub(float*f, size_t n, float v)
+    void   Aligned::Sub(float*f, size_t n, float v)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -451,61 +381,88 @@ namespace WDutils {
 #define __Init  __m128d V = _mm_set1_pd(v);
 #define __Worku _mm_storeu_pd(f+i,_mm_sub_pd(_mm_loadu_pd(f+i),V));
 #define __Worka _mm_store_pd(f+i,_mm_sub_pd(_mm_load_pd(f+i),V));
-    template<>
-    void U16<double>::Sub(double*f, size_t n, double v)
+    void UnAligned::Sub(double*f, size_t n, double v)
     { __LoopDouble("Sub",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<double>::Sub(double*f, size_t n, double v)
+    void   Aligned::Sub(double*f, size_t n, double v)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
+
 #undef  __Works
+    // for(i=0; i!=n; ++i) f[i]-=b[i];
+#define __Works a[i]-=b[i];
+#define __Init
+
+#define __Worka _mm_store_epi32(a+i,_mm_sub_epi32(_mm_load_epi32(a+i),	\
+						  _mm_load_epi32(b+i)));
+    void   Aligned::Sub(int*a, size_t n, const int*b)
+    { __LoopInt16(__Init,__Works,__Worka); }
+#undef  __Worka
 
 #define __Init
-#define __Works a[i] -= b[i];
-#define __Worka _mm_store_ps(a+i,_mm_sub_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
-    template<>
-    void A16<float>::Sub(float*a, size_t n, const float*b)
+#define __Worka _mm_store_ps(a+i,_mm_sub_ps(_mm_load_ps(a+i),	\
+					    _mm_load_ps(b+i)));
+    void   Aligned::Sub(float*a, size_t n, const float*b)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
-#define __Worka _mm_store_pd(a+i,_mm_sub_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
-    template<>
-    void A16<double>::Sub(double*a, size_t n, const double*b)
+
+#define __Worka _mm_store_pd(a+i,_mm_sub_pd(_mm_load_pd(a+i),	\
+					    _mm_load_pd(b+i)));
+    void   Aligned::Sub(double*a, size_t n, const double*b)
     { __LoopDouble16(__Init,__Works,__Worka); }
+#undef  __Worka
+
 #undef  __Init
 #undef  __Works
+    // for(i=0; i!=n; ++i) f[i]-=w*b[i];
+#define __Works a[i] -= w*b[i];
+
+#define __Init  __m128i W = _mm_set1_epi32(w);
+#define __Worka _mm_store_epi32(a+i,_mm_sub_epi32(_mm_load_epi32(a+i),	\
+	        _mm_mul_epi32(W,_mm_load_epi32(b+i))));
+    void   Aligned::Sub(int*a, size_t n, int w, const int*b)
+    { __LoopXInt16(__Init,__Works,__Worka); }
+#undef  __Init
 #undef  __Worka
 
 #define __Init  __m128 W = _mm_set1_ps(w);
-#define __Works a[i] -= w*b[i];
 #define __Worka _mm_store_ps(a+i,_mm_sub_ps(_mm_load_ps(a+i),		\
 					    _mm_mul_ps(W,_mm_load_ps(b+i))));
-    template<>
-    void A16<float>::Sub(float*a, size_t n, float w, const float*b)
+    void   Aligned::Sub(float*a, size_t n, float w, const float*b)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
+
 #define __Init  __m128d W = _mm_set1_pd(w);
 #define __Worka _mm_store_pd(a+i,_mm_sub_pd(_mm_load_pd(a+i),		\
 					    _mm_mul_pd(W,_mm_load_pd(b+i))));
-    template<>
-    void A16<double>::Sub(double*a, size_t n, double w, const double*b)
+    void   Aligned::Sub(double*a, size_t n, double w, const double*b)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
-#undef  __Works
 #undef  __Worka
 
-    // SSE::U16<>::Mul, SSE::A16<>::Mul
-#define __Works f[i] *= v;
+#undef  __Works
+    // for(i=0; i!=n; ++i) f[i]*=v;
+#define __Works f[i]*=v;
+
+#define __Init  __m128 V = _mm_set1_epi32(v);
+#define __Worku _mm_storeu_epi32(f+i,_mm_mul_epi32(_mm_loadu_epi32(f+i),V));
+#define __Worka _mm_store_epi32(f+i,_mm_mul_epi32(_mm_load_epi32(f+i),V));
+    void UnAligned::Mul(int*f, size_t n, int v)
+    { __LoopXInt("Mul",__Init,__Works,__Worku,__Worka); }
+    void   Aligned::Mul(int*f, size_t n, int v)
+    { __LoopXInt16(__Init,__Works,__Worka); }
+#undef  __Init
+#undef  __Worku
+#undef  __Worka
+
 #define __Init  __m128 V = _mm_set1_ps(v);
 #define __Worku _mm_storeu_ps(f+i,_mm_mul_ps(_mm_loadu_ps(f+i),V));
 #define __Worka _mm_store_ps(f+i,_mm_mul_ps(_mm_load_ps(f+i),V));
-    template<>
-    void U16<float>::Mul(float*f, size_t n, float v)
+    void UnAligned::Mul(float*f, size_t n, float v)
     { __LoopFloat("Mul",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<float>::Mul(float*f, size_t n, float v)
+    void   Aligned::Mul(float*f, size_t n, float v)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -514,58 +471,62 @@ namespace WDutils {
 #define __Init  __m128d V = _mm_set1_pd(v);
 #define __Worku _mm_storeu_pd(f+i,_mm_mul_pd(_mm_loadu_pd(f+i),V));
 #define __Worka _mm_store_pd(f+i,_mm_mul_pd(_mm_load_pd(f+i),V));
-    template<>
-    void U16<double>::Mul(double*f, size_t n, double v)
+    void UnAligned::Mul(double*f, size_t n, double v)
     { __LoopDouble("Mul",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<double>::Mul(double*f, size_t n, double v)
+    void   Aligned::Mul(double*f, size_t n, double v)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
-#undef  __Works
 
+#undef  __Works
+    // for(i=0; i!=n; ++i) f[i]*=b[i];
+#define __Works a[i]*=b[i];
 #define __Init
-#define __Works a[i] -= b[i];
+
+#define __Worka _mm_store_epi32(a+i,_mm_mul_epi32(_mm_load_epi32(a+i),	\
+						  _mm_load_epi32(b+i)));
+    void   Aligned::Mul(int*a, size_t n, const int*b)
+    { __LoopXInt16(__Init,__Works,__Worka); }
+#undef  __Worka
+
 #define __Worka _mm_store_ps(a+i,_mm_mul_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
-    template<>
-    void A16<float>::Mul(float*a, size_t n, const float*b)
+    void   Aligned::Mul(float*a, size_t n, const float*b)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
+
 #define __Worka _mm_store_pd(a+i,_mm_mul_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
-    template<>
-    void A16<double>::Mul(double*a, size_t n, const double*b)
+    void   Aligned::Mul(double*a, size_t n, const double*b)
     { __LoopDouble16(__Init,__Works,__Worka); }
-#undef  __Init
-#undef  __Works
 #undef  __Worka
 
-    // SSE::A16<>::Div
+#undef  __Init
+#undef  __Works
+    // for(i=0; i!=n; ++i) a[i]/=b[i];
+#define __Works a[i]/=b[i];
 #define __Init
-#define __Works a[i] -= b[i];
+
 #define __Worka _mm_store_ps(a+i,_mm_div_ps(_mm_load_ps(a+i),_mm_load_ps(b+i)));
-    template<>
-    void A16<float>::Div(float*a, size_t n, const float*b)
+    void   Aligned::Div(float*a, size_t n, const float*b)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
+
 #define __Worka _mm_store_pd(a+i,_mm_div_pd(_mm_load_pd(a+i),_mm_load_pd(b+i)));
-    template<>
-    void A16<double>::Div(double*a, size_t n, const double*b)
+    void   Aligned::Div(double*a, size_t n, const double*b)
     { __LoopDouble16(__Init,__Works,__Worka); }
-#undef  __Init
-#undef  __Works
 #undef  __Worka
 
-    // SSE::U16<>::Inv, SSE::A16<>::Inv
-#define __Works f[i] = x/f[i];
+#undef  __Init
+#undef  __Works
+    // for(i=0; i!=n; ++i) f[i]=x/f[i];
+#define __Works f[i]=x/f[i];
+
 #define __Init  __m128 X = _mm_set1_ps(x);
 #define __Worku _mm_storeu_ps(f+i,_mm_div_ps(X,_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_div_ps(X,_mm_load_ps(f+i)));
-    template<>
-    void U16<float>::Inv(float*f, size_t n, float x)
+    void UnAligned::Inv(float*f, size_t n, float x)
     { __LoopFloat("Inv",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<float>::Inv(float*f, size_t n, float x)
+    void   Aligned::Inv(float*f, size_t n, float x)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
@@ -574,75 +535,261 @@ namespace WDutils {
 #define __Init  __m128d X = _mm_set1_pd(x);
 #define __Worku _mm_storeu_pd(f+i,_mm_div_pd(X,_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_div_pd(X,_mm_load_pd(f+i)));
-    template<>
-    void U16<double>::Inv(double*f, size_t n, double x)
+    void UnAligned::Inv(double*f, size_t n, double x)
     { __LoopDouble("Inv",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<double>::Inv(double*f, size_t n, double x)
+    void   Aligned::Inv(double*f, size_t n, double x)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worku
 #undef  __Worka
+
 #undef  __Works
+    // for(i=0; i!=n; ++i) a[i]=x/b[i];
+#define __Works a[i]=x/b[i];
 
 #define __Init  __m128 X = _mm_set1_ps(x);
-#define __Works a[i] = x/b[i];
 #define __Worka _mm_store_ps(a+i,_mm_div_ps(X,_mm_load_ps(b+i)));
-    template<>
-    void A16<float>::Inv(float*a, size_t n, float x, const float*b)
+    void   Aligned::Inv(float*a, size_t n, float x, const float*b)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Worka
+
 #define __Init  __m128d X = _mm_set1_pd(x);
 #define __Worka _mm_store_pd(a+i,_mm_div_pd(X,_mm_load_pd(b+i)));
-    template<>
-    void A16<double>::Inv(double*a, size_t n, double x, const double*b)
+    void   Aligned::Inv(double*a, size_t n, double x, const double*b)
     { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
-#undef  __Works
 #undef  __Worka
 
-    // SSE::U16<>::Sqrt, SSE::A16<>::Sqrt
-#define __Works f[i] = std::sqrt(f[i]);
+#undef  __Works
+    // for(i=0; i!=n; ++i) f[i]=std::sqrt(f[i])
+#define __Works f[i]=std::sqrt(f[i]);
 #define __Init
+
 #define __Worku _mm_storeu_ps(f+i,_mm_sqrt_ps(_mm_loadu_ps(f+i)));
 #define __Worka _mm_store_ps(f+i,_mm_sqrt_ps(_mm_load_ps(f+i)));
-    template<>
-    void U16<float>::Sqrt(float*f, size_t n)
+    void UnAligned::Sqrt(float*f, size_t n)
     { __LoopFloat("Sqrt",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<float>::Sqrt(float*f, size_t n)
+    void   Aligned::Sqrt(float*f, size_t n)
     { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worku
 #undef  __Worka
 
 #define __Worku _mm_storeu_pd(f+i,_mm_sqrt_pd(_mm_loadu_pd(f+i)));
 #define __Worka _mm_store_pd(f+i,_mm_sqrt_pd(_mm_load_pd(f+i)));
-    template<>
-    void U16<double>::Sqrt(double*f, size_t n)
+    void UnAligned::Sqrt(double*f, size_t n)
     { __LoopDouble("Sqrt",__Init,__Works,__Worku,__Worka); }
-    template<>
-    void A16<double>::Sqrt(double*f, size_t n)
+    void   Aligned::Sqrt(double*f, size_t n)
     { __LoopDouble16(__Init,__Works,__Worka); }
-#undef  __Init
 #undef  __Worku
 #undef  __Worka
-#undef  __Works
 
-#define __Init
-#define __Works a[i] = std::sqrt(b[i]);
-#define __Worka _mm_store_ps(a+i,_mm_sqrt_ps(_mm_load_ps(b+i)));
-    template<>
-    void A16<float>::Sqrt(float*a, size_t n, const float*b)
-    { __LoopFloat16(__Init,__Works,__Worka); }
-#undef  __Worka
-#define __Worka _mm_store_pd(a+i,_mm_sqrt_pd(_mm_load_pd(b+i)));
-    template<>
-    void A16<double>::Sqrt(double*a, size_t n, const double*b)
-    { __LoopDouble16(__Init,__Works,__Worka); }
 #undef  __Init
 #undef  __Works
+    // for(i=0; i!=n; ++i) a[i]=std::sqrt(b[i])
+#define __Works a[i]=std::sqrt(b[i]);
+#define __Init
+
+#define __Worka _mm_store_ps(a+i,_mm_sqrt_ps(_mm_load_ps(b+i)));
+    void   Aligned::Sqrt(float*a, size_t n, const float*b)
+    { __LoopFloat16(__Init,__Works,__Worka); }
 #undef  __Worka
+
+#define __Worka _mm_store_pd(a+i,_mm_sqrt_pd(_mm_load_pd(b+i)));
+    void   Aligned::Sqrt(double*a, size_t n, const double*b)
+    { __LoopDouble16(__Init,__Works,__Worka); }
+#undef  __Worka
+
+#undef  __Init
+#undef  __Works
+    // S=0; for(i=0; i!=n; ++i) S+=f[i]; return S;
+#define __Works tm+=f[i];
+
+#ifdef __SSE__
+# define __FloatTmp  __m128 Tm = _mm_setzero_ps();float tm(0.f)
+# define __FloatRet  return _mm_getsum_ps(Tm) + tm
+#else
+# define __FloatTmp  float tm(0.f);	
+# define __FloatRet  return tm;
+#endif
+
+#ifdef __SSE2__
+
+# define __IntTmp    __m128i Tm = _mm_setzero_si128(); int tm(0)
+# define __IntRet    return _mm_getsum_epi32(Tm) + tm
+
+# define __DoubleTmp __m128d Tm = _mm_setzero_pd(); double tm(0.0)
+# define __DoubleRet							\
+    __attribute__ ((aligned(16))) double tmp[2];			\
+    _mm_store_pd(tmp,Tm);						\
+    return tmp[0]+tmp[1] + tm
+
+#else
+
+# define __IntTmp    int tm(0)
+# define __IntRet    return tm
+
+# define __DoubleTmp double tm(0.0)
+# define __DoubleRet return tm
+
+#endif
+
+#define __Init
+
+#define __Worka Tm = _mm_add_epi32(Tm,_mm_load_epi32(f+i));
+#define __Worku Tm = _mm_add_epi32(Tm,_mm_loadu_epi32(f+i));
+    int UnAligned::Sum(const int*f, size_t n)
+    {
+      __IntTmp;
+      __LoopInt("Sum",__Init,__Works,__Worku,__Worka);
+      __IntRet;
+    }
+    int   Aligned::Sum(const int*f, size_t n)
+    {
+      __IntTmp;
+      __LoopInt16(__Init,__Works,__Worka);
+      __IntRet;
+    }
+#undef  __Worku
+#undef  __Worka
+
+#define __Worka Tm = _mm_add_ps(Tm,_mm_load_ps(f+i));
+#define __Worku Tm = _mm_add_ps(Tm,_mm_loadu_ps(f+i));
+    float UnAligned::Sum(const float*f, size_t n)
+    {
+      __FloatTmp;
+      __LoopFloat("Sum",__Init,__Works,__Worku,__Worka);
+      __FloatRet;
+    }
+    float   Aligned::Sum(const float*f, size_t n)
+    {
+      __FloatTmp;
+      __LoopFloat16(__Init,__Works,__Worka);
+      __FloatRet;
+    }
+#undef  __Worku
+#undef  __Worka
+
+#define __Worka Tm = _mm_add_pd(Tm,_mm_load_pd(f+i));
+#define __Worku Tm = _mm_add_pd(Tm,_mm_loadu_pd(f+i));
+    double UnAligned::Sum(const double*f, size_t n)
+    {
+      __DoubleTmp;
+      __LoopDouble("Sum",__Init,__Works,__Worku,__Worka);
+      __DoubleRet;
+    }
+    double   Aligned::Sum(const double*f, size_t n)
+    {
+      __DoubleTmp;
+      __LoopDouble16(__Init,__Works,__Worka);
+      __DoubleRet;
+    }
+#undef  __Worku
+#undef  __Worka
+
+#undef  __Works
+    // S=0; for(i=0; i!=n; ++i) S+=f[i]*f[i]; return S;
+#define __Works tm+=f[i]*f[i];
+
+#define __Worka __m128i iF=_mm_load_epi32(f+i); \
+    Tm = _mm_add_epi32(Tm,_mm_mul_epi32(iF,iF));
+#define __Worku __m128i iF=_mm_loadu_epi32(f+i); \
+    Tm = _mm_add_epi32(Tm,_mm_mul_epi32(iF,iF));
+    int UnAligned::Norm(const int*f, size_t n)
+    {
+      __IntTmp;
+      __LoopXInt("Norm",__Init,__Works,__Worku,__Worka);
+      __IntRet;
+    }
+    int   Aligned::Norm(const int*f, size_t n)
+    {
+      __IntTmp;
+      __LoopXInt16(__Init,__Works,__Worka);
+      __IntRet;
+    }
+#undef  __Worku
+#undef  __Worka
+
+#define __Worka __m128 iF=_mm_load_ps(f+i); \
+    Tm = _mm_add_ps(Tm,_mm_mul_ps(iF,iF));
+#define __Worku __m128 iF=_mm_loadu_ps(f+i); \
+    Tm = _mm_add_ps(Tm,_mm_mul_ps(iF,iF));
+    float UnAligned::Norm(const float*f, size_t n)
+    {
+      __FloatTmp;
+      __LoopFloat("Norm",__Init,__Works,__Worku,__Worka);
+      __FloatRet;
+    }
+    float   Aligned::Norm(const float*f, size_t n)
+    {
+      __FloatTmp;
+      __LoopFloat16(__Init,__Works,__Worka);
+      __FloatRet;
+    }
+#undef  __Worku
+#undef  __Worka
+
+#define __Worka __m128d iF=_mm_load_pd(f+i); \
+    Tm = _mm_add_pd(Tm,_mm_mul_pd(iF,iF));
+#define __Worku __m128d iF=_mm_loadu_pd(f+i); \
+    Tm = _mm_add_pd(Tm,_mm_mul_pd(iF,iF));
+    double UnAligned::Norm(const double*f, size_t n)
+    {
+      __DoubleTmp;
+      __LoopDouble("Norm",__Init,__Works,__Worku,__Worka);
+      __DoubleRet;
+    }
+    double   Aligned::Norm(const double*f, size_t n)
+    {
+      __DoubleTmp;
+      __LoopDouble16(__Init,__Works,__Worka);
+      __DoubleRet;
+    }
+#undef  __Worku
+#undef  __Worka
+
+#undef  __Works
+    // S=0; for(i=0; i!=n; ++i) S+=a[i]*b[i]; return S;
+#define __Works tm += a[i]*b[i];
+
+#define __Worka Tm = _mm_add_epi32(Tm,_mm_mul_epi32(_mm_load_epi32(a+i), \
+						    _mm_load_epi32(b+i)));
+    int   Aligned::Dot(const int*a, size_t n, const int*b)
+    {
+      __IntTmp;
+      __LoopXInt16(__Init,__Works,__Worka);
+      __IntRet;
+    }
+#undef  __Worka
+
+#define __Worka Tm = _mm_add_ps(Tm,_mm_mul_ps(_mm_load_ps(a+i),		\
+					      _mm_load_ps(b+i)));
+    float   Aligned::Dot(const float*a, size_t n, const float*b)
+    {
+      __FloatTmp;
+      __LoopFloat16(__Init,__Works,__Worka);
+      __FloatRet;
+    }
+#undef  __Worka
+
+#define __Worka Tm = _mm_add_pd(Tm,_mm_mul_pd(_mm_load_pd(a+i),		\
+					      _mm_load_pd(b+i)));
+    double   Aligned::Dot(const double*a, size_t n, const double*b)
+    {
+      __DoubleTmp;
+      __LoopDouble16(__Init,__Works,__Worka);
+      __DoubleRet;
+    }
+#undef  __Worka
+
+#undef  __Init
+#undef  __IntTmp
+#undef  __IntRet
+#undef  __FloatTmp
+#undef  __FloatRet
+#undef  __DoubleTmp
+#undef  __DoubleRet
+#undef  __Works
     //
 #undef __Loop2SSE
 #undef __Loop2SSE16

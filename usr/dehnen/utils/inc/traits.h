@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2005-2007, 2010
+/// \date   2005-2007, 2010-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2005-2007, 2010 Walter Dehnen
+// Copyright (C) 2005-2007, 2010-2011 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -51,8 +51,8 @@ namespace WDutils {
     template<typename I, typename U> struct __ISIZE {
       typedef I integer_s;
       typedef U integer_u;
-      static const int size_s = sizeof(integer_s);
-      static const int size_u = sizeof(integer_u);
+      WDutilsStaticAssert(sizeof(integer_s) == sizeof(integer_u));
+      static const int size = sizeof(integer_s);
     };
 
     template<int> struct __ITRAITS;
@@ -67,25 +67,20 @@ namespace WDutils {
     template<> struct __ITRAITS<4> :
       public __ISIZE<long long, unsigned long long> {};
 
-    template<int WORDS> struct __IWORDS {
-      static const int STYPE = 
-    __ITRAITS<0>::size_s == WORDS ? 0 :
-    __ITRAITS<1>::size_s == WORDS ? 1 :
-    __ITRAITS<2>::size_s == WORDS ? 2 :
-    __ITRAITS<3>::size_s == WORDS ? 3 :
-    __ITRAITS<4>::size_s == WORDS ? 4 : 5;
-      typedef typename __ITRAITS<STYPE>::integer_s integer_s;
-      static const int UTYPE = 
-    __ITRAITS<0>::size_u == WORDS ? 0 :
-    __ITRAITS<1>::size_u == WORDS ? 1 :
-    __ITRAITS<2>::size_u == WORDS ? 2 :
-    __ITRAITS<3>::size_u == WORDS ? 3 :
-    __ITRAITS<4>::size_u == WORDS ? 4 : 5;
-      typedef typename __ITRAITS<UTYPE>::integer_u integer_u;
-
-      WDutilsStaticAssert(sizeof(integer_s) == WORDS &&
-			  sizeof(integer_u) == WORDS   );
-
+    template<int WORDS> struct __IWORDS
+    {
+    private:
+      static const int TYPE = 
+    __ITRAITS<0>::size == WORDS ? 0 :
+    __ITRAITS<1>::size == WORDS ? 1 :
+    __ITRAITS<2>::size == WORDS ? 2 :
+    __ITRAITS<3>::size == WORDS ? 3 :
+    __ITRAITS<4>::size == WORDS ? 4 : 5;
+    public:
+      typedef typename __ITRAITS<TYPE>::integer_s integer_s;
+      typedef typename __ITRAITS<TYPE>::integer_u integer_u;
+    private:
+      WDutilsStaticAssert(sizeof(integer_s) == WORDS);
     };
   } // namespace meta {
 

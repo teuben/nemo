@@ -60,6 +60,7 @@ namespace WDutils {
       static const bool identical = true;
       static const bool different = false;
     };
+#define WDutilsSameType(T1,T2) WDutils::meta::TypeCompare<T1,T2>::identical
     /// static type information: an extension of std::numeric_limits<>
     /// \note The only additional member indicates a floating point type; @c
     ///       std::numeric_limits<>::is_integer cannot be used instead as it's
@@ -330,7 +331,7 @@ namespace WDutils {
     static int max_omp_proc()
     { return Info.__omp_proc; }
     /// # openMP threads to be used, may exceed @a max_omp_proc()
-    /// \note defaults to 0, implying openMP is not supposed to be used
+    /// \note defaults to max_omp_proc, implying openMP is used if available
     static int omp_threads()
     { return Info.__omp_size; }
     /// set # openMP threads

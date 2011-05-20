@@ -7,11 +7,11 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2009,2010
+/// \date   2009-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2009,2010 Walter Dehnen
+// Copyright (C) 2009-2011 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -70,6 +70,12 @@ extern "C" {
   _mm_and_pd (__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
 #  define _mm_signmove_pd(__x,__y)					\
   _mm_or_pd(_mm_signmask_pd(__x),_mm_abs_pd(__y))
+
+//
+// conversion:  two __m128d  [D,D],[D,D]  -->  one __m128  [S,S,S,S]
+// 
+# define _mm_cvt2pd_ps(__A,__B) \
+  _mm_movelh_ps(_mm_cvtpd_ps(__A),_mm_cvtpd_ps(__B))
 
 //
 // macros for |x|, -x, -|x|, |x-y|, and sign(x)*|y| of packed single 
@@ -257,169 +263,98 @@ namespace WDutils {
     template<int N, typename __I> inline
     __I bottom(__I i) { return __Aux<N>::bot(i); }
 
-    // auxiliary for routines below
-    template<typename T> struct U16
-    {
-      WDutilsStaticAssert((// meta::TypeCompare<T,int>::identical    ||
-			   meta::TypeCompare<T,float>::identical  ||
-			   meta::TypeCompare<T,double>::identical ));
-      static void Ass(T*, size_t, T);
-      static void Neg(T*, size_t);
-      static void Add(T*, size_t, T);
-      static void Sub(T*, size_t, T);
-      static void Mul(T*, size_t, T);
-      static void Div(T*f, size_t n, T x) WDutils_THROWING
-      { 
-// 	WDutilsStaticAssert(meta::TypeInfo<T>::is_floating_point);
-	if(x==T(0)) WDutils_THROW("SSE::Div() by 0\n");
-	Mul(f,n,T(1)/x);
-      }
-      static void Inv(T*, size_t n, T x);
-      static void Sqrt(T*f, size_t n);
-      static T Sum(const T*, size_t);
-    };
-    // special case: T=int not all implemented (yet?)
-    template<> struct U16<int>
-    {
-      typedef int T;
-      static void Ass(T*, size_t, T);
-//       static void Neg(T*, size_t);
-      static void Add(T*, size_t, T);
-//       static void Sub(T*, size_t, T);
-//       static void Mul(T*, size_t, T);
-//       static T Sum(const T*, size_t);
-    };
-
-    /// \name simple manipulations of each array element
-    /// \note up to about 16/sizeof(T) times faster than simple code
-    //@{
-
-    /// assign same value to all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
-    template<typename T>
-    inline void Ass(int*f, size_t n, int x)
-    { U16<T>::Ass(f,n,x); }
-
-    /// assign element-wise to another array
-    /// \code for(size_t i=0; i!=n; ++i) a[i] = b[i]; \endcode
-    template<typename T>
-    inline void Ass(T*a, size_t n, const T*b)
-    { std::memcpy(a,b,n*sizeof(T)); }
-
-    /// negate all elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = -f[i]; \endcode
-    template<typename T>
-    inline void Neg(T*f, size_t n)
-    { U16<T>::Neg(f,n); }
-
-    /// set eaqch element to zero
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
-    template<typename T>
-    inline void Reset(T*f, size_t n)
-    { Ass(f,n,T(0)); }
-
-    /// add same value to each elements
-    /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
-    template<typename T>
-    inline void Add(T*f, size_t n, T x)
-    { U16<T>::Add(f,n,x); }
-
-    /// subtract same value from each element
-    /// \code for(size_t i=0; i!=n; ++i) f[i] -= x; \endcode
-    template<typename T>
-    inline void Sub(T*f, size_t n, T x)
-    { U16<T>::Sub(f,n,x); }
-
-    /// multiply each element with same value
-    /// \code for(size_t i=0; i!=n; ++i) f[i] *= x; \endcode
-    /// \note up to 4 times faster than simple code
-    template<typename T>
-    inline void Mul(T*f, size_t n, T x)
-    { U16<T>::Mul(f,n,x); }
-
-    /// sum of all elements
-    /// \code float S(0); for(size_t i=0; i!=n; ++i) S+=f[i]; return S;
-    /// \endcode
-    template<typename T>
-    inline T Sum(const T*f, size_t n)
-    { return U16<T>::Sum(f,n); }
-
-    /// divide each element by same value
-    /// \code for(size_t i=0; i!=n; ++i) f[i] /= x; \endcode
-    template<typename T>
-    inline void Div(T*f, size_t n, T x)
-    { U16<T>::Div(f,n,x); }
-
-    /// replace each elements by its inverse times a constant
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = x/f[i]; \endcode
-    template<typename T>
-    inline void Inv(float*f, size_t n, float x)
-    { U16<T>::Inv(f,n,x); }
-
-    /// replace each element by its inverse
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = 1/f[i]; \endcode
-    template<typename T>
-    inline void Reciprocal(T*f, size_t n)
-    { Inv(f,n,T(1)); }
-
-    /// replace each element by its square root
-    /// \code for(size_t i=0; i!=n; ++i) f[i] = std::sqrt(f[i]); \endcode
-    template<typename T>
-    inline void Sqrt(float*f, size_t n)
-    { U16<T>::Sqrt(f,n); }
-    //@}
-
-    // auxiliary for struct Align below
-    template<typename T> struct A16
-    {
-      WDutilsStaticAssert((// meta::TypeCompare<T,int>::identical    ||
-			   meta::TypeCompare<T,float>::identical  ||
-			   meta::TypeCompare<T,double>::identical));
-      static void Ass(T*, size_t, T);
-      static void Ass(T*, size_t, T, const T*);
-      static void Neg(T*, size_t);
-      static void Add(T*, size_t, T);
-      static void Add(T*, size_t, const T*);
-      static void Add(T*, size_t, T, const T*);
-      static void Sub(T*, size_t, T);
-      static void Sub(T*, size_t, const T*);
-      static void Sub(T*, size_t, T, const T*);
-      static void Mul(T*, size_t, T);
-      static void Mul(T*, size_t, const T*);
-      static void Div(T*f, size_t n, T x) WDutils_THROWING { 
-// 	WDutilsStaticAssert(meta::TypeInfo<T>::is_floating_point);
-	if(x==T(0)) WDutils_THROW("SSE::Aligned::Div() by 0\n");
-	Mul(f,n,T(1)/x);
-      }
-      static void Div(T*, size_t, const T*);
-      static void Inv(T*, size_t, T);
-      static void Inv(T*, size_t, T, const T*);
-      static void Sqrt(T*, size_t);
-      static void Sqrt(T*, size_t, const T*);
-      static T Sum(const T*, size_t);
-      static T Dot(const T*, size_t, const T*);
-    };
-    // special case: T=int not all implemented (yet?)
-    template<> struct A16<int>
-    {
-      typedef int T;
-      static void Ass(T*, size_t, T);
-//       static void Ass(T*, size_t, T, const T*);
-//       static void Neg(T*, size_t);
-      static void Add(T*, size_t, T);
-      static void Add(T*, size_t, const T*);
-//       static void Add(T*, size_t, T, const T*);
-//       static void Sub(T*, size_t, T);
-//       static void Sub(T*, size_t, const T*);
-//       static void Sub(T*, size_t, T, const T*);
-//       static void Mul(T*, size_t, T);
-//       static void Mul(T*, size_t, const T*);
-//       static void Div(T*, size_t, const T*);
-//       static void Inv(T*, size_t, T);
-//       static void Inv(T*, size_t, T, const T*);
-//       static T Sum(const T*, size_t);
-//       static T Dot(const T*, size_t, const T*);
-    };
+    ///
+    /// simple array manipulations for unaligned arrays
+    ///
+    /// \note routines are up to 16/sizeof(T) times faster than simple code
+    ///
+    struct UnAligned {
+      /// \name assign to each element of array
+      //@{
+      /// \code for(i=0; i!=n; ++i) f[i]=x; \endcode
+      static void Ass(int*f, size_t n, int x);
+      /// \code for(i=0; i!=n; ++i) f[i]=x; \endcode
+      static void Ass(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]=x; \endcode
+      static void Ass(double*f, size_t n, double x);
+      //
+      /// \code for(size_t i=0; i!=n; ++i) a[i] = b[i]; \endcode
+      template<typename T>
+      static void Ass(T*a, size_t n, const T*b)
+      { std::memcpy(a,b,n*sizeof(T)); }
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=-f[i]; \endcode
+      static void Neg(int*f, size_t n);
+      /// \code for(i=0; i!=n; ++i) f[i]=-f[i]; \endcode
+      static void Neg(float*f, size_t n);
+      /// \code for(i=0; i!=n; ++i) f[i]=-f[i]; \endcode
+      static void Neg(double*f, size_t n);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=0; \endcode
+      template<typename T>
+      static void Reset(T*f, size_t n)
+      { Ass(f,n,T(0)); }
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]+=x; \endcode
+      static void Add(int*f, size_t n, int x);
+      /// \code for(i=0; i!=n; ++i) f[i]+=x; \endcode
+      static void Add(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]+=x; \endcode
+      static void Add(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]-=x; \endcode
+      static void Sub(int*f, size_t n, int x);
+      /// \code for(i=0; i!=n; ++i) f[i]-=x; \endcode
+      static void Sub(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]-=x; \endcode
+      static void Sub(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]*=x; \endcode
+      static void Mul(int*f, size_t n, int x);
+      /// \code for(i=0; i!=n; ++i) f[i]*=x; \endcode
+      static void Mul(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]*=x; \endcode
+      static void Mul(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]/=x; \endcode
+      static void Div(float*f, size_t n, float x)
+      { Mul(f,n,float(1.0/x)); }
+      /// \code for(i=0; i!=n; ++i) f[i]/=x; \endcode
+      static void Div(double*f, size_t n, double x)
+      { Mul(f,n,1.0/x); }
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=x/f[i]; \endcode
+      static void Inv(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]=x/f[i]; \endcode
+      static void Inv(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=1/f[i]; \endcode
+      template<typename T>
+      static void Reciprocal(T*f, size_t n)
+      { Inv(f,n,T(1)); }
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=std::sqrt(f[i]); \endcode
+      static void Sqrt(float*f, size_t n);
+      /// \code for(i=0; i!=n; ++i) f[i]=std::sqrt(f[i]); \endcode
+      static void Sqrt(double*f, size_t n);
+      //@}
+      /// \name compute property of whole array
+      //{@
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]; return S; \endcode
+      static int Sum(const int*f, size_t n);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]; return S; \endcode
+      static float Sum(const float*f, size_t n);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]; return S; \endcode
+      static double Sum(const double*f, size_t n);
+      //
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]*f[i]; return S; \endcode
+      static int Norm(const int*f, size_t n);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]*f[i]; return S; \endcode
+      static float Norm(const float*f, size_t n);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]*f[i]; return S; \endcode
+      static double Norm(const double*f, size_t n);
+      //@}
+    };// class SSE::UnAligned
 
     ///
     /// simple array manipulations for aligned arrays
@@ -431,155 +366,160 @@ namespace WDutils {
     struct Aligned {
       /// \name assign to each element of array
       //@{
-      /// assign each element to scalar
-      /// \code for(size_t i=0; i!=n; ++i) f[i] = x; \endcode
-      template<typename T>
-      static void Ass(T*f, size_t n, T x)
-      { A16<T>::Ass(f,n,x); }
-
-      /// assign element-wise to another array
-      /// \code for(size_t i=0; i!=n; ++i) a[i] = b[i]; \endcode
+      /// \code for(i=0; i!=n; ++i) f[i]=x; \endcode
+      static void Ass(int*f, size_t n, int x);
+      /// \code for(i=0; i!=n; ++i) f[i]=x; \endcode
+      static void Ass(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]=x; \endcode
+      static void Ass(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]=b[i]; \endcode
       /// \note this does not require 16-byte alignment
       template<typename T>
       static void Ass(T*a, size_t n, const T*b)
       { std::memcpy(a,b,n*sizeof(T)); }
-
-      /// assign element-wise to weighted array
-      /// \code for(size_t i=0; i!=n; ++i) a[i] = w*b[i]; \endcode
-      template<typename T>
-      static void Ass(T*a, size_t n, T w, const T*b)
-      { A16<T>::Ass(a,n,w,b); }
-
-      /// replace each element with its negative
-      /// \code for(size_t i=0; i!=n; ++i) f[i] = -f[i]; \endcode
-      template<typename T>
-      static void Neg(T*f, size_t n)
-      { A16<T>::Neg(f,n); }
-
-      /// set each element to zero
-      /// \code for(size_t i=0; i!=n; ++i) f[i] = 0; \endcode
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]=w*b[i]; \endcode
+      static void Ass(int*a, size_t n, int w, const int*b);
+      /// \code for(i=0; i!=n; ++i) a[i]=w*b[i]; \endcode
+      static void Ass(float*a, size_t n, float w, const float*b);
+      /// \code for(i=0; i!=n; ++i) a[i]=w*b[i]; \endcode
+      static void Ass(double*a, size_t n, double w, const double*b);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=-f[i]; \endcode
+      static void Neg(int*f, size_t n);
+      /// \code for(i=0; i!=n; ++i) f[i]=-f[i]; \endcode
+      static void Neg(float*f, size_t n);
+      /// \code for(i=0; i!=n; ++i) f[i]=-f[i]; \endcode
+      static void Neg(double*f, size_t n);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=0; \endcode
       template<typename T>
       static void Reset(T*f, size_t n)
-      { Aligned::Ass(f,n,T(0)); }
-
-      /// add same scalar to each element
-      /// \code for(size_t i=0; i!=n; ++i) f[i] += x; \endcode
-      template<typename T>
-      static void Add(T*f, size_t n, T x)
-      { A16<T>::Add(f,n,x); }
-
-      /// add another array element wise
-      /// \code for(size_t i=0; i!=n; ++i) a[i] += b[i]; \endcode
-      template<typename T>
-      static void Add(T*a, size_t n, const T*b)
-      { A16<T>::Add(a,n,b); }
-
-      /// add weighted array element wise
-      /// \code for(size_t i=0; i!=n; ++i) a[i] += w*b[i]; \endcode
-      template<typename T>
-      static void Add(T*a, size_t n, T w, const T*b)
-      { A16<T>::Add(a,n,w,b); }
-
-      /// subtract same scalar from each element
-      /// \code for(size_t i=0; i!=n; ++i) f[i] -= x; \endcode
-      template<typename T>
-      static void Sub(T*f, size_t n, T x)
-      { A16<T>::Sub(f,n,x); }
-
-      /// subtract another array element wise
-      /// \code for(size_t i=0; i!=n; ++i) a[i] -= b[i]; \endcode
-      template<typename T>
-      static void Sub(T*a, size_t n, const T*b)
-      { A16<T>::Sub(a,n,b); }
-
-      /// subtract weighted array element wise
-      /// \code for(size_t i=0; i!=n; ++i) a[i] -= w*b[i]; \endcode
-      template<typename T>
-      static void Sub(T*a, size_t n, T w, const T*b)
-      { A16<T>::Sub(a,n,w,b); }
-
-      /// multiply each element by same scalar
-      /// \code for(size_t i=0; i!=n; ++i) f[i] *= x; \endcode
-      template<typename T>
-      static void Mul(T*f, size_t n, T x)
-      { A16<T>::Mul(f,n,x); }
-
-      /// multiply element-wise with another array
-      /// \code for(size_t i=0; i!=n; ++i) a[i] *= b[i]; \endcode
-      template<typename T>
-      static void Mul(T*a, size_t n, const T*b)
-      { A16<T>::Mul(a,n,b); }
-
-      /// divide each element by same scalar
-      /// \code for(size_t i=0; i!=n; ++i) f[i] /= x; \endcode
-      template<typename T>
-      static void Div(T*f, size_t n, T x)
-      { A16<T>::Div(f,n); }
-
-      /// divide by elements of another array
-      /// \code for(size_t i=0; i!=n; ++i) a[i] /= b[i]; \endcode
-      template<typename T>
-      static void Div(T*a, size_t n, const T*b)
-      { A16<T>::Div(a,n,b); }
-
-      /// replace each elements by its inverse times a constant
-      /// \code for(size_t i=0; i!=n; ++i) f[i] = x/f[i]; \endcode
-      template<typename T>
-      static void Inv(T*f, size_t n, T x)
-      { A16<T>::Inv(f,n,x); }
-
-      /// set to constant divided by element of another array
-      /// \code for(size_t i=0; i!=n; ++i) a[i] = x/b[i]; \endcode
-      template<typename T>
-      static void Inv(T*a, size_t n, T x, const T*b)
-      { A16<T>::Inv(a,n,x,b); }
-
-      /// replace each element by its inverse
-      /// \code for(size_t i=0; i!=n; ++i) f[i] = 1/f[i]; \endcode
+      { Ass(f,n,T(0)); }
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]+=x; \endcode
+      static void Add(int*f, size_t n, int x);
+      /// \code for(i=0; i!=n; ++i) f[i]+=x; \endcode
+      static void Add(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]+=x; \endcode
+      static void Add(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]+=b[i]; \endcode
+      static void Add(int*a, size_t n, const int*b);
+      /// \code for(i=0; i!=n; ++i) a[i]+=b[i]; \endcode
+      static void Add(float*a, size_t n, const float*b);
+      /// \code for(i=0; i!=n; ++i) a[i]+=b[i]; \endcode
+      static void Add(double*a, size_t n, const double*b);
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]+=w*b[i]; \endcode
+      static void Add(int*a, size_t n, int w, const int*b);
+      /// \code for(i=0; i!=n; ++i) a[i]+=w*b[i]; \endcode
+      static void Add(float*a, size_t n, float w, const float*b);
+      /// \code for(i=0; i!=n; ++i) a[i]+=w*b[i]; \endcode
+      static void Add(double*a, size_t n, double w, const double*b);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]-=x; \endcode
+      static void Sub(int*f, size_t n, int x);
+      /// \code for(i=0; i!=n; ++i) f[i]-=x; \endcode
+      static void Sub(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]-=x; \endcode
+      static void Sub(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]-=b[i]; \endcode
+      static void Sub(int*a, size_t n, const int*b);
+      /// \code for(i=0; i!=n; ++i) a[i]-=b[i]; \endcode
+      static void Sub(float*a, size_t n, const float*b);
+      /// \code for(i=0; i!=n; ++i) a[i]-=b[i]; \endcode
+      static void Sub(double*a, size_t n, const double*b);
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]-=w*b[i]; \endcode
+      static void Sub(int*a, size_t n, int w, const int*b);
+      /// \code for(i=0; i!=n; ++i) a[i]-=w*b[i]; \endcode
+      static void Sub(float*a, size_t n, float w, const float*b);
+      /// \code for(i=0; i!=n; ++i) a[i]-=w*b[i]; \endcode
+      static void Sub(double*a, size_t n, double w, const double*b);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]*=x; \endcode
+      static void Mul(int*f, size_t n, int x);
+      /// \code for(i=0; i!=n; ++i) f[i]*=x; \endcode
+      static void Mul(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]*=x; \endcode
+      static void Mul(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]*=b[i]; \endcode
+      static void Mul(int*a, size_t n, const int*b);
+      /// \code for(i=0; i!=n; ++i) a[i]*=b[i]; \endcode
+      static void Mul(float*a, size_t n, const float*b);
+      /// \code for(i=0; i!=n; ++i) a[i]*=b[i]; \endcode
+      static void Mul(double*a, size_t n, const double*b);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]/=x; \endcode
+      static void Div(float*f, size_t n, float x)
+      { Mul(f,n,float(1.0/x)); }
+      /// \code for(i=0; i!=n; ++i) f[i]/=x; \endcode
+      static void Div(double*f, size_t n, double x)
+      { Mul(f,n,1.0/x); }
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]/=b[i]; \endcode
+      static void Div(float*a, size_t n, const float*b);
+      /// \code for(i=0; i!=n; ++i) a[i]/=b[i]; \endcode
+      static void Div(double*a, size_t n, const double*b);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=x/f[i]; \endcode
+      static void Inv(float*f, size_t n, float x);
+      /// \code for(i=0; i!=n; ++i) f[i]=x/f[i]; \endcode
+      static void Inv(double*f, size_t n, double x);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=x/b[i]; \endcode
+      static void Inv(float*f, size_t n, float x, const float*b);
+      /// \code for(i=0; i!=n; ++i) f[i]=x/b[i]; \endcode
+      static void Inv(double*f, size_t n, double x, const double*b);
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=1/f[i]; \endcode
       template<typename T>
       static void Reciprocal(T*f, size_t n)
       { Inv(f,n,T(1)); }
-
-      /// set each element to the inverse of another array
-      /// \code for(size_t i=0; i!=n; ++i) a[i] = 1/b[i]; \endcode
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]=1/b[i]; \endcode
       template<typename T>
       static void Reciprocal(T*a, size_t n, const T*b)
       { Inv(a,n,T(1),b); }
-
-      /// replace each element by its square root
-      /// \code for(size_t i=0; i!=n; ++i) f[i] = std::sqrt(f[i]); \endcode
-      template<typename T>
-      static void Sqrt(T*f, size_t n)
-      { A16<T>::Sqrt(f,n); }
-
-      /// set each element to the square root of another array
-      /// \code for(size_t i=0; i!=n; ++i) a[i] = std::sqrt(b[i]); \endcode
-      template<typename T>
-      static void Sqrt(T*a, size_t n, const T*b)
-      { A16<T>::Sqrt(a,n,b); }
-
+      //
+      /// \code for(i=0; i!=n; ++i) f[i]=std::sqrt(f[i]); \endcode
+      static void Sqrt(float*f, size_t n);
+      /// \code for(i=0; i!=n; ++i) f[i]=std::sqrt(f[i]); \endcode
+      static void Sqrt(double*f, size_t n);
+      //
+      /// \code for(i=0; i!=n; ++i) a[i]=std::sqrt(b[i]); \endcode
+      static void Sqrt(float*a, size_t n, const float*b);
+      /// \code for(i=0; i!=n; ++i) a[i]=std::sqrt(b[i]); \endcode
+      static void Sqrt(double*a, size_t n, const double*b);
       //@}
       /// \name compute property of whole array
       //{@
-
-      /// sum of all elements
-      /// \code float S(0); for(size_t i=0; i!=n; ++i) S+=f[i]; return S;
-      /// \endcode
-      template<typename T>
-      static T Sum(const T*f, size_t n)
-      { return A16<T>::Sum(f,n); }
-
-      /// dot product between two arrays
-      /// \code float S(0); for(size_t i=0; i!=n; ++i) S+=a[i]*b[i]; return S;
-      /// \endcode
-      template<typename T>
-      static T Dot(const T*a, size_t n, const T*b)
-      { return A16<T>::Dot(a,n,b); }
-
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]; return S; \endcode
+      static int Sum(const int*f, size_t n);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]; return S; \endcode
+      static float Sum(const float*f, size_t n);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]; return S; \endcode
+      static double Sum(const double*f, size_t n);
+      //
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]*f[i]; return S; \endcode
+      static int Norm(const int*f, size_t n);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]*f[i]; return S; \endcode
+      static float Norm(const float*f, size_t n);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=f[i]*f[i]; return S; \endcode
+      static double Norm(const double*f, size_t n);
+      //
+      /// \code S=0; for(i=0; i!=n; ++i) S+=a[i]*b[i]; return S; \endcode
+      static int Dot(const int*a, size_t n, const int*b);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=a[i]*b[i]; return S; \endcode
+      static float Dot(const float*a, size_t n, const float*b);
+      /// \code S=0; for(i=0; i!=n; ++i) S+=a[i]*b[i]; return S; \endcode
+      static double Dot(const double*a, size_t n, const double*b);
       //@}
     };// class SSE::Aligned
-
-
 
     /// contains some constants and code relevant for SSE coding
     /// instantinations for float and double
@@ -680,7 +620,9 @@ namespace WDutils {
     /// \note not to be confused with WDutils::Array16 in memory.h
     template<typename _F>
     class Array16 {
-      WDutilsStaticAssert( meta::TypeInfo<_F>::is_floating_point );
+      WDutilsStaticAssert( WDutilsSameType(_F,int) ||
+			   WDutilsSameType(_F,float) ||
+			   WDutilsSameType(_F,double) );
       /// copy ctor disabled to encourage references as return type etc.
       /// \note you may use  member \a assign() instead
       Array16(Array16 const&);
@@ -727,68 +669,53 @@ namespace WDutils {
       _F const&operator[] (int i) const { return _A[i]; }
       /// non-const access
       _F&operator[] (int i) { return _A[i]; }
+      /// direct access to data array
+      _F*array() { return _A; }
+      /// direct access to data array
+      const _F*array() const { return _A; }
       /// \name unary operations
       //@{
       /// reset element-wise to 0
       /// \code for(int i=0; i!=size(); ++i) A[i] = 0; \endcode
       Array16&reset()
-      {
-	A16<_F>::Ass(_A,_S,_F(0));
-	return*this;
-      }
+      { Aligned::Reset(_A,_S); return*this; }
       /// negate element-wise
       /// \code for(int i=0; i!=size(); ++i) A[i] = -A[i]; \endcode
       Array16&negate()
-      {
-	A16<_F>::Neg(_A,_S);
-	return*this;
-      }
+      { Aligned::Neg(_A,_S); return*this; }
       /// sum of all elements
       /// \code _F x(0); for(int i=0; i!=size(); ++i) x+=A[i]; return x;
       /// \endcode
       _F sum() const
-      {
-	reset_tail();
-	return A16<_F>::Sum(_A,_S);
-      }
+      { reset_tail(); return Aligned::Sum(_A,_S); }
+      /// sum of all elements squared
+      /// \code _F x(0); for(int i=0; i!=size(); ++i) x+=A[i]*A[i]; return x;
+      /// \endcode
+      _F norm() const
+      { reset_tail(); return Aligned::Norm(_A,_S); }
       //@}
       /// \name binary operations with scalar
       //@{
       /// assign element-wise to scalar
       /// \code for(int i=0; i!=size(); ++i) A[i] = x; \endcode
       Array16&operator=(_F x)
-      {
-	A16<_F>::Ass(_A,_S,x);
-	return*this;
-      }
+      { Aligned::Ass(_A,_S,x); return*this; }
       /// add a scalar to each element
       /// \code for(int i=0; i!=size(); ++i) A[i] += x; \endcode
       Array16&operator+=(_F x)
-      {
-	A16<_F>::Add(_A,_S,x);
-	return*this;
-      }
+      { Aligned::Add(_A,_S,x); return*this; }
       /// subtract a scalar from each element
       /// \code for(int i=0; i!=size(); ++i) A[i] -= x; \endcode
       Array16&operator-=(_F x)
-      {
-	A16<_F>::Sub(_A,_S,x);
-	return*this;
-      }
+      { Aligned::Sub(_A,_S,x); return*this; }
       /// multiply each element by a scalar
       /// \code for(int i=0; i!=size(); ++i) A[i] *= x; \endcode
       Array16&operator*=(_F x)
-      {
-	A16<_F>::Mul(_A,_S,x);
-	return*this;
-      }
+      { Aligned::Mul(_A,_S,x); return*this; }
       /// divide each element by a scalar
       /// \code for(int i=0; i!=size(); ++i) A[i] *= x; \endcode
       Array16&operator/=(_F x) WDutils_THROWING
-      {
-	A16<_F>::Div(_A,_S,x);
-	return*this;
-      }
+      { Aligned::Div(_A,_S,x); return*this; }
       //@}
       /// \name binary operations with another Array16
       //@{
@@ -802,7 +729,7 @@ namespace WDutils {
       Array16&operator+=(Array16 const&B) WDutils_THROWING
       {
 	check_size(B,"operator+=(Array16&)");
-	A16<_F>::Add(_A,_S,B._A);
+	Aligned::Add(_A,_S,B._A);
 	return*this;
       }
       /// subtract element-wise
@@ -811,7 +738,7 @@ namespace WDutils {
       Array16&operator-=(Array16 const&B) WDutils_THROWING
       {
 	check_size(B,"operator-=(Array16&)");
-	A16<_F>::Sub(_A,_S,B._A);
+	Aligned::Sub(_A,_S,B._A);
 	return*this;
       }
       /// dot product
@@ -822,7 +749,7 @@ namespace WDutils {
       {
 	check_size(B,"operator*(Array16&)");
 	reset_tail();
-	return A16<_F>::Dot(_A,_S,B._A);
+	return Aligned::Dot(_A,_S,B._A);
       }
       //@}
       /// \name tertiary operations with scalar and another Array16
@@ -832,7 +759,7 @@ namespace WDutils {
       Array16&addtimes(Array16 const&B, _F w) WDutils_THROWING
       {
 	check_size(B,"addtimes(Array16&)");
-	A16<_F>::Add(_A,_S,w,B._A);
+	Aligned::Add(_A,_S,w,B._A);
 	return*this;
       }
       /// subtract weighted element-wise
@@ -840,7 +767,7 @@ namespace WDutils {
       Array16&subtimes(Array16 const&B, _F w) WDutils_THROWING
       {
 	check_size(B,"subtimes(Array16&)");
-	A16<_F>::Sub(_A,_S,w,B._A);
+	Aligned::Sub(_A,_S,w,B._A);
 	return*this;
       }
       //@}
