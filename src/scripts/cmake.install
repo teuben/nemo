@@ -6,28 +6,32 @@
 # e.g. http://www.cmake.org/files/v2.8/cmake-2.8.3.tar.gz
 
 set root=http://www.cmake.org/files
-set version=2.8.3
-
+set version=2.8.4
 
 set cmake1=$root/v${version:r}/cmake-$version.tar.gz
+set cmake2=http://www.cmake.org/files/v2.8/cmake-2.8.4.tar.gz
 
-set cmake2=http://www.cmake.org/files/v2.8/cmake-2.8.3.tar.gz
 echo $cmake1
 echo $cmake2
 echo These two better be the same , or the script may fail
 
 cd $NEMO/local
 
+set url=$cmake1
 set targz=$cmake1:t
 set dir=$targz:r:r
 
-if (! -e $targz) then
-  wget $cmake1
-endif
 if (! -d $dir) then
-  tar zxf $cmake1:t
+  if (! -e $targz) then
+    wget $url
+    if ($status) then
+      curl $url > $targz
+    endif
+  endif
+  tar zxf $targz
 endif
-cd cmake-$version
+
+cd $dir
 ./configure --prefix=$NEMO
 make
 make install
