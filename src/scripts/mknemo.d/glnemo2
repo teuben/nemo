@@ -4,12 +4,16 @@
 #
 
 set dir=$NEMO/usr/jcl/glnemo2
-
-# for mac
-set args="-spec macx-g++"
+set sys=`uname -s`
 
 # for linux
 set args=""
+
+if ($sys == Darwin) then
+  # for mac
+  set args="-spec macx-g++"
+endif
+
 
 # for some implementations it is called 'qmake'
 set qmake=qmake-qt4
