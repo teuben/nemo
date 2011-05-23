@@ -2,6 +2,8 @@
 #
 # a quick hack   - Nov 2010
 #
+#  need:  libboost, libboost-system, libboost-thread
+#
 # g77:        -lfrtbegin -lg2c
 # gfortran:   -lgfortran
 
