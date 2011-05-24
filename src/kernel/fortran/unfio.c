@@ -17,6 +17,7 @@
  *    4-mar-06  using new autoconf computed value appropriate for this fortran
  *    8-may-08  support for header=0
  *   25-feb-09  added unfwrite()
+ *   21-may-11  allow swap on write
  *   
  * 
  *   TODO: with a keyword like ssize=4::20,8::10,1::100
@@ -28,13 +29,14 @@
 #include <unfio.h>
 
 static bool do_swap;    /* (re)set in a call to unfswap() */
+static bool do_swap_write = FALSE;
 
 extern void bswap(void *vdat, int len, int cnt);
 
 #ifdef UNFIO_HDR_SIZE
 static int hdr_size = UNFIO_HDR_SIZE;   /* g77 uses 4, gfortran uses 8 */
 #else
-static int hdr_size = 4;                /* old standard default */
+static int hdr_size = 4;                /* old standard/hardcoded default */
 #endif
 
 
@@ -181,6 +183,7 @@ int unfread(stream fp, char *buf, int bufsize)
  *           or 0 if some error (e..g disk full).
  *
  * TODO: support swapping
+ *       but needs item size
  */
 
 int unfwrite(stream fp, char *buf, int bufsize)
@@ -191,11 +194,15 @@ int unfwrite(stream fp, char *buf, int bufsize)
     size = lsize = bufsize;
 
     if (hdr_size == sizeof(int)) {
+      if (do_swap_write) bswap(&size, hdr_size, 1);
       n = fwrite(&size,hdr_size,1,fp);
       if (n!=1) return 0;
+      if (do_swap_write) bswap(&size, hdr_size, 1);
     } else if (hdr_size == sizeof(long long)) {
+      if (do_swap_write) bswap(&lsize, hdr_size, 1);
       n = fwrite(&lsize,hdr_size,1,fp);
       if (n!=1) return 0;
+      if (do_swap_write) bswap(&lsize, hdr_size, 1);
       size = lsize; /* ieck, need to switch to size_t */
     } else if (hdr_size == 0) {
       size = bufsize;
@@ -209,11 +216,15 @@ int unfwrite(stream fp, char *buf, int bufsize)
     if (n != size) return 0;
 
     if (hdr_size == sizeof(int)) {
+      if (do_swap_write) bswap(&size, hdr_size, 1);
       n = fwrite(&size, hdr_size, 1, fp);
       if (n != 1) return 0;
+      if (do_swap_write) bswap(&size, hdr_size, 1);
     } else if  (hdr_size == sizeof(long long)) {
+      if (do_swap_write) bswap(&lsize, hdr_size, 1);
       n = fwrite(&lsize, hdr_size, 1, fp);
       if (n != 1) return 0;
+      if (do_swap_write) bswap(&lsize, hdr_size, 1);
     } 
     return size;
 }
