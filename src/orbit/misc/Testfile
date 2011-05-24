@@ -1,5 +1,5 @@
 DIR = src/orbit/misc
-BIN = mkorbit orbint otos orblist 
+BIN = mkorbit orbint orbintv otos orblist 
 NEED = $(BIN) potcode snapprint
 
 help:
@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f orb1.in snap1.in orb?.out snap?.out orb?.log
+	@rm -f orb1.in snap1.in orb?.out orb??.out snap?.out orb?.log
 
 NBODY = 10
 
