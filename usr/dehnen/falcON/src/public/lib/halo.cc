@@ -5,7 +5,7 @@
 //
 // Copyright (C) 2000-2004 Walter Dehnen
 // Copyright (C) 2005-2007 Walter Dehnen, Paul McMillan
-// Copyright (C) 2008-2010 Walter Dehnen
+// Copyright (C) 2008-2011 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -778,8 +778,13 @@ namespace {
   //  N.B. the part for when psi < last point on spline IS used, and works      
   //  for all density profiles provided ReducedDensity is done right.           
   //----------------------------------------------------------------------------
+  //  NOTE (26-05-2011) We re-normalise the integral by dividing the integrand
+  //                    (usually d^2rho/dPsi^2) by its maximum value. Strangely,
+  //                    this simple multiplication does improve the performance
+  //                    of qbulir (hinting at a problem with qbulir).
+  //----------------------------------------------------------------------------
   const ReducedDensity  *RED;
-  double nu,MT,Be,Q;                               // 1/(1-p), Mtot, beta, Q    
+  double nu,MT,Be,Q,iI;         // 1/(1-p), Mtot, beta, Q, 1/in[i]
   inline double intgQ_of_q(double q) {
     //                                                                          
     //   d Psi       Q^(1-p)                                                    
@@ -794,15 +799,15 @@ namespace {
       if(Be > 0.5) {
 	double r=MT/psi,rd1;
 	(*RED)(r,rd1);
-	return -r*rd1/psi;
+	return -r*iI*rd1/psi;
       }
       if(Be >-0.5){
 	double r=MT/psi,rd1,rd2;
 	(*RED)(r,rd1,rd2);
- 	return r/(psi*psi)*(twice(rd1) + r*rd2);
+ 	return r*iI/(psi*psi)*(twice(rd1) + r*rd2);
       }
     }
-    return (*SPLINE)(psi);
+    return iI*(*SPLINE)(psi);
   }
   //
   inline double intgQ(double z) {                  // q = z^4; dq = 4 z^3 dz    
@@ -873,7 +878,10 @@ HaloModel::HaloModel(HaloDensity const&model,
 	}
       }
       lg[i] = log(in[i]) - Logalfa;
-      if(i && lg[i]>lg[i-1]) g_nonmon=true;
+      if(i && lg[i]>lg[i-1] && !g_nonmon) {
+	g_nonmon=true;
+	falcON_Warning("HaloModel: g(Q) non-monotinic at Q=%g\n",ps[i]);
+      }
     }
   else {
     const int mm = int(1.5-B);
@@ -887,6 +895,7 @@ HaloModel::HaloModel(HaloDensity const&model,
     SPLINE = new spline<double>(ps,in);
     for(int i=0; i!=n; ++i) {
       Q = ps[i];
+      iI= 1/in[i];
       double err, g = qbulir(intgQ,0.,1.,1.e-8,&err,0,50);
       if(g<0.) {
 	g_negative = true;
@@ -899,8 +908,11 @@ HaloModel::HaloModel(HaloDensity const&model,
       else if(err>1.e-3) 
 	falcON_Warning("HaloModel: inaccurate integration for g(Q) at Q=%g\n",
 		       Q);
-      lg[i] = lfc + p1*log(Q) + log(nu*g);
-      if(i && lg[i]>lg[i-1]) g_nonmon=true;
+      lg[i] = lfc + p1*log(Q) + log(nu*g*in[i]);
+      if(i && lg[i]>lg[i-1] && !g_nonmon) {
+	g_nonmon=true;
+	falcON_Warning("HaloModel: g(Q) non-monotinic at Q=%g\n",Q);
+      }
     }
     if(g_negative) negative_g *= exp(lfc);
     delete SPLINE;
@@ -908,8 +920,6 @@ HaloModel::HaloModel(HaloDensity const&model,
   if(g_negative)
     falcON_THROW("HaloModel: g(Q)<0 g_min=%g at Q=%g = Ps(%g)",
 		 negative_g,ps[negative_i],r[negative_i]);
-  if(g_nonmon)
-    falcON_Warning("HaloModel: g(Q) non-monotinic\n");
   falcON_DEL_O(RED); RED=0;
 }
 // g(Q)

@@ -55,7 +55,7 @@ namespace falcON { namespace Manipulate {
   /// See falcON::projected_profile for details.                                
   ///                                                                           
   /// Meaning of the parameters:\n                                              
-  /// par[0-2]: position P. line of sight has direction P - 'xcen'              
+  /// par[0-2]: position P. line of sight has direction P - 'xcen'            \n
   /// par[3]: minimum # bodies in radial bin (def: 500)                       \n
   /// par[4]: minimum bin size in log(r)     (def: 0.1)                       \n
   /// file:   a C-type format string to form file name for writing profiles     
