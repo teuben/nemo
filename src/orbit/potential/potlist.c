@@ -38,7 +38,7 @@ string defv[] = {
     "format=%g\n    Format used to print numbers",
     "ndim=3\n       Poission test in 3-dim  (XYZ) or 2-dim (XY)",
     "double=\n      float or double, or automatic detection",
-    "VERSION=4.0a\n  19-sep-04 PJT",
+    "VERSION=4.0b\n  30-may-2011 PJT",
     NULL,
 };
 
@@ -177,7 +177,7 @@ void nemo_main(void)
             da[1] -= acc[1];			/* force derivative along y */
 
             pos[1]=yarr[iy]; 
-            pos[2]=zarr[iy]+dr;
+            pos[2]=zarr[iz]+dr;
             do_potential(Qdouble,&ndim,pos,acc,&pot,&time);
             if (ndim==3) da[2] -= acc[2];	/* force derivative along z */
             else da[2] = 0.0;
