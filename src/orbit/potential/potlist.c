@@ -185,7 +185,7 @@ void nemo_main(void)
             da[0] /= dr; da[1] /= dr; da[2] /= dr;
         
             printf (pfmt,
-                xarr[ix], yarr[iy], zarr[iy],		/* positions */
+                xarr[ix], yarr[iy], zarr[iz],		/* positions */
                 ax,       ay,       az,        		/* forces */
                 epot,					/* potential */
                 da[0], da[1], da[2],                    /* higher derivs */
@@ -194,7 +194,7 @@ void nemo_main(void)
                 time);                                  /* time */
         } else {
             printf (pfmt,
-                xarr[ix], yarr[iy], zarr[iy],		/* positions */
+                xarr[ix], yarr[iy], zarr[iz],		/* positions */
                 ax,       ay,       az,        		/* forces */
                 epot,					/* potential */
                 time);                                  /* time */
