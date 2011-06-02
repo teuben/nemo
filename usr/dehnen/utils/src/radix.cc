@@ -26,7 +26,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <radix.h>
-#include <parallel.h>
+#ifdef WDutilsDevel
+# include <parallel.h>
+#endif
 #include <sse.h>
 
 //
@@ -92,7 +94,7 @@ namespace {
       if(It)
 	for(int i=0; i<n; ++i)  // NOTE: we can SSE optimise here
 	  L[i] += B[0][i];
-      // this barrier seems unnecessary, but removing it gives crashes ...
+      // barrier ensures master L=B[0] remains valid until all L[i] are set
 #pragma omp barrier
     }
     /// auxialiary for sort(): slots data back in
