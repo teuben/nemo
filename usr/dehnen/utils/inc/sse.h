@@ -49,12 +49,21 @@ extern "C" {
 #  endif // WDutils_included_xmmintrin_h
 
 # ifdef __SSE2__
-#  ifndef WDutils_included_emmintrin_h
+#  ifdef __SSE4_1__
+#   ifndef WDutils_included_smmintrin_h
+#    define WDutils_included_smmintrin_h
+extern "C" {
+#    include <smmintrin.h>
+}
+#   endif // WDutils_included_smmintrin_h
+#  else
+#   ifndef WDutils_included_emmintrin_h
 #    define WDutils_included_emmintrin_h
 extern "C" {
 #    include <emmintrin.h>
 }
-#  endif // WDutils_included_emmintrin_h
+#   endif // WDutils_included_emmintrin_h
+#  endif  // __SSE4_1__
 //
 // macros for |x|, -x, -|x|, |x-y|, and sign(x)*|y| of packed double
 //
@@ -643,8 +652,8 @@ namespace WDutils {
       void check_size(Array16 const&B, const char*name) const WDutils_THROWING
       {
 	if(B._N != _N)
-	  WDutils_THROW("SSE::Array16<%s>::%s: size mismatch:%lu vs %lu\n",
-			nameof(_F),name,_N,B._N);
+	  WDutils_THROW("SSE::Array16<%s>::%s: size mismatch:%u vs %u\n",
+			nameof(_F),name, unsigned(_N), unsigned(B._N));
       }
     public:
       /// default ctor

@@ -446,7 +446,7 @@ namespace WDutils {
     // for(i=0; i!=n; ++i) f[i]*=v;
 #define __Works f[i]*=v;
 
-#define __Init  __m128 V = _mm_set1_epi32(v);
+#define __Init  __m128i V = _mm_set1_epi32(v);
 #define __Worku _mm_storeu_epi32(f+i,_mm_mul_epi32(_mm_loadu_epi32(f+i),V));
 #define __Worka _mm_store_epi32(f+i,_mm_mul_epi32(_mm_load_epi32(f+i),V));
     void UnAligned::Mul(int*f, size_t n, int v)
