@@ -834,6 +834,8 @@ HaloModel::HaloModel(HaloDensity const&model,
   // 1.1 tabulate integrand on grid considering possible cases for beta
   Array<double,1> in(n);
   RED = new ReducedDensity(DEN,RA,B);
+  double negative_v=0;
+  int    negative_i=0;
   if       (B >= 0.5) {        //  0.5 <= beta <  1  :  tabulate d red/ dpsi    
     bool integrand_negative = false;
     for(int i=0; i!=n; ++i) {
@@ -841,10 +843,17 @@ HaloModel::HaloModel(HaloDensity const&model,
 	ps1 = -mt[i]/square(r[i]);                // psi'                       
       (*RED)(r[i],rd1);                           // red'                       
       in[i] = rd1/ps1;                            // dred/dpsi                  
-      if(in[i]<0.) integrand_negative = true;
+      if(in[i]<0.) {
+	integrand_negative = true;
+	if(in[i]<negative_v) {
+	  negative_v = in[i];
+	  negative_i = i;
+	}
+      }
     }
     if(integrand_negative)
-      falcON_Warning("HaloModel: integrand for DF is negative;\n");
+      falcON_Warning("HaloModel: drho/dPsi<0 min=%g at Ps(%g) r=%g",
+		     negative_v,ps[negative_i],r[negative_i]);
   } else if(B >=-0.5) {        // -0.5 <= beta <  0.5:  tabulate d^2 red/ dpsi^2
     bool integrand_negative = false;
     for(int i=0; i!=n; ++i) {
@@ -853,10 +862,17 @@ HaloModel::HaloModel(HaloDensity const&model,
 	ps2 =-twice(ps1)/r[i]-FPi*(rh[i]);        // psi"                       
       (*RED)(r[i],rd1,rd2),                       // red', red"                 
       in[i] = (rd2*ps1 - rd1*ps2)/cube(ps1);      // d^2red/dpsi^2              
-      if(in[i]<0.) integrand_negative = true;
+      if(in[i]<0.) {
+	integrand_negative = true;
+	if(in[i]<negative_v) {
+	  negative_v = in[i];
+	  negative_i = i;
+	}
+      }
     }
     if(integrand_negative)
-      falcON_Warning("HaloModel: integrand for DF is negative;\n");
+      falcON_Warning("HaloModel: d^2rho/dPsi^2<0 min=%g at Ps(%g) r=%g",
+		     negative_v,ps[negative_i],r[negative_i]);
   } else
     falcON_THROW("HaloModel: beta < -0.5 not supported");
   // 1.2 compute g(Q) of f=L^-2B * g(Q)                                         
@@ -866,14 +882,14 @@ HaloModel::HaloModel(HaloDensity const&model,
               log( (B >= 0.5 ? 1 : ( 0.5-B)) *
 	           (B >=-0.5 ? 1 : (-0.5-B)) );
   bool   g_negative = false;
-  double negative_g = 0.;
-  int    negative_i = 0;
+  negative_i=0;
+  negative_v=0;
   if(B == 0.5  ||  B ==-0.5 ||  B ==-1.5)     // trivial cases: no integration  
     for(int i=0; i!=n; ++i) {
       if(in[i] < 0) {
 	g_negative = true;
-	if(in[i] < negative_g) { 
-	  negative_g = in[i];
+	if(in[i] < negative_v) { 
+	  negative_v = in[i];
 	  negative_i = i;
 	}
       }
@@ -900,8 +916,8 @@ HaloModel::HaloModel(HaloDensity const&model,
       if(g<0.) {
 	g_negative = true;
 	g *= pow(Q,p1);
-	if(g < negative_g) { 
-	  negative_g = g;
+	if(g < negative_v) { 
+	  negative_v = g;
 	  negative_i = i;
 	}
       }
@@ -914,12 +930,12 @@ HaloModel::HaloModel(HaloDensity const&model,
 	falcON_Warning("HaloModel: g(Q) non-monotinic at Q=%g\n",Q);
       }
     }
-    if(g_negative) negative_g *= exp(lfc);
+    if(g_negative) negative_v *= exp(lfc);
     delete SPLINE;
   }
   if(g_negative)
     falcON_THROW("HaloModel: g(Q)<0 g_min=%g at Q=%g = Ps(%g)",
-		 negative_g,ps[negative_i],r[negative_i]);
+		 negative_v,ps[negative_i],r[negative_i]);
   falcON_DEL_O(RED); RED=0;
 }
 // g(Q)
