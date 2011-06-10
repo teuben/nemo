@@ -83,7 +83,7 @@ void nemo_main()
       }
 
       /* fbuf holds the array of posvel's
-       * mbuf holds the (all the same ) masses 
+       * mbuf holds the (all the same ) masses - not used in header=f mode
        */
       fbuf = (real *) allocate(nbody*6*sizeof(real)); 
       mbuf = (real *) allocate(nbody*sizeof(real));   
