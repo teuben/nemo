@@ -23,6 +23,7 @@ namespace uns {
      enum StringData {
       // data
       Time      ,
+      Redshift  ,
       Pos       ,
       Vel       ,
       Mass      ,

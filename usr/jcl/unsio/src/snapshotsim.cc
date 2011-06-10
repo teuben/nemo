@@ -86,6 +86,7 @@ int CSnapshotSimIn::nextFrameSelect(ComponentRangeVector * crvs)
 {
   snapshot->user_select.setSelection(getSelectPart(),crvs);
   setNsel(snapshot->user_select.getNSel());
+  snapshot->setReqBits(req_bits);
   snapshot->setNsel(snapshot->user_select.getNSel());
   return(snapshot->nextFrame(snapshot->user_select.getIndexesTab(),snapshot->user_select.getNSel()));
 }

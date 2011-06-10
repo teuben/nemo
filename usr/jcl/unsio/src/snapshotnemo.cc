@@ -62,6 +62,7 @@ CSnapshotNemoIn::CSnapshotNemoIn(const std::string _name,
   aux    = NULL;
   keys   = NULL;
   last_nbody=0;
+  last_nemobits=-1;
   initparam(const_cast<char**>(argv),const_cast<char**>(defv));
   valid=isValidNemo();
 }
@@ -190,7 +191,7 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
       }
     }
     if (status != -2) { // NEMO snapshot must have particles TAG
-      if (*ionbody > last_nbody) { // we must resize arrays
+      if (*ionbody > last_nbody || (last_nemobits>0 && last_nemobits!=(*nemobits))) { // we must resize arrays
 	if (pos) delete [] pos;
 	if ( *nemobits & PosBit)  pos = new float[*ionbody*3];
 	else pos=NULL;
@@ -216,7 +217,8 @@ int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int n
 	if ( *nemobits & KeyBit)  keys = new int[*ionbody];
         else keys=NULL;
       }
-      last_nbody = *ionbody; // save nbody
+      last_nbody    = *ionbody;  // save nbody
+      last_nemobits = *nemobits; // save nemobits
       int cpt=0;
       // fill array according to selection
       for (int i=0; i<*ionbody; i++) {

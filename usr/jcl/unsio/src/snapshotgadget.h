@@ -131,19 +131,20 @@ typedef struct particle_data_lite
 
    int read (const uns::t_indexes_tab *index, const int nsel);
    int read2(const uns::t_indexes_tab *index, const int nsel);
-   int getVersion() const { return version;};
-   const uns::ComponentRangeVector getCRV() const { return crv;};
-   int   getNtotal() const { return npartTotal;};
+   int getVersion() const { return version;}
+   const uns::ComponentRangeVector getCRV() const { return crv;}
+   int   getNtotal() const { return npartTotal;}
      std::string filename,file0;
   std::ifstream in;
 
   int multiplefiles;
   bool lonely_file;
+  unsigned int load_bits, comp_bits[6];
   //data
   float * mass, * pos, * vel, * acc, *pot, * rho, * hsml, * age, * metal, * intenerg, * temp;
   int * id;
   int bits; // to store the bits components
-  float tframe;
+  float tframe,redshift;
   float ntotmasses;
   t_io_header_1 header;
   int npartTotal, npart;
@@ -154,6 +155,7 @@ typedef struct particle_data_lite
   // member data
   float * getMass()   { return mass; }
   float   getTime()   { return tframe;}
+  float   getRedshift() { return redshift;}
   float * getPos()    { return pos; }
   float * getVel()    { return vel; }
   float * getAcc()    { return acc; }
@@ -174,6 +176,8 @@ typedef struct particle_data_lite
   bool status;
   int bytes_counter;
   // method
+  template <class T> int readCompData(T * ptr, const int * index2, const int * npartOffset,
+                                      const int dim);
   bool readBlockName();
   std::string block_name;
   int readHeader(const int);
@@ -187,10 +191,16 @@ typedef struct particle_data_lite
     int len1 = readFRecord();
     in.seekg(len1,std::ios::cur);
     int len2 = readFRecord();
+    if (verbose) std::cerr << "skipping block name ["<<block_name<<"]\n";
     assert(in.good() && len1==len2);
     if (block_name == "AGE" || block_name == "Z" ) {
       //std::cerr << "len1 = " << len1 << "\nlen2 = " << len2 << "\n";
     }
+  }
+  inline void skipData(int len) {
+    bytes_counter += (len);
+    in.seekg(len,std::ios::cur);
+    assert(in.good());
   }
   // swap bytes
   inline void swapBytes(void * x,const int size) {

@@ -48,7 +48,7 @@ namespace uns {
   {
     assert(snapshot != NULL);
     assert(snapshot->isValidData()==true);
-    snapshot->setNsel(nsel);
+    snapshot->setNsel(nsel);   
     return (snapshot->nextFrame(index_tab,nsel));
   }
   // ============================================================================
@@ -57,6 +57,7 @@ namespace uns {
   {
     snapshot->user_select.setSelection(getSelectPart(),crvs);
     setNsel(snapshot->user_select.getNSel());
+     snapshot->setReqBits(req_bits);
     snapshot->setNsel(snapshot->user_select.getNSel());
     return(snapshot->nextFrame(snapshot->user_select.getIndexesTab(),snapshot->user_select.getNSel()));
   }

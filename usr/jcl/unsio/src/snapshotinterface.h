@@ -67,6 +67,7 @@ namespace uns {
       verbose = verb;
       first=true;
       valid=false;
+      req_bits=0; // requested bits
       crvs=NULL;
       crv.clear();
       stv.clear();
@@ -99,7 +100,7 @@ namespace uns {
     virtual int  getNSel() { return nsel;}
     virtual void setNsel(const int _nsel) { nsel = _nsel;}
     virtual bool isNewFrame() { return true;}
-    virtual int nextFrame(std::string bits="mxvpaekXRMAHIU");
+    virtual int nextFrame(std::string bits="");//mxvpaekXRMAHIU");
     virtual ComponentRangeVector * getCrvFromSelection() { return user_select.getCrvFromSelection();}
     virtual bool shift(std::string,const float x, const float y, const float z);
     virtual float   getEps(const std::string) { return -1.;}
@@ -112,7 +113,8 @@ namespace uns {
       if ((base=="")?0:1) {;}
       if ((ext=="")?0:1) {;}
       return -1;
-    };
+    }
+    virtual void setReqBits(const unsigned int bits) { req_bits = bits;}
     
     // normal functions        
     bool isValidData() { return valid; }
@@ -148,8 +150,8 @@ namespace uns {
     static std::string nemo_range_file;
 
     
-    int req_bits;
-    void computeBits(std::string);
+    unsigned int req_bits;
+    void computeBits(std::string _s="");
     CSelectTimeVector stv;
     void parseSelectTime();
     inline bool diffTime(const float t,const float fuzz=0.000001) {

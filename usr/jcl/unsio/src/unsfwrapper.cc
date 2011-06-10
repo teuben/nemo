@@ -24,10 +24,12 @@ namespace uns {
     // load protocol
     int uns_init_(const char *,const char *, const char * );
     int uns_load_(const int *);
+    int uns_load_opt_(const int *, const char * bits);
     int uns_close_(const int *);
     // load data
     int uns_get_nbody_( const int * id, int   * nbody            );
     int uns_get_time_ ( const int * id, float * timu             );
+    int uns_get_redshift_ ( const int * id, float * rs           );
     int uns_get_pos_  ( const int * id, float * pos   , int * size);
     int uns_get_vel_  ( const int * id, float * vel   , int * size);
     int uns_get_mass_ ( const int * id, float * mass  , int * size);
@@ -114,15 +116,42 @@ int uns_init_(const char * simname,const char * select_comp, const char * select
 //  1 sucessfull                                                               
 int uns_load_(const int * ident)
 {
-  PRINT("uns_load ident requested : "<< *ident << "\n";)
+  PRINT("uns_load ident requested : "<< *ident << "\n";);
   // look for "ident" exist in the already opened snapshots
   // return the index in the vector of -1 if false         
   int index=uns::CunsIdentifier::getUnsvIndex(*ident,&unsv);
-  PRINT("index in UNSV ="<< index << "\n";)
-
+  PRINT("index in UNSV ="<< index << "\n";);
+  
   if (index >= 0) {
     uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
-    index = snap->nextFrame();
+    index = snap->nextFrame("");
+  }
+
+  return index;
+}
+// ----------------------------------------------------------------------------
+// uns_load_opt
+// this is an optimized version of uns_load.  From the second parameter you specify
+// which data you want to load. It can speed up the loading
+// load the next time steps of the snapshot with the idendity "ident           
+// return value:                                                               
+// -1 snapshot was not open                                                    
+//  0 end of snapshot reached                                                  
+//  1 sucessfull                                                               
+int uns_load_opt_(const int * ident, const char * _bits)
+{
+  PRINT("uns_load ident requested : "<< *ident << "\n";);
+  // look for "ident" exist in the already opened snapshots
+  // return the index in the vector of -1 if false         
+  int index=uns::CunsIdentifier::getUnsvIndex(*ident,&unsv);
+  PRINT("index in UNSV ="<< index << "\n";);
+  std::string bits="";
+  bits  = tools::Ctools::fixFortran(_bits);
+
+  std::cerr << "uns_load_opt = [" << bits << "]\n";
+  if (index >= 0) {
+    uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
+    index = snap->nextFrame(bits);
   }
 
   return index;
@@ -247,6 +276,18 @@ int uns_get_time_( const int * id, float  * time)
   uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
   snap->getData("time",time);
   return 1;
+}
+// ----------------------------------------------------------------------------
+// uns_get_redshift:                                                                
+// return redshift belonging to the simulation with the identifier ident           
+int uns_get_redshift_( const int * id, float  * rs)
+{
+  int index=getUnsvIndex(*id);
+  uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
+  if (snap->getData("redshift",rs))
+    return 1;
+  else
+    return 0;
 }
 // ----------------------------------------------------------------------------
 // uns_getPos:                                                                 

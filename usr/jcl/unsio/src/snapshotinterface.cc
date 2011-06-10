@@ -40,6 +40,7 @@ namespace uns {
     int ret=0;
     computeBits(bits);
     if (isNewFrame()) {
+      computeBits(bits);
       crvs = getSnapshotRange();
       if (crvs) {
         ret=nextFrameSelect(crvs);
@@ -61,30 +62,41 @@ namespace uns {
   {
     req_bits = 0;
     if (verbose) std::cerr << "BITS ="<<bits<<"\n";
-    for (unsigned int i=0;i <bits.length();i++) {
-      switch (bits.at(i)) {
-      case 'm': req_bits |= MASS_BIT  ; break;
-      case 'x': req_bits |= POS_BIT   ; break;
-      case 'v': req_bits |= VEL_BIT   ; break;
-      case 'p': req_bits |= POT_BIT   ; break;
-      case 'a': req_bits |= ACC_BIT   ; break;
-      case 'e': req_bits |= EPS_BIT   ; break;
-      case 'k': req_bits |= KEYS_BIT  ; break;
-      case 'X': req_bits |= AUX_BIT   ; break;
-      case 'R': req_bits |= RHO_BIT   ; break;
-      case 'I': req_bits |= ID_BIT    ; break;
-      case 'U': req_bits |= U_BIT     ; break;
-      case 'M': req_bits |= METAL_BIT ; break;
-      case 'A': req_bits |= AGE_BIT   ; break;        
-      case 'H': req_bits |= HSML_BIT  ; break;        
-      default: 
-        std::cerr << "!!!!WARNING unknown requested bit : <"<<bits.at(i)<<">\n";
-        break;
+    if (bits=="") {
+      req_bits = (unsigned int) (( 1 << 31 )<<2)-1;
+      //std::cerr << "Reqbits = "<< req_bits<<"\n";
+    } 
+    else {    
+      if (bits=="none") {
+        req_bits = 0;
+      }      
+      else {
+        for (unsigned int i=0;i <bits.length();i++) {
+          switch (bits.at(i)) {
+          case 'm': req_bits |= MASS_BIT  ; break; // mass
+          case 'x': req_bits |= POS_BIT   ; break; // pos
+          case 'v': req_bits |= VEL_BIT   ; break; // vel
+          case 'p': req_bits |= POT_BIT   ; break; // potential
+          case 'a': req_bits |= ACC_BIT   ; break; // acceleration
+          case 'e': req_bits |= EPS_BIT   ; break; // softening
+          case 'k': req_bits |= KEYS_BIT  ; break; // keys (from nemo)
+          case 'X': req_bits |= AUX_BIT   ; break; // aux array (from nemo)
+          case 'R': req_bits |= RHO_BIT   ; break; // density
+          case 'I': req_bits |= ID_BIT    ; break; // Id
+          case 'U': req_bits |= U_BIT     ; break; // Internal energy
+          case 'M': req_bits |= METAL_BIT ; break; // metallicity
+          case 'A': req_bits |= AGE_BIT   ; break; // stars's age
+          case 'H': req_bits |= HSML_BIT  ; break; // hsml
+          case 'T': req_bits |= TEMP_BIT  ; break; // temperature
+          default: 
+            std::cerr << "!!!!WARNING unknown requested bit : <"<<bits.at(i)<<">\n";
+            break;
+          }
+          //std::cerr << "req_bits ["<<bits.at(i)<<"]=" <<req_bits <<"\n";
+        }
       }
-      //std::cerr << "req_bits ["<<bits.at(i)<<"]=" <<req_bits <<"\n";
     }
   }
-
   // ============================================================================
   // getRangeTime                                                                
   // split a string a:b[:c] into inf, sup,delta                                  

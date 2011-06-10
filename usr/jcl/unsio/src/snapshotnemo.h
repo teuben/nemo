@@ -52,7 +52,7 @@ private:
     float * pos, *vel, *mass, * rho, *acc, *aux, *pot;
     bool first_stream;
     int status_ionemo;
-    int last_nbody;
+    int last_nbody,last_nemobits;
     void checkBits(std::string,const int);
     bool isValidNemo();
     float *  getPos()  { //checkBits("pos",PosBit); 

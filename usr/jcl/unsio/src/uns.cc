@@ -165,6 +165,7 @@ namespace uns {
   {
     
     CunsOut::s_mapStringValues["time"       ] = uns::Time;
+    CunsOut::s_mapStringValues["redshift"   ] = uns::Redshift;
     CunsOut::s_mapStringValues["pos"        ] = uns::Pos;
     CunsOut::s_mapStringValues["vel"        ] = uns::Vel;
     CunsOut::s_mapStringValues["mass"       ] = uns::Mass;

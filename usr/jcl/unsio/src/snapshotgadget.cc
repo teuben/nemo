@@ -61,6 +61,7 @@ namespace uns {
   hsml   = NULL;
   bits   = 0;
   tframe = 0.;
+  redshift=0.;
   frecord_offset = 4;
   bytes_counter = 0;
   multiplefiles = 0;
@@ -190,23 +191,53 @@ int CSnapshotGadgetIn::close()
   return 1;
 }
 // ============================================================================
+template <class T> int CSnapshotGadgetIn::readCompData(T * ptr, const int * index2, 
+                                                       const int * npartOffset,const int dim)
+{
+  bytes_counter=0;
+  int len1 = readFRecord();
+
+  for(int k=0;k<6;k++) {   
+    if (header.npart[k]>0) { // there are particles for the component
+      int idx=index2[npartOffset[k]];                
+      if (idx != -1) {
+        readData((char *) &ptr[dim*idx], sizeof(T), dim*header.npart[k]);                  
+      } else {
+        skipData(sizeof(T)*dim*header.npart[k]);
+      }
+    }
+  }  
+  int len2 = readFRecord();
+  assert(in.good() && len1==len2 && len1==bytes_counter);
+  return 1;
+}
+#if 1
+// ============================================================================
 int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
 {
   int npartOffset[6];
   if (! is_read ) {
-    if (! pos)  pos  = new float[3*nsel];
-    if (! vel)  vel  = new float[3*nsel];
-    if (! acc)  acc  = new float[3*nsel];
-    if (! mass) mass = new float[nsel];
-    if (! pot)  pot  = new float[nsel];
-    if (! id)   id   = new int[nsel];
-    if (! age && header.npartTotal[4]>0) age = new float[header.npartTotal[4]];
-    if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0) 
+    //checkCompBits(index,nsel);
+    
+    if (! pos  && req_bits&POS_BIT )  pos  = new float[3*nsel];
+    if (! vel  && req_bits&VEL_BIT )  vel  = new float[3*nsel];
+    if (! acc  && req_bits&ACC_BIT )  acc  = new float[3*nsel];
+    if (! mass && req_bits&MASS_BIT)  mass = new float[nsel  ];
+    if (! pot  && req_bits&POT_BIT )  pot  = new float[nsel  ];
+    if (! id   && req_bits&ID_BIT  )  id   = new int  [nsel  ];
+    if (! age && header.npartTotal[4]>0 && req_bits&AGE_BIT) 
+      age = new float[header.npartTotal[4]];
+    if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0 && req_bits&METAL_BIT) 
       metal = new float[header.npartTotal[0]+header.npartTotal[4]];
     if (! intenerg && header.npartTotal[0]>0) intenerg = new float[header.npartTotal[0]];
-    if (! temp && header.npartTotal[0]>0) temp = new float[header.npartTotal[0]];
-    if (! rho && header.npartTotal[0]>0) rho = new float[header.npartTotal[0]];
-    if (! hsml&& header.npartTotal[0]>0) hsml= new float[header.npartTotal[0]];
+    if (! temp && header.npartTotal[0]>0 && req_bits&TEMP_BIT) 
+      temp = new float[header.npartTotal[0]];
+    if (! rho && header.npartTotal[0]>0 && req_bits&RHO_BIT) 
+      rho = new float[header.npartTotal[0]];
+    if (! hsml&& header.npartTotal[0]>0 && req_bits&HSML_BIT) 
+      hsml= new float[header.npartTotal[0]];
+    
+    //ComponentRange::list(&crv);
     // allocate memory
     assert(nsel<=npartTotal);
     is_read=true;
@@ -236,6 +267,271 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
       }
     }    
    
+    int z_offset  =0; // metalicity offset
+    int age_offset=0; // age offset
+    
+    // loop on all the files
+    for (int i=0; i<header.num_files || (i==0 && header.num_files==0);i++) {
+      std::string infile;
+      if (header.num_files > 0 ) { // more than one file
+        std::ostringstream stm;
+        stm << "." << i;               // add ".XX" extension
+        infile = filename + stm.str(); // new filename
+        if (i>0) {
+          close();                 // close previous file
+          int fail=open(infile);   // open new file,read header
+          assert(!fail);           // fail is true abort
+        }
+      }
+      else infile=filename;        // lonely file
+      int len1=0,len2=0;
+      bool stop=false;
+      std::string next_block_name;
+      if (version==1) next_block_name="POS";
+
+      // Read the whole file till a valid block exist
+      // or stop = true in case of Gadget1 file      
+      while (readBlockName() && !stop) {
+        if (version==1) block_name=next_block_name;
+        bool ok=false;
+        // --> Postions block
+        if (block_name=="POS" && req_bits&POS_BIT) { 
+          ok=true;
+          readCompData(pos,index2,npartOffset,3);
+        }
+        // --> Velocities block
+        if (block_name=="VEL" && req_bits&VEL_BIT) { 
+          ok=true;
+          readCompData(vel,index2,npartOffset,3);
+        }
+        // --> IDs block
+        if (block_name=="ID" && req_bits&ID_BIT) { 
+          ok=true;
+          readCompData(id,index2,npartOffset,1);
+          if (version==1) next_block_name="MASS";
+        }
+        // --> MASS block
+        if (block_name=="MASS" && req_bits&MASS_BIT ) { 
+          ok=true;
+          bytes_counter=0;
+          if (ntotmasses>0.) {    // different masses
+            len1 = readFRecord(); // we must read from disk
+          }
+          for(int k=0;k<6;k++) {
+            for(int n=0;n<header.npart[k];n++){
+              int idx=index2[npartOffset[k]+n];
+              assert(idx<nsel);
+              if (idx != -1 && (header.mass[k] == 0)) {          // variable mass selected
+                readData((char *) &mass[idx], sizeof(float), 1); // read from disk              
+              } else { 
+                if (idx == -1 && (header.mass[k] == 0)) {        // variable mass **not** selected
+                  float tmp;
+                  readData((char *) &tmp, sizeof(float), 1);     // read from disk (skip it)
+                } else {                             
+                  if (idx != -1 && (header.mass[k] != 0)) {      // constant mass selected
+                    mass[idx] = header.mass[k];                  // read from header
+                  }
+                }
+              }
+            } // for n         
+          } // for k
+          if (ntotmasses > 0.) {  // different masses
+	    len2 = readFRecord(); // we must read from disk
+	    assert(in.good() && len1==len2 && len1==bytes_counter);
+	  }
+          if (version==1) stop=true; // we stop reading for gadget1
+        }
+        // --> POT block
+        if (block_name=="POT" && req_bits&POT_BIT) { 
+          ok=true;
+          readCompData(pot,index2,npartOffset,1);
+        }
+        // --> Acceleration block
+        if (block_name=="ACCE" && req_bits&ACC_BIT) { 
+          ok=true;
+          readCompData(acc,index2,npartOffset,3);
+        }
+        // --> U block (Internal energy)
+        if (block_name=="U" && req_bits&U_BIT) { 
+          assert(header.npart[0]>0); // (gas only)         
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+          int idx=npartOffset[0];
+          assert((idx+header.npart[0])<=header.npartTotal[0]);
+          readData((char *) &intenerg[idx], sizeof(float),header.npart[0] );          
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);
+        }
+        // --> Temperature block
+        if (block_name=="NE" && req_bits&TEMP_BIT) { 
+          assert(header.npart[0]>0); // (gas only)
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+          int idx=npartOffset[0];
+          assert((idx+header.npart[0])<=header.npartTotal[0]);
+          readData((char *) &temp[idx], sizeof(float),header.npart[0] );          
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);
+        }
+        // --> RHO block (density)
+        if (block_name=="RHO" && req_bits&RHO_BIT) { 
+          assert(header.npart[0]>0); // (gas only)
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+          int idx=npartOffset[0];
+          assert((idx+header.npart[0])<=header.npartTotal[0]);
+          readData((char *) &rho[idx], sizeof(float),header.npart[0] );          
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);          
+        }
+        // --> HSML block (neighbours size)
+        if (block_name=="HSML" && req_bits&HSML_BIT) { 
+          assert(header.npart[0]>0); // (gas only)
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+          int idx=npartOffset[0];
+          assert((idx+header.npart[0])<=header.npartTotal[0]);
+          readData((char *) &hsml[idx], sizeof(float),header.npart[0] );          
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);                    
+        }
+        // --> Z block (Metalicity)
+        if (block_name=="Z" && req_bits&METAL_BIT) {  
+          assert((header.npart[0]+header.npart[4])>0); // gas+stars
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+          int idx=z_offset;
+          assert((idx+header.npart[0]+header.npart[4])<=(header.npartTotal[0]+header.npartTotal[4]));
+          readData((char *) &metal[idx], sizeof(float),header.npart[0]+header.npart[4]);          
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);                
+        }
+        // --> AGE block
+        if (block_name=="AGE" && req_bits&AGE_BIT) { 
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+	  if (len1/4 != header.npart[4]) {
+	    std::cerr << "\nWARNING: Wang's AGE bug detected.......skipping age\n";
+	    in.seekg(len1,std::ios::cur); 
+	  } else {
+	    assert(header.npart[4]>0); // stars only
+	    int idx=age_offset;
+	    assert((idx+header.npart[4])<=(header.npartTotal[4]));
+	    readData((char *) &age[idx], sizeof(float),header.npart[4]);          
+	  }
+	  len2 = readFRecord();
+	  assert(in.good() && len1==len2);// && len1==bytes_counter);  
+        }
+
+        if (!ok) {
+          if (in.eof()) {
+            stop=true;
+          }
+          else {
+            skipBlock();
+          }
+        }
+      } // end of while readBlock
+      
+      // add masses if no BLOCK_MASS present (mass inside the header)
+      if (ntotmasses == 0. && req_bits&MASS_BIT) { // no BLOCK_MASS present (mass inside the header)
+        for(int k=0;k<6;k++) {
+          for(int n=0;n<header.npart[k];n++){
+            int idx=index2[npartOffset[k]+n];
+            assert(idx<nsel);
+            if (idx != -1 && (header.mass[k] != 0)) {      // constant mass selected
+              mass[idx] = header.mass[k];                  // read from header
+            }
+          } // for n
+        } // for k
+      } // if         
+            
+      // correct the offset of the particles which have been read
+      for (int i=0;i<6;i++) {
+        npartOffset[i] = npartOffset[i]+header.npart[i];
+      }
+      // correction for metalicity and age
+      z_offset   += (header.npart[0]+header.npart[4]);
+      age_offset += header.npart[4];
+    } // end of loop on numfiles
+
+    // garbage collecting
+    delete [] index2;
+#if 0
+    std::string nemo="nemo.out";
+    const int * n=&nsel;
+    io_nemo(nemo.c_str(),"float,save,n,x,info",&n,&pos);
+#endif
+    // convert to temperature units
+    if (header.npartTotal[0] > 0) {
+      //unitConversion();
+    }
+  }
+  return 1;
+}
+#else
+// ============================================================================
+int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
+{
+  int npartOffset[6];
+  if (! is_read ) {
+    //checkCompBits(index,nsel);
+    
+    if (! pos)  pos  = new float[3*nsel];
+    if (! vel)  vel  = new float[3*nsel];
+    if (! acc)  acc  = new float[3*nsel];
+    if (! mass) mass = new float[nsel];
+    if (! pot)  pot  = new float[nsel];
+    if (! id)   id   = new int[nsel];
+    if (! age && header.npartTotal[4]>0) age = new float[header.npartTotal[4]];
+    if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0) 
+      metal = new float[header.npartTotal[0]+header.npartTotal[4]];
+    if (! intenerg && header.npartTotal[0]>0) intenerg = new float[header.npartTotal[0]];
+    if (! temp && header.npartTotal[0]>0) temp = new float[header.npartTotal[0]];
+    if (! rho && header.npartTotal[0]>0) rho = new float[header.npartTotal[0]];
+    if (! hsml&& header.npartTotal[0]>0) hsml= new float[header.npartTotal[0]];
+    
+    //ComponentRange::list(&crv);
+    // allocate memory
+    assert(nsel<=npartTotal);
+    is_read=true;
+    // allocate memory
+    assert(nsel<=npartTotal);
+    // compute offset in case of multiple gadget file
+    npartOffset[0] = 0;
+    for (int i=1;i<=5;i++) {
+      npartOffset[i] = npartOffset[i-1]+header.npartTotal[i-1];
+      if (verbose) std::cerr 
+          << "npartOffset["<<i<<"]="<<npartOffset[i]<<" npartOffset["<<i-1<<"]="
+          <<npartOffset[i-1]<<" header.npartTotal["<<i-1<<"]="<<header.npartTotal[i-1]<<"\n";
+    }
+    //for (int i=0;i<6;i++)   std::cerr << "npartOffset["<<i<<"]="<<npartOffset[i] <<"\n";
+    
+    // allocate array to store indexes 
+    int * index2  = new int[npartTotal];
+    for (int i=0; i<npartTotal; i++)
+        index2[i] = -1; // index2 init
+
+    for (int i=0, cpt=0; i<npartTotal; i++) {
+      int idx=index[i].i;
+      assert(idx<npartTotal);
+      //std::cerr << i<< " " << index[i].i << " "<< index[i].idx << " " << nsel << " " <<npartTotal << "\n";
+      if (idx != -1 ) {
+          index2[idx] = cpt++;
+      }
+    }    
+    for(int k=0;k<6;k++) {
+      int idx=index2[npartOffset[k]];
+      if (verbose) std::cerr 
+          << "npartOffset["<<k<<"]="<<npartOffset[k]<< "\n"
+          << "index2["<<npartOffset[k]<<"]="<<index2[npartOffset[k]]<< " idx="<<idx<<"\n";
+    }
     int z_offset  =0; // metalicity offset
     int age_offset=0; // age offset
     
@@ -474,15 +770,20 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
         }
         // --> AGE block
         if (block_name=="AGE") { 
-          assert(header.npart[4]>0); // stars only
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
-          int idx=age_offset;
-          assert((idx+header.npart[4])<=(header.npartTotal[4]));
-          readData((char *) &age[idx], sizeof(float),header.npart[4]);          
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);  
+	  if (len1/4 != header.npart[4]) {
+	    std::cerr << "\nWARNING: Wang's AGE bug detected.......skipping age\n";
+	    in.seekg(len1,std::ios::cur); 
+	  } else {
+	    assert(header.npart[4]>0); // stars only
+	    int idx=age_offset;
+	    assert((idx+header.npart[4])<=(header.npartTotal[4]));
+	    readData((char *) &age[idx], sizeof(float),header.npart[4]);          
+	  }
+	  len2 = readFRecord();
+	  assert(in.good() && len1==len2);// && len1==bytes_counter);  
         }
 
         if (!ok) {
@@ -531,6 +832,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
   }
   return 1;
 }
+#endif
 // ============================================================================
 // unitConversion()                                                            
 void CSnapshotGadgetIn::unitConversion()
@@ -651,6 +953,7 @@ int CSnapshotGadgetIn::readHeader(const int id)
     return 2;
   if (id==0) {                         // first time
     tframe = header.time;
+    redshift = header.redshift;
     npartTotal = 0;
     for(int k=0; k<6; k++)  {
       npartTotal += header.npartTotal[k];  // count particles
@@ -754,6 +1057,20 @@ bool CSnapshotGadgetIn::getData(const std::string comp, std::string name, int *n
     nbody=getNSel();
   }
   switch(CunsOut::s_mapStringValues[name]) {
+  case uns::Nbody :
+    if (status) {
+      *data = NULL;
+      *n = nbody;
+    } else {
+      ok = false;
+    }
+    break;  
+  case uns::Nsel   :
+    if (status) {
+      *n    = nbody;
+    } else {
+      ok=false;
+    }  
   case uns::Pos   :
     if (status && getPos()) {
       *data = &getPos()[first*3];
@@ -920,6 +1237,9 @@ bool CSnapshotGadgetIn::getData(const std::string name,float *data)
   case uns::Time   :
     *data = getTime();   
     break;
+  case uns::Redshift   :
+    *data = getRedshift();   
+    break; 
   default: ok=false;
   }
   if (verbose) {
@@ -952,6 +1272,14 @@ bool CSnapshotGadgetIn::getData(const std::string comp,const std::string name,in
       ok = false;
     }
     break;
+  case uns::Nbody :
+    if (status) {
+      *data = NULL;
+      *n = nbody;
+    } else {
+      ok = false;
+    }
+    break;  
   default: ok=false;
   }
   if (verbose) {

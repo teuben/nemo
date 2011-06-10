@@ -19,7 +19,7 @@
 
 namespace tools {
 
-  // global
+// Physical bits
 #define TIME_BIT          (1 <<  1)
 #define KEYS_BIT          (1 <<  2)
 #define HEADER_BIT        (1 <<  3)
@@ -36,6 +36,19 @@ namespace tools {
 #define AUX_BIT           (1 << 14)
 #define POT_BIT           (1 << 15)
 #define ACC_BIT           (1 << 16)
+#define TEMP_BIT          (1 << 17)
+  
+// Component BITS
+#define ALL_BIT           (1 <<  1)
+#define GAS_BIT           (1 <<  2)
+#define HALO_BIT          (1 <<  3)
+#define DISK_BIT          (1 <<  4)
+#define BULGE_BIT         (1 <<  5)
+#define STARS_BIT         (1 <<  6)
+#define BNDRY_BIT         (1 <<  7)
+
+  
+
   class Ctools {
   public:
     Ctools() {;}
