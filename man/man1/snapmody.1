@@ -1,4 +1,4 @@
-.TH SNAPMODY 1NEMO "10 March 2009"
+.TH SNAPMODY 1NEMO "10 June 2011"
 .SH NAME
 snapmody \- convert snapshot to Mody's pos-vel files 
 .SH SYNOPSIS
@@ -16,6 +16,9 @@ understands.
 Note: this program is forced
 to convert to single precision, even if the input dataset
 is in double precision.
+.PP
+Output files from QuMond are the same as MODY files, except
+they don't carry a header.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -30,9 +33,14 @@ Output  mody pos-vel file (moutXX.bin style).
 \fBout2=\fP
 If given, this NEMO history of the input dataset is written here. Default: none
 .TP
-\fBswap=\fP
+\fBswap=t|f\fP
 Swap bytes in each int/float if endianism differs .
 Not implemented yet.
+.TP
+\fBheader=t|f\fP
+Write a header?  Needed for MODY style, but e.g. QuMOND only carries
+particle information.
+Default: true
 .SH CAVEAT
 Will only process the first snapshot.
 .SH SEE ALSO
@@ -46,4 +54,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 25-Feb-09	V1.0 Created 
 10-mar-09	V1.1 added out2=	PJT
+10-jun-11	V1.2 added header=	PJT
 .fi

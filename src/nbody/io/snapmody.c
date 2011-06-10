@@ -19,7 +19,8 @@ string defv[] = {
     "out=???\n      Output mody moutXX.bin pos-vel file",
     "out2=\n        Output of history/headlines",
     "swap=f\n       Swap bytes in each float if endianism differs",
-    "VERSION=1.1\n  10-mar-09 pjt",
+    "header=t\n     Use standard MODY header?",
+    "VERSION=1.2\n  10-jun-2011 pjt",
     NULL,
 };
 
@@ -33,6 +34,7 @@ void nemo_main()
     string hl;
     real *fbuf, *mbuf, tsnap, mass0, mass1, mass2;
     bool Qswap = getbparam("swap");
+    bool Qhead = getbparam("header");
     long nread;
     int nbody, i, nbad;
     int cs = CSCode(Cartesian, NDIM, 2);
@@ -86,8 +88,10 @@ void nemo_main()
 	      nbad, mass2, mass0);
 			      
 
-    nread = unfwrite(outstr, (char *)ipar, 5*sizeof(int));
-    nread = unfwrite(outstr, (char *)rpar, 5*sizeof(float));
+    if (Qhead) {
+      nread = unfwrite(outstr, (char *)ipar, 5*sizeof(int));
+      nread = unfwrite(outstr, (char *)rpar, 5*sizeof(float));
+    }
 
     for (i=0; i<nbody; i++) {
       mbuf[i] = mass1;                              
