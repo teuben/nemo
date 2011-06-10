@@ -24,7 +24,7 @@ string defv[] = {
     NULL,
 };
 
-string usage = "convert snapshot to Mody's pos-vel file";
+string usage = "convert snapshot to MODY's BIN pos-vel file";
 
 extern void bswap(void *vdat, int len, int cnt);
  
@@ -35,6 +35,7 @@ void nemo_main()
     real *fbuf, *mbuf, tsnap, mass0, mass1, mass2;
     bool Qswap = getbparam("swap");
     bool Qhead = getbparam("header");
+    bool Qmass = FALSE;
     long nread;
     int nbody, i, nbad;
     int cs = CSCode(Cartesian, NDIM, 2);
@@ -61,7 +62,8 @@ void nemo_main()
 
       get_set(instr,ParticlesTag);
         get_data(instr,CoordSystemTag, IntType, &cs, 0);
-        get_data_coerced(instr,MassTag,RealType,mbuf,nbody,0);
+	if (Qmass)
+	  get_data_coerced(instr,MassTag,RealType,mbuf,nbody,0);
         get_data_coerced(instr,PhaseSpaceTag,RealType,fbuf,nbody,2,NDIM,0);
       get_tes(instr,ParticlesTag);
     get_tes(instr,SnapShotTag);
