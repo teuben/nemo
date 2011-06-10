@@ -124,7 +124,7 @@ int main(int argc, char ** argv )
   C2dplot<float> * c2dplot = new C2dplot<float>(threads,pixel,dimx,dimy,gp);
     
   if (uns->isValid()) {
-    while(uns->snapshot->nextFrame()) {      
+    while(uns->snapshot->nextFrame("mxv")) {      
       bool ok;
       int cnbody,nbody;      
       float * pos, * mass, time;

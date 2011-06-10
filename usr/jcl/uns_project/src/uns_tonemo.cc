@@ -124,7 +124,7 @@ int main(int argc, char ** argv )
   
   if (unsin->isValid()) { // input file is known by UNS lib        
     int cpt=0;
-    while(unsin->snapshot->nextFrame()&&!stop) { // there is a new frame
+    while(unsin->snapshot->nextFrame("mxvRHI")&&!stop) { // there is a new frame
       std::string itype = unsin->snapshot->getInterfaceType();
       std::cerr << "Input file is of type :"<<itype<<"\n";
       bool ok;

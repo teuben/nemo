@@ -46,17 +46,25 @@ void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
   float * pos, * vel, * mass;
   int * id;
   int n1,n2,n3,n4;
+  n1=n2=n3=n4=0;
   bool ok1,ok2,ok3,ok4;
-
-  ok1 = uns->snapshot->getData(comp,"pos" ,&n1,&pos );
-  ok2 = uns->snapshot->getData(comp,"vel" ,&n2,&vel );
-  ok3 = uns->snapshot->getData(comp,"mass",&n3,&mass);
-  ok4 = uns->snapshot->getData(comp,"id"  ,&n4,&id);
-  if (ok1 || ok2 || ok3) {
+  ok1=ok2=ok3=ok4=false;
+  
+  if (display) {
+    ok1 = uns->snapshot->getData(comp,"pos" ,&n1,&pos );
+    ok2 = uns->snapshot->getData(comp,"vel" ,&n2,&vel );
+    ok3 = uns->snapshot->getData(comp,"mass",&n3,&mass);
+    ok4 = uns->snapshot->getData(comp,"id"  ,&n4,&id);
+  } else {
+    float * nullp;
+    ok1 = uns->snapshot->getData(comp,"nbody" ,&n1,&nullp);
+    n2=n3=n4=n1;
+  }
+  if (ok1 || ok2 || ok3 ) {
     int nbody=max(max(n1,n2),n3);
-    std::cerr << setw(50) << setfill('=') << ""<<"\n";
-    std::cerr<< setfill(' ');
-    std::cerr << left<< setw(8) << comp << ":" << setw(9) << right << nbody << "\n";
+    std::cout << setw(50) << setfill('=') << ""<<"\n";
+    std::cout<< setfill(' ');
+    std::cout<< left<< setw(8) << comp << ":" << setw(9) << right << nbody << "\n";
   }
   if (ok3 && display) {
     displayFormat(maxlines,"mass[1] = ",mass,1,n3, 3);
@@ -91,25 +99,25 @@ void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
 // displayFormat
 template <class T>  void displayFormat(int maxlines,std::string text, T * array, int dim, int size, int np)
 {
-  std::cerr << scientific << left << setw(11) << text;
+  std::cout << scientific << left << setw(11) << text;
   // First line
   for (int k=0;k<std::min(size,np);k++) {
     for (int j=0;j<dim;j++) {
-      std::cerr << array[k*dim+j] << " ";
+      std::cout << array[k*dim+j] << " ";
     }
   }
-  std::cerr << "\n";
+  std::cout << "\n";
   // other lines
   for (int i=1; i<std::min(maxlines,size); i+=np) {
-    std::cerr << left << setw(11) << "";
+    std::cout << left << setw(11) << "";
     for (int k=0;k<std::min(size,np);k++) {
       for (int j=0;j<dim;j++) {
-        std::cerr << array[(k+(i*np))*dim+j] << " ";
+        std::cout << array[(k+(i*np))*dim+j] << " ";
       }
     }
-    std::cerr << "\n";
+    std::cout << "\n";
   }  
-  std::cerr << left << setw(11) << "" << ". . .\n";
+  std::cout << left << setw(11) << "" << ". . .\n";
 }
 
 // ------------------------------------------------------------
@@ -130,19 +138,21 @@ int main(int argc, char ** argv )
   // instantiate a new UNS input object (for reading)
   uns::CunsIn * uns = new uns::CunsIn(simname,select_c,select_t,verbose);
   
+  std::string bits="";       // read all bits
+  if (!display) bits="none"; // we don't read anything
   if (uns->isValid()) { // input file is known by UNS lib        
-    while(uns->snapshot->nextFrame()) { // there is a new frame
+    while(uns->snapshot->nextFrame(bits)) { // there is a new frame
       std::string stype = uns->snapshot->getInterfaceType();
-      std::cerr << setw(50) << setfill('*') << ""<<"\n";
-      std::cerr << "File name : "<<uns->snapshot->getFileName()<<"\n";
-      std::cerr << "File type : "<<stype<<"\n";
+      std::cout << setw(50) << setfill('*') << ""<<"\n";
+      std::cout << "File name : "<<uns->snapshot->getFileName()<<"\n";
+      std::cout << "File type : "<<stype<<"\n";
       int nbody; float time; bool ok;
       // get the input number of bodies according to the selection
       ok=uns->snapshot->getData("nsel",&nbody);
       // get the simulation time
       ok=uns->snapshot->getData("time",&time);
 
-      std::cerr << "Nbody selected = " << nbody << "\nTime="<<time <<"\n";
+      std::cout << "Nbody selected = " << nbody << "\nTime="<<time <<"\n";
       if (stype=="Nemo") {
         displayInfo(display,maxlines,"all",uns);
       } else {

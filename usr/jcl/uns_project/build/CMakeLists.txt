@@ -30,7 +30,7 @@ if    (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 # require boost
 find_package( Boost 1.36.0)
-set(LIBBOOST boost_thread-mt.a boost_system-mt.a)
+set(LIBBOOST boost_thread-mt.so boost_system-mt.so)
 set(DNOBOOST "")
 if(NOT Boost_FOUND)
    MESSAGE (STATUS " Boost not found, uns_2dplot will run slowly.....")

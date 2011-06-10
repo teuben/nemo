@@ -21,7 +21,7 @@ using namespace jclut;
 // moveToCod
 // move particles positions and velocities to center of density
 //template <class T> void CSnaptools<T>::moveToCod(const int nbody,T * pos, T * mass)
-template <class T> void CSnaptools::moveToCod(const int nbody,T * pos,T * vel, T * mass, T * rho, double cod[6], bool move)
+template <class T> void CSnaptools::moveToCod(const int nbody,T * pos,T * vel, T * mass, T * rho, double cod[6], bool move, bool verbose)
 {
   double codp[3] = {0., 0., 0.};
   double codv[3] = {0., 0., 0.};
@@ -55,8 +55,10 @@ template <class T> void CSnaptools::moveToCod(const int nbody,T * pos,T * vel, T
     
   }
   cod[3] = codv[0]; cod[4] = codv[1]; cod[5] = codv[2];
-  std::cerr << "COD = " << cod[0]<<" "<< cod[1]<<" "<< cod[2]<<" "
-      << cod[3]<<" "<< cod[4]<<" "<< cod[5]<<"\n";
+  if (verbose) {
+    std::cerr << "COD = " << cod[0]<<" "<< cod[1]<<" "<< cod[2]<<" "
+        << cod[3]<<" "<< cod[4]<<" "<< cod[5]<<"\n";
+  }
   if (move) {
     // move to cod requested
     for (int i=0; i<nbody;i++) {
@@ -69,13 +71,13 @@ template <class T> void CSnaptools::moveToCod(const int nbody,T * pos,T * vel, T
     }
   }
 }
-template void CSnaptools::moveToCod(const int nbody,float * pos,float * vel, float * mass, float * rho, double cod[6], bool move);
-template void CSnaptools::moveToCod(const int nbody,double * pos,double * vel, double * mass, double * rho, double cod[6], bool move);
+template void CSnaptools::moveToCod(const int nbody,float * pos,float * vel, float * mass, float * rho, double cod[6], bool move, bool verbose);
+template void CSnaptools::moveToCod(const int nbody,double * pos,double * vel, double * mass, double * rho, double cod[6], bool move, bool verbose);
 //
 // moveToCom
 // move particles positions to center of mass
 //template <class T> void CSnaptools<T>::moveToCom(const int nbody,T * pos, T * mass)
-template <class T> void CSnaptools::moveToCom(const int nbody,T * pos, T * mass)
+template <class T> void CSnaptools::moveToCom(const int nbody,T * pos, T * mass, bool verbose)
 {
   double com[3] = {0., 0., 0.};
   double np=0.,masstot=0;;
@@ -93,9 +95,11 @@ template <class T> void CSnaptools::moveToCom(const int nbody,T * pos, T * mass)
   if (!mass) {
     std::cerr << "No mass in the snapshot, we assum mass=1.0 for each particles...\n";
   }
-  std::cerr <<"COM     ="<<com[0]<<" "<<com[1]<<" "<<com[2]<<"\n";
-  std::cerr <<"np      ="<<np<<"\n";
-  std::cerr <<"mass tot="<<masstot<<"\n";
+  if (verbose) {
+    std::cerr <<"COM     ="<<com[0]<<" "<<com[1]<<" "<<com[2]<<"\n";
+    std::cerr <<"np      ="<<np<<"\n";
+    std::cerr <<"mass tot="<<masstot<<"\n";
+  }
   // center
   for (int i=0; i<nbody;i++) {
     pos[i*3+0] -= (com[0]/masstot);
@@ -103,8 +107,8 @@ template <class T> void CSnaptools::moveToCom(const int nbody,T * pos, T * mass)
     pos[i*3+2] -= (com[2]/masstot);
   }  
 }
-template void CSnaptools::moveToCom<float>(const int nbody,float * pos, float * mass);
-template void CSnaptools::moveToCom<double>(const int nbody,double * pos, double * mass);
+template void CSnaptools::moveToCom<float>(const int nbody,float * pos, float * mass, bool verbose);
+template void CSnaptools::moveToCom<double>(const int nbody,double * pos, double * mass, bool verbose);
 //
 // basename
 std::string  CSnaptools::basename(const std::string str)
@@ -179,4 +183,30 @@ template <class T>  std::vector<T> CSnaptools::stringToVector(const std::string 
 template std::vector<float> CSnaptools::stringToVector<float>(const std::string s, const int min, float val, std::string sep);
 template std::vector<int  > CSnaptools::stringToVector<int  >(const std::string s, const int min, int   val, std::string sep);
 template std::vector<std::string> CSnaptools::stringToVector<std::string  >(const std::string s, const int min, std::string  val, std::string sep);
+//
+// minArray
+template <class T> T CSnaptools::minArray(const int nbody, const T * array)
+{
+   T min = array[0];
+   for (int i=1;i<nbody;i++) {
+     min = std::min(min,array[i]);
+   }
+   return min;
+}
+template float  CSnaptools::minArray(const int nbody, const float  * array);
+template double CSnaptools::minArray(const int nbody, const double * array);
+template int    CSnaptools::minArray(const int nbody, const int    * array);
+//
+// maxArray
+template <class T> T CSnaptools::maxArray(const int nbody, const T * array)
+{
+   T max = array[0];
+   for (int i=1;i<nbody;i++) {
+     max = std::max(max,array[i]);
+   }
+   return max;
+}
+template float  CSnaptools::maxArray(const int nbody, const float  * array);
+template double CSnaptools::maxArray(const int nbody, const double * array);
+template int    CSnaptools::maxArray(const int nbody, const int    * array);
 //

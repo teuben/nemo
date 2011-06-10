@@ -23,13 +23,15 @@ namespace jclut {
     public:
       CSnaptools() {;};
       
-      template <class T> static void moveToCod(const int nbody,T * pos, T * Vel, T * mass, T * rho, double cod[6], bool move);
-      template <class T> static void moveToCom(const int nbody,T * pos, T * mass);
+      template <class T> static void moveToCod(const int nbody,T * pos, T * Vel, T * mass, T * rho, double cod[6], bool move, bool verbose=false);
+      template <class T> static void moveToCom(const int nbody,T * pos, T * mass, bool verbose=false);
       static std::string basename(const std::string);
       static std::string dirname(const std::string);
       static std::string parseString(std::string & next_string, const std::string sep=",");
       template <class T> static std::vector<T> stringToVector(const std::string s, const int min, T val, std::string sep=",");
       template <class T> static bool isStringANumber(const std::string mystring, T &data);
+      template <class T> static T minArray(const int, const T * array);
+      template <class T> static T maxArray(const int, const T * array);
     };
 }
 #endif

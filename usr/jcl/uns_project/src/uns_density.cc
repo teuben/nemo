@@ -95,7 +95,7 @@ int main(int argc, char ** argv )
   
   if (uns->isValid()) { // input file is known by UNS lib        
     int cpt=0;
-    while(uns->snapshot->nextFrame()&&!stop) { // there is a new frame
+    while(uns->snapshot->nextFrame("mxvpI")&&!stop) { // there is a new frame
       std::cerr << "Input file is of type :"<<uns->snapshot->getInterfaceType()<<"\n";
       bool ok;
       int cnbody,nbody;      
@@ -152,6 +152,12 @@ int main(int argc, char ** argv )
         unsout->snapshot->setData("all" ,nbody,mass,pos,vel,false);
         unsout->snapshot->setData("rho" ,nbody,rho ,false);
         unsout->snapshot->setData("hsml",nbody,hsml,false);
+        // add pot (for manu)
+        float * pot=NULL;
+        ok=uns->snapshot->getData("pot" ,&cnbody,&pot);
+        if (ok) {
+          unsout->snapshot->setData("pot",cnbody,pot,false);
+        }
         // Try to get Ids
         int * id,nn;
         ok = uns->snapshot->getData("id" ,&nn,&id );
