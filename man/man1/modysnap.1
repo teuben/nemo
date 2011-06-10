@@ -1,6 +1,6 @@
-.TH MODYSNAP 1NEMO "26 February 2009"
+.TH MODYSNAP 1NEMO "10 June 2011"
 .SH NAME
-modysnap \- convert Mody's pos-vel files to snapshot
+modysnap \- convert Mody's bin pos-vel files to snapshot
 .SH SYNOPSIS
 \fBmodysnap\fP [parameter=value]
 .SH DESCRIPTION
@@ -26,6 +26,16 @@ Swap bytes in each int/float if endianism differs . This is only needed if
 the input files come from a machine with the opposite endianism as your
 local host.
 Not implemented yet.
+.TP
+\fBheader=t|f\fP
+Read the header?  Needed for MODY style, but e.g. QuMOND only carries
+particle information, so nbody= is needed instead (see below)
+Default: true
+.TP
+\fBnbody=\fP
+Set the number of particles to read. Only used when \fPheader=f\fP for QuMOND
+style files. In principle by setting smaller value of nbody, you could use 
+this to split the output snapshot in pieces.
 .SH EXAMPLES
 Here is an example of running n-mody. First create in input file:
 .nf
@@ -78,4 +88,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 23-Feb-09	V1.0 Created	PJT
 26-feb-09	V1.2 process multiple files if present	PJT
+10-jun-11	V1.3 added header= and nbody=	PJT
 .fi
