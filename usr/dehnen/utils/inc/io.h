@@ -316,7 +316,7 @@ namespace WDutils {
   struct smanip_fp_width {
     X   x;
     int p,w,s;
-    int width(double l) { // given precision, what is minimum width
+    int width(double l) {            // given precision, what is minimum width
       int il = 1+int(l);
       int fw = l<0? 3+p-il : il>=p? il : p+1;
       int ew = p+5;
@@ -404,6 +404,7 @@ namespace WDutils {
   //
   // class WDutils::iofile
   //
+  /// base class for WDutils::output and WDutils::input
   // ///////////////////////////////////////////////////////////////////////////
   class iofile {
   protected:
@@ -433,6 +434,34 @@ namespace WDutils {
   public:
     /// give file name, if any
     const char*const&file() const { return FILE; }
+    /// does a file of given name exist?
+    /// \note For non-unix systems, we try to construct an std::ifstream, which
+    ///       essentially tests for existence and read permission.
+    static bool file_exists(const char*fname)
+    {
+#ifdef unix
+      // simply use the access system call. F_OK asks for existence only.
+      return 0 == access(fname, F_OK);
+#else
+      // in fact, this test is different, as existence and read permission are
+      // required to open an ifstream.
+      std::ifstream IN(fname);
+      return IN.is_open();
+#endif
+    }
+    /// does file with name generated from \a format plus data \a tag exist?
+    /// \param[in]  format C-style format string for file name
+    /// \param[in]  tag    datum needed in generating file to open
+    /// \return     true if file with name exists
+    /// \note For non-unix systems, we try to construct an std::ifstream, which
+    ///       essentially tests for existence and read permission.
+    template<typename T>
+    static bool file_exists(const char*format, T const&tag)
+    {
+      char FNEW[FNAME_MAX_SIZE];
+      SNprintf(FNEW,FNAME_MAX_SIZE,format,tag);
+      return file_exists(FNEW);
+    }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -562,27 +591,6 @@ namespace WDutils {
 	return false;
     }
     //@}
-    /// does file with name generated from \a format plus data \a tag exist?
-    /// \param[in]  format C-style format string for file name
-    /// \param[in]  tag    datum needed in generating file to open
-    /// \return     true if file with name exists
-    /// \note For non-unix systems, we try to construct an std::ifstream, which
-    ///       essentially tests for existence and read permission.
-    template<typename T>
-    static bool file_exists(const char*format, T const&tag)
-    {
-      char FNEW[FNAME_MAX_SIZE];
-      SNprintf(FNEW,FNAME_MAX_SIZE,format,tag);
-#ifdef unix
-      // simply use the access system call. F_OK asks for existence only.
-      return 0 == access(FNEW, F_OK);
-#else
-      // in fact, this test is different, as existence and read permission are
-      // required to open an ifstream.
-      std::ifstream IN(FNEW);
-      return IN.is_open();
-#endif
-    }
     //--------------------------------------------------------------------------
     /// flush() output
     void flush() { if(OUT) OUT->flush(); }
@@ -706,13 +714,46 @@ namespace WDutils {
       setfile(fname);
       __open();
     }
-    //@}
     /// close possible old stream, then proceed as in construction
     void open(std::string const&fname) {
       close();
       setfile(fname.c_str());
       __open();
     }
+    /// open file with name made from \a format string and \a tag.
+    ///
+    /// A new file name is created from the C-style \a format string and the
+    /// data \a tag provided via code equivalent to
+    /// \code
+    /// sprintf(filename, format, tag);
+    /// \endcode
+    /// If this file name differs from the current, the old file is closed and
+    /// the new one opened. The idea is to provide the possibility of numbered
+    /// input files as in the following code snippet
+    /// \code
+    /// output out;
+    /// for(int i=0; i!=20; ++i) {
+    ///   out.reopen("file%02d.dat",i);
+    ///   out << i << std::endl;
+    /// }
+    /// \endcode
+    /// reading the files \c file00.dat, \c file01.dat, ... \c file19.dat
+    /// \return     has a new file been opened (and the old closed)?
+    /// \param[in]  format C-style format string for file to open
+    /// \param[in]  tag    datum needed in generating file to open
+    template<typename T> 
+    bool reopen(const char*format, T const&tag)
+    {
+      char FNEW[FNAME_MAX_SIZE];
+      SNprintf(FNEW,FNAME_MAX_SIZE,format,tag);
+      DebugInfo(4,"IN=%p FNEW='%s' FNAME='%s'\n",IN,FNEW,FNAME);
+      if(IN==0 || strcmp(FNEW,FNAME)) {
+	open(FNEW);
+	return is_open();
+      } else
+	return false;
+    }
+    //@}
     //--------------------------------------------------------------------------
     /// \name formated input using operator >>
     //@{
