@@ -121,7 +121,7 @@ int uns_load_(const int * ident)
   // return the index in the vector of -1 if false         
   int index=uns::CunsIdentifier::getUnsvIndex(*ident,&unsv);
   PRINT("index in UNSV ="<< index << "\n";);
-  
+
   if (index >= 0) {
     uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
     index = snap->nextFrame("");

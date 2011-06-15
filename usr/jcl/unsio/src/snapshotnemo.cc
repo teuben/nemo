@@ -552,6 +552,7 @@ CSnapshotNemoOut::CSnapshotNemoOut(const std::string _n, const std::string _t, c
   ptrIsAlloc["aux"  ]=false; 
   ptrIsAlloc["keys" ]=false; 
   ptrIsAlloc["rho"  ]=false; 
+  ptrIsAlloc["id"   ]=false; 
   
   nbody = -1;
   bits = 0;
@@ -568,7 +569,8 @@ CSnapshotNemoOut::~CSnapshotNemoOut()
   if (pot  && ptrIsAlloc["pot" ]) delete [] pot;
   if (acc  && ptrIsAlloc["acc" ]) delete [] acc;
   if (aux  && ptrIsAlloc["aux" ]) delete [] aux;
-  if (keys && ptrIsAlloc["keys"]) delete [] keys;
+  if ((keys && ptrIsAlloc["keys"]) ||
+      (keys && ptrIsAlloc["id"  ])  ) delete [] keys;
   if (rho  && ptrIsAlloc["rho" ]) delete [] rho;
   close();
 }
