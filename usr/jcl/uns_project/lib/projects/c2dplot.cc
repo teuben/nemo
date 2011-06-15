@@ -14,6 +14,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstring>
+#include <assert.h>
 #include "c2dplot.h"
 #include "csnaptools.h"
 #include "ctimer.h"
