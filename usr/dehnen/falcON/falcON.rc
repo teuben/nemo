@@ -29,6 +29,7 @@ endif
 
 # set enviroment variables FALCONLIB and ACCPATH
 setenv FALCONLIB $FALCON/lib
+setenv WDUTILSLIB $FALCON/utils/lib
 
 if($?ACCPATH) then
     setenv ACCPATH $FALCON"/acc/:"$ACCPATH
@@ -38,6 +39,16 @@ endif
 
 if ($?prompt) then
   echo "falcON loaded from $FALCON"
+endif
+
+# add FALCONLIB to LD_LIBRARY_PATH and DYLD_LIBRARY_PATH
+if ($?LD_LIBRARY_PATH) then
+    setenv LD_LIBRARY_PATH ${FALCONLIB}:${WDUTILSLIB}:${LD_LIBRARY_PATH}
+else
+    setenv LD_LIBRARY_PATH ${FALCONLIB}:${WDUTILSLIB}
+endif
+if($VENDOR == apple) then
+    setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
 endif
 
 # provide alias 'NOclaf' to de-active falcON
