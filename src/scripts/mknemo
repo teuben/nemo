@@ -17,7 +17,7 @@
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 3.5 4-dec-2010"
+set version="MKNEMO Version 3.5a 15-jun-2011"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -276,7 +276,7 @@ foreach f ($argv)
      echo $l
    else
      @ errs += 1
-     echo "Nothing found"
+     echo "Nothing found, try the -D flag to find out special projects"
    endif
  else
    echo "found one: $l"
