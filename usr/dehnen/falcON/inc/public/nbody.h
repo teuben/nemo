@@ -407,7 +407,10 @@ namespace falcON {
     /// \name virtual and pure virtual methods
     //@{
     /// perform a full time step
-    virtual void fullstep() const = 0;
+    /// \param[in] recompute_forces  if true, forces are re-computed
+    /// \note recomputing the forces has the potential to substantially increase
+    ///       the total time for the simulation (double it for LeapFrogCode).
+    virtual void fullstep(bool recompute_forces=0) const = 0;
     /// print full statistic
     virtual void stats_body(output&to) const {
       SOLVER -> dia_stats_body(to);
@@ -467,7 +470,7 @@ namespace falcON {
 		 fieldset k_sph,
 		 fieldset r_sph) falcON_THROWING;
     /// perform a full kick-drift-kick step
-    void fullstep() const;
+    void fullstep(bool=0) const;
     //--------------------------------------------------------------------------
   };// class falcON::LeapFrogCode
   // ///////////////////////////////////////////////////////////////////////////
@@ -520,7 +523,7 @@ namespace falcON {
     /// how many bodies are in level l?
     const unsigned&No_in_level   (int l)  const { return N[l]; }
     /// implements Integrator::fullstep()
-    void fullstep() const;
+    void fullstep(bool=0) const;
     /// implements Integrator::stats_head
     void stats_head(output&) const;
     /// implements Integrator::stats_line
@@ -639,7 +642,8 @@ namespace falcON {
     /// \param[in] w what to write?
     void write(nemo_out&o, fieldset w) const { CODE->write(o,w); }
     /// time integration
-    void full_step() { CODE->fullstep(); }
+    /// \param[in] rf  if true then re-compute initial forces
+    void full_step(bool rf=0) { CODE->fullstep(rf); }
     /// print statistic outputs
     /// \param[in] to ostream to print to
     void stats(output&to) const { 
@@ -1089,10 +1093,10 @@ namespace falcON {
 	       soft_type          soft = global_fixed, 
 	       const char        *trange = 0,
 	       fieldset           read = fieldset::empty,
-	       const unsigned     dir[4] = Default::direct) falcON_THROWING :
-      NBodyCode ( file, resume, to_read(read,
-				      soft!=global_fixed ? 1 : 0,
-				      Grav || aex), trange ),
+	       const unsigned     dir[4] = Default::direct) falcON_THROWING
+    : NBodyCode ( file, resume, to_read(read,
+					soft!=global_fixed ? 1 : 0,
+					Grav || aex), trange ),
       ForceALCON( SHOT, eps, theta, Ncrit, croot, kernel, Grav, epssk, fsink,
 		  (1<<hgrow)-1, aex, dir ,soft
 #ifdef falcON_ADAP

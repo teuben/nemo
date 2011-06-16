@@ -5,13 +5,13 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2004-2010
+/// \date    2004-2011
 ///
 /// \brief   implements inc/public/bodyfunc.h
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2004-2010  Walter Dehnen
+// Copyright (C) 2004-2011  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -155,8 +155,11 @@ namespace {
 #elif defined(falcON_SINGLE)
 	     " -DfalcON_SINGLE"
 #endif
+#ifdef __DARWIN_UNIX03
+	     " -L$FALCONLIB -lfalcON -L$FALCON/utils/lib -lWDutils"
+#endif
 	     " >& %s.log",
-	     getenv("CPATH")? "$CPATH/g++" : "g++",
+	     getenv("CPATH")? "$CPATH/" COMPILER : COMPILER,
 	     fname,fname,(flags? flags : " "),falcON_path,falcON_path,fname);
     DebugInfo(2,"now compiling using the following command\n   %s\n",cmmd);
     if(system(cmmd)) {

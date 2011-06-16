@@ -89,22 +89,24 @@ namespace falcON {
 	J0 = I0-4                                  // N(N+1)(N+2)/6-4           
       };
       typedef symt3D<N,X> Tensor;                  // sym 3D tensor of order N  
-      static Tensor      &tens(      X*a) { return *static_cast<Tensor*>
-	  (static_cast<void*>(a+I0)); }
-      static Tensor const&tens(const X*a) { return *static_cast<const Tensor*>
-	  (static_cast<const void*>(a+I0)); }
-      static Tensor      &pole(      X*a) { return *static_cast<Tensor*>
-	  (static_cast<void*>(a+J0)); }
-      static Tensor const&pole(const X*a) { return *static_cast<const Tensor*>
-	  (static_cast<const void*>(a+J0)); }
+      static Tensor      &tens(      X*a)
+      { return *static_cast<      Tensor*>(static_cast<void*>(a+I0)); }
+      static Tensor const&tens(const X*a)
+      { return *static_cast<const Tensor*>(static_cast<const void*>(a+I0)); }
+      static Tensor      &pole(      X*a)
+      { return *static_cast<      Tensor*>(static_cast<void*>(a+J0)); }
+      static Tensor const&pole(const X*a)
+      { return *static_cast<const Tensor*>(static_cast<const void*>(a+J0)); }
     };
     tm<typename X> struct ONE3D<1,X> : ONE<1> {
       enum { ND=3, CD=4, I0=1 };
       typedef tupel<3,X> Tensor;
-      static Tensor      &tens(      X*a) { return *static_cast<Tensor*>
-	  (static_cast<void*>(a+I0)); }
-      static Tensor const&tens(const X*a) { return *static_cast<const Tensor*>
-	  (static_cast<const void*>(a+I0)); }
+      static Tensor      &tens(      X*a)
+//    { return *static_cast<      Tensor*>(static_cast<void*>(a+I0)); }
+      { return reinterpret_cast<Tensor&>(*(a+I0)); }
+      static Tensor const&tens(const X*a)
+//    { return *static_cast<const Tensor*>(static_cast<const void*>(a+I0)); }
+      { return reinterpret_cast<const Tensor&>(*(a+I0)); }
     };
     tm<typename X> struct ONE3D<0,X> : ONE<0> {
       enum { ND=1, CD=1, I0=0 };
@@ -124,19 +126,19 @@ namespace falcON {
 #define T4i template<int,int,int,int> class
     // struct l for looping L=0...K, M=0...L                                    
     tm<T4i P, int Z, int K, int L, int M> struct l {            // K,L,M        
-  tA    sv loop(A&a) { 
-    P<  Z,K,L,M  >::job (a);
-    l<P,Z,K,L,M+1>::loop(a); }
-  tAB   sv loop(A&a,cB&b) { 
-    P<  Z,K,L,M  >::job (a,b);
-    l<P,Z,K,L,M+1>::loop(a,b); }
-  tABC  sv loop(A&a,cB&b,cC&c) { 
-    P<  Z,K,L,M  >::job (a,b,c);
-    l<P,Z,K,L,M+1>::loop(a,b,c); }
-  tABCD sv loop(A&a,cB&b,cC&c,cD&d) { 
-    P<  Z,K,L,M  >::job (a,b,c,d);
-    l<P,Z,K,L,M+1>::loop(a,b,c,d); }
-};
+      tA    sv loop(A&a) { 
+	P<  Z,K,L,M  >::job (a);
+	l<P,Z,K,L,M+1>::loop(a); }
+      tAB   sv loop(A&a,cB&b) { 
+	P<  Z,K,L,M  >::job (a,b);
+	l<P,Z,K,L,M+1>::loop(a,b); }
+      tABC  sv loop(A&a,cB&b,cC&c) { 
+	P<  Z,K,L,M  >::job (a,b,c);
+	l<P,Z,K,L,M+1>::loop(a,b,c); }
+      tABCD sv loop(A&a,cB&b,cC&c,cD&d) { 
+	P<  Z,K,L,M  >::job (a,b,c,d);
+	l<P,Z,K,L,M+1>::loop(a,b,c,d); }
+    };
     //--------------------------------------------------------------------------
     tm<T4i P, int Z, int K, int L> struct l<P,Z,K,L,L> {        // M=L          
       tA    sv loop(A&a) { 

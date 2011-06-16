@@ -4,11 +4,11 @@
 /// \file   src/public/exe/snapstac.cc                                          
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2005-2008                                                           
+/// \date   2005-2011                                                           
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2005-2008 Walter Dehnen                                        
+// Copyright (C) 2005-2011 Walter Dehnen                                        
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -31,10 +31,11 @@
 // v 0.0    21/09/2005 WD created                                               
 // v 0.1    10/09/2007 WD fixed bug with history buffer                         
 // v 0.2    19/09/2007 WD changes in fields.h, body.h, io.h; keyword time       
-// v 0.2.1  10/09/2008 WD happy gcc 4.3.1                                      
+// v 0.2.1  10/09/2008 WD happy gcc 4.3.1
+// v 0.2.2  15/06/2011 WD keyword mirror
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.2.1"
-#define falcON_VERSION_D "10-sep-2008 Walter Dehnen                          "
+#define falcON_VERSION   "0.2.2"
+#define falcON_VERSION_D "15-jun-2011 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "snapstac"
@@ -50,6 +51,7 @@ const char*defv[] = {
   "out=???\n          output file name                                   ",
   "deltax=0,0,0\n     position of in1 wrt in2                            ",
   "deltav=0,0,0\n     velocity of in1 wrt in2                            ",
+  "mirror=f\n         take reflected in2                                 ",
   "time=\n            set simulation time                                ",
   "zerocm=f\n         zero center of mass                                ",
   "write=\n           which data to write [default: all read]            ",
@@ -81,6 +83,12 @@ void falcON::main() falcON_THROWING
   if(write && !got.contain(write))
     falcON_Warning("couldn't read %s from both %s and %s\n",
 		   word(got.missing(write)), getparam("in1"), getparam("in2"));
+  // mirrot snapshot 2
+  if(getbparam("mirror"))
+    for(body b(b2); b!=shot.end_all_bodies(); ++b) {
+      b.pos() = -pos(b);
+      b.vel() = -vel(b);
+    }
   // shift centre of snapshot 1
   const vect dx(getvparam("deltax")), dv(getvparam("deltav"));
   if(dx != zero || dv != zero)

@@ -297,9 +297,10 @@ void LeapFrogCode::account_new() const {
   }
 }
 //------------------------------------------------------------------------------
-void LeapFrogCode::fullstep() const {
+void LeapFrogCode::fullstep(bool rf) const {
   reset_CPU();                                     // reset cpu timers          
   account_new();                                   // account for new bodies    
+  if(rf) set_time_derivs(1,1,0.);                  // re-compute initial forces 
   kick(tauh(0));                                   // eg: v+= a*tau/2           
   drift(tau(0));                                   // eg: x+= v*tau;  w+= a*tau 
   set_time_derivs(1,1,tau(0));                     // eg: a = F(x,w)            
@@ -393,10 +394,11 @@ void BlockStepCode::update_Nlev(const bodies*B) {
     ++(N[level(b)]);
 }
 //------------------------------------------------------------------------------
-void BlockStepCode::fullstep() const {
+void BlockStepCode::fullstep(bool rf) const {
   reset_CPU();                                     // reset cpu timers          
   account_new();                                   // account for new bodies    
   account_del();                                   // account for removed bodies
+  if(rf) set_time_derivs(1,1,0.);                  // re-compute initial forces 
   remember(true);                                  // remember to be predicted  
   kick_i(tauh(),true);                             // kick by half a step       
   for(int t=0; t!=1<<highest_level(); ++t)         // LOOP elementary steps     
@@ -484,8 +486,8 @@ NBodyCode::NBodyCode(const char*file,
   READ ( fieldset::empty )
 {
   SHOT->add_fields(fieldset::gravity | read_more);
-  const fieldset must(fieldset::basic | read_more);
-  const fieldset read(must | read_try);
+  const fieldset must(fieldset::basic | (read_more-fieldset::k));
+  const fieldset read(must | read_try | (read_more&fieldset::k));
   nemo_in In;
 #ifdef falcON_MPI
   if(!PSHT || Comm(PSHT)->rank() == 0)

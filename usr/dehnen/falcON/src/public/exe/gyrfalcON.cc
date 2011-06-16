@@ -4,13 +4,13 @@
 /// \file   src/public/exe/gyrfalcON.cc
 ///
 /// \author Walter Dehnen
-/// \date   2001-2010
+/// \date   2001-2011
 ///                                                                             
 /// \brief  N-body code using the falcON force solver
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2010 Walter Dehnen
+// Copyright (C) 2000-2011 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -144,9 +144,10 @@
 // v 3.4.1  25/03/2010  WD debugged sink particle gravity, fsink back
 // v 3.4.2  13/04/2010  WD removed use of initial_time()
 // v 3.4.3  02/07/2010  WD write env variable FalcONLastOutputTime
+// v 3.5    15/06/2011  WD recompute forces if manipulator changes masses
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "3.4.3"
-#define falcON_VERSION_D "02-jul-2010 Walter Dehnen                          "
+#define falcON_VERSION   "3.5"
+#define falcON_VERSION_D "15-jun-2011 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
@@ -239,6 +240,7 @@ void falcON::main() falcON_THROWING
 			  getparam_z("manipfile"),
 			  getparam_z("manippath"));
   const fieldset need(MANIP? MANIP.need() : fieldset(fieldset::empty));
+  const bool recforce(MANIP && MANIP.change().contain(fieldbit::m));
   if(Nlev>1 &&
      ! (hasvalue("fac") || hasvalue("fph") ||
 	hasvalue("fpa") || hasvalue("fea") ))
@@ -322,7 +324,7 @@ void falcON::main() falcON_THROWING
   for(int steps=1; never_ending || NBDY.time() < t_end; ++steps) {
     HaltFile = stopfile && file_exists(getparam("stopfile"));
     if(HaltFile) break;
-    NBDY.full_step();
+    NBDY.full_step(recforce);
     if(LOGOUT && steps%logstep ==0)
       NBDY.stats(LOGOUT);
     HaltManip = MANIP && MANIP(NBDY.my_snapshot());
