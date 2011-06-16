@@ -12,7 +12,7 @@ INCFILES =
 SRCFILES = dopri5.c dop853.c 
 OBJFILES=  dopri5.o dop853.o
 LOBJFILES= $L(dopri5.o) $L(dop853.o)
-BINFILES = orbfour orbint orbplot otos perorb stoo orbsos orbstat orblist
+BINFILES = orbfour orbint orbintv orbplot otos perorb stoo orbsos orbstat orblist
 TESTFILES=  orbdim orblist
 
 help:
