@@ -5,6 +5,7 @@
  *	23-dec-94	V1.1 added out=- and mode=	PJT
     -- not completed yet -- use only mode=d
  *	17-aug-00       V1.2 padding byte ....		PJT
+ *      16-jun-11       V1.3 add warning - padding was turned off???   PJT
  */
 
 #include <stdinc.h>
@@ -27,7 +28,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		Times to select snapshot",
     "mode=dark\n                Output mode (dark|gas|star)",
     "swap=f\n                   Swap bytes on output?",
-    "VERSION=1.2a\n		15-aug-03",
+    "VERSION=1.3\n		16-jun-2011",
     NULL,
 };
 
@@ -68,6 +69,9 @@ void nemo_main()
         default:    error("mode=%s not supported",mode);
     }
     get_history(instr);                 /* read history */
+
+    if (sizeof(header) != 32) 
+      warning("%d: TIPSY header not 32 in size",sizeof(header));
 
     for(;;) {                /* repeating until first or all times are read */
 	get_history(instr);
