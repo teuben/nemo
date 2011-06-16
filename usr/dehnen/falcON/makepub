@@ -169,7 +169,7 @@ ifdef NEMO
 $(LIB)manip.o:		$(manip_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)bodyfunc.o:	$(bodyfunc_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ) $(NBDYFLAGS)
+			$(MAKE_OBJ) $(NBDYFLAGS) -DCOMPILER='"$(GPP)"'
 endif
 $(LIB)neighbours.o:	$(neighbours_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
@@ -232,6 +232,8 @@ $(MAN)density.so:		$(SMAN)density.cc $(MANT) $(defman_h) $(neighbours_h) $(makef
 				$(MAKE_MANIP)
 $(MAN)densprof.so:		$(SMAN)densprof.cc $(MANT) $(defman_h) $(makefiles)
 				$(MAKE_MANIP)
+$(MAN)grow_mass.so:		$(SMAN)grow_mass.cc $(MANT) $(timer_h)  $(defman_h) $(makefiles)
+				$(MAKE_MANIP)
 $(MAN)lagrange.so:		$(SMAN)lagrange.cc $(MANT) $(defman_h) $(numerics_h) $(heap_h) $(makefiles)
 				$(MAKE_MANIP)
 $(MAN)projprof.so:		$(SMAN)projprof.cc $(MANT) $(defman_h) $(profile_h) $(makefiles)
@@ -264,6 +266,7 @@ manip_pub		:=	$(MAN)addgravity.so \
 				$(MAN)dens_centre.so \
 				$(MAN)density.so \
 				$(MAN)densprof.so \
+				$(MAN)grow_mass.so \
 				$(MAN)lagrange.so \
 				$(MAN)projprof.so \
 				$(MAN)randomize_azimuth.so \
