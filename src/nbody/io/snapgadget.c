@@ -35,6 +35,17 @@ struct io_header_1
     double   Omega0;
     double   OmegaLambda;
     double   HubbleParam;
+
+#if 0
+  /* newer versions may have this - need to recount the filler space now */
+   int flag_multiphase;
+   int flag_stellarage;
+   int flag_sfrhistogram;
+   int flag_metals;
+   int flag_decouple;
+   int flag_effmodel;
+#endif
+
     char     fill[256- 6*4- 6*8- 2*8- 2*4- 6*4- 2*4 - 4*8]; /* fills to 256 bytes */
 };
 
@@ -45,7 +56,12 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "N=???\n			Nhalo,Ndisk,Nbulge,Nstars (in that order)",
     "times=all\n		Times to select snapshot",
     "swap=f\n                   Swap bytes on output?",
-    "VERSION=0.2a\n		7-jul-06 PJT",
+    "z=0\n                      ** Current Redshift",
+    "box=128\n                  ** Box size (Mpc/h)",
+    "omega0=1\n                 ** Omega_0",
+    "lambda=1\n                 ** OmegaLambda",
+    "h=0.75\n                   ** HubbleParam",
+    "VERSION=1.0\n		21-jun-2011 PJT",
     NULL,
 };
 
@@ -207,18 +223,22 @@ void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
     header.mass[4] = pmass;
   }
 
+  header.mass[5] = 0.0;
+
+
+
   /* rest of the header */
-  header.num_files=0;
-  header.time=time;
-  header.redshift=0;
-  header.flag_sfr=0;
-  header.flag_feedback=0;
-  header.flag_cooling=0;
-  header.BoxSize=0;
-  header.Omega0=0;
-  header.OmegaLambda=0;
-  header.HubbleParam=0;
-  header.npart[0] = header.npartTotal[0] = 0;
+  header.num_files    = 0;
+  header.time         = time;              /* inherit from snapshot */
+  header.redshift     = getrparam("z");
+  header.flag_sfr     = 0;                 /* fake */
+  header.flag_feedback= 0;                 /* fake */
+  header.flag_cooling = 0;                 /* fake */
+  header.BoxSize      = getdparam("box");
+  header.Omega0       = getdparam("omega0");
+  header.OmegaLambda  = getdparam("lambda");
+  header.HubbleParam  = getdparam("h");
+  header.npart[0] = header.npartTotal[0] = 0;      /* no gas */
   header.npart[1] = header.npartTotal[1] = nhalo;
   header.npart[2] = header.npartTotal[2] = ndisk;
   header.npart[3] = header.npartTotal[3] = nbulge;
