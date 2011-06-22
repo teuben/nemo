@@ -4,6 +4,7 @@
 /// \file   src/public/exe/s2s.cc
 ///
 /// \author Walter Dehnen
+///
 /// \date   2007-2010
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,9 +37,10 @@
 // v 1.0.1 25/03/2008  WD warn if no snapshot matched times
 // v 1.0.2 10/09/2008  WD happy gc 4.3.1
 // v 2.0   09/03/2010  WD sorting, new filter (in body.h)
+// v 2.0.1 22/06/2011  WD check for snapshot first
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.0"
-#define falcON_VERSION_D "09-mar-2010 Walter Dehnen                          "
+#define falcON_VERSION   "2.0.1"
+#define falcON_VERSION_D "22-jun-2011 Walter Dehnen                          "
 //
 #ifndef falcON_NEMO                                // this is a NEMO program
 #  error You need NEMO to compile "s2s"
@@ -96,25 +98,24 @@ namespace {
   };
 }
 //
-void falcON::main() falcON_THROWING {
+void falcON::main() falcON_THROWING
+{
   nemo_in         In(getparam("in"));
   fieldset        Read;
   snapshot        Shot;
   FilterSortWrite FSW;
+  if(!In.has_snapshot())
+    falcON_THROW("no snapshots found in input file\n");
   if(0==strcmp(getparam("times"),"first")) {
     // special case times=first
-    if(In.has_snapshot()) {
-      Shot.read_nemo(In,Read,FSW.Need,0,0);
-      FSW(Shot);
-    }
+    Shot.read_nemo(In,Read,FSW.Need,0,0);
+    FSW(Shot);
   } else if(0==strcmp(getparam("times"),"last")) {
     // special case times=last
-    if(In.has_snapshot()) {
-      while(In.has_snapshot())
-	Shot.read_nemo(In,Read,FSW.Need,0,0);
-      Shot.del_fields(~Read);
-      FSW(Shot);
-    }
+    while(In.has_snapshot())
+      Shot.read_nemo(In,Read,FSW.Need,0,0);
+    Shot.del_fields(~Read);
+    FSW(Shot);
   } else {
     // general case for times
     while(In.has_snapshot())
@@ -127,3 +128,4 @@ void falcON::main() falcON_THROWING {
     falcON_Warning("no snapshot matching \"times=%s\" found in input\n",
 		   getparam("times"));
 }
+//
