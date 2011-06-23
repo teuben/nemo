@@ -54,7 +54,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "in=???\n			Input file (NEMO snapshot)",
     "out=???\n                  Output file (GADGET format), %t for time",
     "N=???\n			Nhalo,Ndisk,Nbulge,Nstars (in that order)",
-    "mass=\n                    Mh, Md, Mb, Ms (if no masses in input)",
+    "M=\n                       Mh, Md, Mb, Ms (if no masses in input)",
     "times=all\n		Times to select snapshot",
     "swap=f\n                   Swap bytes on output?",
     "z=0\n                      ** Current Redshift",
@@ -62,7 +62,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "omega0=0.3\n               ** Omega0",
     "lambda0=0.7\n              ** OmegaLambda0",
     "h=0.75\n                   ** HubbleParam",
-    "VERSION=1.1\n		22-jun-2011 PJT",
+    "VERSION=1.1a\n		23-jun-2011 PJT",
     NULL,
 };
 
@@ -128,8 +128,8 @@ void nemo_main()
 	if(nbody != nh + nd  + nb + ns) {
 	  error("nbody != nh + nd + nb + ns");
 	}
-	if (hasvalue("mass")) {
-	  sscanf(getparam("mass"),"%lg,%lg,%lg,%lg", &mh,&md,&mb,&ms);
+	if (hasvalue("M")) {
+	  sscanf(getparam("M"),"%lg,%lg,%lg,%lg", &mh,&md,&mb,&ms);
 	  if (bits&MassBit) warning("Overwriting masses");
 	  for (i=0; i<nh; i++)  Mass(btab+i) = mh;
     	  for (i=nh; i<nh+nd; i++) Mass(btab+i) = md;
