@@ -1,12 +1,18 @@
-.TH SNAPGADGET 1NEMO "5 July 2006"
-.SH NAME
-snapgadget \- convert NEMO snapshot files to gadget files
-.SH SYNOPSIS
+.TH SNAPGADGET 1NEMO "23 June 2011"
 \fBsnapgadget\fP [parameter=value]
 .SH DESCRIPTION
 \fBsnapgadget\fP converts  data
 from standard \fIsnapshot(5NEMO)\fP format into
-\fIgadget(lNEMO)\fP. There are probably some limitations to be listed here...
+\fIgadget(lNEMO)\fP. 
+.PP
+Although \fIgadget(lNEMO)\fP has several flavors of particles
+(halo, disk, bulge, stars, gas), this version can only handle
+a limited set due to current limitations in the way snapshot's
+are handled.
+.PP
+Some programs (e.g. AHF) that need proper cosmological information
+in a gadget header, will need these explicitly passed via
+a set of parameters (see below).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -22,13 +28,34 @@ for times=all). No default.
 .TP
 \fBN=\fP\fINhalo,Ndisk,Nbulge,Nstars\fP
 Nhalo,Ndisk,Nbulge,Nstars needs to be specified for
-the sub-components as GADGET wants them. No default.
+the sub-components as GADGET wants them. Note the 
+current version does not handle gas particles. No default.
+.TP
+\fBM=\fP\fIMhalo,Mdisk,Mbulge,Mstars\fP
+The masses (per particle) of each of the components listed
+in the \fBN=\fP keyword. You only need this if no masses
+are present. Note in this mode it is not possible to have
+different masses per component. Default: not used.
 .TP
 \fBtimes=\fP
 Times of the snapshots to select for output. Default: all
 .TP 
 \fBswap=\fP
 Force swaping bytes for other-endian machines [f] 
+\fBz=\fP
+Current Redshift [0]    
+.TP
+\fBbox=\fP
+Box size (Mpc/h) [128]   
+.TP
+\fBomega0=\fP
+Omega_0 [1]     
+.TP
+\fBlambda=\fP
+OmegaLambda [1]     
+.TP
+\fBh=\fP
+HubbleParam [0.75]     
 .SH CAVEAT
 There is an option to run gadget in double precision mode, their output files 
 may not be compatible with this version of the program.
@@ -44,4 +71,6 @@ Jeremy Bailin
 .ta +1.0i +4.0i
 8-sep-03	V0.1 Created	J.Bailin
 8-sep-03	V0.2 minor mods on order of arguments, fix missing %t case	PJT
+21-jun-11	V1.0 add some reasonable cosmo defaults, in case they're needed	PJT
+22-jun-11	V1.1 add M=
 .fi
