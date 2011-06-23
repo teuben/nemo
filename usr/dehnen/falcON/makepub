@@ -312,6 +312,8 @@ $(ACC)Shrink.so:		$(SACC)Shrink.cc $(ACCT) $(timer_h) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)SoftKernel.so:		$(SACC)SoftKernel.cc $(ACCT) $(makefiles)
 				$(MAKE_ACC) $(NBDYFLAGS)
+$(ACC)LogPot.so:		$(SACC)LogPot.cc $(ACCT) $(makefiles)
+				$(MAKE_ACC)
 
 acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
@@ -326,7 +328,8 @@ acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Point.so \
 				$(ACC)PotExp.so \
 				$(ACC)Shrink.so \
-				$(ACC)SoftKernel.so
+				$(ACC)SoftKernel.so \
+				$(ACC)LogPot.so
 endif
 
 # -----

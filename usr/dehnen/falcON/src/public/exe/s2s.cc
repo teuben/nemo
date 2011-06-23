@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2007-2010
+/// \date   2007-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2007-2008 Walter Dehnen 
+// Copyright (C) 2007-2011 Walter Dehnen 
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
