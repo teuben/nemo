@@ -54,14 +54,15 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "in=???\n			Input file (NEMO snapshot)",
     "out=???\n                  Output file (GADGET format), %t for time",
     "N=???\n			Nhalo,Ndisk,Nbulge,Nstars (in that order)",
+    "mass=\n                    Mh, Md, Mb, Ms (if no masses in input)",
     "times=all\n		Times to select snapshot",
     "swap=f\n                   Swap bytes on output?",
     "z=0\n                      ** Current Redshift",
     "box=128\n                  ** Box size (Mpc/h)",
-    "omega0=1\n                 ** Omega_0",
-    "lambda=1\n                 ** OmegaLambda",
+    "omega0=0.3\n               ** Omega0",
+    "lambda0=0.7\n              ** OmegaLambda0",
     "h=0.75\n                   ** HubbleParam",
-    "VERSION=1.0\n		21-jun-2011 PJT",
+    "VERSION=1.1\n		22-jun-2011 PJT",
     NULL,
 };
 
@@ -86,7 +87,8 @@ void nemo_main()
     bool Qswap;
     Body *btab = NULL, *bp;
     int i, ndim, nbody, bits, ParticlesBit, omode;
-    int nh,nd,nb,ns;
+    int  nh,nd,nb,ns;
+    real mh,md,mb,ms;
     string *burststring();
     rproc btrtrans();
     struct dark_particle *dark;
@@ -120,9 +122,19 @@ void nemo_main()
 	}
 	dprintf(1,"Writing t=%f to \"%s\"\n",tsnap,outfname);
         outstr = stropen(outfname,"w");
+
+	/* @todo:   should really use nemoinpi/nemoinpd here */
 	sscanf(getparam("N"), "%d,%d,%d,%d", &nh, &nd, &nb, &ns);
 	if(nbody != nh + nd  + nb + ns) {
 	  error("nbody != nh + nd + nb + ns");
+	}
+	if (hasvalue("mass")) {
+	  sscanf(getparam("mass"),"%lg,%lg,%lg,%lg", &mh,&md,&mb,&ms);
+	  if (bits&MassBit) warning("Overwriting masses");
+	  for (i=0; i<nh; i++)  Mass(btab+i) = mh;
+    	  for (i=nh; i<nh+nd; i++) Mass(btab+i) = md;
+    	  for (i=nh+nd; i<nh+nd+nb; i++) Mass(btab+i) = mb;
+    	  for (i=nh+nd+nb; i<nh+nd+nb+ns; i++) Mass(btab+i) = ms;
 	}
 	write_gadget(outstr, tsnap, btab, nh, nd, nb, ns, Qswap);
 	strclose(outstr);
@@ -149,8 +161,11 @@ void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
   /* check if all the masses for a given particle type are the same,
      in which case we should use the mass field in the header rather
      than giving each particle an individual mass */
-  header.mass[0] = 0.0; /* gas */
-  /* halo */
+
+  /* 0: gas */
+  header.mass[0] = 0.0;
+
+  /* 1: halo */
   indivmass[0]=FALSE;
   if(nhalo>=1) {
     pmass = Mass(bodies+0);
@@ -168,7 +183,8 @@ void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
   } else {
     header.mass[1] = pmass;
   }
-  /* disk */
+
+  /* 2: disk */
   indivmass[1]=FALSE;
   if(ndisk>=1) {
     pmass = Mass(bodies+nhalo);
@@ -186,7 +202,8 @@ void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
   } else {
     header.mass[2] = pmass;
   }
-  /* bulge */
+
+  /* 3: bulge */
   indivmass[2]=FALSE;
   if(nbulge>=1) {
     pmass = Mass(bodies + nhalo+ndisk);
@@ -204,7 +221,8 @@ void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
   } else {
     header.mass[3] = pmass;
   }
-  /* stars */
+
+  /* 4: stars */
   indivmass[3]=FALSE;
   if(nstars>=1) {
     pmass = Mass(bodies + nhalo+ndisk+nbulge);
@@ -223,8 +241,8 @@ void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
     header.mass[4] = pmass;
   }
 
+  /* 5: boundary */
   header.mass[5] = 0.0;
-
 
 
   /* rest of the header */
@@ -236,7 +254,7 @@ void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
   header.flag_cooling = 0;                 /* fake */
   header.BoxSize      = getdparam("box");
   header.Omega0       = getdparam("omega0");
-  header.OmegaLambda  = getdparam("lambda");
+  header.OmegaLambda  = getdparam("lambda0");
   header.HubbleParam  = getdparam("h");
   header.npart[0] = header.npartTotal[0] = 0;      /* no gas */
   header.npart[1] = header.npartTotal[1] = nhalo;
