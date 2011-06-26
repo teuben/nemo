@@ -3,10 +3,8 @@ include $(NEMOLIB)/makedefs
 # potcode
 
 MBODY=16384
+LM=-DMBODY=$(MBODY)
 
-LOCAL_INC=-DMBODY=$(MBODY)
-
-#CFLAGS = -O -DMBODY=$(MBODY)
 LDFLAGS =
 L = $(NEMOLIB)/libnemo.a
 
@@ -64,18 +62,18 @@ potcode: $(OBJFILES)
 	$(CC) $(CFLAGS) -o potcode $(OBJFILES) $(NEMO_LIBS) $(FORLIBS)
 
 potcode.o: potcode.c defs.h
-	$(CC) $(CFLAGS) -c potcode.c
+	$(CC) $(LM) $(CFLAGS) -c potcode.c
 
 orbstep.o: orbstep.c defs.h
-	$(CC) $(CFLAGS) -c orbstep.c
+	$(CC) $(LM) $(CFLAGS) -c orbstep.c
 
 code_io.o: code_io.c defs.h
-	$(CC) $(CFLAGS) -c code_io.c
+	$(CC) $(LM) $(CFLAGS) -c code_io.c
 
 dissipate.o: dissipate.c defs.h
-	$(CC) $(CFLAGS) -c dissipate.c
+	$(CC) $(LM) $(CFLAGS) -c dissipate.c
 
 diffuse.o: diffuse.c defs.h
-	$(CC) $(CFLAGS) -c diffuse.c
+	$(CC) $(LM) $(CFLAGS) -c diffuse.c
 
 
