@@ -5,6 +5,8 @@
  *         of trying this on Cray, VMS or Microsoft MSDOS or any non-IEEE
  *         machines (:-) Well, it's just a matter of #ifdeffing this....
  *
+ *   see also: gfortran compile option -frecord-marker=length 
+ *
  *	may-94	created in a hurry for rvcsnap(1NEMO)
  *   20-may-94  fixed bug in computing  'n' in display(); added warning EOF.
  *   22-may-95  added some comments, extra check at end of unfread
