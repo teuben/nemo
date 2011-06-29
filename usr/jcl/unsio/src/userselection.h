@@ -25,6 +25,8 @@ namespace uns {
 #define GasBit      (1  <<  5)
   struct indexes_tab { int i,p; };
   typedef struct indexes_tab t_indexes_tab;
+class  ParticlesObject;
+typedef std::vector <ParticlesObject> ParticlesObjectVector; 
 
 class UserSelection{
 // this class allows to the user to check if the components/range she/he has
@@ -41,6 +43,7 @@ public:
   ComponentRangeVector * getCrvFromSelection() { return &crvsel;}
   
 private:
+  ParticlesObjectVector pov;
   static int comparePos(const void * a, const void * b) {
     t_indexes_tab * aa = (t_indexes_tab *) a;
     t_indexes_tab * bb = (t_indexes_tab *) b;
@@ -65,5 +68,33 @@ private:
   int min,max;
   void findMinMax(const int, const int);
 };
+//
+// class ParticlesObject
+//
+// this class is used to re-ordering the object according to
+// user selection
+class ParticlesObject{
+  public:
+  ParticlesObject() {
+    npart=0;    
+    step=first=last=-1;
+    pos=-1;
+  }
+
+  const ParticlesObject& operator=(const ParticlesObject&m) {
+    npart = m.npart;
+    first = m.first;
+    last  = m.last;
+    pos   = m.pos;
+    return *this;
+  }
+
+  int npart;       // #particles in the object
+  int first;       // index of the first particle
+  int last;        // index of the last particle
+  int step;        // incremental step between particles.
+  int pos;         // position of the object
+};
+
 }
 #endif

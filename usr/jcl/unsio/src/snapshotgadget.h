@@ -122,7 +122,7 @@ typedef struct particle_data_lite
     bool getData(const std::string,       int   * );
     bool getData(const std::string, const std::string ,int *,float **);
     bool getData(const std::string, const std::string ,int *,int   **);
-
+    bool isNewFrame() { return first_loc;}
    int close();
 
   private:

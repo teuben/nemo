@@ -291,18 +291,20 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
 
       // Read the whole file till a valid block exist
       // or stop = true in case of Gadget1 file      
-      while (readBlockName() && !stop) {
+      while (req_bits!=0 && readBlockName() && !stop) {
         if (version==1) block_name=next_block_name;
         bool ok=false;
         // --> Postions block
         if (block_name=="POS" && req_bits&POS_BIT) { 
           ok=true;
           readCompData(pos,index2,npartOffset,3);
+          if (version==1) next_block_name="VEL";
         }
         // --> Velocities block
         if (block_name=="VEL" && req_bits&VEL_BIT) { 
           ok=true;
           readCompData(vel,index2,npartOffset,3);
+          if (version==1) next_block_name="ID";          
         }
         // --> IDs block
         if (block_name=="ID" && req_bits&ID_BIT) { 
@@ -435,6 +437,11 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
           }
           else {
             skipBlock();
+            if (version==1) { // we set the nextblockname
+              if (block_name=="POS") next_block_name="VEL";
+              if (block_name=="VEL") next_block_name="ID";
+              if (block_name=="ID" ) next_block_name="MASS";
+            }
           }
         }
       } // end of while readBlock

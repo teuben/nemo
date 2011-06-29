@@ -53,6 +53,7 @@ add_definitions(-Wall -g -Wswitch -Wcast-align -Wreturn-type -Wno-unused-functio
 
 # create library "uns"
 add_library (unsio SHARED ${LIBSOURCES} )
+
 if(OSX) 
   set_target_properties(unsio PROPERTIES LINK_FLAGS "-L${NEMOLIB} -lnemo -lsqlite3")
 endif(OSX)

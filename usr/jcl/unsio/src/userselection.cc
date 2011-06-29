@@ -39,6 +39,11 @@ UserSelection::~UserSelection()
 // setSelection:                                                               
 // according to User's selection (string select) and the differents components 
 // (ranges, components) inside the snapshot, the POV is filled up.             
+// the user make a selection "_sel" and  "_crv" is an array of
+// available component for the snapshot.
+// This function will build an array of indexes selected by the user.
+// This function takes care in which order the user has selected the particles and build
+// the array of selected indexes accordingly.
 bool UserSelection::setSelection(const std::string _sel,
                                  const ComponentRangeVector * _crv)
 {
@@ -59,9 +64,29 @@ bool UserSelection::setSelection(const std::string _sel,
   nsel = 0;
   min = max = -1;
   crvsel.clear();  // crv to stro selected component
+  pov.clear();
   bool status=parse();
   if (status || 1 ) { // we force here
-    qsort(indx,nbody,sizeof(t_indexes_tab),UserSelection::comparePos);
+    t_indexes_tab * indx2 = new t_indexes_tab[nbody];
+    for (int i=0;i<nbody;i++) {
+      indx2[i].i=-1;    // reset indexes
+      indx2[i].p=10000; // set position to high number
+    }
+    int ptr=0;
+    for (unsigned int i=0;i<pov.size();i++) {
+      for (int j=pov[i].first; j<=pov[i].last; j++) {
+        indx2[ptr].i = indx[j].i;
+        indx2[ptr].p = indx[j].p;
+	assert(indx2[ptr].i!=-1);
+	assert(indx[j].p == (int) i);
+	assert(ptr<nbody);
+        ptr++;
+      }
+    }
+    //assert(ptr==nbody);
+    
+    delete [] indx;
+    indx=indx2;
     // resise crvsel
     crvResize(crvsel);
   }
@@ -206,6 +231,15 @@ void UserSelection::fillIndexes(const std::string comp,const int first, const in
     indx[i].p = pos;
     assert(nsel<=nbody);
   }
+  // add a new object in the structure
+  ParticlesObject po;
+  po.first=first;
+  po.last=last;
+  po.step=step;
+  po.npart=last-first+1;
+  po.pos=pos;
+  pov.push_back(po);
+  
   // store selected component in a CRV vector
   uns::ComponentRange cr;
   cr.setData(first,last);
