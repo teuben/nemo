@@ -106,6 +106,71 @@ int get_atable(
     dprintf(1,"%d lines read from table file, %d data used \n",nline, npt);
     return npt;
 }
+
+int get_itable(
+    stream instr,                   /* in: input ascii file */
+    int ncol,                       /* in: number of columns to read */
+    int colnr[],                    /* in: column numbers to read */
+    int *coldat[],                  /* out: array of pointers to integer data */
+    int ndat)                       /* in: length of dat arrays ; if < 0, repeat */
+{
+    string *sp;
+    int i, n, nr, nret, nline=0, npt=0;
+    bool bad;
+    static char line[MAX_LINELEN];
+    int *dat;
+
+    if (ndat==0 || ncol<=0) error("Illegal ndat=%d ncol=%d",ndat,ncol);
+    dprintf(2,"get_atable: parsing into %d columns\n",ncol);
+    for(;;) {
+        if (ndat < 0) {    /* line[] was filled from previous iteration */
+	  ndat = -ndat;
+        } else {
+	  if (fgets(line,MAX_LINELEN,instr) == NULL) 
+	    break;
+        }
+        n = strlen(line);
+        nline++;                        /* count number of lines read */
+        if (line[n-1]=='\n') line[n-1]='\0';      /* patch line */
+	if (line[0]=='#' || line[0]==';' || line[0]=='!') {
+            dprintf(2,"%s\n",line);     
+            continue;                       /* skip comment lines */
+	}
+        sp = burststring(line,", \t\r");     /* tokenize input line */
+        n = xstrlen(sp,sizeof(string))-1;   /* number of items found */
+        dprintf(3,"[%d] %s\n",n,line);
+        if (n==0) continue;                 /* skip empty lines ? */
+	if (npt >= ndat) {
+	  npt = -ndat;
+	  break;
+	}
+        bad = FALSE;
+        for (i=0; i<ncol; i++) {            /* process and fill each column */
+            nr = colnr[i];		/* column number : >= 1 */
+            dat = coldat[i];		/* pointer to data */
+            if (nr>n) {		/* reference to an out of bounds column */
+                warning("get_itable: skip line %d: %d columns, %d not present",
+					nline,n,colnr[i]);
+                bad = TRUE;
+                break;
+            }
+            if (nr==0)			/* reference line number  */
+                dat[npt] = nline;
+            else if ( (nret=nemoinpi(sp[nr-1], &dat[npt], 1)) != 1) {
+                warning("get_itable: line %d: error %d reading %s",
+					nline,nret,sp[nr-1]);
+                bad = TRUE;
+                break;
+            }
+        } /* for (i) */
+	freestrings(sp);
+        if (bad) continue;
+        npt++;                              /* count how much data filled */
+    } /* for(;;) */
+    dprintf(1,"%d lines read from table file, %d data used \n",nline, npt);
+    return npt;
+}
+
 
 /*
  *  get_ftable:  read fixed formatted table
