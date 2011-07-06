@@ -1,0 +1,36 @@
+.TH AHF2GRP 1NEMO "6 July 2011"
+.SH NAME
+ahf2grp \- AHF to halo group format
+.SH SYNOPSIS
+\fBahf2grp\fP [parameter=value]
+.SH DESCRIPTION
+The AHF group finder program writes out a group membership (ascii) table, but
+the halos
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input dataset. This must be a specially formatted ascii table.
+No default.
+.TP 20
+\fBout=\fP
+Output dataset. This will be a specially formatted ascii table.
+No Default.
+.TP 20
+\fBnbody=\fP
+Maximum index particles in input (e.g. 128**3) [30]
+.TP 20
+\fBnmax=\fP
+Max lines in data, if pipe. Use 0 on a file, if you want it
+to count lines.
+.SH EXAMPLES
+.SH SEE ALSO
+tabmath(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+06-Jul-11	V0.2 Created	PJT
+.fi
