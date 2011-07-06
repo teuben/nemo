@@ -14,7 +14,7 @@ string defv[] = {
   "out=???\n          Output",
   "nbody=30\n        Maximum index particles in input (e.g. 128**3)",
   "nmax=10000\n       Max lines in data, if pipe",
-  "VERSION=0.1\n      1-jul-11 PJT",
+  "VERSION=0.2\n      6-jul-11 PJT",
   NULL,
 };
 
@@ -57,7 +57,7 @@ nemo_main()
 
   fprintf(instr2,"%d\n",nbody);
   for (i=0; i<nbody; i++)
-    fprintf(instr2,"%d %d\n",i+1,ihalo[i]);
+    fprintf(instr2,"%d\n",ihalo[i]);
   strclose(instr2);
 
 }
