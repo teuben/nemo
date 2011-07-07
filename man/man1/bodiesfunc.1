@@ -1,0 +1,76 @@
+.TH bodyfunc 1falcON "12 July 2006"
+
+.SH Name
+bodiesfunc \- functions taking a set of bodies, time, and a set of
+parameters and returning bool, int, real, or vector.
+
+.SH Synopsis
+\fBfalcON/inc/public/bodyfunc.h\fP
+.PP
+
+.BI "class bodiesfunc {"
+.br
+.BI "public:"
+.br
+.BI "  bodiesfunc(const char* " expr ") throw(falcON::exception);"
+.br
+.BI "  char     const& " type "() const;"
+.br
+.BI "  fieldset const& " need "() const;"
+.br
+.BI "  int      const& " npar "() const;"
+.br
+.BI "  bool            " is_empty "() const;"
+.br
+.BI "  template<typename " T ">" T " " func "(bodies const&b, double const&time, const real*pars) const;"
+.br
+.BI "};"
+
+
+.SH Description
+\fIbodiesfunc\fP function objects are constructed from a bodiesfunc
+expression \fIexpr\fP (see \fIbodiesfunc(5falcON)\fP) by envoking the
+C++ compiler.
+.br
+\fItype\fP() returns 'b', 'i', 'r', or 'v' for
+boolean, integer, real (scalar) or vector being the return type of
+\fIfunc\fP() as determined from the bodyfunc expression \fIexpr\fP.
+.br
+\fInpar\fP() returns the number of parameter required
+by the member function \fIfunc\fP.
+.br
+\fIneed\fP() returns the N-body data required by
+\fIfunc\fP().
+.br
+\fIis_empty\fP() returns true if the function
+is not defined (e.g. because the bodiesfunc expression \fIexpr\fP was
+empty or invalid).
+.br
+\fIfunc\fP() takes a set of bodies, time, and \fInpar\fP()
+parameters and returns a \fIT\fP, which \fBMUST\fP match with \fItype\fP().
+Similarly the bodies \fBMUST\fP support the data indicated by \fIneed\fP().
+Note that usually neither type nor data need are checked, unless when
+compiled for debugging). In case of an empty function, 'true', 0, 0.,
+or (0,0,0) are returned for boolean, integer, real, or vector return
+type, respectively.
+
+.SH Caveats
+Because \fBbodiesfunc\fP relies on the C++ compiler to generate
+information and function, any syntax errors in the
+\fIbodiesfunc(5falcON)\fP expression will result in compiler errors and
+are not analysed and reported in any detail. The experienced user may
+inspect the C++ source code and the compiler output, which are
+reported to stderr if debug>=2.
+
+
+.SH See Also
+bodiesfunc(5falcON)
+.SH Author
+Walter Dehnen
+.SH Update History
+.nf
+.ta +1.0i +6.0i
+21-jul-2004 Created	WD
+07-nov-2004 parameters added, changed cond#expr to expr@cond	WD
+12-jul-2006 Updated	WD
+.fi

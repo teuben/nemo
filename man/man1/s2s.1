@@ -1,0 +1,76 @@
+.TH s2s 1falcON "31 Oct 2007"
+
+.SH name
+\fBs2s\fP \- copies selected snapshots from a nemo snapshot file
+
+.SH synopsis
+\fB2s2s\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+.SH description
+\fBs2s\fP reads from a nemo snapshot file and copies specified data
+from selected snapshots to another nemo snapshot file. This is very
+similar to snapcopy(1NEMO), except that it allows to copy all data
+supported by falcON (including SPH data). A bodyfunc (5falcON) filter
+may be applied to reduce the number of bodies copied.
+
+.SH parameters
+
+.TP 12
+\fBin=\fP\fIfile\fP
+Input file name (nemo snapshot file). Default: \fBrequired\fP.
+.TP
+\fBout=\fP\fIfbase\fP
+Output file name (nemo snapshot file). Default: \fBrequired\fP.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Specifies the times for the snapshots to be converted. In addition
+to the usual NEMO convention of allowing "all", the values "first"
+and "last" are also possible. Default: \fBall\fP
+.TP
+\fBfilter=\fIbodyfunc expression\fP
+A valied bodyfunc (5falcON) expression which evaluates to a boolean.
+If given, a filter constructed from this expression will be applied
+before writing data to output. No default.
+.TP
+\fBparams=\fIparameters\fP
+Comma separated list of parameters required (if any) by the filter.
+No default.
+.TP
+\fBzeromissing=\fIt|f\fP
+Boolean specifying whether body data required by the filter, but not
+present in the input snapshot, shall be set to zero (alternatively
+the code terminates). Default: \fBf\fP
+.TP
+\fBtime=\fIvalue\fP
+If given, the time of the output snapshot is set to \fIvalue\fP. Note
+that the new time is set after the filter (if any) has been applied.
+No default
+.TP
+\fBcopy=\fP\fIIOstring\fP
+Specifies which data shall be copied.
+Default: \fBall\fP.
+
+.SH see also
+snapcopy(1NEMO), s2a(1falcON), a2s(1falcON)
+.PP
+
+.fi
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf               \fIUser Guide for falcON\fP.
+.fi
+.SH author
+Walter Dehnen   walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+28-Feb-2007	first version of manual  WD
+31-Oct-2007	updated (filter, times=first,last) WD
+.fi
+
+

@@ -1,0 +1,85 @@
+.TH g2s 1falcON "16 Feb 2007"
+
+.SH name
+\fBg2s\fP \- converts gadget to nemo snapshot file(s) using falcON
+
+.SH synopsis
+\fBgagdet2nemo\fP [parameter=value]
+
+.SH requirement
+requires NEMO version 3.0.13 or higher, see
+http://www.astro.umd.edu/nemo.
+
+.SH description
+\fBg2s\fP tries to read gadget snapshots (gadget data
+format 1) and write them into a single nemo snapshot file. If the
+input has been different endianess than the local machine, the
+data are converted on the fly.
+
+.SH parameters
+
+.TP 12
+\fBin=\fP\fIfbase\fP
+Gives the base file name for gadget snapshot data files. Default:
+\fBrequired\fP.
+.TP
+\fBout=\fP\fIfile\fP
+File name for writing data in nemo snapshot format. Default: \fBrequired\fP.
+.TP
+\fBnshot=\fP\fIval\fP
+Number of snapshots to be converted. If \fBnshot\fP>1, we assume that
+there are snapshots \fIfbase\fP\fBXXX\fP with \fBXXX\fP running from
+\fBfirst\fP to \fBnshot\fP-\fBfirst\fP+1. Otherwisw (if
+\fBnshot\fP==1), we assume the snapshot \fIfbase\fP to exists. Note
+that each snapshot can be distributed over several files, e.g. the 4th
+snapshot may be in 8 files "\fIfbase\fP004.0" to "\fIfbase\fP004.7".
+Default: \fB1\fP.
+.TP
+\fBcopy=\fP\fIIOstring\fP
+Specifies which data are copied to the nemo snapshot file (and hence are
+assumed present in the gadget data files).
+
+We assume that the gadget file contains the following data in this
+order: positions, velocities, keys (ids), masses (if not specified via
+the header), internal gas energies, gas densities, gas smoothing
+lengths, potentials, and accelerations. We stop reading the gadget
+data file once all data to be copied have been read (or the end of the
+file has been reached). Note that the first five are guaranteed to be
+always present. Default: \fBmxvU\fP.
+.TP
+\fBfirst=\fP\fIval\fP
+If \fBnshot\fP>1, we assume the first snapshot to be converted to have index
+\fIval\fP. So, if e.g.\ \fBfirst\fP=4 and \fBnshot\fP=5, we seek to 
+read snapshots "\fIfbase\fP004" to "\fIfbase\fP008". Default: \fB0\fP.
+.TP
+\fBheader=\fP\fIval\fP
+Size (in bytes) of the FORTRAN record header used when the gadget data
+files have been written. This is usually 4, but on some 64bit machines it
+may be 8. Using a wrong value is likely to result in a fatal error with
+a completely misguiding error message. Default: \fB4\fP.
+
+.SH limitations
+Gadget is a massively parallel code and a single gadget snapshot distributed
+over several files may contain more data than can be hold in memory on just
+one node. Such snapshots cannot presently converted; the code is likely to
+crash when trying to grab too much memory.
+
+.SH see also
+s2g(1falcON)
+.PP
+
+.fi
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf               \fIUser Guide for falcON\fP.
+.fi
+.SH author
+Walter Dehnen   walter.dehnen@astro.le.ac.uk
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+16-Feb-2007	first version of manual  WD
+.fi
+
+

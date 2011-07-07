@@ -1,0 +1,111 @@
+.TH bodyfunc 5falcON "12 July 2006"
+
+.SH Name
+bodiesfunc expression \- used in generating \fIbodiesfunc(1falcON)\fP
+functions: functions taking a set of bodies, time and a set of
+parameters and returning bool, int, real, or vector.
+
+.SH Description
+\fIbodiesfunc\fP expression are valid C (in fact C++) expressions that
+evaluate to either a bool, an integer, a real, or a vector.  On
+construction of a \fIbodiesfunc\fP, the C++ compiler is
+employed to to generate on the fly (as the user runs the program) the
+function together with type information and information on which body
+data are required, see \fIbodiesfunc(1falcON)\fP.
+
+.SH List of valid subexpressions
+The bodiesfunc expression may contain the following subexpressions
+.sp 2
+.nf
+.ta \w'vtimes'u+14n +\w'vtimes.3c'u+2n
+\fIName\fP	 \fIType\fP      \fIDescription\fP
+.sp 5p
+\fB constants and global properties\fP
+Pi	r	3.14159265358979323846264338328
+N	i	\fBN\fP, the total number of bodies
+M	r	\fBM\fP, the total mass
+t	r	\fBt\fP, the time of the snapshot
+\fB operators\fP
+Sum{\fIexpr\fP@\fIcond\fP}	i,r,v	\fBsum\fP of \fIexpr\fP over bodies satisfying \fIcond\fP
+Mean{\fIexpr\fP@\fIcond\fP}	i,r,v	\fBmean\fP of \fIexpr\fP over bodies satisfying \fIcond\fP
+Mmean{\fIexpr\fP@\fIcond\fP}	i,r,v	\fBmass-weighted mean\fP of \fIexpr\fP over bodies satisfying \fIcond\fP
+Max{\fIexpr\fP@\fIcond\fP}	i,r,v	\fBmax\fP of \fIexpr\fP over bodies satisfying \fIcond\fP
+Min{\fIexpr\fP@\fIcond\fP}	i,r,v	\fBmin\fP of \fIexpr\fP over bodies satisfying \fIcond\fP
+And{\fIexpr\fP@\fIcond\fP}	b	\fBAND\fP of \fIexpr\fP over bodies satisfying \fIcond\fP
+Or {\fIexpr\fP@\fIcond\fP}	b	\fBOR\fP  of \fIexpr\fP over bodies satisfying \fIcond\fP
+Num{\fIcond\fP}	i		\fBNumber\fP of bodies satisfying \fIcond\fP
+.fi
+
+Note that \fBMean{\fP\fIX\fP\fB}\fP is equivalent to (but more efficient
+than) \fBSum{\fP\fIX\fP\fB}/N\fP. Similarly, \fBMmean{\fP\fIX\fP\fB}\fP is
+equivalent to \fBSum{m*\fP\fIX\fP\fB}/M\fP.
+
+.SH Operations and functions
+The subexpression arguments \fIcond\fP and \fIexpr\fP to the operators
+can be bodiesfunc expressions mixed with \fIbodyfunc(5falcON)\fP
+expressions. \fIcond\fP is defined as the part after the separator '\fB@\fP'
+and constitutes a condition for a body to be considered. If the argument of the
+operator contains no '\fB@\fP', the condition is omitted (all bodies are
+considered). The condition is converted to bool: non boolean conditions are
+considered true if non-zero.
+.sp
+In addition, the expression may use any standard mathematical
+expressions, including math functions. For vectors, all operations
+defined for tupel<3,real>, see \fItupel(5falcON)\fP, are allowed.
+The following lists some of these and additional functions supported.
+.sp 2
+.nf
+.ta \w'vtimes'u+8n +\w'vtimes.3c'u+2n
+\fIName\fP	\fIType\fP	\fIDescription\fP
+vector*vector	real		returns the scalar product
+vector^vector	vector		returns the vector cross product
+vector(x)	vector		converts scalar to vector
+real(x)	real		converts integer to real
+norm(x)				returns x*x for any type
+abs(vector)	real		returns sqrt(norm(vector))
+abs(real)	real		returns |real|
+max(x,y)	scalar		returns the greater of two scalars
+max(vector)	real		returns the greatest vector element		
+min(x,y)	scalar		returns the smaller of two scalars
+min(vector)	real		returns the smallest vector element		
+.sp 5p
+
+.SH Examples
+The following lists some example \fIbodiesfunc\fP expressions:
+.sp
+	\fBM\fP and \fBSum{m}\fP
+.br
+both evaluate the total mass of all bodies;
+.sp
+	\fBMin{eps}\fP and \fBMin{eps@r>#0}\fP
+.br
+evaluate the mininum softening length of, respectively, all bodies and
+of all bodies with radius larger than parameter 0;
+.sp
+	\fBSum{m@E<0}\fP and \fB0.5*Sum{m*norm(vel)@E<0}\fP
+.br
+evaluate, respectively, the mass and the kinetic energy of all bound
+bodies;
+.sp
+	\fBNum{r<Min{eps}}\fP and \fBSum{1@r<Min{eps}}\fP
+.br
+both evaluate the number of bodies with radius less than the minimum
+softening length (this demonstrates the usage of another bodiesfunc
+expression inside a bodiesfunc operator);
+.sp
+	\fBSum{l*m}/M\fP, \fBMean{l*m}/Mean{m}\fP and \fBMmean{l}\fP
+.br
+are three ways to evaluate the mass-weighted mean of specific angular momentum.
+
+.SH See Also
+bodiesfunc(1falcON), bodyfunc(1falcON), snapprop(1falcON)
+.SH Author
+Walter Dehnen
+.SH Update History
+.nf
+.ta +1.0i +6.0i
+21-jul-2004 Created	WD
+20-aug-2004 nested expressions added	WD
+07-nov-2004 parameters added, changed cond#expr to expr@cond	WD
+12-jul-2006 Updated	WD
+.fi

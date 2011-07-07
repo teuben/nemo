@@ -1,0 +1,328 @@
+.TH UNS "09 Jun 2011"
+.SH NAME
+\fBUNSIOF -- Unified Nbody Snapshot\fP Library (fortran version).
+
+.SH DESCRIPTION
+\fIUNSIOF\fP is a high level C++ library which allows
+ Input operations in a generic way on Nbody snapshot files,
+from a FORTRAN program. Currently, NEMO, Gadget 1 and 2 little and
+bigendian, and list of separated snapshots in a text file are supported.
+The use of this set of functions is very simple and doesn't require any
+knowledge of the internal file structure of the snapshot.
+ The library can manage multiple reading of different snapshots in the
+same program. Every snapshots is identified by a unique identifier
+provided by the library.
+.PP
+ The process to read data is done in 3 steps:
+
+ 1) Initialisation of the library
+ 2) Data loading
+ 3) Data extracting
+
+.SH INITIALISATION
+ 
+.TP 3
+\fBinteger uns_init(filename, selected_component, selected_time)\fP
+ This function initialise the library according to the given
+parameters. Each parameters is a string and must be terminated with
+either a "\\0" or a "#" character for compatibility reasons between
+Fortran and C++.
+ It returns an integer as a unique identifier.  A returned value less
+than 0 means that the simulation does not exist or a file format
+unknown.
+
+\fIfilename\fP: (character * (*))
+ Is the input simulation filename. It can be an absolute
+filename path or just a simulation name (eg "gas001"). In the later
+case, all the parameters of the simulation, if it exists, will be
+automatically collected from the simulation database filename stored
+in the usual place (/pil/programs/DB/simulation.dbl).
+
+\fIselected_component\fP: (character * (*))
+ select components or range of particles that you want to load. The
+following data can be
+requested:\fBdisk,gas,halo,bulge,stars,bndry,all\fP. A range
+with the value \fB"0:299999"\fP select the particles between 0 and
+299999. For NEMO simulation, range and components of the selected
+simulation will be taken from the file \fI/pil/programs/DB/simulation.dbl\fP.
+ You can request several data separated with a ","  like  this:
+"disk,gas". The order of your selection will be respected when you
+will get the data.
+
+\fIselected_time\fP: (character * (*))
+ select a range of time from where you want to select the
+particles. You can request several range of times separated with a
+",".  
+ Example: "700:750,800:900" will only proceed on particles in the time
+range [700:750] and [800:900].
+
+\fBinteger uns_sim_type(ident)\fP
+ This function return an integer matching to the type of the snaphot identified by
+the integer \fBident\fP.
+ It returns \fB"0"\fP for \fBnemo\fP snapshot, \fB"1"\fP for \fBgadget\fP snapshot.
+
+.SH DATA LOADING
+
+.TP 3
+\fBinteger uns_load(ident)\fP
+ This function load the next time step of the snaphot identified by
+the integer \fBident\fP.
+ It returns \fB"1"\fP if the snapshot has been successfully loaded or \fB"0"\fP at
+the end of the snapshot.
+
+.TP 3
+\fBinteger uns_load_opt(ident,selected_values)\fP
+ This is an optimized version of the uns_load() function. 
+ This function load the next time step of the snaphot identified by
+the integer \fBident\fP.
+ It returns \fB"1"\fP if the snapshot has been successfully loaded or \fB"0"\fP at
+the end of the snapshot.
+
+\fIselected_values\fP: (character * (*))
+ The extra variable \fBselected_values\fP allows to restrict the loading of
+ selected values only. It can speedup the file
+ loading and reduce the memory footprint. Each value is specified by a
+ character. Here is all the possibilities :
+  'm'  mass
+  'x'  position
+  'v'  velolcity
+  'p'  potential
+  'a'  acceleration
+  'e'  softening
+  'k'  keys array (from nemo)
+  'X'  aux array  (from nemo)
+  'R'  density
+  'I'  particles's Id
+  'U'  Internal energy
+  'M'  metallicity
+  'A'  stars's age
+  'H'  hsml
+  'T'  temperature
+
+ example:  \fB"mxR"\fP will load mass, position and density only.
+ 
+.SH DATA EXTRACTING
+ There is a set of \fBuns_get_XXXX\fP functions to get data from the
+snapshot. Each functions take as the first parameter an integer
+\fBident\fP returned by the function \fIuns_init(...)\fP.
+
+\fBsubroutine uns_get_nbody(ident,nbody)\fP
+ Put in the integer variable \fBnbody\fP the #bodies resquested
+according to the \fIselected_component\fP variable (Cf uns_init(...) function).
+
+\fBsubroutine uns_get_time(ident,time)\fP
+ Put in the floating variable \fBtime\fP the current time of the simulation.
+
+\fBsubroutine uns_get_pos(ident,pos,size_array)\fP
+ Put in the two dimensional floating array \fBpos(3,size_array)\fP,
+all the positions requested.
+
+\fBsubroutine uns_get_vel(ident,vel,size_array)\fP
+ Put in the two dimensional floating array \fBvel(3,size_array)\fP,
+all the velocities requested.
+
+\fBsubroutine uns_get_mass(ident,mass,size_array)\fP
+ Put in the one dimensional floating array \fBmass(size_array)\fP,
+all the masses requested.
+
+\fBfunction integer uns_get_age(ident,age,size_array)\fP
+ Put in the one dimensional floating array \fBage(size_array)\fP,
+all the particles with an age (stars). It returns the number of stars particles or 0.
+
+\fBfunction integer uns_get_metal(ident,metal,size_array)\fP
+ Put in the one dimensional floating array \fBmetal(size_array)\fP,
+all the particles with metalicity (gas+stars) in the respective order
+gas then stars. It returns the number of gas+stars particles or 0.
+
+\fBfunction integer uns_get_metal_gas(ident,metal,size_array)\fP
+ Put in the one dimensional floating array \fBmetal(size_array)\fP,
+metalicity of the gas particles. It returns the number of gas particles or 0.
+
+\fBfunction integer uns_get_metal_stars(ident,metal,size_array)\fP
+ Put in the one dimensional floating array \fBmetal(size_array)\fP,
+metalicity of the stars particles. It returns the number of stars particles or 0.
+
+\fBfunction integer uns_get_u(ident,u,size_array)\fP
+ Put in the one dimensional floating array \fBu(size_array)\fP,
+internal energy of the gas particles. It returns the number of gas particles or 0.
+
+\fBfunction integer uns_get_temp(ident,temp,size_array)\fP
+ Put in the one dimensional floating array \fBtemp(size_array)\fP,
+temperature of the gas particles. It returns the number of gas particles or 0.
+
+\fBfunction integer uns_get_rho(ident,rho,size_array)\fP
+ Put in the one dimensional floating array \fBrho(size_array)\fP,
+density of the gas particles. It returns the number of gas particles or 0.
+
+\fBinteger uns_get_range(ident,component,nbody,first,last)\fP
+ This function give the particles's range for a selected
+component. You give in a string variable
+\fBcomponent\fP, the name of the component, and the function return
+an integer variable \fBnbody\fP (#bodies), \fBfirst\fP and \fBlast\fP,
+the first and the last index of the component in the array. First and
+last values are given in fortran array convention (starts from index 1).
+ The variable \fIcomponent\fP must be terminated with
+either a "\\0" or a "#" character for compatibility reasons between
+Fortran and C++.
+ It returns \fB"1"\fP if the component exist, and \fB"0"\fP otherwise.
+ Example to get halo's particles range:
+
+ status =  uns_get_range(ident,"halo\\0",n,first,last)
+
+\fBinteger uns_get_eps(ident,component,eps)\fP
+ This function give the softening for a selected component. You give
+in a string variable \fBcomponent\fP, the name of the component, and 
+the function return a float variable \fBeps\fP.
+ The variable \fIcomponent\fP must be terminated with
+either a "\\0" or a "#" character for compatibility reasons between
+Fortran and C++.
+ It returns \fB"1"\fP if the softening exist for the component, and
+\fB"0"\fP otherwise.
+ This function will only work if the simulation requested belong to
+the database file \fI/pil/programs/DB/simulation.dbl\fP.
+
+ Example to get halo's softening:
+
+ status =  uns_get_eps(ident,"halo\\0",eps)
+
+\fBinteger uns_get_cod(ident,component,time,tcod[7])\fP
+ This function give the COD for a selected component (or a set of
+ components separeted with ","), at the selected time. You give
+in a string variable \fBcomponent\fP, the name of the component, and 
+the function return a float array \fBtcod[7]\fP filled with respectively
+ the time, x,y,z,vx,vy,vz of the COD.
+ The variable \fIcomponent\fP must be terminated with
+either a "\\0" or a "#" character for compatibility reasons between
+Fortran and C++.
+ It returns \fB"1"\fP if the cod  exist for the requested component
+ and time. It returns \fB"0"\fP if the cod does not exits for the
+ requested time. It returns \fB"-1"\fP if the COD file does not exist.
+
+ This function will only work if the simulation requested belong to
+the database file \fI/pil/programs/DB/simulation.dbl\fP.
+
+ Example to get "disk,stars"'s cod at time=0.1:
+
+ status =  uns_get_cod(ident,"disk,stars\\0",0.1,tcod)
+
+.SH EXAMPLE
+
+.nf
+      ! -----------------------------------------------------------
+      program testlib
+      implicit none
+      integer iargc, lnblnk, narg, uns_init, uns_load, valid, ident,
+     $     nbody
+
+      character arg1 * 80, arg2 * 80, arg3 * 80
+      narg = command_argument_count()  
+
+      if (narg.ne.3) then
+         write(0,*) "You must give 3 parameters:"
+         write(0,*) "filename selected_component selected_time"
+         stop
+      endif
+      call get_command_argument(1,arg1) ! get filename
+      arg1(lnblnk(arg1)+1:lnblnk(arg1)+1) = '\\0' ! fortran to C++
+      call get_command_argument(2,arg2) ! get selected component
+      arg2(lnblnk(arg2)+1:lnblnk(arg2)+1) = '\\0' ! fortran to C++
+      call get_command_argument(3,arg3) ! get selected time
+      arg3(lnblnk(arg3)+1:lnblnk(arg3)+1) = '\\0' ! fortran to C++
+
+      ! initialyze UNS engine
+      ident=uns_init(arg1, arg2, arg3) ! return identifier for the snaphot
+                                       ! ident must be positive
+      if (ident.gt.0) then
+         valid = 1
+         do while (valid .gt. 0) ! loop on all the time step
+            valid = uns_load(ident) ! load data belonging to ident snapshot
+            if (valid .gt. 0) then  ! it goes fine 
+               call uns_get_nbody(ident, nbody) ! get #bodies
+               call start(ident,nbody)
+            endif
+         enddo
+      endif
+      end
+      ! -----------------------------------------------------------
+      subroutine start(ident,nbody)
+      implicit none
+! input parameters
+      integer ident,nbody
+! UNS variable
+      integer status
+      integer  uns_get_range
+      real *4 time, pos(3,nbody), vel(3,nbody), mass(3,nbody)
+! various      
+      integer io_nemo_f
+      character * 90 out
+      integer n,first,last
+
+      call uns_get_time(ident,time      )  ! read time
+      call uns_get_pos (ident,pos ,nbody)  ! read pos
+      call uns_get_vel (ident,vel ,nbody)  ! read vel
+      call uns_get_mass(ident,mass,nbody)  ! read mass
+      status = uns_get_range(ident,"gas\\0",n,first,last) ! gas's range
+
+      out = "nemo.out"
+      write(0,*) "nbody=",nbody," time=",time
+      status = io_nemo_f(out,80,nbody,"float,save,3n,n,t,x,v,m",
+     $     nbody,time,pos,vel,mass)
+      end
+      ! -----------------------------------------------------------
+
+.PP
+.SH COMPILATION
+ A fortran program which use the UNS library must link against NEMO
+library (-lnemo) and C++ library (-lstdc++). Here is an example of
+Makefile using gfortran compiler.
+
+.nf
+# ----------------------------------------
+# MAKEFILE to use UNS
+# ----------------------------------------
+# find libg2c.a library
+LIB_G77 := $(shell g77 -print-libgcc-file-name  2> /dev/null)
+LIB_G77 := $(shell dirname $(LIB_G77)           2> /dev/null)
+
+# path for NEMO Library, UNS library and G2C
+UNS_LIB_PATH :=  $(LOCAL)/lib
+LIBS         := -L$(NEMOLIB) -L$(UNS_LIB_PATH) -L$(LIB_G77)
+
+# - - - - - - - - - - - - - - - - - - - -
+# compilation with gfortran compiler
+# - - - - - - - - - - - - - - - - - - - -
+GFORTFLAGS = -Wall -O2 -ggdb -Wl,-rpath,$(UNS_LIB_PATH)
+
+testlibF : testlib.F
+	gfortran $(GFORTFLAGS)  -o $@ testlib.F $(LIBS) \\
+                  -lnemomaing77 -lunsio -lnemo -lg2c -lstdc++ -lm
+# ----------------------------------------
+.fi
+.SH SEE ALSO
+.nf
+nemo(1NEMO), snapshot(5NEMO), gadget2nemo, uns_tonemo, uns_density, uns_2dplot
+.fi
+.SH AUTHOR
+Jean-Charles LAMBERT
+
+.SH BUGS and COMMENT
+Please, report all bugs and comment to : 
+.nf
+Jean-Charles.Lambert@oamp.fr
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+11-Dec-08	created                        JCL
+09-Jun-11	a lot of improvement           JCL
+.fi
+
+
+
+
+
+
+
+
+
+

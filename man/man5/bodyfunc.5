@@ -1,0 +1,134 @@
+.TH bodyfunc 5falcON "12 July 2006"
+
+.SH Name
+bodyfunc expression \- used in generating \fIbodyfunc(1falcON)\fP
+functions: functions taking body, time and a set of up to 10
+parameters and returning bool, int, real, or vector.
+
+.SH Description
+\fIbodyfunc expression\fPs are valid C (in fact C++) expressions that
+evaluate to either a bool, an integer, a real, or a vector. On
+construction of a \fIbodyfunc\fP, the C++ compiler is
+employed to to generate on the fly (as the user runs the program) the
+function together with type information and information on which body
+data are required, see \fIbodyfunc(1falcON)\fP.
+
+.SH List of body properties
+The bodyfunc expression may contain the following sub-expressions
+for body properties.
+.sp 2
+.nf
+.ta \w'vtimes'u+2n +\w'vtimes.3c'u+2n
+\fIName\fP      \fIType\fP      \fIDescription\fP
+.sp 5p
+\fB constants and global properties\fP
+Pi	real	returns 3.14159265358979323846264338328
+N	int	returns \fBN\fP, the total number of bodies
+M	real	returns \fBM\fP, the total mass
+t	real	returns \fBt\fP, the time of the snapshot
+#\fId\fP	real	parameter number \fId\fP
+\fB basic body properties\fP
+i	int	returns the \fBindex\fP, between 0 and N-1
+m	real	returns the \fBmass\fP
+pos	vector	returns the \fBposition\fP vector
+vel	vector	returns the \fBvelocity\fP vector
+acc	vector	returns the \fBacceleration\fP vector
+aux	real	returns an \fBauxiliary\fP real
+pot	real	returns the \fBpotential\fP
+phi	real	returns the \fBpotential\fP
+eps	real	returns the individual \fBsoftening length\fP
+key	int	returns the \fBkey\fP, an auxiliary integer
+\fB basic SPH body properties\fP (only with falcON SPH)
+h	real	returns the \fBsmoothing length\fP, 
+n	real	returns the \fBnumber of gas neighbours\fP
+U	real	returns the \fBinternal energy\fP
+Ui	real	returns the \fB(dU/dt)_internal\fP
+Ue	real	returns the \fB(dU/dt)_external\fP
+U	real	returns the \fBinternal energy\fP
+S	real	returns the \fBentropy function\fP
+rho	real	returns the \fBgas density\fP
+f	real	returns the \fBfactor f_i\fP
+s	real	returns the \fBsound speed\fP
+\fB components of basic body properties\fP
+x	real	returns \fBx\fP, the x-component of \fBpos\fP
+y	real	returns \fBy\fP, the y-component of \fBpos\fP
+z	real	returns \fBz\fP, the z-component of \fBpos\fP
+vx	real	returns \fBvx\fP, the x-component of \fBvel\fP
+vy	real	returns \fBvy\fP, the y-component of \fBvel\fP
+vz	real	returns \fBvz\fP, the z-component of \fBvel\fP
+ax	real	returns \fBax\fP, the x-component of \fBacc\fP
+ay	real	returns \fBay\fP, the y-component of \fBacc\fP
+az	real	returns \fBaz\fP, the z-component of \fBacc\fP
+\fB compounds from basic body properties\fP
+r	real	returns abs(\fBpos\fP), the radius
+R	real	returns sqrt(\fBx\fP*\fBx\fP+\fBy\fP*\fBy\fP), the cylindrical radius
+v	real	returns abs(\fBvel\fP), the total velocity
+a	real	returns abs(\fBacc\fP), the total acceleration
+vr	real	returns \fBvr\fP, the radial component of \fBvel\fP
+vt	real	returns \fBvt\fP, the absolute value of tangential velocity
+vphi	real	returns \fPvphi\fP, the azimuthal component of \fBvel\fP
+l	vector	returns \fBl\fP=\fBx^v\fP, the specific angular momentum
+lx	real	returns \fBLx\fP, the x-component of \fBl\fP
+ly	real	returns \fBLy\fP, the y-component of \fBl\fP
+lz	real	returns \fBLz\fP, the z-component of \fBl\fP
+ltot	real	returns abs(\fBl\fP), the total specific angular momentum
+jtot	real	the same as \fBltot\fP, for NEMO compatibility
+L	vector	returns \fBL\fP=\fBl*m\fP, the angular momentum vector
+Lx	real	returns \fBLx\fP, the x-component of \fBL\fP
+Ly	real	returns \fBLy\fP, the y-component of \fBL\fP
+Lz	real	returns \fBLz\fP, the z-component of \fBL\fP
+Ltot	real	returns abs(\fBL\fP), the total angular momentum
+E	real	returns \fBphi+vel*vel/2\fP, the total energy
+etot	real	the same as \fBE\fP, for NEMO compatibility
+.fi
+.SH Operations and functions
+In addition, the expression may use any standard mathematical
+expressions, including math functions. For vectors, all operations
+defined for tupel<3,real>, see \fItupel(5falcON)\fP, are allowed.
+The following lists some of these and additional functions supported.
+.sp 2
+.nf
+.ta \w'vtimes'u+8n +\w'vtimes.3c'u+2n
+\fIName\fP	\fIType\fP	\fIDescription\fP
+vector*vector	real		returns the scalar product
+vector^vector	vector		returns the vector cross product
+vector(x)	vector		converts scalar to vector
+real(x)	real		converts integer to real
+norm(x)				returns x*x for any type
+abs(vector)	real		returns sqrt(norm(vector))
+abs(real)	real		returns |real|
+max(x,y)	scalar		returns the greater of two scalars
+max(vector)	real		returns the greatest vector element		
+min(x,y)	scalar		returns the smaller of two scalars
+min(vector)	real		returns the smallest vector element		
+.sp 5p
+
+.SH Compatibility
+\fIbodyfunc\fP expressions are backward compatible with
+\fIbodytrans(5NEMO)\fP expressions, i.e. any valid \fIbodytrans\fP
+expression may be used. Note, however that \fIbodyfunc\fP allows more
+functionality, for example vector expressions.
+
+.SH Examples
+The following lists some example \fIbodyfunc\fP expressions
+.sp 2
+.nf
+.ta \w'vtimes'u+18n +\w'vtimes.3c'u+1n
+\fIexpression\fP	\fIType\fP	\fIDescription\fP
+r<2	bool	true if the radius is less than 2
+norm(pos)<#0	bool	same as before, but more efficient, since (1) no sqrt() needed and (2) the limit is parametrized
+E<0? L:vector(zero)	vector	bound bodies: angular momentum, unbound: 0
+.sp 5p
+
+
+.SH See Also
+bodyfunc(1falcON), bodytrans(5NEMO)
+.SH Author
+Walter Dehnen
+.SH Update History
+.nf
+.ta +1.0i +6.0i
+21-jul-2004 Created	WD
+07-nov-2004 parameters added, changed cond#expr to expr@cond	WD
+12-jul-2006 Updated	WD
+.fi
