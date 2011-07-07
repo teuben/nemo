@@ -129,7 +129,7 @@ std::string CSnaptools::dirname(const std::string str)
 std::string CSnaptools::parseString(std::string & next_string, const std::string sep)
 {
   std::string return_string;
-  std::string::size_type coma=next_string.find(sep,0);  // try to find ","
+  std::string::size_type coma=next_string.find(sep,0);  // try to find separator sep ","
   if (coma != std::string::npos) { // found "separator"
     return_string = next_string.substr(0,coma);
     next_string   = next_string.substr(coma+1,next_string.length());
@@ -159,6 +159,76 @@ template bool CSnaptools::isStringANumber<double>(const std::string mystring, do
 template bool CSnaptools::isStringANumber<float> (const std::string mystring, float  &data);
 template bool CSnaptools::isStringANumber<int>   (const std::string mystring, int    &data);
 //
+// mapStringVectorIndexes
+// should parse strings like : gas@0:100,200:3000:2+disk@1000:2000
+// into a map string of vector
+// gas  vec[0:100,200:3000:2]
+// disk vec[1000:2000]
+std::map<std::string, std::vector<int> > CSnaptools::mapStringVectorIndexes(const std::string s, const int max, std::string sep1,std::string sep2,std::string sep3)
+{
+  std::map<std::string, std::vector<int> > sOfv;
+  std::string current_s,next_s;
+  next_s = s;              // string to be parsed
+ 
+  // parse a+b+c
+  while ((current_s=parseString(next_s,sep1)) != "") {  // look for XXXX,YYYY,ZZZZ strings
+    // current_s =  gas@0:100,200:300  
+    std::string comp=parseString(current_s,sep2); // 
+    // comp=gas current_s=0:100,200:300
+    std::vector<int> vec=CSnaptools::rangeToVectorIndexes<int>(current_s,max,sep3);
+    sOfv[comp]=vec;
+  }
+  return sOfv;
+}
+
+//
+// rangeToVector
+template <class T> std::vector<T> CSnaptools::rangeToVectorIndexes(const std::string s, const int max, std::string sep)
+{
+  std::string current_s,next_s;
+  next_s = s;              // string to be parsed
+  
+  std::vector <T> vec;
+  // parse 
+  while ((current_s=parseString(next_s,sep)) != "") {  // look for XXXX,YYYY,ZZZZ strings
+    // look for   a[:b[:c]] sting
+    T va,vb,vc=(T)1;
+    std::string a=parseString(current_s,":");
+    if (a=="all") { // special case for all
+      va=0; vb=max-1;
+      // feed up the vector
+      while (va <= vb) {
+        vec.push_back(va);
+        va += vc;
+      }
+    }
+    else { 
+      if (a!="") { // a ?
+        va = stringToNumber<T>(a);
+        std::string b =parseString(current_s,":");
+        if (b!="") { // b ?
+          vb = stringToNumber<T>(b);
+          std::string c =parseString(current_s,":");
+          if (c!="") { // c ?
+            vc = stringToNumber<T>(c);
+          } // c 
+          else vc = (T)1;
+        } // b 
+        else vb = va;
+        // feed up the vector
+        while (va <= vb) {
+          vec.push_back(va);
+          va += vc;
+        }
+      } // a 
+    }
+  }
+  return vec;  
+}
+template std::vector<float > CSnaptools::rangeToVectorIndexes<float >(const std::string s, const int max, std::string sep);
+template std::vector<double> CSnaptools::rangeToVectorIndexes<double>(const std::string s, const int max, std::string sep);
+template std::vector<int   > CSnaptools::rangeToVectorIndexes<int   >(const std::string s, const int max, std::string sep);
+//
 // stringToVector
 template <class T>  std::vector<T> CSnaptools::stringToVector(const std::string s, const int min, T val, std::string sep)
 {
@@ -180,8 +250,9 @@ template <class T>  std::vector<T> CSnaptools::stringToVector(const std::string 
   }  
   return vec;
 }
-template std::vector<float> CSnaptools::stringToVector<float>(const std::string s, const int min, float val, std::string sep);
-template std::vector<int  > CSnaptools::stringToVector<int  >(const std::string s, const int min, int   val, std::string sep);
+template std::vector<float > CSnaptools::stringToVector<float >(const std::string s, const int min, float  val, std::string sep);
+template std::vector<double> CSnaptools::stringToVector<double>(const std::string s, const int min, double val, std::string sep);
+template std::vector<int   > CSnaptools::stringToVector<int   >(const std::string s, const int min, int    val, std::string sep);
 template std::vector<std::string> CSnaptools::stringToVector<std::string  >(const std::string s, const int min, std::string  val, std::string sep);
 //
 // minArray

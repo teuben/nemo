@@ -29,10 +29,11 @@ const char * defv[] = {
   "select=???\n               select particles (range, or component name)\n"
   "                   component: gas,halo,disk,bulge,stars,bndry",
   "display=t\n                display array's content (t|f)",
+  "bits=mxvXRIUMAHT\n physicals quantities that you want to display\n",
   "maxline=2\n                max lines per components",  
   "times=all\n		      selected time",
   "verbose=f\n                verbose on/off",
-  "VERSION=1.O\n              compiled on <"__DATE__"> JCL  ",
+  "VERSION=2.O\n              compiled on <"__DATE__"> JCL  ",
   NULL,
 };
 const char * usage="Print information about an UNS file";
@@ -43,57 +44,78 @@ template <class T> void displayFormat(int maxlines,std::string text, T * array, 
 //  displayInfo
 void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
 {
-  float * pos, * vel, * mass;
+  float * pos, * vel, * mass, * pot , *acc;
   int * id;
-  int n1,n2,n3,n4;
-  n1=n2=n3=n4=0;
-  bool ok1,ok2,ok3,ok4;
-  ok1=ok2=ok3=ok4=false;
+  int nbody=0;
+  bool ok=false;
+
+  float * nullp;
+  ok = uns->snapshot->getData(comp,"nbody" ,&nbody,&nullp);
   
-  if (display) {
-    ok1 = uns->snapshot->getData(comp,"pos" ,&n1,&pos );
-    ok2 = uns->snapshot->getData(comp,"vel" ,&n2,&vel );
-    ok3 = uns->snapshot->getData(comp,"mass",&n3,&mass);
-    ok4 = uns->snapshot->getData(comp,"id"  ,&n4,&id);
-  } else {
-    float * nullp;
-    ok1 = uns->snapshot->getData(comp,"nbody" ,&n1,&nullp);
-    n2=n3=n4=n1;
-  }
-  if (ok1 || ok2 || ok3 ) {
-    int nbody=max(max(n1,n2),n3);
+  if (ok) {
     std::cout << setw(50) << setfill('=') << ""<<"\n";
     std::cout<< setfill(' ');
     std::cout<< left<< setw(8) << comp << ":" << setw(9) << right << nbody << "\n";
   }
-  if (ok3 && display) {
-    displayFormat(maxlines,"mass[1] = ",mass,1,n3, 3);
+  ok = uns->snapshot->getData(comp,"mass",&nbody,&mass);
+  if (ok && display) {
+    displayFormat(maxlines,"mass[1] = ",mass,1,nbody, 3);
   }  
-  if (ok1 && display) {
-    displayFormat(maxlines,"pos [3] = ",pos ,3,n1, 1);
+  ok = uns->snapshot->getData(comp,"pos" ,&nbody,&pos );
+  if (ok && display) {
+    displayFormat(maxlines,"pos [3] = ",pos ,3,nbody, 1);
   }
-  if (ok2 && display) {
-    displayFormat(maxlines,"vel [3] = ",vel ,3,n2, 1);
+  ok = uns->snapshot->getData(comp,"vel" ,&nbody,&vel );
+  if (ok && display) {
+    displayFormat(maxlines,"vel [3] = ",vel ,3,nbody, 1);
   }
-  if (ok4 && display) {
-    displayFormat(maxlines,"id  [1] = ",id  ,1,n4, 3);
+  ok = uns->snapshot->getData(comp,"pot" ,&nbody,&pot );
+  if (ok && display) {
+    displayFormat(maxlines,"pot [1] = ",pot ,1,nbody, 3);
+  }
+  ok = uns->snapshot->getData(comp,"acc" ,&nbody,&acc );
+  if (ok && display) {
+    displayFormat(maxlines,"acc [3] = ",acc ,3,nbody, 1);
+  }
+  ok = uns->snapshot->getData(comp,"id"  ,&nbody,&id);
+  if (ok && display) {
+    displayFormat(maxlines,"id  [1] = ",id  ,1,nbody, 3);
   }  
-  if (comp == "gas" && ok1 && ok2 && ok3) {
-    float * rho, * u, * hsml;
-    ok1 = uns->snapshot->getData(comp,"rho" ,&n1,&rho );
-    ok2 = uns->snapshot->getData(comp,"u"   ,&n2,&u );
-    ok3 = uns->snapshot->getData(comp,"hsml",&n3,&hsml);
-    if (ok1 && display) {
-      displayFormat(maxlines,"rho [1] = ",rho ,1,n1, 3);
-    }
-    if (ok2 && display) {
-      displayFormat(maxlines,"u   [1] = ",u   ,1,n2, 3);
-    }
-    if (ok3 && display) {
-      displayFormat(maxlines,"hsml[1] = ",hsml,1,n3, 3);
-    }
-    
+  //if (comp == "gas") {
+  float * rho, * u, * hsml, * temp, * metal;
+  ok = uns->snapshot->getData(comp,"rho" ,&nbody,&rho );
+  
+  if (ok && display) {
+    displayFormat(maxlines,"rho [1] = ",rho ,1,nbody, 3);
   }
+  ok = uns->snapshot->getData(comp,"u"   ,&nbody,&u );
+  if (ok && display) {
+    displayFormat(maxlines,"u   [1] = ",u   ,1,nbody, 3);
+  }
+  ok = uns->snapshot->getData(comp,"hsml",&nbody,&hsml);
+  if (ok && display) {
+    displayFormat(maxlines,"hsml[1] = ",hsml,1,nbody, 3);
+  }
+  ok = uns->snapshot->getData(comp,"temp",&nbody,&temp);
+  if (ok && display) {
+    displayFormat(maxlines,"temp[1] = ",temp,1,nbody, 3);
+  }
+  ok = uns->snapshot->getData(comp,"metal",&nbody,&metal);
+  if (ok && display) {
+    displayFormat(maxlines,"metal[1] = ",metal,1,nbody, 3);
+  }    
+  //}
+  //if (comp == "stars") {
+  float * age;//, * metal;
+  ok = uns->snapshot->getData(comp,"age" ,&nbody,&age );
+  if (ok && display) {
+    displayFormat(maxlines,"age [1] = ",age,1,nbody, 3);
+  } 
+  ok = uns->snapshot->getData(comp,"metal" ,&nbody,&metal );
+  if (ok && display) {
+    displayFormat(maxlines,"metal[1] = ",metal,1,nbody, 3);
+  } 
+  //}
 }
 // ------------------------------------------------------------
 // displayFormat
@@ -130,6 +152,7 @@ int main(int argc, char ** argv )
   char * simname     = getparam ((char *) "in"      );
   char * select_c    = getparam ((char *) "select"  );
   bool   display     = getbparam((char *) "display" );
+  std::string bits   =(getparam ((char *) "bits"    ));
   int    maxlines    = getiparam((char *) "maxline" );
   char * select_t    = getparam ((char *) "times"   );
   bool   verbose     = getbparam((char *) "verbose" );  
@@ -138,11 +161,11 @@ int main(int argc, char ** argv )
   // instantiate a new UNS input object (for reading)
   uns::CunsIn * uns = new uns::CunsIn(simname,select_c,select_t,verbose);
   
-  std::string bits="";       // read all bits
   if (!display) bits="none"; // we don't read anything
   if (uns->isValid()) { // input file is known by UNS lib        
     while(uns->snapshot->nextFrame(bits)) { // there is a new frame
       std::string stype = uns->snapshot->getInterfaceType();
+      std::string file_structure=uns->snapshot->getFileStructure();
       std::cout << setw(50) << setfill('*') << ""<<"\n";
       std::cout << "File name : "<<uns->snapshot->getFileName()<<"\n";
       std::cout << "File type : "<<stype<<"\n";
@@ -153,7 +176,7 @@ int main(int argc, char ** argv )
       ok=uns->snapshot->getData("time",&time);
 
       std::cout << "Nbody selected = " << nbody << "\nTime="<<time <<"\n";
-      if (stype=="Nemo") {
+      if (file_structure=="range") {
         displayInfo(display,maxlines,"all",uns);
       } else {
         displayInfo(display,maxlines,"gas"  ,uns);
