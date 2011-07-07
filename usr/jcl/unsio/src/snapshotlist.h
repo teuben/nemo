@@ -32,12 +32,12 @@ namespace uns {
 		 const bool verb=false);
     ~CSnapshotList();
     int nextFrame(const uns::t_indexes_tab * index_tab, const int nsel);
-    int close() { return 1;};
+    int close() { return 1;}
     ComponentRangeVector * getSnapshotRange();
-    bool getData(const std::string name,int *n,float **f) { return snapshot->getData(name,n,f); };
-    bool getData(const std::string name,       float * f) { return snapshot->getData(name,  f); };
-    bool getData(const std::string name,int *n,int   **i) { return snapshot->getData(name,n,i); };
-    bool getData(const std::string name,       int   * i) { return snapshot->getData(name,  i); };
+    bool getData(const std::string name,int *n,float **f) { return snapshot->getData(name,n,f); }
+    bool getData(const std::string name,       float * f) { return snapshot->getData(name,  f); }
+    bool getData(const std::string name,int *n,int   **i) { return snapshot->getData(name,n,i); }
+    bool getData(const std::string name,       int   * i) { return snapshot->getData(name,  i); }
     bool getData(const std::string comp, const std::string name,int *n,float **f) {
       return snapshot->getData(comp,name,n,f);
     }
@@ -56,6 +56,11 @@ namespace uns {
 
     virtual ComponentRangeVector * getCrvFromSelection() { return snapshot->user_select.getCrvFromSelection();}
     //bool     isNewFrame();
+    std::string getFileStructure() {
+      if (snapshot) return snapshot->getFileStructure();
+      std::cerr << "Algo error : snapshot not defined...\n";
+      assert(0);
+    }
 
   private:
     // from ascii database

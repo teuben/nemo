@@ -76,7 +76,7 @@ namespace uns {
     CunsIn(const char * ,const char * , const char *, const bool verb=false );
     CunsIn(const std::string ,const std::string,const std::string, const bool verb=false );
     ~CunsIn();
-    bool isValid() { return valid;};
+    bool isValid() { return valid;}
     CSnapshotInterfaceIn * snapshot; // object to store data
 
   private:

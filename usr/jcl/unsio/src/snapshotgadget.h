@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2010                                       
+// Copyright Jean-Charles LAMBERT - 2008-2011                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -152,6 +152,13 @@ typedef struct particle_data_lite
   bool swap;
   uns::ComponentRangeVector  crv;
   void storeComponents();
+  inline bool ckloadBit(unsigned int lb) { return load_bits & lb; }
+  template <class T> inline void freeNotLoadedData(T ** data,unsigned int lb) {
+    if (!ckloadBit(lb) && data) {      
+      delete [] *data;
+      *data=NULL;
+    }
+  }
   // member data
   float * getMass()   { return mass; }
   float   getTime()   { return tframe;}
@@ -222,10 +229,6 @@ typedef struct particle_data_lite
 
   }; // end of class CSnapshotGadgetIn  
 
-
-
-
-
   //
   //
   //
@@ -289,6 +292,10 @@ typedef struct particle_data_lite
     int setRho (const int _n, float * _rho , const bool addr);
     int setHsml(const int _n, float * _hsml, const bool addr);
     int setU   (const int _n, float * _U   , const bool addr);
+    int setAge (const int _n, float * _age   , const bool addr);
+    int setTemp(const int _n, float * _temp, const bool addr);
+    int setMetalGas(const int _n, float * _mg   , const bool addr);
+    int setMetalStars(const int _n, float * _ms   , const bool addr);
   }; // end of class CSnapshotGadgetOut  
 } // namespace
 

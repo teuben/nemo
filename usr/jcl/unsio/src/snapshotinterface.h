@@ -93,7 +93,10 @@ namespace uns {
     virtual bool getData(const std::string, const std::string ,int *,float **)=0;
     virtual bool getData(const std::string, const std::string ,int *,int   **)=0;
     
+    
     // Virtual function with a default behaviour
+    virtual std::string getInterfaceType() { return interface_type;}
+    virtual std::string getFileStructure() { return file_structure;}
     virtual bool isEndOfData() const { return end_of_data;}
     virtual std::string getFileName() { return filename;}
     virtual std::string getSimDir() { return simdir;}
@@ -121,7 +124,6 @@ namespace uns {
     void setFileName(std::string _f) { filename = _f;}
     bool getRangeSelect(const char *, int *, int *, int * , bool fortran=false);
     //std::string getFileName() const { return filename;};
-    std::string getInterfaceType() { return interface_type;}
     int getInterfaceIndex() { return interface_index; }
     bool isFileExist() { return true; }
     std::string getSelectPart() { return select_part; }
@@ -137,7 +139,7 @@ namespace uns {
     CSnapshotInterfaceIn * obj;
     std::string filename;
     std::string simdir;
-    std::string interface_type;
+    std::string interface_type, file_structure;
     int interface_index;
     mutable bool end_of_data;
     std::string select_part, select_time;
@@ -192,10 +194,12 @@ namespace uns {
     virtual int setData(std::string, const int, int *,const bool _addr=false)=0;
     virtual int save()=0;
     virtual std::vector<double> moveToCom()=0;
-
+    std::string getInterfaceType() { return interface_type;}
+    std::string getFileStructure() { return file_structure;}
   protected:
     // WRITING
     std::string simname, simtype;
+    std::string interface_type,file_structure;
     bool verbose;
     
   }; // end of class CSnapshotInterfaceOut

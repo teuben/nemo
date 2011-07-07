@@ -39,6 +39,7 @@ CSnapshotNemoIn::CSnapshotNemoIn(const std::string _name,
   const char * argv[] = { "CSnapshotNemoIn",NULL };
 
   interface_type="Nemo";
+  file_structure = "range";
   interface_index=0;
   first_stream=false;
   nemobits=NULL;
@@ -337,6 +338,20 @@ bool CSnapshotNemoIn::getData(const std::string comp,const std::string name,int 
     nbody=getNSel();
   }
   switch(CunsOut::s_mapStringValues[name]) {
+  case uns::Nbody :
+    if (status) {
+      *data = NULL;
+      *n = nbody;
+    } else {
+      ok = false;
+    }
+    break;  
+  case uns::Nsel   :
+    if (status) {
+      *n    = nbody;
+    } else {
+      ok=false;
+    }  
   case uns::Pos   :
     if (status && getPos()) {
       *data = &getPos()[first*3];
@@ -534,6 +549,9 @@ CSnapshotNemoOut::CSnapshotNemoOut(const std::string _n, const std::string _t, c
               << "aborting .....\n";
     std::exit(1);
   }
+  //
+  interface_type = "Nemo";
+  file_structure = "range"; // "range" like file
   // RAZ
   mass   = NULL;
   pos    = NULL;

@@ -60,6 +60,7 @@ namespace uns {
   rho    = NULL;
   hsml   = NULL;
   bits   = 0;
+  load_bits = 0;
   tframe = 0.;
   redshift=0.;
   frecord_offset = 4;
@@ -76,7 +77,7 @@ namespace uns {
     stm << getVersion();
     interface_type = "Gadget" + stm.str();
     interface_index=1;
-    
+    file_structure = "component";
   }
 }
 // ----------------------------------------------------------------------------
@@ -211,7 +212,6 @@ template <class T> int CSnapshotGadgetIn::readCompData(T * ptr, const int * inde
   assert(in.good() && len1==len2 && len1==bytes_counter);
   return 1;
 }
-#if 1
 // ============================================================================
 int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
 {
@@ -229,7 +229,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
       age = new float[header.npartTotal[4]];
     if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0 && req_bits&METAL_BIT) 
       metal = new float[header.npartTotal[0]+header.npartTotal[4]];
-    if (! intenerg && header.npartTotal[0]>0) intenerg = new float[header.npartTotal[0]];
+    if (! intenerg && header.npartTotal[0]>0 && req_bits&U_BIT) intenerg = new float[header.npartTotal[0]];
     if (! temp && header.npartTotal[0]>0 && req_bits&TEMP_BIT) 
       temp = new float[header.npartTotal[0]];
     if (! rho && header.npartTotal[0]>0 && req_bits&RHO_BIT) 
@@ -296,24 +296,28 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
         bool ok=false;
         // --> Postions block
         if (block_name=="POS" && req_bits&POS_BIT) { 
+          load_bits |= POS_BIT;
           ok=true;
           readCompData(pos,index2,npartOffset,3);
           if (version==1) next_block_name="VEL";
         }
         // --> Velocities block
         if (block_name=="VEL" && req_bits&VEL_BIT) { 
+          load_bits |= VEL_BIT;
           ok=true;
           readCompData(vel,index2,npartOffset,3);
           if (version==1) next_block_name="ID";          
         }
         // --> IDs block
         if (block_name=="ID" && req_bits&ID_BIT) { 
+          load_bits |= ID_BIT;
           ok=true;
           readCompData(id,index2,npartOffset,1);
           if (version==1) next_block_name="MASS";
         }
         // --> MASS block
         if (block_name=="MASS" && req_bits&MASS_BIT ) { 
+          load_bits |= MASS_BIT;
           ok=true;
           bytes_counter=0;
           if (ntotmasses>0.) {    // different masses
@@ -345,16 +349,19 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
         }
         // --> POT block
         if (block_name=="POT" && req_bits&POT_BIT) { 
+          load_bits |= POT_BIT;
           ok=true;
           readCompData(pot,index2,npartOffset,1);
         }
         // --> Acceleration block
         if (block_name=="ACCE" && req_bits&ACC_BIT) { 
+          load_bits |= ACC_BIT;
           ok=true;
           readCompData(acc,index2,npartOffset,3);
         }
         // --> U block (Internal energy)
         if (block_name=="U" && req_bits&U_BIT) { 
+          load_bits |= U_BIT;
           assert(header.npart[0]>0); // (gas only)         
           ok=true;
           bytes_counter=0;
@@ -367,6 +374,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
         }
         // --> Temperature block
         if (block_name=="NE" && req_bits&TEMP_BIT) { 
+          load_bits |= TEMP_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
           bytes_counter=0;
@@ -379,6 +387,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
         }
         // --> RHO block (density)
         if (block_name=="RHO" && req_bits&RHO_BIT) { 
+          load_bits |= RHO_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
           bytes_counter=0;
@@ -391,6 +400,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
         }
         // --> HSML block (neighbours size)
         if (block_name=="HSML" && req_bits&HSML_BIT) { 
+          load_bits |= HSML_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
           bytes_counter=0;
@@ -403,6 +413,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
         }
         // --> Z block (Metalicity)
         if (block_name=="Z" && req_bits&METAL_BIT) {  
+          load_bits |= METAL_BIT;
           assert((header.npart[0]+header.npart[4])>0); // gas+stars
           ok=true;
           bytes_counter=0;
@@ -415,6 +426,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
         }
         // --> AGE block
         if (block_name=="AGE" && req_bits&AGE_BIT) { 
+          load_bits |= AGE_BIT;
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
@@ -448,6 +460,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
       
       // add masses if no BLOCK_MASS present (mass inside the header)
       if (ntotmasses == 0. && req_bits&MASS_BIT) { // no BLOCK_MASS present (mass inside the header)
+        load_bits |= MASS_BIT;
         for(int k=0;k<6;k++) {
           for(int n=0;n<header.npart[k];n++){
             int idx=index2[npartOffset[k]+n];
@@ -470,376 +483,26 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
 
     // garbage collecting
     delete [] index2;
-#if 0
-    std::string nemo="nemo.out";
-    const int * n=&nsel;
-    io_nemo(nemo.c_str(),"float,save,n,x,info",&n,&pos);
-#endif
+
     // convert to temperature units
     if (header.npartTotal[0] > 0) {
       //unitConversion();
     }
+    // check bits
+    freeNotLoadedData(&mass     ,MASS_BIT);
+    freeNotLoadedData(&pos      ,POS_BIT);
+    freeNotLoadedData(&vel      ,VEL_BIT);
+    freeNotLoadedData(&acc      ,ACC_BIT);
+    freeNotLoadedData(&pot      ,POT_BIT);
+    freeNotLoadedData(&age      ,AGE_BIT);
+    freeNotLoadedData(&metal    ,METAL_BIT);
+    freeNotLoadedData(&temp     ,TEMP_BIT);
+    freeNotLoadedData(&intenerg ,U_BIT);
+    freeNotLoadedData(&rho      ,RHO_BIT);
+    freeNotLoadedData(&hsml     ,HSML_BIT);
   }
   return 1;
 }
-#else
-// ============================================================================
-int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
-{
-  int npartOffset[6];
-  if (! is_read ) {
-    //checkCompBits(index,nsel);
-    
-    if (! pos)  pos  = new float[3*nsel];
-    if (! vel)  vel  = new float[3*nsel];
-    if (! acc)  acc  = new float[3*nsel];
-    if (! mass) mass = new float[nsel];
-    if (! pot)  pot  = new float[nsel];
-    if (! id)   id   = new int[nsel];
-    if (! age && header.npartTotal[4]>0) age = new float[header.npartTotal[4]];
-    if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0) 
-      metal = new float[header.npartTotal[0]+header.npartTotal[4]];
-    if (! intenerg && header.npartTotal[0]>0) intenerg = new float[header.npartTotal[0]];
-    if (! temp && header.npartTotal[0]>0) temp = new float[header.npartTotal[0]];
-    if (! rho && header.npartTotal[0]>0) rho = new float[header.npartTotal[0]];
-    if (! hsml&& header.npartTotal[0]>0) hsml= new float[header.npartTotal[0]];
-    
-    //ComponentRange::list(&crv);
-    // allocate memory
-    assert(nsel<=npartTotal);
-    is_read=true;
-    // allocate memory
-    assert(nsel<=npartTotal);
-    // compute offset in case of multiple gadget file
-    npartOffset[0] = 0;
-    for (int i=1;i<=5;i++) {
-      npartOffset[i] = npartOffset[i-1]+header.npartTotal[i-1];
-      if (verbose) std::cerr 
-          << "npartOffset["<<i<<"]="<<npartOffset[i]<<" npartOffset["<<i-1<<"]="
-          <<npartOffset[i-1]<<" header.npartTotal["<<i-1<<"]="<<header.npartTotal[i-1]<<"\n";
-    }
-    //for (int i=0;i<6;i++)   std::cerr << "npartOffset["<<i<<"]="<<npartOffset[i] <<"\n";
-    
-    // allocate array to store indexes 
-    int * index2  = new int[npartTotal];
-    for (int i=0; i<npartTotal; i++)
-        index2[i] = -1; // index2 init
-
-    for (int i=0, cpt=0; i<npartTotal; i++) {
-      int idx=index[i].i;
-      assert(idx<npartTotal);
-      //std::cerr << i<< " " << index[i].i << " "<< index[i].idx << " " << nsel << " " <<npartTotal << "\n";
-      if (idx != -1 ) {
-          index2[idx] = cpt++;
-      }
-    }    
-    for(int k=0;k<6;k++) {
-      int idx=index2[npartOffset[k]];
-      if (verbose) std::cerr 
-          << "npartOffset["<<k<<"]="<<npartOffset[k]<< "\n"
-          << "index2["<<npartOffset[k]<<"]="<<index2[npartOffset[k]]<< " idx="<<idx<<"\n";
-    }
-    int z_offset  =0; // metalicity offset
-    int age_offset=0; // age offset
-    
-    // loop on all the files
-    for (int i=0; i<header.num_files || (i==0 && header.num_files==0);i++) {
-      std::string infile;
-      if (header.num_files > 0 ) { // more than one file
-        std::ostringstream stm;
-        stm << "." << i;               // add ".XX" extension
-        infile = filename + stm.str(); // new filename
-        if (i>0) {
-          close();                 // close previous file
-          int fail=open(infile);   // open new file,read header
-          assert(!fail);           // fail is true abort
-        }
-      }
-      else infile=filename;        // lonely file
-      int len1=0,len2=0;
-      bool stop=false;
-      std::string next_block_name;
-      if (version==1) next_block_name="POS";
-
-      // Read the whole file till a valid block exist
-      // or stop = true in case of Gadget1 file      
-      while (readBlockName() && !stop) {
-        if (version==1) block_name=next_block_name;
-        bool ok=false;
-        // --> Postions block
-        if (block_name=="POS") { 
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-
-          for(int k=0;k<6;k++) {
-            for(int n=0;n<header.npart[k];n++) {
-              int idx=index2[npartOffset[k]+n];
-              assert(idx<nsel);
-              if (idx != -1) {
-                readData((char *) &pos[3*idx], sizeof(float), 3);
-              } else {
-                float tmp3[3];
-                readData((char *) tmp3, sizeof(float), 3);
-              }
-            }
-          }
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);
-          if (version==1) next_block_name="VEL";
-        }
-        // --> Velocities block
-        if (block_name=="VEL") { 
-          ok=true;
-          if (1) {
-            bytes_counter=0;
-            len1 = readFRecord();
-
-            for(int k=0;k<6;k++)
-              for(int n=0;n<header.npart[k];n++){
-                int idx=index2[npartOffset[k]+n];                
-                assert(idx<nsel);
-                if (idx != -1) {
-                    readData((char *) &vel[3*idx], sizeof(float), 3);                  
-                } else {
-                  //skipData(sizeof(float)*3);
-                  float tmp3[3];
-                  readData((char *) tmp3, sizeof(float), 3);
-                }
-              }
-            len2 = readFRecord();
-            assert(in.good() && len1==len2 && len1==bytes_counter);
-          } 
-          else {
-            skipBlock();
-          }
-          if (version==1) next_block_name="ID";
-        }
-        // --> IDs block
-        if (block_name=="ID") { 
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-
-          for(int k=0;k<6;k++)
-            for(int n=0;n<header.npart[k];n++){
-              int idx=index2[npartOffset[k]+n];
-              assert(idx<nsel);
-              if (idx != -1) {
-                  readData((char *) &id[idx], sizeof(int), 1);                  
-              } else {
-                //skipData(sizeof(float)*3);
-                float tmp;
-                readData((char *) &tmp, sizeof(int), 1);
-              }
-            }
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);
-          
-          if (version==1) next_block_name="MASS";
-        }
-        // --> MASS block
-        if (block_name=="MASS") { 
-          ok=true;
-          bytes_counter=0;
-          if (ntotmasses>0.) {    // different masses
-            len1 = readFRecord(); // we must read from disk
-          }
-          for(int k=0;k<6;k++) {
-            for(int n=0;n<header.npart[k];n++){
-              int idx=index2[npartOffset[k]+n];
-              assert(idx<nsel);
-              if (idx != -1 && (header.mass[k] == 0)) {          // variable mass selected
-                readData((char *) &mass[idx], sizeof(float), 1); // read from disk              
-              } else { 
-                if (idx == -1 && (header.mass[k] == 0)) {        // variable mass **not** selected
-                  float tmp;
-                  readData((char *) &tmp, sizeof(float), 1);     // read from disk (skip it)
-                } else {                             
-                  if (idx != -1 && (header.mass[k] != 0)) {      // constant mass selected
-                    mass[idx] = header.mass[k];                  // read from header
-                  }
-                }
-              }
-            } // for n         
-          } // for k
-          if (ntotmasses > 0.) {  // different masses
-	    len2 = readFRecord(); // we must read from disk
-	    assert(in.good() && len1==len2 && len1==bytes_counter);
-	  }
-          if (version==1) stop=true; // we stop reading for gadget1
-        }
-        // --> POT block
-        if (block_name=="POT") { 
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-
-          for(int k=0;k<6;k++)
-            for(int n=0;n<header.npart[k];n++){
-              int idx=index2[npartOffset[k]+n];
-              assert(idx<nsel);
-              if (idx != -1) {
-                  readData((char *) &pot[idx], sizeof(float), 1);                  
-              } else {
-                float tmp;
-                readData((char *) &tmp, sizeof(float), 1);
-              }
-            }
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);
-        }
-        // --> Acceleration block
-        if (block_name=="ACCE") { 
-          ok=true;
-          if (1) {
-            bytes_counter=0;
-            len1 = readFRecord();
-            
-            for(int k=0;k<6;k++)
-              for(int n=0;n<header.npart[k];n++){
-              int idx=index2[npartOffset[k]+n];                
-              assert(idx<nsel);
-              if (idx != -1) {
-                readData((char *) &acc[3*idx], sizeof(float), 3);                  
-              } else {
-                //skipData(sizeof(float)*3);
-                float tmp3[3];
-                readData((char *) tmp3, sizeof(float), 3);
-              }
-            }
-            len2 = readFRecord();
-            assert(in.good() && len1==len2 && len1==bytes_counter);
-          } 
-          else {
-            skipBlock();
-          }          
-        }
-        // --> U block (Internal energy)
-        if (block_name=="U") { 
-          assert(header.npart[0]>0); // (gas only)         
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-          int idx=npartOffset[0];
-          assert((idx+header.npart[0])<=header.npartTotal[0]);
-          readData((char *) &intenerg[idx], sizeof(float),header.npart[0] );          
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);
-        }
-        // --> Temperature block
-        if (block_name=="NE") { 
-          assert(header.npart[0]>0); // (gas only)
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-          int idx=npartOffset[0];
-          assert((idx+header.npart[0])<=header.npartTotal[0]);
-          readData((char *) &temp[idx], sizeof(float),header.npart[0] );          
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);
-        }
-        // --> RHO block (density)
-        if (block_name=="RHO") { 
-          assert(header.npart[0]>0); // (gas only)
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-          int idx=npartOffset[0];
-          assert((idx+header.npart[0])<=header.npartTotal[0]);
-          readData((char *) &rho[idx], sizeof(float),header.npart[0] );          
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);          
-        }
-        // --> HSML block (neighbours size)
-        if (block_name=="HSML") { 
-          assert(header.npart[0]>0); // (gas only)
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-          int idx=npartOffset[0];
-          assert((idx+header.npart[0])<=header.npartTotal[0]);
-          readData((char *) &hsml[idx], sizeof(float),header.npart[0] );          
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);                    
-        }
-        // --> Z block (Metalicity)
-        if (block_name=="Z") {  
-          assert((header.npart[0]+header.npart[4])>0); // gas+stars
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-          int idx=z_offset;
-          assert((idx+header.npart[0]+header.npart[4])<=(header.npartTotal[0]+header.npartTotal[4]));
-          readData((char *) &metal[idx], sizeof(float),header.npart[0]+header.npart[4]);          
-          len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);                
-        }
-        // --> AGE block
-        if (block_name=="AGE") { 
-          ok=true;
-          bytes_counter=0;
-          len1 = readFRecord();
-	  if (len1/4 != header.npart[4]) {
-	    std::cerr << "\nWARNING: Wang's AGE bug detected.......skipping age\n";
-	    in.seekg(len1,std::ios::cur); 
-	  } else {
-	    assert(header.npart[4]>0); // stars only
-	    int idx=age_offset;
-	    assert((idx+header.npart[4])<=(header.npartTotal[4]));
-	    readData((char *) &age[idx], sizeof(float),header.npart[4]);          
-	  }
-	  len2 = readFRecord();
-	  assert(in.good() && len1==len2);// && len1==bytes_counter);  
-        }
-
-        if (!ok) {
-          if (in.eof()) {
-            stop=true;
-          }
-          else {
-            skipBlock();
-          }
-        }
-      } // end of while readBlock
-      
-      // add masses if no BLOCK_MASS present (mass inside the header)
-      if (ntotmasses == 0.) { // no BLOCK_MASS present (mass inside the header)
-        for(int k=0;k<6;k++) {
-          for(int n=0;n<header.npart[k];n++){
-            int idx=index2[npartOffset[k]+n];
-            assert(idx<nsel);
-            if (idx != -1 && (header.mass[k] != 0)) {      // constant mass selected
-              mass[idx] = header.mass[k];                  // read from header
-            }
-          } // for n
-        } // for k
-      } // if         
-            
-      // correct the offset of the particles which have been read
-      for (int i=0;i<6;i++) {
-        npartOffset[i] = npartOffset[i]+header.npart[i];
-      }
-      // correction for metalicity and age
-      z_offset   += (header.npart[0]+header.npart[4]);
-      age_offset += header.npart[4];
-    } // end of loop on numfiles
-
-    // garbage collecting
-    delete [] index2;
-#if 0
-    std::string nemo="nemo.out";
-    const int * n=&nsel;
-    io_nemo(nemo.c_str(),"float,save,n,x,info",&n,&pos);
-#endif
-    // convert to temperature units
-    if (header.npartTotal[0] > 0) {
-      //unitConversion();
-    }
-  }
-  return 1;
-}
-#endif
 // ============================================================================
 // unitConversion()                                                            
 void CSnapshotGadgetIn::unitConversion()
@@ -1119,45 +782,45 @@ bool CSnapshotGadgetIn::getData(const std::string comp, std::string name, int *n
     }
     break;
   case uns::Rho :
-    if (status && comp=="gas") {
+    if (status && comp=="gas" && getRho(*n)) {
       *data = getRho(*n);
     } else {
       ok=false;
     }
     break;
   case uns::U :
-    if (status && comp=="gas") {
+    if (status && comp=="gas" && getU(*n)) {
       *data = getU(*n);
     } else {
       ok=false;
     } 
     break;
   case uns::Hsml :
-    if (status && comp=="gas") {
+    if (status && comp=="gas" && getHsml(*n)) {
       *data = getHsml(*n);
     } else {
       ok=false;
     }  
     break;
   case uns::Temp :
-    if (status && comp=="gas") {
+    if (status && comp=="gas" && getTemp(*n)) {
       *data = getTemp(*n);
     } else {
       ok=false;
     } 
     break;
   case uns::Age :
-    if (status && comp=="stars") {
+    if (status && comp=="stars" && getAge(*n)) {
       *data = getAge(*n);
     } else {
       ok=false;
     } 
     break;
   case uns::Metal :
-    if (status && comp=="gas") {
+    if (status && comp=="gas" && ckloadBit(METAL_BIT)) {
       *data = getMetalGas(*n);
     } else
-      if (status && comp=="stars") {
+      if (status && comp=="stars" && ckloadBit(METAL_BIT)) {
       *data = getMetalStars(*n);
     } else {
       ok=false;
@@ -1216,14 +879,17 @@ bool CSnapshotGadgetIn::getData(const std::string name,int *n,float **data)
     *data = getMetal(*n);
     break;
   case uns::GasMetal :
-    *data = getMetalGas(*n);
+    if (ckloadBit(METAL_BIT))
+      *data = getMetalGas(*n);
     break;
   case uns::StarsMetal :
-    *data = getMetalStars(*n);
+    if (ckloadBit(METAL_BIT))
+      *data = getMetalStars(*n);
     break;    
   default: ok=false;
   }
-
+  
+  if (ok && !*data) ok = false; // not ok because array is NULL
   if (verbose) {
     if (ok) {
       std::cerr << "CSnapshotGadgetIn::getData name["<<name<<"]=" << CunsOut::s_mapStringValues[name] << "\n";
@@ -1269,10 +935,14 @@ bool CSnapshotGadgetIn::getData(const std::string comp,const std::string name,in
   
   int nbody,first,last;
   bool status=getRangeSelect(comp.c_str(),&nbody,&first,&last,false); // find components ranges
-  
+  if (!status && comp=="all") { // retreive all particles selected by the user
+    status=1;
+    first=0;
+    nbody=getNSel();
+  }
   switch(CunsOut::s_mapStringValues[name]) {
   case uns::Id :
-    if (status) {
+    if (status && ckloadBit(ID_BIT)) {
       *data = id+first;
       *n = nbody;
     } else {
@@ -1310,8 +980,12 @@ bool CSnapshotGadgetIn::getData(const std::string name,int *n, int **data)
   
   switch(CunsOut::s_mapStringValues[name]) {
   case uns::Id :
-    *data = id;
-    *n    = getNSel();
+    if (ckloadBit(ID_BIT)) {
+      *data = id;
+      *n    = getNSel();
+    } else {
+      ok = false;
+    }
     break;
   default: ok=false;
   }
@@ -1387,16 +1061,20 @@ void CSnapshotGadgetIn::storeComponents()
 
 // ----------------------------------------------------------------------------
 // WRITING constructor
-  CSnapshotGadgetOut::CSnapshotGadgetOut(const std::string _n, const std::string _t, const bool _v):CSnapshotInterfaceOut(_n, _t, _v)
+CSnapshotGadgetOut::CSnapshotGadgetOut(const std::string _n, const std::string _t, const bool _v):CSnapshotInterfaceOut(_n, _t, _v)
 {
   if (simtype=="gadget1") version=1;
   else
     if (simtype=="gadget2") version=2;
-    else {
-      std::cerr << "Unkwown Gadget file type : ["<<simtype<<"]\n"
-		<< "aborting .....\n";
-      std::exit(1);
-    }
+  else {
+    std::cerr << "Unkwown Gadget file type : ["<<simtype<<"]\n"
+        << "aborting .....\n";
+    std::exit(1);
+  }
+  std::ostringstream stm;
+  stm << version;
+  interface_type = "Gadget" + stm.str();
+  file_structure = "component"; // "component" like file
   if (verbose) std::cerr << "CSnapshotGadgetOut::CSnapshotGadgetOut simname = " << simname <<"\n";
   for (int i=0;i<6; i++) {
     mass[i]   = NULL;
@@ -1417,13 +1095,16 @@ void CSnapshotGadgetIn::storeComponents()
   hsml   = NULL;
   ntot_withmasses=0;
 
-  //ptrIsAlloc[0]["id"   ]=false;     
-  ptrIsAlloc[0]["age"  ]=false; 
+  // gas only
   ptrIsAlloc[0]["temp" ]=false;
   ptrIsAlloc[0]["rho"  ]=false; 
   ptrIsAlloc[0]["hsml" ]=false; 
   ptrIsAlloc[0]["metal"]=false; 
   ptrIsAlloc[0]["u"    ]=false; 
+  // stars only
+  ptrIsAlloc[4]["age"  ]=false; 
+  ptrIsAlloc[4]["metal"]=false; 
+  
   bits   = 0;
   bzero(&header,sizeof(header));
 }
@@ -1437,12 +1118,21 @@ CSnapshotGadgetOut::~CSnapshotGadgetOut()
     if (vel [i]&& ptrIsAlloc[i]["vel"  ]) delete [] vel[i];    
     if (id  [i]&& ptrIsAlloc[i]["id"   ]) delete [] id[i];    
   }
-  //if (id       && ptrIsAlloc[0]["id"   ]) delete [] id;
+  // gas only
   if (rho      && ptrIsAlloc[0]["rho"  ]) delete [] rho;
   if (hsml     && ptrIsAlloc[0]["hsml" ]) delete [] hsml;
-  if (metal    && ptrIsAlloc[0]["metal"]) delete [] metal;
+  if (metal    && ptrIsAlloc[0]["metal"]) {
+    delete [] metal;
+    metal=NULL;
+  }
   if (temp     && ptrIsAlloc[0]["temp" ]) delete [] temp;
   if (intenerg && ptrIsAlloc[0]["u"    ]) delete [] intenerg;
+  // stars only
+  if (metal    && ptrIsAlloc[4]["metal"]) {
+    delete [] metal;
+    metal=NULL;
+  }
+  if (age      && ptrIsAlloc[4]["age"  ]) delete [] age;
 }
 // ----------------------------------------------------------------------------
 // putHeader
@@ -1527,6 +1217,18 @@ int CSnapshotGadgetOut::setData(std::string name, const int n ,float * data,cons
   case uns::U: 
     status = setU(n, data, _addr);
     break;
+  case uns::Temp  :
+    status = setTemp(n, data, _addr);
+    break;
+  case uns::Age  :
+    status = setAge(n, data, _addr);
+    break;
+  case uns::GasMetal  :
+    status = setMetalGas(n, data, _addr);
+    break;
+  case uns::StarsMetal  :
+    status = setMetalStars(n, data, _addr);
+    break;
   default: ok=false;
   }
 
@@ -1564,6 +1266,18 @@ int CSnapshotGadgetOut::setData(std::string name,std::string array,  const int n
     break;
   case uns::U  :
     status = setU(n, data, _addr);
+    break;
+  case uns::Temp  :
+    status = setTemp(n, data, _addr);
+    break;
+  case uns::Age  :
+    status = setAge(n, data, _addr);
+    break;
+  case uns::GasMetal  :
+    status = setMetalGas(n, data, _addr);
+    break;
+  case uns::StarsMetal  :
+    status = setMetalStars(n, data, _addr);
     break;
   default: ok=false;
   }
@@ -1823,9 +1537,9 @@ int CSnapshotGadgetOut::setPos(std::string name, const int _n, float * _pos, con
 }
  // ============================================================================
  // setU:                                                            
-  int CSnapshotGadgetOut::setU(const int _n, float * _U, const bool addr)
+ int CSnapshotGadgetOut::setU(const int _n, float * _U, const bool addr)
  {
- 
+   
    assert(_n==header.npart[0]);; // #U particles = #gas particles
    if (addr) { // map address
      intenerg = _U;
@@ -1839,7 +1553,79 @@ int CSnapshotGadgetOut::setPos(std::string name, const int _n, float * _pos, con
    bits |= U_BIT;
    return 1;
  }
-//// ============================================================================
+ // ============================================================================
+ // setTemp:                                                            
+ int CSnapshotGadgetOut::setTemp(const int _n, float * _temp, const bool addr)
+ {
+   
+   assert(_n==header.npart[0]);; // #U particles = #gas particles
+   if (addr) { // map address
+     temp = _temp;
+   }
+   else {
+     ptrIsAlloc[0]["temp"]=true;
+     if (! temp) 
+       temp = new float[_n];
+     memcpy(temp,_temp,sizeof(float)*_n);
+   }
+   bits |= TEMP_BIT;
+   return 1;
+ }
+ // ============================================================================
+ // setMetalGas:                                                            
+ int CSnapshotGadgetOut::setMetalGas(const int _n, float * _mg, const bool addr)
+ {
+   
+   assert(_n==header.npart[0]);; // #U particles = #gas particles
+   if (addr) { // map address
+     metal = _mg;
+   }
+   else {
+     ptrIsAlloc[0]["metal"]=true;
+     if (! metal) 
+       metal = new float[header.npart[0]+header.npart[4]];
+     memcpy(metal,_mg,sizeof(float)*_n);
+   }
+   bits |= METAL_BIT;
+   return 1;
+ }
+ // ============================================================================
+ // setMetalStars:                                                            
+ int CSnapshotGadgetOut::setMetalStars(const int _n, float * _ms, const bool addr)
+ {
+   
+   assert(_n==header.npart[4]);; // #metal stars particles
+   if (addr) { // map address
+     metal = _ms;
+   }
+   else {
+     ptrIsAlloc[4]["metal"]=true;
+     if (! metal) 
+       metal = new float[header.npart[0]+header.npart[4]];        
+     memcpy(metal+header.npart[0],_ms,sizeof(float)*_n);
+   }
+   bits |= METAL_BIT;
+   return 1;
+ }
+ // ============================================================================
+ // setAge:                                                            
+ int CSnapshotGadgetOut::setAge(const int _n, float * _age, const bool addr)
+ {
+   
+   assert(_n==header.npart[4]);; // #age stars particles
+   if (addr) { // map address
+     age = _age;
+   }
+   else {
+     ptrIsAlloc[4]["age"]=true;
+     if (! age) 
+       age = new float[header.npart[4]];        
+     memcpy(age,_age,sizeof(float)*_n);
+   }
+   bits |= AGE_BIT;
+   return 1;
+ }
+ //// ============================================================================
 //// saveDataMPV:                                                            
 // int CSnapshotGadgetOut::saveDataMPV(const int _n, const float * _m, const float * _p, const float * _v)
 //{
@@ -1859,15 +1645,15 @@ int CSnapshotGadgetOut::save()
 #endif
   if (!(bits & MASS_BIT)) {
     std::cerr << "No Mass Bit !!\n";
-    fail = 1;
+    //fail = 1;
   }
   if (!(bits & POS_BIT)) {
     std::cerr << "No Pos Bit !!\n";
-    fail = 1;
+    //fail = 1;
   }
   if (!(bits & VEL_BIT)) {
     std::cerr << "No Vel Bit !!\n";
-    fail = 1;
+    //fail = 1;
   }
 
   if (!fail) {
@@ -1878,16 +1664,6 @@ int CSnapshotGadgetOut::save()
     }
     if (verbose) std::cerr << "CSnapshotGadgetOut::save npartTotal = " << npartTotal << "\n";
     setupHeader();
-#if 0
-    if (!(bits & ID_BIT)) {
-      std::cerr << "No Id Bit, I am going to create them for you....\n";
-      if (! id) {
-        ptrIsAlloc[0]["id"]=true;
-        id = new int[npartTotal];
-       }
-      for (int i=0; i<npartTotal; i++) id[i]=i;
-    }
-#endif
     saveFile();
   }
   return 1;
@@ -1924,8 +1700,10 @@ void CSnapshotGadgetOut::setupHeader(bool check)
     ntot_withmasses=0;
     for(int k=0;k<6;k++) { // loop an component
       if (header.npart[k] ) {
-        assert(mass[k]!=NULL);
-        float mass0=mass[k][0]; // mass 0
+        //assert(mass[k]!=NULL);
+        float mass0=0.0;
+        if (mass[k]!=NULL)
+          mass0=mass[k][0]; // mass 0
         bool equal=true;
         // loop on all masses of the currentcomponent
         for(int n=0;(n<header.npart[k])&&equal;n++) {
@@ -1935,7 +1713,7 @@ void CSnapshotGadgetOut::setupHeader(bool check)
 //            std::cerr << "pindex :"<<pindex<<" "<< npartTotal <<"\n";
 //          }
 
-          if (mass0 != mass[k][pindex]) { // mass differ !
+          if (mass[k]!=NULL && mass0 != mass[k][pindex]) { // mass differ !
             equal=false;
           }
         }
@@ -2011,26 +1789,28 @@ int CSnapshotGadgetOut::write()
 {
   int blk;
   // POS
-  blk=sizeof(float)*3*npartTotal;
-  writeBlockName("POS ",blk);
-  writeFRecord(blk);
-  for(int k=0;k<6;k++) {
-    if (header.npart[k]) { // pos exist for the component
-      assert(pos[k]!=NULL);
-      writeData((char *) pos[k], sizeof(float)*3, header.npart[k]);
+  if (bits & POS_BIT) {
+    blk=sizeof(float)*3*npartTotal;
+    writeBlockName("POS ",blk);
+    writeFRecord(blk);
+    for(int k=0;k<6;k++) {
+      if (header.npart[k]) { // pos exist for the component
+        assert(pos[k]!=NULL);
+        writeData((char *) pos[k], sizeof(float)*3, header.npart[k]);
+      }
     }
+    writeFRecord(blk);
   }
-  writeFRecord(blk);
-
   // VEL
-  blk=sizeof(float)*3*npartTotal;
-  writeBlockName("VEL ",blk);
-  writeFRecord(blk);
-  for(int k=0;k<6;k++)
-    if (header.npart[k]) // vel exist for the component
-      writeData((char *) vel[k], sizeof(float)*3, header.npart[k]);
-  writeFRecord(blk);
-
+  if (bits & VEL_BIT) {
+    blk=sizeof(float)*3*npartTotal;
+    writeBlockName("VEL ",blk);
+    writeFRecord(blk);
+    for(int k=0;k<6;k++)
+      if (header.npart[k]) // vel exist for the component
+        writeData((char *) vel[k], sizeof(float)*3, header.npart[k]);
+    writeFRecord(blk);
+  }
   // ID
   blk=sizeof(int)*npartTotal;
   writeBlockName("ID  ",blk);
@@ -2071,6 +1851,15 @@ int CSnapshotGadgetOut::write()
     writeData((char *) intenerg, sizeof(float), header.npart[0]);
     writeFRecord(blk);
   }
+  // Temp
+  if (bits & TEMP_BIT) {
+    assert(header.npart[0]>0);
+    blk=sizeof(float)*header.npart[0];
+    writeBlockName("NE  ",blk);
+    writeFRecord(blk);
+    writeData((char *) temp, sizeof(float), header.npart[0]);
+    writeFRecord(blk);
+  }
   // RHO
   if (bits & RHO_BIT) {
     assert(header.npart[0]>0);
@@ -2080,7 +1869,6 @@ int CSnapshotGadgetOut::write()
     writeData((char *) rho, sizeof(float), header.npart[0]);
     writeFRecord(blk);
   }
-
   // HSML
   if (bits & HSML_BIT) {
     assert(header.npart[0]>0);
@@ -2090,14 +1878,25 @@ int CSnapshotGadgetOut::write()
     writeData((char *) hsml, sizeof(float), header.npart[0]);
     writeFRecord(blk);
   }
-    
-#if 0
-  offset=0;
-  for(int k=0;k<6;k++)
-    for(int n=0;n<header.npart[k];n++,offset++)
-      writeData((char *) (mass+offset), sizeof(float), 1);
-
-#endif
+  // Metal
+  if (bits & METAL_BIT) {
+    int nb=(header.npart[0]+header.npart[4]);
+    assert(nb>0);
+    blk=sizeof(float)*nb;
+    writeBlockName("Z   ",blk);
+    writeFRecord(blk);
+    writeData((char *) metal, sizeof(float), nb);
+    writeFRecord(blk);
+  }
+  // Age
+  if (bits & AGE_BIT) {
+    assert(header.npart[4]>0);
+    blk=sizeof(float)*header.npart[4];
+    writeBlockName("AGE ",blk);
+    writeFRecord(blk);
+    writeData((char *) age, sizeof(float), header.npart[4]);
+    writeFRecord(blk);
+  }
   return 1;
 }
 // ============================================================================

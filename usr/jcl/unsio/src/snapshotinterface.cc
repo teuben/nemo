@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2010                                       
+// Copyright Jean-Charles LAMBERT - 2008-2011                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -133,10 +133,12 @@ namespace uns {
         stop=true;
       }
     }
+#if 0
     for (std::vector<float>::iterator it=store.begin(); it!=store.end(); it++) {
       //std::cerr << " range i ="<< it-store.begin() << "\n";
       //std::cerr << " value   =" << *it << "\n";
     }
+#endif
     float inf=store[0];
     float sup=inf;
     float offset=0.0;
