@@ -149,7 +149,16 @@ int main(int argc, char ** argv )
         float * hsml = density->getHsml();
         // feed up UNS out arrays
         unsout->snapshot->setData("time",time);
-        unsout->snapshot->setData("all" ,nbody,mass,pos,vel,false);
+        //unsout->snapshot->setData("all" ,nbody,mass,pos,vel,false);
+        if (pos) {
+          unsout->snapshot->setData("pos",nbody,pos,false);
+        }
+        if (vel) {
+          unsout->snapshot->setData("vel",nbody,vel,false);
+        }
+        if (mass) {
+          unsout->snapshot->setData("mass",nbody,mass,false);
+        }
         unsout->snapshot->setData("rho" ,nbody,rho ,false);
         unsout->snapshot->setData("hsml",nbody,hsml,false);
         // add pot (for manu)
