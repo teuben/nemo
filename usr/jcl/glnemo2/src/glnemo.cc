@@ -92,6 +92,7 @@ using namespace std;
     "auto_ts=t\n       automatic texture size                           ",
     "texture=t\n       show particles as textures                       ",
     "texture_s=1.0\n   texture size of gaz particle                     ",
+    "texture_a=1.0\n   texture alpha of gaz particle                    ",
     "cmapindex=0\n     Color map index                                  ",
     "psize=1.0\n       Set particles size                               ",
     "port=4000\n       Server's communication port                      ",

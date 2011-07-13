@@ -86,6 +86,7 @@ GlobalOptions::GlobalOptions()
   // from experimental TAB
   show_poly=false;
   texture_size=1.;
+  texture_alpha=1.;
   octree_enable=false;
   octree_display=false;
   octree_level=10;
@@ -236,6 +237,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   // from experimental TAB
   show_poly=m.show_poly;
   texture_size=m.texture_size;
+  texture_alpha=m.texture_alpha;
   octree_enable=m.octree_enable;
   octree_display=m.octree_display;
   octree_level=m.octree_level;

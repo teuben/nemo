@@ -14,6 +14,7 @@
 #include <sstream>
 #include <QRegExp>
 #include <QString>
+#include <QTime>
 #include "userselection.h"
 #include <algorithm>
 #include "assert.h"
@@ -74,6 +75,8 @@ bool UserSelection::setSelection(std::string _sel,
 
   bool status=parse();
   if (status || 1 ) { // we force here
+    QTime tbench;
+    tbench.restart();
     // ascending sort according to the 'first' element
     int nobj=ParticlesObject::nobj;
     std::sort(pov->begin(),pov->end(),ParticlesObject::compareFirst);
@@ -95,6 +98,8 @@ bool UserSelection::setSelection(std::string _sel,
         (*pov)[i].copyProperties((*povcpy2)[i]);
       }
     }
+    std::cerr << "UserSelection::setSelection, Time elapsed for sorting="<< 
+        tbench.elapsed()/1000 << "\n";
   }
   
   return status;

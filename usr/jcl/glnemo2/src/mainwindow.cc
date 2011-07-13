@@ -744,6 +744,7 @@ void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
     pov[i].setPart(store_options->show_points);
     pov[i].setGaz(store_options->show_poly);
     pov[i].setGazSize(store_options->texture_size);
+    pov[i].setGazAlpha(store_options->texture_alpha*255);
     pov[i].setGazSizeMax(store_options->texture_size);
     pov[i].setVel(store_options->show_vel);
     if (store_options->phys_min_glob!=-1) {
@@ -840,7 +841,7 @@ void MainWindow::parseNemoParameters()
   // textures
   store_options->auto_texture_size  =getbparam((char *) "auto_ts");
   store_options->texture_size       =getdparam((char *) "texture_s");
-  //store_options->texture_alpha_color=getiparam((char *) "texture_ac");
+  store_options->texture_alpha      =getdparam((char *) "texture_a");
   
   store_options->duplicate_mem = getbparam((char *) "smooth_gui");
   // ortho

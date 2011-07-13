@@ -486,15 +486,16 @@ int PhysicalData::computeMinMax()
       break;                        
     }
     valid = true;
-    
-    if ((max == -1E9 && min == 1E9 )|| (max == min) ||
-        max >  std::numeric_limits<double>::max() ||
-        max <  std::numeric_limits<double>::min() ||
-        min >  std::numeric_limits<double>::max() ||
-        min <  std::numeric_limits<double>::min() 
+    if (min>0 && max>0) {
+      if ((max == -1E9 && min == 1E9 )|| (max == min) ||
+          max >  std::numeric_limits<double>::max() ||
+          max <  std::numeric_limits<double>::min() ||
+          min >  std::numeric_limits<double>::max() ||
+          min <  std::numeric_limits<double>::min() 
         ) {
-      valid = false;
-    } 
+        valid = false;
+      } 
+    }
     std::cerr <<" min = "<< std::scientific << std::setw(10) << min
               <<"\n max = "<< std::setw(10)<<max<<"\n";
     if (max >  std::numeric_limits<double>::max()) {

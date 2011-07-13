@@ -78,7 +78,7 @@ public:
     float osd_font_size;
     // from experimental TAB
     bool show_poly;
-    float texture_size;
+    float texture_size, texture_alpha;
     bool octree_enable;
     bool octree_display;
     int octree_level;
