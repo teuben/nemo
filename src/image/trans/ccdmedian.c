@@ -6,6 +6,7 @@
  *      30-jul-04       PJT     optional X,Y range selection
  *       1-nov-04       PJT     experiment to cf. to python kpno_soft/imsubtract.py
  *       2-nov-04       PJT     added nstep= cheat mode for ShiPing Lai
+ *      14-jul-11       PJT     0.6 fixed edge problem
  *                      
  */
 
@@ -25,7 +26,7 @@ string defv[] = {
 	"nstep=1\n      Cheat mode: replicate each nstep pixels",
 	"fraction=0.5\n Fraction of positive image values in subtract mode",
 	"mode=median\n  Mode: median, subtract",
-	"VERSION=0.5\n  2-nov-04 PJT",
+	"VERSION=0.6\n  14-jul-11 PJT",
 	NULL,
 };
 
@@ -50,8 +51,18 @@ void sort0(int, real *);
 void sort1(int, real *);
 void sort2(int, real *);
 void sort3(int, real *);
+void sort4(int, real *);
 
 #define sort sort0
+
+/* @todo
+ *
+ *   miriad 2048 ran map  size=2 -> 3.1"   size=4 -> 12.3"
+ *   nemo                      5 -> 1-"         9    60"
+ *   this is terribly much slower than miriad,why?
+ *   idl is even faster, size=5->1.9"  9->5.3"
+ */
+
 
 void get_range(string axis, int *ia)
 {
@@ -119,11 +130,11 @@ void nemo_main()
 
       for (j=nstep1; j<ny-nstep1; j+=nstep) {
 	for (i=nstep1; i<nx-nstep1; i+=nstep) {
-	  if (j<n || j > ny-n || j < iy[0] || j > iy[1]) {
+	  if (j<n1 || j >= ny-n1 || j < iy[0] || j > iy[1]) {
 	    CVO(i,j) = CVI(i,j);
 	    continue;
 	  }
-	  if (i<n || i>nx-n || i < ix[0] || i > ix[1]) {
+	  if (i<n1 || i >= nx-n1 || i < ix[0] || i > ix[1]) {
 	    CVO(i,j) = CVI(i,j);
 	    continue;
 	  }
@@ -141,11 +152,11 @@ void nemo_main()
 
       for (j=0; j<ny; j++) {
 	for (i=0; i<nx; i++) {
-	  if (j<n || j > ny-n || j < iy[0] || j > iy[1]) {
+	  if (j<n1 || j >= ny-n1 || j < iy[0] || j > iy[1]) {
 	    CVO(i,j) = CVI(i,j);
 	    continue;
 	  }
-	  if (i<n || i>nx-n || i < ix[0] || i > ix[1]) {
+	  if (i<n1 || i >= nx-n1 || i < ix[0] || i > ix[1]) {
 	    CVO(i,j) = CVI(i,j);
 	    continue;
 	  }
@@ -290,12 +301,14 @@ void sort1(int n, real *arr)
 
 
 /*
- * NR heap sort  ; don't use index-1 based
+ * NR heap sort  
  */
 void sort3(int n, real *ra)
 {
   int i,ir,j,l;
   real rra;
+
+  ra--;    /* NR is 1 based, nemo uses 0-based */
   
   if (n < 2) return;
   l=(n >> 1)+1;
@@ -323,4 +336,13 @@ void sort3(int n, real *ra)
     }
     ra[i]=rra;
   }
+}
+
+/* 
+ * another heap sort ?
+ */
+
+void sort4(int n, real *ra)
+{
+  *ra = 0.0;
 }
