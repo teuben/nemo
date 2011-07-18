@@ -15,6 +15,7 @@
  * 	11-sep-95  V1.3a   fixed parsing error $PP_DIR		   pjt
  *	 9-oct-95      b   new .cat extension, instead of .ed4	   pjt
  *      15-may-98  V1.4    merged two confusing version            pjt
+ *      17-jul-11  V1.5    fixed copying into colval[]             pjt
  */
 /**************** NEMO * UNIX INCLUDE FILES **********************************/ 
 
@@ -38,7 +39,7 @@ string defv[] = {
     "select=\n  C-style selection criteria (** not implemented **)",
     "fmt=\n     Alternative format for column output (** not implemented **)",
     "dir=$PP_DIR,c%s.cat,catdir.cat\n  Dir, species-fmt, sp-dirfile",
-    "VERSION=1.4\n               15-may-98 PJT",
+    "VERSION=1.5\n               17-jul-11 PJT",
     NULL,
 };
 
@@ -76,17 +77,8 @@ struct species {
 string colnam[] = {
     "freq", "err", "lgint", "dr", "elow", "gup", "tag", "qnform", "mu2",
     NULL};
-string colval[] = {
-    "                                ",
-    "                                ",
-    "                                ",
-    "                                ",
-    "                                ",
-    "                                ",
-    "                                ",
-    "                                ",
-    "                                ",
-    NULL};
+
+string colval[9] ;
 int scount, lcount;
 
 string defdir = "/lma/spectra";
@@ -125,7 +117,7 @@ nemo_main()
     sels = burststring(getparam("select"),",");   /* note only comma separated, not space */
     Qselall = (xstrlen(sels,sizeof(string))<=1);
     if(xstrlen(dirs,sizeof(string)) != 4)
-        error("dir=PP_DIR,sp-fmt,catname");
+        error("dir=$PP_DIR,sp-fmt,catname");
     if(hasvalue("cutoff")) cutoff = getdparam("cutoff");
 
     cp = dirs[0];
@@ -174,7 +166,7 @@ nemo_main()
     }
     lfactor = log10(factor);
     if(freqmin>freqmax) {
-          warning("Toggling freq's since they much be sorted");
+          warning("Toggling freq's since they must be sorted");
           freqmin = tmp;
           freqmin = freqmax;
           freqmax = tmp;
@@ -187,7 +179,7 @@ nemo_main()
         if (check_species(usespecies) == 0)
             error("No species left to search for");
         if(*names==NULL || streq(names,"all"))
-            dprintf(0,"[Be patient, this operation may take a while]\n");
+            dprintf(1,"[Be patient, this operation may take a while]\n");
 	if (Qcolall) {
             dprintf(0,fmt6);
 	} else
@@ -204,14 +196,12 @@ nemo_main()
     }
 }
 
-patchzero(name)
-char *name;
+patchzero(char *name)
 {
     while (*name) if(*name == ' ') *name++ = '0'; else name++;
 }
 
-patchnull(name)
-char *name;
+patchnull(char *name)
 {
     while (*name) if(*name == ' ') *name++ = '\0'; else name++;
 }
@@ -224,7 +214,7 @@ string fname;
 string *cols[];
 bool lmode, Qall;
 {
-    char line[90], tag[6+1], name[14+1], note[1+1];
+    char line[128], tag[6+1], name[14+1], note[1+1];
     int  nline, version, tag1, tag2;
     float qlog[7];
     stream instr;
@@ -240,7 +230,7 @@ bool lmode, Qall;
     }
 
     scount = 0;
-    while (fgets(line,90,instr) != NULL) {
+    while (fgets(line,128,instr) != NULL) {
         line[strlen(line)-1] = '\0';
         n = 0;
         strcpy(tag,mysubstr(line,&n,6));  tag[6] = '\0';
@@ -282,7 +272,7 @@ struct species *spp;            /* the species this applies to */
 bool Qall;                      /* print all of one line? */
 string *sels;                   /* list of selection criteria applied to each line */
 {
-    char line[90], zcatcmd[256], *cp;
+    char line[128], zcatcmd[256], *cp;
     string ext;
     float freq, err, lgint, elow, eup, mu2;
     int   dr, gup, tag, qnform;
@@ -301,10 +291,17 @@ string *sels;                   /* list of selection criteria applied to each li
         pipe = FALSE;
         instr=stropen(fname,"r");
     }
-    while (fgets(line,90,instr) != NULL) {          /* read row from line catalogue */
+    for (i=0; i<9; i++)  colval[i] = allocate(32);
+
+    while (fgets(line,128,instr) != NULL) {          /* read row from line catalogue */
         line[strlen(line)-1] = '\0';
+	dprintf(3,"%s\n",line);
         n = 0;
         /***  "freq", "err", "lgint", "dr", "elow", "gup", "tag", "qnform",   ***/
+	/*    1041.4215   .0026 -8.7541 3   69.4458 23  46005 30311 3 8      11 3 9  */
+        /*    1420.4058  0.0000 -9.0612 0    0.0000  3  -1001  22 1 1         1 0    */
+	/*1234567890123........xxxxxxxx--xxxxxxxxxx---xxxxxxx----                    */
+
         cp = mysubstr(line,&n,13); freq =    atof(cp);  strcpy(colval[0],cp);
         cp = mysubstr(line,&n,8);  err  =    atof(cp);  strcpy(colval[1],cp);
         cp = mysubstr(line,&n,8);  lgint=    atof(cp);  strcpy(colval[2],cp);
@@ -329,7 +326,6 @@ string *sels;                   /* list of selection criteria applied to each li
         err  *= factor;
         lgint += lfactor;
 
-
         if(freqmin <= freq && freq <= freqmax && lgint>cutoff) {
             if(num_select(colnam, colval, sels))
                 if(Qall)
@@ -343,8 +339,7 @@ string *sels;                   /* list of selection criteria applied to each li
     else   strclose(instr);
 }
 
-check_species(names)
-string *names;
+check_species(string *names)
 {
     int i, n = xstrlen(names,sizeof(string))-1;
     bool found;
@@ -370,15 +365,16 @@ string *names;
 }
 
 
+
 local char *mysubstr(char *line,int *n, int l)
 {
     local char word[100];
 
     strncpy(word,&line[*n],l);
-    word[l] = NULL;
+    word[l] = 0;
     *n += l;
 
-    return(word);
+    return word;
 }
 
 local string *burstcommand(string cmd)
