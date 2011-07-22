@@ -910,7 +910,7 @@ void bootstrap3(int nboot,
   
   for (j=0; j<nboot; j++) {
     random_permute3(npt,perm);
-    printf("PERM: ");
+    /* printf("PERM: ");  */
     for (i=0; i<npt; i++) {
       printf("%d ",perm[i]);
       x1[i] = x[perm[i]];
