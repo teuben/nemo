@@ -910,14 +910,11 @@ void bootstrap3(int nboot,
   
   for (j=0; j<nboot; j++) {
     random_permute3(npt,perm);
-    /* printf("PERM: ");  */
     for (i=0; i<npt; i++) {
-      printf("%d ",perm[i]);
       x1[i] = x[perm[i]];
       y1[i] = y[perm[i]];
       if (dy) dy1[i] = dy[perm[i]];
     }
-    printf("\n");
     nrt = (*my_nllsqfit)(x1,ndim,y1,dy1,d1,npt,fpar,epar,mpar,npar,tol,itmax,lab, fitfunc,fitderv);
     dprintf(1,"%g %g %g %g\n", fpar[0],fpar[1],epar[0],epar[1]);
     for (i=0; i<npar; i++) {
