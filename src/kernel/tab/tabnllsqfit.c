@@ -66,7 +66,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=2.3\n      14-may-2011 PJT",
+    "VERSION=2.3a\n     22-jul-2011 PJT",
     NULL
 };
 
