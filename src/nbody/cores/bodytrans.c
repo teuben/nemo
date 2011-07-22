@@ -239,7 +239,7 @@ local proc bodytrans(string type, string expr, string fname)
             sprintf(cmmd,"rm -f %s",edbbak);    /* end file locking */
             system(cmmd);
 #endif
-            error("bodytrans(): could not compile");
+            error("bodytrans(): could not compile expr=%s",expr);
 	}
 #if defined(LOADOBJ3)
         sprintf(file, "/tmp/%s.so", name);
