@@ -1,4 +1,4 @@
-.TH HACKCODE1 1NEMO "29 March 2004"
+.TH HACKCODE1 1NEMO "27 July 2011"
 .SH NAME
 hackcode1, hackcode1_qp \- hierarchical N-body code
 .SH SYNOPSIS
@@ -98,9 +98,10 @@ If this frequency is not a simple fraction of \fBfreq\fP (see above),
 the program can waiste significant amounts of time.
 Default is \fB32.0\fP (32 diagnostic measurements per unit time).
 .TP
-\fBdebug\fP=\fIdebug-flag\fP
-Debugging switch; generates lots of output.
-Default is \fBfalse\fP.
+\fBlog\fP=\fIlogfile\fP
+Output filename for log. 
+Default is standard output (\fB-\fP). Can also use \fBlog=.\fP to make it disappear
+in case your out=- needs to be part of a pipe.
 .SH SEE ALSO
 treecode(1NEMO), newton0(1NEMO), directcode(1NEMO), gyrfalcON(1NEMO)
 .SH BUGS
@@ -157,4 +158,5 @@ usr/josh/treecode			updated 1990s version
 13-may-91	added undocumented feature of restricted Nbody  	PJT
 6-mar-94	added link to export version	PJT
 29-mar-04	V1.4 major code cleanup for MacOS and prototypes	PJT
+27-jul-11	V1.5 removed debug=, added log=  	PJT
 .fi
