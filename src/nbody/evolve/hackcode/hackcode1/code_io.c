@@ -63,13 +63,15 @@ local stream outstr;                  /* output stream pointer */
 
 void initoutput(void)
 {
-    printf("\n%s\n\n", headline);               /* print headline, params   */
-    printf("%12s%12s%12s%12s\n",
-           "nbody", "freq", "eps", "tol");
-    printf("%12d%12.2f%12.4f%12.4f\n\n",
-           nbody, freq, eps, tol);
+    logstr = stropen(logfile,"w");
+
+    fprintf(logstr,"\n%s\n\n", headline);       /* print headline, params   */
+    fprintf(logstr,"%12s%12s%12s%12s\n",
+	    "nbody", "freq", "eps", "tol");
+    fprintf(logstr,"%12d%12.2f%12.4f%12.4f\n\n",
+	    nbody, freq, eps, tol);
     if (*options)
-        printf("\toptions: %s\n", options);
+      fprintf(logstr,"\toptions: %s\n", options);
     if (*outfile) { 		                /* output file specified?   */
         outstr = stropen(outfile, "w");         /*   setup output stream    */
 	put_history(outstr);			/*   write file history     */
@@ -114,17 +116,17 @@ void output(void)
     nttot = n2bcalc + nbccalc;
     nbavg = (int) ((real) n2bcalc / (real) nfcalc);
     ncavg = (int) ((real) nbccalc / (real) nfcalc);
-    printf("\n  %10s%10s%10s%10s%10s%10s%10s\n",
+    fprintf(logstr,"\n  %10s%10s%10s%10s%10s%10s%10s\n",
            "tnow", "T+U", "T/U", "nttot", "nbavg", "ncavg", "cputime");
-    printf("  %10.3f%10.4f%10.4f%10d%10d%10d%10.2f\n\n",
-           tnow, etot[0], etot[1]/etot[2], nttot, nbavg, ncavg, cputime());
-    printf("\t    %10s", "cm pos");
+    fprintf(logstr,"  %10.3f%10.4f%10.4f%10d%10d%10d%10.2f\n\n",
+	    tnow, etot[0], etot[1]/etot[2], nttot, nbavg, ncavg, cputime());
+    fprintf(logstr,"\t    %10s", "cm pos");
     for (k = 0; k < NDIM; k++)
-        printf("%10.4f", cmphase[0][k]);
-    printf("\n\t    %10s", "cm vel");
+      fprintf(logstr,"%10.4f", cmphase[0][k]);
+    fprintf(logstr,"\n\t    %10s", "cm vel");
     for (k = 0; k < NDIM; k++)
-        printf("%10.4f", cmphase[1][k]);
-    printf("\n");
+      fprintf(logstr,"%10.4f", cmphase[1][k]);
+    fprintf(logstr,"\n");
     bits = 0;					/* collect output bit flags */
     if (minor_freqout > 0.0 && (minor_tout - 0.01/freq) <= tnow) {
 	minor_tout += 1.0 / minor_freqout;
@@ -145,7 +147,7 @@ void output(void)
     if (bits != 0 && outstr != NULL) {		/* output ready and able?   */
 	put_snap(outstr, &bodytab, &nbody, &tnow, &bits);
 	if (bits & PhaseSpaceBit)
-	    printf("\n\tparticle data written\n");
+	  fprintf(logstr,"\n\tparticle data written\n");
     }
     if (*savefile)				/* state file specified?    */
 	savestate(savefile);			/*   save system data       */
@@ -259,7 +261,7 @@ void restorestate(string file)
     version = get_string(str, "version");
     if (! streq(program, getargv0()) ||		/* check program, version   */
 	  ! streq(version, getparam("VERSION")))
-	printf("warning: state file may be outdated\n\n");
+      fprintf(logstr,"warning: state file may be outdated\n\n");
     headline = get_string(str, "headline");	/* read control parameters  */
     get_data(str, "freq", RealType, &freq, 0);
     get_data(str, "tol", RealType, &tol, 0);

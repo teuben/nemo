@@ -60,23 +60,20 @@ local void expandbox(bodyptr p)                       /* body to be loaded */
     cellptr newt;
 
     while (! intcoord(xtmp, Pos(p))) {		/* expand box (rarely)      */
-        if (debug)
-            printf("expandbox: expanding box\n");
+        dprintf(1,"expandbox: expanding box\n");
         ADDVS(rmid, rmin, 0.5 * rsize);         /*   find box midpoint      */
         for (k = 0; k < NDIM; k++)              /*   loop over dimensions   */
             if (Pos(p)[k] < rmid[k])            /*     is p left of mid?    */
                 rmin[k] -= rsize;               /*       extend to left     */
         rsize = 2.0 * rsize;                    /*   double length of box   */
-        if (debug)
-            printf("\t   rmin = [%8.4f,%8.4f,%8.4f]\trsize = %8.4f\n",
+	dprintf(1,"\t   rmin = [%8.4f,%8.4f,%8.4f]\trsize = %8.4f\n",
                    rmin[0], rmin[1], rmin[2], rsize);
         if (troot != NULL) {                     /*   repot existing tree?   */
             newt = makecell();                  /*     create new root cell */
             assert(intcoord(xmid, rmid));	/*     locate old root cell */
             k = subindex(xmid, IMAX >> 1);      /*     find old tree index  */
             Subp(newt)[k] = troot;               /*     graft old on new     */
-	    if (debug)
-		printf("expandbox: old root goes in subcell %d\n", k);
+	    dprintf(1,"expandbox: old root goes in subcell %d\n", k);
             troot = (nodeptr) newt;              /*     plant new tree       */
         }
     }
@@ -96,12 +93,10 @@ local void loadtree(bodyptr p)			/* body to load into tree */
     l = IMAX >> 1;				/* start with top bit       */
     qptr = &troot;				/* start with tree root     */
     while (*qptr != NULL) {			/* loop descending tree     */
-	if (debug)
-	    printf("loadtree: descending tree  l = %o\n", l);
+        dprintf(1,"loadtree: descending tree  l = %o\n", l);
 	assert(l != 0);				/*   dont run out of bits   */
 	if (Type(*qptr) == BODY) {		/*   reached a "leaf"?      */
-	    if (debug)
-		printf("loadtree: replacing body with cell\n");
+   	    dprintf(1,"loadtree: replacing body with cell\n");
 	    c = makecell();			/*     alloc a new cell     */
 	    assert(intcoord(xq, Pos(*qptr)));	/*     get integer coords   */
 	    Subp(c)[subindex(xq, l)] = *qptr;	/*     put body in cell     */
@@ -110,8 +105,7 @@ local void loadtree(bodyptr p)			/* body to load into tree */
 	qptr = &Subp(*qptr)[subindex(xp, l)];	/*   move down one level    */
 	l = l >> 1;				/*   and test next bit      */
     }
-    if (debug)
-	printf("loadtree: installing body  l = %o\n", l);
+    dprintf(1,"loadtree: installing body  l = %o\n", l);
     *qptr = (nodeptr) p;			/* found place, store p     */
 }
 
@@ -128,8 +122,7 @@ local bool intcoord(
     bool inb;
     double xsc;
 
-    if (debug)
-        printf("intcoord: rp = [%8.4f,%8.4f,%8.4f]\n", rp[0], rp[1], rp[2]);
+    dprintf(1,"intcoord: rp = [%8.4f,%8.4f,%8.4f]\n", rp[0], rp[1], rp[2]);
     inb = TRUE;					/* use to check bounds      */
     for (k = 0; k < NDIM; k++) {		/* loop over dimensions     */
         xsc = (rp[k] - rmin[k]) / rsize;        /*   scale to range [0,1)   */
@@ -138,8 +131,7 @@ local bool intcoord(
         else                                    /*   out of range           */
             inb = FALSE;                        /*     then remember that   */
     }
-    if (debug)
-        printf("\t  xp = [%8x,%8x,%8x]\tinb = %d\n", xp[0], xp[1], xp[2], inb);
+    dprintf(1,"\t  xp = [%8x,%8x,%8x]\tinb = %d\n", xp[0], xp[1], xp[2], inb);
     return inb;
 }
 
@@ -153,15 +145,13 @@ local int subindex(
 {
     register int i, k;
 
-    if (debug)
-        printf("subindex: x = [%8x,%8x,%8x]\tl = %8x\n", x[0],x[1],x[2],l);
+    dprintf(1,"subindex: x = [%8x,%8x,%8x]\tl = %8x\n", x[0],x[1],x[2],l);
     i = 0;                                      /* sum index in i           */
     for (k = 0; k < NDIM; k++)                  /* check each dimension     */
         if (x[k] & l)                           /*   if beyond midpoint     */
             i += NSUB >> (k + 1);               /*     skip over subcells   */
-    if (debug)
-        printf("          returning %d\n", i);
-    return (i);
+    dprintf(1,"          returning %d\n", i);
+    return i;
 }
 
 /*
@@ -227,8 +217,7 @@ local cellptr makecell(void)
 	      maxcell);
     c = ctab + ncell;
     ncell++;
-    if (debug)
-	printf("cell %d allocated at address 0%o\n", ncell, (int) c);
+    dprintf(1,"cell %d allocated at address 0%o\n", ncell, (int) c);
     Type(c) = CELL;
     for (i = 0; i < NSUB; i++)
 	Subp(c)[i] = NULL;

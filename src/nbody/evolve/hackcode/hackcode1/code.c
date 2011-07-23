@@ -11,6 +11,8 @@
  *      8-sep-01  init_xrandom
  *     29-mar-04  MacOS forcing us to use global/extern      pjt
  *                plus LOTS of prototype cleanup
+ *     23-jul-11  V1.5    Use log= to be able to bypass log  pjt
+ *                        removed debug= to enable system key
  */
 
 #define global                                  /* don't default to extern  */
@@ -43,12 +45,12 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "freqout=4.0\n		  major data-output frequency ",
     "minor_freqout=32.0\n	  minor data-output frequency ",
 
-    "debug=false\n		  turn on debugging messages ",
-    "VERSION=1.4\n		  29-mar-04 PJT",
+    "log=-\n                      logging output",
+    "VERSION=1.5\n		  27-jul-11 PJT",
     NULL,
 };
 
-string usage = "hierarchical N-body code";
+string usage = "Barnes & Hut hierarchical N-body tree code";
 
 string headline = "Hack code";	/* default id for run */
 
@@ -75,8 +77,8 @@ void startrun(void)
     restfile = getparam("restart");
     contfile = getparam("continue");
     savefile = getparam("save");
+    logfile = getparam("log");
     options = getparam("options");		/* set control options      */
-    debug = getbparam("debug");
     if (*contfile)				/* resume interrupted run   */
 	restorestate(contfile);
     else if (*restfile) {			/* resume w/ new parameters */

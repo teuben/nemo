@@ -34,14 +34,12 @@ global real eps;                       /* potential softening parameter */
 global int n2bterm;                    /* number 2-body of terms evaluated */
 global int nbcterm;			/* num of body-cell terms evaluated */
 
-global bool debug;                     /* control debugging messages */
-
-
 /* old */
 
 global string infile;			/* file name for snapshot input */
 global string outfile;			/* file name for snapshot output */
-global string savefile;		/* file name for state output */
+global string savefile;		        /* file name for state output */
+global string logfile;                  /* file name for log output */
 
 global real freq;			/* fundamental integration frequency */
 
@@ -65,4 +63,6 @@ global int nbccalc;			/* num of body-cell force calculations */
 
 global int nbody;			/* number of bodies in system */
 
-global bodyptr bodytab;		/* points to array of bodies */
+global bodyptr bodytab;		        /* points to array of bodies */
+
+global stream logstr;                   /* logging */

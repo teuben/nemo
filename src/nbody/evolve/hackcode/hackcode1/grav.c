@@ -96,8 +96,7 @@ local void walksub(nodeptr p,                          /* pointer into body-tree
     register nodeptr *pp;
     register int k;
 
-    if (debug)
-        printf("walksub: p = %o  dsq = %f\n", p, dsq);
+    dprintf(2,"walksub: p = %o  dsq = %f\n", p, dsq);
     if (subdivp(p, dsq)) {                      /* should p be opened?      */
         pp = & Subp(p)[0];                      /*   point to sub-cells     */
         for (k = 0; k < NSUB; k++) {            /*   loop over sub-cells    */
