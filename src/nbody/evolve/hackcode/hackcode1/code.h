@@ -28,11 +28,13 @@ global real rsize;			/* side-length of int. coord. box */
 
 global real fcells;			/* ratio of cells/bodies allocated */
 
-global real tol;                       /* accuracy parameter: 0.0 => exact */
-global real eps;                       /* potential softening parameter */
+global real tol;                        /* accuracy parameter: 0.0 => exact */
+global real eps;                        /* potential softening parameter */
 
-global int n2bterm;                    /* number 2-body of terms evaluated */
+global int n2bterm;                     /* number 2-body of terms evaluated */
 global int nbcterm;			/* num of body-cell terms evaluated */
+
+extern int debug_level;                 /* see dprinft.c */
 
 /* old */
 
