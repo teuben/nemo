@@ -7,9 +7,7 @@
  *     28-mar-2011    Created  // PJT
  */
  
-
 #include <nemo.h>
-
 
 
 string defv[] = {
@@ -26,7 +24,7 @@ string usage = "bench openmp";
 void sum_st(int *A, int *B, int *C)
 {
   int i;
-#pragma omp parallel for
+  #pragma omp parallel for
   for(i = 0; i < M; i++)
     A[i] = B[i] + C[i];
 }
