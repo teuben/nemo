@@ -1,0 +1,60 @@
+.TH TPMC 1NEMO "28 July 2011"
+.SH NAME
+tpmc \- TPMC, Powerspectrum, Massfunction calculator
+.SH SYNOPSIS
+\fBtpmc\fP [parameter=value]
+.SH DESCRIPTION
+From a list of "particles" with given mass, position and velocities
+the two-point correlation function (TPCF), power spectrum (PS)
+and mass function (MF) are computed.
+.PP
+\fIthis program is under development\fP
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input table, in ASCII format. No default.
+.TP 20
+\fBout=\fP
+Output table, will be in ascii format. No default.
+.TP 20
+\fBbins=\fP
+Number of bins for TPCF [12]  
+.TP 20
+\fBmassbins=\fP
+Number of bins for MF [7]  
+.TP 20
+\fBparticlemass=\fP
+Particle Mass [1e13]     
+.TP 20
+\fBrmin=\fP
+Minimum radius [30]     
+.TP 20
+\fBrmax=\fP
+Maximum radius [60]     
+.TP 20
+\fBboxsize=\fP
+CDM Boxsize [512]     
+.TP 20
+\fBmpvcol=\fP
+Columns for m,x,y,z,vx,vy,vz [1,3,4,5,6,7,8]    
+.TP 20
+\fBnmax=\fP
+Specify if input from a pipe [] 
+.TP 20
+\fBbullet=\fP
+Give critical max. separation and min. velocity []
+.TP 20
+\fBVERSION=\fP
+28-jul-2011 PJT [0.4]     
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Harley Katz, Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Jul-11	V0.1 Initial version	HK/PJT
+.fi
