@@ -53,4 +53,5 @@ offt8:	offt.c
 
 
 array_add_omp:  array_add.c
-	$(CC) $(CFLAGS) -std=c99 -fopenmp array_add.c -o array_add_omp $(NEMO_LIBS)
+	$(CC) $(CFLAGS)  -fopenmp array_add.c -o array_add_omp $(NEMO_LIBS)
+#	$(CC) $(CFLAGS) -std=c99 -fopenmp array_add.c -o array_add_omp $(NEMO_LIBS)
