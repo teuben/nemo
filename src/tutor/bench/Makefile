@@ -51,3 +51,6 @@ offt:	offt.c
 offt8:	offt.c
 	$(CC) -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -o offt8 offt.c
 
+
+array_add_omp:  array_add.c
+	$(CC) $(CFLAGS) -std=c99 -fopenmp array_add.c -o array_add_omp $(NEMO_LIBS)
