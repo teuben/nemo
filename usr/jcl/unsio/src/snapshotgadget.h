@@ -170,7 +170,7 @@ typedef struct particle_data_lite
   float * getAge(int & n)   { n=header.npartTotal[4]; return age;}
   float * getMetal(int & n) { n=header.npartTotal[0]+header.npartTotal[4]; return metal;}
   float * getMetalGas(int & n) { n=header.npartTotal[0]; return metal;}
-  float * getMetalStars(int & n) { n=header.npartTotal[4]; return metal+n;}
+  float * getMetalStars(int & n) { n=header.npartTotal[4]; return metal+header.npartTotal[0];}
   float * getTemp(int & n) { n=header.npartTotal[0]; return temp;}
   float * getU(int & n) { n=header.npartTotal[0]; return intenerg;}
   float * getRho(int & n) { n=header.npartTotal[0]; return rho;}
