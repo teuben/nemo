@@ -29,7 +29,7 @@ namespace uns {
     CSnapshotSimIn(const std::string, const std::string, const std::string,
 		 const bool verb=false);
     ~CSnapshotSimIn();
-    int nextFrame(const uns::t_indexes_tab * index_tab, const int nsel);
+    int nextFrame(uns::UserSelection &);
     int close() { return 1;}
     ComponentRangeVector * getSnapshotRange();
     bool getData(const std::string name,int *n,float **f) { return snapshot->getData(name,n,f); }

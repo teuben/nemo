@@ -33,7 +33,7 @@ namespace uns {
     CSnapshotNemoIn(const std::string, const std::string, const std::string,
 		  const bool verb=false);
     ~CSnapshotNemoIn();
-    int nextFrame(const uns::t_indexes_tab * index_tab, const int nsel);
+    int nextFrame(uns::UserSelection &);
     int close();
     ComponentRangeVector * getSnapshotRange();
     // virtual function implemented

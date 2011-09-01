@@ -165,8 +165,11 @@ ComponentRangeVector * CSnapshotNemoIn::getSnapshotRange()
 }
 // ============================================================================
 // nextFrame()                                                                 
-int CSnapshotNemoIn::nextFrame(const uns::t_indexes_tab * index_tab, const int nsel)
+int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
 {
+  const uns::t_indexes_tab * index_tab=user_select.getIndexesTab();
+  const int nsel=user_select.getNSel();
+  
   int status;  // io_nemo status
   std::string force_select = "all"; 
   if (! first_stream) { // normal file or second reading (stream)

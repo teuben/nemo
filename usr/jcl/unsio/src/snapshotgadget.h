@@ -111,7 +111,7 @@ typedef struct particle_data_lite
     // READING constrcuctor
     CSnapshotGadgetIn(const std::string, const std::string, const std::string, const bool verb=false);
     ~CSnapshotGadgetIn();
-    int nextFrame(const uns::t_indexes_tab * index_tab, const int nsel);
+    int nextFrame(uns::UserSelection &);
 //    int nextFrame();
     ComponentRangeVector * getSnapshotRange();
     int getNbody() { return getNtotal();}
@@ -129,8 +129,7 @@ typedef struct particle_data_lite
    bool first_loc;
    int open(const std::string);
 
-   int read (const uns::t_indexes_tab *index, const int nsel);
-   int read2(const uns::t_indexes_tab *index, const int nsel);
+   int read (uns::UserSelection &);
    int getVersion() const { return version;}
    const uns::ComponentRangeVector getCRV() const { return crv;}
    int   getNtotal() const { return npartTotal;}
@@ -139,7 +138,7 @@ typedef struct particle_data_lite
 
   int multiplefiles;
   bool lonely_file;
-  unsigned int load_bits, comp_bits[6];
+  unsigned int load_bits, comp_bits;
   //data
   float * mass, * pos, * vel, * acc, *pot, * rho, * hsml, * age, * metal, * intenerg, * temp;
   int * id;

@@ -41,7 +41,7 @@ public:
   int   getNSel()       const { return nsel   ; }
   static std::string parseString(std::string&);
   ComponentRangeVector * getCrvFromSelection() { return &crvsel;}
-  
+  int compBits() { return comp_bits; }
 private:
   ParticlesObjectVector pov;
   static int comparePos(const void * a, const void * b) {
@@ -59,6 +59,7 @@ private:
   int nbody;                        // #bodies max                
   int nsel;                         // #bodies selected           
   int pos;                          // current component position 
+  int comp_bits;                    // components bits requested
   const ComponentRangeVector * crv; // vector of component range  
   ComponentRangeVector crvsel;      // crv for selected components
   void fillIndexes(const std::string, const int, const int, const int, int);

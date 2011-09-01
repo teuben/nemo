@@ -54,7 +54,7 @@ namespace uns {
   {
     user_select.setSelection(getSelectPart(),crvs);
     setNsel(user_select.getNSel());
-    return(nextFrame(user_select.getIndexesTab(),user_select.getNSel()));
+    return(nextFrame(user_select));
   }
   // ============================================================================
   // computeBits 

@@ -44,12 +44,12 @@ namespace uns {
   }
   // ============================================================================
   // getSnapshotRange 
-  int CSnapshotList::nextFrame(const uns::t_indexes_tab * index_tab, const int nsel)
+  int CSnapshotList::nextFrame(uns::UserSelection &user_select)
   {
     assert(snapshot != NULL);
     assert(snapshot->isValidData()==true);
     snapshot->setNsel(nsel);   
-    return (snapshot->nextFrame(index_tab,nsel));
+    return (snapshot->nextFrame(user_select));
   }
   // ============================================================================
   // nextFrame 
@@ -57,9 +57,9 @@ namespace uns {
   {
     snapshot->user_select.setSelection(getSelectPart(),crvs);
     setNsel(snapshot->user_select.getNSel());
-     snapshot->setReqBits(req_bits);
+    snapshot->setReqBits(req_bits);
     snapshot->setNsel(snapshot->user_select.getNSel());
-    return(snapshot->nextFrame(snapshot->user_select.getIndexesTab(),snapshot->user_select.getNSel()));
+    return(snapshot->nextFrame(snapshot->user_select));
   }
   // ============================================================================
   // isNewFrame() 

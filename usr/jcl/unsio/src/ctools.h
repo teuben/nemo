@@ -56,6 +56,16 @@ namespace tools {
     static bool isFileExist(std::string);
     static std::string toupper(std::string);
     static std::string tolower(std::string);
+    static int compBits(std::string s) {
+      int ret=0;
+      if (s=="all"   ) ret=ALL_BIT|GAS_BIT|HALO_BIT|DISK_BIT|STARS_BIT|BNDRY_BIT;
+      if (s=="gas"   ) ret=GAS_BIT;
+      if (s=="halo"  ) ret=HALO_BIT;
+      if (s=="disk"  ) ret=DISK_BIT;
+      if (s=="stars" ) ret=STARS_BIT;
+      if (s=="bndry" ) ret=BNDRY_BIT;
+      return ret;
+    }
   };
 }
 

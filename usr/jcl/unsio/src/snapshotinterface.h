@@ -84,7 +84,7 @@ namespace uns {
     // index_tab = array of selected indexes (size max=part_data->nbody)
     // nsel      = #particles selected in index_tab                     
     // particles not selected must have the value '-1'                  
-    virtual int nextFrame(const uns::t_indexes_tab * index_tab, const int nsel)= 0;     
+    virtual int nextFrame(uns::UserSelection &)= 0;     
     virtual int close() = 0;
     virtual bool getData(const std::string,int *,float **)=0;
     virtual bool getData(const std::string,      float * )=0;

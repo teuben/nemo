@@ -128,14 +128,14 @@ ComponentRangeVector * CSnapshotGadgetIn::getSnapshotRange()
 
 // ============================================================================
 // nextFrame 
-int CSnapshotGadgetIn::nextFrame(const uns::t_indexes_tab * index_tab, const int nsel)
+int CSnapshotGadgetIn::nextFrame(uns::UserSelection &user_select)
 {
   int status=0;
   assert(valid==true);
   if (first_loc) {
     first_loc = false;
     if (checkRangeTime(getTime())) {
-      read(index_tab,nsel); // read Gadget
+      read(user_select); // read Gadget
       status = 1;
     }
   }
@@ -213,11 +213,17 @@ template <class T> int CSnapshotGadgetIn::readCompData(T * ptr, const int * inde
   return 1;
 }
 // ============================================================================
-int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
+int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
 {
+  const uns::t_indexes_tab * index=user_select.getIndexesTab();
+  const int nsel=user_select.getNSel();
+  
   int npartOffset[6];
   if (! is_read ) {
     //checkCompBits(index,nsel);
+    
+    // check component bits`
+    comp_bits=user_select.compBits();
     
     if (! pos  && req_bits&POS_BIT )  pos  = new float[3*nsel];
     if (! vel  && req_bits&VEL_BIT )  vel  = new float[3*nsel];
@@ -225,19 +231,25 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
     if (! mass && req_bits&MASS_BIT)  mass = new float[nsel  ];
     if (! pot  && req_bits&POT_BIT )  pot  = new float[nsel  ];
     if (! id   && req_bits&ID_BIT  )  id   = new int  [nsel  ];
-    if (! age && header.npartTotal[4]>0 && req_bits&AGE_BIT) 
+    if (! age && header.npartTotal[4]>0 && req_bits&AGE_BIT && comp_bits&STARS_BIT) 
       age = new float[header.npartTotal[4]];
-    if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0 && req_bits&METAL_BIT) 
-      metal = new float[header.npartTotal[0]+header.npartTotal[4]];
-    if (! intenerg && header.npartTotal[0]>0 && req_bits&U_BIT) intenerg = new float[header.npartTotal[0]];
-    if (! temp && header.npartTotal[0]>0 && req_bits&TEMP_BIT) 
-      temp = new float[header.npartTotal[0]];
-    if (! rho && header.npartTotal[0]>0 && req_bits&RHO_BIT) 
-      rho = new float[header.npartTotal[0]];
-    if (! hsml&& header.npartTotal[0]>0 && req_bits&HSML_BIT) 
-      hsml= new float[header.npartTotal[0]];
     
+    if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0 
+        && req_bits&METAL_BIT && (comp_bits&GAS_BIT||comp_bits&STARS_BIT)) 
+      metal = new float[header.npartTotal[0]+header.npartTotal[4]];
+  
+    if (comp_bits&GAS_BIT) {
+      if (! intenerg && header.npartTotal[0]>0 && req_bits&U_BIT) intenerg = new float[header.npartTotal[0]];
+      if (! temp && header.npartTotal[0]>0 && req_bits&TEMP_BIT) 
+        temp = new float[header.npartTotal[0]];
+      if (! rho && header.npartTotal[0]>0 && req_bits&RHO_BIT) 
+        rho = new float[header.npartTotal[0]];
+      if (! hsml&& header.npartTotal[0]>0 && req_bits&HSML_BIT) 
+        hsml= new float[header.npartTotal[0]];
+    }
     //ComponentRange::list(&crv);
+    //ComponentRange::list(user_select.getCrvFromSelection());
+    
     // allocate memory
     assert(nsel<=npartTotal);
     is_read=true;
@@ -360,7 +372,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
           readCompData(acc,index2,npartOffset,3);
         }
         // --> U block (Internal energy)
-        if (block_name=="U" && req_bits&U_BIT) { 
+        if (block_name=="U" && req_bits&U_BIT && comp_bits&GAS_BIT) { 
           load_bits |= U_BIT;
           assert(header.npart[0]>0); // (gas only)         
           ok=true;
@@ -373,7 +385,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
           assert(in.good() && len1==len2 && len1==bytes_counter);
         }
         // --> Temperature block
-        if (block_name=="NE" && req_bits&TEMP_BIT) { 
+        if (block_name=="NE" && req_bits&TEMP_BIT && comp_bits&GAS_BIT) { 
           load_bits |= TEMP_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
@@ -386,7 +398,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
           assert(in.good() && len1==len2 && len1==bytes_counter);
         }
         // --> RHO block (density)
-        if (block_name=="RHO" && req_bits&RHO_BIT) { 
+        if (block_name=="RHO" && req_bits&RHO_BIT && comp_bits&GAS_BIT) { 
           load_bits |= RHO_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
@@ -399,7 +411,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
           assert(in.good() && len1==len2 && len1==bytes_counter);          
         }
         // --> HSML block (neighbours size)
-        if (block_name=="HSML" && req_bits&HSML_BIT) { 
+        if (block_name=="HSML" && req_bits&HSML_BIT && comp_bits&GAS_BIT) { 
           load_bits |= HSML_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
@@ -412,7 +424,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
           assert(in.good() && len1==len2 && len1==bytes_counter);                    
         }
         // --> Z block (Metalicity)
-        if (block_name=="Z" && req_bits&METAL_BIT) {  
+        if (block_name=="Z" && req_bits&METAL_BIT && (comp_bits&GAS_BIT || comp_bits&STARS_BIT)) {  
           load_bits |= METAL_BIT;
           assert((header.npart[0]+header.npart[4])>0); // gas+stars
           ok=true;
@@ -425,7 +437,7 @@ int CSnapshotGadgetIn::read(const uns::t_indexes_tab *index, const int nsel)
           assert(in.good() && len1==len2 && len1==bytes_counter);                
         }
         // --> AGE block
-        if (block_name=="AGE" && req_bits&AGE_BIT) { 
+        if (block_name=="AGE" && req_bits&AGE_BIT && comp_bits&STARS_BIT) { 
           load_bits |= AGE_BIT;
           ok=true;
           bytes_counter=0;

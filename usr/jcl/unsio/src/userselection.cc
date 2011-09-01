@@ -16,6 +16,7 @@
 #include <vector>
 #include <algorithm>
 #include "assert.h"
+#include "ctools.h"
 namespace uns {
 
 // ============================================================================
@@ -50,6 +51,7 @@ bool UserSelection::setSelection(const std::string _sel,
   pos = 0; // current component selection
   select =_sel; // cop selection              
   crv    = _crv;   // link component range vector
+  comp_bits = 0;   // no bits yet
   assert(crv);                   // must not be NULL
   assert((*crv)[0].type=="all"); // first entry must be "all"    
   nbody = (*crv)[0].n;           // #bodies max in the snapshot  
@@ -203,6 +205,7 @@ int UserSelection::isComponent(const std::string comp)
     int icrv=ComponentRange::getIndexMatchType(crv,type,offset);
     if (icrv != -1 ) {
       assert(icrv<(int)crv->size());
+      comp_bits |= tools::Ctools::compBits(type);
       first=(*crv)[icrv].first;
       last =(*crv)[icrv].last;
       assert(last>=first);
