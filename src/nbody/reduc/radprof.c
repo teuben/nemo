@@ -42,7 +42,7 @@ string defv[] = {
     "kmax=1\n			  number of nearest 'radial' neighbors",
     "tab=f\n			  need a table ? ",
     "headline=\n                  random verbiage for plot",
-    "VERSION=3.1\n		  20-jun-02 PJT",
+    "VERSION=3.1a\n		  20-jun-02 PJT",
     NULL,
 };
 
@@ -54,7 +54,7 @@ local string iname;		/* input file  name */
 local real pos0[NDIM];		/* assumed center */
 
 #ifndef MOBJ
-#define MOBJ 100000             /* maximum particles */
+#define MOBJ 10000000           /* maximum particles */
 #endif
 
 local int  nobj;		/* globals for writesnap */
