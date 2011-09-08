@@ -20,12 +20,18 @@
  * V3.1   pjt 29-aug-02         confirmed bug item=XXX doesn't work anymore
  * V3.1a  pjt 25-nov-03         fix minor (but fatal) xml syntax error
  * V3.1e  pjt 10-aug-09         fix bug handled items > 2GB
+ * V3.2   wd  08-sep-11         margin automatic adapts to terminal width
  *
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#ifdef unix
+# include <sys/ioctl.h>
+# include <stdio.h>
+# include <unistd.h>
+#endif
 
 string defv[] = {
     "in=???\n                     input file name ",
@@ -33,7 +39,11 @@ string defv[] = {
     "maxline=4\n                  max lines per item ",
     "allline=false\n              print all lines (overrides maxline) ",
     "indent=2\n			  indentation of compound items ",
+#ifdef unix
+    "margin=\n                    righthand margin (default: window width)",
+#else
     "margin=72\n		  righthand margin ",
+#endif
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
@@ -77,6 +87,13 @@ void nemo_main()
     maxprec = getbparam("maxprec");
     maxline = getiparam("maxline");
     indent = getiparam("indent");
+#ifdef unix
+    if(!hasvalue("margin")) {
+	struct winsize w;
+	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+	margin = w.ws_col;
+    } else
+#endif
     margin = getiparam("margin");
     allline = getbparam("allline");
     if (hasvalue("item")) warning("item= is broken");
