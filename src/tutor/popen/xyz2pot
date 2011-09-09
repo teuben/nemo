@@ -1,0 +1,11 @@
+#! /bin/csh -f
+#
+#  convert an ascii table of X,Y,Z to output the 
+#  (positive) potentials - DEMO version
+
+set in=$1
+
+tabtos in=$in out=- header="" block1=x,y,z |\
+   snapmass - - mass=1 |\
+   hackforce - - fcells=2 |\
+   snapprint - -phi
