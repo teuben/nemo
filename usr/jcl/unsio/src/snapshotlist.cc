@@ -145,8 +145,9 @@ namespace uns {
           //
           int cpt=0;
           while (  str >> parse   &&              // something to read 
-                   parse[0] != '#' &&              // not commented out 
-                   parse[0] != '!'                 // not commented out 
+                   parse[0] != '#' &&             // not commented out 
+                   parse[0] != '!' &&             // not commented out 
+                   parse[0] != '\n'               // not a blank line
                    ) {
             cpt++;
             if (cpt==1) snapname=parse;
@@ -156,9 +157,9 @@ namespace uns {
             while(i<snapname.length() && snapname[i]==' ') i++; // search first non blank
             if (i<snapname.length() && snapname[i]!='/')        // first char not a '/'  
             {;}//snapname = dirpath.toStdString() + snapname;      // append to dirpath     
+            stop   = true; // we have a snapname
+            status = true; // so we can stop reading            
           }
-          stop   = true; // we have a snapname
-          status = true; // so we can stop reading
         }
         else { // end of file
           stop   = true;
