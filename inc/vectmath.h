@@ -8,6 +8,7 @@
  * 16-feb-97    sqrt() from math.h			pjt
  * 23-jun-01    ZENOisms
  * 23-oct-07    added ZENOism for Koda's etude code     pjt
+ * 21-sep-11    added SMINV and SMAXV                   pjt
  *
  */
 
@@ -206,6 +207,20 @@
     for (_i = 0; _i < NDIM; _i++)                                       \
         (v)[_i] /= (s);                                                 \
 }
+
+#define SMINV(v,u)     /* Min value of a vector */                      \
+{                                                                       \
+    register int _i;                                                    \
+    for (_i = 0; _i < NDIM; _i++)                                       \
+      (v)[_i] = MIN( (v)[_i], (u)[_i]);                                 \
+}									
+
+#define SMAXV(v,u)     /* Max value of a vector */                      \
+{                                                                       \
+    register int _i;                                                    \
+    for (_i = 0; _i < NDIM; _i++)                                       \
+      (v)[_i] = MAX((v)[_i], (u)[_i]);                                  \
+}									
 
 /* For compatiblity with older Nemo (1.3 and before) the INC macros */
 /* are equated to the Self-macros (which came from starlab)	    */
