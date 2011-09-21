@@ -98,7 +98,7 @@ nemo_main()
 	size  = pow(2.0,(double)l);
 	mass[i] /= size;
       }
-      dprintf(0,"mass %d %g\n",i,mass[i]);
+      dprintf(1,"mass %d %g\n",i,mass[i]);
     }
     printf("done\n");
     put_set(outstr,SnapShotTag);
