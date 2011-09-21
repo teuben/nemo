@@ -15,7 +15,7 @@
 
 string defv[] = {
     "in=???\n        Input file name (snapshot)",
-    "VERSION=1.0a\n  25-jun-94 PJT",
+    "VERSION=1.1\n   21-sep-2011 PJT",
     NULL,
 };
 
@@ -27,6 +27,7 @@ nemo_main()
 {
     stream instr;
     real   tsnap, fact;
+    vector pmin, pmax, vmin, vmax;
     vector tmp, sump1, sump2, sumv1, sumv2, meanp, meanv, sigp, sigv;
     int    i, nbody, bits;
     Body *btab = NULL, *bp;
@@ -44,6 +45,10 @@ nemo_main()
         CLRV(sump2);
         CLRV(sumv1);
         CLRV(sumv2);
+	SETV(pmin,Pos(btab));
+	SETV(pmax,Pos(btab));
+	SETV(vmin,Vel(btab));
+	SETV(vmax,Vel(btab));
         for (bp = btab; bp < btab+nbody; bp++) {    /* loop all bodies */
             SADDV(sump1,Pos(bp));
             MULVV(tmp,Pos(bp),Pos(bp));
@@ -51,6 +56,10 @@ nemo_main()
             SADDV(sumv1,Vel(bp));
             MULVV(tmp,Vel(bp),Vel(bp));
             SADDV(sumv2,tmp);
+	    SMINV(pmin,Pos(bp))
+	    SMAXV(pmax,Pos(bp))
+	    SMINV(vmin,Vel(bp))
+	    SMAXV(vmax,Vel(bp))
         }   /* for (bp) */
         fact = 1.0 / nbody;
         SMULVS(sump1,fact);                     /* position statistics */
@@ -77,6 +86,16 @@ nemo_main()
         printf("vel: ");
         for (i=0; i<NDIM; i++)
             printf(" %lf +/- %lf ",meanv[i],sigv[i]);
+        printf("\n");
+
+	printf("mnmx pos: ");
+        for (i=0; i<NDIM; i++)
+            printf(" %lf %lf ",pmin[i],pmax[i]);
+        printf("\n");
+
+	printf("mnmx vel: ");
+        for (i=0; i<NDIM; i++)
+            printf(" %lf %lf ",vmin[i],vmax[i]);
         printf("\n");
 
 	btab = NULL; /* free old to make sure newly allocated .... (sic)  */
