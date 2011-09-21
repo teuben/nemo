@@ -22,8 +22,9 @@ string defv[] = {
     "pscale=1e17\n                   Scale position by",
     "vscale=1e5\n                    Scale velocities by",
     "dr=1.448e16\n                   Cell size for level=0",
+    "mass=t\n                        Use density (f) or mass (t)",
     "headline=\n                     Random verbiage",
-    "VERSION=0.1\n                   20-sep-2011 PJT",
+    "VERSION=0.2\n                   21-sep-2011 PJT",
     NULL,
 };
 
@@ -44,8 +45,9 @@ nemo_main()
     int i, nbody, nbuf;
     real *p1, *m1, *pp, tsnap, *t1, *t2;
     real *phase, *mass;
-    real mscale, pscale, vscale;
+    real mscale, pscale, vscale, dr, size;
     float *rv, *rvp;
+    bool Qmass;
 
     warning("Program only parses the KxM2007 data");
 
@@ -55,6 +57,8 @@ nemo_main()
     mscale = getrparam("mscale");
     pscale = getrparam("pscale");
     vscale = getrparam("vscale");
+    dr = getrparam("dr");
+    Qmass = getbparam("mass");
     if (hasvalue("headline"))
         set_headline(getparam("headline"));
     put_history(outstr);
@@ -75,9 +79,9 @@ nemo_main()
       nread = unfread(instr, buf, nbuf);
       if (nread<1) error("cannot read particle %d",i);
       pp = (double *) buf;
-      dprintf(1,"%d: %g %g %g\n",i+1,pp[0],pp[1],pp[2]);
-      dprintf(2,"%d: %g %g %g\n",i+1,pp[3],pp[4],pp[5]);
-      dprintf(2,"%d: %g %g %g\n",i+1,pp[6],pp[7],pp[8]);
+      dprintf(1,"%d: pos %g %g %g\n",i+1,pp[0],pp[1],pp[2]);
+      dprintf(1,"%d: vel %g %g %g\n",i+1,pp[3],pp[4],pp[5]);
+      dprintf(1,"%d: mtt %g %g %g\n",i+1,pp[6],pp[7],pp[8]);
       *p1++ = *pp++ / pscale;  /* X */
       *p1++ = *pp++ / pscale;
       *p1++ = *pp++ / pscale;
@@ -89,7 +93,12 @@ nemo_main()
       *t2++ = *pp++;  /* t2 */
       sp    =  pp;
       l     = (short ) *sp;
-      dprintf(2,"%d: l=%d (0x%x)\n",i+1,l,l);
+      dprintf(1,"%d: l=%d (0x%x)\n",i+1,l,l);
+      if (Qmass) {
+	size  = pow(2.0,(double)l);
+	mass[i] /= size;
+      }
+      dprintf(0,"mass %d %g\n",i,mass[i]);
     }
     printf("done\n");
     put_set(outstr,SnapShotTag);
