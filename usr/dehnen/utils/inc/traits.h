@@ -52,7 +52,7 @@ namespace WDutils {
       typedef I integer_s;
       typedef U integer_u;
       WDutilsStaticAssert(sizeof(integer_s) == sizeof(integer_u));
-      static const int size = sizeof(integer_s);
+      static const int  size = sizeof(integer_s);
     };
 
     template<int> struct __ITRAITS;
@@ -92,49 +92,66 @@ namespace WDutils {
   typedef meta::__IWORDS<2>::integer_u uint16; ///< unsigned integer of 16 bytes
   typedef meta::__IWORDS<4>::integer_u uint32; ///< unsigned integer of 32 bytes
   typedef meta::__IWORDS<8>::integer_u uint64; ///< unsigned integer of 64 bytes
-  // ///////////////////////////////////////////////////////////////////////////
   //
   // class WDutils::traits<type>
   //
-  /// provides very basic information about the name and size of any type
+  /// provides the name and suitable printf-style format for any type
   //
-  // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct traits {
     static const char*name () { return typeid(T).name(); }
+    static const char*fmt  () { return 0; }
   };
-  //////////////////////////////////////////////////////////////////////////////
+  //
   template<typename T> struct traits<T*> {
-    static const char*name () {
-      return message("%s*",traits<T>::name()); }
+    static const char*name () { return message("%s*",traits<T>::name()); }
+    static const char*fmt  () { return "%p"; }
   };
-  //////////////////////////////////////////////////////////////////////////////
+  //
   template<typename T> struct traits<const T*> {
-    static const char*name () {
-      return message("const %s*",traits<T>::name()); }
+    static const char*name () { return message("const %s*",traits<T>::name()); }
+    static const char*fmt  () { return "%p"; }
   };
-  //////////////////////////////////////////////////////////////////////////////
+  //
+  template<> struct traits<char*> {
+    static const char*name () { return "char*"; }
+    static const char*fmt  () { return "%s"; }
+  };
+  //
+  template<> struct traits<const char*> {
+    static const char*name () { return "const char*"; }
+    static const char*fmt  () { return "%s"; }
+  };
+  //
   /// macro  returning the name of a given type.
 #define nameof(TYPE) (static_cast<const char*>(WDutils::traits<TYPE>::name()))
-  //////////////////////////////////////////////////////////////////////////////
-#define WDutils_TRAITS(TYPE,NAME)			\
-  template<> struct traits<TYPE> {			\
-    static const char  *name () { return NAME; }	\
+  /// macro  returning the suitable printf-style format for a given type
+#define fmtof(TYPE) (static_cast<const char*>(WDutils::traits<TYPE>::fmt()))
+  //
+#define WDutils_TRAITS_FORMAT(TYPE,NAME,FMT)	\
+  template<> struct traits<TYPE> {		\
+    static const char*name () { return NAME; }	\
+    static const char*fmt  () { return FMT; }	\
   };
-  WDutils_TRAITS(void,"void");
-  WDutils_TRAITS(bool,"bool");
-  WDutils_TRAITS(char,"char");
-  WDutils_TRAITS(unsigned char,"unsigned char");
-  WDutils_TRAITS(int,"int");
-  WDutils_TRAITS(unsigned,"unsigned");
-  WDutils_TRAITS(short,"short");
-  WDutils_TRAITS(unsigned short,"unsigned short");
-  WDutils_TRAITS(long,"long");
-  WDutils_TRAITS(unsigned long,"unsigned long");
-  WDutils_TRAITS(long long,"long long");
-  WDutils_TRAITS(unsigned long long,"unsigned long long");
-  WDutils_TRAITS(float,"float");
-  WDutils_TRAITS(double,"double");
-  WDutils_TRAITS(long double,"long double");
+  WDutils_TRAITS_FORMAT(void,"void",0);
+  WDutils_TRAITS_FORMAT(bool,"bool","%d");
+  WDutils_TRAITS_FORMAT(char,"char","%c");
+  WDutils_TRAITS_FORMAT(unsigned char,"unsigned char","%uc");
+  WDutils_TRAITS_FORMAT(int,"int","%d");
+  WDutils_TRAITS_FORMAT(unsigned,"unsigned","%ud");
+  WDutils_TRAITS_FORMAT(short,"short","%sd");
+  WDutils_TRAITS_FORMAT(unsigned short,"unsigned short","%sud");
+  WDutils_TRAITS_FORMAT(long,"long","%ld");
+  WDutils_TRAITS_FORMAT(unsigned long,"unsigned long","%lud");
+  WDutils_TRAITS_FORMAT(long long,"long long","%lld");
+  WDutils_TRAITS_FORMAT(unsigned long long,"unsigned long long","%llud");
+  WDutils_TRAITS_FORMAT(float,"float","%g");
+  WDutils_TRAITS_FORMAT(double,"double","%g");
+  WDutils_TRAITS_FORMAT(long double,"long double","%g");
+#define WDutils_TRAITS(TYPE,NAME)		\
+  template<> struct traits<TYPE> {		\
+    static const char*name () { return NAME; }	\
+    static const char*fmt  () { return 0; }	\
+  };
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////

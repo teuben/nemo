@@ -979,7 +979,7 @@ namespace WDutils {
   //
   //  class WDutils::Pool<>
   //
-  /// template class, based on WDutils::pool, for allocating elemnts of type T
+  /// template class, based on WDutils::pool, for allocating elements of type T
   //
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T>

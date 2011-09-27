@@ -496,15 +496,26 @@ namespace WDutils {
 	for(int i=0;i<n-m;++i) {
 	  if(x[i]==x[i+m]) {
 	    if(file)
-	      WDutils_THROWN("[%s:%d]: x's not distinct in Polev()",file,line);
+	      WDutils_THROWN("[%s:%d]: x's not distinct in Polev(): "
+			     "x[%d]=%g=x[%d]=%g (xi=%g, x=%p)\n",
+			     file,line,i,x[i],i+m,x[i+m],xi,x);
 	    else
-	      WDutils_THROW ("x's not distinct in polev()");
+	      WDutils_THROW ("x's not distinct in polev(): "
+			     "x[%d]=%g=x[%d]=%g (xi=%g, x=%p)\n",
+			     i,x[i],i+m,x[i+m],xi,x);
 	  }
 	  P[i]= ( (xi-x[i+m])*P[i] + (x[i]-xi)*P[i+1] ) / (x[i] - x[i+m]);
 	}
       return P[0];
     }
     //..........................................................................
+    template<int M, typename X, typename Y> inline
+    Y interpol(X xi, const X*x, const Y*y, int n) WDutils_THROWING
+    { 
+      Y P[M];
+      int j;
+      return find(j,n,M,x,xi)==1? y[j] : polint(M,x+j,y+j,P,xi);
+    }
   public:
     /// default constructor
     PolynomialEvaluation() : FileLineFind() {}
@@ -521,9 +532,18 @@ namespace WDutils {
     template<typename X, typename Y> inline
     Y operator()(X xi, const X*x, const Y*y, int n, int m=4) WDutils_THROWING
     {
-      int j;
-      Y P[4];
-      return find(j,n,4,x,xi)==1? y[j] : polint(m,x+j,y+j,P,xi);
+      switch(m) {
+      case 2: return interpol<2,X,Y>(xi,x,y,n);
+      case 3: return interpol<3,X,Y>(xi,x,y,n);
+      case 4: return interpol<4,X,Y>(xi,x,y,n);
+      case 5: return interpol<5,X,Y>(xi,x,y,n);
+      case 6: return interpol<6,X,Y>(xi,x,y,n);
+      default: 
+	if(file) 
+	  WDutils_THROW("[%s:%d]: m=%d not supported in polev\n",file,line,m);
+	else
+	  WDutils_THROW("m=%d not supported in polev\n",m);
+      }
     }
     /// polynomial interpolation using m of n values, taking Array<T> arguments
     /// \param[in] xi position to find function value at

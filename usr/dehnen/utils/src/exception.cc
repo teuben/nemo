@@ -235,6 +235,7 @@ namespace {
 		       const char*issue,
 		       const char*fmt,
 		       va_list   &ap,
+		       int        depth= 0,
 		       const char*file = 0,
 		       int        line = 0,
 		       bool       name = true)
@@ -242,6 +243,9 @@ namespace {
     const int size=1024;
     int s=size, w=0;
     char ffmt[size], *t=ffmt;
+    char dpth[24] = ":                     ";
+    if(depth>20) depth=20;
+    dpth[2+depth]=0;
     w=snprintf(t,s,"### %s %s",lib,issue);
     t+=w; s-=w;
     if(name && RunInfo::name_known()) {
@@ -262,9 +266,9 @@ namespace {
       t+=w; s-=w;
     }
     if (fmt[strlen(fmt)-1] != '\n')
-      w=snprintf(t,s,": %s\n",fmt);
+      w=snprintf(t,s,"%s%s\n",dpth,fmt);
     else
-      w=snprintf(t,s,": %s",fmt);
+      w=snprintf(t,s,"%s%s",dpth,fmt);
     t+=w; s-=w;
     vfprintf(stderr,ffmt,ap);
     fflush(stderr);
@@ -275,7 +279,7 @@ void WDutils::Error::operator()(const char* fmt, ...) const
 {
   va_list  ap;
   va_start(ap,fmt);
-  printerr(lib, "Error", fmt, ap, file, line);
+  printerr(lib, "Error", fmt, ap, 0, file, line);
   va_end(ap);
   std::exit(1);
 }
@@ -284,7 +288,7 @@ void WDutils::Warning::operator()(const char* fmt, ...) const
 {
   va_list  ap;
   va_start(ap,fmt);
-  printerr(lib, "Warning", fmt, ap, file, line);
+  printerr(lib, "Warning", fmt, ap, 0, file, line);
   va_end(ap);
 }
 //
@@ -292,7 +296,7 @@ void WDutils::DebugInformation::operator()(const char* fmt, ...) const
 {
   va_list  ap;
   va_start(ap,fmt);
-  printerr(lib, "Debug Info", fmt, ap, file, line, false);
+  printerr(lib, "Debug Info", fmt, ap, 0, file, line, false);
   va_end(ap);
 }
 //
@@ -301,7 +305,7 @@ void WDutils::DebugInformation::operator()(int deb, const char* fmt, ...) const
   if(RunInfo::debug(deb)) {
     va_list  ap;
     va_start(ap,fmt);
-    printerr(lib, "Debug Info", fmt, ap, file, line, false);
+    printerr(lib, "Debug Info", fmt, ap, deb, file, line, false);
     va_end(ap);
   }
 }
