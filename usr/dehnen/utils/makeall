@@ -146,6 +146,12 @@ $(INC)partreeOLD.h	: $(DEV)partreeOLD.h
 			(cd $(INC); ln -s ../$(DEV)partreeOLD.h partreeOLD.h)
 partreeOLD_h		:= $(INC)partreeOLD.h $(memory_h) $(geometry_h) \
 			$(parallel_h)
+
+$(INC)radixP.h		: $(DEV)radixP.h
+			(cd $(INC); ln -s ../$(DEV)radixP.h radixP.h)
+radixP_h		:= $(INC)radixP.h $(parallel_h)
+
+radix_h			+= $(parallel_h) $(radixP_h)
 endif
 
 # -----------------------
@@ -165,7 +171,6 @@ octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(timer_h)
 domain_cc		:= $(DEV)domain.cc $(domain_h) $(io_h)
 
 ifdef WDutilsDevel
-radix_cc		+= $(parallel_h)
 neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
 parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
 partreeOLD_cc		:= $(DEV)partreeOLD.cc $(partreeOLD_h) $(peano_h) \

@@ -26,45 +26,49 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <radix.h>
-#ifdef WDutilsDevel
-# include <parallel.h>
-#endif
 #include <sse.h>
 
 //
 #ifdef WDutilsDevel
+namespace WDutils {
+#ifdef _OPENMP
+  namespace Radix {
+    /// global datum: pointers to counters across all threads
+    /// \note these are externally linkable and used in devel/radixP.h
+    int* B[OMP::MaxNumThreadsInFunc];
+  }
+#else
+# warning openMP not supported: implementing serial version for Radix::PSort()
+#endif
+}
+//
 namespace {
   using namespace WDutils;
-#ifdef _OPENMP
-  /// global datum: pointers to counters across all threads
-  static int* B[OMP::MaxNumThreadsInFunc];
-#else
-# warning openMP not supported: implementing serial version for RadixSortP()
-#endif
+  using WDutils::Radix::B;
   /// parallel radix sort for float or double
   template<typename X> class ParallelRadixSort {
 #ifdef _OPENMP
     /// type used to map X to and from
-    typedef typename RadixSortTraits<X>::integer_type integer;
+    typedef typename Radix::SortTraits<X>::integer_type integer;
     /// mask and counter size in sections 1,2,4,5
     static const int n0=0x800,m0=0x7ff;
     /// mask and counter size in sections 3,6
     static const int n2=0x400,m2=0x3ff;
     /// \name local data
     //@{
-    const int     It,Nt;    ///< rank of local thread; # threads
-    const int     i0,iN;    ///< begin and end of local data partition
-    int    *const L;        ///< local counters
-    integer*const iX;       ///< X array seen as unsigned int
-    integer*const iY;       ///< Y array seen as unsigned int
+    const int      It,Nt;    ///< rank of local thread; # threads
+    const unsigned i0,iN;    ///< begin and end of local data partition
+    int     *const L;        ///< local counters
+    integer *const iX;       ///< X array seen as unsigned int
+    integer *const iY;       ///< Y array seen as unsigned int
     //@}
     /// auxiliary for sort(): first-section count (converts)
     void first_count(integer*to)
     {
       SSE::Aligned::Reset(L,n0);
-      for(int i=i0; i!=iN; ++i) {
+      for(unsigned i=i0; i!=iN; ++i) {
 	integer f=iX[i];
-	to[i]= f^= RadixSortTraits<X>::forward_map(f);
+	to[i]= f^= Radix::SortTraits<X>::forward_map(f);
 	L[f&m0]++;
       }
     }
@@ -72,43 +76,24 @@ namespace {
     template<int shift, int mask> void count(integer*in)
     {
       SSE::Aligned::Reset(L,1+mask);
-      for(int i=i0; i!=iN; ++i)
+      for(unsigned i=i0; i!=iN; ++i)
 	L[(in[i]>>shift) & mask]++;
     }
     /// auxialiary for sort(): cumulates counts
     void cumulate(const int n)
-    {
-#pragma omp barrier
-      // 1  cumulate across threads (vertically)
-#pragma omp for
-      for(int i=0; i<n; ++i) {  // NOTE we can SSE optimise here
-	int c=B[0][i];
-	for(int t=1,tm; t!=Nt; ++t) { tm=B[t][i]; B[t][i]=c; c+=tm; }
-	B[0][i]=c;
-      }
-      // 2  master: cumulate (horizontally)
-      if(0==It)
-	for(int i=0,c=0,tm; i!=n; ++i) { tm=L[i]; L[i]=c; c+=tm; }
-#pragma omp barrier
-      // 3  slaves: add master (vertical add)
-      if(It)
-	for(int i=0; i<n; ++i)  // NOTE: we can SSE optimise here
-	  L[i] += B[0][i];
-      // barrier ensures master L=B[0] remains valid until all L[i] are set
-#pragma omp barrier
-    }
+    { Radix::cumulate(n,It,Nt); }
     /// auxialiary for sort(): slots data back in
     template<int shift, int mask> void slot(const integer*in, integer*to)
     {
-      for(int i=i0; i!=iN; ++i) 
+      for(unsigned i=i0; i!=iN; ++i) 
 	to[L[(in[i]>>shift)&mask]++]=in[i];
     }
     /// auxialiary for sort(): slots data back in and converts back to X
     template<int shift> void last_slot()
     {
-      for(int i=i0; i!=iN; ++i) {
+      for(unsigned i=i0; i!=iN; ++i) {
 	integer f=iY[i];
-	iX[L[(f>>shift)&m2]++] = f^ RadixSortTraits<X>::backward_map(f);
+	iX[L[(f>>shift)&m2]++] = f^ Radix::SortTraits<X>::backward_map(f);
       }
     }
     /// dtor: delete memory for counter
@@ -119,7 +104,7 @@ namespace {
     /// \param[in,out]  x  array to sort/sorted
     /// \param[in,out]  y  array to sort/sorted
     ParallelRadixSort(unsigned n, X*x, X*y)
-      : It(OMP::Rank()), Nt(OMP::TeamSize()), i0(0),iN(0),
+      : It(OMP::Rank()), Nt(OMP::TeamSize()), i0(0), iN(0),
 	L (WDutils_NEW16(int,n0)),
 	iX(reinterpret_cast<integer*>(x)),
 	iY(reinterpret_cast<integer*>(y))
@@ -127,26 +112,23 @@ namespace {
       // share local counters
       B[It]=L;
       // create partition of data
-      int Np=n/Nt;
-      int hi=n-Nt*Np;
-      for(int t=0; t!=It; ++t) const_cast<int&>(i0) += t<hi? Np+1:Np;
-      if(It<hi) Np++;
-      const_cast<int&>(iN)=i0+Np;
+      OMP::Partition(n,It,Nt,
+		     const_cast<unsigned&>(i0),const_cast<unsigned&>(iN));
     }
     /// perform radix sort in parallel
     void sort();
 #endif // _OPENMP
   public:
-    /// wrapper for RadixSortP(n,x,y,w)
+    /// wrapper for Radix::PSort(n,x,y,w)
     static void sortP(unsigned n, X*x, X*y, bool warn)
     {
 #ifdef _OPENMP
       if(OMP::IsParallel() && OMP::TeamSize()>1) {
 	if(warn && OMP::Rank()==0)
-	  WDutils_WarningN("WDutils::RadixSortP(%s): called from within OMP "
+	  WDutils_WarningN("WDutils::Radix::PSort(%s): called from within OMP "
 			   "parallel region: we assume shared global data "
-			   "(use WDutils::RadixSort() for sorting local data)."
-			   "\n",nameof(X));
+			   "(use WDutils::Radix::Sort() for sorting local "
+			   "data).\n",nameof(X));
 	try {
 #pragma omp barrier
 	  ParallelRadixSort<X> P(n,x,y);
@@ -162,19 +144,19 @@ namespace {
 	}
       else
 #endif
-	RadixSort(n,x,y);
+	Radix::Sort(n,x,y);
     }
-    /// wrapper for RadixSortP(n,x,w)
+    /// wrapper for Radix::PSort(n,x,w)
     static void sortP(unsigned n, X*x, bool warn)
     {
       X*y;
 #ifdef _OPENMP
       if(OMP::IsParallel() && OMP::TeamSize()>1) {
 	if(warn && OMP::Rank()==0)
-	  WDutils_WarningN("WDutils::RadixSortP(%s): called from within OMP "
+	  WDutils_WarningN("WDutils::Radix::PSort(%s): called from within OMP "
 			   "parallel region: we assume shared global data "
-			   "(use WDutils::RadixSort() for sorting local data)."
-			   "\n",nameof(X));
+			   "(use WDutils::Radix::Sort() for sorting local "
+			   "data).\n",nameof(X));
 	try {
 	  if(OMP::Rank() == 0) y=WDutils_NEW16(X,n);
 #pragma omp barrier
@@ -196,7 +178,7 @@ namespace {
 	  }
 	else 
 #endif
-	  RadixSort(n,x,y);
+	  Radix::Sort(n,x,y);
 	WDutils_DEL16(y);
       }
     }
@@ -258,28 +240,28 @@ namespace {
   //
 } // namespace {
 //
-void WDutils::RadixSortP(unsigned n, float*x, float*y, bool w)
+void WDutils::Radix::PSort(unsigned n, float*x, float*y, bool w)
 {
   ::ParallelRadixSort<float>::sortP(n,x,y,w);
 }
 //
-void WDutils::RadixSortP(unsigned n, float*x, bool w)
+void WDutils::Radix::PSort(unsigned n, float*x, bool w)
 {
   ::ParallelRadixSort<float>::sortP(n,x,w);
 }
 //
-void WDutils::RadixSortP(unsigned n, double*x, double*y, bool w)
+void WDutils::Radix::PSort(unsigned n, double*x, double*y, bool w)
 {
   ::ParallelRadixSort<double>::sortP(n,x,y,w);
 }
 //
-void WDutils::RadixSortP(unsigned n, double*x, bool w)
+void WDutils::Radix::PSort(unsigned n, double*x, bool w)
 {
   ::ParallelRadixSort<double>::sortP(n,x,w);
 }
 #endif // WDutilsDevel
 //
-void WDutils::RadixSort(unsigned N, float*X, float*Y)
+void WDutils::Radix::Sort(unsigned N, float*X, float*Y)
 {
   static const int n0=0x800,n2=0x400;
   static const int m0=0x7ff,m2=0x3ff;
@@ -304,7 +286,7 @@ void WDutils::RadixSort(unsigned N, float*X, float*Y)
   }
 }
 //
-void WDutils::RadixSort(unsigned N, double*X, double*Y)
+void WDutils::Radix::Sort(unsigned N, double*X, double*Y)
 {
   static const uint32 n0=0x800,n2=0x400, n=n0+n0+n2;
   static const uint64 m0=0x7ff,m2=0x3ff;
