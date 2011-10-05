@@ -237,24 +237,6 @@ namespace WDutils {
     template<int K, typename __T>
     inline void SortLow(unsigned N, __T*X, __T*Y)
     { SortBits<K,SortTraits<__T> >::sort(N,X,Y); }
-#ifdef WDutilsDevel
-    /// parallel radix sort of any type with a SortTraits<>
-    /// \param[in]      N  # elements
-    /// \param[in,out]  X  array, sorted on return
-    /// \param[in]      Y  auxiliary array of @a N elements
-    /// \param[in]   warn  warn about call from within parallel region?
-    /// \note radix sort provides stable sorting and costs O(N) time
-    template<typename __T>
-    void PSort(unsigned N, __T*X, __T*Y, bool warn=1);
-    /// parallel radix sort of the lower K bits of any type with a SortTraits<>
-    /// \param[in]      N  # elements
-    /// \param[in,out]  X  array, sorted on return
-    /// \param[in]      Y  auxiliary array of @a N elements
-    /// \param[in]   warn  warn about call from within parallel region?
-    /// \note radix sort provides stable sorting and costs O(N) time
-    template<int K, typename __T>
-    void PSortLow(unsigned N, __T*X, __T*Y, bool warn=1);
-#endif
     /// radix sort of single-precision floating point numbers
     /// \param[in]      N  # elements
     /// \param[in,out]  X  array, sorted on return
@@ -287,6 +269,38 @@ namespace WDutils {
       WDutils_DEL16(Y);
     }
 #ifdef WDutilsDevel
+    /// \name these parallel radix sorts scale badly
+    //@{
+    /// parallel radix sort of any type with a SortTraits<>
+    /// \param[in]      N  # elements
+    /// \param[in,out]  X  array, sorted on return
+    /// \param[in]      Y  auxiliary array of @a N elements
+    /// \param[in]   warn  warn about call from within parallel region?
+    /// \note radix sort provides stable sorting and costs O(N) time
+    template<typename __T>
+    void PSort(unsigned N, __T*X, __T*Y, bool warn=1);
+    /// parallel radix sort of any type with a SortTraits<>
+    /// \param[in]      N  # elements
+    /// \param[in,out]  X  array, sorted on return
+    /// \param[in]   warn  warn about call from within parallel region?
+    /// \note radix sort provides stable sorting and costs O(N) time
+    template<typename __T>
+    void PSort(unsigned N, __T*X, bool warn=1);
+    /// parallel radix sort of the lower K bits of any type with a SortTraits<>
+    /// \param[in]      N  # elements
+    /// \param[in,out]  X  array, sorted on return
+    /// \param[in]      Y  auxiliary array of @a N elements
+    /// \param[in]   warn  warn about call from within parallel region?
+    /// \note radix sort provides stable sorting and costs O(N) time
+    template<int K, typename __T>
+    void PSortLow(unsigned N, __T*X, __T*Y, bool warn=1);
+    /// parallel radix sort of the lower K bits of any type with a SortTraits<>
+    /// \param[in]      N  # elements
+    /// \param[in,out]  X  array, sorted on return
+    /// \param[in]   warn  warn about call from within parallel region?
+    /// \note radix sort provides stable sorting and costs O(N) time
+    template<int K, typename __T>
+    void PSortLow(unsigned N, __T*X, bool warn=1);
     /// radix sort of single-precision floating point numbers in parallel
     //
     /// \warning the speed-up is usually not optimal, but still non-zero.
@@ -365,6 +379,7 @@ namespace WDutils {
     ///       assume that the data refer to a shared array and sort them. If you
     ///       instead want to sort private data, use Sort() instead.
     void PSort(unsigned N, double*X, bool w=true);
+    //@}
 #endif
     /// radix sort of the first K bits
     /// \param[in]      N  # elements
@@ -378,22 +393,6 @@ namespace WDutils {
       SortLow<K>(N,X,Y);
       WDutils_DEL16(Y);
     }
-#ifdef WDutilsDevel
-    /// parallel radix sort of the first K bits
-    /// \param[in]      N  # elements
-    /// \param[in,out]  X  array, sorted on return
-    /// \param[in]      W  warn about call from inside a parallel region
-    /// \note radix sort provides stable sorting and costs O(N) time
-    /// \note allocates and de-allocates an auxiliary array
-    template<int K, typename __T>
-    inline void PSortLow(unsigned N, __T*X, bool W=1)
-    {
-      __T*Y;
-      if(!OMP::IsParallel() || OMP::Rank()==0) Y=WDutils_NEW16(__T,N);
-      PSortLow<K>(N,X,Y,W);
-      if(!OMP::IsParallel() || OMP::Rank()==0) WDutils_DEL16(Y);
-    }
-#endif
   } // namespace WDutils::Radix
 } // namespace WDutils {
 #ifdef WDutilsDevel
