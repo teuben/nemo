@@ -1,4 +1,4 @@
-.TH FITSHEAD 1NEMO "13 July 1995"
+.TH FITSHEAD 1NEMO "6 October 2011"
 .SH NAME
 fitshead \- dump the header of a fits file, or convert ascii to fits header
 .SH SYNOPSIS
@@ -52,6 +52,9 @@ and not contain strange control characters. (a NULL can trigger
 erroneous conversions). However, no
 checking is done if the input file is properly 
 formatted (see fits(5NEMO)).
+.TP
+\fBcounter=t|f\P
+Add line counter to output?   Not used yet.
 .SH EXAMPLE
 Consider fixing the CTYPE1 and CTYPE2 keywords of a large number of
 FITS files from 'LL','MM' to 'RA---TAN','DEC--TAN':
@@ -98,4 +101,5 @@ Peter Teuben
 13-apr-92	V1.1 Renamed file= to hdu=                       	PJT
 13-apr-94	V1.2a added out= to convert ascii to fits header	PJT
 23-may-95	V1.2b fixed bug in conversion to header format      	PJT
+6-oct-11	V1.3b fixed bug for large files				PJT
 .fi
