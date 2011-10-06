@@ -58,13 +58,14 @@ read_fits_header()
     for (i=1;;i++) {			             /* try infinite loop */
        fts_zero(&fh);			             /* clean out header */
        dsize = fts_rhead(&fh,instr);	             /* read header */
-       if (dsize<0)			             /* if no data (EOF) .. */
+       dprintf(1,"%d: dsize=0x%x (%ld)\n",i,dsize,dsize);
+       if (dsize < 0)			             /* if no data (EOF) .. */
           break;			             /* ... quit */
 
        if (nfile==0 || nfile==i)
           fts_thead(&fh);
        fts_sdata(&fh,instr);	                     /* alawys skip the data */
-       if (i==nfile)
+       if (i>=nfile)
             break;                                   /* all done */
     }
 
