@@ -515,7 +515,8 @@ void fitsetpl(FITS *file, int n, int *nsize)
 ----------------------------------------------------------------------*/
 {
   FITS *f;
-  int i,offset;
+  int i;
+  size_t offset;
 
   f = file;
   if(f->status == STATUS_NEW){
@@ -537,8 +538,8 @@ void fitsetpl(FITS *file, int n, int *nsize)
   if (f->skip == 0)
   	warning("fitsetpl: f->skip is 0, should be multiple of 2880");
   if (offset < 0)
-	error("fitsetpl: bad offset=%d (%d,...)\n",offset,nsize[0]);
-  dprintf(4,"fitsetpl: offset=%d (%d,...)\n",offset,nsize[0]);
+	error("fitsetpl: bad offset=%ld (%d,...)\n",offset,nsize[0]);
+  dprintf(4,"fitsetpl: offset=%ld (%d,...)\n",offset,nsize[0]);
 }
 /**********************************************************************/
 void fit_setbitpix(int bp)

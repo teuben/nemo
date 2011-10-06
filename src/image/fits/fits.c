@@ -59,6 +59,7 @@
  *                              also made a3..a5 1 char longer to make room for the terminating 0
  *              10-nov-05       newline option in fts_pgroup,fts_ptable 
  *              11-dec-06       store cvsID in saved string
+ *              10-aug-09       int -> size_t in a few more places for big files
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -84,8 +85,8 @@ typedef long int8;              /* some stupid fallback, probably wrong */
 #endif
 
 
-local char *fts_buffer = NULL; /* buffer for exact header in memory */
-local int  fts_buflen = 0;
+local char   *fts_buffer = NULL;        /* buffer for exact header in memory */
+local size_t  fts_buflen = 0;
 
 local int ftsblksiz_i=FTSBLKSIZ;	/* blocksize for i and o */
 local int ftsblksiz_o=FTSBLKSIZ;
@@ -144,7 +145,7 @@ static int colmask(int n, string key[],string col[],int colsel[]);
  *  use fts_xhead
  */
 
-int fts_rhead(fits_header *fh, stream instr)
+size_t fts_rhead(fits_header *fh, stream instr)
 {
     char buf[FTSLINSIZ+2];                /* buffer to hold one card image */
     char a1[9], a2[2], a3[FTSLINSIZ+1],a4[FTSLINSIZ+1],a5[FTSLINSIZ+1];  /* args */
@@ -463,7 +464,7 @@ int fts_rhead(fits_header *fh, stream instr)
  *
  */
 
-int fts_xhead(fits_header *fh, stream instr,
+size_t fts_xhead(fits_header *fh, stream instr,
 	      int bitpix, int naxis, int *naxisn, int skip)
 {
     int  i;
@@ -529,13 +530,13 @@ char *fts_shead(fits_header *fh, string keyword)
 
 int fts_lhead(fits_header *fh)
 {
-    int n;
+    size_t dsize;
 
     if (fh->simple >= 0) {      /* if its a primary header */
-        n = fts_dsize(fh);
-        if (n<0) {
-            warning("Negative size for data?\n");
-            return n;
+        dsize = fts_dsize(fh);
+        if (dsize<0) {
+	  warning("Negative size for data? dsize=%ld\n",dsize);
+	  return dsize;
         }
     } else if (fh->xtension) {
         if (streq(fh->xtension,"A3DTABLE") ||
@@ -1123,6 +1124,7 @@ local int fix_promote(fits_header *fh)
 int fts_phead(fits_header *fh, string *print)
 {
     int i,istart,naxis, pcount, gcount, n, ncards;
+    size_t dsize;
     char *card, buf[FTSLINSIZ+1];
     char a1[9], a2[2], a3[FTSLINSIZ+1],a4[FTSLINSIZ+1],a5[FTSLINSIZ+1];  /* args */
     string *sp;
@@ -1249,11 +1251,11 @@ int fts_phead(fits_header *fh, string *print)
         }
         printf("##\n");
     }
-    i = fts_dsize(fh);
+    dsize = fts_dsize(fh);
     printf("headersize = %d bytes = %d %d-records\n",
             fh->hlen, (fh->hlen - 1)/ftsblksiz_i + 1, ftsblksiz_i);
-    printf("datasize = %d bytes = %d %d-records\n",
-            i, (i - 1)/ftsblksiz_i + 1, ftsblksiz_i);
+    printf("datasize = %ld bytes = %ld %d-records\n",
+            dsize, (dsize-1)/ftsblksiz_i + 1, ftsblksiz_i);
     printf("__________________________________________________________\n");
 
     return 1;
@@ -1317,7 +1319,8 @@ int fts_ptable(
 {
     char *card, *dp, rowfmt[10];
     int ncards, i, j, k, n, w, len, pos, *colsel;
-    int ncolin, ncolout, check, idx, nskip, ntail;
+    int ncolin, ncolout, check, idx; 
+    size_t nskip, ntail;
     bool colall, addrow, ascii;
     string *sp;
 
@@ -1529,8 +1532,8 @@ int fts_ptable(
         	nskip += ntail;
     	}
     	nskip -= ncards * len;		/* subtract what already read */
-      	dprintf(1,"Skipping %d bytes for tail\n",ntail);        
-        if (nskip < 0) error("fts_ptable: negative tail 5d to skip",nskip);
+      	dprintf(1,"Skipping %ld bytes for tail\n",ntail);        
+        if (nskip < 0) error("fts_ptable: negative tail %ld to skip",nskip);
     	fseek(instr, nskip, 1);
     } else 
         fts_sdata(fh,instr);
@@ -1552,7 +1555,8 @@ int fnl)                    /* (*)  frequency of a newline  [not implemented] */
 {
     char *card, rowfmt[10];
     int ncards, i, j, k, n, w, len, nitems;
-    int bytpix, idx, nskip, ntail;
+    int bytpix, idx; 
+    size_t nskip, ntail;
     bool colall, addrow;
     real pscal, pzero;
     bool Qpar, Qval, Qraw;
@@ -1668,8 +1672,8 @@ int fnl)                    /* (*)  frequency of a newline  [not implemented] */
         	nskip += ntail;
     }
     nskip -= ncards * len;		/* subtract what already read */
-    dprintf(1,"Skipping %d bytes for tail\n",ntail);        
-    if (nskip < 0) error("fts_ptable: negative tail 5d to skip",nskip);
+    dprintf(1,"Skipping %ld bytes for tail\n",ntail);        
+    if (nskip < 0) error("fts_ptable: negative tail %ld to skip",nskip);
     fseek(instr, nskip, 1);
 
     return 1;
@@ -2021,15 +2025,15 @@ int fts_sdata(
 	      fits_header *fh,         /*  (i) pointer to fits header */
 	      stream instr)                   /*  (i) file pointer    */
 {
-    int nskip, ntail;
+    size_t nskip, ntail;
 
     nskip = fts_dsize(fh);
-    dprintf(1,"Skipping %d bytes for data (but %d read)\n",
+    dprintf(1,"Skipping %ld bytes for data (but %ld read)\n",
 		nskip, fh->nread);
 
     if (nskip % ftsblksiz_i) {
         ntail = ftsblksiz_i - nskip % ftsblksiz_i;
-        dprintf(1,"Skipping %d bytes for empty tail\n",ntail);        
+        dprintf(1,"Skipping %ld bytes for empty tail\n",ntail);        
         nskip += ntail;
     }
     nskip -= fh->nread;
@@ -2185,7 +2189,7 @@ int fts_rdata(
 	      char *buf)
 {
     double *outp, convbuf[CONVBUFLEN];   /* local buffer used for conversion */
-    int nread, nskip;      /* number of bytes to read */
+    size_t nread, nskip;      /* number of bytes to read */
     int i, *ip;
     int8 *kp;
     short *sp;
@@ -2266,7 +2270,7 @@ int fts_rdata(
         return 0;
 
     ntail = ftsblksiz_i - nskip % ftsblksiz_i;
-    dprintf(1,"Reading %d tail bytes\n",ntail);
+    dprintf(1,"Reading %ld tail bytes\n",ntail);
     for (i=0; i<ntail; i++) {
         if (fread(&c,1,1,instr) != 1) {
             dprintf(0,"*** Error reading tail byte number %d\n",i);
