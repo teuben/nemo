@@ -9,6 +9,8 @@
  *      23-may-95       V1.2b fixed bug in convert_to_header		pjt
  *	 7-aug-01       V1.3  added counter=t|f
  *                            -- oops, needs a library change --
+ *      10-aug-09       V1.3a make it work for large FITS files
+ *       6-oct-11       V1.3b work around dsize bug? 
  */
 
 #include <stdinc.h>
@@ -21,12 +23,13 @@ string defv[] = {	/* Standard NEMO keyword+help */
     "blocking=1\n          Blocking factor (blocking/2880)",
     "out=\n                Convert input text to output fits header",
     "counter=f\n           Add line counter to output?",
-    "VERSION=1.3a\n        10-aug-09 PJT",
+    "VERSION=1.3b\n        6-oct-2011 PJT",
     NULL,
 };
 
 string usage = "display, or convert to, a fits header";
 
+string cvsid="$Id$";
 
 extern string *burststring(string, string);
 
