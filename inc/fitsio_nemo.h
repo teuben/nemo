@@ -94,8 +94,8 @@ typedef struct {
     int ncards;		/* is now 1-based !!! */
     int naxis;
     int axes[MAXNAX];
-    int offset;		/* will/can change during I/O */
-    int skip;		/* fixed */
+    size_t offset;		/* will/can change during I/O */
+    size_t skip;		/* fixed */
     int type;
     int bytepix;
     int status;		/* STATUS  _OLD, _NEW, _NEW_WRITE   */

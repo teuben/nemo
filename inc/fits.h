@@ -1,6 +1,7 @@
 /*
  *  definitions and declarations for nemo's FITS.C
  *  22-feb-94  ansi- and C++ safe
+ *  10-aug-09  size_t instead of int for 2GB+ files
  */
 
 #ifndef _fits_h_
@@ -125,15 +126,13 @@ static struct arglist {
 /*      The fits structure to hold primary header */
 
 typedef struct fits_header {
-#if 1
     /* Optionally we could store the buffer in the first structure too... */
     char *buffer;       /* pointer to exact header copy */
-    int  buflen;        /* current length of buffer */
-#endif
-    int hlen;           /* length of header (bytes, through the END keyword) */
-    int dlen;           /* length of data (bytes) */
-    int nwritten;       /* accumulated in fts_wdata() only */
-    int nread;		/* accumulated in various routines ... */
+    size_t buflen;      /* current length of buffer */
+    size_t hlen;        /* length of header (bytes, through the END keyword) */
+    size_t dlen;        /* length of data (bytes) */
+    size_t nwritten;    /* accumulated in fts_wdata() only */
+    size_t nread;	/* accumulated in various routines ... */
     int flip;           /* flips bytes when read in fts_rdata; see DECORDER */
     int ascii;		/* allow unfilled ascii headers to be read ? */
     int simple;         /*  0=FALSE 1=TRUE  */
@@ -145,7 +144,7 @@ typedef struct fits_header {
     int *naxisn;        /* length of axes (array or NULL) */
     int maxis;
     int *maxisn;
-    int blank;          /* only used for positive bitpix */
+    int blank;           /* only used for positive bitpix */
     double *crvaln;      /* coordinate at reference pixel (array or NULL) */
     double *crpixn;      /* reference pixel (array or NULL) */
     double *cdeltn;      /* pixel increment (array or NULL) */ 
@@ -199,7 +198,7 @@ typedef struct fits_header {
 } fits_header;
 
 
-int fts_rhead    (fits_header *, stream);
+size_t fts_rhead    (fits_header *, stream);
 char *fts_shead    (fits_header *, string);
 int fts_lhead    (fits_header *);
 int fts_chead    (fits_header *, stream);
@@ -210,7 +209,7 @@ int fts_ihead    (fits_header *, string *);
 int fts_fhead    (fits_header *, string *);
 int fts_phead    (fits_header *, string *);
 int fts_whead    (fits_header *, stream);
-int fts_xhead    (fits_header *, stream, int, int, int *, int);
+size_t fts_xhead    (fits_header *, stream, int, int, int *, int);
 
 int fts_ptable   (fits_header *, stream, string *, string, int *, int);
 int fts_pgroup   (fits_header *, stream, string *, string, int *, int);
