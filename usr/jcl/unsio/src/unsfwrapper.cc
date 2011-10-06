@@ -210,7 +210,7 @@ int uns_get_array_i_( const int * id, const char * _comp, const char * _tag, int
   // and the object
   std::string tag  = tools::Ctools::fixFortran(_tag);
   std::string comp = tools::Ctools::fixFortran(_comp);  
-  float *data;
+  int *data;
   int nbody;
   bool ok=snap->getData(comp,tag,&nbody,&data);
   int status=0;

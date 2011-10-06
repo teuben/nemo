@@ -88,8 +88,10 @@
       integer  uns_get_range, uns_save_init
       integer  uns_get_value_f, uns_get_array_f, nsel
       integer  uns_set_array_f, uns_set_value_f, ok
+      integer  uns_get_array_i
       real *4 time, pos(3,nbody), vel(3,nbody), mass(nbody), rho(nbody),
      $     hsml(nbody), u(nbody)
+      integer id(nbody)
       character out * 80, atyp * 80
 ! various      
       integer n,first,last, idento
@@ -109,6 +111,8 @@
       nsel=uns_get_array_f(ident,"all\0","vel\0" ,vel ,nbody)
       nsel=uns_get_array_f(ident,"all\0","mass\0",mass,nbody)
       write (0,*) 'nsel =',nsel,' nbody=',nbody
+      nsel=uns_get_array_i(ident,"all\0","id\0",id,nbody)
+      write (0,*) 'ID nsel =',nsel,' id(1)',id(1)
       ! check if gas component exist
       status = uns_get_range(ident,"gas\0",n,first,last);
       if (status.gt.0) then ! prepare gas data for saving
