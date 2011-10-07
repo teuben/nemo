@@ -33,9 +33,10 @@
 // v 0.2    19/09/2007 WD changes in fields.h, body.h, io.h; keyword time       
 // v 0.2.1  10/09/2008 WD happy gcc 4.3.1
 // v 0.2.2  15/06/2011 WD keyword mirror
+// v 0.3    30/06/2011 WD keywords dx1,dx2,dv1,dv2 replace deltax and deltav
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.2.2"
-#define falcON_VERSION_D "15-jun-2011 Walter Dehnen                          "
+#define falcON_VERSION   "0.3"
+#define falcON_VERSION_D "30-jun-2011 Walter Dehnen                          "
 //-----------------------------------------------------------------------------+
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile "snapstac"
@@ -49,11 +50,13 @@ const char*defv[] = {
   "in1=???\n          input file name                                    ",
   "in2=???\n          input file name                                    ",
   "out=???\n          output file name                                   ",
-  "deltax=0,0,0\n     position of in1 wrt in2                            ",
-  "deltav=0,0,0\n     velocity of in1 wrt in2                            ",
-  "mirror=f\n         take reflected in2                                 ",
+  "dx1=0,0,0\n        shift positions  of snapshot 1 by dx1              ",
+  "dv1=0,0,0\n        shift velocities of snapshot 1 by dv1              ",
+  "dx2=0,0,0\n        shift positions  of snapshot 2 by dx1              ",
+  "dv2=0,0,0\n        shift velocities of snapshot 2 by dv1              ",
+  "mirror=f\n         reflect snapshot 2 w.r.t. origin (before shifting) ",
   "time=\n            set simulation time                                ",
-  "zerocm=f\n         zero center of mass                                ",
+  "zerocm=f\n         zero center of mass (after all shifting etc.)      ",
   "write=\n           which data to write [default: all read]            ",
   falcON_DEFV, NULL };
 //------------------------------------------------------------------------------
@@ -83,16 +86,26 @@ void falcON::main() falcON_THROWING
   if(write && !got.contain(write))
     falcON_Warning("couldn't read %s from both %s and %s\n",
 		   word(got.missing(write)), getparam("in1"), getparam("in2"));
-  // mirrot snapshot 2
+  // shift centre of snapshot 1
+  vect dx, dv;
+  dx = getvparam("dx1");
+  dv = getvparam("dv1");
+  if(dx != zero || dv != zero)
+    for(body b(b1); b!=b2; ++b) {
+      b.pos() += dx;
+      b.vel() += dv;
+    }
+  // mirror snapshot 2
   if(getbparam("mirror"))
     for(body b(b2); b!=shot.end_all_bodies(); ++b) {
       b.pos() = -pos(b);
       b.vel() = -vel(b);
     }
-  // shift centre of snapshot 1
-  const vect dx(getvparam("deltax")), dv(getvparam("deltav"));
+  // shift centre of snapshot 2
+  dx = getvparam("dx2");
+  dv = getvparam("dv2");
   if(dx != zero || dv != zero)
-    for(body b(b1); b!=b2; ++b) {
+    for(body b(b2); b!=shot.end_all_bodies(); ++b) {
       b.pos() += dx;
       b.vel() += dv;
     }

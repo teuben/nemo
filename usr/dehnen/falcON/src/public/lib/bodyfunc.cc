@@ -67,6 +67,7 @@ namespace {
   typedef falcON::fieldset(*bd_pter)();
   typedef fieldset        (*bt_pter)(char&);
 
+  // type used in functions generated
   inline const char*TypeName(char t)
   {
     switch(t) {
@@ -74,6 +75,18 @@ namespace {
     case 'i': return "int";
     case 'r': return "real";
     case 'v': return "vect";
+    default : return "unknown";
+    }
+  }
+
+  // type used for summations in functions generated
+  inline const char*SumTypeName(char t)
+  {
+    switch(t) {
+    case 'b': return "bool";
+    case 'i': return "long int";
+    case 'r': return "double";
+    case 'v': return "vect_d";
     default : return "unknown";
     }
   }
@@ -811,9 +824,9 @@ namespace {
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n\n"
-	  <<"    "<<TypeName(stype[s])<<" __X("
+	  <<"    "<<SumTypeName(stype[s])<<" __X("
 	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
-	  <<"    int __N = 0;\n"
+	  <<"    unsigned int __N = 0;\n"
 	  <<"    LoopAllBodies(&B, b)";
     if(scond[s])
       file<<"\n      if(cond("<<scond[s]<<"))";
@@ -833,9 +846,9 @@ namespace {
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n"
-	  <<"    "<<TypeName(stype[s])<<" __X("
+	  <<"    "<<SumTypeName(stype[s])<<" __X("
 	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
-	  <<"    real __M(zero);\n"
+	  <<"    double __M(zero);\n"
 	  <<"    LoopAllBodies(&B, b)";
     if(scond[s])
       file<<"\n      if(cond("<<scond[s]<<"))";
@@ -854,7 +867,7 @@ namespace {
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n"
-	  <<"    "<<TypeName(stype[s])<<" __X("
+	  <<"    "<<SumTypeName(stype[s])<<" __X("
 	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
 	  <<"    LoopAllBodies(&B, b)\n";
     if(scond[s])

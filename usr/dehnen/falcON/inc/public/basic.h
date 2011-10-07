@@ -125,7 +125,7 @@ namespace falcON {
   /// declaration
 #  define falcON_THROWING 
   /// instead of throwing an exception: error 
-  /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
+  /// use "WDutils_THROWN(fmt, data)" instead of "error(fmt, data)" or "throw
   /// WDutils::exception(fmt, data)"
 #  define falcON_THROWN	       falcON_ErrorN
   /// use "falcON_RETHROW(E)" to re-throw a caught exception "E"

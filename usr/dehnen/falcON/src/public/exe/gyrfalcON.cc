@@ -145,9 +145,10 @@
 // v 3.4.2  13/04/2010  WD removed use of initial_time()
 // v 3.4.3  02/07/2010  WD write env variable FalcONLastOutputTime
 // v 3.5    15/06/2011  WD recompute forces if manipulator changes masses
+// v 3.5.1  30/06/2011  WD eps required (no default value)
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "3.5"
-#define falcON_VERSION_D "15-jun-2011 Walter Dehnen                          "
+#define falcON_VERSION   "3.5.1"
+#define falcON_VERSION_D "30-jun-2011 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
@@ -174,7 +175,7 @@ const char*defv[] = {
   "eps=0.05\n         >=0: softening length OR maximum softening length\n"
   "                   < 0: use individual but FIXED softening lengths    ",
 #else
-  "eps=0.05\n         >=0: softening length\n"
+  "eps=???\n          >=0: softening length\n"
   "                   < 0: use individual fixed softening lengths        ",
 #endif
 #ifdef falcON_PROPER

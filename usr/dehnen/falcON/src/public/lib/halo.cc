@@ -900,11 +900,19 @@ HaloModel::HaloModel(HaloDensity const&model,
       }
     }
   else {
+    //
+    // edited 8-Sep-2011 WD
+    //
+    // on examination of the compute F(E), it appeared it was exactly Pi^2 too
+    // large (the density computed at any radius for a DM model was too large
+    // by this exact factor for all radii). Therefore, I have edited below to
+    // reduce lfc by 2*LogofPi.
+    //
     const int mm = int(1.5-B);
     const double
       p    = 1.5-B-mm,
       p1   = 1-p,
-      lfc  = log(sin(p1*Pi)) - LogofPi - Logalfa;
+      lfc  = log(sin(p1*Pi)) - 3*LogofPi - Logalfa;
     nu     = 1/p1;
     Be     = B;
     MT     = mt[n1];
