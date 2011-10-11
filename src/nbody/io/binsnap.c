@@ -1,6 +1,6 @@
 /*
  *  convert generic binary dumps to snapshot
- *     20-sep-2011   V0.1 - Q&D for KxM2007 models
+ *     20-sep-2011   V0.1 - Q&D for KMM2007 models
  *
  * @todo
  *      types= needs to be implemented, 1,2,4,8 means skip that many bytes
@@ -24,7 +24,7 @@ string defv[] = {
     "dr=1.448e16\n                   Cell size for level=0",
     "mass=t\n                        Use density (f) or mass (t)",
     "headline=\n                     Random verbiage",
-    "VERSION=0.2\n                   21-sep-2011 PJT",
+    "VERSION=0.3\n                   22-sep-2011 PJT",
     NULL,
 };
 
@@ -49,7 +49,7 @@ nemo_main()
     float *rv, *rvp;
     bool Qmass;
 
-    warning("Program only parses the KxM2007 data");
+    warning("Program only parses the KMM2007 data");
 
     instr = stropen(getparam("in"),"r");
     outstr = stropen(getparam("out"),"w");
@@ -101,6 +101,7 @@ nemo_main()
       dprintf(1,"mass %d %g\n",i,mass[i]);
     }
     printf("done\n");
+    tsnap = 0.0;
     put_set(outstr,SnapShotTag);
     put_set(outstr,ParametersTag);
     put_data(outstr, NobjTag, IntType, &nbody, 0);
