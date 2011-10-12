@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2000-2010
+/// \date   2000-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2010 Walter Dehnen
+// Copyright (C) 2000-2011 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@
 
 namespace WDutils {
 #ifndef WDutilsAllocDebugLevel
-#define WDutilsAllocDebugLevel 8
+# define WDutilsAllocDebugLevel 8
 #endif
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -83,10 +83,10 @@ namespace WDutils {
 #endif
 	(f,l)("allocation of %u '%s' (%u bytes) failed\n",
 	      uint32(n),nameof(T),uint32(n*sizeof(T)));
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)("allocated %u %s = %u bytes @ %p\n",
-				uint32(n),nameof(T),uint32(n*sizeof(T)),
-				static_cast<void*>(t));
+    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
+			      "allocated %u %s = %u bytes @ %p\n",
+			      uint32(n),nameof(T),uint32(n*sizeof(T)),
+			      static_cast<void*>(t));
     return t;
   }
   // ///////////////////////////////////////////////////////////////////////////
@@ -135,9 +135,9 @@ namespace WDutils {
 #endif
 	(f,l)("de-allocating array of '%s' @ %p failed\n", nameof(T),a);
     }
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)("de-allocated array of %s @ %p\n",
-				nameof(T), static_cast<void*>(a));
+    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
+			      "de-allocated array of %s @ %p\n",
+			      nameof(T), static_cast<void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
@@ -184,9 +184,9 @@ namespace WDutils {
 #endif
 	(f,l)("de-allocating object '%s' @ %p failed\n", nameof(T),a);
     }
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)("de-allocated %s object @ %p\n",
-				nameof(T), static_cast<void*>(a));
+    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
+			      "de-allocated %s object @ %p\n",
+			      nameof(T), static_cast<void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
@@ -206,9 +206,9 @@ namespace WDutils {
 #endif
 	(f,l)("de-allocating object '%s' @ %p failed\n",nameof(T),a);
     }
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)("de-allocated %s object @ %p\n",
-				nameof(T), static_cast<const void*>(a));
+    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
+			      "de-allocated %s object @ %p\n",
+			      nameof(T), static_cast<const void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   ///
@@ -300,10 +300,9 @@ namespace WDutils {
 #endif
       (f,l)("allocation of %u '%s' (%u bytes) aligned to 16 failed\n",
 	    uint32(k),nameof(T),uint32(n));
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)("allocated %u %s = %u bytes "
-				"aligned to 16 @ %p\n",
-				uint32(k),nameof(T),uint32(n),t);
+    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
+			      "allocated %u %s = %u bytes aligned to 16 @ %p\n",
+			      uint32(k),nameof(T),uint32(n),t);
     return static_cast<T*>(t);
 #else // __GNUC__ or __INTEL_COMPILER
     // linear memory model:                                                     
@@ -382,9 +381,9 @@ namespace WDutils {
 	(f,l)("de-allocating 16-byte aligned array of '%s' @ %p failed\n",
 	      nameof(T),a);
     }
-    if(debug(WDutilsAllocDebugLevel))
-      DebugInformation(f,l,lib)("de-allocated 16-byte aligned array "
-				"of '%s' @ %p\n", nameof(T),a);
+    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
+			      "de-allocated 16-byte aligned array "
+			      "of '%s' @ %p\n", nameof(T),a);
 #else
     DelArray((char*)(*((void**)(((char*)q)-sizeof(void*)))),f,l,lib);
 #endif

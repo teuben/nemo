@@ -7,11 +7,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2008-2009
+/// \date   2008-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2008-2009 Walter Dehnen
+// Copyright (C) 2008-2011 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -44,6 +44,9 @@
 #endif
 
 namespace WDutils {
+  ///
+  /// support for (mostly numerical) metaprogramming
+  ///
   namespace meta {
 
     /// to be used instead of bool variables true
@@ -563,7 +566,25 @@ namespace WDutils {
       template<typename X, typename AssignFunctor>
       static void assign(X*a, const X*b, AssignFunctor f) { f(a[0],b[0]); }
     };
-  }
-}
-
-#endif
+    //
+    template<bool> struct __Bool;
+    template<> struct __Bool<1> {
+      static bool OR (bool  ) { return 1; }
+      static bool AND(bool x) { return x; }
+    };
+    template<> struct __Bool<0> {
+      static bool OR (bool x) { return x; }
+      static bool AND(bool  ) { return 0; }
+    };
+    /// boolean OR between compile-time and run-time argument
+    /// \param[in] Y  boolean expression which may be ignored
+    /// \return    @a X || @a Y
+    template<bool X> bool Or(bool Y) { return __Bool<X>::OR(Y); }
+    /// boolean AND between compile-time and run-time argument
+    /// \param[in] Y  boolean expression which may be ignored
+    /// \return    @a X && @a Y
+    template<bool X> bool And(bool Y) { return __Bool<X>::AND(Y); }
+  } // namespace WDutils::meta
+} // namespace WDutils
+//
+#endif //WDutils_included_meta_h

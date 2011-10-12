@@ -241,24 +241,16 @@ namespace {
 } // namespace {
 //
 void WDutils::Radix::PSort(unsigned n, float*x, float*y, bool w)
-{
-  ::ParallelRadixSort<float>::sortP(n,x,y,w);
-}
+{ ::ParallelRadixSort<float>::sortP(n,x,y,w); }
 //
 void WDutils::Radix::PSort(unsigned n, float*x, bool w)
-{
-  ::ParallelRadixSort<float>::sortP(n,x,w);
-}
+{ ::ParallelRadixSort<float>::sortP(n,x,w); }
 //
 void WDutils::Radix::PSort(unsigned n, double*x, double*y, bool w)
-{
-  ::ParallelRadixSort<double>::sortP(n,x,y,w);
-}
+{ ::ParallelRadixSort<double>::sortP(n,x,y,w); }
 //
 void WDutils::Radix::PSort(unsigned n, double*x, bool w)
-{
-  ::ParallelRadixSort<double>::sortP(n,x,w);
-}
+{ ::ParallelRadixSort<double>::sortP(n,x,w); }
 #endif // WDutilsDevel
 //
 void WDutils::Radix::Sort(unsigned N, float*X, float*Y)
