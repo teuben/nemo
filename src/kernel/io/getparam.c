@@ -133,6 +133,7 @@
  * 26-sep-08 WD    b  add MPI proc info to some stderr output
  * 27-Sep-10 JCL   c  MINGW32/WINDOWS support
  * 20-Nov-10 WD    d  import environ on darwin (so allow dynamic lib)
+ * 29-sep-11 PJT   e  new system keyword np= for OpenMP (and later others?)
 
   TODO:
       - what if there is no VERSION=
@@ -176,7 +177,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.6a 22-aug-08 PJT"
+#define GETPARAM_VERSION_ID  "3.6e 29-sep-2011 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -351,6 +352,7 @@ int review_flag = 0;    /* review keywords and optional help=8 chaining ? */
 int tcl_flag = 0;       /* go into TCL when all parameters set before go */
 int report_cpu = 0;     /* report time and cpu usage; activated with help=T */
 int report_mem = 0;     /* report memory usage (machine specific) */
+int np_openmp = 0;      /* if OpenMP was set (np=) and how many use */
 string yapp_string = NULL;  /* once only ? */
 string help_string = NULL;  /* cumulative ? */
 string argv_string = NULL;  /* cumulative ? */
@@ -405,6 +407,7 @@ local void set_review(string);
 local void set_tcl(string);
 local void set_yapp(string);
 local void set_outkeys(string);
+local void set_np(string);
 local void local_error(string);
 local void local_exit(int);
 local void report(char);
@@ -581,6 +584,8 @@ void initparam(string argv[], string defv[])
 		set_error(parvalue(argv[i]));
 	      else if (streq(name, "outkeys")) /*    output keywords ? */
 		set_outkeys(parvalue(argv[i]));
+	      else if (streq(name, "np"))      /*    number of processors? */
+		set_np(parvalue(argv[i]));
 	      else
 		error("Parameter \"%s\" unknown", name);
             } /* j>0 (i.e. program/system keyword) */
@@ -917,6 +922,7 @@ local void scan_environment()
             set_error(parvalue(environ[i]));
         else if (streq("TCL", parname(environ[i])))
             set_tcl(parvalue(environ[i]));
+	/* @TODO: should do OMP here as well */
     }
     dprintf(5, 
     "scan_environment: debug=%d yapp=%d help=%d history=%d review=%d error=%d\n",
@@ -1257,6 +1263,7 @@ local void showsystem()
   printf("  review=   interrupt mode to review keywords before start\n");
   printf("  argv=     addition cmdline arguments not parsed by NEMO\n");
   printf("  tcl=      go into tcl (deprecated)\n");
+  printf("  np=       number of processors (OpenMP only currently) to use\n");
 }
 /*
  * PRINTUSAGE: print out helpful usage info.
@@ -2865,6 +2872,29 @@ local void set_outkeys(string arg)
     error("outkeys= not supported, or recompile with -DOUTKEYS");
 #endif
 
+}
+
+/*
+ *   set the number of processors in a parallel environment
+ *   WARNING: does not work yet 
+ */
+
+local void set_np(string arg)
+{
+    static char np_env[128];
+    /* OpenMP - this is the only one we support for now */
+    sprintf(np_env,"OMP_NUM_THREADS=%s",arg);
+    if (putenv(np_env)) {
+      warning("Problem setting %s",np_env);
+    } else {
+      np_openmp = atoi(arg);
+      dprintf(0,"%s\n",np_env);
+#if 0
+      /* on linux the putenv (or even setenv) don't seem to work */
+      /* forcing me to use omp_set_num_threads()                 */
+      omp_set_num_threads(np_openmp);
+#endif
+    }
 }
 
 local void set_debug(string arg)
