@@ -1275,7 +1275,9 @@ local void printusage(string *defv)
     bool otherargs;
 
     if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
-    fprintf(stderr,"Insufficient parameters, try 'help=', 'help=?' or 'help=h',\n");
+    fprintf(stderr,
+	    "Insufficient parameters, try 'help=', 'help=?' or 'help=h' or 'man %s',\n", progname);
+	    
     if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
     fprintf(stderr,"Usage: %s", progname);
     otherargs = FALSE;
