@@ -30,8 +30,9 @@ string defv[] = {
     "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
     "median=f\n     Optional display of the median value",
     "mmcount=f\n    Count occurances of min and max",
+    "maxmom=4\n     Control how many moments are computed",
     "sort=qsort\n   Sorting routine (not activated yet)",
-    "VERSION=1.9\n  6-nov-06 PJT",
+    "VERSION=1.10\n 15-oct-2011 PJT",
     NULL,
 };
 
@@ -65,6 +66,7 @@ nemo_main()
     int npar = getiparam("npar");
     int ngood = 0;
     int min_count, max_count;
+    int maxmom = getiparam("maxmom");
 
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
@@ -96,7 +98,12 @@ nemo_main()
 
     sov = Dx(iptr)*Dy(iptr)*Dz(iptr);   /* voxel volume; TODO: should we do 2D vs. 3D ? */
     
-    ini_moment(&m,4,0);
+    if (maxmom < 0) {
+      warning("No work done, maxmom<0");
+      stop(0);
+    }
+    ini_moment(&m,maxmom,0);
+#if 1
     for (i=0; i<nx; i++) {
       for (j=0; j<ny; j++) {
         for (k=0; k<nz; k++) {
@@ -110,6 +117,23 @@ nemo_main()
         }
       }
     }
+#else
+	/* for test/benchmark */
+    for (i=0; i<nx; i++) {
+      for (j=0; j<ny; j++) {
+         for (k=0; k<nz; k++) {
+            x =  CubeValue(iptr,i,j,k);
+            if (Qmin && x<xmin) continue;
+            if (Qmax && x>xmax) continue;
+            if (Qbad && x==bad) continue;
+	    w = Qw ? CubeValue(wptr,i,j,k) : 1.0;
+            accum_moment(&m,x,w);
+	    if (Qmedian) data[ngood++] = x;
+        }
+      }
+    }
+
+#endif
     if (npar > 0) {
       nu = n_moment(&m)/nppb - npar;
       if (nu < 1) error("%g: No degrees of freedom",nu);
@@ -117,13 +141,18 @@ nemo_main()
       printf("df= %g\n", nu);
     } else {
       nsize = nx * ny * nz;
-    
-      mean = mean_moment(&m);
-      sigma = sigma_moment(&m);
-      skew = skewness_moment(&m);
-      kurt = kurtosis_moment(&m);
-      sum = show_moment(&m,1);
-      
+      sum = mean = sigma = skew = kurt = 0;
+      if (maxmom > 0) {
+	mean = mean_moment(&m);
+        sum = show_moment(&m,1);
+      }
+      if (maxmom > 1)
+	sigma = sigma_moment(&m);
+      if (maxmom > 2)
+	skew = skewness_moment(&m);
+      if (maxmom > 3)
+	kurt = kurtosis_moment(&m);
+
       printf ("Min=%f  Max=%f\n",min_moment(&m), max_moment(&m));
       printf ("Number of points      : %d\n",n_moment(&m));
       printf ("Mean and dispersion   : %f %f\n",mean,sigma);
