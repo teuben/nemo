@@ -21,20 +21,21 @@
 #include <image.h>
 
 string defv[] = {
-	"in=???\n  Input filename",
-	"x=0\n              Pixels in X to print (0=1st pixel, leave blank for all)",
-	"y=0\n              Pixels in Y to print",
-	"z=0\n              Pixels in Z to print",
-	"scale=1.0\n        Scale factor for printout",
-	"format=%g\n        Format specification for output",
-	"newline=f\n        Force newline between each number?",
-	"label=\n	    Add x, y and or z labels add appropriate labels",
-	"offset=0\n         Offset (0 or 1) to index coordinates X,Y,Z",
-	"yreverse=t\n       Reverse printing Y values?",
-	"pixel=f\n          Labels in Pixel or Physical coordinates?",
-	"pair=f\n           Should input (x,y,z) be paired up",
-	"VERSION=1.5\n      24-jan-06 PJT",
-	NULL,
+  "in=???\n           Input filename",
+  "x=0\n              Pixels in X to print (0=1st pixel, leave blank for all)",
+  "y=0\n              Pixels in Y to print",
+  "z=0\n              Pixels in Z to print",
+  "scale=1.0\n        Scale factor for printout",
+  "format=%g\n        Format specification for output",
+  "newline=f\n        Force newline between each number?",
+  "label=\n	      Add x, y and or z labels add appropriate labels",
+  "offset=0\n         Offset (0 or 1) to index coordinates X,Y,Z",
+  "yreverse=t\n       Reverse printing Y values?",
+  "pixel=f\n          Labels in Pixel or Physical coordinates?",
+  "pair=f\n           Should input (x,y,z) be paired up",
+  "seq=0\n            Print a sequence using access shortcut",
+  "VERSION=1.6\n      15-oct-2011 PJT",
+  NULL,
 };
 
 string usage = "print values at gridpoints of an image";
@@ -54,7 +55,8 @@ nemo_main()
     stream  instr;				/* file stream */
     imageptr iptr=NULL;			      /* allocated dynamically */
     string   fmt, label;
-    real     scale_factor, x, y, z, f;
+    real     scale_factor, x, y, z, f, *data;
+    int      seq;
 
     scale_factor = getdparam("scale");
     fmt = getparam("format");
@@ -68,8 +70,16 @@ nemo_main()
     ylabel = scanopt(label,"y");
     zlabel = scanopt(label,"z");
     offset = getiparam("offset");
+    seq = getiparam("seq");
     if (read_image (instr,&iptr) == 0)
       error("Problem reading image from in=",getparam("in"));
+
+    if (seq) {
+      data = Frame(iptr);
+      for (i=0; i<seq; i++) printf("%g\n",data[i]);
+      stop(0);
+    }
+    
     
     nx = Nx(iptr);	                        /* cube dimensions */
     ny = Ny(iptr);
