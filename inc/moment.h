@@ -11,6 +11,7 @@ typedef struct moment {
     real *dat;              /* data[ndata] if moving moments used */
     real *wgt;              /* weight[ndata] if moving moments used */
     real *sum;		    /* mom+1 length array with moment^{0..mom} sums */
+    bool *msk;              /* optional mask (@todo) */
     real datamin, datamax;  /* min & max of data */
 } Moment, *MomentPtr; 
 
@@ -34,5 +35,7 @@ real h4_moment (Moment *);              /* see kinemetry */
 
 real min_moment (Moment *);
 real max_moment (Moment *);
+
+real mean_robust_moment(Moment *);
 
 
