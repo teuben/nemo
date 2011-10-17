@@ -8,6 +8,7 @@ char *getsline(stream, string *);
 
 /* gettab.c */
 int get_atable(stream , int , int *, real **, int);
+int get_itable(stream , int , int *, int **, int);
 int get_ftable(stream , int , int *, string *, real **, int);
 
 /* table.c */
