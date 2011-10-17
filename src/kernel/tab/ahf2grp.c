@@ -1,7 +1,7 @@
 /*
  * AHF2GRP:  convert AHF to halo's group list
  *
- *       1-jul-11  V0.1 created, just for fun	PJT
+ *       1-jul-11  V0.1 created, just for fun and compare with matlab	PJT
  *
  * 
  */
@@ -10,11 +10,11 @@
 #include <getparam.h>
 
 string defv[] = {
-  "in=???\n           Dataset",
-  "out=???\n          Output",
-  "nbody=30\n        Maximum index particles in input (e.g. 128**3)",
-  "nmax=10000\n       Max lines in data, if pipe",
-  "VERSION=0.2\n      6-jul-11 PJT",
+  "in=???\n           Input table",
+  "out=???\n          Output table",
+  "nbody=128**3\n     Maximum index particles in input (e.g. 128**3)",
+  "nmax=0\n           Max lines in data, use > 0 in a pipe",
+  "VERSION=0.3\n      6-jul-11 PJT",
   NULL,
 };
 
@@ -70,7 +70,7 @@ nemo_main()
  *  Nbody, i_H, .....
  */
 
-void convert(int nbody, int ndata,int *kdata)
+void convert(int nbody, int ndata, int *kdata)
 {
   int i,j,k,n,nh,np,p, nuse = 0;
   
