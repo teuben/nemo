@@ -3,7 +3,6 @@
 /* TESTBED: main(), ini_matrix() */
 /*
  * IMAGE-like format for 2 & 3D images using binary filestructure
- *	Simple NEMO example 
  *
  *  25-jun-87   V1.0 created 			P.J. Teuben
  *  30-jun-87	V2.0 using structures			PJT
@@ -29,12 +28,14 @@
  *  13-nov-02   V??? added boolean images for masking operations  PJT
  *   7-may-04   V7.0 (optional) proper astronomical axes          PJT
  *  16-mar-05   V7.1 protection to re-use a pointer for different images PJT
+ *   4-aug-11   V7.2 fixed various map2_image/map3_image mistakes PJT
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
  *
- *	  Example of usage: see SNAPCCD.C	for writing
- *			        CCDSMOOTH.C  	for reading
+ *	  Example of usage: see snapccd.c	for writing
+ *			        ccdsmooth.c  	for reading
+ *                              ccdsharp.c      for [x][y] vs. (x,y) notation
  * 
  *  Note on VO usage:  the WCS in SIAP is a simple, but common, way
  *   to express a WCS of an astronomical image:
@@ -50,7 +51,10 @@
 
 local char *mystrcpy(char *);
 
-/*	storage of matrices can be done in several ways: */
+/*	storage of matrices can be done in several ways: 
+ *      CDef:    C-style storage
+ *    ForDef:    Fortran-style storage
+ */
 
 local char *matdef[] = {"ForDef", "CDef", NULL };
 
@@ -58,6 +62,7 @@ local char *matdef[] = {"ForDef", "CDef", NULL };
    set the appropriate Tag value in the Image descriptor
    If it is not done, the compiled versions will (should)
    complain about missing integer 'idef'
+   idef should be pointing into the matdef[] array
  */
 #if defined(FORDEF)
 local int idef = 0;
@@ -427,17 +432,25 @@ real **map2_image (imageptr iptr)
 {
     real *base = Frame(iptr);
     real **map;
-    int nx, ny, ix;
+    int nx, ny, ix, iy;
 
     nx = Nx(iptr);
     ny = Ny(iptr);
 
 #if defined(CDEF)
+#if 0
     map = (real **) allocate(sizeof(real *) * ny);
+    for (iy=0; iy<ny; iy++) {               /* CDEF */
+        map[iy] = base;
+        base += nx;
+    }
+#else
+    map = (real **) allocate(sizeof(real *) * nx);
     for (ix=0; ix<nx; ix++) {               /* CDEF */
         map[ix] = base;
         base += ny;
     }
+#endif
     return map;
 #else
     error("map2_image: not implemented for !CDEF");    
@@ -448,7 +461,7 @@ real ***map3_image (imageptr iptr)
 {
     real *base = Frame(iptr);
     real ***cube;
-    int nx, ny, nz, ix, iy;
+    int nx, ny, nz, ix, iy, iz;
 
     nx = Nx(iptr);
     ny = Ny(iptr);
@@ -456,11 +469,12 @@ real ***map3_image (imageptr iptr)
 
 #if defined(CDEF)
     cube = (real ***) allocate(sizeof(real **) * nz);
-    for (iy=0; iy<ny; iy++) {
-    for (ix=0; ix<nx; ix++) {               /* CDEF */
-        cube[ix][iy] = base;
-        base += nz;
-    }
+    for (iz=0; iz<nz; iz++) {
+      cube[iz] = (real **) allocate(sizeof(real *) * ny);
+      for (iy=0; iy<ny; iy++) {
+	cube[iz][iy] = base;
+	base += nx;
+      }
     }
     return cube;
 #else
@@ -530,9 +544,7 @@ nemo_main()
     }
 }
 
-void ini_matrix(iptr, nx, ny)
-imageptr *iptr;
-int nx,ny;
+void ini_matrix(imageptr *iptr, int nx, int ny)
 {
 	int ix,iy;
 	
