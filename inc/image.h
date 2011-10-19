@@ -22,11 +22,14 @@
  *                    by (for now optionally) using
  *                    why was i so lazy and didn't do this in 1987.....
  *   6-jan-05         added prototypes for wcsio.c
+ *  19-oct-11    V8.0 (semi)intelligent array idea from Karma
+ *                    i->frame[i->x[ix]+i->y[iy]+i->z[iz]]
  */
 #ifndef _h_image
 #define _h_image
 
 #include <matdef.h>
+#define USE_IARRAY
 
 typedef struct {
     int    nr;
@@ -60,6 +63,11 @@ typedef struct {
     real  *frame;	/* pointer to a contiguous block of data */
     real  **matrix;     /* 2D special case: pointers to pointers */
     real  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
+#ifdef USE_IARRAY
+    int   *x;           /* iarray offset X array into *frame */
+    int   *y;           /* iarray offset Y array into *frame */
+    int   *z;           /* iarray offset Z array into *frame */
+#endif
 
     int   axis;         /* new style axis (image_axis x,y,z) ??  */
 
@@ -76,9 +84,9 @@ typedef struct {
     real  yref;         /* for new style axis */
     real  zref;
 #if 0
-    image_axis  x;      /* new optional axis descriptors */
-    image_axis  y;
-    image_axis  z;
+    image_axis  ax;      /* new optional axis descriptors */
+    image_axis  ay;
+    image_axis  az;
 #endif
     char proj[16];      /* standard WCS projection types */
 
@@ -149,14 +157,21 @@ typedef struct {
 #define Storage(iptr)   ((iptr)->storage)
 #define Mask(iptr)      ((iptr)->mask)
 
+#ifdef USE_IARRAY
+#define MapValue(i,ix,iy)	(*( (i)->frame + (i)->x[ix] + (i)->y[iy]))
+#define CubeValue(i,ix,iy,iz)   (*( (i)->frame + (i)->x[ix] + (i)->y[iy] + (i)->z[iz]))
+#else
+
 #if defined(CDEF)
-#define MapValue(iptr,ix,iy)	(*( (iptr)->frame + iy + Ny(iptr)*(ix)))
-#define CubeValue(iptr,ix,iy,iz) (*( (iptr)->frame + iz + Nz(iptr)*(iy + Ny(iptr)*(ix))))
+#define MapValue(i,ix,iy)	(*( (i)->frame + iy + Ny(i)*(ix)))
+#define CubeValue(i,ix,iy,iz)   (*( (i)->frame + iz + Nz(i)*(iy + Ny(i)*(ix))))
 #endif
 
 #if defined(FORDEF)
 #define MapValue(iptr,ix,iy)	 (*( (iptr)->frame + ix + Nx(iptr)*(iy)) )
 #define CubeValue(iptr,ix,iy,iz) (*( (iptr)->frame + ix + Nx(iptr)*(iy+Ny(iptr)*(iz))))
+#endif
+
 #endif
 
 /* 
