@@ -44,7 +44,7 @@ void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt,
     Zref(iptr) = crval[2];
   }
 
-  dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
+  dprintf(1,"XYZMin/Dxyz: %g %g %g %g %g %g\n",
 	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
 
 }
@@ -56,7 +56,7 @@ void wcs_i2f(image *iptr,
   int i;
   if (ndim<1) return;
 
-  dprintf(1,"XYZMin/Dxyz: %g %g %g %g 5g 5g\n",
+  dprintf(1,"XYZMin/Dxyz: %g %g %g %g %g %g\n",
 	  Xmin(iptr),Ymin(iptr),Zmin(iptr),Dx(iptr),Dy(iptr),Dz(iptr));
 
   crpix[0] = 1.0;
