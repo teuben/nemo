@@ -25,10 +25,11 @@
  *                   in header image.h
  *  21-feb-00   V6.1 mapX_image() routines, cleaned up code a bit PJT
  *   9-sep-02   V6.2 added copy_image()
- *  13-nov-02   V??? added boolean images for masking operations  PJT
- *   7-may-04   V7.0 (optional) proper astronomical axes          PJT
+ *  13-nov-02   V??? added boolean images for masking operations         PJT
+ *   7-may-04   V7.0 (optional) proper astronomical axes                 PJT
  *  16-mar-05   V7.1 protection to re-use a pointer for different images PJT
- *   4-aug-11   V7.2 fixed various map2_image/map3_image mistakes PJT
+ *   4-aug-11   V7.2 fixed various map2_image/map3_image mistakes        PJT
+ *  19-oct-11   V8.0 implementing USE_IARRAY methods                     PJT
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -72,6 +73,40 @@ local int idef = 1;
 #endif
 
 
+
+/* 
+ * set_iarray:  intelligent array usage:
+ *              if USE_IARRAY the index arrays that make
+ *                     data[x[ix] + y[iy] + z[iz]]
+ *              work are defined.
+ */
+
+static void set_iarray(imageptr iptr)
+{
+  int i;
+  int nx, ny, nz;
+
+#ifdef USE_IARRAY
+  nx = Nx(iptr);
+  ny = Ny(iptr);
+  nz = Nz(iptr);
+  warning("USE_IARRAY (%d,%d,%d)",nx,ny,nz);
+  IDx(iptr) = (int *) allocate( nx * sizeof(int));
+  IDy(iptr) = (int *) allocate( ny * sizeof(int));
+  IDz(iptr) = (int *) allocate( nz * sizeof(int));
+  if (idef == 1) { // CDEF
+    for (i=0; i<nz; i++) IDz(iptr)[i] = i;
+    for (i=0; i<ny; i++) IDy(iptr)[i] = nz*i;
+    for (i=0; i<nx; i++) IDx(iptr)[i] = nz*ny*i;
+  } else if (idef == 0) { // FORDEF
+    for (i=0; i<nx; i++) IDx(iptr)[i] = i;
+    for (i=0; i<ny; i++) IDy(iptr)[i] = nx*i;
+    for (i=0; i<nz; i++) IDz(iptr)[i] = nx*ny*i;
+  } else // ILLEGAL
+    error("set_iarray: idef=%d\n",idef);
+#endif
+}
+
 /*
  *  WRITE_IMAGE: writes out a matrix, including header, in binary format
  *
@@ -115,12 +150,12 @@ int write_image (stream outstr, imageptr iptr)
     put_tes (outstr, ParametersTag);
          
     put_set (outstr,MapTag);
-		if (Nz(iptr)==1)
-	                put_data (outstr,MapValuesTag,RealType,
-        	        	Frame(iptr),Nx(iptr),Ny(iptr),0);
-		else
-	                put_data (outstr,MapValuesTag,RealType,
-        	        	Frame(iptr),Nx(iptr),Ny(iptr),Nz(iptr),0);
+    if (Nz(iptr)==1)
+      put_data (outstr,MapValuesTag,RealType,
+		Frame(iptr),Nx(iptr),Ny(iptr),0);
+    else
+      put_data (outstr,MapValuesTag,RealType,
+		Frame(iptr),Nx(iptr),Ny(iptr),Nz(iptr),0);
     put_tes (outstr, MapTag);
   put_tes (outstr, ImageTag);
   return 1;
@@ -151,8 +186,6 @@ int read_image (stream instr, imageptr *iptr)
     if (*iptr==NULL) {		/* allocate image if neccessary */
     	*iptr = (imageptr ) allocate(sizeof(image));
 	dprintf (DLEV,"Allocated image @ %d ",*iptr);
-	if (*iptr == NULL) return 0;	/* no memory available */
-	Frame(*iptr) = NULL;
     } else {
         nx = Nx(*iptr);
         ny = Ny(*iptr);
@@ -226,10 +259,6 @@ int read_image (stream instr, imageptr *iptr)
                 Frame(*iptr) = (real *) 
 			allocate(Nx(*iptr)*Ny(*iptr)*Nz(*iptr)*sizeof(real));   
                 dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
-                if (Frame(*iptr)==NULL) {
-                    printf ("READ_IMAGE: Not enough memory to allocate image\n");
-                    return 0;
-                }
             } else
                 dprintf (DLEV,"Frame already allocated @ %d\n",Frame(*iptr));
 	    if (Nz(*iptr)==1)
@@ -240,6 +269,8 @@ int read_image (stream instr, imageptr *iptr)
                                 Nx(*iptr), Ny(*iptr), Nz(*iptr), 0);
          get_tes (instr,MapTag);
       get_tes (instr,ImageTag);
+
+      set_iarray(*iptr);
 
       dprintf (DLEV,"Frame size %d * %d \n",Nx(*iptr), Ny(*iptr));
       
@@ -256,6 +287,11 @@ int read_image (stream instr, imageptr *iptr)
  
 int free_image (imageptr iptr)
 {
+#ifdef USE_IARRAY  
+  free ((int *) iptr->x);
+  free ((int *) iptr->y);
+  free ((int *) iptr->z);
+#endif
   free ((char *) Frame(iptr));
   free ((char *) iptr);
   return  0;
@@ -269,7 +305,8 @@ int free_image_mask (image_maskptr mptr)
 }
 
 /*
- * CREATE_IMAGE: create a blank image Nx by Ny in size ; forced 2D
+ * CREATE_IMAGE: create a blank image Nx by Ny in size ; forced 2D 
+ *               (mostly for efficiency)
  *		see: create_cube for a full 3D version
  */
  
@@ -277,14 +314,8 @@ int create_image (imageptr *iptr, int nx, int ny)
 {
     *iptr = (imageptr ) allocate(sizeof(image));
     dprintf (DLEV,"create_image:Allocated image @ %d size=%d * %d",*iptr,nx,ny);
-    if (*iptr == NULL) return 0;	/* no memory available */
-    	
     Frame(*iptr) = (real *) allocate(nx*ny*sizeof(real));	
     dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
-    if (Frame(*iptr)==NULL) {
-        printf ("CREATE_IMAGE: Not enough memory to allocate image\n");
-        return 0;
-    }
     Axis(*iptr) = 0;            /* old style axis with no reference pixel */
     Nx(*iptr) = nx;             /* old style ONE map, no cube */
     Ny(*iptr) = ny;
@@ -312,6 +343,7 @@ int create_image (imageptr *iptr, int nx, int ny)
     Storage(*iptr) = matdef[idef];
     Axis(*iptr) = 0;
     Mask(*iptr) = NULL;
+    set_iarray((*iptr));
 
     return 1;		/* succes return code  */
 }
@@ -351,10 +383,6 @@ int copy_image (imageptr iptr, imageptr *optr)
     	
   Frame(*optr) = (real *) allocate(nx*ny*nz*sizeof(real));	
   dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
-  if (Frame(*optr)==NULL) {
-    warning ("CREATE_IMAGE: Not enough memory to allocate image\n");
-    return 0;
-  }
   Nx(*optr) = nx;
   Ny(*optr) = ny;
   Nz(*optr) = nz;
@@ -372,6 +400,7 @@ int copy_image (imageptr iptr, imageptr *optr)
   Zref(*optr) = Zref(iptr);
   Storage(*optr) = matdef[idef];
   Axis(*optr) = Axis(iptr);
+  set_iarray(*optr);
   
   return 1;		/* succes return code  */
 }
@@ -390,10 +419,6 @@ int create_cube (imageptr *iptr, int nx, int ny, int nz)
     	
     Frame(*iptr) = (real *) allocate(nx*ny*nz*sizeof(real));	
     dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
-    if (Frame(*iptr)==NULL) {
-        printf ("CREATE_CUBE: Not enough memory to allocate image cube\n");
-        return 0;
-    }
     Nx(*iptr) = nx;             /* cube dimension */
     Ny(*iptr) = ny;
     Nz(*iptr) = nz;
@@ -420,6 +445,7 @@ int create_cube (imageptr *iptr, int nx, int ny, int nz)
     Storage(*iptr) = matdef[idef];
     Axis(*iptr) = 0;
     Mask(*iptr) = NULL;
+    set_iarray(*iptr);
     
     return 1;		/* succes return code  */
 }
@@ -500,9 +526,9 @@ char *mystrcpy(char *a)
 /*  #define AR 1  */
 
 string defv[] = {
-	"mode=w\n	Read (r) or Write (w)",
-	"VERSION=4.4\n	21-feb-94 pjt",
-	NULL
+  "mode=w\n      	Read (r) or Write (w)",
+  "VERSION=8.0\n	19-oct-11 pjt",
+  NULL
 };
 
 string usage = "testbed for image I/O";
@@ -546,28 +572,38 @@ nemo_main()
 
 void ini_matrix(imageptr *iptr, int nx, int ny)
 {
-	int ix,iy;
+  int ix,iy;
 	
-	printf ("iptr @ %d    (sizeof = %d)\n",*iptr,sizeof(image));
+  printf ("iptr @ %d    (sizeof = %d)\n",*iptr,sizeof(image));
 	
-	if (*iptr==0) {
-		*iptr = (imageptr ) allocate((sizeof(image)));
-		printf ("allocated image 'iptr' @ %d\n",*iptr);
-		Frame(*iptr) = (real *) allocate (nx*ny*sizeof(real));
-		printf ("Allocated frame @ %d\n",Frame(*iptr));
-	} else {
-		printf ("Image already allocated @ %d\n",*iptr);
-		printf ("with Frame @ %d\n",Frame(*iptr));
-	}
-	Nx(*iptr) = nx;
-	Ny(*iptr) = ny;
-	Xmin(*iptr) = 1.0;
-	Ymin(*iptr) = 2.0;
-	Dx(*iptr) = 0.1;
-	Dy(*iptr) = 0.1;
-	for (ix=0; ix<nx; ix++)
-	for (iy=0; iy<ny; iy++)
-		MapValue(*iptr,ix,iy)  = (ix*ny+iy)*0.1;
+  if (*iptr==0) {
+    *iptr = (imageptr ) allocate((sizeof(image)));
+    printf ("allocated image 'iptr' @ %d\n",*iptr);
+    Frame(*iptr) = (real *) allocate (nx*ny*sizeof(real));
+    printf ("Allocated frame @ %d\n",Frame(*iptr));
+  } else {
+    printf ("Image already allocated @ %d\n",*iptr);
+    printf ("with Frame @ %d\n",Frame(*iptr));
+  }
+  Nx(*iptr) = nx;
+  Ny(*iptr) = ny;
+  Nz(*iptr) = 1;
+  Xmin(*iptr) = 1.0;
+  Ymin(*iptr) = 2.0;
+  Zmin(*iptr) = 3.0;
+  Dx(*iptr) = 0.1;
+  Dy(*iptr) = 0.1;
+  Dz(*iptr) = 0.1;
+  Namex(*iptr) = NULL;        /* no axis names */
+  Namey(*iptr) = NULL;
+  Namez(*iptr) = NULL;
+  Unit(*iptr)  = NULL;        /* no units */
+  Mask(*iptr)  = NULL;
+
+  set_iarray(*iptr);
+  for (ix=0; ix<nx; ix++)
+    for (iy=0; iy<ny; iy++)
+      MapValue(*iptr,ix,iy)  = (ix*ny+iy)*0.1;
 }
 #endif
 

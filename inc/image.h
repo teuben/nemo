@@ -1,6 +1,8 @@
 /*
- * IMAGE.H: structured binary file definitions for standard
- * 	    2- and 3D- images
+ * IMAGE.H: structured binary file definitions for standard 2- and 3D-image cubes
+ * 
+ *   Note:   data[ix][iy][iz] is the notation, but can be stored in C or Fortran fashion
+ *         
  *
  *  30-Jun-87    V2.0 structures format for 2D maps, also allows series of maps  PJT
  *  23-dec-88	 V2.3 velocity added to header
@@ -22,8 +24,8 @@
  *                    by (for now optionally) using
  *                    why was i so lazy and didn't do this in 1987.....
  *   6-jan-05         added prototypes for wcsio.c
- *  19-oct-11    V8.0 (semi)intelligent array idea from Karma
- *                    i->frame[i->x[ix]+i->y[iy]+i->z[iz]]
+ *  19-oct-11    V8.0 intelligent array idea from Karma
+ *                    i->frame[i->x[ix] + i->y[iy]+ i->z[iz]]
  */
 #ifndef _h_image
 #define _h_image
@@ -135,6 +137,9 @@ typedef struct {
 #define Nx(iptr)	((iptr)->nx)
 #define Ny(iptr)	((iptr)->ny)
 #define Nz(iptr)	((iptr)->nz)
+#define IDx(iptr)       ((iptr)->x)
+#define IDy(iptr)       ((iptr)->y)
+#define IDz(iptr)       ((iptr)->z)
 #define Xmin(iptr) 	((iptr)->xmin)
 #define Ymin(iptr) 	((iptr)->ymin)
 #define Zmin(iptr) 	((iptr)->zmin)
