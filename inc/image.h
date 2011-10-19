@@ -29,7 +29,7 @@
 #define _h_image
 
 #include <matdef.h>
-#define USE_IARRAY
+//#define USE_IARRAY
 
 typedef struct {
     int    nr;
@@ -50,9 +50,10 @@ typedef struct {
 } image_axis, *image_axisptr;
 
 typedef struct {
-    bool  *frame;	/* pointer to a contiguous block of data */
-    bool  **matrix;     /* 2D special case: pointers to pointers */
+    bool    *frame;	/* pointer to a contiguous block of data */
+    bool   **matrix;    /* 2D special case: pointers to pointers */
     bool  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
+    // @todo: needs USE_IARRAY
     int   nx;		/* dimensions in X, Y and Z */
     int   ny;
     int   nz;
@@ -60,8 +61,8 @@ typedef struct {
 
 
 typedef struct {
-    real  *frame;	/* pointer to a contiguous block of data */
-    real  **matrix;     /* 2D special case: pointers to pointers */
+    real    *frame;     /* pointer to a contiguous block of data */
+    real   **matrix;    /* 2D special case: pointers to pointers */
     real  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
 #ifdef USE_IARRAY
     int   *x;           /* iarray offset X array into *frame */
@@ -75,25 +76,25 @@ typedef struct {
     int   ny;
     int   nz;
     real  xmin;         /* coordinates of first pixel (0,0,0)    */
-    real  ymin;	        /*   --- which is center of cell --- !!  */
+    real  ymin;	        /*   --- which is at center of a cell/voxel --- !!  */
     real  zmin;
-    real  dx;           /* grid spacing */
+    real  dx;           /* grid spacing (same for all pixels) */
     real  dy;
     real  dz;
     real  xref;         /* fake corner (normally 0,0,0 in lower left) */
     real  yref;         /* for new style axis */
     real  zref;
 #if 0
-    image_axis  ax;      /* new optional axis descriptors */
+    image_axis  ax;     /* new optional axis descriptors */
     image_axis  ay;
     image_axis  az;
 #endif
-    char proj[16];      /* standard WCS projection types */
+    char proj[16];      /* standard FITS WCS projection types */
 
 #if 0
-    matrix cd;          /* note, this can only handle NDIM by NDIM */
+    matrix cd;          /* WCS: note, this can only handle NDIM by NDIM */
 #endif
-    real  map_min;	/* data min and max in cube */
+    real  map_min;	/* data min and max in data */
     real  map_max;
     int   beamtype;	/* beams - not very well used yet */
     real  beamx;        /* smoothing beams */
@@ -110,15 +111,15 @@ typedef struct {
 
 typedef struct {
     
-    void  *frame;	/* pointer to a contiguous block of data */
-    void  **matrix;     /* 2D special case: pointers to pointers */
+    void    *frame;  	/* pointer to a contiguous block of data */
+    void   **matrix;    /* 2D special case: pointers to pointers */
     void  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
-
+    // @todo: needs USE_IARRAY
     int	type;		/* data-type of the data */
 
-    image_axis  x;        /* axis descriptors */
-    image_axis  y;
-    image_axis  z;
+    image_axis  ax;      /* axis descriptors */
+    image_axis  ay;
+    image_axis  az;
 
     real  map_min;	/* data min and max in cube */
     real  map_max;
@@ -157,16 +158,21 @@ typedef struct {
 #define Storage(iptr)   ((iptr)->storage)
 #define Mask(iptr)      ((iptr)->mask)
 
+
+
 #ifdef USE_IARRAY
 #define MapValue(i,ix,iy)	(*( (i)->frame + (i)->x[ix] + (i)->y[iy]))
 #define CubeValue(i,ix,iy,iz)   (*( (i)->frame + (i)->x[ix] + (i)->y[iy] + (i)->z[iz]))
 #else
 
+
+/* row major:   data[iy][ix]   data[r][c]   offset = row*NUMCOLS + col    */
 #if defined(CDEF)
 #define MapValue(i,ix,iy)	(*( (i)->frame + iy + Ny(i)*(ix)))
 #define CubeValue(i,ix,iy,iz)   (*( (i)->frame + iz + Nz(i)*(iy + Ny(i)*(ix))))
 #endif
 
+/* column major:    data(ix,iy)  data(r,c)   offset = col*NUMROWS + row    */
 #if defined(FORDEF)
 #define MapValue(iptr,ix,iy)	 (*( (iptr)->frame + ix + Nx(iptr)*(iy)) )
 #define CubeValue(iptr,ix,iy,iz) (*( (iptr)->frame + ix + Nx(iptr)*(iy+Ny(iptr)*(iz))))
@@ -238,7 +244,7 @@ int create_image ( imageptr *, int, int );
 int create_cube  ( imageptr *, int, int, int );
 int copy_image   ( imageptr, imageptr *);
 
-real **map2_image( imageptr );
+real  **map2_image( imageptr );
 real ***map3_image( imageptr );
 
 /* worldpos.c */
