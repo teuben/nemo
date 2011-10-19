@@ -1,9 +1,16 @@
-/* xyio: exerimental MIRIAD-like line-access to 2D and 3D NEMO images 
+/* xyio: experimental MIRIAD-like line-access to 2D and 3D NEMO images 
  *
  *	Although the format can work on full N-dimensional data, 
- *	only 2- and 3D is currently supported.
+ *	only 2- and 3D is currently supported. It is useful if
+ *      you don't want (or can) keep the whole cube in memory.
+ *
+ *      For N-dimensional data, check out the intelligent array
+ *      concept that Karma is advocating
+ *      data[x[i]+y[j]+....]
+ *
  *      Data is accessed in slices using the random access I/O in
  *	filestruct.
+ *
  *	All ideas are based on the image I/O within miriad (xyio.c)
  *	for which Bob Sault deserves all the credit.
  *
