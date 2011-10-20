@@ -24,14 +24,14 @@
  *                    by (for now optionally) using
  *                    why was i so lazy and didn't do this in 1987.....
  *   6-jan-05         added prototypes for wcsio.c
- *  19-oct-11    V8.0 intelligent array idea from Karma
+ *  19-oct-11    V8.0 optional intelligent array from Karma, see USE_IARRAY
  *                    i->frame[i->x[ix] + i->y[iy]+ i->z[iz]]
+ *                    which seems 15% slower..... (ccdstat EVLA benchmark)
  */
 #ifndef _h_image
 #define _h_image
 
 #include <matdef.h>
-//#define USE_IARRAY
 
 typedef struct {
     int    nr;
