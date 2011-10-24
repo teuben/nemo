@@ -1,0 +1,18 @@
+1) REBOUND:  https://github.com/hannorein/rebound
+
+To get it:
+   git clone http://github.com/hannorein/rebound 
+or
+   wget --no-check-certificate https://github.com/hannorein/rebound/tarball/master -O- | tar xvz
+
+then
+
+   cd rebound/examples/shearing_sheet
+   make
+   ./nbody
+
+
+the compilation could fail if some libraries GL/glut.h cannot be found. In that case
+grab that library from http://freeglut.sourceforge.net/ or use your package manager
+to install it.  E.g on ubuntu 10.10 you will need freeglut3-dev, ie.
+    dpkg -i freeglut3-dev
