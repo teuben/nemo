@@ -10,6 +10,7 @@
  *   9-dec-99   fix min/max when data deleted
  *   2-feb-05   added moving moments
  *  12-dec-07   added rms_moment; only valid for equal weights
+ *  18-mar-11   robust mean, 
  */
 
 
@@ -23,6 +24,8 @@
 #define sum4 m->sum[4]
 
 extern real median(int,real*);
+extern real median_q1(int,real*);
+extern real median_q3(int,real*);
 
 void ini_moment(Moment *m, int mom, int ndat)
 {
@@ -156,6 +159,35 @@ real mean_moment(Moment *m)
     return sum1/sum0;
 }
 
+/* 
+ * @todo http://en.wikipedia.org/wiki/Chauvenet's_criterion
+ *       http://en.wikipedia.org/wiki/Robust_statistics
+ *       implement IDL's 'where' masking (see Moment->msk)
+ *
+ */
+
+real mean_robust_moment(Moment *m)
+{
+  int i,n;
+  real m1,m2,m3,iqr,dlo,dhi;
+  Moment tmp;
+
+  if (m->ndat==0)
+    error("mean_robust_moment cannot be computed with ndat=%d",m->ndat);
+  n = MIN(m->n, m->ndat);
+  m2 = median(n,m->dat);
+  m1 = median_q1(n,m->dat);
+  m3 = median_q3(n,m->dat);
+  iqr = m3-m1;
+  dlo = m1 - 1.5*iqr;   /* perhaps better if this 1.5 factor */
+  dhi = m3 + 1.5*iqr;   /* should depend on the # datapoints */
+  ini_moment(&tmp,1,0);
+  for (i=0; i<n; i++) {
+    if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
+    accum_moment(&tmp,m->dat[i],1.0);
+  }
+  return mean_moment(&tmp);
+}
 
 real median_moment(Moment *m)
 {
@@ -282,8 +314,9 @@ string defv[] = {
     "moment=-1\n    Moment to compute (-4..-1 special, 0,1,2,...)",
     "minmax=f\n     Show datamin & max instead ? ",
     "median=f\n     Show median ?",
+    "robust=f\n     Show robust mean etc.?",
     "maxsize=0\n    If > 0, size for moving moments instead\n",
-    "VERSION=0.2\n  2-feb-05 PJT",
+    "VERSION=0.3\n  18-mar-2011 PJT",
     NULL,
 };
 
@@ -311,6 +344,7 @@ void nemo_main(void)
     Moment m;
     bool Qminmax = getbparam("minmax");
     bool Qmedian = getbparam("median");
+    bool Qrobust = getbparam("robust");
 
     ini_moment(&m,ABS(mom),maxsize);
     while (fgets(line,80,instr) != NULL) {
@@ -318,21 +352,25 @@ void nemo_main(void)
       accum_moment(&m,x,1.0);
       if (maxsize > 0) {
 	debug_moment(1,&m);
-	printf("%d ",n_moment(&m));
+	printf("%d %g ",n_moment(&m),x);
 	if (Qminmax)
 	  printf("%g %g\n",min_moment(&m), max_moment(&m));
 	else if (Qmedian)
 	  printf("%g\n",median_moment(&m));
+	else if (Qrobust) 
+        printf("%g\n",mean_robust_moment(&m));
 	else
 	  printf("%g\n",show_moment(&m,mom));
       }
     }
     if (maxsize == 0) {
-      printf("%d ",n_moment(&m));
+      printf("%d %g ",n_moment(&m),x);
       if (Qminmax)
         printf("%g %g\n",min_moment(&m), max_moment(&m));
       else if (Qmedian)
 	printf("%g\n",median_moment(&m));
+      else if (Qrobust) 
+        printf("%g\n",mean_robust_moment(&m));
       else
         printf("%g\n",show_moment(&m,mom));
     }
