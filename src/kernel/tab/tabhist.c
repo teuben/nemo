@@ -43,11 +43,13 @@
  *       7-apr-05   5.2   under and overflow reporting fixed    pjt
  *       1-jun-10   6.0   allow bins= to be edges of bins       pjt 
  *      (8-feb-11   !!!   code cloned into ccdhist              pjt)
- *                        
+ *                
  * 
  * TODO:
  *     option to do dual-pass to subtract the mean before computing
  *     the higher order moments - needed for accuracy
+ *   fix bug when e.g. nsigma=4  and xmin/max is given and still
+ *   plots an outlier.
  *
  *   allow bins= with actual bin edges to also use xmin and xmax for plot
  */
@@ -81,12 +83,13 @@ string defv[] = {
     "residual=t\n		  Overlay residual data-gauss(fit)",
     "cumul=f\n                    Override and do cumulative histogram instead",
     "median=t\n			  Compute median too (can be time consuming)",
+    "robust=f\n                   Compute robust median",
     "nsigma=-1\n                  delete points more than nsigma",
     "xcoord=\n		          Draw additional vertical coordinate lines along these X values",
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
-    "VERSION=6.0\n		  1-jun-10 PJT",
+    "VERSION=6.1\n		  25-oct-2011 PJT",
     NULL
 };
 
@@ -127,6 +130,7 @@ local bool   Qresid;                    /* gaussian residual overlay ? */
 local bool   Qtab;                      /* table output ? */
 local bool   Qcumul;                    /* cumulative histogram ? */
 local bool   Qmedian;			/* compute median also ? */
+local bool   Qrobust;                   /* compute robust median also ? */
 local bool   Qdual;                     /* dual pass ? */
 local bool   Qbin;                      /* manual bins ? */
 local int    maxcount;
@@ -207,6 +211,7 @@ local void setparams()
         ylog=FALSE;
     }
     Qmedian = getbparam("median");
+    Qrobust = getbparam("robust");
     if (ylog && streq(ylab,"N")) ylab = scopy("log(N)");
     Qdual = getbparam("dual");
 
@@ -438,6 +443,8 @@ local void histogram(void)
     dprintf (0,"Median               : %g\n",median);
   }
   dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
+  if (Qrobust)
+    dprintf (0,"Robust Mean          : %g\n",mean_robust_moment(&m));
   
   if (lcount > 0) {
     warning("Recompute histogram because of outlier removals");
