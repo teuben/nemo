@@ -64,7 +64,8 @@ namespace WDutils {
   /// \param[in] l number of the line in that file 
   /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  T* NewArray(size_t n, const char*f, int l, const char*lib = "WDutils")
+  T* NewArray(size_t n, const char*c, const char*f, int l,
+	      const char*lib = "WDutils")
     WDutils_THROWING
   {
     T*t;
@@ -76,17 +77,12 @@ namespace WDutils {
       failed = 1;
     }
     if(failed || (n && t==0))
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	(f,l)("allocation of %u '%s' (%u bytes) failed\n",
-	      uint32(n),nameof(T),uint32(n*sizeof(T)));
-    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
-			      "allocated %u %s = %u bytes @ %p\n",
-			      uint32(n),nameof(T),uint32(n*sizeof(T)),
-			      static_cast<void*>(t));
+      throw Thrower(c,f,l)("allocation of %u '%s' (%u bytes) failed\n",
+			   uint32(n),nameof(T),uint32(n*sizeof(T)));
+    DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
+				"allocated %u %s = %u bytes @ %p\n",
+				uint32(n),nameof(T),uint32(n*sizeof(T)),
+				static_cast<void*>(t));
     return t;
   }
   // ///////////////////////////////////////////////////////////////////////////
@@ -100,8 +96,8 @@ namespace WDutils {
   ///
   /// \param  TYPE name of the element type
   /// \param  SIZE number of elements
-#define WDutils_NEW(TYPE,SIZE) WDutils::NewArray<TYPE>(SIZE,__FILE__,__LINE__)
-
+#define WDutils_NEW(TYPE,SIZE) \
+  WDutils::NewArray<TYPE>(SIZE,WDutilsThisFunction,__FILE__,__LINE__)
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// array de-allocation giving useful info in case of error; mostly used
@@ -119,30 +115,29 @@ namespace WDutils {
   /// \param[in] l  number of the line in that file
   /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  void DelArray(T* a, const char*f, int l, const char*lib = "WDutils")
+  void DelArray(T* a, const char*c, const char*f, int l,
+		const char*lib = "WDutils")
     WDutils_THROWING {
     if(0==a) {
-      Warning(f,l)("trying to delete zero pointer to array of '%s'", nameof(T));
+      Warning(c,f,l,lib)
+	("trying to delete zero pointer to array of '%s'",nameof(T));
       return;
     }
     try {
       delete[] a;
     } catch(...) {
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	(f,l)("de-allocating array of '%s' @ %p failed\n", nameof(T),a);
+      throw Thrower(c,f,l)("de-allocating array of '%s' @ %p failed\n",
+			   nameof(T),a);
     }
-    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
-			      "de-allocated array of %s @ %p\n",
-			      nameof(T), static_cast<void*>(a));
+    DebugInformation(c,f,l,lib)
+      (WDutilsAllocDebugLevel, "de-allocated array of %s @ %p\n",
+       nameof(T), static_cast<void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
-  void DelArray(const T* a, const char*f, int l, const char*lib = "WDutils")
-    WDutils_THROWING { DelArray(const_cast<T*>(a),f,l,lib); }
+  void DelArray(const T* a, const char*c, const char*f, int l,
+		const char*lib = "WDutils")
+    WDutils_THROWING { DelArray(const_cast<T*>(a),c,f,l,lib); }
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// C MACRO to be used for array de-allocation
@@ -153,7 +148,8 @@ namespace WDutils {
   /// about memory de-allocation.
   ///
   /// \param P  pointer to be de-allocated
-#define WDutils_DEL_A(P) WDutils::DelArray(P,__FILE__,__LINE__)
+#define WDutils_DEL_A(P) \
+  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__)
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// Object de-allocation giving useful info in case of error; mostly used
@@ -168,47 +164,43 @@ namespace WDutils {
   /// \param[in] l  number of the line in that file
   /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  void DelObject(T* a, const char*f, int l, const char*lib="WDutils")
+  void DelObject(T* a, const char*c, const char*f, int l,
+		 const char*lib="WDutils")
     WDutils_THROWING {
     if(0==a) {
-      Warning(f,l)("trying to delete zero pointer to object '%s'", nameof(T));
+      Warning(c,f,l,lib)
+	("trying to delete zero pointer to object '%s'",nameof(T));
       return;
     }
     try {
       delete a;
     } catch(...) {
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	(f,l)("de-allocating object '%s' @ %p failed\n", nameof(T),a);
+      throw Thrower(c,f,l)
+	("de-allocating object '%s' @ %p failed\n",nameof(T),a);
     }
-    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
-			      "de-allocated %s object @ %p\n",
-			      nameof(T), static_cast<void*>(a));
+    DebugInformation(c,f,l,lib)
+      (WDutilsAllocDebugLevel,"de-allocated %s object @ %p\n",
+       nameof(T), static_cast<void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
-  void DelObject(const T* a, const char*f, int l, const char*lib="WDutils")
+  void DelObject(const T* a, const char*c, const char*f, int l,
+		 const char*lib="WDutils")
     WDutils_THROWING {
     if(0==a) {
-      Warning(f,l)("trying to delete zero pointer to object '%s'", nameof(T));
+      Warning(c,f,l,lib)
+	("trying to delete zero pointer to object '%s'",nameof(T));
       return;
     }
     try {
       delete a;
     } catch(...) {
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	(f,l)("de-allocating object '%s' @ %p failed\n",nameof(T),a);
+      throw Thrower(c,f,l)
+	("de-allocating object '%s' @ %p failed\n",nameof(T),a);
     }
-    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
-			      "de-allocated %s object @ %p\n",
-			      nameof(T), static_cast<const void*>(a));
+    DebugInformation(c,f,l,lib)
+      (WDutilsAllocDebugLevel,"de-allocated %s object @ %p\n",
+       nameof(T), static_cast<const void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   ///
@@ -220,7 +212,8 @@ namespace WDutils {
   /// an error message detailing the source file and line of the call.
   ///
   /// \param P pointer to object to be de-allocated
-#define WDutils_DEL_O(P) WDutils::DelObject(P,__FILE__,__LINE__)
+#define WDutils_DEL_O(P) \
+  WDutils::DelObject(P,WDutilsThisFunction,__FILE__,__LINE__)
 }
 //
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
@@ -279,7 +272,8 @@ namespace WDutils {
   /// \note Unlike NewArray<>, we do not call the default ctor for each
   ///       allocated object!
   template<typename T> inline
-  T* NewArray16(size_t k, const char*f, int l, const char*lib = "WDutils")
+  T* NewArray16(size_t k, const char*c, const char*f, int l,
+		const char*lib = "WDutils")
     WDutils_THROWING
   {
     size_t n = k*sizeof(T);
@@ -293,16 +287,13 @@ namespace WDutils {
       failed = 1;
     }
     if(failed || (n && t==0))
-#ifdef WDutils_EXCEPTIONS
-    throw Thrower
-#else
-    Error
-#endif
-      (f,l)("allocation of %u '%s' (%u bytes) aligned to 16 failed\n",
-	    uint32(k),nameof(T),uint32(n));
-    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
-			      "allocated %u %s = %u bytes aligned to 16 @ %p\n",
-			      uint32(k),nameof(T),uint32(n),t);
+      throw Thrower(c,f,l)
+	("allocation of %u '%s' (%u bytes) aligned to 16 failed\n",
+	 uint32(k),nameof(T),uint32(n));
+    DebugInformation(c,f,l,lib)
+      (WDutilsAllocDebugLevel,
+       "allocated %u %s = %u bytes aligned to 16 @ %p\n",
+       uint32(k),nameof(T),uint32(n),t);
     return static_cast<T*>(t);
 #else // __GNUC__ or __INTEL_COMPILER
     // linear memory model:                                                     
@@ -341,8 +332,8 @@ namespace WDutils {
   /// \param  SIZE number of elements
   /// \note   Unlike WDutils_NEW(TYPE,SIZE), we do not call the default ctor for
   ///         the objects allocated!
-#define WDutils_NEW16(TYPE,SIZE)			\
-  WDutils::NewArray16<TYPE>(SIZE,__FILE__,__LINE__)
+#define WDutils_NEW16(TYPE,SIZE)					\
+  WDutils::NewArray16<TYPE>(SIZE,WDutilsThisFunction,__FILE__,__LINE__)
   ///
   /// de-allocate memory previously allocated with WDutils::NewArray16()
   /// \ingroup Mem16
@@ -353,37 +344,31 @@ namespace WDutils {
   ///
   /// \param q  pointer previously allocated by WDutils::NewArray16()
   template<typename T> inline
-  void DelArray16(T* a, const char*f, int l, const char*lib = "WDutils")
+  void DelArray16(T* a, const char*c, const char*f, int l,
+		  const char*lib = "WDutils")
     WDutils_THROWING
   {
 #if defined(__GNUC__) || defined (__INTEL_COMPILER)
     if(0==a) {
-      Warning(f,l)("trying to delete zero pointer to array of '%s'",nameof(T));
+      Warning(c,f,l,lib)
+	("trying to delete zero pointer to array of '%s'",nameof(T));
       return;
     }
     if(size_t(a)&15) {
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	(f,l)("de-allocating 16-byte aligned array of '%s' @ %p: "
-	      "not 16-byte aligned",nameof(T),a);
+      throw Thrower(c,f,l)
+	("de-allocating 16-byte aligned array of '%s' @ %p: "
+	 "not 16-byte aligned",nameof(T),a);
     }
     try {
       _mm_free(a);
     } catch(...) {
-#ifdef WDutils_EXCEPTIONS
-      throw Thrower
-#else
-      Error
-#endif
-	(f,l)("de-allocating 16-byte aligned array of '%s' @ %p failed\n",
-	      nameof(T),a);
+      throw Thrower(c,f,l)
+	("de-allocating 16-byte aligned array of '%s' @ %p failed\n",
+	 nameof(T),a);
     }
-    DebugInformation(f,l,lib)(WDutilsAllocDebugLevel,
-			      "de-allocated 16-byte aligned array "
-			      "of '%s' @ %p\n", nameof(T),a);
+    DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
+				"de-allocated 16-byte aligned array "
+				"of '%s' @ %p\n", nameof(T),a);
 #else
     DelArray((char*)(*((void**)(((char*)q)-sizeof(void*)))),f,l,lib);
 #endif
@@ -403,7 +388,8 @@ namespace WDutils {
   /// about memory de-allocation.
   ///
   /// \param P  pointer to be de-allocated
-#define WDutils_DEL16(P) WDutils::DelArray16(P,__FILE__,__LINE__)
+#define WDutils_DEL16(P)					\
+  WDutils::DelArray16(P,WDutilsThisFunction,__FILE__,__LINE__)
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// a simple one-dimensional array of data aligned to 16 bytes
@@ -473,18 +459,18 @@ namespace WDutils {
     /// non-const array
     T*array() { return A; }
   };
-  // deprecated, use WDutils_NEW16 instead
-  inline void* malloc16(size_t n) WDutils_THROWING
-  { return NewArray16<char>(n,0,0); }
-  // deprecated, use WDutils_NEW16 instead
-  template<typename T> inline T* new16(size_t n) WDutils_THROWING
-  { return NewArray16<T>(n,0,0); }
-  // deprecated, use WDutils_DEL16 instead
-  inline void free16(void*q) WDutils_THROWING
-  { DelArray16(q,0,0); }
-  // deprecated, use WDutils_DEL16 instead
-  template<typename T> inline void delete16(T* q)WDutils_THROWING 
-  { free16(static_cast<void*>(q)); }
+//   // deprecated, use WDutils_NEW16 instead
+//   inline void* malloc16(size_t n) WDutils_THROWING
+//   { return NewArray16<char>(n,0,0,0); }
+//   // deprecated, use WDutils_NEW16 instead
+//   template<typename T> inline T* new16(size_t n) WDutils_THROWING
+//   { return NewArray16<T>(n,0,0,0); }
+//   // deprecated, use WDutils_DEL16 instead
+//   inline void free16(void*q) WDutils_THROWING
+//   { DelArray16(q,0,0); }
+//   // deprecated, use WDutils_DEL16 instead
+//   template<typename T> inline void delete16(T* q)WDutils_THROWING 
+//   { free16(static_cast<void*>(q)); }
   //
   //  WDutils::block_alloc<T>
   //
@@ -811,13 +797,13 @@ namespace WDutils {
     size_type N_blocks() const
     { return NBLCK; }
   };// class WDutils::block_alloc
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   template<typename T> struct traits< block_alloc<T> > {
     static const char  *name () {
       return message("block_alloc<%s>",traits<T>::name());
     }
   };
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   // does not compile with gcc 4.3.1, which seems a compiler bug
 #if defined(__GNUC__) && ( __GNUC__ < 4 || __GNUC_MINOR__ < 3)
   template<typename T> struct traits< typename block_alloc<T>::block > {
@@ -847,19 +833,16 @@ namespace WDutils {
   /// linked list. The actual number of bytes per element is at least the size
   /// of a pointer. Thus, for K < sizeof(void*), this class is inefficient.
   ///
-  // ///////////////////////////////////////////////////////////////////////////
   class pool {
   public:
-    // /////////////////////////////////////////////////////////////////////////
-    //
     /// \name sub-types of class WDutils::pool
     //@{
-    ////////////////////////////////////////////////////////////////////////////
     typedef size_t    size_type;         ///< type of number of elements
     typedef ptrdiff_t difference_type;   ///< type of pointer difference
   public:
     /// elementary of a linked list
-    struct link {
+    struct link
+    {
       link *NEXT;   ///< pter to next link
     };
 #define LINK(NAME) reinterpret_cast<link*>(NAME)
@@ -872,39 +855,34 @@ namespace WDutils {
       /// \param[in] Kp sizeof(elements)
       chunk(size_type N, size_type Kp)
 	: DATA ( WDutils_NEW16(char,N*Kp) ),
-	  NEXT ( 0 ) {
-	const    char *END=DATA+N*Kp;
-	register char *l,*n;
+	  NEXT ( 0 )
+      {
+	const char *END=DATA+N*Kp;
+	char*l,*n;
 	for(l=DATA, n=DATA+Kp; n!=END; l+=Kp,n+=Kp)
 	  LINK(l)->NEXT = LINK(n);
 	LINK(l)->NEXT = 0;
       }
       /// destructor: de-allocate memory
-      ~chunk() {
-	WDutils_DEL16(DATA);
-      }
+      ~chunk()
+      { WDutils_DEL16(DATA); }
     };// struct pool::chunk
     //@}
-    // /////////////////////////////////////////////////////////////////////////
-    //
-    /// \name data of class WDutils::pool
+    /// \name data
     //@{
-    // /////////////////////////////////////////////////////////////////////////
   private:
     const size_type N;                    ///< # elements / chunk
     const size_type Kp;                   ///< sizeof(element)
     unsigned        NC;                   ///< # chunks
-    unsigned        Na, Nmax;             ///< # elements given out
+    size_type       Na, Nmax;             ///< # elements given out
     chunk          *CHUNKS;               ///< pter to 1st chunk
     link           *HEAD;                 ///< pter to 1st free element
     //@}
-    // /////////////////////////////////////////////////////////////////////////
-    //
-    /// \name member functions of class WDutils::pool
+    /// \name member methods
     //@{
-    // /////////////////////////////////////////////////////////////////////////
     /// grow: add another chunk
-    void grow() {
+    void grow()
+    {
       chunk *c = new chunk(N,Kp);
       c->NEXT  = CHUNKS;
       CHUNKS   = c;
@@ -912,22 +890,23 @@ namespace WDutils {
       ++NC;
     }
   public:
-    /// construction
+    /// ctor
     /// \param[in] n desired number of elements
     /// \param[in] k sizeof elements
     pool(size_type n, size_type k)
       : N      ( n<1? 1 : n ),
 	Kp     ( sizeof(link)<k? k : sizeof(link) ),
-	NC     ( 1u ),
-	Na     ( 0u ),
-	Nmax   ( 0u ),
+	NC     ( 1 ),
+	Na     ( 0 ),
+	Nmax   ( 0 ),
 	CHUNKS ( new chunk(N,Kp) ),
 	HEAD   ( LINK(CHUNKS->DATA) )
-	  {}
+    {}
 #undef LINK
-    /// destruction: delete all chunks
-    ~pool() {
-      register chunk *a=CHUNKS, *n;
+    /// dtor
+    ~pool()
+    {
+      chunk *a=CHUNKS, *n;
       while(a) {
 	n = a->NEXT;
 	WDutils_DEL_O(a);
@@ -935,9 +914,10 @@ namespace WDutils {
       }
     }
     /// hand out an element = pointer to Kp (=at least K) free bytes
-    void *alloc() {
+    void *alloc()
+    {
       if(HEAD==0) grow();
-      register link*p = HEAD;
+      link*p = HEAD;
       HEAD = p->NEXT;
       Na++;
       if(Na>Nmax) Nmax=Na;
@@ -946,24 +926,22 @@ namespace WDutils {
     /// take back an element (freeing)
     /// \param e pointer to element
     /// \note the pointer \a e MUST have been previously allocated from this
-    void free(void* e) {
-      register link *p = static_cast<link*>(e);
+    void free(void* e)
+    {
+      link *p = static_cast<link*>(e);
       p->NEXT = HEAD;
       HEAD    = p;
       Na--;
     }
-    /// return number of chunks used
-    unsigned const&N_chunks   () const {
-      return NC;
-    }
-    /// return number of bytes handed out
-    unsigned const&N_alloc    () const {
-      return Na;
-    }
-    /// return number of bytes allocated
-    unsigned const&N_alloc_max() const {
-      return Nmax;
-    }
+    /// # chunks used
+    unsigned N_chunks() const
+    { return NC; }
+    /// # elements handed out
+    size_type N_alloc() const
+    { return Na; }
+    /// # elements allocated
+    size_type N_alloc_max() const
+    { return Nmax; }
   };// class WDutils::pool
   // ///////////////////////////////////////////////////////////////////////////
   template<> struct traits< pool > {
@@ -974,44 +952,36 @@ namespace WDutils {
     static const char    *name () { return "pool::chunk"; }
   };
 #endif
-  // ///////////////////////////////////////////////////////////////////////////
   //
   //  class WDutils::Pool<>
   //
   /// template class, based on WDutils::pool, for allocating elements of type T
   //
-  // ///////////////////////////////////////////////////////////////////////////
   template<typename T>
   class Pool : private pool {
   public:
-    /// constructor: allocate 1st chunk
+    /// ctor: allocate 1st chunk
     /// \param[in] n number of elements in first chunk
-    explicit
-    Pool(size_type n)
+    explicit Pool(size_type n)
       : pool(n,sizeof(T)) {}
     /// allocation: hand out a single element
-    T*   alloc()    {
-      return static_cast<T*>(pool::alloc());
-    }
+    T*alloc()
+    { return static_cast<T*>(pool::alloc()); }
     /// freeing: take back a single element
-    void free (T*e) {
-      pool::free(e);
-    }
-    pool::N_chunks;    ///< return number of chunks used
-    pool::N_alloc;     ///< return number of bytes handed out
-    pool::N_alloc_max; ///< return number of bytes allocated
+    void free (T*e)
+    { pool::free(e); }
+    pool::N_chunks;    ///< # chunks used
+    pool::N_alloc;     ///< # elements handed out
+    pool::N_alloc_max; ///< # elements allocated
   };// class WDutils::Pool<>
-  // ///////////////////////////////////////////////////////////////////////////
+  //
   template<typename T> struct traits< Pool<T> > {
-    static const char  *name () {
-      return message("Pool<%s>",traits<T>::name());
-    }
+    static const char  *name ()
+    { return message("Pool<%s>",traits<T>::name()); }
   };
-  //////////////////////////////////////////////////////////////////////////////
   //
   // Arrays<T,D> of type T and arbitrary dimension D 
   //
-  //////////////////////////////////////////////////////////////////////////////
   template<typename T, unsigned D> class SubArray;
   /// \brief    a const array of arbitrary type in D dimensions
   /// \details  used as a return type to support A[i0][i1][i2][i3] (in this case

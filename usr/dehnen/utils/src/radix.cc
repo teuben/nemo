@@ -125,10 +125,10 @@ namespace {
 #ifdef _OPENMP
       if(OMP::IsParallel() && OMP::TeamSize()>1) {
 	if(warn && OMP::Rank()==0)
-	  WDutils_WarningN("WDutils::Radix::PSort(%s): called from within OMP "
-			   "parallel region: we assume shared global data "
+	  WDutils_WarningF("called from within OMP parallel region: "
+			   "we assume shared global data "
 			   "(use WDutils::Radix::Sort() for sorting local "
-			   "data).\n",nameof(X));
+			   "data).\n");
 	try {
 #pragma omp barrier
 	  ParallelRadixSort<X> P(n,x,y);
@@ -153,10 +153,10 @@ namespace {
 #ifdef _OPENMP
       if(OMP::IsParallel() && OMP::TeamSize()>1) {
 	if(warn && OMP::Rank()==0)
-	  WDutils_WarningN("WDutils::Radix::PSort(%s): called from within OMP "
-			   "parallel region: we assume shared global data "
+	  WDutils_WarningF("called from within OMP parallel region: "
+			   "we assume shared global data "
 			   "(use WDutils::Radix::Sort() for sorting local "
-			   "data).\n",nameof(X));
+			   "data).\n");
 	try {
 	  if(OMP::Rank() == 0) y=WDutils_NEW16(X,n);
 #pragma omp barrier

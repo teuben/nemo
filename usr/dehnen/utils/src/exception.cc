@@ -27,7 +27,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <exception.h>
-#include <cstdlib>
 #include <cerrno>
 #include <cstdio>
 #include <cstdarg>
@@ -140,7 +139,7 @@ WDutils::RunInfo::RunInfo()
     {
 #ifdef _OPENMP
       if(omp_in_parallel())
-	WDutils_Error("RunInfo::RunInfo() called inside OMP parallel region\n");
+	WDutils_ErrorF("called inside OMP parallel region\n");
       __omp_proc = omp_get_num_procs();
 #else
       __omp_proc = 1;
@@ -152,7 +151,7 @@ WDutils::RunInfo::RunInfo()
   }
 }
 //
-void WDutils::RunInfo::set_omp(const char*arg) WDutils_THROWING
+void WDutils::RunInfo::set_omp(const char*arg)
 {
 #ifdef _OPENMP
   if(arg==0 || arg[0]==0 || arg[0]=='t')
@@ -162,7 +161,7 @@ void WDutils::RunInfo::set_omp(const char*arg) WDutils_THROWING
   else if(arg && arg[0]) {
     Info.__omp_size = strtol(arg,0,10);
     if(errno == EINVAL || errno == ERANGE)
-      WDutils_THROW("RunInfo::set_omp('%s')\n",arg);
+      WDutils_THROWN("RunInfo::set_omp('%s')\n",arg);
     if(Info.__omp_size < 1) {
       Info.__omp_size = 1;
       WDutils_WarningN("RunInfo::set_omp('%s') assume '1'\n",arg);
@@ -236,6 +235,7 @@ namespace {
 		       const char*fmt,
 		       va_list   &ap,
 		       int        depth= 0,
+		       const char*func = 0,
 		       const char*file = 0,
 		       int        line = 0,
 		       bool       name = true)
@@ -246,8 +246,13 @@ namespace {
     char dpth[24] = ":                     ";
     if(depth>20) depth=20;
     dpth[2+depth]=0;
-    w=snprintf(t,s,"### %s %s",lib,issue);
-    t+=w; s-=w;
+    if(lib) {
+      w=snprintf(t,s,"# %s %s:",lib,issue);
+      t+=w; s-=w;
+    } else if(issue) {
+      w=snprintf(t,s,"# %s:",issue);
+      t+=w; s-=w;
+    }
     if(name && RunInfo::name_known()) {
       w=snprintf(t,s," [%s]",RunInfo::name());
       t+=w; s-=w;
@@ -261,6 +266,10 @@ namespace {
       t+=w; s-=w;
 #endif
     }
+    if(func) {
+      w=snprintf(t,s," in %s",func);
+      t+=w; s-=w;
+    }      
     if(file) {
       w=snprintf(t,s," [%s:%d]",file,line);
       t+=w; s-=w;
@@ -275,47 +284,43 @@ namespace {
   }
 }
 //
-void WDutils::Error::operator()(const char* fmt, ...) const
+template<typename Traits>
+void WDutils::Reporting<Traits>::operator()(int lev, const char* fmt, ...) const
 {
-  va_list  ap;
-  va_start(ap,fmt);
-  printerr(lib, "Error", fmt, ap, 0, file, line);
-  va_end(ap);
-  std::exit(1);
-}
-//
-void WDutils::Warning::operator()(const char* fmt, ...) const
-{
-  va_list  ap;
-  va_start(ap,fmt);
-  printerr(lib, "Warning", fmt, ap, 0, file, line);
-  va_end(ap);
-}
-//
-void WDutils::DebugInformation::operator()(const char* fmt, ...) const
-{
-  va_list  ap;
-  va_start(ap,fmt);
-  printerr(lib, "Debug Info", fmt, ap, 0, file, line, false);
-  va_end(ap);
-}
-//
-void WDutils::DebugInformation::operator()(int deb, const char* fmt, ...) const
-{
-  if(RunInfo::debug(deb)) {
+  if(Traits::condition(lev)) {
     va_list  ap;
     va_start(ap,fmt);
-    printerr(lib, "Debug Info", fmt, ap, deb, file, line, false);
+    printerr(library, Traits::issue(), fmt, ap, lev, func, file, line, false);
     va_end(ap);
+    Traits::after();
   }
 }
+//
+template<typename Traits>
+void WDutils::Reporting<Traits>::operator()(const char* fmt, ...) const
+{
+  va_list  ap;
+  va_start(ap,fmt);
+  printerr(library, Traits::issue(), fmt, ap, 0, func, file, line, false);
+  va_end(ap);
+  Traits::after();
+}
+//
+template struct WDutils::Reporting<WDutils::DebugInfoTraits>;
+template struct WDutils::Reporting<WDutils::ErrorTraits>;
+template struct WDutils::Reporting<WDutils::WarningTraits>;
 //
 WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
 {
   size_t size = 1024;
   char   buffer[1024], *buf=buffer;
+  if(func) {
+    int len = SNprintf(buf,size," in %s",func);
+    buf  += len;
+    size -= len;
+  }
   if(file) {
-    int len = SNprintf(buf,size,"in [%s:%d]: ",file,line);
+    int len = SNprintf(buf,size," [%s:%d]",file,line);
     buf  += len;
     size -= len;
   }
@@ -334,12 +339,11 @@ WDutils::exception::exception(const char*fmt, ...)
   va_start(ap,fmt);
   int w = vsnprintf(__text,msize,fmt,ap);
   if(w>=msize) {
-    WDutils_Warning("WDutils::exception::exception(): "
-		    "string size of %d characters exceeded\n",msize);
+    WDutils_WarningF("string size of %d characters exceeded\n",msize);
     __text[msize-1]=0;
   }
   if(w<0)
-    WDutils_Warning("WDutils::exception::exception(): formatting error\n");
+    WDutils_WarningF("formatting error\n");
   va_end(ap);
   std::string::operator= (__text);
 }
@@ -350,11 +354,9 @@ WDutils::message::message(const char*fmt, ...) throw(exception)
   va_start(ap,fmt);
   int w = vsnprintf(__text,size,fmt,ap);
   if(w>=static_cast<int>(size))
-    throw exception("WDutils::message::message(): "
-		    "string size of %d characters exceeded\n",size);
+    WDutils_THROW("string size of %ld characters exceeded\n",size);
   if(w < 0)
-    throw exception("WDutils::message::message(): "
-		    "formatting error\n");
+    WDutils_THROW("formatting error\n");
   va_end(ap);
 }
 //
@@ -366,11 +368,11 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
   int w = vsnprintf(str,l,fmt,ap);
   va_end(ap);
   if(w==static_cast<int>(l))
-    WDutils_THROW("snprintf(): trailing 0 lost");
+    WDutils_THROWF("trailing 0 lost");
   if(w >static_cast<int>(l))
-    WDutils_THROW("snprintf(): string size exceeded [%d:%lu]",w,l);
+    WDutils_THROWF("string size exceeded [%d:%lu]",w,l);
   if(w <0)
-    WDutils_THROW("snprintf(): formatting error");
+    WDutils_THROWF("formatting error");
   return w;
 }
 //
@@ -382,12 +384,14 @@ int WDutils::snprintf__::operator()(char*str, size_t l, const char* fmt, ...)
   int w = vsnprintf(str,l,fmt,ap);
   va_end(ap);
   if(w==static_cast<int>(l))
-    WDutils_THROW("[%s:%d]: snprintf(): trailing 0 lost",file,line);
+    WDutils_THROWER("snprintf()",file,line)
+      ("trailing 0 lost");
   if(w >static_cast<int>(l))
-    WDutils_THROW("[%s:%d]: snprintf(): string size exceeded [%d:%lu]",
-		  file,line,w,l);
+    WDutils_THROWER("snprintf()",file,line)
+      ("string size exceeded [%d:%lu]",w,l);
   if(w <0)
-    WDutils_THROW("[%s:%d]: snprintf(): formatting error",file,line);
+    WDutils_THROWER("snprintf()",file,line)
+      ("formatting error");
   return w;
 }
 ////////////////////////////////////////////////////////////////////////////////

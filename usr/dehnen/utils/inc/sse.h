@@ -154,11 +154,11 @@ namespace WDutils {
     __s  = __builtin_ia32_addps(__a,__t);
     __t  = __builtin_ia32_shufps(__s,__s,_MM_SHUFFLE (1,0,3,2));
     return (__m128) __builtin_ia32_addps(__s,__t);
-#else
+#else // gcc
     __m128 __S;
     __S =  _mm_add_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
     return _mm_add_ps(__S,_mm_shuffle_ps(__S,__S,_MM_SHUFFLE (1,0,3,2)));
-#endif
+#endif// gcc
   }
 
   /// horizontal sum: A0+A1+A2+A3.
@@ -172,11 +172,11 @@ namespace WDutils {
   __t  = __builtin_ia32_movhlps(__s,__s);
   __s  = __builtin_ia32_addps(__s,__t);
   return __builtin_ia32_vec_ext_v4sf(__s,0);
-#else
+#else // gcc
     __m128 __S;
     __S =  _mm_add_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
     return _mm_cvtss_f32(_mm_add_ps(__S,_mm_movehl_ps(__S,__S)));
-#endif
+#endif// gcc
   }
   /// horizontal maximum: max(A0,A1,A2,A3)
   /// extract the max of the four SPFP values from argument
@@ -189,11 +189,11 @@ namespace WDutils {
   __t  = __builtin_ia32_movhlps(__s,__s);
   __s  = __builtin_ia32_maxps(__s,__t);
   return __builtin_ia32_vec_ext_v4sf(__s,0);
-#else
+#else // gcc
     __m128 __S;
     __S =  _mm_max_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
     return _mm_cvtss_f32(_mm_max_ps(__S,_mm_movehl_ps(__S,__S)));
-#endif
+#endif// gcc
   }
 
   /// horizontal minimum: min(A0,A1,A2,A3)
@@ -207,11 +207,11 @@ namespace WDutils {
   __t  = __builtin_ia32_movhlps(__s,__s);
   __s  = __builtin_ia32_minps(__s,__t);
   return __builtin_ia32_vec_ext_v4sf(__s,0);
-#else
+#else // gcc
     __m128 __S;
     __S =  _mm_min_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
     return _mm_cvtss_f32(_mm_min_ps(__S,_mm_movehl_ps(__S,__S)));
-#endif
+#endif// gcc
   }
 
 #ifdef __SSE2__
@@ -230,7 +230,6 @@ namespace WDutils {
     if(tmp.i[3]<m) m=tmp.i[3];
     return m;
   }
-
   /// horizontal sum: A0+A1+A2+A3
   /// extract the sum of the four packed 32-bit integer values from argument
   inline int32 _mm_getsum_epi32(__m128i __A)
@@ -241,8 +240,8 @@ namespace WDutils {
     tmp.x = _mm_cvtss_f32((__m128)_mm_add_epi32(__S,(__m128i)_mm_movehl_ps((__m128)__S,(__m128)__S)));
     return tmp.i;
   }
-#endif
-#endif
+#endif// __SSE2__
+#endif// __SSE__
 
   /// support for coding with SSE intrinsics, code using SSE intrinsics.
   namespace SSE {

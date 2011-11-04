@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2000-2010
+/// \date   2000-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2010 Walter Dehnen
+// Copyright (C) 2000-2011 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,6 +36,10 @@
 #ifndef WDutils_included_limits
 # define WDutils_included_limits
 # include <limits>
+#endif
+#ifndef WDutils_included_cstdlib
+# define WDutils_included_cstdlib
+# include <cstdlib>
 #endif
 //                                                                              
 //  WDutils                                                                     
@@ -84,208 +88,6 @@ namespace WDutils {
   }
   using meta::TypeInfo;
   using meta::TypeCompare;
-  //
-  /// \name print debugging information to stderr, reporting [file:line]        
-  //@{                                                                          
-  /// to be used for reporting debug info
-  struct DebugInformation {
-    const char*file, *lib;    ///< file and library name
-    const int  line;          ///< line number
-    /// constructor: get library name
-    DebugInformation(const char*__lib = "WDutils")
-      : file(0), lib(__lib), line(0) {}
-    /// constructor: get file name, line number, and library name
-    DebugInformation(const char*__file, int __line, const char*__lib= "WDutils")
-      : file(__file), lib(__lib), line(__line) {}
-    /// print info message to stderr, report [file:line] if known.
-    /// \param[in] fmt debug info message (C-type format string)
-    /// \param[in] ... data to be formated
-    void operator() (const char*fmt, ...) const
-#ifdef __GNUC__
-      __attribute__ ((format (printf, 2, 3)))
-#endif
-      ;
-    /// print info message to stderr, report [file:line] if known.
-    /// \param[in] lev level: only report if less than debug_level()
-    /// \param[in] fmt debug info message (C-type format string)
-    /// \param[in] ... data to be formated
-    void operator() (int lev, const char*fmt, ...) const
-#ifdef __GNUC__
-      __attribute__ ((format (printf, 3, 4)))
-#endif
-      ;
-  };
-  /// print debug info to stderr and report [file:line]).
-  /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax:
-  /// \code
-  /// void DebugInfo(int debug_level, const char*format, ...);
-  /// void DebugInfo(const char*format, ...); 
-  /// \endcode
-#define DebugInfo  WDutils::DebugInformation(__FILE__,__LINE__)
-  /// print debug info to stderr (without reporting [file:line]).
-  /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax.
-  /// \code
-  /// void DebugInfoN(int debug_level, const char*format, ...);
-  /// void DebugInfoN(const char*format, ...); 
-  /// \endcode
-#define DebugInfoN WDutils::DebugInformation()
-  //@}
-  //
-  /// \name exception treatment                                                 
-  //@{                                                                          
-  /// simple exception with error message
-  struct exception : protected std::string {
-    /// copy constructor
-    exception(exception const&e)
-      : std::string(e) {}
-    /// construction from C-style format string + data.
-    /// Uses a printf() style format string as first argument, further arguments
-    /// must match format, exactly as in printf, which will be called.
-    /// \param[in] fmt gives the format in C printf() style
-    explicit exception(const char*fmt, ...);
-    /// return error message 
-    const char*text() const
-    { return c_str(); }
-  };
-  /// return error message given an exception
-  inline const char*text(exception const&e)
-  { return e.text(); }
-  /// for generating exceptions
-  struct Thrower {
-    const char *file;          ///< file name
-    const int   line;          ///< line number
-    /// default constructor: set data to NULL
-    Thrower() : file(0), line(0) {}
-    /// constructor: get file name, and line number
-    Thrower(const char*__file, int __line) : file(__file), line(__line) {}
-    /// generate an exception; for usage in WDutils_THROW
-    /// \param[in] fmt  gives the format in C printf() style
-    exception operator()(const char*fmt, ...) const
-#ifdef __GNUC__
-      __attribute__ ((format (printf, 2, 3)))
-#endif
-      ;
-    /// generate an exception; for usage in WDutilsAssert
-    /// \param[in] expr  boolean expression: throw exception if false
-    exception operator()(bool expr) const;
-  };
-  //@}
-  //
-  /// C++ wrapper around a C string.                                            
-  /// Construction from C-type format string + data;                            
-  /// Type conversion to const char*                                            
-  /// Useful for generating a C-style string containing formatted data.         
-  class message {
-    message(message const&);                       // no copy constructor       
-    static const size_t size = 1024;
-    char __text[size];
-  public:
-    /// Generate a string from format + data.
-    /// Uses a printf() style format string as first argument, further arguments
-    /// must match format, exactly as in printf, which will be called.
-    /// \param fmt gives the format in C printf() style
-    explicit message(const char* fmt, ...) throw(exception);
-    /// conversion to C-style string
-    operator const char*() const { return __text; }
-    /// return C-style string
-    const char* text() const { return __text; }
-  };
-  //
-  /// \name error treatment (alternative to throwing an exception)              
-  //@{                                                                          
-  /// to be used for error reporting
-  struct Error {
-    const char*file, *lib;    ///< file and library name
-    const int  line;          ///< line number
-    /// constructor: get library name
-    Error(const char*__lib = "WDutils")
-      : file(0), lib(__lib), line(0) {}
-    /// constructor: get file name, line number, and library name
-    Error(const char*__file, int __line, const char*__lib = "WDutils")
-      : file(__file), lib(__lib), line(__line) {}
-    /// print error message to stderr, report [file:line] if known.
-    void operator() (const char*fmt, ...) const
-#ifdef __GNUC__
-      __attribute__ ((noreturn, format (printf, 2, 3)))
-#endif
-      ;
-  };
-  /// print error message to stderr, reporting [file:line], and exit.
-  /// use like NEMO's error(), i.e. with the same syntax:
-  /// \code
-  /// void WDutils_Error(const char*format, ...);
-  /// \endcode
-#define WDutils_Error      WDutils::Error(__FILE__,__LINE__)
-  /// print error message to stderr and exit.
-  /// use like NEMO's error(), i.e. with the same syntax:
-  /// \code
-  /// void WDutils_ErrorN(const char*format, ...);
-  /// \endcode
-#define WDutils_ErrorN     WDutils::Error()
-  //@}
-  //
-  /// \name warning treatment                                                   
-  //@{                                                                          
-  /// to be used for warning reporting
-  struct Warning {
-    const char*file, *lib;    ///< file and library name
-    const int  line;          ///< line number
-    /// constructor: get library name
-    Warning(const char*__lib = "WDutils")
-      : file(0), lib(__lib), line(0) {}
-    /// constructor: get file name, line number, and library name
-    Warning(const char*__file, int __line, const char*__lib = "WDutils")
-      : file(__file), lib(__lib), line(__line) {}
-    /// print error message to stderr, report [file:line] if known.
-    void operator() (const char*fmt, ...) const
-#ifdef __GNUC__
-      __attribute__ ((format (printf, 2, 3)))
-#endif
-      ;
-  };
-  /// print warning message to stderr, reporting [file:line].
-  /// use like NEMO's warning(), i.e. with the same syntax:
-  /// \code
-  /// void WDutils_Warning(const char*format, ...);
-  /// \endcode
-#define WDutils_Warning	     WDutils::Warning(__FILE__,__LINE__)
-  /// print warning message to stderr (without reporting [file:line]).
-  /// use like NEMO's warning(), i.e. with the same syntax:
-  /// \code
-  /// void WDutils_WarningN(const char*format, ...);
-  /// \endcode
-#define WDutils_WarningN     WDutils::Warning()
-  //@}
-  /// \name macros and code controling the usage of throw exception vs error    
-  //@{                                                                          
-#if 0
-#  undef  WDutils_EXCEPTIONS
-  /// use instead of <tt> throw(WDutils::exception) </tt> after function
-  /// declaration
-#  define WDutils_THROWING
-  /// instead of throwing an exception: error 
-  /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
-  /// WDutils::exception(fmt, data)"
-#  define WDutils_THROWN	WDutils_ErrorN
-  /// instead of throwing an exception: error with [file:line]
-  /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
-  /// WDutils::exception(fmt, data)"
-#  define WDutils_THROWER       WDutils::Error
-  //----------------------------------------------------------------------------
-  /// use "WDutils_RETHROW(E)" to re-throw a caught exception "E"
-#  define WDutils_RETHROW(E)    WDutils_Error  (text(E))
-#else
-#  define WDutils_EXCEPTIONS
-  /// use instead of <tt> throw(WDutils::exception) </tt> after function
-  /// declaration
-#  define WDutils_THROWING      throw(WDutils::exception)
-#  define WDutils_THROWER       throw WDutils::Thrower
-#  define WDutils_THROWN        throw WDutils::exception
-#  define WDutils_RETHROW(E)    throw E
-#endif
-  /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
-#define WDutils_THROW  WDutils_THROWER(__FILE__,__LINE__)
-  //@}
   /// provides information about the running process
   /// \note only one object exists, the static RunInfo::Info
   class RunInfo {
@@ -339,7 +141,7 @@ namespace WDutils {
     ///       If @a arg[0] == 'f', we set # threads to 1 (no openMP).\n
     ///       Otherwise, we try to convert @a arg to an integer number and
     ///       take that. This may exceed the # processors.
-    static void set_omp(const char*arg) WDutils_THROWING;
+    static void set_omp(const char*arg);
     /// shall openMP parallelism be used?
     static bool use_omp()
     { return Info.__omp_size > 1; }
@@ -413,6 +215,246 @@ namespace WDutils {
   /// \param d debugging depth
   inline bool debug(int d)
   { return RunInfo::debug(d); }
+  /* 
+     Version 2.4 and later of GCC defines a magical variable
+     `__PRETTY_FUNCTION__' which contains the name of the function currently
+     being defined.  This is broken in G++ before version 2.6.  C9x has a
+     similar variable called __func__, but the GCC macro is preferrable since
+     it demangles C++ function names.
+  */
+#ifdef __GNUC__
+#  if (__GNUC__ > 3) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 6))
+#    define WDutilsThisFunction	__PRETTY_FUNCTION__
+#  elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
+#    define WDutilsThisFunction	__func__
+#  endif
+#else
+#  define WDutilsThisFunction	0
+#endif
+  //
+  /// \name print debugging information to stderr, reporting [file:line]        
+  //@{
+  /// to implement DebugInformation, Error, and Warning
+  template<typename ReportTraits>
+  struct Reporting {
+    const char*library;
+    const char*file,*func;      ///< names: file, function
+    const int  line;            ///< line number
+//     /// constructor: get library name
+//     Reporting()
+//       : library(0), file(0), func(0), line(0) {}
+    /// constructor: get library and function name
+    explicit Reporting(const char*__lib)
+      : library(__lib), file(0), func(0), line(0) {}
+    /// constructor: get library and function name
+    explicit Reporting(const char*__func, const char*__lib)
+      : library(__lib), file(0), func(__func), line(0) {}
+    /// constructor: get file name, line number, and library name
+    Reporting(const char*__file, int __line, const char*__lib)
+      : library(__lib), file(__file), func(0), line(__line) {}
+    /// constructor: get file name, func name, line number, and library name
+    Reporting(const char*__func, const char*__file, int __line,
+	      const char*__lib)
+      : library(__lib), file(__file), func(__func), line(__line) {}
+    /// print info message to stderr, report [file:line] if known.
+    /// \param[in] fmt debug info message (C-type format string)
+    /// \param[in] ... data to be formated
+    void operator() (const char*fmt, ...) const
+#ifdef __GNUC__
+      __attribute__ ((format (printf, 2, 3)))
+#endif
+      ;
+    /// print info message to stderr, report [file:line] if known.
+    /// \param[in] lev level: only report if less than debug_level()
+    /// \param[in] fmt debug info message (C-type format string)
+    /// \param[in] ... data to be formated
+    void operator() (int lev, const char*fmt, ...) const
+#ifdef __GNUC__
+      __attribute__ ((format (printf, 3, 4)))
+#endif
+      ;
+  };
+  /// traits for DebugInformation
+  struct DebugInfoTraits {
+    static bool condition(int lev) { return RunInfo::debug(lev); }
+    static const char*issue() { return "Debug Info"; }
+    static void after() {}
+  };
+  typedef Reporting<DebugInfoTraits> DebugInformation;
+  /// print debug info to stderr and report [file:line]func:
+  /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax:
+  /// \code
+  ///   void DebugInfo(int debug_level, const char*format, ...);
+  ///   void DebugInfo(const char*format, ...); 
+  /// \endcode
+#define DebugInfo \
+  WDutils::DebugInformation(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
+  /// print debug info to stderr and report func:
+  /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax:
+  /// \code
+  ///   void DebugInfoF(int debug_level, const char*format, ...);
+  ///   void DebugInfoF(const char*format, ...); 
+  /// \endcode
+#define DebugInfoF WDutils::DebugInformation(WDutilsThisFunction,"WDutils")
+  /// print debug info to stderr (without reporting [file:line]).
+  /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax.
+  /// \code
+  ///   void DebugInfoN(int debug_level, const char*format, ...);
+  ///   void DebugInfoN(const char*format, ...); 
+  /// \endcode
+#define DebugInfoN WDutils::DebugInformation("WDutils")
+  /// traits for Error
+  struct ErrorTraits {
+    static bool condition(int) { return true; }
+    static const char*issue() { return "Error"; }
+    static void after() { std::exit(1); }
+  };
+  typedef Reporting<ErrorTraits> Error;
+  /// print error message to stderr, reporting [file:line]func, and exit.
+  /// use like NEMO's error(), i.e. with the same syntax:
+  /// \code
+  ///   void WDutils_Error(const char*format, ...);
+  /// \endcode
+#define WDutils_Error \
+  WDutils::Error(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
+  /// print error message to stderr, reporting [file:line]func, and exit.
+  /// use like NEMO's error(), i.e. with the same syntax:
+  /// \code
+  ///   void WDutils_ErrorF(const char*format, ...);
+  /// \endcode
+#define WDutils_ErrorF WDutils::Error(WDutilsThisFunction,"WDutils")
+  /// print error message to stderr and exit.
+  /// use like NEMO's error(), i.e. with the same syntax:
+  /// \code
+  ///   void WDutils_ErrorN(const char*format, ...);
+  /// \endcode
+#define WDutils_ErrorN WDutils::Error("WDutils")
+  /// traits for Warning
+  struct WarningTraits {
+    static bool condition(int) { return true; }
+    static const char*issue() { return "Warning"; }
+    static void after() {}
+  };
+  typedef Reporting<WarningTraits> Warning;
+  /// print warning message to stderr, reporting [file:line]func
+  /// use like NEMO's warning(), i.e. with the same syntax:
+  /// \code
+  ///   void WDutils_Warning(const char*format, ...);
+  /// \endcode
+#define WDutils_Warning \
+  WDutils::Warning(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
+  /// print warning message to stderr, reporting [file:line]func
+  /// use like NEMO's warning(), i.e. with the same syntax:
+  /// \code
+  ///   void WDutils_WarningF(const char*format, ...);
+  /// \endcode
+#define WDutils_WarningF WDutils::Warning(WDutilsThisFunction,"WDutils")
+  /// print warning message to stderr
+  /// use like NEMO's warning(), i.e. with the same syntax:
+  /// \code
+  ///   void WDutils_WarningN(const char*format, ...);
+  /// \endcode
+#define WDutils_WarningN WDutils::Warning("WDutils")
+  /// \name exception treatment                                                 
+  //@{                                                                          
+  /// simple exception with error message
+  struct exception : protected std::string {
+    /// copy constructor
+    exception(exception const&e)
+      : std::string(e) {}
+    /// construction from C-style format string + data.
+    /// Uses a printf() style format string as first argument, further arguments
+    /// must match format, exactly as in printf, which will be called.
+    /// \param[in] fmt gives the format in C printf() style
+    explicit exception(const char*fmt, ...);
+    /// return error message 
+    const char*text() const
+    { return c_str(); }
+  };
+  /// return error message given an exception
+  inline const char*text(exception const&e)
+  { return e.text(); }
+  /// for generating exceptions
+  struct Thrower {
+    const char*file,*func;    ///< file name, function name
+    const int  line;          ///< line number
+    /// default constructor: set data to NULL
+    Thrower()
+      : file(0), func(0), line(0) {}
+    /// constructor: get function name
+    explicit Thrower(const char*__func)
+      : file(0), func(__func), line(0) {}
+    /// constructor: get file name, and line number
+    Thrower(const char*__file, int __line)
+      : file(__file), func(0), line(__line) {}
+    /// constructor: get file & function name, and line number
+    Thrower(const char*__func, const char*__file, int __line)
+      : file(__file), func(__func), line(__line) {}
+    /// generate an exception; for usage in WDutils_THROW
+    /// \param[in] fmt  gives the format in C printf() style
+    exception operator()(const char*fmt, ...) const
+#ifdef __GNUC__
+      __attribute__ ((format (printf, 2, 3)))
+#endif
+      ;
+    /// generate an exception; for usage in WDutilsAssert
+    /// \param[in] expr  boolean expression: throw exception if false
+    exception operator()(bool expr) const;
+  };
+  //@}
+  //
+  /// C++ wrapper around a C string.                                            
+  /// Construction from C-type format string + data;                            
+  /// Type conversion to const char*                                            
+  /// Useful for generating a C-style string containing formatted data.         
+  class message {
+    message(message const&);                       // no copy constructor       
+    static const size_t size = 1024;
+    char __text[size];
+  public:
+    /// Generate a string from format + data.
+    /// Uses a printf() style format string as first argument, further arguments
+    /// must match format, exactly as in printf, which will be called.
+    /// \param fmt gives the format in C printf() style
+    explicit message(const char* fmt, ...) throw(exception);
+    /// conversion to C-style string
+    operator const char*() const { return __text; }
+    /// return C-style string
+    const char* text() const { return __text; }
+  };
+  /// \name macros and code controling the usage of throw exception vs error    
+  //@{                                                                          
+#if 0
+#  undef  WDutils_EXCEPTIONS
+  /// use instead of <tt> throw(WDutils::exception) </tt> after function
+  /// declaration
+#  define WDutils_THROWING
+  /// instead of throwing an exception: error 
+  /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
+  /// WDutils::exception(fmt, data)"
+#  define WDutils_THROWN	WDutils_ErrorN
+  /// instead of throwing an exception: error with [file:line]
+  /// use "WDutils_THROW(fmt, data)" instead of "error(fmt, data)" or "throw
+  /// WDutils::exception(fmt, data)"
+#  define WDutils_THROWER       WDutils::Error
+  //----------------------------------------------------------------------------
+  /// use "WDutils_RETHROW(E)" to re-throw a caught exception "E"
+#  define WDutils_RETHROW(E)    WDutils_Error (text(E))
+#else // 0/1
+#  define WDutils_EXCEPTIONS
+  /// use instead of <tt> throw(WDutils::exception) </tt> after function
+  /// declaration
+#  define WDutils_THROWING      throw(WDutils::exception)
+#  define WDutils_THROWER       throw WDutils::Thrower
+#  define WDutils_THROWN        throw WDutils::exception
+#  define WDutils_RETHROW(E)    throw E
+#endif
+  /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
+#define WDutils_THROW  \
+  WDutils_THROWER(WDutilsThisFunction,__FILE__,__LINE__)
+  /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
+#define WDutils_THROWF WDutils_THROWER(WDutilsThisFunction)
+  //@}
   //
   //  macro for compile-time assertion, stolen from the boost library
   //
@@ -442,59 +484,38 @@ namespace WDutils {
   /// throws exception with "assertion failed" message
 # ifdef __GNUC__
   inline
-  void AssertFail(const char*, const char*, unsigned, const char*)
+  void AssertFail(const char*, const char*, const char*, unsigned)
     WDutils_THROWING __attribute__ ((__noreturn__));
 # endif
   inline
-  void AssertFail(const char*assertion, const char*file, unsigned line,
-		  const char*function) WDutils_THROWING
-  {
-    if(function) WDutils_THROWER(file,line)
-		   ("%s: Assertion \"%s\" failed",function,assertion);
-    else         WDutils_THROWER(file,line)
-		   ("Assertion \"%s\" failed",assertion);
-  }
+  void AssertFail(const char*assertion, const char*func, 
+		  const char*file, unsigned line) WDutils_THROWING
+  { WDutils_THROWER(func,file,line)("Assertion \"%s\" failed",assertion); }
   //
 # ifdef __GNUC__
   inline
-  void AssertFailE(const char*, const char*, unsigned, const char*)
+  void AssertFailE(const char*, const char*, const char*, unsigned)
     __attribute__ ((__noreturn__));
 # endif
   inline
-  void AssertFailE(const char*assertion, const char*file, unsigned line,
-		   const char*function)
-  {
-    if(function) WDutils::Error(file,line)
-		   ("%s: Assertion \"%s\" failed",function,assertion);
-    else         WDutils::Error(file,line)
-		   ("Assertion \"%s\" failed",assertion);
+  void AssertFailE(const char*assertion, const char*func,
+		   const char*file, unsigned line)
+  { 
+    WDutils::Error(func,file,line,"WDutils")
+      ("Assertion \"%s\" failed",assertion);
+    std::exit(1);
   }
   /// use instead of assert(): throws an exception
 # define WDutilsAssert(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : WDutils::AssertFail(__STRING(expr),__FILE__,__LINE__,WDutilsThisFunction))
+  : WDutils::AssertFail(__STRING(expr),WDutilsThisFunction,__FILE__,__LINE__))
   /// almost identical to assert()
 # define WDutilsAssertE(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : WDutils::AssertFailE(__STRING(expr),__FILE__,__LINE__,WDutilsThisFunction))
+  : WDutils::AssertFailE(__STRING(expr),WDutilsThisFunction,__FILE__,__LINE__))
 #endif // NDEBUG
-/* Version 2.4 and later of GCC define a magical variable `__PRETTY_FUNCTION__'
-   which contains the name of the function currently being defined.
-   This is broken in G++ before version 2.6.
-   C9x has a similar variable called __func__, but prefer the GCC one since
-   it demangles C++ function names.  */
-#ifdef __GNUC__
-#  if (__GNUC__ > 3) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 6))
-//#  if __GNUC_PREREQ (2, 6)
-#    define WDutilsThisFunction	__PRETTY_FUNCTION__
-#  elif defined __STDC_VERSION__ && __STDC_VERSION__ >= 199901L
-#    define WDutilsThisFunction	__func__
-#  endif
-#else
-#  define WDutilsThisFunction	0
-#endif
   //@}
   //
   /// a safer snprintf.                                                         

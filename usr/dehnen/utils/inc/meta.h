@@ -584,6 +584,38 @@ namespace WDutils {
     /// \param[in] Y  boolean expression which may be ignored
     /// \return    @a X && @a Y
     template<bool X> bool And(bool Y) { return __Bool<X>::AND(Y); }
+
+    /// \name functors useful as template arguments
+    //@{
+    /// x=y
+    struct Assign {
+      template<typename X> static void operate(X&x, X y) { x=y; }
+    };
+    /// x+=y
+    struct Add {
+      template<typename X> static void operate(X&x, X y) { x+=y; }
+    };
+    /// x-=y
+    struct Subtract {
+      template<typename X> static void operate(X&x, X y) { x-=y; }
+    };
+    /// x*=y
+    struct Multiply {
+      template<typename X> static void operate(X&x, X y) { x*=y; }
+    };
+    /// x/=y
+    struct Divide {
+      template<typename X> static void operate(X&x, X y) { x/=y; }
+    };
+    /// x=max(x,y)
+    struct Maximum {
+      template<typename X> static void operate(X&x, X y) { if(y>x) x=y; }
+    };
+    /// x=min(x,y)
+    struct Minimum {
+      template<typename X> static void operate(X&x, X y) { if(y<x) x=y; }
+    };
+    //@}
   } // namespace WDutils::meta
 } // namespace WDutils
 //
