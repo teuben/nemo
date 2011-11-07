@@ -122,6 +122,22 @@ namespace WDutils {
 #  define _mm_signmove_ps(__x,__y)				\
   _mm_or_ps(_mm_signmask_ps(__x),_mm_abs_ps(__y))
 # endif // __SSE2__
+
+#ifdef __INTEL_COMPILER
+  inline __m128&operator*=(__m128&x, __m128 const&y)
+  { return x=_mm_mul_ps(x,y); }
+  inline __m128&operator/=(__m128&x, __m128 const&y)
+  { return x=_mm_div_ps(x,y); }
+  inline __m128&operator+=(__m128&x, __m128 const&y)
+  { return x=_mm_add_ps(x,y); }
+  inline __m128&operator-=(__m128&x, __m128 const&y)
+  { return x=_mm_sub_ps(x,y); }
+# ifdef __SSE2__
+  inline __m128i&operator+=(__m128i&x, __m128i const&y)
+  { return x=_mm_add_epi32(x,y); }
+#endif // __SSE__
+#endif // __INTEL_COMPILER
+
 #endif // __SSE__
 
 //
