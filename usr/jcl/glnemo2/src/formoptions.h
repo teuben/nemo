@@ -121,6 +121,73 @@ class FormOptions: public QDialog {
       go->osd_font_size = (float ) value;
       emit update_osd_font();
     }
+    // ColorBar TAB
+    void on_gcb_enable_clicked(bool b) {
+      go->gcb_enable = b;
+      emit update_gl();
+    }
+    void on_gcb_radio_north_clicked(bool b) {
+      if (b) {;}
+      go->gcb_orientation = 0;
+      emit update_gl();
+    }
+    void on_gcb_radio_est_clicked(bool b) {
+      if (b) {;}
+      go->gcb_orientation = 1;
+      emit update_gl();
+    }
+    void on_gcb_radio_south_clicked(bool b) {
+      if (b) {;}
+      go->gcb_orientation = 2;
+      emit update_gl();
+    }
+    void on_gcb_radio_west_clicked(bool b) {
+      if (b) {;}
+      go->gcb_orientation = 3;
+      emit update_gl();
+    }    
+    void on_gcb_height_valueChanged(double value) {
+      go->gcb_pheight = value/100;
+      emit update_gl();
+    }
+    void on_gcb_width_valueChanged(double value) {
+      go->gcb_pwidth = value/100;
+      emit update_gl();
+    }
+    void on_gcb_log_clicked(bool b) {
+      go->gcb_logmode = b;
+      emit update_gl();
+    }
+    void on_gcb_spin_digit_valueChanged(int value) {
+      go->gcb_ndigits = value;
+      emit update_gl();
+    }
+    void on_gcb_spin_offset_valueChanged(int value) {
+      go->gcb_offset = value;
+      emit update_gl();
+    }
+    // change colorbar font size
+    void on_gcb_spin_font_size_valueChanged(double value) {
+      go->gcb_font_size = value;
+      emit update_gcb_font();
+      emit update_gl();
+    }
+
+    // change colorbar font color button
+    void on_gcb_font_color_clicked() {
+      QPalette pal = form.gcb_font_color->palette();
+      QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
+      QString css=QString("background:rgb(%1,%2,%3)").
+                  arg(color.red()).
+                  arg(color.green()).
+                  arg(color.blue());  
+      form.gcb_font_color->setStyleSheet(css); 
+      go->gcb_color = color;
+      emit update_gcb_font();
+      emit update_gl();
+    }
+    
+    
     // change font color button
     void on_font_color_clicked() {
       QPalette pal = form.font_color->palette();
@@ -240,6 +307,7 @@ class FormOptions: public QDialog {
     void rebuild_grid();
     void update_osd(bool b);
     void update_osd_font();
+    void update_gcb_font();
     void update_gl();
     //           
     // camera tab

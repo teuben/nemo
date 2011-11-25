@@ -1,12 +1,16 @@
-.TH GLNEMO2 1NEMO "October 2010"
+.TH GLNEMO2 1NEMO "November 2011"
 .SH NAME
 glnemo2 \- An interactive 3D OpenGL visualization program for Nemo snapshots
 .SH SYNOPSIS
 \fBglnemo2\fP [parameter=value]
 .SH DESCRIPTION
-\fBglnemo2\fP is  an interactive visualization 3D program  , using OpenGL and trolltech 
-QT 4.X API. It displays in 3D, particles positions of the different components of an 
-nbody snapshot. 
+\fBGlnemo2\fP is an interactive 3D visualization program which displays
+particles positions of the different components (gas, stars, disk,
+dark mater halo, bulge) of an N-body snapshot. It's a very useful tool
+for everybody running N-body simulations from isolated galaxies to cosmological simulations. It can show quickly a lot of information about  data by revealing shapes, dense areas, formation of structures
+such as spirals arms, bars, peanuts or clumps of galaxies. Glnemo2 has
+been designed to meet the  requirements of the user, with simplicity in mind, easy to install, easy to use with an interactive and responsive graphical user interface (based on Nokia QT 4.X API) , powerful with a fast 3D engine (OPenGL and GLSL), and generic with the possibility to load different kinds of input files. 
+
 
  You can zoom in/out, rotate, scale, translate, select different particles 
 and plot them in different blending colors, color particles according to their density,
@@ -250,6 +254,30 @@ simulation's file name will be used as title
 \fBosdfontsize=\fP
 set OSD's font in pixels [13.]
 .TP 20
+\fBcb=\fP
+display Color Bar (CB) on screen [t]
+.TP 20
+\fBcblog=\fP         
+display real or log of the physical value on CB [f]
+.TP 20
+\fBcbloc=\fP         
+CB location, 0:top 1:right 2:bottom 3:left [3]
+.TP 20
+\fBcbdigits=\fP      
+CB #digits [1]
+.TP 20
+\fBcboffset=\fP     
+CB #offset pixels from the border location [35]
+.TP 20
+\fBcbpw=\fP       
+CB size in percentage of the OpenGL windows width [0.03]
+.TP 20
+\fBcbph=\fP       
+CB size in percentage of the OpenGL windows height [0.65]
+.TP 20
+\fBcbfs=\fP   
+size of the fonts used to display CB [13]
+.TP 20
 \fBcom=\fP
 center according the Center Of Mass [t]
 .TP 20
@@ -298,7 +326,7 @@ Screenshot name []
 if true it allows a smoother interactivity with   [t]
 
 .SH WARNING
-Glnemo2 uses hardware accelerated feature of the video card and especially GLSL capabilities. Not all the video cards have this requirement under Linux. The very well supported card are Nvidia card with proprietary driver. If glnemo2 crashs at starting, try to launch the program again by adding to the command line "glsl=f". It will deactivate the hardware accelerated engine, therefore the rendering will be slow but the program might work at least.
+Glnemo2 uses hardware accelerated feature of video card and especially GLSL capabilities. Not all the video cards have this requirement under Linux. The very well supported card are Nvidia card with proprietary driver. If glnemo2 crashs at starting, try to launch the program again by adding to the command line "glsl=f". It will deactivate the hardware accelerated engine, therefore the rendering will be slow but the program might work at least.
 
 .SH SEE ALSO
 glnemo(1NEMO)
@@ -311,7 +339,7 @@ $NEMO/usr/jcl/glnemo2: directory with source code
 .br
 $NEMO/usr/jcl/glnemo2/gyrfalcon: runtime gyrfalcon manipulator (See README)
 .TP
-\fBhttp://www.oamp.fr/lam/equipes/dynamique/jcl/glnemo\fP Home page
+\fBhttp://projets.oamp.fr/projects/glnemo2\fP Home page
 .SH AUTHOR
 Jean-Charles Lambert
 .SH UPDATE HISTORY
@@ -323,4 +351,5 @@ Jean-Charles Lambert
 27-Oct-10	Version 1.1  - see ChangeLog		JCL
 29-Oct-10	Version 1.11 happy gcc 4.5.0		JCL
 16-Apr-11	Ver 1.20 - new rendering pipeline/see ChangeLog	JCL
+25-Nov-11	Ver 1.30 - Color bar display on 3d view	JCL
 .fi

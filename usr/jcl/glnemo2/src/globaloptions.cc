@@ -90,6 +90,19 @@ GlobalOptions::GlobalOptions()
   octree_enable=false;
   octree_display=false;
   octree_level=10;
+  // GL Colorbar
+  gcb_enable=true;
+  gcb_logmode=true;
+  gcb_min=0;
+  gcb_max=100;
+  gcb_orientation=3; // West
+  gcb_ndigits=1;
+  gcb_offset=35;
+  gcb_pwidth=3.0/100.;
+  gcb_pheight=65.0/100.;
+  gcb_font_size=13.;
+  gcb_font_name= RESPATH+"/fonts/AvantGarde-Demi.txf";
+  gcb_color=QColor(Qt::gray);  
   // vel 
   vel_req = false;
   new_frame = false;
@@ -241,6 +254,19 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   octree_enable=m.octree_enable;
   octree_display=m.octree_display;
   octree_level=m.octree_level;
+  // GL Colorbar
+  gcb_enable=m.gcb_enable;
+  gcb_logmode=m.gcb_logmode;
+  gcb_min=m.gcb_min;
+  gcb_max=m.gcb_max;
+  gcb_orientation=m.gcb_orientation;
+  gcb_ndigits=m.gcb_ndigits;
+  gcb_offset=m.gcb_offset;
+  gcb_pwidth=m.gcb_pwidth;
+  gcb_pheight=m.gcb_pheight;
+  gcb_font_size=m.gcb_font_size;
+  gcb_font_name= m.gcb_font_name;
+  gcb_color=m.gcb_color;  
   // vel 
   vel_req = m.vel_req;
   new_frame = m.new_frame;

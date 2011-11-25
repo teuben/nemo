@@ -58,6 +58,7 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   p_data = new ParticlesData();
   pov    = new ParticlesObjectVector();
   gl_select = new GLSelection();
+  
   connect(gl_select, SIGNAL(updateGL()), this, SLOT(updateGL()));
   connect(gl_select, SIGNAL(updateZoom()), this, SLOT(osdZoom()));
   connect(this,SIGNAL(sigScreenshot()),parent,SLOT(startAutoScreenshot()));
@@ -103,6 +104,8 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   text.setFont(font);
   text.setPointSize(store_options->osd_font_size );
   osd = new GLObjectOsd(wwidth,wheight,text,Qt::yellow);
+  // colorbar
+  gl_colorbar = new GLColorbar(store_options,true);
   
   ////////
   // FBO
@@ -155,7 +158,8 @@ void GLWindow::updateGL()
 // update
 void GLWindow::update(ParticlesData   * _p_data,
                       ParticlesObjectVector * _pov,
-                      GlobalOptions         * _go)
+                      GlobalOptions         * _go,
+                      const bool update_old_obj)
 {
   store_options = _go;
   mutex_data->lock();
@@ -176,7 +180,8 @@ void GLWindow::update(ParticlesData   * _p_data,
   store_options->octree_display = true;
   store_options->octree_level = 0;
   //tree->update(p_data, _pov);
-
+  gl_colorbar->update(&gpv,p_data->getPhysData(),store_options,mutex_data);
+  
   for (unsigned int i=0; i<pov->size() ;i++) {
     if (i>=gpv.size()) {
       GLObjectParticles * gp = new GLObjectParticles(p_data,&((*pov)[i]),
@@ -184,9 +189,10 @@ void GLWindow::update(ParticlesData   * _p_data,
       //GLObjectParticles * gp = new GLObjectParticles(&p_data,pov[i],store_options);
       gpv.push_back(*gp);
       delete gp;
-    } else {
-      gpv[i].update(p_data,&((*pov)[i]),store_options);
-      //gpv[i].update(&p_data,pov[i],store_options);
+    } else {      
+      gpv[i].update(p_data,&((*pov)[i]),store_options, update_old_obj);
+      //gpv[i].update(&p_data ,pov[i],store_options);
+        
     }
   }
 
@@ -365,6 +371,7 @@ void GLWindow::paintGL()
 
   // grid display
   if (store_options->show_grid) {
+    glEnable( GL_DEPTH_TEST );
     glEnable(GL_BLEND);
     gridx->display();
     gridy->display();
@@ -408,6 +415,15 @@ void GLWindow::paintGL()
         store_options->render_mode = 0;
       }*/
       gpv[i].display(mModel2,wheight);
+//      const ParticlesObject * po = gpv[i].getPartObj();        // object
+//      if (po->hasPhysic()) {
+//        // display colorbar
+//        gl_colorbar->display(QGLWidget::width(),QGLWidget::height(),
+//                             po->getMinPercenPhys(), po->getMaxPercenPhys());      
+//      }
+    }
+    if (store_options->phys_min_glob!=-1 && store_options->phys_max_glob!=-1) {
+      gl_colorbar->display(QGLWidget::width(),QGLWidget::height());
     }
     //mutex_data->unlock();
   }
@@ -419,14 +435,15 @@ void GLWindow::paintGL()
   // On Screen Display
   if (store_options->show_osd) osd->display();
   
+  
   // display selected area
   gl_select->display(QGLWidget::width(),QGLWidget::height());
 
   if (fbo && GLWindow::GLSL_support) {
     fbo = false;
     //imgFBO = grabFrameBuffer();
-     imgFBO = QImage( texWidth, texHeight,QImage::Format_RGB32);
-     glReadPixels( 0, 0, texWidth, texHeight, GL_RGBA, GL_UNSIGNED_BYTE, imgFBO.bits() );
+    imgFBO = QImage( texWidth, texHeight,QImage::Format_RGB32);
+    glReadPixels( 0, 0, texWidth, texHeight, GL_RGBA, GL_UNSIGNED_BYTE, imgFBO.bits() );
     // Make the window the target
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
 
@@ -456,7 +473,7 @@ void GLWindow::initShader()
 
     if (GLSL_support ) {
       shader = new CShader(GlobalOptions::RESPATH.toStdString()+"/shaders/particles.vert.cc",
-                                 GlobalOptions::RESPATH.toStdString()+"/shaders/particles.frag.cc");
+                           GlobalOptions::RESPATH.toStdString()+"/shaders/particles.frag.cc");
       shader->init();
     }
 
@@ -781,7 +798,8 @@ void GLWindow::rotateAroundAxis(const int axis)
               z_mouse = (int) store_options->zrot;
               break;
       }
-    updateGL();
+      setRotation(store_options->xrot,store_options->yrot,store_options->zrot);
+      updateGL();
   }
 }
 // -----------------------------------------------------------------------------

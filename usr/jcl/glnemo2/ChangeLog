@@ -1,6 +1,7 @@
 1.21 (SVN)
 ----------
 - fix a crash when physical values are out of limits
+- add texture alpha set value from cli
 
 1.20 (May, 3rd 2011)
 --------------

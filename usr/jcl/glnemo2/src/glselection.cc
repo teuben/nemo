@@ -103,7 +103,7 @@ void GLSelection::display(const int width, const int height)
       glVertex2f(0,height-y1);
       glVertex2f(width,height-y1);
     glEnd();
-  
+    glDisable(GL_BLEND);
     glMatrixMode( GL_PROJECTION );
     glPopMatrix();
     glMatrixMode( GL_MODELVIEW );

@@ -42,9 +42,9 @@ void DensityColorBar::draw()
       //QPainterPath path;
       int index;
       if (!go->reverse_cmap) 
-        index=i*ncolors/(parent->width()-1);
+        index=i*(ncolors-1)/(parent->width()-1);
       else
-        index=(parent->width()-1-i)*ncolors/(parent->width()-1);
+        index=(parent->width()-1-i)*(ncolors-1)/(parent->width()-1);
       
       //path.moveTo(i,0);
       //path.lineTo(i,parent->height());

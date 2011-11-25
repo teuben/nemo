@@ -271,6 +271,7 @@ void GLObjectOsd::display()
     }
     
     font.end();
+    glDisable(GL_BLEND);
     // Restore OpenGL state
     glMatrixMode( GL_PROJECTION );
     glPopMatrix();

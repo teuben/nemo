@@ -29,7 +29,7 @@ SnapshotPhiGrape::SnapshotPhiGrape():SnapshotInterface()
   interface_type    ="PhiGRAPE";
   full_nbody = 0;
   size_buff = 2048;
-  BUFF = new char[size_buff];
+  BUFF = NULL;
   sbuff="";
 }
 
@@ -45,7 +45,7 @@ SnapshotPhiGrape::~SnapshotPhiGrape()
   if (vel)   free ((float *) vel);
 
   if (valid) close();
-  delete [] BUFF;
+  if (BUFF) delete [] BUFF;
 
 }
 // ============================================================================
@@ -265,6 +265,7 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
 {
   int status=0;
   if (valid) {
+    BUFF = new char[size_buff];
     status=1;
     if (nsel > *part_data->nbody) {
       if (part_data->pos) delete [] part_data->pos;
@@ -306,7 +307,7 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
           for (int j=0; j<3; j++)
             part_data->vel[cpt*3+j] = *(v+j);
         // rho ALLOC
-        if (first && endptr!='\0') {
+        if (first && *endptr!='\0') {
             first = false;
             if (nsel > *part_data->nbody|| !part_data->rho) {
               if (part_data->rho) delete part_data->rho;
@@ -318,12 +319,12 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
             }
         }
         // rho
-        if (endptr!='\0') {
+        if (*endptr!='\0') {
             rho1  = strtof(p, &endptr);
             p   = endptr;
             part_data->rho->data[cpt]   = rho1;
             // hsml
-            if (endptr!='\0') {
+            if (*endptr!='\0') {
                 hsml  = strtof(p, &endptr);
                 p   = endptr;
                 part_data->rneib->data[cpt] = hsml;

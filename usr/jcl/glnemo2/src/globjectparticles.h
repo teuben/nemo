@@ -67,8 +67,9 @@ class GLObjectParticles : public GLObject {
 		      GLTextureVector *, CShader *);
     ~GLObjectParticles();
     void update(const ParticlesData   *,
-           ParticlesObject *,
-           const GlobalOptions   *);
+                ParticlesObject *,
+                const GlobalOptions   *,
+                const bool update_obj=true);
     void updateVel();
     void updateVbo();
     void updateColorVbo();

@@ -101,6 +101,7 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_options,SIGNAL(select_and_zoom(const bool)),
           gl_window->gl_select,SLOT(setZoom(bool)));
   connect(form_options,SIGNAL(save_selected()),this,SLOT(saveIndexList()));
+  connect(form_options,SIGNAL(create_obj_selected()),this,SLOT(createObjFromIndexList()));
   // Camera
   connect(camera,SIGNAL(updateGL()),gl_window,SLOT(updateGL()));
   connect(form_options,SIGNAL(setCamDisplay(bool,bool)),camera,SLOT(setCamDisplay(bool,bool)));
@@ -127,6 +128,9 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_options,SIGNAL(update_osd(bool)),this,SLOT(updateOsd(bool)));
   connect(form_options,SIGNAL(update_osd_font()),gl_window,SLOT(changeOsdFont()));
   connect(form_options,SIGNAL(update_gl()),gl_window,SLOT(updateGL()));
+  // options GL colorbar tab
+  connect(form_options,SIGNAL(update_gcb_font()),gl_window->gl_colorbar,SLOT(updateFont()));
+  
   // --------- init some stuffs
   initVariables();
   startTimers();
@@ -647,16 +651,25 @@ void MainWindow::loadNewData(const std::string select,
       qDebug("Time elapsed to load snapshot: %d s", tbench.elapsed()/1000);
       store_options->new_frame=true;
       mutex_data->unlock();
-      listObjects();
+      listObjects(pov);
+      listObjects(pov2);
       if (reload) { // backup old pov2 properties to povold
         povold.clear();
         ParticlesObject::backupVVProperties(pov2,povold,pov.size());
+        //std::cerr << "POVOLD list\n";
+        //listObjects(povold);        
       }
       ParticlesObject::initOrbitsVectorPOV(pov);
       pov2 = pov;   // copy new pov object to pov2
       ParticlesObject::clearOrbitsVectorPOV(pov2); // clear orbits vectors if present
       if (reload) { // copy back povold properties to pov2
+        //std::cerr << "POVOLD list\n";
+        //listObjects(povold);
+        //std::cerr << "POV2 list before\n";
+        //listObjects(pov2);
         ParticlesObject::backupVVProperties(povold,pov2,pov.size());
+        //std::cerr << "POV2 list after\n";
+        //listObjects(pov2);
       }
       if (first) {
         if (store_options->auto_texture_size && !store_options->rho_exist) {
@@ -724,15 +737,15 @@ void MainWindow::startTimers()
 // -----------------------------------------------------------------------------
 // List Objects                                                                 
 // -----------------------------------------------------------------------------
-void MainWindow::listObjects()
+void MainWindow::listObjects(ParticlesObjectVector& ppov)
 {
-  for (int i=0; i<(int)pov.size();i++) {
+  for (int i=0; i<(int)ppov.size();i++) {
     std::cerr << "---------------------------------------\n";
     std::cerr << "Object #["<<i<<"]: ";
-    std::cerr << "#npart = "<<pov[i].npart << " -- "
-              << "first  = "<<pov[i].first << " -- "
-              << "last   = "<<pov[i].last  << " -- "
-              << "step   = "<<pov[i].step  << "\n";
+    std::cerr << "#npart = "<<ppov[i].npart << " -- "
+              << "first  = "<<ppov[i].first << " -- "
+              << "last   = "<<ppov[i].last  << " -- "
+              << "step   = "<<ppov[i].step  << "\n";
   }
 }
 // -----------------------------------------------------------------------------
@@ -794,7 +807,17 @@ void MainWindow::parseNemoParameters()
   if (hasvalue((char *) "osd_set_title") ) {
     store_options->osd_title_name = getparam((char *) "osd_set_title");
   }
-  store_options->osd_font_size = getdparam((char *) "osdfontsize");
+  store_options->osd_font_size = getdparam((char *) "osdfs");
+  // Color Bar
+  store_options->gcb_enable      = getbparam((char *) "cb");
+  store_options->gcb_logmode     = getbparam((char *) "cblog");
+  store_options->gcb_orientation = getiparam((char *) "cbloc");
+  store_options->gcb_ndigits     = getiparam((char *) "cbdigits");
+  store_options->gcb_offset      = getiparam((char *) "cboffset");
+  store_options->gcb_pwidth      = getdparam((char *) "cbpw");
+  store_options->gcb_pheight     = getdparam((char *) "cbph");
+  store_options->gcb_font_size   = getdparam((char *) "cbfs");
+  
   store_options->perspective=getbparam((char *) "perspective");
   store_options->orthographic = !store_options->perspective;
   play                   = getbparam((char *) "play");
@@ -1040,9 +1063,9 @@ void MainWindow::actionCenterToCom(const bool ugl)
     // a bug regarding bad COM when interactive centering
     // while loading snapshot...                         
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    for (int i=0; i<(int)pov.size();i++) {
+    for (int i=0; i<(int)pov2.size();i++) {
 	 // loop on all the objects
-	const ParticlesObject * po = &(pov[i]);        // object
+	const ParticlesObject * po = &(pov2[i]);        // object
 	if (po->isVisible()) {                                   // is visible  
 	  ParticlesData * part_data = current_data->part_data;// get its Data
 	  // loop on all the particles of the object
@@ -1181,6 +1204,7 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
         QImage img=(((gl_window->grabFrameBufferObject()).mirrored()).rgbSwapped()); // convert FBO to img
 
         gl_window->resize(sizegl.width(),sizegl.height());    // revert to the previous Ogl windows's size
+        gl_window->updateGL();
 
         // !!! activate the following line if you want to see OSDr
 #if 0
@@ -1400,6 +1424,7 @@ void MainWindow::uploadNewFrame()
       first=false;
       //gl_window->bestZoomFit();
     }
+    //gl_window->bestZoomFit();
     if (store_options->auto_play_screenshot && !store_options->auto_gl_screenshot) {
       startAutoScreenshot();
     }
@@ -1488,6 +1513,34 @@ void MainWindow::updateBenchFrame()
   
 }
 // -----------------------------------------------------------------------------
+// createObjFromIndexList()                                                                
+void MainWindow::createObjFromIndexList()
+{
+  std::vector <int> * list = gl_window->gl_select->getList();
+  if (list->size()) { //&& current_data->part_data->id.size()>0) {
+    std::vector <int> indexes;
+    indexes.reserve(list->size());
+    for (std::vector<int>::iterator i=list->begin(); i<list->end(); i++) {     
+      if (current_data->part_data->id.size()>0) { // save by ids
+        //indexes.push_back(current_data->part_data->id[*i]);
+        indexes.push_back(*i);
+      } else {
+        indexes.push_back(*i);
+      }
+    }
+    ParticlesObject * po = new ParticlesObject(ParticlesObject::Range); // new object
+    po->buildIndexList(indexes);
+    pov.push_back(*po);
+    delete po;
+    listObjects(pov);
+    ParticlesObject::copyVVkeepProperties(pov,pov2,user_select->getNSel()); 
+    form_o_c->update( current_data->part_data, &pov2,store_options,false); // update Form
+    updateOsd();
+    gl_window->update( current_data->part_data, &pov2,store_options,false);
+  }
+}
+
+// -----------------------------------------------------------------------------
 // saveIndexList                                                                
 void MainWindow::saveIndexList()
 {
@@ -1499,8 +1552,8 @@ void MainWindow::saveIndexList()
       if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         out << "#glnemo_index_list\n";
-        for (std::vector<int>::iterator i=list->begin(); i<list->end(); i++) {          
-           //out << (*i) << "\n";
+        for (std::vector<int>::iterator i=list->begin(); i<list->end(); i++) {   
+          //std::cerr << "iterator  *i="<< *i <<"\n";           
           if (current_data->part_data->id.size()>0) { // save by ids
             out << current_data->part_data->id[*i] << "\n";
           } else {                                    // save by indexes

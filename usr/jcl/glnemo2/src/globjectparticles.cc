@@ -319,7 +319,8 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
 // update                                                                      
 void GLObjectParticles::update( const ParticlesData   * _part_data,
                                 ParticlesObject * _po,
-                                const GlobalOptions   * _go)
+                                const GlobalOptions   * _go,
+                                const bool update_obj)
 {
   // update variables
   part_data = _part_data;
@@ -333,31 +334,33 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
   // color
   mycolor   = po->getColor();
   
-  if (!GLWindow::GLSL_support) buildDisplayList();
-  buildVelDisplayList();
-  if (po->isOrbitsRecording()) {
-    po->addOrbits(part_data);
-    buildOrbitsDisplayList();
-  } else {
-    glNewList( orb_dp_list, GL_COMPILE );
-    glEndList();
-  }
-  if (GLWindow::GLSL_support) {
-
-    buildVboPos();
-    checkGlError("GLObjectParticles::update buildVboPos");
-    buildVboPhysData();
-    checkGlError("GLObjectParticles::update buildPhysData");
-    buildVboHsml();
-    checkGlError("GLObjectParticles::update buildVboSize2");
-    
+  if (update_obj) { // force to rebuild VBO and display list
+    if (!GLWindow::GLSL_support) buildDisplayList();
+    buildVelDisplayList();
+    if (po->isOrbitsRecording()) {
+      po->addOrbits(part_data);
+      buildOrbitsDisplayList();
+    } else {
+      glNewList( orb_dp_list, GL_COMPILE );
+      glEndList();
+    }
+    if (GLWindow::GLSL_support) {
+      
+      buildVboPos();
+      checkGlError("GLObjectParticles::update buildVboPos");
+      buildVboPhysData();
+      checkGlError("GLObjectParticles::update buildPhysData");
+      buildVboHsml();
+      checkGlError("GLObjectParticles::update buildVboSize2");
+      
 #if ! GLDRAWARRAYS
-    sortByDensity();
+      sortByDensity();
 #endif
-    updateColormap();
-    checkGlError("GLObjectParticles::update updateColormap");
-    updateBoundaryPhys();
-    checkGlError("GLObjectParticles::update updateBoundaryPhys");
+      updateColormap();
+      checkGlError("GLObjectParticles::update updateColormap");
+      updateBoundaryPhys();
+      checkGlError("GLObjectParticles::update updateBoundaryPhys");
+    }
   }
 }
 // ============================================================================
@@ -695,6 +698,8 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
       // send absolute min and max phys of the object
       shader->sendUniformf("data_phys_min",log(phys_select->getMin()));
       shader->sendUniformf("data_phys_max",log(phys_select->getMax()));
+      //std::cerr << "!go->dynamic_cmap : log(phys_select->getMin())="<<log(phys_select->getMin())<<"\n";
+      //std::cerr << "!go->dynamic_cmap : log(phys_select->getMax())="<<log(phys_select->getMax())<<"\n";
     } else {
       shader->sendUniformf("data_phys_min",log(po->getMinPhys()));
       shader->sendUniformf("data_phys_max",log(po->getMaxPhys()));

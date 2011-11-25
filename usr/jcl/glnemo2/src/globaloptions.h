@@ -82,6 +82,16 @@ public:
     bool octree_enable;
     bool octree_display;
     int octree_level;
+    // Colorbar
+    bool   gcb_enable, gcb_logmode;
+    int    gcb_min, gcb_max; // threshold
+    int    gcb_ndigits;      // #digits
+    int    gcb_orientation;  // North,Est,South,West
+    float  gcb_pwidth, gcb_pheight; // factor size
+    float  gcb_font_size;
+    int    gcb_offset;       // colorbar offset in pixels
+    QString gcb_font_name;
+    QColor  gcb_color;
     // network;
     int port;
     // const

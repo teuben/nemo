@@ -27,6 +27,7 @@
 #include "globjectosd.h"
 #include "gltexture.h"
 #include "gloctree.h"
+#include "glcolorbar.h"
 #include "camera.h"
 
 
@@ -63,6 +64,8 @@ public:
     // select area
     GLSelection * gl_select;
     static void checkGLErrors(std::string s);
+    // color bar
+    GLColorbar * gl_colorbar;
     
   signals:
     void sigKeyMouse(const bool, const bool);
@@ -71,7 +74,8 @@ public:
 public slots:
    void  update(ParticlesData   * ,
                 ParticlesObjectVector * ,
-                GlobalOptions         * );
+                GlobalOptions         * ,
+                const bool update_old_obj=true);
    void  update(ParticlesObjectVector * );
    void  update();
    void  updateVbo(const int);   

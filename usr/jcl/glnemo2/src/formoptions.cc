@@ -79,9 +79,17 @@ FormOptions::FormOptions(GlobalOptions * _go, QWidget *parent):QDialog(parent)
         arg(go->background_color.green()).
         arg(go->background_color.blue());  
   form.background_color->setStyleSheet(css);
+  
+  // ------------- Colorbar tab
+  // font color
+  css=QString("background:rgb(%1,%2,%3)").
+        arg(go->gcb_color.red()).
+        arg(go->gcb_color.green()).
+        arg(go->gcb_color.blue());  
+  form.gcb_font_color->setStyleSheet(css);
+  
   update();
 }
-
 // ============================================================================
 // Destructor                                                                  
 FormOptions::~FormOptions()
@@ -112,8 +120,21 @@ void FormOptions::update()
   form.osd_rot->setChecked(go->osd_rot);
   form.spin_font_size->setValue(go->osd_font_size);
   form.title_name->setText(go->osd_title_name);
+  
+  // ColorBar tab
+  form.gcb_enable->setChecked(go->gcb_enable);
+  form.gcb_height->setValue(go->gcb_pheight*100.);
+  form.gcb_width->setValue(go->gcb_pwidth*100.);
+  form.gcb_log->setChecked(go->gcb_logmode);
+  if (go->gcb_orientation==0) form.gcb_radio_north->setChecked(true);
+  if (go->gcb_orientation==1) form.gcb_radio_est->setChecked(true);
+  if (go->gcb_orientation==2) form.gcb_radio_south->setChecked(true);
+  if (go->gcb_orientation==3) form.gcb_radio_west->setChecked(true);
+  form.gcb_spin_digit->setValue(go->gcb_ndigits);
+  form.gcb_spin_font_size->setValue(go->gcb_font_size);
+  form.gcb_spin_offset->setValue(go->gcb_offset);
+  
 }
-
 // ============================================================================
 // updateFrame                                                                 
 void FormOptions::updateFrame(const int frame, const int tot)

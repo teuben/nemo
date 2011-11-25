@@ -55,6 +55,7 @@ class ParticlesObject{
     static void initOrbitsVectorPOV(ParticlesObjectVector&);   
     void buildIndexList(const int, const int, const int, const int _step=1);
     void buildIndexList();
+    void buildIndexList(std::vector<int> &);
     int resizeRange(const int, const int, int&);
     static int nobj; // object's index           
     int npart;       // #particles in the object
@@ -135,9 +136,10 @@ class ParticlesObject{
       rho_sorted=_v;
     }
     void setPhysic(const bool _v) { has_physic = _v;}
-    bool  hasPhysic() { return has_physic;}
+    bool  hasPhysic() const { return has_physic;}
   private:
 
+    void copyDataObject(const ParticlesObject&, const bool garbage=false);
     QColor color;    // object color                    
     bool visible;    // TRUE if object is visible       
     // part

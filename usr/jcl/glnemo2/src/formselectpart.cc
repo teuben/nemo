@@ -151,28 +151,28 @@ void FormSelectPart::updateSelect()
     coma=true;
   }
   if (coma) tcoma=",";
-  if (form.disk_check->isChecked()) {
-    form.final_select->insert(tcoma+QString("disk"));
+  if (form.halo_check->isChecked()) {
+    form.final_select->insert(tcoma+QString("halo"));
     coma=true;
-  }
+  }  
   if (coma) tcoma=",";
   if (form.gas_check->isChecked()) {
     form.final_select->insert(tcoma+QString("gas"));
     coma=true;
   }
   if (coma) tcoma=",";
-  if (form.halo_check->isChecked()) {
-    form.final_select->insert(tcoma+QString("halo"));
-    coma=true;
-  }
-  if (coma) tcoma=",";
-  if (form.bulge_check->isChecked()) {
-    form.final_select->insert(tcoma+QString("bulge"));
+  if (form.disk_check->isChecked()) {
+    form.final_select->insert(tcoma+QString("disk"));
     coma=true;
   }
   if (coma) tcoma=",";
   if (form.stars_check->isChecked()) {
     form.final_select->insert(tcoma+QString("stars"));
+    coma=true;
+  }
+  if (coma) tcoma=",";
+  if (form.bulge_check->isChecked()) {
+    form.final_select->insert(tcoma+QString("bulge"));
     coma=true;
   }
   if (coma) tcoma=",";

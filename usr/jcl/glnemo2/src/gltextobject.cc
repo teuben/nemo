@@ -93,7 +93,8 @@ int GLTextObject::getTextWidth()
 int GLTextObject::getHeight()
 {
   float l,r,b,t;
-  font.getFont()->getBBox("this is a test",font.getPointSize(),0,&l,&r,&b,&t);
+  //font.getFont()->getBBox("this is a test",font.getPointSize(),0,&l,&r,&b,&t);
+  font.getFont()->getBBox(text.toStdString().c_str(),font.getPointSize(),0,&l,&r,&b,&t);
   return (t-b);
 }
 // ============================================================================

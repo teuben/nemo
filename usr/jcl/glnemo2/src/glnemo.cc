@@ -27,7 +27,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.21 (svn)"
+#define RELEASE_VERSION "1.30"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -82,7 +82,15 @@ using namespace std;
     "osdtitle=t\n      Show title on OSD                                ",
     "osddata=t\n       Show data type on OSD                            ",
     "osd_set_title=\n  Set an explicit title on OSD                     ",
-    "osdfontsize=13.0\n Size of OSD's font                              ",
+    "osdfs=13.0\n Size of OSD's font                              ",
+    "cb=t\n            display Color Bar (CB) on the screen             ",
+    "cblog=f\n         display real or log of the physical value on CB  ",
+    "cbloc=3\n         CB location, 0:top 1:right 2:bottom 3:left       ",
+    "cbdigits=1\n      CB #digits                                       ",
+    "cboffset=35\n     CB #offset pixels from the border location       ",
+    "cbpw=0.03\n       CB size in percentage of the OpenGL windows width",
+    "cbph=0.65\n       CB size in percentage of the OpenGL windows height",
+    "cbfs=13\n   size of the fonts used to display CB             ",
     "com=t\n           centering according Center Of Mass               ", 
     "point=f\n         show particles as points                         ",
     "selphys=1\n        select physical quantity to display\n           "

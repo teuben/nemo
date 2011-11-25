@@ -98,6 +98,7 @@ class MainWindow : public QMainWindow {
     void updateBenchFrame();
     void startAutoScreenshot();
     void saveIndexList();
+    void createObjFromIndexList();
     void updateIpvs(const int ipvs=-1) {
        if (current_data) {
          current_data->part_data->setIpvs(ipvs);
@@ -191,7 +192,7 @@ class MainWindow : public QMainWindow {
     PluginsManage * plugins;
     ParticlesObjectVector pov,pov2;
     ComponentRangeVector * crv;
-    void listObjects();
+    void listObjects(ParticlesObjectVector& ppov);
     void setDefaultParamObject(ParticlesObjectVector&);
     // NEMO parameters
     std::string snapshot,select,server, s_times,version;

@@ -464,27 +464,6 @@ int PhysicalData::computeMinMax()
       }
     }       
     std::cerr << "-------------------------------\n";
-    switch (type) {
-    case PhysicalData::neib :
-      std::cerr << "Hsml        range :\n";
-      break;
-    case PhysicalData::rho : 
-      GlobalOptions::rho_exist         = true;
-      std::cerr << "Density     range :\n";
-      break;
-    case PhysicalData::temperature : 
-      GlobalOptions::temperature_exist = true;
-      std::cerr << "Temperature range :\n";
-      break;  
-    case PhysicalData::temperaturesd : 
-      GlobalOptions::temperature_exist = true;
-      std::cerr << "Temperature range :\n";
-      break;     
-    case PhysicalData::pressure :
-      GlobalOptions::pressure_exist    = true;
-      std::cerr << "Pressure    range :\n";
-      break;                        
-    }
     valid = true;
     if (min>0 && max>0) {
       if ((max == -1E9 && min == 1E9 )|| (max == min) ||
@@ -496,6 +475,28 @@ int PhysicalData::computeMinMax()
         valid = false;
       } 
     }
+    switch (type) {
+    case PhysicalData::neib :
+      std::cerr << "Hsml        range :\n";
+      break;
+    case PhysicalData::rho : 
+      if (valid) GlobalOptions::rho_exist         = true;
+      std::cerr << "Density     range :\n";
+      break;
+    case PhysicalData::temperature : 
+      if (valid) GlobalOptions::temperature_exist = true;
+      std::cerr << "Temperature range :\n";
+      break;  
+    case PhysicalData::temperaturesd : 
+      if (valid) GlobalOptions::temperature_exist = true;
+      std::cerr << "Temperature range :\n";
+      break;     
+    case PhysicalData::pressure :
+      if (valid) GlobalOptions::pressure_exist    = true;
+      std::cerr << "Pressure    range :\n";
+      break;                        
+    } 
+    
     std::cerr <<" min = "<< std::scientific << std::setw(10) << min
               <<"\n max = "<< std::setw(10)<<max<<"\n";
     if (max >  std::numeric_limits<double>::max()) {
@@ -547,7 +548,8 @@ int PhysicalData::computeMinMax()
           int index=(log(data[i])-log(min))*99./(log(max)-log(min));
           //int index=((data[i])-(min))*99./((max)-(min));
           assert(index<100);
-          data_histo[index]++;
+          data_histo[index]++; // data_histo stores the number of particles foreach percentage
+                               // of physical value from 0 to 99 %
         }
       }
     }

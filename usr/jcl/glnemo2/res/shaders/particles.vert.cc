@@ -108,6 +108,7 @@ vec4 computeColor() {
     int cindex;
     cindex=int(min(fcindex,fncmap-1.));
     cindex=int(max(0.,fcindex));
+    //cindex=int(max(0.,cindex));
     col.x = colormap[cindex].x;    // red
     col.y = colormap[cindex].y;    // green
     col.z = colormap[cindex].z;    // blue

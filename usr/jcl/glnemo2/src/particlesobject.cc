@@ -42,10 +42,51 @@ ParticlesObject::ParticlesObject( const int _npart, const int _first,
   last  = _last;
   step  = _step;
 }
+
+// ============================================================================
+// copy data object                                                             
+void ParticlesObject::copyDataObject(const ParticlesObject&m, const bool garbage)
+{
+  obj_from     = m.obj_from;
+  obj_name     = m.obj_name;
+  npart        = m.npart;
+  first        = m.first;
+  last         = m.last;
+  step         = m.step;
+  
+  copyProperties(m);
+  
+  // loop on orbits_max
+  OrbitsVector oo = m.ov;
+  for (OrbitsVector::iterator oit =oo.begin();oit!=oo.end() ; oit++) {  
+    OrbitsList ol;
+    // loop on orbit_history
+    for (OrbitsList::iterator oil=(*oit).begin(); oil != (*oit).end(); oil++){
+      Orbits * ob = new Orbits(*oil); // get each orbits
+      ol.push_back(*ob);              // add in new list
+      delete ob;
+    }
+    ov.push_back(ol);  // insert new list in new object
+  }
+  if (m.index_tab) {
+    if (garbage && index_tab)
+      delete [] index_tab;
+    cpt +=npart;
+    index_tab    = new int[npart];
+    memcpy(index_tab,m.index_tab,sizeof(int)*npart);
+    //for (int i=0;i<npart;i++) index_tab[i] = m.index_tab[i];
+  }
+  else index_tab=NULL;
+  
+}
+
 // ============================================================================
 // copy onstructor                                                             
 ParticlesObject::ParticlesObject(const ParticlesObject&m)
 {
+#if 1
+  copyDataObject(m);
+#else
   obj_from     = m.obj_from;
   obj_name     = m.obj_name;
   npart        = m.npart;
@@ -99,11 +140,15 @@ ParticlesObject::ParticlesObject(const ParticlesObject&m)
     //for (int i=0;i<npart;i++) index_tab[i] = m.index_tab[i];
   }
   else index_tab=NULL;
+#endif
 }
 // ============================================================================
 // copy constructor                                                            
 const ParticlesObject& ParticlesObject::operator=(const ParticlesObject&m)
 {
+#if 1
+  copyDataObject(m,true);
+#else
   obj_from     = m.obj_from;
   obj_name     = m.obj_name;
   npart        = m.npart;
@@ -159,6 +204,7 @@ const ParticlesObject& ParticlesObject::operator=(const ParticlesObject&m)
     //for (int i=0;i<npart;i++) index_tab[i] = m.index_tab[i];
   }
   else index_tab=NULL;
+#endif
   return *this;
 }
 // ============================================================================
@@ -182,6 +228,7 @@ void ParticlesObject::copyProperties(const ParticlesObject&m)
   vel_factor   = m.vel_factor;
   vel_size_max = m.vel_size_max;
   color        = m.color;
+  pos          = m.pos; // 02/sep/2011 added
   orbits       = m.orbits;
   o_record     = m.o_record;
   orbits_max   = m.orbits_max;
@@ -201,6 +248,7 @@ void ParticlesObject::copyVVkeepProperties(ParticlesObjectVector& src,ParticlesO
 {
   for (unsigned int i=0; i<src.size(); i++) {
     if (i<dest.size()) { // object already exist
+      ParticlesObject::nobj--;
       ParticlesObject * podest = new ParticlesObject();
       *podest = dest[i]; // copy dest po
       dest[i] = src[i];  // src to dest
@@ -263,6 +311,11 @@ ParticlesObject::~ParticlesObject()
     cpt -= npart;
     delete [] index_tab;
   }
+  int nn=0;
+  for (OrbitsVector::iterator oit =ov.begin();oit!=ov.end() ; oit++) {    
+    (*oit).clear();  
+    nn++;
+  }
   ov.clear();
 //   if (ol && ol->size())
 //     ol->clear(); // Orbits List
@@ -318,6 +371,24 @@ void ParticlesObject::init(const ObjFrom _of, const std::string _name)
 }
 // ============================================================================
 // buildIndexList                                                              
+void ParticlesObject:: buildIndexList(std::vector<int> & indexes)
+{
+  npart = indexes.size();
+  if (index_tab) {
+    delete [] index_tab;
+    cpt -= npart;
+  }
+  first = 0;
+  last  = npart-1;
+  step  = 1;
+  index_tab    = new int[npart];
+  cpt += npart;
+  for (int i=0; i<npart; i++) {
+    index_tab[i] = indexes[i];
+  }
+}
+// ============================================================================
+// buildIndexList                                                              
 void ParticlesObject::buildIndexList( const int _npart, const int _first,
                                       const int _last, const int _step)
 {
@@ -366,11 +437,13 @@ void ParticlesObject::setColor()
 {
   int modulo_col[5][3] = {
                             { 255, 75, 39 },
-                            { 214,214, 52 },
+                            { 255,255, 255 },
                             { 114,214, 32 },
                             {  58, 61,214 },
                             { 214, 47,197 }
   };
+  //{ 214,214, 52 },
+  //std::cerr << "NOBJ = "<<nobj<<"\n";
   color = QColor(modulo_col[(nobj-1)%5][0],
                  modulo_col[(nobj-1)%5][1],
                  modulo_col[(nobj-1)%5][2]);

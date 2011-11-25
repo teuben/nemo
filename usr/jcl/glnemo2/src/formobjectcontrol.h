@@ -177,7 +177,6 @@ namespace glnemo {
     void on_dens_slide_min_valueChanged(int);
     void on_dens_slide_max_valueChanged(int);
     void on_phys_console_button_clicked();
-    void on_dens_set_uselect_clicked();
     void setPhysicalTabName();
     void setNewPhys();
     //

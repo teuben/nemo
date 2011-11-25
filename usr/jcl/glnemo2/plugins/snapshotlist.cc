@@ -185,7 +185,8 @@ bool SnapshotList::getLine(const bool force)
         int cpt=0;
         while (  str >> parse   &&              // something to read 
                 parse[0] != '#' &&              // not commented out 
-                parse[0] != '!'                 // not commented out 
+                parse[0] != '!' &&              // not commented out 
+                parse[0] != '\n'                // not a blank line
                 ) {
             cpt++;
             if (cpt==1) snapshot=parse;
@@ -195,9 +196,9 @@ bool SnapshotList::getLine(const bool force)
 	  while(i<snapshot.length() && snapshot[i]==' ') i++; // search first non blank
 	  if (i<snapshot.length() && snapshot[i]!='/')        // first char not a '/'  
 	    snapshot = dirpath.toStdString() + snapshot;      // append to dirpath     
-          }
 	  stop   = true; // we have a snapshot
-	  status = true; // so we can stop reading
+	  status = true; // so we can stop reading          
+        }
       }
       else { // end of file
         stop   = true;

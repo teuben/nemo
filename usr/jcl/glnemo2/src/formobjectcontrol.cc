@@ -24,12 +24,18 @@
 namespace glnemo {
 #define RT_VISIB 0
 #define RT_COLOR 2
+#define ST_VISIB 0
+#define ST_COLOR 1
 #define FT_VISIB 0
 #define FT_COLOR 3
 
 int last_row=0;
 bool EMIT=true;  // EMIT only signal from user requests
 
+// Object Start Table
+int osrange=0;
+int osselec=0;
+int osfile =0;
 // ============================================================================
 // Constructor                                                                 
 // create the 2 tables : Range and File                                        
@@ -38,28 +44,45 @@ FormObjectControl::FormObjectControl(QWidget *parent):QDialog(parent)
   ignoreCloseEvent = true;
   form.setupUi(this);
   current_data = NULL;
+  // set number of rows per table (20)
+  form.range_table->setRowCount(20);
+  osrange=0;
+  
+  form.select_table->setRowCount(20);
+  osselec=osrange+form.range_table->rowCount();
+  
+  form.file_table->setRowCount(20);
+  osfile=osselec+form.select_table->rowCount();
+  
   form.range_table->setColumnWidth(0,25);   // Vis  
   form.range_table->setColumnWidth(1,150);  // Range
   form.range_table->setColumnWidth(2,45);   // Color
   form.file_table->setColumnWidth(0,25);
+  form.select_table->setColumnWidth(0,25);
   for (int i=0; i < form.range_table->rowCount(); i++) {
     form.range_table->setRowHeight(i,25);
     form.file_table->setRowHeight(i,25);
+    form.select_table->setRowHeight(i,25);
   }
   // create object index array
-  int no=form.range_table->rowCount()+form.file_table->rowCount();
+  int no=form.range_table->rowCount()  +
+         form.select_table->rowCount() +
+         form.file_table->rowCount();
   object_index = new int[no];
-  for (int i=0; i<no;i++) object_index[i]=-1;
+  for (int i=0; i<no;i++) object_index[i]=-1; // -1=>object does not exist
   current_object = 0;
   pov = NULL;
   first=true;
   lock = true;
   // insert checkbox and color widget into tables
-  initTableWidget(form.range_table,0,RT_VISIB,RT_COLOR);  // range
-  initTableWidget(form.file_table,1,FT_VISIB,FT_COLOR);   // file 
+  initTableWidget(form.range_table ,0,RT_VISIB,RT_COLOR);  // range
+  initTableWidget(form.select_table,1,ST_VISIB,ST_COLOR);  // select
+  initTableWidget(form.file_table  ,2,FT_VISIB,FT_COLOR);  // file 
   // Selection mode and behaviour
   form.range_table->setSelectionMode(QAbstractItemView::SingleSelection);
   form.range_table->setSelectionBehavior(QAbstractItemView::SelectItems);
+  form.select_table->setSelectionMode(QAbstractItemView::SingleSelection);
+  form.select_table->setSelectionBehavior(QAbstractItemView::SelectItems);
   form.file_table->setSelectionMode(QAbstractItemView::SingleSelection);
   form.file_table->setSelectionBehavior(QAbstractItemView::SelectItems);
   // create range selection combobox to store objects' particles indexes.
@@ -201,11 +224,18 @@ void FormObjectControl::update(ParticlesData   * _p_data,
         updateTable(tw,i,RT_VISIB ,RT_COLOR);
         updateRangeTable(i);
       }
+      if ((*pov)[i].selectFrom() == ParticlesObject::Select) { // Range
+        tw = form.select_table;	
+        updateTable(tw,i,RT_VISIB ,RT_COLOR);
+        updateRangeTable(i);
+      }
+#if 0
       else {                                                  // File
         tw = form.range_table;
         updateTable(tw,i,FT_VISIB,FT_COLOR);
         updateFileTable(i);
       }
+#endif
       //updateObjectSettings(i); 
     }
     else {               // not belonging to object list
@@ -436,6 +466,8 @@ void FormObjectControl::checkComboLine(const int row, const int col)
           pobj->step  = step;
           pobj->buildIndexList();   // build object index list
           current_object = row;
+          // parse all the objects to check if physic is present
+          //checkPhysic(); // uncomment this to activate physic rendering (2/sep/2011)
           updateObjectSettings(row);// update form !!! CAUSE OF CRASH
           emit objectUpdate();      // update OpenGL
         }
@@ -1026,8 +1058,11 @@ void FormObjectControl::on_dens_slide_min_valueChanged(int value)
     pobj->setMinPercenPhys(value);
     if (EMIT) {
       
-      setNewPhys();
+      setNewPhys();      
+      go->gcb_min = form.dens_slide_min->value();
+      go->gcb_max = form.dens_slide_max->value();
       emit changeBoundaryPhys(i_obj);      
+      //emit updateThresholMinMax();
     }
   }
   my_mutex2->unlock();
@@ -1058,7 +1093,9 @@ void FormObjectControl::on_dens_slide_max_valueChanged(int value)
     if (EMIT) {
     
       setNewPhys();
-      emit changeBoundaryPhys(i_obj);      
+      go->gcb_min = form.dens_slide_min->value();
+      go->gcb_max = form.dens_slide_max->value();
+      emit changeBoundaryPhys(i_obj);
     }
   }
   my_mutex2->unlock();
@@ -1225,27 +1262,5 @@ void FormObjectControl::setPhysicalTabName()
             break;                        
           }
   }
-}
-// ============================================================================
-// on_dens_set_uselect_clicked()                                              
-void FormObjectControl::on_dens_set_uselect_clicked()
-{
-#if 0
-  if (go  && ! go->duplicate_mem) mutex_data->lock();
-  int i_obj = object_index[current_object];
-  if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
-    assert(i_obj < (int)pov->size());
-    //ParticlesObject * pobj = &(*pov)[i_obj];
-    float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
-    QString value;
-    value.setNum(exp(log(phys_select->getMin())+form.dens_slide_min->value()*diff_rho));
-    form.dens_min_user->setText(value);
-    value.setNum(exp(log(phys_select->getMin())+form.dens_slide_max->value()*diff_rho));
-    form.dens_max_user->setText(value);
-    go->phys_min_glob = (form.dens_min_user->text()).toFloat();
-    go->phys_max_glob = (form.dens_max_user->text()).toFloat();
-  }
-  if (go  && ! go->duplicate_mem) mutex_data->unlock();
-#endif
 }
 }

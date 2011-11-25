@@ -66,7 +66,9 @@ void DensityHisto::drawGrid()
   addPath(path);
 }
 // ============================================================================
-// drawDensity                                                                 
+// drawDensity  
+// density_histo stores the number of particles foreach percentage
+// of density from 0 to 99 %
 void DensityHisto::drawDensity(const int _density_histo[100])
 {
   memcpy(density_histo,_density_histo,sizeof(int)*100);
