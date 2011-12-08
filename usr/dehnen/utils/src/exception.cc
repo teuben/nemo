@@ -243,14 +243,14 @@ namespace {
     const int size=1024;
     int s=size, w=0;
     char ffmt[size], *t=ffmt;
-    char dpth[24] = ":                     ";
+    char dpth[21] = "                    ";
     if(depth>20) depth=20;
-    dpth[2+depth]=0;
+    dpth[depth]=0;
     if(lib) {
-      w=snprintf(t,s,"# %s %s:",lib,issue);
+      w=snprintf(t,s,"# %s %s",lib,issue);
       t+=w; s-=w;
     } else if(issue) {
-      w=snprintf(t,s,"# %s:",issue);
+      w=snprintf(t,s,"# %s",issue);
       t+=w; s-=w;
     }
     if(name && RunInfo::name_known()) {
@@ -266,18 +266,18 @@ namespace {
       t+=w; s-=w;
 #endif
     }
-    if(func) {
-      w=snprintf(t,s," in %s",func);
-      t+=w; s-=w;
-    }      
     if(file) {
       w=snprintf(t,s," [%s:%d]",file,line);
       t+=w; s-=w;
     }
+    if(func) {
+      w=snprintf(t,s," in %s",func);
+      t+=w; s-=w;
+    }      
     if (fmt[strlen(fmt)-1] != '\n')
-      w=snprintf(t,s,"%s%s\n",dpth,fmt);
+      w=snprintf(t,s,": %s%s\n",dpth,fmt);
     else
-      w=snprintf(t,s,"%s%s",dpth,fmt);
+      w=snprintf(t,s,": %s%s",dpth,fmt);
     t+=w; s-=w;
     vfprintf(stderr,ffmt,ap);
     fflush(stderr);
@@ -312,18 +312,22 @@ template struct WDutils::Reporting<WDutils::WarningTraits>;
 //
 WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
 {
-  size_t size = 1024;
+  size_t size = 1024, len;
   char   buffer[1024], *buf=buffer;
-  if(func) {
-    int len = SNprintf(buf,size," in %s",func);
-    buf  += len;
-    size -= len;
-  }
   if(file) {
-    int len = SNprintf(buf,size," [%s:%d]",file,line);
-    buf  += len;
-    size -= len;
+    len  = SNprintf(buf,size,"[%s:%d]",file,line);
+    buf += len;
+    size-= len;
   }
+  if(func) {
+    len  = file? SNprintf(buf,size," in %s",func) :
+                 SNprintf(buf,size, "in %s",func) ;
+    buf += len;
+    size-= len;
+  }
+  len  = SNprintf(buf,size,": ");
+  buf += len;
+  size-= len;
   va_list  ap;
   va_start(ap,fmt);
   vsnprintf(buf, size, fmt, ap);

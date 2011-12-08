@@ -420,8 +420,7 @@ namespace {
       unsigned R;       ///< rank of first point
       scalar   W;       ///< cumulative weight at first point
       range   *S;       ///< pter to left sub-range
-      range() {}
-      range(int n) : N(n), R(0), W(0), S(0) {}
+      explicit range(int n) : N(n), R(0), W(0), S(0) {}
     };
     scalar             SumW;        ///< total weight
     point             *P;           ///< table of points

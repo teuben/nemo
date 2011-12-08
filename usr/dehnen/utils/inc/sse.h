@@ -135,9 +135,41 @@ namespace WDutils {
 # ifdef __SSE2__
   inline __m128i&operator+=(__m128i&x, __m128i const&y)
   { return x=_mm_add_epi32(x,y); }
-#endif // __SSE__
-#endif // __INTEL_COMPILER
-
+#endif // __SSE2__
+  inline float xmm0(__m128 __A)
+  {
+    union { float f; int i; } tmp;
+    tmp.i = _mm_extract_ps(__A,0);
+    return tmp.f;
+  }
+  inline float xmm1(__m128 __A)
+  {
+    union { float f; int i; } tmp;
+    tmp.i = _mm_extract_ps(__A,1);
+    return tmp.f;
+  }
+  inline float xmm2(__m128 __A)
+  {
+    union { float f; int i; } tmp;
+    tmp.i = _mm_extract_ps(__A,2);
+    return tmp.f;
+  }
+  inline float xmm3(__m128 __A)
+  {
+    union { float f; int i; } tmp;
+    tmp.i = _mm_extract_ps(__A,3);
+    return tmp.f;
+  }
+#elif defined(__GNUC__)  // __INTEL_COMPILER / __GNUC__
+  inline float xmm0(__m128 __A)
+  { return __builtin_ia32_vec_ext_v4sf(__A,0); }
+  inline float xmm1(__m128 __A)
+  { return __builtin_ia32_vec_ext_v4sf(__A,1); }
+  inline float xmm2(__m128 __A)
+  { return __builtin_ia32_vec_ext_v4sf(__A,2); }
+  inline float xmm3(__m128 __A)
+  { return __builtin_ia32_vec_ext_v4sf(__A,3); }
+#endif // __INTEL_COMPILER / __GNUC__
 #endif // __SSE__
 
 //
