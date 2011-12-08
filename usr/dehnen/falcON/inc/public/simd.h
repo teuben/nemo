@@ -339,8 +339,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // allocation of many fvec4                                                 
     //--------------------------------------------------------------------------
-    void* operator new   [](        size_t n) { return malloc16(n); }
-    void  operator delete[](void*q, size_t  ) { return free16(q); }
+    void* operator new   [](        size_t n) { return WDutils_NEW16(char,n); }
+    void  operator delete[](void*q, size_t  ) { return WDutils_DEL16(q); }
     //--------------------------------------------------------------------------
     // output to std::ostream; there is no input from std::istream              
     //--------------------------------------------------------------------------

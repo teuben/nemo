@@ -1359,7 +1359,7 @@ namespace falcON {
     {
       if(debug(6) && !have_all(s)) {
 	DebugInfoN(" [%s:%d]: bodies data required but not present: \"%s\"\n",
-		  f,l,word(all_data().missing(s)));
+		   f,l,word(all_data().missing(s)));
 	return false;
       }
       return true;

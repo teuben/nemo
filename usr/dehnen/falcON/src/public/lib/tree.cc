@@ -1299,8 +1299,8 @@ inline void OctTree::allocate (unsigned ns, unsigned nc, unsigned dm, real r0) {
 		        +nc*sizeof(Cell)           // cells                     
                         +(dm+1)*sizeof(real);      // radii of cells            
   if((need > NALLOC) || (need+need < NALLOC)) {
-    if(ALLOC) delete16(ALLOC);
-    ALLOC  = new16<char>(need);
+    if(ALLOC) WDutils_DEL16(ALLOC);
+    ALLOC  = WDutils_NEW16(char,need);
     NALLOC = need;
   }
   DUINT[0] = Ns = ns;
@@ -1422,7 +1422,7 @@ void OctTree::reuse()
 //------------------------------------------------------------------------------
 OctTree::~OctTree()
 {
-  if(ALLOC) { delete16(ALLOC); }
+  if(ALLOC) { WDutils_DEL16(ALLOC); }
 }
 //------------------------------------------------------------------------------
 // find surrounding cell
