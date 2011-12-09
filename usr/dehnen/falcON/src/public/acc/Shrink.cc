@@ -5,13 +5,13 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2009
+/// \date    2009,2011
 /// 
 /// \brief   contains code for a shrinking/expanding potential
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2009  Walter Dehnen
+// Copyright (C) 2009,2011  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -127,19 +127,19 @@ namespace {
       size_t Nscl16 = SSE::Top<scalar>(n);
       size_t Nvec16 = SSE::Top<scalar>(n*NDIM);
       if(Nvec16*sizeof(scalar) > NPOS) {
-	if(POS) free16(POS);
+	if(POS) WDutils_DEL16(POS);
 	NPOS = Nvec16*sizeof(scalar);
-	POS  = new16<char>(NPOS);
+	POS  = WDutils_NEW16(char,NPOS);
       }
       if(Nscl16*sizeof(scalar) > NPOT) {
-	if(POT) free16(POT);
+	if(POT) WDutils_DEL16(POT);
 	NPOT = Nvec16*sizeof(scalar);
-	POT  = new16<char>(NPOT);
+	POT  = WDutils_NEW16(char,NPOT);
       }
       if(Nvec16*sizeof(scalar) > NACC) {
-	if(ACC) free16(ACC);
+	if(ACC) WDutils_DEL16(ACC);
 	NACC = Nvec16*sizeof(scalar);
-	ACC  = new16<char>(NACC);
+	ACC  = WDutils_NEW16(char,NACC);
       }
       if(a == scalar(1)) return x;
       std::memcpy(POS,x,n*NDIM*sizeof(scalar));
@@ -390,9 +390,9 @@ namespace {
     /// dtor
     ~Shrink()
     {
-      if(POS) free16(POS); POS=0;
-      if(POT) free16(POT); POT=0;
-      if(ACC) free16(ACC); ACC=0;
+      if(POS) WDutils_DEL16(POS); POS=0;
+      if(POT) WDutils_DEL16(POT); POT=0;
+      if(ACC) WDutils_DEL16(ACC); ACC=0;
     }
   } *MyAcc[AccMax] = {0};
   int AccN = 0;

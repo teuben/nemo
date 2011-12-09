@@ -8,12 +8,12 @@
 ///
 /// \author Paul McMillan
 /// \author Walter Dehnen
-/// \date   2000-2010
+/// \date   2000-2011
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
 // Copyright (C) 2005      Walter Dehnen, Paul McMillan
-// Copyright (C) 2005-2010 Walter Dehnen
+// Copyright (C) 2005-2011 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -58,9 +58,10 @@
 // v 2.5    08/07/2009  WD  automatically careful if DF non-monotonic
 // v 2.5.1  15/03/2010  WD  inserted explanation of max_r
 // v 2.6    04/08/2010  WD  keyword model
+// v 2.6.1  09/12/2011  WD  improved explanation
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.6"
-#define falcON_VERSION_D "04-aug-2010 Walter Dehnen                          "
+#define falcON_VERSION   "2.6.1"
+#define falcON_VERSION_D "09-dec-2011 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
@@ -133,12 +134,12 @@ const char*usage =
   "             Model(x) = x       (x    + 1),\n"
   "             Trunc(z) = 1                      if r_t = 0,\n"
   "                      = sech(z)                if r_t > 0,\n"
-  "                      = 2/(sech(z)+1/sech(z)   if r_t < 0.\n"
+  "                      = 2/(sech(z)+1/sech(z))  if r_t < 0.\n"
   "          The distribution function is of the form (Cuddeford 1991)\n"
   "             f(E,L) = g(Q)/L^2b\n"
   "          with  Q=-E - L^2 / 2 r^2_a  (Ossipkov 1979, Merritt 1985).\n"
   "          These models have velocity anisotropy\n"
-  "             beta(r) = (r^2 + b r_a^2)/r^2 + r_a^2).\n"
+  "             beta(r) = (r^2 + b r_a^2)/(r^2 + r_a^2).\n"
   "          If an external potential is given, the initial conditions will\n"
   "          be in equilibrium with the total potential."
 #ifdef falcON_PROPER
