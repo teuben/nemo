@@ -593,6 +593,8 @@ void MainWindow::interactiveSelect(std::string _select, const bool first_snapsho
     }
     form_spart->update(current_data,&current_data->crv_first,_select, first_snapshot);
     form_spart->show();
+    std::cerr << " MainWindow::interactiveSelect after  orm_spart->show()----->  \n";
+    ComponentRange::list(crv);
   }
 }
 // -----------------------------------------------------------------------------
@@ -610,7 +612,10 @@ void MainWindow::selectPart(const std::string _select, const bool first_snapshot
     current_data = plugins->getObject(snapshot); // connect
     current_data->initLoading(store_options);
     crv = current_data->getSnapshotRange();
-
+    std::cerr << " MainWindow::selectPart ----->  select="<<select<<"\n";
+    ComponentRange::list(crv);
+    std::cerr << " ******** \n";
+    ComponentRange::list(&current_data->crv_first);
   } else {
     actionReset();             // reset view if menu file open
   }
@@ -917,9 +922,11 @@ void MainWindow::actionMenuFileOpen()
     snapshot = fileName.toStdString();
     SnapshotInterface * new_data = plugins->getObject(snapshot);
     if (new_data)  { // valid object
-      mutex_loading.lock();     // protect area                  
-      delete current_data;      // free memory                   
-      current_data = new_data;  // link new_data                 
+      mutex_loading.lock();     // protect area
+      if (current_data)
+        delete current_data;      // free memory                   
+      current_data = new_data;  // link new_data              
+      current_data->part_data->setIpvs(selphys);
 //       loadNewData("all","all",  // load data
 //           keep_all,store_options->vel_req,true); //
       reload=false;

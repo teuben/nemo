@@ -128,6 +128,10 @@ QMAKE_LIBDIR = \
     ../plugins/zlib/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/network/lib/$$ARCH/$$COMPILEMODE
 
+# Icons
+macx {
+  ICON = ../res/images/glnemo2.icns
+}
 # INSTALLS for Linux and Mac OS X
 MYNEMO = $$(NEMO)
 !win32 {

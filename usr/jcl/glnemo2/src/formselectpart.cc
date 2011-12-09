@@ -35,6 +35,8 @@ void FormSelectPart::update(SnapshotInterface * _si,
 {
   current_data = _si;
   crv = _crv;
+  std::cerr << " FormSelectPart::update ----->  \n";
+  ComponentRange::list(crv);
   first_snapshot = first;
   // update nbody,time and data type
   std::ostringstream stm1,stm2;

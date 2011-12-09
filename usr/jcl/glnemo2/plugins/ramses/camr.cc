@@ -37,7 +37,7 @@ CAmr::CAmr(const std::string _indir, const bool _v)
   if (found != (int) std::string::npos && (int) indir.rfind("output_")<found) {
     indir.erase(found,indir.length()-found);
   }
-  std::cerr << "indir =" << indir <<"\n";
+  std::cerr << "indir =[" << indir <<"]\n";
   
   found=(int) indir.rfind("output_"); 
   if (found!=std::string::npos) {
@@ -46,8 +46,8 @@ CAmr::CAmr(const std::string _indir, const bool _v)
     while ((found=s_run_index.find_last_of("/"))>0) { // remove trailing "/"
       s_run_index.erase(found,found);
     }
-    //std::cerr << "Run index = " << s_run_index << "\n";
     infile = indir + "/amr_" + s_run_index + ".out00001";
+    std::cerr << "Run index = " << s_run_index <<  "  infile=[" << infile << "]\n";
   }
   //computeNbody();
   //loadData();
@@ -128,7 +128,7 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
     std::ostringstream osf;
     osf << std::fixed << std::setw(5) << std::setfill('0') <<icpu+1;
     std::string infile = indir + "/amr_" + s_run_index + ".out" + osf.str();
-    if (verbose) std::cerr << infile << "\n";
+    if (verbose) std::cerr << "CAmr::loadData infile-> ["<<infile << "]\n";
     amr.open(infile);
     amr.skipBlock(21);
     
@@ -162,10 +162,11 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
     amr.skipBlock(3);
     // Open HYDRO file and skip header
     std::string hydrofile = indir + "/hydro_" + s_run_index + ".out" + osf.str();
+    //if (verbose) std::cerr << "CAmr::loadData hydrofile-> ["<<hydrofile << "]\n";
     hydro.open(hydrofile,count_only);
     hydro.skipBlock();
     hydro.readDataBlock((char *) &nvarh);
-    
+    //std::cerr << "nvarh = " << nvarh << "\n" ;
     hydro.skipBlock(4);
     // loop over levels
     for (int ilevel=0; ilevel<lmax; ilevel++) {
@@ -225,7 +226,7 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
         // Read HYDRO data
         //
         hydro.skipBlock(2);
-        if (ngridfile[ilevel][j]>0) {
+        if (!count_only && ngridfile[ilevel][j]>0) {
           // Read hydro variables
           for (int ind=0;ind<twotondim;ind++) {
             for (int ivar=0; ivar<nvarh; ivar++) {

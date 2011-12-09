@@ -47,6 +47,10 @@ public:
     void resize(const int w, const int h ) { resizeGL(w,h);}
     void resizeOsd(const int w, const int h ) { osd->setWH(w,h);}
     void resetView() {    // reset view to initial
+      resetMatScreen();
+      resetMatScene();
+      reset_screen_rotation = true;
+      reset_scene_rotation  = true;
       setRotation(0,0,0);
       setTranslation(0,0,0);
       resetEvents(true);
@@ -119,6 +123,13 @@ private slots:
   void translateZ()    { translateAlongAxis(2); }
   void setTextureObject(const int, const int);
   void resetEvents(bool pos=false);
+  void resetMatScreen() {
+    memcpy(mScreen,mIdentity, 16*sizeof(GLdouble));
+  }
+  void resetMatScene() {
+    memcpy(mScene,mIdentity, 16*sizeof(GLdouble));
+  }
+
 private:
   // my parent
   QWidget * parent;
@@ -162,6 +173,7 @@ private:
   int  x_mouse, y_mouse, z_mouse,
       tx_mouse,ty_mouse,tz_mouse,
       last_posx, last_posy, last_posz;
+  float last_xrot, last_yrot, last_zrot;
   void setRotation( const int x, const int y, const int z );
   void getPixelTranslation(int *x, int *y, int *z);
   void setTranslation( const int x, const int y, const int z );
@@ -169,8 +181,11 @@ private:
   void setZoom(const float z);
   int zoom_dynam;
   // gl matrix
-  GLdouble mProj[16], mModel[16], mModel2[16];
+  GLdouble mProj[16], mModel[16], mModel2[16],
+  mScreen[16], mScene[16];
+  GLdouble static mIdentity[16];
   int viewport[4];
+  bool reset_screen_rotation, reset_scene_rotation;
   void setProjMatrix()  {
     glGetDoublev(GL_PROJECTION_MATRIX, (GLdouble *) mProj);
   };

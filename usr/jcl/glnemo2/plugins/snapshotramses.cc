@@ -75,6 +75,18 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
   int status=0;
   stv.clear();
   parseSelectTime();
+  
+  
+  if ((go->select_part.find("gas")!=std::string::npos)) 
+    take_gas = true;
+  else namr=0;
+  if ((go->select_part.find("halo")!=std::string::npos)) 
+    take_halo = true;
+  else ndm=0;
+  if ((go->select_part.find("stars")!=std::string::npos)) 
+    take_stars = true;
+  else nstars=0;
+  
   if (valid && checkRangeTime(0)) {
     status=1;
     if (nsel > *part_data->nbody) {
@@ -101,11 +113,11 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
     }
     *part_data->nbody = nsel;
     
-    if (namr)          // there are gas particles requested
+    if (take_gas&&namr)          // there are gas particles requested
       amr->loadData(part_data->pos,part_data->vel,part_data->rho->data, part_data->rneib->data,part_data->temp->data,
                     index_tab,nsel,load_vel);
     
-    if (ndm || nstars) // there are halo|stars particles requested
+    if ((take_halo&&ndm) || (take_stars&&nstars)) // there are halo|stars particles requested
       part->loadData(take_halo,take_stars,part_data->pos,part_data->vel,index_tab,nsel,load_vel,namr);
     
     //part_data->computeMaxSize();
@@ -180,6 +192,7 @@ int SnapshotRamses::initLoading(GlobalOptions * so)
   go = so;
   load_vel = so->vel_req;
   select_time = so->select_time;  
+  std::cerr << "SnapshotRamses::initLoading IN\n";
   float x[8];
   // boundary box
   x[0] = so->xmin;
@@ -212,6 +225,11 @@ int SnapshotRamses::initLoading(GlobalOptions * so)
   } else {
     ndm=0; nstars=0;
   }
+  // reset take_xxx variables if no particles selected from the command line
+  if (so->select_part=="") {
+    take_gas = take_halo = take_stars = false;
+  }
+  std::cerr << "SnapshotRamses::initLoading OUT\n";
   return 1;
 }
 // ============================================================================

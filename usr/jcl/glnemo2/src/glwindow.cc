@@ -31,6 +31,7 @@ namespace glnemo {
   
   bool GLWindow::GLSL_support = false;
   GLuint framebuffer, renderbuffer;
+  GLdouble GLWindow::mIdentity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 // ============================================================================
 // Constructor                                                                 
 // BEWARE when parent constructor QGLWidget(QGLFormat(QGL::SampleBuffers),_parent)
@@ -58,6 +59,16 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   p_data = new ParticlesData();
   pov    = new ParticlesObjectVector();
   gl_select = new GLSelection();
+  
+  // reset rotation matrixes
+  resetMatScreen();
+  resetMatScene();
+  reset_screen_rotation = false;
+  reset_scene_rotation  = false;
+  // initialyse rotation variables
+  last_xrot = 0.;
+  last_yrot = 0.;
+  last_zrot = 0.;
   
   connect(gl_select, SIGNAL(updateGL()), this, SLOT(updateGL()));
   connect(gl_select, SIGNAL(updateZoom()), this, SLOT(osdZoom()));
@@ -347,15 +358,42 @@ void GLWindow::paintGL()
   glLoadIdentity();
   //glEnable(GL_DEPTH_TEST);
  
+ 
+  // rotation around screen axes
+  float rx=store_options->xrot-last_xrot;
+  float ry=store_options->yrot-last_yrot;
+  float rz=store_options->zrot-last_zrot;
+
+  // the following code compute OpenGL rotation 
+  // around XYZ screen axes
+  if (rx!=0 ||
+      ry!=0 ||
+      rz!=0) {
+    // rotate only the scene about the delta angle from the previous
+    // rotation, otherwise it mess up the rotation
+    glRotatef( rx, 1.0, 0.0, 0.0 );
+    glRotatef( ry, 0.0, 1.0, 0.0 );
+    glRotatef( rz, 0.0, 0.0, 1.0 );
+    last_xrot = store_options->xrot;
+    last_yrot = store_options->yrot;
+    last_zrot = store_options->zrot;
+    
+    glMultMatrixd (mScreen); // apply previous rotations on the current one
+    glGetDoublev (GL_MODELVIEW_MATRIX, mScreen); // save screen rotation matrix
+  }
+  if (reset_screen_rotation) { 
+    glLoadIdentity ();
+    glGetDoublev (GL_MODELVIEW_MATRIX, mScreen); // set to Identity
+    reset_screen_rotation=false;
+  }
+  glLoadIdentity (); // reset OGL rotations
   // set camera
   camera->setEye(0.0,  0.0,  -store_options->zoom);
   camera->moveTo();
-
-  // rotate the scene
-  glRotatef( store_options->xrot, 1.0, 0.0, 0.0 );
-  glRotatef( store_options->yrot, 0.0, 1.0, 0.0 );
-  glRotatef( store_options->zrot, 0.0, 0.0, 1.0 );
-
+  
+  // apply screen rotation on the whole system
+  glMultMatrixd (mScreen);   
+  
   // Grid Anti aliasing
 #ifdef GL_MULTISAMPLE
   glEnable(GL_MULTISAMPLE);
@@ -389,7 +427,6 @@ void GLWindow::paintGL()
   glGetDoublev(GL_MODELVIEW_MATRIX, (GLdouble *) mModel2);
   // nice points display
   glEnable(GL_POINT_SMOOTH);
-  //glPointSize(store_options->psize);
   
   // control blending on particles
   if (store_options->blending) {
@@ -415,12 +452,6 @@ void GLWindow::paintGL()
         store_options->render_mode = 0;
       }*/
       gpv[i].display(mModel2,wheight);
-//      const ParticlesObject * po = gpv[i].getPartObj();        // object
-//      if (po->hasPhysic()) {
-//        // display colorbar
-//        gl_colorbar->display(QGLWidget::width(),QGLWidget::height(),
-//                             po->getMinPercenPhys(), po->getMaxPercenPhys());      
-//      }
     }
     if (store_options->phys_min_glob!=-1 && store_options->phys_max_glob!=-1) {
       gl_colorbar->display(QGLWidget::width(),QGLWidget::height());
@@ -649,6 +680,7 @@ void GLWindow::mouseMoveEvent( QMouseEvent *e )
     // offset displcacement
     dx = e->x()-last_posx;
     dy = e->y()-last_posy;
+    //std::cerr << "dxdy="<< dx << " " << dy << "\n";
     // save last position
     last_posx = e->x();
     last_posy = e->y();
@@ -688,9 +720,14 @@ void GLWindow::mouseMoveEvent( QMouseEvent *e )
     }
     if (is_translation) {
       setTranslation(tx_mouse,ty_mouse,tz_mouse);
+      //setTranslation(dx,dy,-dz);
     }
     else {
       setRotation(y_mouse,x_mouse,z_mouse);
+      if (! is_mouse_zoom) {
+        //setRotation(dy,dx,-dz);
+      }
+      //setRotation(dy,0,0);
     }
   }
   //!options_form->downloadOptions(store_options);
@@ -784,21 +821,27 @@ void GLWindow::rotateAroundAxis(const int axis)
 {
   if (!is_key_pressed              && // no interactive user request
       !is_mouse_pressed) {
+      float x,y,z;
+      x=y=z=0.0;
       switch (axis) {
       case 0: // X
               store_options->xrot += store_options->ixrot;
               y_mouse = (int) store_options->xrot;
+              x=store_options->ixrot;
               break;
       case 1: // Y
               store_options->yrot += store_options->iyrot;
               x_mouse = (int) store_options->yrot;
+              y=store_options->iyrot;
               break;
       case 2: // Z
               store_options->zrot += store_options->izrot;
               z_mouse = (int) store_options->zrot;
+              z=store_options->izrot;
               break;
       }
       setRotation(store_options->xrot,store_options->yrot,store_options->zrot);
+      //setRotation(x,y,z);
       updateGL();
   }
 }
