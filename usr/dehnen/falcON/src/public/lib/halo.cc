@@ -365,7 +365,7 @@ namespace {
   const double gam_trunc = 100.;
   /// for the table extrema in case of no truncation: 
   ///    |gamma(r)-gamma_asymptotic| < eps_gamma * gamma_asymptotic
-  const double eps_gamma = 0.002;
+  const double eps_gamma = 0.01;
   /// find an appropriate maximum radius for the tables in HaloModel
   double Rmax(HaloDensity const&halo)
   {
@@ -591,6 +591,13 @@ double HaloPotential::Mt(double R) const {
   if(R>r[n1]) return Mtt - fmt*pow(R/r[n1],g3);
   else        return Polev(log(R),lr,mt);
 }
+// total density
+double HaloPotential::rht(double R) const {
+  if(R<= 0.)  return 0.;
+  if(R<r[0] ) return rh[ 0]*pow(r[ 0]/R,At);
+  if(R>r[n1]) return rh[n1]*pow(r[n1]/R,go);
+  else        return Polev(log(R),lr,rh);
+}
 // cumulative halo mass
 double HaloPotential::Mh(double R) const {
   if(R<= 0.)  return 0.;
@@ -778,35 +785,40 @@ namespace {
   //  N.B. the part for when psi < last point on spline IS used, and works      
   //  for all density profiles provided ReducedDensity is done right.           
   //----------------------------------------------------------------------------
-  //  NOTE (26-05-2011) We re-normalise the integral by dividing the integrand
-  //                    (usually d^2rho/dPsi^2) by its maximum value. Strangely,
-  //                    this simple multiplication does improve the performance
-  //                    of qbulir (hinting at a problem with qbulir).
+  //  26-05-2011
+  //  NOTE We re-normalise the integral by dividing the integrand (usually
+  //       d^2rho/dPsi^2) by its maximum value. Strangely, this improves the
+  //       performance of qbulir (hinting at a problem with qbulir).
   //----------------------------------------------------------------------------
-  const ReducedDensity  *RED;
+  const ReducedDensity*RED=0;
   double nu,MT,Be,Q,iI;         // 1/(1-p), Mtot, beta, Q, 1/in[i]
   inline double intgQ_of_q(double q) {
+    //
+    //   d Psi       Q^(1-p)                                      1
+    // ----------- = ------- dq    with  Psi = Q [1-q^nu]   nu = ---
+    // (Q - Psi)^p     1-p                                       1-p
     //                                                                          
-    //   d Psi       Q^(1-p)                                                    
-    // ----------- = ------- dq    with  Psi = Q (1-q^[1/(1-p)])                
-    // (Q - Psi)^p    1-p                                                       
+    // Q and nu=1/(1-p) are both constants
     //                                                                          
-    // Q and p are both constants in this integration, making life very easy    
-    const double psi = Q * (1-pow(q,nu));          // Psi = Q * (1 - q^nu)      
+    const double psi = Q * (1-pow(q,nu));
     if     (psi <= 0.)
+      // Psi < 0 should never happen
       return 0.;
-    else if(psi < SPLINE->last_X()) {
+    if(psi < SPLINE->last_X()) {
+      // Psi < Psi(r_max)
+      // assuming  Psi = MT/r  to compute integrand
       if(Be > 0.5) {
 	double r=MT/psi,rd1;
-	(*RED)(r,rd1);
+	RED->operator()(r,rd1);
 	return -r*iI*rd1/psi;
       }
       if(Be >-0.5){
 	double r=MT/psi,rd1,rd2;
-	(*RED)(r,rd1,rd2);
+	RED->operator()(r,rd1,rd2);
  	return r*iI/(psi*psi)*(twice(rd1) + r*rd2);
       }
-    }
+    } 
+    // Psi(r_max) < Psi < Psi(r_min) 
     return iI*(*SPLINE)(psi);
   }
   //
@@ -860,7 +872,7 @@ HaloModel::HaloModel(HaloDensity const&model,
       double rd1,rd2,
 	ps1 =-mt[i]/square(r[i]),                 // psi'                       
 	ps2 =-twice(ps1)/r[i]-FPi*(rh[i]);        // psi"                       
-      (*RED)(r[i],rd1,rd2),                       // red', red"                 
+      (*RED)(r[i],rd1,rd2);                       // red', red"                 
       in[i] = (rd2*ps1 - rd1*ps2)/cube(ps1);      // d^2red/dpsi^2              
       if(in[i]<0.) {
 	integrand_negative = true;
@@ -892,11 +904,12 @@ HaloModel::HaloModel(HaloDensity const&model,
 	  negative_v = in[i];
 	  negative_i = i;
 	}
+	falcON_Warning("HaloModel: g(Q) < 0 at Q=%20.14g =Psi(%g)\n",Q,r[i]);
       }
       lg[i] = log(in[i]) - Logalfa;
       if(i && lg[i]>lg[i-1] && !g_nonmon) {
 	g_nonmon=true;
-	falcON_Warning("HaloModel: g(Q) non-monotinic at Q=%g\n",ps[i]);
+	falcON_Warning("HaloModel: g(Q) non-monotinic at Q=%20.14g\n",ps[i]);
       }
     }
   else {
@@ -928,14 +941,15 @@ HaloModel::HaloModel(HaloDensity const&model,
 	  negative_v = g;
 	  negative_i = i;
 	}
+	falcON_Warning("HaloModel: g(Q) < 0 at Q=%20.14g =Psi(%g)\n",Q,r[i]);
       }
       else if(err>1.e-3) 
-	falcON_Warning("HaloModel: inaccurate integration for g(Q) at Q=%g\n",
+	falcON_Warning("HaloModel: inaccurate integration for g(Q=%20.14g)\n",
 		       Q);
       lg[i] = lfc + p1*log(Q) + log(nu*g*in[i]);
       if(i && lg[i]>lg[i-1] && !g_nonmon) {
 	g_nonmon=true;
-	falcON_Warning("HaloModel: g(Q) non-monotinic at Q=%g\n",Q);
+	falcON_Warning("HaloModel: g(Q) non-monotinic at Q=%20.14g\n",Q);
       }
     }
     if(g_negative) negative_v *= exp(lfc);

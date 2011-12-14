@@ -129,6 +129,8 @@ namespace falcON {
     double PotAcc(double rq, double&acx) const;
     /// total cumulative mass
     double Mt(double R) const;
+    /// total mass density
+    double rht(double R) const;
     /// halo cumulative mass
     double Mh(double R) const;
     /// total halo mass
