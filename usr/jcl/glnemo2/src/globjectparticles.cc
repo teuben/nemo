@@ -25,12 +25,17 @@
 #include <vector>
 #include <sstream>
 #include <algorithm>
+#ifdef _OPENMP
+#include <parallel/algorithm>
+#include <omp.h>
+#endif
+
 
 #define OLDRENDER 0
 #define BENCH 1
 #define GLDRAWARRAYS 1
 namespace glnemo {
-float PHYS_MIN=-1.;;
+float PHYS_MIN=-1.;
 float PHYS_MAX=0.000006;
 int index_min, index_max;
 
@@ -436,10 +441,11 @@ void GLObjectParticles::updateBoundaryPhys()
 // Build Vector Buffer Object for positions array                              
 void GLObjectParticles::buildVboPos()
 {
-  QTime tbench;
+  QTime tbench,tbloc;
   tbench.restart();
   nvert_pos=0;
-
+  tbloc.restart();
+  
   std::vector <GLfloat> vertices;
   vertices.reserve(((po->npart/po->step)+1)*3);
   
@@ -447,6 +453,10 @@ void GLObjectParticles::buildVboPos()
   phys_itv.clear(); // clear ohysical value vector
   rho_itv.clear();
   vindex_sel.clear();   // clear zdepth vector     
+  rho_itv.reserve(((po->npart/po->step)+1));
+  vindex_sel.reserve(((po->npart/po->step)+1));
+  phys_itv.reserve(((po->npart/po->step)+1));
+  
   for (int i=0; i < po->npart; i+=po->step) {
     int index=po->index_tab[i];
     if (phys_select && phys_select->isValid()) {
@@ -465,8 +475,7 @@ void GLObjectParticles::buildVboPos()
         rho_itv.push_back(myphys);
       }
     }
-    
-    
+        
 #if 1 // used if z depth test activated
     GLObjectIndexTab myz;
     myz.index = index;
@@ -474,18 +483,26 @@ void GLObjectParticles::buildVboPos()
     vindex_sel.push_back(myz);
 #endif
   }
+  if (BENCH) qDebug("Time elapsed to setup PHYSICAL arrays: %f s", tbloc.elapsed()/1000.);
+  
+#ifdef _OPENMP
+  int ntask=omp_get_max_threads(); // return number of task requested
+  std::cerr << "#OpenMP TASKS = "<<ntask<<"\n";  
+#endif
   // sort by density
 #if GLDRAWARRAYS
-  
+  tbloc.restart();
   if (po->rhoSorted() &&
       phys_select && phys_select->getType() != PhysicalData::rho && part_data->rho) {
     sort(rho_itv.begin(),rho_itv.end(),GLObjectIndexTab::compareLow);
   } else {
     sort(phys_itv.begin(),phys_itv.end(),GLObjectIndexTab::compareLow);
   }
+  if (BENCH) qDebug("Time elapsed to SORT PHYSICAL arrays: %f s", tbloc.elapsed()/1000.);
   //sort(rho.begin(),rho.end(),GLObjectIndexTab::compareHigh);
 #endif
   // select vertices
+  tbloc.restart();
   for (int i=0; i < po->npart; i+=po->step) {
     int index;
     if (po->rhoSorted() &&
@@ -503,11 +520,15 @@ void GLObjectParticles::buildVboPos()
     vertices.push_back(part_data->pos[index*3+2]);
     nvert_pos++; // one more particle
   }
-  
+  if (BENCH) qDebug("Time elapsed to setup VBO arrays: %f s", tbloc.elapsed()/1000.);
   // build first particle index in the histo
   min_index=0; max_index=nvert_pos-1;
-  buildIndexHisto();  
 
+  tbloc.restart();
+  buildIndexHisto();  
+  if (BENCH) qDebug("Time elapsed to build indexes histo : %f s", tbloc.elapsed()/1000.);
+
+  tbloc.restart();
   // bind VBO buffer for sending data
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
   assert( nvert_pos <= (po->npart/po->step)+1);
@@ -518,7 +539,7 @@ void GLObjectParticles::buildVboPos()
 
   //checkVboAllocation((int) (nvert_pos * 3 * sizeof(float)));
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-
+  if (BENCH) qDebug("Time elapsed to transfert VBO arrays to GPU: %f s", tbloc.elapsed()/1000.);
   vertices.clear();
   if (BENCH) qDebug("Time elapsed to build VBO pos: %f s", tbench.elapsed()/1000.);
 }
@@ -853,8 +874,22 @@ void GLObjectParticles::buildIndexHisto()
   // reset index_histo array
   for (int i=0; i <100;i++) index_histo[i]=-1;
   
- // compute first particle index in the percentage
+
+  // compute first particle index in the percentage
   if (phys_select && phys_select->isValid()) {
+  
+    float log_part_r_max=0., log_part_r_min=0., diff_log_part=0.;
+    float log_phys_max,log_phys_min, diff_log_phys;
+    
+    if (part_data->rho) {
+      log_part_r_max = log(part_data->rho->getMax());
+      log_part_r_min = log(part_data->rho->getMin());
+      diff_log_part  = 99./(log_part_r_max-log_part_r_min);
+    }
+    log_phys_max = log(phys_select->getMax());
+    log_phys_min = log(phys_select->getMin());
+    diff_log_phys= 99./(log_phys_max-log_phys_min);
+    
     int cpt=0;
     // find first index of particle in the percentage
     for (int i=0; i < po->npart; i+=po->step) {
@@ -862,11 +897,11 @@ void GLObjectParticles::buildIndexHisto()
 #if 1
       if (po->rhoSorted() &&
           phys_select && phys_select->getType() != PhysicalData::rho && part_data->rho) {
-        index = rho_itv[i].index; // it's temperature/pressure, we sort by density        
-        if (part_data->rho->data[index]!=0 && part_data->rho->data[index]!=-1) {
+        index = rho_itv[i].index; // it's temperature/pressure, we sort by density
+        float rho_data=part_data->rho->data[index];
+        if (rho_data!=0 && rho_data!=-1) {
           //std::cerr << "I="<<i<<" => "<<phys_select->data[index]<<"\n";
-          int percen=(log(part_data->rho->data[index])-log(part_data->rho->getMin()))*99./
-                     (log(part_data->rho->getMax())-log(part_data->rho->getMin()));
+          int percen=(log(rho_data)-log_part_r_min)*diff_log_part;
           assert(percen<100 && percen>=0);
           if (index_histo[percen]==-1) { // no value yet
             index_histo[percen]=cpt; // store 
@@ -876,11 +911,11 @@ void GLObjectParticles::buildIndexHisto()
         }
       }
       else {        
-        index = phys_itv[i].index; // we sort by physical value        
-        if (phys_select->data[index]!=0 && phys_select->data[index]!=-1) {
-          //std::cerr << "I="<<i<<" => "<<phys_select->data[index]<<"\n";
-          int percen=(log(phys_select->data[index])-log(phys_select->getMin()))*99./
-                     (log(phys_select->getMax())-log(phys_select->getMin()));
+        index = phys_itv[i].index; // we sort by physical value     
+        float phys_data=phys_select->data[index];
+        if (phys_data!=0 && phys_data!=-1) {
+          //std::cerr << "I="<<i<<" => "<<phys_data<<"\n";
+          int percen=(log(phys_data)-log_phys_min)*diff_log_phys;
           assert(percen<100 && percen>=0);
           if (index_histo[percen]==-1) { // no value yet
             index_histo[percen]=cpt; // store 

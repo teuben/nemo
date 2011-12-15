@@ -602,7 +602,7 @@ void FormObjectControl::updateObjectSettings( const int row)
       form.pressure_phys_radio->setEnabled(current_data->pressure!=NULL?true:false);
       setPhysicalTabName();
     }
-    if (phys_select && phys_select->isValid()) {
+    if (pobj->hasPhysic() && phys_select && phys_select->isValid()) {
       dens_histo->drawDensity(phys_select->data_histo);
       float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
       //min

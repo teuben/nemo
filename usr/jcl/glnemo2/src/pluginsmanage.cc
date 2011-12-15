@@ -35,8 +35,9 @@ SnapshotInterface * PluginsManage::getObject(const std::string filename )
     if (iface) {
       SnapshotInterface * iface1 = iface->newObject(filename);
       std::cerr << "Trying Interface:" << iface1->getInterfaceType() << "\n";
-      if (iface1->isValidData())
-         return iface1;
+      if (iface1->isValidData()) {        
+        return iface1;
+      }
       else {
          delete iface1;
       }

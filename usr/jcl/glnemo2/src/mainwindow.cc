@@ -47,6 +47,7 @@ MainWindow::MainWindow(std::string _ver)
 //  QPalette mp;
 //  mp.setColor(QPalette::Window,QColor(224,212,247));
 //  setPalette(mp);
+  status_bar = statusBar();
   
   // Plugins
   plugins = new PluginsManage();
@@ -156,7 +157,7 @@ void MainWindow::start(std::string shot)
     bool exist=hasvalue((char*)"select");
     current_data = plugins->getObject(snapshot);
     if (current_data) {
-
+      connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
       current_data->part_data->setIpvs(selphys);
       if (! exist ) {
         current_data->initLoading(store_options); 
@@ -272,6 +273,7 @@ void MainWindow::createToolBars()
   icons_tool_bar->addAction(print_file_action);
   icons_tool_bar->addAction(movie_form_action);
   //icons_tool_bar->addAction(com_action);
+  icons_tool_bar->addAction(toggle_rotation_screen_action);
   
   QSize icons;
   icons.scale(ICONSIZE,ICONSIZE,Qt::KeepAspectRatio);
@@ -529,6 +531,12 @@ void MainWindow::createActions()
   connect( zsorting_action, SIGNAL( activated() ), this, SLOT( actionZSorting() ) );
   addAction(zsorting_action);
 
+  // Toggle rotation screen
+  toggle_rotation_screen_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/fitscreen.png"),tr("Toggle rotation mode around axes screen/world"),this);
+  toggle_rotation_screen_action->setShortcut(tr("Ctrl+L"));
+  connect( toggle_rotation_screen_action, SIGNAL( activated() ), gl_window, SLOT( toggleRotateScreen()) );
+  addAction(toggle_rotation_screen_action);
+  
   // Auto rotate around X 
   rotatex_action = new QAction(this);
   rotatex_action->setShortcut(tr("Ctrl+X"));
@@ -565,6 +573,42 @@ void MainWindow::createActions()
   connect( rotatezr_action, SIGNAL( activated() ), this, SLOT( actionRotateRZ() ) );
   addAction(rotatezr_action);
   
+  // Auto rotate around U 
+  rotateu_action = new QAction(this);
+  rotateu_action->setShortcut(tr("Ctrl+U"));
+  connect( rotateu_action, SIGNAL( activated() ), this, SLOT( actionRotateU() ) );
+  addAction(rotateu_action);
+  
+  // Auto rotate reverse around U
+  rotateur_action = new QAction(this);
+  rotateur_action->setShortcut(tr("Ctrl+Shift+U"));
+  connect( rotateur_action, SIGNAL( activated() ), this, SLOT( actionRotateRU() ) );
+  addAction(rotateur_action);
+  
+  // Auto rotate around V 
+  rotatev_action = new QAction(this);
+  rotatev_action->setShortcut(tr("Ctrl+V"));
+  connect( rotatev_action, SIGNAL( activated() ), this, SLOT( actionRotateV() ) );
+  addAction(rotatev_action);
+  
+  // Auto rotate reverse around V 
+  rotatevr_action = new QAction(this);
+  rotatevr_action->setShortcut(tr("Ctrl+Shift+V"));
+  connect( rotatevr_action, SIGNAL( activated() ), this, SLOT( actionRotateRV() ) );
+  addAction(rotatevr_action);
+  
+  // Auto rotate around W 
+  rotatew_action = new QAction(this);
+  rotatew_action->setShortcut(tr("Ctrl+W"));
+  connect( rotatew_action, SIGNAL( activated() ), this, SLOT( actionRotateW() ) );
+  addAction(rotatew_action);
+  
+  // Auto rotate reverse around W
+  rotatewr_action = new QAction(this);
+  rotatewr_action->setShortcut(tr("Ctrl+Shift+W"));
+  connect( rotatewr_action, SIGNAL( activated() ), this, SLOT( actionRotateRW() ) );
+  addAction(rotatewr_action);
+  
   // Auto translate along X
   transx_action = new QAction(this);
   transx_action->setShortcut(tr("Alt+X"));
@@ -593,8 +637,7 @@ void MainWindow::interactiveSelect(std::string _select, const bool first_snapsho
     }
     form_spart->update(current_data,&current_data->crv_first,_select, first_snapshot);
     form_spart->show();
-    std::cerr << " MainWindow::interactiveSelect after  orm_spart->show()----->  \n";
-    ComponentRange::list(crv);
+    //ComponentRange::list(crv);
   }
 }
 // -----------------------------------------------------------------------------
@@ -607,15 +650,15 @@ void MainWindow::selectPart(const std::string _select, const bool first_snapshot
   select = _select;
   store_options->select_part = select;
   if (reload && current_data) {// reload action requested   
+    store_options->phys_max_glob = store_options->phys_min_glob = -1; // reset for colobar display
     current_data->close();     // close the current snapshot
     delete current_data;       // delete previous object    
     current_data = plugins->getObject(snapshot); // connect
+    connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
     current_data->initLoading(store_options);
-    crv = current_data->getSnapshotRange();
-    std::cerr << " MainWindow::selectPart ----->  select="<<select<<"\n";
-    ComponentRange::list(crv);
-    std::cerr << " ******** \n";
-    ComponentRange::list(&current_data->crv_first);
+    crv = current_data->getSnapshotRange();    
+    //ComponentRange::list(crv);
+    //ComponentRange::list(&current_data->crv_first);
   } else {
     actionReset();             // reset view if menu file open
   }
@@ -657,7 +700,7 @@ void MainWindow::loadNewData(const std::string select,
       store_options->new_frame=true;
       mutex_data->unlock();
       listObjects(pov);
-      listObjects(pov2);
+      //listObjects(pov2);
       if (reload) { // backup old pov2 properties to povold
         povold.clear();
         ParticlesObject::backupVVProperties(pov2,povold,pov.size());
@@ -694,6 +737,12 @@ void MainWindow::loadNewData(const std::string select,
         store_options->render_mode = 2; // density mode
       }
       if (interact && !reload && !store_options->rho_exist) {
+        store_options->render_mode = 0; // alpha blending accumulation mode
+      }
+      // 9 dec 2011 force to density mode if rho exist
+      if (store_options->rho_exist) {
+        store_options->render_mode = 2; // density mode
+      } else {
         store_options->render_mode = 0; // alpha blending accumulation mode
       }
       if (! store_options->auto_render) {
@@ -733,6 +782,13 @@ void MainWindow::startTimers()
   auto_transz_timer = new QTimer(this);
   connect(auto_transz_timer, SIGNAL(timeout()), gl_window, SLOT(translateZ()));
 
+  auto_rotu_timer = new QTimer(this);
+  connect(auto_rotu_timer, SIGNAL(timeout()), gl_window, SLOT(rotateAroundU()));
+  auto_rotv_timer = new QTimer(this);
+  connect(auto_rotv_timer, SIGNAL(timeout()), gl_window, SLOT(rotateAroundV()));
+  auto_rotw_timer = new QTimer(this);
+  connect(auto_rotw_timer, SIGNAL(timeout()), gl_window, SLOT(rotateAroundW()));
+  
   bench_gup_timer = new QTimer(this);
   connect(bench_gup_timer, SIGNAL(timeout()), gl_window, SLOT(updateGL()));
   bench_nframe_timer = new QTimer(this);
@@ -925,12 +981,14 @@ void MainWindow::actionMenuFileOpen()
       mutex_loading.lock();     // protect area
       if (current_data)
         delete current_data;      // free memory                   
-      current_data = new_data;  // link new_data              
+      current_data = new_data;  // link new_data   
+      connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
       current_data->part_data->setIpvs(selphys);
 //       loadNewData("all","all",  // load data
 //           keep_all,store_options->vel_req,true); //
       reload=false;
       bestzoom = true;
+      store_options->select_part="";
       current_data->initLoading(store_options);
       interactiveSelect("",true);
       mutex_loading.unlock();   // release area                  
@@ -1052,6 +1110,7 @@ void MainWindow::actionBestZoom()
 void MainWindow::actionRenderMode()
 {
   store_options->render_mode = (store_options->render_mode+1)%3;
+  if (store_options->render_mode==1) store_options->render_mode=2; // giveup mode 1
   store_options->auto_render=true;
   gl_window->updateGL();
 }
@@ -1136,6 +1195,11 @@ void MainWindow::actionAutoScreenshot()
 void MainWindow::actionGLAutoScreenshot()
 {
   store_options->auto_gl_screenshot = !store_options->auto_gl_screenshot;
+}
+// -----------------------------------------------------------------------------
+// actionToggleRotationScreen
+void MainWindow::actionToggleRotationScreen()
+{
 }
 // -----------------------------------------------------------------------------
 // actionToggleOsd()
@@ -1243,7 +1307,9 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
     }
 }
 // -----------------------------------------------------------------------------
-// actionRotateX() starts timer to rotate around x axis                                                       
+// actionRotate around SCREEN axis
+// -----------------------------------------------------------------------------
+// actionRotateX() starts timer to rotate around screen x axis                                                       
 void MainWindow::actionRotateX()
 {
   static bool rot=false;
@@ -1253,7 +1319,7 @@ void MainWindow::actionRotateX()
   else      auto_rotx_timer->stop();
 }
 // -----------------------------------------------------------------------------
-// actionRotateRX() starts timer to rotate around x axis (reverse)                                   
+// actionRotateRX() starts timer to rotate around screen x axis (reverse)                                   
 void MainWindow::actionRotateRX()
 {
   static bool rot=false;
@@ -1263,7 +1329,7 @@ void MainWindow::actionRotateRX()
   else      auto_rotx_timer->stop();
 }
 // -----------------------------------------------------------------------------
-// actionRotateY() starts timer to rotate around y axis              
+// actionRotateY() starts timer to rotate around screen y axis              
 void MainWindow::actionRotateY()
 {
   static bool rot=false;
@@ -1273,7 +1339,7 @@ void MainWindow::actionRotateY()
   else      auto_roty_timer->stop();
 }
 // -----------------------------------------------------------------------------
-// actionRotateRY() starts timer to rotate around y axis (reverse)                                   
+// actionRotateRY() starts timer to rotate around screen y axis (reverse)                                   
 void MainWindow::actionRotateRY()
 {
   static bool rot=false;
@@ -1284,7 +1350,7 @@ void MainWindow::actionRotateRY()
 }
 
 // -----------------------------------------------------------------------------
-// actionRotateZ() starts timer to rotate around z axis                              
+// actionRotateZ() starts timer to rotate around screen z axis                              
 void MainWindow::actionRotateZ()
 {
   static bool rot=false;
@@ -1294,7 +1360,7 @@ void MainWindow::actionRotateZ()
   else      auto_rotz_timer->stop();
 }
 // -----------------------------------------------------------------------------
-// actionRotateRZ() starts timer to rotate around z axis (reverse)                                   
+// actionRotateRZ() starts timer to rotate around screen z axis (reverse)                                   
 void MainWindow::actionRotateRZ()
 {
   static bool rot=false;
@@ -1303,7 +1369,68 @@ void MainWindow::actionRotateRZ()
   if (rot)  auto_rotz_timer->start(20);
   else      auto_rotz_timer->stop();
 }
-
+// -----------------------------------------------------------------------------
+// actionRotate around SCENE/Object axis
+// -----------------------------------------------------------------------------
+// actionRotateU() starts timer to rotate around scene u axis                                                       
+void MainWindow::actionRotateU()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->iurot = 1;
+  if (rot)  auto_rotu_timer->start(20);
+  else      auto_rotu_timer->stop();
+}
+// -----------------------------------------------------------------------------
+// actionRotateRU() starts timer to rotate around scene u axis (reverse)                                   
+void MainWindow::actionRotateRU()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->iurot = -1;
+  if (rot)  auto_rotu_timer->start(20);
+  else      auto_rotu_timer->stop();
+}
+// -----------------------------------------------------------------------------
+// actionRotateV() starts timer to rotate around scene v axis                                                       
+void MainWindow::actionRotateV()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->ivrot = 1;
+  if (rot)  auto_rotv_timer->start(20);
+  else      auto_rotv_timer->stop();
+}
+// -----------------------------------------------------------------------------
+// actionRotateRV() starts timer to rotate around scene v axis (reverse)                                   
+void MainWindow::actionRotateRV()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->ivrot = -1;
+  if (rot)  auto_rotv_timer->start(20);
+  else      auto_rotv_timer->stop();
+}
+// -----------------------------------------------------------------------------
+// actionRotateW() starts timer to rotate around scene w axis                                                       
+void MainWindow::actionRotateW()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->iwrot = 1;
+  if (rot)  auto_rotw_timer->start(20);
+  else      auto_rotw_timer->stop();
+}
+// -----------------------------------------------------------------------------
+// actionRotateRW() starts timer to rotate around scene w axis (reverse)                                   
+void MainWindow::actionRotateRW()
+{
+  static bool rot=false;
+  rot = !rot; // toggle rotation
+  store_options->iwrot = -1;
+  if (rot)  auto_rotw_timer->start(20);
+  else      auto_rotw_timer->stop();
+}
 // -----------------------------------------------------------------------------
 // actionTranlateX()                                                            
 void MainWindow::actionTranslateX()

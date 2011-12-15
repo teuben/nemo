@@ -59,16 +59,21 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   p_data = new ParticlesData();
   pov    = new ParticlesObjectVector();
   gl_select = new GLSelection();
-  
+  // rotatation mode is screen by default
+  rotate_screen = true;
   // reset rotation matrixes
   resetMatScreen();
   resetMatScene();
   reset_screen_rotation = false;
   reset_scene_rotation  = false;
   // initialyse rotation variables
-  last_xrot = 0.;
-  last_yrot = 0.;
-  last_zrot = 0.;
+  last_xrot = last_urot = 0.;
+  last_yrot = last_vrot = 0.;
+  last_zrot = last_wrot = 0.;
+  // SCENE/object matrix index
+  i_umat = 0;
+  i_vmat = 1;
+  i_wmat = 2;
   
   connect(gl_select, SIGNAL(updateGL()), this, SLOT(updateGL()));
   connect(gl_select, SIGNAL(updateZoom()), this, SLOT(osdZoom()));
@@ -93,6 +98,9 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   gridy = new GLGridObject(1,store_options->col_y_grid,store_options->yz_grid);
   gridz = new GLGridObject(2,store_options->col_z_grid,store_options->xz_grid);
 
+  // axes
+  axes = new GLAxesObject();
+  
   // cube
   cube  = new GLCubeObject(store_options->mesh_length*store_options->nb_meshs,store_options->col_cube,store_options->show_cube);
   // load texture
@@ -143,6 +151,7 @@ GLWindow::~GLWindow()
   delete gl_select;
   delete cube;
   delete tree;
+  delete axes;
   if (GLWindow::GLSL_support) {
     glDeleteRenderbuffersEXT(1, &renderbuffer);
     glDeleteRenderbuffersEXT(1, &framebuffer);
@@ -312,7 +321,55 @@ void GLWindow::updateGrid(bool ugl)
   
   if (ugl) updateGL();
 }
-
+// ============================================================================
+// drawAxes
+void GLWindow::drawAxes()
+{
+  float ORG[3] = {0,0,0};
+  
+  float XP[3] = {1,0,0},  YP[3] = {0,1,0},
+  ZP[3] = {0,0,1};
+  int size=100;
+  glPushMatrix ();
+  // set projection
+  setProjection( wwidth-size, 0, size, size);
+  glMatrixMode( GL_MODELVIEW );
+  glLoadIdentity (); // reset OGL rotations
+  glTranslatef (0, 0 , -3);
+  
+  // apply screen rotation on the whole system
+  glMultMatrixd (mScreen);   
+  // apply scene/world rotation on the whole system
+  glMultMatrixd (mScene); 
+    
+  //glScalef (0.25, 0.25, 0.25);
+  
+  glLineWidth (1.2);
+  
+  glBegin (GL_LINES);
+  glColor3f (1,0,0); // X axis is red.
+  glVertex3fv (ORG);
+  glVertex3fv (XP );
+  glColor3f (0,1,0); // Y axis is green.
+  glVertex3fv (ORG);
+  glVertex3fv (YP );
+  glColor3f (0,0,1); // z axis is blue.
+  glVertex3fv (ORG);
+  glVertex3fv (ZP );
+  glEnd();
+  glLineWidth (0.2);
+  glColor3f (0.5,0.5,0.5); // 
+  GLUquadric* quadratic = gluNewQuadric();
+  gluQuadricNormals(quadratic, GLU_SMOOTH); 
+//  gluQuadricTexture(quadratic, GL_TRUE);
+  gluQuadricDrawStyle(quadratic,GLU_LINE);
+ 
+  gluSphere(quadratic,1.f,8,8); 
+  gluDeleteQuadric(quadratic);
+//  setProjection( 0,0, wwidth, wheight );
+//  glMatrixMode( GL_MODELVIEW );
+  glPopMatrix ();
+}
 // ============================================================================
 // init Light                                                                  
 void GLWindow::initLight()
@@ -353,11 +410,35 @@ void GLWindow::paintGL()
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
   // set projection
-  setProjection( wwidth, wheight);
+  setProjection(0, 0,  wwidth, wheight);
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
   //glEnable(GL_DEPTH_TEST);
- 
+   
+  // rotation around scene/object axes
+  float ru=store_options->urot-last_urot;
+  float rv=store_options->vrot-last_vrot;
+  float rw=store_options->wrot-last_wrot;
+  
+  // the following code compute OpenGL rotation 
+  // around UVW scene/object axes
+  if (ru!=0 ||
+      rv!=0 ||
+      rw!=0) {
+    glLoadIdentity();
+    if (ru!=0)
+      glRotatef(ru, mScene[0],mScene[1], mScene[2] );
+    if (rv!=0)
+      glRotatef(rv, mScene[4],mScene[5], mScene[6] );
+    if (rw!=0)
+      glRotatef(rw, mScene[8],mScene[9], mScene[10]);
+    
+    last_urot = store_options->urot;
+    last_vrot = store_options->vrot;
+    last_wrot = store_options->wrot;
+    glMultMatrixd (mScene);
+    glGetDoublev (GL_MODELVIEW_MATRIX, mScene);
+  }
  
   // rotation around screen axes
   float rx=store_options->xrot-last_xrot;
@@ -369,7 +450,8 @@ void GLWindow::paintGL()
   if (rx!=0 ||
       ry!=0 ||
       rz!=0) {
-    // rotate only the scene about the delta angle from the previous
+    glLoadIdentity();
+    // rotate only around the screen axes about the delta angle from the previous
     // rotation, otherwise it mess up the rotation
     glRotatef( rx, 1.0, 0.0, 0.0 );
     glRotatef( ry, 0.0, 1.0, 0.0 );
@@ -386,13 +468,23 @@ void GLWindow::paintGL()
     glGetDoublev (GL_MODELVIEW_MATRIX, mScreen); // set to Identity
     reset_screen_rotation=false;
   }
+  if (reset_scene_rotation) { 
+    glLoadIdentity ();
+    glGetDoublev (GL_MODELVIEW_MATRIX, mScene); // set to Identity
+    reset_scene_rotation=false;
+    last_urot = last_vrot = last_wrot = 0.0;
+  }
+  
   glLoadIdentity (); // reset OGL rotations
   // set camera
   camera->setEye(0.0,  0.0,  -store_options->zoom);
   camera->moveTo();
   
+  
   // apply screen rotation on the whole system
   glMultMatrixd (mScreen);   
+  // apply scene/world rotation on the whole system
+  glMultMatrixd (mScene);   
   
   // Grid Anti aliasing
 #ifdef GL_MULTISAMPLE
@@ -465,11 +557,14 @@ void GLWindow::paintGL()
     
   // On Screen Display
   if (store_options->show_osd) osd->display();
-  
-  
+    
   // display selected area
   gl_select->display(QGLWidget::width(),QGLWidget::height());
 
+  // draw axes
+  //drawAxes();
+  axes->display(mScreen, mScene, wwidth);
+  
   if (fbo && GLWindow::GLSL_support) {
     fbo = false;
     //imgFBO = grabFrameBuffer();
@@ -566,9 +661,9 @@ void GLWindow::resizeGL(int w, int h)
 }
 // ============================================================================
 // set up the projection according to the width and height of the windows
-void GLWindow::setProjection(const int width, const int height)
+void GLWindow::setProjection(const int x, const int y, const int width, const int height)
 {
-  glViewport( 0, 0, width, height);
+  glViewport( x, y, width, height);
   ratio =  ((double )width) / ((double )height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -723,11 +818,11 @@ void GLWindow::mouseMoveEvent( QMouseEvent *e )
       //setTranslation(dx,dy,-dz);
     }
     else {
-      setRotation(y_mouse,x_mouse,z_mouse);
-      if (! is_mouse_zoom) {
-        //setRotation(dy,dx,-dz);
-      }
-      //setRotation(dy,0,0);
+      //std::cerr << "xyz mouse="<<x_mouse<<" "<<y_mouse<<" "<< z_mouse<<"\n";
+      if (rotate_screen)
+        setRotationScreen(y_mouse,x_mouse,z_mouse);
+      else
+        setRotationScene(y_mouse,x_mouse,z_mouse);      
     }
   }
   //!options_form->downloadOptions(store_options);
@@ -799,8 +894,8 @@ void GLWindow::keyReleaseEvent(QKeyEvent * k)
   //!options_form->downloadOptions(store_options);
 }
 // ============================================================================
-//  Set the rotation angle of the object to n degrees around the X,Y,Z axis.
-void GLWindow::setRotation( const int x, const int y, const int z )
+//  Set the rotation angle of the object to n degrees around the X,Y,Z axis of the screen
+void GLWindow::setRotationScreen( const int x, const int y, const int z )
 {
   // rotate angles
   GLfloat xRot = (GLfloat)(x % 360);
@@ -815,34 +910,72 @@ void GLWindow::setRotation( const int x, const int y, const int z )
   store_options->zrot =zRot;
   updateGL();
 }
+// ============================================================================
+//  Set the rotation angle of the object to n degrees around the U,V,W axis of the scene/object
+void GLWindow::setRotationScene( const int x, const int y, const int z )
+{
+  // rotate angles
+  GLfloat xRot = (GLfloat)(x % 360);
+  GLfloat yRot = (GLfloat)(y % 360);
+  GLfloat zRot = (GLfloat)(z % 360);
+//  // hud display
+//  osd->setText(GLObjectOsd::Rot,xRot,yRot,zRot);
+//  osd->updateDisplay();
+  // save values
+  store_options->urot =xRot;
+  store_options->vrot =yRot;
+  store_options->wrot =zRot;
+  updateGL();
+}
 // -----------------------------------------------------------------------------
 // rotateAroundAxis()
 void GLWindow::rotateAroundAxis(const int axis)
 {
   if (!is_key_pressed              && // no interactive user request
       !is_mouse_pressed) {
-      float x,y,z;
-      x=y=z=0.0;
+
       switch (axis) {
       case 0: // X
               store_options->xrot += store_options->ixrot;
-              y_mouse = (int) store_options->xrot;
-              x=store_options->ixrot;
+              y_mouse = (int) store_options->xrot;              
               break;
       case 1: // Y
               store_options->yrot += store_options->iyrot;
               x_mouse = (int) store_options->yrot;
-              y=store_options->iyrot;
               break;
       case 2: // Z
               store_options->zrot += store_options->izrot;
               z_mouse = (int) store_options->zrot;
-              z=store_options->izrot;
+              break;
+      case 3: // U
+              store_options->urot += store_options->iurot;
+              //y_mouse = (int) store_options->urot;              
+              i_umat = 0;
+              i_vmat = 1;
+              i_wmat = 2;
+              break;
+      case 4: // V
+              store_options->vrot += store_options->ivrot;
+              //x_mouse = (int) store_options->vrot;
+              i_umat = 4;
+              i_vmat = 5;
+              i_wmat = 6;              
+              break;
+      case 5: // W
+              store_options->wrot += store_options->iwrot;
+              //z_mouse = (int) store_options->wrot;
+              i_umat = 8;
+              i_vmat = 9;
+              i_wmat = 10;              
               break;
       }
-      setRotation(store_options->xrot,store_options->yrot,store_options->zrot);
+      if (axis < 3) {
+        setRotationScreen(store_options->xrot,store_options->yrot,store_options->zrot);
+      } else {
+        setRotationScene(store_options->urot,store_options->vrot,store_options->wrot);
+      }
       //setRotation(x,y,z);
-      updateGL();
+      //updateGL();
   }
 }
 // -----------------------------------------------------------------------------

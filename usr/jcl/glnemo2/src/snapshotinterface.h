@@ -24,6 +24,7 @@
 #include "particlesdata.h"
 #include "componentrange.h"
 #include "globaloptions.h"
+#include <QObject>
 
 namespace glnemo {
 //class ParticlesData;
@@ -47,8 +48,9 @@ namespace glnemo {
     }
     float inf,sup,offset,lastt;
   };
-class SnapshotInterface
+class SnapshotInterface: public QObject
 {
+  Q_OBJECT
   public:
     SnapshotInterface()
     {
@@ -59,7 +61,7 @@ class SnapshotInterface
       crv.clear();
       stv.clear();
       parseSelectTime();
-    };
+    }
     virtual ~SnapshotInterface() {};
     // ---------------------------------------------------
     // Pure Virtual functions, *** MUST be implemented ***
@@ -89,7 +91,18 @@ class SnapshotInterface
     int nbody_first;
     float time_first;
     ComponentRangeVector crv_first;
-  protected:
+signals:
+    void stringStatus(const QString);
+    void intStatus(const int);
+    
+public slots:
+    void slotStringStatus(const QString status) {
+      emit stringStatus(status);
+    }
+    void slotIntStatus(const int status) {
+      emit intStatus(status);
+    }
+protected:
     SnapshotInterface * obj;
     std::string filename;
     std::string interface_type;

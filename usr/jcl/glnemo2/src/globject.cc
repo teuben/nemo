@@ -17,7 +17,7 @@
 
 namespace glnemo {
 
-
+#define DOF 4000000
 // ============================================================================
 // Constructor                                                                 
 GLObject::GLObject()
@@ -69,6 +69,32 @@ void GLObject::setColor(const QColor &c)
 void GLObject::buildDisplayList()
 {
 }
+// ============================================================================
+// GLObject::setProjection                                              
+//
+void GLObject::setProjection(const int x, const int y, const int width, const int height)
+{
+  glViewport( x, y, width, height);
+  double ratio =  ((double )width) / ((double )height);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+
+  if (1) {
+    gluPerspective(45.,ratio,0.0005,(float) DOF);
+  }
+  else {
+#if 0
+    computeOrthoFactorRatio();
+    glOrtho(ortho_left   * fx  * store_options->zoomo,
+            ortho_right  * fx  * store_options->zoomo,
+            ortho_bottom * fy  * store_options->zoomo,
+            ortho_top    * fy  * store_options->zoomo,
+            -1000,1000);
+            //(float) -DOF/2.,(float) -DOF/2.);
+#endif
+  }
+}
+
 // ============================================================================
 
 

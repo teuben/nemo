@@ -31,9 +31,9 @@ public:
   ~GLGridObject();
 
   // method
-  void setNbSquare(int _nsquare) { nsquare = _nsquare;};
-  void setSquareSize(float _square_size) { square_size = _square_size;};
-  void rebuild() { buildDisplayList(); };
+  void setNbSquare(int _nsquare) { nsquare = _nsquare;}
+  void setSquareSize(float _square_size) { square_size = _square_size;}
+  void rebuild() { buildDisplayList(); }
   static int nsquare;        // #square       
   static float square_size;  // size of square
   

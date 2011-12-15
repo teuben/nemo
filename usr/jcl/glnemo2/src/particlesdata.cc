@@ -465,6 +465,9 @@ int PhysicalData::computeMinMax()
     }       
     std::cerr << "-------------------------------\n";
     valid = true;
+    if ((max == -1E9 && min == 1E9 )) {
+      valid = false;
+    }
     if (min>0 && max>0) {
       if ((max == -1E9 && min == 1E9 )|| (max == min) ||
           max >  std::numeric_limits<double>::max() ||
@@ -481,22 +484,26 @@ int PhysicalData::computeMinMax()
       break;
     case PhysicalData::rho : 
       if (valid) GlobalOptions::rho_exist         = true;
+      else       GlobalOptions::rho_exist         = false;
       std::cerr << "Density     range :\n";
       break;
     case PhysicalData::temperature : 
       if (valid) GlobalOptions::temperature_exist = true;
+      else       GlobalOptions::temperature_exist = false;
       std::cerr << "Temperature range :\n";
       break;  
     case PhysicalData::temperaturesd : 
       if (valid) GlobalOptions::temperature_exist = true;
+      else       GlobalOptions::temperature_exist = false;
       std::cerr << "Temperature range :\n";
       break;     
     case PhysicalData::pressure :
       if (valid) GlobalOptions::pressure_exist    = true;
+      else       GlobalOptions::pressure_exist    = false;
       std::cerr << "Pressure    range :\n";
       break;                        
     } 
-    
+    std::cerr << "VALID =["<<valid<<"]\n";
     std::cerr <<" min = "<< std::scientific << std::setw(10) << min
               <<"\n max = "<< std::setw(10)<<max<<"\n";
     if (max >  std::numeric_limits<double>::max()) {

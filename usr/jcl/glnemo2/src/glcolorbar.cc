@@ -65,7 +65,7 @@ void GLColorbar::display(const int _width, const int _height)
   height = _height;
   width  = _width;
   
-  if (go && go->gcb_enable) {
+  if (go && go->gcb_enable && phys_select && phys_select->isValid()) {
     glDisable( GL_DEPTH_TEST );
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
@@ -212,7 +212,7 @@ void GLColorbar::drawBox()
 // void GLColorbar::drawColor
 void GLColorbar::drawColor()
 {
-  if (go) {
+  if (go && phys_select && phys_select->isValid()) {
     int large_box,long_box;
     if (go->gcb_orientation==1 || go->gcb_orientation==3) {  // Est or West
       long_box=x[3][1]-x[0][1];// -2 pixels
@@ -274,7 +274,7 @@ void GLColorbar::drawColor()
 // void GLColorbar::drawLegend
 void GLColorbar::drawLegend()
 {
-  if (go && phys_select->isValid()) {
+  if (go && phys_select && phys_select->isValid()) {
     float value;
     float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
     //max

@@ -61,7 +61,9 @@ public:
     // from Scene Orientation TAB
     float zoom,zoomo;
     float xrot,yrot,zrot;
+    float urot,vrot,wrot;
     float ixrot,iyrot,izrot;
+    float iurot,ivrot,iwrot;
     float xtrans,ytrans,ztrans;
     // from Grids TAB
     bool show_grid;

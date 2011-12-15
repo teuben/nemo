@@ -80,10 +80,17 @@ class MainWindow : public QMainWindow {
     void actionRotateRY();
     void actionRotateZ();
     void actionRotateRZ();
+    void actionRotateU();
+    void actionRotateRU();
+    void actionRotateV();
+    void actionRotateRV();
+    void actionRotateW();
+    void actionRotateRW();    
     void actionTranslateX();
     void actionTranslateY();
     void actionTranslateZ();
     void actionToggleOsd();
+    void actionToggleRotationScreen();
     void actionToggleCamera();
     void actionEmpty() {;};
     void actionQuit();
@@ -158,14 +165,20 @@ class MainWindow : public QMainWindow {
     QAction * auto_gl_screenshot_action;
     QAction * toggle_osd_action;
     QAction * toggle_camera_action;
+    QAction * toggle_rotation_screen_action;
+    // status bar
+    QStatusBar * status_bar;
     // GL actions
     QAction * next_cmap_action;
     QAction * prev_cmap_action;
     QAction * reverse_cmap_action;
     QAction * dynamic_cmap_action;
-    // auto rotate
+    // auto rotate around SCREEN axis
     QAction * rotatex_action, * rotatey_action,* rotatez_action,
     * rotatexr_action, * rotateyr_action,* rotatezr_action;
+    // auto rotate around SCENE/Object axis
+    QAction * rotateu_action, * rotatev_action,* rotatew_action,
+    * rotateur_action, * rotatevr_action,* rotatewr_action;
     // auto translate
     QAction * transx_action, * transy_action, * transz_action;
     // Z sorting
@@ -203,9 +216,11 @@ class MainWindow : public QMainWindow {
     bool play_animation, play;
     QTimer * play_timer;
     LoadingThread * loading_thread;
-    // auto rotate timers
+    // auto rotate timers arounf SCREEN axis
     QTimer * auto_rotx_timer, * auto_roty_timer, * auto_rotz_timer;
     QTimer * auto_transx_timer, * auto_transy_timer, * auto_transz_timer;
+    // auto rotate timers arounf SCENE/Object axis
+    QTimer * auto_rotu_timer, * auto_rotv_timer, * auto_rotw_timer;
     // bench
     QTimer * bench_gup_timer, * bench_nframe_timer;
     int total_frame;

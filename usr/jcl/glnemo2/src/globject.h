@@ -49,9 +49,9 @@ public:
   void display(int my_list=-1);
   void setColor(const QColor&);
   void toggleActivate();
-  bool getActivate() { return is_activated; };
-  void setActivate(bool status) { is_activated = status ;}; 
-  void setWH(int new_w, int new_h) { width=new_w; height=new_h; };
+  bool getActivate() { return is_activated; }
+  void setActivate(bool status) { is_activated = status ;}
+  void setWH(int new_w, int new_h) { width=new_w; height=new_h; }
 // protected slots:
   void updateAlphaSlot(const int);
   
@@ -63,6 +63,8 @@ public:
   int particles_alpha;  
   // method
   void  buildDisplayList();
+  // projections
+  void setProjection(const int x, const int y, const int w, const int h );
 
 };
 

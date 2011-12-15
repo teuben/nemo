@@ -42,7 +42,7 @@ namespace glnemo {
       void changeVisib(const bool,const int ,const int );
   private slots:
     void myClicked(bool b) {
-      std::cerr << "my clicked row : "<< row <<" bool : " << b << "\n";
+      //std::cerr << "my clicked row : "<< row <<" bool : " << b << "\n";
       emit changeVisib(b,row,table);
     };
     //~QCheckBoxTable();
