@@ -52,7 +52,8 @@ namespace tools {
   class Ctools {
   public:
     Ctools() {;}
-    static std::string fixFortran(const char *);
+    static std::string fixFortran(const char *,const bool lower=true);
+    static std::string fixFortran(const char *,const int len, const bool lower=true);
     static bool isFileExist(std::string);
     static std::string toupper(std::string);
     static std::string tolower(std::string);

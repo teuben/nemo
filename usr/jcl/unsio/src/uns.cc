@@ -48,9 +48,15 @@ namespace uns {
   void CunsIn::init(const std::string _name ,const std::string _comp ,const std::string _time, const bool verb )
   {
     valid = false;
-    simname  = tools::Ctools::fixFortran(_name.c_str());
-    sel_comp = tools::Ctools::fixFortran(_comp.c_str());
-    sel_time = tools::Ctools::fixFortran(_time.c_str());
+    simname  = tools::Ctools::fixFortran(_name.c_str(),false);
+    sel_comp = tools::Ctools::fixFortran(_comp.c_str(),false);
+    sel_time = tools::Ctools::fixFortran(_time.c_str(),false);
+    
+    // to lower
+    //simname  = tools::Ctools::tolower(simname);
+    //sel_comp = tools::Ctools::tolower(sel_comp);
+    //sel_time = tools::Ctools::tolower(sel_time);
+    
     verbose=verb;
     snapshot = NULL;
     PRINT("name    ["<< simname  <<"]\n");
@@ -134,8 +140,8 @@ namespace uns {
   // constructor
   CunsOut::CunsOut(const std::string _name, const std::string _type, const bool _verb )
   {
-    simname  = tools::Ctools::fixFortran(_name.c_str());
-    simtype  = tools::Ctools::fixFortran(_type.c_str());
+    simname  = tools::Ctools::fixFortran(_name.c_str(),false);
+    simtype  = tools::Ctools::fixFortran(_type.c_str(),false);
     verbose = _verb;
     snapshot= NULL;
     initializeStringMap(verbose);

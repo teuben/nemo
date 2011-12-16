@@ -27,25 +27,14 @@
 
       ! format fortran string to c string
       call get_command_argument(1,ain)
-      
-      ! fortran to C string
-      ain(lnblnk(ain)+1:lnblnk(ain)+1) = '\0'
 
       call get_command_argument(2,aout)
-      ! fortran to C string
-      !aout(lnblnk(aout)+1:lnblnk(aout)+1) = '\0'
 
       call get_command_argument(3,acomp)
-      ! fortran to C string
-      acomp(lnblnk(acomp)+1:lnblnk(acomp)+1) = '\0'
 
       call get_command_argument(4,atyp)
-      ! fortran to C string
-      atyp(lnblnk(atyp)+1:lnblnk(atyp)+1) = '\0'
 
       call get_command_argument(5,atim)
-      ! fortran to C string
-      atim(lnblnk(atim)+1:lnblnk(atim)+1) = '\0'
 
       ! initialyze UNS engine
       ident=uns_init(ain, acomp, atim) ! return identifier for the snaphot
@@ -65,10 +54,9 @@
                !! build output file name
                write (ii,'(I6)') cpt
                out = trim(aout)//"."//trim(adjustl(ii))
-               out(lnblnk(out)+1:lnblnk(out)+1)='\0'
                write (0,*) out
                !! get nbody
-               status=uns_get_value_i(ident,"nsel\0", nbody) ! get #bodies
+               status=uns_get_value_i(ident,"nsel", nbody) ! get #bodies
                write (0,*) "nbody =", nbody
                !! start main subroutine
                call start(ident,nbody,out,atyp)
@@ -99,74 +87,74 @@
       ! initialyze uns output
       idento=uns_save_init(out,atyp)
 
-      status=uns_get_value_f(ident,"time\0",time      )
+      status=uns_get_value_f(ident,"time",time      )
       write (0,*) 'time =',time
 
       
       ! prepare time for saving
-      ok=uns_set_value_f(idento,"time\0", time)
+      ok=uns_set_value_f(idento,"time", time)
 
       ! load pos vel mass
-      nsel=uns_get_array_f(ident,"all\0","pos\0" ,pos ,nbody)
-      nsel=uns_get_array_f(ident,"all\0","vel\0" ,vel ,nbody)
-      nsel=uns_get_array_f(ident,"all\0","mass\0",mass,nbody)
+      nsel=uns_get_array_f(ident,"all","pos" ,pos ,nbody)
+      nsel=uns_get_array_f(ident,"all","vel" ,vel ,nbody)
+      nsel=uns_get_array_f(ident,"all","mass",mass,nbody)
       write (0,*) 'nsel =',nsel,' nbody=',nbody
-      nsel=uns_get_array_i(ident,"all\0","id\0",id,nbody)
+      nsel=uns_get_array_i(ident,"all","id",id,nbody)
       write (0,*) 'ID nsel =',nsel,' id(1)',id(1)
       ! check if gas component exist
-      status = uns_get_range(ident,"gas\0",n,first,last);
+      status = uns_get_range(ident,"gas",n,first,last);
       if (status.gt.0) then ! prepare gas data for saving
          write (0,*) 'Gas ok, n=',n,' first=',first, ' last=',last
-         ok=uns_set_array_f(idento,"gas\0","mass\0",mass(first)  ,n);
-         ok=uns_set_array_f(idento,"gas\0","pos\0" ,pos (1,first),n);
-         ok=uns_set_array_f(idento,"gas\0","vel\0" ,vel (1,first),n);
+         ok=uns_set_array_f(idento,"gas","mass",mass(first)  ,n);
+         ok=uns_set_array_f(idento,"gas","pos" ,pos (1,first),n);
+         ok=uns_set_array_f(idento,"gas","vel" ,vel (1,first),n);
 
          ! gas density
-         n=uns_get_array_f(ident,"gas\0","rho\0",rho,nbody);
+         n=uns_get_array_f(ident,"gas","rho",rho,nbody);
          if (n.gt.0) then
-            ok=uns_set_array_f(idento,"gas\0","rho\0" ,rho,n);
+            ok=uns_set_array_f(idento,"gas","rho" ,rho,n);
          endif
 
          ! gas hsml
-         n=uns_get_array_f(ident,"gas\0","hsml\0",hsml,nbody);
+         n=uns_get_array_f(ident,"gas","hsml",hsml,nbody);
          if (n.gt.0) then
-            ok=uns_set_array_f(idento,"gas\0","hsml\0" ,hsml,n);
+            ok=uns_set_array_f(idento,"gas","hsml" ,hsml,n);
          endif                  
          
          ! gas internal energy
-         n=uns_get_array_f(ident,"gas\0","u\0",u,nbody);
+         n=uns_get_array_f(ident,"gas","u",u,nbody);
          if (n.gt.0) then
-            ok=uns_set_array_f(idento,"gas\0","u\0" ,u,n);
+            ok=uns_set_array_f(idento,"gas","u" ,u,n);
          endif                  
 
       endif
       ! check if disk component exist
-      status = uns_get_range(ident,"disk\0",n,first,last);
+      status = uns_get_range(ident,"disk",n,first,last);
       if (status.gt.0) then ! prepare disk data for saving
-         ok=uns_set_array_f(idento,"disk\0","mass\0",mass(first)  ,n);
-         ok=uns_set_array_f(idento,"disk\0","pos\0" ,pos (1,first),n);
-         ok=uns_set_array_f(idento,"disk\0","vel\0" ,vel (1,first),n);
+         ok=uns_set_array_f(idento,"disk","mass",mass(first)  ,n);
+         ok=uns_set_array_f(idento,"disk","pos" ,pos (1,first),n);
+         ok=uns_set_array_f(idento,"disk","vel" ,vel (1,first),n);
       endif
       ! check if stars component exist
-      status = uns_get_range(ident,"stars\0",n,first,last);
+      status = uns_get_range(ident,"stars",n,first,last);
       if (status.gt.0) then ! prepare stars data for saving
-         ok=uns_set_array_f(idento,"stars\0","mass\0",mass(first)  ,n);
-         ok=uns_set_array_f(idento,"stars\0","pos\0" ,pos (1,first),n);
-         ok=uns_set_array_f(idento,"stars\0","vel\0" ,vel (1,first),n);
+         ok=uns_set_array_f(idento,"stars","mass",mass(first)  ,n);
+         ok=uns_set_array_f(idento,"stars","pos" ,pos (1,first),n);
+         ok=uns_set_array_f(idento,"stars","vel" ,vel (1,first),n);
       endif
       ! check if halo component exist
-      status = uns_get_range(ident,"halo\0",n,first,last);
+      status = uns_get_range(ident,"halo",n,first,last);
       if (status.gt.0) then ! prepare halo data for saving
-         ok=uns_set_array_f(idento,"halo\0","mass\0",mass(first)  ,n);
-         ok=uns_set_array_f(idento,"halo\0","pos\0" ,pos (1,first),n);
-         ok=uns_set_array_f(idento,"halo\0","vel\0" ,vel (1,first),n);
+         ok=uns_set_array_f(idento,"halo","mass",mass(first)  ,n);
+         ok=uns_set_array_f(idento,"halo","pos" ,pos (1,first),n);
+         ok=uns_set_array_f(idento,"halo","vel" ,vel (1,first),n);
       endif
       ! check if bulge component exist
-      status = uns_get_range(ident,"bulge\0",n,first,last);
+      status = uns_get_range(ident,"bulge",n,first,last);
       if (status.gt.0) then ! prepare bulge data for saving
-         ok=uns_set_array_f(idento,"bulge\0","mass\0",mass(first)  ,n);
-         ok=uns_set_array_f(idento,"bulge\0","pos\0" ,pos (1,first),n);
-         ok=uns_set_array_f(idento,"bulge\0","vel\0" ,vel (1,first),n);
+         ok=uns_set_array_f(idento,"bulge","mass",mass(first)  ,n);
+         ok=uns_set_array_f(idento,"bulge","pos" ,pos (1,first),n);
+         ok=uns_set_array_f(idento,"bulge","vel" ,vel (1,first),n);
       endif
 
       ! save data

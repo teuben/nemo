@@ -22,9 +22,9 @@
 namespace uns {
   extern "C" {
     // load protocol
-    int uns_init_(const char *,const char *, const char * );
+    int uns_init_(const char *,const char *, const char * , const int l1, const int l2, const int l3);
     int uns_load_(const int *);
-    int uns_load_opt_(const int *, const char * bits);
+    int uns_load_opt_(const int *, const char * bits, const int l1);
     int uns_close_(const int *);
     // load data
     int uns_get_nbody_( const int * id, int   * nbody            );
@@ -38,34 +38,34 @@ namespace uns {
     int uns_get_metal_gas_( const int * id , float * metal, int * size);
     int uns_get_metal_stars_( const int * id , float * metal, int * size);
     int uns_get_range_( const int * id, const char * comp ,
-			int * nbody, int * first, int * last);
-    int uns_get_eps_  ( const int * id, const char * comp, float * eps);
+			int * nbody, int * first, int * last, const int l1);
+    int uns_get_eps_  ( const int * id, const char * comp, float * eps, const int l1);
     int uns_sim_type_ ( const int * id);
-    void uns_sim_dir_ ( const int * id, char * simdir, int len);
+    void uns_sim_dir_ ( const int * id, char * simdir, const int l1);
     int uns_get_u_    ( const int * id , float * u  , int * size);
     int uns_get_temp_ ( const int * id , float * temp  , int * size);
     int uns_get_rho_  ( const int * id , float * rho  , int * size);
     int uns_get_hsml_ ( const int * id , float * hsml , int * size);
     int uns_get_cod_  ( const int * id, const char * select, const float * time,
-		       float * tcod);
-    int uns_get_array_f_( const int * id, const char * comp, const char * tag, float * array , int * size);
-    int uns_get_array_i_( const int * id, const char * comp, const char * tag, int   * array , int * size);
-    int uns_get_value_f_ ( const int * id, const char * tag, float *  data);
-    int uns_get_value_i_ ( const int * id, const char * tag, int   *  data);
+		       float * tcod, const int l1);
+    int uns_get_array_f_( const int * id, const char * comp, const char * tag, float * array , int * size, const int l1, const int l2);
+    int uns_get_array_i_( const int * id, const char * comp, const char * tag, int   * array , int * size, const int l1, const int l2);
+    int uns_get_value_f_ ( const int * id, const char * tag, float *  data, const int l1);
+    int uns_get_value_i_ ( const int * id, const char * tag, int   *  data, const int l1);
     
     // save protocol
-    int uns_save_init_(const char *,const char *);
+    int uns_save_init_(const char *,const char *, const int l1, const int l2);
     // save data
     int uns_set_nbody_  ( const int * id, int   * nbody            );
     int uns_set_time_   ( const int * id, float * timu             );
-    int uns_set_array_f_( const int * id, const char * comp, const char * tag, float * array , int * size);
-    int uns_set_array_i_( const int * id, const char * comp, const char * tag, int   * array , int * size);
-    int uns_set_value_f_ ( const int * id, const char * tag, float *  data);
-    int uns_set_value_i_ ( const int * id, const char * tag, int   *  data);
+    int uns_set_array_f_( const int * id, const char * comp, const char * tag, float * array , int * size, const int l1, const int l2);
+    int uns_set_array_i_( const int * id, const char * comp, const char * tag, int   * array , int * size, const int l1, const int l2);
+    int uns_set_value_f_ ( const int * id, const char * tag, float *  data, const int l1);
+    int uns_set_value_i_ ( const int * id, const char * tag, int   *  data, const int l1);
     int uns_set_pos_    ( const int * id, float * pos   , int * size);
     int uns_set_vel_    ( const int * id, float * vel   , int * size);
     int uns_set_mass_   ( const int * id, float * mass   , int * size);
-    int uns_set_ncomp_  ( const int * id, const char * comp, int * nbody);
+    int uns_set_ncomp_  ( const int * id, const char * comp, int * nbody, const int l1);
     int uns_save_       ( const int * id);
   }
 
@@ -90,12 +90,14 @@ uns::UserSelection user_select;
 // select_comp -> selected components or range                                 
 // select_time -> selected time                                                
 // Output :                                                                    
-int uns_init_(const char * simname,const char * select_comp, const char * select_time )
+int uns_init_(const char * _name,const char * _comp, const char * _time, const int l1, const int l2, const int l3 )
 {
   first=false;
   int ret=0;
-  
-  uns::CunsIn * uns = new uns::CunsIn(simname,select_comp,select_time,false);
+  std::string simname  = tools::Ctools::fixFortran(_name,l1,false);
+  std::string sel_comp = tools::Ctools::fixFortran(_comp,l2,false);
+  std::string sel_time = tools::Ctools::fixFortran(_time,l3,false);
+  uns::CunsIn * uns = new uns::CunsIn(simname,sel_comp,sel_time,false);
   bool valid = uns->isValid();
   
   if (valid) {
@@ -138,7 +140,7 @@ int uns_load_(const int * ident)
 // -1 snapshot was not open                                                    
 //  0 end of snapshot reached                                                  
 //  1 sucessfull                                                               
-int uns_load_opt_(const int * ident, const char * _bits)
+int uns_load_opt_(const int * ident, const char * _bits, const int l1)
 {
   PRINT("uns_load ident requested : "<< *ident << "\n";);
   // look for "ident" exist in the already opened snapshots
@@ -146,7 +148,7 @@ int uns_load_opt_(const int * ident, const char * _bits)
   int index=uns::CunsIdentifier::getUnsvIndex(*ident,&unsv);
   PRINT("index in UNSV ="<< index << "\n";);
   std::string bits="";
-  bits  = tools::Ctools::fixFortran(_bits);
+  bits  = tools::Ctools::fixFortran(_bits,l1,false);
 
   std::cerr << "uns_load_opt = [" << bits << "]\n";
   if (index >= 0) {
@@ -178,14 +180,14 @@ int uns_close_(const int * ident)
 // ----------------------------------------------------------------------------
 // uns_get_array_f:                                                                
 // return component's array belonging to the simulation with the identifier ident         
-int uns_get_array_f_( const int * id, const char * _comp, const char * _tag, float * array , int * size)
+int uns_get_array_f_( const int * id, const char * _comp, const char * _tag, float * array , int * size, const int l1, const int l2)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
   // populate user_select object according to the selection
   // and the object
-  std::string tag  = tools::Ctools::fixFortran(_tag);
-  std::string comp = tools::Ctools::fixFortran(_comp);  
+  std::string tag  = tools::Ctools::fixFortran(_tag,l2);
+  std::string comp = tools::Ctools::fixFortran(_comp,l1);  
   float *data;
   int nbody;
   bool ok=snap->getData(comp,tag,&nbody,&data);
@@ -202,14 +204,14 @@ int uns_get_array_f_( const int * id, const char * _comp, const char * _tag, flo
 // ----------------------------------------------------------------------------
 // uns_get_array_i:                                                                
 // return component's array belonging to the simulation with the identifier ident         
-int uns_get_array_i_( const int * id, const char * _comp, const char * _tag, int * array , int * size)
+int uns_get_array_i_( const int * id, const char * _comp, const char * _tag, int * array , int * size, const int l1, const int l2)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
   // populate user_select object according to the selection
   // and the object
-  std::string tag  = tools::Ctools::fixFortran(_tag);
-  std::string comp = tools::Ctools::fixFortran(_comp);  
+  std::string tag  = tools::Ctools::fixFortran(_tag,l2);
+  std::string comp = tools::Ctools::fixFortran(_comp,l1);  
   int *data;
   int nbody;
   bool ok=snap->getData(comp,tag,&nbody,&data);
@@ -224,13 +226,13 @@ int uns_get_array_i_( const int * id, const char * _comp, const char * _tag, int
 // ----------------------------------------------------------------------------
 // uns_get_value_f_:                                                               
 // return tag's value belonging to the simulation with the identifier ident        
-int uns_get_value_f_( const int * id, const char * _tag, float   *  data)
+int uns_get_value_f_( const int * id, const char * _tag, float   *  data, const int l1)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
   // populate user_select object according to the selection
   // and the object
-  std::string tag = tools::Ctools::fixFortran(_tag);
+  std::string tag = tools::Ctools::fixFortran(_tag,l1);
   int status=0;
   bool ok=snap->getData(tag,data);
   if (ok) {
@@ -241,13 +243,13 @@ int uns_get_value_f_( const int * id, const char * _tag, float   *  data)
 // ----------------------------------------------------------------------------
 // uns_get_value_i_:                                                               
 // return tag's value belonging to the simulation with the identifier ident        
-int uns_get_value_i_( const int * id, const char * _tag, int   *  data)
+int uns_get_value_i_( const int * id, const char * _tag, int   *  data, const int l1)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
   // populate user_select object according to the selection
   // and the object
-  std::string tag = tools::Ctools::fixFortran(_tag);
+  std::string tag = tools::Ctools::fixFortran(_tag,l1);
   int status=0;
   bool ok=snap->getData(tag,data);
   if (ok) {
@@ -521,10 +523,10 @@ int uns_get_hsml_( const int * id, float  * hsml, int * size)
 // return nbody, first and last particles of the component selected and        
 // belonging to the simulation with the identifier ident                       
 int uns_get_range_( const int * id, const char * _comp ,
-			int * nbody, int * first, int * last)
+			int * nbody, int * first, int * last, const int l1)
 {
   int index=getUnsvIndex(*id);
-  std::string comp = tools::Ctools::fixFortran(_comp);
+  std::string comp = tools::Ctools::fixFortran(_comp,l1);
   int status=((CunsIn *)unsv[index].obj)->snapshot->getRangeSelect(comp.c_str(),nbody,first,last,true);
   return status;
 }
@@ -533,10 +535,10 @@ int uns_get_range_( const int * id, const char * _comp ,
 // return softening of the component selected and                              
 // belonging to the simulation with the identifier ident                       
 int uns_get_eps_( const int * id, const char * _comp ,
-		    float * eps)
+		    float * eps, const int l1)
 {
   int index=getUnsvIndex(*id);
-  std::string comp = tools::Ctools::fixFortran(_comp);
+  std::string comp = tools::Ctools::fixFortran(_comp,l1);
   *eps=((CunsIn *)unsv[index].obj)->snapshot->getEps(comp);
   return (((*eps)>0.)?1:0);
 }
@@ -545,11 +547,11 @@ int uns_get_eps_( const int * id, const char * _comp ,
 // return time+cod of the components selected and                              
 // belonging to the simulation with the identifier ident                       
 int uns_get_cod_ ( const int * id, const char * _select, const float * time,
-		   float * tcod)
+		   float * tcod, const int l1)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
-  std::string select = tools::Ctools::fixFortran(_select);
+  std::string select = tools::Ctools::fixFortran(_select,l1);
   int status = snap->getCod(select,*time,tcod);
   return status;
 }
@@ -627,10 +629,11 @@ void checkFArray(const int size, const int nbody)
 // simname     -> snapshot's output file name
 // simtype     -> simulation type
 // Output :                                                                    
-int uns_save_init_(const char * simname,const char * simtype)
+int uns_save_init_(const char * _name,const char * _type, const int l1, const int l2)
 {
   int ret=0;
-  
+  std::string simname  = tools::Ctools::fixFortran(_name,l1,false);
+  std::string simtype  = tools::Ctools::fixFortran(_type,l2,false);
   uns::CunsOut * uns = new uns::CunsOut(simname,simtype,false);
     
   uns::CunsIdentifier * unso = new  uns::CunsIdentifier();
@@ -669,13 +672,13 @@ int uns_set_time_( const int * id, float  * time)
 // ----------------------------------------------------------------------------
 // uns_set_array_f_:                                                                 
 // set comp's float array belonging to the simulation with the identifier ident      
-int uns_set_array_f_( const int * id, const char * _comp, const char * _array, float * data , int * size)
+int uns_set_array_f_( const int * id, const char * _comp, const char * _array, float * data , int * size, const int l1, const int l2)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceOut * snap = ((CunsOut *)unsv[index].obj)->snapshot;
 
-  std::string comp  = tools::Ctools::fixFortran(_comp);
-  std::string array = tools::Ctools::fixFortran(_array);
+  std::string comp  = tools::Ctools::fixFortran(_comp,l1);
+  std::string array = tools::Ctools::fixFortran(_array,l2);
     
   // set data
   int status=snap->setData(comp,array,*size,data,true);  
@@ -684,13 +687,13 @@ int uns_set_array_f_( const int * id, const char * _comp, const char * _array, f
 // ----------------------------------------------------------------------------
 // uns_set_array_i_:                                                                 
 // set comp's integer array belonging to the simulation with the identifier ident      
-int uns_set_array_i_( const int * id, const char * _comp, const char * _array, int * data , int * size)
+int uns_set_array_i_( const int * id, const char * _comp, const char * _array, int * data , int * size, const int l1, const int l2)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceOut * snap = ((CunsOut *)unsv[index].obj)->snapshot;
 
-  std::string comp  = tools::Ctools::fixFortran(_comp);
-  std::string array = tools::Ctools::fixFortran(_array);
+  std::string comp  = tools::Ctools::fixFortran(_comp,l1);
+  std::string array = tools::Ctools::fixFortran(_array,l2);
   
   // set data
   int status=snap->setData(comp,array,*size,data,true);
@@ -699,11 +702,11 @@ int uns_set_array_i_( const int * id, const char * _comp, const char * _array, i
 // ----------------------------------------------------------------------------
 // uns_set_value_f_:                                                                 
 // set comp's float data belonging to the simulation with the identifier ident      
-int uns_set_value_f_( const int * id, const char * tag, float * data)
+int uns_set_value_f_( const int * id, const char * tag, float * data, const int l1)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceOut * snap = ((CunsOut *)unsv[index].obj)->snapshot;
-  std::string comp  = tools::Ctools::fixFortran(tag);
+  std::string comp  = tools::Ctools::fixFortran(tag,l1);
   // set data
   int status=snap->setData(comp,*data);
   return status;
@@ -711,12 +714,12 @@ int uns_set_value_f_( const int * id, const char * tag, float * data)
 // ----------------------------------------------------------------------------
 // uns_set_value_i_:                                                                 
 // set comp's integer data belonging to the simulation with the identifier ident      
-int uns_set_value_i_( const int * id, const char * tag, int * data)
+int uns_set_value_i_( const int * id, const char * tag, int * data, const int l1)
 {
   int index=getUnsvIndex(*id);
   uns::CSnapshotInterfaceOut * snap = ((CunsOut *)unsv[index].obj)->snapshot;
 
-  std::string comp  = tools::Ctools::fixFortran(tag);  
+  std::string comp  = tools::Ctools::fixFortran(tag,l1);  
   // set data
   int status=snap->setData(comp,*data);
   return status;

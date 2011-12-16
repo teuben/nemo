@@ -111,10 +111,10 @@ void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
   if (ok && display) {
     displayFormat(maxlines,"age [1] = ",age,1,nbody, 3);
   } 
-  ok = uns->snapshot->getData(comp,"metal" ,&nbody,&metal );
-  if (ok && display) {
-    displayFormat(maxlines,"metal[1] = ",metal,1,nbody, 3);
-  } 
+//  ok = uns->snapshot->getData(comp,"metal" ,&nbody,&metal );
+//  if (ok && display) {
+//    displayFormat(maxlines,"metal[1] = ",metal,1,nbody, 3);
+//  } 
   //}
 }
 // ------------------------------------------------------------

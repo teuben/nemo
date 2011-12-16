@@ -13,9 +13,83 @@
 #include <cmath>
 #include <sstream>
 #include <assert.h>
+#include <cstring>
+#include <algorithm>
 #include "csnaptools.h"
 
 using namespace jclut;
+
+//
+// ----------------------------------------------------------------------------
+// fixFortran
+std::string CSnaptools::fixFortran(const char * _ff, const bool lower)
+{
+  static char buff[200], * p;
+  memset( buff, '\0', 200 );
+  
+  //std::cerr << "Fortran string ["<<_ff<<"]\n";
+  
+  p=(char *) strchr(_ff,'\\');
+  if (p) {
+    //std::cerr << "Got \\ \n";
+    assert (p-_ff<=200);
+    strncpy(buff,_ff,p-_ff);
+  }
+  else {
+    p=(char *) strchr(_ff,'#');
+    if (p) {
+      //std::cerr << "Got #\n";
+      assert (p-_ff<=200);
+      strncpy(buff,_ff,p-_ff);
+    } else {
+      //std::cerr << "Got nothing.....\n";
+      strcpy(buff,_ff);
+    }
+  } 
+  //std::cerr << "Buff ["<<buff<<"]\n";
+  if (lower)
+    return tolower(std::string(buff));
+  else
+    return std::string(buff);
+}
+//
+// ----------------------------------------------------------------------------
+// fixFortran
+std::string CSnaptools::fixFortran(const char * _ff, const int len, const bool lower)
+{
+  char * buff = new char[len+1];
+  strncpy(buff,_ff,len);
+  buff[len]='\0';
+  std::string str=buff;
+  delete [] buff;
+  
+  std::cerr << "fix_fortran =["<<str<<"]\n";
+  
+  size_t found;
+  found=str.find_last_not_of(" ");
+  if (found!=std::string::npos)
+    str.erase(found+1);
+  else
+    str.clear();            // str is all whitespace
+  
+  std::cerr << '"' << str << '"' << std::endl;
+  
+  return str;
+}
+// ----------------------------------------------------------------------------
+// tolower
+std::string CSnaptools::tolower(std::string s)
+{
+  std::transform(s.begin(),s.end(),s.begin(),(int(*)(int)) std::tolower);
+  return s;
+}
+// ----------------------------------------------------------------------------
+// tolupper
+std::string CSnaptools::toupper(std::string s)
+{
+  std::transform(s.begin(),s.end(),s.begin(),(int(*)(int)) std::toupper);
+  return s;
+}
 
 //
 // moveToCod
@@ -258,11 +332,11 @@ template std::vector<std::string> CSnaptools::stringToVector<std::string  >(cons
 // minArray
 template <class T> T CSnaptools::minArray(const int nbody, const T * array)
 {
-   T min = array[0];
-   for (int i=1;i<nbody;i++) {
-     min = std::min(min,array[i]);
-   }
-   return min;
+  T min = array[0];
+  for (int i=1;i<nbody;i++) {
+    min = std::min(min,array[i]);
+  }
+  return min;
 }
 template float  CSnaptools::minArray(const int nbody, const float  * array);
 template double CSnaptools::minArray(const int nbody, const double * array);
@@ -271,13 +345,12 @@ template int    CSnaptools::minArray(const int nbody, const int    * array);
 // maxArray
 template <class T> T CSnaptools::maxArray(const int nbody, const T * array)
 {
-   T max = array[0];
-   for (int i=1;i<nbody;i++) {
-     max = std::max(max,array[i]);
-   }
-   return max;
+  T max = array[0];
+  for (int i=1;i<nbody;i++) {
+    max = std::max(max,array[i]);
+  }
+  return max;
 }
 template float  CSnaptools::maxArray(const int nbody, const float  * array);
 template double CSnaptools::maxArray(const int nbody, const double * array);
 template int    CSnaptools::maxArray(const int nbody, const int    * array);
-//

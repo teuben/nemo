@@ -44,6 +44,10 @@ namespace jclut {
         parse >> value;
         return value;
       };
+      static std::string fixFortran(const char *,const bool lower=true);
+      static std::string fixFortran(const char *,const int len, const bool lower=true);
+      static std::string toupper(std::string);
+      static std::string tolower(std::string);
     };
 }
 #endif
