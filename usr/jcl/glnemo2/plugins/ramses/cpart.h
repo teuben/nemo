@@ -22,11 +22,12 @@
 #include <iostream>
 #include <vector>
 #include "cfortio.h"
+#include <QObject>
 
 namespace ramses {
-class CPart {
-
- public:
+class CPart: public QObject {
+  Q_OBJECT
+public:
   CPart(const std::string,const int select,const bool _v=true);
   ~CPart();
   void setBoundary(float x[6]) {
@@ -46,8 +47,11 @@ class CPart {
     *stars = nstar_box; 
     return nselect;
   }
-  
- private:
+signals:
+    void stringStatus(const QString);
+    void intStatus(const int);    
+    
+private:
   bool verbose,valid;
   std::string infile,indir;
   int select,nselect;

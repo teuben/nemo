@@ -23,11 +23,10 @@
 
 namespace glnemo {
   using namespace std;
-class SnapshotPhiGrape: public QObject,
-                      public SnapshotInterface
+class SnapshotPhiGrape: public SnapshotInterface
 {
     Q_OBJECT
-    Q_INTERFACES(glnemo::SnapshotInterface);
+    Q_INTERFACES(glnemo::SnapshotInterface)
 
 public:
     SnapshotPhiGrape();

@@ -22,10 +22,9 @@
 namespace glnemo {
 
 
-class SnapshotGadget: public QObject,
-                      public SnapshotInterface{
+class SnapshotGadget: public SnapshotInterface{
      Q_OBJECT
-     Q_INTERFACES(glnemo::SnapshotInterface);
+     Q_INTERFACES(glnemo::SnapshotInterface)
 public:
     SnapshotGadget();
 

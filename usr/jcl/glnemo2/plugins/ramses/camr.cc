@@ -116,7 +116,8 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
   int ngridbound [nlevelmax][     nboundary];
   double xc[3][8];
   int ngrida;
-  
+  std::string infile;
+  QString str_status;
   if (load_vel || nsel || vel) {;} // remove compiler warning
   
   nbody = 0;
@@ -127,8 +128,10 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
   for (int icpu=0; icpu<ncpu; icpu++) {
     std::ostringstream osf;
     osf << std::fixed << std::setw(5) << std::setfill('0') <<icpu+1;
-    std::string infile = indir + "/amr_" + s_run_index + ".out" + osf.str();
+    infile = indir + "/amr_" + s_run_index + ".out" + osf.str();
     if (verbose) std::cerr << "CAmr::loadData infile-> ["<<infile << "]\n";
+    str_status = std::string("Loading file : " + infile).c_str();
+    emit stringStatus(str_status);
     amr.open(infile);
     amr.skipBlock(21);
     

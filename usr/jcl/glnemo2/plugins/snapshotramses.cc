@@ -63,6 +63,8 @@ bool SnapshotRamses::isValidData()
   part = new ramses::CPart(filename,2);
   amr  = new ramses::CAmr(filename);
   if (part->isValid() && amr->isValid()) {
+    connect(amr, SIGNAL(stringStatus(const QString)),this,SLOT(slotStringStatus(QString)));    //SLOT(slotStringStatus(const Qstring)));
+    connect(part,SIGNAL(stringStatus(const QString)),this,SLOT(slotStringStatus(QString)));
     valid=true;
   }
 

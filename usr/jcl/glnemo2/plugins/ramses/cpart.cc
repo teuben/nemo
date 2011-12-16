@@ -91,7 +91,8 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
   int cpt_dm=0;
   int cpt_star=0;
   bool count_only=false;
-
+  QString str_status;
+  
   if (nsel) {;} // remove compiler warning
   
   if (index==NULL) {
@@ -110,6 +111,8 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
     osf << std::fixed << std::setw(5) << std::setfill('0') <<i+1;
     std::string infile = indir + "/part_" + s_run_index + ".out" + osf.str();
     if (verbose) std::cerr << "reading file : " << infile << "\n";
+    str_status = std::string("Loading file : " + infile).c_str();
+    emit stringStatus(str_status);
     part.open(infile);
     readHeader();
     

@@ -21,10 +21,11 @@
 #include <iostream>
 #include <vector>
 #include "cfortio.h"
+#include <QObject>
 
 namespace ramses {
-class CAmr
-{
+class CAmr : public QObject {
+  Q_OBJECT
 public:
     CAmr(const std::string,const bool _v=true);
     
@@ -49,7 +50,12 @@ public:
                  float * rneib=NULL, float * temp=NULL,const int *index=NULL,
                  const int nsel=0,   const bool load_vel=false);
     int getNbody()    { return nbody;}
-   private:
+    
+signals:
+    void stringStatus(const QString);
+    void intStatus(const int);    
+    
+private:
     // some variables
     
     bool verbose,valid;

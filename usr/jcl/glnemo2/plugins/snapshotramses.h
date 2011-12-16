@@ -23,11 +23,10 @@
 
 namespace glnemo {
 
-class SnapshotRamses: public QObject,
-                      public SnapshotInterface
+class SnapshotRamses: public SnapshotInterface
 {
     Q_OBJECT
-    Q_INTERFACES(glnemo::SnapshotInterface);
+    Q_INTERFACES(glnemo::SnapshotInterface)
 
 public:
     SnapshotRamses();
@@ -39,7 +38,7 @@ public:
     bool isValidData();
     int initLoading(GlobalOptions * so);
     int nextFrame(const int * index_tab, const int nsel);
-    int close() { return 1;};
+    int close() { return 1;}
     QString endOfDataMessage();
 
 private:

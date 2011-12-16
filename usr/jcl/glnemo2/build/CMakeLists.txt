@@ -63,7 +63,7 @@ FILE(GLOB hdrs1_files ../plugins/*.h ../plugins/ftm/*.h ..plugins/gadget/*.h
 SET(LIBRARY_OUTPUT_PATH LIB)
 
 # compilation options
-add_definitions(-Wall -O2 -ggdb)
+add_definitions(-Wall -O2 -fopenmp -D_GLIBCXX_PARALLEL -ggdb)
 ADD_DEFINITIONS(-DQT_PLUGIN)
 ADD_DEFINITIONS(-DQT_STATICPLUGIN)
 ADD_DEFINITIONS(-DQT_OPENGL_LIB)
@@ -124,7 +124,7 @@ set(EXECUTABLE_OUTPUT_PATH ../bin)
 add_executable (glnemo2 ${src_files} ${rc_src} ${ui_headers} ${moc_src} ${glew})
 
 # Link the executable to the Hello library.
-target_link_libraries (glnemo2 uns ${OPENGL_LIBRARY}  ${QT_LIBRARIES} )
+target_link_libraries (glnemo2 uns ${OPENGL_LIBRARY}  ${QT_LIBRARIES} gomp )
 
 # INSTALLATION
 
