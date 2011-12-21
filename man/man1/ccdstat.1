@@ -1,4 +1,4 @@
-.TH CCDSTAT 1NEMO "24 May 2005"
+.TH CCDSTAT 1NEMO "15 October 2011"
 .SH NAME
 ccdstat \- statistics (1st through 4th moment) and chi2
 .SH SYNOPSIS
@@ -9,7 +9,7 @@ ccdstat \- statistics (1st through 4th moment) and chi2
 in an image/cube, 
 and calculate some human understandable numbers (mean, dispersion, skewness,
 curtosis) from them. It can optionally use a weighting map, in case the 
-map needs to weighted per pixel.
+map needs to be weighted per pixel.
 .PP
 Optionally, if the map contains an error normalized difference between an
 observation and model, it can also compute a chi2 goodness of
@@ -62,6 +62,12 @@ Optional display of the median value
 \fBmmcount=t|f\fP
 Count occurances of min and max 
 .TP
+\fBmaxmom=\fP
+Maximum moments it should compute. The current maximum is 4, moments up
+through the kurtosis are computed. For maxmom<0 no work is done, except
+for reading the file, which can be used to benchmark your disk I/O for
+large NEMO images.  [Default: 4].
+.TP
 \fBsort=t|f\fP
 Sorting routine (not activated yet) 
 .SH "EXAMPLE"
@@ -110,4 +116,5 @@ src/image/misc	ccdstat.c
 5-jun-03	V1.4: added win=	PJT
 14-nov-04	V1.5: added the chi2 trigger with npar= and nppb=	PJT
 24-may-06	V1.8: added mmcount	PJT
+15-oct-11	V1.10: added maxmom= and bench options	PJT
 .fi

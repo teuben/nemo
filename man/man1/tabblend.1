@@ -1,0 +1,51 @@
+.TH TABBLEND 1NEMO "21 December 2011"
+.SH NAME
+tabblend \- create (blended) lines and grid them
+.SH SYNOPSIS
+\fBtabblend\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabblend\fP creates a blended line spectrum, grids them,
+optionally with hanning smoothing and outputs a table that
+can be compared with observations, or be fitted.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBx=\fP
+X coordinates (velocities if you wish) of the line(s). Multiple
+velocities can be given here.
+.TP 20
+\fBa=\fP
+Amplitudes for each line. 
+If not enough values are given, the last value repeats.
+[1]
+.TP 20
+\fBd=\fP
+FWHM of the lines (FWHM=2.355*sigma) [1]  
+.TP
+\fBs=\fP
+Points where to sample [-16:16:0.01]    
+.TP
+\fBg=\fP
+Points where to lay the grid [-10:10:1]    
+.TP
+\fBfwhm=\fP
+If non-zero, smooth points with this beam [0]
+.TP
+\fBhanning=t|f\fP
+Optional hanning (not implemented).
+.TP
+\fBfft=f\n
+Use FFT to compute observed spectrum? (not implemented)
+.SH EXAMPLES
+.SH SEE ALSO
+tabplot(1NEMO)
+.SH FILES
+NEMO/src/kernel/tab : sources
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+21-dec-11	V0.0 Created	PJT
+.fi

@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "18 October 2005"
+.TH CCDMOM 1NEMO "16 September 2011"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
@@ -46,6 +46,13 @@ Boolean value if the values should accumulate instead along the selected axis.
 The \fBmom=\fP keyword is ignored, and the input and output datasets will
 now have the same shape and dimension. 
 [Default: \fBf\fP]
+.TP
+\fBclip=\fP
+Exclude pixels with values in the range -clip to clip. Default: 0
+.TP
+\fBrngmsk=t|f\fP
+Don't assign a 1st moment if the value results in a value outside the
+range of the axis. This can easily happen for noisy data. Default: false.
 .SH SEE ALSO
 pvtrace(1NEMO), ccdsub(1NEMO), image(5NEMO)
 .SH CAVEATS
@@ -67,4 +74,5 @@ Peter Teuben
 21-feb-01	V0.4a added mom=3, and fixed major bugs in computing moments	PJT
 25-mar-01	V0.5 added mom=-1	PJT
 18-oct-05	V0.6 added mom=-2 and cumulative option 	PJT
+16-sep-11	V0.8 added clip= and rngmsk=	PJT
 .fi
