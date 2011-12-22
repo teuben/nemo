@@ -33,11 +33,25 @@ Points where to lay the grid [-10:10:1]
 If non-zero, smooth points with this beam [0]
 .TP
 \fBhanning=t|f\fP
-Optional hanning (not implemented).
+Optional hanning.
 .TP
-\fBfft=f\n
+\fBfft=t|f\fP
 Use FFT to compute observed spectrum? (not implemented)
+.TP
+\fBrms=\fP
+RMS value for the noise added to the final spectrum. Default: 0
+.TP
+\fBseed=\fP
+The usual random seed (see also \fIxrandom(1NEMO)\fP). Default: 0
+.TP 
+\fBmode=\fP
+Output mode. 0 will output the raw spectrum before smoothing 
+and gridding etc.   1=will output the final spectrum, after 
+all gridding and noise addition. Default: 1
 .SH EXAMPLES
+.nf
+   tabblend x=-4,0,2 a=0.5,1,0.5 | tabplot - line=1,1
+.fi
 .SH SEE ALSO
 tabplot(1NEMO)
 .SH FILES
