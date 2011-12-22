@@ -1,8 +1,10 @@
 /*
- * TABBLEND: create (blined) lines, grid them, output table(s)
-
+ * TABBLEND: create (blended) lines, grid them, output table(s)
  *
- *      21-dec-2011 V1.0    Created - shortest day of the year
+ *
+ *      21-dec-2011 V0.1    Created - shortest day of the year
+ *
+ *  @TODO:   gridding shift
  */
 
 #include <stdinc.h>	
@@ -19,14 +21,14 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "a=1\n                 Amplitudes",
   "d=1\n                 FWHM of the lines (FWHM=2.355*sigma)",
   "s=-16:16:0.01\n       Points to sample",
-  "g=-10:10:1\n          Points to grid",
-  "fwhm=0\n              If non-zero, smooth points with this beam",
+  "g=-16:16:1\n          Points to grid",
+  "fwhm=0\n              If non-zero, convolve points with this beam",
   "hanning=f\n           Optional hanning",
   "fft=f\n               Use FFT to compute spectrum (not implemented)", 
   "rms=0\n               Add gaussian noise",
   "seed=0\n              seed for random number generator",
   "mode=1\n              0 = output raw   1=output final",
-  "VERSION=0.2\n	 22-dec-2011 PJT",
+  "VERSION=0.3\n	 22-dec-2011 PJT",
   NULL
 };
 
@@ -94,7 +96,9 @@ nemo_main()
     y[i] = 0;
     for (j=0; j<nx; j++) {   /* add in all lines */
       arg = (s[i]-x[j])*d1[j];
-      y[i] += a[j]*exp(-arg*arg);
+      arg = arg*arg;
+      if (arg > 100) continue;   
+      y[i] += a[j]*exp(-arg);
     }
     if (mode==0)
       printf("%g  %g\n",s[i],y[i]);
@@ -116,8 +120,8 @@ nemo_main()
   if (ds < dg) {
     for (i=0; i<ng; i++) z[i] = z1[i] = 0.0;
     for (i=0; i<ns; i++) {
+      /* @TODO: gridding shift ?  */
       j = index_grid(&G, s[i]);
-      printf("### %d %g %d\n",i,s[i],j);
       if (j<0) continue;
       z[j]  += y[i];
       z1[j] += 1.0;
@@ -125,28 +129,31 @@ nemo_main()
     for (i=0; i<ng; i++) {
       if (z1[i] > 0.0) z[i] /= z1[i];
     }
-  }
+  } else
+    error("No gridding possible?");
 
   /* Hanning */
   if (Qhan) {
+    warning("Hanning");
     for (i=0; i<ng; i++) {
-      il = MAX(i,0);
-      ir = MIN(i,ng-1);
+      il = MAX(i-1,0);
+      ir = MIN(i+1,ng-1);
       z1[i] = 0.25 * z[il] + 0.5 * z[i] + 0.25 * z[ir];
     }
-  } else
-    for (i=0; i<ng; i++) z1[i] = z[i];
+    for (i=0; i<ng; i++) z[i] = z1[i];
+  } 
+
 
   /* add noise */
   if (rms > 0.0) {
     for (i=0; i<ng; i++)
-      z1[i] += grandom(0.0,rms);
+      z[i] += grandom(0.0,rms);
   }
 
   if (mode==1) {
     printf("# final grid\n");
     for (i=0; i<ng; i++)
-      printf("%g  %g\n",g[i],z1[i]);
+      printf("%g  %g\n",g[i],z[i]);
   }
 
   
