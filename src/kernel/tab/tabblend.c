@@ -1,5 +1,5 @@
 /*
- * TABBLEND: create (blined) lines, grid them,output table
+ * TABBLEND: create (blined) lines, grid them, output table(s)
 
  *
  *      21-dec-2011 V1.0    Created - shortest day of the year
@@ -8,6 +8,7 @@
 #include <stdinc.h>	
 #include <getparam.h>
 #include <moment.h>
+#include <grid.h>
 
 
 #define MAXL       100
@@ -20,26 +21,39 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "s=-16:16:0.01\n       Points to sample",
   "g=-10:10:1\n          Points to grid",
   "fwhm=0\n              If non-zero, smooth points with this beam",
-  "hanning=f\n           Optional hanning (not implemented)",
-  "fft=f\n               Use FFT to compute spectrum",
-  "VERSION=0.1\n	 21-dec-2011 PJT",
+  "hanning=f\n           Optional hanning",
+  "fft=f\n               Use FFT to compute spectrum (not implemented)", 
+  "rms=0\n               Add gaussian noise",
+  "seed=0\n              seed for random number generator",
+  "mode=1\n              0 = output raw   1=output final",
+  "VERSION=0.2\n	 22-dec-2011 PJT",
   NULL
 };
 
 string usage = "create (blended) lines and grid them";
 
+string cvsid="$Id$";
+
+
 local real x[MAXL], a[MAXL], d[MAXL], d1[MAXL];
-local real s[MAXP], g[MAXP], y[MAXP];
+local real s[MAXP], g[MAXP], y[MAXP], z[MAXP], z1[MAXP];
 local real fwhm;
 
 
 
 nemo_main()
 {
-  int i, j, nx, na, nd, ns, ng;
-  real arg;
+  Grid G;
+  int i, j, il, ir, nx, na, nd, ns, ng;
+  real arg, ds, dg;
   real fac1 = 2.3548;   /* 2sqrt(2ln2): fwhm to sigma factor */
-  real fac2 = 1.6651;   /* 2sqrt(ln2)  */
+  real fac2 = 1.6651;   /* 2sqrt(ln2)                        */
+  bool Qraw;
+  bool Qfft = getbparam("fft");
+  bool Qhan = getbparam("hanning");
+  int mode = getiparam("mode");
+  int seed = init_xrandom(getparam("seed"));
+  real rms = getdparam("rms");
 
   nx = nemoinpr(getparam("x"),x,MAXL);
   if (nx < 1) error("Error parsing x=%s",getparam("x"));
@@ -49,7 +63,6 @@ nemo_main()
   if (na > nx) error("Too many a=%s",getparam("a"));
   for (i=na; i<nx; i++) a[i] = a[i-1];
   
-
   nd = nemoinpr(getparam("d"),d,MAXL);
   if (nd < 1) error("Error parsing d=%s",getparam("d"));
   if (nd > nx) error("Too many d=%s",getparam("d"));
@@ -58,9 +71,12 @@ nemo_main()
 
   ns = nemoinpr(getparam("s"),s,MAXP);
   if (ns < 1) error("Error parsing s=%s",getparam("s"));
+  ds = s[1]-s[0];  /* better be a uniform grid */
 
   ng = nemoinpr(getparam("g"),g,MAXP);
   if (ng < 1) error("Error parsing g=%s",getparam("g"));
+  dg = g[1]-g[0];  /* better be a uniform grid */
+  inil_grid(&G, ng, g[0], g[ng-1]);
 
   fwhm = getdparam("fwhm");
 
@@ -70,6 +86,9 @@ nemo_main()
   for (i=0; i<nx; i++) {
     printf("#  %g %g %g\n",x[i], a[i], d[i]);
   }
+  if (mode==0) printf("# raw spectrum\n");
+
+  /* compute raw sampled spectrum */
 
   for (i=0; i<ns; i++) {     /* loop over all sample points */
     y[i] = 0;
@@ -77,7 +96,57 @@ nemo_main()
       arg = (s[i]-x[j])*d1[j];
       y[i] += a[j]*exp(-arg*arg);
     }
-    printf("%g  %g\n",s[i],y[i]);
+    if (mode==0)
+      printf("%g  %g\n",s[i],y[i]);
+  }
+
+  /* smooth the raw spectrum */
+
+  if (fwhm > 0.0) {
+    warning("fwhm not implemented yet");
+  }
+
+  /* use an FFT engine ?  */
+
+  if (Qfft) {
+    warning("fft not implemented yet");
+  }
+
+  /* grid the 's' to 'g' grid */
+  if (ds < dg) {
+    for (i=0; i<ng; i++) z[i] = z1[i] = 0.0;
+    for (i=0; i<ns; i++) {
+      j = index_grid(&G, s[i]);
+      printf("### %d %g %d\n",i,s[i],j);
+      if (j<0) continue;
+      z[j]  += y[i];
+      z1[j] += 1.0;
+    }
+    for (i=0; i<ng; i++) {
+      if (z1[i] > 0.0) z[i] /= z1[i];
+    }
+  }
+
+  /* Hanning */
+  if (Qhan) {
+    for (i=0; i<ng; i++) {
+      il = MAX(i,0);
+      ir = MIN(i,ng-1);
+      z1[i] = 0.25 * z[il] + 0.5 * z[i] + 0.25 * z[ir];
+    }
+  } else
+    for (i=0; i<ng; i++) z1[i] = z[i];
+
+  /* add noise */
+  if (rms > 0.0) {
+    for (i=0; i<ng; i++)
+      z1[i] += grandom(0.0,rms);
+  }
+
+  if (mode==1) {
+    printf("# final grid\n");
+    for (i=0; i<ng; i++)
+      printf("%g  %g\n",g[i],z1[i]);
   }
 
   
