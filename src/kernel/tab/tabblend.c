@@ -28,7 +28,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "rms=0\n               Add gaussian noise",
   "seed=0\n              seed for random number generator",
   "mode=1\n              0 = output raw   1=output final",
-  "VERSION=0.3\n	 22-dec-2011 PJT",
+  "VERSION=0.4\n	 22-dec-2011 PJT",
   NULL
 };
 
@@ -38,7 +38,7 @@ string cvsid="$Id$";
 
 
 local real x[MAXL], a[MAXL], d[MAXL], d1[MAXL];
-local real s[MAXP], g[MAXP], y[MAXP], z[MAXP], z1[MAXP];
+local real s[MAXP], g[MAXP], y[MAXP], z[MAXP], z1[MAXP], b[MAXP];
 local real fwhm;
 
 
@@ -81,6 +81,16 @@ nemo_main()
   inil_grid(&G, ng, g[0], g[ng-1]);
 
   fwhm = getdparam("fwhm");
+  if (fwhm > 0.0) {
+    for (i=0; i<ns; i++) {
+      arg = i * ds*fac2/fwhm;
+      arg = arg*arg;
+      if (arg < 100) 
+	b[i] = exp(-arg);
+      else
+	b[i] = 0;
+    }
+  }
 
   /* write out a header reminding which lines used */
 
@@ -100,14 +110,29 @@ nemo_main()
       if (arg > 100) continue;   
       y[i] += a[j]*exp(-arg);
     }
-    if (mode==0)
-      printf("%g  %g\n",s[i],y[i]);
   }
 
   /* smooth the raw spectrum */
 
   if (fwhm > 0.0) {
-    warning("fwhm not implemented yet");
+    warning("Smoothing raw");
+    for (i=0; i<ns; i++) z[i] = z1[i] = 0.0;
+    for (i=0; i<ns; i++) {
+      z[i]  += y[i];
+      z1[i] += 1.0;
+      for (j=1; j<ns; j++) {
+	if (b[j] == 0.0) break;
+	if (i+j<ns) {
+	  z[i]  += y[i+j]*b[j];
+	  z1[i] += b[j];
+	}
+	if (i-j>=0) {
+	  z[i]  += y[i-j]*b[j];
+	  z1[i] += b[j];
+	}
+      }
+    }
+    for (i=0; i<ns; i++) y[i] = z[i]/z1[i];
   }
 
   /* use an FFT engine ?  */
@@ -115,6 +140,12 @@ nemo_main()
   if (Qfft) {
     warning("fft not implemented yet");
   }
+
+  /* print out sampled spectrum */
+
+  if (mode==0)
+    for (i=0; i<ns; i++) 
+      printf("%g  %g\n",s[i],y[i]);
 
   /* grid the 's' to 'g' grid */
   if (ds < dg) {
