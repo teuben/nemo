@@ -1074,7 +1074,7 @@ do_gauss1d()
 {
   real *x1, *x2, *x, *y, *dy, *d;
   int i,j, nrt, npt1, iter, mpar[4];
-  real sum, fpar[4], epar[4];
+  real sum, dmin, dmax, xmin, xmax, fpar[4], epar[4];
   int lpar = 4;
 
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -1095,17 +1095,36 @@ do_gauss1d()
     par[0] = par[1] = y[0];
     par[2] = x[0];
     par[3] = x[1]-x[0];
+    if (par[3] < 0) warning("Xcol not sorted, estimates may be lousy");
     sum = 0.0;
     for (i=1; i<npt; i++) {
-      sum += y[i]*(x[i]-x[i-1]);
-      if (y[i] < par[0]) par[0] = y[i];   /* store min */
+      sum += y[i]*(x[i]-x[i-1]);          /* sum of emission */
+      if (y[i] < par[0]) {                /* store min */
+	par[0] = y[i];
+	xmin = x[i];
+      }
       if (y[i] > par[1]) {                /* store max + loc */
 	par[1] = y[i];
-	par[2] = x[i];
+	xmax   = x[i];
       }
     }
-    par[1] -= par[0];
-    par[3] = sum / (par[1]*sqrt(TWO_PI));
+    dmin = 0.5*(y[0]+y[npt-1]) - par[0];
+    dmax = 0.5*(y[0]+y[npt-1]) - par[1];
+    dmin = ABS(dmin);
+    dmax = ABS(dmax);
+    printf("par01,dmin/max = %g %g %g %g\n",par[0],par[1],dmin,dmax);
+    if (dmax > dmin) {                    /* positive peak */
+      par[1] -= par[0];
+      par[2] = xmax;
+    } else {                              /* negative peak */
+      dmin = par[1];
+      dmax = par[0]-par[1];
+      par[0] = dmin;
+      par[1] = dmax;
+      par[2] = xmin;
+    }
+
+    par[3] = sum / (par[1]*sqrt(TWO_PI)); /* sigma */
     printf("par=%g,%g,%g,%g\n",par[0],par[1],par[2],par[3]);
   }
   
