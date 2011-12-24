@@ -1105,7 +1105,7 @@ do_gauss1d()
       }
     }
     par[1] -= par[0];
-    par[3] = sum / (par[1]*2*sqrt(PI));
+    par[3] = sum / (par[1]*sqrt(TWO_PI));
     printf("par=%g,%g,%g,%g\n",par[0],par[1],par[2],par[3]);
   }
   
