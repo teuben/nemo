@@ -66,7 +66,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=2.3a\n     22-jul-2011 PJT",
+    "VERSION=2.3b\n     24-dec-2011 PJT",
     NULL
 };
 
@@ -1074,7 +1074,7 @@ do_gauss1d()
 {
   real *x1, *x2, *x, *y, *dy, *d;
   int i,j, nrt, npt1, iter, mpar[4];
-  real fpar[4], epar[4];
+  real sum, fpar[4], epar[4];
   int lpar = 4;
 
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -1089,11 +1089,31 @@ do_gauss1d()
   dy = (dycolnr>0 ? dycol.dat : NULL);
   d = (real *) allocate(npt * sizeof(real));
 
+  if (npar==0) {
+    warning("No initial estimates for gauss1d, attempting to get some");
+    /* tricky, this assumes X is sorted */
+    par[0] = par[1] = y[0];
+    par[2] = x[0];
+    par[3] = x[1]-x[0];
+    sum = 0.0;
+    for (i=1; i<npt; i++) {
+      sum += y[i]*(x[i]-x[i-1]);
+      if (y[i] < par[0]) par[0] = y[i];   /* store min */
+      if (y[i] > par[1]) {                /* store max + loc */
+	par[1] = y[i];
+	par[2] = x[i];
+      }
+    }
+    par[1] -= par[0];
+    par[3] = sum / (par[1]*2*sqrt(PI));
+    printf("par=%g,%g,%g,%g\n",par[0],par[1],par[2],par[3]);
+  }
+  
   for (i=0; i<lpar; i++) {
     mpar[i] = mask[i];
     fpar[i] = par[i];
   }
-  
+
   fitfunc = func_gauss1d;
   fitderv = derv_gauss1d;
 
