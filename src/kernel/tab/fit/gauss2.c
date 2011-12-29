@@ -4,13 +4,22 @@
  *	f = a + b1*exp(-(x-c1)^2/(2*d1^2)) + b2*exp(-(x-c2)^2/(2*d2^2))
  *
  * 15-may-2004	created 
+ * 28-dec-2011  added debug
  */
 
 #include <stdinc.h>
 
+static int debug_first = 1;
+
 real func_gauss2(real *x, real *p, int np)
 {
   real a,b,arg1,arg2;
+
+  if (debug_first) {
+    dprintf(0,"gauss2: p1 + p2*exp(-(x-p3)^2/(2*p4^2)) + p5*exp(-(x-p6)^2/(2*p7^2))\n");
+    debug_first = 0;
+  }
+
   a = p[2]-x[0];
   b = p[3];
   arg1 = a*a/(2*b*b);
