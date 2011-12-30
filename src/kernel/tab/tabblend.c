@@ -28,7 +28,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "rms=0\n               Add gaussian noise",
   "seed=0\n              seed for random number generator",
   "mode=1\n              0 = output raw   1=output final",
-  "VERSION=0.4\n	 22-dec-2011 PJT",
+  "VERSION=0.5\n	 30-dec-2011 PJT",
   NULL
 };
 
@@ -112,7 +112,7 @@ nemo_main()
     }
   }
 
-  /* smooth the raw spectrum */
+  /* smooth the raw spectrum with fwhm */
 
   if (fwhm > 0.0) {
     warning("Smoothing raw");
@@ -141,11 +141,19 @@ nemo_main()
     warning("fft not implemented yet");
   }
 
-  /* print out sampled spectrum */
+  /* print out sampled (raw) spectrum  */
+  /* optionally add noise here as well since this is the last step */
+  /* one could argue the rms should be done before smoothing */
+  /* but that also changes the actual rms */
 
-  if (mode==0)
+  if (mode==0) {
+    if (rms > 0.0) {        
+      for (i=0; i<ns; i++)
+	y[i] += grandom(0.0,rms);
+    }
     for (i=0; i<ns; i++) 
       printf("%g  %g\n",s[i],y[i]);
+  }
 
   /* grid the 's' to 'g' grid */
   if (ds < dg) {
