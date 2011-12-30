@@ -6,28 +6,39 @@ tabblend \- create (blended) lines and grid them
 .SH DESCRIPTION
 \fBtabblend\fP creates a blended line spectrum, grids them,
 optionally with hanning smoothing and outputs a table that
-can be compared with observations, or be fitted.
+can be compared with observations, or be fitted with
+\fItabnllsqfit(1NEMO)\fP.
+.PP
+After a raw spectrum is computed on the grid specified by \fBs=\fP,
+it can be optionally smoothed using \fBfwhm=\fP, after which
+it is currently simply gridded on the grid specified by
+\fBg=\fP. Note that both grids need to be regular (use the notation
+\fImin:max:step\fP) and \fBmin<max\fP. An optional simple (1/4,1/2,1/4)
+hanning smoothing can be applied. As last step before output noise
+can be added.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
-\fBx=\fP
+\fBx=\fP\fIx1,x2,...\fP
 X coordinates (velocities if you wish) of the line(s). Multiple
 velocities can be given here.
-.TP 20
-\fBa=\fP
+.TP 
+\fBa=\fP\fIa1,a2,...\fP
 Amplitudes for each line. 
 If not enough values are given, the last value repeats.
 [1]
-.TP 20
-\fBd=\fP
+.TP
+\fBd=\fP\fId1,d2,...\fP
 FWHM of the lines (FWHM=2.355*sigma) [1]  
 .TP
-\fBs=\fP
-Points where to sample [-16:16:0.01]    
+\fBs=\fP\fImin:max:step\fP
+Points where to sample. They need to be regular and increasing.
+[Default: -16:16:0.01]    
 .TP
-\fBg=\fP
-Points where to lay the grid [-16:16:1]    
+\fBg=\fP\fImin:max:step\fP
+Points where to lay the grid. They need to be regular and increasing.
+[Default: -16:16:1]    
 .TP
 \fBfwhm=\fP
 If non-zero, smooth points with this beam [0]
@@ -36,10 +47,14 @@ If non-zero, smooth points with this beam [0]
 Optional hanning.
 .TP
 \fBfft=t|f\fP
-Use FFT to compute observed spectrum? (not implemented)
+Use FFT to compute observed spectrum? (not implemented,
+probably another mode=)
 .TP
 \fBrms=\fP
-RMS value for the noise added to the final spectrum. Default: 0
+RMS value for the noise added to the spectrum before printing.
+This can be done to either raw (mode=0) or gridded (mode=1)
+spectrum.
+Default: 0
 .TP
 \fBseed=\fP
 The usual random seed (see also \fIxrandom(1NEMO)\fP). Default: 0
@@ -53,7 +68,7 @@ all gridding and noise addition. Default: 1
    tabblend x=-4,0,2 a=0.5,1,0.5 | tabplot - line=1,1
 .fi
 .SH SEE ALSO
-tabplot(1NEMO)
+tabplot(1NEMO), tabnllsqfit(1NEMO)
 .SH FILES
 NEMO/src/kernel/tab : sources
 .SH AUTHOR
@@ -62,4 +77,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 21-dec-2011	V0.1 Created	PJT
+30-dec-2011	V0.5 added rms to both mode=0 and mode=1	PJT
 .fi
