@@ -73,8 +73,7 @@ real func_gauss7_n2hp(real *x, real *p, int np)
   real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7;
 
   if (debug_first) {
-    dprintf(0,"gauss7_n2h+: %g %g %g %g %g %g %g\n",
-	    dv1,dv2,dv3,dv4,dv5,dv6,dv7);
+    dprintf(0,"gauss7_n2hp: a,b1,c1,d1,b2,c2,d2,...b7,c7,d7\n");
     debug_first = 0;
   }
 
@@ -184,6 +183,13 @@ void derv_gauss7_n2hp(real *x, real *p, real *e, int np)
 real func_gauss7_n2hp_1(real *x, real *p, int np)
 {
   real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7;
+
+  if (debug_first) {
+    dprintf(0,"gauss7_n2hp_1: a,c,b1,d1,b2,d2,...b7,d7\n");
+    dprintf(0,"gauss7_n2hp_1: %g,%g,%g,%g,%g,%g,%g\n",
+	    dv1,dv2,dv3,dv4,dv5,dv6,dv7);
+    debug_first = 0;
+  }
   a = p[1]-x[0]+dv1;
   b = p[3];
   arg1 = a*a/(2*b*b);
@@ -285,6 +291,14 @@ void derv_gauss7_n2hp_1(real *x, real *p, real *e, int np)
 real func_gauss7_n2hp_2(real *x, real *p, int np)
 {
   real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7;
+
+  if (debug_first) {
+    dprintf(0,"gauss7_n2hp_2: a,c,d,b1,b2,...b7\n");
+    dprintf(0,"gauss7_n2hp_2: dv=%g,%g,%g,%g,%g,%g,%g\n",
+	    dv1,dv2,dv3,dv4,dv5,dv6,dv7);
+    debug_first = 0;
+  }
+
   a = p[1]-x[0]+dv1;
   b = p[2];
   arg1 = a*a/(2*b*b);

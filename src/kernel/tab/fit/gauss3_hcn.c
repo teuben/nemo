@@ -1,6 +1,21 @@
 /*
  * HCN 88.63 GHz triplet fitting 3 (constrained) gaussians
  *
+ * 88630.4157(10) HCN          1-0 F=1-1                     9.6   OriMC-1         NRAO     11m Uli76  DeL69
+ * 88631.8473(10) HCN          1-0 F=2-1                    17.2   OriMC-1         NRAO     11m Uli76  DeL69
+ * 88633.9360(10) HCN          1-0 F=0-1                     6.8   OriMC-1         NRAO     11m Uli76  DeL69
+ *
+ * f=[88630.4157,88631.8473,88633.9360]
+ * v=[    4.842,     0.0,      -7.065 ]
+ * / 88630.41560, 88631.84750, 88633.93570 /
+ * / 0.6, 1.0, 0.2 /
+ * 
+ * splatalogue:
+ * f=[88.63042,88.63185,88.63394]
+ * s=[9.6,17.2,6.8]
+ * id=11,21,01
+ *
+ *
  * gauss3_hcn: (10 parameters)
  *	f = a + b1*exp(-(x-c1)^2/(2*d1^2)) + 
  *              b2*exp(-(x-c2)^2/(2*d2^2))
@@ -25,10 +40,23 @@
 #define F01 -7.0698
 
 #include <stdinc.h>
+
+static real dv1 = F01;
+static real dv2 = F21;
+static real dv3 = F11;
+
+static debug_first = 1;
+
 
 real func_gauss3_hcn(real *x, real *p, int np)
 {
   real a,b,arg1,arg2,arg3;
+
+  if (debug_first) {
+    dprintf(0,"gauss3_hcn: a,b1,c1,d1,b2,c2,d2,b3,c3,d3\n");
+    debug_first = 0;
+  }
+
   a = p[2]-x[0];
   b = p[3];
   arg1 = a*a/(2*b*b);
@@ -81,13 +109,16 @@ void derv_gauss3_hcn(real *x, real *p, real *e, int np)
  *      0 1 2  3  4  5  6  7
  */
 
-static real dv1 = F01;
-static real dv2 = F21;
-static real dv3 = F11;
-
 real func_gauss3_hcn_1(real *x, real *p, int np)
 {
   real a,b,arg1,arg2,arg3;
+
+  if (debug_first) {
+    dprintf(0,"gauss3_hcn_1: a,c,b1,d1,b2,d2,b3,d3\n");
+    dprintf(0,"gauss3_hcn_1: dv=%g,%g,%g\n",dv1,dv2,dv3);
+    debug_first = 0;
+  }
+
   a = p[1]-x[0]+dv1;
   b = p[3];
   arg1 = a*a/(2*b*b);
@@ -143,6 +174,13 @@ void derv_gauss3_hcn_1(real *x, real *p, real *e, int np)
 real func_gauss3_hcn_2(real *x, real *p, int np)
 {
   real a,b,arg1,arg2,arg3;
+
+  if (debug_first) {
+    dprintf(0,"gauss3_hcn_2: a,c,d,b1,b2,b3\n");
+    dprintf(0,"gauss3_hcn_2: dv=%g,%g,%g\n",dv1,dv2,dv3);
+    debug_first = 0;
+  }
+
   a = p[1]-x[0]+dv1;
   b = p[2];
   arg1 = a*a/(2*b*b);

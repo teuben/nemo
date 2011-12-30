@@ -101,12 +101,9 @@ void derv_gaussn_1(real *x, real *p, real *e, int np)
     a = p[2*i+3] - x[0];
     b = p[1];
     arg = a*a/(2*b*b);
-    // @todo: better double check this, seems to work though
-    /* amp, vel */
     e[2*i+2] = exp(-arg);
-    e[2*i+3] = -p[2*i+2]*e[2*i+2] *  a  /  (b*b);    
-    /* accum sig */
-    e[1] += p[2*i+2] * e[2*i+2] *  (a*a) / (b*b*b);
+    e[2*i+3] = -p[2*i+2]*e[2*i+2] *   a  /  (b*b);    
+    e[1]    +=  p[2*i+2]*e[2*i+2] *  a*a / (b*b*b);
   }
 }
 
