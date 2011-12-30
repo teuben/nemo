@@ -66,7 +66,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=2.3b\n     24-dec-2011 PJT",
+    "VERSION=2.3c\n     30-dec-2011 PJT",
     NULL
 };
 
@@ -81,7 +81,7 @@ string cvsid="$Id$";
 #endif
 
 #define MAXCOL 10
-#define MAXPAR 10
+#define MAXPAR 32
 #define MAXSIG 10
 
 typedef struct column {
@@ -93,7 +93,7 @@ typedef struct column {
 
 int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr;
 real dypow;
-a_column            xcol[MAXCOL],   ycol[MAXCOL],   dycol,  bcol;
+a_column            xcol[MAXCOL],   ycol[MAXCOL], dycol,  bcol;
 
 real xrange[MAXCOL*2];      /* ??? */
 
@@ -165,7 +165,7 @@ static void derv_gauss1d(real *x, real *p, real *e, int np)
   arg = a*a/(2*b*b);
   e[0] = 1.0;
   e[1] = exp(-arg);
-  e[2] = -p[1]*e[1] * a   / (b*b);
+  e[2] = -p[1]*e[1] *  a  /  (b*b);
   e[3] =  p[1]*e[1] * a*a / (b*b*b);
 }
 
