@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "7 May 2010"
+.TH TABNLLSQFIT 1NEMO "24 December 2011"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -91,7 +91,9 @@ multiple iterations are done.
 \fBpar=\fP
 Initial estimates for the parameters. For non-linear fits, or linear fits where
 certain parameters are fixed (see \fBfree=\fP below) they need to be given here.
-By default they are all 0.
+Some fits (e.g. gauss1d) do not require an initial estimate and attempt to come
+up with a reasonable one.
+Otherwise all initial parameters are 0.
 .TP
 \fBfree=\fP
 A list of 1's and 0's to set which parameters are to be kept free (1) and which
@@ -326,5 +328,6 @@ Peter Teuben
 21-nov-05	V2.0 added fit=gauss1d,gauss2d		PJT
 24-apr-08	V2.1 added psf	PJT
 7-may-10	V2.2 added grow		PJT
+24-dec-11	V2.3b estimate gauss1d if no initial par given	PJT
 .fi
 
