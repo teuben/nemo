@@ -3,8 +3,8 @@
  *
  *
  *      21-dec-2011 V0.1    Created - shortest day of the year
+ *      30-dec-2011 V0.6    proper definition of cell centered grid g=
  *
- *  @TODO:   gridding shift
  */
 
 #include <stdinc.h>	
@@ -23,12 +23,13 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "s=-16:16:0.01\n       Points to sample",
   "g=-16:16:1\n          Points to grid",
   "fwhm=0\n              If non-zero, convolve points with this beam",
+  "bin=t\n               Bin data (t) or Integrate (f) raw into the bins",
   "hanning=f\n           Optional hanning",
   "fft=f\n               Use FFT to compute spectrum (not implemented)", 
   "rms=0\n               Add gaussian noise",
   "seed=0\n              seed for random number generator",
   "mode=1\n              0 = output raw   1=output final",
-  "VERSION=0.5\n	 30-dec-2011 PJT",
+  "VERSION=0.6\n	 30-dec-2011 PJT",
   NULL
 };
 
@@ -41,7 +42,7 @@ local real x[MAXL], a[MAXL], d[MAXL], d1[MAXL];
 local real s[MAXP], g[MAXP], y[MAXP], z[MAXP], z1[MAXP], b[MAXP];
 local real fwhm;
 
-
+void integrate_bin(int ns, real *x, real *y, int ng, real *g, real *z);
 
 nemo_main()
 {
@@ -53,9 +54,10 @@ nemo_main()
   bool Qraw;
   bool Qfft = getbparam("fft");
   bool Qhan = getbparam("hanning");
-  int mode = getiparam("mode");
-  int seed = init_xrandom(getparam("seed"));
-  real rms = getdparam("rms");
+  bool Qbin = getbparam("bin");
+  int  mode = getiparam("mode");
+  int  seed = init_xrandom(getparam("seed"));
+  real  rms = getdparam("rms");
 
   nx = nemoinpr(getparam("x"),x,MAXL);
   if (nx < 1) error("Error parsing x=%s",getparam("x"));
@@ -78,7 +80,7 @@ nemo_main()
   ng = nemoinpr(getparam("g"),g,MAXP);
   if (ng < 1) error("Error parsing g=%s",getparam("g"));
   dg = g[1]-g[0];  /* better be a uniform grid */
-  inil_grid(&G, ng, g[0], g[ng-1]);
+  inil_grid(&G, ng, g[0]-0.5*dg, g[ng-1]+0.5*dg);
 
   fwhm = getdparam("fwhm");
   if (fwhm > 0.0) {
@@ -156,20 +158,26 @@ nemo_main()
   }
 
   /* grid the 's' to 'g' grid */
-  if (ds < dg) {
+  if (Qbin && ds < dg) {
+    // s[] is the input grid, on which y[] is defined
     for (i=0; i<ng; i++) z[i] = z1[i] = 0.0;
     for (i=0; i<ns; i++) {
-      /* @TODO: gridding shift ?  */
       j = index_grid(&G, s[i]);
       if (j<0) continue;
+      dprintf(2,"s->g: %d %g -> %d\n",i,s[i],j);
       z[j]  += y[i];
       z1[j] += 1.0;
     }
     for (i=0; i<ng; i++) {
       if (z1[i] > 0.0) z[i] /= z1[i];
     }
-  } else
-    error("No gridding possible?");
+    // g[] is the output grid, on which z[] is now defined
+  } else {
+    // integrate the raw data is much better
+    error("No binning integration implemented yet");
+    integrate_bin(ns,x,y,ng,g,z);
+  }
+
 
   /* Hanning */
   if (Qhan) {
@@ -198,3 +206,6 @@ nemo_main()
   
 }
 
+void integrate_bin(int ns, real *x, real *y, int ng, real *g, real *z)
+{
+}
