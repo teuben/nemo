@@ -30,7 +30,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "rms=0\n               Add gaussian noise",
   "seed=0\n              seed for random number generator",
   "mode=1\n              0 = output raw   1=output final",
-  "VERSION=0.7\n	 31-dec-2011 PJT",
+  "VERSION=0.8\n	 1-jan-2012 PJT",
   NULL
 };
 
@@ -39,14 +39,13 @@ string usage = "create (blended) gaussian profiles and grid them";
 string cvsid="$Id$";
 
 
-local real x[MAXL], a[MAXL], d[MAXL], d1[MAXL];
-local real s[MAXP], g[MAXP], y[MAXP], z[MAXP], z1[MAXP], b[MAXP];
-local real fwhm;
-
 void integrate_bin(int ns, real *x, real *y, int ng, real *g, real *z);
 
 nemo_main()
 {
+  real x[MAXL], a[MAXL], d[MAXL], d1[MAXL];
+  real s[MAXP], g[MAXP], y[MAXP], z[MAXP], z1[MAXP], b[MAXP];
+  real fwhm;
   Grid G;
   int i, j, il, ir, nx, na, nd, ns, ng;
   real arg, ds, dg;
@@ -180,8 +179,6 @@ nemo_main()
     }
     // g[] is the output grid, on which z[] is now defined
   } else {
-    // integrate the raw data is much better
-    warning("bin=f is not 100% robust");
     integrate_bin(ns,s,y,ng,g,z);
   }
 
@@ -231,7 +228,6 @@ void integrate_bin(int ns, real *x, real *y, int ng, real *g, real *z)
 
   if (g1 < x[0]) error("grid not inside the sample: %g < %g",g1,x[0]);
 
-
   /* set up integration and find first sample to contribute */
 
   i = j = 0;
@@ -249,23 +245,39 @@ void integrate_bin(int ns, real *x, real *y, int ng, real *g, real *z)
     z[0] = (y[i-1]+y[i])*dx*0.5;
   }
 
+  /* loop over all sample points (assumes ordered) integrate them into grid */
+
   while (i<ns) {
     x0 = x[i];
     x1 = x[i+1];
     dx = x1-x0;
 
-    if (x0>=g1) {
+    if (x0<g1 && x1>g1) {   /* interval split */
+      dx = g1-x0;
+      z[j] += 0.5*dx*(y[i+1]+y[i]);
+      dprintf(2,"int-1a s->g: %d %g -> %d  (%g,%g)\n",i,x[i],j,g0,g1);
       j++;
       if (j==ng)  break;
-      z[j] = 0.0;
+      dx = x1-g1;
       g0 = g[j] - 0.5*dg;
       g1 = g[j] + 0.5*dg;
-    }
-    dprintf(2,"int s->g: %d %g -> %d  (%g,%g)\n",i,s[i],j,g0,g1);
+      z[j] = 0.0;
+      dprintf(2,"int-1b s->g: %d %g -> %d  (%g,%g)\n",i,x[i],j,g0,g1);
+    } else if (x0>=g1) {    /* full new interval */
+      j++;
+      if (j==ng)  break;
+      g0 = g[j] - 0.5*dg;
+      g1 = g[j] + 0.5*dg;
+      z[j] = 0.0;
+      dprintf(2,"int-2  s->g: %d %g -> %d  (%g,%g)\n",i,x[i],j,g0,g1);
+    } else
+      dprintf(2,"int-3  s->g: %d %g -> %d  (%g,%g)\n",i,x[i],j,g0,g1);
 
     z[j] += 0.5*dx*(y[i+1]+y[i]);
     i++;
   } 
+
+  /* normalize */
 
   for (j=0; j<ng; j++)  z[j] /= dg;
 }
