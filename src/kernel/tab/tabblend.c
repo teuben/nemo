@@ -4,6 +4,7 @@
  *
  *      21-dec-2011 V0.1    Created - shortest day of the year
  *      30-dec-2011 V0.6    proper definition of cell centered grid g=
+ *      31-dec-2011 V0.7    bin=f implementing integration of function
  *
  */
 
@@ -23,17 +24,17 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "s=-16:16:0.01\n       Points to sample",
   "g=-16:16:1\n          Points to grid",
   "fwhm=0\n              If non-zero, convolve points with this beam",
-  "bin=t\n               Bin data (t) or Integrate (f) raw into the bins",
+  "bin=f\n               Bin data (t) or Integrate (f) raw into the bins",
   "hanning=f\n           Optional hanning",
   "fft=f\n               Use FFT to compute spectrum (not implemented)", 
   "rms=0\n               Add gaussian noise",
   "seed=0\n              seed for random number generator",
   "mode=1\n              0 = output raw   1=output final",
-  "VERSION=0.6\n	 30-dec-2011 PJT",
+  "VERSION=0.7\n	 31-dec-2011 PJT",
   NULL
 };
 
-string usage = "create (blended) lines and grid them";
+string usage = "create (blended) gaussian profiles and grid them";
 
 string cvsid="$Id$";
 
@@ -82,6 +83,8 @@ nemo_main()
   dg = g[1]-g[0];  /* better be a uniform grid */
   inil_grid(&G, ng, g[0]-0.5*dg, g[ng-1]+0.5*dg);
 
+  /*  initialize half a gaussian as smoothing kernel */
+
   fwhm = getdparam("fwhm");
   if (fwhm > 0.0) {
     for (i=0; i<ns; i++) {
@@ -92,15 +95,19 @@ nemo_main()
       else
 	b[i] = 0;
     }
-  }
+  } 
 
-  /* write out a header reminding which lines used */
+  /* write out a header, report which lines used */
 
   printf("#  X    A   D\n");
   for (i=0; i<nx; i++) {
     printf("#  %g %g %g\n",x[i], a[i], d[i]);
   }
+  printf("# fwhm=%g  rms=%g \n",fwhm,rms);
+  if (Qhan) printf("# with hanning\n");
+  if (Qbin) printf("# simple binning\n");
   if (mode==0) printf("# raw spectrum\n");
+  if (mode==1) printf("# gridded spectrum\n");
 
   /* compute raw sampled spectrum */
 
@@ -164,7 +171,7 @@ nemo_main()
     for (i=0; i<ns; i++) {
       j = index_grid(&G, s[i]);
       if (j<0) continue;
-      dprintf(2,"s->g: %d %g -> %d\n",i,s[i],j);
+      dprintf(2,"bin s->g: %d %g -> %d\n",i,s[i],j);
       z[j]  += y[i];
       z1[j] += 1.0;
     }
@@ -174,8 +181,8 @@ nemo_main()
     // g[] is the output grid, on which z[] is now defined
   } else {
     // integrate the raw data is much better
-    error("No binning integration implemented yet");
-    integrate_bin(ns,x,y,ng,g,z);
+    warning("bin=f is not 100% robust");
+    integrate_bin(ns,s,y,ng,g,z);
   }
 
 
@@ -198,7 +205,6 @@ nemo_main()
   }
 
   if (mode==1) {
-    printf("# final grid\n");
     for (i=0; i<ng; i++)
       printf("%g  %g\n",g[i],z[i]);
   }
@@ -206,6 +212,60 @@ nemo_main()
   
 }
 
+/* 
+ * some of this code relies on:
+ *   - x and g increasing 
+ *   - x and g are linear, each delta-x and delta-g, the same
+ */
+
+
 void integrate_bin(int ns, real *x, real *y, int ng, real *g, real *z)
 {
+  real x0,x1,g0,g1, dg,dx,fac;
+  int i,j;
+  
+  dx = x[1]-x[0];
+  dg = g[1]-g[0];
+  g0 = g[0] - 0.5*dg;
+  g1 = g[0] + 0.5*dg;
+
+  if (g1 < x[0]) error("grid not inside the sample: %g < %g",g1,x[0]);
+
+
+  /* set up integration and find first sample to contribute */
+
+  i = j = 0;
+  if (g0 < x[0] && g1 > x[1]) {     /* first grid has partial sample */
+    x0 = x[0];
+    x1 = x[1];
+    dx = x1-x0;
+    z[0] = (y[0]+y[1])*dx*0.5;
+    i++;
+  } else {                           /* first grid fully inside sample */
+    // find first sample 
+    while (x[i]<g0) i++;
+    x0 = x[i-1];
+    x1 = x[i];
+    z[0] = (y[i-1]+y[i])*dx*0.5;
+  }
+
+  while (i<ns) {
+    x0 = x[i];
+    x1 = x[i+1];
+    dx = x1-x0;
+
+    if (x0>=g1) {
+      j++;
+      if (j==ng)  break;
+      z[j] = 0.0;
+      g0 = g[j] - 0.5*dg;
+      g1 = g[j] + 0.5*dg;
+    }
+    dprintf(2,"int s->g: %d %g -> %d  (%g,%g)\n",i,s[i],j,g0,g1);
+
+    z[j] += 0.5*dx*(y[i+1]+y[i]);
+    i++;
+  } 
+
+  for (j=0; j<ng; j++)  z[j] /= dg;
 }
