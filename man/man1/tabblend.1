@@ -1,19 +1,21 @@
-.TH TABBLEND 1NEMO "21 December 2011"
+.TH TABBLEND 1NEMO "1 January 2012"
 .SH NAME
-tabblend \- create (blended) lines and grid them
+tabblend \- create (blended) gaussian profiles and bin them
 .SH SYNOPSIS
 \fBtabblend\fP [parameter=value]
 .SH DESCRIPTION
-\fBtabblend\fP creates a blended line spectrum, grids them,
-optionally with hanning smoothing and outputs a table that
+\fBtabblend\fP creates a blended line spectrum of gaussians, 
+bins them, optionally with hanning smoothing and outputs a table that
 can be compared with observations, or be fitted with
 \fItabnllsqfit(1NEMO)\fP.
 .PP
 After a raw spectrum is computed on the grid specified by \fBs=\fP,
 it can be optionally smoothed using \fBfwhm=\fP, after which
-it is currently simply gridded on the grid specified by
-\fBg=\fP. Note that both grids need to be regular (use the notation
-\fImin:max:step\fP) and \fBmin<max\fP. An optional simple (1/4,1/2,1/4)
+it is binned on the grid specified by
+\fBg=\fP.  This binning can be done in a number of ways
+(e.g. see \fBbin=\fP below).
+Note that both grids need to be regular (use the notation
+\fImin:max:step\fP) and \fImin<max\fP. An optional simple (0.5,1,0.5)
 hanning smoothing can be applied. As last step before output noise
 can be added.
 .SH PARAMETERS
@@ -21,56 +23,93 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBx=\fP\fIx1,x2,...\fP
-X coordinates (velocities if you wish) of the line(s). Multiple
-velocities can be given here.
+X coordinates of the centroid(s) line(s). Multiple
+coordinates can be given here. There is no default, at least one
+value needs to be specified here.
 .TP 
 \fBa=\fP\fIa1,a2,...\fP
 Amplitudes for each line. 
-If not enough values are given, the last value repeats.
+If not enough values are given, the last value repeats. 
+The number of values should be the same as those in \fBx=\fP.
 [1]
 .TP
 \fBd=\fP\fId1,d2,...\fP
-FWHM of the lines (FWHM=2.355*sigma) [1]  
+FWHM of the lines (FWHM=2.355*sigma).
+If not enough values are given, the last value repeats. 
+The number of values should be the same as those in \fBx=\fP.
+[1]  
 .TP
 \fBs=\fP\fImin:max:step\fP
-Points where to sample. They need to be regular and increasing.
+Points where to sample the lines. 
+The values need to be regular and increasing.
+Use \Bmode=0\fP with specified \fBx,a,d,s\fP to
+look at the raw spectrum.
 [Default: -16:16:0.01]    
 .TP
 \fBg=\fP\fImin:max:step\fP
-Points where to lay the grid. They need to be regular and increasing.
+Points where to lay the grid for binning.
+The values need to be regular and increasing,
+these values are the midpoint of their cells, not
+the edges.
+(see \fBbin=\fP).
 [Default: -16:16:1]    
 .TP
 \fBfwhm=\fP
-If non-zero, smooth points with this beam [0]
+If non-zero, smooth the raw points with a gaussian beam with given FWHM. [0]
+.TP
+\fBbin=t|f\fP
+Use the simple way of binning by using a fine sample grid and sprinkling 
+them into the bins? Or properly integrate the sample grid onto the bins?
+The latter prevents edge effect if Sample and Grid are commensurate.
+Default: t
 .TP
 \fBhanning=t|f\fP
-Optional hanning.
+Optional hanning applied to the gridded data. [Default: f]
 .TP
 \fBfft=t|f\fP
-Use FFT to compute observed spectrum? (not implemented,
-probably another mode=)
+Use FFT to compute observed spectrum? (not implemented yet).
 .TP
 \fBrms=\fP
-RMS value for the noise added to the spectrum before printing.
-This can be done to either raw (mode=0) or gridded (mode=1)
+RMS value for the noise added to the spectrum before output.
+This can be done to either raw (mode=0) or binned (mode=1)
 spectrum.
-Default: 0
+[Default: 0]
 .TP
 \fBseed=\fP
-The usual random seed (see also \fIxrandom(1NEMO)\fP). Default: 0
+The usual random seed (see also \fIxrandom(1NEMO)\fP). 
+[Default: 0]
 .TP 
 \fBmode=\fP
 Output mode. 0 will output the raw spectrum before smoothing 
-and gridding etc.   1=will output the final spectrum, after 
-all gridding and noise addition. Default: 1
+and binning etc.   1=will output the final spectrum, after 
+all binning and noise addition. 
+[Default: 1]
 .SH EXAMPLES
+plotting triplet of gaussians, moderately blended and binned :
 .nf
-   tabblend x=-4,0,2 a=0.5,1,0.5 | tabplot - line=1,1
+  \fBtabblend x=-4,0,2 a=0.5,1,0.5 | tabplot - line=1,1 point=2,0.1\fP
+.fi
+and fitting a single gaussian
+.nf
+  \fBtabblend x=0 d=2.355 | tabnllsqfit - fit=gauss1d\fP
+  ### Warning [tabnllsqfit]: No initial estimates for gauss1d, attempting to get some
+  Fitting a+b*exp(-(x-c)^2/(2*d^2)):  
+  a= -2.28081e-05 1.99529e-05 
+  b= 0.960098 9.51577e-05 
+  c= 1.11565e-20 0.000118163
+  d= 1.04196 0.000121485
+  rms2/chi2= 3.1717e-07
+.fi
+Note the width d=1.04 is about 4% higher than expected due to some moderate binning.
+.PP
+To view a the line and the residuals from the fit:
+.nf
+  \fBtabblend x=0 d=2.355 rms=0.1 | tabnllsqfit - fit=gauss1d out=- | tabplot - 1 2,3 line=1,1 color=2,3\fP
 .fi
 .SH SEE ALSO
-tabplot(1NEMO), tabnllsqfit(1NEMO)
+tabplot(1NEMO), tabnllsqfit(1NEMO), tabmath(1NEMO)
 .SH FILES
-NEMO/src/kernel/tab : sources
+NEMO/src/kernel/tab : tabblend.c
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -78,4 +117,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 21-dec-2011	V0.1 Created	PJT
 30-dec-2011	V0.5 added rms to both mode=0 and mode=1	PJT
+1-jan-2012	V0.8 added bin= 	PJT
 .fi
