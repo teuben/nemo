@@ -34,28 +34,35 @@ string cvsid="$Id$";
 
 void nemo_main()
 {
-  int i;
+  int n;
 
   stream parstr, outstr;
   string molfile = getparam("mol");
   string outfile = getparam("out");
   string outdir  = getparam("outdir");
   string exefile = "radex";
-  string datfile = "qmics.dat";
+  string datfile = "mol.dat";
   string parfile = "input.txt";
-  string logfile = "QMcode.log";
+  string logfile = "radex.txt";
   char dname[256], cmd[256];
-  real  den[MAXPARTNER];
 
   real  fmin = getdparam("fmin");
   real  fmax = getdparam("fmax");
   real  tkin = getdparam("tkin");
 
-  int   npartner = 1;
-  char  *partner = "H2";
+  int   npartner;
+  string *partner;
+  real  density[MAXPARTNER];
+
   real  tbg = getdparam("tbg");
   real  cdmol = getdparam("cdmol");
   real  deltav = getdparam("deltav");
+
+  partner = burststring(getparam("partner"),",");
+  npartner = xstrlen(partner,sizeof(string))-1;
+  if (npartner < 1 || npartner>MAXPARTNER) error("too few/many partners");
+  n = nemoinpr(getparam("density"),density,MAXPARTNER);
+  if (n != npartner) error("need matching numbers for partner= and density=");
 
   make_rundir(outdir);
   sprintf(dname,"%s/%s",outdir,parfile);
