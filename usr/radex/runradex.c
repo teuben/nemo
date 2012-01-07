@@ -26,7 +26,7 @@ string defv[] = {
   NULL,
 };
 
-string usage="Frontend to the RADEX program";
+string usage="RADEX frontend; see also http://www.sron.rug.nl/~vdtak/radex/index.shtml";
 
 string cvsid="$Id$";
 
@@ -75,6 +75,7 @@ void nemo_main()
   fprintf(parstr,"%g\n",tbg);
   fprintf(parstr,"%g\n",cdmol);
   fprintf(parstr,"%g\n",deltav);
+  fprintf(parstr,"0\n");
 
   strclose(parstr);
 
