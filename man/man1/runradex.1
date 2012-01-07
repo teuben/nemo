@@ -68,6 +68,18 @@ in cm^-2.  [1e13]
 Thermal + turbulent width (FWHM) of the lines, in km/s. Allowed
 range is 1e-3 to 1e3. [1.0]   
 .SH EXAMPLES
+This frontend is particularly useful to run a large number of models, optionally
+followed by some more analysis. For example, here is a set of models
+run at a grid of temperature and densities:
+.nf
+    foreach tkin (15 20 25 30 35)
+      foreach cdmol (1e12 3e12 1e13 3e13 1e14)
+        runradex hco+.dat run_${tkin}_$cdmol tkin=$tkin cdmol=$cdmol
+      end
+    end
+.fi
+this will create a series of run directories (run_15_1e12,run_15_1e13, ... run_35_3e13)
+with a local file called output.txt containing the output from RADEX. 
 .SH SEE ALSO
 http://www.sron.rug.nl/~vdtak/radex/index.shtml
 .PP
