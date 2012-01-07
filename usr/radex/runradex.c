@@ -74,11 +74,10 @@ void nemo_main()
   fprintf(parstr,"%g %g\n",fmin,fmax);
   fprintf(parstr,"%g\n",tkin);
   fprintf(parstr,"%d\n",npartner);
-  if (npartner==1) {
-    fprintf(parstr,"%s\n",getparam("partner"));
-    fprintf(parstr,"%g\n",getdparam("density"));
-  } else
-    error("not suppoerting > 1 parner yet");
+  for (n=0; n<npartner; n++) {
+    fprintf(parstr,"%s\n",partner[n]);
+    fprintf(parstr,"%g\n",density[n]);
+  } 
   fprintf(parstr,"%g\n",tbg);
   fprintf(parstr,"%g\n",cdmol);
   fprintf(parstr,"%g\n",deltav);
@@ -86,13 +85,9 @@ void nemo_main()
 
   strclose(parstr);
 
-  sprintf(cmd,"cp %s %s/%s", molfile, outdir, datfile);
-  run_program(cmd);
-
   goto_rundir(outdir);
   sprintf(cmd,"%s < %s > %s ", exefile, parfile, logfile);
   run_program(cmd);
-
 }
 
 goto_rundir(string name)
