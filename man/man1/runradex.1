@@ -1,6 +1,6 @@
-.TH RUNRADEX 1NEMO "7 January 2012"
+.TH RUNRADEX 1NEMO "8 January 2012"
 .SH NAME
-runradex \- RADEX frontend
+runradex \- NEMO frontend to run the RADEX program
 .SH SYNOPSIS
 \fBrunradex\fP mol= outdir= [parameter=value]
 .SH DESCRIPTION
@@ -22,16 +22,19 @@ temperature range specified in the molecular data file used as
 input. Instead they are kept constant.
 .PP
 In addition to this frontend to the original fortran program, there is
-also on online version available (see below).
+also an online version available (see below).
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBmol=\fP
-Input molecular data file [hco+.dat, from $RADEXDAT/] [???]
+Input molecular data file e.g. hco+.dat, from $RADEXDAT. If the
+filename starts with . or /, it will be taken as an absolute or
+relative address, else a predefined location (such as $RADEXDAT)
+will be used. No default.
 .TP
 \fBoutdir=\fP
-Run directory [???]     
+Run directory within which all files will be created. No default.
 .TP
 \fBout=\fP
 Output filename [output.txt]     
@@ -50,10 +53,15 @@ Kinetic temperature of the medium in K.  Allowed range
 is 0.1 - 10,000. [20]    
 .TP
 \fBpartner=\fP
-Partner(s) names (H2 p-H2 o-H2 e H He
+Collision partner name(s). Pick (m)any from: H2,p-H2,o-H2,e,H,He.  [H2]
 .TP
 \fBdensity=\fP
-Density of partner(s) [1e4]    
+Number density (cm^-3) of collision partners (usually just H2). By default,
+collisions with He are not taken into account. To approximate their
+effect, multiply the H2 density by 1.2 for an He/H2=0.2 abundance. The
+effects of mass and geometrical cross section between He and H2 cancel
+out to first order.
+One number required for each partner. [1e4]    
 .TP
 \fBtbg=\fP
 Rayleigh-Jeans equivalent temperature of the background radiation
@@ -79,7 +87,9 @@ run at a grid of temperature and densities:
     end
 .fi
 this will create a series of run directories (run_15_1e12,run_15_1e13, ... run_35_3e13)
-with a local file called output.txt containing the output from RADEX. 
+with a local file called output.txt containing the output from RADEX. There are also
+two python scripts in the distribution of RADEX with examples how to run over a grid
+of models and extract or fit data.
 .SH SEE ALSO
 http://www.sron.rug.nl/~vdtak/radex/index.shtml
 .PP
