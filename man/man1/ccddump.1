@@ -1,4 +1,4 @@
-.TH CCDDUMP 1NEMO "28 March 2007"
+.TH CCDDUMP 1NEMO "9 January 2012"
 .SH NAME
 ccddump \- dump contents of an image to other format
 .SH SYNOPSIS
@@ -20,25 +20,35 @@ input file name, in \fIimage(5NEMO)\fP format.
 [no default].
 .TP
 \fBout=\fIdump-file\fP
-output file, will be in one of the selected dump formats (se below)
+output file, will be in one of the selected dump formats (see below)
 [no default]
 .TP
 \fBoption=\fIoption-string\fP
-Dump option. Currently available are \fBfloat\fP and \fBbyte\fP.
+Dump option. Currently available are \fBfloat\fP, \fBdouble\fP, and \fBbyte\fP.
 Both dumps are straight dumps in the local system format.
 [default: \fBfloat\fP].
 .TP
 \fBrange=\fIlow:high\fP
 Range of input map used in output map. This option is only active
 when the output format is some fixed length integer type.
-When \fBoption\fP is left blank, autoscaling is used.
+When \fBoption\fP is left blank, the min and max value from
+the image header is used.
 [default: blank]
 .TP
 \fBmode=\fImode-string\fP
 Output mode, rows first or columns first. [default: row]
 .TP
 \fBswap=\fIbool\fP
-Swap the bytes? [default: \fBtrue\fP].
+Swap the bytes? [default: \fBfalse\fP].
+.TP
+\fBscale=\fP
+Output scaling type in case fixed length integers are used. 
+.TP
+\fBgamma=\fP
+Gamma scaling factor for \fBscale=gamma\fP
+.TP
+\fBb=\fP
+Softening for \fBscale=asinh\fP
 .TP
 \fBsm=t|f\fP
 Use the CH sm file_type? . You will need the directive
@@ -60,4 +70,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 30-Jul-89	V1.0: Created	PJT
 28-mar-07	V1.2 sm output option	PJT
+9-jan-12	V1.3 3D option, scale= added	PJT
 .fi
