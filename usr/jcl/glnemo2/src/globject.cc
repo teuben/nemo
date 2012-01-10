@@ -11,6 +11,7 @@
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
 #include "globject.h"
+#include <GL/glu.h>
 
 #define LOCAL_DEBUG 0
 //#include "print_debug.h"

@@ -30,7 +30,7 @@ macx {
         ARCH     = macx
         NEMOLIB = ../plugins/nemolight/lib/$$ARCH/$$COMPILEMODE
         NEMOINC = ../plugins/nemolight/inc
-        INCLUDEPATH += /usr/include/malloc
+        INCLUDEPATH += /usr/include/malloc /usr/X11/include
         QMAKE_CFLAGS += -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE
         QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.5
 }

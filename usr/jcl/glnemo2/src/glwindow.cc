@@ -492,7 +492,9 @@ void GLWindow::paintGL()
 #endif
   if (1) { //line_aliased) {
     glEnable(GL_LINE_SMOOTH);
+    glEnable(GL_POLYGON_SMOOTH);    
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     //glLineWidth (0.61);
     glLineWidth (1.0);
   } else {
@@ -563,7 +565,7 @@ void GLWindow::paintGL()
 
   // draw axes
   //drawAxes();
-  axes->display(mScreen, mScene, wwidth);
+  axes->display(mScreen, mScene, wwidth,wheight);
   
   if (fbo && GLWindow::GLSL_support) {
     fbo = false;

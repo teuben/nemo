@@ -20,6 +20,7 @@
 #include <QGLFormat>
 #include <QDesktopWidget>
 #include <iostream>
+#include <QSplashScreen>
 // Nemo stuffs
 #define _vectmath_h // put this statement to avoid conflict with C++ vector class
 #include <nemo.h>
@@ -27,7 +28,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.40 beta3"
+#define RELEASE_VERSION "1.40 beta4"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -157,6 +158,12 @@ int main(int argc, char *argv[])
   }  else
     shot="";
   Q_INIT_RESOURCE(glnemo); // load resources
+//  QPixmap pixmap(glnemo::GlobalOptions::RESPATH+"/images/glnemo2.png");
+//  QSplashScreen splash(pixmap);
+//  if (interact) {    
+//    splash.show();
+//    app.processEvents();
+//  }
   glnemo::MainWindow main_win(RELEASE_VERSION); // main window object
 
   // compute window size
@@ -166,8 +173,13 @@ int main(int argc, char *argv[])
   // move to the center of the screen
   main_win.move(x,y);
 
-  if (interact) main_win.show();
+  
+  if (interact) {
+    main_win.show();
+    
+  }
   main_win.start(shot);
+//  splash.finish(&main_win);
   finiparam();  // garbage collecting for nemo
 
   //if (interact) return app.exec();

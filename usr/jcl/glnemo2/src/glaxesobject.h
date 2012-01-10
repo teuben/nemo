@@ -16,6 +16,7 @@
 #ifndef GLAXESOBJECT_H
 #define GLAXESOBJECT_H
 #include "globject.h"
+#include <GL/glu.h>
 
 namespace glnemo {
 
@@ -23,7 +24,7 @@ class GLAxesObject: public GLObject {
 public:
   GLAxesObject();
   ~GLAxesObject();
-  void display(const double * mScreen,const double * mScene, const int width);
+  void display(const double * mScreen,const double * mScene, const int width, const int height);
 private:
   void buildDisplayList();
   void buildDisplayList2();

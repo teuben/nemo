@@ -16,6 +16,7 @@
 
 #include <sstream>
 #include "camera.h"
+#include <GL/glu.h>
 
 namespace glnemo {
   // ============================================================================

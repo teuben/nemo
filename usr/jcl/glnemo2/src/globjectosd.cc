@@ -11,6 +11,8 @@
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
 #include "globjectosd.h"
+#include <GL/glu.h>
+
 namespace glnemo {
 // init static data
 char * GLObjectOsd::OsdText[n_OsdKeys] = {

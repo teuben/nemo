@@ -77,6 +77,8 @@ void GLColorbar::display(const int _width, const int _height)
         
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);// No Alpha bending accumulation
     glEnable(GL_BLEND);
+    glLineWidth (1.01); // long time bug on ATI/Intel hardware !!!!
+                        // On Intel witdh must be > 1 after shaders....crazy bug
     // draw box
     drawBox();
     // draw text

@@ -34,12 +34,14 @@ GLAxesObject::~GLAxesObject()
 }
 // ============================================================================
 // display
-void GLAxesObject::display(const double * mScreen,const double * mScene, const int width)
+void GLAxesObject::display(const double * mScreen,const double * mScene, const int width, const int height)
 {
   int size=100;
+  
   glPushMatrix ();
   // set projection  
   setProjection( width-size, 0, size, size);
+  //setProjection( width/2-size/2, width/2, size, size);
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity (); // reset OGL rotations
   glTranslatef (0, 0 , -3);
@@ -47,12 +49,22 @@ void GLAxesObject::display(const double * mScreen,const double * mScene, const i
   // apply screen rotation on the whole system
   glMultMatrixd (mScreen);  
   glMultMatrixd (mScene);  
+  
+  //glDisable( GL_DEPTH_TEST );
+  
   glEnable(GL_BLEND);
-  //glEnable( GL_DEPTH_TEST );
+  //glDepthMask(GL_FALSE);                               // Lock the Depth Mask so we cant edit it
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE);                   // Set the type of blending we want
+  //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  
   GLObject::display(); // call display list
   
+  //glDepthMask(GL_TRUE);                                // Unlock the Depth Mask so we can edit it again
   glDisable(GL_BLEND);
+  
   glPopMatrix ();
+  
 }
 
 // ============================================================================
@@ -103,15 +115,22 @@ void GLAxesObject::buildDisplayList2()
 void GLAxesObject::buildDisplayList()
 {
   float length=1.0;
-  float radius=length*0.03;
+  float radius=length*0.05;
   //GLfloat color[4];
   // display list
   glNewList( dplist_index, GL_COMPILE );
+  glEnable(GL_LIGHT0);
+  glEnable(GL_LIGHTING);
+  glDisable(GL_COLOR_MATERIAL);
   gluQuadricNormals(quadric, GLU_SMOOTH); 
   // x axis  
   glPushMatrix();
   glColor3f (1,0,0); // x axis is red.
   glRotatef(90.0, 0.0, 1.0, 0.0);
+  float color[4];
+  color[0] = 0.7f;  color[1] = 0.7f;  color[2] = 1.0f;  color[3] = 1.0f;
+  color[0] = 1.f;  color[1] = 0.f;  color[2] = 0.0f;  color[3] = 1.0f;
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
   buildArrow(length,radius,12);
   glPopMatrix();
 
@@ -119,11 +138,17 @@ void GLAxesObject::buildDisplayList()
   glPushMatrix();
   glColor3f (0,1,0); // y axis is red.
   glRotatef(-90.0, 1.0, 0.0, 0.0);
+  color[0] = 1.0f;  color[1] = 0.7f;  color[2] = 0.7f;  color[3] = 1.0f;
+  color[0] = 0.0f;  color[1] = 1.f;  color[2] = 0.f;  color[3] = 1.0f;
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
   buildArrow(length,radius,12);
   glPopMatrix();
 
   // z axis
   glColor3f (0,0,1); // z axis is blue
+  color[0] = 0.7f;  color[1] = 1.0f;  color[2] = 0.7f;  color[3] = 1.0f;
+  color[0] = 0.0f;  color[1] = 0.0f;  color[2] = 1.f;  color[3] = 1.0f;
+  glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE, color);
   buildArrow(length,radius,12);
   
 #if 0  
@@ -137,6 +162,7 @@ void GLAxesObject::buildDisplayList()
   gluSphere(quadric,length,12,12); 
   //gluDeleteQuadric(quadratic);
 #endif
+  glDisable(GL_LIGHTING);
   glEndList();
 }
 
