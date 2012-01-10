@@ -13,7 +13,7 @@ INCFILES =
 SRCFILES = 
 OBJFILES=  
 LOBJFILES= 
-BINFILES = ccdsmooth ccdmath ccdflip ccdfill ccdsharp \
+BINFILES = ccdsmooth ccdmath ccdflip ccdfill ccdsharp ccdsharp3 \
 	ccdclip ccdintpol ccdmedian ccdpot ccdgen
 TESTFILES= 
 

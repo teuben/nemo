@@ -1,5 +1,5 @@
 DIR = src/image/trans
-BIN = ccdmath ccdflip ccdsmooth ccdgen
+BIN = ccdmath ccdflip ccdsmooth ccdgen ccdsharp ccdsharp3
 NEED = $(BIN) 
 
 help:
@@ -10,13 +10,17 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f ccd.in ccd.smooth
+	@rm -f ccd.in ccd3.in ccd.smooth
 
 all:	$(BIN)
 
 ccd.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=5,5,1 ; nemo.coverage ccdmath.c
+
+ccd3.in:
+	@echo Creating $@
+	$(EXEC) ccdmath out=ccd3.in "fie=10*%x+sqrt(%y)+%z*%z"  size=5,5,5 ; nemo.coverage ccdmath.c
 
 ccdmath: ccd.in
 	@echo Running $@
@@ -34,6 +38,13 @@ ccdsmooth: ccd.in
 	@echo Running $@
 	$(EXEC) ccdsmooth ccd.in - 1 | $(EXEC) ccdprint - x= y= format=%7.3f ; nemo.coverage ccdsmooth.c
 
+ccdsharp:
+	@echo Running $@
+	$(EXEC) ccdsharp ccd.in - | $(EXEC) ccdprint - x= y= format=%7.3f ; nemo.coverage ccdsmooth.c
+
+ccdsharp3: ccd3.in
+	@echo Running $@
+	$(EXEC) ccdsharp3 ccd3.in -| $(EXEC) ccdprint - x= y= z= format=%7.3f ; nemo.coverage ccdsmooth.c
 
 ccdintpol:
 	@echo Running $@
