@@ -27,7 +27,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <exception.h>
-#include <parallel.h>
 #include <cerrno>
 #include <cstdio>
 #include <cstdarg>
@@ -335,8 +334,10 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
   va_start(ap,fmt);
   vsnprintf(buf, size, fmt, ap);
   va_end(ap);
-  if(OMP::IsParallel() && InsteadOfThrow)
+#ifdef _OPENMP
+  if(omp_in_parallel() && InsteadOfThrow)
     InsteadOfThrow(func,file,line,buffer);
+#endif
   return exception(buffer);
 }
 //
