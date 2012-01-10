@@ -103,7 +103,7 @@ FOREACH(exe_cpp ${execpp_sources})
 
   # Link the executable to the Hello library.
 #  target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot X11 g2c unsio nemo sqlite3 ${Boost_LIBRARIES} boost_thread-mt.a boost_system-mt.a)
- target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot.a ${FC_GFORT_LIB} ${FC_G77_LIB}  X11 unsio WDutils falcON nemo ${SQLITE3_LIB} gomp ${LIBBOOST} dl)
+ target_link_libraries (${exe}  JCLutils JCLprojects cpgplot pgplot.a ${FC_GFORT_LIB} ${FC_G77_LIB}  X11 unsio WDutils falcON nemo ${SQLITE3_LIB} gomp ${LIBBOOST} pthread dl)
 
 
 ENDFOREACH(exe_cpp ${execpp_sources})
