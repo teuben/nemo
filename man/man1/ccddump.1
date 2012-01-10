@@ -23,9 +23,11 @@ input file name, in \fIimage(5NEMO)\fP format.
 output file, will be in one of the selected dump formats (see below)
 [no default]
 .TP
-\fBoption=\fIoption-string\fP
-Dump option. Currently available are \fBfloat\fP, \fBdouble\fP, and \fBbyte\fP.
-Both dumps are straight dumps in the local system format.
+\fBtype=\fIoutput-type-string\fP
+Dump option type. 
+Currently available are \fBfloat\fP, \fBdouble\fP, and \fBbyte\fP.
+Such dumps are straight dumps in the local system format, with
+an option to byte swap (see swap= below).
 [default: \fBfloat\fP].
 .TP
 \fBrange=\fIlow:high\fP
@@ -71,4 +73,5 @@ Peter Teuben
 30-Jul-89	V1.0: Created	PJT
 28-mar-07	V1.2 sm output option	PJT
 9-jan-12	V1.3 3D option, scale= added	PJT
+10-jan-12	V2.0 option= -> type=		PJT
 .fi
