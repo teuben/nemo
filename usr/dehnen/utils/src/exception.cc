@@ -27,6 +27,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 #include <exception.h>
+#include <parallel.h>
 #include <cerrno>
 #include <cstdio>
 #include <cstdarg>
@@ -310,6 +311,8 @@ template struct WDutils::Reporting<WDutils::DebugInfoTraits>;
 template struct WDutils::Reporting<WDutils::ErrorTraits>;
 template struct WDutils::Reporting<WDutils::WarningTraits>;
 //
+WDutils::Thrower::handler WDutils::Thrower::InsteadOfThrow=0;
+//
 WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
 {
   size_t size = 1024, len;
@@ -321,7 +324,7 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
   }
   if(func) {
     len  = file? SNprintf(buf,size," in %s",func) :
-                 SNprintf(buf,size, "in %s",func) ;
+      SNprintf(buf,size, "in %s",func) ;
     buf += len;
     size-= len;
   }
@@ -332,6 +335,8 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
   va_start(ap,fmt);
   vsnprintf(buf, size, fmt, ap);
   va_end(ap);
+  if(OMP::IsParallel() && InsteadOfThrow)
+    InsteadOfThrow(func,file,line,buffer);
   return exception(buffer);
 }
 //

@@ -133,20 +133,19 @@ namespace {
 			   "we assume shared global data "
 			   "(use WDutils::Radix::Sort() for sorting local "
 			   "data).\n");
-	try {
 #pragma omp barrier
+	try {
 	  ParallelRadixSort<X> P(n,x,y);
 	  P.sort();
 	} catch(exception E)  { WDutils_ErrorN(text(E)); }
-      } else if(!OMP::IsParallel() && OMP::MaxNumThreads()>1)
+      } else if(!OMP::IsParallel() && OMP::MaxNumThreads()>1) {
+	ThrowGuard Guard;
 #pragma omp parallel
 	{
-	  try {
-	    ParallelRadixSort<X> P(n,x,y);
-	    P.sort();
-	  } catch(exception E) { WDutils_ErrorN(text(E)); }
+	  ParallelRadixSort<X> P(n,x,y);
+	  P.sort();
 	}
-      else
+      } else
 #endif
 	Radix::Sort(n,x,y);
     }

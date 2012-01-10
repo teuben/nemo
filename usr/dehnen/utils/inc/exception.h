@@ -374,10 +374,16 @@ namespace WDutils {
   /// return error message given an exception
   inline const char*text(exception const&e)
   { return e.text(); }
+  //
+  class ThrowGuard;
   /// for generating exceptions
-  struct Thrower {
-    const char*file,*func;    ///< file name, function name
-    const int  line;          ///< line number
+  class Thrower {
+    friend class ThrowGuard;
+    typedef void(*handler)(const char*,const char*, int, const char*);
+    static handler  InsteadOfThrow;  ///< make error if OMP::IsParallel()
+    const  char    *file,*func;      ///< file name, function name
+    const  int      line;            ///< line number
+  public:
     /// default constructor: set data to NULL
     Thrower()
       : file(0), func(0), line(0) {}
@@ -400,6 +406,27 @@ namespace WDutils {
     /// generate an exception; for usage in WDutilsAssert
     /// \param[in] expr  boolean expression: throw exception if false
     exception operator()(bool expr) const;
+  };
+  /// method invoking an error, suitable as @a Thrower::handler
+  inline void MakeError(const char*func, const char*file, int line,
+			const char*mess)
+  { Error(func,file,line,"WDutils")(mess); }
+  /// guard against throwing an exception inside an openMP parallel region
+  struct ThrowGuard
+  {
+    /// ctor: guard against throwing of @c WDutils::exception via @c
+    /// WDutils::Thrower inside omp parallel regions
+    ThrowGuard() : OldHandler(Thrower::InsteadOfThrow)
+    { Thrower::InsteadOfThrow = WDutils::MakeError; }
+    /// dtor: replace handler with original
+    ~ThrowGuard()
+    { Thrower::InsteadOfThrow = OldHandler; }
+  protected:
+    explicit ThrowGuard(Thrower::handler H)
+      : OldHandler(Thrower::InsteadOfThrow)
+    { Thrower::InsteadOfThrow = H; }
+  private:
+    const Thrower::handler OldHandler;
   };
   //@}
   //

@@ -5,6 +5,8 @@
 #                                                                               
 ################################################################################
 
+PWD	:=	$(PWD)/falcON
+
 .PHONY	:	utils falcON
 all	:	utils falcON
 utils	:

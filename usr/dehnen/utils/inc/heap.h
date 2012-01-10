@@ -272,7 +272,7 @@ namespace WDutils {
     }
     //--------------------------------------------------------------------------
     template<typename T> 
-    static void build(Array<T>&a)
+    static void build(WDutils::Array<T>&a)
     { build(a.array(),a.size()); }
     template<typename T> 
     static void after_top_replace(Array<T>&a)
