@@ -10,6 +10,7 @@
  *      28-mar-07   1.2   allow SM style                        pjt
  *       9-jan-12   1.3   ds9 style scale options, add 3D       pjt
  *                        lots of unfinished options
+ *      10-jan-12   2.0   option= -> type=, and default now byte  PJT
  */
 
 
@@ -23,7 +24,7 @@
 string defv[] = {	/* keywords + help string for user interface */
   "in=???\n	    Input filename (image)",
   "out=???\n	    Output filename (dump)",
-  "option=float\n   Dump option [byte|short|int|float|double]",
+  "type=byte\n      Dump option [byte|short|int|float|double]",
   "range=\n	    Range in case scaling is needed (A:B)",
   "mode=row\n       Output mode [row|column]",
   "swap=false\n	    Swap bytes?[t|f]",
@@ -31,11 +32,13 @@ string defv[] = {	/* keywords + help string for user interface */
   "gamma=2\n        gamma factor in gamma and mid scaling",
   "b=1\n            softening parameter for the asinh magnitude scale",
   "sm=f\n           use SM file_type mode CH?",
-  "VERSION=1.3\n    9-jan-2012 PJT",
+  "VERSION=2.0\n    10-jan-2012 PJT",
   NULL,
 };
 
 string usage="dump the bytes of an image, optional scaling";
+
+string cvsid = "$Id$";
 
 static bool Qsm;
 static real p_gamma;
@@ -108,7 +111,7 @@ nemo_main()
   
   outstr = stropen(getparam("out"),"w");
   write_dump(outstr, iptr,
-	     getparam("mode"),getparam("option"),
+	     getparam("mode"),getparam("type"),
 	     getparam("range"),getbparam("swap"));
   strclose(outstr);
 }
