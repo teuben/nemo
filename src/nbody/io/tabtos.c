@@ -37,6 +37,7 @@
  *      21-sep-03       j   fixed bug in calling nemo_file_lines              pjt
  *      29-jul-05   V1.4    added auto-incrementing time option (Amsterdam, cafe amaricain) pjt
  *      14-nov-06   V1.5    add first # comments to the NEMO output history.
+ *      18-Jan-12   V1.5a   add 'dens' array                           jcl
  */
 
 #include <stdinc.h>
@@ -68,7 +69,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.5a\n 15-nov-06 PJT",
+    "VERSION=1.5a\n 18-Jan-12 PJT",
     NULL,
 };
 
@@ -282,7 +283,7 @@ local bool get_block(int id,string options)
     string *o;
     Body *bp;
     bool skip = streq(options,"skip");   /* if to skip the whole block */
-    int colmass, colpos, colvel, colphase, colphi, colacc, colaux, colkey;
+    int colmass, colpos, colvel, colphase, colphi, colacc, colaux, coldens, colkey;
     int colx, coly, colz, colvx, colvy, colvz, colax, colay, colaz;
 
     dprintf(1,"Block%d: %s",id,options);
@@ -290,7 +291,7 @@ local bool get_block(int id,string options)
     if (options==NULL || *options==0) return FALSE;
     o = burststring(options,", \t");
     n = xstrlen(o,sizeof(string)) - 1;
-    colmass=colpos=colvel=colphase=colphi=colacc=colaux=colkey=0;
+    colmass=colpos=colvel=colphase=colphi=colacc=colaux=colkey=coldens=0;
     colx=coly=colz=colvx=colvy=colvz=colax=colay=colaz=0;
 
     need = 0;
@@ -327,8 +328,10 @@ local bool get_block(int id,string options)
             colax   = need+1;   need += 1;      bits |= AccelerationBit;
 	} else if (streq(o[i], "ay"))  { 
             colay   = need+1;   need += 1;      bits |= AccelerationBit;
-	} else if (streq(o[i], "az"))  { 
-            colaz   = need+1;   need += 1;      bits |= AccelerationBit;
+	} else if (streq(o[i], "dens"))  { 
+            coldens = need+1;   need += 1;      bits |= DensBit;
+        } else if (streq(o[i], "az"))  { 
+	    colaz   = need+1;   need += 1;      bits |= AccelerationBit;
         } else if (streq(o[i], "aux"))  { 
             colaux  = need+1;   need += 1;      bits |= AuxBit;
         } else if (streq(o[i], "key"))  { 
@@ -339,8 +342,8 @@ local bool get_block(int id,string options)
         dprintf(1,"%d: skipping block ; need=%d\n",id,need);
     else
         dprintf(1,
-     "%d: mass(%d),pos(%d),vel(%d),phase(%d),phi(%d),acc(%d),aux(%d),key(%d)\n",
-      id,colmass,colpos,colvel,colphase,colphi,colacc,colaux,colkey);
+     "%d: mass(%d),pos(%d),vel(%d),phase(%d),phi(%d),acc(%d),aux(%d),dens(%d),key(%d)\n",
+		id,colmass,colpos,colvel,colphase,colphi,colacc,colaux,coldens,colkey);
 
     
     for (j=0, nvals=0, bp=btab; j<nbody; j++, bp++) {
@@ -429,6 +432,7 @@ local bool get_block(int id,string options)
         if (colphi>0)    Phi(bp) = dvals[colphi-1];
         if (colacc>0)    SETV(Acc(bp),&dvals[colacc-1]);
         if (colaux>0)    Aux(bp) = dvals[colaux-1];
+        if (coldens>0)   Dens(bp)= dvals[coldens-1];
         if (colkey>0)    Key(bp) = dvals[colkey-1];
         if (j==0) dprintf(1,"%d: First line: %s\n",id,line);
         if (j==nbody-1) dprintf(1,"%d: Last line: %s\n",id,line);
