@@ -69,7 +69,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.5a\n 18-Jan-12 PJT",
+    "VERSION=1.5b\n 18-Jan-2012 PJT",
     NULL,
 };
 
@@ -237,6 +237,7 @@ local bool get_header(void)
 
     if (feof(instr)) return FALSE;
 
+    /* @TODO:  nskip appears not to work??? */
     for (i=0; i<nskip; i++) {
         if (fgets(line,MAXLINE,instr) == NULL) {
             if (i==0) return FALSE;
