@@ -1,12 +1,12 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2011                                  
+// Copyright Jean-Charles LAMBERT - 2007-2012                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
-//           CNRS U.M.R 6110                                                   
+//           CNRS U.M.R 7326                                                   
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
@@ -92,6 +92,8 @@ GlobalOptions::GlobalOptions()
   octree_enable=false;
   octree_display=false;
   octree_level=10;
+  // axes
+  axes_enable = true;     
   // GL Colorbar
   gcb_enable=true;
   gcb_logmode=true;
@@ -270,6 +272,8 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   octree_enable=m.octree_enable;
   octree_display=m.octree_display;
   octree_level=m.octree_level;
+  // axes
+  axes_enable = m.axes_enable;
   // GL Colorbar
   gcb_enable=m.gcb_enable;
   gcb_logmode=m.gcb_logmode;

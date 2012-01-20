@@ -5,7 +5,7 @@
 |            Laboratoire d'Astrophysique de Marseille               
 |            2, place Le Verrier                                    
 |            13248 Marseille Cedex 4, France                        
-|            CNRS U.M.R 6110                                        
+|            CNRS U.M.R 7326                                        
 | ==================================================================
 |* Shared data imported from "io_nemo_f.c"                          
 +----------------------------------------------------------------- */

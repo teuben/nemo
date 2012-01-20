@@ -1,12 +1,12 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2011                                  
+// Copyright Jean-Charles LAMBERT - 2007-2012                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
-//           CNRS U.M.R 6110                                                   
+//           CNRS U.M.R 7326                                                   
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
@@ -83,7 +83,8 @@ using namespace std;
     "osdtitle=t\n      Show title on OSD                                ",
     "osddata=t\n       Show data type on OSD                            ",
     "osd_set_title=\n  Set an explicit title on OSD                     ",
-    "osdfs=13.0\n Size of OSD's font                              ",
+    "osdfs=13.0\n Size of OSD's font                                    ",
+    "axes=t\n          display axes                                     ",
     "cb=t\n            display Color Bar (CB) on the screen             ",
     "cblog=f\n         display real or log of the physical value on CB  ",
     "cbloc=3\n         CB location, 0:top 1:right 2:bottom 3:left       ",

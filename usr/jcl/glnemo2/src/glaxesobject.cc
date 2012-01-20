@@ -1,12 +1,12 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2011                                  
+// Copyright Jean-Charles LAMBERT - 2007-2012                                  
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
-//           CNRS U.M.R 6110                                                   
+//           CNRS U.M.R 7326                                                   
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
@@ -123,6 +123,7 @@ void GLAxesObject::buildDisplayList()
   glEnable(GL_LIGHTING);
   glDisable(GL_COLOR_MATERIAL);
   gluQuadricNormals(quadric, GLU_SMOOTH); 
+  gluQuadricDrawStyle(quadric, GLU_FILL); //this makes it solid
   // x axis  
   glPushMatrix();
   glColor3f (1,0,0); // x axis is red.
