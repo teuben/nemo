@@ -5,6 +5,7 @@
  *       9-dec-99   V1.0    Created
  *       6-jun-01   V1.1    renamed sigma= to nsigma= as in other programs PJT
  * 	 2-mar-01   V1.2    added sum to the output			   pjt
+ *      24-jan-12   V1.4    also report min/max in sigma from mean         pjt
  *
  *
  *  @todo:   xcol=0 should use the first data row to figure out all columns
@@ -30,7 +31,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "nmax=10000\n        maximum number of data to be read if pipe",
     "xmin=\n             Set minimum ",
     "xmax=\n             Set maximum ",
-    "VERSION=1.3\n	 8-apr-2011 PJT",
+    "VERSION=1.4\n	 24-jan-2012 PJT",
     NULL
 };
 
@@ -145,49 +146,49 @@ void stat_data()
 
         if (Qverbose || iter==0) {          /* always print out last iter */
                                             /* and in verbose all iters */
-            printf("npt:   ");
+            printf("npt:    ");
             for (j=0; j<nxcol; j++) {
                 sprintf(fmt," %d",n_moment(&m[j]));
                 out(fmt);
             }
             printf("\n");
     
-            printf("min:   ");
+            printf("min:    ");
             for (j=0; j<nxcol; j++) {
                 sprintf(fmt," %g",min_moment(&m[j]));
                 out(fmt);
             }
             printf("\n");
 
-            printf("max:   ");
+            printf("max:    ");
             for (j=0; j<nxcol; j++) {
                 sprintf(fmt," %g",max_moment(&m[j]));   
                 out(fmt);
             }
             printf("\n");
     
-            printf("sum:   ");
+            printf("sum:    ");
             for (j=0; j<nxcol; j++) {
 	        sprintf(fmt," %g",sum_moment(&m[j]) * mean_moment(&m[j]));
                 out(fmt);
             }   
             printf("\n");
 
-            printf("mean:  ");
+            printf("mean:   ");
             for (j=0; j<nxcol; j++) {
                 sprintf(fmt," %g",mean_moment(&m[j]));
                 out(fmt);
             }   
             printf("\n");
 
-            printf("disp:  ");
+            printf("disp:   ");
             for (j=0; j<nxcol; j++) {
                 sprintf(fmt," %g",sigma_moment(&m[j]));        
                 out(fmt);
             }
             printf("\n");
 
-            printf("skew:  ");
+            printf("skew:   ");
             for (j=0; j<nxcol; j++) {
                 sprintf(fmt," %g",skewness_moment(&m[j]));        
                 out(fmt);
@@ -201,8 +202,26 @@ void stat_data()
             }
             printf("\n");
 
+
+	    printf("min/sig:");
+            for (j=0; j<nxcol; j++) {
+	      d = (min_moment(&m[j]) - mean_moment(&m[j]))/sigma_moment(&m[j]);
+	      sprintf(fmt," %g",d);
+	      out(fmt);
+            }
+            printf("\n");
+
+	    printf("max/sig:");
+            for (j=0; j<nxcol; j++) {
+	      d = (max_moment(&m[j]) - mean_moment(&m[j]))/sigma_moment(&m[j]);
+	      sprintf(fmt," %g",d);
+	      out(fmt);
+            }
+            printf("\n");
+
+
             if (Qmedian) {
-                printf("median:");
+                printf("median: ");
                 for (j=0; j<nxcol; j++) {
                     sortptr(x[j],ix,npt);
                     kmin = 0;
