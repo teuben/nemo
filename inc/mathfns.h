@@ -5,9 +5,11 @@
 /* switch (MIXEDPREC, SINGLEPREC, or DOUBLEPREC).                           */
 /* Copyright (c) 2001 by Joshua E. Barnes, Honolulu, Hawai`i.               */
 /*                                                                          */
-/* 22-jun-01:    adapted for NEMO - included by stdinc.h                    */
+/* 22-jun-01     adapted for NEMO - included by stdinc.h                    */
 /*               note, NEMO does not use MIXEDPREC yet                      */
-/* 18-Sep-08: WD made sqr,qbe,dex inline                                    */
+/* 18-Sep-08  WD made sqr,qbe,dex inline                                    */
+/* ??-???-??  WD adapted for MAC                                            */
+/* 24-Jan-12  WD commented decl of rexp2() which clashes with math.h        */
 /****************************************************************************/
 
 #ifndef _mathfns_h
@@ -128,7 +130,7 @@ inline static float fdex(float x) { return rexp(M_LN10*x); }
 /* real rdex(real); */
 
 /* real rlog2(real);*/
-real rexp2(real);
+/* real rexp2(real);*/
 
 #if defined(SINGLEPREC)
 float rcbrt(float);
