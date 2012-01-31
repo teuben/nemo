@@ -5,6 +5,7 @@
  *                      (IMGEN is just tooooo cumbersome, and so is ccdmath) 
  *      6-jan-05        V0.7: added many more models and features. added factor=
  *      8-jan-05        V0.8: add m!=2 multi-arm spirals
+ *      5-aug-11        V0.9: object = test
  * TODO:
  *    - find out why the normalization was PI, and not TWO_PI, which worked before.
  *       (this happened when I changed from 1 to 1/3600 scaling factor in the examples)
@@ -26,7 +27,7 @@
 string defv[] = {
   "in=\n           Input file (optional) to be added to the new file",
   "out=???\n       Output file",
-  "object=flat\n   Object type (flat,exp,gauss,bar,spiral,....)",
+  "object=flat\n   Object type (test,flat,exp,gauss,bar,spiral,....)",
   "spar=\n         Parameters for this object",
   "center=\n       Center of object (defaults to map(reference)center) in pixels 0..size-1",
   "size=10,10,1\n  2- or 3D dimensions of map/cube (only if no input file given)",
@@ -40,7 +41,7 @@ string defv[] = {
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=0.8a\n  25-jan-05 PJT",
+  "VERSION=0.9\n   5-aug-2011 PJT",
   NULL,
 };
 
@@ -75,6 +76,7 @@ real surface=1.0;
 
 local void do_create(int nx, int ny, int nz);
 
+local void object_test(int npars, real *pars);
 local void object_flat(int npars, real *pars);
 local void object_exp(int npars, real *pars);
 local void object_gauss(int npars, real *pars);
@@ -195,6 +197,8 @@ void nemo_main ()
     object_comet(npar,spar);
   else if (streq(object,"shell"))
     object_shell(npar,spar);
+  else if (streq(object,"test"))
+    object_test(npar,spar);
   else
     error("Unknown object %g",object);
   
@@ -268,6 +272,21 @@ local void do_create(int nx, int ny,int nz)
 			total*Dx(iptr)*Dy(iptr));
     if (badvalues)
     	warning ("There were %d bad operations in dofie",badvalues);
+}
+
+
+local void object_test(int npars, real *pars)
+{
+  int i,j,k;
+  int nx = Nx(iptr);
+  int ny = Ny(iptr);
+  int nz = Ny(iptr);
+  real A = 1.0;
+
+  for (k=0; k<nz; k++)
+    for (j=0; j<ny; j++)
+      for (i=0; i<nx; i++)
+	CubeValue(iptr,i,j,k) = i + 10*j + 100*k;
 }
 
 
@@ -473,8 +492,8 @@ local void object_spiral(int npars, real *pars)
   int i,nx = Nx(iptr);
   int j,ny = Ny(iptr);
   int l, lmax;
-  real A = 1.0;
-  real h = 1.0;
+  real A = 1.0;   /* Amplitude */
+  real h = 1.0;   /* radial scale length */
   real k = 1.0;   /* wave number */
   real p = 1.0;   /* 1/2 power of cos */
   real r0 = 0.0;  /* starting radius */
