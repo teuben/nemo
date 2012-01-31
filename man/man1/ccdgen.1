@@ -1,4 +1,4 @@
-.TH CCDGEN 1NEMO "25 January 2005"
+.TH CCDGEN 1NEMO "31 January 2012"
 .SH NAME
 ccdgen \- create or add objects to an image
 .SH SYNOPSIS
@@ -8,10 +8,10 @@ ccdgen \- create or add objects to an image
 adding simple parameterized two-dimensional objects. For arbitrary
 expressions use \fIccdmath(1NEMO)\fP instead. 
 .PP
-An odd feature is that the objects can be added as if they are
+An added feature is that the objects can be added as if they are
 in a "galactic" disk with given inclination and position angle. The
-default is a "face-on" view. No corrections for brightness
-due to inclination are made however.
+default is a "face-on" view (\fBinc=0\fP). 
+No corrections for brightness due to inclination are made however.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -24,7 +24,7 @@ map is generated.
 Output file, in standard \fIimage(5NEMO)\fP format. No default.     
 .TP
 \fBobject=\fP
-Object type. Valid are flat, exp, gauss, bar, spiral, noise. See below for
+Object type. Valid are flat, exp, gauss, bar, spiral, noise, test. See below for
 an explanation and their parameters. Default: flat
 .TP
 \fBspar=\fP
@@ -91,7 +91,7 @@ noise	gaussian(m,s)	mean,sigma
 spiral	A.exp(-r/h)	A,h,k,p,m,r0,p0
 ferrers	A.(1-r^2)^p	A,h,e,b,p (h=size of bar, p=power to 1-r^2)
 isothermal	A.(1+r^2)^p	A,h,p
-
+test	x+10y+100z	-
 \fImaybe to be implemented\fP:
 
 j1x	J1(x)/x
@@ -130,7 +130,7 @@ p controls the relative width of the spiral (assumed to be cos^p(m*phi),
 r0 the starting radius of the spiral (defaults to 0), p0 the
 phase of the spiral at radius r0, and m the number of spiral arms. In particular,
 since the \fIpow(3)\fP function is used internally for non-integer values of \fBp\fP,
-the bahavior of \fBm\fP for integer and non-integer values of \fBp\fP is different:
+the behavior of \fBm\fP for integer and non-integer values of \fBp\fP is different:
 for integer values our own internal \fIpowi(3NEMO)\fP is used, and correctly represents.
 For example, for m=1 and p=1 you'll get a one armed spiral, but with negative counter-arm.
 With p=2 it becomes a 2-armed spiral, as they will get progressively narrower as p remains
@@ -166,4 +166,5 @@ Peter Teuben
 4-Jan-05	V0.1 Created	PJT
 6-jan-05	V0.7 added (many features and) factor=	PJT
 8-jan-05	V0.8 add #arms parameter to spiral	PJT
+31-jan-12	V0.9 added object=test	PJT
 .fi
