@@ -317,7 +317,14 @@ only be predicted roughly with respect to real time; iterating with
 increasing smaller timestep helps to zoom in on the correct end-time;
 Default: \fBniter=\fR3).
 .SH SEE ALSO
-mkplummer(1NEMO).
+mkplummer(1NEMO), nbody0(1NEMO)
+.PP
+STARLAB: http://www.sns.ias.edu/~starlab/
+.SH CAVEATS
+\fBnewton0\fP has not been maintained for a long time, the code was 
+revived in 2001 as version 2.0, but for any serious research codes
+such as the \fBnbodyX\fP series written by S.Aarseth (see e.g.
+\fInbody0(1NEMO)\fP) or the \fIstarlab\fP package should be used.
 .SH BUGS
 Running the code with a file named \fIsavefile\fP lying around tricks
 poor newton0 into assuming that it has just been restored to the land
