@@ -69,7 +69,7 @@ private:
   GlobalOptions * store_options;
   QTimer * anim_timer;
   Vec3D trans_in, trans_out, comvec;
-  float zoom_dynamic;
+  float zoom_dynamic, zoomo_dynamic;
   int total_frame, frame_counter;
   QMutex * mutex_data;
   // METHOD

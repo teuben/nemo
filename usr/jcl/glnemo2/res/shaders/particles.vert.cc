@@ -24,6 +24,7 @@
 uniform float alpha;           // alpha color factor                   
 uniform float factor_size;     // texture size factor                  
 uniform int   use_point;       // false=texture, true=point
+uniform int   perspective;     // false=orthographic, true=perspective
 
 // colormap
 uniform vec3 colormap[100]; // rgb colormap
@@ -65,8 +66,12 @@ void main()
   } 
   else {           // use texture, size change according to the distance
     float pointSize =  a_sprite_size*factor_size;                          
-    vec3 pos_eye = vec3 (gl_ModelViewMatrix * vert);                   
-    gl_PointSize = max(0.00001, pointSize / (1.0 - pos_eye.z));        
+    vec3 pos_eye = vec3 (gl_ModelViewMatrix * vert);                  
+    if (perspective==1) {
+      gl_PointSize = max(0.00001, pointSize / (1.0 - pos_eye.z));        
+    } else {
+      gl_PointSize = max(0.00001, pointSize - pos_eye.z + pos_eye.z);        
+    }
   }
   gl_TexCoord[0] = gl_MultiTexCoord0;                                
   gl_Position = ftransform();

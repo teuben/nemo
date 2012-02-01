@@ -139,6 +139,8 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
     int in_area=0;
     list.clear();
     // loop on all the objects
+    // to find out all particles in the
+    // selected area
     for (int i=0; i<nobj; i++) {
       const ParticlesObject * po = (*gpv)[i].getPartObj();        // object
       float DMIN = po->getMinPhys();
@@ -200,7 +202,9 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
 	//std::cerr << "center of mass:" << com[0] << " " << com[1] << " " << com[2] <<"\n";
         //std::cerr << "zoom in=" << store_options->zoom << "\n";
         // save information
-        float zoom1=store_options->zoom; // zoom value
+        float zoom1 =store_options->zoom; // zoom value
+        float zoomo1=store_options->zoomo; // zoom value
+        float ortho1=store_options->ortho_range; // zoom value
         trans_in.set(store_options->xtrans,store_options->ytrans,store_options->ztrans);
         if (zoom) {// best ZOOM on particles inside selected area 
            // centering on COM
@@ -209,10 +213,19 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
            store_options->ztrans -= com[2];
            trans_out.set(store_options->xtrans,store_options->ytrans,store_options->ztrans);
 
+           // in following function we compute the best
+           // zoom for perspective and orthographic projection
+           // BUT for orthographic, best zoom is set to ortho_range
            Tools3D::bestZoomFromList(mProj,mModel,viewport,&list, part_data, store_options);
            if (anim_zoom) {
-            float zoom2=store_options->zoom; // new zoom value
-            zoom_dynamic=(zoom2-zoom1)/float(total_frame); // animation zoom value offset
+            float zoom2 =store_options->zoom; // new zoom value
+            float zoomo2=store_options->zoomo; // new zoom value
+            // perspective zoom offset
+            zoom_dynamic =(zoom2-zoom1)/float(total_frame); // animation zoom value offset
+            // orthoraphic zoom offset
+            zoomo_dynamic=(store_options->ortho_range-ortho1*zoomo1)/float(total_frame); 
+            //std::cerr << "ortho0 =" << store_options->ortho_range << " ortho1="<< ortho1 << "\n";
+            //std::cerr << "zoomo_dynmaic = "<< zoomo_dynamic << " zoomo1="<<zoomo1<<"\n";
             // set initial Center
             store_options->xtrans=trans_in[0];
             store_options->ytrans=trans_in[1];
@@ -221,7 +234,9 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
             comvec = trans_out-trans_in; // vector director to COM
             Vec3D v;
             v = comvec + comvec;
-            store_options->zoom = zoom1; // set initial zoom value
+            store_options->zoom  = zoom1; // set initial zoom value
+            store_options->zoomo = 1.; // we want to keep zoomo = 1
+            store_options->ortho_range = ortho1*zoomo1; // initial range with zoomo = 1
             frame_counter = 0;
             mutex_data->lock();          // keep priority on data
             anim_timer->start(20);       // start zoom animation 
@@ -239,13 +254,16 @@ void GLSelection::playZoomAnim()
   frame_counter++;                                       // one more frame         
   if (frame_counter<=total_frame) {                      // frame exist            
     float off = float(frame_counter)/float(total_frame); // new displacement offset
-    store_options->zoom += zoom_dynamic;                 // new zoom               
+    store_options->zoom  += zoom_dynamic;                 // new zoom               
+    //store_options->zoomo += zoomo_dynamic;                 // new zoom   
+    store_options->ortho_range += zoomo_dynamic;
     store_options->xtrans=trans_in[0]+(off*comvec[0]);   // new x center           
     store_options->ytrans=trans_in[1]+(off*comvec[1]);   // new y center           
     store_options->ztrans=trans_in[2]+(off*comvec[2]);   // new z center           
     emit updateZoom();                                   // update GL
   }
   else {
+    
     anim_timer->stop();
     mutex_data->unlock(); // release the data
   }

@@ -19,6 +19,7 @@
 namespace glnemo {
 
 #define DOF 4000000
+//float ortho_left,ortho_right,ortho_bottom,ortho_top;
 // ============================================================================
 // Constructor                                                                 
 GLObject::GLObject()
@@ -84,12 +85,18 @@ void GLObject::setProjection(const int x, const int y, const int width, const in
     gluPerspective(45.,ratio,0.0005,(float) DOF);
   }
   else {
-#if 0
-    computeOrthoFactorRatio();
-    glOrtho(ortho_left   * fx  * store_options->zoomo,
-            ortho_right  * fx  * store_options->zoomo,
-            ortho_bottom * fy  * store_options->zoomo,
-            ortho_top    * fy  * store_options->zoomo,
+#if 1
+    //computeOrthoFactor();
+    float range=3;
+    float fx,fy=fx=1.0;
+    float ortho_right = range;
+    float ortho_left  =-range;
+    float ortho_top   = range;
+    float ortho_bottom=-range;
+    glOrtho(ortho_left   * fx  * 1.,
+            ortho_right  * fx  * 1.,
+            ortho_bottom * fy  * 1.,
+            ortho_top    * fy  * 1.,
             -1000,1000);
             //(float) -DOF/2.,(float) -DOF/2.);
 #endif
@@ -98,5 +105,15 @@ void GLObject::setProjection(const int x, const int y, const int width, const in
 
 // ============================================================================
 
-
+// ============================================================================
+// compute some factors for the orthographic projection
+void GLObject::computeOrthoFactor()
+{
+  if (ratio<1.0) {
+    fx = 1.0  ; fy = 1./ratio;
+  }
+  else {
+    fx = ratio; fy = 1.0;
+  }
+}
 }

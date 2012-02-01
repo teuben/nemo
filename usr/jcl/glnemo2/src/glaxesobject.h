@@ -24,7 +24,8 @@ class GLAxesObject: public GLObject {
 public:
   GLAxesObject();
   ~GLAxesObject();
-  void display(const double * mScreen,const double * mScene, const int width, const int height);
+  void display(const double * mScreen,const double * mScene, const int width, const int height, 
+               const int loc=0, const float psize=0.1);
 private:
   void buildDisplayList();
   void buildDisplayList2();

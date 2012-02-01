@@ -117,6 +117,10 @@ class FormOptions: public QDialog {
       go->osd_rot = b;
       emit update_osd(true);
     }
+    void on_osd_proj_clicked(bool b) {
+      go->osd_projection = b;
+      emit update_osd(true);
+    }
     void on_spin_font_size_valueChanged(double value) {
       go->osd_font_size = (float ) value;
       emit update_osd_font();
@@ -297,6 +301,145 @@ class FormOptions: public QDialog {
       go->col_cube = color;
       emit update_grid();
     }
+    
+    // axis bottom
+    void on_axis_bottom_clicked(bool b) {
+      if (b) {
+        go->axes_loc = 0;
+        emit update_gl();
+      }
+    }
+    // axis center
+    void on_axis_center_clicked(bool b) {
+      if (b) {
+        go->axes_loc = 1;
+        emit update_gl();
+      }
+    }
+    // toogle screen axis
+    void on_show_3daxis_clicked() {
+      go->axes_enable = !go->axes_enable;
+      emit update_gl();
+    }
+    //
+    void on_axis_dial_valueChanged(int v) {
+      go->axes_psize = v/100.;
+      emit update_gl();
+    }
+    
+    // screen rotation mode
+    void on_rot_screen_clicked() {
+      go->rotate_screen = true;
+      emit update_gl();
+    }
+    // world rotation mode
+    void on_rot_world_clicked() {
+      go->rotate_screen = false;
+      emit update_gl();
+    }
+    //
+    // auto rotate xyz
+    //
+    // x normal
+    void on_xsrotate_clicked(bool b) {
+      go->xbrot = b;
+      go->ixrot = (form.xsreverse->isChecked()==true?-1:1);
+              
+      emit autoRotate(0);
+    }
+    // x reverse
+    void on_xsreverse_clicked(bool b) {
+      go->xbrot = form.xsrotate->isChecked();
+      go->ixrot = (b==true?-1:1);
+      
+      emit autoRotate(0);
+    }
+    // y normal
+    void on_ysrotate_clicked(bool b) {
+      go->ybrot = b;
+      go->iyrot = (form.ysreverse->isChecked()==true?-1:1);
+              
+      emit autoRotate(1);
+    }
+    // y reverse
+    void on_ysreverse_clicked(bool b) {
+      go->ybrot = form.ysrotate->isChecked();
+      go->iyrot = (b==true?-1:1);
+      
+      emit autoRotate(1);
+    }
+    // z normal
+    void on_zsrotate_clicked(bool b) {
+      go->zbrot = b;
+      go->izrot = (form.zsreverse->isChecked()==true?-1:1);
+              
+      emit autoRotate(2);
+    }
+    // z reverse
+    void on_zsreverse_clicked(bool b) {
+      go->zbrot = form.zsrotate->isChecked();
+      go->izrot = (b==true?-1:1);
+      
+      emit autoRotate(2);
+    }
+    //
+    // auto rotate uvw
+    //
+    // u normal
+    void on_uwrotate_clicked(bool b) {
+      go->ubrot = b;
+      go->iurot = (form.uwreverse->isChecked()==true?-1:1);
+              
+      emit autoRotate(3);
+    }
+    // u reverse
+    void on_uwreverse_clicked(bool b) {
+      go->ubrot = form.uwrotate->isChecked();
+      go->iurot = (b==true?-1:1);
+      
+      emit autoRotate(3);
+    }
+    // v normal
+    void on_vwrotate_clicked(bool b) {
+      go->vbrot = b;
+      go->ivrot = (form.vwreverse->isChecked()==true?-1:1);
+              
+      emit autoRotate(4);
+    }
+    // v reverse
+    void on_vwreverse_clicked(bool b) {
+      go->vbrot = form.vwrotate->isChecked();
+      go->ivrot = (b==true?-1:1);
+      
+      emit autoRotate(4);
+    }
+    // w normal
+    void on_wwrotate_clicked(bool b) {
+      go->wbrot = b;
+      go->iwrot = (form.wwreverse->isChecked()==true?-1:1);
+              
+      emit autoRotate(5);
+    }
+    // w reverse
+    void on_wwreverse_clicked(bool b) {
+      go->wbrot = form.wwrotate->isChecked();
+      go->iwrot = (b==true?-1:1);
+      
+      emit autoRotate(5);
+    }
+    //
+    // OpenGL tab
+    void on_radio_ortho_clicked() {
+      go->perspective = false;
+      emit update_osd(true);
+      //emit update_gl();
+    }
+    void on_radio_persp_clicked() {
+      go->perspective = true;
+      emit update_osd(true);
+      //emit update_gl();
+    }
+
   signals:
     void start_bench(const bool);
     void select_and_zoom(const bool);
@@ -309,6 +452,9 @@ class FormOptions: public QDialog {
     void update_osd_font();
     void update_gcb_font();
     void update_gl();
+    // auto rotation
+    void autoRotate(const int);
+    
     //           
     // camera tab
     void setCamDisplay(const bool, const bool);

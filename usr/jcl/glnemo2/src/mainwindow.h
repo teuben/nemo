@@ -74,25 +74,27 @@ class MainWindow : public QMainWindow {
     void actionReset();
     void actionReload();
     void actionPrint();
-    void actionRotateX();
-    void actionRotateRX();
-    void actionRotateY();
-    void actionRotateRY();
-    void actionRotateZ();
-    void actionRotateRZ();
-    void actionRotateU();
-    void actionRotateRU();
-    void actionRotateV();
-    void actionRotateRV();
-    void actionRotateW();
-    void actionRotateRW();    
+    void actionAutoRotate(const int);
+    void actionRotateX (const bool b=false);
+    void actionRotateRX(const bool b=false);
+    void actionRotateY (const bool b=false);
+    void actionRotateRY(const bool b=false);
+    void actionRotateZ (const bool b=false);
+    void actionRotateRZ(const bool b=false);
+    void actionRotateU (const bool b=false);
+    void actionRotateRU(const bool b=false);
+    void actionRotateV (const bool b=false);
+    void actionRotateRV(const bool b=false);
+    void actionRotateW (const bool b=false);
+    void actionRotateRW(const bool b=false);    
     void actionTranslateX();
     void actionTranslateY();
     void actionTranslateZ();
     void actionToggleOsd();
     void actionToggleRotationScreen();
     void actionToggleCamera();
-    void actionEmpty() {;};
+    void actionToggleProjection();
+    void actionEmpty() {;}
     void actionQuit();
     void actionAutoScreenshot();
     void actionGLAutoScreenshot();
@@ -113,6 +115,8 @@ class MainWindow : public QMainWindow {
     }
     // OSD
     void updateOsd(bool ugl=false);
+    //
+    void toggleRotateScreen();
   private:
 
     // ------------------------------
@@ -168,6 +172,8 @@ class MainWindow : public QMainWindow {
     QAction * toggle_rotation_screen_action;
     // status bar
     QStatusBar * status_bar;
+    // Projection ortho/perps
+    QAction * proj_action;
     // GL actions
     QAction * next_cmap_action;
     QAction * prev_cmap_action;

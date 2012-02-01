@@ -60,6 +60,8 @@ GlobalOptions::GlobalOptions()
   urot=vrot=wrot=0.0;     // x y z SCENE/Object rotation
   ixrot=iyrot=ixrot=1.;   // x y z increment screen rotation
   iurot=ivrot=iwrot=1.;   // x y z increment scene/object rotation
+  xbrot=ybrot=zbrot=false;// x y z screen control rotation
+  ubrot=vbrot=wbrot=false;// x y z world  control rotation
   xtrans=ytrans=ztrans=0.0;
   // from Grids TAB
   show_grid=true;
@@ -94,6 +96,9 @@ GlobalOptions::GlobalOptions()
   octree_level=10;
   // axes
   axes_enable = true;     
+  axes_loc    = 0;
+  axes_psize  = 0.15;
+  rotate_screen = true;
   // GL Colorbar
   gcb_enable=true;
   gcb_logmode=true;
@@ -141,6 +146,7 @@ GlobalOptions::GlobalOptions()
   select_time = "";
   select_part = "";
   auto_render=true;
+  ortho_range = 6.0;
 }
 // ============================================================================
 // destructor                                                                  
@@ -187,6 +193,13 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   vrot    = m.vrot;
   wrot    = m.wrot;
   
+  xbrot   = m.xbrot;
+  ybrot   = m.ybrot;
+  zbrot   = m.zbrot;
+  ubrot   = m.ubrot;
+  vbrot   = m.vbrot;
+  wbrot   = m.wbrot;
+  
   ixrot   = m.ixrot;
   iyrot   = m.iyrot;
   izrot   = m.izrot;
@@ -200,6 +213,8 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   // zoom
   zoom   = m.zoom;
   zoomo  = m.zoomo;
+  // orthographic range
+  ortho_range = m.ortho_range;
   
     // SET default parameters
   MAX_PARTICLES_SIZE   = m.MAX_PARTICLES_SIZE;
@@ -272,8 +287,11 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   octree_enable=m.octree_enable;
   octree_display=m.octree_display;
   octree_level=m.octree_level;
-  // axes
+  // rotation/axis
   axes_enable = m.axes_enable;
+  axes_loc = m.axes_loc;
+  axes_psize = m.axes_psize;
+  rotate_screen = m.rotate_screen;     
   // GL Colorbar
   gcb_enable=m.gcb_enable;
   gcb_logmode=m.gcb_logmode;

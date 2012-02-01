@@ -28,7 +28,7 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.40 beta4"
+#define RELEASE_VERSION "1.40 beta5"
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -84,7 +84,7 @@ using namespace std;
     "osddata=t\n       Show data type on OSD                            ",
     "osd_set_title=\n  Set an explicit title on OSD                     ",
     "osdfs=13.0\n Size of OSD's font                                    ",
-    "axes=t\n          display axes                                     ",
+    "axis=t\n          display axis                                     ",
     "cb=t\n            display Color Bar (CB) on the screen             ",
     "cblog=f\n         display real or log of the physical value on CB  ",
     "cbloc=3\n         CB location, 0:top 1:right 2:bottom 3:left       ",

@@ -34,14 +34,30 @@ GLAxesObject::~GLAxesObject()
 }
 // ============================================================================
 // display
-void GLAxesObject::display(const double * mScreen,const double * mScene, const int width, const int height)
+void GLAxesObject::display(const double * mScreen,const double * mScene, const int width, const int height, 
+                           const int loc, const float psize)
 {
-  int size=100;
+  int size=psize*width;
   
+  int pwidth,pheight;
+  switch (loc) {
+  case 0: // bottom right
+    pwidth = width-size;
+    pheight= 0;
+    break;
+  case 1: // center
+    pwidth = width/2-size/2;
+    pheight= height/2-size/2;
+    break;
+  }
+
   glPushMatrix ();
+  
   // set projection  
-  setProjection( width-size, 0, size, size);
+  //setProjection( width-size, 0, size, size);
   //setProjection( width/2-size/2, width/2, size, size);
+  setProjection( pwidth, pheight, size, size);
+  
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity (); // reset OGL rotations
   glTranslatef (0, 0 , -3);

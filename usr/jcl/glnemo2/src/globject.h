@@ -61,10 +61,12 @@ public:
   GLuint dplist_index;
   int width,height;              // Display width and height
   int particles_alpha;  
+  float ratio, fx,fy;
   // method
   void  buildDisplayList();
   // projections
   void setProjection(const int x, const int y, const int w, const int h );
+  void computeOrthoFactor();
 
 };
 

@@ -93,12 +93,22 @@ o              launch option dialog box
 s              take a screenshot
 p              play all snapshots
 y
-C + x          toogle automatic rotation around x axis
-C + y          toogle automatic rotation around y axis
-C + z          toogle automatic rotation around z axis
-SC + x         toogle automatic reverse rotation around x axis
-SC + y         toogle automatic reverse rotation around y axis
-SC + z         toogle automatic reverse rotation around z axis
+
+Rotation around screen axis
+C + x          toogle automatic rotation around screen x axis
+C + y          toogle automatic rotation around screen y axis
+C + z          toogle automatic rotation around screen z axis
+SC + x         toogle automatic reverse rotation around screen x axis
+SC + y         toogle automatic reverse rotation around screen y axis
+SC + z         toogle automatic reverse rotation around screen z axis
+
+Rotation around world axis
+C + u          toogle automatic rotation around world x axis
+C + v          toogle automatic rotation around world y axis
+C + w          toogle automatic rotation around world z axis
+SC + u         toogle automatic reverse rotation around world x axis
+SC + v         toogle automatic reverse rotation around world y axis
+SC + w         toogle automatic reverse rotation around world z axis
 
 
 .fi
@@ -254,6 +264,9 @@ simulation's file name will be used as title
 \fBosdfontsize=\fP
 set OSD's font in pixels [13.]
 .TP 20
+\fBaxis=\fP
+display 3d axis [t]
+.TP 20
 \fBcb=\fP
 display Color Bar (CB) on screen [t]
 .TP 20
@@ -288,8 +301,17 @@ display particles as points [f]
 glnemo2 guess automatically the rendering mode, otherwise accumulation
 buffer will be selected[t]
 .TP 20
+\fBauto_ts=\fP
+automatic texture size [t]
+.TP 20
 \fBtexture=\fP
 display particles as textures [t]
+.TP 20
+\fBtexture_s=\fP
+textures size  [1.]
+.TP 20
+\fBtexture_a=\fP
+transparency texture value [1.]
 .TP 20
 \fBselphys=\fP
 select physical quantity to display
@@ -300,9 +322,6 @@ set minimal physical value
 .TP 20
 \fBmaxphys=\fP
 set maximal physical value
-.TP 20
-\fBtexture_s=\fP
-texture size for gas like particles
 .TP 20
 \fBcmapindex=\fP
 color map index (used to color particles by density)
@@ -352,4 +371,5 @@ Jean-Charles Lambert
 29-Oct-10	Version 1.11 happy gcc 4.5.0		JCL
 16-Apr-11	Ver 1.20 - new rendering pipeline/see ChangeLog	JCL
 25-Nov-11	Ver 1.30 - Color bar display on 3d view	JCL
+xx-xxx-12	Ver 1.40 - New rotation system		JCL
 .fi

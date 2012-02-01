@@ -119,6 +119,8 @@ MainWindow::MainWindow(std::string _ver)
   // options play tab
   connect(form_options,SIGNAL(playPressed()),this,SLOT(actionPlay()));
   connect(this,SIGNAL(endOfSnapshot()),form_options,SLOT(on_play_pressed()));
+  // options auto rotate
+  connect(form_options,SIGNAL(autoRotate(int)),this,SLOT(actionAutoRotate(int)));
   // leaveEvent to pass focus to gl_window
   connect(form_o_c,SIGNAL(leaveEvent()),gl_window,SLOT(setFocus()));
   connect(form_options,SIGNAL(leaveEvent()),gl_window,SLOT(setFocus()));
@@ -414,6 +416,13 @@ void MainWindow::createActions()
   connect( com_action, SIGNAL( activated() ), this, SLOT( actionCenterToCom() ) );
   addAction(com_action);
   
+  // Toggle projection orthographic/perspective
+  proj_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Toggle projection"),this);
+  proj_action->setShortcut(tr("Ctrl+Shift+P"));
+  proj_action->setStatusTip(tr("Toggle projection ortho/perps"));
+  connect( proj_action, SIGNAL( activated() ), this, SLOT( actionToggleProjection()) );
+  addAction(proj_action);
+  
   // render mode 
   render_mode_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Rendering mode"),this);
   render_mode_action->setShortcut(tr("M"));
@@ -532,9 +541,9 @@ void MainWindow::createActions()
   addAction(zsorting_action);
 
   // Toggle rotation screen
-  toggle_rotation_screen_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/fitscreen.png"),tr("Toggle rotation mode around axes screen/world"),this);
+  toggle_rotation_screen_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/3daxis.png"),tr("Toggle rotation mode around axes screen/world"),this);
   toggle_rotation_screen_action->setShortcut(tr("Ctrl+L"));
-  connect( toggle_rotation_screen_action, SIGNAL( activated() ), gl_window, SLOT( toggleRotateScreen()) );
+  connect( toggle_rotation_screen_action, SIGNAL( activated() ), this, SLOT( toggleRotateScreen()) );
   addAction(toggle_rotation_screen_action);
   
   // Auto rotate around X 
@@ -870,7 +879,7 @@ void MainWindow::parseNemoParameters()
   }
   store_options->osd_font_size = getdparam((char *) "osdfs");
   // Axes
-  store_options->axes_enable = getbparam((char *) "axes");
+  store_options->axes_enable = getbparam((char *) "axis");
   // Color Bar
   store_options->gcb_enable      = getbparam((char *) "cb");
   store_options->gcb_logmode     = getbparam((char *) "cblog");
@@ -930,11 +939,10 @@ void MainWindow::parseNemoParameters()
   store_options->texture_alpha      =getdparam((char *) "texture_a");
   
   store_options->duplicate_mem = getbparam((char *) "smooth_gui");
+  
   // ortho
-  float range_ortho;
-  if (store_options->orthographic) {
-    range_ortho=getdparam((char *) "ortho_range");
-  }
+  store_options->ortho_range = getdparam((char *) "ortho_range");
+  
   if (store_options->port) {;} // do nothing (remove compiler warning)
   
   //                         finish NEMO
@@ -1204,6 +1212,15 @@ void MainWindow::actionToggleRotationScreen()
 {
 }
 // -----------------------------------------------------------------------------
+// actionToggleProjection
+void MainWindow::actionToggleProjection()
+{
+  store_options->perspective = !store_options->perspective;
+  updateOsd(false);
+  form_options->update();
+  gl_window->updateGL();
+}
+// -----------------------------------------------------------------------------
 // actionToggleOsd()
 void MainWindow::actionToggleOsd()
 {
@@ -1311,127 +1328,193 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
 // -----------------------------------------------------------------------------
 // actionRotate around SCREEN axis
 // -----------------------------------------------------------------------------
-// actionRotateX() starts timer to rotate around screen x axis                                                       
-void MainWindow::actionRotateX()
+// actionAutoRotate() starts timer to rotate around screen x axis                                                       
+void MainWindow::actionAutoRotate(const int v)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->ixrot = 1;
-  if (rot)  auto_rotx_timer->start(20);
-  else      auto_rotx_timer->stop();
+  switch (v) {
+  case 0 : // x
+    if (store_options->ixrot==1)
+      actionRotateX(true);
+    else
+      actionRotateRX(true);
+    break;
+  case 1 : // y
+    if (store_options->iyrot==1)
+      actionRotateY(true);
+    else
+      actionRotateRY(true);
+    break;
+  case 2 : // z
+    if (store_options->izrot==1)
+      actionRotateZ(true);
+    else
+      actionRotateRZ(true);
+    break;
+  case 3 : // u
+    if (store_options->iurot==1)
+      actionRotateU(true);
+    else
+      actionRotateRU(true);
+    break;
+  case 4 : // v
+    if (store_options->ivrot==1)
+      actionRotateV(true);
+    else
+      actionRotateRV(true);
+    break;
+  case 5 : // w
+    if (store_options->iwrot==1)
+      actionRotateW(true);
+    else
+      actionRotateRW(true);
+    break;
+  }
+}
+// -----------------------------------------------------------------------------
+// actionRotateX() starts timer to rotate around screen x axis                                                       
+void MainWindow::actionRotateX(const bool b)
+{
+  if (!b ) {
+    store_options->ixrot = 1;
+    store_options->xbrot = ! store_options->xbrot;
+    form_options->update();
+  }
+  if (store_options->xbrot)  auto_rotx_timer->start(20);
+  else                       auto_rotx_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateRX() starts timer to rotate around screen x axis (reverse)                                   
-void MainWindow::actionRotateRX()
+void MainWindow::actionRotateRX(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->ixrot = -1;
-  if (rot)  auto_rotx_timer->start(20);
-  else      auto_rotx_timer->stop();
+  if (!b ) {
+    store_options->ixrot = -1;
+    store_options->xbrot = ! store_options->xbrot;
+    form_options->update();
+  }
+  if (store_options->xbrot)  auto_rotx_timer->start(20);
+  else                       auto_rotx_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateY() starts timer to rotate around screen y axis              
-void MainWindow::actionRotateY()
+void MainWindow::actionRotateY(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->iyrot = 1;
-  if (rot)  auto_roty_timer->start(20);
-  else      auto_roty_timer->stop();
+  if (!b ) {
+    store_options->iyrot = 1;
+    store_options->ybrot = ! store_options->ybrot;
+    form_options->update();
+  }
+  if (store_options->ybrot)  auto_roty_timer->start(20);
+  else                       auto_roty_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateRY() starts timer to rotate around screen y axis (reverse)                                   
-void MainWindow::actionRotateRY()
+void MainWindow::actionRotateRY(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->iyrot = -1;
-  if (rot)  auto_roty_timer->start(20);
-  else      auto_roty_timer->stop();
+  if (!b ) {
+    store_options->iyrot = -1;
+    store_options->ybrot = ! store_options->ybrot;
+    form_options->update();
+  }
+  if (store_options->ybrot)  auto_roty_timer->start(20);
+  else                       auto_roty_timer->stop();
 }
-
 // -----------------------------------------------------------------------------
 // actionRotateZ() starts timer to rotate around screen z axis                              
-void MainWindow::actionRotateZ()
+void MainWindow::actionRotateZ(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->izrot = 1;
-  if (rot)  auto_rotz_timer->start(20);
-  else      auto_rotz_timer->stop();
+  if (!b ) {
+    store_options->izrot = 1;
+    store_options->zbrot = ! store_options->zbrot;
+    form_options->update();
+  }
+  if (store_options->zbrot)  auto_rotz_timer->start(20);
+  else                       auto_rotz_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateRZ() starts timer to rotate around screen z axis (reverse)                                   
-void MainWindow::actionRotateRZ()
+void MainWindow::actionRotateRZ(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->izrot = -1;
-  if (rot)  auto_rotz_timer->start(20);
-  else      auto_rotz_timer->stop();
+  if (!b ) {
+    store_options->izrot = -1;
+    store_options->zbrot = ! store_options->zbrot;
+    form_options->update();
+  }
+  if (store_options->zbrot)  auto_rotz_timer->start(20);
+  else                       auto_rotz_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotate around SCENE/Object axis
 // -----------------------------------------------------------------------------
 // actionRotateU() starts timer to rotate around scene u axis                                                       
-void MainWindow::actionRotateU()
+void MainWindow::actionRotateU(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->iurot = 1;
-  if (rot)  auto_rotu_timer->start(20);
-  else      auto_rotu_timer->stop();
+  if (!b ) {
+    store_options->iurot = 1;
+    store_options->ubrot = ! store_options->ubrot;
+    form_options->update();
+  }
+  if (store_options->ubrot) auto_rotu_timer->start(20);
+  else                      auto_rotu_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateRU() starts timer to rotate around scene u axis (reverse)                                   
-void MainWindow::actionRotateRU()
+void MainWindow::actionRotateRU(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->iurot = -1;
-  if (rot)  auto_rotu_timer->start(20);
-  else      auto_rotu_timer->stop();
+  if (!b ) {
+    store_options->iurot = -1;
+    store_options->ubrot = ! store_options->ubrot;
+    form_options->update();
+  }
+  if (store_options->ubrot) auto_rotu_timer->start(20);
+  else                      auto_rotu_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateV() starts timer to rotate around scene v axis                                                       
-void MainWindow::actionRotateV()
+void MainWindow::actionRotateV(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->ivrot = 1;
-  if (rot)  auto_rotv_timer->start(20);
-  else      auto_rotv_timer->stop();
+  if (!b ) {
+    store_options->ivrot = 1;
+    store_options->vbrot = ! store_options->vbrot;
+    form_options->update();
+  }
+  if (store_options->vbrot) auto_rotv_timer->start(20);
+  else                      auto_rotv_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateRV() starts timer to rotate around scene v axis (reverse)                                   
-void MainWindow::actionRotateRV()
+void MainWindow::actionRotateRV(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->ivrot = -1;
-  if (rot)  auto_rotv_timer->start(20);
-  else      auto_rotv_timer->stop();
+  if (!b ) {
+    store_options->ivrot = -1;
+    store_options->vbrot = ! store_options->vbrot;
+    form_options->update();
+  }
+  if (store_options->vbrot) auto_rotv_timer->start(20);
+  else                      auto_rotv_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateW() starts timer to rotate around scene w axis                                                       
-void MainWindow::actionRotateW()
+void MainWindow::actionRotateW(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->iwrot = 1;
-  if (rot)  auto_rotw_timer->start(20);
-  else      auto_rotw_timer->stop();
+  if (!b ) {
+    store_options->iwrot = 1;
+    store_options->wbrot = ! store_options->wbrot;
+    form_options->update();
+  }
+  if (store_options->wbrot) auto_rotw_timer->start(20);
+  else                      auto_rotw_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionRotateRW() starts timer to rotate around scene w axis (reverse)                                   
-void MainWindow::actionRotateRW()
+void MainWindow::actionRotateRW(const bool b)
 {
-  static bool rot=false;
-  rot = !rot; // toggle rotation
-  store_options->iwrot = -1;
-  if (rot)  auto_rotw_timer->start(20);
-  else      auto_rotw_timer->stop();
+  if (!b ) {
+    store_options->iwrot = -1;
+    store_options->wbrot = ! store_options->wbrot;
+    form_options->update();
+  }
+  if (store_options->wbrot) auto_rotw_timer->start(20);
+  else                      auto_rotw_timer->stop();
 }
 // -----------------------------------------------------------------------------
 // actionTranlateX()                                                            
@@ -1602,6 +1685,11 @@ void MainWindow::updateOsd(bool ugl)
     if (title=="") {
       title = current_data->getFileName();
     }
+    
+    gl_window->setOsd(GLObjectOsd::Projection,
+                      g->perspective==true?QString("Perspective"):QString("Orthographic"),
+                      g->osd_projection,false);
+    
     gl_window->setOsd(GLObjectOsd::Title,
                       QString(title.c_str()),
                       g->osd_title,false);
@@ -1622,6 +1710,15 @@ void MainWindow::updateOsd(bool ugl)
   }
   
 }
+// -----------------------------------------------------------------------------
+// toggleRotateScreen                                                                  
+void MainWindow::toggleRotateScreen()
+{
+  store_options->rotate_screen = !store_options->rotate_screen;
+  gl_window->toggleRotateScreen();
+  form_options->update();
+}
+
 // -----------------------------------------------------------------------------
 // startBench()                                                                 
 void MainWindow::startBench(const bool start)

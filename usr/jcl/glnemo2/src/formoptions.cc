@@ -134,6 +134,36 @@ void FormOptions::update()
   form.gcb_spin_font_size->setValue(go->gcb_font_size);
   form.gcb_spin_offset->setValue(go->gcb_offset);
   
+  // rotation/axis tab
+  form.show_3daxis->setChecked(go->axes_enable);
+  if (go->rotate_screen) 
+    form.rot_screen->setChecked(true);
+  else
+    form.rot_world->setChecked(true);
+  
+  form.xsrotate->setChecked(go->xbrot);
+  form.xsreverse->setChecked(go->ixrot==-1?true:false);
+  
+  form.ysrotate->setChecked(go->ybrot);
+  form.ysreverse->setChecked(go->iyrot==-1?true:false);
+  
+  form.zsrotate->setChecked(go->zbrot);
+  form.zsreverse->setChecked(go->izrot==-1?true:false);
+  
+  form.uwrotate->setChecked(go->ubrot);
+  form.uwreverse->setChecked(go->iurot==-1?true:false);
+  
+  form.vwrotate->setChecked(go->vbrot);
+  form.vwreverse->setChecked(go->ivrot==-1?true:false);
+  
+  form.wwrotate->setChecked(go->wbrot);
+  form.wwreverse->setChecked(go->iwrot==-1?true:false);
+  
+  // OpenGL tab
+  if (go->perspective) 
+    form.radio_persp->setChecked(true);
+  else
+    form.radio_ortho->setChecked(true);
 }
 // ============================================================================
 // updateFrame                                                                 

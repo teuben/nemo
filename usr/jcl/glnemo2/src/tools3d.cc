@@ -46,18 +46,16 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
     // force ZOOM to fit all particles
     // Zoom is located in ModelView matrix at coordinates MM(2,3)
     double best_zoom;
-    if (store_options->perspective) {
-      MM(2,3) = -20000000.0;
-      best_zoom=10000;
-    }
-    else {
-      MM(2,3) =  20000000.0;
-      best_zoom=-10000;
-      return;
-    }
+    
+    MM(2,3)  =    -20000000.0;
+    best_zoom=     std::numeric_limits<double>::max();//10000;
+    std::cerr << "MM = " << MM(2,3)  << " best zoom ="<<best_zoom<<"\n";
     float mid_screenx = (viewport[2]-viewport[0])/2.;
     float mid_screeny = (viewport[3]-viewport[1])/2.;
     float coo[3];
+    double absxmax=0.;//fabs(std::numeric_limits<double>::min());
+    double absymax=0.;//fabs(std::numeric_limits<double>::min());
+    std::cerr << "xy max "<<absxmax << " " << absymax << "\n";
     // loop on all the objects
     for (int i=0; i<(int)pov->size(); i++) {
       //const ParticlesObject * po = gpv[i].getPartObj();        // object
@@ -91,6 +89,10 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
           px /= pw;
           py /= pw;
           pz /= pw;
+          // compute orthographic best zoom
+          if (fabs(x)>fabs(absxmax)) absxmax =x;
+          if (fabs(y)>fabs(absymax)) absymax =y; 
+          
           //std::cerr << px << " " << py << " " << pz << "\n";
           // compute screen coordinates
           float winx=viewport[0] + (1 + px) * viewport[2] / 2;
@@ -149,8 +151,10 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
       else { // object not visible
       }
     }
+    store_options->ortho_range=std::max(fabs(absxmax),fabs(absymax));
+    std::cerr << "ortho_range = " << store_options->ortho_range << "\n";
     //setZoom( best_zoom);
-    store_options->zoom = best_zoom;
+    store_options->zoom  = best_zoom;
     //std::cerr << "[" << best_zoom << "] Cordinates for best zoom = "
     //                  << coo[0] <<" " << coo[1] << " " << coo[2] << "\n";
   }
@@ -175,18 +179,15 @@ void Tools3D::bestZoomFromList(double * mProj,double * mModel,
     // force ZOOM to fit all particles
     // Zoom is located in ModelView matrix at coordinates MM(2,3)
     float best_zoom;
-    if (store_options->perspective) {
-      MM(2,3) = -20000000.0;
-      best_zoom=10000;
-    }
-    else {
-      MM(2,3) =  20000000.0;
-      best_zoom=-10000;
-      return;
-    }
+    
+    MM(2,3) = -20000000.0;
+    best_zoom=std::numeric_limits<double>::max();//10000;
+    
     float mid_screenx = (viewport[2]-viewport[0])/2.;
     float mid_screeny = (viewport[3]-viewport[1])/2.;
     float coo[3];
+    double absxmax=0.;//fabs(std::numeric_limits<double>::min());
+    double absymax=0.;//fabs(std::numeric_limits<double>::min());
     // loop on all the objects
     for (int i=0; i<(int)list->size(); i++) {
 
@@ -216,7 +217,11 @@ void Tools3D::bestZoomFromList(double * mProj,double * mModel,
           px /= pw;
           py /= pw;
           pz /= pw;
-
+          
+          // compute orthographic best zoom
+          if (fabs(x)>fabs(absxmax)) absxmax =x;
+          if (fabs(y)>fabs(absymax)) absymax =y; 
+          
           // compute screen coordinates
           float winx=viewport[0] + (1 + px) * viewport[2] / 2.;
           float winy=viewport[1] + (1 + py) * viewport[3] / 2.;
@@ -267,6 +272,7 @@ void Tools3D::bestZoomFromList(double * mProj,double * mModel,
             }
           }
     }
+    store_options->ortho_range=std::max(fabs(absxmax),fabs(absymax));
     store_options->zoom=best_zoom;
   }
 }

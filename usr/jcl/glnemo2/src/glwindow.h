@@ -100,9 +100,9 @@ public slots:
                       const float value2, const float value3,  bool show,bool b=true);
    void changeOsdFont();     
    void toggleRotateScreen() {
-     rotate_screen = !rotate_screen;
+     
      last_posx = last_posy = last_posz =0;
-     if (rotate_screen) {
+     if (store_options->rotate_screen) {
        y_mouse = store_options->xrot;
        x_mouse = store_options->yrot;
        z_mouse = store_options->zrot;
@@ -166,6 +166,7 @@ private:
   // projections
   void setProjection(const int x, const int y, const int w, const int h );
   void computeOrthoFactor();
+  float ortho_left,ortho_right,ortho_bottom,ortho_top;
   float ratio, fx,fy;
   int wwidth, wheight;
   GLuint texWidth, texHeight;
@@ -189,6 +190,7 @@ private:
   bool is_ctrl_pressed;
 
   void translateAlongAxis(const int);
+  
   // transformations (rotation, translation)
   bool is_translation;
   int  x_mouse, y_mouse, z_mouse,
@@ -197,7 +199,6 @@ private:
   float last_xrot, last_yrot, last_zrot;
   float last_urot, last_vrot, last_wrot;
   int   i_umat, i_vmat, i_wmat; // index of the SCENE/Object rotation matrix
-  bool rotate_screen;
   
   void setRotationScreen( const int x, const int y, const int z );
   void setRotationScene ( const int u, const int v, const int w );
@@ -221,7 +222,7 @@ private:
   void setViewPort() {
     glGetIntegerv(GL_VIEWPORT,viewport);
   }
-  void drawAxes();
+  void setPerspectiveMatrix();
   // OSD
   GLObjectOsd * osd;
   QImage image,gldata;

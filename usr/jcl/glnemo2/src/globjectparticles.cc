@@ -697,13 +697,20 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
   if (use_point) {
     shader->sendUniformf("factor_size",(float) po->getPartSize());
   } else {
-    shader->sendUniformf("factor_size",po->getGazSize()*win_height);
+    if (go->perspective) {
+      shader->sendUniformf("factor_size",po->getGazSize()*win_height);
+    } else {
+      shader->sendUniformf("factor_size",po->getGazSize()*win_height/fabs(go->zoom));//*win_height);
+    }
   }
   // Send data to Pixel Shader
   shader->sendUniformi("splatTexture",0);
 
   // use point or texture ?
   shader->sendUniformi("use_point",use_point);
+  
+  // perspective mode ?
+  shader->sendUniformi("perspective",go->perspective);
   
   // send colormap stuffs
   shader->sendUniformXfv("colormap",3,cmap.size()/3,&cmap[0]);

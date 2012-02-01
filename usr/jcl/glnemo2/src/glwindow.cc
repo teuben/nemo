@@ -16,6 +16,8 @@
 #include <QtOpenGL>
 #include <QMutex>
 #include <assert.h>
+#include <limits>
+#include <math.h>
 #include "glwindow.h"
 #include "glgridobject.h"
 #include "glcubeobject.h"
@@ -32,6 +34,8 @@ namespace glnemo {
   bool GLWindow::GLSL_support = false;
   GLuint framebuffer, renderbuffer;
   GLdouble GLWindow::mIdentity[16] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+  //float store_options->ortho_range;
+  
 // ============================================================================
 // Constructor                                                                 
 // BEWARE when parent constructor QGLWidget(QGLFormat(QGL::SampleBuffers),_parent)
@@ -60,7 +64,7 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   pov    = new ParticlesObjectVector();
   gl_select = new GLSelection();
   // rotatation mode is screen by default
-  rotate_screen = true;
+  store_options->rotate_screen = true;
   // reset rotation matrixes
   resetMatScreen();
   resetMatScene();
@@ -322,55 +326,6 @@ void GLWindow::updateGrid(bool ugl)
   if (ugl) updateGL();
 }
 // ============================================================================
-// drawAxes
-void GLWindow::drawAxes()
-{
-  float ORG[3] = {0,0,0};
-  
-  float XP[3] = {1,0,0},  YP[3] = {0,1,0},
-  ZP[3] = {0,0,1};
-  int size=100;
-  glPushMatrix ();
-  // set projection
-  setProjection( wwidth-size, 0, size, size);
-  glMatrixMode( GL_MODELVIEW );
-  glLoadIdentity (); // reset OGL rotations
-  glTranslatef (0, 0 , -3);
-  
-  // apply screen rotation on the whole system
-  glMultMatrixd (mScreen);   
-  // apply scene/world rotation on the whole system
-  glMultMatrixd (mScene); 
-    
-  //glScalef (0.25, 0.25, 0.25);
-  
-  glLineWidth (1.2);
-  
-  glBegin (GL_LINES);
-  glColor3f (1,0,0); // X axis is red.
-  glVertex3fv (ORG);
-  glVertex3fv (XP );
-  glColor3f (0,1,0); // Y axis is green.
-  glVertex3fv (ORG);
-  glVertex3fv (YP );
-  glColor3f (0,0,1); // z axis is blue.
-  glVertex3fv (ORG);
-  glVertex3fv (ZP );
-  glEnd();
-  glLineWidth (0.2);
-  glColor3f (0.5,0.5,0.5); // 
-  GLUquadric* quadratic = gluNewQuadric();
-  gluQuadricNormals(quadratic, GLU_SMOOTH); 
-//  gluQuadricTexture(quadratic, GL_TRUE);
-  gluQuadricDrawStyle(quadratic,GLU_LINE);
- 
-  gluSphere(quadratic,1.f,8,8); 
-  gluDeleteQuadric(quadratic);
-//  setProjection( 0,0, wwidth, wheight );
-//  glMatrixMode( GL_MODELVIEW );
-  glPopMatrix ();
-}
-// ============================================================================
 // init Light                                                                  
 void GLWindow::initLight()
 {
@@ -414,7 +369,7 @@ void GLWindow::paintGL()
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
   //glEnable(GL_DEPTH_TEST);
-   
+  
   // rotation around scene/object axes
   float ru=store_options->urot-last_urot;
   float rv=store_options->vrot-last_vrot;
@@ -477,9 +432,11 @@ void GLWindow::paintGL()
   
   glLoadIdentity (); // reset OGL rotations
   // set camera
-  camera->setEye(0.0,  0.0,  -store_options->zoom);
-  camera->moveTo();
-  
+  if ( store_options->perspective) {
+    camera->setEye(0.0,  0.0,  -store_options->zoom);
+    camera->moveTo();
+  }
+  glGetDoublev(GL_MODELVIEW_MATRIX, (GLdouble *) mRot);
   
   // apply screen rotation on the whole system
   glMultMatrixd (mScreen);   
@@ -513,12 +470,13 @@ void GLWindow::paintGL()
   }
   // camera display path and control points
   camera->display();
-  
+
   setModelMatrix(); // save ModelView  Matrix
   setProjMatrix();  // save Projection Matrix
   // move the scene
   glTranslatef( store_options->xtrans, store_options->ytrans, store_options->ztrans);
-  glGetDoublev(GL_MODELVIEW_MATRIX, (GLdouble *) mModel2);
+  glGetDoublev(GL_MODELVIEW_MATRIX, (GLdouble *) mModel2);  
+  
   // nice points display
   glEnable(GL_POINT_SMOOTH);
   
@@ -552,11 +510,12 @@ void GLWindow::paintGL()
     }
     //mutex_data->unlock();
   }
+  
   // octree
   if (store_options->octree_display || 1) {
     tree->display();
   }
-    
+  
   // On Screen Display
   if (store_options->show_osd) osd->display();
     
@@ -564,9 +523,8 @@ void GLWindow::paintGL()
   gl_select->display(QGLWidget::width(),QGLWidget::height());
 
   // draw axes
-  //drawAxes();
   if (store_options->axes_enable)
-    axes->display(mScreen, mScene, wwidth,wheight);
+    axes->display(mScreen, mScene, wwidth,wheight,store_options->axes_loc,store_options->axes_psize);
   
   if (fbo && GLWindow::GLSL_support) {
     fbo = false;
@@ -675,15 +633,19 @@ void GLWindow::setProjection(const int x, const int y, const int width, const in
     gluPerspective(45.,ratio,0.0005,(float) DOF);
   }
   else {
-#if 0
-    computeOrthoFactorRatio();
+    computeOrthoFactor();    
+    //std::cerr << "RANGE="<<store_options->ortho_range<<" zoom="<<store_options->zoom<<" zoomo="<<store_options->zoomo<<"\n";
+    ortho_right = store_options->ortho_range;
+    ortho_left  =-store_options->ortho_range;
+    ortho_top   = store_options->ortho_range;
+    ortho_bottom=-store_options->ortho_range;
+    //std::cerr << "zoom0 = " << store_options->zoomo << "\n";
     glOrtho(ortho_left   * fx  * store_options->zoomo,
             ortho_right  * fx  * store_options->zoomo,
             ortho_bottom * fy  * store_options->zoomo,
             ortho_top    * fy  * store_options->zoomo,
-            -1000,1000);
+            -100000,100000);
             //(float) -DOF/2.,(float) -DOF/2.);
-#endif
   }
   glGetIntegerv(GL_VIEWPORT,viewport);
 }
@@ -757,6 +719,7 @@ void GLWindow::mouseReleaseEvent( QMouseEvent *e )
 #endif
   if (is_shift_pressed) {
     if ( !store_options->duplicate_mem) mutex_data->lock();
+    setPerspectiveMatrix(); // toggle to perspective matrix mode
     gl_select->zoomOnArea(pov->size(),mProj,mModel,viewport);
     osd->setText(GLObjectOsd::Zoom,(const float) store_options->zoom);
     osd->updateDisplay();
@@ -822,7 +785,7 @@ void GLWindow::mouseMoveEvent( QMouseEvent *e )
     }
     else {
       //std::cerr << "xyz mouse="<<x_mouse<<" "<<y_mouse<<" "<< z_mouse<<"\n";
-      if (rotate_screen)
+      if (store_options->rotate_screen)
         setRotationScreen(y_mouse,x_mouse,z_mouse);
       else
         setRotationScene(y_mouse,x_mouse,z_mouse);      
@@ -1128,13 +1091,45 @@ void GLWindow::setZoom(const float z)
   osdZoom();
 }
 // ============================================================================
+// >> HERE WE FORCE PERSPECTIVE PROJECTION
+//    TO COMPUTE BOTH BEST ZOOM FOR ORTHO
+//    AND PERSPECTVE PROJECTION
+//
+//    we must force perspective projection to have
+//    te good prjection and modelview matrix
+void GLWindow::setPerspectiveMatrix()
+{
+  gluPerspective(45.,ratio,0.0005,(float) DOF);
+  glMatrixMode( GL_MODELVIEW );
+  glLoadIdentity();
+  camera->setEye(0.0,  0.0,  -store_options->zoom);
+  camera->moveTo();
+  // apply screen rotation on the whole system
+  glMultMatrixd (mScreen);   
+  // apply scene/world rotation on the whole system
+  glMultMatrixd (mScene);   
+  setModelMatrix(); // save ModelView  Matrix
+  setProjMatrix();  // save Projection Matrix
+}
+
+// ============================================================================
 // Best Zoom fit
 // fit all the particles on the screen from perspective view
 void GLWindow::bestZoomFit()
 {
   if ( !store_options->duplicate_mem) mutex_data->lock();
+  
+  setPerspectiveMatrix(); // toggle to perspective matric mode
+  
   Tools3D::bestZoomFromObject(mProj,mModel,
                               viewport, pov, p_data, store_options);
+    
+  ortho_right = store_options->ortho_range;
+  ortho_left  =-store_options->ortho_range;
+  ortho_top   = store_options->ortho_range;
+  ortho_bottom=-store_options->ortho_range;
+  store_options->zoomo = 1.;
+  
   osdZoom();
   if ( !store_options->duplicate_mem) mutex_data->unlock();
 }

@@ -18,6 +18,7 @@
 #include "glselection.h"
 #include "particlesobject.h"
 #include "vec3d.h"
+#include <limits>
 
 namespace glnemo {
 
