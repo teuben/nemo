@@ -263,6 +263,12 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
 // nextFrame()                                                                 
 int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
 {
+  
+  // note about strtof
+  //
+  // after  x=strtof(p, &endptr);
+  // if (p==endptr) means that there was NOT data to read
+  
   int status=0;
   if (valid) {
     BUFF = new char[size_buff];
@@ -306,8 +312,11 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
         if (load_vel)
           for (int j=0; j<3; j++)
             part_data->vel[cpt*3+j] = *(v+j);
+
+        // try rho
+        rho1  = strtof(p, &endptr);
         // rho ALLOC
-        if (first && *endptr!='\0') {
+        if (p!=endptr && first && *endptr!='\0') {
             first = false;
             if (nsel > *part_data->nbody|| !part_data->rho) {
               if (part_data->rho) delete part_data->rho;
@@ -319,13 +328,14 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
             }
         }
         // rho
-        if (*endptr!='\0') {
-            rho1  = strtof(p, &endptr);
+        if (p!=endptr && *endptr!='\0') {
+            //rho1  = strtof(p, &endptr);
             p   = endptr;
             part_data->rho->data[cpt]   = rho1;
             // hsml
-            if (*endptr!='\0') {
-                hsml  = strtof(p, &endptr);
+            hsml  = strtof(p, &endptr);
+            
+            if (p != endptr) {                
                 p   = endptr;
                 part_data->rneib->data[cpt] = hsml;
             }
