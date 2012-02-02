@@ -35,7 +35,7 @@ GLAxesObject::~GLAxesObject()
 // ============================================================================
 // display
 void GLAxesObject::display(const double * mScreen,const double * mScene, const int width, const int height, 
-                           const int loc, const float psize)
+                           const int loc, const float psize, const bool perspective)
 {
   int size=psize*width;
   
@@ -56,7 +56,7 @@ void GLAxesObject::display(const double * mScreen,const double * mScene, const i
   // set projection  
   //setProjection( width-size, 0, size, size);
   //setProjection( width/2-size/2, width/2, size, size);
-  setProjection( pwidth, pheight, size, size);
+  setProjection( pwidth, pheight, size, size,perspective);
   
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity (); // reset OGL rotations
@@ -66,8 +66,8 @@ void GLAxesObject::display(const double * mScreen,const double * mScene, const i
   glMultMatrixd (mScreen);  
   glMultMatrixd (mScene);  
   
-  //glDisable( GL_DEPTH_TEST );
   
+  //glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
   //glDepthMask(GL_FALSE);                               // Lock the Depth Mask so we cant edit it
   //glBlendFunc(GL_SRC_ALPHA, GL_ONE);                   // Set the type of blending we want

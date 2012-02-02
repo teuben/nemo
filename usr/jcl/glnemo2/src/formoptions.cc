@@ -118,6 +118,7 @@ void FormOptions::update()
   form.osd_trans->setChecked(go->osd_trans);
   form.osd_zoom->setChecked(go->osd_zoom);
   form.osd_rot->setChecked(go->osd_rot);
+  form.osd_proj->setChecked(go->osd_projection);
   form.spin_font_size->setValue(go->osd_font_size);
   form.title_name->setText(go->osd_title_name);
   

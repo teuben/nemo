@@ -155,8 +155,8 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
     std::cerr << "ortho_range = " << store_options->ortho_range << "\n";
     //setZoom( best_zoom);
     store_options->zoom  = best_zoom;
-    //std::cerr << "[" << best_zoom << "] Cordinates for best zoom = "
-    //                  << coo[0] <<" " << coo[1] << " " << coo[2] << "\n";
+    std::cerr << "[" << best_zoom << "] Cordinates for best zoom = "
+                      << coo[0] <<" " << coo[1] << " " << coo[2] << "\n";
   }
 }
 // ============================================================================

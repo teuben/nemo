@@ -65,7 +65,7 @@ public:
   // method
   void  buildDisplayList();
   // projections
-  void setProjection(const int x, const int y, const int w, const int h );
+  void setProjection(const int x, const int y, const int w, const int h, const bool perspective=true );
   void computeOrthoFactor();
 
 };

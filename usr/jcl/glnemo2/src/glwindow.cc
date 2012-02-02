@@ -460,7 +460,8 @@ void GLWindow::paintGL()
 
   // grid display
   if (store_options->show_grid) {
-    glEnable( GL_DEPTH_TEST );
+    //glEnable( GL_DEPTH_TEST );
+    glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     gridx->display();
     gridy->display();
@@ -524,7 +525,8 @@ void GLWindow::paintGL()
 
   // draw axes
   if (store_options->axes_enable)
-    axes->display(mScreen, mScene, wwidth,wheight,store_options->axes_loc,store_options->axes_psize);
+    axes->display(mScreen, mScene, wwidth,wheight,
+                  store_options->axes_loc,store_options->axes_psize, store_options->perspective);
   
   if (fbo && GLWindow::GLSL_support) {
     fbo = false;
@@ -1099,6 +1101,8 @@ void GLWindow::setZoom(const float z)
 //    te good prjection and modelview matrix
 void GLWindow::setPerspectiveMatrix()
 {
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
   gluPerspective(45.,ratio,0.0005,(float) DOF);
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();

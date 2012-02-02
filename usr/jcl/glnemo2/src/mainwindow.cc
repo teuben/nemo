@@ -189,6 +189,7 @@ void MainWindow::start(std::string shot)
         }
     }
   }
+  updateOsd();
   if (shot != "" && play) {
       store_options->enable_gui=false;
       store_options->auto_play_screenshot=true;
@@ -1674,8 +1675,12 @@ void MainWindow::pressedKeyMouse(const bool k, const bool m)
 // updateOsd()                                                                  
 void MainWindow::updateOsd(bool ugl)
 {
-  if (current_data) {
-    GlobalOptions * g = store_options;
+  GlobalOptions * g = store_options;
+  gl_window->setOsd(GLObjectOsd::Projection,
+                    g->perspective==true?QString("Perspective"):QString("Orthographic"),
+                    g->osd_projection,false);
+  
+  if (current_data) {    
     gl_window->setOsd(GLObjectOsd::Nbody,
                       *current_data->part_data->nbody,g->osd_nbody,false);
     gl_window->setOsd(GLObjectOsd::Time,
@@ -1686,9 +1691,7 @@ void MainWindow::updateOsd(bool ugl)
       title = current_data->getFileName();
     }
     
-    gl_window->setOsd(GLObjectOsd::Projection,
-                      g->perspective==true?QString("Perspective"):QString("Orthographic"),
-                      g->osd_projection,false);
+    
     
     gl_window->setOsd(GLObjectOsd::Title,
                       QString(title.c_str()),

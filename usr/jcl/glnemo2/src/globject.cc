@@ -12,7 +12,7 @@
 // ============================================================================
 #include "globject.h"
 #include <GL/glu.h>
-
+#include <iostream>
 #define LOCAL_DEBUG 0
 //#include "print_debug.h"
 
@@ -74,21 +74,23 @@ void GLObject::buildDisplayList()
 // ============================================================================
 // GLObject::setProjection                                              
 //
-void GLObject::setProjection(const int x, const int y, const int width, const int height)
+void GLObject::setProjection(const int x, const int y, const int width, const int height,
+                             const bool perspective)
 {
   glViewport( x, y, width, height);
   double ratio =  ((double )width) / ((double )height);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
 
-  if (1) {
+  if (perspective) {
     gluPerspective(45.,ratio,0.0005,(float) DOF);
   }
   else {
 #if 1
-    //computeOrthoFactor();
-    float range=3;
-    float fx,fy=fx=1.0;
+    computeOrthoFactor();
+    float range=1;
+    //float fx,fy=fx=1.0;
+    //std::cerr << "fx="<<fx<<" fy="<<fy<< " width="<<width<<" height="<<height<<"\n";
     float ortho_right = range;
     float ortho_left  =-range;
     float ortho_top   = range;
@@ -109,11 +111,15 @@ void GLObject::setProjection(const int x, const int y, const int width, const in
 // compute some factors for the orthographic projection
 void GLObject::computeOrthoFactor()
 {
-  if (ratio<1.0) {
+  if (ratio<1.0 && ratio!=0.) {
     fx = 1.0  ; fy = 1./ratio;
   }
   else {
-    fx = ratio; fy = 1.0;
+    if (ratio!=0)
+      fx = ratio;
+    else
+      fx = 1.0;
+    fy = 1.0;
   }
 }
 }

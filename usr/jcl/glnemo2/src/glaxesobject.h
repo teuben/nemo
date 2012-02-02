@@ -25,7 +25,7 @@ public:
   GLAxesObject();
   ~GLAxesObject();
   void display(const double * mScreen,const double * mScene, const int width, const int height, 
-               const int loc=0, const float psize=0.1);
+               const int loc=0, const float psize=0.1, const bool perspective=true);
 private:
   void buildDisplayList();
   void buildDisplayList2();
