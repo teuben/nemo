@@ -1034,6 +1034,39 @@ void FormObjectControl::on_orbit_history_spin_valueChanged(int value)
 // ============================================================================
 // ON PHYSICAL QUANTITY TAB                                                    
 // ============================================================================
+// ============================================================================
+// change slide value on both direction
+// add x to min and max (move both slide to right or left
+// add min-y and max+y  (spread or shrink min and max)
+void FormObjectControl::dens_slide_min_max(const int x, const int y)
+{
+  if (go  && ! go->duplicate_mem) mutex_data->lock();
+  my_mutex2->lock();
+  int i_obj = object_index[current_object];
+  if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
+    assert(i_obj < (int)pov->size());
+    std::cerr << "x="<<x<< "  y="<<y<<"\n";
+    EMIT=FALSE;
+    // horizontal move
+    //on_dens_slide_min_valueChanged(form.dens_slide_min->value()+x);
+    //on_dens_slide_max_valueChanged(form.dens_slide_max->value()+x);
+    form.dens_slide_min->setValue(form.dens_slide_min->value()+x);
+    form.dens_slide_max->setValue(form.dens_slide_max->value()+x);
+    // vertical move
+    if (y>0)
+      form.dens_slide_min->setValue(form.dens_slide_min->value()+y);
+    else
+      form.dens_slide_max->setValue(form.dens_slide_max->value()-y);
+    EMIT=TRUE;
+    setNewPhys();      
+    go->gcb_min = form.dens_slide_min->value();
+    go->gcb_max = form.dens_slide_max->value();
+    emit changeBoundaryPhys(i_obj); 
+  }
+  my_mutex2->unlock();
+  //if (lock)
+  if (go  && ! go->duplicate_mem) mutex_data->unlock();
+}
 
 // ============================================================================
 // on_dens_slide_min_valueChanged                                              
@@ -1044,6 +1077,7 @@ void FormObjectControl::on_dens_slide_min_valueChanged(int value)
   int i_obj = object_index[current_object];
   if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
     assert(i_obj < (int)pov->size());
+    //std::cerr << "min value="<<value<<"\n";
     //ParticlesObject * pobj = &(*pov)[i_obj];
     if (value >= form.dens_slide_max->value()) { // min < max !
       form.dens_slide_max->setValue(value+1);
@@ -1078,6 +1112,7 @@ void FormObjectControl::on_dens_slide_max_valueChanged(int value)
   int i_obj = object_index[current_object];
   if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
     assert(i_obj < (int)pov->size());
+    //std::cerr << "max value="<<value<<"\n";
     //ParticlesObject * pobj = &(*pov)[i_obj];
     if (value <= form.dens_slide_min->value()) { // min < max !
       form.dens_slide_min->setValue(std::max(value-1,0));

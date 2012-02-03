@@ -77,6 +77,7 @@ public:
     void sigKeyMouse(const bool, const bool);
     void sigScreenshot();
     void leaveEvent();
+    void sigMouseXY(const int x, const int y);
 public slots:
    void  update(ParticlesData   * ,
                 ParticlesObjectVector * ,

@@ -174,6 +174,7 @@ namespace glnemo {
     void on_orbit_history_spin_valueChanged(int);
 
     // -- Physical quantities  Tab --
+    void dens_slide_min_max(const int, const int);
     void on_dens_slide_min_valueChanged(int);
     void on_dens_slide_max_valueChanged(int);
     void on_phys_console_button_clicked();
