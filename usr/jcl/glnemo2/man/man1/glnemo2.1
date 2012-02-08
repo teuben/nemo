@@ -1,4 +1,4 @@
-.TH GLNEMO2 1NEMO "November 2011"
+.TH GLNEMO2 1NEMO "February 2012"
 .SH NAME
 glnemo2 \- An interactive 3D OpenGL visualization program for Nemo snapshots
 .SH SYNOPSIS
@@ -67,16 +67,20 @@ dialog boxes. Most of the operations can also be activated by
 hitting a key in the display window itself:
 .nf
 - - - - - - - - - - - - - 
-LMB = Left Mouse Button
-RMB = Right Mouse Button
-MM  = Mouve Mouse
+LMB = Left   Mouse Button
+RMB = Right  Mouse Button
+MMB = Middle Mouse Button
+MM  = Move Mouse
+MMH = Move Mouse Horizontally 
+MMV = Move Mouse Vertically
 A   = Alt key
 C   = Control key
 S   = Shift key
+
 - - - - - - - - - - - - - 
 
-LMB + MM       rotate around X/Y axis
-RMB + MM       rotate around Z axis
+LMB + MM(H/V)  rotate around X/Y screen axis
+RMB + MM       rotate around Z screen axis
 Wheel mouse    zoom in or out
 +              zoom in
 -              zoom out
@@ -94,7 +98,13 @@ s              take a screenshot
 p              play all snapshots
 y
 
-Rotation around screen axis
+Density threshold
+MMB + MMH right  modify percentage of density threshold: min+1 and max+1
+MMB + MMH left   modify percentage of density threshold: min-1 and max-1
+MMB + MMV up     modify percentage of density threshold: min-1 and max+1
+MMB + MMV down   modify percentage of density threshold: min+1
+
+Automatic rotation around screen axis
 C + x          toogle automatic rotation around screen x axis
 C + y          toogle automatic rotation around screen y axis
 C + z          toogle automatic rotation around screen z axis
@@ -102,7 +112,7 @@ SC + x         toogle automatic reverse rotation around screen x axis
 SC + y         toogle automatic reverse rotation around screen y axis
 SC + z         toogle automatic reverse rotation around screen z axis
 
-Rotation around world axis
+Automatic rotation around world axis
 C + u          toogle automatic rotation around world x axis
 C + v          toogle automatic rotation around world y axis
 C + w          toogle automatic rotation around world z axis
@@ -359,6 +369,8 @@ $NEMO/usr/jcl/glnemo2: directory with source code
 $NEMO/usr/jcl/glnemo2/gyrfalcon: runtime gyrfalcon manipulator (See README)
 .TP
 \fBhttp://projets.oamp.fr/projects/glnemo2\fP Home page
+.TP
+\fBhttp://projets.oamp.fr/projects/glnemo2/wiki/Movies\fP Movies
 .SH AUTHOR
 Jean-Charles Lambert
 .SH UPDATE HISTORY
@@ -371,5 +383,5 @@ Jean-Charles Lambert
 29-Oct-10	Version 1.11 happy gcc 4.5.0		JCL
 16-Apr-11	Ver 1.20 - new rendering pipeline/see ChangeLog	JCL
 25-Nov-11	Ver 1.30 - Color bar display on 3d view	JCL
-xx-xxx-12	Ver 1.40 - New rotation system		JCL
+07-Feb-12	Ver 1.40 - New rotation system		JCL
 .fi

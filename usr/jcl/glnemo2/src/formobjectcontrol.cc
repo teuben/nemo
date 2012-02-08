@@ -1045,18 +1045,22 @@ void FormObjectControl::dens_slide_min_max(const int x, const int y)
   int i_obj = object_index[current_object];
   if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
     assert(i_obj < (int)pov->size());
-    std::cerr << "x="<<x<< "  y="<<y<<"\n";
+    //std::cerr << "x="<<x<< "  y="<<y<<"\n";
     EMIT=FALSE;
-    // horizontal move
-    //on_dens_slide_min_valueChanged(form.dens_slide_min->value()+x);
-    //on_dens_slide_max_valueChanged(form.dens_slide_max->value()+x);
-    form.dens_slide_min->setValue(form.dens_slide_min->value()+x);
-    form.dens_slide_max->setValue(form.dens_slide_max->value()+x);
-    // vertical move
-    if (y>0)
-      form.dens_slide_min->setValue(form.dens_slide_min->value()+y);
-    else
-      form.dens_slide_max->setValue(form.dens_slide_max->value()-y);
+    
+    if (fabs(x)> fabs(y)) {
+      // horizontal move
+      form.dens_slide_min->setValue(form.dens_slide_min->value()+x);
+      form.dens_slide_max->setValue(form.dens_slide_max->value()+x);
+      // vertical move
+    } else {
+      if (y>0)
+        form.dens_slide_min->setValue(form.dens_slide_min->value()+y);
+      else {
+        form.dens_slide_min->setValue(form.dens_slide_min->value()+y);
+        form.dens_slide_max->setValue(form.dens_slide_max->value()-y);
+      }
+    }
     EMIT=TRUE;
     setNewPhys();      
     go->gcb_min = form.dens_slide_min->value();
