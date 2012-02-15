@@ -239,11 +239,11 @@ void GLWindow::update(ParticlesObjectVector * _pov)
 }
 // ============================================================================
 // updateBondaryPhys
-void GLWindow::updateBoundaryPhys(const int i_obj)
+void GLWindow::updateBoundaryPhys(const int i_obj, const bool ugl)
 {
   assert(i_obj < (int) gpv.size());
   gpv[i_obj].updateBoundaryPhys();
-  updateGL();
+  if (ugl) updateGL();
 }
 // ============================================================================
 // updateVbo

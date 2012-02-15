@@ -603,20 +603,26 @@ void FormObjectControl::updateObjectSettings( const int row)
       setPhysicalTabName();
     }
     if (pobj->hasPhysic() && phys_select && phys_select->isValid()) {
+      std::cerr << "updateObjectSettings("<<row<<") getMax="<<log(phys_select->getMax())<< " getMin="<<
+            log(phys_select->getMin())<<"\n";
       dens_histo->drawDensity(phys_select->data_histo);
-      float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
+      double diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
       //min
-      float minphys=pobj->getMinPhys();
-      float maxphys=pobj->getMaxPhys();
-      
-      int min=(log(minphys)-log(phys_select->getMin()))*1./diff_rho;
+      double minphys=pobj->getMinPhys();
+      double maxphys=pobj->getMaxPhys();
+      //std::cerr << "minphys ="<<minphys << " maxphys="<<maxphys<<"\n";
+      int min=rint((log(minphys)-log(phys_select->getMin()))*1./diff_rho);
       form.dens_slide_min->setValue(min);
       //pobj->setMinPercenPhys(std::max(min-1,0));
       //max      
-      int max=(log(maxphys)-log(phys_select->getMin()))*1./diff_rho;
+      int max=rint((log(maxphys)-log(phys_select->getMin()))*1./diff_rho);      
       form.dens_slide_max->setValue(max);
       //pobj->setMaxPercenPhys(std::max(1,max-1));
-
+#if 1
+      setNewPhys();
+      go->gcb_min = form.dens_slide_min->value();
+      go->gcb_max = form.dens_slide_max->value();
+#endif
       dens_histo->drawDensity(form.dens_slide_min->value(),form.dens_slide_max->value());
       dens_color_bar->draw(form.dens_slide_min->value(),form.dens_slide_max->value());
       //pobj->setMinPhys(minphys);
@@ -1065,7 +1071,7 @@ void FormObjectControl::dens_slide_min_max(const int x, const int y)
     setNewPhys();      
     go->gcb_min = form.dens_slide_min->value();
     go->gcb_max = form.dens_slide_max->value();
-    emit changeBoundaryPhys(i_obj); 
+    emit changeBoundaryPhys(i_obj,EMIT); 
   }
   my_mutex2->unlock();
   //if (lock)
@@ -1083,12 +1089,10 @@ void FormObjectControl::on_dens_slide_min_valueChanged(int value)
     assert(i_obj < (int)pov->size());
     //std::cerr << "min value="<<value<<"\n";
     //ParticlesObject * pobj = &(*pov)[i_obj];
-    if (value >= form.dens_slide_max->value()) { // min < max !
+    if (value > form.dens_slide_max->value()) { // min < max !
       form.dens_slide_max->setValue(value+1);
     }
-    dens_histo->drawDensity(form.dens_slide_min->value(), form.dens_slide_max->value());
-    dens_color_bar->draw(form.dens_slide_min->value(), form.dens_slide_max->value());
-    
+        
     //setNewPhys();
     ParticlesObject * pobj = &(*pov)[i_obj];
     if (value<0) value=0;
@@ -1099,9 +1103,14 @@ void FormObjectControl::on_dens_slide_min_valueChanged(int value)
       setNewPhys();      
       go->gcb_min = form.dens_slide_min->value();
       go->gcb_max = form.dens_slide_max->value();
-      emit changeBoundaryPhys(i_obj);      
+      emit changeBoundaryPhys(i_obj,EMIT);      
       //emit updateThresholMinMax();
     }
+    
+    dens_histo->drawDensity(form.dens_slide_min->value(), form.dens_slide_max->value());
+    dens_color_bar->draw(form.dens_slide_min->value(), form.dens_slide_max->value());
+    
+    //if (EMIT) emit changeBoundaryPhys(i_obj,EMIT);
   }
   my_mutex2->unlock();
   //if (lock)
@@ -1121,8 +1130,6 @@ void FormObjectControl::on_dens_slide_max_valueChanged(int value)
     if (value <= form.dens_slide_min->value()) { // min < max !
       form.dens_slide_min->setValue(std::max(value-1,0));
     }
-    dens_histo->drawDensity(form.dens_slide_min->value(), form.dens_slide_max->value());
-    dens_color_bar->draw(form.dens_slide_min->value(), form.dens_slide_max->value());
     
     //setNewPhys();
     ParticlesObject * pobj = &(*pov)[i_obj];
@@ -1134,8 +1141,13 @@ void FormObjectControl::on_dens_slide_max_valueChanged(int value)
       setNewPhys();
       go->gcb_min = form.dens_slide_min->value();
       go->gcb_max = form.dens_slide_max->value();
-      emit changeBoundaryPhys(i_obj);
+      emit changeBoundaryPhys(i_obj, EMIT);
     }
+
+    dens_histo->drawDensity(form.dens_slide_min->value(), form.dens_slide_max->value());
+    dens_color_bar->draw(form.dens_slide_min->value(), form.dens_slide_max->value());
+    
+    //if (EMIT) emit changeBoundaryPhys(i_obj,EMIT);
   }
   my_mutex2->unlock();
   //if (lock)
@@ -1150,7 +1162,7 @@ void FormObjectControl::setNewPhys()
   if (pov && pov->size()>0 && i_obj != -1 && phys_select)  {  // at least one object
     assert(i_obj < (int)pov->size());
     ParticlesObject * pobj = &(*pov)[i_obj];
-    float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
+    double diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
     pobj->setMinPhys(exp(log(phys_select->getMin())+form.dens_slide_min->value()*diff_rho));
     pobj->setMaxPhys(exp(log(phys_select->getMin())+form.dens_slide_max->value()*diff_rho));
     go->phys_min_glob = pobj->getMinPhys();
@@ -1257,7 +1269,7 @@ void FormObjectControl::physicalSelected()
       pobj->setMaxPhys(phys_select->getMax());
       
       dens_histo->drawDensity(phys_select->data_histo);
-      float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
+      double diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
       form.dens_slide_min->setValue((log(pobj->getMinPhys())-log(phys_select->getMin()))*1./diff_rho);
       form.dens_slide_max->setValue((log(pobj->getMaxPhys())-log(phys_select->getMin()))*1./diff_rho);
       dens_histo->drawDensity(form.dens_slide_min->value(),form.dens_slide_max->value());

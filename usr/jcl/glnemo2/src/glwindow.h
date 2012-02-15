@@ -86,7 +86,7 @@ public slots:
    void  update(ParticlesObjectVector * );
    void  update();
    void  updateVbo(const int);   
-   void  updateBoundaryPhys(const int);
+   void  updateBoundaryPhys(const int, const bool);
    void  updateColorVbo(const int);
    void  changeColorMap();
    void  reverseColorMap();

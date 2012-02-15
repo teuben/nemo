@@ -131,7 +131,7 @@ namespace glnemo {
   void constantColorMap(const bool);
   void reverseColorMap(const bool);
   void customColormap();
-  void changeBoundaryPhys(const int);
+  void changeBoundaryPhys(const int, const bool b);
   public slots:
     void changeColorMap() {
       form.dynamic_cmap->setChecked(go->dynamic_cmap);

@@ -22,7 +22,6 @@
 
 class MasterServer : public QTcpServer {
 
-    Q_OBJECT
 
     public:
         MasterServer(int port, int maxConnexion, std::string sim_name, const falcON::snapshot * S);

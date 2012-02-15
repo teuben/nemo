@@ -21,7 +21,6 @@ class MasterServer;
 
 class MasterServerThread : public QThread {
 
-    Q_OBJECT
 
     public:
         MasterServerThread(std::string _sim_name, int _port, int _max_port, const falcON::snapshot * S);

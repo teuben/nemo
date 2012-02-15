@@ -84,8 +84,8 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_o_c,SIGNAL(objectUpdate()),gl_window,SLOT(update()));
   connect(form_o_c,SIGNAL(textureObjectChanged(const int, const int)),
           gl_window,SLOT(setTextureObject(const int, const int)));
-  connect(form_o_c,SIGNAL(changeBoundaryPhys(const int)),
-          gl_window,SLOT(updateBoundaryPhys(const int)));
+  connect(form_o_c,SIGNAL(changeBoundaryPhys(const int, const bool)),
+          gl_window,SLOT(updateBoundaryPhys(const int, const bool)));
   connect(form_o_c,SIGNAL(gazAlphaObjectChanged(const int)),
           gl_window,SLOT(updateVbo(const int)));
   connect(form_o_c,SIGNAL(gazSizeObjectChanged(const int)),
@@ -1629,6 +1629,10 @@ void MainWindow::uploadNewFrame()
     } else {
       //pov2=pov; // modif orbits
     }
+    //!!!!
+    
+    //store_options->yrot =(float)((int)(store_options->yrot--)%360); // rotate around Y
+    //!!!!
     updateOsd();
 #if 0
     if (store_options->rho_exist) {

@@ -277,8 +277,8 @@ void GLColorbar::drawColor()
 void GLColorbar::drawLegend()
 {
   if (go && phys_select && phys_select->isValid()) {
-    float value;
-    float diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
+    double value;
+    double diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
     //max
     value=log(phys_select->getMin())+go->gcb_max*diff_rho;
     drawText(value,0);

@@ -26,7 +26,6 @@ class QTcpSocket;
 
 class Client : public QThread {
 
-    Q_OBJECT
 
     public:
         Client(int socketDesc, const falcON::snapshot *_my_snap, QMutex *_mutex, QWaitCondition *_condition, int *nbConnectfree);

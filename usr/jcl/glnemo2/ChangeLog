@@ -1,7 +1,26 @@
-1.21 (SVN)
-----------
-- fix a crash when physical values are out of limits
-- add texture alpha set value from cli
+1.41 (February, 14th 2012)
+---------------------------
+  - fix wrong density value displayed on colorbar when min/max phys set from cli
+  - fix compilation issue with gyrfalcON manipulator
+
+1.40 (February, 7th 2012)
+-------------------------
+  - rotation interface totally rewritten. Rotations are now applied around
+  SCREEN axis x,y,z, which are fixed. It's more intuitive for the user.
+  - add new tab option to manage automatic rotation
+  - add screen axis display
+  - add orthographic projection
+  - density threshold controlled with mouse middle button
+  - fix bug#58 crashs on ramses file loading
+  - fix bug#61 colorbar disapear on ATI/Intel hardware
+  - happy qt4.8 compilation
+
+1.30 (November, 25th 2011)
+--------------------------
+  - add color bar display on 3D view (see "color bar" tab)
+  - fix a bug when physical values are out of limits
+  - fix a bug when list of files contains blank lines
+  - experimental object creation 
 
 1.20 (May, 3rd 2011)
 --------------
