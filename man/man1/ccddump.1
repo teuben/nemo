@@ -3,14 +3,13 @@
 ccddump \- dump contents of an image to other format
 .SH SYNOPSIS
 .PP
-\fBccddump in=\fPimage  \fBou=\fPdump [parameter = value ...]
+\fBccddump in=\fPimage  \fBout=\fPdump [parameter = value ...]
 .SH DESCRIPTION
 \fBccddump\fP dumps the contents of an image file on a user selected
 format. A number of formats are available, and costumization is
-easy.
-.PP
-\fBccddump\fP was used for a local test, but may find useful applications,
-and was as such kept in the distribution set.
+easy. The reverse operation, reading a binary image into NEMO's
+\fIimage(5NEMO)\fP format is mostly possible via
+\fIfitsccd(5NEMO)\fP with special options to provide a header.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -59,7 +58,7 @@ Use the CH sm file_type? . You will need the directive
 .fi
 in your ~/.sm file. [default: \fBfalse\fP].
 .SH "SEE ALSO"
-ccdfits(1NEMO), ccdprint(1NEMO), image(5NEMO), tsf(1NEMO)
+fitsccd(1NEMO), ccdfits(1NEMO), ccdprint(1NEMO), image(5NEMO), tsf(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
