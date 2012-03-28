@@ -9,11 +9,12 @@ fitsccd \- read a (fits) image file from disk
 \fIfits(5NEMO)\fP format, although certain foreign data formats can 
 also be read in a limited form of \fIraw\fP mode
 (see \fBFOREIGN FORMATS\fP below). This effectively
-allows you to read formats such as Miriad, Gipsy, Iraf, Zodiac and Aips data, 
+allows you to read formats such as MIRIAD, GIPSY, IRAF, ZODIAC and AIPS data, 
 given the right parameters... The output will always be in 
-standard \fIimage(5NEMO)\fP format.
+standard \fIimage(5NEMO)\fP format. Typicall you will need the
+keywords \fBbitpix=\fP,\fBoffset=\fP and \fBnaxis=\fP.
 .PP
-See notes in \fIccdfits(1NEMO)\fP how to process fits files from
+See old notes in \fIccdfits(1NEMO)\fP how to process fits files from
 tape instead disk.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
