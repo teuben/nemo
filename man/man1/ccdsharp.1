@@ -1,4 +1,4 @@
-.TH CCDSHARP 1NEMO "5 April 1996"
+.TH CCDSHARP 1NEMO "10 January 2012"
 .SH NAME
 ccdsharp \- enhance/sharpen an image
 .SH SYNOPSIS
@@ -10,6 +10,9 @@ The program is not very consistent in coordinate systems, some
 by half a pixel. Most images will have some edge effects too. For
 divergence/vorticity the images are assumes to be \fBvx\fP and
 \fBvy\fP, in that order.
+.PP
+All sharpening operations are applied to each plane independantly. 
+If you need to sharpen in 3D, use \fIccdsharp3(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -23,7 +26,7 @@ Output image file.
 No default.
 .TP 20
 \fBmode=\fP
-Modes (laplace, aregan, pregan, divergence, vorticity).
+Modes (laplace, aregan, pregan, divergence, vorticity, grad).
 Minimum match applies. 
 [Default: \fBlaplace\fP].
 .SH EXAMPLES
@@ -33,7 +36,7 @@ the X and Y velocities you would:
     cat vx vy | ccdsharp - v.vor vor
 .fi
 .SH SEE ALSO
-ccdmath(1NEMO)
+ccdsharp3(1NEMO), ccdmath(1NEMO)
 .SH AUTHOR
 Peter Teuben, 
 .SH UPDATE HISTORY
@@ -41,4 +44,5 @@ Peter Teuben,
 .ta +1.0i +4.0i
 20-Sep-95	V0.1 Created 	PJT
 5-apr-96	V0.2 added divergence, vorticity	PJT
+12-jan-2012	
 .fi
