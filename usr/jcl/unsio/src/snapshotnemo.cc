@@ -124,7 +124,7 @@ bool CSnapshotNemoIn::isValidNemo()
     if (status)  {                // it's a NEMO snapshot
       int * ptr=NULL;      // get the full nbody
       ntimu=NULL;
-      if (io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&iotime,&nemobits) > 0) {
+      if (io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&iotime,&nemobits) != 0) {
         io_nemo(filename.c_str(),"close");
       } else {
       }
@@ -197,28 +197,28 @@ int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
     if (status != -2) { // NEMO snapshot must have particles TAG
       if (*ionbody > last_nbody || (last_nemobits>0 && last_nemobits!=(*nemobits))) { // we must resize arrays
 	if (pos) delete [] pos;
-	if ( *nemobits & PosBit)  pos = new float[*ionbody*3];
+	if ( *nemobits & PosBit && req_bits&POS_BIT)  pos = new float[*ionbody*3];
 	else pos=NULL;
 	if (vel) delete [] vel;
-	if ( *nemobits & VelBit)  vel = new float[*ionbody*3];
+	if ( *nemobits & VelBit && req_bits&VEL_BIT)  vel = new float[*ionbody*3];
 	else vel=NULL;
 	if (mass) delete [] mass;
-	if ( *nemobits & MassBit)  mass = new float[*ionbody];
+	if ( *nemobits & MassBit && req_bits&MASS_BIT)  mass = new float[*ionbody];
 	else mass=NULL;
 	if (rho) delete [] rho;
-	if ( *nemobits & DensBit)  rho = new float[*ionbody];
+	if ( *nemobits & DensBit && req_bits&RHO_BIT)  rho = new float[*ionbody];
 	else rho=NULL;
 	if (acc) delete [] acc;
-	if ( *nemobits & AccelerationBit)  acc = new float[*ionbody*3];
+	if ( *nemobits & AccelerationBit && req_bits&ACC_BIT)  acc = new float[*ionbody*3];
 	else acc=NULL;
 	if (aux) delete [] aux;
-	if ( *nemobits & AuxBit)  aux = new float[*ionbody];
+	if ( *nemobits & AuxBit && req_bits&AUX_BIT)  aux = new float[*ionbody];
 	else aux=NULL;
 	if (pot) delete [] pot;
-	if ( *nemobits & PotentialBit)  pot = new float[*ionbody];
+	if ( *nemobits & PotentialBit && req_bits&POT_BIT)  pot = new float[*ionbody];
 	else pot=NULL;
 	if (keys) delete [] keys;
-	if ( *nemobits & KeyBit)  keys = new int[*ionbody];
+	if ( *nemobits & KeyBit && req_bits&KEYS_BIT)  keys = new int[*ionbody];
         else keys=NULL;
       }
       last_nbody    = *ionbody;  // save nbody
@@ -229,15 +229,15 @@ int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
 	int idx=index_tab[i].i;
 	if (idx!=-1) { // index selected
 	  for (int j=0; j<3; j++) {
-	    if ( *nemobits & PosBit) pos[cpt*3+j] = iopos[idx*3+j];
-	    if ( *nemobits & VelBit) vel[cpt*3+j] = iovel[idx*3+j];
-            if ( *nemobits & AccelerationBit) acc[cpt*3+j] = ioacc[idx*3+j];
+	    if ( *nemobits & PosBit && req_bits&POS_BIT) pos[cpt*3+j] = iopos[idx*3+j];
+	    if ( *nemobits & VelBit && req_bits&VEL_BIT) vel[cpt*3+j] = iovel[idx*3+j];
+            if ( *nemobits & AccelerationBit && req_bits&ACC_BIT) acc[cpt*3+j] = ioacc[idx*3+j];
 	  }
-	  if ( *nemobits & MassBit) mass[cpt] = iomass[cpt];
-          if ( *nemobits & DensBit) rho[cpt]  = iorho[cpt];
-          if ( *nemobits & AuxBit ) aux[cpt]  = ioaux[cpt];
-          if ( *nemobits & PotentialBit ) pot[cpt]  = iopot[cpt];
-          if ( *nemobits & KeyBit ) keys[cpt]  = iokeys[cpt];
+	  if ( *nemobits & MassBit && req_bits&MASS_BIT) mass[cpt] = iomass[cpt];
+          if ( *nemobits & DensBit && req_bits&RHO_BIT) rho[cpt]  = iorho[cpt];
+          if ( *nemobits & AuxBit  && req_bits&AUX_BIT) aux[cpt]  = ioaux[cpt];
+          if ( *nemobits & PotentialBit && req_bits&POT_BIT ) pot[cpt]  = iopot[cpt];
+          if ( *nemobits & KeyBit  && req_bits&KEYS_BIT) keys[cpt]  = iokeys[cpt];
 	  cpt++;
 	}
       }
