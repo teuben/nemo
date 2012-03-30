@@ -65,7 +65,7 @@ FOREACH(exe_cpp ${execpp_sources})
   add_executable (${exe} ${exe_cpp})
 
   # Link the executable to the Hello library.
-  target_link_libraries (${exe}  WDutils falcON nemo dl stdc++ )
+  target_link_libraries (${exe}  WDutils falcON nemo gomp dl stdc++ )
 
 ENDFOREACH(exe_cpp ${execpp_sources})
 
