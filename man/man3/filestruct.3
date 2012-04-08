@@ -1,4 +1,4 @@
-.TH FILESTRUCT 3NEMO "2 June 2005"
+.TH FILESTRUCT 3NEMO "7 April 2012"
 .SH NAME
 filestruct \- primitives for structured binary file I/O
 .SH SYNOPSIS
@@ -68,6 +68,9 @@ standard C integers.
 .TP 12
 \fBLongType\fP
 standard C long integers.
+.TP 12
+\fBHalfpType\fP
+16 bit floating point half precision (non-standard, cf. EXR)
 .TP 12
 \fBFloatType\fP
 standard C floating point.
@@ -255,6 +258,8 @@ random access can currently only take place in one item
 Joshua E. Barnes, Lyman P. Hurd, Peter Teuben
 .SH SEE ALSO
 filestruct(5NEMO), \fINEMO Users/Programmers Guide\fP
+.P
+http://www.openexr.com/about.html#features  (half precision floating point)
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +2.0i
