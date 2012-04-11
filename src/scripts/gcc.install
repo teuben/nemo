@@ -1,7 +1,8 @@
 #! /bin/csh -f
 #
 #  Install GCC for NEMO ; from a source tree compilating and installation
-#  with optional GMP and MPFR libraries if not present
+#  with optional GMP, MPFR and MPC libraries if not present. They will
+#  be located within the "install" directory where gcc is installed into
 #
 #  For 'astromake', a more typical call would be:
 #  
@@ -23,6 +24,7 @@
 #   gcc    gmp       mpfr     mpc
 #  4.4.5   4.?      2.3?      n/a
 #  4.5.1   4.2+     2.3.1+   0.8.0+
+#  4.6.3   5.0.4    3.1.0    0.8.2
 
 # TODO:     the 4.4 and 4.5 series with the gmp/mpfr needs don't compile yet :-(
 
@@ -96,6 +98,7 @@ set opts=()
 if (-d gmp-$gmp) then
   echo pre-installing GMP $gmp
   pushd gmp-$gmp
+  make -i clean >& /dev/null
   ./configure --prefix=$prefix >& ../build0a.log
   echo status $status on          ../build0a.log
   make                         >& ../build0b.log
@@ -108,12 +111,13 @@ endif
 if (-d mpfr-$mpfr) then
   echo pre-installing MPFR $mpfr
   pushd mpfr-$mpfr
-  ./configure --prefix=$prefix >& ../build0d.log
-  echo status $status on          ../build0d.log
-  make                         >& ../build0e.log
-  echo status $status on          ../build0e.log
-  make install                 >& ../build0f.log
-  echo status $status on          ../build0f.log
+  make -i clean >& /dev/null
+  ./configure --prefix=$prefix $opts >& ../build0d.log
+  echo status $status on                ../build0d.log
+  make                               >& ../build0e.log
+  echo status $status on                ../build0e.log
+  make install                       >& ../build0f.log
+  echo status $status on                ../build0f.log
   popd
   set opts=($opts --with-mpfr=$prefix)
 endif
@@ -121,6 +125,7 @@ endif
 if (-d mpc-$mpc) then
   echo pre-installing MPC $mpc
   pushd mpc-$mpc
+  make -i clean >& /dev/null
   ./configure --prefix=$prefix $opts >& ../build0g.log
   echo status $status on                ../build0g.log
   make                               >& ../build0h.log
@@ -130,8 +135,10 @@ if (-d mpc-$mpc) then
   popd
 endif
 
+# ieck, on 64bit need to add lib64 as well
 setenv LD_LIBRARY_PATH $prefix/lib
 
+# make -i distclean >& /dev/null
 ../configure --prefix=$prefix --enable-threads $opts \
     --enable-languages=c,c++,$fc >& build1.log
 echo status $status on build1.log
