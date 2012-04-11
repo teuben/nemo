@@ -1,6 +1,6 @@
 #! /bin/csh -f
 #
-#  falcON tools, for the version after Aug 6, 2006 (nemo 3.2.4)
+#  Jin Koda's SPH code
 
 set dir=$NEMO/usr/koda/etude
 
