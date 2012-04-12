@@ -101,6 +101,9 @@ void nemo_main()
     xml = getbparam("xml");
     if (xml) {     /* if XML output used, it should print all items */
       allline = TRUE;
+      /* @todo : should this be added:
+         <?xml version='1.0' encoding='UTF-8'?> 
+       */
       printf("<nemo>\n");
     }
     octal = getbparam("octal");
