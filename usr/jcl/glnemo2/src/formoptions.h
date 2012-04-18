@@ -32,6 +32,9 @@ class FormOptions: public QDialog {
     void update();
     void updateFrame(const int, const int);
     void updateParticlesSelect(const int);
+    void showTab(const int index) {
+        form.options_dialog->setCurrentIndex(index);
+    }
   private:
     Ui::FormOptions form;
     GlobalOptions * go;
@@ -438,6 +441,20 @@ class FormOptions: public QDialog {
       go->perspective = true;
       emit update_osd(true);
       //emit update_gl();
+    }
+
+    // disc opaque
+    void on_cb_opaque_disc_clicked(bool b) {
+      go->od_enable  = b;
+      emit update_gl();
+    }
+    void on_od_radius_spin_valueChanged(double value) {
+      go->od_radius = (float ) value;
+      emit update_gl();
+    }
+    void on_cb_coronograph_clicked(bool b) {
+      go->od_display = b;
+      emit update_gl();
     }
 
   signals:

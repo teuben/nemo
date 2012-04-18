@@ -68,6 +68,7 @@ class MainWindow : public QMainWindow {
     void actionGrid();
     void actionFormObjectControl();
     void actionFormOptions();
+    void actionFormOptionsShowMovie();
     void actionMenuFileOpen();
 	void actionMenuFileConnect();
     bool actionMenuFileConnect2(std::string ip, int port, bool velocities, bool dencities, bool interactivSelect);

@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           Pôle de l'Etoile, site de Château-Gombert                         
-//           38, rue Frédéric Joliot-Curie                                     
+//           Ple de l'Etoile, site de Chteau-Gombert                         
+//           38, rue Frdric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 7326                                                   
 // ============================================================================
@@ -515,7 +515,7 @@ void MainWindow::createActions()
   movie_form_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/video_section.png"),tr("Make a movie"),this);
   movie_form_action->setShortcut(tr(""));
   movie_form_action->setStatusTip(tr("Make a movie"));
-  connect(movie_form_action, SIGNAL( activated() ), this, SLOT(actionEmpty()) );
+  connect(movie_form_action, SIGNAL( activated() ), this, SLOT(actionFormOptionsShowMovie()) );
   // Next colormap
   next_cmap_action = new QAction(this);
   next_cmap_action->setShortcut(tr("Alt+Shift+n"));
@@ -881,6 +881,10 @@ void MainWindow::parseNemoParameters()
     store_options->osd_title_name = getparam((char *) "osd_set_title");
   }
   store_options->osd_font_size = getdparam((char *) "osdfs");
+  // use opaque disc
+  store_options->od_enable   = getbparam((char *) "od");
+  store_options->od_display  = getbparam((char *) "odd");
+  store_options->od_radius   = getdparam((char *) "odr");
   // Axes
   store_options->axes_enable = getbparam((char *) "axis");
   // Color Bar
@@ -936,6 +940,7 @@ void MainWindow::parseNemoParameters()
   store_options->colormap += getiparam((char *) "cmapindex");
   
   store_options->auto_com           =getbparam((char *) "com");
+  store_options->cod                =getbparam((char *) "cod");
   // textures
   store_options->auto_texture_size  =getbparam((char *) "auto_ts");
   store_options->texture_size       =getdparam((char *) "texture_s");
@@ -1095,6 +1100,13 @@ void MainWindow::actionFormOptions()
   else      dock_options->close();
 }
 // -----------------------------------------------------------------------------
+// actionFormOptionsShowTab()
+void MainWindow::actionFormOptionsShowMovie()
+{
+  form_options->showTab(7);
+  actionFormOptions();
+}
+// -----------------------------------------------------------------------------
 // actionFullScreen()                                                           
 void MainWindow::actionFullScreen()
 {
@@ -1132,7 +1144,8 @@ void MainWindow::actionRenderMode()
 void MainWindow::actionCenterToCom(const bool ugl)
 {
   double com[3] = {0., 0., 0.};
-  int np=0;
+  int np=0; 
+  double weight=0.0;
   mutex_data->lock();
   //mutex_loading.lock();
   if (current_data ) {
@@ -1151,15 +1164,19 @@ void MainWindow::actionCenterToCom(const bool ugl)
 	  for (int j  = 0; j  <  po->npart; j ++) {
 	    np++;
 	    int jndex= po->index_tab[j];
-	    com[0] +=part_data->pos[jndex*3  ];
-	    com[1] +=part_data->pos[jndex*3+1];
-	    com[2] +=part_data->pos[jndex*3+2];
+            float rho_fac=1.0;
+            if (store_options->cod &&part_data->rho && (part_data->rho->data[jndex]!=-1.0))
+              rho_fac = part_data->rho->data[jndex];
+	    com[0] +=(part_data->pos[jndex*3  ]*rho_fac);
+	    com[1] +=(part_data->pos[jndex*3+1]*rho_fac);
+            com[2] +=(part_data->pos[jndex*3+2]*rho_fac);
+            weight += rho_fac;
 	  }
 	}
     }
-    store_options->xtrans = -(com[0]/np);
-    store_options->ytrans = -(com[1]/np);
-    store_options->ztrans = -(com[2]/np);
+    store_options->xtrans = -(com[0]/weight);
+    store_options->ytrans = -(com[1]/weight);
+    store_options->ztrans = -(com[2]/weight);
     if (ugl) gl_window->updateGL();
   }
   mutex_data->unlock();

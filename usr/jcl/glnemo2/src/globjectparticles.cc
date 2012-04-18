@@ -698,13 +698,37 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
     shader->sendUniformf("factor_size",(float) po->getPartSize());
   } else {
     if (go->perspective) {
-      shader->sendUniformf("factor_size",po->getGazSize()*win_height);
+        shader->sendUniformf("factor_size",po->getGazSize()*win_height);
     } else {
       shader->sendUniformf("factor_size",po->getGazSize()*win_height/fabs(go->zoom));//*win_height);
     }
   }
+  if (go->perspective) // perspective  projection
+    shader->sendUniformf("zoom",(float) go->zoom);
+  else                 // orthographic projection
+    shader->sendUniformf("zoom",(float) 0.0);
+  // send zoom
+  if (go->od_enable)
+    shader->sendUniformi("show_zneg",(int) 0);
+  else
+    shader->sendUniformi("show_zneg",(int) 1);
+
+  // opaque disc radius
+  shader->sendUniformf("radius",go->od_radius);
+
+  // coronographe
+  shader->sendUniformi("coronograph",(int) go->od_display);
+
   // Send data to Pixel Shader
   shader->sendUniformi("splatTexture",0);
+
+  int viewporti[4];
+  float viewport[4];
+  glGetIntegerv(GL_VIEWPORT,viewporti);
+  for (int i=0; i<4; i++) {
+      viewport[i] = viewporti[i];
+  }
+  shader->sendUniformXfv("viewport",1,4,&viewport[0]);
 
   // use point or texture ?
   shader->sendUniformi("use_point",use_point);

@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>714</width>
-    <height>213</height>
+    <width>757</width>
+    <height>234</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -22,10 +22,10 @@
    </iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_33">
-   <item row="1" column="0">
+   <item row="0" column="0">
     <widget class="QTabWidget" name="options_dialog">
      <property name="currentIndex">
-      <number>9</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="tab_i_select">
       <attribute name="title">
@@ -1454,7 +1454,7 @@
       <attribute name="title">
        <string>OpenGL</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_36">
+      <layout class="QGridLayout" name="gridLayout_37">
        <item row="0" column="0">
         <widget class="QGroupBox" name="groupBox_23">
          <property name="title">
@@ -1478,7 +1478,7 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="1" rowspan="2">
+       <item row="0" column="1" rowspan="3">
         <widget class="QGroupBox" name="groupBox_15">
          <property name="title">
           <string>3D axis</string>
@@ -1542,7 +1542,60 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="2">
+       <item row="0" column="2" rowspan="2">
+        <widget class="QGroupBox" name="groupBox_24">
+         <property name="title">
+          <string>Opaque disc</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_36">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="cb_opaque_disc">
+            <property name="toolTip">
+             <string>Toggle opaque disc centered in 0,0,0</string>
+            </property>
+            <property name="text">
+             <string>Enable</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_16">
+            <item>
+             <widget class="QDoubleSpinBox" name="od_radius_spin">
+              <property name="toolTip">
+               <string>Opaque disc radius</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+              <property name="maximum">
+               <double>999999999.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_26">
+              <property name="text">
+               <string>Radius</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <widget class="QCheckBox" name="cb_coronograph">
+            <property name="toolTip">
+             <string>Display a coronograph</string>
+            </property>
+            <property name="text">
+             <string>Coronograph</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="3">
         <spacer name="horizontalSpacer_16">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -1555,7 +1608,7 @@
          </property>
         </spacer>
        </item>
-       <item row="1" column="0">
+       <item row="1" column="0" rowspan="2">
         <spacer name="verticalSpacer_25">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -1568,7 +1621,20 @@
          </property>
         </spacer>
        </item>
-       <item row="2" column="1">
+       <item row="2" column="2">
+        <spacer name="verticalSpacer_26">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>46</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="1">
         <spacer name="verticalSpacer_24">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -4940,7 +5006,7 @@ p, li { white-space: pre-wrap; }
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_3">
+     <widget class="QWidget" name="tab_colorbar">
       <attribute name="title">
        <string>Color Bar</string>
       </attribute>

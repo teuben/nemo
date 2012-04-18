@@ -66,7 +66,8 @@ void CShader::sendUniformXfv(const char * s,const int _dim, const int _count, co
   case 1: glUniform1fv(loc,_count,_v); break;// 
   case 2: glUniform2fv(loc,_count,_v); break;// 
   case 3: glUniform3fv(loc,_count,_v); break;// 
-  case 4: glUniform4fv(loc,_count,_v); break;// 
+  case 4: glUniform4fv(loc,_count,_v); break;//
+  case 16:glUniformMatrix4fv(loc,1,false,_v); break;
   default: 
     std::cerr << "CShader::sendUniformXfv unknown dimension ["<<_dim<<"], abort\n";
     std::exit(1);

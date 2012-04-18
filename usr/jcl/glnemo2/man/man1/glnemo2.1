@@ -1,4 +1,4 @@
-.TH GLNEMO2 1NEMO "February 2012"
+.TH GLNEMO2 1NEMO "March 2012"
 .SH NAME
 glnemo2 \- An interactive 3D OpenGL visualization program for Nemo snapshots
 .SH SYNOPSIS
@@ -272,7 +272,18 @@ set an explicit title on OSD. If this variable remains blank, then
 simulation's file name will be used as title
 .TP 20
 \fBosdfontsize=\fP
-set OSD's font in pixels [13.]
+set OSD's font in pixels [13.
+.TP 20
+\fBod=\fP
+toggle an opaque disc centered in 0,0,0 [f] for hiding particles with z<0. It's useful for
+displaying spherical data like the Sun.
+.TP 20
+\fBodr=\fP
+opaque disc radius size [0.00]
+.TP 20
+\fBodd=\fP
+display opaque disc which act like a coronograph. If enable, all
+particles will be hidden.
 .TP 20
 \fBaxis=\fP
 display 3d axis [t]
@@ -385,4 +396,5 @@ Jean-Charles Lambert
 25-Nov-11	Ver 1.30 - Color bar display on 3d view	JCL
 07-Feb-12	Ver 1.40 - New rotation system		JCL
 14-Feb-12	Ver 1.41 - bug fix release		JCL
+22-Mar-12	Ver 1.50 - opaque sphere		JCL
 .fi

@@ -633,6 +633,10 @@ void GLWindow::setProjection(const int x, const int y, const int width, const in
 
   if (store_options->perspective) {
     gluPerspective(45.,ratio,0.0005,(float) DOF);
+//    double mp[16];
+//    glGetDoublev(GL_PROJECTION_MATRIX, (GLdouble *) mp);
+//    for (int i=0;i<16;i++) std::cerr << "// "<< mp[i];
+//    std::cerr << "\n";
   }
   else {
     computeOrthoFactor();    

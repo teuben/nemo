@@ -165,6 +165,11 @@ void FormOptions::update()
     form.radio_persp->setChecked(true);
   else
     form.radio_ortho->setChecked(true);
+  
+  // opaque disc
+  form.cb_opaque_disc->setChecked(go->od_enable);
+  form.od_radius_spin->setValue(go->od_radius);
+  form.cb_coronograph->setChecked(go->od_display);
 }
 // ============================================================================
 // updateFrame                                                                 

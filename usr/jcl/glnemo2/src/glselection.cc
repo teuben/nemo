@@ -218,8 +218,7 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
            // BUT for orthographic, best zoom is set to ortho_range
            Tools3D::bestZoomFromList(mProj,mModel,viewport,&list, part_data, store_options);
            if (anim_zoom) {
-            float zoom2 =store_options->zoom; // new zoom value
-            float zoomo2=store_options->zoomo; // new zoom value
+            float zoom2 =store_options->zoom; // new zoom value            
             // perspective zoom offset
             zoom_dynamic =(zoom2-zoom1)/float(total_frame); // animation zoom value offset
             // orthoraphic zoom offset

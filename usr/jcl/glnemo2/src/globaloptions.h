@@ -111,6 +111,8 @@ public:
     static QString RESPATH;
     // velocity
     bool vel_req;
+    // cod
+    bool cod;
     // method
     void copyTransform(const GlobalOptions &m);
     // frame
@@ -147,6 +149,10 @@ public:
     bool auto_render;
     // orthographic range
     float ortho_range;
+    // opaque disc
+    bool od_enable;
+    bool od_display;
+    float od_radius;
 };
 
 }

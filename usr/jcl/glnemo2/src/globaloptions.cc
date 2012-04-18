@@ -3,8 +3,8 @@
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
-//           Pôle de l'Etoile, site de Château-Gombert                         
-//           38, rue Frédéric Joliot-Curie                                     
+//           Ple de l'Etoile, site de Chteau-Gombert                         
+//           38, rue Frdric Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 7326                                                   
 // ============================================================================
@@ -115,6 +115,8 @@ GlobalOptions::GlobalOptions()
   // vel 
   vel_req = false;
   new_frame = false;
+  // cod
+  cod=false;
   // memory
   duplicate_mem = true;
   octree_enable = false;
@@ -147,6 +149,10 @@ GlobalOptions::GlobalOptions()
   select_part = "";
   auto_render=true;
   ortho_range = 6.0;
+  // opaque disc
+  od_enable = false;
+  od_display= false;
+  od_radius = 0.0;
 }
 // ============================================================================
 // destructor                                                                  
@@ -308,6 +314,8 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   // vel 
   vel_req = m.vel_req;
   new_frame = m.new_frame;
+  // cod
+  cod = m.cod;
   // memory
   duplicate_mem = m.duplicate_mem;
   // physical value
@@ -344,6 +352,10 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   select_time = m.select_time;
   select_part = m.select_part;  
   auto_render = m.auto_render;
+  // opaque disc
+  od_enable  = m.od_enable;
+  od_display = m.od_display;
+  od_radius  = m.od_radius;
   return *this;
 }
 // ============================================================================
