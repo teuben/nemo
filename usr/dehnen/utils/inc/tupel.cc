@@ -1,36 +1,37 @@
-// -*- C++ -*-                                                                  
+// -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
-///                                                                             
-/// \file    utils/inc/tupel.cc                                                 
-///                                                                             
-/// \author  Walter Dehnen                                                      
-///                                                                             
-/// \date    2003-2011                                                          
-///                                                                             
-/// \brief   definition of auxiliary methods for template class tupel<>         
-///                                                                             
-/// \version aug-2003: created                                                  
-/// \version sep-2006: made human readable; unused code commented out           
+///
+/// \file    utils/inc/tupel.cc 
+///
+/// \author  Walter Dehnen
+/// 
+/// \date    2003-2012
+///
+/// \brief   definition of auxiliary methods for template class tupel<>
+///
+/// \version aug-2003: created
+/// \version sep-2006: made human readable; unused code commented out
 /// \version aug-2011: taux<X,N,I> replaced by taux<X,I>
-///                                                                             
+/// \version jan-2012: support for tupel::abs_diff()
+/// 
 ////////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 1996-2011  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 1996-2012  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the Free
+// Software Foundation; either version 2 of the License, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+// more details.
+//
+// You should have received a copy of the GNU General Public License along
+// with this program; if not, write to the Free Software Foundation, Inc., 675
+// Mass Ave, Cambridge, MA 02139, USA.
+//
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_tupel_cc
 #define WDutils_included_tupel_cc
@@ -253,6 +254,13 @@ namespace meta {
     {
       M::v_dif(a,b,c);
       a[I] = b[I]-c[I];
+    }
+    /// used in tupel::abd_diff(tupel) const
+    template<typename S>
+    static void v_adif(X*a, cX*b, const S*c)
+    {
+      M::v_adif(a,b,c);
+      a[I] = std::abs(b[I]-c[I]);
     }
     /// used in tupel::operator==(scalar) const, and in falcON
     static bool s_eq(cX*a, cX&b)
@@ -556,6 +564,10 @@ namespace meta {
     template<typename S>
     static void v_dif(X*a, cX*b, const S*c)
     { a[0] = b[0]-c[0]; }
+    //
+    template<typename S>
+    static void v_adif(X*a, cX*b, const S*c)
+    { a[0] = std::abs(b[0]-c[0]); }
     //
     static bool s_eq(cX*a, cX&b)
     { return a[0]==b; }

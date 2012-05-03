@@ -10,7 +10,7 @@
 ///          \li falcON::compile_info                                           
 ///          \li memory allocation and de-allocation support                    
 ///                                                                             
-/// \author  Walter Dehnen                                                      
+/// \author  alter Dehnen                                                      
 ///                                                                             
 /// \date    2002-2008                                                          
 ///                                                                             
@@ -179,7 +179,9 @@ namespace falcON {
   ///                                                                           
   /// \param P  pointer to be de-allocated                                      
 #define falcON_DEL_A(P)							\
-  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__,"falcON ")
+  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__,0,"falcON ")
+#define falcON_DEL_AN(P,N)						\
+  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__,N,"falcON ")
   //////////////////////////////////////////////////////////////////////////////
   ///                                                                           
   /// C MACRO to be used for object de-allocation                               

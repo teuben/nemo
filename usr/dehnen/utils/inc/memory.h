@@ -98,6 +98,16 @@ namespace WDutils {
   /// \param  SIZE number of elements
 #define WDutils_NEW(TYPE,SIZE) \
   WDutils::NewArray<TYPE>(SIZE,WDutilsThisFunction,__FILE__,__LINE__)
+  template<typename T> struct __report
+  {
+    static bool report(int n) { return n>0; }
+    static int  bytes (int n) { return n*sizeof(T); }
+  };
+  template<> struct __report<void>
+  {
+    static bool report(int) { return 0; }
+    static int  bytes (int) { return 0; }
+  };
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// array de-allocation giving useful info in case of error; mostly used
@@ -115,8 +125,8 @@ namespace WDutils {
   /// \param[in] l  number of the line in that file
   /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  void DelArray(T* a, const char*c, const char*f, int l,
-		const char*lib = "WDutils")
+  void DelArray(T*a, const char*c, const char*f, int l,
+		int n=0, const char*lib = "WDutils")
     WDutils_THROWING {
     if(0==a) {
       Warning(c,f,l,lib)
@@ -129,15 +139,20 @@ namespace WDutils {
       throw Thrower(c,f,l)("de-allocating array of '%s' @ %p failed\n",
 			   nameof(T),a);
     }
-    DebugInformation(c,f,l,lib)
-      (WDutilsAllocDebugLevel, "de-allocated array of %s @ %p\n",
-       nameof(T), static_cast<void*>(a));
+    if(__report<T>::report(n))
+      DebugInformation(c,f,l,lib)
+	(WDutilsAllocDebugLevel, "de-allocated array of %d %s [%d byes] @ %p\n",
+	 n, nameof(T), __report<T>::bytes(n), static_cast<void*>(a));
+    else
+      DebugInformation(c,f,l,lib)
+	(WDutilsAllocDebugLevel, "de-allocated array of %s @ %p\n",
+	 nameof(T), static_cast<void*>(a));
   }
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   void DelArray(const T* a, const char*c, const char*f, int l,
-		const char*lib = "WDutils")
-    WDutils_THROWING { DelArray(const_cast<T*>(a),c,f,l,lib); }
+		int n=0, const char*lib = "WDutils")
+    WDutils_THROWING { DelArray(const_cast<T*>(a),c,f,l,n,lib); }
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// C MACRO to be used for array de-allocation
@@ -148,8 +163,10 @@ namespace WDutils {
   /// about memory de-allocation.
   ///
   /// \param P  pointer to be de-allocated
-#define WDutils_DEL_A(P) \
+#define WDutils_DEL_A(P)					\
   WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__)
+#define WDutils_DEL_AN(P,N)					\
+  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__,N)
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// Object de-allocation giving useful info in case of error; mostly used
@@ -345,7 +362,7 @@ namespace WDutils {
   /// \param q  pointer previously allocated by WDutils::NewArray16()
   template<typename T> inline
   void DelArray16(T* a, const char*c, const char*f, int l,
-		  const char*lib = "WDutils")
+		  int n=0, const char*lib = "WDutils")
     WDutils_THROWING
   {
 #if defined(__GNUC__) || defined (__INTEL_COMPILER)
@@ -366,17 +383,24 @@ namespace WDutils {
 	("de-allocating 16-byte aligned array of '%s' @ %p failed\n",
 	 nameof(T),a);
     }
-    DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
-				"de-allocated 16-byte aligned array "
-				"of '%s' @ %p\n", nameof(T),a);
+    if(__report<T>::report(n))
+      DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
+				  "de-allocated 16-byte aligned array "
+				  "of %d '%s' [%d bytes] @ %p\n", 
+				  n,nameof(T),__report<T>::bytes(n),a);
+    else
+      DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
+				  "de-allocated 16-byte aligned array "
+				  "of '%s' @ %p\n", nameof(T),a);
 #else
-    DelArray((char*)(*((void**)(((char*)q)-sizeof(void*)))),f,l,lib);
+    DelArray((char*)(*((void**)(((char*)q)-sizeof(void*)))),f,l,n,lib);
 #endif
   }
   //
   template<typename T> inline
-  void DelArray16(const T* a, const char*f, int l, const char*lib = "WDutils")
-    WDutils_THROWING { DelArray16(const_cast<T*>(a),f,l,lib); }
+  void DelArray16(const T* a, const char*f, int l, int n=0, 
+		  const char*lib = "WDutils")
+    WDutils_THROWING { DelArray16(const_cast<T*>(a),f,l,n,lib); }
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// C MACRO to be used for array de-allocation of 16-byte aligned stuff
@@ -390,6 +414,8 @@ namespace WDutils {
   /// \param P  pointer to be de-allocated
 #define WDutils_DEL16(P)					\
   WDutils::DelArray16(P,WDutilsThisFunction,__FILE__,__LINE__)
+#define WDutils_DEL16N(P,N)					\
+  WDutils::DelArray16(P,WDutilsThisFunction,__FILE__,__LINE__,N)
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// a simple one-dimensional array of data aligned to 16 bytes
@@ -414,16 +440,22 @@ namespace WDutils {
     /// dtor
     ~Array16()
     {
-      if(A) WDutils_DEL16(A);
+      if(A) WDutils_DEL16N(A,N);
       const_cast<unsigned&>(N) = 0;
       const_cast<T*      &>(A) = 0;
+    }
+    /// will reset() allocate new data (and delete any old data)?
+    bool reset_will_allocate(unsigned n) const
+    {
+      n = Nalloc(n);
+      return n>N || (3*n<2*N && sizeof(T)*n>16);
     }
     /// reset(): only re-allocate if n>N or n<2N/3
     void reset(unsigned n)
     {
       n = Nalloc(n);
       if(n>N || (3*n<2*N && sizeof(T)*n>16) ) {
-	if(A) WDutils_DEL16(A);
+	if(A) WDutils_DEL16N(A,N);
 	const_cast<unsigned&>(N) = n;
 	const_cast<T*      &>(A) = WDutils_NEW16(T,N);
       }
@@ -437,7 +469,7 @@ namespace WDutils {
 	if(N) {
 	  T* newA = WDutils_NEW16(T,n);
 	  memcpy(newA,A,sizeof(T)*N);
-	  WDutils_DEL16(A);
+	  WDutils_DEL16N(A,N);
 	  const_cast<unsigned&>(N) = n;
 	  const_cast<T*      &>(A) = newA;
 	} else {
@@ -1219,7 +1251,7 @@ namespace WDutils {
     ~Array() WDutils_THROWING
     {
       if(A) {
-	WDutils_DEL_A(A);
+	WDutils_DEL_AN(A,K[0]*N[0]);
 	const_cast<T*&>(A) = 0;
       }
       set(0);
@@ -1233,7 +1265,7 @@ namespace WDutils {
     void reset(const unsigned n[D]) WDutils_THROWING
     {
       if(A==0 || !equal(n) ) {
-	if(A) WDutils_DEL_A(A);
+	if(A) WDutils_DEL_AN(A,K[0]*N[0]);
 	set(n);
 	const_cast<T*&>(A) = K[0]*N[0] ? WDutils_NEW(T,K[0]*N[0]) : 0;
       }
@@ -1323,7 +1355,7 @@ namespace WDutils {
     void reset(unsigned n) WDutils_THROWING
     {
       if(n!=N || (n && A==0)) {
-	if(A) WDutils_DEL_A(A);
+	if(A) WDutils_DEL_AN(A,N);
 	N = n;
 	A = N>0? WDutils_NEW(T,N) : 0;
       }
@@ -1368,7 +1400,7 @@ namespace WDutils {
     /// destruction: de-allocate memory
     ~Array() WDutils_THROWING { 
       if(A) {
-	WDutils_DEL_A(A);
+	WDutils_DEL_AN(A,N);
 	A = 0;
       }
       N = 0;
@@ -1485,7 +1517,7 @@ namespace WDutils {
     Stack(unsigned n, const X&a) : S(WDutils_NEW(X,n? n:1)), P(S), SN(S+n)
     { push(a); }
     /// dtor: de-allocate memory
-    ~Stack() { if(S) WDutils_DEL_A(S); S=0; }
+    ~Stack() { if(S) WDutils_DEL_AN(S,int(SN-S)); S=0; }
     /// is stack empty?
     bool is_empty () const { return P<=S; }
     /// is there space for more to stack?

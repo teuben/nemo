@@ -47,18 +47,6 @@ namespace {
   using namespace falcON;
   const unsigned K_default = 256;
   const double   A_default = 3;
-  inline real ppp(body const&b) {
-    real p = zero;
-    if(has_pot(b)) p += pot(b);
-    if(has_pex(b)) p += pex(b);
-    return p;
-  }
-  inline real ppp(const snapshot*S, bodies::index i) {
-    real p = zero;
-    if(S->have_pot()) p += S->pot(i);
-    if(S->have_pex()) p += S->pex(i);
-    return p;
-  }
 }
 namespace falcON {
 namespace Manipulate {
@@ -91,6 +79,7 @@ namespace Manipulate {
   /// pars[1]: power \f$\alpha\f$ in energy weighting (default: 3)\n
   /// pars[2]: (0,1,2,3): kernel for subtracting off satellite\n
   /// pars[3]: softening length for sink particles\n
+  /// pars[4]: use external potential (default: 1)\n
   /// file: write centre position to file.
   ///
   /// Usage of pointers: sets 'xcen' and 'vcen', may use 'epssink'
@@ -103,7 +92,7 @@ namespace Manipulate {
     double          A;
     const kern_type KERN;
     const real      EQ;
-    const bool      HaveE,GivenK;
+    const bool      HaveE,GivenK,UsePex;
     mutable output  OUT;
     mutable vect    XCEN,VCEN;
     mutable bool    FIRST;
@@ -162,19 +151,20 @@ namespace Manipulate {
     bound_centre(const double*pars,
 		 int          npar,
 		 const char  *file) falcON_THROWING
-    : K     ( npar>0? max(1,int(pars[0])) : K_default ),
-      A     ( npar>1? pars[1]  : A_default ),
-      KERN  ( npar>2? kernel(int(pars[2])) : Default::kernel ),
-      EQ    ( npar>3? square(pars[3]) : zero ),
-      HaveE ( npar>3 ),
-      GivenK( npar>2 ),
-      OUT   ( file, true ),
-      XCEN  ( vect(zero) ),
-      VCEN  ( vect(zero) ),
-      FIRST ( true ),
-      Nb    ( K ),
-      Pn    ( K ),
-      In    ( K )
+    : K     ( npar>0? max(1,int(pars[0])) : K_default )
+      , A     ( npar>1? pars[1]  : A_default )
+      , KERN  ( npar>2? kernel(int(pars[2])) : Default::kernel )
+      , EQ    ( npar>3? square(pars[3]) : zero )
+      , HaveE ( npar>3 )
+      , GivenK( npar>2 )
+      , UsePex( npar>4? int(pars[4]) : 1 )
+      , OUT   ( file, true )
+      , XCEN  ( vect(zero) )
+      , VCEN  ( vect(zero) )
+      , FIRST ( true )
+      , Nb    ( K )
+      , Pn    ( K )
+      , In    ( K )
     {
       if(debug(2) || npar > 4)
 	std::cerr <<
@@ -188,13 +178,14 @@ namespace Manipulate {
 	  " pars[0] K (default "<<K_default<<")\n"
 	  " pars[1] A (default "<<A_default<<")\n"
 	  " pars[2] k (default 1)\n"
-	  " pars[3] e softening length to correct for sink contribution\n";
+	  " pars[3] e softening length to correct for sink contribution\n"
+	  " pars[4] U (default 1): use external potential?\n";
       if(A < 0)
 	falcON_THROW("Manipulator \"%s\": "
 		     "A=%f < 0",name(),A);
-      if(npar>4)
+      if(npar>5)
 	falcON_WarningN("Manipulator \"%s\": "
-			"skipping parameters beyond 2\n",name());
+			"skipping parameters beyond 4\n",name());
     }
     //--------------------------------------------------------------------------
     bool manipulate(const snapshot*) const;
@@ -237,7 +228,7 @@ namespace Manipulate {
 	  GravKernBase::Psi(KERN,dist_sq(pos(b),pos(s)),
 			    S->have_eps()? square(half*(eps(b)+eps(s))) : EQ);
       if(S->have_pot()) phi += pot(b);
-      if(S->have_pex()) phi += pex(b);
+      if(UsePex && S->have_pex()) phi += pex(b);
       Pot[bodyindex(b)] = phi;
       if(phi < Pmin) {
 	Pmin = phi;

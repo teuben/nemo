@@ -7,16 +7,17 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2010
+/// \date   2010,2012
 ///
 /// \version 07-06-2010 WD  tested: octant,contains,dist_sq,outside,inside
 /// \version 08-06-2010 WD  new template layout, struct Algorithms<al,sse>
 /// \version 10-06-2010 WD  struct SearchSphere<Dim,real>
 /// \version 11-06-2010 WD  cuboid<> supported in Algorithms<>, SearchSphere<>
+/// \version 11-01-2012 WD  contains(cuboid,cuboid)
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2010 Walter Dehnen
+// Copyright (C) 2010,2012 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -218,12 +219,22 @@ namespace WDutils {
       /// \return is sphere completely inside cube?
       template<int Dim, typename real> static inline
       bool inside(cube<Dim,real> const&c, sphere<Dim,real> const&s);
+      ///
       /// does a cuboid contain a given position
+      ///
       /// \param[in] c    cuboid
       /// \param[in] x    position
       /// \return is @a x[i] in [c.X[i]-c.R[i], c.X[i]+c.R[i]) for i=0..D-1?
       template<int Dim, typename real> static inline
       bool contains(cuboid<Dim,real> const&c, tupel<Dim,real> const&x);
+      ///
+      /// does a cuboid contain another cuboid
+      ///
+      /// \param[in] c    cuboid
+      /// \param[in] b    inner cuboid
+      /// \return is @a b inside @a c (common boundary accepted)?
+      template<int Dim, typename real> static inline
+      bool contains(cuboid<Dim,real> const&c, cuboid<Dim,real> const&b);
       ///
       /// distance^2 from given point to the nearest point on a cuboid
       ///
@@ -444,39 +455,39 @@ namespace WDutils {
       ///
       //@{
       ///
-      /// distance^2 from cube to centre of sphere (zero if inside cube)
+      /// distance^2 from cuboid to centre of sphere (zero if inside cube)
       ///
-      /// \param[in]  c  cubic box
+      /// \param[in]  c  rectangular box
       real dist_sq(cuboid<Dim,real> const&c, int) const
       { return Algorithms<0>::dist_sq(c,S.X); }
       ///
       /// distance^2 from cuboid to centre of sphere (zero if inside cuboid)
       ///
-      /// \param[in]  c  cubic box, 16-byte aligned
+      /// \param[in]  c  rectangular box, 16-byte aligned
       real dist_sq(cuboid<Dim,real> const&c) const
       { return Algorithms<1>::dist_sq(c,S.X); }
       ///
       /// is search sphere outside of a cubic box?
       ///
-      /// \param[in]  c  cubic box
+      /// \param[in]  c  rectangular box
       bool outside(cuboid<Dim,real> const&c, int) const
       { return Algorithms<0>::outside(c,S); }
       ///
       /// is search sphere outside of a cubic box?
       ///
-      /// \param[in]  c  cubic box, 16-byte aligned
+      /// \param[in]  c  rectangular box, 16-byte aligned
       bool outside(cuboid<Dim,real> const&c) const
       { return Algorithms<1>::outside(c,S); }
       ///
       /// is search sphere inside of a cubic box?
       ///
-      /// \param[in]  c  cubic box
+      /// \param[in]  c  rectangular box
       bool inside(cuboid<Dim,real> const&c, int) const
       { return Algorithms<0>::inside(c,S); }
       ///
       /// is search sphere inside of a cubic box?
       ///
-      /// \param[in]  c  cubic box, 16-byte aligned
+      /// \param[in]  c  rectangular box, 16-byte aligned
       bool inside(cuboid<Dim,real> const&c) const
       { return Algorithms<1>::inside(c,S); }
       //@}

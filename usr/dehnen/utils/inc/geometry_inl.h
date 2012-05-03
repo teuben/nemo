@@ -71,6 +71,11 @@ namespace WDutils {
 	{
 	  return x<c? c<=x+r : x<c+r;
 	}
+	// is the interval [a-b, a+b] in the interval [c-r, c+r]?
+	static bool in_interval(real c, real r, real a, real b)
+	{
+	  return std::abs(c-a) <= r-b;
+	}
 	// copy(cube,cube)
 	template<int Dim>
 	static void copy(cube<Dim,real> const&in, cube<Dim,real> &out)
@@ -124,6 +129,18 @@ namespace WDutils {
 	  return in_interval(c.X[0],c.Y[0],x[0])
 	    &&   in_interval(c.X[1],c.Y[1],x[1])
 	    &&   in_interval(c.X[2],c.Y[2],x[2]);
+	}
+	// contains(cuboid,cuboid)
+	static bool contains(box2 const&c, box2 const&b)
+	{
+	  return in_interval(c.X[0],c.Y[0], b.X[0],b.Y[0])
+	    &&   in_interval(c.X[1],c.Y[1], b.X[1],b.Y[1]);
+	}
+	static bool contains(box3 const&c, box3 const&b)
+	{
+	  return in_interval(c.X[0],c.Y[0], b.X[0],b.Y[0])
+	    &&   in_interval(c.X[1],c.Y[1], b.X[1],b.Y[1])
+	    &&   in_interval(c.X[2],c.Y[2], b.X[2],b.Y[2]);
 	}
 	// dist_sq(point,point)
 	static real dist_sq(vec2 const&x, vec2 const&y)
@@ -340,6 +357,25 @@ namespace WDutils {
 	  return
 	    7==(7&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),
 					     _mm_cmpgt_ps(_mm_add_ps(C,H),X))));
+	}
+	// contains(cuboid,cuboid)
+	static bool contains(box2 const&c, box2 const&b)
+	{
+	  __m128 C = _mm_loadu_ps(cPF(c.X));
+	  __m128 R = _mm_movehl_ps(C,C);
+	  __m128 A = _mm_loadu_ps(cPF(b.X));
+	  __m128 B = _mm_movehl_ps(A,A);
+	  return 3==(3&_mm_movemask_ps(_mm_cmple_ps(_mm_diff_ps(C,A),
+						    _mm_sub_ps(R,B))));
+	}
+	static bool contains(box3 const&c, box3 const&b)
+	{
+	  __m128 C = _mm_loadu_ps(cPF(c.X));
+	  __m128 R = _mm_loadu_ps(cPF(c.Y));
+	  __m128 A = _mm_loadu_ps(cPF(b.X));
+	  __m128 B = _mm_loadu_ps(cPF(b.Y));
+	  return 7==(7&_mm_movemask_ps(_mm_cmple_ps(_mm_diff_ps(C,A),
+						    _mm_sub_ps(R,B))));
 	}
 	// dist_sq(point,point)
 	// for unaligned access, non-SSE code is faster (don't ask me why)
@@ -579,6 +615,25 @@ namespace WDutils {
 	  return
 	    7==(7&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),
 					     _mm_cmpgt_ps(_mm_add_ps(C,H),X))));
+	}
+	// contains(cuboid,cuboid)
+	static bool contains(box2 const&c, box2 const&b)
+	{
+	  __m128 C = _mm_load_ps(cPF(c.X));
+	  __m128 R = _mm_movehl_ps(C,C);
+	  __m128 A = _mm_load_ps(cPF(b.X));
+	  __m128 B = _mm_movehl_ps(A,A);
+	  return 3==(3&_mm_movemask_ps(_mm_cmple_ps(_mm_diff_ps(C,A),
+						    _mm_sub_ps(R,B))));
+	}
+	static bool contains(box3 const&c, box3 const&b)
+	{
+	  __m128 C = _mm_load_ps(cPF(c.X));
+	  __m128 R = _mm_load_ps(cPF(c.Y));
+	  __m128 A = _mm_load_ps(cPF(b.X));
+	  __m128 B = _mm_load_ps(cPF(b.Y));
+	  return 7==(7&_mm_movemask_ps(_mm_cmple_ps(_mm_diff_ps(C,A),
+						    _mm_sub_ps(R,B))));
 	}
 	// dist_sq(point,point)
 	static float dist_sq(vec2 const&x, vec2 const&y)
@@ -832,6 +887,31 @@ namespace WDutils {
 	  H = _mm_loadu_pd(cPD2(c.Y));
 	  return 1&_mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C,H),X),
 					      _mm_cmpgt_pd(_mm_add_pd(C,H),X)));
+	}
+	// contains(cuboid,cuboid)
+	static bool contains(box2 const&c, box2 const&b)
+	{
+	  __m128d C = _mm_loadu_pd(cPD(c.X));
+	  __m128d R = _mm_loadu_pd(cPD(c.Y));
+	  __m128d A = _mm_loadu_pd(cPD(b.X));
+	  __m128d B = _mm_loadu_pd(cPD(b.Y));
+	  return
+	    3==_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B)));
+	}
+	static bool contains(box3 const&c, box3 const&b)
+	{
+	  __m128d C = _mm_loadu_pd(cPD(c.X));
+	  __m128d R = _mm_loadu_pd(cPD(c.Y));
+	  __m128d A = _mm_loadu_pd(cPD(b.X));
+	  __m128d B = _mm_loadu_pd(cPD(b.Y));
+	  if(3!=_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B))))
+	    return false;
+	  C = _mm_loadu_pd(cPD2(c.X));
+	  R = _mm_loadu_pd(cPD2(c.Y));
+	  A = _mm_loadu_pd(cPD2(b.X));
+	  B = _mm_loadu_pd(cPD2(b.Y));
+	  return
+	    1 &_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B)));
 	}
 	// dist_sq(point,point)
 	// for unaligned access, non-SSE code is faster
@@ -1158,6 +1238,31 @@ namespace WDutils {
 	  return 1&_mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C,H),X),
 					      _mm_cmpgt_pd(_mm_add_pd(C,H),X)));
 	}
+	// contains(cuboid,cuboid)
+	static bool contains(box2 const&c, box2 const&b)
+	{
+	  __m128d C = _mm_load_pd(cPD(c.X));
+	  __m128d R = _mm_load_pd(cPD(c.Y));
+	  __m128d A = _mm_load_pd(cPD(b.X));
+	  __m128d B = _mm_load_pd(cPD(b.Y));
+	  return
+	    3==_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B)));
+	}
+	static bool contains(box3 const&c, box3 const&b)
+	{
+	  __m128d C = _mm_load_pd(cPD(c.X));
+	  __m128d R = _mm_load_pd(cPD(c.Y));
+	  __m128d A = _mm_load_pd(cPD(b.X));
+	  __m128d B = _mm_load_pd(cPD(b.Y));
+	  if(3!=_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B))))
+	    return false;
+	  C = _mm_load_pd(cPD2(c.X));
+	  R = _mm_load_pd(cPD2(c.Y));
+	  A = _mm_load_pd(cPD2(b.X));
+	  B = _mm_load_pd(cPD2(b.Y));
+	  return
+	    1 &_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B)));
+	}
 	// dist_sq(point,point)
 	static double dist_sq(vec2 const&x, vec2 const&y)
 	{
@@ -1428,6 +1533,11 @@ namespace WDutils {
     bool Algorithms<__A,__S>::contains(cuboid<__D,__X> const&c,
 				       tupel<__D,__X> const&x)
     { return Meta::AlgorithmsHelper<__X,__A,__S>::contains(c,x); }
+    //
+    template<bool __A, bool __S> template<int __D, typename __X> inline
+    bool Algorithms<__A,__S>::contains(cuboid<__D,__X> const&c,
+				       cuboid<__D,__X> const&b)
+    { return Meta::AlgorithmsHelper<__X,__A,__S>::contains(c,b); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
     __X Algorithms<__A,__S>::dist_sq(cuboid<__D,__X> const&c,
