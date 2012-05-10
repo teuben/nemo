@@ -156,6 +156,19 @@ process:
 
 if ($go == 0 && $#argv == 0) goto noargs
 
+# sanity check on a frequent problem, replace 1 with 0 if you want to skip this
+if (1) then
+  grep iraf $NEMOLIB/makedefs
+  if ($status == 0) then
+    echo WARNING: you have some iraf references in $NEMOLIB/makedefs
+    echo this is likely an IRAF bug - now fixed.
+    echo During the installation, setenv FC gfortran, and reinstall.
+    echo Or edit $NEMOBIN/mknemo and disable this section of code
+    rm -f $lockfile >& /dev/null
+    exit 1
+  endif
+endif
+
 if ($D) then
   ls $NEMO/src/scripts/mknemo.d  | egrep -v '(README|CVS)'
   rm -f $lockfile >& /dev/null
