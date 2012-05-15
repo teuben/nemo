@@ -11,12 +11,22 @@ If successfull, the binary will be placed in \fB$NEMOBIN\fP.
 Add the '-u' flag if your NEMO is under CVS control, so you can
 force an update before the build.
 .PP
-On a first pass a single
-source file \fIprogram.c\fP is looked for, which is
+Finding the method how to install \fIprogram\fP takes several paths:
+.PP
+First, if a file \fI$NEMO/src/scripts/mknemo.d/program\fP exists,
+it is assumed to be a shell script with directions how to install this
+program. \fPgyrfalcON\fP is an example of such a complex program.
+.PP
+Next, within the $NEMO/src (optionally also the $NEMO/usr tree) a
+source file \fIprogram.c\fP (or C++ or Fortran) is looked for, which is
 compiled with a local \fBMakefile\fP (or a template
-if none is available). If no source code is found,
+if none is available).  \fPtsf\fP is an example of this type of
+program.
+.PP
+Finally, if still no source code is found,
 a directory with the name \fIprogram\fP is searched for, 
 and a local Makefile is then used to install the \fIprogram\fP.
+\fBhackcode1\fP is am example of this type of program.
 .PP
 After the binary is moved over to \fB$NEMOBIN\fP, the script
 \fImkpdoc\fP is called to see if the \fIdoc(5)\fP file needs 
