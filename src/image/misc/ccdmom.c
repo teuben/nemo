@@ -27,7 +27,7 @@ string defv[] = {
 	"mom=0\n	Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc, -1=mean val, -2=disp val]",
 	"keep=f\n	Keep moment axis in full length, and replace all values",
 	"cumulative=f\n Cumulative axis (only valid for mom=0)",
-	"VERSION=0.6\n  18-oct-05 PJT",
+	"VERSION=0.6a\n 18-may-2012 PJT",
 	NULL,
 };
 
@@ -220,7 +220,7 @@ void nemo_main()
 	    } else {
 	      if (mom==-1)
 		newvalue = tmp0/cnt;
-	      else if (mom==2)
+	      else if (mom==-2)
 		newvalue = sqrt(tmp00/cnt - sqr(tmp0/cnt));
 	      else if (mom==0)
 		newvalue = tmp0;
