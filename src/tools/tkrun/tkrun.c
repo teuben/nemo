@@ -83,6 +83,7 @@ typedef struct simple_widget {	/* our simple widget */
 #define W_CHECK  4
 #define W_IFILE 11
 #define W_OFILE 12
+#define W_IDIR  13
 #define W_MEXEC 21
 #define W_PEXEC 22
 
@@ -349,7 +350,9 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                           t, "{top frame center fill}");
                 nw++;
 
-            } else if (strcmp(wp[1],"IFILE")==0 || strcmp(wp[1],"OFILE")==0) {
+            } else if (strcmp(wp[1],"IFILE")==0 || 
+                       strcmp(wp[1],"IDIR")==0 ||
+                       strcmp(wp[1],"OFILE")==0) {
                 vp = strchr(wp[2],'=');
                 if (vp==NULL) {
                     fprintf(tp,"### Warning: missing '=' in keyword %s\n",wp[1]);
@@ -405,6 +408,9 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                 fprintf(sp,"   global %s\n",tvar);
                 if (strcmp(wp[1],"IFILE")==0)
                     fprintf(sp,"   set %s [tk_getOpenFile -parent %s]\n",
+                            tvar,tval);
+                else if (strcmp(wp[1],"IDIR")==0)
+                    fprintf(sp,"   set %s [tk_chooseDirectory -parent %s]\n",
                             tvar,tval);
                 else if (strcmp(wp[1],"OFILE")==0)
                     fprintf(sp,"   set %s [tk_getSaveFile -parent %s]\n",
@@ -714,6 +720,7 @@ void example(void)
     printf("#\n");
     printf("#>  IFILE   in=\n");
     printf("#>  OFILE   out=\n");
+    printf("#>  IDIR    indir=\n");
     printf("#>  ENTRY   eps=0.01\n");
     printf("#>  RADIO   mode=gauss              gauss,newton,leibniz\n");
     printf("#>  CHECK   options=mean,sigma      sum,mean,sigma,skewness,kurtosis\n");
@@ -728,6 +735,7 @@ void example(void)
     printf("end\n");
     printf("\n# some example code using the variables:\n");
     printf("echo in      =$in\n");
+    printf("echo indir   =$indir\n");
     printf("echo out     =$out\n");
     printf("echo eps     =$eps\n");
     printf("echo mode    =$mode\n");
