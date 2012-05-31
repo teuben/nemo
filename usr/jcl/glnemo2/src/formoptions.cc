@@ -21,24 +21,34 @@ namespace glnemo {
   };
 // ============================================================================
 // Constructor                                                                 
-FormOptions::FormOptions(GlobalOptions * _go, QWidget *parent):QDialog(parent)
+FormOptions::FormOptions(GlobalOptions * _go, QMutex * _mutex, QWidget *parent):QDialog(parent)
 {
   if (parent) {;}  // remove compiler warning
   form.setupUi(this);
+  EMIT=true;
   start=false;
   limited_timer = new QTimer(this);
   connect(limited_timer, SIGNAL(timeout()), this, SLOT(stop_bench()));
   
   // density tab
   go = _go;
+  mutex_data = _mutex;
   // default screen resolution for offscreen rendering set to 1280x720
   form.screen_size->setCurrentIndex(8);
   form.frame_name_text->setText(QString(go->base_frame_name));
   // activate the first TAB by default
   form.options_dialog->setCurrentIndex(0);
   form.com->setChecked(go->auto_com);
-  
-
+  form.cod->setChecked(go->cod);
+  // player tab
+  form.frame_slide->setTracking(true);
+  connect(form.frame_slide,SIGNAL(sliderPressed()) ,this,SLOT(lockFrame()));
+  connect(form.frame_slide,SIGNAL(sliderReleased()),this,SLOT(unLockFrame()));
+  connect(form.frame_dial ,SIGNAL(sliderPressed()) ,this,SLOT(lockFrame()));
+  connect(form.frame_dial ,SIGNAL(sliderReleased()),this,SLOT(unLockFrame()));
+  // frame spin box
+  form.frame_spin->setKeyboardTracking(false);
+  form.frame_spin->setButtonSymbols(QAbstractSpinBox::PlusMinus);
   QString css;
   // ---------- Grid tab
   // Color cube button
@@ -108,7 +118,10 @@ void FormOptions::update()
   form.mesh_length_spin->setValue(go->mesh_length);
   form.mesh_nb_spin->setValue(go->nb_meshs);
   form.cube_checkb->setChecked(go->show_cube);
-  
+
+  // Play tab
+  form.cod->setEnabled(go->rho_exist);
+
   // OSD tabs
   form.show_osd_checkb->setChecked(go->show_osd);
   form.osd_datatype->setChecked(go->osd_data_type);
@@ -134,7 +147,7 @@ void FormOptions::update()
   form.gcb_spin_digit->setValue(go->gcb_ndigits);
   form.gcb_spin_font_size->setValue(go->gcb_font_size);
   form.gcb_spin_offset->setValue(go->gcb_offset);
-  
+
   // rotation/axis tab
   form.show_3daxis->setChecked(go->axes_enable);
   if (go->rotate_screen) 
@@ -249,16 +262,24 @@ void FormOptions::on_frame_name_pressed()
   }
 }
 // ============================================================================
-void FormOptions::on_play_pressed()
+void FormOptions::on_play_pressed2(const int forcestop)
 {
   static bool play=false;
-  play = ! play;
+  switch (forcestop) {
+    case    0: play=true ; break;
+    case    1: play=false; break;
+    default  : play = ! play;
+      emit playPressed();
+      break;
+  }
+
   if (play) {
     form.play->setText("STOP");
   } else {
     form.play->setText("PLAY");
   }
-  emit playPressed();  
+ // if (!forcestop)
+ //   emit playPressed();
 }
 // ============================================================================
 void FormOptions::on_screen_size_activated(int index)

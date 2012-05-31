@@ -35,6 +35,7 @@ FormAbout::FormAbout(QWidget *parent):QDialog(parent)
        "<br>38, rue Frédéric Joliot-Curie"
        "<br>13388 Marseille cedex 13"
        "<br>FRANCE"
+                 "<br><br><a href=http://projets.oamp.fr/projects/glnemo2>GLNEMO2 home page</a>"
        "</center>"));
   form.text_info->setHtml(info);
   QRect geo = form.view_picture->geometry();       // initial geometry defined with designer

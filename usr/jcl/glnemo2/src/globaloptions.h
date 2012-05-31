@@ -28,10 +28,13 @@ public:
 	// Network stuff
 	std::string  network_host;
 	int  network_port;
+     bool list_type;
     // from play option TAB
     bool auto_play_screenshot;
     bool auto_gl_screenshot;
     bool auto_com;
+    bool play_forward;
+    int jump_frame;
     int play_fps;
     int frame_index;
     int frame_height;

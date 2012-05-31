@@ -24,7 +24,7 @@ class FormAbout: public QDialog {
 Q_OBJECT
 public:
     FormAbout(QWidget *parent = 0);
-    void setVersion(const QString & _ver) { form.version->setText(_ver);};
+    void setVersion(const QString & _ver) { form.version->setText(_ver);}
     ~FormAbout();
 private:
     Ui::FormAbout form;

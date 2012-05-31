@@ -19,6 +19,7 @@
 #include <QTimer>
 #include <QColorDialog>
 #include <iostream>
+#include <QMutex>
 #include "ui_formoptions.h"
 #include "globaloptions.h"
 namespace glnemo {
@@ -26,7 +27,7 @@ namespace glnemo {
 class FormOptions: public QDialog {
   Q_OBJECT
   public:
-    FormOptions(GlobalOptions * ,QWidget *parent = 0);
+    FormOptions(GlobalOptions * ,QMutex * _mutex, QWidget *parent = 0);
     ~FormOptions();
   public slots:
     void update();
@@ -35,6 +36,23 @@ class FormOptions: public QDialog {
     void showTab(const int index) {
         form.options_dialog->setCurrentIndex(index);
     }
+    void activatePlayTime(bool b) {
+        form.direction_box->setEnabled(b);
+        form.frame_box->setEnabled(b);;
+    }
+    void setPlaySettings(const int maxframe, const int frame) {
+      //mutex_load.lock();
+      EMIT=false;
+      form.frame_spin->setValue(frame);
+      form.frame_slide->setMaximum(maxframe-1);
+      form.frame_slide->setValue(frame);
+      form.frame_dial->setMaximum(maxframe-1);
+      form.frame_dial->setValue(frame);
+      form.frame_max->setText(QString("%1").arg(maxframe));
+      EMIT=true;
+      //mutex_load.unlock();
+    }
+
   private:
     Ui::FormOptions form;
     GlobalOptions * go;
@@ -42,6 +60,8 @@ class FormOptions: public QDialog {
     QTime time;
     QTimer * limited_timer;
     static int windows_size[][2];
+    QMutex * mutex_data;
+    bool EMIT;
   private slots:
     void leaveEvent ( QEvent * event ) {
       if (event) {;}
@@ -75,8 +95,41 @@ class FormOptions: public QDialog {
     void on_cam_play_pressed();
     //                   
     // play selection tab
-    void on_play_pressed();
-    void on_com_clicked() { go->auto_com = form.com->isChecked();}
+    void on_play_pressed2(const int forcestop=-1);
+    void on_play_pressed() {
+      on_play_pressed2();
+    }
+
+    void on_com_clicked() { go->auto_com = form.com->isChecked();
+                            if (go->auto_com) emit centering();
+                          }
+    void on_cod_clicked() { go->cod      = form.cod->isChecked();
+                             if (go->cod) emit centering();
+                          }
+    void on_forward_radio_clicked()  {  emit play_forward(true); go->play_forward=true;}
+    void on_backward_radio_clicked() {
+      emit play_forward(false); go->play_forward=false;}
+    void on_frame_slide_valueChanged(int value) {
+      frameValueChanged(value);
+    }
+    void on_frame_spin_valueChanged(int value) {      
+      frameValueChanged(value);      
+    }
+    void frameValueChanged(int value) {
+      mutex_data->lock();
+      go->jump_frame = value;
+      if (EMIT) {
+        emit jump_frame(value);
+        emit change_frame();
+      }
+      mutex_data->unlock();
+    }
+    void lockFrame() {
+      mutex_data->lock();
+    }
+    void unLockFrame() {
+      mutex_data->unlock();
+    }
     //                   
     // auto-screenshot selection tab
     void on_frame_name_pressed();
@@ -469,6 +522,10 @@ class FormOptions: public QDialog {
     void update_osd_font();
     void update_gcb_font();
     void update_gl();
+    void play_forward(const bool);
+    void jump_frame(const int);
+    void change_frame();
+    void centering();
     // auto rotation
     void autoRotate(const int);
     

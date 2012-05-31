@@ -25,6 +25,7 @@ namespace glnemo {
 // constructor                                                                 
 GlobalOptions::GlobalOptions()
 {
+  list_type = false;
   // Network stuff
   network_host = "127.0.0.1";
   network_port = 4000;
@@ -32,6 +33,8 @@ GlobalOptions::GlobalOptions()
   auto_play_screenshot = false;
   auto_gl_screenshot   = false;
   auto_com             = false;
+  play_forward         = true;
+  jump_frame           = -1;
   play_fps             = 25;
   frame_index          = 0;
   base_frame_name      = "frame";
@@ -222,6 +225,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   // orthographic range
   ortho_range = m.ortho_range;
   
+  list_type = m.list_type;
     // SET default parameters
   MAX_PARTICLES_SIZE   = m.MAX_PARTICLES_SIZE;
   MAX_TEXTURE_SIZE     = m.MAX_TEXTURE_SIZE;
@@ -232,6 +236,8 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   auto_gl_screenshot   = m.auto_gl_screenshot;
   auto_com             = m.auto_com;
   play_fps             = m.play_fps;
+  play_forward         = m.play_forward;
+  jump_frame           = m.jump_frame;
   frame_index          = m.frame_index;
   base_frame_name      = m.base_frame_name;
   base_frame_ext       = m.base_frame_ext;

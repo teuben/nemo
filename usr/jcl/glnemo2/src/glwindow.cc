@@ -706,7 +706,8 @@ void GLWindow::mousePressEvent( QMouseEvent *e )
     if (is_translation) {;} //!parent->statusBar()->message("Translating Z");
     else                {;} //!parent->statusBar()->message("Rotating Z");
   }
-  if ( e->button() == Qt::MiddleButton ) {
+  //if ( e->button() == Qt::MiddleButton ) {
+  if ( e->button() == Qt::MidButton ) {
     //std::cerr << "Middle button pressed\n";
     is_mouse_pressed        = TRUE;
     is_pressed_middle_button= TRUE;

@@ -25,6 +25,7 @@
 #include "componentrange.h"
 #include "globaloptions.h"
 #include <QObject>
+#include <QMutex>
 
 namespace glnemo {
 //class ParticlesData;
@@ -61,6 +62,9 @@ class SnapshotInterface: public QObject
       crv.clear();
       stv.clear();
       parseSelectTime();
+      //setPlayForward();
+      play_forward = true;
+      setJumpFrame();
     }
     virtual ~SnapshotInterface() {};
     // ---------------------------------------------------
@@ -70,6 +74,7 @@ class SnapshotInterface: public QObject
     virtual bool isValidData() = 0;
     virtual ComponentRangeVector * getSnapshotRange() = 0;
     virtual int initLoading(GlobalOptions * so) = 0;
+
     virtual int nextFrame(const int * index_tab, const int nsel)= 0;
            // index_tab = array of selected indexes (size max=part_data->nbody)
            // nsel      = #particles selected in index_tab                     
@@ -77,16 +82,28 @@ class SnapshotInterface: public QObject
     virtual int close() = 0;
     virtual QString endOfDataMessage() = 0;
     // simple Virtual functions
-	virtual bool isEndOfData() const { return end_of_data;}
-	virtual void setPort(const int x=4000) { port=x;}
-	virtual void setSelectPart(const std::string _sel) { select_part = _sel;}
-	virtual std::string getSelectPart() { return select_part; }
+    virtual bool isEndOfData() { return end_of_data;}
+    virtual void setPort(const int x=4000) { port=x;}
+    virtual void setSelectPart(const std::string _sel) { select_part = _sel;}
+    virtual std::string getSelectPart() { return select_part; }
+    virtual int getNumberFrames() { return 0;} // >
+    virtual int getCurrentFrameIndex() { return 0;} // >
+    virtual void checkJumpFrame(const int _v=-1) {
+      frame.lock();
+      jump_frame = _v;
+      frame.unlock();
+    }
     // normal functions        
 	void setFileName(std::string _f) { filename = _f;}
 	std::string getFileName() const { return filename;}
 	std::string getInterfaceType() { return interface_type;}
 	bool isFileExist() { return QFile::exists(QString(filename.c_str()));}
-
+        bool isListOf() {
+          if (interface_type.compare(0,4,"List")==0)
+            return true;
+          else
+            return false;
+        }
     ParticlesData * part_data;
     int nbody_first;
     float time_first;
@@ -102,6 +119,16 @@ public slots:
     void slotIntStatus(const int status) {
       emit intStatus(status);
     }
+    void setPlayForward(const bool _b=true) {
+      if (play_forward != _b && end_of_data==true) {
+        end_of_data=false;
+      }
+      play_forward = _b;
+    }
+    void setJumpFrame(const int _v=-1) {
+      checkJumpFrame(_v);
+    }
+
 protected:
     SnapshotInterface * obj;
     std::string filename;
@@ -110,6 +137,10 @@ protected:
     std::string select_part, select_time;
     int port;
     bool keep_all, load_vel;
+    // play seeting
+    bool play_forward;
+    int  jump_frame;
+    QMutex frame;
     ComponentRangeVector crv;
     float * pos, *vel;
     bool first;

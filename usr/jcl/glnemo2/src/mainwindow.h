@@ -100,6 +100,7 @@ class MainWindow : public QMainWindow {
     void actionAutoScreenshot();
     void actionGLAutoScreenshot();
     void playEvent();
+    void playOneFrame();
     void pressedKeyMouse(const bool, const bool);
     void uploadNewFrame();
     void takeScreenshot(const int, const int, std::string name="");
@@ -136,7 +137,7 @@ class MainWindow : public QMainWindow {
     void loadNewData(const std::string, const std::string ,
                             const bool , const bool, const bool first=false);
     void killPlayingEvent();
-    
+    void connectCurrentData();
     // Menus
     QMenu *file_menu;
     QMenu *help_menu;
@@ -221,7 +222,7 @@ class MainWindow : public QMainWindow {
     SnapshotInterface * current_data;
     // Playing snapshot/network
     bool play_animation, play;
-    QTimer * play_timer;
+    QTimer * play_timer, * play_timer_one_frame;
     LoadingThread * loading_thread;
     // auto rotate timers arounf SCREEN axis
     QTimer * auto_rotx_timer, * auto_roty_timer, * auto_rotz_timer;
@@ -254,7 +255,7 @@ class MainWindow : public QMainWindow {
     // Selected Physical quantitie from the command line
     int selphys;
     signals:
-    void endOfSnapshot();
+    void endOfSnapshot(const int);
 };
 }
 

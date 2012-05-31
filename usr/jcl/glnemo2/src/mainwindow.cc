@@ -31,7 +31,6 @@
 #include "nemo.h"
 namespace glnemo {
 #define ICONSIZE 25
-  
 // -----------------------------------------------------------------------------
 // MainWindow constructor                                                       
 // -----------------------------------------------------------------------------
@@ -120,7 +119,9 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_o_c,SIGNAL(reverseColorMap(bool)),colormap,SLOT(reverse(bool)));
   // options play tab
   connect(form_options,SIGNAL(playPressed()),this,SLOT(actionPlay()));
-  connect(this,SIGNAL(endOfSnapshot()),form_options,SLOT(on_play_pressed()));
+  connect(this,SIGNAL(endOfSnapshot(const int)),form_options,SLOT(on_play_pressed2(const int)));
+  connect(form_options,SIGNAL(change_frame()),this,SLOT(playOneFrame()));
+  connect(form_options,SIGNAL(centering()),this,SLOT(actionCenterToCom()));
   // options auto rotate
   connect(form_options,SIGNAL(autoRotate(int)),this,SLOT(actionAutoRotate(int)));
   // leaveEvent to pass focus to gl_window
@@ -157,12 +158,19 @@ void MainWindow::start(std::string shot)
   }
   // try to load a snapshot
   user_select = new UserSelection();
+  form_options->activatePlayTime(false); // disable group box by default
+
   if (hasvalue((char*)"in")) {
     bool exist=hasvalue((char*)"select");
     current_data = plugins->getObject(snapshot);
     if (current_data) {
-      connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
+      store_options->list_type = current_data->isListOf();
+      form_options->activatePlayTime(store_options->list_type); // enable group box
+      connectCurrentData(); // signal and slots connection
       current_data->part_data->setIpvs(selphys);
+      if (  current_data->isListOf() ) { // it's list of data
+        form_options->setPlaySettings(current_data->getNumberFrames(), 0);
+      }
       if (! exist ) {
         current_data->initLoading(store_options); 
         if (shot == "") interactiveSelect("",true);
@@ -172,8 +180,11 @@ void MainWindow::start(std::string shot)
       if (!store_options->rho_exist) {
         store_options->render_mode = 0;
       }
-      
+
       gl_window->updateGL();
+    } else { // no data
+      form_options->activatePlayTime(false); // disable group box
+
     }
   }
   else if (hasvalue((char*)"server")) {
@@ -305,7 +316,7 @@ void MainWindow::createForms()
   form_sshot  = new FormScreenshot(this);
   form_spart  = new FormSelectPart(this);
   form_o_c    = new FormObjectControl(this);
-  form_options= new FormOptions(store_options,this);
+  form_options= new FormOptions(store_options,mutex_data,this);
   form_connect = new FormConnect(this);
   // sig/slot
   connect(form_sshot,SIGNAL(screenshot(const int, const int)),
@@ -471,7 +482,7 @@ void MainWindow::createActions()
   toggle_play_action->setShortcut(tr("p"));
   toggle_play_action->setStatusTip(tr("Play next snapshot"));
   //connect(toggle_play_action, SIGNAL( activated() ), this, SLOT(actionPlay()) );
-  connect(toggle_play_action, SIGNAL( activated() ), form_options, SLOT(on_play_pressed()));
+  connect(toggle_play_action, SIGNAL( activated() ), form_options, SLOT(on_play_pressed2()));
   
   // reload
   reload_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/reload.png"),tr("Reload snaphot"),this);
@@ -637,6 +648,20 @@ void MainWindow::createActions()
   connect( transz_action, SIGNAL( activated() ), this, SLOT( actionTranslateZ() ) );
   addAction(transz_action);
 }
+
+// -----------------------------------------------------------------------------
+// connectCurrentData
+// established all signals/slot connection on current_data
+void MainWindow::connectCurrentData()
+{
+  if (current_data) {
+    connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
+    connect(form_options,SIGNAL(play_forward(bool)),current_data,SLOT(setPlayForward(bool)));
+    connect(form_options,SIGNAL(jump_frame(int)),current_data,SLOT(setJumpFrame(int)));
+    connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
+  }
+}
+
 // -----------------------------------------------------------------------------
 // interactiveSelect                                                            
 // Lauch select particles dialog box                                            
@@ -645,7 +670,12 @@ void MainWindow::interactiveSelect(std::string _select, const bool first_snapsho
 {
   if (current_data) {
     if (!reload) {
+      if (first_snapshot) current_data->setJumpFrame(0);
       crv = current_data->getSnapshotRange();
+    } else {
+      current_data->setJumpFrame(0);
+      form_options->setPlaySettings(current_data->getNumberFrames(), 0);
+      emit endOfSnapshot(1);
     }
     form_spart->update(current_data,&current_data->crv_first,_select, first_snapshot);
     form_spart->show();
@@ -661,19 +691,21 @@ void MainWindow::selectPart(const std::string _select, const bool first_snapshot
 {
   select = _select;
   store_options->select_part = select;
-  if (reload && current_data) {// reload action requested   
+  if ((reload) && current_data) {// reload action requested
     store_options->phys_max_glob = store_options->phys_min_glob = -1; // reset for colobar display
     current_data->close();     // close the current snapshot
     delete current_data;       // delete previous object    
     current_data = plugins->getObject(snapshot); // connect
-    connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
+    connectCurrentData();
+    //connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
     current_data->initLoading(store_options);
     crv = current_data->getSnapshotRange();    
-    //ComponentRange::list(crv);
+    ComponentRange::list(crv);
     //ComponentRange::list(&current_data->crv_first);
   } else {
     actionReset();             // reset view if menu file open
   }
+
   current_data->setSelectPart(select);
   std::cerr << "MainWindow::selectPart store_options->select_time = " << store_options->select_time << "\n";
   loadNewData(select,store_options->select_time,  // load data
@@ -742,6 +774,7 @@ void MainWindow::loadNewData(const std::string select,
       }
       
       form_o_c->update( current_data->part_data, &pov2,store_options);
+      form_options->update();
       updateOsd();
       tbench.restart();
       
@@ -781,6 +814,8 @@ void MainWindow::startTimers()
 {
   play_timer = new QTimer(this);
   connect(play_timer, SIGNAL(timeout()), this, SLOT(playEvent()));
+  play_timer_one_frame = new QTimer(this);
+  connect(play_timer_one_frame, SIGNAL(timeout()), this, SLOT(playEvent()));
   auto_rotx_timer = new QTimer(this);
   connect(auto_rotx_timer, SIGNAL(timeout()), gl_window, SLOT(rotateAroundX()));
   auto_roty_timer = new QTimer(this);
@@ -994,14 +1029,22 @@ void MainWindow::actionMenuFileOpen()
   if (!fileName.isEmpty()) {
     menudir = fileName;
     snapshot = fileName.toStdString();
+    bool save_rho_exist = store_options->rho_exist;
+    store_options->rho_exist = false;
+
     SnapshotInterface * new_data = plugins->getObject(snapshot);
     if (new_data)  { // valid object
       mutex_loading.lock();     // protect area
       if (current_data)
         delete current_data;      // free memory                   
       current_data = new_data;  // link new_data   
-      connect(current_data,SIGNAL(stringStatus(QString)),status_bar, SLOT(showMessage(QString)));
+      store_options->list_type = current_data->isListOf();
+      form_options->activatePlayTime(store_options->list_type); // enable group box
+      connectCurrentData(); // signal and slots connections
       current_data->part_data->setIpvs(selphys);
+      if (  current_data->isListOf() ) { // it's list of data
+        form_options->setPlaySettings(current_data->getNumberFrames(), 0);
+      }
 //       loadNewData("all","all",  // load data
 //           keep_all,store_options->vel_req,true); //
       reload=false;
@@ -1010,6 +1053,9 @@ void MainWindow::actionMenuFileOpen()
       current_data->initLoading(store_options);
       interactiveSelect("",true);
       mutex_loading.unlock();   // release area                  
+    } else { // no new data
+      store_options->rho_exist = save_rho_exist;
+      //form_options->activatePlayTime(false); // disable group box
     }
   }
 }
@@ -1579,22 +1625,25 @@ void MainWindow::actionPlay()
             std::cerr << "store_options->enable_gui.......\n";
             QMessageBox::information( this,tr("Warning"),
                                       current_data->endOfDataMessage(),"Ok");
-            emit endOfSnapshot();
+            emit endOfSnapshot(1);
         }
         else {
             //killPlayingEvent();
             actionQuit();
             close();
         }
-        //play_animation = false;
+        play_animation = false;
         //emit endOfSnapshot();
       }
       else { // start timer
         play_timer->start( 20 );
+        emit endOfSnapshot(0);
       }
     }
     else {
+      play_animation=false;
       play_timer->stop();
+      emit endOfSnapshot(1);
       gl_window->updateGL(); // flush openGL buffer
       //if (! anim_engine->record->isActivated()) 
       //  glbox->setHudActivate(GLHudObject::Loading, FALSE);
@@ -1618,6 +1667,7 @@ void MainWindow::playEvent()
         !is_key_pressed              && // no interactive user request 
         !is_mouse_pressed               // (mouse, keyboard)           
        ) {
+      play_timer_one_frame->stop();
       uploadNewFrame();
       delete loading_thread;
       loading_thread=NULL;
@@ -1628,20 +1678,28 @@ void MainWindow::playEvent()
   mutex_loading.unlock();
 }
 // -----------------------------------------------------------------------------
+// playOneFrame, load a frame in parallele if play_animation is false
+void MainWindow::playOneFrame()
+{
+  if (!play_animation) {   
+    play_timer_one_frame->start();
+  }
+}
+
+// -----------------------------------------------------------------------------
 // uploadNewFrame                                                               
 void MainWindow::uploadNewFrame()
 {
   static bool first=true;
   if (loading_thread->isValidLoading()) {
-    if (  current_data->getInterfaceType() == "List of Ftm"      ||
-	  current_data->getInterfaceType() == "List of Gadget 2" ||
-          current_data->getInterfaceType() == "List of PhiGRAPE" ||
-          current_data->getInterfaceType() == "List of Nemo") { 
+    if (  current_data->isListOf() ) { // it's list of data
       //mutex_data->lock();
       //pov2=pov;
       ParticlesObject::initOrbitsVectorPOV(pov);
       ParticlesObject::copyVVkeepProperties(pov,pov2,user_select->getNSel()); 
       form_o_c->update( current_data->part_data, &pov2,store_options,false); // update Form
+      form_options->update();
+      form_options->setPlaySettings(current_data->getNumberFrames(), current_data->getCurrentFrameIndex());
       //mutex_data->unlock();
     } else {
       //pov2=pov; // modif orbits
@@ -1677,6 +1735,7 @@ void MainWindow::uploadNewFrame()
       //std::cerr << "current_data is end of data\n";
       play_animation = false;
       play_timer->stop();
+      emit endOfSnapshot(1);
       if (store_options->enable_gui)
           QMessageBox::information( this,tr("Warning"),current_data->endOfDataMessage(),"Ok");
       else {

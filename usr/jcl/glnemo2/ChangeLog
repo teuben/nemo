@@ -1,3 +1,14 @@
+1.50 (May, 30th 2012)
+---------------------
+  - add GUI option to control timeline and 
+    to play forward and backward direction from a list of snaphots
+  - add option to render opaque sphere like the SUN
+  - add GUI and CLI for center of density option
+
+1.42 (May, 16th 2012)
+----------------------
+  - happy qt4.6 compilation
+
 1.41 (February, 14th 2012)
 ---------------------------
   - fix wrong density value displayed on colorbar when min/max phys set from cli
