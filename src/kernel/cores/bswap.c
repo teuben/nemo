@@ -29,15 +29,38 @@
  *      12-sep-01  file_size
  *      30-sep-03  testing memcpy, and improved the testing
  *      20-sep-05  little and big endian versions
+ *      14-may-12  optionally use the ffswapX routines from cfitsio
  */
 
+//#define HAVE_CFITSIO
+//#define HAVE_FFSWAP
+
 #include <stdinc.h>
+#if defined(HAVE_CFITSIO)
+#include "fitsio2.h"
+#endif
 
 void bswap(void *vdat, int len, int cnt)
 {
     char tmp, *dat = (char *) vdat;
     int k;
-
+#if defined(HAVE_FFSWAP)
+    if (len==1)
+	return;
+    else if (len==2)
+      ffswap2((short int *)dat,cnt);
+    else if (len==4)
+      ffswap4((int *) dat,cnt);
+    else if (len==8)
+      ffswap8((double *)dat,cnt);
+    else {  /* the general SLOOOOOOOOOWE case; should never happen */
+        for(k=0; k<len/2; k++) {
+            tmp = dat[k];
+            dat[k] = dat[len-1-k];
+            dat[len-1-k] = tmp;
+        }
+    }
+#else
     if (len==1)
 	return;
     else if (len==2)
@@ -66,6 +89,7 @@ void bswap(void *vdat, int len, int cnt)
             dat[len-1-k] = tmp;
         }
     }
+#endif
 }
 
 /*
@@ -103,11 +127,15 @@ string defv[] = {
     "endian=\n      assume 'Little' (l) or 'Big' (b) endian input file",
     "memcpy=f\n     Testing swapping double another way with memcpy",
     "repeat=0\n     How many times to repeat the swapping (speed testing)",
-    "VERSION=1.6\n  20-sep-05 PJT",
+    "VERSION=2.0\n  14-may-2012 PJT",
     NULL,
 };
 
-string usage="swap bytes in a file";
+#if defined(HAVE_FFSWAP)
+string usage="swap bytes in a file - fast";
+#else
+string usage="swap bytes in a file - generic";
+#endif
 
 extern int nemo_file_size(string);
 
