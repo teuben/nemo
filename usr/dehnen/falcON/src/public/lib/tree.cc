@@ -58,11 +58,11 @@ namespace falcON {
     // protected types and methods                                              
     //--------------------------------------------------------------------------
   protected:
-    static uint8   &level_ (OctTree::Cell* const&C) { return C->LEVEL; }
-    static uint8   &octant_(OctTree::Cell* const&C) { return C->OCTANT; }
+    static uint8_t &level_ (OctTree::Cell* const&C) { return C->LEVEL; }
+    static uint8_t &octant_(OctTree::Cell* const&C) { return C->OCTANT; }
 #ifdef falcON_MPI
     static PeanoMap&peano_ (OctTree::Cell* const&C) { return C->PEANO; }
-    static uint8   &key_   (OctTree::Cell* const&C) { return C->KEY; }
+    static uint8_t &key_   (OctTree::Cell* const&C) { return C->KEY; }
 #endif
     static indx    &nleafs_(OctTree::Cell* const&C) { return C->NLEAFS; }
     static indx    &ncells_(OctTree::Cell* const&C) { return C->NCELLS; }
@@ -344,7 +344,7 @@ namespace {
     // NOTE that if we make TYPE a char the code becomes significantly slower   
     //--------------------------------------------------------------------------
     indx     TYPE;                                 // bitfield: 1=cell, 0=dot   
-    uint8    LEVEL;                                // tree level of box         
+    uint8_t  LEVEL;                                // tree level of box         
     PeanoMap PEANO;                                // Peano-Hilbert map within  
     node    *OCT[Nsub];                            // octants                   
     int      NUMBER;                               // number of dots            
@@ -1433,7 +1433,7 @@ const OctTree::Cell* OctTree::surrounding_cell(vect const&x) const
   if(!contains(centre(C),rad(level(C)),x)) return 0;    // x not in root cell
   for(;;) {
     if(0==ncells(C)) return C;                 // twig cell --> we are done
-    uint8 oct = ::octant(centre(C),x);         // get octant of x
+    uint8_t oct = ::octant(centre(C),x);       // get octant of x
     const Cell*D = CellNo(fccell(C));          // LOOP daughter cells
     for(; D!=CellNo(eccell(C)); ++D)           //   search for matching octant
       if(octant(D) == oct) { C=D; break; }     //   match: set C=daughter, break

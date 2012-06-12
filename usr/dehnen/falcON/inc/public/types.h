@@ -4,9 +4,9 @@
 /// \file   inc/public/types.h 
 ///
 /// \author Walter Dehnen
-/// \date   2000-2006, 2009
+/// \date   2000-2006, 2009, 2012
 ///
-/// \brief  contains declaration of some basic types, such as falcON::rea 
+/// \brief  contains declaration of some basic types, such as falcON::real
 ///         and falcON::vect, and constants.
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -157,8 +157,8 @@ falcON_TRAITS(falcON::vect_f,"vect_f");
 // useful constants and typedefs
 //------------------------------------------------------------------------------
 namespace falcON {
-  typedef uint16 indx;                         ///< unsigned integer of 16 bytes
-  typedef uint64 peanokey;                     ///< type of Peano-Hilbert key   
+  typedef uint16_t indx;                       ///< unsigned integer of 16 bytes
+  typedef uint64_t peanokey;                   ///< type of Peano-Hilbert key   
   /// \name some general floating-point constants
   //@{
   //----------------------------------------------------------------------------

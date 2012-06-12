@@ -47,7 +47,7 @@
 #  endif
 #else
 namespace falcON {
-  typedef uint8 PeanoMap;
+  typedef uint8_t PeanoMap;
 }
 #endif
 ////////////////////////////////////////////////////////////////////////////////
@@ -216,10 +216,10 @@ namespace falcON {
       /// \name data initialized in OctTree build
       //@{
     private:                                 ///< 4bytes: flag                  
-      uint8    LEVEL;                        ///< 1byte : level in tree         
-      uint8    OCTANT;                       ///< 1byte : octant of parent cell 
+      uint8_t  LEVEL;                        ///< 1byte : level in tree         
+      uint8_t  OCTANT;                       ///< 1byte : octant of parent cell 
       PeanoMap PEANO;                        ///< 1byte : Peano-Hilbert map     
-      uint8    KEY;                          ///< 1byte : local Peano key       
+      uint8_t  KEY;                          ///< 1byte : local Peano key       
       indx     NLEAFS;                       ///< 2bytes: # leaf children       
       indx     NCELLS;                       ///< 2bytes: # cell children       
       unsigned NUMBER;                       ///< 4bytes: # leaf descendants    
@@ -255,8 +255,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name const data access via friends only
       //@{
-      friend uint8    const&level   (const Cell*);
-      friend uint8    const&octant  (const Cell*);
+      friend uint8_t  const&level   (const Cell*);
+      friend uint8_t  const&octant  (const Cell*);
       friend indx     const&nleafs  (const Cell*);
       friend indx     const&ncells  (const Cell*);
       friend unsigned const&number  (const Cell*);
@@ -274,7 +274,7 @@ namespace falcON {
       friend bool     is_branch     (const Cell*);
 #ifdef falcON_PROPER
       friend PeanoMap const&peano   (const Cell*);
-      friend uint8    const&localkey(const Cell*);
+      friend uint8_t  const&localkey(const Cell*);
 #endif
       //@}
       //------------------------------------------------------------------------
@@ -811,10 +811,10 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
 #ifdef falcON_PROPER
   inline PeanoMap const&peano(const OctTree::Cell*C) { return C->PEANO; }
-  inline uint8 const&localkey(const OctTree::Cell*C) { return C->KEY; }
+  inline uint8_t const&localkey(const OctTree::Cell*C) { return C->KEY; }
 #endif
-  inline uint8 const&level(const OctTree::Cell*C) { return C->LEVEL; }
-  inline uint8 const&octant(const OctTree::Cell*C) { return C->OCTANT; }
+  inline uint8_t const&level(const OctTree::Cell*C) { return C->LEVEL; }
+  inline uint8_t const&octant(const OctTree::Cell*C) { return C->OCTANT; }
   inline indx const&nleafs(const OctTree::Cell*C) { return C->NLEAFS; }
   inline indx const&ncells(const OctTree::Cell*C) { return C->NCELLS; }
   inline unsigned const&number(const OctTree::Cell*C) { return C->NUMBER; }

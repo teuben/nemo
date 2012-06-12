@@ -62,6 +62,15 @@ namespace falcON {
   namespace meta {
     using namespace WDutils::meta;
   }
+  //
+//   typedef WDutils::int8_t  int8;
+//   typedef WDutils::int16_t int16;
+//   typedef WDutils::int32_t int32;
+//   typedef WDutils::int64_t int64;
+//   typedef WDutils::uint8_t  uint8;
+//   typedef WDutils::uint16_t uint16;
+//   typedef WDutils::uint32_t uint32;
+//   typedef WDutils::uint64_t uint64;
 }
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_utils_h

@@ -580,7 +580,7 @@ namespace falcON {
   class fieldset {
   public:
     /// type used in internal representation
-    typedef uint64 value_type;
+    typedef uint64_t value_type;
   private:
     value_type val;
   public:
@@ -962,7 +962,7 @@ namespace falcON {
   ///
   class bodytypes {
     /// type used in internal representation
-    typedef uint8 value_type;
+    typedef uint8_t value_type;
   private:
     value_type val;
     explicit bodytypes(int i) : val(i) {}

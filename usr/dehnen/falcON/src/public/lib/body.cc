@@ -1788,16 +1788,16 @@ namespace {
     swap = 0;
     // read record header and determine swapping necessity
     if(rec == 4) {
-      uint32 S;
-      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32));
+      uint32_t S;
+      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32_t));
       if(S != sizeof(GadgetHeader)) {
 	swap_bytes(S);
 	if(S == sizeof(GadgetHeader)) swap = 1;
 	else return false;
       }
     } else if(rec == 8) {
-      uint64 S;
-      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64));
+      uint64_t S;
+      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64_t));
       if(S != sizeof(GadgetHeader)) {
 	swap_bytes(S);
 	if(S == sizeof(GadgetHeader)) swap = 1;
@@ -1830,16 +1830,16 @@ namespace {
     }
     // read record trailer and check for consistency
     if(rec == 4) {
-      uint32 S;
-      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32));
+      uint32_t S;
+      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint32_t));
       if(swap) swap_bytes(S);
       if(S != sizeof(GadgetHeader)) {
 	falcON_Warning("GadgetHeader::Read(): record size mismatch\n");
 	return false;
       }
     } else if(rec == 8) {
-      uint64 S;
-      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64));
+      uint64_t S;
+      in.read(static_cast<char*>(static_cast<void*>(&S)), sizeof(uint64_t));
       if(swap) swap_bytes(S);
       if(S != sizeof(GadgetHeader)) {
 	falcON_Warning("GadgetHeader::Read(): record size mismatch\n");
