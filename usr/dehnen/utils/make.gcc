@@ -37,7 +37,7 @@ OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
-CXXFLAGS	:= $(OPTFLAGS)
+CXXFLAGS	:= -std=c++0x $(OPTFLAGS)
 LDFLAGS		:= -shared -fopenmp $(PROFLAGS)
 
 # end

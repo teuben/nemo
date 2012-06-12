@@ -962,6 +962,7 @@ namespace WDutils {
     const X   half    = X(0.5);
     const X   one     = X(1);
     const int MaxIter = sizeof(X)*13;
+    const X   eps     = std::numeric_limits<X>::epsilon();
     // copy M to A, set V to unity, copy diagonal of A to B and D
     X A[N][N], B[N], Z[N];
     for(int ip=0; ip!=N; ++ip) {
@@ -981,28 +982,27 @@ namespace WDutils {
       for(int ip=0; ip!=N-1; ++ip)
 	for(int iq=ip+1; iq!=N; ++iq)
 	  sm += abs(A[ip][iq]);
-      if(sm == zero) return;
+      if(sm <= zero) return;
       X tresh = iter<3? sm/X(5*N*N) : zero;
       for(int ip=0; ip!=N-1; ++ip) {
 	for(int iq=ip+1; iq!=N; ++iq) {
-	  X g = 100 * abs(A[ip][iq]);
-	  if(iter > 3                    &&
-	     abs(D[ip])+g == abs(D[ip])  &&
-	     abs(D[iq])+g == abs(D[iq])     )
+	  X a = A[ip][iq];
+	  X g = 100 * abs(a);
+	  if(iter>3 && g <= eps * abs(D[ip]) && g <= eps * abs(D[iq]))
 	    A[ip][iq] = zero;
-	  else if(abs(A[ip][iq]) > tresh) {
+	  else if(abs(a) > tresh) {
 	    X h = D[iq]-D[ip], t;
-	    if(abs(h)+g == abs(h))
+	    if(g <= eps*abs(h))
 	      t = A[ip][iq]/h;
 	    else {
-	      X theta = half*h/A[ip][iq];
+	      X theta = half*h/a;
 	      t = one/(abs(theta)+sqrt(one+theta*theta));
 	      if(theta < zero) t = -t;
 	    }
 	    X c   = one/sqrt(one+t*t);
 	    X s   = t*c;
 	    X tau = s/(one+c);
-	    h     = t*A[ip][iq];
+	    h     = t*a;
 	    Z[ip] -= h;
 	    Z[iq] += h;
 	    D[ip] -= h;
@@ -1015,10 +1015,10 @@ namespace WDutils {
     M[i][j] = g-s*(h+g*tau);			\
     M[k][l] = h+s*(g-h*tau);			\
   }
-	    for(int j=0;    j!=ip; ++j) Rotate(A,j,ip,j,iq);
-	    for(int j=ip+1; j!=iq; ++j) Rotate(A,ip,j,j,iq);
-	    for(int j=iq+1; j!=N;  ++j) Rotate(A,ip,j,iq,j);
-	    for(int j=0;    j!=N;  ++j) Rotate(V,j,ip,j,iq);
+	    for(int j=0;    j<ip; ++j) Rotate(A,j,ip,j,iq);
+	    for(int j=ip+1; j<iq; ++j) Rotate(A,ip,j,j,iq);
+	    for(int j=iq+1; j<N;  ++j) Rotate(A,ip,j,iq,j);
+	    for(int j=0;    j<N;  ++j) Rotate(V,j,ip,j,iq);
 #undef Rotate
 	    ++R;
 	  }

@@ -187,13 +187,13 @@ namespace WDutils {
   using std::exp;
   /// provide log(x) for built-in floating-point types
   using std::log;
-#if defined(linux) || defined(__DARWIN_UNIX03)
+#if defined(__linux) || defined(__DARWIN_UNIX03)
   /// provide cube-root(x) for built-in floating-point types
   using ::cbrt;
 #else
   /// single-precision provide cube-root(x)
   inline float cbrt(float x)
-  { return float( std::pow( double(x), 0.333333333333333333333 ) ); 
+  { return float( std::pow( double(x), 0.333333333333333333333 ) ); }
   /// double-precision provide cube-root(x)
   inline double cbrt(double x)
   { return std::pow( x, 0.333333333333333333333 ); }

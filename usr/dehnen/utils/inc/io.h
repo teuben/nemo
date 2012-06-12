@@ -439,7 +439,7 @@ namespace WDutils {
     ///       essentially tests for existence and read permission.
     static bool file_exists(const char*fname)
     {
-#ifdef unix
+#ifdef __unix
       // simply use the access system call. F_OK asks for existence only.
       return 0 == access(fname, F_OK);
 #else

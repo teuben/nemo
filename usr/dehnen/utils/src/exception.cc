@@ -38,7 +38,7 @@
 #  include <omp.h>
 #endif
 extern "C" {
-#if defined(unix) || defined(__DARWIN_UNIX03)
+#if defined(__unix) || defined(__DARWIN_UNIX03)
 #  include <unistd.h>
 #  include <sys/time.h>
 #endif
@@ -65,7 +65,7 @@ WDutils::RunInfo::RunInfo()
   try {
     // set wall-clock time
     {
-#if defined(unix) || defined(__DARWIN_UNIX03)
+#if defined(__unix) || defined(__DARWIN_UNIX03)
       timeval now;
       gettimeofday(&now, NULL);
       __sec = now.tv_sec;
@@ -84,7 +84,7 @@ WDutils::RunInfo::RunInfo()
       SNprintf(__time,100,ctime(&now));
       __time[24] = 0;
     }
-#if defined(unix) || defined(__DARWIN_UNIX03)
+#if defined(__unix) || defined(__DARWIN_UNIX03)
     // set host name
     {
       gethostname(__host,100);
@@ -128,7 +128,7 @@ WDutils::RunInfo::RunInfo()
 	}
       }
     }
-#else // unix
+#else // __unix
     {
       SNprintf(__host,100,"unknown.host");
       SNprintf(__user,100,"unknown.user");
@@ -187,7 +187,7 @@ void WDutils::RunInfo::header(std::ostream&out)
   }
 }
 //
-#if defined(unix) || defined(__DARWIN_UNIX03)
+#if defined(__unix) || defined(__DARWIN_UNIX03)
 double WDutils::RunInfo::WallClock()
 {
   timeval now;

@@ -95,11 +95,11 @@ namespace WDutils {
     //@{
     typedef __X             real;             ///< floating point type: position
     typedef tupel<__D,real> point;            ///< type: positions
-    typedef uint32          particle_key;     ///< type: indexing particles
-    typedef uint32          count_type;       ///< type: indexing leafs & cells
-    typedef uint8           depth_type;       ///< type: tree depth & level
-    typedef uint8           octant_type;      ///< type: octant and # cell kids
-    typedef uint16          local_count;      ///< type: # leaf kids
+    typedef uint32_t        particle_key;     ///< type: indexing particles
+    typedef uint32_t        count_type;       ///< type: indexing leafs & cells
+    typedef uint8_t         depth_type;       ///< type: tree depth & level
+    typedef uint8_t         octant_type;      ///< type: octant and # cell kids
+    typedef uint16_t        local_count;      ///< type: # leaf kids
     typedef Geometry::cube<__D,real> cube;    ///< type: cubic box
     typedef SSE::Extend16<point> point16;
     typedef SSE::Extend16<cube>  cube16;

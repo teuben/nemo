@@ -78,10 +78,10 @@ namespace WDutils {
     }
     if(failed || (n && t==0))
       throw Thrower(c,f,l)("allocation of %u '%s' (%u bytes) failed\n",
-			   uint32(n),nameof(T),uint32(n*sizeof(T)));
+			   uint32_t(n),nameof(T),uint32_t(n*sizeof(T)));
     DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
 				"allocated %u %s = %u bytes @ %p\n",
-				uint32(n),nameof(T),uint32(n*sizeof(T)),
+				uint32_t(n),nameof(T),uint32_t(n*sizeof(T)),
 				static_cast<void*>(t));
     return t;
   }
@@ -306,11 +306,11 @@ namespace WDutils {
     if(failed || (n && t==0))
       throw Thrower(c,f,l)
 	("allocation of %u '%s' (%u bytes) aligned to 16 failed\n",
-	 uint32(k),nameof(T),uint32(n));
+	 uint32_t(k),nameof(T),uint32_t(n));
     DebugInformation(c,f,l,lib)
       (WDutilsAllocDebugLevel,
        "allocated %u %s = %u bytes aligned to 16 @ %p\n",
-       uint32(k),nameof(T),uint32(n),t);
+       uint32_t(k),nameof(T),uint32_t(n),t);
     return static_cast<T*>(t);
 #else // __GNUC__ or __INTEL_COMPILER
     // linear memory model:                                                     
@@ -1443,11 +1443,11 @@ namespace WDutils {
   };
   // ///////////////////////////////////////////////////////////////////////////
   // ///////////////////////////////////////////////////////////////////////////
-  class BitArray : private Array<uint64>
+  class BitArray : private Array<uint64_t>
   {
-    typedef Array<uint64> Base;
-    static const uint64 null = 0;
-    static const uint64 full = ~null;
+    typedef Array<uint64_t> Base;
+    static const uint64_t null = 0;
+    static const uint64_t full = ~null;
     static unsigned rsize(unsigned n)
     { return (n>>6) + (n&full)? 1 : 0; }
   public:

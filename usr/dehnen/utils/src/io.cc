@@ -175,13 +175,13 @@ void input::close() {
 unsigned WDutils::FortranIRec::read_size() throw(WDutils::exception)
 {
   if(HSZE == 4) {
-    uint32 S;
-    IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32));
+    uint32_t S;
+    IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32_t));
     if(SWAP) swap_bytes(S);
     return S;
   } else if(HSZE == 8) {
-    uint64 S;
-    IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64));
+    uint64_t S;
+    IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64_t));
     if(SWAP) swap_bytes(S);
     return S;
   } else 
@@ -246,11 +246,11 @@ void WDutils::FortranIRec::close() throw(WDutils::exception)
 void WDutils::FortranORec::write_size() throw(WDutils::exception)
 {
   if(HSZE == 4) {
-    uint32 S = SIZE;
-    OUT.write(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32));
+    uint32_t S = SIZE;
+    OUT.write(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32_t));
   } else if(HSZE == 8) {
-    uint64 S;
-    OUT.write(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64));
+    uint64_t S;
+    OUT.write(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64_t));
   } else 
     throw exception("FortranORec: header size must be 4 or 8\n");
 }

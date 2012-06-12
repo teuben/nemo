@@ -261,11 +261,11 @@ void WDutils::Radix::Sort(unsigned N, float*X, float*Y)
   static const int n0=0x800,n2=0x400;
   static const int m0=0x7ff,m2=0x3ff;
   int B0[n0+n0+n2]={0},*B1=B0+n0,*B2=B1+n0;
-  uint32*iX=reinterpret_cast<uint32*>(X);
-  uint32*iY=reinterpret_cast<uint32*>(Y);
-  for(uint32 i=0; i!=N; ++i) {
-    register uint32 f=iX[i];
-    iY[i]=f^=-int32(f>>31)|0x80000000;
+  uint32_t*iX=reinterpret_cast<uint32_t*>(X);
+  uint32_t*iY=reinterpret_cast<uint32_t*>(Y);
+  for(uint32_t i=0; i!=N; ++i) {
+    register uint32_t f=iX[i];
+    iY[i]=f^=-int32_t(f>>31)|0x80000000;
     B0[f       &m0]++;
     B1[(f>>=11)&m0]++;
     B2[(f>>=11)&m2]++;
@@ -273,50 +273,50 @@ void WDutils::Radix::Sort(unsigned N, float*X, float*Y)
   for(int i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
   for(int i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
   for(int i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-  for(uint32 i=0; i!=N; ++i) iX[B0[iY[i]     &m0]++] = iY[i];
-  for(uint32 i=0; i!=N; ++i) iY[B1[iX[i]>>11 &m0]++] = iX[i];
-  for(uint32 i=0; i!=N; ++i) {
-    register uint32 f=iY[i];
+  for(uint32_t i=0; i!=N; ++i) iX[B0[iY[i]     &m0]++] = iY[i];
+  for(uint32_t i=0; i!=N; ++i) iY[B1[iX[i]>>11 &m0]++] = iX[i];
+  for(uint32_t i=0; i!=N; ++i) {
+    register uint32_t f=iY[i];
     iX[B2[f>>22 &m2]++]=f^(((f>>31)-1)|0x80000000); 
   }
 }
 //
 void WDutils::Radix::Sort(unsigned N, double*X, double*Y)
 {
-  static const uint32 n0=0x800,n2=0x400, n=n0+n0+n2;
-  static const uint64 m0=0x7ff,m2=0x3ff;
-  uint32 B0[n]={0},*B1=B0+n0,*B2=B1+n0;
-  uint64*iX=reinterpret_cast<uint64*>(X);
-  uint64*iY=reinterpret_cast<uint64*>(Y);
+  static const uint32_t n0=0x800,n2=0x400, n=n0+n0+n2;
+  static const uint64_t m0=0x7ff,m2=0x3ff;
+  uint32_t B0[n]={0},*B1=B0+n0,*B2=B1+n0;
+  uint64_t*iX=reinterpret_cast<uint64_t*>(X);
+  uint64_t*iY=reinterpret_cast<uint64_t*>(Y);
   // sort the lower 32 bits
-  for(uint32 i=0; i!=N; ++i) {
-    register uint64 f=iX[i];
-    iX[i]=f^=-int64(f>>63) | 0x8000000000000000ll;
+  for(uint32_t i=0; i!=N; ++i) {
+    register uint64_t f=iX[i];
+    iX[i]=f^=-int64_t(f>>63) | 0x8000000000000000ll;
     B0[f       &m0] ++;
     B1[(f>>=11)&m0] ++;
     B2[(f>>=11)&m2] ++;
   }
-  for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-  for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-  for(uint32 i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-  for(uint32 i=0; i!=N; ++i) iY[B0[iX[i]     &m0]++] = iX[i];
-  for(uint32 i=0; i!=N; ++i) iX[B1[iY[i]>>11 &m0]++] = iY[i];
-  for(uint32 i=0; i!=N; ++i) iY[B2[iX[i]>>22 &m2]++] = iX[i];
+  for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
+  for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
+  for(uint32_t i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
+  for(uint32_t i=0; i!=N; ++i) iY[B0[iX[i]     &m0]++] = iX[i];
+  for(uint32_t i=0; i!=N; ++i) iX[B1[iY[i]>>11 &m0]++] = iY[i];
+  for(uint32_t i=0; i!=N; ++i) iY[B2[iX[i]>>22 &m2]++] = iX[i];
   // sort the upper 32 bits
-  for(uint32 i=0; i!=n; ++i) B0[i]=0;
-  for(uint32 i=0; i!=N; ++i) {
-    register uint64 f=iY[i];
+  for(uint32_t i=0; i!=n; ++i) B0[i]=0;
+  for(uint32_t i=0; i!=N; ++i) {
+    register uint64_t f=iY[i];
     B0[(f>>=32)&m0] ++;
     B1[(f>>=11)&m0] ++;
     B2[(f>>=11)&m2] ++;
   }
-  for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-  for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-  for(uint32 i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-  for(uint32 i=0; i!=N; ++i) iX[B0[iY[i]>>32 &m0]++] = iY[i];
-  for(uint32 i=0; i!=N; ++i) iY[B1[iX[i]>>43 &m0]++] = iX[i];
-  for(uint32 i=0; i!=N; ++i) {
-    register uint64 f = iY[i];
+  for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
+  for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
+  for(uint32_t i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
+  for(uint32_t i=0; i!=N; ++i) iX[B0[iY[i]>>32 &m0]++] = iY[i];
+  for(uint32_t i=0; i!=N; ++i) iY[B1[iX[i]>>43 &m0]++] = iX[i];
+  for(uint32_t i=0; i!=N; ++i) {
+    register uint64_t f = iY[i];
     iX[B2[f    >>54 &m2]++] =  f ^ (((f>>63) - 1) | 0x8000000000000000ll);
   }
 }

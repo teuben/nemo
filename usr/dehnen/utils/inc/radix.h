@@ -56,14 +56,14 @@ namespace WDutils {
       WDutilsStaticAssert(std::numeric_limits<integer_type>::is_integer);
       static void sort(unsigned N, input_type*X, input_type*Y)
       {
-	uint32 B0[256] = {0};
+	uint32_t B0[256] = {0};
 	static const integer_type m=0xff;
-	for(uint32 i=0; i!=N; ++i) {
+	for(uint32_t i=0; i!=N; ++i) {
 	  register integer_type f=traits::integer(Y[i]=X[i]);
 	  B0[f&m]++;
 	}
-	for(uint32 i=0,s=0,t; i!=256; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-	for(uint32 i=0; i!=N; ++i) X[B0[traits::integer(Y[i])&m]++]=Y[i];
+	for(uint32_t i=0,s=0,t; i!=256; ++i) { t=B0[i]; B0[i]=s; s+=t; }
+	for(uint32_t i=0; i!=N; ++i) X[B0[traits::integer(Y[i])&m]++]=Y[i];
       }
     };
     /// stable radix sort of the lowest 16 bits
@@ -75,17 +75,17 @@ namespace WDutils {
 			  sizeof(integer_type)>=2);
       static void sort(unsigned N, input_type*X, input_type*Y)
       {
-	uint32 B0[512]={0},*B1=B0+256;
+	uint32_t B0[512]={0},*B1=B0+256;
 	static const integer_type m=0xff;
-	for(uint32 i=0; i!=N; ++i) {
+	for(uint32_t i=0; i!=N; ++i) {
 	  register integer_type f=traits::integer(X[i]);
 	  B0[ f     &m] ++;
 	  B1[(f>>=8)&m] ++;
 	}
-	for(uint32 i=0,s=0,t; i!=256; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-	for(uint32 i=0,s=0,t; i!=256; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-	for(uint32 i=0; i!=N; ++i) Y[B0[traits::integer(X[i])   &m]++]=X[i];
-	for(uint32 i=0; i!=N; ++i) X[B1[traits::integer(Y[i])>>8&m]++]=Y[i];
+	for(uint32_t i=0,s=0,t; i!=256; ++i) { t=B0[i]; B0[i]=s; s+=t; }
+	for(uint32_t i=0,s=0,t; i!=256; ++i) { t=B1[i]; B1[i]=s; s+=t; }
+	for(uint32_t i=0; i!=N; ++i) Y[B0[traits::integer(X[i])   &m]++]=X[i];
+	for(uint32_t i=0; i!=N; ++i) X[B1[traits::integer(Y[i])>>8&m]++]=Y[i];
       }
     };
     /// stable radix sort of the lowest 32 bits
@@ -97,21 +97,24 @@ namespace WDutils {
 			  sizeof(integer_type)>=4);
       static void sort(unsigned N, input_type*X, input_type*Y)
       {
-	static const uint32  n0=0x800,n2=0x400;
+	static const uint32_t  n0=0x800,n2=0x400;
 	static const integer_type m0=0x7ff,m2=0x3ff;
-	uint32 B0[n0+n0+n2]={0},*B1=B0+n0,*B2=B1+n0;
-	for(uint32 i=0; i!=N; ++i) {
+	uint32_t B0[n0+n0+n2]={0},*B1=B0+n0,*B2=B1+n0;
+	for(uint32_t i=0; i!=N; ++i) {
 	  register integer_type f=traits::integer(Y[i]=X[i]);
 	  B0[ f      &m0] ++;
 	  B1[(f>>=11)&m0] ++;
 	  B2[(f>>=11)&m2] ++;
 	}
-	for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-	for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-	for(uint32 i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-	for(uint32 i=0; i!=N; ++i) X[B0[traits::integer(Y[i])     &m0]++]=Y[i];
-	for(uint32 i=0; i!=N; ++i) Y[B1[traits::integer(X[i])>>11 &m0]++]=X[i];
-	for(uint32 i=0; i!=N; ++i) X[B2[traits::integer(Y[i])>>22 &m2]++]=Y[i];
+	for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
+	for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
+	for(uint32_t i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
+	for(uint32_t i=0; i!=N; ++i)
+	  X[B0[traits::integer(Y[i])     &m0]++]=Y[i];
+	for(uint32_t i=0; i!=N; ++i)
+	  Y[B1[traits::integer(X[i])>>11 &m0]++]=X[i];
+	for(uint32_t i=0; i!=N; ++i)
+	  X[B2[traits::integer(Y[i])>>22 &m2]++]=Y[i];
       }
     };
     /// stable radix sort of the lowest 64 bits
@@ -123,36 +126,42 @@ namespace WDutils {
 			  sizeof(integer_type)>=8);
       static void sort(unsigned N, input_type*X, input_type*Y)
       {
-	static const uint32  n0=0x800,n2=0x400,n=n0+n0+n2;
+	static const uint32_t  n0=0x800,n2=0x400,n=n0+n0+n2;
 	static const integer_type m0=0x7ff,m2=0x3ff;
-	uint32 B0[n]={0},*B1=B0+n0,*B2=B1+n0;
+	uint32_t B0[n]={0},*B1=B0+n0,*B2=B1+n0;
 	// sort the lower 32 bits
-	for(uint32 i=0; i!=N; ++i) {
-	  register uint64 f=traits::integer(X[i]);
+	for(uint32_t i=0; i!=N; ++i) {
+	  register uint64_t f=traits::integer(X[i]);
 	  B0[ f      &m0] ++;
 	  B1[(f>>=11)&m0] ++;
 	  B2[(f>>=11)&m2] ++;
 	}
-	for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-	for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-	for(uint32 i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-	for(uint32 i=0; i!=N; ++i) Y[B0[traits::integer(X[i])     &m0]++]=X[i];
-	for(uint32 i=0; i!=N; ++i) X[B1[traits::integer(Y[i])>>11 &m0]++]=Y[i];
-	for(uint32 i=0; i!=N; ++i) Y[B2[traits::integer(X[i])>>22 &m2]++]=X[i];
+	for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
+	for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
+	for(uint32_t i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
+	for(uint32_t i=0; i!=N; ++i)
+	  Y[B0[traits::integer(X[i])     &m0]++]=X[i];
+	for(uint32_t i=0; i!=N; ++i)
+	  X[B1[traits::integer(Y[i])>>11 &m0]++]=Y[i];
+	for(uint32_t i=0; i!=N; ++i)
+	  Y[B2[traits::integer(X[i])>>22 &m2]++]=X[i];
 	// sort the upper 32 bits
-	for(uint32 i=0; i!=n; ++i) B0[i]=0;
-	for(uint32 i=0; i!=N; ++i) {
-	  register uint64 f=traits::integer(Y[i]);
+	for(uint32_t i=0; i!=n; ++i) B0[i]=0;
+	for(uint32_t i=0; i!=N; ++i) {
+	  register uint64_t f=traits::integer(Y[i]);
 	  B0[(f>>=32)&m0] ++;
 	  B1[(f>>=11)&m0] ++;
 	  B2[(f>>=11)&m2] ++;
 	}
-	for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
-	for(uint32 i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
-	for(uint32 i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
-	for(uint32 i=0; i!=N; ++i) X[B0[traits::integer(Y[i])>>32 &m0]++]=Y[i];
-	for(uint32 i=0; i!=N; ++i) Y[B1[traits::integer(X[i])>>43 &m0]++]=X[i];
-	for(uint32 i=0; i!=N; ++i) X[B2[traits::integer(Y[i])>>54 &m2]++]=Y[i];
+	for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B0[i]; B0[i]=s; s+=t; }
+	for(uint32_t i=0,s=0,t; i!=n0; ++i) { t=B1[i]; B1[i]=s; s+=t; }
+	for(uint32_t i=0,s=0,t; i!=n2; ++i) { t=B2[i]; B2[i]=s; s+=t; }
+	for(uint32_t i=0; i!=N; ++i)
+	  X[B0[traits::integer(Y[i])>>32 &m0]++]=Y[i];
+	for(uint32_t i=0; i!=N; ++i)
+	  Y[B1[traits::integer(X[i])>>43 &m0]++]=X[i];
+	for(uint32_t i=0; i!=N; ++i)
+	  X[B2[traits::integer(Y[i])>>54 &m2]++]=Y[i];
       }
     };
 
@@ -171,28 +180,28 @@ namespace WDutils {
 #define WDutilsRadixSortTraits(INT)	\
     template<> struct SortTraits<INT>	\
       : public SortTraitsInteger<INT> {}
-    WDutilsRadixSortTraits(int8);
-    WDutilsRadixSortTraits(int16);
-    WDutilsRadixSortTraits(int32);
-    WDutilsRadixSortTraits(int64);
-    WDutilsRadixSortTraits(uint8);
-    WDutilsRadixSortTraits(uint16);
-    WDutilsRadixSortTraits(uint32);
-    WDutilsRadixSortTraits(uint64);
+    WDutilsRadixSortTraits(int8_t);
+    WDutilsRadixSortTraits(int16_t);
+    WDutilsRadixSortTraits(int32_t);
+    WDutilsRadixSortTraits(int64_t);
+    WDutilsRadixSortTraits(uint8_t);
+    WDutilsRadixSortTraits(uint16_t);
+    WDutilsRadixSortTraits(uint32_t);
+    WDutilsRadixSortTraits(uint64_t);
 #undef WDutilsRadixSortTraits
     /// SortTraits for floats
     /// \detail
     /// for implementing Sort of structs with a float member to be sorted on
-    /// \note the order-preserving map from float to uint32 is due to Michael
+    /// \note the order-preserving map from float to uint32_t is due to Michael
     ///       Herf (see http://www.stereopsis.com/radix.html)
     template<> struct SortTraits<float>
     {
       typedef float  input_type;
-      typedef uint32 integer_type;
+      typedef uint32_t integer_type;
       static integer_type integer(input_type const&x)
       { return forward(reinterpret_cast<integer_type const&>(x)); }
       static integer_type forward_map(integer_type f)
-      { return -int32(f>>31) | 0x80000000; }
+      { return -int32_t(f>>31) | 0x80000000; }
       static integer_type backward_map(integer_type f)
       { return ((f>>31) - 1) | 0x80000000; }
       static integer_type forward(integer_type f)
@@ -203,17 +212,17 @@ namespace WDutils {
     /// SortTraits for doubles
     /// \detail
     /// for implementing Sort of structs with a double member to be sorted on
-    /// \note the order-preserving map from double to uint64 is based on the
-    ///       equivalent map between float and uint32 due to Michael Herf see
+    /// \note the order-preserving map from double to uint64_t is based on the
+    ///       equivalent map between float and uint32_t due to Michael Herf see
     ///       http://www.stereopsis.com/radix.html
     template<> struct SortTraits<double>
     {
       typedef double input_type;
-      typedef uint64 integer_type;
+      typedef uint64_t integer_type;
       static integer_type integer(double const& x)
       { return forward(reinterpret_cast<integer_type const&>(x)); }
       static integer_type forward_map(integer_type f)
-      { return -int64(f>>63) | 0x8000000000000000ll; }
+      { return -int64_t(f>>63) | 0x8000000000000000ll; }
       static integer_type backward_map(integer_type f)
       { return ((f>>63) - 1) | 0x8000000000000000ll; }
       static integer_type forward(integer_type f)
@@ -243,7 +252,7 @@ namespace WDutils {
     /// \param[in]      Y  auxiliary array of @a N @c floats
     /// \note radix sort provides stable sorting and costs O(N) time
     /// \note we map to 32-bit unsigned integers, sort them, and then map back.
-    ///       the order-preserving map from float to uint32 is due to Michael
+    ///       the order-preserving map from float to uint32_t is due to Michael
     ///       Herf (see http://www.stereopsis.com/radix.html)
     void Sort(unsigned N, float*X, float*Y);
     /// radix sort of double-precision floating point numbers
@@ -252,8 +261,8 @@ namespace WDutils {
     /// \param[in]      Y  auxiliary array of @a N @c doubles
     /// \note radix sort provides stable sorting and costs O(N) time
     /// \note we map to 64-bit unsigned integers, sort them, and then map back.
-    ///       the order-preserving map from double to uint64 is based on the
-    ///       equivalent map between float and uint32 due to Michael Herf see
+    ///       the order-preserving map from double to uint64_t is based on the
+    ///       equivalent map between float and uint32_t due to Michael Herf see
     ///       http://www.stereopsis.com/radix.html
     void Sort(unsigned N, double*X, double*Y);
     /// radix sort
@@ -314,7 +323,7 @@ namespace WDutils {
     /// \param[in]      w  warn if called from within OMP parallel region?
     /// \note radix sort provides stable sorting and costs O(N) time
     /// \note we map to 32-bit unsigned integers, sort them, and then map back.
-    ///       the order-preserving map from float to uint32 is due to Michael
+    ///       the order-preserving map from float to uint32_t is due to Michael
     ///       Herf (see http://www.stereopsis.com/radix.html)
     /// \note If called from within an OMP parallel region with >1 threads, we
     ///       assume that the data refer to a shared array and sort them. If you
@@ -332,7 +341,7 @@ namespace WDutils {
     /// \param[in]      w  warn if called from within OMP parallel region?
     /// \note radix sort provides stable sorting and costs O(N) time
     /// \note we map to 32-bit unsigned integers, sort them, and then map back.
-    ///       the order-preserving map from float to uint32 is due to Michael
+    ///       the order-preserving map from float to uint32_t is due to Michael
     ///       Herf (see http://www.stereopsis.com/radix.html)
     /// \note allocates and de-allocates an auxiliary array
     /// \note If called from within an OMP parallel region with >1 threads, we
@@ -352,8 +361,8 @@ namespace WDutils {
     /// \param[in]      w  warn if called from within OMP parallel region?
     /// \note radix sort provides stable sorting and costs O(N) time
     /// \note we map to 64-bit unsigned integers, sort them, and then map back.
-    ///       the order-preserving map from double to uint64 is based on the
-    ///       equivalent map between float and uint32 due to Michael Herf see
+    ///       the order-preserving map from double to uint64_t is based on the
+    ///       equivalent map between float and uint32_t due to Michael Herf see
     ///       http://www.stereopsis.com/radix.html
     /// \note If called from within an OMP parallel region with >1 threads, we
     ///       assume that the data refer to a shared array and sort them. If you
@@ -371,8 +380,8 @@ namespace WDutils {
     /// \param[in]      w  warn if called from within OMP parallel region?
     /// \note radix sort provides stable sorting and costs O(N) time.
     /// \note we map to 64-bit unsigned integers, sort them, and then map back.
-    ///       the order-preserving map from double to uint64 is based on the
-    ///       equivalent map between float and uint32 due to Michael Herf see
+    ///       the order-preserving map from double to uint64_t is based on the
+    ///       equivalent map between float and uint32_t due to Michael Herf see
     ///       http://www.stereopsis.com/radix.html
     /// \note allocates and de-allocates an auxiliary array
     /// \note If called from within an OMP parallel region with >1 threads, we

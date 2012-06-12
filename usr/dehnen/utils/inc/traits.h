@@ -9,7 +9,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2005-2007, 2010-2011 Walter Dehnen
+// Copyright (C) 2005-2007, 2010-2012 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -29,9 +29,15 @@
 #ifndef WDutils_included_traits_h
 #define WDutils_included_traits_h
 
-#ifndef WDutils_included_typeinfo_h
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+# ifndef WDutils_included_cstdint
+#  include <cstdint>
+#  define WDutils_included_cstdint
+# endif
+#endif
+#ifndef WDutils_included_typeinfo
 #  include <typeinfo>
-#  define WDutils_included_typeinfo_h
+#  define WDutils_included_typeinfo
 #endif
 #ifndef WDutils_included_exception_h
 #  include <exception.h>
@@ -47,6 +53,27 @@ namespace WDutils {
   // integer types of given size
   //
   // ///////////////////////////////////////////////////////////////////////////
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+  using std::int8_t;
+  using std::int16_t;
+  using std::int32_t;
+  using std::int64_t;
+  using std::uint8_t;
+  using std::uint16_t;
+  using std::uint32_t;
+  using std::uint64_t;
+  namespace meta {
+    template<int WORDS> struct IntTypeWords;
+    template<> struct IntTypeWords<1>
+    { typedef  int8_t  integer_s; typedef uint8_t  integer_u; };
+    template<> struct IntTypeWords<2>
+    { typedef  int16_t integer_s; typedef uint16_t integer_u; };
+    template<> struct IntTypeWords<4>
+    { typedef  int32_t integer_s; typedef uint32_t integer_u; };
+    template<> struct IntTypeWords<8>
+    { typedef  int64_t integer_s; typedef uint64_t integer_u; };
+  }
+#else
   namespace meta {
     template<typename I, typename U> struct __ISIZE {
       typedef I integer_s;
@@ -67,7 +94,7 @@ namespace WDutils {
     template<> struct __ITRAITS<4> :
       public __ISIZE<long long, unsigned long long> {};
 
-    template<int WORDS> struct __IWORDS
+    template<int WORDS> struct IntTypeWords
     {
     private:
       static const int TYPE = 
@@ -83,15 +110,15 @@ namespace WDutils {
       WDutilsStaticAssert(sizeof(integer_s) == WORDS);
     };
   } // namespace meta {
-
-  typedef meta::__IWORDS<1>::integer_s int8;   ///<   signed integer of  8 bytes
-  typedef meta::__IWORDS<2>::integer_s int16;  ///<   signed integer of 16 bytes
-  typedef meta::__IWORDS<4>::integer_s int32;  ///<   signed integer of 32 bytes
-  typedef meta::__IWORDS<8>::integer_s int64;  ///<   signed integer of 64 bytes
-  typedef meta::__IWORDS<1>::integer_u uint8;  ///< unsigned integer of  8 bytes
-  typedef meta::__IWORDS<2>::integer_u uint16; ///< unsigned integer of 16 bytes
-  typedef meta::__IWORDS<4>::integer_u uint32; ///< unsigned integer of 32 bytes
-  typedef meta::__IWORDS<8>::integer_u uint64; ///< unsigned integer of 64 bytes
+  typedef meta::IntTypeWords<1>::integer_s int8_t;
+  typedef meta::IntTypeWords<2>::integer_s int16_t;
+  typedef meta::IntTypeWords<4>::integer_s int32_t;
+  typedef meta::IntTypeWords<8>::integer_s int64_t;
+  typedef meta::IntTypeWords<1>::integer_u uint8_t;
+  typedef meta::IntTypeWords<2>::integer_u uint16_t;
+  typedef meta::IntTypeWords<4>::integer_u uint32_t;
+  typedef meta::IntTypeWords<8>::integer_u uint64_t;
+#endif
   //
   // class WDutils::traits<type>
   //

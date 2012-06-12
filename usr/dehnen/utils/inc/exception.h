@@ -110,7 +110,7 @@ namespace WDutils {
     int  __mpi_size;
     int  __omp_size;
     int  __omp_proc;
-#if defined(unix) || defined(__DARWIN_UNIX03)
+#if defined(__unix) || defined(__DARWIN_UNIX03)
     long long __sec, __usec;
 #elif defined(WIN32)
     long long __timecount;
@@ -198,13 +198,13 @@ namespace WDutils {
     { return Info.__debug >= depth; }
     /// print a log-file header
     static void header(std::ostream&out);
-#if defined(unix) || defined(__DARWIN_UNIX03) || defined(WIN32)
+#if defined(__unix) || defined(__DARWIN_UNIX03) || defined(WIN32)
     /// time in seconds since start of the program (or more accurately since
     /// construction of the RunInfo object)
     /// \return time in seconds
     static double WallClock();
 #endif
-#if defined(unix) || defined(__DARWIN_UNIX03)
+#if defined(__unix) || defined(__DARWIN_UNIX03)
     /// \param[out] sec   full seconds since start of the program
     /// \param[out] usec  micro seconds since start of the program
     static void WallClock(unsigned&sec, unsigned&usec);
@@ -485,6 +485,10 @@ namespace WDutils {
   //
   //  macro for compile-time assertion, stolen from the boost library
   //
+#ifdef __GXX_EXPERIMENTAL_CXX0X__
+  /// \brief macro for compile-time assertion
+# define WDutilsStaticAssert(TEST) static_assert(TEST,#TEST);
+#else
   template<bool> struct STATIC_ASSERTION_FAILURE;
   template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
   /// \brief macro for compile-time assertion
@@ -501,6 +505,7 @@ namespace WDutils {
   enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
     static_cast<bool>((TEST))>)					\
   }
+#endif
   /// \name assertion which throws an excpetion rather than abort
   //@{
   // is NDEBUG is defined, do nothing

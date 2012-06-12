@@ -134,7 +134,7 @@ namespace {
   /// \param[in] Ndot  # dots
   /// \param[in] Nmax  max # dots/octant
   template<int Dim>
-  inline size_t NBoxes(size_t Ndot, uint8 Nmax)
+  inline size_t NBoxes(size_t Ndot, uint8_t Nmax)
   {
     double
       x = double(400*Nmax+Ndot)/double(100*Nmax+Ndot);
@@ -175,7 +175,7 @@ namespace {
     /// \note We cannot rely on a default constructor being called when
     ///       allocating boxes for the tree (see documentation for block_alloc).
     struct __Box {
-      typedef typename meta::__IWORDS<Nsub>::integer_u ndl_type;
+      typedef typename meta::IntTypeWords<Nsub>::integer_u ndl_type;
       cube              CUB;           ///< box cubus
       void             *OCT[Nsub];     ///< octants
       // if 0 == NDL[i]          the octant is empty
@@ -183,11 +183,11 @@ namespace {
       // if      NDL[i]  > NMAX  the octant holds a box
       union {
 	ndl_type        NDl;
-	uint8           NDL[Nsub];     ///< # dots/octant
+	uint8_t         NDL[Nsub];     ///< # dots/octant
       };
       count_type        NUM;           ///< total # dots in box
-      uint8             NOC;           ///< number of octant occupied
-      uint8             LEV;           ///< tree level of box
+      uint8_t           NOC;           ///< number of octant occupied
+      uint8_t           LEV;           ///< tree level of box
     };
     typedef SSE::Extend16<__Box> Box;
     //
@@ -199,8 +199,8 @@ namespace {
     //@{
     count_type          NDOT;          ///< number of dots to load
     Dot          *const D0;            ///< begin of dots
-    const uint8         NMAX;          ///< maximum # particles/octant
-    const uint8         NMIN;          ///< minimum # particles/cell
+    const uint8_t       NMAX;          ///< maximum # particles/octant
+    const uint8_t       NMIN;          ///< minimum # particles/cell
     const bool          AVSPC;         ///< avoid single-parent cells
     const count_type    NMAX1;         ///< NMAX + 1
     depth_type          DEPTH;         ///< depth of linked tree
@@ -782,7 +782,7 @@ namespace WDutils {
     for(;;) {
       if(NCell(c)==0)
 	return c;
-      uint8 o=Geometry::Algorithms<0>::octant(box(c),x);
+      uint8_t o=Geometry::Algorithms<0>::octant(box(c),x);
       Cell cc=BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce || 
@@ -816,7 +816,7 @@ namespace WDutils {
       if(NCell(c)==0)
 	return c;
       // find sub-cell in same octant as x
-      uint8 o = 3&_mm_movemask_ps(_mm_cmplt_ps(C,X));
+      uint8_t o = 3&_mm_movemask_ps(_mm_cmplt_ps(C,X));
       Cell cc = BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       // non found: return c
@@ -847,7 +847,7 @@ namespace WDutils {
       return InvalidCell();
     for(;;) {
       if(NCell(c)==0) return c;
-      uint8 o = 7&_mm_movemask_ps(_mm_cmplt_ps(C,X));
+      uint8_t o = 7&_mm_movemask_ps(_mm_cmplt_ps(C,X));
       Cell cc = BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce)
@@ -881,7 +881,7 @@ namespace WDutils {
       return InvalidCell();
     for(;;) {
       if(NCell(c)==0) return c;
-      uint8 o = _mm_movemask_pd(_mm_cmplt_pd(C,X));
+      uint8_t o = _mm_movemask_pd(_mm_cmplt_pd(C,X));
       Cell cc = BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce) return c;
@@ -911,8 +911,8 @@ namespace WDutils {
       return InvalidCell();
     for(;;) {
       if(NCell(c)==0) return c;
-      uint8 o = _mm_movemask_pd(_mm_cmplt_pd(C0,X0)) |
-	(    (1&_mm_movemask_pd(_mm_cmplt_pd(C1,X1)))<<2) ;
+      uint8_t o = _mm_movemask_pd(_mm_cmplt_pd(C0,X0)) |
+	  (    (1&_mm_movemask_pd(_mm_cmplt_pd(C1,X1)))<<2) ;
       Cell cc = BeginCell(c), ce=EndCell(c);
       while(cc!=ce && o!=octant(cc)) ++cc;
       if(cc==ce) return c;
