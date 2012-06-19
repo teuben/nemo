@@ -42,11 +42,17 @@
 #  include <iomanip>
 #  define WDutils_included_iomanip
 #endif
-#ifndef WDutils_included_tupel_h
-#  include <tupel.h>
-#endif
 #ifndef WDutils_included_exception_h
 #  include <exception.h>
+#endif
+#if __cplusplus < 201103L
+# ifndef WDutils_included_tupel_h
+#  include <utils/tupel.h>
+# endif
+#else
+# ifndef WDutils_included_vector_h
+#  include <utils/vector.h>
+# endif
 #endif
 #ifndef WDutils_included_memory_h
 #  include <memory.h>
@@ -76,7 +82,11 @@ namespace WDutils {
     /// \name public types
     //@{
     typedef _X               real;    ///< type for scalars
+#if __cplusplus < 201103L
     typedef tupel<Dim,real>  point;   ///< type for positions
+#else
+    typedef vector<Dim,real>  point;  ///< type for positions
+#endif
     /// represents a particle in Dim-dimensional space.
     /// \note This type is designed to be memory minimal to reduce the costs
     ///       of splitting a list of dots (during box splitting).

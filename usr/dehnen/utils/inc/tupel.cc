@@ -110,20 +110,20 @@ namespace meta {
     typedef const X     cX;
     typedef taux<X,I-1> M;
   public:
-    /// used in tupel::tupel, in tupel::operator=(scalar), and in falcON
+    /// used in tupel::tupel, in tupel::operator=(scalar)
     template<typename S>
     static void s_as(X*a, S const&x)
     { 
       M::s_as(a,x);
       a[I] = x;
     }
-    /// used in tupel::reset(), and in falcON
+    /// used in tupel::reset()
     static void s_ze(X*a)
     {
       M::s_ze(a);
       a[I] = X(0);
     }
-    /// used in tupel::operator*=(), and in falcON
+    /// used in tupel::operator*=()
     template<typename S> static void s_ml(X*a, S const &x)
     {
       M::s_ml(a,x);

@@ -190,6 +190,7 @@ namespace WDutils {
     }
 #endif
     ;
+    ///
     template<> struct IntegerInverse<0> {};
     template<> struct IntegerInverse<1> {
       template<typename Real> static Real Inverse() { return Real(1); }
@@ -377,9 +378,9 @@ namespace WDutils {
     /// meta programming arithmetic with small non-negative integers
     /// \note specialisations for N=0,1,2,3
     template<int N> struct Integer : public IntegerInverse<N> {
-      IntegerInverse<N>::Inverse;
-      IntegerInverse<N>::Divide;
-      IntegerInverse<N>::Ratio;
+      using IntegerInverse<N>::Inverse;
+      using IntegerInverse<N>::Divide;
+      using IntegerInverse<N>::Ratio;
       /// modulus with 2
       static const int Odd = N & 2;
       /// half rounded down to integer
@@ -432,9 +433,9 @@ namespace WDutils {
       static const int LargestPow2 = 1;
       static const int Log2 = 0;
       static const int Factorial = 1;
-      IntegerInverse<1>::Inverse;
-      IntegerInverse<1>::Divide;
-      IntegerInverse<1>::Ratio;
+      using IntegerInverse<1>::Inverse;
+      using IntegerInverse<1>::Divide;
+      using IntegerInverse<1>::Ratio;
       template<typename Real> static void Multiply    (Real& ) {}
       template<typename Real> static Real Product     (Real X) { return X; }
       template<typename Real> static void Exponentiate(Real& ) {}
@@ -449,9 +450,9 @@ namespace WDutils {
       static const int LargestPow2 = 2;
       static const int Log2 = 1;
       static const int Factorial = 2;
-      IntegerInverse<2>::Inverse;
-      IntegerInverse<2>::Divide;
-      IntegerInverse<2>::Ratio;
+      using IntegerInverse<2>::Inverse;
+      using IntegerInverse<2>::Divide;
+      using IntegerInverse<2>::Ratio;
       template<typename Real> static void Multiply    (Real&X) { __IncAdd(); X+=X; }
       template<typename Real> static Real Product     (Real X) { __IncAdd(); return X+X; }
       template<typename Real> static void Exponentiate(Real&X) { __IncMul(); X*=X; }
@@ -464,9 +465,9 @@ namespace WDutils {
       static const int LargestPow2 = 2;
       static const int Log2 = 1;
       static const int Factorial = 6;
-      IntegerInverse<3>::Inverse;
-      IntegerInverse<3>::Divide;
-      IntegerInverse<3>::Ratio;
+      using IntegerInverse<3>::Inverse;
+      using IntegerInverse<3>::Divide;
+      using IntegerInverse<3>::Ratio;
       template<typename Real> static void Multiply    (Real&X) { __CountMA(0,2); X+=X+X; }
       template<typename Real> static Real Product     (Real X) { __CountMA(0,2); return X+X+X; }
       template<typename Real> static void Exponentiate(Real&X) { __CountMA(2,0); X*=X*X; }

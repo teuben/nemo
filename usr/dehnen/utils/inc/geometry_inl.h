@@ -7,13 +7,16 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2010
+/// \date   2010,2012
 ///
-/// \version June-2010 WD first tested version
+////////////////////////////////////////////////////////////////////////////////
+///
+/// \version June-2010 WD  first tested version
+/// \version June-2012 WD  using vector instead of tupel if C++11
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2010 Walter Dehnen
+// Copyright (C) 2010,2012 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,8 +61,8 @@ namespace WDutils {
 	friend struct Algorithms<aligned,sse>;
       protected:
 	//
-	typedef tupel <2,real> vec2;
-	typedef tupel <3,real> vec3;
+	typedef GeoVec<2,real> vec2;
+	typedef GeoVec<3,real> vec3;
 	typedef cube  <2,real> cub2;
 	typedef cube  <3,real> cub3;
 	typedef cuboid<2,real> box2;
@@ -252,10 +255,11 @@ namespace WDutils {
 	template<int Dim>
 	static void convert2cuboid(PointPair<Dim,real> &c)
 	{
-	  tupel<Dim,real> C = real(0.5)*(c.X+c.Y);
-	  tupel<Dim,real> H = real(0.5)*(c.Y-c.X);
-	  static_cast<tupel<Dim,real>&>(c.X) = C;
-	  static_cast<tupel<Dim,real>&>(c.Y) = H;
+	  typedef GeoVec<Dim,real> point;
+	  point C = real(0.5)*(c.X+c.Y);
+	  point H = real(0.5)*(c.Y-c.X);
+	  static_cast<point&>(c.X) = C;
+	  static_cast<point&>(c.Y) = H;
 	}
 	// move to octant
 	static void move_to_octant(vec2&c, int i, real r)
@@ -281,14 +285,14 @@ namespace WDutils {
       //
       template<> class AlgorithmsHelper<float,0,1> {
 	friend struct Algorithms<0,1>;
-	typedef tupel <2,float>    vec2;
-	typedef tupel <3,float>    vec3;
-	typedef cube  <2,float>    cub2;
-	typedef cube  <3,float>    cub3;
-	typedef cuboid<2,float>    box2;
-	typedef cuboid<3,float>    box3;
-	typedef sphere<2,float>    sph2;
-	typedef sphere<3,float>    sph3;
+	typedef GeoVec<2,float> vec2;
+	typedef GeoVec<3,float> vec3;
+	typedef cube  <2,float> cub2;
+	typedef cube  <3,float> cub3;
+	typedef cuboid<2,float> box2;
+	typedef cuboid<3,float> box3;
+	typedef sphere<2,float> sph2;
+	typedef sphere<3,float> sph3;
 	// copy(cube,cube)
 	static void copy(cub2 const&in, cub2 &out)
 	{
@@ -539,14 +543,14 @@ namespace WDutils {
       //
       template<> class AlgorithmsHelper<float,1,1> {
 	friend struct Algorithms<1,1>;
-	typedef tupel <2,float>    vec2;
-	typedef tupel <3,float>    vec3;
-	typedef cube  <2,float>    cub2;
-	typedef cube  <3,float>    cub3;
-	typedef cuboid<2,float>    box2;
-	typedef cuboid<3,float>    box3;
-	typedef sphere<2,float>    sph2;
-	typedef sphere<3,float>    sph3;
+	typedef GeoVec<2,float> vec2;
+	typedef GeoVec<3,float> vec3;
+	typedef cube  <2,float> cub2;
+	typedef cube  <3,float> cub3;
+	typedef cuboid<2,float> box2;
+	typedef cuboid<3,float> box3;
+	typedef sphere<2,float> sph2;
+	typedef sphere<3,float> sph3;
 	// copy(cube,cube)
 	static void copy(cub2 const&in, cub2 &out)
 	{
@@ -798,14 +802,14 @@ namespace WDutils {
       //
       template<> class AlgorithmsHelper<double,0,1> {
 	friend struct Algorithms<0,1>;
-	typedef tupel <2,double>   vec2;
-	typedef tupel <3,double>   vec3;
-	typedef cube  <2,double>   cub2;
-	typedef cube  <3,double>   cub3;
-	typedef cuboid<2,double>   box2;
-	typedef cuboid<3,double>   box3;
-	typedef sphere<2,double>   sph2;
-	typedef sphere<3,double>   sph3;
+	typedef GeoVec<2,double> vec2;
+	typedef GeoVec<3,double> vec3;
+	typedef cube  <2,double> cub2;
+	typedef cube  <3,double> cub3;
+	typedef cuboid<2,double> box2;
+	typedef cuboid<3,double> box3;
+	typedef sphere<2,double> sph2;
+	typedef sphere<3,double> sph3;
 	// copy(cube,cube)
 	static void copy(cub2 const&in, cub2 &out)
 	{
@@ -1148,14 +1152,14 @@ namespace WDutils {
       //
       template<> class AlgorithmsHelper<double,1,1> {
 	friend struct Algorithms<1,1>;
-	typedef tupel <2,double>   vec2;
-	typedef tupel <3,double>   vec3;
-	typedef cube  <2,double>   cub2;
-	typedef cube  <3,double>   cub3;
-	typedef cuboid<2,double>   box2;
-	typedef cuboid<3,double>   box3;
-	typedef sphere<2,double>   sph2;
-	typedef sphere<3,double>   sph3;
+	typedef GeoVec<2,double> vec2;
+	typedef GeoVec<3,double> vec3;
+	typedef cube  <2,double> cub2;
+	typedef cube  <3,double> cub3;
+	typedef cuboid<2,double> box2;
+	typedef cuboid<3,double> box3;
+	typedef sphere<2,double> sph2;
+	typedef sphere<3,double> sph3;
 	// copy(cube,cube)
 	static void copy(cub2 const&in, cub2 &out)
 	{
@@ -1496,27 +1500,27 @@ namespace WDutils {
     { return Meta::AlgorithmsHelper<__X,__A,__S>::copy(in,out); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
-    void Algorithms<__A,__S>::move_to_octant(tupel<__D,__X>&c, int i, __X r)
+    void Algorithms<__A,__S>::move_to_octant(GeoVec<__D,__X>&c, int i, __X r)
     { return Meta::AlgorithmsHelper<__X,0,0>::move_to_octant(c,i,r); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
-    int Algorithms<__A,__S>::octant(tupel<__D,__X> const&c,
-				    tupel<__D,__X> const&x)
+    int Algorithms<__A,__S>::octant(GeoVec<__D,__X> const&c,
+				    GeoVec<__D,__X> const&x)
     { return Meta::AlgorithmsHelper<__X,__A,__S>::octant(c,x); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
-    __X Algorithms<__A,__S>::dist_sq(tupel<__D,__X> const&x,
-				     tupel<__D,__X> const&y)
+    __X Algorithms<__A,__S>::dist_sq(GeoVec<__D,__X> const&x,
+				     GeoVec<__D,__X> const&y)
     { return Meta::AlgorithmsHelper<__X,__A,__S>::dist_sq(x,y); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
-    bool Algorithms<__A,__S>::contains(cube<__D,__X> const&c,
-				       tupel<__D,__X> const&x)
+    bool Algorithms<__A,__S>::contains(cube  <__D,__X> const&c,
+				       GeoVec<__D,__X> const&x)
     { return Meta::AlgorithmsHelper<__X,__A,__S>::contains(c,x); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
-    __X Algorithms<__A,__S>::dist_sq(cube<__D,__X> const&c,
-				     tupel<__D,__X> const&x)
+    __X Algorithms<__A,__S>::dist_sq(cube  <__D,__X> const&c,
+				     GeoVec<__D,__X> const&x)
     { return Meta::AlgorithmsHelper<__X,__A,__S>::dist_sq(c,x); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
@@ -1531,7 +1535,7 @@ namespace WDutils {
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
     bool Algorithms<__A,__S>::contains(cuboid<__D,__X> const&c,
-				       tupel<__D,__X> const&x)
+				       GeoVec<__D,__X> const&x)
     { return Meta::AlgorithmsHelper<__X,__A,__S>::contains(c,x); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
@@ -1541,7 +1545,7 @@ namespace WDutils {
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline
     __X Algorithms<__A,__S>::dist_sq(cuboid<__D,__X> const&c,
-				     tupel<__D,__X> const&x)
+				     GeoVec<__D,__X> const&x)
     { return Meta::AlgorithmsHelper<__X,__A,__S>::dist_sq(c,x); }
     //
     template<bool __A, bool __S> template<int __D, typename __X> inline

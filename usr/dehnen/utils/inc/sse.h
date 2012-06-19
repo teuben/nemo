@@ -325,6 +325,9 @@ namespace WDutils {
     /// \note routines are up to 16/sizeof(T) times faster than simple code
     ///
     struct UnAligned {
+#if __cplusplus >= 201103L
+      UnAligned() = delete;
+#endif
       /// \name assign to each element of array
       //@{
       /// \code for(i=0; i!=n; ++i) f[i]=x; \endcode
@@ -420,6 +423,9 @@ namespace WDutils {
     /// \note routines are about 16/sizeof(T) times faster than simple code
     ///
     struct Aligned {
+#if __cplusplus >= 201103L
+      Aligned() = delete;
+#endif
       /// \name assign to each element of array
       //@{
       /// \code for(i=0; i!=n; ++i) f[i]=x; \endcode
@@ -584,6 +590,9 @@ namespace WDutils {
     /// SSE::Traits<float>
     template<> struct Traits<float>
     {
+#if __cplusplus >= 201103L
+      Traits() = delete;
+#endif
       /// is SSE enabled for this type?
 #ifdef __SSE__
       static const bool sse = true;
@@ -611,6 +620,9 @@ namespace WDutils {
     /// SSE::Traits<int>
     template<> struct Traits<int>
     {
+#if __cplusplus >= 201103L
+      Traits() = delete;
+#endif
       /// is SSE enabled for this type?
 #ifdef __SSE2__
       static const bool sse = true;
@@ -638,6 +650,9 @@ namespace WDutils {
     /// SSE::Traits<double>
     template<> struct Traits<double>
     {
+#if __cplusplus >= 201103L
+      Traits() = delete;
+#endif
       /// is SSE enabled for this type?
 #ifdef __SSE2__
       static const bool sse = true;
@@ -676,12 +691,11 @@ namespace WDutils {
     /// \note not to be confused with WDutils::Array16 in memory.h
     template<typename _F>
     class Array16 {
-      WDutilsStaticAssert( WDutilsSameType(_F,int) ||
-			   WDutilsSameType(_F,float) ||
-			   WDutilsSameType(_F,double) );
-      /// copy ctor disabled to encourage references as return type etc.
-      /// \note you may use  member \a assign() instead
-      Array16(Array16 const&);
+      WDutilsStaticAssert((is_same<_F,int>::value ||
+			   is_same<_F,float>::value ||
+			   is_same<_F,double>::value ));
+      //  no copy ctor
+      Array16(const Array16&) WDutilsCXX11Delete;
       /// \name data
       //@{
       const size_t _S; ///< # elements actually allocated

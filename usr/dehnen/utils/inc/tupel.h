@@ -5,9 +5,9 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    1996-2011
+/// \date    1996-2012
 /// 
-/// \brief   contains the definition of template class WDutild::tupel and
+/// \brief   contains the definition of template class WDutils::tupel and
 ///	     all its members and friends
 ///
 /// \version aug-2003: template metaprogramming to unroll loops automatically
@@ -25,10 +25,11 @@
 /// \version sep-2009: formatted output preserves width and precision
 /// \version nov-2010: namespace WDutils::Tuple, allows easy export
 /// \version aug-2011: meta-templating improved
+/// \version jun-2012: starting implementing some C++11 stuff
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 1996-2011  Walter Dehnen
+// Copyright (C) 1996-2012  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -56,21 +57,41 @@
 #  include <cmath>
 #  define WDutils_included_cmath
 #endif
-#ifndef WDutils_included_tupel_cc
-#  include <tupel.cc>
-#endif
-
 ////////////////////////////////////////////////////////////////////////////////
-namespace WDutils {
+#ifndef WDutils_included_exception_h
 
-#ifndef WDutilsStaticAssert
+# if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus >= 201103L)
+
+#  define WDutilsCXX11
+#  define WDutilsCXX11Delete      = delete
+#  define WDutilsCXX11Default     = default
+#  define WDutilsCXX11DefaultBody = default;
+#  define WDutilsStaticAssert(TEST) static_assert(TEST,#TEST);
+
+# else  // C++11
+
+#  undef  WDutilsCXX11
+#  define WDutilsCXX11Delete
+#  define WDutilsCXX11Default
+#  define WDutilsCXX11DefaultBody {}
+
+namespace WDutils {
   template<bool> struct STATIC_ASSERTION_FAILURE;
   template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
 #  define WDutilsStaticAssert(TEST)				\
   enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
     static_cast<bool>((TEST))>)					\
   }
+}
+
+# endif // C++11
+#endif  // WDutils_included_exception_h
+////////////////////////////////////////////////////////////////////////////////
+#ifndef WDutils_included_tupel_cc
+#  include <tupel.cc>
 #endif
+////////////////////////////////////////////////////////////////////////////////
+namespace WDutils {
 
   /// namespace for class tupel<int,typename>
   /// \note To allow \code using namespace WDutils::Tuple; \endcode
@@ -389,7 +410,7 @@ namespace WDutils {
       X dist_sq(tupel const&x) const
       { return M::v_diq(a,x.a); }
       /// distance: return |*this-x| := sqrt(Sum (tupel::a[i]-x[i])^2)
-      X dist(tupel const&x) const
+      X distance(tupel const&x) const
       { return std::sqrt(dist_sq (x)); }
       /// sum squared: return (this+x)^2 := Sum (tupel::a[i]+x[i])^2
       X sum_sq (tupel const&x) const
@@ -461,7 +482,7 @@ namespace WDutils {
       template<typename S> X dist_sq(tupel<N,S> const&x) const
       { return M::v_diq(a,(const S*)x); }
       /// distance: return |*this-x| := sqrt(Sum (tupel::a[i]-x[i])^2)
-      template<typename S> X dist (tupel<N,S> const&x) const
+      template<typename S> X distance (tupel<N,S> const&x) const
       { return std::sqrt(dist_sq (x)); }
       /// sum squared: return (this+x)^2 := Sum (tupel::a[i]+x[i])^2
       template<typename S> X sum_sq (tupel<N,S> const&x) const
@@ -565,7 +586,7 @@ namespace WDutils {
     }
     //@}
     // /////////////////////////////////////////////////////////////////////////
-    /// \relates WDutils::tupel
+    /// \relates WDutils::Tuple::tupel
     /// \name formatted I/O
     //@{
     /// formatted output: space separated; keeps width and precision
@@ -633,8 +654,8 @@ namespace WDutils {
     { return x.dist_sq(y); }
     /// return distance: (x-y)^2 := Sum (x[i]-y[i])^2
     template<int N, typename X, typename S> inline
-    X dist(tupel<N,X> const&x, tupel<N,S> const&y)
-    { return x.dist(y); }
+    X distance(tupel<N,X> const&x, tupel<N,S> const&y)
+    { return x.distance(y); }
     /// return sum squared: (x-y)^2 := Sum (x[i]+y[i])^2
     template<int N, typename X, typename S> inline
     X sum_sq(tupel<N,X> const&x, tupel<N,S> const&y)
@@ -698,5 +719,11 @@ namespace WDutils {
   }
 #endif
 } // namespace WDutils {
+////////////////////////////////////////////////////////////////////////////////
+#ifndef WDutils_included_exception_h
+# undef WDutilsCXX11Delete
+# undef WDutilsCXX11Default
+# undef WDutilsCXX11DefaultBody
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 #endif// WDutils_included_tupel_h

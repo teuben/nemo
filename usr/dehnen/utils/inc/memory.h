@@ -65,8 +65,7 @@ namespace WDutils {
   /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
   T* NewArray(size_t n, const char*c, const char*f, int l,
-	      const char*lib = "WDutils")
-    WDutils_THROWING
+	      const char*lib = "WDutils") WDutils_THROWING
   {
     T*t;
     bool failed=0;
@@ -126,8 +125,8 @@ namespace WDutils {
   /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
   void DelArray(T*a, const char*c, const char*f, int l,
-		int n=0, const char*lib = "WDutils")
-    WDutils_THROWING {
+		int n=0, const char*lib = "WDutils") WDutils_THROWING
+  {
     if(0==a) {
       Warning(c,f,l,lib)
 	("trying to delete zero pointer to array of '%s'",nameof(T));
@@ -182,8 +181,8 @@ namespace WDutils {
   /// \param[in] lib (optional) name of calling library (default: "WDutils")
   template<typename T> inline
   void DelObject(T* a, const char*c, const char*f, int l,
-		 const char*lib="WDutils")
-    WDutils_THROWING {
+		 const char*lib="WDutils") WDutils_THROWING
+  {
     if(0==a) {
       Warning(c,f,l,lib)
 	("trying to delete zero pointer to object '%s'",nameof(T));
@@ -202,8 +201,8 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   void DelObject(const T* a, const char*c, const char*f, int l,
-		 const char*lib="WDutils")
-    WDutils_THROWING {
+		 const char*lib="WDutils") WDutils_THROWING
+  {
     if(0==a) {
       Warning(c,f,l,lib)
 	("trying to delete zero pointer to object '%s'",nameof(T));
@@ -260,16 +259,12 @@ namespace WDutils {
   /// \param p  memory address to be tested
   /// \param al alignemt to a bytes will be tested
   inline bool is_aligned(const void*p, int al)
-  {
-    return size_t(p) % al == 0;
-  }
+  { return size_t(p) % al == 0; }
   ///
   /// is a given memory address aligned to a 16 bytes memory location?
   /// \param p  memory address to be tested
   inline bool is_aligned16(const void*p)
-  {
-    return size_t(p) % 16 == 0;
-  }
+  { return size_t(p) % 16 == 0; }
   ///
   /// find the smallest multiple of 16 not smaller than @a n
   inline size_t next_aligned16(size_t n)
@@ -290,8 +285,7 @@ namespace WDutils {
   ///       allocated object!
   template<typename T> inline
   T* NewArray16(size_t k, const char*c, const char*f, int l,
-		const char*lib = "WDutils")
-    WDutils_THROWING
+		const char*lib = "WDutils") WDutils_THROWING
   {
     size_t n = k*sizeof(T);
 #if defined(__GNUC__) || defined (__INTEL_COMPILER)
@@ -362,8 +356,7 @@ namespace WDutils {
   /// \param q  pointer previously allocated by WDutils::NewArray16()
   template<typename T> inline
   void DelArray16(T* a, const char*c, const char*f, int l,
-		  int n=0, const char*lib = "WDutils")
-    WDutils_THROWING
+		  int n=0, const char*lib = "WDutils") WDutils_THROWING
   {
 #if defined(__GNUC__) || defined (__INTEL_COMPILER)
     if(0==a) {
@@ -428,8 +421,12 @@ namespace WDutils {
     /// # objects to allocate for n
     static unsigned Nalloc(unsigned n)
     { return sizeof(T)>=16? n : ((n*sizeof(T)+15)&(~15))/sizeof(T); }
-    const unsigned N; ///< # allocated data
-    T* const       A; ///< allocates array
+    //  data
+    unsigned N; ///< # allocated data
+    T       *A; ///< allocates array
+    //  no copy ctor and no operator=
+    Array16           (const Array16&) WDutilsCXX11Delete;
+    Array16& operator=(const Array16&) WDutilsCXX11Delete;
   public:
     /// default ctor
     Array16()
@@ -441,8 +438,8 @@ namespace WDutils {
     ~Array16()
     {
       if(A) WDutils_DEL16N(A,N);
-      const_cast<unsigned&>(N) = 0;
-      const_cast<T*      &>(A) = 0;
+      N = 0;
+      A = 0;
     }
     /// will reset() allocate new data (and delete any old data)?
     bool reset_will_allocate(unsigned n) const
@@ -456,8 +453,8 @@ namespace WDutils {
       n = Nalloc(n);
       if(n>N || (3*n<2*N && sizeof(T)*n>16) ) {
 	if(A) WDutils_DEL16N(A,N);
-	const_cast<unsigned&>(N) = n;
-	const_cast<T*      &>(A) = WDutils_NEW16(T,N);
+	N = n;
+	A = WDutils_NEW16(T,N);
       }
     }
     /// grow: increase size by n, but keep old data
@@ -466,16 +463,13 @@ namespace WDutils {
     {
       n = n? N+n : N+N;
       if(n) {
+	T* newA = WDutils_NEW16(T,n);
 	if(N) {
-	  T* newA = WDutils_NEW16(T,n);
 	  memcpy(newA,A,sizeof(T)*N);
 	  WDutils_DEL16N(A,N);
-	  const_cast<unsigned&>(N) = n;
-	  const_cast<T*      &>(A) = newA;
-	} else {
-	  const_cast<unsigned&>(N) = n;
-	  const_cast<T*      &>(A) = WDutils_NEW16(T,N);
 	}
+	N = n;
+	A = newA;
       }
     }
     /// # allocated elements
@@ -491,18 +485,6 @@ namespace WDutils {
     /// non-const array
     T*array() { return A; }
   };
-//   // deprecated, use WDutils_NEW16 instead
-//   inline void* malloc16(size_t n) WDutils_THROWING
-//   { return NewArray16<char>(n,0,0,0); }
-//   // deprecated, use WDutils_NEW16 instead
-//   template<typename T> inline T* new16(size_t n) WDutils_THROWING
-//   { return NewArray16<T>(n,0,0,0); }
-//   // deprecated, use WDutils_DEL16 instead
-//   inline void free16(void*q) WDutils_THROWING
-//   { DelArray16(q,0,0); }
-//   // deprecated, use WDutils_DEL16 instead
-//   template<typename T> inline void delete16(T* q)WDutils_THROWING 
-//   { free16(static_cast<void*>(q)); }
   //
   //  WDutils::block_alloc<T>
   //
@@ -543,6 +525,9 @@ namespace WDutils {
     typedef T        &reference;                 ///< type of reference to elem 
     typedef const T  &const_reference;           ///< type of const reference   
     //@}
+    //  no copy ctor and no operator=
+    block_alloc(const block_alloc&) WDutilsCXX11Delete;
+    block_alloc& operator=(const block_alloc&) WDutilsCXX11Delete;
   private:
     /// allocates and manages a contiguous chunk of elements                    
     class block {
@@ -835,15 +820,6 @@ namespace WDutils {
       return message("block_alloc<%s>",traits<T>::name());
     }
   };
-  //
-  // does not compile with gcc 4.3.1, which seems a compiler bug
-#if defined(__GNUC__) && ( __GNUC__ < 4 || __GNUC_MINOR__ < 3)
-  template<typename T> struct traits< typename block_alloc<T>::block > {
-    static const char  *name () {
-      return message("block_alloc<%s>::block",traits<T>::name());
-    }
-  };
-#endif
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> inline
   block_alloc<T>::~block_alloc() WDutils_THROWING {
@@ -866,6 +842,9 @@ namespace WDutils {
   /// of a pointer. Thus, for K < sizeof(void*), this class is inefficient.
   ///
   class pool {
+    //  no copy ctor and no operator=
+    pool(const pool&) WDutilsCXX11Delete;
+    pool& operator=(const pool&) WDutilsCXX11Delete;
   public:
     /// \name sub-types of class WDutils::pool
     //@{
@@ -976,14 +955,11 @@ namespace WDutils {
     { return Nmax; }
   };// class WDutils::pool
   // ///////////////////////////////////////////////////////////////////////////
-  template<> struct traits< pool > {
-    static const char    *name () { return "pool"; }
-  };
-#if(0) // gcc v 3.3.5 is buggy and doesn't like this
-  template<> struct traits< pool::chunk > {
-    static const char    *name () { return "pool::chunk"; }
-  };
-#endif
+  template<> struct traits< pool >
+  { static const char*name () { return "pool"; } };
+  //
+  template<> struct traits< pool::chunk >
+  { static const char*name () { return "pool::chunk"; } };
   //
   //  class WDutils::Pool<>
   //
@@ -991,6 +967,9 @@ namespace WDutils {
   //
   template<typename T>
   class Pool : private pool {
+    //  no copy ctor and no operator=
+    Pool(const Pool&) WDutilsCXX11Delete;
+    Pool& operator=(const Pool&) WDutilsCXX11Delete;
   public:
     /// ctor: allocate 1st chunk
     /// \param[in] n number of elements in first chunk
@@ -1002,9 +981,9 @@ namespace WDutils {
     /// freeing: take back a single element
     void free (T*e)
     { pool::free(e); }
-    pool::N_chunks;    ///< # chunks used
-    pool::N_alloc;     ///< # elements handed out
-    pool::N_alloc_max; ///< # elements allocated
+    using pool::N_chunks;    ///< # chunks used
+    using pool::N_alloc;     ///< # elements handed out
+    using pool::N_alloc_max; ///< # elements allocated
   };// class WDutils::Pool<>
   //
   template<typename T> struct traits< Pool<T> > {
@@ -1025,6 +1004,9 @@ namespace WDutils {
     const unsigned*const N; // sizes in all dimensions
     const unsigned*const K; // offsets in all dimensions
     const T       *const A; // pointer to first element
+    //  no copy ctor and no operator=
+    ConstSubArray           (const ConstSubArray&) WDutilsCXX11Delete;
+    ConstSubArray& operator=(const ConstSubArray&) WDutilsCXX11Delete;
     // private constructor: accessible from friends only
     ConstSubArray(const unsigned*n, const unsigned*k, const T*a)
       : N(n), K(k), A(a) {}
@@ -1052,6 +1034,9 @@ namespace WDutils {
     const unsigned*const N; ///< sizes in all dimensions
     const unsigned*const K; ///< offsets in all dimensions
     const T       *const A; ///< pointer to first element
+    //  no copy ctor and no operator=
+    ConstSubArray           (const ConstSubArray&) WDutilsCXX11Delete;
+    ConstSubArray& operator=(const ConstSubArray&) WDutilsCXX11Delete;
     /// private constructor: accessible from friends only
     ConstSubArray(const unsigned*n, const unsigned*k, const T*a)
       : N(n), K(k), A(a) {}
@@ -1082,6 +1067,9 @@ namespace WDutils {
     const unsigned*const N; // sizes in all dimensions
     const unsigned*const K; // offsets in all dimensions
     T             *const A; // pointer to allocated memory 
+    //  no copy ctor and no operator=
+    SubArray           (const SubArray&) WDutilsCXX11Delete;
+    SubArray& operator=(const SubArray&) WDutilsCXX11Delete;
     // protected constructor: accessible from friends and derived
     SubArray(const unsigned*n, const unsigned*k, T*a) : N(n), K(k), A(a) {}
   public:
@@ -1118,6 +1106,9 @@ namespace WDutils {
     const unsigned*const N; // sizes in all dimensions
     const unsigned*const K; // offsets in all dimensions
     T             *const A; // pointer to allocated memory 
+    //  no copy ctor and no operator=
+    SubArray           (const SubArray&) WDutilsCXX11Delete;
+    SubArray& operator=(const SubArray&) WDutilsCXX11Delete;
     // protected constructor: accessible from friends and derived
     SubArray(const unsigned*n, const unsigned*k, T*a) : N(n), K(k), A(a) {}
   public:
@@ -1158,9 +1149,9 @@ namespace WDutils {
   template<typename T, unsigned D=1> class Array : public SubArray<T,D>
   {
     typedef SubArray<T,D> Base;
-    Base::N;
-    Base::K;
-    Base::A;
+    using Base::N;
+    using Base::K;
+    using Base::A;
     /// \name data
     //@{
     unsigned __N[D];  ///< __N[d]: size in dimension d 
@@ -1182,12 +1173,12 @@ namespace WDutils {
 	if(N[d] != n[d]) return false;
       return true;
     }
-    //
-    Array           (Array const&);  // disabled
-    Array& operator=(Array const&);  // disabled
+    //  no copy ctor and no operator=
+    Array           (const Array&) WDutilsCXX11Delete;
+    Array& operator=(const Array&) WDutilsCXX11Delete;
   public:
-    Base::Sub;
-    Base::ConstSub;
+    using Base::Sub;
+    using Base::ConstSub;
     /// default constructor: sizes are all equal to 0
     Array()
       : Base(__N,__K,0) { set(0); }
@@ -1332,8 +1323,9 @@ namespace WDutils {
     unsigned  N;     ///< N[d]: size in dimension d 
     T        *A;     ///< pointer to allocated memory 
     //@}
-    /// copy constructor is disabled (private); use references instead of copies
-    Array(Array const&);
+    //  no copy ctor and no operator=
+    Array           (const Array&) WDutilsCXX11Delete;
+    Array& operator=(const Array&) WDutilsCXX11Delete;
   public:
     /// rank: number of dimensions
     static const unsigned rank = 1;
@@ -1350,6 +1342,21 @@ namespace WDutils {
     /// \param[in] x initialize each element with this value
     void setval(T const&x = T(0) )
     { for(unsigned i=0; i!=N; ++i) A[i] = x; }
+    /// grow: increase size by n, but keep old data
+    /// \param[in] n  grow by this much, default: old size ->
+    void grow(unsigned n=0) WDutils_THROWING
+    {
+      n = N + (n?n:N);
+      if(n) {
+	T*newA = WDutils_NEW(T,n);
+	if(N) {
+	  memcpy(newA,A,sizeof(T)*N);
+	  WDutils_DEL_A(A);
+	}
+	N = n;
+	A = newA;
+      }
+    }
     /// reset: destruct and construct again
     /// \param[in] n new size of array
     void reset(unsigned n) WDutils_THROWING
@@ -1437,7 +1444,7 @@ namespace WDutils {
   };
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T, unsigned D> struct traits< Array<T,D> > {
-    static const char  *name () {
+    static const char*name () {
       return message("Array<%s,%d>",traits<T>::name(),D);
     }
   };
@@ -1450,6 +1457,9 @@ namespace WDutils {
     static const uint64_t full = ~null;
     static unsigned rsize(unsigned n)
     { return (n>>6) + (n&full)? 1 : 0; }
+    //  no copy ctor and no operator=
+    BitArray           (const BitArray&) WDutilsCXX11Delete;
+    BitArray& operator=(const BitArray&) WDutilsCXX11Delete;
   public:
     /// return size of array
     unsigned size() const
@@ -1509,6 +1519,9 @@ namespace WDutils {
     X *S;        ///< begin of stack
     X *P;        ///< top of stack
     X *const SN; ///< end of stack
+    //  no copy ctor and no operator=
+    Stack           (const Stack&) WDutilsCXX11Delete;
+    Stack& operator=(const Stack&) WDutilsCXX11Delete;
   public:
     /// ctor: allocate memory, empty stack
     explicit

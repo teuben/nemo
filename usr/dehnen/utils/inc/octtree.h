@@ -94,7 +94,8 @@ namespace WDutils {
     /// \name public constants and types
     //@{
     typedef __X             real;             ///< floating point type: position
-    typedef tupel<__D,real> point;            ///< type: positions
+    /// position vector
+    typedef typename Geometry::cuboid<__D,real>::point point;
     typedef uint32_t        particle_key;     ///< type: indexing particles
     typedef uint32_t        count_type;       ///< type: indexing leafs & cells
     typedef uint8_t         depth_type;       ///< type: tree depth & level

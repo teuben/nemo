@@ -399,14 +399,14 @@ double WDutils::En(int n, double x)
   } else {
     register int    i,ii,nm1=n-1;
     register double del,fac,psi;
-    ans = nm1? 1./double(nm1) : -log(x)-EulerGamma;
+    ans = nm1? 1./double(nm1) : -log(x)-EulerGamma();
     fac = 1.;
     for(i=1; i<=maxit; i++) {
       fac *=-x/double(i);
       if(i!=nm1)
 	del =-fac/double(i-nm1);
       else {
-	psi =-EulerGamma;
+	psi =-EulerGamma();
 	for(ii=1; ii<=nm1; ii++)
 	  psi+= 1./double(ii);
 	del = fac*(psi-log(x));
@@ -422,7 +422,7 @@ double WDutils::En(int n, double x)
 double WDutils::Ei(double x)
 {
   if(x<=0.)   return -En(1,-x);
-  if(x<fpmin) return log(x)+EulerGamma;
+  if(x<fpmin) return log(x)+EulerGamma();
   register int    k;
   const double logeps =-20.72326583694641115616192309216;
   register double fact=1.,sum=0.,term=1.;
@@ -434,7 +434,7 @@ double WDutils::Ei(double x)
       if(term<eps*sum) break;
     }
     if(k>maxit) MathError("series failed","Ei()");
-    return sum+log(x)+EulerGamma;
+    return sum+log(x)+EulerGamma();
   }
   for(k=1; k<=maxit; k++) {
     fact = term;

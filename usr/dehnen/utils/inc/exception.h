@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2000-2011
+/// \date   2000-2012
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2011 Walter Dehnen
+// Copyright (C) 2000-2012 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,18 +29,40 @@
 #ifndef WDutils_included_exception_h
 #define WDutils_included_exception_h
 
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus >= 201103L)
+#  define WDutilsCXX11
+#else
+#  undef  WDutilsCXX11
+#endif
+
+#if defined(__GXX_EXPERIMENTAL_CXX0X__) && __GNUC__ > 4 && __GNUC_MINOR__ >=6 
+#  define WDutilsCXX11Delete      = delete
+#  define WDutilsCXX11Default     = default
+#  define WDutilsCXX11DefaultBody = default;
+#else
+#  define WDutilsCXX11Delete
+#  define WDutilsCXX11Default
+#  define WDutilsCXX11DefaultBody {}
+#endif
+
 #ifndef WDutils_included_string
-# define WDutils_included_string
-# include <string>
+#  define WDutils_included_string
+#  include <string>
 #endif
 #ifndef WDutils_included_limits
-# define WDutils_included_limits
-# include <limits>
+#  define WDutils_included_limits
+#  include <limits>
 #endif
 #ifndef WDutils_included_cstdlib
-# define WDutils_included_cstdlib
-# include <cstdlib>
+#  define WDutils_included_cstdlib
+#  include <cstdlib>
 #endif
+#ifdef WDutilsCXX11
+# ifndef WDutils_included_type_traits
+#  include <type_traits>
+# endif
+#endif
+
 //                                                                              
 //  WDutils                                                                     
 //                                                                              
@@ -48,24 +70,17 @@
 /// public under the GNU public licence                                         
 ///                                                                             
 namespace WDutils {
+#ifdef WDutilsCXX11
+  using std::is_same;
+#else
+  template<typename __T1, typename __T2> struct is_same
+  { static const bool value = false; };
+  template<typename __T> struct is_same<__T,__T>
+  { static const bool value = true; };
+#endif
+  /// static type information: an extension of std::numeric_limits<>
+  //
   namespace meta {
-    /// static type comparison.
-    /// useful together with static assertion, for instance
-    /// \code
-    ///   WDutilsStaticAssert((   meta::TypeCompare<double,__T>::identical
-    ///                        || meta::TypeCompare<float, __T>::identical));
-    /// \endcode
-    /// will generate a compiler error unless type __T is double or float.
-    template<typename __T1, typename __T2> struct TypeCompare {
-      static const bool identical = false;
-      static const bool different = true;
-    };
-    template<typename __T> struct TypeCompare<__T,__T> {
-      static const bool identical = true;
-      static const bool different = false;
-    };
-#define WDutilsSameType(T1,T2) WDutils::meta::TypeCompare<T1,T2>::identical
-    /// static type information: an extension of std::numeric_limits<>
     /// \note The only additional member indicates a floating point type; @c
     ///       std::numeric_limits<>::is_integer cannot be used instead as it's
     ///       @c false for all non-fundamental types.
@@ -87,7 +102,6 @@ namespace WDutils {
     };
   }
   using meta::TypeInfo;
-  using meta::TypeCompare;
   /// provides information about the running process
   /// \note only one object exists, the static RunInfo::Info
   class RunInfo {
@@ -116,8 +130,13 @@ namespace WDutils {
     long long __timecount;
     double __timetick;
 #endif
+    /// default ctor
     RunInfo();
+    /// static Info
     static RunInfo Info;
+    //  no copy ctor and no operator=
+    RunInfo           (const RunInfo&) WDutilsCXX11Delete ;
+    RunInfo& operator=(const RunInfo&) WDutilsCXX11Delete ;
   public:
     /// reset the debugging level
     static void set_debug_level(int d)
@@ -240,9 +259,6 @@ namespace WDutils {
     const char*library;
     const char*file,*func;      ///< names: file, function
     const int  line;            ///< line number
-//     /// constructor: get library name
-//     Reporting()
-//       : library(0), file(0), func(0), line(0) {}
     /// constructor: get library and function name
     explicit Reporting(const char*__lib)
       : library(__lib), file(0), func(0), line(0) {}
@@ -273,6 +289,10 @@ namespace WDutils {
       __attribute__ ((format (printf, 3, 4)))
 #endif
       ;
+  private:
+    //  no copy ctor and no operator=
+    Reporting           (const Reporting&) WDutilsCXX11Delete;
+    Reporting& operator=(const Reporting&) WDutilsCXX11Delete;
   };
   /// traits for DebugInformation
   struct DebugInfoTraits {
@@ -360,8 +380,12 @@ namespace WDutils {
   /// simple exception with error message
   struct exception : protected std::string {
     /// copy constructor
+#if __cplusplus >= 201103L
+    exception(exception const&) = default;
+#else
     exception(exception const&e)
       : std::string(e) {}
+#endif
     /// construction from C-style format string + data.
     /// Uses a printf() style format string as first argument, further arguments
     /// must match format, exactly as in printf, which will be called.
@@ -383,6 +407,9 @@ namespace WDutils {
     static handler  InsteadOfThrow;  ///< make error if OMP::IsParallel()
     const  char    *file,*func;      ///< file name, function name
     const  int      line;            ///< line number
+    //  no copy ctor and no operator=
+    Thrower           (const Thrower&) WDutilsCXX11Delete;
+    Thrower& operator=(const Thrower&) WDutilsCXX11Delete;
   public:
     /// default constructor: set data to NULL
     Thrower()
@@ -427,6 +454,9 @@ namespace WDutils {
     { Thrower::InsteadOfThrow = H; }
   private:
     const Thrower::handler OldHandler;
+    //  no copy ctor and no operator=
+    ThrowGuard           (const ThrowGuard&) WDutilsCXX11Delete;
+    ThrowGuard& operator=(const ThrowGuard&) WDutilsCXX11Delete;
   };
   //@}
   //
@@ -435,9 +465,11 @@ namespace WDutils {
   /// Type conversion to const char*                                            
   /// Useful for generating a C-style string containing formatted data.         
   class message {
-    message(message const&);                       // no copy constructor       
     static const size_t size = 1024;
     char __text[size];
+    //  no copy ctor and no operator=
+    message           (const message&) WDutilsCXX11Delete;
+    message& operator=(const message&) WDutilsCXX11Delete;
   public:
     /// Generate a string from format + data.
     /// Uses a printf() style format string as first argument, further arguments
@@ -485,9 +517,9 @@ namespace WDutils {
   //
   //  macro for compile-time assertion, stolen from the boost library
   //
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
+#ifdef WDutilsCXX11
   /// \brief macro for compile-time assertion
-# define WDutilsStaticAssert(TEST) static_assert(TEST,#TEST);
+#  define WDutilsStaticAssert(TEST) static_assert(TEST,#TEST);
 #else
   template<bool> struct STATIC_ASSERTION_FAILURE;
   template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };

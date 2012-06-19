@@ -29,18 +29,19 @@
 #ifndef WDutils_included_traits_h
 #define WDutils_included_traits_h
 
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
-# ifndef WDutils_included_cstdint
-#  include <cstdint>
-#  define WDutils_included_cstdint
-# endif
-#endif
+//
 #ifndef WDutils_included_typeinfo
 #  include <typeinfo>
 #  define WDutils_included_typeinfo
 #endif
 #ifndef WDutils_included_exception_h
 #  include <exception.h>
+#endif
+#ifdef WDutilsCXX11
+# ifndef WDutils_included_cstdint
+#  include <cstdint>
+#  define WDutils_included_cstdint
+# endif
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef __INTEL_COMPILER
@@ -53,7 +54,7 @@ namespace WDutils {
   // integer types of given size
   //
   // ///////////////////////////////////////////////////////////////////////////
-#ifdef __GXX_EXPERIMENTAL_CXX0X__
+#ifdef WDutilsCXX11
   using std::int8_t;
   using std::int16_t;
   using std::int32_t;
@@ -109,7 +110,7 @@ namespace WDutils {
     private:
       WDutilsStaticAssert(sizeof(integer_s) == WORDS);
     };
-  } // namespace meta {
+  }// namespace meta {
   typedef meta::IntTypeWords<1>::integer_s int8_t;
   typedef meta::IntTypeWords<2>::integer_s int16_t;
   typedef meta::IntTypeWords<4>::integer_s int32_t;

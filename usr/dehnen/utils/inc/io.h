@@ -51,6 +51,10 @@
 #  include <cmath>
 #  define Wdutils_included_cmath
 #endif
+#ifndef WDutils_included_unistd_h
+#  include <unistd.h>
+#  define WDutils_included_unistd_h
+#endif
 #ifndef WDutils_included_string
 #  include <string>
 #  define WDutils_included_string
@@ -354,9 +358,8 @@ namespace WDutils {
   /// possible in the \a w characters wide field. However, we will at least 
   /// write it with precision \a p, even if this means overrunning the width.
   template<typename X>
-  inline smanip_fp_width<X> print(X x, int w, int p, int s=0) {
-    return smanip_fp_width<X>(x,w,p,s);
-  }
+  inline smanip_fp_width<X> print(X x, int w, int p, int s=0)
+  { return smanip_fp_width<X>(x,w,p,s); }
   //----------------------------------------------------------------------------
   template<typename X>
   struct smanip_fp_vec_width {
@@ -367,7 +370,8 @@ namespace WDutils {
   };
   template<typename X>
   inline std::ostream& operator<<(std::ostream&o,
-				  smanip_fp_vec_width<X> const&m) {
+				  smanip_fp_vec_width<X> const&m)
+  {
     if(m.n) {
       o << smanip_fp_width<X>(m.x[0],m.w,m.p);
       for(int i=1; i<m.n; ++i)
@@ -378,14 +382,17 @@ namespace WDutils {
   /// manipulator: write an array of floating point numbers, each with minimum
   /// width but maximum precision.
   template<typename X>
-  inline smanip_fp_vec_width<X> print(const X*x, int n, int w, int p) {
-    return smanip_fp_vec_width<X>(x,n,w,p);
-  }
+  inline smanip_fp_vec_width<X> print(const X*x, int n, int w, int p)
+  { return smanip_fp_vec_width<X>(x,n,w,p); }
 #ifdef WDutils_included_tupel_h
   template<int N, typename X>
-  inline smanip_fp_vec_width<X> print(tupel<N,X> const&x, int w, int p) {
-    return smanip_fp_vec_width<X>(static_cast<const X*>(x),N,w,p);
-  }
+  inline smanip_fp_vec_width<X> print(tupel<N,X> const&x, int w, int p)
+  { return smanip_fp_vec_width<X>(static_cast<const X*>(x),N,w,p); }
+#endif
+#ifdef WDutils_included_vector_h
+  template<int N, typename X>
+  inline smanip_fp_vec_width<X> print(vector<N,X> const&x, int w, int p)
+  { return smanip_fp_vec_width<X>(static_cast<const X*>(x),N,w,p); }
 #endif
   // ///////////////////////////////////////////////////////////////////////////
   //

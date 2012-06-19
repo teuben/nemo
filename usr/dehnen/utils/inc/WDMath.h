@@ -85,12 +85,18 @@ namespace WDutils {
   /// \name some constants                                                      
   //@{                                                                          
   // ///////////////////////////////////////////////////////////////////////////
-  const double EulerGamma  = 0.577215664901532860606512090082; ///< Euler's Gam
-  const double LogofTwo    = 0.693147180559945309417232121458; ///< ln(2)
-  const double LogofPi     = 1.144729885849400174143427351353; ///< ln(Pi)
-  const double LogofTwoInv = 1.442695040888963407359924681002; ///< 1/ln(2)
-  const double LogofTen    = 2.302585092994045684017991454684; ///< ln(10)
-  const double LogofTenInv = 0.434294481903251827651128918917; ///< 1/ln(10)
+  /// Euler's Gamma
+  inline double EulerGamma() { return 0.577215664901532860606512090082; }
+  /// ln(2)
+  inline double LogofTwo() { return 0.693147180559945309417232121458; }
+  /// ln(Pi)
+  inline double LogofPi() { return 1.144729885849400174143427351353; }
+  /// 1/ln(2)
+  inline double LogofTwoInv() { return 1.442695040888963407359924681002; }
+  /// ln(10)
+  inline double LogofTen() { return 2.302585092994045684017991454684; }
+  /// 1/ln(10)
+  inline double LogofTenInv() { return 0.434294481903251827651128918917; }
   //@}
   // ///////////////////////////////////////////////////////////////////////////
   /// hypotenus of x,y                                                          
@@ -176,9 +182,7 @@ namespace WDutils {
   ///       for a user-defined type, you best provide an overloaded version.
   template<typename __T>
   inline bool iszero(__T x)
-  { 
-    return meta::__TypeCompare<__T>::iszero(x);
-  }
+  { return meta::__TypeCompare<__T>::iszero(x); }
   /// are two numbers equal?
   /// \note For floating-point numbers, the naive comparison "X==Y" is
   ///       not reliable at all. It depends very much on the actual
@@ -192,9 +196,7 @@ namespace WDutils {
   ///       for a user-defined type, you best provide an overloaded version.
   template<typename __T>
   inline bool equal(__T x, __T y)
-  { 
-    return meta::__TypeCompare<__T>::equal(x,y);
-  }
+  { return meta::__TypeCompare<__T>::equal(x,y); }
   /// is a number insignificant compared to another
 
   /// \note Numerical code sometimes contains statements like \code
@@ -279,7 +281,7 @@ namespace WDutils {
   /// logarithm to base 2
   inline double ld(double x) {
     if(x<=0) WDutils_Error("in ld(): argument <= 0");
-    return LogofTwoInv*std::log(x);
+    return LogofTwoInv()*std::log(x);
   }
   /// logarithm to base 10
   inline double lg(double x) {
@@ -288,11 +290,11 @@ namespace WDutils {
   }
   /// ten to the power \a x
   inline double Tento(double x) {
-    return std::exp(LogofTen*x);
+    return std::exp(LogofTen()*x);
   }
   /// two to the power \a x
   inline double Twoto(double x) {
-    return std::exp(LogofTwo*x);
+    return std::exp(LogofTwo()*x);
   }
   /// secans hyperbolicus
   inline double sech(double x) {

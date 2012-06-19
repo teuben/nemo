@@ -75,20 +75,19 @@ namespace {
   using std::setfill;
   using namespace WDutils;
   ///
-  template<int D> struct TreeHelper;
-  template<> struct TreeHelper<2> {
-    template<typename real>
-    static tupel<2,real> RootCentre(tupel<2,real> const&x)
+  template<int D, typename real> struct TreeHelper;
+  template<typename real> struct TreeHelper<2,real> {
+    typedef typename OctalTree<2,real>::point point;
+    static point  RootCentre(point const&x)
     {
-      tupel<2,real> c;
+      point c;
       c[0]=int(x[0]+real(0.5));
       c[1]=int(x[1]+real(0.5));
       return c;
     }
-    template<typename real>
-    static real RootRadius(tupel<2,real> const&X,
-			   tupel<2,real> const&Xmin,
-			   tupel<2,real> const&Xmax)
+    static real RootRadius(point const&X,
+			   point const&Xmin,
+			   point const&Xmax)
     {
       real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
       real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]);
@@ -96,20 +95,19 @@ namespace {
       return pow(real(2), int(1+std::log(D)/M_LN2));
     }
   };
-  template<> struct TreeHelper<3> {
-    template<typename real>
-    static tupel<3,real> RootCentre(tupel<3,real> const&x)
+  template<typename real> struct TreeHelper<3,real> {
+    typedef typename OctalTree<3,real>::point point;
+    static point RootCentre(point const&x)
     {
-      tupel<3,real> c;
+      point c;
       c[0]=int(x[0]+real(0.5));
       c[1]=int(x[1]+real(0.5));
       c[2]=int(x[2]+real(0.5));
       return c;
     }
-    template<typename real>
-    static real RootRadius(tupel<3,real> const&X,
-			   tupel<3,real>const&Xmin,
-			   tupel<3,real> const&Xmax)
+    static real RootRadius(point const&X,
+			   point const&Xmin,
+			   point const&Xmax)
     {
       real D  = max(Xmax[0]-X[0], X[0]-Xmin[0]);
       real R1 = max(Xmax[1]-X[1], X[1]-Xmin[1]); if(R1>D) D=R1;
@@ -154,6 +152,7 @@ namespace {
     static const int Nsub = 1<<Dim; ///< number of octants per cell
     //
     typedef OctalTree<Dim,real>            OctTree;
+    typedef TreeHelper<Dim,real>           Helper;
     typedef Geometry::Algorithms<1>        GeoAlg;
     typedef typename OctTree::Initialiser  Initialiser;
     typedef typename OctTree::count_type   count_type;
@@ -623,8 +622,8 @@ namespace {
     // 3  set (empty) root box
     P0->NDl   = 0;
     P0->NOC   = 0;
-    P0->CUB.X = TreeHelper<Dim>::RootCentre(Xave);
-    P0->CUB.H = TreeHelper<Dim>::RootRadius(P0->CUB.X,Xmin,Xmax);
+    P0->CUB.X = Helper::RootCentre(Xave);
+    P0->CUB.H = Helper::RootRadius(P0->CUB.X,Xmin,Xmax);
     P0->LEV   = 0;
     P0->NUM   = 0;
     // 4  add dots
@@ -756,7 +755,7 @@ namespace WDutils {
   typename OctalTree<__D,__X>::point
   OctalTree<__D,__X>::RootCentre(point const&xave)
   {
-    return TreeHelper<Dim>::RootCentre(xave);
+    return TreeHelper<__D,__X>::RootCentre(xave);
   }
   //
   template<int __D, typename __X>
@@ -764,7 +763,7 @@ namespace WDutils {
   OctalTree<__D,__X>::RootRadius(point const&xcen, point const&xmin,
 				 point const&xmax)
   {
-    return TreeHelper<Dim>::RootRadius(xcen,xmin,xmax);
+    return TreeHelper<__D,__X>::RootRadius(xcen,xmin,xmax);
   }
 }
 //

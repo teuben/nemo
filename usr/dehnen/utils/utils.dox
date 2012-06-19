@@ -393,7 +393,7 @@ WARN_LOGFILE           =
 
 INPUT		=	inc/Pi.h inc/heap.h inc/meta.h inc/inline.h \
 			inc/exception.h inc/sse.h inc/traits.h \
-			inc/io.h inc/tupel.h inc/memory.h \
+			inc/io.h inc/tupel.h inc/vector.h inc/memory.h \
 			inc/numerics.h inc/spline.h inc/radix.h inc/random.h \
 			inc/WDMath.h inc/octtree.h
 

@@ -63,9 +63,6 @@
 #ifndef WDutils_included_memory_h
 #  include <memory.h>
 #endif
-#ifndef WDutils_included_tupel_h
-#  include <tupel.h>
-#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 #ifdef __INTEL_COMPILER
@@ -924,15 +921,23 @@ namespace WDutils {
       d[n] *= x2;
   }
   //----------------------------------------------------------------------------
+#ifdef WDutils_included_tupel_h
   template<typename S, int N> inline
-  void LegendrePeven(tupel<N,S>& p, double x) {
-    return LegendrePeven<S,N>(p,x);
-  }
+  void LegendrePeven(tupel<N,S>& p, double x) 
+  { return LegendrePeven<S,N>(p,x); }
+  template<typename S, int N> inline
+  void dLegendrePeven(tupel<N,S>& p, tupel<N,S>& d, double x)
+  { return dLegendrePeven<S,N>(p,d,x); }
+#endif
+#ifdef WDutils_included_vector_h
+  template<typename S, int N> inline
+  void LegendrePeven(vector<N,S>& p, double x) 
+  { return LegendrePeven<S,N>(p,x); }
+  template<typename S, int N> inline
+  void dLegendrePeven(vector<N,S>& p, vector<N,S>& d, double x)
+  { return dLegendrePeven<S,N>(p,d,x); }
+#endif
   //----------------------------------------------------------------------------
-  template<typename S, int N> inline
-  void dLegendrePeven(tupel<N,S>& p, tupel<N,S>& d, double x) {
-    return dLegendrePeven<S,N>(p,d,x);
-  }
   //----------------------------------------------------------------------------
   // Gauss-Legendre integration: points & weights                               
   //----------------------------------------------------------------------------
