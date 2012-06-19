@@ -100,7 +100,7 @@ namespace falcON {
     /// destruction
     ~Random() { falcON_DEL_A(S); }
     /// pseudo random numbers
-    PseudoRandom::operator();
+    using PseudoRandom::operator();
     /// number of Sobol RNGs
     unsigned const& Nsob() const { return N; }
     /// quasi random number in [0,1]

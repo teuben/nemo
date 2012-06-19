@@ -194,7 +194,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     // const data access                                                        
     //--------------------------------------------------------------------------
-    DehnenModel::gamma;
+    using DehnenModel::gamma;
     double const&scale_radius() const { return sR; }
     double const&total_mass  () const { return sM; }
     //--------------------------------------------------------------------------

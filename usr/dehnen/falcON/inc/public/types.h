@@ -1,12 +1,12 @@
 // -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file   inc/public/types.h 
+/// \file   inc/public/types.h
 ///
 /// \author Walter Dehnen
-/// \date   2000-2006, 2009, 2012
+/// \date   2000-2006, 2009
 ///
-/// \brief  contains declaration of some basic types, such as falcON::real
+/// \brief  contains declaration of some basic types, such as falcON::rea 
 ///         and falcON::vect, and constants.
 ///
 ////////////////////////////////////////////////////////////////////////////////
@@ -110,9 +110,9 @@ namespace falcON {
   const int Ndim = 3;                            ///< falcON is 3D only
   const int Nsub = 1<<Ndim;                      ///< 2^(# dimensions)
 }
-//------------------------------------------------------------------------------
+//
 // macros used to test timings
-//------------------------------------------------------------------------------
+//
 #ifdef TEST_TIMING
 #  include <ctime>
 #  define SET_I        std::clock_t __C0_TIMING = std::clock();
@@ -125,26 +125,24 @@ namespace falcON {
 #  define SET_T(TEXT)  {}
 #endif
 
-////////////////////////////////////////////////////////////////////////////////
 //
 // elementary falcON types and constants
 //
-////////////////////////////////////////////////////////////////////////////////
 #define falcON_TRAITS(TYPE,NAME)		\
 namespace WDutils {				\
   WDutils_TRAITS(TYPE,NAME)			\
 }
-//------------------------------------------------------------------------------
+//
 //  vectors and tensors
-//------------------------------------------------------------------------------
+//
 #ifndef falcON_included_tensor_h
 #  include <public/tensor.h>
 #endif
 
 namespace falcON {
-  typedef tupel<Ndim,real  > vect;               ///< a vector of 3 reals
-  typedef tupel<Ndim,float>  vect_f;             ///< a vector of 3 floats
-  typedef tupel<Ndim,double> vect_d;             ///< a vector of 3 doubles
+  typedef falcONVec<Ndim,real  > vect;          ///< a vector of 3 reals
+  typedef falcONVec<Ndim,float>  vect_f;        ///< a vector of 3 floats
+  typedef falcONVec<Ndim,double> vect_d;        ///< a vector of 3 doubles
 }
 //------------------------------------------------------------------------------
 falcON_TRAITS(falcON::vect,"vect");
@@ -153,15 +151,14 @@ falcON_TRAITS(falcON::vect_d,"vect_d");
 #else
 falcON_TRAITS(falcON::vect_f,"vect_f");
 #endif
-//------------------------------------------------------------------------------
+//
 // useful constants and typedefs
-//------------------------------------------------------------------------------
+//
 namespace falcON {
   typedef uint16_t indx;                       ///< unsigned integer of 16 bytes
-  typedef uint64_t peanokey;                   ///< type of Peano-Hilbert key   
+  typedef uint64_t peanokey;                   ///< type of Peano-Hilbert key  
   /// \name some general floating-point constants
   //@{
-  //----------------------------------------------------------------------------
   const real zero       = 0.,                         ///< real: zero
              sixth      = 0.166666666666666666666667, ///< real: 1/6
              fifth      = 0.2,                        ///< real: 1/5
@@ -171,14 +168,13 @@ namespace falcON {
              one        = 1.,                         ///< real: 1
              threehalfs = 1.5,                        ///< real: 3/2
              two        = 2.,                         ///< real: 2
-             three      = 3.,                         ///< real: 3 
-             four       = 4.,                         ///< real: 4 
-             six        = 6.,                         ///< real: 6 
-             eight      = 8.,                         ///< real: 8 
+             three      = 3.,                         ///< real: 3
+             four       = 4.,                         ///< real: 4
+             six        = 6.,                         ///< real: 6
+             eight      = 8.,                         ///< real: 8
              ten        = 10.,                        ///< real: 10
              twelve     = 12.;                        ///< real: 12
   //@}
-  //----------------------------------------------------------------------------
-} // namespace falcON {
+} // namespace falcON
 ////////////////////////////////////////////////////////////////////////////////
 #endif // falcON_included_types_h

@@ -47,12 +47,12 @@ using std::endl;
 using namespace falcON;
 //------------------------------------------------------------------------------
 namespace {
-  typedef tupel<2,real>   vect2;
-  typedef tupel<2,double> vect2_d;
+  typedef falcONVec<2,real>   vect2;
+  typedef falcONVec<2,double> vect2_d;
   vect centre;
   vect project;
   real radius        (body const&b) { return abs(pos(b)); }
-  real radius_centred(body const&b) { return dist(centre,pos(b)); }
+  real radius_centred(body const&b) { return distance(centre,pos(b)); }
   real Radius        (body const&b) { return abs(pos(b)^project); }
   real Radius_centred(body const&b) { return abs((pos(b)-centre)^project); }
   //----------------------------------------------------------------------------
@@ -329,7 +329,6 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
 	vect2_d xi = vect2_d(eX*ri, eY*ri);
 	vect_d  vi = v0? B->vel(I[j])-(*v0) : B->vel(I[j]);
 	double  vp = elos * vi;
-	vect2_d ei = normalized(xi);
 	M    += mi;
 	Mvl  += mi * vp;
 	Mvlq += mi * vp*vp;

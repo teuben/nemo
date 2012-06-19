@@ -44,7 +44,14 @@ namespace {
   // types                                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
+#if   defined(WDutils_included_tupel_h)
   using   falcON::tupel;
+# define  vector tupel
+#elif defined(WDutils_included_vector_h)
+  using   WDutils::vector;
+#else
+# error neither utils/tupel.h nor utils/vector.h
+#endif
   using   falcON::fvec4;
   typedef PotExp::scalar   scalar;
   typedef PotExp::symmetry symmetry;
@@ -95,6 +102,7 @@ namespace {
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     void table_print(symmetry, std::ostream&, int=6) const;
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    template<symmetry> bool   hasnan  () const;        // isnan(A[l,m])
   private: // only accessible to PotExp in file pexp.cc                         
     // set Ylm to non-normalized scalar-valued spherical harmonics, i.e.        
     //    Y(l,m;theta,phi) = P(l,|m|; cos[theta]) * cas(m*phi)                  
@@ -158,6 +166,7 @@ namespace {
     scalar const&operator() (int n, int l) const { return A[n*L1+l]; }
     // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     void table_print(symmetry, std::ostream&, int=6) const;
+    template<symmetry> bool   hasnan  () const;        // isnan(A[n,l])
   private: // only accessible to PotExp in file pexp.cc                         
     template<symmetry> AnlRec&reset   ();              // A[n,l] = 0            
     template<symmetry> AnlRec&assign  (scalar);        // A[n,l] = x            
@@ -440,7 +449,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     template<typename _T>
-    static scalar Dot(tupel<3,_T>&dx,
+    static scalar Dot(vector<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&T, YlmRec const&Q) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -821,7 +830,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     template<typename _T>
-    static scalar Dot(tupel<3,_T>&dx,
+    static scalar Dot(vector<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&T, YlmRec const&Q) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -1175,7 +1184,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     template<typename _T>
-    static scalar Dot(tupel<3,_T>&dx,
+    static scalar Dot(vector<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&T, YlmRec const&Q) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -1350,7 +1359,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     template<typename _T>
-    static scalar Dot(tupel<3,_T>&dx,
+    static scalar Dot(vector<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&T, YlmRec const&) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -1506,7 +1515,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     template<typename _T>
-    static scalar Dot(tupel<3,_T>&dx,
+    static scalar Dot(vector<3,_T>&dx,
 		      Anlm   const&A, AnlRec const&P, AnlRec const&R, 
 		      YlmRec const&Y, YlmRec const&, YlmRec const&) {
       // P = Sum_nlm A_nlm * P_nl * Y_lm                                        
@@ -1639,7 +1648,7 @@ namespace {
   }
   //----------------------------------------------------------------------------
   template<symmetry S, typename T> inline
-  scalar EvalG(tupel<3,T>&d,
+  scalar EvalG(vector<3,T>&d,
 	       Anlm   const&C, AnlRec const&P,  AnlRec const&Pr,
 	       YlmRec const&Y, YlmRec const&Yt, YlmRec const&Yp) {
     return R0 * AUX<S>::Dot(d,C,P,Pr,Y,Yt,Yp);
@@ -1666,6 +1675,7 @@ namespace {
   // structs used as template parameter for AUX<>::Connect<>                  //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
+  bool nan;
   scalar(*fu)(scalar);
   scalar(*fb)(scalar,scalar);
   scalar(*ft)(scalar,scalar,scalar);
@@ -1679,6 +1689,8 @@ namespace {
 #if 0 // not used
   struct __setT { static void op(scalar&a, scalar b, scalar x) {a =x*b; } };
 #endif
+  struct __nan  { static void op(scalar&a, scalar  , scalar  )
+    { if(WDutils::isnan(a)) nan=true; } };
   struct __addT { static void op(scalar&a, scalar b, scalar x) {a+=x*b; } };
   struct __subT { static void op(scalar&a, scalar b, scalar x) {a-=x*b; } };
   struct __una  { static void op(scalar&a, scalar  , scalar  ) {a =fu(a);  } };
@@ -1694,7 +1706,7 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<typename X, typename Y>
   inline void Spherical(X&rd, X&ct, X&st, X&cp, X&sp,
-			tupel<3,Y> const& x) {
+			vector<3,Y> const& x) {
     register X
       A  = x[0]*x[0]+x[1]*x[1],                    // R^2= x^2 + y^2
       B  = sqrt(A);                                // R  = sqrt(x^2 + y^2)
@@ -1719,7 +1731,7 @@ namespace {
   // given (ar,ath,aph) and (cos[the],sin[the],cos[phi],sin[phi]), we compute   
   // in place (ax,ay,az), erasing (ar,ath,aph)                                  
   template<typename X, typename Y>
-  inline void Cartesian(tupel<3,Y> &a, X rd, X ct, X st, X cp, X sp) {
+  inline void Cartesian(vector<3,Y> &a, X rd, X ct, X st, X cp, X sp) {
     if(rd) {
       register X ir = IR0/rd;
       a[1] *= ir;
@@ -1741,19 +1753,19 @@ namespace {
 namespace falcON { namespace P {
 #ifdef falcON_SSE
   void Spherical4(fvec4&, fvec4&, fvec4&, fvec4&, fvec4&,
-		  const tupel<3,double>*);
+		  const vector<3,double>*);
   void Spherical4(fvec4&, fvec4&, fvec4&, fvec4&, fvec4&,
-		  const tupel<3,float>*);
-  void Cartesian4(tupel<3,double>*, fvec4 const&,
+		  const vector<3,float>*);
+  void Cartesian4(vector<3,double>*, fvec4 const&,
 		  fvec4 const&, fvec4 const&, fvec4 const&, fvec4 const&);
-  void Cartesian4(tupel<3,float>*, fvec4 const&,
+  void Cartesian4(vector<3,float>*, fvec4 const&,
 		  fvec4 const&, fvec4 const&, fvec4 const&, fvec4 const&);
   //----------------------------------------------------------------------------
 #else
   template<typename T>
   void Spherical4(fvec4&rd,
 		  fvec4&ct, fvec4&st,
-		  fvec4&cp, fvec4&sp, const tupel<3,T> *X) {
+		  fvec4&cp, fvec4&sp, const vector<3,T> *X) {
     Spherical(rd[0],ct[0],st[0],cp[0],sp[0], X[0]);
     Spherical(rd[1],ct[1],st[1],cp[1],sp[1], X[1]);
     Spherical(rd[2],ct[2],st[2],cp[2],sp[2], X[2]);
@@ -1761,7 +1773,7 @@ namespace falcON { namespace P {
   }
   //----------------------------------------------------------------------------
   template<typename X>
-  void Cartesian4(tupel<3,X>*a, fvec4 const&rd,
+  void Cartesian4(vector<3,X>*a, fvec4 const&rd,
 		  fvec4 const&ct, fvec4 const&st,
 		  fvec4 const&cp, fvec4 const&sp) {
     Cartesian(a[0],rd[0],ct[0],st[0],cp[0],sp[0]);
@@ -1793,6 +1805,13 @@ YlmRec &YlmRec::set(YlmRec&T, YlmRec&P,
 template<symmetry S> inline YlmRec &YlmRec::assign(scalar x) {
   AUX<S>::template Connect<__setX>(*this,*this,x);
   return *this;
+}
+//------------------------------------------------------------------------------
+template<symmetry S> inline bool YlmRec::hasnan() const {
+  nan=false;
+  AUX<S>::template Connect<__nan>(*const_cast<YlmRec*>(this),
+				  *const_cast<YlmRec*>(this),scalar(0));
+  return nan;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline YlmRec &YlmRec::reset() {
@@ -1872,6 +1891,13 @@ void YlmRec::table_print(symmetry     s,
 template<symmetry S> inline AnlRec &AnlRec::assign(scalar x) {
   AUX<S>::template Connect<__setX>(*this,*this,x);
   return *this;
+}
+//------------------------------------------------------------------------------
+template<symmetry S> inline bool AnlRec::hasnan() const {
+  nan=false;
+  AUX<S>::template Connect<__nan>(*const_cast<AnlRec*>(this),
+				  *const_cast<AnlRec*>(this),scalar(0));
+  return nan;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline AnlRec &AnlRec::reset() {
@@ -2092,7 +2118,7 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<typename T>
   class CBlock : private PotExpAccess {
-    typedef tupel<3,T> V;
+    typedef vector<3,T> V;
     //--------------------------------------------------------------------------
     T            M[4];                             // mass                      
     V            X[4];                             // (x,y,z)                   
@@ -2114,6 +2140,25 @@ namespace {
       for(int k=0; k!=K; ++k) {                    //   LOOP buffer             
 	SetPsi<SYM>(Psi,rd[k],M[k]);               //     set Psi_nl(r_i)       
 	SetYlm<SYM>(Ylm,ct[k],st[k],cp[k],sp[k]);  //     set Y_lm(the_i,phi_i) 
+	if(debug(1)) {
+	  if(Psi.hasnan<SYM>()) {
+	    std::cerr<<" found nan in Psi[n,l]: ";
+	    Psi.table_print(SYM,std::cerr);
+	    std::cerr<<" m="<<M[k]
+		     <<" x="<<X[k]
+		     <<" rd="<<rd[k]<<'\n';
+	  }
+	  if(Ylm.hasnan<SYM>()) {
+	    std::cerr<<" found nan in Ylm[l,m]: ";
+	    Ylm.table_print(SYM,std::cerr);
+	    std::cerr<<" m="<<M[k]
+		     <<" x="<<X[k]
+		     <<" ct="<<ct[k]
+		     <<" st="<<st[k]
+		     <<" cp="<<cp[k]
+		     <<" sp="<<sp[k]<<'\n';
+	  }
+	}
 	AUX<SYM>::template Connect<__addB>(C,Psi,Ylm,scalar(0));
 	                                           //     add to C_nlm          
       }                                            //   END LOOP                
@@ -2215,7 +2260,7 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<typename T>
   class GBlock {
-    typedef tupel<3,T> V;
+    typedef vector<3,T> V;
     //--------------------------------------------------------------------------
     int          I[4];                             // body index                
     T            P[4];                             // potential                 
@@ -2362,7 +2407,7 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<typename T>
   class PBlock {
-    typedef tupel<3,T> V;
+    typedef vector<3,T> V;
     //--------------------------------------------------------------------------
     int          I[4];                             // body index                
     T            P[4];                             // potential                 
@@ -2549,13 +2594,13 @@ PotExp::PotExp(scalar   a,                         // parameter alpha
     return;								\
   }
 //------------------------------------------------------------------------------
-template<typename T>                               // T: double or float        
-void PotExp::AddCoeffs  (Anlm            &C,       // O: C_nlm coefficients     
-			 int              n,       // I: # bodies               
-			 const T         *m,       // I: masses                 
-			 const tupel<3,T>*x,       // I: positions              
-			 const int       *f,       // I: flags        see Note  
-			 int              k) const //[I: k]           see Note  
+template<typename T>                                // T: double or float       
+void PotExp::AddCoeffs  (Anlm             &C,       // O: C_nlm coefficients    
+			 int               n,       // I: # bodies              
+			 const T          *m,       // I: masses                
+			 const vector<3,T>*x,       // I: positions             
+			 const int        *f,       // I: flags        see Note 
+			 int               k) const //[I: k]           see Note 
   //                                                                            
   // computes                                                                   
   //                                                                            
@@ -2576,17 +2621,17 @@ void PotExp::AddCoeffs  (Anlm            &C,       // O: C_nlm coefficients
 //------------------------------------------------------------------------------
 template void PotExp::
 AddCoeffs<float>(Anlm&, int, const float*,
-		 const tupel<3,float>*, const int*, int) const;
+		 const vector<3,float>*, const int*, int) const;
 template void PotExp::
 AddCoeffs<double>(Anlm&, int, const double*,
-		  const tupel<3,double>*, const int*, int) const;
+		  const vector<3,double>*, const int*, int) const;
 //------------------------------------------------------------------------------
-template<typename T>                               // T: double or float        
-void PotExp::AddCoeffs  (int              m,       // I: # quantities           
-			 Anlm            *C,       // O: C_nlm coefficients     
-			 int              n,       // I: # bodies               
-			 const tupel<3,T>*x,       // I: positions              
-			 const T        **y) const // I: quantities per body    
+template<typename T>                                // T: double or float       
+void PotExp::AddCoeffs  (int               m,       // I: # quantities          
+			 Anlm             *C,       // O: C_nlm coefficients    
+			 int               n,       // I: # bodies              
+			 const vector<3,T>*x,       // I: positions             
+			 const T         **y) const // I: quantities per body   
   //                                                                            
   // computes                                                                   
   //                                                                            
@@ -2605,9 +2650,9 @@ void PotExp::AddCoeffs  (int              m,       // I: # quantities
 }
 //------------------------------------------------------------------------------
 template void PotExp::
-AddCoeffs<float>(int, Anlm*, int, const tupel<3,float>*, const float**) const;
+AddCoeffs<float>(int, Anlm*, int, const vector<3,float>*, const float**) const;
 template void PotExp::
-AddCoeffs<double>(int, Anlm*, int,const tupel<3,double>*,const double**) const;
+AddCoeffs<double>(int, Anlm*, int,const vector<3,double>*,const double**) const;
 //------------------------------------------------------------------------------
 void PotExp::Normalize(Anlm&C, scalar G) const {
   //                                                                            
@@ -2621,14 +2666,14 @@ void PotExp::Normalize(Anlm&C, scalar G) const {
   else                ::normalize<none       >(C,Knlm,G);
 }
 //------------------------------------------------------------------------------
-template<typename T>                               // T: double or float        
-void PotExp::SetGravity (Anlm const      &C,       // I: C_nlm coefficients     
-			 int              n,       // I: # bodies               
-			 const tupel<3,T>*x,       // I: positions              
-			 T               *p,       // O: potentials             
-			 tupel<3,T>      *a,       // O: accelrations           
-			 const int       *f,       // I: body flags   see Note 1
-			 int              d) const // I: add?         see Note 2
+template<typename T>                                // T: double or float       
+void PotExp::SetGravity (Anlm const       &C,       // I: C_nlm coefficients    
+			 int               n,       // I: # bodies              
+			 const vector<3,T>*x,       // I: positions             
+			 T                *p,       // O: potentials            
+			 vector<3,T>      *a,       // O: accelrations          
+			 const int        *f,       // I: body flags  see Note 1
+			 int               d) const // I: add?        see Note 2
   //                                                                            
   // computes for all bodies or for all active bodies                           
   //                                                                            
@@ -2649,18 +2694,18 @@ void PotExp::SetGravity (Anlm const      &C,       // I: C_nlm coefficients
 }
 //------------------------------------------------------------------------------
 template void PotExp::
-SetGravity<float>(Anlm const&, int, const tupel<3,float>*,
-		  float*, tupel<3,float>*, const int*, int) const;
+SetGravity<float>(Anlm const&, int, const vector<3,float>*,
+		  float*, vector<3,float>*, const int*, int) const;
 template void PotExp::
-SetGravity<double>(Anlm const&, int, const tupel<3,double>*,
-		   double*, tupel<3,double>*, const int*, int) const;
+SetGravity<double>(Anlm const&, int, const vector<3,double>*,
+		   double*, vector<3,double>*, const int*, int) const;
 //------------------------------------------------------------------------------
-template<typename T>                               // T: double or float        
-void PotExp::SetGravity (Anlm       const&C,       // I: C_nlm coefficients     
-			 tupel<3,T> const&x,       // I: position               
-			 T               &p,       // O: potential              
-			 tupel<3,T>      &a,       // O: acceleration           
-			 int              d) const // I: add?         see Note 2
+template<typename T>                                // T: double or float       
+void PotExp::SetGravity (Anlm        const&C,       // I: C_nlm coefficients    
+			 vector<3,T> const&x,       // I: position              
+			 T                &p,       // O: potential             
+			 vector<3,T>      &a,       // O: acceleration          
+			 int              d) const  // I: add?        see Note 2
   //                                                                            
   //                                                                            
   // computes for a single body:                                                
@@ -2681,18 +2726,18 @@ void PotExp::SetGravity (Anlm       const&C,       // I: C_nlm coefficients
   B4.AddGravity(SYM,x,p,a,d);
 }
 //------------------------------------------------------------------------------
-template void PotExp::SetGravity<float>(Anlm const&, tupel<3,float> const&,
-					float&, tupel<3,float>&, int) const;
-template void PotExp::SetGravity<double>(Anlm const&, tupel<3,double> const&,
-					 double&, tupel<3,double>&, int) const;
+template void PotExp::SetGravity<float>(Anlm const&, vector<3,float> const&,
+					float&, vector<3,float>&, int) const;
+template void PotExp::SetGravity<double>(Anlm const&, vector<3,double> const&,
+					 double&, vector<3,double>&, int) const;
 //------------------------------------------------------------------------------
-template<typename T>                               // T: double or float        
-void PotExp::SetPotential(Anlm const      &C,      // I: C_nlm coefficients     
-			  int              n,      // I: # bodies               
-			  const tupel<3,T>*x,      // I: positions              
-			  T               *p,      // O: potentials             
-			  const int       *f,      // I: body flags   see Note 1
-			  int            add) const// I: add?         see Note 2
+template<typename T>                                // T: double or float       
+void PotExp::SetPotential(Anlm const       &C,      // I: C_nlm coefficients    
+			  int               n,      // I: # bodies              
+			  const vector<3,T>*x,      // I: positions             
+			  T                *p,      // O: potentials            
+			  const int        *f,      // I: body flags  see Note 1
+			  int             add) const// I: add?        see Note 2
   //                                                                            
   // computes for all bodies or for all active bodies                           
   //                                                                            
@@ -2710,10 +2755,10 @@ void PotExp::SetPotential(Anlm const      &C,      // I: C_nlm coefficients
 }
 //------------------------------------------------------------------------------
 template void PotExp::
-SetPotential<float>(Anlm const&, int, const tupel<3,float>*,
+SetPotential<float>(Anlm const&, int, const vector<3,float>*,
 		    float*, const int*, int) const;
 template void PotExp::
-SetPotential<double>(Anlm const&, int, const tupel<3,double>*,
+SetPotential<double>(Anlm const&, int, const vector<3,double>*,
 		     double*, const int*, int) const;
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
@@ -3066,7 +3111,7 @@ int main()
 #endif // TESTING
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
-  void SetYlm(double*a, int l, tupel<3,double> const&x)
+  void SetYlm(double*a, int l, vector<3,double> const&x)
   {
     YlmRec Y(l);
     double rd,ct,st,cp,sp;

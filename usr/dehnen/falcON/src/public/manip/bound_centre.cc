@@ -166,7 +166,7 @@ namespace Manipulate {
       , Pn    ( K )
       , In    ( K )
     {
-      if(debug(2) || npar > 4)
+      if(debug(2) || npar > 5)
 	std::cerr <<
 	  " Manipulator \"bound_centre\":\n"
 	  " find centre of most bound region and put it in 'xcen' and 'vcen'\n"
@@ -253,8 +253,8 @@ namespace Manipulate {
 	double w = pow(Pmax-Pn[In[i]],A);
 	W += w;
 	P += w * Pn[In[i]];
-	X += w * S->pos(Nb[In[i]]);
-	V += w * S->vel(Nb[In[i]]);
+	X += w * vect_d(S->pos(Nb[In[i]]));
+	V += w * vect_d(S->vel(Nb[In[i]]));
       }
       P   /= W;
       X   /= W;

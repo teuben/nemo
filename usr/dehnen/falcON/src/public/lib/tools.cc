@@ -96,14 +96,11 @@ void falcON::find_centre_alpha(const bodies*B,
     LoopSubsetBodies(B,b) {                        //   LOOP bodies             
       register double w = weight(b,alpha);         //     w_i = m_i*p_i^alpha   
       W+= w;                                       //     Sum w_i               
-      X+= w * pos(b);                              //     Sum w_i x_i           
+      X+= w * vect_d(pos(b));                      //     Sum w_i x_i           
       Q+= w * norm(pos(b));                        //     Sum w_i x_i^2         
     }                                              //   END LOOP                
     Xc = X/W;                                      //   Xc  = <x>               
     Rq = Q/W - norm(X);                            //   R^2 = <(x-<x>)^2>       
-//     // TEST
-//     std::cerr<<" 0:"<<Xc<<"  "<<sqrt(Rq)<<'\n';
-//     // tensor_set
   }                                                // ENDIF                     
   // 2. iterate: exclude bodies at |X-X0| >= R, reducing R by fac each iteration
   int  I(0);                                       // counter: iterations       
@@ -120,13 +117,10 @@ void falcON::find_centre_alpha(const bodies*B,
       if(dist_sq(pos(b),Xc) < Rq) {                //     IF |X-Xc| < R         
 	register double w = weight(b,alpha);       //       w_i = m_i*p_i^alpha 
 	W+= w;                                     //       Sum w_i             
-	X+= w * pos(b);                            //       Sum w_i x_i         
+	X+= w * vect_d(pos(b));                    //       Sum w_i x_i         
 	N++;                                       //       count               
       }                                            //   END LOOP                
     if(I && SHRINK && N < Nmin) SHRINK = 0;        //   IF (N < Nmin): adjust   
-//     // TEST
-//     std::cerr<<std::setw(2)<<I<<": X="<<Xc<<" R="<<sqrt(Rq)<<" N="<<N<<'\n';
-//     // tensor_set
   }                                                // END DO                    
   xc = Xc;                                         // set output value: position
   rc = sqrt(Rq);                                   // set output value: radius  
@@ -140,7 +134,7 @@ void falcON::find_centre_alpha(const bodies*B,
 	M+= mass(b);                               //       Sum m_i             
 	register double w = weight(b,alpha);       //       w_i = m_i*p_i^alpha 
 	W+= w;                                     //       Sum w_i             
-	V+= w * vel(b);                            //       Sum w_i v_i         
+	V+= w * vect_d(vel(b));                    //       Sum w_i v_i         
       }                                            //   END LOOP                
     if(vc)  *vc  = V/W;                            //   set velocity            
     if(rhc) *rhc = 3.*M/(FPi*Rq*rc);               //   set density estimate    
@@ -265,7 +259,7 @@ namespace {
 	  double D[2];
 	  ferrers<3>::diff1(mass(b),Rq*irq,D);
 	  rho+= D[0];
-	  v  += D[0] * vel(b);
+	  v  += D[0] * vect_d(vel(b));
 	  g  += D[1] * R;
 	  ++n;
 	}

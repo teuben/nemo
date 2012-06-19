@@ -28,7 +28,7 @@ Pi_h			:= $(IUTI)Pi.h
 inline_h		:= $(IUTI)inline.h
 io_h			:= $(IUTI)io.h
 traits_h		:= $(IUTI)traits.h
-tupel_h			:= $(IUTI)tupel.h $(IUTI)tupel.cc $(traits_h)
+tupel_h			:= $(IUTI)tupel.h $(IUTI)vector.h $(IUTI)tupel.cc $(traits_h)
 exception_h		:= $(IUTI)exception.h $(traits_h)
 WDMath_h		:= $(IUTI)WDMath.h $(Pi_h) $(exception_h)
 memory_h		:= $(IUTI)memory.h $(exception_h) $(inline_h)
@@ -95,7 +95,7 @@ WD99disc_h		:= $(IPUB)WD99disc.h $(random_h) $(externacc_h)
 timer_h			:= $(IACC)timer.h
 center_h		:= $(IACC)center.h
 ifdef NEMO
-defacc_h		:= $(NEMOINC)defacc.h
+defacc_h		:= $(NEMOINC)/defacc.h
 endif
 GalPot_h		:= $(IACC)GalPot.cc $(IACC)GalPot.h \
 				$(IACC)GalPot_pre.h $(tupel_h)
@@ -284,36 +284,36 @@ manip_pub		:=	$(MAN)addgravity.so \
 # accelerations
 # -------------
 
-$(ACC)Combined.so:		$(SACC)Combined.cc $(ACCT) $(timer_h) $(makefiles)
+$(ACC)Combined.so:		$(SACC)Combined.cc $(ACCT) $(timer_h) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)Dehnen.so:		$(SACC)Dehnen.cc $(ACCT) $(makefiles)
+$(ACC)Dehnen.so:		$(SACC)Dehnen.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)DehnenMcLaughlin.so:	$(SACC)DehnenMcLaughlin.cc $(ACCT) $(makefiles)
+$(ACC)DehnenMcLaughlin.so:	$(SACC)DehnenMcLaughlin.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)DiscPot.so:		$(SACC)DiscPot.cc $(ACCT) $(GalPot_h) $(makefiles)
+$(ACC)DiscPot.so:		$(SACC)DiscPot.cc $(ACCT) $(GalPot_h) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)GalPot.so:		$(SACC)GalPot.cc $(ACCT) $(GalPot_h) $(makefiles)
+$(ACC)GalPot.so:		$(SACC)GalPot.cc $(ACCT) $(GalPot_h) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)Halo.so:			$(SACC)Halo.cc $(ACCT) $(halo_cc) $(makefiles)
+$(ACC)Halo.so:			$(SACC)Halo.cc $(ACCT) $(halo_cc) $(defacc_h) $(makefiles)
 				$(MAKE_ACC) -I$(SRC) $(NBDYFLAGS)
-$(ACC)MiyamotoNagai.so:		$(SACC)MiyamotoNagai.cc $(ACCT) $(makefiles)
+$(ACC)LogPot.so:		$(SACC)LogPot.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)Monopole.so:		$(SACC)Monopole.cc $(ACCT) $(timer_h) $(makefiles)
+$(ACC)MiyamotoNagai.so:		$(SACC)MiyamotoNagai.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)NFW.so:			$(SACC)NFW.cc $(ACCT) $(makefiles)
+$(ACC)Monopole.so:		$(SACC)Monopole.cc $(ACCT) $(timer_h) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)Plummer.so:		$(SACC)Plummer.cc $(ACCT) $(makefiles)
+$(ACC)NFW.so:			$(SACC)NFW.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)Point.so:			$(SACC)Point.cc $(ACCT) $(makefiles)
+$(ACC)Plummer.so:		$(SACC)Plummer.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)PotExp.so:                $(SACC)PotExp.cc $(ACCT) $(PotExp_cc) $(makefiles)
+$(ACC)Point.so:			$(SACC)Point.cc $(ACCT) $(defacc_h) $(makefiles)
+				$(MAKE_ACC)
+$(ACC)PotExp.so:                $(SACC)PotExp.cc $(ACCT) $(PotExp_cc) $(defacc_h) $(makefiles)
 				$(MAKE_ACC) -I$(SRC) $(NBDYFLAGS)
-$(ACC)Shrink.so:		$(SACC)Shrink.cc $(ACCT) $(timer_h) $(makefiles)
+$(ACC)Shrink.so:		$(SACC)Shrink.cc $(ACCT) $(timer_h) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
-$(ACC)SoftKernel.so:		$(SACC)SoftKernel.cc $(ACCT) $(makefiles)
+$(ACC)SoftKernel.so:		$(SACC)SoftKernel.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC) $(NBDYFLAGS)
-$(ACC)LogPot.so:		$(SACC)LogPot.cc $(ACCT) $(makefiles)
-				$(MAKE_ACC)
 
 acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \

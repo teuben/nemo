@@ -56,9 +56,9 @@ namespace falcON {
   // ///////////////////////////////////////////////////////////////////////////
   class acceleration {
   protected:
-    typedef tupel<3,float>  vectf;
-    typedef tupel<3,double> vectd;
-    typedef bodies::block   block;
+    typedef falcONVec<3,float>  vectf;
+    typedef falcONVec<3,double> vectd;
+    typedef bodies::block       block;
     //--------------------------------------------------------------------------
     /// \name abstract methods to be satisfied by derived instances
     //@{

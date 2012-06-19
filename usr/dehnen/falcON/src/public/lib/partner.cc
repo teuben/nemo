@@ -2,7 +2,7 @@
 //                                                                              
 /// \file src/public/partner.cc                                                 
 //                                                                              
-// Copyright (C) 2000-2009  Walter Dehnen                                       
+// Copyright (C) 2000-2009,2012  Walter Dehnen
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -64,8 +64,8 @@ namespace {
     public BasicIactor<PartnerEstimator> {
     //--------------------------------------------------------------------------
   public:
-    taker::take;
-    taker::take_all;
+    using taker::take;
+    using taker::take_all;
     //--------------------------------------------------------------------------
     // abstract methods                                                         
     //--------------------------------------------------------------------------
@@ -607,17 +607,17 @@ void PartnerEstimator::prepare_sph()
     LoopPartnerLKids(cell_iterator,Ci,l,sph)       //   LOOP partner sub-leafs  
       x += pos(l);                                 //     add up: mean pos      
     LoopPartnerCKids(cell_iterator,Ci,c,sph)       //   LOOP partner sub-cells  
-      x += numb(c) * pos(c);                       //     add up: mean pos      
+      x += real(numb(c)) * pos(c);                 //     add up: mean pos      
     x /= real(numb(Ci));                           //   mean position           
     Ci->pos() = x;                                 //   set cell: mean position 
     real s=zero,r=zero;                            //   size, r_max             
     LoopPartnerLKids(cell_iterator,Ci,l,sph) {     //   LOOP partner sub-leafs  
-      real R = dist(x,pos(l));                     //     distance to sub leaf  
+      real R = distance(x,pos(l));                 //     distance to sub leaf  
       update_max(r,R);                             //     update r_max          
       update_max(s,R+size(l));                     //     update size           
     }                                              //   END LOOP                
     LoopPartnerCKids(cell_iterator,Ci,c,sph) {     //   LOOP partner sub-cells  
-      real R = dist(x,pos(c));                     //     distance to sub cell  
+      real R = distance(x,pos(c));                 //     distance to sub cell  
       update_max(r,R+rmax(c));                     //     update r_max          
       update_max(s,R+size(c));                     //     update size           
     }                                              //   END LOOP                
@@ -671,8 +671,8 @@ void PartnerEstimator::prepare_sticky()
       v += vel(l);                                 //     add up: mean vel      
     }                                              //   END LOOP                
     LoopPartnerCKids(cell_iterator,Ci,c,sticky) {  //   LOOP partner sub-cells  
-      x += numb(c) * pos(c);                       //     add up: mean pos      
-      v += numb(c) * vel(c);                       //     add up: mean vel      
+      x += real(numb(c)) * pos(c);                 //     add up: mean pos      
+      v += real(numb(c)) * vel(c);                 //     add up: mean vel      
     }                                              //   END LOOP                
     real iN=one/real(numb(Ci));                    //   1/N_sticky              
     x *= iN;                                       //   mean position           
@@ -681,12 +681,12 @@ void PartnerEstimator::prepare_sticky()
     Ci->vel() = v;                                 //   set cell: mean position 
     real s=zero,r=zero;                            //   size, vrad              
     LoopPartnerLKids(cell_iterator,Ci,l,sticky) {  //   LOOP partner sub-leafs  
-      update_max(s,dist(x,pos(l))+size(l));        //     update size           
-      update_max(r,dist(v,vel(l)));                //     update vrad           
+      update_max(s,distance(x,pos(l))+size(l));    //     update size           
+      update_max(r,distance(v,vel(l)));            //     update vrad           
     }                                              //   END LOOP                
     LoopPartnerCKids(cell_iterator,Ci,c,sticky) {  //   LOOP partner sub-cells  
-      update_max(s,dist(x,pos(c))+size(c));        //     update size           
-      update_max(r,dist(v,vel(c))+vrad(c));        //     update vrad           
+      update_max(s,distance(x,pos(c))+size(c));    //     update size           
+      update_max(r,distance(v,vel(c))+vrad(c));    //     update vrad           
     }                                              //   END LOOP                
     Ci->size() = s;                                //   set cell: size          
     Ci->vrad() = r;                                //   set cell: vrad          

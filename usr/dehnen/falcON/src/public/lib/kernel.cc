@@ -5,7 +5,7 @@
 //
 /// \brief   implements inc/public/kernel.h
 /// \author  Walter Dehnen
-/// \date    2000-2010
+/// \date    2000-2010,2012
 //
 // /////////////////////////////////////////////////////////////////////////////
 //
@@ -889,18 +889,18 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<kern_type P, int K> struct kernel<P,K,0,0> : private __block<P,K> {
     enum { ND = __block<P,K>::ND };
-    sv a(ARGS_B) { LOAD_G b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
-    sv a(ARGS_C) { LOAD_G b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
+    sv a(ARGS_B) { LOAD_G kernel::b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
+    sv a(ARGS_C) { LOAD_G kernel::b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
   };
   template<kern_type P, int K> struct kernel<P,K,0,1> : private __block<P,K> {
     enum { ND = __block<P,K>::ND };
-    sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
-    sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
+    sv a(ARGS_B) { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
+    sv a(ARGS_C) { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
   };
   template<kern_type P, int K> struct kernel<P,K,1,0> : private __block<P,K> {
     enum { ND = __block<P,K>::ND };
-    sv a(ARGS_B) { LOAD_G b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
-    sv a(ARGS_C) { LOAD_G b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
+    sv a(ARGS_B) { LOAD_G kernel::b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
+    sv a(ARGS_C) { LOAD_G kernel::b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
   };
 #if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 1) 
   // gcc 4.1.2 gives crashing code, if this is inlined.
@@ -910,14 +910,14 @@ namespace {
     sv a(ARGS_C);
   };
   template<kern_type P, int K> void kernel<P,K,1,1>::a(ARGS_B)
-    { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
+    { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
   template<kern_type P, int K> void kernel<P,K,1,1>::a(ARGS_C)
-    { LOAD_I b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
+    { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
 #else
   template<kern_type P, int K> struct kernel<P,K,1,1> : private __block<P,K> {
     enum { ND = __block<P,K>::ND };
-    sv a(ARGS_B) { LOAD_I b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
-    sv a(ARGS_C) { LOAD_I b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
+    sv a(ARGS_B) { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
+    sv a(ARGS_C) { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
   };
 #endif
 #undef sv

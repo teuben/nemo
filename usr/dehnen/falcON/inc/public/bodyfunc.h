@@ -235,18 +235,18 @@ namespace falcON {
     /// dtor: delete data
     ~Bodyfunc() { if(PARS) falcON_DEL_A(PARS); PARS=0; }
     /// return type: 'b', 'i', 'r', 'v' for bool, int, real, vect
-    bodyfunc::type;
+    using bodyfunc::type;
     /// check return type
-    bodyfunc::is_type;
+    using bodyfunc::is_type;
     /// return number of parameters used
-    bodyfunc::npar;
+    using bodyfunc::npar;
     /// return nth parameter
     /// \param[in]  n number of parameter asked
     real const&param(int n) const { return P[n]; }
     /// return fields required
-    bodyfunc::need;
+    using bodyfunc::need;
     /// return original expression
-    bodyfunc::expression;
+    using bodyfunc::expression;
     /// return parameters
     const char*parameters() const { return PARS; }
     /// function call, non-operator
@@ -261,7 +261,7 @@ namespace falcON {
     T operator() (body const&b, double t) const
     { return func<T>(b,t); }
     /// is *this an empty bodyfunc?
-    bodyfunc::is_empty;
+    using bodyfunc::is_empty;
     /// is *this valid (non-empty)?
     operator bool() const
     { return !is_empty(); }
@@ -323,16 +323,16 @@ namespace falcON {
       throw(falcON::exception)
       : Bodyfunc(func_,npar_,need_,expr_,pars_) { checktype(); }
     /// return number of parameters used
-    Bodyfunc::npar;
+    using Bodyfunc::npar;
     /// return nth parameter
     /// \param[in] n number of parameter asked
-    Bodyfunc::param;
+    using Bodyfunc::param;
     /// return fields required
-    Bodyfunc::need;
+    using Bodyfunc::need;
     /// return original expression
-    Bodyfunc::expression;
+    using Bodyfunc::expression;
     /// return parameters
-    Bodyfunc::parameters;
+    using Bodyfunc::parameters;
     /// function call
     /// \param[in] b body
     /// \param[in] t time
@@ -340,7 +340,7 @@ namespace falcON {
     T operator()(body const&b, double t) const
     { return Bodyfunc::func<T>(b,t); }
     /// is *this an empty bodyfunc?
-    Bodyfunc::is_empty;
+    using Bodyfunc::is_empty;
     /// is *this valid (non-empty)?
     operator bool() const
     { return !is_empty(); }
@@ -425,7 +425,7 @@ namespace falcON {
     /// \param[in] b body
     /// \return expression evaluated for body \a b at time set at construction
     proptype operator()(body const&b) const
-    { return convert(F->func<functype>(b,T)); }
+    { return this->convert(F->func<functype>(b,T)); }
     /// is *this an empty bodyfunc?
     bool is_empty() const
     { return F->is_empty(); }
@@ -465,23 +465,23 @@ namespace falcON {
     void set_time(double t)
     { TIME = t; }
     /// return number of parameters used
-    BodyFunc<bool>::npar;
+    using BodyFunc<bool>::npar;
     /// return nth parameter
     /// \param[in] n number of parameter asked
-    BodyFunc<bool>::param;
+    using BodyFunc<bool>::param;
     /// return fields required
-    BodyFunc<bool>::need;
+    using BodyFunc<bool>::need;
     /// return original expression
-    BodyFunc<bool>::expression;
+    using BodyFunc<bool>::expression;
     /// return parameters
-    BodyFunc<bool>::parameters;
+    using BodyFunc<bool>::parameters;
     /// function call
     /// \param[in] b body
     /// \return expression evaluated for body \a b at time set by set_time()
     bool operator()(body const&b) const
     { return BodyFunc<bool>::operator() (b,TIME); }
     /// is *this an empty bodyfunc?
-    BodyFunc<bool>::is_empty;
+    using BodyFunc<bool>::is_empty;
     /// is *this valid (non-empty)?
     operator bool() const { return !is_empty(); }
     /// return number of bodies passing the filter

@@ -890,7 +890,7 @@ HaloModel::HaloModel(HaloDensity const&model,
   // 1.2 compute g(Q) of f=L^-2B * g(Q)                                         
   lg.reset(n);
   const double
-    Logalfa = (1.5-B) * LogofTwo + LogBeta(0.5,1-B) - LogofPi +
+    Logalfa = (1.5-B) * LogofTwo() + LogBeta(0.5,1-B) - LogofPi() +
               log( (B >= 0.5 ? 1 : ( 0.5-B)) *
 	           (B >=-0.5 ? 1 : (-0.5-B)) );
   bool   g_negative = false;
@@ -925,7 +925,7 @@ HaloModel::HaloModel(HaloDensity const&model,
     const double
       p    = 1.5-B-mm,
       p1   = 1-p,
-      lfc  = log(sin(p1*Pi)) - 3*LogofPi - Logalfa;
+      lfc  = log(sin(p1*Pi)) - 3*LogofPi() - Logalfa;
     nu     = 1/p1;
     Be     = B;
     MT     = mt[n1];

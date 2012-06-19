@@ -4,11 +4,11 @@
 /// \file   src/public/manip/sphereprof.cc
 ///
 /// \author Walter Dehnen
-/// \date   2006-2010
+/// \date   2006-2012
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2006-2010 Walter Dehnen
+// Copyright (C) 2006-2012 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -41,6 +41,7 @@
 // v 1.4    07/11/2008  WD added step as 3rd parameter
 // v 1.4.1  13/04/2010  WD removed use of initial_time()
 // v 1.4.2  13/04/2010  WD set initial file index to non-existing file
+// v 1.5    19/06/2012  WD allowed for tupel.h  ->  vector.h                 
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -70,7 +71,7 @@ namespace falcON { namespace Manipulate {
       else      { o << ' '; return print_pos(o, x); }
     }
     template<typename X>
-    std::ostream&print_dir(std::ostream&o, tupel<3,X> const&x) const {
+    std::ostream&print_dir(std::ostream&o, falcONVec<3,X> const&x) const {
       return print(print(print(o,x[0])<<' ',x[1])<<' ',x[2]);
     }
     template<typename X>

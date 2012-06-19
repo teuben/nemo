@@ -313,6 +313,11 @@ namespace falcON {
 	for(scalar*a=A; a!=AN; ++a) *a = f(*a);
 	return *this;
       }
+      bool IsNaN(symmetry s=none) const
+      { return const_cast<Anlm*>(this)->__IsNaN(s); }
+    private:
+      bool __IsNaN(symmetry s);
+    public:
       //------------------------------------------------------------------------
 #ifdef falcON_MPI
       /// on all processes, set A to sum over C on each process.
@@ -404,7 +409,7 @@ namespace falcON {
           the contributions of bodies for which (f[i]&k)==true are added.
     */
     template<typename T>
-    void AddCoeffs(Anlm&A, int n, const T*m, const tupel<3,T>*x,
+    void AddCoeffs(Anlm&A, int n, const T*m, const falcONVec<3,T>*x,
 	           const int*f, int k=0) const;
     //--------------------------------------------------------------------------
     /*!
@@ -445,14 +450,14 @@ namespace falcON {
 	  of 0 means both potentials and acclerations get assigned.
     */
     template<typename T>
-    void SetGravity (Anlm const&A, int n, const tupel<3,T>*x, T*P, tupel<3,T>*F,
-		     const int*f, int add) const;
+    void SetGravity (Anlm const&A, int n, const falcONVec<3,T>*x, T*P,
+		     falcONVec<3,T>*F, const int*f, int add) const;
     //--------------------------------------------------------------------------
     /// compute potential and accelerations due to a set of coefficients 
     /// for a single body.
     template<typename T>
-    void SetGravity (Anlm const&A, tupel<3,T> const&x, T&P, tupel<3,T>&F,
-		     int add) const;
+    void SetGravity (Anlm const&A, falcONVec<3,T> const&x, T&P, 
+		     falcONVec<3,T>&F, int add) const;
     //--------------------------------------------------------------------------
     /*!
     \brief compute potential due to a set of coefficients for a set of bodies.
@@ -476,12 +481,13 @@ namespace falcON {
           added, otherwise assigned.
     */
     template<typename T>
-    void SetPotential(Anlm const&A, int n, const tupel<3,T>*x, T*P,
+    void SetPotential(Anlm const&A, int n, const falcONVec<3,T>*x, T*P,
 		      const int*f, int add) const;
     //--------------------------------------------------------------------------
   protected:
     template<typename T>
-    void AddCoeffs(int m, Anlm*A, int n, const tupel<3,T>*x, const T**y) const;
+    void AddCoeffs(int m, Anlm*A, int n, const falcONVec<3,T>*x, const T**y)
+      const;
   };// class PotExp
   //////////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -548,7 +554,7 @@ namespace falcON {
       if(is_open()) close();
       open_for_read(f);
     }
-    AnlmIO::read;
+    using AnlmIO::read;
     operator bool() const { return is_open(); }
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -571,7 +577,7 @@ namespace falcON {
       if(is_open()) close();
       open_for_write(f);
     }
-    AnlmIO::write;
+    using AnlmIO::write;
     operator bool() const { return is_open(); }
   };
 } // namespace falcON

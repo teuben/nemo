@@ -115,7 +115,7 @@ Integrator::Integrator(const ForceAndDiagnose*S,
 namespace {
   //----------------------------------------------------------------------------
   template<int TYPE, int DERIV>
-  inline void move_all(const bodies*B, double dt, bool all) {
+  inline void move_all(const bodies*B, real dt, bool all) {
     if(all)
       LoopAllBodies(B,b) {
 	b. template datum<TYPE>() += dt * const_datum<DERIV>(b);
@@ -130,16 +130,16 @@ namespace {
   inline void move_all_i(const bodies*B, const double*dt, bool all) {
     if(all)
       LoopAllBodies(B,b) {
-	b. template datum<TYPE>() += dt[level(b)] * const_datum<DERIV>(b);
+	b. template datum<TYPE>() += real(dt[level(b)]) * const_datum<DERIV>(b);
       }
     else
       LoopAllBodies(B,b) if(is_active(b)) {
-	b. template datum<TYPE>() += dt[level(b)] * const_datum<DERIV>(b);
+	b. template datum<TYPE>() += real(dt[level(b)]) * const_datum<DERIV>(b);
       }
   }
   //----------------------------------------------------------------------------
   template<int TYPE, int DERIV>
-  inline void move_sph(const bodies*B, double dt, bool all) {
+  inline void move_sph(const bodies*B, real dt, bool all) {
     if(all)
       LoopSPHBodies(B,b)
 	b. template datum<TYPE>() += dt * const_datum<DERIV>(b);
@@ -152,10 +152,10 @@ namespace {
   inline void move_sph_i(const bodies*B, const double*dt, bool all) {
     if(all)
       LoopSPHBodies(B,b)
-	b. template datum<TYPE>() += dt[level(b)] * const_datum<DERIV>(b);
+	b. template datum<TYPE>() += real(dt[level(b)]) * const_datum<DERIV>(b);
     else
       LoopSPHBodies(B,b) if(is_active(b))
-	b. template datum<TYPE>() += dt[level(b)] * const_datum<DERIV>(b);
+	b. template datum<TYPE>() += real(dt[level(b)]) * const_datum<DERIV>(b);
   }
   //----------------------------------------------------------------------------
   template<int TYPE, int COPY>
@@ -573,7 +573,7 @@ void ForceDiagGrav::diagnose_grav() const
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
       vex+= mi * pex(b);                           //     add: ext pot energy   
-      vect_d mx = mi * pos(b);                     //     m * x                 
+      vect_d mx = mi * vect_d(pos(b));             //     m * x                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       x += mx;                                     //     add: dipole           
     }                                              //   END LOOP                
@@ -582,7 +582,7 @@ void ForceDiagGrav::diagnose_grav() const
       register double mi = mass(b);                //     m                     
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
-      vect_d mx = mi * pos(b);                     //     m * x                 
+      vect_d mx = mi * vect_d(pos(b));             //     m * x                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       x += mx;                                     //     add: dipole           
     }                                              //   END LOOP                
@@ -631,7 +631,7 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
   LoopAllBodies(snap_shot(),b) {                   // LOOP bodies               
     register double mi = mass(b);                  //   m                       
     m  += mi;                                      //   add: total mass         
-    vect_d mv = mi * vel(b);                       //   m * v                   
+    vect_d mv = mi * vect_d(vel(b));               //   m * v                   
     AddTensor(k,mv,vel(b));                        //   add to K_ij             
     v += mv;                                       //   add: total momentum     
     l += vect_d(pos(b)) ^ mv;                      //   add: total ang mom      
@@ -674,8 +674,8 @@ void ForceDiagGrav::diagnose_full() const
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
       vex+= mi * pex(b);                           //     add: ext pot energy   
-      vect_d mx = mi * pos(b);                     //     m * x                 
-      vect_d mv = mi * vel(b);                     //     m * v                 
+      vect_d mx = mi * vect_d(pos(b));             //     m * x                 
+      vect_d mv = mi * vect_d(vel(b));             //     m * v                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       AddTensor(k,mv,vel(b));                      //     add to K_ij           
       x += mx;                                     //     add: dipole           
@@ -687,8 +687,8 @@ void ForceDiagGrav::diagnose_full() const
       register double mi = mass(b);                //     m                     
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
-      vect_d mx = mi * pos(b);                     //     m * x                 
-      vect_d mv = mi * vel(b);                     //     m * v                 
+      vect_d mx = mi * vect_d(pos(b));             //     m * x                 
+      vect_d mv = mi * vect_d(vel(b));             //     m * v                 
       AddTensor(w,mx,acc(b));                      //     add to W_ij           
       AddTensor(k,mv,vel(b));                      //     add to K_ij           
       x += mx;                                     //     add: dipole           

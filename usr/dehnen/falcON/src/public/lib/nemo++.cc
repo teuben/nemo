@@ -5,13 +5,13 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2008-2009
+/// \date    2008-2009,2012
 ///
 /// \brief   implements methods declared in inc/nemo++.h
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2008-2009  Walter Dehnen
+// Copyright (C) 2008-2009,2012  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -615,7 +615,7 @@ bool falcON::snap_in::has(nemo_io::Field f) const
 //------------------------------------------------------------------------------
 namespace {
   using namespace falcON;
-  typedef tupel<Ndim,notreal> Vect;
+  typedef falcONVec<Ndim,notreal> Vect;
 }
 falcON::data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
   INPUT(snap), FIELD(f), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)

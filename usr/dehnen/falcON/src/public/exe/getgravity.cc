@@ -57,11 +57,11 @@ const char*defv[] = {
   "epssink=\n         softening length for sink particles (default: eps) ",
   "fsink=0.2\n        theta_sink/theta <= 1                              ",
 #endif
-  "kernel="falcON_KERNEL_TEXT
+  "kernel=" falcON_KERNEL_TEXT
   "\n                 softening kernel                ",
-  "theta="falcON_THETA_TEXT
+  "theta=" falcON_THETA_TEXT
   "\n                 tolerance parameter at M=M_tot  ",
-  "Ncrit="falcON_NCRIT_TEXT
+  "Ncrit=" falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells  ",
   "Grav=1\n           Newton's constant of gravity (0-> no self-gravity) ",
   falcON_DEFV, NULL };

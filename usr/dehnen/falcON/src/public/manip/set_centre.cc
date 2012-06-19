@@ -8,7 +8,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2006,2008 Walter Dehnen                                        
+// Copyright (C) 2006,2008,2012 Walter Dehnen
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -31,7 +31,8 @@
 // v 0.0    30/05/2006  WD created                                              
 // v 0.1    31/05/2006  WD velocity centre added                                
 // v 1.0    04/07/2006  WD reset (rather than set to origin) if not given       
-// v 1.1    11/09/2008  WD erased direct use of nemo functions                 
+// v 1.1    11/09/2008  WD erased direct use of nemo functions
+// v 1.2    19/06/2012  WD allowed for tupel.h  ->  vector.h                 
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 
@@ -96,11 +97,11 @@ namespace falcON { namespace Manipulate {
       if(npar!=0 && npar!=3 && npar<6)
 	falcON_ErrorN("Manipulator \"set_centre\": #pars must be 0,3, or 6\n");
       if(npar >= 3) {
-	XC = vect(pars);
+	XC = vect(pars[0],pars[1],pars[2]);
 	X0 = &XC;
       }
       if(npar >= 6)  {
-	VC = vect(pars+3);
+	VC = vect(pars[3],pars[4],pars[5]);
 	V0 = &VC;
       }
     }

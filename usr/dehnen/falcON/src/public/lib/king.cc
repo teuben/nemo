@@ -34,7 +34,7 @@ using namespace falcON;
 //==============================================================================
 namespace {
   double c00;                                           // used by set_up() etc 
-  typedef tupel<2,double> vec2D;
+  typedef falcONVec<2,double> vec2D;
   //----------------------------------------------------------------------------
   inline double rhok(const double Psi)
     // B&T eq. 4.131 with rho_1 = 1 and sigma = 1

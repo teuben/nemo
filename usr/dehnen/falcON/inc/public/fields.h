@@ -14,11 +14,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2002-2008
+/// \date    2002-2008,2012
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2002-2008  Walter Dehnen
+// Copyright (C) 2002-2008,2012  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -672,6 +672,8 @@ namespace falcON {
       SINK    = S,
       /// all non-SPH quantities
       nonSPH  = all & ~SPH,
+      /// defaults for falcON::bodies
+      bodiesdefault = gravity | sphdef
     };
     /// \name constructors and assignment                                       
     //@{
@@ -1035,8 +1037,8 @@ namespace falcON {
   template<> struct field_zero<flags> {
     static void set_zero(flags&x) { x = flags::empty; }
   };
-  template<typename T, int N> struct field_zero< tupel<N,T> > {
-    static void set_zero(tupel<N,T>&x) { x = T(0); }
+  template<typename T, int N> struct field_zero< falcONVec<N,T> > {
+    static void set_zero(falcONVec<N,T>&x) { x = T(0); }
   };
   //
   // struct field_type<type>
@@ -1044,7 +1046,7 @@ namespace falcON {
   template<typename TYPE> struct field_type
   : public field_zero<TYPE> {
     //
-    field_zero<TYPE>::set_zero;
+    using field_zero<TYPE>::set_zero;
     //
     static TYPE*array(void*D) {
       return static_cast<TYPE*>(D);}

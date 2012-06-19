@@ -4,29 +4,29 @@
 /// \file   inc/public/tree.h
 ///
 /// \author Walter Dehnen
-/// \date   2000-2007,2010
+/// \date   2000-2007,2010,2012
 ///
 /// \brief  contains definition of class \a OctTree and macros for access to
 ///         cells & leafs of a tree
 ///
 // /////////////////////////////////////////////////////////////////////////////
-//                                                                              
-// Copyright (C) 2000-2010  Walter Dehnen                                       
-//                                                                              
-// This program is free software; you can redistribute it and/or modify         
-// it under the terms of the GNU General Public License as published by         
-// the Free Software Foundation; either version 2 of the License, or (at        
-// your option) any later version.                                              
-//                                                                              
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
-//                                                                              
-// You should have received a copy of the GNU General Public License            
-// along with this program; if not, write to the Free Software                  
-// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                    
-//                                                                              
+//
+// Copyright (C) 2000-2012  Walter Dehnen
+//
+// This program is free software; you can redistribute it and/or
+// modify it under the terms of the GNU General Public License as
+// published by the Free Software Foundation; either version 2 of the
+// License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+//
 // /////////////////////////////////////////////////////////////////////////////
 #ifndef falcON_included_tree_h
 #define falcON_included_tree_h
@@ -215,18 +215,18 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name data initialized in OctTree build
       //@{
-    private:                                 ///< 4bytes: flag                  
-      uint8_t  LEVEL;                        ///< 1byte : level in tree         
-      uint8_t  OCTANT;                       ///< 1byte : octant of parent cell 
-      PeanoMap PEANO;                        ///< 1byte : Peano-Hilbert map     
-      uint8_t  KEY;                          ///< 1byte : local Peano key       
-      indx     NLEAFS;                       ///< 2bytes: # leaf children       
-      indx     NCELLS;                       ///< 2bytes: # cell children       
-      unsigned NUMBER;                       ///< 4bytes: # leaf descendants    
+    private:                                 ///< 4bytes: flag
+      uint8_t  LEVEL;                        ///< 1byte : level in tree
+      uint8_t  OCTANT;                       ///< 1byte : octant of parent cell
+      PeanoMap PEANO;                        ///< 1byte : Peano-Hilbert map
+      uint8_t  KEY;                          ///< 1byte : local Peano key
+      indx     NLEAFS;                       ///< 2bytes: # leaf children
+      indx     NCELLS;                       ///< 2bytes: # cell children
+      unsigned NUMBER;                       ///< 4bytes: # leaf descendants
       unsigned FCLEAF;                       ///< 4bytes: index of fst leaf desc
-      unsigned FCCELL;                       ///< 4bytes: index of fst cell kid 
-      unsigned PACELL;                       ///< 4bytes: index of parent cell  
-      vect     CENTRE;                       ///<12bytes: centre of cube        
+      unsigned FCCELL;                       ///< 4bytes: index of fst cell kid
+      unsigned PACELL;                       ///< 4bytes: index of parent cell
+      vect     CENTRE;                       ///<12bytes: centre of cube
       // 40 bytes
       //@}
       //------------------------------------------------------------------------
@@ -255,8 +255,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// \name const data access via friends only
       //@{
-      friend uint8_t  const&level   (const Cell*);
-      friend uint8_t  const&octant  (const Cell*);
+      friend uint8_t    const&level   (const Cell*);
+      friend uint8_t    const&octant  (const Cell*);
       friend indx     const&nleafs  (const Cell*);
       friend indx     const&ncells  (const Cell*);
       friend unsigned const&number  (const Cell*);
@@ -274,7 +274,7 @@ namespace falcON {
       friend bool     is_branch     (const Cell*);
 #ifdef falcON_PROPER
       friend PeanoMap const&peano   (const Cell*);
-      friend uint8_t  const&localkey(const Cell*);
+      friend uint8_t    const&localkey(const Cell*);
 #endif
       //@}
       //------------------------------------------------------------------------

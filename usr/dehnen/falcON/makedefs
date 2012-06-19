@@ -117,22 +117,14 @@ IUTIL		:= -I$(IUTI)
 ifdef STATIC
 LUTIL		:= -Lutils/lib -lWDutils
 else
-LUTIL		:= -Lutils/lib -lWDutils -Wl,-rpath,$(PWD)/utils/lib
+LUTIL		:= -Lutils/lib -lWDutils
 endif
 
 # --------------
 # falcON library
 # --------------
 
-ifdef STATIC
-
 LFALCON		:= -L$(LIB) -l$(LIBNAME) $(LUTIL) $(LNEMO)
-
-else
-
-LFALCON		:= -L$(LIB) -l$(LIBNAME) -Wl,-rpath,$(PWD)/$(LIB) $(LUTIL) $(LNEMO)
-
-endif
 
 falcON		:= $(links) $(LIB)lib$(LIBNAME).a $(LIB)lib$(LIBNAME).so
 

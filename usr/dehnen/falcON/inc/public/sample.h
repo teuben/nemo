@@ -4,13 +4,13 @@
 /// \file   inc/public/sample.h                                                 
 ///                                                                             
 /// \author Walter Dehnen                                                       
-/// \date   2000-2007                                                           
+/// \date   2000-2007,2012                                                      
 ///                                                                             
 /// \brief  code for sampling spherical stellar dynamical equilibria            
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2004-2007  Walter Dehnen                                       
+// Copyright (C) 2004-2007,2012  Walter Dehnen
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -67,7 +67,7 @@ namespace falcON {
   ///                                                                           
   // ///////////////////////////////////////////////////////////////////////////
   class SphericalSampler {
-    typedef tupel<2,double> pair_d;
+    typedef falcONVec<2,double> pair_d;
   private:
     const bool    careful,OM,beta;
     const double  Mt,ra,iraq,b0,ibt;
@@ -83,6 +83,8 @@ namespace falcON {
     //--------------------------------------------------------------------------
     inline void setis();
     inline double F0(double) const;
+    static double maxr()
+    { return std::sqrt(0.1*std::numeric_limits<real>::max()); }
   public:
     //--------------------------------------------------------------------------
 #ifdef falcON_PROPER
@@ -183,16 +185,24 @@ namespace falcON {
     /// \param[in] N   number of bodies to sample
     /// \param[in] q   use quasi (or pseudo) random numbers?
     /// \param[in] R   quasi and pseudo random number generator
-    void sample_pos(body const&B0, unsigned N, bool q, Random const&R)
+    /// \param[in] rmax if >0: don't emit bodies with r>rmax
+    /// \note The default for @a rmax ensures that the radius squared of any
+    ///       particle position is representable as a @c real.
+   
+    void sample_pos(body const&B0, unsigned N, bool q, Random const&R,
+		    double rmax=maxr())
       const falcON_THROWING;
     /// sampling positions only: non-virtual
     /// \param[in] B   bodies to sample
     /// \param[in] q   use quasi (or pseudo) random numbers?
     /// \param[in] R   quasi and pseudo random number generator
-    void sample_pos(bodies const&B, bool q, Random const&R)
+    /// \param[in] rmax if >0: don't emit bodies with r>rmax
+    /// \note The default for @a rmax ensures that the radius squared of any
+    ///       particle position is representable as a @c real.
+    void sample_pos(bodies const&B, bool q, Random const&R, double rmax=maxr())
       const falcON_THROWING
     {
-      sample_pos(B.begin_all_bodies(), B.N_bodies(), q,R);
+      sample_pos(B.begin_all_bodies(), B.N_bodies(), q,R,rmax);
     }
     /// noop dtor
     virtual~SphericalSampler() {}

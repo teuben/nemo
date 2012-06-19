@@ -21,10 +21,12 @@ endif
 
 # start nemo if it is not already present
 if($?NEMO == 0) then
+  set FALCON_REM = $FALCON
   if ($?prompt) then
     echo "trying to activate NEMO ..."
   endif
   nemo
+  set FALCON = $FALCON_REM
 endif
 
 # set enviroment variables FALCONLIB and ACCPATH
@@ -37,18 +39,28 @@ else
     setenv ACCPATH $FALCON"/acc/"
 endif
 
+# add FALCON/bin to PATH
+setenv PATH $FALCON"/bin:"$PATH
+rehash
+
 if ($?prompt) then
   echo "falcON loaded from $FALCON"
 endif
 
+# set compiler
+if($?MODULE_VERSION) then
+  module purge
+  module load gcc/4.7.0
+endif
+
 # add FALCONLIB to LD_LIBRARY_PATH and DYLD_LIBRARY_PATH
 if ($?LD_LIBRARY_PATH) then
-    setenv LD_LIBRARY_PATH ${FALCONLIB}:${WDUTILSLIB}:${LD_LIBRARY_PATH}
+  setenv LD_LIBRARY_PATH ${FALCONLIB}":"${FALCON}"/utils/lib:"${LD_LIBRARY_PATH}
 else
-    setenv LD_LIBRARY_PATH ${FALCONLIB}:${WDUTILSLIB}
+  setenv LD_LIBRARY_PATH ${FALCONLIB}":"${FALCON}"/utils/lib"
 endif
 if($VENDOR == apple) then
-    setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
+  setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
 endif
 
 # provide alias 'NOclaf' to de-active falcON

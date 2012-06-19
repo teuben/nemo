@@ -4,7 +4,7 @@
 /// \file   src/public/exe/gyrfalcON.cc
 ///
 /// \author Walter Dehnen
-/// \date   2001-2011
+/// \date   2001-2012
 ///                                                                             
 /// \brief  N-body code using the falcON force solver
 ///
@@ -146,9 +146,10 @@
 // v 3.4.3  02/07/2010  WD write env variable FalcONLastOutputTime
 // v 3.5    15/06/2011  WD recompute forces if manipulator changes masses
 // v 3.5.1  30/06/2011  WD eps required (no default value)
+// v 3.6    19/06/2011  WD happy gcc 4.7.0
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "3.5.1"
-#define falcON_VERSION_D "30-jun-2011 Walter Dehnen                          "
+#define falcON_VERSION   "3.6"
+#define falcON_VERSION_D "19-jun-2012 Walter Dehnen                          "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
@@ -166,10 +167,10 @@ const char*defv[] = {
   "logfile=-\n        file for log output                                ",
   "stopfile=\n        stop simulation as soon as file exists             ",
   "logstep=1\n        # blocksteps between log outputs                   ",
-  "theta="falcON_THETA_TEXT
+  "theta=" falcON_THETA_TEXT
   "\n                 tolerance parameter at M=M_tot                     ",
   "hgrow=0\n          grow fresh tree every 2^hgrow smallest steps       ",
-  "Ncrit="falcON_NCRIT_TEXT
+  "Ncrit=" falcON_NCRIT_TEXT
   "\n                 max # bodies in un-split cells                     ",
 #ifdef falcON_ADAP
   "eps=0.05\n         >=0: softening length OR maximum softening length\n"
@@ -182,7 +183,7 @@ const char*defv[] = {
   "epssink=\n         softening length for sink particles (default: eps) ",
   "fsink=0.2\n        theta_sink/theta <= 1                              ",
 #endif
-  "kernel="falcON_KERNEL_TEXT
+  "kernel=" falcON_KERNEL_TEXT
   "\n                 softening kernel of family P_n (P_0=Plummer)       ",
 #ifdef falcON_ADAP
   "Nsoft=0\n          if >0: use individual adaptive eps_i with\n"

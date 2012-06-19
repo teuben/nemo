@@ -77,7 +77,7 @@ namespace falcON { namespace Manipulate {
       else      { o << ' '; return print_pos(o, x); }
     }
     template<typename X>
-    std::ostream&print_dir(std::ostream&o, tupel<3,X> const&x) const {
+    std::ostream&print_dir(std::ostream&o, falcONVec<3,X> const&x) const {
       return print(print(print(o,x[0])<<' ',x[1])<<' ',x[2]);
     }
     template<typename X>
@@ -90,7 +90,7 @@ namespace falcON { namespace Manipulate {
   };
   //----------------------------------------------------------------------------
   template<typename X> inline
-  void add_outer_product(X p[3][3], tupel<3,X> const&x, X m) {
+  void add_outer_product(X p[3][3], falcONVec<3,X> const&x, X m) {
     p[0][0] += m * x[0] * x[0];
     p[0][1] += m * x[0] * x[1];
     p[0][2] += m * x[0] * x[2];
@@ -284,7 +284,7 @@ namespace falcON { namespace Manipulate {
 	vect_d X0 = MX0/Mw;
 	// 4.2  measure in window: median radius
 	for(unsigned i=ib,j=0; i!=kb; ++i,++j) {
-	  Rq[j] = dist_sq(SHOT->pos(T[i]),X0);
+	  Rq[j] = dist_sq(vect_d(SHOT->pos(T[i])),X0);
 	  Mi[j] = SHOT->mass(T[i]);
 	}
 	FindPercentile<double> FP(Rq.array(),N,Mi.array(),1);

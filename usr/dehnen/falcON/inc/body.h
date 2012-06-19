@@ -89,7 +89,7 @@ namespace falcON {
     enum {
       DefSTD      = fieldset::gravity,
       DefSPH      = fieldset::sphdef,
-      DefaultBits = DefSTD | DefSPH
+      DefaultBits = fieldset::bodiesdefault
     };
     class iterator;
     //                                                                          
@@ -1795,7 +1795,7 @@ namespace falcON {
     /// destruction
     ~snapshot();
     //==========================================================================
-    bodies::sorted;
+    using bodies::sorted;
 #ifdef falcON_NEMO
     /// \brief Create an index table sorted in \a func(body) for all bodies 
     /// flagged not to be ignored (in_subset()).

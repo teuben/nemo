@@ -92,13 +92,17 @@ namespace {
 				  real*A, 
 				  real*P,
 				  real*R,
-				  int  Ntot,
-				  int  Nsph,
+				  int _Ntot,
+				  int _Nsph,
 				  real EPS,
 				  real TH,
 				  int  K,
 				  real G)
   {
+    WDutilsAssert(_Ntot> 0);
+    WDutilsAssert(_Nsph>=0);
+    unsigned Ntot = _Ntot;
+    unsigned Nsph = _Nsph;
     if(BODIES) falcON_DEL_O(BODIES);
     if(FALCON) falcON_DEL_O(FALCON);
     if(Nsph > Ntot)

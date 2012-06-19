@@ -253,8 +253,9 @@ void SphericalSampler::sample(body   const&B0,
 void SphericalSampler::sample_pos(body const  &B0,
 				  unsigned     N,
 				  bool         q,
-				  Random const&R) const falcON_THROWING
-  {
+				  Random const&R,
+				  double       rmax) const falcON_THROWING
+  { 
   if(!(B0+(N-1)).is_valid())
     falcON_THROW("SphericalSampler::sample_pos(): not enough bodies free");
   if(q && R.Nsob() < 6)
@@ -263,8 +264,11 @@ void SphericalSampler::sample_pos(body const  &B0,
   const body BN(B0,N);
   const double m  (Mt/double(N));
   for(body Bi(B0); Bi!=BN; ++Bi) {
-    double Mr = (q? R(0):R())*Mt;
-    double r  = rM(Mr);
+    double Mr,r;
+    do {
+      Mr = (q? R(0):R())*Mt;
+      r  = rM(Mr);}
+    while(rmax>0.0 && r>=rmax);
     Bi.mass() = m;
     double
       cth = q? R(1,-1.,1.):R(-1.,1.),

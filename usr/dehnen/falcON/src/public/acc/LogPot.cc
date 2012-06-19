@@ -3,7 +3,7 @@
 //                                                                             |
 // LogPot.cc                                                                   |
 //                                                                             |
-// Copyright (C) 2011 Walter Dehnen                                            |
+// Copyright (C) 2011,2012 Walter Dehnen                                       |
 //                                                                             |
 // This program is free software; you can redistribute it and/or modify        |
 // it under the terms of the GNU General Public License as published by        |
@@ -23,6 +23,7 @@
 //                                                                             |
 // Versions                                                                    |
 // 0.0   23-jun-2011    created                                             WD |
+// 0.1   19-jun-2012    avoid warning about uninitialised vars              WD |
 //-----------------------------------------------------------------------------+
 #include <iostream>
 #include <fstream>
@@ -98,6 +99,7 @@ namespace {
 	A[1]*= sQ;
 	A[2]*= sQ;
       } else
+	P = A[0] = A[1] = A[2] = 0;
 	error("LogPot: wrong number (%d) of dimensions, only allow 3D\n",NDIM);
     }
   };

@@ -29,8 +29,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace falcON;
-  typedef falcON::tupel<3,float>  vectf;
-  typedef falcON::tupel<3,double> vectd;
+  typedef falcONVec<3,float>  vectf;
+  typedef falcONVec<3,double> vectd;
   //----------------------------------------------------------------------------
   const int    Nexp = 10;                          // max # of pot allowed
   const double a_def=1, r_def=1;                   // default parameter
