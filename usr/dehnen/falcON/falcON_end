@@ -1,7 +1,7 @@
 #! /bin/csh
 #
+
 # remove $FALCONBIN from PATH
-#
 if ($?FALCONBIN) then
   set tmp=()
   foreach p ($path)
@@ -12,6 +12,16 @@ if ($?FALCONBIN) then
   set path=($tmp)
   rehash
   echo "$FALCONBIN removed from search path"
+endif
+
+# remove $WDUTILSLIB from PATH
+if ($?WDUTILSLIB) then
+  setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | perl -pe "s[$WDUTILSLIB][]g;"`
+endif
+
+# remove $FALCONLIB from PATH
+if ($?FALCONLIB) then
+  setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | perl -pe "s[$FALCONLIB][]g;"`
 endif
 
 # remove all FALCON related enviroment variables

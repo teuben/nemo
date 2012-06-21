@@ -55,9 +55,9 @@ endif
 
 # add FALCONLIB to LD_LIBRARY_PATH and DYLD_LIBRARY_PATH
 if ($?LD_LIBRARY_PATH) then
-  setenv LD_LIBRARY_PATH ${FALCONLIB}":"${FALCON}"/utils/lib:"${LD_LIBRARY_PATH}
+  setenv LD_LIBRARY_PATH ${FALCONLIB}":"${WDUTILSLIB}":"${LD_LIBRARY_PATH}
 else
-  setenv LD_LIBRARY_PATH ${FALCONLIB}":"${FALCON}"/utils/lib"
+  setenv LD_LIBRARY_PATH ${FALCONLIB}":"${WDUTILSLIB}
 endif
 if($VENDOR == apple) then
   setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
