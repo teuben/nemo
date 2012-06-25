@@ -17,7 +17,7 @@ SRCDIR = $(NEMO)/src/nbody/io
 SUBDIRS= gadget
 BINFILES = atos atos_sp atosph atosph_sp stoa stoa_sp tabtos \
 	   rvsnap snaprv snaptipsy tipsysnap \
-	   gadgetsnap snapgadget
+	   gadgetsnap snapgadget binsnap
 
 TESTFILES = testss testio
 
