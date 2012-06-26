@@ -16,30 +16,32 @@ Input rvc file [???]
 Output snapshot file [???]    
 .TP 20
 \fBnbody=\fP
-Number of bodies [0]    
+Number of bodies . If you leave this at 0, it will be computed from Np*np*np (see below).
+Otherwise just left to test if you want a small snapshot.
+[0]   
 .TP 20
 \fBbody=\fP
 Body variables [pos,vel]     
 .TP 20
 \fBnp=\fP
-Np [256]      
+Number of particles per dimension.
+[256]      
 .TP 20
 \fBlbox=\fP
-Box (MPc/H) [512]     
+Box size (Mpc/H) [512]     
 .TP 20
 \fBh=\fP
-Hubble [72]      
+Hubble constant [72]      
 .TP 20
 \fBheadline=\fP
 Random verbiage []     
-.TP 20
-\fBVERSION=\fP
-26-jun-2012 PJT [0.3]     
-.SH EXAMPLES
+.SH CAVEAT
+The output snapshot time is really 'z'.
 .SH SEE ALSO
+binsnap(1NEMO), snapshot(5NEMO)
 .SH FILES
 .SH AUTHOR
-mkman
+Peter Teuben / Harley Katz
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
