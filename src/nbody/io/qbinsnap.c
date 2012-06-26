@@ -2,9 +2,6 @@
  *  convert generic binary dumps to snapshot
  *     26-jun-2012   V0.1 - Q&D for QMOND (jun 7, 2012)
  *
- * @todo
- *      types= needs to be implemented, 1,2,4,8 means skip that many bytes
- *      body=  needs to be parsed
  */
  
 #include <nemo.h>
@@ -17,11 +14,11 @@ string defv[] = {
     "out=???\n                       Output snapshot file",
     "nbody=0\n                       Number of bodies",
     "body=pos,vel\n                  Body variables",
-    "type=ddddddddds\n               Types (double,float,int,short,1,2,4,8)",
-    "pscale=1\n                      Scale position by",
-    "vscale=1\n                      Scale velocities by",
+    "np=256\n                        Np",
+    "lbox=512\n                      Box   (MPc/H)",
+    "h=72\n                          Hubble",
     "headline=\n                     Random verbiage",
-    "VERSION=0.1\n                   26-jun-2012 PJT",
+    "VERSION=0.2\n                   26-jun-2012 PJT",
     NULL,
 };
 
@@ -42,16 +39,26 @@ nemo_main()
     int i, nbody, nbuf;
     real *p1, *m1, *pp, tsnap, *t1, *t2;
     real *phase, *mass;
-    real mscale, pscale, vscale, dr, size;
+    real pscale, vscale, size, pshift;
     float *rv, *rvp;
+    int np;
+    real lbox, hub, ng;
+    
 
     warning("Program only parses the QMOND 2012 data");
 
     instr = stropen(getparam("in"),"r");
     outstr = stropen(getparam("out"),"w");
     nbody = getiparam("nbody");
-    pscale = getrparam("pscale");
-    vscale = getrparam("vscale");
+    np = getiparam("np");
+    lbox = getrparam("lbox");
+    hub = getrparam("h");
+    if (nbody==0) nbody = np*np*np;
+    ng = np + 1.0;
+    pshift = -1.0;
+    pscale = lbox/ng;
+    vscale = pscale*hub;
+    dprintf(0,"Pscale=%g  Vscale=%g\n",pscale,vscale);
     if (hasvalue("headline"))
         set_headline(getparam("headline"));
     put_history(outstr);
@@ -74,12 +81,12 @@ nemo_main()
       pp = (double *) buf;
       dprintf(1,"%d: pos %g %g %g\n",i+1,pp[0],pp[1],pp[2]);
       dprintf(1,"%d: vel %g %g %g\n",i+1,pp[3],pp[4],pp[5]);
-      *p1++ = *pp++ / pscale;  /* X */
-      *p1++ = *pp++ / pscale;
-      *p1++ = *pp++ / pscale;
-      *p1++ = *pp++ / vscale;  /* VX */
-      *p1++ = *pp++ / vscale;
-      *p1++ = *pp++ / vscale;
+      *p1++ = (*pp++ + pshift) * pscale;  /* X */
+      *p1++ = (*pp++ + pshift) * pscale;
+      *p1++ = (*pp++ + pshift) * pscale;
+      *p1++ = *pp++ * vscale;             /* VX */
+      *p1++ = *pp++ * vscale;
+      *p1++ = *pp++ * vscale;
     }
     printf("done\n");
     tsnap = 0.0;
