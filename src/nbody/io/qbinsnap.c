@@ -16,7 +16,7 @@ string defv[] = {
     "body=pos,vel\n                  Body variables",
     "np=256\n                        Np",
     "lbox=512\n                      Box   (MPc/H)",
-    "h=72\n                          Hubble",
+    "H=72\n                          Hubble Constant at z=0",
     "headline=\n                     Random verbiage",
     "VERSION=0.3\n                   26-jun-2012 PJT",
     NULL,
@@ -52,7 +52,7 @@ nemo_main()
     nbody = getiparam("nbody");
     np = getiparam("np");
     lbox = getrparam("lbox");
-    hub = getrparam("h");
+    hub = getrparam("H");
     if (nbody==0) nbody = np*np*np;
     ng = np + 1.0;
     pshift = -1.0;
