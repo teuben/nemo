@@ -18,7 +18,7 @@ string defv[] = {
     "lbox=512\n                      Box   (MPc/H)",
     "h=72\n                          Hubble",
     "headline=\n                     Random verbiage",
-    "VERSION=0.2\n                   26-jun-2012 PJT",
+    "VERSION=0.3\n                   26-jun-2012 PJT",
     NULL,
 };
 
@@ -70,6 +70,7 @@ nemo_main()
     nread = unfread(instr, buf, 16);
     dp = (double *) buf;
     dprintf(0,"Header: %g   %g\n",dp[0],dp[1]);
+    tsnap = 1.0/dp[0] - 1.0;
 
     phase = p1 = (real *) allocate(NDIM*2*nbody*sizeof(real));
     pp = (real *) allocate(128*sizeof(real));
@@ -89,7 +90,6 @@ nemo_main()
       *p1++ = *pp++ * vscale;
     }
     printf("done\n");
-    tsnap = 0.0;
     put_set(outstr,SnapShotTag);
     put_set(outstr,ParametersTag);
     put_data(outstr, NobjTag, IntType, &nbody, 0);
