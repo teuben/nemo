@@ -114,6 +114,7 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 				$(inline_h)
 geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 				$(INC)geometry_inl.h
+periodic_h		:= $(INC)periodic.h $(geometry_h)
 octtree_h		:= $(INC)octtree.h $(geometry_h) $(memory_h)
 
 ifdef WDutilsDevel
@@ -124,6 +125,10 @@ matr33_h		:= $(INC)matr33.h $(exception_h) $(tupel_h)
 $(INC)neighbour.h	: $(DEV)neighbour.h
 			(cd $(INC); ln -s ../$(DEV)neighbour.h neighbour.h)
 neighbour_h		:= $(INC)neighbour.h $(octtree_h)
+
+$(INC)voronoi.h		: $(DEV)voronoi.h
+			(cd $(INC); ln -s ../$(DEV)voronoi.h voronoi.h)
+voronoi_h		:= $(INC)voronoi.h $(geometry_h)
 
 $(INC)peano.h		: $(DEV)peano.h
 			(cd $(INC); ln -s ../$(DEV)peano.h peano.h)
@@ -172,6 +177,7 @@ domain_cc		:= $(DEV)domain.cc $(domain_h) $(io_h)
 
 ifdef WDutilsDevel
 neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
+voronoi_cc		:= $(DEV)voronoi.cc $(voronoi_h)
 parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
 partreeOLD_cc		:= $(DEV)partreeOLD.cc $(partreeOLD_h) $(peano_h) \
 				$(timer_h)
@@ -205,6 +211,8 @@ ifdef WDutilsDevel
 
 $(LIB)neighbour.o:	$(neighbour_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
+$(LIB)voronoi.o:	$(voronoi_cc) $(LIBT) $(makefiles)
+			$(MAKE_OBJ)
 $(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)partreeOLD.o:	$(partreeOLD_cc) $(LIBT) $(makefiles)
@@ -214,7 +222,8 @@ $(LIB)partree.o:	$(partree_cc) $(LIBT) $(makefiles)
 
 WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
-			$(LIB)radix.o $(LIB)WDMath.o $(LIB)neighbour.o 
+			$(LIB)radix.o $(LIB)WDMath.o $(LIB)neighbour.o \
+			$(LIB)voronoi.o 
 
 WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o $(LIB)partree.o
 
@@ -282,6 +291,12 @@ test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
 				$(MAKE_EXE)
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
 				$(MAKE_EXE)
+test/TestPeriodic$(EXT)	:	test/TestPeriodic.cc $(periodic_h)
+				$(MAKE_EXE)
+test/TestVoronoi$(EXT)	:	test/TestVoronoi.cc $(voronoi_h)
+				$(MAKE_EXE)
+test/SetVoronoi$(EXT)	:	test/SetVoronoi.cc $(voronoi_h)
+				$(MAKE_EXE)
 test/TestRadix$(EXT)	:	test/TestRadix.cc $(radix_h) $(random_h)
 				$(MAKE_EXE)
 test/TestMatrix$(EXT)	:	test/TestMatrix.cc $(matr33_h)
@@ -299,6 +314,9 @@ test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(numerics_h) \
 omp_tests		:=	test/TestTreeP$(EXT) \
 				test/TestTree$(EXT) \
 				test/TestGeometry$(EXT) \
+				test/TestPeriodic$(EXT) \
+				test/TestVoronoi$(EXT) \
+				test/SetVoronoi$(EXT) \
 				test/TestRadix$(EXT) \
 				test/TestMatrix$(EXT) \
 				test/TestOMP$(EXT)

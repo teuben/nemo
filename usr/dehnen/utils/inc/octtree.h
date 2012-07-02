@@ -493,13 +493,22 @@ namespace WDutils {
     static const depth_type Dim  = Tree::Dim;
     /// number of octants per cell
     static const depth_type Nsub = Tree::Nsub;
-    /// pointer to tree
-    const Tree*const TREE;
     /// ctor
     TreeAccess(const Tree*t) : TREE(t) {}
+#if __cplusplus >= 201103L
+    /// copy ctor
+    TreeAccess(const TreeAccess&) = default;
+    /// no default ctor
+    TreeAccess() = delete;
+#else
     /// copy ctor
     TreeAccess(const TreeAccess&t) : TREE(t.TREE) {}
-    // virtual dtor required by some old compilers
+  private:
+    /// no default ctor
+    TreeAccess();
+  public:
+#endif
+    /// dtor
     virtual ~TreeAccess() {}
     /// iterator used for leafs.
     /// A simple wrapper around an index, which, being a separate type, avoids
@@ -625,6 +634,9 @@ namespace WDutils {
     //@}
     /// \name tree walking and related
     //@{
+    ///
+    const Tree*tree() const
+    { return TREE; }
     /// root radius
     real const&RootRadius() const
     { return TREE->RootRadius(); }
@@ -883,6 +895,9 @@ namespace WDutils {
       out.flush();
     }
     //@}
+  private:
+    /// pointer to tree
+    const Tree*const TREE;
   };// struct TreeAccess<>
 
   ///

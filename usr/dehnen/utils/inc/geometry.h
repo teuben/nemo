@@ -52,6 +52,9 @@
 #endif
 
 namespace WDutils {
+  ///
+  /// contains support for geometry algorithms in 2D and 3D
+  ///
   namespace Geometry {
 #if __cplusplus < 201103L
 #  define  GeoVec tupel
@@ -316,7 +319,11 @@ namespace WDutils {
       ///
       /// default ctor
       ///
+#if __cplusplus < 201103L
       SearchSphere() {}
+#else
+      SearchSphere() = default;
+#endif
       ///
       /// ctor from sphere
       ///

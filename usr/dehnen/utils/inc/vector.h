@@ -498,8 +498,10 @@ namespace WDutils {
     void up_min_max(vector&Min, vector&Max)
     {
       unroll::const_tertiary(a,Min.a, Max.a,
-			     [] (T x, T&mi, T&ma) {
-			       if(x<mi) mi=x; if(x>ma) ma=x;
+			     [] (T x, T&mi, T&ma)
+			     {
+			       if     (x<mi) mi=x;
+			       else if(x>ma) ma=x;
 			     } );
     }
     //@}
