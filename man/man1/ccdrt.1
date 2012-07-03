@@ -1,0 +1,32 @@
+.TH CCDRT 1NEMO "3 July 2012"
+.SH NAME
+ccdrt \- apply some radiative transfer in a cube to create a map
+.SH SYNOPSIS
+\fBccdrt\fP [parameter=value]
+.SH DESCRIPTION
+The current version integrates (with no RT applied) along Z. It can optionally
+take the peak value instead of the (default) summed value. This is identical
+of what \fIccdmom(1NEMO)\fP currently does, but this version will have an option
+to apply radiative transfer assigning absorbtion and emission to the cube
+(or different cubes)
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input intensity image file [???]   
+.TP
+\fBout=\fP
+Output image file [???]    
+.TP
+\fBpeak=\fP
+Use peak value [f]    
+.SH SEE ALSO
+ccdmom(1NEMO), snapgrid(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+03-Jul-2012	V0.1 Created	PJT
+.fi
