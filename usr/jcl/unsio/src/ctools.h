@@ -37,7 +37,10 @@ namespace tools {
 #define POT_BIT           (1 << 15)
 #define ACC_BIT           (1 << 16)
 #define TEMP_BIT          (1 << 17)
-  
+#define ZS_BIT            (1 << 18)
+#define ZSMT_BIT          (1 << 19)
+#define IM_BIT            (1 << 20)
+
 // Component BITS
 #define ALL_BIT           (1 <<  1)
 #define GAS_BIT           (1 <<  2)

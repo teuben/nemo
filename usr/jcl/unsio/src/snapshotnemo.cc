@@ -218,7 +218,7 @@ int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
 	if ( *nemobits & PotentialBit && req_bits&POT_BIT)  pot = new float[*ionbody];
 	else pot=NULL;
 	if (keys) delete [] keys;
-	if ( *nemobits & KeyBit && req_bits&KEYS_BIT)  keys = new int[*ionbody];
+        if ( *nemobits & KeyBit && (req_bits&KEYS_BIT || req_bits&ID_BIT))  keys = new int[*ionbody];
         else keys=NULL;
       }
       last_nbody    = *ionbody;  // save nbody
@@ -237,7 +237,7 @@ int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
           if ( *nemobits & DensBit && req_bits&RHO_BIT) rho[cpt]  = iorho[cpt];
           if ( *nemobits & AuxBit  && req_bits&AUX_BIT) aux[cpt]  = ioaux[cpt];
           if ( *nemobits & PotentialBit && req_bits&POT_BIT ) pot[cpt]  = iopot[cpt];
-          if ( *nemobits & KeyBit  && req_bits&KEYS_BIT) keys[cpt]  = iokeys[cpt];
+          if ( *nemobits & KeyBit  && (req_bits&KEYS_BIT || req_bits&ID_BIT)) keys[cpt]  = iokeys[cpt];
 	  cpt++;
 	}
       }

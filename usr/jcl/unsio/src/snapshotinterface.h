@@ -196,6 +196,9 @@ namespace uns {
     virtual std::vector<double> moveToCom()=0;
     std::string getInterfaceType() { return interface_type;}
     std::string getFileStructure() { return file_structure;}
+    virtual int close() {
+      return 1;
+    }
   protected:
     // WRITING
     std::string simname, simtype;

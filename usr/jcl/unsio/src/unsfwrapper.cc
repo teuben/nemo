@@ -26,6 +26,7 @@ namespace uns {
     int uns_load_(const int *);
     int uns_load_opt_(const int *, const char * bits, const int l1);
     int uns_close_(const int *);
+    int uns_close_out_(const int *);
     // load data
     int uns_get_nbody_( const int * id, int   * nbody            );
     int uns_get_time_ ( const int * id, float * timu             );
@@ -163,7 +164,7 @@ int uns_load_opt_(const int * ident, const char * _bits, const int l1)
 // close the UNS file with the identifier ident 
 int uns_close_(const int * ident)
 {
-  PRINT("uns_close ident requested : "<< *ident << "\n";)
+  PRINT("uns_close INPUT file ident requested : "<< *ident << "\n";)
   // look for "ident" exist in the already opened snapshots
   // return the index in the vector of -1 if false         
   int index=uns::CunsIdentifier::getUnsvIndex(*ident,&unsv);
@@ -173,6 +174,25 @@ int uns_close_(const int * ident)
     uns::CSnapshotInterfaceIn * snap = ((CunsIn *)unsv[index].obj)->snapshot;
     snap->close();
     delete ((CunsIn *)unsv[index].obj);
+  }
+
+  return index;
+}
+// ----------------------------------------------------------------------------
+// uns_close_out                                                                    
+// close the UNS (out) file with the identifier ident 
+int uns_close_out_(const int * ident)
+{
+  PRINT("uns_close OUTPUT file ident requested : "<< *ident << "\n";)
+  // look for "ident" exist in the already opened snapshots
+  // return the index in the vector of -1 if false         
+  int index=uns::CunsIdentifier::getUnsvIndex(*ident,&unsv);
+  PRINT("index in UNSV ="<< index << "\n";)
+
+  if (index >= 0) {
+    uns::CSnapshotInterfaceOut * snap = ((CunsOut *)unsv[index].obj)->snapshot;
+    snap->close();
+    delete ((CunsOut *)unsv[index].obj);
   }
 
   return index;

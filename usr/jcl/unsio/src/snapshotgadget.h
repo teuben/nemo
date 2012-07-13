@@ -142,11 +142,32 @@ typedef struct particle_data_lite
   //data
   float * mass, * pos, * vel, * acc, *pot, * rho, * hsml, * age, * metal, * intenerg, * temp;
   int * id;
+  // new data for Sergey
+  float * zs, * zsmt, * im;
+  int czs, czsmt; // constant for zs and zsmt
   int bits; // to store the bits components
   float tframe,redshift;
   float ntotmasses;
   t_io_header_1 header;
-  int npartTotal, npart;
+  int npartTotal, npart, npart_total_local;
+  int array_vs_file_size; // array vs file 0:same  1:smaler(half) 2:bigger(double)
+  inline void checkFileVsArray(const int bytes_to_read, const int size_data, const int npart) {
+    int bytes_array = size_data * npart;
+    if (bytes_array == bytes_to_read) {
+      array_vs_file_size = 0; // same size
+    } else
+      if (bytes_array < bytes_to_read) {
+        array_vs_file_size = 1; // file data type bigger than array data size
+        //assert(2*bytes_array == bytes_to_read);
+      } else {
+        array_vs_file_size = 2; // file data type smaller than array data size
+        //assert(bytes_to_read*2 == bytes_array);
+      }
+    if (verbose) {
+      std::cerr << "file_vs_array_size ="<<array_vs_file_size<<" bytes_to_read="<<bytes_to_read<<" bytes_array ="<<bytes_array<<"\n";
+    }
+  }
+
   bool isLittleEndian();
   bool swap;
   uns::ComponentRangeVector  crv;
@@ -174,7 +195,10 @@ typedef struct particle_data_lite
   float * getU(int & n) { n=header.npartTotal[0]; return intenerg;}
   float * getRho(int & n) { n=header.npartTotal[0]; return rho;}
   float * getHsml(int & n) { n=header.npartTotal[0]; return hsml;}
-  
+  float * getZs(int & n) { n=czs*(header.npartTotal[0]+header.npartTotal[4]); return zs;}
+  float * getZSMT(int & n) { n=czsmt*(header.npartTotal[0]+header.npartTotal[4]); return zsmt;}
+  float * getIm(int & n) { n=header.npartTotal[4]; return im;}
+
   //fortran offset record length
   int frecord_offset;
   //control

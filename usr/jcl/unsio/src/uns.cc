@@ -209,7 +209,11 @@ namespace uns {
     CunsOut::s_mapStringValues["disk_mpv"   ] = uns::DiskMPV;
     CunsOut::s_mapStringValues["stars_mpv"  ] = uns::StarsMPV;
     CunsOut::s_mapStringValues["bndry_mpv"  ] = uns::BndryMPV;
-    
+    CunsOut::s_mapStringValues["zs"         ] = uns::Zs;
+    CunsOut::s_mapStringValues["zsmt"       ] = uns::ZSMT;
+    CunsOut::s_mapStringValues["im"         ] = uns::Im;
+    CunsOut::s_mapStringValues["czs"        ] = uns::Czs;
+    CunsOut::s_mapStringValues["czsmt"      ] = uns::Czsmt;
     if (verbose) {
       std::cout << "CunsOut::initializeStringMap s_mapStringValues contains "
           << CunsOut::s_mapStringValues.size() << " entries." << std::endl;

@@ -59,11 +59,16 @@ namespace uns {
   temp   = NULL;
   rho    = NULL;
   hsml   = NULL;
+  zs     = NULL;
+  zsmt   = NULL;
+  im     = NULL;
   bits   = 0;
   load_bits = 0;
   tframe = 0.;
   redshift=0.;
   frecord_offset = 4;
+  czs = 0;
+  czsmt= 0;
   bytes_counter = 0;
   multiplefiles = 0;
   lonely_file   = true;
@@ -97,6 +102,9 @@ CSnapshotGadgetIn::~CSnapshotGadgetIn()
     if (temp)     delete [] temp;
     if (rho)      delete [] rho;  
     if (hsml)     delete [] hsml;  
+    if (zs)       delete [] zs;
+    if (zsmt)     delete [] zsmt;
+    if (im)       delete [] im;
   }
   crv.clear();
 }
@@ -197,6 +205,7 @@ template <class T> int CSnapshotGadgetIn::readCompData(T * ptr, const int * inde
 {
   bytes_counter=0;
   int len1 = readFRecord();
+  checkFileVsArray(len1,sizeof(T),npart_total_local*dim);
 
   for(int k=0;k<6;k++) {   
     if (header.npart[k]>0) { // there are particles for the component
@@ -231,21 +240,25 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
     if (! mass && req_bits&MASS_BIT)  mass = new float[nsel  ];
     if (! pot  && req_bits&POT_BIT )  pot  = new float[nsel  ];
     if (! id   && req_bits&ID_BIT  )  id   = new int  [nsel  ];
-    if (! age && header.npartTotal[4]>0 && req_bits&AGE_BIT && comp_bits&STARS_BIT) 
+    if (! age && header.npartTotal[4]>0 && req_bits&AGE_BIT && comp_bits&STARS_BIT)
       age = new float[header.npartTotal[4]];
     
-    if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0 
-        && req_bits&METAL_BIT && (comp_bits&GAS_BIT||comp_bits&STARS_BIT)) 
+    if (! metal && (header.npartTotal[0]+header.npartTotal[4])>0
+        && req_bits&METAL_BIT && (comp_bits&GAS_BIT||comp_bits&STARS_BIT))
       metal = new float[header.npartTotal[0]+header.npartTotal[4]];
-  
+
     if (comp_bits&GAS_BIT) {
       if (! intenerg && header.npartTotal[0]>0 && req_bits&U_BIT) intenerg = new float[header.npartTotal[0]];
-      if (! temp && header.npartTotal[0]>0 && req_bits&TEMP_BIT) 
+      if (! temp && header.npartTotal[0]>0 && req_bits&TEMP_BIT)
         temp = new float[header.npartTotal[0]];
-      if (! rho && header.npartTotal[0]>0 && req_bits&RHO_BIT) 
+      if (! rho && header.npartTotal[0]>0 && req_bits&RHO_BIT)
         rho = new float[header.npartTotal[0]];
-      if (! hsml&& header.npartTotal[0]>0 && req_bits&HSML_BIT) 
+      if (! hsml&& header.npartTotal[0]>0 && req_bits&HSML_BIT)
         hsml= new float[header.npartTotal[0]];
+      //if (! zs&& header.npartTotal[0]>0 &&  header.npartTotal[4]>0 && req_bits& ZS_BIT)
+      if (! im&& header.npartTotal[4]>0 && req_bits& IM_BIT) {
+        im = new float[header.npartTotal[4]]; // im for stars particles
+      }
     }
     //ComponentRange::list(&crv);
     //ComponentRange::list(user_select.getCrvFromSelection());
@@ -259,26 +272,26 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
     npartOffset[0] = 0;
     for (int i=1;i<=5;i++) {
       npartOffset[i] = npartOffset[i-1]+header.npartTotal[i-1];
-      if (verbose) std::cerr 
+      if (verbose) std::cerr
           << "npartOffset["<<i<<"]="<<npartOffset[i]<<" npartOffset["<<i-1<<"]="
           <<npartOffset[i-1]<<" header.npartTotal["<<i-1<<"]="<<header.npartTotal[i-1]<<"\n";
     }
     //for (int i=0;i<6;i++)   std::cerr << "npartOffset["<<i<<"]="<<npartOffset[i] <<"\n";
     
-    // allocate array to store indexes 
+    // allocate array to store indexes
     int * index2  = new int[npartTotal];
     for (int i=0; i<npartTotal; i++)
-        index2[i] = -1; // index2 init
+      index2[i] = -1; // index2 init
 
     for (int i=0, cpt=0; i<npartTotal; i++) {
       int idx=index[i].i;
       assert(idx<npartTotal);
       //std::cerr << i<< " " << index[i].i << " "<< index[i].idx << " " << nsel << " " <<npartTotal << "\n";
       if (idx != -1 ) {
-          index2[idx] = cpt++;
+        index2[idx] = cpt++;
       }
-    }    
-   
+    }
+
     int z_offset  =0; // metalicity offset
     int age_offset=0; // age offset
     
@@ -302,159 +315,219 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
       if (version==1) next_block_name="POS";
 
       // Read the whole file till a valid block exist
-      // or stop = true in case of Gadget1 file      
+      // or stop = true in case of Gadget1 file
       while (req_bits!=0 && readBlockName() && !stop) {
         if (version==1) block_name=next_block_name;
         bool ok=false;
         // --> Postions block
-        if (block_name=="POS" && req_bits&POS_BIT) { 
+        if (block_name=="POS" && req_bits&POS_BIT) {
           load_bits |= POS_BIT;
           ok=true;
           readCompData(pos,index2,npartOffset,3);
           if (version==1) next_block_name="VEL";
         }
         // --> Velocities block
-        if (block_name=="VEL" && req_bits&VEL_BIT) { 
+        if (block_name=="VEL" && req_bits&VEL_BIT) {
           load_bits |= VEL_BIT;
           ok=true;
           readCompData(vel,index2,npartOffset,3);
-          if (version==1) next_block_name="ID";          
+          if (version==1) next_block_name="ID";
         }
         // --> IDs block
-        if (block_name=="ID" && req_bits&ID_BIT) { 
+        if (block_name=="ID" && req_bits&ID_BIT) {
           load_bits |= ID_BIT;
           ok=true;
           readCompData(id,index2,npartOffset,1);
           if (version==1) next_block_name="MASS";
         }
         // --> MASS block
-        if (block_name=="MASS" && req_bits&MASS_BIT ) { 
+        if (block_name=="MASS" && req_bits&MASS_BIT ) {
           load_bits |= MASS_BIT;
           ok=true;
           bytes_counter=0;
           if (ntotmasses>0.) {    // different masses
             len1 = readFRecord(); // we must read from disk
+            checkFileVsArray(len1,sizeof(float),ntotmasses);
           }
           for(int k=0;k<6;k++) {
             for(int n=0;n<header.npart[k];n++){
               int idx=index2[npartOffset[k]+n];
               assert(idx<nsel);
               if (idx != -1 && (header.mass[k] == 0)) {          // variable mass selected
-                readData((char *) &mass[idx], sizeof(float), 1); // read from disk              
-              } else { 
+                readData((char *) &mass[idx], sizeof(float), 1); // read from disk
+              } else {
                 if (idx == -1 && (header.mass[k] == 0)) {        // variable mass **not** selected
                   float tmp;
                   readData((char *) &tmp, sizeof(float), 1);     // read from disk (skip it)
-                } else {                             
+                } else {
                   if (idx != -1 && (header.mass[k] != 0)) {      // constant mass selected
                     mass[idx] = header.mass[k];                  // read from header
                   }
                 }
               }
-            } // for n         
+            } // for n
           } // for k
           if (ntotmasses > 0.) {  // different masses
-	    len2 = readFRecord(); // we must read from disk
-	    assert(in.good() && len1==len2 && len1==bytes_counter);
-	  }
+            len2 = readFRecord(); // we must read from disk
+            assert(in.good() && len1==len2 && len1==bytes_counter);
+          }
           if (version==1) stop=true; // we stop reading for gadget1
         }
         // --> POT block
-        if (block_name=="POT" && req_bits&POT_BIT) { 
+        if (block_name=="POT" && req_bits&POT_BIT) {
           load_bits |= POT_BIT;
           ok=true;
           readCompData(pot,index2,npartOffset,1);
         }
         // --> Acceleration block
-        if (block_name=="ACCE" && req_bits&ACC_BIT) { 
+        if (block_name=="ACCE" && req_bits&ACC_BIT) {
           load_bits |= ACC_BIT;
           ok=true;
           readCompData(acc,index2,npartOffset,3);
         }
         // --> U block (Internal energy)
-        if (block_name=="U" && req_bits&U_BIT && comp_bits&GAS_BIT) { 
+        if (block_name=="U" && req_bits&U_BIT && comp_bits&GAS_BIT) {
           load_bits |= U_BIT;
-          assert(header.npart[0]>0); // (gas only)         
+          assert(header.npart[0]>0); // (gas only)
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
+          checkFileVsArray(len1,sizeof(float),header.npart[0]);
           int idx=npartOffset[0];
           assert((idx+header.npart[0])<=header.npartTotal[0]);
-          readData((char *) &intenerg[idx], sizeof(float),header.npart[0] );          
+          readData((char *) &intenerg[idx], sizeof(float),header.npart[0] );
           len2 = readFRecord();
           assert(in.good() && len1==len2 && len1==bytes_counter);
         }
         // --> Temperature block
-        if (block_name=="NE" && req_bits&TEMP_BIT && comp_bits&GAS_BIT) { 
+        if (block_name=="NE" && req_bits&TEMP_BIT && comp_bits&GAS_BIT) {
           load_bits |= TEMP_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
+          checkFileVsArray(len1,sizeof(float),header.npart[0]);
           int idx=npartOffset[0];
           assert((idx+header.npart[0])<=header.npartTotal[0]);
-          readData((char *) &temp[idx], sizeof(float),header.npart[0] );          
+          readData((char *) &temp[idx], sizeof(float),header.npart[0] );
           len2 = readFRecord();
           assert(in.good() && len1==len2 && len1==bytes_counter);
         }
         // --> RHO block (density)
-        if (block_name=="RHO" && req_bits&RHO_BIT && comp_bits&GAS_BIT) { 
+        if (block_name=="RHO" && req_bits&RHO_BIT && comp_bits&GAS_BIT) {
           load_bits |= RHO_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
+          checkFileVsArray(len1,sizeof(float),header.npart[0]);
           int idx=npartOffset[0];
           assert((idx+header.npart[0])<=header.npartTotal[0]);
-          readData((char *) &rho[idx], sizeof(float),header.npart[0] );          
+          readData((char *) &rho[idx], sizeof(float),header.npart[0] );
           len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);          
+          assert(in.good() && len1==len2 && len1==bytes_counter);
         }
         // --> HSML block (neighbours size)
-        if (block_name=="HSML" && req_bits&HSML_BIT && comp_bits&GAS_BIT) { 
+        if (block_name=="HSML" && req_bits&HSML_BIT && comp_bits&GAS_BIT) {
           load_bits |= HSML_BIT;
           assert(header.npart[0]>0); // (gas only)
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
+          checkFileVsArray(len1,sizeof(float),header.npart[0]);
           int idx=npartOffset[0];
           assert((idx+header.npart[0])<=header.npartTotal[0]);
-          readData((char *) &hsml[idx], sizeof(float),header.npart[0] );          
+          readData((char *) &hsml[idx], sizeof(float),header.npart[0] );
           len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);                    
+          assert(in.good() && len1==len2 && len1==bytes_counter);
         }
         // --> Z block (Metalicity)
-        if (block_name=="Z" && req_bits&METAL_BIT && (comp_bits&GAS_BIT || comp_bits&STARS_BIT)) {  
+        if (block_name=="Z" && req_bits&METAL_BIT && (comp_bits&GAS_BIT || comp_bits&STARS_BIT)) {
           load_bits |= METAL_BIT;
           assert((header.npart[0]+header.npart[4])>0); // gas+stars
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
+          checkFileVsArray(len1,sizeof(float),header.npart[0]+header.npart[4]);
           int idx=z_offset;
           assert((idx+header.npart[0]+header.npart[4])<=(header.npartTotal[0]+header.npartTotal[4]));
-          readData((char *) &metal[idx], sizeof(float),header.npart[0]+header.npart[4]);          
+          readData((char *) &metal[idx], sizeof(float),header.npart[0]+header.npart[4]);
           len2 = readFRecord();
-          assert(in.good() && len1==len2 && len1==bytes_counter);                
+          assert(in.good() && len1==len2 && len1==bytes_counter);
         }
         // --> AGE block
-        if (block_name=="AGE" && req_bits&AGE_BIT && comp_bits&STARS_BIT) { 
+        if (block_name=="AGE" && req_bits&AGE_BIT && comp_bits&STARS_BIT) {
           load_bits |= AGE_BIT;
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
-	  if (len1/4 != header.npart[4]) {
-	    std::cerr << "\nWARNING: Wang's AGE bug detected.......skipping age\n";
-	    in.seekg(len1,std::ios::cur); 
-	  } else {
-	    assert(header.npart[4]>0); // stars only
-	    int idx=age_offset;
-	    assert((idx+header.npart[4])<=(header.npartTotal[4]));
-	    readData((char *) &age[idx], sizeof(float),header.npart[4]);          
-	  }
-	  len2 = readFRecord();
-	  assert(in.good() && len1==len2);// && len1==bytes_counter);  
+          checkFileVsArray(len1,sizeof(float),header.npart[4]);
+          if (len1/4 != header.npart[4]) {
+            std::cerr << "\nWARNING: Wang's AGE bug detected.......skipping age\n";
+            in.seekg(len1,std::ios::cur);
+          } else {
+            assert(header.npart[4]>0); // stars only
+            int idx=age_offset;
+            assert((idx+header.npart[4])<=(header.npartTotal[4]));
+            readData((char *) &age[idx], sizeof(float),header.npart[4]);
+          }
+          len2 = readFRecord();
+          assert(in.good() && len1==len2);// && len1==bytes_counter);
         }
-
+        // --> IM block
+        if (block_name=="iM" && req_bits&IM_BIT && comp_bits&STARS_BIT) {
+          load_bits |= IM_BIT;
+          assert((header.npart[4])>0); // stars
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+          checkFileVsArray(len1,sizeof(float),header.npart[4]);
+          int idx=npartOffset[4]; // star offset
+          assert((idx+header.npart[4])<=(header.npartTotal[4]));
+          readData((char *) &im[idx], sizeof(float),header.npart[4]);
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);
+        }
+        // --> Zs block
+        // experimental block reading, we assume that data are stored in one file only
+        if (block_name=="Zs" && req_bits&ZS_BIT && comp_bits&STARS_BIT && comp_bits&GAS_BIT) {
+          assert((load_bits&ZS_BIT)==0); // if failed means that multiple file not supported for this block
+          load_bits |= ZS_BIT;
+          assert((header.npart[0]+header.npart[4])>0); // gas+stars
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+          czs = len1/sizeof(float)/(header.npart[0]+header.npart[4]);
+          //std::cerr << "Zs constant = " << czs << "\n";
+          checkFileVsArray(len1,sizeof(float),czs*(header.npart[0]+header.npart[4]));
+          // allocate memory for the array
+          zs = new float[czs*(header.npart[0]+header.npart[4])]; // im for stars particles
+          //int idx=npartOffset[4]; // star offset
+          //assert((idx+header.npart[4])<=(header.npartTotal[4]));
+          readData((char *) &zs[0], sizeof(float),czs*(header.npart[0]+header.npart[4]));
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);
+        }
+        // --> ZSMT block
+        // experimental block reading, we assume that data are stored in one file only
+        if (block_name=="ZSMT" && req_bits&ZSMT_BIT && comp_bits&STARS_BIT && comp_bits&GAS_BIT) {
+          assert((load_bits&ZSMT_BIT)==0); // if failed means that multiple file not supported for this block
+          load_bits |= ZSMT_BIT;
+          assert((header.npart[0]+header.npart[4])>0); // gas+stars
+          ok=true;
+          bytes_counter=0;
+          len1 = readFRecord();
+          czsmt = len1/sizeof(float)/(header.npart[0]+header.npart[4]);
+          //std::cerr << "ZSMT constant = " << czsmt << "\n";
+          checkFileVsArray(len1,sizeof(float),czsmt*(header.npart[0]+header.npart[4]));
+          // allocate memory for the array
+          zsmt = new float[czsmt*(header.npart[0]+header.npart[4])]; // im for stars particles
+          //int idx=npartOffset[4]; // star offset
+          //assert((idx+header.npart[4])<=(header.npartTotal[4]));
+          readData((char *) &zsmt[0], sizeof(float),czsmt*(header.npart[0]+header.npart[4]));
+          len2 = readFRecord();
+          assert(in.good() && len1==len2 && len1==bytes_counter);
+        }
         if (!ok) {
           if (in.eof()) {
             stop=true;
@@ -482,8 +555,8 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
             }
           } // for n
         } // for k
-      } // if         
-            
+      } // if
+
       // correct the offset of the particles which have been read
       for (int i=0;i<6;i++) {
         npartOffset[i] = npartOffset[i]+header.npart[i];
@@ -512,6 +585,8 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
     freeNotLoadedData(&intenerg ,U_BIT);
     freeNotLoadedData(&rho      ,RHO_BIT);
     freeNotLoadedData(&hsml     ,HSML_BIT);
+    freeNotLoadedData(&zs       ,ZS_BIT);
+    freeNotLoadedData(&zsmt     ,ZSMT_BIT);
   }
   return 1;
 }
@@ -637,12 +712,16 @@ int CSnapshotGadgetIn::readHeader(const int id)
     tframe = header.time;
     redshift = header.redshift;
     npartTotal = 0;
+    npart_total_local = 0;
+    ntotmasses  = 0 ; // !!!!!!!!!!! NEW
     for(int k=0; k<6; k++)  {
-      npartTotal += header.npartTotal[k];  // count particles
+      npartTotal += header.npartTotal[k];    // count global total  particles
+      npart_total_local += header.npart[k];  // count local total particles
     }
     for(int k=0; k<6; k++) {
       if (header.mass[k] == 0 ) {
-	ntotmasses += header.npartTotal[k];
+        //ntotmasses += header.npartTotal[k];
+        ntotmasses += header.npart[k];
       }
       if (verbose) {
         std::cerr << "mass["<<k<<"]="<<header.mass[k]<<"\n";
@@ -660,12 +739,19 @@ bool CSnapshotGadgetIn::readBlockName()
   if (version == 2 ) { // gadget2 file format
     int dummy,nextblock;
     char name[5];
+    array_vs_file_size = 0;
     readData((char *) &dummy    , sizeof(int) , 1); // read
     readData((char *) name      , sizeof(char), 4); // read label
     readData((char *) &nextblock, sizeof(int) , 1); // read nextblock
     readData((char *) &dummy    , sizeof(int) , 1); // read
+#if 0
     int i=0; while (isupper(name[i])&& i<4) i++;
     name[i]='\0';
+#else
+    int i=0; while (name[i]!=' ' && i<4) i++;
+    name[i]='\0';
+#endif
+
     block_name=name;
     status = in.good();
     if (status && block_name!= "HEAD" && verbose) 
@@ -683,6 +769,7 @@ bool CSnapshotGadgetIn::guessVersion()
   // try to read 32bits length fortran record
   int dummy;
   swap = false; // no swapping
+  array_vs_file_size = 0;
   readData((char *) &dummy, sizeof(int), 1); // read
   //std::cerr << "GadgetIn::guessVersion dummy = "<<dummy<<"\n";
   if( dummy != 256  && dummy != 8  ) {           // unknow number
@@ -706,19 +793,36 @@ bool CSnapshotGadgetIn::guessVersion()
 // perform IO (Read,Write) operation on Data                                   
 int CSnapshotGadgetIn::readData(char * ptr,const size_t size_bytes,const int items)
 {
+  if (array_vs_file_size==0) { // no conversion
     bytes_counter += (size_bytes*items);
-  
-  // get data from file
-  in.read(ptr,size_bytes*items);
-  //assert(in.good());
-  if (! in.good()) return 0;
+
+    // get data from file
+    in.read(ptr,size_bytes*items);
+    //assert(in.good());
+    if (! in.good()) return 0;
     
-  // We SWAP data
-  if (swap && (size_bytes != CHAR)) { // swapping requested
-    for (int i=0; i<items; i++) {
-      swapBytes(ptr,size_bytes);
-      ptr += size_bytes;
+    // We SWAP data
+    if (swap && (size_bytes != CHAR)) { // swapping requested
+      for (int i=0; i<items; i++) {
+        swapBytes(ptr,size_bytes);
+        ptr += size_bytes;
+      }
     }
+  } else if (array_vs_file_size==1) {
+    bytes_counter += (size_bytes*2*items);
+    // data bigger on file
+    // we must use a temporary variable
+    double tmp;
+    for (int i=0; i<items; i++) {
+      in.read((char *) &tmp,sizeof(double)); // read one double from file
+      if (swap && (size_bytes != CHAR)) { // swapping requested
+        swapBytes((char *) &tmp,sizeof(double));
+      }
+      float tofloat=(float) tmp; // cast to float
+      memcpy(ptr+sizeof(float)*i,(char*)&tofloat,sizeof(float)); // copy back to array
+
+    }
+
   }
   return 1;
 }
@@ -838,7 +942,28 @@ bool CSnapshotGadgetIn::getData(const std::string comp, std::string name, int *n
       ok=false;
     }    
     break;
-  default: ok=false;    
+  case uns::Zs :
+    if (status && getZs(*n)) {
+      *data = getZs(*n);
+    } else {
+      ok=false;
+    }
+    break;
+  case uns::ZSMT :
+    if (status && getZSMT(*n)) {
+      *data = getZSMT(*n);
+    } else {
+      ok=false;
+    }
+    break;
+  case uns::Im :
+    if (status && comp=="stars" && getIm(*n)) {
+      *data = getIm(*n);
+    } else {
+      ok=false;
+    }
+    break;
+  default: ok=false;
   }
   
   if (verbose) {
@@ -897,7 +1022,16 @@ bool CSnapshotGadgetIn::getData(const std::string name,int *n,float **data)
   case uns::StarsMetal :
     if (ckloadBit(METAL_BIT))
       *data = getMetalStars(*n);
-    break;    
+    break;
+  case uns::Zs :
+    *data = getZs(*n);
+    break;
+  case uns::ZSMT :
+    *data = getZSMT(*n);
+    break;
+  case uns::Im :
+    *data = getIm(*n);
+    break;
   default: ok=false;
   }
   
@@ -1016,18 +1150,43 @@ bool CSnapshotGadgetIn::getData(const std::string name,int *n, int **data)
 bool CSnapshotGadgetIn::getData(const std::string name,int *data)
 {
   bool ok=true;
-  *data=0;  
+  *data=0;
   switch(CunsOut::s_mapStringValues[name]) {
-    case uns::Nsel   :
-     *data = getNSel();   
-     break;
+  case uns::Nsel   :
+    *data = getNSel();
+    break;
+  case uns::Ngas   :
+    *data = header.npartTotal[0];
+    break;
+  case uns::Nhalo   :
+    *data = header.npartTotal[1];
+    break;
+  case uns::Ndisk   :
+    *data = header.npartTotal[2];
+    break;
+  case uns::Nbulge   :
+    *data = header.npartTotal[3];
+    break;
+  case uns::Nstars   :
+    *data = header.npartTotal[4];
+    break;
+  case uns::Nbndry   :
+    *data = header.npartTotal[5];
+    break;
+  case uns::Czs   :
+    *data = czs;
+    break;
+  case uns::Czsmt   :
+    *data = czsmt;
+    break;
   default: ok=false;
   }
+  if (ok && !*data) ok = false; // not ok because array is NULL
   if (verbose) {
     if (ok) {
       std::cerr << "CSnapshotGadgetIn::getData name["<<name<<"]=" << CunsOut::s_mapStringValues[name] << "\n";
     } else {
-      std::cerr << "**WARNING** CSnapshotGadgetIn::getData Value ["<<name<<"] does not exist...\n";
+      std::cerr << "**WARNING** CSnapshotGadgetIn::getData Value ["<<name<<"] does not exist or empty\n";
     }
   }
   return ok;

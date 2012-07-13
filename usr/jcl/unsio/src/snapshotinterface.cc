@@ -62,7 +62,7 @@ namespace uns {
   {
     req_bits = 0;
     if (verbose) std::cerr << "BITS ="<<bits<<"\n";
-    if (bits=="") {
+    if (bits=="") { // all the bits
       req_bits = (unsigned int) (( 1 << 31 )<<2)-1;
       //std::cerr << "Reqbits = "<< req_bits<<"\n";
     } 
@@ -88,6 +88,9 @@ namespace uns {
           case 'A': req_bits |= AGE_BIT   ; break; // stars's age
           case 'H': req_bits |= HSML_BIT  ; break; // hsml
           case 'T': req_bits |= TEMP_BIT  ; break; // temperature
+          case 'z': req_bits |= ZS_BIT    ; break; //
+          case 'Z': req_bits |= ZSMT_BIT  ; break; //
+          case 'i': req_bits |= IM_BIT    ; break; //
           default: 
             std::cerr << "!!!!WARNING unknown requested bit : <"<<bits.at(i)<<">\n";
             break;

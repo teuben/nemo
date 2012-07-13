@@ -159,6 +159,7 @@
 
       ! save data
       call uns_save(idento)
+      call uns_close_out(idento)
 
       end
 

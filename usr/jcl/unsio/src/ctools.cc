@@ -44,7 +44,7 @@ std::string Ctools::fixFortran(const char * _ff, const int len, const bool lower
   // correct old program with explicit '\0' character
   found = str.find("\\");
   if (found!=std::string::npos) {
-    std::cerr << "FOUND at "<<found<< "\n";
+    //std::cerr << "FOUND at "<<found<< "\n";
     str.replace(found,2," ");
   }    
   
@@ -53,7 +53,7 @@ std::string Ctools::fixFortran(const char * _ff, const int len, const bool lower
     str.erase(found+1);
   else
     str.clear();            // str is all whitespace
-  std::cerr << "fix_fortran2 =["<<str<<"]\n";
+  //std::cerr << "fix_fortran2 =["<<str<<"]\n";
   
   return str;
 }

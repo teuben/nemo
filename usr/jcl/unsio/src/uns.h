@@ -40,6 +40,11 @@ namespace uns {
       Metal     ,  // total metal : gas+stars
       GasMetal  ,  // metal for gas
       StarsMetal,  // metal for stars
+      Zs        ,
+      ZSMT      ,
+      Im        ,
+      Czs       ,
+      Czsmt     ,
       
       // Nbodies  per component
       Nsel      ,
