@@ -11,6 +11,7 @@
  *				(was never implemented yet)
  *      14-aug-96       V1.4    source code moved from nbody/{reduc->trans} PJT
  *       5-jun-97       V1.4a   fixed typo, removed nested externs
+ *      18-jul-2012     V2.0    allow out= to be optional, so it only reports    PJT
  */
 
 #include <stdinc.h>
@@ -25,7 +26,7 @@
 
 string defv[] = {
     "in=???\n		Input snapshot",
-    "out=???\n		Output snapshot",
+    "out=\n		(optional) Output snapshot",
     "mscale=f\n		Scale masses ?",
     "rscale=t\n		Scale positions ?",
     "vscale=t\n		Scale velocities ?",
@@ -48,28 +49,37 @@ nemo_main()
     Body   *btab = NULL, *bp;
     int    i, nbody, bits, nrscale, nvscale;
     bool   Qvirial, Qmsc, Qrsc, Qvsc;         /* boolean checks for scalings */
+    bool   Qout;
 
     times = getparam("times");
     instr = stropen(getparam("in"), "r");
-    outstr = stropen(getparam("out"), "w");
+    Qout = hasvalue("out");
+
     Qmsc = getbparam("mscale");
     Qrsc = getbparam("rscale");
     Qvsc = getbparam("vscale");
-    if (Qmsc && Qrsc && Qvsc)
-        error("Cannot scale m, r and v all at same time");
-    else if (!Qmsc && !Qrsc && !Qvsc)
-        error("Nothing being scaled is not very productive");
     Qvirial = hasvalue("virial");
-    if (Qvirial) {
+
+    if (Qout)  {
+      outstr = stropen(getparam("out"), "w");
+      if (Qmsc && Qrsc && Qvsc)
+        error("Cannot scale m, r and v all at same time");
+      else if (!Qmsc && !Qrsc && !Qvsc)
+        error("Nothing being scaled is not very productive");
+      if (Qvirial) {
         virial = getdparam("virial");	/* get the actual value */
         if (virial<0.0) {               /* catch illegal ratios */
             warning("virial=%g ?; old virial ratio retained",virial);
 	    Qvirial = FALSE;
         }
+      }
+    } else {
+      Qmsc = Qrsc = Qvsc = FALSE;
+      if (Qvirial) error("Cannot specify virial in query mode");
     }
 
     get_history(instr);			        /* get history */
-    put_history(outstr);
+    if (Qout) put_history(outstr);
 
     for (;;) {				/* loop through snapshots */
         if (!get_tag_ok(instr, SnapShotTag))
@@ -120,8 +130,8 @@ nemo_main()
         }
         phi_scale = mscale/rscale;
         acc_scale = phi_scale/rscale;
-	dprintf(0,"U= %g T= %g rscale= %g vscale= %g\n",
-            e_pot,e_kin,rscale,vscale);
+	dprintf(0,"U= %g T= %g rscale= %g vscale= %g virial=%g\n",
+		e_pot,e_kin,rscale,vscale,-2*e_kin/e_pot);
         for (bp = btab; bp < btab+nbody; bp++) {
             Mass(bp)   *= mscale;
 	    Phi(bp)    *= phi_scale;
@@ -135,7 +145,7 @@ nemo_main()
             warning("Aux information unscaled");
         if (bits&KeyBit)
             warning("Key information unscaled");
-        put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+	if (Qout) put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 #if 1
         free(btab);
         btab = NULL;
