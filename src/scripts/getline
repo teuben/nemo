@@ -1,23 +1,65 @@
-#! /bin/csh -f
+#! /usr/bin/env python
 #
-if ($#argv < 2) then
-  echo "Usage: $0 file line_number"
-  echo "   or:"
-  echo "       $0 file start_line end_line"
-  exit 0
-endif
+#    get a requested line number from a file, return line number (or 0 if none)
+#    plus line contents
+#    optionally strip off comment(s)
+#
 
-set file=$1
-if (! -e $file) then
-  echo File $file does not exist
-  exit 1
-endif
+import os, sys
 
-if ($#argv == 2) then
-  set line=$2
-  awk '{if (NR == '$line') {print $0; exit 0}}' $file
-else
-  set start=$2
-  set end=$3
-  awk '{if ('$start'<=NR && NR<='$end') print $0}' $file
-endif
+def read_file(file):
+    # read a file
+    fd = open(file,'r')
+    lines = fd.readlines()
+    fd.close()
+    return lines
+
+def strip_comments(line, comment='#'):
+    n = line.find(comment)
+    if n<0: return line
+    return line[:n]
+
+if __name__ == "__main__":
+    n = len(sys.argv)
+    if n==1:
+        print "Usage: %s [-c] file [nnn]"
+        print "Displays line 'nnn' from a file, or report number of lines in a file"
+        print "Options:"
+        print "  -c     remove anything after comment (#) character"
+        sys.exit(0)
+    argv = sys.argv[1:]
+    comment = False
+    have_file = False
+    have_line = False
+    while len(argv) > 0:
+        if len(argv) > 0 and argv[0] == '-c':
+            comment = True
+            argv = argv[1:]
+        if len(argv) > 0 and not have_file:
+            file = argv[0]
+            have_file = True
+            argv = argv[1:]
+        if len(argv) > 0 and not have_line:
+            line = int(argv[0])
+            have_line = True
+            argv = argv[1:] 
+        if len(argv) > 0:
+            print "Unprocessed arguments ",argv
+            sys.exit(1)
+    lines = read_file(file)
+    nl = len(lines)
+    if not have_line:
+        # assume you want to know the number of lines in a file
+        print nl
+        sys.exit(0)
+    if line <= 0: sys.exit(-1)
+    if line > nl:
+        print "0"
+        sys.exit(0)
+
+    if comment:
+        print strip_comments(lines[line-1].strip())
+    else:
+        print lines[line-1].strip()
+        
+
