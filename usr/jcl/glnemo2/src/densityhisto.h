@@ -15,6 +15,7 @@
 #include <QGraphicsScene>
 #include <QWidget>
 #include <QResizeEvent>
+#include <vector>
 /**
 	@author Jean-Charles Lambert <jean-charles.lambert@oamp.fr>
 */
@@ -28,17 +29,18 @@ Q_OBJECT
   public:
     DensityHisto(QWidget *parent = 0);
     ~DensityHisto();
-    void drawDensity(const int _d[100]);
+    void drawDensity(const std::vector<int> _d); // _d[100]);
     void resizeEvent ( QResizeEvent * event );
   public slots:
     void drawDensity(int _min=0, int _max=100);
     void clearScene();
   private:
+    const int nhisto;
     void drawGrid();
 
     const QWidget * parent;
     const int border;
-    int density_histo[100];
+    std::vector <int> density_histo;
     int maxhisto;
     
     

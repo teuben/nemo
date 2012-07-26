@@ -1,3 +1,9 @@
+1.51 (July, 26th 2012)
+---------------------
+  - bug fix release
+  - fix density threshold not correctly set between frames (see issue 125)
+  - fix bug on accumulation blending rendering (key press "m") 
+
 1.50 (May, 30th 2012)
 ---------------------
   - add GUI option to control timeline and 

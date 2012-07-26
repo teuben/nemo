@@ -20,6 +20,7 @@
 #include "gltexture.h"
 #include <QObject>
 #include <iostream>
+#include <vector>
 
 //#include "particlesdata.h"
 namespace glnemo {
@@ -95,7 +96,8 @@ class GLObjectParticles : public GLObject {
     
     // manage min/max index for the physical quantity selected
     int min_index, max_index;
-    int index_histo[100]; // store first part's index in the percentage
+    //static const int nhisto;// #entries in index_histo
+    std::vector <int> index_histo;// index_histo[100]; // store first part's index in the percentage
     // Data
     const ParticlesData * part_data;
     ParticlesObject * po;

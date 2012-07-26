@@ -40,7 +40,8 @@ class PhysicalData {
     }
   }
   float * data;
-  int data_histo[100]; // store #particles per percentage
+  const int nhisto; // #entries in  data_histo
+  std::vector <int> data_histo; //data_histo[100]; // store #particles per percentage
   private:
   int nbody;
   double min,max;

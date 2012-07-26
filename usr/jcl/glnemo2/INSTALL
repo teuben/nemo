@@ -1,19 +1,19 @@
 
                      G l n e m o 2      I n s t a l l a t i o n
                      = = = = = = = = = = = = = = = = = = = = = = 
+                     see http://projets.oamp.fr/projects/glnemo2/wiki/Wiki#Installation
   
   
 0) Requirements:
 ------------------  
  Glnemo2 compiles and runs fine on Linux, Windows and MacOSX platform.
   In order to compile it, you need Trolltech QT development  library (qt > 4.6).
-Go to http://qt.nokia.com/downloads to download QT, click on "LGPL" tab,
-than get and install "Qt SDK: Complete Development Environment" for your specific
-platform.  
+Go to http://qt.nokia.com/downloads to download QT, click on the link for
+your appropriate platform.
  You also need a decent video card with a fast opengl driver. Glnemo2
 has been successfully tested on Nvidia and  ATI GPU cards. If the
 installed OpenGL driver is not fully compatible with the requirement, it
-can also run in software mode.
+can also run in software mode, but very slowly.
 
 
 1) Compilation :
@@ -24,7 +24,7 @@ qt4 are still installed there). Change to 'glnemo2' directory and enter the comm
 
     a) Linux and Windows only
        - - - - - - - - - - - -
-       qmake -recursive
+       qmake -recursiv
           then
        make
 
@@ -61,3 +61,11 @@ you architecture, and could be "unix", "win32" or "macx".
 --------------------------------
 
 see $NEMO/usr/jcl/glnemo2/gyrfalcon/README
+
+4) MacOSX and Windows Binaries
+------------------------------
+
+You can download and install directly glnemo2 binary for MacOSX and windows 32 platform.
+
+See http://projets.oamp.fr/projects/glnemo2/wiki/Download
+

@@ -497,6 +497,7 @@ void GLWindow::paintGL()
   // Display objects (particles and velocity vectors)
   if (store_options->show_part && pov ) {
     //mutex_data->lock();
+    bool first=true;
     for (int i=0; i<(int)pov->size(); i++) {
 /*      if (i==0) {
         store_options->render_mode = 2;
@@ -505,10 +506,16 @@ void GLWindow::paintGL()
         store_options->render_mode = 0;
       }*/
       gpv[i].display(mModel2,wheight);
+
+      if (first) {
+          const ParticlesObject * po = gpv[i].getPartObj();
+          if (po->hasPhysic()) { //store_options->phys_min_glob!=-1 && store_options->phys_max_glob!=-1) {
+              gl_colorbar->display(QGLWidget::width(),QGLWidget::height());
+              first=false;
+            }
+        }
     }
-    if (store_options->phys_min_glob!=-1 && store_options->phys_max_glob!=-1) {
-      gl_colorbar->display(QGLWidget::width(),QGLWidget::height());
-    }
+
     //mutex_data->unlock();
   }
   

@@ -21,13 +21,15 @@ namespace glnemo {
 
 // ============================================================================
 // Constructor                                                                 
-DensityHisto::DensityHisto(QWidget *_parent):parent(_parent),border(0)
+DensityHisto::DensityHisto(QWidget *_parent):parent(_parent),border(0),nhisto(300)
 {
   //drawGrid();
 
  // a white semi-transparent foreground
 //setBackgroundBrush(QColor(Qt::darkYellow));
   
+  // reserve vector
+  density_histo.reserve(nhisto);
  // a grid foreground
  setBackgroundBrush(QBrush(Qt::lightGray, Qt::CrossPattern));
 }
@@ -69,11 +71,12 @@ void DensityHisto::drawGrid()
 // drawDensity  
 // density_histo stores the number of particles foreach percentage
 // of density from 0 to 99 %
-void DensityHisto::drawDensity(const int _density_histo[100])
+void DensityHisto::drawDensity(const std::vector <int> _density_histo) //_density_histo[100])
 {
-  memcpy(density_histo,_density_histo,sizeof(int)*100);
+  //memcpy(density_histo,_density_histo,sizeof(int)*100);
+  density_histo = _density_histo;
   // compute maxhisto
-  for (int i=0; i<100; i++) {
+  for (int i=0; i<nhisto; i++) {
     maxhisto=std::max(maxhisto,density_histo[i]);
   }
   // draw density curve
@@ -87,14 +90,14 @@ void DensityHisto::drawDensity(int _min, int _max)
   clear();
   // draw density curve
   QPainterPath path1;
-  for (int i=0; i<100; i++) {
+  for (int i=0; i<nhisto; i++) {
     int y;
     if (density_histo[i] > 0) {
       y=parent->height()-log(density_histo[i])*(parent->height()-border)/log(maxhisto);
     } else {
       y = parent->height()-border;
     }
-    int x=i*parent->width()/100;
+    int x=i*parent->width()/nhisto;
     if (i==0) {
       path1.moveTo(x+border/2,y);
     } else {
@@ -107,14 +110,14 @@ void DensityHisto::drawDensity(int _min, int _max)
 
   // draw histogram between min and max
   int lastx=-1;
-  for (int i=_min; i<_max; i++) {
+  for (int i=_min*nhisto/100; i<_max*nhisto/100; i++) {
     if (density_histo[i] > 0) {
       y=parent->height()+1-log(density_histo[i])*(parent->height()-border)/log(maxhisto);
     } else {
       y = parent->height()-border;
     }
-    x=i*parent->width()/100.;
-    if (i ==_min) {
+    x=i*parent->width()/(float) (nhisto);
+    if (i ==_min*nhisto/100) {
       lastx=x;
     }
     for (int xx=lastx+1; xx<=x; xx++) {

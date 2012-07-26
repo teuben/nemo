@@ -397,12 +397,14 @@ void ParticlesData::computeMaxSize()
 
 // ============================================================================
 // Constructor                                                                 
-PhysicalData::PhysicalData(const PHYS _type,const int _nbody,const ALLOC _model)
+PhysicalData::PhysicalData(const PHYS _type,const int _nbody,const ALLOC _model):nhisto(300)
 {
   data = NULL;
   type = _type;
   nbody = _nbody;
   cmodel = _model;
+  // reserve memory for vector
+  data_histo.reserve(nhisto);
   if (nbody>0) {
     if (cmodel)
       data = (float *) ParticlesData::mallocate((char *) data, sizeof (float) * (nbody), true);
@@ -434,9 +436,12 @@ const PhysicalData& PhysicalData::operator=(const PhysicalData& m)
     for (int i=0; i < (nbody); i++) {
       data[i] = m.data[i];
     }
-    for (int i=0; i < 100; i++) {
-      data_histo[i] =m.data_histo[i];
-    }
+    //for (int i=0; i < 100; i++) {
+    //  data_histo[i] =m.data_histo[i];
+    //}
+    data_histo.clear();
+    data_histo.reserve(nhisto);
+    data_histo = m.data_histo;
   }
   return *this;
 }
@@ -512,9 +517,10 @@ int PhysicalData::computeMinMax()
     // compute density histogram                                      
     // in a array of 100 bins, going from log(min data) to log(max data)
     // we compute the index in that range for the particles's density,
-    // and we increment the index for that bin                        
-    for (int i=0; i<100; i++) {
-      data_histo[i] = 0;
+    // and we increment the index for that bin
+    data_histo.clear();
+    for (int i=0; i<nhisto; i++) {
+      data_histo.push_back(0);
     }
     if (min <=0) {
       std::cerr << "Min is negative, rescaling data...\n";
@@ -552,9 +558,9 @@ int PhysicalData::computeMinMax()
     if (valid) {
       for (int i=0; i<(nbody); i++) {
         if (data[i] != -1 && data[i] != 0) {
-          int index=(log(data[i])-log(min))*99./(log(max)-log(min));
+            int index=(log(data[i])-log(min))*(nhisto-1.)/(log(max)-log(min));
           //int index=((data[i])-(min))*99./((max)-(min));
-          assert(index<100);
+          assert(index<nhisto);
           data_histo[index]++; // data_histo stores the number of particles foreach percentage
                                // of physical value from 0 to 99 %
         }
