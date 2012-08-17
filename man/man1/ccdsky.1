@@ -1,0 +1,46 @@
+.TH CCDSKY 1NEMO "17 August 2012"
+.SH NAME
+ccdsky \- lazy sky calculator
+.SH SYNOPSIS
+\fBccdsky\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdsky\fP is a lazy sky calculator, which will give you the scaling parameters
+for a FITS file (which uses degrees for angles, and m/s for velocities), to make
+your typical observer or astronomical software package happy and print out values
+in units observers can be in awe about.
+.PP
+Although you can transform an image/cube, the default only needs to know the
+distance (in AU, pc, kpc, mpc, ...) and unit size (in AU, pc, kpc, mpc, ....) of
+the object. This will give you the scaling factors for length and velocities.
+.PP
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Optional input image file []   
+.TP 20
+\fBout=\fP
+Output image file []    
+.TP 20
+\fBd=\fP
+Distance to object [1,pc]    
+.TP 20
+\fBr=\fP
+Length scale of object [1,AU]   
+.TP 20
+\fBv=\fP
+Velocity scale of object [1,km/s]   
+.SH EXAMPLES
+
+.SH SEE ALSO
+ccdmath(1NEMO), ccdfits(1NEMO), snapscale(1NEMO)
+.SH FILES
+NEMO/src/image/trans	ccdsky.c - source code
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+17-Aug-12	V0.0 Created by mkman	NEMO
+.fi
