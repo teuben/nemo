@@ -37,6 +37,7 @@
  *      10-jul-02   5.1  better handling of long COMMENT fields
  *       4-feb-04   5.2  also listen to changed crval/cdelt/crpix= without refmap
  *       8-may-05   5.3  deal with the new  axis type 1 images          PJT
+ *      17-aug-12   5.5  default restfreq to keep some WCS routines happy    PJT
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -70,7 +71,7 @@ string defv[] = {
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present) to select",
-        "VERSION=5.4\n   20-jun-09 PJT",
+        "VERSION=5.5\n   17-aug-2012 PJT",
         NULL,
 };
 
@@ -302,6 +303,7 @@ void write_fits(string name,imageptr iptr)
       fitwrhda(fitsfile,"CTYPE1",radeve[p[0]]);
       fitwrhda(fitsfile,"CTYPE2",radeve[p[1]]);
       if (ndim>2) fitwrhda(fitsfile,"CTYPE3",radeve[p[2]]);
+      fitwrhdr(fitsfile,"RESTFREQ",115271204.0);  /* keep WCS/doppler  happy  */
     } else {
       if (Qrefmap) {
         fitwrhda(fitsfile,"CTYPE1",ref_ctype[0]);
