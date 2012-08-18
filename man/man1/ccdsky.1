@@ -1,10 +1,10 @@
 .TH CCDSKY 1NEMO "17 August 2012"
 .SH NAME
-ccdsky \- lazy sky calculator
+ccdsky \- lazy sky scaling calculator
 .SH SYNOPSIS
 \fBccdsky\fP [parameter=value]
 .SH DESCRIPTION
-\fBccdsky\fP is a lazy sky calculator, which will give you the scaling parameters
+\fBccdsky\fP is a lazy sky scaling calculator, which will give you the scaling parameters
 for a FITS file (which uses degrees for angles, and m/s for velocities), to make
 your typical observer or astronomical software package happy and print out values
 in units observers can be in awe about.
@@ -18,21 +18,60 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Optional input image file []   
-.TP 20
+Optional input image file. 
+.TP
 \fBout=\fP
-Output image file []    
-.TP 20
-\fBd=\fP
-Distance to object [1,pc]    
-.TP 20
-\fBr=\fP
-Length scale of object [1,AU]   
-.TP 20
-\fBv=\fP
-Velocity scale of object [1,km/s]   
+Output image file, only required if an input image is given.
+.TP
+\fBd=#,[unit]\fP
+Distance to your object, and optionally a unit.  
+AU, pc, Kpc, Mpc, and Gpc are allowed.
+[default: 1,pc]    
+.TP
+\fBr=#,[unit]\fP
+Length scale of object, and optonally a unit.
+km, AU, pc, Kpc, Mpc, and Gpc are allowed. 
+Together with a distance \fBd=\fP, this
+will convert the length scale in your maps to degrees, required for FITS.
+[default: 1,AU]   
+.TP
+\fBv=#,[unit]\fP
+Velocity scale of object, and optionally a unit. The output units will be
+the one that FITS uses, m/s.
+[Default: 1,km/s]   
+.TP
+\fBscale=#\fP
+Scale the intensity values in the data itself. Default: 1.
 .SH EXAMPLES
+Viewing a model at a distance 1 pc, where 1 length unit represents 1 AU,
+the coordinates need to be multiplied by 0.000277785 in order for FITS
+to view them in the correct angular size of 1 arcsec. 
+.nf
 
+% ccdsky d=1,pc r=1,AU v=1,km/s
+d=1 pc
+r=1 AU
+v=1 km/s
+rscale=0.000277785  (1.00003 arcsec)
+vscale=1000
+
+.fi
+Here is an example of creating a small bar, at position angle 30, and
+observed at RA=6h and DEC=30d:
+.nf
+
+% ccdgen "" map4 bar 1,10,0.5,30 size=512,512,1 
+% ccdsky map4 map4b
+% ccdfits in=map4b out=map4b.fits radecvel=t crval=90,30 crpix=255.5,255.5
+% # now switch to MIRIAD
+% fits in=map4b.fits out=map4b.mir op=xyin
+% cgdisp in=map4b.mir device=/xs labtyp=arcmin
+
+.fi
+and you should see a bar (possibly with a sign error position angle)
+of about 1 arcmin in length, in an 8 arcmin field. Notice that
+\fIccdfits(1NEMO)\fP also has various options to specify a WCS
+which can override the one set by ccdgen.
 .SH SEE ALSO
 ccdmath(1NEMO), ccdfits(1NEMO), snapscale(1NEMO)
 .SH FILES
@@ -42,5 +81,5 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-17-Aug-12	V0.0 Created by mkman	NEMO
+17-Aug-12	V1.0 Created	PJT
 .fi
