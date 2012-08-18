@@ -29,7 +29,7 @@ For images that require more accurate interpolation,
 use \fIsnapmap(1NEMO)\fP.
 .PP
 For a related program that creates images (and can create movies as well),
-see \fI\uns_2dplot(1NEMO)\fP.
+see \fIuns_2dplot(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized:
 .TP 20
@@ -48,7 +48,8 @@ one can request multiple output images.
 [Default: \fBall\fP].
 .TP
 \fBxrange=\fIxb:xe\fP
-Range in \fBxvar\fP to bin [default: \fB-2:2\fP].
+Range in \fBxvar\fP to bin, the coordinates are allowed to decrease as well as increase.
+ [default: \fB-2:2\fP].
 .TP
 \fByrange=\fIxb:xe\fP
 Range in \fByvar\fP to bin [default: \fB-2:2\fP].
@@ -227,6 +228,12 @@ convolving velocity beam. For a rectangular beam (\fBvrange=vmin:vmax\fP)
 the data should formally be divided by \fB(vmax-vmin)\fP, for a 
 gaussian beam (\fBvrange=vmean,vsig\fP) by \fBvsig*sqrt(2*pi)\fP.
 Also remember that a gaussian beam has \fBFWHM = 2.355*sigma\fP.
+.PP
+Although \fIsnapscale(1NEMO)\fP can also be used, after a snapshot has
+been gridded into a map/cube, \fIccdsky(1NEMO)\fP can optionally be
+used to rescale a cube in astronomical units (degrees and m/s) such 
+that exported FITS files can be compared directly with model generated
+FITS files.
 .SH BUGS
 Combinations of large snapshots and large images may run into memory
 problems since both the snapshot and the image(s) must fit into memory
@@ -238,7 +245,7 @@ Sky projections do not guarantee flux conservation.
 .SH "SEE ALSO"
 snapgridsmooth(1NEMO), snapmap(1NEMO),
 snaprotate(1NEMO), snapslit(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), uns_2dplot(1NEMO), snapaxsym(1NEMO), wcs(1NEMO),
-tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), image(5NEMO)
+tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), ccdsky(1NEMO), image(5NEMO), 
 .PP
 http://www.iinet.com.au/~watson/nngridr.html
 .PP
