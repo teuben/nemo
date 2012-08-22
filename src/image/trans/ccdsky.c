@@ -21,7 +21,7 @@ string defv[] = {
   "d=1,pc\n       Distance to object",
   "r=1,AU\n       Length scale of object",
   "v=1,km/s\n     Velocity scale of object",
-  "scale=1        Scale image values [not implemented]",
+  "scale=1\n      Scale image values [not implemented]",
   "VERSION=1.0\n  17-aug-2012 PJT",
   NULL,
 };
