@@ -83,6 +83,7 @@ string defv[] = {
     "residual=t\n		  Overlay residual data-gauss(fit)",
     "cumul=f\n                    Override and do cumulative histogram instead",
     "median=t\n			  Compute median too (can be time consuming)",
+    "torben=f\n                   Compute median using Torben median method",
     "robust=f\n                   Compute robust median",
     "nsigma=-1\n                  delete points more than nsigma",
     "xcoord=\n		          Draw additional vertical coordinate lines along these X values",
@@ -130,6 +131,7 @@ local bool   Qresid;                    /* gaussian residual overlay ? */
 local bool   Qtab;                      /* table output ? */
 local bool   Qcumul;                    /* cumulative histogram ? */
 local bool   Qmedian;			/* compute median also ? */
+local bool   Qtorben;                   /* new median method */
 local bool   Qrobust;                   /* compute robust median also ? */
 local bool   Qdual;                     /* dual pass ? */
 local bool   Qbin;                      /* manual bins ? */
@@ -153,6 +155,8 @@ local real  xtrans(real), ytrans(real);
 local void  setparams(void), read_data(void), histogram(void);
 local iproc getsort(string name);
 local int   ring_index(int n, real *r, real rad);
+
+extern real median_torben(int n, real *x, real xmin, real xmax);
 
 
 /****************************** START OF PROGRAM **********************/
@@ -211,6 +215,8 @@ local void setparams()
         ylog=FALSE;
     }
     Qmedian = getbparam("median");
+    Qtorben = getbparam("torben");
+    if (Qtorben) Qmedian=FALSE;
     Qrobust = getbparam("robust");
     if (ylog && streq(ylab,"N")) ylab = scopy("log(N)");
     Qdual = getbparam("dual");
@@ -332,7 +338,7 @@ local void histogram(void)
 	k = (int) floor((x[i]-xmin)/(xmax-xmin)*nsteps);
       else
 	k = 0;
-      dprintf(1,"%d k=%d %g\n",i,k,x[i]);
+      dprintf(2,"%d k=%d %g\n",i,k,x[i]);
     }
     if (k==nsteps && x[i]==xmax) k--;     /* include upper edge */
     if (k<0)       { under++; continue; }
@@ -441,6 +447,9 @@ local void histogram(void)
     else
       median = 0.5 * (x[npt/2] + x[npt/2-1]);
     dprintf (0,"Median               : %g\n",median);
+  } else if (Qtorben) {
+    median = median_torben(npt,x,xmin,xmax);
+    dprintf (0,"Median_torben        : %g\n",median);
   }
   dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
   if (Qrobust)
