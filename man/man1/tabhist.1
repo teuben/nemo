@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "1 June 2010"
+.TH TABHIST 1NEMO "22 August 2012"
 .SH NAME
 tabhist \- histogram plotter and gaussian fit for tabular data
 .SH SYNOPSIS
@@ -55,8 +55,9 @@ Maximum count value per bin plotted along the Y-axis
 .TP
 \fBnmax=\fImax_lines\fP
 Maximum number of lines allowed to read from datafile, if the data
-comes from a pipe as supposed from file.  
-[Default: \fB10000\fP].
+comes from a pipe as supposed from file.  A regular file will
+use the number of lines in the file as default.
+[Default: \fB0\fP].
 .TP
 \fBylog=t|f\fP
 Take log of Y-axis? This option is really redundant, since
@@ -99,6 +100,11 @@ and ylog are automatically re-set to false.
 \fBmedian=t|f\fP
 Compute median too? This can be timeconsuming for large numbers of points.
 [Default: \fBt\fP].
+.TP
+\fBtorben=t|f\fP
+Fast median calculator in case N is large. No sort will be used, but
+instead an iterative O(N) method will be used.
+[Default: \fBf\fP].
 .TP
 \fBdual=t|f\fP
 Dual pass over the data, subtracting the mean. This can be important
@@ -149,5 +155,6 @@ xx-mar-88	V1.0: created          	PJT
 7-may-03	4.0: multiple columns allowed	PJT
 28-jan-05	5.0: separate xmin/xmax=, added sort=, fix median if nsigma 	PJT
 1-jun-10	6.0: bins= now allowed to have manual edges	PJT
+22-aug-12	6.2: added torben= option for fast large-N median	PJT
 .fi
 
