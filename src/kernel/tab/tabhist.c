@@ -42,7 +42,8 @@
  *      11-mar-05   5.1   added xcoord= keyword                 pjt
  *       7-apr-05   5.2   under and overflow reporting fixed    pjt
  *       1-jun-10   6.0   allow bins= to be edges of bins       pjt 
- *      (8-feb-11   !!!   code cloned into ccdhist              pjt)
+ *      (8-feb-11   !!!   code cloned into ccdhist              pjt) 
+ *      22-aug-12   6.2   torben median option                  pjt
  *                
  * 
  * TODO:
@@ -90,7 +91,7 @@ string defv[] = {
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
-    "VERSION=6.1\n		  25-oct-2011 PJT",
+    "VERSION=6.2\n		  22-aug-2012 PJT",
     NULL
 };
 
