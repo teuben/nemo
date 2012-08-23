@@ -3,7 +3,8 @@
  *         into degrees and m/s for FITS
  *         Can optionally convert an image. 
  *
- *      17-aug-2012     PJT     created
+ *      17-aug-2012     created        Peter Teuben
+ *      22-aug-2012     added sdv      PJT
  */
 
 
@@ -21,6 +22,7 @@ string defv[] = {
   "d=1,pc\n       Distance to object",
   "r=1,AU\n       Length scale of object",
   "v=1,km/s\n     Velocity scale of object",
+  "sdv=1\n        Integrated Flux Jy.km/s",
   "scale=1\n      Scale image values [not implemented]",
   "VERSION=1.0\n  17-aug-2012 PJT",
   NULL,
@@ -61,6 +63,7 @@ void get_nu(string kv,real *value,string unit, string defunit)
 
 /*
  * efactor:  scaling factor between two common units
+ *           @todo need a more general unit + prefix conversion
  */
 
 real efactor(string u1, string u2)
@@ -78,7 +81,7 @@ real efactor(string u1, string u2)
     else if (streq(u2,"Mpc") || streq(u2,"mpc"))
       s = 1e6*PC/AU;
     else
-      warning("Comparison unit %s not understood for %s",u2,u1);
+      warning("Comparison_1 unit %s not understood for %s",u2,u1);
   } else if (streq(u1,"pc")) {
     if (streq(u2,"pc")) 
       s = 1.0;
@@ -91,26 +94,47 @@ real efactor(string u1, string u2)
     else if (streq(u2,"AU"))
       s = AU/PC;
     else
-      warning("Comparison unit %s not understood for %s",u2,u1);
+      warning("Comparison_2 unit %s not understood for %s",u2,u1);
+  } else if (streq(u1,"Mpc")) {
+    if (streq(u2,"pc")) 
+      s = 1e-6;
+    else if (streq(u2,"Kpc") || streq(u2,"kpc"))
+      s = 1e-3;
+    else if (streq(u2,"Mpc") || streq(u2,"mpc"))
+      s = 1;
+    else if (streq(u2,"Gpc") || streq(u2,"gpc"))
+      s = 1e3;
+    else
+      warning("Comparison_3 unit %s not understood for %s",u2,u1);
   } else if (streq(u1,"m/s")) {
     if (streq(u2,"m/s")) 
       s = 1;
     else if  (streq(u2,"km/s")) 
       s = 1e3;
     else
-      warning("Comparison unit %s not understood for %s",u2,u1);      
+      warning("Comparison_4 unit %s not understood for %s",u2,u1);      
   } else
-    warning ("Comparison unit %s not understood",u1);
+    warning ("Comparison_5 unit %s not understood",u1);
   dprintf(1,"u1=%s u2=%s  s=%g\n",u1,u2,s);
   return s;
 }
 
+
+/*   
+ * See also:  http://www.cv.nrao.edu/course/astr534/HILine.html
+ */
+
+static real HI_factor = 2.35e5;
+
+static real CO_factor = 1.72e4;    /*  this is HI_factor*X/100 ? X=5 ? */
+
 void nemo_main()
 {
     stream  instr, outstr;
     int     nx, ny, nz;
     imageptr iptr=NULL;
     real d,r,v,  rscale, vscale, iscale = getrparam("scale");
+    real mass, sdv_scale,  sdv = getrparam("sdv");
     char ds[MAXU], rs[MAXU], vs[MAXU];
 
     /*  get the distance and scales      */
@@ -122,6 +146,7 @@ void nemo_main()
     printf("d=%g %s\n",d,ds);
     printf("r=%g %s\n",r,rs);
     printf("v=%g %s\n",v,vs);
+    printf("SdV=%g Jy.km/s\n",sdv);
 
 
     /* angles: convert to deg for FITS */
@@ -134,6 +159,13 @@ void nemo_main()
     vscale = v;
     vscale *= efactor("m/s",vs);
     printf("vscale=%g\n",vscale);
+
+    /* sdv calculation */
+    sdv_scale = efactor("Mpc",ds);
+    mass = HI_factor * sqr( d * sdv_scale ) * sdv;
+    printf("Mass(HI) = %g  \n",mass);
+    mass = CO_factor * sqr( d * sdv_scale ) * sdv;
+    printf("Mass(H2) = %g  (X=5)\n",mass);
     
 
     if (hasvalue("in") && hasvalue("out")) {      /* patch image if needed */
