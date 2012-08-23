@@ -24,7 +24,7 @@ string defv[] = {
   "v=1,km/s\n     Velocity scale of object",
   "sdv=1\n        Integrated Flux Jy.km/s",
   "scale=1\n      Scale image values [not implemented]",
-  "VERSION=1.0\n  17-aug-2012 PJT",
+  "VERSION=1.1\n  17-aug-2012 PJT",
   NULL,
 };
 
@@ -126,7 +126,14 @@ real efactor(string u1, string u2)
 
 static real HI_factor = 2.35e5;
 
-static real CO_factor = 1.72e4;    /*  this is HI_factor*X/100 ? X=5 ? */
+/* 
+ * Xco=2e20 cm-2/K km/s, and alpha_co=4.3 Msun/K km/s 
+ * also included 1.36  factor due to Helium contribution to the mass. 
+ *
+ * Older material is also:
+ */
+
+static real CO_factor = 1.05e4;
 
 void nemo_main()
 {
@@ -165,7 +172,7 @@ void nemo_main()
     mass = HI_factor * sqr( d * sdv_scale ) * sdv;
     printf("Mass(HI) = %g  \n",mass);
     mass = CO_factor * sqr( d * sdv_scale ) * sdv;
-    printf("Mass(H2) = %g  (X=5)\n",mass);
+    printf("Mass(H2) = %g  (alpha=4.3; includes 1.36 He contribution)\n",mass);
     
 
     if (hasvalue("in") && hasvalue("out")) {      /* patch image if needed */
