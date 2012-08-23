@@ -1,4 +1,4 @@
-.TH CCDSKY 1NEMO "17 August 2012"
+.TH CCDSKY 1NEMO "23 August 2012"
 .SH NAME
 ccdsky \- lazy sky scaling calculator
 .SH SYNOPSIS
@@ -40,6 +40,11 @@ Velocity scale of object, and optionally a unit. The output units will be
 the one that FITS uses, m/s.
 [Default: 1,km/s]   
 .TP
+\fBsdv=#\fP
+Total flux, in Jy.km/s, of the source. Based on the distance, it will
+the compute the HI and H2 (given some reasonable X factor) masses,in
+units of solar masses. Default: 1
+.TP
 \fBscale=#\fP
 Scale the intensity values in the data itself. Default: 1.
 .SH EXAMPLES
@@ -80,6 +85,7 @@ NEMO/src/image/trans	ccdsky.c - source code
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +4.0i
-17-Aug-12	V1.0 Created	PJT
+.ta +1.0i +1.0i
+17-Aug-2012	V1.0 Created		PJT
+23-aug-2012	V1.1 added sdv=		PJT
 .fi
