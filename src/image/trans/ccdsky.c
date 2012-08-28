@@ -4,7 +4,8 @@
  *         Can optionally convert an image. 
  *
  *      17-aug-2012     created        Peter Teuben
- *      22-aug-2012     added sdv      PJT
+ *      22-aug-2012     added sdv=     PJT
+ *      28-aug-2012     implemented iscale=
  */
 
 
@@ -19,12 +20,12 @@
 string defv[] = {
   "in=\n          Optional input image file",
   "out=\n         Output image file",
-  "d=1,pc\n       Distance to object",
-  "r=1,AU\n       Length scale of object",
-  "v=1,km/s\n     Velocity scale of object",
-  "sdv=1\n        Integrated Flux Jy.km/s",
+  "d=1,pc\n       Distance to object, optional unit [pc]",
+  "r=1,AU\n       Length scale of object, optional unit [AU]",
+  "v=1,km/s\n     Velocity scale of object, optional unit [km/s]",
+  "sdv=1\n        Integrated Flux (must be in Jy.km/s)",
   "scale=1\n      Scale image values [not implemented]",
-  "VERSION=1.1\n  17-aug-2012 PJT",
+  "VERSION=1.2\n  28-aug-2012 PJT",
   NULL,
 };
 
@@ -38,10 +39,34 @@ string cvsid = "$Id$";
 
 #define MAXU 64
 
+
+/*   
+ * See also:  http://www.cv.nrao.edu/course/astr534/HILine.html
+ */
+
+static real HI_factor = 2.35e5;
+
+/* 
+ * Xco=2e20 cm-2/K km/s, and alpha_co=4.3 Msun/K km/s 
+ * also included 1.36  factor due to Helium contribution to the mass. 
+ * Use Xco=14e20 for 13CO, about 7 times that of 12CO
+ *
+ * Older material is also: http://ned.ipac.caltech.edu/level5/March09/Solomon/Solomon2.html
+ */
+
+static real CO_factor = 1.05e4;
+
+
+
 
 
 /*
  *     get_nu :   parse a   NUMBER,UNIT    string
+ *     input:   kv         e.g.   "1,pc"
+ *              defunit    e.f.   "pc"
+ *     output:  value 
+ *              unit
+ *
  */
 
 void get_nu(string kv,real *value,string unit, string defunit)
@@ -63,7 +88,12 @@ void get_nu(string kv,real *value,string unit, string defunit)
 
 /*
  * efactor:  scaling factor between two common units
- *           @todo need a more general unit + prefix conversion
+ *           u1:    first unit
+ *           u2:    second unit
+ *           returned value:   how many u1's in a u2  (i.e.   u2/u1)      
+ *
+ *           @todo need a more general unit + prefix conversion, this
+ *                 was just a quick hack
  */
 
 real efactor(string u1, string u2)
@@ -120,25 +150,10 @@ real efactor(string u1, string u2)
 }
 
 
-/*   
- * See also:  http://www.cv.nrao.edu/course/astr534/HILine.html
- */
-
-static real HI_factor = 2.35e5;
-
-/* 
- * Xco=2e20 cm-2/K km/s, and alpha_co=4.3 Msun/K km/s 
- * also included 1.36  factor due to Helium contribution to the mass. 
- *
- * Older material is also:
- */
-
-static real CO_factor = 1.05e4;
-
 void nemo_main()
 {
     stream  instr, outstr;
-    int     nx, ny, nz;
+    int     ix, iy, iz, nx, ny, nz;
     imageptr iptr=NULL;
     real d,r,v,  rscale, vscale, iscale = getrparam("scale");
     real mass, sdv_scale,  sdv = getrparam("sdv");
@@ -167,6 +182,9 @@ void nemo_main()
     vscale *= efactor("m/s",vs);
     printf("vscale=%g\n",vscale);
 
+    /* mapvalues */
+    printf("iscale=%g\n",iscale);
+
     /* sdv calculation */
     sdv_scale = efactor("Mpc",ds);
     mass = HI_factor * sqr( d * sdv_scale ) * sdv;
@@ -185,7 +203,13 @@ void nemo_main()
       Dy(iptr) *= rscale;
       Dz(iptr) *= vscale;
       if (iscale != 1.0) {
-	warning("scale=%g not implemented yet",iscale);
+	nx = Nx(iptr);
+	ny = Ny(iptr);
+	nz = Nz(iptr);
+	for (iz=0; iz<nz; iz++)
+	  for (iy=0; iy<ny; iy++)
+	    for (ix=0; ix<nx; ix++)
+	      CubeValue(iptr,ix,iy,iz) *= iscale;
       }
 
       outstr = stropen(getparam("out"), "w");

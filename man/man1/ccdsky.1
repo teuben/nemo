@@ -1,4 +1,4 @@
-.TH CCDSKY 1NEMO "23 August 2012"
+.TH CCDSKY 1NEMO "28 August 2012"
 .SH NAME
 ccdsky \- lazy sky scaling calculator
 .SH SYNOPSIS
@@ -42,7 +42,7 @@ the one that FITS uses, m/s.
 .TP
 \fBsdv=#\fP
 Total flux, in Jy.km/s, of the source. Based on the distance, it will
-the compute the HI and H2 (given some reasonable X factor) masses,in
+the compute the HI and H2 (given some reasonable X factor) masses, in
 units of solar masses. Default: 1
 .TP
 \fBscale=#\fP
@@ -77,6 +77,11 @@ and you should see a bar (possibly with a sign error position angle)
 of about 1 arcmin in length, in an 8 arcmin field. Notice that
 \fIccdfits(1NEMO)\fP also has various options to specify a WCS
 which can override the one set by ccdgen.
+.SH CAVEATS
+Although the conversion from an observed HI flux to mass is not
+too controversial (sans optical depth effects), the conversion 
+from CO to a mass is still under debate. We use the value
+2e20 cm-2/K km/s.
 .SH SEE ALSO
 ccdmath(1NEMO), ccdfits(1NEMO), snapscale(1NEMO)
 .SH FILES
@@ -88,4 +93,5 @@ Peter Teuben
 .ta +1.0i +1.0i
 17-Aug-2012	V1.0 Created		PJT
 23-aug-2012	V1.1 added sdv=		PJT
+28-aug-2012	V1.2 implemented scale=	PJT
 .fi
