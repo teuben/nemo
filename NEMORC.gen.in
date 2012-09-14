@@ -1,9 +1,8 @@
-# This file is a template for the NEMORC.local file, which should be
-# in your $NEMO root directory. Copy this file as 'NEMORC.local' and
-# make appropriate changes to the variables from the NEMORC file itself
-# that you want to have modified, and set variables like NEMOSITE
-# and YAPPLIB. Never edit this file as NEMORC.gen, as you will most likely
-# loose any changes in future updates.
+# NEMORC.gen.in : template for the NEMORC.local file, which should be
+# in your $NEMO root directory.  Normally configure will generate a
+# NEMORC.gen, which is then copied (only once) to NEMORC.local, where
+# you can modify it locally without further overwritings since it now
+# exists.
 
 #  Each site should really have an identification name in 'NEMOSITE';
 #  could be as complicated as to include machine name via `hostname`,
