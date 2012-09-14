@@ -22,7 +22,7 @@ string defv[] = {
     "in=???\n                     Input file name",
     "xcol=1\n			  Column(s) to use",
     "nmax=100000\n                max size if a pipe",
-    "VERSION=0.1\n		  24-oct-07 PJT",
+    "VERSION=0.2\n		  26-jun-2012 PJT",
     NULL
 };
 
@@ -72,7 +72,7 @@ local void setparams()
 {
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
-    if (ncol < 0) error("parsing error col=%s",getparam("col"));
+    if (ncol < 0) error("parsing error xcol=%s",getparam("xcol"));
     
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
