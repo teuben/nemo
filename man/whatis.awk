@@ -1,5 +1,6 @@
 
 # awk script, called by make_whatis.csh
+#   BUG:   it produces <A HREF="xyopen,.y.html">
 
 # <a href=bimaudoc/index.html><img src=/icons/blue.ball.gif alt="*"></a>
 #  <a href=bimaudoc/index.html>Bima User Documentation</a>
