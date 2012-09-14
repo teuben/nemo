@@ -28,10 +28,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "width=\n		 Width of columns to print",
     "median=t\n          Compute median too? (can be time consuming)",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
-    "nmax=10000\n        maximum number of data to be read if pipe",
+    "nmax=100000\n       maximum number of data to be read if pipe",
     "xmin=\n             Set minimum ",
     "xmax=\n             Set maximum ",
-    "VERSION=1.4\n	 24-jan-2012 PJT",
+    "VERSION=1.4a\n	 26-jun-2012 PJT",
     NULL
 };
 
