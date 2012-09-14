@@ -1,0 +1,41 @@
+.TH CPUTIME 3NEMO "28 August 2012"
+.SH NAME
+cputime, etime, dtime - routines to time your code
+.SH SYNOPSIS
+.nf
+.B #include <stdinc.h>
+.PP
+.B double cputime(void);
+.B float etime(float *tarray);
+.B float dtime(float *tarray);
+.PP
+.fi
+.SH DESCRIPTION
+\fIcputime\fP returns the CPU time in minutes. 
+.PP
+Two old FORTRAN routines, \fIetime\fP and \fIdtime\fP 
+can be compiled into this code, if not available on the
+local system (-DETIME):
+.PP
+\fIetime\fP returns the elapsed runtime in seconds for the calling process.
+.PP
+\fIdtime\fP returns the elapsed time since the last call to dtime,
+or the start of execution on the first call.
+The returned argument tarray contains user time in the first
+element  and  system  time  in  the second element.  Elapsed
+time, the returned value, is the  sum  of  user  and  system
+time.
+.SH SEE ALSO
+timers(3NEMO), times(2)
+.SH AUTHOR
+Peter Teuben
+.SH FILES
+.nf
+.ta +1.5i
+~/src/kernel/cores	cputime.c
+.fi
+.SH UPDATE HISTORY
+.nf
+.ta +1i +4i
+28-aug-2012	finally documented	PJT
+.fi
