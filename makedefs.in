@@ -5,6 +5,11 @@
 #  ((to $NEMOLIB via the "make config_extra" command during the))
 #  (("make postconfig" step of the install))
 
+#  DSO linking: might need to wrap offending libraries 
+#       -Wl,--no-as-needed -lX11 -Wl,-as-needed
+#  instead of 
+#                          -lX11
+
 
 # we could actually also define a set of NEMO, and derived, variables, such that the build
 # system does not need to source nemo_start

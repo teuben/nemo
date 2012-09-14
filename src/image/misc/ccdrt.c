@@ -8,6 +8,11 @@ Some reading material:
 http://www.cv.nrao.edu/course/astr534/Radxfer.html
 http://en.wikipedia.org/wiki/Radiative_transfer
 
+
+Note ds9 calls the peak=t/f the
+   Maximum Intensity Projection (MIP) and Average Intensity Projection (AIP)
+but applies no radiative transfer
+
  */
 
 

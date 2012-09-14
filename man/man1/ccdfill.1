@@ -1,4 +1,4 @@
-.TH CCDFILL 1NEMO "21 June 2009"
+.TH CCDFILL 1NEMO "6 July 2012"
 .SH NAME
 ccdfill \- patch up the holes in an image
 .SH SYNOPSIS
@@ -9,6 +9,9 @@ ccdfill \- patch up the holes in an image
 Currently a simple 2-dimensional planar fit is done to the
 pixel values surrounding 'bad' pixels. The size of this area
 can be choosen by the user.
+.PP
+This procedure will obviously not conserve flux (see also
+\fBall=t\fP below), and has to be used with caution.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -35,7 +38,8 @@ Value in the map that should be patched.
 .TP
 \fBall=t|f\fP
 Normally only bad pixels are patches. By setting \fBall=t\fP all pixels
-are re-fitted with a planar fit, effectively smoothing the map.
+are re-fitted with a planar fit, effectively smoothing the map. This
+will obviously not conserve flux, and should be used with caution.
 Default: f
 .TP
 \fBm=\fP
