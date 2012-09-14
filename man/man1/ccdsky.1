@@ -18,7 +18,7 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Optional input image file. 
+Optional input image file. Must be in \fIimage(5NEMO)\fP format.
 .TP
 \fBout=\fP
 Output image file, only required if an input image is given.
@@ -29,7 +29,7 @@ AU, pc, Kpc, Mpc, and Gpc are allowed.
 [default: 1,pc]    
 .TP
 \fBr=#,[unit]\fP
-Length scale of object, and optonally a unit.
+Length scale of object, and optionally a unit.
 km, AU, pc, Kpc, Mpc, and Gpc are allowed. 
 Together with a distance \fBd=\fP, this
 will convert the length scale in your maps to degrees, required for FITS.
@@ -76,14 +76,14 @@ observed at RA=6h and DEC=30d:
 and you should see a bar (possibly with a sign error position angle)
 of about 1 arcmin in length, in an 8 arcmin field. Notice that
 \fIccdfits(1NEMO)\fP also has various options to specify a WCS
-which can override the one set by ccdgen.
+which can override the one set by \fIccdgen(1NEMO)\fP.
 .SH CAVEATS
 Although the conversion from an observed HI flux to mass is not
 too controversial (sans optical depth effects), the conversion 
 from CO to a mass is still under debate. We use the value
 2e20 cm-2/K km/s.
 .SH SEE ALSO
-ccdmath(1NEMO), ccdfits(1NEMO), snapscale(1NEMO)
+ccdgen(1NEMO), ccdmath(1NEMO), ccdfits(1NEMO), snapscale(1NEMO), image(5NEMO)
 .SH FILES
 NEMO/src/image/trans	ccdsky.c - source code
 .SH AUTHOR
