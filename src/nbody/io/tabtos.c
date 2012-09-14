@@ -372,7 +372,7 @@ local bool get_block(int id,string options)
 	      } else
 		break;
 	    }
-	  } while(line[0]=='#');    /* read until EOF or non-comment lines */
+	  } while(line[0]=='#' || line[0]=='\n');    /* read until EOF or non-comment lines */
 
 	  linecnt++;
 	  if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;
