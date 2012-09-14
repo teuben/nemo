@@ -1,0 +1,184 @@
+.TH RUNDISKFIT 1NEMO "13 September 2012"
+.SH NAME
+rundiskfit \- NEMO frontend to run Spekkens & Sellwood's 2012 \fIdiskfit\fP code
+.SH SYNOPSIS
+\fBrundiskfit\fP [parameter=value]
+.SH DESCRIPTION
+\fBrundiskfit\fP is a NEMO frontend to \fBdiskfit\fP, which supersedes
+their previous \fBvelfit\fP (see \fIrunvelfitss07(1NEMO)\fP) release.
+.PP
+\fBdiskfit\fP implements procedures for fitting
+non-axisymmetries in either kinematic or photometric data,
+as first described in Spekkens & Sellwood (2007) for velocity
+fields and Reese et al. (2007, SS07) for images. DiskFit supercedes
+velfit 2.0 in that it implements a refined version of that code to fit kinematics,
+and corresponds to the first public release of the image fitting code described in
+R07. DiskFit improves upon the functionality of velfit described in SS07 and
+Sellwood & Zanmar Sanches (2010) as well as that for image
+fitting described in R07, by carrying out an optional seeing correction for both
+kinematic and photometric fits.
+.PP
+Radial (m=0) flow
+can be fitted by setting \fBflags(4)\fP, whereas
+bisymmetric (m=2) or lobsided (m=1) flow with \fBflags(5)\fP
+(see \fBflags=\fP below). The code is usually not well
+converging when fitting both.
+For more details and a full explanation of the parameters, 
+Spekkens and Sellwood (2007ApJ...664..204S) and the Users Guide
+on the DISKFIT website.
+.PP
+An updated version is now available as DISKFIT, see also \fIrundiskfit12(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP
+\fBinp=\fP
+This is currently the only supported option. This is the input parameter 
+file, as supplied to diskfit.
+.TP
+\fBin=\fP
+input velocity field. The first 4 lines are completely ignored, each
+subsequent data line must be X,Y,V,DV in 4F10.2 format. Note X is positive to the
+west. Up to 50,000 points can
+be read in the default compilation. No default.
+.TP
+\fBout=\fP
+output model field. No default.
+.TP
+\fBpar=\fP
+output parameter file. No default.
+.TP
+\fBcenter=\fP\fIxc,yc\fP
+center of velocity field. Note X is positive to the west  [0,0].
+.TP
+\fBvsys=\fP
+systemic velocity [0]     
+.TP
+\fBpa=\fP
+(kinematic) position angle of disk (E of N), the usual convention
+applies where this means the receding side of the disk [0]
+.TP
+\fBinc=\fP
+inclination angle of disk [0]   
+.TP
+\fBrmsism=\fP
+ISM turbulence [0]     
+.TP
+\fBflags=\fP\fIf1,f2,f3,f4,f5,f6\fP
+Siz flags which to be fitted/done: geom (inc and pa), center, vsys, radial (m=0), 
+lobsides/bisymmetric (m=1,2...), error estimates.
+[1,1,1,0,0,0]
+.TP
+\fBm=\fP
+harmonic order of bar perturbation (1 or 2).
+[2]
+.TP
+\fBseed=\fP
+Random Seed [-50]     
+.TP
+\fBbootstrap=\fP
+Number of bootstrap samples if errors (\fBflags(6)\fP set) are calculated. 
+Note using bootstrap will result in a large runtime.
+[200]
+.TP
+\fBj=\fP
+correlation length, in case bootstrap is used [1.0]
+.TP
+\fBrcirc=\fP
+Radius beyond which no non-circular rmotions fitted [50]
+.TP
+\fBradii=\fP\fIrmin:rmax:step\fP
+Ring Radii at which velocity field components are are extracted.
+.TP
+\fBregrid=t|f\fP
+Only used for ASCII tables, if the program should attempt to 
+regrid the data in a 
+Default: t.
+.TP
+\fBexe=\fP
+name of VELFITSS07 executable. It will have to be found in the user's $PATH. Note that
+although the original name of the SS07 is \fIvelfit\fP, this conflicts with
+\fIvelfit(1NEMO)\fP and within NEMO we normally rename the SS07 version fo
+\fIvelfitss07\fP.  [velfitss07]   
+.SH EXAMPLES
+Here are the 5 examples from the Users Guide:
+.nf
+
+rundiskfit inp=EXAMPLE/PHOT/phot_disk.inp
+rundiskfit inp=EXAMPLE/PHOT/phot_full.inp
+rundiskfit inp=EXAMPLE/VELS/FITS/velsf_disk.inp
+rundiskfit inp=EXAMPLE/VELS/FITS/velsf_bi.inp
+rundiskfit inp=EXAMPLE/VELS/TEXT/velst_err.inp
+
+.fi
+
+Note you have to run them from a directory where \fBEXAMPLE\fP is a subdirectory.
+.SH BENCHMARK
+The 5 benchmarks (1a, 1b, 2a, 2b and 3a) reporting pure user times:
+.nf
+.ta +2.5i +1i +1i +1i +1i +1i
+CPU/speed		test1a	test1b	test2a	test2b	test3a
+
+core2d T7300 @ 2.0 GHz	4.3	220.6	15.4	7.6	45.2 "2007 linux laptop"
+i7/870 @ 2.93 GHz	2.1	463.7	8.6	4.8	27.9 "2010? linux desktop"
+i7/3770 @ 3.50 GHz	1.7	77.6	7.3	4.1	26.5 "2012 linux desktop"
+i7? mac @ x.x GHz	2.7	124.9	9.7	5.2	36.4 "2010? mac desktop"
+.fi
+
+.SH SEE ALSO
+rotcur(1NEMO), velfit(1NEMO), runvelfitss07(1NEMO), rotcurshape(1NEMO), rundiskfit12(1NEMO)
+.nf
+2007ApJ...664..204S (Spekkens & Sellwood, 2007)
+2007AJ....133.2846R (Reese, Williams, Sellwood, Barnes & Powell 2007)
+2012MNRAS.....  (Kuzio de Naray, Arsenault, Spekkens, Sellwood, McDonald, Simon, Teuben 2012)
+WEBSITE: http://www.physics.rutgers.edu/~spekkens/velfit/
+WEBSITE: http://www.physics.rutgers.edu/~spekkens/diskfit/
+.fi
+.SH FILES
+.nf
+NEMO/usr/spekkens/velfit	- original SS07 code/examples (see their WEBSITE)
+NEMOBIN/velfitss07	- SS07 executable (see also \fBexe=\fP)
+NEMO/src/image/rotcur	- NEMO frontend 
+.fi
+.SH CAVEATS
+The parameter file (velfit.inc) is in the local run directory, and is silently overwritten.
+This will hamper running the program in parallel.
+.SH EXAMPLES
+Below is an example snippet C-shell code to output the table in the format \fBvelfitss07\fP needs:
+.nf
+#! /bin/csh -f
+#
+#  create an example input file for velfitss07 from a MIRIAD dataset
+#  1) select the inner 40x40 arcsec
+#  2) select points where flux mom0 map > 1.0
+
+
+set region="arcsec,box(-20,-20,20,20)"
+
+set map=mom0a
+set vel=mom1a
+set sig=mom2a
+
+imtab in=$map region="$region" > tmp.map1.tab
+imtab in=$vel region="$region" > tmp.vel1.tab
+
+tail -n +3 tmp.map1.tab | grep -v Found > tmp.map2.tab
+tail -n +3 tmp.vel1.tab | grep -v Found > tmp.vel2.tab
+
+
+#  here's a simple example of constant errors and only use mom0 and mom1
+
+echo "# input file for velfitss07:  $0" 
+echo "#      X          Y       VEL       EVEL"
+echo "#     asec       asec    km/s       km/s"
+echo "#----------------------------------------"
+paste tmp.map2.tab tmp.vel2.tab |\
+  awk '{ if ($3 > 1.0) printf("%10.2f%10.2f%10.2f%10.2f\n",$1,$2,$6,5.0)}'
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+13-sep-2012	V1.0 : frontend for diskfit V1.0  (July/Aug 2012)	PJT
+.fi
