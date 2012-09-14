@@ -4,6 +4,9 @@ runvelfitss07 \- frontend to run Spekkens & Sellwood's 2007 \fIvelfit\fP code
 .SH SYNOPSIS
 \fBrunvelfitss07\fP [parameter=value]
 .SH DESCRIPTION
+Note this code is deprecated and superseded by \fBdiskfit\fP, with 
+a NEMO frontend in \fIrundiskfit(1NEMO)\fP.
+.PP
 \fBrunvelfitss07\fP is a NEMO frontend to \fBvelfitss07\fP, and fits a
 non-parametric
 non-axisymmetric flow to a planar disk galaxy velocity field. Radial (m=0) flow
@@ -14,8 +17,6 @@ converging when fitting both.
 For more details and a full explanation of the parameters, see 
 Spekkens and Sellwood (2007ApJ...664..204S) and the Users Guide
 on the VELFIT website.
-.PP
-An updated version is now available as DISKFIT, see also \fIrundiskfit12(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -93,7 +94,7 @@ runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 
 .fi
 
 .SH SEE ALSO
-rotcur(1NEMO), velfit(1NEMO), rotcurshape(1NEMO), rundiskfit12(1NEMO)
+rotcur(1NEMO), velfit(1NEMO), rotcurshape(1NEMO), rundiskfit(1NEMO)
 .nf
 2007ApJ...664..204S (Spekkens & Sellwood, 2007)
 WEBSITE: http://www.physics.rutgers.edu/~spekkens/velfit/
@@ -146,4 +147,6 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 27-oct-2008	V1.0 : frontend for velfitss07 V1.0 (oct 2008)	PJT
+??-???-????	V2.0 : still not implemented	PJT
+14-sep-2012	noting this is now deprecated	PJT
 .fi
