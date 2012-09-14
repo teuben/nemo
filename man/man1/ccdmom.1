@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "16 September 2011"
+.TH CCDMOM 1NEMO "20 July 2012"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
@@ -53,8 +53,13 @@ Exclude pixels with values in the range -clip to clip. Default: 0
 \fBrngmsk=t|f\fP
 Don't assign a 1st moment if the value results in a value outside the
 range of the axis. This can easily happen for noisy data. Default: false.
+.TP
+\fpeak=N\fP
+For \fBmom=3\fP where it finds the peak, this allows you to find the N-th
+peak instead of the first. This is achieved by visiting each peak, and masking
+out all values downwards those peaks and then finding the next one.
 .SH SEE ALSO
-pvtrace(1NEMO), ccdsub(1NEMO), image(5NEMO)
+pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), image(5NEMO)
 .SH CAVEATS
 Cannot compute straight moments, e.g. the 2nd moment along an axis, such
 as e.g. \fIsnapgrid\fP can do. This 

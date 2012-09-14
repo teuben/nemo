@@ -9,8 +9,11 @@
  *                       also fixed ccdmom 
  *      25-mar-01   0.5  added mom=-1 as mean value along an axis, fixed bugs
  *      18-oct-05   0.6  added mom=-2 as dispersion around mean along an axis
+ * ??   16-sep-11   ???  added clip= and  rngmsk= ???   code lost ???
+ *      19-jul-12   0.7  allow peak (mom=3) to find 2nd peak
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
+ *        man page talks about clip= and  rngmsk=, where is this code?
  */
 
 
@@ -27,7 +30,8 @@ string defv[] = {
 	"mom=0\n	Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc, -1=mean val, -2=disp val]",
 	"keep=f\n	Keep moment axis in full length, and replace all values",
 	"cumulative=f\n Cumulative axis (only valid for mom=0)",
-	"VERSION=0.6a\n 18-may-2012 PJT",
+	"peak=1\n       Find N-th peak in case of peak finding (mom=3)",
+	"VERSION=0.7\n  19-jul-2012 PJT",
 	NULL,
 };
 
@@ -35,6 +39,7 @@ string usage = "moment along an axis of an image";
 string cvsid="$Id$";
 
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
+local int  peak_find(int n, real *data, int *mask, int npeak);
 local bool out_of_range(real);
 
 
@@ -44,16 +49,21 @@ void nemo_main()
     stream  instr, outstr;
     int     nx, ny, nz, nx1, ny1, nz1;
     int     axis, mom;
-    int     i,j,k, apeak, cnt;
+    int     i,j,k, apeak, apeak1, cnt;
     imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
     real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
+    real    *spec;
+    int     *smask;
     bool    Qkeep = getbparam("keep");
+    int     npeak = getiparam("peak");
 
     instr = stropen(getparam("in"), "r");
     mom = getiparam("mom");
     if (mom < -2 || mom > 3)  error("Illegal value mom=%d",mom);
     axis = getiparam("axis");
     if (axis < 0 || axis > 3) error("Illegal value axis=%d",axis);
+
+    if (mom==3 && axis!=3 && npeak>1) error("Nth-peak>1 finding only axis=3");
 
     if (getbparam("cumulative"))
       axis = -axis;
@@ -65,15 +75,23 @@ void nemo_main()
     nz1 = nz = Nz(iptr);
     if (Qkeep) {
         dprintf(0,"Keeping %d*%d*%d cube\n",nx1,ny1,nz1);
+	spec = smask = NULL;
     } else {
         if (axis==1) {
             nx1 = 1;    ny1 = ny;   nz1 = nz;
+	    spec = (real *) allocate(nx*sizeof(real));
+	    smask = (int *) allocate(nx*sizeof(int));
         } else if (axis==2) {
             nx1 = nx;   ny1 = 1;    nz1 = nz;
+	    spec = (real *) allocate(ny*sizeof(real));
+	    smask = (int *) allocate(ny*sizeof(int));
         } else if (axis==3) {
             nx1 = nx;   ny1 = ny;   nz1 = 1;
+	    spec = (real *) allocate(nz*sizeof(real));
+	    smask = (int *) allocate(nz*sizeof(int));
         } else if (axis < 0) {
 	    nx1 = nx;   ny1 = ny;   nz1 = nz;
+	    spec = smask = NULL;
 	} else
             error("Invalid axis: %d (Valid: 1,2,3)",axis);
         dprintf(0,"Reducing %d*%d*%d to a %d*%d*%d cube\n",
@@ -98,6 +116,7 @@ void nemo_main()
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,0,j,k);
             for (i=0; i<nx; i++) {
+	        spec[i] = CubeValue(iptr,i,j,k);
  	        if (out_of_range(CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
@@ -151,6 +170,7 @@ void nemo_main()
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,i,0,k);
             for (j=0; j<ny; j++) {
+	        spec[j] = CubeValue(iptr,i,j,k); 
  	        if (out_of_range(CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
@@ -204,6 +224,7 @@ void nemo_main()
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,i,j,0);
     	    for(k=0; k<nz; k++) {
+	        spec[k] = CubeValue(iptr,i,j,k);
  	        if (out_of_range(CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
@@ -228,8 +249,31 @@ void nemo_main()
 		newvalue = scale*(tmp1/tmp0) + offset;
 	      else if (mom==2)
 		newvalue = scale*sqrt(tmp2/tmp0 - sqr(tmp1/tmp0));
-	      else if (mom==3)
-		newvalue = scale*(apeak + peak_axis(iptr,i,j,apeak,axis)) + offset;
+	      else if (mom==3) {
+		if (npeak == 0) {
+		  newvalue = scale*(apeak + peak_axis(iptr,i,j,apeak,axis)) + offset;
+		} else {
+		  for (k=0; k<nz; k++) smask[k] = 1;
+		  apeak1 = peak_find(nz, spec, smask, 1);
+		  if (apeak1 > 0) {
+		    if  (apeak1 != apeak && (apeak!=0 && apeak!=nz-1)) {
+		      for (k=0; k<nz; k++)
+			printf("%d %g  %d\n",k,spec[k],smask[k]);
+		      warning("peak_find no good (%d,%d) %d %d",i,j,apeak,apeak1);
+		    }
+		    newvalue = scale*(apeak1 + peak_axis(iptr,i,j,apeak1,axis)) + offset;
+		  } else
+		    newvalue = 0.0;
+		  if (npeak > 1) { 
+		    for (k=2; k<npeak; k++)
+		      apeak1 = peak_find(nz,spec,smask,k);
+		    if (apeak1 > 0) {
+		      newvalue = scale*(apeak1 + peak_axis(iptr,i,j,apeak1,axis)) + offset;
+		    } else
+		      newvalue = 0;
+		  }
+		}
+	      }
 	    }
             for (k=0; k<nz1; k++)
 	      CubeValue(iptr1,i,j,k) = newvalue;
@@ -310,6 +354,82 @@ local real peak_axis(imageptr iptr, int i, int j, int k, int axis)
   if (y1+y3 == 2*y2) return 0.0;
   return 0.5*(y1-y3)/(y1+y3-2*y2);
 }
+
+/* 
+ * this routine can be called multiple times
+ * each time it will find a peak, and then walk down the peak
+ * and set the mask to be 0, so it's not found again
+ * Before the first call, the mask[] array needs to be set to all 1's.
+ */
+
+
+local int peak_find(int n, real *data, int *mask, int npeak)
+{
+  int i, ipeak=0, apeak=-1;
+  real peakvalue, oldvalue;
+
+  dprintf(1,"peak_find %d\n",n);
+
+  while (1) {                   /* iterate until a good peak found ? */
+    ipeak++;
+    dprintf(1,"iter ipeak=%d npeak=%d\n",ipeak,npeak);
+    if (ipeak > npeak+3) break;
+
+    for(i=0; i<n; i++) {        /* go over all good points and find the peak */
+      if (mask[i]) {            /* for all good data not yet masked out */
+	if (apeak<0) {          /* make sure we initialize first good value as peak */
+	  peakvalue = data[i];   
+	  apeak = i; 
+	  continue;
+	}
+	if (data[i] > peakvalue) {   /* find largest values and remember where it was */
+	  peakvalue = data[i];
+	  apeak = i;
+	}
+      }
+    }
+    dprintf(1,"apeak=%d\n",apeak);
+    if (apeak==0) {             /* never allow first point... */
+      mask[apeak] = 0;
+      apeak = -1;
+      for (i=1, oldvalue=peakvalue; mask[i] && i<n; i++) {   /* walk down, and mask out */
+	if (data[i] > oldvalue) break;                       /* util data increase again */
+	oldvalue = data[i];
+	mask[i] = 0;
+      }
+      continue;
+    }
+    if (apeak==(n-1)) {         /* ...or last point, since they have no neighbors */
+      mask[apeak]= 0;
+      apeak = -1;
+      for (i=n-2; oldvalue=peakvalue, mask[i] && i>0; i--) {  /* walk down, and mask out */
+	if (data[i] > oldvalue) break;                        /* until data increase again */
+	oldvalue = data[i];
+	mask[i] = 0;
+      }
+      break;
+
+      continue;
+    }
+    if (apeak > 0) {            /* done, found a peak, but mask down the peak */
+      mask[apeak] = 0;
+      for (i=apeak+1, oldvalue=peakvalue; mask[i]; i++) {
+	if (data[i] > oldvalue) break;
+	oldvalue = data[i];
+	mask[i] = 0;
+      }
+      for (i=apeak-1; oldvalue=peakvalue, mask[i]; i--) {
+	if (data[i] > oldvalue) break;
+	oldvalue = data[i];
+	mask[i] = 0;
+      }
+      break;
+    }
+
+  } /* while() */
+  return apeak;
+}
+
 
 
 local bool out_of_range(real x)
