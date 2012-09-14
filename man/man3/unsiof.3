@@ -1,4 +1,4 @@
-.TH UNS "09 Jun 2011"
+.TH UNS "05 Dec 2011"
 .SH NAME
 \fBUNSIOF -- Unified Nbody Snapshot\fP Library (fortran version).
 
@@ -23,10 +23,6 @@ provided by the library.
  
 .TP 3
 \fBinteger uns_init(filename, selected_component, selected_time)\fP
- This function initialise the library according to the given
-parameters. Each parameters is a string and must be terminated with
-either a "\\0" or a "#" character for compatibility reasons between
-Fortran and C++.
  It returns an integer as a unique identifier.  A returned value less
 than 0 means that the simulation does not exist or a file format
 unknown.
@@ -101,7 +97,58 @@ the end of the snapshot.
 
  example:  \fB"mxR"\fP will load mass, position and density only.
  
-.SH DATA EXTRACTING
+.SH DATA EXTRACTING (uns_get_value/ uns_get_array)
+In the following text, we assume that character variable \fIcomponent\fP can take the following values:
+ "all","gas","disk","halo","stars","bulge","bndry"
+
+Each functions return 1 if success or 0 if it fails.
+
+ There is a set of \fBuns_get_value\fP functions to get data value (float or integer) from the
+snapshot. Each functions take as first parameter an integer \fBident\fP, returned by the function \fIuns_init(...)\fP.
+
+\fBfunction integer uns_get_value_i(ident,tag,data)\fP  Put in the integer variable \fBdata\fP, the requested \fItag\fP value. Tag is a string  variable.
+
+tag="nsel" => set data with number of particles selected
+
+\fBfunction integer uns_get_value_f(ident,tag,data)\fP Put in the real*4 variable \fBdata\fP, the requested  \fItag\fP value. Tag is a string  variable.
+
+tag="time"      => set data with snapshot time 
+.nf
+tag="redshift"  => set data with snapshot redshift
+
+\fBfunction integer uns_get_array_i(ident,component,tag,data,n)\fP
+Put in the integer array variable \fBdata(n)\fP, the requested  combination of \fItag\fP value and \fIcomponent\fP. Tag and component are string  variables.
+
+tag="id"        => set data array with component ids
+tag="nbody"     => set n value with component nbody 
+
+\fBfunction integer uns_get_array_f(ident,component,tag,data,n)\fP
+ Put in the real*4 array variable \fBdata(n)\fP, the requested combination of \fItag\fP value and \fIcomponent\fP. Tag and component are string  variables.
+
+tag="pos"        => set data array with component position
+.nf
+tag="vel"        => set data array with component velocity
+.nf
+tag="mass"       => set data array with component mass
+.nf
+tag="acc"        => set data array with component acceleration
+.nf
+tag="pot"        => set data array with component potential
+.nf
+tag="rho "       => set data array with component density
+.nf
+tag="u"          => set data array with component internal energy
+.nf
+tag="hsml"       => set data array with component hydro smooth length
+.nf
+tag="age"        => set data array with component age
+.nf
+tag="metal"      => set data array with component metalicity
+.nf
+tag="temp"       => set data array with component temperature
+
+
+.SH DATA EXTRACTING (uns_get_XXXX)
  There is a set of \fBuns_get_XXXX\fP functions to get data from the
 snapshot. Each functions take as the first parameter an integer
 \fBident\fP returned by the function \fIuns_init(...)\fP.
@@ -161,21 +208,17 @@ component. You give in a string variable
 an integer variable \fBnbody\fP (#bodies), \fBfirst\fP and \fBlast\fP,
 the first and the last index of the component in the array. First and
 last values are given in fortran array convention (starts from index 1).
- The variable \fIcomponent\fP must be terminated with
-either a "\\0" or a "#" character for compatibility reasons between
-Fortran and C++.
+
  It returns \fB"1"\fP if the component exist, and \fB"0"\fP otherwise.
  Example to get halo's particles range:
 
- status =  uns_get_range(ident,"halo\\0",n,first,last)
+ status =  uns_get_range(ident,"halo",n,first,last)
 
 \fBinteger uns_get_eps(ident,component,eps)\fP
  This function give the softening for a selected component. You give
 in a string variable \fBcomponent\fP, the name of the component, and 
 the function return a float variable \fBeps\fP.
- The variable \fIcomponent\fP must be terminated with
-either a "\\0" or a "#" character for compatibility reasons between
-Fortran and C++.
+
  It returns \fB"1"\fP if the softening exist for the component, and
 \fB"0"\fP otherwise.
  This function will only work if the simulation requested belong to
@@ -183,7 +226,7 @@ the database file \fI/pil/programs/DB/simulation.dbl\fP.
 
  Example to get halo's softening:
 
- status =  uns_get_eps(ident,"halo\\0",eps)
+ status =  uns_get_eps(ident,"halo",eps)
 
 \fBinteger uns_get_cod(ident,component,time,tcod[7])\fP
  This function give the COD for a selected component (or a set of
@@ -191,9 +234,7 @@ the database file \fI/pil/programs/DB/simulation.dbl\fP.
 in a string variable \fBcomponent\fP, the name of the component, and 
 the function return a float array \fBtcod[7]\fP filled with respectively
  the time, x,y,z,vx,vy,vz of the COD.
- The variable \fIcomponent\fP must be terminated with
-either a "\\0" or a "#" character for compatibility reasons between
-Fortran and C++.
+
  It returns \fB"1"\fP if the cod  exist for the requested component
  and time. It returns \fB"0"\fP if the cod does not exits for the
  requested time. It returns \fB"-1"\fP if the COD file does not exist.
@@ -203,7 +244,7 @@ the database file \fI/pil/programs/DB/simulation.dbl\fP.
 
  Example to get "disk,stars"'s cod at time=0.1:
 
- status =  uns_get_cod(ident,"disk,stars\\0",0.1,tcod)
+ status =  uns_get_cod(ident,"disk,stars",0.1,tcod)
 
 .SH EXAMPLE
 
@@ -223,11 +264,8 @@ the database file \fI/pil/programs/DB/simulation.dbl\fP.
          stop
       endif
       call get_command_argument(1,arg1) ! get filename
-      arg1(lnblnk(arg1)+1:lnblnk(arg1)+1) = '\\0' ! fortran to C++
       call get_command_argument(2,arg2) ! get selected component
-      arg2(lnblnk(arg2)+1:lnblnk(arg2)+1) = '\\0' ! fortran to C++
       call get_command_argument(3,arg3) ! get selected time
-      arg3(lnblnk(arg3)+1:lnblnk(arg3)+1) = '\\0' ! fortran to C++
 
       ! initialyze UNS engine
       ident=uns_init(arg1, arg2, arg3) ! return identifier for the snaphot
@@ -261,7 +299,7 @@ the database file \fI/pil/programs/DB/simulation.dbl\fP.
       call uns_get_pos (ident,pos ,nbody)  ! read pos
       call uns_get_vel (ident,vel ,nbody)  ! read vel
       call uns_get_mass(ident,mass,nbody)  ! read mass
-      status = uns_get_range(ident,"gas\\0",n,first,last) ! gas's range
+      status = uns_get_range(ident,"gas",n,first,last) ! gas's range
 
       out = "nemo.out"
       write(0,*) "nbody=",nbody," time=",time
