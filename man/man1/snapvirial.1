@@ -1,4 +1,4 @@
-.TH SNAPVIRIAL 1NEMO "8 April 1997"
+.TH SNAPVIRIAL 1NEMO "18 July 2012"
 .SH NAME
 snapvirial \- scale snapshots while retaining or setting virial ratio
 .SH SYNOPSIS
@@ -21,7 +21,8 @@ The following parameters are recognized:
 input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
 .TP
 \fBout=\fIout_file\fP
-output file, also \fIsnapshot\fP format.  Default: none.
+output file, also \fIsnapshot\fP format.  If none supplied, the 
+current virial ratio is reported, 1 being the ideal virialized case.
 .TP
 \fBmscale=\fIbool\fP
 Scale the masses? [default: \fBf\fP].
@@ -67,6 +68,7 @@ Peter Teuben
 11-aug-89	V1.2: mscale added and logic improved       PJT
 29-oct-90	V1.3: fixed decision bug	PJT
 11-nov-91	V1.3a: man page clarifications	PJT
+18-jul-2012	V2.0:  reporting mode when out= left blank	PJT
 .fi
 
 
