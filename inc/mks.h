@@ -17,5 +17,6 @@
 #define L_SOLAR   3.827e26 	/* Luminosity of Sun [W] */
 #define R_SOLAR	  6.96e8	/* Radius of Sun [m] */
 #define M_EARTH   5.974e24	/* Mass of earth [kg] */
-#define AU	  1.49597870691e11  /* Astronomical Unit [m]  */
+/* #define AU	  1.49597870691e11     Astronomical Unit [m]  */
+#define AU        1.49597870700e11  /* AU as per IAU 2012 definition */
 #define PC        3.0856e16     /* Parsec [m] */
