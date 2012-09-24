@@ -55,13 +55,13 @@ namespace WDutils {
   namespace SSE {
     // loading and storing 32-bit integers
 #define _mm_load_epi32(A) \
-    (__m128i)(_mm_load_ps(reinterpret_cast<float const*>(A)))
+    reinterpret_cast<__m128i>(_mm_load_ps(reinterpret_cast<float const*>(A)))
 #define _mm_loadu_epi32(A) \
-    (__m128i)(_mm_loadu_ps(reinterpret_cast<float const*>(A)))
+    reinterpret_cast<__m128i>(_mm_loadu_ps(reinterpret_cast<float const*>(A)))
 #define _mm_store_epi32(M,A) \
-    _mm_store_ps(reinterpret_cast<float*>(M),(__m128)(A))
+    _mm_store_ps(reinterpret_cast<float*>(M),reinterpret_cast<__m128>(A))
 #define _mm_storeu_epi32(M,A) \
-    _mm_storeu_ps(reinterpret_cast<float*>(M),(__m128)(A))
+    _mm_storeu_ps(reinterpret_cast<float*>(M),reinterpret_cast<__m128>(A))
 
 #ifdef __SSE2__
 # define __Loop2SSE(__NAME,__INIT,__WORKS,__WORKU,__WORKA,__TYPE)	\
@@ -104,8 +104,8 @@ namespace WDutils {
       i=0;								\
       size_t n4=bottom<4>(n);						\
       __INIT;								\
-      for(; i!=n4; i+=4) { __WORKU; }   /* unaligned blocks work  */	\
-      for(; i!=n ;  ++i) { __WORKS; }   /* final few elements     */	\
+      for(; i<n4; i+=4) { __WORKU; }    /* unaligned blocks work  */	\
+      for(; i<n ;  ++i) { __WORKS; }    /* final few elements     */	\
     } else {								\
       i >>= 2;                          /* begin: shifted pointer */	\
       n  += i;                          /* end:   shifted pointer */	\
@@ -113,13 +113,13 @@ namespace WDutils {
       size_t i4=top<4>(i);              /* begin: aligned blocks  */	\
       size_t n4=bottom<4>(n);           /* end:   aligned blocks  */	\
       __INIT;								\
-      for(; i!=i4;  ++i) { __WORKS; }   /* STD work @ begin       */	\
-      for(; i!=n4; i+=4) { __WORKA; }   /* SSE work in blocks     */	\
-      for(; i!=n ;  ++i) { __WORKS; }   /* STD work @ end         */	\
+      for(; i<i4;  ++i) { __WORKS; }    /* STD work @ begin       */	\
+      for(; i<n4; i+=4) { __WORKA; }    /* SSE work in blocks     */	\
+      for(; i<n ;  ++i) { __WORKS; }    /* STD work @ end         */	\
     }
 # define __Loop4SSE16(__INIT,__WORKA)					\
     __INIT;								\
-    for(size_t i=0; i!=n; i+=4) { __WORKA; }
+    for(size_t i=0; i<n; i+=4) { __WORKA; }
 #endif 
 
 #ifdef __SSE__

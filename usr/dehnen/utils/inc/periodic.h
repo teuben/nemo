@@ -42,6 +42,10 @@
 
 namespace WDutils {
   ///
+  /// type used to hold offset bitset for positional offsets
+  ///
+  typedef uint8_t positional_offset_bits;
+  ///
   /// trivial parts of PeriodicBox
   ///
   template<int __D, typename __X> class PeriodicBoxBase
@@ -80,10 +84,8 @@ namespace WDutils {
     bvec PiDim;                 ///< HalfP[d]>0?
     bool PiAny;                 ///< periodic in any d?
     //@}
-    ///
-    /// type used to hold offset bitset
-    ///
-    typedef uint8_t offsetbits;
+    //  deprecated
+    typedef positional_offset_bits offsetbits;
     ///
     /// default ctor: open boundary in all dimensions
     ///
@@ -123,6 +125,16 @@ namespace WDutils {
 	}
       }
     }
+    ///
+    /// are we implementing the same periodic box as other?
+    ///
+    bool operator==(PeriodicBoxBase const&other) const
+    { return HalfP == other.HalfP; }
+    ///
+    /// are we implementing another periodic box as other?
+    ///
+    bool operator!=(PeriodicBoxBase const&other) const
+    { return HalfP != other.HalfP; }
     ///
     /// half period in dimension d
     ///
@@ -193,6 +205,9 @@ namespace WDutils {
     using base::MinHP;
     using base::PiDim;
     using base::PiAny;
+    using base::inside;
+    using base::shift;
+    using base::shift_short;
   public:
     typedef typename base::real real;
     typedef typename base::bvec bvec;
@@ -315,9 +330,9 @@ namespace WDutils {
     /// \param[out] off  offset bitsets for ghost positions
     /// \return          number of neighbouring ghosts
     ///
-    /// \note We only check for the 3 nearest ghosts. Further ghosts can only be
-    ///       neighbouring the box if @a q > (half-period)^2 in any dimension;
-    ///       see also length_okay() and length_sq_okay().
+    /// \note We only check for the 3/7 (2D/3D) nearest ghosts. Further ghosts
+    ///       can only be neighbouring the box if @a q > (half-period)^2 in
+    ///       any dimension; see also length_okay() and length_sq_okay().
     ///
     /// \note The offset bitset has bit (2d) set if the offset is -FullP[d]
     ///       and the bit (2d+1) set if the offset if +FullP[d] (otherwise the
@@ -379,6 +394,9 @@ namespace WDutils {
     using base::MinHP;
     using base::PiDim;
     using base::PiAny;
+    using base::inside;
+    using base::shift;
+    using base::shift_short;
   public:
     typedef typename base::real real;
     typedef typename base::bvec bvec;

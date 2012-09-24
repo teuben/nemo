@@ -429,14 +429,15 @@ namespace WDutils {
     virtual ~iofile() {}
 #endif
     void setfile(const char*fname) {
-      DebugInfo(12,"iofile::setfile(%s): FILE=%p\n",fname,(void*)(FILE));
+      DebugInfo(12,"iofile::setfile(%s): FILE=%p\n",fname,
+		static_cast<const void*>(FILE));
       if(fname && fname[0]) {
 	strncpy(FNAME,fname,FNAME_MAX_SIZE);
 	FILE = FNAME;
       } else
 	FILE = 0;
       DebugInfo(12,"iofile::setfile(%s): FILE=%p = %s\n",fname,
-		(void*)(FILE),FILE);
+		static_cast<const void*>(FILE),FILE);
     }
   public:
     /// give file name, if any
@@ -955,7 +956,7 @@ namespace WDutils {
       if(WRITTEN + n*sizeof(T) > SIZE) {
 	WDutils_Warning("FortranORec::write(): "
 			"cannot write %u, but only %lu  %s\n",
-			n, (unsigned long)((SIZE-WRITTEN)/sizeof(T)),
+			n,static_cast<unsigned long>((SIZE-WRITTEN)/sizeof(T)),
 			nameof(T));
 	n = (SIZE-WRITTEN)/sizeof(T);
       }

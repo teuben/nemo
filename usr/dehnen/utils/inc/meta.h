@@ -43,7 +43,25 @@
 #  endif
 #endif
 
+#if __cplusplus >= 201103L
+# ifndef WDutils_included_type_traits
+#  include <type_traits>
+#  define WDutils_included_type_traits
+# endif
+#endif
+
 namespace WDutils {
+
+#if __cplusplus >= 201103L
+  using std::enable_if;
+#else
+  template<bool B, class T = void>
+  struct enable_if {};
+
+  template<class T>
+  struct enable_if<true, T> { typedef T type; };
+#endif
+
   ///
   /// support for (mostly numerical) metaprogramming
   ///
@@ -568,8 +586,7 @@ namespace WDutils {
       static void assign(X*a, const X*b, AssignFunctor f) { f(a[0],b[0]); }
     };
     //
-    template<bool> struct __Bool;
-    template<> struct __Bool<1> {
+    template<bool> struct __Bool {
       static bool OR (bool  ) { return 1; }
       static bool AND(bool x) { return x; }
     };
@@ -618,6 +635,74 @@ namespace WDutils {
     };
     //@}
   } // namespace WDutils::meta
+  ///
+  /// \name methods supporting SFINAE
+  ///
+  //@{
+#if __cplusplus >= 201103L
+  /// is_equal<l,r>::value = l==r
+  template<int Left, int Right>
+  struct is_equal : std::integral_constant<bool, (Left==Right) > {};
+  /// is_not_equal<l,r>::value = l!=r
+  template<int Left, int Right>
+  struct is_not_equal : std::integral_constant<bool, (Left!=Right) > {};
+  /// is_less<l,r>::value =  l< r
+  template<int Left, int Right>
+  struct is_less : std::integral_constant<bool, (Left<Right) > {};
+  /// is_greater<l,r>::value =  l> r
+  template<int Left, int Right>
+  struct is_greater : std::integral_constant<bool, (Left>Right) > {};
+  /// is_less_or_equal<l,r>::value =  l<=r
+  template<int Left, int Right>
+  struct is_less_or_equal : std::integral_constant<bool, (Left<=Right) > {};
+  /// is_greater_or_equal<l,r>::value =  l>=r
+  template<int Left, int Right>
+  struct is_greater_or_equal : std::integral_constant<bool, (Left>=Right) > {};
+  /// is_in_range<x,l,r>::value =  l<=x && x<=r
+  template<int X, int Low, int High>
+  struct is_in_range : std::integral_constant<bool, (Low<=X && X<=High) > {};
+  /// is_not_in_range<x,l,r>::value =  l<=x && x<=r
+  template<int X, int Low, int High>
+  struct is_not_in_range : std::integral_constant<bool, (High<X || X<Low) > {};
+  //
+  namespace detail {
+    enum class enabler {};
+  }
+  /// nifty template magic due to R.Martinho Fernandes
+  /// http://rmartinho.github.com/2012/05/29/type-traits-galore.html
+
+
+  /// Then or Else, depending on If::value
+  template <typename If, typename Then, typename Else>
+  using Conditional = typename std::conditional<If::value,Then,Else>::type;
+  /// dependent boolean type
+  template <bool B, typename...>
+  struct dependent_bool_type : std::integral_constant<bool, B> {};
+  /// and an alias
+  template <bool B, typename... T>
+  using Bool = typename dependent_bool_type<B, T...>::type;
+  /// meta-logical negation
+  template <typename T>
+  using Not = Bool<!T::value>;
+  /// meta-logical disjunction
+  template <typename... T>
+  struct Any : Bool<false> {};
+  template <typename Head, typename... Tail>
+  struct Any<Head, Tail...> : Conditional<Head, Bool<true>, Any<Tail...>> {};
+  /// meta-logical conjunction
+  template <typename... T>
+  struct All : Bool<true> {};
+  template <typename Head, typename... Tail>
+  struct All<Head, Tail...> : Conditional<Head, All<Tail...>, Bool<false>> {};
+  ///
+  template <bool If, typename Then, typename Else>
+  using Condition = typename std::conditional<If,Then,Else>::type;
+  template <bool Condition, typename T = void>
+  using EnableIf  = typename std::enable_if<Condition, T>::type;
+  template <bool Condition, typename T = void>
+  using DisableIf = typename std::enable_if<!Condition, T>::type;
+#endif// __cplusplus >= 201103L
+  //@} 
 } // namespace WDutils
 //
 #endif //WDutils_included_meta_h

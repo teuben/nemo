@@ -173,6 +173,20 @@ void WDutils::RunInfo::set_omp(const char*arg)
 #endif
 }
 //
+void WDutils::RunInfo::set_omp(int n)
+{
+#ifdef _OPENMP
+  Info.__omp_size = n;
+  if(Info.__omp_size < 1) {
+    Info.__omp_size = 1;
+    WDutils_WarningN("RunInfo::set_omp('%d') assume '1'\n",n);
+  }
+  omp_set_num_threads(Info.__omp_size);
+#else
+  Info.__omp_size = 1;
+#endif
+}
+//
 void WDutils::RunInfo::header(std::ostream&out)
 {
   if(out) {

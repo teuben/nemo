@@ -68,15 +68,19 @@ extern "C" {
 // macros for |x|, -x, -|x|, |x-y|, and sign(x)*|y| of packed double
 //
 #  define _mm_abs_pd(__x)						\
-    _mm_and_pd(__x,(__m128d)_mm_set_epi32(0x7fffffff,0xffffffff,	\
-					  0x7fffffff,0xffffffff))
+  _mm_and_pd(__x,reinterpret_cast<__m128d>				\
+	     (_mm_set_epi32(0x7fffffff,0xffffffff,			\
+			    0x7fffffff,0xffffffff)))
 #  define _mm_neg_pd(__x)						\
-    _mm_xor_pd(__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
+  _mm_xor_pd(__x,reinterpret_cast<__m128d>				\
+	     (_mm_set_epi32(0x80000000,0x0,0x80000000,0x0)))
 #  define _mm_nabs_pd(__x)						\
-    _mm_or_pd (__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
+  _mm_or_pd (__x,reinterpret_cast<__m128d>				\
+	     (_mm_set_epi32(0x80000000,0x0,0x80000000,0x0)))
 #  define _mm_diff_pd(__x,__y) _mm_abs_pd(_mm_sub_pd(__x,__y))
 #  define _mm_signmask_pd(__x)						\
-  _mm_and_pd (__x,(__m128d)_mm_set_epi32(0x80000000,0x0,0x80000000,0x0))
+  _mm_and_pd (__x,reinterpret_cast<__m128d>				\
+	      (_mm_set_epi32(0x80000000,0x0,0x80000000,0x0)))
 #  define _mm_signmove_pd(__x,__y)					\
   _mm_or_pd(_mm_signmask_pd(__x),_mm_abs_pd(__y))
 
@@ -89,12 +93,15 @@ extern "C" {
 //
 // macros for |x|, -x, -|x|, |x-y|, and sign(x)*|y| of packed single 
 //
-#  define _mm_abs_ps(__x) _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x7fffffff))
-#  define _mm_neg_ps(__x) _mm_xor_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
-#  define _mm_nabs_ps(__x) _mm_or_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
+#  define _mm_abs_ps(__x)						\
+  _mm_and_ps(__x,reinterpret_cast<__m128>(_mm_set1_epi32(0x7fffffff)))
+#  define _mm_neg_ps(__x)						\
+  _mm_xor_ps(__x,reinterpret_cast<__m128>(_mm_set1_epi32(0x80000000)))
+#  define _mm_nabs_ps(__x)						\
+  _mm_or_ps(__x,reinterpret_cast<__m128>(_mm_set1_epi32(0x80000000)))
 #  define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
-#  define _mm_signmask_ps(__x)				\
-  _mm_and_ps(__x,(__m128)_mm_set1_epi32(0x80000000))
+#  define _mm_signmask_ps(__x)						\
+  _mm_and_ps(__x,reinterpret_cast<__m128>(_mm_set1_epi32(0x80000000)))
 #  define _mm_signmove_ps(__x,__y)			\
   _mm_or_ps(_mm_signmask_ps(__x),_mm_abs_ps(__y))
 # else // __SSE2__
@@ -135,7 +142,10 @@ namespace WDutils {
 # ifdef __SSE2__
   inline __m128i&operator+=(__m128i&x, __m128i const&y)
   { return x=_mm_add_epi32(x,y); }
-#endif // __SSE2__
+# endif // __SSE2__
+#endif // __INTEL_COMPILER
+namespace WDutils {
+#ifdef __INTEL_COMPILER
   inline float xmm0(__m128 __A)
   {
     union { float f; int i; } tmp;
@@ -160,6 +170,20 @@ namespace WDutils {
     tmp.i = _mm_extract_ps(__A,3);
     return tmp.f;
   }
+# ifdef __SSE2__
+  inline double xmm0(__m128d __A)
+  {
+    union { double x; long long int i; } tmp;
+    tmp.i = _mm_extract_ps(__A,0);
+    return tmp.x;
+  }
+  inline double xmm1(__m128d __A)
+  {
+    union { double x; long long int i; } tmp;
+    tmp.i = _mm_extract_ps(__A,1);
+    return tmp.x;
+  }
+# endif// __SSE2__
 #elif defined(__GNUC__)  // __INTEL_COMPILER / __GNUC__
   inline float xmm0(__m128 __A)
   { return __builtin_ia32_vec_ext_v4sf(__A,0); }
@@ -169,7 +193,14 @@ namespace WDutils {
   { return __builtin_ia32_vec_ext_v4sf(__A,2); }
   inline float xmm3(__m128 __A)
   { return __builtin_ia32_vec_ext_v4sf(__A,3); }
+# ifdef __SSE2__
+  inline double xmm0(__m128d __A)
+  { return __builtin_ia32_vec_ext_v2df(__A,0); }
+  inline double xmm1(__m128d __A)
+  { return __builtin_ia32_vec_ext_v2df(__A,1); }
+# endif// __SSE2__
 #endif // __INTEL_COMPILER / __GNUC__
+}
 #endif // __SSE__
 
 //
@@ -197,11 +228,11 @@ namespace WDutils {
   inline __m128 _mm_sum_ps(__m128 __A)
   {
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-    __v4sf __a = (__v4sf)__A, __t,__s;
+    __v4sf __a = reinterpret_cast<__v4sf>(__A), __t,__s;
     __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
     __s  = __builtin_ia32_addps(__a,__t);
     __t  = __builtin_ia32_shufps(__s,__s,_MM_SHUFFLE (1,0,3,2));
-    return (__m128) __builtin_ia32_addps(__s,__t);
+    return reinterpret_cast<__m128>(__builtin_ia32_addps(__s,__t));
 #else // gcc
     __m128 __S;
     __S =  _mm_add_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
@@ -214,12 +245,12 @@ namespace WDutils {
   inline float _mm_getsum_ps(__m128 __A)
   {
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-  __v4sf __a = (__v4sf)__A, __t,__s;
-  __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
-  __s  = __builtin_ia32_addps(__a,__t);
-  __t  = __builtin_ia32_movhlps(__s,__s);
-  __s  = __builtin_ia32_addps(__s,__t);
-  return __builtin_ia32_vec_ext_v4sf(__s,0);
+    __v4sf __a = reinterpret_cast<__v4sf>(__A), __t,__s;
+    __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
+    __s  = __builtin_ia32_addps(__a,__t);
+    __t  = __builtin_ia32_movhlps(__s,__s);
+    __s  = __builtin_ia32_addps(__s,__t);
+    return __builtin_ia32_vec_ext_v4sf(__s,0);
 #else // gcc
     __m128 __S;
     __S =  _mm_add_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
@@ -231,12 +262,12 @@ namespace WDutils {
   inline float _mm_getmax_ps(__m128 __A)
   {
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-  __v4sf __a = (__v4sf)__A, __t,__s;
-  __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
-  __s  = __builtin_ia32_maxps(__a,__t);
-  __t  = __builtin_ia32_movhlps(__s,__s);
-  __s  = __builtin_ia32_maxps(__s,__t);
-  return __builtin_ia32_vec_ext_v4sf(__s,0);
+    __v4sf __a = reinterpret_cast<__v4sf>(__A), __t,__s;
+    __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
+    __s  = __builtin_ia32_maxps(__a,__t);
+    __t  = __builtin_ia32_movhlps(__s,__s);
+    __s  = __builtin_ia32_maxps(__s,__t);
+    return __builtin_ia32_vec_ext_v4sf(__s,0);
 #else // gcc
     __m128 __S;
     __S =  _mm_max_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
@@ -249,12 +280,12 @@ namespace WDutils {
   inline float _mm_getmin_ps(__m128 __A)
   {
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-  __v4sf __a = (__v4sf)__A, __t,__s;
-  __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
-  __s  = __builtin_ia32_minps(__a,__t);
-  __t  = __builtin_ia32_movhlps(__s,__s);
-  __s  = __builtin_ia32_minps(__s,__t);
-  return __builtin_ia32_vec_ext_v4sf(__s,0);
+    __v4sf __a = reinterpret_cast<__v4sf>(__A), __t,__s;
+    __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
+    __s  = __builtin_ia32_minps(__a,__t);
+    __t  = __builtin_ia32_movhlps(__s,__s);
+    __s  = __builtin_ia32_minps(__s,__t);
+    return __builtin_ia32_vec_ext_v4sf(__s,0);
 #else // gcc
     __m128 __S;
     __S =  _mm_min_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
@@ -271,7 +302,7 @@ namespace WDutils {
       int   i[4];
       float x[4];
     } tmp;
-    _mm_store_ps(tmp.x,(__m128)__A);
+    _mm_store_ps(tmp.x,reinterpret_cast<__m128>(__A));
     int m=tmp.i[0];
     if(tmp.i[1]<m) m=tmp.i[1];
     if(tmp.i[2]<m) m=tmp.i[2];
@@ -285,7 +316,11 @@ namespace WDutils {
     __m128i __S;
     __S =  _mm_add_epi32(__A,_mm_shuffle_epi32(__A,_MM_SHUFFLE (2,3,0,1)));
     union { int32_t i; float x; } tmp;
-    tmp.x = _mm_cvtss_f32((__m128)_mm_add_epi32(__S,(__m128i)_mm_movehl_ps((__m128)__S,(__m128)__S)));
+    tmp.x = _mm_cvtss_f32
+      (reinterpret_cast<__m128>
+       (_mm_add_epi32(__S,reinterpret_cast<__m128i>
+		      (_mm_movehl_ps(reinterpret_cast<__m128>(__S),
+				     reinterpret_cast<__m128>(__S))))));
     return tmp.i;
   }
 #endif// __SSE2__

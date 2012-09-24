@@ -517,7 +517,7 @@ double WDutils::Jn(unsigned n, double x)
     ans=bj;
   } else {
     tox  = 2./ax;
-    m    = 2*((n+(int) sqrt(acc*n))/2);
+    m    = 2*((n+int(sqrt(acc*n))/2));
     jsum = 0;
     bjp  = ans = sum = 0.;
     bj   = 1.;
@@ -647,7 +647,7 @@ double WDutils::In(unsigned n, double x)
   tox=2.0/fabs(x);
   bip=ans=0.0;
   bi=1.0;
-  for(register unsigned j=2*(n+(int)sqrt(acc*n)); j!=0; --j) {
+  for(register unsigned j=2*(n+int(sqrt(acc*n))); j!=0; --j) {
     bim = bip+j*tox*bi;
     bip = bi;
     bi  = bim;
@@ -739,16 +739,16 @@ void WDutils::NormSqHermite(unsigned n, double *N)
 {
   N[0] = SPi;	if(n==0) return;   	                // Sqrt[Pi]             
   N[1] = 2*SPi;	if(n==1) return;	                // 2*Sqrt[Pi]           
-  for(register unsigned i=2; i<=n; ++i) N[i] = 2*i*N[i-1];
+  for(unsigned i=2; i<=n; ++i) N[i] = 2*i*N[i-1];
 }
 //------------------------------------------------------------------------------
 double WDutils::HermiteH_normalized(unsigned n, double x)
 {
   if(n==0) return 1.   / sqrt(Pi);
   if(n==1) return 2.*x / sqrt(TPi);
-  register double   h0=1., h1=2*x, hi=h1;
-  register unsigned N=2;
-  for(register unsigned i=1; i!=n; ++i, N*=2*i) {
+  double   h0=1., h1=2*x, hi=h1;
+  unsigned N=2;
+  for(unsigned i=1; i<n; ++i, N*=2*i) {
     hi = 2. * (x*h1 - i*h0);
     h0 = h1;
     h1 = hi;
@@ -760,9 +760,9 @@ void WDutils::HermiteH_normalized(unsigned n, double x, double *H)
 {
   H[0] = 1.;
   if(n>0)  H[1] = 2*x;
-  for(register unsigned i=1; i!=n; ++i)
+  for(unsigned i=1; i<n; ++i)
     H[i+1] = 2 * (x*H[i] - 2*H[i-1]);
-  for(register unsigned i=0,N=1; i<=n; ++i,N*=2*i) 
+  for(unsigned i=0,N=1; i<=n; ++i,N*=2*i) 
     H[i] /= sqrt(N*Pi);
 }
 ////////////////////////////////////////////////////////////////////////////////

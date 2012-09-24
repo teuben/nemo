@@ -57,19 +57,19 @@ namespace WDutils {
   //
   //  struct WalkSwap
   //
-  /// provides the elementary heap operations down() and up() using std::swap()
-  /// as static member methods, to be used as template parameter for class
-  /// HeapAlgorithms.
+  /// provides the elementary heap operations @a down() and @a up(), using @c
+  /// std::swap(), as static member methods, to be used as template parameter
+  /// for class @c HeapAlgorithms.
   ///
   /// \note The array holding the heap is addressed from 0 to n-1. This makes
   ///       the relations between parent and child indices somewhat arkward, but
   ///       fits much better with the C/C++ convention of array addressing.
   ///
   /// \note The template parameter @a Comparator for down() and up() specifies
-  ///       the the heap order. Use, for instance, std::less for a max heap and
-  ///       std::greater for a min heap.
+  ///       the heap order. Use, for instance, @c std::less for a max heap and
+  ///       @c std::greater for a min heap.
   struct WalkSwap : public WalkBase {
-    /// downwards pass (heapify algorithm) using std::swap()
+    /// downwards pass (heapify algorithm) using @c std::swap()
     /// \param[in,out] a        array[0..@a n -1] to be heapified
     /// \param[in]     p        index of element to be walked down the tree
     /// \param[in]     n        size of array
@@ -82,7 +82,7 @@ namespace WDutils {
 	else break;
       }
     } 
-    /// upwards pass using std::swap()
+    /// upwards pass using @c std::swap()
     /// \param[in,out] a        array[0..@a n -1] to be heapified
     /// \param[in]     c        index of element to be walked up the tree
     /// \param[in]     compare  Comparator (see \<functional\>), e.g. std::less
@@ -97,23 +97,24 @@ namespace WDutils {
   //
   //  struct WalkNoSwap
   //
-  /// provides the elementary heap operations down() and up() without
-  /// std::swap() as static member methods, to be used as template parameter for
-  /// class HeapAlgorithms.
+  /// provides the elementary heap operations @a down() and @a up() without @c
+  /// std::swap() as static member methods, to be used as template parameter
+  /// for class @c HeapAlgorithms.
   ///
-  /// \note Instead of std::swap(), we use the copy constructor and assign (=)
-  ///       operator of type @a T. For most types, i.e. when std::swap() is not
-  ///       specialised, this algorithm is faster than that implemented in class
-  ///       WalkSwap. Thus, WalkSwap should be used only if the type heaped has
-  ///       no copy constructor and assign operator or if std::swap() for this
-  ///       type is more efficient (as for some container classes).
+  /// \note Instead of @c std::swap(), we use the copy constructor and assign
+  ///       (=) operator of type @a T. For most types, i.e. when std::swap()
+  ///       is not specialised, this algorithm is faster than that implemented
+  ///       in @c WalkSwap. Thus, @c WalkSwap should be used only if the type
+  ///       heaped has no copy constructor and assign operator or if @c
+  ///       std::swap() for this type is more efficient (as for some container
+  ///       classes).
   ///
   /// \note The array holding the heap is addressed from 0 to @a n -1. This
   ///       makes the relations between parent and child indices somewhat
   ///       arkward, but fits much better with the C/C++ convention of array
   ///       addressing.
   ///
-  /// \note The template parameter @a Comparator for down() and up()
+  /// \note The template parameter @a Comparator for @a down() and @a up()
   ///       specifies the the heap order. Use, for instance, std::less for a
   ///       max heap and std::greater for a min heap.
   struct WalkNoSwap : public WalkBase {

@@ -66,16 +66,18 @@ namespace WDutils {
     ///
     template<int Dim, typename real>
     struct cube {
-      GeoVec<Dim,real>  X;                 ///< centre of cube
-      real              H;                 ///< half side length of cube
+      typedef GeoVec<Dim,real> point;
+      point  X;                            ///< centre of cube
+      real   H;                            ///< half side length of cube
     };
     ///
     /// a sphere
     ///
     template<int Dim, typename real>
     struct sphere {
-      GeoVec<Dim,real>  X;                 ///< centre of cube
-      real              Q;                 ///< radius-squared of sphere
+      typedef GeoVec<Dim,real> point;
+      point  X;                            ///< centre of cube
+      real   Q;                            ///< radius-squared of sphere
     };
     ///
     /// a pair of vectors, suitable for SSE usage
@@ -399,6 +401,10 @@ namespace WDutils {
       ///
       point const&Centre() const { return S.X; }
       ///
+      /// centre of search sphere
+      ///
+      point const&centre() const { return S.X; }
+      ///
       /// ith co-ordinate of centre of search sphere
       ///
       real const&Centre(int i) const { return S.X[i]; }
@@ -406,6 +412,10 @@ namespace WDutils {
       /// radius^2 of search sphere
       ///
       real const&RadSq() const { return S.Q; }
+      ///
+      /// radius^2 of search sphere
+      ///
+      real const&radius_squared() const { return S.Q; }
       ///
       /// \name geometric relations with position
       ///

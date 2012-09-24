@@ -35,7 +35,7 @@
 #  undef  WDutilsCXX11
 #endif
 
-#if defined(__GXX_EXPERIMENTAL_CXX0X__) && __GNUC__ > 4 && __GNUC_MINOR__ >=6 
+#if __cplusplus >= 201103L
 #  define WDutilsCXX11Delete      = delete
 #  define WDutilsCXX11Default     = default
 #  define WDutilsCXX11DefaultBody = default;
@@ -161,6 +161,8 @@ namespace WDutils {
     ///       Otherwise, we try to convert @a arg to an integer number and
     ///       take that. This may exceed the # processors.
     static void set_omp(const char*arg);
+    /// set # openMP threads
+    static void set_omp(int n);
     /// shall openMP parallelism be used?
     static bool use_omp()
     { return Info.__omp_size > 1; }

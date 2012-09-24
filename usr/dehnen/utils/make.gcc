@@ -10,9 +10,9 @@ GPP		:= g++
 endif
 
 EXT             :=
-CXX             := CPATH=$(CPATH) $(GPP)
-CC              := CPATH=$(CPATH) $(GCC)
-FC              := CPATH=$(CPATH) gfortran
+CXX             := $(GPP)
+CC              := $(GCC)
+FC              := gfortran
 
 PLATFORM 	:= $(shell uname -m)
 ifneq ($(VENDOR),apple)
@@ -21,9 +21,11 @@ endif
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow
+WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wnoexcept \
+		-Woverloaded-virtual
 else
-WARNING		:= -Wall -Wextra -Winit-self -Wshadow
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wnoexcept \
+		-Wold-style-cast -Woverloaded-virtual 
 endif
 
 # it seem that coverage (to be combined with gcov) does not work for openmp)

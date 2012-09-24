@@ -33,6 +33,10 @@
 #  include <cstddef>
 #  define WDutils_included_cstddef
 #endif
+#ifndef WDutils_included_cstring
+#  include <cstring>                           // for memcpy
+#  define WDutils_included_cstring
+#endif
 #ifndef WDutils_included_iostream
 #  include <iostream>
 #  define WDutils_included_iostream
@@ -42,6 +46,12 @@
 #endif
 #ifndef WDutils_included_inline_h
 #  include <inline.h>
+#endif
+#ifndef WDutils_included_cstdlib
+#  include <cstdlib>
+#endif
+#ifndef WDutils_included_cmalloc
+#  include <malloc.h>
 #endif
 
 namespace WDutils {
@@ -1327,6 +1337,20 @@ namespace WDutils {
     Array           (const Array&) WDutilsCXX11Delete;
     Array& operator=(const Array&) WDutilsCXX11Delete;
   public:
+#if __cplusplus >= 201103L
+
+    /// move ctor
+    Array(Array&&a)
+      : N(a.N), A(a.A)
+    { a.N=0; a.A=0; }
+    /// move operator
+    Array& operator=(Array&&a)
+    {
+      N = a.N; a.N=0;
+      A = a.A; a.A=0;
+      return*this;
+    }
+#endif
     /// rank: number of dimensions
     static const unsigned rank = 1;
     /// return size of array
@@ -1427,6 +1451,8 @@ namespace WDutils {
     ConstSub operator[] (unsigned i) const
     { return A[i]; }
   };// class Array<T,1>
+  template<int D> class Array<void,D> {};
+  template<> class Array<void,1> {};
   //
   /// \brief  Specialisation for D=0, provided for completeness only
   template<typename T> class Array<T,0> {
@@ -1530,7 +1556,7 @@ namespace WDutils {
     Stack(unsigned n, const X&a) : S(WDutils_NEW(X,n? n:1)), P(S), SN(S+n)
     { push(a); }
     /// dtor: de-allocate memory
-    ~Stack() { if(S) WDutils_DEL_AN(S,int(SN-S)); S=0; }
+    ~Stack() { if(S) WDutils_DEL_AN(S,unsigned(SN-S)); S=0; }
     /// is stack empty?
     bool is_empty () const { return P<=S; }
     /// is there space for more to stack?
@@ -1547,12 +1573,290 @@ namespace WDutils {
     X&top() { return *P; }
     /// empty stack
     void reset() { P=S; }
+    /// capacity of stack
+    unsigned capacity() const
+    { return unsigned(SN-S); }
+    /// reset stack capacity
+    void reset_capacity(unsigned new_capacity)
+    {
+      unsigned old_size = (S && P>S) ? unsigned(P-S) : 0;
+      if(new_capacity < old_size)
+	new_capacity = old_size;
+      X *newS = WDutils_NEW(X,new_capacity);
+      if(old_size)
+	std::memcpy(newS,S,sizeof(X)*old_size);
+      if(S)
+	WDutils_DEL_AN(S,unsigned(SN-S));
+      S = newS;
+      P = S+old_size;
+      SN= S+new_capacity;
+    }
   };
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> struct traits< Stack<T> > {
     static const char  *name () {
       return message("Stack<%s>",traits<T>::name());
     }
+  };
+  ///
+  /// allocate and de-allocate aligned memory
+  ///
+  template<std::size_t alignment>
+  struct static_allocator {
+    WDutilsStaticAssert(alignment>1);
+    static void*allocate(std::size_t n)
+    {
+      if(n == 0) return 0;
+      DebugInfoN(WDutilsAllocDebugLevel+2,
+		 "static_allocator<%lu>: trying to allocate %lu bytes\n",
+		 alignment,n);
+      if(n > max_size())
+	throw std::bad_alloc();
+      void*ret =
+#if defined(__GNUC__) || defined (__INTEL_COMPILER)
+	_mm_malloc
+#else
+	_aligned_malloc
+#endif
+	(n,alignment);
+      if(!ret)
+	throw std::bad_alloc();
+      DebugInfoN(WDutilsAllocDebugLevel,
+		 "static_allocator<%lu>: allocated %lu bytes @ %p\n",
+		 alignment,n,ret);
+      return ret;
+    }
+    static void deallocate(void*p)
+    {
+      DebugInfoN(WDutilsAllocDebugLevel+2,
+		 "static_allocator<%lu>: trying to de-allocated memory @ %p\n",
+		 alignment,p);
+#if defined(__GNUC__) || defined (__INTEL_COMPILER)
+      _mm_free
+#else
+      _aligned_free
+#endif
+	(p);
+      DebugInfoN(WDutilsAllocDebugLevel,
+		 "static_allocator<%lu>: de-allocated memory @ %p\n",
+		 alignment,p);
+    }
+    static std::size_t max_size () noexcept
+    { return std::numeric_limits<std::size_t>::max(); }
+  };
+  ///
+  /// allocate and de-allocate unaligned memory
+  ///
+  template<>
+  struct static_allocator<1> {
+    static std::size_t max_size () noexcept
+    { return std::numeric_limits<std::size_t>::max(); }
+    static void*allocate(std::size_t n)
+    { 
+      if(n == 0) return 0;
+      DebugInfoN(WDutilsAllocDebugLevel+2,
+		 "static_allocator<1>: trying to allocate %lu bytes\n",n);
+      void*ret = new char[n];
+      DebugInfoN(WDutilsAllocDebugLevel,
+		 "static_allocator<1>: allocated %lu bytes @ %p\n",n,ret);
+      return ret;
+    }
+    static void deallocate(void*p)
+    { 
+      DebugInfoN(WDutilsAllocDebugLevel+2,
+		 "static_allocator<1>: trying to de-allocated memory @ %p\n",p);
+      delete[] static_cast<char*>(p);
+      DebugInfoN(WDutilsAllocDebugLevel,
+		 "static_allocator<1>: de-allocated memory @ %p\n",p);
+    }
+  };
+  template<> struct static_allocator<0>;
+  ///
+  /// allocator with explicit alignment
+  ///
+  template<typename _Tp, std::size_t alignment = 16>
+  class AlignmentAllocator
+  {
+    WDutilsStaticAssert(alignment);
+    typedef static_allocator<alignment> static_alloc;
+  public:
+    typedef size_t     size_type;
+    typedef ptrdiff_t  difference_type;
+    typedef _Tp*       pointer;
+    typedef const _Tp* const_pointer;
+    typedef _Tp&       reference;
+    typedef const _Tp& const_reference;
+    typedef _Tp        value_type;
+
+    template <typename _Tp1>
+    struct rebind
+    { typedef AlignmentAllocator<_Tp1, alignment> other; };
+
+    AlignmentAllocator() noexcept {}
+
+    AlignmentAllocator (const AlignmentAllocator&) noexcept {}
+
+    template <typename _Tp1>
+    AlignmentAllocator (const AlignmentAllocator<_Tp1, alignment> &) noexcept {}
+
+    ~AlignmentAllocator () noexcept {}
+
+    pointer address (reference __x) const noexcept
+    { return std::addressof(__x); }
+
+    const_pointer address (const_reference __x) const noexcept
+    { return std::addressof(__x); }
+
+    pointer allocate (size_type __n, const void* = 0)
+    {
+      return
+	static_cast<pointer>(static_alloc::allocate(__n*sizeof(value_type)));
+    }
+
+    void deallocate (pointer __p, size_type)
+    { static_alloc::deallocate(__p); }
+
+    size_type max_size () const noexcept
+    { return static_alloc::max_size() / sizeof (value_type); }
+
+#if __cplusplus >= 201103L
+
+    template<typename _Up, typename... _Args>
+    void construct(_Up* __p, _Args&&... __args)
+    { ::new(static_cast<void*>(__p)) _Up(std::forward<_Args>(__args)...); }
+    
+    template<typename _Up>
+    void destroy(_Up* __p)
+    { __p->~_Up(); }
+
+#else
+
+    void construct (pointer __p, const_reference __val)
+    { ::new((void *)__p) value_type(__val); } }
+
+    void destroy (pointer __p)
+    { __p->~value_type (); }
+
+#endif
+
+    bool operator!=(const AlignmentAllocator&) const 
+    { return false; }
+  
+    // Returns true if and only if storage allocated from *this
+    // can be deallocated from other, and vice versa.
+    // Always returns true for stateless allocators.
+    bool operator==(const AlignmentAllocator&) const 
+    { return true; }
+
+  };// class AlignmentAllocator<>
+
+  /// AlignmentAllocator<void> specialization.
+  template<std::size_t alignment>
+  class AlignmentAllocator<void, alignment>
+  {
+  public:
+    typedef size_t      size_type;
+    typedef ptrdiff_t   difference_type;
+    typedef void*       pointer;
+    typedef const void* const_pointer;
+    typedef void        value_type;
+
+    template<typename _Tp1>
+    struct rebind
+    { typedef AlignmentAllocator<_Tp1, alignment> other; };
+  };
+  ///
+  /// managing raw memory
+  ///
+  template<std::size_t alignment = 0>
+  class raw_memory
+  {
+    typedef static_allocator<alignment> static_alloc;
+    char       *_mem;
+    std::size_t _num;
+  public:
+    /// default ctor: no memory
+    raw_memory() noexcept
+      : _mem(0)
+      , _num(0) {}
+#if __cplusplus >= 201103L
+    /// move ctor: steal memory
+    raw_memory(raw_memory&&other) noexcept
+      : _mem(other._mem)
+      , _num(other._num)
+    { other._mem = 0; other._num = 0; }
+    /// move operator: steal memory
+    raw_memory&operator=(raw_memory&&other) noexcept
+    {
+      _mem = other._mem;
+      _num = other._num;
+      other._mem = 0;
+      other._num = 0;
+      return*this;
+    }
+#endif// c++11
+    /// ctor: allocate @a n bytes
+    explicit raw_memory(std::size_t n)
+      : _mem(static_cast<char*>(static_alloc::allocate(n)))
+      , _num(n)
+    {}
+    /// dtor
+    ~raw_memory()
+    { if(_mem) static_alloc::deallocate(_mem); }
+    /// release memory
+    char*release() noexcept
+    {
+      char*tmp = _mem;
+      _mem = 0;
+      _num = 0;
+      return tmp;
+    }
+    /// reset capacity
+    void reset(std::size_t n)
+    {
+      if(n != _num) {
+	if(_mem) static_alloc::deallocate(_mem);
+	_num = n;
+	_mem = _num? static_cast<char*>(static_alloc::allocate(_num)) : 0;
+      }
+    }
+    /// reset capacity, but shrink only if  n*q < p*capacity()
+    template<unsigned q, unsigned p>
+    void reset_conditional(std::size_t n)
+    {
+      static_assert(q>=p,"shrink not allowed");
+      if(n>_num || n*q < p*_num) reset(n);
+    }
+    /// number of bytes allocated
+    std::size_t capacity() const noexcept
+    { return _num; }
+    /// access to raw memory
+    const char*get() const noexcept
+    { return _mem; }
+    /// access to raw memory
+    char*get() noexcept
+    { return _mem; }
+    /// begin of raw memory
+    const char*begin() const noexcept
+    { return _mem; }
+    /// begin of raw memory
+    char*begin() noexcept
+    { return _mem; }
+    /// end of raw memory
+    const char*end() const noexcept
+    { return _mem + _num; }
+    /// end of raw memory
+    char*end() noexcept
+    { return _mem + _num; }
+    //  disable copy from lvalue
+#if __cplusplus >= 201103L
+    raw_memory(raw_memory const&) = delete;
+    raw_memory&operator=(raw_memory const&) = delete;
+#else // c++11
+  private:
+    raw_memory(raw_memory const&);
+    raw_memory&operator=(raw_memory const&);
+#endif// c++11
   };
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////

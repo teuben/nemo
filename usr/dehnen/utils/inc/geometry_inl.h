@@ -255,11 +255,10 @@ namespace WDutils {
 	template<int Dim>
 	static void convert2cuboid(PointPair<Dim,real> &c)
 	{
-	  typedef GeoVec<Dim,real> point;
-	  point C = real(0.5)*(c.X+c.Y);
-	  point H = real(0.5)*(c.Y-c.X);
-	  static_cast<point&>(c.X) = C;
-	  static_cast<point&>(c.Y) = H;
+	  GeoVec<Dim,real> C = real(0.5)*(c.X+c.Y);
+	  GeoVec<Dim,real> H = real(0.5)*(c.Y-c.X);
+	  static_cast<GeoVec<Dim,real>&>(c.X) = C;
+	  static_cast<GeoVec<Dim,real>&>(c.Y) = H;
 	}
 	// move to octant
 	static void move_to_octant(vec2&c, int i, real r)
@@ -521,10 +520,12 @@ namespace WDutils {
 	  XY =_mm_loadu_ps(cPF(c.X));
 	  YX =_mm_shuffle_ps(XY,XY,_MM_SHUFFLE(1,0,3,2));
 #ifdef __SSE2__
-	  YX =_mm_xor_ps(YX,(__m128)_mm_set_epi32(0x80000000,0x80000000,0,0));
+	  YX =_mm_xor_ps(YX,reinterpret_cast<__m128>
+			 (_mm_set_epi32(0x80000000,0x80000000,0,0)));
 #else
-	  XY =_mm_xor_ps(YX,(__m128)_mm_set_ps(meta::__neg_mask.__F,
-					       meta::__neg_mask.__F,0,0));
+	  XY =_mm_xor_ps(YX,reinterpret_cast<__m128>
+			 (_mm_set_ps(meta::__neg_mask.__F,
+				     meta::__neg_mask.__F,0,0)));
 #endif
 	  _mm_storeu_ps(PF(c.X),_mm_mul_ps(_mm_set1_ps(0.5f),
 					   _mm_add_ps(XY,YX)));
@@ -771,10 +772,12 @@ namespace WDutils {
 	  XY =_mm_load_ps(cPF(c.X));
 	  YX =_mm_shuffle_ps(XY,XY,_MM_SHUFFLE(1,0,3,2));
 #ifdef __SSE2__
-	  YX =_mm_xor_ps(YX,(__m128)_mm_set_epi32(0x80000000,0x80000000,0,0));
+	  YX =_mm_xor_ps(YX,reinterpret_cast<__m128>
+			 (_mm_set_epi32(0x80000000,0x80000000,0,0)));
 #else
-	  XY =_mm_xor_ps(YX,(__m128)_mm_set_ps(meta::__neg_mask.__F,
-					       meta::__neg_mask.__F,0,0));
+	  XY =_mm_xor_ps(YX,reinterpret_cast<__m128>
+			 (_mm_set_ps(meta::__neg_mask.__F,
+				     meta::__neg_mask.__F,0,0)));
 #endif
 	  _mm_store_ps(PF(c.X),_mm_mul_ps(_mm_set1_ps(0.5f),
 					  _mm_add_ps(XY,YX)));

@@ -80,13 +80,13 @@ endif
 # -------------------------
 
 CXXFLAGS		:= $(CXXFLAGS) $(WDutilsDevel)
-LUTIL			:= -L$(LIB) -lWDutils -Wl,-rpath,$(PWD)/$(LIB)
+LUTIL			:= -L$(LIB) -lWDutils
 LIBRARIES		:= $(LUTIL) $(MATHLIB)
 MAKE			= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS)
 MAKE_OBJ		= $(MAKE) -c
 MAKE_EXE		= $(MAKE) $(LIBRARIES)
 ifdef WDutilsMPI
-LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI -Wl,-rpath,$(PWD)/$(LIB)
+LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI
 LIBRARIES_MPI		:= $(LUTIL_MPI) $(MATHLIB)
 MAKE_OBJ_MPI		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI)
 MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI) $(LIBRARIES_MPI)
@@ -115,42 +115,35 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 				$(INC)geometry_inl.h
 periodic_h		:= $(INC)periodic.h $(geometry_h)
-octtree_h		:= $(INC)octtree.h $(geometry_h) $(memory_h)
+peano_h			:= $(INC)peano.h $(traits_h)
+octtree_h		:= $(INC)octtree.h $(periodic_h) $(memory_h) $(io_h)
+ifdef WDutilsDevel
+$(INC)parallel.h	: $(DEV)parallel.h
+			(cd $(INC); ln -s ../$(DEV)parallel.h parallel.h)
+parallel_h		:= $(INC)parallel.h $(memory_h)
+octtree_h		+= $(parallel_h)
+endif
 
 ifdef WDutilsDevel
 $(INC)matr33.h		: $(DEV)matr33.h
 			(cd $(INC); ln -s ../$(DEV)matr33.h matr33.h)
 matr33_h		:= $(INC)matr33.h $(exception_h) $(tupel_h)
 
+$(INC)neighbour.tcc	: $(DEV)neighbour.tcc
+			(cd $(INC); ln -s ../$(DEV)neighbour.tcc neighbour.tcc)
+neighbour_tcc		:= $(INC)neighbour.tcc
+
 $(INC)neighbour.h	: $(DEV)neighbour.h
 			(cd $(INC); ln -s ../$(DEV)neighbour.h neighbour.h)
-neighbour_h		:= $(INC)neighbour.h $(octtree_h)
+neighbour_h		:= $(INC)neighbour.h $(octtree_h) $(neighbour_tcc)
 
 $(INC)voronoi.h		: $(DEV)voronoi.h
 			(cd $(INC); ln -s ../$(DEV)voronoi.h voronoi.h)
 voronoi_h		:= $(INC)voronoi.h $(geometry_h)
 
-$(INC)peano.h		: $(DEV)peano.h
-			(cd $(INC); ln -s ../$(DEV)peano.h peano.h)
-peano_h			:= $(INC)peano.h $(traits_h)
-
 $(INC)domain.h		: $(DEV)domain.h
 			(cd $(INC); ln -s ../$(DEV)domain.h domain.h)
 domain_h		:= $(INC)domain.h $(parallel_h) $(octtree_h) $(peano_h)
-
-$(INC)parallel.h	: $(DEV)parallel.h
-			(cd $(INC); ln -s ../$(DEV)parallel.h parallel.h)
-parallel_h		:= $(INC)parallel.h $(memory_h)
-
-$(INC)partree.h		: $(DEV)partree.h
-			(cd $(INC); ln -s ../$(DEV)partree.h partree.h)
-partree_h		:= $(INC)partree.h $(memory_h) $(geometry_h) \
-			$(parallel_h)
-
-$(INC)partreeOLD.h	: $(DEV)partreeOLD.h
-			(cd $(INC); ln -s ../$(DEV)partreeOLD.h partreeOLD.h)
-partreeOLD_h		:= $(INC)partreeOLD.h $(memory_h) $(geometry_h) \
-			$(parallel_h)
 
 $(INC)radixP.h		: $(DEV)radixP.h
 			(cd $(INC); ln -s ../$(DEV)radixP.h radixP.h)
@@ -172,16 +165,14 @@ numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
-octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(timer_h)
-domain_cc		:= $(DEV)domain.cc $(domain_h) $(io_h)
+octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(peano_h) $(timer_h) \
 
 ifdef WDutilsDevel
+domain_cc		:= $(DEV)domain.cc $(domain_h) $(io_h)
+octtree_cc		+= $(DEV)octtree_omp.cc
 neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
 voronoi_cc		:= $(DEV)voronoi.cc $(voronoi_h)
 parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
-partreeOLD_cc		:= $(DEV)partreeOLD.cc $(partreeOLD_h) $(peano_h) \
-				$(timer_h)
-partree_cc		:= $(DEV)partree.cc $(partree_h) $(peano_h) $(timer_h)
 endif
 
 # ---------------
@@ -215,17 +206,13 @@ $(LIB)voronoi.o:	$(voronoi_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)partreeOLD.o:	$(partreeOLD_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ)
-$(LIB)partree.o:	$(partree_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ)
 
 WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
-			$(LIB)radix.o $(LIB)WDMath.o $(LIB)neighbour.o \
+			$(LIB)numerics.o $(LIB)octtree.o $(LIB)neighbour.o \
+			$(LIB)random.o $(LIB)radix.o $(LIB)WDMath.o \
 			$(LIB)voronoi.o 
 
-WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o $(LIB)partree.o
+WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o 
 
 else
 
@@ -285,10 +272,10 @@ library		:	$(libraryOMP) $(libraryMPI)
 
 ifdef WDutilsDevel
 
-test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
-				$(WDMath_h) $(neighbour_h) $(Pi_h) $(io_h) \
-				$(heap_h) $(timer_h)
-				$(MAKE_EXE)
+#test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
+#				$(WDMath_h) $(neighbour_h) $(Pi_h) $(io_h) \
+#				$(heap_h) $(timer_h)
+#				$(MAKE_EXE)
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
 				$(MAKE_EXE)
 test/TestPeriodic$(EXT)	:	test/TestPeriodic.cc $(periodic_h)
@@ -303,16 +290,22 @@ test/TestMatrix$(EXT)	:	test/TestMatrix.cc $(matr33_h)
 				$(MAKE_EXE)
 test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) $(WDMath_h)
 				$(MAKE_EXE)
-test/TestTreeP$(EXT)	:	test/TestTreeP.cc $(partree_h) $(numerics_h) \
+test/TestOTree$(EXT)	:	test/TestOTree.cc $(octtree_h) $(numerics_h) \
 				$(Pi_h) $(io_h) $(timer_h)
-				$(MAKE_EXE)
+				$(MAKE_EXE) -DTestOTree
 
-#test/TestTreeN$(EXT)	:	test/TestTreeP.cc $(LIB)newtree.o $(numerics_h) \
-#				$(Pi_h) $(io_h) $(timer_h)
-#				$(MAKE) -DNEWTREE $(LIB)newtree.o $(LIBRARIES)
+test/TestITree$(EXT)	:	test/TestOTree.cc $(octtree_h) $(numerics_h) \
+				$(Pi_h) $(io_h) $(timer_h)
+				$(MAKE_EXE) -DTestITree
 
-omp_tests		:=	test/TestTreeP$(EXT) \
-				test/TestTree$(EXT) \
+test/TestNbour$(EXT)	:	test/TestOTree.cc $(neighbour_h) $(numerics_h) \
+				$(Pi_h) $(io_h) $(timer_h)
+				$(MAKE_EXE) -DTestNbour
+
+
+omp_tests		:=	test/TestOTree$(EXT) \
+				test/TestITree$(EXT) \
+				test/TestNbour$(EXT) \
 				test/TestGeometry$(EXT) \
 				test/TestPeriodic$(EXT) \
 				test/TestVoronoi$(EXT) \
@@ -346,7 +339,7 @@ dox/html/index.htlm:	$(Pi_h) $(heap_h) $(meta_h) $(inline_h) $(exception_h) \
 			$(sse_h) $(traits_h) $(io_h) $(tupel_h) $(memory_h) \
 			$(numerics_h) $(spline_h) $(radix_h) $(random_h) \
 			$(WDMath_h) $(octtree_h) $(neighbour_h) $(parallel_h) \
-			$(parallelMPI_h) $(domain_h) $(peano_h) $(partree_h)
+			$(parallelMPI_h) $(domain_h) $(peano_h)
 			doxygen devel/utils.dox
 else
 dox/html/index.htlm:	$(Pi_h) $(heap_h) $(meta_h) $(inline_h) $(exception_h) \

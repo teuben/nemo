@@ -495,7 +495,7 @@ namespace WDutils {
     /// update minimum and maximum element-wise:
     ///  Min[i] = min(Min[i], (*this)[i]); and
     ///  Max[i] = max(Max[i], (*this)[i]);
-    void up_min_max(vector&Min, vector&Max)
+    void up_min_max(vector&Min, vector&Max) const
     {
       unroll::const_tertiary(a,Min.a, Max.a,
 			     [] (T x, T&mi, T&ma)
