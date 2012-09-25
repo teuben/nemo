@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2000-2011
+/// \date   2000-2012
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2011 Walter Dehnen
+// Copyright (C) 2000-2012 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,6 +52,10 @@
 #endif
 #ifndef WDutils_included_cmalloc
 #  include <malloc.h>
+#endif
+
+#if __cplusplus < 201103L
+# define noexcept
 #endif
 
 namespace WDutils {
@@ -1702,10 +1706,22 @@ namespace WDutils {
     ~AlignmentAllocator () noexcept {}
 
     pointer address (reference __x) const noexcept
-    { return std::addressof(__x); }
+    {
+#if __cplusplus >= 201103L
+      return std::addressof(__x);
+#else
+      return reinterpret_cast<_Tp*>(&reinterpret_cast<char&>(__x));
+#endif
+    }
 
     const_pointer address (const_reference __x) const noexcept
-    { return std::addressof(__x); }
+    {
+#if __cplusplus >= 201103L
+      return std::addressof(__x);
+#else
+      return reinterpret_cast<const _Tp*>(&reinterpret_cast<const char&>(__x));
+#endif
+    }
 
     pointer allocate (size_type __n, const void* = 0)
     {
@@ -1732,7 +1748,7 @@ namespace WDutils {
 #else
 
     void construct (pointer __p, const_reference __val)
-    { ::new((void *)__p) value_type(__val); } }
+    { ::new(static_cast<void*>(__p)) value_type(__val); }
 
     void destroy (pointer __p)
     { __p->~value_type (); }
@@ -1860,4 +1876,7 @@ namespace WDutils {
   };
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////
+#if __cplusplus < 201103L
+# undef noexcept
+#endif
 #endif // WDutils_included_memory_h

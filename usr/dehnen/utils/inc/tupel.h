@@ -477,22 +477,22 @@ namespace WDutils {
       }
       /// scalar (dot) product: return Sum tupel::a[i]*x[i]
       template<typename S> X operator* (tupel<N,S> const&x) const
-      { return M::v_dot(a,(const S*)x); }
+      { return M::v_dot(a,static_cast<const S*>(x)); }
       /// difference squared: return (*this-x)^2 := Sum (tupel::a[i]-x[i])^2
       template<typename S> X dist_sq(tupel<N,S> const&x) const
-      { return M::v_diq(a,(const S*)x); }
+      { return M::v_diq(a,static_cast<const S*>(x)); }
       /// distance: return |*this-x| := sqrt(Sum (tupel::a[i]-x[i])^2)
       template<typename S> X distance (tupel<N,S> const&x) const
       { return std::sqrt(dist_sq (x)); }
       /// sum squared: return (this+x)^2 := Sum (tupel::a[i]+x[i])^2
       template<typename S> X sum_sq (tupel<N,S> const&x) const
-      { return M::v_suq(a,(const S*)x); }
+      { return M::v_suq(a,static_cast<const S*>(x)); }
       /// update minimum and maximum element-wise:
       /// \param[in,out] xmin  replaced by min(xmin[i], tupel::a[i]);
       /// \param[in,out] xmax  replaced by max(xmax[i], tupel::a[i]);
       template<typename S>
       void up_min_max(tupel<N,S>&xmin,  tupel<N,S>&xmax) const
-      { M::v_umia((S*)xmin,(S*)xmax,a); }
+      { M::v_umia(static_cast<S*>(xmin),static_cast<S*>(xmax),a); }
       //@}
       //------------------------------------------------------------------------
       /// \name miscellaneous

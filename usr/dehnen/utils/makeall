@@ -217,7 +217,7 @@ WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o
 else
 
 WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)octtree.o $(LIB)random.o \
+			$(LIB)numerics.o $(LIB)random.o \
 			$(LIB)radix.o $(LIB)WDMath.o
 
 WDutils_objs	:=	$(WDutilsS_objs)

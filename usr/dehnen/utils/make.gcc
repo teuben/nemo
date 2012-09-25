@@ -21,10 +21,10 @@ endif
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wnoexcept \
+WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow \
 		-Woverloaded-virtual
 else
-WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wnoexcept \
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow \
 		-Wold-style-cast -Woverloaded-virtual 
 endif
 
