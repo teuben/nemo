@@ -11,6 +11,10 @@
  *   2-feb-05   added moving moments
  *  12-dec-07   added rms_moment; only valid for equal weights
  *  18-mar-11   robust mean, 
+ *   9-oct-12   free_moment()  
+ *
+ * @todo    iterative robust by using a mask
+ *          robust factor, now hardcoded at 1.5
  */
 
 
@@ -47,6 +51,15 @@ void ini_moment(Moment *m, int mom, int ndat)
       m->wgt = (real *) allocate(ndat*sizeof(real));
     } 
 }
+
+void free_moment(Moment *m)
+{  
+   if (m->ndat) {
+     /* @todo   free sum */
+     free(m->dat);
+     free(m->wgt);
+   }
+} 
 
 void accum_moment(Moment *m, real x, real w)
 {
@@ -167,12 +180,14 @@ real mean_moment(Moment *m)
  */
 
 static real  last_sigma_robust_moment;
+static real  last_median_robust_moment;
 
 real mean_robust_moment(Moment *m)
 {
   int i,n;
   real m1,m2,m3,iqr,dlo,dhi;
   Moment tmp;
+  real frob = 1.5;   /* hardcoded for now */
 
   if (m->ndat==0)
     error("mean_robust_moment cannot be computed with ndat=%d",m->ndat);
@@ -181,15 +196,22 @@ real mean_robust_moment(Moment *m)
   m1 = median_q1(n,m->dat);
   m3 = median_q3(n,m->dat);
   iqr = m3-m1;
-  dlo = m1 - 1.5*iqr;   /* perhaps better if this 1.5 factor */
-  dhi = m3 + 1.5*iqr;   /* should depend on the # datapoints */
-  ini_moment(&tmp,2,0);
+  dlo = m1 - frob*iqr;   /* perhaps better if this 1.5 factor */
+  dhi = m3 + frob*iqr;   /* should depend on the # datapoints */
+  ini_moment(&tmp,2,n);
   for (i=0; i<n; i++) {
     if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
     accum_moment(&tmp,m->dat[i],1.0);
   }
-  last_sigma_robust_moment = sigma_moment(&tmp);
+  last_sigma_robust_moment  = sigma_moment(&tmp);
+  last_median_robust_moment = median_moment(&tmp);
+  free_moment(&tmp); 
   return mean_moment(&tmp);
+}
+
+real median_robust_moment(Moment *m)
+{
+  return last_median_robust_moment;
 }
 
 real sigma_robust_moment(Moment *m)
