@@ -171,6 +171,7 @@ nemo_main()
       }
       if (Qrobust) {
 	  printf ("Mean Robust           : %f\n",mean_robust_moment(&m));
+	  printf ("Sigma Robust          : %f\n",sigma_robust_moment(&m));
       }
 
       if (Qmmcount) {
