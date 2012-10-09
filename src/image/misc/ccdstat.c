@@ -125,16 +125,17 @@ nemo_main()
     }
 #else
 	/* for test/benchmark */
+    w = 1.0 ;
     for (i=0; i<nx; i++) {
-      for (j=0; j<ny; j++) {
+      for (j=0; j<ny; j++) {    
          for (k=0; k<nz; k++) {
             x =  CubeValue(iptr,i,j,k);
-            if (Qmin && x<xmin) continue;
-            if (Qmax && x>xmax) continue;
-            if (Qbad && x==bad) continue;
-	    w = Qw ? CubeValue(wptr,i,j,k) : 1.0;
+            //if (Qmin && x<xmin) continue;
+            //if (Qmax && x>xmax) continue;
+            //if (Qbad && x==bad) continue;
+	    // Qw ? CubeValue(wptr,i,j,k) : 1.0;            
             accum_moment(&m,x,w);
-	    if (Qmedian) data[ngood++] = x;
+	    // if (Qmedian) data[ngood++] = x;
         }
       }
     }
@@ -172,6 +173,7 @@ nemo_main()
       if (Qrobust) {
 	  printf ("Mean Robust           : %f\n",mean_robust_moment(&m));
 	  printf ("Sigma Robust          : %f\n",sigma_robust_moment(&m));
+	  printf ("Median Robust         : %f\n",median_robust_moment(&m));
       }
 
       if (Qmmcount) {
