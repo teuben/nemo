@@ -37,5 +37,6 @@ real min_moment (Moment *);
 real max_moment (Moment *);
 
 real mean_robust_moment(Moment *);
+real sigma_robust_moment(Moment *);
 
 
