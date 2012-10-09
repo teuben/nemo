@@ -166,6 +166,8 @@ real mean_moment(Moment *m)
  *
  */
 
+static real  last_sigma_robust_moment;
+
 real mean_robust_moment(Moment *m)
 {
   int i,n;
@@ -181,12 +183,18 @@ real mean_robust_moment(Moment *m)
   iqr = m3-m1;
   dlo = m1 - 1.5*iqr;   /* perhaps better if this 1.5 factor */
   dhi = m3 + 1.5*iqr;   /* should depend on the # datapoints */
-  ini_moment(&tmp,1,0);
+  ini_moment(&tmp,2,0);
   for (i=0; i<n; i++) {
     if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
     accum_moment(&tmp,m->dat[i],1.0);
   }
+  last_sigma_robust_moment = sigma_moment(&tmp);
   return mean_moment(&tmp);
+}
+
+real sigma_robust_moment(Moment *m)
+{
+  return last_sigma_robust_moment;
 }
 
 real median_moment(Moment *m)
