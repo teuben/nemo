@@ -29,10 +29,11 @@ string defv[] = {
     "npar=0\n       Number of fitting parameters assumed for chi2 calc",
     "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
     "median=f\n     Optional display of the median value",
+    "robust=f\n     Compute robust median",
     "mmcount=f\n    Count occurances of min and max",
     "maxmom=4\n     Control how many moments are computed",
     "sort=qsort\n   Sorting routine (not activated yet)",
-    "VERSION=1.10\n 15-oct-2011 PJT",
+    "VERSION=1.11\n 8-oct-2012 PJT",
     NULL,
 };
 
@@ -61,10 +62,11 @@ nemo_main()
     real x, xmin, xmax, mean, sigma, skew, kurt, median, bad, w, *data;
     real sum, sov;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qmmcount = getbparam("mmcount");
+    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qmmcount = getbparam("mmcount");
     real nu, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood = 0;
+    int ndat = 0;
     int min_count, max_count;
     int maxmom = getiparam("maxmom");
 
@@ -93,8 +95,12 @@ nemo_main()
     Qbad = hasvalue("bad");
     if (Qbad) bad = getdparam("bad");
     Qmedian = getbparam("median");
-    if (Qmedian)
-      data = (real *) allocate(nx*ny*nz*sizeof(real));
+    Qrobust = getbparam("robust");
+    if (Qmedian || Qrobust) {
+      ndat = nx*ny*nz;
+      data = (real *) allocate(ndat*sizeof(real));
+    }
+
 
     sov = Dx(iptr)*Dy(iptr)*Dz(iptr);   /* voxel volume; TODO: should we do 2D vs. 3D ? */
     
@@ -102,7 +108,7 @@ nemo_main()
       warning("No work done, maxmom<0");
       stop(0);
     }
-    ini_moment(&m,maxmom,0);
+    ini_moment(&m,maxmom,ndat);
 #if 1
     for (i=0; i<nx; i++) {
       for (j=0; j<ny; j++) {
@@ -158,8 +164,14 @@ nemo_main()
       printf ("Mean and dispersion   : %f %f\n",mean,sigma);
       printf ("Skewness and kurtosis : %f %f\n",skew,kurt);
       printf ("Sum and Sum*Dx*Dy*Dz  : %f %f\n",sum, sum*sov);
-      if (Qmedian)
+      if (Qmedian) {
 	printf ("Median                : %f\n",get_median(ngood,data));
+	if (ndat>0)
+	  printf ("Median                : %f\n",median_moment(&m));
+      }
+      if (Qrobust) {
+	  printf ("Mean Robust           : %f\n",mean_robust_moment(&m));
+      }
 
       if (Qmmcount) {
 	min_count = max_count = 0;
