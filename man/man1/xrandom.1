@@ -1,4 +1,4 @@
-.TH XRANDOM 1NEMO "9 September 2001"
+.TH XRANDOM 1NEMO "9 October 2012"
 .SH NAME
 xrandom \- Return seed for random numbers and optionally random numbers
 .SH SYNOPSIS
@@ -24,9 +24,14 @@ the seed value can be optionally followed by the random number
 generator type (default: mt19937). See \fIxrandom(3)\fP for more
 details.
 \fBn=\fP
-[Default: 0].
 Number of random numbers to draw 
 [Default: 0].
+.TP
+\fBm=\fP
+Number of times to repeat the experiment. If more than 1, tabulating
+is turned off, and reporting is now doine at the end of all tests,
+and the statistics of the mean's from each \fBn\fP sample is shown.
+[Default: 1].
 .TP
 \fBgauss=\fP
 Return gaussian numbers instead of uniform?
@@ -132,4 +137,5 @@ Peter Teuben
 26-Nov-96	V1.0 turned TESTBED into a TOOLBOX program	PJT
 13-apr-97	example
 8-sep-01	V2.0 GSL optionally added	PJT
+9-oct-2012	V2.2 added m=	PJT
 .fi
