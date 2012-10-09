@@ -26,6 +26,7 @@
  *  23-oct-07   added random0() and srandom0(), from Koda, based on ran1 from NumRec     PJT
  *  19-jun-08   enable init_xrandom(0) (previously caused Segmentation fault)  WD
  *  27-Sep-10   MINGW32/WINDOWS support  JCL
+ *   9-oct-12   test the miriad method of drawing a gaussian                  PJT
  */
 
 #include <stdinc.h>
@@ -230,13 +231,16 @@ double grandom(double mean, double sdev)
 
 #if defined(TOOLBOX)
 
+#include <moment.h>
+
 string defv[] = {
 #ifdef HAVE_GSL
-  "seed=0,mt19937\n Seed [0=seconds_1970, -1=centisec_boot -2=pid], and optional GSL name",
+    "seed=0,mt19937\n Seed [0=seconds_1970, -1=centisec_boot -2=pid], and optional GSL name",
 #else
     "seed=0\n       Seed [0=seconds_1970, -1=centisec_boot -2=pid]",
 #endif
     "n=0\n          Number of random numbers to draw",
+    "m=1\n          Number of times to repeat experiment (enforces tab=f)",
     "gauss=f\n      gaussian or uniform noise?",
     "report=f\n     Report mean/dispersian/skewness/kurtosis?",
     "tab=t\n        Tabulate all random numbers?",
@@ -244,7 +248,7 @@ string defv[] = {
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.1\n  23-oct-07 PJT",
+    "VERSION=2.2\n  9-oct-2012 PJT",
     NULL,
 };
 
@@ -266,58 +270,81 @@ static bool check(string, string, string, int, int);
 
 nemo_main()
 {
-    int i, seed, n, npars;
-    double sum[5], mean, sigma, skew, kurt, x, y, s;
-    double p[MAXPARS];
-    unsigned int up[MAXPARS];
-    bool   Qgauss = getbparam("gauss");
-    bool   Qreport = getbparam("report");
-    bool   Qtab = getbparam("tab");
-    bool   Qbench;
-    string *sp, ran_name;
+  int i, j, k, seed, n, m, npars;
+  double sum[5], mean, sigma, skew, kurt, x, y, s;
+  double p[MAXPARS];
+  unsigned int up[MAXPARS];
+  bool   Qgauss = getbparam("gauss");
+  bool   Qreport = getbparam("report");
+  bool   Qtab = getbparam("tab");
+  bool   Qbench;
+  string *sp, ran_name;
+  Moment mom;
+  
+  n = getiparam("n");
+  m = getiparam("m");
+  seed = init_xrandom(getparam("seed"));
+  Qbench = (n==4 && seed==1);
+  
+  if (m>1) {
+    Qtab= Qreport = FALSE;   /* override */
+    ini_moment(&mom,4,0);
+  } else {
+    ini_moment(&mom,0,0);
+  }
 
-    n = getiparam("n");
-    seed = init_xrandom(getparam("seed"));
-    Qbench = (n==4 && seed==1);
-
-    printf("Seed used = %d\n",seed);
-
+  printf("Seed used = %d\n",seed);
+  
+  for (k=0; k<m; k++) {
     sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = 0.0;
     if (Qgauss) {
-        while (n-- > 0) {
-            for (i=0, s=1.0, y = grandom(0.0,1.0); i<5; i++, s *= y)
-                sum[i] += s;
-            if (Qtab) printf("%g\n",y);
-        }
+      for (j=0; j<n;j++) {
+	for (i=0, s=1.0, y = grandom(0.0,1.0); i<5; i++, s *= y)
+	  sum[i] += s;
+	if (Qtab) printf("%g\n",y);
+      }
     } else {
-        while (n-- > 0) {
-            for (i=0, s=1.0, y = xrandom(0.0,1.0); i<5; i++, s *= y)
-                sum[i] += s;
-            if (Qtab) printf("%g\n",y);	
-        }
+      for (j=0; j<n;j++) {
+	for (i=0, s=1.0, y = xrandom(0.0,1.0); i<5; i++, s *= y)
+	  sum[i] += s;
+	if (Qtab) printf("%g\n",y);	
+      }
     }
 
-    n = getiparam("n");
+    if (m>1) {
+      accum_moment(&mom, sum[1]/sum[0], 1.0);
+    }
+    
     if (Qreport && n > 1) {
-        mean  = sum[1]/sum[0];
-	sigma = sqrt(sum[2]/sum[0]-mean*mean);
-        skew  = ( (sum[3]-3*sum[2]*mean)/sum[0] + 2*mean*mean*mean) /
-                           (sigma*sigma*sigma);
-        kurt  = ( (sum[4]-4*sum[3]*mean+6*sum[2]*mean*mean)/sum[0]
-                  - 3*mean*mean*mean*mean) /
-	            (sigma*sigma*sigma*sigma)  - 3.0;
-
-        printf ("Mean and dispersion  : %f %f\n",mean,sigma); 
-        printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
+      mean  = sum[1]/sum[0];
+      sigma = sqrt(sum[2]/sum[0]-mean*mean);
+      skew  = ( (sum[3]-3*sum[2]*mean)/sum[0] + 2*mean*mean*mean) /
+	(sigma*sigma*sigma);
+      kurt  = ( (sum[4]-4*sum[3]*mean+6*sum[2]*mean*mean)/sum[0]
+		- 3*mean*mean*mean*mean) /
+	(sigma*sigma*sigma*sigma)  - 3.0;
+      
+      printf ("Mean and dispersion  : %f %f\n",mean,sigma); 
+      printf ("Skewness and kurtosis: %f %f\n",skew,kurt);
     }
+  } /* k < m */
 
-        
-    if (!Qgauss && Qbench) {
-            dprintf(0,"Known n=4 seed=1 cases are:\n");
-            for (sp=defaults; *sp; sp++) dprintf(0,"%s\n",*sp);
-    }
+  if (m>1) {
+    printf ("N                    : %d\n",n_moment(&mom));
+    printf ("Mean and dispersion  : %f %f\n",mean_moment(&mom),sigma_moment(&mom));
+    printf ("Skewness and kurtosis: %f %f\n",skewness_moment(&mom),kurtosis_moment(&mom));
+  }
+
+
+
+  if (!Qgauss && Qbench) {
+    dprintf(0,"Known n=4 seed=1 cases are:\n");
+    for (sp=defaults; *sp; sp++) dprintf(0,"%s\n",*sp);
+  }
+
+
 #ifdef HAVE_GSL
-    if (hasvalue("gsl")) {
+  if (hasvalue("gsl")) {
       ran_name = getparam("gsl");
       npars = nemoinpd(getparam("pars"),p,MAXPARS);
       if (npars < 0) error("Error parsing pars=%s",getparam("pars"));
@@ -395,7 +422,7 @@ nemo_main()
 	for (i=0; i<n; i++) printf("%g\n", (double) gsl_ran_logarithmic(my_r, p[0]));
       } else
 	error("Bad name");
-    }
+  }
 #endif
 }
 
