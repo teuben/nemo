@@ -18,7 +18,8 @@ typedef struct moment {
 void ini_moment   (Moment *, int, int);		/* allocates */
 void accum_moment (Moment *, real, real);	/* accumulates */
 void decr_moment  (Moment *, real, real);	/* decrements (dangerous) */
-void reset_moment (Moment *);       	/* resets */
+void reset_moment (Moment *);       	        /* resets */
+void free_moment  (Moment *);                   /* frees allocs from ini_ */
 
 real show_moment  (Moment *, int);     /* general case to peek at (special) values */
 
@@ -38,5 +39,6 @@ real max_moment (Moment *);
 
 real mean_robust_moment(Moment *);
 real sigma_robust_moment(Moment *);
+real median_robust_moment(Moment *);
 
 
