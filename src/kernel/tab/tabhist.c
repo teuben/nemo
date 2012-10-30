@@ -91,7 +91,7 @@ string defv[] = {
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
-    "VERSION=6.2\n		  22-aug-2012 PJT",
+    "VERSION=6.2a\n		  29-oct-2012 PJT",
     NULL
 };
 
@@ -307,6 +307,7 @@ local void histogram(void)
   real count[MAXHIST], under, over;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
   real mean, sigma, skew, kurt, h3, h4, lmin, lmax, median;
+  real rmean, rsigma;
   Moment m;
   
   dprintf (0,"read %d values\n",npt);
@@ -330,7 +331,7 @@ local void histogram(void)
     count[k] = 0;		/* init histogram */
   under = over = 0;
   
-  ini_moment(&m,4,0);
+  ini_moment(&m,4,  Qrobust ? npt : 0);
   for (i=0; i<npt; i++) {
     if (Qbin) {
       k=ring_index(nsteps,bins,x[i]);
@@ -453,8 +454,11 @@ local void histogram(void)
     dprintf (0,"Median_torben        : %g\n",median);
   }
   dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
-  if (Qrobust)
-    dprintf (0,"Robust Mean          : %g\n",mean_robust_moment(&m));
+  if (Qrobust) {
+    rmean  = mean_robust_moment(&m);
+    rsigma = sigma_robust_moment(&m);
+    dprintf (0,"Robust Mean Disp     : %g %g\n",rmean,rsigma);
+  }
   
   if (lcount > 0) {
     warning("Recompute histogram because of outlier removals");
