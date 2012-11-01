@@ -17,6 +17,12 @@ ifeq ($(COMPILER),gcc)
 makefiles		:= makeall make.gcc
 endif
 
+# clang compiler
+ifeq ($(COMPILER),clang)
+-include make.clang
+makefiles		:= makeall make.clang
+endif
+
 # Portland group compiler
 ifeq ($(COMPILER),pgi)
 -include make.pgi
@@ -130,11 +136,13 @@ $(INC)matr33.h		: $(DEV)matr33.h
 matr33_h		:= $(INC)matr33.h $(exception_h) $(tupel_h)
 
 $(INC)neighbour.tcc	: $(DEV)neighbour.tcc
-			(cd $(INC); ln -s ../$(DEV)neighbour.tcc neighbour.tcc)
+			(cd $(INC); \
+			ln -s ../$(DEV)neighbour.tcc neighbour.tcc)
 neighbour_tcc		:= $(INC)neighbour.tcc
 
 $(INC)neighbour.h	: $(DEV)neighbour.h
-			(cd $(INC); ln -s ../$(DEV)neighbour.h neighbour.h)
+			(cd $(INC); \
+			ln -s ../$(DEV)neighbour.h neighbour.h)
 neighbour_h		:= $(INC)neighbour.h $(octtree_h) $(neighbour_tcc)
 
 $(INC)voronoi.h		: $(DEV)voronoi.h
@@ -170,7 +178,8 @@ octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(peano_h) $(timer_h) \
 ifdef WDutilsDevel
 domain_cc		:= $(DEV)domain.cc $(domain_h) $(io_h)
 octtree_cc		+= $(DEV)octtree_omp.cc
-neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) $(heap_h)
+neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) \
+				$(octtree_h) $(heap_h)
 voronoi_cc		:= $(DEV)voronoi.cc $(voronoi_h)
 parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
 endif
@@ -208,17 +217,17 @@ $(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 
 WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)octtree.o $(LIB)neighbour.o \
-			$(LIB)random.o $(LIB)radix.o $(LIB)WDMath.o \
-			$(LIB)voronoi.o 
+			$(LIB)numerics.o $(LIB)WDMath.o $(LIB)random.o \
+			$(LIB)octtree.o $(LIB)neighbour.o $(LIB)radix.o \
+			$(LIB)voronoi.o
 
 WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o 
 
 else
 
 WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)random.o \
-			$(LIB)radix.o $(LIB)WDMath.o
+			$(LIB)numerics.o $(LIB)WDMath.o $(LIB)random.o \
+			$(LIB)radix.o
 
 WDutils_objs	:=	$(WDutilsS_objs)
 
@@ -301,7 +310,6 @@ test/TestITree$(EXT)	:	test/TestOTree.cc $(octtree_h) $(numerics_h) \
 test/TestNbour$(EXT)	:	test/TestOTree.cc $(neighbour_h) $(numerics_h) \
 				$(Pi_h) $(io_h) $(timer_h)
 				$(MAKE_EXE) -DTestNbour
-
 
 omp_tests		:=	test/TestOTree$(EXT) \
 				test/TestITree$(EXT) \

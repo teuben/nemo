@@ -12,11 +12,11 @@
 ///                                                                             
 /// \author  alter Dehnen                                                      
 ///                                                                             
-/// \date    2002-2008                                                          
+/// \date    2002-2008,2012                                                     
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                              
-// Copyright (C) 2002-2008  Walter Dehnen                                       
+// Copyright (C) 2002-2008,2012  Walter Dehnen                                 
 //                                                                              
 // This program is free software; you can redistribute it and/or modify         
 // it under the terms of the GNU General Public License as published by         
@@ -166,8 +166,8 @@ namespace falcON {
   ///                                                                           
   /// \param  TYPE name of the element type                                     
   /// \param  SIZE number of elements                                           
-#define falcON_NEW(TYPE,SIZE)						\
-  WDutils::NewArray<TYPE>(SIZE,WDutilsThisFunction,__FILE__,__LINE__,"falcON ")
+#define falcON_NEW(TYPE,SIZE)					\
+  WDutils::NewArray<TYPE>(SIZE,__FILE__,__LINE__,"falcON ")
   //////////////////////////////////////////////////////////////////////////////
   ///                                                                           
   /// C MACRO to be used for array de-allocation                                
@@ -178,10 +178,10 @@ namespace falcON {
   /// about memory de-allocation.                                               
   ///                                                                           
   /// \param P  pointer to be de-allocated                                      
-#define falcON_DEL_A(P)							\
-  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__,0,"falcON ")
-#define falcON_DEL_AN(P,N)						\
-  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__,N,"falcON ")
+#define falcON_DEL_A(P)					\
+  WDutils::DelArray(P,__FILE__,__LINE__,0,"falcON ")
+#define falcON_DEL_AN(P,N)				\
+  WDutils::DelArray(P,__FILE__,__LINE__,N,"falcON ")
   //////////////////////////////////////////////////////////////////////////////
   ///                                                                           
   /// C MACRO to be used for object de-allocation                               
@@ -190,8 +190,8 @@ namespace falcON {
   /// an error message detailing the source file and line of the call.          
   ///                                                                           
   /// \param P  pointer to object to be de-allocated                            
-#define falcON_DEL_O(P)							\
-  DelObject(P,WDutilsThisFunction,__FILE__,__LINE__,"falcON ")
+#define falcON_DEL_O(P)				\
+  DelObject(P,__FILE__,__LINE__,"falcON ")
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // reporting actions to narrow code position of mysterious aborts           //

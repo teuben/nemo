@@ -280,6 +280,10 @@ namespace WDutils {
     operator T*() { return a; }
     /// conversion to const pointer to scalar
     operator const T*() const { return a; }
+    /// conversion to pointer to scalar
+    T*data() { return a; }
+    /// conversion to const pointer to scalar
+    const T*data() const { return a; }
     //@}
     /// \name unary operations
     //@{
@@ -348,7 +352,7 @@ namespace WDutils {
       return
 	unroll::coll_unary(a,
 			   [] (bool x, bool y)->bool { return x || y; },
-			   [] (T x)           ->bool { return isnan(x); });
+			   [] (T x)           ->bool { return std::isnan(x); });
     }
     /// is any element inf?
     bool isinf() const
@@ -356,7 +360,7 @@ namespace WDutils {
       return
 	unroll::coll_unary(a,
 			   [] (bool x, bool y)->bool { return x || y; },
-			   [] (T x)           ->bool { return isinf(x); });
+			   [] (T x)           ->bool { return std::isinf(x); });
     }
     //@}
     /// \name binary operations with scalar

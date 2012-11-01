@@ -7,11 +7,11 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2009-2011
+/// \date   2009-2012
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2009-2011 Walter Dehnen
+// Copyright (C) 2009-2012 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -31,22 +31,33 @@
 #ifndef WDutils_included_sse_h
 #define WDutils_included_sse_h
 
-#ifdef __SSE__
-#  ifndef WDutils_included_xmmintrin_h
-#    define WDutils_included_xmmintrin_h
+#if __cplusplus >= 201103L
+# ifndef WDutils_included_type_traits
+#  include <type_traits>
+#  define WDutils_included_type_traits
+# endif
+#endif
 
-#    if defined(__INTEL_COMPILER) && \
-        defined(__GNUC__) && \
-        defined(_MM_MALLOC_H_INCLUDED)
-#      warning
-#      warning The intel compiler has seen GNU's _mm_malloc.h which declares _mm_malloc() and _mm_free() to have different linking than those declared in INTEL's xmmintrin.h header file, which we are going to include now. This may cause a compiler error, which can be prevented by ensuring that _mm_malloc.h is not explicitly included when using the intel compiler.
-#      warning
-#    endif // __INTEL_COMPILER etc
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+// with GCC use x86intrin.h
+# ifndef _X86INTRIN_H_INCLUDED
+extern "C" {
+#  include <x86intrin.h>
+}
+# endif
 
+#elif defined(__SSE__)
+// use individual headers for intrinsics
+
+# ifdef defined(__INTEL_COMPILER) && defined(_MM_MALLOC_H_INCLUDED)
+# warning The intel compiler has seen GNU's _mm_malloc.h which declares _mm_malloc() and _mm_free() to have different linking than those declared in INTEL's xmmintrin.h header file, which we are going to include now. This may cause a compiler error, which can be prevented by ensuring that _mm_malloc.h is not explicitly included when using the intel compiler.
+# endif
+
+# ifndef WDutils_included_xmmintrin_h
 extern "C" {
 #    include <xmmintrin.h>
 }
-#  endif // WDutils_included_xmmintrin_h
+# endif // WDutils_included_xmmintrin_h
 
 # ifdef __SSE2__
 #  ifdef __SSE4_1__
@@ -64,145 +75,1563 @@ extern "C" {
 }
 #   endif // WDutils_included_emmintrin_h
 #  endif  // __SSE4_1__
-//
-// macros for |x|, -x, -|x|, |x-y|, and sign(x)*|y| of packed double
-//
-#  define _mm_abs_pd(__x)						\
-  _mm_and_pd(__x,reinterpret_cast<__m128d>				\
-	     (_mm_set_epi32(0x7fffffff,0xffffffff,			\
-			    0x7fffffff,0xffffffff)))
-#  define _mm_neg_pd(__x)						\
-  _mm_xor_pd(__x,reinterpret_cast<__m128d>				\
-	     (_mm_set_epi32(0x80000000,0x0,0x80000000,0x0)))
-#  define _mm_nabs_pd(__x)						\
-  _mm_or_pd (__x,reinterpret_cast<__m128d>				\
-	     (_mm_set_epi32(0x80000000,0x0,0x80000000,0x0)))
-#  define _mm_diff_pd(__x,__y) _mm_abs_pd(_mm_sub_pd(__x,__y))
-#  define _mm_signmask_pd(__x)						\
-  _mm_and_pd (__x,reinterpret_cast<__m128d>				\
-	      (_mm_set_epi32(0x80000000,0x0,0x80000000,0x0)))
-#  define _mm_signmove_pd(__x,__y)					\
-  _mm_or_pd(_mm_signmask_pd(__x),_mm_abs_pd(__y))
+# endif   // __SSE2__
+#endif    // __SSE__
+
+#if __cplusplus < 201103L
+# define noexcept
+# define constexpr
+#endif
 
 //
-// conversion:  two __m128d  [D,D],[D,D]  -->  one __m128  [S,S,S,S]
-// 
-# define _mm_cvt2pd_ps(__A,__B) \
-  _mm_movelh_ps(_mm_cvtpd_ps(__A),_mm_cvtpd_ps(__B))
-
-//
-// macros for |x|, -x, -|x|, |x-y|, and sign(x)*|y| of packed single 
-//
-#  define _mm_abs_ps(__x)						\
-  _mm_and_ps(__x,reinterpret_cast<__m128>(_mm_set1_epi32(0x7fffffff)))
-#  define _mm_neg_ps(__x)						\
-  _mm_xor_ps(__x,reinterpret_cast<__m128>(_mm_set1_epi32(0x80000000)))
-#  define _mm_nabs_ps(__x)						\
-  _mm_or_ps(__x,reinterpret_cast<__m128>(_mm_set1_epi32(0x80000000)))
-#  define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
-#  define _mm_signmask_ps(__x)						\
-  _mm_and_ps(__x,reinterpret_cast<__m128>(_mm_set1_epi32(0x80000000)))
-#  define _mm_signmove_ps(__x,__y)			\
-  _mm_or_ps(_mm_signmask_ps(__x),_mm_abs_ps(__y))
-# else // __SSE2__
-// in case we have no __SSE2__, we cannot use _mm_set1_epi32
+#ifdef __SSE__
 namespace WDutils {
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+# define always_inline __attribute__((__always_inline__))
+#else
+# define always_inline
+#endif
+  ///
+  /// \name SSE & AVX functions and operations
+  //@{
   namespace meta {
-    union FandI {
-      float __F;
-      int   __I;
-      FandI(int i) : __I(i) {}
+    union float_and_int {
+      float f; int32_t i; 
+      float_and_int()
+# if __cplusplus >= 201103L
+      = default;
+# else
+      : {}
+# endif
+      float_and_int(int32_t k) : i(k) {}
     };
-    const FandI __val_mask(0x7fffffff);
-    const FandI __sgn_mask(0x80000000);
   }
-}
-#  define _mm_abs_ps(__x)					\
-  _mm_and_ps(__x,_mm_set1_ps(WDutils::meta::__val_mask.__F))
-#  define _mm_neg_ps(__x)					\
-  _mm_xor_ps(__x,_mm_set1_ps(WDutils::meta::__sgn_mask.__F))
-#  define _mm_nabs_ps(__x)					\
-  _mm_or_ps(__x,_mm_set1_ps(WDutils::meta::__sgn_mask.__F))
-#  define _mm_diff_ps(__x,__y) _mm_abs_ps(_mm_sub_ps(__x,__y))
-#  define _mm_signmask_ps(__x)					\
-  _mm_and_ps(__x,_mm_set1_ps(WDutils::meta::__neg_mask.__F))
-#  define _mm_signmove_ps(__x,__y)				\
-  _mm_or_ps(_mm_signmask_ps(__x),_mm_abs_ps(__y))
-# endif // __SSE2__
+# ifdef __SSE2__
+#  define abs_mask_pi _mm_set1_epi32(0x7fffffff)
+#  define sgn_mask_pi _mm_set1_epi32(0x80000000)
+#  define abs_mask_ps _mm_castsi128_ps(abs_mask_pi)
+#  define sgn_mask_ps _mm_castsi128_ps(sgn_mask_pi)
+#  define abs_mask_pd _mm_castsi128_pd(_mm_set1_epi64x(0x7fffffffffffffffll))
+#  define sgn_mask_pd _mm_castsi128_pd(_mm_set1_epi64x(0x8000000000000000ll))
+# else
+#  define abs_mask_ps _mm_set1_ps(WDutils::meta::float_and_int(0x7fffffff).f)
+#  define sgn_mask_ps _mm_set1_ps(WDutils::meta::float_and_int(0x80000000).f)
+# endif// __SSE2__
+# ifdef __AVX__
+#  define abs_mask_qi _mm256_set1_epi32(0x7fffffff)
+#  define sgn_mask_qi _mm256_set1_epi32(0x80000000)
+#  define abs_mask_qs _mm256_castsi256_ps(abs_mask_qi)
+#  define sgn_mask_qs _mm256_castsi256_ps(sgn_mask_qi )
+#  define abs_mask_qd						\
+  _mm256_castsi256_pd(_mm256_set1_epi64x(0x7fffffffffffffffll))
+#  define sgn_mask_qd						\
+  _mm256_castsi256_pd(_mm256_set1_epi64x(0x8000000000000000ll))
+# endif// __AVX__
+#endif // __SSE__
+  //
+  ///
+  /// generic support for coding with SSE/AVX intrinsics
+  ///
+  namespace SSE {
+#if __cplusplus >= 201103L
+    /// is @c VectorType a SSE or AVX floating-point vector type?
+    template<typename VectorType>
+    struct is_floating_vector_type
+    {
+      static const bool value = 0
+# ifdef __SSE__
+	|| std::is_same<VectorType,__m128>::value
+# endif
+# ifdef __SSE2__
+	|| std::is_same<VectorType,__m128d>::value
+# endif
+# ifdef __AVX__
+	|| std::is_same<VectorType,__m256>::value
+	|| std::is_same<VectorType,__m256d>::value
+# endif
+	;
+    };
+    /// is @c VectorType a SSE or AVX integer vector type?
+    template<typename VectorType>
+    struct is_integer_vector_type
+    {
+      static const bool value = 0
+# ifdef __SSE2__
+	|| std::is_same<VectorType,__m128i>::value
+# endif
+# ifdef __AVX__
+	|| std::is_same<VectorType,__m256i>::value
+# endif
+	;
+    };
+    /// is @c VectorType a SSE or AVX 32-bit integer or floating-point vector
+    /// type?
+    template<typename VectorType>
+    struct is_supported_vector_type
+    {
+      static const bool value = 0
+# ifdef __SSE__
+	|| std::is_same<VectorType,__m128>::value
+# endif
+# ifdef __SSE2__
+	|| std::is_same<VectorType,__m128d>::value
+	|| std::is_same<VectorType,__m128i>::value
+# endif
+# ifdef __AVX__
+	|| std::is_same<VectorType,__m256>::value
+	|| std::is_same<VectorType,__m256d>::value
+	|| std::is_same<VectorType,__m256i>::value
+# endif
+	;
+    };
+#endif// C++11
+#ifdef __SSE__
+    /// static info related to SSE/AVX types
+    template<typename VectorType> struct static_type_info;
+    /// __m128:  4 packed single-precision floating point numbers
+    template<> struct static_type_info<__m128>
+    {
+      using vector_type = __m128;
+      using single_type = float;
+      static const int block_size = 4;
+      static const int alignment = 16;
+      static_type_info() = delete;
+    };
+# ifdef __SSE2__
+    /// __m128d:  2 packed double-precision floating point numbers
+    template<> struct static_type_info<__m128d>
+    {
+      using vector_type = __m128d;
+      using single_type = double;
+      static const int block_size = 2;
+      static const int alignment = 16;
+      static_type_info() = delete;
+    };
+    /// __m128i:  4 packed 32-bit signed integers
+    /// \note gcc interprets __m128i differently as 2 int64_t. Our
+    ///       interpretation appears the most useful for scientific computing.
+    template<> struct static_type_info<__m128i>
+    {
+      using vector_type = __m128i;
+      using single_type = int32_t;
+      static const int block_size = 4;
+      static const int alignment = 16;
+      static_type_info() = delete;
+    };
+# endif
+# ifdef __AVX__
+    /// __m256:  8 packed single-precision floating point numbers
+    template<> struct static_type_info<__m256>
+    {
+      using vector_type = __m256;
+      using single_type = float;
+      static const int block_size = 8;
+      static const int alignment = 32;
+      static_type_info() = delete;
+    };
+    /// __m256d:  4 packed double-precision floating point numbers
+    template<> struct static_type_info<__m256d>
+    {
+      using vector_type = __m256d;
+      using single_type = double;
+      static const int block_size = 4;
+      static const int alignment = 32;
+      static_type_info() = delete;
+    };
+    /// __m256d:  8 packed 32-bit signed integers
+    /// \note gcc interprets __m256i differently as 4 int64_t. Our
+    ///       interpretation appears the most useful for scientific computing.
+    template<> struct static_type_info<__m256i>
+    {
+      using vector_type = __m256i;
+      using single_type = int32_t;
+      static const int block_size = 8;
+      static const int alignment = 32;
+      static_type_info() = delete;
+    };
+# endif
+    ///
+    /// auxiliary code used to implement functionality in enclosing namespace
+    ///
+    namespace aux {
+      ///
+      /// auxiliary template, used to implement some SSE/AVX related functions
+      /// which must be templates (because the intended vector type cannot be
+      /// uniquely deduced from their arguments)
+      ///
+      template<typename VectorType> struct VecOps;
+      // for __m128
+      template<> struct VecOps<__m128> : public static_type_info<__m128>
+      {
+	static vector_type always_inline zero() noexcept
+	{ return _mm_setzero_ps(); }
+	static vector_type always_inline one() noexcept
+	{ return _mm_set1_ps(1.f); }
+	static vector_type always_inline set(const single_type x) noexcept
+	{ return _mm_set1_ps(x); }
+	static vector_type always_inline load(const single_type*p) noexcept
+	{ return _mm_load_ps(p); }
+	static vector_type always_inline loadu(const single_type*p) noexcept
+	{ return _mm_loadu_ps(p); }
+      };
+# ifdef __SSE2__
+      // for __m128d
+      template<> struct VecOps<__m128d> : public static_type_info<__m128d>
+      {
+	static vector_type always_inline zero() noexcept
+	{ return _mm_setzero_pd(); }
+	static vector_type always_inline one() noexcept
+	{ return _mm_set1_pd(1.0); }
+	static vector_type always_inline set(const single_type x) noexcept
+	{ return _mm_set1_pd(x); }
+	static vector_type always_inline load(const single_type*p) noexcept
+	{ return _mm_load_pd(p); }
+	static vector_type always_inline loadu(const single_type*p) noexcept
+	{ return _mm_loadu_pd(p); }
+      };
+      // for __m128i
+      template<> struct VecOps<__m128i> : public static_type_info<__m128i>
+      {
+	static vector_type always_inline zero() noexcept
+	{ return _mm_setzero_si128(); }
+	static vector_type always_inline one() noexcept
+	{ return _mm_set1_epi32(1); }
+	static vector_type always_inline set(const single_type x) noexcept
+	{ return _mm_set1_epi32(x); }
+	static vector_type always_inline load(const single_type*p) noexcept
+	{ return _mm_castps_si128(_mm_load_ps
+				  (reinterpret_cast<const float*>(p))); }
+	static vector_type always_inline loadu(const single_type*p) noexcept
+	{ return _mm_castps_si128(_mm_loadu_ps
+				  (reinterpret_cast<const float*>(p))); }
+      };
+# endif
+# ifdef __AVX__
+      // for __m256
+      template<> struct VecOps<__m256> : public static_type_info<__m256>
+      {
+	static vector_type always_inline zero() noexcept
+	{ return _mm256_setzero_ps(); }
+	static vector_type always_inline one() noexcept
+	{ return _mm256_set1_ps(1.f); }
+	static vector_type always_inline set(const single_type x) noexcept
+	{ return _mm256_set1_ps(x); }
+	static vector_type always_inline load(const single_type*p) noexcept
+	{ return _mm256_load_ps(p); }
+	static vector_type always_inline loadu(const single_type*p) noexcept
+	{ return _mm256_loadu_ps(p); }
+      };
+      // for __m256d
+      template<> struct VecOps<__m256d> : public static_type_info<__m256d>
+      {
+	static vector_type always_inline zero() noexcept
+	{ return _mm256_setzero_pd(); }
+	static vector_type always_inline one() noexcept
+	{ return _mm256_set1_pd(1.0); }
+	static vector_type always_inline set(const single_type x) noexcept
+	{ return _mm256_set1_pd(x); }
+	static vector_type always_inline load(const single_type*p) noexcept
+	{ return _mm256_load_pd(p); }
+	static vector_type always_inline loadu(const single_type*p) noexcept
+	{ return _mm256_loadu_pd(p); }
+      };
+      // for __m256i
+      template<> struct VecOps<__m256i> : public static_type_info<__m256i>
+      {
+	static vector_type always_inline zero() noexcept
+	{ return _mm256_setzero_si256(); }
+	static vector_type always_inline one() noexcept
+	{ return _mm256_set1_epi32(1); }
+	static vector_type always_inline set(const single_type x) noexcept
+	{ return _mm256_set1_epi32(x); }
+	static vector_type always_inline load(const single_type*p) noexcept
+	{ return _mm256_castps_si256(_mm256_load_ps
+				     (reinterpret_cast<const float*>(p))); }
+	static vector_type always_inline loadu(const single_type*p) noexcept
+	{ return _mm256_castps_si256(_mm256_loadu_ps
+				     (reinterpret_cast<const float*>(p))); }
+     };
+# endif
+    } // namespace WDutils::SSE::aux
+    ///
+    /// \name SSE/AVX non-operator functions with unified name
+    //@{
 
-#ifdef __INTEL_COMPILER
-  inline __m128&operator*=(__m128&x, __m128 const&y)
-  { return x=_mm_mul_ps(x,y); }
-  inline __m128&operator/=(__m128&x, __m128 const&y)
-  { return x=_mm_div_ps(x,y); }
-  inline __m128&operator+=(__m128&x, __m128 const&y)
-  { return x=_mm_add_ps(x,y); }
-  inline __m128&operator-=(__m128&x, __m128 const&y)
-  { return x=_mm_sub_ps(x,y); }
+    ///
+    /// addition
+    ///
+    inline __m128 always_inline add(__m128 x, __m128 y) noexcept
+    { return _mm_add_ps(x,y); }
 # ifdef __SSE2__
-  inline __m128i&operator+=(__m128i&x, __m128i const&y)
-  { return x=_mm_add_epi32(x,y); }
-# endif // __SSE2__
-#endif // __INTEL_COMPILER
-namespace WDutils {
-#ifdef __INTEL_COMPILER
-  inline float xmm0(__m128 __A)
-  {
-    union { float f; int i; } tmp;
-    tmp.i = _mm_extract_ps(__A,0);
-    return tmp.f;
-  }
-  inline float xmm1(__m128 __A)
-  {
-    union { float f; int i; } tmp;
-    tmp.i = _mm_extract_ps(__A,1);
-    return tmp.f;
-  }
-  inline float xmm2(__m128 __A)
-  {
-    union { float f; int i; } tmp;
-    tmp.i = _mm_extract_ps(__A,2);
-    return tmp.f;
-  }
-  inline float xmm3(__m128 __A)
-  {
-    union { float f; int i; } tmp;
-    tmp.i = _mm_extract_ps(__A,3);
-    return tmp.f;
-  }
+    inline __m128d always_inline add(__m128d x, __m128d y) noexcept
+    { return _mm_add_pd(x,y); }
+    inline __m128i always_inline add(__m128i x, __m128i y) noexcept
+    { return _mm_add_epi32(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline add(__m256 x, __m256 y) noexcept
+    { return _mm256_add_ps(x,y); }
+    inline __m256d always_inline add(__m256d x, __m256d y) noexcept
+    { return _mm256_add_pd(x,y); }
+# endif
+# ifdef __AVX2__
+    inline __m256i always_inline add(__m256i x, __m256i y) noexcept
+    { return _mm256_add_epi32(x,y); }
+# endif
+
+    ///
+    /// subtraction
+    ///
+    inline __m128 always_inline sub(__m128 x, __m128 y) noexcept
+    { return _mm_sub_ps(x,y); }
 # ifdef __SSE2__
-  inline double xmm0(__m128d __A)
+    inline __m128d always_inline sub(__m128d x, __m128d y) noexcept
+    { return _mm_sub_pd(x,y); }
+    inline __m128i always_inline sub(__m128i x, __m128i y) noexcept
+    { return _mm_sub_epi32(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline sub(__m256 x, __m256 y) noexcept
+    { return _mm256_sub_ps(x,y); }
+    inline __m256d always_inline sub(__m256d x, __m256d y) noexcept
+    { return _mm256_sub_pd(x,y); }
+# endif
+# ifdef __AVX2__
+    inline __m256i always_inline sub(__m256i x, __m256i y) noexcept
+    { return _mm256_sub_epi32(x,y); }
+# endif
+
+    ///
+    /// negation
+    ///
+    inline __m128 always_inline neg(__m128 x) noexcept
+    { return _mm_xor_ps(x,sgn_mask_ps); }
+# ifdef __SSE2__
+    inline __m128d always_inline neg(__m128d x) noexcept
+    { return _mm_xor_pd(x,sgn_mask_pd); }
+    inline __m128i always_inline neg(__m128i x) noexcept
+    { return _mm_xor_si128(x,sgn_mask_pi); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline neg(__m256 x) noexcept
+    { return _mm256_xor_ps(x,sgn_mask_qs); }
+    inline __m256d always_inline neg(__m256d x) noexcept
+    { return _mm256_xor_pd(x,sgn_mask_qd); }
+    inline __m256i always_inline neg(__m256i x) noexcept
+#  ifdef __AVX2__
+    { return _mm256_xor_si256(x,sgn_mask_qi); }
+#  else
+    { return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(x),
+					       sgn_mask_qs)); }
+#  endif
+# endif
+
+    ///
+    /// multiplication
+    ///
+    inline __m128 always_inline mul(__m128 x, __m128 y) noexcept
+    { return _mm_mul_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline mul(__m128d x, __m128d y) noexcept
+    { return _mm_mul_pd(x,y); }
+    inline __m128i always_inline mul(__m128i x, __m128i y) noexcept
+    { return _mm_mul_epi32(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline mul(__m256 x, __m256 y) noexcept
+    { return _mm256_mul_ps(x,y); }
+    inline __m256d always_inline mul(__m256d x, __m256d y) noexcept
+    { return _mm256_mul_pd(x,y); }
+# endif
+# ifdef __AVX2__
+    inline __m256i always_inline mul(__m256i x, __m256i y) noexcept
+    { return _mm256_mul_epi32(x,y); }
+# endif
+
+    ///
+    /// division
+    ///
+    inline __m128 always_inline div(__m128 x, __m128 y) noexcept
+    { return _mm_div_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline div(__m128d x, __m128d y) noexcept
+    { return _mm_div_pd(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline div(__m256 x, __m256 y) noexcept
+    { return _mm256_div_ps(x,y); }
+    inline __m256d always_inline div(__m256d x, __m256d y) noexcept
+    { return _mm256_div_pd(x,y); }
+# endif
+
+    ///
+    /// reciprocal
+    ///
+    /// \note we are not using the SSE or AVX intrinsics for the reciprocal,
+    ///       because its accuracy is not sufficient (see SSE documentation)
+    ///
+    inline __m128 always_inline rcp(__m128 x) noexcept
+    { return _mm_div_ps(_mm_set1_ps(1.f),x); }
+# ifdef __SSE2__
+    inline __m128d always_inline rcp(__m128d x) noexcept
+    { return _mm_div_pd(_mm_set1_pd(1.0),x); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline rcp(__m256 x) noexcept
+    { return _mm256_div_ps(_mm256_set1_ps(1.f),x); }
+    inline __m256d always_inline rcp(__m256d x) noexcept
+    { return _mm256_div_pd(_mm256_set1_pd(1.0),x); }
+# endif
+
+    ///
+    /// sqrt
+    ///
+    inline __m128 always_inline sqrt(__m128 x) noexcept
+    { return _mm_sqrt_ps(x); }
+# ifdef __SSE2__
+    inline __m128d always_inline sqrt(__m128d x) noexcept
+    { return _mm_sqrt_pd(x); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline sqrt(__m256 x) noexcept
+    { return _mm256_sqrt_ps(x); }
+    inline __m256d always_inline sqrt(__m256d x) noexcept
+    { return _mm256_sqrt_pd(x); }
+# endif
+
+    ///
+    /// maximum
+    ///
+    inline __m128 always_inline max(__m128 x, __m128 y) noexcept
+    { return _mm_max_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline max(__m128d x, __m128d y) noexcept
+    { return _mm_max_pd(x,y); }
+# endif
+# ifdef __SSE4_1__
+    inline __m128i always_inline max(__m128i x, __m128i y) noexcept
+    { return _mm_max_epi32(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline max(__m256 x, __m256 y) noexcept
+    { return _mm256_max_ps(x,y); }
+    inline __m256d always_inline max(__m256d x, __m256d y) noexcept
+    { return _mm256_max_pd(x,y); }
+# endif
+# ifdef __AVX2__
+    inline __m256i always_inline max(__m256i x, __m256i y) noexcept
+    { return _mm256_max_epi32(x,y); }
+# endif
+
+    ///
+    /// minimum
+    ///
+    inline __m128 always_inline min(__m128 x, __m128 y) noexcept
+    { return _mm_min_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline min(__m128d x, __m128d y) noexcept
+    { return _mm_min_pd(x,y); }
+# endif
+# ifdef __SSE4_1__
+    inline __m128i always_inline min(__m128i x, __m128i y) noexcept
+    { return _mm_min_epi32(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline min(__m256 x, __m256 y) noexcept
+    { return _mm256_min_ps(x,y); }
+    inline __m256d always_inline min(__m256d x, __m256d y) noexcept
+    { return _mm256_min_pd(x,y); }
+# endif
+# ifdef __AVX2__
+    inline __m256i always_inline min(__m256i x, __m256i y) noexcept
+    { return _mm256_min_epi32(x,y); }
+# endif
+
+    ///
+    /// bit-wise and
+    ///
+    inline __m128 always_inline bit_and(__m128 x, __m128 y) noexcept
+    { return _mm_and_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline bit_and(__m128d x, __m128d y) noexcept
+    { return _mm_and_pd(x,y); }
+    inline __m128i always_inline bit_and(__m128i x, __m128i y) noexcept
+    { return _mm_and_si128(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline bit_and(__m256 x, __m256 y) noexcept
+    { return _mm256_and_ps(x,y); }
+    inline __m256d always_inline bit_and(__m256d x, __m256d y) noexcept
+    { return _mm256_and_pd(x,y); }
+    inline __m256i always_inline bit_and(__m256i x, __m256i y) noexcept
+#  ifdef __AVX2__
+    { return _mm256_and_si256(x,y); }
+#  else
+    { return _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(x),
+					       _mm256_castsi256_ps(y))); }
+#  endif
+# endif
+
+    ///
+    /// bit-wise or
+    ///
+    inline __m128 always_inline bit_or(__m128 x, __m128 y) noexcept
+    { return _mm_or_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline bit_or(__m128d x, __m128d y) noexcept
+    { return _mm_or_pd(x,y); }
+    inline __m128i always_inline bit_or(__m128i x, __m128i y) noexcept
+    { return _mm_or_si128(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline bit_or(__m256 x, __m256 y) noexcept
+    { return _mm256_or_ps(x,y); }
+    inline __m256d always_inline bit_or(__m256d x, __m256d y) noexcept
+    { return _mm256_or_pd(x,y); }
+    inline __m256i always_inline bit_or(__m256i x, __m256i y) noexcept
+#  ifdef __AVX2__
+    { return _mm256_or_si256(x,y); }
+#  else
+    { return _mm256_castps_si256(_mm256_or_ps(_mm256_castsi256_ps(x),
+					      _mm256_castsi256_ps(y))); }
+#  endif
+# endif
+
+    ///
+    /// bit-wise xor
+    ///
+    inline __m128 always_inline bit_xor(__m128 x, __m128 y) noexcept
+    { return _mm_xor_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline bit_xor(__m128d x, __m128d y) noexcept
+    { return _mm_xor_pd(x,y); }
+    inline __m128i always_inline bit_xor(__m128i x, __m128i y) noexcept
+    { return _mm_xor_si128(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline bit_xor(__m256 x, __m256 y) noexcept
+    { return _mm256_xor_ps(x,y); }
+    inline __m256d always_inline bit_xor(__m256d x, __m256d y) noexcept
+    { return _mm256_xor_pd(x,y); }
+    inline __m256i always_inline bit_xor(__m256i x, __m256i y) noexcept
+#  ifdef __AVX2__
+    { return _mm256_xor_si256(x,y); }
+#  else
+    { return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(x),
+					       _mm256_castsi256_ps(y))); }
+#  endif
+# endif
+
+    ///
+    /// abs(x)
+    ///
+    inline __m128 always_inline abs(__m128 x) noexcept
+    { return _mm_and_ps(x,abs_mask_ps); }
+# ifdef __SSE2__
+    inline __m128d always_inline abs(__m128d x) noexcept
+    { return _mm_and_pd(x,abs_mask_pd); }
+    inline __m128i always_inline abs(__m128i x) noexcept
+    { return _mm_and_si128(x,abs_mask_pi); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline abs(__m256 x) noexcept
+    { return _mm256_and_ps(x,abs_mask_qs); }
+    inline __m256d always_inline abs(__m256d x) noexcept
+    { return _mm256_and_pd(x,abs_mask_qd); }
+    inline __m256i always_inline abs(__m128i x) noexcept
+#  ifdef __AVX2__
+    { return _mm256_and_si256(x,abs_mask_qi); }
+#  else
+    { return _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(x),
+					       abs_mask_qs)); }
+#  endif
+# endif
+
+    ///
+    /// -abs(x)
+    ///
+    inline __m128 always_inline negabs(__m128 x) noexcept
+    { return _mm_or_ps(x,sgn_mask_ps); }
+# ifdef __SSE2__
+    inline __m128d always_inline negabs(__m128d x) noexcept
+    { return _mm_or_pd(x,sgn_mask_pd); }
+    inline __m128i always_inline negabs(__m128i x) noexcept
+    { return _mm_or_si128(x,sgn_mask_pi); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline negabs(__m256 x) noexcept
+    { return _mm256_or_ps(x,sgn_mask_qs); }
+    inline __m256d always_inline negabs(__m256d x) noexcept
+    { return _mm256_or_pd(x,sgn_mask_qd); }
+    inline __m256i always_inline negabs(__m256i x) noexcept
+#  ifdef __AVX2__
+    { return _mm256_or_si256(x,sgn_mask_qi); }
+#  else
+    { return _mm256_castps_si256(_mm256_or_ps(_mm256_castsi256_ps(x),
+					      sgn_mask_qs)); }
+#  endif
+# endif
+
+    ///
+    /// abs(x-y)
+    ///
+    inline __m128 always_inline diff(__m128 x, __m128 y) noexcept
+    { return _mm_and_ps(_mm_sub_ps(x,y),abs_mask_ps); }
+# ifdef __SSE2__
+    inline __m128d always_inline diff(__m128d x, __m128d y) noexcept
+    { return _mm_and_pd(_mm_sub_pd(x,y),abs_mask_pd); }
+    inline __m128i always_inline diff(__m128i x, __m128i y) noexcept
+    { return abs(sub(x,y)); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline diff(__m256 x, __m256 y) noexcept
+    { return _mm256_and_ps(_mm256_sub_ps(x,y),abs_mask_qs); }
+    inline __m256d always_inline diff(__m256d x, __m256d y) noexcept
+    { return _mm256_and_pd(_mm256_sub_pd(x,y),abs_mask_qd); }
+    inline __m256i always_inline diff(__m256i x, __m256i y) noexcept
+    { return abs(sub(x,y)); }
+# endif
+
+    ///
+    /// just the sign bits
+    ///
+    inline __m128 always_inline signmask(__m128 x) noexcept
+    { return _mm_and_ps(x,sgn_mask_ps); }
+# ifdef __SSE2__
+    inline __m128d always_inline signmask(__m128d x) noexcept
+    { return _mm_and_pd(x,sgn_mask_pd); }
+    inline __m128i always_inline signmask(__m128i x) noexcept
+    { return _mm_and_si128(x,sgn_mask_pi); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline signmask(__m256 x) noexcept
+    { return _mm256_and_ps(x,sgn_mask_qs); }
+    inline __m256d always_inline signmask(__m256d x) noexcept
+    { return _mm256_and_pd(x,sgn_mask_qd); }
+    inline __m256i always_inline signmask(__m256i x) noexcept
+#  ifdef __AVX2__
+    { return _mm256_and_si256(x,sgn_mask_qi); }
+#  else
+    { return _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(x),
+					       sgn_mask_qs)); }
+#  endif
+# endif
+  
+    ///
+    /// sign(x)*y
+    ///
+    inline __m128 always_inline signmove(__m128 x, __m128 y) noexcept
+    { return bit_or(signmask(x),abs(y)); }
+# ifdef __SSE2__
+    inline __m128d always_inline signmove(__m128d x, __m128d y) noexcept
+    { return bit_or(signmask(x),abs(y)); }
+    inline __m128i always_inline signmove(__m128i x, __m128i y) noexcept
+    { return bit_or(signmask(x),abs(y)); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline signmove(__m256 x, __m256 y) noexcept
+    { return bit_or(signmask(x),abs(y)); }
+    inline __m256d always_inline signmove(__m256d x, __m256d y) noexcept
+    { return bit_or(signmask(x),abs(y)); }
+    inline __m256i always_inline signmove(__m256i x, __m256i y) noexcept
+    { return bit_or(signmask(x),abs(y)); }
+# endif
+
+    ///
+    /// equal
+    ///
+    inline __m128 always_inline cmpeq(__m128 x, __m128 y) noexcept
+    { return _mm_cmpeq_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline cmpeq(__m128d x, __m128d y) noexcept
+    { return _mm_cmpeq_pd(x,y); }
+    inline __m128i always_inline cmpeq(__m128i x, __m128i y) noexcept
+    { return _mm_cmpeq_epi32(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline cmpeq(__m256 x, __m256 y) noexcept
+    { return _mm256_cmp_ps(x,y,_CMP_EQ_UQ); }
+    inline __m256d always_inline cmpeq(__m256d x, __m256d y) noexcept
+    { return _mm256_cmp_pd(x,y,_CMP_EQ_UQ); }
+# endif
+# ifdef __AVX2__
+    inline __m256i always_inline cmpeq(__m256i x, __m256i y) noexcept
+    { return _mm256_cmpeq_epi32(x,y); }
+# endif
+
+    ///
+    /// not equal
+    ///
+    inline __m128 always_inline cmpneq(__m128 x, __m128 y) noexcept
+    { return _mm_cmpneq_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline cmpneq(__m128d x, __m128d y) noexcept
+    { return _mm_cmpneq_pd(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline cmpneq(__m256 x, __m256 y) noexcept
+    { return _mm256_cmp_ps(x,y,_CMP_NEQ_UQ); }
+    inline __m256d always_inline cmpneq(__m256d x, __m256d y) noexcept
+    { return _mm256_cmp_pd(x,y,_CMP_NEQ_UQ); }
+# endif
+
+    ///
+    /// less than
+    ///
+    inline __m128 always_inline cmplt(__m128 x, __m128 y) noexcept
+    { return _mm_cmplt_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline cmplt(__m128d x, __m128d y) noexcept
+    { return _mm_cmplt_pd(x,y); }
+    inline __m128i always_inline cmplt(__m128i x, __m128i y) noexcept
+    { return _mm_cmplt_epi32(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline cmplt(__m256 x, __m256 y) noexcept
+    { return _mm256_cmp_ps(x,y,_CMP_LT_UQ); }
+    inline __m256d always_inline cmplt(__m256d x, __m256d y) noexcept
+    { return _mm256_cmp_pd(x,y,_CMP_LT_UQ); }
+# endif
+# ifdef __AVX2__
+    inline __m256i always_inline cmpgt(__m256i x, __m256i y) noexcept
+    { return _mm256_cmpgt_epi32(y,x); }
+# endif
+
+    ///
+    /// less than or equal
+    ///
+    inline __m128 always_inline cmple(__m128 x, __m128 y) noexcept
+    { return _mm_cmple_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline cmple(__m128d x, __m128d y) noexcept
+    { return _mm_cmple_pd(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline cmple(__m256 x, __m256 y) noexcept
+    { return _mm256_cmp_ps(x,y,_CMP_LE_UQ); }
+    inline __m256d always_inline cmple(__m256d x, __m256d y) noexcept
+    { return _mm256_cmp_pd(x,y,_CMP_LE_UQ); }
+# endif
+
+    ///
+    /// greater than
+    ///
+    inline __m128 always_inline cmpgt(__m128 x, __m128 y) noexcept
+    { return _mm_cmpgt_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline cmpgt(__m128d x, __m128d y) noexcept
+    { return _mm_cmpgt_pd(x,y); }
+    inline __m128i always_inline cmpgt(__m128i x, __m128i y) noexcept
+    { return _mm_cmpgt_epi32(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline cmpgt(__m256 x, __m256 y) noexcept
+    { return _mm256_cmp_ps(x,y,_CMP_GT_UQ); }
+    inline __m256d always_inline cmpgt(__m256d x, __m256d y) noexcept
+    { return _mm256_cmp_pd(x,y,_CMP_GT_UQ); }
+# endif
+# ifdef __AVX2__
+    inline __m256i always_inline cmpgt(__m256i x, __m256i y) noexcept
+    { return _mm256_cmpgt_epi32(x,y); }
+# endif
+
+    ///
+    /// grater than or equal
+    ///
+    inline __m128 always_inline cmpge(__m128 x, __m128 y) noexcept
+    { return _mm_cmpge_ps(x,y); }
+# ifdef __SSE2__
+    inline __m128d always_inline cmpge(__m128d x, __m128d y) noexcept
+    { return _mm_cmpge_pd(x,y); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline cmpge(__m256 x, __m256 y) noexcept
+    { return _mm256_cmp_ps(x,y,_CMP_GE_UQ); }
+    inline __m256d always_inline cmpge(__m256d x, __m256d y) noexcept
+    { return _mm256_cmp_pd(x,y,_CMP_GE_UQ); }
+# endif
+
+    ///
+    /// integer whose bits are the sign bits of the operand
+    ///
+    inline int always_inline movemask(__m128 x) noexcept
+    { return _mm_movemask_ps(x); }
+# ifdef __SSE2__
+    inline int always_inline movemask(__m128d x) noexcept
+    { return _mm_movemask_pd(x); }
+    inline int always_inline movemask(__m128i x) noexcept
+    { return _mm_movemask_ps(_mm_castsi128_ps(x)); }
+# endif
+# ifdef __AVX__
+    inline int always_inline movemask(__m256 x) noexcept
+    { return _mm256_movemask_ps(x); }
+    inline int always_inline movemask(__m256d x) noexcept
+    { return _mm256_movemask_pd(x); }
+    inline int always_inline movemask(__m256i x) noexcept
+    { return _mm256_movemask_ps(_mm256_castsi256_ps(x)); }
+# endif
+
+    ///
+    /// horizontal sum
+    ///
+    inline float always_inline sum(__m128 x) noexcept
+    {
+# if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+      __v4sf a,t,s;
+      a = x;
+      t = __builtin_ia32_shufps(a,a,_MM_SHUFFLE (2,3,0,1));
+      s = __builtin_ia32_addps(a,t);
+      t = __builtin_ia32_movhlps(s,s);
+      s = __builtin_ia32_addps(s,t);
+      return __builtin_ia32_vec_ext_v4sf(s,0);
+# else
+      __m128 s = _mm_add_ps(x,_mm_shuffle_ps(x,x,_MM_SHUFFLE (2,3,0,1)));
+      return _mm_cvtss_f32(_mm_add_ps(s,_mm_movehl_ps(s,s)));
+# endif
+    }
+# ifdef __SSE2__
+    inline int always_inline sum(__m128i x) noexcept
+    {
+      __m128i s;
+      s = _mm_add_epi32(x,_mm_shuffle_epi32(x,_MM_SHUFFLE (2,3,0,1)));
+      WDutils::meta::float_and_int tmp;
+//       tmp.x = _mm_cvtss_f32
+// 	(reinterpret_cast<__m128>
+// 	 (_mm_add_epi32(s,reinterpret_cast<__m128i>
+// 			(_mm_movehl_ps(reinterpret_cast<__m128>(s),
+// 				       reinterpret_cast<__m128>(s))))));
+      tmp.f = _mm_cvtss_f32
+	(_mm_castsi128_ps(_mm_add_epi32(s,_mm_castps_si128
+					(_mm_movehl_ps(_mm_castsi128_ps(s),
+						       _mm_castsi128_ps(s))))));
+      return tmp.i;
+    }
+# endif
+
+    ///
+    /// horizontal sum in each element
+    ///
+    inline __m128 always_inline hadd(__m128 x) noexcept
+    {
+# if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+      __v4sf a,t,s;
+      a = x;
+      t = __builtin_ia32_shufps(a,a,_MM_SHUFFLE (2,3,0,1));
+      s = __builtin_ia32_addps(a,t);
+      t = __builtin_ia32_shufps(s,s,_MM_SHUFFLE (1,0,3,2));
+      return __builtin_ia32_addps(s,t);
+# else
+      __m128 s = _mm_add_ps(x,_mm_shuffle_ps(x,x,_MM_SHUFFLE (2,3,0,1)));
+      return _mm_add_ps(s,_mm_shuffle_ps(s,s,_MM_SHUFFLE (1,0,3,2)));
+# endif
+    }
+
+    ///
+    /// horizontal maximum
+    ///
+    inline float always_inline max(__m128 x) noexcept
+    {
+# if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+      __v4sf a,t,s;
+      a = x;
+      t = __builtin_ia32_shufps(a,a,_MM_SHUFFLE (2,3,0,1));
+      s = __builtin_ia32_maxps(a,t);
+      t = __builtin_ia32_movhlps(s,s);
+      s = __builtin_ia32_maxps(s,t);
+      return __builtin_ia32_vec_ext_v4sf(s,0);
+# else
+      __m128 s = _mm_max_ps(x,_mm_shuffle_ps(x,x,_MM_SHUFFLE (2,3,0,1)));
+      return _mm_cvtss_f32(_mm_max_ps(s,_mm_movehl_ps(s,s)));
+# endif
+    }
+
+    ///
+    /// horizontal minimum
+    ///
+    inline float always_inline min(__m128 x) noexcept
+    {
+# if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+      __v4sf a,t,s;
+      a = x;
+      t = __builtin_ia32_shufps(a,a,_MM_SHUFFLE (2,3,0,1));
+      s = __builtin_ia32_minps(a,t);
+      t = __builtin_ia32_movhlps(s,s);
+      s = __builtin_ia32_minps(s,t);
+      return __builtin_ia32_vec_ext_v4sf(s,0);
+# else
+      __m128 s = _mm_min_ps(x,_mm_shuffle_ps(x,x,_MM_SHUFFLE (2,3,0,1)));
+      return _mm_cvtss_f32(_mm_min_ps(s,_mm_movehl_ps(s,s)));
+# endif
+    }
+# ifdef __SSE2__
+    inline int always_inline min(__m128i x) noexcept
+    // a poor man's implementation
+    {
+      union WDutils__align16 {
+	int32_t i[4];
+	float   x[4];
+      } tmp;
+      _mm_store_ps(tmp.x,_mm_castsi128_ps(x));
+      int m=tmp.i[0];
+      if(tmp.i[1]<m) m=tmp.i[1];
+      if(tmp.i[2]<m) m=tmp.i[2];
+      if(tmp.i[3]<m) m=tmp.i[3];
+      return m;
+    }
+# endif
+    ///
+    /// return vector with elements equal to zero
+    ///
+    template<typename vec>
+    inline vec always_inline zero() noexcept
+    { return aux::VecOps<vec>::zero(); }
+
+    ///
+    /// return vector with all elements equal to one
+    ///
+    template<typename vec>
+    inline vec always_inline one() noexcept
+    { return aux::VecOps<vec>::one(); }
+
+    ///
+    /// return vector with all elements equal to same value
+    ///
+    template<typename vec>
+    inline vec always_inline set(const typename aux::VecOps<vec>::single_type x)
+      noexcept
+    { return aux::VecOps<vec>::set(x); }
+
+    ///
+    /// return vector with elements equal to given values
+    ///
+    inline __m128 always_inline set(const float x, const float y,
+				    const float z, const float w) noexcept
+    { return _mm_set_ps(x,y,z,w); }
+# ifdef __SSE2__
+    inline __m128d always_inline set(const double x, const double y) noexcept
+    { return _mm_set_pd(x,y); }
+    inline __m128i always_inline set(const int x, const int y,
+				     const int z, const int w) noexcept
+    { return _mm_set_epi32(x,y,z,w); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline set(const float a, const float b,
+				    const float d, const float d,
+				    const float e, const float f,
+				    const float g, const float h) noexcept
+    { return _mm256_set_ps(a,b,c,d,e,f,g,h); }
+    inline __m256d always_inline set(const double x, const double y,
+				     const double z, const double w) noexcept
+    { return _mm256_set_pd(x,y,z,w); }
+    inline __m256i always_inline set(const int a, const int b,
+				     const int d, const int d,
+				     const int e, const int f,
+				     const int g, const int h) noexcept
+    { return _mm256_set_epi32(a,b,c,d,e,f,g,h); }
+# endif
+
+    ///
+    /// return vector with elements equal to given values in reverse order
+    ///
+    inline __m128 always_inline setr(const float x, const float y,
+				     const float z, const float w) noexcept
+    { return _mm_setr_ps(x,y,z,w); }
+# ifdef __SSE2__
+    inline __m128d always_inline setr(const double x, const double y) noexcept
+    { return _mm_setr_pd(x,y); }
+    inline __m128i always_inline setr(const int x, const int y,
+				      const int z, const int w) noexcept
+    { return _mm_setr_epi32(x,y,z,w); }
+# endif
+# ifdef __AVX__
+    inline __m256 always_inline setr(const float a, const float b,
+				     const float d, const float d,
+				     const float e, const float f,
+				     const float g, const float h) noexcept
+    { return _mm256_setr_ps(a,b,c,d,e,f,g,h); }
+    inline __m256d always_inline setr(const double x, const double y,
+				      const double z, const double w) noexcept
+    { return _mm256_setr_pd(x,y,z,w); }
+    inline __m256i always_inline setr(const int a, const int b,
+				      const int d, const int d,
+				      const int e, const int f,
+				      const int g, const int h) noexcept
+    { return _mm256_setr_epi32(a,b,c,d,e,f,g,h); }
+# endif
+
+    ///
+    /// load vector from aligned memory
+    ///
+    template<typename vec>
+    inline vec always_inline
+    load(const typename aux::VecOps<vec>::single_type*p)
+    { return aux::VecOps<vec>::load(p); }
+
+    ///
+    /// load vector from unaligned memory
+    ///
+    template<typename vec>
+    inline vec always_inline
+    loadu(const typename aux::VecOps<vec>::single_type*p)
+    { return aux::VecOps<vec>::loadu(p); }
+
+    ///
+    /// \name store vector to aligned memory
+    ///
+    inline void always_inline store(float*p, __m128 x) noexcept
+    { _mm_store_ps(p,x); }
+# ifdef __SSE2__
+    inline void always_inline store(double*p, __m128d x) noexcept
+    { _mm_store_pd(p,x); }
+    inline void always_inline store(int32_t*p, __m128i x) noexcept
+    { _mm_store_ps(reinterpret_cast<float*>(p), _mm_castsi128_ps(x)); }
+# endif
+# ifdef __AVX__
+    inline void always_inline store(float*p, __m256 x) noexcept
+    { _mm256_store_ps(p,x); }
+    inline void always_inline store(double*p, __m256d x) noexcept
+    { _mm256_store_pd(p,x); }
+    inline void always_inline store(int32_t*p, __m128i x) noexcept
+    { _mm256_store_ps(reinterpret_cast<float*>(p), _mm256_castsi256_ps(x)); }
+# endif
+
+    ///
+    /// \name store vector to unaligned memory
+    ///
+    inline void always_inline storeu(float*p, __m128 x) noexcept
+    { _mm_storeu_ps(p,x); }
+# ifdef __SSE2__
+    inline void always_inline storeu(double*p, __m128d x) noexcept
+    { _mm_storeu_pd(p,x); }
+    inline void always_inline storeu(int*p, __m128i x) noexcept
+    { _mm_storeu_ps(reinterpret_cast<float*>(p), _mm_castsi128_ps(x)); }
+# endif
+# ifdef __AVX__
+    inline void always_inline storeu(float*p, __m256 x) noexcept
+    { _mm256_storeu_ps(p,x); }
+    inline void always_inline storeu(double*p, __m256d x) noexcept
+    { _mm256_storeu_pd(p,x); }
+    inline void always_inline storeu(int32_t*p, __m128i x) noexcept
+    { _mm256_storeu_ps(reinterpret_cast<float*>(p), _mm256_castsi256_ps(x)); }
+# endif
+    ///
+    /// conversions (not just casts) between vector types
+    ///
+# ifdef __SSE2__
+    /// convert two pairs of double to four packed float
+    inline __m128 always_inline convert(__m128d x, __m128d y) noexcept
+    { return _mm_movelh_ps(_mm_cvtpd_ps(x),_mm_cvtpd_ps(y)); }
+# endif
+# ifdef __AVX__
+    inline __m128 always_inline convert(__m256d x) noexcept
+    { return _mm256_cvtpd_ps(x); }
+    inline __m256 always_inline convert(__m256d x, __m256d x) noexcept
+    { return _mm256_insertf128_ps(_mm256_castps128_ps256(_mm256_cvtpd_ps(x)),
+				  _mm256_cvtpd_ps(y),1); }
+    //@}
+# endif
+    //@}
+#endif//__SSE__
+  } // namespace SSE
+  //
+#ifdef __SSE__
+
+# ifdef __INTEL_COMPILER
+  ///
+  /// \name SSE/AVX operators
+  //@{
+
+  ///
+  /// x+=y
+  ///
+  inline __m128& always_inline operator+=(__m128&x, __m128 y) noexcept
+  { return x = _mm_add_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d& always_inline operator+=(__m128d&x, __m128d y) noexcept
+  { return x = _mm_add_pd(x,y); }
+  inline __m128i& always_inline operator+=(__m128i&x, __m128i y) noexcept
+  { return x = _mm_add_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256& always_inline operator+=(__m256&x, __m256 y) noexcept
+  { return x = _mm256_add_ps(x,y); }
+  inline __m256d& always_inline operator+=(__m256d&x, __m256d y) noexcept
+  { return x = _mm256_add_pd(x,y); }
+#  endif
+# ifdef __AVX2__
+  inline __m256i& always_inline operator+=(__m256i&x, __m256i y) noexcept
+  { return x = _mm256_add_epi32(x,y); }
+# endif
+
+  ///
+  /// x+y
+  ///
+  inline __m128 always_inline operator+(__m128 x, __m128 y) noexcept
+  { return _mm_add_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator+(__m128d x, __m128d y) noexcept
+  { return _mm_add_pd(x,y); }
+  inline __m128i always_inline operator+(__m128i x, __m128i y) noexcept
+  { return _mm_add_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator+(__m256 x, __m256 y) noexcept
+  { return _mm256_add_ps(x,y); }
+  inline __m256d always_inline operator+(__m256d x, __m256d y) noexcept
+  { return _mm256_add_pd(x,y); }
+#  endif
+# ifdef __AVX2__
+  inline __m256i always_inline operator+(__m256i x, __m256i y) noexcept
+  { return _mm256_add_epi32(x,y); }
+# endif
+
+  ///
+  /// x-=y
+  ///
+  inline __m128& always_inline operator-=(__m128&x, __m128 y) noexcept
+  { return x = _mm_sub_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d& always_inline operator-=(__m128d&x, __m128d y) noexcept
+  { return x = _mm_sub_pd(x,y); }
+  inline __m128i& always_inline operator-=(__m128i&x, __m128i y) noexcept
+  { return x = _mm_sub_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256& always_inline operator-=(__m256&x, __m256 y) noexcept
+  { return x = _mm256_sub_ps(x,y); }
+  inline __m256d& always_inline operator-=(__m256d&x, __m256d y) noexcept
+  { return x = _mm256_sub_pd(x,y); }
+#  endif
+#  ifdef __AVX2__
+  inline __m256i& always_inline operator-(__m256i&x, __m256i y) noexcept
+  { return x = _mm256_sub_epi32(x,y); }
+#  endif
+
+  ///
+  /// x-y
+  ///
+  inline __m128 always_inline operator-(__m128 x, __m128 y) noexcept
+  { return _mm_sub_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator-(__m128d x, __m128d y) noexcept
+  { return _mm_sub_pd(x,y); }
+  inline __m128i always_inline operator-(__m128i x, __m128i y) noexcept
+  { return _mm_sub_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator-(__m256 x, __m256 y) noexcept
+  { return _mm256_sub_ps(x,y); }
+  inline __m256d always_inline operator-(__m256d x, __m256d y) noexcept
+  { return _mm256_sub_pd(x,y); }
+#  endif
+#  ifdef __AVX2__
+  inline __m256i always_inline operator-(__m256i x, __m256i y) noexcept
+  { return _mm256_sub_epi32(x,y); }
+#  endif
+
+  ///
+  /// -x
+  ///
+  inline __m128 always_inline operator-(__m128 x) noexcept
+  { return _mm_xor_ps(x,sgn_mask_ps); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator-(__m128d x) noexcept
+  { return _mm_xor_pd(x,sgn_mask_pd); }
+  inline __m128i always_inline operator-(__m128i x) noexcept
+  { return _mm_xor_si128(x,sign_mask_pi); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator-(__m256 x) noexcept
+  { return _mm256_xor_ps(x,sgn_mask_qs); }
+  inline __m256d always_inline operator-(__m256d x) noexcept
+  { return _mm256_xor_pd(x,sgn_mask_qd); }
+  inline __m256i always_inline operator-(__m256i x) noexcept
+#   ifdef __AVX2__
+  { return _mm256_xor_si256(x,sgn_mask_qi); }
+#   else
+  { return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(x),
+					     sgn_mask_qs)); }
+#   endif
+#  endif
+
+  ///
+  /// x*=y
+  ///
+  inline __m128& always_inline operator*=(__m128&x, __m128 y) noexcept
+  { return x = _mm_mul_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d& always_inline operator*=(__m128d&x, __m128d y) noexcept
+  { return x = _mm_mul_pd(x,y); }
+  inline __m128i& always_inline operator*=(__m128i&x, __m128i y) noexcept
+  { return x = _mm_mul_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256& always_inline operator*=(__m256&x, __m256 y) noexcept
+  { return x = _mm256_mul_ps(x,y); }
+  inline __m256d& always_inline operator*=(__m256d&x, __m256d y) noexcept
+  { return x = _mm256_mul_pd(x,y); }
+#  endif
+#  ifdef __AVX2__
+  inline __m256i& always_inline operator*=(__m256i&x, __m256i y) noexcept
+  { return x = _mm256_mul_epi32(x,y); }
+#  endif
+
+  ///
+  /// x*y
+  ///
+  inline __m128 always_inline operator*(__m128 x, __m128 y) noexcept
+  { return _mm_mul_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator*(__m128d x, __m128d y) noexcept
+  { return _mm_mul_pd(x,y); }
+  inline __m128i always_inline operator*(__m128i x, __m128i y) noexcept
+  { return _mm_mul_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator*(__m256 x, __m256 y) noexcept
+  { return _mm256_mul_ps(x,y); }
+  inline __m256d always_inline operator*(__m256d x, __m256d y) noexcept
+  { return _mm256_mul_pd(x,y); }
+#  endif
+#  ifdef __AVX2__
+  inline __m256i always_inline operator*(__m256i x, __m256i y) noexcept
+  { return _mm256_mul_epi32(x,y); }
+#  endif
+
+  ///
+  /// x/=y
+  ///
+  inline __m128& always_inline operator/=(__m128&x, __m128 y) noexcept
+  { return x = _mm_div_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d& always_inline operator/=(__m128d&x, __m128d y) noexcept
+  { return x = _mm_div_pd(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256& always_inline operator/=(__m256&x, __m256 y) noexcept
+  { return x = _mm256_div_ps(x,y); }
+  inline __m256d& always_inline operator/=(__m256d&x, __m256d y) noexcept
+  { return x = _mm256_div_pd(x,y); }
+#  endif
+
+  ///
+  /// x/y
+  ///
+  inline __m128 always_inline operator/(__m128 x, __m128 y) noexcept
+  { return _mm_div_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator/(__m128d x, __m128d y) noexcept
+  { return _mm_div_pd(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator/(__m256 x, __m256 y) noexcept
+  { return _mm256_div_ps(x,y); }
+  inline __m256d always_inline operator/(__m256d x, __m256d y) noexcept
+  { return _mm256_div_pd(x,y); }
+#  endif
+
+  ///
+  /// x&=y
+  ///
+  inline __m128& always_inline operator&=(__m128&x, __m128 y) noexcept
+  { return x = _mm_and_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d& always_inline operator&=(__m128d&x, __m128d y) noexcept
+  { return x = _mm_and_pd(x,y); }
+  inline __m128i& always_inline operator&=(__m128i&x, __m128i y) noexcept
+  { return x = _mm_and_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256& always_inline operator&=(__m256&x, __m256 y) noexcept
+  { return x = _mm256_and_ps(x,y); }
+  inline __m256d& always_inline operator&=(__m256d&x, __m256d y) noexcept
+  { return x = _mm256_and_pd(x,y); }
+  inline __m256i&always_inline operator&=(__m256i&x, __m256d y) noexcept
+#   ifdef __AVX2__
+  { return x = _mm256_and_si256(x,y); }
+#   else
+  { return x = _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(x),
+						 _mm256_castsi256_ps(y))); }
+#   endif
+#  endif
+
+  ///
+  /// x&y
+  ///
+  inline __m128 always_inline operator&(__m128 x, __m128 y) noexcept
+  { return _mm_and_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator&(__m128d x, __m128d y) noexcept
+  { return _mm_and_pd(x,y); }
+  inline __m128i always_inline operator&(__m128i x, __m128i y) noexcept
+  { return _mm_and_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator&(__m256 x, __m256 y) noexcept
+  { return _mm256_and_ps(x,y); }
+  inline __m256d always_inline operator&(__m256d x, __m256d y) noexcept
+  { return _mm256_and_pd(x,y); }
+  inline __m256i always_inline operator&(__m256i x, __m256d y) noexcept
+#   ifdef __AVX2__
+  { return _mm256_and_si256(x,y); }
+#   else
+  { return _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(x),
+					     _mm256_castsi256_ps(y))); }
+#   endif
+#  endif
+
+  ///
+  /// x|=y
+  ///
+  inline __m128& always_inline operator|=(__m128&x, __m128 y) noexcept
+  { return x = _mm_or_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d& always_inline operator|=(__m128d&x, __m128d y) noexcept
+  { return x = _mm_or_pd(x,y); }
+  inline __m128i& always_inline operator|=(__m128i&x, __m128i y) noexcept
+  { return x = _mm_or_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256& always_inline operator|=(__m256&x, __m256 y) noexcept
+  { return x = _mm256_or_ps(x,y); }
+  inline __m256d& always_inline operator|=(__m256d&x, __m256d y) noexcept
+  { return x = _mm256_or_pd(x,y); }
+  inline __m256i&always_inline operator|=(__m256i& x, __m256i y) noexcept
+#   ifdef __AVX2__
+  { return x = _mm256_or_si256(x,y); }
+#   else
+  { return x = _mm256_castps_si256(_mm256_or_ps(_mm256_castsi256_ps(x),
+						_mm256_castsi256_ps(y))); }
+#   endif
+#  endif
+
+  ///
+  /// x|y
+  ///
+  inline __m128 always_inline operator|(__m128 x, __m128 y) noexcept
+  { return _mm_or_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator|(__m128d x, __m128d y) noexcept
+  { return _mm_or_pd(x,y); }
+  inline __m128i always_inline operator|(__m128i x, __m128i y) noexcept
+  { return _mm_or_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator|(__m256 x, __m256 y) noexcept
+  { return _mm256_or_ps(x,y); }
+  inline __m256d always_inline operator|(__m256d x, __m256d y) noexcept
+  { return _mm256_or_pd(x,y); }
+  inline __m256i always_inline operator|(__m256i x, __m256i y) noexcept
+#   ifdef __AVX2__
+  { return _mm256_or_si256(x,y); }
+#   else
+  { return _mm256_castps_si256(_mm256_or_ps(_mm256_castsi256_ps(x),
+					    _mm256_castsi256_ps(y))); }
+#   endif
+#  endif
+
+  ///
+  /// x^=y
+  ///
+  inline __m128& always_inline operator^=(__m128&x, __m128 y) noexcept
+  { return x = _mm_xor_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d& always_inline operator^=(__m128d&x, __m128d y) noexcept
+  { return x = _mm_xor_pd(x,y); }
+  inline __m128i& always_inline operator^=(__m128i&x, __m128i y) noexcept
+  { return x = _mm_xor_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256& always_inline operator^=(__m256&x, __m256 y) noexcept
+  { return x = _mm256_xor_ps(x,y); }
+  inline __m256d& always_inline operator^=(__m256d&x, __m256d y) noexcept
+  { return x = _mm256_xor_pd(x,y); }
+  inline __m256i& always_inline operator^=(__m256i& x, __m256i y) noexcept
+#   ifdef __AVX2__
+  { return x = _mm256_xor_si256(x,y); }
+#   else
+  { return x = _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(x),
+						 _mm256_castsi256_ps(y))); }
+#   endif
+#  endif
+
+  ///
+  /// x^y
+  ///
+  inline __m128 always_inline operator^(__m128 x, __m128 y) noexcept
+  { return _mm_xor_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator^(__m128d x, __m128d y) noexcept
+  { return _mm_xor_pd(x,y); }
+  inline __m128i always_inline operator^(__m128i x, __m128i y) noexcept
+  { return _mm_xor_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator^(__m256 x, __m256 y) noexcept
+  { return _mm256_xor_ps(x,y); }
+  inline __m256d always_inline operator^(__m256d x, __m256d y) noexcept
+  { return _mm256_xor_pd(x,y); }
+  inline __m256i always_inline operator^(__m256i x, __m256i y) noexcept
+#   ifdef __AVX2__
+  { return _mm256_xor_si256(x,y); }
+#   else
+  { return _mm256_castps_si256(_mm256_xor_ps(_mm256_castsi256_ps(x),
+					     _mm256_castsi256_ps(y))); }
+#   endif
+#  endif
+
+  ///
+  /// x < y
+  ///
+  inline __m128 always_inline operator<(__m128 x, __m128 y) noexcept
+  { return _mm_cmplt_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator<(__m128d x, __m128d y) noexcept
+  { return _mm_cmplt_pd(x,y); }
+  inline __m128i always_inline operator<(__m128i x, __m128i y) noexcept
+  { return _mm_cmplt_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator<(__m256 x, __m256 y) noexcept
+  { return _mm256_cmp_ps(x,y,_CMP_LT_UQ); }
+  inline __m256d always_inline operator<(__m256d x, __m256d y) noexcept
+  { return _mm256_cmp_pd(x,y,_CMP_LT_UQ); }
+#  endif
+#  ifdef __AVX2__
+  inline __m256i always_inline operator<(__m256i x, __m256i y) noexcept
+  { return _mm256_cmpgt_epi32(y,x); }
+#  endif
+
+  ///
+  /// x <= y
+  ///
+  inline __m128 always_inline operator<=(__m128 x, __m128 y) noexcept
+  { return _mm_cmple_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator<=(__m128d x, __m128d y) noexcept
+  { return _mm_cmple_pd(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator<=(__m256 x, __m256 y) noexcept
+  { return _mm256_cmp_pd(x,y,_CMP_LE_UQ); }
+  inline __m256d always_inline operator<=(__m256d x, __m256d y) noexcept
+  { return _mm256_cmp_pd(x,y,_CMP_LE_UQ); }
+#  endif
+
+  ///
+  /// x > y
+  ///
+  inline __m128 always_inline operator>(__m128 x, __m128 y) noexcept
+  { return _mm_cmpgt_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator>(__m128d x, __m128d y) noexcept
+  { return _mm_cmpgt_pd(x,y); }
+  inline __m128i always_inline operator>(__m128i x, __m128i y) noexcept
+  { return _mm_cmpgt_epi32(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator>(__m256 x, __m256 y) noexcept
+  { return _mm256_cmp_ps(x,y,_CMP_GT_UQ); }
+  inline __m256d always_inline operator>(__m256d x, __m256d y) noexcept
+  { return _mm256_cmp_pd(x,y,_CMP_GT_UQ); }
+#  endif
+#  ifdef __AVX2__
+  inline __m256i always_inline operator>(__m256i x, __m256i y) noexcept
+  { return _mm256_cmpgt_epi32(x,y); }
+#  endif
+
+  ///
+  /// x >= y
+  ///
+  inline __m128 always_inline operator>=(__m128 x, __m128 y) noexcept
+  { return _mm_cmpge_ps(x,y); }
+#  ifdef __SSE2__
+  inline __m128d always_inline operator>=(__m128d x, __m128d y) noexcept
+  { return _mm_cmpge_pd(x,y); }
+#  endif
+#  ifdef __AVX__
+  inline __m256 always_inline operator>=(__m256 x, __m256 y) noexcept
+  { return _mm256_cmp_ps(x,y,_CMP_GE_UQ); }
+  inline __m256d always_inline operator>=(__m256d x, __m256d y) noexcept
+  { return _mm256_cmp_pd(x,y,_CMP_GE_UQ); }
+#  endif
+  
+  //@}
+# endif // __INTEL_COMPILER
+# undef abs_mask_pi
+# undef sgn_mask_pi
+# undef abs_mask_ps
+# undef sgn_mask_ps
+# undef abs_mask_pd
+# undef sgn_mask_pd
+# undef abs_mask_qi
+# undef sgn_mask_qi
+# undef abs_mask_qs
+# undef sgn_mask_qs
+# undef abs_mask_qd
+# undef sgn_mask_qd
+
+  //
+# ifdef __INTEL_COMPILER
+  inline float xmm0(__m128 _A)
+  {
+    union { float f; int i; } tmp;
+    tmp.i = _mm_extract_ps(_A,0);
+    return tmp.f;
+  }
+  inline float xmm1(__m128 _A)
+  {
+    union { float f; int i; } tmp;
+    tmp.i = _mm_extract_ps(_A,1);
+    return tmp.f;
+  }
+  inline float xmm2(__m128 _A)
+  {
+    union { float f; int i; } tmp;
+    tmp.i = _mm_extract_ps(_A,2);
+    return tmp.f;
+  }
+  inline float xmm3(__m128 _A)
+  {
+    union { float f; int i; } tmp;
+    tmp.i = _mm_extract_ps(_A,3);
+    return tmp.f;
+  }
+#  ifdef __SSE2__
+  inline double xmm0(__m128d _A)
   {
     union { double x; long long int i; } tmp;
-    tmp.i = _mm_extract_ps(__A,0);
+    tmp.i = _mm_extract_ps(_A,0);
     return tmp.x;
   }
-  inline double xmm1(__m128d __A)
+  inline double xmm1(__m128d _A)
   {
     union { double x; long long int i; } tmp;
-    tmp.i = _mm_extract_ps(__A,1);
+    tmp.i = _mm_extract_ps(_A,1);
     return tmp.x;
   }
-# endif// __SSE2__
-#elif defined(__GNUC__)  // __INTEL_COMPILER / __GNUC__
-  inline float xmm0(__m128 __A)
-  { return __builtin_ia32_vec_ext_v4sf(__A,0); }
-  inline float xmm1(__m128 __A)
-  { return __builtin_ia32_vec_ext_v4sf(__A,1); }
-  inline float xmm2(__m128 __A)
-  { return __builtin_ia32_vec_ext_v4sf(__A,2); }
-  inline float xmm3(__m128 __A)
-  { return __builtin_ia32_vec_ext_v4sf(__A,3); }
-# ifdef __SSE2__
-  inline double xmm0(__m128d __A)
-  { return __builtin_ia32_vec_ext_v2df(__A,0); }
-  inline double xmm1(__m128d __A)
-  { return __builtin_ia32_vec_ext_v2df(__A,1); }
-# endif// __SSE2__
-#endif // __INTEL_COMPILER / __GNUC__
+#  endif// __SSE2__
+# elif defined(__GNUC__)  // __INTEL_COMPILER / __GNUC__
+  inline float xmm0(__m128 _A)
+  { return __builtin_ia32_vec_ext_v4sf(_A,0); }
+  inline float xmm1(__m128 _A)
+  { return __builtin_ia32_vec_ext_v4sf(_A,1); }
+  inline float xmm2(__m128 _A)
+  { return __builtin_ia32_vec_ext_v4sf(_A,2); }
+  inline float xmm3(__m128 _A)
+  { return __builtin_ia32_vec_ext_v4sf(_A,3); }
+#  ifdef __SSE2__
+  inline double xmm0(__m128d _A)
+  { return __builtin_ia32_vec_ext_v2df(_A,0); }
+  inline double xmm1(__m128d _A)
+  { return __builtin_ia32_vec_ext_v2df(_A,1); }
+#  endif// __SSE2__
+# endif // __INTEL_COMPILER / __GNUC__
 }
 #endif // __SSE__
-
+//
+#undef noexcept
+#undef constexpr
 //
 
 #ifndef WDutils_included_meta_h
@@ -219,140 +1648,34 @@ namespace WDutils {
 #  include <cstring>
 #endif
 
+
 namespace WDutils {
-
-#ifdef __SSE__
-  /// horizontal sum: A0+A1+A2+A3.
-  /// compute in each SPFP value the sum of the four SPFP values from argument:
-  /// result: [A0+A1+A2+A3, A0+A1+A2+A3, A0+A1+A2+A3, A0+A1+A2+A3]
-  inline __m128 _mm_sum_ps(__m128 __A)
-  {
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-    __v4sf __a = reinterpret_cast<__v4sf>(__A), __t,__s;
-    __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
-    __s  = __builtin_ia32_addps(__a,__t);
-    __t  = __builtin_ia32_shufps(__s,__s,_MM_SHUFFLE (1,0,3,2));
-    return reinterpret_cast<__m128>(__builtin_ia32_addps(__s,__t));
-#else // gcc
-    __m128 __S;
-    __S =  _mm_add_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
-    return _mm_add_ps(__S,_mm_shuffle_ps(__S,__S,_MM_SHUFFLE (1,0,3,2)));
-#endif// gcc
-  }
-
-  /// horizontal sum: A0+A1+A2+A3.
-  /// extract the sum of the four SPFP values from argument
-  inline float _mm_getsum_ps(__m128 __A)
-  {
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-    __v4sf __a = reinterpret_cast<__v4sf>(__A), __t,__s;
-    __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
-    __s  = __builtin_ia32_addps(__a,__t);
-    __t  = __builtin_ia32_movhlps(__s,__s);
-    __s  = __builtin_ia32_addps(__s,__t);
-    return __builtin_ia32_vec_ext_v4sf(__s,0);
-#else // gcc
-    __m128 __S;
-    __S =  _mm_add_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
-    return _mm_cvtss_f32(_mm_add_ps(__S,_mm_movehl_ps(__S,__S)));
-#endif// gcc
-  }
-  /// horizontal maximum: max(A0,A1,A2,A3)
-  /// extract the max of the four SPFP values from argument
-  inline float _mm_getmax_ps(__m128 __A)
-  {
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-    __v4sf __a = reinterpret_cast<__v4sf>(__A), __t,__s;
-    __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
-    __s  = __builtin_ia32_maxps(__a,__t);
-    __t  = __builtin_ia32_movhlps(__s,__s);
-    __s  = __builtin_ia32_maxps(__s,__t);
-    return __builtin_ia32_vec_ext_v4sf(__s,0);
-#else // gcc
-    __m128 __S;
-    __S =  _mm_max_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
-    return _mm_cvtss_f32(_mm_max_ps(__S,_mm_movehl_ps(__S,__S)));
-#endif// gcc
-  }
-
-  /// horizontal minimum: min(A0,A1,A2,A3)
-  /// extract the min of the four SPFP values from argument
-  inline float _mm_getmin_ps(__m128 __A)
-  {
-#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-    __v4sf __a = reinterpret_cast<__v4sf>(__A), __t,__s;
-    __t  = __builtin_ia32_shufps(__a,__a,_MM_SHUFFLE (2,3,0,1));
-    __s  = __builtin_ia32_minps(__a,__t);
-    __t  = __builtin_ia32_movhlps(__s,__s);
-    __s  = __builtin_ia32_minps(__s,__t);
-    return __builtin_ia32_vec_ext_v4sf(__s,0);
-#else // gcc
-    __m128 __S;
-    __S =  _mm_min_ps(__A,_mm_shuffle_ps(__A,__A,_MM_SHUFFLE (2,3,0,1)));
-    return _mm_cvtss_f32(_mm_min_ps(__S,_mm_movehl_ps(__S,__S)));
-#endif// gcc
-  }
-
-#ifdef __SSE2__
-  /// horizontal minimum: min(A0,A1,A2,A3)
-  /// extract the min of the four packed 32-bit integer values from argument
-  inline int32_t _mm_getmin_epi32(__m128i __A)
-  {
-    union WDutils__align16 {
-      int   i[4];
-      float x[4];
-    } tmp;
-    _mm_store_ps(tmp.x,reinterpret_cast<__m128>(__A));
-    int m=tmp.i[0];
-    if(tmp.i[1]<m) m=tmp.i[1];
-    if(tmp.i[2]<m) m=tmp.i[2];
-    if(tmp.i[3]<m) m=tmp.i[3];
-    return m;
-  }
-  /// horizontal sum: A0+A1+A2+A3
-  /// extract the sum of the four packed 32-bit integer values from argument
-  inline int32_t _mm_getsum_epi32(__m128i __A)
-  {
-    __m128i __S;
-    __S =  _mm_add_epi32(__A,_mm_shuffle_epi32(__A,_MM_SHUFFLE (2,3,0,1)));
-    union { int32_t i; float x; } tmp;
-    tmp.x = _mm_cvtss_f32
-      (reinterpret_cast<__m128>
-       (_mm_add_epi32(__S,reinterpret_cast<__m128i>
-		      (_mm_movehl_ps(reinterpret_cast<__m128>(__S),
-				     reinterpret_cast<__m128>(__S))))));
-    return tmp.i;
-  }
-#endif// __SSE2__
-#endif// __SSE__
-
-  /// support for coding with SSE intrinsics, code using SSE intrinsics.
   namespace SSE {
 
-    template<int N> struct __Aux;
-    template<> struct __Aux<2> {
-      template<typename __I> static __I top(__I i) { return (i+1) & ~1; }
-      template<typename __I> static __I bot(__I i) { return i     & ~1; }
+    template<int N> struct _Aux;
+    template<> struct _Aux<2> {
+      template<typename _I> static _I top(_I i) { return (i+1) & ~1; }
+      template<typename _I> static _I bot(_I i) { return i     & ~1; }
     };
-    template<> struct __Aux<4> {
-      template<typename __I> static __I top(__I i) { return (i+3) & ~3; }
-      template<typename __I> static __I bot(__I i) { return i     & ~3; }
+    template<> struct _Aux<4> {
+      template<typename _I> static _I top(_I i) { return (i+3) & ~3; }
+      template<typename _I> static _I bot(_I i) { return i     & ~3; }
     };
-    template<> struct __Aux<8> {
-      template<typename __I> static __I top(__I i) { return (i+7) & ~7; }
-      template<typename __I> static __I bot(__I i) { return i     & ~7; }
+    template<> struct _Aux<8> {
+      template<typename _I> static _I top(_I i) { return (i+7) & ~7; }
+      template<typename _I> static _I bot(_I i) { return i     & ~7; }
     };
-    template<> struct __Aux<16> {
-      template<typename __I> static __I top(__I i) { return (i+15)& ~15; }
-      template<typename __I> static __I bot(__I i) { return i     & ~15; }
+    template<> struct _Aux<16> {
+      template<typename _I> static _I top(_I i) { return (i+15)& ~15; }
+      template<typename _I> static _I bot(_I i) { return i     & ~15; }
     };
 
     /// smallest multiple of N not less than i
-    template<int N, typename __I> inline
-    __I top(__I i) { return __Aux<N>::top(i); }
+    template<int N, typename _I> inline
+    _I top(_I i) { return _Aux<N>::top(i); }
     /// largest multiple of N not greater than i
-    template<int N, typename __I> inline
-    __I bottom(__I i) { return __Aux<N>::bot(i); }
+    template<int N, typename _I> inline
+    _I bottom(_I i) { return _Aux<N>::bot(i); }
 
     ///
     /// simple array manipulations for unaligned arrays
@@ -620,7 +1943,7 @@ namespace WDutils {
 
     /// contains some constants and code relevant for SSE coding
     /// instantinations for float and double
-    template<typename __F> struct Traits;
+    template<typename _F> struct Traits;
 
     /// SSE::Traits<float>
     template<> struct Traits<float>
@@ -637,11 +1960,11 @@ namespace WDutils {
       /// alignment number: K floats align to 128 bytes
       static const int K=4;
       /// smallest multiple of K not less than n
-      template<typename __I>
-      static __I Top(__I n) { return top<K,__I>(n); }
+      template<typename _I>
+      static _I Top(_I n) { return top<K,_I>(n); }
       /// largest multiple of K not greater than n
-      template<typename __I>
-      static __I Bottom(__I n) { return bottom<K,__I>(n); }
+      template<typename _I>
+      static _I Bottom(_I n) { return bottom<K,_I>(n); }
       /// is an array of floats aligned to at least 4 bytes (=sizeof(float))?
       static bool is_minimum_aligned(float*f) {
 	return (size_t(f) & 4)  == 0;
@@ -667,11 +1990,11 @@ namespace WDutils {
       /// alignment number: K floats align to 128 bytes
       static const int K=4;
       /// smallest multiple of K not less than n
-      template<typename __I>
-      static __I Top(__I n) { return top<K,__I>(n); }
+      template<typename _I>
+      static _I Top(_I n) { return top<K,_I>(n); }
       /// largest multiple of K not greater than n
-      template<typename __I>
-      static __I Bottom(__I n) { return bottom<K,__I>(n); }
+      template<typename _I>
+      static _I Bottom(_I n) { return bottom<K,_I>(n); }
       /// is an array of ints aligned to at least 4 bytes (=sizeof(int))?
       static bool is_minimum_aligned(int*f) {
 	return (size_t(f) & 4)  == 0;
@@ -697,11 +2020,11 @@ namespace WDutils {
       /// alignment number: K doubles align to 128 bytes
       static const int K=2;
       /// smallest multiple of K not less than n
-      template<typename __I>
-      static __I Top(__I n) { return top<K,__I>(n); }
+      template<typename _I>
+      static _I Top(_I n) { return top<K,_I>(n); }
       /// largest multiple of K not greater than n
-      template<typename __I>
-      static __I Bottom(__I n) { return bottom<K,__I>(n); }
+      template<typename _I>
+      static _I Bottom(_I n) { return bottom<K,_I>(n); }
       /// is an array of floats aligned to at least 8 bytes (=sizeof(double))?
       static bool is_minimum_aligned(double*f) {
 	return (size_t(f) & 8)  == 0;
@@ -711,15 +2034,15 @@ namespace WDutils {
 	return (size_t(f) & 16) == 0;
       }
     };
-    /// smallest multiple of 16/sizeof(__F) not less than i
-    template<typename __F, typename __I> inline
-    __I Top(__I i) {
-      return Traits<__F>::Top(i);
+    /// smallest multiple of 16/sizeof(_F) not less than i
+    template<typename _F, typename _I> inline
+    _I Top(_I i) {
+      return Traits<_F>::Top(i);
     }
-    /// largest multiple of 16/sizeof(__F) not greater than i
-    template<typename __F, typename __I> inline
-    __I Bottom(__I i) {
-      return Traits<__F>::Bottom(i);
+    /// largest multiple of 16/sizeof(_F) not greater than i
+    template<typename _F, typename _I> inline
+    _I Bottom(_I i) {
+      return Traits<_F>::Bottom(i);
     }
     ////////////////////////////////////////////////////////////////////////////
     /// An array of float or double supporting operations via SSE instructions
@@ -877,8 +2200,8 @@ namespace WDutils {
       }
       //@}
     };
-    /// filler object of size __S
-    template<size_t __S> class Filler { char __F[__S]; };
+    /// filler object of size _S
+    template<size_t _S> class Filler { char _F[_S]; };
     /// extend a given class to have size a multibple of 16-byte
     /// \note only default constructor possible for @a Base
     template<typename Base>
@@ -887,13 +2210,13 @@ namespace WDutils {
       static const size_t Bytes = sizeof(Base);
       static const size_t Splus = Bytes & 15;
       static const size_t Added = Splus? 16-Splus : 0;
-      Filler<Added> __Filler;
+      Filler<Added> _Filler;
     };
     //
 #ifdef __SSE__
     /// working horse actually implemented in sse.cc
     /// \note Not intended for consumption, use routine below instead.
-    void __swap16(float*a, float*b, size_t n);
+    void _swap16(float*a, float*b, size_t n);
     /// swap a multiple of 16 bytes at 16-byte aligned memory.
     /// \param[in] a   16-byte aligned memory address
     /// \param[in] b   16-byte aligned memory address
@@ -903,7 +2226,7 @@ namespace WDutils {
     ///       (segmentation fault) will result. If @a n is not a multiple of
     ///       16, the last @a n%16 bytes will not be swapped.
     inline void Swap16(void*a, void*b, size_t n)
-    { __swap16(static_cast<float*>(a),static_cast<float*>(b),n>>2); }
+    { _swap16(static_cast<float*>(a),static_cast<float*>(b),n>>2); }
     /// swaps 16-byte aligned objects with size a multiple of 16-bytes
     /// \param[in,out] x  pter to object, on return holds data of @a y
     /// \param[in,out] y  pter to object, on return holds data of @a x
@@ -914,8 +2237,8 @@ namespace WDutils {
     inline void SwapAligned(Object*a, Object*b)
     {
       WDutilsStaticAssert( sizeof(Object)%16 == 0 );
-      __swap16(reinterpret_cast<float*>(a), reinterpret_cast<float*>(b),
-	       sizeof(Object)>>2);
+      _swap16(reinterpret_cast<float*>(a), reinterpret_cast<float*>(b),
+	      sizeof(Object)>>2);
     }
 #endif
   } // namespace SSE

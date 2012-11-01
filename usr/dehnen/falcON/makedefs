@@ -77,6 +77,7 @@ endif
 
 # GNU compiler
 ifeq ($(COMPILER),gcc)
+LIMITED_WARNINGS	:= -Wextra -Winit-self 
 -include utils/make.gcc
 endif
 

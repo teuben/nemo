@@ -50,12 +50,10 @@
 #ifndef WDutils_included_cstdlib
 #  include <cstdlib>
 #endif
-#ifndef WDutils_included_cmalloc
-#  include <malloc.h>
-#endif
 
 #if __cplusplus < 201103L
 # define noexcept
+# define constexpr
 #endif
 
 namespace WDutils {
@@ -72,30 +70,31 @@ namespace WDutils {
   /// WDutilsAllocDebugLevel (default 8), we always print debugging
   /// information about memory allocation.
   ///
-  /// \return    a valid pointer (unless an error occurs) 
-  /// \param[in] n number of array elements
-  /// \param[in] f name of the source file where this routines is called
-  /// \param[in] l number of the line in that file 
-  /// \param[in] lib (optional) name of calling library (default: "WDutils")
+  /// \return         a valid pointer (unless an error occurs) 
+  /// \param[in] num  number of array elements to allocate
+  /// \param[in] file name of the source file where this routines is called
+  /// \param[in] line number of the line in that file 
+  /// \param[in] lib  (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  T* NewArray(size_t n, const char*c, const char*f, int l,
-	      const char*lib = "WDutils") WDutils_THROWING
+  T* NewArray(size_t num, const char*file, int line, const char*lib="WDutils")
+    WDutils_THROWING
   {
     T*t;
     bool failed=0;
     try {
-      t = new T[n];
+      t = new T[num];
     } catch(std::bad_alloc E) {
       t = 0;
       failed = 1;
     }
-    if(failed || (n && t==0))
-      throw Thrower(c,f,l)("allocation of %u '%s' (%u bytes) failed\n",
-			   uint32_t(n),nameof(T),uint32_t(n*sizeof(T)));
-    DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
-				"allocated %u %s = %u bytes @ %p\n",
-				uint32_t(n),nameof(T),uint32_t(n*sizeof(T)),
-				static_cast<void*>(t));
+    if(failed || (num && t==0))
+      throw Thrower(file,line)("allocation of %u '%s' (%u bytes) failed\n",
+			       uint32_t(num),nameof(T),uint32_t(num*sizeof(T)));
+    DebugInformation(file,line,lib)(WDutilsAllocDebugLevel,
+				    "allocated %u %s = %u bytes @ %p\n",
+				    uint32_t(num),nameof(T),
+				    uint32_t(num*sizeof(T)),
+				    static_cast<void*>(t));
     return t;
   }
   // ///////////////////////////////////////////////////////////////////////////
@@ -109,14 +108,14 @@ namespace WDutils {
   ///
   /// \param  TYPE name of the element type
   /// \param  SIZE number of elements
-#define WDutils_NEW(TYPE,SIZE) \
-  WDutils::NewArray<TYPE>(SIZE,WDutilsThisFunction,__FILE__,__LINE__)
-  template<typename T> struct __report
+#define WDutils_NEW(TYPE,SIZE)				\
+  WDutils::NewArray<TYPE>(SIZE,__FILE__,__LINE__)
+  template<typename T> struct _report
   {
     static bool report(int n) { return n>0; }
     static int  bytes (int n) { return n*sizeof(T); }
   };
-  template<> struct __report<void>
+  template<> struct _report<void>
   {
     static bool report(int) { return 0; }
     static int  bytes (int) { return 0; }
@@ -132,40 +131,37 @@ namespace WDutils {
   /// (default 8), we always print debugging information about memory
   /// de-allocation.
   ///                                                                           
-  /// \param[in] a  pointer previously allocated with WDutils::NewArray<>()
-  ///               or ::operator new[].
-  /// \param[in] f  name of the source file where this routines is called
-  /// \param[in] l  number of the line in that file
-  /// \param[in] lib (optional) name of calling library (default: "WDutils")
+  /// \param[in] array pointer previously allocated with WDutils::NewArray<>()
+  ///                  or ::operator new[].
+  /// \param[in] file  name of the source file where this routines is called
+  /// \param[in] line  number of the line in that file
+  /// \param[in] num   (optional) number of elements de-allocated
+  /// \param[in] lib   (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  void DelArray(T*a, const char*c, const char*f, int l,
-		int n=0, const char*lib = "WDutils") WDutils_THROWING
+  void DelArray(const T*array, const char*file, int line, int num=0,
+		const char*lib = "WDutils")
+    WDutils_THROWING
   {
-    if(0==a) {
-      Warning(c,f,l,lib)
-	("trying to delete zero pointer to array of '%s'",nameof(T));
+    if(0==array) {
+      Warning(file,line,lib)
+	("trying to delete zero pointer to array of '%s'", nameof(T));
       return;
     }
     try {
-      delete[] a;
+      delete[] array;
     } catch(...) {
-      throw Thrower(c,f,l)("de-allocating array of '%s' @ %p failed\n",
-			   nameof(T),a);
+      throw Thrower(file,line)
+	("de-allocating array of '%s' @ %p failed\n", nameof(T),array);
     }
-    if(__report<T>::report(n))
-      DebugInformation(c,f,l,lib)
+    if(_report<T>::report(num))
+      DebugInformation(file,line,lib)
 	(WDutilsAllocDebugLevel, "de-allocated array of %d %s [%d byes] @ %p\n",
-	 n, nameof(T), __report<T>::bytes(n), static_cast<void*>(a));
+	 num, nameof(T), _report<T>::bytes(num), array);
     else
-      DebugInformation(c,f,l,lib)
+      DebugInformation(file,line,lib)
 	(WDutilsAllocDebugLevel, "de-allocated array of %s @ %p\n",
-	 nameof(T), static_cast<void*>(a));
+	 nameof(T), array);
   }
-  // ///////////////////////////////////////////////////////////////////////////
-  template<typename T> inline
-  void DelArray(const T* a, const char*c, const char*f, int l,
-		int n=0, const char*lib = "WDutils")
-    WDutils_THROWING { DelArray(const_cast<T*>(a),c,f,l,n,lib); }
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// C MACRO to be used for array de-allocation
@@ -176,10 +172,10 @@ namespace WDutils {
   /// about memory de-allocation.
   ///
   /// \param P  pointer to be de-allocated
-#define WDutils_DEL_A(P)					\
-  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__)
-#define WDutils_DEL_AN(P,N)					\
-  WDutils::DelArray(P,WDutilsThisFunction,__FILE__,__LINE__,N)
+#define WDutils_DEL_A(P)			\
+  WDutils::DelArray(P,__FILE__,__LINE__)
+#define WDutils_DEL_AN(P,N)			\
+  WDutils::DelArray(P,__FILE__,__LINE__,N)
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// Object de-allocation giving useful info in case of error; mostly used
@@ -189,48 +185,27 @@ namespace WDutils {
   /// an error is generated (or an exception thrown, depending on the WDutils
   /// error settings).
   ///
-  /// \param[in] a  pointer previously allocated with ::operator new().
-  /// \param[in] f  name of the source file where this routines is called
-  /// \param[in] l  number of the line in that file
-  /// \param[in] lib (optional) name of calling library (default: "WDutils")
+  /// \param[in] pobj  pointer previously allocated with ::operator new().
+  /// \param[in] file  name of the source file where this routines is called
+  /// \param[in] line  number of the line in that file
+  /// \param[in] lib   (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  void DelObject(T* a, const char*c, const char*f, int l,
+  void DelObject(const T*pobj, const char*file, int line,
 		 const char*lib="WDutils") WDutils_THROWING
   {
-    if(0==a) {
-      Warning(c,f,l,lib)
-	("trying to delete zero pointer to object '%s'",nameof(T));
+    if(0==pobj) {
+      Warning(file,line,lib)
+	("trying to delete zero pointer to object '%s'", nameof(T));
       return;
     }
     try {
-      delete a;
+      delete pobj;
     } catch(...) {
-      throw Thrower(c,f,l)
-	("de-allocating object '%s' @ %p failed\n",nameof(T),a);
+      throw Thrower(file,line)
+	("de-allocating object '%s' @ %p failed\n", nameof(T),pobj);
     }
-    DebugInformation(c,f,l,lib)
-      (WDutilsAllocDebugLevel,"de-allocated %s object @ %p\n",
-       nameof(T), static_cast<void*>(a));
-  }
-  // ///////////////////////////////////////////////////////////////////////////
-  template<typename T> inline
-  void DelObject(const T* a, const char*c, const char*f, int l,
-		 const char*lib="WDutils") WDutils_THROWING
-  {
-    if(0==a) {
-      Warning(c,f,l,lib)
-	("trying to delete zero pointer to object '%s'",nameof(T));
-      return;
-    }
-    try {
-      delete a;
-    } catch(...) {
-      throw Thrower(c,f,l)
-	("de-allocating object '%s' @ %p failed\n",nameof(T),a);
-    }
-    DebugInformation(c,f,l,lib)
-      (WDutilsAllocDebugLevel,"de-allocated %s object @ %p\n",
-       nameof(T), static_cast<const void*>(a));
+    DebugInformation(file,line,lib)
+      (WDutilsAllocDebugLevel,"de-allocated %s object @ %p\n", nameof(T),pobj);
   }
   // ///////////////////////////////////////////////////////////////////////////
   ///
@@ -243,7 +218,7 @@ namespace WDutils {
   ///
   /// \param P pointer to object to be de-allocated
 #define WDutils_DEL_O(P) \
-  WDutils::DelObject(P,WDutilsThisFunction,__FILE__,__LINE__)
+  WDutils::DelObject(P,__FILE__,__LINE__)
 }
 //
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
@@ -252,10 +227,10 @@ namespace WDutils {
 //
 namespace WDutils {
   //////////////////////////////////////////////////////////////////////////////
-  /// \defgroup  Mem16  memory alignment to 16 bytes
+  /// \defgroup  MemAligned  memory alignment to K bytes
 
   /// Macro enforcing memory alignment to 16 bytes
-  /// \ingroup Mem16
+  /// \ingroup MemAligned
   ///
   /// Forces the corresponding variable/type to be 16-byte aligned; Works with
   /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
@@ -267,13 +242,43 @@ namespace WDutils {
 #else
 #  define WDutils__align16
 #endif
+
+  /// Macro enforcing memory alignment to 32 bytes
+  /// \ingroup MemAligned
   ///
-  /// is a given memory address aligned?
-  /// \ingroup Mem16
+  /// Forces the corresponding variable/type to be 32-byte aligned; Works with
+  /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
+  ///    struct WDutils__align32 name { ... };              \endcode
+#if defined (__INTEL_COMPILER)
+#  define WDutils__align32 __declspec(align(32))
+#elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
+#  define WDutils__align32 __attribute__ ((aligned(32)))
+#else
+#  define WDutils__align32
+#endif
+  ///
+  /// is a given memory address aligned to K bytes?
+  /// \ingroup MemAligned
   /// \param p  memory address to be tested
   /// \param al alignemt to a bytes will be tested
-  inline bool is_aligned(const void*p, int al)
-  { return size_t(p) % al == 0; }
+  template<int K>
+  inline constexpr bool is_aligned(const void*p)
+  { return size_t(p) % K == 0; }
+  ///
+  /// find the smallest multiple of K not smaller than @a n
+  /// \note @a K must be power of 2
+  template<int K>
+  inline constexpr size_t next_aligned(size_t n)
+  {
+    static_assert(K>0 && (K&(K-1))==0,"K not a power of 2");
+    return (n+K-1)&(~(K-1));
+  }
+  ///
+  /// find the smallest K-byte aligned address not smaller than @a p
+  template<int K, typename T>
+  inline T* next_aligned(T*p)
+  { return reinterpret_cast<T*>(next_aligned<K>(reinterpret_cast<size_t>(p))); }
+#if(0)
   ///
   /// is a given memory address aligned to a 16 bytes memory location?
   /// \param p  memory address to be tested
@@ -288,39 +293,45 @@ namespace WDutils {
   template<typename T>
   inline T* next_aligned16(T*p)
   { return reinterpret_cast<T*>(next_aligned16(reinterpret_cast<size_t>(p))); }
+#endif
   ///
-  /// Allocate memory at a address aligned to a 16 byte memory location
-  /// \ingroup Mem16
+  /// Allocate memory at a address aligned to a K byte memory location
+  /// \ingroup MemAligned
   ///
-  /// \return   a newly allocated memory address at a 16 byte memory location
-  /// \param k  number of objects to allocate
+  /// \return a newly allocated memory address at a K byte memory location
+  /// \param[in] nobj  number of objects to allocate
+  /// \param[in] file  name of the source file where this routines is called
+  /// \param[in] line  number of the line in that file
+  /// \param[in] lib   (optional) name of calling library (default: "WDutils")
   /// \version  debugged 02-09-2004 WD
   /// \note Unlike NewArray<>, we do not call the default ctor for each
   ///       allocated object!
-  template<typename T> inline
-  T* NewArray16(size_t k, const char*c, const char*f, int l,
-		const char*lib = "WDutils") WDutils_THROWING
+  template<int K, typename T> inline
+  T* NewArrayAligned(size_t nobj, const char*file, int line,
+		     const char*lib = "WDutils") WDutils_THROWING
   {
-    size_t n = k*sizeof(T);
+    static_assert(K>0 && (K&(K-1))==0,"K not power of 2");
+    size_t nbytes = nobj*sizeof(T);
 #if defined(__GNUC__) || defined (__INTEL_COMPILER)
     void*t;
     bool failed=0;
     try {
-      t = _mm_malloc(n,16);
+      t = _mm_malloc(nbytes,K);
     } catch(...) {
       t = 0;
       failed = 1;
     }
-    if(failed || (n && t==0))
-      throw Thrower(c,f,l)
-	("allocation of %u '%s' (%u bytes) aligned to 16 failed\n",
-	 uint32_t(k),nameof(T),uint32_t(n));
-    DebugInformation(c,f,l,lib)
+    if(failed || (nbytes && t==0))
+      throw Thrower(file,line)
+	("NewArrayAligned<%d,%s>(%u): allocation of %u bytes failed\n",
+	 K,nameof(T),uint32_t(nobj),uint32_t(nbytes));
+    DebugInformation(file,line,lib)
       (WDutilsAllocDebugLevel,
-       "allocated %u %s = %u bytes aligned to 16 @ %p\n",
-       uint32_t(k),nameof(T),uint32_t(n),t);
+       "allocated %u %s = %u bytes aligned to %d @ %p\n",
+       uint32_t(nobj),nameof(T),uint32_t(nbytes),K,t);
     return static_cast<T*>(t);
 #else // __GNUC__ or __INTEL_COMPILER
+    static_assert(K==16,"only implemented for K=16 (for other than gcc & icc)");
     // linear memory model:                                                     
     // ^    = 16byte alignment points                                           
     // S    = sizeof(void*) (assumed 4 in this sketch)                          
@@ -336,7 +347,7 @@ namespace WDutils {
     //                                                                          
     // the original allocation gave p, we return the shifted q and remember     
     // the original allocation address at PPPP.
-    char*p = NewArray<char>(n+16+sizeof(void*),f,l,lib);// alloc: (n+16)b + pter
+    char*p = NewArray<char>(nbytes+16+sizeof(void*),func,line,lib);
     char*q = p + sizeof(void*);                     // go sizeof pointer up     
     size_t off = size_t(q) % 16;                    // offset from 16b alignment
     if(off) q += 16-off;                            // IF offset, shift         
@@ -345,89 +356,96 @@ namespace WDutils {
 #endif
   }
   //
-  /// C MACRO to be used for array allocation aligned to 16 bytes
-  /// \ingroup Mem16
+  /// C MACRO to be used for array allocation aligned to K bytes
+  /// \ingroup MemAligned
   ///
-  /// Calling WDutils::NewArray16<TYPE>(), which in case of an error generates
-  /// an error message detailing the source file and line of the call. In case
-  /// the debugging level exceeds 10, we always print debugging information
-  /// about memory allocation.
+  /// Calling WDutils::NewArrayAligned<K,TYPE>(), which in case of an error
+  /// generates an error message detailing the source file and line of the
+  /// call. In case the debugging level exceeds 10, we always print debugging
+  /// information about memory allocation.
   ///
   /// \param  TYPE name of the element type
   /// \param  SIZE number of elements
   /// \note   Unlike WDutils_NEW(TYPE,SIZE), we do not call the default ctor for
   ///         the objects allocated!
-#define WDutils_NEW16(TYPE,SIZE)					\
-  WDutils::NewArray16<TYPE>(SIZE,WDutilsThisFunction,__FILE__,__LINE__)
+#define WDutils_NEW_aligned(K,TYPE,SIZE)			\
+  WDutils::NewArrayAligned<K,TYPE>(SIZE,__FILE__,__LINE__)
+  /// for backwards compatibility
+#define WDutils_NEW16(TYPE,SIZE) WDutils_NEW_aligned(16,TYPE,SIZE)
   ///
-  /// de-allocate memory previously allocated with WDutils::NewArray16()
-  /// \ingroup Mem16
+  /// de-allocate memory previously allocated with WDutils::NewArrayAligned<K>()
+  /// \ingroup MemAligned
   ///
-  /// This routine \b must be used to properly de-allocate memory that has been
-  /// previously allocated by WDutils::NewArray16(); other de-allocation will
-  /// inevitably result in a run-time \b error!
+  /// \param[in] array pointer previously allocated with
+  ///                  WDutils::NewArrayAligned<K>()
+  /// \param[in] file  name of the source file where this routines is called
+  /// \param[in] line  number of the line in that file
+  /// \param[in] num   (optional) number of elements de-allocated
+  /// \param[in] lib   (optional) name of calling library (default: "WDutils")
   ///
-  /// \param q  pointer previously allocated by WDutils::NewArray16()
-  template<typename T> inline
-  void DelArray16(T* a, const char*c, const char*f, int l,
-		  int n=0, const char*lib = "WDutils") WDutils_THROWING
+  /// \note This routine \b must be used to properly de-allocate memory that
+  ///       has been previously allocated by WDutils::NewArrayAligned<K>();
+  ///       other de-allocation may result in a run-time \b error!
+  template<int K, typename T> inline
+  void DelArrayAligned(const T*array, const char*file, int line,
+		       int num=0, const char*lib="WDutils") WDutils_THROWING
   {
 #if defined(__GNUC__) || defined (__INTEL_COMPILER)
-    if(0==a) {
-      Warning(c,f,l,lib)
-	("trying to delete zero pointer to array of '%s'",nameof(T));
+    if(0==array) {
+      Warning(file,line,lib)("WDutils::DelArrayAligned<%d,%s>(0x0)\n",
+			     K,nameof(T));
       return;
     }
-    if(size_t(a)&15) {
-      throw Thrower(c,f,l)
-	("de-allocating 16-byte aligned array of '%s' @ %p: "
-	 "not 16-byte aligned",nameof(T),a);
+    if(!is_aligned<K>(array)) {
+      throw Thrower(file,line)
+	("WDutils::DelArrayAligned<%d,%s>(%p): not aligned",K,nameof(T),array);
     }
     try {
-      _mm_free(a);
+      _mm_free(const_cast<T*>(array));
     } catch(...) {
-      throw Thrower(c,f,l)
-	("de-allocating 16-byte aligned array of '%s' @ %p failed\n",
-	 nameof(T),a);
+      throw Thrower(file,line)
+	("WDutils::DelArrayAligned<%d,%s>(%p): de-allocation failed\n",
+	 K,nameof(T),array);
     }
-    if(__report<T>::report(n))
-      DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
-				  "de-allocated 16-byte aligned array "
-				  "of %d '%s' [%d bytes] @ %p\n", 
-				  n,nameof(T),__report<T>::bytes(n),a);
+    if(_report<T>::report(num))
+      DebugInformation(file,line,lib)
+	(WDutilsAllocDebugLevel,
+	 "de-allocated %d-byte aligned array of %d '%s' [%d bytes] @ %p\n", 
+	 K,num,nameof(T),_report<T>::bytes(num),array);
     else
-      DebugInformation(c,f,l,lib)(WDutilsAllocDebugLevel,
-				  "de-allocated 16-byte aligned array "
-				  "of '%s' @ %p\n", nameof(T),a);
+      DebugInformation(file,line,lib)
+	(WDutilsAllocDebugLevel,
+	 "de-allocated %d-byte aligned array of '%s' @ %p\n",
+	 K,nameof(T),array);
 #else
-    DelArray((char*)(*((void**)(((char*)q)-sizeof(void*)))),f,l,n,lib);
+    static_assert(K==16,"only implemented for K=16 (for other than gcc & icc)");
+    DelArray((char*)(*((void**)(((char*)array)-sizeof(void*)))),
+	     file,line,num,lib);
 #endif
   }
-  //
-  template<typename T> inline
-  void DelArray16(const T* a, const char*f, int l, int n=0, 
-		  const char*lib = "WDutils")
-    WDutils_THROWING { DelArray16(const_cast<T*>(a),f,l,n,lib); }
   // ///////////////////////////////////////////////////////////////////////////
   //
-  /// C MACRO to be used for array de-allocation of 16-byte aligned stuff
-  /// \ingroup Mem16
+  /// C MACRO to be used for array de-allocation of K-byte aligned stuff
+  /// \ingroup MemAligned
   ///
-  /// Calling WDutilsN::DelArray16<TYPE>(), which in case of an error generates
-  /// an error message detailing the source file and line of the call. In case
-  /// the debugging level exceeds 10, we always print debugging information
-  /// about memory de-allocation.
+  /// Calling WDutilsN::DelArrayAlgined<K,TYPE>(), which in case of an error
+  /// generates an error message detailing the source file and line of the
+  /// call. In case the debugging level exceeds 10, we always print debugging
+  /// information about memory de-allocation.
   ///
   /// \param P  pointer to be de-allocated
-#define WDutils_DEL16(P)					\
-  WDutils::DelArray16(P,WDutilsThisFunction,__FILE__,__LINE__)
-#define WDutils_DEL16N(P,N)					\
-  WDutils::DelArray16(P,WDutilsThisFunction,__FILE__,__LINE__,N)
+#define WDutils_DEL_aligned(K,P)			\
+  WDutils::DelArrayAligned<K>(P,__FILE__,__LINE__)
+#define WDutils_DEL_alignedN(K,P,N)			\
+  WDutils::DelArrayAligned<K>(P,__FILE__,__LINE__,N)
+  /// for backward compatibility
+#define WDutils_DEL16(P) WDutils_DEL_aligned(16,P)
+#define WDutils_DEL16N(P,N) WDutils_DEL_alignedN(16,P,N)
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// a simple one-dimensional array of data aligned to 16 bytes
   /// \note  sizeof(T) must be either a multiple or a dividor of 16.
-  /// \ingroup Mem16
+  /// \ingroup MemAligned
   template<typename T>
   class Array16 {
     /// ensure sizeof(T) is either multiple or dividor of 16
@@ -1604,6 +1622,7 @@ namespace WDutils {
   };
   ///
   /// allocate and de-allocate aligned memory
+  /// \ingroup MemAligned
   ///
   template<std::size_t alignment>
   struct static_allocator {
@@ -1650,6 +1669,7 @@ namespace WDutils {
   };
   ///
   /// allocate and de-allocate unaligned memory
+  /// \ingroup MemAligned
   ///
   template<>
   struct static_allocator<1> {
@@ -1677,6 +1697,7 @@ namespace WDutils {
   template<> struct static_allocator<0>;
   ///
   /// allocator with explicit alignment
+  /// \ingroup MemAligned
   ///
   template<typename _Tp, std::size_t alignment = 16>
   class AlignmentAllocator
@@ -1767,6 +1788,7 @@ namespace WDutils {
   };// class AlignmentAllocator<>
 
   /// AlignmentAllocator<void> specialization.
+  /// \ingroup MemAligned
   template<std::size_t alignment>
   class AlignmentAllocator<void, alignment>
   {
@@ -1783,6 +1805,7 @@ namespace WDutils {
   };
   ///
   /// managing raw memory
+  /// \ingroup MemAligned
   ///
   template<std::size_t alignment = 0>
   class raw_memory
@@ -1878,5 +1901,6 @@ namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////
 #if __cplusplus < 201103L
 # undef noexcept
+# undef constexpr
 #endif
 #endif // WDutils_included_memory_h

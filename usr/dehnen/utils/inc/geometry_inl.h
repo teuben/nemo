@@ -368,7 +368,7 @@ namespace WDutils {
 	  __m128 R = _mm_movehl_ps(C,C);
 	  __m128 A = _mm_loadu_ps(cPF(b.X));
 	  __m128 B = _mm_movehl_ps(A,A);
-	  return 3==(3&_mm_movemask_ps(_mm_cmple_ps(_mm_diff_ps(C,A),
+	  return 3==(3&_mm_movemask_ps(_mm_cmple_ps(SSE::diff(C,A),
 						    _mm_sub_ps(R,B))));
 	}
 	static bool contains(box3 const&c, box3 const&b)
@@ -377,7 +377,7 @@ namespace WDutils {
 	  __m128 R = _mm_loadu_ps(cPF(c.Y));
 	  __m128 A = _mm_loadu_ps(cPF(b.X));
 	  __m128 B = _mm_loadu_ps(cPF(b.Y));
-	  return 7==(7&_mm_movemask_ps(_mm_cmple_ps(_mm_diff_ps(C,A),
+	  return 7==(7&_mm_movemask_ps(_mm_cmple_ps(SSE::diff(C,A),
 						    _mm_sub_ps(R,B))));
 	}
 	// dist_sq(point,point)
@@ -409,7 +409,7 @@ namespace WDutils {
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 X = _mm_loadu_ps(cPF(x));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(2,2,2,2));
-	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  X = _mm_sub_ps(SSE::diff(C,X),H);
 	  WDutils__align16 float q[4];
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
@@ -421,7 +421,7 @@ namespace WDutils {
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 X = _mm_loadu_ps(cPF(x));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(3,3,3,3));
-	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  X = _mm_sub_ps(SSE::diff(C,X),H);
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
 	  return q[0]+q[1]+q[2];
@@ -432,7 +432,7 @@ namespace WDutils {
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 H = _mm_movehl_ps(C,C);
 	  __m128 X = _mm_loadu_ps(cPF(x));
-	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  X = _mm_sub_ps(SSE::diff(C,X),H);
 	  WDutils__align16 float q[4];
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
@@ -444,7 +444,7 @@ namespace WDutils {
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 H = _mm_loadu_ps(cPF(c.Y));
 	  __m128 X = _mm_loadu_ps(cPF(x));
-	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  X = _mm_sub_ps(SSE::diff(C,X),H);
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
 	  return q[0]+q[1]+q[2];
@@ -465,7 +465,7 @@ namespace WDutils {
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(2,2,2,2));
 	  __m128 X = _mm_loadu_ps(cPF(s.X));
-	  C = _mm_diff_ps(C,X);
+	  C = SSE::diff(C,X);
 	  if(3&_mm_movemask_ps(_mm_cmpgt_ps(C,H)))
 	    return false;
 	  X = _mm_shuffle_ps(X,X,_MM_SHUFFLE(2,2,2,2));
@@ -478,7 +478,7 @@ namespace WDutils {
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(3,3,3,3));
 	  __m128 X = _mm_loadu_ps(cPF(s.X));
-	  C = _mm_diff_ps(C,X);
+	  C = SSE::diff(C,X);
 	  if(7&_mm_movemask_ps(_mm_cmpgt_ps(C,H)))
 	    return false;
 	  X = _mm_shuffle_ps(X,X,_MM_SHUFFLE(3,3,3,3));
@@ -492,7 +492,7 @@ namespace WDutils {
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 H = _mm_movehl_ps(C,C);
 	  __m128 X = _mm_loadu_ps(cPF(s.X));
-	  C = _mm_diff_ps(C,X);
+	  C = SSE::diff(C,X);
 	  if(3&_mm_movemask_ps(_mm_cmpgt_ps(C,H)))
 	    return false;
 	  X = _mm_shuffle_ps(X,X,_MM_SHUFFLE(2,2,2,2));
@@ -505,7 +505,7 @@ namespace WDutils {
 	  __m128 C = _mm_loadu_ps(cPF(c.X));
 	  __m128 H = _mm_loadu_ps(cPF(c.Y));
 	  __m128 X = _mm_loadu_ps(cPF(s.X));
-	  C = _mm_diff_ps(C,X);
+	  C = SSE::diff(C,X);
 	  if(7&_mm_movemask_ps(_mm_cmpgt_ps(C,H)))
 	    return false;
 	  X = _mm_shuffle_ps(X,X,_MM_SHUFFLE(3,3,3,3));
@@ -628,7 +628,7 @@ namespace WDutils {
 	  __m128 R = _mm_movehl_ps(C,C);
 	  __m128 A = _mm_load_ps(cPF(b.X));
 	  __m128 B = _mm_movehl_ps(A,A);
-	  return 3==(3&_mm_movemask_ps(_mm_cmple_ps(_mm_diff_ps(C,A),
+	  return 3==(3&_mm_movemask_ps(_mm_cmple_ps(SSE::diff(C,A),
 						    _mm_sub_ps(R,B))));
 	}
 	static bool contains(box3 const&c, box3 const&b)
@@ -637,7 +637,7 @@ namespace WDutils {
 	  __m128 R = _mm_load_ps(cPF(c.Y));
 	  __m128 A = _mm_load_ps(cPF(b.X));
 	  __m128 B = _mm_load_ps(cPF(b.Y));
-	  return 7==(7&_mm_movemask_ps(_mm_cmple_ps(_mm_diff_ps(C,A),
+	  return 7==(7&_mm_movemask_ps(_mm_cmple_ps(SSE::diff(C,A),
 						    _mm_sub_ps(R,B))));
 	}
 	// dist_sq(point,point)
@@ -662,7 +662,7 @@ namespace WDutils {
 	  __m128 C = _mm_load_ps(cPF(c.X));
 	  __m128 X = _mm_load_ps(cPF(x));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(2,2,2,2));
-	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  X = _mm_sub_ps(SSE::diff(C,X),H);
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
 	  return q[0]+q[1];
@@ -673,7 +673,7 @@ namespace WDutils {
 	  __m128 C = _mm_load_ps(cPF(c.X));
 	  __m128 X = _mm_load_ps(cPF(x));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(3,3,3,3));
-	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  X = _mm_sub_ps(SSE::diff(C,X),H);
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
 	  return q[0]+q[1]+q[2];
@@ -684,7 +684,7 @@ namespace WDutils {
 	  __m128 C = _mm_load_ps(cPF(c.X));
 	  __m128 H = _mm_movehl_ps(C,C);
 	  __m128 X = _mm_load_ps(cPF(x));
-	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  X = _mm_sub_ps(SSE::diff(C,X),H);
 	  WDutils__align16 float q[4];
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
@@ -696,7 +696,7 @@ namespace WDutils {
 	  __m128 C = _mm_load_ps(cPF(c.X));
 	  __m128 H = _mm_load_ps(cPF(c.Y));
 	  __m128 X = _mm_load_ps(cPF(x));
-	  X = _mm_sub_ps(_mm_diff_ps(C,X),H);
+	  X = _mm_sub_ps(SSE::diff(C,X),H);
 	  _mm_store_ps(q,_mm_and_ps(_mm_mul_ps(X,X),
 				    _mm_cmpgt_ps(X,_mm_setzero_ps())));
 	  return q[0]+q[1]+q[2];
@@ -717,7 +717,7 @@ namespace WDutils {
 	  __m128 C = _mm_load_ps(cPF(c.X));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(2,2,2,2));
 	  __m128 X = _mm_load_ps(cPF(s.X));
-	  C = _mm_diff_ps(C,X);
+	  C = SSE::diff(C,X);
 	  if(3&_mm_movemask_ps(_mm_cmpgt_ps(C,H)))
 	    return false;
 	  X = _mm_shuffle_ps(X,X,_MM_SHUFFLE(2,2,2,2));
@@ -730,7 +730,7 @@ namespace WDutils {
 	  __m128 C = _mm_load_ps(cPF(c.X));
 	  __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(3,3,3,3));
 	  __m128 X = _mm_load_ps(cPF(s.X));
-	  C = _mm_diff_ps(C,X);
+	  C = SSE::diff(C,X);
 	  if(7&_mm_movemask_ps(_mm_cmpgt_ps(C,H)))
 	    return false;
 	  X = _mm_shuffle_ps(X,X,_MM_SHUFFLE(3,3,3,3));
@@ -744,7 +744,7 @@ namespace WDutils {
 	  __m128 C = _mm_load_ps(cPF(c.X));
 	  __m128 H = _mm_movehl_ps(C,C);
 	  __m128 X = _mm_load_ps(cPF(s.X));
-	  C = _mm_diff_ps(C,X);
+	  C = SSE::diff(C,X);
 	  if(3&_mm_movemask_ps(_mm_cmpgt_ps(C,H)))
 	    return false;
 	  X = _mm_shuffle_ps(X,X,_MM_SHUFFLE(2,2,2,2));
@@ -757,7 +757,7 @@ namespace WDutils {
 	  __m128 C = _mm_load_ps(cPF(c.X));
 	  __m128 H = _mm_load_ps(cPF(c.Y));
 	  __m128 X = _mm_load_ps(cPF(s.X));
-	  C = _mm_diff_ps(C,X);
+	  C = SSE::diff(C,X);
 	  if(7&_mm_movemask_ps(_mm_cmpgt_ps(C,H)))
 	    return false;
 	  X = _mm_shuffle_ps(X,X,_MM_SHUFFLE(3,3,3,3));
@@ -903,7 +903,7 @@ namespace WDutils {
 	  __m128d A = _mm_loadu_pd(cPD(b.X));
 	  __m128d B = _mm_loadu_pd(cPD(b.Y));
 	  return
-	    3==_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B)));
+	    3==_mm_movemask_pd(_mm_cmple_pd(SSE::diff(C,A),_mm_sub_pd(R,B)));
 	}
 	static bool contains(box3 const&c, box3 const&b)
 	{
@@ -911,14 +911,14 @@ namespace WDutils {
 	  __m128d R = _mm_loadu_pd(cPD(c.Y));
 	  __m128d A = _mm_loadu_pd(cPD(b.X));
 	  __m128d B = _mm_loadu_pd(cPD(b.Y));
-	  if(3!=_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B))))
+	  if(3!=_mm_movemask_pd(_mm_cmple_pd(SSE::diff(C,A),_mm_sub_pd(R,B))))
 	    return false;
 	  C = _mm_loadu_pd(cPD2(c.X));
 	  R = _mm_loadu_pd(cPD2(c.Y));
 	  A = _mm_loadu_pd(cPD2(b.X));
 	  B = _mm_loadu_pd(cPD2(b.Y));
 	  return
-	    1 &_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B)));
+	    1 &_mm_movemask_pd(_mm_cmple_pd(SSE::diff(C,A),_mm_sub_pd(R,B)));
 	}
 	// dist_sq(point,point)
 	// for unaligned access, non-SSE code is faster
@@ -952,7 +952,7 @@ namespace WDutils {
 	  __m128d C = _mm_loadu_pd(cPD(c.X));
 	  __m128d X = _mm_loadu_pd(cPD(x));
 	  __m128d H = _mm_set1_pd(c.H);
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(X,X),
 				    _mm_cmpgt_pd(X,_mm_setzero_pd())));
 	  return q[0]+q[1];
@@ -963,14 +963,14 @@ namespace WDutils {
 	  C = _mm_loadu_pd(cPD(c.X));
 	  X = _mm_loadu_pd(cPD(x));
 	  H = _mm_set1_pd(c.H);
-	  C = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  C = _mm_sub_pd(SSE::diff(C,X),H);
 	  WDutils__align16 double q[2];
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(C,C),
 				    _mm_cmpgt_pd(C,_mm_setzero_pd())));
 	  register double d=q[0]+q[1];
 	  C = _mm_loadu_pd(cPD2(c.X));
 	  X = _mm_loadu_pd(cPD2(x));
-	  C = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  C = _mm_sub_pd(SSE::diff(C,X),H);
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(C,C),
 				    _mm_cmpgt_pd(C,_mm_setzero_pd())));
 	  return d+=q[0];
@@ -982,7 +982,7 @@ namespace WDutils {
 	  __m128d C = _mm_loadu_pd(cPD(c.X));
 	  __m128d X = _mm_loadu_pd(cPD(x));
 	  __m128d H = _mm_loadu_pd(cPD(c.Y));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(X,X),
 				    _mm_cmpgt_pd(X,_mm_setzero_pd())));
 	  return q[0]+q[1];
@@ -993,7 +993,7 @@ namespace WDutils {
 	  C = _mm_loadu_pd(cPD(c.X));
 	  X = _mm_loadu_pd(cPD(x));
 	  H = _mm_loadu_pd(cPD(c.Y));
-	  C = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  C = _mm_sub_pd(SSE::diff(C,X),H);
 	  WDutils__align16 double q[2];
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(C,C),
 				    _mm_cmpgt_pd(C,_mm_setzero_pd())));
@@ -1001,7 +1001,7 @@ namespace WDutils {
 	  C = _mm_loadu_pd(cPD2(c.X));
 	  X = _mm_loadu_pd(cPD2(x));
 	  H = _mm_loadu_pd(cPD2(c.Y));
-	  C = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  C = _mm_sub_pd(SSE::diff(C,X),H);
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(C,C),
 				    _mm_cmpgt_pd(C,_mm_setzero_pd())));
 	  return d+=q[0];
@@ -1017,7 +1017,7 @@ namespace WDutils {
 	  C = _mm_loadu_pd(cPD(c.X));
 	  X = _mm_loadu_pd(cPD(s.X));
 	  H = _mm_set1_pd(c.H);
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  WDutils__align16 double q[2];
 	  _mm_store_pd(q,Q);
@@ -1025,7 +1025,7 @@ namespace WDutils {
 	  if(d>s.Q) return true;
 	  C = _mm_loadu_pd(cPD2(c.X));
 	  X = _mm_loadu_pd(cPD2(s.X));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  _mm_store_pd(q,Q);
 	  return (d+=q[0]) > s.Q;
@@ -1041,7 +1041,7 @@ namespace WDutils {
 	  C = _mm_loadu_pd(cPD(c.X));
 	  X = _mm_loadu_pd(cPD(s.X));
 	  H = _mm_loadu_pd(cPD(c.Y));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  WDutils__align16 double q[2];
 	  _mm_store_pd(q,Q);
@@ -1050,7 +1050,7 @@ namespace WDutils {
 	  C = _mm_loadu_pd(cPD2(c.X));
 	  X = _mm_loadu_pd(cPD2(s.X));
 	  H = _mm_loadu_pd(cPD2(c.Y));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  _mm_store_pd(q,Q);
 	  return (d+=q[0]) > s.Q;
@@ -1061,7 +1061,7 @@ namespace WDutils {
 	  __m128d C = _mm_loadu_pd(cPD(c.X));
 	  __m128d H = _mm_set1_pd(c.H);
 	  __m128d X = _mm_loadu_pd(cPD(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  X = _mm_set1_pd(s.Q);
 	  C = _mm_sub_pd(C,H);
@@ -1073,7 +1073,7 @@ namespace WDutils {
 	  __m128d C = _mm_loadu_pd(cPD(c.X));
 	  __m128d H = _mm_set1_pd(c.H);
 	  __m128d X = _mm_loadu_pd(cPD(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  __m128d Q = _mm_set1_pd(s.Q);
 	  C = _mm_sub_pd(C,H);
@@ -1081,7 +1081,7 @@ namespace WDutils {
 	  if(_mm_movemask_pd(_mm_cmpgt_pd(Q,C))) return false;
 	  C = _mm_loadu_pd(cPD2(c.X));
 	  X = _mm_loadu_pd(cPD2(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(1&_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  C = _mm_sub_pd(C,H);
 	  C = _mm_mul_pd(C,C);
@@ -1093,7 +1093,7 @@ namespace WDutils {
 	  __m128d C = _mm_loadu_pd(cPD(c.X));
 	  __m128d H = _mm_loadu_pd(cPD(c.Y));
 	  __m128d X = _mm_loadu_pd(cPD(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  X = _mm_set1_pd(s.Q);
 	  C = _mm_sub_pd(C,H);
@@ -1105,7 +1105,7 @@ namespace WDutils {
 	  __m128d C = _mm_loadu_pd(cPD(c.X));
 	  __m128d H = _mm_loadu_pd(cPD(c.Y));
 	  __m128d X = _mm_loadu_pd(cPD(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  __m128d Q = _mm_set1_pd(s.Q);
 	  C = _mm_sub_pd(C,H);
@@ -1114,7 +1114,7 @@ namespace WDutils {
 	  C = _mm_loadu_pd(cPD2(c.X));
 	  X = _mm_loadu_pd(cPD2(s.X));
 	  H = _mm_loadu_pd(cPD2(c.Y));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(1&_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  C = _mm_sub_pd(C,H);
 	  C = _mm_mul_pd(C,C);
@@ -1253,7 +1253,7 @@ namespace WDutils {
 	  __m128d A = _mm_load_pd(cPD(b.X));
 	  __m128d B = _mm_load_pd(cPD(b.Y));
 	  return
-	    3==_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B)));
+	    3==_mm_movemask_pd(_mm_cmple_pd(SSE::diff(C,A),_mm_sub_pd(R,B)));
 	}
 	static bool contains(box3 const&c, box3 const&b)
 	{
@@ -1261,14 +1261,14 @@ namespace WDutils {
 	  __m128d R = _mm_load_pd(cPD(c.Y));
 	  __m128d A = _mm_load_pd(cPD(b.X));
 	  __m128d B = _mm_load_pd(cPD(b.Y));
-	  if(3!=_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B))))
+	  if(3!=_mm_movemask_pd(_mm_cmple_pd(SSE::diff(C,A),_mm_sub_pd(R,B))))
 	    return false;
 	  C = _mm_load_pd(cPD2(c.X));
 	  R = _mm_load_pd(cPD2(c.Y));
 	  A = _mm_load_pd(cPD2(b.X));
 	  B = _mm_load_pd(cPD2(b.Y));
 	  return
-	    1 &_mm_movemask_pd(_mm_cmple_pd(_mm_diff_pd(C,A),_mm_sub_pd(R,B)));
+	    1 &_mm_movemask_pd(_mm_cmple_pd(SSE::diff(C,A),_mm_sub_pd(R,B)));
 	}
 	// dist_sq(point,point)
 	static double dist_sq(vec2 const&x, vec2 const&y)
@@ -1294,7 +1294,7 @@ namespace WDutils {
 	  __m128d C = _mm_load_pd(cPD(c.X));
 	  __m128d X = _mm_load_pd(cPD(x));
 	  __m128d H = _mm_set1_pd(c.H);
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(X,X),
 				    _mm_cmpgt_pd(X,_mm_setzero_pd())));
 	  return q[0]+q[1];
@@ -1305,14 +1305,14 @@ namespace WDutils {
 	  C = _mm_load_pd(cPD(c.X));
 	  X = _mm_load_pd(cPD(x));
 	  H = _mm_set1_pd(c.H);
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  WDutils__align16 double q[2];
 	  _mm_store_pd(q,Q);
 	  double d=q[0]+q[1];
 	  C = _mm_load_pd(cPD2(c.X));
 	  X = _mm_load_pd(cPD2(x));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  _mm_store_pd(q,Q);
 	  return d+=q[0];
@@ -1324,7 +1324,7 @@ namespace WDutils {
 	  __m128d C = _mm_load_pd(cPD(c.X));
 	  __m128d X = _mm_load_pd(cPD(x));
 	  __m128d H = _mm_load_pd(cPD(c.Y));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(X,X),
 				    _mm_cmpgt_pd(X,_mm_setzero_pd())));
 	  return q[0]+q[1];
@@ -1335,7 +1335,7 @@ namespace WDutils {
 	  C = _mm_load_pd(cPD(c.X));
 	  X = _mm_load_pd(cPD(x));
 	  H = _mm_load_pd(cPD(c.Y));
-	  C = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  C = _mm_sub_pd(SSE::diff(C,X),H);
 	  WDutils__align16 double q[2];
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(C,C),
 				    _mm_cmpgt_pd(C,_mm_setzero_pd())));
@@ -1343,7 +1343,7 @@ namespace WDutils {
 	  C = _mm_load_pd(cPD2(c.X));
 	  X = _mm_load_pd(cPD2(x));
 	  H = _mm_load_pd(cPD2(c.Y));
-	  C = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  C = _mm_sub_pd(SSE::diff(C,X),H);
 	  _mm_store_pd(q,_mm_and_pd(_mm_mul_pd(C,C),
 				    _mm_cmpgt_pd(C,_mm_setzero_pd())));
 	  return d+=q[0];
@@ -1359,7 +1359,7 @@ namespace WDutils {
 	  C = _mm_load_pd(cPD(c.X));
 	  X = _mm_load_pd(cPD(s.X));
 	  H = _mm_set1_pd(c.H);
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  WDutils__align16 double q[2];
 	  _mm_store_pd(q,Q);
@@ -1367,7 +1367,7 @@ namespace WDutils {
 	  if(d>s.Q) return true;
 	  C = _mm_load_pd(cPD2(c.X));
 	  X = _mm_load_pd(cPD2(s.X));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  _mm_store_pd(q,Q);
 	  return (d+=q[0]) > s.Q;
@@ -1383,7 +1383,7 @@ namespace WDutils {
 	  C = _mm_load_pd(cPD(c.X));
 	  X = _mm_load_pd(cPD(s.X));
 	  H = _mm_load_pd(cPD(c.Y));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  WDutils__align16 double q[2];
 	  _mm_store_pd(q,Q);
@@ -1392,7 +1392,7 @@ namespace WDutils {
 	  C = _mm_load_pd(cPD2(c.X));
 	  X = _mm_load_pd(cPD2(s.X));
 	  H = _mm_load_pd(cPD2(c.Y));
-	  X = _mm_sub_pd(_mm_diff_pd(C,X),H);
+	  X = _mm_sub_pd(SSE::diff(C,X),H);
 	  Q = _mm_and_pd(_mm_mul_pd(X,X),_mm_cmpgt_pd(X,_mm_setzero_pd()));
 	  _mm_store_pd(q,Q);
 	  return (d+=q[0]) > s.Q;
@@ -1403,7 +1403,7 @@ namespace WDutils {
 	  __m128d C = _mm_load_pd(cPD(c.X));
 	  __m128d H = _mm_set1_pd(c.H);
 	  __m128d X = _mm_load_pd(cPD(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  X = _mm_set1_pd(s.Q);
 	  C = _mm_sub_pd(C,H);
@@ -1415,7 +1415,7 @@ namespace WDutils {
 	  __m128d C = _mm_load_pd(cPD(c.X));
 	  __m128d H = _mm_set1_pd(c.H);
 	  __m128d X = _mm_load_pd(cPD(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if( _mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  __m128d Q = _mm_set1_pd(s.Q);
 	  C = _mm_sub_pd(C,H);
@@ -1423,7 +1423,7 @@ namespace WDutils {
 	  if( _mm_movemask_pd(_mm_cmpgt_pd(Q,C))) return false;
 	  C = _mm_load_pd(cPD2(c.X));
 	  X = _mm_load_pd(cPD2(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(1 & _mm_movemask_pd(_mm_cmpgt_pd(C,H)) ) return false;
 	  C = _mm_sub_pd(C,H);
 	  C = _mm_mul_pd(C,C);
@@ -1435,7 +1435,7 @@ namespace WDutils {
 	  __m128d C = _mm_load_pd(cPD(c.X));
 	  __m128d H = _mm_load_pd(cPD(c.Y));
 	  __m128d X = _mm_load_pd(cPD(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  X = _mm_set1_pd(s.Q);
 	  C = _mm_sub_pd(C,H);
@@ -1447,7 +1447,7 @@ namespace WDutils {
 	  __m128d C = _mm_load_pd(cPD(c.X));
 	  __m128d H = _mm_load_pd(cPD(c.Y));
 	  __m128d X = _mm_load_pd(cPD(s.X));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  __m128d Q = _mm_set1_pd(s.Q);
 	  C = _mm_sub_pd(C,H);
@@ -1456,7 +1456,7 @@ namespace WDutils {
 	  C = _mm_load_pd(cPD2(c.X));
 	  X = _mm_load_pd(cPD2(s.X));
 	  H = _mm_load_pd(cPD2(c.Y));
-	  C = _mm_diff_pd(C,X);
+	  C = SSE::diff(C,X);
 	  if(1&_mm_movemask_pd(_mm_cmpgt_pd(C,H))) return false;
 	  C = _mm_sub_pd(C,H);
 	  C = _mm_mul_pd(C,C);

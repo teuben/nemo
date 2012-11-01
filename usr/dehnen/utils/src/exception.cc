@@ -160,8 +160,10 @@ void WDutils::RunInfo::set_omp(const char*arg)
     Info.__omp_size = 1;
   else if(arg && arg[0]) {
     Info.__omp_size = strtol(arg,0,10);
-    if(errno == EINVAL || errno == ERANGE)
-      WDutils_THROWN("RunInfo::set_omp('%s')\n",arg);
+    if(errno == EINVAL)
+      WDutils_THROWN("RunInfo::set_omp('%s') (errno=EINVAL)\n",arg,errno);
+    if(errno == ERANGE)
+      WDutils_THROWN("RunInfo::set_omp('%s') (errno=ERANGE)\n",arg,errno);
     if(Info.__omp_size < 1) {
       Info.__omp_size = 1;
       WDutils_WarningN("RunInfo::set_omp('%s') assume '1'\n",arg);
@@ -349,8 +351,9 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
   vsnprintf(buf, size, fmt, ap);
   va_end(ap);
 #ifdef _OPENMP
-  if(omp_in_parallel() && InsteadOfThrow)
-    InsteadOfThrow(func,file,line,buffer);
+  if(omp_get_level() && InsteadOfThrow)
+    InsteadOfThrow(file,line,buffer);
+//   MakeError(file,line,buffer);
 #endif
   return exception(buffer);
 }

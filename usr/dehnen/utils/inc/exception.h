@@ -309,15 +309,15 @@ namespace WDutils {
   ///   void DebugInfo(int debug_level, const char*format, ...);
   ///   void DebugInfo(const char*format, ...); 
   /// \endcode
-#define DebugInfo \
-  WDutils::DebugInformation(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
+#define DebugInfo WDutils::DebugInformation(__FILE__,__LINE__,"WDutils")
   /// print debug info to stderr and report func:
   /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax:
   /// \code
   ///   void DebugInfoF(int debug_level, const char*format, ...);
   ///   void DebugInfoF(const char*format, ...); 
   /// \endcode
-#define DebugInfoF WDutils::DebugInformation(WDutilsThisFunction,"WDutils")
+#define DebugInfoF \
+  WDutils::DebugInformation(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
   /// print debug info to stderr (without reporting [file:line]).
   /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax.
   /// \code
@@ -337,14 +337,14 @@ namespace WDutils {
   /// \code
   ///   void WDutils_Error(const char*format, ...);
   /// \endcode
-#define WDutils_Error \
-  WDutils::Error(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
+#define WDutils_Error WDutils::Error(__FILE__,__LINE__,"WDutils")
   /// print error message to stderr, reporting [file:line]func, and exit.
   /// use like NEMO's error(), i.e. with the same syntax:
   /// \code
   ///   void WDutils_ErrorF(const char*format, ...);
   /// \endcode
-#define WDutils_ErrorF WDutils::Error(WDutilsThisFunction,"WDutils")
+#define WDutils_ErrorF \
+  WDutils::Error(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
   /// print error message to stderr and exit.
   /// use like NEMO's error(), i.e. with the same syntax:
   /// \code
@@ -363,14 +363,14 @@ namespace WDutils {
   /// \code
   ///   void WDutils_Warning(const char*format, ...);
   /// \endcode
-#define WDutils_Warning \
-  WDutils::Warning(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
+#define WDutils_Warning WDutils::Warning(__FILE__,__LINE__,"WDutils")
   /// print warning message to stderr, reporting [file:line]func
   /// use like NEMO's warning(), i.e. with the same syntax:
   /// \code
   ///   void WDutils_WarningF(const char*format, ...);
   /// \endcode
-#define WDutils_WarningF WDutils::Warning(WDutilsThisFunction,"WDutils")
+#define WDutils_WarningF \
+  WDutils::Warning(WDutilsThisFunction,__FILE__,__LINE__,"WDutils")
   /// print warning message to stderr
   /// use like NEMO's warning(), i.e. with the same syntax:
   /// \code
@@ -405,7 +405,7 @@ namespace WDutils {
   /// for generating exceptions
   class Thrower {
     friend class ThrowGuard;
-    typedef void(*handler)(const char*,const char*, int, const char*);
+    typedef void(*handler)(const char*, int, const char*);
     static handler  InsteadOfThrow;  ///< make error if OMP::IsParallel()
     const  char    *file,*func;      ///< file name, function name
     const  int      line;            ///< line number
@@ -413,6 +413,7 @@ namespace WDutils {
     Thrower           (const Thrower&) WDutilsCXX11Delete;
     Thrower& operator=(const Thrower&) WDutilsCXX11Delete;
   public:
+    static handler instead_of_throw() { return InsteadOfThrow; }
     /// default constructor: set data to NULL
     Thrower()
       : file(0), func(0), line(0) {}
@@ -437,9 +438,8 @@ namespace WDutils {
     exception operator()(bool expr) const;
   };
   /// method invoking an error, suitable as @a Thrower::handler
-  inline void MakeError(const char*func, const char*file, int line,
-			const char*mess)
-  { Error(func,file,line,"WDutils")(mess); }
+  inline void MakeError(const char*file, int line, const char*mess)
+  { Error(file,line,"WDutils")(mess); }
   /// guard against throwing an exception inside an openMP parallel region
   struct ThrowGuard
   {
@@ -544,30 +544,31 @@ namespace WDutils {
   //@{
   // is NDEBUG is defined, do nothing
 #ifdef  NDEBUG
-# define WDutilsAssert(expr)   (static_cast<void>(0))
-# define WDutilsAssertE(expr)  (static_cast<void>(0))
+# define WDutilsAssert(expr)          (static_cast<void>(0))
+# define WDutilsAssertE(expr)         (static_cast<void>(0))
+# define WDutilsAssertIf(cond,expr)   (static_cast<void>(0))
+# define WDutilsAssertEIf(cond,expr)  (static_cast<void>(0))
 #else
   /// throws exception with "assertion failed" message
 # ifdef __GNUC__
   inline
-  void AssertFail(const char*, const char*, const char*, unsigned)
+  void AssertFail(const char*, const char*, unsigned)
     WDutils_THROWING __attribute__ ((__noreturn__));
 # endif
   inline
-  void AssertFail(const char*assertion, const char*func, 
-		  const char*file, unsigned line) WDutils_THROWING
-  { WDutils_THROWER(func,file,line)("Assertion \"%s\" failed",assertion); }
+  void AssertFail(const char*assertion, const char*file, unsigned line)
+      WDutils_THROWING
+  { WDutils_THROWER(file,line)("Assertion \"%s\" failed",assertion); }
   //
 # ifdef __GNUC__
   inline
-  void AssertFailE(const char*, const char*, const char*, unsigned)
+  void AssertFailE(const char*, const char*, unsigned)
     __attribute__ ((__noreturn__));
 # endif
   inline
-  void AssertFailE(const char*assertion, const char*func,
-		   const char*file, unsigned line)
+  void AssertFailE(const char*assertion, const char*file, unsigned line)
   { 
-    WDutils::Error(func,file,line,"WDutils")
+    WDutils::Error(file,line,"WDutils")
       ("Assertion \"%s\" failed",assertion);
     std::exit(1);
   }
@@ -575,12 +576,28 @@ namespace WDutils {
 # define WDutilsAssert(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : WDutils::AssertFail(__STRING(expr),WDutilsThisFunction,__FILE__,__LINE__))
+  : WDutils::AssertFail(__STRING(expr),__FILE__,__LINE__))
   /// almost identical to assert()
 # define WDutilsAssertE(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
-  : WDutils::AssertFailE(__STRING(expr),WDutilsThisFunction,__FILE__,__LINE__))
+  : WDutils::AssertFailE(__STRING(expr),__FILE__,__LINE__))
+  //
+  template<bool Condition> struct AssertIf;
+  template<> struct AssertIf<true>
+  { static bool test(bool expr) { return expr; } };
+  template<> struct AssertIf<false>
+  { static bool test(bool) { return true; } };
+  /// use instead of @a if(cond) WDutilsAssert(expr) with cond a constexpr
+# define WDutilsAssertIf(cond,expr)					\
+    ((AssertIf<cond>(expr))						\
+  ? static_cast<void>(0)						\
+  : WDutils::AssertFail(__STRING(expr),__FILE__,__LINE__))
+  /// use instead of @a if(cond) WDutilsAssertE(expr) with cond a constexpr
+# define WDutilsAssertEIf(cond,expr)					\
+    ((AssertIf<cond>(expr))						\
+  ? static_cast<void>(0)						\
+  : WDutils::AssertFailE(__STRING(expr),__FILE__,__LINE__))
 #endif // NDEBUG
   //@}
   //

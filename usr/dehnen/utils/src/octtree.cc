@@ -29,6 +29,7 @@
 /// \version 10-aug-2012 WD  removed OMP stuff to non-public part of library
 /// \version 30-aug-2012 WD  replaced typedef with using
 /// \version 19-sep-2012 WD  alternative memory layout using std::vector
+/// \version 30-oct-2012 WD  memory alignment for AVX
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -139,9 +140,6 @@ namespace {
     if(x<100) x=100;
     return size_t(Dim==2? 1.5*x : x);
   }
-  /// the next multiple of 16 to n*sizeof(T)
-  template<typename T> inline size_t Next16(size_t n)
-  { return WDutils::next_aligned16(n*sizeof(T)); }
   //
 #ifdef OCTALTREE_DATA_IN_ONE_BLOCK
   template<typename _Tp>
@@ -151,18 +149,18 @@ namespace {
   static _Tp*p_data(octtree::storage<_Tp> const&X)
   { return const_cast<_Tp*>(X.data()); }
   template<typename _Tp>
-  static _Tp*p_data(octtree::store16<_Tp> const&X)
+  static _Tp*p_data(octtree::aligned_store<_Tp> const&X)
   { return const_cast<_Tp*>(X.data()); }
 #endif
   //
   /// tree of boxes and dots, to be used inside an openMP parallel region
   //
-  template<int __D, typename __X> 
-  struct TreeImplementer< OctalTree<__D,__X> >
+  template<int _D, typename _X> 
+  struct TreeImplementer< OctalTree<_D,_X> >
   {
     //
-    using OTree            = OctalTree<__D,__X>;
-    using Helper           = TreeHelper<__D,__X>;
+    using OTree            = OctalTree<_D,_X>;
+    using Helper           = TreeHelper<_D,_X>;
     using Dot              = typename OTree::Dot;
     using Initialiser      = typename OTree::Initialiser;
     using GeoAlg           = Geometry::Algorithms<1>;
@@ -172,14 +170,14 @@ namespace {
     using point            = typename Helper::point;
     using point16          = typename OTree::point16;
     using PerBoundary      = typename OTree::PerBoundary;
-    using BuilderInterface = typename OTree::BuilderInterface;
-    using peano_map        = typename Peano<__D>::Map;
-    using peano_dig        = typename Peano<__D>::Digit;
-    using peano_oct        = typename Peano<__D>::Octant;
+    using TreeBuilder      = typename OTree::TreeBuilderInterface;
+    using peano_map        = typename Peano<_D>::Map;
+    using peano_dig        = typename Peano<_D>::Digit;
+    using peano_oct        = typename Peano<_D>::Octant;
     //
-    static const peano_oct  Dim          = __D;
-    static const peano_oct  Nsub         = 1<<Dim;
-    static const depth_type MaximumDepth = OTree::MaximumDepth;
+    static const peano_oct  Dim            = _D;
+    static const peano_oct  Nsub           = 1<<Dim;
+    static const depth_type MaximumDepth   = OTree::MaximumDepth;
     /// \name types used in tree construction
     //@{
     /// represents a cubic cell in the box-dot tree
@@ -188,7 +186,7 @@ namespace {
     /// \note This is carefully designed to have no more than 64, 80, 96, and
     ///       112 bytes for (Dim,pos_type)=(2,float), (2,double), (3,float),
     ///       and (3,double), respectively.
-    struct __Box {
+    struct _Box {
       using ndl_type = typename meta::IntTypeWords<Nsub>::integer_u;
       cube        CUB;                 ///< box cubus
       void       *OCT[Nsub];           ///< octants
@@ -205,7 +203,7 @@ namespace {
       uint8_t     LEV;                 ///< tree level of box
       peano_map   MAP;                 ///< peano map octant <-> digit
     };
-    using Box = SSE::Extend16<__Box>;
+    using Box = SSE::Extend16<_Box>;
     //
 #define  pDOT(d) static_cast<Dot*>((d))
 #define cpDOT(d) static_cast<const Dot*>((d))
@@ -498,23 +496,25 @@ namespace {
     ~TreeImplementer();
     /// allocate data for an OctalTree
     static void AllocateTree(OTree*tree, count_type nc, count_type nl,
-			     count_type ne, bool fr) WDutils_THROWING;
+			     count_type ne, bool fr,
+			     const TreeBuilder*builder=0) WDutils_THROWING;
     /// serial build of an OctalTree
     static void BuildTreeSerial(OTree*tree,bool fresh,
-				const BuilderInterface*builder);
+				const TreeBuilder*builder);
     /// build an OctalTree
-    static void BuildTree(OTree*tree,bool fresh, count_type 
+    static count_type BuildTree(OTree*tree,bool fresh, count_type 
 #ifdef OCTALTREE_USE_OPENMP
-			  tol
+				tol
 #endif
-			  , const BuilderInterface*builder=0)
+				, const TreeBuilder*builder=0)
     {
 #ifdef OCTALTREE_USE_OPENMP
       if(tree->NDOM>1)
-	BuildTreeParallel(tree,fresh,tol,builder);
+	return BuildTreeParallel(tree,fresh,tol,builder);
       else 
 #endif
 	BuildTreeSerial  (tree,fresh,builder);
+      return 0;
     }
 #ifdef TESTING
     /// header for dot data dump
@@ -640,7 +640,7 @@ namespace {
       DumpHeadDot(dumpD);
       DumpHeadBox(dumpB);
       Dump(ROOT,dumpD,dumpB,ns,true);
-      DebugInfoN(5," %d single-child boxes\n",ns);
+      DebugInfo(5," %d single-child boxes\n",ns);
     }
 #endif// TESTING
   };// class TreeImplementer<>
@@ -685,8 +685,8 @@ namespace {
   //
   // set dots for local partition from old domain
   //
-  template<int __D, typename __X>
-  void TreeImplementer<OctalTree<__D,__X> >::
+  template<int _D, typename _X>
+  void TreeImplementer<OctalTree<_D,_X> >::
   SetDots(const Initialiser*init, const OTree*tree,
 	  point&Xmin, point&Xmax, point&Xsum)
   {
@@ -720,8 +720,8 @@ namespace {
   //
   // build box-dot tree from all 'our' dots
   //
-  template<int __D, typename __X>
-  void TreeImplementer< OctalTree<__D,__X> >::
+  template<int _D, typename _X>
+  void TreeImplementer< OctalTree<_D,_X> >::
   Build(const Initialiser*init, const OTree*tree)
   {
     // 1 load data into dots
@@ -730,6 +730,8 @@ namespace {
     // 2 establish global domain
     unsigned Ntot = NDOT;
 #ifdef OCTALTREE_USE_OPENMP
+    if(NDOT <= NMAX)
+      WDutils_ErrorN("OctTree: found #particles=%d < nmax=%d\n",NDOT,NMAX);
     if(NT>1) {
       OMP::AllReduce<Parallel::Sum>(NDOT,Ntot);
       OMP::AllReduce<Parallel::Min>(static_cast<pos_type*>(Xmin),Dim);
@@ -767,8 +769,8 @@ namespace {
   //
   // count boxes (including root) and dots in the tree
   //
-  template<int __D, typename __X>
-  void TreeImplementer< OctalTree<__D,__X> >::
+  template<int _D, typename _X>
+  void TreeImplementer< OctalTree<_D,_X> >::
   CountNodesSerial(count_type&NB, count_type&ND) const
   {
     NB=1, ND=NDOT;
@@ -788,8 +790,8 @@ namespace {
   //
   // link a cell (recursive)
   //
-  template<int __D, typename __X>
-  depth_type TreeImplementer< OctalTree<__D,__X> >::
+  template<int _D, typename _X>
+  depth_type TreeImplementer< OctalTree<_D,_X> >::
   LinkCell(const Box*P, const count_type C, const count_type cN) const
   {
 #ifdef TESTING
@@ -846,8 +848,8 @@ namespace {
   //
   // link serial
   //
-  template<int __D, typename __X>
-  void TreeImplementer< OctalTree<__D,__X> >::
+  template<int _D, typename _X>
+  void TreeImplementer< OctalTree<_D,_X> >::
   LinkSerial(OTree*tree) const
   {
     const_cast<OTree*&>(TREE) = tree;
@@ -879,8 +881,8 @@ namespace {
   //
   // destructor
   //
-  template<int __D, typename __X>
-  TreeImplementer< OctalTree<__D,__X> >::~TreeImplementer()
+  template<int _D, typename _X>
+  TreeImplementer< OctalTree<_D,_X> >::~TreeImplementer()
   {
     if(DOTS) WDutils_DEL16(DOTS); DOTS=0;
     if(BXAL) WDutils_DEL_O(BXAL); BXAL=0;
@@ -895,50 +897,60 @@ namespace {
   //
   // allocate OctalTree data
   //
-  template<int __D, typename __X>
-  void TreeImplementer< OctalTree<__D,__X> >::
-  AllocateTree(OTree*const tree, const count_type nc, const count_type nl,
-	       const count_type ne, const bool flag_and_rung) WDutils_THROWING
+  template<int _D, typename _X>
+  void TreeImplementer< OctalTree<_D,_X> >::
+  AllocateTree(OTree*const tree, count_type nc, count_type nl,
+	       count_type ne, const bool flag_and_rung,
+	       const TreeBuilder*builder) WDutils_THROWING
   {
     tree->NLEAFEXT = ne;
     tree->NLEAF    = nl;
     tree->NCELL    = nc;
+    // ensure that ne,nl,nc are multiples of LeafBlockSize
+    ne= OctalTree<_D,_X>::blocked(ne); // multiple of LeafBlockSize >= # ExtLeaf
+    nl= OctalTree<_D,_X>::blocked(nl); // multiple of LeafBlockSize >= # Leaf
 #ifdef OCTALTREE_DATA_IN_ONE_BLOCK
-    size_t need = Next16<point16>      (ne)        // _XL[1]
-      +           Next16<particle_key> (ne)        // _PL[1]
-      +           Next16<point16>      (nl)        // _XL[0]
-      +           Next16<particle_key> (nl)        // _PL[0]
-      +           Next16<count_type>   (nl)        // _PC
-      +           Next16<depth_type>   (nc)        // _LE
-      +           Next16<octant_type>  (nc)        // _OC
-      +           Next16<cube16>       (nc)        // _XC
-      +           Next16<count_type>   (nc)        // _L0
-      +           Next16<local_count>  (nc)        // _NL
-      +           Next16<count_type>   (nc)        // _NM
-      +           Next16<count_type>   (nc)        // _C0
-      +           Next16<octant_type>  (nc)        // _NC
-      +           Next16<count_type>   (nc)        // _PA
-      +           Next16<depth_type>   (nc)        // _DP
+    size_t need = NextAligned<point16>      (ne)        // _XL[1]
+      +           NextAligned<particle_key> (ne)        // _PL[1]
+      +           NextAligned<point16>      (nl)        // _XL[0]
+      +           NextAligned<particle_key> (nl)        // _PL[0]
+      +           NextAligned<count_type>   (nl)        // _PC
+      +           NextAligned<depth_type>   (nc)        // _LE
+      +           NextAligned<octant_type>  (nc)        // _OC
+      +           NextAligned<cube16>       (nc)        // _XC
+      +           NextAligned<count_type>   (nc)        // _L0
+      +           NextAligned<local_count>  (nc)        // _NL
+      +           NextAligned<count_type>   (nc)        // _NM
+      +           NextAligned<count_type>   (nc)        // _C0
+      +           NextAligned<octant_type>  (nc)        // _NC
+      +           NextAligned<count_type>   (nc)        // _PA
+      +           NextAligned<depth_type>   (nc)        // _DP
 # ifdef OCTALTREE_HAVE_D0
-      +           Next16<domain_id>    (nc)        // _D0
+      +           NextAligned<domain_id>    (nc)        // _D0
 # endif// OCTALTREE_USE_OPENMP
       ;
     if(flag_and_rung)
-      need     += Next16<float>        (ne)        // _RG[1]
-	+         Next16<uint8_t>      (ne)        // _FL[1]
-	+         Next16<float>        (nl)        // _RG[0]
-	+         Next16<uint8_t>      (nl)        // _FL[0]
-	+         Next16<count_type>   (nc);       // _NA
-    tree->_MEM. template reset_conditional<3,2>(need);
+      need     += NextAligned<float>        (ne)        // _RG[1]
+	+         NextAligned<uint8_t>      (ne)        // _FL[1]
+	+         NextAligned<float>        (nl)        // _RG[0]
+	+         NextAligned<uint8_t>      (nl)        // _FL[0]
+	+         NextAligned<count_type>   (nc);       // _NA
+    // account for derived data
+    size_t need_derived_leaves = builder? builder->bytes_for_leaves(nl,ne) : 0;
+    size_t need_derived_cells  = builder? builder->bytes_for_cells(nc) : 0;
+    need += need_derived_leaves + need_derived_cells;
+    // ensure enough memory
+    tree->_BUF. template reset_conditional<3,2>(need);
 # define SET_DATA(Name,Number,Type)				\
     if(Number) {						\
       tree->Name = reinterpret_cast<Type*>(A);			\
-      A += Next16<Type>(Number);				\
+      A += NextAligned<Type>(Number);				\
     } else							\
       tree->Name = 0;						\
     DebugInfoN(6,"OctalTree: set %s = %p for %d %s\n",		\
 	       __STRING(Name),tree->Name,Number,__STRING(Type));
-    char*A = tree->_MEM.begin();
+    // set pointers to memory
+    char*A = tree->_BUF.begin();
     SET_DATA(_XL[1],ne,point16);
     SET_DATA(_PL[1],ne,particle_key);
     SET_DATA(_RG[1],flag_and_rung?ne:0,float);
@@ -948,6 +960,10 @@ namespace {
     SET_DATA(_PC   ,nl,count_type);
     SET_DATA(_RG[0],flag_and_rung?nl:0,float);
     SET_DATA(_FL[0],flag_and_rung?nl:0,uint8_t);
+    if(builder && need_derived_leaves) {
+      builder->set_leaf_memory(A,nl,ne);
+      A += need_derived_leaves;
+    }
     SET_DATA(_LE,nc,depth_type);
     SET_DATA(_OC,nc,octant_type);
     SET_DATA(_XC,nc,cube16);
@@ -962,7 +978,11 @@ namespace {
 # ifdef OCTALTREE_HAVE_D0
     SET_DATA(_D0,nc,domain_id);
 # endif// OCTALTREE_USE_OPENMP
-    WDutilsAssert(A == tree->_MEM.begin()+need && A <= tree->_MEM.end());
+    if(builder && need_derived_cells) {
+      builder->set_cell_memory(A,nc);
+      A += need_derived_cells;
+    }
+    WDutilsAssert(A == tree->_BUF.begin()+need && A <= tree->_BUF.end());
 #else // OCTALTREE_DATA_IN_ONE_BLOCK
     const count_type nc4=(nc+3)&~3;              // multiple of 4 >= nc
     const count_type ne4=(ne+3)&~3;              // multiple of 4 >= ne
@@ -1007,9 +1027,9 @@ namespace {
   //
   // BuildTreeSerial
   // 
-  template<int __D, typename __X>
-  void TreeImplementer< OctalTree<__D,__X> >::
-  BuildTreeSerial(OTree*tree,bool fresh, const BuilderInterface*builder=0)
+  template<int _D, typename _X>
+  void TreeImplementer< OctalTree<_D,_X> >::
+  BuildTreeSerial(OTree*tree,bool fresh, const TreeBuilder*builder=0)
   {
     double    wtime = WALLCLOCK();
     count_type Next = tree->INIT->Nexternal();
@@ -1026,7 +1046,9 @@ namespace {
 #endif
       // 2 allocate top domain and link cells and leaves
       TI.CountNodesSerial(tree->NCELL,tree->NLEAF);
-      AllocateTree(tree,tree->NCELL,tree->NLEAF,Next,load_flags);
+      if(builder)
+	builder->Before(fresh,tree->NCELL,tree->NLEAF,Next);
+      AllocateTree(tree,tree->NCELL,tree->NLEAF,Next,load_flags,builder);
       TI.LinkSerial(tree);
       // 3 load rungs & flags and pass _NA[] up the tree
       if(load_flags) {
@@ -1052,8 +1074,10 @@ namespace {
 		       Next);
     }
     // 6 set derived data
-    if(builder)
-      builder->Serial(fresh,tree);
+    if(builder) {
+      builder->SetSub(tree,0);
+      builder->SetTop(tree);
+    }
     DebugInfoN(2,"  OctalTree: build finished\n");
   }
   //
@@ -1068,8 +1092,8 @@ namespace WDutils {
   //
   // OctalTree::~OctalTree()
   //
-  template<int __D, typename __X>
-  OctalTree<__D,__X>::~OctalTree()
+  template<int _D, typename _X>
+  OctalTree<_D,_X>::~OctalTree()
   {
 #ifdef OCTALTREE_USE_OPENMP
     WDutilsAssertE(!OMP::IsParallel());
@@ -1079,8 +1103,8 @@ namespace WDutils {
   //
   // OctalTree::OctalTree()
   //
-  template<int __D, typename __X>
-  OctalTree<__D,__X>::OctalTree(const Initialiser*ini, Data const&data)
+  template<int _D, typename _X>
+  OctalTree<_D,_X>::OctalTree(const Initialiser*ini, Data const&data)
     throw(exception)
     : INIT  ( ini )
     , PERB  ( INIT->Boundary() )
@@ -1112,15 +1136,18 @@ namespace WDutils {
     for(int i=0; i!=NDAT; ++i) DATA[0][i] = DATA[1][i] = 0;
 #endif
     // build tree
-    TreeImplementer<OctalTree>::BuildTree(this,1,data.TOL);
+#ifdef OCTALTREE_USE_OPENMP
+    TOL = 
+#endif// OCTALTREE_USE_OPENMP
+      TreeImplementer<OctalTree>::BuildTree(this,1,data.TOL);
     ++NBUILD;
   }
   //
   // OctalTree::OctalTree()
   //
-  template<int __D, typename __X>
-  OctalTree<__D,__X>::OctalTree(const Initialiser*ini, Data const&data,
-				BuilderInterface const&builder)
+  template<int _D, typename _X>
+  OctalTree<_D,_X>::OctalTree(const Initialiser*ini, Data const&data,
+				TreeBuilderInterface const&builder)
     throw(exception)
     : INIT  ( ini )
     , PERB  ( INIT->Boundary()  )
@@ -1152,14 +1179,17 @@ namespace WDutils {
     for(int i=0; i!=NDAT; ++i) DATA[0][i] = DATA[1][i] = 0;
 #endif
     // build tree
-    TreeImplementer<OctalTree>::BuildTree(this,1,data.TOL,&builder);
+#ifdef OCTALTREE_USE_OPENMP
+    TOL = 
+#endif// OCTALTREE_USE_OPENMP
+      TreeImplementer<OctalTree>::BuildTree(this,1,data.TOL,&builder);
     ++NBUILD;
   }
   //
   // OctalTree::rebuild
   //
-  template<int __D, typename __X>
-  void OctalTree<__D,__X>::rebuild(Data const&data) throw(exception)
+  template<int _D, typename _X>
+  void OctalTree<_D,_X>::rebuild(Data const&data) throw(exception)
   {
     // sanity checks
     if(data.NMAX!=0) {
@@ -1180,15 +1210,18 @@ namespace WDutils {
     for(int i=0; i!=NDAT; ++i) DATA[0][i] = DATA[1][i] = 0;
 #endif
     // rebuild tree
-    TreeImplementer<OctalTree>::BuildTree(this,0,data.TOL);
+#ifdef OCTALTREE_USE_OPENMP
+    TOL = 
+#endif// OCTALTREE_USE_OPENMP
+      TreeImplementer<OctalTree>::BuildTree(this,0,data.TOL);
     ++NBUILD;
   }
   //
   // OctalTree::rebuild
   //
-  template<int __D, typename __X>
-  void OctalTree<__D,__X>::rebuild(Data const&data,
-				   BuilderInterface const&builder)
+  template<int _D, typename _X>
+  void OctalTree<_D,_X>::rebuild(Data const&data,
+				   TreeBuilderInterface const&builder)
     throw(exception)
   {
     // sanity checks
@@ -1217,7 +1250,7 @@ namespace WDutils {
   // OctalTree::scc()
   //
 #ifdef __SSE__
-#  define cPF(__X) static_cast<const float*>(__X)
+#  define cPF(_X) static_cast<const float*>(_X)
   //
   // SSE version for 2D, single precision
   template<>
@@ -1272,8 +1305,8 @@ namespace WDutils {
 #undef NotInCell
   }
 #ifdef __SSE2__
-#  define cPD0(__X) static_cast<const double*>(__X)
-#  define cPD1(__X) static_cast<const double*>(__X)+2
+#  define cPD0(_X) static_cast<const double*>(_X)
+#  define cPD1(_X) static_cast<const double*>(_X)+2
   // SSE version for 2D, double precision
   template<>
   count_type OctalTree<2,double>::scc(point const&x) const noexcept
@@ -1343,12 +1376,12 @@ namespace WDutils {
 #ifndef __SSE2__
 #ifdef __SSE__
   //   only for double
-  template<int __D>
-  count_type OctalTree<__D,double>::scc(point const&x) const noexcept
+  template<int _D>
+  count_type OctalTree<_D,double>::scc(point const&x) const noexcept
 #else // __SSE__
   //   for float and double
-  template<int __D, typename __X>
-  count_type OctalTree<__D,__X>::scc(point const&x) const noexcept
+  template<int _D, typename _X>
+  count_type OctalTree<_D,_X>::scc(point const&x) const noexcept
 #endif// __SSE__
   {
     count_type c=0;
@@ -1369,9 +1402,9 @@ namespace WDutils {
   //
   // OctalTree::LeafHeader()
   //
-  template<int __Dim, typename __X> template<int __D>
-  typename std::enable_if<__D==2,std::ostream&>::type
-  OctalTree<__Dim,__X>::__LeafHeader(std::ostream&s) const
+  template<int _Dim, typename _X> template<int _D>
+  typename std::enable_if<_D==2,std::ostream&>::type
+  OctalTree<_Dim,_X>::_LeafHeader(std::ostream&s) const
   {
     s  << "Leaf     ";
     if(have_flag())
@@ -1381,22 +1414,22 @@ namespace WDutils {
     return s;
   }
   //
-  template<int __Dim, typename __X> template<int __D>
-  typename std::enable_if<__D==3,std::ostream&>::type
-  OctalTree<__Dim,__X>::__LeafHeader(std::ostream&s) const
+  template<int _Dim, typename _X> template<int _D>
+  typename std::enable_if<_D==3,std::ostream&>::type
+  OctalTree<_Dim,_X>::_LeafHeader(std::ostream&s) const
   {
     s  << "Leaf     ";
     if(have_flag())
       s<< " f rg";
-    s  << "       k up       ";
+    s  << "        k up       ";
     s  << "                         X             ";
     return s;
   }
   //
   // OctalTree::Dump(Leaf)
   //
-  template<int __Dim, typename __X>
-  std::ostream&OctalTree<__Dim,__X>::Dump(const Leaf l, std::ostream&s)
+  template<int _Dim, typename _X>
+  std::ostream&OctalTree<_Dim,_X>::Dump(const Leaf l, std::ostream&s)
     const
   {
     s  << l;
@@ -1411,8 +1444,8 @@ namespace WDutils {
   //
   // OctalTree::Dump(ExtLeaf)
   //
-  template<int __Dim, typename __X>
-  std::ostream&OctalTree<__Dim,__X>::Dump(const ExtLeaf l, std::ostream&s)
+  template<int _Dim, typename _X>
+  std::ostream&OctalTree<_Dim,_X>::Dump(const ExtLeaf l, std::ostream&s)
     const
   {
     s  << l << ' ';
@@ -1428,14 +1461,14 @@ namespace WDutils {
   //
   // OctalTree::CellHeader()
   //
-  template<int __Dim, typename __X> template<int __D>
-  typename std::enable_if<__D==2,std::ostream&>::type
-  OctalTree<__Dim,__X>::__CellHeader(std::ostream&s) const
+  template<int _Dim, typename _X> template<int _D>
+  typename std::enable_if<_D==2,std::ostream&>::type
+  OctalTree<_Dim,_X>::_CellHeader(std::ostream&s) const
   {
     s  << "Cell     ";
     s  << " le dp";
-#ifdef OCTALTREE_HAVE_D0
-    s  << " d0";
+#ifdef OCTALTREE_USE_OPENMP
+    s  << " d0 nd";
 #endif
     s  << " up       ";
     s  << "oc C0       ";
@@ -1449,14 +1482,14 @@ namespace WDutils {
     return s;
   }
   //
-  template<int __Dim, typename __X> template<int __D>
-  typename std::enable_if<__D==3,std::ostream&>::type
-  OctalTree<__Dim,__X>::__CellHeader(std::ostream&s) const
+  template<int _Dim, typename _X> template<int _D>
+  typename std::enable_if<_D==3,std::ostream&>::type
+  OctalTree<_Dim,_X>::_CellHeader(std::ostream&s) const
   {
     s  << "Cell     ";
     s  << " le dp";
-#ifdef OCTALTREE_HAVE_D0
-    s  << " d0";
+#ifdef OCTALTREE_USE_OPENMP
+    s  << " d0 nd";
 #endif
     s  << " up       ";
     s  << "oc C0       ";
@@ -1472,8 +1505,8 @@ namespace WDutils {
   //
   // OctalTree::Dump(Cell)
   //
-  template<int __Dim, typename __X>
-  std::ostream&OctalTree<__Dim,__X>::Dump(const Cell c, std::ostream&s)
+  template<int _Dim, typename _X>
+  std::ostream&OctalTree<_Dim,_X>::Dump(const Cell c, std::ostream&s)
     const
   {
     // cell id
@@ -1481,9 +1514,10 @@ namespace WDutils {
     // level
     s   << std::setw(2) << int (_LE[c.I]) << ' '
 	<< std::setw(2) << int (_DP[c.I]) << ' ';
-#ifdef OCTALTREE_HAVE_D0
+#ifdef OCTALTREE_USE_OPENMP
     // domain and # domains
-    s   << std::setw(2) << int (_D0[c.I]) << ' ';
+    s   << std::setw(2) << int (first_domain(c)) << ' '
+	<< std::setw(2) << int (n_domain(c)) << ' ';
 #endif
     // parent
     if(c.I)
@@ -1519,13 +1553,13 @@ namespace WDutils {
   template class OctalTree<3,float>;
   template class OctalTree<2,double>;
   template class OctalTree<3,double>;
-  template std::ostream&OctalTree<2,double>::__CellHeader<2>(std::ostream&)
+  template std::ostream&OctalTree<2,double>::_CellHeader<2>(std::ostream&)
     const;
-  template std::ostream&OctalTree<3,double>::__CellHeader<3>(std::ostream&)
+  template std::ostream&OctalTree<3,double>::_CellHeader<3>(std::ostream&)
     const;
-  template std::ostream&OctalTree<2,float>::__CellHeader<2>(std::ostream&)
+  template std::ostream&OctalTree<2,float>::_CellHeader<2>(std::ostream&)
     const;
-  template std::ostream&OctalTree<3,float>::__CellHeader<3>(std::ostream&)
+  template std::ostream&OctalTree<3,float>::_CellHeader<3>(std::ostream&)
     const;
   //
 } // namespace WDutils
@@ -1533,25 +1567,25 @@ namespace WDutils {
 namespace {
 #ifdef __SSE__
 
-#  define __TemplateDecl						\
-  template<int __Dim, typename __PosType, typename __PropType, bool __Anc>
-#  define __TemplateList __Dim,__PosType,__PropType,__Anc
+#  define _TemplateDecl						\
+  template<int _Dim, typename _PosType, typename _PropType, bool _Anc>
+#  define _TemplateList _Dim,_PosType,_PropType,_Anc
 
 #else  // __SSE__
 
-#  define __TemplateDecl					\
-  template<int __Dim, typename __PosType, typename __PropType>
-#  define __TemplateList __Dim,__PosType,__PropType
+#  define _TemplateDecl					\
+  template<int _Dim, typename _PosType, typename _PropType>
+#  define _TemplateList _Dim,_PosType,_PropType
 
 #endif
   ///
   /// auxiliary for InteractionTree<>::Builder
   ///
-  __TemplateDecl struct TreeImplementer
-  < octtree::InteractionTreeData<__TemplateList> >
+  _TemplateDecl struct TreeImplementer
+  < octtree::InteractionTreeData<_TemplateList> >
   {
-    using ITree = InteractionTree<__TemplateList>;
-    static const int  Dim       = __Dim;
+    using ITree = InteractionTree<_TemplateList>;
+    static const int  Dim       = _Dim;
 #ifdef __SSE__
     static const bool Anchoring = ITree::Anchoring;
 #endif
@@ -1570,70 +1604,79 @@ namespace {
     using Anchor       = typename ITree::Anchor;
     using sse_pos_type = typename ITree::sse_pos_type;
     /// set SSE position without anchoring
-    template<bool __A>
-    static typename std::enable_if<!__A>::type
-    __set_sse(const OTree*tree, IData*data,
+    template<bool _A>
+    static typename std::enable_if<!_A>::type
+    _set_sse(const OTree*tree, IData*data,
 # ifdef OCTALTREE_USE_OPENMP
-	      count_type dom,
+	     count_type dom,
 # endif
-	      float*, float)
+	     float*, float)
     {
-      DebugInfoN(2,"InteractionTree: setting sse positions w/o anchoring\n");
-      tree->
+      DebugInfoN(2,"InteractionTree: setting sse positions ...\n");
 # ifdef OCTALTREE_USE_OPENMP
-	domain(dom)->
+      auto sub=tree->domain(dom);
+# else
+      auto sub=tree;
 # endif
-	loop_leaves([=](const Leaf l) noexcept
-		   {
-		     for(int d=0; d!=Dim; ++d)
-		       data->_X16[d][l.I] = tree->position(l)[d];
-		   } );
+      for(auto l=sub->begin_leaf(); l!=sub->end_leaf(); ++l)
+	for(int d=0; d!=Dim; ++d)
+	  data->_XVEC[d][l.I] = tree->position(l)[d];
 # ifdef OCTALTREE_USE_OPENMP
       if(dom+1 == tree->n_dom())
 # endif
-	for(auto l=tree->end_leaf(); l.I<tree->n_leaf4(); ++l)
+	for(auto l=tree->end_leaf(); l.I<tree->leaf_capacity(); ++l)
 	  for(int d=0; d!=Dim; ++d)
-	    data->_X16[d][l.I] = 0;
+	    data->_XVEC[d][l.I] = 0;
+      DebugInfoN(3,"InteractionTree: DONE (sse positions)\n");
     }
+    //
+    template<typename FuncOfCell>
+    static void loop_cells_up(const OTree*tree, FuncOfCell f)
+      noexcept(noexcept(f))
+    { for(auto c=tree->rbegin_cell(); c!=tree->rend_cell(); --c) f(c); }
+# ifdef OCTALTREE_USE_OPENMP
+    //
+    template<typename FuncOfCell>
+    static void loop_cells_up(cp_domain dom, FuncOfCell f) noexcept(noexcept(f))
+    { dom->loop_cells_up(f); }
+# endif
     /// set SSE positions and anchors
-    template<bool __A>
-    static typename std::enable_if< __A>::type
-    __set_sse(const OTree*tree, IData*data,
+    template<bool _A>
+    static typename std::enable_if< _A>::type
+    _set_sse(const OTree*tree, IData*data,
 # ifdef OCTALTREE_USE_OPENMP
 	      count_type dom,
 # endif
 	      float*QI, float del)
     {
-# ifdef OCTALTREE_USE_OPENMP
-      cp_domain DOM = tree->domain(dom);
-# else
-#  define DOM tree
-# endif
       DebugInfoN(2,"InteractionTree: setting anchors and sse positions ...\n");
+# ifdef OCTALTREE_USE_OPENMP
+      auto sub=tree->domain(dom);
+# else
+      auto sub=tree;
+# endif
       // 1 up-ward pass: set QI[cell] = min(Q)
       DebugInfoN(4,"InteractionTree: passing qmin up the domain ...\n");
-      DOM -> loop_cells_up([&](const Cell c) noexcept {
-	  float qmin;
-	  tree->loop_leaf_kids(c,
-			       [&](const Leaf l0) noexcept
-			       { qmin = data->_HSQ[0][l0.I]; },
-			       [&](const Leaf ll) noexcept
-			       { update_min(qmin,data->_HSQ[0][ll.I]); }
-			       );
-	  tree->loop_daughters(c,[&](const Cell cc) noexcept
-			       { update_min(qmin,QI[cc.I]); }
-			       );
-	  QI[c.I] = qmin;
-	});
+      loop_cells_up(sub,[&](const Cell c) noexcept
+		    {
+		      auto ll=tree->begin_leaf(c);
+		      float qmin = data->_HSQ[0][ll.I];
+		      for(++ll; ll<tree->end_leaf_kids(c); ++ll)
+			update_min(qmin,data->_HSQ[0][ll.I]);
+		      for(auto cc=tree->begin_cell(c); cc!=tree->end_cell(c);
+			  ++cc)
+			update_min(qmin,QI[cc.I]);
+		      QI[c.I] = qmin;
+		    });
       DebugInfoN(5,"InteractionTree: DONE (passing qmin up the domain)\n");
       // 2 count anchors needed
       DebugInfoN(4,"InteractionTree: counting anchors needed ...\n");
       const double fac = square(double(del)/
 				std::numeric_limits<float>::epsilon());
-      Stack<Cell> CS(OTree::Nsub * DOM->depth());
+      Stack<Cell> CS(OTree::Nsub * sub->depth());
       count_type ianc=0,ntot=0;
 # ifdef OCTALTREE_USE_OPENMP
-      DOM->loop_branches([&](const Cell b) {
+      sub->loop_branches([&](const Cell b) {
 	  CS.push(b);
 # else
 	  CS.push(tree->root());
@@ -1644,7 +1687,8 @@ namespace {
 	    if(square(tree->radius(c)) < fac * QI[c.I])
 	      ++ntot;
 	    else
-	      tree->loop_daughters(c,[&](Cell cc) noexcept { CS.push(cc); });
+	      for(auto cc=tree->begin_cell(c); cc!=tree->end_cell(c); ++cc)
+		CS.push(cc);
 	  }
 # ifdef OCTALTREE_USE_OPENMP
 	});
@@ -1667,33 +1711,32 @@ namespace {
       DebugInfoN(4,"InteractionTree: setting anchors and SSE pos ...\n");
 # ifdef OCTALTREE_USE_OPENMP
 # pragma omp barrier
-      DOM->loop_branches([&](const Cell b) {
+      sub->loop_branches([&](const Cell b) {
 	  CS.push(b);
 # else
 	  CS.push(tree->root());
 # endif
 	  while(!CS.is_empty()) {
-	    Cell c = CS.pop();
+	    auto c = CS.pop();
 	    if(square(tree->radius(c)) < fac * QI[c.I]) {
 	      Anchor*An = &(data->_ANCH[ianc++]);
 	      An->Z = tree->centre(c);
 	      An->B = tree->begin_leaf(c);
 	      An->E = tree->end_leaf_desc(c);
-	      tree->loop_all_leaves(c,[&](const Leaf l) noexcept {
-		  data->_ANC[l.I] = An;
-		  for(int d=0; d!=Dim; ++d)
-		    data->_X16[d][l.I] = float(tree->position(l)[d] - An->Z[d]);
-		} );
+	      for(auto l=tree->begin_leaf(c); l!=tree->end_leaf_desc(c); ++l) {
+		data->_ANC[l.I] = An;
+		for(int d=0; d!=Dim; ++d)
+		  data->_XVEC[d][l.I] = float(tree->position(l)[d] - An->Z[d]);
+	      }
 	    } else {
-	      tree->loop_leaf_kids(c,[&](const Leaf l) noexcept {
-		  data->_ANC[l.I] = 0;
-		  for(int d=0; d!=Dim; ++d)
-		    data->_X16[d][l.I] = float(tree->position(l)[d] -
-					      tree->centre  (c)[d] );
-		} );
-	      tree->loop_daughters(c,[&](const Cell cc) noexcept {
-		  CS.push(cc);
-		});
+	      for(auto l=tree->begin_leaf(c); l<tree->end_leaf_kids(c); ++l) {
+		data->_ANC[l.I] = 0;
+		for(int d=0; d!=Dim; ++d)
+		  data->_XVEC[d][l.I] = float(tree->position(l)[d] -
+					     tree->centre  (c)[d] );
+	      }
+	      for(auto cc=tree->begin_cell(c); cc!=tree->end_cell(c); ++cc)
+		CS.push(cc);
 	    }
 	  }
 # ifdef OCTALTREE_USE_OPENMP
@@ -1704,10 +1747,9 @@ namespace {
       // 4 pad unused final positions
       if(dom+1 == tree->n_dom())
 # endif
-	for(auto l=tree->end_leaf(); l.I<tree->n_leaf4(); ++l)
+	for(auto l=tree->end_leaf(); l.I<tree->leaf_capacity(); ++l)
 	  for(int d=0; d!=Dim; ++d)
-	    data->_X16[d][l.I] = 0;
-# undef DOM
+	    data->_XVEC[d][l.I] = 0;
       DebugInfoN(3,"InteractionTree: DONE "
 		 "(setting anchors and SSE positions)\n");
     }
@@ -1718,22 +1760,22 @@ namespace {
 	    domain_id dom,
 # endif
 	    float*QI, float del)
-    { return __set_sse<__Anc>(tree,data,
+    { return _set_sse<_Anc>(tree,data,
 # ifdef OCTALTREE_USE_OPENMP
-			      dom,
+			    dom,
 # endif
-			      QI,del); }
+			    QI,del); }
     /// (not) dump anchor
-    template<bool __A>
-    static typename std::enable_if<!__A>::type
+    template<bool _A>
+    static typename std::enable_if<!_A>::type
     dumpanchor(const ITree*, const Leaf, std::ostream&) {}
     /// (not) dump anchor
-    template<bool __A>
-    static typename std::enable_if<!__A>::type
+    template<bool _A>
+    static typename std::enable_if<!_A>::type
     dumpanchor(const ITree*, const ExtLeaf, std::ostream&) {}
     /// dump anchor
-    template<bool __A>
-    static typename std::enable_if<__A>::type
+    template<bool _A>
+    static typename std::enable_if<_A>::type
     dumpanchor(const ITree*tree, const Leaf l, std::ostream&s)
     {
       if(tree->have_anchor()) {
@@ -1742,20 +1784,20 @@ namespace {
       }
     }
     /// dump anchor
-    template<bool __A>
-    static typename std::enable_if<__A>::type
+    template<bool _A>
+    static typename std::enable_if<_A>::type
     dumpanchor(const ITree*tree, const ExtLeaf, std::ostream&s)
     {
       if(tree->have_anchor())
 	s << "               ---          ";
     }
     /// no anchor head
-    template<bool __A>
-    static typename std::enable_if<!__A>::type
+    template<bool _A>
+    static typename std::enable_if<!_A>::type
     headanchor(const ITree*, std::ostream&) {}
     /// anchor head
-    template<bool __A>
-    static typename std::enable_if<__A>::type
+    template<bool _A>
+    static typename std::enable_if<_A>::type
     headanchor(const ITree*tree, std::ostream&s)
     {
       if(tree->have_anchor())
@@ -1773,10 +1815,10 @@ namespace {
       DebugInfoN(2,"InteractionTree: loading masses ...\n");
       // 1 load mass for domain leaves
 #ifdef OCTALTREE_USE_OPENMP
-      cp_domain DOM = tree->domain(dom);
-      init->InitMass(tree->template particle_keys<0>()+DOM->L0,
-		     p_data(data->_MASS[0])           +DOM->L0,
-		     DOM ->n_leaf());
+      auto sub = tree->domain(dom);
+      init->InitMass(tree->template particle_keys<0>()+sub->L0,
+		     p_data(data->_MASS[0])           +sub->L0,
+		     sub ->n_leaf());
 #else
       init->InitMass(tree->template particle_keys<0>(),
 		     p_data(data->_MASS[0]),
@@ -1786,7 +1828,7 @@ namespace {
 #ifdef OCTALTREE_USE_OPENMP
       if(dom+1 == tree->n_dom())
 #endif
-	for(count_type l=tree->n_leaf(); l<tree->n_leaf4(); ++l)
+	for(count_type l=tree->n_leaf(); l<tree->leaf_capacity(); ++l)
 	  p_data(data->_MASS[0])[l] = 0;
       DebugInfoN(3,"InteractionTree: DONE (loading masses)\n");
     }
@@ -1800,7 +1842,7 @@ namespace {
 		     p_data(data->_MASS[1]),
 		     tree->n_extleaf());
       // 2 pad last few
-      for(count_type l=tree->n_extleaf(); l<tree->n_extleaf4(); ++l)
+      for(count_type l=tree->n_extleaf(); l<tree->extleaf_capacity(); ++l)
 	p_data(data->_MASS[1])[l] = 0;
       DebugInfoN(3,"InteractionTree: DONE (loading masses for ext leaves)\n");
     }
@@ -1815,10 +1857,10 @@ namespace {
       DebugInfoN(2,"InteractionTree: loading sizes^2 ...\n");
       // 1 load size^2 for domain leaves
 #ifdef OCTALTREE_USE_OPENMP
-      cp_domain DOM = tree->domain(dom);
-      init->InitSizeQ(tree->template particle_keys<0>()+DOM->L0,
-		      p_data(data->_HSQ[0])            +DOM->L0,
-		      DOM ->n_leaf());
+      auto sub = tree->domain(dom);
+      init->InitSizeQ(tree->template particle_keys<0>()+sub->L0,
+		      p_data(data->_HSQ[0])            +sub->L0,
+		      sub ->n_leaf());
 #else
       init->InitSizeQ(tree->template particle_keys<0>(),
 		      p_data(data->_HSQ[0]),
@@ -1828,7 +1870,7 @@ namespace {
 #ifdef OCTALTREE_USE_OPENMP
       if(dom+1 == tree->n_dom())
 #endif
-      for(count_type l=tree->n_leaf(); l<tree->n_leaf4(); ++l)
+      for(count_type l=tree->n_leaf(); l<tree->leaf_capacity(); ++l)
 	p_data(data->_HSQ[0])[l] = 0;
       DebugInfoN(3,"InteractionTree: DONE (loading sizes^2)\n");
     }
@@ -1842,81 +1884,155 @@ namespace {
 		      p_data(data->_HSQ[1]),
 		      tree->n_extleaf());
       // 2 pad last few rungs
-      for(count_type l=tree->n_extleaf(); l<tree->n_extleaf4(); ++l)
+      for(count_type l=tree->n_extleaf(); l<tree->extleaf_capacity(); ++l)
 	p_data(data->_HSQ[1])[l] = 0;
       DebugInfoN(3,"InteractionTree: DONE (loading sizes^2 for ext leaves)\n");
     }
-    /// allocate
-    static void allocate(IData*DATA, 
-			 int load, count_type NLeaf, count_type NExtLeaf)
-    { DATA->allocate(load,NLeaf,NExtLeaf); }
   };// TreeImplenter<InteractionTree>
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
   namespace octtree {
-    ///
-    /// InteractionTreeData::allocate()
-    /// 
-    template<int __Dim, typename __PosType, typename __PropType
-# ifdef __SSE__
-	     , bool __Anchoring
-# endif
-	     >
-    void InteractionTreeData<__Dim,__PosType,__PropType
-# ifdef __SSE__
-			     ,__Anchoring
-# endif
-			     >::
-    allocate(const int load, const count_type nl, const count_type ne)
-    {
-      static_assert(!__Anchoring,
-		    " InteractionTreeData::allocate(): not anchoring");
-      DebugInfoN(2,"InteractionTree<>: allocating additional data ...\n");
 #ifdef OCTALTREE_DATA_IN_ONE_BLOCK
-      count_type need = 0;
-      if(load & p_mass)
+    //
+    // InteractionTreeData<not anchoring>::bytes_needed()
+    //    NOTE: typically, our sse_pos_type is different from base!
+    //
+    _TemplateDecl size_t InteractionTreeData<_TemplateList>::
+    bytes_needed(int load, count_type nl, count_type ne) const
+    {
+      static_assert(!_Anc," InteractionTreeData::allocate(): not anchoring");
+      size_t need = 0;
+      if(load & mass_tag)
 	need +=
-	  Next16<prop_type> (nl) +                 // _MASS[0]
-	  Next16<prop_type> (ne) ;                 // _MASS[1]
-      if(load & p_size)
+	  NextAligned<prop_type> (nl) +                 // _MASS[0]
+	  NextAligned<prop_type> (ne) ;                 // _MASS[1]
+      if(load & size_tag)
 	need +=
-	  Next16<prop_type> (nl) +                 // _HSQ [0]
-	  Next16<prop_type> (ne) ;                 // _HSQ [1] 
+	  NextAligned<prop_type> (nl) +                 // _HSQ [0]
+	  NextAligned<prop_type> (ne) ;                 // _HSQ [1] 
 # ifdef __SSE__
-      if(load & p_ssex)
+      if(load & xvec_tag)
 	need +=
-	  Dim * Next16<sse_pos_type>(nl) ;         // _X16 [DIM]
+	  Dim * NextAligned<sse_pos_type>(nl) ;         // _XVEC [DIM]
 # endif
-      _MEM. template reset_conditional<3,2>(need);
+      DebugInfoN(2,"InteractionTree<>: need %ld bytes of data\n",need);
+      return need;
+    }
+# ifdef __SSE__
+    //
+    // InteractionTreeData<anchoring>::bytes_needed()
+    //
+    template<int _Dim>
+    size_t InteractionTreeData<_Dim,double,float,true>::
+    bytes_needed(int load, count_type nl, count_type ne) const
+    {
+      size_t need = 0;
+      if(load & mass_tag)
+	need +=
+	  NextAligned<prop_type> (nl) +                 // _MASS[0]
+	  NextAligned<prop_type> (ne) ;                 // _MASS[1]
+      if(load & size_tag)
+	need +=
+	  NextAligned<prop_type> (nl) +                 // _HSQ [0]
+	  NextAligned<prop_type> (ne) ;                 // _HSQ [1] 
+      if(load & xvec_tag)
+	need +=
+	  Dim * NextAligned<sse_pos_type>(nl) +         // _XVEC [DIM]
+	  NextAligned<Anchor*>   (nl) ;                 // _ANC
+      DebugInfoN(4,"InteractionTree<>: need %ld bytes of data\n",need);
+      return need;
+    }
+# endif// __SSE__
+    //
+    // InteractionTreeData<not anchoring>::set_memory()
+    //
+    _TemplateDecl void InteractionTreeData<_TemplateList>::
+    set_memory(int load, char*buf, count_type nl, count_type ne)
+    {
+      static_assert(!_Anc," InteractionTreeData::allocate(): not anchoring");
 # define SET_DATA(Name,Number,Type)					\
       {									\
 	if(Number) {							\
 	  Name = reinterpret_cast<Type*>(A);				\
-	  A += Next16<Type>(Number);					\
+	  A += NextAligned<Type>(Number);				\
 	  DebugInfoN(6,"InteractionTree: set %s = %p for %d %s "	\
 		     "(%lu bytes)\n",					\
 		     __STRING(Name),Name,				\
 		     Number,__STRING(Type),Number*sizeof(Type));	\
 	} else {							\
 	  Name = 0;							\
-	  DebugInfoN(6,"set %s = 0\n",__STRING(Name));			\
+	  DebugInfoN(6,"InteractionTree: set %s = 0\n",			\
+		     __STRING(Name));					\
 	}								\
       }
-      char*A=_MEM.begin();
-      SET_DATA(_MASS[0],(load&p_mass)?nl:0,prop_type);
-      SET_DATA(_MASS[1],(load&p_mass)?ne:0,prop_type);
-      SET_DATA(_HSQ [0],(load&p_size)?nl:0,prop_type);
-      SET_DATA(_HSQ [1],(load&p_size)?ne:0,prop_type);
+      char*A=buf;
+      SET_DATA(_MASS[0],((load&mass_tag)?nl:0),prop_type);
+      SET_DATA(_MASS[1],((load&mass_tag)?ne:0),prop_type);
+      SET_DATA(_HSQ [0],((load&size_tag)?nl:0),prop_type);
+      SET_DATA(_HSQ [1],((load&size_tag)?ne:0),prop_type);
 # ifdef __SSE__
       for(int d=0; d!=Dim; ++d)
-	SET_DATA(_X16[d],(load&p_ssex)?nl:0,sse_pos_type);
+	SET_DATA(_XVEC[d],((load&xvec_tag)?nl:0),sse_pos_type);
 # endif
-      WDutilsAssert(A == _MEM.begin()+need && A <= _MEM.end());
-#else // OCTALTREE_DATA_IN_ONE_BLOCK
+      WDutilsAssert(A==buf+bytes_needed(load,nl,ne));
+      DebugInfoN(5,"InteractionTree<>: setting data: DONE\n");
+    }
+# ifdef __SSE__
+    //
+    // InteractionTreeData<anchoring>::set_memory()
+    //    NOTE: typically, our sse_pos_type is different from base!
+    //
+    template<int _Dim>
+    void InteractionTreeData<_Dim,double,float,true>::
+    set_memory(int load, char*buf, count_type nl, count_type ne)
+    {
+      char*A=buf;
+      SET_DATA(_MASS[0],((load&mass_tag)?nl:0),prop_type);
+      SET_DATA(_MASS[1],((load&mass_tag)?ne:0),prop_type);
+      SET_DATA(_HSQ [0],((load&size_tag)?nl:0),prop_type);
+      SET_DATA(_HSQ [1],((load&size_tag)?ne:0),prop_type);
+      for(int d=0; d!=Dim; ++d)
+	SET_DATA(_XVEC[d],((load&xvec_tag)?nl:0),sse_pos_type);
+      SET_DATA(_ANC,((load&xvec_tag)?nl:0),Anchor*);
+      WDutilsAssert(A==buf+bytes_needed(load,nl,ne));
+      DebugInfoN(3,"InteractionTree<>: setting data: DONE\n");
+    }
+# endif// __SSE__
+#endif // OCTALTREE_DATA_IN_ONE_BLOCK
+    //
+    // InteractionTreeData<>::allocate()
+    //
+#ifndef INTERACTIONTREE_USES_BASE_BLOCK
+# ifdef OCTALTREE_DATA_IN_ONE_BLOCK
+    // allocate() using own block
+    _TemplateDecl void InteractionTreeData<_TemplateList>::
+    allocate(int load, const count_type nl, const count_type ne)
+    {
+      DebugInfoN(5,"InteractionTreeDatat<non-anchoring>::allocate() ...\n");
+      size_t need = bytes_needed(load,nl,ne);
+      _BUF. template reset_conditional<3,2>(need);
+      set_memory(load,_BUF.begin(),nl,ne);
+    }
+    template<int _Dim>
+    void InteractionTreeData<_Dim,double,float,true>::
+    allocate(const int load, const count_type nl, const count_type ne)
+    {
+      DebugInfoN(5,"InteractionTreeDatat<anchoring>::allocate() ...\n");
+      size_t need = bytes_needed(load,nl,ne);
+      _BUF. template reset_conditional<3,2>(need);
+      set_memory(load,_BUF.begin(),nl,ne);
+    }
+# else// OCTALTREE_DATA_IN_ONE_BLOCK
+    // allocating using vector<>, non-anchoring
+    _TemplateDecl void InteractionTreeData<_TemplateList>::
+    allocate(const int load, const count_type nl, const count_type ne)
+    {
+      static_assert(!_Anc," InteractionTreeData::allocate(): not anchoring");
+      DebugInfoN(2,"InteractionTree<>: allocating additional data ...\n");
       const count_type ne4=(ne+3)&~3;              // multiple of 4 >= ne
       const count_type nl4=(nl+3)&~3;              // multiple of 4 >= nl
-# define SET_DATA(Name,Number)					\
+#  define SET_DATA(Name,Number)					\
       if(Number) {						\
 	Name.resize(Number);					\
       } else {							\
@@ -1927,82 +2043,54 @@ namespace WDutils {
 		 __STRING(Name),Name.data(),Number,		\
 		 nameof(typename std::remove_reference<		\
 			decltype(Name[0])>::type));
-      SET_DATA(_MASS[0],(load&p_mass)?nl4:0);
-      SET_DATA(_MASS[1],(load&p_mass)?ne4:0);
-      SET_DATA( _HSQ[0],(load&p_size)?nl4:0);
-      SET_DATA( _HSQ[1],(load&p_size)?ne4:0);
-# ifdef __SSE__
-      SET_DATA(_x16    ,(load&p_ssex)?Dim*nl4:0);
-      if(load&p_ssex) {
-	_X16[0] = _x16.data();
-	for(int d=1; d<Dim; ++d) _X16[d] = _X16[d-1] + nl4;
+      SET_DATA(_MASS[0],((load&mass_tag)?nl4:0));
+      SET_DATA(_MASS[1],((load&mass_tag)?ne4:0));
+      SET_DATA( _HSQ[0],((load&size_tag)?nl4:0));
+      SET_DATA( _HSQ[1],((load&size_tag)?ne4:0));
+#  ifdef __SSE__
+      SET_DATA(_xvec    ,((load&xvec_tag)?Dim*nl4:0));
+      if(load&xvec_tag) {
+	_XVEC[0] = _xvec.data();
+	for(int d=1; d<Dim; ++d) _XVEC[d] = _XVEC[d-1] + nl4;
       } else
-	for(int d=0; d<Dim; ++d) _X16[d] = 0;
-# endif
-#endif// OCTALTREE_DATA_IN_ONE_BLOCK
+	for(int d=0; d<Dim; ++d) _XVEC[d] = 0;
+#  endif
       DebugInfoN(3,"InteractionTree<>: DONE "
 		   "(allocating additional data)\n");
     }
-#ifdef __SSE__
-    //
-    // NOTE: typically, our sse_pos_type is different from base!
-    //
-    template<int __Dim>
-    void InteractionTreeData<__Dim,double,float,true>::
+#  ifdef __SSE__
+    // allocating using vector<>, anchoring
+    //   NOTE: typically, our sse_pos_type is different from base!
+    template<int _Dim>
+    void InteractionTreeData<_Dim,double,float,true>::
     allocate(const int load, const count_type nl, const count_type ne)
     {
       DebugInfoN(2,"InteractionTree<>: allocating additional data ...\n");
-
-
-#ifdef OCTALTREE_DATA_IN_ONE_BLOCK
-      count_type need = 0;
-      if(load & p_mass)
-	need +=
-	  Next16<prop_type> (nl) +                 // _MASS[0]
-	  Next16<prop_type> (ne) ;                 // _MASS[1]
-      if(load & p_size)
-	need +=
-	  Next16<prop_type> (nl) +                 // _HSQ [0]
-	  Next16<prop_type> (ne) ;                 // _HSQ [1] 
-      if(load & p_ssex)
-	need +=
-	  Dim * Next16<sse_pos_type>(nl) +         // _X16 [DIM]
-	  Next16<Anchor*>   (nl) ;                 // _ANC
-      _MEM. template reset_conditional<3,2>(need);
-      char*A=_MEM.begin();
-      SET_DATA(_MASS[0],(load&p_mass)?nl:0,prop_type);
-      SET_DATA(_MASS[1],(load&p_mass)?ne:0,prop_type);
-      SET_DATA(_HSQ [0],(load&p_size)?nl:0,prop_type);
-      SET_DATA(_HSQ [1],(load&p_size)?ne:0,prop_type);
-      for(int d=0; d!=Dim; ++d)
-	SET_DATA(_X16[d],(load&p_ssex)?nl:0,sse_pos_type);
-      SET_DATA(_ANC,(load&p_ssex)?nl:0,Anchor*);
-      WDutilsAssert(A == _MEM.begin()+need && A <= _MEM.end());
-#else // OCTALTREE_DATA_IN_ONE_BLOCK
       const count_type ne4=(ne+3)&~3;              // multiple of 4 >= ne
       const count_type nl4=(nl+3)&~3;              // multiple of 4 >= nl
-      SET_DATA(_MASS[0],(load&p_mass)?nl4:0);
-      SET_DATA(_MASS[1],(load&p_mass)?ne4:0);
-      SET_DATA( _HSQ[0],(load&p_size)?nl4:0);
-      SET_DATA( _HSQ[1],(load&p_size)?ne4:0);
-      SET_DATA(_x16    ,(load&p_ssex)?Dim*nl4:0);
-      if(load&p_ssex) {
-	_X16[0] = _x16.data();
-	for(int d=1; d<Dim; ++d) _X16[d] = _X16[d-1] + nl4;
+      SET_DATA(_MASS[0],((load&mass_tag)?nl4:0));
+      SET_DATA(_MASS[1],((load&mass_tag)?ne4:0));
+      SET_DATA( _HSQ[0],((load&size_tag)?nl4:0));
+      SET_DATA( _HSQ[1],((load&size_tag)?ne4:0));
+      SET_DATA(_xvec   ,((load&xvec_tag)?Dim*nl4:0));
+      if(load&xvec_tag) {
+	_XVEC[0] = _xvec.data();
+	for(int d=1; d<Dim; ++d) _XVEC[d] = _XVEC[d-1] + nl4;
       } else
-	for(int d=0; d<Dim; ++d) _X16[d] = 0;
-      SET_DATA(_ANC    ,(load&p_ssex)?nl:0);
-#endif// OCTALTREE_DATA_IN_ONE_BLOCK
+	for(int d=0; d<Dim; ++d) _XVEC[d] = 0;
+      SET_DATA(_ANC    ,((load&xvec_tag)?nl:0));
       DebugInfoN(3,"InteractionTree<>: DONE "
 		 "(allocating additional data)\n");
     }
-#endif// __SSE__
+#  endif// __SSE__
+# endif// OCTALTREE_DATA_IN_ONE_BLOCK
+#endif// INTERACTIONTREE_USES_BASE_BLOCK
 #undef SET_DATA
   } // namespace WDutils::octtree
-  ///
-  /// InteractionTree::Builder::Builder
-  ///
-  __TemplateDecl InteractionTree<__TemplateList>::
+  //
+  // InteractionTree::Builder::Builder()
+  //
+  _TemplateDecl InteractionTree<_TemplateList>::
   Builder::Builder(DataBase*t, const Initialiser*i, Data const&d)
     : INIT(i)
     , DATA(t)
@@ -2015,8 +2103,8 @@ namespace WDutils {
     if(LOAD == 0)
       WDutils_WarningN("InteractionTree: load=0\n");
 #ifdef __SSE__
-    if(LOAD & octtree::p_ssex) {
-      if(!(LOAD & octtree::p_size))
+    if(LOAD & octtree::xvec_tag) {
+      if(!(LOAD & octtree::size_tag))
 	WDutils_THROW("InteractionTree: SSE positions require sizes\n");
       if(DEL >= 1.f)
 	WDutils_THROWN("InteractionTree: del=%f >= 1\n",DEL);
@@ -2033,19 +2121,23 @@ namespace WDutils {
 			 DEL,std::numeric_limits<float>::epsilon());
     }
 #endif
+    DebugInfoN(6,"InteractionTree<>::Builder::Builder(): DATA=%p\n",DATA);
   }
-  ///
-  /// InteractionTree::Builder::Before
-  ///
-  __TemplateDecl void InteractionTree<__TemplateList>::
+  //
+  // InteractionTree::Builder::Before()
+  //
+  _TemplateDecl void InteractionTree<_TemplateList>::
   Builder::Before(bool, count_type NCell,
 		  count_type NLeaf, count_type NExtLeaf) const
   {
     DebugInfoN(4,"InteractionTree<>::Builder::Before() ...\n");
-    using Impl = TreeImplementer<typename InteractionTree::DataBase>;
-    Impl::allocate(DATA,LOAD,NLeaf,NExtLeaf);
+    WDutilsAssert(NLeaf>0);
+    WDutilsAssert(NCell>0);
+#ifndef INTERACTIONTREE_USES_BASE_BLOCK
+    DATA->allocate(LOAD,NLeaf,NExtLeaf); 
+#endif
 #ifdef __SSE__
-    if(LOAD & p_ssex) {
+    if(LOAD & xvec_tag) {
       DebugInfoN(6,"InteractionTree<>::Builder::Before(): "
 		 "resetting QI (NCELL=%d)\n",NCell);
       const_cast<float*&>(QI) = WDutils_NEW(float,NCell);
@@ -2053,22 +2145,22 @@ namespace WDutils {
 #endif
     DebugInfoN(5,"InteractionTree<>::Builder::Before(): done\n");
   }
-  ///
-  /// InteractionTree::Builder::SetSub
-  ///
-  __TemplateDecl void InteractionTree<__TemplateList>::
+  //
+  // InteractionTree::Builder::SetSub()
+  //
+  _TemplateDecl void InteractionTree<_TemplateList>::
   Builder::SetSub(const OTree*tree, count_type dom) const
   {
     using Impl = TreeImplementer<typename InteractionTree::DataBase>;
     // 1 load masses
-    if(LOAD & p_mass)
+    if(LOAD & mass_tag)
       Impl::load_mass(tree,DATA,INIT,dom);
     // 2 load size^2
-    if(LOAD & p_size)
+    if(LOAD & size_tag)
       Impl::load_size(tree,DATA,INIT,dom);
 #ifdef __SSE__
     // 3 set SSE positions
-    if(LOAD & p_ssex)
+    if(LOAD & xvec_tag)
       Impl::set_sse(tree,DATA,
 # ifdef OCTALTREE_USE_OPENMP
 		    dom,
@@ -2076,27 +2168,27 @@ namespace WDutils {
 		    QI,DEL);
 #endif
   }
-  ///
-  /// InteractionTree::Builder::SetTop
-  ///
-  __TemplateDecl void InteractionTree<__TemplateList>::
+  //
+  // InteractionTree::Builder::SetTop()
+  //
+  _TemplateDecl void InteractionTree<_TemplateList>::
   Builder::SetTop(const OTree*tree) const
   {
     using Impl = TreeImplementer<typename InteractionTree::DataBase>;
     if(tree->n_extleaf()) {
       // 1 load masses
-      if(LOAD & p_mass)
+      if(LOAD & mass_tag)
 	Impl::load_mass_ext(tree,DATA,INIT);
       // 2 load size^2
-      if(LOAD & p_size)
+      if(LOAD & size_tag)
 	Impl::load_size_ext(tree,DATA,INIT);
     }
   }
 #undef itree
-  ///
-  /// InteractionTree::LeafHeader
-  ///
-  __TemplateDecl std::ostream&InteractionTree<__TemplateList>::
+  //
+  // InteractionTree::LeafHeader()
+  //
+  _TemplateDecl std::ostream&InteractionTree<_TemplateList>::
   LeafHeader(std::ostream&s) const
   {
     OTree::LeafHeader(s);
@@ -2110,10 +2202,10 @@ namespace WDutils {
 #endif
     return s;
   }
-  ///
-  /// InteractionTree::Dump(internal leaf)
-  ///
-  __TemplateDecl std::ostream&InteractionTree<__TemplateList>::
+  //
+  // InteractionTree::Dump(internal leaf)
+  //
+  _TemplateDecl std::ostream&InteractionTree<_TemplateList>::
   Dump(const Leaf l, std::ostream&s) const
   {
     OTree::Dump(l,s);
@@ -2127,10 +2219,10 @@ namespace WDutils {
 #endif
     return s;
   }
-  ///
-  /// InteractionTree::Dump(external leaf)
-  ///
-  __TemplateDecl std::ostream&InteractionTree<__TemplateList>::
+  //
+  // InteractionTree::Dump(external leaf)
+  //
+  _TemplateDecl std::ostream&InteractionTree<_TemplateList>::
   Dump(const ExtLeaf l, std::ostream&s) const
   {
     OTree::Dump(l,s);

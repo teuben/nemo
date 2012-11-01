@@ -46,6 +46,7 @@ endif
 # corresponding compiler is present
 # NOTE: we need csh (default for make is sh, which wouldn't work)
 __GCC		:= $(shell which gcc    |& wc -l)
+__CLG		:= $(shell which clang  |& wc -l)
 __PGI		:= $(shell which pgcc   |& wc -l)
 __PTH		:= $(shell which pathcc |& wc -l)
 __SUN		:= $(shell which cc     |& wc -l)
@@ -62,6 +63,17 @@ libgcc		:
 ifdef WDutilsDevel
 testsuite	:
 		make -f makeall COMPILER=gcc WDutilsDevel=$(WDutilsDevel) testsuite
+endif
+endif
+
+# CLANG compiler
+#    
+ifeq ($(__CLG),$(VALID))
+libclg		:
+		make -f makeall COMPILER=clang WDutilsDevel=$(WDutilsDevel) library
+ifdef WDutilsDevel
+testsuiteclg	:
+		make -f makeall COMPILER=clang WDutilsDevel=$(WDutilsDevel) testsuite
 endif
 endif
 

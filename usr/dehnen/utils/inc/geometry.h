@@ -87,7 +87,8 @@ namespace WDutils {
       static const int Dim=__D;
       typedef __X real;
       typedef GeoVec<Dim,real> point;
-      SSE::Extend16<point> X,Y;
+      typedef SSE::Extend16<point> point16;
+      point16 X,Y;
     };
     /// special case Dim=2, real=float: just pack all in 128 bits
     template<>

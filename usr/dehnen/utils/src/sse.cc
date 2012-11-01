@@ -607,7 +607,7 @@ namespace WDutils {
 
 #ifdef __SSE__
 # define __FloatTmp  __m128 Tm = _mm_setzero_ps();float tm(0.f)
-# define __FloatRet  return _mm_getsum_ps(Tm) + tm
+# define __FloatRet  return sum(Tm) + tm
 #else
 # define __FloatTmp  float tm(0.f);	
 # define __FloatRet  return tm;
@@ -616,7 +616,7 @@ namespace WDutils {
 #ifdef __SSE2__
 
 # define __IntTmp    __m128i Tm = _mm_setzero_si128(); int tm(0)
-# define __IntRet    return _mm_getsum_epi32(Tm) + tm
+# define __IntRet    return sum(Tm) + tm
 
 # define __DoubleTmp __m128d Tm = _mm_setzero_pd(); double tm(0.0)
 # define __DoubleRet							\
