@@ -31,7 +31,7 @@ string defv[] = {
 	"keep=f\n	Keep moment axis in full length, and replace all values",
 	"cumulative=f\n Cumulative axis (only valid for mom=0)",
 	"peak=1\n       Find N-th peak in case of peak finding (mom=3)",
-	"VERSION=0.7\n  19-jul-2012 PJT",
+	"VERSION=0.7a\n 28-sep-2012 PJT",
 	NULL,
 };
 
@@ -75,7 +75,17 @@ void nemo_main()
     nz1 = nz = Nz(iptr);
     if (Qkeep) {
         dprintf(0,"Keeping %d*%d*%d cube\n",nx1,ny1,nz1);
-	spec = smask = NULL;
+        if (axis==1) {
+	    spec = (real *) allocate(nx*sizeof(real));
+	    smask = (int *) allocate(nx*sizeof(int));
+        } else if (axis==2) {
+	    spec = (real *) allocate(ny*sizeof(real));
+	    smask = (int *) allocate(ny*sizeof(int));
+        } else if (axis==3) {
+	    spec = (real *) allocate(nz*sizeof(real));
+	    smask = (int *) allocate(nz*sizeof(int));
+        } else 
+            error("Invalid axis: %d (Valid: 1,2,3)",axis);
     } else {
         if (axis==1) {
             nx1 = 1;    ny1 = ny;   nz1 = nz;
