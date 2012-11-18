@@ -1,17 +1,20 @@
 /*
  * timers: collection of routines to timers
  *
+ *         jul-2005     gleaned from some magazine?
+ *      18-nov-2012     certified it works on x86_64 as well
+ *
  */
 
 #include <stdinc.h>
 #include <timers.h>
 
 /* 
- * readTSC:   reads the Time Stamp Counter of an i386 processor
+ * readTSC:   reads the Time Stamp Counter of an intel processor
  *            and returns it in a 64 bit 'long'
  */
 
-#if defined(__GNUC__) && defined(i386)
+#if defined(__GNUC__) && (defined(i386) || defined(__x86_64))
 long long readTSC(void) {
   /* this assumes long long is 64 bits. unsigned in 32 */
   union {
@@ -40,6 +43,9 @@ void init_timers(int n)
     dprintf(2,"init_timers: free up old maxtimers %d \n",maxtimers);
     free(timers);
   }
+  if (sizeof(long long) != 8) warning("timers::long long is not 8 bytes");
+  if (sizeof(unsigned)  != 4) warning("timers::unsigned  is not 4 bytes");
+
   timers = (long long *) allocate(n*sizeof(long long));
   maxtimers = n;
   if (n>1) {
