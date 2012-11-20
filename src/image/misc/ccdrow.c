@@ -23,11 +23,12 @@ string defv[] = {
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
   "div2=f\n       Divide subsequent rows instead of aver",
-  "VERSION=2.0\n  9-apr-2009 PJT",
+  "row=-1\n       Set this to a (>=0) row as calibration row",
+  "VERSION=1.1\n  19-nov-2012 PJT",
   NULL,
 };
 
-string usage = "sub/average of an image";
+string usage = "hacking rows of an image";
 
 string cvsid="$Id$";
 
@@ -55,10 +56,11 @@ void nemo_main()
     int     nx1,ny1,nz1;
     int     nxaver, nyaver,nzaver;
     int     i,j,k, i0,j0,k0, i1,j1,k1, i_p, j_p, k_p;
+    int     row = getiparam("row");
     imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
-    real    sum, tmp, zzz;
+    real    sum, tmp, zzz, sum0,sum1;
     bool    Qreorder = FALSE;
-    bool    Qdummy, Qsample, Qdiv;
+    bool    Qdummy, Qsample, Qdiv2;
     string  reorder;
 
     instr = stropen(getparam("in"), "r");
@@ -66,7 +68,7 @@ void nemo_main()
     nyaver=getiparam("nyaver");
     nzaver=getiparam("nzaver");
     Qdummy = getbparam("dummy");
-    Qdiv   = getbparam("div2");
+    Qdiv2  = getbparam("div2");
 
     nx1 = nemoinpi(getparam("x"),ix,MAXDIM);
     ny1 = nemoinpi(getparam("y"),iy,MAXDIM);
@@ -104,7 +106,7 @@ void nemo_main()
             j = j1*nyaver;
 	    LOOP(i1,nx1) {
 	      i = i1*nxaver;
-	      if (Qdiv) {
+	      if (Qdiv2) {
 		sum = 0.0;
 		LOOP(k0,nzaver) LOOP(j0,nyaver) LOOP(i0,nxaver) {
 		  if (sum == 0.0)  {
@@ -127,6 +129,24 @@ void nemo_main()
 	}
 	if (!Qdummy) ax_shift(iptr);
         write_image(outstr, iptr);
+    } else if (row >= 0) {
+      warning("row hacking CLASSy off positions");
+      LOOP(k1,nz1) {
+	sum0 = 0.0;
+	LOOP(i1,nx1) sum0 += CV(iptr,i1,row,k1);
+
+	LOOP(j1,ny1) {
+	  if (j1==row) continue;
+	  sum1 = 0.0;
+	  LOOP(i1,nx1) sum1 += CV(iptr,i1,j1,k1);
+	  LOOP(i1,nx1) {
+	    CV(iptr,i1,j1,k1) *= sum0/(sum1*CV(iptr,i1,row,k1));
+	    CV(iptr,i1,j1,k1) -= 1.0;
+	  }
+	}
+	LOOP(i1,nx1) CV(iptr,i1,row,k1) = 0.0;
+      }
+      write_image(outstr, iptr);
     } else if (Qreorder) {            	/* reordering */
       warning("new reordering mode");
       if (streq(reorder,"xyz")) {
