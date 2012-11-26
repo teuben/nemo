@@ -1,0 +1,39 @@
+.TH TABTREND 1NEMO "26 November 2012"
+.SH NAME
+tabtrend \- difference rows from previous rows
+.SH SYNOPSIS
+\fBtabtrend\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabtrend\fP takes a single column from an ASCII table, and differences subsequent
+values, creating a new column that is thus one row shorter.
+.PP
+Note that for a gaussian signal, 
+differencing subsequent elements will create a distribution
+with a noise sqrt(2) larger than the input signal.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name. No default.
+.TP
+\fBxcol=\fP
+Column(s) to use [1]    
+.TP
+\fBnmax=\fP
+max size if a pipe [100000]  
+.SH EXAMPLES
+Create 1000 numbers from gaussian with dispersion 1, observe that the distribution
+now has a sigma of about 1.4:
+.nf
+nemoinp 0:1000 | tabmath - - 'rang(0,1)' | tabtrend - 2 | tabhist - 
+.fi
+.SH SEE ALSO
+tabmath(1NEMO), nemoinp(1NEMO), tabhist(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Nov-2012	finally documented	PJT
+.fi
