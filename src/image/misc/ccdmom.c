@@ -31,7 +31,7 @@ string defv[] = {
 	"keep=f\n	Keep moment axis in full length, and replace all values",
 	"cumulative=f\n Cumulative axis (only valid for mom=0)",
 	"peak=1\n       Find N-th peak in case of peak finding (mom=3)",
-	"VERSION=0.7a\n 28-sep-2012 PJT",
+	"VERSION=0.7b\n 27-nov-2012 PJT",
 	NULL,
 };
 
@@ -138,7 +138,7 @@ void nemo_main()
 		  peakvalue = CubeValue(iptr,i,j,k);
 		}
             }
-	    if (cnt==0 || tmp0==0.0) {
+	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
 	      newvalue = 0.0;
 	    } else {
 	      if (mom==-1)
@@ -192,7 +192,7 @@ void nemo_main()
 		  peakvalue = CubeValue(iptr,i,j,k);
 		}
             }
-	    if (cnt==0 || tmp0==0.0) {
+	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
 	      newvalue = 0.0;
 	    } else {
 	      if (mom==-1)
@@ -246,7 +246,7 @@ void nemo_main()
 		  peakvalue = CubeValue(iptr,i,j,k);
 		}
     	    }
-	    if (cnt==0 || tmp0==0.0) {
+	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
 	      newvalue = 0.0;
 	    } else {
 	      if (mom==-1)
