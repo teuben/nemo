@@ -9,6 +9,19 @@
 //           CNRS U.M.R 6110                                                   
 // ============================================================================
 
+// ============================================================================
+// plugins mecanism
+//
+// trySnaphot
+//    snapshot = new CSnaphot
+//    if (snapsht->isValidDtata()) then Ok
+//
+//    CSnapshot constructor must validate with "valid" variable
+//
+//
+//
+//
+
 /**
    @author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
 */
@@ -67,7 +80,9 @@ namespace uns {
       verbose = verb;
       first=true;
       valid=false;
-      req_bits=0; // requested bits
+      req_bits=0;  // data requested
+      load_bits=0; // data loaded
+      comp_bits=0; // component requested
       crvs=NULL;
       crv.clear();
       stv.clear();
@@ -151,7 +166,14 @@ namespace uns {
     static std::string eps_db_file;
     static std::string nemo_range_file;
 
-    
+    unsigned int load_bits, comp_bits;
+    inline bool ckloadBit(unsigned int lb) { return load_bits & lb; }
+    template <class T> inline void freeNotLoadedData(T ** data,unsigned int lb) {
+      if (!ckloadBit(lb) && *data) {
+        delete [] *data;
+        *data=NULL;
+      }
+    }
     unsigned int req_bits;
     void computeBits(std::string _s="");
     CSelectTimeVector stv;

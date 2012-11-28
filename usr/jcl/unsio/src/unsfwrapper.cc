@@ -53,7 +53,11 @@ namespace uns {
     int uns_get_array_i_( const int * id, const char * comp, const char * tag, int   * array , int * size, const int l1, const int l2);
     int uns_get_value_f_ ( const int * id, const char * tag, float *  data, const int l1);
     int uns_get_value_i_ ( const int * id, const char * tag, int   *  data, const int l1);
-    
+
+    void uns_get_file_structure_(const int * id, char * filestruct, const int l1);
+    void uns_get_interface_type_(const int * id, char * inter_type, const int l1);
+    void uns_get_file_name_(const int * id, char * file_name, const int l1);
+
     // save protocol
     int uns_save_init_(const char *,const char *, const int l1, const int l2);
     // save data
@@ -323,7 +327,7 @@ int uns_get_pos_( const int * id, float  * pos, int * size)
   float *data;
   int nbody;
   bool ok=snap->getData("pos",&nbody,&data);
-  assert(ok==true);
+  if (!ok) assert(0);
   checkFArray(*size,nbody);
   memcpy(pos,data,sizeof(float)*3*nbody);
   return 1;
@@ -340,7 +344,7 @@ int uns_get_vel_( const int * id, float  * vel, int * size)
   float *data;
   int nbody;
   bool ok=snap->getData("vel",&nbody,&data);
-  assert(ok==true);
+  if (!ok) assert(0);
   checkFArray(*size,nbody);
   memcpy(vel,data,sizeof(float)*3*nbody);
   return 1;
@@ -357,7 +361,7 @@ int uns_get_mass_( const int * id, float  * mass, int * size)
   float *data;
   int nbody;
   bool ok=snap->getData("mass",&nbody,&data);
-  assert(ok==true);
+  if (!ok) assert(0);
   checkFArray(*size,nbody);
   memcpy(mass,data,sizeof(float)*nbody);
   return 1;
@@ -597,6 +601,48 @@ void uns_sim_dir_(const int * id, char * simdir, int lenstring)
   strcpy(simdir,dir.c_str());
   for (int i=strlen(simdir); i<lenstring; i++) {
     simdir[i] = ' ';
+  }
+}
+// ----------------------------------------------------------------------------
+// uns_get_file_structure:
+// return snapshot file structure of the requested simulation
+// and belonging to the simulation with the identifier ident
+void uns_get_file_structure_(const int * id, char * dest, int lenstring)
+{
+  int index=getUnsvIndex(*id);
+  std::string source= ((CunsIn *)unsv[index].obj)->snapshot->getFileStructure();
+  assert(source.length() <= (unsigned int) lenstring);
+  strcpy(dest,source.c_str());
+  for (int i=strlen(dest); i<lenstring; i++) {
+    dest[i] = ' ';
+  }
+}
+// ----------------------------------------------------------------------------
+// uns_get_file_name:
+// return snapshot file name of the requested simulation
+// and belonging to the simulation with the identifier ident
+void uns_get_file_name_(const int * id, char * dest, int lenstring)
+{
+  int index=getUnsvIndex(*id);
+  std::string source= ((CunsIn *)unsv[index].obj)->snapshot->getFileName();
+  assert(source.length() <= (unsigned int) lenstring);
+  strcpy(dest,source.c_str());
+  for (int i=strlen(dest); i<lenstring; i++) {
+    dest[i] = ' ';
+  }
+}
+// ----------------------------------------------------------------------------
+// uns_get_interface_type:
+// return interface type of the requested simulation
+// and belonging to the simulation with the identifier ident
+void uns_get_interface_type_(const int * id, char * dest, int lenstring)
+{
+  int index=getUnsvIndex(*id);
+  std::string source= ((CunsIn *)unsv[index].obj)->snapshot->getInterfaceType();
+  assert(source.length() <= (unsigned int) lenstring);
+  strcpy(dest,source.c_str());
+  for (int i=strlen(dest); i<lenstring; i++) {
+    dest[i] = ' ';
   }
 }
 // ----------------------------------------------------------------------------

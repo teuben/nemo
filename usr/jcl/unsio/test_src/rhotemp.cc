@@ -54,28 +54,28 @@ int main(int argc, char ** argv )
   uns::CunsIn * uns = new uns::CunsIn(simname,"gas",select_t);
   if (uns->isValid()) {
     while(uns->snapshot->nextFrame()) {
-        bool ok;
-	int n,nbody;
-        float time;
-        // get the input number of bodies according to the selection
-        ok=uns->snapshot->getData("nsel",&nbody);
-        // get the simulation time
-        ok=uns->snapshot->getData("time",&time);
-	std::cerr << "nbody=" << nbody << " time="<<time <<"\n";
-        // rho
-        float * rho=NULL;
-        ok=uns->snapshot->getData("rho",&n,&rho);
-        std::cerr << "n=" << n <<"\n";
-	assert(n== nbody);
-        // temp
-	float * temp=NULL;
-        ok=uns->snapshot->getData("temp",&n,&rho);
-        std::cerr << "n=" << n <<"\n";
-	assert(n== nbody);
-	for (int i=0; i<n; i++) {
-	  std::cout << rho[i] << " " << temp[i] << "\n";
-	}
-
+      bool ok;
+      int n,nbody;
+      float time;
+      // get the input number of bodies according to the selection
+      ok=uns->snapshot->getData("nsel",&nbody);
+      // get the simulation time
+      ok=uns->snapshot->getData("time",&time);
+      std::cerr << "nbody=" << nbody << " time="<<time <<"\n";
+      // rho
+      float * rho=NULL;
+      ok=uns->snapshot->getData("rho",&n,&rho);
+      std::cerr << "n=" << n <<"\n";
+      assert(n== nbody);
+      // temp
+      float * temp=NULL;
+      ok=uns->snapshot->getData("temp",&n,&rho);
+      std::cerr << "n=" << n <<"\n";
+      assert(n== nbody);
+      for (int i=0; i<n; i++) {
+        std::cout << rho[i] << " " << temp[i] << "\n";
+      }
+      if (ok) ;
     }
   } else {
     std::cerr << "Unknown UNS file format["<<simname<<"]\n";

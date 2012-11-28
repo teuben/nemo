@@ -17,6 +17,7 @@
 #include <algorithm>
 #include "assert.h"
 #include "ctools.h"
+#include "uns.h"
 namespace uns {
 
 // ============================================================================
@@ -32,7 +33,7 @@ UserSelection::UserSelection()
 // destructor                                                                  
 UserSelection::~UserSelection()
 {
-  if (indx) {    
+  if (indx) {
     delete [] indx;
   }
 }
@@ -44,53 +45,72 @@ UserSelection::~UserSelection()
 // available component for the snapshot.
 // This function will build an array of indexes selected by the user.
 // This function takes care in which order the user has selected the particles and build
-// the array of selected indexes accordingly.
+// the array of selected indexes accordingly
+// IMPORTANT TO REMEMBER
+// CRV is a pointer const, means every modifications of CRV outside
+// will be efective here also
+// IMPORTANT TO REMEMBER
 bool UserSelection::setSelection(const std::string _sel,
-                                 const ComponentRangeVector * _crv)
+                                 const ComponentRangeVector * _crv,bool _nodata)
 {
-  pos = 0; // current component selection
-  select =_sel; // cop selection              
-  crv    = _crv;   // link component range vector
-  comp_bits = 0;   // no bits yet
-  assert(crv);                   // must not be NULL
-  assert((*crv)[0].type=="all"); // first entry must be "all"    
-  nbody = (*crv)[0].n;           // #bodies max in the snapshot  
-  if (indx) {
-    delete [] indx;
-  }
-  indx = new t_indexes_tab[nbody];
-  for (int i=0;i<nbody;i++) {
-    indx[i].i=-1;    // reset indexes
-    indx[i].p=10000; // set position to high number
-  }
-  nsel = 0;
-  min = max = -1;
-  crvsel.clear();  // crv to stro selected component
-  pov.clear();
-  bool status=parse();
-  if (status || 1 ) { // we force here
-    t_indexes_tab * indx2 = new t_indexes_tab[nbody];
+  nodata = _nodata; // are there data selected ?
+  bool status;
+  if (!nodata) {
+    pos = 0; // current component selection
+    select =_sel; // cop selection
+    crv    = _crv;   // link component range vector
+    comp_bits = 0;   // no bits yet
+    assert(crv);                   // must not be NULL
+    assert((*crv)[0].type=="all"); // first entry must be "all"
+    nbody = (*crv)[0].n;           // #bodies max in the snapshot
+    if (indx) {
+      delete [] indx;
+    }
+    indx = new t_indexes_tab[nbody];
     for (int i=0;i<nbody;i++) {
-      indx2[i].i=-1;    // reset indexes
-      indx2[i].p=10000; // set position to high number
+      indx[i].i=-1;    // reset indexes
+      indx[i].p=10000; // set position to high number
     }
-    int ptr=0;
-    for (unsigned int i=0;i<pov.size();i++) {
-      for (int j=pov[i].first; j<=pov[i].last; j++) {
-        indx2[ptr].i = indx[j].i;
-        indx2[ptr].p = indx[j].p;
-	assert(indx2[ptr].i!=-1);
-	assert(indx[j].p == (int) i);
-	assert(ptr<nbody);
-        ptr++;
+    nsel = 0;
+    min = max = -1;
+    crvsel.clear();  // crv to stro selected component
+    pov.clear();
+    status=parse();
+    if (status || 1 ) { // we force here
+      t_indexes_tab * indx2 = new t_indexes_tab[nbody];
+      for (int i=0;i<nbody;i++) {
+        indx2[i].i=-1;    // reset indexes
+        indx2[i].p=10000; // set position to high number
       }
+      int ptr=0;
+      for (unsigned int i=0;i<pov.size();i++) {
+        for (int j=pov[i].first; j<=pov[i].last; j++) {
+          indx2[ptr].i = indx[j].i;
+          indx2[ptr].p = indx[j].p;
+          //assert(indx2[ptr].i!=-1);
+          //assert(indx[j].p == (int) i);
+          assert(ptr<nbody);
+          ptr++;
+        }
+      }
+      //assert(ptr==nbody);
+
+      delete [] indx;
+      indx=indx2;
+      // resise crvsel
+      crvResize(crvsel);
     }
-    //assert(ptr==nbody);
-    
-    delete [] indx;
-    indx=indx2;
-    // resise crvsel
-    crvResize(crvsel);
+  } else { // parse comp_bits with no_data
+    select_order.clear();
+    status=parse();
+    if (select_order.size()==1 && select_order[0]==-1) { // "all" has been selected
+      // set to default
+      select_order.clear();
+      for (int i=0;i<6;i++) {
+        select_order.push_back(i);
+      }
+
+    }
   }
   return status;
 }
@@ -132,21 +152,21 @@ int UserSelection::isRange(const std::string comp)
     size_t found = comp.find(':',ppos);
     if (found!=std::string::npos) {
       if (found > (size_t) (ppos)) {
-	cpt++;
-	std::string str=comp.substr(ppos,found-ppos);
-	std::istringstream ss(str);
-	int val;
-	ss>>val;
-	store.push_back(val);
+        cpt++;
+        std::string str=comp.substr(ppos,found-ppos);
+        std::istringstream ss(str);
+        int val;
+        ss>>val;
+        store.push_back(val);
       }
       ppos=found+1; //
     } else { // no more ":"
       if (cpt>0) {
-	std::string str=comp.substr(ppos);
-	std::istringstream ss(str);
-	int val;
-	ss>>val;
-	store.push_back(val);
+        std::string str=comp.substr(ppos);
+        std::istringstream ss(str);
+        int val;
+        ss>>val;
+        store.push_back(val);
       }
       stop=true;
     }
@@ -167,6 +187,7 @@ int UserSelection::isRange(const std::string comp)
     }
     assert(last>=first);
     int npart=last-first+1; // #part
+    if (npart) ; // remove compiler warning
     assert(npart<=nbody);
     fillIndexes(comp,first,last,step,pos); // fill indexes array
     pos++;
@@ -182,15 +203,20 @@ int UserSelection::isRange(const std::string comp)
 // return true is the component is component type                              
 int UserSelection::isComponent(const std::string comp)
 {
-  int status;
+  int status=1;
   // Regular expression => all|halo|disk ......
-  const char *  rx[] = {"all","halo","disk","bulge","stars","gas","bndry","halo2",NULL};
+  const char *  rx[] = {"all","halo","dm","disk","bulge","stars","gas","bndry","halo2",NULL};
   int i=0;
   int match=-1;
   while (rx[i] && match==-1) {
     if (rx[i]) {
       std::string tmp=rx[i];
-      if (tmp == comp) match=i;
+      if (tmp == comp) {
+        match=i;
+        if (comp=="dm") {
+          match=i-1;
+        }
+      }
     }
     i++;
   }
@@ -203,20 +229,26 @@ int UserSelection::isComponent(const std::string comp)
     std::string type=rx[match];
     int offset;
     int icrv=ComponentRange::getIndexMatchType(crv,type,offset);
-    if (icrv != -1 ) {
+    if (icrv != -1 && !nodata) {
       assert(icrv<(int)crv->size());
       comp_bits |= tools::Ctools::compBits(type);
       first=(*crv)[icrv].first;
       last =(*crv)[icrv].last;
       assert(last>=first);
       int npart=last-first+1; // #part
+      if (npart) ; // remove compiler warning
       assert(npart<=nbody);
       status=0;
       fillIndexes(comp,first,last,step,pos); // fill indexes array
       pos++;
     }
     else {
-      status=4;      // type does not exist
+      if (nodata) { // no data known yet (like ramses)
+        comp_bits |= tools::Ctools::compBits(type); // one more bits component
+        select_order.push_back(CunsIn::s_mapCompInt[comp]); // save order
+      } else {
+        status=4;      // type does not exist
+      }
     }
   }
   return status;
@@ -230,7 +262,7 @@ void UserSelection::fillIndexes(const std::string comp,const int first, const in
   assert(npart<=nbody);
   for (int i=first; i<=last; i+=step) {
     if (indx[i].i==-1) nsel++; // one more particles
-    indx[i].i = i;             // set new particles 
+    indx[i].i = i;             // set new particles
     indx[i].p = pos;
     assert(nsel<=nbody);
   }
@@ -253,8 +285,8 @@ void UserSelection::fillIndexes(const std::string comp,const int first, const in
   int nlast=first+npart-1;
   // step =1  by default now
   findMinMax(first,nlast); // find min and max for later processing
-                           // like resizing cvrsel according user selected
-                           // data
+  // like resizing cvrsel according user selected
+  // data
 }
 // ============================================================================
 // parseString                                                                 
@@ -289,8 +321,8 @@ void UserSelection::findMinMax(const int first, const int last)
 //                                                                             
 void UserSelection::crvResize(ComponentRangeVector & mycrv)
 {
-//  std::cerr << "BEFORE Listing of the Users' selectef CRV\n";
-//  ComponentRange::list(&mycrv);
+  //  std::cerr << "BEFORE Listing of the Users' selectef CRV\n";
+  //  ComponentRange::list(&mycrv);
   
   // sort mycrv according to its smaller "first" field
   std::sort(mycrv.begin(),mycrv.end(),ComponentRange::compareFirst);
@@ -328,7 +360,7 @@ int UserSelection::crvPermut(ComponentRange& cr,int min, int max, int &next_firs
   }
   next_first=cr.last+1;
   cr.setData(cr.first,cr.last,cr.type);
-  return ret; 
+  return ret;
 }
 } //namespace uns
 

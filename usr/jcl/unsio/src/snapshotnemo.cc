@@ -101,7 +101,6 @@ CSnapshotNemoIn::~CSnapshotNemoIn()
 bool CSnapshotNemoIn::isValidNemo()
 {
   bool status;
-  float * ntimu;
   valid=true;
   
   if (filename == "-") { // we assume here that "-"
@@ -123,7 +122,6 @@ bool CSnapshotNemoIn::isValidNemo()
     strclose(str);
     if (status)  {                // it's a NEMO snapshot
       int * ptr=NULL;      // get the full nbody
-      ntimu=NULL;
       if (io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&iotime,&nemobits) != 0) {
         io_nemo(filename.c_str(),"close");
       } else {
@@ -241,9 +239,10 @@ int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
 	  cpt++;
 	}
       }
-      assert(cpt==nsel);
+      assert(nsel==cpt);
     }
   }
+  if (nsel) ; // remove compiler warning
   if (verbose) std::cerr << "CSnapshotNemoIn::nextFrame status = " << status << "\n";
   if (status == -1) status=1;
   return status;
@@ -843,7 +842,7 @@ int CSnapshotNemoOut::close()
 std::vector<double> CSnapshotNemoOut::moveToCom()
 {
   std::vector<double> com(6,0.);
-  double masstot;
+  double masstot=0.0;
   // compute center of mass
   for (int i=0; i<nbody;i++) {
     float massi;

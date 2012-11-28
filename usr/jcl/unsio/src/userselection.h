@@ -36,12 +36,19 @@ public:
   UserSelection();
   //const UserSelection& operator=(const UserSelection& m);
   ~UserSelection();
-  bool setSelection(const std::string,const ComponentRangeVector *);
+  bool setSelection(const std::string,const ComponentRangeVector *, bool nodata=false);
   const t_indexes_tab * getIndexesTab() const { return indx; }
   int   getNSel()       const { return nsel   ; }
   static std::string parseString(std::string&);
   ComponentRangeVector * getCrvFromSelection() { return &crvsel;}
   int compBits() { return comp_bits; }
+  std::vector <int> selectOrder() {
+    return select_order;
+  }
+  void setCrv(ComponentRangeVector _crv) {
+    crvsel = _crv;
+  }
+
 private:
   ParticlesObjectVector pov;
   static int comparePos(const void * a, const void * b) {
@@ -49,12 +56,14 @@ private:
     t_indexes_tab * bb = (t_indexes_tab *) b;
     return (aa->p - bb->p);
   }
+  std::vector <int> select_order;
   std::string select;           // input range (console | GUI)
   bool parse();                 // parse selection
   int parseComponent(const std::string);
   bool checkComponent(const std::string);
   int isComponent(const std::string);
   int isRange(const std::string);
+  bool nodata; // no data before setSelection
   std::string out_range;            // range selected             
   int nbody;                        // #bodies max                
   int nsel;                         // #bodies selected           

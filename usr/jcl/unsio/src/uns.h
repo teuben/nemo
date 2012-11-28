@@ -43,6 +43,7 @@ namespace uns {
       Zs        ,
       ZSMT      ,
       Im        ,
+      Cm        ,
       Czs       ,
       Czsmt     ,
       
@@ -84,6 +85,9 @@ namespace uns {
     bool isValid() { return valid;}
     CSnapshotInterfaceIn * snapshot; // object to store data
 
+    // Map to associate component with a type
+    static std::map<std::string, int> s_mapCompInt;
+
   private:
     void init(const std::string ,const std::string,const std::string, const bool verb=false );
     std::string simname, sel_comp, sel_time; // IN
@@ -91,7 +95,8 @@ namespace uns {
     void tryNemo();
     void trySimDB();
     void trySnapList();
-    
+    void tryRamses();
+
     //bool findSim();
     bool valid;
     bool verbose;
@@ -111,6 +116,8 @@ namespace uns {
 
     // Map to associate the strings with the enum values
     static std::map<std::string, StringData> s_mapStringValues;
+
+
 
     static  void initializeStringMap(const bool);
   private:

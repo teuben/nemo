@@ -138,12 +138,12 @@ typedef struct particle_data_lite
 
   int multiplefiles;
   bool lonely_file;
-  unsigned int load_bits, comp_bits;
+
   //data
   float * mass, * pos, * vel, * acc, *pot, * rho, * hsml, * age, * metal, * intenerg, * temp;
   int * id;
   // new data for Sergey
-  float * zs, * zsmt, * im;
+  float * zs, * zsmt, * im, * cm;
   int czs, czsmt; // constant for zs and zsmt
   int bits; // to store the bits components
   float tframe,redshift;
@@ -172,13 +172,7 @@ typedef struct particle_data_lite
   bool swap;
   uns::ComponentRangeVector  crv;
   void storeComponents();
-  inline bool ckloadBit(unsigned int lb) { return load_bits & lb; }
-  template <class T> inline void freeNotLoadedData(T ** data,unsigned int lb) {
-    if (!ckloadBit(lb) && data) {      
-      delete [] *data;
-      *data=NULL;
-    }
-  }
+
   // member data
   float * getMass()   { return mass; }
   float   getTime()   { return tframe;}
@@ -196,8 +190,15 @@ typedef struct particle_data_lite
   float * getRho(int & n) { n=header.npartTotal[0]; return rho;}
   float * getHsml(int & n) { n=header.npartTotal[0]; return hsml;}
   float * getZs(int & n) { n=czs*(header.npartTotal[0]+header.npartTotal[4]); return zs;}
-  float * getZSMT(int & n) { n=czsmt*(header.npartTotal[0]+header.npartTotal[4]); return zsmt;}
+  float * getZsGas(int & n) { n=czs*(header.npartTotal[0]); return zs;}
+  float * getZsStars(int & n) { n=czs*(header.npartTotal[4]); return zs+header.npartTotal[0]*czs;}
+  float * getZsmt(int & n) { n=czsmt*(header.npartTotal[0]+header.npartTotal[4]); return zsmt;}
+  float * getZsmtGas(int & n) { n=czsmt*(header.npartTotal[0]); return zsmt;}
+  float * getZsmtStars(int & n) { n=czsmt*(header.npartTotal[4]); return zsmt+header.npartTotal[0]*czsmt;}
   float * getIm(int & n) { n=header.npartTotal[4]; return im;}
+  float * getCm(int & n) { n=1*(header.npartTotal[0]+header.npartTotal[4]); return cm;}
+  float * getCmGas(int & n) { n=1*(header.npartTotal[0]); return cm;}
+  float * getCmStars(int & n) { n=1*(header.npartTotal[4]); return ((cm==NULL)?cm:cm+header.npartTotal[0]*1);}
 
   //fortran offset record length
   int frecord_offset;
@@ -206,8 +207,10 @@ typedef struct particle_data_lite
   bool status;
   int bytes_counter;
   // method
-  template <class T> int readCompData(T * ptr, const int * index2, const int * npartOffset,
-                                      const int dim);
+  template <class T> int readCompData(T ** data, const int * index2, const int * npartOffset,
+                                      const int dim, const int nsel);
+  template <class T> int readGasStarsUnknownArray(T ** data, int * n,const int * compOffset);
+  template <class T> int readOneArray(T ** data, const int compid,const int * compOffset);
   bool readBlockName();
   std::string block_name;
   int readHeader(const int);
@@ -222,7 +225,8 @@ typedef struct particle_data_lite
     in.seekg(len1,std::ios::cur);
     int len2 = readFRecord();
     if (verbose) std::cerr << "skipping block name ["<<block_name<<"]\n";
-    assert(in.good() && len1==len2);
+    if (len2==len1) ; // remove warning....
+    assert(len1==len2 && in.good());
     if (block_name == "AGE" || block_name == "Z" ) {
       //std::cerr << "len1 = " << len1 << "\nlen2 = " << len2 << "\n";
     }
@@ -285,7 +289,7 @@ typedef struct particle_data_lite
 
   private:
     //data
-    float * mass[6], * pos[6], * vel[6], * rho, * hsml, * age, * metal, * intenerg, * temp;
+    float * mass[6], * pos[6], *acc[6], * vel[6], * pot[6], * rho, * hsml, * age, * metal, * intenerg, * temp;
     int * id[6];
     int ntot_withmasses;
     std::ofstream out;
@@ -297,6 +301,7 @@ typedef struct particle_data_lite
     int version;
     int setHeader(t_io_header_1 *);
     int writeData(char * ptr,const size_t size_bytes,const int items);
+    template <class T> int writeDataValue(T value, const size_t size_bytes,const int items);
     void saveFile();
     void setupHeader(bool check=false);
     int writeHeader();
@@ -311,7 +316,9 @@ typedef struct particle_data_lite
     int setPos (std::string, const int _n, float * _pos , const bool addr);
     int setVel (std::string, const int _n, float * _vel , const bool addr);
     int setId  (std::string, const int _n, int   * _id  , const bool addr);
-    
+    int setPot (std::string, const int _n, float * _pot , const bool addr);
+    int setAcc (std::string, const int _n, float * _acc , const bool addr);
+
     int setRho (const int _n, float * _rho , const bool addr);
     int setHsml(const int _n, float * _hsml, const bool addr);
     int setU   (const int _n, float * _U   , const bool addr);

@@ -51,7 +51,7 @@ namespace uns {
   // ============================================================================
   // nextFrame 
   int CSnapshotInterfaceIn::nextFrameSelect(ComponentRangeVector * crvs)
-  {
+  {  
     user_select.setSelection(getSelectPart(),crvs);
     setNsel(user_select.getNSel());
     return(nextFrame(user_select));
@@ -91,6 +91,8 @@ namespace uns {
           case 'z': req_bits |= ZS_BIT    ; break; //
           case 'Z': req_bits |= ZSMT_BIT  ; break; //
           case 'i': req_bits |= IM_BIT    ; break; //
+          case 'c': req_bits |= CM_BIT    ; break; //
+          case 'C': req_bits |= (CM_BIT|IM_BIT|ZSMT_BIT|ZS_BIT)  ; break; //
           default: 
             std::cerr << "!!!!WARNING unknown requested bit : <"<<bits.at(i)<<">\n";
             break;
@@ -105,7 +107,6 @@ namespace uns {
   // split a string a:b[:c] into inf, sup,delta                                  
   void CSnapshotInterfaceIn::getRangeTime(const std::string rtime)
   {
-    int status;
     std::vector<float> store;
     int ppos=0;
     bool stop=false;
@@ -153,7 +154,6 @@ namespace uns {
     }
     
     assert(sup>=inf);
-    status=0;
     // store inf and supp time in vector array
     CSelectTime st(inf,sup,offset,-666.0);
     stv.push_back(st);

@@ -71,9 +71,10 @@ int main(int argc, char ** argv )
           ok=uns->snapshot->getData("mass",&nbody,&m);
           std::cerr << "nbody=" << nbody << " time="<< time <<"\n";
           double masstot=0;
-          for (int i=0; i<nbody; i++) {
-            masstot += m[i];
-          }
+          if (ok)
+            for (int i=0; i<nbody; i++) {
+              masstot += m[i];
+            }
           std::cout << time << " " << masstot << "\n";
         }
     }

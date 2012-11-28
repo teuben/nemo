@@ -51,6 +51,7 @@ namespace uns {
       if (snapshot) return snapshot->getFileStructure();
       std::cerr << "Algo error : snapshot not defined...\n";
       assert(0);
+      return "";
     }
     bool shift(std::string name, const float x, const float y, const float z) {
       return snapshot->shift(name,x,y,z);

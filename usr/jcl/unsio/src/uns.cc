@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2010                                       
+// Copyright Jean-Charles LAMBERT - 2008-2012
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -16,6 +16,7 @@
 #include <assert.h>
 #include "snapshotinterface.h"
 #include "snapshotgadget.h"
+#include "snapshotramses.h"
 #include "snapshotnemo.h"
 #include "snapshotsim.h"
 #include "snapshotlist.h"
@@ -28,7 +29,7 @@
 namespace uns {
   // static variable to store DATA string
   std::map<std::string, StringData> CunsOut::s_mapStringValues;
-  
+  std::map<std::string, int> CunsIn::s_mapCompInt;
   // ----------------------------------------------------------------------------
   // READING OPERATIONS
   CunsIn::CunsIn(const std::string _name ,const std::string _comp ,const std::string _time, const bool verb)
@@ -52,6 +53,16 @@ namespace uns {
     sel_comp = tools::Ctools::fixFortran(_comp.c_str(),false);
     sel_time = tools::Ctools::fixFortran(_time.c_str(),false);
     
+    // initialise some maps
+    CunsIn::s_mapCompInt["gas"        ] = 0;
+    CunsIn::s_mapCompInt["halo"       ] = 1;
+    CunsIn::s_mapCompInt["dm"         ] = 1;
+    CunsIn::s_mapCompInt["disk"       ] = 2;
+    CunsIn::s_mapCompInt["bulge"      ] = 3;
+    CunsIn::s_mapCompInt["stars"      ] = 4;
+    CunsIn::s_mapCompInt["bndry"      ] = 5;
+    CunsIn::s_mapCompInt["all"        ] =-1;
+
     // to lower
     //simname  = tools::Ctools::tolower(simname);
     //sel_comp = tools::Ctools::tolower(sel_comp);
@@ -68,6 +79,9 @@ namespace uns {
     } else {
       if (tools::Ctools::isFileExist(simname)) {  // file exist 
         tryGadget();               // try gadget 
+        if (!valid) {              // gadget failed
+          tryRamses();             // try ramses
+        }
         if (!valid) {              // gadget failed
           tryNemo();               // try nemo   
         }
@@ -103,6 +117,14 @@ namespace uns {
   {
     PRINT("tryGadget("<<simname<<")\n");
     snapshot = new CSnapshotGadgetIn(simname, sel_comp, sel_time, verbose);
+    valid = snapshot->isValidData();
+  }
+  // ----------------------------------------------------------------------------
+  // tryRamses
+  void CunsIn::tryRamses()
+  {
+    PRINT("tryRamses("<<simname<<")\n");
+    snapshot = new CSnapshotRamsesIn(simname, sel_comp, sel_time, verbose);
     valid = snapshot->isValidData();
   }
   // ----------------------------------------------------------------------------
@@ -198,6 +220,8 @@ namespace uns {
     CunsOut::s_mapStringValues["nbndry"     ] = uns::Nbndry;
     CunsOut::s_mapStringValues["gas"        ] = uns::Gas;
     CunsOut::s_mapStringValues["halo"       ] = uns::Halo;
+    CunsOut::s_mapStringValues["dm"         ] = uns::Halo;
+    CunsOut::s_mapStringValues["ndm"        ] = uns::Halo;
     CunsOut::s_mapStringValues["bulge"      ] = uns::Bulge;
     CunsOut::s_mapStringValues["disk"       ] = uns::Disk;
     CunsOut::s_mapStringValues["stars"      ] = uns::Stars;
@@ -212,6 +236,7 @@ namespace uns {
     CunsOut::s_mapStringValues["zs"         ] = uns::Zs;
     CunsOut::s_mapStringValues["zsmt"       ] = uns::ZSMT;
     CunsOut::s_mapStringValues["im"         ] = uns::Im;
+    CunsOut::s_mapStringValues["cm"         ] = uns::Cm;
     CunsOut::s_mapStringValues["czs"        ] = uns::Czs;
     CunsOut::s_mapStringValues["czsmt"      ] = uns::Czsmt;
     if (verbose) {

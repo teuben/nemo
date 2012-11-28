@@ -40,6 +40,7 @@ namespace tools {
 #define ZS_BIT            (1 << 18)
 #define ZSMT_BIT          (1 << 19)
 #define IM_BIT            (1 << 20)
+#define CM_BIT            (1 << 21)
 
 // Component BITS
 #define ALL_BIT           (1 <<  1)
@@ -65,6 +66,7 @@ namespace tools {
       if (s=="all"   ) ret=ALL_BIT|GAS_BIT|HALO_BIT|DISK_BIT|STARS_BIT|BNDRY_BIT;
       if (s=="gas"   ) ret=GAS_BIT;
       if (s=="halo"  ) ret=HALO_BIT;
+      if (s=="dm"    ) ret=HALO_BIT;
       if (s=="disk"  ) ret=DISK_BIT;
       if (s=="stars" ) ret=STARS_BIT;
       if (s=="bndry" ) ret=BNDRY_BIT;

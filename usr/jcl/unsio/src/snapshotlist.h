@@ -60,6 +60,7 @@ namespace uns {
       if (snapshot) return snapshot->getFileStructure();
       std::cerr << "Algo error : snapshot not defined...\n";
       assert(0);
+      return "";
     }
 
   private:
