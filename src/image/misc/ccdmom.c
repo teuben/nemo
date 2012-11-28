@@ -11,6 +11,7 @@
  *      18-oct-05   0.6  added mom=-2 as dispersion around mean along an axis
  * ??   16-sep-11   ???  added clip= and  rngmsk= ???   code lost ???
  *      19-jul-12   0.7  allow peak (mom=3) to find 2nd peak
+ *      27-nov-12   1.0  add oper=  to insert an operator (ie. out = in <oper> out )
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -30,8 +31,9 @@ string defv[] = {
 	"mom=0\n	Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc, -1=mean val, -2=disp val]",
 	"keep=f\n	Keep moment axis in full length, and replace all values",
 	"cumulative=f\n Cumulative axis (only valid for mom=0)",
+	"oper=\n        Operator on output (enforces keep=t)",
 	"peak=1\n       Find N-th peak in case of peak finding (mom=3)",
-	"VERSION=0.7b\n 27-nov-2012 PJT",
+	"VERSION=1.0\n  27-nov-2012 PJT",
 	NULL,
 };
 
@@ -41,12 +43,14 @@ string cvsid="$Id$";
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
 local int  peak_find(int n, real *data, int *mask, int npeak);
 local bool out_of_range(real);
+local void image_oper(imageptr ip1, string oper, imageptr ip2);
 
 
 
 void nemo_main()
 {
     stream  instr, outstr;
+    string  oper;
     int     nx, ny, nz, nx1, ny1, nz1;
     int     axis, mom;
     int     i,j,k, apeak, apeak1, cnt;
@@ -55,7 +59,13 @@ void nemo_main()
     real    *spec;
     int     *smask;
     bool    Qkeep = getbparam("keep");
+    bool    Qoper = hasvalue("oper");
     int     npeak = getiparam("peak");
+
+    if (Qoper) {
+      Qkeep = TRUE;
+      oper = getparam("oper");
+    }
 
     instr = stropen(getparam("in"), "r");
     mom = getiparam("mom");
@@ -64,6 +74,7 @@ void nemo_main()
     if (axis < 0 || axis > 3) error("Illegal value axis=%d",axis);
 
     if (mom==3 && axis!=3 && npeak>1) error("Nth-peak>1 finding only axis=3");
+
 
     if (getbparam("cumulative"))
       axis = -axis;
@@ -171,6 +182,8 @@ void nemo_main()
         Namey(iptr1) = Namey(iptr);
         Namez(iptr1) = Namez(iptr);
 
+	if (Qoper) image_oper(iptr,oper,iptr1);
+
     } else if (axis==2) {                      
       scale = Dy(iptr);
       offset = Ymin(iptr);
@@ -224,6 +237,8 @@ void nemo_main()
         Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
         Namey(iptr1) = Namey(iptr);
         Namez(iptr1) = Namez(iptr);
+
+	if (Qoper) image_oper(iptr,oper,iptr1);
 
     } else if (axis==3) {                       /* this one is tested */
         scale = Dz(iptr);
@@ -301,6 +316,8 @@ void nemo_main()
         Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
         Namey(iptr1) = Namey(iptr);
         Namez(iptr1) = Namez(iptr);
+
+	if (Qoper) image_oper(iptr,oper,iptr1);
         
     } else if (axis == -1) {
       for (k=0; k<nz; k++)
@@ -445,4 +462,30 @@ local int peak_find(int n, real *data, int *mask, int npeak)
 local bool out_of_range(real x)
 {
   return FALSE;
+}
+
+#define CV(p,i,j,k)   CubeValue(p,i,j,k)
+#define LOOP(i,n)     for(i=0;i<n;i++)
+
+local void image_oper(imageptr ip1, string oper, imageptr ip2)
+{
+  int i,j,k, nx,ny,nz;
+  nx = Nx(ip1);
+  ny = Ny(ip1);
+  nz = Nz(ip1);
+  if(nx!=Nx(ip2)) error("image_oper: NX size %d != %d",nx,Nx(ip2));
+  if(ny!=Ny(ip2)) error("image_oper: NY size %d != %d",ny,Ny(ip2));
+  if(nz!=Nz(ip2)) error("image_oper: NZ size %d != %d",nz,Nz(ip2));
+
+  if (*oper== '+')
+    LOOP(k,nz) LOOP(j,ny) LOOP(i,nx) CV(ip2,i,j,k) = CV(ip1,i,j,k) + CV(ip2,i,j,k);
+  else if (*oper== '-')
+    LOOP(k,nz) LOOP(j,ny) LOOP(i,nx) CV(ip2,i,j,k) = CV(ip1,i,j,k) - CV(ip2,i,j,k);
+  else if (*oper== '*')
+    LOOP(k,nz) LOOP(j,ny) LOOP(i,nx) CV(ip2,i,j,k) = CV(ip1,i,j,k) * CV(ip2,i,j,k);
+  else if (*oper== '/')
+    LOOP(k,nz) LOOP(j,ny) LOOP(i,nx) CV(ip2,i,j,k) = CV(ip1,i,j,k) / CV(ip2,i,j,k);
+  else 
+    error("invalid operator: %s",oper);
+ 
 }

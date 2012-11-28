@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "20 July 2012"
+.TH CCDMOM 1NEMO "27 November 2012"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
@@ -47,17 +47,31 @@ The \fBmom=\fP keyword is ignored, and the input and output datasets will
 now have the same shape and dimension. 
 [Default: \fBf\fP]
 .TP
-\fBclip=\fP
+** \fBclip=\fP **
 Exclude pixels with values in the range -clip to clip. Default: 0
 .TP
-\fBrngmsk=t|f\fP
+** \fBrngmsk=t|f\fP **
 Don't assign a 1st moment if the value results in a value outside the
 range of the axis. This can easily happen for noisy data. Default: false.
 .TP
-\fpeak=N\fP
+\fBpeak=N\fP
 For \fBmom=3\fP where it finds the peak, this allows you to find the N-th
 peak instead of the first. This is achieved by visiting each peak, and masking
 out all values downwards those peaks and then finding the next one.
+.TP
+\fBoper\fP
+If supplied, this is an extra operator supplied to the input file and output file,
+to create the final output file. This is to prevent having to type two commands
+such as
+.nf
+    ccdmom map0 tmp0 axis=1 mom=-1 keep=t
+    ccdmath map0,tmp0 map1 %1-%2
+.fi
+instead of
+.nf
+    ccdmom map0 map1 axis=1 mom=-1 oper=-
+.fi
+
 .SH SEE ALSO
 pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), image(5NEMO)
 .SH CAVEATS
@@ -79,5 +93,7 @@ Peter Teuben
 21-feb-01	V0.4a added mom=3, and fixed major bugs in computing moments	PJT
 25-mar-01	V0.5 added mom=-1	PJT
 18-oct-05	V0.6 added mom=-2 and cumulative option 	PJT
-16-sep-11	V0.8 added clip= and rngmsk=	PJT
+16-sep-11	V0.8 added clip= and rngmsk= [lost code]	PJT
+27-nov-12	V1.0 added oper=	PJT
+
 .fi
