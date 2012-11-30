@@ -143,7 +143,8 @@ namespace {
       }
       if(a == scalar(1)) return x;
       std::memcpy(POS,x,n*NDIM*sizeof(scalar));
-      SSE::Aligned::Mul(reinterpret_cast<scalar*>(POS),Nvec16,a);
+      for(size_t i=0; i!=Nvec16; ++i)
+	reinterpret_cast<scalar*>(POS)[i] *= a;
       return reinterpret_cast<const scalar*>(POS);
     }
     /// scale factor alpha(t)
