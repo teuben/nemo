@@ -1,5 +1,6 @@
 /* 
  * CCDROW: some crazy row based operations, cloned of ccdsub
+ *         useful for some CLASSy hacking.
  *
  *	quick and dirty: 9-nov-2012
  */
@@ -24,11 +25,12 @@ string defv[] = {
   "reorder=\n     New coordinate ordering",
   "div2=f\n       Divide subsequent rows instead of aver",
   "row=-1\n       Set this to a (>=0) row as calibration row",
-  "VERSION=1.1\n  19-nov-2012 PJT",
+  "repair=-1\n    Column (1-based) to repair from its neighbors (-1 means none)",
+  "VERSION=1.3\n  23-nov-2012 PJT",
   NULL,
 };
 
-string usage = "hacking rows of an image";
+string usage = "hacking rows of an image for CLASSy";
 
 string cvsid="$Id$";
 
@@ -57,6 +59,7 @@ void nemo_main()
     int     nxaver, nyaver,nzaver;
     int     i,j,k, i0,j0,k0, i1,j1,k1, i_p, j_p, k_p;
     int     row = getiparam("row");
+    int     repair = getiparam("repair");
     imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
     real    sum, tmp, zzz, sum0,sum1;
     bool    Qreorder = FALSE;
@@ -94,6 +97,14 @@ void nemo_main()
 
     outstr = stropen(getparam("out"), "w");
 
+    if (repair > 0) {
+      warning("Repairing column %d/%d\n",repair,nx);
+      LOOP(k,nz) {
+	LOOP(j,ny) {
+	  CV(iptr,repair-1,j,k) = 0.5*(CV(iptr,repair-2,j,k)+CV(iptr,repair,j,k));
+	}
+      }
+    } 
     if (nxaver>1 || nyaver>1 || nzaver>1) {  /*  averaging, but retaining size */
         dprintf(0,"Averaging map %d * %d * %d pixels; mapsize %d * %d * %d\n",
                    nxaver,nyaver,nzaver,nx,ny,nz);
@@ -204,7 +215,7 @@ void nemo_main()
       if (!Qdummy) ax_shift(iptr1);
       write_image(outstr, iptr1);
     } else {                            /* nothing really done */
-      warning("nothing really done?");
+      warning("nothing really done? (repair=%d)",repair);
       if (!Qdummy) ax_shift(iptr);
       write_image(outstr, iptr);
     }
