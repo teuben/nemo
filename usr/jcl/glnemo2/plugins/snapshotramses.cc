@@ -62,7 +62,7 @@ bool SnapshotRamses::isValidData()
   valid=false;
   part = new ramses::CPart(filename,2);
   amr  = new ramses::CAmr(filename);
-  if (part->isValid() && amr->isValid()) {
+  if (part->isValid() || amr->isValid()) {
     connect(amr, SIGNAL(stringStatus(const QString)),this,SLOT(slotStringStatus(QString)));    //SLOT(slotStringStatus(const Qstring)));
     connect(part,SIGNAL(stringStatus(const QString)),this,SLOT(slotStringStatus(QString)));
     valid=true;
@@ -125,11 +125,11 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
     //part_data->computeMaxSize();
     // rescale particles
     for (int i=0;i <nsel; i++) {
-      part_data->pos[i*3+0]     *= go->scale;
-      part_data->pos[i*3+1]     *= go->scale;
-      part_data->pos[i*3+2]     *= go->scale;
+      part_data->pos[i*3+0]     *= go->scale*amr->getHeader()->boxlen;
+      part_data->pos[i*3+1]     *= go->scale*amr->getHeader()->boxlen;
+      part_data->pos[i*3+2]     *= go->scale*amr->getHeader()->boxlen;
       if (part_data->rneib->data[i]!=-1)
-        part_data->rneib->data[i] *= go->scale;
+        part_data->rneib->data[i] *= go->scale*amr->getHeader()->boxlen;
     }
     part_data->computeVelNorm();
     part_data->rho->computeMinMax();
@@ -144,7 +144,8 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
       part_data->temp=NULL;
     }
     if (! part_data->timu ) part_data->timu = new float;
-    *part_data->timu = 0; // !!!!!! gadget_io->getTime();
+    //*part_data->timu = amr->getHeader()->time; // !!!!!! gadget_io->getTime();
+    *part_data->timu = amr->getMapInfo("time")*amr->getMapInfo("unit_t") /(60.*60.*24.*365.15*1E9) ;
     end_of_data=true; // only one frame from an gadget snapshot
     
   }
@@ -214,14 +215,14 @@ int SnapshotRamses::initLoading(GlobalOptions * so)
   if (so->select_part=="" || (so->select_part.find("stars")!=std::string::npos)) 
     take_stars = true;
   
-  if (take_gas) {
+  if (take_gas && amr->isValid()) {
     take_gas = true;
     namr=amr->loadData(); // count gas particles
   } else {
     namr=0;
   }
   
-  if (take_halo || take_stars) {
+  if ((take_halo || take_stars) && part->isValid()) {
     part->loadData(take_halo,take_stars);     // count dm+stars particles
     part->getNbody(&ndm,&nstars);
   } else {

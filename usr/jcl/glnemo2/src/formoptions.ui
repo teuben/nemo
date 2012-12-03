@@ -25,7 +25,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="options_dialog">
      <property name="currentIndex">
-      <number>2</number>
+      <number>9</number>
      </property>
      <widget class="QWidget" name="tab_i_select">
       <attribute name="title">

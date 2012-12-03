@@ -498,22 +498,20 @@ void GLWindow::paintGL()
   if (store_options->show_part && pov ) {
     //mutex_data->lock();
     bool first=true;
+    bool obj_has_physic=false;
     for (int i=0; i<(int)pov->size(); i++) {
-/*      if (i==0) {
-        store_options->render_mode = 2;
-      }
-      else {
-        store_options->render_mode = 0;
-      }*/
       gpv[i].display(mModel2,wheight);
 
       if (first) {
-          const ParticlesObject * po = gpv[i].getPartObj();
-          if (po->hasPhysic()) { //store_options->phys_min_glob!=-1 && store_options->phys_max_glob!=-1) {
-              gl_colorbar->display(QGLWidget::width(),QGLWidget::height());
-              first=false;
-            }
+        const ParticlesObject * po = gpv[i].getPartObj();
+        if (po->hasPhysic()) { //store_options->phys_min_glob!=-1 && store_options->phys_max_glob!=-1) {
+          obj_has_physic=true;
+          first=false;
         }
+      }
+    }
+    if (obj_has_physic) {
+      gl_colorbar->display(QGLWidget::width(),QGLWidget::height());
     }
 
     //mutex_data->unlock();

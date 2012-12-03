@@ -123,12 +123,15 @@ bool SnapshotList::isValidData()
 bool SnapshotList::openFile()
 {
   bool status;
+  QDir dir(QString(filename.c_str()));
     // open file
   if (filename == "-")
     ;//fi = &std::cin;//fi.open(std::cin,std::ios::in);
-  else
+  else {
     fi.open(filename.c_str(),std::ios::in);
-  if (! fi.is_open()) {
+  }
+  std::cerr << "good :" << fi.good() << "\n";
+  if (! fi.is_open() || dir.exists()) {
     std::cerr << "Unable to open file ["<<filename<<"] for reading, aborting...\n";
     status = false;
   }

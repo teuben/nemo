@@ -1,3 +1,12 @@
+1.52 (December, 1st 2012)
+--------------------
+  - bug fix release
+  - bug fix on temperature with gadget files
+  - fix about rescaling data when physical values <= 0
+  - ramses files, give time in giga years
+  - ramses files, fix crash when no hydro files
+  - ramses files, resize positions and hsml with respect of boxlen
+
 1.51 (July, 26th 2012)
 ---------------------
   - bug fix release

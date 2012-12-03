@@ -97,7 +97,7 @@ GlobalOptions::GlobalOptions()
   octree_enable=false;
   octree_display=false;
   octree_level=10;
-  // axes
+  // axesF
   axes_enable = true;     
   axes_loc    = 0;
   axes_psize  = 0.15;

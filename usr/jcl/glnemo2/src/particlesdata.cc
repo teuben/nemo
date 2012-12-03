@@ -458,27 +458,29 @@ PhysicalData::~PhysicalData()
 // PhysicalData::computeMinMax()                                           
 int PhysicalData::computeMinMax()
 {
+  double LMIN=std::numeric_limits<double>::min();
+  double LMAX=std::numeric_limits<double>::max();
   if (data) {
-    max = -1E9;
-    min = 1E9;
+    max = -LMAX;//LMIN;
+    min = LMAX;
     // compute Min/Max
     for (int i=0; i<(nbody); i++) {
       if (data[i] != -1 ) {
-	max=std::max(max,(double) data[i]);
-	min=std::min(min,(double) data[i]);
+        max=std::max(max,(double) data[i]);
+        min=std::min(min,(double) data[i]);
       }
     }       
     std::cerr << "-------------------------------\n";
     valid = true;
-    if ((max == -1E9 && min == 1E9 )) {
+    if ((max == -LMAX && min == LMAX )) {
       valid = false;
     }
     if (min>0 && max>0) {
-      if ((max == -1E9 && min == 1E9 )|| (max == min) ||
-          max >  std::numeric_limits<double>::max() ||
-          max <  std::numeric_limits<double>::min() ||
-          min >  std::numeric_limits<double>::max() ||
-          min <  std::numeric_limits<double>::min() 
+      if ((max == -LMAX && min == LMAX )|| (max == min) ||
+          max >  LMAX ||
+          max <  -LMAX ||
+          min >  LMAX ||
+          min <  -LMAX
         ) {
         valid = false;
       } 
@@ -523,13 +525,14 @@ int PhysicalData::computeMinMax()
       data_histo.push_back(0);
     }
     if (min <=0) {
-      std::cerr << "Min is negative, rescaling data...\n";
+      std::cerr << "Min<=0, rescaling data...\n";
       double offset;
       if (min==0) {
-        min=1E-9;
-        offset=1E-9;
+        min=LMIN;
+        offset=LMIN;
+      } else {
+        offset=(min*-1.00)+LMIN;//-1.0001;//(1+1.E-12);
       }
-      else offset=min*-1.0001;//(1+1.E-12);
       double mmin=0.0;
       bool first=true;
       for (int i=0; i<(nbody); i++) {
@@ -541,10 +544,11 @@ int PhysicalData::computeMinMax()
             if (data[i] != 0.0)
               first=false;
           } else {
-            if (data[i]!=0.0)
+            if (data[i]!=0.0) {
               mmin = std::min(mmin,(double)data[i]);
+            }
             else {
-              std::cerr << "i="<<i<<" data="<<dd<<"\n";
+              //std::cerr << "i="<<i<<" data="<<dd<<"\n";
             }
           }
         }
@@ -553,7 +557,7 @@ int PhysicalData::computeMinMax()
       min=mmin;
       max=max+offset;
       std::cerr <<" new min = "<< std::scientific << std::setw(10) << min
-                <<"\n new max = "<< std::setw(10)<<max<<"\n";
+               <<"\n new max = "<< std::setw(10)<<max<<"\n";
     }
     if (valid) {
       for (int i=0; i<(nbody); i++) {

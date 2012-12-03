@@ -112,7 +112,7 @@ int GadgetIO::read(std::vector <int> * id, float * pos, float * vel, float * rho
     // allocate memory
     assert(nsel<=npartTotal);
     //t_particle_data_lite * P= new t_particle_data_lite[npartTotal];
-    if (! intenerg && header.npartTotal[0]>0) intenerg = new float[header.npartTotal[0]];
+
     
     int npartOffset[6];
     // compute offset in case of multiple gadget file
@@ -248,6 +248,9 @@ int GadgetIO::read(std::vector <int> * id, float * pos, float * vel, float * rho
 
         if (block_name=="U") { // U block (Internal energy)
           assert(header.npart[0]>0);
+          if (! intenerg && header.npartTotal[0]>0) {
+            intenerg = new float[header.npartTotal[0]];
+          }
           ok=true;
           bytes_counter=0;
           len1 = readFRecord();
@@ -376,15 +379,15 @@ int GadgetIO::read(std::vector <int> * id, float * pos, float * vel, float * rho
     //qsort(P,npartTotal,sizeof(t_particle_data_lite),gadget::compare);
     
     // convert to temperature units only if user has selected gas particles
-    if (use_gas && is_temp && header.npartTotal[0] > 0) {
+    if (intenerg!=NULL && use_gas && is_temp && header.npartTotal[0] > 0) {
       rhop      = rho;
       tempp     = temp;
       intenergp = intenerg;
       unitConversion();
     }
     if (! is_temp) {
-      delete [] temp;
-      temp=NULL;
+      //delete [] temp;
+      //temp=NULL;
     }
     // garbage collecting
     delete [] index2;

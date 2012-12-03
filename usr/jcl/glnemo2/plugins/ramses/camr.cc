@@ -31,7 +31,7 @@ CAmr::CAmr(const std::string _indir, const bool _v)
   verbose=_v;
   indir = _indir;
   infile="";
-  
+
   // keep filename untill last /
   int found=indir.find_last_of("/");
   if (found != (int) std::string::npos && (int) indir.rfind("output_")<found) {
@@ -47,8 +47,18 @@ CAmr::CAmr(const std::string _indir, const bool _v)
       s_run_index.erase(found,found);
     }
     infile = indir + "/amr_" + s_run_index + ".out00001";
+    testhydrofile = indir + "/hydro_" + s_run_index + ".out00001";
+    info_file = indir + "/info_" + s_run_index + ".txt";
     std::cerr << "Run index = " << s_run_index <<  "  infile=[" << infile << "]\n";
   }
+  // readHeader
+  if (amr.open(infile)) {
+    readHeader();
+    amr.close();
+  }
+  // read info file
+  readInfoFile();
+
   //computeNbody();
   //loadData();
 }
@@ -61,15 +71,16 @@ CAmr::~CAmr()
 //
 bool CAmr::isValid()
 {    
-  if (amr.open(infile)) {
+  if (amr.open(infile) && hydro.open(testhydrofile)) {
     valid=true;
-    readHeader();
+    //readHeader();
     amr.close();
+    hydro.close();
     std::cerr << "ncpu="<<ncpu<<"  ndim="<<ndim<< "\n";// "npart=" << npart << "\n";
     xbound[0] = nx/2;
     xbound[1] = ny/2;
     xbound[2] = nz/2;
-    twotondim = pow(2,ndim);  
+    twotondim = pow(2,ndim);
     ordering = "hilbert";
     scale_nH =  XH/mH * 0.276090728884102e-29;
   }
@@ -77,6 +88,48 @@ bool CAmr::isValid()
     valid=false;
   amr.close();
   return valid;
+}
+// ============================================================================
+// readInfoFile
+bool CAmr::readInfoFile()
+{
+  bool status=true;
+  std::ifstream fi;
+
+  fi.open(info_file.c_str(),std::ios::in);
+
+  if (! fi.is_open()) {
+    std::cerr << "Unable to open file ["<<info_file.c_str()<<"] for reading, aborting...\n";
+    status = false;
+  }
+  else {
+    bool stop=false;
+    while (!stop && ! fi.eof()) {           // while ! eof
+      std::string line;
+      getline(fi,line); // Read one line
+      if ( ! fi.eof()) { // ! EOF, keep reading
+        int pos; // pos of "="
+        if ((pos=line.find("=")) != std::string::npos) { // '=' found
+          line.replace(pos,1," ",1); // replace '=' with ' '
+          //std::cerr << "Line = " << line << "\n";
+          std::istringstream str(line);  // stream line
+          std::string key;
+          double value;
+          str >> key;
+          str >> value;
+          mapinfo[key] = value; // build info map
+        }
+
+        else { // end of file
+          if (fi.eof()) {
+            stop   = true;
+          }
+        }
+      }
+    }
+    fi.close();
+  }
+  return status;
 }
 // ============================================================================
 // readHeader
@@ -102,7 +155,38 @@ int CAmr::readHeader()
   
   amr.readDataBlock((char *) &ngrid_current);
   
-  amr.skipBlock();
+  amr.readDataBlock((char *) &header.boxlen);
+  std::cerr << "BOX LEN ="<<header.boxlen<<"\n";
+  amr.skipBlock(3); // noutput,iout,ifout
+                    // tout
+                    // aout
+  amr.readDataBlock((char *) &header.time);
+  std::cerr << "TIME  ="<<header.time<<"\n";
+  amr.skipBlock(4); // dtold
+                    // dtnew
+                    // nstep,nstep_coarse
+                    // const,mass_tot_0,rho_tot
+  len1=amr.readFRecord();
+  amr.readData((char *) &header.omega_m   ,sizeof(double),1);
+  amr.readData((char *) &header.omega_l   ,sizeof(double),1);
+  amr.readData((char *) &header.omega_k   ,sizeof(double),1);
+  amr.readData((char *) &header.omega_b   ,sizeof(double),1);
+  amr.readData((char *) &header.h0        ,sizeof(double),1);
+  amr.readData((char *) &header.aexp_ini  ,sizeof(double),1);
+  amr.readData((char *) &header.boxlen_ini,sizeof(double),1);
+  len2=amr.readFRecord();
+  assert(amr.good() && len1==len2);
+
+  len1=amr.readFRecord();
+  amr.readData((char *) &header.aexp,sizeof(double),1);
+  amr.readData((char *) &header.hexp,sizeof(double),1);
+  amr.readData((char *) &header.aexp_old,sizeof(double),1);
+  amr.readData((char *) &header.epot_tot_int,sizeof(double),1);
+  amr.readData((char *) &header.epot_tot_old,sizeof(double),1);
+  len2=amr.readFRecord();
+  assert(amr.good() && len1==len2);
+
+  if (len2==len1) ; // remove warning....
   
   return 1;
 }
@@ -119,10 +203,11 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
   std::string infile;
   QString str_status;
   if (load_vel || nsel || vel) {;} // remove compiler warning
-  
+  qsrand(0);
   nbody = 0;
   int cpt=0;
   bool count_only=false;
+
   if (index==NULL)  count_only=true;
   // loop on all cpus/files
   for (int icpu=0; icpu<ncpu; icpu++) {
@@ -263,9 +348,23 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
               if (!count_only) {
                 int idx=index[nbody];
                 if (idx!=-1) { // it's a valide particle
-                  pos[3*cpt+0] = px;
-                  pos[3*cpt+1] = py;
-                  pos[3*cpt+2] = pz;
+#if 0
+                  pos[3*cpt+0] = px + getSign()*dx2*getRandom(0.5);
+                  pos[3*cpt+1] = py + getSign()*dx2*getRandom(0.5);
+                  pos[3*cpt+2] = pz + getSign()*dx2*getRandom(0.5);
+#else
+
+#if 0
+                  pos[3*cpt+0] = px + getSign()*dx2*getRandomGaussian(dx2);
+                  pos[3*cpt+1] = py + getSign()*dx2*getRandomGaussian(dx2);
+                  pos[3*cpt+2] = pz + getSign()*dx2*getRandomGaussian(dx2);
+#else
+                  pos[3*cpt+0] = px ;
+                  pos[3*cpt+1] = py ;
+                  pos[3*cpt+2] = pz ;
+#endif
+
+#endif
                   rneib[cpt]   = dx;
                   rho[cpt] = var[0*ngrida*twotondim+ind*ngrida+i];
 #if 1
