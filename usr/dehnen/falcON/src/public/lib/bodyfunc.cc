@@ -156,7 +156,10 @@ namespace {
     if(falcON_path == 0) throw BfErr("cannot locate falcON directory");
     char cmmd[512];
     SNprintf(cmmd,512,"cd /tmp; %s %s.cc -o %s.so"
-	     " %s -shared -fPIC -I%s/inc -I%s/inc/utils"
+	     " %s -shared -fPIC -I%s/inc -I%s/inc/utils -O2"
+#if __cplusplus >= 201103L
+	     " -std=c++0x"
+#endif
 #ifdef  falcON_NEMO
 	     " -I$NEMOINC -DfalcON_NEMO"
 #endif
@@ -167,6 +170,15 @@ namespace {
 	     " -DfalcON_DOUBLE"
 #elif defined(falcON_SINGLE)
 	     " -DfalcON_SINGLE"
+#endif
+#if   defined(__INTEL_COMPILER)
+	     " -ip -xHost -fpic -falign-functions -openmp -g -Wall"
+#elif defined(__GNUC__)
+	     " -march=native -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
+	     " -Wall -Wextra -Winit-self -Wshadow -Woverloaded-virtual -fPIC"
+	     " -fopenmp -funroll-loops -fforce-addr"
+#else
+	     " -fpic -openmp -g"
 #endif
 #ifdef __DARWIN_UNIX03
 	     " -L$FALCONLIB -lfalcON -L$FALCON/utils/lib -lWDutils"
