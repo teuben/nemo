@@ -5,11 +5,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2000-2010
+/// \date    2000-2012
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2010  Walter Dehnen
+// Copyright (C) 2000-2012  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -2118,18 +2118,31 @@ double bodies::read_gadget(const char*fname,
     // 3.7 read gas densities
     READ(fieldbit::R);
     if(read == fgot) goto NextFile;
-    // 3.8 read SPH smoothing lengths
+    // 3.8 skip possible Nelec and NH0
+    if(header->flag_cooling) {
+      {
+	FortranIRec F(in, rec, swap);
+	F.skip_bytes(F.size());
+	if(debug(3)) DebugInfoF("skip %u 'Nelec'\n",ns);
+      }
+      {
+	FortranIRec F(in, rec, swap);
+	F.skip_bytes(F.size());
+	if(debug(3)) DebugInfoF("skip %u 'NH0'\n",ns);
+      }
+    }
+    // 3.9 read SPH smoothing lengths
     READ(fieldbit::H);
     if(read == fgot) goto NextFile;
-    // 3.9 read potentials
+    // 3.10 read potentials
     READ(fieldbit::p);
     if(read == fgot) goto NextFile;
-    // 3.10 read accelerations
+    // 3.11 read accelerations
     READ(fieldbit::a);
     if(read == fgot) goto NextFile;
   NextFile:
     got |= fgot;
-    // 3.11 open next data file (unless all have been read) and move SPH & STD
+    // 3.12 open next data file (unless all have been read) and move SPH & STD
     if(++ifile != nfile) {
       SPH += ns;
       STD += nd;
