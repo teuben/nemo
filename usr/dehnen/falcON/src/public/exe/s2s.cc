@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2007-2011
+/// \date   2007-2012
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2007-2011 Walter Dehnen 
+// Copyright (C) 2007-2012 Walter Dehnen 
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@
 // v 1.0.2 10/09/2008  WD happy gc 4.3.1
 // v 2.0   09/03/2010  WD sorting, new filter (in body.h)
 // v 2.0.1 22/06/2011  WD check for snapshot first
+// v 2.1   04/12/2012  WD added rotaxis and rotangle
 ////////////////////////////////////////////////////////////////////////////////
 #define falcON_VERSION   "2.0.1"
 #define falcON_VERSION_D "22-jun-2011 Walter Dehnen                          "
@@ -49,6 +50,7 @@
 //
 #include <public/nemo++.h>                         // WDs C++ NEMO I/O
 #include <public/bodyfunc.h>                       // body functions
+#include <utils/matr33.h>                          // matrix
 #include <main.h>                                  // NEMO basics & main
 #include <cstdio>                                  // C std I/O
 //
@@ -61,29 +63,97 @@ const char*defv[] = {
   "sorting=\n       scalar bodyfunc expression: property to sort       ",
   "sortpars=\n      parameters, must match requirements for sorting    ",
   "zeromissing=f\n  set body properties missing for filter to zero?    ",
+  "rotaxis=\n       rotate snapshot around this axis                   ",
+  "rotangle=0\n     angle [degrees] to rotate snapshot                 ",
   "time=\n          set time of snapshots to this value (at output)    ",
   "copy=\n          select data to write out (default: all read)       ",
   falcON_DEFV, NULL };
 const char*usage = "s2s -- Walter's alternative to snapcopy";
 //
+typedef WDutils::Matrix33<falcON::real> Matrix;
+template<typename T> struct rotate_helper {
+  static void job(T&, Matrix const&) {}
+};
+template<> struct rotate_helper<falcON::vect> {
+  static void job(falcON::vect&x, Matrix const&R) { x = R*x; }
+};
+template<typename T> inline
+void rotate_it(T&x, Matrix const&R)
+{
+  rotate_helper<T>::job(x,R);
+}
+//
+template<int BIT> struct rotate_body {
+  static void job(falcON::fieldset r, falcON::body&B, Matrix const&R)
+  {
+    if(r.contain(falcON::fieldbit(BIT)))
+      rotate_it(B.template datum<BIT>(), R);
+    rotate_body<BIT-1>::job(r,B,R);
+  }
+};
+template<> struct rotate_body<0> {
+  static void job(falcON::fieldset, falcON::body&, Matrix const&) {}
+};
+//
+inline void rotate(falcON::fieldset r, falcON::body&B, Matrix const&R)
+{
+  rotate_body<falcON::fieldbit::NQUANT-1>::job(r,B,R);
+}
+//
 namespace {
   using namespace falcON;
-  struct FilterSortWrite
+  struct FilterSortRotateWrite
   {
     BodyFilter     Filter;
     BodyFunc<real> SortFunc;
-    fieldset       Copy,Need;
+    fieldset       Copy,Need,VecCopy;
     nemo_out       Out;
-    bool           keys,zm;
+    bool           keys,zm,rot;
+    Matrix33<real> RotMat;
 
-    FilterSortWrite()
-      : Filter(getparam_z("filter"),getparam_z("params")),
-	SortFunc(getparam_z("sorting"),getparam_z("sortpars")),
-	Copy(getioparam_a("copy")),
-	Need(Copy | Filter.need() | SortFunc.need()),
-	keys(getioparam_z("copy").contain(fieldbit::k)),
-	zm(getbparam("zeromissing"))
-    { if(keys) Copy |= fieldset::k; }
+    FilterSortRotateWrite()
+      : Filter(getparam_z("filter"),getparam_z("params"))
+      , SortFunc(getparam_z("sorting"),getparam_z("sortpars"))
+      , Copy(getioparam_a("copy"))
+      , Need(Copy | Filter.need() | SortFunc.need())
+      , VecCopy(Copy & fieldset::vectors)
+      , keys(getioparam_z("copy").contain(fieldbit::k))
+      , zm(getbparam("zeromissing"))
+      , rot(hasvalue("rotaxis"))
+    { 
+      if(keys) Copy |= fieldset::k;
+      if(getrparam("rotangle")==0) {
+	if(rot)
+	  falcON_Warning("rotaxis given but rotangle=%g\n",
+			 getrparam("rotangle"));
+	rot = 0;
+      } else if(rot)
+	falcON_Warning("rotangle =%g but no rotaxis given\n",
+		       getrparam("rotangle"));
+      if(rot) {
+	vect u = getvparam("rotaxis");
+	if(norm(u)==0) {
+	  rot = 0;
+	  falcON_Warning("rotaxis=0,0,0: cannot rotate\n");
+	  return;
+	}
+	u /= abs(u);
+	real the = getrparam("rotangle")*Pi/180;
+	real cth = std::cos(the);
+	real sth = std::sin(the);
+	RotMat.dyadic(u,u);
+	RotMat    *= 1-cth;
+	RotMat(0) += cth;
+	RotMat(1) -= u[2]*sth;
+	RotMat(2) += u[1]*sth;
+	RotMat(3) += u[2]*sth;
+	RotMat(4) += cth;
+	RotMat(5) -= u[0]*sth;
+	RotMat(6) -= u[1]*sth;
+	RotMat(7) += u[0]*sth;
+	RotMat(8) += cth;
+      }
+    }
     void operator()(snapshot&shot)
     {
       if(keys) shot.add_field(fieldbit::k);
@@ -91,6 +161,9 @@ namespace {
       if(shot.N_bodies()) {
 	shot.apply_sort(SortFunc,Copy,zm);
 	if(hasvalue("time")) shot.set_time(getdparam("time"));
+	if(rot)
+	  LoopAllBodies(&shot,B)
+	    rotate(VecCopy,B,RotMat);
 	if(!Out) Out.open(getparam("out"));
 	shot.write_nemo(Out,Copy);
       }
@@ -100,31 +173,31 @@ namespace {
 //
 void falcON::main() falcON_THROWING
 {
-  nemo_in         In(getparam("in"));
-  fieldset        Read;
-  snapshot        Shot;
-  FilterSortWrite FSW;
+  nemo_in  In(getparam("in"));
+  fieldset Read;
+  snapshot Shot;
+  FilterSortRotateWrite FSRW;
   if(!In.has_snapshot())
     falcON_THROW("no snapshots found in input file\n");
   if(0==strcmp(getparam("times"),"first")) {
     // special case times=first
-    Shot.read_nemo(In,Read,FSW.Need,0,0);
-    FSW(Shot);
+    Shot.read_nemo(In,Read,FSRW.Need,0,0);
+    FSRW(Shot);
   } else if(0==strcmp(getparam("times"),"last")) {
     // special case times=last
     while(In.has_snapshot())
-      Shot.read_nemo(In,Read,FSW.Need,0,0);
+      Shot.read_nemo(In,Read,FSRW.Need,0,0);
     Shot.del_fields(~Read);
-    FSW(Shot);
+    FSRW(Shot);
   } else {
     // general case for times
     while(In.has_snapshot())
-      if(Shot.read_nemo(In,Read,FSW.Need,getparam("times"),0)) {
+      if(Shot.read_nemo(In,Read,FSRW.Need,getparam("times"),0)) {
 	Shot.del_fields(~Read);
-	FSW(Shot);
+	FSRW(Shot);
       }
   }
-  if(!FSW.Out)
+  if(!FSRW.Out)
     falcON_Warning("no snapshot matching \"times=%s\" found in input\n",
 		   getparam("times"));
 }

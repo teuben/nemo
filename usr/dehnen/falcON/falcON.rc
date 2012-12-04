@@ -59,7 +59,7 @@ if ($?LD_LIBRARY_PATH) then
 else
   setenv LD_LIBRARY_PATH ${FALCONLIB}":"${WDUTILSLIB}
 endif
-if($VENDOR == apple) then
+if($?VENDOR && $VENDOR == apple) then
   setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
 endif
 
