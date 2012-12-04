@@ -106,7 +106,7 @@ namespace {
   {
     BodyFilter     Filter;
     BodyFunc<real> SortFunc;
-    fieldset       Copy,Need,VecCopy;
+    fieldset       Copy,Need;
     nemo_out       Out;
     bool           keys,zm,rot;
     Matrix33<real> RotMat;
@@ -116,7 +116,6 @@ namespace {
       , SortFunc(getparam_z("sorting"),getparam_z("sortpars"))
       , Copy(getioparam_a("copy"))
       , Need(Copy | Filter.need() | SortFunc.need())
-      , VecCopy(Copy & fieldset::vectors)
       , keys(getioparam_z("copy").contain(fieldbit::k))
       , zm(getbparam("zeromissing"))
       , rot(hasvalue("rotaxis"))
@@ -127,7 +126,7 @@ namespace {
 	  falcON_Warning("rotaxis given but rotangle=%g\n",
 			 getrparam("rotangle"));
 	rot = 0;
-      } else if(rot)
+      } else if(!rot)
 	falcON_Warning("rotangle =%g but no rotaxis given\n",
 		       getrparam("rotangle"));
       if(rot) {
@@ -161,9 +160,12 @@ namespace {
       if(shot.N_bodies()) {
 	shot.apply_sort(SortFunc,Copy,zm);
 	if(hasvalue("time")) shot.set_time(getdparam("time"));
-	if(rot)
+	if(rot) {
+	  fieldset VecCopy = Copy & fieldset::vectors;
+	  VecCopy &= shot.all_data();
 	  LoopAllBodies(&shot,B)
 	    rotate(VecCopy,B,RotMat);
+	}
 	if(!Out) Out.open(getparam("out"));
 	shot.write_nemo(Out,Copy);
       }
