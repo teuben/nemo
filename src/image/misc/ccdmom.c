@@ -12,6 +12,7 @@
  * ??   16-sep-11   ???  added clip= and  rngmsk= ???   code lost ???
  *      19-jul-12   0.7  allow peak (mom=3) to find 2nd peak
  *      27-nov-12   1.0  add oper=  to insert an operator (ie. out = in <oper> out )
+ *       8-dec-12   1.1  allow mom=-3 for differentials (axis=3 only for now) in 2..Nz()
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -33,7 +34,7 @@ string defv[] = {
 	"cumulative=f\n Cumulative axis (only valid for mom=0)",
 	"oper=\n        Operator on output (enforces keep=t)",
 	"peak=1\n       Find N-th peak in case of peak finding (mom=3)",
-	"VERSION=1.0\n  27-nov-2012 PJT",
+	"VERSION=1.1\n  8-dec-2012 PJT",
 	NULL,
 };
 
@@ -69,7 +70,7 @@ void nemo_main()
 
     instr = stropen(getparam("in"), "r");
     mom = getiparam("mom");
-    if (mom < -2 || mom > 3)  error("Illegal value mom=%d",mom);
+    if (mom < -3 || mom > 3)  error("Illegal value mom=%d",mom);
     axis = getiparam("axis");
     if (axis < 0 || axis > 3) error("Illegal value axis=%d",axis);
 
@@ -260,6 +261,12 @@ void nemo_main()
 		  apeak = k;
 		  peakvalue = CubeValue(iptr,i,j,k);
 		}
+		if (mom==-3) {
+		  if (k==0)
+		    CubeValue(iptr1,i,j,k) = 0;
+		  else
+		    CubeValue(iptr1,i,j,k) = CubeValue(iptr,i,j,k) - CubeValue(iptr,i,j,k-1);
+		}
     	    }
 	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
 	      newvalue = 0.0;
@@ -300,8 +307,9 @@ void nemo_main()
 		}
 	      }
 	    }
-            for (k=0; k<nz1; k++)
-	      CubeValue(iptr1,i,j,k) = newvalue;
+	    if (mom>-3)
+	      for (k=0; k<nz1; k++)
+		CubeValue(iptr1,i,j,k) = newvalue;
     	}
 
         /* TODO: */
