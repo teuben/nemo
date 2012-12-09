@@ -22,6 +22,7 @@
  *      24-apr-08  2.1  psf (phase structure function)
  *       7-may-10  2.2  grow
  *      14-may-11  2.3  different options for bootstrap method
+ *       9-dec-12  3.0  xrange= now allows separate sections   a:b,c:d,....
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -66,7 +67,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=2.3c\n     30-dec-2011 PJT",
+    "VERSION=3.0\n      9-dec-2012 PJT",
     NULL
 };
 
@@ -91,11 +92,20 @@ typedef struct column {
     int colnr;      /* column number this data came from */ /* not used */
 } a_column;
 
+#define MAXR 16
+
+typedef struct range {
+  int nr;
+  real *rmin;
+  real *rmax;
+} a_range;
+
 int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr;
 real dypow;
 a_column            xcol[MAXCOL],   ycol[MAXCOL], dycol,  bcol;
+a_range    xrange;
 
-real xrange[MAXCOL*2];      /* ??? */
+/* real xrange[MAXCOL*2];      /* ??? */
 
 string method;              /* fit method (line, poly, ....) */
 stream instr, outstr;       /* input / output file */
@@ -142,6 +152,8 @@ extern double  xrandom(double a, double b);
 extern real gammq(real a, real x);    /* from nr */
 
 
+void setrange(a_range *r, string rexp);
+int  inrange(a_range *r, real rval);
 
 
 my_proc3 my_nllsqfit;    /* set via numrec= to be the Gipsy or NumRec routine */
@@ -488,11 +500,9 @@ setparams()
     dypow *= -2.0;
 
     if (hasvalue("xrange"))
-        setrange(xrange,getparam("xrange"));
-    else {
-        xrange[0] = -HUGE;
-        xrange[1] = HUGE;
-    } 
+      setrange(&xrange,getparam("xrange"));
+    else
+      xrange.nr = 0;
 
     if (hasvalue("tol")) tol = getdparam("tol");
     if (hasvalue("lab")) lab = getdparam("lab");
@@ -530,21 +540,46 @@ setparams()
     init_xrandom(getparam("seed"));
 }
 
-setrange(real *rval, string rexp)
-{
-    char *cptr;
+/*
+ * parse    some kind of range=min1:max1,min2:max2,....
+ */
 
-    cptr = strchr(rexp, ':');
+void setrange(a_range *r, string rexp)
+{
+  char *cptr;
+  string *bs;
+  int i,nr;
+
+  bs = burststring(rexp,", ");
+  nr = xstrlen(bs, sizeof(string)) - 1;
+  printf("nr=%d\n",nr);
+  r->rmin = (real *) allocate(nr*sizeof(real));
+  r->rmax = (real *) allocate(nr*sizeof(real));
+  r->nr = nr;
+
+  for (i=0; i<nr; i++) {
+    printf("bs=%s\n",bs[i]);
+    cptr = strchr(bs[i], ':');
     if (cptr) {
-        rval[0] = natof(rexp);
-        rval[1] = natof(cptr+1);
-    } else {
-        rval[0] = 0.0;
-        rval[1] = natof(rexp);
-    	warning("Range taken from 0 - %g",rval[1]);
-    }
+      r->rmin[i] = natof(rexp);
+      r->rmax[i] = natof(cptr+1);
+      dprintf(1,"xrange(%d)= %g %g\n",i+1,r->rmin[i],r->rmax[i]);
+    } else 
+      error("xrange needs a comma separates series of xmin:xmax");
+  }
+  freestrings(bs);
 }
 
+
+int inrange(a_range *r, real rval)
+{
+  int i,  nr = r->nr;
+  if (nr==0) return 1;
+  for (i=0; i<nr; i++) {
+    if (r->rmin[i] <= rval && rval <= r->rmax[i]) return 1;
+  }
+  return 0;
+}
 
 
 real data_rms(int n, real *d, real *dy, int m)
@@ -617,7 +652,7 @@ read_data()
 
     if (nxcol == 1 && nycol == 1) {
         for(i=0, j=0; i<npt; i++) {
-          if(xrange[0] <= xcol[0].dat[i] && xcol[0].dat[i] <= xrange[1]) {    /* sub-select on X */
+	  if(inrange(&xrange,xcol[0].dat[i])) {      /* sub-select on X */
               xcol[0].dat[j] = xcol[0].dat[i];
               ycol[0].dat[j] = ycol[0].dat[i];
               if (dycolnr>0) dycol.dat[j] = dycol.dat[i];
