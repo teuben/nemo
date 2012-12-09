@@ -152,7 +152,7 @@ extern double  xrandom(double a, double b);
 extern real gammq(real a, real x);    /* from nr */
 
 
-void setrange(a_range *r, string rexp);
+int setrange(a_range *r, string rexp);
 int  inrange(a_range *r, real rval);
 
 
@@ -544,7 +544,7 @@ setparams()
  * parse    some kind of range=min1:max1,min2:max2,....
  */
 
-void setrange(a_range *r, string rexp)
+int setrange(a_range *r, string rexp)
 {
   char *cptr;
   string *bs;
@@ -552,22 +552,23 @@ void setrange(a_range *r, string rexp)
 
   bs = burststring(rexp,", ");
   nr = xstrlen(bs, sizeof(string)) - 1;
-  printf("nr=%d\n",nr);
+  r->nr = nr;
+  if (nr==0) return 0;
   r->rmin = (real *) allocate(nr*sizeof(real));
   r->rmax = (real *) allocate(nr*sizeof(real));
-  r->nr = nr;
 
   for (i=0; i<nr; i++) {
     printf("bs=%s\n",bs[i]);
     cptr = strchr(bs[i], ':');
     if (cptr) {
-      r->rmin[i] = natof(rexp);
+      r->rmin[i] = natof(bs[i]);
       r->rmax[i] = natof(cptr+1);
       dprintf(1,"xrange(%d)= %g %g\n",i+1,r->rmin[i],r->rmax[i]);
     } else 
       error("xrange needs a comma separates series of xmin:xmax");
   }
   freestrings(bs);
+  return nr;
 }
 
 
@@ -576,8 +577,10 @@ int inrange(a_range *r, real rval)
   int i,  nr = r->nr;
   if (nr==0) return 1;
   for (i=0; i<nr; i++) {
+    dprintf(0,"%g <? %g <? %g\n",r->rmin[i],rval,r->rmax[i]);
     if (r->rmin[i] <= rval && rval <= r->rmax[i]) return 1;
   }
+  dprintf(0,"%g not in range\n",rval);
   return 0;
 }
 
