@@ -166,7 +166,6 @@ endif
 
 meta_cc			:= $(SRC)meta.cc $(meta_h)
 exception_cc		:= $(SRC)exception.cc $(exception_h)
-sse_cc			:= $(SRC)sse.cc $(sse_h)
 io_cc			:= $(SRC)io.cc $(io_h)
 radix_cc		:= $(SRC)radix.cc $(radix_h)
 numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
@@ -189,8 +188,6 @@ endif
 # ---------------
 
 $(LIB)exception.o:	$(exception_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ)
-$(LIB)sse.o:		$(sse_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 $(LIB)io.o:		$(io_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
@@ -216,7 +213,7 @@ $(LIB)voronoi.o:	$(voronoi_cc) $(LIBT) $(makefiles)
 $(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ)
 
-WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
+WDutilsS_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)WDMath.o $(LIB)random.o \
 			$(LIB)octtree.o $(LIB)neighbour.o $(LIB)radix.o \
 			$(LIB)voronoi.o
@@ -225,7 +222,7 @@ WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o
 
 else
 
-WDutilsS_objs	:=	$(LIB)exception.o $(LIB)sse.o $(LIB)io.o $(LIB)meta.o \
+WDutilsS_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
 			$(LIB)numerics.o $(LIB)WDMath.o $(LIB)random.o \
 			$(LIB)radix.o
 
@@ -281,62 +278,62 @@ library		:	$(libraryOMP) $(libraryMPI)
 
 ifdef WDutilsDevel
 
-#test/TestTree$(EXT)	:	test/TestTree.cc $(octtree_h) $(numerics_h) \
-#				$(WDMath_h) $(neighbour_h) $(Pi_h) $(io_h) \
-#				$(heap_h) $(timer_h)
-#				$(MAKE_EXE)
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
 				$(MAKE_EXE)
+TESTSUITE		+=	test/TestGeometry$(EXT)
+
 test/TestPeriodic$(EXT)	:	test/TestPeriodic.cc $(periodic_h)
 				$(MAKE_EXE)
+TESTSUITE		+=	test/TestPeriodic$(EXT)
+
+test/MakeVoronoi$(EXT)	:	test/MakeVoronoi.cc $(voronoi_h)
+				$(MAKE_EXE)
+TESTSUITE		+=	test/MakeVoronoi$(EXT)
+
 test/TestVoronoi$(EXT)	:	test/TestVoronoi.cc $(voronoi_h)
 				$(MAKE_EXE)
-test/SetVoronoi$(EXT)	:	test/SetVoronoi.cc $(voronoi_h)
-				$(MAKE_EXE)
+TESTSUITE		+=	test/TestVoronoi$(EXT)
+
 test/TestRadix$(EXT)	:	test/TestRadix.cc $(radix_h) $(random_h)
 				$(MAKE_EXE)
+TESTSUITE		+=	test/TestRadix$(EXT)
+
 test/TestMatrix$(EXT)	:	test/TestMatrix.cc $(matr33_h)
 				$(MAKE_EXE)
+TESTSUITE		+=	test/TestMatrix$(EXT)
+
 test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) $(WDMath_h)
 				$(MAKE_EXE)
+TESTSUITE		+=	test/TestOMP$(EXT)
+
 test/TestOTree$(EXT)	:	test/TestOTree.cc $(octtree_h) $(numerics_h) \
 				$(Pi_h) $(io_h) $(timer_h)
 				$(MAKE_EXE) -DTestOTree
+TESTSUITE		+=	test/TestOTree$(EXT)
 
 test/TestITree$(EXT)	:	test/TestOTree.cc $(octtree_h) $(numerics_h) \
 				$(Pi_h) $(io_h) $(timer_h)
 				$(MAKE_EXE) -DTestITree
+TESTSUITE		+=	test/TestITree$(EXT)
 
 test/TestNbour$(EXT)	:	test/TestOTree.cc $(neighbour_h) $(numerics_h) \
 				$(Pi_h) $(io_h) $(timer_h)
 				$(MAKE_EXE) -DTestNbour
-
-omp_tests		:=	test/TestOTree$(EXT) \
-				test/TestITree$(EXT) \
-				test/TestNbour$(EXT) \
-				test/TestGeometry$(EXT) \
-				test/TestPeriodic$(EXT) \
-				test/TestVoronoi$(EXT) \
-				test/SetVoronoi$(EXT) \
-				test/TestRadix$(EXT) \
-				test/TestMatrix$(EXT) \
-				test/TestOMP$(EXT)
+TESTSUITE		+=	test/TestNbour$(EXT)
 
 ifdef WDutilsMPI
 
 test/TestDomainMPI$(EXT).o:	test/TestDomainMPI.cc $(domain_h) $(Pi_h)
 				$(MAKE_OBJ_MPI)
+
 test/TestDomainMPI$(EXT):	test/TestDomainMPI$(EXT).o $(libraryMPI)
 				$(MAKE_EXE_MPI)
-
-testsuite		:	library $(omp_tests) \
-				test/TestDomainMPI$(EXT)
-
-else
-
-testsuite		:	library $(omp_tests)
+TESTSUITE		+=	test/TestDomainMPI$(EXT)
 
 endif
+
+testsuite		:	library $(TESTSUITE)
+
 endif
 # ---------------------
 # doxygen documentation

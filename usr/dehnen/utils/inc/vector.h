@@ -521,9 +521,9 @@ namespace WDutils {
     /// apply unary function element wise: ret[i] = f(vec[i])
     template<typename UnaryFunction>
     auto applied(UnaryFunction f) const
-      -> vector<N,decltype(f(T{}))>
+      -> vector<N,decltype(f(this->first()))>
     {
-      typedef decltype(f(T{})) Y;
+      typedef decltype(f(this->first())) Y;
       vector<N,Y> r;
       unroll::binary(r.a, a, [f] (Y&y, T x) { y=f(x); } );
       return r;
@@ -538,9 +538,9 @@ namespace WDutils {
     /// connect with another vector element wise: ret[i] = f(vec[i], other[i])
     template<typename BinaryFunction>
     auto applied_binary(vector const&other, BinaryFunction f) const
-      -> vector<N,decltype(f(T{},T{}))>
+      -> vector<N,decltype(f(this->first(),this->first()))>
     {
-      typedef decltype(f(T{},T{})) Y;
+      typedef decltype(f(this->first(),this->first())) Y;
       vector<N,Y> r;
       unroll::tertiary(r.a, a, other.a, [f] (Y&y, T x, T z) { y=f(x,z); } );
       return r;
@@ -652,8 +652,7 @@ namespace WDutils {
   /// vector distance = sqrt( norm(vector difference) )
   /// \relates WDutils::vector
   template<int N, typename T>
-  inline auto distance(vector<N,T> const&x, vector<N,T> const&y)
-    -> decltype(std::sqrt(dist_sq(x,y)))
+  inline T distance(vector<N,T> const&x, vector<N,T> const&y)
   { return std::sqrt(dist_sq(x,y)); }
   /// vector cross product for N=2: returns x[0]*y[1]- x[1]*y[0]
   /// \relates WDutils::vector

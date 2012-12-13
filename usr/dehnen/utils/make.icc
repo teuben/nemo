@@ -14,13 +14,13 @@ CC		:= icc
 FC		:= ifc
 
 # general optimisation and warning flags
-WARNFLAGS	:= -Wall -early-template-check
+WARNFLAGS	:= -Wall
 # note -fast or -ipo gave wrong results with TestTree
 OPTFLAGS	:= -O2 -ip -xHost -fpic -falign-functions -openmp -g
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
-CXXFLAGS	:= $(OPTFLAGS) $(WARNFLAGS)
+CXXFLAGS	:= -std=c++0x $(OPTFLAGS) $(WARNFLAGS)
 LDFLAGS		:= -shared -openmp
 MATHLIB		:= -limf -lm
 # xiar is needed if using ipo

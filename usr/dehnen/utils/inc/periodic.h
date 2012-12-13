@@ -48,16 +48,16 @@ namespace WDutils {
   ///
   /// trivial parts of PeriodicBox
   ///
-  template<int __D, typename __X> class PeriodicBoxBase
+  template<int _tD, typename _tX> class PeriodicBoxBase
   {
   public:
-    typedef __X real;
+    typedef _tX real;
 #if __cplusplus < 201103L
-    typedef tupel<__D,bool> bvec;
-    typedef tupel<__D,real> xvec;
+    typedef tupel<_tD,bool> bvec;
+    typedef tupel<_tD,real> xvec;
 #else
-    typedef vector<__D,bool> bvec;
-    typedef vector<__D,real> xvec;
+    typedef vector<_tD,bool> bvec;
+    typedef vector<_tD,real> xvec;
 #endif
   protected:
     /// is x within the periodic range?
@@ -83,6 +83,7 @@ namespace WDutils {
     real MinHP;                 ///< minimum non-zero HalfP
     bvec PiDim;                 ///< HalfP[d]>0?
     bool PiAny;                 ///< periodic in any d?
+    bool PiAll;                 ///< periodic in all d?
     //@}
     //  deprecated
     typedef positional_offset_bits offsetbits;
@@ -95,7 +96,8 @@ namespace WDutils {
       , InvFP(real(0))
       , MinHP(0)
       , PiDim(false)
-      , PiAny(false) {}
+      , PiAny(false)
+      , PiAll(false) {}
     ///
     /// ctor from given half range
     /// \param[in]  hp   half the period in each dimension
@@ -114,7 +116,8 @@ namespace WDutils {
       MinHP = 0;
       PiDim = 0;
       PiAny = 0;      
-      for(int d=0; d!=__D; ++d) {
+      PiAll = 1;      
+      for(int d=0; d!=_tD; ++d) {
 	HalfP[d] = abs(hp[d]);
 	FullP[d] = HalfP[d]+HalfP[d];
 	InvFP[d] = FullP[d]>0? real(1)/FullP[d] : real(0);
@@ -122,7 +125,8 @@ namespace WDutils {
 	  PiDim[d] = true;
 	  PiAny    = true;
 	  if(MinHP<=0 || HalfP[d]<MinHP) MinHP=HalfP[d];
-	}
+	} else
+	  PiAll    = false;
       }
     }
     ///
@@ -150,6 +154,11 @@ namespace WDutils {
     ///
     bool is_periodic() const
     { return PiAny; }
+    ///
+    /// is there periodicity in all dimensions?
+    ///
+    bool is_fully_periodic() const
+    { return PiAll; }
     ///
     /// is there periodicity in given dimension?
     ///
@@ -190,15 +199,15 @@ namespace WDutils {
   /// In each spatial dimension d, the periodic box extends from -HalfP[d] to
   /// +HalfP[d] unless HalfP[d]=0, in which case we assume an open boundary.
   ///
-  template<int __D, typename __X> class PeriodicBox;
+  template<int _tD, typename _tX> class PeriodicBox;
 
   ///
   /// specialisation for 2D
   ///
-  template<typename __X> class PeriodicBox<2,__X>
-  : public PeriodicBoxBase<2,__X> 
+  template<typename _tX> class PeriodicBox<2,_tX>
+  : public PeriodicBoxBase<2,_tX> 
   {
-    typedef PeriodicBoxBase<2,__X> base;
+    typedef PeriodicBoxBase<2,_tX> base;
     using base::HalfP;
     using base::FullP;
     using base::InvFP;
@@ -212,7 +221,7 @@ namespace WDutils {
     typedef typename base::real real;
     typedef typename base::bvec bvec;
     typedef typename base::xvec xvec;
-    typedef typename base::offsetbits offsetbits;
+    typedef positional_offset_bits offsetbits;
     ///
     /// default ctor: open boundary in all dimensions
     ///
@@ -384,10 +393,10 @@ namespace WDutils {
   ///
   /// specialisation for 2D
   ///
-  template<typename __X> class PeriodicBox<3,__X>
-  : public PeriodicBoxBase<3,__X> 
+  template<typename _tX> class PeriodicBox<3,_tX>
+  : public PeriodicBoxBase<3,_tX> 
   {
-    typedef PeriodicBoxBase<3,__X> base;
+    typedef PeriodicBoxBase<3,_tX> base;
     using base::HalfP;
     using base::FullP;
     using base::InvFP;

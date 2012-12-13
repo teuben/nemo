@@ -140,6 +140,18 @@ namespace WDutils {
     static const char*fmt  () { return "%p"; }
   };
   //
+  template<int K, typename T> struct traits<T[K]> {
+    static const char*name ()
+    { return message("%s[%d]",traits<T>::name(),K); }
+    static const char*fmt  () { return "%p"; }
+  };
+  //
+  template<int K, typename T> struct traits<const T[K]> {
+    static const char*name ()
+    { return message("const %s[%d]",traits<T>::name(),K); }
+    static const char*fmt  () { return "%p"; }
+  };
+  //
   template<> struct traits<char*> {
     static const char*name () { return "char*"; }
     static const char*fmt  () { return "%s"; }

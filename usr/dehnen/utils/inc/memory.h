@@ -229,33 +229,27 @@ namespace WDutils {
   //////////////////////////////////////////////////////////////////////////////
   /// \defgroup  MemAligned  memory alignment to K bytes
 
-  /// Macro enforcing memory alignment to 16 bytes
+  /// Macro enforcing memory alignment to K bytes
   /// \ingroup MemAligned
   ///
-  /// Forces the corresponding variable/type to be 16-byte aligned; Works with
-  /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
-  ///    struct WDutils__align16 name { ... };              \endcode
+  /// Forces the corresponding variable/type to be aligned to K bytes; Works
+  /// with icc (icpc) and gcc (g++) [versions > 3]; Use it like \code
+  ///    struct WDutils__align_to(K) name { ... };              \endcode
 #if defined (__INTEL_COMPILER)
-#  define WDutils__align16 __declspec(align(16))
+#  define WDutilsAlignTo(K) __declspec(align(K))
 #elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
-#  define WDutils__align16 __attribute__ ((aligned(16)))
+#  define WDutilsAlignTo(K) __attribute__ ((aligned(K)))
 #else
-#  define WDutils__align16
+#  define WDutilsAlignTo(K)
 #endif
 
+  /// Macro enforcing memory alignment to 16 bytes
+  /// \ingroup MemAligned
+#define WDutils__align16 WDutilsAlignTo(16)
   /// Macro enforcing memory alignment to 32 bytes
   /// \ingroup MemAligned
-  ///
-  /// Forces the corresponding variable/type to be 32-byte aligned; Works with
-  /// icc (icpc) and gcc (g++) [versions > 3]; Use it like \code 
-  ///    struct WDutils__align32 name { ... };              \endcode
-#if defined (__INTEL_COMPILER)
-#  define WDutils__align32 __declspec(align(32))
-#elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
-#  define WDutils__align32 __attribute__ ((aligned(32)))
-#else
-#  define WDutils__align32
-#endif
+#define WDutils__align32 WDutilsAlignTo(32)
+
   ///
   /// is a given memory address aligned to K bytes?
   /// \ingroup MemAligned
@@ -544,9 +538,10 @@ namespace WDutils {
   ///          constructor to have been called.
   ///
   // ///////////////////////////////////////////////////////////////////////////
-  template<typename T>
+  template<typename T, int Align=16>
   class block_alloc {
   public:
+    WDutilsStaticAssert(0== (Align & (Align-1)));
     /// \name some public typedefs
     //@{
     typedef T         value_type;                ///< type of elements          
@@ -578,12 +573,12 @@ namespace WDutils {
       explicit
       block(size_type const&n) :
 	NEXT    ( 0 ),
-	FIRST   ( WDutils_NEW16(value_type,n) ),
+	FIRST   ( WDutils_NEW_aligned(Align,value_type,n) ),
 	END     ( FIRST ),
 	ENDTOT  ( FIRST + n ) {}
       /// destructor: de-allocate
       ~block()
-      { WDutils_DEL16(FIRST); }
+      { WDutils_DEL_aligned(Align,FIRST); }
       /// link block to next block
       void link(block*__n)
       { NEXT = __n; }
@@ -847,14 +842,14 @@ namespace WDutils {
     { return NBLCK; }
   };// class WDutils::block_alloc
   //
-  template<typename T> struct traits< block_alloc<T> > {
+  template<typename T, int K> struct traits< block_alloc<T,K> > {
     static const char  *name () {
-      return message("block_alloc<%s>",traits<T>::name());
+      return message("block_alloc<%s,%d>",traits<T>::name(),K);
     }
   };
   // ///////////////////////////////////////////////////////////////////////////
-  template<typename T> inline
-  block_alloc<T>::~block_alloc() WDutils_THROWING {
+  template<typename T, int K> inline
+  block_alloc<T,K>::~block_alloc() WDutils_THROWING {
     block *A=FIRST, *N;
     while(A) {
       N = A->next();

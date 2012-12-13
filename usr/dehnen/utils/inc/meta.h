@@ -58,12 +58,17 @@ namespace WDutils {
 
 #if __cplusplus >= 201103L
   using std::enable_if;
+  using std::is_same;
 #else
   template<bool B, class T = void>
   struct enable_if {};
-
   template<class T>
   struct enable_if<true, T> { typedef T type; };
+
+  template<class A, class B = void>
+  struct is_same { static const bool value = false; };
+  template<class A>
+  struct is_same<A,A> { static const bool value = true; };
 #endif
 
   ///
@@ -703,6 +708,8 @@ namespace WDutils {
   /// dependent boolean type
   template <bool B, typename...>
   struct dependent_bool_type : std::integral_constant<bool, B> {};
+#ifndef __INTEL_COMPILER
+  //  icpc 13 doesn't have variadic templates
   /// and an alias
   template <bool B, typename... T>
   using Bool = typename dependent_bool_type<B, T...>::type;
@@ -719,6 +726,7 @@ namespace WDutils {
   struct All : Bool<true> {};
   template <typename Head, typename... Tail>
   struct All<Head, Tail...> : Conditional<Head, All<Tail...>, Bool<false>> {};
+#endif
   ///
   template <bool If, typename Then, typename Else>
   using Condition = typename std::conditional<If,Then,Else>::type;

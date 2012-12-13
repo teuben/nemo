@@ -28,6 +28,10 @@ ifeq ($(USER),walter)
 WDutilsDevel	:= -DWDutilsDevel
 endif
 
+ifeq ($(USER),dc-dehn1)
+WDutilsDevel	:= -DWDutilsDevel
+endif
+
 endif
 
 # ---------

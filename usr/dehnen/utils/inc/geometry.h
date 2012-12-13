@@ -15,6 +15,7 @@
 /// \version 11-06-2010 WD  cuboid<> supported in Algorithms<>, SearchSphere<>
 /// \version 11-01-2012 WD  contains(cuboid,cuboid)
 /// \version 18-06-2012 WD  adapted for tupel.h -> vector.h (using C++11)
+/// \version 06-11-2012 WD  adapted for AVX usage, using noexcept decls
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -41,14 +42,15 @@
 #ifndef WDutils_included_sse_h
 #  include <sse.h>
 #endif
-#if __cplusplus < 201103L
-# ifndef WDutils_included_tupel_h
-#  include <tupel.h>
-# endif
-#else
+#if __cplusplus >= 201103L
 # ifndef WDutils_included_vector_h
 #  include <vector.h>
 # endif
+#else
+# ifndef WDutils_included_tupel_h
+#  include <tupel.h>
+# endif
+# define noexcept
 #endif
 
 namespace WDutils {
@@ -128,16 +130,34 @@ namespace WDutils {
       point      &size  ()       { return Y; }
     };
     ///
+    /// alignment<Dim,type>::value gives the alignment appropriate for usage in
+    /// @c Algorithms<true,true>
+    ///
+    template<int Dim, typename floating>
+    struct alignment
+    {
+      WDutilsStaticAssert(Dim==2 || Dim==3);
+#if __cplusplus >= 201103L
+      static_assert(std::is_floating_point<floating>::value,
+		    "not a floating point type");
+#endif
+#ifdef __AVX__
+      static const int value = Dim==2? 16 : 4*sizeof(floating);
+#else
+      static const int value = 16;
+#endif
+    };
+    ///
     /// simple geometry algorithms implemented using explicit SSE
     ///
-    /// \note If template parameter @a aligned_to_16_bytes is true, we assume
-    ///       that all data are 16-byte aligned, which often results in
-    ///       considerable speed-up (up to factor 3 when @a use_sse is true). If
-    ///       data are unaligned but both @a aligned_to_16_bytes and @a use_sse
-    ///       are true, a run-time error will result.
+    /// \note If template parameter @a aligned is true, we assume that all
+    ///       data are aligned to alignment<dim,type>::value bytes, which
+    ///       often results in considerable speed-up. If data are unaligned
+    ///       but both @a aligned and @a use_sse are true, a run-time error
+    ///       will result.
     ///
     /// \note The SSE algorithms are at least as fast as the non-SSE ones, and
-    ///       usually faster in particular if data are 16-byte aligned. It is
+    ///       usually faster in particular if data are aligned. It is
     ///       recommended to use the default setting for @a use_sse (if @a
     ///       use_sse is set, but SSE is unavailable, the non-SSE instructions
     ///       are used automatically). The explicit non-SSE versions are used
@@ -147,23 +167,57 @@ namespace WDutils {
     ///       implemented only for 2D and 3D and for single (float) and double
     ///       precision. Using other parameters causes a compile-time error.
     ///
-    template<bool aligned_to_16_bytes, bool use_sse = true>
+    template<bool aligned, bool use_sse = true>
     struct Algorithms
     {
+      ///
+      /// is a certain datum appropriately aligned for usage?
+      ///
+      template<int Dim, typename real> static inline
+      bool is_aligned(cube<Dim,real> const&c)
+      {
+	return aligned
+	  && WDutils::is_aligned<alignment<Dim,real>::value>
+	  (static_cast<const real*>(c.X));
+      }
+      //
+      template<int Dim, typename real> static inline
+      bool is_aligned(cuboid<Dim,real> const&c)
+      {
+	return aligned
+	  && WDutils::is_aligned<alignment<Dim,real>::value>
+	  (static_cast<const real*>(c.X));
+      }
+      //
+      template<int Dim, typename real> static inline
+      bool is_aligned(sphere<Dim,real> const&s)
+      {
+	return aligned
+	  && WDutils::is_aligned<alignment<Dim,real>::value>
+	  (static_cast<const real*>(s.X));
+      }
+      //
+      template<int Dim, typename real> static inline
+      bool is_aligned(GeoVec<Dim,real> const&x)
+      {
+	return aligned
+	  && WDutils::is_aligned<alignment<Dim,real>::value>
+	  (static_cast<const real*>(x));
+      }
       ///
       /// copy a cube
       ///
       /// \param[in]  in  cube to copy
       /// \param[out] out cube copied
       template<int Dim, typename real> static inline
-      void copy(cube<Dim,real> const&in, cube<Dim,real> &out);
+      void copy(cube<Dim,real> const&in, cube<Dim,real> &out) noexcept;
       ///
       /// copy a sphere
       ///
       /// \param[in]  in  sphere to copy
       /// \param[out] out sphere copied
       template<int Dim, typename real> static inline
-      void copy(sphere<Dim,real> const&in, sphere<Dim,real> &out);
+      void copy(sphere<Dim,real> const&in, sphere<Dim,real> &out) noexcept;
       ///
       /// move centre position to octant
       ///
@@ -171,14 +225,14 @@ namespace WDutils {
       /// \param[in]     i octant
       /// \param[in]     r amount to move by (= radius of shrunk cube)
       template<int Dim, typename real> static inline
-      void move_to_octant(GeoVec<Dim,real>&c, int i, real r);
+      void move_to_octant(GeoVec<Dim,real>&c, int i, real r) noexcept;
       ///
       /// shrink cube to its octant
       ///
       /// \param[in,out] c cube
       /// \param[in]     i octant
       template<int Dim, typename real> static inline
-      void shrink(cube<Dim,real>&c, int i)
+      void shrink(cube<Dim,real>&c, int i) noexcept
       { c.H *= real(0.5); move_to_octant(c.X,i,c.H); }
       ///
       /// octant of a point w.r.t. a centre.
@@ -187,7 +241,7 @@ namespace WDutils {
       /// \param[in] x  point
       /// \return integer: ith bit equals x[i]>c[i]; bits @a D and beyond are 0.
       template<int Dim, typename real> static inline
-      int octant(GeoVec<Dim,real> const&c, GeoVec<Dim,real> const&x);
+      int octant(GeoVec<Dim,real> const&c, GeoVec<Dim,real> const&x) noexcept;
       ///
       /// octant of a point w.r.t. a cube's centre
       ///
@@ -195,7 +249,7 @@ namespace WDutils {
       /// \param[in] x  point
       /// \return integer: ith bit equals x[i]>c[i]; bits @a D and beyond are 0.
       template<int Dim, typename real> static inline
-      int octant(cube<Dim,real> const&c, GeoVec<Dim,real> const&x)
+      int octant(cube<Dim,real> const&c, GeoVec<Dim,real> const&x) noexcept
       { return octant(c.X,x); }
       ///
       /// distance^2 between two points
@@ -204,13 +258,13 @@ namespace WDutils {
       /// \param[in] y    point
       /// \return |x-y|^2
       template<int Dim, typename real> static inline
-      real dist_sq(GeoVec<Dim,real> const&x, GeoVec<Dim,real> const&y);
+      real dist_sq(GeoVec<Dim,real> const&x, GeoVec<Dim,real> const&y) noexcept;
       /// does a cubic box contain a given position
       /// \param[in] c    cube
       /// \param[in] x    position
       /// \return is @a x[i] in [c.X[i]-c.R[i], c.X[i]+c.R[i]) for i=0..D-1?
       template<int Dim, typename real> static inline
-      bool contains(cube<Dim,real> const&c, GeoVec<Dim,real> const&x);
+      bool contains(cube<Dim,real> const&c, GeoVec<Dim,real> const&x) noexcept;
       ///
       /// distance^2 from given point to the nearest point on a cube
       ///
@@ -218,7 +272,7 @@ namespace WDutils {
       /// \param[in] x    point
       /// \return squared distance of @a x to @a c; zero if @a x is inside @a c.
       template<int Dim, typename real> static inline
-      real dist_sq(cube<Dim,real> const&c, GeoVec<Dim,real> const&x);
+      real dist_sq(cube<Dim,real> const&c, GeoVec<Dim,real> const&x) noexcept;
       ///
       /// is a sphere completely outside of a cube?
       ///
@@ -226,9 +280,9 @@ namespace WDutils {
       /// \param[in] s    sphere
       /// \return is sphere outside cube?
       /// \note Equivalent to, but on average faster than, 
-      ///       \code s.Q < outside_dist_sq(c,s.X) \endcode
+      ///       \code s.Q < dist_sq(c,s.X) \endcode
       template<int Dim, typename real> static inline
-      bool outside(cube<Dim,real> const&c, sphere<Dim,real> const&s);
+      bool outside(cube<Dim,real> const&c, sphere<Dim,real> const&s) noexcept;
       ///
       /// is a sphere completely inside of a cube?
       ///
@@ -236,7 +290,7 @@ namespace WDutils {
       /// \param[in] s    sphere
       /// \return is sphere completely inside cube?
       template<int Dim, typename real> static inline
-      bool inside(cube<Dim,real> const&c, sphere<Dim,real> const&s);
+      bool inside(cube<Dim,real> const&c, sphere<Dim,real> const&s) noexcept;
       ///
       /// does a cuboid contain a given position
       ///
@@ -244,7 +298,8 @@ namespace WDutils {
       /// \param[in] x    position
       /// \return is @a x[i] in [c.X[i]-c.R[i], c.X[i]+c.R[i]) for i=0..D-1?
       template<int Dim, typename real> static inline
-      bool contains(cuboid<Dim,real> const&c, GeoVec<Dim,real> const&x);
+      bool contains(cuboid<Dim,real> const&c,
+		    GeoVec<Dim,real> const&x) noexcept;
       ///
       /// does a cuboid contain another cuboid
       ///
@@ -253,7 +308,7 @@ namespace WDutils {
       /// \return is @a b inside @a c (common boundary accepted)?
       template<int Dim, typename real> static inline
       bool contains(cuboid<Dim,real> const&c,
-		    cuboid<Dim,real> const&b);
+		    cuboid<Dim,real> const&b) noexcept;
       ///
       /// distance^2 from given point to the nearest point on a cuboid
       ///
@@ -261,7 +316,8 @@ namespace WDutils {
       /// \param[in] x    point
       /// \return squared distance of @a x to @a c; zero if @a x is inside @a c.
       template<int Dim, typename real> static inline
-      real dist_sq(cuboid<Dim,real>  const&c, GeoVec<Dim,real> const&x);
+      real dist_sq(cuboid<Dim,real>  const&c,
+		   GeoVec<Dim,real> const&x) noexcept;
       ///
       /// is a sphere completely outside of a cuboid?
       ///
@@ -269,10 +325,10 @@ namespace WDutils {
       /// \param[in] s    sphere
       /// \return is sphere outside cube?
       /// \note Equivalent to, but on average faster than, 
-      ///       \code s.Q < outside_dist_sq(c,s.X) \endcode
+      ///       \code s.Q < dist_sq(c,s.X) \endcode
       template<int Dim, typename real> static inline
       bool outside(cuboid<Dim,real> const&c,
-		   sphere<Dim,real> const&s);
+		   sphere<Dim,real> const&s) noexcept;
       ///
       /// is a sphere completely inside of a cuboid?
       ///
@@ -281,14 +337,14 @@ namespace WDutils {
       /// \return is sphere completely inside cube?
       template<int Dim, typename real> static inline
       bool inside(cuboid<Dim,real> const&c,
-		  sphere<Dim,real> const&s);
+		  sphere<Dim,real> const&s) noexcept;
       ///
       /// converting (Xmin,Xmax) to (centre,size)
       ///
       /// \note centre,size = 0.5 (Xmax +/- Xmin)
       /// \param[in,out] p  input: (Xmin,Xmax) output: cuboid=(centre,size)
       template<int Dim, typename real> static inline
-      void convert2cuboid(PointPair<Dim,real> &p);
+      void convert2cuboid(PointPair<Dim,real> &p) noexcept;
     };// struct WDutils::Geometry::Algorithms<aligned,sse>
 
     ///
@@ -331,92 +387,98 @@ namespace WDutils {
       /// ctor from sphere
       ///
       /// \param[in] s  sphere, need not be aligned
-      SearchSphere(sphere<Dim,real> const&s, int)
+      SearchSphere(sphere<Dim,real> const&s, int) noexcept
       { reset(s,0); }
       ///
       /// ctor from sphere, assuming 16-byte alignment
       ///
       /// \param[in] s  sphere, 16-byte aligned
       explicit
-      SearchSphere(sphere<Dim,real> const&s)
+      SearchSphere(sphere<Dim,real> const&s) noexcept
       { reset(s); }
       ///
       /// ctor from centre position and radius^2
       ///
       /// \param[in] x  centre of sphere
       /// \param[in] q  radius^2 of sphere
-      SearchSphere(point const&x, real q, int)
+      SearchSphere(point const&x, real q, int) noexcept
       { reset(x,q,0); }
       ///
       /// ctor from centre position and radius^2, assuming 16-byte alignment
       ///
       /// \param[in] x  centre of sphere, 16-byte aligned
       /// \param[in] q  radius^2 of sphere
-      SearchSphere(point const&x, real q)
+      SearchSphere(point const&x, real q) noexcept
       { reset(x,q); }
       ///
       /// reset centre and radius^2
       ///
       /// \param[in] x  new centre of sphere
       /// \param[in] q  new radius^2 of sphere
-      void reset(point const&x, real q, int)
+      void reset(point const&x, real q, int) noexcept
       { S.X=x; S.Q=q; }
       ///
       /// reset centre and radius^2, assuming 16-byte alignment
       ///
       /// \param[in] x  new centre of sphere, 16-byte aligned
       /// \param[in] q  new radius^2 of sphere
-      void reset(point const&x, real q)
+      void reset(point const&x, real q) noexcept
       { S.X=x; S.Q=q; }
       ///
       /// reset centre and radius^2
       ///
       /// \param[in] s  new sphere
-      void reset(sphere<Dim,real> const&s, int)
+      void reset(sphere<Dim,real> const&s, int) noexcept
       { S.X=s.X; S.Q=s.Q; }
       ///
       /// reset centre and radius^2, assuming 16-byte alignment
       ///
       /// \param[in] s  new sphere, 16-byte aligned
-      void reset(sphere<Dim,real> const&s)
+      void reset(sphere<Dim,real> const&s) noexcept
       { S.X=s.X; S.Q=s.Q; }
       ///
       /// reset just the radius^2
       ///
       /// \param[in] q  new radius^2 of sphere
-      void reset(real q) { S.Q = q; }
+      void reset(real q) noexcept
+      { S.Q = q; }
       ///
       /// reset just the centre
       ///
       /// \param[in] x  new centre of sphere
-      void reset(point const&x, int)
+      void reset(point const&x, int) noexcept
       { S.X=x; }
       ///
       /// reset just the centre, assuming 16-byte alignment
       ///
       /// \param[in] x  new centre of sphere
-      void reset(point const&x)
+      void reset(point const&x) noexcept
       { S.X=x; }
       ///
       /// centre of search sphere
       ///
-      point const&Centre() const { return S.X; }
+      point const&Centre() const noexcept
+      { return S.X; }
       ///
       /// centre of search sphere
       ///
-      point const&centre() const { return S.X; }
+      point const&centre() const noexcept
+      { return S.X; }
       ///
       /// ith co-ordinate of centre of search sphere
       ///
-      real const&Centre(int i) const { return S.X[i]; }
+      real const&Centre(int i) const noexcept
+      { return S.X[i]; }
       ///
       /// radius^2 of search sphere
       ///
-      real const&RadSq() const { return S.Q; }
+      real const&RadSq() const noexcept
+      { return S.Q; }
       ///
       /// radius^2 of search sphere
       ///
-      real const&radius_squared() const { return S.Q; }
+      real const&radius_squared() const noexcept
+      { return S.Q; }
       ///
       /// \name geometric relations with position
       ///
@@ -425,25 +487,25 @@ namespace WDutils {
       /// distance^2 from centre of sphere to some point
       ///
       /// \param[in]  x  position
-      real dist_sq(point const&x, int) const
+      real dist_sq(point const&x, int) const noexcept
       { return Algorithms<0>::dist_sq(S.X,x); }
       ///
       /// distance^2 from centre of sphere to some point
       ///
       /// \param[in]  x  position, 16-byte aligned
-      real dist_sq(point const&x) const
+      real dist_sq(point const&x) const noexcept
       { return Algorithms<1>::dist_sq(S.X,x); }
       ///
       /// is a position contained within the search sphere?
       ///
       /// \param[in]  x  position
-      bool contains(point const&x, int) const
+      bool contains(point const&x, int) const noexcept
       { return dist_sq(x,0) < S.Q; }
       ///
       /// is a position contained within the search sphere?
       ///
       /// \param[in]  x  position, 16-byte aligned
-      bool contains(point const&x) const
+      bool contains(point const&x) const noexcept
       { return dist_sq(x) < S.Q; }
       //@}
       ///
@@ -454,37 +516,37 @@ namespace WDutils {
       /// distance^2 from cube to centre of sphere (zero if inside cube)
       ///
       /// \param[in]  c  cubic box
-      real dist_sq(cube<Dim,real> const&c, int) const
+      real dist_sq(cube<Dim,real> const&c, int) const noexcept
       { return Algorithms<0>::dist_sq(c,S.X); }
       ///
       /// distance^2 from cube to centre of sphere (zero if inside cube)
       ///
       /// \param[in]  c  cubic box, 16-byte aligned
-      real dist_sq(cube<Dim,real> const&c) const
+      real dist_sq(cube<Dim,real> const&c) const noexcept
       { return Algorithms<1>::dist_sq(c,S.X); }
       ///
       /// is search sphere outside of a cubic box?
       ///
       /// \param[in]  c  cubic box
-      bool outside(cube<Dim,real> const&c, int) const
+      bool outside(cube<Dim,real> const&c, int) const noexcept
       { return Algorithms<0>::outside(c,S); }
       ///
       /// is search sphere outside of a cubic box?
       ///
       /// \param[in]  c  cubic box, 16-byte aligned
-      bool outside(cube<Dim,real> const&c) const
+      bool outside(cube<Dim,real> const&c) const noexcept
       { return Algorithms<1>::outside(c,S); }
       ///
       /// is search sphere inside of a cubic box?
       ///
       /// \param[in]  c  cubic box
-      bool inside(cube<Dim,real> const&c, int) const
+      bool inside(cube<Dim,real> const&c, int) const noexcept
       { return Algorithms<0>::inside(c,S); }
       ///
       /// is search sphere inside of a cubic box?
       ///
       /// \param[in]  c  cubic box, 16-byte aligned
-      bool inside(cube<Dim,real> const&c) const
+      bool inside(cube<Dim,real> const&c) const noexcept
       { return Algorithms<1>::inside(c,S); }
       //@}
       ///
@@ -495,37 +557,37 @@ namespace WDutils {
       /// distance^2 from cuboid to centre of sphere (zero if inside cube)
       ///
       /// \param[in]  c  rectangular box
-      real dist_sq(cuboid<Dim,real> const&c, int) const
+      real dist_sq(cuboid<Dim,real> const&c, int) const noexcept
       { return Algorithms<0>::dist_sq(c,S.X); }
       ///
       /// distance^2 from cuboid to centre of sphere (zero if inside cuboid)
       ///
       /// \param[in]  c  rectangular box, 16-byte aligned
-      real dist_sq(cuboid<Dim,real> const&c) const
+      real dist_sq(cuboid<Dim,real> const&c) const noexcept
       { return Algorithms<1>::dist_sq(c,S.X); }
       ///
       /// is search sphere outside of a cubic box?
       ///
       /// \param[in]  c  rectangular box
-      bool outside(cuboid<Dim,real> const&c, int) const
+      bool outside(cuboid<Dim,real> const&c, int) const noexcept
       { return Algorithms<0>::outside(c,S); }
       ///
       /// is search sphere outside of a cubic box?
       ///
       /// \param[in]  c  rectangular box, 16-byte aligned
-      bool outside(cuboid<Dim,real> const&c) const
+      bool outside(cuboid<Dim,real> const&c) const noexcept
       { return Algorithms<1>::outside(c,S); }
       ///
       /// is search sphere inside of a cubic box?
       ///
       /// \param[in]  c  rectangular box
-      bool inside(cuboid<Dim,real> const&c, int) const
+      bool inside(cuboid<Dim,real> const&c, int) const noexcept
       { return Algorithms<0>::inside(c,S); }
       ///
       /// is search sphere inside of a cubic box?
       ///
       /// \param[in]  c  rectangular box, 16-byte aligned
-      bool inside(cuboid<Dim,real> const&c) const
+      bool inside(cuboid<Dim,real> const&c) const noexcept
       { return Algorithms<1>::inside(c,S); }
       //@}
     private:
@@ -551,6 +613,7 @@ namespace WDutils {
   Geometry_TRAITS(Geometry::SearchSphere,"Geometry::SearchSphere")
 #undef Geometry_TRAITS
 } // namespace WDutils
+#undef noexcept
 // inline implementations
 #ifndef WDutils_included_geometry_inl_h
 #  include <geometry_inl.h>

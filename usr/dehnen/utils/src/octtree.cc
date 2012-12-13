@@ -21,15 +21,17 @@
 /// \version 15-apr-2010 WD  tree pruning, OctalTree::build()
 /// \version 22-apr-2010 WD  parameter nmin, changes in tree building
 /// \version 24-apr-2010 WD  changes in tree building code.
-/// \version 09-jun-2010 WD  16-byte alignement, using geometry.h
+/// \version 09-jun-2010 WD  16-byte alignment, using geometry.h
 /// \version 15-jul-2010 WD  maximum tree depth = numeric_limits<real>::digits
 /// \version 02-jul-2012 WD  added periodic boundary condition
 /// \version 10-aug-2012 WD  completely new, OMP parallel in non-public part
 ///                          requires C++11
 /// \version 10-aug-2012 WD  removed OMP stuff to non-public part of library
-/// \version 30-aug-2012 WD  replaced typedef with using
 /// \version 19-sep-2012 WD  alternative memory layout using std::vector
 /// \version 30-oct-2012 WD  memory alignment for AVX
+/// \version 08-nov-2012 WD  data types pointXX, cubeXX, Dot, Box, TopBox
+///                            correctly aligned for Geometry::Algorithms<>
+///                          using SSE::packed<> to implement OctalTree::scc()
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -159,25 +161,26 @@ namespace {
   struct TreeImplementer< OctalTree<_D,_X> >
   {
     //
-    using OTree            = OctalTree<_D,_X>;
-    using Helper           = TreeHelper<_D,_X>;
-    using Dot              = typename OTree::Dot;
-    using Initialiser      = typename OTree::Initialiser;
-    using GeoAlg           = Geometry::Algorithms<1>;
-    using pos_type         = typename OTree::pos_type;
-    using cube             = typename OTree::cube;
-    using cube16           = typename OTree::cube16;
-    using point            = typename Helper::point;
-    using point16          = typename OTree::point16;
-    using PerBoundary      = typename OTree::PerBoundary;
-    using TreeBuilder      = typename OTree::TreeBuilderInterface;
-    using peano_map        = typename Peano<_D>::Map;
-    using peano_dig        = typename Peano<_D>::Digit;
-    using peano_oct        = typename Peano<_D>::Octant;
+    using OTree              = OctalTree<_D,_X>;
+    using Helper             = TreeHelper<_D,_X>;
+    using Dot                = typename OTree::Dot;
+    using Initialiser        = typename OTree::Initialiser;
+    using GeoAlg             = Geometry::Algorithms<1>;
+    using pos_type           = typename OTree::pos_type;
+    using cube               = typename OTree::cube;
+    using cubeXX             = typename OTree::cubeXX;
+    using point              = typename Helper::point;
+    using pointXX            = typename OTree::pointXX;
+    using PerBoundary        = typename OTree::PerBoundary;
+    using TreeBuilder        = typename OTree::TreeBuilderInterface;
+    using peano_map          = typename Peano<_D>::Map;
+    using peano_dig          = typename Peano<_D>::Digit;
+    using peano_oct          = typename Peano<_D>::Octant;
     //
     static const peano_oct  Dim            = _D;
     static const peano_oct  Nsub           = 1<<Dim;
     static const depth_type MaximumDepth   = OTree::MaximumDepth;
+    static const count_type PosAlignment   = OTree::PosAlignment;
     /// \name types used in tree construction
     //@{
     /// represents a cubic cell in the box-dot tree
@@ -203,7 +206,7 @@ namespace {
       uint8_t     LEV;                 ///< tree level of box
       peano_map   MAP;                 ///< peano map octant <-> digit
     };
-    using Box = SSE::Extend16<_Box>;
+    using Box = SSE::Extend<_Box,PosAlignment>;
     //
 #define  pDOT(d) static_cast<Dot*>((d))
 #define cpDOT(d) static_cast<const Dot*>((d))
@@ -216,38 +219,31 @@ namespace {
 # undef  OCTALTREE_IMPLEMENTER_ADDITIONAL_MEMBER_TYPES
 #endif
     //@}
-    /// \name data set by constructor
-    //@{
-    mutable double        TIME;         ///< wallclock time at start
-    const uint8_t         NMAX;         ///< maximum # particles/octant
-    const uint8_t         NMIN;         ///< maximum # particles/octant
-    const bool            ASCC;         ///< avoid single-child cells
+    /// \name data
+    // data set by constructor
+    mutable double                   TIME; ///< wallclock time at start
+    const uint8_t                    NMAX; ///< maximum # particles/octant
+    const uint8_t                    NMIN; ///< maximum # particles/octant
+    const bool                       ASCC; ///< avoid single-child cells
 #ifdef OCTALTREE_USE_OPENMP
-    depth_type            IT,NT;        ///< this thread, # threads
+    depth_type                       IT,NT;///< this thread, # threads
 #endif// OCTALTREE_USE_OPENMP
-    const count_type      NMX1;         ///< NMAX + 1
-    //@}
-    /// \name data set by SetDots()
-    //@{
-    Dot                  *DOTS;         ///< begin: locally loaded dots
-    count_type            NDOT;         ///< # locally loaded dots
-    //@}
-    /// \name data set by Build()
-    //@{
-    block_alloc<Box>     *BXAL;         ///< allocator for boxes
-    Box                  *ROOT;         ///< root box
-    //@}
+    const count_type                 NMX1; ///< NMAX + 1
+    // data set by SetDots()
+    octtree::aligned_vector<Dot>     vDOT; ///< locally loaded dots
+    Dot                             *DOTS; ///< pter to locally loaded dots
+    // data set by Build()
+    block_alloc<Box,PosAlignment>   *BXAL; ///< allocator for boxes
+    Box                             *ROOT; ///< root box
 #ifdef OCTALTREE_USE_OPENMP
 # define OCTALTREE_IMPLEMENTER_ADDITIONAL_DATA_MEMBERS
 # include <../devel/octtree_omp.cc>
 # undef  OCTALTREE_IMPLEMENTER_ADDITIONAL_DATA_MEMBERS
 #endif
+    // data used in tree linking
     OTree                *TREE;         ///< tree to be linked
     mutable count_type    CF;           ///< cell counter during linking
     mutable count_type    LF;           ///< leaf counter during linking
-#ifdef OCTALTREE_USE_OPENMP
-    mutable count_type    BF;           ///< branch counter during linking
-#endif// OCTALTREE_USE_OPENMP
     //@}
     /// set dots; cumulate Xmin, Xmax, Xsum; called from Build()
     /// \param[in]  init  initialiser for particle data
@@ -255,7 +251,7 @@ namespace {
     /// \param[out] Xmin  in each dimension: minimum of positions loaded
     /// \param[out] Xmin  in each dimension: maximum of positions loaded
     /// \param[out] Xsum  sum of all positions loaded
-    /// \note sets @a DOTS and @a NDOT
+    /// \note sets @a vDOT & @a DOTS
     void SetDots(const Initialiser*init, const OTree*tree,
 		 point&Xmin, point&Xmax, point&Xave) WD_HOT;
     /// build tree, called from ctor
@@ -384,9 +380,9 @@ namespace {
     void LinkLeaf(const count_type L, const Dot*const D, const count_type P)
       const
     {
-      static_cast<point&>(TREE->_XL[0][L]) = D->X;
-      TREE->_PL[0][L] = D->I;
-      TREE->_PC[L] = P;
+      static_cast<point&>(TREE->XL[0][L]) = D->X;
+      TREE->PL[0][L] = D->I;
+      TREE->PC[L] = P;
     }
     /// tree linking: make a cell from an octant of a parent box
     /// \param[in] P    parent box
@@ -401,41 +397,68 @@ namespace {
     {
 #ifdef TESTING
       if(C > Cn)
-	WDutils_ErrorN("error in cell linking: C=%d > NC=%d\n",C,Cn);
+	WDutils_Error("OctalTree: error in cell linking: C=%d > NC=%d\n",C,Cn);
 #endif
-      TREE->_LE[C] = P->LEV + 1;
-      GeoAlg::copy(P->CUB,static_cast<cube&>(TREE->_XC[C]));
-      GeoAlg::shrink(TREE->_XC[C],oct);
-      TREE->_L0[C] = LF;
-      TREE->_NL[C] = P->NDL[oct];
-      TREE->_NM[C] = P->NDL[oct];
-      TREE->_C0[C] = C;
-      TREE->_NC[C] = 0;
+      TREE->LE[C] = P->LEV + 1;
+      GeoAlg::copy(P->CUB,static_cast<cube&>(TREE->XC[C]));
+      GeoAlg::shrink(TREE->XC[C],oct);
+      TREE->L0[C] = LF;
+      TREE->NL[C] = P->NDL[oct];
+      TREE->NM[C] = P->NDL[oct];
+      TREE->C0[C] = C;
+      TREE->NC[C] = 0;
 #ifdef OCTALTREE_HAVE_D0
-      TREE->_D0[C] = IT;
+      TREE->D0[C] = IT;
 #endif
-      TREE->_DP[C] = 0;
+      TREE->DP[C] = 0;
       for(const Dot*Di=cpDOT(P->OCT[oct]); Di; Di=pDOT(Di->Next))
 	LinkLeaf(LF++,Di,C);
     }
-    //
-    // PassUpNactive
-    //
-    static void PassUpNactive(OTree*const tree,
-			      bool all_active, count_type C0, count_type CN)
+    /// load RG[] and set FL[] for domain
+    /// \return # active leafs
+    /// \param[in] tree   tree to load rungs and flags for
+    /// \param[in] ract   set flag = rung>=ract? 0xff:0
+    /// \param[in] L0     begin of leaves
+    /// \param[in] NL     # leaves
+    template<int EXT>
+    static count_type LoadRungFlag(OTree*const tree, float ract,
+				   count_type L0, count_type NL)
     {
-      if(all_active)
+      static_assert(EXT==0 || EXT==1,"unexpected value for EXT");
+      tree->INIT->InitRung(tree->template particle_keys<EXT>() + L0,
+			   p_data(tree->RG[EXT])+ L0, NL);
+      count_type Nact=0;
+      for(count_type l=L0; l!=L0+NL; ++l) {
+	tree->FL[EXT][l] = tree->RG[EXT][l] >= ract? 0xff : 0;
+	if(tree->FL[EXT][l]) ++Nact;
+      }
+      return Nact;
+    }
+    /// pass up NA[] for sub-domain
+    /// \param[in] tree         tree to pass NA[] up for
+    /// \param[in] none_active  are none of the leafs active?
+    /// \param[in] all_active   are all of the leafs active?
+    /// \param[in] C0           begin of cells to pass NA[] up for
+    /// \param[in] CN           end of cells to pass NA[] up for
+    static void PassUpNactive(OTree*const tree,
+			      bool none_active, bool all_active,
+			      count_type C0, count_type CN)
+    {
+      if(none_active)
 	for(count_type c=C0; c!=CN; ++c)
-	  tree->_NA[c] = tree->_NM[c];
+	  tree->NA[c] = 0;
+      else if(all_active)
+	for(count_type c=C0; c!=CN; ++c)
+	  tree->NA[c] = tree->NM[c];
       else
 	for(count_type c=CN-1; c!=(C0-1); --c) {
-	  tree->_NA[c] = 0;
-	  if(tree->_NL[c])
-	    for(count_type ll=tree->_L0[c]; ll!=tree->_L0[c]+tree->_NL[c]; ++ll)
-	      if(tree->_FL[0][ll]) tree->_NA[c]++;
-	  if(tree->_NC[c])
-	    for(count_type cc=tree->_C0[c]; cc!=tree->_C0[c]+tree->_NC[c]; ++cc)
-	      tree->_NA[c] += tree->_NA[cc];
+	  tree->NA[c] = 0;
+	  if(tree->NL[c])
+	    for(count_type ll=tree->L0[c]; ll!=tree->L0[c]+tree->NL[c]; ++ll)
+	      if(tree->FL[0][ll]) tree->NA[c]++;
+	  if(tree->NC[c])
+	    for(count_type cc=tree->C0[c]; cc!=tree->C0[c]+tree->NC[c]; ++cc)
+	      tree->NA[c] += tree->NA[cc];
 	}
     }
     /// link ordinary cell
@@ -499,10 +522,11 @@ namespace {
 			     count_type ne, bool fr,
 			     const TreeBuilder*builder=0) WDutils_THROWING;
     /// serial build of an OctalTree
-    static void BuildTreeSerial(OTree*tree,bool fresh,
+    static void BuildTreeSerial(OTree*tree, bool fresh, bool load_rungs,
 				const TreeBuilder*builder);
     /// build an OctalTree
-    static count_type BuildTree(OTree*tree,bool fresh, count_type 
+    static count_type BuildTree(OTree*tree, bool fresh, bool load_rungs,
+				count_type 
 #ifdef OCTALTREE_USE_OPENMP
 				tol
 #endif
@@ -510,10 +534,10 @@ namespace {
     {
 #ifdef OCTALTREE_USE_OPENMP
       if(tree->NDOM>1)
-	return BuildTreeParallel(tree,fresh,tol,builder);
+	return BuildTreeParallel(tree,fresh,load_rungs,tol,builder);
       else 
 #endif
-	BuildTreeSerial  (tree,fresh,builder);
+	BuildTreeSerial  (tree,fresh,load_rungs,builder);
       return 0;
     }
 #ifdef TESTING
@@ -691,27 +715,30 @@ namespace {
 	  point&Xmin, point&Xmax, point&Xsum)
   {
     // 1 allocate & initialise dots
-    DOTS = init->InitIntern(NDOT,
+    vDOT = init->InitIntern(
 #ifdef OCTALTREE_USE_OPENMP
 			    IT,NT,
 #endif// OCTALTREE_USE_OPENMP
 			    tree? tree->template particle_keys<0>() : 0,
 			    tree? tree->NLEAF : 0);
-    if(DOTS==0) WDutils_ErrorN("0 returned by Initialiser::InitIntern()\n");
-    if(NDOT==0) WDutils_ErrorN("# Dots = 0 from Initialiser::InitIntern()\n");
+    if(vDOT.empty())
+      WDutils_ErrorN("OctalTree: no Dots from by Initialiser::InitIntern()\n");
+    DOTS = vDOT.data();
+    if(!is_aligned<PosAlignment>(DOTS))
+      WDutils_ErrorN("OctalTree: Dots returned by Initialiser::InitIntern() "
+		     "not aligned to %d bytes\n",PosAlignment);
     // 2 cumulate Xmin,Xmax,Xsum
-    Dot*Di=DOTS, *const DN=DOTS+NDOT;
-    Xmin = Xmax = Xsum = Di->X;
-    for(++Di; Di!=DN; ++Di) {
-      Di->X.up_min_max(Xmin,Xmax);
-      Xsum += Di->X;
+    Xmin = Xmax = Xsum = vDOT.cbegin()->X;
+    for(auto d:vDOT) {
+      d.X.up_min_max(Xmin,Xmax);
+      Xsum += d.X;
     }
     // 3 check for nan and inf
     if(isnan(Xsum) || isinf(Xsum)) {
-      for(Di=DOTS; Di!=DN; ++Di)
-	if(isnan(Di->X) || isinf(Di->X)) {
+      for(auto d:vDOT)
+	if(isnan(d.X) || isinf(d.X)) {
 	  std::ostringstream out;
-	  out<<"OctalTree: x="<<Di->X<<" for particle "<<Di->I;
+	  out<<"OctalTree: x="<<d.X<<" for particle "<<d.I;
 	  WDutils_ErrorN("%s\n",out.str().c_str());
 	}
       WDutils_ErrorN("OctalTree: found non-numeric position sum\n");
@@ -728,12 +755,12 @@ namespace {
     point Xmin,Xmax,Xave;
     SetDots(init,tree,Xmin,Xmax,Xave);
     // 2 establish global domain
-    unsigned Ntot = NDOT;
+    unsigned Ntot = vDOT.size();
 #ifdef OCTALTREE_USE_OPENMP
-    if(NDOT <= NMAX)
-      WDutils_ErrorN("OctTree: found #particles=%d < nmax=%d\n",NDOT,NMAX);
+    if(Ntot <= NMAX)
+      WDutils_ErrorN("OctTree: found #particles=%d < nmax=%d\n",Ntot,NMAX);
     if(NT>1) {
-      OMP::AllReduce<Parallel::Sum>(NDOT,Ntot);
+      OMP::AllReduce<Parallel::Sum>(Ntot);
       OMP::AllReduce<Parallel::Min>(static_cast<pos_type*>(Xmin),Dim);
       OMP::AllReduce<Parallel::Max>(static_cast<pos_type*>(Xmax),Dim);
       OMP::AllReduce<Parallel::Sum>(static_cast<pos_type*>(Xave),Dim);
@@ -741,7 +768,7 @@ namespace {
 #endif// OCTALTREE_USE_OPENMP
     Xave /= pos_type(Ntot);
     // 3 set empty box: local root
-    BXAL = new block_alloc<Box>(NBoxes<Dim>(NDOT,NMAX));
+    BXAL = new block_alloc<Box,PosAlignment>(NBoxes<Dim>(vDOT.size(),NMAX));
     ROOT = BXAL->new_element();
     ROOT->NDl   = 0;
     ROOT->NOC   = 0;
@@ -757,12 +784,12 @@ namespace {
       TIME = time;
     }
     // 4 add all local dots to local root box
-    for(Dot*Di=DOTS,*DN=DOTS+NDOT; Di!=DN; ++Di)
+    for(Dot*Di=DOTS, *DN=Di+vDOT.size(); Di!=DN; ++Di)
       AddDotToBox(ROOT,Di);
     if(debug(3)) {
       double time=WALLCLOCK();
-      DebugInfoN("OctalTree: box-dot tree grown in %f sec (NDOT=%d)\n",
-		time-TIME,NDOT);
+      DebugInfoN("OctalTree: box-dot tree grown in %f sec (#Dots=%d)\n",
+		 time-TIME,int(vDOT.size()));
       TIME = time;
     }
   }
@@ -773,7 +800,7 @@ namespace {
   void TreeImplementer< OctalTree<_D,_X> >::
   CountNodesSerial(count_type&NB, count_type&ND) const
   {
-    NB=1, ND=NDOT;
+    NB=1, ND=vDOT.size();
     Stack<const Box*> BS(Nsub*MaximumDepth);
     BS.push(ROOT);
     while(! BS.is_empty() ) {
@@ -801,12 +828,12 @@ namespace {
     // 1 if single-child box replace by non-single-child box descendant
     if(ASCC) EnsureNonSingleChildBox(P);
     // 2 copy some data, set octant
-    TREE->_LE[C] = P->LEV;
-    GeoAlg::copy(P->CUB,static_cast<cube&>(TREE->_XC[C]));
-    TREE->_L0[C] = LF;
-    TREE->_NM[C] = P->NUM;
+    TREE->LE[C] = P->LEV;
+    GeoAlg::copy(P->CUB,static_cast<cube&>(TREE->XC[C]));
+    TREE->L0[C] = LF;
+    TREE->NM[C] = P->NUM;
 #ifdef OCTALTREE_HAVE_D0
-    TREE->_D0[C] = IT;
+    TREE->D0[C] = IT;
 #endif
     // 3 loop octants: link leaf kids (from octants with < NMIN), count cells
     depth_type tmp = 0;
@@ -819,31 +846,31 @@ namespace {
 	  LinkLeaf(LF++,Di,C);
     }
     // 4 set number of leaves kids and daughter cells
-    TREE->_NL[C] = LF - TREE->_L0[C];
-    TREE->_NC[C] = tmp;
+    TREE->NL[C] = LF - TREE->L0[C];
+    TREE->NC[C] = tmp;
     // 5 link daughter cells, if any
     if(tmp) {
-      TREE->_C0[C] = CF;
+      TREE->C0[C] = CF;
       count_type Ci = CF;
       CF += tmp;
       tmp = 0;
       for(peano_dig d=0; d!=Nsub; ++d) {
 	peano_oct oc = P->MAP.octant(d);
 	if(P->NDL[oc] > NMAX) {
-	  TREE->_PA[Ci] = C;
-	  TREE->_OC[Ci] = oc;
+	  TREE->PA[Ci] = C;
+	  TREE->OC[Ci] = oc;
 	  update_max(tmp, LinkCell(cpBOX(P->OCT[oc]),Ci++,cN));
 	} else if(P->NDL[oc] >= NMIN) {
-	  TREE->_PA[Ci] = C;
-	  TREE->_OC[Ci] = oc;
+	  TREE->PA[Ci] = C;
+	  TREE->OC[Ci] = oc;
 	  LinkOctantCell(P,Ci++,oc,cN);
 	}
       }
       ++tmp;
     } else 
-      TREE->_C0[C] = C;
+      TREE->C0[C] = C;
     // 6 set and return tree depth of cell
-    return TREE->_DP[C] = tmp;
+    return TREE->DP[C] = tmp;
   }
   //
   // link serial
@@ -863,14 +890,14 @@ namespace {
     DOM->C0= CF;
     DOM->L0= LF;
 #endif// OCTALTREE_USE_OPENMP
-    TREE->_PA[0] = 0;
-    TREE->_OC[0] = 0;
+    TREE->PA[0] = 0;
+    TREE->OC[0] = 0;
     LinkCell(ROOT,0,TREE->NCELL);
     tree->NCELL = CF;
 #ifdef OCTALTREE_USE_OPENMP
     DOM->CN= CF; DOM->NC= CF-DOM->C0;
     DOM->LN= LF; DOM->NL= LF-DOM->L0;
-    DOM->DEPTH= TREE->_DP[0];
+    DOM->DEPTH= TREE->DP[0];
 #endif// OCTALTREE_USE_OPENMP
     if(debug(3)) {
       double time=WALLCLOCK();
@@ -884,7 +911,6 @@ namespace {
   template<int _D, typename _X>
   TreeImplementer< OctalTree<_D,_X> >::~TreeImplementer()
   {
-    if(DOTS) WDutils_DEL16(DOTS); DOTS=0;
     if(BXAL) WDutils_DEL_O(BXAL); BXAL=0;
 #ifdef OCTALTREE_USE_OPENMP
     if(TBAL) WDutils_DEL_O(TBAL); TBAL=0;
@@ -906,41 +932,41 @@ namespace {
     tree->NLEAFEXT = ne;
     tree->NLEAF    = nl;
     tree->NCELL    = nc;
-    // ensure that ne,nl,nc are multiples of LeafBlockSize
-    ne= OctalTree<_D,_X>::blocked(ne); // multiple of LeafBlockSize >= # ExtLeaf
-    nl= OctalTree<_D,_X>::blocked(nl); // multiple of LeafBlockSize >= # Leaf
+    // ensure that ne,nl,nc are multiples of LeafDataBlockSize
+    ne= OctalTree<_D,_X>::data_blocked(ne);
+    nl= OctalTree<_D,_X>::data_blocked(nl);
 #ifdef OCTALTREE_DATA_IN_ONE_BLOCK
-    size_t need = NextAligned<point16>      (ne)        // _XL[1]
-      +           NextAligned<particle_key> (ne)        // _PL[1]
-      +           NextAligned<point16>      (nl)        // _XL[0]
-      +           NextAligned<particle_key> (nl)        // _PL[0]
-      +           NextAligned<count_type>   (nl)        // _PC
-      +           NextAligned<depth_type>   (nc)        // _LE
-      +           NextAligned<octant_type>  (nc)        // _OC
-      +           NextAligned<cube16>       (nc)        // _XC
-      +           NextAligned<count_type>   (nc)        // _L0
-      +           NextAligned<local_count>  (nc)        // _NL
-      +           NextAligned<count_type>   (nc)        // _NM
-      +           NextAligned<count_type>   (nc)        // _C0
-      +           NextAligned<octant_type>  (nc)        // _NC
-      +           NextAligned<count_type>   (nc)        // _PA
-      +           NextAligned<depth_type>   (nc)        // _DP
+    size_t need = NextAligned<pointXX>      (ne)        // XL[1]
+      +           NextAligned<particle_key> (ne)        // PL[1]
+      +           NextAligned<pointXX>      (nl)        // XL[0]
+      +           NextAligned<particle_key> (nl)        // PL[0]
+      +           NextAligned<count_type>   (nl)        // PC
+      +           NextAligned<depth_type>   (nc)        // LE
+      +           NextAligned<octant_type>  (nc)        // OC
+      +           NextAligned<cubeXX>       (nc)        // XC
+      +           NextAligned<count_type>   (nc)        // L0
+      +           NextAligned<local_count>  (nc)        // NL
+      +           NextAligned<count_type>   (nc)        // NM
+      +           NextAligned<count_type>   (nc)        // C0
+      +           NextAligned<octant_type>  (nc)        // NC
+      +           NextAligned<count_type>   (nc)        // PA
+      +           NextAligned<depth_type>   (nc)        // DP
 # ifdef OCTALTREE_HAVE_D0
-      +           NextAligned<domain_id>    (nc)        // _D0
+      +           NextAligned<domain_id>    (nc)        // D0
 # endif// OCTALTREE_USE_OPENMP
       ;
     if(flag_and_rung)
-      need     += NextAligned<float>        (ne)        // _RG[1]
-	+         NextAligned<uint8_t>      (ne)        // _FL[1]
-	+         NextAligned<float>        (nl)        // _RG[0]
-	+         NextAligned<uint8_t>      (nl)        // _FL[0]
-	+         NextAligned<count_type>   (nc);       // _NA
+      need     += NextAligned<float>        (ne)        // RG[1]
+	+         NextAligned<uint8_t>      (ne)        // FL[1]
+	+         NextAligned<float>        (nl)        // RG[0]
+	+         NextAligned<uint8_t>      (nl)        // FL[0]
+	+         NextAligned<count_type>   (nc);       // NA
     // account for derived data
     size_t need_derived_leaves = builder? builder->bytes_for_leaves(nl,ne) : 0;
     size_t need_derived_cells  = builder? builder->bytes_for_cells(nc) : 0;
     need += need_derived_leaves + need_derived_cells;
     // ensure enough memory
-    tree->_BUF. template reset_conditional<3,2>(need);
+    tree->BUF. template reset_conditional<3,2>(need);
 # define SET_DATA(Name,Number,Type)				\
     if(Number) {						\
       tree->Name = reinterpret_cast<Type*>(A);			\
@@ -950,39 +976,39 @@ namespace {
     DebugInfoN(6,"OctalTree: set %s = %p for %d %s\n",		\
 	       __STRING(Name),tree->Name,Number,__STRING(Type));
     // set pointers to memory
-    char*A = tree->_BUF.begin();
-    SET_DATA(_XL[1],ne,point16);
-    SET_DATA(_PL[1],ne,particle_key);
-    SET_DATA(_RG[1],flag_and_rung?ne:0,float);
-    SET_DATA(_FL[1],flag_and_rung?ne:0,uint8_t);
-    SET_DATA(_XL[0],nl,point16);
-    SET_DATA(_PL[0],nl,particle_key);
-    SET_DATA(_PC   ,nl,count_type);
-    SET_DATA(_RG[0],flag_and_rung?nl:0,float);
-    SET_DATA(_FL[0],flag_and_rung?nl:0,uint8_t);
+    char*A = tree->BUF.begin();
+    SET_DATA(XL[1],ne,pointXX);
+    SET_DATA(PL[1],ne,particle_key);
+    SET_DATA(RG[1],flag_and_rung?ne:0,float);
+    SET_DATA(FL[1],flag_and_rung?ne:0,uint8_t);
+    SET_DATA(XL[0],nl,pointXX);
+    SET_DATA(PL[0],nl,particle_key);
+    SET_DATA(PC   ,nl,count_type);
+    SET_DATA(RG[0],flag_and_rung?nl:0,float);
+    SET_DATA(FL[0],flag_and_rung?nl:0,uint8_t);
     if(builder && need_derived_leaves) {
       builder->set_leaf_memory(A,nl,ne);
       A += need_derived_leaves;
     }
-    SET_DATA(_LE,nc,depth_type);
-    SET_DATA(_OC,nc,octant_type);
-    SET_DATA(_XC,nc,cube16);
-    SET_DATA(_L0,nc,count_type);
-    SET_DATA(_NL,nc,local_count);
-    SET_DATA(_NM,nc,count_type);
-    SET_DATA(_C0,nc,count_type);
-    SET_DATA(_NC,nc,octant_type);
-    SET_DATA(_PA,nc,count_type);
-    SET_DATA(_NA,flag_and_rung?nc:0,count_type);
-    SET_DATA(_DP,nc,depth_type);
+    SET_DATA(LE,nc,depth_type);
+    SET_DATA(OC,nc,octant_type);
+    SET_DATA(XC,nc,cubeXX);
+    SET_DATA(L0,nc,count_type);
+    SET_DATA(NL,nc,local_count);
+    SET_DATA(NM,nc,count_type);
+    SET_DATA(C0,nc,count_type);
+    SET_DATA(NC,nc,octant_type);
+    SET_DATA(PA,nc,count_type);
+    SET_DATA(NA,flag_and_rung?nc:0,count_type);
+    SET_DATA(DP,nc,depth_type);
 # ifdef OCTALTREE_HAVE_D0
-    SET_DATA(_D0,nc,domain_id);
+    SET_DATA(D0,nc,domain_id);
 # endif// OCTALTREE_USE_OPENMP
     if(builder && need_derived_cells) {
       builder->set_cell_memory(A,nc);
       A += need_derived_cells;
     }
-    WDutilsAssert(A == tree->_BUF.begin()+need && A <= tree->_BUF.end());
+    WDutilsAssert(A == tree->BUF.begin()+need && A <= tree->BUF.end());
 #else // OCTALTREE_DATA_IN_ONE_BLOCK
     const count_type nc4=(nc+3)&~3;              // multiple of 4 >= nc
     const count_type ne4=(ne+3)&~3;              // multiple of 4 >= ne
@@ -998,28 +1024,28 @@ namespace {
 	       __STRING(Name),tree->Name.data(),Number,		\
 	       nameof(typename std::remove_reference<		\
 		      decltype(tree->Name[0])>::type));
-    SET_DATA(_XL[1],ne4);
-    SET_DATA(_PL[1],ne);
-    SET_DATA(_RG[1],flag_and_rung?ne4:0);
-    SET_DATA(_FL[1],flag_and_rung?ne4:0);
-    SET_DATA(_XL[0],nl4);
-    SET_DATA(_PL[0],nl);
-    SET_DATA(_RG[0],flag_and_rung?nl4:0);
-    SET_DATA(_FL[0],flag_and_rung?nl4:0);
-    SET_DATA(_PC,nl);
-    SET_DATA(_LE,nc);
-    SET_DATA(_OC,nc);
-    SET_DATA(_XC,nc4);
-    SET_DATA(_L0,nc);
-    SET_DATA(_NL,nc);
-    SET_DATA(_NM,nc);
-    SET_DATA(_NA,flag_and_rung?nc:0);
-    SET_DATA(_C0,nc);
-    SET_DATA(_NC,nc);
-    SET_DATA(_PA,nc);
-    SET_DATA(_DP,nc);
+    SET_DATA(XL[1],ne4);
+    SET_DATA(PL[1],ne);
+    SET_DATA(RG[1],flag_and_rung?ne4:0);
+    SET_DATA(FL[1],flag_and_rung?ne4:0);
+    SET_DATA(XL[0],nl4);
+    SET_DATA(PL[0],nl);
+    SET_DATA(RG[0],flag_and_rung?nl4:0);
+    SET_DATA(FL[0],flag_and_rung?nl4:0);
+    SET_DATA(PC,nl);
+    SET_DATA(LE,nc);
+    SET_DATA(OC,nc);
+    SET_DATA(XC,nc4);
+    SET_DATA(L0,nc);
+    SET_DATA(NL,nc);
+    SET_DATA(NM,nc);
+    SET_DATA(NA,flag_and_rung?nc:0);
+    SET_DATA(C0,nc);
+    SET_DATA(NC,nc);
+    SET_DATA(PA,nc);
+    SET_DATA(DP,nc);
 # ifdef OCTALTREE_HAVE_D0
-    SET_DATA(_D0,nc);
+    SET_DATA(D0,nc);
 # endif// OCTALTREE_USE_OPENMP
 #endif
 #undef SET_DATA
@@ -1029,11 +1055,12 @@ namespace {
   // 
   template<int _D, typename _X>
   void TreeImplementer< OctalTree<_D,_X> >::
-  BuildTreeSerial(OTree*tree,bool fresh, const TreeBuilder*builder=0)
+  BuildTreeSerial(OTree*tree, bool fresh, bool load_rungs,
+		  const TreeBuilder*builder=0)
   {
     double    wtime = WALLCLOCK();
     count_type Next = tree->INIT->Nexternal();
-    bool load_flags = tree->INIT->LoadRungFlag();
+    rung_type  Ract = tree->RACT;
     {
       // 1 build box-dot-tree
       TreeImplementer TI(wtime, tree->INIT, 
@@ -1048,30 +1075,24 @@ namespace {
       TI.CountNodesSerial(tree->NCELL,tree->NLEAF);
       if(builder)
 	builder->Before(fresh,tree->NCELL,tree->NLEAF,Next);
-      AllocateTree(tree,tree->NCELL,tree->NLEAF,Next,load_flags,builder);
+      AllocateTree(tree,tree->NCELL,tree->NLEAF,Next,load_rungs,builder);
       TI.LinkSerial(tree);
-      // 3 load rungs & flags and pass _NA[] up the tree
-      if(load_flags) {
-	bool all_active = tree->INIT->
-	  InitRungFlag(tree->template particle_keys<0>(),
-		       p_data(tree->_RG[0]),
-		       p_data(tree->_FL[0]),
-		       tree->NLEAF);
-	PassUpNactive(tree,all_active,0,tree->NCELL);
+      // 3 load rungs & flags and pass NA[] up the tree
+      if(load_rungs) {
+	count_type Nact = LoadRungFlag<0>(tree,float(Ract),0,tree->NLEAF);
+	if(Nact==0)
+	  WDutils_WarningN("OctalTree: no particle has rung >= RACT=%d\n",Ract);
+	PassUpNactive(tree,Nact==0,Nact==tree->NLEAF,0,tree->NCELL);
       }
       // 4 destruct TreeImplementer
     }
     // 5 load external particles
     if(Next) {
       for(count_type e=0; e!=Next; ++e)
-	tree->INIT->InitExtern(e, static_cast<point&>(tree->_XL[1][e]),
-			       tree->_PL[1][e]);
-      if(load_flags)
-	tree->INIT->
-	  InitRungFlag(tree->template particle_keys<1>(),
-		       p_data(tree->_RG[1]),
-		       p_data(tree->_FL[1]),
-		       Next);
+	tree->INIT->InitExtern(e, static_cast<point&>(tree->XL[1][e]),
+			       tree->PL[1][e]);
+      if(load_rungs)
+	LoadRungFlag<1>(tree,float(Ract),0,Next);
     }
     // 6 set derived data
     if(builder) {
@@ -1113,24 +1134,33 @@ namespace WDutils {
     , DOM   ( WDutils_NEW(DomainData,NDOM) )
 #endif// OCTALTREE_USE_OPENMP
     , NBUILD( 0 )
-    , NMAX  ( data.NMAX<1? 1 : (data.NMAX>MAXNMAX? MAXNMAX:data.NMAX) )
-    , NMIN  ( data.NMIN? (data.NMIN<NMAX? data.NMIN:NMAX) : (NMAX<2?NMAX:2) )
+    , NMAX  ( std::min( MAXNMAX, std::max(depth_type(1),data.NMAX) ) )
+    , NMIN  ( std::min( NMAX   , data.NMIN? data.NMIN : depth_type(2) ) )
+    , RACT  ( data.RACT )
     , ASCC  ( data.ASCC )
   {
     // sanity checks
     if(0==INIT)
-      WDutils_THROWF("null pter to Initialiser provided\n");
+      WDutils_THROW("OctalTree: null pter to Initialiser provided\n");
     if(data.NMAX == 0)
-      WDutils_WarningF("nmax=0; will use nmax=%d instead\n",int(NMAX));
+      WDutils_WarningN("OctalTree: nmax=0; will use nmax=%d instead\n",
+		      int(NMAX));
     if(data.NMAX > MAXNMAX)
-      WDutils_WarningF("nmax=%d exceeds %d; will use nmax=%d instead\n",
-		       int(data.NMAX),int(MAXNMAX),int(NMAX));
+      WDutils_WarningN("OctalTree: nmax=%d exceeds %d; "
+		      "will use nmax=%d instead\n",
+		      int(data.NMAX),int(MAXNMAX),int(NMAX));
     if(data.NMIN > MAXNMAX)
-      WDutils_WarningF("nmin=%d exceeds %d; will use nmin=%d instead\n",
-		       int(data.NMIN),int(MAXNMAX),int(NMIN));
+      WDutils_WarningN("OctalTree: nmin=%d exceeds %d; "
+		      "will use nmin=%d instead\n",
+		      int(data.NMIN),int(MAXNMAX),int(NMIN));
     else if(data.NMIN > data.NMAX)
-      WDutils_WarningF("nmin=%d exceeds nmax=%d; will use nmin=%d\n",
-		       int(data.NMIN),int(data.NMAX),int(NMIN));
+      WDutils_WarningN("OctalTree: nmin=%d exceeds nmax=%d; will use nmin=%d\n",
+		      int(data.NMIN),int(data.NMAX),int(NMIN));
+    // loading rungs?
+    bool load_rungs = data.LOAD & octtree::rung_tag;
+    if(RACT>0 && !load_rungs)
+      WDutils_WarningN("OctalTree: ract=%d > 0 but no rungs to be loaded\n",
+		       RACT);
 #ifdef OCTALTREE_HAVE_DATA
     // reset DATA[]
     for(int i=0; i!=NDAT; ++i) DATA[0][i] = DATA[1][i] = 0;
@@ -1139,7 +1169,7 @@ namespace WDutils {
 #ifdef OCTALTREE_USE_OPENMP
     TOL = 
 #endif// OCTALTREE_USE_OPENMP
-      TreeImplementer<OctalTree>::BuildTree(this,1,data.TOL);
+      TreeImplementer<OctalTree>::BuildTree(this,1,load_rungs,data.TOL);
     ++NBUILD;
   }
   //
@@ -1156,24 +1186,33 @@ namespace WDutils {
     , DOM   ( WDutils_NEW(DomainData,NDOM) )
 #endif// OCTALTREE_USE_OPENMP
     , NBUILD( 0 )
-    , NMAX  ( data.NMAX<1? 1 : (data.NMAX>MAXNMAX? MAXNMAX:data.NMAX) )
-    , NMIN  ( data.NMIN? (data.NMIN<NMAX? data.NMIN:NMAX) : (NMAX<2?NMAX:2) )
+    , NMAX  ( std::min( MAXNMAX, std::max(depth_type(1),data.NMAX) ) )
+    , NMIN  ( std::min( NMAX   , data.NMIN? data.NMIN : depth_type(2) ) )
+//     , NMAX  ( data.NMAX<1? 1 : (data.NMAX>MAXNMAX? MAXNMAX:data.NMAX) )
+//     , NMIN  ( data.NMIN? (data.NMIN<NMAX? data.NMIN:NMAX) : (NMAX<2?NMAX:2) )
+    , RACT  ( data.RACT )
     , ASCC  ( data.ASCC )
   {
     // sanity checks
     if(0==INIT)
-      WDutils_THROWF("null pter to Initialiser provided\n");
+      WDutils_THROW("OctalTree: null pter to Initialiser provided\n");
     if(data.NMAX == 0)
-      WDutils_WarningF("nmax=0; will use nmax=%d instead\n",int(NMAX));
+      WDutils_WarningN("OctalTree: nmax=0; will use nmax=%d instead\n",
+		      int(NMAX));
     if(data.NMAX > MAXNMAX)
-      WDutils_WarningF("nmax=%d exceeds %d; will use nmax=%d instead\n",
-		       int(data.NMAX),int(MAXNMAX),int(NMAX));
+      WDutils_WarningN("OctalTree: nmax=%d > %d; will use nmax=%d instead\n",
+		      int(data.NMAX),int(MAXNMAX),int(NMAX));
     if(data.NMIN > MAXNMAX)
-      WDutils_WarningF("nmin=%d exceeds %d; will use nmin=%d instead\n",
-		       int(data.NMIN),int(MAXNMAX),int(NMIN));
+      WDutils_WarningN("OctalTree: nmin=%d > %d; will use nmin=%d instead\n",
+		      int(data.NMIN),int(MAXNMAX),int(NMIN));
     else if(data.NMIN > data.NMAX)
-      WDutils_WarningF("nmin=%d exceeds nmax=%d; will use nmin=%d\n",
-		       int(data.NMIN),int(data.NMAX),int(NMIN));
+      WDutils_WarningN("OctalTree: nmin=%d > nmax=%d; will use nmin=%d\n",
+		      int(data.NMIN),int(data.NMAX),int(NMIN));
+    // loading rungs?
+    bool load_rungs = data.LOAD & octtree::rung_tag;
+    if(RACT>0 && !load_rungs)
+      WDutils_WarningN("OctalTree: ract=%d > 0 but no rungs to be loaded\n",
+		       RACT);
 #ifdef OCTALTREE_HAVE_DATA
     // reset DATA[]
     for(int i=0; i!=NDAT; ++i) DATA[0][i] = DATA[1][i] = 0;
@@ -1182,7 +1221,8 @@ namespace WDutils {
 #ifdef OCTALTREE_USE_OPENMP
     TOL = 
 #endif// OCTALTREE_USE_OPENMP
-      TreeImplementer<OctalTree>::BuildTree(this,1,data.TOL,&builder);
+      TreeImplementer<OctalTree>::BuildTree(this,1,load_rungs,data.TOL,
+					    &builder);
     ++NBUILD;
   }
   //
@@ -1191,20 +1231,36 @@ namespace WDutils {
   template<int _D, typename _X>
   void OctalTree<_D,_X>::rebuild(Data const&data) throw(exception)
   {
-    // sanity checks
+    // reset NMAX, NMIN
     if(data.NMAX!=0) {
-      NMAX = data.NMAX>MAXNMAX? MAXNMAX:data.NMAX;
-      NMIN =(data.NMIN? (data.NMIN<NMAX?data.NMIN:NMAX) : (NMAX<2?NMAX:2) );
+      NMAX = std::min( MAXNMAX, std::max(depth_type(1),data.NMAX) );
+      NMIN = std::min( NMAX   , data.NMIN? data.NMIN : depth_type(2) );
+//       NMAX = data.NMAX>MAXNMAX? MAXNMAX:data.NMAX;
+//       NMIN =(data.NMIN? (data.NMIN<NMAX?data.NMIN:NMAX) : (NMAX<2?NMAX:2) );
       if(data.NMAX > MAXNMAX)
-	WDutils_WarningF("nmax=%d exceeds %d; will use nmax=%d instead\n",
-			 int(data.NMAX),int(MAXNMAX),int(NMAX));
+	WDutils_WarningN("OctalTree::rebuild(): nmax=%d exceeds %d; "
+			"will use nmax=%d instead\n",
+			int(data.NMAX),int(MAXNMAX),int(NMAX));
       if(data.NMIN > MAXNMAX)
-	WDutils_WarningF("nmin=%d exceeds %d; will use nmin=%d instead\n",
-			 int(data.NMIN),int(MAXNMAX),int(NMIN));
+	WDutils_WarningN("OctalTree::rebuild(): nmin=%d exceeds %d; "
+			"will use nmin=%d instead\n",
+			int(data.NMIN),int(MAXNMAX),int(NMIN));
       else if(data.NMIN > data.NMAX)
-	WDutils_WarningF("nmin=%d exceeds nmax=%d; will use nmin=%d\n",
-			 int(data.NMIN),int(data.NMAX),int(NMIN));
+	WDutils_WarningN("OctalTree::rebuild(): nmin=%d exceeds nmax=%d; "
+			"will use nmin=%d\n",
+			int(data.NMIN),int(data.NMAX),int(NMIN));
     }
+    // check ASCC
+    if(ASCC != data.ASCC)
+      WDutils_WarningN("OctalTree: cannot change data.ASCC (from %d to %d) "
+		       "in rebuild()\n",ASCC,data.ASCC);
+    // reset RACT
+    RACT = data.RACT;
+    // loading rungs?
+    bool load_rungs = data.LOAD & octtree::rung_tag;
+    if(RACT>0 && !load_rungs)
+      WDutils_WarningN("OctalTree: ract=%d > 0 but no rungs to be loaded\n",
+		       RACT);
 #ifdef OCTALTREE_HAVE_DATA
     // reset DATA[]
     for(int i=0; i!=NDAT; ++i) DATA[0][i] = DATA[1][i] = 0;
@@ -1213,7 +1269,7 @@ namespace WDutils {
 #ifdef OCTALTREE_USE_OPENMP
     TOL = 
 #endif// OCTALTREE_USE_OPENMP
-      TreeImplementer<OctalTree>::BuildTree(this,0,data.TOL);
+      TreeImplementer<OctalTree>::BuildTree(this,0,load_rungs,data.TOL);
     ++NBUILD;
   }
   //
@@ -1221,184 +1277,68 @@ namespace WDutils {
   //
   template<int _D, typename _X>
   void OctalTree<_D,_X>::rebuild(Data const&data,
-				   TreeBuilderInterface const&builder)
+				 TreeBuilderInterface const&builder)
     throw(exception)
   {
-    // sanity checks
+    // reset NMAX, NMIN
     if(data.NMAX!=0) {
-      NMAX = data.NMAX>MAXNMAX? MAXNMAX:data.NMAX;
-      NMIN =(data.NMIN? (data.NMIN<NMAX?data.NMIN:NMAX) : (NMAX<2?NMAX:2) );
+      NMAX = std::min( MAXNMAX, std::max(depth_type(1),data.NMAX) );
+      NMIN = std::min( NMAX   , data.NMIN? data.NMIN : depth_type(2) );
       if(data.NMAX > MAXNMAX)
-	WDutils_WarningF("nmax=%d exceeds %d; will use nmax=%d instead\n",
-			 int(data.NMAX),int(MAXNMAX),int(NMAX));
+	WDutils_WarningN("OctalTree::rebuild(): nmax=%d exceeds %d; "
+			"will use nmax=%d instead\n",
+			int(data.NMAX),int(MAXNMAX),int(NMAX));
       if(data.NMIN > MAXNMAX)
-	WDutils_WarningF("nmin=%d exceeds %d; will use nmin=%d instead\n",
-			 int(data.NMIN),int(MAXNMAX),int(NMIN));
+	WDutils_WarningN("OctalTree::rebuild(): nmin=%d exceeds %d; "
+			"will use nmin=%d instead\n",
+			int(data.NMIN),int(MAXNMAX),int(NMIN));
       else if(data.NMIN > data.NMAX)
-	WDutils_WarningF("nmin=%d exceeds nmax=%d; will use nmin=%d\n",
-			 int(data.NMIN),int(data.NMAX),int(NMIN));
+	WDutils_WarningN("OctalTree::rebuild(): nmin=%d exceeds nmax=%d; "
+			"will use nmin=%d\n",
+			int(data.NMIN),int(data.NMAX),int(NMIN));
     }
+    // check ASCC
+    if(ASCC != data.ASCC)
+      WDutils_WarningN("OctalTree: cannot change data.ASCC (from %d to %d) "
+		       "in rebuild()\n",ASCC,data.ASCC);
+    // reset RACT
+    RACT = data.RACT;
+    // loading rungs?
+    bool load_rungs = data.LOAD & octtree::rung_tag;
+    if(RACT>0 && !load_rungs)
+      WDutils_WarningN("OctalTree: ract=%d > 0 but no rungs to be loaded\n",
+		       RACT);
 #ifdef OCTALTREE_HAVE_DATA
     // reset DATA[]
     for(int i=0; i!=NDAT; ++i) DATA[0][i] = DATA[1][i] = 0;
 #endif
     // build tree and derived
-    TreeImplementer<OctalTree>::BuildTree(this,0,data.TOL,&builder);
+#ifdef OCTALTREE_USE_OPENMP
+    TOL = 
+#endif// OCTALTREE_USE_OPENMP
+    TreeImplementer<OctalTree>::BuildTree(this,0,load_rungs,data.TOL,&builder);
     ++NBUILD;
   }
   //
   // OctalTree::scc()
   //
-#ifdef __SSE__
-#  define cPF(_X) static_cast<const float*>(_X)
-  //
-  // SSE version for 2D, single precision
-  template<>
-  count_type OctalTree<2,float>::scc(point const&x) const noexcept
-  {
-    count_type c=0;
-    __m128 X = _mm_loadu_ps(cPF(x));
-    __m128 C = _mm_load_ps(cPF(_XC[c].X));
-    __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(2,2,2,2));
-#define NotInCell							\
-    3 != (3&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),	\
-				       _mm_cmpgt_ps(_mm_add_ps(C,H),X))))
-    if(NotInCell) return c;
-    while(_NC[c]) {
-      uint8_t o = 3&_mm_movemask_ps(_mm_cmplt_ps(C,X));
-      count_type cc=_C0[c], ce=cc+_NC[c];
-      while(cc!=ce && o!=_OC[cc]) ++cc;
-      if(cc==ce)
-	return c;
-      C = _mm_load_ps(cPF(_XC[cc].X));
-      if(ASCC && _LE[cc] > _LE[c]+1 && NotInCell)
-	return c;
-      c = cc;
-    }
-    return c;
-#undef NotInCell
-  }
-  // SSE version for 3D, single precision
-  template<>
-  count_type OctalTree<3,float>::scc(point const&x) const noexcept
-  {
-    count_type c=0;
-    __m128 X = _mm_loadu_ps(cPF(x));
-    __m128 C = _mm_load_ps(cPF(_XC[c].X));
-    __m128 H = _mm_shuffle_ps(C,C,_MM_SHUFFLE(3,3,3,3));
-#define NotInCell							\
-    7 != (7&_mm_movemask_ps(_mm_and_ps(_mm_cmple_ps(_mm_sub_ps(C,H),X),	\
-				       _mm_cmpgt_ps(_mm_add_ps(C,H),X))))
-    if(NotInCell) return c;
-    while(_NC[c]) {
-      uint8_t o = 7&_mm_movemask_ps(_mm_cmplt_ps(C,X));
-      count_type cc=_C0[c], ce=cc+_NC[c];
-      while(cc!=ce && o!=_OC[cc]) ++cc;
-      if(cc==ce)
-	return c;
-      C = _mm_load_ps(cPF(_XC[cc].X));
-      if(ASCC && _LE[cc] > _LE[c]+1 && NotInCell)
-	return c;
-      c = cc;
-    }
-    return c;
-#undef NotInCell
-  }
-#ifdef __SSE2__
-#  define cPD0(_X) static_cast<const double*>(_X)
-#  define cPD1(_X) static_cast<const double*>(_X)+2
-  // SSE version for 2D, double precision
-  template<>
-  count_type OctalTree<2,double>::scc(point const&x) const noexcept
-  {
-    count_type c=0;
-    __m128d X = _mm_loadu_pd(cPD0(x));
-    __m128d C = _mm_load_pd(cPD0(_XC[c].X));
-    __m128d H = _mm_set1_pd(_XC[c].H);
-#define NotInCell							\
-    3 != _mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(C,H),X),	\
-				    _mm_cmpgt_pd(_mm_add_pd(C,H),X)))
-    if(NotInCell) return c;
-    while(_NC[c]) {
-      uint8_t o = _mm_movemask_pd(_mm_cmplt_pd(C,X));
-      count_type cc=_C0[c], ce=cc+_NC[c];
-      while(cc!=ce && o!=_OC[cc]) ++cc;
-      if(cc==ce)
-	return c;
-      C = _mm_load_pd(cPD0(_XC[cc].X));
-      if(ASCC && _LE[cc] > _LE[c]+1 && NotInCell)
-	return c;
-      c = cc;
-    }
-    return c;
-#undef NotInCell
-  }
-  // SSE version for 3D, double precision
-  template<>
-  count_type OctalTree<3,double>::scc(point const&x) const noexcept
-  {
-    count_type c=0;
-    __m128d Xa = _mm_loadu_pd(cPD0(x));
-    __m128d Ca = _mm_load_pd(cPD0(_XC[c].X));
-    __m128d H  = _mm_set1_pd(_XC[c].H);
-#define NotInCell_a							\
-    3 != _mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(Ca,H),Xa),	\
-				    _mm_cmpgt_pd(_mm_add_pd(Ca,H),Xa)))
-    if(NotInCell_a)
-      return c;
-    __m128d Xb = _mm_loadu_pd(cPD1(x));
-    __m128d Cb = _mm_load_pd(cPD1(_XC[c].X));
-#define NotInCell_b							\
-    ! (1&_mm_movemask_pd(_mm_and_pd(_mm_cmple_pd(_mm_sub_pd(Cb,H),Xb),	\
-				    _mm_cmpgt_pd(_mm_add_pd(Cb,H),Xb))))
-    if(NotInCell_b)
-      return c;
-    while(_NC[c]) {
-      uint8_t o = _mm_movemask_pd(_mm_cmplt_pd(Ca,Xa)) |
-	(      (1&_mm_movemask_pd(_mm_cmplt_pd(Cb,Xb)))<<2) ;
-      count_type cc=_C0[c], ce=cc+_NC[c];
-      while(cc!=ce && o!=_OC[cc]) ++cc;
-      if(cc==ce)
-	return c;
-      Ca = _mm_load_pd(cPD0(_XC[cc].X));
-      Cb = _mm_load_pd(cPD1(_XC[cc].X));
-      if(ASCC && _LE[cc] > _LE[c]+1 && (NotInCell_a || NotInCell_b))
-	return c;
-      c = cc;
-    }
-    return c;
-#undef NotInCell_a
-#undef NotInCell_b
-  }
-#endif // __SSE2__
-#endif // __SSE__
-  // generic non-SSE version
-#ifndef __SSE2__
-#ifdef __SSE__
-  //   only for double
-  template<int _D>
-  count_type OctalTree<_D,double>::scc(point const&x) const noexcept
-#else // __SSE__
-  //   for float and double
   template<int _D, typename _X>
   count_type OctalTree<_D,_X>::scc(point const&x) const noexcept
-#endif// __SSE__
   {
+    using geo = Geometry::Algorithms<1>;
     count_type c=0;
-    if(! Geometry::Algorithms<0>::contains(_XC[c],x))
+    if(!geo::contains(XC[c],x))
       return c;
-    while(_NC[c]) {
-      uint8_t o=Geometry::Algorithms<0>::octant(_XC[c],x);
-      count_type cc=_C0[c], ce=cc+_NC[c];
-      while(cc!=ce && o!=_OC[cc]) ++cc;
-      if(cc==ce || ( ASCC && _LE[cc] > _LE[c]+1 &&
-		     ! Geometry::Algorithms<0>::contains(_XC[cc],x)))
+    while(NC[c]) {
+      octant_type oc=geo::octant(XC[c],x);
+      count_type  cc=C0[c], ce=cc+NC[c];
+      while(cc!=ce && oc!=OC[cc]) ++cc;
+      if(cc==ce || (ASCC && LE[cc] > LE[c]+1 && !geo::contains(XC[cc],x)))
 	return c;
       c = cc;
     }
     return c;
   }
-#endif// no __SSE2__
   //
   // OctalTree::LeafHeader()
   //
@@ -1409,7 +1349,7 @@ namespace WDutils {
     s  << "Leaf     ";
     if(have_flag())
       s<< " f rg";
-    s  << "      k up       ";
+    s  << "       k up       ";
     s  << "             X            ";
     return s;
   }
@@ -1421,7 +1361,7 @@ namespace WDutils {
     s  << "Leaf     ";
     if(have_flag())
       s<< " f rg";
-    s  << "        k up       ";
+    s  << "       k up       ";
     s  << "                         X             ";
     return s;
   }
@@ -1436,9 +1376,9 @@ namespace WDutils {
     if(have_flag())
       s<< ' ' << std::setw(1) << (flag(l)!=0)
        << ' ' << std::setw(2) << int(rung(l));
-    s  << ' ' << std::setw(7) << _PL[0][l.I]
-       << ' ' << std::setfill(' ') << Cell(_PC[l.I])
-       << ' ' << std::setw(12) << _XL[0][l.I];
+    s  << ' ' << std::setw(7) << PL[0][l.I]
+       << ' ' << std::setfill(' ') << Cell(PC[l.I])
+       << ' ' << std::setw(12) << XL[0][l.I];
     return s;
   }
   //
@@ -1452,10 +1392,10 @@ namespace WDutils {
     if(have_flag())
       s<< ' ' << std::setw(1) << (flag(l)!=0)
        << ' ' << std::setw(2) << int(rung(l));
-    s  << std::setw(7) << _PL[1][l.I] << ' '
+    s  << std::setw(7) << PL[1][l.I] << ' '
        << std::setfill(' ') 
        << "nil        "
-       << std::setw(12) << _XL[1][l.I];
+       << std::setw(12) << XL[1][l.I];
     return s;
   }
   //
@@ -1512,8 +1452,8 @@ namespace WDutils {
     // cell id
     s   << c << ' ';
     // level
-    s   << std::setw(2) << int (_LE[c.I]) << ' '
-	<< std::setw(2) << int (_DP[c.I]) << ' ';
+    s   << std::setw(2) << int (LE[c.I]) << ' '
+	<< std::setw(2) << int (DP[c.I]) << ' ';
 #ifdef OCTALTREE_USE_OPENMP
     // domain and # domains
     s   << std::setw(2) << int (first_domain(c)) << ' '
@@ -1521,26 +1461,26 @@ namespace WDutils {
 #endif
     // parent
     if(c.I)
-      s << Cell(_PA[c.I]) << ' ';
+      s << Cell(PA[c.I]) << ' ';
     else 
       s << "nil       ";
     // octant
-    s   << int (_OC[c.I]) << ' ';
+    s   << int (OC[c.I]) << ' ';
     // cells
-    if(_NC[c.I])
-      s << Cell(_C0[c.I]) << ' '
-	<< int (_NC[c.I]) << ' ';
+    if(NC[c.I])
+      s << Cell(C0[c.I]) << ' '
+	<< int (NC[c.I]) << ' ';
     else
       s << "nil       0 ";
     // leaves
-    s   << Leaf(_L0[c.I]) << ' '
-	<< std::setw(3)  << int(_NL[c.I])  << ' '
-	<< std::setw(7)  << _NM[c.I] << ' ';
+    s   << Leaf(L0[c.I]) << ' '
+	<< std::setw(3)  << int(NL[c.I])  << ' '
+	<< std::setw(7)  << NM[c.I] << ' ';
     if(have_flag())
-      s << std::setw(7)  << _NA[c.I] << ' ';
+      s << std::setw(7)  << NA[c.I] << ' ';
     // radius, centre
-    s   << std::setw(10) << _XC[c.I].H << ' '
-	<< std::setw(11) << _XC[c.I].X;
+    s   << std::setw(10) << XC[c.I].H << ' '
+	<< std::setw(11) << XC[c.I].X;
     return s;
   }
 #ifdef OCTALTREE_USE_OPENMP
@@ -1586,9 +1526,6 @@ namespace {
   {
     using ITree = InteractionTree<_TemplateList>;
     static const int  Dim       = _Dim;
-#ifdef __SSE__
-    static const bool Anchoring = ITree::Anchoring;
-#endif
     using IData        = typename ITree::DataBase;
     using OTree        = typename ITree::OTree;
     using Leaf         = typename ITree::Leaf;
@@ -1602,11 +1539,13 @@ namespace {
 
 #ifdef __SSE__
     using Anchor       = typename ITree::Anchor;
-    using sse_pos_type = typename ITree::sse_pos_type;
+    using packed_pos_type= typename ITree::packed_pos_type;
+    using pos_comp_block = typename ITree::pos_comp_block;
+    using pos_vect_block = typename ITree::pos_vect_block;
     /// set SSE position without anchoring
     template<bool _A>
     static typename std::enable_if<!_A>::type
-    _set_sse(const OTree*tree, IData*data,
+    _set_packed_pos(const OTree*tree, IData*data,
 # ifdef OCTALTREE_USE_OPENMP
 	     count_type dom,
 # endif
@@ -1618,15 +1557,21 @@ namespace {
 # else
       auto sub=tree;
 # endif
-      for(auto l=sub->begin_leaf(); l!=sub->end_leaf(); ++l)
+      for(auto l=sub->begin_leaf(); l!=sub->end_leaf(); ++l) {
+	count_type j = packed_pos_type::block_index(l.I);
+	count_type k = packed_pos_type::sub_index(l.I);
 	for(int d=0; d!=Dim; ++d)
-	  data->_XVEC[d][l.I] = tree->position(l)[d];
+	  data->PPOS[j][d][k] = tree->position(l)[d];
+      }
 # ifdef OCTALTREE_USE_OPENMP
       if(dom+1 == tree->n_dom())
 # endif
-	for(auto l=tree->end_leaf(); l.I<tree->leaf_capacity(); ++l)
+	for(auto l=tree->end_leaf(); l.I<tree->leaf_capacity(); ++l) {
+	  count_type j = packed_pos_type::block_index(l.I);
+	  count_type k = packed_pos_type::sub_index(l.I);
 	  for(int d=0; d!=Dim; ++d)
-	    data->_XVEC[d][l.I] = 0;
+	    data->PPOS[j][d][k] = 0;
+	}
       DebugInfoN(3,"InteractionTree: DONE (sse positions)\n");
     }
     //
@@ -1643,11 +1588,11 @@ namespace {
     /// set SSE positions and anchors
     template<bool _A>
     static typename std::enable_if< _A>::type
-    _set_sse(const OTree*tree, IData*data,
+    _set_packed_pos(const OTree*tree, IData*data,
 # ifdef OCTALTREE_USE_OPENMP
-	      count_type dom,
+		    count_type dom,
 # endif
-	      float*QI, float del)
+		    float*QI, float del)
     {
       DebugInfoN(2,"InteractionTree: setting anchors and sse positions ...\n");
 # ifdef OCTALTREE_USE_OPENMP
@@ -1660,9 +1605,9 @@ namespace {
       loop_cells_up(sub,[&](const Cell c) noexcept
 		    {
 		      auto ll=tree->begin_leaf(c);
-		      float qmin = data->_HSQ[0][ll.I];
+		      float qmin = data->SQ[0][ll.I];
 		      for(++ll; ll<tree->end_leaf_kids(c); ++ll)
-			update_min(qmin,data->_HSQ[0][ll.I]);
+			update_min(qmin,data->SQ[0][ll.I]);
 		      for(auto cc=tree->begin_cell(c); cc!=tree->end_cell(c);
 			  ++cc)
 			update_min(qmin,QI[cc.I]);
@@ -1706,7 +1651,7 @@ namespace {
 	// 3.1 last thread allocates anchors
 	{
 	  DebugInfoN(5,"InteractionTree: %d anchors needed in total\n",ntot);
-	  data->_ANCH.resize(ntot);
+	  data->ANCH.resize(ntot);
 	}
       DebugInfoN(4,"InteractionTree: setting anchors and SSE pos ...\n");
 # ifdef OCTALTREE_USE_OPENMP
@@ -1719,21 +1664,25 @@ namespace {
 	  while(!CS.is_empty()) {
 	    auto c = CS.pop();
 	    if(square(tree->radius(c)) < fac * QI[c.I]) {
-	      Anchor*An = &(data->_ANCH[ianc++]);
+	      Anchor*An = &(data->ANCH[ianc++]);
 	      An->Z = tree->centre(c);
 	      An->B = tree->begin_leaf(c);
 	      An->E = tree->end_leaf_desc(c);
 	      for(auto l=tree->begin_leaf(c); l!=tree->end_leaf_desc(c); ++l) {
-		data->_ANC[l.I] = An;
+		data->ANC[l.I] = An;
+		count_type j = packed_pos_type::block_index(l.I);
+		count_type k = packed_pos_type::sub_index(l.I);
 		for(int d=0; d!=Dim; ++d)
-		  data->_XVEC[d][l.I] = float(tree->position(l)[d] - An->Z[d]);
+		  data->PPOS[j][d][k] = float(tree->position(l)[d] - An->Z[d]);
 	      }
 	    } else {
 	      for(auto l=tree->begin_leaf(c); l<tree->end_leaf_kids(c); ++l) {
-		data->_ANC[l.I] = 0;
+		data->ANC[l.I] = 0;
+		count_type j = packed_pos_type::block_index(l.I);
+		count_type k = packed_pos_type::sub_index(l.I);
 		for(int d=0; d!=Dim; ++d)
-		  data->_XVEC[d][l.I] = float(tree->position(l)[d] -
-					     tree->centre  (c)[d] );
+		  data->PPOS[j][d][k] = float(tree->position(l)[d] -
+					      tree->centre  (c)[d] );
 	      }
 	      for(auto cc=tree->begin_cell(c); cc!=tree->end_cell(c); ++cc)
 		CS.push(cc);
@@ -1747,24 +1696,27 @@ namespace {
       // 4 pad unused final positions
       if(dom+1 == tree->n_dom())
 # endif
-	for(auto l=tree->end_leaf(); l.I<tree->leaf_capacity(); ++l)
+	for(auto l=tree->end_leaf(); l.I<tree->leaf_capacity(); ++l) {
+	  count_type b = packed_pos_type::block_index(l.I);
+	  count_type k = packed_pos_type::sub_index(l.I);
 	  for(int d=0; d!=Dim; ++d)
-	    data->_XVEC[d][l.I] = 0;
+	    data->PPOS[b][d][k] = 0;
+	}
       DebugInfoN(3,"InteractionTree: DONE "
 		 "(setting anchors and SSE positions)\n");
     }
     /// set SSE positions and anchors (if required)
     static void
-    set_sse(const OTree*tree, IData*data, 
+    set_packed_pos(const OTree*tree, IData*data, 
 # ifdef OCTALTREE_USE_OPENMP
-	    domain_id dom,
+		   domain_id dom,
 # endif
-	    float*QI, float del)
-    { return _set_sse<_Anc>(tree,data,
+		   float*QI, float del)
+    { return _set_packed_pos<_Anc>(tree,data,
 # ifdef OCTALTREE_USE_OPENMP
-			    dom,
+				   dom,
 # endif
-			    QI,del); }
+				   QI,del); }
     /// (not) dump anchor
     template<bool _A>
     static typename std::enable_if<!_A>::type
@@ -1817,11 +1769,11 @@ namespace {
 #ifdef OCTALTREE_USE_OPENMP
       auto sub = tree->domain(dom);
       init->InitMass(tree->template particle_keys<0>()+sub->L0,
-		     p_data(data->_MASS[0])           +sub->L0,
+		     p_data(data->MS[0])           +sub->L0,
 		     sub ->n_leaf());
 #else
       init->InitMass(tree->template particle_keys<0>(),
-		     p_data(data->_MASS[0]),
+		     p_data(data->MS[0]),
 		     tree->n_leaf());
 #endif
       // 2 pad last few
@@ -1829,7 +1781,7 @@ namespace {
       if(dom+1 == tree->n_dom())
 #endif
 	for(count_type l=tree->n_leaf(); l<tree->leaf_capacity(); ++l)
-	  p_data(data->_MASS[0])[l] = 0;
+	  p_data(data->MS[0])[l] = 0;
       DebugInfoN(3,"InteractionTree: DONE (loading masses)\n");
     }
     /// load masses for external leaves
@@ -1839,11 +1791,11 @@ namespace {
       DebugInfoN(2,"InteractionTree: loading masses for ext leaves ...\n");
       // 1 load mass for external leaves
       init->InitMass(tree->template particle_keys<1>(),
-		     p_data(data->_MASS[1]),
+		     p_data(data->MS[1]),
 		     tree->n_extleaf());
       // 2 pad last few
       for(count_type l=tree->n_extleaf(); l<tree->extleaf_capacity(); ++l)
-	p_data(data->_MASS[1])[l] = 0;
+	p_data(data->MS[1])[l] = 0;
       DebugInfoN(3,"InteractionTree: DONE (loading masses for ext leaves)\n");
     }
     /// load size^2 for domain leaves
@@ -1859,11 +1811,11 @@ namespace {
 #ifdef OCTALTREE_USE_OPENMP
       auto sub = tree->domain(dom);
       init->InitSizeQ(tree->template particle_keys<0>()+sub->L0,
-		      p_data(data->_HSQ[0])            +sub->L0,
+		      p_data(data->SQ[0])              +sub->L0,
 		      sub ->n_leaf());
 #else
       init->InitSizeQ(tree->template particle_keys<0>(),
-		      p_data(data->_HSQ[0]),
+		      p_data(data->SQ[0]),
 		      tree->n_leaf());
 #endif
       // 2 pad last few rungs
@@ -1871,7 +1823,7 @@ namespace {
       if(dom+1 == tree->n_dom())
 #endif
       for(count_type l=tree->n_leaf(); l<tree->leaf_capacity(); ++l)
-	p_data(data->_HSQ[0])[l] = 0;
+	p_data(data->SQ[0])[l] = 0;
       DebugInfoN(3,"InteractionTree: DONE (loading sizes^2)\n");
     }
     /// load size^2 for external leaves
@@ -1881,11 +1833,11 @@ namespace {
       DebugInfoN(2,"InteractionTree: loading sizes^2 for ext leaves ...\n");
       // 1 load size^2 for external leaves
       init->InitSizeQ(tree->template particle_keys<1>(),
-		      p_data(data->_HSQ[1]),
+		      p_data(data->SQ[1]),
 		      tree->n_extleaf());
       // 2 pad last few rungs
       for(count_type l=tree->n_extleaf(); l<tree->extleaf_capacity(); ++l)
-	p_data(data->_HSQ[1])[l] = 0;
+	p_data(data->SQ[1])[l] = 0;
       DebugInfoN(3,"InteractionTree: DONE (loading sizes^2 for ext leaves)\n");
     }
   };// TreeImplenter<InteractionTree>
@@ -1905,16 +1857,16 @@ namespace WDutils {
       size_t need = 0;
       if(load & mass_tag)
 	need +=
-	  NextAligned<prop_type> (nl) +                 // _MASS[0]
-	  NextAligned<prop_type> (ne) ;                 // _MASS[1]
+	  NextAligned<prop_type> (nl) +                 // MS[0]
+	  NextAligned<prop_type> (ne) ;                 // MS[1]
       if(load & size_tag)
 	need +=
-	  NextAligned<prop_type> (nl) +                 // _HSQ [0]
-	  NextAligned<prop_type> (ne) ;                 // _HSQ [1] 
+	  NextAligned<prop_type> (nl) +                 // SQ[0]
+	  NextAligned<prop_type> (ne) ;                 // SQ[1] 
 # ifdef __SSE__
-      if(load & xvec_tag)
-	need +=
-	  Dim * NextAligned<sse_pos_type>(nl) ;         // _XVEC [DIM]
+      if(load & ppos_tag)
+	need += NextAligned<pos_vect_block>
+	  (packed_pos_type::num_blocks(nl));            // PPOS
 # endif
       DebugInfoN(2,"InteractionTree<>: need %ld bytes of data\n",need);
       return need;
@@ -1930,16 +1882,16 @@ namespace WDutils {
       size_t need = 0;
       if(load & mass_tag)
 	need +=
-	  NextAligned<prop_type> (nl) +                 // _MASS[0]
-	  NextAligned<prop_type> (ne) ;                 // _MASS[1]
+	  NextAligned<prop_type> (nl) +                 // MS[0]
+	  NextAligned<prop_type> (ne) ;                 // MS[1]
       if(load & size_tag)
 	need +=
-	  NextAligned<prop_type> (nl) +                 // _HSQ [0]
-	  NextAligned<prop_type> (ne) ;                 // _HSQ [1] 
-      if(load & xvec_tag)
-	need +=
-	  Dim * NextAligned<sse_pos_type>(nl) +         // _XVEC [DIM]
-	  NextAligned<Anchor*>   (nl) ;                 // _ANC
+	  NextAligned<prop_type> (nl) +                 // SQ[0]
+	  NextAligned<prop_type> (ne) ;                 // SQ[1] 
+      if(load & ppos_tag)
+	need += NextAligned<pos_vect_block>
+	  (packed_pos_type::num_blocks(nl)) +           // PPOS
+	  NextAligned<Anchor*>   (nl) ;                 // ANC
       DebugInfoN(4,"InteractionTree<>: need %ld bytes of data\n",need);
       return need;
     }
@@ -1967,13 +1919,13 @@ namespace WDutils {
 	}								\
       }
       char*A=buf;
-      SET_DATA(_MASS[0],((load&mass_tag)?nl:0),prop_type);
-      SET_DATA(_MASS[1],((load&mass_tag)?ne:0),prop_type);
-      SET_DATA(_HSQ [0],((load&size_tag)?nl:0),prop_type);
-      SET_DATA(_HSQ [1],((load&size_tag)?ne:0),prop_type);
+      SET_DATA(MS[0],((load&mass_tag)?nl:0),prop_type);
+      SET_DATA(MS[1],((load&mass_tag)?ne:0),prop_type);
+      SET_DATA(SQ[0],((load&size_tag)?nl:0),prop_type);
+      SET_DATA(SQ[1],((load&size_tag)?ne:0),prop_type);
 # ifdef __SSE__
-      for(int d=0; d!=Dim; ++d)
-	SET_DATA(_XVEC[d],((load&xvec_tag)?nl:0),sse_pos_type);
+      count_type nb = packed_pos_type::num_blocks(nl);
+      SET_DATA(PPOS ,((load&ppos_tag)?nb:0),pos_vect_block);
 # endif
       WDutilsAssert(A==buf+bytes_needed(load,nl,ne));
       DebugInfoN(5,"InteractionTree<>: setting data: DONE\n");
@@ -1988,13 +1940,13 @@ namespace WDutils {
     set_memory(int load, char*buf, count_type nl, count_type ne)
     {
       char*A=buf;
-      SET_DATA(_MASS[0],((load&mass_tag)?nl:0),prop_type);
-      SET_DATA(_MASS[1],((load&mass_tag)?ne:0),prop_type);
-      SET_DATA(_HSQ [0],((load&size_tag)?nl:0),prop_type);
-      SET_DATA(_HSQ [1],((load&size_tag)?ne:0),prop_type);
-      for(int d=0; d!=Dim; ++d)
-	SET_DATA(_XVEC[d],((load&xvec_tag)?nl:0),sse_pos_type);
-      SET_DATA(_ANC,((load&xvec_tag)?nl:0),Anchor*);
+      count_type nb = packed_pos_type::num_blocks(nl);
+      SET_DATA(MS[0],((load&mass_tag)?nl:0),prop_type);
+      SET_DATA(MS[1],((load&mass_tag)?ne:0),prop_type);
+      SET_DATA(SQ[0],((load&size_tag)?nl:0),prop_type);
+      SET_DATA(SQ[1],((load&size_tag)?ne:0),prop_type);
+      SET_DATA(PPOS ,((load&ppos_tag)?nb:0),pos_vect_block);
+      SET_DATA(ANC  ,((load&ppos_tag)?nl:0),Anchor*);
       WDutilsAssert(A==buf+bytes_needed(load,nl,ne));
       DebugInfoN(3,"InteractionTree<>: setting data: DONE\n");
     }
@@ -2011,8 +1963,8 @@ namespace WDutils {
     {
       DebugInfoN(5,"InteractionTreeDatat<non-anchoring>::allocate() ...\n");
       size_t need = bytes_needed(load,nl,ne);
-      _BUF. template reset_conditional<3,2>(need);
-      set_memory(load,_BUF.begin(),nl,ne);
+      BUF. template reset_conditional<3,2>(need);
+      set_memory(load,BUF.begin(),nl,ne);
     }
     template<int _Dim>
     void InteractionTreeData<_Dim,double,float,true>::
@@ -2020,8 +1972,8 @@ namespace WDutils {
     {
       DebugInfoN(5,"InteractionTreeDatat<anchoring>::allocate() ...\n");
       size_t need = bytes_needed(load,nl,ne);
-      _BUF. template reset_conditional<3,2>(need);
-      set_memory(load,_BUF.begin(),nl,ne);
+      BUF. template reset_conditional<3,2>(need);
+      set_memory(load,BUF.begin(),nl,ne);
     }
 # else// OCTALTREE_DATA_IN_ONE_BLOCK
     // allocating using vector<>, non-anchoring
@@ -2030,9 +1982,10 @@ namespace WDutils {
     {
       static_assert(!_Anc," InteractionTreeData::allocate(): not anchoring");
       DebugInfoN(2,"InteractionTree<>: allocating additional data ...\n");
-      const count_type ne4=(ne+3)&~3;              // multiple of 4 >= ne
-      const count_type nl4=(nl+3)&~3;              // multiple of 4 >= nl
-#  define SET_DATA(Name,Number)					\
+      const count_type neb=packed_prop_type::blocked_num(ne);
+      const count_type nlb=packed_prop_type::blocked_num(nl);
+      const count_type nbb=packed_prop_type::num_blocks(nl);
+      #  define SET_DATA(Name,Number)  				\
       if(Number) {						\
 	Name.resize(Number);					\
       } else {							\
@@ -2043,17 +1996,12 @@ namespace WDutils {
 		 __STRING(Name),Name.data(),Number,		\
 		 nameof(typename std::remove_reference<		\
 			decltype(Name[0])>::type));
-      SET_DATA(_MASS[0],((load&mass_tag)?nl4:0));
-      SET_DATA(_MASS[1],((load&mass_tag)?ne4:0));
-      SET_DATA( _HSQ[0],((load&size_tag)?nl4:0));
-      SET_DATA( _HSQ[1],((load&size_tag)?ne4:0));
+      SET_DATA(MS[0],((load&mass_tag)?nlb:0));
+      SET_DATA(MS[1],((load&mass_tag)?neb:0));
+      SET_DATA(SQ[0],((load&size_tag)?nlb:0));
+      SET_DATA(SQ[1],((load&size_tag)?neb:0));
 #  ifdef __SSE__
-      SET_DATA(_xvec    ,((load&xvec_tag)?Dim*nl4:0));
-      if(load&xvec_tag) {
-	_XVEC[0] = _xvec.data();
-	for(int d=1; d<Dim; ++d) _XVEC[d] = _XVEC[d-1] + nl4;
-      } else
-	for(int d=0; d<Dim; ++d) _XVEC[d] = 0;
+      SET_DATA(PPOS ,((load&ppos_tag)?nbb:0));
 #  endif
       DebugInfoN(3,"InteractionTree<>: DONE "
 		   "(allocating additional data)\n");
@@ -2066,19 +2014,15 @@ namespace WDutils {
     allocate(const int load, const count_type nl, const count_type ne)
     {
       DebugInfoN(2,"InteractionTree<>: allocating additional data ...\n");
-      const count_type ne4=(ne+3)&~3;              // multiple of 4 >= ne
-      const count_type nl4=(nl+3)&~3;              // multiple of 4 >= nl
-      SET_DATA(_MASS[0],((load&mass_tag)?nl4:0));
-      SET_DATA(_MASS[1],((load&mass_tag)?ne4:0));
-      SET_DATA( _HSQ[0],((load&size_tag)?nl4:0));
-      SET_DATA( _HSQ[1],((load&size_tag)?ne4:0));
-      SET_DATA(_xvec   ,((load&xvec_tag)?Dim*nl4:0));
-      if(load&xvec_tag) {
-	_XVEC[0] = _xvec.data();
-	for(int d=1; d<Dim; ++d) _XVEC[d] = _XVEC[d-1] + nl4;
-      } else
-	for(int d=0; d<Dim; ++d) _XVEC[d] = 0;
-      SET_DATA(_ANC    ,((load&xvec_tag)?nl:0));
+      const count_type neb=packed_prop_type::blocked_num(ne);
+      const count_type nlb=packed_prop_type::blocked_num(nl);
+      const count_type nbb=packed_prop_type::num_blocks(nl);
+      SET_DATA(MS[0],((load&mass_tag)?nlb:0));
+      SET_DATA(MS[1],((load&mass_tag)?neb:0));
+      SET_DATA(SQ[0],((load&size_tag)?nlb:0));
+      SET_DATA(SQ[1],((load&size_tag)?neb:0));
+      SET_DATA(PPOS ,((load&ppos_tag)?nbb:0));
+      SET_DATA(ANC  ,((load&ppos_tag)?nl:0));
       DebugInfoN(3,"InteractionTree<>: DONE "
 		 "(allocating additional data)\n");
     }
@@ -2103,22 +2047,22 @@ namespace WDutils {
     if(LOAD == 0)
       WDutils_WarningN("InteractionTree: load=0\n");
 #ifdef __SSE__
-    if(LOAD & octtree::xvec_tag) {
+    if(LOAD & octtree::ppos_tag) {
       if(!(LOAD & octtree::size_tag))
 	WDutils_THROW("InteractionTree: SSE positions require sizes\n");
       if(DEL >= 1.f)
-	WDutils_THROWN("InteractionTree: del=%f >= 1\n",DEL);
+	WDutils_THROW("InteractionTree: del=%f >= 1\n",DEL);
       if(DEL < std::numeric_limits<float>::epsilon())
-	WDutils_THROWN("InteractionTree: "
-		       "del=%f < single precision (%f)\n",
-		       DEL,std::numeric_limits<float>::epsilon());
+	WDutils_THROW("InteractionTree: "
+		      "del=%f < single precision (%f)\n",
+		      DEL,std::numeric_limits<float>::epsilon());
       if(DEL > 0.1f)
 	WDutils_WarningN("InteractionTree: "
-			 "del=%f close to 1\n",DEL);
+			"del=%f close to 1\n",DEL);
       if(DEL < 10*std::numeric_limits<float>::epsilon())
 	WDutils_WarningN("InteractionTree: "
-			 "del=%f close to %f (single precision)\n",
-			 DEL,std::numeric_limits<float>::epsilon());
+			"del=%f close to %f (single precision)\n",
+			DEL,std::numeric_limits<float>::epsilon());
     }
 #endif
     DebugInfoN(6,"InteractionTree<>::Builder::Builder(): DATA=%p\n",DATA);
@@ -2137,7 +2081,7 @@ namespace WDutils {
     DATA->allocate(LOAD,NLeaf,NExtLeaf); 
 #endif
 #ifdef __SSE__
-    if(LOAD & xvec_tag) {
+    if(LOAD & ppos_tag) {
       DebugInfoN(6,"InteractionTree<>::Builder::Before(): "
 		 "resetting QI (NCELL=%d)\n",NCell);
       const_cast<float*&>(QI) = WDutils_NEW(float,NCell);
@@ -2160,12 +2104,12 @@ namespace WDutils {
       Impl::load_size(tree,DATA,INIT,dom);
 #ifdef __SSE__
     // 3 set SSE positions
-    if(LOAD & xvec_tag)
-      Impl::set_sse(tree,DATA,
+    if(LOAD & ppos_tag)
+      Impl::set_packed_pos(tree,DATA,
 # ifdef OCTALTREE_USE_OPENMP
-		    dom,
+			   dom,
 # endif
-		    QI,DEL);
+			   QI,DEL);
 #endif
   }
   //

@@ -19,7 +19,7 @@
 /// \version Mar-2010 WD  class FastNeighbourFinder
 /// \version Apr-2010 WD  class TreeWalkAlgorithm, tree pruning
 /// \version Apr-2010 WD  faster and memory-leaner tree-building algorithm
-/// \version Jun-2010 WD  16-byte alignement, using geometry.h
+/// \version Jun-2010 WD  16-byte alignment, using geometry.h
 /// \version Jul-2012 WD  allowed for periodic boundaries
 /// \version Aug-2012 WD  completely new, OMP parallel in non-public part
 ///                       requires C++11
@@ -27,6 +27,10 @@
 /// \version Oct-2012 WD  one memory block for OctalTree and InteractionTree
 /// \version Oct-2012 WD  define only one TreeWalker instantination
 /// \version Oct-2012 WD  prepare for AVX (block sizes and data alignment)
+/// \version Nov-2012 WD  further preparations for using AVX
+/// \version Nov-2012 WD  direct support for blocked and packed data types
+/// \version Nov-2012 WD  happy icpc 13.0.1
+/// \version Nov-2012 WD  use std::vector<> for importing Dots
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -65,6 +69,14 @@
 #ifndef WDutils_included_iomanip
 #  include <iomanip>
 #  define WDutils_included_iomanip
+#endif
+#ifndef WDutils_included_stack
+#  include <stack>
+#  define WDutils_included_stack
+#endif
+#ifndef WDutils_included_array
+#  define  WDutils_included_array
+#  include <array>
 #endif
 #ifndef WDutils_included_periodic_h
 #  include <periodic.h>
@@ -182,14 +194,15 @@ namespace WDutils {
     typedef uint8_t octant_type;
     typedef uint8_t local_count;
     typedef positional_offset_bits offbits;
+    typedef uint8_t rung_type;
 #ifdef OCTALTREE_USE_OPENMP
     typedef uint8_t domain_id;
 #endif// OCTALTREE_USE_OPENMP
     //@}
-    template<int> struct block_flag_t;
-    template<> struct block_flag_t<2> { typedef uint16_t type; };
-    template<> struct block_flag_t<4> { typedef uint32_t type; };
-    template<> struct block_flag_t<8> { typedef uint64_t type; };
+    template<int> struct block_flag_type;
+    template<> struct block_flag_type<2> { typedef uint16_t type; };
+    template<> struct block_flag_type<4> { typedef uint32_t type; };
+    template<> struct block_flag_type<8> { typedef uint64_t type; };
     ///
     /// wrapper around count_type: either a cell or leaf in the tree
     ///
@@ -253,7 +266,7 @@ namespace WDutils {
     //
     typedef TreeNode<0,0> Leaf;              ///< type: internal leaf
     typedef TreeNode<1,0> ExtLeaf;           ///< type: external leaf
-    typedef TreeNode<0,2> Cell;              ///< type: cell
+    typedef TreeNode<0,1> Cell;              ///< type: cell
     /// an invalid internal leaf
     inline Leaf invalid_leaf() noexcept
     { return Leaf::invalid(); }
@@ -301,6 +314,16 @@ namespace WDutils {
     private:
       LeafRange() = delete;
     };// struct LeafRange
+    ///
+    /// tags for various additional particle properties
+    ///
+    enum PropTags {
+      rung_tag = 1 << 0,     ///< tag: particle rungs and activity flags
+      mass_tag = 1 << 1,     ///< tag: particle masses
+      size_tag = 1 << 2,     ///< tag: particle sizes^2
+      ppos_tag = 1 << 3,     ///< tag: packed particle positions
+    };
+    //
 #ifdef OCTALTREE_USE_OPENMP
     template<OMP::Schedule> struct _default_chunk {
       static unsigned size(unsigned n)
@@ -315,32 +338,13 @@ namespace WDutils {
     inline unsigned default_chunk(unsigned n)
     { return _default_chunk<schedule>::size(n); }
 #endif
-    /// collection of common types and constants used with trees
-    struct static_tree_properties {
-      using Leaf = octtree::Leaf;
-      using Cell = octtree::Cell;
-      template<bool EXT>
-      using TreeLeaf = TreeNode<EXT,0>;
-      using LeafRange = octtree::LeafRange;
-      using ExtLeaf = octtree::ExtLeaf;
-      using count_type = octtree::count_type;
-      using particle_key = octtree::particle_key;
-      using offbits = octtree::offbits;
-      using depth_type = octtree::depth_type;
-      using octant_type = octtree::octant_type;
-      using local_count = octtree::local_count;
-#ifdef OCTALTREE_USE_OPENMP
-      using domain_id = octtree::domain_id;
-#endif
-    };
-    /// block size for leaf data
 #ifdef __AVX__
-    constexpr count_type LeafBlockSize = 8;
+    /// data alignment (bytes) used for all tree data in OctalTree<>
+    constexpr count_type DataAlignment = 32;
 #else
-    constexpr count_type LeafBlockSize = 4;
+    /// data alignment (bytes) used for all tree data in OctalTree<>
+    constexpr count_type DataAlignment = 16;
 #endif
-    /// data alignement (bytes) used for all tree data in OctalTree<>
-    constexpr count_type DataAlignment= 4*LeafBlockSize;
     /// the next multiple of @a DataAlignment to n*sizeof(T)
     template<typename T>
     inline constexpr size_t NextAligned(size_t n)
@@ -378,7 +382,14 @@ namespace WDutils {
 #undef  _COLON
 		    "]");
     };
-    /// std::vector with K-byte aligning allocator
+    ///
+#ifdef __SSE__
+    /// a std::array of an even number of element blocks
+    /// to be used to store velocity components
+    template<int Dim, typename PackedType>
+    using vector_block = std::array<typename PackedType::element_block,Dim>;
+#endif
+    /// std::vector with allocator aligning to DataAlignment bytes
     template<typename _Tp> using aligned_vector =
       std::vector<_Tp, AlignmentAllocator<_Tp, DataAlignment> >;
 #ifdef OCTALTREE_DATA_IN_ONE_BLOCK
@@ -399,7 +410,7 @@ namespace WDutils {
     template<typename _Tp> inline bool have_data(aligned_storage<_Tp> const&X)
     { return X.size() > 0; }
     template<typename _Tp>
-    inline const _Tp*cp_data(aligned_storage<_Tp,_alignment> const&X)
+    inline const _Tp*cp_data(aligned_storage<_Tp> const&X)
     { return X.data(); }
 #endif// OCTALTREE_DATA_IN_ONE_BLOCK
   } // namespace octtree
@@ -486,34 +497,73 @@ namespace WDutils {
   ///
   template<int _Dim, typename _PosType>
   class OctalTree :
-    private parameters_okay_for_OctalTree<_Dim,_PosType>,
-    public  octtree::static_tree_properties
+    parameters_okay_for_OctalTree<_Dim,_PosType>
   {
     template<typename, typename> friend class TreeWalker;
     friend struct ::TreeImplementer<OctalTree>;
-    // disable default and copy ctor
+    // delete copy and move
+    OctalTree           (OctalTree&&) = delete;
+    OctalTree& operator=(OctalTree&&) = delete;
     OctalTree           (const OctalTree&) = delete;
     OctalTree& operator=(const OctalTree&) = delete;
   public:
     /// \name public constants and types
     //@{
-    static const int                 Dim = _Dim;    ///< # dimensions
-    static const octtree::depth_type Nsub= 1<<Dim;  ///< # octants/cell
-    static const int                 Noff= Nsub-1;  ///< Nsub-1
+    using Leaf = octtree::Leaf;
+    using Cell = octtree::Cell;
+    template<bool EXT>
+    using TreeLeaf = octtree::TreeNode<EXT,0>;
+    using LeafRange = octtree::LeafRange;
+    using ExtLeaf = octtree::ExtLeaf;
+    using count_type = octtree::count_type;
+    using particle_key = octtree::particle_key;
+    using offbits = octtree::offbits;
+    using depth_type = octtree::depth_type;
+    using octant_type = octtree::octant_type;
+    using local_count = octtree::local_count;
+    using rung_type = octtree::rung_type;
+#ifdef OCTALTREE_USE_OPENMP
+    using domain_id = octtree::domain_id;
+#endif
+    typedef _PosType pos_type;       ///< floating-point type for positions
+    static const int                 Dim = _Dim;       ///< # dimensions
+    static const int                 Dim2= (Dim+1)&~1; ///< even number >= Dim
+    static const octtree::depth_type Nsub= 1<<Dim;     ///< # octants/cell
+    static const int                 Noff= Nsub-1;     ///< Nsub-1
     /// maximum for @a NMAX
     static const octtree::depth_type MAXNMAX = 250;
-    /// block size of leaf data
-    static const count_type LeafBlockLim  = octtree::LeafBlockSize-1;
-    static const count_type LeafBlockMask = ~LeafBlockLim;
-    /// smallest multiple of LeafBlockSize larger or equal to n
-    static count_type blocked(const count_type n) noexcept
-    { return (n+LeafBlockLim)&LeafBlockMask; }
-    //
-    typedef _PosType pos_type;
+    /// alignment for positions and cubes
+    /// \note this is required for them to be used with Geometry::Algorithm<1,1>
+    static const count_type PosAlignment = Geometry::
+					      alignment<Dim,pos_type>::value;
+    static_assert(PosAlignment <= octtree::DataAlignment,
+		  "positional alignment error");
+  protected:
+    /// leaf data are allocated to a multiple of the LeafDataBlockSize
+    static const count_type LeafDataBlockSize = octtree::DataAlignment/4;
+    static const count_type LeafDataBlockTrim = LeafDataBlockSize-1;
+    static const count_type LeafDataBlockMask =~LeafDataBlockTrim;
+    /// smallest multiple of LeafDataBlockSize larger or equal to n
+    constexpr static count_type data_blocked(const count_type n) noexcept
+    { return (n+LeafDataBlockTrim)&LeafDataBlockMask; }
+  public:
+    /// \name support for blocked leaf processing
+    //@{
+    /// leaves may be processed in blocks of LeafBlockSize
+    static const count_type LeafBlockSize =
+      octtree::DataAlignment/sizeof(pos_type);
+    static const count_type LeafBlockTrim = LeafBlockSize-1;
+    static const count_type LeafBlockMask =~LeafBlockTrim;
+    static const count_type LeafBlockShft =
+      LeafBlockSize==2? 1: LeafBlockSize==4? 2:3;
+    static_assert((LeafBlockSize&LeafBlockTrim)==0,
+		  "LeafBlockSize not a power of 2");
+    static_assert((1<<LeafBlockShft) == LeafBlockSize,"wrong LeafBlockShft");
+    //@}
     typedef Geometry::cube<Dim,pos_type> cube;
-    typedef SSE::Extend16<cube> cube16;
+    typedef SSE::Extend<cube,PosAlignment> cubeXX;
     typedef typename cube::point point;
-    typedef SSE::Extend16<point> point16;
+    typedef SSE::Extend<point,PosAlignment> pointXX;
     typedef PeriodicBox<Dim,pos_type> PerBoundary;
     template<typename _Tp> using storage        = octtree::storage<_Tp>;
     template<typename _Tp> using aligned_storage= octtree::aligned_storage<_Tp>;
@@ -526,7 +576,7 @@ namespace WDutils {
       particle_key   I;                             ///< particle identifier
       mutable void  *Next;                          ///< next dot in a list
     };
-    typedef SSE::Extend16<_Dot> Dot;               ///< 16-aligned dot
+    typedef SSE::Extend<_Dot,PosAlignment> Dot;     ///< aligned dot
     //@}
     ///
     /// Interface for initialising particles at tree building
@@ -556,10 +606,7 @@ namespace WDutils {
       /// 
       /// initialises @a Dot::X and @a Dot::I for all internal particles
       /// 
-      /// \return            dots initialised (and allocated), must be != 0
-      /// \note will be de-allocated using WDutils_DEL16
-      ///
-      /// \param[out] Ndot   # dots initialised (and allocated), must be > 0
+      /// \return dots initialised
 #ifdef OCTALTREE_USE_OPENMP
       /// \param[in]  iT     local thread index
       /// \param[in]  nT     # threads
@@ -577,43 +624,30 @@ namespace WDutils {
       /// \code
       ///       count_type k;
       ///       OMP::PartitionSub(Nkey,iT,nT,k,Nloc);
-      ///       Dot*const D0 = WDutils_NEW16(Dot,Nloc);
-      ///       for(Dot*Di=D0,*DN=D0+Nloc; Di!=DN; ++k,++Di) {
-      ///         Di->I = Keys[k];
-      ///         Di->X = my_particle_position(Keys[k]);
+      ///       octtree::aligned_vector<Dot> dots(Nloc);
+      ///       for(auto&d:dots) {
+      ///         d.X = my_particle_position(Keys[k]);
+      ///         d.I = Keys[k++];
       ///       }
-      ///       return D0;
+      ///       return dots;
       /// \endcode
       ///       But if particles have been removed or created, the user has to
       ///       find a way to ensure that all particles are initialised.
-      /// 
-      /// 
-      /// \note the implementation can assume that each Dot is 16-byte
-      ///       aligned.
-      virtual Dot*InitIntern(count_type&Nloc, 
+      virtual octtree::aligned_vector<Dot> InitIntern(
 #ifdef OCTALTREE_USE_OPENMP
-			     depth_type iT, depth_type nT,
+						      depth_type iT,
+						      depth_type nT,
 #endif
-			     const particle_key*Keys, count_type Nkey)
-	const=0;
-      /// shall we load rungs and flags?
-      virtual bool LoadRungFlag() const
-      { return false; }
-      /// load rungs and flags for all particles in a domain
+						      const particle_key*Keys,
+						      count_type Nkey) const=0;
+      /// load rungs for all particles in a domain
       /// \param[in]  key    table: particle identifiers
       /// \param[out] rung   table: rung for particles associated with keys
-      /// \param[out] flag   table: flag for particles associated with keys
       /// \param[in]  n      size of tables.
-      /// \return            all particles flagged as active?
-      virtual bool InitRungFlag(const particle_key*,
-				float*rung, uint8_t*flag, count_type n) const
-      {
-	for(count_type i=0; i!=n; ++i) {
-	  rung[i] = 0;
-	  flag[i] = 0xff;
-	}
-	return true;
-      }
+      /// \note called in tree build only if @a Data::RACT > 0
+      virtual void InitRung(const particle_key*, float*rung, count_type n)
+	const
+      { for(count_type i=0; i!=n; ++i) rung[i]=0; }
     };// struct OctalTree<>::Initialiser 
 #ifdef OCTALTREE_USE_OPENMP
     ///
@@ -724,32 +758,33 @@ namespace WDutils {
 #ifdef OCTALTREE_USE_OPENMP
     count_type                         TOL;     ///< tolerance at last build
 #endif// OCTALTREE_USE_OPENMP
+    rung_type                          RACT;    ///< lowest active rung
     const bool                         ASCC;    ///< avoid single-child cells?
     // tree data
 #ifdef OCTALTREE_DATA_IN_ONE_BLOCK
-    raw_memory<octtree::DataAlignment> _BUF;    ///< memory holding tree data
+    raw_memory<octtree::DataAlignment> BUF;     ///< memory holding tree data
 #endif// OCTALTREE_DATA_IN_ONE_BLOCK
   private:
     // data for leaves
-    aligned_storage<point16>           _XL[2];  ///< any leaf: position
-    storage<particle_key>              _PL[2];  ///< any leaf: particle
-    aligned_storage<float>             _RG[2];  ///< any leaf: rung
-    aligned_storage<uint8_t>           _FL[2];  ///< any leaf: flag
-    storage<count_type>                _PC;     ///< int leaf: parent cell
+    aligned_storage<pointXX>           XL[2];   ///< any leaf: position
+    storage<particle_key>              PL[2];   ///< any leaf: particle
+    aligned_storage<float>             RG[2];   ///< any leaf: rung
+    aligned_storage<uint8_t>           FL[2];   ///< any leaf: flag
+    storage<count_type>                PC;      ///< int leaf: parent cell
     // data for cells
-    storage<depth_type>                _LE;     ///< cell: tree level
-    storage<octant_type>               _OC;     ///< cell: octant in cell
-    aligned_storage<cube16>            _XC;     ///< cell: cubic box
-    storage<count_type>                _L0;     ///< cell: first leaf
-    storage<local_count>               _NL;     ///< cell: # leaf kids
-    storage<count_type>                _NM;     ///< cell: # leaves in total
-    storage<count_type>                _C0;     ///< cell: index: 1st daughter
-    storage<octant_type>               _NC;     ///< cell: # daughter cells
-    storage<count_type>                _PA;     ///< cell: parent cell index
-    storage<count_type>                _NA;     ///< cell: # active leaves
-    storage<depth_type>                _DP;     ///< cell: tree depth
+    storage<depth_type>                LE;      ///< cell: tree level
+    storage<octant_type>               OC;      ///< cell: octant in cell
+    aligned_storage<cubeXX>            XC;      ///< cell: cubic box
+    storage<count_type>                L0;      ///< cell: first leaf
+    storage<local_count>               NL;      ///< cell: # leaf kids
+    storage<count_type>                NM;      ///< cell: # leaves in total
+    storage<count_type>                C0;      ///< cell: index: 1st daughter
+    storage<octant_type>               NC;      ///< cell: # daughter cells
+    storage<count_type>                PA;      ///< cell: parent cell index
+    storage<count_type>                NA;      ///< cell: # active leaves
+    storage<depth_type>                DP;      ///< cell: tree depth
 #ifdef OCTALTREE_USE_OPENMP
-    storage<domain_id>                 _D0;     ///< cell: first domain
+    storage<domain_id>                 D0;      ///< cell: first domain
 #endif// OCTALTREE_USE_OPENMP
     //@}
 #ifdef OCTALTREE_HAVE_DATA
@@ -775,87 +810,116 @@ namespace WDutils {
     ///
 # if OCTALTREE_CAREFUL
 #  define ASSERT_DAT_OKAY(FUNC)						\
-    if(DATA[EXT][I] == 0)						\
-      WDutils_ErrorN("invalid " FUNC "<EXT=%d,I=%d,T=%s>(n=%d)\n",	\
-		     EXT,I,nameof(T),n);
-#  define ASSERT_VEC_OKAY(FUNC)						\
-    if(DATA[EXT][I] == 0)						\
-      WDutils_ErrorN("invalid " FUNC "<EXT=%d,I=%d,J=%d,T=%s>(n=%d)\n",	\
-		     EXT,I,J,nameof(T),n);
+    if(DATA[EXT][IDAT] == 0)						\
+      WDutils_ErrorN("invalid " FUNC "<EXT=%d,IDAT=%d,T=%s>(n=%d)\n",	\
+		     EXT,IDAT,nameof(T),n);
 # else
 #  define ASSERT_DAT_OKAY(FUNC)
-#  define ASSERT_VEC_OKAY(FUNC)
 # endif// OCTALTREE_CAREFUL
-    /// const access to DATA[I][i]
-    template<bool EXT, int I, typename T>
+    /// const access to DATA[I][n]
+    template<bool EXT, int IDAT, typename T>
     T const&dat(count_type n) const noexcept
     {
-      static_assert(0<=I && I<NDAT,"OctalTree::dat<I>: I out of range");
+      static_assert(0<=IDAT && IDAT<NDAT,
+		    "OctalTree::dat<IDAT>: IDAT out of range");
       ASSERT_DAT_OKAY("dat");
-      return static_cast<const T*>(DATA[EXT][I])[n];
+      return static_cast<const T*>(DATA[EXT][IDAT])[n];
     }
-    /// non-const access to DATA[I][i]
-    template<bool EXT, int I, typename T>
+    /// non-const access to DATA[I][n]
+    template<bool EXT, int IDAT, typename T>
     T&dat_lv(count_type n) const noexcept
     {
-      static_assert(0<=I && I<NDAT,"OctalTree::dat_lv<I>: I out of range");
-      ASSERT_DAT_OKAY("dat)lv");
-      return static_cast<T*>(DATA[EXT][I])[n];
+      static_assert(0<=IDAT && IDAT<NDAT,
+		    "OctalTree::dat_lv<IDAT>: IDAT out of range");
+      ASSERT_DAT_OKAY("dat_lv");
+      return static_cast<T*>(DATA[EXT][IDAT])[n];
     }
-    /// const access to user vector datum
-    template<bool EXT, int I, int J, typename T> 
-    T const&vec(count_type n) const noexcept
+    /// const access to DATA[I][l.I]
+    template<bool EXT, int IDAT, typename T>
+    T const&dat(const Leaf l) const noexcept
+    { return dat<EXT,IDAT,T>(l.I); }
+    /// non-const access to DATA[I][l.I]
+    template<bool EXT, int IDAT, typename T>
+    T&dat_lv(const Leaf l) const noexcept
+    { return dat_lv<EXT,IDAT,T>(l.I); }
+    //
+# ifdef __SSE__
+# if OCTALTREE_CAREFUL
+#  undef  ASSERT_DAT_OKAY
+#  define ASSERT_DAT_OKAY(FUNC)						\
+    if(DATA[EXT][IDAT] == 0)						\
+      WDutils_ErrorN("invalid " FUNC "<EXT=%d,IDAT=%d,T=%s>(l=%s)\n",	\
+		     EXT,IDAT,nameof(PackedType),name(l));
+# endif// OCTALTREE_CAREFUL
+    /// const access to block of scalar user data 
+    template<bool EXT, int IDAT, typename PackedType>
+    typename PackedType::element_block const&
+    b_dat(const Leaf l) const noexcept
     {
-      static_assert(0<=I && I<NDAT,"OctalTree::vec<I,J>: I out of range");
-      static_assert(0<=J && J<Dim, "OctalTree::vec<I,J>: J out of range");
-      ASSERT_VEC_OKAY("vec");
-      return static_cast<const T*const*>(DATA[EXT][I])[J][n];
+      static_assert(0<=IDAT && IDAT<NDAT,
+		    "OctalTree::b_dat<IDAT>: IDAT out of range");
+      ASSERT_DAT_OKAY("b_dat");
+      typedef typename PackedType::element_block comp_block;
+      return static_cast<const comp_block*> (DATA[EXT][IDAT])
+	[PackedType::block_index(l.I)];
     }
-    /// non-const access to user vector datum
-    template<bool EXT, int I, int J, typename T> 
-    T&vec_lv(count_type n) const noexcept
+    /// non-const access to block of scalar user data 
+    template<bool EXT, int IDAT, typename PackedType>
+    typename PackedType::element_block&
+    b_dat_lv(const Leaf l) const noexcept
     {
-      static_assert(0<=I && I<NDAT,"OctalTree::vec_lv<I,J>: I out of range");
-      static_assert(0<=J && J<Dim, "OctalTree::vec_lv<I,J>: J out of range");
-      ASSERT_VEC_OKAY("vec_lv");
-      return static_cast<T*const*>(DATA[EXT][I])[J][n];
+      static_assert(0<=IDAT && IDAT<NDAT,
+		    "OctalTree::b_dat<IDAT>: IDAT out of range");
+      ASSERT_DAT_OKAY("b_dat");
+      typedef typename PackedType::element_block comp_block;
+      return static_cast<comp_block*>(DATA[EXT][IDAT])
+	[PackedType::block_index(l.I)];
     }
-    /// pointer to user datum
-    template<bool EXT, int I, typename T>
-    T*p_dat(count_type n) const noexcept
+    /// packed block of scalar user data
+    template<bool EXT, int IDAT, typename PackedType>
+    PackedType p_dat(const Leaf l) const noexcept
     {
-      static_assert(0<=I && I<NDAT,"OctalTree::p_dat<I>: I out of range");
-      ASSERT_DAT_OKAY("p_dat");
-      return static_cast<T*>(DATA[EXT][I])+n;
+      static_assert(0<=IDAT && IDAT<NDAT,
+		    "OctalTree::p_dat<IDAT>: IDAT out of range");
+      typedef typename PackedType::element_type element_type;
+      return PackedType::load(static_cast<element_type*>(DATA[EXT][IDAT])+l.I);
     }
-    /// constant pointer to user datum
-    template<bool EXT, int I, typename T>
-    const T*cp_dat(count_type n) const
+    /// const access to block of J-th component of vector user data 
+    template<bool EXT, int IDAT, int J, typename PackedType>
+    typename PackedType::element_block const&
+    b_vec(const Leaf l) const noexcept
     {
-      static_assert(0<=I && I<NDAT,"OctalTree::cp_dat<I>: I out of range");
-      ASSERT_DAT_OKAY("cp_dat");
-      return static_cast<const T*>(DATA[EXT][I])+n;
+      static_assert(0<=IDAT && IDAT<NDAT,
+		    "OctalTree::b_vec<IDAT>: IDAT out of range");
+      ASSERT_DAT_OKAY("b_vec");
+      typedef octtree::vector_block<Dim,PackedType> vect_block;
+      return static_cast<const vect_block*>(DATA[EXT][IDAT])
+	[PackedType::block_index(l.I)][J];
     }
-    /// non-const pointer to vector component
-    template<bool EXT, int I, int J, typename T>
-    T*p_vec(count_type n) const
+    /// non-const access to block of J-th component of vector user data 
+    template<bool EXT, int IDAT, int J, typename PackedType>
+    typename PackedType::element_block&
+    b_vec_lv(const Leaf l) const noexcept
     {
-      static_assert(0<=I && I<NDAT,"OctalTree::p_vec<I,J>: I out of range");
-      static_assert(0<=J && J<Dim, "OctalTree::p_vec<I,J>: J out of range");
-      ASSERT_VEC_OKAY("p_vec");
-      return static_cast<T*const*>(DATA[EXT][I])[J]+n;
+      static_assert(0<=IDAT && IDAT<NDAT,
+		    "OctalTree::b_vec<IDAT>: IDAT out of range");
+      ASSERT_DAT_OKAY("b_vec");
+      typedef octtree::vector_block<Dim,PackedType> vect_block;
+      return static_cast<vect_block*>(DATA[EXT][IDAT])
+	[PackedType::block_index(l.I)][J];
     }
-    /// const pointer to vector component from free methods
-    template<bool EXT, int I, int J, typename T>
-    const T*cp_vec(count_type n) const
+    /// packed block of J-th component of vector user data
+    template<bool EXT, int IDAT, int J, typename PackedType>
+    PackedType p_vec(const Leaf l) const noexcept
     {
-      static_assert(0<=I && I<NDAT,"OctalTree::cp_vec<I,J>: I out of range");
-      static_assert(0<=J && J<Dim, "OctalTree::cp_vec<I,J>: J out of range");
-      ASSERT_VEC_OKAY("cp_vec");
-      return static_cast<const T* const*>(DATA[EXT][I])[J]+n;
+      static_assert(0<=IDAT && IDAT<NDAT,
+		    "OctalTree::p_dat<IDAT>: IDAT out of range");
+      typedef octtree::vector_block<Dim,PackedType> vect_block;
+      return PackedType::load(static_cast<vect_block*>(DATA[EXT][IDAT])
+			      [PackedType::block_index(l.I)][J]);
     }
+# endif
 # undef ASSERT_DAT_OKAY
-# undef ASSERT_VEC_OKAY
 #endif// OCTALTREE_HAVE_DATA
     /// \name tree building and related
     //@{
@@ -864,16 +928,16 @@ namespace WDutils {
       depth_type NMAX;       ///< maximum # particles in unsplit octants
       depth_type NMIN;       ///< minimum # particles in cell
       bool       ASCC;       ///< avoid single-child cells?
+      rung_type  RACT;       ///< minimum rung of active particles
+      count_type LOAD;       ///< bits from octtree::PropTags: props to load
       count_type TOL;        ///< tolerance for # leaves in domains
       Data()
 	: NMAX( Nsub )
 	, NMIN( 0 )
 	, ASCC( true )
+	, RACT( 0 )
+	, LOAD( 0 )
 	, TOL ( 0 ) {}
-      Data(Data &&) = default;
-      Data(Data const&) = default;
-      Data&operator=(Data &&) = default;
-      Data&operator=(Data const&) = default;
     };
     /// \brief
     /// ctor: build tree from scratch
@@ -920,22 +984,28 @@ namespace WDutils {
     ///
     /// \note We require @a _data.NMIN <= @a _data.NMAX <= 250 but map @a
     ///       _data.NMIN=0 to @a _data.NMIN=min(2,_data.NMAX). For @a
-    ///       _data.NMIN=2 (and @a _data.NMAX>1) the cell-leaf tree reflects the
-    ///       depth of the original box-dot tree. However, for @a _data.NMIN >
-    ///       2, while the cell-leaf tree is not as deep, the tree order of the
-    ///       deeper box-dot tree is preserved in the tree order of the
-    ///       leaves. For @a _data.NMAX=_data.NMIN=1 the tree is build to
-    ///       maximum depth when each leaf has its own final cell (and tree
-    ///       building is most CPU time consuming), which is unlikely to be
-    ///       required by most applications.
+    ///       _data.NMIN=2 (and @a _data.NMAX>1) the cell-leaf tree reflects
+    ///       the depth of the original box-dot tree. However, for @a
+    ///       _data.NMIN > 2, while the cell-leaf tree is not as deep, the
+    ///       tree order of the deeper box-dot tree is preserved in the tree
+    ///       order of the leaves. For @a _data.NMAX=_data.NMIN=1 the tree
+    ///       is build to maximum depth when each leaf has its own final cell
+    ///       (and tree building is most CPU time consuming), which is
+    ///       unlikely to be required by most applications.
     ///
+    /// \note If _data.LOAD & PropTags::rung_tag, we load the particle rungs,
+    ///       set their activity flags to rung>=_data.RACT, and propagate the
+    ///       number of active particles per cell up the tree. Otherwise, no
+    ///       memory for rungs, flags, and the number of active particles per
+    ///       cell is allocated.
 #ifdef OCTALTREE_USE_OPENMP
+    ///
     /// \note _data.NMAX must not exceed the number of particles per domain.
     ///       We try to adjust _data.TOL (see below) to help meeting this
     ///       criterion, but we may not succeed.
     ///
-    /// \note If @a _data.TOL==0 (default), we choose a reasonable value. Use @a
-    ///       _data.TOL=1 if you want no tolerance, i.e. an completely even
+    /// \note If @a _data.TOL==0 (default), we choose a reasonable value. Use
+    ///       @a _data.TOL=1 if you want no tolerance, i.e. an completely even
     ///       distribution of leaves accross domains. Note that @a _data.TOL=1
     ///       enforces deep domain splits and hence domains with many small
     ///       branches at their edges.
@@ -947,8 +1017,9 @@ namespace WDutils {
     ///       parent and child cells may be more than one tree level apart and
     ///       the tree depth less than the maximum tree level of any cell.
     ///
-    /// \note It is strongly recommended to keep @a _data.NMIN, and @a _data.TOL
-    ///       at their default setting unless you have very specific reasons.
+    /// \note It is strongly recommended to keep @a _data.NMIN, and @a
+    ///       _data.TOL at their default setting unless you have very specific
+    ///       reasons.
     OctalTree(const Initialiser*_init, Data const&_data) throw(exception);
     ///
     /// rebuild tree (after particles have changed position and/or number)
@@ -968,10 +1039,15 @@ namespace WDutils {
     ///       _data.NMAX <=250 and map @a _data.NMIN=0 to @a
     ///       _data.NMIN=min(2,_data.NMAX).
     ///
+    /// \note If _data.LOAD & PropTags::rung_tag, we load the particle rungs,
+    ///       set their activity flags to rung>=_data.RACT, and propagate the
+    ///       number of active particles per cell up the tree. Otherwise, no
+    ///       memory for rungs, flags, and the number of active particles per
+    ///       cell is allocated.
 #ifdef OCTALTREE_USE_OPENMP
     ///
-    /// \note If @a _data.TOL==0 (default), we choose a reasonable value. Use @a
-    ///       _data.TOL=1 if you want no tolerance, i.e. an completely even
+    /// \note If @a _data.TOL==0 (default), we choose a reasonable value. Use
+    ///       @a _data.TOL=1 if you want no tolerance, i.e. an completely even
     ///       distribution of leaves accross domains. Note that @a _data.TOL=1
     ///       enforces deep domain splits and hence domains with many small
     ///       branches at their edges.
@@ -1099,21 +1175,24 @@ namespace WDutils {
     /// was @a ascc set during tree building?
     bool const&avoided_single_child_cells() const noexcept
     { return ASCC; }
+    /// minimum rung of active particles
+    rung_type const&rung_active() const noexcept
+    { return RACT; }
     /// tree depth
     depth_type const&depth() const noexcept
-    { return _DP[0]; }
+    { return DP[0]; }
     /// root cell
     static Cell root() noexcept
     { return Cell(0); }
     /// root box
     cube const&root_box() const noexcept
-    { return _XC[0]; }
+    { return XC[0]; }
     /// root centre
     point const&root_centre() const noexcept
-    { return _XC[0].X; }
+    { return XC[0].X; }
     /// root radius
     pos_type const&root_radius() const noexcept
-    { return _XC[0].H; }
+    { return XC[0].H; }
 #ifdef OCTALTREE_USE_OPENMP
     /// tolerance in domain splitting
     count_type const&tol() const noexcept
@@ -1135,157 +1214,134 @@ namespace WDutils {
     /// # internal leaves
     count_type n_leaf() const noexcept
     { return NLEAF; }
-    /// # leaves actually allocated, multiple of LeafBlockSize, >= @a n_leaf()
+    /// # leaves actually allocated, multiple of LeafDataBlockSize
     count_type leaf_capacity() const noexcept
-    { return blocked(n_leaf()); }
-    /// # 4-blocks of internal leaves
-    count_type n_4blck() const noexcept
-    { return (NLEAF+3)>>2; }
+    { return data_blocked(n_leaf()); }
     /// begin of all internal leaves
     static Leaf begin_leaf() noexcept
     { return Leaf(0); }
     /// end of all internal leaves
     Leaf end_leaf() const noexcept
     { return Leaf(n_leaf()); }
-    /// end of complete leaf blocks of Blocksize
-    template<int Blocksize>
-    Leaf end_complete_block() const noexcept
-    {
-      static_assert(Blocksize==2 || Blocksize==4 || Blocksize==8,
-		    "end_complete_block<>: Blocksize must be 2,4, or 8");
-      return Leaf(n_leaf() & ~(Blocksize-1));
-    }
-    /// position of leaf, 16-byte aligned
+    /// end of all allocated internal leaves
+    Leaf end_leaf_capacity() const noexcept
+    { return Leaf(leaf_capacity()); }
+    /// # LeafBlockSize-sized blocks of internal leaves
+    count_type num_leaf_blocks() const noexcept
+    { return (NLEAF+LeafBlockTrim)>>LeafBlockShft; }
+    /// end of last (possibly incomplete) LeafBlockSize-sized block of leaves
+    Leaf end_leaf_all_blocks() const noexcept
+    { return Leaf((n_leaf()+LeafBlockTrim)&LeafBlockMask); }
+    /// end of complete LeafBlockSize-sized block of leaves
+    Leaf end_leaf_complete_blocks() const noexcept
+    { return Leaf(n_leaf()&LeafBlockMask); }
+    /// position of leaf (always aligned to @a PosAlignment bytes)
     template<bool EXT>
     point const&position(const TreeLeaf<EXT> l) const noexcept
-    { return _XL[EXT][l.I]; }
-    /// position of leaf, 16-byte aligned
-    template<bool EXT>
-    point16 const&position16(const TreeLeaf<EXT> l) const noexcept
-    { return _XL[EXT][l.I]; }
+    { return XL[EXT][l.I]; }
     /// index of particle associated with leaf
     template<bool EXT>
     particle_key const&particle(const TreeLeaf<EXT> l) const noexcept
-    { return _PL[EXT][l.I]; }
+    { return PL[EXT][l.I]; }
     /// pointer to all particle keys
     template<bool EXT>
     const particle_key*particle_keys() const noexcept
 #ifdef OCTALTREE_DATA_IN_ONE_BLOCK
-    { return _PL[EXT]; }
+    { return PL[EXT]; }
 #else
-    { return _PL[EXT].data(); }
+    { return PL[EXT].data(); }
 #endif
     /// do we have rungs loaded
     bool have_rung() const noexcept
-    { return octtree::have_data(_RG[0]); }
+    { return octtree::have_data(RG[0]); }
     /// const access to rung for leaf
     template<bool EXT>
     float const&rung(const TreeLeaf<EXT> l) const noexcept
-    { WDutilsTreeAssertE(octtree::have_data(_RG[EXT])); return _RG[EXT][l.I]; }
-    /// const to rungs for internal leaves
-    const float*cp_rung(const Leaf l) const noexcept
-    { WDutilsTreeAssertE(have_rung()); return octtree::cp_data(_RG[0])+l.I; }
+    { WDutilsTreeAssertE(octtree::have_data(RG[EXT])); return RG[EXT][l.I]; }
+    /// packed rungs
+#ifdef __SSE__
+    SSE::fvec4 p_rung4(const Leaf l) const noexcept
+    { WDutilsTreeAssertE(SSE::fvec4::is_aligned(l.I));
+      return SSE::fvec4::load(RG[0]+l.I); }
+#endif
+#ifdef __AVX__
+    SSE::fvec8 p_rung8(const Leaf l) const noexcept
+    { WDutilsTreeAssertE(SSE::fvec8::is_aligned(l.I));
+      return SSE::fvec8::load(RG[0]+l.I); }
+    SSE::fvec8 p_rung(const Leaf l) const noexcept
+    { return p_rung8(l); }
+#elif defined(__SSE__)
+    SSE::fvec4 p_rung(const Leaf l) const noexcept
+    { return p_rung4(l); }
+#endif
     /// do we have flags loaded
     bool have_flag() const noexcept
-    { return octtree::have_data(_FL[0]); }
+    { return octtree::have_data(FL[0]); }
     /// const access to flag for leaf
     template<bool EXT>
     uint8_t const&flag(const TreeLeaf<EXT> l) const noexcept
-    { WDutilsTreeAssertE(octtree::have_data(_FL[EXT])); return _FL[EXT][l.I]; }
-    /// pointer to flags for internal leaf 
-    const uint8_t*cp_flag(const Leaf l) const
-    { WDutilsTreeAssertE(have_flag()); return octtree::cp_data(_FL[0])+l.I; }
-    //
-  private:
-    template<int _B> typename std::enable_if<_B==2,const uint16_t*>::type
-    _cp_block_flag(const Leaf l) const noexcept
-    {
-      WDutilsTreeAssertE((l.I&1)==0);
-      return reinterpret_cast<const uint16_t*>(cp_flag(l));
-    }
-    template<int _B> typename std::enable_if<_B==4,const uint32_t*>::type
-    _cp_block_flag(const Leaf l) const noexcept
-    { 
-      WDutilsTreeAssertE((l.I&3)==0);
-      return reinterpret_cast<const uint32_t*>(cp_flag(l));
-    }
-    template<int _B> typename std::enable_if<_B==8,const uint64_t*>::type
-    _cp_block_flag(const Leaf l) const noexcept
-    {
-      WDutilsTreeAssertE((l.I&7)==0);
-      return reinterpret_cast<const uint64_t*>(cp_flag(l));
-    }
-  public:
+    { WDutilsTreeAssertE(octtree::have_data(FL[EXT])); return FL[EXT][l.I]; }
+    /// All || internal leaf is active
+    template<bool All> typename enable_if< All,bool>::type
+    is_active(const Leaf ) const noexcept { return true; }
+    template<bool All> typename enable_if<!All,bool>::type
+    is_active(const Leaf l) const noexcept { return flag(l)!=0; }
     /// pointer to combined flag of block of leaves
-    /// \note BlockSize must be 2,4,8 and @a l be BlockSize aligned
     template<int BlockSize>
-    const typename octtree::block_flag_t<BlockSize>::type*
-    cp_block_flag(const Leaf l) const noexcept
+    const typename octtree::block_flag_type<BlockSize>::type*
+    cp_block_flag_t(const Leaf l) const noexcept
     {
-      static_assert(BlockSize==2 || BlockSize==4 || BlockSize==8,
-		    "OctTree::cp_block_flag(): block size must be 2, 4, or 8");
-      return _cp_block_flag<BlockSize>(l);
+      WDutilsTreeAssertE((l.I&(BlockSize-1))==0);
+      WDutilsTreeAssertE(have_flag());
+      typedef typename octtree::block_flag_type<BlockSize>::type int_type;
+      return reinterpret_cast<const int_type*>(FL[0]+l.I);
     }
     /// combined flag of block of leaves
-    /// \note BlockSize must be 2,4,8 and @a l be BlockSize aligned
     template<int BlockSize>
-    typename octtree::block_flag_t<BlockSize>::type
+    typename octtree::block_flag_type<BlockSize>::type
+    block_flag_t(const Leaf l) const noexcept
+    { return *cp_block_flag_t<BlockSize>(l); }
+    /// All || any of a block of @a BlockSize internal leaves is active
+    template<bool All, int BlockSize> typename enable_if< All,bool>::type
+    block_has_active_t(const Leaf ) const noexcept { return true; }
+    template<bool All, int BlockSize> typename enable_if<!All,bool>::type
+    block_has_active_t(const Leaf l) const noexcept
+    { return block_flag_t<BlockSize>(l)!=0; }
+    /// pointer to combined flag of block of leaves
+    const typename octtree::block_flag_type<LeafBlockSize>::type*
+    cp_block_flag(const Leaf l) const noexcept
+    { return cp_block_flag_t<LeafBlockSize>(l); }
+    /// combined flag of block of leaves
+    typename octtree::block_flag_type<LeafBlockSize>::type
     block_flag(const Leaf l) const noexcept
-    { 
-      static_assert(BlockSize==2 || BlockSize==4 || BlockSize==8,
-		    "OctTree::block_flag(): block size must be 2, 4, or 8");
-      return *cp_block_flag<BlockSize>(l);
-    }
-  private:
-    //
-    template<bool _A> typename std::enable_if< _A,bool>::type
-    _is_active(const Leaf ) const noexcept { return 1; }
-    template<bool _A> typename std::enable_if<!_A,bool>::type
-    _is_active(const Leaf l) const noexcept { return flag(l)!=0; }
-    template<bool _A, int BlockSize> typename std::enable_if< _A,bool>::type
-    _block_has_active(const Leaf ) const noexcept { return 1; }
-    template<bool _A, int BlockSize> typename std::enable_if<!_A,bool>::type
-    _block_has_active(const Leaf l) const noexcept
-    { return block_flag<BlockSize>(l)!=0; }
-  public:
-    /// is internal leaf active?
+    { return block_flag_t<LeafBlockSize>(l); }
+    /// All || any of a block of @a BlockSize internal leaves is active
     template<bool All>
-    bool is_active(const Leaf l) const noexcept
-    { return _is_active<All>(l); }
-    /// is any of a block of @a BlockSize internal leaves active?
-    template<bool All, int BlockSize>
     bool block_has_active(const Leaf l) const noexcept
-    { return _block_has_active<All, BlockSize>(l); }
+    { return block_has_active_t<All,LeafBlockSize>(l); }
     /// parent cell of internal leaf
     Cell parent(const Leaf l) const noexcept
-    { return Cell(_PC[l.I]); }
+    { return Cell(PC[l.I]); }
     /// is @a l a valid internal leaf?
     bool is_valid(const Leaf l) const noexcept
     { return l.I < n_leaf(); }
     /// # external leaves
     count_type const&n_extleaf() const noexcept
     { return NLEAFEXT; }
-    /// # external leaves allocated, multiple of LeafBlockSize,
-    /// >= @a n_extleaf_()
+    /// # external leaves allocated, multiple of LeafDataBlockSize
     count_type extleaf_capacity() const noexcept
-    { return blocked(n_cell()); }
+    { return data_blocked(n_cell()); }
     /// begin of external leaves
     static ExtLeaf begin_extleaf() noexcept
     { return ExtLeaf(0); }
     /// end of external leaves
     ExtLeaf end_extleaf() const noexcept
     { return ExtLeaf(n_extleaf()); }
-  private:
-    //
-    template<bool _A> typename std::enable_if< _A,bool>::type
-    _is_active(const ExtLeaf ) const noexcept { return 1; }
-    template<bool _A> typename std::enable_if<!_A,bool>::type
-    _is_active(const ExtLeaf l) const noexcept { return flag(l)!=0; }
-  public:
-    /// is leaf active?
-    template<bool All>
-    bool is_active(const ExtLeaf l) const noexcept
-    { return _is_active<All>(l); }
+    /// All || external leaf is active
+    template<bool All> typename enable_if< All,bool>::type
+    is_active(const ExtLeaf ) const noexcept { return true; }
+    template<bool All> typename enable_if<!All,bool>::type
+    is_active(const ExtLeaf l) const noexcept { return flag(l)!=0; }
     /// is @a l a valid leaf?
     bool is_valid(const ExtLeaf l) const noexcept
     { return l.I < n_extleaf(); }
@@ -1337,16 +1393,16 @@ namespace WDutils {
     { return --(Cell(0)); }
     /// tree level of cell
     depth_type const&level(const Cell c) const noexcept
-    { return _LE[c.I]; }
+    { return LE[c.I]; }
     /// tree depth of cell
     depth_type const&depth(const Cell c) const noexcept
-    { return _DP[c.I]; }
+    { return DP[c.I]; }
     /// octant of cell in parent
     octant_type const&octant(const Cell c) const noexcept
-    { return _OC[c.I]; }
-    /// cell's cubic box, 16-byte aligned
+    { return OC[c.I]; }
+    /// cell's cubic box (always algined to @a PosAlignment bytes)
     cube const&box(const Cell c) const noexcept
-    { return _XC[c.I]; }
+    { return XC[c.I]; }
     /// cell's geometric centre (of cubic box)
     point const&centre(const Cell c) const noexcept
     { return box(c).X; }
@@ -1355,16 +1411,19 @@ namespace WDutils {
     { return box(c).H; }
     /// number of leaf kids
     local_count const&n_leaf_kids(const Cell c) const noexcept
-    { return _NL[c.I]; }
+    { return NL[c.I]; }
     /// total number of leaves
     count_type const&number(const Cell c) const noexcept
-    { return _NM[c.I]; }
+    { return NM[c.I]; }
     /// # active leaf in cell
     count_type const&n_active(const Cell c) const noexcept
-    { WDutilsTreeAssertE(have_flag()); return _NA[c.I]; }
+    { WDutilsTreeAssertE(have_flag()); return NA[c.I]; }
     /// # active internal leaves
     count_type const&n_active() const noexcept
-    { WDutilsTreeAssertE(have_flag()); return _NA[0]; }
+    { WDutilsTreeAssertE(have_flag()); return NA[0]; }
+    /// are all internal leaves active?
+    bool all_active() const noexcept
+    { return RACT==0 || NA[0]==NM[0]; }
   private:
     //
     template<bool _A> typename std::enable_if< _A,bool>::type
@@ -1381,33 +1440,33 @@ namespace WDutils {
     { return _has_active<All>(c); }
     /// number of daughter cells
     octant_type const&n_cell(const Cell c) const noexcept
-    { return _NC[c.I]; }
+    { return NC[c.I]; }
     /// number of daughter cells
     octant_type const&n_daughters(const Cell c) const noexcept
-    { return _NC[c.I]; }
+    { return NC[c.I]; }
     /// has a cell no daughter cells?
     bool is_final(const Cell c) const noexcept
     { return n_cell(c)==0; }
     /// first leaf in cell
     Leaf begin_leaf(const Cell c) const noexcept
-    { return Leaf(_L0[c.I]); }
+    { return Leaf(L0[c.I]); }
     /// end of leaf children (loose leaves) in cell
     Leaf end_leaf_kids(const Cell c) const noexcept
-    { return Leaf(_L0[c.I]+_NL[c.I]); }
+    { return Leaf(L0[c.I]+NL[c.I]); }
     /// end of all leaves in cell
     Leaf end_leaf_desc(const Cell c) const noexcept
-    { return Leaf(_L0[c.I]+_NM[c.I]); }
+    { return Leaf(L0[c.I]+NM[c.I]); }
     /// last of all leaves in cell
     Leaf last_leaf_desc(const Cell c) const noexcept
-    { return Leaf(_L0[c.I]+_NM[c.I]-1); }
+    { return Leaf(L0[c.I]+NM[c.I]-1); }
     /// first daughter cell
     /// \note if @a c has no daughter cells, this returns @a c itself
     Cell begin_cell(const Cell c) const noexcept
-    { return Cell(_C0[c.I]); }
+    { return Cell(C0[c.I]); }
     /// end of daughter cells
     /// \note if @a c has no daughter cells, this returns @a c itself
     Cell end_cell(const Cell c) const noexcept
-    { return Cell(_C0[c.I]+_NC[c.I]); }
+    { return Cell(C0[c.I]+NC[c.I]); }
     /// before first daughter cell
     Cell rend_cell(const Cell c) const noexcept
     { return --begin_cell(c); }
@@ -1416,7 +1475,7 @@ namespace WDutils {
     { return --end_cell(c); }
     /// parent cell
     Cell parent(const Cell c) const noexcept
-    { return Cell(_PA[c.I]); }
+    { return Cell(PA[c.I]); }
     /// does a cell contain a leaf ?
     bool contains(const Cell c, const Leaf l) const noexcept
     { return begin_leaf(c) <= l && l < end_leaf_desc(c); }
@@ -1471,7 +1530,7 @@ namespace WDutils {
 #ifdef OCTALTREE_HAVE_D0
     /// first domain contributing to cell
     domain_id const&first_domain(const Cell c) const noexcept
-    { return _D0[c.I]; }
+    { return D0[c.I]; }
     /// domain of a given leaf
     domain_id domain_of(const Leaf l) const noexcept
     { return first_domain(parent(l)); }
@@ -1491,7 +1550,7 @@ namespace WDutils {
     /// # domains contributing to cell (>1 only for non-branch top-tree cells)
     domain_id n_domain(const Cell c) const noexcept
     { 
-      if(c.I >= NTOPC || _C0[c.I] >= NTOPC || _NC[c.I]==0) return 1;
+      if(c.I >= NTOPC || C0[c.I] >= NTOPC || NC[c.I]==0) return 1;
       return 1 + domain_of(last_leaf_desc(c)) - first_domain(c);
     }
     /// is a cell a top-tree cell?
@@ -1601,14 +1660,6 @@ namespace WDutils {
   //
   namespace octtree {
     ///
-    /// tags for various additional particle properties
-    ///
-    enum PropTag {
-      mass_tag = 1 << 0,     ///< tag: particle mass
-      size_tag = 1 << 1,     ///< tag: particle size^2
-      xvec_tag = 1 << 2      ///< tag: SSE position for particles
-    };
-    ///
     /// Interface for loading additional particle properties
     ///
     /// \note can be implemented (derived) together with
@@ -1642,7 +1693,6 @@ namespace WDutils {
 #else
     class InteractionTreeData
 #endif
-      : protected static_tree_properties 
     {
       /// ensure what is implemented in octtree.cc
       static_assert(is_in_range<_Dim,2,3>::value,
@@ -1651,21 +1701,26 @@ namespace WDutils {
 		    "InteractionTree<>: position type must be floating point");
       static_assert(std::is_floating_point<_PropType>::value,
 		    "InteractionTree<>: property type must be floating point");
+      //
     protected:
       typedef OctalTree<_Dim,_PosType> OTree;
       static const int Dim = _Dim;
-      typedef _PropType prop_type;
+      using prop_type = _PropType;
+      static const count_type PropBlockSize =
+	octtree::DataAlignment/sizeof(prop_type);
 #ifndef __SSE__
+      static const count_type PosBlockSize =
+	octtree::DataAlignment/sizeof(_PosType);
       friend class TreeImplementer<InteractionTreeData>;
     private:
 #endif
       template<typename _Tp>
       using aligned_storage = typename OTree::template aligned_storage<_Tp>;
 #ifdef INTERACTIONTREE_HOLDS_OWN_BLOCK
-      raw_memory<octtree::DataAlignment> _BUF;
+      raw_memory<octtree::DataAlignment> BUF;
 #endif
-      aligned_storage<prop_type>         _MASS[2];  ///< any leaf: mass
-      aligned_storage<prop_type>         _HSQ [2];  ///< any leaf: size^2
+      aligned_storage<prop_type>         MS[2];  ///< any leaf: mass
+      aligned_storage<prop_type>         SQ[2];  ///< any leaf: size^2
     protected:
       /// ctor
 #ifdef __SSE__
@@ -1704,156 +1759,26 @@ namespace WDutils {
     public:
       /// do we have size^2 allocated and loaded?
       bool have_Hsq() const noexcept
-      { return have_data(_HSQ[0]); }
+      { return have_data(SQ[0]); }
       /// const access to size^2 for internal or external leaf
       template<bool EXT>
-	prop_type const&Hsq(const TreeLeaf<EXT> l) const noexcept
-      { WDutilsTreeAssertE(have_data(_HSQ[EXT])); return _HSQ[EXT][l.I]; }
-      /// const pter to size^2 for internal leaves
-      const prop_type*cp_Hsq(const Leaf l) const noexcept
-      { WDutilsTreeAssertE(have_Hsq()); return cp_data(_HSQ[0])+l.I; }
+      prop_type const&Hsq(const TreeNode<EXT,0> l) const noexcept
+      { WDutilsTreeAssertE(have_data(SQ[EXT])); return SQ[EXT][l.I]; }
       /// non-const access to size squared for leaf
       template<bool EXT>
-      prop_type&Hsq_lv(const TreeLeaf<EXT> l) const noexcept
+      prop_type&Hsq_lv(const TreeNode<EXT,0> l) const noexcept
       {
-	WDutilsTreeAssertE(have_data(_HSQ[EXT]));
-	return const_cast<prop_type&>(_HSQ[EXT][l.I]);
+	WDutilsTreeAssertE(have_data(SQ[EXT]));
+	return const_cast<prop_type&>(SQ[EXT][l.I]);
       }
       /// do we have masses allocated and loaded?
       bool have_mass() const noexcept
-      { return have_data(_MASS[0]); }
+      { return have_data(MS[0]); }
       /// const access to mass for internal or external leaf
       template<bool EXT>
-      prop_type const&mass(const TreeLeaf<EXT> l) const noexcept
-      { WDutilsTreeAssertE(have_data(_MASS[EXT])); return _MASS[EXT][l.I]; }
-      /// const pter to masses for internal leaves
-      const prop_type*cp_mass(const Leaf l) const noexcept
-      { WDutilsTreeAssertE(have_mass()); return cp_data(_MASS[0])+l.I; }
+      prop_type const&mass(const TreeNode<EXT,0> l) const noexcept
+      { WDutilsTreeAssertE(have_data(MS[EXT])); return MS[EXT][l.I]; }
     };// class octtree::InteractionTreeDataBase<>
-#ifdef __SSE__
-    ///
-    /// interaction tree data supporting SSE w/o anchoring
-    ///
-    template<int _Dim, typename _PosType, typename _PropType,
-	     bool _Anchoring>
-    class InteractionTreeData
-      : public InteractionTreeDataBase<_Dim,_PosType,_PropType>
-    {
-      friend class TreeImplementer<InteractionTreeData>;
-      typedef InteractionTreeDataBase<_Dim,_PosType,_PropType> IBase;
-      typedef typename IBase::OTree OTree;
-      typedef typename IBase::prop_type prop_type;
-      using IBase::Dim;
-#ifdef INTERACTIONTREE_HOLDS_OWN_BLOCK
-      using IBase::_BUF;
-#endif
-      using IBase::_MASS;
-      using IBase::_HSQ;
-    public:
-      using IBase::have_Hsq;
-      using IBase::Hsq;
-      using IBase::Hsq_lv;
-      using IBase::cp_Hsq;
-      using IBase::have_mass;
-      using IBase::mass;
-      using IBase::cp_mass;
-      typedef _PosType sse_pos_type;
-      typedef void Anchor;
-    protected:
-      template<typename _Tp>
-      using aligned_storage = typename OTree::template aligned_storage<_Tp>;
-# ifndef OCTALTREE_DATA_IN_ONE_BLOCK
-      aligned_storage<sse_pos_type> _xvec;
-# endif
-      sse_pos_type                 *_XVEC[Dim];   ///< int. leaf: SSE position
-    public:
-# ifdef OCTALTREE_DATA_IN_ONE_BLOCK
-      /// # bytes needed for nl internal and ne external leaves
-      size_t bytes_needed(int load, count_type nl, count_type ne) const;
-      /// set the memory
-      void set_memory(int load, char*mem, count_type nl, count_type ne);
-# endif
-# ifndef INTERACTIONTREE_USES_BASE_BLOCK
-      /// (re-)allocate data
-      void allocate(const int, const count_type, const count_type);
-# endif
-      /// do we have SSE positions allocated and set?
-      bool have_xvec() const noexcept
-      { return _XVEC[0]!=0; }
-      /// const pter to sse positions of leaves
-      template<int I>
-      const sse_pos_type*cp_xvec(const Leaf l) const noexcept
-      { WDutilsTreeAssertE(have_xvec()); return _XVEC[I]+l.I; }
-    };// class octtree::InteractionTreeData< Anchoring = false >
-    ///
-    /// interaction tree data supporting SSE with anchoring
-    ///
-    template<int _Dim>
-    class InteractionTreeData<_Dim,double,float,true>
-      : public InteractionTreeDataBase<_Dim,double,float>
-    {
-      typedef InteractionTreeDataBase<_Dim,double,float> IBase;
-      typedef typename IBase::OTree OTree;
-      typedef typename IBase::prop_type prop_type;
-      typedef typename OTree::point point;
-      template<typename _Tp>
-      using storage         = typename OTree::template storage<_Tp>;
-      template<typename _Tp>
-      using aligned_storage = typename OTree::template aligned_storage<_Tp>;
-      using IBase::Dim;
-#ifdef INTERACTIONTREE_HOLDS_OWN_BLOCK
-      using IBase::_BUF;
-#endif
-      using IBase::_MASS;
-      using IBase::_HSQ;
-    public:
-      using IBase::have_Hsq;
-      using IBase::Hsq;
-      using IBase::Hsq_lv;
-      using IBase::cp_Hsq;
-      using IBase::have_mass;
-      using IBase::mass;
-      using IBase::cp_mass;
-      typedef float sse_pos_type;
-      struct Anchor {
-	point Z;                                 ///< anchor position
-	Leaf  B,E;                               ///< begin,end of leaves
-      };
-    protected:
-# ifndef OCTALTREE_DATA_IN_ONE_BLOCK
-      aligned_storage<sse_pos_type> _xvec;
-# endif
-      sse_pos_type                 *_XVEC[Dim];  ///< int. leaf: SSE position
-      storage<Anchor*>              _ANC;        ///< int. leaf: pter to anchor
-      std::vector<Anchor>           _ANCH;       ///< anchor data
-    public:
-# ifdef OCTALTREE_DATA_IN_ONE_BLOCK
-      /// # bytes needed for nl internal and ne external leaves
-      size_t bytes_needed(int load, count_type nl, count_type ne) const;
-      /// set the memory
-      void set_memory(int load, char*mem, count_type nl, count_type ne);
-# endif
-# ifndef INTERACTIONTREE_USES_BASE_BLOCK
-      /// (re-)allocate data
-      void allocate(const int, const count_type, const count_type);
-# endif
-      /// do we have SSE positions allocated and set?
-      bool have_xvec() const noexcept
-      { return _XVEC[0]!=0; }
-      /// const pter to sse positions of leaves
-      template<int I>
-      const sse_pos_type*cp_xvec(const Leaf l) const noexcept
-      { WDutilsTreeAssertE(have_xvec()); return _XVEC[I]+l.I; }
-      /// do we have anchors allocated and set?
-      bool have_anchor() const noexcept
-      { return have_data(_ANC); }
-      /// const pter to anchor for leaf
-      const Anchor*anchor(const Leaf l) const noexcept
-      { return _ANC[l.I]; }
-      //
-      friend class TreeImplementer<InteractionTreeData>;
-    };// class octtree::InteractionTreeData< Anchoring = true >
-#endif// __SSE__
   } // namespace octtree
   //
   template<> struct traits< octtree::InteractionTreeDataBase<2,float,float> >
@@ -1872,7 +1797,187 @@ namespace WDutils {
   { static const char*name()
     { return "InteractionTreeDataBase<3,double,double>"; }
   };
+  //
+  namespace octtree {
 #ifdef __SSE__
+    ///
+    /// interaction tree data supporting SSE w/o anchoring
+    ///
+    template<int _Dim, typename _PosType, typename _PropType,
+	     bool _Anchoring>
+    class InteractionTreeData
+      : public InteractionTreeDataBase<_Dim,_PosType,_PropType>
+    {
+      static_assert(!_Anchoring,"anchoring mismatch");
+#ifndef __SSE2__
+      static_assert(!is_same<double,_PosType>::value,
+		    "cannot implement InteractionTree<pos_type=double> "
+		    "without SSE2");
+#endif
+      friend class TreeImplementer<InteractionTreeData>;
+      typedef InteractionTreeDataBase<_Dim,_PosType,_PropType> IBase;
+      typedef typename IBase::OTree OTree;
+#ifdef INTERACTIONTREE_HOLDS_OWN_BLOCK
+      using IBase::BUF;
+#endif
+      using IBase::MS;
+      using IBase::SQ;
+      template<typename _Tp>
+      using aligned_storage = typename OTree::template aligned_storage<_Tp>;
+    public:
+      using IBase::Dim;
+      using IBase::have_Hsq;
+      using IBase::Hsq;
+      using IBase::Hsq_lv;
+      using IBase::have_mass;
+      using IBase::mass;
+      /// \name positional SSE stuff
+      //@{
+      static const count_type PosBlockSize =
+	octtree::DataAlignment/sizeof(_PosType);
+      typedef SSE::packed<PosBlockSize,_PosType> packed_pos_type;
+      typedef typename packed_pos_type::element_block pos_comp_block;
+      typedef octtree::vector_block<Dim,packed_pos_type> pos_vect_block;
+      typedef void Anchor;
+    protected:
+      aligned_storage<pos_vect_block>    PPOS;   ///< int. leaf: SSE position
+      //@}
+    public:
+      /// \name property SSE stuff
+      //@{
+      typedef typename IBase::prop_type prop_type;
+      using IBase::PropBlockSize;
+      typedef SSE::packed<PropBlockSize,prop_type> packed_prop_type;
+      typedef typename packed_prop_type::element_block prop_comp_block;
+      typedef octtree::vector_block<Dim,packed_prop_type> prop_vect_block;
+      //@}
+# ifdef OCTALTREE_DATA_IN_ONE_BLOCK
+      /// # bytes needed for nl internal and ne external leaves
+      size_t bytes_needed(int load, count_type nl, count_type ne) const;
+      /// set the memory
+      void set_memory(int load, char*mem, count_type nl, count_type ne);
+# endif
+# ifndef INTERACTIONTREE_USES_BASE_BLOCK
+      /// (re-)allocate data
+      void allocate(const int, const count_type, const count_type);
+# endif
+      /// packed sizes^2 at given leaf
+      /// \note l must be aligned to LeafBlockSize
+      packed_prop_type p_Hsq(const Leaf l) const noexcept
+      { return packed_prop_type::load(cp_data(SQ[0])+l.I); }
+      /// packed masses at given leaf
+      /// \note l must be aligned to LeafBlockSize
+      packed_prop_type p_mass(const Leaf l) const noexcept
+      { return packed_prop_type::load(cp_data(MS[0])+l.I); }
+      /// do we have SSE positions allocated and set?
+      bool have_ppos() const noexcept
+      { return have_data(PPOS); }
+      /// block of Ith component of leaf positions of leaves
+      template<int I>
+      pos_comp_block const&b_pos(const Leaf l) const noexcept
+      { return PPOS[packed_pos_type::block_index(l.I)][I]; }
+      /// packed Ith component of leaf positions of leaves
+      template<int I>
+      packed_pos_type p_pos(const Leaf l) const noexcept
+      { return packed_pos_type::load
+	  (PPOS[packed_pos_type::block_index(l.I)][I]); }
+      //
+      constexpr static bool have_anchor() noexcept
+      { return 0; }
+      //
+      constexpr static const Anchor*anchor(const Leaf l) noexcept
+      { return 0; }
+    };// class octtree::InteractionTreeData< Anchoring = false >
+    ///
+    /// interaction tree data supporting SSE with anchoring
+    ///
+    template<int _Dim>
+    class InteractionTreeData<_Dim,double,float,true>
+      : public InteractionTreeDataBase<_Dim,double,float>
+    {
+      friend class TreeImplementer<InteractionTreeData>;
+      typedef InteractionTreeDataBase<_Dim,double,float> IBase;
+      typedef typename IBase::OTree OTree;
+#ifdef INTERACTIONTREE_HOLDS_OWN_BLOCK
+      using IBase::BUF;
+#endif
+      using IBase::MS;
+      using IBase::SQ;
+      template<typename _Tp>
+      using storage         = typename OTree::template storage<_Tp>;
+      template<typename _Tp>
+      using aligned_storage = typename OTree::template aligned_storage<_Tp>;
+    public:
+      using IBase::Dim;
+      using IBase::have_Hsq;
+      using IBase::Hsq;
+      using IBase::Hsq_lv;
+      using IBase::have_mass;
+      using IBase::mass;
+      /// \name positional SSE stuff
+      //@{
+      static const count_type PosBlockSize =
+	octtree::DataAlignment/sizeof(float);
+      typedef SSE::packed<PosBlockSize,float> packed_pos_type;
+      typedef typename packed_pos_type::element_block pos_comp_block;
+      typedef octtree::vector_block<Dim,packed_pos_type> pos_vect_block;
+      /// holding anchoring data
+      struct Anchor {
+	typename OTree::point Z;                 ///< anchor position
+	Leaf B,E;                                ///< begin & end of leaves
+      };
+    protected:
+      aligned_storage<pos_vect_block>    PPOS;   ///< int. leaf: SSE position
+      storage<Anchor*>                   ANC;    ///< int. leaf: pter to anchor
+      std::vector<Anchor>                ANCH;   ///< anchor data
+      //@}
+    public:
+      /// \name property SSE stuff
+      //@{
+      typedef typename IBase::prop_type prop_type;
+      using IBase::PropBlockSize;
+      typedef SSE::packed<PropBlockSize,prop_type> packed_prop_type;
+      typedef typename packed_prop_type::element_block prop_comp_block;
+      typedef octtree::vector_block<Dim,packed_prop_type> prop_vect_block;
+# ifdef OCTALTREE_DATA_IN_ONE_BLOCK
+      /// # bytes needed for nl internal and ne external leaves
+      size_t bytes_needed(int load, count_type nl, count_type ne) const;
+      /// set the memory
+      void set_memory(int load, char*mem, count_type nl, count_type ne);
+# endif
+# ifndef INTERACTIONTREE_USES_BASE_BLOCK
+      /// (re-)allocate data
+      void allocate(const int, const count_type, const count_type);
+# endif
+      /// packed sizes^2 at given leaf
+      /// \note l must be aligned to LeafBlockSize
+      packed_prop_type p_Hsq(const Leaf l) const noexcept
+      { return packed_prop_type::load(cp_data(SQ[0])+l.I); }
+      /// packed masses at given leaf
+      /// \note l must be aligned to LeafBlockSize
+      packed_prop_type p_mass(const Leaf l) const noexcept
+      { return packed_prop_type::load(cp_data(MS[0])+l.I); }
+      /// do we have SSE positions allocated and set?
+      bool have_ppos() const noexcept
+      { return have_data(PPOS); }
+      /// block of Ith component of leaf positions of leaves
+      template<int I>
+      pos_comp_block const&b_pos(const Leaf l) const noexcept
+      { return PPOS[packed_pos_type::block_index(l.I)][I]; }
+      /// packed Ith component of leaf positions of leaves
+      template<int I>
+      packed_pos_type p_pos(const Leaf l) const noexcept
+      { return packed_pos_type::load
+	  (PPOS[packed_pos_type::block_index(l.I)][I]); }
+      /// do we have anchors allocated and set?
+      bool have_anchor() const noexcept
+      { return have_data(ANC); }
+      /// const pter to anchor for leaf
+      const Anchor*anchor(const Leaf l) const noexcept
+      { return ANC[l.I]; }
+    };// class octtree::InteractionTreeData< Anchoring = true >
+  } // namespace octtree
+  //
   template<>
   struct traits<octtree::InteractionTreeData<2,double,float,true>::Anchor>
   { static const char*name() { return "Anchor"; } };
@@ -1897,7 +2002,7 @@ namespace WDutils {
   template<> struct traits< octtree::InteractionTreeData<3,double,float,1> >
   { static const char*name() { return "InteractionTreeData<3,double,float,1>"; }
   };
-#endif
+#endif // __SSE__
   ///
   /// oct-tree with particle masses, sizes, and SSE positions.
   ///
@@ -1942,25 +2047,78 @@ namespace WDutils {
     using OTree::Dim;
     using OTree::Nsub;
     using OTree::Noff;
+    using pos_type = _PosType;
     using prop_type = _PropType;
+    static_assert(is_same<pos_type,typename OTree::pos_type>::value,
+		  "position type mismatch");
 #ifdef __SSE__
     static const bool Anchoring = _Anchoring; ///< anchoring enabled?
 #endif// __SSE__
-    typedef typename OTree::pos_type pos_type;
     typedef typename OTree::point point;
-    using DataBase = octtree::InteractionTreeData<Dim,pos_type,prop_type
-#ifdef __SSE__
-					       ,_Anchoring
-#endif
-					       >;
-#ifdef __SSE__
-    typedef typename DataBase::Anchor Anchor;
-    typedef typename DataBase::sse_pos_type sse_pos_type;
-#endif// __SSE__
     typedef octtree::Leaf Leaf;
     typedef octtree::Cell Cell;
     typedef octtree::ExtLeaf ExtLeaf;
     typedef octtree::count_type count_type;
+    using DataBase = octtree::InteractionTreeData<Dim,pos_type,prop_type
+#ifdef __SSE__
+						  ,_Anchoring
+#endif
+						  >;
+  public:
+    /// \name support for blocked leaf processing
+    /// \note we override some of the definitions from base @c OctalTree
+    ///       because those may have another LeafBlockSize (this happens if
+    ///       pos_type=double, prop_type=float, and Anchoring=false).
+    //@{
+    static const count_type PosBlockSize  = DataBase::PosBlockSize;
+    static const count_type PropBlockSize = DataBase::PropBlockSize;
+    /// leaves may be processed in blocks of LeafBlockSize
+    static const count_type LeafBlockSize = PropBlockSize;
+    static const count_type LeafBlockTrim = LeafBlockSize-1;
+    static const count_type LeafBlockMask =~LeafBlockTrim;
+    static const count_type LeafBlockShft =
+      LeafBlockSize==2? 1: LeafBlockSize==4? 2:3;
+    static_assert((LeafBlockSize&LeafBlockTrim)==0,
+		  "LeafBlockSize not a power of 2");
+    static_assert((1<<LeafBlockShft) == LeafBlockSize,"wrong LeafBlockShft");
+    /// # LeafBlockSize-sized blocks of internal leaves
+    count_type num_leaf_blocks() const noexcept
+    { return (this->n_leaf()+LeafBlockTrim)>>LeafBlockShft; }
+    /// end of last (possibly incomplete) LeafBlockSize-sized block of leaves
+    Leaf end_leaf_all_blocks() const noexcept
+    { return Leaf((this->n_leaf()+LeafBlockTrim)&LeafBlockMask); }
+    /// end of complete LeafBlockSize-sized block of leaves
+    Leaf end_leaf_complete_blocks() const noexcept
+    { return Leaf(this->n_leaf()&LeafBlockMask); }
+    /// pointer to combined flag of block of leaves
+    const typename octtree::block_flag_type<LeafBlockSize>::type*
+    cp_block_flag(const Leaf l) const noexcept
+    { return OTree::template cp_block_flag_t<LeafBlockSize>(l); }
+    /// combined flag of block of leaves
+    typename octtree::block_flag_type<LeafBlockSize>::type
+    block_flag(const Leaf l) const noexcept
+    { return OTree::template block_flag_t<LeafBlockSize>(l); }
+    /// All || any of a block of @a BlockSize internal leaves is active
+    template<bool All>
+    bool block_has_active(const Leaf l) const noexcept
+    { return OTree::template block_has_active_t<All,LeafBlockSize>(l); }
+    //@}
+#ifdef __SSE__
+    typedef typename DataBase::Anchor Anchor;
+    typedef typename DataBase::packed_pos_type packed_pos_type;
+    typedef typename DataBase::pos_comp_block pos_comp_block;
+    typedef typename DataBase::pos_vect_block pos_vect_block;
+    typedef typename DataBase::packed_prop_type packed_prop_type;
+    typedef typename DataBase::prop_comp_block prop_comp_block;
+    typedef typename DataBase::prop_vect_block prop_vect_block;
+    //
+    static_assert((!is_same<pos_type,prop_type>::value && !Anchoring) || 
+		  PosBlockSize==PropBlockSize,"block size error");
+    static_assert(PropBlockSize <= OTree::LeafDataBlockSize,
+		  "PropBlocksize too large");
+    static_assert(PosBlockSize <= OTree::LeafDataBlockSize,
+		  "PosBlocksize too large");
+#endif// __SSE__
   protected:
     /// \name data dumping
     //@{
@@ -1981,13 +2139,8 @@ namespace WDutils {
     /// data needed in ctor
     struct Data : OTree::Data
     {
-      int   LOAD;               ///< bits from octtree::PropTag: props to load
       float DEL;                ///< relative precision of anchored positions.
-      Data() : LOAD(0), DEL(0.0001f)  {}
-      Data(Data&&) = default;
-      Data(Data const&) = default;
-      Data&operator=(Data&&) = default;
-      Data&operator=(Data const&) = default;
+      Data() : DEL(0.0001f)  {}
     };
   protected:
     friend struct Builder;
@@ -2008,11 +2161,11 @@ namespace WDutils {
       ///
     private:
       const PropInitialiser*INIT;
-      DataBase*DATA;
-      int      LOAD;
-      float    DEL;
+      DataBase  *DATA;
+      count_type LOAD;
+      float      DEL;
 #ifdef __SSE__
-      float   *QI;
+      float     *QI;
     public:
       ~Builder() { if(QI) WDutils_DEL_A(QI); QI=0; }
 #endif
@@ -2113,14 +2266,24 @@ namespace WDutils {
       using prop_type = void;
 #ifdef __SSE__
       using Anchor = void;
-      using sse_pos_type = void;
+      using pos_comp_block = void;
+      using prop_comp_block = void;
+      using pos_vect_block = void;
+      using prop_vect_block = void;
+      using packed_pos_type = void;
+      using packed_prop_type = void;
 #endif
     };
     template<typename _Tree> struct itree_types<_Tree,true> {
       using prop_type = typename _Tree::prop_type;
 #ifdef __SSE__
       using Anchor = typename _Tree::Anchor;
-      using sse_pos_type = typename _Tree::sse_pos_type;
+      using pos_comp_block = typename _Tree::pos_comp_block;
+      using prop_comp_block = typename _Tree::prop_comp_block;
+      using pos_vect_block = typename _Tree::pos_vect_block;
+      using prop_vect_block = typename _Tree::prop_vect_block;
+      using packed_pos_type = typename _Tree::packed_pos_type;
+      using packed_prop_type = typename _Tree::packed_prop_type;
 #endif
     };
   } // namespace octtree
@@ -2133,7 +2296,6 @@ namespace WDutils {
   template<typename _Tree>
   class TreeWalker<_Tree,
 		   typename enable_if<is_OctalTree<_Tree>::value>::type> : 
-    public octtree::static_tree_properties,
     public octtree::itree_types<_Tree>
   {
   public:
@@ -2143,23 +2305,46 @@ namespace WDutils {
     static const int Dim  = Tree::Dim;
     static const int Nsub = Tree::Nsub;
     static const int Noff = Tree::Noff;
-    using typename i_types::prop_type;
+    using prop_type = typename i_types::prop_type;
 #ifdef __SSE__
-    using typename i_types::Anchor;
-    using typename i_types::sse_pos_type;
+    using Anchor = typename i_types::Anchor;
+    using packed_pos_type = typename i_types::packed_pos_type;
+    using packed_prop_type = typename i_types::packed_prop_type;
+    using pos_comp_block = typename i_types::pos_comp_block;
+    using prop_comp_block = typename i_types::prop_comp_block;
+    using pos_vect_block = typename i_types::pos_vect_block;
+    using prop_vect_block = typename i_types::prop_vect_block;
 #endif
     //
     template<bool _C, typename _T=void>
     using enable_if_type = typename std::enable_if<_C,_T>::type;
     //
+    typedef octtree::Leaf Leaf;
+    typedef octtree::Cell Cell;
+    typedef octtree::ExtLeaf ExtLeaf;
+    typedef octtree::LeafRange LeafRange;
+#ifdef OCTALTREE_USE_OPENMP
+    typedef octtree::domain_id domain_id;
+#endif
+    typedef octtree::rung_type rung_type;
+    typedef octtree::count_type count_type;
+    typedef octtree::depth_type depth_type;
+    typedef octtree::local_count local_count;
+    typedef octtree::octant_type octant_type;
+    typedef octtree::particle_key particle_key;
+    template<bool EXT> using TreeLeaf = octtree::TreeNode<EXT,0>;
     typedef typename Tree::BuilderInterface BuilderInterface;
     typedef typename Tree::pos_type pos_type;
     typedef typename Tree::cube cube;
-    typedef typename Tree::cube16 cube16;
+    typedef typename Tree::cubeXX cubeXX;
     typedef typename Tree::point point;
-    typedef typename Tree::point16 point16;
+    typedef typename Tree::pointXX pointXX;
     typedef typename Tree::PerBoundary PerBoundary;
     typedef typename Tree::cp_domain cp_domain;
+    static const count_type LeafBlockSize = Tree::LeafBlockSize;
+    static const count_type LeafBlockTrim = Tree::LeafBlockTrim;
+    static const count_type LeafBlockMask = Tree::LeafBlockMask;
+    static const count_type LeafBlockShft = Tree::LeafBlockShft;
     /// \name data
     //@{
   protected:
@@ -2176,10 +2361,6 @@ namespace WDutils {
     TreeWalker(TreeWalker const&) = default;
     /// move ctor
     TreeWalker(TreeWalker &&) = default;
-    /// copy operator
-    TreeWalker&operator=(TreeWalker const&) = default;
-    /// move operator
-    TreeWalker&operator=(TreeWalker &&) = default;
     /// dtor
     virtual~TreeWalker() {}
   protected:
@@ -2190,8 +2371,10 @@ namespace WDutils {
     void update(bool fresh, BuilderInterface const&builder)
     { TREE->update_application_data(fresh,builder); }
   private:
-    /// no default ctor
+    //  delete default ctor and assignment
     TreeWalker() = delete;
+    TreeWalker&operator=(TreeWalker &&) = delete;
+    TreeWalker&operator=(TreeWalker const&) = delete;
     //@}
 #ifdef OCTALTREE_HAVE_DATA
   protected:
@@ -2208,38 +2391,6 @@ namespace WDutils {
     /// return pointer set by SetData<I>
     template<bool EXT, int I> void*GetData() const noexcept
     { return TREE->template GetData<EXT,I>(); }
-    /// const access to DATA[I][i]
-    template<bool EXT, int I, typename T>
-    T const&dat(count_type n) const noexcept
-    { return TREE-> template dat<EXT,I,T>(n); }
-    /// non-const access to DATA[I][i]
-    template<bool EXT, int I, typename T>
-    T&dat_lv(count_type n) const noexcept
-    { return TREE-> template dat_lv<EXT,I,T>(n); }
-    /// const access to user vector datum
-    template<bool EXT, int I, int J, typename T> 
-    T const&vec(count_type n) const noexcept
-    { return TREE-> template vec<EXT,I,J,T>(n); }
-    /// non-const access to user vector datum
-    template<bool EXT, int I, int J, typename T> 
-    T&vec_lv(count_type n) const noexcept
-    { return TREE-> template vec_lv<EXT,I,J,T>(n); }
-    /// pointer to user datum
-    template<bool EXT, int I, typename T>
-    T*p_dat(count_type n) const noexcept
-    { return TREE-> template p_dat<EXT,I,T>(n); }
-    /// constant pointer to user datum
-    template<bool EXT, int I, typename T>
-    const T*cp_dat(count_type n) const noexcept
-    { return TREE-> template cp_dat<EXT,I,T>(n); }
-    /// non-const pointer to vector component
-    template<bool EXT, int I, int J, typename T>
-    T*p_vec(count_type n) const noexcept
-    { return TREE -> template p_vec<EXT,I,J,T>(n); }
-    /// const pointer to vector component from free methods
-    template<bool EXT, int I, int J, typename T>
-    T*cp_vec(count_type n) const noexcept
-    { return TREE -> template cp_vec<EXT,I,J,T>(n); }
     //@}
 #endif // OCTALTREE_HAVE_DATA
   public:
@@ -2251,6 +2402,9 @@ namespace WDutils {
     /// was @a ascc set during tree building?
     bool avoided_single_child_cells() const noexcept
     { return TREE->avoided_single_child_cells(); }
+    /// minimum rung of active particles
+    rung_type const&rung_active() const noexcept
+    { return TREE->rung_active(); }
 #ifdef OCTALTREE_USE_OPENMP
     /// tolerance in domain splitting
     count_type const&tol() const noexcept
@@ -2291,12 +2445,13 @@ namespace WDutils {
     /// # internal leaves
     count_type n_leaf() const noexcept
     { return TREE->n_leaf(); }
-    /// # leaves actually allocated, multiple of LeafBlockSize, >= @a n_leaf()
+    /// # leaves actually allocated, 
+    /// multiple of Tree::LeafDataBlockSize, >= @a n_leaf()
     count_type leaf_capacity() const noexcept
     { return TREE->leaf_capacity(); }
-    /// # 4-blocks of internal leaves
-    count_type n_4blck() const noexcept
-    { return TREE->n_4blck(); }
+    /// # LeafBlockSize-sized blocks of internal leaves
+    count_type num_leaf_blocks() const noexcept
+    { return TREE->num_leaf_blocks(); }
     /// leaf of given global index @a n in @a [0,n_leaf()[
     static Leaf leaf_no(count_type n) noexcept
     { return Leaf(n); }
@@ -2306,18 +2461,19 @@ namespace WDutils {
     /// end of all internal leaves
     Leaf end_leaf() const noexcept
     { return TREE->end_leaf(); }
-    /// end of complete leaf blocks of N
-    template<int Blocksize>
-    Leaf end_complete_block() const noexcept
-    { return TREE->template end_complete_block<Blocksize>(); }
-    /// position of internal leaf, 16-byte aligned
+    /// end of all allocated internal leaves
+    Leaf end_leaf_capacity() const noexcept
+    { return TREE->end_leaf_capacity(); }
+    /// end of last (possibly incomplete) LeafBlockSize-sized block of leaves
+    Leaf end_leaf_all_blocks() const noexcept
+    { return TREE->end_leaf_all_blocks(); }
+    /// end of complete LeafBlockSize-sized block of leaves
+    Leaf end_leaf_complete_blocks() const noexcept
+    { return TREE->end_leaf_complete_blocks(); }
+    /// position of internal leaf (always aligned to @a PosAlignment bytes)
     template<bool EXT>
     point const&position(const TreeLeaf<EXT> l) const noexcept
     { return TREE->position(l); }
-    /// position of internal leaf, 16-byte aligned
-    template<bool EXT>
-    point16 const&position16(const TreeLeaf<EXT> l) const noexcept
-    { return TREE->position16(l); }
     /// index of particle associated with internal leaf
     template<bool EXT>
     particle_key const&particle(const TreeLeaf<EXT> l) const noexcept
@@ -2352,24 +2508,22 @@ namespace WDutils {
     { return TREE->find_particle(i,x); }
     /// pointer to combined flag of block of leaves
     /// \note BlockSize must be 2,4,8 and @a l be BlockSize aligned
-    template<int BlockSize>
-    const typename octtree::block_flag_t<BlockSize>::type*
+    const typename octtree::block_flag_type<LeafBlockSize>::type*
     cp_block_flag(const Leaf l) const noexcept
-    { return TREE->template cp_block_flag<BlockSize>(l); }
+    { return TREE->template cp_block_flag(l); }
     /// combined flag of block of leaves
     /// \note BlockSize must be 2,4,8 and @a l be BlockSize aligned
-    template<int BlockSize>
-    typename octtree::block_flag_t<BlockSize>::type
+    typename octtree::block_flag_type<LeafBlockSize>::type
     block_flag(const Leaf l) const noexcept
-    { return TREE->template block_flag<BlockSize>(l); }
+    { return TREE->template block_flag(l); }
     /// is leaf active?
     template<bool All, bool EXT>
     bool is_active(const TreeLeaf<EXT> l) const noexcept
     { return TREE->template is_active<All>(l); }
     /// is any of a block of 4 internal leaves active?
-    template<bool All, int BlockSize>
+    template<bool All>
     bool block_has_active(const Leaf l) const noexcept
-    { return TREE->template block_has_active<All,BlockSize>(l); }
+    { return TREE->template block_has_active<All>(l); }
     /// parent cell of internal leaf
     Cell parent(const Leaf l) const noexcept
     { return TREE->parent(l); }
@@ -2380,7 +2534,7 @@ namespace WDutils {
     /// # external leaves
     count_type const&n_extleaf() const noexcept
     { return TREE->n_extleaf(); }
-    /// # external leaves allocated, multiple of LeafBlockSize,
+    /// # external leaves allocated, multiple of LeafDataBlockSize,
     /// >= @a n_extleaves()
     count_type extleaf_capacity() const noexcept
     { return TREE->extleaf_capacity(); }
@@ -2423,10 +2577,10 @@ namespace WDutils {
     template<bool i, bool EXT> enable_if_type<!i> 
     _mass(TreeLeaf<EXT>) const noexcept {}
     //
-    template<bool i, bool EXT> enable_if_type< i,prop_type> const*
-    _cp_mass(const TreeLeaf<EXT> l) const noexcept { return TREE->cp_mass(l); }
+    template<bool i, bool EXT> enable_if_type< i,packed_prop_type>
+    _p_mass(const TreeLeaf<EXT> l) const noexcept { return TREE->p_mass(l); }
     template<bool i, bool EXT> enable_if_type<!i> 
-    _cp_mass(TreeLeaf<EXT>) const noexcept {}
+    _p_mass(TreeLeaf<EXT>) const noexcept {}
     //
     template<bool i> enable_if_type< i,bool>
     _have_Hsq() const noexcept { return TREE->have_Hsq(); }
@@ -2443,22 +2597,28 @@ namespace WDutils {
     template<bool i, bool EXT> enable_if_type<!i>
     _Hsq_lv(TreeLeaf<EXT>) const noexcept {}
     //
-    template<bool i, bool EXT> enable_if_type< i,prop_type> const*
-    _cp_Hsq(const TreeLeaf<EXT> l) const noexcept { return TREE->cp_Hsq(l); }
+    template<bool i, bool EXT> enable_if_type< i,packed_prop_type>
+    _p_Hsq(const TreeLeaf<EXT> l) const noexcept { return TREE->p_Hsq(l); }
     template<bool i, bool EXT> enable_if_type<!i> 
-    _cp_Hsq(TreeLeaf<EXT>) const noexcept {}
+    _p_Hsq(TreeLeaf<EXT>) const noexcept {}
 #ifdef __SSE__
     //
     template<bool i> enable_if_type< i,bool>
-    _have_xvec() const noexcept { return TREE->have_xvec(); }
+    _have_ppos() const noexcept { return TREE->have_ppos(); }
     template<bool i> enable_if_type<!i,bool>
-    _have_xvec() const noexcept { return 0; }
+    _have_ppos() const noexcept { return 0; }
     //
-    template<bool i, int I> enable_if_type< i, sse_pos_type> const*
-    _cp_xvec(const Leaf l) const noexcept
-    { return TREE-> template cp_xvec<I>(l); }
+    template<bool i, int I> enable_if_type< i, pos_comp_block> const&
+    _b_pos(const Leaf l) const noexcept
+    { return TREE-> template b_pos<I>(l); }
     template<bool i, int I> enable_if_type<!i>
-    _cp_xvec(Leaf) const noexcept {}
+    _b_pos(Leaf) const noexcept {}
+    //
+    template<bool i, int I> enable_if_type< i, packed_pos_type>
+    _p_pos(const Leaf l) const noexcept
+    { return TREE-> template p_pos<I>(l); }
+    template<bool i, int I> enable_if_type<!i>
+    _p_pos(Leaf) const noexcept {}
     //
     template<bool i> enable_if_type< i,bool>
     _have_anchor() const noexcept { return TREE->have_anchor(); }
@@ -2469,27 +2629,33 @@ namespace WDutils {
     _anchor(const Leaf l) const noexcept { return TREE->anchor(l); }
     template<bool i> enable_if_type<!i>
     _anchor(Leaf) const noexcept {}
-#endif
+#endif // __SSE__
   public:
     // NOTE: these dummy methods are not implemented, but provide a public way
     //       to get the appropriate return type. They are necessary because a
     //       bug in GCC 4.7.0 prevents the use of private methods within the
     //       decltype specifier of the return type of public methods.
-    template<bool i> static enable_if_type< i,prop_type> const&_prop();
-    template<bool i> static enable_if_type<!i> _prop();
+    template<bool i> static enable_if_type< i,prop_type> const&_prop() noexcept;
+    template<bool i> static enable_if_type<!i> _prop() noexcept;
     //
-    template<bool i> static enable_if_type< i,prop_type>&_prop_lv();
-    template<bool i> static enable_if_type<!i> _prop_lv();
-    //
-    template<bool i> static enable_if_type< i,prop_type> const*_cp_prop();
-    template<bool i> static enable_if_type<!i> _cp_prop();
+    template<bool i> static enable_if_type< i,prop_type>&_prop_lv() noexcept;
+    template<bool i> static enable_if_type<!i> _prop_lv() noexcept;
     //
 #ifdef __SSE__
-    template<bool i> static enable_if_type< i,sse_pos_type> const*_cp_sse();
-    template<bool i> static enable_if_type<!i> _cp_sse();
+    template<bool i> static enable_if_type< i,pos_comp_block> const&
+    _pos_comp() noexcept;
+    template<bool i> static enable_if_type<!i> _pos_comp() noexcept;
     //
-    template<bool i> static enable_if_type< i,Anchor> const*_cp_anch();
-    template<bool i> static enable_if_type<!i> _cp_anch();
+    template<bool i> static enable_if_type< i,packed_pos_type>
+    _pack_pos() noexcept;
+    template<bool i> static enable_if_type<!i> _pack_pos() noexcept;
+    //
+    template<bool i> static enable_if_type< i,packed_prop_type>
+    _pack_prop() noexcept;
+    template<bool i> static enable_if_type<!i> _pack_prop() noexcept;
+    //
+    template<bool i> static enable_if_type< i,Anchor> const*_cp_anch() noexcept;
+    template<bool i> static enable_if_type<!i> _cp_anch() noexcept;
 #endif
     /// do we have masses?
     bool have_mass() const noexcept
@@ -2498,10 +2664,6 @@ namespace WDutils {
     template<bool EXT>
     auto mass(const TreeLeaf<EXT> l) const noexcept
       -> decltype(_prop<IsITree>()) { return _mass<IsITree>(l); }
-    /// const pointer to leaf mass
-    template<bool EXT>
-    auto cp_mass(const TreeLeaf<EXT> l) const noexcept
-      -> decltype(_cp_prop<IsITree>()) { return Tree::_cp_mass<IsITree>(l); }
     /// do we have sizes?
     bool have_Hsq() const noexcept
     { return _have_Hsq<IsITree>(); }
@@ -2513,25 +2675,33 @@ namespace WDutils {
     template<bool EXT>
     auto Hsq_lv(TreeLeaf<EXT> const&l) const noexcept
       -> decltype(_prop_lv<IsITree>()) { return _Hsq_lv<IsITree>(l); }
-    /// const pointer to leaf size^2
-    template<bool EXT>
-    auto cp_Hsq(const TreeLeaf<EXT> l) const noexcept
-      -> decltype(_cp_prop<IsITree>()) { return _cp_Hsq<IsITree>(l); }
 #ifdef __SSE__
+    /// packed masses
+    template<bool EXT>
+    auto p_mass(const TreeLeaf<EXT> l) const noexcept
+      -> decltype(_pack_prop<IsITree>()) { return _p_mass<IsITree>(l); }
+    /// packed sizes^2
+    template<bool EXT>
+    auto p_Hsq(const TreeLeaf<EXT> l) const noexcept
+      -> decltype(_pack_prop<IsITree>()) { return _p_Hsq<IsITree>(l); }
     /// do we have sse positions?
-    bool have_xvec() const noexcept
-    { return _have_xvec<IsITree>(); }
-    /// const pter to sse positions of leafs
+    bool have_ppos() const noexcept
+    { return _have_ppos<IsITree>(); }
+    /// block of J-th component of SSE positions
     template<int I>
-    auto cp_xvec(const Leaf l) const noexcept
-      -> decltype(_cp_sse<IsITree>()) { return _cp_xvec<IsITree,I>(l); }
+    auto b_pos(const Leaf l) const noexcept
+      -> decltype(_pos_comp<IsITree>()) { return _b_pos<IsITree,I>(l); }
+    /// packed J-th components of SSE positions
+    template<int I>
+    auto p_pos(const Leaf l) const noexcept
+      -> decltype(_pack_pos<IsITree>()) { return _p_pos<IsITree,I>(l); }
     /// do we have anchors
     bool have_anchor() const noexcept
     { return _have_anchor<IsITree>(); }
     /// const access to leaf anchor
     auto anchor(const Leaf l) const noexcept
       -> decltype(_cp_anch<IsITree>()) { return _anchor<IsITree>(l); }
-#endif
+#endif // __SSE__
     //@}
 
     /// \name functionality related to cells
@@ -2566,7 +2736,7 @@ namespace WDutils {
     /// octant of cell in parent
     octant_type const&octant(const Cell c) const noexcept
     { return TREE->octant(c); }
-    /// cell's cubic box, 16-byte aligned
+    /// cell's cubic box (always aligned to @a PosAlignment bytes)
     cube const&box(const Cell c) const noexcept
     { return TREE->box(c); }
     /// cell's geometric centre (of cubic box)
@@ -2587,6 +2757,9 @@ namespace WDutils {
     /// total # active internal leaves
     count_type const&n_active() const noexcept
     { return TREE->n_active(); }
+    /// are all internal leaves active?
+    bool all_active() const noexcept
+    { return TREE->all_active(); }
     /// does cell have active leaves?
     template<bool All>
     bool has_active(const Cell c) const noexcept
@@ -2759,26 +2932,26 @@ namespace WDutils {
 				     0,n_leaf(),leaf_chunk<schedule>());
     }
 #endif// OCTALTREE_USE_OPENMP
-    /// loop all 4-blocks of internal leaves
-    /// \param[in] f  function called for each 4-block of leaves
-    /// \note the last 4-block may not be complete, though data are allocated
+    /// loop all LeafBlockSize-sized blocks of internal leaves
+    /// \param[in] f  function called for each block of leaves
+    /// \note the last block may not be complete, though data are allocated
     template<typename FuncOfLeaf>
     void loop_blocks(FuncOfLeaf f) const noexcept(noexcept(f))
-    { for(auto l=begin_leaf(); l<end_leaf(); l+=4) f(l); }
-    /// loop all 4-blocks of internal leaves in range
-    /// \param[in] f  function called for each 4-block of leaves
-    /// \note the last 4-block may not be complete, though data are allocated
+    { for(auto l=begin_leaf(); l<end_leaf(); l+=Tree::LeafBlockSize) f(l); }
+    /// loop all LeafBlockSize-sized blocks of internal leaves in range
+    /// \param[in] f  function called for each block of leaves
+    /// \note the last block may not be complete, though data are allocated
     template<typename FuncOfLeaf>
     void loop_blocks(const LeafRange r, FuncOfLeaf f)
       const noexcept(noexcept(f))
-    { for(auto l=begin_leaf(r); l<end_leaf(r); l+=4) f(l); }
+    { for(auto l=begin_leaf(r); l<end_leaf(r); l+=LeafBlockSize) f(l); }
 #ifdef OCTALTREE_USE_OPENMP
-    /// useful chunk size for parallelism on 4-blocks of leaves
+    /// useful chunk size for parallelism on blocks of leaves
     template<OMP::Schedule schedule>
     unsigned block_chunk()  const noexcept
-    { return octtree::default_chunk<schedule>(n_4blck()); }
-    //    /// loop all 4-blocks of internal leaves in parallel
-    /// \param[in] f  function called in parallel for each 4-block of leaves
+    { return octtree::default_chunk<schedule>(num_leaf_blocks()); }
+    /// loop all LeafBlockSize-sized blocks of internal leaves in parallel
+    /// \param[in] f  function called in parallel for each block of leaves
     /// \param[in] c  size of chunk for parallel loop
     /// \note to be called from within a OMP parallel region
     /// \note implies a synchronisation barrier before returning
@@ -2786,23 +2959,25 @@ namespace WDutils {
     void loop_blocks_omp(FuncOfLeaf f, unsigned c)
       const noexcept(noexcept(f))
     {
-      OMP::for_each<schedule>([f](unsigned l) { f(Leaf(l<<2)); },
-			      0, n_4blck(), c);
+      OMP::for_each<schedule>([f](unsigned l)
+			      { f(Leaf(l<<LeafBlockShft)); },
+			      0, num_leaf_blocks(), c);
     }
-    /// loop all 4-blocks of internal leaves in parallel without implicit
-    /// barrier
-    /// \param[in] f  function called in parallel for each 4-block of leaves
+    /// loop all LeafBlockSize-sized blocks of internal leaves in parallel
+    /// without implicit barrier
+    /// \param[in] f  function called in parallel for each block of leaves
     /// \param[in] c  size of chunk for parallel loop
     /// \note to be called from within a OMP parallel region
     template<OMP::Schedule schedule, typename FuncOfLeaf>
     void loop_blocks_omp_nowait(FuncOfLeaf f, unsigned c)
       const noexcept(noexcept(f))
     {
-      OMP::for_each_nowait<schedule>([f](unsigned l) { f(Leaf(l<<2)); },
-				     0, n_4blck(), c);
+      OMP::for_each_nowait<schedule>([f](unsigned l)
+				     { f(Leaf(l<<LeafBlockShft)); },
+				     0, num_leaf_blocks(), c);
     }
-    /// loop all 4-blocks of internal leaves in parallel
-    /// \param[in] f  function called in parallel for each 4-block of leaves
+    /// loop all LeafBlockSize-sized blocks of internal leaves in parallel
+    /// \param[in] f  function called in parallel for each block of leaves
     /// \note For static schedule we use non-overlapping chunks, while for
     ///       dynamic and guided schedule we use chunks of size @a
     ///       n_leaf()/(32*OMP::TeamSize().
@@ -2812,12 +2987,13 @@ namespace WDutils {
     void loop_blocks_omp(FuncOfLeaf f)
       const noexcept(noexcept(f))
     {
-      OMP::for_each<schedule>([f](unsigned l) { f(Leaf(l<<2)); },
-			      0, n_4blck(), block_chunk<schedule>());
+      OMP::for_each<schedule>([f](unsigned l)
+			      { f(Leaf(l<<LeafBlockShft)); },
+			      0, num_leaf_blocks(), block_chunk<schedule>());
     }
-    /// loop all 4-blocks of internal leaves in parallel without implicit
-    /// barrier
-    /// \param[in] f  function called in parallel for each 4-block of leaves
+    /// loop all LeafBlockSize-sized blocks of internal leaves in parallel
+    /// without implicit barrier
+    /// \param[in] f  function called in parallel for each block of leaves
     /// \note For static schedule we use non-overlapping chunks, while for
     ///       dynamic and guided schedule we use chunks of size @a
     ///       n_leaf()/(32*OMP::TeamSize().
@@ -2826,8 +3002,10 @@ namespace WDutils {
     void loop_blocks_omp_nowait(FuncOfLeaf f)
       const noexcept(noexcept(f))
     {
-      OMP::for_each_nowait<schedule>([f](unsigned l) { f(Leaf(l<<2)); },
-				     0, n_4blck(), block_chunk<schedule>());
+      OMP::for_each_nowait<schedule>([f](unsigned l)
+				     { f(Leaf(l<<LeafBlockShft)); },
+				     0, num_leaf_blocks(),
+				     block_chunk<schedule>());
     }
 #endif// OCTALTREE_USE_OPENMP
     /// loop all leaf ranges
@@ -2894,8 +3072,9 @@ namespace WDutils {
 				       { this->loop_leaves(r,f); },
 				       c);
     }
-    /// loop all 4-blocks of internal leaves using parallelism on ranges
-    /// \param[in] f  function called in parallel for each 4-block of leaves
+    /// loop all LeafBlockSize-sized blocks of internal leaves using
+    /// parallelism on ranges
+    /// \param[in] f  function called in parallel for each block of leaves
     /// \param[in] c  size of chunk for parallel loop
     /// \note to be called from within a OMP parallel region
     /// \note implies a synchronisation barrier before returning
@@ -2907,9 +3086,9 @@ namespace WDutils {
 				{ this->loop_blocks(r,f); },
 				c);
     }
-    /// loop all 4-blocks of internal leaves using parallelism on ranges
-    /// without implicit barrier
-    /// \param[in] f  function called in parallel for each 4-block of leaves
+    /// loop all LeafBlockSize-sized blocks of internal leaves using
+    /// parallelism on ranges without implicit barrier
+    /// \param[in] f  function called in parallel for each block of leaves
     /// \param[in] c  size of chunk for parallel loop
     /// \note to be called from within a OMP parallel region
     template<OMP::Schedule schedule, typename FuncOfLeaf>
@@ -3206,6 +3385,84 @@ namespace WDutils {
     //@}
 
     ///
+    /// \name the tree-walking algorithm, as used in the Barnes&Hut tree code
+    //@{
+  private:
+    /// process many leaves using Proc::process(Leaf,Leaf)
+    template<bool HasMany, typename Proc>
+    typename std::enable_if< HasMany>::type
+    process_for_walk(const Proc*proc, Leaf l, const Leaf lN)
+    { proc->process(l,lN); }
+    /// process many leaves using Proc::process(Leaf)
+    template<bool HasMany, typename Proc>
+    typename std::enable_if<!HasMany>::type
+    process_for_walk(const Proc*proc, Leaf l, const Leaf lN)
+    { for(; l<lN; ++l) proc->process(l); }
+    //  template magic for determining whether
+    //  \code void Proc::process(Leaf,Leaf) const \endcode
+    //  exists
+    template<typename T, T>
+    struct sig_check : std::true_type {};
+    //
+    template<typename T, typename = std::true_type>
+    struct proc_has_many : std::false_type {};
+    //
+    template<typename T> struct proc_has_many
+    < T, std::integral_constant<bool, sig_check<void(T::*)(Leaf, Leaf) const,
+						&T::process>::value>
+    > : std::true_type {};
+  public:
+    ///
+    /// tree walk
+    ///
+    /// \param[in] proc  (pter to) processor of tree nodes
+    /// \param[in] cell  tree cell to walk (defaults to tree root)
+    /// \param[in] auxc  auxiliary deque for stacking cells
+    /// \note @c Proc must implement the following concept
+    /// \code
+    ///   /// try to process cell, return true in case of success
+    ///   bool Proc::process(Tree::Cell c) const;
+    ///   /// processs a single internal leaf
+    ///   void Proc::process(Tree::Leaf l) const;
+    ///   /// optional: processs many internal leaves. if this function is not
+    ///   /// implemented, we process each leaf individually.
+    ///   void Proc::process(Tree::Leaf l0, Tree::Leaf lN) const;
+    ///   /// should we also process external leaves (if any)?
+    ///   bool Proc::do_external() const;
+    ///   /// processs a single external leaf
+    ///   void Proc::process(Tree::ExtLeaf l) const;
+    /// \endcode
+    template<typename Proc>
+    void walk(const Proc*proc, std::deque<Cell>&auxc,
+	      const Cell cell=Cell(0)) const
+    {
+      static const bool ProcHasMany = proc_has_many<Proc>::value;
+      auxc.clear();
+      std::stack<Cell> cell_stack(auxc);
+      if(!proc->process(cell))
+	cell_stack.push(cell);
+      while(!cell_stack.empty()) {
+	const Cell c = cell_stack.top();  cell_stack.pop(); 
+	if(n_leaf_kids(c))
+	  process_for_walk<ProcHasMany>(proc, begin_leaf(c), end_leaf_kids(c));
+	if(n_daughters(c))
+	  loop_daughters_reverse([&](const Cell cc)
+				 { if(!proc->process(cc)) cell_stack.push(cc); }
+				 );
+      }
+      if(proc->do_external() && n_extleaf())
+	loop_extleaves([&](const ExtLeaf el){ proc->process(el); });
+    }
+    /// the same, but uses its own temporary stack
+    template<typename Proc>
+    void walk(const Proc*proc, const Cell cell=Cell(0)) const
+    {
+      std::deque<Cell> auxc;
+      walk(proc,auxc,cell);
+    }
+    //@}
+
+    ///
     /// \name dump tree data
     //@{
   protected:
@@ -3264,128 +3521,6 @@ namespace WDutils {
     //@}
 #endif
   };// TreeWalker<Tree derived from OctalTree>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  //
-  template<typename _Tree, class Enable=void> class StandardTreeWalk;
-  ///
-  /// The standard tree-walking algorithm.
-  ///
-  template<typename _Tree>
-  class StandardTreeWalk<_Tree,
-			 typename enable_if<is_OctalTree<_Tree>::value>::type>
-    : public TreeWalker<_Tree>
-  {
-    typedef TreeWalker<_Tree>   Base;
-    typedef typename Base::Tree Tree;
-    typedef typename Base::Cell Cell;
-    typedef typename Base::Leaf Leaf;
-    typedef typename Base::ExtLeaf ExtLeaf;
-    /// datum: a stack of cells
-    mutable Stack<Cell> cell_stack;
-    /// process many leaves using Proc::process(Leaf,Leaf)
-    template<bool HasMany, typename Proc>
-    typename std::enable_if< HasMany>::type
-    process_many(const Proc*proc, Leaf l, const Leaf lN)
-    { proc->process(l,lN); }
-    /// process many leaves using Proc::process(Leaf)
-    template<bool HasMany, typename Proc>
-    typename std::enable_if<!HasMany>::type
-    process_many(const Proc*proc, Leaf l, const Leaf lN)
-    { for(; l<lN; ++l) proc->process(l); }
-    //  template magic for determining whether
-    //  \code void Proc::process(Leaf,Leaf) const \endcode
-    //  exists
-    template<typename T, T>
-    struct sig_check : std::true_type {};
-    //
-    template<typename T, typename = std::true_type>
-    struct proc_has_many : std::false_type {};
-    //
-    template<typename T> struct proc_has_many
-    < T, std::integral_constant<bool, sig_check<void(T::*)(Leaf, Leaf) const,
-						&T::process>::value>
-    > : std::true_type {};
-  public:
-    /// ctor: initialise cell stack
-    /// \param[in] tree  tree to walk
-    explicit StandardTreeWalk(const Tree*tree)
-      : Base(tree)
-      , cell_stack(Tree::Nsub*this->depth()) {}
-    ///
-    /// tree walk
-    ///
-    /// \param[in] proc  (pter to) processor of tree nodes
-    /// \note @c Proc must implement the following concept
-    /// \code
-    ///   // try to process cell, return true in case of success
-    ///   bool Proc::process(Tree::Cell c) const;
-    ///   // processs a single internal leaf
-    ///   void Proc::process(Tree::Leaf l) const;
-    ///   // optional: processs many internal leaves. if this function is not
-    ///   // implemented, we process each leaf individually.
-    ///   void Proc::process(Tree::Leaf l0, Tree::Leaf lN) const;
-    ///   // should we also process external leaves (if any)?
-    ///   bool Proc::do_external() const;
-    ///   // processs a single external leaf
-    ///   void Proc::process(Tree::ExtLeaf l) const;
-    /// \endcode
-    template<typename Proc>
-    void operator()(const Proc*proc) const
-    {
-      // does @c Proc have member function @a void process(Leaf,Leaf) const ?
-      static const bool ProcHasMany = proc_has_many<Proc>::value;
-      // reset the cell stack
-      cell_stack.reset();
-      // ensure that the cell stack is big enough (tree depth may have changed)
-      if(cell_stack.capacity()  < Tree::Nsub*this->depth())
-	cell_stack.reset_capacity(Tree::Nsub*this->depth());
-      // try processing the root cell, put it on stack if it needs opening
-      if(!proc->process(this->root()))
-	cell_stack.push(this->root());
-      // while the stack is not empty: process cells
-      while(!cell_stack.is_empty()) {
-	const Cell c = cell_stack.pop();
-	// process leaf kids of cell c
-	if(this->n_leaf_kids(c))
-	  process_many<ProcHasMany>(proc, this->begin_leaf(c),
-					  this->end_leaf_kids(c));
-	// process (or stack) daughters of cell c
-	if(this->n_cell(c))
-	  this->loop_daughters_reverse([&](const Cell cc){
-	      if(!proc->process(cc))
-		cell_stack.push(cc);
-	    });
-      }
-      // process external leaves, if any
-      if(proc->do_external() && this->n_extleaf())
-	this->loop_extleaves([&](const ExtLeaf el){ proc->process(el); });
-    }
-  };// class StandardWalk<Tree>
-  //
-  template<typename _Tree >
-  struct traits< StandardTreeWalk<_Tree> >
-  { static const char*name()
-    { return message("StandardTreeWalk<%s>",nameof(_Tree)); }
-  };
 } //  namespace WDutils
 ////////////////////////////////////////////////////////////////////////////////
 #endif // WDutils_included_octtree_h

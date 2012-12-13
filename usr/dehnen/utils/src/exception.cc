@@ -62,7 +62,9 @@ WDutils::RunInfo::RunInfo()
     __is_mpi_proc(0),
     __debug(0)
 {
+#ifndef __INTEL_COMPILER
   try {
+#endif
     // set wall-clock time
     {
 #if defined(__unix) || defined(__DARWIN_UNIX03)
@@ -146,9 +148,16 @@ WDutils::RunInfo::RunInfo()
 #endif
       __omp_size = __omp_proc;
     }
-  } catch(exception E) {
-    WDutils_RETHROW(E);
+#ifndef __INTEL_COMPILER
+    // icpc 13:
+    // internal error: assertion failed at:
+    // "shared/cfe/edgcpfe/decls.c", line 13056
+    //   } catch(WDutils::exception ex) {
+    //                              ^
+  } catch(WDutils::exception ex) {
+    WDutils_RETHROW(ex);
   }
+#endif
 }
 //
 void WDutils::RunInfo::set_omp(const char*arg)

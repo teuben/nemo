@@ -4,11 +4,11 @@
 /// \file   utils/src/radix.cc
 ///
 /// \author Walter Dehnen
-/// \date   2011
+/// \date   2011,2012
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2011 Walter Dehnen
+// Copyright (C) 2011,2012 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -69,7 +69,8 @@ namespace {
     /// auxiliary for sort(): first-section count (converts)
     void first_count(integer*to)
     {
-      SSE::Aligned::Reset(L,n0);
+      for(int i=i0; i!=n0; ++i)
+	L[i] = 0;
       for(unsigned i=i0; i!=iN; ++i) {
 	integer f=iX[i];
 	to[i]= f^= Radix::SortTraits<X>::forward_map(f);
@@ -79,7 +80,8 @@ namespace {
     /// auxiliary for sort(): ordinary count (any but first section)
     template<int shift, int mask> void count(integer*in)
     {
-      SSE::Aligned::Reset(L,1+mask);
+      for(unsigned i=i0; i<=mask; ++i)
+	L[i] = 0;
       for(unsigned i=i0; i!=iN; ++i)
 	L[(in[i]>>shift) & mask]++;
     }
@@ -134,10 +136,14 @@ namespace {
 			   "(use WDutils::Radix::Sort() for sorting local "
 			   "data).\n");
 #pragma omp barrier
-	try {
+#ifndef __INTEL_COMPILER
+        try {
+#endif
 	  ParallelRadixSort<X> P(n,x,y);
 	  P.sort();
-	} catch(exception E)  { WDutils_ErrorN(text(E)); }
+#ifndef __INTEL_COMPILER
+	} catch(WDutils::exception E)  { WDutils_ErrorN(text(E)); }
+#endif
       } else if(!OMP::IsParallel() && OMP::MaxNumThreads()>1) {
 	ThrowGuard Guard;
 #pragma omp parallel
@@ -160,13 +166,17 @@ namespace {
 			   "we assume shared global data "
 			   "(use WDutils::Radix::Sort() for sorting local "
 			   "data).\n");
+#ifndef __INTEL_COMPILER
 	try {
+#endif
 	  if(OMP::Rank() == 0) y=WDutils_NEW16(X,n);
 #pragma omp barrier
 	  ParallelRadixSort<X> P(n,x,y);
 	  P.sort();
 	  if(OMP::Rank() == 0) WDutils_DEL16(y);
-	} catch(exception E)  { WDutils_ErrorN(text(E)); }
+#ifndef __INTEL_COMPILER
+	} catch(WDutils::exception E)  { WDutils_ErrorN(text(E)); }
+#endif
       } else {
 #endif
 	y=WDutils_NEW16(X,n);
@@ -174,10 +184,14 @@ namespace {
 	if(!OMP::IsParallel() && OMP::MaxNumThreads()>1)
 #pragma omp parallel
 	  {
+#ifndef __INTEL_COMPILER
 	    try {
+#endif
 	      ParallelRadixSort<X> P(n,x,y);
 	      P.sort();
-	    } catch(exception E) { WDutils_ErrorN(text(E)); }
+#ifndef __INTEL_COMPILER
+	    } catch(WDutils::exception E) { WDutils_ErrorN(text(E)); }
+#endif
 	  }
 	else 
 #endif
