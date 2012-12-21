@@ -13,6 +13,7 @@
  *	8-sep-01	init_xrandom
  *     11-jan-02      d debug= renamed to hdebug=
  *     15-aug-06  V1.3  prototype and global/extern as in hackcode1	PJT
+ *     21-dec-12  V1.4  only output the (last) non-rigit particles
  */
 
 #define global
@@ -52,7 +53,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
     "potfile=\n			Filename for potential(5)",
 
     "hdebug=false\n		Turn on debugging messages",
-    "VERSION=1.3a\n		15-aug-06 PJT",
+    "VERSION=1.4\n		21-dec-2012 PJT",
     NULL,
 };
 

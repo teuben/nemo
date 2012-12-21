@@ -103,8 +103,9 @@ local bool firstmass = TRUE;	/* if true, output mass data */
 
 output()
 {
-    int nttot, nbavg, ncavg, k, bits;
-
+    int nttot, nbavg, ncavg, k, bits, nout;
+    bodyptr bodyout;
+  
     diagnostics();				/* compute std diagnostics  */
     nttot = n2bcalc + nbccalc;
     nbavg = (int) ((real) n2bcalc / (real) nfcalc);
@@ -138,7 +139,15 @@ output()
 	    bits |= AccelerationBit;
     }
     if (bits != 0 && outstr != NULL) {		/* output ready and able?   */
-	put_snap(outstr, &bodytab, &nbody, &tnow, &bits);
+      bodyout = bodytab;
+      nout = nbody;
+#if 0
+      put_snap(outstr, &bodytab, &nbody, &tnow, &bits);
+#else
+      for (bodyout = bodytab; bodyout < bodytab + nrigid; bodyout++)
+	nout--;
+      put_snap(outstr, &bodyout, &nout, &tnow, &bits);
+#endif
 	if (bits & PhaseSpaceBit)
 	    printf("\n\tparticle data written\n");
     }
