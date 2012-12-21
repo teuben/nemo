@@ -1,4 +1,4 @@
-.TH HACKCODE3 1NEMO "15 October 1993"
+.TH HACKCODE3 1NEMO "21 December 2012"
 .SH NAME
 hackcode3, hackcode3_qp \- hierarchical N-body code (3)
 .SH SYNOPSIS
@@ -22,7 +22,8 @@ snapshot format.
 At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
 .TP
 \fBout\fP=\fIout-file\fP
-If given, results are written to \fIout-file\fP in snapshot format.
+If given, results are written to \fIout-file\fP in snapshot format. Note
+as of version 1.4 only the non-rigid particles are output.
 .TP
 \fBrestart\fP=\fIstate-file\fP
 If given, the system state will be read from \fIstate-file\fP.
@@ -139,4 +140,5 @@ $NEMO/src/nbody/evolve/hackcode/hackcode3
 26-Jan-90	V1.2  nrigid added	PJT
 2-apr-90	V1.2a etot bug removed	PJT
 8-may-92	formally added to NEMO	PJT
+21-dec-2012	V1.4 only non-rigid particles output	PJT
 .fi
