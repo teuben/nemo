@@ -1,5 +1,5 @@
 DIR = src/image/misc
-BIN = ccdplot ccdstat ccdmom
+BIN = ccdplot ccdstat ccdmom ccdsub ccdrow
 NEED = $(BIN)  ccdmath
 
 help:
@@ -38,7 +38,11 @@ ccdstat: ccd.in
 
 ccdsub: ccd.in
 	@echo Running $@
-	$(EXEC) ccdsub ccd.in
+	$(EXEC) ccdsub ccd.in - 10:20 10:20 |  $(EXEC) ccdstat - ; nemo.coverage ccdsub.c ccdstat.c
+
+ccdrow: ccd.in
+	@echo Running $@
+	$(EXEC) ccdrow ccd.in - row=0 |  $(EXEC) ccdstat - ; nemo.coverage ccdrow.c ccdstat.c
 
 ccdmom: ccdmom.in
 	@echo Running $@
