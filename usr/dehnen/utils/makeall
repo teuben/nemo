@@ -278,6 +278,10 @@ library		:	$(libraryOMP) $(libraryMPI)
 
 ifdef WDutilsDevel
 
+test/TestSSE$(EXT)	:	test/TestSSE.cc $(sse_h) $(memory_h)
+				$(MAKE_EXE)
+TESTSUITE		+=	test/TestSSE$(EXT)
+
 test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
 				$(MAKE_EXE)
 TESTSUITE		+=	test/TestGeometry$(EXT)

@@ -84,10 +84,10 @@ namespace WDutils {
     ///
     /// a pair of vectors, suitable for SSE usage
     ///
-    template<int __D, typename __X>
+    template<int _tD, typename _tX>
     struct PointPair {
-      static const int Dim=__D;
-      typedef __X real;
+      static const int Dim=_tD;
+      typedef _tX real;
       typedef GeoVec<Dim,real> point;
       typedef SSE::Extend16<point> point16;
       point16 X,Y;
@@ -110,10 +110,10 @@ namespace WDutils {
     ///       the lower left and upper right corners C-H and C+H. However,
     ///       the geometric algorithms are simpler to code with (C,H).
     ///
-    template<int __D, typename __X>
-    class cuboid : public PointPair<__D,__X>
+    template<int _tD, typename _tX>
+    class cuboid : public PointPair<_tD,_tX>
     {
-      typedef PointPair<__D,__X> Base;
+      typedef PointPair<_tD,_tX> Base;
     public:
       using Base::X;
       using Base::Y;
@@ -348,9 +348,22 @@ namespace WDutils {
     };// struct WDutils::Geometry::Algorithms<aligned,sse>
 
     ///
+    /// apropriately aligned search-sphere data
+    ///
+    template<int _tD, typename _tX> struct SearchSphereData
+    {
+    protected: WDutils__align16 sphere<_tD,_tX> S;
+    };
+#ifdef __AVX__
+    template<> struct SearchSphereData<3,double>
+    {
+    protected: WDutils__align32 sphere<3,double> S;
+    };
+#endif
+    ///
     /// a search sphere
     ///
-    /// \note If SSE instructions for @a __X are available, we implement in
+    /// \note If SSE instructions for @a _tX are available, we implement in
     ///       geometry_inl.h specialisation which exploit them and, to this
     ///       end, have a different data representation. Therefore, nothing
     ///       must be assumed about the private member layout.
@@ -365,11 +378,16 @@ namespace WDutils {
     ///       Providing data not aligned to 16 bytes to methods assuming
     ///       16-byte alignement will cause a run-time error.
     ///
-    /// \note Only @a __D = 2 or 3 and @a __X = float or double are possible.
-    template<int __D, typename __X> struct SearchSphere
+    /// \note Only @a _tD = 2 or 3 and @a _tX = float or double are possible.
+    template<int _tD, typename _tX> struct SearchSphere
+    : private AlignedDatum<
+#ifdef __AVX__
+      _tD==3? 4*sizeof(_tX) :
+#endif
+      16, sphere<_tD,_tX> >
     {
-      static const int         Dim = __D; ///< number of spatial dimensions
-      typedef __X              real;      ///< floating point type
+      static const int         Dim = _tD; ///< number of spatial dimensions
+      typedef _tX              real;      ///< floating point type
 #if __cplusplus < 201103L
       typedef tupel<Dim,real>  point;     ///< position type
 #else
@@ -416,69 +434,69 @@ namespace WDutils {
       /// \param[in] x  new centre of sphere
       /// \param[in] q  new radius^2 of sphere
       void reset(point const&x, real q, int) noexcept
-      { S.X=x; S.Q=q; }
+      { Datum.X=x; Datum.Q=q; }
       ///
       /// reset centre and radius^2, assuming 16-byte alignment
       ///
       /// \param[in] x  new centre of sphere, 16-byte aligned
       /// \param[in] q  new radius^2 of sphere
       void reset(point const&x, real q) noexcept
-      { S.X=x; S.Q=q; }
+      { Datum.X=x; Datum.Q=q; }
       ///
       /// reset centre and radius^2
       ///
       /// \param[in] s  new sphere
       void reset(sphere<Dim,real> const&s, int) noexcept
-      { S.X=s.X; S.Q=s.Q; }
+      { Datum.X=s.X; Datum.Q=s.Q; }
       ///
       /// reset centre and radius^2, assuming 16-byte alignment
       ///
       /// \param[in] s  new sphere, 16-byte aligned
       void reset(sphere<Dim,real> const&s) noexcept
-      { S.X=s.X; S.Q=s.Q; }
+      { Datum.X=s.X; Datum.Q=s.Q; }
       ///
       /// reset just the radius^2
       ///
       /// \param[in] q  new radius^2 of sphere
       void reset(real q) noexcept
-      { S.Q = q; }
+      { Datum.Q = q; }
       ///
       /// reset just the centre
       ///
       /// \param[in] x  new centre of sphere
       void reset(point const&x, int) noexcept
-      { S.X=x; }
+      { Datum.X=x; }
       ///
       /// reset just the centre, assuming 16-byte alignment
       ///
       /// \param[in] x  new centre of sphere
       void reset(point const&x) noexcept
-      { S.X=x; }
+      { Datum.X=x; }
       ///
       /// centre of search sphere
       ///
       point const&Centre() const noexcept
-      { return S.X; }
+      { return Datum.X; }
       ///
       /// centre of search sphere
       ///
       point const&centre() const noexcept
-      { return S.X; }
+      { return Datum.X; }
       ///
       /// ith co-ordinate of centre of search sphere
       ///
       real const&Centre(int i) const noexcept
-      { return S.X[i]; }
+      { return Datum.X[i]; }
       ///
       /// radius^2 of search sphere
       ///
       real const&RadSq() const noexcept
-      { return S.Q; }
+      { return Datum.Q; }
       ///
       /// radius^2 of search sphere
       ///
       real const&radius_squared() const noexcept
-      { return S.Q; }
+      { return Datum.Q; }
       ///
       /// \name geometric relations with position
       ///
@@ -488,25 +506,25 @@ namespace WDutils {
       ///
       /// \param[in]  x  position
       real dist_sq(point const&x, int) const noexcept
-      { return Algorithms<0>::dist_sq(S.X,x); }
+      { return Algorithms<0>::dist_sq(Datum.X,x); }
       ///
       /// distance^2 from centre of sphere to some point
       ///
       /// \param[in]  x  position, 16-byte aligned
       real dist_sq(point const&x) const noexcept
-      { return Algorithms<1>::dist_sq(S.X,x); }
+      { return Algorithms<1>::dist_sq(Datum.X,x); }
       ///
       /// is a position contained within the search sphere?
       ///
       /// \param[in]  x  position
       bool contains(point const&x, int) const noexcept
-      { return dist_sq(x,0) < S.Q; }
+      { return dist_sq(x,0) < Datum.Q; }
       ///
       /// is a position contained within the search sphere?
       ///
       /// \param[in]  x  position, 16-byte aligned
       bool contains(point const&x) const noexcept
-      { return dist_sq(x) < S.Q; }
+      { return dist_sq(x) < Datum.Q; }
       //@}
       ///
       /// \name geometric relations with cubic box
@@ -517,37 +535,37 @@ namespace WDutils {
       ///
       /// \param[in]  c  cubic box
       real dist_sq(cube<Dim,real> const&c, int) const noexcept
-      { return Algorithms<0>::dist_sq(c,S.X); }
+      { return Algorithms<0>::dist_sq(c,Datum.X); }
       ///
       /// distance^2 from cube to centre of sphere (zero if inside cube)
       ///
       /// \param[in]  c  cubic box, 16-byte aligned
       real dist_sq(cube<Dim,real> const&c) const noexcept
-      { return Algorithms<1>::dist_sq(c,S.X); }
+      { return Algorithms<1>::dist_sq(c,Datum.X); }
       ///
       /// is search sphere outside of a cubic box?
       ///
       /// \param[in]  c  cubic box
       bool outside(cube<Dim,real> const&c, int) const noexcept
-      { return Algorithms<0>::outside(c,S); }
+      { return Algorithms<0>::outside(c,Datum); }
       ///
       /// is search sphere outside of a cubic box?
       ///
       /// \param[in]  c  cubic box, 16-byte aligned
       bool outside(cube<Dim,real> const&c) const noexcept
-      { return Algorithms<1>::outside(c,S); }
+      { return Algorithms<1>::outside(c,Datum); }
       ///
       /// is search sphere inside of a cubic box?
       ///
       /// \param[in]  c  cubic box
       bool inside(cube<Dim,real> const&c, int) const noexcept
-      { return Algorithms<0>::inside(c,S); }
+      { return Algorithms<0>::inside(c,Datum); }
       ///
       /// is search sphere inside of a cubic box?
       ///
       /// \param[in]  c  cubic box, 16-byte aligned
       bool inside(cube<Dim,real> const&c) const noexcept
-      { return Algorithms<1>::inside(c,S); }
+      { return Algorithms<1>::inside(c,Datum); }
       //@}
       ///
       /// \name geometric relations with rectangular box
@@ -558,42 +576,46 @@ namespace WDutils {
       ///
       /// \param[in]  c  rectangular box
       real dist_sq(cuboid<Dim,real> const&c, int) const noexcept
-      { return Algorithms<0>::dist_sq(c,S.X); }
+      { return Algorithms<0>::dist_sq(c,Datum.X); }
       ///
       /// distance^2 from cuboid to centre of sphere (zero if inside cuboid)
       ///
       /// \param[in]  c  rectangular box, 16-byte aligned
       real dist_sq(cuboid<Dim,real> const&c) const noexcept
-      { return Algorithms<1>::dist_sq(c,S.X); }
+      { return Algorithms<1>::dist_sq(c,Datum.X); }
       ///
       /// is search sphere outside of a cubic box?
       ///
       /// \param[in]  c  rectangular box
       bool outside(cuboid<Dim,real> const&c, int) const noexcept
-      { return Algorithms<0>::outside(c,S); }
+      { return Algorithms<0>::outside(c,Datum); }
       ///
       /// is search sphere outside of a cubic box?
       ///
       /// \param[in]  c  rectangular box, 16-byte aligned
       bool outside(cuboid<Dim,real> const&c) const noexcept
-      { return Algorithms<1>::outside(c,S); }
+      { return Algorithms<1>::outside(c,Datum); }
       ///
       /// is search sphere inside of a cubic box?
       ///
       /// \param[in]  c  rectangular box
       bool inside(cuboid<Dim,real> const&c, int) const noexcept
-      { return Algorithms<0>::inside(c,S); }
+      { return Algorithms<0>::inside(c,Datum); }
       ///
       /// is search sphere inside of a cubic box?
       ///
       /// \param[in]  c  rectangular box, 16-byte aligned
       bool inside(cuboid<Dim,real> const&c) const noexcept
-      { return Algorithms<1>::inside(c,S); }
+      { return Algorithms<1>::inside(c,Datum); }
       //@}
     private:
-      WDutilsStaticAssert( ( __D == 2 || __D == 3 )               &&
-			   meta::TypeInfo<__X>::is_floating_point    );
-      WDutils__align16 sphere<Dim,real> S;   ///< search sphere data
+      WDutilsStaticAssert( ( _tD == 2 || _tD == 3 )               &&
+			   meta::TypeInfo<_tX>::is_floating_point    );
+      using AlignedDatum<
+#ifdef __AVX__
+	_tD==3? 4*sizeof(_tX) :
+#endif
+	16, sphere<_tD,_tX> >::Datum;
     };// struct SearchSphere
   } // namespace WDutils::Geometry
 #define Geometry_TRAITS(TYPE,NAME)					\

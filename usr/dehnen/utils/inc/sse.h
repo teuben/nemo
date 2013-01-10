@@ -7,11 +7,11 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2009-2012
+/// \date   2009-2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2009-2012 Walter Dehnen
+// Copyright (C) 2009-2013 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -72,6 +72,7 @@ extern "C" {
 #if __cplusplus < 201103L
 # define noexcept
 # define constexpr
+# define static_assert(EXPR,MESG) WDutilsStaticAssert(EXPR)
 #endif
 
 //
@@ -203,9 +204,6 @@ namespace WDutils {
       /// is given index aligned to block_index?
       constexpr static bool is_aligned(unsigned i) noexcept
       { return (i&block_trim)==0; }
-      /// is given pointer appropriately aligned?
-      constexpr static bool is_aligned(void*p) noexcept
-      { return (size_t(p)&(alignment-1))==0; }
       /// aligned index given an index
       constexpr static unsigned aligned_index(unsigned i) noexcept
       { return i & block_mask; }
@@ -215,6 +213,12 @@ namespace WDutils {
       /// block index given an index
       constexpr static unsigned block_index(unsigned i) noexcept
       { return i >> block_shft; }
+      /// is given pointer appropriately aligned?
+      constexpr static bool is_aligned(void*p) noexcept
+      { return (size_t(p)&(alignment-1))==0; }
+      /// offset (number of element_types) of pointer from alignment
+      constexpr static size_t offset(element_type*p) noexcept
+      { return (size_t(p)>>sizeof(element_type))&block_mask; }
       /// # blocks given # elements
       constexpr static unsigned num_blocks(unsigned n) noexcept
       { return (n+block_trim)>>block_shft; }
@@ -227,21 +231,18 @@ namespace WDutils {
       //@{
       /// default ctor
       always_inline packed() = default;
-      /// move ctor
-      always_inline packed(packed&&) = default;
       /// copy ctor
       always_inline packed(packed const&) = default;
-#ifndef __INTEL_COMPILER
-      /// move operator
-      packed& always_inline operator=(packed&&) = default;
-#endif
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
       /// ctor from data_type
       explicit always_inline packed(data_type m) : _m(m) {}
       /// ctor from single value: set all element equal to single value
-      explicit always_inline packed(element_type x) noexcept
+      explicit always_inline packed(float x) noexcept
       { _m = _mm_set1_ps(x); }
+      /// ctor from single value: set all element equal to single value
+      explicit always_inline packed(double x) noexcept
+      { _m = _mm_set1_ps(float(x)); }
       /// ctor from 4 values: set elements
       /// \note inverse order to _mm_set_ps(a,b,c,d)
       always_inline packed(element_type a, element_type b,
@@ -276,15 +277,19 @@ namespace WDutils {
       { return _m; }
       /// constant element access, templated
       template<unsigned I>
-      friend element_type at(packed const&p) noexcept
+      friend element_type always_inline at(packed p) noexcept
       {
 	static_assert(I<block_size,"index out of range");
 # if   defined(__GNUC__) && !defined(__INTEL_COMPILER)
 	return __builtin_ia32_vec_ext_v4sf(p._m,I);
+# elif defined(__SSE4_1__)
+	float tmp;
+	_MM_EXTRACT_FLOAT(tmp,p.m,I);
+	return tmp;
 # else
-	union { float f; int32_t i; } tmp;
-	tmp.i = _mm_extract_ps(p._m,I);
-	return tmp.f;
+	aligned_element_block tmp;
+	_mm_store_ps(tmp,p.m);
+	return tmp[I];
 # endif
       }
 # ifdef __SSE2__
@@ -450,14 +455,14 @@ namespace WDutils {
       /// sum of first two elements
       friend element_type always_inline sum2(packed p) noexcept
       {
-	WDutils__align16 float q[4];
+	aligned_element_block q;
 	_mm_store_ps(q,p._m);
 	return q[0]+q[1];
       }
       /// sum of first three elements
       friend element_type always_inline sum3(packed p) noexcept
       {
-	WDutils__align16 float q[4];
+	aligned_element_block q;
 	_mm_store_ps(q,p._m);
 	return q[0]+q[1]+q[2];
       }
@@ -627,7 +632,6 @@ namespace WDutils {
       /// data
       data_type _m;
     };// SSE::packed<4,float>
-
     typedef packed<4,float> fvec4;
 
 # ifdef __AVX__
@@ -667,9 +671,6 @@ namespace WDutils {
       /// is given index aligned to block_index?
       constexpr static bool is_aligned(unsigned i) noexcept
       { return (i&block_trim)==0; }
-      /// is given pointer appropriately aligned?
-      constexpr static bool is_aligned(void*p) noexcept
-      { return (size_t(p)&(alignment-1))==0; }
       /// aligned index given an index
       constexpr static unsigned aligned_index(unsigned i) noexcept
       { return i & block_mask; }
@@ -679,6 +680,12 @@ namespace WDutils {
       /// block index given an index
       constexpr static unsigned block_index(unsigned i) noexcept
       { return i >> block_shft; }
+      /// is given pointer appropriately aligned?
+      constexpr static bool is_aligned(void*p) noexcept
+      { return (size_t(p)&(alignment-1))==0; }
+      /// offset (number of element_types) of pointer from alignment
+      constexpr static size_t offset(element_type*p) noexcept
+      { return (size_t(p)>>sizeof(element_type))&block_mask; }
       /// # blocks given # elements
       constexpr static unsigned num_blocks(unsigned n) noexcept
       { return (n+block_trim)>>block_shft; }
@@ -691,14 +698,8 @@ namespace WDutils {
       //@{
       /// default ctor
       always_inline packed() = default;
-      /// move ctor
-      always_inline packed(packed&&) = default;
       /// copy ctor
       always_inline packed(packed const&) = default;
-#ifndef __INTEL_COMPILER
-      /// move operator
-      packed& always_inline operator=(packed&&) = default;
-#endif
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
       /// ctor from data_type
@@ -706,7 +707,7 @@ namespace WDutils {
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(element_type x) noexcept
       { _m = _mm256_set1_ps(x); }
-      /// ctor from 4 values: set elements
+      /// ctor from 8 values: set elements
       /// \note inverse order to _mm256_set_ps(a,b,c,d,e,f,g,h)
       always_inline packed(element_type a, element_type b,
 			   element_type c, element_type d,
@@ -717,15 +718,23 @@ namespace WDutils {
       packed& always_inline set_zero() noexcept
       { _m = _mm256_setzero_ps(); return*this; }
       /// set element equal to single value
-      packed& always_inline set(element_type x) noexcept
+      packed& always_inline set(float x) noexcept
       { _m = _mm256_set1_ps(x); return*this; }
+      /// set element equal to single value
+      packed& always_inline set(double x) noexcept
+      { _m = _mm256_set1_ps(float(x)); return*this; }
       /// set elements
       /// \note inverse order to _mm256_set_ps(a,b,c,d,e,f,g,h)
       packed& always_inline set(element_type a, element_type b,
-			   element_type c, element_type d,
-			   element_type e, element_type f,
-			   element_type g, element_type h) noexcept
+				element_type c, element_type d,
+				element_type e, element_type f,
+				element_type g, element_type h) noexcept
       { _m = _mm256_setr_ps(a,b,c,d,e,f,g,h); return*this; }
+      /// ctor from fvec4
+      always_inline packed(packed<4,float> a) noexcept
+      { _m = _mm256_broadcast_ps(&(a.data())); }
+//       /// ctor from 2 fvec4
+//       always_inline packed(packed<4,float> a, packed<4,float> b) noexcept
       //@}
 
       /// \name data access and conversion
@@ -742,19 +751,25 @@ namespace WDutils {
       /// direct non-const data access
       data_type& always_inline data() noexcept
       { return _m; }
-      /// obtain packed<4,float> from elements [I,...,I+3]
+      /// obtain lower (I=0) or upper (I=1) packed<4,float>
       template<unsigned I>
-      packed<4,float> always_inline extract() const noexcept
+      friend packed<4,float> always_inline extract(packed p) noexcept
       {
-	static_assert(I<block_size,"index out of range");
-	return packed<4,float>(_mm256_extractf128_ps(_m,I));
+	static_assert(I<2,"index out of range");
+	return packed<4,float>(_mm256_extractf128_ps(p._m,I));
       }
+      /// obtain lower packed<4,float>
+      friend packed<4,float> always_inline lower(packed p) noexcept
+      { return extract<0>(p); }
+      /// obtain upper packed<4,float>
+      friend packed<4,float> always_inline upper(packed p) noexcept
+      { return extract<1>(p); }
       /// constant element access, templated
       template<unsigned I>
-      friend element_type at(packed const&p) noexcept
+      friend element_type always_inline at(packed p) noexcept
       {
 	static_assert(I<block_size,"index out of range");
-	return at<(I&3)>(extract<(I>>2)>());
+	return at<(I&3)>(extract<(I>>2)>(p));
       }
       /// downcast: convert 2 @c packed<4,double> to  @c packed<8,float>
       friend packed downcast(packed<4,double>, packed<4,double>) noexcept;
@@ -895,19 +910,22 @@ namespace WDutils {
       { return packed(_mm256_or_ps(a.signmask(),
 				   _mm256_and_ps(b._m,abs_mask()))); }
       //@}
-#  if(0)
       /// \name horizontal arithmetic operations
       //@{
       /// horizontal sum
       friend element_type always_inline sum(packed p) noexcept
+      { return sum(lower(p)+upper(p)); }
+#  if(0)
       /// horizontal sum in each element
       friend packed always_inline hadd(packed p) noexcept
+#  endif
       /// horizontal maximum
       friend element_type always_inline max(packed p) noexcept
+      { return max(max(lower(p),upper(p))); }
       /// horizontal minimum
       friend element_type always_inline min(packed p) noexcept
+      { return min(min(lower(p),upper(p))); }
       //@}
-#  endif
       /// \name vectorised comparisons
       //@{
       /// <
@@ -987,7 +1005,6 @@ namespace WDutils {
       data_type _m;
     };// SSE::packed<8,float>
 # endif // __AVX__
-
     typedef packed<8,float> fvec8;
 
 # ifdef __SSE2__
@@ -1028,9 +1045,6 @@ namespace WDutils {
       /// is given index aligned to block_index?
       constexpr static bool is_aligned(unsigned i) noexcept
       { return (i&block_trim)==0; }
-      /// is given pointer appropriately aligned?
-      constexpr static bool is_aligned(void*p) noexcept
-      { return (size_t(p)&(alignment-1))==0; }
       /// aligned index given an index
       constexpr static unsigned aligned_index(unsigned i) noexcept
       { return i & block_mask; }
@@ -1040,6 +1054,12 @@ namespace WDutils {
       /// block index given an index
       constexpr static unsigned block_index(unsigned i) noexcept
       { return i >> block_shft; }
+      /// is given pointer appropriately aligned?
+      constexpr static bool is_aligned(void*p) noexcept
+      { return (size_t(p)&(alignment-1))==0; }
+      /// offset (number of element_types) of pointer from alignment
+      constexpr static size_t offset(element_type*p) noexcept
+      { return (size_t(p)>>sizeof(element_type))&block_mask; }
       /// # blocks given # elements
       constexpr static unsigned num_blocks(unsigned n) noexcept
       { return (n+block_trim)>>block_shft; }
@@ -1052,20 +1072,17 @@ namespace WDutils {
       //@{
       /// default ctor
       always_inline packed() = default;
-      /// move ctor
-      always_inline packed(packed&&) = default;
       /// copy ctor
       always_inline packed(packed const&) = default;
-#ifndef __INTEL_COMPILER
-      /// move operator
-      packed& always_inline operator=(packed&&) = default;
-#endif
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
       /// ctor from data_type is private
       explicit always_inline packed(__m128d m) : _m(m) {}
       /// ctor from single value: set all element equal to single value
-      explicit always_inline packed(element_type x) noexcept
+      explicit always_inline packed(float x) noexcept
+      { _m = _mm_set1_pd(double(x)); }
+      /// ctor from single value: set all element equal to single value
+      explicit always_inline packed(double x) noexcept
       { _m = _mm_set1_pd(x); }
       /// ctor from 2 values: set elements
       /// \note inverse order to _mm_set_pd(y,x)
@@ -1099,15 +1116,15 @@ namespace WDutils {
       { return _m; }
       /// constant element access, templated
       template<unsigned I>
-      friend element_type at(packed const&p) noexcept
+      friend element_type at(packed p) noexcept
       {
 	static_assert(I<block_size,"index out of range");
 # if   defined(__GNUC__) && !defined(__INTEL_COMPILER)
 	return __builtin_ia32_vec_ext_v2df(p._m,I);
 # else
-	union { double d; int64_t i; } tmp;
-	tmp.i = _mm_extract_pd(p._m,I);
-	return tmp.d;
+	aligned_element_block q;
+	_mm_store_pd(q,p._m);
+	return q[I];
 # endif
       }
       /// downcast: convert two @c packed<2,double> to one @c packed<4,float>
@@ -1259,25 +1276,31 @@ namespace WDutils {
       /// horizontal sum
       friend element_type always_inline sum(packed p) noexcept
       {
-	WDutils__align16 double q[2];
+	aligned_element_block q;
 	_mm_store_pd(q,p._m);
 	return q[0]+q[1];
       }
       /// horizontal sum of first element
       friend element_type always_inline sum1(packed p) noexcept
-      {
-	WDutils__align16 double q[2];
-	_mm_store_pd(q,p._m);
-	return q[0];
-      }
+      { return at<0>(p); }
 #  if(0)
       /// horizontal sum in each element
       friend packed always_inline hadd(packed p) noexcept
+#  endif
       /// horizontal maximum
       friend element_type always_inline max(packed p) noexcept
+      {
+	aligned_element_block q;
+	_mm_store_pd(q,p._m);
+	return q[0]>q[1]? q[0]:q[1];
+      }
       /// horizontal minimum
       friend element_type always_inline min(packed p) noexcept
-#  endif
+      {
+	aligned_element_block q;
+	_mm_store_pd(q,p._m);
+	return q[0]<q[1]? q[0]:q[1];
+      }
       //@}
 
       /// \name vectorised comparisons
@@ -1341,7 +1364,7 @@ namespace WDutils {
 	static_assert(K>=0 && K<block_size,"K out of range");
 	return packed(_mm_shuffle_pd(p._m,p._m,_MM_SHUFFLE2(K,K)));
       }
-      /// blend two vectors depending on sign of third:  result = sign<0? x : y
+      /// blend two vectors depending on sign of third: result = sign<0? x : y
       friend packed always_inline blend(packed sign, packed x, packed y)
 	noexcept
       { 
@@ -1387,7 +1410,6 @@ namespace WDutils {
       data_type _m;
     };// SSE::packed<2,double>
 # endif // __SSE2__
-
     typedef packed<2,double> dvec2;
 
 # ifdef __AVX__
@@ -1427,9 +1449,6 @@ namespace WDutils {
       /// is given index aligned to block_index?
       constexpr static bool is_aligned(unsigned i) noexcept
       { return (i&block_trim)==0; }
-      /// is given pointer appropriately aligned?
-      constexpr static bool is_aligned(void*p) noexcept
-      { return (size_t(p)&(alignment-1))==0; }
       /// aligned index given an index
       constexpr static unsigned aligned_index(unsigned i) noexcept
       { return i & block_mask; }
@@ -1439,6 +1458,12 @@ namespace WDutils {
       /// block index given an index
       constexpr static unsigned block_index(unsigned i) noexcept
       { return i >> block_shft; }
+      /// is given pointer appropriately aligned?
+      constexpr static bool is_aligned(void*p) noexcept
+      { return (size_t(p)&(alignment-1))==0; }
+      /// offset (number of element_types) of pointer from alignment
+      constexpr static size_t offset(element_type*p) noexcept
+      { return (size_t(p)>>sizeof(element_type))&block_mask; }
       /// # blocks given # elements
       constexpr static unsigned num_blocks(unsigned n) noexcept
       { return (n+block_trim)>>block_shft; }
@@ -1451,26 +1476,26 @@ namespace WDutils {
       //@{
       /// default ctor
       always_inline packed() = default;
-      /// move ctor
-      always_inline packed(packed&&) = default;
       /// copy ctor
       always_inline packed(packed const&) = default;
-#ifndef __INTEL_COMPILER
-      /// move operator
-      packed& always_inline operator=(packed&&) = default;
-#endif
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
       /// ctor from data_type is private
       explicit always_inline packed(data_type m) : _m(m) {}
       /// ctor from single value: set all element equal to single value
-      explicit always_inline packed(element_type x) noexcept
+      explicit always_inline packed(float x) noexcept
+      { _m = _mm256_set1_pd(float(x)); }
+      /// ctor from single value: set all element equal to single value
+      explicit always_inline packed(double x) noexcept
       { _m = _mm256_set1_pd(x); }
       /// ctor from 4 values: set elements
       /// \note inverse ordre to _mm256_set_pd()
       always_inline packed(element_type a, element_type b,
 			   element_type c, element_type d) noexcept
       { _m = _mm256_set_pd(d,c,b,a); }
+      /// ctor from dvec2
+      always_inline packed(packed<2,double> a) noexcept
+      { _m = _mm256_broadcast_pd(&(a.data())); }
       /// set all elements equal to zero
       packed& always_inline set_zero() noexcept
       { _m = _mm256_setzero_pd(); return*this; }
@@ -1498,19 +1523,25 @@ namespace WDutils {
       /// direct non-const data access
       data_type& always_inline data() noexcept
       { return _m; }
-      /// obtain packed<2,double> from elements [I,I+1]
+      /// obtain lower (I=0) or upper (I=1) packed<2,double>
       template<unsigned I>
-      packed<2,double> always_inline extract() const noexcept
+      friend packed<2,double> always_inline extract(packed p) noexcept
       {
-	static_assert(I<block_size,"index out of range");
-	return packed<2,double>(_mm256_extractf128_pd(_m,I));
+	static_assert(I<2,"index out of range");
+	return packed<2,double>(_mm256_extractf128_pd(p._m,I));
       }
+      /// obtain lower packed<2,double>
+      friend packed<2,double> always_inline lower(packed p) noexcept
+      { return extract<0>(p); }
+      /// obtain upper packed<2,double>
+      friend packed<2,double> always_inline upper(packed p) noexcept
+      { return extract<1>(p); }
       /// constant element access, templated
       template<unsigned I>
-      friend element_type at(packed const&p) noexcept
+      friend element_type always_inline at(packed p) noexcept
       {
 	static_assert(I<block_size,"index out of range");
-	return at<(I&1)>(extract<(I>>1)>());
+	return at<(I&1)>(extract<(I>>1)>(p));
       }
       /// downcast: convert 2 @c packed<4,double> to @c packed<8,float>
       friend packed<8,float> always_inline downcast(packed a, packed b) noexcept
@@ -1663,14 +1694,14 @@ namespace WDutils {
       /// horizontal sum
       friend element_type always_inline sum(packed p) noexcept
       {
-	WDutils__align32 double q[4];
+	aligned_element_block q;
 	_mm256_store_pd(q,p._m);
 	return q[0]+q[1]+q[2]+q[3];
       }
       /// sum of first three elements
       friend element_type always_inline sum3(packed p) noexcept
       {
-	WDutils__align32 double q[4];
+	aligned_element_block q;
 	_mm256_store_pd(q,p._m);
 	return q[0]+q[1]+q[2];
       }
@@ -1744,10 +1775,10 @@ namespace WDutils {
       {
 	static_assert(K>=0 && K<block_size,"K out of range");
 #ifdef __AVX2__
-# warning more efficient implementation possible
+# warning more efficient implementation possible with AVX2
 #endif
 	return packed(_mm256_permute_pd
-		      (_mm256_permute2f128_pd(p._m,p._m,K&2? 49:32),K&1?15:0));
+		      (_mm256_permute2f128_pd(p._m,p._m,K&2?49:32),K&1?15:0));
       }
       /// blend two vectors depending on sign of third:  result = sign<0? x : y
       friend packed blend(packed sign, packed x, packed y) noexcept
@@ -1779,14 +1810,16 @@ namespace WDutils {
   //
 #ifdef __SSE__
 # ifdef __INTEL_COMPILER
+// #  ifndef __SSE4_1__
   inline float xmm0(__m128 _A)
-  { union { float f; int i; } t; t.i = _mm_extract_ps(_A,0); return t.f; }
+  { float t; _MM_EXTRACT_FLOAT(t,_A,0); return t; }
   inline float xmm1(__m128 _A)
-  { union { float f; int i; } t; t.i = _mm_extract_ps(_A,1); return t.f; }
+  { float t; _MM_EXTRACT_FLOAT(t,_A,1); return t; }
   inline float xmm2(__m128 _A)
-  { union { float f; int i; } t; t.i = _mm_extract_ps(_A,2); return t.f; }
+  { float t; _MM_EXTRACT_FLOAT(t,_A,2); return t; }
   inline float xmm3(__m128 _A)
-  { union { float f; int i; } t; t.i = _mm_extract_ps(_A,3); return t.f; }
+  { float t; _MM_EXTRACT_FLOAT(t,_A,3); return t; }
+// #  endif// __SSE4_1__
 #  ifdef __SSE2__
   inline double xmm0(__m128d _A)
   { double x; _mm_storel_pd(&x,_A); return x; }
@@ -1837,13 +1870,11 @@ namespace WDutils {
   { return xmm1(_mm256_extractf128_pd(_A,1)); }
 # endif // __AVX__
 #endif // __SSE__
-} // namespace WDutils
 //
 #undef noexcept
 #undef constexpr
+#undef static_assert
 //
-
-namespace WDutils {
   namespace SSE {
 
     template<int N> struct _Aux;
@@ -1903,6 +1934,12 @@ namespace WDutils {
       static bool is_aligned(float*f) {
 	return (size_t(f) & 16) == 0;
       }
+      /// largest packed type
+#if   defined(__AVX__)
+      typedef packed<8,float> packed_type;
+#elif defined(__SSE__)
+      typedef packed<4,float> packed_type;
+#endif
     };
 
     /// SSE::Traits<int>
@@ -1963,7 +2000,818 @@ namespace WDutils {
       static bool is_aligned(double*f) {
 	return (size_t(f) & 16) == 0;
       }
+      /// largest packed type
+#if   defined(__AVX__)
+      typedef packed<4,double> packed_type;
+#elif defined(__SSE__)
+      typedef packed<2,double> packed_type;
+#endif
     };
+    ////////////////////////////////////////////////////////////////////////////
+    namespace details {
+      // auxiliary for connect<>
+      template<typename RealType>
+      struct connector
+      {
+	// for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y[i]);
+	template<typename AssignFunc>
+	static void connect(RealType*x, const RealType*y, unsigned n) noexcept
+	{ for(; n; --n,x++,y++) AssignFunc::operate(*x,*y); }
+	// for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y);
+	template<typename AssignFunc>
+	static void connect(RealType*x, const RealType y, unsigned n) noexcept
+	{ for(; n; --n,x++) AssignFunc::operate(*x,y); }
+      };
+      // auxiliary for struct connector_helper<>
+      template<typename AssignFunc>
+      struct is_assign {
+	static const bool value =
+	  std::is_same<AssignFunc,meta::assign>::value;
+      };
+      // auxiliary for struct connector<>
+      template<typename> struct connector_helper;
+#ifdef __SSE2__
+      // auxiliary for connector<double> and static_connector<double>
+      template<>
+      struct connector_helper<double>
+      {
+      protected:
+	//
+	template<typename AssignFunc,unsigned block_size, bool y_aligned>
+	static typename std::enable_if<block_size==1 &&
+				       !is_assign<AssignFunc>::value >::type
+	always_inline connect_block(double*x, const double*y)
+	{ AssignFunc::operate(*x,*y); }
+	//
+	template<typename AssignFunc,unsigned block_size, bool y_aligned>
+	static typename std::enable_if<(block_size==2 || block_size==4) &&
+				       !is_assign<AssignFunc>::value >::type
+	always_inline connect_block(double*x, const double*y)
+	{
+	  typedef packed<block_size,double> vec;
+	  vec v = vec::load(x);
+	  AssignFunc::operate(v,vec::template load_t<y_aligned>(y));
+	  v.store(x);
+	}
+	//
+	template<typename AssignFunc,unsigned block_size, bool y_aligned>
+	static typename std::enable_if<block_size==1 &&
+				       is_assign<AssignFunc>::value >::type
+	always_inline connect_block(double*x, const double*y)
+	{ *x = *y; }
+	//
+	template<typename AssignFunc,unsigned block_size, bool y_aligned>
+	static typename std::enable_if<(block_size==2 || block_size==4) &&
+				       is_assign<AssignFunc>::value >::type
+	always_inline connect_block(double*x, const double*y)
+	{
+	  typedef packed<block_size,double> vec;
+	  vec v = vec::template load_t<y_aligned>(y);
+	  v.store(x);
+	}
+	//
+	template<typename AssignFunc,unsigned block_size>
+	static typename std::enable_if<block_size==1 &&
+				       !is_assign<AssignFunc>::value >::type
+	always_inline apply_block(double*x, const double y)
+	{ AssignFunc::operate(*x,y); }
+	//
+	template<typename AssignFunc,unsigned block_size>
+	static typename std::enable_if<(block_size==2 || block_size==4) &&
+				       !is_assign<AssignFunc>::value >::type
+	always_inline apply_block(double*x, const packed<block_size,double> y)
+	{
+	  typedef packed<block_size,double> vec;
+	  vec v = vec::load(x);
+	  AssignFunc::operate(v,y);
+	  v.store(x);
+	}
+	//
+	template<typename AssignFunc,unsigned block_size>
+	static typename std::enable_if<block_size==1 &&
+				       is_assign<AssignFunc>::value >::type
+	always_inline apply_block(double*x, const double y)
+	{ *x = y; }
+	//
+	template<typename AssignFunc,unsigned block_size>
+	static typename std::enable_if<(block_size==2 || block_size==4) &&
+				       is_assign<AssignFunc>::value >::type
+	always_inline apply_block(double*x, const packed<block_size,double> y)
+	{ y.store(x); }
+      };// struct SSE::details::connector_helper<double>
+      // templated array connection: SSE version for @c RealType = @c double
+      template<>
+      struct connector<double> : private connector_helper<double>
+      {
+	typedef connector_helper<double> helper;
+	/// for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y[i]);
+	template<typename AssignFunc>
+	static void connect(double*x, const double*y, unsigned n) noexcept
+	{
+	  WDutilsAssertE(0==(size_t(x)&7) &&
+			 0==(size_t(y)&7));
+	  if(n && (size_t(x)&15)) {
+	    helper::connect_block<AssignFunc,1,0>(x,y);
+	    --n,++x,++y; 
+	  }
+# ifdef __AVX__
+	  if(n>=2 && (size_t(x)&31)) {
+	    helper::connect_block<AssignFunc,2,0>(x,y);
+	    n-=2,x+=2,y+=2;
+	  }
+	  if(size_t(y)&31) {
+	    for(; n>=4; n-=4,x+=4,y+=4)
+	      helper::connect_block<AssignFunc,4,0>(x,y);
+	    if(n>=2) {
+	      helper::connect_block<AssignFunc,2,0>(x,y);
+	      n-=2,x+=2,y+=2;
+	    }
+	  } else {
+	    for(; n>=4; n-=4,x+=4,y+=4)
+	      helper::connect_block<AssignFunc,4,1>(x,y);
+	    if(n>=2) {
+	      helper::connect_block<AssignFunc,2,1>(x,y);
+	      n-=2,x+=2,y+=2;
+	    }
+	  }
+# else
+	  if(size_t(y)&15)
+	    for(; n>=2; n-=2,x+=2,y+=2)
+	      helper::connect_block<AssignFunc,2,0>(x,y);
+	  else
+	    for(; n>=2; n-=2,x+=2,y+=2)
+	      helper::connect_block<AssignFunc,2,1>(x,y);
+# endif
+	  if(n)
+	    helper::connect_block<AssignFunc,1,0>(x,y);
+	}
+	/// for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y);
+	template<typename AssignFunc>
+	static void connect(double*x, const double y, unsigned n) noexcept
+	{
+	  WDutilsAssertE(0==(size_t(x)&7));
+	  if(n && (size_t(x)&15)) {
+	    helper::apply_block<AssignFunc,1>(x,y);
+	    --n,++x; 
+	  }
+	  dvec2 y2(y);
+# ifdef __AVX__
+	  if(n>=2 && (size_t(x)&31)) {
+	    helper::apply_block<AssignFunc,2>(x,y2);
+	    n-=2,x+=2;
+	  }
+	  dvec4 y4(y);
+	  for(; n>=4; n-=4,x+=4)
+	    helper::apply_block<AssignFunc,4>(x,y4);
+# endif
+	  for(; n>=2; n-=2,x+=2)
+	    helper::apply_block<AssignFunc,2>(x,y2);
+	  if(n)
+	    helper::apply_block<AssignFunc,1>(x,y);
+	}
+      };// struct SSE::details::connector<double>
+#endif// __SSE2__
+#ifdef __SSE__
+      // auxiliary for connector<double> and static_connector<double>
+      template<>
+      struct connector_helper<float>
+      {
+      protected:
+	// non-assigning, block_size=1
+	template<typename AssignFunc,unsigned block_size, bool y_aligned>
+	static typename std::enable_if<block_size==1 &&
+				       !is_assign<AssignFunc>::value >::type
+	always_inline connect_block(float*x, const float*y)
+	{ AssignFunc::operate(*x,*y); }
+	// non-assigning, block_size>1
+	template<typename AssignFunc,unsigned block_size, bool y_aligned>
+	static typename std::enable_if<(block_size==4 || block_size==8) &&
+				       !is_assign<AssignFunc>::value >::type
+	always_inline connect_block(float*x, const float*y)
+	{
+	  typedef packed<block_size,float> vec;
+	  vec v = vec::load(x);
+	  AssignFunc::operate(v,vec::template load_t<y_aligned>(y));
+	  v.store(x);
+	}
+	// assigning, block_size=1
+	template<typename AssignFunc,unsigned block_size, bool y_aligned>
+	static typename std::enable_if<block_size==1 &&
+				       is_assign<AssignFunc>::value >::type
+	always_inline connect_block(float*x, const float*y)
+	{ *x = *y ; }
+	// assigning, block_size>1
+	template<typename AssignFunc,unsigned block_size, bool y_aligned>
+	static typename std::enable_if<(block_size==4 || block_size==8) &&
+				       is_assign<AssignFunc>::value >::type
+	always_inline connect_block(float*x, const float*y)
+	{
+	  typedef packed<block_size,float> vec;
+	  vec v = vec::template load_t<y_aligned>(y);
+	  v.store(x);
+	}
+	// non-assigning, block_size=1
+	template<typename AssignFunc,unsigned block_size>
+	static typename std::enable_if<block_size==1 &&
+				       !is_assign<AssignFunc>::value >::type
+	always_inline apply_block(float*x, const float y)
+	{ AssignFunc::operate(*x,y); }
+	// non-assigning, block_size>1
+	template<typename AssignFunc,unsigned block_size>
+	static typename std::enable_if<(block_size==4 || block_size==8) &&
+				       !is_assign<AssignFunc>::value >::type
+	always_inline apply_block(float*x, const packed<block_size,float> y)
+	{
+	  typedef packed<block_size,float> vec;
+	  vec v = vec::load(x);
+	  AssignFunc::operate(v,y);
+	  v.store(x);
+	}
+	// assigning, block_size=1
+	template<typename AssignFunc,unsigned block_size>
+	static typename std::enable_if<block_size==1 &&
+				       is_assign<AssignFunc>::value >::type
+	always_inline apply_block(float*x, const float y)
+	{ *x = y; }
+	// assigning, block_size>1
+	template<typename AssignFunc,unsigned block_size>
+	static typename std::enable_if<(block_size==4 || block_size==8) &&
+				       is_assign<AssignFunc>::value >::type
+	always_inline apply_block(float*x, const packed<block_size,float> y)
+	{ y.store(x); }
+      };// struct SSE::details::connect_helper<float>
+      // templated array connection: SSE version for @c RealType = @c float
+      template<>
+      struct connector<float> : private connector_helper<float>
+      {
+	typedef connector_helper<float> helper;
+	/// for(i=0; i!=N; ++i) assignment_functor<float>(x[i], y[i]);
+	template<typename AssignFunc>
+	static void connect(float*x, const float*y, unsigned n) noexcept
+	{
+	  // assert basic 4-byte alignment
+	  WDutilsAssertE(0==(size_t(x)&3) &&
+			 0==(size_t(y)&3));
+	  // ensure 16-byte alignment
+	  for(; n && (size_t(x)&15); --n,++x,++y)
+	    helper::connect_block<AssignFunc,1,0>(x,y);
+# ifdef __AVX__
+	  // ensure 32-byte alignment
+	  if(n>=4 && (size_t(x)&31)) {
+	    helper::connect_block<AssignFunc,4,0>(x,y);
+	    n-=4,x+=4,y+=4;
+	  }
+	  // loop 32-byte aligned blocks of 8 until n<8
+	  if(size_t(y)&31) {
+	    for(; n>=8; n-=8,x+=8,y+=8)
+	      helper::connect_block<AssignFunc,8,0>(x,y);
+	    if(n>=4) {
+	      helper::connect_block<AssignFunc,4,0>(x,y);
+	      n-=4,x+=4,y+=4;
+	    }
+	  } else {
+	    for(; n>=8; n-=8,x+=8,y+=8)
+	      helper::connect_block<AssignFunc,8,1>(x,y);
+	    if(n>=4) {
+	      helper::connect_block<AssignFunc,4,1>(x,y);
+	      n-=4,x+=4,y+=4;
+	    }
+	  }
+	  // loop 16-byte aligned blocks of 4 until n<4
+# else
+	  if(size_t(y)&15)
+	    for(; n>=4; n-=4,x+=4,y+=4)
+	      helper::connect_block<AssignFunc,4,0>(x,y);
+	  else
+	    for(; n>=4; n-=4,x+=4,y+=4)
+	      helper::connect_block<AssignFunc,4,1>(x,y);
+# endif
+	  // loop remaining (unaligned) until n==0
+	  for(; n; --n,++x,++y)
+	    helper::connect_block<AssignFunc,1,0>(x,y);
+	}
+	/// for(i=0; i!=N; ++i) assignment_functor<float>(x[i], y);
+	template<typename AssignFunc>
+	static void connect(float*x, const float y, unsigned n) noexcept
+	{
+	  WDutilsAssertE(0==(size_t(x)&3));
+	  for(; n && (size_t(x)&15); --n,++x)
+	    helper::apply_block<AssignFunc,1>(x,y);
+	  fvec4 y4(y);
+# ifdef __AVX__
+	  if(n>=4 && (size_t(x)&31)) {
+	    helper::apply_block<AssignFunc,4>(x,y4);
+	    n-=4,x+=4;
+	  }
+	  fvec8 y8(y);
+	  for(; n>=8; n-=8,x+=8)
+	    helper::apply_block<AssignFunc,8>(x,y8);
+# endif
+	  for(; n>=4; n-=4,x+=4)
+	    helper::apply_block<AssignFunc,4>(x,y4);
+	  for(; n; --n,++x)
+	    helper::apply_block<AssignFunc,1>(x,y);
+	}
+      };// struct SSE::details::connector<float>
+#endif// __SSE__
+    } // namespace WDutils::SSE::details
+    ///
+    /// for(unsigned i=0; i!=n; ++i) AssignFunc::operate(x[i], y[i]);
+    ///
+    template<typename AssignFunc, typename RealType>
+    void connect(RealType*x, const RealType*y, unsigned n) noexcept
+    {
+      details::connector<RealType>::template connect<AssignFunc>(x,y,n);
+    }
+    ///
+    /// for(unsigned i=0; i!=n; ++i) AssignFunc::operate(x[i], y);
+    ///
+    template<typename AssignFunc, typename RealType>
+    void connect(RealType*x, const RealType y, unsigned n) noexcept
+    {
+      details::connector<RealType>::template connect<AssignFunc>(x,y,n);
+    }
+    //
+    namespace details {
+      // static templated array connection: non-SSE version
+      template<typename RealType>
+      struct static_connector
+      {
+	// unrolled for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y[i]);
+	template<unsigned N, typename AssignFunc>
+	static typename std::enable_if<N>::type
+	connect(RealType*x, const RealType*y) noexcept
+	{
+	  AssignFunc::operate(*x,*y);
+	  connect<N-1,AssignFunc>(++x,++y);
+	}
+	template<unsigned N, typename AssignFunc>
+	static typename std::enable_if<N==0>::type
+	always_inline connect(RealType*, const RealType*) noexcept {}
+	// unrolled for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y);
+	template<unsigned N, typename AssignFunc>
+	static typename std::enable_if<N>::type
+	connect(RealType*x, const RealType y) noexcept
+	{
+	  AssignFunc::operate(*x,y);
+	  connect<N-1,AssignFunc>(++x,y);
+	}
+	template<unsigned N, typename AssignFunc>
+	static typename std::enable_if<N==0>::type
+	always_inline connect(RealType*, RealType) noexcept {}
+      };
+#ifdef __SSE2__
+      // static templated array connection: SSE version for @c double
+      template<>
+      struct static_connector<double> : private connector_helper<double>
+      {
+	// unrolled for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y[i]);
+	template<unsigned N, typename AssignFunc>
+	static void connect(double*x, const double*y) noexcept
+	{ 
+	  WDutilsAssertE(0==(size_t(x)&7) && 0==(size_t(y)&7));
+	  connect_t<AssignFunc,N,1,0>(x,y);
+	}
+	// unrolled for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y);
+	template<unsigned N, typename AssignFunc>
+	static void connect(double*x, double y) noexcept
+	{
+	  WDutilsAssertE(0==(size_t(x)&7));
+	  apply_t<AssignFunc,N,1>(x,y,dvec2(y)
+# ifdef __AVX__
+				  ,dvec4(y)
+# endif
+				  );
+	}
+      private:
+	typedef connector_helper<double> helper;
+	//
+	static constexpr unsigned half_block(unsigned block)
+	{ return block>1? block/2 : 1; }
+	//
+	static constexpr unsigned block_size(unsigned N,
+					     unsigned max_block)
+	{
+	  return
+	    N >= max_block? max_block : 
+	    N >= half_block(max_block)? half_block(max_block) : 1;
+	}
+	//
+	template<typename Func, unsigned N, unsigned max_block>
+	static void always_inline connect_start(double*x, const double*y)
+	  noexcept
+	{
+	  static const unsigned block = block_size(N,max_block);
+	  static const size_t   align = sizeof(double)*block-1;
+	  if(size_t(y)&align) connect_t<Func,N,block,0>(x,y);
+	  else                connect_t<Func,N,block,1>(x,y);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<N==0 && block==1>::type
+	connect_t(double*, const double*) noexcept {}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<N==1 && block==1>::type
+	connect_t(double*x, const double*y) noexcept
+	{ helper::connect_block<Func,1,0>(x,y); }
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<(N>1) && block==1>::type
+	connect_t(double*x, const double*y) noexcept
+	{
+	  WDutilsStaticAssert(N>1);
+	  if(size_t(x)&15) {
+	    helper::connect_block<Func,1,0>(x,y);
+	    connect_start<Func,N-1,2>(++x,++y);
+	  } else
+	    connect_start<Func,N  ,2>(x,y);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<block==2
+# ifdef __AVX__
+				       && (N<4)
+# endif
+					   >::type
+	connect_t(double*x, const double*y) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  helper::connect_block<Func,2,y_aligned>(x,y);
+	  connect_t<Func,N-2,block_size(N-2,2),y_aligned>(x+=2,y+=2);
+	}
+# ifdef __AVX__
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<(N>=4) && block==2>::type
+	connect_t(double*x, const double*y) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  if(size_t(x)&31) {
+	    helper::connect_block<Func,2,y_aligned>(x,y);
+	    connect_start<Func,N-2,4>(x+=2,y+=2);
+	  } else
+	    connect_start<Func,N  ,4>(x,y);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<block==4>::type
+	connect_t(double*x, const double*y) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  helper::connect_block<Func,4,y_aligned>(x,y);
+	  connect_t<Func,N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
+	}
+# endif
+	//
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<N==0 && block==1>::type
+	apply_t(double*, double, dvec2
+# ifdef __AVX__
+		, dvec4
+# endif
+		) noexcept {}
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<N==1 && block==1>::type
+	apply_t(double*x, const double y, dvec2
+# ifdef __AVX__
+		, dvec4
+# endif
+		) noexcept
+	{ helper::apply_block<Func,1>(x,y); }
+	//
+# ifdef __AVX__
+#  define ARGS_DECL const double y, const dvec2&y2, const dvec4&y4
+#  define ARGS_PASS y, y2, y4
+# else
+#  define ARGS_DECL const double y, const dvec2&y2
+#  define ARGS_PASS y, y2
+# endif
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<(N>1) && block==1>::type
+	apply_t(double*x, ARGS_DECL) noexcept
+	{
+	  WDutilsStaticAssert(N>1);
+	  if(size_t(x)&15) {
+	    helper::apply_block<Func,1>(x,y);
+	    apply_t<Func,N-1,block_size(N-1,2)>(++x, ARGS_PASS);
+	  } else
+	    apply_t<Func,N,block_size(N,2)>(x, ARGS_PASS);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<block==2
+# ifdef __AVX__
+				       && (N<4)
+# endif
+					   >::type
+	apply_t(double*x, ARGS_DECL) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  helper::apply_block<Func,2>(x,y2);
+	  apply_t<Func,N-2,block_size(N-2,2)>(x+=2, ARGS_PASS);
+	}
+# ifdef __AVX__
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<(N>=4) && block==2>::type
+	apply_t(double*x, ARGS_DECL) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  if(size_t(x)&31) {
+	    helper::apply_block<Func,2>(x,y2);
+	    apply_t<Func,N-2,block_size(N-2,4)>(x+=2, ARGS_PASS);
+	  } else
+	    apply_t<Func,N,block_size(N,4)>(x, ARGS_PASS);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<block==4>::type
+	apply_t(double*x, ARGS_DECL) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  helper::apply_block<Func,4>(x,y4);
+	  apply_t<Func,N-4,block_size(N-4,4)>(x+=4, ARGS_PASS);
+	}
+# endif
+# undef ARGS_DECL
+# undef ARGS_PASS
+      };// struct SSE::details::static_connector<double>
+#endif // __SSE2__
+#ifdef __SSE__
+      // static templated array connection: SSE version for @c float
+      template<>
+      struct static_connector<float> : private connector_helper<float>
+      {
+	/// unrolled for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y[i]);
+	template<unsigned N, typename AssignFunc>
+	static void connect(float*x, const float*y) noexcept
+	{ 
+	  WDutilsAssertE(0==(size_t(x)&3) && 0==(size_t(y)&3));
+	  connect_t<AssignFunc,N,1,0>(x,y);
+	}
+	/// unrolled for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y);
+	template<unsigned N, typename AssignFunc>
+	static void connect(float*x, float y) noexcept
+	{ 
+	  WDutilsAssertE(0==(size_t(x)&3));
+	  apply_t<AssignFunc,N,1>(x,y,fvec4(y)
+# ifdef __AVX__
+				  ,fvec8(y)
+# endif
+				  );
+	}
+      private:
+	typedef connector_helper<float> helper;
+	//
+	static constexpr unsigned smll_block(unsigned block)
+	{ return block==8? 4 : 1; }
+	//
+	static constexpr unsigned block_size(unsigned N, unsigned max_block)
+	{
+	  return
+	    N >= max_block? max_block  : 
+	    N >= smll_block(max_block)? smll_block(max_block) : 1;
+	}
+	//
+	template<typename Func, unsigned N, unsigned max_block>
+	static void always_inline connect_start(float*x, const float*y) noexcept
+	{
+	  static const unsigned block = block_size(N,max_block);
+	  static const size_t   align = sizeof(float)*block-1;
+	  if(size_t(y)&align) connect_t<Func,N,block,0>(x,y);
+	  else                connect_t<Func,N,block,1>(x,y);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<N==0 && block==1>::type
+	connect_t(float*, const float*) noexcept {}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<N==1 && block==1>::type
+	connect_t(float*x, const float*y) noexcept
+	{ helper::connect_block<Func,1,y_aligned>(x,y); }
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<N==2 && block==1>::type
+	connect_t(float*x, const float*y) noexcept
+	{
+	  helper::connect_block<Func,1,y_aligned>(x++,y++);
+	  helper::connect_block<Func,1,y_aligned>(x  ,y  );
+	}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<N==3 && block==1>::type
+	connect_t(float*x, const float*y) noexcept
+	{
+	  helper::connect_block<Func,1,y_aligned>(x++,y++);
+	  helper::connect_block<Func,1,y_aligned>(x++,y++);
+	  helper::connect_block<Func,1,y_aligned>(x  ,y  );
+	}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<(N>3) && block==1>::type
+	connect_t(float*x, const float*y) noexcept
+	{
+	  WDutilsStaticAssert(N>3);
+	  switch((size_t(x)&15)) {
+	  case 12:
+	    helper::connect_block<Func,1,y_aligned>(x++,y++);
+	    connect_start<Func,N-1,4>(x,y);
+	    break;
+	  case 8:
+	    helper::connect_block<Func,1,y_aligned>(x++,y++);
+	    helper::connect_block<Func,1,y_aligned>(x++,y++);
+	    connect_start<Func,N-2,4>(x,y);
+	    break;
+	  case 4:
+	    helper::connect_block<Func,1,y_aligned>(x++,y++);
+	    helper::connect_block<Func,1,y_aligned>(x++,y++);
+	    helper::connect_block<Func,1,y_aligned>(x++,y++);
+	    connect_start<Func,N-3,4>(x,y);
+	    break;
+	  default:
+	    connect_start<Func,N  ,4>(x,y);
+	  }
+	}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<block==4
+# ifdef __AVX__
+				       && (N<8)
+# endif
+					   >::type
+	connect_t(float*x, const float*y) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  helper::connect_block<Func,4,y_aligned>(x,y);
+	  connect_t<Func,N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
+	}
+# ifdef __AVX__
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<(N>=8) && block==4>::type
+	connect_t(float*x, const float*y) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  if(size_t(x)&31) {
+	    helper::connect_block<Func,4,y_aligned>(x,y);
+	    connect_start<Func,N-4,8>(x+=4,y+=4);
+	  } else
+	    connect_start<Func,N  ,8>(x,y);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	static typename std::enable_if<block==8>::type
+	connect_t(float*x, const float*y) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  helper::connect_block<Func,8,y_aligned>(x,y);
+	  connect_t<Func,N-8,block_size(N-8,8),y_aligned>(x+=8,y+=8);
+	}
+# endif
+	//
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<N==0 && block==1>::type
+	apply_t(float*, float, fvec4
+# ifdef __AVX__
+		, fvec8
+# endif
+		) noexcept {}
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<N==1 && block==1>::type
+	apply_t(float*x, const float y, fvec4
+# ifdef __AVX__
+		, fvec8
+# endif
+		) noexcept
+	{ helper::apply_block<Func,1>(x,y); }
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<N==2 && block==1>::type
+	apply_t(float*x, const float y, fvec4
+# ifdef __AVX__
+		, fvec8
+# endif
+		) noexcept
+	{
+	  helper::apply_block<Func,1>(x++,y);
+	  helper::apply_block<Func,1>(x  ,y);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<N==3 && block==1>::type
+	apply_t(float*x, const float y, fvec4
+# ifdef __AVX__
+		, fvec8
+# endif
+		) noexcept
+	{
+	  helper::apply_block<Func,1>(x++,y);
+	  helper::apply_block<Func,1>(x++,y);
+	  helper::apply_block<Func,1>(x  ,y);
+	}
+	//
+# ifdef __AVX__
+#  define ARGS_DECL const float y, const fvec4&y4, const fvec8&y8
+#  define ARGS_PASS y, y4, y8
+# else
+#  define ARGS_DECL const float y, const fvec4&y4
+#  define ARGS_PASS y, y4
+# endif
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<(N>3) && block==1>::type
+	apply_t(float*x, ARGS_DECL) noexcept
+	{
+	  WDutilsStaticAssert(N>3);
+	  switch((size_t(x)&15)) {
+	  case 12:
+	    helper::apply_block<Func,1>(x++,y);
+	    apply_t<Func,N-1,block_size(N-1,4)>(x, ARGS_PASS);
+	    break;
+	  case 8:
+	    helper::apply_block<Func,1>(x++,y);
+	    helper::apply_block<Func,1>(x++,y);
+	    apply_t<Func,N-2,block_size(N-2,4)>(x, ARGS_PASS);
+	    break;
+	  case 4:
+	    helper::apply_block<Func,1>(x++,y);
+	    helper::apply_block<Func,1>(x++,y);
+	    helper::apply_block<Func,1>(x++,y);
+	    apply_t<Func,N-3,block_size(N-3,4)>(x, ARGS_PASS);
+	    break;
+	  default:
+	    apply_t<Func,N  ,block_size(N  ,4)>(x, ARGS_PASS);
+	  }
+	}
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<block==4
+# ifdef __AVX__
+				       && (N<8)
+# endif
+					   >::type
+	apply_t(float*x, ARGS_DECL) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  helper::apply_block<Func,4>(x,y4);
+	  apply_t<Func,N-4,block_size(N-4,4)>(x+=4, ARGS_PASS);
+	}
+# ifdef __AVX__
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<(N>=8) && block==4>::type
+	apply_t(float*x, ARGS_DECL) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  if(size_t(x)&31) {
+	    helper::apply_block<Func,4>(x,y4);
+	    apply_t<Func,N-4,block_size(N-4,8)>(x+=4, ARGS_PASS);
+	  } else
+	    apply_t<Func,N,  block_size(N,  8)>(x   , ARGS_PASS);
+	}
+	//
+	template<typename Func, unsigned N, unsigned block>
+	static typename std::enable_if<block==8>::type
+	apply_t(float*x, ARGS_DECL) noexcept
+	{
+	  WDutilsStaticAssert(N>=block);
+	  helper::apply_block<Func,8>(x,y8);
+	  apply_t<Func,N-8,block_size(N-8,8)>(x+=8, ARGS_PASS);
+	}
+# endif
+# undef ARGS_DECL
+# undef ARGS_PASS
+      };// struct SSE::details::static_connector<float>
+#endif // __SSE__
+    } // namespace WDutils::SSE::details
+    ////////////////////////////////////////////////////////////////////////////
+    ///
+    /// for(unsigned i=0; i!=n; ++i) AssignFunc::operate(x[i], y[i]);
+    ///
+    template<typename AssignFunc, unsigned N, typename RealType>
+    void static_connect(RealType*x, const RealType*y) noexcept
+    {
+      details::static_connector<RealType>::template connect<N,AssignFunc>(x,y);
+    }
+    ///
+    /// for(unsigned i=0; i!=n; ++i) AssignFunc::operate(x[i], y);
+    ///
+    template<typename AssignFunc, unsigned N, typename RealType>
+    void static_connect(RealType*x, const RealType y) noexcept
+    {
+      details::static_connector<RealType>::template connect<N,AssignFunc>(x,y);
+    }
+    //
+    //
+    //
+
     /// smallest multiple of 16/sizeof(_F) not less than i
     template<typename _F, typename _I> inline
     _I Top(_I i) {
@@ -2043,5 +2891,7 @@ class
 #endif
   } // namespace SSE
 } // namespace WDutils
+//
+#undef always_inline
 //
 #endif

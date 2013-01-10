@@ -521,10 +521,10 @@ namespace WDutils {
     /// Product with integer: convert to sum for N=0,1,2,3
     template<int N, typename Real> inline
     Real Times(Real x) noexcept { return Integer<N>::Product(x); }
+#if(0)
     ////////////////////////////////////////////////////////////////////////////
-    /// \name simple functors for assign-type operations (see also functional)
+    /// \name simple functors for assign-type operations
     //@{
-
     /// functor base class
     template<typename _lVal, typename _rVal>
     struct assign_function {
@@ -533,33 +533,51 @@ namespace WDutils {
     };
     /// =
     template<typename _Tp>
-    struct assign : assign_function<_Tp,_Tp>
+    struct assign : assign_function<_Tp&,_Tp>
     {
-      _Tp operator()(_Tp& __x, _Tp const&__y) const noexcept
+      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
+      { return __x = __y; }
+      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
       { return __x = __y; }
     };
     /// +=
     template<typename _Tp>
-    struct add_assign : assign_function<_Tp,_Tp>
+    struct add_assign : assign_function<_Tp&,_Tp>
     {
-      _Tp operator()(_Tp& __x, _Tp const&__y) const noexcept
+      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
+      { return __x += __y; }
+      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
       { return __x += __y; }
     };
     /// -=
     template<typename _Tp>
-    struct subtract_assign : assign_function<_Tp,_Tp>
+    struct subtract_assign : assign_function<_Tp&,_Tp>
     {
-      _Tp operator()(_Tp& __x, _Tp const&__y) const noexcept
+      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
+      { return __x -= __y; }
+      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
       { return __x -= __y; }
     };
     /// *=
     template<typename _Tp>
-    struct multiply_assign : assign_function<_Tp,_Tp>
+    struct multiply_assign : assign_function<_Tp&,_Tp>
     {
-      _Tp operator()(_Tp& __x, _Tp const&__y) const noexcept
+      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
+      { return __x *= __y; }
+      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
       { return __x *= __y; }
     };
+    /// /=
+    template<typename _Tp>
+    struct divide_assign : assign_function<_Tp&,_Tp>
+    {
+      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
+      { return __x /= __y; }
+      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
+      { return __x /= __y; }
+    };
     //@}
+#endif
     ////////////////////////////////////////////////////////////////////////////
     //
     // struct ONE<N>
@@ -630,38 +648,42 @@ namespace WDutils {
     /// \param[in] Y  boolean expression which may be ignored
     /// \return    @a X && @a Y
     template<bool X> bool And(bool Y) { return __Bool<X>::AND(Y); }
-
     /// \name functors useful as template arguments
     //@{
     /// x=y
-    struct Assign {
-      template<typename X> static void operate(X&x, X y) noexcept { x=y; }
+    struct assign {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x=y; }
     };
     /// x+=y
-    struct Add {
-      template<typename X> static void operate(X&x, X y) noexcept { x+=y; }
+    struct add {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x+=y; }
     };
     /// x-=y
-    struct Subtract {
-      template<typename X> static void operate(X&x, X y) noexcept { x-=y; }
+    struct subtract {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x-=y; }
     };
     /// x*=y
-    struct Multiply {
-      template<typename X> static void operate(X&x, X y) noexcept { x*=y; }
+    struct multiply {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x*=y; }
     };
     /// x/=y
-    struct Divide {
-      template<typename X> static void operate(X&x, X y) noexcept { x/=y; }
+    struct divide {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x/=y; }
     };
     /// x=max(x,y)
-    struct Maximum {
-      template<typename X> static void operate(X&x, X y) noexcept
-      { if(y>x) x=y; }
+    struct maximum {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x=max(x,y); }
     };
     /// x=min(x,y)
-    struct Minimum {
-      template<typename X> static void operate(X&x, X y) noexcept
-      { if(y<x) x=y; }
+    struct minimum {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x=min(x,y); }
     };
     //@}
   } // namespace WDutils::meta

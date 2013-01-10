@@ -242,6 +242,27 @@ namespace WDutils {
 #else
 #  define WDutilsAlignTo(K)
 #endif
+  /// struct holding aligned datum
+  template<int alignment, typename data_type> struct AlignedDatum
+  {
+    WDutilsStaticAssert(alignment<=1);
+    data_type Datum;
+  };
+  //
+  template<typename data_type> struct AlignedDatum<2,data_type>
+  { WDutilsAlignTo(2) data_type Datum; };
+  //
+  template<typename data_type> struct AlignedDatum<4,data_type>
+  { WDutilsAlignTo(4) data_type Datum; };
+  //
+  template<typename data_type> struct AlignedDatum<8,data_type>
+  { WDutilsAlignTo(8) data_type Datum; };
+  //
+  template<typename data_type> struct AlignedDatum<16,data_type>
+  { WDutilsAlignTo(16) data_type Datum; };
+  //
+  template<typename data_type> struct AlignedDatum<32,data_type>
+  { WDutilsAlignTo(32) data_type Datum; };
 
   /// Macro enforcing memory alignment to 16 bytes
   /// \ingroup MemAligned

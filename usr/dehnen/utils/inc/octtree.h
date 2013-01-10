@@ -2340,7 +2340,9 @@ namespace WDutils {
     typedef typename Tree::point point;
     typedef typename Tree::pointXX pointXX;
     typedef typename Tree::PerBoundary PerBoundary;
+#ifdef OCTALTREE_USE_OPENMP
     typedef typename Tree::cp_domain cp_domain;
+#endif
     static const count_type LeafBlockSize = Tree::LeafBlockSize;
     static const count_type LeafBlockTrim = Tree::LeafBlockTrim;
     static const count_type LeafBlockMask = Tree::LeafBlockMask;
