@@ -607,6 +607,15 @@ namespace WDutils {
       { return Algorithms<1>::inside(c,Datum); }
       //@}
     private:
+<<<<<<< geometry.h
+      WDutilsStaticAssert( ( _tD == 2 || _tD == 3 )               &&
+			   meta::TypeInfo<_tX>::is_floating_point    );
+      using AlignedDatum<
+#ifdef __AVX__
+	_tD==3? 4*sizeof(_tX) :
+#endif
+	16, sphere<_tD,_tX> >::Datum;
+=======
       WDutilsStaticAssert( ( _tD == 2 || _tD == 3 )               &&
 			   is_floating_point<_tX>::value   );
       using AlignedDatum<
@@ -614,6 +623,7 @@ namespace WDutils {
 	_tD==3? 4*sizeof(_tX) :
 #endif
 	16, sphere<_tD,_tX> >::Datum;
+>>>>>>> 1.19
     };// struct SearchSphere
   } // namespace WDutils::Geometry
 #define Geometry_TRAITS(TYPE,NAME)					\
