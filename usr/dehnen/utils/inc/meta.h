@@ -7,11 +7,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2008-2011
+/// \date   2008-2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2008-2011 Walter Dehnen
+// Copyright (C) 2008-2013 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -59,6 +59,10 @@ namespace WDutils {
 #if __cplusplus >= 201103L
   using std::enable_if;
   using std::is_same;
+  using std::is_floating_point;
+  using std::remove_volatile;
+  using std::remove_const;
+  using std::remove_cv;
 #else
   template<bool B, class T = void>
   struct enable_if {};
@@ -69,6 +73,25 @@ namespace WDutils {
   struct is_same { static const bool value = false; };
   template<class A>
   struct is_same<A,A> { static const bool value = true; };
+
+  template<class T> struct remove_const          { typedef T type; };
+  template<class T> struct remove_const<const T> { typedef T type; };
+ 
+  template<class T> struct remove_volatile             { typedef T type; };
+  template<class T> struct remove_volatile<volatile T> { typedef T type; };
+
+  template<class T>
+  struct remove_cv {
+    typedef typename 
+    remove_volatile<typename remove_const<T>::type>::type type;
+  };
+  template<class T>
+  struct is_floating_point {
+    static const bool value = 
+      is_same<float, typename remove_cv<T>::type>::value  ||
+      is_same<double, typename remove_cv<T>::type>::value  ||
+      is_same<long double, typename remove_cv<T>::type>::value;
+  };
 #endif
 
   ///

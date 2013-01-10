@@ -87,33 +87,6 @@ namespace WDutils {
       (alignment % sizeof(T)) == 0 ;
   }
 
-#if(0)
-  template<size_t A, typename T>
-  struct alignment_traits
-  {
-    using element_type            = T;
-    static const size_t alignment = A;
-    static_assert((alignment&(alignment-1))==0,"alignment not a power of 2");
-    static const bool   aligns       = aligns_at<element_type>(alignment);
-    static const size_t element_size = sizeof(element_type);
-    static const size_t block_size   =
-      element_size>=alignment? 1:alignment/element_size;
-    static const size_t block_trim   = block_size - 1;
-    static const size_t block_mask   =~block_trim;
-    static const bool   block_size_is_power_of_two = (block_size&block_trim)==0;
-    constexpr static size_t num_blocks(size_t n) noexcept
-    { return _num_blocks<block_size>(n); }
-  private:
-    template<size_t _block_size>
-    constexpr static size_t _num_blocks(size_t n) noexcept
-    { 
-      static_assert(aligns,"type does not align");
-      static_assert(block_size_is_power_of_two,"block size not a power of 2");
-      return (n+block_trim)&block_mask;
-    }
-  };
-#endif
-
 #ifdef __SSE__
 # if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 #  define always_inline __attribute__((__always_inline__))
@@ -124,12 +97,7 @@ namespace WDutils {
   namespace meta {
     union float_and_int {
       float f; int32_t i; 
-      float_and_int()
-# if __cplusplus >= 201103L
-      = default;
-# else
-      : {}
-# endif
+      float_and_int() WDutilsCXX11DefaultBody
       float_and_int(int32_t k) : i(k) {}
     };
   }
@@ -230,11 +198,13 @@ namespace WDutils {
       /// \name construction and assignment
       //@{
       /// default ctor
-      always_inline packed() = default;
+      always_inline packed() WDutilsCXX11DefaultBody
+#if __cplusplus >= 201103L
       /// copy ctor
       always_inline packed(packed const&) = default;
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
+#endif
       /// ctor from data_type
       explicit always_inline packed(data_type m) : _m(m) {}
       /// ctor from single value: set all element equal to single value
@@ -697,11 +667,13 @@ namespace WDutils {
       /// \name construction and assignment
       //@{
       /// default ctor
-      always_inline packed() = default;
+      always_inline packed() WDutilsCXX11DefaultBody
+#if __cplusplus >= 201103L
       /// copy ctor
       always_inline packed(packed const&) = default;
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
+#endif
       /// ctor from data_type
       explicit always_inline packed(data_type m) : _m(m) {}
       /// ctor from single value: set all element equal to single value
@@ -1071,11 +1043,13 @@ namespace WDutils {
       /// \name construction and assignment
       //@{
       /// default ctor
-      always_inline packed() = default;
+      always_inline packed() WDutilsCXX11DefaultBody
+#if __cplusplus >= 201103L
       /// copy ctor
       always_inline packed(packed const&) = default;
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
+#endif
       /// ctor from data_type is private
       explicit always_inline packed(__m128d m) : _m(m) {}
       /// ctor from single value: set all element equal to single value
@@ -1475,11 +1449,13 @@ namespace WDutils {
       /// \name construction and assignment
       //@{
       /// default ctor
-      always_inline packed() = default;
+      always_inline packed() WDutilsCXX11DefaultBody
+#if __cplusplus >= 201103L
       /// copy ctor
       always_inline packed(packed const&) = default;
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
+#endif
       /// ctor from data_type is private
       explicit always_inline packed(data_type m) : _m(m) {}
       /// ctor from single value: set all element equal to single value
@@ -1871,10 +1847,6 @@ namespace WDutils {
 # endif // __AVX__
 #endif // __SSE__
 //
-#undef noexcept
-#undef constexpr
-#undef static_assert
-//
   namespace SSE {
 
     template<int N> struct _Aux;
@@ -2026,7 +1998,7 @@ namespace WDutils {
       template<typename AssignFunc>
       struct is_assign {
 	static const bool value =
-	  std::is_same<AssignFunc,meta::assign>::value;
+	  is_same<AssignFunc,meta::assign>::value;
       };
       // auxiliary for struct connector<>
       template<typename> struct connector_helper;
@@ -2038,14 +2010,14 @@ namespace WDutils {
       protected:
 	//
 	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename std::enable_if<block_size==1 &&
-				       !is_assign<AssignFunc>::value >::type
+	static typename enable_if<block_size==1 &&
+				  !is_assign<AssignFunc>::value >::type
 	always_inline connect_block(double*x, const double*y)
 	{ AssignFunc::operate(*x,*y); }
 	//
 	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename std::enable_if<(block_size==2 || block_size==4) &&
-				       !is_assign<AssignFunc>::value >::type
+	static typename enable_if<(block_size==2 || block_size==4) &&
+				  !is_assign<AssignFunc>::value >::type
 	always_inline connect_block(double*x, const double*y)
 	{
 	  typedef packed<block_size,double> vec;
@@ -2055,14 +2027,14 @@ namespace WDutils {
 	}
 	//
 	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename std::enable_if<block_size==1 &&
-				       is_assign<AssignFunc>::value >::type
+	static typename enable_if<block_size==1 &&
+				  is_assign<AssignFunc>::value >::type
 	always_inline connect_block(double*x, const double*y)
 	{ *x = *y; }
 	//
 	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename std::enable_if<(block_size==2 || block_size==4) &&
-				       is_assign<AssignFunc>::value >::type
+	static typename enable_if<(block_size==2 || block_size==4) &&
+				  is_assign<AssignFunc>::value >::type
 	always_inline connect_block(double*x, const double*y)
 	{
 	  typedef packed<block_size,double> vec;
@@ -2071,14 +2043,14 @@ namespace WDutils {
 	}
 	//
 	template<typename AssignFunc,unsigned block_size>
-	static typename std::enable_if<block_size==1 &&
-				       !is_assign<AssignFunc>::value >::type
+	static typename enable_if<block_size==1 &&
+				  !is_assign<AssignFunc>::value >::type
 	always_inline apply_block(double*x, const double y)
 	{ AssignFunc::operate(*x,y); }
 	//
 	template<typename AssignFunc,unsigned block_size>
-	static typename std::enable_if<(block_size==2 || block_size==4) &&
-				       !is_assign<AssignFunc>::value >::type
+	static typename enable_if<(block_size==2 || block_size==4) &&
+				  !is_assign<AssignFunc>::value >::type
 	always_inline apply_block(double*x, const packed<block_size,double> y)
 	{
 	  typedef packed<block_size,double> vec;
@@ -2088,14 +2060,14 @@ namespace WDutils {
 	}
 	//
 	template<typename AssignFunc,unsigned block_size>
-	static typename std::enable_if<block_size==1 &&
-				       is_assign<AssignFunc>::value >::type
+	static typename enable_if<block_size==1 &&
+				  is_assign<AssignFunc>::value >::type
 	always_inline apply_block(double*x, const double y)
 	{ *x = y; }
 	//
 	template<typename AssignFunc,unsigned block_size>
-	static typename std::enable_if<(block_size==2 || block_size==4) &&
-				       is_assign<AssignFunc>::value >::type
+	static typename enable_if<(block_size==2 || block_size==4) &&
+				  is_assign<AssignFunc>::value >::type
 	always_inline apply_block(double*x, const packed<block_size,double> y)
 	{ y.store(x); }
       };// struct SSE::details::connector_helper<double>
@@ -2179,14 +2151,14 @@ namespace WDutils {
       protected:
 	// non-assigning, block_size=1
 	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename std::enable_if<block_size==1 &&
-				       !is_assign<AssignFunc>::value >::type
+	static typename enable_if<block_size==1 &&
+				  !is_assign<AssignFunc>::value >::type
 	always_inline connect_block(float*x, const float*y)
 	{ AssignFunc::operate(*x,*y); }
 	// non-assigning, block_size>1
 	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename std::enable_if<(block_size==4 || block_size==8) &&
-				       !is_assign<AssignFunc>::value >::type
+	static typename enable_if<(block_size==4 || block_size==8) &&
+				  !is_assign<AssignFunc>::value >::type
 	always_inline connect_block(float*x, const float*y)
 	{
 	  typedef packed<block_size,float> vec;
@@ -2196,14 +2168,14 @@ namespace WDutils {
 	}
 	// assigning, block_size=1
 	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename std::enable_if<block_size==1 &&
-				       is_assign<AssignFunc>::value >::type
+	static typename enable_if<block_size==1 &&
+				  is_assign<AssignFunc>::value >::type
 	always_inline connect_block(float*x, const float*y)
 	{ *x = *y ; }
 	// assigning, block_size>1
 	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename std::enable_if<(block_size==4 || block_size==8) &&
-				       is_assign<AssignFunc>::value >::type
+	static typename enable_if<(block_size==4 || block_size==8) &&
+				  is_assign<AssignFunc>::value >::type
 	always_inline connect_block(float*x, const float*y)
 	{
 	  typedef packed<block_size,float> vec;
@@ -2212,14 +2184,14 @@ namespace WDutils {
 	}
 	// non-assigning, block_size=1
 	template<typename AssignFunc,unsigned block_size>
-	static typename std::enable_if<block_size==1 &&
-				       !is_assign<AssignFunc>::value >::type
+	static typename enable_if<block_size==1 &&
+				  !is_assign<AssignFunc>::value >::type
 	always_inline apply_block(float*x, const float y)
 	{ AssignFunc::operate(*x,y); }
 	// non-assigning, block_size>1
 	template<typename AssignFunc,unsigned block_size>
-	static typename std::enable_if<(block_size==4 || block_size==8) &&
-				       !is_assign<AssignFunc>::value >::type
+	static typename enable_if<(block_size==4 || block_size==8) &&
+				  !is_assign<AssignFunc>::value >::type
 	always_inline apply_block(float*x, const packed<block_size,float> y)
 	{
 	  typedef packed<block_size,float> vec;
@@ -2229,14 +2201,14 @@ namespace WDutils {
 	}
 	// assigning, block_size=1
 	template<typename AssignFunc,unsigned block_size>
-	static typename std::enable_if<block_size==1 &&
-				       is_assign<AssignFunc>::value >::type
+	static typename enable_if<block_size==1 &&
+				  is_assign<AssignFunc>::value >::type
 	always_inline apply_block(float*x, const float y)
 	{ *x = y; }
 	// assigning, block_size>1
 	template<typename AssignFunc,unsigned block_size>
-	static typename std::enable_if<(block_size==4 || block_size==8) &&
-				       is_assign<AssignFunc>::value >::type
+	static typename enable_if<(block_size==4 || block_size==8) &&
+				  is_assign<AssignFunc>::value >::type
 	always_inline apply_block(float*x, const packed<block_size,float> y)
 	{ y.store(x); }
       };// struct SSE::details::connect_helper<float>
@@ -2339,25 +2311,25 @@ namespace WDutils {
       {
 	// unrolled for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y[i]);
 	template<unsigned N, typename AssignFunc>
-	static typename std::enable_if<N>::type
+	static typename enable_if<N>::type
 	connect(RealType*x, const RealType*y) noexcept
 	{
 	  AssignFunc::operate(*x,*y);
 	  connect<N-1,AssignFunc>(++x,++y);
 	}
 	template<unsigned N, typename AssignFunc>
-	static typename std::enable_if<N==0>::type
+	static typename enable_if<N==0>::type
 	always_inline connect(RealType*, const RealType*) noexcept {}
 	// unrolled for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y);
 	template<unsigned N, typename AssignFunc>
-	static typename std::enable_if<N>::type
+	static typename enable_if<N>::type
 	connect(RealType*x, const RealType y) noexcept
 	{
 	  AssignFunc::operate(*x,y);
 	  connect<N-1,AssignFunc>(++x,y);
 	}
 	template<unsigned N, typename AssignFunc>
-	static typename std::enable_if<N==0>::type
+	static typename enable_if<N==0>::type
 	always_inline connect(RealType*, RealType) noexcept {}
       };
 #ifdef __SSE2__
@@ -2385,17 +2357,26 @@ namespace WDutils {
 	}
       private:
 	typedef connector_helper<double> helper;
+# if __cplusplus >= 201103L
 	//
 	static constexpr unsigned half_block(unsigned block)
 	{ return block>1? block/2 : 1; }
 	//
-	static constexpr unsigned block_size(unsigned N,
-					     unsigned max_block)
+	static constexpr unsigned block_size(unsigned N, unsigned max_block)
 	{
 	  return
 	    N >= max_block? max_block : 
 	    N >= half_block(max_block)? half_block(max_block) : 1;
 	}
+# else  //
+	template<unsigned N, unsigned maxb>
+	struct size_block {
+	  static const unsigned half  = maxb>1? maxb/2 : 1;
+	  static const unsigned block = N >= maxb? maxb : 
+	                                N >= half? half : 1;
+	};
+#  define block_size(NUM,MAXBLOCK) size_block<NUM,MAXBLOCK>::block
+# endif
 	//
 	template<typename Func, unsigned N, unsigned max_block>
 	static void always_inline connect_start(double*x, const double*y)
@@ -2408,16 +2389,16 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<N==0 && block==1>::type
+	static typename enable_if<N==0 && block==1>::type
 	connect_t(double*, const double*) noexcept {}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<N==1 && block==1>::type
+	static typename enable_if<N==1 && block==1>::type
 	connect_t(double*x, const double*y) noexcept
 	{ helper::connect_block<Func,1,0>(x,y); }
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<(N>1) && block==1>::type
+	static typename enable_if<(N>1) && block==1>::type
 	connect_t(double*x, const double*y) noexcept
 	{
 	  WDutilsStaticAssert(N>1);
@@ -2429,11 +2410,11 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<block==2
+	static typename enable_if<block==2
 # ifdef __AVX__
-				       && (N<4)
+				  && (N<4)
 # endif
-					   >::type
+	                         >::type
 	connect_t(double*x, const double*y) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2443,7 +2424,7 @@ namespace WDutils {
 # ifdef __AVX__
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<(N>=4) && block==2>::type
+	static typename enable_if<(N>=4) && block==2>::type
 	connect_t(double*x, const double*y) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2455,7 +2436,7 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<block==4>::type
+	static typename enable_if<block==4>::type
 	connect_t(double*x, const double*y) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2466,7 +2447,7 @@ namespace WDutils {
 	//
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<N==0 && block==1>::type
+	static typename enable_if<N==0 && block==1>::type
 	apply_t(double*, double, dvec2
 # ifdef __AVX__
 		, dvec4
@@ -2474,7 +2455,7 @@ namespace WDutils {
 		) noexcept {}
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<N==1 && block==1>::type
+	static typename enable_if<N==1 && block==1>::type
 	apply_t(double*x, const double y, dvec2
 # ifdef __AVX__
 		, dvec4
@@ -2491,7 +2472,7 @@ namespace WDutils {
 # endif
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<(N>1) && block==1>::type
+	static typename enable_if<(N>1) && block==1>::type
 	apply_t(double*x, ARGS_DECL) noexcept
 	{
 	  WDutilsStaticAssert(N>1);
@@ -2503,11 +2484,11 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<block==2
+	static typename enable_if<block==2
 # ifdef __AVX__
-				       && (N<4)
+				  && (N<4)
 # endif
-					   >::type
+			       	   >::type
 	apply_t(double*x, ARGS_DECL) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2517,7 +2498,7 @@ namespace WDutils {
 # ifdef __AVX__
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<(N>=4) && block==2>::type
+	static typename enable_if<(N>=4) && block==2>::type
 	apply_t(double*x, ARGS_DECL) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2529,7 +2510,7 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<block==4>::type
+	static typename enable_if<block==4>::type
 	apply_t(double*x, ARGS_DECL) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2537,6 +2518,7 @@ namespace WDutils {
 	  apply_t<Func,N-4,block_size(N-4,4)>(x+=4, ARGS_PASS);
 	}
 # endif
+# undef block_size
 # undef ARGS_DECL
 # undef ARGS_PASS
       };// struct SSE::details::static_connector<double>
@@ -2566,6 +2548,7 @@ namespace WDutils {
 	}
       private:
 	typedef connector_helper<float> helper;
+# if __cplusplus >= 201103L
 	//
 	static constexpr unsigned smll_block(unsigned block)
 	{ return block==8? 4 : 1; }
@@ -2576,6 +2559,15 @@ namespace WDutils {
 	    N >= max_block? max_block  : 
 	    N >= smll_block(max_block)? smll_block(max_block) : 1;
 	}
+# else  //
+	template<unsigned N, unsigned maxb>
+	struct size_block {
+	  static const unsigned smll  = maxb==8? 4 : 1;
+	  static const unsigned block = N >= maxb? maxb : 
+	                                N >= smll? smll : 1;
+	};
+#  define block_size(NUM,MAXBLOCK) size_block<NUM,MAXBLOCK>::block
+# endif
 	//
 	template<typename Func, unsigned N, unsigned max_block>
 	static void always_inline connect_start(float*x, const float*y) noexcept
@@ -2587,16 +2579,16 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<N==0 && block==1>::type
+	static typename enable_if<N==0 && block==1>::type
 	connect_t(float*, const float*) noexcept {}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<N==1 && block==1>::type
+	static typename enable_if<N==1 && block==1>::type
 	connect_t(float*x, const float*y) noexcept
 	{ helper::connect_block<Func,1,y_aligned>(x,y); }
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<N==2 && block==1>::type
+	static typename enable_if<N==2 && block==1>::type
 	connect_t(float*x, const float*y) noexcept
 	{
 	  helper::connect_block<Func,1,y_aligned>(x++,y++);
@@ -2604,7 +2596,7 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<N==3 && block==1>::type
+	static typename enable_if<N==3 && block==1>::type
 	connect_t(float*x, const float*y) noexcept
 	{
 	  helper::connect_block<Func,1,y_aligned>(x++,y++);
@@ -2613,7 +2605,7 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<(N>3) && block==1>::type
+	static typename enable_if<(N>3) && block==1>::type
 	connect_t(float*x, const float*y) noexcept
 	{
 	  WDutilsStaticAssert(N>3);
@@ -2639,11 +2631,11 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<block==4
+	static typename enable_if<block==4
 # ifdef __AVX__
-				       && (N<8)
+				  && (N<8)
 # endif
-					   >::type
+			       	   >::type
 	connect_t(float*x, const float*y) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2653,7 +2645,7 @@ namespace WDutils {
 # ifdef __AVX__
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<(N>=8) && block==4>::type
+	static typename enable_if<(N>=8) && block==4>::type
 	connect_t(float*x, const float*y) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2665,7 +2657,7 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block, bool y_aligned>
-	static typename std::enable_if<block==8>::type
+	static typename enable_if<block==8>::type
 	connect_t(float*x, const float*y) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2676,7 +2668,7 @@ namespace WDutils {
 	//
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<N==0 && block==1>::type
+	static typename enable_if<N==0 && block==1>::type
 	apply_t(float*, float, fvec4
 # ifdef __AVX__
 		, fvec8
@@ -2684,7 +2676,7 @@ namespace WDutils {
 		) noexcept {}
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<N==1 && block==1>::type
+	static typename enable_if<N==1 && block==1>::type
 	apply_t(float*x, const float y, fvec4
 # ifdef __AVX__
 		, fvec8
@@ -2693,7 +2685,7 @@ namespace WDutils {
 	{ helper::apply_block<Func,1>(x,y); }
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<N==2 && block==1>::type
+	static typename enable_if<N==2 && block==1>::type
 	apply_t(float*x, const float y, fvec4
 # ifdef __AVX__
 		, fvec8
@@ -2705,7 +2697,7 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<N==3 && block==1>::type
+	static typename enable_if<N==3 && block==1>::type
 	apply_t(float*x, const float y, fvec4
 # ifdef __AVX__
 		, fvec8
@@ -2726,7 +2718,7 @@ namespace WDutils {
 # endif
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<(N>3) && block==1>::type
+	static typename enable_if<(N>3) && block==1>::type
 	apply_t(float*x, ARGS_DECL) noexcept
 	{
 	  WDutilsStaticAssert(N>3);
@@ -2752,11 +2744,11 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<block==4
+	static typename enable_if<block==4
 # ifdef __AVX__
-				       && (N<8)
+				  && (N<8)
 # endif
-					   >::type
+			       	   >::type
 	apply_t(float*x, ARGS_DECL) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2766,7 +2758,7 @@ namespace WDutils {
 # ifdef __AVX__
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<(N>=8) && block==4>::type
+	static typename enable_if<(N>=8) && block==4>::type
 	apply_t(float*x, ARGS_DECL) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2778,7 +2770,7 @@ namespace WDutils {
 	}
 	//
 	template<typename Func, unsigned N, unsigned block>
-	static typename std::enable_if<block==8>::type
+	static typename enable_if<block==8>::type
 	apply_t(float*x, ARGS_DECL) noexcept
 	{
 	  WDutilsStaticAssert(N>=block);
@@ -2786,6 +2778,7 @@ namespace WDutils {
 	  apply_t<Func,N-8,block_size(N-8,8)>(x+=8, ARGS_PASS);
 	}
 # endif
+# undef block_size
 # undef ARGS_DECL
 # undef ARGS_PASS
       };// struct SSE::details::static_connector<float>
@@ -2892,6 +2885,9 @@ class
   } // namespace SSE
 } // namespace WDutils
 //
+#undef noexcept
+#undef constexpr
+#undef static_assert
 #undef always_inline
 //
 #endif

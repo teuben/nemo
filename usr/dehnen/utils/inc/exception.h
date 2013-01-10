@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2000-2012
+/// \date   2000-2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2012 Walter Dehnen
+// Copyright (C) 2000-2013 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,12 +28,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_exception_h
 #define WDutils_included_exception_h
-
-#if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus >= 201103L)
-#  define WDutilsCXX11
-#else
-#  undef  WDutilsCXX11
-#endif
 
 #if __cplusplus >= 201103L
 #  define WDutilsCXX11Delete      = delete
@@ -57,7 +51,7 @@
 #  define WDutils_included_cstdlib
 #  include <cstdlib>
 #endif
-#ifdef WDutilsCXX11
+#if __cplusplus >= 201103L
 # ifndef WDutils_included_type_traits
 #  include <type_traits>
 # endif
@@ -70,38 +64,32 @@
 /// public under the GNU public licence                                         
 ///                                                                             
 namespace WDutils {
-#ifdef WDutilsCXX11
-  using std::is_same;
-#else
-  template<typename __T1, typename __T2> struct is_same
-  { static const bool value = false; };
-  template<typename __T> struct is_same<__T,__T>
-  { static const bool value = true; };
-#endif
-  /// static type information: an extension of std::numeric_limits<>
-  //
-  namespace meta {
-    /// \note The only additional member indicates a floating point type; @c
-    ///       std::numeric_limits<>::is_integer cannot be used instead as it's
-    ///       @c false for all non-fundamental types.
-    template<typename __T> struct TypeInfo :
-      public std::numeric_limits<__T> {
-      static const bool is_floating_point = false;
-    };
-    template<> struct TypeInfo<float> :
-      public std::numeric_limits<float> {
-      static const bool is_floating_point = true;
-    };
-    template<> struct TypeInfo<double> :
-      public std::numeric_limits<double> {
-      static const bool is_floating_point = true;
-    };
-    template<> struct TypeInfo<long double> :
-      public std::numeric_limits<long double> {
-      static const bool is_floating_point = true;
-    };
-  }
-  using meta::TypeInfo;
+
+  // /// static type information: an extension of std::numeric_limits<>
+  // //
+  // namespace meta {
+  //   /// \note The only additional member indicates a floating point type; @c
+  //   ///       std::numeric_limits<>::is_integer cannot be used instead as it's
+  //   ///       @c false for all non-fundamental types.
+  //   template<typename __T> struct TypeInfo :
+  //     public std::numeric_limits<__T> {
+  //     static const bool is_floating_point = false;
+  //   };
+  //   template<> struct TypeInfo<float> :
+  //     public std::numeric_limits<float> {
+  //     static const bool is_floating_point = true;
+  //   };
+  //   template<> struct TypeInfo<double> :
+  //     public std::numeric_limits<double> {
+  //     static const bool is_floating_point = true;
+  //   };
+  //   template<> struct TypeInfo<long double> :
+  //     public std::numeric_limits<long double> {
+  //     static const bool is_floating_point = true;
+  //   };
+  // }
+  // using meta::TypeInfo;
+
   /// provides information about the running process
   /// \note only one object exists, the static RunInfo::Info
   class RunInfo {
@@ -519,7 +507,9 @@ namespace WDutils {
   //
   //  macro for compile-time assertion, stolen from the boost library
   //
-#ifdef WDutilsCXX11
+#if __cplusplus >= 201103L
+  /// \brief macro for compile-time assertion
+#  define WDutilsCXX11StaticAssert(TEST,MSGS) static_assert(TEST,MSGS);
   /// \brief macro for compile-time assertion
 #  define WDutilsStaticAssert(TEST) static_assert(TEST,#TEST);
 #else
@@ -535,10 +525,12 @@ namespace WDutils {
   /// "STATIC_ASSERTION_FAILURE" along with the line of the actual
   /// instantination causing the error will also appear in the
   /// compiler-generated error message.
-#define WDutilsStaticAssert(TEST)				\
+#  define WDutilsStaticAssert(TEST)				\
   enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
     static_cast<bool>((TEST))>)					\
   }
+#  define WDutilsCXX11StaticAssert(TEST,MSGS)	\
+  WDutilsStaticAssert(TEST)
 #endif
   /// \name assertion which throws an excpetion rather than abort
   //@{

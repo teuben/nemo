@@ -16,7 +16,7 @@
 /// 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 1996-2012  Walter Dehnen
+// Copyright (C) 1996-2013  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -35,6 +35,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_tupel_cc
 #define WDutils_included_tupel_cc
+
+#ifndef WDutils_included_tupel_h
+#  error tupel.cc must only be included from tupel.h
+#endif
 
 #ifndef WDutils_included_algorithm
 #  include <algorithm>

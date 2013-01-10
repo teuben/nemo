@@ -5,7 +5,7 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    1996-2012
+/// \date    1996-2013
 /// 
 /// \brief   contains the definition of template class WDutils::tupel and
 ///	     all its members and friends
@@ -29,7 +29,7 @@
 ///                                                                             
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 1996-2012  Walter Dehnen
+// Copyright (C) 1996-2013  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -59,22 +59,9 @@
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_exception_h
-
-# if defined(__GXX_EXPERIMENTAL_CXX0X__) || (__cplusplus >= 201103L)
-
-#  define WDutilsCXX11
-#  define WDutilsCXX11Delete      = delete
-#  define WDutilsCXX11Default     = default
-#  define WDutilsCXX11DefaultBody = default;
-#  define WDutilsStaticAssert(TEST) static_assert(TEST,#TEST);
-
-# else  // C++11
-
-#  undef  WDutilsCXX11
-#  define WDutilsCXX11Delete
-#  define WDutilsCXX11Default
-#  define WDutilsCXX11DefaultBody {}
-
+# if __cplusplus >= 201103L
+#  define WDutilsCXX11StaticAssert(TEST,MSGS) static_assert(TEST,MSGS);
+# else
 namespace WDutils {
   template<bool> struct STATIC_ASSERTION_FAILURE;
   template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
@@ -83,8 +70,7 @@ namespace WDutils {
     static_cast<bool>((TEST))>)					\
   }
 }
-
-# endif // C++11
+# endif // __cplusplus
 #endif  // WDutils_included_exception_h
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_tupel_cc
@@ -92,6 +78,37 @@ namespace WDutils {
 #endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
+
+#if __cplusplus < 201103L && !defined(WDutils_included_meta_h)
+  template<bool B, class T = void>
+  struct enable_if {};
+  template<class T>
+  struct enable_if<true, T> { typedef T type; };
+
+  template<class A, class B = void>
+  struct is_same { static const bool value = false; };
+  template<class A>
+  struct is_same<A,A> { static const bool value = true; };
+
+  template<class T> struct remove_const          { typedef T type; };
+  template<class T> struct remove_const<const T> { typedef T type; };
+ 
+  template<class T> struct remove_volatile             { typedef T type; };
+  template<class T> struct remove_volatile<volatile T> { typedef T type; };
+
+  template<class T>
+  struct remove_cv {
+    typedef typename 
+    remove_volatile<typename remove_const<T>::type>::type type;
+  };
+  template<class T>
+  struct is_floating_point {
+    static const bool value = 
+      is_same<float, typename remove_cv<T>::type>::value  ||
+      is_same<double, typename remove_cv<T>::type>::value  ||
+      is_same<long double, typename remove_cv<T>::type>::value;
+  };
+#endif
 
   /// namespace for class tupel<int,typename>
   /// \note To allow \code using namespace WDutils::Tuple; \endcode
@@ -662,7 +679,8 @@ namespace WDutils {
     { return x.sum_sq(y); }
     /// product with scalar: x[i] = y * v[i]
     template<int N, typename X, typename S> inline
-    tupel<N,X> operator*(S y, tupel<N,X> const&v)
+    typename enable_if<is_floating_point<S>::value, tupel<N,X> >::type
+    operator*(S y, tupel<N,X> const&v)
     { return v*y; }
     /// return element-wise function call: return f(tupel::a[i])
     template<int N, typename X> inline

@@ -78,6 +78,9 @@
 #ifndef WDutils_included_inline_h
 # include <inline.h>
 #endif
+#ifndef WDutils_included_meta_h
+# include <meta.h>
+#endif
 
 namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
@@ -124,18 +127,25 @@ namespace WDutils {
     template<typename __T> struct __TypeCompareE<__T,false>
     {
       // static assert to avoid non-exact non-float-point types
-      WDutilsStaticAssert(TypeInfo<__T>::is_floating_point);
+      WDutilsStaticAssert(is_floating_point<__T>::value);
       static bool iszero(__T x)
-      { return std::abs(x) < TypeInfo<__T>::min(); }
+      {
+	return std::abs(x) < std::numeric_limits<__T>::min();
+      }
       static bool equal(__T x, __T y)
-      { return std::abs(x-y) <=
-	  std::max(std::abs(x),std::abs(y)) * TypeInfo<__T>::epsilon(); }
+      {
+	return std::abs(x-y) <=
+	  std::max(std::abs(x),std::abs(y)) *
+	  std::numeric_limits<__T>::epsilon();
+      }
       static bool insignificant(__T e, __T x)
-      { return std::abs(e) < std::abs(x) * TypeInfo<__T>::epsilon(); }
+      {
+	return std::abs(e) < std::abs(x) * std::numeric_limits<__T>::epsilon();
+      }
     };
     // all built-in types
     template<typename __T> struct __TypeCompare :
-      public __TypeCompareE<__T, TypeInfo<__T>::is_exact> {};
+      public __TypeCompareE<__T, std::numeric_limits<__T>::is_exact> {};
     // specialisation: pointer
     template<typename __T> struct __TypeCompare<__T*> :
       public __TypeCompareE<__T*, true> {};
@@ -146,7 +156,7 @@ namespace WDutils {
     // specialisation: complex
     template<typename __T> struct __TypeCompare<std::complex<__T> >
     {
-      typedef __TypeCompareE<__T, TypeInfo<__T>::is_exact> __Comp;
+      typedef __TypeCompareE<__T, std::numeric_limits<__T>::is_exact> __Comp;
       static bool iszero(std::complex<__T> x)
       { 
 	return

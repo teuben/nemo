@@ -137,10 +137,8 @@ namespace WDutils {
     struct alignment
     {
       WDutilsStaticAssert(Dim==2 || Dim==3);
-#if __cplusplus >= 201103L
-      static_assert(std::is_floating_point<floating>::value,
-		    "not a floating point type");
-#endif
+      WDutilsCXX11StaticAssert(is_floating_point<floating>::value,
+			       "not a floating point type");
 #ifdef __AVX__
       static const int value = Dim==2? 16 : 4*sizeof(floating);
 #else
@@ -610,7 +608,7 @@ namespace WDutils {
       //@}
     private:
       WDutilsStaticAssert( ( _tD == 2 || _tD == 3 )               &&
-			   meta::TypeInfo<_tX>::is_floating_point    );
+			   is_floating_point<_tX>::value   );
       using AlignedDatum<
 #ifdef __AVX__
 	_tD==3? 4*sizeof(_tX) :

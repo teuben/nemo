@@ -285,7 +285,7 @@ namespace WDutils {
   template<int K>
   inline constexpr size_t next_aligned(size_t n)
   {
-    static_assert(K>0 && (K&(K-1))==0,"K not a power of 2");
+    WDutilsCXX11StaticAssert(K>0 && (K&(K-1))==0,"K not a power of 2");
     return (n+K-1)&(~(K-1));
   }
   ///
@@ -325,7 +325,7 @@ namespace WDutils {
   T* NewArrayAligned(size_t nobj, const char*file, int line,
 		     const char*lib = "WDutils") WDutils_THROWING
   {
-    static_assert(K>0 && (K&(K-1))==0,"K not power of 2");
+    WDutilsCXX11StaticAssert(K>0 && (K&(K-1))==0,"K not power of 2");
     size_t nbytes = nobj*sizeof(T);
 #if defined(__GNUC__) || defined (__INTEL_COMPILER)
     void*t;
@@ -346,7 +346,7 @@ namespace WDutils {
        uint32_t(nobj),nameof(T),uint32_t(nbytes),K,t);
     return static_cast<T*>(t);
 #else // __GNUC__ or __INTEL_COMPILER
-    static_assert(K==16,"only implemented for K=16 (for other than gcc & icc)");
+    WDutilsCXX11StaticAssert(K==16,"only implemented for K=16");
     // linear memory model:                                                     
     // ^    = 16byte alignment points                                           
     // S    = sizeof(void*) (assumed 4 in this sketch)                          
@@ -433,7 +433,7 @@ namespace WDutils {
 	 "de-allocated %d-byte aligned array of '%s' @ %p\n",
 	 K,nameof(T),array);
 #else
-    static_assert(K==16,"only implemented for K=16 (for other than gcc & icc)");
+    WDutilsCXX11StaticAssert(K==16,"only implemented for K=16");
     DelArray((char*)(*((void**)(((char*)array)-sizeof(void*)))),
 	     file,line,num,lib);
 #endif
@@ -1879,7 +1879,7 @@ namespace WDutils {
     template<unsigned q, unsigned p>
     void reset_conditional(std::size_t n)
     {
-      static_assert(q>=p,"shrink not allowed");
+      WDutilsCXX11StaticAssert(q>=p,"shrink not allowed");
       if(n>_num || n*q < p*_num) reset(n);
     }
     /// number of bytes allocated

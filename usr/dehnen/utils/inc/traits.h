@@ -37,7 +37,8 @@
 #ifndef WDutils_included_exception_h
 #  include <exception.h>
 #endif
-#ifdef WDutilsCXX11
+
+#if __cplusplus >= 201103L
 # ifndef WDutils_included_cstdint
 #  include <cstdint>
 #  define WDutils_included_cstdint
@@ -54,7 +55,7 @@ namespace WDutils {
   // integer types of given size
   //
   // ///////////////////////////////////////////////////////////////////////////
-#ifdef WDutilsCXX11
+#if __cplusplus >= 201103L
   using std::int8_t;
   using std::int16_t;
   using std::int32_t;

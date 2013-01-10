@@ -117,12 +117,13 @@ numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(tupel_h)
 spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
 WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
-				$(inline_h)
+				$(inline_h) $(meta_h)
 geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 				$(INC)geometry_inl.h
 periodic_h		:= $(INC)periodic.h $(geometry_h)
 peano_h			:= $(INC)peano.h $(traits_h)
 octtree_h		:= $(INC)octtree.h $(periodic_h) $(memory_h) $(io_h)
+matr33_h		:= $(INC)matr33.h $(exception_h) $(inline_h)
 ifdef WDutilsDevel
 $(INC)parallel.h	: $(DEV)parallel.h
 			(cd $(INC); ln -s ../$(DEV)parallel.h parallel.h)
@@ -131,9 +132,6 @@ octtree_h		+= $(parallel_h)
 endif
 
 ifdef WDutilsDevel
-$(INC)matr33.h		: $(DEV)matr33.h
-			(cd $(INC); ln -s ../$(DEV)matr33.h matr33.h)
-matr33_h		:= $(INC)matr33.h $(exception_h) $(tupel_h)
 
 $(INC)neighbour.tcc	: $(DEV)neighbour.tcc
 			(cd $(INC); \
