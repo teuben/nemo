@@ -39,11 +39,21 @@ OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
+
 ifdef WDutilsDevel
+CXX11		:= 1
+OPENMP		:= 1
+endif
+
+ifdef CXX11
 CXXFLAGS	:= -std=c++0x $(OPTFLAGS)
-LDFLAGS		:= -shared -fopenmp $(PROFLAGS)
 else
 CXXFLAGS	:= $(OPTFLAGS)
+endif
+
+ifdef OPENMP
+LDFLAGS		:= -shared -fopenmp $(PROFLAGS)
+else
 LDFLAGS		:= -shared $(PROFLAGS)
 endif
 
