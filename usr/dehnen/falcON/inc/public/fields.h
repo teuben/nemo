@@ -580,7 +580,7 @@ namespace falcON {
   class fieldset {
   public:
     /// type used in internal representation
-    typedef uint64_t value_type;
+    typedef WDutils::uint64_t value_type;
   private:
     value_type val;
   public:
@@ -964,7 +964,7 @@ namespace falcON {
   ///
   class bodytypes {
     /// type used in internal representation
-    typedef uint8_t value_type;
+    typedef WDutils::uint8_t value_type;
   private:
     value_type val;
     explicit bodytypes(int i) : val(i) {}
@@ -976,8 +976,8 @@ namespace falcON {
       sink    = one << bodytype::sink,   ///< only sink bodies
       gas     = one << bodytype::gas,    ///< only gas bodies
       std     = one << bodytype::std,    ///< only std bodies
-      nonsink = gas|std,               ///< all but sink bodies
-      all     = sink|gas|std           ///< all types of bodies
+      nonsink = gas|std,                 ///< all but sink bodies
+      all     = sink|gas|std             ///< all types of bodies
     };
     //--------------------------------------------------------------------------
     /// \name constructors and assignment                                       

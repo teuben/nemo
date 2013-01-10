@@ -41,10 +41,12 @@ ifeq ($(COMPILER),gcc)
 endif
 endif
 
+ifndef Standard
 ## ifdef DPROPER
 ifdef DWALTER
 # 3.2 full sph support (development version)
 DSPH			:= -DfalcON_SPH
+endif
 endif
 
 # 3.3 individual softening lengths (default: non-adaptive)
@@ -100,6 +102,8 @@ endif
 # 5.2 makepub: all targets for the public version
 -include makepub
 
+ifndef Standard
+
 # 5.3 proper/make: additional targets for proprietary version
 ifdef DPROPER
 -include proper/make
@@ -113,6 +117,8 @@ endif
 # 5.5 additional targets for any private sandboxes
 ifdef DWALTER
 -include walter/make
+endif
+
 endif
 
 #
@@ -136,7 +142,7 @@ links			:	$(links)
 
 # 6.1 utils library
 utils/lib/libWDutils.a	: utils
-			$(MAKE) -C utils
+			$(MAKE) Standard=$(Standard) -C utils
 libutils		: utils utils/lib/libWDutils.a
 
 # 6.3 falcON library

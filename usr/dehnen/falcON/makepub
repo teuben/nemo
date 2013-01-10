@@ -25,24 +25,35 @@ makefiles		:= Makefile makedefs makepub
 # ------------
 
 Pi_h			:= $(IUTI)Pi.h
+timer_h			:= $(IUTI)timer.h
 inline_h		:= $(IUTI)inline.h
-io_h			:= $(IUTI)io.h
-traits_h		:= $(IUTI)traits.h
-tupel_h			:= $(IUTI)tupel.h $(IUTI)vector.h $(IUTI)tupel.cc $(traits_h)
-exception_h		:= $(IUTI)exception.h $(traits_h)
-WDMath_h		:= $(IUTI)WDMath.h $(Pi_h) $(exception_h)
-memory_h		:= $(IUTI)memory.h $(exception_h) $(inline_h)
+exception_h		:= $(IUTI)exception.h
+meta_h			:= $(IUTI)meta.h $(exception_h)
+traits_h		:= $(IUTI)traits.h $(exception_h)
+io_h			:= $(IUTI)io.h $(exception_h) $(traits_h)
+tupel_h			:= $(IUTI)vector.h $(IUTI)tupel.h $(IUTI)tupel.cc
+memory_h		:= $(IUTI)memory.h $(traits_h) $(inline_h)
+radix_h			:= $(IUTI)radix.h $(traits_h) $(memory_h)
+sse_h			:= $(IUTI)sse.h $(exception_h) $(meta_h) $(memory_h)
 heap_h			:= $(IUTI)heap.h $(memory_h)
 numerics_h		:= $(IUTI)numerics.h $(inline_h) $(memory_h) $(tupel_h)
 spline_h		:= $(IUTI)spline.h $(numerics_h) $(memory_h)
 random_h_util		:= $(IUTI)random.h $(inline_h) $(Pi_h) $(traits_h)
+WDMath_h		:= $(IUTI)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
+				$(inline_h) $(meta_h)
+geometry_h		:= $(IUTI)geometry.h $(sse_h) $(tupel_h) \
+				$(IUTI)geometry_inl.h
+periodic_h		:= $(IUTI)periodic.h $(geometry_h)
+peano_h			:= $(IUTI)peano.h $(traits_h)
+octtree_h		:= $(IUTI)octtree.h $(periodic_h) $(memory_h) $(io_h)
+matr33_h		:= $(IUTI)matr33.h $(exception_h) $(inline_h)
 
 # -----------------------
 # header dependency lists
 # -----------------------
 
 utils_h			:= $(traits_h) $(Pi_h) $(inline_h) $(io_h) $(tupel_h) \
-				$(exception_h) $(memory_h)
+				$(exception_h) $(meta_h) $(memory_h)
 types_h			:= $(IPUB)types.h $(utils_h) $(tensor_h)
 basic_h			:= $(IPUB)basic.h $(types_h)
 simd_h			:= $(IPUB)simd.h $(basic_h)

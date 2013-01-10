@@ -41,6 +41,9 @@
 #ifndef WDutils_included_exception_h
 #  include <utils/exception.h>
 #endif
+#ifndef WDutils_included_meta_h
+#  include <utils/meta.h>
+#endif
 #if __cplusplus < 201103L
 # ifndef WDutils_included_tupel_h
 #  include <utils/tupel.h>

@@ -86,13 +86,13 @@ namespace falcON {
       };
       typedef symt3D<N,X> Tensor;                  // sym 3D tensor of order N
       static Tensor      &tens(      X*a)
-      { return *static_cast<      Tensor*>(static_cast<void*>(a+I0)); }
+      { return*static_cast<      Tensor*>(static_cast<void*>(a+I0)); }
       static Tensor const&tens(const X*a)
-      { return *static_cast<const Tensor*>(static_cast<const void*>(a+I0)); }
+      { return*static_cast<const Tensor*>(static_cast<const void*>(a+I0)); }
       static Tensor      &pole(      X*a)
-      { return *static_cast<      Tensor*>(static_cast<void*>(a+J0)); }
+      { return*static_cast<      Tensor*>(static_cast<void*>(a+J0)); }
       static Tensor const&pole(const X*a)
-      { return *static_cast<const Tensor*>(static_cast<const void*>(a+J0)); }
+      { return*static_cast<const Tensor*>(static_cast<const void*>(a+J0)); }
     };
     tm<typename X> struct ONE3D<1,X> : ONE<1> {
       enum { ND=3, CD=4, I0=1 };
