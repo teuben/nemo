@@ -48,7 +48,9 @@ namespace WDutils {
 //
 namespace {
   using namespace WDutils;
+#ifdef _OPENMP
   using WDutils::Radix::B;
+#endif
   /// parallel radix sort for float or double
   template<typename X> class ParallelRadixSort {
 #ifdef _OPENMP
@@ -126,7 +128,11 @@ namespace {
 #endif // _OPENMP
   public:
     /// wrapper for Radix::PSort(n,x,y,w)
-    static void sortP(unsigned n, X*x, X*y, bool warn)
+    static void sortP(unsigned n, X*x, X*y, bool
+#ifdef _OPENMP
+		      warn
+#endif
+		      )
     {
 #ifdef _OPENMP
       if(OMP::IsParallel() && OMP::TeamSize()>1) {
@@ -156,7 +162,11 @@ namespace {
 	Radix::Sort(n,x,y);
     }
     /// wrapper for Radix::PSort(n,x,w)
-    static void sortP(unsigned n, X*x, bool warn)
+    static void sortP(unsigned n, X*x, bool
+#ifdef _OPENMP
+		      warn
+#endif
+		      )
     {
       X*y;
 #ifdef _OPENMP
@@ -166,32 +176,33 @@ namespace {
 			   "we assume shared global data "
 			   "(use WDutils::Radix::Sort() for sorting local "
 			   "data).\n");
-#ifndef __INTEL_COMPILER
+# ifndef __INTEL_COMPILER
 	try {
-#endif
+# endif
 	  if(OMP::Rank() == 0) y=WDutils_NEW16(X,n);
 #pragma omp barrier
 	  ParallelRadixSort<X> P(n,x,y);
 	  P.sort();
 	  if(OMP::Rank() == 0) WDutils_DEL16(y);
-#ifndef __INTEL_COMPILER
+# ifndef __INTEL_COMPILER
 	} catch(WDutils::exception E)  { WDutils_ErrorN(text(E)); }
+# endif
+      } else
 #endif
-      } else {
-#endif
+      {
 	y=WDutils_NEW16(X,n);
 #ifdef _OPENMP
 	if(!OMP::IsParallel() && OMP::MaxNumThreads()>1)
 #pragma omp parallel
 	  {
-#ifndef __INTEL_COMPILER
+# ifndef __INTEL_COMPILER
 	    try {
-#endif
+# endif
 	      ParallelRadixSort<X> P(n,x,y);
 	      P.sort();
-#ifndef __INTEL_COMPILER
+# ifndef __INTEL_COMPILER
 	    } catch(WDutils::exception E) { WDutils_ErrorN(text(E)); }
-#endif
+# endif
 	  }
 	else 
 #endif

@@ -52,7 +52,7 @@ CXXFLAGS	:= $(OPTFLAGS)
 endif
 
 ifdef OPENMP
-OPTFLAGS	+= -fopenmp
+CXXFLAGS	+= -fopenmp
 LDFLAGS		:= -shared -fopenmp $(PROFLAGS)
 else
 LDFLAGS		:= -shared $(PROFLAGS)

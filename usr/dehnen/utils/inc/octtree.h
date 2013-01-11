@@ -1084,6 +1084,15 @@ namespace WDutils {
       /// \param[in] tree  tree being build or updated
       /// \note called once after all sub-domains have been set
       virtual void SetTop(const OctalTree*tree) const = 0;
+#ifndef OCTALTREE_USE_OPENMP
+      /// for serial build
+      void Serial(bool fresh, const OctalTree*tree) const
+      {
+	Before(fresh,tree->n_cell(),tree->n_leaf(),tree->n_extleaf());
+	SetSub(tree,0);
+	SetTop(tree);
+      }
+#endif
     };
 #ifdef OCTALTREE_DATA_IN_ONE_BLOCK
     ///

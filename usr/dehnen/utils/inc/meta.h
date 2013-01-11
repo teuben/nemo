@@ -698,6 +698,11 @@ namespace WDutils {
       template<typename X> static X& operate(X&x, X y) noexcept
       { return x/=y; }
     };
+    /// x <-> y
+    struct swap {
+      template<typename X> static void operate(X&x, X&y) noexcept
+      { X tmp(x); x=y; y=tmp; }
+    };
     /// x=max(x,y)
     struct maximum {
       template<typename X> static X& operate(X&x, X y) noexcept

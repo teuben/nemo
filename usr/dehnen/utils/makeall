@@ -121,17 +121,20 @@ WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
 				$(INC)geometry_inl.h
 periodic_h		:= $(INC)periodic.h $(geometry_h)
-peano_h			:= $(INC)peano.h $(traits_h)
 octtree_h		:= $(INC)octtree.h $(periodic_h) $(memory_h) $(io_h)
 matr33_h		:= $(INC)matr33.h $(exception_h) $(inline_h)
+
 ifdef WDutilsDevel
+
 $(INC)parallel.h	: $(DEV)parallel.h
 			(cd $(INC); ln -s ../$(DEV)parallel.h parallel.h)
 parallel_h		:= $(INC)parallel.h $(memory_h)
-octtree_h		+= $(parallel_h)
-endif
 
-ifdef WDutilsDevel
+$(INC)peano.h		: $(DEV)peano.h
+			(cd $(INC); ln -s ../$(DEV)peano.h peano.h)
+peano_h			:= $(INC)peano.h $(traits_h)
+
+octtree_h		+= $(parallel_h) $(peano_h)
 
 $(INC)neighbour.tcc	: $(DEV)neighbour.tcc
 			(cd $(INC); \

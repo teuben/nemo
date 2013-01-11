@@ -1799,9 +1799,24 @@ namespace WDutils {
       data_type _m;
     };// SSE::packed<4,double>
     typedef packed<4,double> dvec4;
-
 # endif // __AVX__
 #endif  // __SSE__
+    //
+    template<typename vec>
+    struct is_packed {
+      static const bool value = false
+#ifdef __SSE__
+	|| is_same<fvec4,vec>::value
+#endif
+#ifdef __SSE2__
+	|| is_same<dvec2,vec>::value
+#endif
+#ifdef __AVX__
+	|| is_same<dvec4,vec>::value
+	|| is_same<fvec8,vec>::value
+#endif
+	;
+    };
   } // namespace WDutils::SSE
   //
 #ifdef __SSE__
@@ -2001,381 +2016,387 @@ namespace WDutils {
     };
     ////////////////////////////////////////////////////////////////////////////
     namespace details {
+      template<typename Functor>
+      struct is_functor {
+	static const bool value =
+	  is_same<Functor,meta::assign  >::value ||
+	  is_same<Functor,meta::add     >::value ||
+	  is_same<Functor,meta::subtract>::value ||
+	  is_same<Functor,meta::multiply>::value ||
+	  is_same<Functor,meta::divide  >::value ||
+	  is_same<Functor,meta::swap    >::value ||
+	  is_same<Functor,meta::maximum >::value ||
+	  is_same<Functor,meta::minimum >::value;
+      };
+      //
+      template<typename Functor>
+      struct is_assign {
+	static const bool value = is_same<Functor,meta::assign  >::value;
+      };
+      //
+      template<typename Functor>
+      struct is_divide {
+	static const bool value = is_same<Functor,meta::divide  >::value;
+      };
+      //
+      template<typename Functor>
+      struct is_swap {
+	static const bool value = is_same<Functor,meta::swap  >::value;
+      };
       // auxiliary for connect<>
       template<typename RealType>
       struct connector
       {
-	// for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y[i]);
-	template<typename AssignFunc>
+	// for(i=0; i!=N; ++i) Functor::operate(x[i], y[i]);
+	template<typename Functor>
 	static void connect(RealType*x, const RealType*y, unsigned n) noexcept
-	{ for(; n; --n,x++,y++) AssignFunc::operate(*x,*y); }
-	// for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y);
-	template<typename AssignFunc>
-	static void connect(RealType*x, const RealType y, unsigned n) noexcept
-	{ for(; n; --n,x++) AssignFunc::operate(*x,y); }
+	{ for(unsigned i=0; i!=n; ++i) Functor::operate(x[i],y[i]); }
+	// for(i=0; i!=N; ++i) Functor::operate(x[i], y[i]);
+	static void swap(RealType*x, RealType*y, unsigned n) noexcept
+	{ for(unsigned i=0; i!=n; ++i) meta::swap::operate(x[i],y[i]); }
+	// for(i=0; i!=N; ++i) Functor::operate(x[i], y);
+	template<typename Functor>
+	static void foreach(RealType*x, const RealType y, unsigned n) noexcept
+	{ for(unsigned i=0; i!=n; ++i) Functor::operate(x[i],y); }
       };
-      // auxiliary for struct connector_helper<>
-      template<typename AssignFunc>
-      struct is_assign {
-	static const bool value =
-	  is_same<AssignFunc,meta::assign>::value;
-      };
+#ifdef __SSE__
       // auxiliary for struct connector<>
-      template<typename> struct connector_helper;
-#ifdef __SSE2__
-      // auxiliary for connector<double> and static_connector<double>
-      template<>
-      struct connector_helper<double>
+      template<typename real>
+      struct connector_helper
       {
-      protected:
 	//
-	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename enable_if<block_size==1 &&
-				  !is_assign<AssignFunc>::value >::type
-	always_inline connect_block(double*x, const double*y)
-	{ AssignFunc::operate(*x,*y); }
+	template<typename Functor>
+	static always_inline void connect(real*x, real y) noexcept
+	{ Functor::operate(*x,y); }
 	//
-	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename enable_if<(block_size==2 || block_size==4) &&
-				  !is_assign<AssignFunc>::value >::type
-	always_inline connect_block(double*x, const double*y)
+	template<typename Functor, typename vec>
+	static always_inline
+	typename enable_if<!is_assign<Functor>::value &&
+	                    is_packed<vec>::value>::type
+	connect(real*x, vec const&vy) noexcept
 	{
-	  typedef packed<block_size,double> vec;
-	  vec v = vec::load(x);
-	  AssignFunc::operate(v,vec::template load_t<y_aligned>(y));
-	  v.store(x);
+	  vec vx = vec::load(x);
+	  Functor::operate(vx,vy);
+	  vx.store(x);
 	}
 	//
-	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename enable_if<block_size==1 &&
-				  is_assign<AssignFunc>::value >::type
-	always_inline connect_block(double*x, const double*y)
-	{ *x = *y; }
+	template<typename Functor, typename vec>
+	static always_inline
+	typename enable_if<is_assign<Functor>::value>::type
+	connect(real*x, vec const&vy) noexcept
+	{ vy.store(x); }
 	//
-	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename enable_if<(block_size==2 || block_size==4) &&
-				  is_assign<AssignFunc>::value >::type
-	always_inline connect_block(double*x, const double*y)
+	template<unsigned block_size, bool y_aligned>
+	static always_inline
+	typename enable_if<block_size==1>::type
+	swap(real*x, real*y) noexcept
+	{ real tmp(*x); *x=*y; *y=tmp; }
+	//
+	template<unsigned block_size, bool y_aligned>
+	static always_inline
+	typename enable_if<block_size!=1>::type
+	swap(real*x, real*y) noexcept
 	{
-	  typedef packed<block_size,double> vec;
-	  vec v = vec::template load_t<y_aligned>(y);
-	  v.store(x);
+	  typedef packed<block_size,real> vec;
+	  vec vx = vec::load(x);
+	  vec vy = vec::template load_t<y_aligned>(y);
+	  vy.store(x);
+	  vx.template store_t<y_aligned>(y);
 	}
-	//
-	template<typename AssignFunc,unsigned block_size>
-	static typename enable_if<block_size==1 &&
-				  !is_assign<AssignFunc>::value >::type
-	always_inline apply_block(double*x, const double y)
-	{ AssignFunc::operate(*x,y); }
-	//
-	template<typename AssignFunc,unsigned block_size>
-	static typename enable_if<(block_size==2 || block_size==4) &&
-				  !is_assign<AssignFunc>::value >::type
-	always_inline apply_block(double*x, const packed<block_size,double> y)
-	{
-	  typedef packed<block_size,double> vec;
-	  vec v = vec::load(x);
-	  AssignFunc::operate(v,y);
-	  v.store(x);
-	}
-	//
-	template<typename AssignFunc,unsigned block_size>
-	static typename enable_if<block_size==1 &&
-				  is_assign<AssignFunc>::value >::type
-	always_inline apply_block(double*x, const double y)
-	{ *x = y; }
-	//
-	template<typename AssignFunc,unsigned block_size>
-	static typename enable_if<(block_size==2 || block_size==4) &&
-				  is_assign<AssignFunc>::value >::type
-	always_inline apply_block(double*x, const packed<block_size,double> y)
-	{ y.store(x); }
-      };// struct SSE::details::connector_helper<double>
+      };
+#endif
+#ifdef __SSE2__
       // templated array connection: SSE version for @c RealType = @c double
       template<>
       struct connector<double> : private connector_helper<double>
       {
 	typedef connector_helper<double> helper;
-	/// for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y[i]);
-	template<typename AssignFunc>
+	// for(i=0; i!=N; ++i) Functor::operate(x[i], y[i]);
+	template<typename Functor>
 	static void connect(double*x, const double*y, unsigned n) noexcept
 	{
-	  WDutilsAssertE(0==(size_t(x)&7) &&
-			 0==(size_t(y)&7));
 	  if(n && (size_t(x)&15)) {
-	    helper::connect_block<AssignFunc,1,0>(x,y);
+	    helper::connect<Functor>(x,*y);
 	    --n,++x,++y; 
 	  }
 # ifdef __AVX__
 	  if(n>=2 && (size_t(x)&31)) {
-	    helper::connect_block<AssignFunc,2,0>(x,y);
+	    helper::connect<Functor>(x,dvec2::loadu(y));
 	    n-=2,x+=2,y+=2;
 	  }
 	  if(size_t(y)&31) {
 	    for(; n>=4; n-=4,x+=4,y+=4)
-	      helper::connect_block<AssignFunc,4,0>(x,y);
+	      helper::connect<Functor>(x,dvec4::loadu(y));
 	    if(n>=2) {
-	      helper::connect_block<AssignFunc,2,0>(x,y);
+	      helper::connect<Functor>(x,dvec2::loadu(y));
 	      n-=2,x+=2,y+=2;
 	    }
 	  } else {
 	    for(; n>=4; n-=4,x+=4,y+=4)
-	      helper::connect_block<AssignFunc,4,1>(x,y);
+	      helper::connect<Functor>(x,dvec4::load(y));
 	    if(n>=2) {
-	      helper::connect_block<AssignFunc,2,1>(x,y);
+	      helper::connect<Functor>(x,dvec2::load(y));
 	      n-=2,x+=2,y+=2;
 	    }
 	  }
 # else
 	  if(size_t(y)&15)
 	    for(; n>=2; n-=2,x+=2,y+=2)
-	      helper::connect_block<AssignFunc,2,0>(x,y);
+	      helper::connect<Functor>(x,dvec2::loadu(y));
 	  else
 	    for(; n>=2; n-=2,x+=2,y+=2)
-	      helper::connect_block<AssignFunc,2,1>(x,y);
+	      helper::connect<Functor>(x,dvec2::load(y));
 # endif
 	  if(n)
-	    helper::connect_block<AssignFunc,1,0>(x,y);
+	    helper::connect<Functor>(x,*y);
 	}
-	/// for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y);
-	template<typename AssignFunc>
-	static void connect(double*x, const double y, unsigned n) noexcept
+	// for(i=0; i!=N; ++i) Functor::operate(x[i], y[i]);
+	static void swap(double*x, double*y, unsigned n) noexcept
 	{
-	  WDutilsAssertE(0==(size_t(x)&7));
 	  if(n && (size_t(x)&15)) {
-	    helper::apply_block<AssignFunc,1>(x,y);
+	    helper::swap<1,0>(x,y);
+	    --n,++x,++y; 
+	  }
+# ifdef __AVX__
+	  if(n>=2 && (size_t(x)&31)) {
+	    helper::swap<2,0>(x,y);
+	    n-=2,x+=2,y+=2;
+	  }
+	  if(size_t(y)&31) {
+	    for(; n>=4; n-=4,x+=4,y+=4)
+	      helper::swap<4,0>(x,y);
+	    if(n>=2) {
+	      helper::swap<2,0>(x,y);
+	      n-=2,x+=2,y+=2;
+	    }
+	  } else {
+	    for(; n>=4; n-=4,x+=4,y+=4)
+	      helper::swap<4,1>(x,y);
+	    if(n>=2) {
+	      helper::swap<2,1>(x,y);
+	      n-=2,x+=2,y+=2;
+	    }
+	  }
+# else
+	  if(size_t(y)&15)
+	    for(; n>=2; n-=2,x+=2,y+=2)
+	      helper::swap<2,0>(x,y);
+	  else
+	    for(; n>=2; n-=2,x+=2,y+=2)
+	      helper::swap<2,1>(x,y);
+# endif
+	  if(n)
+	    helper::swap<1,0>(x,y);
+	}
+	// for(i=0; i!=N; ++i) Functor::operate(x[i], y);
+	template<typename Functor>
+	static void foreach(double*x, const double y, unsigned n) noexcept
+	{
+	  if(n && (size_t(x)&15)) {
+	    helper::connect<Functor>(x,y);
 	    --n,++x; 
 	  }
 	  dvec2 y2(y);
 # ifdef __AVX__
 	  if(n>=2 && (size_t(x)&31)) {
-	    helper::apply_block<AssignFunc,2>(x,y2);
+	    helper::connect<Functor>(x,y2);
 	    n-=2,x+=2;
 	  }
 	  dvec4 y4(y);
 	  for(; n>=4; n-=4,x+=4)
-	    helper::apply_block<AssignFunc,4>(x,y4);
+	    helper::connect<Functor>(x,y4);
 # endif
 	  for(; n>=2; n-=2,x+=2)
-	    helper::apply_block<AssignFunc,2>(x,y2);
+	    helper::connect<Functor>(x,y2);
 	  if(n)
-	    helper::apply_block<AssignFunc,1>(x,y);
+	    helper::connect<Functor>(x,y);
 	}
       };// struct SSE::details::connector<double>
 #endif// __SSE2__
 #ifdef __SSE__
-      // auxiliary for connector<double> and static_connector<double>
-      template<>
-      struct connector_helper<float>
-      {
-      protected:
-	// non-assigning, block_size=1
-	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename enable_if<block_size==1 &&
-				  !is_assign<AssignFunc>::value >::type
-	always_inline connect_block(float*x, const float*y)
-	{ AssignFunc::operate(*x,*y); }
-	// non-assigning, block_size>1
-	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename enable_if<(block_size==4 || block_size==8) &&
-				  !is_assign<AssignFunc>::value >::type
-	always_inline connect_block(float*x, const float*y)
-	{
-	  typedef packed<block_size,float> vec;
-	  vec v = vec::load(x);
-	  AssignFunc::operate(v,vec::template load_t<y_aligned>(y));
-	  v.store(x);
-	}
-	// assigning, block_size=1
-	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename enable_if<block_size==1 &&
-				  is_assign<AssignFunc>::value >::type
-	always_inline connect_block(float*x, const float*y)
-	{ *x = *y ; }
-	// assigning, block_size>1
-	template<typename AssignFunc,unsigned block_size, bool y_aligned>
-	static typename enable_if<(block_size==4 || block_size==8) &&
-				  is_assign<AssignFunc>::value >::type
-	always_inline connect_block(float*x, const float*y)
-	{
-	  typedef packed<block_size,float> vec;
-	  vec v = vec::template load_t<y_aligned>(y);
-	  v.store(x);
-	}
-	// non-assigning, block_size=1
-	template<typename AssignFunc,unsigned block_size>
-	static typename enable_if<block_size==1 &&
-				  !is_assign<AssignFunc>::value >::type
-	always_inline apply_block(float*x, const float y)
-	{ AssignFunc::operate(*x,y); }
-	// non-assigning, block_size>1
-	template<typename AssignFunc,unsigned block_size>
-	static typename enable_if<(block_size==4 || block_size==8) &&
-				  !is_assign<AssignFunc>::value >::type
-	always_inline apply_block(float*x, const packed<block_size,float> y)
-	{
-	  typedef packed<block_size,float> vec;
-	  vec v = vec::load(x);
-	  AssignFunc::operate(v,y);
-	  v.store(x);
-	}
-	// assigning, block_size=1
-	template<typename AssignFunc,unsigned block_size>
-	static typename enable_if<block_size==1 &&
-				  is_assign<AssignFunc>::value >::type
-	always_inline apply_block(float*x, const float y)
-	{ *x = y; }
-	// assigning, block_size>1
-	template<typename AssignFunc,unsigned block_size>
-	static typename enable_if<(block_size==4 || block_size==8) &&
-				  is_assign<AssignFunc>::value >::type
-	always_inline apply_block(float*x, const packed<block_size,float> y)
-	{ y.store(x); }
-      };// struct SSE::details::connect_helper<float>
       // templated array connection: SSE version for @c RealType = @c float
       template<>
       struct connector<float> : private connector_helper<float>
       {
 	typedef connector_helper<float> helper;
-	/// for(i=0; i!=N; ++i) assignment_functor<float>(x[i], y[i]);
-	template<typename AssignFunc>
+	// for(i=0; i!=N; ++i) assignment_functor<float>(x[i], y[i]);
+	template<typename Functor>
 	static void connect(float*x, const float*y, unsigned n) noexcept
 	{
-	  // assert basic 4-byte alignment
-	  WDutilsAssertE(0==(size_t(x)&3) &&
-			 0==(size_t(y)&3));
-	  // ensure 16-byte alignment
 	  for(; n && (size_t(x)&15); --n,++x,++y)
-	    helper::connect_block<AssignFunc,1,0>(x,y);
+	    helper::connect<Functor>(x,*y);
 # ifdef __AVX__
-	  // ensure 32-byte alignment
 	  if(n>=4 && (size_t(x)&31)) {
-	    helper::connect_block<AssignFunc,4,0>(x,y);
+	    helper::connect<Functor>(x,fvec4::loadu(y));
 	    n-=4,x+=4,y+=4;
 	  }
-	  // loop 32-byte aligned blocks of 8 until n<8
 	  if(size_t(y)&31) {
 	    for(; n>=8; n-=8,x+=8,y+=8)
-	      helper::connect_block<AssignFunc,8,0>(x,y);
+	      helper::connect<Functor>(x,fvec8::loadu(y));
 	    if(n>=4) {
-	      helper::connect_block<AssignFunc,4,0>(x,y);
+	      helper::connect<Functor>(x,fvec4::loadu(y));
 	      n-=4,x+=4,y+=4;
 	    }
 	  } else {
 	    for(; n>=8; n-=8,x+=8,y+=8)
-	      helper::connect_block<AssignFunc,8,1>(x,y);
+	      helper::connect<Functor>(x,fvec8::load(y));
 	    if(n>=4) {
-	      helper::connect_block<AssignFunc,4,1>(x,y);
+	      helper::connect<Functor>(x,fvec4::load(y));
 	      n-=4,x+=4,y+=4;
 	    }
 	  }
-	  // loop 16-byte aligned blocks of 4 until n<4
 # else
 	  if(size_t(y)&15)
 	    for(; n>=4; n-=4,x+=4,y+=4)
-	      helper::connect_block<AssignFunc,4,0>(x,y);
+	      helper::connect<Functor>(x,fvec4::loadu(y));
 	  else
 	    for(; n>=4; n-=4,x+=4,y+=4)
-	      helper::connect_block<AssignFunc,4,1>(x,y);
+	      helper::connect<Functor>(x,fvec4::load(y));
 # endif
-	  // loop remaining (unaligned) until n==0
 	  for(; n; --n,++x,++y)
-	    helper::connect_block<AssignFunc,1,0>(x,y);
+	    helper::connect<Functor>(x,*y);
 	}
-	/// for(i=0; i!=N; ++i) assignment_functor<float>(x[i], y);
-	template<typename AssignFunc>
-	static void connect(float*x, const float y, unsigned n) noexcept
+	// for(i=0; i!=N; ++i) assignment_functor<float>(x[i], y[i]);
+	static void swap(float*x, float*y, unsigned n) noexcept
 	{
-	  WDutilsAssertE(0==(size_t(x)&3));
+	  for(; n && (size_t(x)&15); --n,++x,++y)
+	    helper::swap<1,0>(x,y);
+# ifdef __AVX__
+	  if(n>=4 && (size_t(x)&31)) {
+	    helper::swap<4,0>(x,y);
+	    n-=4,x+=4,y+=4;
+	  }
+	  if(size_t(y)&31) {
+	    for(; n>=8; n-=8,x+=8,y+=8)
+	      helper::swap<8,0>(x,y);
+	    if(n>=4) {
+	      helper::swap<4,0>(x,y);
+	      n-=4,x+=4,y+=4;
+	    }
+	  } else {
+	    for(; n>=8; n-=8,x+=8,y+=8)
+	      helper::swap<8,1>(x,y);
+	    if(n>=4) {
+	      helper::swap<4,1>(x,y);
+	      n-=4,x+=4,y+=4;
+	    }
+	  }
+# else
+	  if(size_t(y)&15)
+	    for(; n>=4; n-=4,x+=4,y+=4)
+	      helper::swap<4,0>(x,y);
+	  else
+	    for(; n>=4; n-=4,x+=4,y+=4)
+	      helper::swap<4,1>(x,y);
+# endif
+	  for(; n; --n,++x,++y)
+	    helper::swap<1,0>(x,y);
+	}
+	// for(i=0; i!=N; ++i) assignment_functor<float>(x[i], y);
+	template<typename Functor>
+	static void foreach(float*x, const float y, unsigned n) noexcept
+	{
 	  for(; n && (size_t(x)&15); --n,++x)
-	    helper::apply_block<AssignFunc,1>(x,y);
+	    helper::connect<Functor>(x,y);
 	  fvec4 y4(y);
 # ifdef __AVX__
 	  if(n>=4 && (size_t(x)&31)) {
-	    helper::apply_block<AssignFunc,4>(x,y4);
+	    helper::connect<Functor>(x,y4);
 	    n-=4,x+=4;
 	  }
 	  fvec8 y8(y);
 	  for(; n>=8; n-=8,x+=8)
-	    helper::apply_block<AssignFunc,8>(x,y8);
+	    helper::connect<Functor>(x,y8);
 # endif
 	  for(; n>=4; n-=4,x+=4)
-	    helper::apply_block<AssignFunc,4>(x,y4);
+	    helper::connect<Functor>(x,y4);
 	  for(; n; --n,++x)
-	    helper::apply_block<AssignFunc,1>(x,y);
+	    helper::connect<Functor>(x,y);
 	}
       };// struct SSE::details::connector<float>
 #endif// __SSE__
     } // namespace WDutils::SSE::details
     ///
-    /// for(unsigned i=0; i!=n; ++i) AssignFunc::operate(x[i], y[i]);
+    /// connect two arrays element wise:
+    /// @code  for(i=0; i!=n; ++i) Functor::operate(x[i], y[i]); @endcode
     ///
-    template<typename AssignFunc, typename RealType>
-    void connect(RealType*x, const RealType*y, unsigned n) noexcept
-    {
-      details::connector<RealType>::template connect<AssignFunc>(x,y,n);
-    }
+    template<typename Functor, typename RealType>
+    typename enable_if< details::is_functor<Functor>::value &&
+                       !details::is_swap   <Functor>::value>::type
+    connect(RealType*x, const RealType*y, unsigned n) noexcept
+    { details::connector<RealType>::template connect<Functor>(x,y,n); }
     ///
-    /// for(unsigned i=0; i!=n; ++i) AssignFunc::operate(x[i], y);
+    /// swap elements of two arrays:
+    /// @code  for(i=0; i!=n; ++i) swap(x[i], y[i]); @endcode
     ///
-    template<typename AssignFunc, typename RealType>
-    void connect(RealType*x, const RealType y, unsigned n) noexcept
-    {
-      details::connector<RealType>::template connect<AssignFunc>(x,y,n);
-    }
+    template<typename RealType>
+    void swap(RealType*x, RealType*y, unsigned n) noexcept
+    { details::connector<RealType>::swap(x,y,n); }
+    //
+    template<typename Functor, typename RealType>
+    typename enable_if<details::is_swap   <Functor>::value>::type
+    connect(RealType*x, RealType*y, unsigned n) noexcept
+    { swap(x,y,n); }
+    ///
+    /// connect each array element with (the same) scalar:
+    /// @code  for(i=0; i!=n; ++i) Functor::operate(x[i], y); @endcode
+    ///
+    template<typename Functor, typename RealType>
+    typename enable_if< details::is_functor<Functor>::value &&
+                       !details::is_swap   <Functor>::value &&
+                       !details::is_divide <Functor>::value>::type
+    foreach(RealType*x, const RealType y, unsigned n) noexcept
+    { details::connector<RealType>::template foreach<Functor>(x,y,n); }
+    //
+    template<typename Functor, typename RealType>
+    typename enable_if<details::is_divide <Functor>::value>::type
+    foreach(RealType*x, const RealType y, unsigned n) noexcept
+    { foreach<meta::multiply>(x,RealType(1)/y); }
     //
     namespace details {
       // static templated array connection: non-SSE version
       template<typename RealType>
       struct static_connector
       {
-	// unrolled for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y[i]);
-	template<unsigned N, typename AssignFunc>
+	// for(i=0; i!=N; ++i) Functor::operate(x[i], y[i]);
+	template<unsigned N, typename Functor>
 	static typename enable_if<N>::type
 	connect(RealType*x, const RealType*y) noexcept
 	{
-	  AssignFunc::operate(*x,*y);
-	  connect<N-1,AssignFunc>(++x,++y);
+	  Functor::operate(*x,*y);
+	  connect<N-1,Functor>(++x,++y);
 	}
-	template<unsigned N, typename AssignFunc>
+	template<unsigned N, typename Functor>
 	static typename enable_if<N==0>::type
 	always_inline connect(RealType*, const RealType*) noexcept {}
-	// unrolled for(i=0; i!=N; ++i) AssignFunc::operate(x[i], y);
-	template<unsigned N, typename AssignFunc>
+	// for(i=0; i!=N; ++i) swap(x[i], y[i]);
+	template<unsigned N, typename Functor>
 	static typename enable_if<N>::type
-	connect(RealType*x, const RealType y) noexcept
+	swap(RealType*x, RealType*y) noexcept
 	{
-	  AssignFunc::operate(*x,y);
-	  connect<N-1,AssignFunc>(++x,y);
+	  meta::swap::operate(*x,*y);
+	  swap<N-1,Functor>(++x,++y);
 	}
-	template<unsigned N, typename AssignFunc>
+	template<unsigned N, typename Functor>
 	static typename enable_if<N==0>::type
-	always_inline connect(RealType*, RealType) noexcept {}
+	always_inline swap(RealType*, RealType*) noexcept {}
+	// for(i=0; i!=N; ++i) Functor::operate(x[i], y);
+	template<unsigned N, typename Functor>
+	static typename enable_if<N>::type
+	foreach(RealType*x, const RealType y) noexcept
+	{
+	  Functor::operate(*x,y);
+	  foreach<N-1,Functor>(++x,y);
+	}
+	template<unsigned N, typename Functor>
+	static typename enable_if<N==0>::type
+	always_inline foreach(RealType*, RealType) noexcept {}
       };
 #ifdef __SSE2__
       // static templated array connection: SSE version for @c double
       template<>
-      struct static_connector<double> : private connector_helper<double>
+      class static_connector<double> : connector_helper<double>
       {
-	// unrolled for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y[i]);
-	template<unsigned N, typename AssignFunc>
-	static void connect(double*x, const double*y) noexcept
-	{ 
-	  WDutilsAssertE(0==(size_t(x)&7) && 0==(size_t(y)&7));
-	  connect_t<AssignFunc,N,1,0>(x,y);
-	}
-	// unrolled for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y);
-	template<unsigned N, typename AssignFunc>
-	static void connect(double*x, double y) noexcept
-	{
-	  WDutilsAssertE(0==(size_t(x)&7));
-	  apply_t<AssignFunc,N,1>(x,y,dvec2(y)
-# ifdef __AVX__
-				  ,dvec4(y)
-# endif
-				  );
-	}
-      private:
 	typedef connector_helper<double> helper;
 # if __cplusplus >= 201103L
 	//
@@ -2398,38 +2419,38 @@ namespace WDutils {
 #  define block_size(NUM,MAXBLOCK) size_block<NUM,MAXBLOCK>::block
 # endif
 	//
-	template<typename Func, unsigned N, unsigned max_block>
+	template<typename Functor, unsigned N, unsigned max_block>
 	static void always_inline connect_start(double*x, const double*y)
 	  noexcept
 	{
 	  static const unsigned block = block_size(N,max_block);
 	  static const size_t   align = sizeof(double)*block-1;
-	  if(size_t(y)&align) connect_t<Func,N,block,0>(x,y);
-	  else                connect_t<Func,N,block,1>(x,y);
+	  if(size_t(y)&align) connect_t<Functor,N,block,0>(x,y);
+	  else                connect_t<Functor,N,block,1>(x,y);
 	}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==0 && block==1>::type
 	connect_t(double*, const double*) noexcept {}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==1 && block==1>::type
 	connect_t(double*x, const double*y) noexcept
-	{ helper::connect_block<Func,1,0>(x,y); }
+	{ helper::connect<Functor>(x,*y); }
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>1) && block==1>::type
 	connect_t(double*x, const double*y) noexcept
 	{
-	  WDutilsStaticAssert(N>1);
+	  static_assert(N>1,"block size mismatch");
 	  if(size_t(x)&15) {
-	    helper::connect_block<Func,1,0>(x,y);
-	    connect_start<Func,N-1,2>(++x,++y);
+	    helper::connect<Functor>(x,*y);
+	    connect_start<Functor,N-1,2>(++x,++y);
 	  } else
-	    connect_start<Func,N  ,2>(x,y);
+	    connect_start<Functor,N  ,2>(x,y);
 	}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==2
 # ifdef __AVX__
 				  && (N<4)
@@ -2437,110 +2458,219 @@ namespace WDutils {
 	                         >::type
 	connect_t(double*x, const double*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
-	  helper::connect_block<Func,2,y_aligned>(x,y);
-	  connect_t<Func,N-2,block_size(N-2,2),y_aligned>(x+=2,y+=2);
+	  static_assert(N>=block,"block size mismatch");
+	  helper::connect<Functor>(x,dvec2::load_t<y_aligned>(y));
+	  connect_t<Functor,N-2,block_size(N-2,2),y_aligned>(x+=2,y+=2);
 	}
 # ifdef __AVX__
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>=4) && block==2>::type
 	connect_t(double*x, const double*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
+	  static_assert(N>=block,"block size mismatch");
 	  if(size_t(x)&31) {
-	    helper::connect_block<Func,2,y_aligned>(x,y);
-	    connect_start<Func,N-2,4>(x+=2,y+=2);
+	    helper::connect<Functor>(x,dvec2::load_t<y_aligned>(y));
+	    connect_start<Functor,N-2,4>(x+=2,y+=2);
 	  } else
-	    connect_start<Func,N  ,4>(x,y);
+	    connect_start<Functor,N  ,4>(x,y);
 	}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==4>::type
 	connect_t(double*x, const double*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
-	  helper::connect_block<Func,4,y_aligned>(x,y);
-	  connect_t<Func,N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
+	  static_assert(N>=block,"block size mismatch");
+	  helper::connect<Functor>(x,dvec4::load_t<y_aligned>(y));
+	  connect_t<Functor,N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
 	}
 # endif
+      public:
+	// for(i=0; i!=N; ++i) Functor::operator(x[i], y[i]);
+	template<unsigned N, typename Functor>
+	static void connect(double*x, const double*y) noexcept
+	{ connect_t<Functor,N,1,0>(x,y); }
+
+      private:
 	//
-	//
-	template<typename Func, unsigned N, unsigned block>
-	static typename enable_if<N==0 && block==1>::type
-	apply_t(double*, double, dvec2
-# ifdef __AVX__
-		, dvec4
-# endif
-		) noexcept {}
-	//
-	template<typename Func, unsigned N, unsigned block>
-	static typename enable_if<N==1 && block==1>::type
-	apply_t(double*x, const double y, dvec2
-# ifdef __AVX__
-		, dvec4
-# endif
-		) noexcept
-	{ helper::apply_block<Func,1>(x,y); }
-	//
-# ifdef __AVX__
-#  define ARGS_DECL const double y, const dvec2&y2, const dvec4&y4
-#  define ARGS_PASS y, y2, y4
-# else
-#  define ARGS_DECL const double y, const dvec2&y2
-#  define ARGS_PASS y, y2
-# endif
-	//
-	template<typename Func, unsigned N, unsigned block>
-	static typename enable_if<(N>1) && block==1>::type
-	apply_t(double*x, ARGS_DECL) noexcept
+	template<unsigned N, unsigned max_block>
+	static void always_inline swap_start(double*x, double*y)
+	  noexcept
 	{
-	  WDutilsStaticAssert(N>1);
-	  if(size_t(x)&15) {
-	    helper::apply_block<Func,1>(x,y);
-	    apply_t<Func,N-1,block_size(N-1,2)>(++x, ARGS_PASS);
-	  } else
-	    apply_t<Func,N,block_size(N,2)>(x, ARGS_PASS);
+	  static const unsigned block = block_size(N,max_block);
+	  static const size_t   align = sizeof(double)*block-1;
+	  if(size_t(y)&align) swap_t<N,block,0>(x,y);
+	  else                swap_t<N,block,1>(x,y);
 	}
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
+	static typename enable_if<N==0 && block==1>::type
+	swap_t(double*, double*) noexcept {}
+	//
+	template<unsigned N, unsigned block, bool y_aligned>
+	static typename enable_if<N==1 && block==1>::type
+	swap_t(double*x, double*y) noexcept
+	{ helper::swap<1,0>(x,y); }
+	//
+	template<unsigned N, unsigned block, bool y_aligned>
+	static typename enable_if<(N>1) && block==1>::type
+	swap_t(double*x, double*y) noexcept
+	{
+	  static_assert(N>1,"block size mismatch");
+	  if(size_t(x)&15) {
+	    helper::swap<1,0>(x,y);
+	    swap_start<N-1,2>(++x,++y);
+	  } else
+	    swap_start<N  ,2>(x,y);
+	}
+	//
+	template<unsigned N, unsigned block, bool y_aligned>
+	static typename enable_if<block==2
+# ifdef __AVX__
+				  && (N<4)
+# endif
+	                         >::type
+	swap_t(double*x, double*y) noexcept
+	{
+	  static_assert(N>=block,"block size mismatch");
+	  helper::swap<2,y_aligned>(x,y);
+	  swap_t<N-2,block_size(N-2,2),y_aligned>(x+=2,y+=2);
+	}
+# ifdef __AVX__
+	//
+	template<unsigned N, unsigned block, bool y_aligned>
+	static typename enable_if<(N>=4) && block==2>::type
+	swap_t(double*x, double*y) noexcept
+	{
+	  static_assert(N>=block,"block size mismatch");
+	  if(size_t(x)&31) {
+	    helper::swap<2,y_aligned>(x,y);
+	    swap_start<N-2,4>(x+=2,y+=2);
+	  } else
+	    swap_start<N  ,4>(x,y);
+	}
+	//
+	template<unsigned N, unsigned block, bool y_aligned>
+	static typename enable_if<block==4>::type
+	swap_t(double*x, double*y) noexcept
+	{
+	  static_assert(N>=block,"block size mismatch");
+	  helper::swap<4,y_aligned>(x,y);
+	  swap_t<N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
+	}
+# endif
+      public:
+	// for(i=0; i!=N; ++i) swap(x[i], y[i]);
+	template<unsigned N>
+	static void swap(double*x, double*y) noexcept
+	{ swap_t<N,1,0>(x,y); }
+	//
+      private:
+# ifdef __AVX__
+#  define VECS_DECL dvec2, dvec4
+# else
+#  define VECS_DECL dvec2
+# endif
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<N==0 && block==1>::type
+	foreach_t(double*, double, VECS_DECL) noexcept {}
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<N==1 && block==1>::type
+	foreach_t(double*x, const double y, VECS_DECL) noexcept
+	{ helper::connect<Functor>(x,y); }
+	//
+#  undef  VECS_DECL
+# ifdef __AVX__
+#  define VECS_DECL const double y, const dvec2&y2, const dvec4&y4
+#  define VECS_PASS y, y2, y4
+# else
+#  define VECS_DECL const double y, const dvec2&y2
+#  define VECS_PASS y, y2
+# endif
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<(N>1) && block==1>::type
+	foreach_t(double*x, VECS_DECL) noexcept
+	{
+	  static_assert(N>1,"block size mismatch");
+	  if(size_t(x)&15) {
+	    helper::connect<Functor>(x,y);
+	    foreach_t<Functor,N-1,block_size(N-1,2)>(++x, VECS_PASS);
+	  } else
+	    foreach_t<Functor,N,block_size(N,2)>(x, VECS_PASS);
+	}
+	//
+	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<block==2
 # ifdef __AVX__
 				  && (N<4)
 # endif
 			       	   >::type
-	apply_t(double*x, ARGS_DECL) noexcept
+	foreach_t(double*x, VECS_DECL) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
-	  helper::apply_block<Func,2>(x,y2);
-	  apply_t<Func,N-2,block_size(N-2,2)>(x+=2, ARGS_PASS);
+	  static_assert(N>=block,"block size mismatch");
+	  helper::connect<Functor>(x,y2);
+	  foreach_t<Functor,N-2,block_size(N-2,2)>(x+=2, VECS_PASS);
 	}
 # ifdef __AVX__
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<(N>=4) && block==2>::type
-	apply_t(double*x, ARGS_DECL) noexcept
+	foreach_t(double*x, VECS_DECL) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
+	  static_assert(N>=block,"block size mismatch");
 	  if(size_t(x)&31) {
-	    helper::apply_block<Func,2>(x,y2);
-	    apply_t<Func,N-2,block_size(N-2,4)>(x+=2, ARGS_PASS);
+	    helper::connect<Functor>(x,y2);
+	    foreach_t<Functor,N-2,block_size(N-2,4)>(x+=2, VECS_PASS);
 	  } else
-	    apply_t<Func,N,block_size(N,4)>(x, ARGS_PASS);
+	    foreach_t<Functor,N,block_size(N,4)>(x, VECS_PASS);
 	}
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<block==4>::type
-	apply_t(double*x, ARGS_DECL) noexcept
+	foreach_t(double*x, VECS_DECL) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
-	  helper::apply_block<Func,4>(x,y4);
-	  apply_t<Func,N-4,block_size(N-4,4)>(x+=4, ARGS_PASS);
+	  static_assert(N>=block,"block size mismatch");
+	  helper::connect<Functor>(x,y4);
+	  foreach_t<Functor,N-4,block_size(N-4,4)>(x+=4, VECS_PASS);
 	}
 # endif
 # undef block_size
-# undef ARGS_DECL
-# undef ARGS_PASS
+# undef VECS_DECL
+# undef VECS_PASS
+	//
+	template<typename Functor, unsigned N>
+	static typename enable_if<N==0>::type
+	m_foreach(double*, double) noexcept {}
+	//
+	template<typename Functor, unsigned N>
+	static typename enable_if<N==1>::type
+	m_foreach(double*x, const double y) noexcept
+	{ helper::connect<Functor>(x,y); }
+# ifdef __AVX__
+	//
+	template<typename Functor, unsigned N>
+	static typename enable_if<(N>=2 && N<4)>::type
+	m_foreach(double*x, double y) noexcept
+	{ foreach_t<Functor,N,1>(x,y,dvec2(y),dvec4()); }
+	//
+	template<typename Functor, unsigned N>
+	static typename enable_if<(N>=4)>::type
+	m_foreach(double*x, double y) noexcept
+	{ foreach_t<Functor,N,1>(x,y,dvec2(y),dvec4(y)); }
+#else   //
+	template<typename Functor, unsigned N>
+	static typename enable_if<(N>=2)>::type
+	m_foreach(double*x, double y) noexcept
+	{ foreach_t<Functor,N,1>(x,y,dvec2(y)); }
+# endif
+      public:
+	// for(i=0; i!=N; ++i) Functor::operator(x[i], y);
+	template<unsigned N, typename Functor>
+	static void foreach(double*x, double y) noexcept
+	{ m_foreach<Functor,N>(x,y); }
       };// struct SSE::details::static_connector<double>
 #endif // __SSE2__
 #ifdef __SSE__
@@ -2548,25 +2678,6 @@ namespace WDutils {
       template<>
       struct static_connector<float> : private connector_helper<float>
       {
-	/// unrolled for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y[i]);
-	template<unsigned N, typename AssignFunc>
-	static void connect(float*x, const float*y) noexcept
-	{ 
-	  WDutilsAssertE(0==(size_t(x)&3) && 0==(size_t(y)&3));
-	  connect_t<AssignFunc,N,1,0>(x,y);
-	}
-	/// unrolled for(i=0; i!=N; ++i) AssignFunc::operator(x[i], y);
-	template<unsigned N, typename AssignFunc>
-	static void connect(float*x, float y) noexcept
-	{ 
-	  WDutilsAssertE(0==(size_t(x)&3));
-	  apply_t<AssignFunc,N,1>(x,y,fvec4(y)
-# ifdef __AVX__
-				  ,fvec8(y)
-# endif
-				  );
-	}
-      private:
 	typedef connector_helper<float> helper;
 # if __cplusplus >= 201103L
 	//
@@ -2589,68 +2700,68 @@ namespace WDutils {
 #  define block_size(NUM,MAXBLOCK) size_block<NUM,MAXBLOCK>::block
 # endif
 	//
-	template<typename Func, unsigned N, unsigned max_block>
+	template<typename Functor, unsigned N, unsigned max_block>
 	static void always_inline connect_start(float*x, const float*y) noexcept
 	{
 	  static const unsigned block = block_size(N,max_block);
 	  static const size_t   align = sizeof(float)*block-1;
-	  if(size_t(y)&align) connect_t<Func,N,block,0>(x,y);
-	  else                connect_t<Func,N,block,1>(x,y);
+	  if(size_t(y)&align) connect_t<Functor,N,block,0>(x,y);
+	  else                connect_t<Functor,N,block,1>(x,y);
 	}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==0 && block==1>::type
 	connect_t(float*, const float*) noexcept {}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==1 && block==1>::type
 	connect_t(float*x, const float*y) noexcept
-	{ helper::connect_block<Func,1,y_aligned>(x,y); }
+	{ helper::connect<Functor>(x,*y); }
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==2 && block==1>::type
 	connect_t(float*x, const float*y) noexcept
 	{
-	  helper::connect_block<Func,1,y_aligned>(x++,y++);
-	  helper::connect_block<Func,1,y_aligned>(x  ,y  );
+	  helper::connect<Functor>(x++,*y++);
+	  helper::connect<Functor>(x  ,*y  );
 	}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==3 && block==1>::type
 	connect_t(float*x, const float*y) noexcept
 	{
-	  helper::connect_block<Func,1,y_aligned>(x++,y++);
-	  helper::connect_block<Func,1,y_aligned>(x++,y++);
-	  helper::connect_block<Func,1,y_aligned>(x  ,y  );
+	  helper::connect<Functor>(x++,*y++);
+	  helper::connect<Functor>(x++,*y++);
+	  helper::connect<Functor>(x  ,*y  );
 	}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>3) && block==1>::type
 	connect_t(float*x, const float*y) noexcept
 	{
-	  WDutilsStaticAssert(N>3);
+	  static_assert(N>3,"block size mismatch");
 	  switch((size_t(x)&15)) {
 	  case 12:
-	    helper::connect_block<Func,1,y_aligned>(x++,y++);
-	    connect_start<Func,N-1,4>(x,y);
+	    helper::connect<Functor>(x++,*y++);
+	    connect_start<Functor,N-1,4>(x,y);
 	    break;
 	  case 8:
-	    helper::connect_block<Func,1,y_aligned>(x++,y++);
-	    helper::connect_block<Func,1,y_aligned>(x++,y++);
-	    connect_start<Func,N-2,4>(x,y);
+	    helper::connect<Functor>(x++,*y++);
+	    helper::connect<Functor>(x++,*y++);
+	    connect_start<Functor,N-2,4>(x,y);
 	    break;
 	  case 4:
-	    helper::connect_block<Func,1,y_aligned>(x++,y++);
-	    helper::connect_block<Func,1,y_aligned>(x++,y++);
-	    helper::connect_block<Func,1,y_aligned>(x++,y++);
-	    connect_start<Func,N-3,4>(x,y);
+	    helper::connect<Functor>(x++,*y++);
+	    helper::connect<Functor>(x++,*y++);
+	    helper::connect<Functor>(x++,*y++);
+	    connect_start<Functor,N-3,4>(x,y);
 	    break;
 	  default:
-	    connect_start<Func,N  ,4>(x,y);
+	    connect_start<Functor,N  ,4>(x,y);
 	  }
 	}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==4
 # ifdef __AVX__
 				  && (N<8)
@@ -2658,169 +2769,334 @@ namespace WDutils {
 			       	   >::type
 	connect_t(float*x, const float*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
-	  helper::connect_block<Func,4,y_aligned>(x,y);
-	  connect_t<Func,N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
+	  static_assert(N>=block,"block size mismatch");
+	  helper::connect<Functor>(x,fvec4::load_t<y_aligned>(y));
+	  connect_t<Functor,N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
 	}
 # ifdef __AVX__
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>=8) && block==4>::type
 	connect_t(float*x, const float*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
+	  static_assert(N>=block,"block size mismatch");
 	  if(size_t(x)&31) {
-	    helper::connect_block<Func,4,y_aligned>(x,y);
-	    connect_start<Func,N-4,8>(x+=4,y+=4);
+	    helper::connect<Functor>(x,fvec4::load_t<y_aligned>(y));
+	    connect_start<Functor,N-4,8>(x+=4,y+=4);
 	  } else
-	    connect_start<Func,N  ,8>(x,y);
+	    connect_start<Functor,N  ,8>(x,y);
 	}
 	//
-	template<typename Func, unsigned N, unsigned block, bool y_aligned>
+	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==8>::type
 	connect_t(float*x, const float*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
-	  helper::connect_block<Func,8,y_aligned>(x,y);
-	  connect_t<Func,N-8,block_size(N-8,8),y_aligned>(x+=8,y+=8);
+	  static_assert(N>=block,"block size mismatch");
+	  helper::connect<Functor>(x,fvec8::load_t<y_aligned>(y));
+	  connect_t<Functor,N-8,block_size(N-8,8),y_aligned>(x+=8,y+=8);
 	}
 # endif
+      public:
+	/// unrolled for(i=0; i!=N; ++i) Functor::operator(x[i], y[i]);
+	template<unsigned N, typename Functor>
+	static void connect(float*x, const float*y) noexcept
+	{ connect_t<Functor,N,1,0>(x,y); }
+      private:
 	//
+	template<unsigned N, unsigned max_block>
+	static void always_inline swap_start(float*x, float*y) noexcept
+	{
+	  static const unsigned block = block_size(N,max_block);
+	  static const size_t   align = sizeof(float)*block-1;
+	  if(size_t(y)&align) swap_t<N,block,0>(x,y);
+	  else                swap_t<N,block,1>(x,y);
+	}
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==0 && block==1>::type
-	apply_t(float*, float, fvec4
-# ifdef __AVX__
-		, fvec8
-# endif
-		) noexcept {}
+	swap_t(float*, float*) noexcept {}
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==1 && block==1>::type
-	apply_t(float*x, const float y, fvec4
-# ifdef __AVX__
-		, fvec8
-# endif
-		) noexcept
-	{ helper::apply_block<Func,1>(x,y); }
+	swap_t(float*x, float*y) noexcept
+	{ helper::swap<1,0>(x,y); }
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==2 && block==1>::type
-	apply_t(float*x, const float y, fvec4
-# ifdef __AVX__
-		, fvec8
-# endif
-		) noexcept
+	swap_t(float*x, float*y) noexcept
 	{
-	  helper::apply_block<Func,1>(x++,y);
-	  helper::apply_block<Func,1>(x  ,y);
+	  helper::swap<1,0>(x++,y++);
+	  helper::swap<1,0>(x  ,y  );
 	}
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<N==3 && block==1>::type
-	apply_t(float*x, const float y, fvec4
-# ifdef __AVX__
-		, fvec8
-# endif
-		) noexcept
+	swap_t(float*x, float*y) noexcept
 	{
-	  helper::apply_block<Func,1>(x++,y);
-	  helper::apply_block<Func,1>(x++,y);
-	  helper::apply_block<Func,1>(x  ,y);
+	  helper::swap<1,0>(x++,y++);
+	  helper::swap<1,0>(x++,y++);
+	  helper::swap<1,0>(x  ,y  );
 	}
 	//
-# ifdef __AVX__
-#  define ARGS_DECL const float y, const fvec4&y4, const fvec8&y8
-#  define ARGS_PASS y, y4, y8
-# else
-#  define ARGS_DECL const float y, const fvec4&y4
-#  define ARGS_PASS y, y4
-# endif
-	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>3) && block==1>::type
-	apply_t(float*x, ARGS_DECL) noexcept
+	swap_t(float*x, float*y) noexcept
 	{
-	  WDutilsStaticAssert(N>3);
+	  static_assert(N>=4,"block size mismatch");
 	  switch((size_t(x)&15)) {
 	  case 12:
-	    helper::apply_block<Func,1>(x++,y);
-	    apply_t<Func,N-1,block_size(N-1,4)>(x, ARGS_PASS);
+	    helper::swap<1,0>(x++,y++);
+	    swap_start<N-1,4>(x,y);
 	    break;
 	  case 8:
-	    helper::apply_block<Func,1>(x++,y);
-	    helper::apply_block<Func,1>(x++,y);
-	    apply_t<Func,N-2,block_size(N-2,4)>(x, ARGS_PASS);
+	    helper::swap<1,0>(x++,y++);
+	    helper::swap<1,0>(x++,y++);
+	    swap_start<N-2,4>(x,y);
 	    break;
 	  case 4:
-	    helper::apply_block<Func,1>(x++,y);
-	    helper::apply_block<Func,1>(x++,y);
-	    helper::apply_block<Func,1>(x++,y);
-	    apply_t<Func,N-3,block_size(N-3,4)>(x, ARGS_PASS);
+	    helper::swap<1,0>(x++,y++);
+	    helper::swap<1,0>(x++,y++);
+	    helper::swap<1,0>(x++,y++);
+	    swap_start<N-3,4>(x,y);
 	    break;
 	  default:
-	    apply_t<Func,N  ,block_size(N  ,4)>(x, ARGS_PASS);
+	    swap_start<N  ,4>(x,y);
 	  }
 	}
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==4
 # ifdef __AVX__
 				  && (N<8)
 # endif
 			       	   >::type
-	apply_t(float*x, ARGS_DECL) noexcept
+	swap_t(float*x, float*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
-	  helper::apply_block<Func,4>(x,y4);
-	  apply_t<Func,N-4,block_size(N-4,4)>(x+=4, ARGS_PASS);
+	  static_assert(N>=block,"block size mismatch");
+	  helper::swap<4,y_aligned>(x,y);
+	  swap_t<N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
 	}
 # ifdef __AVX__
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>=8) && block==4>::type
-	apply_t(float*x, ARGS_DECL) noexcept
+	swap_t(float*x, float*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
+	  static_assert(N>=block,"block size mismatch");
 	  if(size_t(x)&31) {
-	    helper::apply_block<Func,4>(x,y4);
-	    apply_t<Func,N-4,block_size(N-4,8)>(x+=4, ARGS_PASS);
+	    helper::swap<4,y_aligned>(x,y);
+	    swap_start<N-4,8>(x+=4,y+=4);
 	  } else
-	    apply_t<Func,N,  block_size(N,  8)>(x   , ARGS_PASS);
+	    swap_start<N  ,8>(x,y);
 	}
 	//
-	template<typename Func, unsigned N, unsigned block>
+	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==8>::type
-	apply_t(float*x, ARGS_DECL) noexcept
+	swap_t(float*x, float*y) noexcept
 	{
-	  WDutilsStaticAssert(N>=block);
-	  helper::apply_block<Func,8>(x,y8);
-	  apply_t<Func,N-8,block_size(N-8,8)>(x+=8, ARGS_PASS);
+	  helper::swap<8,y_aligned>(x,y);
+	  swap_t<N-8,block_size(N-8,8),y_aligned>(x+=8,y+=8);
+	}
+# endif
+      public:
+	/// unrolled for(i=0; i!=N; ++i) swap(x[i], y[i]);
+	template<unsigned N>
+	static void swap(float*x, float*y) noexcept
+	{ swap_t<N,1,0>(x,y); }
+	//
+      private:
+# ifdef __AVX__
+#  define VECS_DECL fvec4, fvec8
+# else
+#  define VECS_DECL fvec4
+# endif
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<N==0 && block==1>::type
+	foreach_t(float*, float, VECS_DECL) noexcept {}
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<N==1 && block==1>::type
+	foreach_t(float*x, const float y, VECS_DECL) noexcept
+	{ helper::connect<Functor>(x,y); }
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<N==2 && block==1>::type
+	foreach_t(float*x, const float y, VECS_DECL) noexcept
+	{
+	  helper::connect<Functor>(x++,y);
+	  helper::connect<Functor>(x  ,y);
+	}
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<N==3 && block==1>::type
+	foreach_t(float*x, const float y, VECS_DECL) noexcept
+	{
+	  helper::connect<Functor>(x++,y);
+	  helper::connect<Functor>(x++,y);
+	  helper::connect<Functor>(x  ,y);
+	}
+	//
+#  undef  VECS_DECL
+# ifdef __AVX__
+#  define VECS_DECL const float y, const fvec4&y4, const fvec8&y8
+#  define VECS_PASS y, y4, y8
+# else
+#  define VECS_DECL const float y, const fvec4&y4
+#  define VECS_PASS y, y4
+# endif
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<(N>3) && block==1>::type
+	foreach_t(float*x, VECS_DECL) noexcept
+	{
+	  static_assert(N>=4,"block size mismatch");
+	  switch((size_t(x)&15)) {
+	  case 12:
+	    helper::connect<Functor>(x++,y);
+	    foreach_t<Functor,N-1,block_size(N-1,4)>(x, VECS_PASS);
+	    break;
+	  case 8:
+	    helper::connect<Functor>(x++,y);
+	    helper::connect<Functor>(x++,y);
+	    foreach_t<Functor,N-2,block_size(N-2,4)>(x, VECS_PASS);
+	    break;
+	  case 4:
+	    helper::connect<Functor>(x++,y);
+	    helper::connect<Functor>(x++,y);
+	    helper::connect<Functor>(x++,y);
+	    foreach_t<Functor,N-3,block_size(N-3,4)>(x, VECS_PASS);
+	    break;
+	  default:
+	    foreach_t<Functor,N  ,block_size(N  ,4)>(x, VECS_PASS);
+	  }
+	}
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<block==4
+# ifdef __AVX__
+				  && (N<8)
+# endif
+			       	   >::type
+	foreach_t(float*x, VECS_DECL) noexcept
+	{
+	  static_assert(N>=block,"block size mismatch");
+	  helper::connect<Functor>(x,y4);
+	  foreach_t<Functor,N-4,block_size(N-4,4)>(x+=4, VECS_PASS);
+	}
+# ifdef __AVX__
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<(N>=8) && block==4>::type
+	foreach_t(float*x, VECS_DECL) noexcept
+	{
+	  static_assert(N>=block,"block size mismatch");
+	  if(size_t(x)&31) {
+	    helper::connect<Functor>(x,y4);
+	    foreach_t<Functor,N-4,block_size(N-4,8)>(x+=4, VECS_PASS);
+	  } else
+	    foreach_t<Functor,N,  block_size(N,  8)>(x   , VECS_PASS);
+	}
+	//
+	template<typename Functor, unsigned N, unsigned block>
+	static typename enable_if<block==8>::type
+	foreach_t(float*x, VECS_DECL) noexcept
+	{
+	  static_assert(N>=block,"block size mismatch");
+	  helper::connect<Functor>(x,y8);
+	  foreach_t<Functor,N-8,block_size(N-8,8)>(x+=8, VECS_PASS);
 	}
 # endif
 # undef block_size
-# undef ARGS_DECL
-# undef ARGS_PASS
+# undef VECS_DECL
+# undef VECS_PASS
+	//
+	template<typename Functor, unsigned N>
+	static typename enable_if<N==0>::type
+	m_foreach(float*, float) noexcept {}
+	//
+	template<typename Functor, unsigned N>
+	static typename enable_if<N==1>::type
+	m_foreach(float*x, const float y) noexcept
+	{ helper::connect<Functor>(x,y); }
+	//
+	template<typename Functor, unsigned N>
+	static typename enable_if<N==2>::type
+	m_foreach(float*x, const float y) noexcept
+	{
+	  helper::connect<Functor>(x++,y);
+	  helper::connect<Functor>(x  ,y);
+	}
+	//
+	template<typename Functor, unsigned N>
+	static typename enable_if<N==3>::type
+	m_foreach(float*x, const float y) noexcept
+	{
+	  helper::connect<Functor>(x++,y);
+	  helper::connect<Functor>(x++,y);
+	  helper::connect<Functor>(x  ,y);
+	}
+	//
+# ifdef __AVX__
+	template<unsigned N, typename Functor>
+	static typename enable_if<(N>=4 && N<8)>::type
+	m_foreach(float*x, float y) noexcept
+	{ foreach_t<Functor,N,1>(x,y,fvec4(y),fvec8()); }
+	//
+	template<unsigned N, typename Functor>
+	static typename enable_if<(N>=8)>::type
+	m_foreach(float*x, float y) noexcept
+	{ foreach_t<Functor,N,1>(x,y,fvec4(y),fvec8(y)); }
+# else  //
+	template<unsigned N, typename Functor>
+	static typename enable_if<(N>=4)>::type
+	m_foreach(float*x, float y) noexcept
+	{ foreach_t<Functor,N,1>(x,y,fvec4(y)); }
+# endif
+      public:
+	/// unrolled for(i=0; i!=N; ++i) Functor::operator(x[i], y);
+	template<unsigned N, typename Functor>
+	static void foreach(float*x, float y) noexcept
+	{ m_foreach<N,Functor>(x,y); }
       };// struct SSE::details::static_connector<float>
 #endif // __SSE__
     } // namespace WDutils::SSE::details
-    ////////////////////////////////////////////////////////////////////////////
     ///
-    /// for(unsigned i=0; i!=n; ++i) AssignFunc::operate(x[i], y[i]);
+    /// connect two arrays element wise:
+    /// @code  for(i=0; i!=n; ++i) Functor::operate(x[i], y[i]); @endcode
     ///
-    template<typename AssignFunc, unsigned N, typename RealType>
-    void static_connect(RealType*x, const RealType*y) noexcept
-    {
-      details::static_connector<RealType>::template connect<N,AssignFunc>(x,y);
-    }
+    template<typename Functor, unsigned N, typename RealType>
+    typename enable_if< details::is_functor<Functor>::value &&
+                       !details::is_swap   <Functor>::value>::type
+    static_connect(RealType*x, const RealType*y) noexcept
+    { details::static_connector<RealType>::template connect<N,Functor>(x,y); }
     ///
-    /// for(unsigned i=0; i!=n; ++i) AssignFunc::operate(x[i], y);
+    /// swap elements of two arrays:
+    /// @code  for(i=0; i!=n; ++i) swap(x[i], y[i]); @endcode
     ///
-    template<typename AssignFunc, unsigned N, typename RealType>
-    void static_connect(RealType*x, const RealType y) noexcept
-    {
-      details::static_connector<RealType>::template connect<N,AssignFunc>(x,y);
-    }
+    template<unsigned N, typename RealType>
+    void static_swap(RealType*x, RealType*y) noexcept
+    { details::static_connector<RealType>::template swap<N>(x,y); }
+    //
+    template<typename Functor, unsigned N, typename RealType>
+    typename enable_if<details::is_swap   <Functor>::value>::type
+    static_connect(RealType*x, RealType*y) noexcept
+    { static_swap<N>(x,y); }
+    ///
+    /// connect each array element with (the same) scalar:
+    /// @code  for(i=0; i!=n; ++i) Functor::operate(x[i], y); @endcode
+    ///
+    template<typename Functor, unsigned N, typename RealType>
+    typename enable_if< details::is_functor<Functor>::value &&
+                       !details::is_swap   <Functor>::value &&
+                       !details::is_divide <Functor>::value>::type
+    static_foreach(RealType*x, const RealType y) noexcept
+    { details::static_connector<RealType>::template foreach<N,Functor>(x,y); }
+    //
+    template<typename Functor, unsigned N, typename RealType>
+    typename enable_if<details::is_divide <Functor>::value>::type
+    static_foreach(RealType*x, const RealType y) noexcept
+    { static_foreach<N,meta::multiply>(x,RealType(1)/y); }
     //
     //
     //
