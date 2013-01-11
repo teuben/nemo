@@ -1,6 +1,7 @@
 #! /bin/csh -f
 #
 # a quick hack   - May 2010
+# some changed dir structure   - Jan 2013
 #
 # g77:        -lfrtbegin -lg2c
 # gfortran:   -lgfortran
@@ -13,7 +14,7 @@ set args=""
 
 if (-e $dir) then
   cd $dir/build
-  cmake .
+  cmake ..
   make
   make install 
 else
