@@ -1,12 +1,16 @@
 #! /bin/csh -f
 #
-# a quick hack   - June 2009
+# a quick hack       - June 2009
+# added cmake option -  Jan 2012
 # 
 # ubuntu12 :    qt4-qmake libqt4-dev
 # fedora17:     qt-devel   
+#
+# @todo:   did not clean up e.g. glnemo2/utils/lib/unix/debug/libutils.a
 
 set dir=$NEMO/usr/jcl/glnemo2
 set sys=`uname -s`
+set cmake=1
 
 # for linux
 set args=""
@@ -20,20 +24,28 @@ endif
 # for some implementations it may be called 'qmake'
 set qmake=qmake-qt4
 
-
 if (-e $dir) then
-  cd $dir
-  $qmake -recursive $args
-  if ($status) then
-    echo "It appears as if the Qt library , or at least the development"
-    echo "package, has not been installed on your system."
-    exit 1
+  if ($cmake) then
+    echo "WARNING: using new experimental CMAKE install"
+    cd $dir/build
+    if (-e Makefile) make clean
+    cmake .
+    make
+    make install
+  else
+    cd $dir
+    $qmake -recursive $args
+      if ($status) then
+      echo "It appears as if the Qt library , or at least the development"
+      echo "package, has not been installed on your system."
+      exit 1
+    endif
+    make
+    # hopefully only 1 subdir in bin
+    # pre leiden release:   cp bin/*/glnemo2.debug $NEMOBIN/glnemo2
+    make install
   endif
-  make
-  # hopefully only 1 subdir in bin
-  # pre leiden release:   cp bin/*/glnemo2.debug $NEMOBIN/glnemo2
-  make install
 else
-  echo mknemo.d: $dir does not exist
+    echo mknemo.d: $dir does not exist
 endif
 
