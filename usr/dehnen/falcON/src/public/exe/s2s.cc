@@ -40,8 +40,8 @@
 // v 2.0.1 22/06/2011  WD check for snapshot first
 // v 2.1   04/12/2012  WD added rotaxis and rotangle
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.0.1"
-#define falcON_VERSION_D "22-jun-2011 Walter Dehnen                          "
+#define falcON_VERSION   "2.1"
+#define falcON_VERSION_D "04-dec-2012 Walter Dehnen                          "
 //
 #ifndef falcON_NEMO                                // this is a NEMO program
 #  error You need NEMO to compile "s2s"

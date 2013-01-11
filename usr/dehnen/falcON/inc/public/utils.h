@@ -73,6 +73,14 @@ namespace falcON {
   using WDutils::snprintf;
   using WDutils::isnan;
   using WDutils::isinf;
+  using WDutils::int8_t;
+  using WDutils::int16_t;
+  using WDutils::int32_t;
+  using WDutils::int64_t;
+  using WDutils::uint8_t;
+  using WDutils::uint16_t;
+  using WDutils::uint32_t;
+  using WDutils::uint64_t;
   namespace meta {
     using namespace WDutils::meta;
   }

@@ -44,7 +44,6 @@ WDMath_h		:= $(IUTI)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 geometry_h		:= $(IUTI)geometry.h $(sse_h) $(tupel_h) \
 				$(IUTI)geometry_inl.h
 periodic_h		:= $(IUTI)periodic.h $(geometry_h)
-peano_h			:= $(IUTI)peano.h $(traits_h)
 octtree_h		:= $(IUTI)octtree.h $(periodic_h) $(memory_h) $(io_h)
 matr33_h		:= $(IUTI)matr33.h $(exception_h) $(inline_h)
 
@@ -71,7 +70,7 @@ kernel_SSE_h		:= $(IPRO)kernel_SSE.h
 endif
 body_h			:= $(INC)body.h $(fields_h)
 externacc_h		:= $(INC)externacc.h $(body_h)
-tree_h			:= $(IPUB)tree.h $(default_h) $(body_h) $(peano_h)
+tree_h			:= $(IPUB)tree.h $(default_h) $(body_h)
 partner_h		:= $(IPUB)partner.h $(tree_h)
 gravity_h		:= $(IPUB)gravity.h $(tree_h) $(tensor_set_h)
 kernel_h		:= $(IPUB)kernel.h $(gravity_h) $(simd_h)

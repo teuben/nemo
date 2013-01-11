@@ -52,6 +52,9 @@
 #  include <cmath>
 #  define WDutils_included_cmath
 #endif
+#ifndef WDutils_included_inline_h
+#  include <inline.h>
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
 namespace meta {

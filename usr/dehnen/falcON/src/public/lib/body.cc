@@ -1721,6 +1721,8 @@ void snapshot::write_nemo(nemo_out const&o,        // I: nemo output
 #ifdef falcON_REAL_IS_FLOAT
 
 namespace {
+  using WDutils::uint32_t;
+  using WDutils::uint64_t;
   //                                                                            
   /// structure modelled after gadget/allvars.h                                 
   //                                                                            

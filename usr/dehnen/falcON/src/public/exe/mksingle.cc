@@ -32,9 +32,10 @@
 // history:
 //
 // v 0.0    28/03/2011  WD  created
+// v 0.1    17/12/2012  WD  added keyword "eps"
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "0.0"
-#define falcON_VERSION_D "28-mar-2011 Walter Dehnen                          "
+#define falcON_VERSION   "0.1"
+#define falcON_VERSION_D "17-dec-2012 Walter Dehnen                          "
 //
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mksingle
@@ -48,6 +49,7 @@ const char*defv[] = {
   "m=???\n            mass of particle                                   ",
   "pos=0,0,0\n        position of particle                               ",
   "vel=0,0,0\n        velocity of particle                               ",
+  "eps=\n             softening length of particle                       ",
   "sink=t\n           sink (or std) particle?                            ",
   falcON_DEFV, NULL };
 //
@@ -62,6 +64,13 @@ void falcON::main() falcON_THROWING
   b.mass() = getrparam("m");
   b.pos () = getvrparam("pos");
   b.vel () = getvrparam("vel");
+  if(hasvalue("eps")) {
+    if(getrparam("eps")>=zero) {
+      shot.add_field(fieldbit::e);
+      b.eps() = getrparam("eps");
+    } else
+      falcON_Warning("ignoring eps=%g < 0\n",getrparam("eps"));
+  }
   nemo_out out(getparam("out"));
   shot.write_nemo(out);
 }
