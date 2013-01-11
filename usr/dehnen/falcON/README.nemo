@@ -9,6 +9,12 @@ Differences from Dehnen's distribution:
 2) when you build within nemo,use the -i flag to pass over problems,
    and make sure CXX=$CXX is compatible with the one in $NEMOLIB/makedefs
 
+3) If shared library usage of NEMO gives linking problems try one of these:
+    LNEMO := -L$(NEMOLIB) -lnemo -ldl
+    LNEMO := -L$(NEMOLIB) -Wl,--no-as-needed  -lnemo -ldl -Wl,-as-needed
+    LNEMO := $(NEMOLIB)/libnemo.a -ldl 
+   The last example was needed on Ubuntu 12.04 (DSO linking), fix this in
+   the makedefs file. 
 
 Also check the following files used to aid installing falcON tools:
 	Makefile.nemo
