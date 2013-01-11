@@ -160,7 +160,11 @@ WDutils::RunInfo::RunInfo()
 #endif
 }
 //
-void WDutils::RunInfo::set_omp(const char*arg)
+void WDutils::RunInfo::set_omp(const char*
+#ifdef _OPENMP
+			       arg
+#endif
+    )
 {
 #ifdef _OPENMP
   if(arg==0 || arg[0]==0 || arg[0]=='t')
@@ -184,7 +188,11 @@ void WDutils::RunInfo::set_omp(const char*arg)
 #endif
 }
 //
-void WDutils::RunInfo::set_omp(int n)
+void WDutils::RunInfo::set_omp(int 
+#ifdef _OPENMP
+			       n
+#endif
+    )
 {
 #ifdef _OPENMP
   Info.__omp_size = n;

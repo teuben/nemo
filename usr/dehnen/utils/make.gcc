@@ -34,7 +34,7 @@ endif
 #endif
 # general optimisation and warning flags
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
-		-ggdb3 $(WARNING) -O2 -fPIC -fopenmp -funroll-loops \
+		-ggdb3 $(WARNING) -O2 -fPIC -funroll-loops \
 		-fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 # these are actually to be set
@@ -52,6 +52,7 @@ CXXFLAGS	:= $(OPTFLAGS)
 endif
 
 ifdef OPENMP
+OPTFLAGS	+= -fopenmp
 LDFLAGS		:= -shared -fopenmp $(PROFLAGS)
 else
 LDFLAGS		:= -shared $(PROFLAGS)

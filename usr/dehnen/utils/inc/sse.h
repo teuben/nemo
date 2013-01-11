@@ -39,10 +39,30 @@
 #endif
 
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-// with GCC use x86intrin.h
+// with GCC 4.4 use x86intrin.h
+# if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
 extern "C" {
 #  include <x86intrin.h>
 }
+# else
+extern "C" {
+#  ifdef __SSE__
+#  include <xmmintrin.h>
+#  endif
+#  ifdef __SSE2__
+#  include <emmintrin.h>
+#  endif
+#  if defined (__SSE4_2__) || defined (__SSE4_1__)
+#  include <smmintrin.h>
+#  endif
+#  ifdef __AVX__
+#  include <avxintrin.h>
+#  endif
+#  ifdef __AVX2__
+#  include <avx2intrin.h>
+#  endif
+}
+# endif
 #elif defined(__SSE__)
 // use individual headers for intrinsics
 
@@ -1346,7 +1366,7 @@ namespace WDutils {
 	return packed(_mm_blendv_pd(y._m,x._m,sign._m));
 #  else
 	// perhapd there is a better way using move and movemask?
-        __m128 mask = _mm_cmplt_pd(sign._m,_mm_setzero_pd());
+        __m128d mask = _mm_cmplt_pd(sign._m,_mm_setzero_pd());
         return packed(_mm_or_pd(_mm_and_pd(mask,x._m),
 				_mm_andnot_pd(mask,y._m)));
 #  endif
