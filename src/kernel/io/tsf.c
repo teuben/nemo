@@ -21,6 +21,7 @@
  * V3.1a  pjt 25-nov-03         fix minor (but fatal) xml syntax error
  * V3.1e  pjt 10-aug-09         fix bug handled items > 2GB
  * V3.2   wd  08-sep-11         margin automatic adapts to terminal width
+ *                              NOTE:  in a pipe or redirect this is not correct
  *
  */
 
@@ -47,7 +48,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSION=3.1e\n		  10-aug-09 PJT ",
+    "VERSION=3.1f\n		  16-jan-2012 PJT ",
     NULL,
 };
 
@@ -75,7 +76,7 @@ bool   outstr       (string);
 void   end_line     (void);
 void   change_indent(int);
 
-#define BUFLEN   256
+#define BUFLEN   512
 
 
 void nemo_main()
@@ -89,12 +90,21 @@ void nemo_main()
     indent = getiparam("indent");
 #ifdef unix
     if(!hasvalue("margin")) {
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	margin = w.ws_col;
-    } else
-#endif
+      struct winsize w;
+      ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+      margin = w.ws_col;
+    } else {
+      margin = getiparam("margin");
+    }
+    if (margin<1) {
+      warning("awfully small margin=%d",margin);
+      margin=72;
+    }
+    if (margin>BUFLEN) error("BUFLEN might be too small");
+    dprintf(2,"margin=%d\n",margin);
+#else
     margin = getiparam("margin");
+#endif
     allline = getbparam("allline");
     if (hasvalue("item")) warning("item= is broken");
     testtag = getparam("item");
@@ -213,7 +223,7 @@ void print_data(string tag, string type, int *dims)
 
     fmt = find_fmt(type);
     dlen = get_dlen(instr, tag);
-    dat = (byte*) allocate(dlen);
+    dat = (byte*) allocate(dlen+1);
     get_data_sub(instr, tag, type, dat, dims, FALSE);
     if (streq(type, CharType) && Qprint)
 	(void) outstr(dims != NULL ? "\"" : "\'");
