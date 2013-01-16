@@ -1,0 +1,16 @@
+These are tools maintained by Jean-Charles Lambert. We try to
+maintain the latest/stable versions here, but if you need to
+patch/experiment with something more recent, here are the 
+recipes:
+
+
+unsio:   (see also: http://projets.oamp.fr/projects/unsio/)
+    mv unsio unsio_cvs
+    svn co http://svn.oamp.fr/repos/unsio/trunk unsio
+    mknemo unsio
+
+glnemo2: (see also: http://projets.oamp.fr/projects/glnemo2)
+    mv glnemo2 glnemo2_cvs
+    svn co http://svn.oamp.fr/repos/glnemo2/trunk glnemo2
+    mknemo glnemo2
+
