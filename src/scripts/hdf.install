@@ -11,10 +11,8 @@
 if ($?NEMO == 0) set NEMO=`pwd`
 
 #			 	.. command line keywords ..
-set HDF=HDF-4.2.8
 set hdf=hdf-4.2.8
 set src=$NEMO/local/$hdf
-set SRC=$NEMO/local/$HDF
 
 set prefix=$NEMO
 
@@ -27,7 +25,7 @@ foreach arg ($*)
    set $arg
 end
 
-if (! -e $SRC) then
+if (! -e $src) then
   echo HDF source directory src=$src does not exist, try NEMO=
   echo or:
   echo " cd $NEMO/local"
