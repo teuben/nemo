@@ -43,6 +43,8 @@ in particular its optimization options.
 Machine        	      & cpu-sec/step & code        & comments \\ 
 &&& \\ \hline
 
+i70-870 @ 2.93 GHz	     & 0.00030 & hackcode1 & 2010 desktop \\
+core 2 duo @ 2.0 GHz	     & 0.0012 & hackcode1 & 2007 laptop \\
 Dec-alpha		     & 0.0042 & hackcode1 & -O4 -fast \\
 Dec-alpha		     & 0.0048 & hackcode1 & default \\
 CRAY X/YMP48                 & 0.0060 & TREECODE V3 & estimate (1989) \\
