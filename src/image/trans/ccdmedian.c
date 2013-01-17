@@ -7,6 +7,7 @@
  *       1-nov-04       PJT     experiment to cf. to python kpno_soft/imsubtract.py
  *       2-nov-04       PJT     added nstep= cheat mode for ShiPing Lai
  *      14-jul-11       PJT     0.6 fixed edge problem
+ *       7-aug-12       PJT     0.7 optional median method
  *                      
  */
 
@@ -26,7 +27,8 @@ string defv[] = {
 	"nstep=1\n      Cheat mode: replicate each nstep pixels",
 	"fraction=0.5\n Fraction of positive image values in subtract mode",
 	"mode=median\n  Mode: median, subtract",
-	"VERSION=0.6\n  14-jul-11 PJT",
+	"torben=f\n     Median method",
+	"VERSION=0.7\n  9-aug-2012 PJT",
 	NULL,
 };
 
@@ -52,6 +54,8 @@ void sort1(int, real *);
 void sort2(int, real *);
 void sort3(int, real *);
 void sort4(int, real *);
+
+extern real median_torben(int n, real *x, real xmin, real xmax);
 
 #define sort sort0
 
