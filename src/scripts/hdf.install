@@ -6,6 +6,7 @@
 #  16-dec-04    checked for HDF4.2r0.tar.gz
 #  11-mar-07    fixed for new hdfgroup location and their new naming convention
 #  28-sep-09    updated version and added hint for symlink
+#  17-jan-12    fixed for new naming convention (no more upper lower case)
 # 
 
 if ($?NEMO == 0) set NEMO=`pwd`
@@ -29,14 +30,14 @@ if (! -e $src) then
   echo HDF source directory src=$src does not exist, try NEMO=
   echo or:
   echo " cd $NEMO/local"
-  echo " wget ftp://ftp.hdfgroup.org/HDF/HDF_Current/src/$HDF.tar.gz"
-  echo " tar zxf $HDF.tar.gz"
-  echo " ln -s $HDF hdf"
+  echo " wget ftp://ftp.hdfgroup.org/HDF/HDF_Current/src/$hdf.tar.gz"
+  echo " tar zxf $hdf.tar.gz"
+  echo " ln -s $hdf hdf"
   echo " ../src/scripts/hdf.install"
   exit 1
 endif
 
-cd $SRC
+cd $src
 ./configure --prefix=$prefix
 #
 # we're using -i since it sometimes fails for silly reasons that don't bother NEMO
