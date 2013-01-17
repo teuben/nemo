@@ -96,15 +96,16 @@ void nemo_main()
     } else {
       margin = getiparam("margin");
     }
+#else
+    margin = getiparam("margin");
+#endif
     if (margin<1) {
       warning("awfully small margin=%d",margin);
       margin=72;
     }
     if (margin>BUFLEN) error("BUFLEN might be too small");
     dprintf(2,"margin=%d\n",margin);
-#else
-    margin = getiparam("margin");
-#endif
+
     allline = getbparam("allline");
     if (hasvalue("item")) warning("item= is broken");
     testtag = getparam("item");
