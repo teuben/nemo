@@ -1,4 +1,4 @@
-.TH DATA 5NEMO "6 May 2011"
+.TH DATA 5NEMO "10 January 2013"
 .SH NAME
 bench \- NEMO benchmarks in NemoStones
 .SH DESCRIPTION
@@ -12,7 +12,7 @@ O(N) version from Dehnen (2002?). Again 64 timesteps.
 direct N-body code, also 64 timesteps. 
 \fBbench3\fP benchmarks the I/O and creation of a large (>2GB) snapshot.
 .SH DATA
-Here are the benchmarks
+Here are the commands to execute the benchmarks
 .ta +1i
 .nf
 \fBbench0\fP:	\fItime directcode nbody=10240\fP
@@ -26,7 +26,9 @@ and the data :
 .PP
 .nf
 .ta +3i
-bench0
+bench0 (directcode)
+       I7/3630QM@3.6	174.2  (nemo2: 
+       I7/3770@3.5	152.6
        P4/3.0            342.7
        G5/2.0            472.8
        AMD-opt64/2.0     300.3
@@ -36,7 +38,9 @@ bench0
        x86_64/3.2        480.6
        sparcv9+vis/0.36 3048.2
 
-bench1
+bench1 (hackcode1)
+       I7/3.6		14.0  (nemo2: 1.2 - 3.6)  5.1
+       I7/3.5		 4.4
        P4/3.0           13.4
        G5/2.0           13.1
        AMD-opt64/2.0     9.36
@@ -46,7 +50,9 @@ bench1
        x86_64/3.2       10.7
        sparcv9+vis/0.36 81.5
 
-bench2
+bench2 (gyrfalcON)
+       I7/3.6		 8.1  (nemo2)  2.948 3.19 5.09
+       I7/3.6		31.2  (?)
        P4/3.0           10.8
        G5/2.0           21.0
        AMD-opt64/2.0     8.1
@@ -55,7 +61,10 @@ bench2
        x86_64/3.2        8.6
        sparcv9+vis/0.36 85.1  
 
-bench3 
+bench3 (mkspiral)
+       I7/3.6	23.657u 3.856s 0:28.04 98.0%  (nemo2)
+	        10.760u 0.832s 0:20.33 57.0%
+       I7/3.5	7.112u 1.520 0:09.37 98.5%
        P4/3.0	22.890u  5.980s 1:45.63 27.3%
        G5/2.0	28.400u 24.660s 1:05.41 81.1% 
        AMD-opt64/2.0	18.540u 10.921s 0:56.93 51.7% 

@@ -57,10 +57,10 @@ them as \fIweight^dypow\fP. The most common use is when your
 (e.g. an intensity), in which case \fBdypow=-0.5\fP is appropriate.
 [default: 1].
 .TP
-\fBxrange=\fIxmin:xmax\fP
-Range in X-values for which the fit is done. If only one number is
-given, the other one is considered zero. This keyword cannot be used
-if more than one X-column is used.
+\fBxrange=\fIxmin:xmax,xmin:xmax,...\fP
+Range in X-values for which the fit is done. A set of min:max,
+separated by comma's, can be given.
+This keyword cannot be used if more than one X-column is used.
 [default: no entry, i.e. all].
 .TP
 \fBfit=\fP\fImodel\fP
@@ -329,5 +329,6 @@ Peter Teuben
 24-apr-08	V2.1 added psf	PJT
 7-may-10	V2.2 added grow		PJT
 24-dec-11	V2.3b estimate gauss1d if no initial par given	PJT
+9-dec-12	V3.0 new style xrange= with multiple segments	PJT
 .fi
 

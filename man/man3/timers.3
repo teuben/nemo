@@ -16,6 +16,12 @@ hold timer information. \fIstamp_timers\fP is used remember
 the timer info in a \fBslot\fP. The difference between
 \fBslot2\fP and \fBslot1\fP (slot2>slot1 is normally assumed) is 
 returned by \fIdiff_timers\fP.
+.PP
+Timers use a low level assembly routine to directly accces the TSC (Time Stamp Counter),
+and have the usual flaws on multi proccesing cores and multi-tasking operating systems
+how to translate this to a CPU usage.  For long term stability routines such as
+\fIcputime(3NEMO)\fP should be used,for short fine grained understanding, these routines
+could be useful.
 .SH EXAMPLE
 .nf
     init_timers(n+1);

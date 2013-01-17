@@ -17,7 +17,7 @@ The median is also optionally computed, for which an
 alternate sorting routine can be selected (if available). 
 .PP
 Using the \fBnsigma\fP keyword, outliers can be removed
-and statistics re-computed.
+and statistics re-computed (a.k.a. sigma-clipping).
 .PP
 This program was derived from \fItabhist(1NEMO)\fP, which works on ASCII tables,
 and derived much of it's user interface from that program.
@@ -87,6 +87,7 @@ and ylog are automatically re-set to false.
 \fBmedian=t|f\fP
 Compute median too? This can be timeconsuming for large numbers of points.
 [Default: \fBt\fP].
+.\" @todo   what about torben method?
 .TP
 \fBdual=t|f\fP
 Dual pass over the data, subtracting the mean. This can be important
@@ -96,8 +97,10 @@ the min/max/mean/median etc.
 Default: f
 .TP
 \fBnsigma=\fI
-Delete points more than nsigma times the sigma from the mean. After each
+Delete points more than nsigma times the sigma from the mean. Also known
+as sigma-clipping. After each
 point sigma and mean are recomputed. [Default: none]
+.\" @todo   iter= to do it a few times?   what about robust=
 .TP
 \fBsort=\fP\fIsort_mode\fP
 .SH BUGS

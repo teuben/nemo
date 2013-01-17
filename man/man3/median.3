@@ -9,6 +9,7 @@ median, init_median, finis_median \- compute the median of a distribution
 .B real median(int n, real *x);
 .B void init_median(int size);
 .B void finis_median(void);
+.B real median_torben(int n, real *x, real xmin, real xmax);
 .fi
 .SH DESCRIPTION
 \fImedian\fP computes the median value of a set of real values. Is uses
@@ -47,4 +48,5 @@ Peter Teuben
 .ta +1i +4i
 20-jun-01	written 	PJT
 10-jun-05	man page written	PJT
+6-aug-2012	added Torben method	PJT
 .fi
