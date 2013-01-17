@@ -224,6 +224,10 @@ void ax_copy(imageptr i0, imageptr i1)
   Namez(i1) = strdup(Namez(i0));
 }
 
+/* ax_shift:  
+ *
+ */
+
 void ax_shift(imageptr iptr)
 {
   if (Nx(iptr)==1 && Ny(iptr)>1 && Nz(iptr)==1) {            /* permute {x,y} */
