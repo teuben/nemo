@@ -89,6 +89,7 @@ local void object_isothermal(int npars, real *pars);
 local void object_comet(int npars, real *pars);
 local void object_jet(int npars, real *pars);
 local void object_shell(int npars, real *pars);
+local void object_point(int npars, real *pars);
 
 extern string *burststring(string,string);
 
@@ -197,6 +198,8 @@ void nemo_main ()
     object_comet(npar,spar);
   else if (streq(object,"shell"))
     object_shell(npar,spar);
+  else if (streq(object,"point"))
+    object_point(npar,spar);
   else if (streq(object,"test"))
     object_test(npar,spar);
   else
@@ -660,4 +663,16 @@ local void object_jet(int npars, real *pars)
 local void object_shell(int npars, real *pars)
 {
   warning("alas, shell not supported yet");
+}
+
+local void object_point(int npars, real *pars)
+{
+  int nx = Nx(iptr);
+  int ny = Ny(iptr);
+  int i = nx/2;
+  int j = ny/2;
+
+  if (npars == 0) error("object=point requires a value");
+
+  MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + pars[0];
 }
