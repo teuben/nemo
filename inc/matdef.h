@@ -1,5 +1,7 @@
 /* MATDEF.H	
- *		defines how matrices are stored in image(5NEMO) programs
+ *		defines how n-dimensional images are stored in image(5NEMO) 
+ *              programs. Mostly 2 and 3 dim images. 
+ *              See also mdarray.h for arrays of higher dimension.
  *		This include file is automatically included by image.h
  *		and perhaps by a few others, e.g. contour.c
  *
@@ -9,7 +11,7 @@
  *	#define CDEF			c-definition        = row major
  *	#define FORDEF			fortran-definition  = column major
  *
- *	The default is CDEF
+ *	As of January 2013 the default is FORDEF
  * 
  *   C:  data[row][col]     row major,     row after row
  *   F:  data(row,col)      column major,  column after column
@@ -19,7 +21,7 @@
  */
 
 
-#define CDEF 
+//#define CDEF
 
 #if !defined(FORDEF) && !defined(CDEF)
 # define FORDEF

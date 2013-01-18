@@ -30,6 +30,7 @@
  *  16-mar-05   V7.1 protection to re-use a pointer for different images PJT
  *   4-aug-11   V7.2 fixed various map2_image/map3_image mistakes        PJT
  *  19-oct-11   V8.0 implementing USE_IARRAY methods                     PJT
+ *  17-jan-12   V9.0 FORDEF now the default
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -104,6 +105,8 @@ static void set_iarray(imageptr iptr)
     for (i=0; i<nz; i++) IDz(iptr)[i] = nx*ny*i;
   } else // ILLEGAL
     error("set_iarray: idef=%d\n",idef);
+#else
+  warning("Skipping IARRAY, not enabled (-DUSE_IARRAY)");
 #endif
 }
 
@@ -522,18 +525,19 @@ char *mystrcpy(char *a)
 
 #include <getparam.h>
 
-#define N 10
-/*  #define AR 1  */
-
 string defv[] = {
   "mode=w\n      	Read (r) or Write (w)",
-  "VERSION=8.0\n	19-oct-11 pjt",
+  "VERSION=9.0\n	17-jan-2012 PJT",
   NULL
 };
 
 string usage = "testbed for image I/O";
 
 void ini_matrix(imageptr *, int, int);
+
+
+#define N 10    /* leave N=10, otherwise no nice numbers in test matrix */
+
 	
 nemo_main()
 {
@@ -564,7 +568,7 @@ nemo_main()
 	instr = stropen ("foo.dat","r");
 	while (read_image(instr,&fp2)) {
             printf ("Read image\n");
-            printf ("with MapValue(5,5)=%f\n",MapValue(fp2,5,5));
+            printf ("with MapValue(ix=4,iy=5)=%f [5.4]\n",MapValue(fp2,4,5));
 	}
 	strclose(instr);
     }
@@ -594,16 +598,28 @@ void ini_matrix(imageptr *iptr, int nx, int ny)
   Dx(*iptr) = 0.1;
   Dy(*iptr) = 0.1;
   Dz(*iptr) = 0.1;
-  Namex(*iptr) = NULL;        /* no axis names */
-  Namey(*iptr) = NULL;
-  Namez(*iptr) = NULL;
+  Namex(*iptr) = "x";        /* simple axis names */
+  Namey(*iptr) = "y";
+  Namez(*iptr) = "z";
   Unit(*iptr)  = NULL;        /* no units */
   Mask(*iptr)  = NULL;
+  Xref(*iptr) = 0.0;
+  Yref(*iptr) = 0.0;
+  Zref(*iptr) = 0.0;
+  Time(*iptr) = 0.0;
+  BeamType(*iptr) = NOBEAM;
+  Beamx(*iptr) = 0.0;
+  Beamy(*iptr) = 0.0;
+  Beamz(*iptr) = 0.0;
+  Axis(*iptr) = 1;   /* linear axis */
 
   set_iarray(*iptr);
-  for (ix=0; ix<nx; ix++)
-    for (iy=0; iy<ny; iy++)
-      MapValue(*iptr,ix,iy)  = (ix*ny+iy)*0.1;
+  dprintf(0,"CDEF/FORDEF matrix %d x %d\n",nx,ny);
+  for (iy=0; iy<ny; iy++) 
+    for (ix=0; ix<nx; ix++)
+      MapValue(*iptr,ix,iy)  = (iy*nx+ix)*0.1;
+  MapMin(*iptr) = 0.0;
+  MapMax(*iptr) = MapValue(*iptr,nx-1,ny-1);
 }
 #endif
 

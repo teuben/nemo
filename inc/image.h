@@ -27,6 +27,8 @@
  *  19-oct-11    V8.0 optional intelligent array from Karma, see USE_IARRAY
  *                    i->frame[i->x[ix] + i->y[iy]+ i->z[iz]]
  *                    which seems 15% slower..... (ccdstat EVLA benchmark)
+ * 
+ *  17-jan-12    V9.0 use FORDEF as default to easy I/O with real astronomy
  */
 #ifndef _h_image
 #define _h_image
@@ -189,7 +191,7 @@ typedef struct {
  *  BeamTypes -- not really used though
  */
 
-#define NONE	       -1
+#define NOBEAM	       -1
 #define ANYBEAM		0
 #define	HANNING		1
 #define GAUSS		2
