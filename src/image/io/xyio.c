@@ -13,6 +13,9 @@
  *
  *	All ideas are based on the image I/O within miriad (xyio.c)
  *	for which Bob Sault deserves all the credit.
+ *      Also check out the xyzio.c routines that Bart Wakker wrote to
+ *      mimick the novel image I/O access in GIPSY that was written 
+ *      in GDS in the late 80s.
  *
  *  Note: xyio in NEMO is  0 based, not 1 based, as is in the Miriad
  *        package
@@ -22,6 +25,29 @@
  *	feb 1994 - ansi					pjt
  *	apr 1995 - no more ARGS, fix up prototypes
  *    6-jan-1998 - fixed up TESTBED bit more            pjt
+ *
+ * @TODO    FORDEF ok, CDEF wrong.
+
+  // FORDEF:  tsf $NEMO/data/test/mapf.ccd
+  set Map
+    double MapValues[10][5] 0.00000 1.00000 2.00000 3.00000 4.00000 5.00000 
+      6.00000 7.00000 8.00000 9.00000 10.0000 11.0000 12.0000 13.0000 14.0000 
+      15.0000 16.0000 17.0000 18.0000 19.0000 20.0000 21.0000 22.0000 23.0000 
+      24.0000 25.0000 26.0000 27.0000 28.0000 29.0000 30.0000 31.0000 32.0000 
+      33.0000 34.0000 35.0000 36.0000 37.0000 38.0000 39.0000 40.0000 41.0000 
+      42.0000 43.0000 44.0000 45.0000 46.0000 47.0000 48.0000 49.0000 
+  tes
+
+  // CDEF: tsf $NEMO/data/test/mapc.ccd
+  set Map
+    double MapValues[10][5] 0.00000 10.0000 20.0000 30.0000 40.0000 1.00000 
+      11.0000 21.0000 31.0000 41.0000 2.00000 12.0000 22.0000 32.0000 42.0000 
+      3.00000 13.0000 23.0000 33.0000 43.0000 4.00000 14.0000 24.0000 34.0000 
+      44.0000 5.00000 15.0000 25.0000 35.0000 45.0000 6.00000 16.0000 26.0000 
+      36.0000 46.0000 7.00000 17.0000 27.0000 37.0000 47.0000 8.00000 18.0000 
+      28.0000 38.0000 48.0000 9.00000 19.0000 29.0000 39.0000 49.0000 
+  tes
+
  */
 
 #include <stdinc.h>
