@@ -24,7 +24,7 @@ help:
 	@echo OBJFILES: $(OBJFILES)
 	@echo BINFILES: $(BINFILES)
 clean:
-	rm -f *.o *.a core $(BINFILES) $(TESTFILES)
+	rm -f *.o *.a core foo.dat $(BINFILES) $(TESTFILES)
 
 cleanlib:
 	ar dv $(L) $(OBJFILES)
