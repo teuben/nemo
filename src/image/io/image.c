@@ -106,7 +106,7 @@ static void set_iarray(imageptr iptr)
   } else // ILLEGAL
     error("set_iarray: idef=%d\n",idef);
 #else
-  warning("Skipping IARRAY, not enabled (-DUSE_IARRAY)");
+  dprintf(2,"Skipping IARRAY, not enabled (-DUSE_IARRAY)\n");
 #endif
 }
 
@@ -614,7 +614,7 @@ void ini_matrix(imageptr *iptr, int nx, int ny)
   Axis(*iptr) = 1;   /* linear axis */
 
   set_iarray(*iptr);
-  dprintf(0,"CDEF/FORDEF matrix %d x %d\n",nx,ny);
+  dprintf(0,"Y.X matrix %d x %d\n",nx,ny);
   for (iy=0; iy<ny; iy++) 
     for (ix=0; ix<nx; ix++)
       MapValue(*iptr,ix,iy)  = (iy*nx+ix)*0.1;
