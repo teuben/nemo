@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2009-2010                                       
+// Copyright Jean-Charles LAMBERT - 2009-2013                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -41,6 +41,7 @@ namespace tools {
 #define ZSMT_BIT          (1 << 19)
 #define IM_BIT            (1 << 20)
 #define CM_BIT            (1 << 21)
+#define SSL_BIT           (1 << 22)
 
 // Component BITS
 #define ALL_BIT           (1 <<  1)

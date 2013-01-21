@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2010-2012
+// Copyright Jean-Charles LAMBERT - 2010-2013
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -110,11 +110,15 @@ void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
   if (ok && display) {
     displayFormat(maxlines,"age [1] = ",age,1,nbody, 3);
   } 
-
   float * im;
   ok = uns->snapshot->getData(comp,"im" ,&nbody,&im );
   if (ok && display) {
     displayFormat(maxlines,"im [1] = ",im,1,nbody, 3);
+  }
+  float * ssl;
+  ok = uns->snapshot->getData(comp,"ssl" ,&nbody,&ssl );
+  if (ok && display) {
+    displayFormat(maxlines,"ssl [1] = ",ssl,1,nbody, 3);
   }
   float * zs,* zsmt;
   int czs, czsmt, nzs, nzsmt;
@@ -154,7 +158,7 @@ template <class T>  void displayFormat(int maxlines,std::string text, T * array,
   }
   std::cout << "\n";
   // other lines
-  for (int i=1; i<std::min(maxlines,size); i+=np) {
+  for (int i=1; i<std::min(maxlines,size/min(size,np)); i+=min(size,np)) {
     std::cout << left << setw(11) << "";
     for (int k=0;k<std::min(size,np);k++) {
       for (int j=0;j<dim;j++) {

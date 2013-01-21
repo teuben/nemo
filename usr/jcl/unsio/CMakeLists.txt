@@ -1,5 +1,5 @@
 # ============================================================================
-# Copyright Jean-Charles LAMBERT - 2009-2012
+# Copyright Jean-Charles LAMBERT - 2008-2013
 # e-mail:   Jean-Charles.Lambert@oamp.fr
 # address:  Dynamique des galaxies
 #           Centre de donneeS Astrophysique de Marseille (CeSAM)
@@ -91,6 +91,10 @@ if(DEFINED CMAKE_Fortran_COMPILER AND CMAKE_Fortran_COMPILER MATCHES "^$")
 endif(DEFINED CMAKE_Fortran_COMPILER AND CMAKE_Fortran_COMPILER MATCHES "^$")
 enable_language(Fortran OPTIONAL)
 message(STATUS "CMAKE_Fortran_COMPILER_WORKS = ${CMAKE_Fortran_COMPILER_WORKS}")
+if (CMAKE_Fortran_COMPILER)
+  SET(CMAKE_Fortran_COMPILER gfortran)
+  MESSAGE(STATUS "Fortran compiler : " ${CMAKE_Fortran_COMPILER})
+endif()
 
 # Enable Fortran support
 #ENABLE_LANGUAGE(Fortran)
@@ -136,6 +140,7 @@ ENDFOREACH(exe_cpp ${execpp_sources})
 # build Fortran executables according to the source
 # compilation options
 if (CMAKE_Fortran_COMPILER)
+
 FOREACH(exe_f ${exe_sources})
 
   get_filename_component(exe ${exe_f} NAME_WE)

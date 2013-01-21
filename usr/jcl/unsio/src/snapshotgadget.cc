@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2010                                       
+// Copyright Jean-Charles LAMBERT - 2008-2013                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -62,6 +62,7 @@ namespace uns {
   zs     = NULL;
   zsmt   = NULL;
   im     = NULL;
+  ssl    = NULL;
   cm     = NULL;
   bits   = 0;
   load_bits = 0;
@@ -106,6 +107,7 @@ CSnapshotGadgetIn::~CSnapshotGadgetIn()
     if (zs)       delete [] zs;
     if (zsmt)     delete [] zsmt;
     if (im)       delete [] im;
+    if (ssl)      delete [] ssl;
     if (cm)       delete [] cm;
   }
   crv.clear();
@@ -496,6 +498,13 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
           ok=true;
           readOneArray(&im,4,compOffset);
         }
+        // --> SSL block
+        if (block_name=="SSL" && req_bits&SSL_BIT && comp_bits&STARS_BIT) {
+          load_bits |= SSL_BIT;
+          assert((header.npart[4])>0); // stars
+          ok=true;
+          readOneArray(&ssl,4,compOffset);
+        }
         // --> CM block
         if (block_name=="cM" && req_bits&CM_BIT && (comp_bits&GAS_BIT || comp_bits&STARS_BIT)) {
           assert((load_bits&CM_BIT)==0); // if failed means that multiple file not supported for this block
@@ -586,6 +595,7 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
     freeNotLoadedData(&zs       ,ZS_BIT);
     freeNotLoadedData(&zsmt     ,ZSMT_BIT);
     freeNotLoadedData(&im       ,IM_BIT);
+    freeNotLoadedData(&ssl      ,SSL_BIT);
     freeNotLoadedData(&cm       ,CM_BIT);
   }
   return 1;
@@ -991,6 +1001,13 @@ bool CSnapshotGadgetIn::getData(const std::string comp, std::string name, int *n
       ok=false;
     }
     break;
+  case uns::Ssl :
+    if (status && comp=="stars" && getSsl(*n)) {
+      *data = getSsl(*n);
+    } else {
+      ok=false;
+    }
+    break;
   default: ok=false;
   }
   if (ok && !*data &&
@@ -1092,6 +1109,9 @@ bool CSnapshotGadgetIn::getData(const std::string name,int *n,float **data)
     break;
   case uns::Im :
     *data = getIm(*n);
+    break;
+  case uns::Ssl :
+    *data = getSsl(*n);
     break;
   default: ok=false;
   }

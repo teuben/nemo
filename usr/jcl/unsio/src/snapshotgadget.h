@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2011                                       
+// Copyright Jean-Charles LAMBERT - 2008-2013                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -143,7 +143,7 @@ typedef struct particle_data_lite
   float * mass, * pos, * vel, * acc, *pot, * rho, * hsml, * age, * metal, * intenerg, * temp;
   int * id;
   // new data for Sergey
-  float * zs, * zsmt, * im, * cm;
+  float * zs, * zsmt, * im, * cm, * ssl;
   int czs, czsmt; // constant for zs and zsmt
   int bits; // to store the bits components
   float tframe,redshift;
@@ -196,6 +196,7 @@ typedef struct particle_data_lite
   float * getZsmtGas(int & n) { n=czsmt*(header.npartTotal[0]); return zsmt;}
   float * getZsmtStars(int & n) { n=czsmt*(header.npartTotal[4]); return zsmt+header.npartTotal[0]*czsmt;}
   float * getIm(int & n) { n=header.npartTotal[4]; return im;}
+  float * getSsl(int & n) { n=header.npartTotal[4]; return ssl;}
   float * getCm(int & n) { n=1*(header.npartTotal[0]+header.npartTotal[4]); return cm;}
   float * getCmGas(int & n) { n=1*(header.npartTotal[0]); return cm;}
   float * getCmStars(int & n) { n=1*(header.npartTotal[4]); return ((cm==NULL)?cm:cm+header.npartTotal[0]*1);}

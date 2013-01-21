@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2010                                       
+// Copyright Jean-Charles LAMBERT - 2008-2013                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -46,6 +46,7 @@ namespace uns {
       Cm        ,
       Czs       ,
       Czsmt     ,
+      Ssl       ,
       
       // Nbodies  per component
       Nsel      ,

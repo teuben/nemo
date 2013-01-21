@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                       
+// Copyright Jean-Charles LAMBERT - 2007-2013                                       
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -342,7 +342,7 @@ int CAmr::loadData(uns::CParticles * particles,
                 // gas density
                 float rho = var[0*ngrida*twotondim+ind*ngrida+i];                
                 if (req_bits&MASS_BIT) {                
-                  particles->mass.push_back(rho*dx*dx*dx);
+                  particles->mass.push_back(rho*dx*header.boxlen*dx*header.boxlen*dx*header.boxlen);
                   particles->load_bits |= MASS_BIT;
                   take=true;
                 }
