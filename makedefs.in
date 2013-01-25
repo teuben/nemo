@@ -9,6 +9,10 @@
 #       -Wl,--no-as-needed -lX11 -Wl,-as-needed
 #  instead of 
 #                          -lX11
+#  Another option is to add -Wl,--no-as-needed to CFLAGS
+#  uncomment the next line if you want this:
+# NEMO_CFLAGS1 = -Wl,--no-as-needed
+
 
 
 # we could actually also define a set of NEMO, and derived, variables, such that the build
@@ -66,7 +70,7 @@ GSL_LIBS   = @GSL_LIBS@
 
 #	FFTW
 #       -lfftw3, or -lfftw3f or -lfftw3l (depending on precision library, for float or long double)
-#       
+#       [actually still not used yet]
 FFTW_CFLAGS = @FFTW_CFLAGS@
 FFTW_LIBS   = @FFTW_LIBS@
 
@@ -85,7 +89,7 @@ MACH = @LOADOBJ_MACH@
 #	need to define C code that is to be called from Fortran
 
 #       F77_CMAIN_FFLAGS is needed if you link with fortran, but main is in C
-#  on MacOS you need to remove the -lcrt1.o and -lcrt2.o (or the like) references
+#  on older MacOS you need to remove any -lcrt1.o and -lcrt2.o (or the like) references
 FLIBS = @FLIBS@
 FORLIBS = $(FLIBS)
 F77_CMAIN_FFLAGS = @F77_CMAIN_FFLAGS@
@@ -107,7 +111,7 @@ YAPPLIB = $(NEMOLIB)/yapp_@YAPP_NAME@.o @YAPP_LIBS@
 ## Fortran compiler
 #  some older gnu compilers may still need -fno-globals
 
-NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ $(GSL_CFLAGS) $(MACH)
+NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) @XINCS@ $(GSL_CFLAGS) $(MACH) $(NEMO_CFLAGS1)
 NEMO_FFLAGS = @NEMO_FFLAGS@
 NEMO_LDFLAGS = 
 NEMO_LIBS   = -L$(NEMOLIB)          -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
