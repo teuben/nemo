@@ -13,6 +13,7 @@
 #               19-may-2010   gfortran now the default (but 4.1 or below no pgplot/GIF)
 #               24-may-2010   glnemo deprecated, only glnemo2 
 #               19-jan-2011   added a cmake=1 option to build internally
+#               25-jan-2012   DSO linking (dso=1) needed for modern linux
 
 set nemo=nemo           # root directory name
 
@@ -20,6 +21,7 @@ set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
 set gfortran=1          # pick gfortran compiler (otherwise g77 is the default)
 set gcc=0		# pick gcc version (version number via astromake)
+set dso=1               # use DSO linking trick for new linux gcc
 set anonymous=0		# anonymous CVS ?
 set cvsroot=0		# override the official CVSROOT
 set vogl=1		# compile vogl
@@ -154,6 +156,7 @@ if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single) set copts=($copts --enable-single)
 if ($debug) set copts=($copts --enable-debug)
 if ($pedantic) set copts=($copts --enable-pedantic)
+if ($dso==0)  set copts=($copts --without-dso)
 
 echo Running configure $copts
 echo configure $copts  >& install.config.log
