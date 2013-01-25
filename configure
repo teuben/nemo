@@ -619,6 +619,7 @@ CFITSIO_LIB
 CFITSIO_INC
 HDF_LIB
 HDF_INC
+DSO_LINK
 MATH_LIBS
 LOADOBJ_LIBS
 LOADOBJ_MACH
@@ -728,6 +729,7 @@ enable_fortran
 with_mesa
 with_hdf
 with_ccmalloc
+with_dso
 with_x
 enable_png
 with_pgplot_prefix
@@ -1406,6 +1408,7 @@ Optional Packages:
   --with-mesa             force the use of Mesa instead of other graphics libs
   --with-hdf              force the use of HDF
   --with-ccmalloc         use CCMALLOC for malloc
+  --with-dso              use DSO linking
   --with-x                use the X Window System
   --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR
   --with-hdf-prefix=PFX     Prefix where HDF was installed
@@ -5599,9 +5602,17 @@ fi
 
 # Check whether --with-ccmalloc was given.
 if test "${with_ccmalloc+set}" = set; then :
-  withval=$with_ccmalloc; with_malloc=$withval
+  withval=$with_ccmalloc; with_ccmalloc=$withval
 else
   with_ccmalloc=no
+fi
+
+
+# Check whether --with-dso was given.
+if test "${with_dso+set}" = set; then :
+  withval=$with_dso; with_dso=$withval
+else
+  with_dso=yes
 fi
 
 
@@ -7971,6 +7982,13 @@ fi
 
 if test "$with_ccmalloc" = "yes"; then
   MATH_LIBS="-lccmalloc $MATH_LIBS"
+fi
+
+
+
+DSO_LINK=''
+if test "$with_dso" = "yes"; then
+  DSO_LINK="-Wl,--no-as-needed"
 fi
 
 
@@ -10853,7 +10871,7 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS='-L\$NEMOLIB'" -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    YAPP_LIBS='-L\$NEMOLIB'" -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
 	    PGPLOT_DIR='\$NEMOLIB'
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using dollar" >&5
 $as_echo "$as_me: WARNING: using dollar" >&2;}

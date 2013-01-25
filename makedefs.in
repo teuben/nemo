@@ -10,8 +10,9 @@
 #  instead of 
 #                          -lX11
 #  Another option is to add -Wl,--no-as-needed to CFLAGS
-#  uncomment the next line if you want this:
-# NEMO_CFLAGS1 = -Wl,--no-as-needed
+#  This is the current default in configure (to use it)
+#  Comment the next line if you do not want this, or use --without-dso
+NEMO_CFLAGS1 = @DSO_LINK@
 
 
 

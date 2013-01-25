@@ -168,7 +168,9 @@ AC_ARG_ENABLE(fortran,[  --disable-fortran       don't use any Fortran], enable_
 AC_ARG_WITH(mesa, [  --with-mesa             force the use of Mesa instead of other graphics libs], with_mesa=$withval, with_mesa=maybe)
 AC_ARG_WITH(hdf,  [  --with-hdf              force the use of HDF], with_hdf=$withval, with_hdf=maybe)
 AC_ARG_WITH(ccmalloc, 
-		  [  --with-ccmalloc         use CCMALLOC for malloc], with_malloc=$withval, with_ccmalloc=no)
+		  [  --with-ccmalloc         use CCMALLOC for malloc], with_ccmalloc=$withval, with_ccmalloc=no)
+AC_ARG_WITH(dso,
+		  [  --with-dso              use DSO linking], with_dso=$withval, with_dso=yes)
 
 dnl ---------------------------------------------------------------------
 dnl             Check for basic X windows stuff
@@ -502,6 +504,14 @@ if test "$with_ccmalloc" = "yes"; then
   MATH_LIBS="-lccmalloc $MATH_LIBS"
 fi
 AC_SUBST(MATH_LIBS)
+
+dnl ---------------------------------------------------------------------
+
+DSO_LINK=''
+if test "$with_dso" = "yes"; then
+  DSO_LINK="-Wl,--no-as-needed"
+fi
+AC_SUBST(DSO_LINK)
 
 dnl ---------------------------------------------------------------------
 
@@ -844,7 +854,7 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS='-L\$NEMOLIB'" -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    YAPP_LIBS='-L\$NEMOLIB'" -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
 	    PGPLOT_DIR='\$NEMOLIB'
 	    AC_MSG_WARN(using dollar)
 	    echo $PGPLOT_DIR
