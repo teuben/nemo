@@ -156,7 +156,7 @@ if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single) set copts=($copts --enable-single)
 if ($debug) set copts=($copts --enable-debug)
 if ($pedantic) set copts=($copts --enable-pedantic)
-if ($dso==0)  set copts=($copts --without-dso)
+if ($dso == 0)  set copts=($copts --without-dso)
 
 echo Running configure $copts
 echo configure $copts  >& install.config.log
