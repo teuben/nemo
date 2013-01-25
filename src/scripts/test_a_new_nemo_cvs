@@ -21,7 +21,6 @@ set pgplot=1		# install PGPLOT via CVS also
 set intel=0		# pick intel compiler (astromake)
 set gfortran=1          # pick gfortran compiler (otherwise g77 is the default)
 set gcc=0		# pick gcc version (version number via astromake)
-set dso=1               # use DSO linking trick for new linux gcc
 set anonymous=0		# anonymous CVS ?
 set cvsroot=0		# override the official CVSROOT
 set vogl=1		# compile vogl
@@ -44,6 +43,16 @@ set debug=1             # compile in debug mode (not implemented)
 set pedantic=0          # compile in pedantic mode
 set make=make           # make, gmake, pmake, bmake, ....
 set cmake=0             # 1= build internally
+
+set unames=`uname -s`   # Darwin, Linux
+
+# dso:                  # use DSO linking trick for new linux gcc.  4.6.3 on ubuntu needs it
+if ($unames == Linux) then
+  set dso=1
+else
+  set dso=0
+endif
+
 
 # some variables that affect variables set before
 
