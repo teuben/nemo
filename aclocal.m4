@@ -1,7 +1,8 @@
-# generated automatically by aclocal 1.7 -*- Autoconf -*-
+# generated automatically by aclocal 1.11.3 -*- Autoconf -*-
 
-# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002
-# Free Software Foundation, Inc.
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
+# 2005, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
+# Inc.
 # This file is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -11,302 +12,102 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-# This file contains various auxiliary autoconf macros, adapted from
-# the FFTW 2.1.3 package (www.fftw.org).  FFTW is under the GNU GPL too,
-# so there are no licensing troubles.  This stuff is copyright (c)
-# 1999 by the Massachusetts Institute of Technology.
+# ===========================================================================
+#    http://www.gnu.org/software/autoconf-archive/ax_f77_cmain_fflags.html
+# ===========================================================================
+#
+# SYNOPSIS
+#
+#   AX_F77_CMAIN_FFLAGS([ACTION-IF-SUCCEED], [ACTION-IF-FAIL])
+#
+# DESCRIPTION
+#
+#   This macro figures out if extra Fortran compiler flags are required in
+#   order to use the Fortran linker to link programs where the main()
+#   function is defined via C (or other language). On some systems, notably
+#   the Alpha with Compaq compilers, the Fortran libraries have their own
+#   main() function which must be disabled.
+#
+#   Runs ACTION-IF-SUCCEED if successful, and ACTION-IF-FAIL if not. Defines
+#   the output variable F77_CMAIN_FFLAGS to any discovered flags. (If
+#   ACTION-IF-FAIL is not specified, defaults to halting with an error.)
+#
+#   This macro is especially useful in conjunction with automake, since by
+#   default automake uses $F77 to link programs mixing C and Fortran,
+#   leading to a link error on some systems. In this case, you should set
+#   the FFLAGS for that program to include F77_CMAIN_FFLAGS.
+#
+# LICENSE
+#
+#   Copyright (c) 2008 Steven G. Johnson <stevenj@alum.mit.edu>
+#
+#   This program is free software: you can redistribute it and/or modify it
+#   under the terms of the GNU General Public License as published by the
+#   Free Software Foundation, either version 3 of the License, or (at your
+#   option) any later version.
+#
+#   This program is distributed in the hope that it will be useful, but
+#   WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+#   Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License along
+#   with this program. If not, see <http://www.gnu.org/licenses/>.
+#
+#   As a special exception, the respective Autoconf Macro's copyright owner
+#   gives unlimited permission to copy, distribute and modify the configure
+#   scripts that are the output of Autoconf when processing the Macro. You
+#   need not follow the terms of the GNU General Public License when using
+#   or distributing such scripts, even though portions of the text of the
+#   Macro appear in them. The GNU General Public License (GPL) does govern
+#   all other use of the material that constitutes the Autoconf Macro.
+#
+#   This special exception to the GPL applies to versions of the Autoconf
+#   Macro released by the Autoconf Archive. When you make and distribute a
+#   modified version of the Autoconf Macro, you may extend this special
+#   exception to the GPL to apply to your modified version as well.
 
-AC_DEFUN(ACX_CHECK_CC_FLAGS,
-[
-AC_REQUIRE([AC_PROG_CC])
-AC_CACHE_CHECK(whether ${CC-cc} accepts $1, ac_$2,
-[echo 'void f(){}' > conftest.c
-if test -z "`${CC-cc} $1 -c conftest.c 2>&1`"; then
-	ac_$2=yes
-else
-	ac_$2=no
-fi
-rm -f conftest*
-])
-if test "$ac_$2" = yes; then
-	:
-	$3
-else
-	:
-	$4
-fi
-])
+#serial 5
 
-AC_DEFUN(ACX_PROG_GCC_VERSION,
-[
-AC_REQUIRE([AC_PROG_CC])
-AC_CACHE_CHECK(whether we are using gcc $1.$2 or later, ac_cv_prog_gcc_$1_$2,
-[
-dnl The semicolon after "yes" below is to pacify NeXT's syntax-checking cpp.
-cat > conftest.c <<EOF
-#ifdef __GNUC__
-#  if (__GNUC__ > $1) || (__GNUC__ == $1 && __GNUC_MINOR__ >= $2)
-     yes;
-#  endif
-#endif
-EOF
-if AC_TRY_COMMAND(${CC-cc} -E conftest.c) | egrep yes >/dev/null 2>&1; then
-  ac_cv_prog_gcc_$1_$2=yes
-else
-  ac_cv_prog_gcc_$1_$2=no
-fi
-])
-if test "$ac_cv_prog_gcc_$1_$2" = yes; then
-	:
-	$3
-else
-	:
-	$4
-fi
-])
-
-AC_DEFUN(ACX_PROG_CC_EGCS,
-[ACX_PROG_GCC_VERSION(2,90,acx_prog_egcs=yes,acx_prog_egcs=no)])
-
-AC_DEFUN(ACX_PROG_CC_MAXOPT,
-[
-AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([ACX_PROG_CC_EGCS])
-AC_REQUIRE([AC_CANONICAL_HOST])
-
-# Try to determine "good" native compiler flags if none specified on command
-# line.  This is modified from the FFTW version to be a little more
-# conservative, and to not complain so much to the user when good flags
-# aren't found.
-if test "$ac_test_CFLAGS" != "set"; then
-  CFLAGS=""
-  case "${host_cpu}-${host_os}" in
-
-  *linux*)
-	echo "*******************************************************"
-	echo "*       Congratulations! You are running Linux.       *"
-	echo "*******************************************************"
-	;;
-  sparc-solaris2*) if test "$CC" = cc; then
-                    CFLAGS="-native -fast -xO5 -dalign"
-                 fi;;
-
-  alpha*-osf*)  if test "$CC" = cc; then
-                    CFLAGS="-newc -w0 -O5 -fp_reorder -tune host -arch host -std1"
-                fi;;
-
-  hppa*-hpux*)  if test "$CC" = cc; then
-                    CFLAGS="-Ae +O3 +Oall"
-                fi;;
-
-   *-aix*)  if test "$CC" = cc -o "$CC" = xlc; then
-                    CFLAGS="-O3 -w"
-                fi;;
-  esac
-
-  # use default flags for gcc on all systems
-  if test $ac_cv_prog_gcc = yes; then
-     CFLAGS="-O6 -fomit-frame-pointer"
-  fi
-
-  # test for gcc-specific flags:
-  if test $ac_cv_prog_gcc = yes; then
-    # -malign-double for x86 systems
-    ACX_CHECK_CC_FLAGS(-malign-double,align_double,
-	CFLAGS="$CFLAGS -malign-double")
-  fi
-
-  CPU_FLAGS=""
-  if test "$GCC" = "yes"; then
-	  dnl try to guess correct CPU flags, at least for linux
-	  case "${host_cpu}" in
-	  i586*)  ACX_CHECK_CC_FLAGS(-mcpu=pentium,cpu_pentium,
-			[CPU_FLAGS=-mcpu=pentium],
-			[ACX_CHECK_CC_FLAGS(-mpentium,pentium,
-				[CPU_FLAGS=-mpentium])])
-		  ;;
-	  i686*)  ACX_CHECK_CC_FLAGS(-mcpu=pentiumpro,cpu_pentiumpro,
-			[CPU_FLAGS=-mcpu=pentiumpro],
-			[ACX_CHECK_CC_FLAGS(-mpentiumpro,pentiumpro,
-				[CPU_FLAGS=-mpentiumpro])])
-		  ;;
-	  powerpc*)
-		cputype=`(grep cpu /proc/cpuinfo | head -1 | cut -d: -f2 | sed 's/ //g') 2> /dev/null`
-		is60x=`echo $cputype | egrep "^60[0-9]e?$"`
-		if test -n "$is60x"; then
-			ACX_CHECK_CC_FLAGS(-mcpu=$cputype,m_cpu_60x,
-				CPU_FLAGS=-mcpu=$cputype)
-		elif test "$cputype" = 750; then
-                        ACX_PROG_GCC_VERSION(2,95,
-                                ACX_CHECK_CC_FLAGS(-mcpu=750,m_cpu_750,
-					CPU_FLAGS=-mcpu=750))
-		fi
-		if test -z "$CPU_FLAGS"; then
-		        ACX_CHECK_CC_FLAGS(-mcpu=powerpc,m_cpu_powerpc,
-				CPU_FLAGS=-mcpu=powerpc)
-		fi
-		if test -z "$CPU_FLAGS"; then
-			ACX_CHECK_CC_FLAGS(-mpowerpc,m_powerpc,
-				CPU_FLAGS=-mpowerpc)
-		fi
-	  esac
-  fi
-
-  if test -n "$CPU_FLAGS"; then
-        CFLAGS="$CFLAGS $CPU_FLAGS"
-  fi
-
-  if test -z "$CFLAGS"; then
-	echo "Don't know good CFLAGS...guessing -O3."
-	ACX_CHECK_CC_FLAGS(-O3,opt3,CFLAGS="-O3")
-	if test -z "$CFLAGS"; then
-		echo "-O3 didn't work...guessing -O."
-		ACX_CHECK_CC_FLAGS(-O,opt1,CFLAGS="-O")
-	fi
-  else
-  	ACX_CHECK_CC_FLAGS(${CFLAGS}, guessed_cflags, , [
-	     echo "Guessed CFLAGS don't seem to work...disabling optimization."
-             CFLAGS=""
-  	])
-  fi
-
-fi
-])
-
-dnl---------------------------------------------------------------------------
-
-dnl detect Fortran name-mangling scheme
-
-AC_DEFUN(ACX_F77_FUNC_MANGLE,
-[
-AC_REQUIRE([AC_PROG_CC])
-AC_REQUIRE([AC_PROG_F77])
-AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
-AC_MSG_CHECKING(how f77 mangles function names)
-cat > mangle-func.f <<EOF
-      subroutine foobar()
-      return
-      end
-      subroutine foo_bar()
-      return
-      end
-EOF
-ac_try='$F77 -c $FFLAGS mangle-func.f 1>&AC_FD_CC'
-if AC_TRY_EVAL(ac_try); then
-  ac_try=""
-else
-  echo "configure: failed program was:" >&AC_FD_CC
-  cat mangle-func.f >&AC_FD_CC
-  rm -f mangle-func*
-  AC_MSG_ERROR(failed to compile fortran test program)
-fi
-
-ac_f77_mangle_type=unknown
-AC_LANG_SAVE
-AC_LANG_C
-ac_save_LIBS="$LIBS"
-LIBS="mangle-func.o $FLIBS $LIBS"
-AC_TRY_LINK(,foobar();,
-     ac_f77_mangle_type=lowercase,
-     AC_TRY_LINK(,foobar_();,
-          ac_f77_mangle_type=lowercase-underscore,
-          AC_TRY_LINK(,FOOBAR();,
-               ac_f77_mangle_type=uppercase,
-               AC_TRY_LINK(,FOOBAR_();,
-                    ac_f77_mangle_type=uppercase-underscore))))
-LIBS="$ac_save_LIBS"
-AC_LANG_RESTORE
-AC_MSG_RESULT($ac_f77_mangle_type)
-
-mangle_try=unknown
-case $ac_f77_mangle_type in
-        lowercase)
-                AC_DEFINE(FORTRANIZE_LOWERCASE)
-                mangle_try=foo_bar_
-                ;;
-        lowercase-underscore)
-                AC_DEFINE(FORTRANIZE_LOWERCASE_UNDERSCORE)
-                mangle_try=foo_bar__
-                ;;
-        uppercase)
-                AC_DEFINE(FORTRANIZE_UPPERCASE)
-                mangle_try=FOO_BAR_
-                ;;
-        uppercase-underscore)
-                AC_DEFINE(FORTRANIZE_UPPERCASE_UNDERSCORE)
-                mangle_try=FOO_BAR__
-                ;;
-esac
-
-AC_MSG_CHECKING(if f77 functions with an underscore get an extra underscore)
-
-AC_LANG_SAVE
-AC_LANG_C
-ac_save_LIBS="$LIBS"
-LIBS="mangle-func.o $FLIBS $LIBS"
-AC_TRY_LINK(,$mangle_try();,
-            [ac_f77_mangle_underscore=yes;
-             AC_DEFINE(FORTRANIZE_EXTRA_UNDERSCORE)],
-            [ac_f77_mangle_underscore=no])
-LIBS="$ac_save_LIBS"
-AC_LANG_RESTORE
-rm -f mangle-func*
-AC_MSG_RESULT($ac_f77_mangle_underscore)
-])
-
-dnl like AC_SUBST, but replace XXX_variable_XXX instead of @variable@
-dnl This macro protects VARIABLE from being diverted twice
-dnl if this macro is called twice for it.
-dnl AC_SUBST(VARIABLE)
-define(ACX_SUBST_XXX,
-[ifdef([ACX_SUBST_XXX_$1], ,
-[define([ACX_SUBST_XXX_$1], )dnl
-AC_DIVERT_PUSH(AC_DIVERSION_SED)dnl
-s=XXX_$1_XXX=[$]$1=g
-AC_DIVERT_POP()dnl
-])])
-
-dnl Available from the GNU Autoconf Macro Archive at:
-dnl http://www.gnu.org/software/ac-archive/htmldoc/acx_f77_cmain_fflags.html
-dnl
-AC_DEFUN([ACX_F77_CMAIN_FFLAGS],
-[AC_CACHE_CHECK([for f77 flags to use C main function], acx_cv_f77_cmain_fflags,
-[acx_cv_f77_cmain_fflags="unknown"
+AU_ALIAS([ACX_F77_CMAIN_FFLAGS], [AX_F77_CMAIN_FFLAGS])
+AC_DEFUN([AX_F77_CMAIN_FFLAGS],
+[AC_CACHE_CHECK([for f77 flags to use C main function], ax_cv_f77_cmain_fflags,
+[ax_cv_f77_cmain_fflags="unknown"
 AC_LANG_PUSH(C)
 AC_COMPILE_IFELSE([[int main(void) { return 0; }]],
 		  [mv conftest.$ac_objext conftest_cmain.$ac_objext],
-		  [acx_cv_f77_cmain_fflags=error])
+		  [ax_cv_f77_cmain_fflags=error])
 AC_LANG_POP(C)
-if test "x$acx_cv_f77_cmain_fflags" != xerror; then
+if test "x$ax_cv_f77_cmain_fflags" != xerror; then
     AC_LANG_PUSH(Fortran 77)
-    acx_save_LIBS=$LIBS
+    ax_save_LIBS=$LIBS
     LIBS="conftest_cmain.$ac_objext $LIBS"
-    acx_save_FFLAGS=$FFLAGS
-    for acx_flag in none -nofor_main; do
-	case $acx_flag in
-	    none) FFLAGS=$acx_save_FFLAGS ;;
-	    *)    FFLAGS="$acx_save_FFLAGS $acx_flag" ;;
+    ax_save_FFLAGS=$FFLAGS
+    for ax_flag in none -nofor_main; do
+	case $ax_flag in
+	    none) FFLAGS=$ax_save_FFLAGS ;;
+	    *)    FFLAGS="$ax_save_FFLAGS $ax_flag" ;;
 	esac
 	AC_LINK_IFELSE([
       subroutine foobar()
       return
       end
-], [acx_cv_f77_cmain_fflags=$acx_flag; break]);
+], [ax_cv_f77_cmain_fflags=$ax_flag; break]);
     done
-    FFLAGS=$acx_save_FFLAGS
-    LIBS=$acx_save_LIBS
+    FFLAGS=$ax_save_FFLAGS
+    LIBS=$ax_save_LIBS
     AC_LANG_POP(Fortran 77)
 fi])
-    case $acx_cv_f77_cmain_fflags in
-	error|unknown) 
+    case $ax_cv_f77_cmain_fflags in
+	error|unknown)
 	    F77_CMAIN_FFLAGS=""
 	    ifelse([$2],,[AC_MSG_ERROR([cannot link C main with Fortran])],[$2])
 	    ;;
-	*) 
-	    if test "x$acx_cv_f77_cmain_fflags" = xnone; then
+	*)
+	    if test "x$ax_cv_f77_cmain_fflags" = xnone; then
 		F77_CMAIN_FFLAGS=""
 	    else
-		F77_CMAIN_FFLAGS="$acx_cv_f77_cmain_fflags"
+		F77_CMAIN_FFLAGS="$ax_cv_f77_cmain_fflags"
 	    fi
 	    $1
 	    ;;
@@ -318,7 +119,7 @@ fi])
 # Christopher R. Gabriel <cgabriel@linux.it>, April 2000
 
 
-AC_DEFUN(AM_PATH_GSL,
+AC_DEFUN([AX_PATH_GSL],
 [
 AC_ARG_WITH(gsl-prefix,[  --with-gsl-prefix=PFX   Prefix where GSL is installed (optional)],
             gsl_prefix="$withval", gsl_prefix="")
@@ -415,19 +216,13 @@ int main (void)
    if (($gsl_major_version > major) ||
       (($gsl_major_version == major) && ($gsl_minor_version > minor)) ||
       (($gsl_major_version == major) && ($gsl_minor_version == minor) && ($gsl_micro_version >= micro)))
-    {
-      exit(0);
-    }
-  else
-    {
-      printf("\n*** 'gsl-config --version' returned %d.%d.%d, but the minimum version\n", $gsl_major_version, $gsl_minor_version, $gsl_micro_version);
-      printf("*** of GSL required is %d.%d.%d. If gsl-config is correct, then it is\n", major, minor, micro);
-      printf("*** best to upgrade to the required version.\n");
-      printf("*** If gsl-config was wrong, set the environment variable GSL_CONFIG\n");
-      printf("*** to point to the correct copy of gsl-config, and remove the file\n");
-      printf("*** config.cache before re-running configure\n");
-      exit(1);
-    }
+     { 
+       exit(0);
+     }   
+   else
+     {
+       exit(1);
+     }
 }
 
 ],, no_gsl=yes,[echo $ac_n "cross compiling; assumed OK... $ac_c"])
@@ -481,5 +276,6 @@ int main (void)
   rm -f conf.gsltest
 ])
 
+AU_ALIAS([AM_PATH_GSL], [AX_PATH_GSL])
 
-
+m4_include([acinclude.m4])

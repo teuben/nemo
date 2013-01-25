@@ -5,9 +5,9 @@ dnl this.
 dnl http://www-106.ibm.com/developerworks/linux/library/l-debcon.html
 dnl ---------------------------------------------------------------------------------
 
-AC_MSG_CHECKING([NEMO config])
-
 AC_INIT(NEMORC)
+
+AC_MSG_CHECKING([NEMO config])
 
 AC_CONFIG_HEADER([config.h:config.h.in])
 
@@ -51,8 +51,8 @@ done
 dnl ----                Architecture stuff we need to know
 AC_CANONICAL_HOST
 echo "Found CANONICAL_HOST = $host_os"
-  
-dnl ---                 sizeof various data types
+   
+dnl ---                 sizeof various data types (used to be AC_CHECK_SIZEOF())
 AC_CHECK_SIZEOF(float)
 AC_CHECK_SIZEOF(double)
 AC_CHECK_SIZEOF(long double)
@@ -79,6 +79,9 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+dnl next ones seems to force linking with FC
+dnl AC_PROG_FC
+dnl AC_FC_WRAPPERS
 
 AC_ARG_PROGRAM
 
@@ -344,6 +347,8 @@ fi
 
 dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
 ACX_F77_CMAIN_FFLAGS([],[AC_MSG_WARN([problems fortran-c interface])])
+AX_F77_CMAIN_FFLAGS([AC_MSG_WARN([f77 cmain ok])],[AC_MSG_WARN([problems fortran-c interface])])
+dnl ACX_F77_CMAIN_FFLAGS([],[])
 
 dnl Fortran binary I/O has a 4 or 8 byte header the unfio library needs to know
 AC_MSG_CHECKING(size of unformatted fortran I/O header/footer)
@@ -378,8 +383,8 @@ case $host_os in
   darwin*)
     CCSHARED="-fPIC -fno-common"
 #    MACOS_LIBS="-lcc_dynamic -L/sw/lib"
-    MACOS_LIBS="-L/sw/lib"
-    NEMO_CFLAGS="$NEMO_CFLAGS -I/sw/include"
+#    MACOS_LIBS="-L/sw/lib"
+#    NEMO_CFLAGS="$NEMO_CFLAGS -I/sw/include"
     ;;
   sol*)
 #   -PIC ??
