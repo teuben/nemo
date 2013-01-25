@@ -26,7 +26,7 @@ clean:
 
 
 # go figure, on a mac galaxy.a is claimed to be not of the right architecture
-# this kludge will create it
+# this kludge will create it. Will 'libtool -static' work instead of 'ar' on mac ?
 
 galaxy0: galaxy
 
