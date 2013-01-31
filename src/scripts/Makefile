@@ -9,7 +9,7 @@ OS=
 #LDFLAGS = -O
 
 SCRIPTS = mknemo mkpdoc manlaser nemoman ldso nemo.version \
-	fitsedit nds9 shtool nemo.coverage showvar mir2nemo
+	fitsedit nds9 shtool nemo.coverage showvar mir2nemo getline
 MAKES = Makefile.lib 
 FAKES = cc make f77 ranlib
 
@@ -41,7 +41,7 @@ nemo_bin: $(SCRIPTS)
 
 
 nemo_src:
-		
+
 clean:
 	rm -f *.o *.a core 
 ####				install by USER (nemo)
@@ -74,7 +74,7 @@ cc:
 	  echo "Copying cc.d/cc.$(OS) script as cc replacement to NEMOBIN"; \
 	  if [ ! -f $(NEMOBIN)/cc ]; \
 	  then \
-  	    cp cc.d/cc.$(OS) $(NEMOBIN)/cc; \
+	    cp cc.d/cc.$(OS) $(NEMOBIN)/cc; \
 	  else \
 	    echo Will not overwrite existing $(NEMOBIN)/cc; \
 	  fi; \
@@ -97,7 +97,7 @@ f77:
 	else \
 	  echo "No f77 script available for OS=$(OS) - skipped"; \
 	  echo "Standard f77 compiler will hence be used: "; \
- 	  which f77; \
+	  which f77; \
 	fi
 
 ranlib:
