@@ -520,8 +520,9 @@ AC_MSG_CHECKING(whether we have HDF)
 AC_ARG_WITH(hdf-prefix, 
         [  --with-hdf-prefix=PFX     Prefix where HDF was installed], 
         hdf_config_prefix="$withval", 
-        hdf_config_prefix="/usr/local")
+        hdf_config_prefix="/usr")
 dnl			this assumes people will use include <hdf.h>, not <hdf/hdf.h>
+dnl                     on Fedora, you will find HDF4 in /usr/{include,lib}/hdf 
 hdf=$hdf_config_prefix
 for dir in $hdf $hdf/include $hdf/hdf $hdf/include/hdf
     do
@@ -532,7 +533,7 @@ for dir in $hdf $hdf/include $hdf/hdf $hdf/include/hdf
     done
 
 if test "X$HDF_INC" != "X"; then
-    HDF_LIB="-L$hdf/lib -ldf -ljpeg -lz"
+    HDF_LIB="-L$hdf/lib -L$hdf/hdf -ldf -ljpeg -lz"
     AC_DEFINE(HAVE_HDF)
     AC_MSG_RESULT([yes: hdf4, $HDF_INC])
 else
