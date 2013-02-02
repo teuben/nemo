@@ -1,0 +1,36 @@
+Linux distributions are notoriously different in their package
+naming conventions, and makes it complicated to describe to
+each other what you need to install NEMO.
+
+If your package/version if not present, try and look at a
+related or different version and try those. Or make a new
+one, once you figured out what you needed.
+
+Also note that often one package will trigger other packages,
+so this list is the minimum you might need.
+
+
+For Fedora:   yum list > packages.list
+    	      yum install package_name
+    	      rpm -qa
+	      rpm -qf /usr/include/math.h
+
+For Ubuntu:   
+              apt-get install package_name
+    	      dpkg -l
+	      dpkg -S /usr/include/math.h
+	      
+
+In general you will need 1) and 2), and most likely 3) and 4).
+When you use PGPLOT (recommended), X-windows development 
+libraries are needed as well
+
+
+1) C,C++,Fortran compiler
+2) tcsh
+3) cvs
+   cvsutils
+4) doxygen
+
+
+xorg-x11-proto-devel-7.2-9.fc7

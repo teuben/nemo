@@ -1,0 +1,9 @@
+# apt-get install package_name
+# gcc 4.6.3
+#
+gcc
+gfortran
+g++
+cvs
+tcsh
+#
