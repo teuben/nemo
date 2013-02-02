@@ -8014,7 +8014,7 @@ for dir in $hdf $hdf/include $hdf/hdf $hdf/include/hdf
     done
 
 if test "X$HDF_INC" != "X"; then
-    HDF_LIB="-L$hdf/lib -L$hdf/hdf -ldf -ljpeg -lz"
+    HDF_LIB="-L$hdf/lib -L$hdf/lib/hdf -ldf -ljpeg -lz"
     $as_echo "#define HAVE_HDF 1" >>confdefs.h
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes: hdf4, $HDF_INC" >&5

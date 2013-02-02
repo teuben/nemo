@@ -533,7 +533,7 @@ for dir in $hdf $hdf/include $hdf/hdf $hdf/include/hdf
     done
 
 if test "X$HDF_INC" != "X"; then
-    HDF_LIB="-L$hdf/lib -L$hdf/hdf -ldf -ljpeg -lz"
+    HDF_LIB="-L$hdf/lib -L$hdf/lib/hdf -ldf -ljpeg -lz"
     AC_DEFINE(HAVE_HDF)
     AC_MSG_RESULT([yes: hdf4, $HDF_INC])
 else
