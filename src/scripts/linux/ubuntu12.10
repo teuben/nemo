@@ -1,0 +1,13 @@
+# apt-get install package_name
+# gcc 4.7.2
+# NOTE:  ubuntu uses a meta-package name "build-essential" 
+#        this takes care of g++, but not gfortran
+build-essential
+gfortran
+# 
+cvs
+tcsh
+# pgplot needs this
+x11proto-core-dev
+libx11-dev
+#
