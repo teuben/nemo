@@ -170,7 +170,12 @@ if ($dso == 0)  set copts=($copts --without-dso)
 echo Running configure $copts
 echo configure $copts  >& install.config.log
 ./configure  $copts   >>& install.config.log
-source nemo_start
+if (-e nemo_start) then
+  source nemo_start
+else
+  echo Configure failed, no nemo_start produced.
+  exit 0
+endif
 $make postconfig
 
 source NEMORC.local
