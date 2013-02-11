@@ -1,6 +1,6 @@
 # apt-get install package_name
 # gcc 4.6.3
-#
+# NOTE:  ubuntu uses a meta-package name "build-essential" which probably can skip a lot from below
 gcc
 gfortran
 g++
