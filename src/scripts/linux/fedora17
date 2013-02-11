@@ -1,0 +1,16 @@
+o# yum install package_name
+#        gcc 4.7.2
+# basic:
+gcc
+gcc-gfortran
+gcc-c++
+cvs
+tcsh
+# if you use pgplot w/ xwindows  (Xext seems not needed, except configure wants it)
+xorg-x11-proto-devel
+libX11-devel
+libXext-devel
+# if you use HDF4 (e.g. cmhog2) - note it uses /usr/include/hdf and /usr/lib/hdf
+libhdf-devel
+# /usr/lib   and /usr/include/cfitsio
+cfitsio-devel
