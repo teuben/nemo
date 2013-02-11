@@ -71,7 +71,7 @@ string defv[] = {
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present) to select",
-        "VERSION=5.5\n   17-aug-2012 PJT",
+        "VERSION=5.6\n   10-feb-2013 PJT",
         NULL,
 };
 
@@ -185,6 +185,7 @@ static string xyz[3]    = { "X",        "Y",        "Z" };
 void write_fits(string name,imageptr iptr)
 {
     FLOAT tmpr,xmin[3],xref[3],dx[3],mapmin,mapmax;   /* fitsio FLOAT !!! */
+    FLOAT bmaj,bmin,bpa;
     FITS *fitsfile;
     char *cp, origin[80];
     string *hitem, axname[3];
@@ -211,6 +212,10 @@ void write_fits(string name,imageptr iptr)
     axname[2] = (Namez(iptr) ? Namez(iptr) : xyz[2]);
     mapmin = MapMin(iptr);
     mapmax = MapMax(iptr);
+    bmaj = Beamx(iptr);
+    bmin = Beamy(iptr);
+    bpa  = 0.0;        /* only spherical beams for now */
+
     if (Qdummy) 
       for (i=0; i<3; i++) p[i] = i;
     else {
@@ -315,6 +320,10 @@ void write_fits(string name,imageptr iptr)
 	if (ndim>2) fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
       }
     }
+
+    fitwrhdr(fitsfile,"BMAJ",bmaj);
+    fitwrhdr(fitsfile,"BMIN",bmin);
+    fitwrhdr(fitsfile,"BPA",bpa);
 
     fitwrhdr(fitsfile,"DATAMIN",mapmin);
     fitwrhdr(fitsfile,"DATAMAX",mapmax);
