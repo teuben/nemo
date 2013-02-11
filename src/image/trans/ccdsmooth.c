@@ -31,11 +31,13 @@ string defv[] = {
 	"out=???\n              Output filename",
 	"gauss=\n               FWHP gaussian beamwidth, if used",		
 	"dir=xy\n               Coordinates to smooth (xyz)",			
-	"smooth=0.25,0.5,0.25\n ALternate smoothing array if gauss= not used",
+	"smooth=0.25,0.5,0.25\n Alternate smoothing array if gauss= not used",
+	"wiener=\n              Size of a wiener filter, if used (square in X,Y)",
 	"nsmooth=1\n            Number of smoothings",
 	"bad=\n			Optional ignoring this bad value",
 	"cut=0.01\n             Cutoff value for gaussian, if used",
-	"VERSION=3.1a\n         20-apr-01 PJT",
+	"mode=0\n               Special edge smoothing modes (testing)",
+	"VERSION=3.3a\n         10-feb-2013 PJT",
 	NULL,
 };
 
@@ -57,6 +59,7 @@ int    nx,ny,nz,nsize;			/* actual size of map */
 real   xmin,ymin,zmin,dx,dy,dz;
 real   size;				/* size of frame (square) */
 real   cell;				/* cell or pixel size (square) */
+int    nxw=0, nyw=0, nzw=0;             /* wiener filter size */
 
 real   smooth[MSMOOTH];			/* full 1D beam */
 int    lsmooth;				/* actual smoothing length */
@@ -64,6 +67,7 @@ int    nsmooth;				/* number of smoothings */
 real   gauss_fwhm;			/* beam size in case gauss */
 real   gauss_cut;                       /* cutoff of gaussian */
 string dir;                             /* direction to smooth 'xyz' */
+int    mode;                            /* special edge smoothing modes */
 
 bool   Qbad;                            /* ignore smoothing for */
 real   bad;                             /* this value */
@@ -93,7 +97,10 @@ void nemo_main ()
         make_gauss_beam(getparam("dir"));
 
     outstr = stropen (outfile,"w");
-    smooth_it();
+    if (hasvalue("wiener"))
+      wiener();
+    else
+      smooth_it();
     write_image (outstr,iptr);
 
     strclose(instr);
@@ -102,6 +109,7 @@ void nemo_main ()
 
 void setparams()
 {
+    int     nw,nws[3];
     infile = getparam ("in");
     outfile = getparam ("out");
 
@@ -116,6 +124,12 @@ void setparams()
     dir = getparam("dir");
     Qbad = hasvalue("bad");
     if (Qbad) bad = getdparam("bad");
+    mode = getiparam("mode");
+    nw = nemoinpi("wiener",nws,3);
+    if (nw>0) {
+      /* for now */
+      nxw = nyw = nws[0];
+    }
 }
 
 void smooth_it()
@@ -168,8 +182,13 @@ void smooth_it()
     	   Beamy(iptr)=gauss_fwhm;
 	if (strchr(getparam("dir"),'z'))
     	   Beamz(iptr)=gauss_fwhm;
-     } else
+     } else {
     	BeamType(iptr)=ANYBEAM;
+	/*  factor (3+nsmooth)/2   is very roughly ok for nsmooth=1,2,3,4 */
+	Beamx(iptr) = (1.5+0.5*nsmooth) * ABS(Dx(iptr));
+	Beamy(iptr) = (1.5+0.5*nsmooth) * ABS(Dy(iptr));
+	Beamz(iptr) = (1.5+0.5*nsmooth) * ABS(Dz(iptr));
+     }
     	
     dprintf (1,"New min and max in map are: %f %f\n",m_min,m_max);
     dprintf (1,"New total brightness/mass is %f\n",total*Dx(iptr)*Dy(iptr));
@@ -342,3 +361,44 @@ int    nx, ny, nz, nb, ix, iy;
 	return 1;
 }
 
+
+
+int wiener(void)
+{
+#if 0
+  imageptr itmp = NULL;
+  int ix, iy, ixd, iyd; ix1, iy1;
+
+
+  itmp = create_image(iptr,nx,ny);
+
+  for (iz=0; iz< nz; iz++) {
+    for (iy=0; iy<ny; iy++)
+      for (ix=0; ix<nx; ix++)   	
+	MapValue(iptr,ix,iy,iz) = CubeValue(iptr,ix,iy,iz);
+    for (iy=0; iy<ny; iy++)
+      for (ix=0; ix<nx; ix++) {
+	sumi = sumii = 0.0;
+	for (iyd=-nxw; iyd<=nxw; iyd++) {
+	  iy1 = iy + iyd;
+	  if (iy1<0 || iy1>=ny) continue;
+	  for (ixd=-nxw; ixd<=nxw; ixd++) {
+	    ix1 = ix + ixd;
+	    if (ix1<0 || ix1>=nz) continue;
+	    sumi  += MapValue(iptr,ix1,iy1,iz);
+	    sumii += MapValue(iptr,ix1,iy1,iz) * MapValue(iptr,ix1,iy1,iz);
+	    
+	    
+	
+    
+
+    for (iy=0; iy<ny; iy++)
+      for (ix=0; ix<nx; ix++)   	
+          brightness = CubeValue(iptr,ix,iy,iz);
+	  total += brightness;
+          m_max = MAX(m_max, brightness);
+          m_min = MIN(m_min, brightness);
+    }
+
+#endif
+}
