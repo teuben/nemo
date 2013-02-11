@@ -196,6 +196,7 @@ switch ($host)
     else 
       $dir/pgplot/makemake  $dir/pgplot sol2 f77_cc $new4
     endif
+    # rm libpgplot.so
     breaksw
   case Linux:
   case linux:
