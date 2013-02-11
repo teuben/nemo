@@ -1,6 +1,6 @@
 /* 
  *  SNAPGRID:  program grids a snapshot into a 3D image-cube
- *             can do emission as well as absorbtion
+ *             can do emission as well as absorption
  *             generalization of snapccd
  *
  *	19-jan-89  V1.0 -- derived from snapccd	PJT
@@ -28,6 +28,7 @@
  *       7-feb-06   5.1 integrate= option to compact the 3rd axis on the fly (ccdmom-like)
  *       9-feb-06   5.2 make it work for stack=t
  *       2-mar-11   5.3 implemented h3,h4 as moment -3 and -4
+ *      18-may-12   5.4 added smoothing in VZ (szvar)
  *
  * Todo: - mean=t may not be correct for nz>1 
  *       - hermite h3 and h4 for proper kinemetry
@@ -60,10 +61,11 @@ string defv[] = {		/* keywords/default values/help */
         "evar=m\n                         emission variable(s)",
         "tvar=0\n                         absorbtion variable",
         "dvar=z\n                         depth variable w/ tvar=",
-        "svar=\n                          smoothing size variable",
+        "svar=\n                          smoothing size variable in XY",
+	"szvar=\n                         smoothing size variable in ZVAR",
 	"nx=64\n			  x size of image",
 	"ny=64\n			  y size of image",
-	"nz=1\n			  	  z size of image",
+	"nz=1\n			  	  z size of image/cube",
 	"xlab=\n                          Optional X label [xvar]",
 	"ylab=\n                          Optional Y label [yvar]",
 	"zlab=\n                          Optional Z label [zvar]",
@@ -72,7 +74,7 @@ string defv[] = {		/* keywords/default values/help */
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=5.3\n			  3-mar-2011 PJT",
+	"VERSION=5.4\n			  19-may-2012 PJT",
 	NULL,
 };
 
@@ -106,8 +108,8 @@ local rproc  xfunc, yfunc, zfunc;	/* bodytrans expression evaluator for axes */
 local string *evar;
 local rproc  efunc[MAXVAR];
 local int    nvar;			/* number of evar's present */
-local string dvar, tvar, svar;
-local rproc  dfunc, tfunc, sfunc;
+local string dvar, tvar, svar, szvar;
+local rproc  dfunc, tfunc, sfunc, szfunc;
 
 local int    moment;	                /* moment to take in velocity */
 local real   zsig;			/* positive if convolution in Z used */
@@ -118,6 +120,7 @@ local bool   Qint;                      /* integrate, instead of sum, along the 
 local bool   Qstack;                    /* stacking snapshots ?? */
 local bool   Qdepth;                    /* need dfunc/tfunc for depth integration */
 local bool   Qsmooth;                   /* (variable) smoothing */
+local bool   Qzsmooth;                  /* (variable) smoothing */
 
 local bool   Qwcs;                      /* use a real astronomical WCS in "fits" degrees */
 local string proj;         
@@ -318,6 +321,8 @@ void setparams()
     tvar = getparam("tvar");
     Qsmooth = hasvalue("svar");
     if (Qsmooth) svar = getparam("svar");
+    Qzsmooth = hasvalue("szvar");
+    if (Qzsmooth) szvar = getparam("szvar");
     if (nvar < 1) error("Need evar=");
     if (nvar > MAXVAR) error("Too many evar's (%d > MAXVAR = %d)",nvar,MAXVAR);
     if (Qstack && nvar>1) error("stack=t with multiple (%d) evar=",nvar);
@@ -349,6 +354,9 @@ void compfuncs()
     }
     if (Qsmooth)
         sfunc = btrtrans(svar);
+    if (Qzsmooth)
+        szfunc = btrtrans(szvar);
+    
 }
 
 int read_snap()
