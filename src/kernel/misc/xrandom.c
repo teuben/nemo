@@ -244,6 +244,7 @@ string defv[] = {
     "gauss=f\n      gaussian or uniform noise?",
     "report=f\n     Report mean/dispersian/skewness/kurtosis?",
     "tab=t\n        Tabulate all random numbers?",
+    "offset=0.0\n   Offset of distribution from 0",
 #ifdef HAVE_GSL
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
@@ -280,6 +281,8 @@ nemo_main()
   bool   Qbench;
   string *sp, ran_name;
   Moment mom;
+  real   offset = getdparam("offset");
+
   
   n = getiparam("n");
   m = getiparam("m");
@@ -299,13 +302,13 @@ nemo_main()
     sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = 0.0;
     if (Qgauss) {
       for (j=0; j<n;j++) {
-	for (i=0, s=1.0, y = grandom(0.0,1.0); i<5; i++, s *= y)
+	for (i=0, s=1.0, y = grandom(offset,1.0); i<5; i++, s *= y)
 	  sum[i] += s;
 	if (Qtab) printf("%g\n",y);
       }
     } else {
       for (j=0; j<n;j++) {
-	for (i=0, s=1.0, y = xrandom(0.0,1.0); i<5; i++, s *= y)
+	for (i=0, s=1.0, y = xrandom(offset,1.0); i<5; i++, s *= y)
 	  sum[i] += s;
 	if (Qtab) printf("%g\n",y);	
       }
