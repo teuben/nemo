@@ -33,7 +33,7 @@ ignored [default: not used].
 \fBdir=x|y|z\fP
 Direction of smoothing. This gives the flexibility of smoothing in
 x, y and/or z separately. Note that when smoothing in more than one
-coordinate the beam is forced to be circular.
+coordinate the \fIbeam\fP is forced to be the same in each dimension
 [default: xy].
 .TP
 \fBsmooth=\fIarray\fP
@@ -45,8 +45,7 @@ Example is e.g. the Hanning smoothing: "0.25,0.5,0.25".
 \fBgauss\fP parameter is not used.
 .TP
 \fBnsmooth=\fIvalue\fP
-Number of times the above smoothing kernel is applied over the data, 
-just in case you wanted to be wasteful.
+Number of times the above smoothing kernel is applied over the data.
 [default: \fB1\fP].
 .TP
 \fBbad=\fIbad_value\fP
