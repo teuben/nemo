@@ -132,6 +132,13 @@ typedef struct {
 } new_image, *new_imageptr;
 
 
+typedef struct {
+  int mode;             /* default mode is rectangular region blc-trc */
+  int blc[3];           /* bottom lower (boundingbox) corner  in ix,iy,iz */
+  int trc[3];           /* top right (boundingbox) corner in ix,iy,iz */
+} region,  *regionptr;
+
+
 #define Frame(iptr)	((iptr)->frame)
 #define Axis(iptr)      ((iptr)->axis)
 #define Nx(iptr)	((iptr)->nx)
@@ -162,6 +169,9 @@ typedef struct {
 #define Time(iptr)	((iptr)->time)
 #define Storage(iptr)   ((iptr)->storage)
 #define Mask(iptr)      ((iptr)->mask)
+
+#define BLC(rptr)       ((rptr)->blc)
+#define TRC(rptr)       ((rptr)->trc)
 
 
 
