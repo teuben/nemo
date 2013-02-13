@@ -57,6 +57,9 @@ nemo_main()
   string input1 = getparam("in1");
   string input2 = getparam("in2");
   stream instr1, instr2;
+  bool Qradec = getbparam("radec");
+
+  if (Qradec) error("radec mode not implemented yet");
 
   ncol1 = nemoinpi(getparam("col1"),colnr1,NDIM);
   ncol2 = nemoinpi(getparam("col2"),colnr2,NDIM);
