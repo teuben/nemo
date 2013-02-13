@@ -142,6 +142,7 @@ void compare_2d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2)
 	jmin = j;
       }
     }
+    dmin = sqrt(dmin);
     printf("%d %g %g   %d %g %g   %g\n",i+1,x1[i],y1[i],jmin+1,x2[jmin], y2[jmin],dmin);
   }
 }
@@ -161,6 +162,7 @@ void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real
 	jmin = j;
       }
     }
+    dmin = sqrt(dmin);
     printf("%d %g %g %g   %d %g %g %g   %g\n",i+1,x1[i],y1[i],z1[i],jmin+1,x2[jmin],y2[jmin],z2[jmin],dmin);
   }
 }
