@@ -1,0 +1,64 @@
+.TH TABDIST 1NEMO "13 February 2013"
+.SH NAME
+tabdist \- Compare distances between points in two tables, aka catalog matching
+.SH SYNOPSIS
+\fBtabdist\fP [parameter=value]
+.SH DESCRIPTION
+Given two tables, each representing 1D, 2D or 3D points, it will
+compute the nearest neigbor(s) from one table into the other table.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin1=\fP
+First dataset, an ascii table. No default.
+.TP
+\fBin2=\fP
+Second dataset, an ascii table. No default.
+The tables do not need to be of the same length.
+.TP
+\fBcol1=\fP
+Coordinate columns from 1st dataset. 1D, 2D and 3D are currently supported [1,2]
+.TP
+\fBcol2=\fP
+Coordinate columns from 2nd dataset. 1D, 2D and 3D are currently supported [1,2]
+.SH EXAMPLES
+The X,Y,Z coordinates of a 3 particle plummer sphere are perturbed by a small
+amount and then compared to the original list. Thus they must match one on one:
+.nf
+% mkplummer - 3 | snapprint - x,y,z > tab11
+% tabmath tab11 - '%1+rang(0,0.01),%2+rang(0,0.01),%3+rang(0,0.01)' > tab12
+.fi
+
+First a one dimensional comparison
+
+.nf
+% tabdist tab12 tab12 1 4
+1  0.117073   1  0.122846     0.005773
+2 -0.00899587 2 -0.0100997    0.00110383
+3 -0.108077   3 -0.0964223    0.0116547
+.fi
+and then a full 3D case:
+.nf
+% tabdist tab12 tab12 1,2,3 4,5,6
+1  0.117073  -0.097704 -0.299081   1  0.122846  -0.102288 -0.317648   0.0199768
+2 -0.00899587 0.293374  0.12652    2 -0.0100997  0.281876  0.121453   0.0126134 
+3 -0.108077  -0.19567   0.172561   3 -0.0964223 -0.203288  0.17993    0.0157534
+
+.fi
+Currently it will display the line number, the coordinate(s) in table1,
+then the best matching line number and coordinates(s) from table2, and finally the distance.
+
+.SH CAVEAT
+Currently a brute force (quadratic in N) minimum distance is used.
+.SH SEE ALSO
+tabmath(1NEMO)
+.SH FILES
+src/kernel/tab/tabdist.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+13-Feb-13	V0.1 Created	PJT
+.fi
