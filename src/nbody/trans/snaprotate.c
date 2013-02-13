@@ -39,7 +39,7 @@ string defv[] = {
     "tscale=\n             If used, scalefactor for angles with time of snapshot",
     "spinvector=\n         Alternate way to specify order= for one given theta",
     "select=pos,vel,acc\n  Select the vectors for rotation",
-    "VERSION=6.0\n         19-sep-08 PJT",
+    "VERSION=6.0b\n        13-feb-2013 PJT",
     NULL,
 };
 
@@ -79,7 +79,7 @@ nemo_main()
     if (strstr(rotvects,"vel")) vecmask |= VelBit;
     if (strstr(rotvects,"acc")) vecmask |= AccelerationBit;
 
-    dprintf(0,"Warning: new option: select=%s  => mask=%d\n",rotvects,vecmask);
+    dprintf(1,"Warning: new option: select=%s  => mask=%d\n",rotvects,vecmask);
 
     instr = stropen(getparam("in"), "r");           /* open input file */
     nopt = nemoinpr(getparam("theta"),theta,MAXANG);  /* get angles */
