@@ -11,6 +11,7 @@
  *      30-jan-05   1.7 added an optional median
  *      24-may-06   1.8 add mmcount=
  *       6-nov-06   1.9 output the total mass/luminosity as well as sum of densities
+ *      13-feb-13   2.0 ignore axis if N=1 
  *
  */
 
@@ -32,8 +33,9 @@ string defv[] = {
     "robust=f\n     Compute robust median",
     "mmcount=f\n    Count occurances of min and max",
     "maxmom=4\n     Control how many moments are computed",
+    "ignore=t\n     (for summing) Ignore axes width where N=1",
     "sort=qsort\n   Sorting routine (not activated yet)",
-    "VERSION=1.11\n 8-oct-2012 PJT",
+    "VERSION=2.0\n  13-feb-2013 PJT",
     NULL,
 };
 
@@ -63,12 +65,14 @@ nemo_main()
     real sum, sov;
     Moment m;
     bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qmmcount = getbparam("mmcount");
+    bool Qx, Qy, Qz, Qone = getbparam("ignore");
     real nu, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood = 0;
     int ndat = 0;
     int min_count, max_count;
     int maxmom = getiparam("maxmom");
+    char slabel[32];
 
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
@@ -102,7 +106,18 @@ nemo_main()
     }
 
 
-    sov = Dx(iptr)*Dy(iptr)*Dz(iptr);   /* voxel volume; TODO: should we do 2D vs. 3D ? */
+    sov = 1.0;
+
+    Qx = Qone && Nx(iptr)==1;
+    Qy = Qone && Ny(iptr)==1;
+    Qz = Qone && Nz(iptr)==1;
+    sov *= Qx ? 1.0 : Dx(iptr);
+    sov *= Qy ? 1.0 : Dy(iptr);
+    sov *= Qz ? 1.0 : Dz(iptr);
+    strcpy(slabel,"*");
+    if (!Qx) strcat(slabel,"Dx*");
+    if (!Qy) strcat(slabel,"Dy*");
+    if (!Qz) strcat(slabel,"Dz*");
     
     if (maxmom < 0) {
       warning("No work done, maxmom<0");
@@ -164,7 +179,7 @@ nemo_main()
       printf ("Number of points      : %d\n",n_moment(&m));
       printf ("Mean and dispersion   : %f %f\n",mean,sigma);
       printf ("Skewness and kurtosis : %f %f\n",skew,kurt);
-      printf ("Sum and Sum*Dx*Dy*Dz  : %f %f\n",sum, sum*sov);
+      printf ("Sum and Sum*%s        : %f %f\n",sum, slabel, sum*sov);
       if (Qmedian) {
 	printf ("Median                : %f\n",get_median(ngood,data));
 	if (ndat>0)
