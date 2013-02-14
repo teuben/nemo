@@ -13,7 +13,7 @@
  *      19-jul-12   0.7  allow peak (mom=3) to find 2nd peak
  *      27-nov-12   1.0  add oper=  to insert an operator (ie. out = in <oper> out )
  *       8-dec-12   1.1  allow mom=-3 for differentials (axis=3 only for now) in 2..Nz()
- *      13-fen-13   1.2  allow integration, instead of just summing
+ *      13-feb-13   2.0  default integration, instead of just summing
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -35,8 +35,8 @@ string defv[] = {
 	"cumulative=f\n Cumulative axis (only valid for mom=0)",
 	"oper=\n        Operator on output (enforces keep=t)",
 	"peak=1\n       Find N-th peak in case of peak finding (mom=3)",
-	"integrate=f\n  Allow integration instead of summing, for mom=0",
-	"VERSION=1.2\n  13-feb-2013 PJT",
+	"integrate=t\n  Use integration instead of just summing, only used for mom=0",
+	"VERSION=2.0\n  13-feb-2013 PJT",
 	NULL,
 };
 
