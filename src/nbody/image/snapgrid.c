@@ -29,6 +29,7 @@
  *       9-feb-06   5.2 make it work for stack=t
  *       2-mar-11   5.3 implemented h3,h4 as moment -3 and -4
  *      18-may-12   5.4 added smoothing in VZ (szvar)
+ *     13-feb-2013  6.0 units changed on a cube (now density instead of surface brightness?)
  *
  * Todo: - mean=t may not be correct for nz>1 
  *       - hermite h3 and h4 for proper kinemetry
@@ -74,7 +75,7 @@ string defv[] = {		/* keywords/default values/help */
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=5.4\n			  19-may-2012 PJT",
+	"VERSION=6.0\n			  13-feb-2013 PJT",
 	NULL,
 };
 
@@ -511,8 +512,10 @@ bin_data(int ivar)
     expfac = (zsig > 0.0 ? 1.0/(sqrt(TWO_PI)*zsig) : 0.0);
     if (Qmean)
         cell_factor = 1.0;
-    else
+    else {
         cell_factor = 1.0 / ABS(Dx(iptr)*Dy(iptr));
+	if (Nz(iptr) > 1) cell_factor /= ABS(Dz(iptr));
+    }
 
     if (Qint)
         cell_factor = 1.0;   
