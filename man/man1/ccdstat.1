@@ -1,4 +1,4 @@
-.TH CCDSTAT 1NEMO "15 October 2011"
+.TH CCDSTAT 1NEMO "14 February 2013"
 .SH NAME
 ccdstat \- statistics (1st through 4th moment) and chi2
 .SH SYNOPSIS
@@ -68,6 +68,11 @@ through the kurtosis are computed. For maxmom<0 no work is done, except
 for reading the file, which can be used to benchmark your disk I/O for
 large NEMO images.  [Default: 4].
 .TP
+\fBignore=t|f\fP
+This will ignore the cell width when summing emission for any axis
+that has only one cell (assumed infinity, or a result of \fIccdmom(1NEMO)\fP).
+Setting this to false, will not ignore that cell width. [Default : t]
+.TP
 \fBsort=t|f\fP
 Sorting routine (not activated yet) 
 .SH "EXAMPLE"
@@ -117,4 +122,5 @@ src/image/misc	ccdstat.c
 14-nov-04	V1.5: added the chi2 trigger with npar= and nppb=	PJT
 24-may-06	V1.8: added mmcount	PJT
 15-oct-11	V1.10: added maxmom= and bench options	PJT
+14-feb-13	V2.0:  ignore=t to properly handle units	PJT
 .fi
