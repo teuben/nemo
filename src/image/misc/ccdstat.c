@@ -33,7 +33,7 @@ string defv[] = {
     "robust=f\n     Compute robust median",
     "mmcount=f\n    Count occurances of min and max",
     "maxmom=4\n     Control how many moments are computed",
-    "ignore=t\n     (for summing) Ignore axes width where N=1",
+    "ignore=t\n     (for summing) Ignore cell width when N=1 (assumed infinity)",
     "sort=qsort\n   Sorting routine (not activated yet)",
     "VERSION=2.0\n  13-feb-2013 PJT",
     NULL,
