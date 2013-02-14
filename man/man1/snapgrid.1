@@ -1,4 +1,4 @@
-.TH SNAPGRID 1NEMO "4 March 2010"
+.TH SNAPGRID 1NEMO "14 February 2013"
 .SH NAME
 snapgrid \- grid a snapshot into a 2D or 3D image (cube), with optional moments
 .SH SYNOPSIS
@@ -25,11 +25,15 @@ Although \fIsnapgrid(1NEMO)\fP can grid datacubes (e.g. X-Y-Z),
 since it does not integrate along any lines of sight, whereas this
 program is more suited for taking moments along the 3rd axis.
 .PP
-For images that require more accurate interpolation, 
-use \fIsnapmap(1NEMO)\fP.
+For images that require more accurate interpolation, instead of
+this histogramming approach, use \fIsnapmap(1NEMO)\fP.
 .PP
 For a related program that creates images (and can create movies as well),
 see \fIuns_2dplot(1NEMO)\fP.
+.PP
+As of V6.0 the units in 3D cubes will be particle density. This ensures
+that programs such as \fIccdmom(1NEMO)\fP and \fIccdstat(1NEMO)\fP give
+the proper answer in their summed emission.
 .SH PARAMETERS
 The following parameters are recognized:
 .TP 20
@@ -275,4 +279,6 @@ src/nbody/image  	snapgrid.c
 8-may-04	V5.0: added proj= to optionallaly allow sky projections	PJT
 7-feb-06	V5.1: added integrate=t to deal with 3D density points	PJT
 2-mar-11	V5.3: moment -3,-4 implemented	PJT
-.fi
+18-may-12	V5.4: added smoothing in VZ (szvar)
+14-feb-13	V6.0: units changed on a cube (now xyz-density instead of xy-surface brightness)	PJT
+.fi 
