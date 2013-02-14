@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "27 November 2012"
+.TH CCDMOM 1NEMO "14 February 2013"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
@@ -59,7 +59,7 @@ For \fBmom=3\fP where it finds the peak, this allows you to find the N-th
 peak instead of the first. This is achieved by visiting each peak, and masking
 out all values downwards those peaks and then finding the next one.
 .TP
-\fBoper\fP
+\fBoper=\fP
 If supplied, this is an extra operator supplied to the input file and output file,
 to create the final output file. This is to prevent having to type two commands
 such as
@@ -71,9 +71,14 @@ instead of
 .nf
     ccdmom map0 map1 axis=1 mom=-1 oper=-
 .fi
-
+.TP
+\fBintegrate=t|f\fP
+When using mom=0 the signal is summed along an axis, you can either just sum
+the numbers (this used to be the old default), or integrate, ie. multiply
+the sum by the cell-size along that axis. This is now the default, to make
+it more consistent with the new units in \fIsnapgrid(1NEMO)\fP.
 .SH SEE ALSO
-pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), image(5NEMO)
+pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), snapgrid(1NEMO), image(5NEMO)
 .SH CAVEATS
 Cannot compute straight moments, e.g. the 2nd moment along an axis, such
 as e.g. \fIsnapgrid\fP can do. This 
@@ -95,5 +100,5 @@ Peter Teuben
 18-oct-05	V0.6 added mom=-2 and cumulative option 	PJT
 16-sep-11	V0.8 added clip= and rngmsk= [lost code]	PJT
 27-nov-12	V1.0 added oper=	PJT
-
+14-feb-13	V2.0 integrate=t is now the new default for mom=0	PJT
 .fi
