@@ -13,6 +13,7 @@
  *      19-jul-12   0.7  allow peak (mom=3) to find 2nd peak
  *      27-nov-12   1.0  add oper=  to insert an operator (ie. out = in <oper> out )
  *       8-dec-12   1.1  allow mom=-3 for differentials (axis=3 only for now) in 2..Nz()
+ *      13-fen-13   1.2  allow integration, instead of just summing
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -34,7 +35,8 @@ string defv[] = {
 	"cumulative=f\n Cumulative axis (only valid for mom=0)",
 	"oper=\n        Operator on output (enforces keep=t)",
 	"peak=1\n       Find N-th peak in case of peak finding (mom=3)",
-	"VERSION=1.1\n  8-dec-2012 PJT",
+	"integrate=f\n  Allow integration instead of summing, for mom=0",
+	"VERSION=1.2\n  13-feb-2013 PJT",
 	NULL,
 };
 
@@ -57,11 +59,12 @@ void nemo_main()
     int     i,j,k, apeak, apeak1, cnt;
     imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
     real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
-    real    *spec;
+    real    *spec, ifactor;
     int     *smask;
     bool    Qkeep = getbparam("keep");
     bool    Qoper = hasvalue("oper");
     int     npeak = getiparam("peak");
+    bool    Qint  = getbparam("integrate"); 
 
     if (Qoper) {
       Qkeep = TRUE;
@@ -129,9 +132,11 @@ void nemo_main()
       copy_image(iptr,&iptr1);
     }
 
+    ifactor = 1.0;
     if (axis==1) {
       scale = Dx(iptr);
       offset = Xmin(iptr);
+      if (Qint) ifactor *= ABS(Dx(iptr));
       for (k=0; k<nz; k++)
         for (j=0; j<ny; j++) {
 	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
@@ -158,7 +163,7 @@ void nemo_main()
 	      else if (mom==-2)
 		newvalue = sqrt(tmp00/cnt - sqr(tmp0/cnt));
 	      else if (mom==0) 
-		newvalue = tmp0;
+		newvalue = tmp0 * ifactor;
 	      else if (mom==1)
 		newvalue = offset + scale*(tmp1/tmp0);
 	      else if (mom==2)
@@ -188,6 +193,7 @@ void nemo_main()
     } else if (axis==2) {                      
       scale = Dy(iptr);
       offset = Ymin(iptr);
+      if (Qint) ifactor *= ABS(Dy(iptr));
       for (k=0; k<nz; k++)
         for (i=0; i<nx; i++) {
             tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
@@ -214,7 +220,7 @@ void nemo_main()
 	      else if (mom==-2)
 		newvalue = sqrt(tmp00/cnt - sqr(tmp0/cnt));
 	      else if (mom==0)
-		newvalue = tmp0;
+		newvalue = tmp0 * ifactor;
 	      else if (mom==1)
 		newvalue = scale*(tmp1/tmp0) + offset;
 	      else if (mom==2)
@@ -244,6 +250,7 @@ void nemo_main()
     } else if (axis==3) {                       /* this one is tested */
         scale = Dz(iptr);
 	offset = Zmin(iptr);
+	if (Qint) ifactor *= ABS(Dz(iptr));
     	for(j=0; j<ny; j++)
     	for(i=0; i<nx; i++) {
     	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
@@ -276,7 +283,7 @@ void nemo_main()
 	      else if (mom==-2)
 		newvalue = sqrt(tmp00/cnt - sqr(tmp0/cnt));
 	      else if (mom==0)
-		newvalue = tmp0;
+		newvalue = tmp0 * ifactor;
 	      else if (mom==1)
 		newvalue = scale*(tmp1/tmp0) + offset;
 	      else if (mom==2)
