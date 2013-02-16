@@ -42,6 +42,7 @@
  *       4-oct-03      a fix nsigma>0 for fit=line
  *       3-may-05  V3.4b add x/x0+y/y0=1 variant for a linear fit
  *      21-nov-05  V3.4c added gauss2d
+ *      16-feb-13  V3.5  added fit=slope from miriad::immerge
  *
  * TODO:   check 'r', wip gives slightly different numbers
  */
@@ -94,7 +95,7 @@ string defv[] = {
     "dxcol=\n           column for X errors (only used in fit=line)",
     "dycol=\n           column for Y errors",
     "xrange=\n          in case restricted range is used (1D only)",
-    "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak, area, zero, gauss2d)",
+    "fit=line\n         fitmode (line, ellipse, imageshift, plane, poly, peak, area, zero, gauss2d, slope)",
     "order=0\n		Order of plane/poly fit",
     "out=\n             optional output file for some fit modes",
     "nsigma=-1\n        delete points more than nsigma away?",
@@ -159,6 +160,8 @@ nemo_main()
 
     if (scanopt(method,"line")) {
         do_line();
+    } else if (scanopt(method,"slope")) {
+        do_slope();
     } else if (scanopt(method,"ellipse")) {
         do_ellipse();
     } else if (scanopt(method,"imageshift")) {
@@ -518,6 +521,86 @@ do_line()
     if (outstr) write_data(outstr);
 #endif
 }
+
+
+
+
+inline real signo(real a, real b)
+{
+  if (b < 0) return -a;
+  return a;
+}
+/*
+ *  Determine the function needed to solve for the median.
+ */
+
+real medfunc(real a, real *x, real *y, int n)
+{
+  real rv = 0.0;
+  int i;
+  for (i=0; i<n; i++) {
+    rv += y[i]*signo(1.0,x[i]-a*y[i]) - x[i]/a/a*signo(1.0,y[i]-x[i]/a);
+  }
+  return rv;
+}
+
+
+do_slope()
+{
+    real *x, *y, *dx, *dy, *dz;
+    int i,j, n, mwt;
+    real chi2,q,siga,sigb, sigma, d, sa, sb;
+    real cov00, cov01, cov11, sumsq;
+    real r, prob, z;
+    real sumxx, sumxy, sumyy, a, f;
+    real rms, a1, f1, a2, f2;
+
+    warning("Some experimental code from miriad::immerge");
+    n = npt;
+
+    if (nxcol < 1) error("nxcol=%d",nxcol);
+    if (nycol < 1) error("nycol=%d",nycol);
+    x = ycol[0].dat;
+    y = xcol[0].dat;
+
+    sumxx = sumxy = sumyy = 0.0;
+    for (i=0; i<n; i++) {
+      sumxx += x[i]*x[i];
+      sumxy += x[i]*y[i];
+      sumyy += y[i]*y[i];
+    }
+    if (sumxx==0.0 || sumyy==0.0) error("zero data");
+    a = sumxy/sumyy;
+    rms = (sumxx + a*a*sumyy - 2*a*sumxy)/(n*sumyy);
+    rms = sqrt(rms);
+
+    a1 = a;
+    f1 = medfunc(a1,x,y,n);
+    a2 = a1 + signo(3*rms,f1);
+    f2 = medfunc(a2,x,y,n);
+    while (f1*f2 > 0.0) {
+      a = 2*a2 - a1;
+      a1 = a2;
+      f1 = f2;
+      a2 = a;
+      f2 = medfunc(a2,x,y,n);
+    }
+    while ( ABS(a1-a2) > 0.001 * rms) {
+      a = 0.5*(a1+a2);
+      if (a==a1 || a==a2) break;
+      f = medfunc(a,x,y,n);
+      if (f*f1 > 0) {
+	f1 = f;
+	a1 = a;
+      } else {
+	f2 = f;
+	a2 = a;
+      }
+    }
+    printf("Fitting y=ax:\n");
+    printf("a= %g\n",a);
+}
+
 
 char name[10] = "ABCDE";
 
