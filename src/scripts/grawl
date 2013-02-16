@@ -28,14 +28,15 @@ def parselist(words):
         """
 
 if __name__ == '__main__':
-    if len(sys.argv) == 4:
+    nargs = len(sys.argv)
+    if nargs == 5:
         filename = sys.argv[1]
         pattern  = sys.argv[2]
-        lines    = sys.argv[3]    
-        words    = sys.argv[4]
+        l        = sys.argv[3]    
+        w        = sys.argv[4]
         #
-        w1 = int(words)
-        l1 = int(lines)
+        w1 = int(w)
+        l1 = int(l)
         #
         lines = grab(filename)
         for line in lines:
@@ -43,5 +44,25 @@ if __name__ == '__main__':
             if i<0: continue
             words = line.strip().split()
             print words[w1]
+            # todo: only l1
+    elif nargs == 4:
+        filename = sys.argv[1]
+        pattern  = sys.argv[2]
+        l1       = sys.argv[3]    
+        #
+        lines = grab(filename)
+        for line in lines:
+            i = line.find(pattern)
+            if i<0: continue
+            print line.strip()
+            # todo: only l1
+    elif nargs == 3:
+        filename = sys.argv[1]
+        pattern  = sys.argv[2]
+        lines = grab(filename)
+        for line in lines:
+            i = line.find(pattern)
+            if i<0: continue
+            print line.strip()
     else:
         print "Usage:  grawl file pattern line0# word0#"
