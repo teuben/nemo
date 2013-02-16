@@ -1,7 +1,7 @@
 #! /bin/csh -f
 #
 #   make a local RCS link in the current NEMO tree
-
+#   totally deprecates, since we are using CVS since ages
 
 
 set move=0
