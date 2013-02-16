@@ -1,0 +1,47 @@
+#! /usr/bin/python
+#
+#   GRAWL : grep and awk some lines from a text file
+#
+#   Combining the power of grep awk head/tail and cut
+#   Usually to get numbers out of a file, but simple
+#
+#   Usage: grawl file [-i|-v|....] "pattern"     line|0   words|0  
+#                      <-----   grep   ----->   head/tail    awk 
+#
+
+import sys
+
+def grab(file):
+    fp = open(file,'r')
+    lines = fp.readlines()
+    fp.close()
+    return lines
+
+def parselist(words):
+    """ parse the various allowed options in which words to print
+        using python notation
+        k1        just the k1-th line (k1=0 being the first)
+        k1:k2     k1 until k2 (but excluding k2)
+        k2:k2:k3  k1 until k2 (excluding k2) in steps of k3
+        :k2:k3    -same , but k1=0
+        :k2       -same, but k1=0 and k3=1
+        """
+
+if __name__ == '__main__':
+    if len(sys.argv) == 4:
+        filename = sys.argv[1]
+        pattern  = sys.argv[2]
+        lines    = sys.argv[3]    
+        words    = sys.argv[4]
+        #
+        w1 = int(words)
+        l1 = int(lines)
+        #
+        lines = grab(filename)
+        for line in lines:
+            i = line.find(pattern)
+            if i<0: continue
+            words = line.strip().split()
+            print words[w1]
+    else:
+        print "Usage:  grawl file pattern line0# word0#"
