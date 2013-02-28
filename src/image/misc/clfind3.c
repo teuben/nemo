@@ -23,24 +23,97 @@
 #include <mdarray.h>
 
 string defv[] = {
-    "in=???\n             Input file name",
-    "out=???\n            Output clump identification file name",
-    "step=0.05\n          Contour step",
-    "start=1\n            Starting step",
-    "VERSION=0.0\n	  28-feb-2013 PJT",
-    NULL,
+  "in=???\n             Input file name",
+  "out=???\n            Output clump identification file name",
+  "step=0.05\n          Contour step",
+  "start=1\n            Starting step",
+  "levmin=\n            Test one level: min",
+  "levmax=\n            Test one level: max",
+  "VERSION=0.1\n	28-feb-2013 PJT",
+  NULL,
 };
 
 string usage = "ClumpFind in 2D or 3D";
 
 string cvsid = "$Id$";
 
+
+/* 
+ * common clfindblk1,     infile,levs0,dlevs,ncl,clump_peak
+ * common clfindblk2,     data,assign,nx,ny,nv,bx,by,bv
+ */
+
+
+
+local string  infile;      /* input data filename */
+local string  outfile;     /* output clump filename */
+local imageptr iptr=NULL;	
+local int nx,ny,nz;        /* size of data cube */
+local real levs0;          /* starting level */
+local real dlevs;          /* delta contours */
+
+local int *idx, *idy, *idz; /* index into X,Y,Z coordinates */
+local int nid;              /* active number in index array */
+
+
 nemo_main()
 {
-  warning("CLFIND3: testing an IDL to C conversion");
+  infile = getparam("in");
+  outfile = getparam("out");
+  levs0 = getiparam("start");
+  dlevs = getrparam("step");
+
+  read_data();
+
+  if (hasvalue("levmin") && hasvalue("levmax")) {
+    real levmin = getrparam("levmin");
+    real levmax = getrparam("levmax");
+    defreg(levmin,levmax);
+  }
 }
 
 
+void read_data()
+{
+  stream instr;
+
+  instr = stropen (infile, "r");
+  read_image (instr,&iptr);
+  strclose(instr);
+
+  nx = Nx(iptr);
+  ny = Ny(iptr);
+  nz = Nz(iptr);
+
+  idx = (int *) allocate(sizeof(int)*nx*ny*nz);
+  idy = (int *) allocate(sizeof(int)*nx*ny*nz);
+  idz = (int *) allocate(sizeof(int)*nx*ny*nx);
+
+  dprintf(0,"Read %s : [%d x %d x %d]\n",infile, nx,ny,nz);
+}
+
+
+void defreg(real dmin, real dmax)
+{
+  /* first find all pixels between levmin and levmax */
+  int ix, iy, iz;
+  real d;
+
+
+  nid = 0;
+  for (ix=0; ix<nx; ix++)
+    for (iy=0; iy<ny; iy++)
+      for (iz=0; iz<nz; iz++) {
+	d = CubeValue(iptr,ix,iy,iz);
+	if (dmin <= d  && d < dmax) {
+	  idx[nid]   = ix;
+	  idy[nid]   = iy;
+	  idz[nid++] = iz;
+	}
+      }
+  dprintf(0,"defreq %g %g found %d pixels (%g%%)\n",dmin,dmax,nid,nid*100.0/(nx*ny*nz));
+
+}
 #if 0
 
 ;...................... START DEFREG ......................
