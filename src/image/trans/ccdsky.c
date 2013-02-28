@@ -6,6 +6,7 @@
  *      17-aug-2012     created        Peter Teuben
  *      22-aug-2012     added sdv=     PJT
  *      28-aug-2012     implemented iscale=
+ *      29-jan-2013     allow distance to be in cosmological 'z'
  */
 
 
@@ -25,7 +26,8 @@ string defv[] = {
   "v=1,km/s\n     Velocity scale of object, optional unit [km/s]",
   "sdv=1\n        Integrated Flux (must be in Jy.km/s)",
   "scale=1\n      Scale image values [not implemented]",
-  "VERSION=1.2\n  28-aug-2012 PJT",
+  "H=70\n         Hubble Constant, in case [d] is 'z'",
+  "VERSION=2.2\n  27-feb-2013 PJT",
   NULL,
 };
 
@@ -58,18 +60,39 @@ static real CO_factor = 1.05e4;
 
 
 
+/* 
+ * Hubble Constant.  Usually around 70 these days. 
+ * Obtained via getparam(), see below.
+ */
+
+static real H0;
+
+
 
+
+/*
+ *  convert a dimensionless 'z' to a distance in Mpc
+ *  given a Hubble constant in km/s/Mpc
+ */
+
+real z_to_d(real z, real H)
+{
+  real z1 = (z+1)*(z+1);
+  real d = (z1-1)/(z1+1) * c_MKS / H / 1000.0;    /*   d is now Mpc  */
+  return d;
+}
+
 
 /*
  *     get_nu :   parse a   NUMBER,UNIT    string
  *     input:   kv         e.g.   "1,pc"
- *              defunit    e.f.   "pc"
- *     output:  value 
+ *              defunit    e.g.   "pc"
+ *     output:  value      
  *              unit
  *
  */
 
-void get_nu(string kv,real *value,string unit, string defunit)
+void get_nu(string kv, real *value, string unit, string defunit)
 {
   string *sp = burststring(kv,",");
   int nsp = xstrlen(sp,sizeof(string)) - 1;
@@ -111,7 +134,7 @@ real efactor(string u1, string u2)
     else if (streq(u2,"Mpc") || streq(u2,"mpc"))
       s = 1e6*PC/AU;
     else
-      warning("Comparison_1 unit %s not understood for %s",u2,u1);
+      error("Comparison_1 unit %s not understood for %s",u2,u1);
   } else if (streq(u1,"pc")) {
     if (streq(u2,"pc")) 
       s = 1.0;
@@ -123,8 +146,10 @@ real efactor(string u1, string u2)
       s = 1e9;
     else if (streq(u2,"AU"))
       s = AU/PC;
-    else
-      warning("Comparison_2 unit %s not understood for %s",u2,u1);
+    else if (streq(u2,"z")) {
+      s = -1.0;  /* to be ammended later */
+    } else
+      error("Comparison_2 unit %s not understood for %s",u2,u1);
   } else if (streq(u1,"Mpc")) {
     if (streq(u2,"pc")) 
       s = 1e-6;
@@ -134,20 +159,23 @@ real efactor(string u1, string u2)
       s = 1;
     else if (streq(u2,"Gpc") || streq(u2,"gpc"))
       s = 1e3;
-    else
-      warning("Comparison_3 unit %s not understood for %s",u2,u1);
+    else if (streq(u2,"z")) {
+      s = -1.0;  /* to be ammended later */
+    } else
+      error("Comparison_3 unit %s not understood for %s",u2,u1);
   } else if (streq(u1,"m/s")) {
     if (streq(u2,"m/s")) 
       s = 1;
     else if  (streq(u2,"km/s")) 
       s = 1e3;
     else
-      warning("Comparison_4 unit %s not understood for %s",u2,u1);      
+      error("Comparison_4 unit %s not understood for %s",u2,u1);      
   } else
-    warning ("Comparison_5 unit %s not understood",u1);
+    error("Comparison_5 unit %s not understood",u1);
   dprintf(1,"u1=%s u2=%s  s=%g\n",u1,u2,s);
   return s;
 }
+
 
 
 void nemo_main()
@@ -159,22 +187,30 @@ void nemo_main()
     real mass, sdv_scale,  sdv = getrparam("sdv");
     char ds[MAXU], rs[MAXU], vs[MAXU];
 
+
+    H0 = getrparam("H");
+
     /*  get the distance and scales      */
 
     get_nu(getparam("d"),&d,ds,"pc");
     get_nu(getparam("r"),&r,rs,"AU");
     get_nu(getparam("v"),&v,vs,"km/s");
 
-    printf("d=%g %s\n",d,ds);
+    if (streq(ds,"z")) {
+      printf("d=%g %s  [%g Mpc]\n",d,ds,z_to_d(d,H0));
+      d = z_to_d(d,H0);
+      strcpy(ds,"Mpc");
+    } else
+      printf("d=%g %s\n",d,ds);
     printf("r=%g %s\n",r,rs);
     printf("v=%g %s\n",v,vs);
     printf("SdV=%g Jy.km/s\n",sdv);
-
 
     /* angles: convert to deg for FITS */
     rscale = (r * AU) / ( d * PC) * 180.0/PI;   
     rscale *= efactor("AU",rs);
     rscale /= efactor("pc",ds);
+    if (rscale < 0) error("z-machine d");
     printf("rscale=%g  (%g arcsec)\n",rscale,rscale*3600.0);
 
     /* velocities:  convert to m/s for FITS */
@@ -187,11 +223,11 @@ void nemo_main()
 
     /* sdv calculation */
     sdv_scale = efactor("Mpc",ds);
+    if (sdv_scale < 0) error("z-machine sdv");
     mass = HI_factor * sqr( d * sdv_scale ) * sdv;
     printf("Mass(HI) = %g  \n",mass);
     mass = CO_factor * sqr( d * sdv_scale ) * sdv;
     printf("Mass(H2) = %g  (alpha=4.3; includes 1.36 He contribution)\n",mass);
-    
 
     if (hasvalue("in") && hasvalue("out")) {      /* patch image if needed */
       instr = stropen(getparam("in"), "r");
@@ -202,6 +238,9 @@ void nemo_main()
       Dx(iptr) *= rscale;
       Dy(iptr) *= rscale;
       Dz(iptr) *= vscale;
+      Beamx(iptr) *= rscale;
+      Beamy(iptr) *= rscale;
+      Beamz(iptr) *= vscale;
       if (iscale != 1.0) {
 	nx = Nx(iptr);
 	ny = Ny(iptr);
