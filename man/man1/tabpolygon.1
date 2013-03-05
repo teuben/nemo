@@ -1,0 +1,41 @@
+.TH TABPOLYGON 1NEMO "5 March 2013"
+.SH NAME
+tabpolygon \- select points that are either inside or outside a polygon
+.SH SYNOPSIS
+\fBtabpolygon\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name (table) [???]   
+.TP
+\fBxcol=\fP
+x coordinate column(s) [1]    
+.TP
+\fBycol=\fP
+y coordinate column(s) [2]    
+.TP
+\fBpolygon=\fP
+Give pairs of X,Y that define the polygon
+.TP
+\fBinside=\fP
+Select inside of region to be output [t]
+.TP
+\fBcomment=\fP
+Also copy comment lines? [t]   
+.TP
+\fBnmax=\fP
+Hardcoded allocation space, if needed for piped data
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+05-Mar-13	V0.1 Created		PJT
+.fi
