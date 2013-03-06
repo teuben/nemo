@@ -19,36 +19,37 @@
 /**************** COMMAND LINE PARAMETERS **********************/
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
-    "in=???\n            Input file name (table)",
-    "xcol=1\n		 x coordinate column(s)",
-    "ycol=2\n		 y coordinate column(s)",
-    "polygon=\n          Give pairs of X,Y that define the polygon",
-    "inside=t\n          Select inside of region to be output",
-    "comment=t\n         Also copy comment lines?",
-    "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
-    "VERSION=0.1\n	 5-mar-2013 PJT",
-    NULL
+  "in=???\n            Input file name (table)",
+  "xcol=1\n	       x coordinate column(s)",
+  "ycol=2\n	       y coordinate column(s)",
+  "polygon=\n          Give pairs of X,Y that define the polygon",
+  "inside=t\n          Select inside of region to be output",
+  "comment=f\n         Also copy comment lines and comment rejected lines?",
+  "VERSION=0.2\n       6-mar-2013 PJT",
+  NULL
 };
 
-string usage = "select points that are either inside or outside a polygon";
+string usage = "select points from a table that are either inside or outside a polygon";
 
 string cvsid="$Id$";
 
 
 /**************** GLOBAL VARIABLES ************************/
 
-#define MAXPOLY    128
+#define MAXPOLY       128
+#define MVAL          128
+
+#ifndef MAX_LINELEN
+#define MAX_LINELEN  2048
+#endif
+
+
 
 local string input;				/* filename */
 local stream instr;				/* input file */
 
 local int xcol, ycol;
 
-local real  *x[MAXCOL], *y[MAXCOL]; 			/* data from file */
-local int    npt;				/* actual number of data points */
-local int    np;                              /* actual number of rebinned data */
-
-local int    nmax;				/* lines to allocate */
 local int    np;
 local real   polygon[2*MAXPOLY];
 local real   xp[MAXPOLY], yp[MAXPOLY];
@@ -57,15 +58,8 @@ local bool Qinside;
 local bool Qcomment;
 
 void setparams(void);
-int pairs(string p, real *pairs, real *x, real *y, int maxp);
-int inpolygon (int n, real *x, real *y, real x0, real y0);
-
-#define MVAL            128
-
-#ifndef MAX_LINELEN
-#define MAX_LINELEN  2048
-#endif
-
+int  pairs(string p, real *pairs, real *x, real *y, int maxp);
+int  inpolygon (int n, real *x, real *y, real x0, real y0);
 
 
 
@@ -75,12 +69,14 @@ nemo_main()
 {
   char line[MAX_LINELEN];
   real vals[MVAL], x0,y0;
-  int nv, in;
-  setparams();
+  int nv, in, nl=0;
 
+  setparams();
   instr = stropen (input,"r");
+
   while(1) {
     if (fgets(line,MAX_LINELEN,instr) == NULL) break;
+    nl++;
     if (line[0] == '#')  {
       if (Qcomment)
 	printf("%s",line);
@@ -90,12 +86,17 @@ nemo_main()
     line[strlen(line)-1] = '\0';
     nv = nemoinpr(line,vals,MVAL);
     if (nv<1) error("parsing error line: %s",line);
+    if (xcol>nv || ycol>nv) {
+      warning("line %d: found only %d values",nl,nv);
+      if (Qcomment) printf("#[bad col count %d] %s",nv,line);
+      continue;
+    }
     x0 = vals[xcol-1];
     y0 = vals[ycol-1];
     in = inpolygon(np,xp,yp,x0,y0);
     if ((Qinside && in) || (!Qinside && !in))
       printf("%s\n",line);
-    else
+    else if (Qcomment)
       printf("# %s\n",line);
   }
 }
@@ -105,6 +106,8 @@ void setparams()
   input = getparam("in");             /* input table file */
   xcol = getiparam("xcol");
   ycol = getiparam("ycol");
+  if (xcol<1) error("xcol=%d must be 1 or larger",xcol);
+  if (ycol<1) error("ycol=%d must be 1 or larger",ycol);
   np = pairs(getparam("polygon"),polygon,xp,yp,2*MAXPOLY);
   
   Qinside = getbparam("inside");
@@ -118,8 +121,8 @@ int pairs(string p, real *pairs, real *xp, real *yp, int maxp)
   int n, i;
 
   n = nemoinpr(p,pairs,maxp);
-  if (n>=0 && n<2) error("%s= needs at least 2 values",p);
-  if (n%2) error("Need even number of points for pairs");
+  if (n>=0 && n<6) error("%s needs at least 6 values for polygon=",p);
+  if (n%2) error("Need even number of points for x,y pairs in polygon=");
   if (n<0) error("Parsing error %s",p);
   for (i=0; i<n; i++) {
     if (i%2)
@@ -129,7 +132,7 @@ int pairs(string p, real *pairs, real *xp, real *yp, int maxp)
   }
   n = n/2;
   for (i=0; i<n; i++) 
-    dprintf(0,"polygon-%d: %g %g\n",i,xp[i],yp[i]);
+    dprintf(1,"polygon-%d: %g %g\n",i,xp[i],yp[i]);
   return n;
 }
 

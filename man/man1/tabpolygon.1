@@ -1,37 +1,58 @@
 .TH TABPOLYGON 1NEMO "5 March 2013"
 .SH NAME
-tabpolygon \- select points that are either inside or outside a polygon
+tabpolygon \- select points from a table that are either inside or outside a polygon
 .SH SYNOPSIS
 \fBtabpolygon\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+\fBtabpolygon\fP uses two columns from a table as the X and Y coordinates of a series of
+points in a plane, and allows
+you to define a polygon in that coordinate system and output only lines whose points
+would lie either inside or outside that polygon.
+.PP
+Optionally rejected lines can be output as comments, which keeps the linecount of input
+and output the same.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input file name (table) [???]   
+Input file name (table). No default
 .TP
 \fBxcol=\fP
-x coordinate column(s) [1]    
+X coordinate column [1]    
 .TP
 \fBycol=\fP
-y coordinate column(s) [2]    
+Y coordinate column [2]    
 .TP
 \fBpolygon=\fP
-Give pairs of X,Y that define the polygon
+The (minimum 3) pairs of X,Y that define the polygon. These must be in the same
+coordinate system as the one in the X and Y columns, and the last point is automatically
+closed connected to the first point to close the polygon.  
+There is no check for self-intersecting polygons such as the
+figure 8.  No default.
 .TP
 \fBinside=\fP
-Select inside of region to be output [t]
+Select inside of region to be output? [t]
 .TP
 \fBcomment=\fP
-Also copy comment lines? [t]   
-.TP
-\fBnmax=\fP
-Hardcoded allocation space, if needed for piped data
+Also copy comment lines?. If true, comment lines, as well as points
+failing to match the inside/outside polygon criterion, will be output, but
+commented using the usual # symbol.. Default : f
 .SH EXAMPLES
+Here is how points in two (assumed disjoint) regions are identified, and the remnant
+in the 3rd table. 
+.nf
+  % tabpolygon in=points_all.tab   polygon=@region1.pol            > points_1.tab
+  % tabpolygon in=points_all.tab   polygon=@region1.pol inside=f   > points_not_1.tab
+  % tabpolygon in=points_not_1.tab polygon=@region2.pol            > points_2.tab
+  % tabpolygon in=points_not_1.tab polygon=@region2.pol inside=f   > points_3.tab
+.fi
+.SH CAVEATS
+Boolean operations on multiple regions is cumbersome or impossible at the moment.
 .SH SEE ALSO
+tabmath(1NEMO)
 .SH FILES
+src/kernel/tab/tabpolygon.c	source code
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
