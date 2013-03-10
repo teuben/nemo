@@ -1,0 +1,26 @@
+# planar 3body initial conditions [Suvakov & Dmitrasinovic (2013)]
+#  x1(0) = -x2(0) = -1
+#  x3(0) = 0
+#  y1(0) = y2(0) = y3(0) = 0
+#  vx2(0) = vx1(0)
+#  vx3(0) = -2vx1(0)
+#  vy2(0) = vy1(0)
+#  vy3(0) = -2vy1(0)
+# --------------------------------
+# vx1(0)   vy1(0)    T      name
+#
+0.30689 0.12551 6.2356     I.A.1 butterfly I
+0.39295 0.09758 7.0039	   I.A.2 butterfly II
+0.18428 0.58719 63.5345	   I.A.3 bumblebee	   
+0.46444 0.39606 14.8939	   I.B.1 moth I
+0.43917 0.45297 28.6703	   I.B.2 moth II   
+0.40592 0.23016 13.8658	   I.B.3 butterfly III	   
+0.38344 0.37736 25.8406	   I.B.4 moth III
+0.08330 0.12789 10.4668	   I.B.5 goggles
+0.350112 0.07934 79.4759   I.B.6 butterfly IV
+0.08058 0.58884 21.2710	   I.B.7 dragonfly
+0.55906 0.34919 55.5018	   II.B.1 yarn
+0.51394 0.30474 17.3284	   II.C.2a yin-yang I
+0.28270 0.32721 10.9626	   II.C.2b yin-yang I
+0.41682 0.33033 55.7898	   II.C.3a yin-yang II
+0.41734 0.31310 54.2076	   II.C.3b yin-yang II
