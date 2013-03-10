@@ -1,7 +1,9 @@
 Most of the code in here is (c) Copyrighted by Numerical Recipes Software.
 
-However, please be careful in using them; some routines have a slightly
-different parameter sequence or type than their corresponding NumRec
-version to make them work within the NEMO environment. Also, some 
-routines do not use the #define's, but instead of control parameters.
+You cannot use these selected few outside of NEMO because of interface
+and code changes. Please be careful in using them; some routines have
+a slightly different parameter sequence or type than their
+corresponding NumRec version to make them work within the NEMO
+environment. Also, some routines do not use the #define's, but instead
+of control parameters.
 

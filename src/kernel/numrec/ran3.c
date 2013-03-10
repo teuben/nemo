@@ -1,5 +1,6 @@
 /*
- * RAN3: based on ran3() from Numerical Recipes,
+ * RAN3: loosely based on ran3() from NumRec
+ *
  *	17-sep-95: addition safeguard against out of bounds
  *		   when initialized with large idum's (idum > MBIG)
  *       9-may-97: option to view long as int for 64bit machines to keep
