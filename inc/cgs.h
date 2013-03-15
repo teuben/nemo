@@ -24,3 +24,4 @@
 #define KPCCM 3.085678e+21	/* kiloparsec in centimeters */
 #define GYRSEC 3.155693e+16	/* gigayear in seconds */
 
+#define HI_MHz    1420.40575177 /* 21cm (21.10611405413 cm) line  of HI */

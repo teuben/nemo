@@ -20,3 +20,5 @@
 /* #define AU	  1.49597870691e11     Astronomical Unit [m]  */
 #define AU        1.49597870700e11  /* AU as per IAU 2012 definition */
 #define PC        3.0856e16     /* Parsec [m] */
+
+#define HI_MHz    1420.40575177 /* 21cm (21.10611405413 cm) line  of HI */
