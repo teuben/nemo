@@ -1,18 +1,20 @@
-.TH CCDSKY 1NEMO "18 September 2012"
+.TH CCDSKY 1NEMO "28 February 2013"
 .SH NAME
 ccdsky \- lazy sky scaling calculator
 .SH SYNOPSIS
 \fBccdsky\fP [parameter=value]
 .SH DESCRIPTION
-\fBccdsky\fP is a lazy sky scaling calculator, which will give you the scaling parameters
+\fBccdsky\fP is a lazy sky scaling calculator. It will give you the scaling parameters
 for a FITS file (which uses degrees for angles, and m/s for velocities), to make
-your typical observer or astronomical software package happy and print out values
-in units observers can be in awe about.
+your typical observer or astronomical software package happy and print out values 
+in units observers can be in awe about. It is also useful to remind yourself
+how many arcseconds/minutes a given object is at a given distance.
 .PP
 Although you can transform an image/cube, the default only needs to know the
-distance (in AU, pc, kpc, mpc, ...) and unit size (in AU, pc, kpc, mpc, ....) of
+distance (in AU, pc, kpc, mpc, z, ...) and unit size (in AU, pc, kpc, mpc, ....) of
 the object. This will give you the scaling factors for length and velocities.
-.PP
+.PP 
+When the distance is given in z, Wright's (2006) cosmological calculator is used.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -27,7 +29,8 @@ axes coordinates.
 .TP
 \fBd=#,[unit]\fP
 Distance to your object, and optionally a unit.  
-AU, pc, Kpc, Mpc, and Gpc are allowed.
+AU, pc, Kpc, Mpc, and Gpc are allowed. You can also specify a dimensionless
+number 'z', in which case the special cosmological calculator is used. 
 [default: 1,pc]    
 .TP
 \fBr=#,[unit]\fP
@@ -49,6 +52,15 @@ units of solar masses. Default: 1
 .TP
 \fBscale=#\fP
 Scale the intensity values in the data itself. Default: 1.
+.TP
+\fBH=\fP
+Specify the cosmological model, with up to 3 parameters. Only used
+when units in \fBd=\fP are 'z' were specified.
+The first parameter is the Hubble Constant.
+Optionally followed by the WM (Omega(matter)) and WV (Omega(vacuum)),
+for different cosmologies. If only H0 and WM are given,
+a flat universe (WV=0) is used. See also Wright(2006).
+[Default:  75,0.3,0.7]
 .SH EXAMPLES
 Viewing a model at a distance 1 pc, where 1 length unit represents 1 AU,
 the coordinates need to be multiplied by 0.000277785 in order for FITS
@@ -63,6 +75,14 @@ rscale=0.000277785  (1.00003 arcsec)
 vscale=1000
 
 .fi
+
+To find out the radius of 2 pc at the distance of the galactic center:
+.nf
+ccdsky r=2,pc d=8.5,kpc
+rscale=0.0134814  (48.5329 arcsec)
+
+.fi
+
 Here is an example of creating a small bar, at position angle 30, and
 observed at RA=6h and DEC=30d:
 .nf
@@ -86,14 +106,17 @@ from CO to a mass is still under debate. We use the value
 2e20 cm-2/K km/s.
 .SH SEE ALSO
 ccdgen(1NEMO), ccdmath(1NEMO), ccdfits(1NEMO), snapscale(1NEMO), image(5NEMO)
+.PP
+http://arxiv.org/abs/astro-ph/0609593  \fIA Cosmology Calculator for the Web\fP (E.Wright)
 .SH FILES
 NEMO/src/image/trans	ccdsky.c - source code
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +1.0i
+.ta +0.5i +3.0i
 17-Aug-2012	V1.0 Created		PJT
 23-aug-2012	V1.1 added sdv=		PJT
 28-aug-2012	V1.2 implemented scale=	PJT
+28-feb-2013	V2.2 more verbose, added H=	PJT
 .fi
