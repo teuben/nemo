@@ -7,6 +7,9 @@
  *      22-aug-2012     added sdv=     PJT
  *      28-aug-2012     implemented iscale=
  *      29-jan-2013     allow distance to be in cosmological 'z'
+ *      16-mar-2013     3.0 added Wright's CosmoCalculator math, verbose
+ *                      (cosmocalc in ASCL?)
+ *
  */
 
 
@@ -19,19 +22,20 @@
 #include <mks.h>
 
 string defv[] = {
-  "in=\n          Optional input image file",
-  "out=\n         Output image file",
-  "d=1,pc\n       Distance to object, optional unit [pc]",
-  "r=1,AU\n       Length scale of object, optional unit [AU]",
-  "v=1,km/s\n     Velocity scale of object, optional unit [km/s]",
-  "sdv=1\n        Integrated Flux (must be in Jy.km/s)",
-  "scale=1\n      Scale image values [not implemented]",
-  "H=70\n         Hubble Constant, in case [d] is 'z'",
-  "VERSION=2.2\n  27-feb-2013 PJT",
+  "in=\n            Optional input image file",
+  "out=\n           Output image file",
+  "d=1,pc\n         Distance to object, optional unit [pc]",
+  "r=1,AU\n         Length scale of object, optional unit [AU]",
+  "v=1,km/s\n       Velocity scale of object, optional unit [km/s]",
+  "sdv=1\n          Integrated Flux (must be in Jy.km/s)",
+  "scale=1\n        Scale image values",
+  "H=71,0.27,0.73\n Hubble Constant, in case [d] is 'z', with optional WM and WV",
+  "nsteps=1000\n    Integrations steps in the cosmo code (accuracy)",
+  "VERSION=3.0a\n   16-mar-2013 PJT",
   NULL,
 };
 
-string usage = "lazy sky scaling calculator";
+string usage = "lazy sky scaling (cosmology) calculator";
 
 string cvsid = "$Id$";
 
@@ -46,7 +50,7 @@ string cvsid = "$Id$";
  * See also:  http://www.cv.nrao.edu/course/astr534/HILine.html
  */
 
-static real HI_factor = 2.35e5;
+static real HI_factor = 2.3595e5;
 
 /* 
  * Xco=2e20 cm-2/K km/s, and alpha_co=4.3 Msun/K km/s 
@@ -61,12 +65,16 @@ static real CO_factor = 1.05e4;
 
 
 /* 
- * Hubble Constant.  Usually around 70 these days. 
- * Obtained via getparam(), see below.
+ * CC (cosmology) parameters
  */
 
 static real H0;
+static real WM;
+static real WV;
+static real DA_Mpc;
 
+void setCC(int nc, real *cpar);
+void CC(real z, int nsteps, int verbose);
 
 
 
@@ -181,14 +189,17 @@ real efactor(string u1, string u2)
 void nemo_main()
 {
     stream  instr, outstr;
-    int     ix, iy, iz, nx, ny, nz;
+    int     ix, iy, iz, nx, ny, nz, nc;
+    int     nsteps = getiparam("nsteps");
     imageptr iptr=NULL;
     real d,r,v,  rscale, vscale, iscale = getrparam("scale");
     real mass, sdv_scale,  sdv = getrparam("sdv");
+    real cpar[3];
     char ds[MAXU], rs[MAXU], vs[MAXU];
 
-
-    H0 = getrparam("H");
+    nc = nemoinpr(getparam("H"), cpar, 3);
+    if (nc < 0) error("Parsing cosmo H=%s",getparam("H"));
+    setCC(nc, cpar);   /* set H0, WM, WV */
 
     /*  get the distance and scales      */
 
@@ -197,8 +208,11 @@ void nemo_main()
     get_nu(getparam("v"),&v,vs,"km/s");
 
     if (streq(ds,"z")) {
+      CC(d,nsteps,0);
+      CC(d,nsteps,1);
       printf("d=%g %s  [%g Mpc]\n",d,ds,z_to_d(d,H0));
-      d = z_to_d(d,H0);
+      // d = z_to_d(d,H0);
+      d = DA_Mpc;
       strcpy(ds,"Mpc");
     } else
       printf("d=%g %s\n",d,ds);
@@ -211,8 +225,12 @@ void nemo_main()
     rscale *= efactor("AU",rs);
     rscale /= efactor("pc",ds);
     if (rscale < 0) error("z-machine d");
-    printf("rscale=%g  (%g arcsec)\n",rscale,rscale*3600.0);
-
+    if (rscale > 0.01666) 
+      printf("rscale=%g  [ %g arcsec   %g arcmin]\n",rscale,rscale*3600.0,rscale*60);
+    else if (rscale < 2.777e-7)
+      printf("rscale=%g  [ %g arcsec   %g mas]\n",rscale,rscale*3600.0,rscale*3600000.0);
+    else
+      printf("rscale=%g  (%g arcsec)\n",rscale,rscale*3600.0);
     /* velocities:  convert to m/s for FITS */
     vscale = v;
     vscale *= efactor("m/s",vs);
@@ -256,3 +274,172 @@ void nemo_main()
     }
 }
 
+
+
+/*
+ * taken from Wright's Cosmo Calculator (Schombert's python module)
+ * See http://www.astro.ucla.edu/~wright
+
+example: 
+
+CC.py 0.1 71 0.27 0.73
+  T      D kpc/arcsec  m-M
+  12.38 413.49 1.82 38.29
+
+
+ */
+
+void setCC(int nc, real *cpar)
+{
+  if (nc==0) {              // no values, assume Benchmark Model
+    H0 = 75.0;
+    WM = 0.3;
+    WV = 1.0 - WM - 0.4165/(H0*H0);
+  } else if (nc == 1) {     // one value, assume Benchmark Model with given Ho
+    H0 = cpar[0];
+    WM = 0.3;
+    WV = 1.0 - WM - 0.4165/(H0*H0);
+  } else if (nc == 2) {     // Universe is Open, use Ho, Wm and set Wv to 0.
+    H0 = cpar[0];
+    WM = cpar[1];
+    WV = 0.0;
+  } else if (nc == 3) {     // Universe is General, use Ho, Wm and given Wv
+    H0 = cpar[0];
+    WM = cpar[1];
+    WV = cpar[2];
+  }
+
+}
+
+void CC(real z, int n, int verbose)
+{
+  int i;
+  real WR, WK, Tyr, DTT, DTT_Gyr, age, age_Gyr, zage, zage_Gyr,
+    DCMR, DCMR_Mpc, DCMR_Gyr, DA, DA_Gyr, kpc_DA, DL, DL_Mpc, DL_Gyr,
+    V_Gpc, a, az, h, adot, ratio, x, y, DCMT, VCM, pi, c;
+  
+  
+  /* H0, WM, WV have been set in setCC() */
+
+  /* initialize constants */
+  
+  WR = 0.0;         // Omega(radiation)
+  WK = 0.0;         // Omega curvaturve = 1-Omega(total)
+  c = c_MKS/1000.0; // velocity of light in km/sec
+  Tyr = 977.8;      // coefficent for converting 1/H into Gyr
+  DTT = 0.5;        // time from z to now in units of 1/H0
+  DTT_Gyr = 0.0;    // value of DTT in Gyr
+  age = 0.5;        // age of Universe in units of 1/H0
+  age_Gyr = 0.0;    // value of age in Gyr
+  zage = 0.1;       // age of Universe at redshift z in units of 1/H0
+  zage_Gyr = 0.0;   // value of zage in Gyr
+  DCMR = 0.0;       // comoving radial distance in units of c/H0
+  DCMR_Mpc = 0.0;  
+  DCMR_Gyr = 0.0; 
+  DA = 0.0;         // angular size distance
+  DA_Mpc = 0.0;
+  DA_Gyr = 0.0;
+  kpc_DA = 0.0;
+  DL = 0.0;         // luminosity distance
+  DL_Mpc = 0.0;
+  DL_Gyr = 0.0;     // DL in units of billions of light years
+  V_Gpc = 0.0;
+  a = 1.0;          // 1/(1+z), the scale factor of the Universe
+  az = 0.5;         //  1/(1+z(object))
+
+  h = H0/100;       // 
+  WR = 4.165E-5/(h*h);   //includes 3 massless neutrino species, T0 = 2.72528
+  WK = 1-WM-WR-WV;
+  az = 1.0/(1+1.0*z);
+  age = 0.;
+  for (i=0; i<n; i++) {
+    a = az*(i+0.5)/n;
+    adot = sqrt(WK+(WM/a)+(WR/(a*a))+(WV*a*a));
+    age = age + 1./adot;
+  }
+
+  zage = az*age/n;
+  zage_Gyr = (Tyr/H0)*zage;
+  DTT = 0.0;
+  DCMR = 0.0;
+
+  /* do integral over a=1/(1+z) from az to 1 in n steps, midpoint rule */
+
+  for (i=0; i<n; i++) {
+    a = az+(1-az)*(i+0.5)/n;
+    adot = sqrt(WK+(WM/a)+(WR/(a*a))+(WV*a*a));
+    DTT = DTT + 1./adot;
+    DCMR = DCMR + 1./(a*adot);
+  }
+
+  DTT = (1.-az)*DTT/n;
+  DCMR = (1.-az)*DCMR/n;
+  age = DTT+zage;
+  age_Gyr = age*(Tyr/H0);
+  DTT_Gyr = (Tyr/H0)*DTT;
+  DCMR_Gyr = (Tyr/H0)*DCMR;
+  DCMR_Mpc = (c/H0)*DCMR;
+
+  /*  tangential comoving distance */
+
+  ratio = 1.00;
+  x = sqrt(abs(WK))*DCMR;
+  if (x > 0.1) {
+    if (WK > 0) 
+      ratio =  0.5*(exp(x)-exp(-x))/x ;
+    else
+      ratio = sin(x)/x;
+  } else {
+    y = x*x;
+    if (WK < 0) y = -y;
+    ratio = 1. + y/6. + y*y/120.;
+  }
+  DCMT = ratio*DCMR;
+  DA = az*DCMT;
+  DA_Mpc = (c/H0)*DA;
+  kpc_DA = DA_Mpc/206.264806;
+  DA_Gyr = (Tyr/H0)*DA;
+  DL = DA/(az*az);
+  DL_Mpc = (c/H0)*DL;
+  DL_Gyr = (Tyr/H0)*DL;
+
+  /* comoving volume computation */
+
+  ratio = 1.00;
+  x = sqrt(abs(WK))*DCMR;
+  if (x > 0.1) {
+    if (WK > 0) 
+      ratio = (0.125*(exp(2.*x)-exp(-2.*x))-x/2.)/(x*x*x/3.);
+    else
+      ratio = (x/2. - sin(2.*x)/4.)/(x*x*x/3.);
+  } else {
+    y = x*x;
+    if (WK < 0) y = -y;
+    ratio = 1. + y/5. + (2./105.)*y*y;
+  }
+  VCM = ratio*DCMR*DCMR*DCMR/3.;
+  V_Gpc = FOUR_PI*qbe(0.001*c/H0)*VCM;
+
+  if (verbose) {
+    printf("-------------------------------------------------------------\n");
+    printf("For H_o = %1.1f  Omega_M = %1.2f Omega_vac = %1.2f z = %1.3f\n",H0,WM,WV,z);
+    printf("It is now %1.3f Gyr since the Big Bang.\n", age_Gyr);
+    printf("The age at redshift z was %1.3f Gyr.\n",zage_Gyr);
+    printf("The light travel time was %1.3f Gyr.\n",DTT_Gyr);
+    printf("The comoving radial distance, which goes into Hubbles law, is ");
+    printf("%1.1f Mpc or %1.3f Gly\n",DCMR_Mpc ,DCMR_Gyr);
+    printf("The comoving volume within redshift z is %1.3f Gpc^3.\n" ,V_Gpc );
+    printf("The angular size distance D_A is %1.3f Mpc or %1.3f Gly.\n",DA_Mpc, DA_Gyr);
+    printf("This gives a scale of %.3f  kpc/arcsec\n" ,kpc_DA );
+    printf("The luminosity distance D_L is %1.1f Mpc or %1.3f Gly.\n",DL_Mpc, DL_Gyr);
+    printf("The distance modulus, m-M, is %1.2f\n" , 5*log10(DL_Mpc*1e6)-5 );
+    printf("-------------------------------------------------------------\n");
+  } else {
+    printf("%1.2f " , zage_Gyr);
+    printf("%1.2f " , DCMR_Mpc);
+    printf("%1.2f " , kpc_DA);
+    printf("%1.2f " , (5*log10(DL_Mpc*1e6)-5));
+    printf("\n");
+  }
+
+}
