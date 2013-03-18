@@ -1,6 +1,6 @@
-.TH CCDSKY 1NEMO "28 February 2013"
+.TH CCDSKY 1NEMO "16 March 2013"
 .SH NAME
-ccdsky \- lazy sky scaling calculator
+ccdsky \- lazy (cosmology) sky scaling calculator
 .SH SYNOPSIS
 \fBccdsky\fP [parameter=value]
 .SH DESCRIPTION
@@ -14,7 +14,7 @@ Although you can transform an image/cube, the default only needs to know the
 distance (in AU, pc, kpc, mpc, z, ...) and unit size (in AU, pc, kpc, mpc, ....) of
 the object. This will give you the scaling factors for length and velocities.
 .PP 
-When the distance is given in z, Wright's (2006) cosmological calculator is used.
+When the distance is given in z, Wright's (2006) cosmology calculator is used.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -30,7 +30,7 @@ axes coordinates.
 \fBd=#,[unit]\fP
 Distance to your object, and optionally a unit.  
 AU, pc, Kpc, Mpc, and Gpc are allowed. You can also specify a dimensionless
-number 'z', in which case the special cosmological calculator is used. 
+number 'z', in which case the special cosmology calculator is used. 
 [default: 1,pc]    
 .TP
 \fBr=#,[unit]\fP
@@ -54,7 +54,7 @@ units of solar masses. Default: 1
 Scale the intensity values in the data itself. Default: 1.
 .TP
 \fBH=\fP
-Specify the cosmological model, with up to 3 parameters. Only used
+Specify the cosmology model, with up to 3 parameters. Only used
 when units in \fBd=\fP are 'z' were specified.
 The first parameter is the Hubble Constant.
 Optionally followed by the WM (Omega(matter)) and WV (Omega(vacuum)),
@@ -119,4 +119,5 @@ Peter Teuben
 23-aug-2012	V1.1 added sdv=		PJT
 28-aug-2012	V1.2 implemented scale=	PJT
 28-feb-2013	V2.2 more verbose, added H=	PJT
+16-mar-2013	V3.0 added Wright's cosmology calculator	PJT
 .fi
