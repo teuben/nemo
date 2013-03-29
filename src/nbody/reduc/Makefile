@@ -132,8 +132,10 @@ snapcmpplot:  snapcmp.c
 
 
 #   a huge kludge, this will work on Fedora 11 (or 13) and Ubuntu 10.10
-S2_CFLAGS = -I$(S2PATH)
-S2_LFLAGS = -L$(S2PATH)/$(S2ARCH)  -ls2plot -ls2freetype -ls2dispstub -ls2meshstub -ls2winglut -lglut -lGLU -lGL  -L/usr/X11R6/lib -L/usr/lib -lfreetype -lX11 -lm -Wl,-rpath,$(S2PATH)/$(S2ARCH)  -Wl,-export-dynamic
+#   notice v2.6 uses a different searchpath from V3.x
+S2_LIBS   = -ls2plot -ls2freetype -ls2dispstub -ls2meshstub -ls2winglut -lglut
+S2_CFLAGS = -I$(S2PATH)/src
+S2_LFLAGS = -L$(S2PATH)/$(S2ARCH) $(S2_LIBS) -lGLU -lGL  -L/usr/X11R6/lib -L/usr/lib -lfreetype -lX11 -lm -Wl,-rpath,$(S2PATH)/$(S2ARCH)  -Wl,-export-dynamic
 
 snaps2plot:	snaps2plot.c
 	$(CC) $(CFLAGS)	$(S2_CFLAGS) -DCOLOR \
