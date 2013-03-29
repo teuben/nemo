@@ -1,4 +1,4 @@
-.TH SNAPS2PLOT 1NEMO "14 February 2011"
+.TH SNAPS2PLOT 1NEMO "29 March 2013"
 .SH NAME
 snaps2plot \- display an N-body snapshot file in a s2plot display
 .SH SYNOPSIS
@@ -86,9 +86,17 @@ The default range is \fB0:1\fP.
 \fBs2box\*e\fP\fIcolor-range\fP
 S2PLOT style for the X, Y and Z axes. Default: BCDETMNOQ
 .SH SEE ALSO
-snapplot3(1NEMO), snapplot(1NEMO), bodytrans(1NEMO), snapshot(5NEMO).
+snapplot3(1NEMO), snapplot(1NEMO), bodytrans(1NEMO), snapshot(5NEMO), s2splot(5NEMO)
 .PP
 http://astronomy.swin.edu.au/s2plot/
+.SH ENVIRONMENT VARIABLES
+\fBs2plot\fP needs a number of environment variables during install,
+and optionally during running.  The most common ones are
+S2PATH and S2ARCH for building, and S2PLOT_DEV for selecting the
+default plotting device.  If you don't use s2plot for yapp,
+more than likely the $YAPP will be conflicting with a valid
+name for S2PLOT_DEV.  use \fByapp=/?\fP to get a valid list of
+s2plot device names, possibly \fByapp=/S2MONO\fP.
 .SH CAVEATS
 Version 0.1 was a quick hack on valentines evening.
 It only plots the selected snapshot, it cannot yet
@@ -100,4 +108,5 @@ Peter Teuben
 .nf
 .ta +1i +4i
 14-feb-2011	V0.1 - initial version written  	PJT
+
 .fi
