@@ -14,6 +14,7 @@
  *	 7-mar-98      a attempted to handle maps with < 0 Dx/Dy/Dz	PJT
  *      12-mar-98  V3.1  handle gauss=0 and added cut= keyword          PJT
  *	20-apr-01      a bigger default size for MSIZE			pjt
+ *      18-jan-12  V3.2  FORDEF/CDEF
  *
  *	"Smoothing is art, not science"
  *				- Numerical Recipies, p495
@@ -27,19 +28,20 @@
 #include <image.h>
 
 string defv[] = {
-	"in=???\n               Input filename",
-	"out=???\n              Output filename",
-	"gauss=\n               FWHP gaussian beamwidth, if used",		
-	"dir=xy\n               Coordinates to smooth (xyz)",			
-	"smooth=0.25,0.5,0.25\n ALternate smoothing array if gauss= not used",
-	"nsmooth=1\n            Number of smoothings",
-	"bad=\n			Optional ignoring this bad value",
-	"cut=0.01\n             Cutoff value for gaussian, if used",
-	"VERSION=3.1a\n         20-apr-01 PJT",
-	NULL,
+  "in=???\n               Input filename",
+  "out=???\n              Output filename",
+  "gauss=\n               FWHP gaussian beamwidth, if used",		
+  "dir=xy\n               Coordinates to smooth (xyz)",			
+  "smooth=0.25,0.5,0.25\n ALternate smoothing array if gauss= not used",
+  "nsmooth=1\n            Number of smoothings",
+  "bad=\n			Optional ignoring this bad value",
+  "cut=0.01\n             Cutoff value for gaussian, if used",
+  "VERSION=3.2\n          18-jan-2012 PJT",
+  NULL,
 };
 
 string usage = "smooth image cube in XYZ";
+string cvsid="$Id$";
 
 #ifndef HUGE
 # define HUGE 1.0e20
@@ -100,7 +102,7 @@ void nemo_main ()
     strclose(outstr);
 }
 
-void setparams()
+void setparams(void)
 {
     infile = getparam ("in");
     outfile = getparam ("out");
@@ -250,95 +252,95 @@ int convolve_x (a, iy, iz, nx, ny, nz, b, nb)
 real *a, b[];
 int    nx, ny, nz, nb, iy, iz;
 {
-	real c[MSIZE];
-	int    ix, jx, kx, offset;
+  real c[MSIZE];
+  int    ix, jx, kx, offset;
 	
-	if (nx>MSIZE) {
-		warning("convolve_x: MSIZE=%d array too small for input %d\n",
-			MSIZE,nx);
-                return 0;
-	}
-	
-	for (ix=0; ix<nx; ix++) {
-		offset = iz + iy*nz + ix*nz*ny;	/* CDEF */
-		c[ix] = *(a+offset);		/* copy array */
-		*(a+offset) = 0.0;		/* reset for accumulation */
-	}
+  if (nx>MSIZE) {
+    warning("convolve_x: MSIZE=%d array too small for input %d\n",
+	    MSIZE,nx);
+    return 0;
+  }
+  
+  for (ix=0; ix<nx; ix++) {
+    offset = iz + iy*nz + ix*nz*ny;	/* CDEF */
+    c[ix] = *(a+offset);		/* copy array */
+    *(a+offset) = 0.0;		/* reset for accumulation */
+  }
 		
-	for (ix=0; ix<nx; ix++) 
-	    for (jx=0; jx<nb; jx++) {
-	        kx = ix + jx - (nb-1)/2;
-		if (kx>=0)
-		    if (kx<nx) {
-                        if (Qbad && c[ix]==bad) continue;
-		        *(a+iz+iy*nz+kx*ny*nz) += b[jx]*c[ix];
-		    } else
-			continue;
-	    }
-	return 1;
+  for (ix=0; ix<nx; ix++) 
+    for (jx=0; jx<nb; jx++) {
+      kx = ix + jx - (nb-1)/2;
+      if (kx>=0)
+	if (kx<nx) {
+	  if (Qbad && c[ix]==bad) continue;
+	  *(a+iz+iy*nz+kx*ny*nz) += b[jx]*c[ix];
+	} else
+	  continue;
+    }
+  return 1;
 }
 
 int convolve_y (a, ix, iz, nx, ny, nz, b, nb)
 real *a, b[];
 int    nx, ny, nz, nb, ix, iz;
 {
-	real c[MSIZE];
-	int    iy, jy, ky, offset;
-	
-	if (ny>MSIZE) {
-		warning("convolve_y: MSIZE=%d array too small for input %d\n",
-			MSIZE,ny);
-                return 0;
-	}
-	
-	for (iy=0; iy<ny; iy++) {
-	    offset = iz+iy*nz+ix*nz*ny;     /* CDEF */
-	    c[iy] = *(a+offset);		/* copy array */
-	    *(a+offset) = 0.0;		/* reset for accumulation */
-	}
-		
-	for (iy=0; iy<ny; iy++) 
-    	    for (jy=0; jy<nb; jy++) {
-	        ky = iy + jy - (nb-1)/2;
-		if (ky>=0)
-		    if (ky<ny){
-                        if (Qbad && c[iy]==bad) continue;
-		        *(a+iz+ky*nz+ix*ny*nz) += b[jy]*c[iy];
-		    } else
-			continue;
-	    }
-	return 1;
+  real c[MSIZE];
+  int    iy, jy, ky, offset;
+  
+  if (ny>MSIZE) {
+    warning("convolve_y: MSIZE=%d array too small for input %d\n",
+	    MSIZE,ny);
+    return 0;
+  }
+  
+  for (iy=0; iy<ny; iy++) {
+    offset = iz+iy*nz+ix*nz*ny;     /* CDEF */
+    c[iy] = *(a+offset);		/* copy array */
+    *(a+offset) = 0.0;		/* reset for accumulation */
+  }
+  
+  for (iy=0; iy<ny; iy++) 
+    for (jy=0; jy<nb; jy++) {
+      ky = iy + jy - (nb-1)/2;
+      if (ky>=0)
+	if (ky<ny){
+	  if (Qbad && c[iy]==bad) continue;
+	  *(a+iz+ky*nz+ix*ny*nz) += b[jy]*c[iy];
+	} else
+	  continue;
+    }
+  return 1;
 }
 
 int convolve_z (a, ix, iy, nx, ny, nz, b, nb)
 real *a, b[];
 int    nx, ny, nz, nb, ix, iy;
 {
-	real c[MSIZE];
-	int    iz, jz, kz, offset;
-	
-	if (nz>MSIZE) {
-		warning("convolve_z: MSIZE=%d array too small for input %d\n",
-			MSIZE,nz);
-		return 0;
-	}
-	
-	for (iz=0; iz<nz; iz++) {
-            offset = iz+iy*nz+ix*nz*ny;         /* CDEF */
-            c[iz] = *(a+offset);		/* copy array */
-            *(a+offset) = 0.0;		/* reset for accumulation */
-	}
-		
-	for (iz=0; iz<nz; iz++) 
-            for (jz=0; jz<nb; jz++) {
-		kz = iz + jz - (nb-1)/2;
-		if (kz>=0)
-	            if (kz<nz) {
-                        if (Qbad && c[iz]==bad) continue;
-			*(a+kz+iy*nz+ix*nz*ny) += b[jz]*c[iz];
-		    } else
-			continue;
-	    }
-	return 1;
+  real c[MSIZE];
+  int    iz, jz, kz, offset;
+  
+  if (nz>MSIZE) {
+    warning("convolve_z: MSIZE=%d array too small for input %d\n",
+	    MSIZE,nz);
+    return 0;
+  }
+  
+  for (iz=0; iz<nz; iz++) {
+    offset = iz+iy*nz+ix*nz*ny;         /* CDEF */
+    c[iz] = *(a+offset);		/* copy array */
+    *(a+offset) = 0.0;		/* reset for accumulation */
+  }
+  
+  for (iz=0; iz<nz; iz++) 
+    for (jz=0; jz<nb; jz++) {
+      kz = iz + jz - (nb-1)/2;
+      if (kz>=0)
+	if (kz<nz) {
+	  if (Qbad && c[iz]==bad) continue;
+	  *(a+kz+iy*nz+ix*nz*ny) += b[jz]*c[iz];
+	} else
+	  continue;
+    }
+  return 1;
 }
 

@@ -26,7 +26,8 @@
  *	apr 1995 - no more ARGS, fix up prototypes
  *    6-jan-1998 - fixed up TESTBED bit more            pjt
  *
- * @TODO    FORDEF ok, CDEF wrong.
+ * @todo    need longint to handle large files
+ * @todo    FORDEF ok, CDEF wrong.
 
   // FORDEF:  tsf $NEMO/data/test/mapf.ccd
   set Map
@@ -58,7 +59,7 @@
 #define DLEV   5		/* local default debug output level */
 
 
-/*	storage of matrices can be done in several ways: */
+/*	storage of matrices can be done in two ways: */
 
 local char *matdef[] = {"ForDef", "CDef", NULL };
 
@@ -66,7 +67,7 @@ local char *matdef[] = {"ForDef", "CDef", NULL };
  * one of the above XXXDEF's must be defined below, and
  * set the appropriate Tag value in the Image descriptor
  * If it is not done, the compiled versions will (should)
- * complain about missing integer 'idef'
+ * complain about missing integer 'idef' 
  */
 
 #if defined(FORDEF)
@@ -90,7 +91,7 @@ local int idef = 1;
 #define PUT 1
 #define GET 2
 #define MAXNAXIS 3   /* for now !!! */
-#define MAXOPEN 10
+#define MAXOPEN 32
 
 local struct { 
     stream str;
@@ -106,6 +107,12 @@ local bool first=TRUE;
 
 local void xy_init(void);
 local void xy_handle(int, string);
+
+local string get_string_def(stream str, string tag, string def)
+{
+  if (get_tag_ok(str,tag))  return get_string(str,tag);
+  return def;
+}
 
 
 image *xyopen(int *handle, string name, string status, int naxis, int *axes)
@@ -154,22 +161,10 @@ image *xyopen(int *handle, string name, string status, int naxis, int *axes)
 	  get_data_coerced (str,BeamxTag, RealType, &(Beamx(iptr)), 0);
 	  get_data_coerced (str,BeamyTag, RealType, &(Beamy(iptr)), 0);
 	  get_data_coerced (str,BeamzTag, RealType, &(Beamz(iptr)), 0);
-          if (get_tag_ok(str,NamexTag))             /* X-axis name */
-            Namex(iptr) = get_string(str,NamexTag);
-          else
-            Namex(iptr) = NULL;
-          if (get_tag_ok(str,NameyTag))             /* Y-axis name */
-            Namey(iptr) = get_string(str,NameyTag);
-          else
-            Namey(iptr) = NULL;
-          if (get_tag_ok(str,NamezTag))             /* Z-axis name */
-            Namez(iptr) = get_string(str,NamezTag);
-          else
-            Namez(iptr) = NULL;
-          if (get_tag_ok(str,UnitTag))             /* units  */
-            Unit(iptr) = get_string(str,UnitTag);
-          else
-            Unit(iptr) = NULL;
+	  Namex(iptr) = get_string_def(str,NamexTag,NULL);
+	  Namey(iptr) = get_string_def(str,NameyTag,NULL);
+	  Namez(iptr) = get_string_def(str,NamezTag,NULL);
+	  Unit(iptr) = get_string_def(str,UnitTag,NULL);
           read_matdef = get_string(str,StorageTag);
 	  if (!streq(read_matdef,matdef[idef]))
              dprintf(0,"read_image: StorageTag = %s, compiled with %s\n",

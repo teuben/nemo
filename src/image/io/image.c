@@ -382,7 +382,10 @@ int copy_image (imageptr iptr, imageptr *optr)
   nz = Nz(iptr);
 
   *optr = (imageptr ) allocate(sizeof(image));
-  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*optr,nx,ny,nz);
+  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*op
+
+
+tr,nx,ny,nz);
     	
   Frame(*optr) = (real *) allocate(nx*ny*nz*sizeof(real));	
   dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
@@ -399,12 +402,17 @@ int copy_image (imageptr iptr, imageptr *optr)
   Namey(*optr) = mystrcpy(Namey(iptr));
   Namez(*optr) = mystrcpy(Namez(iptr));
   Xref(*optr) = Xref(iptr);
-  Yref(*optr) = Yref(iptr);
-  Zref(*optr) = Zref(iptr);
-  Storage(*optr) = matdef[idef];
-  Axis(*optr) = Axis(iptr);
-  set_iarray(*optr);
-  
+  Yre
+
+ds9 &
+f(*optr) = Yref(iptr);
+  Zref(*optr) = Zref(iptr);cd
+
+
+
+
+
+
   return 1;		/* succes return code  */
 }
 
@@ -468,12 +476,14 @@ real **map2_image (imageptr iptr)
 
 #if defined(CDEF)
 #if 0
+    // map[ny][nx]
     map = (real **) allocate(sizeof(real *) * ny);
     for (iy=0; iy<ny; iy++) {               /* CDEF */
         map[iy] = base;
         base += nx;
     }
 #else
+    // map[nx][ny]
     map = (real **) allocate(sizeof(real *) * nx);
     for (ix=0; ix<nx; ix++) {               /* CDEF */
         map[ix] = base;
@@ -497,6 +507,7 @@ real ***map3_image (imageptr iptr)
     nz = Nz(iptr);
 
 #if defined(CDEF)
+    // cube[nz][ny][nx]
     cube = (real ***) allocate(sizeof(real **) * nz);
     for (iz=0; iz<nz; iz++) {
       cube[iz] = (real **) allocate(sizeof(real *) * ny);
