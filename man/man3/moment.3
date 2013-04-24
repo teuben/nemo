@@ -1,8 +1,8 @@
-.TH MOMENT 3NEMO "2 March 2011"
+.TH MOMENT 3NEMO "24 April 2013"
 .SH NAME
 ini_moment, accum_moment, decr_moment, 
 reset_moment, show_moment, n_moment, sum_moment,
-mean_moment, sigma_moment, skewness_moment, kurtosis_moment,
+mean_moment, sigma_moment, skewness_moment, kurtosis_moment, robust_moment,
 min_moment, max_moment \- various (moving) moment and minmax routines
 .SH SYNOPSIS
 .nf
@@ -28,6 +28,12 @@ min_moment, max_moment \- various (moving) moment and minmax routines
 .B real min_moment(m);
 .B real max_moment(m);
 .PP
+.B void compute_robust_moment(m);
+.B int n_robust_moment(m);
+.B real mean_robust_moment(m);
+.B real median_robust_moment(m);
+.B real sigma_robust_moment(m);
+.PP
 .B Moment *m;
 .B int mom, ndat;
 .B real x, w;
@@ -52,7 +58,16 @@ Note that the \fImedian_moment\fP can only be used in \fBx\fP (the weights are
 ignored) and moving moment where \fBndat>0\fP.
 .PP
 \fBmean_moment\fP returns the mean value, where \fBsigma_moment\fP returns
-the variance
+the square root of the variance
+.PP
+\fBrobust_moment's\fP can also be computed. These are based on an algorithm to
+remove the outliers. It first computes the distance between the 1st and 3rd quartile,
+then removes all points further than 1.5 times that distance from the 1st and 
+3rd quartile. After calling \fBcompute_robust_moment\fP, the mean, median and
+sigma can be retrieved as those computations are done in a temporary Moment
+structure. Caveat: for large datasets and/or moving moments, 
+robust_moment's can become expensive because of the need for sorting to
+get the quartiles.
 .SH EXAMPLES
 The following code computes a weighted mean and dispersion of a set of points:
 .nf
@@ -66,6 +81,9 @@ The following code computes a weighted mean and dispersion of a set of points:
 	accum_moment(&m,x[i],w[i]);
     printf("Mean: %g   Dispersion: %g\\n",
 	mean_moment(&m), sigma_moment(&m));
+    compute_robust_moment(&m);
+    printf("Robust Mean: %g   Dispersion: %g\\n",
+	robust_mean_moment(&m), robust_sigma_moment(&m));
 
 .fi
 .SH MOMENT STRUCTURE
@@ -95,7 +113,7 @@ correctly.
 .SH SEE ALSO
 grid(3NEMO)
 .nf
-http://apophenia.sourceforge.net/
+http://apophenia.info
 .fi
 .SH AUTHOR
 Peter Teuben
@@ -112,4 +130,5 @@ Peter Teuben
 13-jun-95	added decr_moment	PJT
 2-feb-05	added moving moments	PJT
 2-mar-11	added h3,h4	PJT
+24-apr-13	documented robust statistics	PJT
 .fi
