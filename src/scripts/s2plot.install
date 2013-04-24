@@ -1,13 +1,15 @@
 #! /bin/csh -f
 #
 #  Install S2PLOT within NEMO
-#
+#  See also: http://astronomy.swin.edu.au/s2plot/index.php?title=S2PLOT
 #
 #  23-feb-2011  created for V2.6
+#  29-mar-2013  updated for 3.2.1
 # 
 # summary of build STEPS:
 # - grab s2plot-base-2.6-2009-02-04.tar.bz2 
 #   ( see http://groups.google.com/group/s2plot/files )
+#   or see also
 # - check S2X11PATH is ok s2plot.csh
 # - setenv S2PATH and S2ARCH 
 # - source the s2plot.csh file
@@ -16,8 +18,8 @@
 if ($?NEMO == 0) set NEMO=`pwd`
 
 #			 	.. command line keywords ..
-set s2path=$NEMO/local/s2plot-2.6
-set s2arch=linux-gnu-i386
+set s2path=$NEMO/local/s2plot-3.2.1
+set s2arch=linux-gnu-x86_64
 
 
 #				.. parse command line ..
@@ -37,5 +39,5 @@ setenv S2PATH $s2path
 setenv S2ARCH $s2arch
 
 cd $s2path
-source s2plot.csh
-./build.csh
+source scripts/s2plot.csh
+scripts/build.csh
