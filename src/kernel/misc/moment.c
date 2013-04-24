@@ -12,6 +12,7 @@
  *  12-dec-07   added rms_moment; only valid for equal weights
  *  18-mar-11   robust mean, 
  *   9-oct-12   free_moment()  
+ *  23-apr-13   add compute_robust_moment()
  *
  * @todo    iterative robust by using a mask
  *          robust factor, now hardcoded at 1.5
@@ -179,10 +180,12 @@ real mean_moment(Moment *m)
  *
  */
 
-static real  last_sigma_robust_moment;
-static real  last_median_robust_moment;
+static real  last_mean_robust_moment   = -1;
+static real  last_sigma_robust_moment  = -1;
+static real  last_median_robust_moment = -1;
+static int   last_n_robust_moment      = -1;
 
-real mean_robust_moment(Moment *m)
+void compute_robust_moment(Moment *m)
 {
   int i,n;
   real m1,m2,m3,iqr,dlo,dhi;
@@ -203,10 +206,21 @@ real mean_robust_moment(Moment *m)
     if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
     accum_moment(&tmp,m->dat[i],1.0);
   }
+  last_mean_robust_moment   = mean_moment(&tmp);
   last_sigma_robust_moment  = sigma_moment(&tmp);
   last_median_robust_moment = median_moment(&tmp);
+  last_n_robust_moment      = n_moment(&tmp);
   free_moment(&tmp); 
-  return mean_moment(&tmp);
+}
+
+int n_robust_moment(Moment *m)
+{
+  return last_n_robust_moment;
+}
+
+real mean_robust_moment(Moment *m)
+{
+  return last_mean_robust_moment;
 }
 
 real median_robust_moment(Moment *m)
