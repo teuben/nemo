@@ -401,9 +401,10 @@ void nemo_main(void)
 	  printf("%g %g\n",min_moment(&m), max_moment(&m));
 	else if (Qmedian)
 	  printf("%g\n",median_moment(&m));
-	else if (Qrobust) 
-        printf("%g\n",mean_robust_moment(&m));
-	else
+	else if (Qrobust) {
+	  compute_robust_moment(&m);
+          printf("%g\n",mean_robust_moment(&m));
+	} else
 	  printf("%g\n",show_moment(&m,mom));
       }
     }
@@ -413,9 +414,10 @@ void nemo_main(void)
         printf("%g %g\n",min_moment(&m), max_moment(&m));
       else if (Qmedian)
 	printf("%g\n",median_moment(&m));
-      else if (Qrobust) 
+      else if (Qrobust)  {
+	compute_robust_moment(&m);
         printf("%g\n",mean_robust_moment(&m));
-      else
+      } else
         printf("%g\n",show_moment(&m,mom));
     }
 }
