@@ -360,7 +360,7 @@ string defv[] = {
     "median=f\n     Show median ?",
     "robust=f\n     Show robust mean etc.?",
     "maxsize=0\n    If > 0, size for moving moments instead\n",
-    "VERSION=0.3\n  18-mar-2011 PJT",
+    "VERSION=0.4\n  23-apr-2013 PJT",
     NULL,
 };
 
