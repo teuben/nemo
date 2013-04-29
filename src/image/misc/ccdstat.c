@@ -39,7 +39,7 @@ string defv[] = {
     "ignore=t\n     (for summing) Ignore cell width when N=1 (assumed infinity)",
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
-    "VERSION=3.0\n  17-apr-2013 PJT",
+    "VERSION=3.0a\n 29-apr-2013 PJT",
     NULL,
 };
 
@@ -201,6 +201,7 @@ nemo_main()
 	    printf ("Median                : %f\n",median_moment(&m));
 	}
 	if (Qrobust) {
+	  compute_robust_moment(&m);
 	  printf ("Mean Robust           : %f\n",mean_robust_moment(&m));
 	  printf ("Sigma Robust          : %f\n",sigma_robust_moment(&m));
 	  printf ("Median Robust         : %f\n",median_robust_moment(&m));
