@@ -39,7 +39,7 @@ string defv[] = {
     "ignore=t\n     (for summing) Ignore cell width when N=1 (assumed infinity)",
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
-    "VERSION=3.0b\n 30-apr-2013 PJT",
+    "VERSION=3.1\n  1-may-2013 PJT",
     NULL,
 };
 
@@ -66,7 +66,7 @@ real get_median(int n, real *x);
 nemo_main()
 {
     int  i, j, k, ki;
-    real x, xmin, xmax, mean, sigma, skew, kurt, median, bad, w, *data;
+    real x, y, z, xmin, xmax, mean, sigma, skew, kurt, median, bad, w, *data;
     real sum, sov;
     Moment m;
     bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qmmcount = getbparam("mmcount");
@@ -229,7 +229,7 @@ nemo_main()
 
       /* tabular output, one line per (selected) plane */
 
-      printf("# p  min  max  N  mean sigma skew kurt sum sum ");
+      printf("# iz z min  max  N  mean sigma skew kurt sum sum ");
       if (Qmedian) printf(" [med med]");
       if (Qrobust) printf(" robust[N mean sig med]");
       printf("\n");
@@ -238,6 +238,7 @@ nemo_main()
       for (ki=0; ki<nplanes; ki++) {
 	reset_moment(&m);
 	k = planes[ki];
+	z = Zmin(iptr) + k*Dz(iptr);
 	ngood = 0;
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
@@ -267,8 +268,8 @@ nemo_main()
 	  printf("# %d no data\n",k+1);
 	  continue;
 	}
-	printf("%d %f %f %d  %f %f %f %f  %f %f",
-	       k+1, min_moment(&m), max_moment(&m), n_moment(&m),
+	printf("%d %f  %f %f %d  %f %f %f %f  %f %f",
+	       k+1, z, min_moment(&m), max_moment(&m), n_moment(&m),
 	       mean,sigma,skew,kurt,sum,sum*sov);
 	if (Qmedian) {
 	  printf ("   %f",get_median(ngood,data));
