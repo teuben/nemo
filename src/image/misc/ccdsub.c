@@ -31,11 +31,11 @@ string defv[] = {
   "nzaver=1\n	  Number Z to aver (size remains same)",
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
-  "VERSION=2.0\n  9-apr-2009 PJT",
+  "VERSION=2.0a\n 1-may-2013 PJT",
   NULL,
 };
 
-string usage = "sub/average of an image";
+string usage = "sub/average of an image, with reorder option";
 
 string cvsid="$Id$";
 
@@ -121,7 +121,7 @@ void nemo_main()
 	if (!Qdummy) ax_shift(iptr);
         write_image(outstr, iptr);
     } else if (Qreorder) {            	/* reordering */
-      warning("new reordering mode");
+      warning("new reordering mode %s",reorder);
       if (streq(reorder,"xyz")) {
 	create_cube(&iptr1,nx1,ny1,nz1);
 	ax_copy(iptr,iptr1);
@@ -219,9 +219,9 @@ void ax_copy(imageptr i0, imageptr i1)
   Beamx(i1) = Beamx(i0);
   Beamy(i1) = Beamy(i0);
   Beamz(i1) = Beamz(i0);
-  Namex(i1) = strdup(Namex(i0));
-  Namey(i1) = strdup(Namey(i0));
-  Namez(i1) = strdup(Namez(i0));
+  if (Namex(i0))  Namex(i1) = strdup(Namex(i0));
+  if (Namey(i0))  Namey(i1) = strdup(Namey(i0));
+  if (Namez(i0))  Namez(i1) = strdup(Namez(i0));
 }
 
 /* ax_shift:  
