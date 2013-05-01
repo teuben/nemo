@@ -56,7 +56,7 @@ void ini_moment(Moment *m, int mom, int ndat)
 void free_moment(Moment *m)
 {  
    if (m->ndat) {
-     /* @todo   free sum */
+     if (m->sum) free(m->sum);
      free(m->dat);
      free(m->wgt);
    }
@@ -178,6 +178,7 @@ real mean_moment(Moment *m)
  *       http://en.wikipedia.org/wiki/Robust_statistics
  *       implement IDL's 'where' masking (see Moment->msk)
  *
+ * @todo these temp variables should be stored inside the Moment structure
  */
 
 static real  last_mean_robust_moment   = -1;

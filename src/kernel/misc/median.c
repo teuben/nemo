@@ -28,10 +28,12 @@ real median(int n, real *x)
 
     if (nix==0) {                       /* first time allocate */
         nix = n;
-        ix = (int *) allocate(sizeof(real)*nix);
+        ix = (int *) allocate(sizeof(int)*nix);
+	dprintf(0,"MEDIAN alloc %d\n",nix);
     } else if (nix < n) {               /* re-allocation */
         nix = n;
-        ix = (int *) reallocate(ix, sizeof(real)*nix);
+        ix = (int *) reallocate(ix, sizeof(int)*nix);
+	dprintf(0,"MEDIAN re-alloc %d\n",nix);
     }
     sortptr(x,ix,n);
     if (n % 2)
