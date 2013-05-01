@@ -124,6 +124,7 @@ void nemo_main()
 	}
       } else 
 	error("axis=%d not yet supported for mom=%d",axis,mom);
+      free_image(iptr);
       return;
     }
 
