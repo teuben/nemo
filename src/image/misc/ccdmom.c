@@ -14,6 +14,7 @@
  *      27-nov-12   1.0  add oper=  to insert an operator (ie. out = in <oper> out )
  *       8-dec-12   1.1  allow mom=-3 for differentials (axis=3 only for now) in 2..Nz()
  *      13-feb-13   2.0  default integration, instead of just summing
+ *      29-apr-13   2.1  add clumping definition  http://arxiv.org/abs/1304.1586  (mom=-4)
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -27,17 +28,19 @@
 #include <image.h>
 
 string defv[] = {
-        "in=???\n       Input image file",
-	"out=???\n      Output image file",
-	"axis=1\n       Axis to take moment along (1=x 2=y 3=z)",
-	"mom=0\n	Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc, -1=mean val, -2=disp val]",
-	"keep=f\n	Keep moment axis in full length, and replace all values",
-	"cumulative=f\n Cumulative axis (only valid for mom=0)",
-	"oper=\n        Operator on output (enforces keep=t)",
-	"peak=1\n       Find N-th peak in case of peak finding (mom=3)",
-	"integrate=t\n  Use integration instead of just summing, only used for mom=0",
-	"VERSION=2.0\n  13-feb-2013 PJT",
-	NULL,
+  "in=???\n       Input image file",
+  "out=???\n      Output image file",
+  "axis=1\n       Axis to take moment along (1=x 2=y 3=z)",
+  "mom=0\n	  Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc,-1=mean val,-2=disp val,-3=clump]",
+  "keep=f\n	  Keep moment axis in full length, and replace all values",
+  "cumulative=f\n Cumulative axis (only valid for mom=0)",
+  "oper=\n        Operator on output (enforces keep=t)",
+  "peak=1\n       Find N-th peak in case of peak finding (mom=3)",
+  "clip=\n        If used, clip values between -clip,clip or clip1,clip2 [not impl]",
+  "rngmsk=f\n     Invalidate pixel when first moment falls outside range of valid axis [not impl]",
+  "integrate=t\n  Use integration instead of just summing, only used for mom=0",
+  "VERSION=2.1\n  29-apr-2013 PJT",
+  NULL,
 };
 
 string usage = "moment along an axis of an image";
@@ -54,17 +57,18 @@ void nemo_main()
 {
     stream  instr, outstr;
     string  oper;
-    int     nx, ny, nz, nx1, ny1, nz1;
+    int     i,j,k,nx, ny, nz, nx1, ny1, nz1;
     int     axis, mom;
-    int     i,j,k, apeak, apeak1, cnt;
+    int     nclip, apeak, apeak1, cnt;
     imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
     real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
-    real    *spec, ifactor;
+    real    *spec, ifactor, cv, clip[2];
     int     *smask;
     bool    Qkeep = getbparam("keep");
     bool    Qoper = hasvalue("oper");
     int     npeak = getiparam("peak");
     bool    Qint  = getbparam("integrate"); 
+    bool    Qclip = hasvalue("clip");
 
     if (Qoper) {
       Qkeep = TRUE;
@@ -73,21 +77,56 @@ void nemo_main()
 
     instr = stropen(getparam("in"), "r");
     mom = getiparam("mom");
-    if (mom < -3 || mom > 3)  error("Illegal value mom=%d",mom);
+    if (mom < -4 || mom > 3)  error("Illegal value mom=%d",mom);
     axis = getiparam("axis");
     if (axis < 0 || axis > 3) error("Illegal value axis=%d",axis);
 
     if (mom==3 && axis!=3 && npeak>1) error("Nth-peak>1 finding only axis=3");
+
+    if (Qclip) {
+      nclip = nemoinpr(getparam("clip"),clip,2);
+      if (nclip<1) error("error parsing clip=%s",getparam("clip"));
+      if (nclip==1) {
+	clip[1] =  clip[0];
+	clip[0] = -clip[1];
+      }
+    }
 
 
     if (getbparam("cumulative"))
       axis = -axis;
 
     read_image( instr, &iptr);
-
     nx1 = nx = Nx(iptr);	
     ny1 = ny = Ny(iptr);
     nz1 = nz = Nz(iptr);
+
+    if (mom==-4) {   /* clumping hack */
+      if (axis==3) {
+	for (k=0; k<nz; k++) {
+	  tmp0 = tmp1 = tmp2 = 0.0;
+	  for (j=0; j<ny; j++) {
+            for (i=0; i<nx; i++) {	
+	      cv = CubeValue(iptr,i,j,k);
+	      if (Qclip && (cv < clip[0] || cv>clip[1])) {
+		dprintf(1,"%d %d %d  %f %f %f\n",i,j,k,cv,clip[0],clip[1]);
+		continue;
+	      }
+	      tmp0 += 1.0;
+	      tmp1 += cv;
+	      tmp2 += cv*cv;
+	    }
+	  }
+	  if (tmp1 != 0.0)
+	    printf("%d %f %.0f\n",k,(tmp2*tmp0)/(tmp1*tmp1),tmp0);
+	  else
+	    printf("%d 0.0 0\n",k);
+	}
+      } else 
+	error("axis=%d not yet supported for mom=%d",axis,mom);
+      return;
+    }
+
     if (Qkeep) {
         dprintf(0,"Keeping %d*%d*%d cube\n",nx1,ny1,nz1);
         if (axis==1) {
@@ -247,7 +286,7 @@ void nemo_main()
 
 	if (Qoper) image_oper(iptr,oper,iptr1);
 
-    } else if (axis==3) {                       /* this one is tested */
+    } else if (axis==3) {                       /* this one is well tested */
         scale = Dz(iptr);
 	offset = Zmin(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
