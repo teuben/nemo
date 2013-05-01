@@ -39,7 +39,7 @@ string defv[] = {
     "ignore=t\n     (for summing) Ignore cell width when N=1 (assumed infinity)",
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
-    "VERSION=3.0a\n 29-apr-2013 PJT",
+    "VERSION=3.0b\n 30-apr-2013 PJT",
     NULL,
 };
 
@@ -234,9 +234,10 @@ nemo_main()
       if (Qrobust) printf(" robust[N mean sig med]");
       printf("\n");
 
+      ini_moment(&m,maxmom,ndat);
       for (ki=0; ki<nplanes; ki++) {
+	reset_moment(&m);
 	k = planes[ki];
-	ini_moment(&m,maxmom,ndat);
 	ngood = 0;
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
@@ -262,6 +263,10 @@ nemo_main()
 	  skew = skewness_moment(&m);
 	if (maxmom > 3)
 	  kurt = kurtosis_moment(&m);
+	if (n_moment(&m) == 0) {
+	  printf("# %d no data\n",k+1);
+	  continue;
+	}
 	printf("%d %f %f %d  %f %f %f %f  %f %f",
 	       k+1, min_moment(&m), max_moment(&m), n_moment(&m),
 	       mean,sigma,skew,kurt,sum,sum*sov);
@@ -291,7 +296,7 @@ nemo_main()
 	printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
 #endif
 	printf("\n");
-      }
+      } /* ki */
     }
 }
 
