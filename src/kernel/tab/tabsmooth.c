@@ -2,6 +2,8 @@
  * TABSMOOTH: smooth a table column - hanning for now 
  *          
  *   24-oct-07   Created quick & dirty               PJT
+ *          12   keyword error
+ *      may-13   smooth= added
  *                        
  * 
  */
@@ -22,7 +24,8 @@ string defv[] = {
     "in=???\n                     Input file name",
     "xcol=1\n			  Column(s) to use",
     "nmax=100000\n                max size if a pipe",
-    "VERSION=0.2\n		  26-jun-2012 PJT",
+    "smooth=0.25,0.5,0.25\n       Smoothing array",
+    "VERSION=0.4\n		  2-may-2013 PJT",
     NULL
 };
 
@@ -41,6 +44,7 @@ string cvsid = "$Id$";
 #endif
 
 #define MAXCOORD 16
+#define MAXSM    128
 
 local string input;			/* filename */
 local stream instr;			/* input file */
@@ -52,10 +56,14 @@ real *coldat[MAXCOL];
 local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
 
+local int  nsm;
+local real sm[MAXSM];                   /* smoothing array */
+
 
 local void setparams(void);
 local void read_data(void); 
 local void smooth_data(void);
+local void smooth_data_old(void);
 
 
 
@@ -70,6 +78,9 @@ nemo_main()
 
 local void setparams()
 {
+    real sum;
+    int i;
+
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
     if (ncol < 0) error("parsing error xcol=%s",getparam("xcol"));
@@ -78,6 +89,12 @@ local void setparams()
     if (nmax<1) error("Problem reading from %s",input);
 
     instr = stropen (input,"r");
+
+    nsm = nemoinpr(getparam("smooth"),sm,MAXSM);
+    if (nsm < 0) error("smooth=%s parsing error",getparam("smooth"));
+    if (nsm % 2 != 1) error("smooth=%s needs an odd number of values",getparam("smooth"));
+    for (i=0, sum=0.0; i<nsm; i++) sum += sm[i];
+    dprintf(0,"Smooth sum= %g\n",sum);
 }
 
 
@@ -97,7 +114,7 @@ local void read_data()
 }
 
 
-local void smooth_data(void)
+local void smooth_data_old(void)
 {
   int i,j;
 
@@ -113,5 +130,25 @@ local void smooth_data(void)
   for (j=0; j<ncol;  j++)
     printf("%g ",0.667*coldat[j][npt-2] + 0.333*coldat[j][npt-1]);
   printf("\n");
+}
+
+local void smooth_data(void)
+{
+  int i,j,k,ipk;
+  real sum[MAXCOL];
+  int nsmh = (nsm-1)/2;  /* nsm better be odd */
+
+  for (i=0; i<npt; i++) {
+    for (j=0; j<ncol;  j++) {
+      sum[j] = 0.0;
+      for (k=-nsmh; k<=nsmh; k++) {
+	ipk = i+k;
+	if (ipk<0 || ipk>=npt) continue;
+	sum[j] += coldat[j][ipk] * sm[k+nsmh];
+      }
+      printf("%g ",sum[j]);
+    }
+    printf("\n");
+  }
 }
 
