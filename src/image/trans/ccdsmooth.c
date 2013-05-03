@@ -37,7 +37,7 @@ string defv[] = {
 	"bad=\n			Optional ignoring this bad value",
 	"cut=0.01\n             Cutoff value for gaussian, if used",
 	"mode=0\n               Special edge smoothing modes (testing)",
-	"VERSION=3.3a\n         10-feb-2013 PJT",
+	"VERSION=3.3b\n         2-may-2013 PJT",
 	NULL,
 };
 
