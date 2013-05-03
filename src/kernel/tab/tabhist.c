@@ -44,6 +44,7 @@
  *       1-jun-10   6.0   allow bins= to be edges of bins       pjt 
  *      (8-feb-11   !!!   code cloned into ccdhist              pjt) 
  *      22-aug-12   6.2   torben median option                  pjt
+ *      23-apr-13   6.2b  use compute_robust_mean               pjt
  *                
  * 
  * TODO:
@@ -91,7 +92,7 @@ string defv[] = {
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
-    "VERSION=6.2a\n		  29-oct-2012 PJT",
+    "VERSION=6.2b\n		  24-apr-2013 PJT",
     NULL
 };
 
@@ -455,6 +456,7 @@ local void histogram(void)
   }
   dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
   if (Qrobust) {
+    compute_robust_moment(&m);
     rmean  = mean_robust_moment(&m);
     rsigma = sigma_robust_moment(&m);
     dprintf (0,"Robust Mean Disp     : %g %g\n",rmean,rsigma);
