@@ -30,6 +30,7 @@
  *  16-mar-05   V7.1 protection to re-use a pointer for different images PJT
  *   4-aug-11   V7.2 fixed various map2_image/map3_image mistakes        PJT
  *  19-oct-11   V8.0 implementing USE_IARRAY methods                     PJT
+ *  13-feb-13   V8.1 added region and sub_image()                        PJT
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -177,6 +178,7 @@ int read_image (stream instr, imageptr *iptr)
 {
     string read_matdef;
     int nx=0, ny=0, nz=0;
+    size_t  nxyz;
 
     get_history(instr);         /* accumulate history */
 
@@ -256,8 +258,8 @@ int read_image (stream instr, imageptr *iptr)
 
          get_set (instr,MapTag);
             if (Frame(*iptr)==NULL) {        /* check if allocated */
-                Frame(*iptr) = (real *) 
-			allocate(Nx(*iptr)*Ny(*iptr)*Nz(*iptr)*sizeof(real));   
+	        nxyz = Nx(*iptr)*Ny(*iptr)*Nz(*iptr);
+                Frame(*iptr) = (real *) allocate(nxyz * sizeof(real));
                 dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
             } else
                 dprintf (DLEV,"Frame already allocated @ %d\n",Frame(*iptr));
@@ -353,7 +355,7 @@ int create_image_mask(imageptr iptr, image_maskptr *mptr)
   int nx = Nx(iptr);
   int ny = Ny(iptr);
   int nz = Nz(iptr);
-  int np = nx*ny*nz;
+  size_t np = nx*ny*nz;
 
   *mptr = (image_maskptr ) allocate(sizeof(image_mask));
   dprintf (DLEV,"create_image_mask:Allocated image_mask @ %d size=%d * %d * %d",*mptr,nx,ny,nz);
@@ -374,14 +376,17 @@ int create_image_mask(imageptr iptr, image_maskptr *mptr)
 int copy_image (imageptr iptr, imageptr *optr)
 {
   int nx,ny,nz;
+  size_t np;
   nx = Nx(iptr);
   ny = Ny(iptr);
   nz = Nz(iptr);
+  np = nx*ny*nz;
+  
 
   *optr = (imageptr ) allocate(sizeof(image));
   dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*optr,nx,ny,nz);
     	
-  Frame(*optr) = (real *) allocate(nx*ny*nz*sizeof(real));	
+  Frame(*optr) = (real *) allocate(np*sizeof(real));	
   dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
   Nx(*optr) = nx;
   Ny(*optr) = ny;
@@ -398,6 +403,55 @@ int copy_image (imageptr iptr, imageptr *optr)
   Xref(*optr) = Xref(iptr);
   Yref(*optr) = Yref(iptr);
   Zref(*optr) = Zref(iptr);
+  Storage(*optr) = matdef[idef];
+  Axis(*optr) = Axis(iptr);
+  set_iarray(*optr);
+  
+  return 1;		/* succes return code  */
+}
+
+int sub_image (imageptr iptr, regionptr rptr, imageptr *optr)
+{
+  int nx,ny,nz, nx1,ny1,nz1, ix,iy,iz, ix0,iy0,iz0;
+  size_t np, np1;
+
+  nx  = Nx(iptr);
+  ny  = Ny(iptr);
+  nz  = Nz(iptr);
+  np = nx*ny*nz;
+  /* grab the bounding box */
+  ix0 = BLC(rptr)[0];
+  iy0 = BLC(rptr)[1];
+  iz0 = BLC(rptr)[2];
+  nx1 = TRC(rptr)[0] - ix0;
+  ny1 = TRC(rptr)[1] - iy0;
+  nz1 = TRC(rptr)[2] - iz0;
+  np1 = nx1*ny1*nz1;
+
+  *optr = (imageptr ) allocate(sizeof(image));
+  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*optr,nx1,ny1,nz1);
+    	
+  Frame(*optr) = (real *) allocate(np1*sizeof(real));	
+  dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
+  Nx(*optr) = nx1;
+  Ny(*optr) = ny1;
+  Nz(*optr) = nz1;
+  Xmin(*optr) = Xmin(iptr) + ix0*Dx(iptr);
+  Ymin(*optr) = Ymin(iptr) + iy0*Dy(iptr);
+  Zmin(*optr) = Zmin(iptr) + iz0*Dz(iptr);
+  Dx(*optr) = Dx(iptr);
+  Dy(*optr) = Dy(iptr);
+  Dz(*optr) = Dz(iptr);
+  Namex(*optr) = mystrcpy(Namex(iptr));
+  Namey(*optr) = mystrcpy(Namey(iptr));
+  Namez(*optr) = mystrcpy(Namez(iptr));
+  Xref(*optr) = Xref(iptr) + ix0;
+  Yref(*optr) = Yref(iptr) + iy0;
+  Zref(*optr) = Zref(iptr) + iz0;
+  for (iz=0; iz<nz1; iz++)
+    for (iy=0; iy<ny1; iy++)
+      for (ix=0; ix<nx1; ix++)
+	CubeValue(*optr,ix,iy,iz) = CubeValue(iptr,ix-ix0,iy-iy0,iz-iy0);
   Storage(*optr) = matdef[idef];
   Axis(*optr) = Axis(iptr);
   set_iarray(*optr);
