@@ -11,6 +11,7 @@
 #  26-oct-06    for 3020
 #  11-aug-11    for 3280
 #  14-may-12    for 3300
+#  26-apr-13    the latest is now always available
 # 
 # TODO:   needs to add  -D_FILE_OFFSET_BITS=64   on e.g.linux if you want large file support
 
@@ -19,7 +20,8 @@ if ($?NEMO == 0) set NEMO=`pwd`
 #			 	.. command line keywords ..
 set src=$NEMO/local/cfitsio 
 set prefix=$NEMO
-set version=3310
+#set version=3310
+set version=_latest
 
 #				.. parse command line ..
 foreach arg ($*)
