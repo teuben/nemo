@@ -67,6 +67,7 @@ string defv[] = {
 	"crval=\n        reference value, if different from default",
 	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
+	"restfreq=115271204\n   Restfreq (in Hz) if a doppler axis is used",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
@@ -98,6 +99,7 @@ bool Qdummy;            /* write dummy axes ? */
 int   nref = 0, nfill = 0;
 FLOAT ref_crval[3], ref_crpix[3], ref_cdelt[3];
 char  ref_ctype[3][80], ref_cunit[3][80];
+FLOAT restfreq;
 
 void setparams(void);
 void write_fits(string,imageptr);
@@ -147,6 +149,7 @@ void setparams(void)
     error("parsing error scale=%s - must be 2 numbers",getparam("scale"));
   object = getparam("object");
   comment = getparam("comment");
+  restfreq = getrparam("restfreq");
   Qcdmatrix = getbparam("cdmatrix");
   Qradecvel = getbparam("radecvel");
   Qrefmap = hasvalue("refmap");
@@ -262,6 +265,7 @@ void write_fits(string name,imageptr iptr)
     if (fitsfile==NULL) error("Could not open fitsfile %s for writing\n",name);
 
     if (Qrefmap || Qcrpix) {
+      dprintf(1,"Using ref_crpix\n");
       fitwrhdr(fitsfile,"CRPIX1",ref_crpix[0]);       
       fitwrhdr(fitsfile,"CRPIX2",ref_crpix[1]);       
       if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",ref_crpix[2]);
@@ -277,6 +281,7 @@ void write_fits(string name,imageptr iptr)
       }
     }
     if (Qrefmap || Qcrval) {
+      dprintf(1,"Using ref_crval\n");
       fitwrhdr(fitsfile,"CRVAL1",ref_crval[0]);
       fitwrhdr(fitsfile,"CRVAL2",ref_crval[1]);
       if (ndim>2) fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
@@ -292,6 +297,7 @@ void write_fits(string name,imageptr iptr)
       if (ndim>2) fitwrhdr(fitsfile,"CD3_3",dx[p[2]]);    
     } else {
       if (Qrefmap || Qcdelt) {
+	dprintf(1,"Using ref_cdelt\n");
 	fitwrhdr(fitsfile,"CDELT1",ref_cdelt[0]*scale[0]);
 	fitwrhdr(fitsfile,"CDELT2",ref_cdelt[1]*scale[1]);
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
@@ -308,7 +314,7 @@ void write_fits(string name,imageptr iptr)
       fitwrhda(fitsfile,"CTYPE1",radeve[p[0]]);
       fitwrhda(fitsfile,"CTYPE2",radeve[p[1]]);
       if (ndim>2) fitwrhda(fitsfile,"CTYPE3",radeve[p[2]]);
-      fitwrhdr(fitsfile,"RESTFREQ",115271204.0);  /* keep WCS/doppler  happy  */
+      fitwrhdr(fitsfile,"RESTFREQ",restfreq);
     } else {
       if (Qrefmap) {
         fitwrhda(fitsfile,"CTYPE1",ref_ctype[0]);
