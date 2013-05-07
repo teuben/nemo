@@ -1,4 +1,4 @@
-.TH IMAGE 5NEMO "8 May 2004"
+.TH IMAGE 5NEMO "7 May 2013"
 .SH NAME
 image \- binary format for 2D and 3D image/cube files
 .SH SYNOPSIS
@@ -123,6 +123,21 @@ the commonly used array syntax:
         for (j=0; j<nx; j++)
             a[i][j] = 0.0;
 .fi
+.PP
+The following example creates a simple cube by which you can test
+the row-major and column-major implementations.
+.PP
+In CDef mode:
+.nf
+    % ccdmath "" cube0 "%x+10*%y+100*%z" 4,3,2
+    % tsf cube0
+    double MapValues[4][3][2] 0.00000 100.000 10.0000 110.000 20.0000 120.000 ...  123.000
+.fi
+In ForDef mode:
+.nf
+    % tsf cube0
+    double MapValues[4][3][2] 0.00000 1.00000 2.00000 3.00000 10.0000 11.0000 ... 123.000
+.fi
 .SH LIMITATIONS
 The current default images (axis=0) have their original at the
 first (lower-left = 0,0) pixel. In FITS parlance, there is no
@@ -155,4 +170,5 @@ Peter Teuben
 21-feb-00	A[i][j] usage        	PJT
 19-may-03	improved documentation	PJT
 8-may-04	V5.0: added reference pixel for axis type 1	PJT
+7-may-13	added benchmark example
 .fi
