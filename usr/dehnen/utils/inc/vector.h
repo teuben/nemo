@@ -5,13 +5,14 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2012
+/// \date    2012-2013
 /// 
 /// \brief   contains the definition of class template WDutils::vector<int,T>
 ///
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \version jun-2012  implemented, based on tupel.h, fully C++11
+/// \version jan-2013  support for vector wrappers and derived types
 ///
 ////////////////////////////////////////////////////////////////////////////////
 #if __cplusplus < 201103L
@@ -27,648 +28,1400 @@
 #  include <cmath>
 #  define WDutils_included_cmath
 #endif
+#ifndef WDutils_included_type_traits
+#  include <type_traits>
+#  define WDutils_included_type_traits
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 namespace WDutils {
+  /// a vector of N elements of type T, hold in a buffer
+  template<int N, typename T> struct vector;
+  /// a vector of N elements of type T, referred to by a pointer
+  template<int N, typename T> struct vector_wrapper;
+  /// a constant vector of N elements of type T, referred to by a pointer
+  /// \note allowed_element_type<T>::value must be true
+  template<int N, typename T> struct const_vector_wrapper;
   /// namespace for auxiliary functionality for vector<>
-  namespace Vector {
-    ///
-    /// auxiliary class template for loop unrolling in vector<>
-    ///
-    template<int N1, typename T, int I=0> struct unroll
+  namespace vector_details {
+    //
+    //  auxiliary class template for loop unrolling
+    //
+    //  NOTE We have to start with I=0 and call I+1 after doing I (rather than
+    //       start with N-1 and call I-1 before doing I) for the variadic method
+    //       set() to work properly.
+    //
+    template<int N1, typename X, int I=0> struct unroll
     {
       static_assert(N1>=I,"logic error");
-      typedef unroll<N1,T,I+1> next;
+      typedef unroll<N1,X,I+1> next;
       // output
-      static std::ostream&out(std::ostream&s, const T*x, unsigned w, unsigned p)
+      static std::ostream&out(std::ostream&s, const X*x,
+			      std::streamsize w, std::streamsize p)
       {
 	s << x[I] << ' ';
 	s.width(w);
 	s.precision(p);
 	return next::out(s,x,w,p);
       }
+      // const unary
+      template<typename UnaryFunc>
+      static void const_unary(const X*x, UnaryFunc f)
+	noexcept(noexcept(f))
+      { f(x[I]); next:: const_unary(x,f); }
       // unary
       template<typename UnaryFunc>
-      static void unary(T*x, UnaryFunc f)
+      static void unary(X*x, UnaryFunc f)
+	noexcept(noexcept(f))
       { f(x[I]); next::unary(x,f); }
       // collect unary
       template<typename Operator, typename UnaryFunc>
-      static auto coll_unary(const T*x, Operator op, UnaryFunc f)
-	-> decltype(f(x[I]))
+      static auto coll_unary(const X*x, Operator op, UnaryFunc f)
+	noexcept(noexcept(f)) -> decltype(f(x[I]))
       { return op(f(x[I]), next::coll_unary(x,op,f)); }
+      // const binary
+      template<typename Y, typename BinaryFunc>
+      static void const_binary(const X*x, const Y*y, BinaryFunc f)
+	noexcept(noexcept(f))
+      { f(x[I],y[I]); next::const_binary(x,y,f); }
       // binary
       template<typename Y, typename BinaryFunc>
-      static void binary(T*x, const Y*y, BinaryFunc f)
+      static void binary(X*x, const Y*y, BinaryFunc f)
+	noexcept(noexcept(f))
       { f(x[I],y[I]); next::binary(x,y,f); }
       // collect binary
-      template<typename Operator, typename BinaryFunc>
-      static auto coll_binary(const T*x, const T*y, Operator op, BinaryFunc f)
-	-> decltype(f(x[I],y[I]))
+      template<typename Y, typename Operator, typename BinaryFunc>
+      static auto coll_binary(const X*x, const Y*y, Operator op, BinaryFunc f)
+	noexcept(noexcept(f) && noexcept(op)) -> decltype(f(x[I],y[I]))
       { return op(f(x[I],y[I]), next::coll_binary(x,y,op,f)); }
       // tertiary
-      template<typename TertiaryFunc>
-      static void tertiary(T*x, const T*y, const T*z, TertiaryFunc f)
+      template<typename Y, typename Z, typename TertiaryFunc>
+      static void tertiary(X*x, const Y*y, const Z*z, TertiaryFunc f)
+	noexcept(noexcept(f))
       { f(x[I],y[I],z[I]); next::tertiary(x,y,z,f); }
       // constant tertiary
-      template<typename TertiaryFunc>
-      static void const_tertiary(const T*x, T*y, T*z, TertiaryFunc f)
+      template<typename Y, typename Z, typename TertiaryFunc>
+      static void const_tertiary(const X*x, Y*y, Z*z, TertiaryFunc f)
+	noexcept(noexcept(f))
       { f(x[I],y[I],z[I]); next::const_tertiary(x,y,z,f); }
+      // variadic set
+      template<typename Y, typename... Args>
+      static typename std::enable_if<std::is_convertible<Y,X>::value>::type
+      set(X*x, Y y, Args... args) noexcept
+      {
+	static_assert(std::is_convertible<Y,X>::value,
+		      "cannot convert argument to element type");
+	x[I]=y; next::set(x,args...);
+      }
     };
-    /// closing the loop: last element
-    template<int I, typename T> struct unroll<I,T,I>
+    // closing the loop: last element
+    template<int I, typename X> struct unroll<I,X,I>
     {
       // output
-      static std::ostream&out(std::ostream&s, const T*x, unsigned, unsigned)
+      static std::ostream&out(std::ostream&s, const X*x,
+			      std::streamsize, std::streamsize)
       { return s << x[I]; }
+      // const unary
+      template<typename UnaryFunc>
+      static void const_unary(const X*x, UnaryFunc f)
+	noexcept(noexcept(f))
+      { f(x[I]); }
       // unary
       template<typename UnaryFunc>
-      static void unary(T*x, UnaryFunc f)
+      static void unary(X*x, UnaryFunc f)
+	noexcept(noexcept(f))
       { f(x[I]); }
       // collect unary
       template<typename Operator, typename UnaryFunc>
-      static auto coll_unary(const T*x, Operator, UnaryFunc f)
-	-> decltype(f(x[I]))
+      static auto coll_unary(const X*x, Operator, UnaryFunc f)
+	noexcept(noexcept(f)) -> decltype(f(x[I]))
       { return f(x[I]); }
+      // const binary
+      template<typename Y, typename BinaryFunc>
+      static void const_binary(const X*x, const Y*y, BinaryFunc f)
+	noexcept(noexcept(f))
+      { f(x[I],y[I]); }
       // binary
       template<typename Y, typename BinaryFunc>
-      static void binary(T*x, const Y*y, BinaryFunc f)
+      static void binary(X*x, const Y*y, BinaryFunc f)
+	noexcept(noexcept(f))
       { f(x[I],y[I]); }
       // collect binary
-      template<typename Operator, typename BinaryFunc>
-      static auto coll_binary(const T*x, const T*y, Operator, BinaryFunc f)
-	-> decltype(f(x[I],y[I]))
+      template<typename Y, typename Operator, typename BinaryFunc>
+      static auto coll_binary(const X*x, const Y*y, Operator, BinaryFunc f)
+	noexcept(noexcept(f)) -> decltype(f(x[I],y[I]))
       { return f(x[I],y[I]); }
       // tertiary
-      template<typename TertiaryFunc>
-      static void tertiary(T*x, const T*y, const T*z, TertiaryFunc f)
+      template<typename Y, typename Z, typename TertiaryFunc>
+      static void tertiary(X*x, const Y*y, const Z*z, TertiaryFunc f)
+	noexcept(noexcept(f))
       { f(x[I],y[I],z[I]); }
       // constant tertiary
-      template<typename TertiaryFunc>
-      static void const_tertiary(const T*x, T*y, T*z, TertiaryFunc f)
+      template<typename Y, typename Z, typename TertiaryFunc>
+      static void const_tertiary(const X*x, Y*y, Z*z, TertiaryFunc f)
+	noexcept(noexcept(f))
       { f(x[I],y[I],z[I]); }
+      // variadic set
+      template<typename Y>
+      static typename std::enable_if<std::is_convertible<Y,X>::value>::type
+      set(X*x, Y a0) noexcept
+      { 
+	static_assert(std::is_convertible<Y,X>::value,
+		      "cannot convert first argument to element type");
+	x[I] = X(a0);
+      }
     };
-    /// square of argument
+    //  square of argument
     template<typename X>
-    inline X square(X a) { return a*a; }
-  } // namespace WDutils::Vector
-  template<int, typename> class vector;
+    inline auto square(X a) noexcept -> decltype(a*a) { return a*a; }
+    //  forward decl
+    template<int, typename, typename> struct non_const_vector_methods;
+    //
+    //  code idea pinched from http://stackoverflow.com/questions/6534041
+    //
+    namespace check
+    {
+      typedef char No[7];                        // nothing else has 7 bytes
+      // check for existence of x*y
+      template<typename left, typename right>
+      No&operator*(const left&, const right&);
+      template <typename left, typename right=left>
+      struct mul
+      {
+	typedef decltype( (*static_cast<left *>(0)) *
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x*=y
+      template<typename left, typename right>
+      No&operator*=(left&, const right&);
+      template <typename left, typename right=left>
+      struct mul_ass
+      {
+	typedef decltype( (*static_cast<left *>(0)) *=
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x/y
+      template<typename left, typename right>
+      No&operator/(const left&, const right&);
+      template <typename left, typename right=left>
+      struct div
+      {
+	typedef decltype( (*static_cast<left *>(0)) /
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x/=y
+      template<typename left, typename right>
+      No&operator/=(left&, const right&);
+      template <typename left, typename right=left>
+      struct div_ass
+      {
+	typedef decltype( (*static_cast<left *>(0)) /=
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x+y
+      template<typename left, typename right>
+      No&operator+(const left&, const right&);
+      template <typename left, typename right=left>
+      struct add
+      {
+	typedef decltype( (*static_cast<left *>(0)) +
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x+=y
+      template<typename left, typename right>
+      No&operator+=(left&, const right&);
+      template <typename left, typename right=left>
+      struct add_ass
+      {
+	typedef decltype( (*static_cast<left *>(0)) +=
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x-y
+      template<typename left, typename right>
+      No&operator-(const left&, const right&);
+      template <typename left, typename right=left>
+      struct sub
+      {
+	typedef decltype( (*static_cast<left* >(0)) -
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x+=y
+      template<typename left, typename right>
+      No&operator-=(left&, const right&);
+      template <typename left, typename right=left>
+      struct sub_ass
+      {
+	typedef decltype( (*static_cast<left *>(0)) -=
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x<y
+      template<typename left, typename right>
+      No&operator<(const left&, const right&);
+      template <typename left, typename right=left>
+      struct lt
+      {
+	typedef decltype( (*static_cast<left* >(0)) <
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of x>y
+      template<typename left, typename right>
+      No&operator<(const left&, const right&);
+      template <typename left, typename right=left>
+      struct gt
+      {
+	typedef decltype( (*static_cast<left* >(0)) >
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of bool equal(x,y)
+      template<typename left, typename right>
+      No&equal(const left&, const right&);
+      template <typename left, typename right=left>
+      struct eq
+      {
+	typedef decltype( (*static_cast<left* >(0)) >
+			  (*static_cast<right*>(0)) ) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+      // check for existence of -x
+      template<typename operand>
+      No&operator-(const operand&);
+       template <typename operand>
+      struct neg
+      {
+	typedef decltype( -(*static_cast<operand*>(0))) _R;
+	static const bool value = !std::is_same<_R,No>::value;
+	typedef typename std::conditional<value,_R,void>::type type;
+      };
+    }
+    ///
+    /// specifies whether vector operations *,/,+,- with other_type and/or
+    /// @c vector<other_type> are implemented
+    ///
+    /// \note we allow this if                                             \n
+    ///       1) the respective operator is defined,                       \n
+    ///       2) neither type is bool, and                                 \n
+    ///       3) the non-element type is convertible to the element type.  \n
+    ///       You may override this by providing a specialisation.
+    template<template<typename, typename> class bin_op,
+	     typename element_type, typename other_type = element_type>
+    struct allow_bin_op
+    {
+      static const bool value =
+	! std::is_same<bool,other_type>::value              &&
+	! std::is_same<bool,element_type>::value            &&
+	( std::is_same<other_type,element_type>::value ||
+	  std::is_convertible<other_type,element_type>::value ) &&
+	bin_op<element_type, other_type>::value;
+    };
+    ///
+    /// functionality for const vector operations (observers)
+    ///
+    /// \note there are also some stand-alone observer functions and operators
+    template<int N, typename X, typename V>
+    struct const_vector_base
+    {
+      static_assert(N>=0,"negative number of vector elements");
+      static_assert(N!=0,"zero vector elements");
+      /// total \# coefficients
+      static const int num_elem = N;
+      /// element type
+      typedef X element_type;
+      /// derived vector type
+      typedef V vector_type;
+      //
+      template<typename other_type, typename other_vector_type>
+      using other_const_vector =
+	const_vector_base<num_elem,other_type,other_vector_type>;
+      //
+      typedef vector_details::unroll<N-1,X> do_unroll;
+      /// const data access
+      const element_type*data() const noexcept 
+      { return static_cast<const vector_type*>(this)->buffer; }
+      /// const element access: X[n]
+      element_type const&operator[] (int n) const noexcept
+      { return data()[n]; }
+      /// equality
+      /// \note you should not compare floating point numbers for equality
+      bool operator==(element_type s) const noexcept
+      {
+	return do_unroll::
+	  coll_unary(data(),
+		     [] (bool x, bool y) noexcept -> bool { return x&&y; },
+		     [s](X x)            noexcept -> bool { return x==s; } );
+      }
+      /// inequality
+      /// \note you should not compare floating point numbers for inequality
+      bool operator!=(element_type s) const noexcept
+      { return ! operator==(s); }
+      /// equality
+      /// \note you should not compare floating point numbers for equality
+      template<typename other_vector_type>
+      bool operator==
+      (other_const_vector<element_type,other_vector_type> const&other)
+	const noexcept
+      {
+	return do_unroll::
+	  coll_binary(data(),other.data(),
+		      [](bool x, bool y) noexcept -> bool { return x&&y; },
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wfloat-equal"
+		      [](X x, X y)       noexcept -> bool { return x==y; } );
+#pragma clang diagnostic pop
+      }
+      /// inequality
+      /// \note you should not compare floating point numbers for inequality
+      template<typename other_vector_type>
+      bool operator!=
+      (other_const_vector<element_type,other_vector_type> const&other)
+	const noexcept
+      { return ! operator==(other); }
+      /// update minimum and maximum element-wise:
+      ///  Min[i] = min(Min[i], (*this)[i]); and
+      ///  Max[i] = max(Max[i], (*this)[i]);
+      template<typename min_vector_type, typename max_vector_type>
+      inline void up_min_max
+      (non_const_vector_methods<N,X,min_vector_type>&Min,
+       non_const_vector_methods<N,X,max_vector_type>&Max) const noexcept;
+      /// write vector element-wise to std::ostream; keeps width and precision
+      friend std::ostream&operator<<(std::ostream&s,
+				     const_vector_base const&v)
+      {
+	auto w = s.width();
+	auto p = s.precision();
+	return do_unroll::out(s,v.data(),w,p);
+      }
+      /// return the range [I0..IN[ with constant access
+      template<int I0, int IN>
+      inline typename std::enable_if<(0<=I0 && I0<IN && IN<=N) ,
+				     const_vector_wrapper<(IN-I0),X> >::type
+      range() const noexcept;
+    };// struct vector_details::qconst_vector_base<>
+    ///
+    /// functionality for non-const vector operations (modifiers)
+    ///
+    template<int N, typename X, typename V>
+    struct non_const_vector_methods
+    {
+      /// total \# coefficients
+      static const int num_elem = N;
+      /// element type
+      typedef X element_type;
+      /// derived vector type
+      typedef V vector_type;
+      //
+      template<typename other_type, typename other_vector_type>
+      using other_const_vector =
+	const_vector_base<num_elem,other_type,other_vector_type>;
+      //
+      typedef vector_details::unroll<N-1,X> do_unroll;
+      /// data access
+      element_type*data() noexcept
+      { return static_cast<vector_type*>(this)->buffer; }
+      /// element access: X[n]
+      element_type &operator[] (int n) noexcept
+      { return data()[n]; }
+      /// copy from (possibly) larger vector
+      template<int other_num_elem, typename other_type,
+	       typename other_vector_type>
+      typename std::enable_if<std::is_convertible<other_type,
+						  element_type>::value,
+			      vector_type&>::type
+      copy(const_vector_base<other_num_elem,other_type,other_vector_type>
+	   const&other) noexcept
+      {
+	static_assert(other_num_elem>=num_elem,"cannot copy < few elements");
+	do_unroll::binary(data(), other.data(),
+			  [] (X&x, other_type y) noexcept { x=X(y); } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// reset all elements to zero
+      vector_type& reset() noexcept
+      {
+	do_unroll::unary(data(), [] (X&x) noexcept { x=X(0); } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// set all elements to the same scalar
+      vector_type& set(element_type s) noexcept
+      {
+	do_unroll::unary(data(), [s] (X&x) noexcept { x=s; } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// set elements to arguments
+      /// \note will not compile if                                        \n
+      ///       1) the number of arguments doesn't match N or              \n
+      ///       2) the arguments aren't convertible to element_type.
+      template<typename other_type, typename... Args>
+      vector_type&set(other_type a0, Args... args) noexcept
+      { 
+	static_assert(sizeof...(args)   < N, "too many arguments");
+	static_assert(sizeof...(args)+2 > N, "too few arguments");
+	do_unroll::set(data(),a0,args...);
+	return static_cast<vector_type&>(*this);
+      }
+      /// change sign for each element
+      vector_type&negate() noexcept
+      { 
+	static_assert(check::neg<X>::value,
+		      "unary minus for elements not supported: "
+		      "cannot implement vector::negate()");
+	do_unroll::unary(data(), [] (X&x) noexcept { x=-x; });
+	return static_cast<vector_type&>(*this);
+      }
+      /// multiply all elements by scalar
+      vector_type& operator*=(element_type s) noexcept
+      {
+	do_unroll::unary(data(), [s] (X&x) noexcept { x*=s; } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// divide all elements by scalar
+      vector_type&operator/= (element_type s) noexcept
+      { return operator*=(X(1)/s); }
+      /// add another vector: element-wise +=
+      template<typename other_type, typename other_vector_type>
+      vector_type&operator+=
+      (other_const_vector<other_type,other_vector_type> const&other) noexcept
+      {
+	static_assert(allow_bin_op<check::add_ass,X,other_type>::value,
+		      "add-and-assign of elements not supported: "
+		      "cannot implement vector += vector");
+	do_unroll::binary(data(), other.data(),
+			  [] (X&x, other_type y) noexcept { x+=y; } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// subtract another vector: element-wise -=
+      template<typename other_type, typename other_vector_type>
+      vector_type&operator-=
+      (other_const_vector<other_type,other_vector_type> const&other) noexcept
+      {
+	static_assert(allow_bin_op<check::sub_ass,X,other_type>::value,
+		      "subtract-and-assign of elements not supported: "
+		      "cannot implement vector -= vector");
+	do_unroll::binary(data(), other.data(),
+			  [] (X&x, other_type y) noexcept { x-=y; } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// element wise *=
+      template<typename other_type, typename other_vector_type>
+      vector_type&multiply_element_wise
+      (other_const_vector<other_type,other_vector_type> const&other) noexcept
+      {
+	static_assert(allow_bin_op<check::mul_ass,X,other_type>::value,
+		      "multiply-and-assign of elements not supported: "
+		      "cannot implement vector::multiply_element_wise(vector)");
+	do_unroll::binary(data(), other.data(),
+			  [] (X&x, other_type y) noexcept { x*=y; } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// element wise /=
+      template<typename other_type, typename other_vector_type>
+      vector_type&divide_element_wise
+      (other_const_vector<other_type,other_vector_type> const&other) noexcept
+      {
+	static_assert(allow_bin_op<check::mul_ass,X,other_type>::value,
+		      "divide-and-assign of elements not supported: "
+		      "cannot implement vector::divide_element_wise(vector)");
+	do_unroll::binary(data(), other.data(),
+			  [] (X&x, other_type y) noexcept { x/=y; } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// element-wise maximum: a[i] = max(a[i],other[i])
+      template<typename other_vector_type>
+      vector_type&up_max
+      (other_const_vector<element_type,other_vector_type> const&other) noexcept
+      {
+	static_assert(allow_bin_op<check::gt,X>::value,
+		      "'>' comparison of elements not supported: "
+		      "cannot implement vector::up_max()");
+	do_unroll::binary(data(), other.data(),
+			  [] (X&x, X y) noexcept { if(y>x) x=y; } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// element-wise minimum: a[i] = min(a[i],other[i])
+      template<typename other_vector_type>
+      vector_type&up_min
+      (other_const_vector<X,other_vector_type> const&other) noexcept
+      {
+	static_assert(allow_bin_op<check::lt,X>::value,
+		      "'<' comparison of elements not supported: "
+		      "cannot implement vector::up_min()");
+	do_unroll::binary(data(), other.data(),
+			  [] (X&x, X y) noexcept { if(y<x) x=y; } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// apply unary function element wise: vec[i] = f(vec[i])
+      /// \note f(element_type) must be convertible to element_type
+      template<typename UnaryFunction>
+      vector_type&apply(UnaryFunction f) noexcept(noexcept(f))
+      {
+	static_assert(std::is_convertible<decltype(f(data()[0])),
+		      element_type>::value,
+		      "cannot apply function: "
+		      "result not convertible to element type");
+	do_unroll::unary(data(), [f] (X&x) noexcept(noexcept(f)) { x=f(x); } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// connect with another vector element wise: vec[i] = f(vec[i], other[i])
+      /// \note f(element_type,other_type) must be convertible to element_type
+      template<typename other_type, typename other_vector_type,
+	       typename binary_function>
+      vector_type&connect
+      (other_const_vector<other_type,other_vector_type> const&other,
+       binary_function f) noexcept(noexcept(f))
+      {
+	static_assert(std::is_convertible<decltype(f(data()[0],other[0])),
+		      element_type>::value,
+		      "cannot connect using binary function: "
+		      "result not convertible to element type");
+	do_unroll::binary(data(), other.data(), [f] (X&x, other_type y)
+			  noexcept(noexcept(f))  { x=f(x,y); } );
+	return static_cast<vector_type&>(*this);
+      }
+      /// normalise: vec[i] /= abs(vec)
+      vector_type&normalise() noexcept
+      {
+	static_assert(allow_bin_op<check::mul,element_type>::value,
+		      "multiplication of elements not suported: "
+		      "cannot normalise");
+	typedef typename check::mul<element_type>::type M;
+	static_assert(allow_bin_op<check::add,M>::value,
+		      "adding up of squared elements not supported: "
+		      "cannot normalise");
+	typedef decltype(M(0)*M(0)) T;
+	auto n = do_unroll::
+	  coll_unary(data(),
+		     [] (M x, M y) noexcept -> T { return x+y; },
+		     [] (X x)      noexcept -> M { return x*x; });
+	if(n && n!=T(1)) return operator /= (std::sqrt(n));
+	else return static_cast<vector_type&>(*this);
+      }
+      /// read vector element-wise from std::istream
+      friend std::istream&operator>>(std::istream&s,
+				     non_const_vector_methods&v) noexcept
+      {
+	do_unroll::unary(v.data(),[&s] (X&x) { s >> x; } );
+	return s;
+      }
+      /// return the range [I0..IN[
+      template<int I0, int IN>
+      inline typename std::enable_if<(0<=I0 && I0<IN && IN<=N),
+		                     vector_wrapper<(IN-I0),X> >::type
+      range() noexcept;
+    };// struct non_const_vector_methods
+    ///
+    /// functionality for const and non-const vector operations
+    ///
+    template<int N, typename X, typename V>
+    struct vector_base :
+      const_vector_base<N,X,V>, non_const_vector_methods<N,X,V>
+    {
+      typedef const_vector_base<N,X,V> cbase;
+      typedef non_const_vector_methods<N,X,V> nbase;
+      //
+      typedef X element_type;
+      typedef V vector_type;
+      //
+      using cbase::num_elem;
+      using cbase::data;
+      using cbase::operator[];
+      using cbase::up_min_max;
+      using cbase::range;
+      //
+      using nbase::data;
+      using nbase::reset;
+      using nbase::copy;
+      using nbase::set;
+      using nbase::negate;
+      using nbase::multiply_element_wise;
+      using nbase::divide_element_wise;
+      using nbase::up_max;
+      using nbase::up_min;
+      using nbase::apply;
+      using nbase::connect;
+      using nbase::normalise;
+      using nbase::operator[];
+      using nbase::range;
+      /// assignment from single value
+      vector_type&operator=(element_type s) noexcept
+      { return nbase::set(s); }
+    };
+  } // namespace WDutils::vector_details
   ///
-  /// array of @a N elements of type @c T
+  /// array of @a N elements of type @c X with full vector functionalities
   ///
-  /// \note  We minimise cross-type operations (i.e. between @c vector<3,float>
-  ///        and @c vector<3,double>). If such functionality is required, one
-  ///        should first raise the lower-precision operand (we do provide a
-  ///        constructor and assignment from vector with another element type).
-  template<int N, typename T> class vector
+  /// \note  @c allowed_element_type defaults to @c std::is_arithmetic.
+  ///        @a allowed_element_type<X>::value must be true. 
+  template<int N, typename X>
+  struct vector :
+    public vector_details::vector_base<N,X,vector<N,X> >
   {
-  private:
-    static_assert(N>0,"WDutils::vector<N>: N<=0");
-    typedef Vector::unroll<N-1,T> unroll;
-    /// data: an array of N elements of type T
-    T a[N];
-    //  friendship with vector of other type to allow assignment
-    template <int,typename> friend class vector;
-  public:
-    /// type of elements 
-    typedef T element_type;
-    /// tensor rank or order
-    static const int ORD  = 1;
-    /// number of elements
-    constexpr static int size()
-    { return N; }
-    /// \name construction and assignment
+    typedef X element_type;
+    typedef vector_details::vector_base<N,X,vector<N,X> > vbase;
+    //
+    using vbase::num_elem;
+    using vbase::data;
+    using vbase::reset;
+    using vbase::set;
+    using vbase::negate;
+    using vbase::multiply_element_wise;
+    using vbase::divide_element_wise;
+    using vbase::up_max;
+    using vbase::up_min;
+    using vbase::up_min_max;
+    using vbase::apply;
+    using vbase::connect;
+    using vbase::normalise;
+    using vbase::range;
+    /// \name constructors and assignment operators
     //@{
-    /// default ctor
+    /// default constructor
     vector() = default;
-    /// copy ctor
+    /// copy constructor
     vector(vector const&) = default;
+    /// casting copy constructor
+    template<typename other_type, typename other_vector_type,
+	     class = typename
+	     std::enable_if<std::is_convertible<other_type,
+						element_type>::value
+			    >::type >
+    vector(vector_details::
+	   const_vector_base<num_elem,other_type,other_vector_type> const&other)
+    { vbase::copy(other); }
     /// assignment from another vector
     vector&operator=(vector const&) = default;
-    /// copy from vector of another element type
-    template<typename U>
-    vector(vector<N,U> const&other)
-    { unroll::binary(a, other.a, [] (T&x, U y) { x=y; } ); }
-    /// assignment from another vector of another element type
-    template<typename U>
-    vector&operator=(vector<N,U> const&other)
-    {
-      unroll::binary(a, other.a, [] (T&x, U y) { x=y; } );
-      return*this;
-    }
-    /// ctor from a scalar: set all elements to scalar
-    explicit vector(T s)
-    { unroll::unary(a, [s] (T&x) { x=s; } ); }
-    /// assignment to a scalar: set all elements to scalar
-    vector&operator=(T s)
-    {
-      unroll::unary(a, [s] (T&x) { x=s; } );
-      return*this;
-    }
-    /// ctor from 2 scalars for N=2
-    vector(T a0, T a1)
-    {
-      static_assert(N==2,"vector<N>::vector(a0,a1): N!=2");
-      a[0]=a0;
-      a[1]=a1;
-    }
-    /// ctor from 3 scalars for N=3
-    vector(T a0, T a1, T a2)
-    {
-      static_assert(N==3,"vector<N>::vector(a0,a1,a2): N!=3");
-      a[0]=a0;
-      a[1]=a1;
-      a[2]=a2;
-    }
-    /// ctor from 4 scalars for N=4
-    vector(T a0, T a1, T a2, T a3)
-    {
-      static_assert(N==4,"vector<N>::vector(a0,a1,a2,a3): N!=4");
-      a[0]=a0;
-      a[1]=a1;
-      a[2]=a2;
-      a[3]=a3;
-    }
-    /// ctor from 5 scalars for N=5
-    vector(T a0, T a1, T a2, T a3, T a4)
-    {
-      static_assert(N==5,"vector<N>::vector(a0,a1,a2,a3,a4): N!=5");
-      a[0]=a0;
-      a[1]=a1;
-      a[2]=a2;
-      a[3]=a3;
-      a[4]=a4;
-    }
-    /// ctor from 6 scalars for N=6
-    vector(T a0, T a1, T a2, T a3, T a4, T a5)
-    {
-      static_assert(N==6,"vector<N>::vector(a0,a1,a2,a3,a4,a5): N!=6");
-      a[0]=a0;
-      a[1]=a1;
-      a[2]=a2;
-      a[3]=a3;
-      a[4]=a4;
-      a[5]=a5;
-    }
-    /// ctor from 7 scalars for N=7
-    vector(T a0, T a1, T a2, T a3, T a4, T a5, T a6)
-    {
-      static_assert(N==7,"vector<N>::vector(a0,a1,a2,a3,a4,a5,a6): N!=7");
-      a[0]=a0;
-      a[1]=a1;
-      a[2]=a2;
-      a[3]=a3;
-      a[4]=a4;
-      a[5]=a5;
-      a[6]=a6;
-    }
-    /// ctor from 8 scalars for N=8
-    vector(T a0, T a1, T a2, T a3, T a4, T a5, T a6, T a7)
-    {
-      static_assert(N==8,"vector<N>::vector(a0,a1,a2,a3,a4,a5,a6,a7): N!=8");
-      a[0]=a0;
-      a[1]=a1;
-      a[2]=a2;
-      a[3]=a3;
-      a[4]=a4;
-      a[5]=a5;
-      a[6]=a6;
-      a[7]=a7;
-    }
-    /// ctor from 9 scalars for N=9
-    vector(T a0, T a1, T a2, T a3, T a4, T a5, T a6, T a7, T a8)
-    {
-      static_assert(N==9,"vector<N>::vector(a0,a1,a2,a3,a4,a5,a6,a7,a8): N!=9");
-      a[0]=a0;
-      a[1]=a1;
-      a[2]=a2;
-      a[3]=a3;
-      a[4]=a4;
-      a[5]=a5;
-      a[6]=a6;
-      a[7]=a7;
-      a[8]=a8;
-    }
-    /// ctor from 10 scalars for N=10
-    vector(T a0, T a1, T a2, T a3, T a4, T a5, T a6, T a7, T a8, T a9)
-    {
-      static_assert(N==10,
-		    "vector<N>::vector(a0,a1,a2,a3,a4,a5,a6,a7,a8,a9): N!=10");
-      a[0]=a0;
-      a[1]=a1;
-      a[2]=a2;
-      a[3]=a3;
-      a[4]=a4;
-      a[5]=a5;
-      a[6]=a6;
-      a[7]=a7;
-      a[8]=a8;
-      a[9]=a9;
-    }
+    /// casting assignment from vector of other type
+    template<typename other_type, typename other_vector_type>
+    typename std::enable_if<std::is_convertible<other_type,
+						element_type>::value,
+			    vector&>::type
+    operator=(vector_details::
+	      const_vector_base<num_elem,other_type,other_vector_type>
+	      const&other)
+    { return vbase::copy(other); }
+    ///
+    using vbase::operator=;
+    /// explicit construction from N values
+    template<typename... Args>
+    explicit vector(element_type a0, Args... args)
+    { vbase::set(a0, args...); }
     //@}
-    /// \name element access
+    /// the actual data
+    //  NOTE  Xhere is no point in making buffer private, as access is granted
+    //        anyway. Moreover it would invalidate the current template magic.
+    element_type buffer[num_elem];
+  private:
+    using vbase::copy;
+  };// class WDutils::vector<>
+  ///
+  /// interpreting a data buffer as vector with full functionalities
+  ///
+  template<int N, typename X>
+  struct vector_wrapper :
+    vector_details::vector_base<N,X,vector_wrapper<N,X> >
+  {
+    typedef X element_type;
+    typedef vector_details::vector_base<N,X,vector_wrapper<N,X> > vbase;
+    //
+    using vbase::num_elem;
+    using vbase::data;
+    using vbase::reset;
+    using vbase::set;
+    using vbase::negate;
+    using vbase::multiply_element_wise;
+    using vbase::divide_element_wise;
+    using vbase::up_max;
+    using vbase::up_min;
+    using vbase::up_min_max;
+    using vbase::apply;
+    using vbase::connect;
+    using vbase::normalise;
+    using vbase::range;
+    /// \name constructors and assignment operators
     //@{
-    /// first element
-    /// \note used as public const member in decltype()
-    T const&first() const
-    { return a[0]; }
-    /// const element access
-    T const&operator[] (int i) const
-    { return a[i]; }
-    /// non-const element access
-    T&operator[] (int i)
-    { return a[i]; }
-    /// conversion to pointer to scalar
-    operator T*() { return a; }
-    /// conversion to const pointer to scalar
-    operator const T*() const { return a; }
-    /// conversion to pointer to scalar
-    T*data() { return a; }
-    /// conversion to const pointer to scalar
-    const T*data() const { return a; }
+    /// no default constructor
+    vector_wrapper() = delete;
+    /// no copy constructor
+    vector_wrapper(vector_wrapper const&) = delete;
+    /// move constructor
+    vector_wrapper(vector_wrapper &&) = default;
+    /// constructor from pointer to data
+    explicit vector_wrapper(element_type*b) noexcept
+      : buffer(b) {}
+    /// constructor from a another vector: just wrap other[0,N[
+    template<typename other_vector_type>
+    explicit vector_wrapper
+    (vector_details::
+     non_const_vector_methods<num_elem,element_type,other_vector_type>&other)
+      noexcept : buffer(other.data()) {}
     //@}
-    /// \name unary operations
+    /// pointer to the actual data held somewhere else
+    //  NOTE  There is no point in making buffer private, as access is granted
+    //        anyway. Moreover it would invalidate the current template magic.
+    element_type*const buffer;
+  };// class WDutils::vector_wrapper<>
+  ///
+  /// interpreting a constant data buffer as vector with constant functionality
+  ///
+  template<int N, typename X>
+  struct const_vector_wrapper :
+    vector_details::const_vector_base<N,X,const_vector_wrapper<N,X>>
+  {
+    typedef
+      vector_details::const_vector_base<N,X,const_vector_wrapper<N,X> > cbase;
+    //
+    typedef X element_type;
+    //
+    using cbase::num_elem;
+    using cbase::data;
+    using cbase::up_min_max;
+    using cbase::range;
+    /// \name constructors and assignment operators
     //@{
-    /// change sign for each element
-    vector&negate()
-    { 
-      unroll::unary(a, [] (T&x) { x=-x; });
-      return*this;
-    }
-    /// return negative of this
-    vector operator-() const
-    {
-      vector v;
-      unroll::binary(v.a, a, [] (T&x, T y) { x=-y; });
-      return v;
-    }
-    /// norm: sum of elements squared
-    T norm() const
-    {
-      return unroll::coll_unary(a,
-				[] (T x, T y)->T { return x+y; },
-				[] (T x)     ->T { return x*x; });
-    }
-    /// abs: sqrt(norm)
-    /// \note returns appropriate type, e.g. @c double for @a abs(vect<N,int>)
-    auto abs() const -> decltype(std::sqrt(this->first()))
-    { return std::sqrt(norm()); }
-    /// minimum element
-    T min() const
-    {
-      return unroll::coll_unary(a,
-				[] (T x, T y)->T { return x<y?x:y; },
-				[] (T x)     ->T { return x; });
-    }
-    /// minimum |element|
-    T minnorm() const
-    {
-      return unroll::coll_unary(a,
-				[] (T x, T y)->T { return x<y?x:y; },
-				[] (T x)     ->T { return std::abs(x); });
-    }
-    /// maximum element
-    T max() const
-    {
-      return unroll::coll_unary(a,
-				[] (T x, T y)->T { return x>y?x:y; },
-				[] (T x)     ->T { return x; });
-    }
-    /// maximum |element|
-    T maxnorm() const
-    {
-      return unroll::coll_unary(a,
-				[] (T x, T y)->T { return x>y?x:y; },
-				[] (T x)     ->T { return std::abs(x); });
-    }
-    /// product of elements
-    T volume() const
-    {
-      return unroll::coll_unary(a,
-				[] (T x, T y)->T { return x*y; },
-				[] (T x)     ->T { return x; });
-    }
-    /// is any element NaN?
-    bool isnan() const
-    { 
-      return
-	unroll::coll_unary(a,
-			   [] (bool x, bool y)->bool { return x || y; },
-			   [] (T x)           ->bool { return std::isnan(x); });
-    }
-    /// is any element inf?
-    bool isinf() const
-    { 
-      return
-	unroll::coll_unary(a,
-			   [] (bool x, bool y)->bool { return x || y; },
-			   [] (T x)           ->bool { return std::isinf(x); });
-    }
+    /// no default constructor
+    const_vector_wrapper() = delete;
+    /// no copy constructor
+    const_vector_wrapper(const_vector_wrapper const&) = delete;
+    /// move constructor
+    const_vector_wrapper(const_vector_wrapper &&) = default;
+    /// constructor from pointer to data
+    explicit const_vector_wrapper(const element_type*b) noexcept
+      : buffer(b) {}
+    /// constructor from a another vector: just wrap other[0,N[
+    template<typename other_vector_type>
+    explicit const_vector_wrapper
+    (vector_details::const_vector_base<num_elem,element_type,other_vector_type>
+     const &other) noexcept
+      : buffer(other.data()) {}
     //@}
-    /// \name binary operations with scalar
-    //@{
-    /// multiply all elements by scalar
-    vector& operator*=(T s)
-    { unroll::unary(a, [s] (T&x) { x*=s; } ); return*this; }
-    /// product with scalar
-    vector operator*(T s) const
+    /// pointer to the actual data held somewhere else
+    //  NOTE  There is no point in making buffer private, as access is granted
+    //        anyway. Moreover it would invalidate the current template magic.
+    const element_type*const buffer;
+  };// class WDutils::const_vector_wrapper<>
+  //
+  namespace vector_details {
+    //
+    // members of const_vector_base<>
+    //
+    // update minimum and maximum
+    template<int N, typename X, typename V>
+    template<typename OMin, typename OMax>
+    inline void const_vector_base<N,X,V>::up_min_max
+    (non_const_vector_methods<N,X,OMin>&Min,
+     non_const_vector_methods<N,X,OMax>&Max) const noexcept
     {
-      vector r;
-      unroll::binary(r.a, a, [s] (T&z, T x) { z=x*s; } );
-      return r;
+      do_unroll::const_tertiary(data(), Min.data(), Max.data(),
+				[] (X x, X&mi, X&ma) noexcept 
+				{ if     (x<mi) mi=x;
+				  else if(x>ma) ma=x; } );
     }
-    /// divide all elements by scalar
-    vector&operator/= (T s)
-    { return operator*=(T(1)/s); }
-    /// division by scalar
-    vector operator/ (T s) const
-    { return operator*(T(1)/s); }
-    /// equality
-    /// \note you should not compare floating point numbers for equality
-    bool operator==(T s) const
+    // constant range
+    template<int N, typename X, typename V>  template<int I0, int IN>
+    inline typename std::enable_if<(0<=I0 && I0<IN && IN<=N),
+				   const_vector_wrapper<(IN-I0),X> >::type
+    const_vector_base<N,X,V>::range() const noexcept
+    { return const_vector_wrapper<(IN-I0),X>(data()+I0); }
+    //
+    // members of non_const_vector_methods<>
+    //
+    // non-constant range
+    template<int N, typename X, typename V> template<int I0, int IN>
+    inline typename std::enable_if<(0<=I0 && I0<IN && IN<=N),
+				   vector_wrapper<(IN-I0),X> >::type
+    non_const_vector_methods<N,X,V>::range() noexcept
+    { return vector_wrapper<(IN-I0),X>(data()+I0); }
+    //
+    // non-member functions taking vector arguments
+    //
+
+    /// unary minus
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline vector<N,X> operator-(const_vector_base<N,X,V> const&v) noexcept
     {
-      return unroll::coll_unary(a,
-				[]  (bool x, bool y)->bool { return x&&y; },
-				[s] (T x) { return x==s; } );
-    }
-    /// inequality
-    /// \note you should not compare floating point numbers for inequality
-    bool operator!=(T s) const
-    {
-      return unroll::coll_unary(a,
-				[]  (bool x, bool y)->bool { return x||y; },
-				[s] (T x) { return x!=s; } );
-    }
-    //@}
-    /// \name binary operations with other vector
-    //@{
-    /// equality
-    /// \note you should not compare floating point numbers for equality
-    bool operator==(vector const&other) const
-    {
-      return unroll::coll_binary(a,other.a,
-				 [] (bool x, bool y)->bool { return x&&y; },
-				 [] (T x, T y) { return x==y; } );
-    }
-    /// inequality
-    /// \note you should not compare floating point numbers for inequality
-    bool operator!=(vector const&other) const
-    {
-      return unroll::coll_binary(a,other.a,
-				 [] (bool x, bool y)->bool { return x||y; },
-				 [] (T x, T y) { return x!=y; } );
-    }
-    /// add another vector
-    vector&operator+=(vector const&other)
-    {
-      unroll::binary(a, other.a, [] (T&x, T y) { x+=y; } );
-      return*this;
-    }
-    /// subtract another vector
-    vector&operator-=(vector const&other)
-    {
-      unroll::binary(a, other.a, [] (T&x, T y) { x-=y; } );
-      return*this;
-    }
-    /// element wise *=
-    vector&multiply_element_wise_with(vector const&other)
-    {
-      unroll::binary(a, other.a, [] (T&x, T y) { x*=y; } );
-      return*this;
-    }
-    /// element wise /=
-    vector&divide_element_wise_by(vector const&other)
-    {
-      unroll::binary(a, other.a, [] (T&x, T y) { x/=y; } );
-      return*this;
+      static_assert(check::neg<X>::value,
+		    "unary minus for elements no supported: "
+		    "cannot implement -vector");
+      vector<N,X> ret;
+      unroll<N-1,X>::binary(ret.data(), v.data(),
+			    [] (X&r, X x) noexcept { r=-x; });
+      return ret;
     }
     /// vector sum
-    vector operator+(vector const&other) const
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename Y, typename V, typename W>
+    inline typename std::conditional<check::add<X,Y>::value,
+				     vector<N, typename check::add<X,Y>::type>,
+				     void>::type
+    operator+(const_vector_base<N,X,V> const&v,
+	      const_vector_base<N,Y,W> const&w) noexcept
     {
-      vector r;
-      unroll::tertiary(r.a,a,other.a, [] (T&s, T x, T y) { s = x+y; } );
-      return r;
+      static_assert(allow_bin_op<check::add,X,Y>::value,
+		    "addition of elements not supported: "
+		    "cannot implement vector+vector");
+      typedef typename check::add<X,Y>::type R;
+      vector<N,R> ret;
+      unroll<N-1,R>::tertiary(ret.data(),v.data(),w.data(),
+			      [] (R&r, X x, Y y) noexcept { r=x+y; } );
+      return ret;
     }
     /// vector difference
-    vector operator-(vector const&other) const
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename Y, typename V, typename W>
+    inline typename std::conditional<check::add<X,Y>::value,
+				     vector<N, typename check::sub<X,Y>::type>,
+				     void>::type
+    operator-(const_vector_base<N,X,V> const&v,
+	      const_vector_base<N,Y,W> const&w) noexcept
     {
-      vector r;
-      unroll::tertiary(r.a,a,other.a, [] (T&d, T x, T y) { d = x-y; } );
-      return r;
+      static_assert(allow_bin_op<check::sub,X,Y>::value,
+		    "subtraction of elements not supported: "
+		    "cannot implement vector-vector");
+      typedef typename check::sub<X,Y>::type R;
+      vector<N,R> ret;
+      unroll<N-1,R>::tertiary(ret.data(),v.data(),w.data(),
+			      [] (R&r, X x, Y y) noexcept { r=x-y; } );
+      return ret;
     }
-    /// absolute difference: return |*this - other| element wise
-    vector abs_diff(vector const&other) const
+    /// vector times scalar of element type
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline vector<N,X> operator*(const_vector_base<N,X,V> const&v, X s) noexcept
     {
-      vector r;
-      unroll::tertiary(r.a,a,other.a, [] (T&d, T x, T y) { d=std::abs(x-y); } );
-      return r;
+      static_assert(check::mul<X>::value &&
+		    std::is_same<X,typename check::mul<X>::type>::value,
+		    "multiplication of elements no supported: "
+		    "cannot implement vector*scalar");
+      vector<N,X> ret;
+      unroll<N-1,X>::binary(ret.data(), v.data(),
+			    [s](X&r, X x) noexcept { r=x*s; } );
+      return ret;
     }
-    /// vector difference squared
-    T dist_sq(vector const&other) const
+    /// scalar of element type times vector
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline vector<N,X>
+    operator*(X s, const_vector_base<N,X,V> const&v) noexcept
     {
-      return
-	unroll::coll_binary(a, other.a,
-			    [] (T x, T y)->T { return x+y; },
-			    [] (T x, T y)->T { return Vector::square(x-y); } );
+      static_assert(check::mul<X>::value &&
+		    std::is_same<X,typename check::mul<X>::type>::value,
+		    "multiplication of elements no supported: "
+		    "cannot implement scalar*vector");
+      vector<N,X> ret;
+      unroll<N-1,X>::binary(ret.data(), v.data(),
+			    [s](X&r, X x) noexcept { r=x*s; } );
+      return ret;
     }
-    /// vector sum squared
-    T sum_sq(vector const&other) const
+#ifdef WDutils_included_WDMath_h
+    /// element-wise equality, save for floating point types
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename W>
+    inline bool equal(const_vector_base<N,X,V> const&v,
+		      const_vector_base<N,X,W> const&w) noexcept
     {
-      return
-	unroll::coll_binary(a, other.a,
-			    [] (T x, T y)->T { return x+y; },
-			    [] (T x, T y)->T { return Vector::square(x+y); } );
+      static_assert(check::eq<X,X>::value,
+		    "equal(element_type,element_type) not defined");
+      static_assert(std::is_same<typename check::eq<X,X>::type, bool>::value,
+		    "equal(element_type,element_type) not returning bool");
+      return unroll<N-1,X>::
+	coll_binary(v.data(), w.data(),
+		    [] (bool x, bool y) noexcept->bool
+		    { return x && y; },
+		    [] (X    x, X    y) noexcept->bool
+		    { return WDutils::equal(x,y); } );
+    }
+#endif
+    /// vector dot product
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename Y, typename V, typename W>
+    inline auto dot(const_vector_base<N,X,V> const&v,
+		    const_vector_base<N,Y,W> const&w) noexcept
+      -> decltype(v[0]*w[0]+v[1]*w[1])
+    {
+      static_assert(allow_bin_op<check::mul,X,Y>::value,
+		    "element type multiplication not supported: "
+		    "cannot implement vector dot product");
+      typedef typename check::mul<X,Y>::type M;
+      static_assert(allow_bin_op<check::add,M,M>::value,
+		    "addition of product of elements not supported: "
+		    "cannot implement vector dot product");
+      typedef typename check::add<M,M>::type R;
+      return unroll<N-1,X>::
+	coll_binary(v.data(), w.data(),
+		    [] (M x, M y) noexcept ->R { return x+y; },
+		    [] (X x, Y y) noexcept ->M { return x*y; } );
     }
     /// vector dot product
-    T operator*(vector const&other) const
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename Y, typename V, typename W>
+    inline auto operator*(const_vector_base<N,X,V> const&v,
+			  const_vector_base<N,Y,W> const&w) noexcept
+      -> decltype(v[0]*w[0]+v[1]*w[1])
+    { return dot(v,w); }
+    /// vector times scalar of other than element type
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename S>
+    inline typename
+    std::enable_if<allow_bin_op<check::mul,X,S>::value,
+		   vector<N, typename check::mul<X,S>::type> >::type
+    operator*(const_vector_base<N,X,V> const&v, S s) noexcept
     {
-      return unroll::coll_binary(a, other.a,
-				 [] (T x, T y)->T { return x+y; },
-				 [] (T x, T y)->T { return x*y; } );
+      typedef typename check::mul<X,S>::type R;
+      vector<N,R> ret;
+      unroll<N-1,R>::binary(ret.data(), v.data(),
+			    [s](R&r, X x) noexcept { r=x*s; } );
+      return ret;
     }
-    /// update maximum element-wise: a[i] = max(a[i],other[i])
-    vector&up_max(vector const&other)
+    /// scalar of other than element type times vector
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename S>
+    inline typename
+    std::enable_if<allow_bin_op<check::mul,X,S>::value,
+		   vector<N, typename check::mul<X,S>::type> >::type
+    operator*(S s, const_vector_base<N,X,V> const&v) noexcept
     {
-      unroll::binary(a, other.a, [] (T&x, T y) { if(y>x) x=y; } );
-      return*this;
+      typedef typename check::mul<X,S>::type R;
+      vector<N,R> ret;
+      unroll<N-1,R>::binary(ret.data(), v.data(),
+			    [s](R&r, X x) noexcept { r=x*s; } );
+      return ret;
     }
-    /// update minimum element-wise: a[i] = max(a[i],other[i])
-    vector&up_min(vector const&other)
+    /// vector division by scalar
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename S>
+    inline auto operator/(const_vector_base<N,X,V> const&v, S s) noexcept
+      -> decltype(v*(X(1)/s)) { return v * (X(1)/s); }
+    /// vector cross product for N=2: returns x[0]*y[1]- x[1]*y[0]
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<typename X, typename Y, typename V, typename W>
+    inline typename check::sub<typename check::mul<X,Y>::type>::type
+    operator^(const_vector_base<2,X,V> const&x,
+	      const_vector_base<2,Y,W> const&y) noexcept
     {
-      unroll::binary(a, other.a, [] (T&x, T y) { if(y<x) x=y; } );
-      return*this;
+      static_assert(allow_bin_op<check::mul,X,Y>::value,
+		    "multiplication of elements not supported: "
+		    "cannot implement vector<2> ^ vector<2>");
+      typedef typename check::mul<X,Y>::type M;
+      static_assert(allow_bin_op<check::sub,M>::value,
+		    "subtraction of element products not supported: "
+		    "cannot implement vector<2> ^ vector<2>");
+      return x[0]*y[1] - x[1]*y[0];
     }
-    /// update minimum and maximum element-wise:
-    ///  Min[i] = min(Min[i], (*this)[i]); and
-    ///  Max[i] = max(Max[i], (*this)[i]);
-    void up_min_max(vector&Min, vector&Max) const
+    /// vector cross product for N=3
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<typename X, typename Y, typename V, typename W>
+    inline vector<3, typename check::sub<typename check::mul<X,Y>::type>::type>
+    operator^(const_vector_base<3,X,V> const&x,
+	      const_vector_base<3,Y,W> const&y) noexcept
     {
-      unroll::const_tertiary(a,Min.a, Max.a,
-			     [] (T x, T&mi, T&ma)
-			     {
-			       if     (x<mi) mi=x;
-			       else if(x>ma) ma=x;
-			     } );
+      static_assert(allow_bin_op<check::mul,X,Y>::value,
+		    "multiplication of elements not supported: "
+		    "cannot implement vector<3> ^ vector<3>");
+      typedef typename check::mul<X,Y>::type M;
+      static_assert(allow_bin_op<check::sub,M>::value,
+		    "subtraction of element products not supported: "
+		    "cannot implement vector<3> ^ vector<3>");
+      typedef typename check::sub<M>::type R;
+      return vector<3,R>(x[1]*y[2] - x[2]*y[1],
+			 x[2]*y[0] - x[0]*y[2],
+			 x[0]*y[1] - x[1]*y[0]);
     }
-    //@}
-    /// \name miscellaneous
-    //@{
-    /// apply unary function element wise: vec[i] = f(vec[i])
-    template<typename UnaryFunction>
-    vector&apply(UnaryFunction f)
+    /// norm: sum of vector elements squared
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline typename check::add<typename check::mul<X>::type>::type
+    norm(const_vector_base<N,X,V> const&v) noexcept
     {
-      unroll::unary(a, [f] (T&x) { x=f(x); } );
-      return*this;
+      static_assert(allow_bin_op<check::mul,X>::value,
+		    "element type multiplication not supported: "
+		    "cannot implement vector norm");
+      typedef typename check::mul<X>::type M;
+      static_assert(allow_bin_op<check::add,M,M>::value,
+		    "addition of product of elements not supported: "
+		    "cannot implement vector norm");
+      typedef typename check::add<M,M>::type R;
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](M x, M y) noexcept -> R { return x+y; },
+		   [](X x)      noexcept -> M { return x*x; });
     }
-    /// apply unary function element wise: ret[i] = f(vec[i])
-    template<typename UnaryFunction>
-    auto applied(UnaryFunction f) const
-      -> vector<N,decltype(f(this->first()))>
+    /// absolute value: sqrt(norm(vector))
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline auto abs(const_vector_base<N,X,V> const&v)
+      noexcept -> decltype(std::sqrt(norm(v)))
     {
-      typedef decltype(f(this->first())) Y;
-      vector<N,Y> r;
-      unroll::binary(r.a, a, [f] (Y&y, T x) { y=f(x); } );
-      return r;
+      return std::sqrt(norm(v));
     }
-    /// connect with another vector element wise: vec[i] = f(vec[i], other[i])
-    template<typename BinaryFunction>
-    vector&apply_binary(vector const&other, BinaryFunction f)
+    /// product of elements
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline X volume(const_vector_base<N,X,V> const&v) noexcept
     {
-      unroll::binary(a, other.a, [f] (T&x, T y) { x=f(x,y); } );
-      return*this;
+      static_assert(allow_bin_op<check::mul,X>::value,
+		    "multiplication of elements not supported: "
+		    "cannot implement volume(vector)");
+      typedef typename check::mul<X>::type M;
+      static_assert(std::is_same<X,M>::value,
+		    "element multiplication not type preserving: "
+		    "cannot implement volume(vector)");
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](X x, X y) noexcept ->X { return x*y; },
+		   [](X x)      noexcept ->X { return x; });
     }
-    /// connect with another vector element wise: ret[i] = f(vec[i], other[i])
-    template<typename BinaryFunction>
-    auto applied_binary(vector const&other, BinaryFunction f) const
-      -> vector<N,decltype(f(this->first(),this->first()))>
+    /// minimum element of vector
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline X min(const_vector_base<N,X,V> const&v) noexcept
     {
-      typedef decltype(f(this->first(),this->first())) Y;
-      vector<N,Y> r;
-      unroll::tertiary(r.a, a, other.a, [f] (Y&y, T x, T z) { y=f(x,z); } );
-      return r;
+      static_assert(allow_bin_op<check::lt,X>::value,
+		    "'<' comparison of elements not supported: "
+		    "cannot implement min(vector)");
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](X x, X y) noexcept ->X { return x<y?x:y; },
+		   [](X x)      noexcept ->X { return x; });
     }
-    /// normalize: vec[i] /= abs(vec)
-    vector&normalize()
+    /// minimum |element| of vector
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline X min_abs(const_vector_base<N,X,V> const&v) noexcept
     {
-      T n = norm();
-      if(n) return operator /= (std::sqrt(n));
-      else  return*this;
+      static_assert(std::is_same<X,decltype(std::abs(X(1)))>::value,
+		    "std::abs(elements) not type preserving: "
+		    "cannot implement min_abs(vector)");
+      static_assert(allow_bin_op<check::lt,X>::value,
+		    "'<' comparison of elements not supported: "
+		    "cannot implement min_abs(vector)");
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](X x, X y) noexcept ->X { return x<y?x:y; },
+		   [](X x)      noexcept ->X { return std::abs(x); });
     }
-    /// normalized: ret[i] = vec[i] / abs(vec)
-    vector normalized() const
+    /// maximum element of vector
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline X max(const_vector_base<N,X,V> const&v) noexcept
     {
-      T n = norm();
-      if(n) return this->operator/ (std::sqrt(n));
-      else  return*this;
+      static_assert(allow_bin_op<check::gt,X>::value,
+		    "'>' comparison of elements not supported: "
+		    "cannot implement max(vector)");
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](X x, X y) noexcept -> X { return x>y?x:y; },
+		   [](X x)      noexcept -> X { return x; });
     }
-    /// write vector element-wise to std::ostream; keeps width and precision
-    friend std::ostream&operator<<(std::ostream&s, vector const&vec)
+    /// maximum |element| of vector
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline X max_abs(const_vector_base<N,X,V> const&v) noexcept
     {
-      unsigned w = s.width();
-      unsigned p = s.precision();
-      return unroll::out(s,vec.a,w,p);
+      static_assert(std::is_same<X,decltype(std::abs(X(1)))>::value,
+		    "std::abs(elements) not type preserving: "
+		    "cannot implement max_abs(vector)");
+      static_assert(allow_bin_op<check::gt,X>::value,
+		    "'>' comparison of elements not supported: "
+		    "cannot implement max_abs(vector)");
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](X x, X y) noexcept -> X { return x>y?x:y; },
+		   [](X x) noexcept -> X { return std::abs(x); });
     }
-    /// read vector element-wise from std::istream
-    friend std::istream&operator>>(std::istream&s, vector&vec)
+    /// are all elements zero?
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline bool is_zero(const_vector_base<N,X,V> const&v) noexcept
     {
-      unroll::unary(vec.a,[&s] (T&x) { s >> x; } );
-      return s;
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](bool x, bool y) noexcept -> bool { return x && y; },
+		   [](X x) noexcept -> bool { return x == X(0); });
     }
-    //@}
-  };// class WDutils::vector<N,T>
-  /// \name properties of a vector
-  //@{
-  /// norm: sum of vector elements squared
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline T norm(vector<N,T> const&vec)
-  { return vec.norm(); }
-  /// absolute value: sqrt(norm(vector))
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline auto abs(vector<N,T> const&vec) -> decltype(vec.abs())
-  { return vec.abs(); }
-  /// product of elements
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline T volume(vector<N,T> const&vec)
-  { return vec.volume(); }
-  /// minimum element of vector
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline T min(vector<N,T> const&vec)
-  { return vec.min(); }
-  /// minimum |element| of vector
-  /// \relates WDutils::vector
-  template<int N, typename X> inline
-  X minnorm(vector<N,X> const&x)
-  { return x.minnorm(); }
-  /// maximum element of vector
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline T max(vector<N,T> const&vec)
-  { return vec.max(); }
-  /// maximum |element| of vector
-  /// \relates WDutils::vector
-  template<int N, typename X> inline
-  X maxnorm(vector<N,X> const&x)
-  { return x.maxnorm(); }
-  /// is any element NaN?
-  /// \relates WDutils::vector
-  template<int N, typename X> inline
-  bool isnan(vector<N,X> const&x)
-  { return x.isnan(); }
-  /// is any element inf?
-  /// \relates WDutils::vector
-  template<int N, typename X> inline
-  bool isinf(vector<N,X> const&x)
-  { return x.isinf(); }
-  /// returns @a x/|x|, the unit vector in direction @a x
-  /// \relates WDutils::vector
-  template<int N, typename X> inline
-  vector<N,X> normalized(vector<N,X> const&x)
-  { return x.normalized(); }
-  //@}
-  /// \name binary operations with vectors
-  //@{
-  /// scalar times vector
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline vector<N,T> operator*(T s, vector<N,T> const&vec)
-  { return vec*s; }
-  /// return absolute difference between two vectors
-  /// \relates WDutils::vector
-  template<int N, typename X>
-  inline vector<N,X> abs_diff(vector<N,X> const&x, vector<N,X> const&y)
-  { return x.abs_diff(y); }
-  /// vector difference squared
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline T dist_sq(vector<N,T> const&x, vector<N,T> const&y)
-  { return x.dist_sq(y); }
-  /// vector sum squared
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline T sum_sq(vector<N,T> const&x, vector<N,T> const&y)
-  { return x.sum_sq(y); }
-  /// vector distance = sqrt( norm(vector difference) )
-  /// \relates WDutils::vector
-  template<int N, typename T>
-  inline T distance(vector<N,T> const&x, vector<N,T> const&y)
-  { return std::sqrt(dist_sq(x,y)); }
-  /// vector cross product for N=2: returns x[0]*y[1]- x[1]*y[0]
-  /// \relates WDutils::vector
-  template<typename T>
-  inline T operator^ (vector<2,T> const&x, vector<2,T> const&y)
-  { return x[0]*y[1] - x[1]*y[0]; }
-  /// vector cross product for N=3
-  /// \relates WDutils::vector
-  template<typename T>
-  inline vector<3,T> operator^ (vector<3,T> const&x, vector<3,T> const&y)
-  {
-    return vector<3,T>(x[1]*y[2] - x[2]*y[1],
-		       x[2]*y[0] - x[0]*y[2],
-		       x[0]*y[1] - x[1]*y[0]);
-  }
-  //@}
+    /// is any element NaN?
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    bool isnan(const_vector_base<N,X,V> const&v) noexcept
+    {
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](bool x, bool y) noexcept -> bool { return x || y; },
+		   [](X x) noexcept -> bool { return std::isnan(x); });
+    }
+    /// is any element inf?
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    bool isinf(const_vector_base<N,X,V> const&v) noexcept
+    {
+      return unroll<N-1,X>::
+	coll_unary(v.data(),
+		   [](bool x, bool y) noexcept -> bool { return x || y; },
+		   [](X x) noexcept -> bool { return std::isinf(x); });
+    }
+    /// vector difference squared
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename Y, typename V, typename W>
+    inline typename
+    check::add<typename check::mul<typename check::sub<X,Y>::type>::type>::type
+    dist_sq(const_vector_base<N,X,V> const&v,
+	    const_vector_base<N,Y,W> const&w) noexcept
+    {
+      static_assert(allow_bin_op<check::sub,X,Y>::value,
+		    "subtraction of elements not supported: "
+		    "cannot implement dist_sq(vector,vector)");
+      typedef typename check::sub<X,Y>::type S;
+      static_assert(allow_bin_op<check::sub,X,Y>::value,
+		    "multiplication of element differences not supported: "
+		    "cannot implement dist_sq(vector,vector)");
+      typedef typename check::mul<S,S>::type M;
+      static_assert(allow_bin_op<check::sub,X,Y>::value,
+		    "addition of squared element differences not supported: "
+		    "cannot implement dist_sq(vector,vector)");
+      typedef typename check::add<M,M>::type R;
+      return unroll<N-1,X>::
+	coll_binary(v.data(), w.data(),
+		    [](M x, M y) noexcept ->R { return x+y; },
+		    [](X x, Y y) noexcept ->M { return square(x-y); } );
+    }
+    /// vector distance = sqrt( norm(vector difference) )
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename Y, typename V, typename W>
+    inline auto distance(const_vector_base<N,X,V> const&v,
+			 const_vector_base<N,Y,W> const&w)
+      noexcept -> decltype(std::sqrt(dist_sq(v,w)))
+    { return std::sqrt(dist_sq(v,w)); }
+    /// vector sum squared
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename Y, typename V, typename W>
+    inline typename
+    check::add<typename check::mul<typename check::add<X,Y>::type>::type>::type
+    sum_sq(const_vector_base<N,X,V> const&v,
+	   const_vector_base<N,Y,W> const&w) noexcept
+    {
+      static_assert(allow_bin_op<check::add,X,Y>::value,
+		    "addition of elements not supported: "
+		    "cannot implement sum_sq(vector,vector)");
+      typedef typename check::sub<X,Y>::type S;
+      static_assert(allow_bin_op<check::sub,X,Y>::value,
+		    "multiplication of element differences not supported: "
+		    "cannot implement sum_sq(vector,vector)");
+      typedef typename check::mul<S,S>::type M;
+      static_assert(allow_bin_op<check::sub,X,Y>::value,
+		    "addition of squared element differences not supported: "
+		    "cannot implement sum_sq(vector,vector)");
+      typedef typename check::add<M,M>::type R;
+      return unroll<N-1,X>::
+	coll_binary(v.data(), w.data(),
+		    [](M x, M y) noexcept ->R { return x+y; },
+		    [](X x, Y y) noexcept ->M { return square(x-y); } );
+    }
+    /// apply unary function: R[i] = f(X[i]); f() doesn't return void
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename F>
+    inline auto apply(const_vector_base<N,X,V> const&v, F f)
+      noexcept(noexcept(f))
+      -> typename std::enable_if<!std::is_void<decltype(f(v[0]))>::value,
+				 vector<N,decltype(f(v[0]))> >::type
+    {
+      typedef decltype(f(v[0])) R;
+      vector<N,R> ret;
+      unroll<N-1,R>::binary(ret.data(), v.data(),
+			    [f] (R&r, X x) noexcept { r=f(x); } );
+      return ret;
+    }
+    /// apply binary function: R[i] = f(X[i],Y[i]); f() doesn't return void
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename Y, typename W,  typename F>
+    inline auto apply(const_vector_base<N,X,V> const&v,
+		      const_vector_base<N,Y,W> const&w, F f)
+      noexcept(noexcept(f))
+      -> typename std::enable_if<!std::is_void<decltype(f(v[0],w[0]))>::value,
+				 vector<N,decltype(f(v[0],w[0]))> >::type
+    {
+      typedef decltype(f(v[0],w[0])) R;
+      vector<N,R> ret;
+      unroll<N-1,R>::
+	tertiary(ret.data(), v.data(), w.data(),
+		 [f] (R&r, X x, Y y) noexcept { r=f(x,y); } );
+      return ret;
+    }
+    /// apply unary function: f(X[i]); f() returns void
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename F>
+    inline auto apply(const_vector_base<N,X,V> const&v, F f)
+      noexcept(noexcept(f))
+      -> typename std::enable_if<std::is_void<decltype(f(v[0]))>::value>::type
+    {
+      unroll<N-1,X>::const_unary(v.data(),f);
+    }
+    /// apply binary function: f(X[i],Y[i]); f() returns void
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename Y, typename W,  typename F>
+    inline auto apply(const_vector_base<N,X,V> const&v,
+		      const_vector_base<N,Y,W> const&w, F f)
+      noexcept(noexcept(f))
+      -> typename std::enable_if<std::is_void<decltype(f(v[0],w[0]))>
+				 ::value>::type
+    {
+      unroll<N-1,X>::const_binary(v.data(),w.data(),f);
+    }
+    /// vector absolute difference
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V, typename Y, typename W>
+    inline typename
+    std::conditional<check::sub<X,Y>::value,
+		     vector<N, typename check::sub<X,Y>::type>, void
+		     >::type
+    abs_diff(const_vector_base<N,X,V> const&v,
+	     const_vector_base<N,Y,W> const&w)
+    {
+      static_assert(allow_bin_op<check::sub,X,Y>::value,
+		    "subtraction of elements not supported: "
+		    "cannot implement abs_diff(vector,vector)");
+      typedef typename check::sub<X,Y>::type R;
+      vector<N,R> ret;
+      unroll<N-1,R>::
+	tertiary(ret.data(), v.data(), w.data(),
+		 [] (R&r, X x, Y y) noexcept { r=std::abs(x-y); } );
+      return ret;
+    }
+    /// returns @a x/|x|, the unit vector in direction @a x
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int N, typename X, typename V>
+    inline auto normalised(const_vector_base<N,X,V> const&v)
+      noexcept -> decltype(v/std::sqrt(norm(v)))
+    {
+      auto n = norm(v);
+      if(n) return v / (std::sqrt(n));
+      else  return v;
+    }
+    /// range of elements
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int I0, int IN, int N, typename X, typename V>
+    inline auto range(const_vector_base<N,X,V> const&vec)
+      noexcept -> decltype(vec.template range<I0,IN>())
+    { return vec.template range<I0,IN>(); }
+    /// range of elements
+    /// \relates WDutils::vector
+    /// \relates WDutils::vector_wrapper
+    /// \relates WDutils::const_vector_wrapper
+    template<int I0, int IN, int N, typename X, typename V>
+    inline auto range(non_const_vector_methods<N,X,V>&vec)
+      noexcept -> decltype(vec.template range<I0,IN>())
+    { return vec.template range<I0,IN>(); }
+  } // namespace WDutils::vector_details
+  //
+  using vector_details::norm;
+  using vector_details::abs;
+  using vector_details::volume;
+  using vector_details::dot;
+  using vector_details::min;
+  using vector_details::max;
+  using vector_details::min_abs;
+  using vector_details::max_abs;
+  using vector_details::is_zero;
+#ifdef WDutils_included_WDMath_h
+  using vector_details::equal;
+#endif
+  using vector_details::isnan;
+  using vector_details::isinf;
+  using vector_details::dist_sq;
+  using vector_details::distance;
+  using vector_details::sum_sq;
+  using vector_details::apply;
+  using vector_details::abs_diff;
+  using vector_details::normalised;
+  using vector_details::operator+;
+  using vector_details::operator-;
+  using vector_details::operator*;
+  using vector_details::operator/;
+  using vector_details::operator^;
+  using vector_details::range;
 } // namespace WDutils
 //
-#endif // WDutils_included_vector_h
+#endif

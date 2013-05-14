@@ -199,9 +199,16 @@ namespace WDutils {
       typedef float  input_type;
       typedef uint32_t integer_type;
       static integer_type integer(input_type const&x)
-      { return forward(reinterpret_cast<integer_type const&>(x)); }
+      {
+	union { input_type f; integer_type i; };
+	f=x;
+	return forward(i);
+      }
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wsign-conversion"
       static integer_type forward_map(integer_type f)
       { return -int32_t(f>>31) | 0x80000000; }
+# pragma clang diagnostic pop
       static integer_type backward_map(integer_type f)
       { return ((f>>31) - 1) | 0x80000000; }
       static integer_type forward(integer_type f)
@@ -220,9 +227,16 @@ namespace WDutils {
       typedef double input_type;
       typedef uint64_t integer_type;
       static integer_type integer(double const& x)
-      { return forward(reinterpret_cast<integer_type const&>(x)); }
+      {
+	union { input_type f; integer_type i; };
+	f=x;
+	return forward(i);
+      }
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wsign-conversion"
       static integer_type forward_map(integer_type f)
       { return -int64_t(f>>63) | 0x8000000000000000ll; }
+# pragma clang diagnostic pop
       static integer_type backward_map(integer_type f)
       { return ((f>>63) - 1) | 0x8000000000000000ll; }
       static integer_type forward(integer_type f)

@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2000-2012
+/// \date   2000-2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2012 Walter Dehnen
+// Copyright (C) 2000-2013 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,9 +37,29 @@
 #  include <cstring>                           // for memcpy
 #  define WDutils_included_cstring
 #endif
+#ifndef WDutils_included_cstdlib
+#  include <cstdlib>
+#  define WDutils_included_cstdlib
+#endif
 #ifndef WDutils_included_iostream
 #  include <iostream>
 #  define WDutils_included_iostream
+#endif
+#ifndef WDutils_included_sstream
+#  include <sstream>
+#  define WDutils_included_sstream
+#endif
+#ifndef WDutils_included_vector
+#  include <vector>
+#  define WDutils_included_vector
+#endif
+#ifndef WDutils_included_iterator
+#  include <iterator>
+#  define WDutils_included_iterator
+#endif
+#ifndef WDutils_included_stdexcept
+#  include <stdexcept>
+#  define WDutils_included_stdexcept
 #endif
 #ifndef WDutils_included_traits_h
 #  include <traits.h>
@@ -47,13 +67,15 @@
 #ifndef WDutils_included_inline_h
 #  include <inline.h>
 #endif
-#ifndef WDutils_included_cstdlib
-#  include <cstdlib>
-#endif
 
 #if __cplusplus < 201103L
 # define noexcept
 # define constexpr
+#endif
+#if defined(__clang__) || (defined(__GNUC__) && !defined(__INTEL_COMPILER))
+# define always_inline inline __attribute__((__always_inline__))
+#else
+# define always_inline inline
 #endif
 
 namespace WDutils {
@@ -76,8 +98,8 @@ namespace WDutils {
   /// \param[in] line number of the line in that file 
   /// \param[in] lib  (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  T* NewArray(size_t num, const char*file, int line, const char*lib="WDutils")
-    WDutils_THROWING
+  T* NewArray(size_t num, const char*file, unsigned line,
+	      const char*lib="WDutils")
   {
     T*t;
     bool failed=0;
@@ -110,16 +132,18 @@ namespace WDutils {
   /// \param  SIZE number of elements
 #define WDutils_NEW(TYPE,SIZE)				\
   WDutils::NewArray<TYPE>(SIZE,__FILE__,__LINE__)
-  template<typename T> struct _report
-  {
-    static bool report(int n) { return n>0; }
-    static int  bytes (int n) { return n*sizeof(T); }
-  };
-  template<> struct _report<void>
-  {
-    static bool report(int) { return 0; }
-    static int  bytes (int) { return 0; }
-  };
+  namespace details {
+    template<typename T> struct _report
+    {
+      static bool   report(size_t n) { return n>0; }
+      static size_t bytes (size_t n) { return n*size_t(sizeof(T)); }
+    };
+    template<> struct _report<void>
+    {
+      static bool   report(size_t) { return 0; }
+      static size_t bytes (size_t) { return 0; }
+    };
+  }
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// array de-allocation giving useful info in case of error; mostly used
@@ -138,29 +162,26 @@ namespace WDutils {
   /// \param[in] num   (optional) number of elements de-allocated
   /// \param[in] lib   (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  void DelArray(const T*array, const char*file, int line, int num=0,
+  void DelArray(const T*array, const char*file, unsigned line, size_t num=0,
 		const char*lib = "WDutils")
-    WDutils_THROWING
   {
-    if(0==array) {
-      Warning(file,line,lib)
-	("trying to delete zero pointer to array of '%s'", nameof(T));
+    if(!array)
       return;
-    }
     try {
       delete[] array;
     } catch(...) {
       throw Thrower(file,line)
 	("de-allocating array of '%s' @ %p failed\n", nameof(T),array);
     }
-    if(_report<T>::report(num))
-      DebugInformation(file,line,lib)
-	(WDutilsAllocDebugLevel, "de-allocated array of %d %s [%d byes] @ %p\n",
-	 num, nameof(T), _report<T>::bytes(num), array);
-    else
-      DebugInformation(file,line,lib)
-	(WDutilsAllocDebugLevel, "de-allocated array of %s @ %p\n",
-	 nameof(T), array);
+    if(debug(WDutilsAllocDebugLevel)) {
+      if(details::_report<T>::report(num))
+	DebugInformation(file,line,lib)
+	  ("de-allocated array of %ld %s [%ld bytes] @ %p\n",
+	   num, nameof(T), details::_report<T>::bytes(num), array);
+      else
+	DebugInformation(file,line,lib)
+	  ("de-allocated array of %s @ %p\n", nameof(T), array);
+    }
   }
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -190,22 +211,23 @@ namespace WDutils {
   /// \param[in] line  number of the line in that file
   /// \param[in] lib   (optional) name of calling library (default: "WDutils")
   template<typename T> inline
-  void DelObject(const T*pobj, const char*file, int line,
-		 const char*lib="WDutils") WDutils_THROWING
+  void DelObject(const T*pobj, const char*file, unsigned line,
+		 const char*lib="WDutils")
   {
-    if(0==pobj) {
-      Warning(file,line,lib)
-	("trying to delete zero pointer to object '%s'", nameof(T));
+    if(!pobj)
       return;
-    }
     try {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winline"
       delete pobj;
+#pragma GCC diagnostic pop
     } catch(...) {
       throw Thrower(file,line)
 	("de-allocating object '%s' @ %p failed\n", nameof(T),pobj);
     }
-    DebugInformation(file,line,lib)
-      (WDutilsAllocDebugLevel,"de-allocated %s object @ %p\n", nameof(T),pobj);
+    if(debug(WDutilsAllocDebugLevel))
+      DebugInformation(file,line,lib)
+	("de-allocated %s object @ %p\n", nameof(T),pobj);
   }
   // ///////////////////////////////////////////////////////////////////////////
   ///
@@ -226,22 +248,47 @@ namespace WDutils {
 #endif
 //
 namespace WDutils {
+
+#define GNU_HAS_VERSION_OR_HIGHER(MAJOR,MINOR,PATCH)			\
+  defined(__GNUC__)        && ( __GNUC__            >  MAJOR || (	\
+  __GNUC__       == MAJOR  && ( __GNUC_MINOR__      >  MINOR || (	\
+  __GNUC_MINOR__ == MINOR  &&   __GNUC_PATCHLEVEL__ >= PATCH    ) ) ) )
+
+#define GNU_HAS_VERSION_OR_LOWER(MAJOR,MINOR,PATCH)			\
+  defined(__GNUC__)        && ( __GNUC__            <  MAJOR || (	\
+  __GNUC__       == MAJOR  && ( __GNUC_MINOR__      <  MINOR || (	\
+  __GNUC_MINOR__ == MINOR  &&   __GNUC_PATCHLEVEL__ <= PATCH    ) ) ) )
+
+#define GNU_HAS_VERSION_EXACTLY(MAJOR,MINOR,PATCH)			\
+  GNU_HAS_VERSION_OR_HIGHER(MAJOR,MINOR,PATCH) &&			\
+  GNU_HAS_VERSION_OR_LOWER(MAJOR,MINOR,PATCH)
   //////////////////////////////////////////////////////////////////////////////
   /// \defgroup  MemAligned  memory alignment to K bytes
-
   /// Macro enforcing memory alignment to K bytes
   /// \ingroup MemAligned
   ///
   /// Forces the corresponding variable/type to be aligned to K bytes; Works
-  /// with icc (icpc) and gcc (g++) [versions > 3]; Use it like \code
-  ///    struct WDutils__align_to(K) name { ... };              \endcode
-#if defined (__INTEL_COMPILER)
+  /// with c++11, or icc (icpc) and gcc (g++) [versions > 3]; Use it like \code
+  ///    struct WDutilsAlignTo(K) name { ... };              \endcode
+#if   defined (__INTEL_COMPILER)
 #  define WDutilsAlignTo(K) __declspec(align(K))
-#elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
+#elif defined(__GNUC__)
 #  define WDutilsAlignTo(K) __attribute__ ((aligned(K)))
+#elif __cplusplus >= 201103L
+#  define WDutilsAlignTo(K) alignas(K)
 #else
+#  warning do not know how to enforce memory alignment
 #  define WDutilsAlignTo(K)
 #endif
+// #if defined(__clang__) && __cplusplus >= 201103L
+// #  define WDutilsAlignTo(K) alignas(K)
+// #elif defined (__INTEL_COMPILER)
+// #  define WDutilsAlignTo(K) __declspec(align(K))
+// #elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
+// #  define WDutilsAlignTo(K) __attribute__ ((aligned(K)))
+// #else
+// #  define WDutilsAlignTo(K)
+// #endif
   /// struct holding aligned datum
   template<int alignment, typename data_type> struct AlignedDatum
   {
@@ -275,14 +322,13 @@ namespace WDutils {
   /// is a given memory address aligned to K bytes?
   /// \ingroup MemAligned
   /// \param p  memory address to be tested
-  /// \param al alignemt to a bytes will be tested
-  template<int K>
+  template<size_t K>
   inline constexpr bool is_aligned(const void*p)
   { return size_t(p) % K == 0; }
   ///
   /// find the smallest multiple of K not smaller than @a n
   /// \note @a K must be power of 2
-  template<int K>
+  template<size_t K>
   inline constexpr size_t next_aligned(size_t n)
   {
     WDutilsCXX11StaticAssert(K>0 && (K&(K-1))==0,"K not a power of 2");
@@ -290,7 +336,7 @@ namespace WDutils {
   }
   ///
   /// find the smallest K-byte aligned address not smaller than @a p
-  template<int K, typename T>
+  template<size_t K, typename T>
   inline T* next_aligned(T*p)
   { return reinterpret_cast<T*>(next_aligned<K>(reinterpret_cast<size_t>(p))); }
 #if(0)
@@ -322,8 +368,8 @@ namespace WDutils {
   /// \note Unlike NewArray<>, we do not call the default ctor for each
   ///       allocated object!
   template<int K, typename T> inline
-  T* NewArrayAligned(size_t nobj, const char*file, int line,
-		     const char*lib = "WDutils") WDutils_THROWING
+  T* NewArrayAligned(size_t nobj, const char*file, unsigned line,
+		     const char*lib = "WDutils")
   {
     WDutilsCXX11StaticAssert(K>0 && (K&(K-1))==0,"K not power of 2");
     size_t nbytes = nobj*sizeof(T);
@@ -402,15 +448,12 @@ namespace WDutils {
   ///       has been previously allocated by WDutils::NewArrayAligned<K>();
   ///       other de-allocation may result in a run-time \b error!
   template<int K, typename T> inline
-  void DelArrayAligned(const T*array, const char*file, int line,
-		       int num=0, const char*lib="WDutils") WDutils_THROWING
+  void DelArrayAligned(const T*array, const char*file, unsigned line,
+		       size_t num=0, const char*lib="WDutils")
   {
 #if defined(__GNUC__) || defined (__INTEL_COMPILER)
-    if(0==array) {
-      Warning(file,line,lib)("WDutils::DelArrayAligned<%d,%s>(0x0)\n",
-			     K,nameof(T));
+    if(!array)
       return;
-    }
     if(!is_aligned<K>(array)) {
       throw Thrower(file,line)
 	("WDutils::DelArrayAligned<%d,%s>(%p): not aligned",K,nameof(T),array);
@@ -422,16 +465,16 @@ namespace WDutils {
 	("WDutils::DelArrayAligned<%d,%s>(%p): de-allocation failed\n",
 	 K,nameof(T),array);
     }
-    if(_report<T>::report(num))
-      DebugInformation(file,line,lib)
-	(WDutilsAllocDebugLevel,
-	 "de-allocated %d-byte aligned array of %d '%s' [%d bytes] @ %p\n", 
-	 K,num,nameof(T),_report<T>::bytes(num),array);
-    else
-      DebugInformation(file,line,lib)
-	(WDutilsAllocDebugLevel,
-	 "de-allocated %d-byte aligned array of '%s' @ %p\n",
-	 K,nameof(T),array);
+    if(debug(WDutilsAllocDebugLevel)) {
+      if(details::_report<T>::report(num))
+	DebugInformation(file,line,lib)
+	  ("de-allocated %d-byte aligned array of %ld '%s' [%ld bytes] @ %p\n", 
+	   K,num,nameof(T),details::_report<T>::bytes(num),array);
+      else
+	DebugInformation(file,line,lib)
+	  ("de-allocated %d-byte aligned array of '%s' @ %p\n",
+	   K,nameof(T),array);
+    }
 #else
     WDutilsCXX11StaticAssert(K==16,"only implemented for K=16");
     DelArray((char*)(*((void**)(((char*)array)-sizeof(void*)))),
@@ -456,6 +499,192 @@ namespace WDutils {
   /// for backward compatibility
 #define WDutils_DEL16(P) WDutils_DEL_aligned(16,P)
 #define WDutils_DEL16N(P,N) WDutils_DEL_alignedN(16,P,N)
+  // ///////////////////////////////////////////////////////////////////////////
+  /// 
+  /// an imported array with limited container functionality
+  ///
+  template<typename T>
+  struct data_buffer
+  {
+    typedef T value_type;
+    typedef size_t size_type;
+    typedef T&reference;
+    typedef const T&const_reference;
+    typedef T*pointer;
+    typedef const T*const_pointer;
+    typedef pointer iterator;
+    typedef const_pointer const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    //
+    data_buffer(pointer b=0, size_type n=0) noexcept
+    : _M_buf(b), _M_cnt(b?n:0) {}
+//     //
+//     data_buffer(data_buffer const&) = default;
+// #if __cplusplus >= 201103L
+//     data_buffer(data_buffer &&) = default;
+// #endif
+    // data access
+    reference       operator[](size_t i)       noexcept { return _M_buf[i]; }
+    const_reference operator[](size_t i) const noexcept { return _M_buf[i]; }
+    reference       at        (size_t i)
+    {
+      if(i>_M_cnt) {
+	std::ostringstream s;
+	s << "data_buffer<"<<nameof(T)<<">::at(): i="<<i
+	  << " > size()="<<_M_cnt;
+	throw std::out_of_range(s.str());
+      }
+      return _M_buf[i];
+    }
+    const_reference at        (size_t i) const
+    { 
+      if(i>_M_cnt) {
+	std::ostringstream s;
+	s << "data_buffer<"<<nameof(T)<<">::at(): i="<<i
+	  << " > size()="<<_M_cnt;
+	throw std::out_of_range(s.str());
+      }
+      return _M_buf[i];
+    }
+    // the effect of front() and back() for an empty() data_buffer is undefined
+    reference       front()       noexcept { return _M_buf[0]; }
+    const_reference front() const noexcept { return _M_buf[0]; }
+    reference        back()       noexcept { return _M_buf[_M_cnt-1]; }
+    const_reference  back() const noexcept { return _M_buf[_M_cnt-1]; }
+    // direct access to buffer
+    pointer          data()       noexcept { return _M_buf; }
+    const_pointer    data() const noexcept { return _M_buf; }
+    // capacity
+    size_type        size() const noexcept { return _M_cnt; }
+    bool            empty() const noexcept { return _M_buf==0 || _M_cnt==0; }
+    // iterator to begin of buffer
+    iterator        begin()       noexcept { return _M_buf; }
+    const_iterator  begin() const noexcept { return _M_buf; }
+    const_iterator cbegin() const noexcept { return _M_buf; }
+    // iterator to end of buffer
+    iterator          end()       noexcept { return _M_buf+_M_cnt; }
+    const_iterator    end() const noexcept { return _M_buf+_M_cnt; }
+    const_iterator   cend() const noexcept { return _M_buf+_M_cnt; }
+    // iterator to begin of reversed buffer
+    reverse_iterator        rbegin()       noexcept
+    { return reverse_iterator(--end()); } 
+    const_reverse_iterator  rbegin() const noexcept
+    { return const_reverse_iterator(--end()); } 
+    const_reverse_iterator crbegin() const noexcept
+    { return const_reverse_iterator(--cend()); } 
+    // iterator to end of reversed buffer
+    reverse_iterator        rend()       noexcept
+    { return reverse_iterator(--begin()); } 
+    const_reverse_iterator  rend() const noexcept
+    { return const_reverse_iterator(--begin()); } 
+    const_reverse_iterator crend() const noexcept
+    { return const_reverse_iterator(--cbegin()); }
+  private:
+    const pointer   _M_buf;
+    const size_type _M_cnt;
+  };
+  /// 
+  /// a constant imported array with limited container functionality
+  ///
+  template<typename T>
+  struct const_data_buffer
+  {
+    typedef T value_type;
+    typedef size_t size_type;
+    typedef const T&reference;
+    typedef const T&const_reference;
+    typedef const T*pointer;
+    typedef const T*const_pointer;
+    typedef pointer iterator;
+    typedef const_pointer const_iterator;
+    typedef std::reverse_iterator<iterator> reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+    //
+    const_data_buffer(pointer b=0, size_type n=0) noexcept
+    : _M_buf(b), _M_cnt(b?n:0) {}
+//     //
+//     const_data_buffer(const_data_buffer const&) = default;
+// #if __cplusplus >= 201103L
+//     const_data_buffer(const_data_buffer &&) = default;
+// #endif
+    //
+    const_data_buffer(data_buffer<T> const&b) noexcept
+    : _M_buf(b._M_buf), _M_cnt(b._M_cnt) {}
+#if __cplusplus >= 201103L
+   const_data_buffer(data_buffer<T>&&b) noexcept
+    : _M_buf(b._M_buf), _M_cnt(b._M_cnt) {}
+#endif
+    // data access
+    const_reference operator[](size_t i) const noexcept { return _M_buf[i]; }
+    const_reference at        (size_t i) const
+    {
+      if(i>_M_cnt) {
+	std::ostringstream s;
+	s << "const_data_buffer<"<<nameof(T)<<">::at(): i="<<i
+	  << " > size()="<<_M_cnt;
+	throw std::out_of_range(s.str());
+      }
+      return _M_buf[i];
+    }
+    // the effect of front() and back() for an empty() data_buffer is undefined
+    const_reference front() const noexcept { return _M_buf[0]; }
+    const_reference  back() const noexcept { return _M_buf[_M_cnt-1]; }
+    // direct access to buffer
+    const_pointer    data() const noexcept { return _M_buf; }
+    // capacity
+    size_type        size() const noexcept { return _M_cnt; }
+    bool            empty() const noexcept { return _M_buf==0 || _M_cnt==0; }
+    // iterator to begin of buffer
+    const_iterator  begin() const noexcept { return _M_buf; }
+    const_iterator cbegin() const noexcept { return _M_buf; }
+    // iterator to end of buffer
+    const_iterator    end() const noexcept { return _M_buf+_M_cnt; }
+    const_iterator   cend() const noexcept { return _M_buf+_M_cnt; }
+    // iterator to begin of reversed buffer
+    const_reverse_iterator  rbegin() const noexcept
+    { return const_reverse_iterator(--end()); } 
+    const_reverse_iterator crbegin() const noexcept
+    { return const_reverse_iterator(--cend()); } 
+    // iterator to end of reversed buffer
+    const_reverse_iterator  rend() const noexcept
+    { return const_reverse_iterator(--begin()); } 
+    const_reverse_iterator crend() const noexcept
+    { return const_reverse_iterator(--cbegin()); } 
+  private:
+    const pointer   _M_buf;
+    const size_type _M_cnt;
+  };
+  //
+  template<typename T>
+  bool operator==(data_buffer<T> const&x, data_buffer<T> const&y) noexcept
+  { return x.data()==y.data() && x.size()==y.size(); }
+  template<typename T>
+  bool operator!=(data_buffer<T> const&x, data_buffer<T> const&y) noexcept
+  { return !(x==y); }
+  //
+  template<typename T>
+  bool operator==(const_data_buffer<T> const&x, data_buffer<T> const&y) noexcept
+  { return x.data()==y.data() && x.size()==y.size(); }
+  template<typename T>
+  bool operator!=(const_data_buffer<T> const&x, data_buffer<T> const&y) noexcept
+  { return !(x==y); }
+  //
+  template<typename T>
+  bool operator==(data_buffer<T> const&x, const_data_buffer<T> const&y) noexcept
+  { return x.data()==y.data() && x.size()==y.size(); }
+  template<typename T>
+  bool operator!=(data_buffer<T> const&x, const_data_buffer<T> const&y) noexcept
+  { return !(x==y); }
+  //
+  template<typename T>
+  bool operator==(const_data_buffer<T> const&x, const_data_buffer<T> const&y)
+    noexcept
+  { return x.data()==y.data() && x.size()==y.size(); }
+  template<typename T>
+  bool operator!=(const_data_buffer<T> const&x, const_data_buffer<T> const&y)
+    noexcept
+  { return !(x==y); }
   // ///////////////////////////////////////////////////////////////////////////
   //
   /// a simple one-dimensional array of data aligned to 16 bytes
@@ -544,7 +773,7 @@ namespace WDutils {
   /// In order to (i) guarantee the correct amount of elements (not known a
   /// priori) will be allocated and (ii) not to waste memory by allocating too
   /// many, we use the following strategy, similar to that of std::string.
-  /// Elements are allocated in blocks, which in turn are organized in a
+  /// Elements are allocated in blocks, which in turn are organised in a
   /// linked list. When a number of new elements is to be allocated and the
   /// last block in the list cannot provide them, we allocated a new block and
   /// add it to the list. The number of elements allocated in this new block
@@ -590,7 +819,7 @@ namespace WDutils {
       block();
     public:
       /// constructor
-      /// \param n number of elements to allocate
+      /// \param[in] n  number of elements to allocate in initial block
       explicit
       block(size_type const&n) :
 	NEXT    ( 0 ),
@@ -734,13 +963,13 @@ namespace WDutils {
 	NUSED ( 0 ),
 	NBLCK ( 1 ) {}
     /// destructor: delete all blocks
-    ~block_alloc() WDutils_THROWING;
+    ~block_alloc();
     /// give out: another element
     /// \return pointer to allocated element
     pointer new_element()
     {
       if(LAST->is_full()) {
-	size_type New = LAST->N_alloc();
+	size_type New = size_type(LAST->N_alloc());
 	LAST->link(new block(New));
 	LAST = LAST->next();
 	NTOT+= New;
@@ -798,7 +1027,7 @@ namespace WDutils {
       return LAST->new_elements(Ne);
     }
     /// an invalid number for an element
-    static const unsigned invalid = ~0;
+    static const unsigned invalid = ~0u;
     /// the running number of a given element
     ///
     /// If @a E does not to point to an element, we return @a invalid
@@ -870,13 +1099,20 @@ namespace WDutils {
   };
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T, int K> inline
-  block_alloc<T,K>::~block_alloc() WDutils_THROWING {
+#if defined(__clang__) || (defined(__GNUC__) && !defined(__INTEL_COMPILER))
+  __attribute__((__always_inline__))
+#endif
+  block_alloc<T,K>::~block_alloc()
+  {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winline"
     block *A=FIRST, *N;
     while(A) {
       N = A->next();
       WDutils_DEL_O(A);
       A = N;
     }
+#pragma clang diagnostic pop
   }
   //
   //  class WDutils::pool
@@ -884,7 +1120,7 @@ namespace WDutils {
   /// allocates blocks of K bytes (=elements) in chunks of N elements
   ///
   /// elements are defined solely by their size K in bytes. They are allocated
-  /// in chunks of N, which are organized as linked list. Single elements can be
+  /// in chunks of N, which are organised as linked list. Single elements can be
   /// handed out (allocate) or freed (de-allocated). Free elements are kept in a
   /// linked list. The actual number of bytes per element is at least the size
   /// of a pointer. Thus, for K < sizeof(void*), this class is inefficient.
@@ -910,15 +1146,15 @@ namespace WDutils {
       char   *DATA; ///< pter to allocated memory
       chunk  *NEXT; ///< pter to next chunk
       /// constructor
-      /// \param[in] N  number of element in chunk
-      /// \param[in] Kp sizeof(elements)
-      chunk(size_type N, size_type Kp)
-	: DATA ( WDutils_NEW16(char,N*Kp) ),
+      /// \param[in] _N  number of element in chunk
+      /// \param[in] _Kp sizeof(elements)
+      chunk(size_type _N, size_type _Kp)
+	: DATA ( WDutils_NEW16(char,_N*_Kp) ),
 	  NEXT ( 0 )
       {
-	const char *END=DATA+N*Kp;
+	const char *END=DATA+_N*_Kp;
 	char*l,*n;
-	for(l=DATA, n=DATA+Kp; n!=END; l+=Kp,n+=Kp)
+	for(l=DATA, n=DATA+_Kp; n!=END; l+=_Kp,n+=_Kp)
 	  LINK(l)->NEXT = LINK(n);
 	LINK(l)->NEXT = 0;
       }
@@ -1232,13 +1468,13 @@ namespace WDutils {
       : Base(__N,__K,0) { set(0); }
     /// construction from sizes
     /// \param[in] n size of array in each dimension
-    explicit Array(const unsigned n[D]) WDutils_THROWING
+    explicit Array(const unsigned n[D])
       : Base(__N,__K,0) { reset(n); }
     /// construction from sizes for D=2 (compile-time error otherwise)
     /// \param[in] n0 size of array in dimension 0
     /// \param[in] n1 size of array in dimension 1
-    Array(unsigned n0, unsigned n1) WDutils_THROWING
-    : Base(__N,__K,0)
+    Array(unsigned n0, unsigned n1)
+      : Base(__N,__K,0)
     {
       WDutilsStaticAssert(D==2);
       const unsigned n[2] = {n0,n1};
@@ -1248,8 +1484,8 @@ namespace WDutils {
     /// \param[in] n0 size of array in dimension 0
     /// \param[in] n1 size of array in dimension 1
     /// \param[in] n2 size of array in dimension 2
-    Array(unsigned n0, unsigned n1, unsigned n2) WDutils_THROWING
-    : Base(__N,__K,0)
+    Array(unsigned n0, unsigned n1, unsigned n2)
+      : Base(__N,__K,0)
     {
       WDutilsStaticAssert(D==3);
       const unsigned n[3] = {n0,n1,n2};
@@ -1260,8 +1496,8 @@ namespace WDutils {
     /// \param[in] n1 size of array in dimension 1
     /// \param[in] n2 size of array in dimension 2
     /// \param[in] n3 size of array in dimension 3
-    Array(unsigned n0, unsigned n1, unsigned n2, unsigned n3) WDutils_THROWING
-    : Base(__N,__K,0)
+    Array(unsigned n0, unsigned n1, unsigned n2, unsigned n3)
+      : Base(__N,__K,0)
     {
       WDutilsStaticAssert(D==4);
       const unsigned n[4] = {n0,n1,n2,n3};
@@ -1274,8 +1510,7 @@ namespace WDutils {
     /// \param[in] n3 size of array in dimension 3
     /// \param[in] n4 size of array in dimension 4
     Array(unsigned n0, unsigned n1, unsigned n2, unsigned n3, unsigned n4)
-    WDutils_THROWING
-    : Base(__N,__K,0)
+      : Base(__N,__K,0)
     {
       WDutilsStaticAssert(D==5);
       const unsigned n[5] = {n0,n1,n2,n3,n4};
@@ -1284,10 +1519,10 @@ namespace WDutils {
     /// construction from sizes and initial value
     /// \param[in] n size of array in each dimension
     /// \param[in] x initialize each element with this value
-    Array(const unsigned n[D], T const&x) WDutils_THROWING
+    Array(const unsigned n[D], T const&x)
     : Base(__N,__K,0) { reset(n,x); }
     /// destruction: de-allocate memory
-    ~Array() WDutils_THROWING
+    ~Array()
     {
       if(A) {
 	WDutils_DEL_AN(A,K[0]*N[0]);
@@ -1301,7 +1536,7 @@ namespace WDutils {
     { for(unsigned i=0; i!=K[0]*N[0]; ++i) A[i]=x; }
     /// reset: destruct and construct again
     /// \param[in] n new size of array in each dimension
-    void reset(const unsigned n[D]) WDutils_THROWING
+    void reset(const unsigned n[D])
     {
       if(A==0 || !equal(n) ) {
 	if(A) WDutils_DEL_AN(A,K[0]*N[0]);
@@ -1312,7 +1547,7 @@ namespace WDutils {
     /// reset for D=2 (compile-time error otherwise)
     /// \param[in] n0 new size of array in dimension 0
     /// \param[in] n1 new size of array in dimension 1
-    void reset(unsigned n0, unsigned n1) WDutils_THROWING
+    void reset(unsigned n0, unsigned n1)
     {
       WDutilsStaticAssert(D==2);
       const unsigned n[D] = {n0,n1};
@@ -1322,7 +1557,7 @@ namespace WDutils {
     /// \param[in] n0 new size of array in dimension 0
     /// \param[in] n1 new size of array in dimension 1
     /// \param[in] n2 new size of array in dimension 2
-    void reset(unsigned n0, unsigned n1, unsigned n2) WDutils_THROWING
+    void reset(unsigned n0, unsigned n1, unsigned n2)
     {
       WDutilsStaticAssert(D==3);
       const unsigned n[D] = {n0,n1,n2};
@@ -1334,7 +1569,6 @@ namespace WDutils {
     /// \param[in] n2 new size of array in dimension 2
     /// \param[in] n3 new size of array in dimension 3
     void reset(unsigned n0, unsigned n1, unsigned n2, unsigned n3)
-      WDutils_THROWING
     {
       WDutilsStaticAssert(D==4);
       const unsigned n[D] = {n0,n1,n2,n3};
@@ -1347,7 +1581,6 @@ namespace WDutils {
     /// \param[in] n3 new size of array in dimension 3
     /// \param[in] n4 new size of array in dimension 4
     void reset(unsigned n0, unsigned n1, unsigned n2, unsigned n3, unsigned n4)
-      WDutils_THROWING
     {
       WDutilsStaticAssert(D==5);
       const unsigned n[D] = {n0,n1,n2,n3,n4};
@@ -1356,7 +1589,8 @@ namespace WDutils {
     /// reset: destruct and construct again
     /// \param[in] n new size of array in each dimension
     /// \param[in] x initialize each element with this value
-    void reset(const unsigned n[D], T const&x) WDutils_THROWING {
+    void reset(const unsigned n[D], T const&x)
+    {
       reset(n);
       setval(x);
     }
@@ -1406,7 +1640,7 @@ namespace WDutils {
     { for(unsigned i=0; i!=N; ++i) A[i] = x; }
     /// grow: increase size by n, but keep old data
     /// \param[in] n  grow by this much, default: old size ->
-    void grow(unsigned n=0) WDutils_THROWING
+    void grow(unsigned n=0)
     {
       n = N + (n?n:N);
       if(n) {
@@ -1421,7 +1655,7 @@ namespace WDutils {
     }
     /// reset: destruct and construct again
     /// \param[in] n new size of array
-    void reset(unsigned n) WDutils_THROWING
+    void reset(unsigned n)
     {
       if(n!=N || (n && A==0)) {
 	if(A) WDutils_DEL_AN(A,N);
@@ -1431,43 +1665,48 @@ namespace WDutils {
     }
     /// reset: destruct and construct again
     /// \param[in] n new size of array
-    void reset(const unsigned n[1]) WDutils_THROWING
-    { reset(n[0]); }
+    void reset(const unsigned n[1])
+    {
+      reset(n[0]);
+    }
     /// reset: destruct and construct again
     /// \param[in] n new size of array
     /// \param[in] x initial value for each element
-    void reset(unsigned n, T const&x) WDutils_THROWING {
+    void reset(unsigned n, T const&x)
+    {
       reset(n);
       for(unsigned i=0; i!=N; ++i) A[i] = x;
     }
     /// reset: destruct and construct again
     /// \param[in] n new size of array
     /// \param[in] x initial value for each element
-    void reset(const unsigned n[1], T const&x) WDutils_THROWING {
+    void reset(const unsigned n[1], T const&x)
+    {
       reset(n[0],x);
     }
     /// default constructor: size equal to 0
     Array() : N(0), A(0) {}
     /// construction from sizes
     /// \param[in] n size of array in each dimension
-    explicit Array(unsigned n) WDutils_THROWING
+    explicit Array(unsigned n)
       : N(0), A(0) { reset(n); }
     /// construction from sizes
     /// \param[in] n size of array in each dimension
-    explicit Array(const unsigned n[1]) WDutils_THROWING
-    : N(0), A(0) { reset(n); }
+    explicit Array(const unsigned n[1])
+      : N(0), A(0) { reset(n); }
     /// construction from size and initial value
     /// \param[in] n size of array in each dimension
     /// \param[in] x initialize each element with this value
-    Array(const unsigned n, T const&x) WDutils_THROWING
-    : N(0), A(0) { reset(n,x); }
+    Array(const unsigned n, T const&x)
+      : N(0), A(0) { reset(n,x); }
     /// construction from size and initial value
     /// \param[in] n size of array in each dimension
     /// \param[in] x initialize each element with this value
-    Array(const unsigned n[1], T const&x) WDutils_THROWING
-    : N(0), A(0) { reset(n,x); }
+    Array(const unsigned n[1], T const&x)
+      : N(0), A(0) { reset(n,x); }
     /// destruction: de-allocate memory
-    ~Array() WDutils_THROWING { 
+    ~Array()
+    { 
       if(A) {
 	WDutils_DEL_AN(A,N);
 	A = 0;
@@ -1546,12 +1785,12 @@ namespace WDutils {
       : Base() {}
     /// construction from size
     /// \param[in] n  size of array
-    explicit BitArray(unsigned n) WDutils_THROWING
+    explicit BitArray(unsigned n)
       : Base(rsize(n)) {}
     /// construction from size and initial value
     /// \param[in] n  size of array
     /// \param[in] b  initialise each bit to this value
-    BitArray(unsigned n, bool b) WDutils_THROWING
+    BitArray(unsigned n, bool b)
       : Base(rsize(n),b? full:null) {}
     /// const data access
     /// \param[in] i  index of bit to access
@@ -1601,8 +1840,11 @@ namespace WDutils {
     bool has_space() const { return P>=SN; }
     /// push another X onto the stack
     /// \note we use the operator=(X,X), which must be defined and accessible
-    void push(const X&a) WDutils_THROWING {
-      if(P>=SN) WDutils_THROW("Stack<%s>::push(): exceeding stack\n",nameof(X));
+    void push(const X&a)
+    {
+      if(P>=SN)
+	WDutils_THROW("Stack<%s>::push(): exceeding stack capacity of %d\n",
+		      nameof(X),capacity());
       *(P++) = a;
     }
     /// pop top element off the stack
@@ -1634,6 +1876,56 @@ namespace WDutils {
   template<typename T> struct traits< Stack<T> > {
     static const char  *name () {
       return message("Stack<%s>",traits<T>::name());
+    }
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  //
+  //  class static_stack<N,X>
+  //
+  /// a simple stack of up to N elements of type X
+  ///
+  // ///////////////////////////////////////////////////////////////////////////
+  template<unsigned N, typename X>
+  class static_stack {
+    WDutilsStaticAssert(N>0);
+    X S[N];     ///< begin of stack
+    X*P;        ///< top of stack
+    X*const SN; ///< end of stack
+    //  no copy ctor and no operator=
+    static_stack           (const static_stack&) WDutilsCXX11Delete;
+    static_stack& operator=(const static_stack&) WDutilsCXX11Delete;
+  public:
+    /// ctor: empty stack
+    static_stack() : P(S), SN(S+N) {}
+    /// ctor: put one element on stack
+    explicit static_stack(const X&a) : P(S), SN(S+N)
+    { push(a); }
+    /// is stack empty?
+    bool is_empty () const { return P<=S; }
+    /// is there space for more to stack?
+    bool has_space() const { return P>=SN; }
+    /// push another X onto the stack
+    /// \note we use the operator=(X,X), which must be defined and accessible
+    void push(const X&a)
+    {
+      WDutilsAssert(P<SN); 
+      *(P++) = a;
+    }
+    /// pop top element off the stack
+    X pop()
+    {
+      WDutilsAssert(P>=S);
+      return *(--P);
+    }
+    /// return top element, but don't pop it
+    X&top() { return *P; }
+    /// empty stack
+    void reset() { P=S; }
+  };
+  // ///////////////////////////////////////////////////////////////////////////
+  template<unsigned N, typename T> struct traits< static_stack<N,T> > {
+    static const char  *name () {
+      return message("static_stack<%d,%s>",N,traits<T>::name());
     }
   };
   ///
@@ -1819,60 +2111,136 @@ namespace WDutils {
     struct rebind
     { typedef AlignmentAllocator<_Tp1, alignment> other; };
   };
+#if __cplusplus >= 201103L
+  ///
+  template<typename T, std::size_t alignment>
+  using alignment_allocator = AlignmentAllocator<T,alignment>;
+  ///
+  /// allocator that doesn't initialise memory by default.
+  /// \note this violates the standard, but allows for uninitialised vectors
+  ///       here is some pseudo code to illustrate
+  ///
+  template<typename T, typename base_allocator >
+  struct uninitialised_allocator
+    : base_allocator::template rebind<T>::other
+  {
+    template<typename U>
+    using base_t = typename base_allocator::template rebind<U>::other;
+
+    // 
+    template<typename U>
+    struct rebind
+    { typedef uninitialised_allocator<U, base_allocator > other; };
+    // elide trivial default construction
+    template<typename U>
+    always_inline
+#  if defined(__clang__) || GNU_HAS_VERSION_OR_HIGHER(4,9,0)
+    typename
+    std::enable_if<std::is_trivially_default_constructible<U>::value>::type
+#  else
+    void
+#  endif
+    construct(U*) {}
+    // elide trivial default destruction
+    template<typename U>
+    always_inline
+#  if defined(__clang__) || GNU_HAS_VERSION_OR_HIGHER(4,9,0)
+    typename std::enable_if<std::is_trivially_destructible<U>::value>::type
+#  else
+    void
+#  endif
+    destroy(U*) {}
+    // forward everything else to the base
+    using base_t<T>::construct;
+    using base_t<T>::destroy;
+  };// uninitialised_allocator<>
+  ///
+  /// an uninitialiased vector: essential for high performance code
+  /// 
+  /// \code
+  ///     uninitialised_vector<int> x(10); // elements are uninitialised
+  ///     x.push_back(7);
+  ///     assert(x.back()==7);
+  /// \endcode
+  template<typename T, typename base_allocator = std::allocator<T> >
+  using uninitialised_vector
+  = std::vector<T, uninitialised_allocator<T,base_allocator> >;
+#  ifndef __INTEL_COMPILER
+  //  icpc 13.1.1 still cannot alignof(type)
+  ///
+  /// the maximum alignment required in aligned vector
+  /// 
+  template<typename _Tp>
+  constexpr std::size_t maximum_alignment(std::size_t minimum_alignment)
+  {
+    return
+      minimum_alignment > std::size_t(alignof(_Tp))?
+      minimum_alignment : std::size_t(alignof(_Tp));
+  }
+  ///
+  /// an aligned uninitialiased vector: essential for high performance code
+  /// 
+  template<typename T, size_t minimum_alignment=0>
+  using aligned_uninitialised_vector
+  = uninitialised_vector<T,alignment_allocator
+			<T,maximum_alignment<T>(minimum_alignment)> >;
+#  endif// not for intel
+#endif // c++11
   ///
   /// managing raw memory
   /// \ingroup MemAligned
   ///
-  template<std::size_t alignment = 0>
+  template<std::size_t _alignment = 0>
   class raw_memory
   {
-    typedef static_allocator<alignment> static_alloc;
-    char       *_mem;
-    std::size_t _num;
+    typedef static_allocator<_alignment> static_alloc;
+    char       *_m_BEG;
+    std::size_t _m_NUM;
   public:
+    static const size_t alignment = _alignment;
     /// default ctor: no memory
     raw_memory() noexcept
-      : _mem(0)
-      , _num(0) {}
+      : _m_BEG(0)
+      , _m_NUM(0) {}
 #if __cplusplus >= 201103L
     /// move ctor: steal memory
     raw_memory(raw_memory&&other) noexcept
-      : _mem(other._mem)
-      , _num(other._num)
-    { other._mem = 0; other._num = 0; }
+      : _m_BEG(other._m_BEG)
+      , _m_NUM(other._m_NUM)
+    { other._m_BEG = 0; other._m_NUM = 0; }
     /// move operator: steal memory
     raw_memory&operator=(raw_memory&&other) noexcept
     {
-      _mem = other._mem;
-      _num = other._num;
-      other._mem = 0;
-      other._num = 0;
+      _m_BEG = other._m_BEG;
+      _m_NUM = other._m_NUM;
+      other._m_BEG = 0;
+      other._m_NUM = 0;
       return*this;
     }
 #endif// c++11
     /// ctor: allocate @a n bytes
-    explicit raw_memory(std::size_t n)
-      : _mem(static_cast<char*>(static_alloc::allocate(n)))
-      , _num(n)
+    explicit raw_memory(size_t n)
+      : _m_BEG(static_cast<char*>(static_alloc::allocate(n)))
+      , _m_NUM(n)
     {}
     /// dtor
     ~raw_memory()
-    { if(_mem) static_alloc::deallocate(_mem); }
+    { if(_m_BEG) static_alloc::deallocate(_m_BEG); }
     /// release memory
     char*release() noexcept
     {
-      char*tmp = _mem;
-      _mem = 0;
-      _num = 0;
+      char*tmp = _m_BEG;
+      _m_BEG = 0;
+      _m_NUM = 0;
       return tmp;
     }
     /// reset capacity
     void reset(std::size_t n)
     {
-      if(n != _num) {
-	if(_mem) static_alloc::deallocate(_mem);
-	_num = n;
-	_mem = _num? static_cast<char*>(static_alloc::allocate(_num)) : 0;
+      if(_m_NUM != n) {
+	if(_m_BEG) static_alloc::deallocate(_m_BEG);
+	_m_NUM = n;
+	_m_BEG = n? static_cast<char*>(static_alloc::allocate(n)) : 0;
       }
     }
     /// reset capacity, but shrink only if  n*q < p*capacity()
@@ -1880,29 +2248,30 @@ namespace WDutils {
     void reset_conditional(std::size_t n)
     {
       WDutilsCXX11StaticAssert(q>=p,"shrink not allowed");
-      if(n>_num || n*q < p*_num) reset(n);
+      if(_m_NUM < n ||  n*q < p*_m_NUM)
+	reset(n);
     }
     /// number of bytes allocated
     std::size_t capacity() const noexcept
-    { return _num; }
+    { return _m_NUM; }
     /// access to raw memory
     const char*get() const noexcept
-    { return _mem; }
+    { return _m_BEG; }
     /// access to raw memory
     char*get() noexcept
-    { return _mem; }
+    { return _m_BEG; }
     /// begin of raw memory
     const char*begin() const noexcept
-    { return _mem; }
+    { return _m_BEG; }
     /// begin of raw memory
     char*begin() noexcept
-    { return _mem; }
+    { return _m_BEG; }
     /// end of raw memory
     const char*end() const noexcept
-    { return _mem + _num; }
+    { return _m_BEG + _m_NUM; }
     /// end of raw memory
     char*end() noexcept
-    { return _mem + _num; }
+    { return _m_BEG + _m_NUM; }
     //  disable copy from lvalue
 #if __cplusplus >= 201103L
     raw_memory(raw_memory const&) = delete;
@@ -1912,11 +2281,10 @@ namespace WDutils {
     raw_memory(raw_memory const&);
     raw_memory&operator=(raw_memory const&);
 #endif// c++11
-  };
+  };// struct raw_memory<>
 } // namespace WDutils {
 ////////////////////////////////////////////////////////////////////////////////
-#if __cplusplus < 201103L
-# undef noexcept
-# undef constexpr
-#endif
+#undef noexcept
+#undef constexpr
+#undef always_inline
 #endif // WDutils_included_memory_h

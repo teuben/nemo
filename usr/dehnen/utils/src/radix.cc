@@ -42,7 +42,10 @@ namespace WDutils {
     int* B[OMP::MaxNumThreadsInFunc];
   }
 #else
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wpedantic"
 # warning openMP not supported: implementing serial version for Radix::PSort()
+# pragma clang diagnostic pop
 #endif
 }
 //
@@ -290,7 +293,10 @@ void WDutils::Radix::Sort(unsigned N, float*X, float*Y)
   uint32_t*iY=reinterpret_cast<uint32_t*>(Y);
   for(uint32_t i=0; i!=N; ++i) {
     register uint32_t f=iX[i];
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wsign-conversion"
     iY[i]=f^=-int32_t(f>>31)|0x80000000;
+# pragma clang diagnostic pop
     B0[f       &m0]++;
     B1[(f>>=11)&m0]++;
     B2[(f>>=11)&m2]++;
@@ -316,7 +322,10 @@ void WDutils::Radix::Sort(unsigned N, double*X, double*Y)
   // sort the lower 32 bits
   for(uint32_t i=0; i!=N; ++i) {
     register uint64_t f=iX[i];
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wsign-conversion"
     iX[i]=f^=-int64_t(f>>63) | 0x8000000000000000ll;
+# pragma clang diagnostic pop
     B0[f       &m0] ++;
     B1[(f>>=11)&m0] ++;
     B2[(f>>=11)&m2] ++;

@@ -67,21 +67,21 @@ namespace WDutils {
   namespace meta {
     template<int WORDS> struct IntTypeWords;
     template<> struct IntTypeWords<1>
-    { typedef  int8_t  integer_s; typedef uint8_t  integer_u; };
+    { typedef  int8_t  signed_integer; typedef uint8_t  unsigned_integer; };
     template<> struct IntTypeWords<2>
-    { typedef  int16_t integer_s; typedef uint16_t integer_u; };
+    { typedef  int16_t signed_integer; typedef uint16_t unsigned_integer; };
     template<> struct IntTypeWords<4>
-    { typedef  int32_t integer_s; typedef uint32_t integer_u; };
+    { typedef  int32_t signed_integer; typedef uint32_t unsigned_integer; };
     template<> struct IntTypeWords<8>
-    { typedef  int64_t integer_s; typedef uint64_t integer_u; };
+    { typedef  int64_t signed_integer; typedef uint64_t unsigned_integer; };
   }
 #else
   namespace meta {
     template<typename I, typename U> struct __ISIZE {
-      typedef I integer_s;
-      typedef U integer_u;
-      WDutilsStaticAssert(sizeof(integer_s) == sizeof(integer_u));
-      static const int  size = sizeof(integer_s);
+      typedef I signed_integer;
+      typedef U unsigned_integer;
+      WDutilsStaticAssert(sizeof(signed_integer) == sizeof(unsigned_integer));
+      static const int  size = sizeof(signed_integer);
     };
 
     template<int> struct __ITRAITS;
@@ -106,20 +106,20 @@ namespace WDutils {
     __ITRAITS<3>::size == WORDS ? 3 :
     __ITRAITS<4>::size == WORDS ? 4 : 5;
     public:
-      typedef typename __ITRAITS<TYPE>::integer_s integer_s;
-      typedef typename __ITRAITS<TYPE>::integer_u integer_u;
+      typedef typename __ITRAITS<TYPE>::signed_integer signed_integer;
+      typedef typename __ITRAITS<TYPE>::unsigned_integer unsigned_integer;
     private:
-      WDutilsStaticAssert(sizeof(integer_s) == WORDS);
+      WDutilsStaticAssert(sizeof(signed_integer) == WORDS);
     };
   }// namespace meta {
-  typedef meta::IntTypeWords<1>::integer_s int8_t;
-  typedef meta::IntTypeWords<2>::integer_s int16_t;
-  typedef meta::IntTypeWords<4>::integer_s int32_t;
-  typedef meta::IntTypeWords<8>::integer_s int64_t;
-  typedef meta::IntTypeWords<1>::integer_u uint8_t;
-  typedef meta::IntTypeWords<2>::integer_u uint16_t;
-  typedef meta::IntTypeWords<4>::integer_u uint32_t;
-  typedef meta::IntTypeWords<8>::integer_u uint64_t;
+  typedef meta::IntTypeWords<1>::signed_integer int8_t;
+  typedef meta::IntTypeWords<2>::signed_integer int16_t;
+  typedef meta::IntTypeWords<4>::signed_integer int32_t;
+  typedef meta::IntTypeWords<8>::signed_integer int64_t;
+  typedef meta::IntTypeWords<1>::unsigned_integer uint8_t;
+  typedef meta::IntTypeWords<2>::unsigned_integer uint16_t;
+  typedef meta::IntTypeWords<4>::unsigned_integer uint32_t;
+  typedef meta::IntTypeWords<8>::unsigned_integer uint64_t;
 #endif
   //
   // class WDutils::traits<type>

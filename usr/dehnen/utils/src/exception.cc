@@ -5,11 +5,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2000-2012
+/// \date    2000-2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2012  Walter Dehnen
+// Copyright (C) 2000-2013  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -49,92 +49,110 @@ extern "C" {
 
 #ifdef __INTEL_COMPILER
 #pragma warning (disable:981) /* operands are evaluated in unspecified order */
+#pragma warning (disable:161) /* unrecognized pragma */
 #endif
 
+#ifdef WDutilsTBB
+
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wundef"
+#  include <map>
+#  include <tbb/tbb_thread.h>
+#  include <tbb/task_scheduler_init.h>
+# pragma clang diagnostic pop
+namespace {
+  typedef tbb::task_scheduler_init _tbb_ts_init;
+}
+#endif
 //                                                                              
 // class RunInfo                                                                
 //                                                                              
 WDutils::RunInfo::RunInfo()
-  : __host_known(0),
-    __user_known(0),
-    __pid_known(0),
-    __name_known(0),
-    __is_mpi_proc(0),
-    __debug(0)
+  : _m_host_known(0)
+  , _m_user_known(0)
+  , _m_pid_known(0)
+  , _m_name_known(0)
+  , _m_is_mpi_proc(0)
+  , _m_debug(0)
+  , _m_tbb_init(0)
 {
-#ifndef __INTEL_COMPILER
   try {
-#endif
     // set wall-clock time
     {
 #if defined(__unix) || defined(__DARWIN_UNIX03)
       timeval now;
       gettimeofday(&now, NULL);
-      __sec = now.tv_sec;
-      __usec = now.tv_usec;
+      _m_sec = now.tv_sec;
+      _m_usec = now.tv_usec;
 #elif defined(WIN32)
       LARGE_INTEGER tmp;
       QueryPerformanceCounter(&tmp);
       QueryPerformanceFrequency(&tmp);
-      __timecount = tmp.QuadPart;
-      __timetick = 1.0/double(tmp.QuadPart);
+      _m_timecount = tmp.QuadPart;
+      _m_timetick = 1.0/double(tmp.QuadPart);
 #endif
     }
     // set run time
     {
       time_t now = ::time(0);
-      SNprintf(__time,100,ctime(&now));
-      __time[24] = 0;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-security"
+      SNprintf(_m_time,104,ctime(&now));
+#pragma clang diagnostic pop
+      _m_time[24] = 0;
     }
 #if defined(__unix) || defined(__DARWIN_UNIX03)
     // set host name
     {
-      gethostname(__host,100);
-      __host_known = 1;
+      gethostname(_m_host,104);
+      _m_host_known = 1;
     }
     // set user name
     {
       const char*user__ = getenv("USER");
       if(user__) {
-	SNprintf(__user,100,user__);
-	__user_known = 1;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-security"
+	SNprintf(_m_user,104,user__);
+#pragma clang diagnostic pop
+	_m_user_known = 1;
       } else
-	SNprintf(__user,100,"unknown.user");
+	SNprintf(_m_user,104,"unknown.user");
     }
     // set pid
     {
-      __pid_num = getpid();
-      SNprintf(__pid,20,"%d",__pid_num);
-      __pid_known  = 1;
+      _m_pid_num = getpid();
+      SNprintf(_m_pid,24,"%d",_m_pid_num);
+      _m_pid_known  = 1;
     }
     // set command and name of executable
     {
       char file[64];
-      if(__pid_known) {
-	SNprintf(file,64,"/proc/%s/cmdline",__pid);
+      if(_m_pid_known) {
+	SNprintf(file,64,"/proc/%s/cmdline",_m_pid);
 	std::ifstream in(file);
 	if(in) {
 	  int i,e=0;
-	  for(i=0; i!=1024; ++i) __cmd[i]=0;
-	  in.getline(__cmd,1023);
+	  for(i=0; i!=1024; ++i) _m_cmd[i]=0;
+	  in.getline(_m_cmd,1023);
 	  for(i=1023; i!=0; --i)
-	    if(__cmd[i]==0 || isspace(__cmd[i])) __cmd[i] = ' ';
+	    if(_m_cmd[i]==0 || isspace(_m_cmd[i])) _m_cmd[i] = ' ';
 	    else if(e==0) e=i;
-	  __cmd[e+1] = 0;
-	  for(i=0; !isspace(__cmd[i]); ++i)
-	    __name[i] = __cmd[i];
-	  __name[i] = 0;
-	  __name[i] = 0;
-	  __cmd_known  = 1;
-	  __name_known = 1;
+	  _m_cmd[e+1] = 0;
+	  for(i=0; !isspace(_m_cmd[i]); ++i)
+	    _m_name[i] = _m_cmd[i];
+	  _m_name[i] = 0;
+	  _m_name[i] = 0;
+	  _m_cmd_known  = 1;
+	  _m_name_known = 1;
 	}
       }
     }
 #else // __unix
     {
-      SNprintf(__host,100,"unknown.host");
-      SNprintf(__user,100,"unknown.user");
-      SNprintf(__name,100,"unknown.name");
+      SNprintf(_m_host,104,"unknown.host");
+      SNprintf(_m_user,104,"unknown.user");
+      SNprintf(_m_name,104,"unknown.name");
     }
 #endif
     // set # proc available for openMP
@@ -142,21 +160,43 @@ WDutils::RunInfo::RunInfo()
 #ifdef _OPENMP
       if(omp_in_parallel())
 	WDutils_ErrorF("called inside OMP parallel region\n");
-      __omp_proc = omp_get_num_procs();
+      _m_omp_proc = omp_get_num_procs();
 #else
-      __omp_proc = 1;
+      _m_omp_proc = 1;
 #endif
-      __omp_size = __omp_proc;
+      _m_omp_size = _m_omp_proc;
     }
-#ifndef __INTEL_COMPILER
-    // icpc 13:
-    // internal error: assertion failed at:
-    // "shared/cfe/edgcpfe/decls.c", line 13056
-    //   } catch(WDutils::exception ex) {
-    //                              ^
-  } catch(WDutils::exception ex) {
-    WDutils_RETHROW(ex);
+    // set # threads used by TBB
+    {
+#ifdef WDutilsTBB
+      _m_tbb_proc = unsigned(_tbb_ts_init::default_num_threads());
+#else
+      _m_tbb_proc = 1u;
+#endif 
+      _m_tbb_size = _m_tbb_proc;
+    }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winline"
+  } 
+  catch(WDutils::exception ex) { WDutils_RETHROW(ex); }
+#pragma GCC diagnostic pop
+}
+//
+void WDutils::RunInfo::set_omp(int 
+#ifdef _OPENMP
+			       n
+#endif
+			       )
+{
+#ifdef _OPENMP
+  Info._m_omp_size = n;
+  if(Info._m_omp_size < 1) {
+    Info._m_omp_size = 1;
+    WDutils_WarningN("RunInfo::set_omp('%d') assume '1'\n",n);
   }
+  omp_set_num_threads(Info._m_omp_size);
+#else
+  Info._m_omp_size = 1;
 #endif
 }
 //
@@ -164,47 +204,97 @@ void WDutils::RunInfo::set_omp(const char*
 #ifdef _OPENMP
 			       arg
 #endif
-    )
+			       )
 {
 #ifdef _OPENMP
   if(arg==0 || arg[0]==0 || arg[0]=='t')
-    Info.__omp_size = Info.__omp_proc;
+    Info._m_omp_size = Info._m_omp_proc;
   else if(arg[0] == 'f')
-    Info.__omp_size = 1;
+    Info._m_omp_size = 1;
   else if(arg && arg[0]) {
-    Info.__omp_size = strtol(arg,0,10);
+    Info._m_omp_size = strtol(arg,0,10);
     if(errno == EINVAL)
       WDutils_THROWN("RunInfo::set_omp('%s') (errno=EINVAL)\n",arg,errno);
     if(errno == ERANGE)
       WDutils_THROWN("RunInfo::set_omp('%s') (errno=ERANGE)\n",arg,errno);
-    if(Info.__omp_size < 1) {
-      Info.__omp_size = 1;
+    if(Info._m_omp_size < 1) {
+      Info._m_omp_size = 1;
       WDutils_WarningN("RunInfo::set_omp('%s') assume '1'\n",arg);
     }
   }
-  omp_set_num_threads(Info.__omp_size);
+  omp_set_num_threads(Info._m_omp_size);
 #else
-  Info.__omp_size = 1;
+  Info._m_omp_size = 1;
 #endif
 }
 //
-void WDutils::RunInfo::set_omp(int 
-#ifdef _OPENMP
-			       n
-#endif
-    )
+WDutils::RunInfo::~RunInfo()
 {
-#ifdef _OPENMP
-  Info.__omp_size = n;
-  if(Info.__omp_size < 1) {
-    Info.__omp_size = 1;
-    WDutils_WarningN("RunInfo::set_omp('%d') assume '1'\n",n);
-  }
-  omp_set_num_threads(Info.__omp_size);
-#else
-  Info.__omp_size = 1;
+#ifdef WDutilsTBB
+  if(Info._m_tbb_init)
+    delete static_cast<_tbb_ts_init*>(Info._m_tbb_init);
 #endif
+  Info._m_tbb_init = 0;
 }
+//
+#ifdef WDutilsTBB
+void WDutils::RunInfo::set_tbb(unsigned n)
+{
+  if(n==1) {
+    if(Info._m_tbb_init) {
+      delete static_cast<_tbb_ts_init*>(Info._m_tbb_init);
+      Info._m_tbb_init = 0;
+    }
+    Info._m_tbb_size = 1;
+  } else {
+    if(Info._m_tbb_init==0)
+      Info._m_tbb_init = n==0?
+	new _tbb_ts_init(_tbb_ts_init::automatic) :
+	new _tbb_ts_init(int(n))                  ;
+    else if(n >1 && n!=Info._m_tbb_size)
+      static_cast<_tbb_ts_init*>(Info._m_tbb_init)
+	-> initialize(int(n));
+    else if(n==0 && Info._m_tbb_proc != Info._m_tbb_size)
+      static_cast<_tbb_ts_init*>(Info._m_tbb_init)
+	-> initialize(int(Info._m_tbb_proc));
+    Info._m_tbb_size = n==0? Info._m_tbb_proc : n;
+  }
+}
+//
+void WDutils::RunInfo::set_tbb(const char* arg)
+{
+  unsigned n=0;
+  if(arg==0 || arg[0]==0 || arg[0]=='t')
+    n = Info._m_tbb_proc;
+  else if(arg[0] == 'f')
+    n = 1u;
+  else if(arg && arg[0]) {
+    n = unsigned(strtol(arg,0,10));
+    if(errno == EINVAL)
+      WDutils_THROWN("RunInfo::set_tbb('%s') (errno=EINVAL)\n",arg,errno);
+    if(errno == ERANGE)
+      WDutils_THROWN("RunInfo::set_tbb('%s') (errno=ERANGE)\n",arg,errno);
+  }
+  set_tbb(n);
+}
+//
+unsigned WDutils::RunInfo::tbb_thread_id()
+{
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wexit-time-destructors"
+  // yes, I know that ids will be destroyed at exit time. this is not problem.
+  static unsigned nextindex = 0;
+  static std::map<tbb::tbb_thread::id, unsigned> ids;
+  auto id = tbb::this_tbb_thread::get_id();
+  if(ids.find(id) == ids.end())
+    ids[id] = nextindex++;
+  return ids[id];
+# pragma clang diagnostic pop
+}
+//
+#elif defined(WDutilsDevel)
+# warning not implementing TBB stuff
+#endif // WDutilsTBB
 //
 void WDutils::RunInfo::header(std::ostream&out)
 {
@@ -225,18 +315,18 @@ double WDutils::RunInfo::WallClock()
 {
   timeval now;
   gettimeofday(&now, NULL);
-  return (now.tv_sec - Info.__sec) + (now.tv_usec - Info.__usec) * 1.e-6;
+  return (now.tv_sec - Info._m_sec) + (now.tv_usec - Info._m_usec) * 1.e-6;
 }
 void WDutils::RunInfo::WallClock(unsigned&sec, unsigned&usec)
 {
   timeval now;
   gettimeofday(&now, NULL);
-  if(now.tv_usec > Info.__usec) {
-    sec  = now.tv_sec  - Info.__sec;
-    usec = now.tv_usec - Info.__usec;
+  if(now.tv_usec > Info._m_usec) {
+    sec  = unsigned(now.tv_sec  - Info._m_sec);
+    usec = unsigned(now.tv_usec - Info._m_usec);
   } else {
-    sec  = now.tv_sec  - Info.__sec - 1;
-    usec = (1000000 + now.tv_usec) - Info.__usec;
+    sec  = unsigned(now.tv_sec  - Info._m_sec - 1);
+    usec = unsigned((1000000 + now.tv_usec) - Info._m_usec);
   }
 }
 #elif defined(WIN32)
@@ -244,11 +334,15 @@ double WDutils::RunInfo::WallClock()
 {
   LARGE_INTEGER now;
   QueryPerformanceCounter(&now);
-  return (now.QuadPart - Info.__timecount) * Info.__timetick;
+  return (now.QuadPart - Info._m_timecount) * Info._m_timetick;
 }
 #endif
 //
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wglobal-constructors"
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
 WDutils::RunInfo WDutils::RunInfo::Info;
+#pragma clang diagnostic pop
 
 //
 
@@ -263,15 +357,20 @@ namespace {
   using std::vsnprintf;
 #endif
 
-  inline void printerr(const char*lib,
-		       const char*issue,
-		       const char*fmt,
-		       va_list   &ap,
-		       int        depth= 0,
-		       const char*func = 0,
-		       const char*file = 0,
-		       int        line = 0,
-		       bool       name = true)
+  void printerr(const char*lib,
+		const char*issue,
+		const char*fmt,
+		va_list   &ap,
+		int        depth,
+		const char*func,
+		const char*file,
+		unsigned   line,
+		unsigned   
+#ifdef _OPENMP
+		flag
+#endif
+		,
+		bool       name)
   {
     const int size=1024;
     int s=size, w=0;
@@ -280,40 +379,46 @@ namespace {
     if(depth>20) depth=20;
     dpth[depth]=0;
     if(lib) {
-      w=snprintf(t,s,"# %s %s",lib,issue);
+      w=snprintf(t,size_t(s),"# %s %s",lib,issue);
       t+=w; s-=w;
     } else if(issue) {
-      w=snprintf(t,s,"# %s",issue);
+      w=snprintf(t,size_t(s),"# %s",issue);
       t+=w; s-=w;
     }
     if(name && RunInfo::name_known()) {
-      w=snprintf(t,s," [%s]",RunInfo::name());
+      w=snprintf(t,size_t(s)," [%s]",RunInfo::name());
       t+=w; s-=w;
     }
     if(RunInfo::is_mpi_proc()) {
-      w=snprintf(t,s," @%2d",RunInfo::mpi_proc());
+      w=snprintf(t,size_t(s)," @%2d",RunInfo::mpi_proc());
       t+=w; s-=w;
 #ifdef _OPENMP
-    } else if(omp_in_parallel()) {
-      w=snprintf(t,s," @%2d",omp_get_thread_num());
+    } else if( (flag&1) && omp_in_parallel()) {
+      w=snprintf(t,size_t(s)," @%2d",omp_get_thread_num());
       t+=w; s-=w;
 #endif
     }
     if(file) {
-      w=snprintf(t,s," [%s:%d]",file,line);
+      w=snprintf(t,size_t(s)," [%s:%d]",file,line);
       t+=w; s-=w;
     }
     if(func) {
-      w=snprintf(t,s," in %s",func);
+      w=snprintf(t,size_t(s)," in %s",func);
       t+=w; s-=w;
     }      
     if (fmt[strlen(fmt)-1] != '\n')
-      w=snprintf(t,s,": %s%s\n",dpth,fmt);
+      /*w=*/snprintf(t,size_t(s),": %s%s\n",dpth,fmt);
     else
-      w=snprintf(t,s,": %s%s",dpth,fmt);
-    t+=w; s-=w;
+      /*w=*/snprintf(t,size_t(s),": %s%s",dpth,fmt);
+    //t+=w; s-=w;
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wformat-nonliteral"
+# ifdef __unix
+# pragma clang diagnostic ignored "-Wdisabled-macro-expansion"
+# endif
     vfprintf(stderr,ffmt,ap);
     fflush(stderr);
+# pragma clang diagnostic pop
   }
 }
 //
@@ -323,7 +428,8 @@ void WDutils::Reporting<Traits>::operator()(int lev, const char* fmt, ...) const
   if(Traits::condition(lev)) {
     va_list  ap;
     va_start(ap,fmt);
-    printerr(library, Traits::issue(), fmt, ap, lev, func, file, line, false);
+    printerr(library, Traits::issue(), fmt, ap, lev, func, file, line, flag,
+	     false);
     va_end(ap);
     Traits::after();
   }
@@ -334,7 +440,7 @@ void WDutils::Reporting<Traits>::operator()(const char* fmt, ...) const
 {
   va_list  ap;
   va_start(ap,fmt);
-  printerr(library, Traits::issue(), fmt, ap, 0, func, file, line, false);
+  printerr(library, Traits::issue(), fmt, ap, 0, func, file, line, flag, false);
   va_end(ap);
   Traits::after();
 }
@@ -350,17 +456,18 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
   size_t size = 1024, len;
   char   buffer[1024], *buf=buffer;
   if(file) {
-    len  = SNprintf(buf,size,"[%s:%d]",file,line);
+    len  = size_t(SNprintf(buf,size,"[%s:%d]",file,line));
     buf += len;
     size-= len;
   }
   if(func) {
-    len  = file? SNprintf(buf,size," in %s",func) :
-      SNprintf(buf,size, "in %s",func) ;
+    len  = size_t(file?
+		  SNprintf(buf,size," in %s",func) :
+		  SNprintf(buf,size, "in %s",func) ) ;
     buf += len;
     size-= len;
   }
-  len  = SNprintf(buf,size,": ");
+  len  = size_t(SNprintf(buf,size,": "));
   buf += len;
   size-= len;
   va_list  ap;
@@ -376,27 +483,34 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
 }
 //
 WDutils::exception::exception(const char*fmt, ...)
+  : std::runtime_error(std::string())
 {
   const int msize=1024;
-  char __text[msize];
+  char _m_text[msize];
   va_list  ap;
   va_start(ap,fmt);
-  int w = vsnprintf(__text,msize,fmt,ap);
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wformat-nonliteral"
+  int w = vsnprintf(_m_text,msize,fmt,ap);
+# pragma clang diagnostic pop
   if(w>=msize) {
     WDutils_WarningF("string size of %d characters exceeded\n",msize);
-    __text[msize-1]=0;
+    _m_text[msize-1]=0;
   }
   if(w<0)
     WDutils_WarningF("formatting error\n");
   va_end(ap);
-  std::string::operator= (__text);
+  std::runtime_error::operator= (std::runtime_error(_m_text));
 }
 //
 WDutils::message::message(const char*fmt, ...) throw(exception)
 {
   va_list  ap;
   va_start(ap,fmt);
-  int w = vsnprintf(__text,size,fmt,ap);
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wformat-nonliteral"
+  int w = vsnprintf(_m_text,size,fmt,ap);
+# pragma clang diagnostic pop
   if(w>=static_cast<int>(size))
     WDutils_THROW("string size of %ld characters exceeded\n",size);
   if(w < 0)
@@ -405,11 +519,13 @@ WDutils::message::message(const char*fmt, ...) throw(exception)
 }
 //
 int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
-  WDutils_THROWING
 {
   va_list ap;
   va_start(ap,fmt);
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wformat-nonliteral"
   int w = vsnprintf(str,l,fmt,ap);
+# pragma clang diagnostic pop
   va_end(ap);
   if(w==static_cast<int>(l))
     WDutils_THROWF("trailing 0 lost");
@@ -421,7 +537,6 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
 }
 //
 int WDutils::snprintf__::operator()(char*str, size_t l, const char* fmt, ...)
-  WDutils_THROWING
 {
   va_list ap;
   va_start(ap,fmt);

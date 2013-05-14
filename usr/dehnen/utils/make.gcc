@@ -9,24 +9,24 @@ GCC		:= gcc
 GPP		:= g++
 endif
 
-EXT             :=
+EXT             := .gcc
 CXX             := $(GPP)
 CC              := $(GCC)
 FC              := gfortran
 
 PLATFORM 	:= $(shell uname -m)
-ifneq ($(VENDOR),apple)
-RDYNAMIC	:= -rdynamic
-endif
 
 # warning flags
 ifdef LIMITED_WARNINGS
 WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow \
 		-Woverloaded-virtual
 else
-WARNING		:= -Wall -Wextra -Winit-self -Wshadow \
-		-Wold-style-cast -Woverloaded-virtual 
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Woverloaded-virtual -Winline
 endif
+ifndef TBBROOT
+WARNING		+= -Wold-style-cast
+endif
+WARNING		+= -Wno-unknown-pragmas
 
 # it seem that coverage (to be combined with gcov) does not work for openmp)
 #ifdef WDutilsDevel
@@ -36,6 +36,12 @@ endif
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
 		-ggdb3 $(WARNING) -O2 -fPIC -funroll-loops \
 		-fforce-addr $(PROFLAGS) $(RDYNAMIC)
+
+ifneq ($(VENDOR),apple)
+OPTFLAGS	+= -rdynamic
+endif
+
+
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)

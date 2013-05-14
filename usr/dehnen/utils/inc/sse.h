@@ -40,7 +40,7 @@
 
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 // with GCC 4.4 use x86intrin.h
-# if __GNUC__ >= 4 && __GNUC_MINOR__ >= 4
+# if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4) || defined(__clang__)
 extern "C" {
 #  include <x86intrin.h>
 }
@@ -67,7 +67,7 @@ extern "C" {
 // use individual headers for intrinsics
 
 # ifdef defined(__INTEL_COMPILER) && defined(_MM_MALLOC_H_INCLUDED)
-#  warning The intel compiler has seen GNU's _mm_malloc.h which declares _mm_malloc() and _mm_free() to have different linking than those declared in INTEL's xmmintrin.h header file, which we are going to include now. This may cause a compiler error, which can be prevented by ensuring that _mm_malloc.h is not explicitly included when using the intel compiler.
+#  warning The intel compiler has seen _mm_malloc.h by GNU which declares _mm_malloc() and _mm_free() to have different linking than those declared in xmmintrin.h by INTEL, which we are going to include now. This may cause a compiler error, which can be prevented by ensuring that _mm_malloc.h is not explicitly included when using the intel compiler.
 # endif
 
 extern "C" {
@@ -95,6 +95,14 @@ extern "C" {
 # define static_assert(EXPR,MESG) WDutilsStaticAssert(EXPR)
 #endif
 
+#if   defined(__INTEL_COMPILER)
+#  define alignas(K) __declspec(align(K))
+#elif defined(__GNUC__)
+#  define alignas(K) __attribute__ ((aligned(K)))
+#elif __cplusplus < 201103L
+#  error do not know how to enforce alignment with this compiler
+#endif
+
 //
 namespace WDutils {
 
@@ -108,17 +116,22 @@ namespace WDutils {
   }
 
 #ifdef __SSE__
-# if defined(__GNUC__) && !defined(__INTEL_COMPILER)
+# if defined(__clang__) || (defined(__GNUC__) && !defined(__INTEL_COMPILER))
 #  define always_inline __attribute__((__always_inline__))
 # else
 #  define always_inline
 # endif
   //
   namespace meta {
-    union float_and_int {
-      float f; int32_t i; 
-      float_and_int() WDutilsCXX11DefaultBody
-      float_and_int(int32_t k) : i(k) {}
+    union float_and_uint {
+      float f; uint32_t i; 
+      float_and_uint() WDutilsCXX11DefaultBody
+      float_and_uint(uint32_t k) : i(k) {}
+    };
+    union double_and_uint {
+      double d; uint64_t i; 
+      double_and_uint() WDutilsCXX11DefaultBody
+      double_and_uint(uint64_t k) : i(k) {}
     };
   }
   ///
@@ -136,11 +149,14 @@ namespace WDutils {
     /// for an efficient yet convenient SSE/AVX interface.
     ///
 
-    template<int K, typename T> class packed;
+    template<int K, typename T> struct packed;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation"
     ///
-    /// packed_is_supported<a,b>::value is true if packed<a,b> is supported
+    /// @a packed_is_supported<a,b>::value=true if @a packed<a,b> is supported
     ///
+#pragma clang diagnostic pop
     template<int _S, typename _T>
     struct packed_is_supported
     {
@@ -155,40 +171,34 @@ namespace WDutils {
 #endif
 	;
     };
-
-    //--------------------------------------------------------------------------
-    ///
-    /// 4 packed single-precision floating-point numbers
-    ///
-    //--------------------------------------------------------------------------
-    template<> struct packed<4,float>
+    //
+#if __cplusplus >= 201103L
+    constexpr unsigned log2(unsigned n) noexcept
     {
-      /// \name types, constants, and static methods
-      //@
+      return n<2? 0 : 1+log2(n>>1);
+    }
+#endif
+
+    ///
+    /// base class for packed<K,T>
+    ///
+    template<int K> struct packed_base
+    {
+      static_assert(K>0 && 0==(K&(K-1)),"block_size must be power of 2 > 0");
       /// number of elements
-      static const unsigned block_size = 4;
-      /// associated SSE/AVX vector type
-      typedef __m128 data_type;
-      /// associated element type
-      typedef float element_type;
-      /// equivalent array of elements
-      typedef element_type element_block[block_size];
-      /// aligned equivalent array of elements
-      typedef WDutils__align16 element_block aligned_element_block;
+      static const unsigned block_size = K;
       /// block_size = 1<<block_sft
-      static const unsigned block_shft = 2;
+#if __cplusplus >= 201103L && !defined(__INTEL_COMPILER)
+      static const unsigned block_shft = log2(block_size);
+#else
+      static const unsigned block_shft = meta::Integer<block_size>::Log2;
+#endif
       /// mask for obtaining sub-index within block
-      static const unsigned block_trim = 3;
+      static const unsigned block_trim = K-1;
       /// mask for obtaining aligned index
       static const unsigned block_mask =~block_trim;
-      /// required alignement (bytes)
-      static const unsigned alignment = block_size*sizeof(element_type);
-      /// a packed with all elements equal to 0
-      static packed always_inline zero() noexcept
-      { return packed(_mm_setzero_ps()); }
-      /// a packed with all elements equal to 1
-      static packed always_inline one() noexcept
-      { return packed(_mm_set1_ps(1.f)); }
+      /// maximum signbits
+      static const int max_signbits = (1<<block_size)-1;
       /// is given index aligned to block_index?
       constexpr static bool is_aligned(unsigned i) noexcept
       { return (i&block_trim)==0; }
@@ -201,18 +211,55 @@ namespace WDutils {
       /// block index given an index
       constexpr static unsigned block_index(unsigned i) noexcept
       { return i >> block_shft; }
-      /// is given pointer appropriately aligned?
-      constexpr static bool is_aligned(void*p) noexcept
-      { return (size_t(p)&(alignment-1))==0; }
-      /// offset (number of element_types) of pointer from alignment
-      constexpr static size_t offset(element_type*p) noexcept
-      { return (size_t(p)>>sizeof(element_type))&block_mask; }
       /// # blocks given # elements
       constexpr static unsigned num_blocks(unsigned n) noexcept
       { return (n+block_trim)>>block_shft; }
       /// # elements in full blocks, given # elements
       constexpr static unsigned blocked_num(unsigned n) noexcept
       { return (n+block_trim)&block_mask; }
+    };
+    //--------------------------------------------------------------------------
+    ///
+    /// 4 packed single-precision floating-point numbers
+    ///
+    //--------------------------------------------------------------------------
+    template<> struct packed<4,float> : packed_base<4>
+    {
+      /// \name types, constants, and static methods
+      //@
+      using packed_base<4>::block_size;
+      using packed_base<4>::block_shft;
+      using packed_base<4>::block_trim;
+      using packed_base<4>::block_mask;
+      using packed_base<4>::max_signbits;
+      using packed_base<4>::is_aligned;
+      using packed_base<4>::aligned_index;
+      using packed_base<4>::sub_index;
+      using packed_base<4>::block_index;
+      using packed_base<4>::num_blocks;
+      using packed_base<4>::blocked_num;
+      /// associated SSE/AVX vector type
+      typedef __m128 data_type;
+      /// associated element type
+      typedef float element_type;
+      /// equivalent array of elements
+      typedef element_type element_block[block_size];
+      /// required alignement (bytes)
+      static const unsigned alignment = block_size*sizeof(element_type);
+      /// aligned equivalent array of elements
+      typedef element_block alignas(16) aligned_element_block;
+      /// a packed with all elements equal to 0
+      static packed always_inline zero() noexcept
+      { return packed(_mm_setzero_ps()); }
+      /// a packed with all elements equal to 1
+      static packed always_inline one() noexcept
+      { return packed(_mm_set1_ps(1.f)); }
+      /// is given pointer appropriately aligned?
+      static bool is_aligned(void*p) noexcept
+      { return (size_t(p)&(alignment-1))==0; }
+      /// offset (number of element_types) of pointer from alignment
+      static size_t offset(element_type*p) noexcept
+      { return (size_t(p)>>sizeof(element_type))&block_mask; }
       //@}
 
       /// \name construction and assignment
@@ -227,6 +274,9 @@ namespace WDutils {
 #endif
       /// ctor from data_type
       explicit always_inline packed(data_type m) : _m(m) {}
+      /// ctor from single integer value: set all element equal to single value
+      explicit always_inline packed(int x) noexcept
+      { _m = _mm_set1_ps(x); }
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(float x) noexcept
       { _m = _mm_set1_ps(x); }
@@ -267,21 +317,7 @@ namespace WDutils {
       { return _m; }
       /// constant element access, templated
       template<unsigned I>
-      friend element_type always_inline at(packed p) noexcept
-      {
-	static_assert(I<block_size,"index out of range");
-# if   defined(__GNUC__) && !defined(__INTEL_COMPILER)
-	return __builtin_ia32_vec_ext_v4sf(p._m,I);
-# elif defined(__SSE4_1__)
-	float tmp;
-	_MM_EXTRACT_FLOAT(tmp,p.m,I);
-	return tmp;
-# else
-	aligned_element_block tmp;
-	_mm_store_ps(tmp,p.m);
-	return tmp[I];
-# endif
-      }
+      friend element_type at(packed) noexcept;
 # ifdef __SSE2__
       /// upcast: convert lower two elements to  @c packed<2,double>
       friend packed<2,double> upcast_lo(packed) noexcept;
@@ -306,60 +342,53 @@ namespace WDutils {
       /// load from unaligned memory location
       static packed always_inline loadu(const element_type*p) noexcept
       { return packed(_mm_loadu_ps(p)); }
-      /// load any aligned object that can be statically cast to const
-      /// element_type*
-      template<typename anything>
-      static packed always_inline pack(anything const&a) noexcept
-      { return load(static_cast<const element_type*>(a)); }
-      /// load any unaligned object that can be statically cast to const
-      /// element_type*
-      template<typename anything>
-      static packed always_inline packu(anything const&a) noexcept
-      { return loadu(static_cast<const element_type*>(a)); }
       /// load from aligned memory location, using template arg for alignment
-      template<bool aligned> static
-      typename enable_if< aligned, packed>::type always_inline
-      load_t(const element_type*p) noexcept
+      template<bool aligned> static typename enable_if< aligned, packed>::type
+      always_inline load_t(const element_type*p) noexcept
       { return packed(_mm_load_ps(p)); }
       /// load from unaligned memory location, using template arg for alignment
-      template<bool aligned> static
-      typename enable_if<!aligned,packed>::type always_inline
-      load_t(const element_type*p) noexcept
+      template<bool aligned> static typename enable_if<!aligned,packed>::type
+      always_inline load_t(const element_type*p) noexcept
       { return packed(_mm_loadu_ps(p)); }
-      /// load any object that can be statically cast to const element_type*
-      template<bool aligned, typename anything>
-      static packed always_inline pack_t(anything const&a) noexcept
-      { return load_t<aligned>(static_cast<const element_type*>(a)); }
       /// store to aligned memory location
       void always_inline store(element_type*p) const noexcept
       { _mm_store_ps(p,_m); }
       /// store to unaligned memory location
       void always_inline storeu(element_type*p) const noexcept
       { _mm_storeu_ps(p,_m); }
-      /// store to any aligned object that can be statically cast to
-      /// element_type*
-      template<typename anything>
-      void always_inline unpack(anything&a) const noexcept
-      { store(static_cast<element_type*>(a)); }
-      /// store to any unaligned object that can be statically cast to
-      /// element_type*
-      template<typename anything>
-      void always_inline unpacku(anything&a) const noexcept
-      { storeu(static_cast<element_type*>(a)); }
       /// store to aligned memory location, using template arg for alignment
-      template<bool aligned>
-      typename enable_if< aligned>::type always_inline
-      store_t(element_type*p) const noexcept
+      template<bool aligned> typename enable_if< aligned>::type
+      always_inline store_t(element_type*p) const noexcept
       { _mm_store_ps(p,_m); }
       /// store to unaligned memory location, using template arg for alignment
-      template<bool aligned>
-      typename enable_if<!aligned>::type always_inline
-      store_t(element_type*p) const noexcept
+      template<bool aligned> typename enable_if<!aligned>::type
+      always_inline store_t(element_type*p) const noexcept
       { _mm_storeu_ps(p,_m); }
-      /// store to any object that can be statically cast to element_type*
-      template<bool aligned, typename anything>
-      void always_inline unpack_t(anything&a) const noexcept
-      { store_t<aligned>(static_cast<element_type*>(a)); }
+      /// load aligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline pack(class_with_member_data const&a) noexcept
+      { return load(a.data()); }
+      /// load unaligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline packu(class_with_member_data const&a) noexcept
+      { return loadu(a.data()); }
+      /// load object with member data() returning const element_type*
+      template<bool aligned, typename class_with_member_data>
+      static packed always_inline pack_t(class_with_member_data const&a)
+	noexcept
+      { return load_t<aligned>(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpack(class_with_member_data&a) const noexcept
+      { store(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpacku(class_with_member_data&a) const noexcept
+      { storeu(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<bool aligned, typename class_with_member_data>
+      void always_inline unpack_t(class_with_member_data&a) const noexcept
+      { store_t<aligned>(a.data()); }
       /// store directly to aligned memory without polluting cashes
       void always_inline stream(element_type*p) const noexcept
       { _mm_stream_ps(p,_m); }
@@ -528,18 +557,39 @@ namespace WDutils {
       { return packed(_mm_andnot_ps(p._m,_m)); }
       //@}
 
-      /// \name miscellaneous
+      /// \name boolean or integer properties
       //@{
       /// return integer with bits equal to sign bits
+      /// \note if @a p is the result of a boolean operation (comparison, or
+      ///       bit-wise operations on comparison results), signbit(p) can be
+      ///       used to in an if statement.
       friend always_inline int signbits(packed p) noexcept
       { return _mm_movemask_ps(p._m); }
+      /// is any element negative
+      friend always_inline bool has_negative(packed p) noexcept
+      { return _mm_movemask_ps(p._m); }
+      /// are all elements negative
+      friend always_inline bool all_negative(packed p) noexcept
+      { return _mm_movemask_ps(p._m) == max_signbits; }
+      /// is any element non-zero
+      friend always_inline bool has_non_zero(packed p) noexcept
+      { return signbits(p!=packed::zero()); }
+      /// are all elements non-zero
+      friend always_inline bool all_non_zero(packed p) noexcept
+      { return signbits(p!=packed::zero()) == max_signbits; }
+      /// is any element zero
+      friend always_inline bool has_zero(packed p) noexcept
+      { return signbits(p==packed::zero()); }
+      /// are all elements zero
+      friend always_inline bool all_zero(packed p) noexcept
+      { return signbits(p==packed::zero()) == max_signbits; }
+      //@}
+
+      /// \name miscellaneous
+      //@{
       /// set all elements to Kth element of argument
       template<int K>
-      friend packed always_inline single(packed p) noexcept
-      {
-	static_assert(K>=0 && K<block_size,"K out of range");
-	return packed(_mm_shuffle_ps(p._m,p._m,_MM_SHUFFLE(K,K,K,K)));
-      }
+      friend packed single(packed p) noexcept;
       /// result = [b2,b3,a2,a3]
       friend packed always_inline movehl(packed a, packed b) noexcept
       { return packed(_mm_movehl_ps(a._m,b._m)); }
@@ -549,14 +599,7 @@ namespace WDutils {
       /// shuffle
       /// \note inverse order to _MM_SHUFFLE (here: first is first)
       template<int I0, int I1, int I2, int I3>
-      friend packed always_inline shuffle(packed a, packed b) noexcept
-      {
-	static_assert(I0>=0 && I0<block_size &&
-		      I1>=0 && I1<block_size &&
-		      I2>=0 && I2<block_size &&
-		      I3>=0 && I3<block_size, "Is out of range");
-	return packed(_mm_shuffle_ps(a._m,b._m,_MM_SHUFFLE(I3,I2,I1,I0)));
-      }
+      friend packed shuffle(packed a, packed b) noexcept;
       /// blend two vectors depending on sign of third:  result = sign<0? x : y
       friend packed always_inline blend(packed sign, packed x, packed y)
 	noexcept
@@ -588,33 +631,33 @@ namespace WDutils {
       }
       //@}
       static element_type always_inline nil_mask_elem() noexcept
-      { return WDutils::meta::float_and_int(0x0).f; }
+      { return WDutils::meta::float_and_uint(0x0u).f; }
       static element_type always_inline all_mask_elem() noexcept
-      { return WDutils::meta::float_and_int(0xffffffff).f; }
+      { return WDutils::meta::float_and_uint(0xffffffffu).f; }
       static element_type always_inline sgn_mask_elem() noexcept
-      { return WDutils::meta::float_and_int(0x80000000).f; }
+      { return WDutils::meta::float_and_uint(0x80000000u).f; }
       static element_type always_inline abs_mask_elem() noexcept
-      { return WDutils::meta::float_and_int(0x7fffffff).f; }
+      { return WDutils::meta::float_and_uint(0x7fffffffu).f; }
     private:
       //
 # ifdef __SSE2__
       static data_type always_inline nil_mask() noexcept
       { return _mm_castsi128_ps(_mm_set1_epi32(0x0)); }
       static data_type always_inline one_mask() noexcept
-      { return _mm_castsi128_ps(_mm_set1_epi32(0xffffffff)); }
+      { return _mm_castsi128_ps(_mm_set1_epi32(int(0xffffffff))); }
       static data_type always_inline sgn_mask() noexcept
-      { return _mm_castsi128_ps(_mm_set1_epi32(0x80000000)); }
+      { return _mm_castsi128_ps(_mm_set1_epi32(int(0x80000000))); }
       static data_type always_inline abs_mask() noexcept
       { return _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff)); }
 # else
       static data_type always_inline nil_mask() noexcept
-      { return _mm_set1_ps(WDutils::meta::float_and_int(0x0).f); }
+      { return _mm_set1_ps(WDutils::meta::float_and_uint(0x0u).f); }
       static data_type always_inline one_mask() noexcept
-      { return _mm_set1_ps(WDutils::meta::float_and_int(0xffffffff).f); }
+      { return _mm_set1_ps(WDutils::meta::float_and_uint(0xffffffffu).f); }
       static data_type always_inline sgn_mask() noexcept
-      { return _mm_set1_ps(WDutils::meta::float_and_int(0x80000000).f); }
+      { return _mm_set1_ps(WDutils::meta::float_and_uint(0x80000000u).f); }
       static data_type always_inline abs_mask() noexcept
-      { return _mm_set1_ps(WDutils::meta::float_and_int(0x7fffffff).f); }
+      { return _mm_set1_ps(WDutils::meta::float_and_uint(0x7fffffffu).f); }
 # endif // __SSE2__
       /// just our sign bits
       data_type always_inline signmask() const noexcept
@@ -623,65 +666,90 @@ namespace WDutils {
       data_type _m;
     };// SSE::packed<4,float>
     typedef packed<4,float> fvec4;
-
+    //
+    template<unsigned I> inline
+    float always_inline at(fvec4 p) noexcept
+    {
+      static_assert(I < fvec4::block_size,"index out of range");
+# if   defined(__clang__)
+      return p._m[I];
+# elif defined(__GNUC__) && !defined(__INTEL_COMPILER)
+      return __builtin_ia32_vec_ext_v4sf(p._m,I);
+# elif defined(__SSE4_1__)
+      float tmp;
+      _MM_EXTRACT_FLOAT(tmp,p.m,I);
+      return tmp;
+# else
+      fvec4::aligned_element_block tmp;
+      _mm_store_ps(tmp,p.m);
+      return tmp[I];
+# endif
+    }
+    //
+    template<int K> inline
+    fvec4 always_inline single(fvec4 p) noexcept
+    {
+      static_assert(K>=0 && K<fvec4::block_size,"K out of range");
+      return fvec4(_mm_shuffle_ps(p._m,p._m,_MM_SHUFFLE(K,K,K,K)));
+    }
+    //
+    template<int I0, int I1, int I2, int I3> inline
+    fvec4 always_inline shuffle(fvec4 a, fvec4 b) noexcept
+    {
+      static_assert(I0>=0 && I0<fvec4::block_size &&
+		    I1>=0 && I1<fvec4::block_size &&
+		    I2>=0 && I2<fvec4::block_size &&
+		    I3>=0 && I3<fvec4::block_size, "Is out of range");
+      return fvec4(_mm_shuffle_ps(a._m,b._m,_MM_SHUFFLE(I3,I2,I1,I0)));
+    }
+  }
+  //
+  WDutils_TRAITS(SSE::fvec4,"fvec4");
+  //
+  namespace SSE {
 # ifdef __AVX__
     //--------------------------------------------------------------------------
     ///
     /// 8 packed single-precision floating-point numbers
     ///
     //--------------------------------------------------------------------------
-    template<> struct packed<8,float>
+    template<> struct packed<8,float> : packed_base<8>
     {
       /// \name types, constants, and static methods
       //@
+      using packed_base<8>::block_size;
+      using packed_base<8>::block_shft;
+      using packed_base<8>::block_trim;
+      using packed_base<8>::block_mask;
+      using packed_base<8>::max_signbits;
+      using packed_base<8>::is_aligned;
+      using packed_base<8>::aligned_index;
+      using packed_base<8>::sub_index;
+      using packed_base<8>::block_index;
+      using packed_base<8>::num_blocks;
+      using packed_base<8>::blocked_num;
       /// associated SSE/AVX vector type
       typedef __m256 data_type;
-      /// number of elements
-      static const unsigned block_size = 8;
       /// associated element type
       typedef float element_type;
       /// equivalent array of elements
       typedef element_type element_block[block_size];
-      /// aligned equivalent array of elements
-      typedef WDutils__align32 element_block aligned_element_block;
-      /// block_size = 1<<block_sft
-      static const unsigned block_shft = 3;
-      /// mask for obtaining sub-index within block
-      static const unsigned block_trim = 7;
-      /// mask for obtaining aligned index
-      static const unsigned block_mask =~block_trim;
       /// required alignement (bytes)
       static const unsigned alignment = block_size*sizeof(element_type);
+      /// aligned equivalent array of elements
+      typedef element_block alignas(32) aligned_element_block;
       /// a packed with all elements equal to 0
       static packed always_inline zero() noexcept
       { return packed(_mm256_setzero_ps()); }
       /// a packed with all elements equal to 1
       static packed always_inline one() noexcept
       { return packed(_mm256_set1_ps(1.f)); }
-      /// is given index aligned to block_index?
-      constexpr static bool is_aligned(unsigned i) noexcept
-      { return (i&block_trim)==0; }
-      /// aligned index given an index
-      constexpr static unsigned aligned_index(unsigned i) noexcept
-      { return i & block_mask; }
-      /// sub-index given an index
-      constexpr static unsigned sub_index(unsigned i) noexcept
-      { return i & block_trim; }
-      /// block index given an index
-      constexpr static unsigned block_index(unsigned i) noexcept
-      { return i >> block_shft; }
       /// is given pointer appropriately aligned?
-      constexpr static bool is_aligned(void*p) noexcept
+      static bool is_aligned(void*p) noexcept
       { return (size_t(p)&(alignment-1))==0; }
       /// offset (number of element_types) of pointer from alignment
-      constexpr static size_t offset(element_type*p) noexcept
+      static size_t offset(element_type*p) noexcept
       { return (size_t(p)>>sizeof(element_type))&block_mask; }
-      /// # blocks given # elements
-      constexpr static unsigned num_blocks(unsigned n) noexcept
-      { return (n+block_trim)>>block_shft; }
-      /// # elements in full blocks, given # elements
-      constexpr static unsigned blocked_num(unsigned n) noexcept
-      { return (n+block_trim)&block_mask; }
       //@}
 
       /// \name construction and assignment
@@ -696,9 +764,15 @@ namespace WDutils {
 #endif
       /// ctor from data_type
       explicit always_inline packed(data_type m) : _m(m) {}
-      /// ctor from single value: set all element equal to single value
-      explicit always_inline packed(element_type x) noexcept
+      /// ctor from single integer value: set all element equal to single value
+      explicit always_inline packed(int x) noexcept
       { _m = _mm256_set1_ps(x); }
+      /// ctor from single value: set all element equal to single value
+      explicit always_inline packed(float x) noexcept
+      { _m = _mm256_set1_ps(x); }
+      /// ctor from single value: set all element equal to single value
+      explicit always_inline packed(double x) noexcept
+      { _m = _mm256_set1_ps(float(x)); }
       /// ctor from 8 values: set elements
       /// \note inverse order to _mm256_set_ps(a,b,c,d,e,f,g,h)
       always_inline packed(element_type a, element_type b,
@@ -743,26 +817,18 @@ namespace WDutils {
       /// direct non-const data access
       data_type& always_inline data() noexcept
       { return _m; }
-      /// obtain lower (I=0) or upper (I=1) packed<4,float>
-      template<unsigned I>
-      friend packed<4,float> always_inline extract(packed p) noexcept
-      {
-	static_assert(I<2,"index out of range");
-	return packed<4,float>(_mm256_extractf128_ps(p._m,I));
-      }
       /// obtain lower packed<4,float>
       friend packed<4,float> always_inline lower(packed p) noexcept
-      { return extract<0>(p); }
+      { return packed<4,float>(_mm256_extractf128_ps(p._m,0)); }
       /// obtain upper packed<4,float>
       friend packed<4,float> always_inline upper(packed p) noexcept
-      { return extract<1>(p); }
+      { return packed<4,float>(_mm256_extractf128_ps(p._m,1)); }
+      /// obtain lower (I=0) or upper (I=1) packed<4,float>
+      template<unsigned I>
+      friend packed<4,float> extract(packed p) noexcept;
       /// constant element access, templated
       template<unsigned I>
-      friend element_type always_inline at(packed p) noexcept
-      {
-	static_assert(I<block_size,"index out of range");
-	return at<(I&3)>(extract<(I>>2)>(p));
-      }
+      friend element_type at(packed p) noexcept;
       /// downcast: convert 2 @c packed<4,double> to  @c packed<8,float>
       friend packed downcast(packed<4,double>, packed<4,double>) noexcept;
       //@}
@@ -776,59 +842,52 @@ namespace WDutils {
       static packed always_inline loadu(const element_type*p) noexcept
       { return packed(_mm256_loadu_ps(p)); }
       /// load from aligned memory location, using template arg for alignment
-      template<bool aligned> static
-      typename enable_if< aligned, packed>::type always_inline
-      load_t(const element_type*p) noexcept
+      template<bool aligned> static typename enable_if< aligned, packed>::type
+      always_inline load_t(const element_type*p) noexcept
       { return packed(_mm256_load_ps(p)); }
-      /// load any aligned object that can be statically cast to const
-      /// element_type*
-      template<typename anything>
-      static packed always_inline pack(anything const&a) noexcept
-      { return load(static_cast<const element_type*>(a)); }
-      /// load any unaligned object that can be statically cast to const
-      /// element_type*
-      template<typename anything>
-      static packed always_inline packu(anything const&a) noexcept
-      { return loadu(static_cast<const element_type*>(a)); }
       /// load from unaligned memory location, using template arg for alignment
-      template<bool aligned> static
-      typename enable_if<!aligned,packed>::type always_inline
-      load_t(const element_type*p) noexcept
+      template<bool aligned> static typename enable_if<!aligned,packed>::type
+      always_inline load_t(const element_type*p) noexcept
       { return packed(_mm256_loadu_ps(p)); }
-      /// load any object that can be statically cast to const element_type*
-      template<bool aligned, typename anything>
-      static packed always_inline pack_t(anything const&a) noexcept
-      { return load_t<aligned>(static_cast<const element_type*>(a)); }
       /// store to aligned memory location
       void always_inline store(element_type*p) const noexcept
       { _mm256_store_ps(p,_m); }
       /// store to unaligned memory location
       void always_inline storeu(element_type*p) const noexcept
       { _mm256_storeu_ps(p,_m); }
-      /// store to any aligned object that can be statically cast to
-      /// element_type*
-      template<typename anything>
-      void always_inline unpack(anything&a) const noexcept
-      { store(static_cast<element_type*>(a)); }
-      /// store to any unaligned object that can be statically cast to
-      /// element_type*
-      template<typename anything>
-      void always_inline unpacku(anything&a) const noexcept
-      { storeu(static_cast<element_type*>(a)); }
       /// store to aligned memory location, using template arg for alignment
-      template<bool aligned>
-      typename enable_if< aligned>::type always_inline
-      store_t(element_type*p) const noexcept
+      template<bool aligned> typename enable_if< aligned>::type
+      always_inline store_t(element_type*p) const noexcept
       { _mm256_store_ps(p,_m); }
       /// store to unaligned memory location, using template arg for alignment
-      template<bool aligned>
-      typename enable_if<!aligned>::type always_inline
-      store_t(element_type*p) const noexcept
+      template<bool aligned> typename enable_if<!aligned>::type
+      always_inline store_t(element_type*p) const noexcept
       { _mm256_storeu_ps(p,_m); }
-      /// store to any object that can be statically cast to element_type*
-      template<bool aligned, typename anything>
-      void always_inline unpack_t(anything&a) const noexcept
-      { store_t<aligned>(static_cast<element_type*>(a)); }
+      /// load aligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline pack(class_with_member_data const&a) noexcept
+      { return load(a.data()); }
+      /// load unaligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline packu(class_with_member_data const&a) noexcept
+      { return loadu(a.data()); }
+      /// load object with member data() returning const element_type*
+      template<bool aligned, typename class_with_member_data>
+      static packed always_inline pack_t(class_with_member_data const&a)
+	noexcept
+      { return load_t<aligned>(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpack(class_with_member_data&a) const noexcept
+      { store(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpacku(class_with_member_data&a) const noexcept
+      { storeu(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<bool aligned, typename class_with_member_data>
+      void always_inline unpack_t(class_with_member_data&a) const noexcept
+      { store_t<aligned>(a.data()); }
       /// store directly to aligned memory without polluting cashes
       void always_inline stream(element_type*p) const noexcept
       { _mm256_stream_ps(p,_m); }
@@ -967,11 +1026,36 @@ namespace WDutils {
       { return packed(_mm256_andnot_ps(p._m,_m)); }
       //@}
 
-      /// \name miscellaneous
+      /// \name boolean or integer properties
       //@{
       /// return integer with bits equal to sign bits
+      /// \note if @a p is the result of a boolean operation (comparison, or
+      ///       bit-wise operations on comparison results), signbit(p) can be
+      ///       used to in an if statement.
       friend always_inline int signbits(packed p) noexcept
       { return _mm256_movemask_ps(p._m); }
+      /// is any element negative
+      friend always_inline bool has_negative(packed p) noexcept
+      { return _mm256_movemask_ps(p._m); }
+      /// are all elements negative
+      friend always_inline bool all_negative(packed p) noexcept
+      { return _mm256_movemask_ps(p._m) == max_signbits; }
+      /// is any element non-zero
+      friend always_inline bool has_non_zero(packed p) noexcept
+      { return signbits(p!=packed::zero()); }
+      /// are all elements non-zero
+      friend always_inline bool all_non_zero(packed p) noexcept
+      { return signbits(p!=packed::zero()) == max_signbits; }
+      /// is any element zero
+      friend always_inline bool has_zero(packed p) noexcept
+      { return signbits(p==packed::zero()); }
+      /// are all elements zero
+      friend always_inline bool all_zero(packed p) noexcept
+      { return signbits(p==packed::zero()) == max_signbits; }
+      //@}
+
+      /// \name miscellaneous
+      //@{
       /// blend two vectors depending on sign of third:  result = sign<0? x : y
       friend packed always_inline blend(packed sign, packed x, packed y)
 	noexcept
@@ -981,13 +1065,21 @@ namespace WDutils {
 	noexcept
       { return packed(_mm256_blendv_ps(y._m,x._m,mask._m)); }
       //@}
+      static element_type always_inline nil_mask_elem() noexcept
+      { return WDutils::meta::float_and_uint(0x0u).f; }
+      static element_type always_inline all_mask_elem() noexcept
+      { return WDutils::meta::float_and_uint(0xffffffffu).f; }
+      static element_type always_inline sgn_mask_elem() noexcept
+      { return WDutils::meta::float_and_uint(0x80000000u).f; }
+      static element_type always_inline abs_mask_elem() noexcept
+      { return WDutils::meta::float_and_uint(0x7fffffffu).f; }
     private:
       static data_type always_inline nil_mask() noexcept
       { return _mm256_castsi256_ps(_mm256_set1_epi32(0x0)); }
       static data_type always_inline one_mask() noexcept
-      { return _mm256_castsi256_ps(_mm256_set1_epi32(0xffffffff)); }
+      { return _mm256_castsi256_ps(_mm256_set1_epi32(int(0xffffffff))); }
       static data_type always_inline sgn_mask() noexcept
-      { return _mm256_castsi256_ps(_mm256_set1_epi32(0x80000000)); }
+      { return _mm256_castsi256_ps(_mm256_set1_epi32(int(0x80000000))); }
       static data_type always_inline abs_mask() noexcept
       { return _mm256_castsi256_ps(_mm256_set1_epi32(0x7fffffff)); }
       /// just our sign bits
@@ -996,8 +1088,32 @@ namespace WDutils {
       /// data
       data_type _m;
     };// SSE::packed<8,float>
-# endif // __AVX__
+    //
     typedef packed<8,float> fvec8;
+    //
+    template<unsigned I> inline
+    fvec4 always_inline extract(fvec8 p) noexcept
+    {
+      static_assert(I<2,"index out of range");
+      return fvec4(_mm256_extractf128_ps(p._m,I));
+    }
+    //
+    template<unsigned I> inline
+    float always_inline at(fvec8 p) noexcept
+    {
+      static_assert(I<fvec8::block_size,"index out of range");
+#  if   defined(__clang__)
+      return p._m[I];
+#  else
+      return SSE::at<(I&3)>(extract<(I>>2)>(p));
+#  endif
+    }
+  }
+  //
+  WDutils_TRAITS(SSE::fvec8,"fvec8");
+  //
+  namespace SSE {
+# endif // __AVX__
 
 # ifdef __SSE2__
     //--------------------------------------------------------------------------
@@ -1005,59 +1121,44 @@ namespace WDutils {
     /// 2 packed double-precision floating-point numbers
     ///
     //--------------------------------------------------------------------------
-    template<> struct packed<2,double>
+    template<> struct packed<2,double> : packed_base<2>
     {
     public:
       /// \name types, constants, and static methods
       //@
+      using packed_base<2>::block_size;
+      using packed_base<2>::block_shft;
+      using packed_base<2>::block_trim;
+      using packed_base<2>::block_mask;
+      using packed_base<2>::max_signbits;
+      using packed_base<2>::is_aligned;
+      using packed_base<2>::aligned_index;
+      using packed_base<2>::sub_index;
+      using packed_base<2>::block_index;
+      using packed_base<2>::num_blocks;
+      using packed_base<2>::blocked_num;
       /// associated element type
       typedef double element_type;
       /// associated SSE/AVX vector type
       typedef __m128d data_type;
-      /// number of element types hold
-      static const unsigned block_size = 2;
       /// equivalent array of elements
       typedef element_type element_block[block_size];
-      /// aligned equivalent array of elements
-      typedef WDutils__align16 element_block aligned_element_block;
-      /// block_size = 1<<block_sft
-      static const unsigned block_shft = 1;
-      /// mask for obtaining sub-index within block
-      static const unsigned block_trim = 1;
-      /// mask for obtaining aligned index
-      static const unsigned block_mask =~block_trim;
       /// required alignement (bytes)
       static const unsigned alignment = block_size*sizeof(element_type);
+      /// aligned equivalent array of elements
+      typedef element_block alignas(16) aligned_element_block;
       /// a packed with all elements equal to 0
       static packed always_inline zero() noexcept
       { return packed(_mm_setzero_pd()); }
       /// a packed with all elements equal to 1
       static packed always_inline one() noexcept
       { return packed(_mm_set1_pd(1.0)); }
-      /// is given index aligned to block_index?
-      constexpr static bool is_aligned(unsigned i) noexcept
-      { return (i&block_trim)==0; }
-      /// aligned index given an index
-      constexpr static unsigned aligned_index(unsigned i) noexcept
-      { return i & block_mask; }
-      /// sub-index given an index
-      constexpr static unsigned sub_index(unsigned i) noexcept
-      { return i & block_trim; }
-      /// block index given an index
-      constexpr static unsigned block_index(unsigned i) noexcept
-      { return i >> block_shft; }
       /// is given pointer appropriately aligned?
-      constexpr static bool is_aligned(void*p) noexcept
+      static bool is_aligned(void*p) noexcept
       { return (size_t(p)&(alignment-1))==0; }
       /// offset (number of element_types) of pointer from alignment
-      constexpr static size_t offset(element_type*p) noexcept
+      static size_t offset(element_type*p) noexcept
       { return (size_t(p)>>sizeof(element_type))&block_mask; }
-      /// # blocks given # elements
-      constexpr static unsigned num_blocks(unsigned n) noexcept
-      { return (n+block_trim)>>block_shft; }
-      /// # elements in full blocks, given # elements
-      constexpr static unsigned blocked_num(unsigned n) noexcept
-      { return (n+block_trim)&block_mask; }
       //@}
 
       /// \name construction and assignment
@@ -1072,6 +1173,9 @@ namespace WDutils {
 #endif
       /// ctor from data_type is private
       explicit always_inline packed(__m128d m) : _m(m) {}
+      /// ctor from single integer value: set all element equal to single value
+      explicit always_inline packed(int x) noexcept
+      { _m = _mm_set1_pd(x); }
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(float x) noexcept
       { _m = _mm_set1_pd(double(x)); }
@@ -1110,17 +1214,7 @@ namespace WDutils {
       { return _m; }
       /// constant element access, templated
       template<unsigned I>
-      friend element_type at(packed p) noexcept
-      {
-	static_assert(I<block_size,"index out of range");
-# if   defined(__GNUC__) && !defined(__INTEL_COMPILER)
-	return __builtin_ia32_vec_ext_v2df(p._m,I);
-# else
-	aligned_element_block q;
-	_mm_store_pd(q,p._m);
-	return q[I];
-# endif
-      }
+      friend element_type at(packed p) noexcept;
       /// downcast: convert two @c packed<2,double> to one @c packed<4,float>
       friend packed<4,float> always_inline downcast(packed a, packed b) noexcept
       { return packed<4,float>(_mm_movelh_ps(_mm_cvtpd_ps(a._m),
@@ -1141,60 +1235,53 @@ namespace WDutils {
       /// load from unaligned memory location
       static packed always_inline loadu(const element_type*p) noexcept
       { return packed(_mm_loadu_pd(p)); }
-      /// load any aligned object that can be statically cast to const
-      /// element_type*
-      template<typename anything>
-      static packed always_inline pack(anything const&a) noexcept
-      { return load(static_cast<const element_type*>(a)); }
-      /// load any unaligned object that can be statically cast to const
-      /// element_type*
-      template<typename anything>
-      static packed always_inline packu(anything const&a) noexcept
-      { return loadu(static_cast<const element_type*>(a)); }
       /// load from aligned memory location, using template arg for alignment
-      template<bool aligned> static
-      typename enable_if< aligned, packed>::type always_inline
-      load_t(const element_type*p) noexcept
+      template<bool aligned> static typename enable_if< aligned, packed>::type
+      always_inline load_t(const element_type*p) noexcept
       { return packed(_mm_load_pd(p)); }
       /// load from unaligned memory location, using template arg for alignment
-      template<bool aligned> static
-      typename enable_if<!aligned,packed>::type always_inline
-      load_t(const element_type*p) noexcept
+      template<bool aligned> static typename enable_if<!aligned,packed>::type
+      always_inline load_t(const element_type*p) noexcept
       { return packed(_mm_loadu_pd(p)); }
-      /// load any object that can be statically cast to const element_type*
-      template<bool aligned, typename anything>
-      static packed always_inline pack_t(anything const&a) noexcept
-      { return load_t<aligned>(static_cast<const element_type*>(a)); }
       /// store to aligned memory location
       void always_inline store(element_type*p) const noexcept
       { _mm_store_pd(p,_m); }
       /// store to unaligned memory location
       void always_inline storeu(element_type*p) const noexcept
       { _mm_storeu_pd(p,_m); }
-      /// store to any aligned object that can be statically cast to
-      /// element_type*
-      template<typename anything>
-      void always_inline unpack(anything&a) const noexcept
-      { store(static_cast<element_type*>(a)); }
-      /// store to any unaligned object that can be statically cast to
-      /// element_type*
-      template<typename anything>
-      void always_inline unpacku(anything&a) const noexcept
-      { storeu(static_cast<element_type*>(a)); }
       /// store to aligned memory location, using template arg for alignment
-      template<bool aligned>
-      typename enable_if< aligned>::type always_inline
-      store_t(element_type*p) const noexcept
+      template<bool aligned> typename enable_if< aligned>::type
+      always_inline store_t(element_type*p) const noexcept
       { _mm_store_pd(p,_m); }
       /// store to unaligned memory location, using template arg for alignment
-      template<bool aligned>
-      typename enable_if<!aligned>::type always_inline
-      store_t(element_type*p) const noexcept
+      template<bool aligned> typename enable_if<!aligned>::type
+      always_inline store_t(element_type*p) const noexcept
       { _mm_storeu_pd(p,_m); }
-      /// store to any object that can be statically cast to element_type*
-      template<bool aligned, typename anything>
-      void always_inline unpack_t(anything&a) const noexcept
-      { store_t<aligned>(static_cast<element_type*>(a)); }
+      /// load aligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline pack(class_with_member_data const&a) noexcept
+      { return load(a.data()); }
+      /// load unaligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline packu(class_with_member_data const&a) noexcept
+      { return loadu(a.data()); }
+      /// load object with member data() returning const element_type*
+      template<bool aligned, typename class_with_member_data>
+      static packed always_inline pack_t(class_with_member_data const&a)
+	noexcept
+      { return load_t<aligned>(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpack(class_with_member_data&a) const noexcept
+      { store(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpacku(class_with_member_data&a) const noexcept
+      { storeu(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<bool aligned, typename class_with_member_data>
+      void always_inline unpack_t(class_with_member_data&a) const noexcept
+      { store_t<aligned>(a.data()); }
       /// store directly to aligned memory without polluting cashes
       void always_inline stream(element_type*p) const noexcept
       { _mm_stream_pd(p,_m); }
@@ -1346,18 +1433,39 @@ namespace WDutils {
       { return packed(_mm_andnot_pd(p._m,_m)); }
       //@}
 
-      /// \name miscellaneous
+      /// \name boolean or integer properties
       //@{
       /// return integer with bits equal to sign bits
+      /// \note if @a p is the result of a boolean operation (comparison, or
+      ///       bit-wise operations on comparison results), signbit(p) can be
+      ///       used to in an if statement.
       friend always_inline int signbits(packed p) noexcept
       { return _mm_movemask_pd(p._m); }
+      /// is any element negative
+      friend always_inline bool has_negative(packed p) noexcept
+      { return _mm_movemask_pd(p._m); }
+      /// are all elements negative
+      friend always_inline bool all_negative(packed p) noexcept
+      { return _mm_movemask_pd(p._m) == max_signbits; }
+      /// is any element non-zero
+      friend always_inline bool has_non_zero(packed p) noexcept
+      { return signbits(p!=packed::zero()); }
+      /// are all elements non-zero
+      friend always_inline bool all_non_zero(packed p) noexcept
+      { return signbits(p!=packed::zero()) == max_signbits; }
+      /// is any element zero
+      friend always_inline bool has_zero(packed p) noexcept
+      { return signbits(p==packed::zero()); }
+      /// are all elements zero
+      friend always_inline bool all_zero(packed p) noexcept
+      { return signbits(p==packed::zero()) == max_signbits; }
+      //@}
+
+      /// \name miscellaneous
+      //@{
       /// set all elements to Kth element of argument
       template<int K>
-      friend packed always_inline single(packed p) noexcept
-      {
-	static_assert(K>=0 && K<block_size,"K out of range");
-	return packed(_mm_shuffle_pd(p._m,p._m,_MM_SHUFFLE2(K,K)));
-      }
+      friend packed always_inline single(packed p) noexcept;
       /// blend two vectors depending on sign of third: result = sign<0? x : y
       friend packed always_inline blend(packed sign, packed x, packed y)
 	noexcept
@@ -1388,13 +1496,21 @@ namespace WDutils {
 #  endif
       }
       //@}
+      static element_type always_inline nil_mask_elem() noexcept
+      { return WDutils::meta::double_and_uint(0x0lu).d; }
+      static element_type always_inline all_mask_elem() noexcept
+      { return WDutils::meta::double_and_uint(0xfffffffffffffffflu).d; }
+      static element_type always_inline sgn_mask_elem() noexcept
+      { return WDutils::meta::double_and_uint(0x8000000000000000lu).d; }
+      static element_type always_inline abs_mask_elem() noexcept
+      { return WDutils::meta::double_and_uint(0x7ffffffffffffffflu).d; }
     private:
       static __m128d always_inline nil_mask() noexcept
-      { return _mm_castsi128_pd(_mm_set1_epi64x(0x0)); }
+      { return _mm_castsi128_pd(_mm_set1_epi64x(0x0l)); }
       static __m128d always_inline one_mask() noexcept
-      { return _mm_castsi128_pd(_mm_set1_epi64x(0xffffffffffffffff)); }
+      { return _mm_castsi128_pd(_mm_set1_epi64x(int64_t(0xffffffffffffffff))); }
       static __m128d always_inline sgn_mask() noexcept
-      { return _mm_castsi128_pd(_mm_set1_epi64x(0x8000000000000000)); }
+      { return _mm_castsi128_pd(_mm_set1_epi64x(int64_t(0x8000000000000000))); }
       static __m128d always_inline abs_mask() noexcept
       { return _mm_castsi128_pd(_mm_set1_epi64x(0x7fffffffffffffff)); }
       /// just our sign bits
@@ -1403,8 +1519,36 @@ namespace WDutils {
       /// data
       data_type _m;
     };// SSE::packed<2,double>
-# endif // __SSE2__
+    //
     typedef packed<2,double> dvec2;
+    //
+    template<unsigned I> inline
+    double always_inline at(dvec2 p) noexcept
+    {
+      static_assert(I<dvec2::block_size,"index out of range");
+# if   defined(__clang__)
+      return p._m[I];
+# elif defined(__GNUC__) && !defined(__INTEL_COMPILER)
+      return __builtin_ia32_vec_ext_v2df(p._m,I);
+# else
+      dvec2::aligned_element_block q;
+      _mm_store_pd(q,p._m);
+      return q[I];
+# endif
+    }
+    //
+    template<int K> inline
+    dvec2 always_inline single(dvec2 p) noexcept
+    {
+      static_assert(K>=0 && K<dvec2::block_size,"K out of range");
+      return dvec2(_mm_shuffle_pd(p._m,p._m,_MM_SHUFFLE2(K,K)));
+    }
+  }
+  //
+  WDutils_TRAITS(SSE::dvec2,"dvec2");
+  //
+  namespace SSE {
+# endif // __SSE2__
 
 # ifdef __AVX__
     //--------------------------------------------------------------------------
@@ -1412,58 +1556,43 @@ namespace WDutils {
     /// 4 packed double-precision floating-point numbers
     ///
     //--------------------------------------------------------------------------
-    template<> struct packed<4,double>
+    template<> struct packed<4,double> : packed_base<4>
     {
       /// \name types, constants, and static methods
       //@
+      using packed_base<4>::block_size;
+      using packed_base<4>::block_shft;
+      using packed_base<4>::block_trim;
+      using packed_base<4>::block_mask;
+      using packed_base<4>::max_signbits;
+      using packed_base<4>::is_aligned;
+      using packed_base<4>::aligned_index;
+      using packed_base<4>::sub_index;
+      using packed_base<4>::block_index;
+      using packed_base<4>::num_blocks;
+      using packed_base<4>::blocked_num;
       /// associated element type
       typedef double element_type;
       /// associated SSE/AVX vector type
       typedef __m256d data_type;
-      /// number of elements
-      static const unsigned block_size = 4;
       /// equivalent array of elements
       typedef element_type element_block[block_size];
-      /// aligned equivalent array of elements
-      typedef WDutils__align32 element_block aligned_element_block;
-      /// block_size = 1<<block_sft
-      static const unsigned block_shft = 2;
-      /// mask for obtaining sub-index within block
-      static const unsigned block_trim = 3;
-      /// mask for obtaining aligned index
-      static const unsigned block_mask =~block_trim;
       /// required alignement (bytes)
       static const unsigned alignment = block_size*sizeof(element_type);
+      /// aligned equivalent array of elements
+      typedef element_block alignas(32) aligned_element_block;
       /// a packed with all elements equal to 0
       static packed always_inline zero() noexcept
       { return packed(_mm256_setzero_pd()); }
       /// a packed with all elements equal to 1
       static packed always_inline one() noexcept
       { return packed(_mm256_set1_pd(1.0)); }
-      /// is given index aligned to block_index?
-      constexpr static bool is_aligned(unsigned i) noexcept
-      { return (i&block_trim)==0; }
-      /// aligned index given an index
-      constexpr static unsigned aligned_index(unsigned i) noexcept
-      { return i & block_mask; }
-      /// sub-index given an index
-      constexpr static unsigned sub_index(unsigned i) noexcept
-      { return i & block_trim; }
-      /// block index given an index
-      constexpr static unsigned block_index(unsigned i) noexcept
-      { return i >> block_shft; }
       /// is given pointer appropriately aligned?
-      constexpr static bool is_aligned(void*p) noexcept
+      static bool is_aligned(void*p) noexcept
       { return (size_t(p)&(alignment-1))==0; }
       /// offset (number of element_types) of pointer from alignment
-      constexpr static size_t offset(element_type*p) noexcept
+      static size_t offset(element_type*p) noexcept
       { return (size_t(p)>>sizeof(element_type))&block_mask; }
-      /// # blocks given # elements
-      constexpr static unsigned num_blocks(unsigned n) noexcept
-      { return (n+block_trim)>>block_shft; }
-      /// # elements in full blocks, given # elements
-      constexpr static unsigned blocked_num(unsigned n) noexcept
-      { return (n+block_trim)&block_mask; }
       //@}
 
       /// \name construction and assignment
@@ -1478,6 +1607,9 @@ namespace WDutils {
 #endif
       /// ctor from data_type is private
       explicit always_inline packed(data_type m) : _m(m) {}
+      /// ctor from single integer value: set all element equal to single value
+      explicit always_inline packed(int x) noexcept
+      { _m = _mm256_set1_pd(x); }
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(float x) noexcept
       { _m = _mm256_set1_pd(float(x)); }
@@ -1521,24 +1653,16 @@ namespace WDutils {
       { return _m; }
       /// obtain lower (I=0) or upper (I=1) packed<2,double>
       template<unsigned I>
-      friend packed<2,double> always_inline extract(packed p) noexcept
-      {
-	static_assert(I<2,"index out of range");
-	return packed<2,double>(_mm256_extractf128_pd(p._m,I));
-      }
+      friend packed<2,double> always_inline extract(packed p) noexcept;
       /// obtain lower packed<2,double>
       friend packed<2,double> always_inline lower(packed p) noexcept
-      { return extract<0>(p); }
+      { return packed<2,double>(_mm256_extractf128_pd(p._m,0)); }
       /// obtain upper packed<2,double>
       friend packed<2,double> always_inline upper(packed p) noexcept
-      { return extract<1>(p); }
+      { return packed<2,double>(_mm256_extractf128_pd(p._m,1)); }
       /// constant element access, templated
       template<unsigned I>
-      friend element_type always_inline at(packed p) noexcept
-      {
-	static_assert(I<block_size,"index out of range");
-	return at<(I&1)>(extract<(I>>1)>(p));
-      }
+      friend element_type always_inline at(packed p) noexcept;
       /// downcast: convert 2 @c packed<4,double> to @c packed<8,float>
       friend packed<8,float> always_inline downcast(packed a, packed b) noexcept
       { return packed<8,float>(_mm256_insertf128_ps
@@ -1560,60 +1684,53 @@ namespace WDutils {
       /// load from unaligned memory location
       static packed always_inline loadu(const element_type*p) noexcept
       { return packed(_mm256_loadu_pd(p)); }
-      /// load any aligned object that can be statically cast to const
-      /// element_type*
-      template<typename anything>
-      static packed always_inline pack(anything const&a) noexcept
-      { return load(static_cast<const element_type*>(a)); }
-      /// load any unaligned object that can be statically cast to const
-      /// element_type*
-      template<typename anything>
-      static packed always_inline packu(anything const&a) noexcept
-      { return loadu(static_cast<const element_type*>(a)); }
       /// load from aligned memory location, using template arg for alignment
-      template<bool aligned> static
-      typename enable_if< aligned, packed>::type always_inline
-      load_t(const element_type*p) noexcept
+      template<bool aligned> static typename enable_if< aligned, packed>::type
+      always_inline load_t(const element_type*p) noexcept
       { return packed(_mm256_load_pd(p)); }
       /// load from unaligned memory location, using template arg for alignment
-      template<bool aligned> static
-      typename enable_if<!aligned,packed>::type always_inline
-      load_t(const element_type*p) noexcept
+      template<bool aligned> static typename enable_if<!aligned,packed>::type
+      always_inline load_t(const element_type*p) noexcept
       { return packed(_mm256_loadu_pd(p)); }
-      /// load from any object that can be statically cast to const element*
-      template<bool aligned, typename anything>
-      static packed always_inline pack_t(anything const&a) noexcept
-      { return load_t<aligned>(static_cast<const element_type*>(a)); }
       /// store to aligned memory location
       void always_inline store(element_type*p) const noexcept
       { _mm256_store_pd(p,_m); }
       /// store to unaligned memory location
       void always_inline storeu(element_type*p) const noexcept
       { _mm256_storeu_pd(p,_m); }
-      /// store to any aligned object that can be statically cast to
-      /// element_type*
-      template<typename anything>
-      void always_inline unpack(anything&a) const noexcept
-      { store(static_cast<element_type*>(a)); }
-      /// store to any unaligned object that can be statically cast to
-      /// element_type*
-      template<typename anything>
-      void always_inline unpacku(anything&a) const noexcept
-      { storeu(static_cast<element_type*>(a)); }
       /// store to aligned memory location, using template arg for alignment
-      template<bool aligned>
-      typename enable_if< aligned>::type always_inline
-      store_t(element_type*p) const noexcept
+      template<bool aligned> typename enable_if< aligned>::type
+      always_inline store_t(element_type*p) const noexcept
       { _mm256_store_pd(p,_m); }
       /// store to unaligned memory location, using template arg for alignment
-      template<bool aligned>
-      typename enable_if<!aligned>::type always_inline
-      store_t(element_type*p) const noexcept
+      template<bool aligned> typename enable_if<!aligned>::type
+      always_inline store_t(element_type*p) const noexcept
       { _mm256_storeu_pd(p,_m); }
-      /// store to any object that can be statically cast to element*
-      template<bool aligned, typename anything>
-      void always_inline unpack_t(anything&a) const noexcept
-      { store_t<aligned>(static_cast<element_type*>(a)); }
+      /// load aligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline pack(class_with_member_data const&a) noexcept
+      { return load(a.data()); }
+      /// load unaligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline packu(class_with_member_data const&a) noexcept
+      { return loadu(a.data()); }
+      /// load object with member data() returning const element_type*
+      template<bool aligned, typename class_with_member_data>
+      static packed always_inline pack_t(class_with_member_data const&a)
+	noexcept
+      { return load_t<aligned>(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpack(class_with_member_data&a) const noexcept
+      { store(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpacku(class_with_member_data&a) const noexcept
+      { storeu(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<bool aligned, typename class_with_member_data>
+      void always_inline unpack_t(class_with_member_data&a) const noexcept
+      { store_t<aligned>(a.data()); }
       /// store directly to aligned memory without polluting cashes
       void always_inline stream(element_type*p) const noexcept
       { _mm256_stream_pd(p,_m); }
@@ -1760,22 +1877,39 @@ namespace WDutils {
       { return packed(_mm256_andnot_pd(p._m,_m)); }
       //@}
 
-      /// \name miscellaneous
+      /// \name boolean or integer properties
       //@{
       /// return integer with bits equal to sign bits
+      /// \note if @a p is the result of a boolean operation (comparison, or
+      ///       bit-wise operations on comparison results), signbit(p) can be
+      ///       used to in an if statement.
       friend always_inline int signbits(packed p) noexcept
       { return _mm256_movemask_pd(p._m); }
+      /// is any element negative
+      friend always_inline bool has_negative(packed p) noexcept
+      { return _mm256_movemask_pd(p._m); }
+      /// are all elements negative
+      friend always_inline bool all_negative(packed p) noexcept
+      { return _mm256_movemask_pd(p._m) == max_signbits; }
+      /// is any element non-zero
+      friend always_inline bool has_non_zero(packed p) noexcept
+      { return signbits(p!=packed::zero()); }
+      /// are all elements non-zero
+      friend always_inline bool all_non_zero(packed p) noexcept
+      { return signbits(p!=packed::zero()) == max_signbits; }
+      /// is any element zero
+      friend always_inline bool has_zero(packed p) noexcept
+      { return signbits(p==packed::zero()); }
+      /// are all elements zero
+      friend always_inline bool all_zero(packed p) noexcept
+      { return signbits(p==packed::zero()) == max_signbits; }
+      //@}
+
+      /// \name miscellaneous
+      //@{
       /// set all elements to Kth element of argument
       template<int K>
-      friend packed always_inline single(packed p) noexcept
-      {
-	static_assert(K>=0 && K<block_size,"K out of range");
-#ifdef __AVX2__
-# warning more efficient implementation possible with AVX2
-#endif
-	return packed(_mm256_permute_pd
-		      (_mm256_permute2f128_pd(p._m,p._m,K&2?49:32),K&1?15:0));
-      }
+      friend packed always_inline single(packed p) noexcept;
       /// blend two vectors depending on sign of third:  result = sign<0? x : y
       friend packed blend(packed sign, packed x, packed y) noexcept
       { return packed(_mm256_blendv_pd(y._m,x._m,sign._m)); }
@@ -1783,13 +1917,21 @@ namespace WDutils {
       friend packed combine(packed mask, packed x, packed y) noexcept
       { return packed(_mm256_blendv_pd(y._m,x._m,mask._m)); }
       //@}
+      static element_type always_inline nil_mask_elem() noexcept
+      { return WDutils::meta::double_and_uint(0x0lu).d; }
+      static element_type always_inline all_mask_elem() noexcept
+      { return WDutils::meta::double_and_uint(0xfffffffffffffffflu).d; }
+      static element_type always_inline sgn_mask_elem() noexcept
+      { return WDutils::meta::double_and_uint(0x8000000000000000lu).d; }
+      static element_type always_inline abs_mask_elem() noexcept
+      { return WDutils::meta::double_and_uint(0x7ffffffffffffffflu).d; }
     private:
       static data_type always_inline nil_mask() noexcept
-      { return _mm256_castsi256_pd(_mm256_set1_epi64x(0x0)); }
+      { return _mm256_castsi256_pd(_mm256_set1_epi64x(0x0l)); }
       static data_type always_inline one_mask() noexcept
-      { return _mm256_castsi256_pd(_mm256_set1_epi64x(0xffffffffffffffff)); }
+      { return _mm256_castsi256_pd(_mm256_set1_epi64x(int64_t(0xffffffffffffffff))); }
       static data_type always_inline sgn_mask() noexcept
-      { return _mm256_castsi256_pd(_mm256_set1_epi64x(0x8000000000000000)); }
+      { return _mm256_castsi256_pd(_mm256_set1_epi64x(int64_t(0x8000000000000000))); }
       static data_type always_inline abs_mask() noexcept
       { return _mm256_castsi256_pd(_mm256_set1_epi64x(0x7fffffffffffffff)); }
       /// just our sign bits
@@ -1798,10 +1940,45 @@ namespace WDutils {
       /// data
       data_type _m;
     };// SSE::packed<4,double>
+    //
     typedef packed<4,double> dvec4;
+    //
+    template<unsigned I> inline
+    dvec2 always_inline extract(dvec4 p) noexcept
+    {
+      static_assert(I<2,"index out of range");
+      return dvec2(_mm256_extractf128_pd(p._m,I));
+    }
+    //
+    template<unsigned I> inline
+    double always_inline at(dvec4 p) noexcept
+    {
+      static_assert(I<dvec4::block_size,"index out of range");
+#  if   defined(__clang__)
+      return p._m[I];
+#  else
+      return SSE::at<(I&1)>(extract<(I>>1)>(p));
+#  endif
+    }
+    //
+    template<int K> inline
+    dvec4 always_inline single(dvec4 p) noexcept
+    {
+      static_assert(K>=0 && K<dvec4::block_size,"K out of range");
+#  ifdef __AVX2__
+#   warning more efficient implementation possible with AVX2
+#  endif
+      return dvec4(_mm256_permute_pd
+		   (_mm256_permute2f128_pd(p._m,p._m,K&2?49:32),K&1?15:0));
+    }
+  }
+  //
+  WDutils_TRAITS(SSE::dvec4,"dvec4");
+  //
+  namespace SSE {
 # endif // __AVX__
 #endif  // __SSE__
-    //
+    /// is_packed<X>::value is true if X is SSE::packed<K,T>
     template<typename vec>
     struct is_packed {
       static const bool value = false
@@ -1817,6 +1994,24 @@ namespace WDutils {
 #endif
 	;
     };
+    /// get_packed<X>::type is packed<K,X> with largest supported K
+    template<typename T> struct get_packed;
+#ifdef __SSE__
+    template<> struct get_packed<float>
+# ifdef __AVX__
+    { typedef fvec8 type; };
+# else
+    { typedef fvec4 type; };
+# endif
+#endif
+#ifdef __SSE2__
+    template<> struct get_packed<double>
+# ifdef __AVX__
+    { typedef dvec4 type; };
+# else
+    { typedef dvec2 type; };
+# endif
+#endif
   } // namespace WDutils::SSE
   //
 #ifdef __SSE__
@@ -1837,6 +2032,15 @@ namespace WDutils {
   inline double xmm1(__m128d _A)
   { double x; _mm_storeh_pd(&x,_A); return x; }
 #  endif// __SSE2__
+# elif defined(__clang__)  // clang
+  inline float xmm0(__m128 _A)
+  { return _A[0]; }
+  inline float xmm1(__m128 _A)
+  { return _A[1]; }
+  inline float xmm2(__m128 _A)
+  { return _A[2]; }
+  inline float xmm3(__m128 _A)
+  { return _A[3]; }
 # elif defined(__GNUC__)  // __INTEL_COMPILER / __GNUC__
   inline float xmm0(__m128 _A)
   { return __builtin_ia32_vec_ext_v4sf(_A,0); }
@@ -1854,6 +2058,33 @@ namespace WDutils {
 #  endif// __SSE2__
 # endif // __INTEL_COMPILER / __GNUC__
 # ifdef __AVX__
+#  if defined(__clang__)  // clang
+  inline float ymm0(__m256 _A)
+  { return _A[0]; }
+  inline float ymm1(__m256 _A)
+  { return _A[1]; }
+  inline float ymm2(__m256 _A)
+  { return _A[2]; }
+  inline float ymm3(__m256 _A)
+  { return _A[3]; }
+  inline float ymm4(__m256 _A)
+  { return _A[4]; }
+  inline float ymm5(__m256 _A)
+  { return _A[5]; }
+  inline float ymm6(__m256 _A)
+  { return _A[6]; }
+  inline float ymm7(__m256 _A)
+  { return _A[7]; }
+  //
+  inline double ymm0(__m256d _A)
+  { return _A[0]; }
+  inline double ymm1(__m256d _A)
+  { return _A[1]; }
+  inline double ymm2(__m256d _A)
+  { return _A[2]; }
+  inline double ymm3(__m256d _A)
+  { return _A[3]; }
+#  else
   inline float ymm0(__m256 _A)
   { return xmm0(_mm256_extractf128_ps(_A,0)); }
   inline float ymm1(__m256 _A)
@@ -1879,6 +2110,7 @@ namespace WDutils {
   { return xmm0(_mm256_extractf128_pd(_A,1)); }
   inline double ymm3(__m256d _A)
   { return xmm1(_mm256_extractf128_pd(_A,1)); }
+#  endif
 # endif // __AVX__
 #endif // __SSE__
 //
@@ -2019,29 +2251,17 @@ namespace WDutils {
       template<typename Functor>
       struct is_functor {
 	static const bool value =
-	  is_same<Functor,meta::assign  >::value ||
-	  is_same<Functor,meta::add     >::value ||
-	  is_same<Functor,meta::subtract>::value ||
-	  is_same<Functor,meta::multiply>::value ||
-	  is_same<Functor,meta::divide  >::value ||
-	  is_same<Functor,meta::swap    >::value ||
-	  is_same<Functor,meta::maximum >::value ||
-	  is_same<Functor,meta::minimum >::value;
-      };
-      //
-      template<typename Functor>
-      struct is_assign {
-	static const bool value = is_same<Functor,meta::assign  >::value;
-      };
-      //
-      template<typename Functor>
-      struct is_divide {
-	static const bool value = is_same<Functor,meta::divide  >::value;
-      };
-      //
-      template<typename Functor>
-      struct is_swap {
-	static const bool value = is_same<Functor,meta::swap  >::value;
+	  is_same<Functor,meta::assign    >::value ||
+	  is_same<Functor,meta::add       >::value ||
+	  is_same<Functor,meta::subtract  >::value ||
+	  is_same<Functor,meta::multiply  >::value ||
+	  is_same<Functor,meta::divide    >::value ||
+	  is_same<Functor,meta::swap      >::value ||
+	  is_same<Functor,meta::sqrt      >::value ||
+	  is_same<Functor,meta::square    >::value ||
+	  is_same<Functor,meta::reciprocal>::value ||
+	  is_same<Functor,meta::maximum   >::value ||
+	  is_same<Functor,meta::minimum   >::value;
       };
       // auxiliary for connect<>
       template<typename RealType>
@@ -2071,7 +2291,10 @@ namespace WDutils {
 	//
 	template<typename Functor, typename vec>
 	static always_inline
-	typename enable_if<!is_assign<Functor>::value &&
+	typename enable_if<!is_same<Functor,meta::assign>::value &&
+	                   !is_same<Functor,meta::sqrt>::value &&
+	                   !is_same<Functor,meta::square>::value &&
+	                   !is_same<Functor,meta::reciprocal>::value &&
 	                    is_packed<vec>::value>::type
 	connect(real*x, vec const&vy) noexcept
 	{
@@ -2082,9 +2305,30 @@ namespace WDutils {
 	//
 	template<typename Functor, typename vec>
 	static always_inline
-	typename enable_if<is_assign<Functor>::value>::type
+	typename enable_if<is_same<Functor,meta::assign>::value>::type
 	connect(real*x, vec const&vy) noexcept
 	{ vy.store(x); }
+	//
+	template<typename Functor, typename vec>
+	static always_inline
+	typename enable_if<is_same<Functor,meta::sqrt>::value>::type
+	connect(real*x, vec const&vy) noexcept
+	{ sqrt(vy).store(x); }
+	//
+	template<typename Functor, typename vec>
+	static always_inline
+	typename enable_if<is_same<Functor,meta::square>::value>::type
+	connect(real*x, vec const&vy) noexcept
+	{ (vy*vy).store(x); }
+	//
+	template<typename Functor, typename vec>
+	static always_inline
+	typename enable_if<is_same<Functor,meta::reciprocal>::value>::type
+	connect(real*x, vec const&vy) noexcept
+	{
+	  static vec one = vec::one();
+	  (one/vy).store(x);
+	}
 	//
 	template<unsigned block_size, bool y_aligned>
 	static always_inline
@@ -2322,7 +2566,7 @@ namespace WDutils {
     ///
     template<typename Functor, typename RealType>
     typename enable_if< details::is_functor<Functor>::value &&
-                       !details::is_swap   <Functor>::value>::type
+		       !is_same<Functor,meta::swap >::value>::type
     connect(RealType*x, const RealType*y, unsigned n) noexcept
     { details::connector<RealType>::template connect<Functor>(x,y,n); }
     ///
@@ -2334,7 +2578,7 @@ namespace WDutils {
     { details::connector<RealType>::swap(x,y,n); }
     //
     template<typename Functor, typename RealType>
-    typename enable_if<details::is_swap   <Functor>::value>::type
+    typename enable_if<is_same<Functor,meta::swap>::value>::type
     connect(RealType*x, RealType*y, unsigned n) noexcept
     { swap(x,y,n); }
     ///
@@ -2342,16 +2586,16 @@ namespace WDutils {
     /// @code  for(i=0; i!=n; ++i) Functor::operate(x[i], y); @endcode
     ///
     template<typename Functor, typename RealType>
-    typename enable_if< details::is_functor<Functor>::value &&
-                       !details::is_swap   <Functor>::value &&
-                       !details::is_divide <Functor>::value>::type
+    typename enable_if< details::is_functor<Functor> ::value &&
+                       !is_same<Functor,meta::swap>  ::value &&
+                       !is_same<Functor,meta::divide>::value>::type
     foreach(RealType*x, const RealType y, unsigned n) noexcept
     { details::connector<RealType>::template foreach<Functor>(x,y,n); }
     //
     template<typename Functor, typename RealType>
-    typename enable_if<details::is_divide <Functor>::value>::type
+    typename enable_if<is_same<Functor,meta::divide>::value>::type
     foreach(RealType*x, const RealType y, unsigned n) noexcept
-    { foreach<meta::multiply>(x,RealType(1)/y); }
+    { foreach<meta::multiply>(x,RealType(1)/y,n); }
     //
     namespace details {
       // static templated array connection: non-SSE version
@@ -2679,7 +2923,7 @@ namespace WDutils {
       struct static_connector<float> : private connector_helper<float>
       {
 	typedef connector_helper<float> helper;
-# if __cplusplus >= 201103L
+# if __cplusplus >= 201103L && !defined(__INTEL_COMPILER)
 	//
 	static constexpr unsigned smll_block(unsigned block)
 	{ return block==8? 4 : 1; }
@@ -3067,9 +3311,13 @@ namespace WDutils {
     ///
     template<typename Functor, unsigned N, typename RealType>
     typename enable_if< details::is_functor<Functor>::value &&
-                       !details::is_swap   <Functor>::value>::type
+		       !is_same<Functor,meta::swap >::value>::type
     static_connect(RealType*x, const RealType*y) noexcept
     { details::static_connector<RealType>::template connect<N,Functor>(x,y); }
+    /// copy array element wise
+    template<unsigned N, typename RealType>
+    void static_copy(RealType*x, const RealType*y) noexcept
+    { static_connect<meta::assign,N>(x,y); }
     ///
     /// swap elements of two arrays:
     /// @code  for(i=0; i!=n; ++i) swap(x[i], y[i]); @endcode
@@ -3079,7 +3327,7 @@ namespace WDutils {
     { details::static_connector<RealType>::template swap<N>(x,y); }
     //
     template<typename Functor, unsigned N, typename RealType>
-    typename enable_if<details::is_swap   <Functor>::value>::type
+    typename enable_if<is_same<Functor,meta::swap>::value>::type
     static_connect(RealType*x, RealType*y) noexcept
     { static_swap<N>(x,y); }
     ///
@@ -3087,20 +3335,101 @@ namespace WDutils {
     /// @code  for(i=0; i!=n; ++i) Functor::operate(x[i], y); @endcode
     ///
     template<typename Functor, unsigned N, typename RealType>
-    typename enable_if< details::is_functor<Functor>::value &&
-                       !details::is_swap   <Functor>::value &&
-                       !details::is_divide <Functor>::value>::type
+    typename enable_if< details::is_functor<Functor >::value &&
+                       !is_same<Functor,meta::swap  >::value &&
+                       !is_same<Functor,meta::divide>::value>::type
     static_foreach(RealType*x, const RealType y) noexcept
     { details::static_connector<RealType>::template foreach<N,Functor>(x,y); }
     //
     template<typename Functor, unsigned N, typename RealType>
-    typename enable_if<details::is_divide <Functor>::value>::type
+    typename enable_if<is_same<Functor,meta::divide>::value>::type
     static_foreach(RealType*x, const RealType y) noexcept
-    { static_foreach<N,meta::multiply>(x,RealType(1)/y); }
-    //
-    //
-    //
-
+    { static_foreach<meta::multiply,N>(x,RealType(1)/y); }
+#if(0)
+    /// copy raw memory from srce to dest
+    void*memory_copy(void*dest, const void*srce, size_t bytes)
+    {
+#ifdef __SSE__
+      // if memory offset between dest & srce is not a multiple of 4, use memcpy
+      int off_dest = size_t(dest)&31;
+      int off_srce = size_t(srce)&31;
+      if((off_dest-off_srce)&3)
+#endif
+	return std::memcpy(dest,srce,bytes);
+#ifdef __SSE__
+      // assert no undue overlap
+# ifdef __AVX__
+      WDutilsAssert(size_t(dest)+32    <= size_t(srce) &&
+		    size_t(srce)+bytes <= size_t(dest));
+# else
+      WDutilsAssert(size_t(dest)+16    <= size_t(srce) &&
+		    size_t(srce)+bytes <= size_t(dest));
+# endif
+      char      *p_dest = static_cast<char*> (dest);
+      const char*p_srce = static_cast<const char*>(dest);
+      // ensure alignment to  4 bytes
+      for(; bytes>=4 && size_t(p_dest)&3; --bytes,++p_dest,++p_srce)
+	*p_dest = *p_srce;
+      // ensure alignment to 16 bytes
+      for(; bytes>=16 && size_t(p_dest)&15; bytes-=4,p_dest+=4,p_srce+=4)
+	reinterpret_cast<int32_t&>(*p_dest) =
+	  reinterpret_cast<const int32_t&>(*p_srce);
+# ifdef __AVX__
+      // ensure alignment to 32 bytes
+      if(bytes>=16 && size_t(p_dest)&31) {
+	_mm_store_ps(reinterpret_cast<float*>(p_dest),
+		     _mm_loadu_ps(reinterpret_cast<const float*>(p_srce)));
+	bytes -=16;
+	p_dest+=16;
+	p_srce+=16;
+      }
+      // loop blocks of 32 bytes
+      if(size_t(p_srce)&31) {
+	for(; bytes>=32; bytes-=32,p_dest+=32,p_srce+=32)
+	  _mm256_store_ps(reinterpret_cast<float*>(p_dest)
+	  _mm256_loadu_ps(reinterpret_cast<const float*>(p_srce)));
+	if(bytes>=16) {
+	  _mm_store_ps(reinterpret_cast<float*>(p_dest),
+	  _mm_loadu_ps(reinterpret_cast<const float*>(p_srce)));
+	  bytes -=16;
+	  p_dest+=16;
+	  p_srce+=16;
+	}
+      } else {
+	for(; bytes>=32; bytes-=32,p_dest+=32,p_srce+=32)
+	  _mm256_store_ps(reinterpret_cast<float*>(p_dest)
+	  _mm256_load_ps(reinterpret_cast<const float*>(p_srce)));
+	if(bytes>=16) {
+	  _mm_store_ps(reinterpret_cast<float*>(p_dest),
+	  _mm_load_ps(reinterpret_cast<const float*>(p_srce)));
+	  bytes -=16;
+	  p_dest+=16;
+	  p_srce+=16;
+	}
+      }
+# else
+      // loop blocks of 16 bytes
+      if(size_t(p_srce)&15) {
+	for(; bytes>=16; bytes-=16,p_dest+=16,p_srce+=16)
+	  _mm_store_ps(reinterpret_cast<float*>(p_dest),
+		       _mm_loadu_ps(reinterpret_cast<const float*>(p_srce)));
+      } else {
+	for(; bytes>=16; bytes-=16,p_dest+=16,p_srce+=16)
+	  _mm_store_ps(reinterpret_cast<float*>(p_dest),
+		       _mm_load_ps(reinterpret_cast<const float*>(p_srce)));
+      }
+# endif
+      // do remaining blocks of 4 bytes
+      for(; bytes>=4; bytes-=4,p_dest+=4,p_srce+=4)
+	reinterpret_cast<int32_t&>(*p_dest) =
+	  reinterpret_cast<const int32_t&>(*p_srce);
+      // do remaining single bytes
+      for(; bytes; --bytes,++p_dest,++p_srce)
+	*p_dest = *p_srce;
+#endif // __SSE__
+      return dest;
+    }
+#endif
     /// smallest multiple of 16/sizeof(_F) not less than i
     template<typename _F, typename _I> inline
     _I Top(_I i) {
@@ -3111,40 +3440,41 @@ namespace WDutils {
     _I Bottom(_I i) {
       return Traits<_F>::Bottom(i);
     }
-    /// filler object of size _S
-    template<size_t _S> class Filler { char _F[_S]; };
+    /// extend Base by Add bytes
+    template<typename Base, size_t Add>
+    struct ExtendBy
+    { class type : public Base { char _m_fill[Add]; }; };
+    template<typename Base>
+    struct ExtendBy<Base,0>
+    { typedef Base type; };
+    /// extension needed for alignment with K bytes
+    template<typename Base, size_t K>
+    class Extension
+    {
+      struct _tmp {
+	WDutilsCXX11StaticAssert((K&(K-1))==0,"K not a power of two"); };
+      static const size_t bytes = sizeof(Base);
+      static const size_t splus = bytes & (K-1);
+    public:
+      static const size_t added = splus? K-splus : 0;
+      typedef typename ExtendBy<Base,added>::type Extended;
+      WDutilsStaticAssert((sizeof(Extended)&(K-1))==0);
+    };
     /// extend a given class to have size a multibple of K bytes
     /// \note only default constructor possible for @a Base
-    template<typename Base
 #if __cplusplus >= 201103L
-	     , int K= 16
-#endif
-	     >
-class
-#if __cplusplus >= 201103L
-    Extend
-#else
-    Extend16
-#endif
-     : public Base
-    {
-#if __cplusplus >= 201103L
-      static_assert((K&(K-1))==0,"K not a power of two");
-#else
-      static const int K=16;
-#endif
-      static const size_t Bytes = sizeof(Base);
-      static const size_t Splus = Bytes & (K-1);
-      static const size_t Added = Splus? K-Splus : 0;
-      Filler<Added> _Filler;
-    };
-#if __cplusplus >= 201103L
+    template<typename Base, size_t K>
+    using Extend = typename Extension<Base,K>::Extended;
     template<typename Base>
     using Extend16 = Extend<Base,16>;
+#else
+    template<typename Base, size_t K>
+    struct Extend : public Extension<Base,K>::Extended {};
+    template<typename Base>
+    struct Extend16 : public Extension<Base,16>::Extended {};
 #endif
     //
 #ifdef __SSE__
-    /// working horse actually implemented in sse.cc
     /// \note Not intended for consumption, use routine below instead.
     inline void _swap16(float*a, float*b, size_t n)
     {
@@ -3165,8 +3495,8 @@ class
     inline void Swap16(void*a, void*b, size_t n)
     { _swap16(static_cast<float*>(a),static_cast<float*>(b),n>>2); }
     /// swaps 16-byte aligned objects with size a multiple of 16-bytes
-    /// \param[in,out] x  pter to object, on return holds data of @a y
-    /// \param[in,out] y  pter to object, on return holds data of @a x
+    /// \param[in,out] a  pter to object, on return holds data of @a y
+    /// \param[in,out] b  pter to object, on return holds data of @a x
     /// \note If the sizeof(Object) is not a multiple of 16, a compile-time
     ///       error occurs. However, if either @a x or @a y is not 16-byte
     ///       aligned a run-time error (segmentation fault) will result.
@@ -3185,5 +3515,6 @@ class
 #undef constexpr
 #undef static_assert
 #undef always_inline
+#undef alignas
 //
 #endif

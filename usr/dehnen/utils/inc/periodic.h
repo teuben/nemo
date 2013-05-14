@@ -363,7 +363,7 @@ namespace WDutils {
 	    real q1 = q0 + (i1? qi[1] : 0);
 	    if(q1>q) continue;
 	    unsigned o1 = o0 | (i1? x[1]>0? 4:8:0);
-	    if(o1) off[n++] = o1;
+	    if(o1) off[n++] = offsetbits(o1);
 	  }
 	}
       }
@@ -565,7 +565,7 @@ namespace WDutils {
 	      real q2 = q1 + (i2? qi[2] : 0);
 	      if(q2>q) continue;
 	      unsigned o2 = o1 | (i2? x[2]>0? 16:32:0);
-	      if(o2) off[n++] = o2;
+	      if(o2) off[n++] = offsetbits(o2);
 	    }
 	  }
 	}

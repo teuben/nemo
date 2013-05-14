@@ -80,7 +80,7 @@ double WDutils::qbulir(double(*func)(double),
   // initialise some variables
   bool   bo,bu=0,odd=1;
   int    i,m,n=2,nn=3,mr;
-  double d[7],dt[7];
+  double d[7],dt[7]={0.};
   double ddt,hm,nt,err(0),t,ta,tab=(0),v=(0),w(0),sm(0),gr(0),t1(0),
     t2 =0.5*(func(a)+func(b)),
     t2a=t2,
@@ -181,8 +181,8 @@ double WDutils::qbulir(double(*func)(double),
 void WDutils::GaussLegendre(double *x, double *w, const unsigned n)
 {
   const double eps=std::numeric_limits<double>::epsilon();
-  const int m=(n+1)/2;
-  for(int i=0; i!=m; ++i) {
+  const unsigned m=(n+1)/2;
+  for(unsigned i=0; i!=m; ++i) {
     double z1,pp,z=std::cos(Pi*(i+0.75)/(n+0.5));
     do {
       double p1 = 1.0;
@@ -420,7 +420,7 @@ namespace {
       unsigned R;       ///< rank of first point
       scalar   W;       ///< cumulative weight at first point
       range   *S;       ///< pter to left sub-range
-      explicit range(int n) : N(n), R(0), W(0), S(0) {}
+      explicit range(unsigned n) : N(n), R(0), W(0), S(0) {}
     };
     scalar             SumW;        ///< total weight
     point             *P;           ///< table of points
@@ -435,10 +435,10 @@ namespace {
       memcpy( b,&p, sizeof(point));
     }
     /// split a list of points
-    /// \param[in]  p list of points to split
-    /// \param[in]  n size of list
-    /// \param[in]  s split point
-    /// \param[out] w total weight of left part
+    /// \param[in]  p  list of points to split
+    /// \param[in]  np size of list
+    /// \param[in]  s  split point
+    /// \param[out] w  total weight of left part
     /// \return     number of points in left part
     /// \note If s is in the range of positions, the split will always generate
     ///       non-empty sub-ranges.
@@ -456,21 +456,20 @@ namespace {
 	for(++l;            l!=n && l->X<s; ++l) w += l->W;
 	for(u=max(u+1,l+1); u!=n && u->X>s; ++u) {}
       }
-      return l - p;
+      return unsigned(l-p);
     }
     /// split a range.
     /// we split at the element in mid-index.
-    void split(range*A) WDutils_THROWING;
+    void split(range*A);
     /// ctor: create points and set root
-    Ranker(const scalar*, unsigned, const scalar*, unsigned) WDutils_THROWING;
+    Ranker(const scalar*, unsigned, const scalar*, unsigned);
     /// ctor: create points and set root
-    Ranker(unsigned, scalar(*)(unsigned), unsigned) WDutils_THROWING;
+    Ranker(unsigned, scalar(*)(unsigned), unsigned);
     /// ctor: create points and set root
-    Ranker(unsigned, void(*)(unsigned,scalar&,scalar&),unsigned)
-    WDutils_THROWING;
+    Ranker(unsigned, void(*)(unsigned,scalar&,scalar&),unsigned);
   public:
     /// dtor: delete points
-    ~Ranker() WDutils_THROWING { WDutils_DEL_A(P); }
+    ~Ranker() { WDutils_DEL_A(P); }
     /// is a range pointer valid?
     bool is_valid(const range*r)
     {
@@ -481,7 +480,7 @@ namespace {
     /// \return range of size 1 with position of given rank
     /// The sort tree is refined such that at rank R the range has size 1 and
     /// the point or rank R has internal index R.
-    const range*RankR(unsigned r) WDutils_THROWING
+    const range*RankR(unsigned r)
     {
       range*A=&Root;
       if(r>=A->N) WDutils_THROW("FindPercentile<%s>::FindRank: "
@@ -497,7 +496,7 @@ namespace {
     /// \return range of size 1 with cumulative weight just below W
     /// The sort tree is refined such that at cumulative weight W the range has
     /// size 1 and the point rank and index match.
-    const range*RankW(scalar w) WDutils_THROWING
+    const range*RankW(scalar w)
     {
       if(w>SumW) WDutils_THROW("FindPercentile<%s>::FindCumulativeWeight: "
 			       "w=%f >= Wtot=%f\n",nameof(scalar),w,SumW);
@@ -511,21 +510,24 @@ namespace {
   };// class FindPercentile<>
 } // namespace {
 namespace WDutils {
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wunused-member-function"
   WDutils_TRAITS(Ranker<float>::point,"Ranker<float>::point");
   WDutils_TRAITS(Ranker<float>::range,"Ranker<float>::range");
   WDutils_TRAITS(Ranker<double>::point,"Ranker<double>::point");
   WDutils_TRAITS(Ranker<double>::range,"Ranker<double>::range");
+# pragma clang diagnostic pop
 }
 //
 namespace {
   // Ranker::Ranker
   template<typename T>
   Ranker<T>::Ranker(const T*a, unsigned n, const T*w, unsigned k)
-    WDutils_THROWING :
-    SumW       ( 0 ),
-    P          ( WDutils_NEW(point,n) ),
-    Root       ( n ),
-    RangeAlloc ( k? 4*k*int(1+log(double(n))) : 10*int(1+log(double(n))) )
+    : SumW       ( 0 )
+    , P          ( WDutils_NEW(point,n) )
+    , Root       ( n )
+    , RangeAlloc ( k? 4*k*unsigned(1+log(double(n))) :
+		      10 *unsigned(1+log(double(n))) )
   {
     for(unsigned i=0; i!=n; ++i) {
       P[i].X = a[i];
@@ -539,11 +541,11 @@ namespace {
   //
   template<typename T>
   Ranker<T>::Ranker(unsigned n, T(*F)(unsigned), unsigned k)
-    WDutils_THROWING :
-    SumW       ( 0 ),
-    P          ( WDutils_NEW(point,n) ),
-    Root       ( n ),
-    RangeAlloc ( k? 4*k*int(1+log(double(n))) : 10*int(1+log(double(n))) )
+    : SumW       ( 0 )
+    , P          ( WDutils_NEW(point,n) )
+    , Root       ( n )
+    , RangeAlloc ( k? 4*k*unsigned(1+log(double(n))) :
+	  	      10 *unsigned(1+log(double(n))) )
   {
     for(unsigned i=0; i!=n; ++i) {
       P[i].X = F(i);
@@ -555,11 +557,11 @@ namespace {
   //
   template<typename T>
   Ranker<T>::Ranker(unsigned n, void(*F)(unsigned, T&, T&), unsigned k)
-    WDutils_THROWING :
-    SumW       ( 0 ),
-    P          ( WDutils_NEW(point,n) ),
-    Root       ( n ),
-    RangeAlloc ( k? 4*k*int(1+log(double(n))) : 10*int(1+log(double(n))) )
+    : SumW       ( 0 )
+    , P          ( WDutils_NEW(point,n) )
+    , Root       ( n )
+    , RangeAlloc ( k? 4*k*unsigned(1+log(double(n))) :
+		      10 *unsigned(1+log(double(n))) )
   {
     for(unsigned i=0; i!=n; ++i) {
       P[i].I = i;
@@ -571,7 +573,7 @@ namespace {
   }
   // Ranker::split
   template<typename T>
-  void Ranker<T>::split(range*A) WDutils_THROWING
+  void Ranker<T>::split(range*A)
   {
     if(A->N >= 2) {
       unsigned L;
@@ -600,7 +602,6 @@ namespace WDutils {
   template<typename T>
   void FindPercentile<T>::setup(const T*X, unsigned N,
 				const T*W, unsigned K)
-    WDutils_THROWING
   {
     if(DATA) WDutils_THROW("FindPercentile<%s>::setup(): DATA=%p != 0\n",
 			   nameof(T),DATA);
@@ -610,7 +611,6 @@ namespace WDutils {
   template<typename T>
   void FindPercentile<T>::setup(unsigned N, T(*X)(unsigned),
 				unsigned K)
-    WDutils_THROWING
   {
     if(DATA) WDutils_THROW("FindPercentile<%s>::setup(): DATA=%p != 0\n",
 			   nameof(T),DATA);
@@ -621,7 +621,6 @@ namespace WDutils {
   void FindPercentile<T>::setup(unsigned N,
 				void(*F)(unsigned, T&, T&),
 				unsigned K)
-    WDutils_THROWING
   {
     if(DATA) WDutils_THROW("FindPercentile<%s>::setup(): DATA=%p != 0\n",
 			   nameof(T),DATA);
@@ -641,19 +640,19 @@ namespace WDutils {
   }
   //
   template<typename T> typename FindPercentile<T>::
-  handle FindPercentile<T>::FindRank(unsigned r) const WDutils_THROWING
+  handle FindPercentile<T>::FindRank(unsigned r) const
   {
     return RANKER->RankR(r);
   }
   //
   template<typename T> typename FindPercentile<T>::
-  handle FindPercentile<T>::FindCumulativeWeight(T w) const WDutils_THROWING
+  handle FindPercentile<T>::FindCumulativeWeight(T w) const
   {
     return RANKER->RankW(w);
   }
   //
   template<typename T>
-  unsigned FindPercentile<T>::Index(handle h, bool c) const WDutils_THROWING
+  unsigned FindPercentile<T>::Index(handle h, bool c) const
   {
     if(c && (!RANKER->is_valid(Range(h)) || Range(h)->N!=1) )
       WDutils_THROW("FindPercentile<%s>::Index(): invalid handle\n",nameof(T));
@@ -661,7 +660,7 @@ namespace WDutils {
   }
   //
   template<typename T>
-  T FindPercentile<T>::Weight(handle h, bool c) const WDutils_THROWING
+  T FindPercentile<T>::Weight(handle h, bool c) const
   {
     if(c && (!RANKER->is_valid(Range(h)) || Range(h)->N!=1) )
       WDutils_THROW("FindPercentile<%s>::Weight(): invalid handle\n",nameof(T));
@@ -669,7 +668,7 @@ namespace WDutils {
   }
   //
   template<typename T>
-  T FindPercentile<T>::Position(handle h, bool c) const WDutils_THROWING
+  T FindPercentile<T>::Position(handle h, bool c) const
   {
     if(c && (!RANKER->is_valid(Range(h)) || Range(h)->N!=1) )
       WDutils_THROW("FindPercentile<%s>::Position(): invalid handle\n",
@@ -678,7 +677,7 @@ namespace WDutils {
   }
   //
   template<typename T>
-  unsigned FindPercentile<T>::Rank(handle h, bool c) const WDutils_THROWING
+  unsigned FindPercentile<T>::Rank(handle h, bool c) const
   {
     if(c && (!RANKER->is_valid(Range(h)) || Range(h)->N!=1) )
       WDutils_THROW("FindPercentile<%s>::Rank(): invalid handle\n",nameof(T));
@@ -686,7 +685,7 @@ namespace WDutils {
   }
   //
   template<typename T>
-  T FindPercentile<T>::CumulativeWeight(handle h, bool c) const WDutils_THROWING
+  T FindPercentile<T>::CumulativeWeight(handle h, bool c) const
   {
     if(c && (!RANKER->is_valid(Range(h)) || Range(h)->N!=1) )
       WDutils_THROW("FindPercentile<%s>::Weight(): invalid handle\n",nameof(T));

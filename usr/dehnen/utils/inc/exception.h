@@ -51,10 +51,18 @@
 #  define WDutils_included_cstdlib
 #  include <cstdlib>
 #endif
+#ifndef WDutils_included_stdexcept
+#  define WDutils_included_stdexcept
+#  include <stdexcept>
+#endif
 #if __cplusplus >= 201103L
-# ifndef WDutils_included_type_traits
-#  include <type_traits>
-# endif
+#  ifndef WDutils_included_type_traits
+#    include <type_traits>
+#  endif
+#endif
+
+#ifdef __INTEL_COMPILER
+#  pragma warning (disable:161) /* unrecognized pragma */
 #endif
 
 //                                                                              
@@ -65,61 +73,41 @@
 ///                                                                             
 namespace WDutils {
 
-  // /// static type information: an extension of std::numeric_limits<>
-  // //
-  // namespace meta {
-  //   /// \note The only additional member indicates a floating point type; @c
-  //   ///       std::numeric_limits<>::is_integer cannot be used instead as it's
-  //   ///       @c false for all non-fundamental types.
-  //   template<typename __T> struct TypeInfo :
-  //     public std::numeric_limits<__T> {
-  //     static const bool is_floating_point = false;
-  //   };
-  //   template<> struct TypeInfo<float> :
-  //     public std::numeric_limits<float> {
-  //     static const bool is_floating_point = true;
-  //   };
-  //   template<> struct TypeInfo<double> :
-  //     public std::numeric_limits<double> {
-  //     static const bool is_floating_point = true;
-  //   };
-  //   template<> struct TypeInfo<long double> :
-  //     public std::numeric_limits<long double> {
-  //     static const bool is_floating_point = true;
-  //   };
-  // }
-  // using meta::TypeInfo;
-
   /// provides information about the running process
   /// \note only one object exists, the static RunInfo::Info
   class RunInfo {
   private:
-    bool __host_known;
-    bool __user_known;
-    bool __pid_known;
-    bool __name_known;
-    bool __cmd_known;
-    bool __is_mpi_proc;
-    char __time   [100];
-    char __host   [100];
-    char __user   [100];
-    char __pid     [20];
-    char __name   [100];
-    char __cmd   [1024];
-    int  __pid_num;
-    int  __debug;
-    int  __mpi_proc;
-    int  __mpi_size;
-    int  __omp_size;
-    int  __omp_proc;
+    bool _m_host_known;
+    bool _m_user_known;
+    bool _m_pid_known;
+    bool _m_name_known;
+    bool _m_cmd_known;
+    bool _m_is_mpi_proc;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-private-field"
+    bool _m_dummy_bool[2]; // padding to 8 bytes
+#pragma clang diagnostic pop
+    char _m_time   [104];
+    char _m_host   [104];
+    char _m_user   [104];
+    char _m_pid     [24];
+    char _m_name   [104];
+    char _m_cmd   [1024];
+    int       _m_pid_num,_m_debug;
+    int       _m_mpi_proc,_m_mpi_size;
+    int       _m_omp_proc,_m_omp_size;
+    unsigned  _m_tbb_proc,_m_tbb_size;
+    void     *_m_tbb_init;
 #if defined(__unix) || defined(__DARWIN_UNIX03)
-    long long __sec, __usec;
+    long long _m_sec, _m_usec;
 #elif defined(WIN32)
-    long long __timecount;
-    double __timetick;
+    long long _m_timecount;
+    double    _m_timetick;
 #endif
-    /// default ctor
+    /// default constructor
     RunInfo();
+    /// destructor
+    ~RunInfo();
     /// static Info
     static RunInfo Info;
     //  no copy ctor and no operator=
@@ -128,21 +116,17 @@ namespace WDutils {
   public:
     /// reset the debugging level
     static void set_debug_level(int d)
-    { Info.__debug = d; }
+    { Info._m_debug = d; }
     /// provide info about MPI
     static void set_mpi_proc(int p, int s)
     {
-      Info.__is_mpi_proc = 1;
-      Info.__mpi_proc=p;
-      Info.__mpi_size=s;
+      Info._m_is_mpi_proc = 1;
+      Info._m_mpi_proc=p;
+      Info._m_mpi_size=s;
     }
-    /// maximum # processors available for openMP
-    static int max_omp_proc()
-    { return Info.__omp_proc; }
-    /// # openMP threads to be used, may exceed @a max_omp_proc()
-    /// \note defaults to max_omp_proc, implying openMP is used if available
-    static int omp_threads()
-    { return Info.__omp_size; }
+
+    /// \name openMP stuff
+    //@{
     /// set # openMP threads
     /// \note If @a arg[0] == 't', we set # threads to # processors.\n
     ///       If @a arg[0] == 'f', we set # threads to 1 (no openMP).\n
@@ -151,60 +135,105 @@ namespace WDutils {
     static void set_omp(const char*arg);
     /// set # openMP threads
     static void set_omp(int n);
+    /// maximum # processors available for openMP
+    static int max_omp_proc()
+    { return Info._m_omp_proc; }
+    /// # openMP threads to be used, may exceed @a max_omp_proc()
+    /// \note defaults to max_omp_proc, implying openMP is used if available
+    static int omp_threads()
+    { return Info._m_omp_size; }
     /// shall openMP parallelism be used?
     static bool use_omp()
-    { return Info.__omp_size > 1; }
+    { return Info._m_omp_size > 1; }
+    //@}
+
+    /// \name TBB stuff
+    //@{
+#ifdef WDutilsTBB
+#  define _END_FUNCTION_
+#else
+#  define _END_FUNCTION_ {}
+#endif
+    /// set # TBB threads
+    /// \note If @a arg[0] == 't', we set # threads to automatic
+    ///       If @a arg[0] == 'f', we set # threads to 1.         \n
+    ///       Otherwise, we try to convert @a arg to an integer number and
+    ///       take that. This may exceed the # processors.
+    static void set_tbb(const char*) _END_FUNCTION_;
+    /// set # TBB threads, if arg=0, uses tbb::task_scheduler_init::automatic
+    /// \note use n=1 to de-activate tbb parallelism
+    static void set_tbb(unsigned =0) _END_FUNCTION_;
+#undef _END_FUNCTION_
+    /// use tbb
+    static bool use_tbb()
+    { return Info._m_tbb_size > 1; }
+    /// maximum # processors available for TBB
+    static unsigned max_tbb_proc()
+    { return Info._m_tbb_proc; }
+    /// # TBB threads to be used, may exceed @a max_tbb_proc()
+    static unsigned tbb_threads()
+    { return Info._m_tbb_size; }
+    /// is TBB parallelism activated through set_tbb()?
+    /// \note you can use TBB parallelism even if tbb_is_active() returns false
+    static bool tbb_is_active()
+    { return tbb_threads() > 0; }
+#ifdef WDutilsTBB
+    /// return a unique short id for the current tbb thread
+    static unsigned tbb_thread_id();
+#endif
+    //@}
+
     /// is host name known?
     static bool host_known()
-    { return Info.__host_known; }
+    { return Info._m_host_known; }
     /// is user name known?
     static bool user_known()
-    { return Info.__user_known; }
+    { return Info._m_user_known; }
     /// is user pid known?
     static bool pid_known()
-    { return Info.__pid_known; }
+    { return Info._m_pid_known; }
     /// is name of the running program known?
     static bool name_known()
-    { return Info.__name_known; }
+    { return Info._m_name_known; }
     /// is command line is known?
     static bool cmd_known()
-    { return Info.__cmd_known; }
+    { return Info._m_cmd_known; }
     /// string with full time of run
     static const char*time()
-    { return Info.__time; }
+    { return Info._m_time; }
     /// string with host nam
     static const char*host()
-    { return Info.__host; }
+    { return Info._m_host; }
     /// string with user name
     static const char*user()
-    { return Info.__user; }
+    { return Info._m_user; }
     /// string with process id
     static const char*pid()
-    { return Info.__pid; }
+    { return Info._m_pid; }
     /// numerical valud of user process id
     static int const&pid_num()
-    { return Info.__pid_num; }
+    { return Info._m_pid_num; }
     /// string with name of the running program
     static const char*name()
-    { return Info.__name; }
+    { return Info._m_name; }
     /// string with command line
     static const char*cmd()
-    { return Info.__cmd; }
+    { return Info._m_cmd; }
     /// return debugging level
     static int debug_level()
-    { return Info.__debug; }
+    { return Info._m_debug; }
     /// is this process part of an MPI run?
     static bool is_mpi_proc()
-    { return Info.__is_mpi_proc; }
+    { return Info._m_is_mpi_proc; }
     /// return our rank within MPI, if we are part of a MPI run
     static int mpi_proc()
-    { return Info.__mpi_proc; }
+    { return Info._m_mpi_proc; }
     /// return our size of MPI::World, if we are part of a MPI run
     static int mpi_size()
-    { return Info.__mpi_size; }
+    { return Info._m_mpi_size; }
     /// return true if debug level >= given debug depth
     static bool debug(int depth)
-    { return Info.__debug >= depth; }
+    { return Info._m_debug >= depth; }
     /// print a log-file header
     static void header(std::ostream&out);
 #if defined(__unix) || defined(__DARWIN_UNIX03) || defined(WIN32)
@@ -246,25 +275,29 @@ namespace WDutils {
   /// to implement DebugInformation, Error, and Warning
   template<typename ReportTraits>
   struct Reporting {
-    const char*library;
-    const char*file,*func;      ///< names: file, function
-    const int  line;            ///< line number
+    const char    *library;
+    const char    *file,*func;      ///< names: file, function
+    const unsigned line;            ///< line number
+    const unsigned flag;            ///< currently only: write thread id?
     /// constructor: get library and function name
-    explicit Reporting(const char*__lib)
-      : library(__lib), file(0), func(0), line(0) {}
+    explicit Reporting(const char*_m_lib, unsigned _m_flag=1)
+      : library(_m_lib), file(0), func(0), line(0), flag(_m_flag) {}
     /// constructor: get library and function name
-    explicit Reporting(const char*__func, const char*__lib)
-      : library(__lib), file(0), func(__func), line(0) {}
+    explicit Reporting(const char*_m_func, const char*_m_lib,
+		       unsigned _m_flag=1)
+      : library(_m_lib), file(0), func(_m_func), line(0), flag(_m_flag) {}
     /// constructor: get file name, line number, and library name
-    Reporting(const char*__file, int __line, const char*__lib)
-      : library(__lib), file(__file), func(0), line(__line) {}
+    Reporting(const char*_m_file, unsigned _m_line, const char*_m_lib,
+	      unsigned _m_flag=1)
+      : library(_m_lib), file(_m_file), func(0), line(_m_line), flag(_m_flag) {}
     /// constructor: get file name, func name, line number, and library name
-    Reporting(const char*__func, const char*__file, int __line,
-	      const char*__lib)
-      : library(__lib), file(__file), func(__func), line(__line) {}
+    Reporting(const char*_m_func, const char*_m_file, unsigned _m_line,
+	      const char*_m_lib, unsigned _m_flag=1)
+      : library(_m_lib), file(_m_file), func(_m_func), line(_m_line)
+      , flag(_m_flag) {}
     /// print info message to stderr, report [file:line] if known.
     /// \param[in] fmt debug info message (C-type format string)
-    /// \param[in] ... data to be formated
+    /// \note  data to be formated must obey the usual C-style formatting rules
     void operator() (const char*fmt, ...) const
 #ifdef __GNUC__
       __attribute__ ((format (printf, 2, 3)))
@@ -273,7 +306,7 @@ namespace WDutils {
     /// print info message to stderr, report [file:line] if known.
     /// \param[in] lev level: only report if less than debug_level()
     /// \param[in] fmt debug info message (C-type format string)
-    /// \param[in] ... data to be formated
+    /// \note  data to be formated must obey the usual C-style formatting rules
     void operator() (int lev, const char*fmt, ...) const
 #ifdef __GNUC__
       __attribute__ ((format (printf, 3, 4)))
@@ -312,12 +345,13 @@ namespace WDutils {
   ///   void DebugInfoN(int debug_level, const char*format, ...);
   ///   void DebugInfoN(const char*format, ...); 
   /// \endcode
-#define DebugInfoN WDutils::DebugInformation("WDutils")
+#define DebugInfoN  WDutils::DebugInformation("WDutils")
+#define DebugInfoN0 WDutils::DebugInformation("WDutils",0u)
   /// traits for Error
   struct ErrorTraits {
     static bool condition(int) { return true; }
     static const char*issue() { return "Error"; }
-    static void after() { std::exit(1); }
+    static __attribute__((noreturn)) void after() { std::terminate(); }
   };
   typedef Reporting<ErrorTraits> Error;
   /// print error message to stderr, reporting [file:line]func, and exit.
@@ -368,14 +402,16 @@ namespace WDutils {
   /// \name exception treatment                                                 
   //@{                                                                          
   /// simple exception with error message
-  struct exception : protected std::string {
-    /// copy constructor
-#if __cplusplus >= 201103L
-    exception(exception const&) = default;
-#else
-    exception(exception const&e)
-      : std::string(e) {}
-#endif
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winline"
+  struct exception : std::runtime_error
+  {
+    /// construction from std::runtime_error
+    explicit exception(std::runtime_error const&e)
+      : std::runtime_error(e) {}
+    /// construction from string
+    explicit exception(std::string const&s)
+      : std::runtime_error(s) {}
     /// construction from C-style format string + data.
     /// Uses a printf() style format string as first argument, further arguments
     /// must match format, exactly as in printf, which will be called.
@@ -383,20 +419,21 @@ namespace WDutils {
     explicit exception(const char*fmt, ...);
     /// return error message 
     const char*text() const
-    { return c_str(); }
+    { return std::runtime_error::what(); }
   };
+#pragma GCC diagnostic pop
   /// return error message given an exception
   inline const char*text(exception const&e)
   { return e.text(); }
   //
-  class ThrowGuard;
+  struct ThrowGuard;
   /// for generating exceptions
   class Thrower {
-    friend class ThrowGuard;
-    typedef void(*handler)(const char*, int, const char*);
+    friend struct ThrowGuard;
+    typedef void(*handler)(const char*, unsigned, const char*);
     static handler  InsteadOfThrow;  ///< make error if OMP::IsParallel()
     const  char    *file,*func;      ///< file name, function name
-    const  int      line;            ///< line number
+    const  unsigned line;            ///< line number
     //  no copy ctor and no operator=
     Thrower           (const Thrower&) WDutilsCXX11Delete;
     Thrower& operator=(const Thrower&) WDutilsCXX11Delete;
@@ -406,14 +443,14 @@ namespace WDutils {
     Thrower()
       : file(0), func(0), line(0) {}
     /// constructor: get function name
-    explicit Thrower(const char*__func)
-      : file(0), func(__func), line(0) {}
+    explicit Thrower(const char*_m_func)
+      : file(0), func(_m_func), line(0) {}
     /// constructor: get file name, and line number
-    Thrower(const char*__file, int __line)
-      : file(__file), func(0), line(__line) {}
+    Thrower(const char*_m_file, unsigned _m_line)
+      : file(_m_file), func(0), line(_m_line) {}
     /// constructor: get file & function name, and line number
-    Thrower(const char*__func, const char*__file, int __line)
-      : file(__file), func(__func), line(__line) {}
+    Thrower(const char*_m_func, const char*_m_file, unsigned _m_line)
+      : file(_m_file), func(_m_func), line(_m_line) {}
     /// generate an exception; for usage in WDutils_THROW
     /// \param[in] fmt  gives the format in C printf() style
     exception operator()(const char*fmt, ...) const
@@ -426,8 +463,13 @@ namespace WDutils {
     exception operator()(bool expr) const;
   };
   /// method invoking an error, suitable as @a Thrower::handler
-  inline void MakeError(const char*file, int line, const char*mess)
-  { Error(file,line,"WDutils")(mess); }
+  inline void MakeError(const char*file, unsigned line, const char*mess)
+  { 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-security"
+    Error(file,line,"WDutils")(mess);
+#pragma clang diagnostic pop
+  }
   /// guard against throwing an exception inside an openMP parallel region
   struct ThrowGuard
   {
@@ -456,7 +498,7 @@ namespace WDutils {
   /// Useful for generating a C-style string containing formatted data.         
   class message {
     static const size_t size = 1024;
-    char __text[size];
+    char _m_text[size];
     //  no copy ctor and no operator=
     message           (const message&) WDutilsCXX11Delete;
     message& operator=(const message&) WDutilsCXX11Delete;
@@ -467,9 +509,9 @@ namespace WDutils {
     /// \param fmt gives the format in C printf() style
     explicit message(const char* fmt, ...) throw(exception);
     /// conversion to C-style string
-    operator const char*() const { return __text; }
+    operator const char*() const { return _m_text; }
     /// return C-style string
-    const char* text() const { return __text; }
+    const char* text() const { return _m_text; }
   };
   /// \name macros and code controling the usage of throw exception vs error    
   //@{                                                                          
@@ -536,27 +578,26 @@ namespace WDutils {
   //@{
   // is NDEBUG is defined, do nothing
 #ifdef  NDEBUG
-# define WDutilsAssert(expr)          (static_cast<void>(0))
-# define WDutilsAssertE(expr)         (static_cast<void>(0))
-# define WDutilsAssertIf(cond,expr)   (static_cast<void>(0))
-# define WDutilsAssertEIf(cond,expr)  (static_cast<void>(0))
+#  define WDutilsAssert(expr)          (static_cast<void>(0))
+#  define WDutilsAssertE(expr)         (static_cast<void>(0))
+#  define WDutilsAssertIf(cond,expr)   (static_cast<void>(0))
+#  define WDutilsAssertEIf(cond,expr)  (static_cast<void>(0))
 #else
   /// throws exception with "assertion failed" message
-# ifdef __GNUC__
+#  ifdef __GNUC__
   inline
   void AssertFail(const char*, const char*, unsigned)
-    WDutils_THROWING __attribute__ ((__noreturn__));
-# endif
+    __attribute__ ((__noreturn__));
+#  endif
   inline
   void AssertFail(const char*assertion, const char*file, unsigned line)
-      WDutils_THROWING
   { WDutils_THROWER(file,line)("Assertion \"%s\" failed",assertion); }
   //
-# ifdef __GNUC__
+#  ifdef __GNUC__
   inline
   void AssertFailE(const char*, const char*, unsigned)
     __attribute__ ((__noreturn__));
-# endif
+#  endif
   inline
   void AssertFailE(const char*assertion, const char*file, unsigned line)
   { 
@@ -565,12 +606,12 @@ namespace WDutils {
     std::exit(1);
   }
   /// use instead of assert(): throws an exception
-# define WDutilsAssert(expr)						\
+#  define WDutilsAssert(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
   : WDutils::AssertFail(__STRING(expr),__FILE__,__LINE__))
   /// almost identical to assert()
-# define WDutilsAssertE(expr)						\
+#  define WDutilsAssertE(expr)						\
   ((expr)								\
   ? static_cast<void>(0)						\
   : WDutils::AssertFailE(__STRING(expr),__FILE__,__LINE__))
@@ -581,12 +622,12 @@ namespace WDutils {
   template<> struct AssertIf<false>
   { static bool test(bool) { return true; } };
   /// use instead of @a if(cond) WDutilsAssert(expr) with cond a constexpr
-# define WDutilsAssertIf(cond,expr)					\
+#  define WDutilsAssertIf(cond,expr)					\
     ((AssertIf<cond>(expr))						\
   ? static_cast<void>(0)						\
   : WDutils::AssertFail(__STRING(expr),__FILE__,__LINE__))
   /// use instead of @a if(cond) WDutilsAssertE(expr) with cond a constexpr
-# define WDutilsAssertEIf(cond,expr)					\
+#  define WDutilsAssertEIf(cond,expr)					\
     ((AssertIf<cond>(expr))						\
   ? static_cast<void>(0)						\
   : WDutils::AssertFailE(__STRING(expr),__FILE__,__LINE__))
@@ -601,14 +642,13 @@ namespace WDutils {
   /// \param str string to write into                                           
   /// \param size maximum number of bytes to write, including trailing 0.      
   /// \param fmt format string                                                  
-  int snprintf(char*str, size_t size, const char* fmt, ... ) WDutils_THROWING;
+  int snprintf(char*str, size_t size, const char* fmt, ... );
   // ///////////////////////////////////////////////////////////////////////////
   struct snprintf__ {
-    const char* file;
-    const int   line;
-    snprintf__(const char*f, int l) : file(f), line(l) {}
+    const char*    file;
+    const unsigned line;
+    snprintf__(const char*f, unsigned l) : file(f), line(l) {}
     int operator() (char*str, size_t size, const char* fmt, ... )
-      WDutils_THROWING
 #ifdef __GNUC__
       __attribute__ ((format (printf, 4, 5)))
 #endif

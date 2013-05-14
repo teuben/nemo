@@ -77,8 +77,7 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// find position in ordered table (see NR)                                   
   ///                                                                           
-  /// \param T (template parameter) type with < and > operators, usually a
-  ///          scalar
+  /// \note template parameter @c T must support < and > operators
   /// \param[in] xarr  array of T, must be ordered (ascending or descending)
   /// \param[in] n     size of array xarr
   /// \param[in] x     value to find position fo
@@ -93,7 +92,7 @@ namespace WDutils {
   int hunt(const T*xarr, int n, T x, int j) {
     int  jlo=j,jhi,l=n-1;
     bool ascnd=(xarr[l]>xarr[0]);
-    if(!ascnd && xarr[l]==xarr[0] ) return -1;	    // x_0 = x_l
+    if( !ascnd && xarr[l]>=xarr[0] ) return -1;	    // x_0 = x_l
     if( (ascnd && x<xarr[0]) || (!ascnd && x>xarr[0]) ) return -1;
     if( (ascnd && x>xarr[l]) || (!ascnd && x<xarr[l]) ) return  n;
 
@@ -103,7 +102,7 @@ namespace WDutils {
     } else {
       int inc = 1;
       if((x>=xarr[jlo]) == ascnd) {                 // hunt upward
-	if(jlo == l) return (x==xarr[l])? l : n;
+	if(jlo == l) return (x<=xarr[l] && x>=xarr[l])? l : n;
 	jhi = jlo+1;
 	while((x>=xarr[jhi]) == ascnd) {            // not done hunting
 	  jlo =jhi;
@@ -139,18 +138,17 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// find position in ordered table (see NR)
   ///
-  /// \param T (template param) type with < and > operators, usually a scalar
+  /// \note template param T must support < and > operators
   /// \param[in,out] k  jlo such that xarr[jlo] <= x < xarr[jlo+1]
   /// \param[in]     x  array of T, must be ordered (ascending or descending) 
   /// \param[in]     n  size of array xarr
   /// \param[in]     xi value to find position for
-  /// \return        position jlo such that xarr[jlo] <= x < xarr[jlo+1]
   ///
   /// If the original value for k already gives the position, we return.
   /// Otherwise, we guess k from linear interpolation and then invoke hunt().
   /// If x is not in range, we throw an error.
   template<typename T>
-  inline void find(int&k, int n, const T*x, T xi) WDutils_THROWING
+  inline void find(int&k, int n, const T*x, T xi)
   {
     if(k<0 || k>=n-1 || x[k]>xi || x[k+1]<xi) {
       k = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
@@ -168,8 +166,7 @@ namespace WDutils {
   /// the numbers 0 to n-1 are ordered in ascending order of A[i]
   /// using the heap-sort algorithm; based on a routine given in NR.
   /// \note a routine HeapSort() can be found in file heap.h.
-  /// \param sortable type of values to be sorted
-  /// \param sortit class with operator[](int) returning sortable
+  /// \note type @c sortit must have @c sortable sortit::operator[](int)
   /// \param A (input) array or values to be sorted
   /// \param n (input) number of elements
   /// \param indx (output) index table so that A[indx[i]] is sorted
@@ -211,23 +208,26 @@ namespace WDutils {
   /// the numbers 0 to n-1 are ordered in ascending order of A[i]
   /// using the heap-sort algorithm; based on a routine given in NR.
   /// \note a routine HeapSort() can be found in file heap.h.
-  /// \param sortable type of values to be sorted
   /// \param A (input) array or values to be sorted
   /// \param n (input) number of elements
   /// \param indx (output) index table so that A[indx[i]] is sorted
-  template<typename sortable>
-  void HeapIndex(const sortable*A, int n, int*indx)
+  template<typename sortable, typename integer>
+  void HeapIndex(const sortable*A, size_t n, integer*indx)
     // based on a routine given in NR                                           
     // the numbers 0 to n-1 are ordered in ascending order of A[i]              
   {
+#if __cplusplus >= 201103L
+    WDutilsStaticAssert(std::is_integral<integer>::value);
+#endif
+    WDutilsAssert      (n <= std::numeric_limits<integer>::max());
     if(n<=0) return;
     if(n==1) { indx[0]=0; return; }
-    for(int j=0; j!=n; ++j) indx[j] = j;
-    int l = n>>1;
-    int ir= n-1;
+    for(size_t j=0; j!=n; ++j) indx[j] = integer(j);
+    size_t l = n>>1;
+    size_t ir= n-1;
     for(;;) {
       const sortable*q;
-      int indxt;
+      integer indxt;
       if(l>0)
 	q = A+(indxt=indx[--l]);
       else {
@@ -238,8 +238,8 @@ namespace WDutils {
 	  return;
 	}
       }
-      int i = l;
-      int j = (l<<1) + 1;
+      size_t i = l;
+      size_t j = (l<<1) + 1;
       while(j<=ir) {
 	if(j  < ir && A[indx[j]] < A[indx[j+1]] ) j++;
 	if(*q < A[indx[j]] ) {
@@ -254,11 +254,11 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// the numbers 0 to n-1 are ordered in ascending order of A[i]
   /// using the heap-sort algorithm; based on a routine given in NR
-  /// \param sortable type of values to be sorted
   /// \param A (input) Array or values to be sorted
   /// \param I (output) index table so that A[I[i]] is sorted
-  template<typename sortable>
-  void HeapIndex(Array<sortable,1>const&A, Array<int,1>&I) WDutils_THROWING {
+  template<typename sortable, typename integer>
+  void HeapIndex(Array<sortable,1>const&A, Array<integer,1>&I)
+  {
     if(A.size() != I.size()) WDutils_THROW("size mismatch in HeapIndex()\n");
     HeapIndex(A.array(),A.size(),I.array());
   }
@@ -268,7 +268,7 @@ namespace WDutils {
   void HeapRank(const sortable*A, int n, int*rank)
   {
     if(n<=0) return;
-    int*indx = WDutils_NEW(int,n);
+    int*indx = WDutils_NEW(int,size_t(n));
     HeapIndex(A,n,indx);
     for(int r=0; r!=n; ++r) rank[indx[r]] = r;
     WDutils_DEL_A(indx);
@@ -276,7 +276,8 @@ namespace WDutils {
   //----------------------------------------------------------------------------
   /// given an array of values, produce a table of their ranks
   template<typename sortable>
-  void HeapRank(Array<sortable,1>const&A, Array<int,1>&I) WDutils_THROWING {
+  void HeapRank(Array<sortable,1>const&A, Array<int,1>&I)
+  {
     if(A.size() != I.size()) WDutils_THROW("size mismatch in HeapRank()\n");
     HeapRank(A.array(),A.size(),I.array());
   }
@@ -295,12 +296,9 @@ namespace WDutils {
     void *DATA;
     /// copy constructor disabled; use references instead of copies
     FindPercentile(const FindPercentile&);
-    void setup(const scalar*, unsigned, const scalar*, unsigned)
-      WDutils_THROWING;
-    void setup(unsigned, scalar(*)(unsigned), unsigned)
-      WDutils_THROWING;
-    void setup(unsigned, void(*)(unsigned, scalar&, scalar&), unsigned)
-      WDutils_THROWING;
+    void setup(const scalar*, unsigned, const scalar*, unsigned);
+    void setup(unsigned, scalar(*)(unsigned), unsigned);
+    void setup(unsigned, void(*)(unsigned, scalar&, scalar&), unsigned);
   public:
     /// ctor: setup sort tree
     /// \param[in] X  array with positions
@@ -311,7 +309,7 @@ namespace WDutils {
     ///       weight 1. This implies that the cumulative weight and the rank
     ///       for each element are identical.
     FindPercentile(const scalar*X, unsigned N, const scalar*W=0, unsigned K=0)
-    WDutils_THROWING : DATA(0)
+      : DATA(0)
     {
       setup(X,N,W,K);
     }
@@ -321,7 +319,7 @@ namespace WDutils {
     /// \note Each element is assumed to have weight 1. This implies that the
     ///       cumulative weight and the rank for each element are identical.
     FindPercentile(Array<scalar,1>const&X, unsigned K=0)
-    WDutils_THROWING : DATA(0)
+      : DATA(0)
     {
       setup(X.array(),X.size(),0,K);
     }
@@ -330,7 +328,7 @@ namespace WDutils {
     /// \param[in] W  Array with weights
     /// \param[in] K  (optional) expected number of calls to Index() or Value()
     FindPercentile(Array<scalar,1>const&X, Array<scalar,1>const&W, unsigned K=0)
-    WDutils_THROWING : DATA(0)
+      : DATA(0)
     {
       if(X.size() != W.size())
 	WDutils_THROW("FindPercentile: positions vs weight number mismatch "
@@ -344,7 +342,7 @@ namespace WDutils {
     /// \note Each element is assumed to have weight 1. This implies that the
     ///       cumulative weight and the rank for each element are identical.
     FindPercentile(unsigned N, scalar(*X)(unsigned), unsigned K=0)
-    WDutils_THROWING : DATA(0)
+      : DATA(0)
     {
       setup(N,X,K);
     }
@@ -353,7 +351,7 @@ namespace WDutils {
     /// \param[in] F  function setting position & weight given i in[0,N-1]
     /// \param[in] K  (optional) expected number of calls to Index() or Value()
     FindPercentile(unsigned N, void(*F)(unsigned,scalar&,scalar&), unsigned K=0)
-    WDutils_THROWING : DATA(0)
+      : DATA(0)
     {
       setup(N,F,K);
     }
@@ -368,12 +366,12 @@ namespace WDutils {
     /// find element of given rank
     /// \param[in] r  positional rank in [0,N-1]
     /// \return    handle to element of given rank
-    handle FindRank(unsigned r) const WDutils_THROWING;
+    handle FindRank(unsigned r) const;
     /// find element of given cumulative weight
     /// \param[in] w  cumulative weight in [0, TotalWeight()[
     /// \return    handle to element at which cumulative weight equals w
     /// \note If no weights were given, this is equivalent to FindRank(r=w).
-    handle FindCumulativeWeight(scalar w) const WDutils_THROWING;
+    handle FindCumulativeWeight(scalar w) const;
     /// given a handle, find the next element up
     /// \param[in] h element handle
     /// \return    handle to next element in ascending position
@@ -381,7 +379,7 @@ namespace WDutils {
     /// \note Looping through all elments in ascending order using this
     ///       method, whilst in principle possible, is not efficient. If
     ///       the rank of all elements is required, use a sorting algorithm.
-    handle Next(handle h) const WDutils_THROWING
+    handle Next(handle h) const
     {
       unsigned r = Rank(h) + 1;
       return r == TotalNumber()? 0 : FindRank(r);
@@ -393,7 +391,7 @@ namespace WDutils {
     /// \note Looping through all elments in descending order using this
     ///       method, whilst in principle possible, is not efficient. If
     ///       the rank of all elements is required, use a sorting algorithm.
-    handle Previous(handle h) const WDutils_THROWING
+    handle Previous(handle h) const
     {
       unsigned r = Rank(h);
       return r? FindRank(r-1) : 0;
@@ -401,45 +399,49 @@ namespace WDutils {
     /// index given handle
     /// \param[in] h handle as returned from FindRank() or FindWeight()
     /// \return index of element referred to by handle
-    unsigned Index(handle h, bool=true) const WDutils_THROWING;
+    unsigned Index(handle h, bool=true) const;
     /// rank given handle
     /// \param[in] h element handle as returned from FindRank() or FindWeight()
     /// \return rank of element referred to by handle
-    unsigned Rank(handle h, bool=true) const WDutils_THROWING; 
+    unsigned Rank(handle h, bool=true) const; 
     /// position given handle
     /// \param[in] h element handle as returned from FindRank() or FindWeight()
     /// \return position of element referred to by handle
-    scalar Position(handle h, bool=true) const WDutils_THROWING;
+    scalar Position(handle h, bool=true) const;
     /// cumulative weight given handle
     /// \param[in] h handle as returned from FindRank() or FindWeight()
     /// \return cumulative weight at element referred to by handle
-    scalar CumulativeWeight(handle h, bool=true) const WDutils_THROWING;
+    scalar CumulativeWeight(handle h, bool=true) const;
     /// local weight given handle
     /// \param[in] h handle as returned from FindRank() or FindWeight()
     /// \return weight of element referred to by handle
-    scalar Weight(handle h, bool=true) const WDutils_THROWING;
+    scalar Weight(handle h, bool=true) const;
     /// index given rank
     /// \param[in] r  positional rank in [0,N-1]
     /// \return index of element with that rank
-    unsigned IndexOfRank(unsigned r) const WDutils_THROWING {
+    unsigned IndexOfRank(unsigned r) const
+    {
       return Index(FindRank(r),0);
     }
     /// position given rank
     /// \param[in] r  positional rank in [0,N-1]
     /// \return position of element with that rank
-    scalar PositionOfRank(unsigned r) const WDutils_THROWING {
+    scalar PositionOfRank(unsigned r) const
+    {
       return Position(FindRank(r),0);
     }
     /// index given cumulative weight
     /// \param[in] w  cumulative weight in [0, TotalWeight()]
     /// \return index of element with that cumulative weight
-    unsigned IndexOfCumulativeWeight(scalar w) const WDutils_THROWING {
+    unsigned IndexOfCumulativeWeight(scalar w) const
+    {
       return Index(FindCumulativeWeight(w),0);
     }
     /// position given cumulative weight
     /// \param[in] w  cumulative weight in [0, TotalWeight()]
     /// \return position of element with that cumulative weight
-    scalar PositionOfCumulativeWeight(scalar w) const WDutils_THROWING {
+    scalar PositionOfCumulativeWeight(scalar w) const
+    {
       return Position(FindCumulativeWeight(w),0);
     }
   };
@@ -463,9 +465,9 @@ namespace WDutils {
       int M=m<n? m:n;
       j = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
       j = hunt(x,n,xi,j) - (M+1)/2 + 1;
-      if(j>=0 && j<n && x[j]==xi) M = 1;
-      else if(j<0)		  j = 0;
-      else if(j>n-M)		  j = n-M;
+      if(j>=0 && j<n && x[j]<=xi && x[j]>=xi) M = 1;
+      else if(j<0)		              j = 0;
+      else if(j>n-M)		              j = n-M;
       return M;
     }
     FileLineFind() : file(0), line(0) {}
@@ -485,13 +487,13 @@ namespace WDutils {
     /// \param[in] xi position to be interpolated at
     /// \return y(xi) as interpolated
     template<typename X, typename Y>
-    Y polint(int n, const X*x, const Y*y, Y*P, X xi) WDutils_THROWING
+    Y polint(int n, const X*x, const Y*y, Y*P, X xi)
     {
       for(int i=0;i!=n;++i)
 	P[i]=y[i];
       for(int m=1;m!=n;++m)
 	for(int i=0;i<n-m;++i) {
-	  if(x[i]==x[i+m]) {
+	  if(x[i]<=x[i+m] && x[i]>=x[i+m]) {
 	    if(file)
 	      WDutils_THROWN("[%s:%d]: x's not distinct in Polev(): "
 			     "x[%d]=%g=x[%d]=%g (xi=%g, x=%p)\n",
@@ -507,7 +509,7 @@ namespace WDutils {
     }
     //..........................................................................
     template<int M, typename X, typename Y> inline
-    Y interpol(X xi, const X*x, const Y*y, int n) WDutils_THROWING
+    Y interpol(X xi, const X*x, const Y*y, int n)
     { 
       Y P[M];
       int j;
@@ -527,7 +529,7 @@ namespace WDutils {
     /// \note Together with the macro Polev this implements the function
     ///       polev()
     template<typename X, typename Y> inline
-    Y operator()(X xi, const X*x, const Y*y, int n, int m=4) WDutils_THROWING
+    Y operator()(X xi, const X*x, const Y*y, int n, int m=4)
     {
       switch(m) {
       case 2: return interpol<2,X,Y>(xi,x,y,n);
@@ -551,7 +553,6 @@ namespace WDutils {
     ///       polev() Array<> arguments
     template<typename X, typename Y>
     Y operator()(X xi, const Array<X,1>&x, const Array<Y,1>&y, int m=4)
-	WDutils_THROWING
     {
       if(x.size() != y.size()) {
 	if(file)
@@ -582,7 +583,7 @@ namespace WDutils {
   /// \param[in] n  total size of arrays
   /// \param[in] m  number of points to use in interpolation
   template<typename X, typename Y>
-  inline Y polev(X xi, const X*x, const Y*y, int n, int m=4) WDutils_THROWING
+  inline Y polev(X xi, const X*x, const Y*y, int n, int m=4)
   { return PolynomialEvaluation(0,0)(xi,x,y,n,m); }
   /// polynomial interpolation using @a m of @a n values,
   /// taking Array<T> arguments
@@ -592,7 +593,6 @@ namespace WDutils {
   /// \param[in] m  number of points to use in interpolation
   template<typename X, typename Y>
   inline Y polev(X xi, const Array<X,1>&x, const Array<Y,1>&y, int m=4)
-    WDutils_THROWING
   { return PolynomialEvaluation()(xi,x,y,m); }
   //----------------------------------------------------------------------------
   /// like polev(), but no extrapolation; gives boundary values instead
@@ -949,8 +949,8 @@ namespace WDutils {
   //@{
   // ---------------------------------------------------------------------------
   /// Eigen values and vectors for symmetric matrix using Jacobi transformation
-  /// \param      N (template parameter) size of matrix
-  /// \param      X (template parameter) scalar type (either float or double)
+  /// \note    @a N  size of matrix
+  /// \note    @c X  scalar type (either float or double)
   /// \param[in]  M  symmetric matrix
   /// \param[out] V  matrix with Eigenvectors of M
   /// \param[out] D  vector with Eigenvalues of M
@@ -1040,8 +1040,8 @@ namespace WDutils {
   // ---------------------------------------------------------------------------
   /// function template sorting the eigenvalues & vectors by straight insertion
   ///
-  /// \param         N (template parameter) size of matrix
-  /// \param         X (template parameter) scalar type (float or double)
+  /// \note @a       N  size of matrix
+  /// \note @c       X  scalar type (float or double)
   /// \param[in,out] V  matrix with Eigenvectors
   /// \param[in,out] D  vector with Eigenvalues
   // ---------------------------------------------------------------------------
@@ -1065,8 +1065,8 @@ namespace WDutils {
   }
   // ---------------------------------------------------------------------------
   /// Sorted eigen values and vectors of symmetric matrix with Jacobi transform
-  /// \param      N  (template parameter) size of matrix
-  /// \param      X  (template parameter) scalar type (float or double)
+  /// \note    @a N  size of matrix
+  /// \note    @c X  scalar type (float or double)
   /// \param[in]  M  symmetric matrix
   /// \param[out] V  matrix with Eigenvectors, sorted
   /// \param[out] D  vector with Eigenvalues = columns, sorted
@@ -1094,8 +1094,8 @@ namespace WDutils {
   //@{
   // ---------------------------------------------------------------------------
   /// reduce real symmetric matrix to tridiagonal form
-  /// \param T (template parameter) prepare for eigenvector extraction?
-  /// \param X (template parameter) scalar type (float or double)
+  /// \note       @c T prepare for eigenvector extraction?
+  /// \note       @c X scalar type (float or double)
   /// \param[in]     N size of matrix
   /// \param[in,out] A on input: real symmetric matrix,\n
   ///                  on putput: input required by \a EigenSystemTridiagonal()
@@ -1114,7 +1114,7 @@ namespace WDutils {
   // ---------------------------------------------------------------------------
   /// compute eigensystem of tridiagonal symmetric matrix
   ///
-  /// \param X (template parameter) only X=float and X=double are implemented
+  /// \pnote      @c X  only X=float and X=double are implemented
   /// \param[in]     N  size of matrix
   /// \param[in,out] D  on input: diagonal elements; on output: eigenvalues
   /// \param[in,out] E  on input: off-diagonal elements; on output: destroyed
@@ -1131,8 +1131,8 @@ namespace WDutils {
   // ---------------------------------------------------------------------------
   /// compute eigenvalues of tridiagonal symmetric matrix
   ///
-  /// \param X (template parameter) only X=float and X=double are implemented
-  /// \param[in]     N   size of matrix
+  /// \note     @c   X  only X=float and X=double are implemented
+  /// \param[in]     N  size of matrix
   /// \param[in,out] D  on input: diagonal elements; on output: eigenvalues
   /// \param[in,out] E  on input: off-diagonal elements; on output: destroyed
   ///
@@ -1144,12 +1144,11 @@ namespace WDutils {
   // ---------------------------------------------------------------------------
   /// eigensystem of symmetric matrix, replaces original matrix
   ///
-  /// \param EIGENVECTORS (template parameter) want eigenvectors?
-  /// \param X (template parameter) scalar type (either float or double)
+  /// \note       @a EIGENVECTORS want eigenvectors?
+  /// \note       @c X  scalar type (either float or double)
   /// \param[in]     N  size of matrix
   /// \param[in,out] A  on input: symmetric matrix; on output: eigenvectors
   /// \param[out]    D  vector with eigenvalues 
-  /// \param[out]    V  (optional) vector with eigenvectors
   ///
   /// This combines HouseholderReduction() and EigenSystemTridiagonal() or
   /// EigenValuesTridiagonal() for \a N known at run time. If \a N is known at
@@ -1167,7 +1166,7 @@ namespace WDutils {
   // ---------------------------------------------------------------------------
   /// eigensystem of symmetric matrix, keeps original matrix
   ///
-  /// \param X (template parameter) scalar type (either float or double)
+  /// \note    @c X  scalar type (either float or double)
   /// \param[in]  N  size of matrix
   /// \param[in]  M  symmetric matrix
   /// \param[out] D  vector with eigenvalues
@@ -1205,8 +1204,8 @@ namespace WDutils {
   // ---------------------------------------------------------------------------
   /// eigensystem of symmetric matrix, keeps original matrix, N template param
   ///
-  /// \param      N  (template parameter) size of matrix
-  /// \param      X  (template parameter) scalar type (float or double)
+  /// \note    @a N  size of matrix
+  /// \note    @c X  scalar type (float or double)
   /// \param[in]  M  matrix
   /// \param[out] D  vector with Eigenvalues
   /// \param[out] V  (optional) matrix with Eigenvectors

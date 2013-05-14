@@ -47,55 +47,78 @@ ifeq ($(COMPILER),icc)
 makefiles		:= makeall make.icc
 endif
 
-# math lib
-ifndef MATHLIB
-MATHLIB			:= -lm
-endif
-
-# ---------
-# MPI stuff
-# ---------
-
-ifdef WDutilsDevel
-MPIDIR			:= $(shell ls | grep mpich)
-ifeq ($(MPIDIR),mpich)
-WDutilsMPI		:= -DWDutilsMPI
-MPICC			:= $(MPIDIR)/bin/mpiCC
-MPIINC			:= $(MPIDIR)/include/
-IMPI			:= -I$(MPIINC)
-endif
-endif
-
 # -----------
 # directories
 # -----------
 
 INC             	:= inc/
 SRC             	:= src/
-LIB			:= lib$(EXT)/
+OBJ			:= obj$(EXT)/
+OBJT			:= $(OBJ).dummy
+$(OBJT)			:
+			mkdir -p -m 755 $(OBJ)
+			touch $(OBJT)
+
+LIB			:= lib/
 LIBT			:= $(LIB).dummy
 $(LIBT)			:
 			mkdir -p -m 755 $(LIB)
 			touch $(LIBT)
+
 ifdef WDutilsDevel
 DEV			:= devel/
 endif
 
-# -------------------------
-# compile and link commands
-# -------------------------
+# ---------------------
+# compiling and linking
+# ---------------------
 
-CXXFLAGS		:= $(CXXFLAGS) $(WDutilsDevel)
-LUTIL			:= -L$(LIB) -lWDutils
-LIBRARIES		:= $(LUTIL) $(MATHLIB)
-MAKE			= $(CXX) -o $@ $< -I$(INC) $(CXXFLAGS)
+# math lib
+ifndef MATHLIB
+MATHLIB			:= -lm
+endif
+
+CXXFLAGS		+= $(WDutilsDevel)
+INCLUDE			:= -I$(INC)
+LUTIL			:= -L$(LIB) -lWDutils$(EXT)
+LINKLIBS		:=
+
+# MPI stuff
+
+ifdef WDutilsDevel
+MPIDIR			:= $(shell ls | grep mpich)
+ifeq ($(MPIDIR),mpich)
+WDutilsMPI		:= -DWDutilsMPI
+CXXFLAGS		+= $(WDutilsMPI)
+MPICC			:= $(MPIDIR)/bin/mpiCC
+MPIINC			:= $(MPIDIR)/include/
+INCLUDE			+= -I$(MPIINC)
+endif
+endif
+
+# TBB stuff
+
+ifdef WDutilsDevel
+ifdef TBBROOT
+CXXFLAGS		+= -DWDutilsTBB
+INCLUDE			+= -I$(TBBROOT)/include/
+LINKLIBS		+= -L$(TBBROOT)/lib/ -ltbb
+endif
+endif
+
+
+# compile and link commands
+
+LINKLIBS		+= $(MATHLIB)
+LIBRARIES		:= $(LUTIL) $(LINKLIBS)
+MAKE			= $(CXX) -o $@ $< $(INCLUDE) $(CXXFLAGS)
 MAKE_OBJ		= $(MAKE) -c
 MAKE_EXE		= $(MAKE) $(LIBRARIES)
 ifdef WDutilsMPI
-LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI
+LUTIL_MPI		:= -L$(LIB) -lWDutilsMPI$(EXT)
 LIBRARIES_MPI		:= $(LUTIL_MPI) $(MATHLIB)
-MAKE_OBJ_MPI		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI)
-MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(WDutilsMPI) $(LIBRARIES_MPI)
+MAKE_OBJ_MPI		= $(CXX) -c -o $@ $< -I$(INC) $(CXXFLAGS)
+MAKE_EXE_MPI		= $(MPICC) -o $@ $< -I$(INC) $(CXXFLAGS) $(LIBRARIES_MPI)
 endif
 # -----------------------
 # header dependency lists
@@ -108,18 +131,18 @@ exception_h		:= $(INC)exception.h
 meta_h			:= $(INC)meta.h $(exception_h)
 traits_h		:= $(INC)traits.h $(exception_h)
 io_h			:= $(INC)io.h $(exception_h) $(traits_h)
-tupel_h			:= $(INC)vector.h $(INC)tupel.h $(INC)tupel.cc
+vector_h			:= $(INC)vector.h $(INC)tupel.h $(INC)tupel.cc
 memory_h		:= $(INC)memory.h $(traits_h) $(inline_h)
 radix_h			:= $(INC)radix.h $(traits_h) $(memory_h)
 sse_h			:= $(INC)sse.h $(exception_h) $(meta_h) $(memory_h)
 heap_h			:= $(INC)heap.h $(memory_h)
-numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(tupel_h)
+numerics_h		:= $(INC)numerics.h $(inline_h) $(memory_h) $(vector_h)
 spline_h		:= $(INC)spline.h $(numerics_h) $(memory_h)
 random_h		:= $(INC)random.h $(inline_h) $(Pi_h) $(traits_h)
 WDMath_h		:= $(INC)WDMath.h $(Pi_h) $(exception_h) $(traits_h) \
 				$(inline_h) $(meta_h)
-geometry_h		:= $(INC)geometry.h $(sse_h) $(tupel_h) \
-				$(INC)geometry_inl.h
+geometry_h		:= $(INC)geometry.h $(sse_h) $(vector_h) \
+				$(INC)geometry.tcc
 periodic_h		:= $(INC)periodic.h $(geometry_h)
 octtree_h		:= $(INC)octtree.h $(periodic_h) $(memory_h) $(io_h)
 matr33_h		:= $(INC)matr33.h $(exception_h) $(inline_h)
@@ -130,25 +153,43 @@ $(INC)parallel.h	: $(DEV)parallel.h
 			(cd $(INC); ln -s ../$(DEV)parallel.h parallel.h)
 parallel_h		:= $(INC)parallel.h $(memory_h)
 
+$(INC)tbb_tools.h	: $(DEV)tbb_tools.h
+			(cd $(INC); ln -s ../$(DEV)tbb_tools.h tbb_tools.h)
+tbb_tools_h		:= $(INC)tbb_tools.h
+
 $(INC)peano.h		: $(DEV)peano.h
 			(cd $(INC); ln -s ../$(DEV)peano.h peano.h)
 peano_h			:= $(INC)peano.h $(traits_h)
 
 octtree_h		+= $(parallel_h) $(peano_h)
 
-$(INC)neighbour.tcc	: $(DEV)neighbour.tcc
+$(INC)tbbtree.h		: $(DEV)tbbtree.h
 			(cd $(INC); \
-			ln -s ../$(DEV)neighbour.tcc neighbour.tcc)
-neighbour_tcc		:= $(INC)neighbour.tcc
+			ln -s ../$(DEV)tbbtree.h tbbtree.h)
+tbbtree_h		:= $(INC)tbbtree.h $(periodic_h) $(tbb_tools_h) \
+				$(memory_h)
 
 $(INC)neighbour.h	: $(DEV)neighbour.h
 			(cd $(INC); \
 			ln -s ../$(DEV)neighbour.h neighbour.h)
-neighbour_h		:= $(INC)neighbour.h $(octtree_h) $(neighbour_tcc)
+$(INC)neighbour.tcc	: $(DEV)neighbour.tcc
+			(cd $(INC); \
+			ln -s ../$(DEV)neighbour.tcc neighbour.tcc)
+neighbour_h		:= $(INC)neighbour.h $(octtree_h) $(INC)neighbour.tcc
+
+$(INC)neighbourtbb.h	: $(DEV)neighbourtbb.h
+			(cd $(INC); \
+			ln -s ../$(DEV)neighbourtbb.h neighbourtbb.h)
+$(INC)neighbourtbb.tcc	: $(DEV)neighbourtbb.tcc
+			(cd $(INC); \
+			ln -s ../$(DEV)neighbourtbb.tcc neighbourtbb.tcc)
+
+neighbourtbb_h		:= $(INC)neighbourtbb.h $(tbbtree_h) \
+			$(INC)neighbourtbb.tcc
 
 $(INC)voronoi.h		: $(DEV)voronoi.h
 			(cd $(INC); ln -s ../$(DEV)voronoi.h voronoi.h)
-voronoi_h		:= $(INC)voronoi.h $(geometry_h)
+voronoi_h		:= $(INC)voronoi.h $(neighbour_h)
 
 $(INC)domain.h		: $(DEV)domain.h
 			(cd $(INC); ln -s ../$(DEV)domain.h domain.h)
@@ -165,7 +206,6 @@ endif
 # source dependency lists
 # -----------------------
 
-meta_cc			:= $(SRC)meta.cc $(meta_h)
 exception_cc		:= $(SRC)exception.cc $(exception_h)
 io_cc			:= $(SRC)io.cc $(io_h)
 radix_cc		:= $(SRC)radix.cc $(radix_h)
@@ -173,62 +213,65 @@ numerics_cc		:= $(SRC)numerics.cc $(numerics_h) $(WDMath_h)
 random_cc		:= $(SRC)random.cc $(random_h) $(numerics_h) \
 				$(exception_h)
 WDMath_cc		:= $(SRC)WDMath.cc $(WDMath_h) $(inline_h)
-octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(peano_h) $(timer_h) \
+octtree_cc		:= $(SRC)octtree.cc $(octtree_h) $(peano_h) $(timer_h)
 
 ifdef WDutilsDevel
 domain_cc		:= $(DEV)domain.cc $(domain_h) $(io_h)
 octtree_cc		+= $(DEV)octtree_omp.cc
 neighbour_cc		:= $(DEV)neighbour.cc $(neighbour_h) \
 				$(octtree_h) $(heap_h)
+neighbourtbb_cc		:= $(DEV)neighbourtbb.cc $(neighbourtbb_h) \
+				$(tbbtree_h) $(heap_h)
 voronoi_cc		:= $(DEV)voronoi.cc $(voronoi_h)
 parallel_cc		:= $(DEV)parallel.cc $(parallel_h)
+tbbtree_cc		:= $(DEV)tbbtree.cc $(tbbtree_h) $(peano_h)
 endif
 
 # ---------------
 # library modules
 # ---------------
 
-$(LIB)exception.o:	$(exception_cc) $(LIBT) $(makefiles)
+$(OBJ)exception.o:	$(exception_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)io.o:		$(io_cc) $(LIBT) $(makefiles)
+$(OBJ)io.o:		$(io_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)meta.o:		$(meta_cc) $(LIBT) $(makefiles)
+$(OBJ)numerics.o:	$(numerics_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)numerics.o:	$(numerics_cc) $(LIBT) $(makefiles)
+$(OBJ)random.o:		$(random_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)random.o:		$(random_cc) $(LIBT) $(makefiles)
+$(OBJ)radix.o:		$(radix_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)radix.o:		$(radix_cc) $(LIBT) $(makefiles)
+$(OBJ)WDMath.o:		$(WDMath_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)WDMath.o:		$(WDMath_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ)
-$(LIB)octtree.o:	$(octtree_cc) $(LIBT) $(makefiles)
+$(OBJ)octtree.o:	$(octtree_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
 
 ifdef WDutilsDevel
 
-$(LIB)neighbour.o:	$(neighbour_cc) $(LIBT) $(makefiles)
+$(OBJ)neighbour.o:	$(neighbour_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)voronoi.o:	$(voronoi_cc) $(LIBT) $(makefiles)
+$(OBJ)voronoi.o:	$(voronoi_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-$(LIB)parallel.o:	$(parallel_cc) $(LIBT) $(makefiles)
+$(OBJ)tbbtree.o:	$(tbbtree_cc) $(OBJT) $(makefiles)
 			$(MAKE_OBJ)
-
-WDutilsS_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)WDMath.o $(LIB)random.o \
-			$(LIB)octtree.o $(LIB)neighbour.o $(LIB)radix.o \
-			$(LIB)voronoi.o
-
-WDutils_objs	:=	$(WDutilsS_objs) $(LIB)parallel.o 
+$(OBJ)neighbourtbb.o:	$(neighbourtbb_cc) $(OBJT) $(makefiles)
+			$(MAKE_OBJ)
+WDutilsS_objs	:=	$(OBJ)exception.o $(OBJ)io.o $(OBJ)numerics.o \
+			$(OBJ)WDMath.o $(OBJ)random.o $(OBJ)octtree.o \
+			$(OBJ)neighbour.o $(OBJ)radix.o $(OBJ)voronoi.o \
+			$(OBJ)tbbtree.o $(OBJ)neighbourtbb.o
+ifdef OPENMP
+$(OBJ)parallel.o:	$(parallel_cc) $(OBJT) $(makefiles)
+			$(MAKE_OBJ)
+WDutils_objs	:=	$(WDutilsS_objs) $(OBJ)parallel.o 
+else
+WDutils_objs	:=	$(WDutilsS_objs)
+endif
 
 else
-
-WDutilsS_objs	:=	$(LIB)exception.o $(LIB)io.o $(LIB)meta.o \
-			$(LIB)numerics.o $(LIB)WDMath.o $(LIB)random.o \
-			$(LIB)radix.o
-
+WDutilsS_objs	:=	$(OBJ)exception.o $(OBJ)io.o $(OBJ)numerics.o \
+			$(OBJ)WDMath.o $(OBJ)random.o $(OBJ)radix.o
 WDutils_objs	:=	$(WDutilsS_objs)
-
 endif
 
 # -------
@@ -238,40 +281,40 @@ endif
 AR			:= ar rc
 RL			:= ranlib
 
-$(LIB)libWDutils.a:	$(WDutils_objs)
-			$(AR) $@ $?
-			$(RL) $@
-$(LIB)libWDutils.so:	$(WDutils_objs)
-			$(CXX) $^ $(LDFLAGS) -o $@
+$(LIB)libWDutils$(EXT).a:	$(WDutils_objs)
+				$(AR) $@ $?
+				$(RL) $@
+$(LIB)libWDutils$(EXT).so:	$(WDutils_objs)
+				$(CXX) $^ $(LDFLAGS) $(LINKLIBS) -o $@
 
-libraryOMP	:=	$(LIB)libWDutils.a $(LIB)libWDutils.so
+libraryOMP		:=	$(LIB)libWDutils$(EXT).a $(LIB)libWDutils$(EXT).so
 
 ifdef WDutilsMPI
 # -----------------------
 # MPI modules and library
 # -----------------------
 
-$(LIB)parallelMPI.o:	$(parallel_cc) $(makefiles)
+$(OBJ)parallelMPI.o:	$(parallel_cc) $(makefiles)
 			$(MAKE_OBJ_MPI) $(IMPI)
-$(LIB)domainMPI.o:	$(domain_cc) $(makefiles)
+$(OBJ)domainMPI.o:	$(domain_cc) $(makefiles)
 			$(MAKE_OBJ_MPI)
 
 WDutilsP_objs	:=	$(WDutilsS_objs) \
-			$(LIB)domainMPI.o $(LIB)parallelMPI.o
+			$(OBJ)domainMPI.o $(OBJ)parallelMPI.o
 
-$(LIB)libWDutilsMPI.a:	$(WDutilsP_objs)
-			$(AR) $@ $?
-			$(RL) $@
-$(LIB)libWDutilsMPI.so:	$(WDutilsP_objs)
-			$(CXX) $^ $(LDFLAGS) -o $@
+$(OBJ)libWDutilsMPI$(EXT).a:	$(WDutilsP_objs)
+				$(AR) $@ $?
+				$(RL) $@
+$(OBJ)libWDutilsMPI$(EXT).so:	$(WDutilsP_objs)
+				$(CXX) $^ $(LDFLAGS) -o $@
 
-libraryMPI	:=	$(LIB)libWDutilsMPI.a $(LIB)libWDutilsMPI.so
+libraryMPI	:=	$(LIB)libWDutilsMPI$(EXT).a $(LIB)libWDutilsMPI$(EXT).so
 
 endif
 
 #
 
-library		:	$(libraryOMP) $(libraryMPI)
+library		:	$(LIBT) $(libraryOMP) $(libraryMPI)
 
 # -------------
 # test routines
@@ -279,65 +322,86 @@ library		:	$(libraryOMP) $(libraryMPI)
 
 ifdef WDutilsDevel
 
-test/TestSSE$(EXT)	:	test/TestSSE.cc $(sse_h) $(memory_h)
-				$(MAKE_EXE)
-TESTSUITE		+=	test/TestSSE$(EXT)
+test/TestSSE$(EXT):	test/TestSSE.cc $(sse_h) $(memory_h) $(makefiles)
+			$(MAKE_EXE)
+TESTSUITE	+=	test/TestSSE$(EXT)
 
-test/TestGeometry$(EXT)	:	test/TestGeometry.cc $(geometry_h)
-				$(MAKE_EXE)
-TESTSUITE		+=	test/TestGeometry$(EXT)
+test/TestGeometry$(EXT):test/TestGeometry.cc $(geometry_h) $(makefiles)
+			$(MAKE_EXE)
+TESTSUITE	+=	test/TestGeometry$(EXT)
 
-test/TestPeriodic$(EXT)	:	test/TestPeriodic.cc $(periodic_h)
-				$(MAKE_EXE)
-TESTSUITE		+=	test/TestPeriodic$(EXT)
+test/TestPeriodic$(EXT):test/TestPeriodic.cc $(periodic_h) $(makefiles)
+			$(MAKE_EXE)
+TESTSUITE	+=	test/TestPeriodic$(EXT)
 
-test/MakeVoronoi$(EXT)	:	test/MakeVoronoi.cc $(voronoi_h)
-				$(MAKE_EXE)
-TESTSUITE		+=	test/MakeVoronoi$(EXT)
+test/MakeVoronoi$(EXT):	test/MakeVoronoi.cc $(voronoi_h) $(makefiles)
+			$(MAKE_EXE)
+TESTSUITE	+=	test/MakeVoronoi$(EXT)
 
-test/TestVoronoi$(EXT)	:	test/TestVoronoi.cc $(voronoi_h)
-				$(MAKE_EXE)
-TESTSUITE		+=	test/TestVoronoi$(EXT)
+test/TestVoronoi$(EXT):	test/TestVoronoi.cc $(voronoi_h) $(makefiles)
+			$(MAKE_EXE)
+TESTSUITE	+=	test/TestVoronoi$(EXT)
 
-test/TestRadix$(EXT)	:	test/TestRadix.cc $(radix_h) $(random_h)
-				$(MAKE_EXE)
-TESTSUITE		+=	test/TestRadix$(EXT)
+test/TestRadix$(EXT):	test/TestRadix.cc $(radix_h) $(random_h) $(makefiles)
+			$(MAKE_EXE)
+TESTSUITE	+=	test/TestRadix$(EXT)
 
-test/TestMatrix$(EXT)	:	test/TestMatrix.cc $(matr33_h)
-				$(MAKE_EXE)
-TESTSUITE		+=	test/TestMatrix$(EXT)
+test/TestMatrix$(EXT):	test/TestMatrix.cc $(matr33_h) $(makefiles)
+			$(MAKE_EXE)
+TESTSUITE	+=	test/TestMatrix$(EXT)
 
-test/TestOMP$(EXT)	:	test/TestOMP.cc $(parallel_h) $(WDMath_h)
-				$(MAKE_EXE)
-TESTSUITE		+=	test/TestOMP$(EXT)
+ifdef OPENMP
+test/TestOMP$(EXT):	test/TestOMP.cc $(parallel_h) $(WDMath_h) $(makefiles)
+			$(MAKE_EXE)
+TESTSUITE	+=	test/TestOMP$(EXT)
+endif
 
-test/TestOTree$(EXT)	:	test/TestOTree.cc $(octtree_h) $(numerics_h) \
-				$(Pi_h) $(io_h) $(timer_h)
-				$(MAKE_EXE) -DTestOTree
-TESTSUITE		+=	test/TestOTree$(EXT)
+test/TestOTree$(EXT):	test/TestOTree.cc $(octtree_h) $(numerics_h) $(Pi_h) \
+			$(io_h) $(timer_h) $(makefiles)
+			$(MAKE_EXE) -DTestOTree
+TESTSUITE	+=	test/TestOTree$(EXT)
 
-test/TestITree$(EXT)	:	test/TestOTree.cc $(octtree_h) $(numerics_h) \
-				$(Pi_h) $(io_h) $(timer_h)
-				$(MAKE_EXE) -DTestITree
-TESTSUITE		+=	test/TestITree$(EXT)
+test/TestITree$(EXT):	test/TestOTree.cc $(octtree_h) $(numerics_h) $(Pi_h) \
+			$(io_h) $(timer_h) $(makefiles)
+			$(MAKE_EXE) -DTestITree
+TESTSUITE	+=	test/TestITree$(EXT)
 
-test/TestNbour$(EXT)	:	test/TestOTree.cc $(neighbour_h) $(numerics_h) \
-				$(Pi_h) $(io_h) $(timer_h)
-				$(MAKE_EXE) -DTestNbour
-TESTSUITE		+=	test/TestNbour$(EXT)
+#ifneq ($(COMPILER),icc)
+test/TestNbour$(EXT):	test/TestOTree.cc $(neighbour_h) $(numerics_h) $(Pi_h) \
+			$(io_h) $(timer_h) $(makefiles)
+			$(MAKE_EXE) -DTestNbour
+TESTSUITE	+=	test/TestNbour$(EXT)
+#endif
+
+ifdef TBBROOT
+test/TestTOTree$(EXT):	test/TestTTree.cc $(tbbtree_h) $(numerics_h) $(Pi_h) \
+			$(io_h) $(timer_h) $(makefiles)
+			$(MAKE_EXE) -DTestOTree
+TESTSUITE	+=	test/TestTOTree$(EXT)
+
+test/TestTITree$(EXT):	test/TestTTree.cc $(tbbtree_h) $(numerics_h) $(Pi_h) \
+			$(io_h) $(timer_h) $(makefiles)
+			$(MAKE_EXE) -DTestITree
+TESTSUITE	+=	test/TestTITree$(EXT)
+
+test/TestTNbour$(EXT):	test/TestTTree.cc $(neighbourtbb_h) $(numerics_h) $(Pi_h) \
+			$(io_h) $(timer_h) $(makefiles)
+			$(MAKE_EXE) -DTestNbour
+TESTSUITE	+=	test/TestTNbour$(EXT)
+endif
 
 ifdef WDutilsMPI
 
-test/TestDomainMPI$(EXT).o:	test/TestDomainMPI.cc $(domain_h) $(Pi_h)
-				$(MAKE_OBJ_MPI)
+test/TestDomainMPI$(EXT).o:	test/TestDomainMPI.cc $(domain_h) $(Pi_h) $(makefiles)
+			$(MAKE_OBJ_MPI)
 
-test/TestDomainMPI$(EXT):	test/TestDomainMPI$(EXT).o $(libraryMPI)
-				$(MAKE_EXE_MPI)
-TESTSUITE		+=	test/TestDomainMPI$(EXT)
+test/TestDomainMPI$(EXT):	test/TestDomainMPI$(EXT).o $(libraryMPI) $(makefiles)
+			$(MAKE_EXE_MPI)
+TESTSUITE	+=	test/TestDomainMPI$(EXT)
 
 endif
 
-testsuite		:	library $(TESTSUITE)
+testsuite	:	library $(TESTSUITE)
 
 endif
 # ---------------------
@@ -346,14 +410,14 @@ endif
 
 ifdef WDutilsDevel
 dox/html/index.htlm:	$(Pi_h) $(heap_h) $(meta_h) $(inline_h) $(exception_h) \
-			$(sse_h) $(traits_h) $(io_h) $(tupel_h) $(memory_h) \
+			$(sse_h) $(traits_h) $(io_h) $(vector_h) $(memory_h) \
 			$(numerics_h) $(spline_h) $(radix_h) $(random_h) \
 			$(WDMath_h) $(octtree_h) $(neighbour_h) $(parallel_h) \
-			$(parallelMPI_h) $(domain_h) $(peano_h)
+			$(parallelMPI_h) $(domain_h) $(peano_h) $(tbbtree_h) 
 			doxygen devel/utils.dox
 else
 dox/html/index.htlm:	$(Pi_h) $(heap_h) $(meta_h) $(inline_h) $(exception_h) \
-			$(sse_h) $(traits_h) $(io_h) $(tupel_h) $(memory_h) \
+			$(sse_h) $(traits_h) $(io_h) $(vector_h) $(memory_h) \
 			$(numerics_h) $(spline_h) $(radix_h) $(random_h) \
 			$(WDMath_h) $(octtree_h)
 			doxygen utils.dox

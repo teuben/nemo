@@ -250,8 +250,8 @@ complex<double> WDutils::LogGamma(complex<double> const&z)
     tmp -= log(STPi*ser/y) + lnsin(y);
   } else 
     tmp = log(STPi*ser) - tmp;
-  while(std::imag(tmp)> Pi) tmp-= ITPi;
-  while(std::imag(tmp)<-Pi) tmp+= ITPi;
+  while(std::imag(tmp)> Pi) tmp-= complex<double>(0,TPi);
+  while(std::imag(tmp)<-Pi) tmp+= complex<double>(0,TPi);
   return tmp;
 }
 //------------------------------------------------------------------------------
@@ -500,8 +500,9 @@ double WDutils::Jn(unsigned n, double x)
   if(n==1)  return J1(x);
 
   const double acc=60., bigno=1.e10, bigni=1.e-10;
-  register int    jsum,m;
-  register double ax,bj,bjm,bjp,sum,tox,ans;
+  unsigned m;
+  bool jsum;
+  double ax,bj,bjm,bjp,sum,tox,ans;
 
   ax=abs(x);
   if(iszero(ax)) return 0.;
@@ -509,7 +510,7 @@ double WDutils::Jn(unsigned n, double x)
     tox = 2./ax;
     bjm = J0(ax);
     bj  = J1(ax);
-    for(register unsigned j=1; j!=n; ++j) {
+    for(unsigned j=1; j!=n; ++j) {
       bjp=j*tox*bj-bjm;
       bjm=bj;
       bj=bjp;
@@ -517,11 +518,11 @@ double WDutils::Jn(unsigned n, double x)
     ans=bj;
   } else {
     tox  = 2./ax;
-    m    = 2*((n+int(sqrt(acc*n))/2));
-    jsum = 0;
+    m    = 2*((n+unsigned(sqrt(acc*n))/2));
+    jsum = false;
     bjp  = ans = sum = 0.;
     bj   = 1.;
-    for(register unsigned j=m; j!=0; --j) {
+    for(unsigned j=m; j; --j) {
       bjm = j*tox*bj-bjp;
       bjp = bj;
       bj  = bjm;
@@ -643,11 +644,11 @@ double WDutils::In(unsigned n, double x)
   if(n==0)  return I0(x);
   if(n==1)  return I1(x);
   if(iszero(x)) return 0.;
-  register double bi,bim,bip,tox,ans;
+  double bi,bim,bip,tox,ans;
   tox=2.0/fabs(x);
   bip=ans=0.0;
   bi=1.0;
-  for(register unsigned j=2*(n+int(sqrt(acc*n))); j!=0; --j) {
+  for(unsigned j=2*(n+unsigned(sqrt(acc*n))); j; --j) {
     bim = bip+j*tox*bi;
     bip = bi;
     bi  = bim;

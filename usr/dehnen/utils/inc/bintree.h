@@ -330,7 +330,7 @@ namespace WDutils {
     }
     /// build the tree and set DPTH, NFIN.
     /// \return true if successfull (otherwise not enough boxes were allocated)
-    bool stack_build() WDutils_THROWING
+    bool stack_build()
     {
       const Box*  BOXU = ROOT+NALL;
       Stack<Box*> STCK(MAXD+MAXD);
@@ -408,7 +408,7 @@ namespace WDutils {
       return true;
     }
     //
-    void build() WDutils_THROWING
+    void build()
     {
       while(!stack_build()) {
 	unsigned N = min(NALL+NALL,NDOT-NCRT);

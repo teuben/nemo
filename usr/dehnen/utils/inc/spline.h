@@ -6,11 +6,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    1994-2007, 2010
+/// \date    1994-2007,2010,2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 1994-2007, 2010  Walter Dehnen
+// Copyright (C) 1994-2007,2010,2013  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ namespace WDutils {
     template<class scalar_type, class table_type>
     static void construct(int n, const scalar_type*x, const table_type *y,
 			  table_type *const y2, const table_type *yp1=0,
-			  const table_type *ypn=0) WDutils_THROWING
+			  const table_type *ypn=0)
     { 
       const scalar_type
 	zero =scalar_type(0),
@@ -125,7 +125,6 @@ namespace WDutils {
     static void construct(int n, const scalar_type*x, const table_type *y,
 			  table_type const&yp1, table_type const&ypn,
 			  table_type*const y2, bool n1=false, bool nn=false)
-      WDutils_THROWING
     { construct(n,x,y,y2, n1? &yp1 : 0, nn? &ypn : 0); }
     /// evaluate spline at x=xi with xl <= xi <= xh and yl=y(xl) etc...
     /// \param[in]  xi   x-value where spline is desired
@@ -148,7 +147,7 @@ namespace WDutils {
 			 table_type  const&y2h,
 			 table_type       *yi,
 			 table_type       *dyi = 0,
-			 table_type       *d2yi= 0) WDutils_THROWING
+			 table_type       *d2yi= 0)
     {
       const scalar_type sixth=scalar_type(0.16666666666666666666667);
       scalar_type 
@@ -215,7 +214,7 @@ namespace WDutils {
 	   const scalar_type*_x,
 	   const table_type *_y,
 	   const table_type *yp1=0,
-	   const table_type *ypn=0) WDutils_THROWING
+	   const table_type *ypn=0)
       : n(_n), x(_x), y(_y), y2(0), lo(0)
     {
       DebugInfo(6,"constructing spline of %d %s vs %s\n",n,
@@ -234,7 +233,7 @@ namespace WDutils {
     spline(Array<scalar_type,1> const&_x,
 	   Array<table_type ,1> const&_y,
 	   const table_type *yp1=0,
-	   const table_type *ypn=0) WDutils_THROWING
+	   const table_type *ypn=0)
       : n(_x.size()), x(_x.array()), y(_y.array()), y2(0), lo(0)
     {
       DebugInfo(6,"constructing spline of %d %s vs %s\n",n,
@@ -258,7 +257,7 @@ namespace WDutils {
     /// \param[out] d2y (optional) y''(xi)
     table_type operator() (scalar_type xi,
 			   table_type *dy = 0,
-			   table_type *d2y= 0) const WDutils_THROWING
+			   table_type *d2y= 0) const
     {
       find(lo,n,x,xi);
       if(lo==n-1) --lo;
@@ -295,7 +294,7 @@ namespace WDutils {
   void SplineDifferentiate(int n, const scalar_type*x, const table_type *y,
 			   table_type *yp,
 			   const table_type *yp1=0,
-			   const table_type *ypn=0) WDutils_THROWING
+			   const table_type *ypn=0)
   {
     table_type*y2 = WDutils_NEW(table_type,n);
     cubic_splines::construct(n,x,y,y2,yp1,ypn);
@@ -317,7 +316,7 @@ namespace WDutils {
 			   Array<table_type> const&y,
 			   Array<table_type> &yp,
 			   const table_type *yp1=0,
-			   const table_type *ypn=0) WDutils_THROWING
+			   const table_type *ypn=0)
   {
     if(x.size() != y.size() )
       WDutils_THROW("SplineDifferentiate: input array size mismatch\n");

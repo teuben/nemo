@@ -58,12 +58,17 @@
 #endif
 
 #if  defined(__COMPLEX__)					\
+  || defined(_LIBCPP_COMPLEX)	 /* LLVM libc++'s complex*/	\
   || defined(_CPP_COMPLEX)					\
   || defined(__STD_COMPLEX)					\
   || defined(__PGI) && defined(_STLP_template_complex)		\
   || defined(__GNUC__) && defined(_GLIBCXX_COMPLEX)		\
   || defined(WDutils_included_complex)
 #  define WDutils_COMPLEX
+#endif
+
+#ifdef WDutils_included_vector_h
+#  define WDUTILS_VECTOR_INCLUDED_FIRST 1
 #endif
 
 #ifndef WDutils_included_Pi_h
@@ -80,6 +85,10 @@
 #endif
 #ifndef WDutils_included_meta_h
 # include <meta.h>
+#endif
+
+#if !defined(WDUTILS_VECTOR_INCLUDED_FIRST) && defined(WDutils_included_vector_h)
+#  error  vector.h included from other include files in WDMath.h (will break code in vector.h)
 #endif
 
 namespace WDutils {

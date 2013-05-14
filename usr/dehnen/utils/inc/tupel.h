@@ -325,6 +325,10 @@ namespace WDutils {
       operator       X*  ()       { return a; }
       /// conversion to const pointer to scalar
       operator const X*  () const { return a; }
+      /// conversion to pointer to scalar
+      X*data() { return a; }
+      /// conversion to const pointer to scalar
+      const X*data() const { return a; }
       //@}
       //------------------------------------------------------------------------
       /// \name binary operators with scalar
@@ -564,19 +568,22 @@ namespace WDutils {
 	M::v_appl(y.a,x.a,f);
 	return y;
       }
-      /// normalize: x[i] /= abs(x)
-      tupel&normalize()
+      /// normalise: x[i] /= abs(x)
+      tupel&normalise()
       {
 	X n = norm();
 	if(n) return operator /= (std::sqrt(n));
 	else  return*this;
       }
-      /// normalizes: return x[i] / abs(x)
-      tupel normalized() const
+      /// normalises: return x[i] / abs(x)
+      tupel normalised() const
       {
 	tupel y(*this);
 	return y.normalize();
       }
+      //
+      tupel&normalize() { return normalise(); }
+      tupel normalized() const { return normalised(); }
       /// is any element nan?
       bool isnan() const
       { return M::v_nan(a); }
@@ -698,11 +705,19 @@ namespace WDutils {
     template<int N, typename X> inline
     bool isinf(tupel<N,X> const&x)
     { return x.isinf(); }
-    /// normalize: x[i] /= abs(x)
+    /// normalise: x[i] /= abs(x)
+    template<int N, typename X> inline
+    tupel<N,X> &normalise(tupel<N,X> &x)
+    { return x.normalise(); }
+    /// normalises: x[i] = abs(x)
+    template<int N, typename X> inline
+    tupel<N,X> normalised(tupel<N,X> const&x)
+    { return x.normalised(); }
+    //
     template<int N, typename X> inline
     tupel<N,X> &normalize(tupel<N,X> &x)
     { return x.normalize(); }
-    /// normalizes: x[i] = abs(x)
+    //
     template<int N, typename X> inline
     tupel<N,X> normalized(tupel<N,X> const&x)
     { return x.normalized(); }

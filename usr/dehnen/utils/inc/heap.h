@@ -49,10 +49,10 @@
 
 namespace WDutils {
   struct WalkBase {
-    static int parent(int i) { return (i-1)>>1; }
-    static void to_parent(int&i) { --i; i>>=1; }
-    static int child (int i) { return 1+(i<<1); }
-    static void to_child(int&i) { i<<=1; ++i; }
+    static unsigned parent(unsigned i) { return (i-1)>>1; }
+    static void to_parent(unsigned&i) { --i; i>>=1; }
+    static unsigned child (unsigned i) { return 1+(i<<1); }
+    static void to_child(unsigned&i) { i<<=1; ++i; }
   };
   //
   //  struct WalkSwap
@@ -75,8 +75,9 @@ namespace WDutils {
     /// \param[in]     n        size of array
     /// \param[in]     compare  Comparator (see \<functional\>), e.g. std::less
     template<typename T, class Comparator>
-    static void down(T*a, int p, int n, Comparator compare) {
-      for(int c=child(p); c<n; p=c,to_child(c)) {
+    static void down(T*a, unsigned p, unsigned n, Comparator compare)
+    {
+      for(unsigned c=child(p); c<n; p=c,to_child(c)) {
 	if((c+1)<n && compare(a[c],a[c+1])) ++c;
 	if(compare(a[p],a[c])) std::swap(a[p],a[c]);
 	else break;
@@ -87,8 +88,9 @@ namespace WDutils {
     /// \param[in]     c        index of element to be walked up the tree
     /// \param[in]     compare  Comparator (see \<functional\>), e.g. std::less
     template<typename T, class Comparator>
-    static void up(T*a, int c, Comparator compare) {
-      for(int p=parent(c); c; c=p,to_parent(p)) {
+    static void up(T*a, unsigned c, Comparator compare)
+    {
+      for(unsigned p=parent(c); c; c=p,to_parent(p)) {
 	if(compare(a[p],a[c])) std::swap(a[p],a[c]);
 	else break;
       }
@@ -124,11 +126,11 @@ namespace WDutils {
     /// \param[in]     n        size of array
     /// \param[in]     compare  Comparator (see \<functional\>), e.g. std::less
     template<typename T, class Comparator>
-    static void down(T*a, int p, int n, Comparator compare) {
+    static void down(T*a, unsigned p, unsigned n, Comparator compare) {
       if(p>=(n>>1)) return;
       T tmp=a[p];
-      int i=p;
-      for(int c=child(p); c<n; p=c,to_child(c)) {
+      unsigned i=p;
+      for(unsigned c=child(p); c<n; p=c,to_child(c)) {
 	if((c+1)<n && compare(a[c],a[c+1])) ++c;
 	if(compare(tmp,a[c])) a[p]=a[i=c];
 	else break;
@@ -140,11 +142,11 @@ namespace WDutils {
     /// \param[in]     c        index of element to be walked up the tree
     /// \param[in]     compare  Comparator (see \<functional\>), e.g. std::less
     template<typename T, class Comparator>
-    static void up(T*a, int c, Comparator compare) {
+    static void up(T*a, unsigned c, Comparator compare) {
       if(c<1) return;
       T tmp=a[c];
-      int i=c;
-      for(int p=parent(c); c; c=p,to_parent(p)) {
+      unsigned i=c;
+      for(unsigned p=parent(c); c; c=p,to_parent(p)) {
 	if(compare(a[p],tmp)) a[c]=a[i=p];
 	else break;
       }
@@ -166,26 +168,26 @@ namespace WDutils {
     /// \param[in]     p        index of element to be walked down the tree
     /// \param[in]     n        size of array
     template<typename T>
-    static void down(T*a, int p, int n)
+    static void down(T*a, unsigned p, unsigned n)
     { Walk::down(a,p,n,Comparator<T>()); }
     /// upwards pass
     /// \param[in,out] a        array[0..@a n -1] to be heapified
     /// \param[in]     c        index of element to be walked up the tree
     template<typename T>
-    static void up(T*a, int c)
+    static void up(T*a, unsigned c)
     { Walk::up(a,c,Comparator<T>()); }
     /// put randomly ordered array into heap order
     /// \param[in,out] a  array[0..@a n -1]; input: random; output: heap order
     /// \param[in]     n  size of array
     template<typename T> 
-    static void build(T*a, int n)
-    { for(int i=n>>1; i; --i) down(a,i-1,n); }
+    static void build(T*a, unsigned n)
+    { for(unsigned i=n>>1; i; --i) down(a,i-1,n); }
     /// put array back into heap order after the top element has been replaced.
     /// This is equivalent to, but faster than, pop() followed by push().
     /// \param[in,out] a  array[0..@a n -1] in heap order, except for element 0 
     /// \param[in]     n  size of array
     template<typename T>
-    static void after_top_replace(T*a, int n)
+    static void after_top_replace(T*a, unsigned n)
     { down(a,0,n); }
     /// put array back into heap order after the last element has been replaced
     /// \note used in push()
@@ -193,8 +195,8 @@ namespace WDutils {
     ///                   n -1
     /// \param[in]     n  size of array
     template<typename T>
-    static void after_last_replace(T*a, int n)
-    { up(a,n-1); }
+    static void after_last_replace(T*a, unsigned n)
+    { if(n) up(a,n-1); }
     /// put array back into heap order after the @a i th element (only) has
     /// been replaced
     /// \param[in,out] a  array[0..@a n -1] in heap order, except for element @a
@@ -202,16 +204,18 @@ namespace WDutils {
     /// \param[in]     i  element that has been replaced, must be in [0,@a n -1]
     /// \param[in]     n  size of array
     template<typename T>
-    static void after_replace(T*a, int i, int n)
+    static void after_replace(T*a, unsigned i, unsigned n)
     {
-      int p=Walk::parent(i);
+      if(i==0)
+	return after_top_replace(a,n);
+      unsigned p=Walk::parent(i);
       Comparator<T> compare;
       if(compare(a[p],a[i]))
 	Walk::up(a,i,compare);
       else {
-	int c=Walk::child(i);
-	if(c  <n && compare(a[i],a[c]) || 
-	   c+1<n && compare(a[i],a[c+1]))
+	unsigned c=Walk::child(i);
+	if((c  <n && compare(a[i],a[c  ])) || 
+	   (c+1<n && compare(a[i],a[c+1]))    )
 	  Walk::down(a,i,n,compare);
       }
     }
@@ -221,7 +225,7 @@ namespace WDutils {
     /// \param[in,out] a  array[0..@a n -1] in heap order
     /// \param[in,out] n  size of array, increased by one on output
     template<typename T>
-    static void push(T const&x, T*a, int&n)
+    static void push(T const&x, T*a, unsigned&n)
     {
       a[n++] = x;
       after_last_replace(a,n);
@@ -232,11 +236,13 @@ namespace WDutils {
     /// \param[in,out] a  array[0..@a n -1] in heap order
     /// \param[in,out] n  size of array, reduced by one on output
     template<typename T>
-    static void pop(T&x, T*a, int&n)
+    static void pop(T&x, T*a, unsigned&n)
     {
-      x = a[0];
-      a[0] = a[n-1];
-      after_top_replace(a,--n);
+      if(n) {
+	x = a[0];
+	a[0] = a[n-1];
+	after_top_replace(a,--n);
+      }
     }
     /// transform heap structured array into ordered array.
     /// For a max-heap, i.e. if @a Comparator is std::less, the array will be
@@ -244,12 +250,13 @@ namespace WDutils {
     /// \param[in,out] a  array[0..@a n -1]; input heap; output ordered
     /// \param[in]     n  size of array, assuming @a n > 0
     template<typename T>
-    static void sort(T*a, int n)
+    static void sort(T*a, unsigned n)
     {
-      for(--n; n; --n) {
-	std::swap(a[n],a[0]);
-	down(a,0,n);
-      }
+      if(n)
+	for(--n; n; --n) {
+	  std::swap(a[n],a[0]);
+	  down(a,0,n);
+	}
     }
     /// find the index of the smallest element in a heap which is larger than x
     /// (for @a Comparator std::less).
@@ -258,10 +265,10 @@ namespace WDutils {
     /// \param[in] n  size of array
     /// \return index of element closest to x, but upwards in Comparator order
     template<typename T>
-    static int next_up(T const&x, const T*a, int n)
+    static unsigned next_up(T const&x, const T*a, unsigned n)
     {
-      if(!compare(x,a[0])) return -1;     // x larger than top: illegal
-      for(int i,j,p=0;;) {
+      WDutilsAssert(compare(x,a[0]));     // ensure x not larger than top
+      for(unsigned i,j,p=0;;) {
 	i=j=Walk::child(p);
 	if(i>=n) return p;                // no children -> return p
 	if((i+1)<n) {                     // 2 children? i=larger, j=smaller
@@ -282,7 +289,7 @@ namespace WDutils {
     static void after_last_replace(Array<T>&a)
     { after_last_replace(a.array(),a.size()); }
     template<typename T> 
-    static void after_replace(Array<T>&a, int i)
+    static void after_replace(Array<T>&a, unsigned i)
     { after_replace(a.array(),i,a.size()); }
     template<typename T> 
     static void sort(Array<T>&a)
@@ -302,7 +309,7 @@ namespace WDutils {
   //@{
   /// ascending heapsort in place, avoiding std::swap()
   template<typename T>
-  void HeapSortAsc(T*a, int n)
+  void HeapSortAsc(T*a, unsigned n)
   {
     if(n>0) {
       MaxHeap::build(a,n);
@@ -311,7 +318,7 @@ namespace WDutils {
   }
   /// descending heapsort in place, avoiding std::swap()
   template<typename T>
-  void HeapSortDesc(T*a, int n)
+  void HeapSortDesc(T*a, unsigned n)
   {
     if(n>0) {
       MinHeap::build(a,n);
@@ -320,7 +327,7 @@ namespace WDutils {
   }
   /// ascending heapsort in place, using std::swap()
   template<typename T>
-  void HeapSortAscSwap(T*a, int n)
+  void HeapSortAscSwap(T*a, unsigned n)
   {
     if(n>0) {
       MaxHeapSwap::build(a,n);
@@ -329,7 +336,7 @@ namespace WDutils {
   }
   /// descending heapsort in place, using std::swap()
   template<typename T>
-  void HeapSortDescSwap(T*a, int n)
+  void HeapSortDescSwap(T*a, unsigned n)
   {
     if(n>0) {
       MinHeapSwap::build(a,n);

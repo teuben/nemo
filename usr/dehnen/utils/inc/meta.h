@@ -103,108 +103,78 @@ namespace WDutils {
     struct True {};
     /// to be used instead of bool variables false
     struct False {};
-    ///
-    /// support for operation count
-    class OpCounting {
-      static int M, A, D, S;
-    public:
-      static void reset() noexcept { M=0u; A=0u; D=0u; S=0u; }
-      static void inc_mul() noexcept { ++ M; }
-      static void inc_add() noexcept { ++ A; }
-      static void inc_div() noexcept { ++ D; }
-      static void inc_sqr() noexcept { ++ S; }
-      static void count_ma(int m, int a) noexcept { M+=m; A+=a; }
-      static void count_ds(int d, int s) noexcept { D+=d; S+=s; }
-      static int mul() noexcept { return M; }
-      static int add() noexcept { return A; }
-      static int div() noexcept { return D; }
-      static int sqr() noexcept { return S; }
-    };
-#ifdef WDutilsMetaCountOperations
-# define __ResetC()     WDutils::meta::OpCounting::reset()
-# define __CountMA(M,A) WDutils::meta::OpCounting::count_ma(M,A)
-# define __CountDS(D,S) WDutils::meta::OpCounting::count_ds(D,S)
-# define __IncMul()     WDutils::meta::OpCounting::inc_mul()
-# define __IncAdd()     WDutils::meta::OpCounting::inc_add()
-# define __IncDiv()     WDutils::meta::OpCounting::inc_div()
-# define __IncSqr()     WDutils::meta::OpCounting::inc_sqr()
-#else
-# define __ResetC();
-# define __CountMA(M,A);
-# define __CountDS(D,S);
-# define __IncMul();
-# define __IncAdd();
-# define __IncDiv();
-# define __IncSqr();
-#endif
     ////////////////////////////////////////////////////////////////////////////
     // operational dependence on even or odd integer
-    template<int> struct __EvenOdd;
-    template<> struct __EvenOdd<0> {
-      template<typename Real> static void neg (Real&) noexcept {}
-      template<typename Real> static Real pow (Real ) noexcept { return Real(1); }
-      template<typename Real> static Real powp(Real ,  Real y) noexcept { return y; }
-      template<typename Real> static void ass (Real&x, Real y) noexcept { x =y; }
-      template<typename Real> static void add (Real&x, Real y) noexcept { __IncAdd(); x+=y; }
-      template<typename Real> static void sub (Real&x, Real y) noexcept { __IncAdd(); x-=y; }
-      template<typename Real> static void add2(Real&x, Real y) noexcept { __CountMA(0,2); x+=y; x+=y; }
-      template<typename Real> static void sub2(Real&x, Real y) noexcept { __CountMA(0,2); x-=y; x-=y; }
-      template<typename Real> static Real sum (Real x, Real y) noexcept { __IncAdd(); return x+y; }
-      template<typename Real> static Real diff(Real x, Real y) noexcept { __IncAdd(); return x-y; }
+    template<int> struct _m_EvenOdd;
+    template<> struct _m_EvenOdd<0> {
+      template<typename R> static void neg (R&) noexcept {}
+      template<typename R> static R    pow (R ) noexcept { return R(1); }
+      template<typename R> static R    powp(R ,  R y) noexcept { return y; }
+      template<typename R> static void ass (R&x, R y) noexcept { x =y; }
+      template<typename R> static void add (R&x, R y) noexcept { x+=y; }
+      template<typename R> static void sub (R&x, R y) noexcept { x-=y; }
+      template<typename R> static void add2(R&x, R y) noexcept { x+=y; x+=y; }
+      template<typename R> static void sub2(R&x, R y) noexcept { x-=y; x-=y; }
+      template<typename R> static R    sum (R x, R y) noexcept { return x+y; }
+      template<typename R> static R    diff(R x, R y) noexcept { return x-y; }
     };
-    template<> struct __EvenOdd<1> {
-      template<typename Real> static void neg (Real&x) noexcept { x=-x; }
-      template<typename Real> static Real pow (Real x) noexcept { return x; }
-      template<typename Real> static Real powp(Real x, Real y) noexcept { __IncMul(); return x*y; }
-      template<typename Real> static void ass (Real&x, Real y) noexcept { x =-y; }
-      template<typename Real> static void add (Real&x, Real y) noexcept { __IncAdd(); x-=y; }
-      template<typename Real> static void sub (Real&x, Real y) noexcept { __IncAdd(); x+=y; }
-      template<typename Real> static void add2(Real&x, Real y) noexcept { __CountMA(0,2); x-=y; x-=y; }
-      template<typename Real> static void sub2(Real&x, Real y) noexcept { __CountMA(0,2); x+=y; x+=y; }
-      template<typename Real> static Real sum (Real x, Real y) noexcept { __IncAdd(); return x-y; }
-      template<typename Real> static Real diff(Real x, Real y) noexcept { __IncAdd(); return x+y; }
+    template<> struct _m_EvenOdd<1> {
+      template<typename R> static void neg (R&x) noexcept { x=-x; }
+      template<typename R> static R    pow (R x) noexcept { return x; }
+      template<typename R> static R    powp(R x, R y) noexcept { return x*y; }
+      template<typename R> static void ass (R&x, R y) noexcept { x =-y; }
+      template<typename R> static void add (R&x, R y) noexcept { x-=y; }
+      template<typename R> static void sub (R&x, R y) noexcept { x+=y; }
+      template<typename R> static void add2(R&x, R y) noexcept { x-=y; x-=y; }
+      template<typename R> static void sub2(R&x, R y) noexcept { x+=y; x+=y; }
+      template<typename R> static R    sum (R x, R y) noexcept { return x-y; }
+      template<typename R> static R    diff(R x, R y) noexcept { return x+y; }
     };
     /// assigns positive or negative, depending on whether N is even or odd
     /// \param[in,out] x lvalue, replaced by y if N is even, -y if N is odd
     /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void Assign(Real&x, Real y) noexcept { __EvenOdd<N&1>::ass(x,y); }
+    template<int N, typename R> inline
+    void Assign(R&x, R y) noexcept { _m_EvenOdd<N&1>::ass(x,y); }
     /// switches sign of x if N is odd
     /// \param[in,out] x lvalue, replaced by -x if N is odd
-    template<int N, typename Real> inline
-    void Negate(Real&x) noexcept { __EvenOdd<N&1>::neg(x); }
+    template<int N, typename R> inline
+    void Negate(R&x) noexcept { _m_EvenOdd<N&1>::neg(x); }
+    /// switches sign of x if N is odd
+    /// \param[in,out] x lvalue, replaced by -x if N is odd
+    template<int N, typename R> inline
+    void negate_if_odd(R&x) noexcept { _m_EvenOdd<N&1>::neg(x); }
     /// adds or subtracts, depending on whether N is even or odd
     /// \param[in,out] x lvalue, replaced by x+y if N is even, x-y if N is odd
     /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void Add(Real&x, Real y) noexcept { __EvenOdd<N&1>::add(x,y); }
+    template<int N, typename R> inline
+    void Add(R&x, R y) noexcept { _m_EvenOdd<N&1>::add(x,y); }
     /// adds or subtracts twice, depending on whether N is even or odd
     /// \param[in,out] x lvalue, replaced by x+2y if N is even, x-2y if N is odd
     /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void AddTwice(Real&x, Real y) noexcept { __EvenOdd<N&1>::add2(x,y); }
+    template<int N, typename R> inline
+    void AddTwice(R&x, R y) noexcept { _m_EvenOdd<N&1>::add2(x,y); }
     /// subtracts or adds, depending on whether N is even or odd
     /// \param[in,out] x lvalue, replaced by x-y if N is even, x+y if N is odd
     /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void Sub(Real&x, Real y) noexcept { __EvenOdd<N&1>::sub(x,y); }
+    template<int N, typename R> inline
+    void Sub(R&x, R y) noexcept { _m_EvenOdd<N&1>::sub(x,y); }
     /// subtracts or adds twice, depending on whether N is even or odd
     /// \param[in,out] x lvalue, replaced by x-2y if N is even, x+2y if N is odd
     /// \param[in]     y rvalue
-    template<int N, typename Real> inline
-    void SubTwice(Real&x, Real y) noexcept { __EvenOdd<N&1>::sub2(x,y); }
+    template<int N, typename R> inline
+    void SubTwice(R&x, R y) noexcept { _m_EvenOdd<N&1>::sub2(x,y); }
     /// sum or difference, depending on whether N is even or odd
     /// \param[in] x rvalue
     /// \param[in] y rvalue
     /// \return x+y if N is even, x-y if N is odd
-    template<int N, typename Real> inline
-    Real Sum(Real x, Real y) noexcept { return __EvenOdd<N&1>::sum(x,y); }
+    template<int N, typename R> inline
+    R Sum(R x, R y) noexcept { return _m_EvenOdd<N&1>::sum(x,y); }
     /// difference or sum, depending on whether N is even or odd
     /// \param[in] x rvalue
     /// \param[in] y rvalue
     /// \return x-y if N is even, x+y if N is odd
-    template<int N, typename Real> inline
-    Real Diff(Real x, Real y) noexcept { return __EvenOdd<N&1>::diff(x,y); }
+    template<int N, typename R> inline
+    R Diff(R x, R y) noexcept { return _m_EvenOdd<N&1>::diff(x,y); }
     ////////////////////////////////////////////////////////////////////////////
     /// sign of an integer
     template<int N> struct Sign
@@ -217,46 +187,37 @@ namespace WDutils {
     {
       WDutilsStaticAssert((N!=0 && N!=1));
       /// inverse of integer
-      template<typename Real> Real Inverse() noexcept
-      {
-	__IncDiv();
-	return Real(1)/Real(N);
-      }
+      template<typename R> static R Inverse() noexcept
+      { return R(1)/R(N); }
       /// divide scalar
       /// \param[in,out] X scalar, replaced by X/N on output
-      template<typename Real>
-      static void Divide(Real&X) noexcept
-      {
-	__IncMul();
-	X *= Inverse<Real>();
-      }
+      template<typename R>
+      static void Divide(R&X) noexcept
+      { X *= Inverse<R>(); }
       /// ratio of scalar and N
       /// \param[in] X scalar
       /// \return    X/N
-      template<typename Real>
-      static Real Ratio(Real X) noexcept
-      {
-	__IncMul();
-	return X*Inverse<Real>();
-      }
+      template<typename R>
+      static R Ratio(R X) noexcept
+      { return X*Inverse<R>(); }
     }
 #endif
     ;
     ///
     template<> struct IntegerInverse<0> {};
     template<> struct IntegerInverse<1> {
-      template<typename Real> static Real Inverse() noexcept { return Real(1); }
-      template<typename Real> static void Divide(Real&) noexcept {}
-      template<typename Real> static Real Ratio(Real X) noexcept { return X; }
+      template<typename R> static R Inverse() noexcept { return R(1); }
+      template<typename R> static void Divide(R&) noexcept {}
+      template<typename R> static R Ratio(R X) noexcept { return X; }
     };
 #define DEFINVERSE(NUM,INVERSE)						\
     template<> struct IntegerInverse<NUM> {				\
-      template<typename Real> static Real Inverse() noexcept {		\
-	return Real(INVERSE); }						\
-      template<typename Real> static void Divide(Real&X) noexcept {	\
-	__IncMul(); X *= Real(INVERSE); }				\
-      template<typename Real> static Real Ratio(Real X) noexcept {	\
-	__IncMul(); return X * Real(INVERSE); }				\
+      template<typename R> static R Inverse() noexcept 		\
+      { return R(INVERSE); }						\
+      template<typename R> static void Divide(R&X) noexcept	\
+      { X *= R(INVERSE); }						\
+      template<typename R> static R Ratio(R X) noexcept 	\
+      { return X * R(INVERSE); }					\
     }
     // all numbers up to 100
     DEFINVERSE(   2, 0.5);
@@ -416,6 +377,31 @@ namespace WDutils {
     DEFINVERSE( 252, 0.0039682539682539682540);
     DEFINVERSE( 255, 0.0039215686274509803922);
     DEFINVERSE( 256, 0.00390625);
+    // more numbers needed in fmm
+    DEFINVERSE( 286, 0.0034965034965034965035);
+    DEFINVERSE( 330, 0.0030303030303030303030);
+    DEFINVERSE( 364, 0.0027472527472527472527);
+    DEFINVERSE( 455, 0.0021978021978021978022);
+    DEFINVERSE( 462, 0.0021645021645021645022);
+    DEFINVERSE( 495, 0.0020202020202020202020);
+    DEFINVERSE( 560, 0.0017857142857142857143);
+    DEFINVERSE( 715, 0.0013986013986013986014);
+    DEFINVERSE( 792, 0.0012626262626262626263);
+    DEFINVERSE( 924, 0.0010822510822510822511);
+    DEFINVERSE(1001, 0.00099900099900099900100);
+    DEFINVERSE(1287, 0.00077700077700077700078);
+    DEFINVERSE(1365, 0.00073260073260073260073);
+    DEFINVERSE(1716, 0.00058275058275058275058);
+    DEFINVERSE(1820, 0.00054945054945054945055);
+    DEFINVERSE(2002, 0.00049950049950049950050);
+    DEFINVERSE(3003, 0.00033300033300033300033);
+    DEFINVERSE(3432, 0.00029137529137529137529);
+    DEFINVERSE(4368, 0.00022893772893772893773);
+    DEFINVERSE(5005, 0.00019980019980019980020);
+    DEFINVERSE(6435, 0.00015540015540015540016);
+    DEFINVERSE(8008, 0.00012487512487512487512);
+    DEFINVERSE(11440,0.000087412587412587412587);
+    DEFINVERSE(12870,0.000077700077700077700078);
     // further powers of two
     DEFINVERSE( 512, 0.001953125);
     DEFINVERSE(1024, 0.0009765625);
@@ -425,7 +411,7 @@ namespace WDutils {
     // some low factorials
     DEFINVERSE( 720, 0.0013888888888888888889);
     DEFINVERSE(5040, 0.00019841269841269841270);
-    DEFINVERSE(40320, 0.000024801587301587301587);
+    DEFINVERSE(40320,0.000024801587301587301587);
 #undef DEFINVERSE
     /// meta programming arithmetic with small non-negative integers
     /// \note specialisations for N=0,1,2,3
@@ -442,43 +428,42 @@ namespace WDutils {
       /// logarithm of two rounded down to integer
       static const int Log2 = 1+Integer<Half>::Log2;
       /// multiply scalar
-      /// \param[in,out] X scalar, replaced by N*X on output
-      template<typename Real>
-      static void Multiply(Real&X) noexcept { __IncMul(); X *= N; }
+      /// \param[in,out] x scalar, replaced by N*x on output
+      template<typename R>
+      static void Multiply(R&x) noexcept { x *= R(N); }
       /// scalar to power N
-      /// \param[in] X scalar
-      /// \return X^N
-      template<typename Real>
-      static Real Power(Real X) noexcept
+      /// \param[in] x scalar
+      /// \return x^N
+      template<typename R>
+      static R Power(R x) noexcept
       {
-	__IncMul();
-	Real t = Integer<(N>>1)>::Power(X);
-	return __EvenOdd<N&1>::powp(X, t*t);
+	R t = Integer<(N>>1)>::Power(x);
+	return _m_EvenOdd<N&1>::powp(x, t*t);
       }
-      /// replace X with X^N
-      template<typename Real> static void Exponentiate(Real&X) noexcept
-      { X = Power(X); }
+      /// replace x with x^N
+      template<typename R> static void Exponentiate(R&x) noexcept
+      { x = Power(x); }
       /// product of scalar with N
-      /// \param[in] X scalar
-      /// \return    X*N
-      template<typename Real>
-      static Real Product(Real X) noexcept
-      { __IncMul(); return X*N; }
+      /// \param[in] x scalar
+      /// \return    x*N
+      template<typename R>
+      static R Product(R x) noexcept
+      { return x*R(N); }
     };
     //
     template<> struct Integer<0> {
       static const int Odd = 0;
       static const int Half = 0;
       static const int Factorial = 1;
-      template<typename Real> static void Multiply    (Real&X) noexcept
-      { X=0; }
-      template<typename Real> static Real Product     (Real  ) noexcept
+      template<typename R> static void Multiply    (R&x) noexcept
+      { x=0; }
+      template<typename R> static R    Product     (R  ) noexcept
       { return 0; }
-      template<typename Real> static void Exponentiate(Real&X) noexcept
-      { X=1; }
-      template<typename Real> static Real Power       (Real  ) noexcept
+      template<typename R> static void Exponentiate(R&x) noexcept
+      { x=1; }
+      template<typename R> static R    Power       (R  ) noexcept
       { return 1; }
-      template<typename Real> static Real PowerProduct(Real, Real Y) noexcept
+      template<typename R> static R    PowerProduct(R, R Y) noexcept
       { return Y; }
     };
     //
@@ -491,14 +476,16 @@ namespace WDutils {
       using IntegerInverse<1>::Inverse;
       using IntegerInverse<1>::Divide;
       using IntegerInverse<1>::Ratio;
-      template<typename Real> static void Multiply    (Real& ) noexcept {}
-      template<typename Real> static Real Product     (Real X) noexcept
-      { return X; }
-      template<typename Real> static void Exponentiate(Real& ) noexcept {}
-      template<typename Real> static Real Power       (Real X) noexcept
-      { return X; }
-      template<typename Real> static Real PowerProduct(Real X, Real Y) noexcept
-      { __IncMul(); return X*Y; }
+      template<typename R>
+      static void Multiply    (R& ) noexcept {}
+      template<typename R>
+      static R Product        (R x) noexcept { return x; }
+      template<typename R>
+      static void Exponentiate(R& ) noexcept {}
+      template<typename R>
+      static R Power          (R x) noexcept { return x; }
+      template<typename R>
+      static R PowerProduct(R x, R Y) noexcept { return x*Y; }
     };
     //
     template<> struct Integer<2> : IntegerInverse<2> {
@@ -510,14 +497,14 @@ namespace WDutils {
       using IntegerInverse<2>::Inverse;
       using IntegerInverse<2>::Divide;
       using IntegerInverse<2>::Ratio;
-      template<typename Real> static void Multiply    (Real&X) noexcept
-      { __IncAdd(); X+=X; }
-      template<typename Real> static Real Product     (Real X) noexcept
-      { __IncAdd(); return X+X; }
-      template<typename Real> static void Exponentiate(Real&X) noexcept
-      { __IncMul(); X*=X; }
-      template<typename Real> static Real Power       (Real X) noexcept
-      { __IncMul(); return X*X; }
+      template<typename R>
+      static void Multiply    (R&x) noexcept { x+=x; }
+      template<typename R>
+      static R    Product     (R x) noexcept { return x+x; }
+      template<typename R>
+      static void Exponentiate(R&x) noexcept { x*=x; }
+      template<typename R>
+      static R    Power       (R x) noexcept { return x*x; }
     };
     //
     template<> struct Integer<3> : IntegerInverse<3> {
@@ -529,21 +516,21 @@ namespace WDutils {
       using IntegerInverse<3>::Inverse;
       using IntegerInverse<3>::Divide;
       using IntegerInverse<3>::Ratio;
-      template<typename Real> static void Multiply    (Real&X) noexcept
-      { __CountMA(0,2); X+=X+X; }
-      template<typename Real> static Real Product     (Real X) noexcept
-      { __CountMA(0,2); return X+X+X; }
-      template<typename Real> static void Exponentiate(Real&X) noexcept
-      { __CountMA(2,0); X*=X*X; }
-      template<typename Real> static Real Power       (Real X) noexcept
-      { __CountMA(2,0); return X*X*X; }
+      template<typename R>
+      static void Multiply    (R&x) noexcept { x+=x+x; }
+      template<typename R>
+      static R    Product     (R x) noexcept { return x+x+x; }
+      template<typename R>
+      static void Exponentiate(R&x) noexcept { x*=x*x; }
+      template<typename R>
+      static R    Power       (R x) noexcept { return x*x*x; }
     };
     /// Ratio with integer: convert into real-valued multiplication
-    template<int N, typename Real> inline
-    Real Over(Real x) noexcept { return Integer<N>::Ratio(x); }
+    template<int N, typename R> inline
+    R Over(R x) noexcept { return Integer<N>::Ratio(x); }
     /// Product with integer: convert to sum for N=0,1,2,3
-    template<int N, typename Real> inline
-    Real Times(Real x) noexcept { return Integer<N>::Product(x); }
+    template<int N, typename R> inline
+    R Times(R x) noexcept { return Integer<N>::Product(x); }
 #if(0)
     ////////////////////////////////////////////////////////////////////////////
     /// \name simple functors for assign-type operations
@@ -558,46 +545,46 @@ namespace WDutils {
     template<typename _Tp>
     struct assign : assign_function<_Tp&,_Tp>
     {
-      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
-      { return __x = __y; }
-      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
-      { return __x = __y; }
+      _Tp& operator()(_Tp& _m_x, _Tp const&_m_y) const noexcept
+      { return _m_x = _m_y; }
+      static _Tp& operate(_Tp& _m_x, _Tp const&_m_y) noexcept
+      { return _m_x = _m_y; }
     };
     /// +=
     template<typename _Tp>
     struct add_assign : assign_function<_Tp&,_Tp>
     {
-      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
-      { return __x += __y; }
-      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
-      { return __x += __y; }
+      _Tp& operator()(_Tp& _m_x, _Tp const&_m_y) const noexcept
+      { return _m_x += _m_y; }
+      static _Tp& operate(_Tp& _m_x, _Tp const&_m_y) noexcept
+      { return _m_x += _m_y; }
     };
     /// -=
     template<typename _Tp>
     struct subtract_assign : assign_function<_Tp&,_Tp>
     {
-      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
-      { return __x -= __y; }
-      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
-      { return __x -= __y; }
+      _Tp& operator()(_Tp& _m_x, _Tp const&_m_y) const noexcept
+      { return _m_x -= _m_y; }
+      static _Tp& operate(_Tp& _m_x, _Tp const&_m_y) noexcept
+      { return _m_x -= _m_y; }
     };
     /// *=
     template<typename _Tp>
     struct multiply_assign : assign_function<_Tp&,_Tp>
     {
-      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
-      { return __x *= __y; }
-      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
-      { return __x *= __y; }
+      _Tp& operator()(_Tp& _m_x, _Tp const&_m_y) const noexcept
+      { return _m_x *= _m_y; }
+      static _Tp& operate(_Tp& _m_x, _Tp const&_m_y) noexcept
+      { return _m_x *= _m_y; }
     };
     /// /=
     template<typename _Tp>
     struct divide_assign : assign_function<_Tp&,_Tp>
     {
-      _Tp& operator()(_Tp& __x, _Tp const&__y) const noexcept
-      { return __x /= __y; }
-      static _Tp& operate(_Tp& __x, _Tp const&__y) noexcept
-      { return __x /= __y; }
+      _Tp& operator()(_Tp& _m_x, _Tp const&_m_y) const noexcept
+      { return _m_x /= _m_y; }
+      static _Tp& operate(_Tp& _m_x, _Tp const&_m_y) noexcept
+      { return _m_x /= _m_y; }
     };
     //@}
 #endif
@@ -655,22 +642,22 @@ namespace WDutils {
       static void assign(X*a, const X*b, AssignFunctor f) { f(a[0],b[0]); }
     };
     //
-    template<bool> struct __Bool {
+    template<bool> struct _m_Bool {
       static bool OR (bool  ) { return 1; }
       static bool AND(bool x) { return x; }
     };
-    template<> struct __Bool<0> {
+    template<> struct _m_Bool<0> {
       static bool OR (bool x) { return x; }
       static bool AND(bool  ) { return 0; }
     };
     /// boolean OR between compile-time and run-time argument
     /// \param[in] Y  boolean expression which may be ignored
     /// \return    @a X || @a Y
-    template<bool X> bool Or(bool Y) { return __Bool<X>::OR(Y); }
+    template<bool X> bool Or(bool Y) { return _m_Bool<X>::OR(Y); }
     /// boolean AND between compile-time and run-time argument
     /// \param[in] Y  boolean expression which may be ignored
     /// \return    @a X && @a Y
-    template<bool X> bool And(bool Y) { return __Bool<X>::AND(Y); }
+    template<bool X> bool And(bool Y) { return _m_Bool<X>::AND(Y); }
     /// \name functors useful as template arguments
     //@{
     /// x=y
@@ -703,6 +690,21 @@ namespace WDutils {
       template<typename X> static void operate(X&x, X&y) noexcept
       { X tmp(x); x=y; y=tmp; }
     };
+    /// x=sqrt(y)
+    struct sqrt {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x=sqrt(y); }
+    };
+    /// x=y*y
+    struct square {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x=y*y; }
+    };
+    /// x=1/y
+    struct reciprocal {
+      template<typename X> static X& operate(X&x, X y) noexcept
+      { return x=X(1)/y; }
+    };
     /// x=max(x,y)
     struct maximum {
       template<typename X> static X& operate(X&x, X y) noexcept
@@ -713,6 +715,82 @@ namespace WDutils {
       template<typename X> static X& operate(X&x, X y) noexcept
       { return x=min(x,y); }
     };
+#if(0)
+    /// functor base class
+    template<typename _arg1, typename _arg2, typename _result>
+    struct assign_function {
+      typedef _arg1 arg1_type;
+      typedef _arg2 arg2_type;
+      typedef _result result_type;
+    };
+    /// x=y
+    template<typename T>
+    struct assign : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x = y; }
+    };
+    /// x+=y
+    template<typename T>
+    struct add : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x += y; }
+    };
+    /// x-=y
+    template<typename T>
+    struct subtract : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x -= y; }
+    };
+    /// x*=y
+    template<typename T>
+    struct multiply : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x *= y; }
+    };
+    /// x/=y
+    template<typename T>
+    struct divide : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x /= y; }
+    };
+    /// x <-> y
+    template<typename T>
+    struct swap : assign_function<T&,T&,void>
+    {
+      void operator()(T&x, T&y) const noexcept 
+      { T tmp(x); x=y; y=tmp; }
+    };
+    /// x=sqrt(y)
+    template<typename T>
+    struct sqrt : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x=sqrt(y); }
+    };
+    /// x=y*y
+    template<typename T>
+    struct square : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x=y*y; }
+    };
+    /// x=1/y
+    template<typename T>
+    struct reciprocal : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x=T(1)/y; }
+    };
+    /// x=max(x,y)
+    template<typename T>
+    struct maximum : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x=max(x,y); }
+    };
+    /// x=min(x,y)
+    template<typename T>
+    struct minimum : assign_function<T&,T,T&>
+    {
+      T& operator()(T& x, T const&y) const noexcept { return x=min(x,y); }
+    };
+#endif
     //@}
   } // namespace WDutils::meta
   ///
@@ -758,7 +836,7 @@ namespace WDutils {
   /// dependent boolean type
   template <bool B, typename...>
   struct dependent_bool_type : std::integral_constant<bool, B> {};
-#ifndef __INTEL_COMPILER
+// #ifndef __INTEL_COMPILER
   //  icpc 13 doesn't have variadic templates
   /// and an alias
   template <bool B, typename... T>
@@ -776,7 +854,7 @@ namespace WDutils {
   struct All : Bool<true> {};
   template <typename Head, typename... Tail>
   struct All<Head, Tail...> : Conditional<Head, All<Tail...>, Bool<false>> {};
-#endif
+// #endif
   ///
   template <bool If, typename Then, typename Else>
   using Condition = typename std::conditional<If,Then,Else>::type;

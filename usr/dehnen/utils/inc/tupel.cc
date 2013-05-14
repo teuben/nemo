@@ -93,14 +93,9 @@ namespace meta {
   template<int N, typename X> inline
   X times (const X&x) { return times__<N>::is(x); }
   //----------------------------------------------------------------------------
-  template<typename X> inline
-  static X square(X const&x) { return x*x; }
-  //----------------------------------------------------------------------------
-  template<typename X> inline
-  void update_max(X&x, const X&y) { if(y>x) x=y; }
-  //----------------------------------------------------------------------------
-  template<typename X> inline
-  void update_min(X&x, const X&y) { if(y<x) x=y; }
+  using WDutils::square;
+  using WDutils::update_max;
+  using WDutils::update_min;
   //----------------------------------------------------------------------------
   template<typename X> inline
   void update_max(X&x, const X&y, const X&a) { if((y+a)>x) x=y+a; }

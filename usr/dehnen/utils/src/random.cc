@@ -45,8 +45,7 @@ using namespace WDutils;
 //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  const long   mbig  = 1000000000, mseed = 161803398;
-  const double fac   = 1./double(mbig);
+  const long mbig = 1000000000, mseed = 161803398;
 }
 //------------------------------------------------------------------------------
 Random3::Random3(long idum) : inext(0), inextp(31)
@@ -71,9 +70,11 @@ Random3::Random3(long idum) : inext(0), inextp(31)
     }
 }
 //------------------------------------------------------------------------------
-double Random3::RandomDouble() const {
-  register long   mj;
-  register double r;
+double Random3::RandomDouble() const
+{
+  static double fac = 1./double(mbig);
+  long   mj;
+  double r;
   do {
     if(++inext  >= 56) inext  = 1;
     if(++inextp >= 56) inextp = 1;
@@ -93,68 +94,72 @@ double Random3::RandomDouble() const {
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
-  static int  setb  = 30;
-  const  int  MO    = 52;
-  static char f[MO] ={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-		      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  const  int  d[MO] ={1,2,3,3,4,4,5,5,5,5,5,5,6,6,6,6,6,6,
-		      7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-		      8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
-  const  int  p[MO] ={0,1,1,2,1,4,2,4,7,11,13,14,1,13,16,19,22,25,
-		      1,4,7,8,14,19,21,28,31,32,37,41,42,50,55,56,59,62,
-		      14,21,22,38,47,49,50,52,56,67,70,84,97,103,115,122};
+  static unsigned sobol_setb  = 30;
+  const unsigned  sobol_MO = 52;
+  static char sobol_f[sobol_MO]
+  = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  const unsigned sobol_d[sobol_MO]
+  = {1,2,3,3,4,4,5,5,5,5,5,5,6,6,6,6,6,6,
+     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+     8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+  const unsigned sobol_p[sobol_MO]
+  = {0,1,1,2,1,4,2,4,7,11,13,14,1,13,16,19,22,25,
+     1,4,7,8,14,19,21,28,31,32,37,41,42,50,55,56,59,62,
+     14,21,22,38,47,49,50,52,56,67,70,84,97,103,115,122};
 }
 //------------------------------------------------------------------------------
-void set_bits(const int BITS)
+void Sobol::set_bits(const unsigned BITS)
 {
-  setb = (BITS<=0) ? 30 : BITS;
+  sobol_setb = (BITS<=0) ? 30 : BITS;
 }
 //------------------------------------------------------------------------------
-Sobol::Sobol(int ACTL, int BITS)
+Sobol::Sobol(int ACTL, unsigned BITS)
 {
   // set degree and polynomial from the static tables. It's important, that     
   // no other object with the same degree and polynomial is currently existing, 
   // because its quasi random numbers would be the same as ours. If ACTL on     
   // input is set >=0 we don't care and construct the sequence No. ACTL.        
-  if(ACTL>=0 && ACTL < MO)
-    actl=ACTL;
+  if(ACTL>=0 && ACTL < int(sobol_MO))
+    actl=unsigned(ACTL);
   else {
-    for(actl=0; actl!=MO && f[actl]; ++actl) {}
-    if(actl>=MO)
+    for(actl=0; actl!=sobol_MO && sobol_f[actl]; ++actl) {}
+    if(actl>=sobol_MO)
       WDutils_Error("in Sobol::Sobol(): trying to create the 53th object");
   }
-  f[actl] += 1;
+  sobol_f[actl] += 1;
   if(BITS==0)
-    bits = setb;
+    bits = sobol_setb;
   else if((bits=BITS)<10)
     WDutils_Warning("in Sobol::Sobol(): "
 		    "creating object with less than 10 bits");
-  in       = 0;
-  ix       = 0;
-  fac      = 1./(1L<<bits);
-  int degs = d[actl];
-  int poly = p[actl];
+  in  = 0;
+  ix  = 0;
+  fac = 1./(1L<<bits);
+  unsigned degs = sobol_d[actl];
+  unsigned poly = sobol_p[actl];
   // seed initial Mi; i=1,...,degs                                              
   // these must be odd integer numbers less than 2^i.                           
   // Finally the direction numbers are Vi = 2^(bits-i) * Mi                     
-  register int i,i2,ip,l;
-  register unsigned long vi;
+  unsigned i,i2,ip,l;
+  unsigned long vi;
   v = WDutils_NEW(unsigned long,bits)-1;
   for(i=1,i2=2; i<=degs; i++,i2<<=1) {
     if(i2<=poly) 
       vi = 1;
     else {
-      vi = i2 - poly;
+      vi = unsigned(i2-poly);
       if(!(vi&1)) vi-= 1;
     }
-    v[i] = vi << (bits-i);
+    if(bits>i)
+      v[i] = vi << (bits-i);
   }
   // now use the recurrence (Press et al. 1992, eq. 7.7.2) to create            
   // the remaining direction numbers. With Vi = 2^(bits-i) Mi it reads          
   // V[i] = (a[1]*V[i-1]) XOR (a[2]*V[i-2]) XOR ... XOR (a[q-1]*V[i-q+1])       
   //   XOR ( V[i-q] XOR V[i-q]/2^q )                                            
-  for(i=degs+1; i<=int(bits); i++) {
+  for(i=degs+1; i<=bits; i++) {
     ip = poly;
     vi = v[i-degs];
     vi^= (vi>>degs);
@@ -168,11 +173,11 @@ Sobol::Sobol(int ACTL, int BITS)
 //------------------------------------------------------------------------------
 Sobol::~Sobol() {
   WDutils_DEL_A(v+1);
-  f[actl]  = 0;
+  sobol_f[actl]  = 0;
 }
 //------------------------------------------------------------------------------
 double Sobol::RandomDouble () const {
-  register unsigned long im=in++, j;
+  unsigned long im=in++, j;
   for(j=1; j<=bits; j++) {
     if( !(im&1) ) break;
     im >>= 1;
@@ -189,8 +194,8 @@ double Sobol::RandomDouble () const {
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 Normal::Normal(const RandomNumberGenerator*r1,
-	       const RandomNumberGenerator*r2) WDutils_THROWING :
-  iset(0), R1(r1), R2(r2? r2:r1)
+	       const RandomNumberGenerator*r2)
+  : iset(0), R1(r1), R2(r2? r2:r1)
 {
   if(R1==R2 && !R1->is_pseudo())
     WDutils_THROW("trying to construct \"Normal\" with a "
@@ -203,7 +208,7 @@ double Normal::operator() () const
     iset = 0;
     return gset;
   } else {
-    register double v1,v2,rsq,fac;
+    double v1,v2,rsq,fac;
     do {
       v1  = 2 * R1->RandomDouble() - 1.;
       v2  = 2 * R2->RandomDouble() - 1.;
@@ -220,26 +225,16 @@ double Normal::operator() () const
 // class WDutils::ExpDisk                                                     //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-ExpDisk::ExpDisk(const RandomNumberGenerator* r, const double H) : 
-  N(256), N1(N+1), R(r), h(H), hi(1./h), hqi(hi*hi)
+ExpDisk::ExpDisk(const RandomNumberGenerator*r, const double H) : 
+  R(r), h(H), hi(1./h), hqi(hi*hi)
 {
-  register int    i;
-  register double y1;
-  Y = WDutils_NEW(double,N1);
-  P = WDutils_NEW(double,N1);
   Y[0] = P[0] = 0.;
   Y[N] = P[N] = 1.;
-  for(i=1; i<N; i++) {
+  for(unsigned i=1; i<N; ++i) {
     Y[i] = i/double(N);
-    y1   = 1.-Y[i];
+    double y1 = 1.-Y[i];
     P[i] = 1.-exp(-Y[i]/y1)/y1;
   }
-}
-//------------------------------------------------------------------------------
-ExpDisk::~ExpDisk()
-{
-  WDutils_DEL_A(Y);
-  WDutils_DEL_A(P);
 }
 //------------------------------------------------------------------------------
 double ExpDisk::ranvar() const

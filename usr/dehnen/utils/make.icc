@@ -16,13 +16,31 @@ FC		:= ifc
 # general optimisation and warning flags
 WARNFLAGS	:= -Wall
 # note -fast or -ipo gave wrong results with TestTree
-OPTFLAGS	:= -O2 -ip -xHost -fpic -falign-functions -openmp -g
+OPTFLAGS	:= -O2 -ip -xHost -fpic -falign-functions -g
 
 # these are actually to be set
-CFLAGS		:= $(OPTFLAGS)
-CXXFLAGS	:= -std=c++0x $(OPTFLAGS) $(WARNFLAGS)
-LDFLAGS		:= -shared -openmp
+CFLAGS		:= $(OPTFLAGS) $(WARNFLAGS)
+LDFLAGS		:= -shared
 MATHLIB		:= -limf -lm
+
+ifdef WDutilsDevel
+CXX11		:= 1
+OPENMP		:= 1
+endif
+
+ifdef CXX11
+CXXFLAGS	:= -std=c++0x $(CFLAGS)
+else
+CXXFLAGS	:= $(CFLAGS)
+endif
+
+ifdef OPENMP
+CXXFLAGS	+= -openmp
+LDFLAGS		+= -openmp
+endif
+
+
+
 # xiar is needed if using ipo
 #ARCHIVE		:= xiar rc
 

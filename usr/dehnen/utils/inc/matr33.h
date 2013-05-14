@@ -5,11 +5,12 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2010-2012
+/// \date   2010-2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \version June-2012 WD  using vector_class to allow vector.h and tupel.h
+/// \version jun-2012 WD  using vector_class to allow vector.h and tupel.h
+/// \version jan-2013 WD  adapted to new vector.h
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -34,14 +35,21 @@
 #define WDutils_included_matr33_h
 
 #ifndef WDutils_included_exception_h
-#  include <exception.h>
+# include <exception.h>
 #endif
 #ifndef WDutils_included_inline_h
-#  include <inline.h>
+# include <inline.h>
 #endif
 
-#if __cpluspluc < 201103L
-#  define noexcept
+#if __cplusplus < 201103L
+# ifndef WDutils_included_tupel_h
+#  include <tupel.h>
+# endif
+# define noexcept
+#else
+# ifndef WDutils_included_vector_h
+#  include <vector.h>
+# endif
 #endif
 namespace WDutils {
 
@@ -61,6 +69,18 @@ namespace WDutils {
     { A[0]=a0; A[1]=a1; A[2]=a2;
       A[3]=a3; A[4]=a4; A[5]=a5;
       A[6]=a6; A[7]=a7; A[8]=a8; }
+#if __cplusplus < 201103L
+    typedef tupel<3,X> vect;
+    typedef const tupel<3,X> &const_vect;
+# define TempV
+#else
+    typedef vector<3,X> vect;
+    template<typename V>
+    using _const_vect =
+      vector_details::const_vector_base<3,X,V>;
+# define TempV template<typename V>
+# define const_vect _const_vect<V> const&
+#endif
   public:
     typedef SymmMatrix33<X> SymmMatrix;  ///< associated symmetric matrix type
     /// default ctor
@@ -98,7 +118,7 @@ namespace WDutils {
     Matrix33 operator+(Matrix33 const&m) const noexcept
     { Matrix33 r; for(int i=0; i!=N; ++i) r.A[i]=A[i]+m.A[i]; return r; }
     /// sum of matrix and symmetric matrix
-    inline Matrix33 operator+ (SymmMatrix const&m) const;
+    inline Matrix33 operator+ (SymmMatrix const&m) const noexcept;
     /// subtract matrix
     Matrix33&operator-=(Matrix33 const&m) noexcept
     { for(int i=0; i!=N; ++i) A[i]-=m.A[i]; return*this; }
@@ -157,7 +177,7 @@ namespace WDutils {
       m[2][0] = M[1][0]*M[2][1]-M[1][1]*M[2][0];
       m[2][1] = M[0][1]*M[2][0]-M[0][0]*M[2][1];
       m[2][2] = M[0][0]*M[1][1]-M[0][1]*M[1][0];
-      return m/= M[0][0]*m[0][0]-M[1][0]*m[0][1]+M[2][0]*m[0][2];
+      return m/= M[0][0]*m[0][0]+M[1][0]*m[0][1]+M[2][0]*m[0][2];
     }
     /// remove trace-part of matrix
     Matrix33&traceless() noexcept
@@ -246,9 +266,7 @@ namespace WDutils {
     /// \name operations with vector
     //@{
     /// set to dyadic vector product
-    template<template<int,typename> class vector_class>
-    Matrix33&dyadic(vector_class<3,X> const&x,
-		    vector_class<3,X> const&y) noexcept
+    TempV Matrix33&dyadic(const_vect x, const_vect y) noexcept
     {
       for(int i=0; i!=3; ++i)
 	for(int j=0; j!=3; ++j)
@@ -256,8 +274,7 @@ namespace WDutils {
       return*this;
     }
     /// set to dyadic vector product
-    template<template<int,typename> class vector_class>
-    Matrix33&dyadic(vector_class<3,X> const&x) noexcept
+    TempV Matrix33&dyadic(const_vect x) noexcept
     {
       A[0]     =x[0]*x[0];
       A[1]=A[3]=x[0]*x[1];
@@ -268,9 +285,7 @@ namespace WDutils {
       return*this;
     }
     /// add dyadic vector product
-    template<template<int,typename> class vector_class>
-    Matrix33&add_dyadic(vector_class<3,X> const&x,
-			vector_class<3,X> const&y) noexcept
+    TempV Matrix33&add_dyadic(const_vect x, const_vect y) noexcept
     {
       for(int i=0; i!=3; ++i)
 	for(int j=0; j!=3; ++j)
@@ -278,9 +293,7 @@ namespace WDutils {
       return*this;
     }
     /// add dyadic vector product times a scalar
-    template<template<int,typename> class vector_class>
-    Matrix33&add_dyadic(X fac, vector_class<3,X> const&x, 
-			       vector_class<3,X> const&y) noexcept
+    TempV Matrix33&add_dyadic(X fac, const_vect x, const_vect y) noexcept
     {
       for(int i=0; i!=3; ++i) {
 	X tmp = fac*x[i];
@@ -290,12 +303,11 @@ namespace WDutils {
       return*this;
     }
     /// product with vector from right
-    template<template<int,typename> class vector_class>
-    vector_class<3,X> operator*(vector_class<3,X> const&x) const noexcept
+    TempV vect operator*(const_vect x) const noexcept
     {
-      return vector_class<3,X>(M[0][0]*x[0] + M[0][1]*x[1] + M[0][2]*x[2],
-			       M[1][0]*x[0] + M[1][1]*x[1] + M[1][2]*x[2],
-			       M[2][0]*x[0] + M[2][1]*x[1] + M[2][2]*x[2]);
+      return vect(M[0][0]*x[0] + M[0][1]*x[1] + M[0][2]*x[2],
+		  M[1][0]*x[0] + M[1][1]*x[1] + M[1][2]*x[2],
+		  M[2][0]*x[0] + M[2][1]*x[1] + M[2][2]*x[2]);
     }
     //@}
   };// class Matrix33
@@ -310,6 +322,15 @@ namespace WDutils {
     friend class Matrix33<X>;
     SymmMatrix33(X a0, X a1, X a2, X a3, X a4, X a5)
     { A[0]=a0; A[1]=a1; A[2]=a2; A[3]=a3; A[4]=a4; A[5]=a5; }
+#if __cplusplus < 201103L
+    typedef tupel<3,X> vect;
+    typedef const tupel<3,X> &const_vect;
+#else
+    typedef vector<3,X> vect;
+    template<typename V>
+    using _const_vect =
+      vector_details::const_vector_base<3,X,V>;
+#endif
   public:
     typedef Matrix33<X> Matrix;     ///< associated general matrix type
     /// default ctor
@@ -353,7 +374,7 @@ namespace WDutils {
     /// \note the produce of two symmetric matrices is in general not symmetric
     Matrix operator*(SymmMatrix33 const&m) const noexcept
     {
-      register X t11=A[1]*m.A[1], t22=A[2]*m.A[2], t44=A[3]*m.A[3];
+      register X t11=A[1]*m.A[1], t22=A[2]*m.A[2], t44=A[4]*m.A[4];
       return Matrix(A[0]*m.A[0] + t11         + t22,
 		    A[0]*m.A[1] + A[1]*m.A[3] + A[2]*m.A[4],
 		    A[0]*m.A[2] + A[1]*m.A[4] + A[2]*m.A[5],
@@ -363,7 +384,7 @@ namespace WDutils {
 		    A[2]*m.A[0] + A[4]*m.A[1] + A[5]*m.A[2],
 		    A[2]*m.A[1] + A[4]*m.A[3] + A[5]*m.A[4],
 		    t22         + t44         + A[5]*m.A[5]);
-    }
+    }      
     /// product with general matrix
     Matrix operator*(Matrix const&m) const noexcept
     {
@@ -400,7 +421,7 @@ namespace WDutils {
       M(3) = A[0]*A[5] - A[2]*A[2];
       M(4) = A[1]*A[2] - A[0]*A[4];
       M(5) = A[0]*A[3] - A[1]*A[1];
-      M   /= A[0]*M(0) - A[1]*M(1) + A[2]*M(2);
+      M   /= A[0]*M(0) + A[1]*M(1) + A[2]*M(2);
     }
     /// inverse of symmetrix matrix
     /// \note the inverse of a symmetric matrix is itself symmetric
@@ -417,9 +438,9 @@ namespace WDutils {
     X det() const noexcept
     { 
       return
-	A[0]*(A[3]*A[5]-A[4]*A[4])
-	+A[1]*(twice(A[2]*A[4])-A[1]*A[5])
-	-A[3]*A[2]*A[2];
+	A[0]*(A[3]*A[5]-A[4]*A[4]) +
+	A[1]*(twice(A[2]*A[4])-A[1]*A[5]) -
+	A[3]*A[2]*A[2];
     }
     /// trace = Mkk
     /// \note norm = 1/3 trace^2 + shear^2
@@ -471,8 +492,7 @@ namespace WDutils {
     /// \name operations with vector
     //@{
     /// set to dyadic vector self-product
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&dyadic(vector_class<3,X> const&x) noexcept
+    TempV SymmMatrix33&dyadic(const_vect x) noexcept
     {
       A[0]=x[0]*x[0];
       A[1]=x[0]*x[1];
@@ -483,9 +503,7 @@ namespace WDutils {
       return*this;
     }
     /// set to symmetrised dyadic vector product
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&dyadic_symm(vector_class<3,X> const&x,
-			     vector_class<3,X> const&y) noexcept
+    TempV SymmMatrix33&dyadic_symm(const_vect x, const_vect y) noexcept
     {
       A[0]=x[0]*y[0];
       A[1]=X(0.5)*(x[0]*y[1]+x[1]*y[0]);
@@ -496,8 +514,7 @@ namespace WDutils {
       return*this;
     }
     /// add dyadic vector product
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&add_dyadic(vector_class<3,X> const&x) noexcept
+    TempV SymmMatrix33&add_dyadic(const_vect x) noexcept
     {
       A[0]+=x[0]*x[0];
       A[1]+=x[0]*x[1];
@@ -508,9 +525,7 @@ namespace WDutils {
       return*this;
     }
     /// add symmetrised dyadic vector product
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&add_dyadic_symm(vector_class<3,X> const&x,
-				 vector_class<3,X> const&y) noexcept
+    TempV SymmMatrix33&add_dyadic_symm(const_vect x, const_vect y) noexcept
     {
       A[0]+=x[0]*y[0];
       A[1]+=X(0.5)*(x[0]*y[1]+x[1]*y[0]);
@@ -521,8 +536,7 @@ namespace WDutils {
       return*this;
     }
     /// add dyadic vector product times scalar
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&add_dyadic(X fac, vector_class<3,X> const&x) noexcept
+    TempV SymmMatrix33&add_dyadic(X fac, const_vect x) noexcept
     {
       X tmp=fac*x[0];
       A[0]+=tmp*x[0];
@@ -535,9 +549,8 @@ namespace WDutils {
       return*this;
     }
     /// add symmetrised dyadic vector product times scalar
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&add_dyadic_symm(X fac, vector_class<3,X> const&x,
-				        vector_class<3,X> const&y) noexcept
+    TempV SymmMatrix33&add_dyadic_symm(X fac, const_vect x, const_vect y)
+      noexcept
     {
       A[0]+=fac*x[0]*y[0];
       A[1]+=fac*X(0.5)*(x[0]*y[1]+x[1]*y[0]);
@@ -548,9 +561,7 @@ namespace WDutils {
       return*this;
     }
     /// compute to moment of intertia tensor
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&moment_of_intertia(X mass, vector_class<3,X> const&x)
-      noexcept 
+    TempV SymmMatrix33&moment_of_intertia(X mass, const_vect x) noexcept 
     {
       X xx = x[0]*x[0],
 	yy = x[1]*x[1],
@@ -564,9 +575,7 @@ namespace WDutils {
       return*this;
     }
     /// add moment of intertia tensor
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&add_moment_of_intertia(X mass, vector_class<3,X> const&x)
-      noexcept 
+    TempV SymmMatrix33&add_moment_of_intertia(X mass, const_vect x) noexcept 
     {
       X xx = x[0]*x[0],
 	yy = x[1]*x[1],
@@ -580,9 +589,7 @@ namespace WDutils {
       return*this;
     }
     /// subtract moment of intertia tensor
-    template<template<int,typename> class vector_class>
-    SymmMatrix33&sub_moment_of_intertia(X mass, vector_class<3,X> const&x)
-      noexcept 
+    TempV SymmMatrix33&sub_moment_of_intertia(X mass, const_vect x) noexcept 
     {
       X xx = x[0]*x[0],
 	yy = x[1]*x[1],
@@ -596,16 +603,16 @@ namespace WDutils {
       return*this;
     }
     /// product with vector
-    template<template<int,typename> class vector_class>
-    vector_class<3,X> operator*(vector_class<3,X> const&x) const noexcept
+    TempV vect operator*(const_vect x) const noexcept
     {
-      return vector_class<3,X>(A[0]*x[0] + A[1]*x[1] + A[2]*x[2],
-			       A[1]*x[0] + A[3]*x[1] + A[4]*x[2],
-			       A[2]*x[0] + A[4]*x[1] + A[5]*x[2]);
+      return vect(A[0]*x[0] + A[1]*x[1] + A[2]*x[2],
+		  A[1]*x[0] + A[3]*x[1] + A[4]*x[2],
+		  A[2]*x[0] + A[4]*x[1] + A[5]*x[2]);
     }
     //@}
-
   };// class SymmMatrix33
+#undef TempV
+#undef const_vect
   //
   template<typename X>
   inline Matrix33<X>::Matrix33(SymmMatrix const&m) noexcept
@@ -698,14 +705,21 @@ namespace WDutils {
   /// \related SymmMatrix33
   //@{
   /// product of vector times matrix
-  template<typename X, template<int, typename> class vector_class>
-  inline
-  vector_class<3,X> operator*(vector_class<3,X> const&x, Matrix33<X> const&M)
+#if __cplusplus < 201103L
+  template<typename X>
+  inline tupel<3,X> operator*(tupel<3,X> const&x, Matrix33<X> const&M)
+#else
+  template<typename X, typename V>
+  inline vector<3,X> operator*
+    (vector_details::const_vector_base<3,X,V> const&x,
+     Matrix33<X> const&M)
+#endif
     noexcept
   {
-    return vector_class<3,X>(M[0][0]*x[0] + M[1][0]*x[1] + M[2][0]*x[2],
-			     M[0][1]*x[0] + M[1][1]*x[1] + M[2][1]*x[2],
-			     M[0][2]*x[0] + M[1][2]*x[1] + M[2][2]*x[2]);
+    return typename Matrix33<X>::vect
+      (M[0][0]*x[0] + M[1][0]*x[1] + M[2][0]*x[2],
+       M[0][1]*x[0] + M[1][1]*x[1] + M[2][1]*x[2],
+       M[0][2]*x[0] + M[1][2]*x[1] + M[2][2]*x[2]);
   }
   /// trace of matrix
   template<typename X> inline X trace(Matrix33<X> const&M) noexcept
@@ -771,9 +785,16 @@ namespace WDutils {
   template<typename X> inline SymmMatrix33<X> unity() noexcept
   { SymmMatrix33<X> M; return M.unity(); }
   /// product of vector times symmetric matrix
-  template<typename X, template<int,typename> class vector_class>
-  inline vector_class<3,X>
-  operator*(vector_class<3,X> const&x, SymmMatrix33<X> const&M) noexcept
+#if __cplusplus < 201103L
+  template<typename X>
+  inline tupel<3,X> operator*(tupel<3,X> const&x, SymmMatrix33<X> const&M)
+#else
+  template<typename X, typename V>
+  inline vector<3,X> operator*
+    (vector_details::const_vector_base<3,X,V> const&x,
+   SymmMatrix33<X> const&M)
+#endif
+    noexcept
   { return M*x; }
   /// symmetric part of 3x3 matrix
   template<typename X> inline SymmMatrix33<X>
@@ -786,8 +807,14 @@ namespace WDutils {
   /// \param[in] a   rotation angle [radian] about @a axis
   /// \return matrix for rotating 3D vectors by angle @a around axis @a u
   /// \note We assume but don't check that @a u is a unit vector
-  template<typename X, template<int,typename> class vector_class>
-  inline Matrix33<X> rotation_matrix_na(vector_class<3,X> const&u, X a)
+#if __cplusplus < 201103L
+  template<typename X>
+  inline Matrix33<X> rotation_matrix_na(tupel<3,X> const&u, X a)
+#else
+  template<typename X, typename V>
+  inline Matrix33<X> rotation_matrix_na
+    (vector_details::const_vector_base<3,X,V> const&u, X a)
+#endif
     noexcept
   {
     Matrix33<X> R; R.dyadic(u);
@@ -809,10 +836,17 @@ namespace WDutils {
   /// \param[in] axis   rotation axis, not necessarily normalised
   /// \param[in] angle  rotation angle [radian] about @a axis
   /// \return matrix for rotating 3D vectors by @a angle around @a axis
-  template<typename X, template<int,typename> class vector_class>
-  inline Matrix33<X> rotation_matrix(vector_class<3,X> const&axis, X angle)
+#if __cplusplus < 201103L
+  template<typename X>
+  inline Matrix33<X> rotation_matrix(tupel<3,X> const&axis, X angle)
+#else
+  template<typename X, typename V>
+  inline Matrix33<X> rotation_matrix
+  (vector_details::const_vector_base<3,X,V> const&axis,
+   X angle)
+#endif
     noexcept
-  { return rotation_matrix_na(axis.normalized(),angle); }
+  { return rotation_matrix_na(normalised(axis),angle); }
 } // namespace WDutils
 //
 #undef noexcept 

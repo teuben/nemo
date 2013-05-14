@@ -1,7 +1,7 @@
 // -*- C++ -*-
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// \file   utils/inc/geometry_inl.h
+/// \file   utils/inc/geometry.tcc
 ///
 /// \brief  implements inline methods for geometry.h
 ///
@@ -36,8 +36,8 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef WDutils_included_geometry_inl_h
-#define WDutils_included_geometry_inl_h
+#ifndef WDutils_included_geometry_tcc
+#define WDutils_included_geometry_tcc
 
 #ifndef WDutils_included_geometry_h
 #  include <geometry.h>
@@ -59,7 +59,12 @@ namespace WDutils {
     //      member function templates --- only class templates, such as
     //      AlgorithmsHelper<>.
     //
-    namespace Meta {
+    namespace details {
+#if defined(__clang__) || (defined(__GNUC__) && !defined(__INTEL_COMPILER))
+#  define always_inline __attribute__((__always_inline__))
+#else
+#  define always_inline
+#endif
       //
       // 0  generic non-SSE code
       //
@@ -72,33 +77,42 @@ namespace WDutils {
 	friend struct Algorithms<1,1>;
       protected:
 	// is @a x in the interval [@a c-r, @a c+r) ?
-	static bool in_interval(real c, real r, real x) noexcept
+	static bool always_inline in_interval(real c, real r, real x) noexcept
 	{
 	  return x<c? c<=x+r : x<c+r;
 	}
+	// is @a x in the interval [@a c-r, @a c+r] ?
+	static bool always_inline in_open_interval(real c, real r, real x)
+	  noexcept
+	{
+	  return x<c? c<=x+r : x<=c+r;
+	}
 	// is the interval [a-b, a+b] in the interval [c-r, c+r]?
-	static bool in_interval(real c, real r, real a, real b) noexcept
+	static bool always_inline in_interval(real c, real r, real a, real b)
+	  noexcept
 	{
 	  return std::abs(c-a) <= r-b;
 	}
 	// copy(cube,cube)
 	template<int Dim>
-	static void copy(cube<Dim,real> const&in, cube<Dim,real> &out) noexcept
+	static void always_inline copy(cube<Dim,real> const&in,
+				       cube<Dim,real> &out) noexcept
 	{
 	  out.X = in.X;
 	  out.H = in.H;
 	}
 	// copy(sphere,sphere)
 	template<int Dim>
-	static void copy(sphere<Dim,real> const&in,
-			 sphere<Dim,real> &out) noexcept
+	static void always_inline copy(sphere<Dim,real> const&in,
+				       sphere<Dim,real> &out) noexcept
 	{
 	  out.X = in.X;
 	  out.Q = in.Q;
 	}
 	// convert2cuboid(PointPair)
 	template<int Dim>
-	static void convert2cuboid(PointPair<Dim,real> &c) noexcept
+	static void always_inline convert2cuboid(PointPair<Dim,real> &c)
+	  noexcept
 	{
 	  GeoVec<Dim,real> C = real(0.5)*(c.X+c.Y);
 	  GeoVec<Dim,real> H = real(0.5)*(c.Y-c.X);
@@ -125,6 +139,7 @@ namespace WDutils {
       protected:
 	using AlgorithmsHelperBase<real>::copy;
 	using AlgorithmsHelperBase<real>::in_interval;
+	using AlgorithmsHelperBase<real>::in_open_interval;
 	using AlgorithmsHelperBase<real>::convert2cuboid;
 	//
 	typedef GeoVec<2,real> vec2;
@@ -132,38 +147,52 @@ namespace WDutils {
 	typedef cuboid<2,real> box2;
 	typedef sphere<2,real> sph2;
 	// octant(point,point)
-	static int octant(vec2 const&c, vec2 const&x) noexcept
+	static int always_inline octant(vec2 const&c, vec2 const&x) noexcept
 	{
 	  int oct(0);
-	  if(x[0] > c[0]) oct |= 1;
-	  if(x[1] > c[1]) oct |= 2;
+	  if(x[0] >= c[0]) oct |= 1;
+	  if(x[1] >= c[1]) oct |= 2;
 	  return oct;
 	}
 	// contains(cube,point)
-	static bool contains(cub2 const&c, vec2 const&x) noexcept
+	static bool always_inline contains(cub2 const&c, vec2 const&x) noexcept
 	{
 	  return in_interval(c.X[0],c.H,x[0])
 	    &&   in_interval(c.X[1],c.H,x[1]);
 	}
+	// contains_open(cube,point)
+	static bool always_inline contains_open(cub2 const&c,
+						vec2 const&x) noexcept
+	{
+	  return in_open_interval(c.X[0],c.H,x[0])
+	    &&   in_open_interval(c.X[1],c.H,x[1]);
+	}
 	// contains(cuboid,point)
-	static bool contains(box2 const&c, vec2 const&x) noexcept
+	static bool always_inline contains(box2 const&c, vec2 const&x) noexcept
 	{
 	  return in_interval(c.X[0],c.Y[0],x[0])
 	    &&   in_interval(c.X[1],c.Y[1],x[1]);
 	}
+	// contains_open(cuboid,point)
+	static bool always_inline contains_open(box2 const&c,
+						vec2 const&x) noexcept
+	{
+	  return in_open_interval(c.X[0],c.Y[0],x[0])
+	    &&   in_open_interval(c.X[1],c.Y[1],x[1]);
+	}
 	// contains(cuboid,cuboid)
-	static bool contains(box2 const&c, box2 const&b) noexcept
+	static bool always_inline contains(box2 const&c, box2 const&b) noexcept
 	{
 	  return in_interval(c.X[0],c.Y[0], b.X[0],b.Y[0])
 	    &&   in_interval(c.X[1],c.Y[1], b.X[1],b.Y[1]);
 	}
 	// dist_sq(point,point)
-	static real dist_sq(vec2 const&x, vec2 const&y) noexcept
+	static real always_inline dist_sq(vec2 const&x, vec2 const&y) noexcept
 	{
 	  return WDutils::dist_sq(x,y);
 	}
 	// dist_sq(cube,point)
-	static real dist_sq(cub2 const&c, vec2 const&x) noexcept
+	static real always_inline dist_sq(cub2 const&c, vec2 const&x) noexcept
 	{
 	  real q(0),D;
 	  D = abs(c.X[0]-x[0]); if(D>c.H) q+=square(D-c.H);
@@ -171,7 +200,7 @@ namespace WDutils {
 	  return q;
 	}
 	// dist_sq(cuboid,point)
-	static real dist_sq(box2 const&c, vec2 const&x) noexcept
+	static real always_inline dist_sq(box2 const&c, vec2 const&x) noexcept
 	{
 	  real q(0),D;
 	  D = abs(c.X[0]-x[0])-c.Y[0]; if(D>0) q+=D*D;
@@ -179,7 +208,7 @@ namespace WDutils {
 	  return q;
 	}
 	// inside(cube,sphere)
-	static bool inside(cub2 const&c, sph2 const&s) noexcept
+	static bool always_inline inside(cub2 const&c, sph2 const&s) noexcept
 	{
 	  real D;
 	  D=abs(c.X[0]-s.X[0])-c.H; if(D>0 || s.Q>D*D) return false;
@@ -187,7 +216,7 @@ namespace WDutils {
 	  return true;
 	}
 	// inside(cuboid,sphere)
-	static bool inside(box2 const&c, sph2 const&s) noexcept
+	static bool always_inline inside(box2 const&c, sph2 const&s) noexcept
 	{
 	  real D;
 	  D=abs(c.X[0]-s.X[0])-c.Y[0]; if(D>0 || s.Q>D*D) return false;
@@ -195,7 +224,7 @@ namespace WDutils {
 	  return true;
 	}
 	// move to octant
-	static void move_to_octant(vec2&c, int i, real r) noexcept
+	static void always_inline move_to_octant(vec2&c, int i, real r) noexcept
 	{
 	  if(i&1) c[0] += r;  else  c[0] -= r;
 	  if(i&2) c[1] += r;  else  c[1] -= r;
@@ -216,6 +245,7 @@ namespace WDutils {
       protected:
 	using AlgorithmsHelperBase<real>::copy;
 	using AlgorithmsHelperBase<real>::in_interval;
+	using AlgorithmsHelperBase<real>::in_open_interval;
 	using AlgorithmsHelperBase<real>::convert2cuboid;
 	//
 	typedef GeoVec<3,real> vec3;
@@ -223,42 +253,57 @@ namespace WDutils {
 	typedef cuboid<3,real> box3;
 	typedef sphere<3,real> sph3;
 	// octant(point,point)
-	static int octant(vec3 const&c, vec3 const&x) noexcept
+	static int always_inline octant(vec3 const&c, vec3 const&x) noexcept
 	{
 	  int oct(0);
-	  if(x[0] > c[0]) oct |= 1;
-	  if(x[1] > c[1]) oct |= 2;
-	  if(x[2] > c[2]) oct |= 4;
+	  if(x[0] >= c[0]) oct |= 1;
+	  if(x[1] >= c[1]) oct |= 2;
+	  if(x[2] >= c[2]) oct |= 4;
 	  return oct;
 	}
 	// contains(cube,point)
-	static bool contains(cub3 const&c, vec3 const&x) noexcept
+	static bool always_inline contains(cub3 const&c, vec3 const&x) noexcept
 	{
 	  return in_interval(c.X[0],c.H,x[0])
 	    &&   in_interval(c.X[1],c.H,x[1])
 	    &&   in_interval(c.X[2],c.H,x[2]);
 	}
+	// contains_open(cube,point)
+	static bool contains_open(cub3 const&c, vec3 const&x) noexcept
+	{
+	  return in_open_interval(c.X[0],c.H,x[0])
+	    &&   in_open_interval(c.X[1],c.H,x[1])
+	    &&   in_open_interval(c.X[2],c.H,x[2]);
+	}
 	// contains(cuboid,point)
-	static bool contains(box3 const&c, vec3 const&x) noexcept
+	static bool always_inline contains(box3 const&c, vec3 const&x) noexcept
 	{
 	  return in_interval(c.X[0],c.Y[0],x[0])
 	    &&   in_interval(c.X[1],c.Y[1],x[1])
 	    &&   in_interval(c.X[2],c.Y[2],x[2]);
 	}
+	// contains_open(cuboid,point)
+	static bool always_inline contains_open(box3 const&c,
+						vec3 const&x) noexcept
+	{
+	  return in_open_interval(c.X[0],c.Y[0],x[0])
+	    &&   in_open_interval(c.X[1],c.Y[1],x[1])
+	    &&   in_open_interval(c.X[2],c.Y[2],x[2]);
+	}
 	// contains(cuboid,cuboid)
-	static bool contains(box3 const&c, box3 const&b) noexcept
+	static bool always_inline contains(box3 const&c, box3 const&b) noexcept
 	{
 	  return in_interval(c.X[0],c.Y[0], b.X[0],b.Y[0])
 	    &&   in_interval(c.X[1],c.Y[1], b.X[1],b.Y[1])
 	    &&   in_interval(c.X[2],c.Y[2], b.X[2],b.Y[2]);
 	}
 	// dist_sq(point,point)
-	static real dist_sq(vec3 const&x, vec3 const&y) noexcept
+	static real always_inline dist_sq(vec3 const&x, vec3 const&y) noexcept
 	{
 	  return WDutils::dist_sq(x,y);
 	}
 	// dist_sq(cube,point)
-	static real dist_sq(cub3 const&c, vec3 const&x) noexcept
+	static real always_inline dist_sq(cub3 const&c, vec3 const&x) noexcept
 	{
 	  real q(0),D;
 	  D = abs(c.X[0]-x[0]); if(D>c.H) q+=square(D-c.H);
@@ -267,7 +312,7 @@ namespace WDutils {
 	  return q;
 	}
 	// dist_sq(cuboid,point)
-	static real dist_sq(box3 const&c, vec3 const&x) noexcept
+	static real always_inline dist_sq(box3 const&c, vec3 const&x) noexcept
 	{
 	  real q(0),D;
 	  D = abs(c.X[0]-x[0])-c.Y[0]; if(D>0) q+=D*D;
@@ -276,7 +321,7 @@ namespace WDutils {
 	  return q;
 	}
 	// inside(cube,sphere)
-	static bool inside(cub3 const&c, sph3 const&s) noexcept
+	static bool always_inline inside(cub3 const&c, sph3 const&s) noexcept
 	{
 	  real D;
 	  D=abs(c.X[0]-s.X[0])-c.H; if(D>0 || s.Q>D*D) return false;
@@ -285,7 +330,7 @@ namespace WDutils {
 	  return true;
 	}
 	// inside(cuboid,sphere)
-	static bool inside(box3 const&c, sph3 const&s) noexcept
+	static bool always_inline inside(box3 const&c, sph3 const&s) noexcept
 	{
 	  real D;
 	  D=abs(c.X[0]-s.X[0])-c.Y[0]; if(D>0 || s.Q>D*D) return false;
@@ -294,7 +339,7 @@ namespace WDutils {
 	  return true;
 	}
 	// move to octant
-	static void move_to_octant(vec3&c, int i, real r) noexcept
+	static void always_inline move_to_octant(vec3&c, int i, real r) noexcept
 	{
 	  if(i&1) c[0] += r;  else  c[0] -= r;
 	  if(i&2) c[1] += r;  else  c[1] -= r;
@@ -319,41 +364,71 @@ namespace WDutils {
 	typedef cuboid<2,float> box2;
 	typedef sphere<2,float> sph2;
 	// load a fvec4
+	static fvec4 always_inline load(vec2 const&p) noexcept
+	{
+	  return fvec4::template load_t<aligned>(p.data());
+	}
+	// store a fvec4
+	static void always_inline store(fvec4 x, vec2&p) noexcept
+	{
+	  x.template store_t<aligned>(p.data());
+	}
+#if(0)
+	// load a fvec4
 	template<typename A>
-	static fvec4 load(A const&p) noexcept
+	static fvec4 always_inline load(A const&p) noexcept
 	{
 	  return fvec4::template pack_t<aligned>(p);
 	}
 	// store a fvec4
 	template<typename A>
-	static void store(fvec4 x, A&p) noexcept
+	static void always_inline store(fvec4 x, A&p) noexcept
 	{
 	  x.template unpack_t<aligned>(p);
 	}
+#endif
 	// octant(point,point)
-	static int octant(vec2 const&c, vec2 const&x) noexcept
+	static int always_inline octant(vec2 const&c, vec2 const&x) noexcept
 	{
-	  return 3 & signbits(load(c) < load(x));
+	  return 3 & signbits(load(c) <= load(x));
 	}
 	// contains(cube,point)
-	static bool contains(cub2 const&c, vec2 const&x) noexcept
+	static bool always_inline contains(cub2 const&c, vec2 const&x) noexcept
 	{
 	  fvec4 C = load(c.X);
 	  fvec4 H = single<2>(C);
 	  fvec4 X = load(x);
 	  return 3 == (3 & signbits((C-H <= X) & (X < C+H)));
 	}
+	// contains_open(cube,point)
+	static bool always_inline contains_open(cub2 const&c,
+						vec2 const&x) noexcept
+	{
+	  fvec4 C = load(c.X);
+	  fvec4 H = single<2>(C);
+	  fvec4 X = load(x);
+	  return 3 == (3 & signbits((C-H <= X) & (X <= C+H)));
+	}
 	// contains(cuboid,point)
-	static bool contains(box2 const&c, vec2 const&x) noexcept
+	static bool always_inline contains(box2 const&c, vec2 const&x) noexcept
 	{
 	  fvec4 C = load(c.X);
 	  fvec4 H = movehl(C,C);
 	  fvec4 X = load(x);
 	  return 3 == (3 & signbits((C-H <= X) & (X < C+H)));
 	}
+	// contains_open(cuboid,point)
+	static bool always_inline contains_open(box2 const&c,
+						vec2 const&x) noexcept
+	{
+	  fvec4 C = load(c.X);
+	  fvec4 H = movehl(C,C);
+	  fvec4 X = load(x);
+	  return 3 == (3 & signbits((C-H <= X) & (X <= C+H)));
+	}
 	// contains(cuboid,cuboid)
 	// for unaligned access, non-SSE code is faster
-	static bool contains(box2 const&c, box2 const&b) noexcept
+	static bool always_inline contains(box2 const&c, box2 const&b) noexcept
 	{
 	  WDutilsStaticAssert(aligned);
 	  fvec4 C = load(c.X);
@@ -366,7 +441,7 @@ namespace WDutils {
 	}
 	// dist_sq(point,point)
 	// for unaligned access, non-SSE code is faster
-	static float dist_sq(vec2 const&x, vec2 const&y) noexcept
+	static float always_inline dist_sq(vec2 const&x, vec2 const&y) noexcept
 	{
 	  WDutilsStaticAssert(aligned);
 	  fvec4 X;
@@ -376,7 +451,7 @@ namespace WDutils {
 	  return sum2(X);
 	}
 	// dist_sq(cube,point)
-	static float dist_sq(cub2 const&c, vec2 const&x) noexcept
+	static float always_inline dist_sq(cub2 const&c, vec2 const&x) noexcept
 	{
 	  fvec4 C = load(c.X);
 	  fvec4 H = single<2>(C);
@@ -387,7 +462,7 @@ namespace WDutils {
 	  return sum2(C);
 	}
 	// dist_sq(cuboid,point)
-	static float dist_sq(box2 const&c, vec2 const&x) noexcept
+	static float always_inline dist_sq(box2 const&c, vec2 const&x) noexcept
 	{
 	  fvec4 C = load(c.X);
 	  fvec4 H = movehl(C,C);
@@ -398,7 +473,7 @@ namespace WDutils {
 	  return sum2(C);
 	}
 	// inside(cube,sphere)
-	static bool inside(cub2 const&c, sph2 const&s) noexcept
+	static bool always_inline inside(cub2 const&c, sph2 const&s) noexcept
 	{
 	  fvec4 C = load(c.X);
 	  fvec4 H = single<2>(C);
@@ -410,7 +485,7 @@ namespace WDutils {
 	  return ! ( 3 & signbits( (Q>C) | (X>H) ) );
 	}
 	// inside(cuboid,sphere)
-	static bool inside(box2 const&c, sph2 const&s) noexcept
+	static bool always_inline inside(box2 const&c, sph2 const&s) noexcept
 	{
 	  fvec4 C = load(c.X);
 	  fvec4 H = movehl(C,C);
@@ -422,7 +497,7 @@ namespace WDutils {
 	  return ! ( 3 & signbits( (Q>C) | (X>H) ) );
 	}
 	// convert2cuboid(PointPair)
-	static void convert2cuboid(PointPair<2,float> &c) noexcept
+	static void always_inline convert2cuboid(PointPair<2,float> &c) noexcept
 	{
 	  WDutilsStaticAssert(aligned);
 	  fvec4 XY = load(c.X);                                     // [X  , Y ]
@@ -463,51 +538,81 @@ namespace WDutils {
 	typedef sphere<3,real> sph3;
 	typedef packed<4,real> rvec4;
 	// load a rvec4
+	static rvec4 always_inline load(vec3 const&p) noexcept
+	{
+	  return rvec4::template load_t<aligned>(p.data());
+	}
+	// store a rvec4
+	static void always_inline store(rvec4 x, vec3&p) noexcept
+	{
+	  x.template store_t<aligned>(p.data());
+	}
+#if(0)
+	// load a rvec4
 	template<typename A>
-	static rvec4 load(A const&p) noexcept
+	static rvec4 always_inline load(A const&p) noexcept
 	{
 	  return rvec4::template pack_t<aligned>(p);
 	}
 	// store a rvec4
 	template<typename A>
-	static void store(rvec4 x, A&p) noexcept
+	static void always_inline store(rvec4 x, A&p) noexcept
 	{
 	  x.template unpack_t<aligned>(p);
 	}
+#endif
 	// copy(cube,cube)
-	static void copy(cub3 const&in, cub3 &out) noexcept
+	static void always_inline copy(cub3 const&in, cub3 &out) noexcept
 	{
 	  store(load(in.X),out.X);
 	}
 	// copy(sphere,sphere)
-	static void copy(sph3 const&in, sph3 &out) noexcept
+	static void always_inline copy(sph3 const&in, sph3 &out) noexcept
 	{
 	  store(load(in.X),out.X);
 	}
 	// octant(point,point)
-	static int octant(vec3 const&c, vec3 const&x) noexcept
+	static int always_inline octant(vec3 const&c, vec3 const&x) noexcept
 	{
-	  return 7 & signbits(load(c) < load(x));
+	  return 7 & signbits(load(c) <= load(x));
 	}
 	// contains(cube,point)
-	static bool contains(cub3 const&c, vec3 const&x) noexcept
+	static bool always_inline contains(cub3 const&c, vec3 const&x) noexcept
 	{
 	  rvec4 C = load(c.X);
 	  rvec4 H = single<3>(C);
 	  rvec4 X = load(x);
 	  return 7 == (7 & signbits((C-H <= X) & (X < C+H)));
 	}
+	// contains_open(cube,point)
+	static bool always_inline contains_open(cub3 const&c,
+						vec3 const&x) noexcept
+	{
+	  rvec4 C = load(c.X);
+	  rvec4 H = single<3>(C);
+	  rvec4 X = load(x);
+	  return 7 == (7 & signbits((C-H <= X) & (X <= C+H)));
+	}
 	// contains(cuboid,point)
-	static bool contains(box3 const&c, vec3 const&x) noexcept
+	static bool always_inline contains(box3 const&c, vec3 const&x) noexcept
 	{
 	  rvec4 C = load(c.X);
 	  rvec4 H = load(c.Y);
 	  rvec4 X = load(x);
 	  return 7 == (7 & signbits((C-H <= X) & (X < C+H)));
 	}
+	// contains_open(cuboid,point)
+	static bool always_inline contains_open(box3 const&c,
+						vec3 const&x) noexcept
+	{
+	  rvec4 C = load(c.X);
+	  rvec4 H = load(c.Y);
+	  rvec4 X = load(x);
+	  return 7 == (7 & signbits((C-H <= X) & (X <= C+H)));
+	}
 	// contains(cuboid,cuboid)
 	// for unaligned access, non-SSE code is faster
-	static bool contains(box3 const&c, box3 const&b) noexcept
+	static bool always_inline contains(box3 const&c, box3 const&b) noexcept
 	{
 	  WDutilsStaticAssert(!real_is_float || aligned);
 	  rvec4 C = load(c.X);  C.make_diff(load(b.X));
@@ -516,14 +621,14 @@ namespace WDutils {
 	}
 	// dist_sq(point,point)
 	// for unaligned access, non-SSE code is faster
-	static real dist_sq(vec3 const&x, vec3 const&y) noexcept
+	static real always_inline dist_sq(vec3 const&x, vec3 const&y) noexcept
 	{
 	  WDutilsStaticAssert(!real_is_float || aligned);
 	  rvec4 X = load(x);  X-= load(y);  X*= X;
 	  return sum3(X);
 	}
 	// dist_sq(cube,point)
-	static real dist_sq(cub3 const&c, vec3 const&x) noexcept
+	static real always_inline dist_sq(cub3 const&c, vec3 const&x) noexcept
 	{
 	  rvec4 X = load(c.X);
 	  rvec4 H = single<3>(X);
@@ -534,7 +639,7 @@ namespace WDutils {
 	  return sum3(X);
 	}
 	// dist_sq(cuboid,point)
-	static real dist_sq(box3 const&c, vec3 const&x) noexcept
+	static real always_inline dist_sq(box3 const&c, vec3 const&x) noexcept
 	{
 	  rvec4 X = load(c.X);
 	  X.make_diff(load(x));
@@ -555,7 +660,7 @@ namespace WDutils {
 	    &&   ! (7&signbits( Q > square(H-X) ));
 	}
 	// inside(cuboid,sphere)
-	static bool inside(box3 const&c, sph3 const&s) noexcept
+	static bool always_inline inside(box3 const&c, sph3 const&s) noexcept
 	{
 	  rvec4 X = load(s.X);
 	  rvec4 Q = single<3>(X);
@@ -565,7 +670,7 @@ namespace WDutils {
 	    &&   ! (7&signbits( Q > square(H-X) ));
 	}
 	// convert2cuboid(PointPair)
-	static void convert2cuboid(PointPair<3,real>&c) noexcept
+	static void always_inline convert2cuboid(PointPair<3,real>&c) noexcept
 	{
 	  rvec4 X = load(c.X);
 	  rvec4 Y = load(c.Y);
@@ -586,54 +691,84 @@ namespace WDutils {
 	typedef cuboid<2,double> box2;
 	typedef sphere<2,double> sph2;
 	// load a dvec2
+	static dvec2 always_inline load(vec2 const&p) noexcept
+	{
+	  return dvec2::template load_t<aligned>(p.data());
+	}
+	// store a dvec2
+	static void always_inline store(dvec2 x, vec2&p) noexcept
+	{
+	  x.template store_t<aligned>(p.data());
+	}
+#if(0)
+	// load a dvec2
 	template<typename A>
-	static dvec2 load(A const&p) noexcept
+	static dvec2 always_inline load(A const&p) noexcept
 	{
 	  return dvec2::template pack_t<aligned>(p);
 	}
 	// store a dvec2
 	template<typename A>
-	static void store(dvec2 x, A&p) noexcept
+	static void always_inline store(dvec2 x, A&p) noexcept
 	{
 	  x.template unpack_t<aligned>(p);
 	}
+#endif
 	// octant(point,point)
-	static int octant(vec2 const&c, vec2 const&x) noexcept
+	static int always_inline octant(vec2 const&c, vec2 const&x) noexcept
 	{
-	  return signbits(load(c) < load(x));
+	  return signbits(load(c) <= load(x));
 	}
 	// contains(cube,point)
-	static bool contains(cub2 const&c, vec2 const&x) noexcept
+	static bool always_inline contains(cub2 const&c, vec2 const&x) noexcept
 	{
 	  dvec2 C = load(c.X);
 	  dvec2 H (c.H);
 	  dvec2 X = load(x);
 	  return ! signbits( (C-H > X) | (X >= C+H) );
 	}
+	// contains_open(cube,point)
+	static bool always_inline contains_open(cub2 const&c,
+						vec2 const&x) noexcept
+	{
+	  dvec2 C = load(c.X);
+	  dvec2 H (c.H);
+	  dvec2 X = load(x);
+	  return ! signbits( (C-H > X) | (X > C+H) );
+	}
 	// contains(cuboid,point)
-	static bool contains(box2 const&c, vec2 const&x) noexcept
+	static bool always_inline contains(box2 const&c, vec2 const&x) noexcept
 	{
 	  dvec2 C = load(c.X);
 	  dvec2 H = load(c.Y);
 	  dvec2 X = load(x);
 	  return ! signbits( (C-H > X) | (X >= C+H) );
 	}
+	// contains_open(cuboid,point)
+	static bool always_inline contains_open(box2 const&c,
+						vec2 const&x) noexcept
+	{
+	  dvec2 C = load(c.X);
+	  dvec2 H = load(c.Y);
+	  dvec2 X = load(x);
+	  return ! signbits( (C-H > X) | (X > C+H) );
+	}
 	// contains(cuboid,cuboid)
-	static bool contains(box2 const&c, box2 const&b) noexcept
+	static bool always_inline contains(box2 const&c, box2 const&b) noexcept
 	{
 	  dvec2 C = diff(load(c.X),load(b.X));
 	  dvec2 D = load(c.Y) - load(b.Y);
 	  return ! signbits( C > D );
 	}
 	// dist_sq(point,point)
-	static double dist_sq(vec2 const&x, vec2 const&y) noexcept
+	static double always_inline dist_sq(vec2 const&x, vec2 const&y) noexcept
 	{
 	  dvec2 X = load(x) - load(y);
 	  X*= X;
 	  return sum(X);
 	}
 	// dist_sq(cube,point)
-	static double dist_sq(cub2 const&c, vec2 const&x) noexcept
+	static double always_inline dist_sq(cub2 const&c, vec2 const&x) noexcept
 	{
 	  dvec2 C = load(c.X);
 	  dvec2 H (c.H);
@@ -644,7 +779,7 @@ namespace WDutils {
 	  return sum(C);
 	}
 	// dist_sq(cuboid,point)
-	static double dist_sq(box2 const&c, vec2 const&x) noexcept
+	static double always_inline dist_sq(box2 const&c, vec2 const&x) noexcept
 	{
 	  dvec2 C = load(c.X);
 	  dvec2 H = load(c.Y);
@@ -655,7 +790,7 @@ namespace WDutils {
 	  return sum(C);
 	}
 	// inside(cube,sphere)
-	static bool inside(cub2 const&c, sph2 const&s) noexcept
+	static bool always_inline inside(cub2 const&c, sph2 const&s) noexcept
 	{
 	  dvec2 C = load(c.X);
 	  dvec2 H (c.H);
@@ -667,7 +802,7 @@ namespace WDutils {
 	  return ! signbits( (Q>C) | (X>H) );
 	}
 	// inside(cuboid,sphere)
-	static bool inside(box2 const&c, sph2 const&s) noexcept
+	static bool always_inline inside(box2 const&c, sph2 const&s) noexcept
 	{
 	  WDutilsStaticAssert(aligned);
 	  dvec2 C = load(c.X);
@@ -680,7 +815,7 @@ namespace WDutils {
 	  return ! signbits( (Q>C) | (X>H) );
 	}
 	// convert2cuboid(PointPair)
-	static void convert2cuboid(PointPair<2,double>&c) noexcept
+	static void always_inline convert2cuboid(PointPair<2,double>&c) noexcept
 	{
 	  WDutilsStaticAssert(aligned);
 	  dvec2 X = load(c.X);
@@ -702,8 +837,24 @@ namespace WDutils {
 	typedef cuboid<3,double> box3;
 	typedef sphere<3,double> sph3;
 	// load a dvec2
+	template<int K, int Dim>
+	static dvec2 always_inline load(GeoVec<Dim,double> const&p) noexcept
+	{
+	  WDutilsStaticAssert(K==0 || K==2);
+	  return dvec2::template
+	    load_t<aligned>(p.data()+K);
+	}
+	// store a dvec2
+	template<int K, int Dim>
+	static void always_inline store(dvec2 x, GeoVec<Dim,double>&p) noexcept
+	{
+	  WDutilsStaticAssert(K==0 || K==2);
+	  x.template store_t<aligned>(p.data()+K);
+	}
+#if(0)
+	// load a dvec2
 	template<int K, typename A>
-	static dvec2 load(A const&p) noexcept
+	static dvec2 always_inline load(A const&p) noexcept
 	{
 	  WDutilsStaticAssert(K==0 || K==2);
 	  return dvec2::template
@@ -711,31 +862,32 @@ namespace WDutils {
 	}
 	// store a dvec2
 	template<int K, typename A>
-	static void store(dvec2 x, A&p) noexcept
+	static void always_inline store(dvec2 x, A&p) noexcept
 	{
 	  WDutilsStaticAssert(K==0 || K==2);
 	  x.template store_t<aligned>(static_cast<double*>(p)+K);
 	}
+#endif
 	// copy(cube,cube)
-	static void copy(cub3 const&in, cub3 &out) noexcept
+	static void always_inline copy(cub3 const&in, cub3 &out) noexcept
 	{
 	  store<0>(load<0>(in.X),out.X);
 	  store<2>(load<2>(in.X),out.X);
 	}
 	// copy(sphere,sphere)
-	static void copy(sph3 const&in, sph3 &out) noexcept
+	static void always_inline copy(sph3 const&in, sph3 &out) noexcept
 	{
 	  store<0>(load<0>(in.X),out.X);
 	  store<2>(load<2>(in.X),out.X);
 	}
 	// octant(point,point) 3D
-	static int octant(vec3 const&c, vec3 const&x) noexcept
+	static int always_inline octant(vec3 const&c, vec3 const&x) noexcept
 	{
-	  return signbits(load<0>(c) < load<0>(x))
-	    |((1&signbits(load<2>(c) < load<2>(x)))<<2);
+	  return signbits(load<0>(c) <= load<0>(x))
+	    |((1&signbits(load<2>(c) <= load<2>(x)))<<2);
 	}
 	// contains(cube,point)
-	static bool contains(cub3 const&c, vec3 const&x) noexcept
+	static bool always_inline contains(cub3 const&c, vec3 const&x) noexcept
 	{
 	  dvec2 C0 = load<0>(c.X);
 	  dvec2 X0 = load<0>(x);
@@ -745,8 +897,20 @@ namespace WDutils {
 	  return ! signbits( (C0-H > X0) | (X0 >= C0+H) )
 	    && !(1&signbits( (C2-H > X2) | (X2 >= C2+H) ));
 	}
+	// contains_open(cube,point)
+	static bool always_inline contains_open(cub3 const&c,
+						vec3 const&x) noexcept
+	{
+	  dvec2 C0 = load<0>(c.X);
+	  dvec2 X0 = load<0>(x);
+	  dvec2 C2 = load<2>(c.X);
+	  dvec2 H  = single<1>(C2);
+	  dvec2 X2 = load<2>(x);
+	  return ! signbits( (C0-H > X0) | (X0 > C0+H) )
+	    && !(1&signbits( (C2-H > X2) | (X2 > C2+H) ));
+	}
 	// contains(cuboid,point)
-	static bool contains(box3 const&c, vec3 const&x) noexcept
+	static bool always_inline contains(box3 const&c, vec3 const&x) noexcept
 	{
 	  dvec2 C0 = load<0>(c.X);
 	  dvec2 H0 = load<0>(c.Y);
@@ -757,8 +921,21 @@ namespace WDutils {
 	  return ! signbits( (C0-H0 > X0) | (X0 >= C0+H0) )
 	    && !(1&signbits( (C2-H2 > X2) | (X2 >= C2+H2) ));
 	}
+	// contains_open(cuboid,point)
+	static bool always_inline contains_open(box3 const&c,
+						vec3 const&x) noexcept
+	{
+	  dvec2 C0 = load<0>(c.X);
+	  dvec2 H0 = load<0>(c.Y);
+	  dvec2 X0 = load<0>(x);
+	  dvec2 C2 = load<2>(c.X);
+	  dvec2 H2 = load<2>(c.Y);
+	  dvec2 X2 = load<2>(x);
+	  return ! signbits( (C0-H0 > X0) | (X0 > C0+H0) )
+	    && !(1&signbits( (C2-H2 > X2) | (X2 > C2+H2) ));
+	}
 	// contains(cuboid,cuboid)
-	static bool contains(box3 const&c, box3 const&b) noexcept
+	static bool always_inline contains(box3 const&c, box3 const&b) noexcept
 	{
 	  dvec2 D0 = diff(load<0>(c.X),load<0>(b.X));
 	  dvec2 S0 = load<0>(c.Y) - load<0>(b.Y);
@@ -769,7 +946,7 @@ namespace WDutils {
 	}
 
 	// dist_sq(point,point)
-	static double dist_sq(vec3 const&x, vec3 const&y) noexcept
+	static double always_inline dist_sq(vec3 const&x, vec3 const&y) noexcept
 	{
 	  dvec2 X0 = load<0>(x) - load<0>(y);
 	  dvec2 X2 = load<2>(x) - load<2>(y);
@@ -778,7 +955,7 @@ namespace WDutils {
 	  return sum(X0) + sum1(X2);
 	}
 	// dist_sq(cube,point)
-	static double dist_sq(cub3 const&c, vec3 const&x) noexcept
+	static double always_inline dist_sq(cub3 const&c, vec3 const&x) noexcept
 	{
 	  dvec2 D0 = load<0>(c.X);
 	  dvec2 D2 = load<2>(c.X);
@@ -788,7 +965,7 @@ namespace WDutils {
 	  return sum(D0) + sum1(D2);
 	}
 	// dist_sq(cuboid,point)
-	static double dist_sq(box3 const&c, vec3 const&x) noexcept
+	static double always_inline dist_sq(box3 const&c, vec3 const&x) noexcept
 	{
 	  dvec2 D0 = load<0>(c.X);  D0.make_diff(load<0>(x));
 	  D0-=load<0>(c.Y); D0=max(D0,dvec2::zero()); D0*=D0;
@@ -797,7 +974,7 @@ namespace WDutils {
 	  return sum(D0) + sum1(D2);
 	}
 	// inside(cube,sphere)
-	static bool inside(cub3 const&c, sph3 const&s) noexcept
+	static bool always_inline inside(cub3 const&c, sph3 const&s) noexcept
 	{
 	  WDutilsStaticAssert(aligned);
 	  dvec2 X0 = load<0>(s.X);
@@ -811,7 +988,7 @@ namespace WDutils {
 	    &&!(1& signbits( (Q>square(H-X2)) | (X2>H) ) );
 	}
 	// inside(cuboid,sphere)
-	static bool inside(box3 const&c, sph3 const&s) noexcept
+	static bool always_inline inside(box3 const&c, sph3 const&s) noexcept
 	{
 	  WDutilsStaticAssert(aligned);
 	  dvec2 H0 = load<0>(c.Y);
@@ -825,7 +1002,7 @@ namespace WDutils {
 	    &&!(1& signbits( (Q>square(H2-X2)) | (X2>H2) ) );
 	}
 	// convert2cuboid(PointPair)
-	static void convert2cuboid(PointPair<3,double>&c) noexcept
+	static void always_inline convert2cuboid(PointPair<3,double>&c) noexcept
 	{
 	  dvec2 X = load<0>(c.X);
 	  dvec2 Y = load<0>(c.Y);
@@ -842,42 +1019,48 @@ namespace WDutils {
 #  endif // ! __AVX__
 # endif  // __SSE2__
 #endif   // __SSE__
-    } // namespace WDutils::Geometry::Meta
+#undef always_inline
+    } // namespace WDutils::Geometry::details
     // copy(cube,cube):  for 2D: use non-SSE
     template<bool _A, bool _S> template<int _D, typename _X> inline
     void Algorithms<_A,_S>::copy(cube<_D,_X> const&in,
 				 cube<_D,_X> &out) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_D==3&&_S>::copy(in,out); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_D==3&&_S>::copy(in,out); }
     // copy(sphere,sphere):  for 2D: use non-SSE
     template<bool _A, bool _S> template<int _D, typename _X> inline
     void Algorithms<_A,_S>::copy(sphere<_D,_X> const&in,
 				 sphere<_D,_X> &out) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_D==3&&_S>::copy(in,out); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_D==3&&_S>::copy(in,out); }
     // move_to_octant(point,int,real)
     template<bool _A, bool _S> template<int _D, typename _X> inline
     void Algorithms<_A,_S>::move_to_octant(GeoVec<_D,_X>&c,
 					   int i, _X r) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,0,0>::move_to_octant(c,i,r); }
+    { return details::AlgorithmsHelper<_D,_X,0,0>::move_to_octant(c,i,r); }
     // octant(point,point)
     template<bool _A, bool _S> template<int _D, typename _X> inline
     int Algorithms<_A,_S>::octant(GeoVec<_D,_X> const&c,
 				  GeoVec<_D,_X> const&x) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_S>::octant(c,x); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_S>::octant(c,x); }
     // dist_sq(point,point):   prefer non-SSE if unaligned
     template<bool _A, bool _S> template<int _D, typename _X> inline
     _X Algorithms<_A,_S>::dist_sq(GeoVec<_D,_X> const&x,
 				  GeoVec<_D,_X> const&y) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_A&&_S>::dist_sq(x,y); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_A&&_S>::dist_sq(x,y); }
     // contains(cube,point)
     template<bool _A, bool _S> template<int _D, typename _X> inline
     bool Algorithms<_A,_S>::contains(cube  <_D,_X> const&c,
 				     GeoVec<_D,_X> const&x) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_S>::contains(c,x); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_S>::contains(c,x); }
+    // contains_open(cube,point)
+    template<bool _A, bool _S> template<int _D, typename _X> inline
+    bool Algorithms<_A,_S>::contains_open(cube  <_D,_X> const&c,
+					  GeoVec<_D,_X> const&x) noexcept
+    { return details::AlgorithmsHelper<_D,_X,_A,_S>::contains_open(c,x); }
     // dist_sq(cube,point)
     template<bool _A, bool _S> template<int _D, typename _X> inline
     _X Algorithms<_A,_S>::dist_sq(cube  <_D,_X> const&c,
 				  GeoVec<_D,_X> const&x) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_S>::dist_sq(c,x); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_S>::dist_sq(c,x); }
     // outside(cube,sphere)
     template<bool _A, bool _S> template<int _D, typename _X> inline
     bool Algorithms<_A,_S>::outside(cube<_D,_X> const&c,
@@ -888,7 +1071,7 @@ namespace WDutils {
     bool Algorithms<_A,_S>::inside(cube<_D,_X> const&c,
 				   sphere<_D,_X> const&s) noexcept
     {
-      return Meta::AlgorithmsHelper<_D,_X,_A,
+      return details::AlgorithmsHelper<_D,_X,_A,
 #ifndef __AVX__
 	(_D==2 || is_same<float,_X>::value || _A) &&
 #endif
@@ -898,17 +1081,22 @@ namespace WDutils {
     template<bool _A, bool _S> template<int _D, typename _X> inline
     bool Algorithms<_A,_S>::contains(cuboid<_D,_X> const&c,
 				     GeoVec<_D,_X> const&x) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_S>::contains(c,x); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_S>::contains(c,x); }
+    // contains_open(cuboid,point)
+    template<bool _A, bool _S> template<int _D, typename _X> inline
+    bool Algorithms<_A,_S>::contains_open(cuboid<_D,_X> const&c,
+					  GeoVec<_D,_X> const&x) noexcept
+    { return details::AlgorithmsHelper<_D,_X,_A,_S>::contains_open(c,x); }
     // contains(cuboid,cuboid):   prefer non-SSE if unaligned
     template<bool _A, bool _S> template<int _D, typename _X> inline
     bool Algorithms<_A,_S>::contains(cuboid<_D,_X> const&c,
 				     cuboid<_D,_X> const&b) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_A&&_S>::contains(c,b); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_A&&_S>::contains(c,b); }
     // dist_sq(cuboid,point)
     template<bool _A, bool _S> template<int _D, typename _X> inline
     _X Algorithms<_A,_S>::dist_sq(cuboid<_D,_X> const&c,
 				  GeoVec<_D,_X> const&x) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_S>::dist_sq(c,x); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_S>::dist_sq(c,x); }
     // outside(cuboid,point)
     template<bool _A, bool _S> template<int _D, typename _X> inline
     bool Algorithms<_A,_S>::outside(cuboid<_D,_X> const&c,
@@ -919,15 +1107,15 @@ namespace WDutils {
     bool Algorithms<_A,_S>::inside(cuboid<_D,_X> const&c,
 				   sphere<_D,_X> const&s) noexcept
     { 
-      return Meta::AlgorithmsHelper<_D,_X,_A,
+      return details::AlgorithmsHelper<_D,_X,_A,
 	(is_same<float,_X>::value || _A) && _S>::inside(c,s);
     }
     // convert2cuboid(point-pair):   for unaligned: prefer non-SSE version
     template<bool _A, bool _S> template<int _D, typename _X> inline
     void Algorithms<_A,_S>::convert2cuboid(PointPair<_D,_X> &p) noexcept
-    { return Meta::AlgorithmsHelper<_D,_X,_A,_A&&_S>::convert2cuboid(p); }
+    { return details::AlgorithmsHelper<_D,_X,_A,_A&&_S>::convert2cuboid(p); }
   } // nameapce WDutils::Geometry
 } // namespace WDutils
 #undef noexcept
 //
-#endif
+#endif // WDutils_included_geometry_tcc

@@ -6,11 +6,11 @@
 /// \brief  contains definitions of methods declared in utils/inc/io.h         
 ///
 /// \author Walter Dehnen
-/// \date   2000-2009
+/// \date   2000-2009,2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2009 Walter Dehnen
+// Copyright (C) 2000-2009,2013 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -40,14 +40,17 @@ namespace {
   int openstdout = 0;
   int openstdin  = 0;
 }
-void output::open_std() WDutils_THROWING {
+void output::open_std()
+{
   if( ++openstdout > 1 )
     WDutils_THROW("trying to open more than one output to stdout");
 }
-void output::close_std() {
+void output::close_std()
+{
   if(openstdout) --openstdout;
 }
-void input::open_std() WDutils_THROWING {
+void input::open_std()
+{
   if( ++openstdin > 1 )
     WDutils_THROW("trying to open more than one input from stdin");
 }
@@ -67,7 +70,8 @@ size_t WDutils::FileSize(const char*sFileName)
   f.seekg(0, std::ios_base::beg);
   std::ifstream::pos_type begin_pos = f.tellg();
   f.seekg(0, std::ios_base::end);
-  return f.tellg() - begin_pos;
+  std::ifstream::pos_type end_pos = f.tellg();
+  return size_t(end_pos > begin_pos? end_pos-begin_pos : 0);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -172,18 +176,18 @@ void input::close() {
 // class WDutils::FortranIRec
 //
 ////////////////////////////////////////////////////////////////////////////////
-unsigned WDutils::FortranIRec::read_size() throw(WDutils::exception)
+size_t WDutils::FortranIRec::read_size() throw(WDutils::exception)
 {
   if(HSZE == 4) {
     uint32_t S;
-    IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32_t));
+    IN.read(reinterpret_cast<char*>(&S),sizeof(uint32_t));
     if(SWAP) swap_bytes(S);
-    return S;
+    return size_t(S);
   } else if(HSZE == 8) {
     uint64_t S;
-    IN.read(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64_t));
+    IN.read(reinterpret_cast<char*>(&S),sizeof(uint64_t));
     if(SWAP) swap_bytes(S);
-    return S;
+    return size_t(S);
   } else 
     throw exception("FortranIRec: header size must be 4 or 8\n");
 #ifndef __PGI
@@ -200,26 +204,26 @@ WDutils::FortranIRec::FortranIRec(input& in, unsigned rec, bool swap)
     throw exception("trying to open 2nd FortranIRec to same input\n");
   IN.FREC = this;
   SIZE = read_size();
-  DebugInfo(6,"FortranIRec: opened with %u bytes\n",SIZE);
+  DebugInfo(6,"FortranIRec: opened with %lu bytes\n",SIZE);
 }
 //------------------------------------------------------------------------------
-unsigned WDutils::FortranIRec::read_bytes(char*buf, unsigned n)
+size_t WDutils::FortranIRec::read_bytes(char*buf, size_t n)
   throw(WDutils::exception)
 {
   if(!IN) throw exception("FortranIRec::read_bytes(): input corrupted");
   if(READ + n > SIZE) {
-    WDutils_Warning("FortranIRec::read(): cannot read %u, but only %u bytes\n",
-		   n, SIZE-READ);
+    WDutils_Warning("FortranIRec::read(): "
+		    "can only read %lu bytes, not %lu\n",SIZE-READ,n);
     n = SIZE - READ;
   }
   IN.read(buf,n);
   if(!IN) throw exception("FortranIRec: input corrupted");
   READ += n;
-  DebugInfo(6,"FortranIRec: read %u bytes\n",n);
+  DebugInfo(6,"FortranIRec: read %lu bytes\n",n);
   return n;
 }
 //------------------------------------------------------------------------------
-void WDutils::FortranIRec::skip_bytes(unsigned n) {
+void WDutils::FortranIRec::skip_bytes(size_t n) {
   if(READ + n > SIZE) n = SIZE - READ;
   if(n && !IN) throw exception("FortranIRec::skip_bytes(): input corrupted");
   for(char C; n; --n,++READ) IN.read(&C,1);
@@ -229,14 +233,14 @@ void WDutils::FortranIRec::close() throw(WDutils::exception)
 {
   if(!IN) throw exception("FortranIRec::close(): input corrupted");
   if(READ != SIZE) {
-    WDutils_Warning("FortranIRec: only %u of %u bytes read on closing record\n",
-		   READ, SIZE);
+    WDutils_Warning("FortranIRec: only %lu of %lu bytes read "
+		    "on closing record\n", READ, SIZE);
     for(char C; READ!=SIZE; ++READ) IN.read(&C,1);
   }
-  unsigned S = read_size();
+  size_t S = read_size();
   IN.FREC = 0;
   if(S != SIZE) throw exception("FortranIRec: record size mismatch");
-  DebugInfo(6,"FortranIRec: closed with %u bytes\n",SIZE);
+  DebugInfo(6,"FortranIRec: closed with %lu bytes\n",SIZE);
 }
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -246,16 +250,16 @@ void WDutils::FortranIRec::close() throw(WDutils::exception)
 void WDutils::FortranORec::write_size() throw(WDutils::exception)
 {
   if(HSZE == 4) {
-    uint32_t S = SIZE;
-    OUT.write(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint32_t));
+    uint32_t S = uint32_t(SIZE);
+    OUT.write(reinterpret_cast<const char*>(&S),sizeof(uint32_t));
   } else if(HSZE == 8) {
-    uint64_t S;
-    OUT.write(static_cast<char*>(static_cast<void*>(&S)),sizeof(uint64_t));
+    uint64_t S = uint64_t(SIZE);
+    OUT.write(reinterpret_cast<const char*>(&S),sizeof(uint64_t));
   } else 
     throw exception("FortranORec: header size must be 4 or 8\n");
 }
 //------------------------------------------------------------------------------
-WDutils::FortranORec::FortranORec(output& out, unsigned rsize, unsigned rec)
+WDutils::FortranORec::FortranORec(output& out, size_t rsize, unsigned rec)
   throw(WDutils::exception) : OUT(out), HSZE(rec), SIZE(rsize), WRITTEN(0)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
@@ -263,26 +267,26 @@ WDutils::FortranORec::FortranORec(output& out, unsigned rsize, unsigned rec)
     throw exception("trying to open 2nd FortranORec to same output\n");
   OUT.FREC = this;
   write_size();
-  DebugInfo(6,"FortranORec: opened for %u bytes\n",SIZE);
+  DebugInfo(6,"FortranORec: opened for %lu bytes\n",SIZE);
 }
 //------------------------------------------------------------------------------
-unsigned WDutils::FortranORec::write_bytes(const char*buf, unsigned n)
+size_t WDutils::FortranORec::write_bytes(const char*buf, size_t n)
   throw(WDutils::exception)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(WRITTEN + n > SIZE) {
-    WDutils_Warning("FortranORec::write(): cannot read %u, but only %u bytes\n",
-		   n, SIZE-WRITTEN);
+    WDutils_Warning("FortranORec::write(): can only write %lu bytes, not %lu\n",
+		    SIZE-WRITTEN,n);
     n = SIZE - WRITTEN;
   }
   OUT.write(buf,n);
   if(!OUT) throw exception("FortranORec: ostream corrupted");
   WRITTEN += n;
-  DebugInfo(6,"FortranORec: written %u bytes\n",n);
+  DebugInfo(6,"FortranORec: written %lu bytes\n",n);
   return n;
 }
 //------------------------------------------------------------------------------
-void WDutils::FortranORec::fill_bytes(unsigned n, char C) {
+void WDutils::FortranORec::fill_bytes(size_t n, char C) {
   if(WRITTEN + n > SIZE) n = SIZE - WRITTEN;
   for(; n; --n,++WRITTEN) OUT.write(&C,1);
 }
@@ -291,12 +295,12 @@ void WDutils::FortranORec::close() throw(WDutils::exception)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(WRITTEN!=SIZE) {
-    WDutils_Warning("FortranORec: only %u of %u bytes written on closing record"
-		   " ... padding with 0\n", WRITTEN, SIZE);
+    WDutils_Warning("FortranORec: only %lu of %lu bytes written "
+		    "on closing record ... padding with 0\n", WRITTEN, SIZE);
     for(char C=0; WRITTEN!=SIZE; ++WRITTEN) OUT.write(&C,1);
   }
   write_size();
   OUT.FREC = 0;
-  DebugInfo(6,"FortranORec: closed with %u bytes\n",SIZE);
+  DebugInfo(6,"FortranORec: closed with %lu bytes\n",SIZE);
 }
 //------------------------------------------------------------------------------

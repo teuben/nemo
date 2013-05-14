@@ -109,7 +109,7 @@ namespace WDutils {
   template<> struct times__<1> {
     template<typename S> static S is(S const&x) { return x; } };
   template<> struct times__<0> {
-    template<typename S> static S is(S const&x) { return S(0); } };
+    template<typename S> static S is(S const& ) { return S(0); } };
   template<> struct times__<-1> {
     template<typename S> static S is(S const&x) { return -x; } };
   template<> struct times__<-2> {
@@ -130,7 +130,7 @@ namespace WDutils {
   template<> struct powU<1,1> {
     template<typename S> static S is(S x) { return x; } };
   template<> struct powU<0,0> {
-    template<typename S> static S is(S x) { return S(1); } };
+    template<typename S> static S is(S  ) { return S(1); } };
 
   template<unsigned N> struct powerU {
     template<typename S> static S is(S x) { return powU<N,N%2>::is(x); } };
@@ -177,7 +177,7 @@ namespace WDutils {
   }
 #else
   /// single-precision power with unsigned integer exponent
-  inline float  pow(float  x, unsigned i) { return std::pow(x, int(i)); }
+  inline float  pow(float  x, unsigned i) { return float(std::pow(x, int(i))); }
   /// double-precision power with unsigned integer exponent
   inline double pow(double x, unsigned i) { return std::pow(x, int(i)); }
 #endif

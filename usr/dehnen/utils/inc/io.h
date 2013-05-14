@@ -7,11 +7,11 @@
 ///         as well as WDutils::FortranIRec and WDutils::FortranORec
 ///
 /// \author Walter Dehnen
-/// \date   2000-2010
+/// \date   2000-2013
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2010 Walter Dehnen
+// Copyright (C) 2000-2013 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -292,6 +292,8 @@ namespace WDutils {
     for(register unsigned i=1; i!=N; ++i) s<<" "<<x[i];
     return s;
   }
+#if(0)
+  //  code uses extension of variable-size arrays. seems not used
   //----------------------------------------------------------------------------
   /// read an array from a space-separated format.
   /// \return istream used
@@ -299,7 +301,8 @@ namespace WDutils {
   /// \param[in]     x pointer to first element
   /// \param[in]     N size of array
   template<typename X> inline
-  std::istream& read_array(std::istream&s, X* x, unsigned N) {
+  std::istream& read_array(std::istream&s, X* x, unsigned N)
+  {
     register X y[N];
     char c=0;
     s >> c;
@@ -314,6 +317,7 @@ namespace WDutils {
     for(register unsigned i=0; i!=N; ++i) x[i] = y[i];
     return s;
   }
+#endif // (0)
   //}@
   //----------------------------------------------------------------------------
   template<typename X>
@@ -334,7 +338,7 @@ namespace WDutils {
 	if(x>0 && w>1) --w;
 	else           s=0;
       }
-      if(x == 0) return;
+      if(x<=0 && x>=0 ) return;
       double l=std::log10(std::abs(x));
       w =std::max(w,width(l));       // minimum width to achieve
       for(++p; width(l)<=w; ++p) ;   // try for more precision
@@ -345,8 +349,8 @@ namespace WDutils {
   inline std::ostream& operator<<(std::ostream&o, smanip_fp_width<X> const&m) {
     if(m.s)
       o << ' ';
-    int ow = o.width(m.w);
-    int op = o.precision(m.p);
+    std::streamsize ow = o.width(m.w);
+    std::streamsize op = o.precision(m.p);
     o << m.x;
     o.width(ow);
     o.precision(op);
@@ -392,7 +396,7 @@ namespace WDutils {
 #ifdef WDutils_included_vector_h
   template<int N, typename X>
   inline smanip_fp_vec_width<X> print(vector<N,X> const&x, int w, int p)
-  { return smanip_fp_vec_width<X>(static_cast<const X*>(x),N,w,p); }
+  { return smanip_fp_vec_width<X>(x.data(),N,w,p); }
 #endif
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -591,7 +595,10 @@ namespace WDutils {
     bool reopen(const char*format, T const&tag, bool append=0)
     {
       char FNEW[FNAME_MAX_SIZE];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat-nonliteral"
       SNprintf(FNEW,FNAME_MAX_SIZE,format,tag);
+#pragma clang diagnostic pop
       if(OUT==0 || strcmp(FNEW,FNAME)) {
 	open(FNEW,append);
 	return true;
@@ -629,13 +636,17 @@ namespace WDutils {
     //@}
     //--------------------------------------------------------------------------
     /// unformatted output
-    void write(const char*a, size_t n) {
+    void write(const char*a, size_t n)
+    {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-conversion"
       if(OUT) OUT->write(a,n);
+#pragma clang diagnostic pop
     }
     //--------------------------------------------------------------------------
     /// call if opening any output to stdout from NEMO main
     /// will not allow more than one open output to stdout.
-    static void open_std () WDutils_THROWING;
+    static void open_std ();
     /// call if closing any output to stdout from NEMO main
     static void close_std();
   };
@@ -784,13 +795,17 @@ namespace WDutils {
     //@}
     //--------------------------------------------------------------------------
     /// unformatted input
-    void read(char*a, size_t n) {
+    void read(char*a, size_t n)
+    {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-conversion"
       if(IN) IN->read(a,n);
+#pragma clang diagnostic pop
     }
     //--------------------------------------------------------------------------
     /// call if opening any input to stdin from NEMO main
     /// will not allow more than one open input from stdin.
-    static void open_std () WDutils_THROWING;
+    static void open_std ();
     /// call if closing any output to stdout from NEMO main
     static void close_std();
   };
@@ -804,15 +819,15 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   class FortranIRec {
   private:
-    input           &IN;                  // related input stream
-    const unsigned   HSZE;                // size of header: 4 or 8
-    const bool       SWAP;                // swap bytes for headers
-    unsigned         SIZE;                // size (bytes) of record
-    mutable unsigned READ;                // number of bytes already read
+    input         &IN;                  // related input stream
+    const unsigned HSZE;                // size of header: 4 or 8
+    const bool     SWAP;                // swap bytes for headers
+    size_t         SIZE;                // size (bytes) of record
+    mutable size_t READ;                // number of bytes already read
     //--------------------------------------------------------------------------
     FortranIRec           (FortranIRec const&); // not implemented
     FortranIRec& operator=(FortranIRec const&); // not implemented
-    unsigned read_size() throw(WDutils::exception);
+    size_t read_size() throw(WDutils::exception);
   public:
     //--------------------------------------------------------------------------
     /// constructor: read buffer with size information
@@ -836,7 +851,7 @@ namespace WDutils {
     /// \return     number of bytes actually read
     /// \param[out] buf buffer to read into
     /// \param[in]  n   number of bytes to read
-    unsigned read_bytes(char*buf, unsigned n) throw(WDutils::exception);
+    size_t read_bytes(char*buf, size_t n) throw(WDutils::exception);
     //--------------------------------------------------------------------------
     /// read some data of any type
     ///
@@ -847,7 +862,7 @@ namespace WDutils {
     /// \param[out] buf buffer to read into
     /// \param[in]  n   number of data to read
     template<typename T>
-    unsigned read(T*buf, unsigned n) throw(WDutils::exception) {
+    size_t read(T*buf, size_t n) throw(WDutils::exception) {
       if(READ+n*sizeof(T) > SIZE) {
 	WDutils_Warning("FortranIRec::read(): cannot read %d, but only %d %s\n",
 			n, (SIZE-READ)/sizeof(T), nameof(T));
@@ -861,7 +876,7 @@ namespace WDutils {
     /// skip some bytes
     ///
     /// \param n   number of bytes to skip
-    void skip_bytes(unsigned n);
+    void skip_bytes(size_t n);
     //--------------------------------------------------------------------------
     /// read a single FORTRAN record in one go (you have to know its size!)
     ///
@@ -870,7 +885,7 @@ namespace WDutils {
     /// \param[in]  n   number of data of type T to read
     /// \param[in]  rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
-    static void Read(input &in, T*buf, unsigned n, unsigned rec=4)
+    static void Read(input &in, T*buf, size_t n, unsigned rec=4)
       throw(WDutils::exception)
     {
       FortranIRec FIR(in,rec);
@@ -886,13 +901,13 @@ namespace WDutils {
     }
     //--------------------------------------------------------------------------
     /// information on number of bytes already read
-    unsigned const&bytes_read() const { return READ; }
+    size_t const&bytes_read() const { return READ; }
     //--------------------------------------------------------------------------
     /// information on number of bytes yet to be read
-    unsigned bytes_unread() const { return SIZE-READ; }
+    size_t bytes_unread() const { return SIZE-READ; }
     //--------------------------------------------------------------------------
     /// information on total size of record
-    unsigned const&size() const { return SIZE; }
+    size_t const&size() const { return SIZE; }
   };// class FortranIRec
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -904,10 +919,10 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   class FortranORec {
   private:
-    output          &OUT;                 // related output stream
-    const unsigned   HSZE;                // size of header: 4 or 8
-    unsigned         SIZE;                // size (bytes) of record
-    mutable unsigned WRITTEN;             // number of bytes already written
+    output        &OUT;                 // related output stream
+    const unsigned HSZE;                // size of header: 4 or 8
+    size_t         SIZE;                // size (bytes) of record
+    mutable size_t WRITTEN;             // number of bytes already written
     //--------------------------------------------------------------------------
     FortranORec           (FortranORec const&); // not implemented
     FortranORec& operator=(FortranORec const&); // not implemented
@@ -918,7 +933,7 @@ namespace WDutils {
     /// \param[in,out] out  output stream to write to
     /// \param[in]     size size (in bytes) of record
     /// \param[in]     rec  (optional) size of header must be 4 or 8
-    FortranORec(output&out, unsigned size, unsigned rec=4)
+    FortranORec(output&out, size_t size, unsigned rec=4)
       throw(WDutils::exception);
     //--------------------------------------------------------------------------
     /// destructor: write to end of record, write end buffer
@@ -935,13 +950,13 @@ namespace WDutils {
     /// \return number of bytes actually written
     /// \param buf buffer to write
     /// \param n   number of bytes to write
-    unsigned write_bytes(const char*buf, unsigned n) throw(WDutils::exception);
+    size_t write_bytes(const char*buf, size_t n) throw(WDutils::exception);
     //--------------------------------------------------------------------------
     /// fill some bytes with a given value
     ///
     /// \param[in]   n   number of bytes to fill
     /// \param[in]   val value to fill them with
-    void fill_bytes(unsigned n, char val=0);
+    void fill_bytes(size_t n, char val=0);
     //--------------------------------------------------------------------------
     /// write some data of any type
     ///
@@ -952,12 +967,11 @@ namespace WDutils {
     /// \param[in] buf buffer to write
     /// \param[in] n   number of data to write
     template<typename T>
-    unsigned write(const T*buf, unsigned n) throw(WDutils::exception) {
+    size_t write(const T*buf, size_t n) throw(WDutils::exception) {
       if(WRITTEN + n*sizeof(T) > SIZE) {
 	WDutils_Warning("FortranORec::write(): "
-			"cannot write %u, but only %lu  %s\n",
-			n,static_cast<unsigned long>((SIZE-WRITTEN)/sizeof(T)),
-			nameof(T));
+			"cannot write %lu, but only %lu  %s\n",
+			n,(SIZE-WRITTEN)/sizeof(T),nameof(T));
 	n = (SIZE-WRITTEN)/sizeof(T);
       }
       if(n) write_bytes(static_cast<const char*>
@@ -972,7 +986,7 @@ namespace WDutils {
     /// \param[in]     n   number of data of type T to write
     /// \param[in]     rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
-    static void Write(output&out, const T*buf, unsigned n, unsigned rec=4)
+    static void Write(output&out, const T*buf, size_t n, unsigned rec=4)
       throw(WDutils::exception)
     {
       FortranORec FOR(out, sizeof(T)*n, rec);
@@ -980,13 +994,13 @@ namespace WDutils {
     }
     //--------------------------------------------------------------------------
     /// information on number of bytes already written
-    unsigned const&bytes_written() const { return WRITTEN; }
+    size_t const&bytes_written() const { return WRITTEN; }
     //--------------------------------------------------------------------------
     /// information on number of bytes yet to be written
-    unsigned bytes_free() const { return SIZE-WRITTEN; }
+    size_t bytes_free() const { return SIZE-WRITTEN; }
     //--------------------------------------------------------------------------
     /// information on total size of record
-    unsigned const&size() const { return SIZE; }
+    size_t const&size() const { return SIZE; }
   };// class FortranORec
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -995,20 +1009,20 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   namespace {
     inline void swap_char(char&A, char&B) { char T(A); A=B; B=T; }
-    template<int B> struct __bswap;
-    template<> struct __bswap<1> {
-      static void swap(void*, unsigned) {}
+    template<size_t B> struct _bswap;
+    template<> struct _bswap<1> {
+      static void swap(void*, size_t) {}
     };
-    template<> struct __bswap<2> {
-      static void swap(void*vdat, unsigned cnt) {
+    template<> struct _bswap<2> {
+      static void swap(void*vdat, size_t cnt) {
 	char*dat = static_cast<char*>(vdat);
 	for(; cnt; --cnt,dat+=2) {
 	  swap_char(dat[0],dat[1]);
 	}
       }
     };
-    template<> struct __bswap<4> {
-      static void swap(void*vdat, unsigned cnt) {
+    template<> struct _bswap<4> {
+      static void swap(void*vdat, size_t cnt) {
 	char*dat = static_cast<char*>(vdat);
 	for(; cnt; --cnt, dat+=4) {
 	  swap_char(dat[0],dat[3]);
@@ -1016,8 +1030,8 @@ namespace WDutils {
 	}
       }
     };
-    template<> struct __bswap<8> {
-      static void swap(void*vdat, unsigned cnt) {
+    template<> struct _bswap<8> {
+      static void swap(void*vdat, size_t cnt) {
 	char*dat = static_cast<char*>(vdat);
 	for(; cnt; --cnt,dat+=8) {
 	  swap_char(dat[0],dat[7]);
@@ -1027,8 +1041,8 @@ namespace WDutils {
 	}
       }
     };
-    template<> struct __bswap<16> {
-      static void swap(void*vdat, unsigned cnt) {
+    template<> struct _bswap<16> {
+      static void swap(void*vdat, size_t cnt) {
 	char*dat = static_cast<char*>(vdat);
 	for(; cnt; --cnt,dat+=16) {
 	  swap_char(dat[0],dat[15]);
@@ -1051,7 +1065,7 @@ namespace WDutils {
   /// \param[in,out] bdat element to swap bytes for
   template<typename B> inline
   void swap_bytes(B&bdat) {
-    __bswap<sizeof(B)>::swap(static_cast<void*>(&bdat), 1);
+    _bswap<sizeof(B)>::swap(static_cast<void*>(&bdat), 1);
   }
   /// swap the bytes of elements of any type
   ///
@@ -1060,23 +1074,23 @@ namespace WDutils {
   /// \param[in,out] bdat first element to swap bytes for
   /// \param[in]     cnt  number of elments to swap bytes for
   template<typename B> inline
-  void swap_bytes(B*bdat, unsigned cnt) {
-    __bswap<sizeof(B)>::swap(static_cast<void*>(bdat), cnt);
+  void swap_bytes(B*bdat, size_t cnt) {
+    _bswap<sizeof(B)>::swap(static_cast<void*>(bdat), cnt);
   }
   /// swap the bytes of elements of unknown type but known size
   ///
   /// \param[in,out] vdat pointer to first element
   /// \param[in]     len  size of the elements, must be 1,2,4,8, or 16
   /// \param[in]     cnt  number of elments to swap bytes for
-  inline
-  void swap_bytes(void*vdat, unsigned len, unsigned cnt) WDutils_THROWING {
+  inline void swap_bytes(void*vdat, size_t len, size_t cnt)
+  {
     switch(len) {
-    case  1: return __bswap< 1>::swap(vdat,cnt);  // does nothing
-    case  2: return __bswap< 2>::swap(vdat,cnt);
-    case  4: return __bswap< 4>::swap(vdat,cnt);
-    case  8: return __bswap< 8>::swap(vdat,cnt);
-    case 16: return __bswap<16>::swap(vdat,cnt);
-    default: WDutils_THROW("swap_bytes(): sizeof(type)=%d: not supported\n",
+    case  1: return _bswap< 1>::swap(vdat,cnt);  // does nothing
+    case  2: return _bswap< 2>::swap(vdat,cnt);
+    case  4: return _bswap< 4>::swap(vdat,cnt);
+    case  8: return _bswap< 8>::swap(vdat,cnt);
+    case 16: return _bswap<16>::swap(vdat,cnt);
+    default: WDutils_THROW("swap_bytes(): sizeof(type)=%ld: not supported\n",
 			   len);
     }
   }

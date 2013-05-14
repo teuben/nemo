@@ -48,6 +48,8 @@
 #  include <traits.h>
 #endif
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
 namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -137,22 +139,22 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   class Sobol : public RandomNumberGenerator {
   private:
-    mutable int           in;
+    mutable unsigned      in;
     mutable unsigned long ix;
-    int                   actl;
-    unsigned long         bits, *v;
+    unsigned              actl,bits;
+    unsigned long         *v;
     double                fac;
   public:
     /// which sequence is ours?
     /// \return number of sequence
-    int const& actual() const { return actl; }
+    unsigned const& actual() const { return actl; }
     /// construction
-    /// \param[in] actl (optional) frequence to implement
+    /// \param[in] _actl (optional) frequence to implement
     /// \note By default, we implement the next available sequence for which no
     /// instance exists (yet).
     /// \note With this implementation, actl is restricted to [0,51]
-    /// \param[in] bits (optional) number of bits used
-    explicit Sobol(int actl=-1, int bits=30);
+    /// \param[in] _bits (optional) number of bits used
+    explicit Sobol(int _actl=-1, unsigned _bits=30);
     /// destruction: frees our sequence for next construction
     virtual ~Sobol();
     /// generate random number in [0,1]
@@ -161,6 +163,8 @@ namespace WDutils {
     void Reset() { ix = in = 0; }
     /// is this a pseudo- (or quasi-) random number generator?
     bool is_pseudo() const { return false; }
+    /// sets the default value for number of bits used, if 2nd arg to ctor is 0
+    static void set_bits(const unsigned);
   };
   WDutils_TRAITS(Sobol,"Sobol");
   // ///////////////////////////////////////////////////////////////////////////
@@ -189,7 +193,7 @@ namespace WDutils {
     /// \return a randomm number in [a,b]
     double operator() () const { return a+ba*r(); }
     /// compute parent distribution
-    /// \return \f$ p(x) \f$
+    /// \return distribution \f$ p(x) \f$
     /// \param[in] x potential value for random number
     double value(double x) const { return (a<=x && x<=b)? 1/ba : 0.; }
   };
@@ -219,12 +223,12 @@ namespace WDutils {
     /// ordinary (pseudo-) random numbers, r1 and r2 may well be the same. The
     /// code shall issue a fatal error if r1==r2 and is not a pseudo-RNG.
     Normal(const RandomNumberGenerator*r1,
-	   const RandomNumberGenerator*r2 = 0) WDutils_THROWING;
+	   const RandomNumberGenerator*r2 = 0);
     /// generate random number
     /// \return x normally distributed in [-oo,oo]
     double operator() () const;
     /// give parent distribution
-    /// \return \f$ p(x)\f$
+    /// \return distribution \f$ p(x)\f$
     /// \param[in] x potential value for random number
     double value(double x) const
     {
@@ -254,7 +258,7 @@ namespace WDutils {
       return std::sqrt(-2*std::log(x));
     }
     /// give parent distribution
-    /// \return \f$ p(x)\f$
+    /// \return distribution \f$ p(x)\f$
     /// \param[in] x potential value for random number
     double value(const double x) const {
       return x * std::exp(-0.5*square(x));
@@ -328,16 +332,17 @@ namespace WDutils {
   class ExpDisk: public RandomDeviate {
     // gives x in [0,oo] with probability proportional to  x*Exp[-x/h]
   private:
-    const int N,N1;
-    const RandomNumberGenerator *R;
-    double    h, hi, hqi, *Y, *P;
-    double    ranvar() const;
+    static const unsigned N=256, N1=N+1;
+    const RandomNumberGenerator*const R;
+    const double h,hi,hqi;
+    double Y[N1],P[N1];
+    double ranvar() const;
   public:
     /// construction
-    /// \param[in] R random number generator
-    /// \param[in] h scale length
-    explicit ExpDisk(const RandomNumberGenerator*R, double h=1.);
-    virtual ~ExpDisk();
+    /// \param[in] rng          random number generator
+    /// \param[in] scale_height scale length
+    explicit ExpDisk(const RandomNumberGenerator*rng, double scale_height=1.);
+    virtual ~ExpDisk() {};
     /// give parent distribution
     /// \return p(r)
     /// \param[in] r potential random value
@@ -348,7 +353,6 @@ namespace WDutils {
     double radius(double p) const;
     /// generate random number in [0,oo]
     double operator() () const { return ranvar(); }
-//     void   operator() (double& x) const { x = ranvar(); }
   };
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -386,5 +390,6 @@ namespace WDutils {
   };// PowerLawDist
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
+#pragma clang diagnostic pop
 //-----------------------------------------------------------------------------+
 #endif // WDutils_included_random_h
