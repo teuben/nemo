@@ -14,14 +14,20 @@ if ($?FALCONBIN) then
   echo "$FALCONBIN removed from search path"
 endif
 
-# remove $WDUTILSLIB from PATH
+# remove $WDUTILSLIB from LD_LIBRARY_PATH and DYLD_LIBRARY_PATH
 if ($?WDUTILSLIB) then
-  setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | perl -pe "s[$WDUTILSLIB][]g;"`
+  setenv   LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | perl -pe "s[$WDUTILSLIB][]g;"`
+  if ($?DYLD_LIBRARY_PATH) then
+    setenv DYLD_LIBRARY_PATH `echo $DYLD_LIBRARY_PATH | perl -pe "s[$WDUTILSLIB][]g;"`
+  endif
 endif
 
-# remove $FALCONLIB from PATH
+# remove $FALCONLIB from LD_LIBRARY_PATH and DYLD_LIBRARY_PATH
 if ($?FALCONLIB) then
   setenv LD_LIBRARY_PATH `echo $LD_LIBRARY_PATH | perl -pe "s[$FALCONLIB][]g;"`
+  if ($?DYLD_LIBRARY_PATH) then
+    setenv DYLD_LIBRARY_PATH `echo $DYLD_LIBRARY_PATH | perl -pe "s[$FALCONLIB][]g;"`
+  endif
 endif
 
 # remove all FALCON related enviroment variables

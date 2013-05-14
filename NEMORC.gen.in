@@ -64,7 +64,11 @@ if (1) then
   endif
 
   # Hack for Mac
-  setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
+  if ($?DYLD_LIBRARY_PATH) then
+    setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH:${DYLD_LIBRARY_PATH}
+  else
+    setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
+  endif
 endif
 
 if (-e $NEMO/usr/zeno/ZENORC) then
