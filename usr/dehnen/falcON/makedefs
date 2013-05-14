@@ -116,9 +116,9 @@ RL		:= ranlib
 
 IUTIL		:= -I$(IUTI)
 ifdef STATIC
-LUTIL		:= -Lutils/lib -lWDutils
+LUTIL		:= -Lutils/lib -lWDutils$(EXT)
 else
-LUTIL		:= -Lutils/lib -lWDutils
+LUTIL		:= -Lutils/lib -lWDutils$(EXT)
 endif
 
 # --------------

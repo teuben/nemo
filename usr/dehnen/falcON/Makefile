@@ -24,9 +24,9 @@ endif
 # this should be set by a configure file
 #
 
-COMPILER		:= gcc#		# GNU C compiler
-#COMPILER		:= pgcc#	# problems with linking
-#COMPILER		:= icc#		# intel compiler
+COMPILER		:= gcc#		# GNU compiler g++
+#COMPILER		:= icc#		# intel compiler icpc
+#COMPILER		:= clang#	# llvm compiler clang++
 
 #
 # 3 activate options (some only apply to proprietary and private versions)
@@ -141,9 +141,9 @@ links			:=	$(links_pro) utils inc/utils $(links_sph) $(links_walter) $(links_pjm
 links			:	$(links)
 
 # 6.1 utils library
-utils/lib/libWDutils.a	: utils
+utils/lib/libWDutils$(EXT).a	: utils
 			$(MAKE) Standard=$(Standard) -C utils
-libutils		: utils utils/lib/libWDutils.a
+libutils		: utils utils/lib/libWDutils$(EXT).a
 
 # 6.3 falcON library
 # NOTE: $(falcON) defined in makedefs, depending on value of STATIC
@@ -153,7 +153,7 @@ $(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 			$(AR) $@ $?
 			$(RL) $@
 $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
-			$(CXX) $^ -Lutils/lib -lWDutils $(LNEMO) -shared -o $@
+			$(CXX) $^ -Lutils/lib -lWDutils$(EXT) $(LNEMO) -shared -o $@
 
 library		: 	links $(LIBT) $(falcON) $(BFCT)
 
@@ -185,7 +185,7 @@ cleanbackup	:
 			rm -f *~ */*~ */*/*~  */*/*/*~
 # 6.8.2 clean objects (if no longer needed, since either in library or executable)
 cleanobjs	:
-			rm -rf $(LIB)*.o
+			rm -rf $(OBJ)*.o $(LIB)*.so $(LIB)*.a
 
 # 6.8.3 cleans symbolic links
 cleanlinks	:	
