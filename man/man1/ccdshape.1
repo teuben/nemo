@@ -1,0 +1,31 @@
+.TH CCDSHAPE 1NEMO "16 May 2013"
+.SH NAME
+ccdshape \- shape of a 2D or 3D distribution based on moments of inertia
+.SH SYNOPSIS
+\fBccdshape\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file [???]    
+.TP
+\fBclip=\fP
+Use only values above clip, and below -clip, if only one value given. If two
+values given, exclude this range of values. Default: all values used.
+.TP
+\fBwcs=t|f\fP
+Use axis world coordinate system descriptors or the 0-based coordinate axis
+numbers. Default: true.
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+16-May-13	V0.1 Created	PJT
+.fi
