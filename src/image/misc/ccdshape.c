@@ -16,8 +16,8 @@
 string defv[] = {
   "in=???\n       Input image file",
   "clip=\n        Use only values above clip",
-  "wcs=f\n        Use WCS of the cube (else use integer 0-based coordinates)",
-  "VERSION=0.1\n  16-may-2013 PJT",
+  "wcs=t\n        Use WCS of the cube (else use integer 0-based coordinates)",
+  "VERSION=0.2\n  16-may-2013 PJT",
   NULL,
 };
 
