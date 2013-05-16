@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "14 February 2013"
+.TH CCDMOM 1NEMO "16 May 2013"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
@@ -11,6 +11,9 @@ It can optionally also accumulate along the selected axis.
 For datacubes that need to produce velocity fields a number of
 alternate options (gaussian fit, envelope tracing etc.) are available
 via \fIpvtrace(1NEMO)\fP.
+.PP
+To get the intensity weighted shape of an object using the moments
+of inertia, use \fIccdshape(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -26,10 +29,11 @@ Axis to take moment along (1=x 2=y 3=z)
 [Default: \fB1\fP]
 .TP
 \fBmom=\fP
-Moment to take [-2,-1,0,1,2,3..]    
+Moment to take [-5,-4,-3,-2,-1,0,1,2,3..]    
 Compute either the sum (0), mean (1), dispersion (2), or peak location (3). Negative
 numbers also have a special meaning. -1 computes the average intensity along the axis,
-where -2 computes the dispersion around the mean value.
+where -2 computes the dispersion around the mean value. -4 computes the clumping factor
+per plane (only axis=3 supported now). -3 computes differentials along axis=3. 
 [Default: \fB0\fP].
 .TP
 \fBkeep=t|f\fP
@@ -78,7 +82,7 @@ the numbers (this used to be the old default), or integrate, ie. multiply
 the sum by the cell-size along that axis. This is now the default, to make
 it more consistent with the new units in \fIsnapgrid(1NEMO)\fP.
 .SH SEE ALSO
-pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), snapgrid(1NEMO), image(5NEMO)
+pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), ccdshape(1NEMO), snapgrid(1NEMO), image(5NEMO)
 .SH CAVEATS
 Cannot compute straight moments, e.g. the 2nd moment along an axis, such
 as e.g. \fIsnapgrid\fP can do. This 
