@@ -39,7 +39,7 @@ string defv[] = {
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2 [not impl]",
   "rngmsk=f\n     Invalidate pixel when first moment falls outside range of valid axis [not impl]",
   "integrate=t\n  Use integration instead of just summing, only used for mom=0",
-  "VERSION=2.1\n  29-apr-2013 PJT",
+  "VERSION=2.1a\n 18-may-2013 PJT",
   NULL,
 };
 
@@ -101,14 +101,14 @@ void nemo_main()
     ny1 = ny = Ny(iptr);
     nz1 = nz = Nz(iptr);
 
-    if (mom==-4) {   /* clumping hack */
+    if (mom==-4) {   /* clumping hack : only works for axis=3 */
       if (axis==3) {
 	for (k=0; k<nz; k++) {
 	  tmp0 = tmp1 = tmp2 = 0.0;
 	  for (j=0; j<ny; j++) {
             for (i=0; i<nx; i++) {	
 	      cv = CubeValue(iptr,i,j,k);
-	      if (Qclip && (cv < clip[0] || cv>clip[1])) {
+	      if (Qclip && (clip[0]<=cv && cv<=clip[1])) {
 		dprintf(1,"%d %d %d  %f %f %f\n",i,j,k,cv,clip[0],clip[1]);
 		continue;
 	      }
@@ -516,6 +516,8 @@ local int peak_find(int n, real *data, int *mask, int npeak)
 
 local bool out_of_range(real x)
 {
+  /* @todo more to come */
+
   return FALSE;
 }
 
