@@ -43,6 +43,7 @@
  *       3-may-05  V3.4b add x/x0+y/y0=1 variant for a linear fit
  *      21-nov-05  V3.4c added gauss2d
  *      16-feb-13  V3.5  added fit=slope from miriad::immerge
+ *      28-may-13   4.0e fixed bug in fit=peak value
  *
  * TODO:   check 'r', wip gives slightly different numbers
  */
@@ -103,7 +104,7 @@ string defv[] = {
     "nmax=10000\n       Default max allocation",
     "mpfit=0\n          fit mode for mpfit",
     "tab=f\n            short one-line output?",
-    "VERSION=4.0d\n     9-dec-09 PJT",
+    "VERSION=4.0e\n     28-may-2013 PJT",
     NULL
 };
 
@@ -1140,7 +1141,7 @@ do_peak()
     dprintf(1,"Poly2 fit near j=%d (%g,%g)\n",j+1,x[j],y[j]);
     printf("Peak:x,y= %g %g\n",
             x[j] - sol[1]/(2*sol[2]),
-            sol[0]+sqr(sol[1])/(2*sol[2]));
+	   sol[0]-sol[1]*sol[1]/(4*sol[2]));
 }
 
 /* find a zero point
