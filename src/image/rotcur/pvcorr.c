@@ -14,10 +14,12 @@
 
 string defv[] = {
   "in=???\n       Input image file - must be an PV diagram",
-  "clip=\n        One (for -clip:clip) or Two clipping values, else includes all",
-  "y0=0\n         First row to search for template\n",
-  "y1=30\n        Last row to search for template\n",
-  "VERSION=0.1\n  29-may-2013 PJT",
+  "clip=0\n       Clip value to search for profile in template area",
+  "y0=0\n         First row to search for template",
+  "y1=30\n        Last row to search for template",
+  "region=\n      Miriad style region definition of the template (**not implemented**)",
+  "yscale=1\n     Scale the Dy values to more presentable numbers",
+  "VERSION=0.2\n  29-may-2013 PJT",
   NULL,
 };
 
@@ -31,7 +33,7 @@ string cvsid="$Id$";
 #define HUGE 1.0e20
 #endif
 
-local void pv_corr(imageptr iptr, real clip, int y0, int y1);
+local void pv_corr(imageptr iptr, real clip, int y0, int y1, real yscale);
 
 local real gfit1(int n, real *s, real *clip, int ipeak, real sig, int mode);
 
@@ -42,7 +44,7 @@ nemo_main()
 {
   stream  instr;
   imageptr iptr = NULL;
-  real vel, eta, ilc, sigma, sini, vsys, psys, clip, xsys, ysys;
+  real clip, yscale;
   int y0, y1;
   
   instr = stropen(getparam("in"), "r");     /* get file name and open file */
@@ -52,7 +54,8 @@ nemo_main()
   clip = getrparam("clip");
   y0 = getiparam("y0");
   y1 = getiparam("y1");
-  pv_corr(iptr, clip, y0, y1);
+  yscale = getrparam("yscale");
+  pv_corr(iptr, clip, y0, y1, yscale);
 
 }
 
@@ -64,7 +67,7 @@ nemo_main()
 #define MAXV  32
 #define MV(i,j)   MapValue(iptr,i,j)
 
-local void pv_corr(imageptr iptr, real clip, int ymin, int ymax)
+local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale)
 {
   int  ix, iy, nx, ny, dy, delta;
   real mv, sum, imax;
@@ -111,7 +114,7 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax)
 	sum += MV(ix,iy) * MV(ix,iy+dy);
       }
     }
-    printf("%d %g %g\n",dy,sum,dy*Dy(iptr)/1e9);
+    printf("%g %g %d\n",dy*Dy(iptr)*yscale,sum,dy);
   }
 
 
