@@ -1,0 +1,86 @@
+.TH PVCORR 1NEMO "29 May 2013"
+.SH NAME
+pvcorr \- PV correlation search
+.SH SYNOPSIS
+\fBpvcorr\fP [parameter=value]
+.SH DESCRIPTION
+Using a template area in a PV diagram, this template is shifted in the
+V direction and a cross correlation is computed. Normally a strong
+well known line will be selected, which has a known restfrequency,
+from which the other lines can be identified. See also \fItabpeak(1NEMO)\fP
+to find the peaks in the output from this program.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file - must be an PV diagram, with V along the Y-axis. No default.
+.TP
+\fBclip=\fP
+Clip value to search for valid profiles in the template area defined between
+rows \fBy0\fP and \fBy1\fP (inclusive).
+.TP
+\fBy0=\fP
+First row to search for template. [0]
+.TP
+\fBy1=\fP
+Last row to search for template. [30]
+.TP
+\fBregion=\fP
+MIRIAD style region definition of the template area. Not implemented yet,
+but expect something like region=polygon(10,10,40,15,40,25,10,20)
+.TP
+\fByscale=\fP
+Scale the velocity pixel value by this number to get more presentable
+numbers in the output. Astronomical data sometimes appear in Hz or m/s.
+[Default: 1]
+.SH EXAMPLES
+First an uncalibrated (in velocity) pv1.tab is produced, this needs to be inspected 
+where the strongest template line is located. The velocity axis can then be recomputed
+such that the template line as the correct value, and all the others fall in place:
+.nf
+
+pvcorr pv1 0.01 0 30 1e-9 > pv1.tab
+# y0min=6 y1max=20
+# inspect where the tabpeak cutoff should be, 0.01 seems ok to get all and a bit more
+tabpeak pv1.tab clip=0.01 > pv1.peak
+# the reference line was fitted at -0.000066 (strongest line in pv1.peak) but has freq 100.07640 GHz
+
+tabmath pv1.peak - %1+0.000066+100.07640,%2 all format=%f
+
+100.076400 1.668270 [h3cn]
+100.199489 0.018321 
+100.457913 0.015710 
+100.536535 0.075491 ? nh2cn
+100.626081 0.173972 ch3oh
+100.708805 0.021336 
+101.009627 0.019676 
+101.028764 0.026361 
+101.140399 0.044207 ch3sh
+101.169243 0.053001 ?
+101.343654 0.018929 
+101.476141 0.139334 h2cs_1
+101.526876 0.018724 
+101.779270 0.017957 
+
+tabmath pv1.tab - %1+0.000066+100.07640,%2 all format=%f | tabplot - ymin=-0.1 ymax=0.2 point=2,0.1 line=1,1 color=2 ycoord=0,0.01
+.fi
+.SH CAVEATS
+The current template is defined via the parameters \fB(clip,y0,y1)\fP and is far from ideal. Ideally a properly smoothed
+version of a PV diagram will contain a better definition of the template.
+.PP
+A XYV cube version should work even better.
+.PP
+Instead of the derived template shape, one could also define the offset by using a first moment.
+
+.SH SEE ALSO
+tabpeak(1NEMO), pvtrace(1NEMO), image(5NEMO)
+.SH FILES
+src/image/rotcur/pvcorr.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+29-May-2013	V0.2 Created	PJT
+.fi
