@@ -1,11 +1,11 @@
-.TH TABPEAK 1NEMO "28 May 2013"
+.TH TABPEAK 1NEMO "30 May 2013"
 .SH NAME
-tabpeak \- find peaks in a table
+tabpeak \- find peaks or valleys in a table
 .SH SYNOPSIS
 \fBtabpeak\fP [parameter=value]
 .SH DESCRIPTION
-Find local maxima and fit a local paraboloid, return the location and
-value of the peak. See also \fItablsqfit(1NEMO)\fP.
+Find local maxima (and/or minima) and fit a local paraboloid, return the location and
+value of the peak, or valley. See also \fItablsqfit(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -20,7 +20,10 @@ X-Column [1]
 Y-column [2]      
 .TP
 \fBclip=\fP
-Only consider points above this [0]  
+Only consider points above this [0] 
+.TP
+ \fBvalley=t|f\fP
+Also fit valleys, in which case the signal has to be below -clip. [Default: f]
 .TP
 \fBnmax=\fP
 max size if a pipe [100000]  
@@ -37,5 +40,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-28-May-13	V0.1 Created	PJT
+28-May-2013	V0.1 Created	PJT
+30-may-2013	V0.2 added valley=	PJT
 .fi

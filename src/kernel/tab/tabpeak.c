@@ -1,7 +1,9 @@
 /*
  * TABPEAK: find peaks - see also tablsqfit fit=peak
  *          
- *   28-may-2013   Created quick & dirty for ASTUTE               PJT
+ *   28-may-2013   0.1 Created quick & dirty for ASTUTE               PJT
+ *   30-may-2013   0.2 Also search for valleys
+ *
  *                        
  * 
  */
@@ -23,8 +25,9 @@ string defv[] = {
     "xcol=1\n			  X-Column",
     "ycol=2\n                     Y-column",
     "clip=0\n                     Only consider points above this",
+    "valley=f\n                   Also find the valleys?",
     "nmax=100000\n                max size if a pipe",
-    "VERSION=0.1\n		  28-may-2013 PJT",
+    "VERSION=0.2\n		  30-may-2013 PJT",
     NULL
 };
 
@@ -53,7 +56,7 @@ real *xcol, *ycol, *coldat[2];
 local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
 real clip;
-
+bool  Qvalley;
 
 local void setparams(void);
 local void read_data(void); 
@@ -76,6 +79,7 @@ local void setparams()
     col[0] = getiparam("xcol");
     col[1] = getiparam("ycol");
     clip = getrparam("clip");
+    Qvalley = getbparam("valley");
     
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
@@ -109,10 +113,11 @@ local void peak_data(void)
   int i,j;
   real mat[9], vec[3], sol[3], a[4];
 
-  /* loop over all interior points and find peaks, fit local polynomial */
+  /* loop over all interior points and find peaks or valleys, fit local polynomial */
 
   for (i=1; i<npt-1; i++) {
-    if (ycol[i] > clip && ycol[i]>ycol[i-1] && ycol[i]>ycol[i+1]) {
+    if (            (ycol[i]> clip && ycol[i]>ycol[i-1] && ycol[i]>ycol[i+1]) ||
+         (Qvalley && ycol[i]<-clip && ycol[i]<ycol[i-1] && ycol[i]<ycol[i+1]) ) {
       lsq_zero(3,mat,vec);
       for (j=i-1; j<=i+1; j++) {
 	a[0] = 1.0;
@@ -125,7 +130,7 @@ local void peak_data(void)
       dprintf(1,"Poly2 fit near i=%d (%g,%g)   %g %g %g\n",i+1,xcol[i],ycol[i],sol[0],sol[1],sol[2]);
       printf("%f %f \n",xcol[i] - sol[1]/(2*sol[2]),
 	     sol[0]-sol[1]*sol[1]/(4*sol[2]));
-    }
+    } 
   }
 }
 
