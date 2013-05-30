@@ -126,15 +126,35 @@ of (0,V,0). If you want something else, you can always use \fPsnaprotate(1NEMO)\
 Several systems of the peculiar solar motion have been practiced. 
 .PP
 20 km/s towards of ra,dec=18h,30d (18:03:50.27,30:00:16.8 in J2000), is the common
-convention since 1960.
+convention since 1960, and is referred to as the kinematic LSR.
 .PP
 19.5 km/s towards 18:02:36,+29:56:41 (J2000), or l,b=56d,23d
 .PP
 15.4 km/s towards 17:55:36,+25:36:38 (J2000), or l,b=51d,23d
 .PP
-16.5 km/s towards 17:49:53,+28:00:02 (J2000), or l,b=53d,25d
+16.5 km/s towards 17:49:53,+28:00:02 (J2000), or l,b=53d,25d (canonical value)
 .PP
- (11.1 +/- 0.74, 12.24 +/- 0.47, 7.25 +/-0.37)  - Shoenrich, Binney & Dehnen - 2010
+18.0 km/s (11.1 +/- 0.74, 12.24 +/- 0.47, 7.25 +/-0.37)  - Shoenrich, Binney & Dehnen - 2010
+.PP
+.nf
+CASA::MeasTable.h
+Kinematic: 20.0 km/s towards B1900 RA/Dec direction of (270,30) degrees.
+Dynamical: (9,12,7) km/s in galactic coordinates, or 16.552945 towards l,b = 53.13, +25.02 deg.
+.fi
+.PP
+CASA supported coordinate systems:
+.nf
+REST -- Rest frequency
+LSRD -- Local Standard of Rest (J2000) -- as the dynamical definition (IAU, [9,12,7] km/s in galactic coordinates)
+LSRK -- LSR as a kinematical (radio) definition -- 20.0 km/s in direction ra,dec = [270,+30] deg (B1900.0)
+BARY -- Barycentric (J2000)
+GEO --- Geocentric
+TOPO -- Topocentric
+GALACTO -- Galacto centric (with rotation of 220 km/s in direction l,b = [90,0] deg.
+LGROUP -- Local group velocity -- 308km/s towards l,b = [105,-7] deg (F. Ghigo)
+CMB -- CMB velocity -- 369.5km/s towards l,b = [264.4, 48.4] deg (F. Ghigo)
+
+.fi
 .SH SEE ALSO
 mkorbit(1NEMO), potcode(1NEMO), snapgalview(1NEMO), snaprotate(1NEMO), potential(5NEMO)
 .PP
