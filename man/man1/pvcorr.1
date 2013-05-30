@@ -4,36 +4,46 @@ pvcorr \- PV correlation search
 .SH SYNOPSIS
 \fBpvcorr\fP [parameter=value]
 .SH DESCRIPTION
-Using a template area in a PV diagram, this template is shifted in the
-V direction and a cross correlation is computed. Normally a strong
-well known line will be selected, which has a known restfrequency,
-from which the other lines can be identified. See also \fItabpeak(1NEMO)\fP
-to find the peaks in the output from this program.
+Using a template area in a PV map or XYV cube, this template is shifted in the
+V direction and a cross correlation is computed as function of velocity. 
+Normally a strong well known line will be selected as template, 
+with a known rest frequency,
+from which the other lines can then be identified. See also \fItabpeak(1NEMO)\fP
+to find the peaks in the output from this program. Some renormalizations are
+then needed, which in the presence of doppler shifts comes with some 
+elaborate math. An example of this is given below for the low redshift
+galaxy N253 in the case of some ALMA observations.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input image file - must be an PV diagram, with V along the Y-axis. No default.
+Input image file - must be an PV map, with V along the Y-axis, or
+a XYV cube. No default.
 .TP
 \fBclip=\fP
 Clip value to search for valid profiles in the template area defined between
-rows \fBy0\fP and \fBy1\fP (inclusive).
+rows/planed \fBv0\fP and \fBv1\fP (inclusive).
 .TP
-\fBy0=\fP
-First row to search for template. [0]
+\fBv0=\fP
+First row to search for template. If none given, the program will
+find the largest peak in the map/cube and decide on a reasonable
+template.
+[-1]
 .TP
-\fBy1=\fP
-Last row to search for template. [30]
+\fBv1=\fP
+Last row to search for template. [-1]
 .TP
-\fBregion=\fP
-MIRIAD style region definition of the template area. Not implemented yet,
-but expect something like region=polygon(10,10,40,15,40,25,10,20)
-.TP
-\fByscale=\fP
+\fBvscale=\fP
 Scale the velocity pixel value by this number to get more presentable
 numbers in the output. Astronomical data sometimes appear in Hz or m/s.
+For 2D maps this should be the Y coordinate, for 3D cubes the Z coordinate.
 [Default: 1]
+.TP
+\fBregion=\fP
+MIRIAD style region definition of the template area. ** Not implemented yet **
+but expect something like region=polygon(10,10,40,15,40,25,10,20), all in
+pixel coordinates.
 .SH EXAMPLES
 First an uncalibrated (in velocity) pv1.tab is produced, this needs to be inspected 
 where the strongest template line is located. The velocity axis can then be recomputed
@@ -67,12 +77,16 @@ tabmath pv1.tab - %1+0.000066+100.07640,%2 all format=%f | tabplot - ymin=-0.1 y
 .fi
 .SH CAVEATS
 The current template is defined via the parameters \fB(clip,y0,y1)\fP and is far from ideal. Ideally a properly smoothed
-version of a PV diagram will contain a better definition of the template.
+version of a PV diagram will contain a better definition of the template. Another option is to find the peak in the map,
+assuming this is related to a strong well known line, then walk down the spectrum until clip is reached. This would
+alleviate one from having to supply a \fB(y0,y1)\fP pair.
 .PP
-A XYV cube version should work even better.
+A XYV cube version should work even better, but like in \fIpvtrace(1NEMO)\fP can be implemented.
 .PP
-Instead of the derived template shape, one could also define the offset by using a first moment.
-
+Instead of the derived template shape, one could also define the offset by using a first moment. Or a gaussian fit.
+This would require resampling the spectrum for the cross correlation and is more expensive, but possibly more accurate.
+.PP
+Finally, not all lines have a similar distribution in PV, this will diffuse the cross correlation.
 .SH SEE ALSO
 tabpeak(1NEMO), pvtrace(1NEMO), image(5NEMO)
 .SH FILES
@@ -82,5 +96,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-29-May-2013	V0.2 Created	PJT
+29-May-2013	V0.1 Created	PJT
+30-may-2013	V0.4 Exended to 3D cubes	PJT
 .fi
