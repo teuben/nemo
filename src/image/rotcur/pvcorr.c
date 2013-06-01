@@ -5,6 +5,7 @@
  *     29-may-2013  V0.1    for astute, cloned off pvtrace, Q&D
  *     30-may-2013   0.4    extension to cubes
  *     31-may-2013   0.5    mode=0 implemented (1=default), and a simple rounded mode=2
+ *      1-jun-2013   0.6    auto-peak segment searching phase 1 implemented for PV, fixed y1[] 
  */
 
 
@@ -17,19 +18,19 @@
 
 string defv[] = {
   "in=???\n       Input image file - must be an PV map or XYV cube",
-  "clip=0\n       Clip value to search for profile in template area",
-  "v0=-1\n        First row/plane to search for template (default uses peak line)",
-  "v1=-1\n        Last row/plane to search for template",
+  "clip=???\n     Clip value to search for profile and template area",
+  "v0=\n          First row/plane (1 based) to search for template (default uses peak line)",
+  "v1=\n          Last row/plane to search for template",
   "vscale=1\n     Scale the velocity values to more presentable numbers",
   "region=\n      Miriad style region definition of the template (**not implemented**)",
   "rms=\n         Use RMS to scale the cross correlations (**experimental**)",
   "mode=1\n       0=template cross-corr no weight  1=intensity weight   2=sample in VMEAN",
   "out=\n         Optional output. For PV this is a table. For XYV this is a 3 plane map",
-  "VERSION=0.5\n  31-may-2013 PJT",
+  "VERSION=0.6\n  1-jun-2013 PJT",
   NULL,
 };
 
-string usage="PV correlation search";
+string usage="PV map or XYV cube cross correlation search for spectral lines";
 
 string cvsid="$Id$";
 
@@ -55,10 +56,15 @@ nemo_main()
   if (hasvalue("out")) outstr = stropen(getparam("out"),"w");
   
   clip = getrparam("clip");
-  v0 = getiparam("v0");
-  v1 = getiparam("v1");
+  if (hasvalue("v0") && hasvalue("v1")) {
+    v0 = getiparam("v0") - 1;   /* user supplies 1-based numbers */
+    v1 = getiparam("v1") - 1;   /* internally we use 0-based V's */
+    if (v0<0 || v1<0 || v1<=v0) error("bad values v0,v1=%d,%d",v0+1,v1+1);
+  } else
+    v0 = v1 = -1;
   vscale = getrparam("vscale");
   mode = getiparam("mode");
+  if (mode<0 || mode>2) error("invalid mode=%d",mode);
   if (hasvalue("rms")) rms = getrparam("rms");
   if (Nz(iptr) > 1)
     xyv_corr(iptr, clip, v0, v1, vscale, mode, outstr);
@@ -67,19 +73,76 @@ nemo_main()
 
 }
 
+/* 
+ * helper macros and functions for PV diagram 
+ */
+
+#define MV(i,j)   MapValue(iptr,i,j)
+
+/* find the peak , if not found, allow to grow a bit */
+
+int pv_peak(imageptr iptr, int ix, int iy0, int iy1, real clip, int grow)
+{
+  int iy, iymax = iy0;
+  real peak = MV(ix,iy0);
+
+  if (iy0<0 || iy1<0) return -1;   /* need to find solution for this */
+  
+  for (iy=iy0; iy<=iy1; iy++) {
+    if (MV(ix,iy) > peak) {
+      iymax = iy;
+      peak = MV(ix,iy);
+    }
+  }
+  if (peak > clip) return iymax;
+   
+  if (grow) warning("pv_peak: growing not implemented yet");
+
+  /* if not found by now, return failure -1 */
+  return -1;
+}
+
+/* find lower clip valued boundary, v0 */
+
+int pv_y0(imageptr iptr, int ix, int iymax, real clip)
+{
+  int iy;
+
+  for (iy=iymax; iy>=0; iy--) {
+    if (MV(ix,iy) < clip) return iy+1;
+  }
+  warning("edge-0 > clip");
+  return 0;  /* bad, this means edge still > clip */
+}
+
+
+
+/* find upper clip valued boundary, v1 */
+
+int pv_y1(imageptr iptr, int ix, int iymax, real clip)
+{
+  int iy;
+
+  for (iy=iymax; iy<Ny(iptr); iy++) {
+    if (MV(ix,iy) < clip) return iy-1;
+  }
+  warning("edge-1 > clip");
+  return Ny(iptr)-1;   /* bad, this means edge still > clip */
+
+}
+
+
 /*
  * CORR:  in PV diagram, only in V direction, but search for template first
  *
  */
 
-#define MAXV  32
-#define MV(i,j)   MapValue(iptr,i,j)
 
 local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale, int mode, stream outstr)
 {
   int  ix, iy, nx, ny, np, dy, delta, imax_x, imax_y;
   real mv, sum, sum0, imax, sumi, sumiv, *ym;
-  int *y0, *y1, y0min, y1max;
+  int *y0, *y1, y0min, y1max, iylm;
 
     
   nx = Nx(iptr);     /* assumed to be position for now */
@@ -90,34 +153,36 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale, in
 
   imax = MapMax(iptr);
   if (clip>imax) error("mapmax=%g too large for clip=%g\n",imax,clip);
+  if (ymax >=ny) error("invalid v1=%d",ymax);
 
-  if (ymin>=0 && ymax>=0) {
-    y0min = ny;
-    y1max = -1;
-    np = 0;
-    /* should also assert no values on ymin and ymax are > clip */
+  y0min = ny;
+  y1max = -1;
+  np = 0;
+  if (ymin>=0 && ymax>=0) {       /* if (v0,v1) were given, force looking between those */
     for (ix=0; ix<nx; ix++) { 
+      if (MV(ix,ymin) > clip) error("Clip too large, PV(%d,%d)=%g",ix,ymin,MV(ix,ymin));
+      if (MV(ix,ymax) > clip) error("Clip too large, PV(%d,%d)=%g",ix,ymax,MV(ix,ymax));
       y0[ix] = y1[ix] = -1;
       for (iy=ymin; iy<=ymax; iy++) {
 	mv = MV(ix,iy);
 	if (mv < clip && y0[ix]<0) continue;
 	if (y0[ix]<0 && mv > clip) {
 	  y0[ix] = iy;
-	  if (iy < y0min) y0min = iy;
+	  if (y0[ix] < y0min) y0min = y0[ix];
 	  np++;
 	  continue;
 	}
 	if (y0[ix]>=0 && mv < clip) {
-	  y1[ix] = iy;
-	  if (iy > y1max) y1max = iy;
+	  y1[ix] = iy-1;
+	  if (y1[ix] > y1max) y1max = y1[ix];
 	  break;
 	}
       }
     }
-    printf("# y0min=%d y1max=%d np=%d\n",y0min,y1max,np);
-  } else {
+  } else {                          /* else find peak, and look around the peak */
     imax = MV(0,0);
-    for (ix=0; ix<nx; ix++) {
+    for (ix=0; ix<nx; ix++) {       /* loop over PV and find the location of peak */
+      y0[ix] = y1[ix] = -1;
       for (iy=0; iy<ny; iy++) {    
 	if (MV(ix,iy)>imax) {
 	  imax   = MV(ix,iy);
@@ -126,15 +191,41 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale, in
 	}
       }
     }
-    printf("Peak in map: %g @ (%d,%d)\n",imax,imax_x,imax_y);
+    dprintf(0,"Peak in map: %g @ (%d,%d)\n",imax,imax_x,imax_y);
     if (imax<clip) error("clip and imax bad");
-    error("code not finished here");
+
+    y0[imax_x] = pv_y0(iptr,imax_x,imax_y,clip);
+    y1[imax_x] = pv_y1(iptr,imax_x,imax_y,clip);
+    dprintf(0,"MaxPeak clip segment: %d %d %d %d\n",imax_x,imax_y,y0[imax_x],y1[imax_x]); 
+    delta =  y1[imax_x]  - y0[imax_x] + 1;          
+    for (ix=imax_x+1; ix<nx; ix++) {
+      iylm = pv_peak(iptr, ix, y0[ix-1], y1[ix-1], clip, 0);
+      if (iylm < 0) break;  /* for now - need solition to peak up new blobs */
+      y0[ix] = pv_y0(iptr,ix,iylm,clip);
+      y1[ix] = pv_y1(iptr,ix,iylm,clip);
+      np += y1[ix]-y0[ix]+1;
+      if (y0[ix] < y0min) y0min = y0[ix];
+      if (y1[ix] > y1max) y1max = y1[ix];
+      dprintf(0,"Up clip segment: %d %d %d %d\n",ix,iylm,y0[ix],y1[ix]); 
+    } 
+    for (ix=imax_x-1; ix>=0; ix--) {
+      iylm = pv_peak(iptr, ix, y0[ix+1]-delta, y1[ix+1]+delta, clip, 0);
+      if (iylm < 0) break;  /* for now - need solition to peak up new blobs */
+      y0[ix] = pv_y0(iptr,ix,iylm,clip);
+      y1[ix] = pv_y1(iptr,ix,iylm,clip);
+      np += y1[ix]-y0[ix]+1;
+      if (y0[ix] < y0min) y0min = y0[ix];
+      if (y1[ix] > y1max) y1max = y1[ix];
+      dprintf(0,"Down clip segment: %d %d %d %d\n",ix,iylm,y0[ix],y1[ix]); 
+    }
   }
+  printf("# y0min=%d y1max=%d np=%d\n",y0min,y1max,np);
 
   /*  
    *  compute some potentially normalizing sum , and
    *  grab the mean velocity in case we need that as
    *  well
+   *  @todo   sum0 for mode=2 needs adjusting
    */
   sum = 0.0;
   for (ix=0; ix<nx; ix++) {
@@ -181,6 +272,31 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale, in
 
 #define CV(i,j,k)   CubeValue(iptr,i,j,k)
 
+/* find the peak , if not found, allow to grow a bit */
+
+int xyv_peak(imageptr iptr, int ix, int iy, int iv0, int iv1, real clip, int grow)
+{
+  /* if not found by now, return failure -1 */
+  return -1;
+}
+
+/* find lower clip valued boundary, v0 */
+
+int xyv_v0(imageptr iptr, int ix, int ivmax, real clip)
+{
+  return 0;  /* bad, this means edge still > clip */
+}
+
+
+
+/* find upper clip valued boundary, v1 */
+
+int xyv_v1(imageptr iptr, int ix, int ivmax, real clip)
+{
+  return Nz(iptr)-1;   /* bad, this means edge still > clip */
+}
+
+
 local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale, int mode, stream outstr)
 {
   int  ix, iy, iz, nx, ny, nz, nxy, dv, delta, imax_x, imax_y;
@@ -196,11 +312,12 @@ local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale, i
 
   imax = MapMax(iptr);
   if (clip>imax) error("mapmax=%g too large for clip=%g\n",imax,clip);
+  if (vmax >=nz) error("invalid v1=%d",vmax);
 
+  nxy = 0;
+  v0min = nz;
+  v1max = -1;
   if (vmin>=0 && vmax>=0) {
-    nxy = 0;
-    v0min = nz;
-    v1max = -1;
     for (ix=0; ix<nx; ix++) { 
       for (iy=0; iy<ny; iy++) { 
 	v0[iy][ix] = v1[iy][ix] = -1;
@@ -224,7 +341,7 @@ local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale, i
     }
     printf("# v0min=%d v1max=%d nxy=%d\n",v0min,v1max,nxy);
   } else {
-    error("code not finished here");
+    error("auto peak and template finding code not finished here");
   }
 
   delta = v1max-v0min+1;
