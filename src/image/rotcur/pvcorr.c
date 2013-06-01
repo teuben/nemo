@@ -4,6 +4,7 @@
  *
  *     29-may-2013  V0.1    for astute, cloned off pvtrace, Q&D
  *     30-may-2013   0.4    extension to cubes
+ *     31-may-2013   0.5    mode=0 implemented (1=default), and a simple rounded mode=2
  */
 
 
@@ -15,13 +16,16 @@
 #include <mdarray.h>
 
 string defv[] = {
-  "in=???\n       Input image file - must be an PV diagram",
+  "in=???\n       Input image file - must be an PV map or XYV cube",
   "clip=0\n       Clip value to search for profile in template area",
-  "v0=-1\n        First row to search for template (default uses peak line)",
-  "v1=-1\n        Last row to search for template",
+  "v0=-1\n        First row/plane to search for template (default uses peak line)",
+  "v1=-1\n        Last row/plane to search for template",
   "vscale=1\n     Scale the velocity values to more presentable numbers",
   "region=\n      Miriad style region definition of the template (**not implemented**)",
-  "VERSION=0.4\n  30-may-2013 PJT",
+  "rms=\n         Use RMS to scale the cross correlations (**experimental**)",
+  "mode=1\n       0=template cross-corr no weight  1=intensity weight   2=sample in VMEAN",
+  "out=\n         Optional output. For PV this is a table. For XYV this is a 3 plane map",
+  "VERSION=0.5\n  31-may-2013 PJT",
   NULL,
 };
 
@@ -30,38 +34,36 @@ string usage="PV correlation search";
 string cvsid="$Id$";
 
 
-#define RPD (PI/180.0)
-#ifndef HUGE
-#define HUGE 1.0e20
-#endif
-
-local void pv_corr(imageptr iptr, real clip, int y0, int y1, real yscale);
-local void xyv_corr(imageptr iptr, real clip, int z0, int z1, real zscale);
-
+local void pv_corr(imageptr iptr, real clip, int y0, int y1, real yscale, int mode, stream outstr);
+local void xyv_corr(imageptr iptr, real clip, int z0, int z1, real zscale, int mode, stream outstr);
 local real gfit1(int n, real *s, real *clip, int ipeak, real sig, int mode);
 
-local real qabs(real x, bool Q);
+local real rms = -1.0;
 
+local real psqrt(real x) { return x<0 ? -sqrt(-x) : sqrt(x); }
 
 nemo_main()
 {
-  stream  instr;
+  stream  instr, outstr = NULL;
   imageptr iptr = NULL;
   real clip, vscale;
-  int v0, v1;
+  int v0, v1, mode;
   
   instr = stropen(getparam("in"), "r");     /* get file name and open file */
   read_image( instr, &iptr);                /* read image */
   strclose(instr);                          /* close file */
+  if (hasvalue("out")) outstr = stropen(getparam("out"),"w");
   
   clip = getrparam("clip");
   v0 = getiparam("v0");
   v1 = getiparam("v1");
   vscale = getrparam("vscale");
+  mode = getiparam("mode");
+  if (hasvalue("rms")) rms = getrparam("rms");
   if (Nz(iptr) > 1)
-    xyv_corr(iptr, clip, v0, v1, vscale);
+    xyv_corr(iptr, clip, v0, v1, vscale, mode, outstr);
   else
-    pv_corr(iptr, clip, v0, v1, vscale);
+    pv_corr(iptr, clip, v0, v1, vscale, mode, outstr);
 
 }
 
@@ -73,10 +75,10 @@ nemo_main()
 #define MAXV  32
 #define MV(i,j)   MapValue(iptr,i,j)
 
-local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale)
+local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale, int mode, stream outstr)
 {
-  int  ix, iy, nx, ny, dy, delta, imax_x, imax_y;
-  real mv, sum, imax;
+  int  ix, iy, nx, ny, np, dy, delta, imax_x, imax_y;
+  real mv, sum, sum0, imax, sumi, sumiv, *ym;
   int *y0, *y1, y0min, y1max;
 
     
@@ -84,6 +86,7 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale)
   ny = Ny(iptr);     /* assumed to be velocity for now */
   y0 = (int *) allocate(nx*sizeof(int));
   y1 = (int *) allocate(nx*sizeof(int));
+  ym = (real *) allocate(nx*sizeof(real));
 
   imax = MapMax(iptr);
   if (clip>imax) error("mapmax=%g too large for clip=%g\n",imax,clip);
@@ -91,14 +94,17 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale)
   if (ymin>=0 && ymax>=0) {
     y0min = ny;
     y1max = -1;
+    np = 0;
+    /* should also assert no values on ymin and ymax are > clip */
     for (ix=0; ix<nx; ix++) { 
       y0[ix] = y1[ix] = -1;
-      for (iy=ymin; iy<ymax; iy++) {
-	mv = MapValue(iptr,ix,iy);
+      for (iy=ymin; iy<=ymax; iy++) {
+	mv = MV(ix,iy);
 	if (mv < clip && y0[ix]<0) continue;
 	if (y0[ix]<0 && mv > clip) {
 	  y0[ix] = iy;
 	  if (iy < y0min) y0min = iy;
+	  np++;
 	  continue;
 	}
 	if (y0[ix]>=0 && mv < clip) {
@@ -107,9 +113,8 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale)
 	  break;
 	}
       }
-      dprintf(1,"%d %d %d\n",ix,y0[ix],y1[ix]);
     }
-    printf("# y0min=%d y1max=%d\n",y0min,y1max);
+    printf("# y0min=%d y1max=%d np=%d\n",y0min,y1max,np);
   } else {
     imax = MV(0,0);
     for (ix=0; ix<nx; ix++) {
@@ -126,17 +131,49 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale)
     error("code not finished here");
   }
 
+  /*  
+   *  compute some potentially normalizing sum , and
+   *  grab the mean velocity in case we need that as
+   *  well
+   */
+  sum = 0.0;
+  for (ix=0; ix<nx; ix++) {
+    ym[ix] = 0;
+    sumi = sumiv = 0.0;
+    if (y0[ix] < 0) continue;
+    for (iy=y0[ix]; iy<=y1[ix]; iy++) {
+      sumi  = sumi  + MV(ix,iy);
+      sumiv = sumiv + MV(ix,iy) * iy;
+      if (rms > 0)
+	sum0 += rms*rms;
+      else
+	sum0 += MV(ix,iy)*MV(ix,iy);
+    }
+    ym[ix] = sumiv/sumi;
+    if (outstr) fprintf(outstr,"%d %d %d %g\n",ix,y0[ix],y1[ix],ym[ix]);
+  }
+  printf("# sum0=%g\n",sum0);
+
   delta = y1max-y0min+1;
-  for (dy=-y0min; dy<ny; dy++) {
+  for (dy=-y1max; dy<ny-y0min; dy++) {
     sum = 0.0;
     for (ix=0; ix<nx; ix++) {
       if (y0[ix] < 0) continue;
-      for (iy=y0[ix]; iy<=y1[ix]; iy++) {
-	if(iy+dy<0 || iy+dy>=ny) continue;
-	sum += MV(ix,iy) * MV(ix,iy+dy);
+      if (mode==0 || mode==1) {
+	for (iy=y0[ix]; iy<=y1[ix]; iy++) {
+	  if(iy+dy<0 || iy+dy>=ny) continue;
+	  if (mode == 0)
+	    sum += MV(ix,iy+dy);
+	  else /* mode == 1 */
+	    sum += MV(ix,iy) * MV(ix,iy+dy);
+	}
+      } else { /* mode == 2 */
+	iy = dy + ym[ix];
+	if (iy<0 || iy>=ny) continue;
+	sum += MV(ix,iy);  /* @todo need to properly interpolate */
       }
     }
-    printf("%g %g %d\n",dy*Dy(iptr)*yscale,sum,dy);
+    printf("%g %g %d\n",dy*Dy(iptr)*yscale,(sum/sum0),dy);
   }
 }
 
@@ -144,9 +181,9 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale)
 
 #define CV(i,j,k)   CubeValue(iptr,i,j,k)
 
-local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale)
+local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale, int mode, stream outstr)
 {
-  int  ix, iy, iz, nx, ny, nz, dv, delta, imax_x, imax_y, nxy;
+  int  ix, iy, iz, nx, ny, nz, nxy, dv, delta, imax_x, imax_y;
   real cv, sum, imax;
   int v0min, v1max;
   mdarray2 v0, v1;
@@ -167,12 +204,13 @@ local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale)
     for (ix=0; ix<nx; ix++) { 
       for (iy=0; iy<ny; iy++) { 
 	v0[iy][ix] = v1[iy][ix] = -1;
-	for (iz=vmin; iz<vmax; iz++) {
+	for (iz=vmin; iz<=vmax; iz++) {
 	  cv = CV(ix,iy,iz);
 	  if (cv < clip && v0[iy][ix]<0) continue;
 	  if (v0[iy][ix]<0 && cv > clip) {
 	    v0[iy][ix] = iz;
 	    if (iz < v0min) v0min = iz;
+	    nxy++;
 	    continue;
 	  }
 	  if (v0[iy][ix]>=0 && cv < clip) {
@@ -181,16 +219,16 @@ local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale)
 	    break;
 	  }
 	}
-	dprintf(1,"%d %d %d %d\n",ix,iy,v0[iy][ix],v1[iy][ix]);
+	dprintf(1,"%d %d %g %g\n",ix,iy,v0[iy][ix],v1[iy][ix]);
       }
     }
-    printf("# v0min=%d v1max=%d\n",v0min,v1max);
+    printf("# v0min=%d v1max=%d nxy=%d\n",v0min,v1max,nxy);
   } else {
     error("code not finished here");
   }
 
   delta = v1max-v0min+1;
-  for (dv=-v0min; dv<nz; dv++) {
+  for (dv=-v1max; dv<nz-v0min; dv++) {
     sum = 0.0;
     for (ix=0; ix<nx; ix++) {
       for (iy=0; iy<ny; iy++) {
@@ -203,12 +241,6 @@ local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale)
     }
     printf("%g %g %d\n",dv*Dz(iptr)*vscale,sum,dv);
   }
-}
-
-local real qabs(real x, bool Q)
-{
-  if (Q && x < 0) return -x;
-  return x;
 }
 
 
