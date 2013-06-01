@@ -1,4 +1,4 @@
-.TH PVCORR 1NEMO "29 May 2013"
+.TH PVCORR 1NEMO "31 May 2013"
 .SH NAME
 pvcorr \- PV correlation search
 .SH SYNOPSIS
@@ -40,17 +40,36 @@ numbers in the output. Astronomical data sometimes appear in Hz or m/s.
 For 2D maps this should be the Y coordinate, for 3D cubes the Z coordinate.
 [Default: 1]
 .TP
+\fBrms=\fP
+Experimental way to normalize the data to attempt to get more predictable
+values for the correlation coefficients. Default not used.
+.TP
+\fBmode=\fP
+Cross correlation mode.  1=true cross correllation (default) where the 
+template map values are multiplied by the map values, i.e. intensity
+weighted. 0=template map equally weighted, this gives emphasize to the
+noisy lines to be searched for.  2=use the intensity weighted
+mean velocity within the template to re-sample the map and average
+their emission.   Default: 1
+.TP
 \fBregion=\fP
 MIRIAD style region definition of the template area. ** Not implemented yet **
 but expect something like region=polygon(10,10,40,15,40,25,10,20), all in
 pixel coordinates.
+.TP
+\fBout=\fP
+Optional output filename. If used, for PV maps, the output is 4 columns of
+X coordinate, V0,V1 and Vmean, all in 0-based pixel coordinates.   For
+XYV maps (not implemented yet) there will be 3 planes: V0, V1 and Vmean resp.
+Default: not used.
 .SH EXAMPLES
 First an uncalibrated (in velocity) pv1.tab is produced, this needs to be inspected 
 where the strongest template line is located. The velocity axis can then be recomputed
 such that the template line as the correct value, and all the others fall in place:
 .nf
 
-pvcorr pv1 0.01 0 30 1e-9 > pv1.tab
+pvcorr in=pv1 clip=0.01 v0=0 v1=30 vscale=1e-9 out=pv1.trace > pv1.tab
+tabplot pv1.trace 1 2,3,4 color=2,3,4 line=1,1
 # y0min=6 y1max=20
 # inspect where the tabpeak cutoff should be, 0.01 seems ok to get all and a bit more
 tabpeak pv1.tab clip=0.01 > pv1.peak
@@ -81,10 +100,11 @@ version of a PV diagram will contain a better definition of the template. Anothe
 assuming this is related to a strong well known line, then walk down the spectrum until clip is reached. This would
 alleviate one from having to supply a \fB(y0,y1)\fP pair.
 .PP
-A XYV cube version should work even better, but like in \fIpvtrace(1NEMO)\fP can be implemented.
-.PP
 Instead of the derived template shape, one could also define the offset by using a first moment. Or a gaussian fit.
 This would require resampling the spectrum for the cross correlation and is more expensive, but possibly more accurate.
+.PP
+Can also use the template to define a v_mean, and resample this curvy line through PV and add up all the emission,
+creating a spectrum. Not quite cross correllation, but since the code is all local...
 .PP
 Finally, not all lines have a similar distribution in PV, this will diffuse the cross correlation.
 .SH SEE ALSO
