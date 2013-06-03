@@ -92,7 +92,7 @@ string defv[] = {
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
-    "VERSION=6.2b\n		  24-apr-2013 PJT",
+    "VERSION=6.2c\n		  2-jun-2013 PJT",
     NULL
 };
 
@@ -312,11 +312,11 @@ local void histogram(void)
   Moment m;
   
   dprintf (0,"read %d values\n",npt);
-  dprintf (0,"min and max value in column(s)  %s: [%g : %g]\n",getparam("xcol"),xmin,xmax);
+  dprintf (0,"min and max value in column(s)  %s: %g  %g\n",getparam("xcol"),xmin,xmax);
   if (!Qauto) {
     xmin = xrange[0];
     xmax = xrange[1];
-    dprintf (0,"min and max value reset to : [%g : %g]\n",xmin,xmax);
+    dprintf (0,"min and max value reset to : %g  %g\n",xmin,xmax);
     lmin = xmax;
     lmax = xmin;
     for (i=0; i<npt; i++) {
@@ -325,7 +325,7 @@ local void histogram(void)
 	lmax = MAX(lmax, x[i]);
       }
     }
-    dprintf (0,"min and max value in range : [%g : %g]\n",lmin,lmax);
+    dprintf (0,"min and max value in range : %g  %g\n",lmin,lmax);
   } 
   
   for (k=0; k<nsteps; k++)
