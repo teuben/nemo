@@ -3,6 +3,7 @@
  *          
  *   28-may-2013   0.1 Created quick & dirty for ASTUTE               PJT
  *   30-may-2013   0.2 Also search for valleys
+ *    1-jun-2013   0.3 Allow intensity weighted mean
  *
  *                        
  * 
@@ -26,6 +27,7 @@ string defv[] = {
     "ycol=2\n                     Y-column",
     "clip=0\n                     Only consider points above this",
     "valley=f\n                   Also find the valleys?",
+    "mean=f\n                     Intensity weighted mean",
     "nmax=100000\n                max size if a pipe",
     "VERSION=0.2\n		  30-may-2013 PJT",
     NULL
@@ -56,11 +58,12 @@ real *xcol, *ycol, *coldat[2];
 local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
 real clip;
-bool  Qvalley;
+bool  Qvalley, Qmean;
 
 local void setparams(void);
 local void read_data(void); 
 local void peak_data(void);
+local void mean_data(void);
 
 
 
@@ -70,7 +73,10 @@ nemo_main()
 {
     setparams();			/* read the parameters */
     read_data();
-    peak_data();
+    if (Qmean)
+      mean_data();
+    else
+      peak_data();
 }
 
 local void setparams()
@@ -80,6 +86,8 @@ local void setparams()
     col[1] = getiparam("ycol");
     clip = getrparam("clip");
     Qvalley = getbparam("valley");
+    Qmean = getbparam("mean");
+    if (Qmean && Qvalley) warning("Valley fitting not supported in mean mode");
     
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
@@ -133,4 +141,61 @@ local void peak_data(void)
     } 
   }
 }
+
+local void mean_data(void)
+{
+  int i,i0,i1,ipeak;
+  real peak, sum0, sum1, sum2, xmean, xsig;
+
+  /* loop over all interior points and find peaks or valleys, fit local polynomial */
+
+
+  /* find first occurence > clip */
+  peak = ycol[0];
+  i0   = -1;
+  for (i=0; i<npt; i++) {
+    if (ycol[i]>peak) { 
+      peak = ycol[i];
+      ipeak = i;
+    }
+    if (ycol[i]>clip) {
+      i0 = i;
+      break;
+    }
+  }
+  dprintf(1,"First peak %g at %d\n",peak,i0);
+  if (i0 < 0) error("No data above clip=%g, peak %g at %d",clip,peak,ipeak);
+
+  while (1) {                         /* enter loop searching for sections > clip */
+
+    sum0 = sum1 = sum2 = 0.0;
+    peak = ycol[i0];                 /* first point is guarenteed above clip */
+    for (i=i0; i<npt; i++) {         
+      if (ycol[i] < clip) {
+	i0 = i;
+	break;
+      }
+      if (ycol[i]>peak) peak = ycol[i];
+      sum0 += ycol[i];
+      sum1 += ycol[i]*xcol[i];
+      sum2 += ycol[i]*xcol[i]*xcol[i];
+    }
+    xmean = sum1/sum0;
+    xsig = sum2/sum0 - xmean*xmean;
+    if (xsig>0) xsig=sqrt(xsig);
+    printf("%f %f %f %d\n",xmean,xsig,peak,i0);
+
+    /* search for next peak , i0 is known to have < clip */
+    for (i=i0; i<npt; i++) {
+      if (ycol[i] > clip) {
+	i0 = i;
+	break;
+      }
+    }
+    if (i >= npt-1) break;
+  }
+  
+  
+}
+
 
