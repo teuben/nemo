@@ -26,7 +26,7 @@ string defv[] = {
   "rms=\n         Use RMS to scale the cross correlations (**experimental**)",
   "mode=1\n       0=template cross-corr no weight  1=intensity weight   2=sample in VMEAN",
   "out=\n         Optional output. For PV this is a table. For XYV this is a 3 plane map",
-  "VERSION=0.6\n  1-jun-2013 PJT",
+  "VERSION=0.7\n  1-jun-2013 PJT",
   NULL,
 };
 
@@ -86,7 +86,7 @@ int pv_peak(imageptr iptr, int ix, int iy0, int iy1, real clip, int grow)
   int iy, iymax = iy0;
   real peak = MV(ix,iy0);
 
-  if (iy0<0 || iy1<0) return -1;   /* need to find solution for this */
+  if (iy0<0 || iy1<0) return -1;   /* @todo need to find solution for this */
   
   for (iy=iy0; iy<=iy1; iy++) {
     if (MV(ix,iy) > peak) {
@@ -142,7 +142,8 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale, in
 {
   int  ix, iy, nx, ny, np, dy, delta, imax_x, imax_y;
   real mv, sum, sum0, imax, sumi, sumiv, *ym;
-  int *y0, *y1, y0min, y1max, iylm;
+  int *y0, *y1, y0min, y1max, iylm, ixlast;
+  bool Qfirst = TRUE;  /* only do the first template ? */
 
     
   nx = Nx(iptr);     /* assumed to be position for now */
@@ -165,15 +166,15 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale, in
       y0[ix] = y1[ix] = -1;
       for (iy=ymin; iy<=ymax; iy++) {
 	mv = MV(ix,iy);
-	if (mv < clip && y0[ix]<0) continue;
+	if (y0[ix]<0 && mv < clip) continue;
 	if (y0[ix]<0 && mv > clip) {
 	  y0[ix] = iy;
 	  if (y0[ix] < y0min) y0min = y0[ix];
-	  np++;
 	  continue;
 	}
 	if (y0[ix]>=0 && mv < clip) {
 	  y1[ix] = iy-1;
+	  np += y1[ix] - y0[ix] + 1;
 	  if (y1[ix] > y1max) y1max = y1[ix];
 	  break;
 	}
@@ -191,35 +192,51 @@ local void pv_corr(imageptr iptr, real clip, int ymin, int ymax, real yscale, in
 	}
       }
     }
-    dprintf(0,"Peak in map: %g @ (%d,%d)\n",imax,imax_x,imax_y);
+    dprintf(1,"Peak in map: %g @ (%d,%d)\n",imax,imax_x,imax_y);
     if (imax<clip) error("clip and imax bad");
 
     y0[imax_x] = pv_y0(iptr,imax_x,imax_y,clip);
     y1[imax_x] = pv_y1(iptr,imax_x,imax_y,clip);
-    dprintf(0,"MaxPeak clip segment: %d %d %d %d\n",imax_x,imax_y,y0[imax_x],y1[imax_x]); 
-    delta =  y1[imax_x]  - y0[imax_x] + 1;          
+    dprintf(1,"MaxPeak clip segment: %d %d %d %d\n",imax_x,imax_y,y0[imax_x],y1[imax_x]); 
+    /* not sure yet how much to set delta */
+    delta =  y1[imax_x]  - y0[imax_x] + 1;        /* perhaps too much */  
+    delta = 0;                                    /* conservative     */
+
+    ixlast = imax_x;
     for (ix=imax_x+1; ix<nx; ix++) {
-      iylm = pv_peak(iptr, ix, y0[ix-1], y1[ix-1], clip, 0);
-      if (iylm < 0) break;  /* for now - need solition to peak up new blobs */
+      iylm = pv_peak(iptr, ix, y0[ixlast]-delta, y1[ixlast]+delta, clip, 0);
+      if (Qfirst) {
+	if (iylm < 0) break;  /* @todo for now - need solution to peak up new blobs */
+      } else {
+	continue;
+      }
       y0[ix] = pv_y0(iptr,ix,iylm,clip);
       y1[ix] = pv_y1(iptr,ix,iylm,clip);
       np += y1[ix]-y0[ix]+1;
       if (y0[ix] < y0min) y0min = y0[ix];
       if (y1[ix] > y1max) y1max = y1[ix];
-      dprintf(0,"Up clip segment: %d %d %d %d\n",ix,iylm,y0[ix],y1[ix]); 
+      ixlast = ix;
+      dprintf(1,"Up clip segment: %d %d %d %d\n",ix,iylm,y0[ix],y1[ix]); 
     } 
+    ixlast = imax_x;
     for (ix=imax_x-1; ix>=0; ix--) {
-      iylm = pv_peak(iptr, ix, y0[ix+1]-delta, y1[ix+1]+delta, clip, 0);
-      if (iylm < 0) break;  /* for now - need solition to peak up new blobs */
+      iylm = pv_peak(iptr, ix, y0[ixlast]-delta, y1[ixlast]+delta, clip, 0);
+      if (Qfirst) {
+	if (iylm < 0) break;  /* @todo for now - need solition to peak up new blobs */
+      } else {
+	continue;
+      }
       y0[ix] = pv_y0(iptr,ix,iylm,clip);
       y1[ix] = pv_y1(iptr,ix,iylm,clip);
       np += y1[ix]-y0[ix]+1;
       if (y0[ix] < y0min) y0min = y0[ix];
       if (y1[ix] > y1max) y1max = y1[ix];
-      dprintf(0,"Down clip segment: %d %d %d %d\n",ix,iylm,y0[ix],y1[ix]); 
+      ixlast = ix;
+      dprintf(1,"Down clip segment: %d %d %d %d\n",ix,iylm,y0[ix],y1[ix]); 
     }
   }
-  printf("# y0min=%d y1max=%d np=%d\n",y0min,y1max,np);
+  printf("# y0min=%d y1max=%d np=%d clip=%g\n",y0min,y1max,np,clip);
+  if (outstr) fprintf(outstr,"# y0min=%d y1max=%d np=%d clip=%g\n",y0min,y1max,np,clip);
 
   /*  
    *  compute some potentially normalizing sum , and
@@ -296,6 +313,7 @@ int xyv_v1(imageptr iptr, int ix, int ivmax, real clip)
   return Nz(iptr)-1;   /* bad, this means edge still > clip */
 }
 
+
 
 local void xyv_corr(imageptr iptr, real clip, int vmin, int vmax, real vscale, int mode, stream outstr)
 {
