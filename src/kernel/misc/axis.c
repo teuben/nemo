@@ -6,14 +6,15 @@
  *	19-oct-90   index() -> strchr()                          PJT
  *	15-apr-95   ansi prototypes, no more ARGS		 PJT
  *      17-feb-97   proc prototype (for SINGLEPREC)		 pjt
+ *       2-jun-13   3 digits,finally?                            pjt
  */
 
 #include <stdinc.h>
 #include <yapp.h>
 #include <axis.h>
 
-struct axisvars xaxisvar = { 2, 0.2, 0.0, 0.4, 0.32, 1.0, 0.32 };
-struct axisvars yaxisvar = { 2, 0.2, 0.0, 0.3, 0.32, 1.0, 0.32 };
+struct axisvars xaxisvar = { 3, 0.2, 0.0, 0.4, 0.32, 1.0, 0.32 };
+struct axisvars yaxisvar = { 3, 0.2, 0.0, 0.3, 0.32, 1.0, 0.32 };
 
 /*
  * Accessors for old-fashioned routines.
