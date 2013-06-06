@@ -92,7 +92,8 @@ string defv[] = {
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
-    "VERSION=6.2c\n		  2-jun-2013 PJT",
+    "out=\n                       Optional output file to select the robust points",
+    "VERSION=6.3\n		  5-jun-2013 PJT",
     NULL
 };
 
@@ -113,7 +114,7 @@ string cvsid = "$Id$";
 #define MAXCOORD 16
 
 local string input;			/* filename */
-local stream instr;			/* input file */
+local stream instr, outstr;		/* input file , optional output file */
 
 local int ncol;                         /* number of columns used */
 local int col[MAXCOL];			/* histogram column number(s) */
@@ -180,6 +181,8 @@ local void setparams()
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
     if (ncol < 0) error("parsing error col=%s",getparam("col"));
+    if (hasvalue("out")) outstr=stropen(getparam("out"),"w");
+    else outstr = NULL;
 
     nsteps = nemoinpd(getparam("bins"),bins,MAXHIST+1) - 1;
     if (nsteps == 0) {
@@ -308,7 +311,7 @@ local void histogram(void)
   real count[MAXHIST], under, over;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
   real mean, sigma, skew, kurt, h3, h4, lmin, lmax, median;
-  real rmean, rsigma;
+  real rmean, rsigma, rrange[2];
   Moment m;
   
   dprintf (0,"read %d values\n",npt);
@@ -332,7 +335,7 @@ local void histogram(void)
     count[k] = 0;		/* init histogram */
   under = over = 0;
   
-  ini_moment(&m,4,  Qrobust ? npt : 0);
+  ini_moment(&m, 4, Qrobust ? npt : 0);
   for (i=0; i<npt; i++) {
     if (Qbin) {
       k=ring_index(nsteps,bins,x[i]);
@@ -459,7 +462,16 @@ local void histogram(void)
     compute_robust_moment(&m);
     rmean  = mean_robust_moment(&m);
     rsigma = sigma_robust_moment(&m);
+    robust_range(&m, rrange);
+    dprintf (0,"Robust N             : %d\n",n_robust_moment(&m));
     dprintf (0,"Robust Mean Disp     : %g %g\n",rmean,rsigma);
+    dprintf (0,"Robust Range         : %g %g\n",rrange[0],rrange[1]);
+    if (outstr) {
+      for (i=0; i<npt; i++) {
+	if (x[i]<rrange[0] || x[i]>rrange[1]) continue;
+	fprintf(outstr,"%g %d\n",x[i],i+1);
+      }
+    }
   }
   
   if (lcount > 0) {
