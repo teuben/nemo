@@ -42,6 +42,5 @@ int  n_robust_moment(Moment *);
 real mean_robust_moment(Moment *);
 real sigma_robust_moment(Moment *);
 real median_robust_moment(Moment *);
-
-
+void robust_range(Moment *, real *range);
 
