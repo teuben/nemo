@@ -6,7 +6,8 @@ mkgalorbit \- Make a galactic orbit with from given initial conditions
 .SH DESCRIPTION
 Unlike \fImkorbit(1NEMO)\fP where an arbitrary orbit can be initialized,
 \fImkgalorbit(1NEMO)\fP is specifically intended to initialize orbits
-in a galactic potential w.r.t. an assumed solar motion (LSR).
+in a galactic potential w.r.t. an assumed solar motion (LSR). Input
+coordinates are galactic.
 .PP
 The sun is assumed to be along the negative X axis, i.e. at (-R0,0,0)
 and rotate clock wise, i.e. (0,V0,0). See comments below on this
@@ -19,19 +20,19 @@ is also given:
 output filename (an orbit) [???]   
 .TP
 \fBlon=\fP
-Longitude (in degrees) []    
+Galactic longitude (in degrees) []    
 .TP
 \fBlat=\fP
-Latitude (in degrees) []    
+Galactic latitude (in degrees) []    
 .TP
 \fBdist=\fP
 Distance (in kpc). []
 .TP
 \fBpmlon=\fP
-Proper Motion in Longitude (mas/yr) []  
+Proper Motion in Galactic Longitude (mas/yr) []  
 .TP
 \fBpmlat=\fP
-Proper Motion in Latitude (mas/yr) []  
+Proper Motion in Galactic Latitude (mas/yr) []  
 \fBvrad=\fP
 Radial velocity (in km/s) []
 .TP
@@ -168,6 +169,10 @@ http://lanl.arxiv.org/pdf/0902.3913  (Reid et al.)
 Kerr & Lynden-Bell 1986 MNRAS 221, 1023.
 
 
+.fi
+And an online example from NEMO's webpage:
+.nf
+http://carma.astro.umd.edu/nemo/examples/galactic-orbits.html
 .fi
 .SH AUTHOR
 Peter Teuben
