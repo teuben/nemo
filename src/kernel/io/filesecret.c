@@ -951,7 +951,6 @@ local bool putdat(stream str, itemptr ipt)
     if (ItemDat(ipt) == NULL)			/* no data to write?        */
 	error("putdat: item %s has no data", ItemTag(ipt));
     len = datlen(ipt, 0);			/* count bytes to output  */
-    dprintf(0,"putdat: %ld\n",len);
     return (fwrite((char*)ItemDat(ipt), sizeof(byte), len, str) == len);
 						/* write data to stream   */
 }
