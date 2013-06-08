@@ -1,6 +1,6 @@
-.TH CCDSUB 1NEMO "9 April 2009"
+.TH CCDSUB 1NEMO "8 June 2013"
 .SH NAME
-ccdsub \- sub/average of an image
+ccdsub \- sub/average of an image, and optionally reorder axes.
 .SH SYNOPSIS
 \fBccdsub\fP [parameter=value]
 .SH DESCRIPTION
@@ -12,6 +12,10 @@ be bogus).
 Since cubes/images produced by this program may have dummy
 axes (length 1), you will need to use \fIccdslice(1NEMO)\fP to
 get rid of them, or use the \fBdummy=\fP keyword below.
+.PP
+If no parameters are given, other than in= and out=, the image
+is copied straight through, which is still a great way to
+test your I/O subsystem, assuming your image fits in memory.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -50,7 +54,13 @@ Write out dummy axes as well? [true]
 New order of axes after all previous actions have been taken.
 The default is no reordering, i.e. keep it in \fBxyz\fP order.
 To reverse only the X and Y axis, \fBreorder=yxz\fP is needed.
-** NOT IMPLEMENTED YET **
+.SH EXAMPLES
+To reorder a cube from xyz to zxy and back to xyz, the 2nd step
+will have a perhaps non-intuitive axis reordering, since it refers
+to the new "zxy" order:
+.nf
+    ccdsub cube0 - reorder=zxy | ccdsub - cube1 reorder=yzx
+.fi
 .SH SEE ALSO
 ccdslice(1NEMO), ccdmom(1NEMO), image(5NEMO)
 .SH AUTHOR
