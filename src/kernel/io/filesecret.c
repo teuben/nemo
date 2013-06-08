@@ -6,7 +6,7 @@
  *           minor differences in the implementation that result in
  *           a difference in capabilities, e.g. ZENO can handle
  *           multiple same-named items within a set, whereas NEMO
- *           cannot
+ *           cannot (yet)
  *
  *  Input is done through:      Output through:
  *      fread()                     fwrite()
@@ -39,6 +39,7 @@
  * V 3.3  25-may-07   pjt    handle > 2GB objects in memory (Pierre Fortin <pierre.fortin@oamp.fr>)
  * V 3.4  12-dec-09   pjt    support the new halfp type for I/O (see also csf)
  *        27-Sep-10   jcl    MINGW32/WINDOWS support
+ *   3.5   8-jun-13   pjt    eltcnt type fixed for 64bit so it handles > 2B
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -950,6 +951,7 @@ local bool putdat(stream str, itemptr ipt)
     if (ItemDat(ipt) == NULL)			/* no data to write?        */
 	error("putdat: item %s has no data", ItemTag(ipt));
     len = datlen(ipt, 0);			/* count bytes to output  */
+    dprintf(0,"putdat: %ld\n",len);
     return (fwrite((char*)ItemDat(ipt), sizeof(byte), len, str) == len);
 						/* write data to stream   */
 }
@@ -1324,13 +1326,15 @@ local void safeseek(
 
 /*
  * ELTCNT: compute number of basic elements in subspace of item.
+ *  @todo:    long vs. size_t
  */
 
-local int eltcnt(
+local long eltcnt(
     itemptr ipt,            	/* pointer to item w/ possible vector dims */
     int skp)                	/* num of dims to skip, starting with dimN */
 {
-    register int prod, *ip;
+    register int *ip;
+    register long prod;
 
     prod = 1;                                   /* scalers have one         */
     if (ItemDim(ipt) != NULL) {                 /* a vectorized item?       */
@@ -1338,7 +1342,7 @@ local int eltcnt(
             if (--skp < 0)                      /*     past 1st skp dims?   */
                 prod *= *ip;                    /*       include this dim   */
     }
-    return (prod);				/* return product of dims   */
+    return prod;				/* return product of dims   */
 }
 
 /*
