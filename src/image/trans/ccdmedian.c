@@ -8,6 +8,7 @@
  *       2-nov-04       PJT     added nstep= cheat mode for ShiPing Lai
  *      14-jul-11       PJT     0.6 fixed edge problem
  *       7-aug-12       PJT     0.7 optional median method
+ *      12-jun-13       PJT     0.8 mean option  (average)
  *                      
  */
 
@@ -26,9 +27,9 @@ string defv[] = {
 	"y=\n           Optional subselection of the Y range (min,max)",
 	"nstep=1\n      Cheat mode: replicate each nstep pixels",
 	"fraction=0.5\n Fraction of positive image values in subtract mode",
-	"mode=median\n  Mode: median, subtract",
+	"mode=median\n  Mode: median, average, subtract",
 	"torben=f\n     Median method",
-	"VERSION=0.7\n  9-aug-2012 PJT",
+	"VERSION=0.8\n  12-jun-2013 PJT",
 	NULL,
 };
 
@@ -88,6 +89,7 @@ void nemo_main()
     real    *vals, fraction;
     string  mode = getparam("mode");
     bool Qmedian = (*mode == 'm');
+    bool Qmean = (*mode == 'a');
 
     nstep = getiparam("nstep");
     if (nstep%2 != 1) error("step size %d needs to be odd",nstep);
@@ -96,6 +98,8 @@ void nemo_main()
     n = getiparam("n");
     if (Qmedian)
       dprintf(1,"Median filter size %d\n",n);
+    else if (Qmean) 
+      dprintf(1,"Mean filter size %d\n",n);
     else
       dprintf(1,"Subtraction filter size %d\n",n);
     if (n%2 != 1) error("filter size %d needs to be odd",n);
@@ -171,6 +175,8 @@ void nemo_main()
 
 	  if (Qmedian)
 	    CVO(i,j) = median(m,vals,fraction);
+	  else if (Qmean)
+	    CVO(i,j) = mean(m,vals,fraction);
 	  else
 	    CVO(i,j) = subtract(m,vals,fraction);
 	}

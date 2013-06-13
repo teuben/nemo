@@ -1,6 +1,6 @@
-.TH CCDMEDIAN 1NEMO "12 Feb 2005"
+.TH CCDMEDIAN 1NEMO "12 June 2013"
 .SH NAME
-ccdmedian \- median filter of an image
+ccdmedian \- median or mean filter of an image
 .SH SYNOPSIS
 \fBccdmedian\fP [parameter=value]
 .SH DESCRIPTION
@@ -33,13 +33,16 @@ Cheat mode: replicate each nstep pixels [1]
 Fraction of positive image values in subtract mode
 .TP
 \fBmode=\fP
-Mode: median, subtract [median]    
+Mode: median, average, subtract [median]    
+\fBtorben=t|f\fP
+Use the Torben method for median filter. [f]
 .SH SEE ALSO
-ccdmedian(1NEMO)
+ccdsharp(1NEMO), ccdsmooth(1NEMO), ccdflatten(1NEMO), image(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-12-Feb-05	V0.0 Created by mkman	NEMO
+12-Feb-05	V0.0 Created	PJT
+12-Jun-2013	V0.8 mean option for speed	PJT
 .fi
