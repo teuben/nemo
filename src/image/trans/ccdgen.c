@@ -41,7 +41,7 @@ string defv[] = {
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=0.9\n   5-aug-2011 PJT",
+  "VERSION=0.9a\n  29-may-2013 PJT",
   NULL,
 };
 
@@ -125,7 +125,6 @@ void nemo_main ()
   if (ncen<0) error("Syntax error %s",getparam("center"));
   if (ncen==1) center[1] = center[0];
 
-  init_xrandom(getparam("seed"));
   nwcs = nemorinpd(getparam("crval"),crval,MAXNAX,0.0,FALSE);
   nwcs = nemorinpd(getparam("cdelt"),cdelt,MAXNAX,1.0,FALSE);
   nwcs = nemorinpd(getparam("crpix"),crpix,MAXNAX,1.0,FALSE);
