@@ -249,6 +249,7 @@ real median_moment(Moment *m)
   int n;
   if (m->ndat==0)
     error("median_moment cannot be computed with ndat=%d",m->ndat);
+  dprintf(1,"median_moment: n=%d ndat=%d\n",m->n, m->ndat);
   n = MIN(m->n, m->ndat);
   return median(n,m->dat);
 }

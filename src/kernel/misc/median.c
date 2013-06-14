@@ -29,11 +29,11 @@ real median(int n, real *x)
     if (nix==0) {                       /* first time allocate */
         nix = n;
         ix = (int *) allocate(sizeof(int)*nix);
-	dprintf(0,"MEDIAN alloc %d\n",nix);
+	dprintf(1,"MEDIAN alloc %d\n",nix);
     } else if (nix < n) {               /* re-allocation */
         nix = n;
         ix = (int *) reallocate(ix, sizeof(int)*nix);
-	dprintf(0,"MEDIAN re-alloc %d\n",nix);
+	dprintf(1,"MEDIAN re-alloc %d\n",nix);
     }
     sortptr(x,ix,n);
     if (n % 2)
@@ -123,7 +123,7 @@ real median_torben(int n, real *x, real xmin, real xmax)
     else
       xmin = min_gt_guess;
   }
-  dprintf(1,"median_torben: iter k=%d\n",k);
+  dprintf(1,"median_torben: iter k=%d n=%d\n",k,n);
   if (lt_count >= n2)
     return max_lt_guess;
   else if (lt_count + eq_count >= n2)
