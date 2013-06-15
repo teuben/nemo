@@ -6,6 +6,7 @@
  *
  *	20-jun-01	gcc3
  *       6-aug-2012     added median_torben
+ *      15-jun-2013     added median_torben_info
  */
 
 #include <stdinc.h>
@@ -95,7 +96,7 @@ void finis_median(void)
  */
 
 
-real median_torben(int n, real *x, real xmin, real xmax)
+real median_torben_info(int n, real *x, real xmin, real xmax, real eps,  int *niter)
 {
   real guess, max_lt_guess, min_gt_guess;
   int i, k=0, lt_count, gt_count, eq_count;
@@ -122,8 +123,14 @@ real median_torben(int n, real *x, real xmin, real xmax)
       xmax = max_lt_guess;
     else
       xmin = min_gt_guess;
+    /* early exit if eps was specified */
+    if (eps>0 && xmax-xmin<eps) {
+      *niter = k;
+      return 0.5*(xmax+xmin); /* good enough gamble */
+    }
   }
   dprintf(1,"median_torben: iter k=%d n=%d\n",k,n);
+  *niter = k;
   if (lt_count >= n2)
     return max_lt_guess;
   else if (lt_count + eq_count >= n2)
@@ -131,7 +138,15 @@ real median_torben(int n, real *x, real xmin, real xmax)
   else
     return min_gt_guess;
   /* will never get here */
+  *niter = -1;
   return guess;  
+}
+
+real median_torben(int n, real *x, real xmin, real xmax)
+{
+  int niter;
+  return median_torben_info(n,x,xmin,xmax,-1.0, &niter);
+  
 }
 
 /*
