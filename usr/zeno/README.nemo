@@ -1,0 +1,16 @@
+
+1) go to http://www.ifa.hawaii.edu/~barnes/software.html
+   fetch the main release (009 now)
+   fetch the update (009e now)
+   edit the MAC or LINUX portion in our local version zeno.rc
+   source zeno.rc
+   make -f Zeno
+   set path=($ZENOPATH/bin $path)
+   rehash
+
+
+2) follow the now older instructions in $NEMO/src/scripts/zeno.install
+
+
+WARNING:   if you add ZENO to your NEMO environment, some commands duplicate
+and may not be doing exactly the same thing.
