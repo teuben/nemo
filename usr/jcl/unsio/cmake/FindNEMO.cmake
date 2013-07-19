@@ -1,3 +1,4 @@
+#-*-cmake-*-
 # ============================================================================
 # Copyright Jean-Charles LAMBERT - 2008-2013
 # e-mail:   Jean-Charles.Lambert@oamp.fr
@@ -62,5 +63,5 @@ IF(GLOB_TEMP_VAR)
 ENDIF(GLOB_TEMP_VAR)
 
 if (NOT NEMO_INSTALLED)
-MESSAGE(STATUS "NEMO environement not loaded.... using nemo_light")
+  MESSAGE(STATUS "NEMO environement not loaded.... using nemo_light")
 endif (NOT NEMO_INSTALLED)

@@ -1,5 +1,6 @@
+# -*-cmake-*-
 # ============================================================================
-# Copyright Jean-Charles LAMBERT - 2008-2013
+# Copyright Jean-Charles LAMBERT - 2009-2013
 # e-mail:   Jean-Charles.Lambert@oamp.fr
 # address:  Dynamique des galaxies
 #           Centre de donneeS Astrophysique de Marseille (CeSAM)

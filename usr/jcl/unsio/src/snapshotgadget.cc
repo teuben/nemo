@@ -1305,11 +1305,11 @@ void CSnapshotGadgetIn::storeComponents()
 }
 
 
-
-  //
-  // CSnapshotGadgetOut CLASS implementation
-  //
-
+// ----------------------------------------------------------------------------
+//
+//                     CSnapshotGadgetOut CLASS implementation
+//
+// ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
 // WRITING constructor
@@ -1335,16 +1335,18 @@ CSnapshotGadgetOut::CSnapshotGadgetOut(const std::string _n, const std::string _
     pot [i]   = NULL;
     acc [i]   = NULL;
     id  [i]   = NULL;
+    metal[i]  = NULL;
     ptrIsAlloc[i]["mass" ]=false; 
     ptrIsAlloc[i]["pos"  ]=false; 
     ptrIsAlloc[i]["vel"  ]=false; 
     ptrIsAlloc[i]["id"   ]=false; 
     ptrIsAlloc[i]["pot"  ]=false;
     ptrIsAlloc[i]["acc"  ]=false;
+    ptrIsAlloc[i]["metal"]=false;
   }
   //id     = NULL;
   age    = NULL;
-  metal  = NULL;
+  //metal  = NULL;
   intenerg=NULL;
   temp   = NULL;
   rho    = NULL;
@@ -1375,21 +1377,22 @@ CSnapshotGadgetOut::~CSnapshotGadgetOut()
     if (id  [i]&& ptrIsAlloc[i]["id"   ]) delete [] id[i];
     if (pot [i]&& ptrIsAlloc[i]["pot"  ]) delete [] pot[i];
     if (acc [i]&& ptrIsAlloc[i]["acc"  ]) delete [] acc[i];
+    if (metal[i]&& ptrIsAlloc[i]["metal"]) delete [] metal[i];
   }
   // gas only
   if (rho      && ptrIsAlloc[0]["rho"  ]) delete [] rho;
   if (hsml     && ptrIsAlloc[0]["hsml" ]) delete [] hsml;
-  if (metal    && ptrIsAlloc[0]["metal"]) {
-    delete [] metal;
-    metal=NULL;
-  }
+//  if (metal    && ptrIsAlloc[0]["metal"]) {
+//    delete [] metal;
+//    metal=NULL;
+//  }
   if (temp     && ptrIsAlloc[0]["temp" ]) delete [] temp;
   if (intenerg && ptrIsAlloc[0]["u"    ]) delete [] intenerg;
   // stars only
-  if (metal    && ptrIsAlloc[4]["metal"]) {
-    delete [] metal;
-    metal=NULL;
-  }
+//  if (metal    && ptrIsAlloc[4]["metal"]) {
+//    delete [] metal;
+//    metal=NULL;
+//  }
   if (age      && ptrIsAlloc[4]["age"  ]) delete [] age;
 }
 // ----------------------------------------------------------------------------
@@ -1898,13 +1901,13 @@ int CSnapshotGadgetOut::setPos(std::string name, const int _n, float * _pos, con
    
    assert(_n==header.npart[0]);; // #U particles = #gas particles
    if (addr) { // map address
-     metal = _mg;
+     metal[0] = _mg;
    }
    else {
      ptrIsAlloc[0]["metal"]=true;
-     if (! metal) 
-       metal = new float[header.npart[0]+header.npart[4]];
-     memcpy(metal,_mg,sizeof(float)*_n);
+     if (metal[0]) delete [] metal[0];
+     metal[0] = new float[header.npart[0]];
+     memcpy(metal[0],_mg,sizeof(float)*_n);
    }
    bits |= METAL_BIT;
    return 1;
@@ -1916,13 +1919,13 @@ int CSnapshotGadgetOut::setPos(std::string name, const int _n, float * _pos, con
    
    assert(_n==header.npart[4]);; // #metal stars particles
    if (addr) { // map address
-     metal = _ms;
+     metal[4] = _ms;
    }
    else {
      ptrIsAlloc[4]["metal"]=true;
-     if (! metal) 
-       metal = new float[header.npart[0]+header.npart[4]];        
-     memcpy(metal+header.npart[0],_ms,sizeof(float)*_n);
+     if (metal[4]) delete [] metal[4];
+     metal[4] = new float[header.npart[4]];
+     memcpy(metal[4],_ms,sizeof(float)*_n);
    }
    bits |= METAL_BIT;
    return 1;
@@ -2273,7 +2276,18 @@ int CSnapshotGadgetOut::write()
     blk=sizeof(float)*nb;
     writeBlockName("Z   ",blk);
     writeFRecord(blk);
-    writeData((char *) metal, sizeof(float), nb);
+    // write metal gas
+    if (ptrIsAlloc[0]["metal"]) {
+      writeData((char *) metal[0], sizeof(float), header.npart[0]);
+    } else {
+      writeDataValue(0.0,sizeof(float), header.npart[0]);
+    }
+    // write metal stars
+    if (ptrIsAlloc[4]["metal"]) {
+      writeData((char *) metal[4], sizeof(float), header.npart[4]);
+    } else {
+      writeDataValue(0.0,sizeof(float), header.npart[4]);
+    }
     writeFRecord(blk);
   }
   // Age

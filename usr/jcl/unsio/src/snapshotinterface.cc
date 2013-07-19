@@ -22,7 +22,64 @@
 #include <assert.h>
 #include <cmath>
 #include <cstdlib>
+#include <fstream>
+
 namespace uns {
+  // ============================================================================
+  // parseConfig
+  std::string CSnapshotInterfaceIn::parseConfig(std::string req)
+  {
+    std::string config_file(std::string(getenv("HOME")) + "/.unsio");
+    std::ifstream fi;
+    bool exist=true;
+    std::string key,value="";
+
+    fi.open(config_file.c_str(), std::ios::in);
+    if (! fi.is_open()) {
+      if (verbose) {
+        std::cerr << "Unable to open file ["<<config_file<<"] for reading, skipping...\n";
+      }
+      exist = false;
+    }
+    if (exist) {
+      bool stop = false;
+
+      while (!stop && ! fi.eof()) {           // while ! eof
+        std::string line;
+        getline(fi,line); // read on eline
+        if ( ! fi.eof()) {
+          std::istringstream str(line);  // stream line
+          std::string parse;
+          // following loop parse each lines previously read
+          //
+          int cpt=0;
+          bool equal=false;
+          while (  str >> parse   &&              // something to read
+                   parse[0] != '#' &&             // not commented out
+                   parse[0] != '!'                // not commented out
+                   ) {
+            cpt++;
+            if (cpt==1) { // key
+              key=parse;
+            }
+            if (cpt==2) { // sim type
+              if (parse == "=") {
+                equal=true;
+              } else {
+                equal = false;
+              }
+            }
+            if (cpt==3 && equal && key==req) { // value
+              value=parse;
+              stop=true; // found pair key value
+            }
+          }
+        }
+      }
+      fi.close();
+    }
+    return value;
+  }
   // ============================================================================
   // parseSelectTime                                                             
   void CSnapshotInterfaceIn::parseSelectTime()

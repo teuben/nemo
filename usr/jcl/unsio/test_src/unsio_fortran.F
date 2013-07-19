@@ -102,6 +102,8 @@
       nsel=uns_get_array_i(ident,"all","id",id,nbody)
       write (0,*) 'ID nsel =',nsel,' id(1)',id(1)
       ! check if gas component exist
+      status = uns_get_range(ident,"bndry",n,first,last);
+
       status = uns_get_range(ident,"gas",n,first,last);
       if (status.gt.0) then ! prepare gas data for saving
          write (0,*) 'Gas ok, n=',n,' first=',first, ' last=',last

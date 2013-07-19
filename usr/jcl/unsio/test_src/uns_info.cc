@@ -40,17 +40,19 @@ const char * usage="Print information about an UNS file";
 using namespace std;
 void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns);
 template <class T> void displayFormat(int maxlines,std::string text, T * array, int dim, int size, int np);
+bool component_exist=false;
 // ------------------------------------------------------------
 //  displayInfo
 void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
 {
-  float * pos, * vel, * mass, * pot , *acc;
+  float * pos, * vel, * mass, * pot , *acc, *eps;
   int * id;
   int nbody=0;
   bool ok=false;
 
   float * nullp;
   ok = uns->snapshot->getData(comp,"nbody" ,&nbody,&nullp);
+  if (ok) component_exist=true;
   if (ok) {
     std::cout << setw(50) << setfill('=') << ""<<"\n";
     std::cout<< setfill(' ');
@@ -71,6 +73,10 @@ void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
   ok = uns->snapshot->getData(comp,"pot" ,&nbody,&pot );
   if (ok && display) {
     displayFormat(maxlines,"pot [1] = ",pot ,1,nbody, 3);
+  }
+  ok = uns->snapshot->getData(comp,"eps" ,&nbody,&eps );
+  if (ok && display) {
+    displayFormat(maxlines,"eps [1] = ",eps ,1,nbody, 3);
   }
   ok = uns->snapshot->getData(comp,"acc" ,&nbody,&acc );
   if (ok && display) {
@@ -204,15 +210,19 @@ int main(int argc, char ** argv )
       uns->snapshot->getData("time",&time);
 
       std::cout << "Nbody selected = " << nbody << "\nTime="<<time <<"\n";
-      if (file_structure=="range") {
+      if (0 && file_structure=="range") {
         displayInfo(display,maxlines,"all",uns);
       } else {
+        component_exist=false;
         displayInfo(display,maxlines,"gas"  ,uns);
         displayInfo(display,maxlines,"halo" ,uns);
         displayInfo(display,maxlines,"disk" ,uns);
         displayInfo(display,maxlines,"bulge",uns);
         displayInfo(display,maxlines,"stars",uns);
         displayInfo(display,maxlines,"bndry",uns);
+        if (!component_exist) { // no comp, diplay all
+          displayInfo(display,maxlines,"all",uns);
+        }
       }
     }
   }

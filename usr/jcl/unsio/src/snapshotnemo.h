@@ -48,8 +48,8 @@ private:
     int full_nbody;
     int * nemobits , * ionbody, *iokeys;
     int * keys;
-    float * iotime, *iopos, *iovel, *iomass, *iorho, *ioaux, *ioacc, *iopot;
-    float * pos, *vel, *mass, * rho, *acc, *aux, *pot;
+    float * iotime, *iopos, *iovel, *iomass, *iorho, *ioaux, *ioacc, *iopot, *ioeps;
+    float * pos, *vel, *mass, * rho, *acc, *aux, *pot, *eps;
     bool first_stream;
     int status_ionemo;
     int last_nbody,last_nemobits;
@@ -61,6 +61,7 @@ private:
                          return vel ;}
     float *  getMass() { //checkBits("mass",MassBit); 
                          return mass;}
+    float *  getEps()  { return eps;}
     float *  getRho()  { return rho ;}
     float *  getAux()  { return aux ;}
     float *  getAcc()  { return acc ;}
@@ -93,7 +94,7 @@ private:
   private:
     // Map to associate the strings with the bool values
     std::map<std::string, bool> ptrIsAlloc;
-    float * mass, * pos, * vel, * aux, * acc, * pot, * rho;
+    float * mass, * pos, * vel, * aux, * acc, * pot, * rho, * eps;
     float time;
     int * keys;
     int nbody;

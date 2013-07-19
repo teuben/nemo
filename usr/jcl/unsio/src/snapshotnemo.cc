@@ -53,7 +53,7 @@ CSnapshotNemoIn::CSnapshotNemoIn(const std::string _name,
   ioaux   =NULL;
   iorho   =NULL;
   iokeys  =NULL;
-  
+  ioeps   =NULL;
   mass   = NULL;
   pos    = NULL;
   vel    = NULL;
@@ -62,6 +62,7 @@ CSnapshotNemoIn::CSnapshotNemoIn(const std::string _name,
   rho    = NULL;
   aux    = NULL;
   keys   = NULL;
+  eps    = NULL;
   last_nbody=0;
   last_nemobits=-1;
   initparam(const_cast<char**>(argv),const_cast<char**>(defv));
@@ -82,6 +83,7 @@ CSnapshotNemoIn::~CSnapshotNemoIn()
   if (ioaux  ) free ((float *) ioaux  );
   if (ioacc  ) free ((float *) ioacc  );
   if (iopot  ) free ((float *) iopot  );
+  if (ioeps  ) free ((float *) ioeps  );
   if (iokeys ) free ((int   *) iokeys );
   
   if (pos    ) delete [] pos;
@@ -92,6 +94,7 @@ CSnapshotNemoIn::~CSnapshotNemoIn()
   if (acc    ) delete [] acc;
   if (pot    ) delete [] pot;
   if (keys   ) delete [] keys;
+  if (eps    ) delete [] eps;
   
   if (valid) close();
 }
@@ -108,8 +111,8 @@ bool CSnapshotNemoIn::isValidNemo()
     first_stream=true;
     //select_time="all";
     std::string force_select = "all"; 
-    status_ionemo=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,key,t,st,b",
-            force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,&iokeys,
+    status_ionemo=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,key,e,t,st,b",
+            force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,&iokeys,&ioeps,
             &iotime, select_time.c_str(),&nemobits);
 
     full_nbody = *ionbody;        
@@ -169,11 +172,11 @@ int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
   const int nsel=user_select.getNSel();
   
   int status;  // io_nemo status
-  std::string force_select = "all"; 
+  std::string force_select = "all";
   if (! first_stream) { // normal file or second reading (stream)
-    status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,key,t,st,b",
-                   force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,&iokeys,
-		   &iotime, select_time.c_str(),&nemobits);
+    status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,key,e,t,st,b",
+                   force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,&iokeys,&ioeps,
+                   &iotime, select_time.c_str(),&nemobits);
   } else { // "-" first stream, no need to read
     first_stream=false;
     status=status_ionemo; // status read the first time cf : isValid()
@@ -194,50 +197,54 @@ int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
     }
     if (status != -2) { // NEMO snapshot must have particles TAG
       if (*ionbody > last_nbody || (last_nemobits>0 && last_nemobits!=(*nemobits))) { // we must resize arrays
-	if (pos) delete [] pos;
-	if ( *nemobits & PosBit && req_bits&POS_BIT)  pos = new float[*ionbody*3];
-	else pos=NULL;
-	if (vel) delete [] vel;
-	if ( *nemobits & VelBit && req_bits&VEL_BIT)  vel = new float[*ionbody*3];
-	else vel=NULL;
-	if (mass) delete [] mass;
-	if ( *nemobits & MassBit && req_bits&MASS_BIT)  mass = new float[*ionbody];
-	else mass=NULL;
-	if (rho) delete [] rho;
-	if ( *nemobits & DensBit && req_bits&RHO_BIT)  rho = new float[*ionbody];
-	else rho=NULL;
-	if (acc) delete [] acc;
-	if ( *nemobits & AccelerationBit && req_bits&ACC_BIT)  acc = new float[*ionbody*3];
-	else acc=NULL;
-	if (aux) delete [] aux;
-	if ( *nemobits & AuxBit && req_bits&AUX_BIT)  aux = new float[*ionbody];
-	else aux=NULL;
-	if (pot) delete [] pot;
-	if ( *nemobits & PotentialBit && req_bits&POT_BIT)  pot = new float[*ionbody];
-	else pot=NULL;
-	if (keys) delete [] keys;
+        if (pos) delete [] pos;
+        if ( *nemobits & PosBit && req_bits&POS_BIT)  pos = new float[*ionbody*3];
+        else pos=NULL;
+        if (vel) delete [] vel;
+        if ( *nemobits & VelBit && req_bits&VEL_BIT)  vel = new float[*ionbody*3];
+        else vel=NULL;
+        if (mass) delete [] mass;
+        if ( *nemobits & MassBit && req_bits&MASS_BIT)  mass = new float[*ionbody];
+        else mass=NULL;
+        if (rho) delete [] rho;
+        if ( *nemobits & DensBit && req_bits&RHO_BIT)  rho = new float[*ionbody];
+        else rho=NULL;
+        if (acc) delete [] acc;
+        if ( *nemobits & AccelerationBit && req_bits&ACC_BIT)  acc = new float[*ionbody*3];
+        else acc=NULL;
+        if (aux) delete [] aux;
+        if ( *nemobits & AuxBit && req_bits&AUX_BIT)  aux = new float[*ionbody];
+        else aux=NULL;
+        if (pot) delete [] pot;
+        if ( *nemobits & PotentialBit && req_bits&POT_BIT)  pot = new float[*ionbody];
+        else pot=NULL;
+        if (keys) delete [] keys;
         if ( *nemobits & KeyBit && (req_bits&KEYS_BIT || req_bits&ID_BIT))  keys = new int[*ionbody];
         else keys=NULL;
+        if (eps) delete [] eps;
+        if ( *nemobits & EpsBit && req_bits&EPS_BIT)  eps = new float[*ionbody];
+        else eps=NULL;
       }
       last_nbody    = *ionbody;  // save nbody
       last_nemobits = *nemobits; // save nemobits
       int cpt=0;
       // fill array according to selection
       for (int i=0; i<*ionbody; i++) {
-	int idx=index_tab[i].i;
-	if (idx!=-1) { // index selected
-	  for (int j=0; j<3; j++) {
-	    if ( *nemobits & PosBit && req_bits&POS_BIT) pos[cpt*3+j] = iopos[idx*3+j];
-	    if ( *nemobits & VelBit && req_bits&VEL_BIT) vel[cpt*3+j] = iovel[idx*3+j];
+        int idx=index_tab[i].i;
+        if (idx!=-1) { // index selected
+          for (int j=0; j<3; j++) {
+            if ( *nemobits & PosBit && req_bits&POS_BIT) pos[cpt*3+j] = iopos[idx*3+j];
+            if ( *nemobits & VelBit && req_bits&VEL_BIT) vel[cpt*3+j] = iovel[idx*3+j];
             if ( *nemobits & AccelerationBit && req_bits&ACC_BIT) acc[cpt*3+j] = ioacc[idx*3+j];
-	  }
-	  if ( *nemobits & MassBit && req_bits&MASS_BIT) mass[cpt] = iomass[cpt];
+          }
+          if ( *nemobits & MassBit && req_bits&MASS_BIT) mass[cpt] = iomass[cpt];
           if ( *nemobits & DensBit && req_bits&RHO_BIT) rho[cpt]  = iorho[cpt];
           if ( *nemobits & AuxBit  && req_bits&AUX_BIT) aux[cpt]  = ioaux[cpt];
           if ( *nemobits & PotentialBit && req_bits&POT_BIT ) pot[cpt]  = iopot[cpt];
           if ( *nemobits & KeyBit  && (req_bits&KEYS_BIT || req_bits&ID_BIT)) keys[cpt]  = iokeys[cpt];
-	  cpt++;
-	}
+          if ( *nemobits & EpsBit  && req_bits&EPS_BIT) eps[cpt]  = ioeps[cpt];
+          cpt++;
+        }
       }
       assert(nsel==cpt);
     }
@@ -303,6 +310,9 @@ bool CSnapshotNemoIn::getData(const std::string name,int *n,float **data)
     *data = getPot();
     *n    = getNSel();
     break;    
+  case uns::Eps :
+    *data = getEps();
+    *n    = getNSel();
   case uns::Aux :
   case uns::Hsml :
     *data = getAux();
@@ -397,6 +407,14 @@ bool CSnapshotNemoIn::getData(const std::string comp,const std::string name,int 
   case uns::Rho :
     if (status && getRho()) {
       *data = &getRho()[first];
+      *n    = nbody;//getNSel();
+    } else {
+      ok=false;
+    }
+    break;
+  case uns::Eps :
+    if (status && getEps()) {
+      *data = &getEps()[first];
       *n    = nbody;//getNSel();
     } else {
       ok=false;
@@ -563,6 +581,7 @@ CSnapshotNemoOut::CSnapshotNemoOut(const std::string _n, const std::string _t, c
   pot    = NULL;
   rho    = NULL;
   keys   = NULL;
+  eps    = NULL;
   
   ptrIsAlloc["mass" ]=false; 
   ptrIsAlloc["pos"  ]=false; 
@@ -572,6 +591,7 @@ CSnapshotNemoOut::CSnapshotNemoOut(const std::string _n, const std::string _t, c
   ptrIsAlloc["aux"  ]=false; 
   ptrIsAlloc["keys" ]=false; 
   ptrIsAlloc["rho"  ]=false; 
+  ptrIsAlloc["eps"  ]=false;
   ptrIsAlloc["id"   ]=false; 
   
   nbody = -1;
@@ -589,6 +609,7 @@ CSnapshotNemoOut::~CSnapshotNemoOut()
   if (pot  && ptrIsAlloc["pot" ]) delete [] pot;
   if (acc  && ptrIsAlloc["acc" ]) delete [] acc;
   if (aux  && ptrIsAlloc["aux" ]) delete [] aux;
+  if (eps  && ptrIsAlloc["eps" ]) delete [] eps;
   if ((keys && ptrIsAlloc["keys"]) ||
       (keys && ptrIsAlloc["id"  ])  ) delete [] keys;
   if (rho  && ptrIsAlloc["rho" ]) delete [] rho;
@@ -735,6 +756,9 @@ int CSnapshotNemoOut::setData(std::string name,  const int n ,float * data,const
   case uns::Rho :
     status = setArray(n,1,data,&rho,name.c_str(),DensBit,_addr);
     break;
+  case uns::Eps :
+    status = setArray(n,1,data,&eps,name.c_str(),EpsBit,_addr);
+    break;
   default: ok=false;
   }
   if (verbose) {
@@ -819,8 +843,8 @@ int CSnapshotNemoOut::save()
   int   * n = &nbody;
   float * t = &time;
   int   * b = &bits;
-  int status=io_nemo(simname.c_str(),"float,save,n,t,x,v,m,p,a,aux,k,dens,b",
-                     &n,&t,&pos,&vel,&mass,&pot,&acc,&aux,&keys,&rho,&b);
+  int status=io_nemo(simname.c_str(),"float,save,n,t,x,v,m,p,a,aux,k,dens,e,b",
+                     &n,&t,&pos,&vel,&mass,&pot,&acc,&aux,&keys,&rho,&eps,&b);
   if (status!=0) {
     is_saved=true;
   }

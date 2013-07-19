@@ -147,7 +147,7 @@ int CSnapshotRamsesIn::reorderParticles(uns::UserSelection &user_select)
   uns::ComponentRange cr;
   crv.clear();
 
-  // set #prticles per component
+  // set #particles per component
   npart_comp[0] = particles->ngas;
   npart_comp[1] = particles->ndm;
   npart_comp[4] = particles->nstars;
@@ -210,13 +210,18 @@ int CSnapshotRamsesIn::reorderParticles(uns::UserSelection &user_select)
 
   // particles reordering
   if (particles->ntot) { // exist particles to reorder
-    std::vector <float> pos,vel,mass;
+    std::vector <float> pos,vel,mass,metal;
+    std::vector <int> id;
     if (particles->pos.size()>0)
-      pos.resize(particles->pos.size());      // resize new pos  vector
+      pos.resize(particles->pos.size());      // resize new pos   vector
     if (particles->vel.size()>0)
-      vel.resize(particles->vel.size());    // resize new pos  vector
+      vel.resize(particles->vel.size());      // resize new pos   vector
     if (particles->mass.size()>0)
-      mass.resize(particles->mass.size());    // resize new mass vector
+      mass.resize(particles->mass.size());    // resize new mass  vector
+    if (particles->metal.size()>0)
+      metal.resize(particles->metal.size());  // resize new metal vector
+    if (particles->id.size()>0)
+      id.resize(particles->id.size());     // resize new id vector
 
     for (int i=0; i<particles->ntot; i++) {
 
@@ -251,14 +256,33 @@ int CSnapshotRamsesIn::reorderParticles(uns::UserSelection &user_select)
         mass[istart]    = particles->mass[i];
       }
 
+      // id
+      if (particles->id.size()>0) {
+        assert(istart<(int)particles->id.size());
+        found=true;
+        id[istart]    = particles->id[i];
+      }
+      // metal
+      if (particles->metal.size()>0) { // && (icomp==0 || icomp==4)) { // metal for gas or stars
+        if (!(istart<(int)particles->metal.size())) {
+          std::cerr << " istart ="<<istart<< " metal.size ="<< particles->metal.size() << "\n";
+        }
+        assert(istart<(int)particles->metal.size());
+        found=true;
+        metal[istart]    = particles->metal[i];
+      }
+
       if (found) { // found particles
         offset_comp[icomp]++; //  update offset
       }
     }
     // copy back arrays
-    particles->pos=pos;
-    particles->vel=vel;
-    particles->mass=mass;
+    particles->pos   = pos;
+    particles->vel   = vel;
+    particles->mass  = mass;
+    particles->metal = metal;
+    particles->id    = id;
+    //std::cerr << "metal.size() ="<<particles->metal.size() <<"\n";
   }
   return 1;
 }
@@ -349,6 +373,14 @@ bool CSnapshotRamsesIn::getData(const std::string comp, std::string name, int *n
     if (status && comp=="stars" && particles->age.size()>0) {
       *data = &particles->age[0];
       *n=particles->age.size();
+    } else {
+      ok=false;
+    }
+    break;
+  case uns::Metal :
+    if (status && particles->metal.size()>0) {
+      *data = &particles->metal[first];
+      *n    = nbody;
     } else {
       ok=false;
     }
@@ -501,6 +533,14 @@ bool CSnapshotRamsesIn::getData(const std::string comp,const std::string name,in
     nbody=particles->ntot;
   }
   switch(CunsOut::s_mapStringValues[name]) {
+  case uns::Id :
+    if (status && particles->id.size()>0) {
+      *data = &particles->id[first];
+      *n = nbody;
+    } else {
+      ok = false;
+    }
+    break;
   case uns::Nbody :
     if (status) {
       *data = NULL;

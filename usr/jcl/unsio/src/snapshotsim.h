@@ -87,6 +87,7 @@ namespace uns {
     int nframe;          // #frames read
     bool buildGadgetFile();
     bool buildNemoFile();
+    bool buildRamsesFile();
     int addNemoComponent(int&,std::string,std::string );
     virtual int nextFrameSelect(ComponentRangeVector * crvs);
     std::string nemosim;

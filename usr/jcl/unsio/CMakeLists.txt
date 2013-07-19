@@ -104,6 +104,44 @@ endif()
 #  SET(CMAKE_Fortran_COMPILER gfortran)
 #endif()
 
+
+# ----------------------------------------------------------
+# Install SETUP
+# ----------------------------------------------------------
+
+mark_as_advanced(CMAKE_INSTALL_PREFIX)
+
+IF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  IF (NEMO_INSTALLED)
+     set   (CMAKE_INSTALL_PREFIX "$ENV{NEMO}"  CACHE PATH "" FORCE)        #if NEMO exist  => default install into NEMO path
+  ELSE()
+     set   (CMAKE_INSTALL_PREFIX "$ENV{HOME}/local/unsio" CACHE PATH "" FORCE)  #if NEMO NOT exist => default install into ${HOME}/local/unsio
+  ENDIF()
+ENDIF ()#NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+
+MESSAGE( STATUS "--------> CMAKE_INSTALL_PREFIX =" ${CMAKE_INSTALL_PREFIX})
+
+
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# the RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+IF("${isSystemDir}" STREQUAL "-1")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF("${isSystemDir}" STREQUAL "-1")
+
+
+# ----------------------------------------------------------
 # Executbale output path
 set(EXECUTABLE_OUTPUT_PATH bin)
 MESSAGE( STATUS "EXECUTABLE_OUTPUT_PATH: " ${EXECUTABLE_OUTPUT_PATH} )
@@ -119,9 +157,7 @@ FILE(GLOB exe_sources test_src/*.F)
 
 
 # ----------------------------------------------------------
-# Make sure the compiler can find include files from our Hello library.
-#include_directories (${UNS_SOURCE_DIR}/src $ENV{NEMOINC} ${NEMOLIB})
-
+# compile CC programs
 # Find all LIB's sources files
 FILE(GLOB execpp_sources test_src/*.cc)
 
@@ -134,6 +170,9 @@ FOREACH(exe_cpp ${execpp_sources})
 
   # Link the executable to the Hello library.
   target_link_libraries (${exe} unsio nemo ${SQLITE3_LIB} ${FC_GFORT_LIB} ${FC_G77_LIB} stdc++)
+  IF (${exe} STREQUAL "uns_info")
+    INSTALL(TARGETS ${exe} RUNTIME  DESTINATION bin)
+  ENDIF()
 
 ENDFOREACH(exe_cpp ${execpp_sources})
 
@@ -161,21 +200,6 @@ endif()
 # ----------------------------------------------------------
 # Install procedure
 # ----------------------------------------------------------
-mark_as_advanced(CMAKE_INSTALL_PREFIX)
-
-IF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  IF (NEMO_INSTALLED)
-     set   (CMAKE_INSTALL_PREFIX "$ENV{NEMO}"  CACHE PATH "" FORCE)        #if NEMO exist  => default install into NEMO path
-  ELSE()
-     set   (CMAKE_INSTALL_PREFIX "$ENV{HOME}/local/unsio" CACHE PATH "" FORCE)  #if NEMO NOT exist => default install into ${HOME}/local/unsio
-  ENDIF()
-ENDIF ()#NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
-MESSAGE( STATUS "--------> CMAKE_INSTALL_PREFIX =" ${CMAKE_INSTALL_PREFIX})
-
-# unsio lib
-INSTALL(FILES  ${UNSIO_BINARY_DIR}/lib/libunsio.${LIBEXT} DESTINATION lib)
-
   
 # UNS specific includes
 INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/uns.h DESTINATION inc/uns)
@@ -204,9 +228,24 @@ IF (NOT NEMO_INSTALLED)
   ENDFOREACH()
 
 ENDIF()
+
+# unsio lib
+INSTALL(FILES  ${UNSIO_BINARY_DIR}/lib/libunsio.${LIBEXT} DESTINATION lib)
+
 # man
 INSTALL(FILES  ${UNSIO_BINARY_DIR}/../man/man3/unsiof.3 DESTINATION man/man3)
 # some binaries
 
 #set (CMAKE_INSTALL_PREFIX $ENV{NEMOBIN})
-INSTALL(PROGRAMS  ${UNSIO_BINARY_DIR}/bin/uns_info DESTINATION bin)
+#INSTALL(PROGRAMS  ${UNSIO_BINARY_DIR}/bin/uns_info DESTINATION bin)
+
+# install sqlite3 database files
+INSTALL(PROGRAMS  ${UNSIO_BINARY_DIR}/../scripts/perl/mains/unsio_sql3_get_info.pl DESTINATION bin)
+INSTALL(PROGRAMS  ${UNSIO_BINARY_DIR}/../scripts/perl/mains/unsio_sql3_update_info.pl DESTINATION bin)
+INSTALL(PROGRAMS  ${UNSIO_BINARY_DIR}/../scripts/perl/mains/unsio_sql3_update_nemorange.pl DESTINATION bin)
+INSTALL(PROGRAMS  ${UNSIO_BINARY_DIR}/../scripts/perl/mains/unsio_sql3_create_db.pl DESTINATION bin)
+
+INSTALL(FILES  ${UNSIO_BINARY_DIR}/../scripts/perl/lib/Tools/Tools.pm DESTINATION scripts/perl/lib/Tools)
+INSTALL(FILES  ${UNSIO_BINARY_DIR}/../scripts/perl/lib/Tools/Sqlite3.pm DESTINATION scripts/perl/lib/Tools)
+INSTALL(FILES  ${UNSIO_BINARY_DIR}/../scripts/sql/create_unsio_db.sql DESTINATION scripts/sql)
+INSTALL(FILES  ${UNSIO_BINARY_DIR}/../scripts/sql/README DESTINATION scripts/sql)

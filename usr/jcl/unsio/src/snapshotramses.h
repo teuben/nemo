@@ -31,8 +31,8 @@ public:
     ntot=ngas=ndm,nstars=0;
     load_bits=0;
   }
-  std::vector <float> pos,vel,mass,hsml,rho,temp,age;
-  std::vector <int> indexes;
+  std::vector <float> pos,vel,mass,hsml,rho,temp,age,metal;
+  std::vector <int> indexes,id;
   int ntot, ngas, ndm, nstars;
   unsigned int load_bits;
 };

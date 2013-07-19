@@ -1,0 +1,7 @@
+
+*) To create a new unsio slqite3 database calle "mydb.sql3"
+
+sqlite3 mydb.sql3  '.read create_unsio_db.sql'
+
+
+

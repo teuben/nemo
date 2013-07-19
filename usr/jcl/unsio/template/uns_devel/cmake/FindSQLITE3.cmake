@@ -1,3 +1,4 @@
+# -*-cmake-*-
 # ============================================================================
 # Copyright Jean-Charles LAMBERT - 2009-2012
 # e-mail:   Jean-Charles.Lambert@oamp.fr

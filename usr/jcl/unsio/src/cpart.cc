@@ -115,12 +115,32 @@ int CPart::loadData(uns::CParticles * particles,
     // read masses
     tmp[6] = new double[npart]; // alloc
     part.readDataBlock((char *) tmp[6]);
-    double * agetmp;
-    if (nstar>0) { // || 1) { // there are stars
+    double * agetmp, * metaltmp;
+    int * id=NULL;
+
+    if (req_bits&ID_BIT) {
+      id = new int[npart];
+      part.readDataBlock((char *) id); // read identity
+    } else {
       part.skipBlock(); // skip identity
+    }
+
+    if (nstar>0) { // || 1) { // there are stars
       part.skipBlock(); // skip level
       agetmp = new double[npart];
       part.readDataBlock((char *) agetmp);
+
+      bool found_metal=false;
+      if (req_bits&METAL_BIT) {
+        metaltmp = new double[npart];
+        int status=part.readDataBlock((char *) metaltmp, false);
+        found_metal=true; // found metallicity what happen...
+        if (! status) { // no metallicity block
+          for (int i=0; i<npart; i++) metaltmp[i] = -1.0; // we put -1.0 when no metellicity
+        }
+        //std::cerr << "Metalicity status =" << status << "\n";
+
+      }
       for (int k=0; k<npart; k++) {
         if ((agetmp[k]==0.&& (comp_bits&HALO_BIT))  ||  // it's DM
             (agetmp[k]!=0.&& (comp_bits&STARS_BIT))) {  // its' stars
@@ -146,9 +166,25 @@ int CPart::loadData(uns::CParticles * particles,
               particles->load_bits |= MASS_BIT;
               take=true;
             }
-            if (agetmp[k]!=0 && req_bits&AGE_BIT) { // stars only
+            if (agetmp[k]!=0 && req_bits&AGE_BIT) { // stars only (age)
               particles->age.push_back(agetmp[k]);
               particles->load_bits |= AGE_BIT;
+            }
+            if (agetmp[k]!=0 && req_bits&METAL_BIT && found_metal) { // stars only (metallicity)
+	      //std::cerr << "Stars => "<<metaltmp[k]<<"\n";
+              particles->metal.push_back(metaltmp[k]);
+              particles->load_bits |= METAL_BIT;
+            }
+            if (agetmp[k]==0 && req_bits&METAL_BIT && found_metal) { // stars only (metallicity)
+	      //if ( tmp[6][k] == 0.0 ) 
+	      //std::cerr << "DM => "<<metaltmp[k]<<" mass=" << tmp[6][k] << "\n";
+              //particles->metal.push_back(tmp[6][k]); // put mass for dark matter
+              particles->metal.push_back(-1.0); // put -1 for dark matter after discussion with valentin 18-jul-2013
+              particles->load_bits |= METAL_BIT;
+            }
+            if (req_bits&ID_BIT) {
+              particles->id.push_back(id[k]); // save real id for dm or stars
+              particles->load_bits |= ID_BIT;
             }
             if (take && agetmp[k]!=0) {
                particles->indexes.push_back(4); // save star positions
@@ -158,6 +194,7 @@ int CPart::loadData(uns::CParticles * particles,
                particles->indexes.push_back(1); // save DM positions
                particles->ndm++;
             }
+
             particles->ntot++; // one more total particles
 
             offset++;
@@ -167,6 +204,12 @@ int CPart::loadData(uns::CParticles * particles,
       }
       // garbage
       delete [] agetmp;
+      if (req_bits&ID_BIT) {
+        delete [] id;
+      }
+      if (req_bits&METAL_BIT) {
+        delete [] metaltmp;
+      }
     }
     else {  // there are no stars
       if (comp_bits&HALO_BIT) { // DM sel
@@ -189,6 +232,14 @@ int CPart::loadData(uns::CParticles * particles,
               particles->mass.push_back(tmp[6][k]);
               take=true;
             }
+            if (req_bits&ID_BIT) {
+              particles->id.push_back(id[k]); // save real id for dm or stars
+              particles->load_bits |= ID_BIT;
+            }
+            if (req_bits&METAL_BIT) {
+              particles->metal.push_back(-1.0); // we put -1.0 when no metellicity
+              particles->load_bits |= METAL_BIT;
+            }
             if (take) {
                particles->indexes.push_back(1); // save DM positions
                particles->ndm++;               
@@ -197,7 +248,10 @@ int CPart::loadData(uns::CParticles * particles,
             offset++;
             //assert(offset<=nselect);
           }
-        }
+        }      
+      }
+      if (req_bits&ID_BIT) {
+        delete [] id;
       }
     }
     // garbage collecting

@@ -31,13 +31,14 @@ public:
   bool good() { 
     if (!fake_reading) return in.good();
     else return true;}
-  inline int readDataBlock(char * ptr) {
+  inline int readDataBlock(char * ptr, bool abort=true) {
     if (!fake_reading) {
-      int len1=readFRecord();
+      int len1=readFRecord(abort);
       readData(ptr,1,len1);
-      int len2=readFRecord();
+      int len2=readFRecord(abort);
       if (len2==len1) ; // remove warning....
-      assert(good() && len1==len2);
+      if (abort)
+        assert(good() && len1==len2);
       return len1;
     } else return 1;
   }
@@ -60,14 +61,18 @@ public:
   }
   
   // read fortran record
-  inline int readFRecord() {
+  inline int readFRecord(bool abort=true) {
     if (!fake_reading) {
       int len; in.read((char *) &len,sizeof(int));
       // We SWAP data
       if (swap) { // swapping requested
         swapBytes(&len,sizeof(int));
       }
-      assert(in.good());
+      if (abort)
+        assert(in.good());
+      else {
+        if (! in.good()) len=0;
+      }
       return len;
     } 
     else return 1;

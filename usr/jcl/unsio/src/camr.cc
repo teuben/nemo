@@ -354,10 +354,24 @@ int CAmr::loadData(uns::CParticles * particles,
                   particles->rho.push_back(rho); // rho var(i,ind,1) * scale_nH
                   particles->load_bits |= RHO_BIT;
                 }
-                if (req_bits&TEMP_BIT) {                  
+                if (req_bits&TEMP_BIT && nvarh>4) {
                   float temp= std::max(0.0,var[4*ngrida*twotondim+ind*ngrida+i]/rho);
                   particles->temp.push_back(temp);
                   particles->load_bits |= TEMP_BIT;
+                }
+                if (req_bits&METAL_BIT && nvarh>5) {
+                  float metal= var[5*ngrida*twotondim+ind*ngrida+i];
+                  particles->metal.push_back(metal);
+                  particles->load_bits |= METAL_BIT;
+                }
+                if (req_bits&METAL_BIT && nvarh<=5) {
+                  float metal= -1.0; // we put -1.0 when no metellicity
+                  particles->metal.push_back(metal);
+                  particles->load_bits |= METAL_BIT;
+                }
+                if (req_bits&ID_BIT) {
+                  particles->id.push_back(-1.); // no id for gas, use "-1"
+                  particles->load_bits |= ID_BIT;
                 }
                 if (take) {
                   particles->indexes.push_back(0); // GAS particles

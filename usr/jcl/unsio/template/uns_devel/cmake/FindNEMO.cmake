@@ -1,5 +1,6 @@
+# -*-cmake-*-
 # ============================================================================
-# Copyright Jean-Charles LAMBERT - 2009-2012
+# Copyright Jean-Charles LAMBERT - 2009-2013
 # e-mail:   Jean-Charles.Lambert@oamp.fr
 # address:  Dynamique des galaxies
 #           Centre de donneeS Astrophysique de Marseille (CeSAM)
@@ -62,16 +63,16 @@ IF(GLOB_TEMP_VAR)
 ENDIF(GLOB_TEMP_VAR)
 
 if (NOT NEMO_INSTALLED)
-   MESSAGE(STATUS "NEMO environement not loaded.... using nemo_light")
+  MESSAGE(STATUS "NEMO environement not loaded.... using nemo_light")
 else () # try to find dehnen's stuff
-   find_library(ISFALCONLIB NAMES falcON PATHS $ENV{NEMO}/usr/dehnen/falcON/lib)
-   if (ISFALCONLIB)
-      MESSAGE(STATUS "Found Falcon lib :" ${ISFALCONLIB} )
-      set (FALCON_INSTALLED TRUE)
-      set (FALCON_LIB_PATH $ENV{NEMO}/usr/dehnen/falcON)
-      set (FALCON_UTIL_PATH $ENV{NEMO}/usr/dehnen/utils)
-      set(DEHNEN  $ENV{NEMO}/usr/dehnen)
-   else ()
-      set (FALCON_INSTALLED FALSE)
-   endif()
+  find_library(ISFALCONLIB NAMES falcON PATHS $ENV{NEMO}/usr/dehnen/falcON/lib)
+  if (ISFALCONLIB)
+    MESSAGE(STATUS "Found Falcon lib :" ${ISFALCONLIB} )
+    set (FALCON_INSTALLED TRUE)
+    set (FALCON_LIB_PATH $ENV{NEMO}/usr/dehnen/falcON)
+    set (FALCON_UTIL_PATH $ENV{NEMO}/usr/dehnen/utils)
+    set(DEHNEN  $ENV{NEMO}/usr/dehnen)
+  else ()
+    set (FALCON_INSTALLED FALSE)
+  endif()
 endif (NOT NEMO_INSTALLED)

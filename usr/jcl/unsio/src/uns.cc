@@ -143,7 +143,7 @@ namespace uns {
     snapshot = new CSnapshotSimIn(simname, sel_comp, sel_time, verbose);
     valid = snapshot->isValidData();
     if (valid && verbose) {
-      std::cerr << "CunsIn::trySimDB() It's a simulation...\n";
+      std::cerr << "CunsIn::trySimDB() It's recorded to sqlite3 database...\n";
     }
 #else
     valid = false;
@@ -204,6 +204,7 @@ namespace uns {
     CunsOut::s_mapStringValues["aux"        ] = uns::Aux;
     CunsOut::s_mapStringValues["acc"        ] = uns::Acc;
     CunsOut::s_mapStringValues["pot"        ] = uns::Pot;
+    CunsOut::s_mapStringValues["eps"        ] = uns::Eps;
     CunsOut::s_mapStringValues["keys"       ] = uns::Keys;
     CunsOut::s_mapStringValues["age"        ] = uns::Age;
     CunsOut::s_mapStringValues["temp"       ] = uns::Temp;

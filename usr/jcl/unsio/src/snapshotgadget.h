@@ -290,7 +290,7 @@ typedef struct particle_data_lite
 
   private:
     //data
-    float * mass[6], * pos[6], *acc[6], * vel[6], * pot[6], * rho, * hsml, * age, * metal, * intenerg, * temp;
+    float * mass[6], * pos[6], *acc[6], * vel[6], * pot[6], * rho, * hsml, * age, * metal[6], * intenerg, * temp;
     int * id[6];
     int ntot_withmasses;
     std::ofstream out;

@@ -138,6 +138,7 @@ namespace uns {
     bool isValidData() { return valid; }
     void setFileName(std::string _f) { filename = _f;}
     bool getRangeSelect(const char *, int *, int *, int * , bool fortran=false);
+    std::string parseConfig(std::string);
     //std::string getFileName() const { return filename;};
     int getInterfaceIndex() { return interface_index; }
     bool isFileExist() { return true; }

@@ -10,34 +10,38 @@
 // ============================================================================
 
 /* 
-	@author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
+  @author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
  */
 #ifndef NOSQLITE3  // do not compite if no sqlite3 lib
 #include "snapshotsim.h"
 #include "snapshotgadget.h"
 #include "snapshotnemo.h"
+#include "snapshotramses.h"
 #include "ctools.h"
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+
+#include <cstdio>
+#include <cstdlib>
 
 #define DEBUG 0
 #include "unsdebug.h"
 #include "uns.h"
 
 namespace uns {
-  // ASCII database
-  std::string uns::CSnapshotInterfaceIn::sim_db_file="/pil/programs/DB/sim_info.txt";
-  std::string uns::CSnapshotInterfaceIn::nemo_range_file="/pil/programs/DB/nemo_range.txt";
-  std::string uns::CSnapshotInterfaceIn::eps_db_file="/pil/programs/DB/sim_eps.txt";
-  // SQLITE database
-  
+// ASCII database
+std::string uns::CSnapshotInterfaceIn::sim_db_file="/pil/programs/DB/sim_info.txt";
+std::string uns::CSnapshotInterfaceIn::nemo_range_file="/pil/programs/DB/nemo_range.txt";
+std::string uns::CSnapshotInterfaceIn::eps_db_file="/pil/programs/DB/sim_eps.txt";
+// SQLITE database
+
 // ----------------------------------------------------------------------------
 // constructor
 CSnapshotSimIn::CSnapshotSimIn(const std::string _name,
-			   const std::string _comp, 
-			   const std::string _time,
-			   const bool        verb)
+                               const std::string _comp,
+                               const std::string _time,
+                               const bool        verb)
   :CSnapshotInterfaceIn(_name, _comp, _time, verb)
 {
   snapshot = NULL;
@@ -64,9 +68,9 @@ ComponentRangeVector * CSnapshotSimIn::getSnapshotRange()
 {
   assert(snapshot != NULL);
   assert(snapshot->isValidData());
-    if ((simtype == "Nemo") && nemosim != "" && crv.size()>0) {
+  if ((simtype == "Nemo") && nemosim != "" && crv.size()>0) {
     return &crv;
-  } 
+  }
   else {
     return snapshot->getSnapshotRange();
   }
@@ -99,9 +103,17 @@ int CSnapshotSimIn::nextFrameSelect(ComponentRangeVector * crvs)
 bool CSnapshotSimIn::openSqlDb(std::string db)
 {
   sqlite_db = db;
+  std::string mydbname=parseConfig("dbname");
+  if (mydbname != "" ) {
+    sqlite_db = mydbname;
+  }
+  if (verbose) {
+    std::cerr << "Using sqlite3 database file [" << sqlite_db << "]\n";
+  }
   sql = new jclt::CSQLite3(sqlite_db);
   bool status=sql->isOpen();
   if (! status) {
+    std::cerr << "Unable to load sqlite3 database file [" << sqlite_db << "]\n";
     //std::cerr << __FILE__<< " " << __LINE__ << "Aborting ....\n";
     //std::exit(1);
   } else {
@@ -130,12 +142,14 @@ bool CSnapshotSimIn::findSqlSim()
     basename       = sql->vdata[3];
     
     interface_type = simtype;
-    if (interface_type == "Gadget") interface_index=1;
+    if (tools::Ctools::tolower(interface_type) == "gadget") interface_index=1;
     else
-      if (interface_type == "Nemo") interface_index=0;
-      else {
-	std::cerr <<"CSnapshotSimIn::findSqlSim => Unknown interface type....\n";
-      }
+      if (tools::Ctools::tolower(interface_type) == "nemo") interface_index=0;
+      else
+        if (tools::Ctools::tolower(interface_type) == "ramses") interface_index=2;
+        else {
+          std::cerr <<"CSnapshotSimIn::findSqlSim => Unknown interface type....\n";
+        }
   }
   return status;
 }
@@ -169,11 +183,14 @@ bool CSnapshotSimIn::fillSqlNemoRange()
     if (verbose) sql->display();
     int offset=0;
     assert(sql->vdata[0]==filename);
-    addNemoComponent(offset,sql->vdata[1],"all");
-    addNemoComponent(offset,sql->vdata[2],"disk");
+    addNemoComponent(offset,sql->vdata[1],"all"  );
+    addNemoComponent(offset,sql->vdata[2],"disk" );
     addNemoComponent(offset,sql->vdata[3],"bulge");
-    addNemoComponent(offset,sql->vdata[4],"halo");
+    addNemoComponent(offset,sql->vdata[4],"halo" );
     addNemoComponent(offset,sql->vdata[5],"halo2");
+    addNemoComponent(offset,sql->vdata[6],"gas"  );
+    addNemoComponent(offset,sql->vdata[7],"bndry");
+    addNemoComponent(offset,sql->vdata[8],"stars");
   }
   return status;
 }
@@ -214,44 +231,44 @@ bool CSnapshotSimIn::findSim()
     if ( ! fi.eof()) {
       std::istringstream str(line);  // stream line
       std::string parse;
-      // following loop parse each lines previously read   
+      // following loop parse each lines previously read
       //
       int cpt=0;
-      while (  str >> parse   &&              // something to read 
-	       parse[0] != '#' &&             // not commented out 
-	       parse[0] != '!'                // not commented out 
-	       ) {
-	cpt++;
-	if (cpt==1) { // simname
-	  simname=parse;
-	}
-	if (cpt==2) { // sim type
-	  //std::istringstream ss(parse);
-	  //ss >> simtype;
-	  simtype=parse;
-	  interface_type = simtype;
-	  if (interface_type == "Gadget") interface_index=1;
-	  else
-	    if (interface_type == "Nemo") interface_index=0;
-	    else {
-	      std::cerr <<"CSnapshotSimIn::findSim => Unknown interface type....\n";
-	    }
-	}
-	if (cpt==3) { // sim's dirname
-	  dirname=parse;
-	}
-	if (cpt==4) { // sim's basename
-	  basename=parse;
-	}
+      while (  str >> parse   &&              // something to read
+               parse[0] != '#' &&             // not commented out
+               parse[0] != '!'                // not commented out
+               ) {
+        cpt++;
+        if (cpt==1) { // simname
+          simname=parse;
+        }
+        if (cpt==2) { // sim type
+          //std::istringstream ss(parse);
+          //ss >> simtype;
+          simtype=parse;
+          interface_type = simtype;
+          if (interface_type == "Gadget") interface_index=1;
+          else
+            if (interface_type == "Nemo") interface_index=0;
+            else {
+              std::cerr <<"CSnapshotSimIn::findSim => Unknown interface type....\n";
+            }
+        }
+        if (cpt==3) { // sim's dirname
+          dirname=parse;
+        }
+        if (cpt==4) { // sim's basename
+          basename=parse;
+        }
       }
       if (simname == filename) { // we found simulation
-	stop   = true; // we have a snapshot
-	status = true; // so we can stop reading
-	std::cerr << "SIM DB:Found simulation ["<<simname<<"] in database !\n";
+        stop   = true; // we have a snapshot
+        status = true; // so we can stop reading
+        std::cerr << "SIM DB:Found simulation ["<<simname<<"] in database !\n";
       }
       if (cpt != 4) {
-	std::cerr << "\n\nWarning, bad #strings ["<<cpt<<"] parsed\n"
-		  << "during CSnapshotSimIn::findSim()....\n";
+        std::cerr << "\n\nWarning, bad #strings ["<<cpt<<"] parsed\n"
+                  << "during CSnapshotSimIn::findSim()....\n";
       }
     }
     else { // end of file
@@ -281,54 +298,54 @@ bool CSnapshotSimIn::readEpsFile()
       std::string line;
       getline(fi,line); // read on eline
       if ( ! fi.eof()) {
-	std::istringstream str(line);  // stream line
-	std::string parse;
-	// following loop parse each lines previously read   
-	//
-	int cpt=0;
-	while (  str >> parse    &&             // something to read 
-		 parse[0] != '#' &&             // not commented out 
-		 parse[0] != '!'                // not commented out 
-		 ) {
-	  cpt++;
-	  if (cpt==1) { // simname
-	    simname=parse;
-	    if (simname == filename) { // we found simulation
-	      //stop   = true; // we have a snapshot
-	      status = true; // we have all components	      
-	      std::cerr << "EPS:Found simulation ["<<simname<<"] in database !\n";
-	    }
-	  }
-	  if (simname == filename) { // we found simulation
-	     std::istringstream ss(parse);
-	    if (cpt < MAX_EPS+2) { // 
-	      ss >> eps[cpt-2];    // file EPS array
-	    }
-	  }
-	} // while ( str ....
-	// 
-	if (simname == filename) {
-	  stop=true;     // simulation has been found
-	  assert(cpt>1); // we must have read at least one eps
+        std::istringstream str(line);  // stream line
+        std::string parse;
+        // following loop parse each lines previously read
+        //
+        int cpt=0;
+        while (  str >> parse    &&             // something to read
+                 parse[0] != '#' &&             // not commented out
+                 parse[0] != '!'                // not commented out
+                 ) {
+          cpt++;
+          if (cpt==1) { // simname
+            simname=parse;
+            if (simname == filename) { // we found simulation
+              //stop   = true; // we have a snapshot
+              status = true; // we have all components
+              std::cerr << "EPS:Found simulation ["<<simname<<"] in database !\n";
+            }
+          }
+          if (simname == filename) { // we found simulation
+            std::istringstream ss(parse);
+            if (cpt < MAX_EPS+2) { //
+              ss >> eps[cpt-2];    // file EPS array
+            }
+          }
+        } // while ( str ....
+        //
+        if (simname == filename) {
+          stop=true;     // simulation has been found
+          assert(cpt>1); // we must have read at least one eps
 
-	  // copy last eps read to next eps   
-	  // it's a trick for NEMO simulations
-	  // which have only one eps          
-	  for (int i=cpt-1; i<MAX_EPS; i++) {
-	    std::cerr << "eps shift i="<<i<<" cpt="<<cpt<<" eps="<<eps[cpt-2]<<"\n";
-	    eps[i] = eps[cpt-2]; 
-	  }
-	}
+          // copy last eps read to next eps
+          // it's a trick for NEMO simulations
+          // which have only one eps
+          for (int i=cpt-1; i<MAX_EPS; i++) {
+            std::cerr << "eps shift i="<<i<<" cpt="<<cpt<<" eps="<<eps[cpt-2]<<"\n";
+            eps[i] = eps[cpt-2];
+          }
+        }
       } // if !eof ...
       else { // end of file
-	stop   = true;
-	status = false;
+        stop   = true;
+        status = false;
       }
     } // while (!stop ...
   } // if (status....
   if (! status) {
     std::cerr<<"\n\nWARNING, simulation ["<<filename<<"] has no entry in the"
-	     <<"EPS datafile ["<<uns::CSnapshotInterfaceIn::eps_db_file<<"]\n\n";
+            <<"EPS datafile ["<<uns::CSnapshotInterfaceIn::eps_db_file<<"]\n\n";
   }
   return status;
 }
@@ -370,48 +387,48 @@ bool CSnapshotSimIn::fillNemoRange()
       std::string line;
       getline(fi,line); // read on eline
       if ( ! fi.eof()) {
-	std::istringstream str(line);  // stream line
-	std::string parse;
-	// following loop parse each lines previously read   
-	//
-	int cpt=0;
-	while (  str >> parse    &&             // something to read 
-		 parse[0] != '#' &&             // not commented out 
-		 parse[0] != '!'                // not commented out 
-		 ) {
-	  cpt++;
-	  if (cpt==1) { // simname
-	    simname=parse;
-	    if (simname == filename) { // we found simulation
-	      stop   = true; // we have a snapshot
-	      status = true; // we have all components	      
-	      std::cerr << "Found simulation ["<<simname<<"] in database !\n";
-	      crv.clear();
-	      offset=0;
-	    }
-	  }
-	  if (simname == filename) { // we found simulation
-	    if (cpt==2) { // #total
-	      addNemoComponent(offset,parse,"all");
-	    }
-	    if (cpt==3) { // #disk
-	      addNemoComponent(offset,parse,"disk");
-	    }
-	    if (cpt==4) { // #bulge
-	      addNemoComponent(offset,parse,"bulge");
-	    }
-	    if (cpt==5) { // #halo
-	      addNemoComponent(offset,parse,"halo");
-	    }
-	    if (cpt==6) { // #halo2
-	      addNemoComponent(offset,parse,"halo2");
-	    }
-	  }
-	} // while ( str ....
+        std::istringstream str(line);  // stream line
+        std::string parse;
+        // following loop parse each lines previously read
+        //
+        int cpt=0;
+        while (  str >> parse    &&             // something to read
+                 parse[0] != '#' &&             // not commented out
+                 parse[0] != '!'                // not commented out
+                 ) {
+          cpt++;
+          if (cpt==1) { // simname
+            simname=parse;
+            if (simname == filename) { // we found simulation
+              stop   = true; // we have a snapshot
+              status = true; // we have all components
+              std::cerr << "Found simulation ["<<simname<<"] in database !\n";
+              crv.clear();
+              offset=0;
+            }
+          }
+          if (simname == filename) { // we found simulation
+            if (cpt==2) { // #total
+              addNemoComponent(offset,parse,"all");
+            }
+            if (cpt==3) { // #disk
+              addNemoComponent(offset,parse,"disk");
+            }
+            if (cpt==4) { // #bulge
+              addNemoComponent(offset,parse,"bulge");
+            }
+            if (cpt==5) { // #halo
+              addNemoComponent(offset,parse,"halo");
+            }
+            if (cpt==6) { // #halo2
+              addNemoComponent(offset,parse,"halo2");
+            }
+          }
+        } // while ( str ....
       } // if !eof ...
       else { // end of file
-	stop   = true;
-	status = false;
+        stop   = true;
+        status = false;
       }
     } // while (!stop ...
   } // if (status....
@@ -421,8 +438,9 @@ bool CSnapshotSimIn::fillNemoRange()
 // ============================================================================
 // addNemoComponent                                                            
 int CSnapshotSimIn::addNemoComponent(int& offset, std::string parse,
-				    std::string comp )
+                                     std::string comp )
 {
+#if 0
   int nbody;
   std::istringstream ss(parse);
   ss >> nbody;
@@ -435,6 +453,26 @@ int CSnapshotSimIn::addNemoComponent(int& offset, std::string parse,
     }
   }
   return offset;
+#else
+  if (parse!="") { // there is something for the component
+    std::size_t found = parse.find(":");
+
+    std::istringstream ss;
+    //std::cerr << "substr=[" << parse.substr(0,found-1) << "]\n";
+    ss.str(parse.substr(0,found));
+    int start;
+    ss >> start;
+    ss.clear();
+    ss.str(parse.substr(found+1));
+    int end;
+    ss >> end;
+    uns::ComponentRange cr;
+    //std::cerr << "parse="<< parse << " start="<< start << " end="<< end << " comp="<<comp << "\n";
+    cr.setData(start,end,comp);
+    crv.push_back(cr);
+  }
+  return 1;
+#endif
 }
 // ============================================================================
 // isNewFrame                                                                  
@@ -442,15 +480,20 @@ bool CSnapshotSimIn::isNewFrame()
 {
   bool status=false;
   if (valid) {
-    if (simtype=="Gadget") {
+    if (tools::Ctools::tolower(simtype)=="gadget") {
       status=buildGadgetFile();
     }
     else {
-      if (simtype=="Nemo") {
-	status=buildNemoFile();
+      if (tools::Ctools::tolower(simtype)=="nemo") {
+        status=buildNemoFile();
       }
       else {
-	std::cerr <<"\nUnknown simulation type ["<<simtype<<"]\n";
+        if (tools::Ctools::tolower(simtype)=="ramses") {
+          status=buildRamsesFile();
+        }
+        else {
+          std::cerr <<"\nUnknown simulation type ["<<simtype<<"]\n";
+        }
       }
     }
     if (status) {
@@ -473,16 +516,16 @@ bool CSnapshotSimIn::buildNemoFile()
     if (snapshot) delete snapshot;
     if (0) { // ASCII database
       if (fillNemoRange()) {
-	if (verbose) uns::ComponentRange::list(&crv);
+        if (verbose) uns::ComponentRange::list(&crv);
       }
     } else {
       if (fillSqlNemoRange()) {
-	if (verbose) uns::ComponentRange::list(&crv);
+        if (verbose) uns::ComponentRange::list(&crv);
       }
     }
     // try to open NEMO sim
     PRINT("trying top instantiate  CSnapshotNemo("<<myfile<<") verbose="<<verbose<<"\n";)
-      snapshot = new CSnapshotNemoIn(myfile, select_part, select_time,verbose);
+        snapshot = new CSnapshotNemoIn(myfile, select_part, select_time,verbose);
     if (snapshot->isValidData()) {
       status=true;
       nemosim=myfile;
@@ -507,21 +550,21 @@ bool CSnapshotSimIn::buildGadgetFile()
     std::string myfile = dirname+'/'+basename+'_'+ss.str();
     PRINT("CSnapshotSimIn::buildGadgetFile()  myfile=["<<myfile<<"]\n";)
 
-    if (snapshot) delete snapshot;
+        if (snapshot) delete snapshot;
     // try to open file
     snapshot = new CSnapshotGadgetIn(myfile, select_part, select_time, verbose);
-    if (snapshot->isValidData()) {                // file exist         
+    if (snapshot->isValidData()) {                // file exist
       float t;
       bool ok=snapshot->getData("time",&t);
-      if (ok && checkRangeTime(t)) {              //  time in range     
-	status=true;                              //   valid snap       
-	stop=true;                                //   get out loop     
-      } else {                                    //  time out of range 
-	delete snapshot;                          //   del object       
-	snapshot = NULL;                          //   NULL for the next
-	nframe++;                                 //   try next frame   
+      if (ok && checkRangeTime(t)) {              //  time in range
+        status=true;                              //   valid snap
+        stop=true;                                //   get out loop
+      } else {                                    //  time out of range
+        delete snapshot;                          //   del object
+        snapshot = NULL;                          //   NULL for the next
+        nframe++;                                 //   try next frame
       }
-    } 
+    }
     else {                                        // file does not exist
       delete snapshot;
       snapshot = NULL;
@@ -535,16 +578,44 @@ bool CSnapshotSimIn::buildGadgetFile()
   return status;
 }
 // ============================================================================
+// buildRamsesFile
+bool CSnapshotSimIn::buildRamsesFile()
+{
+  bool status=false;
+
+  std::string myfile = dirname+'/'+basename;
+  if (nframe==0) {
+    snapshot = new CSnapshotRamsesIn(myfile, select_part, select_time, verbose);
+    if (snapshot->isValidData()) {                // file exist
+      float t;
+      bool ok=snapshot->getData("time",&t);
+      if (ok && checkRangeTime(t)) {              //  time in range
+        status=true;                              //   valid snap
+        nframe++;
+      } else {                                    //  time out of range
+        delete snapshot;                          //   del object
+        snapshot = NULL;                          //   NULL for the next
+        nframe++;                                 //   try next frame
+      }
+    }
+    else {                                        // file does not exist
+      delete snapshot;
+      snapshot = NULL;
+    }
+  }
+  return status;
+}
+// ============================================================================
 // getCod
 // returns: 
 // -2 file exist but can't open
 // -1 file does not exist
 // 0  time does not exist
 // 1  time found 
-                                                                   
+
 int CSnapshotSimIn::getCod(const std::string select,
-			 const float time, float * tcod,
-			 const std::string base, const std::string ext)
+                           const float time, float * tcod,
+                           const std::string base, const std::string ext)
 {
   int status=-3;  // sim not valid
   if (valid) {
@@ -555,40 +626,40 @@ int CSnapshotSimIn::getCod(const std::string select,
       status = 0;
       fi.open(codfile.c_str(),std::ios::in);
       if (! fi.is_open()) {
-	std::cerr << "Unable to open file ["<<codfile<<"] for reading...\n";
-	status = -2;
+        std::cerr << "Unable to open file ["<<codfile<<"] for reading...\n";
+        status = -2;
       }
       else {
-	bool stop=false;
-	while (!stop && ! fi.eof()) {           // while ! eof
-	  status = 0; // time not match
-	  std::string line;
-	  getline(fi,line); // read line by line
-	  if ( ! fi.eof()) {
-	    std::istringstream str(line);  // stream line
-	    std::string parse;
-	    int cpt=0;
-	    // get time
-	    str >> parse;                 // read time        
-	    std::stringstream str2; // convert to stream
-	    str2 << parse;
-	    str2 >> tcod[cpt++];              // convert to float 
-	    if (tcod[0]-0.00001 < time && tcod[0]+0.00001 > time) {
-	      while (  str >> parse    &&             // something to read 
-		       parse[0] != '#' &&             // not commented out 
-		       parse[0] != '!'                // not commented out 
-		       ) {
-		assert(cpt < 7);
-		std::stringstream str2(parse); // read cod data       
-		str2 >> tcod[cpt++];          // store in float array
-	      } // while str >> ...
-	      assert(cpt==7); // bc cpt+1
-	      status=1;  // match cod time      
-	      stop=true; //  we can stop so read
-	    } // if (tcod[0]-0.00
-	  } // !fi.eof
-	} // while !stop....
-      } // else 
+        bool stop=false;
+        while (!stop && ! fi.eof()) {           // while ! eof
+          status = 0; // time not match
+          std::string line;
+          getline(fi,line); // read line by line
+          if ( ! fi.eof()) {
+            std::istringstream str(line);  // stream line
+            std::string parse;
+            int cpt=0;
+            // get time
+            str >> parse;                 // read time
+            std::stringstream str2; // convert to stream
+            str2 << parse;
+            str2 >> tcod[cpt++];              // convert to float
+            if (tcod[0]-0.00001 < time && tcod[0]+0.00001 > time) {
+              while (  str >> parse    &&             // something to read
+                       parse[0] != '#' &&             // not commented out
+                       parse[0] != '!'                // not commented out
+                       ) {
+                assert(cpt < 7);
+                std::stringstream str2(parse); // read cod data
+                str2 >> tcod[cpt++];          // store in float array
+              } // while str >> ...
+              assert(cpt==7); // bc cpt+1
+              status=1;  // match cod time
+              stop=true; //  we can stop so read
+            } // if (tcod[0]-0.00
+          } // !fi.eof
+        } // while !stop....
+      } // else
       fi.close(); // close cod file
     } else { // cod file does not exist
       status=-1;
