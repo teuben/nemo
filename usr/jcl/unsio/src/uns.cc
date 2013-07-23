@@ -77,7 +77,8 @@ namespace uns {
     if (simname == "-") { // we assume here that "-"
       tryNemo();          // is standard input and a NEMO stream...      
     } else {
-      if (tools::Ctools::isFileExist(simname)) {  // file exist 
+      if (tools::Ctools::isFileExist(simname)   && // file exist
+          ! tools::Ctools::isDirectory(simname)) { // not a directory
         tryGadget();               // try gadget 
         if (!valid) {              // gadget failed
           tryRamses();             // try ramses
@@ -102,6 +103,9 @@ namespace uns {
     if (valid && verb) {
       std::cerr << "File      : " << snapshot->getFileName() << "\n";
       std::cerr << "Interface : " << snapshot->getInterfaceType() << "\n";
+    }
+    if (!valid){
+      std::cerr << "\nFile ["<< snapshot->getFileName() <<"], unknown UNS file format, aborting.....\n\n";
     }
   }
   // ----------------------------------------------------------------------------

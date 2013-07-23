@@ -210,18 +210,21 @@ int main(int argc, char ** argv )
       uns->snapshot->getData("time",&time);
 
       std::cout << "Nbody selected = " << nbody << "\nTime="<<time <<"\n";
-      if (0 && file_structure=="range") {
-        displayInfo(display,maxlines,"all",uns);
-      } else {
-        component_exist=false;
-        displayInfo(display,maxlines,"gas"  ,uns);
-        displayInfo(display,maxlines,"halo" ,uns);
-        displayInfo(display,maxlines,"disk" ,uns);
-        displayInfo(display,maxlines,"bulge",uns);
-        displayInfo(display,maxlines,"stars",uns);
-        displayInfo(display,maxlines,"bndry",uns);
-        if (!component_exist) { // no comp, diplay all
+
+      if (nbody >0) {
+        if (0 && file_structure=="range") {
           displayInfo(display,maxlines,"all",uns);
+        } else {
+          component_exist=false;
+          displayInfo(display,maxlines,"gas"  ,uns);
+          displayInfo(display,maxlines,"halo" ,uns);
+          displayInfo(display,maxlines,"disk" ,uns);
+          displayInfo(display,maxlines,"bulge",uns);
+          displayInfo(display,maxlines,"stars",uns);
+          displayInfo(display,maxlines,"bndry",uns);
+          if (!component_exist) { // no comp, diplay all
+            displayInfo(display,maxlines,"all",uns);
+          }
         }
       }
     }

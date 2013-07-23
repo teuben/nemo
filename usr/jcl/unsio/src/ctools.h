@@ -60,6 +60,7 @@ namespace tools {
     static std::string fixFortran(const char *,const bool lower=true);
     static std::string fixFortran(const char *,const int len, const bool lower=true);
     static bool isFileExist(std::string);
+    static bool isDirectory(std::string);
     static std::string toupper(std::string);
     static std::string tolower(std::string);
     static int compBits(std::string s) {

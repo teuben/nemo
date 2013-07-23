@@ -30,6 +30,8 @@ BEGIN
 use strict;                    # must define everything
 use Getopt::Long;
 use Tools::Tools;
+use Tools::Sqlite3;
+use DBI;
 
 # -------------------------------------------------------------
 # Main program
@@ -46,7 +48,7 @@ my $halo2 ='';
 my $gas   ='';
 my $bndry ='';
 my $stars ='';
-my $db     = "/pil/programs/DB/simulation.dbl";  # Marseille database
+my $db     = "";  # Marseille database
 my $help   = 0; 
 
 GetOptions( 'simname=s'    => \$name,
@@ -69,6 +71,7 @@ if ( $help ) {
     # check mandatory parameters
     die "Option --simname not specified.\n" unless defined($name);
 }
+my $db = Sqlite->getValidDb($db);
 
 printf STDERR "name=$name,total=$total,disk=$disk,bulge=$bulge,halo=$halo,halo2=$halo2 ,gas=$gas ,bndry=$bndry, stars=$stars [$db]\n";
 

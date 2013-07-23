@@ -75,7 +75,7 @@ sub Sqlite::getValidDb
     my $class          = shift;
     my $dbparam        = shift;
 
-    if (defined($dbparam)) {
+    if (defined($dbparam) && $dbparam ne "") {
 	$db = $dbparam;
     } else {
 	# parse parameter file

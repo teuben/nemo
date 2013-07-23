@@ -88,7 +88,7 @@ namespace uns {
   {
     assert(snapshot != NULL);
     assert(snapshot->isValidData());
-      if ((simtype == "Nemo") && nemosim != "" && crv.size()>0) {
+      if ((tools::Ctools::tolower(simtype) == "nemo") && nemosim != "" && crv.size()>0) {
       return &crv;
     } 
     else {

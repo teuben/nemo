@@ -14,6 +14,11 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <sys/types.h>
+#include <dirent.h>
+#include <sys/types.h>
+#include <dirent.h>
+
 namespace tools {
 // ----------------------------------------------------------------------------
 // isFileExist                                                                 
@@ -25,6 +30,16 @@ bool Ctools::isFileExist(std::string _file)
   if ( ftest.is_open()) {
     status=true;
     ftest.close();
+  }
+  return status;
+}
+// ----------------------------------------------------------------------------
+// isFileExist
+bool Ctools::isDirectory(std::string _dir)
+{
+  bool status=false;
+  if (opendir(_dir.c_str())) {
+    status=true;
   }
   return status;
 }
