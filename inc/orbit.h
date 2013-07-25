@@ -15,6 +15,7 @@
  *  22-feb-93    V3.1a ansi header
  *  11-apr-95    V3.1b no more ARGS, included more header files here
  *   1-mar-03    V3.3  added iom_err, errors in the integrals of motion
+ *  25-jul-13    V4.0  added Key
  */
 
 #include <filestruct.h>
@@ -28,6 +29,7 @@ typedef struct {
         real  mass;
         real  *iom;
         real  *iom_err;
+        int   key;
         int   nsteps;
         int   maxsteps;
         real  *time;
@@ -39,6 +41,7 @@ typedef struct {
 #define CoordSys(optr)  ((optr)->coordsys)
 #define Size(optr)      ((optr)->size)
 #define Masso(optr)     ((optr)->mass)
+#define Key(optr)       ((optr)->key)
 #define IOM(optr)       ((optr)->iom)
 #define IOMERR(optr)    ((optr)->iom_err)
 #define Nsteps(optr)    ((optr)->nsteps)
@@ -88,6 +91,7 @@ typedef struct {
 #define     NdimTag             "Ndim"
 #define     CoordSysTag         "CoordSys"
 #define     MassTag             "Mass"
+#define     KeyTag              "Key"
 #define     IOMTag              "IOM"
 #define     IOMERRTag           "IOM_error"
 

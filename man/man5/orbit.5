@@ -1,4 +1,4 @@
-.TH ORBIT 5NEMO "1 March 2003"
+.TH ORBIT 5NEMO "24 July 2013"
 .SH NAME
 orbit \- binary format for stellar orbits 
 .SH SYNOPSIS
@@ -20,6 +20,7 @@ typedef struct {
 	int   ndim;
 	int   coordsys;
 	real  mass;
+	int   key;
 	real  *iom;	
 	real  *iom_err;
 	int   maxsteps;
@@ -36,6 +37,7 @@ General access macro's are available by including \fBorbit.h\fP.
 #define CoordSys(optr)  ((optr)->coordsys)
 #define Size(optr)      ((optr)->size)
 #define Masso(optr)     ((optr)->mass)
+#define Key(optr)       ((optr)->key)
 #define IOM(optr)       ((optr)->iom)
 #define IOMERR(optr)    ((optr)->iom_err)
 #define Nsteps(optr)    ((optr)->nsteps)
@@ -86,4 +88,5 @@ src/orbit/io	orbit.c
 24-may-92	V2.0: added potential	PJT
 6-dec-93	V3.x: added maxsteps for re-allocation	PJT
 1-mar-03	V3.3: added iom_error	PJT
+24-jul-13	V4.0: added key		PJT
 .fi
