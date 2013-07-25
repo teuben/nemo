@@ -48,7 +48,7 @@ string defv[] = {
     "potpars=\n		  .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=4.1a\n       14-oct-10 PJT",
+    "VERSION=4.2\n        24-jul-2013 PJT",
     NULL,
 };
 
@@ -76,6 +76,7 @@ void nemo_main ()
   optr = NULL;				/* make an orbit */
   allocate_orbit (&optr, 3, 1);
   Masso(optr)  = 1.0;                     /* and set Mass */
+  Key(optr) = 0;
   Torb(optr,0) = tnow;
   Xorb(optr,0) = x;			/* .. positions */
   Yorb(optr,0) = y;

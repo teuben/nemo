@@ -20,6 +20,7 @@
  *  17-apr-95   V3.2b compacted needed header files		pjt
  *  19-apr-96       c initialize strings to "" instead of NULL  pjt
  *   1-mar-03   V3.3  added stuff for iom_err			pjt
+ *  25-jul-13   V4.0  added support for key                     pjt
  *------------------------------------------------------------------------------
  */
 
@@ -40,6 +41,7 @@ void write_orbit (stream outstr, orbitptr optr)
         put_set (outstr,ParametersTag);
             put_data (outstr,NdimTag,    IntType, &(Ndim(optr)),   0);
             put_data (outstr,MassTag,    RealType,&(Masso(optr)),   0);
+            put_data (outstr,KeyTag,     IntType, &(Key(optr)),   0);
             put_data (outstr,IOMTag,     RealType,  IOM(optr), Ndim(optr), 0);
             put_data (outstr,IOMERRTag,  RealType,  IOMERR(optr), Ndim(optr), 0);
 	    /* note we don't write MAXsteps(optr) to disk */
@@ -97,6 +99,10 @@ int read_orbit (stream instr, orbitptr *optr)
                 Nsteps(*optr) = nsteps;
             }
             get_data (instr, MassTag, RealType, &(Masso(*optr)), 0);
+	    if (get_tag_ok(instr,KeyTag))
+	      get_data (instr, KeyTag, IntType, &Key(*optr), 0);
+	    else
+	      Key(*optr) = 0;
             get_data (instr, IOMTag, RealType, IOM(*optr), Ndim(*optr), 0);
             if (get_tag_ok(instr,IOMERRTag))
                 get_data (instr, IOMERRTag, RealType, IOMERR(*optr), Ndim(*optr), 0);
@@ -188,6 +194,7 @@ void copy_orbit(orbitptr iptr, orbitptr optr)
         Ndim(optr) = Ndim(iptr);
         CoordSys(optr) = CoordSys(iptr);
         Masso(optr) = Masso(iptr);
+	Key(optr) = Key(iptr);
         IOM(optr) = IOM(iptr);                 /* needs a copy, not a link ?? */
         IOMERR(optr) = IOMERR(iptr);
         nsteps = Nsteps(optr) = Nsteps(iptr);
@@ -216,6 +223,7 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
         
     dprintf (0,"Total number of steps = %d\n",Nsteps(optr));
     dprintf (0,"Mass = %f \n",Masso(optr));
+    dprintf (0,"Key = %d \n",Key(optr));
     dprintf (0,"Integrals of Motion (IOM) = ");
     for (i=0; i<Ndim(optr); i++)
         dprintf (0," %f ",*(IOM(optr)+i));
@@ -249,7 +257,7 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
 string defv[] = {
         "name=???\n   Filename",
         "mode=w\n     R or W",
-        "VERSION=1.1a\n 24-mar-97 pjt",
+        "VERSION=1.2\n 24-jul-2013 pjt",
         NULL,
 };
 
@@ -286,6 +294,7 @@ orbitptr optr;
     int i;
         
     Masso(optr)  = 1.0;
+    Key(optr) = 1;
     I1(optr) = -1.0;
     I2(optr) = 0.0;
     I3(optr) = 0.0;
