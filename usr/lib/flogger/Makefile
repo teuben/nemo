@@ -1,6 +1,10 @@
 
+
+ULIB = $(NEMOLIB)
+UINC = $(NEMOINC)
+
 CC =		cc
-CFLAGS =	-O4 -pic
+CFLAGS =	-O4 
 STATICFLAGS =	-Bstatic
 
 # CC = gcc
@@ -11,13 +15,13 @@ STATICFLAGS =	-Bstatic
 # STATICFLAGS =	-static
 
 
-LDFLAGS = 	-assert pure-text
+LDFLAGS   = 	# -assert pure-text
 LINTFLAGS = 	-abhuxz
 
 # don't insert a line break after the -d
 SHARFLAGS =	-v -l40 -M -d__KRILL_ARE_YUMMY_AND_CRUNCHY
 
-VERSION =	0.0
+VERSION =	0.1
 SHELL =		/bin/sh
 
 OBJS = 	merge_sort.o \
@@ -28,27 +32,30 @@ OBJS = 	merge_sort.o \
 	bogo_sort.o \
 	insert_sort.o
 
-flogger: flogger.o libsort.so.$(VERSION)
-	$(CC) $(CFLAGS) -o flogger flogger.o -L. -lsort
+flogger: flogger.o libsort.a
+	$(CC) $(CFLAGS) $(STATICFLAGS) -o flogger flogger.o -L. -lsort
 
-flogger.static: flogger.o libsort.a
-	$(CC) $(CFLAGS) $(STATICFLAGS) -o flogger.static flogger.o -L. -lsort
+flogger.dynamic: flogger.o libsort.so.$(VERSION)
+	$(CC) $(CFLAGS) -o flogger.dynamic flogger.o -L. -lsort
 
 libsort.a: $(OBJS)
 	ar ru libsort.a $(OBJS)
 	ranlib libsort.a
 
 libsort.so.$(VERSION): $(OBJS)
-	ld $(LDFLAGS) $(OBJS) -o libsort.so.$(VERSION)
+	#ld $(LDFLAGS) $(OBJS) -o libsort.so.$(VERSION)
 
 $(OBJS): sorting.h
 
-install: libsort.so.$(VERSION) libsort.a
-	cp libsort.a /usr/lib
-	chmod 644 /usr/lib/libsort.a
-	cp libsort.so.$(VERSION) /usr/lib
-	chmod 755 /usr/lib/libsort.so.$(VERSION)
-	/usr/etc/ldconfig
+install: libsort.a sorting.h
+	cp libsort.a $(ULIB)
+	cp sorting.h $(UINC)
+
+
+install_dyn:
+	cp libsort.so.$(VERSION) $(ULIB)
+	chmod 755 $(ULIB)/libsort.so.$(VERSION)
+	#/usr/etc/ldconfig
 
 lint:	lint.out
 
@@ -58,7 +65,7 @@ lint.out: *.c sorting.h
 clean:
 	-rm -f core shar0? $(OBJS) \
 	libsort.so.$(VERSION) libsort.a flogger.o \
-	flogger flogger.static lint.out
+	flogger flogger.static flogger.dynamic lint.out
 
 shar:	
 	shar $(SHARFLAGS) -o shar \
