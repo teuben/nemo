@@ -1,0 +1,33 @@
+
+return -1 or something rather than calling assert() in many places
+
+use "tag" sort when size of records is so large 
+  that memcpy takes a significant amount of time.
+
+better flow control in flogger; add some command line options
+  for selecting which algorithms to test and which situations
+  to present them with.
+
+the check for stable sorting isn't decisive.
+
+some of the file names exceed 14 characters
+
+make the alignment checking easier to configure (merge and quick sorts)
+
+maybe analyze increase in space/time complexity as array size grows
+  and figure out O() empirically.
+
+include file "sorting.h" is of questionable utility.
+
+/usr/lib/lint/llib-lsort might be a nice touch for "make install"
+
+should be more flexible about what size and complexity of thing to sort
+
+maybe add a parallelizing sort
+
+makefile and flogger arent't very portable
+
+cc -pic is unnecessary when making libsort.a
+
+add test for re-entrancy of sort
+

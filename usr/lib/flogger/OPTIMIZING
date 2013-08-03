@@ -1,0 +1,92 @@
+
+A brief word about optimizing code, in particular, code that
+calls a sorting function.
+
+The qsort() that comes with most C implementations is fast enough for
+nearly all purposes.  The sort algorithms in this package are here
+mostly for intellectual curiousity.  The merge_sort algorithm is
+superior in some ways, mostly that it requires fewer callbacks to the
+comparison function, but that alone is no reason to sed -e s/qsort/merge_sort/
+over all your code.
+
+Some general approaches to consider before borrowing one of these
+sort algorithms for use in your code, approximately in decreasing
+order of effectiveness:
+
+1. run prof or gprof to make sure the sorting is an actual
+   bottleneck; often, reading in the records to be sorted
+   takes more wall clock time than the sort itself and effort
+   spent optimizing the sort is completely pointless.
+
+2. Use your compiler's maximal optimization level when compiling
+   the comparison function.  This can result in a surprising 
+   improvement in performance.
+
+3. Hand optimize the comparison function.  Consider sorting on
+   a "predigested" key that requires less work to compare than 
+   the records themselves.  Make as few calls to other functions 
+   as necessary from within the comparison function.
+
+4. Reduce the size of the items being sorted.  Create an
+   array of pointers to records already existing elsewhere
+   in memory; the sort will then only have to shuffle the
+   pointers around rather than copy entire records.  Works
+   well in combination with #3.
+
+5. Consider maintaining a b-tree or other index which
+   lasts beyond program termination.  If the index is updated
+   infrequently and only one or two elements are added
+   to it at a time, the much-maligned bubble sort might
+   actually be of use.
+
+6. Plug in merge_sort from this package.  Expect only a slight
+   improvement.  But a degradation is possible as well: this merge
+   sort allocates a big chunk of memory, which can eat up swap 
+   space and slow things down.
+
+7. Make a copy of the merge_sort code and replace the calls
+   to the cmpr_func with the actual code of the compare.
+   Or if you have gcc, take advantage of inlining to achieve
+   the same thing.  Expect an even less noticeable improvement.
+
+8. If it's *still too slow*, write a sort that takes advantage
+   of the distribution of keys to calculate the position of a
+   record directly without having to compare it to other records.
+
+
+The comp.lang.c FAQ list has this to say about the subject of
+efficiency in general.  "Read it.  Learn it.  Live it."
+
+---------------------------------------------------------------------------
+17.13:  How can I make this code more efficient?
+
+A:      Efficiency, though a favorite comp.lang.c topic, is not
+        important nearly as often as people tend to think it is.  Most
+        of the code in most programs is not time-critical.  When code is
+        not time-critical, it is far more important that it be written
+        clearly and portably than that it be written maximally
+        efficiently.  (Remember that computers are very, very fast, and
+        that even "inefficient" code can run without apparent delay.)
+
+        It is notoriously difficult to predict what the "hot spots" in a
+        program will be.  When efficiency is a concern, it is important
+        to use profiling software to determine which parts of the
+        program deserve attention.  Often, actual computation time is
+        swamped by peripheral tasks such as I/O and memory allocation,
+        which can be sped up by using buffering and cacheing techniques.
+
+        For the small fraction of code that is time-critical, it is
+        vital to pick a good algorithm; it is less important to
+        "microoptimize" the coding details.  Many of the "efficient
+        coding tricks" which are frequently suggested (e.g. substituting
+        shift operators for multiplication by powers of two) are
+        performed automatically by even simpleminded compilers.
+        Heavyhanded "optimization" attempts can make code so bulky that
+        performance is degraded.
+
+        For more discussion of efficiency tradeoffs, as well as good
+        advice on how to increase efficiency when it is important, see
+        chapter 7 of Kernighan and Plauger's The Elements of Programming
+        Style, and Jon Bentley's Writing Efficient Programs.
+---------------------------------------------------------------------------
+

@@ -1,0 +1,41 @@
+From mikey@ontek.com Wed Dec 30 18:56:14 1992
+Newsgroups: comp.sources.misc
+From: mikey@ontek.com (Mike Lee)
+Subject:  v34i073:  flogger - Sort Flogger v0.0, Part01/02
+Followup-To: comp.sources.d
+X-Md4-Signature: ff0ada04ad7449b6a5af60991e3ce2a2
+Organization: Ontek Corporation -- Laguna Hills, California
+Date: Fri, 18 Dec 1992 15:21:46 GMT
+
+Submitted-by: mikey@ontek.com (Mike Lee)
+Posting-number: Volume 34, Issue 73
+Archive-name: flogger/part01
+Environment: UNIX
+
+This is a small collection of some of the more popular sort
+algorithms, including:
+
+      bubble sort -- any 1st semester course in CS
+      heap sort -- contributed by der Mouse
+      insertion sort -- any 1st semester course in CS
+      merge sort -- roughly patterned after Knuth Vol. 3
+      quick sort -- C.A.R. Hoare's as given in K&R 2 pg 87
+      shell sort -- D.L. Shell as given in K&R 2 pg 62
+      bogo sort -- worst-case sort by Richard Krehbiel
+
+A slightly weird test routine is provided which calculates some
+performance measurements on the above algorithms and also on the
+qsort() function provided with your system, as well as verifying that
+the sort actually worked and that it didn't modify anything immediately
+above or below the array, that it doesn't leak memory, and whether
+or not it's stable.  These tests are carried out in a variety of
+situations designed to highlight worst-case behavior.
+
+These implementations of the sort functions are all compatible with
+qsort()'s parameter list, so if you think your application spends too
+much time sorting, you can just s/qsort/merge_sort/ and link in the
+sort library and give it a try.  If you think it doesn't spend *enough*
+time sorting, try bubble_sort instead.
+
+The heapsort was contributed by mouse@larry.mcrcim.mcgill.edu
+aka "der Mouse".

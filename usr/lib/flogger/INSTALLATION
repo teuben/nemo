@@ -1,0 +1,50 @@
+
+Makefile is set up for SunOS 4.1.  If you want to use gcc, move 
+the # comment characters in the makefile around appropriately.
+
+If your machine has memmove() comment out the #define in sorting.h
+
+If you don't have memcpy, comment back in:
+  #define memcpy(to, from, n) bcopy(from, to, n)
+or better yet upgrade your OS.
+
+Type "make" or "make flogger.static"
+
+If you want to install the sort algorithm library for real
+
+  su root
+  make install
+
+---
+
+Potential portability problems:
+
+Shared libraries might work differently, or not at all, on your
+machine.  Edit the makefile as necessary.
+
+You might be missing mallinfo.  Some rewriting of the code will
+be in order.  I'll put some ifdef's around this sooner or later.
+
+If your machine doesn't use a traditional stack, the stack information
+will be either plain wrong or it might cause segmentation faults.
+But if you don't care about the flogger routine-- no big deal.  The
+sort library itself should be quite portable, even if the test routine
+isn't.
+
+The typedefs for chunk4 and chunk8 are thoroughly questionable.  If
+you have a more "natural" size on your machine, experiment.
+
+If you are porting to a machine which doesn't care about alignment
+very much, you can remove the extra alignment tests from merge
+sort and quick sort for a marginal increase in sort speed under some 
+circumstances.
+
+memcpy() is used--if you have a better block-copy function at your
+disposal, by all means plug it in.  Won't help much if you're only
+sorting 4-byte things like ints or pointers, though, 'cause
+merge_sort has special code for these anyway.  
+
+send patches, bug fixes, plane tickets to pittsburgh, etc to mikey@ontek.com
+
+I'm especially interested in portability of the merge_sort routine.
+
