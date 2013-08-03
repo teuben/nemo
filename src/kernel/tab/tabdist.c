@@ -4,6 +4,10 @@
  *      13-feb-2013     0.1    Created, Q&D
  *
  *  See also the SIRTF/map2 project in 'c2d'
+ *
+ *  @todo   consider allowing scaling/offset between two datasets 
+ *          Y = aX + b
+ *          use k-d Match?   http://arxiv.org/abs/1304.0838
  */
 
 #include <stdinc.h>
