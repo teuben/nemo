@@ -102,6 +102,10 @@ tabhist: tabhist.c
 	$(CC) $(CFLAGS) -DYAPP -o tabhist tabhist.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
+tabhist_flogger: tabhist.c
+	$(CC) $(CFLAGS) -DYAPP -DFLOGGER -o tabhist_flogger tabhist.c \
+		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lsort -lm
+
 tablsqfit: tablsqfit.c
 	$(CC) -UHAVE_GSL $(CFLAGS) -o tablsqfit tablsqfit.c \
 		$(NEMO_LIBS) $(EL) -lm
