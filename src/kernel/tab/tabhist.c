@@ -93,11 +93,15 @@ string defv[] = {
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
-    "VERSION=6.3\n		  5-jun-2013 PJT",
+    "VERSION=6.3a\n		  2-aug-2013 PJT",
     NULL
 };
 
+#ifndef FLOGGER
 string usage = "General tabular 1D statistics and histogram plotter";
+#else
+string usage = "General tabular 1D statistics and histogram plotter (w/ FLOGGER)";
+#endif
 
 string cvsid = "$Id$";
 
@@ -656,14 +660,7 @@ typedef struct sortmode {
  */
 
 #ifdef FLOGGER
-                   
-extern int bubble_sort();          /* Flogger library routines */
-extern int heap_sort();
-extern int insertion_sort();
-extern int merge_sort();
-extern int quick_sort();
-extern int shell_sort();
-
+#include "sorting.h"
 #endif
 
 local sortmode smode[] = {
