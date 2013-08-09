@@ -132,11 +132,20 @@ are preceded with an underscore. For a zodiac image with
 .nf
     % \fBfitsccd in=_zim out=zim.ccd mode=raw offset=0 bitpix=-32 ...\fP
 .fi
+.SH "CAVEATS"
+There are FITS image files stored as extensions to a dummy HDU. In those
+cases \fIscanfits(1NEMO)\fP must be used to extract the correct HDU and
+continue the data analysis, e.g.
+.nf
+    % scanfits abc.fits abc1.fits hdu=2
+    % ccdfits abc1.fits abc1.ccd
+.fi
+Note that FITS files in NEMO do now allow the use of pipes.
 .SH "SEE ALSO"
-ccdfits(1NEMO), snapccd(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
-.SH AUTHOR
+ccdfits(1NEMO), snapccd(1NEMO), iofits(1NEMO), scanfits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/image/fits  	fitsccd.c fitsccd.1
