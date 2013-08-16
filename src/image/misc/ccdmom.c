@@ -30,7 +30,7 @@
 string defv[] = {
   "in=???\n       Input image file",
   "out=???\n      Output image file",
-  "axis=1\n       Axis to take moment along (1=x 2=y 3=z)",
+  "axis=3\n       Axis to take moment along (1=x 2=y 3=z)",
   "mom=0\n	  Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc,-1=mean val,-2=disp val,-3=clump]",
   "keep=f\n	  Keep moment axis in full length, and replace all values",
   "cumulative=f\n Cumulative axis (only valid for mom=0)",
@@ -39,7 +39,7 @@ string defv[] = {
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2 [not impl]",
   "rngmsk=f\n     Invalidate pixel when first moment falls outside range of valid axis [not impl]",
   "integrate=t\n  Use integration instead of just summing, only used for mom=0",
-  "VERSION=2.1a\n 18-may-2013 PJT",
+  "VERSION=2.2\n  16-aug-2013 PJT",
   NULL,
 };
 
