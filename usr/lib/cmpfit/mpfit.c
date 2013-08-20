@@ -23,26 +23,26 @@
 #include "mpfit.h"
 
 /* Forward declarations of functions in this module */
-int mp_fdjac2(mp_func funct,
+static int mp_fdjac2(mp_func funct,
 	      int m, int n, int *ifree, int npar, double *x, double *fvec,
 	      double *fjac, int ldfjac, double epsfcn,
 	      double *wa, void *priv, int *nfev,
 	      double *step, double *dstep, int *dside,
 	      int *qulimited, double *ulimit,
 	      int *ddebug, double *ddrtol, double *ddatol);
-void mp_qrfac(int m, int n, double *a, int lda, 
+static void mp_qrfac(int m, int n, double *a, int lda, 
 	      int pivot, int *ipvt, int lipvt,
 	      double *rdiag, double *acnorm, double *wa);
-void mp_qrsolv(int n, double *r, int ldr, int *ipvt, double *diag,
+static void mp_qrsolv(int n, double *r, int ldr, int *ipvt, double *diag,
 	       double *qtb, double *x, double *sdiag, double *wa);
-void mp_lmpar(int n, double *r, int ldr, int *ipvt, int *ifree, double *diag,
+static void mp_lmpar(int n, double *r, int ldr, int *ipvt, int *ifree, double *diag,
 	      double *qtb, double delta, double *par, double *x,
 	      double *sdiag, double *wa1, double *wa2);
-double mp_enorm(int n, double *x);
-double mp_dmax1(double a, double b);
-double mp_dmin1(double a, double b);
-int mp_min0(int a, int b);
-int mp_covar(int n, double *r, int ldr, int *ipvt, double tol, double *wa);
+static double mp_enorm(int n, double *x);
+static double mp_dmax1(double a, double b);
+static double mp_dmin1(double a, double b);
+static int mp_min0(int a, int b);
+static int mp_covar(int n, double *r, int ldr, int *ipvt, double tol, double *wa);
 
 /* Macro to call user function */
 #define mp_call(funct, m, n, x, fvec, dvec, priv) (*(funct))(m,n,x,fvec,dvec,priv)
@@ -269,7 +269,7 @@ int mp_covar(int n, double *r, int ldr, int *ipvt, double tol, double *wa);
 
 
 int mpfit(mp_func funct, int m, int npar,
-	  double *xall, mp_par *pars, mp_config *config, void *private, 
+	  double *xall, mp_par *pars, mp_config *config, void *private_data, 
 	  mp_result *result)
 {
   mp_config conf;
@@ -444,7 +444,7 @@ int mpfit(mp_func funct, int m, int npar,
   mp_malloc(ipvt, int, npar);
 
   /* Evaluate user function with initial parameter values */
-  iflag = mp_call(funct, m, npar, xall, fvec, 0, private);
+  iflag = mp_call(funct, m, npar, xall, fvec, 0, private_data);
   nfev += 1;
   if (iflag < 0) {
     goto CLEANUP;
@@ -481,7 +481,7 @@ int mpfit(mp_func funct, int m, int npar,
 
   /* Calculate the jacobian matrix */
   iflag = mp_fdjac2(funct, m, nfree, ifree, npar, xnew, fvec, fjac, ldfjac,
-		    conf.epsfcn, wa4, private, &nfev,
+		    conf.epsfcn, wa4, private_data, &nfev,
 		    step, dstep, mpside, qulim, ulim,
 		    ddebug, ddrtol, ddatol);
   if (iflag < 0) {
@@ -584,10 +584,9 @@ int mpfit(mp_func funct, int m, int npar,
        O(N^2). */
     int off = 0, nonfinite = 0;
 
-    
     for (j=0; j<nfree; j++) {
       for (i=0; i<nfree; i++) {
-	if (finite(fjac[off+i]) == 0) nonfinite = 1;
+	if (mpfinite(fjac[off+i]) == 0) nonfinite = 1;
       }
       off += ldfjac;
     }
@@ -725,7 +724,7 @@ int mpfit(mp_func funct, int m, int npar,
     xnew[ifree[i]] = wa2[i];
   }
 
-  iflag = mp_call(funct, m, npar, xnew, wa4, 0, private);
+  iflag = mp_call(funct, m, npar, xnew, wa4, 0, private_data);
   nfev += 1;
   if (iflag < 0) goto L300;
 
@@ -883,7 +882,7 @@ int mpfit(mp_func funct, int m, int npar,
   }
   
   if ((conf.nprint > 0) && (info > 0)) {
-    iflag = mp_call(funct, m, npar, xall, fvec, 0, private);
+    iflag = mp_call(funct, m, npar, xall, fvec, 0, private_data);
     nfev += 1;
   }
 
@@ -974,6 +973,7 @@ int mpfit(mp_func funct, int m, int npar,
 
 /************************fdjac2.c*************************/
 
+static 
 int mp_fdjac2(mp_func funct,
 	      int m, int n, int *ifree, int npar, double *x, double *fvec,
 	      double *fjac, int ldfjac, double epsfcn,
@@ -1070,6 +1070,7 @@ int mp_fdjac2(mp_func funct,
   temp = mp_dmax1(epsfcn,MP_MACHEP0);
   eps = sqrt(temp);
   ij = 0;
+  ldfjac = 0; /* Prevents compiler warning */
 
   dvec = (double **) malloc(sizeof(double **)*npar);
   if (dvec == 0) return MP_ERR_MEMORY;
@@ -1216,6 +1217,7 @@ int mp_fdjac2(mp_func funct,
 
 /************************qrfac.c*************************/
  
+static 
 void mp_qrfac(int m, int n, double *a, int lda, 
 	      int pivot, int *ipvt, int lipvt,
 	      double *rdiag, double *acnorm, double *wa)
@@ -1302,6 +1304,10 @@ void mp_qrfac(int m, int n, double *a, int lda,
   static double zero = 0.0;
   static double one = 1.0;
   static double p05 = 0.05;
+
+  lda = 0;   /* Prevent compiler warning */
+  lipvt = 0; /* Prevent compiler warning */
+
   /*
    *     compute the initial column norms and initialize several arrays.
    */
@@ -1419,6 +1425,7 @@ void mp_qrfac(int m, int n, double *a, int lda,
 
 /************************qrsolv.c*************************/
 
+static 
 void mp_qrsolv(int n, double *r, int ldr, int *ipvt, double *diag,
 	       double *qtb, double *x, double *sdiag, double *wa)
 {
@@ -1502,7 +1509,7 @@ void mp_qrsolv(int n, double *r, int ldr, int *ipvt, double *diag,
 *     **********
 */
   int i,ij,ik,kk,j,jp1,k,kp1,l,nsing;
-  double cos,cotan,qtbpj,sin,sum,tan,temp;
+  double cosx,cotan,qtbpj,sinx,sum,tanx,temp;
   static double zero = 0.0;
   static double p25 = 0.25;
   static double p5 = 0.5;
@@ -1558,22 +1565,22 @@ void mp_qrsolv(int n, double *r, int ldr, int *ipvt, double *diag,
 	if (fabs(r[kk]) < fabs(sdiag[k]))
 	  {
 	    cotan = r[kk]/sdiag[k];
-	    sin = p5/sqrt(p25+p25*cotan*cotan);
-	    cos = sin*cotan;
+	    sinx = p5/sqrt(p25+p25*cotan*cotan);
+	    cosx = sinx*cotan;
 	  }
 	else
 	  {
-	    tan = sdiag[k]/r[kk];
-	    cos = p5/sqrt(p25+p25*tan*tan);
-	    sin = cos*tan;
+	    tanx = sdiag[k]/r[kk];
+	    cosx = p5/sqrt(p25+p25*tanx*tanx);
+	    sinx = cosx*tanx;
 	  }
 	/*
 	 *	    compute the modified diagonal element of r and
 	 *	    the modified element of ((q transpose)*b,0).
 	 */
-	r[kk] = cos*r[kk] + sin*sdiag[k];
-	temp = cos*wa[k] + sin*qtbpj;
-	qtbpj = -sin*wa[k] + cos*qtbpj;
+	r[kk] = cosx*r[kk] + sinx*sdiag[k];
+	temp = cosx*wa[k] + sinx*qtbpj;
+	qtbpj = -sinx*wa[k] + cosx*qtbpj;
 	wa[k] = temp;
 	/*
 	 *	    accumulate the tranformation in the row of s.
@@ -1584,8 +1591,8 @@ void mp_qrsolv(int n, double *r, int ldr, int *ipvt, double *diag,
 	    ik = kk + 1;
 	    for (i=kp1; i<n; i++)
 	      {
-		temp = cos*r[ik] + sin*sdiag[i];
-		sdiag[i] = -sin*r[ik] + cos*sdiag[i];
+		temp = cosx*r[ik] + sinx*sdiag[i];
+		sdiag[i] = -sinx*r[ik] + cosx*sdiag[i];
 		r[ik] = temp;
 		ik += 1; /* [i+ldr*k] */
 	      }
@@ -1644,6 +1651,7 @@ void mp_qrsolv(int n, double *r, int ldr, int *ipvt, double *diag,
 
 /************************lmpar.c*************************/
 
+static 
 void mp_lmpar(int n, double *r, int ldr, int *ipvt, int *ifree, double *diag,
 	      double *qtb, double delta, double *par, double *x,
 	      double *sdiag, double *wa1, double *wa2) 
@@ -1946,6 +1954,7 @@ void mp_lmpar(int n, double *r, int ldr, int *ipvt, int *ifree, double *diag,
 
 /************************enorm.c*************************/
  
+static 
 double mp_enorm(int n, double *x) 
 {
   /*
@@ -2077,6 +2086,7 @@ double mp_enorm(int n, double *x)
 
 /************************lmmisc.c*************************/
 
+static 
 double mp_dmax1(double a, double b) 
 {
   if (a >= b)
@@ -2085,6 +2095,7 @@ double mp_dmax1(double a, double b)
     return(b);
 }
 
+static 
 double mp_dmin1(double a, double b)
 {
   if (a <= b)
@@ -2093,6 +2104,7 @@ double mp_dmin1(double a, double b)
     return(b);
 }
 
+static 
 int mp_min0(int a, int b)
 {
   if (a <= b)
@@ -2170,6 +2182,7 @@ c
 c     **********
 */
 
+static 
 int mp_covar(int n, double *r, int ldr, int *ipvt, double tol, double *wa)
 {
   int i, ii, j, jj, k, l;

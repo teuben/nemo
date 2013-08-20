@@ -1,14 +1,34 @@
 /* 
  * MINPACK-1 Least Squares Fitting Library
  *
- * Original public domain version by B. Garbow, K. Hillstrom, J. More'
- *   (Argonne National Laboratory, MINPACK project, March 1980)
+ * Test routines
  * 
- * Tranlation to C Language by S. Moshier (moshier.net)
- * 
- * Enhancements and packaging by C. Markwardt
- *   (comparable to IDL fitting routine MPFIT
- *    see http://cow.physics.wisc.edu/~craigm/idl/idl.html)
+ * These test routines provide examples for users to familiarize 
+ * themselves with the mpfit library.  They also provide a baseline
+ * test data set for users to be sure that the library is functioning
+ * properly on their platform.
+ *
+ * By default, testmpfit is built by the distribution Makefile.
+ *
+ * To test the function of the mpfit library, 
+ *   1. Build testmpfit   ("make testmpfit")
+ *   2. Run testmpfit     ("./mpfit")
+ *   3. Compare results of your run with the distributed file testmpfit.log
+ *
+ * This file contains several test user functions:
+ *   1. linfunc() linear fit function, y = f(x) = a - b*x
+ *      - Driver is testlinfit()
+ *   2. quadfunc() quadratic polynomial function, y = f(x) = a + b*x + c*x^2
+ *      - Driver is testquadfit() - all parameters free
+ *      - Driver is testquadfix() - linear parameter fixed
+ *   3. gaussfunc() gaussian peak
+ *      - Driver is testgaussfit() - all parameters free
+ *      - Driver is testgaussfix() - constant & centroid fixed
+ *           (this routine demonstrates in comments how to impose parameter limits)
+ *   4. main() routine calls all five driver functions
+ *
+ * Copyright (C) 2003,2006,2009,2010, Craig Markwardt
+ *
  */
 
 /* Test routines for mpfit library
@@ -79,7 +99,7 @@ int linfunc(int m, int n, double *p, double *dy, double **dvec, void *vars)
   ey = v->ey;
 
   for (i=0; i<m; i++) {
-    f = p[0] - p[1]*x[i];     /* Linear fit function */
+    f = p[0] - p[1]*x[i];     /* Linear fit function; note f = a - b*x */
     dy[i] = (y[i] - f)/ey[i];
   }
 
@@ -98,7 +118,9 @@ int testlinfit()
 		0.787615,3.2599759E+00,2.9771762E+00,
 		4.5936475E+00};
   double ey[10];
-  double p[2] = {1.0, 1.0};           /* Initial conditions */
+  /*      y = a - b*x    */
+  /*              a    b */
+  double p[2] = {1.0, 1.0};           /* Parameter initial conditions */
   double pactual[2] = {3.20, 1.78};   /* Actual values used to make data */
   double perror[2];                   /* Returned parameter errors */      
   int i;
@@ -106,7 +128,7 @@ int testlinfit()
   int status;
   mp_result result;
 
-  bzero(&result,sizeof(result));       /* Zero results structure */
+  memset(&result,0,sizeof(result));       /* Zero results structure */
   result.xerror = perror;
   for (i=0; i<10; i++) ey[i] = 0.07;   /* Data errors */           
 
@@ -174,7 +196,7 @@ int testquadfit()
   int status;
   mp_result result;
 
-  bzero(&result,sizeof(result));          /* Zero results structure */
+  memset(&result,0,sizeof(result));          /* Zero results structure */
   result.xerror = perror;	                                      
   for (i=0; i<10; i++) ey[i] = 0.2;       /* Data errors */           
 
@@ -216,10 +238,10 @@ int testquadfix()
   int status;
   mp_result result;
 
-  bzero(&result,sizeof(result));       /* Zero results structure */
+  memset(&result,0,sizeof(result));       /* Zero results structure */
   result.xerror = perror;
 
-  bzero(pars, sizeof(pars));           /* Initialize constraint structure */
+  memset(pars, 0, sizeof(pars));       /* Initialize constraint structure */
   pars[1].fixed = 1;                   /* Fix parameter 1 */
 
   for (i=0; i<10; i++) ey[i] = 0.2;
@@ -244,6 +266,10 @@ int testquadfix()
  * m - number of data points
  * n - number of parameters (4)
  * p - array of fit parameters 
+ *     p[0] = constant offset
+ *     p[1] = peak y value
+ *     p[2] = x centroid position
+ *     p[3] = gaussian sigma width
  * dy - array of residuals to be returned
  * vars - private data (struct vars_struct *)
  *
@@ -291,10 +317,10 @@ int testgaussfit()
   int status;
   mp_result result;
 
-  bzero(&result,sizeof(result));      /* Zero results structure */
+  memset(&result,0,sizeof(result));      /* Zero results structure */
   result.xerror = perror;
 
-  bzero(pars, sizeof(pars));          /* Initialize constraint structure */
+  memset(pars,0,sizeof(pars));        /* Initialize constraint structure */
   /* No constraints */
 
   for (i=0; i<10; i++) ey[i] = 0.5;
@@ -340,10 +366,10 @@ int testgaussfix()
   int status;
   mp_result result;
 
-  bzero(&result,sizeof(result));  /* Zero results structure */
+  memset(&result,0,sizeof(result));  /* Zero results structure */
   result.xerror = perror;
 
-  bzero(pars, sizeof(pars));      /* Initialize constraint structure */
+  memset(pars,0,sizeof(pars));    /* Initialize constraint structure */
   pars[0].fixed = 1;              /* Fix parameters 0 and 2 */
   pars[2].fixed = 1;
 
