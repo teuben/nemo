@@ -16,8 +16,16 @@
    $Id$
 */
 
+#ifndef MPFIT_H
+#define MPFIT_H
+
+/* This is a C library.  Allow compilation with a C++ compiler */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* MPFIT version string */
-#define MPFIT_VERSION "1.1"
+#define MPFIT_VERSION "1.2"
 
 /* Definition of a parameter constraint structure */
 struct mp_par_struct {
@@ -57,23 +65,29 @@ typedef void (*mp_iterproc)(void);
 
 /* Definition of MPFIT configuration structure */
 struct mp_config_struct {
-  double ftol;    /* Relative chi-square convergence criterium */
-  double xtol;    /* Relative parameter convergence criterium */
-  double gtol;    /* Orthogonality convergence criterium */
-  double epsfcn;  /* Finite derivative step size */
-  double stepfactor; /* Initial step bound */
-  double covtol;  /* Range tolerance for covariance calculation */
+  /* NOTE: the user may set the value explicitly; OR, if the passed
+     value is zero, then the "Default" value will be substituted by
+     mpfit(). */
+  double ftol;    /* Relative chi-square convergence criterium Default: 1e-10 */
+  double xtol;    /* Relative parameter convergence criterium  Default: 1e-10 */
+  double gtol;    /* Orthogonality convergence criterium       Default: 1e-10 */
+  double epsfcn;  /* Finite derivative step size               Default: MP_MACHEP0 */
+  double stepfactor; /* Initial step bound                     Default: 100.0 */
+  double covtol;  /* Range tolerance for covariance calculation Default: 1e-14 */
   int maxiter;    /* Maximum number of iterations.  If maxiter == 0,
                      then basic error checking is done, and parameter
                      errors/covariances are estimated based on input
-                     parameter values, but no fitting iterations are done. */
-  int maxfev;     /* Maximum number of function evaluations */
-  int nprint;
+                     parameter values, but no fitting iterations are done. 
+		     Default: 200
+		  */
+  int maxfev;     /* Maximum number of function evaluations, or 0 for no limit
+		     Default: 0 (no limit) */
+  int nprint;     /* Default: 1 */
   int douserscale;/* Scale variables by user values?
 		     1 = yes, user scale values in diag;
-		     0 = no, variables scaled internally */
+		     0 = no, variables scaled internally (Default) */
   int nofinitecheck; /* Disable check for infinite quantities from user?
-			0 = do not perform check
+			0 = do not perform check (Default)
 			1 = perform check 
 		     */
   mp_iterproc iterproc; /* Placeholder pointer - must set to 0 */
@@ -113,7 +127,7 @@ typedef int (*mp_func)(int m, /* Number of functions (elts of fvec) */
 		       double *x,      /* I - Parameters */
 		       double *fvec,   /* O - function values */
 		       double **dvec,  /* O - function derivatives (optional)*/
-		       void *private); /* I/O - function private data*/
+		       void *private_data); /* I/O - function private data*/
 
 /* Error codes */
 #define MP_ERR_INPUT (0)         /* General input parameter error */
@@ -155,8 +169,29 @@ typedef int (*mp_func)(int m, /* Number of functions (elts of fvec) */
 
 /* External function prototype declarations */
 extern int mpfit(mp_func funct, int m, int npar,
-		 double *xall, mp_par *pars, mp_config *config, void *private, 
+		 double *xall, mp_par *pars, mp_config *config, 
+		 void *private_data, 
 		 mp_result *result);
 
 
 
+/* C99 uses isfinite() instead of finite() */
+#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#define mpfinite(x) isfinite(x)
+
+/* Microsoft C uses _finite(x) instead of finite(x) */
+#elif defined(_MSC_VER) && _MSC_VER
+#include <float.h>
+#define mpfinite(x) _finite(x)
+
+/* Default is to assume that compiler/library has finite() function */
+#else
+#define mpfinite(x) finite(x)
+
+#endif
+
+#ifdef __cplusplus
+} /* extern "C" */
+#endif
+
+#endif /* MPFIT_H */
