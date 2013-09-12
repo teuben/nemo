@@ -1,0 +1,85 @@
+.TH RUNBULGEROT 1NEMO "11 September 2013"
+.SH NAME
+runbulgerot \- rotation curve of oblate spheroidal sersic bulge
+.SH SYNOPSIS
+\fBrunbulgerot\fP [parameter=value]
+.SH DESCRIPTION
+\fBrunbulgerot\fP is a NEMO frontend to run (a series) of
+Noordemeer's \fBbulgerot\fP program.
+.PP
+This program calculates the rotation curve for an oblate spheroidal 
+bulge. It assumes a projected surface density that follows a Sersic 
+profile. The central surface magnitude M_0, characteristic radius R_0 and
+Sersic index n_sers must be given. Also, the inclination and intrinsic 
+axis ratio of the bulge must be given. Finally, the distance and the 
+Galactic foreground extinction of the galaxy is needed.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP
+\fBlog=\fP
+Output logfile [bulgerot.dat]      
+.TP
+\fBgalaxy=\fP
+Identification [thisgalaxy]      
+.TP
+\fBmu0=\fP
+apparent central R-band surface magnitude M_0 [15] 
+.TP
+\fBr0=\fP
+characteristic radius R_0 in arcseconds [1]  
+.TP
+\fBn=\fP
+Sersic index [1]     
+.TP
+\fBinc=\fP
+Inclination [0]      
+.TP
+\fBq=\fP
+Axis ratio b/a [1]    
+.TP
+\fBdist=\fP
+Distance in Mpc [10]    
+.TP
+\fBar=\fP
+galactic foreground extinction [0]    
+.TP
+\fBradii=\fP
+Radii to calculate for (kpc) [0:2.5:0.01]  
+.SH EXAMPLES
+The following example creates a rotation curve in columns 1 and 5,
+and uses the \fBrotcur\fP potential in \fIrotcurves(1NEMO)\fP to
+plot the lindblad curves derived from this rotcur based potential
+.nf
+% runbulge out=sersic1.tab
+% rotcurves rotcur 0,1,1,5,1 sersec1.tab radii=0:2:0.01 mode=omega yrange=0,400
+.fi
+.SH BENCHMARK
+The default benchmark will produce a logfile of which the header and tail end
+should look as follows:
+.nf
+#    radius     intensity      density         mass        velocity    
+#    (kpc)      (kg/m^2)       (kg/m^3)       (Msun)        (km/s)     
+...
+    2.490000  0.224088D-20  0.827590D-40  0.323728D+09  0.235621D+02
+    2.500000  0.182313D-20  0.671960D-40  0.323728D+09  0.235148D+02
+
+@inferno:   219.102u 0.000s 3:39.28 99.9%     gcc      3.4.6  i7-3820 CPU @ 3.60GHz
+@inferno:   167.281u 0.000s 2:47.42 99.9%     gfortran 4.4.7  i7-3820 CPU @ 3.60GHz
+@nemo2:      77.328u 0.004s 1:17.50 99.7%     gfortran 4.7.3  i7-3630QM CPU @ 2.40GHz
+
+.fi
+.SH SEE ALSO
+rotcurves(1NEMO), potential(5NEMO), tabmath(1NEMO)
+.PP
+http://adsabs.harvard.edu/abs/2008MNRAS.385.1359N  (Noordermeer 2008)
+.SH FILES
+bulgerot.f runbulgerot.c
+.SH AUTHOR
+Edo Noordermeer (NEMO interface: Peter Teuben)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +3.0i
+2007?     	V1 original fortran release as \fBbulgerot\fP	EN
+11-sep-13	V1.1 NEMO interface	PJT
+.fi
