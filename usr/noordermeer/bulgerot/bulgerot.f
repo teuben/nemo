@@ -51,7 +51,7 @@ c     ## DEFINE CONSTANTS: CHANGE FOR EACH GALAXY #############################
 c     #########################################################################
 
       if (.true.) then
-         write (*,*) 'Interactive input:'
+         write (*,*) 'Interactive input: (5 lines expected)'
          read (*,*) logfile
          read (*,*) galaxy
          read (*,*) Mu_0_app, R_0, n_sers
@@ -195,9 +195,11 @@ c     Write header to screen
       endif
 
 c     Write header to file
+      write (*,*) 'Writing to ',logfile
+
       write (11,9997) '----------------------------------',
      $        '------------------------------------'
-      write (11,*) 'Rotation curve for Sersic bulge of ',galaxy
+      write (11,*) '# Rotation curve for Sersic bulge of ',galaxy
       write (11,9997) '----------------------------------',
      $        '------------------------------------'     
 
