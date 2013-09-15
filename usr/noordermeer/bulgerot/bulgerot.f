@@ -199,7 +199,7 @@ c     Write header to file
 
       write (11,9997) '----------------------------------',
      $        '------------------------------------'
-      write (11,*) '# Rotation curve for Sersic bulge of ',galaxy
+      write (11,'(A,A)') '# Rotation curve for Sersic bulge of ',galaxy
       write (11,9997) '----------------------------------',
      $        '------------------------------------'     
 
