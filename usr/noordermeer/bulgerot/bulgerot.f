@@ -45,6 +45,13 @@ c     #########################################################################
 c     ## DEFINE CONSTANTS: CHANGE FOR EACH GALAXY #############################
 c     #########################################################################
 
+      if (.true.) then
+         write (*,*) 'Interactive input:'
+         read (*,*) galaxy
+         read (*,*) Mu_0_app, R_0, n_sers
+         read (*,*) incdeg,axisratio,distpc,A_R
+         read (*,*) Rstart,dR,N
+      else
 c     Define galaxy name
       galaxy = 'thisgalaxy'
 
@@ -71,6 +78,7 @@ c     Starting radius, increment, and number of points (all in kpc)
       Rstart = 0.0d0
       dR     = 0.01d0
       N      = 250
+      endif
 
 c     open outputfile for writing
       open (11,file='bulgerot.dat')
