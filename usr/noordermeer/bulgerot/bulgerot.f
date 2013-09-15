@@ -11,6 +11,9 @@ c     Galactic foreground extinction of the galaxy is needed.
 c     Copyright (C) 2007, Edo Noordermeer
 c     E-mail: edo.noordermeer@gmail.com
 c
+c     Updates:
+c     sept-2013:  Minor modification to read from stdin for NEMO's runbulgerot 
+c
 c     If you use this program for a scientific publication, I would appreciate 
 c     a reference to the paper 'The rotation curves of flattened Sersic bulges
 c     (Noordermeer 2008)'.
@@ -19,6 +22,8 @@ c     #########################################################################
 
       real*8       pi,G,pc,Masssun,MagsunR
       character*20 galaxy
+      character*99 logfile
+      logical      onscreen 
       real*8       Mu_0_app,R_0,n_sers
       real*8       incdeg,axisratio,distpc,A_R
       real*8       Rstart, dR
@@ -47,11 +52,16 @@ c     #########################################################################
 
       if (.true.) then
          write (*,*) 'Interactive input:'
+         read (*,*) logfile
          read (*,*) galaxy
          read (*,*) Mu_0_app, R_0, n_sers
          read (*,*) incdeg,axisratio,distpc,A_R
          read (*,*) Rstart,dR,N
+         onscreen = .false.
       else
+c     Define logfile
+      logfile = 'bulgerot.dat'
+      onscreen = .true.
 c     Define galaxy name
       galaxy = 'thisgalaxy'
 
@@ -81,7 +91,7 @@ c     Starting radius, increment, and number of points (all in kpc)
       endif
 
 c     open outputfile for writing
-      open (11,file='bulgerot.dat')
+      open (11,file=logfile)
      
 c     #########################################################################
 
@@ -137,6 +147,7 @@ c     #########################################################################
 
 c     #########################################################################
 c     Write header to screen
+      if (onscreen) then
       write (*,fmt=9990) '-----------------------------------',
      $        '---------------------------------------------'
       write (*,*) 'Calculating rotation curve for Sersic bulge of ',
@@ -181,6 +192,7 @@ c     Write header to screen
       write (*,fmt=9990) '-----------------------------------',
      $        '---------------------------------------------'
       write (*,fmt=9991) 0.0,0.0,0.0,0.0,0.0,0.0,'%'
+      endif
 
 c     Write header to file
       write (11,9997) '----------------------------------',
@@ -244,8 +256,10 @@ c     Write output to screen and to file.
          density(i) = rho(r)
          mass(i) = cummass(r)
          velocity(i) = vc(r)         
+         if (onscreen) then
          write (*,9991)      radius(i),intensity(i),density(i),
      $        mass(i),velocity(i),1.0d2*i/N, '%'
+         endif
          write (11,fmt=9999) radius(i),intensity(i),density(i),
      $        mass(i),velocity(i)
       enddo
@@ -256,16 +270,16 @@ c     #########################################################################
 c     Wrap up
       close (11)
 
- 9989 format (A10,4A14,A12)
- 9990 format (A35,A45)
+ 9989 format ('#',A10,4A14,A12)
+ 9990 format ('#',A35,A45)
  9991 format (F12.6,4D14.6,F8.2,A1)
- 9992 format (A48,F12.6,A3)
- 9993 format (A40,A9,D12.6,A5)
- 9994 format (A40,A9,F12.6,A4)
- 9995 format (A40,A9,F12.6)
- 9996 format (A40,A9,F12.6,A2)
- 9997 format (A34,A36)
- 9998 format (A10,4A14)
+ 9992 format ('#',A48,F12.6,A3)
+ 9993 format ('#',A40,A9,D12.6,A5)
+ 9994 format ('#',A40,A9,F12.6,A4)
+ 9995 format ('#',A40,A9,F12.6)
+ 9996 format ('#',A40,A9,F12.6,A2)
+ 9997 format ('#',A34,A36)
+ 9998 format ('#',A10,4A14)
  9999 format (F12.6,4D14.6)
       end
 c     #########################################################################
