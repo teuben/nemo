@@ -18,7 +18,7 @@
 #include <unistd.h>
 
 string defv[] = {
-    "out=???\n       directory in which GALAXY will be run",
+    "outdir=???\n    directory in which GALAXY will be run",
     "nbody=40000\n   nbody, if needed",
     "nrad=80\n       nradii in code",
     "maxstep=1000\n  max number of integration steps",
@@ -37,7 +37,7 @@ string defv[] = {
     "nemo=t\n        convert data to NEMO and cleanup ASCII",
     "options=\n      Optional output:  phi(potential), acc (forces) ** soon to come **",
     "exe=CGS.exe\n   name of CGS executable",
-    "VERSION=1.0a\n  29-may-06 PJT",
+    "VERSION=2.0\n   16-sep-2013 PJT",
     NULL,
 };
 
@@ -70,7 +70,7 @@ void nemo_main()
   bool Qpot = TRUE;
   bool Qacc = TRUE;
   string exefile = getparam("exe");
-  string rundir = getparam("out");
+  string rundir = getparam("outdir");
   string infile;
   stream datstr;
   char fullname[256], command[256], line[256];
