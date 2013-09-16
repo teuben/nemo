@@ -41,6 +41,7 @@ string cvsid="$Id$";
  
 int run_program(string);
 
+
 nemo_main()
 {
   string exefile = getparam("exe");
@@ -50,10 +51,8 @@ nemo_main()
   string logfile = "bulgerot.log";
   real r[3];
   int n;
-  char dname[256];
-  char command[256];
+  char dname[256], command[256];
   stream datstr;
-
   
   n = nemoinpr(getparam("r3"),r,3);
   if (n!=3) error("parsing error %s: r3 needs rmin,rstep,nradii",getparam("r3"));
@@ -79,25 +78,18 @@ nemo_main()
   strclose(datstr);
 
   goto_rundir(rundir);
-#if 0
-  sprintf(command,"%s < %s",exefile,infile);
-  if (run_program(command))
-    error("Problem executing %s",command);
-#else
   if (run_program("sh runme"))
     error("Problem executing runme in %s",rundir);
-#endif
 }
 
-
-goto_rundir(string name)
+void goto_rundir(string name)
 {
     if (chdir(name))
         error("Cannot change directory to %s",name);
     return 0;
 }
 
-make_rundir(string name)
+void make_rundir(string name)
 {
     if (mkdir(name, 0755))
         error("Run directory %s already exists",name);
