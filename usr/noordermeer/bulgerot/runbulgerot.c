@@ -6,7 +6,7 @@ c     profile. The central surface magnitude M_0, characteristic radius R_0 and
 c     Sersic index n_sers must be given. Also, the inclination and intrinsic 
 c     axis ratio of the bulge must be given. Finally, the distance and the 
 c     Galactic foreground extinction of the galaxy is needed.
-
+c
 c     Copyright (C) 2007, Edo Noordermeer
 c     E-mail: edo.noordermeer@gmail.com
 c
@@ -19,27 +19,81 @@ c     (Noordermeer 2008)'.
 #include <nemo.h>
 
 string defv[] = {
-  "out=bulgerot.dat\n         output log file",
-  "galaxy=thisgalaxy\n        Identification",
+  "outdir=???\n               output run directory",
   "mu0=15\n                   apparent central R-band surface magnitude M_0",
   "r0=1\n                     characteristic radius R_0 in arcseconds",
   "n=1\n                      Sersic index",
-  "inc=0\n                    Inclination",
-  "q=1\n                      Axis ratio b/a ",
+  "inc=0\n                    Inclination (0=face on)",
+  "q=1\n                      Axis ratio b/a (1=round)",
   "dist=10\n                  Distance in Mpc",
   "ar=0\n                     galactic foreground extinction",
-  "radii=0:2.5:0.01\n         Radii to calculate for (kpc)",
-  "VERSION=1.1\n              12-sep-2013 PJT",
+  "r3=0,0.01,250\n            rstart,rstep,nradii (where to calculate rotation curve for, in kpc)",
+  "galaxy=sersic\n            Identification string",
+  "exe=bulgerot\n             Name of executable (needs to be in $PATH)",
+  "VERSION=1.2\n              15-sep-2013 PJT",
   NULL,
 };
 
 
-string usage="rotation curve of oblate spheroidal bulge";
+string usage="rotation curve of an oblate spheroidal sersic bulge";
 
-string cvsid="$Id:";
+string cvsid="$Id$";
  
+int run_program(string);
 
 nemo_main()
 {
-  warning("work in progress");
+  string exefile = getparam("exe");
+  string rundir = getparam("outdir");
+  string infile = "bulgerot.in";
+  string logfile = "bulgerot.dat";
+  real r[3];
+  int n;
+  char dname[256];
+  char command[256];
+  stream datstr;
+
+  
+  n = nemoinpr(getparam("r3"),r,3);
+  if (n!=3) error("parsing error %s: r3 needs rmin,rstep,nradii",getparam("r3"));
+  n = r[2];
+
+  make_rundir(rundir);
+  sprintf(dname,"%s/%s",rundir,infile);
+  datstr = stropen(dname,"w");
+  fprintf(datstr,"%s\n",logfile);
+  fprintf(datstr,"%s\n",getparam("galaxy"));
+  fprintf(datstr,"%g %g %g\n",
+	  getrparam("mu0"),getrparam("r0"),getrparam("n"));
+  fprintf(datstr,"%g %g %g %g\n",
+	  getrparam("inc"),getrparam("q"),1e6*getrparam("dist"),getrparam("ar"));
+  fprintf(datstr,"%g %g %d\n",r[0],r[1],n);
+  strclose(datstr);
+
+  goto_rundir(rundir);
+  sprintf(command,"%s < %s",exefile,infile);
+  if (run_program(command))
+    error("Problem executing %s",command);
+}
+
+
+goto_rundir(string name)
+{
+    if (chdir(name))
+        error("Cannot change directory to %s",name);
+    return 0;
+}
+
+make_rundir(string name)
+{
+    if (mkdir(name, 0755))
+        error("Run directory %s already exists",name);
+}
+
+int run_program(string cmd)
+{
+  int retval;
+  retval = system(cmd);
+  dprintf(1,"%s: returning %d\n",cmd,retval);
+  return retval;
 }
