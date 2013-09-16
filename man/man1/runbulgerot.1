@@ -1,11 +1,11 @@
 .TH RUNBULGEROT 1NEMO "15 September 2013"
 .SH NAME
-runbulgerot \- rotation curve of oblate spheroidal sersic bulge
+runbulgerot \- rotation curve of oblate spheroidal Sersic bulge
 .SH SYNOPSIS
 \fBrunbulgerot\fP [parameter=value]
 .SH DESCRIPTION
 \fBrunbulgerot\fP is a NEMO frontend to run (a series) of
-Noordemeer's \fBbulgerot\fP program.
+Noordermeer's \fBbulgerot\fP program (2008).
 .PP
 This program calculates the rotation curve for an oblate spheroidal 
 bulge. It assumes a projected surface density that follows a Sersic 
@@ -16,43 +16,65 @@ Galactic foreground extinction of the galaxy is needed.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
-.TP
-\fBlog=\fP
-Output logfile [bulgerot.dat]      
-.TP
-\fBgalaxy=\fP
-Identification [thisgalaxy]      
+.TP 15
+\fBoutdir=\fP
+Output run directory. The \fBexe=\fP program is run
+with a default input file \fBbulgerot.in\fP and
+default output (log) file \fBbulgerot.dat\fP in this
+run directory.  No default.
 .TP
 \fBmu0=\fP
-apparent central R-band surface magnitude M_0 [15] 
+Apparent central R-band surface magnitude M_0 [15.0] 
 .TP
 \fBr0=\fP
-characteristic radius R_0 in arcseconds [1]  
+Characteristic radius R_0 in arcseconds [1.0]  
 .TP
 \fBn=\fP
 Sersic index [1]     
 .TP
 \fBinc=\fP
-Inclination [0]      
+Inclination [0.0]      
 .TP
 \fBq=\fP
-Axis ratio b/a [1]    
+Axis ratio b/a [1.0]    
 .TP
 \fBdist=\fP
-Distance in Mpc [10]    
+Distance in Mpc [10.0]    
 .TP
 \fBar=\fP
-galactic foreground extinction [0]    
+Galactic foreground extinction [0.0]    
 .TP
 \fBradii=\fP
-Radii to calculate for (kpc) [0:2.5:0.01]  
+Radii (in kpc) to calculate the rotation curve for, using standard
+\fInemoinp(3NEMO)\fP notation. [0:2.5:0.01]  
+.TP
+\fBgalaxy=\fP
+Identification [sersic]      
+.TP
+\fBexe=\fP
+Name of \fBbulgerot\fP executable. 
+Needs to be in the user's $PATH. 
+[bulgerot]
 .SH EXAMPLES
 The following example creates a rotation curve in columns 1 and 5,
 and uses the \fBrotcur\fP potential in \fIrotcurves(1NEMO)\fP to
 plot the lindblad curves derived from this rotcur based potential
 .nf
-% runbulge out=sersic1.tab
+% runbulgerot out=sersic1.tab
 % rotcurves rotcur 0,1,1,5,1 sersec1.tab radii=0:2:0.01 mode=omega yrange=0,400
+.fi
+.PP
+The original version of \fBbulgerot\fP had a hardcoded set of input
+parameters (see BENCHMARK below), but the modified version for NEMO
+(and runbulgerot) reads them from stdin in a certain order, viz.
+.nf
+% bulgerot << EOF_BULGEROT
+bulgerot.dat                              # log
+sersic:n=1                                # galaxy 
+15.0d0 1.0d0 1.0d0                        # mu0, r0, n
+0.0d0 1.0d0 10.0d6 0.0d0                  # inc, q, dist, ar
+0.0d0 0.01d0 250                          # rstart, rstep, nradii
+EOF_BULGEROT
 .fi
 .SH BENCHMARK
 The default benchmark will produce a logfile of which the header and tail end
@@ -74,7 +96,8 @@ rotcurves(1NEMO), potential(5NEMO), tabmath(1NEMO)
 .PP
 http://adsabs.harvard.edu/abs/2008MNRAS.385.1359N  (Noordermeer, E. 2008, MNRAS, 385, 1359)
 .SH FILES
-bulgerot.f runbulgerot.c
+.ta +4i
+NEMO/usr/noordermeer/bulgerot/	bulgerot.f runbulgerot.c
 .SH AUTHOR
 Edo Noordermeer (NEMO interface: Peter Teuben)
 .SH UPDATE HISTORY
