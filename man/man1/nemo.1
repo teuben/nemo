@@ -1,6 +1,9 @@
 .TH NEMO 1NEMO "2 March 2006"
 .SH SYNOPSIS
+.nf
 \fBprogram [key1=]val1 [key2=]val2 .\!.\!.
+\fBrunprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
+.fi
 .SH DESCRIPTION
 \fBNEMO\fP is a \fIStellar Dynamics Toolbox\fP for users and
 programmers. It has various
@@ -99,9 +102,36 @@ user using \fBtsf\fP. The alternative would have been
     tsf in=tmp
     rm tmp
 .fi
+.SH HOW TO RUN non-NEMO PROGRAMS
+Over the times NEMO has incoorporated a number of non-NEMO programs,
+with varying degrees of input parameter schemes. For a number of
+them a unified NEMO frontend was developed, usually those programs start
+with the prefix \fBrun\fP. For example, \fBbulgerot\fP comes with
+\fBrunbulgerot\fP. Since often such programs have a hardcoded name
+for input and/or output files, one simple way to be able to run 
+them in parallel without stepping on filenames, is the use of
+a clean run directory.  Example of this can be found
+in 
+\fIrunbulgerot(1NEMO)\fP,
+\fIrunbody1(1NEMO)\fP,
+\fIrungalaxy(1NEMO)\fP,
+\fIrunscfm(1NEMO)\fP,
+\fIrunqumond(1NEMO)\fP,
+and others.
+.PP
+You will find a few common user keywords for this:
+\fBoutdir=\fP is always a required keyword, and needs to
+be a non-existing directory in which the data is written.
+For some programs there is an \fBexe=\fP keyword, in order to
+change the name of the non-NEMO program to be run. This is always
+assumed to be in the standard Unix search path ($PATH).
+.PP
+Although these run* programs use a fairly common method to run
+the non-NEMO programs, they have not all been unified
+as is proposed in \fIrun(3NEMO)\fP.
 .SH SEE ALSO
 index(1NEMO), programs(8NEMO), tricks(8NEMO), mkplummer(1NEMO), files(8NEMO),
-nemoinp(1NEMO), stropen(3NEMO), getparam(3NEMO), pipestatus(l)
+nemoinp(1NEMO), stropen(3NEMO), getparam(3NEMO), run(3NEMO), pipestatus(l)
 .SH AUTHOR
 Peter Teuben (e-mail: teuben@astro.umd.edu  phone: 301-405-1540)
 .SH FURTHER INFORMATION
