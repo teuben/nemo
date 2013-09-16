@@ -27,7 +27,7 @@ string defv[] = {
   "q=1\n                      Axis ratio b/a (1=round)",
   "dist=10\n                  Distance in Mpc",
   "ar=0\n                     galactic foreground extinction",
-  "r3=0,0.01,250\n            rstart,rstep,nradii (where to calculate rotation curve for, in kpc)",
+  "r3=0,0.01,250\n            rstart,rstep,nradii for rotation curve, in kpc",
   "galaxy=sersic\n            Identification string",
   "exe=bulgerot\n             Name of executable (needs to be in $PATH)",
   "VERSION=1.2\n              15-sep-2013 PJT",
@@ -44,9 +44,10 @@ int run_program(string);
 nemo_main()
 {
   string exefile = getparam("exe");
-  string rundir = getparam("outdir");
-  string infile = "bulgerot.in";
-  string logfile = "bulgerot.dat";
+  string rundir  = getparam("outdir");
+  string infile  = "bulgerot.in";
+  string datfile = "bulgerot.dat";
+  string logfile = "bulgerot.log";
   real r[3];
   int n;
   char dname[256];
@@ -61,7 +62,7 @@ nemo_main()
   make_rundir(rundir);
   sprintf(dname,"%s/%s",rundir,infile);
   datstr = stropen(dname,"w");
-  fprintf(datstr,"%s\n",logfile);
+  fprintf(datstr,"%s\n",datfile);
   fprintf(datstr,"%s\n",getparam("galaxy"));
   fprintf(datstr,"%g %g %g\n",
 	  getrparam("mu0"),getrparam("r0"),getrparam("n"));
@@ -70,10 +71,22 @@ nemo_main()
   fprintf(datstr,"%g %g %d\n",r[0],r[1],n);
   strclose(datstr);
 
+  sprintf(dname,"%s/%s",rundir,"runme");
+  datstr = stropen(dname,"w");
+  sprintf(command,"#! /bin/sh\n%s < %s >%s 2>&1\n",exefile,infile,logfile);
+  dprintf(1,"\n%s",command);
+  fprintf(datstr,"%s",command);
+  strclose(datstr);
+
   goto_rundir(rundir);
+#if 0
   sprintf(command,"%s < %s",exefile,infile);
   if (run_program(command))
     error("Problem executing %s",command);
+#else
+  if (run_program("sh runme"))
+    error("Problem executing runme in %s",rundir);
+#endif
 }
 
 
