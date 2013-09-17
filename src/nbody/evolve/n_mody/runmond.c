@@ -1,5 +1,8 @@
 /*
  *  RUNMOND:   run the mond program
+ * 
+ *  2009 ?
+ *  17-sep-2013  0.3   new run interface      PJT
  */
 
 #include <nemo.h>
@@ -30,7 +33,7 @@ string defv[] = {
   "dt_min=1.e-5\n   some help",
   "cfl=0.3\n        some help",
   "lp_ord=2\n       some help",
-  "VERSION=0.2\n    10-mar-2009 PJT",
+  "VERSION=0.3\n    17-sep-2013 PJT",
   NULL,
 };
 
@@ -83,7 +86,7 @@ void nemo_main()
 
 
 
-  make_rundir(outdir);
+  run_mkdir(outdir);
   sprintf(dname,"%s/%s",outdir,parfile);
 
   parstr = stropen(dname,"w");
@@ -109,37 +112,15 @@ void nemo_main()
   strclose(parstr);
 
   sprintf(cmd,"snapmody in=%s out=%s/%s",infile,outdir,"mout00.bin");
-  run_program(cmd);
+  run_sh(cmd);
 
-  goto_rundir(outdir);
+  run_cd(outdir);
   sprintf(cmd,"rmond");
-  run_program(cmd);
+  run_sh(cmd);
 
   if (hasvalue("out")) {
     sprintf(cmd,"cat mout??.bin | modysnap - %s",outfile);
-    run_program(cmd);
+    run_sh(cmd);
   }
 
 }
-
-goto_rundir(string name)
-{
-  dprintf(0,"CHDIR: %s\n",name);
-  if (chdir(name))
-    error("Cannot change directory to %s",name);
-}
-
-make_rundir(string name)
-{
-  dprintf(0,"MKDIR: %s\n",name);
-  if (mkdir(name, 0755))
-    warning("Run directory %s already exists",name);
-}
-
-run_program(string cmd)
-{
-  dprintf(0,"EXEC: %s\n",cmd);
-  system(cmd);
-}
-
-
