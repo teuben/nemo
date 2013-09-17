@@ -3,10 +3,14 @@
  *
  *    all arguments after "--" on the commandline are passed onto the editor
  *    which then replaces all "key=val" instances as directed.
+ * 
+ *    8-may-2011   original?
+ *   17-sep-2013   use new run_ interface
  *
  */
 
 #include <nemo.h>
+#include <run.h>
 
 string defv[] = {
   "exe=???\n          Executable to run",
@@ -14,7 +18,7 @@ string defv[] = {
   "dir=???\n          Directory in which to run",
   "log=\n             Logfile, if needed (> logfile)",
   "stdin=f\n          If true, read ini from stdin (< inifile)",
-  "VERSION=0.1\n      8-may-2011 PJT",
+  "VERSION=0.2\n      17-sep-2013 PJT",
   NULL,
 };
 
@@ -24,9 +28,6 @@ string cvsid="$Id$";
 
 
 void nemo_main(void);
-void goto_rundir(string name);
-void make_rundir(string name);
-void run_program(string cmd);
 void edit_file(string inifile, int argc, string *argv);
 
 void nemo_main()
@@ -41,7 +42,7 @@ void nemo_main()
   string *argv;
 
 
-  make_rundir(dirname);
+  run_mkdir(dirname);
 
 #if 0
   sprintf(dname,"%s/%s",outdir,parfile);
@@ -60,9 +61,9 @@ void nemo_main()
 #endif
 
   sprintf(cmd,"cp %s %s/%s", inifile, dirname, inifile);
-  run_program(cmd);
+  run_sh(cmd);
 
-  goto_rundir(dirname);
+  run_cd(dirname);
 
   argv = getargv(&argc);
   edit_file(inifile, argc, argv);
@@ -77,28 +78,8 @@ void nemo_main()
     strcat(cmd,">"); 
     strcat(cmd,logfile);
   }
-  run_program(cmd);
+  run_sh(cmd);
 
-}
-
-void goto_rundir(string name)
-{
-  dprintf(0,"CHDIR: %s\n",name);
-  if (chdir(name))
-    error("Cannot change directory to %s",name);
-}
-
-void make_rundir(string name)
-{
-  dprintf(0,"MKDIR: %s\n",name);
-  if (mkdir(name, 0755))
-    warning("Run directory %s already exists",name);
-}
-
-void run_program(string cmd)
-{
-  dprintf(0,"EXEC: %s\n",cmd);
-  system(cmd);
 }
 
 void edit_file(string inifile, int argc, string *argv)

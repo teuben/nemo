@@ -7,10 +7,12 @@
  *     16-mar-2006     0.4 update version 
  *     22-mar-2006     0.5 also read forces and potentials
  *     22-may-2006     1.0 readied for more formal release within NEMO; no more freq* but ndt*
+ *     17-sep-2013     1.1 new run interface
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <run.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -37,27 +39,13 @@ string defv[] = {
     "nemo=t\n        convert data to NEMO and cleanup ASCII",
     "options=\n      Optional output:  phi(potential), acc (forces) ** soon to come **",
     "exe=CGS.exe\n   name of CGS executable",
-    "VERSION=2.0\n   16-sep-2013 PJT",
+    "VERSION=2.1\n   17-sep-2013 PJT",
     NULL,
 };
 
 string usage = "NEMO frontend to run CGS";
 
 string cvsid="$Id$";
-
-void goto_rundir(string name)
-{
-    if (chdir(name))
-        error("Cannot change directory to %s",name);
-}
-
-void make_rundir(string name)
-{
-    if (mkdir(name, 0755))
-        error("Run directory %s already exists",name);
-}
-
-
 
 
 
@@ -75,7 +63,9 @@ void nemo_main()
   stream datstr;
   char fullname[256], command[256], line[256];
   string rmcmd = "rm -f";
-  make_rundir(rundir);
+
+
+  run_mkdir(rundir);
 
   if (hasvalue("in")) {
     infile = getparam("in");
@@ -127,11 +117,11 @@ void nemo_main()
   fprintf(datstr,"%g\n",getdparam("dtmin"));
   strclose(datstr);
 
-  goto_rundir(rundir);
+  run_cd(rundir);
 
   sprintf(command,"%s >& CGS.log",exefile);
   dprintf(0,">>> %s\n",command);
-  system(command);
+  run_sh(command);
 
   if (Qnemo) {
     /* only supporting Qpot and Qacc, pos and vel always written  */
