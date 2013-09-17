@@ -191,7 +191,8 @@ string defv[] = {
   "layout=f\n       Show memory layout",
   "static=f\n       Benchmark on a static array",
   "transpose=f\n    Transpose a 2D array",
-  "VERSION=2.2\n    12-nov-07 PJT",
+  "axb=f\n          Test an Ax=b",
+  "VERSION=2.3\n    30-jul-2013 PJT",
   NULL,
 };
 
@@ -474,9 +475,10 @@ void try()
 
 nemo_main()
 {
-  int i,dim[MAXDIM];
+  int i,j,dim[MAXDIM];
   int ndim = nemoinpi(getparam("dim"),dim,MAXDIM);
   bool flip = getbparam("flip"), free=getbparam("free"), trans=getbparam("transpose");
+  bool axb = getbparam("axb");
   int iter=getiparam("iter");
   bool layout = getbparam("layout");
   bool statbench = getbparam("static");
@@ -493,6 +495,33 @@ nemo_main()
   mdarray5 x5;
   mdarray6 x6;
   mdarray7 x7;
+
+#if 1
+  mdarray2  A;
+  mdarray1  x,b;
+
+  if (axb) {
+    A  = allocate_mdarray2(2,3);       /*  Ax=b ;   A[2][3] */
+    x  = allocate_mdarray1(3);         /*           x[3]    */
+    b  = allocate_mdarray1(2);         /*           b[2]    */
+    A[0][0] = 1;
+    A[0][1] = 2;
+    A[0][2] = 3;
+    A[1][0] = 4;
+    A[1][1] = 5;
+    A[1][2] = 6;
+    x[0] = 3;
+    x[1] = 2;
+    x[2] = 1;
+    for (i=0; i<2; i++)
+      for (j=0, b[i]=0; j<3; j++) b[i] += A[i][j] * x[j];
+    for (i=0; i<2; i++)
+      printf("b[%d] = %g\n",i,b[i]);
+	
+    stop(0);
+  }
+#else
+#endif
 
   if (trans) {
     if (ndim != 2) error("transposing needs 2 dimensional array");

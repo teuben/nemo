@@ -151,6 +151,8 @@ real median_torben(int n, real *x, real xmin, real xmax)
 
 /*
  * wirth's algorithm
+ * 
+ * cf. NR's select() pp342.
  */
 
 #define ELEM_SWAP(a,b) { register real t=(a);(a)=(b);(b)=t; }
