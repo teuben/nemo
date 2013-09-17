@@ -1,9 +1,10 @@
 /*
  *  MAIN.C: NEMO driver for nbody4
  *	
- *  28-feb-06    V0.1     Created, in Cambridge           PJT
+ *  28-feb-06    V0.1     Created, in Cambridge                          PJT
  *   8-mar-06    V0.3     clean up keywords, create Nbody on the fly     PJT
  *  10-mar-06    V0.4     unit10 now binary, parallel to nbody1,2
+ *  17-sep-2013  V0.5     using new run interface                        PJT
  *                         
  *  TODO:   only a few special kz() cases were implemented. See nbody4.5 for the full set
  * 
@@ -16,6 +17,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <history.h>
+#include <run.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -137,7 +139,7 @@ string defv[] = {
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
 
-    "VERSION=0.4a\n   12-jul-06 PJT",
+    "VERSION=0.5\n    17-sep-2013 PJT",
     NULL,
 };
 
@@ -256,7 +258,7 @@ nemo_main()
 
 
 
-  make_rundir(rundir);
+  run_mkdir(rundir);
 
   sprintf(dname,"%s/%s",rundir,parfile);
   datstr = stropen(dname,"w");    
@@ -294,7 +296,7 @@ nemo_main()
 
     strclose(datstr);
 
-    goto_rundir(rundir);
+    run_cd(rundir);
 
 
     histr = stropen("history","w");
@@ -319,7 +321,7 @@ nemo_main()
       } else
 	error("in=%s must be an absolute pathname or special file",infile);
       dprintf(0,"%s\n",runcmd);
-      if (system(runcmd)) error("Error converting input data");
+      if (run_sh(runcmd)) error("Error converting input data");
 #else
       dprintf(0,"Using ascii printout with format=%s to convert data for nbody4\n",fmt);
       sprintf(fmt7,"%s %s %s %s %s %s %s\n",fmt,fmt,fmt,fmt,fmt,fmt,fmt);
@@ -334,26 +336,8 @@ nemo_main()
     }
 
     sprintf(runcmd,"%s < %s",exefile,parfile);
-    run_program(runcmd);
+    run_sh(runcmd);
   } else {
     error("kstart=%d not yet supported for NBODY4",kstart);
   }
-}
-
-
-goto_rundir(string name)
-{
-    if (chdir(name))
-        error("Cannot change directory to %s",name);
-}
-
-make_rundir(string name)
-{
-    if (mkdir(name, 0755))
-        warning("Run directory %s already exists",name);
-}
-
-run_program(string cmd)
-{
-    system(cmd);
 }

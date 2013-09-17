@@ -4,6 +4,7 @@
  *  4-mar-98    cloned off runbody2, added KZ_ parameters     PJT
  *  17-mar-04   using in= didn't enable kz(4) properly        PJT
  *  17-mar-06   using fullname()                              PJT
+ *  17-sep-2013  V1.3   using new run interface               PJT
  *
  *
  */
@@ -12,6 +13,7 @@
 #include <getparam.h>
 #include <history.h>
 #include <filefn.h>
+#include <run.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -65,7 +67,7 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=1.2\n    17-mar-06 PJT",
+    "VERSION=1.3\n    17-sep-2013 PJT",
     NULL,
 };
 
@@ -128,7 +130,7 @@ void nemo_main(void)
     infile = getparam("in");
     fname = fullname(infile);
 
-    make_rundir(rundir);
+    run_mkdir(rundir);
 
     sprintf(dname,"%s/%s",rundir,parfile);
     datstr = stropen(dname,"w");    
@@ -160,7 +162,7 @@ void nemo_main(void)
         fprintf(datstr,"%g %g\n",getdparam("xcm"), getdparam("ecc"));
     strclose(datstr);
 
-    goto_rundir(rundir);
+    run_cd(rundir);
     histr = stropen("history","w");
     put_history(histr);
     strclose(histr);
@@ -176,30 +178,11 @@ void nemo_main(void)
     }
 
     sprintf(runcmd,"%s < %s",exefile,parfile);
-    run_program(runcmd);
+    run_sh(runcmd);
   } else {
     error("kstart=%d not yet supported",kstart);
   }
 }
-
-
-goto_rundir(string name)
-{
-    if (chdir(name))
-        error("Cannot change directory to %s",name);
-}
-
-make_rundir(string name)
-{
-    if (mkdir(name, 0755))
-        warning("Run directory %s already exists",name);
-}
-
-run_program(string cmd)
-{
-    system(cmd);
-}
-
 
 /*
  *	Order of input lines in "nbody1.in" for a new run (KSTART=1)

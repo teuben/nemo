@@ -8,12 +8,14 @@
  *                          added tnext=
  *	 5-mar-98   V1.3    added KZ_ parameters in the code		   PJT
  *      17-mar-06   V1.4    using fullname() for in=                       pjt
+ *      17-sep-2013 V1.5    using new run interface                        PJT
  *
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <filefn.h>
+#include <run.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -81,7 +83,7 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=1.4\n    17-mar-06 PJT",
+    "VERSION=1.5\n    17-sep-2013 PJT",
     NULL,
 };
 
@@ -145,7 +147,7 @@ nemo_main()
     infile = getparam("in");
     fname = fullname(infile);
 
-    make_rundir(rundir);
+    run_mkdir(rundir);
 
     sprintf(dname,"%s/%s",rundir,parfile);
     datstr = stropen(dname,"w");    
@@ -175,7 +177,7 @@ nemo_main()
         fprintf(datstr,"%g %g\n",getdparam("xcm"), getdparam("ecc"));
     strclose(datstr);
 
-    goto_rundir(rundir);
+    run_cd(rundir);
     histr = stropen("history","w");
     put_history(histr);
     strclose(histr);
@@ -187,30 +189,14 @@ nemo_main()
 	  sprintf(runcmd,"stou4 %s nbody=%d",fname,nbody);
         } 
         dprintf(0,"%s\n",runcmd);
-        if (system(runcmd)) error("Error converting input data");
+        if (run_sh(runcmd)) error("Error converting input data");
     }
 
     sprintf(runcmd,"%s < %s",exefile,parfile);
-    run_program(runcmd);
+    run_sh(runcmd);
   } else {
     error("kstart=%d not yet supported",kstart);
   }
 }
 
 
-goto_rundir(string name)
-{
-    if (chdir(name))
-        error("Cannot change directory to %s",name);
-}
-
-make_rundir(string name)
-{
-    if (mkdir(name, 0755))
-        warning("Run directory %s already exists",name);
-}
-
-run_program(string cmd)
-{
-    system(cmd);
-}
