@@ -5,25 +5,26 @@ run_ \- utility functions to aid running programs in a clean directory
 .nf
 \fB#include <stdinc.h>\fP
 .PP
-\fBint run_(...)\fP
+\fBint run_mkdir(string name);\fP
+\fBint run_cd(string name);\fP
+\fBint run_sh(string cmd);\fP
+\fBint run_popen1(string exe, string file);\fP
 .fi
 .SH DESCRIPTION
 See also \fInemo(1NEMO)\fP in the description how to
 run non-NEMO programs.
 .PP
-Still under design.
-.SH DESIGN
-Programs already use outdir= and where applicable, allow exe=. 
-A few common function are in use, which need to be unified here:
-.PP
-.nf
-void goto_rundir(string name);
-void make_rundir(string name);
-int run_program(string cmd);
-.fif
+This interface encourages a unified approach how to
+run non-NEMO programs from a NEMO frontend. 
 .PP
 In particular, the "runme" script created by \fIrunbulgerot(1NEMO)\fP
 should be employed by all run environments.  
+.PP
+The \fBrun_popen1\fP is meant to simulate the
+.nf
+      echo file | exe
+.fi
+style of running a program
 .SH SEE ALSO
 nemo(1NEMO)
 .SH AUTHOR
