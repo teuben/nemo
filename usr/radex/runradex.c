@@ -9,6 +9,7 @@
  */
 
 #include <nemo.h>
+#include <run.h>
 
 string defv[] = {
   "mol=???\n             Input molecular data file [hco+.dat, from $RADEXDAT/]",
@@ -22,7 +23,7 @@ string defv[] = {
   "tbg=2.73\n            Background temperature [K]",
   "cdmol=1e13\n          Molecular column density [cm^-2]",
   "deltav=1.0\n          Line width [km/s] ?",
-  "VERSION=0.1\n         7-jan-2012 PJT",
+  "VERSION=0.2\n         17-sep-2013 PJT",
   NULL,
 };
 
@@ -64,7 +65,7 @@ void nemo_main()
   n = nemoinpr(getparam("density"),density,MAXPARTNER);
   if (n != npartner) error("need matching numbers for partner= and density=");
 
-  make_rundir(outdir);
+  run_mkdir(outdir);
   sprintf(dname,"%s/%s",outdir,parfile);
 
   parstr = stropen(dname,"w");
@@ -85,29 +86,9 @@ void nemo_main()
 
   strclose(parstr);
 
-  goto_rundir(outdir);
+  run_cd(outdir);
   sprintf(cmd,"%s < %s > %s ", exefile, parfile, logfile);
-  run_program(cmd);
-}
-
-goto_rundir(string name)
-{
-  dprintf(0,"CHDIR: %s\n",name);
-  if (chdir(name))
-    error("Cannot change directory to %s",name);
-}
-
-make_rundir(string name)
-{
-  dprintf(0,"MKDIR: %s\n",name);
-  if (mkdir(name, 0755))
-    warning("Run directory %s already exists",name);
-}
-
-run_program(string cmd)
-{
-  dprintf(0,"EXEC: %s\n",cmd);
-  system(cmd);
+  run_sh(cmd);
 }
 
 
