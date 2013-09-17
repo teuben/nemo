@@ -11,6 +11,7 @@
  *      18-mar-2004             finally made it work
  *       7-mar-2006     V2.0    no need for snap2ini
  *                      V2.1    also write output snap
+ *      17-sep-2013     V2.2    new run interface
  *
  * 
  *  @TODO: this program should run in SinglePrecision, since galaxy does
@@ -22,6 +23,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <history.h>
+#include <run.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -44,15 +46,13 @@ string defv[] = {
     "format=%g\n      format for pos,vel for galaxy.ini",
     "header=\n        If given, use this for unfio header/trailer size",
     "exe=galaxy\n     name of GALAXY executable",
-    "VERSION=2.1d\n   20-aug-06 PJT",
+    "VERSION=2.2\n    17-sep-2013 PJT",
     NULL,
 };
 
 string usage = "frontend to run Sellwood's galaxy code";
 
 string cvsid="$Id$";
-
-int run_program(string);
 
 int nemo_main()
 {
@@ -85,7 +85,7 @@ int nemo_main()
     tstop = getdparam("tstop");
     sprintf(fmt6,"%s %s %s %s %s %s\n",fmt,fmt,fmt,fmt,fmt,fmt);
 
-    make_rundir(rundir);
+    run_mkdir(rundir);
 
 
     /* prepare the parameter file for galaxy */
@@ -123,8 +123,8 @@ int nemo_main()
 
     /* run the fortran program */
 
-    goto_rundir(rundir);
-    if (run_program(exefile))
+    run_cd(rundir);
+    if (run_sh(exefile))
       error("Problem executing %s",exefile);
 
     /* Output data from native galaxy (.res) format to snapshot */
@@ -161,24 +161,3 @@ int nemo_main()
 }
 
 
-goto_rundir(string name)
-{
-    if (chdir(name))
-        error("Cannot change directory to %s",name);
-    return 0;
-}
-
-make_rundir(string name)
-{
-    if (mkdir(name, 0755))
-        error("Run directory %s already exists",name);
-}
-
-
-int run_program(string exe)
-{
-  int retval;
-  retval = system(exe);
-  dprintf(1,"%s: returning %d\n",exe,retval);
-  return retval;
-}

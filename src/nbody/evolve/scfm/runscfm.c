@@ -7,12 +7,13 @@
  *			    back to non-exe
  *	 3-apr-01   V1.2    back to exe .... why on earth....   pjt
  *      17-mar-06   V1.3    using fullname()  for in=           pjt
- *
+ *      17-sep-2013 V1.4    new run interface                   pjt
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <filefn.h>
+#include <run.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -33,7 +34,7 @@ string defv[] = {
     "zeroeven=f\n     ",
     "fixacc=f\n       ",
     "headline=\n      run comment",
-    "VERSION=1.3\n    17-mar-06 PJT",
+    "VERSION=1.4\n    17-sep-2013 PJT",
     NULL,
 };
 
@@ -65,7 +66,7 @@ nemo_main()
     infile = getparam("in");
     fname = fullname(infile);
 
-    make_rundir(rundir);
+    run_mkdir(rundir);
 
     sprintf(dname,"%s/%s",rundir,parfile);
     datstr = stropen(dname,"w");    
@@ -87,7 +88,7 @@ nemo_main()
     fprintf(datstr,"C end of parameter input\n");
     fclose(datstr);
 
-    goto_rundir(rundir);
+    run_cd(rundir);
     histr = stropen("history","w");
     put_history(histr);
     strclose(histr);
@@ -99,35 +100,19 @@ nemo_main()
 	  sprintf(runcmd,"snapprint %s m,x,y,z,vx,vy,vz header=t > SCFBI",fname);
         } 
         dprintf(0,"%s\n",runcmd);
-        if (system(runcmd)) error("Error converting input data");
+        if (run_sh(runcmd)) error("Error converting input data");
     }
 #if 0
     sprintf(runcmd,"cp ../SCFPAR .; %s",exefile);
 #else
     sprintf(runcmd,"%s",exefile);
 #endif
-    run_program(runcmd);
+    run_sh(runcmd);
 
     sprintf(runcmd,
         "cat SNAP??? | tabtos - scfm.dat nbody,time mass,pos,vel,phi");
-    run_program(runcmd);
+    run_sh(runcmd);
 
 }
 
 
-goto_rundir(string name)
-{
-    if (chdir(name))
-        error("Cannot change directory to %s",name);
-}
-
-make_rundir(string name)
-{
-    if (mkdir(name, 0755))
-        warning("Run directory %s already exists",name);
-}
-
-run_program(string cmd)
-{
-    system(cmd);
-}

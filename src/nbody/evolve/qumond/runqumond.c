@@ -4,6 +4,9 @@
  *    assemble parameters
  *    needs qmics.dat
  *    create directory, run program
+ *
+ *    28-apr-2011   0.3   ?
+ *    17-sep-2013   0.4  new run interface
  */
 
 #include <nemo.h>
@@ -22,7 +25,7 @@ string defv[] = {
   "freq=8\n              frequency to output a binary file",
   "brand=0\n             Restarting option (0=new and ascii, 2=old and binary)",
   "au0=1.0\n             a_0 is empirically ~ 1.2e-8m/s^2. Want to rescale it by a factor s.t. g_0=factor*a_o",
-  "VERSION=0.3\n         28-apr-2011 PJT",
+  "VERSION=0.4\n         17-sep-2013 PJT",
   NULL,
 };
 
@@ -66,7 +69,7 @@ void nemo_main()
   printf("Initial timestep = %g\n",aexpn*adiv);
 
   
-  make_rundir(outdir);
+  run_mkdir(outdir);
   sprintf(dname,"%s/%s",outdir,parfile);
 
   parstr = stropen(dname,"w");
@@ -84,11 +87,11 @@ void nemo_main()
   strclose(parstr);
 
   sprintf(cmd,"cp %s %s/%s", infile, outdir, datfile);
-  run_program(cmd);
+  run_sh(cmd);
 
-  goto_rundir(outdir);
+  run_cd(outdir);
   sprintf(cmd,"%s < %s > %s ", exefile, parfile, logfile);
-  run_program(cmd);
+  run_sh(cmd);
 
   if (hasvalue("out")) {
     warning("no postprocessing yet - only history written");
@@ -99,25 +102,4 @@ void nemo_main()
   }
 
 }
-
-goto_rundir(string name)
-{
-  dprintf(0,"CHDIR: %s\n",name);
-  if (chdir(name))
-    error("Cannot change directory to %s",name);
-}
-
-make_rundir(string name)
-{
-  dprintf(0,"MKDIR: %s\n",name);
-  if (mkdir(name, 0755))
-    warning("Run directory %s already exists",name);
-}
-
-run_program(string cmd)
-{
-  dprintf(0,"EXEC: %s\n",cmd);
-  system(cmd);
-}
-
 
