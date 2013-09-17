@@ -2,6 +2,7 @@
  *  preprocessor to run Spekkens and Sellwood 2007 'velfit' program
  *
  *	27-oct-2008    initial version
+ *      17-sep-2013    use new run interface..
  * 
  *  @TODO: 
  *
@@ -12,6 +13,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <history.h>
+#include <run.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -35,15 +37,13 @@ string defv[] = {
   "radii=\n              Ring Radii at which velocity field components are extracted",
 
   "exe=velfitss07\n      name of VELFITSS07 executable in your $PATH",
-  "VERSION=1.0\n         28-oct-08 PJT",
+  "VERSION=1.1\n         17-sep-2013 PJT",
   NULL,
 };
 
 string usage = "frontend to run Spekkens & Sellwood's 2007 velfit code";
 
 string cvsid="$Id$";
-
-int run_program(string);
 
 #define MAXRAD   100
 #define MAXFLAGS   6
@@ -110,17 +110,7 @@ int nemo_main()
 
   strclose(datstr);
 
-  if (run_program(exefile))
+  if (run_popen1(exefile,"'velfit.inp'"))
     error("Problem executing %s",exefile);
 }
 
-
-int run_program(string exe)
-{
-  FILE *fp;
-  fp = popen(exe,"w");
-  fprintf(fp,"'velfit.inp'");
-
-  fclose(fp);
-  return 0;
-}
