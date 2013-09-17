@@ -35,7 +35,18 @@ int run_sh(string cmd)
   return retval;
 }
 
+/*
+ *   echo file | exe
+ */
 
+int run_popen1(string exe, string file)
+{
+  FILE *fp = popen(exe,"w");
+  if (fp==NULL) return 1;
+  fprintf(fp,file);
+  fclose(fp);
+  return 0;
+}
 
 #ifdef TESTBED
 
