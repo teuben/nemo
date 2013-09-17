@@ -1,0 +1,37 @@
+.TH RUN 1NEMO "17 Septemer 2013"
+.SH NAME
+run \- Generic frontend to edit a parameter file and run a program
+.SH SYNOPSIS
+\fBrun\fP [parameter=value]
+.SH DESCRIPTION
+No description available. This manual page was created by mkman
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBexe=\fP
+Executable to run [???]    
+.TP
+\fBini=\fP
+Ini file to edit [???]   
+.TP
+\fBdir=\fP
+Directory in which to run [???]  
+.TP
+\fBlog=\fP
+Logfile, if needed (> logfile) []  
+.TP
+\fBstdin=\fP
+If true, read ini from stdin (< inifile)
+.SH EXAMPLES
+.SH SEE ALSO
+run(3NEMO)
+.SH FILES
+src/tools/run/run.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+17-Sep-13	V0.2 use new run interface	PJT
+.fi
