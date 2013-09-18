@@ -17,6 +17,7 @@ c     (Noordermeer 2008)'.
 
 
 #include <nemo.h>
+#include <run.h>
 
 string defv[] = {
   "outdir=???\n               output run directory",
@@ -39,8 +40,6 @@ string usage="rotation curve of an oblate spheroidal sersic bulge";
 
 string cvsid="$Id$";
  
-int run_program(string);
-
 
 nemo_main()
 {
@@ -51,14 +50,16 @@ nemo_main()
   string logfile = "bulgerot.log";
   real r[3];
   int n;
-  char dname[256], command[256];
+  char dname[256];
+  static char *cmd = "#! /bin/sh\n"             /* the lines for the "runme" */
+                     "%s < %s >%s 2>&1\n";      /* script inside the rundir  */
   stream datstr;
   
   n = nemoinpr(getparam("r3"),r,3);
   if (n!=3) error("parsing error %s: r3 needs rmin,rstep,nradii",getparam("r3"));
   n = r[2];
 
-  make_rundir(rundir);
+  run_mkdir(rundir);
   sprintf(dname,"%s/%s",rundir,infile);
   datstr = stropen(dname,"w");
   fprintf(datstr,"%s\n",datfile);
@@ -72,33 +73,12 @@ nemo_main()
 
   sprintf(dname,"%s/%s",rundir,"runme");
   datstr = stropen(dname,"w");
-  sprintf(command,"#! /bin/sh\n%s < %s >%s 2>&1\n",exefile,infile,logfile);
-  dprintf(1,"\n%s",command);
-  fprintf(datstr,"%s",command);
+  dprintf(1,     cmd,exefile,infile,logfile);
+  fprintf(datstr,cmd,exefile,infile,logfile);
   strclose(datstr);
 
-  goto_rundir(rundir);
-  if (run_program("sh runme"))
+  run_cd(rundir);
+  if (run_sh("sh runme"))
     error("Problem executing runme in %s",rundir);
 }
 
-void goto_rundir(string name)
-{
-    if (chdir(name))
-        error("Cannot change directory to %s",name);
-    return 0;
-}
-
-void make_rundir(string name)
-{
-    if (mkdir(name, 0755))
-        error("Run directory %s already exists",name);
-}
-
-int run_program(string cmd)
-{
-  int retval;
-  retval = system(cmd);
-  dprintf(1,"%s: returning %d\n",cmd,retval);
-  return retval;
-}
