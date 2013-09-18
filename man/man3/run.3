@@ -24,7 +24,46 @@ The \fBrun_popen1\fP is meant to simulate the
 .nf
       echo file | exe
 .fi
-style of running a program
+style of running a program. The more general \fBrun_sh\fP deals with
+most cases such as
+.nf
+      exe < infile > outfile
+.fi
+with optional \fIinfile\fP and \fIoutfile\fP
+.SH EXAMPLE
+In a typical example, work is done inside of a clean run directory,
+because alien programs often use a parameter file with a fixed
+name, and thus cannot easily run side by side in the same
+directory. Here's a typical example:
+.nf
+
+   string rundir = getparam("rundir");
+   string exe    = getparam("exe");
+   char tmp[256];
+   stream fstr;
+   string cmd = "#! /bin/sh\\n" 
+                " rm -rf foobar.dat\\n" 
+                " %s <foobar.inp >foobar.log 2>&1\\n";
+
+   run_mkdir(rundir);
+
+   sprintf(tmp,"%s/foobar.dat",rundir);
+   fstr = stropen(tmp,"w");
+   fprintf(fstr,"%d",getiparam("n"));
+   fprintf(fstr,"%g",getrparam("x"));
+   strclose(fstr);
+
+   sprintf(tmp,"%s/%s",rundir,"runme");
+   fstr = stropen(tmp,"w");
+   fprintf(fstr,cmd,exefile);
+   strclose(fstr);
+
+   run_cd(rundir);
+   run_sh("sh runme");
+
+.fi
+The creation of the "runme" script is not really needed, the \fIrun_sh()\fP
+could directory use the 
 .SH SEE ALSO
 nemo(1NEMO)
 .SH AUTHOR
