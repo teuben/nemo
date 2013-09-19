@@ -46,7 +46,7 @@ string defv[] = {
     "format=%g\n      format for pos,vel for galaxy.ini",
     "header=\n        If given, use this for unfio header/trailer size",
     "exe=galaxy\n     name of GALAXY executable",
-    "VERSION=2.2\n    17-sep-2013 PJT",
+    "VERSION=2.2a\n   18-sep-2013 PJT",
     NULL,
 };
 
@@ -109,7 +109,7 @@ int nemo_main()
     strclose(instr);
 
     if ( (bits & PhaseSpaceBit) == 0) error("no phasespace");
-    for (bp=btab;bp<btab+nbody; bp++)
+    for (bp=btab, mass=0.0;bp<btab+nbody; bp++)
       mass += Mass(bp);
     
     sprintf(dname,"%s/%s",rundir,"galaxy.ini");
