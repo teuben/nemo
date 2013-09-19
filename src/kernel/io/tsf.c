@@ -22,6 +22,7 @@
  * V3.1e  pjt 10-aug-09         fix bug handled items > 2GB
  * V3.2   wd  08-sep-11         margin automatic adapts to terminal width
  *                              NOTE:  in a pipe or redirect this is not correct
+ * V3.3   pjt 18-sep-2013       fixed the terminal width problem on pipes?
  *
  */
 
@@ -48,7 +49,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSION=3.1f\n		  16-jan-2012 PJT ",
+    "VERSION=3.3\n		  18-sep-2013 PJT ",
     NULL,
 };
 
@@ -91,7 +92,7 @@ void nemo_main()
 #ifdef unix
     if(!hasvalue("margin")) {
       struct winsize w;
-      ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+      ioctl(STDIN_FILENO, TIOCGWINSZ, &w);
       margin = w.ws_col;
     } else {
       margin = getiparam("margin");
@@ -103,7 +104,7 @@ void nemo_main()
       warning("awfully small margin=%d",margin);
       margin=72;
     }
-    if (margin>BUFLEN) error("BUFLEN might be too small");
+    if (margin>BUFLEN) error("BUFLEN might be too small (margin=%d)",margin);
     dprintf(2,"margin=%d\n",margin);
 
     allline = getbparam("allline");
