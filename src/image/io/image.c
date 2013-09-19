@@ -54,8 +54,8 @@
 local char *mystrcpy(char *);
 
 /*	storage of matrices can be done in several ways: 
- *      CDef:    C-style storage
- *    ForDef:    Fortran-style storage
+ *      CDef:    C-style storage, but really messed up (pre-2013)
+ *    ForDef:    Fortran-style storage (2013-)
  */
 
 local char *matdef[] = {"ForDef", "CDef", NULL };
@@ -66,8 +66,10 @@ local char *matdef[] = {"ForDef", "CDef", NULL };
    complain about missing integer 'idef'
    idef should be pointing into the matdef[] array
  */
+
+/*  "idef" should be read-only */
 #if defined(FORDEF)
-local int idef = 0;
+local int idef = 0;    
 #endif
 #if defined(CDEF)
 local int idef = 1;
@@ -153,12 +155,19 @@ int write_image (stream outstr, imageptr iptr)
     put_tes (outstr, ParametersTag);
          
     put_set (outstr,MapTag);
+#ifdef FORDEF
+    if (idef==1) error("impossible FORDEF with idef=1");
     if (Nz(iptr)==1)
-      put_data (outstr,MapValuesTag,RealType,
-		Frame(iptr),Nx(iptr),Ny(iptr),0);
+      put_data (outstr,MapValuesTag,RealType,Frame(iptr),Ny(iptr),Nx(iptr),0);
     else
-      put_data (outstr,MapValuesTag,RealType,
-		Frame(iptr),Nx(iptr),Ny(iptr),Nz(iptr),0);
+      put_data (outstr,MapValuesTag,RealType,Frame(iptr),Nz(iptr),Ny(iptr),Nx(iptr),0);
+#else
+    if (idef==0) error("impossible CDEF with idef=0");
+    if (Nz(iptr)==1)
+      put_data (outstr,MapValuesTag,RealType,Frame(iptr),Nx(iptr),Ny(iptr),0);
+    else
+      put_data (outstr,MapValuesTag,RealType,Frame(iptr),Nx(iptr),Ny(iptr),Nz(iptr),0);
+#endif
     put_tes (outstr, MapTag);
   put_tes (outstr, ImageTag);
   return 1;
@@ -167,8 +176,8 @@ int write_image (stream outstr, imageptr iptr)
 
 /*
  * READ_IMAGE: read a matrix from a stream
- *	      returns 0 on error
- *	              1 if read seems OK
+ *	       returns 0 on error
+ *	               1 if read seems OK
  *	To improve:	One cannot use a external buffer for iptr, iptr
  *			is always assumed to be initialized by one of
  *			the XXX_image() routines here. 
@@ -178,106 +187,122 @@ int write_image (stream outstr, imageptr iptr)
  
 int read_image (stream instr, imageptr *iptr)
 {
-    string read_matdef;
-    int nx=0, ny=0, nz=0;
+  string read_matdef;
+  int nx=0, ny=0, nz=0;
+  bool reverse = FALSE;
+    
+  get_history(instr);         /* accumulate history */
 
-    get_history(instr);         /* accumulate history */
-
-    if (!get_tag_ok (instr,ImageTag))
-        return 0;			/* not an image available */
+  if (!get_tag_ok (instr,ImageTag))
+    return 0;			/* not an image available */
         
-    if (*iptr==NULL) {		/* allocate image if neccessary */
-    	*iptr = (imageptr ) allocate(sizeof(image));
-	dprintf (DLEV,"Allocated image @ %d ",*iptr);
-    } else {
-        nx = Nx(*iptr);
-        ny = Ny(*iptr);
-        nz = Nz(*iptr);
-    	dprintf (DLEV,"Image %dx%dx%d already allocated @ %d\n",
-		 nx,ny,nz,*iptr);
-    }
+  if (*iptr==NULL) {		/* allocate image if neccessary */
+    *iptr = (imageptr ) allocate(sizeof(image));
+    dprintf (DLEV,"Allocated image @ %d ",*iptr);
+  } else {
+    nx = Nx(*iptr);
+    ny = Ny(*iptr);
+    nz = Nz(*iptr);
+    dprintf (DLEV,"Image %dx%dx%d already allocated @ %d\n",nx,ny,nz,*iptr);
+  }
     	
-    get_set (instr,ImageTag);
-        get_set (instr,ParametersTag);
-            get_data (instr,NxTag,IntType, &(Nx(*iptr)), 0);
-            get_data (instr,NyTag,IntType, &(Ny(*iptr)), 0);
-            get_data (instr,NzTag,IntType, &(Nz(*iptr)), 0);
-	    if ((nx>0 || ny>0 || nz>0) &&
-		(nx != Nx(*iptr) || ny != Ny(*iptr) || nz != Nz(*iptr)))
-	      error("Cannot read different sized images in old pointer yet");
-	    if (get_tag_ok(instr,AxisTag))
-	      get_data (instr,AxisTag,IntType, &(Axis(*iptr)), 0);
-	    else
-	      Axis(*iptr) = 0;
-	    if (Axis(*iptr) == 1) {
-	      get_data_coerced (instr,XrefTag,RealType, &(Xref(*iptr)), 0);
-	      get_data_coerced (instr,YrefTag,RealType, &(Yref(*iptr)), 0);
-	      get_data_coerced (instr,ZrefTag,RealType, &(Zref(*iptr)), 0);
-	    } else {
-	      Xref(*iptr) = 0.0;
-	      Yref(*iptr) = 0.0;
-	      Zref(*iptr) = 0.0;
-	    }
+  get_set (instr,ImageTag);
+    get_set (instr,ParametersTag);
+      get_data (instr,NxTag,IntType, &(Nx(*iptr)), 0);
+      get_data (instr,NyTag,IntType, &(Ny(*iptr)), 0);
+      get_data (instr,NzTag,IntType, &(Nz(*iptr)), 0);
+      if ((nx>0 || ny>0 || nz>0) && (nx != Nx(*iptr) || ny != Ny(*iptr) || nz != Nz(*iptr)))
+	error("Cannot read different sized images in old pointer yet");
+      if (get_tag_ok(instr,AxisTag))
+	get_data (instr,AxisTag,IntType, &(Axis(*iptr)), 0);
+      else
+	Axis(*iptr) = 0;
+      if (Axis(*iptr) == 1) {
+	get_data_coerced (instr,XrefTag,RealType, &(Xref(*iptr)), 0);
+	get_data_coerced (instr,YrefTag,RealType, &(Yref(*iptr)), 0);
+	get_data_coerced (instr,ZrefTag,RealType, &(Zref(*iptr)), 0);
+      } else {
+	Xref(*iptr) = 0.0;
+	Yref(*iptr) = 0.0;
+	Zref(*iptr) = 0.0;
+      }
 
-            get_data_coerced (instr,XminTag,RealType, &(Xmin(*iptr)), 0);
-            get_data_coerced (instr,YminTag,RealType, &(Ymin(*iptr)), 0);
-            get_data_coerced (instr,ZminTag,RealType, &(Zmin(*iptr)), 0);
-            get_data_coerced (instr,DxTag,RealType, &(Dx(*iptr)), 0);
-            get_data_coerced (instr,DyTag,RealType, &(Dy(*iptr)), 0);
-            get_data_coerced (instr,DzTag,RealType, &(Dz(*iptr)), 0);
-	    get_data_coerced (instr,MapMinTag, RealType, &(MapMin(*iptr)), 0);
-	    get_data_coerced (instr,MapMaxTag, RealType, &(MapMax(*iptr)), 0);
-	    get_data (instr,BeamTypeTag, IntType, &(BeamType(*iptr)), 0);
-	    get_data_coerced (instr,BeamxTag, RealType, &(Beamx(*iptr)), 0);
-	    get_data_coerced (instr,BeamyTag, RealType, &(Beamy(*iptr)), 0);
-	    get_data_coerced (instr,BeamzTag, RealType, &(Beamz(*iptr)), 0);
-            if (get_tag_ok(instr,NamexTag))             /* X-axis name */
-                Namex(*iptr) = get_string(instr,NamexTag);
-            else
-                Namex(*iptr) = NULL;
-            if (get_tag_ok(instr,NameyTag))             /* Y-axis name */
-                Namey(*iptr) = get_string(instr,NameyTag);
-            else
-                Namey(*iptr) = NULL;
-            if (get_tag_ok(instr,NamezTag))             /* Z-axis name */
-                Namez(*iptr) = get_string(instr,NamezTag);
-            else
-                Namez(*iptr) = NULL;
-            if (get_tag_ok(instr,UnitTag))             /* units  */
-                Unit(*iptr) = get_string(instr,UnitTag);
-            else
-                Unit(*iptr) = NULL;
-            if (get_tag_ok(instr,TimeTag))             /* time  */
-   	    	get_data_coerced (instr,TimeTag, RealType, &(Time(*iptr)), 0);
-   	    else
-   	    	Time(*iptr) = 0.0;
-            read_matdef = get_string(instr,StorageTag);
-	    if (!streq(read_matdef,matdef[idef]))
-                dprintf(0,"read_image: StorageTag = %s, compiled with %s\n",
-		        read_matdef, matdef[idef]);
-         get_tes (instr,ParametersTag);
+      get_data_coerced (instr,XminTag,RealType, &(Xmin(*iptr)), 0);
+      get_data_coerced (instr,YminTag,RealType, &(Ymin(*iptr)), 0);
+      get_data_coerced (instr,ZminTag,RealType, &(Zmin(*iptr)), 0);
+      get_data_coerced (instr,DxTag,RealType, &(Dx(*iptr)), 0);
+      get_data_coerced (instr,DyTag,RealType, &(Dy(*iptr)), 0);
+      get_data_coerced (instr,DzTag,RealType, &(Dz(*iptr)), 0);
+      get_data_coerced (instr,MapMinTag, RealType, &(MapMin(*iptr)), 0);
+      get_data_coerced (instr,MapMaxTag, RealType, &(MapMax(*iptr)), 0);
+      get_data (instr,BeamTypeTag, IntType, &(BeamType(*iptr)), 0);
+      get_data_coerced (instr,BeamxTag, RealType, &(Beamx(*iptr)), 0);
+      get_data_coerced (instr,BeamyTag, RealType, &(Beamy(*iptr)), 0);
+      get_data_coerced (instr,BeamzTag, RealType, &(Beamz(*iptr)), 0);
+      if (get_tag_ok(instr,NamexTag))             /* X-axis name */
+	Namex(*iptr) = get_string(instr,NamexTag);
+      else
+	Namex(*iptr) = NULL;
+      if (get_tag_ok(instr,NameyTag))             /* Y-axis name */
+	Namey(*iptr) = get_string(instr,NameyTag);
+      else
+	Namey(*iptr) = NULL;
+      if (get_tag_ok(instr,NamezTag))             /* Z-axis name */
+	Namez(*iptr) = get_string(instr,NamezTag);
+      else
+	Namez(*iptr) = NULL;
+      if (get_tag_ok(instr,UnitTag))             /* units  */
+	Unit(*iptr) = get_string(instr,UnitTag);
+      else
+	Unit(*iptr) = NULL;
+      if (get_tag_ok(instr,TimeTag))             /* time  */
+	get_data_coerced (instr,TimeTag, RealType, &(Time(*iptr)), 0);
+      else
+	Time(*iptr) = 0.0;
+      read_matdef = get_string(instr,StorageTag);
+      if (!streq(read_matdef,matdef[idef])) {
+	warning("read_image: StorageTag = %s, compiled with %s\n", read_matdef, matdef[idef]);
+	reverse = TRUE;
+      }
+    get_tes (instr,ParametersTag);
 
-         get_set (instr,MapTag);
-            if (Frame(*iptr)==NULL) {        /* check if allocated */
-                Frame(*iptr) = (real *) 
-			allocate(Nx(*iptr)*Ny(*iptr)*Nz(*iptr)*sizeof(real));   
-                dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
-            } else
-                dprintf (DLEV,"Frame already allocated @ %d\n",Frame(*iptr));
-	    if (Nz(*iptr)==1)
-                get_data_coerced (instr,MapValuesTag,RealType, Frame(*iptr), 
-                                Nx(*iptr), Ny(*iptr), 0);
-            else
-                get_data_coerced (instr,MapValuesTag,RealType, Frame(*iptr),
-                                Nx(*iptr), Ny(*iptr), Nz(*iptr), 0);
-         get_tes (instr,MapTag);
-      get_tes (instr,ImageTag);
+    get_set (instr,MapTag);
+      if (Frame(*iptr)==NULL) {        /* check if allocated */
+	Frame(*iptr) = (real *) allocate(Nx(*iptr)*Ny(*iptr)*Nz(*iptr)*sizeof(real));   
+	dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
+      } else
+	dprintf (DLEV,"Frame already allocated @ %d\n",Frame(*iptr));
+#ifdef FORDEF
+      if (idef==1) error("FORDEF with idef=1");
+      if (Nz(*iptr)==1) {
+	if (reverse) {
+	  warning("reading 2D reversed");
+	  get_data_coerced (instr,MapValuesTag,RealType,Frame(*iptr),Nx(*iptr),Ny(*iptr),0); // orig
+	} else
+	  get_data_coerced (instr,MapValuesTag,RealType,Frame(*iptr),Ny(*iptr),Nx(*iptr),0);
+      } else {
+	if (reverse) {
+	  warning("reading 3D reversed");
+	  get_data_coerced (instr,MapValuesTag,RealType,Frame(*iptr),Nx(*iptr),Ny(*iptr),Nz(*iptr),0); // orig
+	} else {
+	  get_data_coerced (instr,MapValuesTag,RealType,Frame(*iptr),Nz(*iptr),Ny(*iptr),Nx(*iptr),0);
+	}
+      }
+#else
+      if (idef==0) error("FORDEF with idef=1");
+      if (Nz(*iptr)==1)
+	get_data_coerced (instr,MapValuesTag,RealType,Frame(*iptr),Nx(*iptr),Ny(*iptr),0); // orig
+      else
+	get_data_coerced (instr,MapValuesTag,RealType,Frame(*iptr),Nx(*iptr),Ny(*iptr),Nz(*iptr),0); // orig
+#endif
+    get_tes (instr,MapTag);
+  get_tes (instr,ImageTag);
 
-      set_iarray(*iptr);
+  set_iarray(*iptr);
 
-      dprintf (DLEV,"Frame size %d * %d \n",Nx(*iptr), Ny(*iptr));
+  dprintf (DLEV,"Frame size %d * %d \n",Nx(*iptr), Ny(*iptr));
       
-      return 1;		/* succes return code  */
+  return 1;		/* succes return code  */
 }
 
 /*
@@ -382,10 +407,7 @@ int copy_image (imageptr iptr, imageptr *optr)
   nz = Nz(iptr);
 
   *optr = (imageptr ) allocate(sizeof(image));
-  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*op
-
-
-tr,nx,ny,nz);
+  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*optr,nx,ny,nz);
     	
   Frame(*optr) = (real *) allocate(nx*ny*nz*sizeof(real));	
   dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
@@ -402,16 +424,8 @@ tr,nx,ny,nz);
   Namey(*optr) = mystrcpy(Namey(iptr));
   Namez(*optr) = mystrcpy(Namez(iptr));
   Xref(*optr) = Xref(iptr);
-  Yre
-
-ds9 &
-f(*optr) = Yref(iptr);
-  Zref(*optr) = Zref(iptr);cd
-
-
-
-
-
+  Yref(*optr) = Yref(iptr);
+  Zref(*optr) = Zref(iptr);
 
   return 1;		/* succes return code  */
 }
