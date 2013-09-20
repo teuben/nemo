@@ -237,16 +237,16 @@ int  nx,ny,nz,nb,idir;
     int ix,iy,iz, ier;
     
     if (idir==1)
-        for (iy=0; iy<ny; iy++)
         for (iz=0; iz<nz; iz++)
+        for (iy=0; iy<ny; iy++)
             ier += convolve_x (a,iy,iz,nx,ny,nz,b,nb);
     else if (idir==2)
-        for (ix=0; ix<nx; ix++)
         for (iz=0; iz<nz; iz++)
+        for (ix=0; ix<nx; ix++)
             ier += convolve_y (a,ix,iz,nx,ny,nz,b,nb);
     else if (idir==3)
-        for (ix=0; ix<nx; ix++)
         for (iy=0; iy<ny; iy++)
+        for (ix=0; ix<nx; ix++)
             ier += convolve_z (a,ix,iy,nx,ny,nz,b,nb);
     else
         return 0;
