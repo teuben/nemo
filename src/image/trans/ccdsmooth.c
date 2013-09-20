@@ -15,6 +15,7 @@
  *      12-mar-98  V3.1  handle gauss=0 and added cut= keyword          PJT
  *	20-apr-01      a bigger default size for MSIZE			pjt
  *      18-jan-12  V3.2  FORDEF/CDEF
+ *      20-sep-13      a finalized the proper FORDEF/CDEF codings       pjt
  *
  *	"Smoothing is art, not science"
  *				- Numerical Recipies, p495
@@ -36,7 +37,7 @@ string defv[] = {
   "nsmooth=1\n            Number of smoothings",
   "bad=\n		  Optional ignoring this bad value",
   "cut=0.01\n             Cutoff value for gaussian, if used",
-  "VERSION=3.2a\n         19-sep-2013 PJT",
+  "VERSION=3.2b\n         20-sep-2013 PJT",
   NULL,
 };
 
@@ -151,7 +152,7 @@ void smooth_it()
     }
 
     m_max = -HUGE;                      /* determine new min/max */
-    m_min =  HUGE;
+    m_min =  HUGE;                      /* this loop adds about 10% in dir=x mode */
 #ifdef FORDEF
     for (iz=0; iz<Nz(iptr); iz++) 
     for (iy=0; iy<Ny(iptr); iy++)
@@ -237,16 +238,26 @@ int  nx,ny,nz,nb,idir;
     int ix,iy,iz, ier;
     
     if (idir==1)
-        for (iz=0; iz<nz; iz++)
-        for (iy=0; iy<ny; iy++)
+#ifdef FORDEF
+        for (iz=0; iz<nz; iz++) for (iy=0; iy<ny; iy++)
+#else
+        for (iy=0; iy<ny; iy++) for (iz=0; iz<nz; iz++) 
+#endif
             ier += convolve_x (a,iy,iz,nx,ny,nz,b,nb);
     else if (idir==2)
-        for (iz=0; iz<nz; iz++)
-        for (ix=0; ix<nx; ix++)
+#ifdef FORDEF
+        for (iz=0; iz<nz; iz++) for (ix=0; ix<nx; ix++)
+#else
+        for (ix=0; ix<nx; ix++) for (iz=0; iz<nz; iz++) 
+#endif
+
             ier += convolve_y (a,ix,iz,nx,ny,nz,b,nb);
     else if (idir==3)
-        for (iy=0; iy<ny; iy++)
-        for (ix=0; ix<nx; ix++)
+#ifdef FORDEF
+        for (iy=0; iy<ny; iy++) for (ix=0; ix<nx; ix++)
+#else
+        for (ix=0; ix<nx; ix++) for (iy=0; iy<ny; iy++) 
+#endif
             ier += convolve_z (a,ix,iy,nx,ny,nz,b,nb);
     else
         return 0;
