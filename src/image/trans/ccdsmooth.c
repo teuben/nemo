@@ -254,9 +254,9 @@ int  nx,ny,nz,nb,idir;
 }
 
 #ifdef FORDEF
-#define OFFSET(ix,iy,iz,nx,ny,nz)  ix + iy*nx + iz*nx*ny
+#define OFFSET(ix,iy,iz)  ix + iy*nx + iz*nx*ny
 #else
-#define OFFSET(ix,iy,iz,nx,ny,nz)  iz + iy*nz + ix*nz*ny
+#define OFFSET(ix,iy,iz)  iz + iy*nz + ix*nz*ny
 #endif
 
 
@@ -274,7 +274,7 @@ int    nx, ny, nz, nb, iy, iz;
   }
   
   for (ix=0; ix<nx; ix++) {
-    offset = OFFSET(ix,iy,iz,nx,ny,nz);
+    offset = OFFSET(ix,iy,iz);
     c[ix] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
@@ -285,7 +285,7 @@ int    nx, ny, nz, nb, iy, iz;
       if (kx>=0)
 	if (kx<nx) {
 	  if (Qbad && c[ix]==bad) continue;
-	  *(a+iz+iy*nz+kx*ny*nz) += b[jx]*c[ix];
+	  *(a+OFFSET(kx,iy,iz)) += b[jx]*c[ix];
 	} else
 	  continue;
     }
@@ -306,7 +306,7 @@ int    nx, ny, nz, nb, ix, iz;
   }
   
   for (iy=0; iy<ny; iy++) {
-    offset = OFFSET(ix,iy,iz,nx,ny,nz);
+    offset = OFFSET(ix,iy,iz);
     c[iy] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
@@ -317,7 +317,7 @@ int    nx, ny, nz, nb, ix, iz;
       if (ky>=0)
 	if (ky<ny){
 	  if (Qbad && c[iy]==bad) continue;
-	  *(a+iz+ky*nz+ix*ny*nz) += b[jy]*c[iy];
+	  *(a+OFFSET(ix,ky,iz)) += b[jy]*c[iy];
 	} else
 	  continue;
     }
@@ -338,7 +338,7 @@ int    nx, ny, nz, nb, ix, iy;
   }
   
   for (iz=0; iz<nz; iz++) {
-    offset = OFFSET(ix,iy,iz,nx,ny,nz);
+    offset = OFFSET(ix,iy,iz);
     c[iz] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
@@ -349,7 +349,7 @@ int    nx, ny, nz, nb, ix, iy;
       if (kz>=0)
 	if (kz<nz) {
 	  if (Qbad && c[iz]==bad) continue;
-	  *(a+kz+iy*nz+ix*nz*ny) += b[jz]*c[iz];
+	  *(a+OFFSET(ix,iy,kz)) += b[jz]*c[iz];
 	} else
 	  continue;
     }
