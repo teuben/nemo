@@ -34,9 +34,9 @@ string defv[] = {
   "dir=xy\n               Coordinates to smooth (xyz)",			
   "smooth=0.25,0.5,0.25\n ALternate smoothing array if gauss= not used",
   "nsmooth=1\n            Number of smoothings",
-  "bad=\n			Optional ignoring this bad value",
+  "bad=\n		  Optional ignoring this bad value",
   "cut=0.01\n             Cutoff value for gaussian, if used",
-  "VERSION=3.2\n          18-jan-2012 PJT",
+  "VERSION=3.2a\n         19-sep-2013 PJT",
   NULL,
 };
 
@@ -152,9 +152,15 @@ void smooth_it()
 
     m_max = -HUGE;                      /* determine new min/max */
     m_min =  HUGE;
+#ifdef FORDEF
+    for (iz=0; iz<Nz(iptr); iz++) 
+    for (iy=0; iy<Ny(iptr); iy++)
+    for (ix=0; ix<Nx(iptr); ix++) {
+#else
     for (ix=0; ix<Nx(iptr); ix++)   	
     for (iy=0; iy<Ny(iptr); iy++)
     for (iz=0; iz<Nz(iptr); iz++) {
+#endif
           brightness = CubeValue(iptr,ix,iy,iz);
 	  total += brightness;
           m_max = MAX(m_max, brightness);
@@ -247,6 +253,12 @@ int  nx,ny,nz,nb,idir;
     return ( ier==0 ? 1 : 0 );
 }
 
+#ifdef FORDEF
+#define OFFSET(ix,iy,iz,nx,ny,nz)  ix + iy*nx + iz*nx*ny
+#else
+#define OFFSET(ix,iy,iz,nx,ny,nz)  iz + iy*nz + ix*nz*ny
+#endif
+
 
 int convolve_x (a, iy, iz, nx, ny, nz, b, nb)
 real *a, b[];
@@ -262,7 +274,7 @@ int    nx, ny, nz, nb, iy, iz;
   }
   
   for (ix=0; ix<nx; ix++) {
-    offset = iz + iy*nz + ix*nz*ny;	/* CDEF */
+    offset = OFFSET(ix,iy,iz,nx,ny,nz)
     c[ix] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
@@ -294,7 +306,7 @@ int    nx, ny, nz, nb, ix, iz;
   }
   
   for (iy=0; iy<ny; iy++) {
-    offset = iz+iy*nz+ix*nz*ny;     /* CDEF */
+    offset = OFFSET(ix,iy,iz,nx,ny,nz)
     c[iy] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
@@ -326,7 +338,7 @@ int    nx, ny, nz, nb, ix, iy;
   }
   
   for (iz=0; iz<nz; iz++) {
-    offset = iz+iy*nz+ix*nz*ny;         /* CDEF */
+    offset = OFFSET(ix,iy,iz,nx,ny,nz)
     c[iz] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
