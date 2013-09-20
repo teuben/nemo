@@ -274,7 +274,7 @@ int    nx, ny, nz, nb, iy, iz;
   }
   
   for (ix=0; ix<nx; ix++) {
-    offset = OFFSET(ix,iy,iz,nx,ny,nz)
+    offset = OFFSET(ix,iy,iz,nx,ny,nz);
     c[ix] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
@@ -306,7 +306,7 @@ int    nx, ny, nz, nb, ix, iz;
   }
   
   for (iy=0; iy<ny; iy++) {
-    offset = OFFSET(ix,iy,iz,nx,ny,nz)
+    offset = OFFSET(ix,iy,iz,nx,ny,nz);
     c[iy] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
@@ -338,7 +338,7 @@ int    nx, ny, nz, nb, ix, iy;
   }
   
   for (iz=0; iz<nz; iz++) {
-    offset = OFFSET(ix,iy,iz,nx,ny,nz)
+    offset = OFFSET(ix,iy,iz,nx,ny,nz);
     c[iz] = *(a+offset);		/* copy array */
     *(a+offset) = 0.0;		/* reset for accumulation */
   }
