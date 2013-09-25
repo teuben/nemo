@@ -38,19 +38,24 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "todms=\n           list of columns (1..) to convert to dms (0=none)",
     "tohms=\n           list of columns (1..) to convert to hms (0=none)",
     "fromhms=\n         list of columns (1..) to convert from hms (0=none)",
+    "fromdms=\n         list of columns (1..) to convert from dms (0=none)",
     "separator=:\n      separator between output D-M-S.S",
     "format=%g\n        output format",
-    "VERSION=0.7\n      31-jan-05 PJT",
+    "scale=1\n          scale applied to degrees in the fromhms=/fromdms=",
+    "VERSION=0.8\n      25-sep-2013 PJT",
     NULL
 };
 
 string usage = "Convert to HMS/DMS tables";
 
+string cvsid="$Id$";
 
 
 stream instr, outstr;			/* file streams */
 
 string sep;                             /* separator */
+string fmt;                             /* output format */
+real   scale;                           /* output scale factor */
 
 #ifndef MAX_COL
 #define MAX_COL 256
@@ -63,6 +68,7 @@ string sep;                             /* separator */
 bool   keepc[MAX_COL+1];                 /* columns to keep (t/f) in old fmt */
 int    colmode[MAX_COL+1];		 /* 0, +/-24, +/- 360 */
 int    fromhms[MAX_COL+1];               /* convert HMS to decimal (seconds)? */
+int    fromdms[MAX_COL+1];               /* convert DMS to decimal (seconds)? */
 
 extern string *burststring(string, string);
 
@@ -84,6 +90,7 @@ setparams()
     for (i=0; i<MAX_COL; i++) {
         colmode[i+1] = 0;
 	fromhms[i+1] = 0;
+	fromdms[i+1] = 0;
     }
 
     if (hasvalue("todms")) {
@@ -116,7 +123,19 @@ setparams()
 	    fromhms[j] = 1;
         }
     }
+    if (hasvalue("fromdms")) {
+    	ncol = nemoinpi(getparam("fromdms"),col,MAX_COL);
+        if (ncol < 0) error("Error parsing fromdms=%s",getparam("fromdms"));
+        for (i=0; i<ncol; i++) {
+            j = ABS(col[i]);
+            if (j>MAX_COL) error("Column %d too large, MAX_COL=%d",j,MAX_COL);
+            if (colmode[j] || fromdms[j]) error("Column %d already specified",j);
+	    fromdms[j] = 1;
+        }
+    }
     sep = getparam("separator");
+    fmt = getparam("format");
+    scale = getrparam("scale");
 }
 
 
@@ -125,8 +144,8 @@ convert(stream instr, stream outstr)
 {
     char   line[MAX_LINELEN];          /* input linelength */
     double dval;        
-    int    nval, i, nlines, sign, decimalval,nhms;
-    string *outv, *hms;             /* pointer to vector of strings to write */
+    int    nval, i, nlines, sign, decimalval,nhms,ndms;
+    string *outv, *hms, *dms;       /* pointer to vector of strings to write */
     string seps=", \t";             /* column separators  */
     real   dd, mm, ss;
         
@@ -151,8 +170,19 @@ convert(stream instr, stream outstr)
 		if (nhms > 1) dval += atof(hms[1])*60;
 		if (nhms > 2) dval += atof(hms[2]);
 		if (nhms > 3) error("HMS string %s too many %s",outv[i],sep);
-                fprintf(outstr,"%g ",dval);
+                fprintf(outstr,fmt,dval/3600.0);
+                fputs(" ",outstr);
 		freestrings(hms);
+	      } else if (fromdms[i+1]) {
+		dms = burststring(outv[i],sep);
+		ndms = xstrlen(dms,sizeof(string))-1;
+		dval = atof(dms[0])*3600;
+		if (ndms > 1) dval += atof(dms[1])*60;
+		if (ndms > 2) dval += atof(dms[2]);
+		if (ndms > 3) error("DMS string %s too many %s",outv[i],sep);
+                fprintf(outstr,fmt,dval*15/3600.0);
+                fputs(" ",outstr);
+		freestrings(dms);
 	      } else {
                 fputs(outv[i],outstr);
                 fputs(" ",outstr);
