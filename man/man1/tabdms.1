@@ -1,4 +1,4 @@
-.TH TABDMS 1NEMO "24 January 2000"
+.TH TABDMS 1NEMO "25 September 2013"
 .SH NAME
 tabdms \- Convert to HMS/DMS tables
 .SH SYNOPSIS
@@ -33,13 +33,21 @@ The H ins HMS is normally assumed to be modulo 24.
 Default: none.
 .TP 
 \fBfromhms=\fP
-A list of columns (1..) to convert from hms.
-** in development **
+A list of columns (1..) to convert from hms to degrees (or seconds)
+[none]
+.TP
+\fBfromhms=\fP
+A list of columns (1..) to convert from dms to seconds (or seconds)
 [none]
 .TP 
 \fBseparator=\fP
 separator between output D-M-S.S 
 [Default: \fB:\fP]
+.TP 
+\fBscale=\fP
+Scaling factor applied to degrees. If you want seconds, use 3600 here. For radians,
+use \fBpi/180\fP.
+[Default: \fB1\fP]
 .SH EXAMPLES
 The following example prints out the 4 possible ways to convert the
 number "12.51" to DMS or HMS:
@@ -49,6 +57,10 @@ number "12.51" to DMS or HMS:
 .fi
 Column 1 in .DMS, 2 as D.MS, 3 as .HMS, 4 as H.MS and 5 is the
 original column copied.
+.nf
+echo 12:00:00 12:00:00 | tabdms - - fromhms=1 fromdms=2
+12 180
+.fi
 .SH LIMITATIONS
 The code is compiled with a maximum number of columns, MAXCOL, typically
 256.
@@ -62,4 +74,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 24-Jan-00	V0.4 doc written	PJT
+25-sep-13	V0.8 added fromdms=	PJT
 .fi
