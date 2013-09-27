@@ -504,10 +504,15 @@ real **map2_image (imageptr iptr)
         base += ny;
     }
 #endif
-    return map;
 #else
-    error("map2_image: not implemented for !CDEF");    
+    // map[ny][nx]
+    map = (real **) allocate(sizeof(real *) * ny);
+    for (iy=0; iy<ny; iy++) {               /* FORDEF */
+        map[iy] = base;
+        base += nx;
+    }
 #endif    
+    return map;
 }
 
 real ***map3_image (imageptr iptr)
@@ -530,10 +535,18 @@ real ***map3_image (imageptr iptr)
 	base += nx;
       }
     }
-    return cube;
 #else
-    error("map3_image: not implemented for !CDEF");    
+    // cube[nz][ny][nx]
+    cube = (real ***) allocate(sizeof(real **) * nz);
+    for (iz=0; iz<nz; iz++) {
+      cube[iz] = (real **) allocate(sizeof(real *) * ny);
+      for (iy=0; iy<ny; iy++) {
+	cube[iz][iy] = base;
+	base += nx;
+      }
+    }
 #endif    
+    return cube;
 }
 
 char *mystrcpy(char *a)
