@@ -9,4 +9,5 @@ set ans=$<
 
 sync
 sync
+#   /sbin/sysctl vm.drop_caches=3
 echo 1 > /proc/sys/vm/drop_caches
