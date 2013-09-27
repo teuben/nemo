@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f ccd.in
+	@rm -f ccd.in cube432.ccd
 
 NBODY = 10
 
@@ -27,3 +27,6 @@ ccdprint: ccd.in
 ccddump: ccd.in
 	@echo Running $@
 	$(EXEC) ccddump ccd.in . ; nemo.coverage ccddump.c
+
+cube432.ccd:
+	ccdmath out=cube432.ccd fie='%x+10*%y+100*%z' size=4,3,2 cdelt=-0.01,0.01,1000
