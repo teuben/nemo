@@ -270,6 +270,10 @@ int read_image (stream instr, imageptr *iptr)
       if (Frame(*iptr)==NULL) {        /* check if allocated */
 	Frame(*iptr) = (real *) allocate(Nx(*iptr)*Ny(*iptr)*Nz(*iptr)*sizeof(real));   
 	dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
+#if defined(USE_CARRAY)
+	warning("new map3_image");
+	Cube(*iptr) = map3_image(*iptr);
+#endif
       } else
 	dprintf (DLEV,"Frame already allocated @ %d\n",Frame(*iptr));
 #ifdef FORDEF
@@ -300,7 +304,7 @@ int read_image (stream instr, imageptr *iptr)
 
   set_iarray(*iptr);
 
-  dprintf (DLEV,"Frame size %d * %d \n",Nx(*iptr), Ny(*iptr));
+  dprintf (DLEV,"Frame size %d * %d * %d\n",Nx(*iptr), Ny(*iptr), Nz(*iptr));
       
   return 1;		/* succes return code  */
 }
