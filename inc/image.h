@@ -29,6 +29,7 @@
  *                    which seems 15% slower..... (ccdstat EVLA benchmark)
  * 
  *  17-jan-12    V9.0 use FORDEF as default to easy I/O with real astronomy
+ *  27-sep-2013  V9.1 use USE_CARRAY
  */
 #ifndef _h_image
 #define _h_image
@@ -135,6 +136,8 @@ typedef struct {
 
 
 #define Frame(iptr)	((iptr)->frame)
+#define Matrix(iptr)    ((iptr)->matrix)
+#define Cube(iptr)      ((iptr)->cube)
 #define Axis(iptr)      ((iptr)->axis)
 #define Nx(iptr)	((iptr)->nx)
 #define Ny(iptr)	((iptr)->ny)
@@ -181,8 +184,13 @@ typedef struct {
 
 /* column major:    data(ix,iy)  data(r,c)   offset = col*NUMROWS + row    */
 #if defined(FORDEF)
+#if defined(USE_CARRAY)
+#define MapValue(iptr,ix,iy)	 (*( (iptr)->matrix[iy][ix] ))
+#define CubeValue(iptr,ix,iy,iz) (*( (iptr)->cube[iz][iy][ix] ))
+#else
 #define MapValue(iptr,ix,iy)	 (*( (iptr)->frame + ix + Nx(iptr)*(iy)) )
 #define CubeValue(iptr,ix,iy,iz) (*( (iptr)->frame + ix + Nx(iptr)*(iy+Ny(iptr)*(iz))))
+#endif
 #endif
 
 #endif
