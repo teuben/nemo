@@ -37,7 +37,8 @@ string defv[] = {
   "nsmooth=1\n            Number of smoothings",
   "bad=\n		  Optional ignoring this bad value",
   "cut=0.01\n             Cutoff value for gaussian, if used",
-  "VERSION=3.2b\n         20-sep-2013 PJT",
+  "test=0\n               do some kind of test mode",
+  "VERSION=3.2b\n         28-sep-2013 PJT",
   NULL,
 };
 
@@ -71,8 +72,11 @@ string dir;                             /* direction to smooth 'xyz' */
 bool   Qbad;                            /* ignore smoothing for */
 real   bad;                             /* this value */
 
+int    test;
+
 void setparams(), smooth_it(), make_gauss_beam();
-int convolve_cube (), convolve_x(), convolve_y(), convolve_z();
+int convolve_cube(), convolve_x(), convolve_y(), convolve_z();
+int convolve_image(), convolve_image_x(), convolve_image_y(), convolve_image_z();
 
 
 void nemo_main ()
@@ -119,6 +123,7 @@ void setparams(void)
     dir = getparam("dir");
     Qbad = hasvalue("bad");
     if (Qbad) bad = getdparam("bad");
+    test = getiparam("test");
 }
 
 void smooth_it()
@@ -146,7 +151,10 @@ void smooth_it()
                 idir=3;
             else
 	        error("Wrong direction %c for beamsmoothing\n",*cp);
-	    convolve_cube (Frame(iptr),nx,ny,nz,smooth,lsmooth,idir);
+	    if (test)
+	      convolve_image (iptr,nx,ny,nz,smooth,lsmooth,idir);
+	    else
+	      convolve_cube (Frame(iptr),nx,ny,nz,smooth,lsmooth,idir);
             cp++;
 	}
     }
@@ -162,7 +170,8 @@ void smooth_it()
     for (iy=0; iy<Ny(iptr); iy++)
     for (iz=0; iz<Nz(iptr); iz++) {
 #endif
-          brightness = CubeValue(iptr,ix,iy,iz);
+      //          brightness = CubeValue(iptr,ix,iy,iz);
+          brightness = iptr->cube[iz][iy][ix];
 	  total += brightness;
           m_max = MAX(m_max, brightness);
           m_min = MIN(m_min, brightness);
@@ -236,6 +245,7 @@ real *a, b[];
 int  nx,ny,nz,nb,idir;
 {
     int ix,iy,iz, ier;
+    warning("Classic ccdsmooth");
     
     if (idir==1)
 #ifdef FORDEF
@@ -259,6 +269,29 @@ int  nx,ny,nz,nb,idir;
         for (ix=0; ix<nx; ix++) for (iy=0; iy<ny; iy++) 
 #endif
             ier += convolve_z (a,ix,iy,nx,ny,nz,b,nb);
+    else
+        return 0;
+    return ( ier==0 ? 1 : 0 );
+}
+
+int convolve_image (iptr, nx, ny, nz, b, nb, idir)
+  imageptr iptr;
+ real b[];
+ int  nx,ny,nz,nb,idir;
+{
+    int ix,iy,iz, ier;
+    real *a = Frame(iptr);
+    warning("new convolve_image style");
+    
+    if (idir==1)
+        for (iz=0; iz<nz; iz++) for (iy=0; iy<ny; iy++)
+            ier += convolve_image_x (iptr,iy,iz,nx,ny,nz,b,nb);
+    else if (idir==2)
+        for (iz=0; iz<nz; iz++) for (ix=0; ix<nx; ix++)
+            ier += convolve_y (a,ix,iz,nx,ny,nz,b,nb);
+    else if (idir==3)
+        for (iy=0; iy<ny; iy++) for (ix=0; ix<nx; ix++)
+            ier += convolve_image_z (iptr,ix,iy,nx,ny,nz,b,nb);
     else
         return 0;
     return ( ier==0 ? 1 : 0 );
@@ -297,6 +330,39 @@ int    nx, ny, nz, nb, iy, iz;
 	if (kx<nx) {
 	  if (Qbad && c[ix]==bad) continue;
 	  *(a+OFFSET(kx,iy,iz)) += b[jx]*c[ix];
+	} else
+	  continue;
+    }
+  return 1;
+}
+
+int convolve_image_x (iptr, iy, iz, nx, ny, nz, b, nb)
+  imageptr iptr;
+  real b[];
+  int    nx, ny, nz, nb, iy, iz;
+{
+  real c[MSIZE];
+  real ***data = iptr->cube;
+  int    ix, jx, kx, offset;
+
+  if (nx>MSIZE) {
+    warning("convolve_x: MSIZE=%d array too small for input %d\n",
+	    MSIZE,nx);
+    return 0;
+  }
+  
+  for (ix=0; ix<nx; ix++) {
+    c[ix] = data[iz][iy][ix];   /* copy array */
+    data[iz][iy][ix] = 0.0;    	/* reset for accumulation */
+  }
+		
+  for (ix=0; ix<nx; ix++) 
+    for (jx=0; jx<nb; jx++) {
+      kx = ix + jx - (nb-1)/2;
+      if (kx>=0)
+	if (kx<nx) {
+	  if (Qbad && c[ix]==bad) continue;
+	  data[iz][iy][kx] += b[jx]*c[ix];
 	} else
 	  continue;
     }
@@ -365,5 +431,39 @@ int    nx, ny, nz, nb, ix, iy;
 	  continue;
     }
   return 1;
+
 }
 
+int convolve_image_z (iptr, ix, iy, nx, ny, nz, b, nb)
+  imageptr iptr;
+ real  b[];
+ int    nx, ny, nz, nb, ix, iy;
+{
+  real c[MSIZE];
+  real ***data = iptr->cube;
+  int    iz, jz, kz, offset;
+  
+  if (nz>MSIZE) {
+    warning("convolve_z: MSIZE=%d array too small for input %d\n",
+	    MSIZE,nz);
+    return 0;
+  }
+
+  for (iz=0; iz<nz; iz++) {
+    c[iz] = data[iz][iy][ix];
+    data[iz][iy][ix] = 0.0;
+  }
+  
+  for (iz=0; iz<nz; iz++) 
+    for (jz=0; jz<nb; jz++) {
+      kz = iz + jz - (nb-1)/2;
+      if (kz>=0)
+	if (kz<nz) {
+	  if (Qbad && c[iz]==bad) continue;
+	  data[kz][iy][ix]  += b[jz]*c[iz];
+	} else
+	  continue;
+    }
+  return 1;
+
+}
