@@ -12,9 +12,9 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f tab.in tab.out gauss1d.tab gauss2d.tab
+	@rm -f tab.in tab.out gauss1d.tab gauss2d.tab fit/myline.so
 
-all:	tab.in $(BIN)
+all:	tab.in $(BIN) fitmyline
 
 tab.in:
 	@echo Creating $@
@@ -69,6 +69,12 @@ tabfilter:
 tabtrend:
 	@echo Running $*
 	@nemoinp 0:4 | $(EXEC) tabmath - - '%1*%1' all | $(EXEC) tabtrend -
+
+#   testing object loading load= in tabnlsqfit from the fit/ directory
+fitmyline:
+	(cd fit; make -f $(NEMOLIB)/Makefile.lib myline.so)
+	tabnllsqfit tab.out
+	tabnllsqfit tab.out load=fit/myline.so par=1,1
 
 SIZE=4
 NOISE=0.01
