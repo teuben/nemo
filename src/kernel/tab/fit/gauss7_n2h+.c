@@ -41,6 +41,10 @@
  *   with fixing the line widths to be all the same
  *        par=a,c5,d,b1,b2,b3,...
  *
+ * gauss7_n2h+_3: (4 parameters)
+ *   with fixing linewidths, delta V's and relative amps
+ *        par=a,b5,c5,d
+ *
  * 28-dec-2011	created for N1333
  */
 
@@ -54,6 +58,14 @@
 #define F11 -1.644
 #define F12 -9.025
 
+#define A01  0.5
+#define A22  0.7 
+#define A10  0.8
+#define A21  0.9
+#define A32  0.9
+#define A11  0.6
+#define A12  0.7
+
 #include <stdinc.h>
 
 
@@ -64,6 +76,15 @@ static real dv4 = F21;
 static real dv5 = F32;
 static real dv6 = F11;
 static real dv7 = F12;
+
+static real av1 = A01;
+static real av2 = A22;
+static real av3 = A10;
+static real av4 = A21;
+static real av5 = A32;
+static real av6 = A11;
+static real av7 = A12;
+
 
 static debug_first = 1;
 
@@ -293,7 +314,8 @@ real func_gauss7_n2hp_2(real *x, real *p, int np)
   real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7;
 
   if (debug_first) {
-    dprintf(0,"gauss7_n2hp_2: a,c,d,b1,b2,...b7\n");
+    dprintf(0,"gauss7_n2hp_2: a,c,d,b1,b2,...b7: %g %g %g %g %g %g %g %g %g %g\n",
+	    p[0],p[1],p[2],p[3],p[4],p[5],p[6],p[7],p[8],p[9],p[10]);
     dprintf(0,"gauss7_n2hp_2: dv=%g,%g,%g,%g,%g,%g,%g\n",
 	    dv1,dv2,dv3,dv4,dv5,dv6,dv7);
     debug_first = 0;
@@ -395,3 +417,126 @@ void derv_gauss7_n2hp_2(real *x, real *p, real *e, int np)
          p[8] * e[8] * a6 * a6 / (b6*b6*b6) +
          p[9] * e[9] * a7 * a7 / (b7*b7*b7);
 }
+
+/* parameters: fix all widths to be the same as well as DV's as well as all Amp's
+ *             to a pre-described ratio
+ * 
+ *      a,b5,c5,d
+ *      0 1  2  3 
+ *
+ */
+real func_gauss7_n2hp_3(real *x, real *p, int np)
+{
+  real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7;
+
+  if (debug_first) {
+    dprintf(0,"gauss7_n2hp_3: a,b5,c5,d: %g %g %g %g\n",p[0],p[1],p[2],p[3]);
+    dprintf(0,"gauss7_n2hp_3: dv=%g,%g,%g,%g,%g,%g,%g\n",
+	    dv1,dv2,dv3,dv4,dv5,dv6,dv7);
+    dprintf(0,"gauss7_n2hp_3: av=%g,%g,%g,%g,%g,%g,%g\n",
+	    av1,av2,av3,av4,av5,av6,av7);
+    debug_first = 0;
+  }
+
+  a = p[2]-x[0]+dv1;
+  b = p[3];
+  arg1 = a*a/(2*b*b);
+
+  a = p[2]-x[0]+dv2;
+  b = p[3];
+  arg2 = a*a/(2*b*b);
+
+  a = p[2]-x[0]+dv3;
+  b = p[3];
+  arg3 = a*a/(2*b*b);
+
+  a = p[2]-x[0]+dv4;
+  b = p[3];
+  arg4 = a*a/(2*b*b);
+
+  a = p[2]-x[0]+dv5;
+  b = p[3];
+  arg5 = a*a/(2*b*b);
+
+  a = p[2]-x[0]+dv6;
+  b = p[3];
+  arg6 = a*a/(2*b*b);
+
+  a = p[2]-x[0]+dv7;
+  b = p[3];
+  arg7 = a*a/(2*b*b);
+
+  return p[0] + p[1]*(av1*exp(-arg1) + av2*exp(-arg2) + av3*exp(-arg3) +
+                      av4*exp(-arg4) + av5*exp(-arg5) + av6*exp(-arg6) + av7*exp(-arg7));
+
+}
+
+/* parameters:
+ *      a,c,d,b1,b2,b3
+ *      0 1 2 3  4  5
+ */
+
+void derv_gauss7_n2hp_3(real *x, real *p, real *e, int np)
+{
+  real a1,b1,arg1,a2,b2,arg2,a3,b3,arg3,a4,b4,arg4,a5,b5,arg5,a6,b6,arg6,a7,b7,arg7;
+  real earg1,earg2,earg3,earg4,earg5,earg6,earg7;
+
+  a1 = p[2]-x[0]+dv1;
+  b1 = p[3];
+  arg1 = a1*a1/(2*b1*b1);
+  earg1 = exp(-arg1);
+
+  a2 = p[2]-x[0]+dv2;
+  b2 = p[3];
+  arg2 = a2*a2/(2*b2*b2);
+  earg2 = exp(-arg2);
+
+  a3 = p[2]-x[0]+dv3;
+  b3 = p[3];
+  arg3 = a3*a3/(2*b3*b3);
+  earg3 = exp(-arg3);
+
+  a4 = p[2]-x[0]+dv4;
+  b4 = p[3];
+  arg4 = a4*a4/(2*b4*b4);
+  earg4 = exp(-arg4);
+
+  a5 = p[2]-x[0]+dv5;
+  b5 = p[3];
+  arg5 = a5*a5/(2*b5*b5);
+  earg5 = exp(-arg5);
+
+  a6 = p[2]-x[0]+dv6;
+  b6 = p[3];
+  arg6 = a6*a6/(2*b6*b6);
+  earg6 = exp(-arg6);
+
+  a7 = p[1]-x[0]+dv7;
+  b7 = p[2];
+  arg7 = a7*a7/(2*b7*b7);
+  earg7 = exp(-arg7);
+  
+  e[0] = 1.0;
+
+  e[1] =  av1*earg1 + av2*earg2 + av3*earg3 +
+          av4*earg4 + av5*earg5 + av6*earg6 + av7*earg7;
+
+
+  e[2] = -p[1]*av1*earg1*a1/(b1*b1)
+         -p[1]*av2*earg2*a2/(b2*b2)
+         -p[1]*av3*earg3*a3/(b3*b3)
+         -p[1]*av4*earg4*a4/(b4*b4)
+         -p[1]*av5*earg5*a5/(b5*b5)
+         -p[1]*av6*earg6*a6/(b6*b6)
+         -p[1]*av7*earg7*a7/(b7*b7);
+
+
+  e[3] = p[1] * av1*earg1 * a1 * a1 / (b1*b1*b1) +
+         p[1] * av2*earg2 * a2 * a2 / (b2*b2*b2) +
+         p[1] * av3*earg3 * a3 * a3 / (b3*b3*b3) +
+         p[1] * av4*earg4 * a4 * a4 / (b4*b4*b4) +
+         p[1] * av5*earg5 * a5 * a5 / (b5*b5*b5) +
+         p[1] * av6*earg6 * a6 * a6 / (b6*b6*b6) +
+         p[1] * av7*earg7 * a7 * a7 / (b7*b7*b7);
+}
+
