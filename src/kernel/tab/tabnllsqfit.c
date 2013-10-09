@@ -66,8 +66,8 @@ string defv[] = {
     "format=%g\n        Output format for fitted values and their errors",
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
-    "numrec=f\n         Try the numrec routine instead?",
-    "VERSION=3.0\n      9-dec-2012 PJT",
+    "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)"
+    "VERSION=4.0\n      9-oct-2013 PJT",
     NULL
 };
 
@@ -107,7 +107,9 @@ a_range    xrange;
 
 /* real xrange[MAXCOL*2];      /* ??? */
 
-string method;              /* fit method (line, poly, ....) */
+string fit_method;          /* fit method (gipsy, numrec, minpack) */
+string fit_object;          /* fit method (line, poly, ....) */
+
 stream instr, outstr;       /* input / output file */
 
 
@@ -144,6 +146,8 @@ my_proc2 fitderv;
 
 extern int nr_nllsqfit(real *, int, real *, real *, real *, int, real *, real *, int *, 
 		       int, real, int, real, my_proc1, my_proc2);
+extern int mp_nllsqfit(real *, int, real *, real *, real *, int, real *, real *, int *, 
+	 	       int, real, int, real, my_proc1, my_proc2);
 extern int    nllsqfit(real *, int, real *, real *, real *, int, real *, real *, int *, 
 		       int, real, int, real, my_proc1, my_proc2);
 
@@ -439,34 +443,34 @@ nemo_main()
     read_data();
 
     if (hasvalue("load")) {
-      load_function(getparam("load"),method);
+      load_function(getparam("load"),fit_object);
       if (hasvalue("x"))
 	do_function_test(getparam("x"));
       else
-	do_function(method);
-    } else if (scanopt(method,"line")) {
+	do_function(fit_object);
+    } else if (scanopt(fit_object,"line")) {
         do_line();
-    } else if (scanopt(method,"plane")) {
+    } else if (scanopt(fit_object,"plane")) {
     	do_plane();
-    } else if (scanopt(method,"poly")) {
+    } else if (scanopt(fit_object,"poly")) {
     	do_poly();
-    } else if (scanopt(method,"poly2")) {
+    } else if (scanopt(fit_object,"poly2")) {
     	do_poly2();
-    } else if (scanopt(method,"gauss1d")) {
+    } else if (scanopt(fit_object,"gauss1d")) {
     	do_gauss1d();
-    } else if (scanopt(method,"gauss2d")) {
+    } else if (scanopt(fit_object,"gauss2d")) {
     	do_gauss2d();
-    } else if (scanopt(method,"exp")) {
+    } else if (scanopt(fit_object,"exp")) {
     	do_exp();
-    } else if (scanopt(method,"grow")) {
+    } else if (scanopt(fit_object,"grow")) {
     	do_grow();
-    } else if (scanopt(method,"arm")) {
+    } else if (scanopt(fit_object,"arm")) {
     	do_arm();
-    } else if (scanopt(method,"loren")) {
+    } else if (scanopt(fit_object,"loren")) {
     	do_loren();
-    } else if (scanopt(method,"arm3")) {
+    } else if (scanopt(fit_object,"arm3")) {
     	do_arm3();
-    } else if (scanopt(method,"psf")) {
+    } else if (scanopt(fit_object,"psf")) {
     	do_psf();
     } else
         error("fit=%s invalid; try [line,plane,poly,poly2,gauss1d,gauss2d,exp,arm,loren,arm3]",
@@ -508,10 +512,10 @@ setparams()
     if (hasvalue("lab")) lab = getdparam("lab");
     itmax = getiparam("itmax");
     
-    method = getparam("fit");
+    fit_object = getparam("fit");
     msigma = nemoinpr(getparam("nsigma"),nsigma,MAXSIG);
     order = getiparam("order");
-    if (order<0) error("order=%d of %s cannot be negative",order,method);
+    if (order<0) error("order=%d of %s cannot be negative",order,fit_object);
 
     if (hasvalue("par")) {         /* get the initial estimates of parameters */
       npar = nemoinpr(getparam("par"),par,MAXPAR);
@@ -531,10 +535,23 @@ setparams()
       for (i=0; i<MAXPAR; i++)
 	mask[i] = 1;
     }
-    if (getbparam("numrec"))
-      my_nllsqfit = nr_nllsqfit;
-    else
+    fit_method = getparam("method");
+    switch (*fit_method) {
+    case 'g':
+    case 'G':
       my_nllsqfit = nllsqfit;
+      break;
+    case 'n':
+    case 'N':
+      my_nllsqfit = nr_nllsqfit;
+      break;
+    case 'm':
+    case 'M':
+      my_nllsqfit = mp_nllsqfit;
+      break;
+    default:
+      error("method=%s not supported, try Gipsy, Numrec, MINPACK",fit_method);
+    }
     format = getparam("format");
     nboot = getiparam("bootstrap");
     init_xrandom(getparam("seed"));
