@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "24 December 2011"
+.TH TABNLLSQFIT 1NEMO "9 October 2013"
 .SH NAME
 tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH SYNOPSIS
@@ -65,7 +65,7 @@ This keyword cannot be used if more than one X-column is used.
 .TP
 \fBfit=\fP\fImodel\fP
 Model name what to fit. Currently implemented are \fIline\fP, \fIplane\fP,
-\fIpoly\fP, \fIgauss\fP, \fIloren\fP, and \fIexp\fP.
+\fIpoly\fP, \fIgauss1d\fP, \fIloren\fP, and \fIexp\fP.
 [default: \fBline\fP].
 .TP
 \fBorder=\fP\fIorder\fP
@@ -112,7 +112,8 @@ must be named \fBfunc_loadobj\fP and \fBderv_loadobj\fP
 If given, these are the X-values for which the load function can be tested.
 It is useful for testing and debugging your function. It will report
 the X, Y and the dY/dPAR vector values. The program will exit after
-this, and no fitting is done.
+this, and no fitting is done.  If the first two values are the \fBsame\fP,
+a numerical derivate is computed (see below).
 Default: none.
 .TP
 \fBnmax=\fP\fImax_lines\fP
@@ -159,7 +160,7 @@ polynomial  	y=p0+p1*x+p2*x^2+p3*x^3...       (example order=3)
 gauss1d       	y=p0+p1*exp(-(x-p2)^2/(2*p3^2))
 gauss2d       	y=p0+p1*exp(-[(x-p2)^2+(x-p3)^2]/(2*p4^2))
 exp		y=p0+p1*exp(-(x-p2)/p3)
-grow            y=p0*(exp(x/p1)-1)
+grow		y=p0*(exp(x/p1)-1)
 arm		y=p0+p1*cos(x)+p2*sin(x)
 arm3		y=p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x) 
 loren		y=p1/PI( (x-p0)^2 + p1^2 )
@@ -196,7 +197,7 @@ And a fit to a gaussian:
 .nf
 % nemoinp 1:100 |\\
 	tabmath - - '4+exp(-(%1-50)**2/(200))+ranu(0,1)' seed=123 |\\
-	tabnllsqfit - fit=gauss par=4,1,50,10
+	tabnllsqfit - fit=gauss1d par=4,1,50,10
 nrt=13
 Fitting a+b*exp(-(x-c)^2/(2*d^2)):  
 a= 4.46714 0.0416026 
@@ -290,11 +291,52 @@ One word of caution: if you find the program having a hard time finding
 a solution in complex cases, it is quite possible that this is not due to
 the fact that the function is complex, but due to noise or bad initial
 conditions.
+.SH DERIVATIVES CHECK
+A common debug problem is to check the analytical derivatives in
+your external loaded function. The \fBx=\fP keyword can be used
+to check the function values (useful to plot up the function
+for a given set of parameters in \fBpar=\fP), in which also all
+the partial derivatives are listed:
+.nf
+   % cd $NEMO/src/kernel/tab/fit ; bake gaussn.so
+   % echo 1 1 | tabnllsqfit - load=gaussn.so fit=gaussn par=1,2,1,0.2 x=1.1:1.4:0.1
+   1.1 2.76499   1 0.882497 4.41248 2.20624
+   1.2 2.21306   1 0.606531 6.06531 6.06531
+   1.3 1.6493   1 0.324652 4.86979 7.30468
+   1.4 1.27067   1 0.135335 2.70671 5.41341
+.fi
+But to check if the analytical derivates in \fIderv_gaussn()\fP are correct, 
+repeating the same value of \fBx\fP a number of times, each parameter
+is incremented by a decreasing factor of 0.1 
+
+.nf
+   % echo 1 1 | tabnllsqfit - load=gaussn.so fit=gaussn par=1,2,1,0.2 x=1.4::4
+   # par iter Y dP  (Y-Y0)/dP   [(Y-Y0)/dP  - dY/dP]
+   0 0 1.37067 0.1 1 [8.88178e-16]
+   0 1 1.32067 0.05 1 [5.32907e-15]
+   ...
+   0 9 1.27087 0.000195313 1 [1.36424e-12]
+   1 0 1.2842 0.1 0.135335 [2.16493e-15]
+   ...
+   2 0 1.6493 0.1 3.78634 [1.07964]
+   2 1 1.43253 0.05 3.2372 [0.53049]
+   ...
+   2 8 1.27173 0.000390625 2.71067 [0.00396662]
+   2 9 1.2712 0.000195313 2.70869 [0.00198288]
+   3 0 1.82222 0.1 5.51554 [0.102129]
+   3 1 1.55607 0.05 5.70808 [0.294669]	
+   ...
+   3 8 1.27279 0.000390625 5.41867 [0.00525903]
+   3 9 1.27173 0.000195313 5.41605 [0.00263639]
+.fi
+You can see that the offset (par 0) and amplitude (par 1) of the gauss are well behaved (as they are linear),
+but the centroid (par 2) and width (par 3) of the gauss only slowly converge linearly with the step. The last
+number in square brackets is the error between numerical and analytical derivative.
 .SH CAVEATS
 It will not recognize linear fits if the non-linear parameters are kept fixed,
-e.g. the offset p0 in fit=gauss.
+e.g. the offset 0 in \fBfit=gauss1d\fP.
 .SH SEE ALSO
-tablsqfit(1NEMO),hist(1NEMO), tabmath(1NEMO), 
+tablsqfit(1NEMO), tabhist(1NEMO), tabmath(1NEMO), 
 gaussfit(1NEMO), linreg(1NEMO), nllsqfit(3NEMO), fit.dc1(GIPSY)
 .PP
 \fINumerical Recipies in C, Ch.14\fP
@@ -335,6 +377,6 @@ Peter Teuben
 7-may-10	V2.2 added grow		PJT
 24-dec-11	V2.3b estimate gauss1d if no initial par given	PJT
 9-dec-12	V3.0 new style xrange= with multiple segments	PJT
-9-oct-13	V4.0 numrec= is now method=  for mpfit trials	PJT
+9-oct-13	V4.0 numrec= is now method=  for mpfit trials, add function deriv checker	PJT
 .fi
 
