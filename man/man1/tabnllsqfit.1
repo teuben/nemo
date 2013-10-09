@@ -144,6 +144,11 @@ Default:0
 \fBseed=\fP
 Initial seed. See \fIxrandom(3)\fP for more
 details. Default: 0
+.TP
+\fBmethod=g|n|m\fP
+Fitting method. Gipsy uses their \fInllsqfit(3NEMO)\fP, NumRec uses their
+\fImrqfit\fP and MINPACK uses \fImpfit(3NEMO)\fP.  Only first character
+is used, case insensitive.  [Default: \fBg\fP]
 .SH FIT PARAMETERS
 Parameters are referred to as p0,p1,p2,p3,.....
 .nf
@@ -330,5 +335,6 @@ Peter Teuben
 7-may-10	V2.2 added grow		PJT
 24-dec-11	V2.3b estimate gauss1d if no initial par given	PJT
 9-dec-12	V3.0 new style xrange= with multiple segments	PJT
+9-oct-13	V4.0 numrec= is now method=  for mpfit trials	PJT
 .fi
 
