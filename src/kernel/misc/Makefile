@@ -22,7 +22,8 @@ SRCFILES= axis.c besselfunc.c erf.c fie.c \
 	  nemoinp.c nemomain.c newextn.c pick.c pow.c run.c scanopt.c \
 	  setfblank.c spline.c timers.c vectmath.c within.c \
 	  xrand.c xrandom.c \
-	  sort.c sortptr.c unwrap.c
+	  sort.c sortptr.c unwrap.c \
+	  mp_nllsqfit.c
 
 OBJFILES= axis.o besselfunc.o erf.o fie.o \
 	  frandom.o grid.o \
@@ -32,7 +33,8 @@ OBJFILES= axis.o besselfunc.o erf.o fie.o \
 	  nemoinp.o nemomain.o newextn.o pick.o pow.o run.o scanopt.o \
 	  setfblank.o spline.o timers.o vectmath.o within.o \
 	  xrand.o xrandom.o \
-	  sort.o sortptr.o unwrap.o
+	  sort.o sortptr.o unwrap.o \
+	  mp_nllsqfit.o
 
 LOBJFILES= $L(axis.o) $L(besselfunc.o) $L(erf.o) $L(fie.o) $L(layout.o) \
 	  $L(frandom.o) $L(grid.o) \
@@ -42,7 +44,8 @@ LOBJFILES= $L(axis.o) $L(besselfunc.o) $L(erf.o) $L(fie.o) $L(layout.o) \
 	  $L(nemoinp.o) $L(nemomain.o) $L(newextn.o) $L(pick.o) $L(pow.o) $L(run.o) $L(scanopt.o) \
 	  $L(setfblank.o) $L(spline.o) $L(timers.o) $L(vectmath.o) $L(within.o) \
 	  $L(xrand.o) $L(xrandom.o) \
-	  $L(sort.o) $L(sortptr.o) $L(unwrap.o)
+	  $L(sort.o) $L(sortptr.o) $L(unwrap.o) \
+	  $L(mp_nllsqfit.o)
 
 BINFILES = nemoinp layout xrandom scanopt 
 
