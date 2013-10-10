@@ -17,14 +17,18 @@ static iproc old_df;
 
 static int old_xdim = -1;
 
-/* mp_func0: wrapper to our function */
+/* my_func: wrapper to our function */
 
-int mp_func0(int m, int n, double *x, double *fvec, double **dvec, void *private_data)
+int my_func(int m, int n, double *x, double *fvec, double **dvec, void *private_data)
 {
   static real old_x, old_a[MAXPAR], old_d[MAXPAR];
   static int i;
 
 #if 0
+
+  /* to be called as follows: */
+  // funct(m,n,x,fvec,dvec,priv);
+
   old_x = x;
   for (i=0; i<na; i++)
     old_a[i] = a[i+1];
@@ -32,7 +36,7 @@ int mp_func0(int m, int n, double *x, double *fvec, double **dvec, void *private
   (*old_df)(&old_x, old_a, old_d, na);
   for (i=0; i<na; i++)
     dyda[i+1] = old_d[i];
-  dprintf(2,"mp_func0(%d): x=%g y=%g a[1]=%g a[2]=%g\n",na,x,*y,a[1],a[2]);
+  dprintf(2,"my_func(%d): x=%g y=%g a[1]=%g a[2]=%g\n",na,x,*y,a[1],a[2]);
 #endif
 }
 
@@ -69,7 +73,9 @@ int mp_nllsqfit(
 
   if (xdim != 1) error("mp_nllsqfit: cannot deal with xdim=%d",xdim);
 
-  mpfit(mp_func0, ndat, npar,
+  old_f = f;   /* mpfit only uses f, doesn't need df */
+
+  mpfit(my_func, ndat, npar,
 	xdat, pars, config, private_data, 
 	&result);
 
