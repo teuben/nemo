@@ -7,7 +7,7 @@ tabnllsqfit \- general purpose non-linear least squares fitting program
 .SH DESCRIPTION
 \fBtabnllsqfit\fP takes a non-linear least squares fit (minimized ChiSquared)
 of a set of datapoints (x(i),y(i)) where a functional
-form y=f(x;a0,a1,...,an) is assumed. The function is not required to
+form y=f(x;p0,p1,...,pN) is assumed. The function is not required to
 be non-linear in it parameters. Although a number of common pre-defined
 functional forms can be selected (see \fBfit=\fP), you can also write
 a small C routine, and dynamically load the fitted function during
@@ -169,15 +169,14 @@ psf		y=p1*x^p2*sin(y)^p3+p4
 .SH EXAMPLE
 Here is an example of a linear fit: a straight 
 line, with some added noise and random weights between 1 and 2:
-(ieck, can't reproduce this anymore)
 .nf
 % nemoinp 1:100 |\\
 	tabmath - - "%1+rang(0,10),ranu(1,2)" seed=123 |\\
 	tabnllsqfit - 1 2 3
 nrt=0
 Fitting a+bx:  
-a= 1.87458 2.29818 
-b= 0.961672 0.0398614
+a= 1.50492 2.25695 
+b= 1.00159 0.0380961
 .fi
 Here is an example of a 2D plane  in 3D: (1+2x+3y)
 .nf
