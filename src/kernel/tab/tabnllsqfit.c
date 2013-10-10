@@ -23,6 +23,7 @@
  *       7-may-10  2.2  grow
  *      14-may-11  2.3  different options for bootstrap method
  *       9-dec-12  3.0  xrange= now allows separate sections   a:b,c:d,....
+ *      10-oct-13  4.0  method=
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -67,7 +68,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)"
-    "VERSION=4.0\n      9-oct-2013 PJT",
+    "VERSION=4.0\n      10-oct-2013 PJT",
     NULL
 };
 
@@ -758,19 +759,33 @@ do_function(string method)
 
 do_function_test(string xvals)
 {
-  real *x, y, dyda[MAXPAR];
-  int i,j,n = getiparam("nmax");
+  real *x, y, y0, dp, dyda[MAXPAR], lpar[MAXPAR];
+  int i,j,k,l,n = getiparam("nmax");
 
   x = (real *) allocate(n * sizeof(real));
   n = nemoinpr(xvals,x,n);
-  if (n < 0) error("Parsing x");
+  if (n < 0) error("Parsing x, try larger nmax=%d",getiparam("nmax"));
   for (i=0; i<n; i++) {
-    y = (*fitfunc)(&x[i],par,npar);
+    y0 = y = (*fitfunc)(&x[i],par,npar);
     (*fitderv)(&x[i],par,dyda,npar);
     printf("%g %g  ",x[i],y);
     for (j=0; j<npar; j++)
       printf(" %g",dyda[j]);
     printf("\n");
+  }
+  if (n>1 && x[0]==x[1]) {
+    printf("# Now computing numerical derivatives to check your functions (itermax=%d)\n",n);
+    printf("# par iter Y dP  (Y-Y0)/dP   [(Y-Y0)/dP  - dY/dP]\n");
+    for(j=0; j<npar; j++) {
+      for(k=0;k<npar;k++) lpar[k] = par[k];
+      y0 = (*fitfunc)(&x[0],lpar,npar);
+      dp = 0.1;
+      for(l=0;l<n; l++, dp /= 2.0) {
+	lpar[j] = par[j] + dp; 
+	y = (*fitfunc)(&x[0],lpar,npar);
+	printf("%d %d %g %g %g [%g]\n",j,l,y,dp,(y-y0)/dp,(y-y0)/dp-dyda[j]);
+      }
+    }
   }
 }
 
