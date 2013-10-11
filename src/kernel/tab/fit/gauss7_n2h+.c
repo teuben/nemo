@@ -2,21 +2,21 @@
  * N2H+ 93.17 GHz triplet fitting 7 component fitting
  * 
  *
- * 93171.619 (10) N2H+         1-0 F1=1-1 F=0-1              0.5   L134N           NRAO     11m Sny79  Caz86
- * 93171.947 (10) N2H+         1-0 F1=1-1 F=2-2              0.7   L134N           NRAO     11m Sny77  Caz86
- * 93172.098 (10) N2H+         1-0 F1=1-1 F=1-0              0.8   L134N           NRAO     11m Sny77  Caz86
- * 93173.505 (10) N2H+         1-0 F1=2-1 F=2-1              0.9   L134N           NRAO     11m Sny77  Caz86
- * 93173.809 (10) N2H+         1-0 F1=2-1 F=3-2              0.9   L134N           NRAO     11m Sny77  Caz86 *center*
- * 93174.016 (10) N2H+         1-0 F1=2-1 F=1-1              0.6   L134N           NRAO     11m Sny77  Caz86
- * 93176.310 (10) N2H+         1-0 F1=0-1 F=1-2              0.7   L134N           NRAO     11m Sny77  Caz86
+ * 93171.619 (10) N2H+    1-0 F1=1-1 F=0-1   0.5   L134N      NRAO     11m Sny79  Caz86
+ * 93171.947 (10) N2H+    1-0 F1=1-1 F=2-2   0.7   L134N      NRAO     11m Sny77  Caz86
+ * 93172.098 (10) N2H+    1-0 F1=1-1 F=1-0   0.8   L134N      NRAO     11m Sny77  Caz86
+ * 93173.505 (10) N2H+    1-0 F1=2-1 F=2-1   0.9   L134N      NRAO     11m Sny77  Caz86
+ * 93173.809 (10) N2H+    1-0 F1=2-1 F=3-2   0.9   L134N      NRAO     11m Sny77  Caz86 *center*
+ * 93174.016 (10) N2H+    1-0 F1=2-1 F=1-1   0.6   L134N      NRAO     11m Sny77  Caz86
+ * 93176.310 (10) N2H+    1-0 F1=0-1 F=1-2   0.7   L134N      NRAO     11m Sny77  Caz86
  *
  * f=[93171.619,93171.947,93172.098,93173.505,93173.809,93174.016,93176.310]
  * v=[    7.046,    5.991,    5.505,    0.978,    0.000,   -0.666,   -8.047]
  * a=[    0.5  ,    0.7,      0.8,      0.9,      0.9,      0.6,      0.7]
  *                                               center
 
- *   93171.62,   93171.92,   93172.05,   93173.48,   93173.78,   93173.97,   93176.27    (shaye,splat)
-         6.950       5.985       5.566       0.965       0.000      -0.611      -8.012
+ *   93171.62,  93171.92,  93172.05,  93173.48,  93173.78,  93173.97,  93176.27    (shaye,splat)
+         6.950      5.985      5.566      0.965      0.000     -0.611     -8.012
  * splatalogue:
  * / 93171.6103, 93171.9051, 93172.0423, 93173.4677, 93173.7642, 93173.9587, 93176.2543 /
  * / 0.1429, 0.7143, 0.4286, 0.7143, 1.0,   0.4286, 0.4286 /
@@ -47,6 +47,8 @@
  *        par=a,b5,c5,d
  *
  * 28-dec-2011	created for N1333
+ * 10-oct-2013  redefined some functions, gauss7_n2hp is now the 1+N*3 parameter 7-let with
+ *              equal sigma's and fixed delta-v's. 
  */
 
 /*  delta wings in km/s */
@@ -440,7 +442,7 @@ void derv_gauss7_n2hp_10(real *x, real *p, real *e, int np)
  */
 real func_gauss7_n2hp(real *x, real *p, int np)
 {
-  real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7, retval;
+  real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7,val;
   int ic,nc, ia,iv,id;
 
 
@@ -457,7 +459,7 @@ real func_gauss7_n2hp(real *x, real *p, int np)
     debug_first = 0;
   }
 
-  retval = p[0];
+  val = p[0];
   for (ic=0; ic<nc; ic++) {
     ia = 1+ic*3;            /* offsets into parameter array */
     iv = 2+ic*3;
@@ -491,10 +493,10 @@ real func_gauss7_n2hp(real *x, real *p, int np)
     b = p[id];
     arg7 = a*a/(2*b*b);
     
-    retval += p[ia]*(av1*exp(-arg1) + av2*exp(-arg2) + av3*exp(-arg3) +
-		     av4*exp(-arg4) + av5*exp(-arg5) + av6*exp(-arg6) + av7*exp(-arg7));
+    val += p[ia]*(av1*exp(-arg1)+av2*exp(-arg2)+av3*exp(-arg3)+
+                  av4*exp(-arg4)+av5*exp(-arg5)+av6*exp(-arg6)+av7*exp(-arg7));
   }
-  return retval;
+  return val;
 
 }
 
@@ -556,7 +558,7 @@ void derv_gauss7_n2hp(real *x, real *p, real *e, int np)
     earg7 = exp(-arg7);
       
     e[ia] +=  av1*earg1 + av2*earg2 + av3*earg3 +
-             av4*earg4 + av5*earg5 + av6*earg6 + av7*earg7;
+              av4*earg4 + av5*earg5 + av6*earg6 + av7*earg7;
 
 
     e[iv] += -p[ia]*av1*earg1*a1/(b1*b1)
