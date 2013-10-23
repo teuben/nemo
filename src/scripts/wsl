@@ -7,6 +7,8 @@
 #		wsll		Full search, list filenames only
 #		wsl_usr		Search usr part only
 #		wsll_usr	Search usr part, list filenames only
+#
+# See also: grin (an open source python tool)
 
 if [ $# = 0 ]; then exit; fi
 
