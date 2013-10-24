@@ -1,4 +1,4 @@
-o# yum install package_name
+# yum install package_name
 #        gcc 4.7.2
 # basic:
 gcc
@@ -6,6 +6,7 @@ gcc-gfortran
 gcc-c++
 cvs
 tcsh
+wget
 # if you use pgplot w/ xwindows  (Xext seems not needed, except configure wants it)
 xorg-x11-proto-devel
 libX11-devel
