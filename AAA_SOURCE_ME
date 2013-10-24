@@ -1,5 +1,5 @@
 #
-# Source this file in a csh to install and build NEMO from scratch 
+# 1a) Source this file in a csh to install and build NEMO from scratch 
 # (referred to as the "old manybody method"). This is not to load
 # NEMO in your shell, use the nemo_start.csh script for that that
 # is produced by this script.
@@ -35,6 +35,12 @@
 #    src/scripts/bootstrap		(deprecated)
 #    src/scripts/test_a_new_nemo_cvs
 #
+# If you have a current directory with NEMO, you can also use the reuse=1 option in
+# the test_a_new_nemo_cvs, e.g.
+#    cd nemo_cvs
+#    cvs update
+#    src/scripts/test_a_new_nemo_cvs   nemo=`pwd`   reuse=1 
+#
 #
 # 25-jul-01  Peter Teuben       created, for MANYBODY
 # 18-jan-02  PJT                added optional PGPLOT if detected
@@ -50,6 +56,7 @@
 # 17-aug-06  PJT                corrected for new falcON procedure
 # 31-aug-06  PJT                some png support for pgplot
 # 20-mar-07  PJT                comment on gmake vs. make
+# 27-jan-12  pjt                deprecate this, use test_a_new_nemo_cvs
 
 # choose make or gmake
 set make=make
