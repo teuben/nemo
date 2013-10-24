@@ -71,10 +71,15 @@ tabtrend:
 	@nemoinp 0:4 | $(EXEC) tabmath - - '%1*%1' all | $(EXEC) tabtrend -
 
 #   testing object loading load= in tabnlsqfit from the fit/ directory
-fitmyline:
+fitmyline_local:
 	(cd fit; make -f $(NEMOLIB)/Makefile.lib myline.so)
 	tabnllsqfit tab.out
 	tabnllsqfit tab.out load=fit/myline.so par=1,1
+
+#   testsuite 
+fitmyline:
+	tabnllsqfit tab.out
+	tabnllsqfit tab.out load=$(NEMOOBJ)/fit/myline.so par=1,1
 
 SIZE=4
 NOISE=0.01
