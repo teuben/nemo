@@ -3,7 +3,7 @@
 echo ""
 echo " ===========   Warning  ============= "
 echo ""
-echo Sourcing the AAA_SOURCE_ME method is deprecated, but it will be
+echo Sourcing the AAA_SOURCE_ME method is now deprecated, but it will be
 echo available as AAA_SOURCE_ME.csh for the forseeable future. Instead
 echo what you should do to install is use the script called
 echo "     src/scripts/test_a_new_nemo_cvs"
