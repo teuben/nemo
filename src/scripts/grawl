@@ -7,7 +7,10 @@
 #
 #   Usage: grawl file [-i|-v|....] "pattern"     line|0   words|0  
 #                      <-----   grep   ----->   head/tail    awk 
+#                      
 #
+#  @todo
+#      allow to bypass the grep with --, so it can quickly just grab lines from a file
 
 import sys
 
@@ -65,4 +68,4 @@ if __name__ == '__main__':
             if i<0: continue
             print line.strip()
     else:
-        print "Usage:  grawl file pattern line0# word0#"
+        print "Usage:  grawl file pattern [line0# [word0#]]"
