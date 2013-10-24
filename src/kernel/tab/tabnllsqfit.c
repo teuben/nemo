@@ -68,7 +68,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)"
-    "VERSION=4.0\n      10-oct-2013 PJT",
+    "VERSION=4.0a\n     11-oct-2013 PJT",
     NULL
 };
 
@@ -613,9 +613,11 @@ real data_rms(int n, real *d, real *dy, int m)
       dprintf(1,"DEBUG(i,d,w) %d %g %g\n",i,d[i],dy[i]);
       sum += sqr(d[i])*dy[i];    /* dy was converted to 1/sigma^2 */
     }
-  else
+  else {
     for (i=0; i<n; i++)
       sum += sqr(d[i]);
+    printf("rms= %g\n",sqrt(sum/n));
+  }
 
   printf("rms2/chi2= %g\n",sum);
 #if 0
@@ -754,6 +756,8 @@ do_function(string method)
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g\n",x[i],y[i],d[i]);
+
+  printf("rms/chi = %g\n",data_rms(npt,d,dy,2));
 }
 
 
