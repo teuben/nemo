@@ -23,6 +23,7 @@
  * V3.2   wd  08-sep-11         margin automatic adapts to terminal width
  *                              NOTE:  in a pipe or redirect this is not correct
  * V3.3   pjt 18-sep-2013       fixed the terminal width problem on pipes?
+ *            23-oct-2013       another fix, using both stdin and stdout
  *
  */
 
@@ -49,7 +50,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSION=3.3\n		  18-sep-2013 PJT ",
+    "VERSIONf=3.3a\n		  23-oct-2013 PJT ",
     NULL,
 };
 
@@ -91,9 +92,16 @@ void nemo_main()
     indent = getiparam("indent");
 #ifdef unix
     if(!hasvalue("margin")) {
-      struct winsize w;
-      ioctl(STDIN_FILENO, TIOCGWINSZ, &w);
-      margin = w.ws_col;
+      struct winsize w1,w2;
+      ioctl(STDIN_FILENO, TIOCGWINSZ, &w1);
+      ioctl(STDOUT_FILENO, TIOCGWINSZ, &w2);
+      dprintf(1,"w_in=%d w_out=%d\n",w1.ws_col,w2.ws_col);
+      if (w1.ws_col==0)
+	margin = w2.ws_col;
+      else if (w2.ws_col==0)
+	margin = w1.ws_col;
+      else
+	margin = MIN(w1.ws_col,w2.ws_col);
     } else {
       margin = getiparam("margin");
     }
