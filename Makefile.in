@@ -1,4 +1,4 @@
-VERSION = NEMO V3.3 14-sep-2012 PJT
+VERSION = NEMO V3.3 24-oct-2013 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -23,6 +23,7 @@ CHECKDIR1 = data inc news tmp csh \
 # absolute (derived) directories & files
 CHECKDIR2 = $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ) \
             $(NEMOOBJ)/bodytrans $(NEMOOBJ)/potential $(NEMOOBJ)/acc $(NEMOOBJ)/manip \
+            $(NEMOOBJ)/fit \
 	    opt opt/include opt/lib opt/bin
 
 CHECKFIL2 = $(NEMO)/adm/Usage \

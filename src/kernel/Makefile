@@ -2,7 +2,7 @@
 include $(NEMOLIB)/makedefs
 
 #	(miriad and hdf are non-Nemo and peculiar)
-DIRS = cores io misc loadobj tab numrec math yapp fortran hdf
+DIRS = cores io misc loadobj tab tab/fit numrec math yapp fortran hdf
 
 
 TARNAME = stuff.tar
