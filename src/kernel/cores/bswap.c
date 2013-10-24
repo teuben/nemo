@@ -137,6 +137,8 @@ string usage="swap bytes in a file - fast";
 string usage="swap bytes in a file - generic";
 #endif
 
+string cvsid="$Id$";
+
 extern int nemo_file_size(string);
 
 
@@ -168,6 +170,10 @@ void nemo_main(void)
     bool onetrip;
     bool Qmemcpy = getbparam("memcpy");
     bswap_proc bptr;
+
+#if defined(HAVE_FFSWAP)
+    dprintf(1,"FFSWAP enabled\n");
+#endif
 
     fname = getparam("in");
     len = getiparam("len");
