@@ -50,7 +50,7 @@ string defv[] = {
     "item=\n                      Select specific item",
     "xml=f\n                      output data in XML format? (experimental)",
     "octal=f\n                    Force integer output in octal again?",
-    "VERSIONf=3.3a\n		  23-oct-2013 PJT ",
+    "VERSIONf=3.3b\n		  24-oct-2013 PJT ",
     NULL,
 };
 
@@ -108,11 +108,14 @@ void nemo_main()
 #else
     margin = getiparam("margin");
 #endif
-    if (margin<1) {
+    if (margin<10) {
       warning("awfully small margin=%d",margin);
-      margin=72;
+      margin=80;
     }
-    if (margin>BUFLEN) error("BUFLEN might be too small (margin=%d)",margin);
+    if (margin>BUFLEN) {
+      warning("BUFLEN %d might be too small (margin=%d)",BUFLEN,margin);
+      margin=80;
+    }
     dprintf(2,"margin=%d\n",margin);
 
     allline = getbparam("allline");
