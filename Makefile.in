@@ -1,4 +1,4 @@
-VERSION = NEMO V3.3 24-oct-2013 PJT
+VERSION = NEMO V3.3 25-oct-2013 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -701,6 +701,10 @@ missingbins:
 	-$(DIFF) bins.list src/scripts
 	@echo This NEMO has `wc -l bins.list`, the benchmark is `wc -l src/scripts/bins.list`
 
+test:
+	@echo ISSUE the following command:
+	@echo 'src/scripts/testsuite -b'
+
 testbins:
 	src/scripts/testsuite -b
 
@@ -710,6 +714,10 @@ testsuite:
 
 check:
 	src/scripts/testsuite
+
+reinstall:
+	@echo 'It is adviced to "cvs update" before this step'
+	src/scripts/test_a_new_nemo_cvs reuse=1 nemo=.
 
 sure:	libs bins
 
