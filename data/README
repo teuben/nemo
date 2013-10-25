@@ -1,1 +1,16 @@
 See also data(5NEMO)
+
+Some other comments:
+
+- The (Lecar 1968) iau25 problem is an Nbody problem.
+  The Tolman solution (Tolman 1934 - Proceedings of the National Academy of
+     Sciences of the United States of America, 20, 169)
+  is an analytical solution of the collapse of a hom sphere.
+  Weinberg (1972) also discusses this in his textbook.
+  See also http://arxiv.org/abs/1310.5102v1 (Schaller et al. 2013)
+
+  nemoinp 0:pi:0.001 | tabmath - - "(%1+sin(%1))/(2*pi*sqrt(8/3)),0.5*(1+cos(%1))" all > iau25-tr.tab
+
+  creates table of time and radius of this sphere as it collapses.
+  This is based on R_0=1 density_0=pi and G=1
+
