@@ -1,0 +1,128 @@
+2009-09-13  Aleksey Cheusov <vle@gmx.net>
+
+  * NEWS: minor change
+
+  * NEWS: updates for 0.6.0
+
+2009-09-12  Aleksey Cheusov <vle@gmx.net>
+
+  * README: FreeBSD-6.2 /bin/sh is also tested
+
+  * pipestatus: version -> 0.6.0
+
+  * README: minor corrections, Solaris /bin/crap-sh is also supported
+
+  * Makefile:
+  shells += pdksh; minor fixes and improvements for targets "test" and "test_all"
+
+  * Makefile: new target "test_all" for testing all available shells
+
+  * pipestatus, selftest:
+  $(()) is replaced with expr(1),
+     $() -- with ``,
+     for i -- with for i in "$@"
+     As a result pipestatus supports even shitty Solaris /bin/sh (Gr-r-r-r-r)
+
+  * pipestatus, selftest:
+  Shell symbols "'`*\?&|; etc. are correctly escaped before eval'ed.
+      As a result all these symbols are allowed in commands.
+      For example,
+
+        runpipe_base \
+           awk 'BEGIN {print "+*<>(){}!&|"; exit 41}'  '|' \
+           sed 's,[+*<>()],?,g' '|' \
+           awk '{print $0 " --- " $0; exit 43}' '|' \
+           awk "{print \"''\" \$0 \"'''\"; exit 44}" > "$tmp_fn"
+
+      Regresion test for this case.
+
+2008-05-04  Aleksey Cheusov <vle@gmx.net>
+
+  * pipestatus: version -> 0.5.0
+
+  * NEWS, README, pipestatus:
+  0.5.0
+      - 'check_status_re' and therefore 'runpipe_re' use 'grep -E'
+        instead of 'grep' in order to simplify regexp that
+        contains >=2 digit exit statuses.
+
+        NOTE: Formally speaking this breaks backward compatibility.
+
+      - If PIPESTATUS_VERBOSE variable is set to non-empty string, then
+        check_status0 and check_status_re functions print an error
+        message to stderr.
+
+2007-10-09  Aleksey Cheusov <vle@gmx.net>
+
+  * NEWS: changes, minor fixes
+
+  * NEWS: notes about release 0.4.0
+
+  * README: notes about supported shells
+
+  * pipestatus: runpipe_base starts with pipesize=0
+
+  * pipestatus, selftest:
+  function 'pipestatus_clear_all_vars' and debugging code removed
+
+  * README: a few changes to MOTIVATIONS section
+
+  * README: some rewrites in MOTIVATION section
+
+2007-10-07  Aleksey Cheusov <vle@gmx.net>
+
+  * pipestatus_demo: pipestatus_all is also printed in demo
+
+  * selftest:
+  more convenient test identifiers
+
+  * README:
+  documentation for pipestatus_all variable
+
+  * pipestatus: grep is used instead of egrep
+
+  * selftest: new test
+
+  * pipestatus, selftest:
+  ADDED: new variable is set pipestatus_all
+
+  * pipestatus:
+  better support for 'set -e' mode (Korn shell)
+
+  * pipestatus:
+  fix for ksh in 'set -e' mode (Korn shell works strangely)
+
+  * selftest:
+  more verbose debugging messages
+  more tests
+  fixed: bugs in tests :-)
+
+  * pipestatus:
+  serious fixes in check_status_re
+  fixes for 'set -e' mode
+
+2007-10-06  Aleksey Cheusov <vle@gmx.net>
+
+  * selftest:
+  more selftests for too long pipes and for 'set -e'
+
+  * pipestatus:
+  FIXED: typo in function 'check_status_re'
+  ADDED: Now old shells that do not support $<NUM>, NUM > 9
+      are also supported
+  dump version to 0.4.0
+
+2007-09-30  Aleksey Cheusov <vle@gmx.net>
+
+  * selftest: added: test for reentrance
+
+  * Makefile: added: "test" target
+
+  * README: new comment about "make test"
+
+  * pipestatus: minor code clean-ups
+
+  * selftest: new tests
+
+  * selftest: script for selftest
+

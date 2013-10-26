@@ -1,0 +1,131 @@
+============================================================
+
+pipestatus - source file for POSIX shell that allows
+to obtain an exit status of every program in a pipe.
+
+Home page:
+   http://sourceforge.net/projects/pipestatus/
+   http://freshmeat.net/projects/pipestatus/
+   http://mova.org/~cheusov/pub/pipestatus/
+
+============================================================
+
+                        MOTIVATION
+
+When we program in shell we often run pipes like this
+
+    prog1 args1 | prog2 args2 | ... | progN argsN
+
+POSIX says that exit status of pipe is the exit status of LAST program
+in it, i.e.  progN in our example. That is, exit status of all other
+programs in pipe is silently ignored.  But in many situations exit
+status of all programs in pipe should be checked to make program
+robust. Some shells like BASH and ZSH have special extensions for
+doing this but POSIX shell unfortunately doesn't provide an EASY way
+for doing this.
+
+In short, this is why I wrote this peace of code, packaged it and
+make it publicly available.
+
+============================================================
+
+                         INSTALL
+
+There is nothing to be built in 'pipestatus'.
+Just copy 'pipestatus' file to the place PATH variable points to
+You can also run ./pipestatus_demo for demo version and
+sample of usage. ./selftest is also a good example.
+
+I tested pipestatus with the following shells.
+
+ - NetBSD-5 /bin/sh,
+ - NetBSD-5 /bin/ksh
+ - FreeBSD-6.2 /bin/sh
+ - bash 3.2.9
+ - bash 2.05b
+ - zsh 4.2.6
+ - zsh 4.2.6
+ - mksh R28
+ - pdksh 5.2.14
+ - Debian dash 0.5.3-7
+ - Solaris-10 /usr/xpg4/bin/sh (5.10 Generic_118833-36)
+ - heirloom sh (http://sf.net/projects/heirloom)
+ - Solaris /bin/sh (5.10 Generic_118833-36)
+
+On all of them pipestatus seems to work fine.
+'set -e' mode was also tested.
+
+If the following command 
+
+    make test
+
+fails on your system, please let me now.
+
+============================================================
+
+                      DOCUMENTATION
+
+Usage:
+  . pipestatus 
+
+Provided functions:
+ runpipe_base, runpipe, runpipe0, runpipe_re,
+ check_status, check_status0, check_status_re
+
+Usage for 'runpipe*' functions:
+   runpipe_base         prog1 [args1] '|' prog2 [args2] '|' ...
+   runpipe              prog1 [args1] '|' prog2 [args2] '|' ...
+   runpipe0             prog1 [args1] '|' prog2 [args2] '|' ...
+   runpipe_re status_re prog1 [args1] '|' prog2 [args2] '|' ...
+
+All runpipeX functions set the following variables:
+  - pipestatus_1   - exit status of prog1,
+  - pipestatus_2   - exit status of prog2,
+  - ...
+  - pipestatus_all - exit status of all progN separated by space,
+  - pipesize       - a number of programs in pipe.
+
+runpipe_base - always sets $? to zero
+
+runpipe - sets $? to the exit status of the last program
+           just like normal pipes do
+
+runpipe0 - sets $? to zero if ALL programs in pipe
+            returned zero exit status
+
+runpipe_re - sets $? to zero if concatenated statuses of
+            all programs in pipe correspond to 'status_re' expression
+
+     'status_re' argument - allowed exit statuses for pipe.
+              Example1: ". 0 0". Here . means that prog1
+                  may exit with ANY status, prog2 may exit with status zero,
+                  and prog3 - with status zero too.
+              Example2: "0 0 0 [01]". Here [01] means that last program
+                  may exit with status 0 or 1,
+                  while first three - with status zero.
+
+Usage for check_statusX functions:
+   check_status
+   check_status0
+   check_status_re status_re
+
+They set $? according to pipestatus_1, pipestatus_2 etc. variables
+(they may be set by runpipe* functions)
+
+If PIPESTATUS_VERBOSE variable is set to non-empty string, then
+check_status0 and check_status_re functions print an error message to
+stderr.
+
+============================================================
+
+                       AUTHORS/FEEDBACK
+
+Initial idea and sources was obtained
+from FAQ of comp.unix.shell news group,
+later the code was modified and improved
+by Aleksey Cheusov <vle@gmx.net>
+
+Send bug reports, suggestions, questions and beer ;-)
+directly to me.
+
+============================================================
