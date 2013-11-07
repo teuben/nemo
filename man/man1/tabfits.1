@@ -1,4 +1,4 @@
-.TH TABFITS 1NEMO "21 September 2005"
+.TH TABFITS 1NEMO "7 November 2013"
 .SH NAME
 tabfits \- convert tables into FITS images
 .SH SYNOPSIS
@@ -48,6 +48,10 @@ Z-Size of data, or else specify in the ascii header as NAXIS3.
 \fBnmax=\fP
 Allocation space for piped I/O.
 .TP
+\fBscale=\fP
+Scale factor by which all incoming data are multiplied for output
+in the fits file. Default: 1
+.TP
 \fBwcs=t|f\fP
 Enforce a proper FITS style WCS definition. For this the FITS header description
 (see ) will need to have a valid CTYPE1 and CTYPE2 to properly
@@ -92,5 +96,6 @@ Peter Teuben
 17-dec-98	V2.0 nxy= is now nx=,ny=; for Harris' project too	PJT
 5-jan-99	V2.0a fixed header formatting bug	PJT
 9-jul-00	V3.1 allow dcol=0	PJT
-21-sep-05	V4.0 add wcs= to deal with real astronomers	PJT
+21-sep-05	V4.0 add wcs= to deal with real astronomers (lost?)	PJT
+7-nov-2013	V3.3 add scale= 	PJT 
 .fi
