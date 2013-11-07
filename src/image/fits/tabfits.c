@@ -12,6 +12,7 @@
  *     23-oct-03    V3.2b: check for MAXDAT (and made it bigger) pjt
  *      1-jan-04        c: get_line check return value
  *     18-may-06        d: fix for too long comment lines        pjt
+ *      7-nov-2013  V3.3  added scale=                           pjt
  *
  * todo:  read one more line, check if file is done!!
  *        if header contains NAXIS, NAXIS1,...., nx=,ny=,nz= is still needed
@@ -31,7 +32,8 @@ string defv[] = {
     "ny=\n              Y-Size of data, or else specify NAXIS2 in header",
     "nz=\n              Z-Size of data, or else specify NAXIS3 in header",
     "nmax=100000\n      Allocation space for piped I/O",
-    "VERSION=3.2d\n	18-may-06 PJT",
+    "scale=1.0\n        Scale factor to multiply data by",
+    "VERSION=3.3\n	7-nov-2013 PJT",
     NULL,
 };
 
@@ -54,6 +56,7 @@ double get_next_data(int);
 static  char line[MAX_LINELEN];
 static  double data[MAXCOL];
 static  stream instr;
+static  double scale;
 
 void nemo_main()
 {
@@ -76,6 +79,8 @@ void nemo_main()
     nx = naxis[0] = hasvalue("nx") ? getiparam("nx") : 0;
     ny = naxis[1] = hasvalue("ny") ? getiparam("ny") : 0;
     nz = naxis[2] = hasvalue("nz") ? getiparam("nz") : 0;
+
+    scale = getdparam("scale");
 
 
     while (1) {             /* read commented header values */
@@ -107,7 +112,7 @@ void nemo_main()
 		   strncmp(key,"CDELT",5)==0 ||        
 		   strncmp(key,"CRPIX",5)==0) {
             /* write real fits header */
-            rvalue = atof(value);
+	    rvalue = atof(value);
             fitwrhdr(fitsfile,key,rvalue);		/* casting problem ??*/
         } else if (strncmp(key,"CTYPE",5)==0) {
             fitwrhd(fitsfile,key,value);
@@ -162,7 +167,7 @@ void nemo_main()
       for (j=0; j<ny; j++) {                       /* loop over whole array */
         for (i=0; i<nx; i++) {
             dval = get_next_data(dcol);
-            rdata[i] = (float) dval;
+            rdata[i] = (float) dval * scale;
             dprintf(1,"%d %d %d = %g\n",i,j,k,dval);
             if (i || j || k) {
                 rmin = MIN(rmin, dval);
