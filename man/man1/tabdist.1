@@ -1,11 +1,16 @@
-.TH TABDIST 1NEMO "13 February 2013"
+.TH TABDIST 1NEMO "14 November 2013"
 .SH NAME
 tabdist \- Compare distances between points in two tables, aka catalog matching
 .SH SYNOPSIS
 \fBtabdist\fP [parameter=value]
 .SH DESCRIPTION
-Given two tables, each representing 1D, 2D or 3D points, it will
-compute the nearest neigbor(s) from one table into the other table.
+Given two tables, each containing column(s) that represent a set
+of 1D, 2D or 3D points, it will
+compute the nearest neigbor(s) from each point in the first table
+to those from the second table. 
+.PP
+The output contains the same number of rows as the input number of
+rows in the first dataset.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -22,6 +27,12 @@ Coordinate columns from 1st dataset. 1D, 2D and 3D are currently supported [1,2]
 .TP
 \fBcol2=\fP
 Coordinate columns from 2nd dataset. 1D, 2D and 3D are currently supported [1,2]
+.TP
+\fBradec=t|f\fP
+Should columns be interpreted as angular (usually RA/DEC)?
+Only 2D comparisions are allowed here. Units must be radians at the moment.
+See also \fItabdms(1NEMO)\fP.
+Default: false
 .SH EXAMPLES
 The X,Y,Z coordinates of a 3 particle plummer sphere are perturbed by a small
 amount and then compared to the original list. Thus they must match one on one:
@@ -52,7 +63,9 @@ then the best matching line number and coordinates(s) from table2, and finally t
 .SH CAVEAT
 Currently a brute force (quadratic in N) minimum distance is used.
 .SH SEE ALSO
-tabmath(1NEMO)
+tabmath(1NEMO), tabdms(1NEMO), comparecats(SIRTF.map2)
+.PP
+k-d Match: http://arxiv.org/abs/1304.0838
 .SH FILES
 src/kernel/tab/tabdist.c
 .SH AUTHOR
@@ -61,4 +74,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 13-Feb-13	V0.1 Created	PJT
+13-nov-2013	V0.3 added radec=	PJT
 .fi
