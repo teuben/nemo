@@ -19,7 +19,7 @@ string defv[] = {
     "col1=1,2\n         X (optionally Y and Z) Column from 1st dataset",
     "col2=1,2\n         X (optionally Y and Z) Column from 2nd dataset",
     "radec=false\n      Interpret X and Y as RA/DEC angles on sky",
-    "VERSION=0.2\n	13-feb-2013 PJT",
+    "VERSION=0.3\n	14-nov-2013 PJT",
     NULL,
 };
 
@@ -28,6 +28,7 @@ string cvsid="$Id$";
 
 void compare_1d(int npt1, int npt2, real *x1, real *x2);
 void compare_2d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2);
+void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2);
 void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real *z1, real *z2);
 
 inline real dist1(real x1,real x2) {
@@ -45,7 +46,7 @@ inline real dist3(real x1,real y1,real z1,real x2,real y2,real z2) {
 }
 
 inline real dist2a(real x1,real y1,real x2,real y2) {
-  return (x1-x2)*(x1-x2)+(y1-y2)*(y1-y2);
+  return sin(y1)*sin(y2)+cos(y1)*cos(y2)*cos(x1-x2);
 }
 
 #define NDIM   3
@@ -63,7 +64,7 @@ nemo_main()
   stream instr1, instr2;
   bool Qradec = getbparam("radec");
 
-  if (Qradec) error("radec mode not implemented yet");
+  if (Qradec) warning("new radec mode ");
 
   ncol1 = nemoinpi(getparam("col1"),colnr1,NDIM);
   ncol2 = nemoinpi(getparam("col2"),colnr2,NDIM);
@@ -102,9 +103,11 @@ nemo_main()
   strclose(instr1);
   strclose(instr2);
 
-  if (ncol1 == 1) 
+  if (Qradec && ncol1==2)
+    compare_2da(npt1, npt2, x1, x2, y1, y2);
+  else if (ncol1 == 1) 
     compare_1d(npt1, npt2, x1, x2);
-  else if (ncol1 == 2)
+  else if (ncol1 == 2) 
     compare_2d(npt1, npt2, x1, x2, y1, y2);
   else if (ncol1 == 3)
     compare_3d(npt1, npt2, x1, x2, y1, y2, z1, z2);
@@ -150,6 +153,26 @@ void compare_2d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2)
       }
     }
     dmin = sqrt(dmin);
+    printf("%d %g %g   %d %g %g   %g\n",i+1,x1[i],y1[i],jmin+1,x2[jmin], y2[jmin],dmin);
+  }
+}
+
+void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2)
+{  
+  int i, j, jmin;
+  real d, dmax, dmin;
+  
+  for (i=0; i<npt1; i++) {
+    dmax = dist2a(x1[i],y1[i],x2[0],y2[0]);
+    jmin = 0;
+    for (j=1; j<npt2; j++) {
+      d = dist2a(x1[i],y1[i],x2[j],y2[j]);
+      if (d>dmax) {
+	dmax = d;
+	jmin = j;
+      }
+    }
+    dmin = acos(dmax)*206265;  /* in arcsec */
     printf("%d %g %g   %d %g %g   %g\n",i+1,x1[i],y1[i],jmin+1,x2[jmin], y2[jmin],dmin);
   }
 }
