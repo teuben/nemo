@@ -8,6 +8,7 @@
  *  @todo   consider allowing scaling/offset between two datasets 
  *          Y = aX + b
  *          use k-d Match?   http://arxiv.org/abs/1304.0838
+ *  @todo   ID column
  */
 
 #include <stdinc.h>
@@ -18,8 +19,10 @@ string defv[] = {
     "in2=???\n		Second (ascii table) dataset",
     "col1=1,2\n         X (optionally Y and Z) Column from 1st dataset",
     "col2=1,2\n         X (optionally Y and Z) Column from 2nd dataset",
+    "id1=0\n            Column in first data reprenting the ID",
+    "id2=0\n            Column in second data reprenting the ID",
     "radec=false\n      Interpret X and Y as RA/DEC angles on sky",
-    "VERSION=0.3\n	14-nov-2013 PJT",
+    "VERSION=0.4\n	15-nov-2013 PJT",
     NULL,
 };
 
@@ -28,8 +31,10 @@ string cvsid="$Id$";
 
 void compare_1d(int npt1, int npt2, real *x1, real *x2);
 void compare_2d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2);
-void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2);
+void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, string *name1, string *name2);
 void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real *z1, real *z2);
+
+void get_atable_a(stream instr, int id, int npt, string *name);
 
 inline real dist1(real x1,real x2) {
   real d = x1-x2;
@@ -53,7 +58,7 @@ inline real dist2a(real x1,real y1,real x2,real y2) {
 
 nemo_main()
 {
-  int i, npt, npt1, npt2, ncol1, ncol2;
+  int i, npt, npt1, npt2, ncol1, ncol2, id1, id2;
   real *coldat1[NDIM], *coldat2[NDIM];
   int colnr1[NDIM], colnr2[NDIM];
   real *x1 = NULL, *x2 = NULL;
@@ -62,6 +67,7 @@ nemo_main()
   string input1 = getparam("in1");
   string input2 = getparam("in2");
   stream instr1, instr2;
+  string *name1, *name2;
   bool Qradec = getbparam("radec");
 
   if (Qradec) warning("new radec mode ");
@@ -99,12 +105,27 @@ nemo_main()
   npt2 = get_atable(instr2,ncol2,colnr2,coldat2,npt2);
 
   dprintf(0,"Npt1=%d Npt2=%d\n",npt1,npt2);
+
+  id1 = getiparam("id1");
+  id2 = getiparam("id2");
+  if (id1 > 0) {
+    rewind(instr1);
+    name1 = (string *) allocate(npt1 * sizeof(string));
+    get_atable_a(instr1,id1,npt1,name1);
+  } else
+    name1 = NULL;
+  if (id2 > 0) {
+    rewind(instr2);
+    name2 = (string *) allocate(npt2 * sizeof(string));
+    get_atable_a(instr2,id2,npt2,name2);
+  } else
+    name2 = NULL;
   
   strclose(instr1);
   strclose(instr2);
 
   if (Qradec && ncol1==2)
-    compare_2da(npt1, npt2, x1, x2, y1, y2);
+    compare_2da(npt1, npt2, x1, x2, y1, y2, name1, name2);
   else if (ncol1 == 1) 
     compare_1d(npt1, npt2, x1, x2);
   else if (ncol1 == 2) 
@@ -157,12 +178,16 @@ void compare_2d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2)
   }
 }
 
-void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2)
+void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, string *name1, string *name2)
 {  
   int i, j, jmin;
   real d, dmax, dmin;
+  string n1, n2;
+  char ord1[16], ord2[16];
+
   
   for (i=0; i<npt1; i++) {
+    if (name1) dprintf(2,"NAME1: %s\n",name1[i]);
     dmax = dist2a(x1[i],y1[i],x2[0],y2[0]);
     jmin = 0;
     for (j=1; j<npt2; j++) {
@@ -173,7 +198,20 @@ void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2)
       }
     }
     dmin = acos(dmax)*206265;  /* in arcsec */
-    printf("%d %g %g   %d %g %g   %g\n",i+1,x1[i],y1[i],jmin+1,x2[jmin], y2[jmin],dmin);
+
+    if (name1==NULL) {
+      sprintf(ord1,"%d",i+1);
+      n1 = ord1;
+    } else
+      n1 = name1[i];
+
+    if (name2==NULL) {
+      sprintf(ord2,"%d",jmin+1);
+      n2 = ord2;
+    } else
+      n2 = name2[jmin];
+
+    printf("%s %g %g   %s %g %g   %g\n",n1,x1[i],y1[i],n2,x2[jmin],y2[jmin],dmin);
   }
 }
 
@@ -195,4 +233,20 @@ void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real
     dmin = sqrt(dmin);
     printf("%d %g %g %g   %d %g %g %g   %g\n",i+1,x1[i],y1[i],z1[i],jmin+1,x2[jmin],y2[jmin],z2[jmin],dmin);
   }
+}
+
+void get_atable_a(stream instr, int id, int npt, string *name)
+{
+  static char line[MAX_LINELEN];
+  int i;
+  string *sp;
+
+  for (i=0; i<npt; i++) {
+    if (fgets(line,MAX_LINELEN,instr) == NULL)
+      error("unexpected EOF on table read (%d,%d)",id,npt);
+    sp = burststring(line,", \t\r");
+    name[i] = strdup(sp[id-1]);
+    freestrings(sp);
+  }
+  dprintf(1,"First and last ID: %s %s\n",name[0],name[npt-1]);
 }
