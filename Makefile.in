@@ -1,4 +1,4 @@
-VERSION = NEMO V3.3 25-oct-2013 PJT
+VERSION = NEMO V3.3a 19-nov-2013 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -249,6 +249,9 @@ html:  doxygen
 
 doxygen:
 	(cd text; doxygen nemo-doxygen.cfg)
+
+readme.html: readme.md
+	markdown_py -x toc readme.md > readme.html
 
 ##############################################################################
 # FIND utilities
@@ -715,9 +718,11 @@ testsuite:
 check:
 	src/scripts/testsuite
 
+#
+TEST=""
 reinstall:
 	@echo 'It is adviced to "cvs update" before this step'
-	src/scripts/test_a_new_nemo_cvs reuse=1 nemo=.
+	src/scripts/test_a_new_nemo_cvs reuse=1 nemo=. $(TEST)
 
 sure:	libs bins
 
