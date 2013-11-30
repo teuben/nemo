@@ -14,3 +14,6 @@ Some other comments:
   creates table of time and radius of this sphere as it collapses.
   This is based on R_0=1 density_0=pi and G=1
 
+  Contopolous, in his 2004 Scientific Autobiography, comments on the optimism of Lecar when
+  different integrators would find anywhere from 1 to 5 escaping stars in this simulation.
+  He decided the number of escapers was 3 plus or minus 2!
