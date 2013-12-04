@@ -37,6 +37,7 @@
  *      12-aug-02           a NaN problems with miriad
  *      14-apr-03           b fix NaN problems with FITS files
  *      23-nov-04        4.9  deal with axistype 1 images, but forced keyword   pjt
+ *       3-dec-2013      5.0  showcs option      pjt
  */
 
 #include <stdinc.h>
@@ -47,7 +48,7 @@
 
 string defv[] = {
     "in=???\n		Input fits file",
-    "out=???\n		Output image file",
+    "out=\n		Output image file",
     "planes=\n          Planes to select from fits cube [all]", 
     "blocking=1\n	Extra blocking factor for input (blocksize/2880)",
     "mode=fits\n        Format mode of input file {fits,raw}",
@@ -63,7 +64,7 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=0\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=4.9a\n	8-nov-05 PJT",
+    "VERSION=5.0\n	3-dec-2013 PJT",
     NULL,
 };
 
@@ -73,9 +74,10 @@ string cvsid="$Id$";
 
 #define MAXPLANES 512
 
-void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, int, FLOAT *, FLOAT *);
+void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int, FLOAT *, FLOAT *);
 void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel);
 FITS *rawopen(string name, string status, int naxis, int *nsize);
+void print_axis(int axis, int naxis, real crpix, real crval, real cdelt);
 int is_feq(int *a, int *b);
 
 void nemo_main()
@@ -90,10 +92,12 @@ void nemo_main()
     int mir_nan = -1;    /* MIRIAD's FITS NaN */
     imageptr iptr;
     string mode, blankval;
-    bool   Qblank, Qrel;
+    bool   Qblank, Qrel, Qout;
     int axistype = getiparam("axistype");
 
-    outstr = stropen(getparam("out"),"w");   /* open image file for output */
+    Qout = hasvalue("out");
+    if (Qout)
+      outstr = stropen(getparam("out"),"w");   /* open image file for output */
     npl = nemoinpi(getparam("planes"),planes,MAXPLANES);
     mode = getparam("mode");
     blankval = getparam("blank");
@@ -128,12 +132,14 @@ void nemo_main()
     if (iptr==NULL) error("No memory to allocate image");
 
     if (streq(mode,"fits")) {
-      make_fitheader(fitsfile,iptr,Qrel,axistype, &fdata_min, &fdata_max);
+      make_fitheader(fitsfile,iptr,Qrel,Qout,axistype, &fdata_min, &fdata_max);
       dprintf(1,"Datamin/max read: %g - %g\n",fdata_min, fdata_max);
     } else if (streq(mode,"raw"))
       make_rawheader(fitsfile,iptr,Qrel);
     else
       error("Never Reached");
+
+    if (!Qout) return;
 
     bval_out = 0.0;
     if (Qblank) {    
@@ -272,7 +278,17 @@ void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel)
 
 }
 #endif
-void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, int axistype,
+
+void print_axis(int axis, int naxis, real crpix, real crval, real cdelt)
+{
+  real xmin = (1.5-crpix)*cdelt;
+  real xmax = (naxis+0.5-crpix)*cdelt;
+  printf("AXIS%d: %d %g %g %g   %g %g\n", axis,naxis,crpix,crval,cdelt,xmin,xmax);
+}
+
+
+
+void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axistype,
 		    FLOAT *data_min, FLOAT *data_max)
 {
     int nz, tmpi, i, j;
@@ -314,6 +330,13 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, int axistype,
     } else
       crpix3 = 0.0;
 
+    if (!Qout) {
+      print_axis(1, Nx(iptr), crpix1, Xmin(iptr), Dx(iptr));
+      print_axis(2, Ny(iptr), crpix2, Ymin(iptr), Dy(iptr));
+      print_axis(3, Nz(iptr), crpix3, Zmin(iptr), Dz(iptr));
+      return;
+    }
+
     if (axistype==0) {
       Axis(iptr) = 0;
       if (crpix1 != 1.0)
@@ -340,6 +363,7 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, int axistype,
            fitrdhda(fitsfile,"CTYPE3",ctype,"");
 	   Namez(iptr) = scopy(ctype);
     }
+
 
     fitrdhdr(fitsfile,"DATAMIN",&tmpr,0.0); 
     MapMin(iptr) = *data_min = tmpr;
