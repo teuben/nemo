@@ -1,0 +1,114 @@
+#! /bin/csh -f
+#
+#  map_ra_dec:  take two columns from a table that represent the RA and DEC
+#               of a set of point sources
+#               Grid this on top of a reference map in the form of a fits file
+#  pjt - nov/dec 2013, for CLASSy
+#
+
+#   table, with ra,dec in columns 1 and 2 , linear emisson absent (ecol=0)
+set tab  = Per_ysoc-radec
+set xcol = 1
+set ycol = 2
+set ecol = 0
+
+#  reference map, needs to be in fits format
+set refmap=n1333.mom0.fits
+
+#
+set out=tmp.3.fits
+
+#  smoothing (sigma) size in degrees, and a normalization constant
+#  such that 1 object give 1 at the peak of that point
+set svar=1.0/120.0
+set dmax=1.2e7
+
+#  snapdens parameter (use 0 to skip this version, 6 is a good default)
+set kmax=0
+
+#  parse command line arguments
+foreach arg ($*)
+  set $arg
+end
+
+#  alas, cannot do this without NEMO
+ 
+if ($?NEMO == 0) then
+  echo need NEMO
+  exit 0
+endif
+
+#  nothing below this line should need to be changed
+
+rm tmp.*
+
+# derive the map frame from fits header
+fitsccd $refmap > tmp.0
+cat tmp.0
+
+set ra0   = `grep AXIS1 tmp.0 | awk '{print $4}'`
+set dec0  = `grep AXIS2 tmp.0 | awk '{print $4}'`
+
+echo Reference center: `nemoinp $ra0,$dec0`
+
+set nx    = `grep AXIS1 tmp.0 | awk '{print $2}'`
+set ny    = `grep AXIS2 tmp.0 | awk '{print $2}'`
+
+echo NAXIS: `nemoinp $nx,$ny`
+
+set xmin  = `grep AXIS1 tmp.0 | awk '{print $6}'`
+set xmax  = `grep AXIS1 tmp.0 | awk '{print $7}'`
+set ymin  = `grep AXIS2 tmp.0 | awk '{print $6}'`
+set ymax  = `grep AXIS2 tmp.0 | awk '{print $7}'`
+
+set cosdec=`nemoinp "cosd($dec0)"`
+
+# in degrees
+set xrange=${xmin}:${xmax}
+set yrange=${ymin}:${ymax}
+
+if ($ecol == 0) then
+  tabmath $tab - "(%$xcol-$ra0)*$cosdec,%$ycol-$dec0,1"       all > tmp.1
+else
+  tabmath $tab - "(%$xcol-$ra0)*$cosdec,%$ycol-$dec0,%$ecol"  all > tmp.1
+endif
+tabtos tmp.1 tmp.2 block1=x,y,m
+tabplot tmp.1 1 2 $xmin $xmax $ymin $ymax point=2,0.025 \
+    xlab="DX(deg)" ylab="DY(deg)" \
+    yapp=fig1.ps/vps
+# snapplot tmp.2 xrange=-0.10:0.10 yrange=-0.14:0.14 yapp=fig2.ps/vps
+snapgrid tmp.2 tmp.3a \
+    xrange=$xrange yrange=$yrange nx=$nx ny=$ny \
+    svar=$svar evar=m
+ccdmath tmp.3a tmp.3 %1/$dmax
+ccdplot tmp.3 yapp=fig3.ps/vps
+ccdfits tmp.3 tmp.3.fits refmap=$refmap
+if ($out != tmp.3.fits) then
+  echo Creating $out
+  cp tmp.3.fits $out
+endif
+
+# alternative snapdens method
+if ($kmax) then
+  snapdens tmp.2 tmp.4 ndim=2 kmax=$kmax
+  snapmap tmp.4 tmp.5 \
+      xrange=$xrange yrange=$yrange nx=$nx ny=$ny \
+      evar="sqrt(aux)" svar=$svar 
+endif
+
+# example runs:
+#
+# ok
+# map_ra_dec refmap=n1333.mom0.fits tab=Per_ysco-radec out=n1333.yso.fits
+#
+# good match
+# map_ra_dec refmap=SerpM.mom0.fits tab=Serp_ysoc-radec out=SerpM.ysoc.fits
+#
+# no YSO's
+# map_ra_dec refmap=SerpS.mom0.fits tab=Serp_ysoc-radec out=SerpS.ysoc.fits
+#
+# just a few, quite random, with a clump where the molecules also clump in the NE 
+# map_ra_dec refmap=B1.mom0.fits tab=Per_ysco-radec out=B1.yso.fits
+#
+# no YSO's
+# map_ra_dec refmap=L1451.mom0.fits tab=Per_ysco-radec out=L1451.yso.fits
