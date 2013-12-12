@@ -1,4 +1,4 @@
-.TH CCDFITS 1NEMO "20 June 2009"
+.TH CCDFITS 1NEMO "12 December 2013"
 .SH NAME
 ccdfits \- write a fits file to disk
 .SH SYNOPSIS
@@ -8,6 +8,9 @@ ccdfits \- write a fits file to disk
 \fBccdfits\fP writes a fits file to disk. The input must be in 
 \fIimage(5NEMO)\fP format, the output will be in standard \fIfits(5NEMO)\fP
 format on disk.
+.PP
+An experimental version of this program that uses the standard
+\fIcfitsio(3)\fP library is known as \fIccdfitsio(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -162,7 +165,7 @@ You could also try the following command procedure on VMS (Bob Hanisch, ST ScI):
  $!
 .fi
 .SH "SEE ALSO"
-snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
+ccdfitsio(1NEMO), snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
