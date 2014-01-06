@@ -1,4 +1,4 @@
-#! /bin/awk -f
+#! /usr/bin/awk -f
 # 
 #   align phases in columns 2 and 3 (time is col 1)
 #   which are assumed in degrees. Output from snapinert
