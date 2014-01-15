@@ -5,6 +5,8 @@
 #          also project and make velocity field, and determine rotation curve
 #          and compare model with model-model
 #
+#  jun-2001    Original version (before gyrfalcON was called YANC)
+#  jan-2014    Fixed for changed options over the past 12+ years...
 
 #  parameters to be changed by the user
 set run=run1               # identification, and basename for all files
@@ -136,7 +138,7 @@ echo "Could study pattern speed by running do2"
 echo "Followed by align.awk and tablsqfit"
 
 snapgrid $run.13 $run.14 $grid_pars
-ccdprint $run.14 x= y= newline=t label=x,y > $run.15
+ccdprint $run.14 x= y= newline=t label=x,y | tabcomment - - delete=t > $run.15
 tabtos $run.15 $run.16 block1=x,y
 snapmass $run.16 $run.17 mass=1
 
@@ -191,6 +193,7 @@ omega:
 echo Determining the pattern speed over times ${tstart}:${tstop}:$step 
 ## get the pattern speed from an analysis of the direction of the moment of inertia tensor
 do2 run=$run times=${tstart}:${tstop}:$step hackdens=$hackdens > $run.ome
+exit 1
 #   DEMO PLOT omega.gif/ps
 align.awk $run.ome | tabplot - 1 2,3 2 10 -1080 360 line=1,1 color=2,3 point=2,0.1 \
     xlab=Time ylab=Phi headline="$*"  yapp=1/xs
