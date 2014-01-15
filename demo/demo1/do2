@@ -26,7 +26,7 @@ foreach t (`nemoinp $times`)
  rm -f $run.snaptmp
  if ($hackdens) then
     snaptrim $run.02 - times=$t debug=-1 |\
-        hackdens - $run.snaptmp 
+        hackdens - $run.snaptmp write_at_phi=t
     snaprect $run.snaptmp . weight="$weight" > $run.tmp
  else
     snaptrim $run.02 $run.snaptmp times=$t debug=-1 
