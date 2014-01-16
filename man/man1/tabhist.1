@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "22 August 2012"
+.TH TABHIST 1NEMO "16 January 2014"
 .SH NAME
 tabhist \- histogram plotter and gaussian fit for tabular data
 .SH SYNOPSIS
@@ -104,6 +104,13 @@ Compute median too? This can be timeconsuming for large numbers of points.
 \fBtorben=t|f\fP
 Fast median calculator in case N is large. No sort will be used, but
 instead an iterative O(N) method will be used.
+[Default: \fBf\fP].
+\fBrobust=t|f\fP
+Use a robust estimator to remove outliers before taking statistics again.
+[Default: \fBf\fP].
+.TP
+\fBmad=t|f\fP 
+Also compute the Mean Absolute Deviation.
 [Default: \fBf\fP].
 .TP
 \fBdual=t|f\fP
