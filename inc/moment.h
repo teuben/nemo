@@ -29,6 +29,7 @@ real mean_moment  (Moment *);	/* computes mean (mom=-1) */
 real median_moment(Moment *);   /* only works if ndat > 0 */
 real sigma_moment (Moment *);	/* computes weighted dispersion around mean (mom=-2) */
 real rms_moment   (Moment *);	/* computes rms */
+real mad_moment   (Moment *);   /* MAD = mean absolute deviation */
 real skewness_moment (Moment *);	/* computes special 3rd moment (mom=-3) */
 real kurtosis_moment (Moment *);	/* computes special 4th moment (mom=-4) */
 real h3_moment (Moment *);              /* see kinemetry */

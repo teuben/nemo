@@ -14,6 +14,7 @@
  *   9-oct-12   free_moment()  
  *  23-apr-13   add compute_robust_moment() 
  *   5-jun-13   add robust_range()
+ *  15-jan-14   add MAD (mean absolute deviation)
  *
  * @todo    iterative robust by using a mask
  *          ? robust factor, now hardcoded at 1.5
@@ -188,6 +189,7 @@ static real  last_median_robust_moment = -1;
 static int   last_n_robust_moment      = -1;
 static real  last_robust_range[2];
 
+
 void compute_robust_moment(Moment *m)
 {
   int i,n;
@@ -267,6 +269,30 @@ real sigma_moment(Moment *m)
     if (tmp <= 0.0) return 0.0;
     return sqrt(tmp);
 }
+
+real mad_moment(Moment *m)
+{
+  real mean, x;
+  int i, n;
+  Moment tmp;
+
+  if (m->ndat==0)
+    error("mad_moment cannot be computed with ndat=%d",m->ndat);
+  mean = sum1/sum0;  
+  n = MIN(m->n, m->ndat);
+  ini_moment(&tmp,1,n);
+  for (i=0; i<n; i++) {
+    x = m->dat[i] - mean;
+    if (x > 0)
+      accum_moment(&tmp,x,1.0);
+    else
+      accum_moment(&tmp,-x,1.0);
+  }
+  mean = mean_moment(&tmp);
+  free_moment(&tmp);
+  return mean;
+}
+
 
 /* TODO:  this needs to be weight independant 
  *        now it only works properly if all weighta are 1

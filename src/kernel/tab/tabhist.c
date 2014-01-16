@@ -45,6 +45,8 @@
  *      (8-feb-11   !!!   code cloned into ccdhist              pjt) 
  *      22-aug-12   6.2   torben median option                  pjt
  *      23-apr-13   6.2b  use compute_robust_mean               pjt
+ *       7-aug-13   6.3   optional numrec routines              pjt
+ *      15-jan-14   6.4   add MAD option
  *                
  * 
  * TODO:
@@ -87,13 +89,14 @@ string defv[] = {
     "median=t\n			  Compute median too (can be time consuming)",
     "torben=f\n                   Compute median using Torben median method",
     "robust=f\n                   Compute robust median",
+    "mad=f\n                      Compute Mean Absoluted Deviation",
     "nsigma=-1\n                  delete points more than nsigma",
     "xcoord=\n		          Draw additional vertical coordinate lines along these X values",
     "sort=qsort\n                 Sort mode {qsort;...}",
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
-    "VERSION=6.3a\n		  2-aug-2013 PJT",
+    "VERSION=6.4\n		  15-jan-2014 PJT",
     NULL
 };
 
@@ -142,6 +145,7 @@ local bool   Qtorben;                   /* new median method */
 local bool   Qrobust;                   /* compute robust median also ? */
 local bool   Qdual;                     /* dual pass ? */
 local bool   Qbin;                      /* manual bins ? */
+local bool   Qmad;                      /* MAD ? */
 local int    maxcount;
 local int    Nunder, Nover;             /* number of data under or over min/max */
 local real   dual_mean;                 /* mean value, if dual pass used */
@@ -209,6 +213,7 @@ local void setparams()
     } else
       error("no proper usage for bins=%s",getparam("bins"));
     Qauto = (!Qmin || !Qmax) ;
+    Qmad = getbparam("mad");
 
     maxcount=getiparam("maxcount");
     headline = getparam("headline");
@@ -314,7 +319,7 @@ local void histogram(void)
   int i,j,k, l, kmin, kmax, lcount = 0;
   real count[MAXHIST], under, over;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
-  real mean, sigma, skew, kurt, h3, h4, lmin, lmax, median;
+  real mean, sigma, mad, skew, kurt, h3, h4, lmin, lmax, median;
   real rmean, rsigma, rrange[2];
   Moment m;
   
@@ -339,7 +344,7 @@ local void histogram(void)
     count[k] = 0;		/* init histogram */
   under = over = 0;
   
-  ini_moment(&m, 4, Qrobust ? npt : 0);
+  ini_moment(&m, 4, Qrobust||Qmad ? npt : 0);
   for (i=0; i<npt; i++) {
     if (Qbin) {
       k=ring_index(nsteps,bins,x[i]);
@@ -368,6 +373,7 @@ local void histogram(void)
   kurt = kurtosis_moment(&m);
   h3 = h3_moment(&m);
   h4 = h4_moment(&m);
+  if (Qmad) mad = mad_moment(&m);
 
   if (nsigma > 0) {    /* remove outliers iteratively, starting from the largest */
     iq = (int *) allocate(npt*sizeof(int));
@@ -400,6 +406,7 @@ local void histogram(void)
 	kurt = kurtosis_moment(&m);
 	h3 = h3_moment(&m);
 	h4 = h4_moment(&m);
+	if (Qmad) mad = mad_moment(&m);
 	dprintf(1,"%d/%d: removing point %d, m/s=%g %g qmax=%g\n",
 		lcount,npt,l,mean,sigma,qmax);
 	if (sigma <= 0) {
@@ -448,6 +455,8 @@ local void histogram(void)
     dprintf (0,"Mean and dispersion  : %g %g %g\n",mean,sigma,sigma/sqrt(npt-1.0));
   else
     dprintf (0,"Mean and dispersion  : %g %g 0.0\n",mean,sigma);
+
+  if (Qmad)  dprintf (0,"MAD                  : %g\n",mad);
   dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
   dprintf (0,"h3 and h4            : %g %g\n", h3, h4);
   if (Qmedian) {
