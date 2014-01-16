@@ -6,6 +6,7 @@
  *       6-jun-01   V1.1    renamed sigma= to nsigma= as in other programs PJT
  * 	 2-mar-01   V1.2    added sum to the output			   pjt
  *      24-jan-12   V1.4    also report min/max in sigma from mean         pjt
+ *      16-jan-13   V1.5    added MAD                                      pjt
  *
  *
  *  @todo:   xcol=0 should use the first data row to figure out all columns
@@ -27,11 +28,12 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "verbose=t\n         Verbose output of all iterations?",
     "width=\n		 Width of columns to print",
     "median=t\n          Compute median too? (can be time consuming)",
+    "mad=f\n             Compute MAD ?",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
     "nmax=100000\n       maximum number of data to be read if pipe",
     "xmin=\n             Set minimum ",
     "xmax=\n             Set maximum ",
-    "VERSION=1.4a\n	 26-jun-2012 PJT",
+    "VERSION=1.5\n	 16-jan-2014 PJT",
     NULL
 };
 
@@ -51,6 +53,7 @@ local int   *ix;
 
 local bool   Qmedian;
 local bool   Qverbose;
+local bool   Qmad;
 local int    nmax;				/* lines to allocate */
 local int    width;
 local char   outfmt[20];
@@ -89,6 +92,7 @@ void setparams()
 
     Qverbose = getbparam("verbose");
     Qmedian = getbparam("median");
+    Qmad = getbparam("mad");
     if (hasvalue("width")) {
         width = getiparam("width");
         sprintf(outfmt,"%%%ds",width);
@@ -127,14 +131,17 @@ read_data()
 
 void stat_data()
 {
-    int i, j, imax, kmin, kmax;
+    int i, j, ndat, imax, kmin, kmax;
     real median, mean, sigma, d, dmax, fac;
     char fmt[20];
     
     ix = (int *) allocate(sizeof(int)*npt);     /* pointer array */
 
+    ndat = 0;
+    if (Qmad) ndat = npt;
+
     for (j=0; j<nxcol; j++) {           /* initialize moments for all data */
-        ini_moment(&m[j],4,0);
+        ini_moment(&m[j],4,ndat);
         for (i=0; i<npt; i++) {
 	  if (Qmin && x[j][i]<xmin) continue;
 	  if (Qmax && x[j][i]>xmax) continue;
@@ -187,6 +194,14 @@ void stat_data()
                 out(fmt);
             }
             printf("\n");
+	    if (Qmad) {
+	      printf("mad:    ");
+	      for (j=0; j<nxcol; j++) {
+                sprintf(fmt," %g",mad_moment(&m[j]));        
+                out(fmt);
+	      }
+	      printf("\n");
+	    }
 
             printf("skew:   ");
             for (j=0; j<nxcol; j++) {
