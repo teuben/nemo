@@ -151,7 +151,7 @@ ccdmath $run.110,$run.111 $run.112 "(%1+%2)/2"
 ccdmath $run.110,$run.111 $run.113 "(%1-%2)/(%1+%2)"
 
 echo "Study sample orbits by running 'do1'"
-#  do1 [run=run1] [iorbit=0] [range=2] [omega=0]
+#  ./do1 [run=run1] [iorbit=0] [range=2] [omega=0]
 
 #  
 # =========================================================================== ROTCUR
@@ -192,7 +192,7 @@ ccdmath $run.20v,$run.24 $run.24d fie="ifeq(%1,0.0,0.0,ifeq(%2,0.0,0.0,%1-%2))"
 omega:
 echo Determining the pattern speed over times ${tstart}:${tstop}:$step 
 ## get the pattern speed from an analysis of the direction of the moment of inertia tensor
-do2 run=$run times=${tstart}:${tstop}:$step hackdens=$hackdens > $run.ome
+./do2 run=$run times=${tstart}:${tstop}:$step hackdens=$hackdens > $run.ome
 exit 1
 #   DEMO PLOT omega.gif/ps
 align.awk $run.ome | tabplot - 1 2,3 2 10 -1080 360 line=1,1 color=2,3 point=2,0.1 \
@@ -216,7 +216,7 @@ exit 0
 snapplot run1.02 nxy=5,5 nxticks=3 nyticks=3 yapp=/vps
 
 # get angle and shape for a set of times
-do2 times=0:10:0.5 > run1.ome
+./do2 times=0:10:0.5 > run1.ome
 tabmath run1.ome - %1,%4,%5,%6,%5/%4,%6/%4 all |\
    tabplot - 1 5,6 0 10 0 1 line=1,1 color=2,3 point=2,0.2 yapp=/vps
 
