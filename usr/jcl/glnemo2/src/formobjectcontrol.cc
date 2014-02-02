@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -431,11 +431,11 @@ void FormObjectControl::checkComboLine(const int row, const int col)
       std::istringstream iss((rx.cap(1)).toStdString());
       iss >> first;
       // get last
-      if (rx.numCaptures()>4) {
+      if (rx.captureCount()>4) {
         std::istringstream  iss((rx.cap(4)).toStdString());
         iss >> last;
         // get step
-        if (rx.numCaptures()>=7) {
+        if (rx.captureCount()>=7) {
           std::istringstream  iss((rx.cap(7)).toStdString());
           iss >> step;
         }
@@ -445,10 +445,10 @@ void FormObjectControl::checkComboLine(const int row, const int col)
       }
 #if 0
       std::cerr << "whole string =["<<(rx.cap(0)).toStdString()<<"\n";
-      for (int i=0;i<=rx.numCaptures();i++) {
+      for (int i=0;i<=rx.captureCount();i++) {
         std::cerr << "cap ="<<(rx.cap(i)).toStdString()<<"\n";
       }
-      std::cerr << "ncap="<<rx.numCaptures()<<" first="<<first<<" last="<<last<<" step="<<step<<"\n";
+      std::cerr << "ncap="<<rx.captureCount()<<" first="<<first<<" last="<<last<<" step="<<step<<"\n";
 #endif
       // check if the syntax is correct
       int npart=last-first+1; // #part 

@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -146,11 +146,11 @@ int UserSelection::isRange(const std::string comp)
     std::istringstream iss((rx.cap(1)).toStdString());
     iss >> first;
     // get last
-    if (rx.numCaptures()>4) {
+    if (rx.captureCount()>4) {
       std::istringstream  iss((rx.cap(4)).toStdString());
       iss >> last;
       // get step
-      if (rx.numCaptures()>=7) {
+      if (rx.captureCount()>=7) {
         std::istringstream  iss((rx.cap(7)).toStdString());
         iss >> step;
       }

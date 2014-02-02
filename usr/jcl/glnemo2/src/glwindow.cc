@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -10,9 +10,14 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
-
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <GL/glew.h>
+#include <QtGui>
+#else
 #include <QtGui>
 #include <GL/glew.h>
+#endif
 #include <QtOpenGL>
 #include <QMutex>
 #include <assert.h>
@@ -1154,7 +1159,7 @@ void GLWindow::bestZoomFit()
   if ( !store_options->duplicate_mem) mutex_data->lock();
   
   setPerspectiveMatrix(); // toggle to perspective matric mode
-  
+  glGetIntegerv(GL_VIEWPORT,viewport);
   Tools3D::bestZoomFromObject(mProj,mModel,
                               viewport, pov, p_data, store_options);
     

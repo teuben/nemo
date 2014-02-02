@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -13,11 +13,19 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <GL/glew.h>
+#include <QApplication>
+#else // QT4
 #include <QtGui>
 #include <QApplication>
 #include <GL/glew.h>
-#include <QtOpenGL>
-#include <QGLFormat>
+#endif
+#include <QtPlugin>
+//#include <QtOpenGL>
+//#include <QGLFormat>
 #include <QDesktopWidget>
 #include <iostream>
 #include <QSplashScreen>
@@ -28,7 +36,26 @@
 #include "mainwindow.h"
 using namespace std;
 
-#define RELEASE_VERSION "1.52"
+#define RELEASE_VERSION "1.6.0"
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+// Import snapshot plugins
+Q_IMPORT_PLUGIN(SnapshotNemo)
+Q_IMPORT_PLUGIN(SnapshotFtm)
+Q_IMPORT_PLUGIN(SnapshotGadget)
+Q_IMPORT_PLUGIN(SnapshotPhiGrape)
+Q_IMPORT_PLUGIN(SnapshotRamses)
+Q_IMPORT_PLUGIN(SnapshotList)
+Q_IMPORT_PLUGIN(SnapshotNetwork)
+#else // QT4
+Q_IMPORT_PLUGIN(nemoplugin);
+Q_IMPORT_PLUGIN(ftmplugin);
+Q_IMPORT_PLUGIN(gadgetplugin);
+Q_IMPORT_PLUGIN(phigrapeplugin);
+Q_IMPORT_PLUGIN(ramsesplugin);
+Q_IMPORT_PLUGIN(listplugin);
+Q_IMPORT_PLUGIN(networkplugin);
+#endif
 
 // ============================================================================
 // NEMO parameters                                                             
@@ -116,24 +143,19 @@ using namespace std;
     "shot_ext=jpg\n    Screenshot's extension jpg|png                    ",
     "smooth_gui=t\n    if true it allows a smoother interactivity with  ",
     "                   the GUI, but it **double** the memory usage. \n",
-    "VERSION="RELEASE_VERSION"\n    "__DATE__"  - JCL  compiled at <"__TIME__">      ",
+    "VERSION=" RELEASE_VERSION "\n    " __DATE__ "  - JCL  compiled at <" __TIME__ ">      ",
     NULL
   };
   const char * usage="Interactive 3D OpenGL NBody simulation Snapshots rendering program";
-  Q_IMPORT_PLUGIN(nemoplugin);
-  Q_IMPORT_PLUGIN(ftmplugin);
-  Q_IMPORT_PLUGIN(gadgetplugin);
-  Q_IMPORT_PLUGIN(phigrapeplugin); 
-  Q_IMPORT_PLUGIN(ramsesplugin); 
-  Q_IMPORT_PLUGIN(listplugin);
-  Q_IMPORT_PLUGIN(networkplugin);
 
-// ============================================================================
+  // ============================================================================
 //  The main program is here                                                   
 int main(int argc, char *argv[])
 {
   QApplication::setDesktopSettingsAware(true);
   QApplication app(argc, argv);
+  setlocale(LC_NUMERIC,"C"); // force numerics functions to use decimal point
+
   if ( !QGLFormat::hasOpenGL() ) {
     qWarning( "This system has no OpenGL support. Exiting." );
     return -1;

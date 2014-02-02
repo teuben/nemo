@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -11,7 +11,7 @@
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
 /**
-	@author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
+	@author Jean-Charles Lambert <Jean-Charles.Lambert@lam.fr>
 */
 #ifndef GLNEMOGLGRIDOBJECT_H
 #define GLNEMOGLGRIDOBJECT_H
@@ -26,7 +26,7 @@ namespace glnemo {
 class GLGridObject: public GLObject {
 public:
 
-  GLGridObject(int axe_parm=0,const QColor &c=Qt::yellow, bool activated=TRUE);
+  GLGridObject(int axe_parm=0,const QColor &c=Qt::yellow, bool activated=true);
   
   ~GLGridObject();
 

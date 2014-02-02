@@ -1,15 +1,14 @@
                              
                              --  Glnemo2 --
                                  
-                Copyright © Jean-Charles LAMBERT 2007-2012
-                 http://projets.oamp.fr/projects/glnemo2
+                Copyright © Jean-Charles LAMBERT 2007-2014
+                 http://projets.lam.fr/projects/glnemo2
  
-                       Jean-Charles.Lambert@oamp.fr
+                       Jean-Charles.Lambert@lam.fr
                          Dynamique des Galaxies
               Centre de donnéS Astrophysique de Marseille (CeSAM)
-               Observatoire Astronomique de Marseille-Provence
                   Laboratoire d'Astrophysique de Marseille
-                           (CNRS U.M.R 6110)
+                           (CNRS U.M.R 7326)
                  Pôle de l'Étoile Site de Château-Gombert
                        38, rue Frédéric Joliot-Curie
                           13388 Marseille cedex 13
@@ -46,7 +45,7 @@ Glnemo2 runs fine on Linux, Windows(using minGW compiler), and MaxOSX, thanks to
  
 2) test purpose files: see "snapshot/README"
 
- Glnemo2 has a dedicated web site : http://projets.oamp.fr/projects/glnemo2
+ Glnemo2 has a dedicated web site : http://projets.lam.fr/projects/glnemo2
 
  License :
  -------

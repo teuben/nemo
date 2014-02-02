@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>757</width>
-    <height>258</height>
+    <width>894</width>
+    <height>255</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="options_dialog">
      <property name="currentIndex">
-      <number>9</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="tab_i_select">
       <attribute name="title">
@@ -2123,7 +2123,7 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="2" rowspan="4">
+       <item row="0" column="2" rowspan="3">
         <widget class="QGroupBox" name="frame_box">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
@@ -2267,6 +2267,31 @@
          </layout>
         </widget>
        </item>
+       <item row="1" column="0">
+        <layout class="QGridLayout" name="gridLayout_39">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="com">
+           <property name="toolTip">
+            <string>Perform automatic centering of mass at each frame</string>
+           </property>
+           <property name="text">
+            <string>C.O.M</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="cod">
+           <property name="toolTip">
+            <string>Prefer automatic centering of density at each frame if density
+exist. You must check COM also.</string>
+           </property>
+           <property name="text">
+            <string>C.O.D</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
        <item row="1" column="1">
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
@@ -2297,31 +2322,6 @@
          </item>
         </layout>
        </item>
-       <item row="1" column="0">
-        <layout class="QGridLayout" name="gridLayout_39">
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="com">
-           <property name="toolTip">
-            <string>Perform automatic centering of mass at each frame</string>
-           </property>
-           <property name="text">
-            <string>C.O.M</string>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QCheckBox" name="cod">
-           <property name="toolTip">
-            <string>Prefer automatic centering of density at each frame if density
-exist. You must check COM also.</string>
-           </property>
-           <property name="text">
-            <string>C.O.D</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
        <item row="2" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
@@ -2343,6 +2343,19 @@ exist. You must check COM also.</string>
          </property>
          <property name="sizeType">
           <enum>QSizePolicy::MinimumExpanding</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>43</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="3" column="2">
+        <spacer name="verticalSpacer_28">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -5995,19 +6008,88 @@ p, li { white-space: pre-wrap; }
       <attribute name="title">
        <string>Auto-Screenshots</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_12">
+      <layout class="QGridLayout" name="gridLayout_42">
        <item row="0" column="0" rowspan="2">
         <widget class="QGroupBox" name="groupBox_6">
          <property name="title">
           <string>Screenshot properties</string>
          </property>
-         <layout class="QGridLayout" name="gridLayout_11">
-          <item row="0" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <layout class="QGridLayout" name="gridLayout_12">
+          <item row="0" column="0" colspan="3">
+           <layout class="QHBoxLayout" name="horizontalLayout_20">
+            <item>
+             <widget class="QGroupBox" name="groupBox_25">
+              <property name="title">
+               <string>Resolution</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_11">
+               <item row="0" column="0">
+                <widget class="QRadioButton" name="radio_res_custom">
+                 <property name="text">
+                  <string>custom</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QRadioButton" name="radio_res_standard">
+                 <property name="text">
+                  <string>standard</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>61</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="groupBox_8">
+              <property name="title">
+               <string>Format</string>
+              </property>
+              <layout class="QGridLayout" name="gridLayout_5">
+               <item row="0" column="0">
+                <widget class="QRadioButton" name="frame_png">
+                 <property name="text">
+                  <string>PNG</string>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QRadioButton" name="frame_jpg">
+                 <property name="text">
+                  <string>JPG</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_19">
             <item>
              <widget class="QLabel" name="label_12">
               <property name="text">
-               <string>resolution</string>
+               <string>standard</string>
               </property>
              </widget>
             </item>
@@ -6503,49 +6585,44 @@ p, li { white-space: pre-wrap; }
             </item>
            </layout>
           </item>
-          <item row="0" column="1">
-           <widget class="QGroupBox" name="groupBox_8">
-            <property name="title">
-             <string>Format</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_5">
-             <item row="0" column="0">
-              <widget class="QRadioButton" name="frame_png">
-               <property name="text">
-                <string>PNG</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QRadioButton" name="frame_jpg">
-               <property name="text">
-                <string>JPG</string>
-               </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
+          <item row="2" column="0" colspan="2">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QLabel" name="label_29">
+              <property name="text">
+               <string>custom</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit"/>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_30">
+              <property name="text">
+               <string>X</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="lineEdit_2"/>
+            </item>
+           </layout>
           </item>
-          <item row="0" column="2">
-           <spacer name="horizontalSpacer_5">
+          <item row="2" column="2">
+           <spacer name="horizontalSpacer_18">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>61</width>
+              <width>128</width>
               <height>20</height>
              </size>
             </property>
            </spacer>
           </item>
-          <item row="1" column="0" colspan="3">
+          <item row="3" column="0" colspan="3">
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
              <widget class="QPushButton" name="frame_name">
@@ -7424,6 +7501,19 @@ p, li { white-space: pre-wrap; }
             </item>
            </layout>
           </item>
+          <item row="1" column="1" colspan="2">
+           <spacer name="horizontalSpacer_17">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>212</width>
+              <height>21</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
         </widget>
        </item>
@@ -7461,6 +7551,9 @@ p, li { white-space: pre-wrap; }
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::MinimumExpanding</enum>
+         </property>
          <property name="sizeHint" stdset="0">
           <size>
            <width>153</width>
@@ -7469,10 +7562,13 @@ p, li { white-space: pre-wrap; }
          </property>
         </spacer>
        </item>
-       <item row="1" column="1" rowspan="2">
+       <item row="1" column="1">
         <spacer name="verticalSpacer">
          <property name="orientation">
           <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Expanding</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
@@ -7490,7 +7586,7 @@ p, li { white-space: pre-wrap; }
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>15</height>
+           <height>27</height>
           </size>
          </property>
         </spacer>
@@ -8988,8 +9084,8 @@ p, li { white-space: pre-wrap; }
      <y>151</y>
     </hint>
     <hint type="destinationlabel">
-     <x>572</x>
-     <y>93</y>
+     <x>715</x>
+     <y>86</y>
     </hint>
    </hints>
   </connection>
@@ -9004,8 +9100,104 @@ p, li { white-space: pre-wrap; }
      <y>78</y>
     </hint>
     <hint type="destinationlabel">
-     <x>490</x>
-     <y>170</y>
+     <x>482</x>
+     <y>184</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_custom</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>screen_size</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>68</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>104</x>
+     <y>130</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_custom</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lineEdit</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>56</x>
+     <y>93</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>81</x>
+     <y>159</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_custom</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lineEdit_2</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>37</x>
+     <y>98</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>230</x>
+     <y>163</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_standard</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>screen_size</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>148</x>
+     <y>95</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>152</x>
+     <y>128</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_standard</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lineEdit</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>100</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>123</x>
+     <y>163</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_standard</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lineEdit_2</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>101</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>234</x>
+     <y>151</y>
     </hint>
    </hints>
   </connection>

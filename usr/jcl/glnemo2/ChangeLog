@@ -1,5 +1,15 @@
+1.6.0 (January, 8th 2014)
+------------------------
+  - maintenance release
+  - glnemo2 compiles both with QT4 and QT5
+
+1.53 (January, 9th 2013)
+------------------------
+  - bug fix release
+  - phiGrape snasphots can be loaded again  (see issue 443)
+
 1.52 (December, 1st 2012)
---------------------
+-------------------------
   - bug fix release
   - bug fix on temperature with gadget files
   - fix about rescaling data when physical values <= 0
@@ -8,7 +18,7 @@
   - ramses files, resize positions and hsml with respect of boxlen
 
 1.51 (July, 26th 2012)
----------------------
+----------------------
   - bug fix release
   - fix density threshold not correctly set between frames (see issue 125)
   - fix bug on accumulation blending rendering (key press "m") 

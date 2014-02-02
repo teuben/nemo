@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -13,7 +13,7 @@
 #ifndef GLNEMOUSERSELECTION_H
 #define GLNEMOUSERSELECTION_H
 /**
-	@author Jean-Charles Lambert <jean-charles.lambert@oamp.fr>
+	@author Jean-Charles Lambert <jean-charles.lambert@lam.fr>
 */
 #include <string>
 #include <vector>

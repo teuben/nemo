@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Ple de l'Etoile, site de Chteau-Gombert                         
 //           38, rue Frdric Joliot-Curie                                     
@@ -10,16 +10,23 @@
 // ============================================================================
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "glwindow.h"
 #include <QtGui>
-
-//#include <QGLWidget>
+#include <QtWidgets>
+#include <QtPrintSupport/QPrinter>
+#include <QtPrintSupport/QPrintDialog>
+#else // QT4
+#include <QtGui>
+#include "glwindow.h"
+#endif
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QLayout>
 #include <assert.h>
 #include <iomanip>
 #include <sstream>
-#include "glwindow.h"
 #include "mainwindow.h"
 #include "pluginsmanage.h"
 #include "particlesselectrange.h"
@@ -175,8 +182,10 @@ void MainWindow::start(std::string shot)
         current_data->initLoading(store_options); 
         if (shot == "") interactiveSelect("",true);
       }
-      else 
-  	loadNewData(select,store_options->select_time,keep_all, false,true);
+      else {
+        //gl_window->updateGL();
+        loadNewData(select,store_options->select_time,keep_all, false,true);
+      }
       if (!store_options->rho_exist) {
         store_options->render_mode = 0;
       }
@@ -415,33 +424,33 @@ void MainWindow::createActions()
                                   tr("Toggle Full Screen"),this);
   fullscreen_action->setShortcut(tr("F"));
   fullscreen_action->setStatusTip(tr("Toogle Full Screen"));
-  connect( fullscreen_action, SIGNAL(activated()), this, SLOT(actionFullScreen()) );
+  connect( fullscreen_action, SIGNAL(triggered()), this, SLOT(actionFullScreen()) );
 
   // Reset 
   reset_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Reset to initial positions"),this);
   reset_action->setShortcut(tr("Ctrl+R"));
   reset_action->setStatusTip(tr("Reset to initial positions"));
-  connect( reset_action, SIGNAL( activated() ), this, SLOT( actionReset() ) );
+  connect( reset_action, SIGNAL( triggered() ), this, SLOT( actionReset() ) );
 
   // Center to COM 
   com_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Center to COM"),this);
   com_action->setShortcut(tr("C"));
   com_action->setStatusTip(tr("Center to COM"));
-  connect( com_action, SIGNAL( activated() ), this, SLOT( actionCenterToCom() ) );
+  connect( com_action, SIGNAL( triggered() ), this, SLOT( actionCenterToCom() ) );
   addAction(com_action);
   
   // Toggle projection orthographic/perspective
   proj_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Toggle projection"),this);
   proj_action->setShortcut(tr("Ctrl+Shift+P"));
   proj_action->setStatusTip(tr("Toggle projection ortho/perps"));
-  connect( proj_action, SIGNAL( activated() ), this, SLOT( actionToggleProjection()) );
+  connect( proj_action, SIGNAL( triggered() ), this, SLOT( actionToggleProjection()) );
   addAction(proj_action);
   
   // render mode 
   render_mode_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/home-mdk.png"),tr("Rendering mode"),this);
   render_mode_action->setShortcut(tr("M"));
   render_mode_action->setStatusTip(tr("Rendering mode"));
-  connect( render_mode_action, SIGNAL( activated() ), this, SLOT( actionRenderMode() ) );
+  connect( render_mode_action, SIGNAL( triggered() ), this, SLOT( actionRenderMode() ) );
   addAction(render_mode_action);
 
   // Fit all particles
@@ -449,203 +458,203 @@ void MainWindow::createActions()
                                      this);
   fit_particles_action->setShortcut(tr("Ctrl+A"));
   fit_particles_action->setStatusTip(tr("Fit all particles on screen"));
-  connect( fit_particles_action, SIGNAL( activated() ), this, SLOT(actionBestZoom()) );
+  connect( fit_particles_action, SIGNAL( triggered() ), this, SLOT(actionBestZoom()) );
 
   // Grid 
   toggle_grid_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/grid.png"),tr("Toggle Grid"),this);
   toggle_grid_action->setShortcut(tr("G"));
   toggle_grid_action->setStatusTip(tr("Toggle Grid"));
-  connect(toggle_grid_action, SIGNAL( activated() ),  this, SLOT(actionGrid()) );
+  connect(toggle_grid_action, SIGNAL( triggered() ),  this, SLOT(actionGrid()) );
 
   // Particles range & color
   particles_form_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/colors.png"),
                                       tr("set Particles range and color"),this);
   particles_form_action->setShortcut(tr("R"));
   particles_form_action->setStatusTip(tr("set Particles range and color"));
-  connect( particles_form_action, SIGNAL( activated() ),
+  connect( particles_form_action, SIGNAL( triggered() ),
            this, SLOT(actionFormObjectControl() ) );
 
   // options
   options_form_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/options.png"),tr("Options dialog box"),this);
   options_form_action->setShortcut(tr("O"));
   options_form_action->setStatusTip(tr("Options dialog box"));
-  connect(options_form_action, SIGNAL( activated() ), this, SLOT( actionFormOptions() ) );
+  connect(options_form_action, SIGNAL( triggered() ), this, SLOT( actionFormOptions() ) );
 
   // Translation
   toggle_trans_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/move.png"),tr("Toggle translation"),this);
   toggle_trans_action->setShortcut(tr("T"));
   toggle_trans_action->setStatusTip(tr("Toggle translation"));
-  connect(toggle_trans_action, SIGNAL( activated() ), this, SLOT(actionEmpty()) );
+  connect(toggle_trans_action, SIGNAL( triggered() ), this, SLOT(actionEmpty()) );
 
   // play simulation
   toggle_play_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/player_play.png"),tr("Play next snapshot"),this);
   toggle_play_action->setShortcut(tr("p"));
   toggle_play_action->setStatusTip(tr("Play next snapshot"));
-  //connect(toggle_play_action, SIGNAL( activated() ), this, SLOT(actionPlay()) );
-  connect(toggle_play_action, SIGNAL( activated() ), form_options, SLOT(on_play_pressed2()));
+  //connect(toggle_play_action, SIGNAL( triggered() ), this, SLOT(actionPlay()) );
+  connect(toggle_play_action, SIGNAL( triggered() ), form_options, SLOT(on_play_pressed2()));
   
   // reload
   reload_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/reload.png"),tr("Reload snaphot"),this);
   reload_action->setShortcut(tr("l"));
   reload_action->setStatusTip(tr("Reload snapshot"));
-  connect(reload_action, SIGNAL( activated() ), this, SLOT(actionReload()) );
+  connect(reload_action, SIGNAL( triggered() ), this, SLOT(actionReload()) );
   
   // screenshot
   screenshot_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/camera.png"),tr("Take a screenshot"),this);
   screenshot_action->setShortcut(tr("S"));
   screenshot_action->setStatusTip(tr("Take a screenshot"));
-  connect(screenshot_action, SIGNAL( activated() ), this, SLOT(actionScreenshot()) );
+  connect(screenshot_action, SIGNAL( triggered() ), this, SLOT(actionScreenshot()) );
   
   // automatic screenshot during Play
   auto_screenshot_action = new QAction(QIcon(""),tr("Take a screenshot during play event"),this);
   auto_screenshot_action->setShortcut(tr("ctrl+S"));
   auto_screenshot_action->setStatusTip(tr("Take a screenshot during play event"));
-  connect(auto_screenshot_action, SIGNAL( activated() ), this, SLOT(actionAutoScreenshot()) );
+  connect(auto_screenshot_action, SIGNAL( triggered() ), this, SLOT(actionAutoScreenshot()) );
   addAction(auto_screenshot_action);
 
   // automatic screenshot during GL event
   auto_gl_screenshot_action = new QAction(QIcon(""),tr("Take a screenshot during OpenGL event"),this);
   auto_gl_screenshot_action->setShortcut(tr("ctrl+G"));
   auto_gl_screenshot_action->setStatusTip(tr("Take a screenshot during OpenGL event"));
-  connect(auto_gl_screenshot_action, SIGNAL(activated()), this, SLOT(actionGLAutoScreenshot()) );
+  connect(auto_gl_screenshot_action, SIGNAL(triggered()), this, SLOT(actionGLAutoScreenshot()) );
   addAction(auto_gl_screenshot_action);
 
   // toggle OSD 
   toggle_osd_action = new QAction(this);
   toggle_osd_action->setShortcut(tr("alt+t"));
-  connect( toggle_osd_action, SIGNAL( activated() ), this, SLOT( actionToggleOsd() ) );
+  connect( toggle_osd_action, SIGNAL( triggered() ), this, SLOT( actionToggleOsd() ) );
   addAction(toggle_osd_action);
   
   // print
   print_file_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/fileprint.png"),tr("Print OpenGL window"),this);
   print_file_action->setShortcut(tr(""));
   print_file_action->setStatusTip(tr("Print OpenGL window"));
-  connect(print_file_action, SIGNAL( activated() ), this, SLOT(actionPrint()) );
+  connect(print_file_action, SIGNAL( triggered() ), this, SLOT(actionPrint()) );
   
   // movie
   movie_form_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/video_section.png"),tr("Make a movie"),this);
   movie_form_action->setShortcut(tr(""));
   movie_form_action->setStatusTip(tr("Make a movie"));
-  connect(movie_form_action, SIGNAL( activated() ), this, SLOT(actionFormOptionsShowMovie()) );
+  connect(movie_form_action, SIGNAL( triggered() ), this, SLOT(actionFormOptionsShowMovie()) );
   // Next colormap
   next_cmap_action = new QAction(this);
   next_cmap_action->setShortcut(tr("Alt+Shift+n"));
-  connect( next_cmap_action, SIGNAL( activated() ), colormap, SLOT( next() ) );
+  connect( next_cmap_action, SIGNAL( triggered() ), colormap, SLOT( next() ) );
   addAction(next_cmap_action);
   // prev colormap
   prev_cmap_action = new QAction(this);
   prev_cmap_action->setShortcut(tr("Alt+Shift+p"));
-  connect( prev_cmap_action, SIGNAL( activated() ), colormap, SLOT( prev() ) );
+  connect( prev_cmap_action, SIGNAL( triggered() ), colormap, SLOT( prev() ) );
   addAction(prev_cmap_action);
   // reverse colormap
   reverse_cmap_action = new QAction(this);
   reverse_cmap_action->setShortcut(tr("Alt+Shift+i"));
-  connect( reverse_cmap_action, SIGNAL( activated() ), colormap, SLOT( reverse() ) );
+  connect( reverse_cmap_action, SIGNAL( triggered() ), colormap, SLOT( reverse() ) );
   addAction(reverse_cmap_action);
   // constant colormap
   dynamic_cmap_action = new QAction(this);
   dynamic_cmap_action->setShortcut(tr("Alt+Shift+c"));
-  connect( dynamic_cmap_action, SIGNAL( activated() ), colormap, SLOT( constant() ) );
+  connect( dynamic_cmap_action, SIGNAL( triggered() ), colormap, SLOT( constant() ) );
   addAction(dynamic_cmap_action);
 
   // Z sorting
   zsorting_action = new QAction(this);
   zsorting_action->setShortcut(tr("Z"));
-  connect( zsorting_action, SIGNAL( activated() ), this, SLOT( actionZSorting() ) );
+  connect( zsorting_action, SIGNAL( triggered() ), this, SLOT( actionZSorting() ) );
   addAction(zsorting_action);
 
   // Toggle rotation screen
   toggle_rotation_screen_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/3daxis.png"),tr("Toggle rotation mode around axes screen/world"),this);
   toggle_rotation_screen_action->setShortcut(tr("Ctrl+L"));
-  connect( toggle_rotation_screen_action, SIGNAL( activated() ), this, SLOT( toggleRotateScreen()) );
+  connect( toggle_rotation_screen_action, SIGNAL( triggered() ), this, SLOT( toggleRotateScreen()) );
   addAction(toggle_rotation_screen_action);
   
   // Auto rotate around X 
   rotatex_action = new QAction(this);
   rotatex_action->setShortcut(tr("Ctrl+X"));
-  connect( rotatex_action, SIGNAL( activated() ), this, SLOT( actionRotateX() ) );
+  connect( rotatex_action, SIGNAL( triggered() ), this, SLOT( actionRotateX() ) );
   addAction(rotatex_action);
   
   // Auto rotate reverse around X 
   rotatexr_action = new QAction(this);
   rotatexr_action->setShortcut(tr("Ctrl+Shift+X"));
-  connect( rotatexr_action, SIGNAL( activated() ), this, SLOT( actionRotateRX() ) );
+  connect( rotatexr_action, SIGNAL( triggered() ), this, SLOT( actionRotateRX() ) );
   addAction(rotatexr_action);
   
   // Auto rotate around Y 
   rotatey_action = new QAction(this);
   rotatey_action->setShortcut(tr("Ctrl+Y"));
-  connect( rotatey_action, SIGNAL( activated() ), this, SLOT( actionRotateY() ) );
+  connect( rotatey_action, SIGNAL( triggered() ), this, SLOT( actionRotateY() ) );
   addAction(rotatey_action);
   
   // Auto rotate reverse around Y 
   rotateyr_action = new QAction(this);
   rotateyr_action->setShortcut(tr("Ctrl++Shift+Y"));
-  connect( rotateyr_action, SIGNAL( activated() ), this, SLOT( actionRotateRY() ) );
+  connect( rotateyr_action, SIGNAL( triggered() ), this, SLOT( actionRotateRY() ) );
   addAction(rotateyr_action);
   
   // Auto rotate around Z 
   rotatez_action = new QAction(this);
   rotatez_action->setShortcut(tr("Ctrl+Z"));
-  connect( rotatez_action, SIGNAL( activated() ), this, SLOT( actionRotateZ() ) );
+  connect( rotatez_action, SIGNAL( triggered() ), this, SLOT( actionRotateZ() ) );
   addAction(rotatez_action);
   
   // Auto rotate reverse around Z 
   rotatezr_action = new QAction(this);
   rotatezr_action->setShortcut(tr("Ctrl+Shift+Z"));
-  connect( rotatezr_action, SIGNAL( activated() ), this, SLOT( actionRotateRZ() ) );
+  connect( rotatezr_action, SIGNAL( triggered() ), this, SLOT( actionRotateRZ() ) );
   addAction(rotatezr_action);
   
   // Auto rotate around U 
   rotateu_action = new QAction(this);
   rotateu_action->setShortcut(tr("Ctrl+U"));
-  connect( rotateu_action, SIGNAL( activated() ), this, SLOT( actionRotateU() ) );
+  connect( rotateu_action, SIGNAL( triggered() ), this, SLOT( actionRotateU() ) );
   addAction(rotateu_action);
   
   // Auto rotate reverse around U
   rotateur_action = new QAction(this);
   rotateur_action->setShortcut(tr("Ctrl+Shift+U"));
-  connect( rotateur_action, SIGNAL( activated() ), this, SLOT( actionRotateRU() ) );
+  connect( rotateur_action, SIGNAL( triggered() ), this, SLOT( actionRotateRU() ) );
   addAction(rotateur_action);
   
   // Auto rotate around V 
   rotatev_action = new QAction(this);
   rotatev_action->setShortcut(tr("Ctrl+V"));
-  connect( rotatev_action, SIGNAL( activated() ), this, SLOT( actionRotateV() ) );
+  connect( rotatev_action, SIGNAL( triggered() ), this, SLOT( actionRotateV() ) );
   addAction(rotatev_action);
   
   // Auto rotate reverse around V 
   rotatevr_action = new QAction(this);
   rotatevr_action->setShortcut(tr("Ctrl+Shift+V"));
-  connect( rotatevr_action, SIGNAL( activated() ), this, SLOT( actionRotateRV() ) );
+  connect( rotatevr_action, SIGNAL( triggered() ), this, SLOT( actionRotateRV() ) );
   addAction(rotatevr_action);
   
   // Auto rotate around W 
   rotatew_action = new QAction(this);
   rotatew_action->setShortcut(tr("Ctrl+W"));
-  connect( rotatew_action, SIGNAL( activated() ), this, SLOT( actionRotateW() ) );
+  connect( rotatew_action, SIGNAL( triggered() ), this, SLOT( actionRotateW() ) );
   addAction(rotatew_action);
   
   // Auto rotate reverse around W
   rotatewr_action = new QAction(this);
   rotatewr_action->setShortcut(tr("Ctrl+Shift+W"));
-  connect( rotatewr_action, SIGNAL( activated() ), this, SLOT( actionRotateRW() ) );
+  connect( rotatewr_action, SIGNAL( triggered() ), this, SLOT( actionRotateRW() ) );
   addAction(rotatewr_action);
   
   // Auto translate along X
   transx_action = new QAction(this);
   transx_action->setShortcut(tr("Alt+X"));
-  connect( transx_action, SIGNAL( activated() ), this, SLOT( actionTranslateX() ) );
+  connect( transx_action, SIGNAL( triggered() ), this, SLOT( actionTranslateX() ) );
   addAction(transx_action);
   // Auto translate along Y
   transy_action = new QAction(this);
   transy_action->setShortcut(tr("Alt+Y"));
-  connect( transy_action, SIGNAL( activated() ), this, SLOT( actionTranslateY() ) );
+  connect( transy_action, SIGNAL( triggered() ), this, SLOT( actionTranslateY() ) );
   addAction(transy_action);
   // Auto translate along Z
   transz_action = new QAction(this);
   transz_action->setShortcut(tr("Alt+Z"));
-  connect( transz_action, SIGNAL( activated() ), this, SLOT( actionTranslateZ() ) );
+  connect( transz_action, SIGNAL( triggered() ), this, SLOT( actionTranslateZ() ) );
   addAction(transz_action);
 }
 

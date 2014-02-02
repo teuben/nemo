@@ -1,7 +1,7 @@
 
                      G l n e m o 2      I n s t a l l a t i o n
                      = = = = = = = = = = = = = = = = = = = = = = 
-                     see http://projets.oamp.fr/projects/glnemo2/wiki/Wiki#Installation
+                     see http://projets.lam.fr/projects/glnemo2/wiki/Wiki#Installation
   
   
 0) Requirements:
@@ -37,15 +37,15 @@ qt4 are still installed there). Change to 'glnemo2' directory and enter the comm
 
     c) cmake experimental
        - - - - - - - - -
-     for linux only, if you have cmake package installed, you can try
-    the following :
+     for linux only and qt5 dev package installed, if you have cmake package installed, you can try
+    to run the following commands :
     cd build
-    cmake .
+    cmake ..
     make
     make install
 
  if the compilation fails, please send me a full report by e-mail : 
-  jean-charles.lambert@oamp.fr 
+  jean-charles.lambert@lam.fr 
    
 it should take a while to compile, at the end you should have a 'glnemo2' binary located in
 "PATH/glnemo2/bin/ARCH/debug" directory. PATH is where is located glnemo2 directory. ARCH depends on
@@ -67,5 +67,5 @@ see $NEMO/usr/jcl/glnemo2/gyrfalcon/README
 
 You can download and install directly glnemo2 binary for MacOSX and windows 32 platform.
 
-See http://projets.oamp.fr/projects/glnemo2/wiki/Download
+See http://projets.lam.fr/projects/glnemo2/wiki/Download
 

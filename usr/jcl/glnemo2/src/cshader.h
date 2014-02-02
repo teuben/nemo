@@ -1,10 +1,10 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
-//           P√¥le de l'Etoile, site de Ch√¢teau-Gombert                         
-//           38, rue Fr√©d√©ric Joliot-Curie                                     
+//           PÙle de l'Etoile, site de Ch‚teau-Gombert
+//           38, rue FrÈdÈric Joliot-Curie
 //           13388 Marseille cedex 13 France                                   
 //           CNRS U.M.R 7326                                                   
 // ============================================================================

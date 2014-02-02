@@ -115,6 +115,8 @@ else {
 TEMPLATE = app
 QT      += opengl
 QT      += network
+QT      += printsupport
+#QT      += widgets
 MOC_DIR     = .moc/$$ARCH/$$COMPILEMODE
 UI_DIR      = ._ui/$$ARCH/$$COMPILEMODE
 OBJECTS_DIR = .obj/$$ARCH/$$COMPILEMODE
