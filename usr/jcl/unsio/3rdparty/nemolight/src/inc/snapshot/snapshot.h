@@ -6,7 +6,8 @@
  *      jan-2002        added ZENO compatible ones
  *      nov-2003        removed Yanc tags (YANC is also called gyrfalcON now)
  *      feb-2004        added some new SPH stuff (GasDensity, NPartners, NSPHPartners)
- *      may-2013        added in a few tag from atos.c for handling its' SPH 
+ *      may-2014
+//           Centre de donneeS Astrophysiques de Marseille (CeSAM)        added in a few tag from atos.c for handling its' SPH 
  */
 
 #ifndef _snapshot_h

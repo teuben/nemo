@@ -6,9 +6,9 @@
 
 UNSIO has 
 
-- a dedicated website : http://projets.oamp.fr/projects/unsio
+- a dedicated website : http://projets.lam.fr/projects/unsio
 
-- a wiki              : http://projets.oamp.fr/projects/unsio/wiki
+- a wiki              : http://projets.lam.fr/projects/unsio/wiki
 
 
 I) REQUIREMENTS
@@ -78,11 +78,11 @@ problems.
 III) BUILDING
 ==============
 
-To build the UNSIO libraries, type
+To build UNSIO libraries, type
 
   make    
 
-If you want, you can install the UNSIO header and libraries. To do so, type
+If you want, you can install UNSIO headers and libraries. To do so, type
 
   make install
 

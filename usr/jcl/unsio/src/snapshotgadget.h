@@ -1,16 +1,17 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2013                                       
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2008-2014
+//           Centre de donneeS Astrophysiques de Marseille (CeSAM)              
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Aix Marseille Universite, CNRS, LAM 
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pole de l'Etoile, site de Chateau-Gombert                         
 //           38, rue Frederic Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
-//           CNRS U.M.R 6110                                                   
+//           CNRS UMR 7326                                       
 // ============================================================================
 
 /**
-	@author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
+	@author Jean-Charles Lambert <Jean-Charles.Lambert@lam.fr>
  */
 
 #ifndef SNAPSHOTGADGET_H
@@ -294,6 +295,8 @@ typedef struct particle_data_lite
     int * id[6];
     int ntot_withmasses;
     std::ofstream out;
+    // Map to associate EXTRA tags with vectors
+    std::map<std::string, std::vector <float>  > s_mapStringVector;
     // Map to associate the strings with the bool values
     std::map<std::string, bool> ptrIsAlloc[6];
     t_io_header_1 header;
@@ -327,6 +330,9 @@ typedef struct particle_data_lite
     int setTemp(const int _n, float * _temp, const bool addr);
     int setMetalGas(const int _n, float * _mg   , const bool addr);
     int setMetalStars(const int _n, float * _ms   , const bool addr);
+    // extra TAGS
+    int setExtra(std::string tag, const int _n, float * _data, const bool addr);
+
   }; // end of class CSnapshotGadgetOut  
 } // namespace
 

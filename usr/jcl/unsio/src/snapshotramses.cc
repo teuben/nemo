@@ -1,6 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2013
-// e-mail:   Jean-Charles.Lambert@oamp.fr
+// Copyright Jean-Charles LAMBERT - 2008-2014
+//           Centre de donneeS Astrophysiques de Marseille (CeSAM)
+// e-mail:   Jean-Charles.Lambert@lam.fr
 // address:  Dynamique des galaxies
 //           Laboratoire d'Astrophysique de Marseille
 //           Pole de l'Etoile, site de Chateau-Gombert
@@ -10,7 +11,7 @@
 // ============================================================================
 
 /*
-  @author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
+  @author Jean-Charles Lambert <Jean-Charles.Lambert@lam.fr>
  */
 
 #include "snapshotramses.h"

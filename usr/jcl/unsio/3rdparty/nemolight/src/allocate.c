@@ -13,7 +13,7 @@
  *	 6-apr-01	changed malloc -> calloc		pjt
  *         jan-02       experimenting with exception handling	pjt/nas
  *       7-sep-05       TOOLBOX benchmark pjt/chapman
- *      31-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@oamp.fr>
+ *      31-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@lam.fr>
  *      12-jun-08       allocate_FL etc, see stdinc.h           WD
  *      12-jun-08       removed tests for size_t < 0            WD
  *      03-oct-08       debugged error in debug_info reporting  WD

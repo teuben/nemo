@@ -36,7 +36,7 @@
  *        18-jun-03   pjt    <docs>
  * V 3.1  15-mar-05   pjt    C++ compilable
  * V 3.2   2-jun-05   pjt    blocked (sequential) I/O
- * V 3.3  25-may-07   pjt    handle > 2GB objects in memory (Pierre Fortin <pierre.fortin@oamp.fr>)
+ * V 3.3  25-may-07   pjt    handle > 2GB objects in memory (Pierre Fortin <pierre.fortin@lam.fr>)
  * V 3.4  12-dec-09   pjt    support the new halfp type for I/O (see also csf)
  *        27-Sep-10   jcl    MINGW32/WINDOWS support
  *

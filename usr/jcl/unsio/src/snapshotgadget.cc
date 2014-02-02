@@ -1,16 +1,17 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2013                                       
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2008-2014
+//           Centre de donneeS Astrophysiques de Marseille (CeSAM)              
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Aix Marseille Universite, CNRS, LAM 
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pole de l'Etoile, site de Chateau-Gombert                         
 //           38, rue Frederic Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
-//           CNRS U.M.R 6110                                                   
+//           CNRS UMR 7326                                       
 // ============================================================================
 
 /* 
-	@author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
+	@author Jean-Charles Lambert <Jean-Charles.Lambert@lam.fr>
  */
 
 
@@ -1059,6 +1060,10 @@ bool CSnapshotGadgetIn::getData(const std::string name,int *n,float **data)
   case uns::Age :
     *data = getAge(*n);
     break;
+  case uns::Acc :
+    *data = getAcc();
+    *n    = getNSel();
+    break;
   case uns::Metal :
     if (comp_bits&STARS_BIT && comp_bits&GAS_BIT)      // gas and stars requested
       *data = getMetal(*n);
@@ -1509,51 +1514,59 @@ int CSnapshotGadgetOut::setData(std::string name,std::string array,  const int n
   bool ok=true;
   int status=0;
 
-  switch(CunsOut::s_mapStringValues[array]) {
-  case uns::Pos  :
-    status = setPos(name, n, data, _addr);
-    break;
-  case uns::Vel  : 
-    status = setVel(name, n, data, _addr);
-    break;
-  case uns::Mass : 
-    status = setMass(name, n, data, _addr);
-    break;
-  case uns::Pot  :
-    status = setPot(name, n, data, _addr);
-    break;
-  case uns::Acc  :
-    status = setAcc(name, n, data, _addr);
-    break;
-  case uns::Hsml :
-    status = setHsml(n, data, _addr);
-    break;
-  case uns::Rho  :
-    status = setRho(n, data, _addr);
-    break;
-  case uns::U  :
-    status = setU(n, data, _addr);
-    break;
-  case uns::Temp  :
-    status = setTemp(n, data, _addr);
-    break;
-  case uns::Age  :
-    status = setAge(n, data, _addr);
-    break;
-  case uns::GasMetal  :
-    status = setMetalGas(n, data, _addr);
-    break;
-  case uns::StarsMetal  :
-    status = setMetalStars(n, data, _addr);
-    break;
-  default: ok=false;
-  }
+  if ( name == "EXTRA" ) { // it's an extra data
+    status = setExtra(array,n, data, _addr);
+  } else {
+    switch(CunsOut::s_mapStringValues[array]) {
+    case uns::Pos  :
+      status = setPos(name, n, data, _addr);
+      break;
+    case uns::Vel  :
+      status = setVel(name, n, data, _addr);
+      break;
+    case uns::Mass :
+      status = setMass(name, n, data, _addr);
+      break;
+    case uns::Pot  :
+      status = setPot(name, n, data, _addr);
+      break;
+    case uns::Acc  :
+      status = setAcc(name, n, data, _addr);
+      break;
+    case uns::Hsml :
+      status = setHsml(n, data, _addr);
+      break;
+    case uns::Rho  :
+      status = setRho(n, data, _addr);
+      break;
+    case uns::U  :
+      status = setU(n, data, _addr);
+      break;
+    case uns::Temp  :
+      status = setTemp(n, data, _addr);
+      break;
+    case uns::Age  :
+      status = setAge(n, data, _addr);
+      break;
+    case uns::GasMetal  :
+      status = setMetalGas(n, data, _addr);
+      break;
+    case uns::StarsMetal  :
+      status = setMetalStars(n, data, _addr);
+      break;
+    default: ok=false;
+    }
 
+  }
   if (verbose) {
     if (ok) { 
       std::cerr << "CSnapshotGadgetOut::setData name["<<name<<"]=" << CunsOut::s_mapStringValues[name] << "\n";
     } else {
-      std::cerr << "** WARNING ** CSnapshotGadgetOut::setData Value ["<<name<<"] does not exist.....\n";
+      if (name != "EXTRA") {
+        std::cerr << "** WARNING ** CSnapshotGadgetOut::setData Value ["<<name<<"] does not exist.....\n";
+      } else {
+        std::cerr << "CSnapshotGadgetOut::setData EXTRA tags["<<array<<"]\n";
+      }
     }
   }
   return status;
@@ -1826,8 +1839,8 @@ int CSnapshotGadgetOut::setPos(std::string name, const int _n, float * _pos, con
 // ============================================================================
 // setRho:                                                            
  int CSnapshotGadgetOut::setRho(const int _n, float * _rho, const bool addr)
-{
-  assert(_n==header.npart[0]);; // #rho particles = #gas particles
+ {
+   assert(_n==header.npart[0]);; // #rho particles = #gas particles
   if (addr) { // map address
     rho = _rho;
   }
@@ -1946,6 +1959,15 @@ int CSnapshotGadgetOut::setPos(std::string name, const int _n, float * _pos, con
      memcpy(age,_age,sizeof(float)*_n);
    }
    bits |= AGE_BIT;
+   return 1;
+ }
+ // ============================================================================
+ // setExtra:
+ int CSnapshotGadgetOut::setExtra(std::string tag, const int _n, float * _data, const bool addr)
+ {
+   s_mapStringVector[tag].clear();
+   s_mapStringVector[tag].resize(_n);
+   memcpy((float *) &s_mapStringVector[tag][0],_data,sizeof(float)*_n);
    return 1;
  }
  //// ============================================================================
@@ -2299,6 +2321,18 @@ int CSnapshotGadgetOut::write()
     writeData((char *) age, sizeof(float), header.npart[4]);
     writeFRecord(blk);
   }
+  // Write EXTRA
+  std::map<std::string,std::vector <float>  >::const_iterator it;
+  for (it =  s_mapStringVector.begin(); it != s_mapStringVector.end(); it++) {
+    if (verbose) {
+      std::cerr << "Saving EXTRA Tag=["<< it->first << "] of size="<<it->second.size()<<"\n";
+    }
+    blk=sizeof(float)*it->second.size();
+    writeBlockName(it->first,blk);
+    writeFRecord(blk);
+    writeData((char *) &s_mapStringVector[it->first][0] , sizeof(float), it->second.size());
+    writeFRecord(blk);
+  }
   return 1;
 }
 // ============================================================================
@@ -2309,9 +2343,13 @@ bool CSnapshotGadgetOut::writeBlockName(std::string block_name, int nextblock)
   if (version == 2 ) { // gadget2 file format
     int dummy=8;
     nextblock += (2*sizeof(int));
-    
+    char block[4];
+    std::string str ("    ");
+    str.copy(block,4,0);
+    block_name.copy(block,block_name.length()<=4?block_name.length():4,0);
     writeData((char *) &dummy , sizeof(int),  1); // write
-    writeData((char *) block_name.c_str()   , sizeof(char), 4); // write label
+    //writeData((char *) block_name.c_str()   , sizeof(char), 4); // write label
+    writeData((char *) block   , sizeof(char), 4); // write label
     writeData((char *) &nextblock           , sizeof(int),  1); // write nextblock
     writeData((char *) &dummy , sizeof(int),  1); // write
     status = out.good();

@@ -3,14 +3,15 @@
 # Perl package to manage sqlite3 operations 
 #
 # ============================================================================
-# Copyright Jean-Charles LAMBERT - -2013                                   
-# e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-# address:  Dynamique des galaxies                                            
+# Copyright Jean-Charles LAMBERT - 2008-2014
+#           Centre de donneeS Astrophysiques de Marseille (CeSAM)       
+# e-mail:   Jean-Charles.Lambert@lam.fr                                      
+# address:  Aix Marseille Universite, CNRS, LAM 
 #           Laboratoire d'Astrophysique de Marseille                          
 #           Pole de l'Etoile, site de Chateau-Gombert                         
 #           38, rue Frederic Joliot-Curie                                     
 #           13388 Marseille cedex 13 France                                   
-#           CNRS U.M.R 6110                                                   
+#           CNRS UMR 7326    
 # ============================================================================
 #
 package Sqlite3::Sqlite;
@@ -161,7 +162,6 @@ sub Sqlite::getSimInfo {
       }
       printf "-------------\n";
     }
-
     #if (  defined(%$status ) ) {
     if (  %$status  ) {
       return %$status;

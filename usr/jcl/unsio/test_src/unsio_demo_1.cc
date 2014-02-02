@@ -1,12 +1,12 @@
 // ============================================================================
 // Copyright Jean-Charles LAMBERT - 2010                                       
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Aix Marseille Universite, CNRS, LAM 
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pole de l'Etoile, site de Chateau-Gombert                         
 //           38, rue Frederic Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
-//           CNRS U.M.R 6110                                                   
+//           CNRS UMR 7326                                       
 // ============================================================================
 #include <iostream>                                   // C++ I/O     
 #include <fstream>                                    // C++ file I/O
@@ -133,7 +133,12 @@ int main(int argc, char ** argv )
       processComponent("bndry",unsin,unsout);
       processComponent("gas"  ,unsin,unsout);
       processComponent("all"  ,unsin,unsout); // only all particles selected
-      
+
+      float * extra=new float[10];
+      for (int i=0; i<10; i++) {
+        extra[i]=i*10.0;
+      }
+      unsout->snapshot->setData("EXTRA","bug",10,extra);
       // according to user's input request ("select" parameter)
       // check if gas component exist from input snapshot     
       bool is_gas=unsin->snapshot->getRangeSelect("gas",&cnbody,&cfirst,&clast);

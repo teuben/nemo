@@ -1,7 +1,8 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2013                                       
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014
+//           Centre de donneeS Astrophysiques de Marseille (CeSAM)              
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Aix Marseille Universite, CNRS, LAM 
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pole de l'Etoile, site de Chateau-Gombert                         
 //           38, rue Frederic Joliot-Curie                                     
@@ -10,7 +11,7 @@
 // ============================================================================
 
 /* 
-	@author Jean-Charles Lambert <Jean-Charles.Lambert@oamp.fr>
+	@author Jean-Charles Lambert <Jean-Charles.Lambert@lam.fr>
  */
 #ifndef CAMR_H
 #define CAMR_H

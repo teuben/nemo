@@ -1,15 +1,15 @@
 # ============================================================================
-# Copyright Jean-Charles LAMBERT - 2008-2013
-# e-mail:   Jean-Charles.Lambert@oamp.fr
-# address:  Dynamique des galaxies
-#           Centre de donneeS Astrophysique de Marseille (CeSAM)
-#           Laboratoire d'Astrophysique de Marseille
-#           Pole de l'Etoile, site de Chateau-Gombert
-#           38, rue Frederic Joliot-Curie
-#           13388 Marseille cedex 13 France
-#           CNRS U.M.R 6110
+# Copyright Jean-Charles LAMBERT - 2008-2014
+#           Centre de donneeS Astrophysiques de Marseille (CeSAM)       
+# e-mail:   Jean-Charles.Lambert@lam.fr                                      
+# address:  Aix Marseille Universite, CNRS, LAM 
+#           Laboratoire d'Astrophysique de Marseille                          
+#           Pole de l'Etoile, site de Chateau-Gombert                         
+#           38, rue Frederic Joliot-Curie                                     
+#           13388 Marseille cedex 13 France                                   
+#           CNRS UMR 7326    
 # ============================================================================
-# CMakeListst.txt file for nemo library
+# CMakeListst.txt file to compile UNSIO library
 # ============================================================================
 
 cmake_minimum_required(VERSION 2.6)
@@ -213,8 +213,8 @@ INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/userselection.h DESTINATION inc/uns)
 IF (NOT NEMO_INSTALLED)
 
   # install nemo lib
-  INSTALL(FILES  ${NEMOLIGHT}/lib/libnemo.${LIBEXT} DESTINATION lib)
-  INSTALL(FILES  ${NEMOLIGHT}/lib/libnemomaing77.${LIBEXT} DESTINATION lib)
+  INSTALL(FILES  ${NEMOLIGHT}/lib/libnemo.a DESTINATION lib)
+  INSTALL(FILES  ${NEMOLIGHT}/lib/libnemomaing77.a DESTINATION lib)
 
   # Find all NEMOLIGHT header files
   FILE(GLOB nlight_files ${NEMOLIGHT}/src/*.h ${NEMOLIGHT}/src/inc/*.h)

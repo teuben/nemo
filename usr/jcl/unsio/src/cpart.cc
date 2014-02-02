@@ -1,7 +1,8 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2008-2013
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2008-2014
+//           Centre de donneeS Astrophysiques de Marseille (CeSAM)
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Aix Marseille Universite, CNRS, LAM 
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pole de l'Etoile, site de Chateau-Gombert                         
 //           38, rue Frederic Joliot-Curie                                     
@@ -179,7 +180,8 @@ int CPart::loadData(uns::CParticles * particles,
 	      //if ( tmp[6][k] == 0.0 ) 
 	      //std::cerr << "DM => "<<metaltmp[k]<<" mass=" << tmp[6][k] << "\n";
               //particles->metal.push_back(tmp[6][k]); // put mass for dark matter
-              particles->metal.push_back(-1.0); // put -1 for dark matter after discussion with valentin 18-jul-2013
+              particles->metal.push_back(-1.0); // put -1 for dark matter after discussion with valentin 18-jul-2014
+//           Centre de donneeS Astrophysiques de Marseille (CeSAM)
               particles->load_bits |= METAL_BIT;
             }
             if (req_bits&ID_BIT) {
