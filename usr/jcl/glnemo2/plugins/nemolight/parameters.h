@@ -1,7 +1,7 @@
 /* =================================================================
 |  Copyright Jean-Charles LAMBERT - 2008                            
-|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
-|  address:  Dynamique des galaxies                                 
+|  e-mail:   Jean-Charles.Lambert@lam.fr                           
+|  address:  Centre de donneeS Astrophysique de Marseille (CeSAM)   
 |            Laboratoire d'Astrophysique de Marseille               
 |            2, place Le Verrier                                    
 |            13248 Marseille Cedex 4, France                        

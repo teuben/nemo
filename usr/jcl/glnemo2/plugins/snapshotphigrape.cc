@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -16,7 +16,12 @@
 #include <cstdio>
 #include <sstream>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+Q_PLUGIN_METADATA(IID "fr.glnemo2.phigrapePlugin")
+#endif
+
 namespace glnemo {
+
 #define KB        512
 #define N_MAX     128*KB
 // ============================================================================
@@ -379,4 +384,6 @@ QString SnapshotPhiGrape::endOfDataMessage()
 // BUT you have to specify the namespace in the export:
 // ==> glnemo::SnapshotNemo                            
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 Q_EXPORT_PLUGIN2(phigrapeplugin, glnemo::SnapshotPhiGrape);
+#endif

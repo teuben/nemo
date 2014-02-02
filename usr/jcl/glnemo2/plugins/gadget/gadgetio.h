@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -11,7 +11,7 @@
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
 /**
-	@author Jean-Charles Lambert <jean-charles.lambert@oamp.fr>
+	@author Jean-Charles Lambert <jean-charles.lambert@lam.fr>
 */
 #ifndef GADGETGADGETIO_H
 #define GADGETGADGETIO_H
@@ -56,7 +56,7 @@ enum DATA_TYPE {
   INT   =4,
   FLOAT =4,
   DOUBLE=8,
-  CHAR  =1
+  C_HAR  =1
 };
 
 const int NB_DATA_HEADER = 14;
@@ -74,7 +74,7 @@ const t_data_type_header dth[NB_DATA_HEADER] = {
   {DOUBLE   ,1}, // double   Omega0;
   {DOUBLE   ,1}, // double   OmegaLambda;
   {DOUBLE   ,1}, // double   HubbleParam; 
-  {CHAR     ,96} // char     fill[256- 6*4- 6*8- 2*8- 2*4- 6*4- 2*4 - 4*8];
+  {C_HAR     ,96} // char     fill[256- 6*4- 6*8- 2*8- 2*4- 6*4- 2*4 - 4*8];
 };
 
 typedef struct particle_data 

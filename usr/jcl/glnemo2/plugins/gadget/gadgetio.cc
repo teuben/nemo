@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -501,7 +501,7 @@ int GadgetIO::ioData(char * ptr,const size_t size_bytes,const int items,const io
     //assert(in.good());
     if (! in.good()) return 0;
     // We SWAP data
-    if (swap && (size_bytes != CHAR)) { // swapping requested
+    if (swap && (size_bytes != C_HAR)) { // swapping requested
       for (int i=0; i<items; i++) {
 	swapBytes(ptr,size_bytes);
 	ptr += size_bytes;
@@ -511,7 +511,7 @@ int GadgetIO::ioData(char * ptr,const size_t size_bytes,const int items,const io
 
   case WRITE :
     // We must SWAP data first
-    if (swap && (size_bytes != CHAR)) { // swapping requested
+    if (swap && (size_bytes != C_HAR)) { // swapping requested
       pp = ptr;
       for (int i=0; i<items; i++) {
 	swapBytes(ptr,size_bytes);
@@ -524,7 +524,7 @@ int GadgetIO::ioData(char * ptr,const size_t size_bytes,const int items,const io
     assert(out.good());
     
     // We have to unswap the data now
-    if (swap && (size_bytes != CHAR)) { // swapping requested
+    if (swap && (size_bytes != C_HAR)) { // swapping requested
       for (int i=0; i<items; i++) {
 	swapBytes(ptr,size_bytes);
 	ptr += size_bytes;

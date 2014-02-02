@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012
+// Copyright Jean-Charles LAMBERT - 2007-2014
 //           Yannick Dalbin
-// e-mail:   Jean-Charles.Lambert@oamp.fr
+// e-mail:   Jean-Charles.Lambert@lam.fr
 // address:  Dynamique des galaxies
 //           Laboratoire d'Astrophysique de Marseille
 //           Pôle de l'Etoile, site de Château-Gombert
@@ -12,7 +12,12 @@
 // See the complete license in LICENSE and/or "http://www.cecill.info".
 // ============================================================================
 #include <QTextStream>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QtWidgets/QWidget>
+#else // QT4
 #include <QMessageBox>
+#endif
 #include <iostream>
 
 #include "serveur.h"

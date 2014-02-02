@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012                                  
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pôle de l'Etoile, site de Château-Gombert                         
 //           38, rue Frédéric Joliot-Curie                                     
@@ -11,7 +11,7 @@
 // See the complete license in LICENSE and/or "http://www.cecill.info".        
 // ============================================================================
 /**
-	@author Jean-Charles Lambert <jean-charles.lambert@oamp.fr>
+	@author Jean-Charles Lambert <jean-charles.lambert@lam.fr>
 */
 #ifndef GLNEMOSNAPSHOTFTM_H
 #define GLNEMOSNAPSHOTFTM_H
@@ -24,8 +24,11 @@ namespace glnemo {
 
 class SnapshotFtm: public SnapshotInterface
 {
-     Q_OBJECT
-     Q_INTERFACES(glnemo::SnapshotInterface)
+  Q_OBJECT
+  Q_INTERFACES(glnemo::SnapshotInterface)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  Q_PLUGIN_METADATA(IID "fr.glnemo2.nemoPlugin" FILE "ftmPlugin.json")
+#endif
 
 public:
     SnapshotFtm();

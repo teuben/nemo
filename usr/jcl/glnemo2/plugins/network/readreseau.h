@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012
+// Copyright Jean-Charles LAMBERT - 2007-2014
 //           Yannick Dalbin
-// e-mail:   Jean-Charles.Lambert@oamp.fr
+// e-mail:   Jean-Charles.Lambert@lam.fr
 // address:  Dynamique des galaxies
 //           Laboratoire d'Astrophysique de Marseille
 //           Pôle de l'Etoile, site de Château-Gombert

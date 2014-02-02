@@ -1,7 +1,7 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012
+// Copyright Jean-Charles LAMBERT - 2007-2014
 //           Yannick Dalbin
-// e-mail:   Jean-Charles.Lambert@oamp.fr
+// e-mail:   Jean-Charles.Lambert@lam.fr
 // address:  Dynamique des galaxies
 //           Laboratoire d'Astrophysique de Marseille
 //           Pôle de l'Etoile, site de Château-Gombert
@@ -17,6 +17,10 @@
 #include <QMessageBox>
 #include "snapshotnetwork.h"
 #include "serveur.h"
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+Q_PLUGIN_METADATA(IID "fr.glnemo2.networkPlugin")
+#endif
 
 namespace glnemo {
   
@@ -211,4 +215,7 @@ namespace glnemo {
 // You have to export outside of the namespace "glnemo"
 // BUT you have to specify the namespace in the export:
 // ==> glnemo::SnapshotNetwork
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 Q_EXPORT_PLUGIN2(networkplugin, glnemo::SnapshotNetwork);
+#endif

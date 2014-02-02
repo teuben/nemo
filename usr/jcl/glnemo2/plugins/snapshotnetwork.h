@@ -1,6 +1,6 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2012
-// e-mail:   Jean-Charles.Lambert@oamp.fr
+// Copyright Jean-Charles LAMBERT - 2007-2014
+// e-mail:   Jean-Charles.Lambert@lam.fr
 // address:  Dynamique des galaxies
 //           Laboratoire d'Astrophysique de Marseille
 //           Pôle de l'Etoile, site de Château-Gombert
@@ -24,8 +24,11 @@ namespace glnemo {
 
 	class SnapshotNetwork : public SnapshotInterface {
 
-		Q_OBJECT
-		Q_INTERFACES(glnemo::SnapshotInterface)
+    Q_OBJECT
+    Q_INTERFACES(glnemo::SnapshotInterface)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    Q_PLUGIN_METADATA(IID "fr.glnemo2.networkPlugin" FILE "networkPlugin.json")
+#endif
 
 		public:
 			SnapshotNetwork();

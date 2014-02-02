@@ -6,7 +6,7 @@
 // C++ code																												|
 //																																|
 // Copyright Jean-Charles LAMBERT - 2005-2010															|
-// e-mail:   Jean-Charles.Lambert@oamp.fr																	|
+// e-mail:   Jean-Charles.Lambert@lam.fr																	|
 // address:  Dynamique des galaxies																			|
 //           Laboratoire d'Astrophysique de Marseille															|
 //           2, place Le Verrier																							|

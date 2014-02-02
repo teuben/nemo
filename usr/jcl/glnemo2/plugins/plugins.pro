@@ -52,3 +52,12 @@ DEPENDPATH += \
     network
 
 #
+
+OTHER_FILES += \
+    nemoPlugin.json \
+    listPlugin.json \
+    networkPlugin.json \
+    phigrapePlugin.json \
+    gadgetPlugin.json \
+    ramsesPlugin.json \
+    ftmPlugin.json
