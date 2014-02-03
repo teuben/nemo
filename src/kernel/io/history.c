@@ -51,10 +51,10 @@
 # define MAXHIST 1024			/* max size of history array        */
 #endif
 
-local int nhist = 0;			/* count history data stored so far */
+local int    nhist = 0;			/* count history data stored so far */
 local string histbuf[MAXHIST+1];	/* history string array             */
 local string headline = NULL;		/* last headline read in            */
-local bool freeup[MAXHIST+1];           /* if space should be free'd        */
+local bool   freeup[MAXHIST+1];         /* if space should be free'd        */
 
 int nemo_history = 1;          /* 1=history is auto-mode  0=no history done */
                                /* this item should eventually disappear     */
