@@ -1,11 +1,11 @@
 /* =================================================================
 |  Copyright Jean-Charles LAMBERT - 2006                            
-|  e-mail:   Jean-Charles.Lambert@lam.fr                           
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
 |            2, place Le Verrier                                    
 |            13248 Marseille Cedex 4, France                        
-|            CNRS UMR 7326                            
+|            CNRS U.M.R 6110                                        
 | ==================================================================
 |* Perform I/O operations on NEMO structure data from a Fortran     
 |  program.                                                         
@@ -24,6 +24,7 @@
 | 24-Apr-06      V1.31: memory leak fixed                        JCL
 | 19-Jun-06      V1.32: happy gfortran                           JCL
 | 29-May-07      V1.42: handle snapshot with different #bodies   JCL
+| 21-Nov-10      V1.53: Fix a linking issue on Mac               JCL
 +----------------------------------------------------------------  */
 
 #ifdef ABSOFT
@@ -74,7 +75,7 @@ char * history_prog_f=NULL;
 char * hist_file_f;        /* history file name */
 
 /* variables to store max #bodies per file */
-int   maxbodies[MAXIO];
+extern int maxbodies[];
 
 /* io_nemo_data_f (EXPORTED) */
 char 

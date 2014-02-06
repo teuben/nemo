@@ -70,7 +70,8 @@ extern int dup (int);			/* POSIX ??? unistd.h */
  *  if the number of files opened for this process -- not necessarily through
  *  calls so stropen() -- exceeds the fixed table size. The new layout
  *  allocates a new entry for each file opened by stropen and thus allows for
- *  an unlimited number of files.
+ *  an unlimited number of files, as long as the OS allows this.
+ *  The old number (64) was commonly used in older versions of UNIX
  */
 local struct flist_element {
     char  *name;

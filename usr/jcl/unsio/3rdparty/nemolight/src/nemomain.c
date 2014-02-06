@@ -1,57 +1,47 @@
 /*
- *	NEMOMAIN:  standard way a nemoprogram starts and finishes
- *	by calling your main program 'nemo_main' instead of
- *	'main' you get more of the user interface done
- *	transparently
- *              (1) calls 'initparam' to set up program
- *              (2) calls program 'nemo_main'
- *              (3) calls 'finiparam' to finish program
- *              (4) return normal status to shell
+ *	Example of a NEMO C program
  *
- *      20-nov-93  added options MAIN_ symbol to fool the fortran compiler
- *      13-jul-96  use optional MAIN, MAIN_ and MAIN__ symbols
- *      20-jun-01  gcc3
+ *       On *Unix* to be compiled and linked as:
+ *       
+ *       cc -g -o main main.c $NEMOLIB/libnemo.a -lm
+ * or:
+ *	 cc -g -o main main.c -lnemo -lm
+ *
+ * within the NEMO environment.
+ *     
+ *
+ *  22-oct-90	V1.0	Created		    PJT
+ *  21-may-92	V1.1	added usage	    PJT
+ *  12-feb-95   V1.2    added format=       PJT
  */
 
-#include <stdinc.h>
+#include <stdinc.h>                             /* standard NEMO include */
 #include <getparam.h>
 
-extern string defv[];		/* defv MUST be defined in user program ! */
-extern string usage;		/* One line description of the program    */
+string defv[] = {                               /* keywords definitions */
+    "nmax=10\n          Number of iterations",
+    "format=%20.10f\n	Format to print result",
+    "VERSION=1.2\n      12-feb-95 PJT",
+    NULL,
+};
 
-extern void nemo_main(void);
+string usage = "Example C program with nemo_main convention";	/* Usage */
 
-int main(int argc,char *argv[])
+void nemo_main(void)                            /* NEMO's program main entry */
 {
-    if(argv[argc] != NULL) warning("Old-style (short) argv[] in main()");
-    initparam(argv,defv);		/* start  */
-    nemo_main();			/* call program */
-    finiparam();			/* end */
-    exit(0);                            /* return normal status to shell */
-    return 0;				/* fool a strict compiler */
-}
+    real a;         /* becomes 'float' or 'double' depending on compile flag */
+    int   i, nmax;
+    char fmt[64];
 
-#if defined(MAIN)
-int MAIN()
-{
-  error("MAIN called; some fortran inconsistency");
-  return 0;
-}
-#endif
+    nmax = getiparam("nmax");      /* obtain 'nmax' from commmand line */
+    if (nmax<1) warning("%d: Unexpected value for nmax",nmax);
+    dprintf(1,"Iteration counter = %d\n",nmax);
+    
+    a = 1.0;
+    for (i=0; i<nmax; i++) {              /* loop the loop */
+         a = a + a;
+    }
 
-#if defined(MAIN_)
-int MAIN_()
-{
-  error("MAIN_ called; some fortran inconsistency");
-  return 0;
+    sprintf(fmt,"The sum is %s\n",getparam("format")); /* set format string */
+    printf(fmt,a);                                         /* output */
 }
-#endif
-
-#if defined(MAIN__) || defined(linux)
-int MAIN__()
-{
-  error("MAIN__ called; some fortran inconsistency");
-  return 0;
-}
-#endif
-

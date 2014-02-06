@@ -1,11 +1,11 @@
 /* =================================================================
 |  Copyright Jean-Charles LAMBERT - 2005                            
-|  e-mail:   Jean-Charles.Lambert@lam.fr                           
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
 |            2, place Le Verrier                                    
 |            13248 Marseille Cedex 4, France                        
-|            CNRS UMR 7326                            
+|            CNRS U.M.R 6110                                        
 | ==================================================================
 |* Initialyze io_nemo data                                          
 +----------------------------------------------------------------- */
@@ -56,7 +56,7 @@ void init_io_one(int  * maxbodies,
 		 char **history_prog,
 		 int    MAXIO)
 { 
-  string defv[] = { "none=none","VERSION=1.51",NULL };
+  string defv[] = { "none=none","VERSION=1.52",NULL };
   string argv[] = { "IO_NEMO",NULL };
   int i;
   string * histo;

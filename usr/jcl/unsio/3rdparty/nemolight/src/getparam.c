@@ -134,6 +134,7 @@
  * 27-Sep-10 JCL   c  MINGW32/WINDOWS support
  * 20-Nov-10 WD    d  import environ on darwin (so allow dynamic lib)
  * 29-sep-11 PJT   e  new system keyword np= for OpenMP (and later others?)
+ *  3-feb-14 PJT   f  fixed bug when using long filenames
 
   TODO:
       - what if there is no VERSION=
@@ -177,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.6e 29-sep-2011 PJT"
+#define GETPARAM_VERSION_ID  "3.6f 31-jan-2013 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -545,7 +546,7 @@ void initparam(string argv[], string defv[])
 	      free(keys[j].val);
 	      keys[j].val = scopy(parvalue(argv[i]));        /* get value */
 	      keys[j].count++;
-      } else if (j=set_indexed(name,&idx)) {       /* enter indexed keywords */
+	    } else if (j=set_indexed(name,&idx)) {       /* enter indexed keywords */
 	      // process this indexed keyword
 #if 1
 	      addindexed(j,argv[i],idx);
@@ -928,6 +929,7 @@ local void scan_environment()
     "scan_environment: debug=%d yapp=%d help=%d history=%d review=%d error=%d\n",
      debug_level, yapp_dev, help_level, nemo_history, review_flag, error_level);
     dprintf(5,"date_id = %s\n",date_id());
+    dprintf(5,"MAXBUF = %d\n",MAXBUF);
 #if defined(INTERACT)
     if ((ev=getenv("NEMODEF")) != NULL) {
         strcpy (key_filename,ev);
@@ -1467,7 +1469,6 @@ bool updparam(string name)
 
 int getparamstat(string name) {
   error("getparamstat is a ZENO feature, not implemented in NEMO yet");
-  return 0;
 }
 
 
@@ -1967,11 +1968,12 @@ local void beep()
 /*
  * PARNAME: extract name from name=value string.
  * W A R N I N G :  returns ptr to static storage, that may also be empty
+ *                  also: values that are > MAXBUF will fail
  */
 
 local string parname(string arg)
 {
-    permanent char namebuf[64];
+    permanent char namebuf[MAXBUF];
     char *ap, *np;
 
     ap = (char *) arg;
@@ -2947,10 +2949,11 @@ string defv[] = {
     "foobar=12345\n     just some digits",
     "donot=read\n       check if complains about never read params",
     "prompt=t\n		Checking interactive prompting routines?",
+    "verbiage=foobar\n  Random verbiage",
 #ifdef INDEXED
     "naxis#=\n          testing an indexed keyword",
 #endif
-    "VERSION=1.4\n      16-sep-01 PJT",
+    "VERSION=1.5\n      31-jan-2014 PJT",
     NULL,
 };
 
@@ -2963,7 +2966,7 @@ void nemo_main(void)
     bool flag2, prompt;
     double tstop;
     int i, n, my_argc;
-    string *my_argv;
+    string *my_argv, verbiage;
 
     my_argv = getargv(&my_argc);
     if (my_argc) {
@@ -2980,6 +2983,7 @@ void nemo_main(void)
     check("tstop");
     check("foobar");
     check("prompt");
+    check("verbiage");
 
     dprintf(0,"debug level 0 printout\n");
     dprintf(1,"debug level 1 printout\n");
@@ -2997,6 +3001,7 @@ void nemo_main(void)
      
 #endif
 
+    verbiage = getparam("verbiage");
 
     flag2 = getbparam("flag2");    
     tstop = getdparam("tstop");

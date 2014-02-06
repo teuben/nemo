@@ -13,10 +13,11 @@
  *	 6-apr-01	changed malloc -> calloc		pjt
  *         jan-02       experimenting with exception handling	pjt/nas
  *       7-sep-05       TOOLBOX benchmark pjt/chapman
- *      31-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@lam.fr>
+ *      31-may-07       use size_t to better match malloc() 	pjt/Pierre Fortin <pierre.fortin@oamp.fr>
  *      12-jun-08       allocate_FL etc, see stdinc.h           WD
  *      12-jun-08       removed tests for size_t < 0            WD
  *      03-oct-08       debugged error in debug_info reporting  WD
+ *       4-jan-11       add local/static arrays to show where they go in the TESTBED version
  */
 
 #include <stdinc.h>
@@ -94,11 +95,15 @@ string defv[] = {
   "big1=100\n      Allocate the product of these two",
   "big2=100\n      Allocate the product of these two",
   "doubling=f\n    Doubling the big1*big2 allocation until failure",
-  "VERSION=2.0\n   4-jul-2010 PJT",
+  "VERSION=2.1\n   4-jan-2011 PJT",
   NULL,
 };
 
 string usage = "(re)allocate benchmark";
+
+#define MAXTEST 128
+
+static int test1[MAXTEST];
 
 void nemo_main(void) {
   int size, size0 = getiparam("size")*1024;
@@ -112,8 +117,15 @@ void nemo_main(void) {
   size_t big64 = (size_t)big1*(size_t)big2;    /* this is crucial to cast */
   size_t i64;
   int i;
+  int test2[MAXTEST];
+  static int test3[MAXTEST];
   bool Qdouble = getbparam("doubling");
   char *data;
+
+  nemo_dprintf(0,"static test1 @ %p\n",test1);
+  nemo_dprintf(0,"       test2 @ %p\n",test2);
+  nemo_dprintf(0,"static test3 @ %p\n",test3);
+
 
   nemo_dprintf(0,"  Alloc:  %d * %d bytes\n",nalloc,size0);
   nemo_dprintf(0,"ReAlloc:  %d * %d bytes\n",nrealloc,incr);

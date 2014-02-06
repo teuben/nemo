@@ -1,11 +1,11 @@
 /* =================================================================
 |  Copyright Jean-Charles LAMBERT - 2008                            
-|  e-mail:   Jean-Charles.Lambert@lam.fr                           
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
 |            2, place Le Verrier                                    
 |            13248 Marseille Cedex 4, France                        
-|            CNRS UMR 7326                            
+|            CNRS U.M.R 6110                                        
 | ==================================================================
 |* Get/Put selected Data from io_nemo_f                             
 | ==================================================================
@@ -39,7 +39,7 @@
 
 #define TIMEFUZZ 0.0000001
 extern int maxbodies[];
-int CURRENT_IO;
+extern int CURRENT_IO;
 /* ----------------------------------------------------------------
 |  put_data_select :                                               
 |  Save the snapshot in NEMO format.                               

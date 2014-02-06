@@ -9,6 +9,7 @@
  * V 2.2: 26-feb-94   ansi				PJT
  *	  14-mar-95   minor cleanup
  *   3.2  15-mar-05   finally using (g++ enforced) cleaned up function prototypes
+ *   3.5   8-jun-13   element counter type fixed to handle > 2B
  */
  
 #define RANDOM  /* allow random access */
@@ -108,7 +109,7 @@ local float getflt     ( stream str );
 local double getdbl    ( stream str );
 local void saferead    ( void *dat, int siz, int cnt, stream str );
 local void safeseek    ( stream str, off_t offset, int key );
-local int eltcnt       ( itemptr ipt, int skp );
+local long eltcnt      ( itemptr ipt, int skp );
 local size_t datlen    ( itemptr ipt, int skp );
 local itemptr makeitem ( string typ, string tag, void *dat, int *dim );
 local void freeitem    ( itemptr ipt, bool flg);

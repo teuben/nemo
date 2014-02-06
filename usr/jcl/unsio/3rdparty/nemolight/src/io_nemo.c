@@ -1,11 +1,11 @@
 /* =================================================================
 |  Copyright Jean-Charles LAMBERT - 2008                            
-|  e-mail:   Jean-Charles.Lambert@lam.fr                           
+|  e-mail:   Jean-Charles.Lambert@oamp.fr                           
 |  address:  Dynamique des galaxies                                 
 |            Laboratoire d'Astrophysique de Marseille               
 |            2, place Le Verrier                                    
 |            13248 Marseille Cedex 4, France                        
-|            CNRS UMR 7326                            
+|            CNRS U.M.R 6110                                        
 | ==================================================================
 |* Perform I/O operations on NEMO structure data from a C program   
 | ==================================================================
@@ -70,6 +70,9 @@ char * hist_file;         /* history file name  */
 
 /* variables to store max #bodies per file */
 int   maxbodies[MAXIO];
+
+/* some other thing to be shared */
+int   CURRENT_IO;
 
 /* ------------------------------------------------------------------
 |  reajust_ptr :                                                     
