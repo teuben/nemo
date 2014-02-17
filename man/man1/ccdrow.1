@@ -1,0 +1,60 @@
+.TH CCDROW 1NEMO "17 February 2014"
+.SH NAME
+ccdrow \- hacking rows of an image for CLASSy
+.SH SYNOPSIS
+\fBccdrow\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdrow\fP was written to manipulate the rows in an image, specific
+to the CLASSy project.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file [???]    
+.TP
+\fBout=\fP
+Output image file [???]    
+.TP
+\fBx=\fP
+X coordinates to select (1..nx) []  
+.TP
+\fBy=\fP
+Y coordinates to select (1..ny) []  
+.TP
+\fBz=\fP
+Z coordinates to select (1..nz) []  
+.TP
+\fBnxaver=\fP
+Number X to aver (size remains same) [1]
+.TP
+\fBnyaver=\fP
+Number Y to aver (size remains same) [1]
+.TP
+\fBnzaver=\fP
+Number Z to aver (size remains same) [1]
+.TP
+\fBdummy=\fP
+Retain dummy axis? [t]    
+.TP
+\fBreorder=\fP
+New coordinate ordering []    
+.TP
+\fBdiv2=\fP
+Divide subsequent rows instead of aver [f] 
+.TP
+\fBrow=\fP
+Set this to a (>=0) row as calibration
+.TP
+\fBrepair=\fP
+Column (1-based) to repair from its neighbors (-1
+.SH EXAMPLES
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+17-Feb-14	V0.0 Created by mkman	PJT
+.fi
