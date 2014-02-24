@@ -9,6 +9,7 @@
  * 1.4  added reorder=  (args, largely unfinished)
  * 1.5  added a more proper WCS when simple subsetting is done     PJT
  * 2.0  rearranged a lot, removed useless options, enabled others  PJT
+ * 2.1  added moving=t averaging for nxaver only (for now)         PJT
 
     TODO:  wcs is wrong on output
  */
@@ -31,7 +32,8 @@ string defv[] = {
   "nzaver=1\n	  Number Z to aver (size remains same)",
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
-  "VERSION=2.0a\n 1-may-2013 PJT",
+  "moving=f\n     Moving average in n{x,y,z}aver= ?",
+  "VERSION=2.1\n  19-feb-2014 PJT",
   NULL,
 };
 
@@ -62,11 +64,12 @@ void nemo_main()
     int     nx, ny, nz;        /* size of scratch map */
     int     nx1,ny1,nz1;
     int     nxaver, nyaver,nzaver;
-    int     i,j,k, i0,j0,k0, i1,j1,k1;
+    int     i,j,k, i0,j0,k0, i1,j1,k1, l;
     imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
     real    sum, tmp, zzz;
+    real    *row;
     bool    Qreorder = FALSE;
-    bool    Qdummy, Qsample;
+    bool    Qdummy, Qsample, Qmoving;
     string  reorder;
 
     instr = stropen(getparam("in"), "r");
@@ -74,6 +77,7 @@ void nemo_main()
     nyaver=getiparam("nyaver");
     nzaver=getiparam("nzaver");
     Qdummy = getbparam("dummy");
+    Qmoving = getbparam("moving");
 
     nx1 = nemoinpi(getparam("x"),ix,MAXDIM);
     ny1 = nemoinpi(getparam("y"),iy,MAXDIM);
@@ -99,7 +103,30 @@ void nemo_main()
 
     outstr = stropen(getparam("out"), "w");
 
-    if (nxaver>1 || nyaver>1 || nzaver>1) {  /*  averaging, but retaining size */
+    if (nxaver>1 && Qmoving) {
+      warning("work in progress; nxaver=%d moving=t", nxaver);   /* this can be done a lot more efficient */
+      row = (real *) allocate(nx*sizeof(real));
+      LOOP(k,nz) {
+	LOOP(j,ny) {
+	  LOOP(i,nx) { 
+	    row[i] = CV(iptr, i, j, k);
+	    CV(iptr, i, j, k);
+	  }
+	  LOOP(i,nx) { 
+	    CV(iptr, i, j, k) = 0.0;
+	    for(i1=-(nxaver-1)/2; i1<=(nxaver-1)/2; i1++) {
+	      l = i+i1;
+	      if (l<0 || l>=nx) continue;
+	      CV(iptr, i, j, k) += row[l];
+	    }
+	    CV(iptr, i, j, k) /= nxaver;	    
+	  }
+	}
+      }
+      free(row);
+      write_image(outstr, iptr);
+    } else if (nxaver>1 || nyaver>1 || nzaver>1) {  /*  averaging, but retaining size */
+        if (Qmoving) error("moving=t not implemented in this mode");
         dprintf(0,"Averaging map %d * %d * %d pixels; mapsize %d * %d * %d\n",
                    nxaver,nyaver,nzaver,nx,ny,nz);
         nx1 = nx/nxaver;  if (nx % nxaver) warning("X binning not even");
@@ -176,7 +203,7 @@ void nemo_main()
 
       if (!Qdummy) ax_shift(iptr1);
       write_image(outstr, iptr1);
-    } else {                            /* nothing really done */
+    } else {                            /* nothing really done, still a great benchmark */
       warning("nothing really done?");
       if (!Qdummy) ax_shift(iptr);
       write_image(outstr, iptr);
