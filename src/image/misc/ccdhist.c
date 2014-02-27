@@ -38,13 +38,15 @@ string defv[] = {
     "gauss=t\n		  Overlay gaussian plot?",
     "residual=t\n	  Overlay residual data-gauss(fit)",
     "cumul=f\n            Override and do cumulative histogram instead",
+    "integrate=f\n        Integrate cumulative?",
     "median=t\n		  Compute median too (can be time consuming)",
     "nsigma=-1\n          delete points more than nsigma",
     "xcoord=\n		  Draw additional vertical coordinate lines along these X values",
     "sort=qsort\n         Sort mode {qsort;...}",
     "dual=f\n             Dual pass for large number",
+    "blankval=\n          if used, use this as blankval",
     "scale=1\n            Scale factor for data",
-    "VERSION=1.0\n	  8-feb-2011 PJT",
+    "VERSION=1.1\n	  25-feb-2013 PJT",
     NULL
 };
 
@@ -77,12 +79,15 @@ local bool   Qgauss;                    /* gaussian overlay ? */
 local bool   Qresid;                    /* gaussian residual overlay ? */
 local bool   Qtab;                      /* table output ? */
 local bool   Qcumul;                    /* cumulative histogram ? */
+local bool   Qint;                      /* integrate the cumulative histogram ? */
 local bool   Qmedian;			/* compute median also ? */
 local bool   Qdual;                     /* dual pass ? */
 local bool   Qbin;                      /* manual bins ? */
 local int    maxcount;
-local int    Nunder, Nover;             /* number of data under or over min/max */
+local int    Nunder, Nover, Nblank;     /* number of data under or over min/max, #blanks */
 local real   dual_mean;                 /* mean value, if dual pass used */
+local bool   Qblank;                    /* use blank value ? */
+local real   blankval;                  /* blank value */
 local real   scale;                     /* scale factor */
 local real   bins[MAXHIST+1];           /* edges of histogram bins */
 
@@ -100,7 +105,6 @@ local real  xtrans(real), ytrans(real);
 local void  setparams(void), read_data(void), histogram(void);
 local iproc getsort(string name);
 local int   ring_index(int n, real *r, real rad);
-local imageptr iptr=NULL;	
 
 
 /****************************** START OF PROGRAM **********************/
@@ -156,6 +160,8 @@ local void setparams()
         Qgauss=Qresid=FALSE;
         ylog=FALSE;
     }
+    Qint = getbparam("integrate");
+    if (Qint && !Qcumul) error("Integrate option in non-cumulative mode makes no sense");
     Qmedian = getbparam("median");
     if (ylog && streq(ylab,"N")) ylab = scopy("log(N)");
     Qdual = getbparam("dual");
@@ -165,6 +171,8 @@ local void setparams()
     nsigma = getdparam("nsigma");
     mysort = getsort(getparam("sort"));
     scale = getrparam("scale");
+    Qblank = hasvalue("blankval");
+    if (Qblank) blankval = getrparam("blankval");
     if (scale != 1.0) {
       int n1=strlen(xlab);
       string s2 = getparam("scale");
@@ -180,9 +188,11 @@ local void setparams()
 
 local void read_data()
 {
-  int   i, k, ndata;
+  int   i, k, ndata, n;
   real *data;
   stream instr;
+  imageptr iptr=NULL;	
+
 
   instr = stropen (input, "r");
   read_image (instr,&iptr);
@@ -200,15 +210,20 @@ local void read_data()
   if (Qdual) {
     /* pass over the data, finding the mean */
     dual_mean = 0.0;
-    for (i=0; i<ndata; i++)
+    n = 0;
+    for (i=0; i<ndata; i++) {
+      if (Qblank && data[i]==blankval) continue;
       dual_mean += data[i];
-    dual_mean /= ndata;
+      n++;
+    }
+    dual_mean /= n;
     dprintf(0,"Dual pass mean       : %g\n",dual_mean);
   } else
     dual_mean = 0.0;
 
-  Nunder = Nover = 0;
+  Nunder = Nover = Nblank = 0;
   for (i=0, k=0; i<ndata; i++) {
+    if (Qblank && data[i]==blankval) { Nblank++; continue;}
     data[i] -= dual_mean;
     if (Qmin && data[i] < xrange[0]) { Nunder++; continue;}
     if (Qmax && data[i] > xrange[1]) { Nover++;  continue;}
@@ -217,16 +232,18 @@ local void read_data()
   }
   npt = k;
   dprintf(0,"Under/Over flow: %d %d\n",Nunder,Nover);
+  dprintf(0,"Blanked:         %d\n",Nblank);
 
 
   minmax(npt, x, &xmin, &xmax);
   if (!Qmin) xrange[0] = xmin;
   if (!Qmax) xrange[1] = xmax;
 
-
   /*  allocate index arrray , and compute sorted index for median */
   if (Qmedian) 
     (mysort)(x,npt,sizeof(real),compar_real);
+  free_image(iptr);
+
 }
 
 
@@ -237,6 +254,9 @@ local void histogram(void)
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
   real mean, sigma, skew, kurt, lmin, lmax, median;
   Moment m;
+
+  if (Qint) warning("new feature integrate=t");
+
   
   dprintf (0,"read %d values\n",npt);
   dprintf (0,"min and max value: [%g : %g]\n",xmin,xmax);
@@ -273,7 +293,7 @@ local void histogram(void)
     if (k==nsteps && x[i]==xmax) k--;     /* include upper edge */
     if (k<0)       { under++; continue; }
     if (k>=nsteps) { over++;  continue; }
-    count[k] = count[k] + 1;
+    count[k] = count[k] + (Qint ? x[i] : 1);
     dprintf (4,"%d : %f %d\n",i,x[i],k);
     accum_moment(&m,x[i],1.0);
   }
@@ -387,7 +407,7 @@ local void histogram(void)
       if (k==nsteps && x[i]==xmax) k--;     /* include upper edge */
       if (k<0)       { under++; continue; }
       if (k>=nsteps) { over++;  continue; }
-      count[k] = count[k] + 1;
+      count[k] = count[k] + (Qint ? x[i] : 1);
       dprintf (4,"%d : %f %d\n",i,x[i],k);
     }
     if (under > 0 || over > 0) error("under=%d over=%d in recomputed histo",under,over);
@@ -423,7 +443,12 @@ local void histogram(void)
   if (ylog && under>0) under = log10(under);
   
   kmax *= 1.1;		/* add 10% */
-  if (Qcumul) kmax = npt;
+  if (Qcumul) {
+    if (Qint) 
+      kmax = count[nsteps-1];
+    else
+      kmax = npt;
+  }
   if (maxcount>0)		/* force scaling by user ? */
     kmax=maxcount;	
   
