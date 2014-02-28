@@ -41,7 +41,8 @@ string defv[] = {
     "ignore=t\n     (for summing) Ignore cell width when N=1 (assumed infinity)",
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
-    "VERSION=3.2\n  6-jun-2013 PJT",
+    "tab=\n         If given, print out data values",
+    "VERSION=3.3\n  28-feb-2014 PJT",
     NULL,
 };
 
@@ -51,9 +52,11 @@ string cvsid="$Id$";
 
 string	infile;	        		/* file names */
 stream  instr;				/* file streams */
+stream  tabstr = NULL;                  /* output table? */
 
 imageptr iptr=NULL;			/* will be allocated dynamically */
 imageptr wptr=NULL;                     /* optional weight map */
+
 
 
 int    nx,ny,nz,nsize;			/* actual size of map */
@@ -90,6 +93,7 @@ nemo_main()
     ny = Ny(iptr);
     nz = Nz(iptr);
     dprintf(1,"# data order debug:  %f %f\n",Frame(iptr)[0], Frame(iptr)[1]);
+    if (hasvalue("tab")) tabstr = stropen(getparam("tab"),"w");
 
     planes = (int *) allocate((nz+1)*sizeof(int));
     nplanes = nemoinpi(getparam("planes"),planes,nz+1);
@@ -166,6 +170,7 @@ nemo_main()
             accum_moment(&m,x,w);
 	    if (Qhalf && x<0) accum_moment(&m,-x,w);
 	    if (Qmedian) data[ngood++] = x;
+	    if (tabstr) fprintf(tabstr,"%g\n",x);
 	  }
 	}
       }
