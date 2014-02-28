@@ -14,6 +14,7 @@
  *      13-feb-13   2.0 ignore axis if N=1 
  *      17-apr-13   3.0 allow each Z plane to be treated seperately
  *      23-apr-13       half= option, use compute_robust_moment()
+ *       6-jun-13   3.2 added torben, cleanup a bit
  *
  */
 
@@ -32,6 +33,7 @@ string defv[] = {
     "npar=0\n       Number of fitting parameters assumed for chi2 calc (full data only)",
     "nppb=1\n       Optional correction 'number of points per beam' for chi2 calc",
     "median=f\n     Optional display of the median value",
+    "torben=f\n     Use torben method for median instead",
     "robust=f\n     Compute robust median",
     "mmcount=f\n    Count occurances of min and max",
     "half=f\n       Only use half (negative) values and symmetrize them",
@@ -39,7 +41,7 @@ string defv[] = {
     "ignore=t\n     (for summing) Ignore cell width when N=1 (assumed infinity)",
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
-    "VERSION=3.1\n  1-may-2013 PJT",
+    "VERSION=3.2\n  6-jun-2013 PJT",
     NULL,
 };
 
@@ -69,7 +71,7 @@ nemo_main()
     real x, y, z, xmin, xmax, mean, sigma, skew, kurt, median, bad, w, *data;
     real sum, sov;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qmmcount = getbparam("mmcount");
+    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount = getbparam("mmcount");
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
     real nu, nppb = getdparam("nppb");
@@ -87,9 +89,7 @@ nemo_main()
     nx = Nx(iptr);	
     ny = Ny(iptr);
     nz = Nz(iptr);
-#if 0
     dprintf(1,"# data order debug:  %f %f\n",Frame(iptr)[0], Frame(iptr)[1]);
-#endif    
 
     planes = (int *) allocate((nz+1)*sizeof(int));
     nplanes = nemoinpi(getparam("planes"),planes,nz+1);
@@ -126,7 +126,9 @@ nemo_main()
     if (Qbad) bad = getdparam("bad");
     Qmedian = getbparam("median");
     Qrobust = getbparam("robust");
-    if (Qmedian || Qrobust) {
+    Qtorben = getbparam("torben");
+    if (Qtorben) Qmedian = TRUE;
+    if (Qmedian || Qrobust || Qtorben) {
       ndat = nx*ny*nz;
       data = (real *) allocate(ndat*sizeof(real));
     }
@@ -148,21 +150,18 @@ nemo_main()
       stop(0);
     }
 
-    if (Qall) {
+    if (Qall) {                 /* treat cube as one data block */
 
       ini_moment(&m,maxmom,ndat);
       ngood = 0;
       for (k=0; k<nz; k++) {
-#if 0
-	if (Qone && k != planes[0]) continue;
-#endif
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
             x =  CubeValue(iptr,i,j,k);
 	    if (Qhalf && x>=0.0) continue;
-            if (Qmin && x<xmin) continue;
-            if (Qmax && x>xmax) continue;
-            if (Qbad && x==bad) continue;
+            if (Qmin  && x<xmin) continue;
+            if (Qmax  && x>xmax) continue;
+            if (Qbad  && x==bad) continue;
 	    w = Qw ? CubeValue(wptr,i,j,k) : 1.0;
             accum_moment(&m,x,w);
 	    if (Qhalf && x<0) accum_moment(&m,-x,w);
@@ -190,15 +189,21 @@ nemo_main()
 	if (maxmom > 3)
 	  kurt = kurtosis_moment(&m);
 	
-	printf ("Min and Max           : %f %f\n",min_moment(&m), max_moment(&m));
 	printf ("Number of points      : %d\n",n_moment(&m));
+	printf ("Min and Max           : %f %f\n",min_moment(&m), max_moment(&m));
 	printf ("Mean and dispersion   : %f %f\n",mean,sigma);
 	printf ("Skewness and kurtosis : %f %f\n",skew,kurt);
 	printf ("Sum and Sum*%s        : %f %f\n",sum, slabel, sum*sov);
 	if (Qmedian) {
-	  printf ("Median                : %f\n",get_median(ngood,data));
+	  if (Qtorben) {
+	    printf ("Median Torben         : %f (%d)\n",median_torben(ngood,data,min_moment(&m),max_moment(&m)),ngood);
+	  } else {
+	    printf ("Median                : %f\n",get_median(ngood,data));
+	  }
+#if 1
 	  if (ndat>0)
-	    printf ("Median                : %f\n",median_moment(&m));
+	    printf ("MedianL               : %f\n",median_moment(&m));
+#endif
 	}
 	if (Qrobust) {
 	  compute_robust_moment(&m);
@@ -225,7 +230,7 @@ nemo_main()
 	printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
       }
 
-    } else { 
+    } else {             /* treat each plane seperately */
 
       /* tabular output, one line per (selected) plane */
 
@@ -300,6 +305,12 @@ nemo_main()
       } /* ki */
     }
 }
+
+
+/* 
+ *   local version of a median. The one in moment.c and median.c are sorting
+ *   pointers , this one sorts the data 
+ */
 
 int compar_real(real *a, real *b)
 {
@@ -308,6 +319,8 @@ int compar_real(real *a, real *b)
 
 real get_median(int n, real *x)
 {
+  dprintf(1,"get_median: n=%d\n",n);
+
   qsort(x,n,sizeof(real),compar_real);
   if (n % 2)
     return  x[(n-1)/2];
