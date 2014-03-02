@@ -1,4 +1,4 @@
-.TH VELFIT 1NEMO "10 April 2011"
+.TH VELFIT 1NEMO "2 March 2014"
 .SH NAME
 velfit \- fit rotation curve to coplanar disk (WWB73 method)
 .SH SYNOPSIS
@@ -37,7 +37,9 @@ this as \fBvobs\fP. No default.
 \fBradii=\fP
 radii of the ring boundaries. For N rings, N+1 values need to be given.
 They need to be sorted by increasing radius.   See \fInemoinp(1NEMO)\fP
-for syntax, though \fIrmin:rmax:rstep\fP is a common shortcut.
+for syntax, though \fIrmin:rmax:rstep\fP is a common shortcut. It uses
+units from the image, usually degrees if you come from a FITS file 
+(see EXAMPLE below) 
 No default.
 .TP
 \fBpa=\fP
@@ -47,7 +49,7 @@ position angle of disk, in degrees. [0]
 inclination angle of disk, in degrees [45]   
 .TP
 \fBvsys=\fP
-systemic velocity b[0]     
+systemic velocity [0]     
 .TP
 \fBcenter=\fP
 rotation center. Default is the mapcenter ((Nx-1)/2,Ny-1)/2)
@@ -104,7 +106,7 @@ The following example fits a velocity field for NGC 6503, produces a table and
 plots the rotation curve with error bars
 .nf
 % fitsccd N6503.xmom1.fits - | ccdmath - n6503.vel %1/1000.0
-% velfit n6503.vel 0:1:0.002 -57 71.5 467,543 20 frang=0 tab=n6503.vtab
+% velfit n6503.vel 0:1:0.002 -57 71.5 20 467,543 frang=0 tab=n6503.vtab
 % tabplot n6503.vtab dycol=3 xmin=0 xmax=0.2
 .fi
 The N6503 example was taken from the 1996 VLA data, published  in 2009
