@@ -22,7 +22,7 @@ string defv[] = {
     "id1=0\n            Column in first data reprenting the ID",
     "id2=0\n            Column in second data reprenting the ID",
     "radec=false\n      Interpret X and Y as RA/DEC angles on sky",
-    "VERSION=0.4\n	15-nov-2013 PJT",
+    "VERSION=0.5\n	15-nov-2013 PJT",
     NULL,
 };
 
@@ -235,18 +235,29 @@ void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real
   }
 }
 
+/* 
+ *  read lines and pick a column as the ID.
+ *  skip lines that start with '#'
+ */
+
 void get_atable_a(stream instr, int id, int npt, string *name)
 {
   static char line[MAX_LINELEN];
-  int i;
   string *sp;
+  int i;
 
-  for (i=0; i<npt; i++) {
+  for (i=0; i<npt; ) {
     if (fgets(line,MAX_LINELEN,instr) == NULL)
       error("unexpected EOF on table read (%d,%d)",id,npt);
+    if (line[0] == '#') continue;
     sp = burststring(line,", \t\r");
+    if (xstrlen(sp,sizeof(string))<id-1) {
+      warning("skipping line, not enough columns");
+      continue;
+    }
     name[i] = strdup(sp[id-1]);
     freestrings(sp);
+    i++;
   }
   dprintf(1,"First and last ID: %s %s\n",name[0],name[npt-1]);
 }
