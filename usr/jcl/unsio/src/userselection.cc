@@ -29,6 +29,7 @@ UserSelection::UserSelection()
   nsel    = 0;
   indx    = NULL;
   pos     = 0;
+  select  = "";
 }
 // ============================================================================
 // destructor                                                                  

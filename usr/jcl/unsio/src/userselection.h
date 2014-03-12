@@ -38,6 +38,7 @@ public:
   //const UserSelection& operator=(const UserSelection& m);
   ~UserSelection();
   bool setSelection(const std::string,const ComponentRangeVector *, bool nodata=false);
+  std::string getSelection() { return select;}
   const t_indexes_tab * getIndexesTab() const { return indx; }
   int   getNSel()       const { return nsel   ; }
   static std::string parseString(std::string&);

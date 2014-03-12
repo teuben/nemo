@@ -69,9 +69,13 @@ To install py_unsio module and library,  enter
 
   make install
 
-note that files will be installed in UNSIOPATH/py/modules
+note that files will be installed in _UNSIOPATH_/py/modules
 directory. In order to use *py_unsio* module, you have to add path
-UNSIOPATH/py/modules to your environment variable PYTHONPATH
+_UNSIOPATH_/py/modules to your environment variable PYTHONPATH
+
+export PYTHONPATH=_UNSIOPATH_/py/modules
+
+_UNSIOPATH_ must match the asbolute path of UNSIO installed directory
 
 A list of all available make targets can be obtained by
 

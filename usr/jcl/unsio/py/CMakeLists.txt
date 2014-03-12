@@ -91,4 +91,5 @@ MESSAGE( STATUS "--------> CMAKE_INSTALL_PREFIX =" ${CMAKE_INSTALL_PREFIX})
 INSTALL(FILES  ${PROJECT_BINARY_DIR}/_${MODULENAME}.so DESTINATION py/modules)
 INSTALL(FILES  ${PROJECT_BINARY_DIR}/swig/${MODULENAME}.py DESTINATION py/modules)
 
+MESSAGE( STATUS "\nAfter running \"make install\", do no forget to set PYTHONPATH variable with command:\n  export PYTHONPATH=${CMAKE_INSTALL_PREFIX}/py/modules\n\n")
 #

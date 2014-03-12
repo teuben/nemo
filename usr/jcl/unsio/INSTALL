@@ -92,3 +92,13 @@ A list of all available make targets can be obtained by
   make help
 
 
+IV) Mac OSX
+============
+
+ Under Mac OSX platform, once installed unsio, you have to set environement DYLD_LIBRARY_PATH to UNSIO installed location path
+
+export DYLD_LIBRARY_PATH=_UNSIOPATH_/lib
+
+where _UNSIOPATH_ matches to UNSIO installed location path
+
+

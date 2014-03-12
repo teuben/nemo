@@ -106,7 +106,7 @@
 !     input parameters
       integer ident,nbody
 !     UNS variable
-      integer status
+      integer status,lnblnk
       integer  uns_get_range, uns_save_init
       integer  uns_get_value_f, uns_get_array_f, nsel
       integer  uns_set_array_f, uns_set_value_f, ok

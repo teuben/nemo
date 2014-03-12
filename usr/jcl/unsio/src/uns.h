@@ -21,7 +21,12 @@
 #include <map>
 
 namespace uns {
-     enum StringData {
+
+const std::string VERSION="1.0.0"; // UNSIO version
+
+inline std::string getVersion() { return uns::VERSION; }
+
+enum StringData {
       // data
       Time      ,
       Redshift  ,

@@ -75,7 +75,7 @@ namespace uns {
   bytes_counter = 0;
   multiplefiles = 0;
   lonely_file   = true;
-  ntotmasses = 0.0;
+  ntotmasses = 0;
   verbose = verb;
   
   int fail = open(filename);
@@ -375,7 +375,7 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
           load_bits |= MASS_BIT;
           ok=true;
           bytes_counter=0;
-          if (ntotmasses>0.) {    // different masses
+          if (ntotmasses>0) {    // different masses
             len1 = readFRecord(); // we must read from disk
             checkFileVsArray(len1,sizeof(float),ntotmasses);
           }
@@ -399,7 +399,7 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
               }
             } // for n
           } // for k
-          if (ntotmasses > 0.) {  // different masses
+          if (ntotmasses > 0) {  // different masses
             len2 = readFRecord(); // we must read from disk
             if (len2==len1) ; // remove warning....
             assert(in.good() && len2==len1 && len1==bytes_counter);
@@ -548,7 +548,7 @@ int CSnapshotGadgetIn::read(uns::UserSelection &user_select)
       } // end of while readBlock
       
       // add masses if no BLOCK_MASS present (mass inside the header)
-      if (ntotmasses == 0. && req_bits&MASS_BIT) { // no BLOCK_MASS present (mass inside the header)
+      if (ntotmasses == 0 && req_bits&MASS_BIT) { // no BLOCK_MASS present (mass inside the header)
         load_bits |= MASS_BIT;
         // allocate memory if NULL pointer
         if (! mass )  mass = new float[nsel  ];

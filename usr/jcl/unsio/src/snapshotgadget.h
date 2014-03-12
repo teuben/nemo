@@ -148,7 +148,7 @@ typedef struct particle_data_lite
   int czs, czsmt; // constant for zs and zsmt
   int bits; // to store the bits components
   float tframe,redshift;
-  float ntotmasses;
+  int ntotmasses;
   t_io_header_1 header;
   int npartTotal, npart, npart_total_local;
   int array_vs_file_size; // array vs file 0:same  1:smaler(half) 2:bigger(double)

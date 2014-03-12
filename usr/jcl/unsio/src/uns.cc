@@ -31,11 +31,15 @@ namespace uns {
 // static variable to store DATA string
 std::map<std::string, StringData> CunsOut::s_mapStringValues;
 std::map<std::string, int> CunsIn::s_mapCompInt;
+
 // ----------------------------------------------------------------------------
 // READING OPERATIONS
 CunsIn::CunsIn(const std::string _name ,const std::string _comp ,const std::string _time, const bool verb)
 {
   init(_name,_comp,_time,verb);
+  if (verbose) {
+    std::cerr << "CunsIn::CunsIn -- UNSIO version = "<<uns::getVersion()<< "\n";
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -259,6 +263,9 @@ CunsOut::CunsOut(const std::string _name, const std::string _type, const bool _v
   simtype  = tools::Ctools::fixFortran(_type.c_str(),false);
   verbose = _verb;
   snapshot= NULL;
+  if (verbose) {
+    std::cerr << "CunsOut::CunsOut -- UNSIO version = "<<uns::getVersion()<< "\n";
+  }
   initializeStringMap(verbose);
   simtype = tools::Ctools::tolower(simtype);
   if (simtype == "gadget2") {

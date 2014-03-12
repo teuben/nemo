@@ -25,6 +25,9 @@ SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 # load setup flags
 include(SetupFlags)
 
+# Check fortran compiler
+include(CheckFortranCompiler)
+
 # contains the full path to the top level directory of your build tree
 MESSAGE( STATUS "PROJECT_BINARY_DIR: " ${PROJECT_BINARY_DIR} )
 
@@ -47,9 +50,9 @@ FIND_PACKAGE(SQLITE3)
 IF (NOT NEMO_INSTALLED) 
   MESSAGE(STATUS "NEMO LIGHT will be build")
 
-  add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/nemolight/build  ${PROJECT_BINARY_DIR}/../3rdparty/nemolight/build )
+  add_subdirectory(${PROJECT_SOURCE_DIR}/3rdparty/nemolight  ${PROJECT_SOURCE_DIR}/3rdparty/nemolight/build-${CMAKE_BUILD_TYPE} )
   set(NEMOLIGHT ${PROJECT_SOURCE_DIR}/3rdparty/nemolight)
-  set(NEMOLIB ${NEMOLIGHT}/lib)
+  set(NEMOLIB ${NEMOLIGHT}/build-${CMAKE_BUILD_TYPE}/lib)
   set(NEMOINC ${NEMOLIGHT}/src/inc)
 
 ELSE (NOT NEMO_INSTALLED) 
@@ -67,7 +70,7 @@ FILE(GLOB LIBSOURCES src/*.cc)
 SET(LIBRARY_OUTPUT_PATH lib)
 
 # compilation options
-#dd_definitions(-Wall ${OPT} -Wswitch -Wcast-align -Wreturn-type -Wno-unused-function  -fno-strict-aliasing -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE ${DNOSQLITE3})
+
 add_definitions(${OPT} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE ${DNOSQLITE3})
 SET(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${WARNCPP} )
 SET(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} ${WARNC} )
@@ -80,30 +83,8 @@ STRING(REPLACE "-DNDEBUG" ""  CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE}
 add_library (unsio ${LIBTYPE} ${LIBSOURCES} )
 
 if(OSX) 
-  set_target_properties(unsio PROPERTIES LINK_FLAGS "-L${NEMOLIB} -lnemo -lsqlite3")
+  set_target_properties(unsio PROPERTIES LINK_FLAGS "-undefined suppress -flat_namespace -L${NEMOLIB} -lnemo -lsqlite3")
 endif(OSX)
-#
-# ------------------
-# TEST PROGRAM      
-# ------------------
-if(DEFINED CMAKE_Fortran_COMPILER AND CMAKE_Fortran_COMPILER MATCHES "^$")
-    set(CMAKE_Fortran_COMPILER CMAKE_Fortran_COMPILER-NOTFOUND)
-endif(DEFINED CMAKE_Fortran_COMPILER AND CMAKE_Fortran_COMPILER MATCHES "^$")
-enable_language(Fortran OPTIONAL)
-message(STATUS "CMAKE_Fortran_COMPILER_WORKS = ${CMAKE_Fortran_COMPILER_WORKS}")
-if (CMAKE_Fortran_COMPILER)
-  SET(CMAKE_Fortran_COMPILER gfortran)
-  MESSAGE(STATUS "Fortran compiler : " ${CMAKE_Fortran_COMPILER})
-endif()
-
-# Enable Fortran support
-#ENABLE_LANGUAGE(Fortran)
-#if (${CMAKE_Fortran_COMPILER} STREQUAL CMAKE_Fortran_COMPILER-NOTFOUND)
-#  MESSAGE(STATUS "NO FORTRAN")
-#else ()
-#  SET(CMAKE_Fortran_COMPILER gfortran)
-#endif()
-
 
 # ----------------------------------------------------------
 # Install SETUP
@@ -120,7 +101,9 @@ IF (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 ENDIF ()#NOT CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 MESSAGE( STATUS "--------> CMAKE_INSTALL_PREFIX =" ${CMAKE_INSTALL_PREFIX})
-
+if (OSX)
+  MESSAGE(STATUS "\nAfter running \"make install\", do not forget to set your environment variable DYLD_LIBRARY_PATH using command:\n\n export DYLD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib\n")
+endif(OSX)
 
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -213,8 +196,8 @@ INSTALL(FILES  ${UNSIO_BINARY_DIR}/../src/userselection.h DESTINATION inc/uns)
 IF (NOT NEMO_INSTALLED)
 
   # install nemo lib
-  INSTALL(FILES  ${NEMOLIGHT}/lib/libnemo.a DESTINATION lib)
-  INSTALL(FILES  ${NEMOLIGHT}/lib/libnemomaing77.a DESTINATION lib)
+  INSTALL(FILES  ${NEMOLIB}/libnemo.a DESTINATION lib)
+  INSTALL(FILES  ${NEMOLIB}/libnemomaing77.a DESTINATION lib)
 
   # Find all NEMOLIGHT header files
   FILE(GLOB nlight_files ${NEMOLIGHT}/src/*.h ${NEMOLIGHT}/src/inc/*.h)
@@ -235,9 +218,6 @@ INSTALL(FILES  ${UNSIO_BINARY_DIR}/lib/libunsio.${LIBEXT} DESTINATION lib)
 # man
 INSTALL(FILES  ${UNSIO_BINARY_DIR}/../man/man3/unsiof.3 DESTINATION man/man3)
 # some binaries
-
-#set (CMAKE_INSTALL_PREFIX $ENV{NEMOBIN})
-#INSTALL(PROGRAMS  ${UNSIO_BINARY_DIR}/bin/uns_info DESTINATION bin)
 
 # install sqlite3 database files
 INSTALL(PROGRAMS  ${UNSIO_BINARY_DIR}/../scripts/perl/mains/unsio_sql3_get_info.pl DESTINATION bin)

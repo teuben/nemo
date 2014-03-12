@@ -66,6 +66,7 @@ CSnapshotNemoIn::CSnapshotNemoIn(const std::string _name,
   eps    = NULL;
   last_nbody=0;
   last_nemobits=-1;
+  reset_history();
   initparam(const_cast<char**>(argv),const_cast<char**>(defv));
   valid=isValidNemo();
 }
@@ -169,19 +170,26 @@ ComponentRangeVector * CSnapshotNemoIn::getSnapshotRange()
 // nextFrame()                                                                 
 int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
 {
-  const uns::t_indexes_tab * index_tab=user_select.getIndexesTab();
-  const int nsel=user_select.getNSel();
-  
+
+
   int status;  // io_nemo status
   std::string force_select = "all";
   if (! first_stream) { // normal file or second reading (stream)
     status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,mass,dens,aux,acc,pot,key,e,t,st,b",
                    force_select.c_str(),&ionbody,&iopos,&iovel,&iomass,&iorho,&ioaux,&ioacc,&iopot,&iokeys,&ioeps,
                    &iotime, select_time.c_str(),&nemobits);
+    full_nbody = *ionbody;
+    crvs = getSnapshotRange();
+    user_select.setSelection(user_select.getSelection(),crvs);
+
   } else { // "-" first stream, no need to read
     first_stream=false;
     status=status_ionemo; // status read the first time cf : isValid()
   }
+
+  const uns::t_indexes_tab * index_tab=user_select.getIndexesTab();
+  const int nsel_loc=user_select.getNSel();
+  nsel = user_select.getNSel();
   if (status == -1) {  // Bad nemobits
     PRINT("io_nemo status="<<status<<"\n";);
   } else {
@@ -245,12 +253,13 @@ int CSnapshotNemoIn::nextFrame(uns::UserSelection &user_select)
           if ( *nemobits & KeyBit  && (req_bits&KEYS_BIT || req_bits&ID_BIT)) keys[cpt]  = iokeys[cpt];
           if ( *nemobits & EpsBit  && req_bits&EPS_BIT) eps[cpt]  = ioeps[cpt];
           cpt++;
+          assert(i<nsel_loc);
         }
       }
-      assert(nsel==cpt);
+      assert(nsel_loc==cpt);
     }
   }
-  if (nsel) ; // remove compiler warning
+  if (nsel_loc) ; // remove compiler warning
   if (verbose) std::cerr << "CSnapshotNemoIn::nextFrame status = " << status << "\n";
   if (status == -1) status=1;
   return status;

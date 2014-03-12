@@ -33,7 +33,6 @@ if ( NOT SETUP_FLAGS_INCLUDED )
   endif ()
 
 
-  #typed_cache_set (STRING "compilation warnings" WARNCPP "-Waddress -Warray-bounds  -Wc++0x-compat -Wchar-subscripts -Wenum-compare -Wcomment -Wformat -Wmain -Wmissing-braces -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wvolatile-register-var")
   typed_cache_set (STRING "compilation warnings" WARNCPP "-Wall")
 
   # check C compiler flags
