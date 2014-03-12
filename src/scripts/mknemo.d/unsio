@@ -17,6 +17,13 @@ if (-e $dir) then
   cmake ..
   make
   make install 
+  # new python stuff (13 march 2014)
+  cd ../py
+  mkdir build
+  cd build
+  cmake ..
+  make
+  make install
 else
   echo mknemo.d: $dir does not exist
 endif
