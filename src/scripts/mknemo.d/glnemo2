@@ -27,7 +27,8 @@ set qmake=qmake-qt4
 
 if (-e $dir) then
   if ($cmake) then
-    echo "WARNING: using new experimental CMAKE install"
+    echo "WARNING: using new experimental CMAKE install for QT5"
+    if ($?QTDIR5 == 0) setenv QTDIR5 /usr
     cd $dir/build
     if (-e Makefile) make clean
     cmake ..
