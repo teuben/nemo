@@ -1157,9 +1157,12 @@ void GLWindow::setPerspectiveMatrix()
 void GLWindow::bestZoomFit()
 {
   if ( !store_options->duplicate_mem) mutex_data->lock();
-  
-  setPerspectiveMatrix(); // toggle to perspective matric mode
+
   glGetIntegerv(GL_VIEWPORT,viewport);
+  ratio =  ((double )viewport[2]) / ((double )viewport[3]);
+
+  setPerspectiveMatrix(); // toggle to perspective matric mode
+
   Tools3D::bestZoomFromObject(mProj,mModel,
                               viewport, pov, p_data, store_options);
     

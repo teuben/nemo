@@ -189,8 +189,12 @@ void MainWindow::start(std::string shot)
       if (!store_options->rho_exist) {
         store_options->render_mode = 0;
       }
-
+      gl_window->setFocus();
       gl_window->updateGL();
+      if (bestzoom) gl_window->bestZoomFit();
+      gl_window->updateGL();
+
+
     } else { // no data
       form_options->activatePlayTime(false); // disable group box
 
