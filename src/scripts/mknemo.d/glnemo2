@@ -1,7 +1,8 @@
 #! /bin/csh -f
 #
 # a quick hack       - June 2009
-# added cmake option -  Jan 2012
+# added cmake option - Jan 2012
+# for QT5            - Mar 2014 
 # 
 # ubuntu12 :    qt4-qmake libqt4-dev
 # fedora17:     qt-devel   
@@ -29,7 +30,7 @@ if (-e $dir) then
     echo "WARNING: using new experimental CMAKE install"
     cd $dir/build
     if (-e Makefile) make clean
-    cmake .
+    cmake ..
     make
     make install
   else
