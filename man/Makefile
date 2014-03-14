@@ -25,7 +25,7 @@ bad:
 
 clean:
 	rm -f cat?/*
-	
+
 CATMANFLAGS = 
 SECTIONS=13568l
 
@@ -63,3 +63,8 @@ fortune: nemo-fortunes.dat
 
 nemo-fortunes.dat: nemo-fortunes
 	strfile nemo-fortunes nemo-fortunes.dat
+
+
+#    Peter's update for the website
+chara:
+	./make_html chara.astro.umd.edu:/chara/teuben/nemo-www/man_html/

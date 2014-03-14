@@ -38,7 +38,12 @@ foreach d ($manlevels)
  set dir=man$d
  foreach file ($dir/*.$d)
    set base=$file:t
-   (rman -f HTML $file  >  html/$base.html ) >>& $log
+    # -r|--reference|--manref printf-string
+    # -r      'http:/usr/share/man/html/%s.%s.html' 
+    # -r '%s.%s.html'
+    # PolyglotMan v3.0.8+X.Org                          - works
+    # PolyglotMan v3.2 of $Date$  - broken, it adds NEMO to the url....
+   (rman -f HTML -r '%s.%s.html' $file  >  html/$base.html ) >>& $log
  end
  (make_man.csh $d > html/index$d.html) >>& $log
  if ($status) echo Some error during make_man, inspect your $log
