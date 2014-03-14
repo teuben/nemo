@@ -21,7 +21,7 @@ set out=tmp.3.fits
 #  smoothing (sigma) size in degrees, and a normalization constant
 #  such that 1 object give 1 at the peak of that point
 set svar=1.0/120.0
-set dmax=1.2e7
+set dmax=1.302e7
 
 #  snapdens parameter (use 0 to skip this version, 6 is a good default)
 set kmax=0
