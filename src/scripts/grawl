@@ -11,6 +11,8 @@
 #
 #  @todo
 #      allow to bypass the grep with --, so it can quickly just grab lines from a file
+#
+#  growl: a mac tool , not related.
 
 import sys
 
