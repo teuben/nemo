@@ -42,13 +42,19 @@ local int entries=0;
 
 void inipotential (int *npar, double *par, string name)
 {
-    int n, colnr[2];
+    int i, n, colnr[2];
     real *coldat[2];
     stream instr;
+    real rscale=1.0, vscale=1.0;
+    int rcol=1, vcol=2;
 
     n = *npar;
     if (n>0) omega = par[0];
-    if (n>1) warning("Rotcur potential: only 1 parameter usable");
+    if (n>1) vscale = par[1];
+    if (n>2) rscale = par[2];
+    if (n>3) vcol = (int) par[3];
+    if (n>4) rcol = (int) par[4];
+    if (n>5) warning("Rotcur potential: only 5 parameters usable: omega,vscale,rscale,vcol,rcol");
     
     if (entries>0) {
         warning("Re-entering rotcur potential(5NEMO): removed previous tables");
@@ -61,6 +67,8 @@ void inipotential (int *npar, double *par, string name)
     dprintf (1,"INIPOTENTIAL Rotcur potential %s\n",name);
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
     dprintf (1,"  Table = %s\n",name);
+    dprintf (1,"  Vscale = %g  Rscale = %g\n", vscale, rscale);
+    dprintf (1,"  Vcol = %d  Rcol = %d\n", vcol, rcol);
 
     nmax = nemo_file_lines(name,0);
     if (nmax<=0) error("file_lines returned %d lines in %s\n",
@@ -68,8 +76,8 @@ void inipotential (int *npar, double *par, string name)
     dprintf (1,"  Nmax = %d\n",nmax);
     rad = (real *) allocate(nmax * sizeof(real));
     vel = (real *) allocate(nmax * sizeof(real));
-    coldat[0] = rad;        colnr[0] = 1;
-    coldat[1] = vel;        colnr[1] = 2;
+    coldat[0] = rad;        colnr[0] = rcol;
+    coldat[1] = vel;        colnr[1] = vcol;
 
     instr = stropen(name,"r");
     nrad = get_atable(instr,2,colnr,coldat,nmax);
@@ -78,6 +86,10 @@ void inipotential (int *npar, double *par, string name)
     if (nrad<0) {
 	nrad = -nrad;
 	warning("only read part of table");
+    }
+    for (i=0; i<nrad; i++) {
+      rad[i] *= rscale;
+      vel[i] *= vscale;
     }
     coef = (real *) allocate(nrad*3*sizeof(real));
     spline(coef, rad, vel, nrad);
