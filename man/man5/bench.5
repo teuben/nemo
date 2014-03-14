@@ -1,4 +1,4 @@
-.TH DATA 5NEMO "10 January 2013"
+.TH DATA 5NEMO "27 September 2013"
 .SH NAME
 bench \- NEMO benchmarks in NemoStones
 .SH DESCRIPTION
@@ -76,6 +76,39 @@ bench3 (mkspiral)
        i7/2.93          7.892u 3.170s 0:12.92 85.6% (HDD)
        i7/2.93          7.662u 1.467s 0:09.13 99.8% (SHMEM)
 .fi
+.SH CAVEATS
+Defining and running a benchmark can be very tricky stuff. It might be
+important to separate disk I/O from CPU usage.   The unix \fItime(1)\fP 
+command can be a help. The output from bash::time is a bit different
+form csh::time, and yet different from /usr/bin/time. Unless you find
+a special one, we prefer the csh::time, since the output clearly
+separates user, system and wall clock time, and also reports the I/O, viz.
+.nf
+   % time ls 
+   0.012u 0.068s 0:00.77 9.0%	0+0k 8376+0io 0pf+0w
+   2.324u 1.080s 0:09.25 36.7%	0+0k 1049384+2097160io 2pf+0w
+   1.876u 0.788s 0:03.63 73.0%	0+0k 0+2097160io 0pf+0w
+.fi
+On linux the command 
+.nf
+   echo 1 > > /proc/sys/vm/drop_caches
+.fi
+will clear the disk cache in memory, so your program will be forced to read
+from disk, with all possible interference from other programs
+.PP
+In NEMO another useful addition to the benchmark is that the output can be
+turned off easily, by using \fBout=.\fP, viz.
+.nf
+    % sudo $NEMO/src/scripts/clearcache
+    % time ccdsmooth n1 . dir=x
+    0.852u 1.068s 0:12.41 15.3%	0+0k 2098312+0io 6pf+0w
+    0.812u 0.400s 0:01.21 100.0%	0+0k 0+0io 0pf+0w
+    0.820u 0.380s 0:01.20 100.0%	0+0k 0+0io 0pf+0w
+.fi
+where the last two instances were just re-running the same command, but
+now clearly showing the effect of reading the file from memory instead
+of disk. By repeating this whole series a few times, an lower bound to the 
+wall clock time is more likely to properly account for the I/O overhead time.
 .SH "SEE ALSO"
 gyrfalcON(1NEMO), data(5NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO),
 triple(1NEMO), accudate(lNEMO)
@@ -94,4 +127,5 @@ Peter Teuben
 17-feb-04	added bench0 comparison  	PJT
 31-mar-05	added some cygwin numbers, fixed input	PJT
 6-may-11    added i7 and SHMEM/HDD comparison   PJT
+27-sep-13	added caveats	PJT
 .fi
