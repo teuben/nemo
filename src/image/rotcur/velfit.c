@@ -40,7 +40,7 @@ string defv[] = {
   "mode=vtan\n    Output mode {vtan,vmod,vres,vtan/r,ome,vrad,dv/dr}",
   "out=\n         Optional output map of converted rotation speeds",
   "tab=\n         Optional output table of radii, velocities etc.",
-  "VERSION=1.4\n  10-apr-2011 PJT",
+  "VERSION=1.4a\n 2-mar-2014 PJT",
   NULL,
 };
 
@@ -49,7 +49,7 @@ string usage="fit rotation curve to coplanar disk (WWB73 method)";
 string cvsid="$Id$";
 
 
-#define MAXRING    1000
+#define MAXRING    4096
 
 
 bool Qwwb73;
