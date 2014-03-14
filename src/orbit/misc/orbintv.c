@@ -4,6 +4,9 @@
  *
  *      15-may-2011    Cloned off orbint               Peter Teuben
  *
+ * @todo
+ *    (18-sep-2013) possibly a 64bit issue, now coredumps
+ *
  */
 
 #include <stdinc.h>
@@ -58,10 +61,12 @@ extern int match(string, string, int *);
 
 
 proc pot;				/* pointer to the potential */
-real print_diag();                      /* returns total energy/hamiltonian */
-void setparams(), prepare();
-void integrate_dopri5(),
-     integrate_dop853();
+
+void integrate_dopri5(void),
+     integrate_dop853(void),
+     setparams(void), 
+     prepare(void);
+real print_diag(double time, double *posvel);
 
 
 /*----------------------------------------------------------------------------*/
@@ -112,7 +117,7 @@ void nemo_main ()
     strclose(outstr);
 }
 
-void setparams() 
+void setparams(void) 
 {
     infile = getparam("in");
     outfile = getparam("out");
@@ -130,7 +135,7 @@ void setparams()
       eta = pow(10.0,eta);
 }
 
-void prepare()
+void prepare(void)
 {
     Masso(o_out) = Masso(o_in);
 }
@@ -197,7 +202,7 @@ void solout5(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
 }
 
 
-void integrate_dopri5()
+void integrate_dopri5(void)
 {
   int i, ndim, kdiag, ksave, isave, res, iout, itoler;
   double time,epot,e_last, rtoler, atoler;
