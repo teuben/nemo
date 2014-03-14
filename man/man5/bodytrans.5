@@ -1,4 +1,4 @@
-.TH BODYTRANS 5NEMO "15 May 2005"
+.TH BODYTRANS 5NEMO "7 May 2013"
 .SH NAME
 bodytrans \- dataformat for body to scalar mapping functions
 .SH DESCRIPTION
@@ -66,6 +66,24 @@ vz	real	returns \fBvz\fP, the Z-velocity
 x	real	returns \fBx\fP, the X-position
 y	real	returns \fBy\fP, the Y-position
 z	real	returns \fBz\fP, the Z-position
+xsky	real	returns \fBatan2(x,z)*180/pi\fP, the RA---TAN projection
+ysky	real	returns \fBatan2(y,z)*180/pi\fP, the DEC---TAN projection
+.fi
+.SH "SKY PROJECTIONS"
+Two common sky projections are available, both produce numbers in degrees, which
+is the common unit in the \fIfits(5NEMO)\fP format.
+.PP
+\fBglon,glat\fP is the galactic coordinate system, useful to observe a galactic
+disk in it full internal glory.
+.PP
+\fBxsky,ysky\fP is a tangential plane projection scheme, which is probably only
+useful for nearby galaxies such as LMC and SMC. 
+.nf
+set a=80      # extent in angle to plot
+set d=1.5     # distance to disk (of size 1)
+set inc=70    # inclination of disk
+mkconfig - 360 ring | snaprotate - - $inc x | snapshift - - 0,0,$d | snapplot - xvar=xsky yvar=ysky xrange=-${a}:${a} yrange=-${a}:${a}
+
 .fi
 .SH SEE ALSO 
 elf(5), a.out(5), bodytrans(1NEMO), bodytrans(3NEMO), loadobj(3NEMO)
