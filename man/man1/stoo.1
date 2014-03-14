@@ -1,24 +1,33 @@
-.TH STOO 1NEMO "23 June 1991" 
+.TH STOO 1NEMO "25 July 2013" 
 .SH NAME
-stoo \- convert snapshot to orbit: choose one particle
+stoo \- convert snapshot to orbit: choose one or more particles
 .SH SYNOPSIS
 .PP
 \fBstoo in=\fPsnapshot \fBout=\fPorbit [parameter=value]
 .SH DESCRIPTION
-\fBstoo\fP selects one particular body from a snapshot file,
-and converts it to orbit format, for further processing.
+\fBstoo\fP selects one or more bodies from a snapshot file,
+and converts it to orbit format, for further processing. Orbits are
+stored sequentially, the Key field in the snapshot is used to
+identify the orbit. If no Key field is present, the first snapshot
+has key 0.
+.PP
+Note if multiple stars selected, the input stream must be able to rewind,
+and thus cannot be a pipe.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
 \fBin=\fIin-file\fP
-input file, in \fIsnapshot(5NEMO)\fP format [no default]
+input file, in \fIsnapshot(5NEMO)\fP format. Cannot be a pipe if
+multiple stars selected. [no default]
 .TP
 \fBout=\fIout-file\fP
 output file, will be in \fIorbit(5NEMO)\fP format [no default]
 .TP
 \fBibody=\fInumber\fP
-ranking \fInumber\fP of the star in the snapshot file [default: \fB0\fP].
+ranking \fInumber\fP of the star in the snapshot file,
+normally the Key field.  Multiple stars can be selected here,
+but [default: \fB0\fP].
 .TP
 \fBnsteps=\fInumber\fP
 \fInumber\fP of timesteps to be allocated. Dont concern yourself
@@ -39,4 +48,5 @@ Peter Teuben
 27-jul-87	V1.0 created	PJT
 8-jun-88	V2.1 new filestruct	PJT
 23-jun-91	V2.4 fixed bugs, upgraded doc for NEMO2 	PJT
+24-jul-2013	V3.0 added support for multiple orbits and use Key	PJT
 .fi

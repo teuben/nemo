@@ -4,7 +4,7 @@ tabsmooth \- (hanning) smooth columns of a table
 .SH SYNOPSIS
 \fBtabsmooth\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+Quick and dirty program to Hanning (1/4,1/2,1/4) smooth a table.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -13,7 +13,8 @@ is also given:
 Input file name [???]    
 .TP 20
 \fBxcol=\fP
-Column(s) to use [1]    
+Column(s) to use. Although multiple columns can be used, only those 
+columns are output to stdout.  [1]
 .TP 20
 \fBnmax=\fP
 max size if a pipe [100000]  
@@ -24,5 +25,5 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-20-Dec-10	V0.0 Created	PJT
+20-Dec-2010	V0.1 Created	PJT
 .fi

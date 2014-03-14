@@ -4,22 +4,45 @@ ccdmask \- image masking
 .SH SYNOPSIS
 \fBccdmask\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+\fBccdmask\fP creates a mask image from one of more input images
+based on a simple clip level. If only one image is given, the output
+values will be 1 where the mapvalues are above some clip level, and
+0 else.
+.PP
+If multiple images are given, the output value will be the
+bitmask (i.e. adding 1,2,4,8,16,32,....) for each image which has
+their value larger than the specified clip level.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input file(s), separated by comma's (optional) [???] 
+Input file(s), separated by comma's. At least one input map is needed.
 .TP 20
 \fBout=\fP
-Output file [???]     
+Output file, in standard \fIimage(5NEMO)\fP format.
 .TP 20
 \fBclip=\fP
-Clip level(s) for each input file [0.0] 
+Clip level(s) for each input file. If not enough numbers are given to 
+match the number of input files, the last number is repeated. Note that
+only single clip levels are allowed, unlike the clip level interface
+in e.g. \fIccdmom(1NEMO)\fP
+[0.0] 
 .SH EXAMPLES
+.nf
+% ccdgen out=map1 object=noise spar=1 seed=1
+% ccdgen out=map2 object=noise spar=1 seed=2
+% ccdgen out=map3 object=noise spar=1 seed=3
+% ccdmask in=map1,map2,map3,map3 out=map_mask clip=0.1,0.15,0.05
+### nemo Debug Info: 3 input file(s)
+### nemo Debug Info: 89/100 masked in map 1 @ clip 0.1
+### nemo Debug Info: 80/100 masked in map 2 @ clip 0.15
+### nemo Debug Info: 86/100 masked in map 3 @ clip 0.05
+### nemo Debug Info: 87/100 masked in final map
+.fi
 .SH SEE ALSO
 .SH FILES
+src/image/misc/ccdmask.c
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY

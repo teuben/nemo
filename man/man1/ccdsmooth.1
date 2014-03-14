@@ -5,7 +5,7 @@ ccdsmooth \- smoothing of an image map (2D or 3D)
 .PP
 \fBccdsmooth in=\fPimage \fBout=\fPimage [parameter=value]
 .SH DESCRIPTION
-\fIccdsmooth\fP will smooth an image cube through a simple convolution
+\fIccdsmooth\fP will smooth an image cube through a simple direct convolution
 (no FFT). The smoothing beam must be circular/spherical, or smoothing
 must be done independantly per coordinate by calling \fIccdsmooth\fP
 multiple times using the \fBdir=\fP keyword (see below).
@@ -61,18 +61,36 @@ ccdfill(1NEMO), ccddiffract(1NEMO), snapccd(1NEMO), snapsmooth(1NEMO), snapgrid(
 .nf
 .ta +1.0i
 With 68881 on SUN 3/50 (~16Mhz) and 200*200 map - old program (pre-V2.1)
-Nbeam=17	54"
-Nbeam=33	98"
-Nbeam=47	140"
+Nbeam=17	54s
+Nbeam=33	98s
+Nbeam=47	140s
+.SH HANNING
+The following are the weights needed in smooth= for subsequent hanning smoothings:
+.nf
+1: 0.25,0.5,0.25
+2: 0.0625,0.25,0.375,0.25,0.0625 
+3: 0.015625,0.09375,0.234375,0.3125,0.234375,0.09375,0.015625 
+4: 0.00390625,0.03125,0.109375,0.21875,0.273438,0.21875,0.109375,0.03125,0.00390625 
+.fi
+and these results in a reduction of the RMS by 0.61, 0.52, 0.47 and 0.44 resp.
+Note this is not the official Hanning definition (0.5-0.5 cos(2.pi.N/(M-1))). 
+.nf
+1: 0.25,0.5,0.25
+2: 0.08333333,0.25,0.33333333,0.25,0.08333333
+3: 0.03661165,0.125,0.21338835,0.25,0.21338835,0.125,0.03661165,
+4: 0.0190983,0.0690983,0.1309017,0.1809017,0.2,0.1809017,0.1309017,0.0690983,0.0190983
+5: 0.01116455,0.04166667,0.08333333,0.125,0.15550212,0.16666667,0.15550212,0.125,0.08333333,0.04166667,0.01116455
+.fi
+which reduce the RMS by 0.61, 0.49, 0.43, 0.38 and 0.34 resp.
 .SH BUGS
 Smoothing a map which has already been smoothed will result in an incorrect
-header - shouldn't it be the simple sum of squares??
+header - this would be a simple sum of squares, if the beams are aligned with the axis.
 .SH AUTHOR
 Peter Teuben
 .SH FILES
 .nf
 .ta +2.5i
-src/image/trans     	ccdsmooth.c ccdsmooth.1
+src/image/trans     	ccdsmooth.c
 .fi
 .SH "UPDATE HISTORY"
 .nf

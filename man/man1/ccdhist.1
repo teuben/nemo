@@ -1,4 +1,4 @@
-.TH CCDHIST 1NEMO "8 February 2011"
+.TH CCDHIST 1NEMO "25 February 2013"
 .SH NAME
 ccdhist \- histogram plotter and gaussian fit for image data
 .SH SYNOPSIS
@@ -84,10 +84,18 @@ Plot a cumulative histogram instead. If set, the keywords gauss, residual,
 and ylog are automatically re-set to false. 
 [Default: \fBf\fP].
 .TP
+\fBintegrate=t|f\fP
+Integrate the cumulative histogram, instead of number count. This option
+makes no sense when cumulative is not selected.
+[Default: \fBf\fP].
+.TP
 \fBmedian=t|f\fP
 Compute median too? This can be timeconsuming for large numbers of points.
 [Default: \fBt\fP].
 .\" @todo   what about torben method?
+.TP
+\fBmedian=\fP
+If used, use this as blankval. Default: none.
 .TP
 \fBdual=t|f\fP
 Dual pass over the data, subtracting the mean. This can be important

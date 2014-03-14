@@ -1,10 +1,18 @@
-.TH CCDSHAPE 1NEMO "16 May 2013"
+.TH CCDSHAPE 1NEMO "12 June 2013"
 .SH NAME
 ccdshape \- shape of a 2D or 3D distribution based on moments of inertia
 .SH SYNOPSIS
 \fBccdshape\fP [parameter=value]
 .SH DESCRIPTION
-No description available. This manual page was created by mkman
+Based on intensity weighted moments of inertia, the center, primary axes
+and their angles (position angle, inclination, or euler) are computed.
+.PP
+By default, the three axes in a cube are treated in the same way, but for
+astronomical
+spectral line cubes the first two (RA-DEC) are different from the third (VEL).
+In this case the third axis is decoupled, and instead of sizes and euler angles,
+the largest velocity gradient dV/dR and a position angle between kinematic and 
+morphological major axis is used.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -14,18 +22,55 @@ Input image file [???]
 .TP
 \fBclip=\fP
 Use only values above clip, and below -clip, if only one value given. If two
-values given, exclude this range of values. Default: all values used.
+values given, exclude this range of values. Setting clip=0 should be sufficient
+to discard all pixels with the value 0.0.
+Default: all values used.
 .TP
 \fBwcs=t|f\fP
 Use axis world coordinate system descriptors or the 0-based coordinate axis
 numbers. Default: true.
+.TP
+\fBradecvel=t|f\fP
+Treat the 3rd axis like a separate velocity axis. This decouples the geometry
+from the velocity axis. Default: false.
+.TP
+\fBweight=t|f\fP
+Use intensity weighted moments? The alternative is all pixels equal weight.
+Default: true.
+.TP
+\fBcross=t|f\fP
+Should cross correlations be taken into account? Normally want this, since that
+is what gives the position angles, but some codes (e.g. miriad::clstats) do
+not do this, so for comparison this option is available. [Default: true]
+.SH CAVEATS
+Derived sizes are not corrected for any beam shapes and sizes that may be
+present in the header of an image.
 .SH EXAMPLES
+Taking a disk with a linearly rising rotation curve at a PA of 30 degrees, and
+inclination of 60:
+.nf
+% mkdisk - 1000 harmonic mass=1 | snaprotate - - 60,30 yz | snapgrid - - nz=64 zrange=-2:2 | ccdshape - clip=0
+Npoints: 514
+Size:    64 64 64
+Center:  -6.25e-05 0.0113125 -0.009375 [wcs]
+                                                               Theta    Phi
+        e_x:     1.00000     0.38733    -0.64866     0.65514    49.1  -59.2
+        e_y:     1.00000     0.86218     0.50653    -0.00821    90.5   30.4
+        e_z:     1.00000    -0.32652     0.56803     0.75546    40.9  119.9
+      qpole:     0.43241    -0.38733     0.64866    -0.65514
+                 0.06310     0.86218     0.50653    -0.00821
+                 0.00034    -0.32652     0.56803     0.75546
+
+.fi
 .SH SEE ALSO
+snapkinem(1NEMO), snaprect(1NEMO), snapinert(1NEMO)
 .SH FILES
+src/image/misc/ccdshape.c
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-16-May-13	V0.1 Created	PJT
+16-May-2013	V0.1 Created	PJT
+19-May-2013	V0.3 added weight= and radecvel=	PJT
 .fi

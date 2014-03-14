@@ -65,6 +65,34 @@ foreach a (1 1.5 2 2.5 3 3.5)
 end
 
 .fi
+.SH NAMELIST
+The fortran \fInamelist\fP format has many flavors, and you may wind up finding
+that your fortran compiler produces a flavor this version of the program cannot
+deal with. For example, a standard line reads as
+.nf
+
+ $hycon idiff=1,ifltn=1,tlim=2.0 $end
+ $ggen2 nbl=37,ymin=0.1,ymax=16.0,yrat=1.15708,igrid=1,lgrid=.true. $end
+ $ggen3 nbl=20,zmin=-1.5708,zmax=1.5708,igrid=1,lgrid=.true. $end
+
+.fi
+but some compilers will expect/produce a comma at the end of each line.
+Also, for example in RAMSES (uses fortran90) you can see this type:
+.nf
+
+&OUTPUT_PARAMS
+noutput=1
+tout=0.4
+/
+
+&HYDRO_PARAMS
+gamma=1.6666667
+courant_factor=0.8
+slope_type=2
+riemann='roe'
+/
+
+.fi
 .SH SEE ALSO
 hdfgrid(1NEMO), sdsfits(1NEMO)
 .SH FILES

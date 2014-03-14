@@ -1,12 +1,12 @@
-.TH PVCORR 1NEMO "31 May 2013"
+.TH PVCORR 1NEMO "1 June 2013"
 .SH NAME
-pvcorr \- PV correlation search
+pvcorr \- PV map or XYV cube cross correlation search for spectral lines
 .SH SYNOPSIS
 \fBpvcorr\fP [parameter=value]
 .SH DESCRIPTION
-Using a template area in a PV map or XYV cube, this template is shifted in the
-V direction and a cross correlation is computed as function of velocity. 
-Normally a strong well known line will be selected as template, 
+Using a template area/volume in a PV map or XYV cube, this template is shifted in the
+velocity (V) direction and a cross correlation is computed as function of V.
+Normally a strong known line will be selected as template, 
 with a known rest frequency,
 from which the other lines can then be identified. See also \fItabpeak(1NEMO)\fP
 to find the peaks in the output from this program. Some renormalizations are
@@ -19,23 +19,24 @@ is also given:
 .TP 20
 \fBin=\fP
 Input image file - must be an PV map, with V along the Y-axis, or
-a XYV cube. No default.
+a XYV cube, with V along the Z-axis. No default.
 .TP
 \fBclip=\fP
-Clip value to search for valid profiles in the template area defined between
-rows/planed \fBv0\fP and \fBv1\fP (inclusive).
+Clip value, above which to search for valid profiles in the template area defined between
+rows/planes \fBv0\fP and \fBv1\fP (inclusive).
 .TP
 \fBv0=\fP
-First row to search for template. If none given, the program will
+First row to search for the template, based on the \fBclip=\fP level. 
+If none given, the program will
 find the largest peak in the map/cube and decide on a reasonable
-template.
+template. Rows are 1-based.
 [-1]
 .TP
 \fBv1=\fP
 Last row to search for template. [-1]
 .TP
 \fBvscale=\fP
-Scale the velocity pixel value by this number to get more presentable
+Scale the velocity pixel size by this number to get more presentable
 numbers in the output. Astronomical data sometimes appear in Hz or m/s.
 For 2D maps this should be the Y coordinate, for 3D cubes the Z coordinate.
 [Default: 1]
@@ -49,8 +50,8 @@ Cross correlation mode.  1=true cross correllation (default) where the
 template map values are multiplied by the map values, i.e. intensity
 weighted. 0=template map equally weighted, this gives emphasize to the
 noisy lines to be searched for.  2=use the intensity weighted
-mean velocity within the template to re-sample the map and average
-their emission.   Default: 1
+mean velocity within the template to re-sample the map and sum
+their emission along this curved line.   Default: 1
 .TP
 \fBregion=\fP
 MIRIAD style region definition of the template area. ** Not implemented yet **
@@ -95,7 +96,9 @@ tabmath pv1.peak - %1+0.000066+100.07640,%2 all format=%f
 tabmath pv1.tab - %1+0.000066+100.07640,%2 all format=%f | tabplot - ymin=-0.1 ymax=0.2 point=2,0.1 line=1,1 color=2 ycoord=0,0.01
 .fi
 .SH CAVEATS
-The current template is defined via the parameters \fB(clip,y0,y1)\fP and is far from ideal. Ideally a properly smoothed
+The current template is defined via the parameters \fB(clip,y0,y1)\fP and is far from ideal, hence the \fBout=\fP to
+inspect which area/volume was computed.
+Ideally a properly smoothed
 version of a PV diagram will contain a better definition of the template. Another option is to find the peak in the map,
 assuming this is related to a strong well known line, then walk down the spectrum until clip is reached. This would
 alleviate one from having to supply a \fB(y0,y1)\fP pair.
@@ -104,9 +107,11 @@ Instead of the derived template shape, one could also define the offset by using
 This would require resampling the spectrum for the cross correlation and is more expensive, but possibly more accurate.
 .PP
 Can also use the template to define a v_mean, and resample this curvy line through PV and add up all the emission,
-creating a spectrum. Not quite cross correllation, but since the code is all local...
+creating a spectrum. Not quite cross correllation, but since the code is all local... This is mode=2.
 .PP
-Finally, not all lines have a similar distribution in PV, this will diffuse the cross correlation.
+Finally, not all lines have a similar distribution in PV, this will diffuse or can even destroy the cross correlation. 
+.PP
+Output cross correlations still have dubious units
 .SH SEE ALSO
 tabpeak(1NEMO), pvtrace(1NEMO), image(5NEMO)
 .SH FILES
@@ -118,4 +123,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 29-May-2013	V0.1 Created	PJT
 30-may-2013	V0.4 Exended to 3D cubes	PJT
+31-may-2013	V0.5 mode=0,2 implemented	PJT
 .fi

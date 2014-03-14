@@ -1,4 +1,4 @@
-.TH FITSCCD 1NEMO "23 November 2004"
+.TH FITSCCD 1NEMO "3 December 2013"
 .SH NAME
 fitsccd \- read a (fits) image file from disk
 .SH SYNOPSIS
@@ -25,7 +25,9 @@ input file, must be \fIfits(5)\fP format unless \fBmode=raw\fP (see below)
 [no default].
 .TP
 \fBout=\fIimage-file\fP
-output file, will be in \fIimage(5)\fP format [no default].
+output file, will be in \fIimage(5)\fP format. If no output file give,
+some output about the WCS in fits is given, which can be used by other programs.
+Default: blank.
 .TP
 \fBplanes=\fIp1,p2..\fP
 List of planes to be read from the fits file in case a cube was
@@ -132,6 +134,19 @@ are preceded with an underscore. For a zodiac image with
 .nf
     % \fBfitsccd in=_zim out=zim.ccd mode=raw offset=0 bitpix=-32 ...\fP
 .fi
+.SH "EXAMPLES"
+The following example presents some parameters of each axis in the cube:
+(listed are naxis, crpix, crval, cdelt, xmin, xmax)
+.nf
+% fitsccd L1451.mom0.fits 
+### nemo Debug Info: FITS file: Image size 1324 832
+AXIS1: 1324 607 51.2543 -0.000277778    0.168194 -0.199306
+AXIS2:  832 444 30.364   0.000277778   -0.122917  0.107917
+AXIS3:    1   0 4079.75 -23565         -35347.5  -35347.5
+.fi
+notice the third axis is bogus in this example. The last two columns (xmin,xmax)
+include half the pixel, so mean to signify the edges of this cells, in units
+relative to the reference pixel (crpix), not in units of
 .SH "CAVEATS"
 There are FITS image files stored as extensions to a dummy HDU. In those
 cases \fIscanfits(1NEMO)\fP must be used to extract the correct HDU and

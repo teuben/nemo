@@ -1,4 +1,4 @@
-.TH NEMO 1NEMO "2 March 2006"
+.TH NEMO 1NEMO "26 October 2013"
 .SH SYNOPSIS
 .nf
 \fBprogram [key1=]val1 [key2=]val2 .\!.\!.
@@ -49,7 +49,8 @@ keystrokes.  There is a consistent ordering of keywords in most programs
 that allows experienced users to use such (and other) shortcuts.
 (e.g. \fBin=\fP the first one, \fBout=\fP the second one etc.). Keywords
 can be used in minimum match, but this is not recommended for shell
-scripts.
+scripts. To make shell scripts robust, it is recommended you add the \fIkeyword=\fP
+part for all but the first one or two.
 .PP
 NEMO programs make a distinction between
 \fBprogram\fP keywords (keywords unique to a program) and \fBsystem\fP 
@@ -65,7 +66,7 @@ programs who use a graphics device. You system manager may have given
 you a default.
 .PP
 Each \fBsystem\fP keyword can be defaulted by setting it's equivalent
-environment variable (in upper case though). Program keywords can be
+environment variable (in upper case!). Program keywords can be
 abbreviated to uniqueness.
 .PP
 Examples: Consider the program \fImkplummer\fP, a program which creates
