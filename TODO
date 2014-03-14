@@ -1,3 +1,7 @@
+  - a new CVS branch is dealing with a better definition of		
+    images, basically doing FORDEF instead of CDEF.
+    CDEF has always been a bad idea...
+
   - objects > 2GB or 4GB have issues, since allocate() deals 
     with int, not size_t. That's being addressed in 3.2.5
     (May 2007)
@@ -7,6 +11,8 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
   - configure leaves -lcrt.o etc. in, so they need manual removal
     from makedefs and NEMORC.gen before continuing on
     Also check http://www.astro.gla.ac.uk/users/norman/note/2004/restFP/
+    ** most of this should be solved with the jan-2013 changes to
+       configure. I get a clean install on mac 10.8, 
 
   - see also:
     http://www.fortran-2000.com/ArnaudRecipes/sharedlib.html
@@ -354,3 +360,16 @@ $(LIB)libWDutils.dylib: $(WDutils_objs)
 
 
 	 few more isnan() and isinf()  fixes  wiht std::
+
+- old style diff and patch
+    diff  file.old  file.new > file.patch
+    patch file.old -i file.patch -o file.new
+    
+diff brent.for brent_dbl.f > test/brent.patch
+cd test
+cp ../brent.for .
+patch brent.for -i brent.patch -o brent_dbl.f
+
+diff brent.for ..
+diff brent_dbl.f ..
+
