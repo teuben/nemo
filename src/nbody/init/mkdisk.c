@@ -17,6 +17,8 @@
  *              8-may-03  V4.5    added energy=
  *              5-jul-03  V4.6 fixed energy= bug ; also
  *                             store Acc and Phi of particles    PJT
+ *             11-mar-14  abs= to control the vel.dispersions differently    PJT
+ *
  */
 
 #include <stdinc.h>
@@ -45,8 +47,9 @@ string defv[] = {
     "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
     "energy=f\n         preserve energy if random motions added?",
+    "abs=f\n            Use absolute vel.disp instead of fractional?",
     "headline=\n	Text headline for output",
-    "VERSION=4.6b\n	15-may-05 PJT",
+    "VERSION=4.7\n	11-mar-2014 PJT",
     NULL,
 };
 
@@ -56,6 +59,7 @@ local real rmin, rmax, mass;
 local int  jz_sign;
 local bool Qangle;
 local bool Qenergy;
+local bool Qabs;
 
 local int ndisk;
 local real frac[NDIM], vrad;
@@ -107,6 +111,7 @@ void nemo_main()
     dprintf(1,"Seed=%d\n",seed);
     Qangle = getbparam("angle");
     Qenergy = getbparam("energy");
+    Qabs = getbparam("abs");
     testdisk();
     writegalaxy(getparam("out"), getparam("headline"), Qmass);
 }
@@ -157,7 +162,7 @@ testdisk()
     rmin2 = rmin * rmin;
     rmax2 = rmax * rmax;
     theta_i = xrandom(0.0, TWO_PI);
-    t = 0;    /* dummy time ; we do not support variable time yet */
+    t = 0;    /* dummy time ; we do not support variable time */
     for (dp=disk, i = 0, ncirc=0; i < ndisk; dp++, i++) {	/* loop all stars */
 	Mass(dp) = mass;
 	if (ndisk == 1)
@@ -178,22 +183,31 @@ testdisk()
         SETV(acc_i,acc_d);
 	vcir_i = sqrt(r_i * absv(acc_i));               /* v^2 / r = force */
 #if 1
-	do {                         /* iterate, if needed, to get vrandom */
-	  sigma_r = grandom(0.0,frac[0]*vcir_i);
-	  sigma_t = grandom(0.0,frac[1]*vcir_i);
-	  sigma_z = grandom(0.0,frac[2]*vcir_i);
-
-	  dv_t = sigma_t;
-	  dv_r = sigma_r * took(r_i) ;
-	  vrandom = sqrt(dv_t*dv_t + dv_r*dv_r);
-	  if (vrandom > vcir_i) ncirc++;
-	} while (Qenergy &&  vrandom > vcir_i);
-	vcir_i = sqrt((vcir_i-vrandom)*(vcir_i+vrandom));
-	dv_r += vrad;
-	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
-	Vel(dp)[1] += sint*dv_r + cost*dv_t;
+	if (Qabs) {
+	  sigma_r = grandom(0.0,frac[0]);
+	  sigma_t = grandom(0.0,frac[1]);
+	  sigma_z = grandom(0.0,frac[2]);
+	  Vel(dp)[0] =  -vcir_i * sint * jz_sign;
+	  Vel(dp)[1] =   vcir_i * cost * jz_sign;
+	  Vel(dp)[0] += cost*sigma_r - sint*sigma_t;  /* add dispersions */
+	  Vel(dp)[1] += sint*sigma_r + cost*sigma_t;
+	} else {
+	  do {                         /* iterate, if needed, to get vrandom */
+	    sigma_r = grandom(0.0,frac[0]*vcir_i);
+	    sigma_t = grandom(0.0,frac[1]*vcir_i);
+	    sigma_z = grandom(0.0,frac[2]*vcir_i);
+	    dv_t = sigma_t;
+	    dv_r = sigma_r * took(r_i) ;
+	    vrandom = sqrt(dv_t*dv_t + dv_r*dv_r);
+	    if (vrandom > vcir_i) ncirc++;
+	  } while (Qenergy &&  vrandom > vcir_i);
+	  vcir_i = sqrt((vcir_i-vrandom)*(vcir_i+vrandom));
+	  dv_r += vrad;
+	  Vel(dp)[0] =  -vcir_i * sint * jz_sign;
+	  Vel(dp)[1] =   vcir_i * cost * jz_sign;
+	  Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
+	  Vel(dp)[1] += sint*dv_r + cost*dv_t;
+	}
 #else
 	sigma_r = grandom(0.0,frac[0]*vcir_i);
 	sigma_t = grandom(0.0,frac[1]*vcir_i);
