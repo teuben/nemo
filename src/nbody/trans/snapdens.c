@@ -39,7 +39,7 @@ string defv[] = {
     "tfactor=-1.0\n               conversion factor v->r [virial=sqrt(2)]",
     "nn=f\n                       add NN index to the Key field?",
     "ndim=3\n                     3dim or 2dim densities?",
-    "VERSION=1.5c\n		  5-apr-06 PJT",
+    "VERSION=1.5c\n		  5-apr-2006 PJT",
     NULL,
 };
 
