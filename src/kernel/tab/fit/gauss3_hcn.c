@@ -16,7 +16,7 @@
  * id=11,21,01
  *
  *
- * gauss3_hcn_10: (10 parameters)
+ * gauss3_hcn_10: (10 parameters - see gaussn, not fitted here anymore
  *	f = a + b1*exp(-(x-c1)^2/(2*d1^2)) + 
  *              b2*exp(-(x-c2)^2/(2*d2^2))
  *              b3*exp(-(x-c3)^2/(2*d3^2))
@@ -58,6 +58,7 @@
 
 #include <stdinc.h>
 
+/* the lines are ordered from low to high velocity */
 static real dv1 = F01;
 static real dv2 = F21;
 static real dv3 = F11;
@@ -238,8 +239,11 @@ real func_gauss3_hcn_2(real *x, real *p, int np)
 {
   real a,b,arg1,arg2,arg3;
 
+  if (np!=6) error("Needs 6 parameters");
+
   if (debug_first) {
-    dprintf(0,"gauss3_hcn_2: a,c,d,b1,b2,b3\n");
+    dprintf(0,"gauss3_hcn_2: a,c,d,b1,b2,b3\n",
+	    p[0],p[1],p[2],p[3],p[4],p[5]);
     dprintf(0,"gauss3_hcn_2: dv=%g,%g,%g\n",dv1,dv2,dv3);
     debug_first = 0;
   }

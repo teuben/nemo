@@ -1,5 +1,5 @@
 /*
- * N2H+ 93.17 GHz triplet fitting 7 component fitting
+ * N2H+ 93.17 GHz 3-3-1 triplet fitting (7) component fitting
  * 
  *
  * 93171.619 (10) N2H+    1-0 F1=1-1 F=0-1   0.5   L134N      NRAO     11m Sny79  Caz86
@@ -49,6 +49,7 @@
  * 28-dec-2011	created for N1333
  * 10-oct-2013  redefined some functions, gauss7_n2hp is now the 1+N*3 parameter 7-let with
  *              equal sigma's and fixed delta-v's. 
+ * 11-oct-2013  remove the _22, since gaussn will do this.    Order lines by increasing velocity
  */
 
 /*  delta wings in km/s */
@@ -63,13 +64,13 @@
 
 #if 0
   /* lovas */
-# define A01  0.5
-# define A22  0.7 
-# define A10  0.8
-# define A21  0.9
-# define A32  0.9
-# define A11  0.6
-# define A12  0.7
+# define A01  0.556
+# define A22  0.778 
+# define A10  0.889
+# define A21  1.0
+# define A32  1.0
+# define A11  0.667
+# define A12  0.778
 #else
   /* splatalogue */
 # define A01  0.1429
@@ -83,132 +84,175 @@
 
 #include <stdinc.h>
 
+/* lines are ordered from low to high vel */
 
-static real dv1 = F01;
-static real dv2 = F22;
-static real dv3 = F10;
+static real dv1 = F12;
+static real dv2 = F11;
+static real dv3 = F32;  /* center */
 static real dv4 = F21;
-static real dv5 = F32;
-static real dv6 = F11;
-static real dv7 = F12;
+static real dv5 = F10;
+static real dv6 = F22;
+static real dv7 = F01;
 
-static real av1 = A01;
-static real av2 = A22;
-static real av3 = A10;
+static real av1 = A12;
+static real av2 = A11;
+static real av3 = A32;  /* center */
 static real av4 = A21;
-static real av5 = A32;
-static real av6 = A11;
-static real av7 = A12;
+static real av5 = A10;
+static real av6 = A22;
+static real av7 = A01;
 
 
 static debug_first = 1;
 
 
-real func_gauss7_n2hp_22(real *x, real *p, int np)
+/* parameters: fix all widths to be the same as well as DV's as well as all Amp's
+ *             to a pre-described ratio
+ * 
+ *      a,b5,c5,d
+ *      0 1  2  3 
+ *
+ */
+real func_gauss7_n2hp(real *x, real *p, int np)
 {
-  real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7;
+  real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7,val;
+  int ic,nc, ia,iv,id;
+
+
+  if ( (np-1)%3) error("Need 1+3*Ncomponents parameters: %d",(np-1)%3);
+  nc = (np-1)/3;
 
   if (debug_first) {
-    dprintf(0,"gauss7_n2hp: a,b1,c1,d1,b2,c2,d2,...b7,c7,d7\n");
+    dprintf(0,"gauss7_n2hp: np=%d nc=%d\n",np,nc);
+    dprintf(0,"gauss7_n2hp: a,b5,c5,d: %g %g %g %g\n",p[0],p[1],p[2],p[3]);
+    dprintf(0,"gauss7_n2hp: dv=%g,%g,%g,%g,%g,%g,%g\n",
+	    dv1,dv2,dv3,dv4,dv5,dv6,dv7);
+    dprintf(0,"gauss7_n2hp: av=%g,%g,%g,%g,%g,%g,%g\n",
+	    av1,av2,av3,av4,av5,av6,av7);
     debug_first = 0;
   }
 
-  a = p[2]-x[0];
-  b = p[3];
-  arg1 = a*a/(2*b*b);
+  val = p[0];
+  for (ic=0; ic<nc; ic++) {
+    ia = 1+ic*3;            /* offsets into parameter array */
+    iv = 2+ic*3;
+    id = 3+ic*3;
+    
+    a = p[iv]-x[0]+dv1;
+    b = p[id];
+    arg1 = a*a/(2*b*b);
 
-  a = p[5]-x[0];
-  b = p[6];
-  arg2 = a*a/(2*b*b);
+    a = p[iv]-x[0]+dv2;
+    b = p[id];
+    arg2 = a*a/(2*b*b);
 
-  a = p[8]-x[0];
-  b = p[9];
-  arg3 = a*a/(2*b*b);
+    a = p[iv]-x[0]+dv3;
+    b = p[id];
+    arg3 = a*a/(2*b*b);
 
-  a = p[11]-x[0];
-  b = p[12];
-  arg4 = a*a/(2*b*b);
-
-  a = p[14]-x[0];
-  b = p[15];
-  arg5 = a*a/(2*b*b);
-
-  a = p[17]-x[0];
-  b = p[18];
-  arg6 = a*a/(2*b*b);
-
-  a = p[20]-x[0];
-  b = p[21];
-  arg7 = a*a/(2*b*b);
-
-  return p[0] + p[1]*exp(-arg1) + p[4]*exp(-arg2) + p[7]*exp(-arg3) +
-    p[10]*exp(-arg4) + p[13]*exp(-arg5) + p[16]*exp(-arg6) + p[19]*exp(-arg7);
+    a = p[iv]-x[0]+dv4;
+    b = p[id];
+    arg4 = a*a/(2*b*b);
+    
+    a = p[iv]-x[0]+dv5;
+    b = p[id];
+    arg5 = a*a/(2*b*b);
+    
+    a = p[iv]-x[0]+dv6;
+    b = p[id];
+    arg6 = a*a/(2*b*b);
+    
+    a = p[iv]-x[0]+dv7;
+    b = p[id];
+    arg7 = a*a/(2*b*b);
+    
+    val += p[ia]*(av1*exp(-arg1)+av2*exp(-arg2)+av3*exp(-arg3)+
+                  av4*exp(-arg4)+av5*exp(-arg5)+av6*exp(-arg6)+av7*exp(-arg7));
+  }
+  return val;
 
 }
- 
-void derv_gauss7_n2hp_22(real *x, real *p, real *e, int np)
+
+/* parameters:
+ *      a,c,d,b1,b2,b3
+ *      0 1 2 3  4  5
+ */
+
+void derv_gauss7_n2hp(real *x, real *p, real *e, int np)
 {
   real a1,b1,arg1,a2,b2,arg2,a3,b3,arg3,a4,b4,arg4,a5,b5,arg5,a6,b6,arg6,a7,b7,arg7;
+  real earg1,earg2,earg3,earg4,earg5,earg6,earg7;
+  int ic,nc, ia,iv,id;
 
-  a1 = p[2]-x[0];
-  b1 = p[3];
-  arg1 = a1*a1/(2*b1*b1);
+  if ( (np-1)%3) error("Need 1+3*Ncomponents parameters: %d",(np-1)%3);
+  nc = (np-1)/3;
 
-  a2 = p[5]-x[0];
-  b2 = p[6];
-  arg2 = a2*a2/(2*b2*b2);
-
-  a3 = p[8]-x[0];
-  b3 = p[9];
-  arg3 = a3*a3/(2*b3*b3);
-
-  a4 = p[11]-x[0];
-  b4 = p[12];
-  arg4 = a3*a3/(2*b3*b3);
-
-  a5 = p[14]-x[0];
-  b5 = p[15];
-  arg5 = a3*a3/(2*b3*b3);
-
-  a6 = p[17]-x[0];
-  b6 = p[18];
-  arg6 = a3*a3/(2*b3*b3);
-
-  a7 = p[20]-x[0];
-  b7 = p[21];
-  arg7 = a3*a3/(2*b3*b3);
-  
   e[0] = 1.0;
+  for (ic=1; ic<np; ic++) e[ic] = 0.0;
 
-  e[1] = exp(-arg1);
-  e[2] = -p[1]*e[1] * a1 / (b1*b1);
-  e[3] = p[1] * e[1] * a1 * a1 / (b1*b1*b1);
+  for (ic=0; ic<nc; ic++) {
+    ia = 1+ic*3;            /* offsets into parameter array */
+    iv = 2+ic*3;
+    id = 3+ic*3;    
 
-  e[4] = exp(-arg2);
-  e[5] = -p[4]*e[4] * a2 / (b2*b2);
-  e[6] = p[4] * e[4] * a2 * a2 / (b2*b2*b2);
+    a1 = p[iv]-x[0]+dv1;
+    b1 = p[id];
+    arg1 = a1*a1/(2*b1*b1);
+    earg1 = exp(-arg1);
 
-  e[7] = exp(-arg3);
-  e[8] = -p[7]*e[7] * a3 / (b3*b3);
-  e[9] = p[7] * e[7] * a3 * a3 / (b3*b3*b3);
+    a2 = p[iv]-x[0]+dv2;
+    b2 = p[id];
+    arg2 = a2*a2/(2*b2*b2);
+    earg2 = exp(-arg2);
+    
+    a3 = p[iv]-x[0]+dv3;
+    b3 = p[id];
+    arg3 = a3*a3/(2*b3*b3);
+    earg3 = exp(-arg3);
+    
+    a4 = p[iv]-x[0]+dv4;
+    b4 = p[id];
+    arg4 = a4*a4/(2*b4*b4);
+    earg4 = exp(-arg4);
+    
+    a5 = p[iv]-x[0]+dv5;
+    b5 = p[id];
+    arg5 = a5*a5/(2*b5*b5);
+    earg5 = exp(-arg5);
+    
+    a6 = p[iv]-x[0]+dv6;
+    b6 = p[id];
+    arg6 = a6*a6/(2*b6*b6);
+    earg6 = exp(-arg6);
+    
+    a7 = p[iv]-x[0]+dv7;
+    b7 = p[id];
+    arg7 = a7*a7/(2*b7*b7);
+    earg7 = exp(-arg7);
+      
+    e[ia] +=  av1*earg1 + av2*earg2 + av3*earg3 +
+              av4*earg4 + av5*earg5 + av6*earg6 + av7*earg7;
 
-  e[10] = exp(-arg4);
-  e[11] = -p[10]*e[10] * a4 / (b4*b4);
-  e[12] = p[10] * e[10] * a4 * a4 / (b4*b4*b4);
 
-  e[13] = exp(-arg5);
-  e[14] = -p[13]*e[13] * a5 / (b5*b5);
-  e[15] = p[13] * e[13] * a5 * a5 / (b5*b5*b5);
+    e[iv] += -p[ia]*av1*earg1*a1/(b1*b1)
+             -p[ia]*av2*earg2*a2/(b2*b2)
+             -p[ia]*av3*earg3*a3/(b3*b3)
+             -p[ia]*av4*earg4*a4/(b4*b4)
+             -p[ia]*av5*earg5*a5/(b5*b5)
+             -p[ia]*av6*earg6*a6/(b6*b6)
+             -p[ia]*av7*earg7*a7/(b7*b7);
 
-  e[16] = exp(-arg6);
-  e[17] = -p[16]*e[16] * a6 / (b6*b6);
-  e[18] = p[16] * e[16] * a6 * a6 / (b6*b6*b6);
 
-  e[19] = exp(-arg7);
-  e[20] = -p[19]*e[19] * a7 / (b7*b7);
-  e[21] = p[19] * e[19] * a7 * a7 / (b7*b7*b7);
-
+    e[id] += p[ia] * av1*earg1 * a1*a1 / (b1*b1*b1) +
+             p[ia] * av2*earg2 * a2*a2 / (b2*b2*b2) +
+             p[ia] * av3*earg3 * a3*a3 / (b3*b3*b3) +
+             p[ia] * av4*earg4 * a4*a4 / (b4*b4*b4) +
+             p[ia] * av5*earg5 * a5*a5 / (b5*b5*b5) +
+             p[ia] * av6*earg6 * a6*a6 / (b6*b6*b6) +
+             p[ia] * av7*earg7 * a7*a7 / (b7*b7*b7);
+  }
 }
+
 
 /* parameters:  fix the velocity offsets
  *      a,c,b1,d1,b2,d2,b3,d3,b4,d4,b5,d5,b6,d6,b7,d7
@@ -433,150 +477,3 @@ void derv_gauss7_n2hp_10(real *x, real *p, real *e, int np)
          p[9] * e[9] * a7 * a7 / (b7*b7*b7);
 }
 
-/* parameters: fix all widths to be the same as well as DV's as well as all Amp's
- *             to a pre-described ratio
- * 
- *      a,b5,c5,d
- *      0 1  2  3 
- *
- */
-real func_gauss7_n2hp(real *x, real *p, int np)
-{
-  real a,b,arg1,arg2,arg3,arg4,arg5,arg6,arg7,val;
-  int ic,nc, ia,iv,id;
-
-
-  if ( (np-1)%3) error("Need 1+3*Ncomponents parameters: %d",(np-1)%3);
-  nc = (np-1)/3;
-
-  if (debug_first) {
-    dprintf(0,"gauss7_n2hp: np=%d nc=%d\n",np,nc);
-    dprintf(0,"gauss7_n2hp: a,b5,c5,d: %g %g %g %g\n",p[0],p[1],p[2],p[3]);
-    dprintf(0,"gauss7_n2hp: dv=%g,%g,%g,%g,%g,%g,%g\n",
-	    dv1,dv2,dv3,dv4,dv5,dv6,dv7);
-    dprintf(0,"gauss7_n2hp: av=%g,%g,%g,%g,%g,%g,%g\n",
-	    av1,av2,av3,av4,av5,av6,av7);
-    debug_first = 0;
-  }
-
-  val = p[0];
-  for (ic=0; ic<nc; ic++) {
-    ia = 1+ic*3;            /* offsets into parameter array */
-    iv = 2+ic*3;
-    id = 3+ic*3;
-    
-    a = p[iv]-x[0]+dv1;
-    b = p[id];
-    arg1 = a*a/(2*b*b);
-
-    a = p[iv]-x[0]+dv2;
-    b = p[id];
-    arg2 = a*a/(2*b*b);
-
-    a = p[iv]-x[0]+dv3;
-    b = p[id];
-    arg3 = a*a/(2*b*b);
-
-    a = p[iv]-x[0]+dv4;
-    b = p[id];
-    arg4 = a*a/(2*b*b);
-    
-    a = p[iv]-x[0]+dv5;
-    b = p[id];
-    arg5 = a*a/(2*b*b);
-    
-    a = p[iv]-x[0]+dv6;
-    b = p[id];
-    arg6 = a*a/(2*b*b);
-    
-    a = p[iv]-x[0]+dv7;
-    b = p[id];
-    arg7 = a*a/(2*b*b);
-    
-    val += p[ia]*(av1*exp(-arg1)+av2*exp(-arg2)+av3*exp(-arg3)+
-                  av4*exp(-arg4)+av5*exp(-arg5)+av6*exp(-arg6)+av7*exp(-arg7));
-  }
-  return val;
-
-}
-
-/* parameters:
- *      a,c,d,b1,b2,b3
- *      0 1 2 3  4  5
- */
-
-void derv_gauss7_n2hp(real *x, real *p, real *e, int np)
-{
-  real a1,b1,arg1,a2,b2,arg2,a3,b3,arg3,a4,b4,arg4,a5,b5,arg5,a6,b6,arg6,a7,b7,arg7;
-  real earg1,earg2,earg3,earg4,earg5,earg6,earg7;
-  int ic,nc, ia,iv,id;
-
-  if ( (np-1)%3) error("Need 1+3*Ncomponents parameters: %d",(np-1)%3);
-  nc = (np-1)/3;
-
-  e[0] = 1.0;
-  for (ic=1; ic<np; ic++) e[ic] = 0.0;
-
-  for (ic=0; ic<nc; ic++) {
-    ia = 1+ic*3;            /* offsets into parameter array */
-    iv = 2+ic*3;
-    id = 3+ic*3;    
-
-    a1 = p[iv]-x[0]+dv1;
-    b1 = p[id];
-    arg1 = a1*a1/(2*b1*b1);
-    earg1 = exp(-arg1);
-
-    a2 = p[iv]-x[0]+dv2;
-    b2 = p[id];
-    arg2 = a2*a2/(2*b2*b2);
-    earg2 = exp(-arg2);
-    
-    a3 = p[iv]-x[0]+dv3;
-    b3 = p[id];
-    arg3 = a3*a3/(2*b3*b3);
-    earg3 = exp(-arg3);
-    
-    a4 = p[iv]-x[0]+dv4;
-    b4 = p[id];
-    arg4 = a4*a4/(2*b4*b4);
-    earg4 = exp(-arg4);
-    
-    a5 = p[iv]-x[0]+dv5;
-    b5 = p[id];
-    arg5 = a5*a5/(2*b5*b5);
-    earg5 = exp(-arg5);
-    
-    a6 = p[iv]-x[0]+dv6;
-    b6 = p[id];
-    arg6 = a6*a6/(2*b6*b6);
-    earg6 = exp(-arg6);
-    
-    a7 = p[iv]-x[0]+dv7;
-    b7 = p[id];
-    arg7 = a7*a7/(2*b7*b7);
-    earg7 = exp(-arg7);
-      
-    e[ia] +=  av1*earg1 + av2*earg2 + av3*earg3 +
-              av4*earg4 + av5*earg5 + av6*earg6 + av7*earg7;
-
-
-    e[iv] += -p[ia]*av1*earg1*a1/(b1*b1)
-             -p[ia]*av2*earg2*a2/(b2*b2)
-             -p[ia]*av3*earg3*a3/(b3*b3)
-             -p[ia]*av4*earg4*a4/(b4*b4)
-             -p[ia]*av5*earg5*a5/(b5*b5)
-             -p[ia]*av6*earg6*a6/(b6*b6)
-             -p[ia]*av7*earg7*a7/(b7*b7);
-
-
-    e[id] += p[ia] * av1*earg1 * a1*a1 / (b1*b1*b1) +
-             p[ia] * av2*earg2 * a2*a2 / (b2*b2*b2) +
-             p[ia] * av3*earg3 * a3*a3 / (b3*b3*b3) +
-             p[ia] * av4*earg4 * a4*a4 / (b4*b4*b4) +
-             p[ia] * av5*earg5 * a5*a5 / (b5*b5*b5) +
-             p[ia] * av6*earg6 * a6*a6 / (b6*b6*b6) +
-             p[ia] * av7*earg7 * a7*a7 / (b7*b7*b7);
-  }
-}
-
