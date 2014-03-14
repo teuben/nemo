@@ -36,11 +36,13 @@ string defv[] = {
     "sign=1\n           Sign of rotcur",
     "outflow=f\n        Outflow or Rotation/Spin",
     "times=all\n	times of snapshots to copy",
-    "VERSION=2.0b\n	23-nov-03 PJT",
+    "VERSION=2.0c\n	3-may-2013 PJT",
     NULL,
 };
 
 string usage="give a snapshot a spin around or outflow from the Z-axis";
+
+string cvsid="$Id$";
 
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
@@ -102,6 +104,7 @@ nemo_main()
             if (Qflow) {                        /* radial in/out-flow */
                 Vel(bp)[0] += omega*Pos(bp)[0];     /*  vx = vx + x*omega */
                 Vel(bp)[1] += omega*Pos(bp)[1];     /*  vy = vy + y*omega */
+                Vel(bp)[2] += omega*Pos(bp)[2];     /*  vz = vz + z*omega */
             } else {                            /* rotation */
                 Vel(bp)[0] -= omega*Pos(bp)[1];     /*  vx = vx - y*omega */
                 Vel(bp)[1] += omega*Pos(bp)[0];     /*  vy = vy + x*omega */
