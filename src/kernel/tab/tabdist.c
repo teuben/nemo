@@ -9,10 +9,13 @@
  *          Y = aX + b
  *          use k-d Match?   http://arxiv.org/abs/1304.0838
  *  @todo   ID column
+ *
+ *  @todo   Faster lookup using 2D grid with linked list?
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <grid.h>
 
 string defv[] = {
     "in1=???\n		First (ascii table) dataset",
@@ -22,16 +25,21 @@ string defv[] = {
     "id1=0\n            Column in first data reprenting the ID",
     "id2=0\n            Column in second data reprenting the ID",
     "radec=false\n      Interpret X and Y as RA/DEC angles on sky",
-    "VERSION=0.5\n	15-nov-2013 PJT",
+    "xgrid=\n           Grid to limit nearest neighbors for special 2D case",
+    "ygrid=\n           Grid to limit nearest neighbors for special 2D case",
+    "VERSION=0.6\n	7-mar-2014 PJT",
     NULL,
 };
 
 string usage="Compare distances between points in two tables";
 string cvsid="$Id$";
 
+#define MAXGRID  1024
+
 void compare_1d(int npt1, int npt2, real *x1, real *x2);
 void compare_2d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2);
 void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, string *name1, string *name2);
+void compare_2dg(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, Grid *g);
 void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real *z1, real *z2);
 
 void get_atable_a(stream instr, int id, int npt, string *name);
@@ -54,6 +62,11 @@ inline real dist2a(real x1,real y1,real x2,real y2) {
   return sin(y1)*sin(y2)+cos(y1)*cos(y2)*cos(x1-x2);
 }
 
+void key2grid(string key, Grid *g)
+{
+
+}
+
 #define NDIM   3
 
 nemo_main()
@@ -69,11 +82,15 @@ nemo_main()
   stream instr1, instr2;
   string *name1, *name2;
   bool Qradec = getbparam("radec");
+  Grid gx, gy;
 
   if (Qradec) warning("new radec mode ");
 
   ncol1 = nemoinpi(getparam("col1"),colnr1,NDIM);
   ncol2 = nemoinpi(getparam("col2"),colnr2,NDIM);
+
+  key2grid("xgrid",&gx);
+  key2grid("ygrid",&gy);
 
   if (ncol1 != ncol2) error("column count error: ncol1=%d and ncol2=%d not same",ncol1,ncol2);
   if (ncol1 < 1 || ncol1 > NDIM) error("ncol1=%d not supported",ncol1);
@@ -214,6 +231,27 @@ void compare_2da(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, str
     printf("%s %g %g   %s %g %g   %g\n",n1,x1[i],y1[i],n2,x2[jmin],y2[jmin],dmin);
   }
 }
+
+void compare_2g(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, Grid *gx, Grid *gy)
+{  
+  int i, j, jmin;
+  real d, dmin;
+  
+  for (i=0; i<npt1; i++) {
+    dmin = dist2(x1[i],y1[i],x2[0],y2[0]);
+    jmin = 0;
+    for (j=1; j<npt2; j++) {
+      d = dist2(x1[i],y1[i],x2[j],y2[j]);
+      if (d<dmin) {
+	dmin = d;
+	jmin = j;
+      }
+    }
+    dmin = sqrt(dmin);
+    printf("%d %g %g   %d %g %g   %g\n",i+1,x1[i],y1[i],jmin+1,x2[jmin], y2[jmin],dmin);
+  }
+}
+
 
 void compare_3d(int npt1, int npt2, real *x1, real *x2, real *y1, real *y2, real *z1, real *z2)
 {  
