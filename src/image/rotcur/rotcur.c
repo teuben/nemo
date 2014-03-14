@@ -143,12 +143,13 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.12\n  2-jun-04 PJT",
+    "VERSION=2.12a\n 3-may-2013 PJT",
     NULL,
 };
 
 string usage="nonlinear fit of kinematical parameters to a velocity field";
 
+string cvsid="$Id$";
 
 
 imageptr denptr, velptr, resptr;    /* pointers to Images, if applicable */
@@ -191,11 +192,11 @@ int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, 
 	   real *x0, real *y0, real *thf, int *wpow, int mask[], int *side, int cor[], 
 	   int *inh, int *fitmode, real *nsigma, stream lunpri);
 int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
-	   real elp4[], int cor[], int *npt, int fitmode, real nsigma, bool useflag, stream lunres);
+	   real elp4[], int cor[], int *npt, real *rms, int fitmode, real nsigma, bool useflag, stream lunres);
 int perform_out(int h, real p[6], int n, real q);
 int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], 
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
-	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
+	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], real res[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
 int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, real p[], 
 	   real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, bool useflag);
@@ -236,7 +237,8 @@ nemo_main()
     real inc[RING],ein[RING]; /* arrays containing resp. inc. and its error */
     real xce[RING],exc[RING]; /* arrays containing resp. xpos and its error */
     real yce[RING],eyc[RING]; /* arrays containing resp. ypos and its error */
-    int  npt[RING];	      /* array containing number of points in ring */
+    real res[RING];           /* array containing rms vel in ring           */
+    int  npt[RING];	      /* array containing number of points in ring  */
     real p[PARAMS],e[PARAMS]; /* arrays containing resp. pars and the errors */
     real ri,ro,r;     /* vars denoting inner, outer and mean radius */
     int  inherit;
@@ -245,6 +247,7 @@ nemo_main()
     real thf;     /* var  denoting free angle around minor axis */
     real nsigma;
     real old_factor, factor;    /* factor > 1, by which errors need be multiplied */
+    real rms;                  /* rms vel in a ring */
 
     if (hasvalue("tab"))
       lunpri=stropen(getparam("tab"),"a");  /* pointer to table stream output */
@@ -287,12 +290,12 @@ nemo_main()
          p[4] = (mask[4] && ifit>0 && inherit) ? xce[ifit-1] : x0;
          p[5] = (mask[5] && ifit>0 && inherit) ? yce[ifit-1] : y0;
 
-         ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,-1.0,FALSE,lunres);
+         ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,&rms,fitmode,-1.0,FALSE,lunres);
 	 if (ier > 0 && nsigma > 0)
-	   ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,nsigma,FALSE,lunres);
+	   ier = rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,&rms,fitmode,nsigma,FALSE,lunres);
          if (ier>0) {           /* only if fit OK, store fit */
 	   if (!Qreuse)
-	     (void)rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,fitmode,nsigma,TRUE,lunres);
+	     (void)rotfit(ri,ro,p,e,mask,wpow,side,thf,elp4,cor,&n,&rms,fitmode,nsigma,TRUE,lunres);
 	   rad[ifit]=r;            /*  radius of ring */
 	   vsy[ifit]=p[0];         /*  systemic velocity */
 	   evs[ifit]=e[0]*factor;  /*  error in systemic velocity */
@@ -310,6 +313,7 @@ nemo_main()
 	   elp[ifit][1]=elp4[1];   /* NOT corrected by 'factor' */
 	   elp[ifit][2]=elp4[2];
 	   elp[ifit][3]=elp4[3];
+	   res[ifit] = rms;
 	   npt[ifit] = n;
 	   ifit++;
          }
@@ -318,7 +322,7 @@ nemo_main()
 
     rotplt(rad,vsy,evs,vro,evr,pan,epa,         /* output the results */
            inc,ein,xce,exc,yce,eyc,
-           mask,ifit,elp,lunpri,cor,npt,factor);
+           mask,ifit,elp,lunpri,cor,res,npt,factor);
 }
 
 /*
@@ -736,9 +740,10 @@ stream  lunpri;       /* LUN for print output */
  *  returns:
  *    IER      integer         result of fit (good or bad)
  *    NPT      integer         number of points in ring
+ *    RMS      real            residual rms velocities
  */
 
-rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, fitmode, nsigma, useflag, lunres)
+rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, rms, fitmode, nsigma, useflag, lunres)
 real ri,ro;      /* inner and outer radius of ring */
 int mask[];      /* mask for free/fixed parameters */
 int wpow;        /* weighting function */
@@ -748,6 +753,7 @@ real elp4[];     /* array for ellipse parameters */
 real p[],e[];    /* initial estimates (I), results and erros (O) */
 real thf;        /* free angle around minor axis (I) */
 int *npt;	 /* number of points in ring (0) */
+real *rms;       /* rms velocity in ring */
 int fitmode;     /* basic fitmode (I) */
 real nsigma;     /* if positive, remove outliers and fit again */
 bool useflag;    /* flag: if TRUE, flag all ring points to undf, no fitting */
@@ -789,6 +795,7 @@ stream lunres;   /* file for residuals */
     printf("position position        velocity\n");
 
     getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr,useflag);  /* this ring */
+    *rms = q;
     if (useflag)
       return;
 
@@ -851,6 +858,7 @@ stream lunres;   /* file for residuals */
                pf[k]=flip*df[k]+p[k];                       /* new parameters */
             pf[3]=MIN(pf[3],180.0-pf[3]);         /* in case inclination > 90 */
             getdat(x,y,w,idx,res,&n,MAXPTS,pf,ri,ro,thf,wpow,&q,side,&full,nfr,useflag);
+           *rms = q;
 	    for (i=0;i<n;i++) w[i] *= iblank[i];            /* apply blanking */
             if (q < chi) {                                     /* better fit ?*/
                perform_out(h,pf,n,q);                   /* show the iteration */
@@ -988,9 +996,9 @@ perform_out(int h,real *p,int n,real q)
  */
 
 rotplt(rad,vsy,evs,vro,evr,pan,epa,inc,ein,xce,exc,yce,eyc,
-       mask,ifit,elp,lunpri,cor,npt,factor)
+       mask,ifit,elp,lunpri,cor,res,npt,factor)
 real rad[],vsy[],evs[],vro[],evr[],pan[],epa[],inc[],ein[],
-     xce[],exc[],yce[],eyc[],elp[][4], factor;
+     xce[],exc[],yce[],eyc[],elp[][4], res[], factor;
 int  mask[],ifit,cor[],npt[];
 stream lunpri;
 {
@@ -1018,6 +1026,7 @@ stream lunpri;
     fprintf(lunpri," %5.2f     %6.2f     %6.2f   %8.2f  %8.2f   %8.2f  %8.2f",
                      epa[i],   inc[i],   ein[i], xce[i],exc[i], yce[i],eyc[i]);
     fprintf(lunpri," %d",npt[i]);
+    fprintf(lunpri," %6.2f",res[i]);
     fprintf(lunpri,"\n");
   }
   fprintf(lunpri,"\n");
