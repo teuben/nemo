@@ -31,8 +31,8 @@ mdarray - simple multi-dimensional (C style) array allocators with sequential me
 dimensions are available. Actually data memory is guarenteed to be
 sequentually in memory, as they are with static multidimensional arrays.
 .PP
-Arrays are stored in row major order, rows vary most rapidly in memory. For
-example in
+Arrays are stored in row major order, if rows vary most rapidly in memory. 
+For example in
 .nf
    double matrix a[20][10];
 .fi
@@ -52,6 +52,11 @@ Example of use: ( b = A.x)
     }
     
 .fi
+.PP
+When referring to rows and columns, we write these
+as A[row][col] (e.g. in C, or the current mdarray2) or 
+A(row,col) (e.g. in Fortran)
+
 .SH TIMING
 The TESTBED function (\fBmdarraytest\fP) excersizes a simple initialization of 
 all array elements, and
