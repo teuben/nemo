@@ -71,6 +71,19 @@ if (1) then
   endif
 endif
 
+if (1) then
+  # mostly for unsio 1.0.0: $NEMO/py/modules
+  if (-d $NEMO/py/modules) then
+    if ($?PYTHONPATH) then
+      setenv PYTHONPATH $NEMO/py/modules:$PYTHONPATH
+    else
+      setenv PYTHONPATH $NEMO/py/modules
+    endif
+  endif
+endif
+
+
+
 if (-e $NEMO/usr/zeno/ZENORC) then
   source $NEMO/usr/zeno/ZENORC
 endif
