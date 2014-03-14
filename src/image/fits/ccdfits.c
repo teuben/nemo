@@ -67,12 +67,13 @@ string defv[] = {
 	"crval=\n        reference value, if different from default",
 	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
-	"restfreq=115271204\n   Restfreq (in Hz) if a doppler axis is used",
+	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN)",
+	"restfreq=115271204000\n   Restfreq (in Hz) if a doppler axis is used",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present) to select",
-        "VERSION=5.6\n   10-feb-2013 PJT",
+        "VERSION=5.6a\n  8-may-2013 PJT",
         NULL,
 };
 
@@ -90,6 +91,7 @@ double iscale[2];	/* intensity rescale */
 string object;           /* name of object in FITS header */
 string comment;          /* extra comments */
 string headline;         /* optional NEMO headline, added as COMMENT */
+string proj;             /* projection type for WCS */
 bool Qcdmatrix;         /* writing out new-style cdmatrix ? */
 bool Qradecvel;         /* fake astronomy WCS header */
 bool Qrefmap;
@@ -176,13 +178,15 @@ void setparams(void)
   }
   Qdummy = getbparam("dummy");
   nfill = getiparam("nfill");
+  proj = getparam("proj");
 }
 
 static string ctypes[3] = { "CTYPE1",   "CTYPE2",   "CTYPE3" };
 static string cdelts[3] = { "CDELT1",   "CDELT2",   "CDELT3" };
 static string crvals[3] = { "CRVAL1",   "CRVAL2",   "CRVAL3" };
 static string crpixs[3] = { "CRPIX1",   "CRPIX2",   "CRPIX3" };
-static string radeve[3] = { "RA---SIN", "DEC--SIN", "VELO-LSR" };
+static string radeves[3]= { "RA---SIN", "DEC--SIN", "VELO-LSR" };
+static string radevet[3]= { "RA---TAN", "DEC--TAN", "VELO-LSR" };
 static string xyz[3]    = { "X",        "Y",        "Z" };
 
 void write_fits(string name,imageptr iptr)
@@ -191,6 +195,7 @@ void write_fits(string name,imageptr iptr)
     FLOAT bmaj,bmin,bpa;
     FITS *fitsfile;
     char *cp, origin[80];
+    char *ctype1_name, *ctype2_name, *ctype3_name;
     string *hitem, axname[3];
     float *buffer, *bp;
     int i, j, k, axistype, bitpix, keepaxis[3], nx[3], p[3], nx_out[3], ndim=3;
@@ -309,11 +314,22 @@ void write_fits(string name,imageptr iptr)
     }
 
     if (Qradecvel) {
+      if (streq(proj,"SIN")) {
+	ctype1_name = radeves[p[0]];
+	ctype2_name = radeves[p[1]];
+	ctype3_name = radeves[p[2]];
+      } else if (streq(proj,"TAN")) {
+	ctype1_name = radevet[p[0]];
+	ctype2_name = radevet[p[1]];
+	ctype3_name = radevet[p[2]];
+      } else
+	error("Illegal projection scheme %s",proj);
+
       dprintf(0,"[Axes names written as %s, %s, %s\n",
-	      radeve[p[0]],radeve[p[1]],radeve[p[2]]);
-      fitwrhda(fitsfile,"CTYPE1",radeve[p[0]]);
-      fitwrhda(fitsfile,"CTYPE2",radeve[p[1]]);
-      if (ndim>2) fitwrhda(fitsfile,"CTYPE3",radeve[p[2]]);
+	      ctype1_name,ctype2_name,ctype3_name);
+      fitwrhda(fitsfile,"CTYPE1",ctype1_name);
+      fitwrhda(fitsfile,"CTYPE2",ctype2_name);
+      if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ctype3_name);
       fitwrhdr(fitsfile,"RESTFREQ",restfreq);
     } else {
       if (Qrefmap) {
