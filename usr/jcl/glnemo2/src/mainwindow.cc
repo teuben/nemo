@@ -806,7 +806,7 @@ void MainWindow::loadNewData(const std::string select,
       if (! store_options->auto_render) {
         store_options->render_mode=0;
       }
-      if (store_options->auto_com) {
+      if (store_options->auto_com ||  store_options->cod) {
         actionCenterToCom(false);
       }
       gl_window->update( current_data->part_data, &pov2,store_options);
@@ -1732,7 +1732,7 @@ void MainWindow::uploadNewFrame()
       store_options->render_mode = 0; // alpha blending accumulation mode
     }
 #endif
-    if (store_options->auto_com) {
+    if (store_options->auto_com || store_options->cod) {
        actionCenterToCom(false);
     } 
     gl_window->update( current_data->part_data, &pov2,store_options);

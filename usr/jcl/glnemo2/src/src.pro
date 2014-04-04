@@ -169,15 +169,17 @@ LIBS += \
     -lgadget \
     -lramses \
     -lnetwork \
-    -lzlib \
     -lutils
 win32 {
+    LIBS += -lzlib
     LIBS += -lopengl32
 }
 unix {
+    LIBS += -lz
     LIBS += -lGLU
 }
 macx {
+    LIBS += -lz
     LIBS -= -lGLU
 }
 POST_TARGETDEPS += \

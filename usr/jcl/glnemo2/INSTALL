@@ -24,7 +24,7 @@ qt4 are still installed there). Change to 'glnemo2' directory and enter the comm
 
     a) Linux and Windows only
        - - - - - - - - - - - -
-       qmake -recursiv
+       qmake -recursive
           then
        make
 

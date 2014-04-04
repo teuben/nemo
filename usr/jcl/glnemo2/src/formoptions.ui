@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>894</width>
-    <height>255</height>
+    <height>286</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="options_dialog">
      <property name="currentIndex">
-      <number>7</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="tab_i_select">
       <attribute name="title">

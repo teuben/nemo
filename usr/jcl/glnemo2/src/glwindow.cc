@@ -516,7 +516,10 @@ void GLWindow::paintGL()
       }
     }
     if (obj_has_physic) {
-      gl_colorbar->display(QGLWidget::width(),QGLWidget::height());
+      if (fbo) // offscreen rendering activated
+        gl_colorbar->display(texWidth,texHeight);
+      else
+        gl_colorbar->display(QGLWidget::width(),QGLWidget::height());
     }
 
     //mutex_data->unlock();

@@ -62,7 +62,6 @@ FILE(GLOB lib_files
      plugins/network/*.cc
      plugins/network/*.cpp
      plugins/ramses/*.cc
-     plugins/zlib/*.c
      utils/*.cc
      3rdparty/pfntlib/*.cxx
     )
@@ -139,7 +138,7 @@ set(EXECUTABLE_OUTPUT_PATH bin)
 add_executable (glnemo2 ${src_files} ${rc_src} ${ui_headers} ${moc_src} ${glew})
 
 # Link the executable to the Hello library.
-target_link_libraries (glnemo2 uns ${OPENGL_LIBRARY}  ${QT_LIBRARIES} gomp )
+target_link_libraries (glnemo2 uns z ${OPENGL_LIBRARY}  ${QT_LIBRARIES} gomp )
 
 qt5_use_modules(glnemo2 Widgets Core OpenGL Network PrintSupport)
 
