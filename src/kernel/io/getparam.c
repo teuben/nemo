@@ -428,6 +428,11 @@ extern double cputime(void);
 #define HELP_FUTURE 0x10		/* Note: not used yet */
 
 
+void initparam0(string argv0)
+{
+  progname = strdup(argv0);
+}
+
 /*
  * INITPARAM: initalize parameter lists and handle special help and
  *            review requests. This should be the first routine any
@@ -1483,7 +1488,13 @@ string getparam(string name)
     keyword *kw;
     int i;
 
-    if (nkeys == 0) local_error("(getparam) called before initparam");
+    if (nkeys == 0) {
+      if (streq(name,"argv0")) {
+	if (progname)  return progname;    /* for those that called initparam0 */
+	else           return "unknown";
+      }
+      local_error("(getparam) called before initparam");
+    }
 
     kw = findakey(name);
     if (kw == NULL) error("(getparam) \"%s\" unknown keyword", name);

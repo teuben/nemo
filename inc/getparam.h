@@ -9,6 +9,7 @@
  * Feb  1995 -- added updparam, no more ARGS
  * Jun  2001 -- added some convenient ZENO macro	PJT
  * Jan  2005 -- added the nemorinpX functions		pjt
+ * May  2014 -- added initparam0() for private parsers  pjt
  */
 
 #ifndef _getparam_h
@@ -18,6 +19,7 @@
 extern "C" {
 #endif
 
+extern void    initparam0 (string);
 extern void    initparam (string *, string *);
 extern void    finiparam (void);
 extern void    stop (int);
