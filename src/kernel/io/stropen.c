@@ -45,7 +45,6 @@
  *      19-oct-10    unlimited number of open files                     wd
  */
 #include <stdinc.h>
-#include <getparam.h>
 #include <strlib.h>
 
 #include <unistd.h>
