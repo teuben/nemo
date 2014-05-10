@@ -5,8 +5,8 @@ FFLAGS = -g -C -u
 
 #	List of all binaries and sources here
 
-BINS = mainf mainc nemomain
-SRCS = mainf.f mainc.c nemomain.c Makefile
+BINS = mainf mainc mainc2 nemomain
+SRCS = mainf.f mainc.c mainc2.c nemomain.c Makefile
 
 #	Define an extra SUFFIX for .doc file
 .SUFFIXES: .doc
@@ -35,7 +35,7 @@ help:
 all: $(BINS)
 
 clean:
-	rm -f $(BINS) main core *.o *.doc
+	rm -f $(BINS) main core *.o *.doc mainc2.out
 
 #	Install targets - not useful for the person who 
 #	studies the tutorial
@@ -53,6 +53,9 @@ mainf:	mainf.f
 
 mainc:	mainc.c
 	$(CC) $(CFLAGS) -o mainc mainc.c
+
+mainc2:	mainc2.c
+	$(CC) $(CFLAGS) -I$(NEMOINC) -I$(NEMOLIB) -o mainc2 mainc2.c $(NEMOLIB)/libnemo.a -lm
 
 nemomain: nemomain.c
 	$(CC) $(CFLAGS) -o nemomain nemomain.c $(NEMOLIB)/libnemo.a -lm
