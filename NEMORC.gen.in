@@ -64,6 +64,9 @@ if (1) then
   endif
 
   # Hack for Mac, i guess it won't hurt on linux
+  # on Mac here's another problem:  might need to use DYLD_INSERT_LIBRARIES
+  # similar to the LD_PRELOAD on linux.  This might be needed for
+  # libunsio.{dylib,so} is a case where this was needed
   if ($?DYLD_LIBRARY_PATH) then
     setenv DYLD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${DYLD_LIBRARY_PATH}
   else
