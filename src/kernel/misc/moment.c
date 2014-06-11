@@ -15,6 +15,8 @@
  *  23-apr-13   add compute_robust_moment() 
  *   5-jun-13   add robust_range()
  *  15-jan-14   add MAD (mean absolute deviation)
+ *  11-jun-14   MAD is really median absolute deviation?  MAD0 for now the old mean
+ *              is that MARD (mean absolute relative difference)
  *
  * @todo    iterative robust by using a mask
  *          ? robust factor, now hardcoded at 1.5
@@ -270,15 +272,15 @@ real sigma_moment(Moment *m)
     return sqrt(tmp);
 }
 
-real mad_moment(Moment *m)
+real mard_moment(Moment *m)
 {
   real mean, x;
   int i, n;
   Moment tmp;
 
   if (m->ndat==0)
-    error("mad_moment cannot be computed with ndat=%d",m->ndat);
-  mean = sum1/sum0;  
+    error("mard_moment cannot be computed with ndat=%d",m->ndat);
+  mean = sum1/sum0;
   n = MIN(m->n, m->ndat);
   ini_moment(&tmp,1,n);
   for (i=0; i<n; i++) {
@@ -291,6 +293,29 @@ real mad_moment(Moment *m)
   mean = mean_moment(&tmp);
   free_moment(&tmp);
   return mean;
+}
+
+real mad_moment(Moment *m)
+{
+  real median, x;
+  int i, n;
+  Moment tmp;
+
+  if (m->ndat==0)
+    error("mad_moment cannot be computed with ndat=%d",m->ndat);
+  median = median_moment(m);
+  n = MIN(m->n, m->ndat);
+  ini_moment(&tmp,1,n);
+  for (i=0; i<n; i++) {
+    x = m->dat[i] - median;
+    if (x > 0)
+      accum_moment(&tmp,x,1.0);
+    else
+      accum_moment(&tmp,-x,1.0);
+  }
+  median = median_moment(&tmp);
+  free_moment(&tmp);
+  return median;
 }
 
 
