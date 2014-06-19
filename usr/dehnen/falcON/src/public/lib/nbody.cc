@@ -537,7 +537,7 @@ void NBodyCode::init(const ForceAndDiagnose         *FS,
 	( new BlockStepCode(kmax,Nlev,FS,St,p,k,r,P,K,R,
 			    int(1+std::log10(double(SHOT->N_bodies())))));
   } catch(falcON::exception E) {
-    DebugInfo(2,"NBodyCode::init(): caught error \"%s\"\n",E.text());
+    DebugInfo(2,"NBodyCode::init(): caught error \"%s\"\n",E.what());
     falcON_RETHROW(E);
   }
   DebugInfo(4,"NBodyCode::init(): done\n");

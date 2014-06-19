@@ -5,7 +5,7 @@
 //                                                                             |
 // C++ code                                                                    |
 //                                                                             |
-// Copyright Walter Dehnen, 2003-2004                                          |
+// Copyright Walter Dehnen, 2003-2004,2013                                     |
 // e-mail:   walter.dehnen@astro.le.ac.uk                                      |
 // address:  Department of Physics and Astronomy, University of Leicester      |
 //           University Road, Leicester LE1 7RH, United Kingdom                |
@@ -32,6 +32,7 @@
 // Versions                                                                    |
 // 0.0   20-jan-2004 WD   created from $NEMO/src/orbits/potential/data/timer.h |
 // 0.1   30-jun-2004 WD   changed to non-template, anonymous namespace         |
+// 0.2   22-nov-2013 WD   added exponential growth                             |
 //-----------------------------------------------------------------------------+
 #ifndef included_timer_h
 #define included_timer_h
@@ -74,6 +75,13 @@ namespace {
   // A = x = --------;                                                        //
   //            tau                                                           //
   //                                                                          //
+  // 5. EXPONENTIAL                                                           //
+  // an exponential grow minus initial                                        //
+  //                                                                          //
+  //   = 0                              for t0 < t                            //
+  // A = fac * exp([t-t0]/tau)-1        for t0 < t < t1                       //
+  //   = 1                              for      t > t1                       //
+  //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   class timer {
   public:
@@ -82,6 +90,7 @@ namespace {
       saturate     = 1,
       quasi_linear = 2,
       linear       = 3,
+      exponential  = 4,
       constant     = 9
     };
     //--------------------------------------------------------------------------
@@ -94,11 +103,11 @@ namespace {
     //--------------------------------------------------------------------------
   private:
     index  in;
-    double t0, tau, itau, t1;                      // t_0, tau, 1/tau, t_1      
+    double t0, tau, itau, t1, fac;                 // t_0, tau, 1/tau, t_1      
     //--------------------------------------------------------------------------
     // functions for A(t)                                                       
     //--------------------------------------------------------------------------
-    double __adiabatic(double t) const {
+    double _m_adiabatic(double t) const {
       if(t <= t0) return 0.;
       if(t >= t1) return 1.;
       const double a0=0.1875, a1=0.625, a2=0.9375;
@@ -109,48 +118,59 @@ namespace {
       return 0.5 + xi;
     }
     //--------------------------------------------------------------------------
-    double __saturate(double t) const {
+    double _m_saturate(double t) const {
       if(t <= t0) return 0.;
       return 1 - std::exp((t0-t)*itau);
     }
     //--------------------------------------------------------------------------
-    double __quasi_linear(double t) const {
+    double _m_quasi_linear(double t) const {
       if(t <= t0) return 0.;
       return std::sqrt(square((t-t0)*itau)+1)-1;
     }
     //--------------------------------------------------------------------------
-    double __linear(double t) const {
+    double _m_linear(double t) const {
       return t<=t0? 0. : (t-t0)*itau;
+    }
+    //--------------------------------------------------------------------------
+    double _m_exponential(double t) const {
+      return 
+	t <= t0?  0 :
+	t >= t1?  1 :
+	fac * (std::exp(itau*(t-t0))-1);
     }
     //--------------------------------------------------------------------------
     // construction and initialization                                          
     //--------------------------------------------------------------------------
   public:
-    timer() {}
     void init(index  _in,
 	      double _t0,
-	      double _ta)
+	      double _ta,
+	      double _t1=0.0)
     {
       in   = _in;
       t0   = _t0;
       tau  = _ta;
       itau = tau==0.? 0. : 1./tau;
-      t1   = t0+tau;
+      t1   = in==exponential? _t1 : t0+tau;
+      fac  = in==exponential? 1/(std::exp(itau*(t1-t0))-1) : 1;
     }
+    timer() {}
     timer(index  _in,
 	  double _t0,
-	  double _ta)
-      : in(_in), t0(_t0), tau(_ta), itau(1./tau), t1(t0+tau) {}
+	  double _ta,
+	  double _t1=0.0)
+    { init(_in,_t0,_ta,_t1); }
     //--------------------------------------------------------------------------
     // returning the amplitude function                                         
     //--------------------------------------------------------------------------
     double operator()(double t) const {
       if (tau== 0) return 1.;
       switch(in) {
-      case saturate:     return __saturate(t);
-      case quasi_linear: return __quasi_linear(t);
-      case linear:       return __linear(t);
-      case adiabatic:    return __adiabatic(t);
+      case saturate:     return _m_saturate(t);
+      case quasi_linear: return _m_quasi_linear(t);
+      case linear:       return _m_linear(t);
+      case adiabatic:    return _m_adiabatic(t);
+      case exponential:  return _m_exponential(t);
       default:           return 1.;
       }
     }
@@ -167,6 +187,8 @@ namespace {
 	return "linear: A(t) = (t-t0)/tau";
       case adiabatic:           
 	return "adiabatic: a smooth transition from A(t<t0)=0 to A(t>t0+tau)=1";
+      case exponential:
+	return "exponential A(t) = f*{exp([t-t0]/tau)-1}, for t0<t<t1; A(t1)=1";
       default:
 	return "none: A == 1 at all times";
       }

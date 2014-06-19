@@ -41,7 +41,8 @@
 // v 1.4    07/11/2008  WD added step as 3rd parameter
 // v 1.4.1  13/04/2010  WD removed use of initial_time()
 // v 1.4.2  13/04/2010  WD set initial file index to non-existing file
-// v 1.5    19/06/2012  WD allowed for tupel.h  ->  vector.h                 
+// v 1.5    19/06/2012  WD allowed for tupel.h  ->  vector.h
+// v 1.6    13/02/2014  WD issue pointer to spherical_profile, handle "sprofile"
 ////////////////////////////////////////////////////////////////////////////////
 #include <public/defman.h>
 #include <public/profile.h>
@@ -106,21 +107,22 @@ namespace falcON { namespace Manipulate {
   /// par[1]: minimum bin size in log(r)     (def: 0.1)\n
   /// file:   a C-type format string to form file name for writing profiles
   ///
-  /// Usage of pointers: uses 'xcen' and 'vcen'\n 
+  /// Usage of pointers: uses 'xcen' and 'vcen'; provides 'sprofile'\n 
   /// Usage of flags:    uses in_subset()\n
   ///
   // ///////////////////////////////////////////////////////////////////////////
   class sphereprof : public manipulator {
   private:
-    const unsigned   W;
-    const double     L;
-    double           STEP;
-    char*  const     FILE;
-    mutable int      I;
-    mutable output   OUT;
-    const PrintSmall PS;
-    mutable double   TMAN;
-    mutable bool     FRST;
+    const unsigned            W;
+    const double              L;
+    double                    STEP;
+    char*  const              FILE;
+    mutable int               I;
+    mutable output            OUT;
+    const PrintSmall          PS;
+    mutable double            TMAN;
+    mutable bool              FRST;
+    mutable spherical_profile*PROF;
     //--------------------------------------------------------------------------
     void print_line(bool) const;
   public:
@@ -138,13 +140,14 @@ namespace falcON { namespace Manipulate {
     sphereprof(const double*pars,
 	       int          npar,
 	       const char  *file) falcON_THROWING
-    : W    ( npar>0?     int(pars[0])    : W_default ),
-      L    ( npar>1?         pars[1]     : L_default ),
-      STEP ( npar>2?         pars[2]     : 0. ),
-      FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 ),
-      I    ( 0 ),
-      PS   ( 3 ),
-      FRST ( 1 )
+      : W    ( npar>0?     int(pars[0])    : W_default )
+      , L    ( npar>1?         pars[1]     : L_default )
+      , STEP ( npar>2?         pars[2]     : 0. )
+      , FILE ( (file && file[0])? falcON_NEW(char,strlen(file)+1) : 0 )
+      , I    ( 0 )
+      , PS   ( 3 )
+      , FRST ( 1 )
+      , PROF ( 0 )
     {
       if(debug(2) || file==0 || file[0]==0 || npar>3)
 	std::cerr<<
@@ -171,6 +174,7 @@ namespace falcON { namespace Manipulate {
     //--------------------------------------------------------------------------
     ~sphereprof() {
       if(FILE) falcON_DEL_A(FILE);
+      if(PROF) falcON_DEL_O(PROF);
     }
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -197,9 +201,10 @@ namespace falcON { namespace Manipulate {
       return false;
     const vect*X0= S->pointer<vect>("xcen");
     const vect*V0= S->pointer<vect>("vcen");
-    spherical_profile SP(S,W,L,X0,V0);
+    if(PROF) falcON_DEL_O(PROF);
+    PROF = new spherical_profile(S,W,L,X0,V0);
     if(OUT.reopen(FILE,I++,1)) {
-      print_line(SP.has_vels());
+      print_line(PROF->has_vels());
       OUT << "#\n"
 	  << "# output from Manipulator \"sphereprof\"\n#\n";
       if(RunInfo::cmd_known ())
@@ -213,10 +218,10 @@ namespace falcON { namespace Manipulate {
 	OUT<<"#     pid "<<RunInfo::pid()<<'\n';
       OUT <<"#\n";
     }
-    print_line(SP.has_vels());
+    print_line(PROF->has_vels());
     OUT  <<"#\n"
 	 <<"# time   = "<<S->time()
-	 <<" Mtot  = "<<std::setprecision(8)<<SP.Mtot()
+	 <<" Mtot  = "<<std::setprecision(8)<<PROF->Mtot()
 	 <<'\n';
     const std::string *SUB = S->pointer<std::string>("subset_description");
     if(SUB)
@@ -225,36 +230,36 @@ namespace falcON { namespace Manipulate {
     if(V0) OUT<<"# vcen   = "<<(*V0)<<'\n';
     OUT  <<"#\n"
 	 <<"#   radius        rho      vcirc";
-    if(SP.has_vels())
+    if(PROF->has_vels())
       OUT<<"      <v_r>    <v_phi>"
 	 <<"    sigma_r   sigma_th  sigma_phi";
     OUT  <<"     c/a      b/a"
 	 <<"        major axis         minor axis";
-    if(SP.has_vels())
+    if(PROF->has_vels())
       OUT<<"      rotation axis";
     OUT  <<'\n';
-    print_line(SP.has_vels());
+    print_line(PROF->has_vels());
     bool nonspherical = false;
-    for(int i=0; i!=SP.N(); ++i) {
-      OUT  << print(SP.rad(i),10,4) << ' '
-	   << print(SP.rho(i),10,4) << ' '
-	   << print(sqrt(SP.vcq(i)),10,4) << ' ';
-      if(SP.has_vels())
-	OUT<< print(SP.vrad(i),10,4) << ' '
-	   << print(SP.vphi(i),10,4) << ' '
-	   << print(SP.sigr(i),10,4) << ' '
-	   << print(SP.sigt(i),10,4) << ' '
-	   << print(SP.sigp(i),10,4) << ' ';
-      OUT  << print(SP.cova(i), 8,3) << ' '
-	   << print(SP.bova(i), 8,3) << "  ";
-      PS.print_dir(OUT, SP.major_axis(i)) << "  ";
-      PS.print_dir(OUT, SP.minor_axis(i));
-      if(SP.has_vels()) {
+    for(int i=0; i!=PROF->N(); ++i) {
+      OUT  << print(PROF->rad(i),10,4) << ' '
+	   << print(PROF->rho(i),10,4) << ' '
+	   << print(sqrt(PROF->vcq(i)),10,4) << ' ';
+      if(PROF->has_vels())
+	OUT<< print(PROF->vrad(i),10,4) << ' '
+	   << print(PROF->vphi(i),10,4) << ' '
+	   << print(PROF->sigr(i),10,4) << ' '
+	   << print(PROF->sigt(i),10,4) << ' '
+	   << print(PROF->sigp(i),10,4) << ' ';
+      OUT  << print(PROF->cova(i), 8,3) << ' '
+	   << print(PROF->bova(i), 8,3) << "  ";
+      PS.print_dir(OUT, PROF->major_axis(i)) << "  ";
+      PS.print_dir(OUT, PROF->minor_axis(i));
+      if(PROF->has_vels()) {
 	OUT<< "  ";
-	PS.print_dir(OUT, SP.drot(i));
+	PS.print_dir(OUT, PROF->drot(i));
       }
       OUT<<'\n';
-      if(SP.cova(i) < 0.8) nonspherical = true;
+      if(PROF->cova(i) < 0.8) nonspherical = true;
     }
     OUT.flush();
     if(nonspherical)
@@ -263,6 +268,7 @@ namespace falcON { namespace Manipulate {
 		     S->time());
     DebugInfo(2,"sphereprof::manipulate(): finished\n");
     TMAN += STEP;
+    S->set_pointer<spherical_profile>(PROF,"sprofile");
     return false;
   }
   //////////////////////////////////////////////////////////////////////////////

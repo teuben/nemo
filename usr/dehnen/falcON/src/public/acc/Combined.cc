@@ -194,16 +194,18 @@ namespace {
 	     int          npar,
 	     const char  *file) : NEEDM(0), NEEDV(0)
     {
-      if(npar < 3 || file==0)
+      if(npar < 4 || file==0)
 	warning("Combined: recognizes 3 parameters and requires a data file.\n"
 		"parameters:\n"
 		"  par[0] = controlling growth factor, see below         [9]\n"
 		"  par[1] = t0: start time for growth                    [0]\n"
 		"  par[2] = tau: time scale for growth                   [1]\n"
+		"  par[3] = t1: end time for growth (only for exp)      [10]\n"
 		"  with par[0]=0: %s\n"
 		"       par[0]=1: %s\n"
 		"       par[0]=2: %s\n"
 		"       par[0]=3: %s\n"
+		"       par[0]=4: %s\n"
 		"       par[0]=9: %s\n"
 		"the data file must contain up to %d entries of the form\n"
 		"  accname=ACCNAME\n [accpars=ACCPARS]\n [accfile=ACCFILE]\n"
@@ -213,6 +215,7 @@ namespace {
 		timer::describe(timer::saturate),
 		timer::describe(timer::quasi_linear),
 		timer::describe(timer::linear),
+		timer::describe(timer::exponential),
 		timer::describe(timer::constant),
 		NMAX);
       if(file == 0) error("Combined: not data file given");
@@ -221,15 +224,17 @@ namespace {
 	timin = (timer::index)(npar>0? int(pars[0]) : 9);
       double
 	_t0    = npar>1? pars[1] : 0.,
-	_tau   = npar>2? pars[2] : 1.;
-      timer::init(timin,_t0,_tau);
-      if(npar>3) warning("Combined: skipped parameters beyond 3");
+	_tau   = npar>2? pars[2] : 1.,
+	_t1    = npar>3? pars[3] : 10.;
+      timer::init(timin,_t0,_tau,_t1);
+      if(npar>4) warning("Combined: skipped parameters beyond 4");
       nemo_dprintf (1,
 		    "initializing Combined\n"
 		    " parameters : timer::index  = %f -> %s\n"
 		    "              t0            = %f\n"
-		    "              tau           = %f\n",
-		    timin,timer::describe(timin),_t0,_tau);
+		    "              tau           = %f\n"
+		    "              t1            = %f\n",
+		    timin,timer::describe(timin),_t0,_tau,_t1);
       // now scan datafile and initialize accs
       const int size=200;
       std::ifstream inpt(file);

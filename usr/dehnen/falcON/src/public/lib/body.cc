@@ -507,7 +507,7 @@ bodies::iterator& bodies::iterator::read_Fortran(FortranIRec&I, fieldbit f,
   if(R * falcON::size(f) > I.bytes_unread())
     falcON_THROW("body::read_Fortran(%c): want %u `%s' (%lu bytes) but "
 		 "only %lu bytes left on Fortran record\n",letter(f),
-		 R, fullname(f), lu(R*falcON::size(f)),lu(I.bytes_unread()));
+		 R, fullname(f), lu(R*falcON::size(f)), I.bytes_unread());
   while(is_valid() && R) {
     unsigned r = min(B->N_bodies()-K, R);
     const_cast<block*>(B)->read_Fortran(I,f,K,r,swap);
@@ -526,7 +526,7 @@ bodies::iterator& bodies::iterator::write_Fortran(FortranORec&O,
   if(W * falcON::size(f) > O.bytes_free())
     falcON_THROW("body::write_Fortran(%c): want %u `%s' (%lu bytes) but "
 		 "only %lu bytes left free on Fortran record\n",letter(f),
-		 W, fullname(f), lu(W*falcON::size(f)),lu(O.bytes_free()));
+		 W, fullname(f), lu(W*falcON::size(f)), O.bytes_free());
   while(is_valid() && W) {
     unsigned w = min(B->N_bodies()-K, W);
     B->write_Fortran(O,f,K,w);
@@ -1947,7 +1947,7 @@ falcON_TRAITS(::GadgetHeader,"GadgetHeader");
 	falcON_THROW("bodies::read_gadget(): mismatch reading %u %c: "	\
 		     "expected %lu bytes, found %lu\n",			\
 		     nr,field_traits<BIT>::word(),			\
-		     lu(nr*field_traits<BIT>::size),lu(F.size()));	\
+		     lu(nr*field_traits<BIT>::size),F.size());		\
       add_field(BIT);							\
       if(ns) {								\
 	body sph(SPH);							\
@@ -2077,7 +2077,7 @@ double bodies::read_gadget(const char*fname,
 	if(F.size() != nm*sizeof(real))
 	  falcON_THROW("bodies::read_gadget(): mismatch reading %u m: "
 		       "expected %lu bytes, found %lu\n",
-		       nm,lu(nm*sizeof(real)),lu(F.size()));
+		       nm,lu(nm*sizeof(real)), F.size());
 	body sph(SPH), std(STD);
 	add_field(fieldbit::m);
 	if(header->npart[0]) {

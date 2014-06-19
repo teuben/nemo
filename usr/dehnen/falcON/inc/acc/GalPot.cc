@@ -1041,7 +1041,7 @@ double DiskAnsatz::operator() (double R, double z, double r, double* dP) const
 double DiskAnsatz::Laplace(double R, double z) const
 {
   if(S0==0.) return 0;
-  register double r=hypot(R,z), g,gp,gpp, F,f,fp,fpp;
+  register double r=hypot(R,z), g,gp,gpp, f,fp,fpp;
   // deal with the vertical part
   if(thin) {
     g  =abs(z);
@@ -1064,18 +1064,18 @@ double DiskAnsatz::Laplace(double R, double z) const
     gpp/= zd;
   }
   // deal with the radial part
-  if(hollow && r==0.) F=f=fp=fpp=0.;
+  if(hollow && r==0.) f=fp=fpp=0.;
   else if(eps) {
     if(hollow) {
       register double rq=r*r,cr=cos(r/Rd),sr=sin(r/Rd);
-      F   = (R==0)? 0. : exp(-R0/R-R/Rd+eps*cos(R/Rd));
+//       F   = (R==0)? 0. : exp(-R0/R-R/Rd+eps*cos(R/Rd));
       f   = exp(-R0/r-r/Rd+eps*cr);
       fp  = R0/rq-(1.+eps*sr)/Rd;
       fpp = (fp*fp-2.*R0/(rq*r)-eps*cr/Rd2)*f;
       fp *= f;
     } else {
       register double cr=cos(r/Rd),sr=sin(r/Rd);
-      F   = exp(-R/Rd+eps*cos(R/Rd));
+//       F   = exp(-R/Rd+eps*cos(R/Rd));
       f   = exp(-r/Rd+eps*cr);
       fp  = -(1.+eps*sr)/Rd;
       fpp = (fp*fp-eps*cr/Rd2)*f;
@@ -1084,13 +1084,13 @@ double DiskAnsatz::Laplace(double R, double z) const
   } else {
     if(hollow) {
       register double rq=r*r;
-      F   = (R==0)? 0. : exp(-R0/R-R/Rd);
+//       F   = (R==0)? 0. : exp(-R0/R-R/Rd);
       f   = exp(-R0/r-r/Rd);
       fp  = R0/rq-1./Rd;
       fpp = (fp*fp-2.*R0/(rq*r))*f;
       fp *= f;
     } else {
-      F   = exp(-R/Rd);
+//       F   = exp(-R/Rd);
       f   = exp(-r/Rd);
       fp  =-f/Rd;
       fpp = f/Rd2;
